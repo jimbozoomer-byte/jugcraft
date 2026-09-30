@@ -264,6 +264,22 @@ public class KitchenGardenGameTests {
 		});
 	}
 
+	/** Breaking a Cooking Pot drops the pot and everything in it. */
+	@GameTest(maxTicks = 40)
+	public void brokenPotDropsItsContents(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(2, 2, 2);
+		helper.setBlock(pos, block("cooking_pot"));
+		CookingPotBlockEntity pot = helper.getBlockEntity(pos, CookingPotBlockEntity.class);
+		pot.setItem(0, new ItemStack(Items.BOWL, 3));
+		pot.setItem(CookingPotBlockEntity.RESULT + 1, new ItemStack(item("chili")));
+		helper.getLevel().destroyBlock(helper.absolutePos(pos), true);
+		helper.succeedWhen(() -> {
+			helper.assertItemEntityPresent(Items.BOWL, pos, 2.0);
+			helper.assertItemEntityPresent(item("chili"), pos, 2.0);
+			helper.assertItemEntityPresent(item("cooking_pot"), pos, 2.0);
+		});
+	}
+
 	/** Without heat below, or with a stray item among the ingredients, the pot does not cook. */
 	@GameTest(maxTicks = 300)
 	public void potNeedsHeatAndTheRightIngredients(GameTestHelper helper) {

@@ -8,7 +8,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 
 > **Status.** Everything here compiles and loads in CI. Where a feature has an automated game test, that test passes on a headless server. Nothing has been play-tested in a client or on a dedicated server with two players yet.
 >
-> This document describes `main` after PRs #4–#28, plus the Agriculture branch's Fall Harvest. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
+> This document describes `main` after PRs #4–#28, plus the Agriculture branch's Fall Harvest and Kitchen Garden. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
 
 ## Quick facts
 
@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 201 items/blocks under `jugcraft:` (the checker counts them) |
+| Registered IDs | 239 items/blocks under `jugcraft:` (the checker counts them) |
 
 ## Build, generate, check
 
@@ -119,12 +119,13 @@ The Agriculture branch ([branches/AGRICULTURE.md](branches/AGRICULTURE.md)). Eve
 
 | Kind | IDs | Class | Notes |
 | --- | --- | --- | --- |
-| Tall crops | `corn_crop` (3 tall), `sunflower_crop` (2 tall) | `TallCropBlock`, numbers in `TallCrop` | `age` 0–7 plus `section` 0–2; picked when ripe; a wall from 2 blocks tall |
-| One-block crops | `bean_crop` (legume), `sweet_potato_crop`, `flax_crop` | `JugcraftCropBlock` (a vanilla `CropBlock`) | vanilla loot rules (carrots or wheat) |
-| Wild plants | `wild_corn`, `wild_sunflower`, `wild_beans`, `wild_sweet_potato`, `wild_flax` | `WildCropBlock` | patches on grass (`worldgen/placed_feature/patch_wild_*`); shears take the plant |
-| Seeds (place the crop) | `corn_kernels`, `sunflower_seeds`, `beans`, `sweet_potato`, `flax_seeds` | `BlockItem` | `c:seeds/*`, and animal food tags |
-| Produce and food | `corn`, `roasted_corn`, `popcorn`, `roasted_sunflower_seeds`, `baked_sweet_potato`, `flax`, `three_sisters_stew` | plain items with food components | `c:crops/*`, `c:foods/*` |
+| Picked crops | `corn_crop` (3 tall), `sunflower_crop` (2 tall), `tomato_crop` (2 tall, climbs a trellis), `pepper_crop` (1-block bush) | `TallCropBlock`, numbers in `TallCrop` | `age` 0–7 plus `section` 0–2; picked when ripe; a wall from 2 blocks tall (climbing crops always) |
+| One-block crops | `bean_crop` (legume), `sweet_potato_crop`, `flax_crop`, `onion_crop`, `garlic_crop`, `cabbage_crop`, `oat_crop`, `barley_crop` | `JugcraftCropBlock` (a vanilla `CropBlock`) | vanilla loot rules (carrots or wheat) |
+| Wild plants | `wild_corn`, `wild_sunflower`, `wild_beans`, `wild_sweet_potato`, `wild_flax`, `wild_tomato`, `wild_pepper`, `wild_onion`, `wild_garlic`, `wild_cabbage`, `wild_oats`, `wild_barley` | `WildCropBlock` | patches on grass (`worldgen/placed_feature/patch_wild_*`); shears take the plant |
+| Seeds (place the crop) | `corn_kernels`, `sunflower_seeds`, `beans`, `sweet_potato`, `flax_seeds`, `pepper_seeds`, `onion`, `garlic`, `cabbage_seeds`, `oat_seeds`, `barley_seeds`; `tomato_seeds` | `BlockItem`; `TrellisSeedItem` (plants on a trellis) | `c:seeds/*`, and animal food tags |
+| Produce and food | `corn`, `roasted_corn`, `popcorn`, `roasted_sunflower_seeds`, `baked_sweet_potato`, `flax`, `three_sisters_stew`, `tomato`, `pepper`, `cabbage`, `oats`, `barley`, `barley_bread`, `sauerkraut`, `garden_salad`, `tomato_soup`, `onion_soup`, `vegetable_soup`, `mushroom_barley_soup`, `oat_porridge`, `chili`, `cabbage_rolls` | plain items with food components | `c:crops/*`, `c:foods/*` |
 | Tools | `flint_sickle` (3×3), `bronze_sickle` (5×5) | `SickleItem` | harvests and replants ripe crops, vanilla crops included |
+| Equipment | `trellis`, `cooking_pot` | `TrellisBlock`; `CookingPotBlock`, `CookingPotBlockEntity`, `CookingPotMenu`, `client/CookingPotScreen` | the pot cooks `jugcraft:pot_cooking` recipes over a block in `jugcraft:heat_sources` |
 
 ## Shared systems and how to plug in
 
@@ -207,10 +208,16 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 ### Crops (`agriculture/`)
 
 - **Growth rules:** `CropGrowth.speed(level, pos, isLegume)`, the vanilla soil formula with no crowding penalty, times `LEGUME_BONUS` (1.5) next to a block in `jugcraft:nitrogen_fixing_crops`. `CropGrowth.chanceDivisor(speed, growthTime)` gives the random-tick odds.
-- **Tall crops:** `TallCropBlock.growTo(level, bottom, age)` adds sections (only into air). `pick(level, bottom, dropPos)` harvests a ripe plant and keeps it standing. `bottom(pos, state)` finds the ticking bottom block from any section.
+- **Tall crops:** `TallCropBlock.growTo(level, bottom, age)` adds sections (only into air, or only into trellis for a `TallCrop.trellis` crop). `pick(level, bottom, dropPos)` harvests a ripe plant and keeps it standing. `bottom(pos, state)` finds the ticking bottom block from any section. A climbing crop's loot drops one trellis from every section.
 - Only the bottom section ticks and has loot, and breaking any section removes the plant. Loot tables use the **26.x format**: singular `condition`, `modifier`, and `minecraft:match_block` with `state` (see `tools/agriculture_data.py`).
 - **Lookups:** `JugcraftAgriculture.item(id)` and `block(id)`. `JugcraftAgriculture.TALL_CROPS` holds the tall-crop blocks.
-- **Seed sources:** a Fabric loot event adds `GRASS_SEED_CHANCE` pools to vanilla short grass. Wild patches are added to biomes by `wildPatch(name, biome tags...)`.
+- **Seed sources:** a Fabric loot event adds one pool to vanilla short grass: `GRASS_SEED_CHANCE` (0.125) to drop one seed chosen evenly from `GRASS_SEEDS`. Wild patches are added to biomes by `wildPatch(name, biome tags...)`.
+
+### Cooking Pot (`agriculture/CookingPot*`)
+
+- **Recipes:** type `jugcraft:pot_cooking` (`CookingPotRecipe`), files in `data/jugcraft/recipe/pot_cooking/`, generated from `POT_RECIPES` in `tools/agriculture.py`. The format is the multi-input machine format: `ingredients` (each an `ingredient` and a `count`), `result` and `time`. Ingredients may sit in any of the six slots and spread over several; every filled slot must hold an ingredient. `CookingPotRecipe.find(server, slots)` returns the recipe and how much to take from each slot; the recipe list is cached and rebuilt after `/reload`.
+- **Heat:** `CookingPotBlockEntity.isHeated(level, pos)` checks the block below against the block tag `jugcraft:heat_sources` (lit if it has a `lit` property). Add a heater to that tag to make it heat pots.
+- **Slots:** 0–5 ingredients, 6–9 results. Hoppers insert from the top and sides and extract from the bottom.
 
 ### Feature switches (`config/`)
 
@@ -249,12 +256,14 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 **A block that uses power, fluid or items:** register a provider on `EnergyStorage.SIDED`, `FluidStorage.SIDED` or `ItemStorage.SIDED`. Implement the matching `*Connectable` marker if transmitters should visibly connect.
 
-**A new crop:** add it to `tools/agriculture.py` (`TALL_CROPS` or `CROPS`, its items in `ITEMS`, and optionally a wild plant). Then:
+**A new crop:** add it to `tools/agriculture.py` (`TALL_CROPS` or `CROPS`, its items in `ITEMS`, and optionally a wild plant). A climbing crop sets `"trellis": True` and its seed `"trellis_seed": True`. Then:
 
-1. Mirror it in Java: a `TallCrop` constant, or a `crop(...)` call plus item calls in `JugcraftAgriculture`.
-2. Draw its stage textures in `tools/crop_textures.py`.
+1. Mirror it in Java: a `TallCrop` constant, or a `crop(...)` call plus item calls in `JugcraftAgriculture` (`trellisSeeds(...)` for a climbing crop's seed).
+2. Draw its stage textures in `tools/crop_textures.py` or `tools/kitchen_textures.py`.
 3. Run both generators and the checker, which compares the Python and the Java.
-4. Add a game test to `AgricultureGameTests`.
+4. Add a game test to `AgricultureGameTests` or `KitchenGardenGameTests`.
+
+**A Cooking Pot dish:** add it to `POT_RECIPES` (and its item to `ITEMS`) in `tools/agriculture.py`, or drop a `jugcraft:pot_cooking` recipe into a data pack. The checker refuses two recipes with the same ingredients.
 
 **A handbook page:** add prose to `ABOUT` in `tools/handbook.py` and list the block in a chapter in `build()`. Its numbers, crafting grid and recipes are filled in from the tables.
 
@@ -278,7 +287,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Bronze is never turned back into its ingredients.
 - Every recipe has a feature-switch condition that includes its result's feature.
 - Python lists must match Java: `MachineKind` numbers and recipe types, `JugcraftComponents` lists, materials, features, worldgen, and every agriculture number (`TallCrop`, items, foods, compost tiers, sickles, wild-plant biomes, grass seeds, legume bonus).
-- Every tall-crop age and section, and every crop age, has a model. Agriculture recipes never form a loop.
+- Every tall-crop age and section, and every crop age, has a model. Agriculture recipes (crafting, cooking and Cooking Pot) never form a loop, no two Cooking Pot recipes share their ingredients, and a seed is a trellis seed exactly when it plants a climbing crop.
 - Every ID has a model, a texture, a name, and a loot table (for blocks). Both machine styles cover every block state. Model elements stay within −16..32.
 
 ## File map
@@ -296,7 +305,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `src/gametest/java/.../test/JugcraftGameTests.java` | game tests (run by `./gradlew build`) |
 | `src/gametest/java/.../test/JugcraftClientGameTests.java` | client game tests with screenshots (CI job `client`) |
 | `…/guide/`, `src/client/.../HandbookScreen.java`, `tools/handbook.py` | Engineer's Handbook |
-| `…/agriculture/`, `tools/agriculture.py`, `tools/agriculture_data.py`, `tools/crop_textures.py`, `tools/render_agriculture.py` | Agriculture branch: crops, wild plants, sickles, their data, textures and doc previews |
+| `…/agriculture/`, `tools/agriculture.py`, `tools/agriculture_data.py`, `tools/crop_textures.py`, `tools/kitchen_textures.py`, `tools/render_agriculture.py` | Agriculture branch: crops, wild plants, sickles, trellis, Cooking Pot, their data, textures and doc previews |
 | `src/test/java/.../VanillaReferences.java` | compile-time guard that vanilla items used by recipes still exist |
 | `src/main/resources/assets/jugcraft/` | generated models, blockstates, lang, textures |
 | `src/main/resources/data/jugcraft/` | generated recipes (`recipe/<type>/` for machines), loot, tags, worldgen |
@@ -307,7 +316,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `docs/TECH_TREE.md` | player-facing guide |
 | `docs/features/` | feature records (required for gameplay features) |
 | `docs/MACHINE_ROADMAP.md`, `docs/branches/CHEMISTRY.md` | planned, not built |
-| `docs/branches/AGRICULTURE.md` | Agriculture: the implemented Fall Harvest and the planned roster and equipment |
+| `docs/branches/AGRICULTURE.md` | Agriculture: the implemented Fall Harvest and Kitchen Garden, and the planned roster and equipment |
 
 ## Not built yet
 
