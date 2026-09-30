@@ -33,6 +33,8 @@ Start from useful ordinary crops, food, livestock and soils. Branch into magical
 
 Proposals may cover orchards, culinary specialties, animal products, breeding, magical herbs, climate cultivation, fiber/fuel crops and off-world farming. Explain planting conditions, growth limits, harvesting automation, outputs, regional role and interactions with both industry and magic. Prevent infinite growth/yield feedback loops. Avoid excessive breeding/entity counts as the optimal farming strategy.
 
+The branch's first slice (Fall Harvest crops, tall corn, wild plants and sickles) and its planned crop roster and farm equipment are in [branches/AGRICULTURE.md](branches/AGRICULTURE.md).
+
 ## Cozy surface biomes
 
 Biomes should belong geographically: temperature, moisture, elevation, water, neighboring terrain, vegetation and animal ecology need a coherent explanation. Give players attractive building palettes, usable regional resources, quiet scenic places and ambient life. Example proposals: orchard valleys, misty woodland workshops, warm meadows or sheltered snowy groves.

@@ -13,6 +13,7 @@ from PIL import Image
 
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS, PART_UNITS, CIRCUITS, WASHED_ORES,
                        all_blocks, all_items, feature_of)
+import agriculture as ag
 from machines import (MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 
@@ -25,6 +26,7 @@ JAVA = JAVA_ROOT / "materials" / "JugcraftMaterials.java"
 CONFIG = JAVA_ROOT / "config" / "JugcraftConfig.java"
 WORLDGEN = JAVA_ROOT / "materials" / "JugcraftWorldgen.java"
 MACHINE_JAVA = JAVA_ROOT / "machine" / "MachineKind.java"
+AGRICULTURE_JAVA = JAVA_ROOT / "agriculture"
 STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
 
 # Tags that Jugcraft reads but that vanilla/Fabric API define.
@@ -83,7 +85,7 @@ def model(ref):
 
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
-    for block in all_blocks() + machine_blocks():
+    for block in all_blocks() + machine_blocks() + ag.all_blocks():
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -94,11 +96,12 @@ def check_assets(registered):
             err(f"Missing name for block {block}")
         if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
             err(f"Missing loot table for {block}")
-    for item in registered:
+    # Crops have no item of their own: their seeds place them.
+    for item in [entry for entry in registered if entry not in ag.crop_blocks()]:
         definition = load(ASSETS / "items" / f"{item}.json")
         if definition:
             model(definition["model"]["model"])
-        if item not in all_blocks() + machine_blocks() and f"item.{MOD}.{item}" not in lang:
+        if item not in all_blocks() + machine_blocks() + ag.all_blocks() and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -115,7 +118,7 @@ UNITS = {"ingots": 9, "nuggets": 1, "raw_materials": 9, "ores": 9, "storage_bloc
          **{f"{form}s": units for form, units in PART_UNITS.items()}}
 
 
-NON_METAL = {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"}
+NON_METAL = {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(ag.all_blocks()) | set(ag.all_items())
 
 
 def item_units(ref):
@@ -244,7 +247,7 @@ def check_tags():
             if value.startswith("#"):
                 if not tag_exists(registry, value[1:]):
                     err(f"{path.relative_to(ROOT)}: unknown tag {value}")
-            elif split(value)[0] == MOD and split(value)[1] not in all_blocks() + all_items() + machine_blocks():
+            elif split(value)[0] == MOD and split(value)[1] not in all_blocks() + all_items() + machine_blocks() + ag.all_blocks() + ag.all_items():
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
 
@@ -453,8 +456,110 @@ def check_style_pack():
             err(f"{block}: the two styles cover different block states")
 
 
+def check_agriculture():
+    """Agriculture: Java matches tools/agriculture.py, every crop state has a model, no recipe loop."""
+    java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
+
+    tall = {name.lower(): {"block": block, "seed": seed, "heights": [int(h) for h in heights.split(",")], "produce": produce,
+                           "pick": [int(low), int(high)], "reset": int(reset), "growth": float(growth)}
+            for name, block, seed, heights, produce, low, high, reset, growth in re.findall(
+                r'(\w+)\("([a-z_]+)", "([a-z_]+)", new int\[\] \{([\d, ]+)\}, "([a-z_]+)", (\d+), (\d+), (\d+), ([\d.]+)F\)',
+                java.get("TallCrop", ""))}
+    expected = {name: {"block": info["block"], "seed": info["seed"], "heights": info["heights"], "produce": info["pick"]["item"],
+                       "pick": [info["pick"]["min"], info["pick"]["max"]], "reset": info["pick_reset"],
+                       "growth": info["growth_time"]} for name, info in ag.TALL_CROPS.items()}
+    if tall != expected:
+        err(f"TallCrop.java {tall} != tools/agriculture.py {expected}")
+    for name, info in ag.TALL_CROPS.items():
+        if len(info["heights"]) != 8 or len(info["textures"]) != 8:
+            err(f"{name}: needs 8 ages of heights and textures")
+        elif any(len(textures) != info["heights"][age] for age, textures in enumerate(info["textures"])):
+            err(f"{name}: each age needs one texture per block of height")
+        elif info["heights"][info["pick_reset"]] != info["heights"][7] or max(info["heights"]) > ag.TALL_SECTIONS:
+            err(f"{name}: picking must keep the plant's height, and it may be at most {ag.TALL_SECTIONS} tall")
+
+    main = java.get("JugcraftAgriculture", "")
+    crops = {block: {"seed": seed, "legume": legume == "true"} for block, seed, legume in
+             re.findall(r'\bcrop\("([a-z_]+)", "([a-z_]+)", (true|false)\)', main)}
+    expected = {info["block"]: {"seed": info["seed"], "legume": info["legume"]} for info in ag.CROPS.values()}
+    if crops != expected:
+        err(f"JugcraftAgriculture.java crops {crops} != tools/agriculture.py {expected}")
+
+    items = {}
+    for name, n, sat, compost in re.findall(r'\bfood\("([a-z_]+)", (\d+), ([\d.]+)F, COMPOST_(\w+)\)', main):
+        items[name] = ("food", int(n), float(sat), compost.lower(), None)
+    for name, crop, compost in re.findall(r'\bseeds\("([a-z_]+)", "([a-z_]+)", COMPOST_(\w+)\)', main):
+        items[name] = ("seeds", None, None, compost.lower(), crop)
+    for name, crop, n, sat, compost in re.findall(r'\bedibleSeeds\("([a-z_]+)", "([a-z_]+)", (\d+), ([\d.]+)F, COMPOST_(\w+)\)', main):
+        items[name] = ("seeds", int(n), float(sat), compost.lower(), crop)
+    for name, compost in re.findall(r'\bplain\("([a-z_]+)", COMPOST_(\w+)\)', main):
+        items[name] = ("plain", None, None, compost.lower(), None)
+    for name, n, sat in re.findall(r'\bstew\("([a-z_]+)", (\d+), ([\d.]+)F\)', main):
+        items[name] = ("stew", int(n), float(sat), None, None)
+    expected = {}
+    for name, info in ag.ITEMS.items():
+        food = info.get("food") or [None, None]
+        kind = "stew" if info.get("stew") else "seeds" if "plants" in info else "food" if "food" in info else "plain"
+        expected[name] = (kind, food[0], food[1], info.get("compost"), info.get("plants"))
+    if items != expected:
+        err(f"JugcraftAgriculture.java items {items} != tools/agriculture.py {expected}")
+
+    sickles = {name: (int(radius), int(durability)) for name, radius, durability in
+               re.findall(r'\bsickle\("([a-z_]+)", (\d+), (\d+)\)', main)}
+    if sickles != {name: (info["radius"], info["durability"]) for name, info in ag.SICKLES.items()}:
+        err(f"JugcraftAgriculture.java sickles {sickles} differ from tools/agriculture.py")
+    if re.findall(r'\bwild\("([a-z_]+)"\)', main) != list(ag.WILD_CROPS):
+        err("JugcraftAgriculture.java wild plants differ from tools/agriculture.py")
+    patches = {name: re.findall(r"ConventionalBiomeTags\.(\w+)", biomes)
+               for name, biomes in re.findall(r'wildPatch\("([a-z_]+)", ([^;]*)\);', main)}
+    if patches != {name: info["biomes"] for name, info in ag.WILD_CROPS.items()}:
+        err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
+    seeds = re.search(r'GRASS_SEEDS = List\.of\(([^)]*)\)', main)
+    chance = re.search(r'GRASS_SEED_CHANCE = ([\d.]+)F', main)
+    if not seeds or re.findall(r'"([a-z_]+)"', seeds.group(1)) != ag.GRASS_SEEDS or not chance or float(chance.group(1)) != ag.GRASS_SEED_CHANCE:
+        err("JugcraftAgriculture.java grass seeds differ from tools/agriculture.py")
+    growth = java.get("CropGrowth", "")
+    bonus = re.search(r'LEGUME_BONUS = ([\d.]+)F', growth)
+    if not bonus or float(bonus.group(1)) != ag.LEGUME_BONUS or f'Jugcraft.id("{ag.LEGUME_TAG.split(":")[1]}")' not in growth:
+        err("CropGrowth.java legume rules differ from tools/agriculture.py")
+
+    # Every crop state has a model, and every seed plants a real crop.
+    for info in ag.TALL_CROPS.values():
+        variants = set((load(ASSETS / "blockstates" / f"{info['block']}.json") or {}).get("variants", {}))
+        if variants != {f"age={a},section={s}" for a in range(8) for s in range(ag.TALL_SECTIONS)}:
+            err(f"{info['block']}: blockstate does not cover every age and section")
+    for info in ag.CROPS.values():
+        variants = set((load(ASSETS / "blockstates" / f"{info['block']}.json") or {}).get("variants", {}))
+        if variants != {f"age={a}" for a in range(8)}:
+            err(f"{info['block']}: blockstate does not cover every age")
+    for name, info in ag.ITEMS.items():
+        if "plants" in info and info["plants"] not in ag.crop_blocks():
+            err(f"{name} plants unknown crop {info['plants']}")
+    for texture in ag.textures():
+        if not (ASSETS / "textures" / "block" / f"{texture}.png").is_file():
+            err(f"Missing crop texture {texture}")
+
+    # No recipe loop among agriculture items: every conversion leads away from where it started.
+    edges = {}
+    for recipe in ag.SHAPELESS:
+        for ref in recipe["inputs"]:
+            edges.setdefault(split(ref)[1], set()).add(split(recipe["result"])[1] if ":" in recipe["result"] else recipe["result"])
+    for result, info in ag.COOKING.items():
+        edges.setdefault(info["input"], set()).add(result)
+
+    def reaches(start, target, seen):
+        for nxt in edges.get(start, ()):
+            if nxt == target or (nxt not in seen and reaches(nxt, target, seen | {nxt})):
+                return True
+        return False
+    for start in edges:
+        if reaches(start, start, {start}):
+            err(f"Agriculture recipes form a loop through {start}")
+
+
 def main():
-    registered = set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
+    registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
+                  | set(ag.all_blocks()) | set(ag.all_items()))
     check_assets(sorted(registered))
     check_loot(registered)
     check_recipes(registered)
@@ -466,6 +571,7 @@ def main():
     check_large_machines()
     check_style_pack()
     check_handbook(registered)
+    check_agriculture()
     for path in RES.rglob("*.json"):
         load(path)
     if errors:

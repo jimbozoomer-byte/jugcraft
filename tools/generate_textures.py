@@ -1122,6 +1122,9 @@ def main():
     machines()
     import steampunk_textures
     steampunk_textures.draw_all()
+    import crop_textures
+    for (kind, name), image in crop_textures.crop_textures().items():
+        save(image, kind, name)
 
 
 if __name__ == "__main__":

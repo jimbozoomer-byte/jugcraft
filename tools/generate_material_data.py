@@ -12,6 +12,7 @@ from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, EXTRA_NAMES, MINERAL
 
 from machines import MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, TOOLS, UPGRADES, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
 import model_writer
+import agriculture_data
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -90,6 +91,7 @@ def assets():
         write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
         lang[f"item.{MOD}.{item}"] = item_name(item)
     machine_assets(lang)
+    agriculture_data.assets(ASSETS, write, lang)
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
 
 
@@ -304,6 +306,7 @@ def loot_tables():
         drop = info["drop"]
         table = ore_drop(rock, drop["item"], drop["min"], drop["max"]) if drop else self_drop(rock)
         write(out / f"{rock}.json", table)
+    agriculture_data.loot(DATA, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -388,6 +391,7 @@ def recipes():
         else:
             write(out / f"{recipe['id']}.json",
                   cooking(recipe["feature"], recipe["kind"], recipe["input"], recipe["result"], recipe["xp"]))
+    agriculture_data.recipes(out, write)
 
 
 # ---------------------------------------------------------------- tags
@@ -471,6 +475,7 @@ def tags():
             tags.add("item", f"c:{info['tag']}", rid(item))
             if info["tag"].startswith("dusts/"):
                 tags.add("item", "c:dusts", f"#c:{info['tag']}")
+    agriculture_data.tags(tags)
     tags.write()
 
 
@@ -520,6 +525,7 @@ def worldgen():
         ore_feature(rock, gen["size"], [{"target": {"predicate_type": "minecraft:tag_match", "tag": gen["target"]},
                                          "state": rid(rock)}])
         placed_feature(rock, gen)
+    agriculture_data.worldgen(DATA, write)
 
 
 def main():

@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:corn_crop",
+    "jugcraft:sunflower_crop",
+    "jugcraft:bean_crop",
+    "jugcraft:sweet_potato_crop",
+    "jugcraft:flax_crop"
+  ]
+}
