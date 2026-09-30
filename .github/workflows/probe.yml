@@ -19,15 +19,20 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
-      - name: Stripping users (4)
+      - name: Components (5)
         run: |
           COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
           CP="$CLIENT:$COMMON"
           FAPI=$(find ~/.gradle/caches -name 'fabric-*.jar' -path '*net.fabricmc.fabric-api*' | grep -v sources | tr '\n' ':')
-          mkdir -p /tmp/x && cd /tmp/x && unzip -q -o "$COMMON" 'net/*'
-          echo "=== classes using STRIPPED_OAK_LOG"; grep -rl --include='*.class' 'STRIPPED_OAK_LOG' net | head -20
-          for f in $(grep -rl --include='*.class' 'STRIPPED_OAK_LOG' net | grep -v '/Blocks.class' | head -4); do c=$(echo ${f%.class} | tr '/' '.'); echo "=== $c"; javap -cp "$CP" -p "$c" | head -40; done
-          echo "=== classes named Fuel"; find net -name '*Fuel*.class' | head
-          echo "=== content registries jar"; J=$(echo $FAPI | tr ':' '\n' | grep content-registries); jar tf "$J" | grep -E '\.class$' | head -60
-          J2=$(echo $FAPI | tr ':' '\n' | grep content-registries); for c in $(jar tf "$J2" | grep -E 'api/.*\.class$' | grep -v '\$' | sed 's/\.class$//; s#/#.#g'); do echo "=== $c"; javap -cp "$CP:$FAPI" "$c" | grep -E 'public' | head -8; done
+          p() { echo "=== $1"; javap -cp "$CP:$FAPI" -p "$1" 2>&1 | head -${2:-60}; }
+          p net.minecraft.world.item.component.BlockTransformers 60
+          p net.minecraft.world.item.component.CookingFuel 30
+          javap -cp "$CP" -p 'net.minecraft.world.item.Item$Properties' | grep -iE 'fuel|transform|strip|axe' 
+          javap -cp "$CP" -p net.minecraft.core.component.DataComponents | grep -iE 'FUEL|TRANSFORM' 
+          javap -cp "$CP" -p net.minecraft.tags.ItemTags | grep -E ' AXES| SWORDS|HOES'
+          javap -cp "$CP" -p net.minecraft.sounds.SoundEvents | grep -E 'AXE_STRIP|SWEET_BERRY|CROP_PLANTED'
+          echo "=== Items using BlockTransformers"; javap -cp "$CP" -c -p net.minecraft.world.item.Items | grep -E 'BlockTransformers|CookingFuel|fuel' | sed 's/.*\/\/ //' | sort | uniq -c | head -20
+          echo "=== BlockTransformers bytecode refs"; javap -cp "$CP" -c -p net.minecraft.world.item.component.BlockTransformers | grep -E 'invoke|getstatic' | sed 's/.*\/\/ //' | sort -u | head -60
+          echo "=== fabric item api"; J=$(echo $FAPI | tr ':' '\n' | grep fabric-item-api); jar tf "$J" | grep -E 'api/.*\.class$' | head -40
+          for c in net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents net.fabricmc.fabric.api.registry.FuelRegistryEvents; do p $c 20; done
