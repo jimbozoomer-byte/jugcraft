@@ -8,9 +8,7 @@
         "predicate_type": "minecraft:tag_match",
         "tag": "minecraft:stone_ore_replaceables"
       },
-      "state": {
-        "Name": "jugcraft:bauxite"
-      }
+      "state": "jugcraft:bauxite"
     }
   ]
 }

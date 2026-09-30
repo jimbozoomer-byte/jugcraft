@@ -421,9 +421,9 @@ def placed_feature(name, gen):
 def layered_targets(ore, deep):
     return [
         {"target": {"predicate_type": "minecraft:tag_match", "tag": "minecraft:stone_ore_replaceables"},
-         "state": {"Name": rid(ore)}},
+         "state": rid(ore)},
         {"target": {"predicate_type": "minecraft:tag_match", "tag": "minecraft:deepslate_ore_replaceables"},
-         "state": {"Name": rid(deep)}},
+         "state": rid(deep)},
     ]
 
 
@@ -436,7 +436,7 @@ def worldgen():
     for rock, info in ROCKS.items():
         gen = info["gen"]
         ore_feature(rock, gen["size"], [{"target": {"predicate_type": "minecraft:tag_match", "tag": gen["target"]},
-                                         "state": {"Name": rid(rock)}}])
+                                         "state": rid(rock)}])
         placed_feature(rock, gen)
 
 

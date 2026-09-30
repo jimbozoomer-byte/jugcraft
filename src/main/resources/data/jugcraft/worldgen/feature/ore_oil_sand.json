@@ -8,9 +8,7 @@
         "predicate_type": "minecraft:tag_match",
         "tag": "minecraft:sand"
       },
-      "state": {
-        "Name": "jugcraft:oil_sand"
-      }
+      "state": "jugcraft:oil_sand"
     }
   ]
 }

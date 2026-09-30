@@ -245,7 +245,7 @@ def check_worldgen():
         if "config" in feature:
             err(f"{path.name}: 26.x features have no \"config\" wrapper")
         for target in feature.get("targets", []):
-            block = split(target["state"]["Name"])[1]
+            block = split(target["state"])[1]
             if block not in all_blocks():
                 err(f"{path.name}: places unknown block {block}")
     for path in sorted((DATA / MOD / "worldgen" / "placed_feature").glob("*.json")):
