@@ -15,6 +15,10 @@ Grow a kitchen garden next to the Fall Harvest fields:
 
 Stand trellises on farmland (stack two for tomatoes), plant tomato seeds on them, and pick red tomatoes all season. Put an iron **Cooking Pot** on a campfire and cook soups, porridge, chili and cabbage rolls from six ingredient slots. Make garden salad, sauerkraut (with Jugcraft salt) and barley bread by hand. The player guide is the Kitchen Garden section of [branches/AGRICULTURE.md](../branches/AGRICULTURE.md#what-exists-now-the-kitchen-garden).
 
+![Rows of trellises with ripe red tomatoes](../images/ingame_tomato_trellis.jpg) ![The Cooking Pot's screen](../images/ingame_cooking_pot_screen.jpg)
+
+*In-game screenshots from CI's client game test (software rendering, small previews). The branch document has more.*
+
 ## Connections
 - Existing input producer: the Overworld (seven new wild plants in jungle, savanna, badlands, plains, hills, forest, taiga and windswept biomes; short grass everywhere), vanilla farmland, campfires, bowls, sticks, iron, bread, carrots, potatoes, sugar, brown mushrooms and raw beef. Beans come from the Fall Harvest. Salt comes from the mining branch's rock salt and is only needed for sauerkraut.
 - Existing output consumer: food for every player. Animal breeding through vanilla tags (`rabbit_food`, `pig_food`, `cow_food`, `sheep_food`, `goat_food`, `horse_food`, `chicken_food`, `parrot_food`). Composters. `c:` convention tags (`c:crops/*`, `c:seeds/*`, `c:foods/*`) let other mods use the crops and dishes.
@@ -42,7 +46,36 @@ Stand trellises on farmland (stack two for tomatoes), plant tomato seeds on them
 No new dependencies. Uses Fabric API's menu, block entity, loot, biome modification and creative tab APIs, which are already required. Every texture is drawn by `tools/kitchen_textures.py` from fixed seeds; no Mojang texture is read, traced or recolored. The Cooking Pot screen reuses Jugcraft's own machine screen background.
 
 ## Verification
-To be filled in from this pull request's CI run.
+Actual results (30 September 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions):
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also checks climbing-crop seeds, the Cooking Pot's numbers, recipe files and unique ingredient sets, and loops through every agriculture recipe) | Pass, 249 IDs |
+| `./gradlew build`, compile, with the Fall Harvest and `main` after #36 merged in (`5119d4a`) | Pass |
+| Game tests on the headless server, same commit: 68 in total, 13 of them new here | **All 68 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`): plants tomato trellis rows, crop rows, oat and barley fields, every growth stage, the wild plants and a Cooking Pot on a campfire, takes screenshots, then opens the pot's screen by using it | **Passes** on `e5b0001`, the last commit before `main` after #36 was merged in; the screenshots above are from that run |
+
+The 13 new game tests (`KitchenGardenGameTests`, plus one in `AgricultureGameTests`):
+1. tomato seeds do nothing on bare farmland and plant a tomato in a trellis standing on farmland, using one seed;
+2. a tomato grows only into trellis: without a second trellis it stops at one block, with one it climbs to two, and it blocks movement;
+3. picking a ripe tomato keeps the plant; breaking it returns the seed and both trellises;
+4. trellises and climbing tomatoes keep the farmland under them (40 ticks later);
+5. picking a ripe pepper drops peppers and sets the bush back to flowering;
+6. ripe onions, garlic, cabbage, oats and barley drop their harvest and seeds (26.x loot tables);
+7. one sickle swing replants ripe onions and picks ripe peppers;
+8. the new foods restore the values in the branch document, onions, garlic, oats and barley are not edible raw, and soups do not stack;
+9. every Cooking Pot recipe loads and is found from its ingredients in any order;
+10. on a lit campfire the pot cooks two batches of tomato soup from ingredients spread over three slots, into separate result slots;
+11. without heat, or with a stray item in a slot, the pot does not cook and does not show broth;
+12. breaking a pot drops the pot and its contents;
+13. tall corn keeps its farmland (`AgricultureGameTests`): Minecraft 26.3 counts a two-block corn plant as a "solid" block, and this checks that the farmland under it survives anyway.
+
+The first run of test 10 found a real problem: soups do not stack, so the pot, which then had one result slot, stopped after one bowl. It now has four result slots.
+
+The test server log shows no load or validation warnings for any Kitchen Garden loot table, model, tag or worldgen file. The Cooking Pot recipes log "can't be placed due to empty ingredients and will be ignored", the same notice the existing multi-input machine recipes log. It concerns only the vanilla recipe book, and the recipes load and cook (tests 9 and 10). The server log's "Unreachable entry!" warnings come from the older ore loot tables, which PR #34 fixes.
+
+**Not run:** a person playing in a client, a dedicated server with two players, save/restart (the pot saves its slots and progress, untested), natural wild-plant generation in a new world, random-tick growth over time, and performance measurement. These need a play session.
 
 ## World and event applicability
 The wild plants follow each crop's real origin (tomatoes and peppers in warm biomes, garlic in woodland, cabbage on windy hills, grains in fields and dry hills). Patches appear in about 1 of 24 chunks of a matching biome, on grass only. There are no hostile or dangerous elements. Nothing is seasonal.

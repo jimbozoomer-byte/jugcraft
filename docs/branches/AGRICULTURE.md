@@ -85,6 +85,16 @@ Every crop has two independent entry points, so none is locked behind a biome, a
 
 The second slice turns a farm into a kitchen: vegetables and grains for everyday meals, trellises for climbing crops, and a Cooking Pot for dishes with several ingredients.
 
+| **Tomatoes on trellises**, ripe and ready to pick | **The kitchen garden:** trellis rows, oat and barley fields, and rows of every new crop |
+| --- | --- |
+| ![Rows of trellises with ripe red tomatoes](../images/ingame_tomato_trellis.jpg) | ![The kitchen garden from above](../images/ingame_kitchen_garden.jpg) |
+| **Every growth stage:** tomatoes, peppers, cabbage, oats, barley, onions and garlic, youngest on the left, with the wild plants | **The Cooking Pot** on a campfire, cooking chili |
+| ![The Kitchen Garden growth stages](../images/ingame_kitchen_stages.jpg) | ![A Cooking Pot on a campfire](../images/ingame_cooking_pot.jpg) |
+
+![The Cooking Pot's screen: six ingredients, the progress bar, the heat flame and two bowls of chili](../images/ingame_cooking_pot_screen.jpg)
+
+*Real screenshots from the client game test that CI runs (`KitchenGardenClientGameTests`, software rendering, small previews, hotbar cropped).*
+
 | Crop | Grows | Plant with | Harvest | Uses now |
 | --- | --- | --- | --- | --- |
 | **Tomato** | **Climbs a trellis, 2 blocks tall**: yellow flowers, green fruit, then red | Tomato Seeds, on a trellis standing on farmland | Right-click the ripe plant to pick 2–4 tomatoes; it stays on the trellis and flowers again | Raw, tomato soup, chili, garden salad; 1 tomato → 2 seeds |
