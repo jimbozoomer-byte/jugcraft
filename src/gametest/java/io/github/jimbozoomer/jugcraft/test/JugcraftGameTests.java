@@ -19,6 +19,7 @@ import io.github.jimbozoomer.jugcraft.machine.MachineRecipe;
 import io.github.jimbozoomer.jugcraft.machine.MachineRecipes;
 import io.github.jimbozoomer.jugcraft.machine.MachineUpgrades;
 import io.github.jimbozoomer.jugcraft.machine.SideConfig;
+import io.github.jimbozoomer.jugcraft.prospecting.OreSurvey;
 import io.github.jimbozoomer.jugcraft.storage.JugcraftStorage;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -33,6 +34,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -555,5 +557,55 @@ public class JugcraftGameTests {
 		List<ItemStack> drops = Block.getDrops(helper.getBlockState(pos), helper.getLevel(), helper.absolutePos(pos), null);
 		helper.assertTrue(drops.size() == 1 && drops.get(0).is(item(drop)) && drops.get(0).getCount() >= min
 				&& drops.get(0).getCount() <= max, block + " should drop " + min + "-" + max + " " + drop + ", dropped " + drops);
+	}
+
+	// ------------------------------------------------------------------ mining & prospecting
+
+	/** The prospector's survey reports ore placed nearby, with a signal of 1-5 and a depth band, and no positions. */
+	@GameTest
+	public void surveyFindsNearbyOre(GameTestHelper helper) {
+		for (int x = 1; x <= 4; x++) {
+			for (int z = 1; z <= 4; z++) {
+				helper.setBlock(new BlockPos(x, 1, z), Blocks.COPPER_ORE);
+			}
+		}
+		List<OreSurvey.Reading> readings = OreSurvey.survey(helper.getLevel(), helper.absolutePos(new BlockPos(2, 2, 2)),
+				helper.getLevel().getRandom());
+		OreSurvey.Reading copper = readings.stream()
+				.filter(reading -> reading.icon().equals(Identifier.parse("minecraft:copper_ore"))).findFirst().orElse(null);
+		helper.assertTrue(copper != null, "No copper reading in " + readings);
+		helper.assertTrue(copper.signal() >= 1 && copper.signal() <= 5, "Signal out of range: " + copper.signal());
+		helper.assertTrue(copper.depth() >= 0 && copper.depth() <= 2, "Depth band out of range: " + copper.depth());
+		helper.succeed();
+	}
+
+	/**
+	 * The ore drill mines ore blocks in the layer below it, puts them in its result slots, fills stone ore
+	 * holes with stone and deepslate ore holes with deepslate, and leaves other blocks alone.
+	 */
+	@GameTest(maxTicks = 400)
+	public void oreDrillMinesOreBelow(GameTestHelper helper) {
+		BlockPos master = new BlockPos(4, 2, 4);
+		BlockPos iron = new BlockPos(5, 1, 3);
+		BlockPos deepIron = new BlockPos(2, 1, 6);
+		BlockPos dirt = new BlockPos(4, 1, 4);
+		helper.setBlock(iron, Blocks.IRON_ORE);
+		helper.setBlock(deepIron, Blocks.DEEPSLATE_IRON_ORE);
+		helper.setBlock(dirt, Blocks.DIRT);
+		MachineBlockEntity drill = large(helper, master, MachineKind.ORE_DRILL);
+		charge(helper, master, Direction.EAST);
+		helper.succeedWhen(() -> {
+			helper.assertBlockPresent(Blocks.STONE, iron);
+			helper.assertBlockPresent(Blocks.DEEPSLATE, deepIron);
+			helper.assertBlockPresent(Blocks.DIRT, dirt);
+			int ore = 0;
+			int deep = 0;
+			for (int slot = 0; slot < MachineKind.ORE_DRILL.slots; slot++) {
+				ItemStack stack = drill.getItem(slot);
+				ore += stack.is(Items.IRON_ORE) ? stack.getCount() : 0;
+				deep += stack.is(Items.DEEPSLATE_IRON_ORE) ? stack.getCount() : 0;
+			}
+			helper.assertTrue(ore == 1 && deep == 1, "Drill holds " + ore + " iron ore and " + deep + " deepslate iron ore");
+		});
 	}
 }
