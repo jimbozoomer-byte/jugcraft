@@ -38,15 +38,19 @@ import org.jspecify.annotations.Nullable;
  * All logic runs on the server; clients only see synced {@link ContainerData}.
  */
 public class MachineBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, ExtendedMenuProvider<BlockPos> {
-	public static final int DATA_ENERGY = 0;
-	public static final int DATA_CAPACITY = 1;
-	public static final int DATA_PROGRESS = 2;
-	public static final int DATA_MAX_PROGRESS = 3;
-	public static final int DATA_BURN = 4;
-	public static final int DATA_MAX_BURN = 5;
-	public static final int DATA_FORMED = 6;
-	public static final int DATA_WATER = 7;
-	public static final int DATA_COUNT = 8;
+	// Container data is synced to clients as 16-bit values, so energy and capacity (which exceed
+	// 32,767) are split into low and high halves; see MachineMenu#energy and #capacity.
+	public static final int DATA_ENERGY_LOW = 0;
+	public static final int DATA_ENERGY_HIGH = 1;
+	public static final int DATA_CAPACITY_LOW = 2;
+	public static final int DATA_CAPACITY_HIGH = 3;
+	public static final int DATA_PROGRESS = 4;
+	public static final int DATA_MAX_PROGRESS = 5;
+	public static final int DATA_BURN = 6;
+	public static final int DATA_MAX_BURN = 7;
+	public static final int DATA_FORMED = 8;
+	public static final int DATA_WATER = 9;
+	public static final int DATA_COUNT = 10;
 
 	/** Steam generator slots. */
 	public static final int SLOT_FUEL = 0;
@@ -76,8 +80,10 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		@Override
 		public int get(int index) {
 			return switch (index) {
-				case DATA_ENERGY -> (int) energy.getAmount();
-				case DATA_CAPACITY -> (int) energy.getCapacity();
+				case DATA_ENERGY_LOW -> (int) (energy.getAmount() & 0xFFFF);
+				case DATA_ENERGY_HIGH -> (int) ((energy.getAmount() >>> 16) & 0xFFFF);
+				case DATA_CAPACITY_LOW -> (int) (energy.getCapacity() & 0xFFFF);
+				case DATA_CAPACITY_HIGH -> (int) ((energy.getCapacity() >>> 16) & 0xFFFF);
 				case DATA_PROGRESS -> progress;
 				case DATA_MAX_PROGRESS -> maxProgress;
 				case DATA_BURN -> burn;
@@ -333,6 +339,15 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	@Override
 	public int getContainerSize() {
 		return items.size();
+	}
+
+	@Override
+	public void setItem(int slot, ItemStack stack) {
+		// A different input restarts processing, so progress cannot carry over to another recipe.
+		if (kind.isProcessor() && slot == 0 && !ItemStack.isSameItemSameComponents(items.get(0), stack)) {
+			progress = 0;
+		}
+		super.setItem(slot, stack);
 	}
 
 	@Override

@@ -53,9 +53,8 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 
 		// Energy bar, filled from the bottom.
 		graphics.fill(x + BAR_X - 1, y + BAR_Y - 1, x + BAR_X + BAR_WIDTH + 1, y + BAR_Y + BAR_HEIGHT + 1, DARK);
-		int energy = menu.data(MachineBlockEntity.DATA_ENERGY);
-		int capacity = Math.max(1, menu.data(MachineBlockEntity.DATA_CAPACITY));
-		int filled = (int) ((long) energy * BAR_HEIGHT / capacity);
+		long capacity = Math.max(1, menu.capacity());
+		int filled = (int) (menu.energy() * BAR_HEIGHT / capacity);
 		graphics.fill(x + BAR_X, y + BAR_Y + BAR_HEIGHT - filled, x + BAR_X + BAR_WIDTH, y + BAR_Y + BAR_HEIGHT, ENERGY);
 
 		MachineKind kind = menu.kind();
@@ -88,7 +87,7 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		super.extractLabels(graphics, mouseX, mouseY);
-		String energy = menu.data(MachineBlockEntity.DATA_ENERGY) + " / " + menu.data(MachineBlockEntity.DATA_CAPACITY) + " JE";
+		String energy = menu.energy() + " / " + menu.capacity() + " JE";
 		graphics.text(font, energy, 28, 60, TEXT);
 		if (menu.kind() == MachineKind.ARC_FURNACE) {
 			String key = menu.data(MachineBlockEntity.DATA_FORMED) == 1
