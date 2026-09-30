@@ -203,15 +203,16 @@ def gourd_stalk():
 # ---------------------------------------------------------------- cranberries
 
 def cranberry_stage(stage):
+    """A cranberry bush for the raised bog model: rows 0-7 stand out of the water, the rest is under it."""
     c = Canvas()
     rng = random.Random(40 + stage)
-    top = (11, 6, 4, 4)[stage]
+    top = (8, 3, 1, 1)[stage]
     # Wiry red-brown runners and upright shoots with small glossy leaves.
     shoots = (2, 5, 6, 6)[stage]
     for i in range(shoots):
         x = 2 + (i * 12) / max(1, shoots - 1) if shoots > 1 else 7.5
         lean = rng.uniform(-1.5, 1.5)
-        height = 15 - top + rng.randint(-1, 1)
+        height = 15 - top + rng.randint(-1, 0)
         for j in range(height):
             y = 15 - j
             sx = x + lean * j / max(1, height)
@@ -222,18 +223,23 @@ def cranberry_stage(stage):
                 c.px(sx + side * 2, y, CRAN_LEAF[2])
                 c.px(sx + side, y - 1, CRAN_LEAF[4])
         c.px(x + lean, 15 - height, CRAN_LEAF[4])
+    # A dense mat of leaves at the top, where the bush stands above the water.
+    if stage > 0:
+        for y in range(top + 1, top + 6):
+            for x in range(1, 15):
+                if rng.random() < 0.45:
+                    c.px(x, y, CRAN_LEAF[rng.choice((2, 3, 4))])
     if stage == 2:
-        for x, y in ((3, 6), (7, 5), (11, 6), (5, 9), (10, 9), (13, 8)):
+        for x, y in ((3, 3), (7, 2), (11, 3), (5, 5), (10, 5), (13, 4), (2, 6)):
             c.px(x, y, CRAN_FLOWER[1])
             c.px(x, y + 1, CRAN_FLOWER[0])
             c.px(x + 1, y, CRAN_FLOWER[2])
     if stage == 3:
-        for x, y in ((3, 6), (7, 5), (11, 6), (5, 9), (10, 9), (13, 8), (2, 10), (8, 11), (12, 12), (6, 13)):
-            c.px(x, y, CRANBERRY[3])
+        for x, y in ((3, 2), (7, 2), (11, 3), (5, 5), (10, 5), (13, 6), (2, 6), (8, 7), (12, 8), (6, 8)):
+            c.px(x, y, CRANBERRY[4] if (x + y) % 3 == 0 else CRANBERRY[3])
             c.px(x + 1, y, CRANBERRY[2])
             c.px(x, y + 1, CRANBERRY[2])
             c.px(x + 1, y + 1, CRANBERRY[1])
-            c.px(x, y, CRANBERRY[4] if (x + y) % 3 == 0 else CRANBERRY[3])
     return c.img
 
 

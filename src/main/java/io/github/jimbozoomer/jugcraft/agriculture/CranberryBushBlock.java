@@ -56,7 +56,7 @@ public class CranberryBushBlock extends VegetationBlock implements BonemealableB
 	public static final int PICK_MAX = 3;
 	public static final int PICK_RESET = 1;
 	private static final VoxelShape SPROUT = Block.box(3.0, 0.0, 3.0, 13.0, 8.0, 13.0);
-	private static final VoxelShape BUSH = Block.box(1.0, 0.0, 1.0, 15.0, 14.0, 15.0);
+	private static final VoxelShape BUSH = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
 
 	public CranberryBushBlock(Properties properties) {
 		super(properties);

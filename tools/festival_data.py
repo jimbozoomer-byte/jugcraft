@@ -76,6 +76,15 @@ def attached_stem_model():
     return model
 
 
+def bog_bush_model():
+    """Vanilla's cross shape (two planes at 45 degrees), lifted from 0-16 to 4-20 pixels."""
+    planes = []
+    for frm, to, faces in (([0.8, 4, 8], [15.2, 20, 8], ("north", "south")), ([8, 4, 0.8], [8, 20, 15.2], ("west", "east"))):
+        planes.append({"from": frm, "to": to, "rotation": {"origin": [8, 8, 8], "axis": "y", "angle": 45, "rescale": True},
+                       "shade": False, "faces": {face: {"uv": [0, 0, 16, 16], "texture": "#cross"} for face in faces}})
+    return {"ambientocclusion": False, "textures": {"particle": "#cross"}, "elements": planes}
+
+
 def lantern_model():
     """A carved turnip, 8 pixels wide, with its face on the north side and a tuft of leaf stalks on top."""
     side, face, top = rid("block/turnip_lantern_side"), rid("block/turnip_lantern_face"), rid("block/turnip_lantern_top")
@@ -187,9 +196,11 @@ def assets(root, write, lang):
         lang[f"block.{MOD}.{stem(gourd)}"] = f"{info['display']} Stem"
         lang[f"block.{MOD}.{attached_stem(gourd)}"] = f"Attached {info['display']} Stem"
 
-    # The cranberry bush: a cross model per stage, standing in water.
+    # The cranberry bush: crossed planes like vanilla's cross model, raised 4 pixels so that the bush
+    # stands out of its water (the surface is 14 pixels up) instead of hiding under it.
+    write(models / "cranberry_bush.json", bog_bush_model())
     for texture in CRANBERRY["stages"]:
-        write(models / f"{texture}.json", {"parent": "minecraft:block/cross", "textures": {"cross": rid(f"block/{texture}")}})
+        write(models / f"{texture}.json", {"parent": rid("block/cranberry_bush"), "textures": {"cross": rid(f"block/{texture}")}})
     write(root / "blockstates" / f"{CRANBERRY['block']}.json", {"variants": {
         f"age={age}": {"model": rid(f"block/{texture}")} for age, texture in enumerate(CRANBERRY["stages"])}})
     lang[f"block.{MOD}.{CRANBERRY['block']}"] = CRANBERRY["display"]
