@@ -105,19 +105,24 @@ public class HandbookScreen extends Screen {
 		return chapters.isEmpty() ? new JsonArray() : chapters.get(chapter).getAsJsonArray("pages");
 	}
 
+	/** The world blur (drawn once by Screen), then the book: leather cover, brass edge and the paper of the page. */
 	@Override
-	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-		extractBackground(graphics, mouseX, mouseY, delta);
-		// Leather cover, brass edge, and the paper of the page.
+	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+		super.extractBackground(graphics, mouseX, mouseY, delta);
 		graphics.fill(left - 3, top - 3, left + WIDTH + 3, top + HEIGHT + 3, BRASS_DARK);
 		graphics.fill(left - 2, top - 2, left + WIDTH + 2, top + HEIGHT + 2, BRASS);
 		graphics.fill(left, top, left + WIDTH, top + HEIGHT, LEATHER);
 		graphics.fill(left + CHAPTER_WIDTH, top + 4, left + WIDTH - 4, top + HEIGHT - 4, PAPER);
 		graphics.fill(left + CHAPTER_WIDTH, top + 4, left + CHAPTER_WIDTH + 3, top + HEIGHT - 4, PAPER_SHADE);
 		graphics.text(font, title, left + 8, top + 8, BRASS, false);
+	}
+
+	@Override
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
 		boolean pageable = pages().size() > 1;
 		previous.visible = pageable;
 		next.visible = pageable;
+		// Draws the background (above) and the buttons; the page content goes on top.
 		super.extractRenderState(graphics, mouseX, mouseY, delta);
 
 		if (chapters.isEmpty()) {

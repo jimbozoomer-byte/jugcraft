@@ -23,6 +23,9 @@ import net.minecraft.world.level.block.state.BlockState;
  * screenshots, so the looks can be checked from actual game renders rather than previews.
  */
 public class JugcraftClientGameTests implements FabricClientGameTest {
+	/** GLFW key code of F1 (hide the HUD). */
+	private static final int GLFW_KEY_F1 = 290;
+
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		try (TestSingleplayerContext singleplayer = context.worldBuilder()
@@ -39,15 +42,22 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 10, y, z - 10, x + 40, y + 6, z + 4));
 			server.runOnServer(minecraft -> buildShowroom(minecraft.overworld(), new BlockPos(x, y, z - 5)));
 
-			// One-block machines, facing the camera.
-			server.runCommand("tp @p %d %d %d 180 15".formatted(x, y, z + 2));
+			// Hide the HUD, hand and chat (F1) so the screenshots show only the machines.
+			context.getInput().pressKey(GLFW_KEY_F1);
+
+			// One-block machines, facing the camera, in two halves.
+			server.runCommand("tp @p %d %d %d 180 25".formatted(x - 4, y, z - 2));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
-			context.takeScreenshot("jugcraft_machines");
+			context.takeScreenshot("jugcraft_machines_1");
+			server.runCommand("tp @p %d %d %d 180 25".formatted(x + 3, y, z - 2));
+			context.waitTicks(20);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_machines_2");
 
 			// Multi-block machines.
-			server.runCommand("tp @p %d %d %d 180 5".formatted(x + 27, y, z + 3));
-			context.waitTicks(40);
+			server.runCommand("tp @p %d %d %d 180 0".formatted(x + 27, y, z + 1));
+			context.waitTicks(20);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_multiblocks");
 
