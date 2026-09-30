@@ -228,8 +228,8 @@
           "title": "Wind Turbine",
           "icon": "jugcraft:wind_turbine",
           "text": [
-            "Three blocks tall. The higher it stands and the worse the weather, the more it makes. Keep the air around its top clear.",
-            "Makes up to 24 JE/t. Holds 16,000 JE."
+            "Nine blocks tall with a seven-block rotor. The higher it stands and the worse the weather, the more it makes, up to 72 JE/t (twice that in a thunderstorm). The rotor needs a clear 7x7 square in front of the top.",
+            "Makes up to 72 JE/t. Holds 48,000 JE."
           ],
           "craft": {
             "grid": [
@@ -334,6 +334,205 @@
             ],
             "result": "jugcraft:aluminum_cable",
             "count": 3
+          }
+        },
+        {
+          "title": "Steam Engine",
+          "icon": "jugcraft:steam_engine",
+          "text": [
+            "Burns coal, charcoal, coke or bitumen and boils water to turn its flywheel: 64 KE/t out of its back. Right-click with fuel or a water bucket, or feed it with hoppers, pipes and pumps; a water source below refills it. It burns only while something takes the power."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:bronze_ingot",
+              "minecraft:bucket",
+              "jugcraft:bronze_ingot",
+              "minecraft:piston",
+              "minecraft:furnace",
+              "minecraft:piston",
+              "jugcraft:bronze_ingot",
+              "jugcraft:iron_shaft",
+              "jugcraft:bronze_ingot"
+            ],
+            "result": "jugcraft:steam_engine",
+            "count": 1
+          }
+        },
+        {
+          "title": "Large Steam Engine",
+          "icon": "jugcraft:large_steam_engine",
+          "text": [
+            "Two by two by two. Four times the small steam engine: 256 KE/t out of a shaft at the back of its upper right block, using 40 mB of water per tick and fuel four times as fast. It has a screen like the steam generator's, and a water source under it refills it.",
+            "Needs no power."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steam_engine",
+              "jugcraft:iron_plate",
+              "jugcraft:steam_engine",
+              "jugcraft:iron_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:iron_plate",
+              "jugcraft:steam_engine",
+              "jugcraft:iron_plate",
+              "jugcraft:steam_engine"
+            ],
+            "result": "jugcraft:large_steam_engine",
+            "count": 1
+          }
+        },
+        {
+          "title": "Hand Crank",
+          "icon": "jugcraft:hand_crank",
+          "text": [
+            "Place it against a shaft, gearbox or machine and right-click: each crank turns it for 5 seconds (up to 20) at 16 KE/t. Cranking makes you a little hungry."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:oak_planks",
+              "jugcraft:iron_shaft",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "result": "jugcraft:hand_crank",
+            "count": 1
+          }
+        },
+        {
+          "title": "Iron Shaft",
+          "icon": "jugcraft:iron_shaft",
+          "text": [
+            "Carries rotation (KE, kinetic energy) along its length, placed like a log. Machines at the end of a shaft line run straight off it: 1 KE counts as 1 JE, with no cables."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:iron_ingot",
+              null,
+              null,
+              "minecraft:iron_ingot",
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "result": "jugcraft:iron_shaft",
+            "count": 4
+          }
+        },
+        {
+          "title": "Brass Gearbox",
+          "icon": "jugcraft:brass_gearbox",
+          "text": [
+            "Passes rotation out of all six sides, to branch a shaft line or turn a corner. Power is shared evenly between everything on the line."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:brass_plate",
+              "jugcraft:bronze_gear",
+              "jugcraft:brass_plate",
+              "jugcraft:bronze_gear",
+              "jugcraft:iron_shaft",
+              "jugcraft:bronze_gear",
+              "jugcraft:brass_plate",
+              "jugcraft:bronze_gear",
+              "jugcraft:brass_plate"
+            ],
+            "result": "jugcraft:brass_gearbox",
+            "count": 1
+          }
+        },
+        {
+          "title": "Belt Pulley",
+          "icon": "jugcraft:belt_pulley",
+          "text": [
+            "A shaft with a grooved wheel. Use a Leather Belt on two pulleys with the same axis (level with each other along it, up to 16 blocks apart) and the second turns with the first: power jumps gaps and walls."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:oak_planks",
+              "jugcraft:iron_shaft",
+              "minecraft:oak_planks",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "result": "jugcraft:belt_pulley",
+            "count": 1
+          }
+        },
+        {
+          "title": "Leather Belt",
+          "icon": "jugcraft:belt",
+          "text": [
+            "Links two belt pulleys: use it on one, then on the other. Breaking a pulley drops the belt."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:leather",
+              "minecraft:string",
+              "minecraft:leather",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "result": "jugcraft:belt",
+            "count": 1
+          }
+        },
+        {
+          "title": "Dynamo",
+          "icon": "jugcraft:dynamo",
+          "text": [
+            "Turns rotation reaching any face into JE at 75% and pushes it into cables on every side: the bridge from a shaft line to the electric network."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:copper_ingot",
+              "minecraft:redstone",
+              "minecraft:copper_ingot",
+              "minecraft:redstone",
+              "jugcraft:iron_shaft",
+              "minecraft:redstone",
+              "minecraft:copper_ingot",
+              "minecraft:redstone",
+              "minecraft:copper_ingot"
+            ],
+            "result": "jugcraft:dynamo",
+            "count": 1
+          }
+        },
+        {
+          "title": "Electric Motor",
+          "icon": "jugcraft:electric_motor",
+          "text": [
+            "Turns JE from cables back into rotation at 75%, up to 96 KE/t out of its shaft, which points the way you looked when placing it. Motor and dynamo together always lose power."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:iron_plate",
+              "jugcraft:copper_wire",
+              "jugcraft:iron_plate",
+              "jugcraft:copper_wire",
+              "jugcraft:iron_shaft",
+              "jugcraft:copper_wire",
+              "jugcraft:iron_plate",
+              "jugcraft:copper_cable",
+              "jugcraft:iron_plate"
+            ],
+            "result": "jugcraft:electric_motor",
+            "count": 1
           }
         }
       ]
@@ -798,6 +997,29 @@
               ]
             }
           ]
+        },
+        {
+          "title": "Auto-Crafter",
+          "icon": "jugcraft:auto_crafter",
+          "text": [
+            "Crafts the crafting recipe laid out in its 3x3 grid. Set the pattern by hand; each grid slot keeps its last item as the pattern, so it crafts while every filled slot holds two or more. Pipes and hoppers top up slots that already hold that item. Empty buckets and bottles go to the slot above the output.",
+            "Uses 8 JE/t while working. Holds 10,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:brass_plate",
+              "jugcraft:basic_circuit",
+              "jugcraft:brass_plate",
+              "minecraft:crafting_table",
+              "jugcraft:machine_casing",
+              "minecraft:crafting_table",
+              "jugcraft:brass_plate",
+              "minecraft:hopper",
+              "jugcraft:brass_plate"
+            ],
+            "result": "jugcraft:auto_crafter",
+            "count": 1
+          }
         }
       ]
     },

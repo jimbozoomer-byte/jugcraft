@@ -3,9 +3,15 @@ package io.github.jimbozoomer.jugcraft.test;
 import io.github.jimbozoomer.jugcraft.client.HandbookScreen;
 import io.github.jimbozoomer.jugcraft.client.MachineScreen;
 import io.github.jimbozoomer.jugcraft.client.ProspectorScreen;
+import io.github.jimbozoomer.jugcraft.kinetic.DynamoBlock;
+import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlock;
+import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
+import io.github.jimbozoomer.jugcraft.kinetic.ShaftBlock;
+import io.github.jimbozoomer.jugcraft.kinetic.SteamEngineBlock;
 import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
 import io.github.jimbozoomer.jugcraft.machine.LargeMachineBlock;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
+import io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import io.github.jimbozoomer.jugcraft.prospecting.OreSurvey;
 import java.util.List;
@@ -14,11 +20,17 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -40,10 +52,14 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			int y = origin.getY();
 			int z = origin.getZ();
 			TestServerContext server = singleplayer.getServer();
+			// No command feedback in chat, so it does not cover the screenshots (the rule's name differs across
+			// versions; whichever does not exist just fails).
+			server.runCommand("gamerule sendCommandFeedback false");
+			server.runCommand("gamerule minecraft:send_command_feedback false");
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:smooth_stone".formatted(x - 10, y - 1, z - 10, x + 40, y - 1, z + 4));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 10, y, z - 10, x + 40, y + 6, z + 4));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:smooth_stone".formatted(x - 10, y - 1, z - 10, x + 64, y - 1, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 10, y, z - 10, x + 64, y + 14, z + 8));
 			server.runOnServer(minecraft -> buildShowroom(minecraft.overworld(), new BlockPos(x, y, z - 5)));
 
 			// Hide the HUD, hand and chat (F1) so the screenshots show only the machines.
@@ -59,11 +75,24 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_machines_2");
 
+			// A running kinetic line: steam engine, shafts, a gearbox with a hand crank, a dynamo and a crusher.
+			// Its own row behind the multi-block camera (the showroom rows are at z - 5).
+			server.runOnServer(minecraft -> buildKineticLine(minecraft.overworld(), new BlockPos(x, y, z + 2)));
+			server.runCommand("tp @p %d %d %d 180 35".formatted(x + 2, y + 2, z + 7));
+			context.waitTicks(60);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_kinetics");
+
 			// Multi-block machines.
-			server.runCommand("tp @p %d %d %d 180 0".formatted(x + 27, y, z + 1));
+			// Two views: the multi-block row is about 40 blocks long, and the wind turbine is nine tall.
+			server.runCommand("tp @p %d %d %d 180 12".formatted(x + 28, y + 4, z + 12));
 			context.waitTicks(20);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_multiblocks");
+			server.runCommand("tp @p %d %d %d 180 12".formatted(x + 50, y + 4, z + 12));
+			context.waitTicks(20);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_multiblocks_2");
 
 			// A machine screen: walk up to the crusher and use it.
 			BlockPos crusher = new BlockPos(x - 7 + singleIndex(MachineKind.CRUSHER), y, z - 5);
@@ -74,6 +103,24 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.getInput().pressKey(options -> options.keyUse);
 			context.waitForScreen(MachineScreen.class);
 			context.takeScreenshot("jugcraft_machine_screen");
+			context.setScreen(() -> null);
+
+			// The auto-crafter's screen, with a stick pattern in its grid.
+			BlockPos crafter = new BlockPos(x - 7 + singleIndex(MachineKind.AUTO_CRAFTER), y, z - 5);
+			server.runOnServer(minecraft -> {
+				if (minecraft.overworld().getBlockEntity(crafter) instanceof MachineBlockEntity machine) {
+					machine.setItem(0, new ItemStack(Items.OAK_PLANKS, 12));
+					machine.setItem(3, new ItemStack(Items.OAK_PLANKS, 12));
+				}
+			});
+			server.runCommand("tp @p %d %d %d 180 30".formatted(crafter.getX(), y, z - 3));
+			context.waitTicks(10);
+			context.getInput().lookAt(crafter);
+			context.waitTick();
+			context.getInput().pressKey(options -> options.keyUse);
+			context.waitForScreen(MachineScreen.class);
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_auto_crafter_screen");
 			context.setScreen(() -> null);
 
 			// The Engineer's Handbook: the first page and the crusher's page.
@@ -100,6 +147,29 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 		}
 	}
 
+	/**
+	 * Engine at {@code start} facing west (its back drives east), two shafts, a gearbox with a hand crank
+	 * on top, a dynamo beyond it and a crusher on the gearbox's north side (behind it, seen from the camera).
+	 */
+	private static void buildKineticLine(ServerLevel level, BlockPos start) {
+		level.setBlock(start.below(), Blocks.WATER.defaultBlockState(), 3);
+		level.setBlock(start, JugcraftKinetics.STEAM_ENGINE.defaultBlockState().setValue(SteamEngineBlock.FACING, Direction.WEST), 3);
+		Storage<ItemVariant> fuel = ItemStorage.SIDED.find(level, start, Direction.UP);
+		try (Transaction transaction = Transaction.openOuter()) {
+			fuel.insert(ItemVariant.of(Items.COAL), 8, transaction);
+			transaction.commit();
+		}
+		BlockState shaft = JugcraftKinetics.IRON_SHAFT.defaultBlockState().setValue(ShaftBlock.AXIS, Direction.Axis.X);
+		level.setBlock(start.east(), shaft, 3);
+		level.setBlock(start.east(2), shaft, 3);
+		BlockPos gearbox = start.east(3);
+		level.setBlock(gearbox, JugcraftKinetics.BRASS_GEARBOX.defaultBlockState(), 3);
+		level.setBlock(gearbox.above(), JugcraftKinetics.HAND_CRANK.defaultBlockState().setValue(HandCrankBlock.FACING, Direction.DOWN), 3);
+		level.setBlock(gearbox.east(), JugcraftKinetics.DYNAMO.defaultBlockState().setValue(DynamoBlock.FACING, Direction.SOUTH), 3);
+		level.setBlock(gearbox.north(), JugcraftMachines.MACHINES.get(MachineKind.CRUSHER).defaultBlockState()
+				.setValue(MachineBlock.FACING, Direction.SOUTH), 3);
+	}
+
 	/** Position of a one-block machine in the showroom row (multi-block machines skipped). */
 	private static int singleIndex(MachineKind target) {
 		int index = 0;
@@ -116,7 +186,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 
 	/**
 	 * One-block machines side by side (in MachineKind order, from x - 7), all facing south towards the
-	 * camera; multi-block machines in a second group 20 blocks east, three apart.
+	 * camera; multi-block machines in a second group 20 blocks east, four apart.
 	 */
 	private static void buildShowroom(ServerLevel level, BlockPos row) {
 		int large = 0;
@@ -124,7 +194,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			MachineBlock block = JugcraftMachines.MACHINES.get(kind);
 			BlockState state = block.defaultBlockState().setValue(MachineBlock.FACING, Direction.SOUTH);
 			if (kind.isLarge()) {
-				BlockPos pos = row.offset(20 + large * 3, 0, 0);
+				BlockPos pos = row.offset(20 + large * 4, 0, 0);
 				level.setBlock(pos, state, 3);
 				((LargeMachineBlock) block).setPlacedBy(level, pos, state, null, ItemStack.EMPTY);
 				large++;

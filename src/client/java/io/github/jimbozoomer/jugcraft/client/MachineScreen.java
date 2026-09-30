@@ -31,6 +31,8 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 	private static final int WATER = 0xFF3060D0;
 	private static final int LAVA = 0xFFE87010;
 	private static final int TEXT = 0xFF404040;
+	/** Energy readout: amber like the energy bar, a shade darker so it reads on the gray panel; no shadow. */
+	private static final int READOUT = 0xFFB8740A;
 
 	// Side configuration: a cross of face buttons (front in the middle) and an eject toggle, on the right.
 	private static final int[][] FACE_BUTTON_XY = {{150, 28}, {162, 40}, {138, 28}, {162, 28}, {150, 16}, {150, 40}};
@@ -87,12 +89,14 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 					Component.translatable("container.jugcraft.side." + face.name().toLowerCase()),
 					Component.translatable("container.jugcraft.mode." + mode.name().toLowerCase()))));
 		}
-		ejectButton.setMessage(Component.translatable(config.eject() ? "container.jugcraft.eject.on" : "container.jugcraft.eject.off"));
+		// "Eject" fits the button; green when on, gray when off, and the tooltip says which.
+		ejectButton.setMessage(Component.translatable("container.jugcraft.eject").withColor(config.eject() ? 0x70E070 : 0x9A9A9A));
 		SideConfig.Redstone redstone = config.redstone();
 		redstoneButton.setMessage(Component.literal("R").withColor(REDSTONE_COLORS[redstone.ordinal()]));
 		redstoneButton.setTooltip(Tooltip.create(Component.translatable("container.jugcraft.redstone",
 				Component.translatable("container.jugcraft.redstone." + redstone.name().toLowerCase()))));
-		ejectButton.setTooltip(Tooltip.create(Component.translatable("container.jugcraft.eject.tooltip")));
+		ejectButton.setTooltip(Tooltip.create(Component.translatable(config.eject() ? "container.jugcraft.eject.on" : "container.jugcraft.eject.off")
+				.append(". ").append(Component.translatable("container.jugcraft.eject.tooltip"))));
 	}
 
 	@Override
@@ -100,6 +104,25 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		extractBackground(graphics, mouseX, mouseY, delta);
 		super.extractRenderState(graphics, mouseX, mouseY, delta);
 		extractTooltip(graphics, mouseX, mouseY);
+		extractGaugeTooltip(graphics, mouseX, mouseY);
+	}
+
+	/** Exact numbers when hovering the energy bar or a tank gauge. */
+	private void extractGaugeTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		int mx = mouseX - leftPos;
+		int my = mouseY - topPos;
+		MachineKind kind = menu.kind();
+		String line = null;
+		if (kind.usesPower() && mx >= BAR_X - 1 && mx <= BAR_X + BAR_WIDTH && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT) {
+			line = String.format("%,d / %,d JE", menu.energy(), menu.capacity());
+		} else if (kind.tankCapacity() > 0 && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT
+				&& (kind.isProcessor() ? mx >= 29 && mx < 37 : mx >= 149 && mx < 163)) {
+			line = String.format("%,d / %,d mB", menu.data(MachineBlockEntity.DATA_TANK), kind.tankCapacity());
+		}
+		if (line == null) {
+			return;
+		}
+		graphics.setTooltipForNextFrame(font, Component.literal(line), mouseX, mouseY);
 	}
 
 	@Override
@@ -122,7 +145,7 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 			int maxBurn = Math.max(1, menu.data(MachineBlockEntity.DATA_MAX_BURN));
 			int flame = menu.data(MachineBlockEntity.DATA_BURN) * 14 / maxBurn;
 			graphics.fill(x + 57, y + 20 + 14 - flame, x + 71, y + 34, FLAME);
-		} else if (kind == MachineKind.STEAM_GENERATOR) {
+		} else if (kind.isBoiler()) {
 			slotFrame(graphics, x + MachineMenu.INPUT_X, y + 17);
 			slotFrame(graphics, x + MachineMenu.INPUT_X, y + 53);
 			slotFrame(graphics, x + MachineMenu.OUTPUT_X, y + MachineMenu.SLOT_Y);
@@ -131,7 +154,7 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 			graphics.fill(x + 57, y + 37 + 14 - flame, x + 71, y + 51, FLAME);
 			// Water tank gauge on the right.
 			graphics.fill(x + 149, y + BAR_Y - 1, x + 163, y + BAR_Y + BAR_HEIGHT + 1, DARK);
-			int water = menu.data(MachineBlockEntity.DATA_TANK) * BAR_HEIGHT / MachineKind.STEAM_TANK;
+			int water = menu.data(MachineBlockEntity.DATA_TANK) * BAR_HEIGHT / kind.tankCapacity();
 			graphics.fill(x + 150, y + BAR_Y + BAR_HEIGHT - water, x + 162, y + BAR_Y + BAR_HEIGHT, WATER);
 		} else if (kind == MachineKind.GEOTHERMAL_GENERATOR) {
 			// Lava tank gauge on the right.
@@ -141,7 +164,7 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		} else if (kind.isProcessor()) {
 			int inputs = kind.outputSlot();
 			for (int slot = 0; slot < inputs; slot++) {
-				slotFrame(graphics, x + MachineMenu.inputX(inputs, slot), y + MachineMenu.SLOT_Y);
+				slotFrame(graphics, x + MachineMenu.inputX(kind, slot), y + MachineMenu.inputY(kind, slot));
 			}
 			slotFrame(graphics, x + MachineMenu.OUTPUT_X, y + MachineMenu.SLOT_Y);
 			for (int index = 0; index < kind.byproductSlots(); index++) {
@@ -158,30 +181,32 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 			}
 			int maxProgress = Math.max(1, menu.data(MachineBlockEntity.DATA_MAX_PROGRESS));
 			int arrow = menu.data(MachineBlockEntity.DATA_PROGRESS) * 24 / maxProgress;
-			graphics.fill(x + 80, y + 41, x + 104, y + 45, DARK);
-			graphics.fill(x + 80, y + 41, x + 80 + arrow, y + 45, PROGRESS);
+			int arrowX = x + MachineMenu.arrowX(kind);
+			graphics.fill(arrowX, y + 41, arrowX + 24, y + 45, DARK);
+			graphics.fill(arrowX, y + 41, arrowX + arrow, y + 45, PROGRESS);
 		}
 	}
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		super.extractLabels(graphics, mouseX, mouseY);
-		if (menu.kind().usesPower()) {
+		// The auto-crafter's grid covers the energy readout's place; its bar still shows the charge.
+		if (menu.kind().usesPower() && menu.kind() != MachineKind.AUTO_CRAFTER) {
 			String energy = compact(menu.energy()) + " / " + compact(menu.capacity()) + " JE";
-			graphics.text(font, energy, 28, 60, TEXT);
+			graphics.text(font, energy, 28, 60, READOUT, false);
 		}
 		if (menu.kind() == MachineKind.ARC_FURNACE) {
 			String key = menu.data(MachineBlockEntity.DATA_FORMED) == 1
 					? "container.jugcraft.arc_furnace.formed" : "container.jugcraft.arc_furnace.incomplete";
-			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT);
+			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT, false);
 		} else if (menu.kind() == MachineKind.WIND_TURBINE) {
 			String key = menu.data(MachineBlockEntity.DATA_FORMED) == 1
 					? "container.jugcraft.wind_turbine.clear" : "container.jugcraft.wind_turbine.blocked";
-			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT);
+			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT, false);
 } else if (menu.kind() == MachineKind.WATER_WHEEL) {
 			String key = menu.data(MachineBlockEntity.DATA_FORMED) == 1
 					? "container.jugcraft.water_wheel.turning" : "container.jugcraft.water_wheel.still";
-			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT);
+			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT, false);
 		}
 	}
 

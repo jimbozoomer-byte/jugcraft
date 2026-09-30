@@ -8,7 +8,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 
 > **Status.** Everything here compiles and loads in CI. Where a feature has an automated game test, that test passes on a headless server. Nothing has been play-tested in a client or on a dedicated server with two players yet.
 >
-> This document describes `main` after PRs #4–#28, plus the Agriculture branch's Fall Harvest and Kitchen Garden. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
+> This document describes `main` after PRs #4–#36, plus the Agriculture branch's Fall Harvest and Kitchen Garden. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
 
 ## Quick facts
 
@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 239 items/blocks under `jugcraft:` (the checker counts them) |
+| Registered IDs | 249 items/blocks under `jugcraft:` (the checker counts them) |
 
 ## Build, generate, check
 
@@ -76,23 +76,25 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | ARC_FURNACE | arc_furnace_controller | 3×3×3 casing structure | 50k / 512 / 0 / 64 | in, out | `jugcraft:arc_smelting` |
 | SOLAR_PANEL | solar_panel | 8 JE/t in sun | 4k / 0 / 32 / – | – | – |
 | STEAM_GENERATOR | steam_generator | coal/bitumen + water → 64 JE/t | 40k / 0 / 128 / – | fuel, water bucket, empty bucket | – |
-| ALLOY_SMELTER | alloy_smelter | **2×2 multi-block**, power socket only | 10k / 128 / 0 / 20 | 2 in, out | `jugcraft:alloying` (multi) |
+| ALLOY_SMELTER | alloy_smelter | **3×2×6 multi-block (36 parts)**, power socket only | 10k / 128 / 0 / 20 | 2 in, out | `jugcraft:alloying` (multi) |
 | METAL_PRESS | metal_press | ingot → plate | 10k / 128 / 0 / 16 | in, out | `jugcraft:pressing` |
 | WIRE_DRAWER | wire_drawer | ingot → 3 wires | 10k / 128 / 0 / 12 | in, out | `jugcraft:wire_drawing` |
 | CIRCUIT_ASSEMBLER | circuit_assembler | circuits | 20k / 256 / 0 / 32 | 3 in, out | `jugcraft:circuit_assembly` (multi) |
-| GEOTHERMAL_GENERATOR | geothermal_generator | **2 wide**, lava → 64 JE/t | 30k / 0 / 128 / – | – (lava tank) | – |
-| WIND_TURBINE | wind_turbine | **3 tall**, 4–24 JE/t | 16k / 0 / 64 / – | – | – |
+| GEOTHERMAL_GENERATOR | geothermal_generator | **2×2×2**, lava → 64 JE/t | 30k / 0 / 128 / – | – (lava tank) | – |
+| WIND_TURBINE | wind_turbine | **9 tall**, 12–72 JE/t; rotor drawn by `client/WindTurbineRenderer` | 48k / 0 / 192 / – | – | – |
 | PULVERIZER | pulverizer | ore → 2 dust + byproduct | 10k / 128 / 0 / 20 | in, out, 2 byproduct | `jugcraft:pulverizing` |
 | ORE_WASHER | ore_washer | ore + 500 mB water → 3 washed ore | 10k / 128 / 0 / 16 | in, out (water tank) | `jugcraft:ore_washing` |
 | SIEVE | sieve | gravel → flint + finds | 10k / 128 / 0 / 8 | in, out, 2 byproduct | `jugcraft:sifting` |
 | SAWMILL | sawmill | log → 6 planks + sawdust | 10k / 128 / 0 / 12 | in, out, 2 byproduct | `jugcraft:sawing` |
 | CAPACITOR_BANK | capacitor_bank | **2×2** battery: charges any side, outputs from its front | 4M / 4,096 / 4,096 / – | – | – |
 | STEEL_TANK | steel_tank | **2×2** tank, 128 buckets, no power, no screen | none | – (fluid) | – |
-| COKE_OVEN | coke_oven | **2 tall**, unpowered: coal → coke | none | in, out | `jugcraft:coking` |
-| STEEL_FOUNDRY | steel_foundry | **3 tall**, unpowered: iron + coke → steel | none | 2 in, out | `jugcraft:steelmaking` (multi) |
+| COKE_OVEN | coke_oven | **2×2, 2 tall + chimney block (9 parts)**, unpowered: coal → coke | none | in, out | `jugcraft:coking` |
+| STEEL_FOUNDRY | steel_foundry | **2×2×5**, unpowered: iron + coke → steel | none | 2 in, out | `jugcraft:steelmaking` (multi) |
 | COBBLESTONE_GENERATOR | cobblestone_generator | water + lava beside it → cobblestone, 20 ticks | 4k / 64 / 0 / 4 | 1 result slot (no inputs) | – |
 | TREE_FARM | tree_farm | sapling → 6 logs, sapling back + extra | 10k / 128 / 0 / 16 | in, out, 2 byproduct | `jugcraft:tree_growing` |
 | WATER_WHEEL | water_wheel | **2 tall** generator: 8–12 JE/t per flowing-water block on its right | 8k / 0 / 64 / – | – | – |
+| AUTO_CRAFTER | auto_crafter | crafts the vanilla recipe in its 3×3 grid; each slot keeps one item as the pattern | 10k / 128 / 0 / 8 | 9 grid, out, 1 remainder | vanilla `crafting` |
+| LARGE_STEAM_ENGINE | large_steam_engine | **2×2×2**: fuel + water → 256 KE/t out of the back of part 7 | none | fuel, water bucket, empty bucket | – |
 | ORE_DRILL | ore_drill | **2 tall**: mines `c:ores` in a 9×9 column below, 40 ticks each (`OreDrilling`) | 20k / 256 / 0 / 32 | 3 result slots (no inputs) | – |
 
 Other blocks:
@@ -109,6 +111,11 @@ Other blocks:
 | `item_sorter` | `logistics/ItemSorterBlock(Entity)` | 9-slot filter into the inventory it faces |
 | `brass_wrench` (item) | `logistics/BrassWrenchItem` | rotate; sneak to dismantle |
 | `item_crate` | `storage/CrateBlock(Entity)`, `JugcraftStorage` | 32 stacks of one item; Fabric `SingleItemStorage` |
+| `iron_shaft`, `brass_gearbox` | `kinetic/ShaftBlock`, `GearboxBlock` | carry KE (along the axis / out of all sides); `turning` block state |
+| `hand_crank`, `steam_engine` | `kinetic/HandCrankBlock(Entity)`, `SteamEngineBlock(Entity)` | KE sources: 16 KE/t cranked, 64 KE/t from fuel + water |
+| `dynamo` | `kinetic/DynamoBlock(Entity)` | KE → JE at 75%; any `MachineBlockEntity` also takes KE directly (`KineticConsumer`) |
+| `belt_pulley`, `belt` (item) | `kinetic/BeltPulleyBlock(Entity)`, `BeltItem` | a shaft whose BE saves `link`; `BeltPulleyBlockEntity.cannotLink`/`connect`; drawn by client `BeltRenderer` |
+| `electric_motor` | `kinetic/ElectricMotorBlock(Entity)` | JE → KE at 75%, 96 KE/t out of `FACING`; 8,000 JE buffer, 256 JE/t in |
 | `speed_upgrade`, `efficiency_upgrade` (items) | `machine/MachineUpgrades` | upgrade slots of powered processors |
 | `prospector` (item) | `prospecting/ProspectorItem`, `OreSurvey`, `SurveyPayload`, `client/ProspectorScreen` | vague 3×3-chunk ore survey; server → client payload `jugcraft:ore_survey` |
 | `engineers_handbook` (item) | `guide/EngineersHandbookItem`, `client/HandbookScreen` | in-game guide generated by `tools/handbook.py` |
@@ -136,10 +143,19 @@ The Agriculture branch ([branches/AGRICULTURE.md](branches/AGRICULTURE.md)). Eve
   - **To make any block take or give power, register a provider on `EnergyStorage.SIDED`.** Cables, generators and machines then connect automatically, and cables draw a connection arm to it.
 - **Base implementation:** `SimpleEnergyStorage(capacity, maxInsert, maxExtract, onChange)`, with `setAmount` for tests and loading.
 - **Pushing:** `EnergyNetworks.pushToNeighbors(level, pos, source, maxAmount, sides)` sends into adjacent storages and cable networks. `EnergyNetworks.move(from, to, max)` is transactional.
+- **Belts:** discovery follows a pulley's `link` to its partner and continues both ways along the partner's axis.
 - **Caching:** networks are cached per level. Call `EnergyNetworks.invalidate(level)` when cable layout changes. There are at most 2,048 cables per network.
 - **Tiers:** `CableBlock(properties, rate)`. A network's rate is the minimum `transferRate()` of its cables.
 - **Marker:** `EnergyConnectable` marks blocks cables always connect to (cables, generators, machines). Other blocks connect through the lookup alone.
-- **Rule:** use this one energy system. Don't add another power unit (CLAUDE.md: no incompatible power systems).
+- **Rule:** use this one energy system for anything that uses or stores power (CLAUDE.md: no incompatible power systems).
+  - Kinetic power (below) is a compatible layer, not a second currency: every JE machine takes KE 1:1 through `KineticConsumer`, and the dynamo bridges KE into JE. New machines should use `EnergyStorage`; they then run off shafts automatically.
+
+### Kinetic power (`kinetic/`)
+
+- **KE per tick**, carried by `ShaftBlock` (along its axis) and `GearboxBlock` (all sides). A source calls `KineticNetworks.push(level, pos, side, amount)`, which splits power evenly between the `KineticConsumer`s at the ends of the line.
+- **Consumers:** `MachineBlockEntity` (as JE, up to `kind.maxInput`, for any powered non-generator, non-battery kind, reached through any block of a multi-block) and `DynamoBlockEntity` (KE → JE at 75%).
+- **Caching:** networks are cached per (source, side) and level. Shafts, gearboxes, sources and the dynamo call `KineticNetworks.invalidate(level)` when placed, removed or their neighbors change. There are at most 256 parts per network.
+- **Turning look:** `ShaftBlock.TURNING`, set by the network with client-only updates and cleared by a scheduled tick 10–20 ticks after the last push.
 
 ### Fluids (`fluid/`)
 
@@ -230,7 +246,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - `JugcraftRegistry.item(path)` and `block(path, copyFrom)` register simple items and blocks.
 - `MetalFamily.builder(name).mined().extraItem(...).build()` registers a whole metal set. `MineralFamily.register(name)` does the same for minerals.
 - `JugcraftWorldgen` adds placed features to biomes. In 26.x, configured features live in `data/jugcraft/worldgen/feature/` (there is no `configured_feature` folder), with no `config` wrapper and with block states written as plain IDs.
-- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → machines → fluids → logistics → storage → prospecting → guide → agriculture → conditions → worldgen → style pack.
+- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → machines → fluids → logistics → storage → prospecting → kinetics → guide → agriculture → conditions → worldgen → style pack.
 
 ### Looks (`tools/model_writer.py`, `tools/steampunk_*.py`)
 
