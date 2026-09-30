@@ -31,8 +31,9 @@ STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
 
 # Tags that Jugcraft reads but that vanilla/Fabric API define.
 EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_replaceables",
-                  "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires", "minecraft:eggs",
-                  "minecraft:dirt", "minecraft:mud", "minecraft:grass_blocks", "minecraft:sand"}
+                  "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires", "minecraft:mineable/axe",
+                  "minecraft:mineable/shovel", "minecraft:leaves", "minecraft:eggs", "minecraft:dirt", "minecraft:mud",
+                  "minecraft:grass_blocks", "minecraft:sand"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []

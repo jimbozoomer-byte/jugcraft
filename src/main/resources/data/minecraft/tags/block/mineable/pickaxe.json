@@ -95,6 +95,9 @@
     "jugcraft:dynamo",
     "jugcraft:belt_pulley",
     "jugcraft:electric_motor",
+    "jugcraft:conveyor",
+    "jugcraft:conveyor_splitter",
+    "jugcraft:charging_station",
     "jugcraft:cooking_pot"
   ]
 }

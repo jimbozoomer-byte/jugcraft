@@ -8,7 +8,7 @@ Format: {"chapters": [{"title", "icon", "pages": [{"title", "icon", "text": [par
 "craft": {"grid": [9 item ids or null], "result", "count"}, "recipes": [{"in": [[id, count]], "out": [id, count]}]}]}]}
 """
 from materials import COMPONENTS, METALS, MINERALS, ingot_id, ore_ids
-from machines import (CRAFTING, MACHINES, STATS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS,
+from machines import (CRAFTING, MACHINES, STATS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, POWERED_TOOLS, TOOL_BLOCKS,
                       UPGRADES, BYPRODUCTS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, machine_recipes)
 
 MOD = "jugcraft"
@@ -65,6 +65,21 @@ ABOUT = {
     "pneumatic_extractor": "Pulls 16 items every 8 ticks from what it faces and pushes them out of its other sides. A "
                            "redstone signal pauses it.",
     "item_sorter": "Takes only the items in its 9-slot filter, and puts them into the inventory it faces.",
+    "mining_drill": "Runs on JE instead of wearing out: 60 JE a block, 100,000 JE when full. Mines everything a "
+                    "pickaxe or shovel does, faster than netherite. Sneak and use it to switch mode: one block, a 3x3 "
+                    "square, or a whole ore vein. Empty, it mines like a bare hand.",
+    "chainsaw": "A JE-powered axe that also cuts leaves: 40 JE a block. Cutting a log fells the whole tree above it; "
+                "sneak to cut one log.",
+    "rocket_pack": "Wear it and hold jump in the air to fly, 50 JE a tick (200,000 JE when full). Landing is safe while "
+                   "it fires. On a dedicated server, set allow-flight=true or long hovers get you kicked.",
+    "charging_station": "Two blocks tall. Hang a drill, chainsaw or rocket pack on its cradle and it fills it from "
+                        "cables, 512 JE a tick; take it back with an empty hand. Its lamp lights while it charges.",
+    "conveyor": "Carries items the way you faced when placing it, 2.5 blocks a second, while rotation drives it. A shaft, "
+                "gearbox or motor on any side drives every conveyor joined to it, for 1 KE per conveyor per tick. Pipes, "
+                "hoppers and machines load it, and so do items dropped on it; at the end items go into the conveyor or "
+                "inventory ahead, or onto the ground. It carries you too; sneak to stand still.",
+    "conveyor_splitter": "A conveyor that sends items left, straight on and right in turn, skipping any way that is "
+                         "blocked.",
     "brass_wrench": "Right-click turns a machine. Sneak and right-click to pick a Jugcraft block up, with everything inside.",
     "speed_upgrade": "In a machine's upgrade slot: each card makes it faster but uses more energy per item. Four cards: 3x as "
                      "fast for twice the energy.",
@@ -240,7 +255,9 @@ def build():
         {"title": "Ore Processing", "icon": f"{MOD}:pulverizer", "pages":
             [machine_page(m) for m in ("pulverizer", "ore_washer", "sieve", "sawmill")]},
         {"title": "Steel", "icon": f"{MOD}:steel_ingot", "pages":
-            [machine_page(m) for m in ("coke_oven", "steel_foundry")]},
+            [machine_page(m) for m in ("coke_oven", "steel_foundry")]
+            + [block_page(b, TOOL_BLOCKS[b]["display"]) for b in TOOL_BLOCKS]
+            + [block_page(t, POWERED_TOOLS[t]) for t in POWERED_TOOLS]},
         {"title": "Fluids", "icon": f"{MOD}:fluid_tank", "pages":
             [block_page("bronze_fluid_pipe", PIPES["bronze_fluid_pipe"]["display"])]
             + [block_page(b, FLUID_BLOCKS[b]["display"]) for b in ("fluid_tank", "electric_pump")]},
@@ -254,6 +271,8 @@ def build():
             block_page("pneumatic_extractor", LOGISTICS_BLOCKS["pneumatic_extractor"]["display"]),
             block_page("high_pressure_extractor", LOGISTICS_BLOCKS["high_pressure_extractor"]["display"]),
             block_page("item_sorter", LOGISTICS_BLOCKS["item_sorter"]["display"]),
+            block_page("conveyor", KINETIC_BLOCKS["conveyor"]["display"]),
+            block_page("conveyor_splitter", KINETIC_BLOCKS["conveyor_splitter"]["display"]),
             block_page("brass_wrench", TOOLS["brass_wrench"]),
         ]},
         {"title": "Storage", "icon": f"{MOD}:item_crate", "pages":
