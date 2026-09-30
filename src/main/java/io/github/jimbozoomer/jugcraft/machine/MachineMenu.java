@@ -62,6 +62,19 @@ public class MachineMenu extends AbstractContainerMenu {
 		return data.get(index);
 	}
 
+	/** Energy stored, reassembled from the two synced 16-bit halves. */
+	public long energy() {
+		return combine(MachineBlockEntity.DATA_ENERGY_LOW, MachineBlockEntity.DATA_ENERGY_HIGH);
+	}
+
+	public long capacity() {
+		return combine(MachineBlockEntity.DATA_CAPACITY_LOW, MachineBlockEntity.DATA_CAPACITY_HIGH);
+	}
+
+	private long combine(int low, int high) {
+		return ((long) (data.get(high) & 0xFFFF) << 16) | (data.get(low) & 0xFFFF);
+	}
+
 	@Override
 	public boolean stillValid(Player player) {
 		return container.stillValid(player);
