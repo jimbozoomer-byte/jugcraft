@@ -2,6 +2,8 @@
 
 You may start a focused prototype and submit a draft pull request now. The Fabric scaffold and MIT license exist. Prior issue approval and upstream write access are not prerequisites for proposing code. Maintainers still review fit, quality and tests before merging.
 
+If you currently have only a plan, implement the smallest useful part on your branch, then commit those files and open a draft PR. A PR needs an actual file change; do not create empty or meaningless commits. A useful design-document change can also be proposed as a documentation PR. Do not stop at an issue when the contributor asked you to implement a feature.
+
 ## 1. Make your own fork
 
 Sign in to your own GitHub account, open https://github.com/jimbozoomer-byte/jugcraft and click Fork. Your copy should appear as YOUR-USERNAME/jugcraft. Sync it with upstream main before starting. Read CONTRIBUTING.md, CLAUDE.md, docs/WHAT_EXISTS.md and docs/PLATFORM.md.
