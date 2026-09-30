@@ -8,7 +8,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 
 > **Status.** Everything here compiles and loads in CI. Where a feature has an automated game test, that test passes on a headless server. Nothing has been play-tested in a client or on a dedicated server with two players yet.
 >
-> This document describes `main` after PRs #4–#25, plus the Agriculture branch's Fall Harvest. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
+> This document describes `main` after PRs #4–#28, plus the Agriculture branch's Fall Harvest. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
 
 ## Quick facts
 
@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 198 items/blocks under `jugcraft:` (the checker counts them) |
+| Registered IDs | 201 items/blocks under `jugcraft:` (the checker counts them) |
 
 ## Build, generate, check
 
@@ -90,6 +90,9 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | STEEL_TANK | steel_tank | **2×2** tank, 128 buckets, no power, no screen | none | – (fluid) | – |
 | COKE_OVEN | coke_oven | **2 tall**, unpowered: coal → coke | none | in, out | `jugcraft:coking` |
 | STEEL_FOUNDRY | steel_foundry | **3 tall**, unpowered: iron + coke → steel | none | 2 in, out | `jugcraft:steelmaking` (multi) |
+| COBBLESTONE_GENERATOR | cobblestone_generator | water + lava beside it → cobblestone, 20 ticks | 4k / 64 / 0 / 4 | 1 result slot (no inputs) | – |
+| TREE_FARM | tree_farm | sapling → 6 logs, sapling back + extra | 10k / 128 / 0 / 16 | in, out, 2 byproduct | `jugcraft:tree_growing` |
+| WATER_WHEEL | water_wheel | **2 tall** generator: 8–12 JE/t per flowing-water block on its right | 8k / 0 / 64 / – | – | – |
 | ORE_DRILL | ore_drill | **2 tall**: mines `c:ores` in a 9×9 column below, 40 ticks each (`OreDrilling`) | 20k / 256 / 0 / 32 | 3 result slots (no inputs) | – |
 
 Other blocks:
@@ -220,7 +223,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - `JugcraftRegistry.item(path)` and `block(path, copyFrom)` register simple items and blocks.
 - `MetalFamily.builder(name).mined().extraItem(...).build()` registers a whole metal set. `MineralFamily.register(name)` does the same for minerals.
 - `JugcraftWorldgen` adds placed features to biomes. In 26.x, configured features live in `data/jugcraft/worldgen/feature/` (there is no `configured_feature` folder), with no `config` wrapper and with block states written as plain IDs.
-- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → machines → fluids → logistics → storage → guide → agriculture → conditions → worldgen → style pack.
+- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → machines → fluids → logistics → storage → prospecting → guide → agriculture → conditions → worldgen → style pack.
 
 ### Looks (`tools/model_writer.py`, `tools/steampunk_*.py`)
 
