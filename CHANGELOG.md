@@ -11,8 +11,16 @@ No numbered release yet. Everything below is on `main`.
 ### Fix: ore loot tables in the 26.x format (pull request pending)
 - **Ores now drop their raw material.** Before this, mining tin, zinc, lead, silver, nickel, tungsten, uranium, salt, phosphate, lepidolite or monazite ore, or oil sand, dropped the block itself, as if with Silk Touch. Fortune and multi-drops (2–4 salt, 1–2 bitumen) did nothing either.
 - **Cause:** Minecraft 26.x renamed the loot keys (`conditions` → `condition`, `functions` → `modifier`, and Silk Touch is now the `minecraft:tool/can_silk_touch` predicate). The old keys were silently ignored. The game test server had been logging "Unreachable entry!" for all 23 ore tables.
-- All 83 generated loot tables now use the 26.x format. Storage blocks and machines still drop themselves, and now respect explosions again.
+- Every generated loot table (86 now) uses the 26.x format. Storage blocks and machines still drop themselves, and now respect explosions again.
 - `tools/check_mod_data.py` fails on any pre-26.x loot key, and a new game test mines ores and checks what drops.
+
+### #28 Renewable resources
+- **Water Wheel** (2 tall): up to 24 JE/t from flowing or falling water beside its wheel, with no fuel.
+- **Cobblestone Generator:** one cobblestone a second from water and lava touching it; neither is used up.
+- **Tree Farm:** grows a sapling into six logs and gives the sapling back, sometimes with an extra (apple, cocoa beans, …). Recipes are data for all nine vanilla trees.
+- Steampunk models (timber water wheel with a coil dynamo, cistern-and-crucible generator, open brass growth cabinet with a grow lamp) and classic models.
+- The handbook gains a "Renewables" chapter; its chapter buttons are packed tighter to fit 11 chapters.
+- Three game tests.
 
 ### #25 Mining and prospecting
 - **Geo-Resonance Prospector:** a hand tool that surveys the 3×3 chunks around you. It opens a steampunk-digital screen: a brass instrument with an amber CRT, valve-tube signal bars, a sweeping scan line and a resonance needle gauge.
