@@ -1,10 +1,21 @@
 # Jugcraft project instructions
 
+## Owner-authorized development: start now
+
+The owner has explicitly authorized Claude to begin the Minecraft 26.3 + Fabric bootstrap, commit on a feature branch, push that branch and open a PR. No separate proposal issue or second maintainer is required for this task. If issue-writing access is unavailable, put the plan in the PR and continue development. This authorization does not supply missing GitHub authentication.
+
+Create the missing scaffold as the first implementation task; do not wait for someone else to create it. Verify and pin Loader/API/JDK/Loom/Gradle, register one original item and recipe, add a real build workflow, and document what actually ran. Update the foundation checker as part of bootstrap to support the implemented build phase. Do not pretend the documentation checker compiles the mod.
+
+Owner-directed original implementation may start while the long-term license is undecided. Preserve upstream template notices; do not choose a license on the owner's behalf. License selection remains required before accepting unrelated third-party code/assets or publishing a general reusable release.
+
+Main requires a PR and passing checks, but zero independent approvals while there is one maintainer. The owner can merge their own PR after reviewing it. CODEOWNERS routes review; its approval is not mandatory. Keep no-force-push/no-deletion and CI protections. Restore independent review when the owner chooses to add maintainers.
+
+
 Read CONTRIBUTING.md, docs/DESIGN.md, docs/ARCHITECTURE.md and docs/PLATFORM.md before changing gameplay. Consult docs/TESTING.md before claiming completion.
 
 - AI-assisted feature implementation uses Claude Opus 5.5. State actual model use; do not pretend this file changes or verifies the running model. Ask maintainers for an exception if unavailable.
-- This repository is currently a contribution foundation, not a playable mod. Do not invent build commands, dependency versions, or test results. Platform bootstrap and license selection precede implementation.
-- Work on one approved issue per branch/PR. Do not merge, publish releases, or deploy servers as part of a contribution.
+- This repository is currently a contribution foundation, not a playable mod. Do not invent build commands, dependency versions, or test results. The owner-authorized bootstrap is the next implementation task; follow the exception above.
+- Work on one approved scope per branch/PR. Owner instructions count as scope approval; an issue is optional for owner-directed bootstrap. Do not merge, publish releases, or deploy servers as part of a contribution.
 - Target Minecraft Java Edition 26.3 + Fabric; exact Loader/API/JDK/build pins still require the verified bootstrap. Original content is the priority, not external-mod availability.
 - Read docs/CONTENT_BRANCHES.md for factories, farming, biomes, caves, creatures, space, realms, loot, schools and seasons. Preserve independently useful specialties with selected collaboration milestones; do not force every player through every branch.
 - Every required dependency has a reachable route, including trading or staged solo production where appropriate. Seasonal content must preserve earned items/world data after events end and cannot be the sole gate to core progression.
