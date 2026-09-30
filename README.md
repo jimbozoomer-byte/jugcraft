@@ -2,7 +2,7 @@
 
 A community-built Minecraft Java 26.3 + Fabric experience about factories, magical workshops, cozy homes, and dangerous frontiers.
 
-**Status: contribution foundation.** Feature proposals and documentation contributions are welcome. There is no playable mod, server, or Minecraft build yet. The first implementation milestone establishes the pinned platform and working mod before feature code is accepted.
+**Status: contribution foundation.** Feature proposals and documentation contributions are welcome. There is no playable mod, server, or Minecraft build yet. The owner has authorized Claude to create the Fabric scaffold now; no separate issue or second maintainer is needed. See [start-now instructions](CLAUDE.md#owner-authorized-development-start-now).
 
 ## The vision
 
@@ -43,4 +43,4 @@ This checks the contribution foundation only. It does **not** compile Minecraft 
 
 ## Rights and conduct
 
-Be constructive and credit contributors. Follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [SECURITY.md](SECURITY.md). See [LICENSE_POLICY.md](LICENSE_POLICY.md): maintainers must choose and publish the project license before accepting implementation or asset contributions.
+Be constructive and credit contributors. Follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [SECURITY.md](SECURITY.md). See [LICENSE_POLICY.md](LICENSE_POLICY.md): owner-directed original bootstrap work can start now; licensing remains pending for broader reuse and third-party contributions.
