@@ -1,0 +1,106 @@
+name: API probe (temporary, festival crops)
+on:
+  push:
+    branches: ['claude/agriculture-festival-crops']
+    paths: ['.github/workflows/probe.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Resolve Minecraft
+        run: ./gradlew compileJava --no-daemon -q
+      - name: Stems, trees, leaves, water plants, wood
+        run: |
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
+          CP="$CLIENT:$COMMON"
+          FAPI=$(find ~/.gradle/caches -name 'fabric-*.jar' -path '*net.fabricmc.fabric-api*' | grep -v sources | tr '\n' ':')
+          p() { echo "=== $1"; javap -cp "$CP:$FAPI" -protected "$1" 2>&1 | head -${2:-80}; }
+          g() { echo "=== $1 | $2"; javap -cp "$CP:$FAPI" -protected "$1" 2>&1 | grep -E "$2" | head -${3:-40}; }
+          m() { echo "=== bytecode $1 $2"; javap -cp "$CP" -c -p "$1" 2>/dev/null | sed -n "/ $2(/,/^\$/p" | head -${3:-90}; }
+          B=net.minecraft.world.level.block
+          p $B.StemBlock 40
+          m $B.StemBlock randomTick 120
+          p $B.AttachedStemBlock 40
+          m $B.AttachedStemBlock updateShape 60
+          p $B.LeavesBlock 60
+          p $B.TintedParticleLeavesBlock 20
+          p $B.UntintedParticleLeavesBlock 20
+          m $B.LeavesBlock randomTick 40
+          m $B.LeavesBlock isRandomlyTicking 30
+          p $B.SaplingBlock 30
+          p $B.grower.TreeGrower 40
+          p $B.RotatedPillarBlock 20
+          p $B.StairBlock 30
+          p $B.SlabBlock 30
+          p $B.FenceBlock 20
+          p $B.FenceGateBlock 30
+          g $B.state.properties.WoodType 'static|public' 40
+          p $B.HorizontalDirectionalBlock 20
+          p $B.CarvedPumpkinBlock 30
+          p $B.SeagrassBlock 40
+          m $B.SeagrassBlock updateShape 40
+          m $B.SeagrassBlock getStateForPlacement 40
+          m $B.SeagrassBlock canSurvive 30
+          p $B.LiquidBlockContainer 20
+          p $B.SweetBerryBushBlock 40
+          m $B.SweetBerryBushBlock useWithoutItem 60
+          p $B.FlowerPotBlock 20
+          g $B.Blocks ' (PUMPKIN|OAK_LEAVES|OAK_SAPLING|OAK_LOG|OAK_PLANKS|MUD|JACK_O_LANTERN|CARVED_PUMPKIN|PUMPKIN_STEM);' 20
+          g net.minecraft.tags.BlockTags 'STEM|DIRT|LEAVES|LOGS|SAPLING|PLANKS|WOODEN|FENCE|MUD|SAND|MINEABLE|OVERWORLD_NATURAL|CONVERTABLE|BAMBOO_PLANTABLE|SUPPORTS' 60
+          g net.minecraft.tags.ItemTags 'LOGS|PLANKS|WOODEN|FENCE|LEAVES|SAPLING|STEM|PIG|SNIFFER' 40
+          g net.minecraft.core.particles.ParticleTypes 'LEAVES|LEAF' 10
+          g $B.SoundType 'WOOD|CHERRY|AZALEA|GRASS|CROP|STEM|HANGING|SHROOMLIGHT|FROGLIGHT|CANDLE' 30
+          g net.minecraft.world.level.levelgen.feature.ConfiguredFeature 'public' 20
+          g net.minecraft.data.worldgen.features.TreeFeatures 'static' 10
+          g net.minecraft.core.registries.Registries 'FEATURE|CONFIGURED' 10
+          g net.minecraft.world.level.material.Fluids 'WATER|public' 10
+          g net.minecraft.world.level.material.FlowingFluid 'getSource|getTickDelay' 10
+          g net.minecraft.world.item.BlockItem 'public|protected' 30
+          echo "=== fabric registry classes"; for j in $(echo $FAPI | tr ':' ' '); do unzip -l "$j" 2>/dev/null | grep -E 'api/registry/[A-Za-z]+\.class' ; done | awk '{print $4}' | sort -u
+          g net.fabricmc.fabric.api.registry.StrippableBlockRegistry 'public' 10
+          g net.fabricmc.fabric.api.registry.FlammableBlockRegistry 'public' 10
+          g net.fabricmc.fabric.api.registry.FuelRegistryEvents 'public' 10
+          echo "=== vanilla data"
+          mkdir -p /tmp/d && cd /tmp/d
+          unzip -q -o "$COMMON" 'data/minecraft/worldgen/feature/oak.json' 'data/minecraft/worldgen/feature/fancy_oak.json' \
+            'data/minecraft/worldgen/feature/birch.json' 'data/minecraft/worldgen/feature/patch_pumpkin.json' 'data/minecraft/worldgen/feature/cherry.json' \
+            'data/minecraft/worldgen/placed_feature/oak_checked.json' 'data/minecraft/worldgen/placed_feature/trees_plains.json' \
+            'data/minecraft/worldgen/placed_feature/trees_birch.json' 'data/minecraft/worldgen/placed_feature/patch_pumpkin.json' \
+            'data/minecraft/worldgen/placed_feature/seagrass_swamp.json' 'data/minecraft/worldgen/feature/seagrass_short.json' \
+            'data/minecraft/loot_table/blocks/oak_leaves.json' 'data/minecraft/loot_table/blocks/oak_log.json' 'data/minecraft/loot_table/blocks/oak_slab.json' \
+            'data/minecraft/loot_table/blocks/oak_sapling.json' 'data/minecraft/loot_table/blocks/pumpkin_stem.json' 'data/minecraft/loot_table/blocks/attached_pumpkin_stem.json' \
+            'data/minecraft/loot_table/blocks/sweet_berry_bush.json' 'data/minecraft/loot_table/blocks/pumpkin.json' 'data/minecraft/loot_table/blocks/potted_oak_sapling.json' \
+            'data/minecraft/recipe/oak_planks.json' 'data/minecraft/recipe/oak_wood.json' 'data/minecraft/recipe/stripped_oak_wood.json' 'data/minecraft/recipe/oak_stairs.json' \
+            'data/minecraft/recipe/oak_slab.json' 'data/minecraft/recipe/oak_fence.json' 'data/minecraft/recipe/oak_fence_gate.json' 'data/minecraft/recipe/pumpkin_seeds.json' \
+            'data/minecraft/recipe/pumpkin_pie.json' 'data/minecraft/recipe/jack_o_lantern.json' \
+            'data/minecraft/tags/block/logs.json' 'data/minecraft/tags/block/logs_that_burn.json' 'data/minecraft/tags/block/oak_logs.json' 'data/minecraft/tags/block/leaves.json' \
+            'data/minecraft/tags/block/saplings.json' 'data/minecraft/tags/block/mineable/axe.json' 'data/minecraft/tags/block/mineable/hoe.json' 'data/minecraft/tags/block/dirt.json' \
+            'data/minecraft/tags/block/*stem*.json' 'data/minecraft/tags/block/wooden_fences.json' 'data/minecraft/tags/block/fence_gates.json' 'data/minecraft/tags/block/planks.json' \
+            'data/minecraft/tags/item/logs.json' 'data/minecraft/tags/item/logs_that_burn.json' 'data/minecraft/tags/item/planks.json' 'data/minecraft/tags/item/leaves.json' \
+            'data/minecraft/tags/item/saplings.json' 'data/minecraft/tags/block/sword_efficient.json' 'data/minecraft/tags/block/enderman_holdable.json' 2>&1 | head -5
+          for f in $(find /tmp/d -name '*.json' | sort); do echo "=== $f"; tr -d ' \n' < "$f" | head -c 3000; echo; done
+          unzip -l "$COMMON" | grep -oE 'data/minecraft/tags/block/[a-z_/]*(stem|dirt|soil|mud|bog|sapling|leaves)[a-z_]*\.json' | sort -u
+          rm -rf /tmp/c && mkdir -p /tmp/c && cd /tmp/c
+          unzip -q -o "$CLIENT" 'assets/minecraft/blockstates/oak_stairs.json' 'assets/minecraft/blockstates/oak_slab.json' 'assets/minecraft/blockstates/oak_fence.json' \
+            'assets/minecraft/blockstates/oak_fence_gate.json' 'assets/minecraft/blockstates/oak_log.json' 'assets/minecraft/blockstates/oak_wood.json' 'assets/minecraft/blockstates/oak_leaves.json' \
+            'assets/minecraft/blockstates/pumpkin_stem.json' 'assets/minecraft/blockstates/attached_pumpkin_stem.json' 'assets/minecraft/blockstates/jack_o_lantern.json' \
+            'assets/minecraft/blockstates/oak_sapling.json' 'assets/minecraft/models/block/stem_growth0.json' 'assets/minecraft/models/block/stem_growth7.json' \
+            'assets/minecraft/models/block/stem_fruit.json' 'assets/minecraft/models/block/pumpkin_stem_stage0.json' 'assets/minecraft/models/block/attached_pumpkin_stem.json' \
+            'assets/minecraft/models/block/leaves.json' 'assets/minecraft/models/block/oak_leaves.json' 'assets/minecraft/models/block/oak_stairs.json' 'assets/minecraft/models/block/oak_fence_post.json' \
+            'assets/minecraft/models/block/oak_fence_gate.json' 'assets/minecraft/models/block/oak_log.json' 'assets/minecraft/models/block/oak_log_horizontal.json' \
+            'assets/minecraft/models/block/cherry_leaves.json' 'assets/minecraft/models/block/azalea_leaves.json' 'assets/minecraft/models/block/oak_sapling.json' \
+            'assets/minecraft/items/oak_fence.json' 'assets/minecraft/items/oak_leaves.json' 'assets/minecraft/items/oak_sapling.json' 'assets/minecraft/items/oak_log.json' \
+            'assets/minecraft/items/pumpkin_seeds.json' 'assets/minecraft/items/oak_fence_gate.json' 'assets/minecraft/items/oak_stairs.json' 'assets/minecraft/items/cherry_leaves.json' 2>&1 | head -5
+          for f in $(find /tmp/c -name '*.json' | sort); do echo "=== $f"; tr -d ' \n' < "$f" | head -c 2500; echo; done
+          unzip -l "$CLIENT" | grep -oE 'assets/minecraft/models/block/(stem|template_fence|fence|custom_fence|template_orientable|stairs|inner_stairs|slab)[a-z_0-9]*\.json' | sort -u | tr '\n' ' '
