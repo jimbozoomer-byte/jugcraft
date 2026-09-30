@@ -49,7 +49,36 @@ No new dependencies. Uses Fabric API's flammable-block registry (content registr
 ## Verification
 Actual results (30 September 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions):
 
-VERIFICATION
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also checks the gourd, cranberry and chestnut numbers against the Java constants, the stem, bush and leaf blockstates, the wood set's registrations, bog-seed rules and the new wild patches) | Pass, 292 IDs |
+| `./gradlew build`, compile, with the Kitchen Garden, the Fall Harvest and `main` after #40 merged in (`4c59f82`) | Pass |
+| Game tests on the headless server, same commit: 90 in total, 13 of them new here | **All 90 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`, same commit): builds a gourd patch, a cranberry bog, two chestnut trees with burs, a chestnut-wood market stall with Turnip Lanterns and every growth stage, and takes screenshots by day and at midnight | **Passes**; the screenshots in the branch document are from this run |
+
+The 13 new game tests (`FestivalGameTests`); the grass-drop test in `AgricultureGameTests` now covers all 18 seeds:
+1. gourd seeds plant a stem on farmland, and not on grass;
+2. a fully grown stem puts its gourd on soil beside it (not over empty space), facing away, and bends towards it; taking the gourd away straightens the stem to grow another;
+3. one sickle swing cuts a gourd off its stem, which then grows another; a gourd a player set down is left alone;
+4. cranberries plant into water one block deep over mud, and not into water two blocks deep or onto dry mud; the bush keeps its water and leaves it when broken;
+5. ripe cranberries are picked by hand or with a sickle, and the bushes flower again;
+6. random ticks ripen a bush in shallow water, and not one with water over it;
+7. a chestnut sapling grows into a chestnut tree of logs and leaves;
+8. tree-grown leaves over air grow burs that ripen, and a right-click picks the chestnuts; placed leaves never fruit;
+9. any axe strips a chestnut log, keeping its axis; the wood joins vanilla's wood tags and burns as fuel;
+10. ripe bushes, burs and turnips drop their crop, gourds drop themselves, and the Turnip Lantern gives light 13;
+11. the new foods restore the values in the branch document, raw chestnuts are not food, and the sauce does not stack;
+12. the three new Cooking Pot recipes load and are found from their ingredients in any order;
+13. the festival's worldgen loads: the wild turnip, gourd, cranberry and chestnut-tree patches and the chestnut tree feature.
+
+Two runs found real problems, both fixed before this record:
+- **Test 7 failed at first:** a tree needs about 10 free blocks above its sapling, more than a game-test area is tall, so the sapling could not grow. The test now plants on top of the area's ceiling. The tree feature itself was not changed.
+- **The first client run showed an empty bog:** the server held all 74 bushes (the test logs the count), but a cross model of normal height sits under the water surface and could not be seen. The bush model now stands 4 pixels higher, so its top rises above the water, with textures redrawn for it and a taller outline. The second run (`4c59f82`) shows the bushes above the water.
+
+The test server log shows no load or validation warnings for any festival loot table, tag, recipe or worldgen file, and the client log shows no model or texture errors. The three new Cooking Pot recipes log "can't be placed due to empty ingredients and will be ignored", the same notice the other multi-input recipes log; it concerns only the vanilla recipe book, and the recipes load (test 12). The server log's "Unreachable entry!" warnings come from the older ore loot tables, which PR #34 fixes.
+
+**Not run:** a person playing in a client, a dedicated server with two players, save/restart, natural generation of the new patches and chestnut trees in a new world (test 13 only checks that the features load), random-tick growth over hours of play, leaf decay around fruiting leaves, and performance measurement. These need a play session.
 
 ## World and event applicability
 Gourd patches appear in about 1 of 32 chunks of a matching biome, on grass. Cranberry patches are tried in about 1 of 4 swamp chunks and only fill water exactly one block deep over bog soil. Chestnut trees appear in about 1 of 3 forest chunks. All only in chunks generated after this feature; grass drops cover older worlds. There are no hostile or dangerous elements, and nothing is seasonal.

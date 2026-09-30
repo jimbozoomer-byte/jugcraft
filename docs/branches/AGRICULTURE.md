@@ -168,7 +168,15 @@ Short grass drops these seeds too (see [Getting your first seeds](#getting-your-
 
 The third slice fills the autumn and winter table and yard: squash and gourds for fall displays, turnips carved into the original jack-o'-lanterns, cranberries from a bog, and a chestnut tree to roast from. **Nothing here is seasonal.** Everything grows all year and stays in the world; the planned Halloween and December events ([CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md#seasonal-content)) can build on these permanent crops, never the other way round.
 
-SCREENSHOTS
+| **The festival harvest:** a gourd patch, a cranberry bog, chestnut trees and a chestnut-wood market stall | **A gourd patch:** butternut squash, acorn squash and warty gourds on their stems, a few stems still growing |
+| --- | --- |
+| ![The festival crops from above](../images/ingame_festival_harvest.jpg) | ![Rows of gourd stems with their gourds](../images/ingame_gourd_patch.jpg) |
+| **A cranberry bog:** bushes standing in water one block deep over mud, ripe and in flower | **Chestnut trees** with burs under their leaves, most of them ripe |
+| ![A shallow bog full of cranberry bushes](../images/ingame_cranberry_bog.jpg) | ![Two chestnut trees](../images/ingame_chestnut_trees.jpg) |
+| **Every growth stage:** turnips, a butternut stem and cranberries in a trench, youngest on the left, then the sapling and a wild turnip | **Turnip Lanterns** on chestnut fence posts at midnight, in front of the market stall |
+| ![The Festival Crops growth stages](../images/ingame_festival_stages.jpg) | ![Turnip Lanterns at night](../images/ingame_turnip_lanterns.jpg) |
+
+*Real screenshots from the client game test that CI runs (`FestivalClientGameTests`, software rendering, small previews, hotbar cropped).*
 
 | Crop | Grows | Plant with | Harvest | Uses now |
 | --- | --- | --- | --- | --- |
