@@ -65,9 +65,9 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 10, y, z - 10, x + 64, y + 14, z + 8));
 			server.runOnServer(minecraft -> buildShowroom(minecraft.overworld(), new BlockPos(x, y, z - 5)));
 
-			// Hide the HUD, hand and chat (what F1 does) so the screenshots show only the machines. Set directly: a
-			// simulated F1 press did not always take effect.
-			context.runOnClient(client -> client.options.hideGui = true);
+			// Hide the HUD, hand and chat so the screenshots show only the machines. In 26.3 this is the "toggle GUI"
+			// key mapping (F1 by default); pressing the raw F1 key code did not reach it.
+			context.getInput().pressKey(options -> options.keyToggleGui);
 
 			// One-block machines, facing the camera, in two halves.
 			server.runCommand("tp @p %d %d %d 180 25".formatted(x - 4, y, z - 2));
