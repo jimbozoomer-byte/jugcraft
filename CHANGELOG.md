@@ -8,7 +8,7 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### #26 Renewable resources
+### #28 Renewable resources
 - **Water Wheel** (2 tall): up to 24 JE/t from flowing or falling water beside its wheel, with no fuel.
 - **Cobblestone Generator:** one cobblestone a second from water and lava touching it; neither is used up.
 - **Tree Farm:** grows a sapling into six logs and gives the sapling back, sometimes with an extra (apple, cocoa beans, …). Recipes are data for all nine vanilla trees.

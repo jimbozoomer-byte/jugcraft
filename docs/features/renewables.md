@@ -1,6 +1,6 @@
 # Renewable resources
 
-Status: implemented in source (PR #26); **not yet played**. Compiles in CI; game tests cover it.
+Status: implemented in source (PR #28); **not yet played**. Compiles in CI; game tests cover it.
 Proposal issue: none. The owner selected "Renewable resources" directly on 30 September 2026.
 Owner: @jimbozoomer-byte
 Target milestone and tier:
