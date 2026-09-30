@@ -411,6 +411,80 @@ def cable_item():
     return img
 
 
+def pipe_texture():
+    """Bronze pipe wall with a darker seam band, matching the cable model's UV layout."""
+    img = new()
+    rng = random.Random(420)
+    for y in range(16):
+        for x in range(16):
+            if x in (6, 9) and 6 <= y <= 9 or y in (6, 9) and 6 <= x <= 9:
+                c = BRONZE[0]
+            elif (x + y) % 7 == 0:
+                c = BRONZE[3]
+            else:
+                c = BRONZE[rng.choice([1, 2, 2])]
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
+def pipe_item():
+    img = new()
+    for i in range(2, 14):
+        for w in (-1, 0, 1):
+            x, y = i, 15 - i + w
+            if 0 <= y < 16:
+                img.putpixel((x, y), BRONZE[3 if w < 0 else (2 if w == 0 else 0)] + (255,))
+    for i in (2, 13):  # flanged ends
+        for w in (-2, 2):
+            y = 15 - i + w
+            if 0 <= y < 16:
+                img.putpixel((i, y), BRONZE[1] + (255,))
+    return img
+
+
+def tank_side(seed):
+    """Tinplate walls around a vertical glass gauge."""
+    img = panel(seed, palette=TIN, trim=TIN)
+    for y in range(2, 14):
+        for x in range(6, 10):
+            edge = x in (6, 9)
+            img.putpixel((x, y), (TIN[0] if edge else (170, 205, 225) if y < 5 else (70, 110, 170)) + (255,))
+    return img
+
+
+def tank_cap(seed, hatch):
+    img = panel(seed, palette=TIN, trim=TIN)
+    if hatch:
+        for y in range(5, 11):
+            for x in range(5, 11):
+                ring = x in (5, 10) or y in (5, 10)
+                img.putpixel((x, y), (TIN[0] if ring else TIN[4]) + (255,))
+    return img
+
+
+def pump_side(seed):
+    """Machine panel with a bronze impeller housing."""
+    img = panel(seed)
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x - 7.5, y - 7.5
+            r2 = dx * dx + dy * dy
+            if 9 <= r2 <= 20:
+                img.putpixel((x, y), BRONZE[1 if dx + dy > 0 else 3] + (255,))
+            elif r2 < 9:
+                img.putpixel((x, y), (BRONZE[2] if abs(dx - dy) < 1.2 or abs(dx + dy) < 1.2 else STEEL[0]) + (255,))
+    return img
+
+
+def pump_port(seed, intake):
+    img = panel(seed)
+    for y in range(4, 12):
+        for x in range(4, 12):
+            ring = x in (4, 11) or y in (4, 11)
+            img.putpixel((x, y), (BRONZE[1] if ring else (20, 22, 26) if intake else STEEL[0]) + (255,))
+    return img
+
+
 def gui():
     """Generic 176x166 machine screen: beveled panel and player inventory slots."""
     img = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
@@ -638,6 +712,14 @@ def machines():
     save(circuit(True), "item", "advanced_circuit")
     save(cable_texture(), "block", "copper_cable")
     save(cable_item(), "item", "copper_cable")
+    save(pipe_texture(), "block", "bronze_fluid_pipe")
+    save(pipe_item(), "item", "bronze_fluid_pipe")
+    save(tank_side(520), "block", "fluid_tank_side")
+    save(tank_cap(521, True), "block", "fluid_tank_top")
+    save(tank_cap(522, False), "block", "fluid_tank_bottom")
+    save(pump_side(523), "block", "electric_pump_side")
+    save(pump_port(524, False), "block", "electric_pump_top")
+    save(pump_port(525, True), "block", "electric_pump_bottom")
     gui()
 
 

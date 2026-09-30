@@ -10,7 +10,7 @@ from pathlib import Path
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, EXTRA_NAMES, MINERAL_TAGS, PROCESSING, COMPONENTS, CIRCUITS,
                        metal_blocks, metal_items, mineral_blocks, all_blocks, all_items, feature_of)
 
-from machines import MACHINES, PARTS, CABLES, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
+from machines import MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -122,7 +122,16 @@ def machine_assets(lang):
               {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{part}")}})
         write(ASSETS / "items" / f"{part}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{part}")}})
 
-    for cable, info in CABLES.items():
+    for block, display in ((b, i["display"]) for b, i in FLUID_BLOCKS.items()):
+        lang[f"block.{MOD}.{block}"] = display
+        write(ASSETS / "blockstates" / f"{block}.json", {"variants": {"": {"model": rid(f"block/{block}")}}})
+        write(ASSETS / "models" / "block" / f"{block}.json", {
+            "parent": "minecraft:block/cube_bottom_top",
+            "textures": {"top": rid(f"block/{block}_top"), "side": rid(f"block/{block}_side"),
+                         "bottom": rid(f"block/{block}_bottom")}})
+        write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+
+    for cable, info in {**CABLES, **PIPES}.items():
         lang[f"block.{MOD}.{cable}"] = info["display"]
         texture = rid(f"block/{cable}")
         write(ASSETS / "models" / "block" / f"{cable}_core.json", {
@@ -150,6 +159,9 @@ def machine_assets(lang):
         write(ASSETS / "items" / f"{cable}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{cable}")}})
 
     lang[f"tooltip.{MOD}.energy"] = "%s / %s JE"
+    lang[f"message.{MOD}.tank"] = "%s: %s / %s mB"
+    lang[f"message.{MOD}.tank.empty"] = "Empty (0 / %s mB)"
+    lang[f"message.{MOD}.pump"] = "Energy %s / %s JE, holding %s mB"
     lang[f"container.{MOD}.arc_furnace.incomplete"] = "Structure incomplete"
     lang[f"container.{MOD}.arc_furnace.formed"] = "Arc furnace formed"
 
