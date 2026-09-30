@@ -121,17 +121,15 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			server.runCommand("item replace entity @p hotbar.2 with jugcraft:rocket_pack");
 			server.runCommand("item replace entity @p armor.chest with jugcraft:rocket_pack");
 			server.runCommand("tp @p %d %d %d 180 20".formatted(x - 6, y, z + 5));
-			// The first hotbar slot (the drill) is selected in a new world.
-			context.runOnClient(client -> client.options.hideGui = false);
+			// Show the HUD again (the first hotbar slot, the drill, is selected in a new world).
+			context.getInput().pressKey(options -> options.keyToggleGui);
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_drill_in_hand");
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_rocket_pack_worn");
-			context.runOnClient(client -> {
-				client.options.setCameraType(CameraType.FIRST_PERSON);
-				client.options.hideGui = true;
-			});
+			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
+			context.getInput().pressKey(options -> options.keyToggleGui);
 			server.runCommand("clear @p");
 
 			// Multi-block machines, ten blocks away, in three views along the row (the wind turbine is nine tall).
