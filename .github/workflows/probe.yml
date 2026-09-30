@@ -19,20 +19,13 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
-      - name: Components (5)
+      - name: Fuel keys (6)
         run: |
           COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
           CP="$CLIENT:$COMMON"
           FAPI=$(find ~/.gradle/caches -name 'fabric-*.jar' -path '*net.fabricmc.fabric-api*' | grep -v sources | tr '\n' ':')
-          p() { echo "=== $1"; javap -cp "$CP:$FAPI" -p "$1" 2>&1 | head -${2:-60}; }
-          p net.minecraft.world.item.component.BlockTransformers 60
-          p net.minecraft.world.item.component.CookingFuel 30
-          javap -cp "$CP" -p 'net.minecraft.world.item.Item$Properties' | grep -iE 'fuel|transform|strip|axe' 
-          javap -cp "$CP" -p net.minecraft.core.component.DataComponents | grep -iE 'FUEL|TRANSFORM' 
-          javap -cp "$CP" -p net.minecraft.tags.ItemTags | grep -E ' AXES| SWORDS|HOES'
-          javap -cp "$CP" -p net.minecraft.sounds.SoundEvents | grep -E 'AXE_STRIP|SWEET_BERRY|CROP_PLANTED'
-          echo "=== Items using BlockTransformers"; javap -cp "$CP" -c -p net.minecraft.world.item.Items | grep -E 'BlockTransformers|CookingFuel|fuel' | sed 's/.*\/\/ //' | sort | uniq -c | head -20
-          echo "=== BlockTransformers bytecode refs"; javap -cp "$CP" -c -p net.minecraft.world.item.component.BlockTransformers | grep -E 'invoke|getstatic' | sed 's/.*\/\/ //' | sort -u | head -60
-          echo "=== fabric item api"; J=$(echo $FAPI | tr ':' '\n' | grep fabric-item-api); jar tf "$J" | grep -E 'api/.*\.class$' | head -40
-          for c in net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents net.fabricmc.fabric.api.registry.FuelRegistryEvents; do p $c 20; done
+          javap -cp "$CP" -p net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders | grep -E 'static final' | sed 's/.*> //'
+          echo "=== Items OAK_LOG/OAK_PLANKS/OAK_SLAB fuel keys"; javap -cp "$CP" -c -p net.minecraft.world.item.Items | grep -E 'ContextIntProviders\.[A-Z_]*(FUEL|BURN)' | sed 's/.*Field //' | sort | uniq -c
+          unzip -l "$COMMON" | awk '{print $4}' | grep -E 'data/minecraft/(block_transformer|context_int_provider|int_provider)' | head -20
+          for c in net.fabricmc.fabric.api.item.v1.BlockTransformerHelper 'net.fabricmc.fabric.api.item.v1.BlockTransformerEvents$Modify' net.fabricmc.fabric.api.item.v1.BlockTransformerEvents; do echo "=== $c"; javap -cp "$CP:$FAPI" "$c" | head -20; done
