@@ -13,6 +13,13 @@
     "jugcraft:cabbage_crop",
     "jugcraft:oat_crop",
     "jugcraft:barley_crop",
-    "jugcraft:trellis"
+    "jugcraft:turnip_crop",
+    "jugcraft:trellis",
+    "jugcraft:butternut_squash_stem",
+    "jugcraft:attached_butternut_squash_stem",
+    "jugcraft:acorn_squash_stem",
+    "jugcraft:attached_acorn_squash_stem",
+    "jugcraft:warty_gourd_stem",
+    "jugcraft:attached_warty_gourd_stem"
   ]
 }

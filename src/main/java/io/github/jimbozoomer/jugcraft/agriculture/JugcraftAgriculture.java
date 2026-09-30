@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -24,6 +25,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -34,18 +36,29 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProvider;
 import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * The Agriculture branch: crops, seeds, foods and farm tools (docs/branches/AGRICULTURE.md).
@@ -58,7 +71,12 @@ public final class JugcraftAgriculture {
 	/** Chance per short grass broken to drop one Jugcraft seed, chosen evenly: as often as vanilla wheat seeds. */
 	public static final float GRASS_SEED_CHANCE = 0.125F;
 	private static final List<String> GRASS_SEEDS = List.of("corn_kernels", "sunflower_seeds", "beans", "sweet_potato", "flax_seeds",
-			"tomato_seeds", "pepper_seeds", "onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds");
+			"tomato_seeds", "pepper_seeds", "onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds",
+			"butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut");
+	/** The chestnut tree's feature (data/jugcraft/worldgen/feature/chestnut.json), grown by its sapling. */
+	public static final ResourceKey<Feature> CHESTNUT_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("chestnut"));
+	public static final TreeGrower CHESTNUT_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_chestnut", WeightedList.of(CHESTNUT_TREE),
+			WeightedList.of(), WeightedList.of(), CHESTNUT_TREE);
 
 	private static final ResourceKey<ContextIntProvider> COMPOST_LOW = ContextIntProviders.COMPOSTABLE_LOW;
 	private static final ResourceKey<ContextIntProvider> COMPOST_MEDIUM = ContextIntProviders.COMPOSTABLE_MEDIUM;
@@ -72,6 +90,7 @@ public final class JugcraftAgriculture {
 	private static final List<Item> INGREDIENT_TAB = new ArrayList<>();
 	private static final List<Item> TOOL_TAB = new ArrayList<>();
 	private static final List<Item> EQUIPMENT_TAB = new ArrayList<>();
+	private static final List<Item> BUILDING_TAB = new ArrayList<>();
 
 	public static RecipeType<CookingPotRecipe> POT_COOKING;
 	public static RecipeSerializer<CookingPotRecipe> POT_SERIALIZER;
@@ -118,6 +137,14 @@ public final class JugcraftAgriculture {
 		crop("cabbage_crop", "cabbage_seeds", false);
 		crop("oat_crop", "oat_seeds", false);
 		crop("barley_crop", "barley_seeds", false);
+		// Festival crops: turnips, gourds on stems, the cranberry bog bush and the chestnut tree.
+		crop("turnip_crop", "turnip", false);
+		gourd("butternut_squash", "butternut_squash_seeds", 1.0F, MapColor.TERRACOTTA_ORANGE);
+		gourd("acorn_squash", "acorn_squash_seeds", 1.0F, MapColor.COLOR_GREEN);
+		gourd("warty_gourd", "warty_gourd_seeds", 1.0F, MapColor.COLOR_YELLOW);
+		registerBlock("cranberry_bush", CranberryBushBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SWEET_BERRY_BUSH)
+				.sound(SoundType.WET_GRASS));
+		registerChestnutTree();
 
 		// Seeds, produce and food.
 		food("corn", 3, 0.6F, COMPOST_MEDIUM);
@@ -155,6 +182,20 @@ public final class JugcraftAgriculture {
 		stew("oat_porridge", 6, 0.6F);
 		stew("chili", 10, 0.8F);
 		meal("cabbage_rolls", 6, 0.8F);
+		// Festival crops.
+		seeds("butternut_squash_seeds", "butternut_squash_stem", COMPOST_LOW);
+		seeds("acorn_squash_seeds", "acorn_squash_stem", COMPOST_LOW);
+		seeds("warty_gourd_seeds", "warty_gourd_stem", COMPOST_LOW);
+		edibleSeeds("turnip", "turnip_crop", 3, 0.6F, COMPOST_MEDIUM);
+		edibleSeeds("cranberries", "cranberry_bush", 2, 0.1F, COMPOST_LOW);
+		seeds("chestnut", "chestnut_sapling", COMPOST_LOW);
+		food("roasted_chestnuts", 4, 0.6F, COMPOST_MEDIUM_HIGH);
+		food("baked_acorn_squash", 6, 0.6F, COMPOST_MEDIUM_HIGH);
+		food("squash_pie", 8, 0.3F, COMPOST_MEDIUM_HIGH);
+		food("candy_corn", 2, 0.1F, COMPOST_MEDIUM_HIGH);
+		stew("butternut_squash_soup", 8, 0.6F);
+		stew("harvest_stew", 10, 0.6F);
+		stew("cranberry_sauce", 5, 0.6F);
 
 		// Farm tools.
 		sickle("flint_sickle", 1, 131);
@@ -173,14 +214,17 @@ public final class JugcraftAgriculture {
 		wild("wild_cabbage");
 		wild("wild_oats");
 		wild("wild_barley");
+		wild("wild_turnip");
 
 		registerEquipment();
+		registerDecorations();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> FOOD_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> INGREDIENT_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> TOOL_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> EQUIPMENT_TAB.forEach(output::accept));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.BUILDING_BLOCKS).register(output -> BUILDING_TAB.forEach(output::accept));
 
 		registerGrassSeeds();
 		registerWorldgen();
@@ -231,6 +275,58 @@ public final class JugcraftAgriculture {
 		CookingPotRecipe.registerReloadListener();
 	}
 
+	/** The Turnip Lantern: a carved turnip that gives light, the original jack-o'-lantern. */
+	private static void registerDecorations() {
+		Block lantern = registerBlock("turnip_lantern", TurnipLanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(0.5F).sound(SoundType.WOOD).lightLevel(state -> 13).noOcclusion().pushReaction(PushReaction.DESTROY));
+		registerItem("turnip_lantern", props -> new BlockItem(lantern, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+	}
+
+	/**
+	 * The chestnut tree: its sapling (planted from a chestnut), fruiting leaves and a small wood set.
+	 * Logs and wood strip with any axe; everything wooden burns like oak.
+	 */
+	private static void registerChestnutTree() {
+		registerBlock("chestnut_sapling", props -> new SaplingBlock(CHESTNUT_GROWER, props) {
+		}, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING));
+		Block leaves = registerBlock("chestnut_leaves", ChestnutLeavesBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)
+				.mapColor(MapColor.PLANT));
+		registerItem("chestnut_leaves", props -> new BlockItem(leaves, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
+
+		BlockBehaviour.Properties log = BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG).mapColor(MapColor.TERRACOTTA_BROWN);
+		Block chestnutLog = registerBlock("chestnut_log", props -> new StrippableLogBlock(props, "stripped_chestnut_log"), log);
+		Block wood = registerBlock("chestnut_wood", props -> new StrippableLogBlock(props, "stripped_chestnut_wood"),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WOOD).mapColor(MapColor.TERRACOTTA_BROWN));
+		Block strippedLog = registerBlock("stripped_chestnut_log", RotatedPillarBlock::new,
+				BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_LOG).mapColor(MapColor.COLOR_BROWN));
+		Block strippedWood = registerBlock("stripped_chestnut_wood", RotatedPillarBlock::new,
+				BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_WOOD).mapColor(MapColor.COLOR_BROWN));
+		Block planks = registerBlock("chestnut_planks", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).mapColor(MapColor.COLOR_BROWN));
+		Block stairs = registerBlock("chestnut_stairs", props -> new StairBlock(planks.defaultBlockState(), props) {
+		}, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_STAIRS).mapColor(MapColor.COLOR_BROWN));
+		Block slab = registerBlock("chestnut_slab", SlabBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SLAB).mapColor(MapColor.COLOR_BROWN));
+		Block fence = registerBlock("chestnut_fence", FenceBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE).mapColor(MapColor.COLOR_BROWN));
+		Block gate = registerBlock("chestnut_fence_gate", props -> new FenceGateBlock(WoodType.OAK, props),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE).mapColor(MapColor.COLOR_BROWN));
+		// Furnace fuel like oak: a slab burns half as long as a block.
+		for (Block block : List.of(chestnutLog, wood, strippedLog, strippedWood, planks, stairs, slab, fence, gate)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix()
+					.cookingFuel(block == slab ? ContextIntProviders.COOKING_TIME_WOOD_SLABS : ContextIntProviders.COOKING_TIME_WOOD_BLOCKS),
+					BUILDING_TAB);
+		}
+
+		// Vanilla oak's fire behaviour: logs catch slowly, planks and their shapes faster, leaves fastest.
+		FlammableBlockRegistry fire = FlammableBlockRegistry.getDefaultInstance();
+		for (Block block : List.of(chestnutLog, wood, strippedLog, strippedWood)) {
+			fire.add(block, 5, 5);
+		}
+		for (Block block : List.of(planks, stairs, slab, fence, gate)) {
+			fire.add(block, 5, 20);
+		}
+		fire.add(leaves, 30, 60);
+	}
+
 	/** Wild plant patches (data/jugcraft/worldgen) in the biomes each crop comes from. New chunks only. */
 	private static void registerWorldgen() {
 		if (!JugcraftConfig.isFeatureEnabled(FEATURE)) {
@@ -249,6 +345,13 @@ public final class JugcraftAgriculture {
 		wildPatch("wild_cabbage", ConventionalBiomeTags.IS_WINDSWEPT, ConventionalBiomeTags.IS_HILL);
 		wildPatch("wild_oats", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_TAIGA);
 		wildPatch("wild_barley", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_HILL);
+		wildPatch("wild_turnip", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_BIRCH_FOREST);
+		// Festival crops found as themselves: gourds on grass, ripe cranberries in swamp shallows, chestnut trees.
+		wildPatch("butternut_squash", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_SAVANNA);
+		wildPatch("acorn_squash", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_TAIGA);
+		wildPatch("warty_gourd", ConventionalBiomeTags.IS_SWAMP, ConventionalBiomeTags.IS_SPOOKY);
+		wildPatch("cranberry_bush", ConventionalBiomeTags.IS_SWAMP);
+		wildPatch("chestnut_tree", ConventionalBiomeTags.IS_FOREST);
 	}
 
 	@SafeVarargs
@@ -280,6 +383,24 @@ public final class JugcraftAgriculture {
 
 	private static void crop(String id, String seedId, boolean legume) {
 		registerBlock(id, props -> new JugcraftCropBlock(props, seedId, legume), BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT));
+	}
+
+	/** Shapes of each gourd facing north or south, then east or west (models: tools/festival_data.py). */
+	private static final Map<String, VoxelShape[]> GOURD_SHAPES = Map.of(
+			"butternut_squash", new VoxelShape[] {Block.box(4.0, 0.0, 1.0, 12.0, 8.0, 15.0), Block.box(1.0, 0.0, 4.0, 15.0, 8.0, 12.0)},
+			"acorn_squash", new VoxelShape[] {Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0), Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0)},
+			"warty_gourd", new VoxelShape[] {Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0)});
+
+	/** A squash or gourd block (with its item), its stem and its attached stem. The seeds are registered with the other items. */
+	private static void gourd(String id, String seedId, float growthTime, MapColor color) {
+		VoxelShape[] shapes = GOURD_SHAPES.get(id);
+		Block gourd = registerBlock(id, props -> new GourdBlock(props, shapes[0], shapes[1]),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.PUMPKIN).mapColor(color).noOcclusion());
+		registerItem(id, props -> new BlockItem(gourd, props), new Item.Properties().useBlockDescriptionPrefix().compostable(COMPOST_MEDIUM),
+				SEEDS_TAB);
+		registerBlock(id + "_stem", props -> new GourdStemBlock(props, id, seedId, growthTime), BlockBehaviour.Properties.ofFullCopy(Blocks.PUMPKIN_STEM));
+		registerBlock("attached_" + id + "_stem", props -> new AttachedGourdStemBlock(props, id, seedId),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.ATTACHED_PUMPKIN_STEM));
 	}
 
 	private static FoodProperties nourishment(int nutrition, float saturation) {

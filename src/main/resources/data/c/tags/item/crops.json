@@ -12,6 +12,14 @@
     "#c:crops/garlic",
     "#c:crops/cabbage",
     "#c:crops/oat",
-    "#c:crops/barley"
+    "#c:crops/barley",
+    "#c:crops/turnip",
+    "#c:crops/cranberry",
+    "#c:crops/chestnut",
+    "#c:crops/squash",
+    "#c:crops/butternut_squash",
+    "#c:crops/acorn_squash",
+    "#c:crops/gourd",
+    "#c:crops/warty_gourd"
   ]
 }

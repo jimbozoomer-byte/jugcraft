@@ -8,6 +8,10 @@
     "jugcraft:garlic_crop",
     "jugcraft:cabbage_crop",
     "jugcraft:oat_crop",
-    "jugcraft:barley_crop"
+    "jugcraft:barley_crop",
+    "jugcraft:turnip_crop",
+    "jugcraft:butternut_squash_stem",
+    "jugcraft:acorn_squash_stem",
+    "jugcraft:warty_gourd_stem"
   ]
 }

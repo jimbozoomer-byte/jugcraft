@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:trellis"
+    "jugcraft:trellis",
+    "jugcraft:butternut_squash",
+    "jugcraft:acorn_squash",
+    "jugcraft:warty_gourd",
+    "jugcraft:turnip_lantern"
   ]
 }

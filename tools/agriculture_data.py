@@ -4,6 +4,7 @@ Called by generate_material_data.py. Loot tables and worldgen use the Minecraft 
 (singular "condition", "modifier", minecraft:match_block, inline block states), copied from
 vanilla 26.3's own crop and berry-bush files.
 """
+import festival_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
                          HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, crop_blocks)
@@ -130,6 +131,8 @@ def assets(root, write, lang):
     lang[f"container.{MOD}.cooking_pot"] = "Cooking Pot"
     lang[f"container.{MOD}.cooking_pot.cold"] = "Needs heat below"
 
+    festival_data.assets(root, write, lang)
+
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
         write(root / "models" / "item" / f"{item}.json", {"parent": parent, "textures": {"layer0": rid(f"item/{item}")}})
@@ -212,6 +215,7 @@ def loot(data, write):
     for block in EQUIPMENT:
         # Like vanilla scaffolding and cauldrons: the block itself, unless an explosion destroys it.
         write(out / f"{block}.json", table(block, pool(entry(block), condition={"type": "minecraft:survives_explosion"}), decay=False))
+    festival_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -224,14 +228,19 @@ def recipes(out, write):
                                          "ingredient": rid(info["input"]), "result": {"id": rid(result)},
                                          "experience": info["xp"], "cookingtime": time})
     for recipe in SHAPELESS:
-        write(out / f"{recipe['id']}.json", {"fabric:load_conditions": conditions(*recipe.get("features", [])),
-                                              "type": "minecraft:crafting_shapeless",
-                                              "category": "misc", "ingredients": recipe["inputs"],
-                                              "result": {"id": rid(recipe["result"]), "count": recipe["count"]}})
+        data = {"fabric:load_conditions": conditions(*recipe.get("features", [])), "type": "minecraft:crafting_shapeless",
+                "category": recipe.get("category", "misc")}
+        if "group" in recipe:
+            data["group"] = recipe["group"]
+        data.update({"ingredients": recipe["inputs"], "result": {"id": rid(recipe["result"]), "count": recipe["count"]}})
+        write(out / f"{recipe['id']}.json", data)
     for recipe in SHAPED:
-        write(out / f"{recipe['id']}.json", {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped",
-                                              "category": recipe["category"], "pattern": recipe["pattern"], "key": recipe["key"],
-                                              "result": {"id": rid(recipe["result"]), "count": recipe["count"]}})
+        data = {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped", "category": recipe["category"]}
+        if "group" in recipe:
+            data["group"] = recipe["group"]
+        data.update({"pattern": recipe["pattern"], "key": recipe["key"],
+                     "result": {"id": rid(recipe["result"]), "count": recipe["count"]}})
+        write(out / f"{recipe['id']}.json", data)
     for result, info in POT_RECIPES.items():
         out_item = {"id": rid(result)}
         if info.get("count", 1) != 1:
@@ -269,11 +278,13 @@ def tags(tags):
         tags.add("block", "minecraft:crops", rid(info["block"]))
         if info["legume"]:
             tags.add("block", LEGUME_TAG, rid(info["block"]))
+    festival_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen
 
 def worldgen(data, write):
+    festival_data.worldgen(data, write)
     spread = WILD_PATCH["spread_xz"]
     for wild in WILD_CROPS:
         write(data / MOD / "worldgen" / "feature" / f"{wild}.json",

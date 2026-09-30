@@ -93,6 +93,9 @@ CROPS = {
              "legume": False, "stages": [0, 0, 1, 1, 2, 2, 2, 3], "loot": "grain"},
     "barley": {"block": "barley_crop", "display": "Barley Crop", "seed": "barley_seeds", "produce": "barley",
                "legume": False, "stages": [0, 0, 1, 1, 2, 2, 2, 3], "loot": "grain"},
+    # Festival crops.
+    "turnip": {"block": "turnip_crop", "display": "Turnip Crop", "seed": "turnip", "produce": "turnip",
+               "legume": False, "stages": [0, 0, 1, 1, 2, 2, 2, 3], "loot": "root"},
 }
 
 # Wild plants: the natural entry point. Found in patches on grass in fitting biomes (new chunks
@@ -123,6 +126,8 @@ WILD_CROPS = {
                   "biomes": ["IS_PLAINS", "IS_TAIGA"]},
     "wild_barley": {"display": "Wild Barley", "crop": "barley", "texture": "barley_stage2",
                     "biomes": ["IS_SAVANNA", "IS_HILL"]},
+    "wild_turnip": {"display": "Wild Turnip", "crop": "turnip", "texture": "turnip_stage3",
+                    "biomes": ["IS_TAIGA", "IS_BIRCH_FOREST"]},
 }
 # One patch in about 1 of `rarity` chunks of a matching biome; `tries` placement attempts per patch.
 WILD_PATCH = {"rarity": 24, "tries": 24, "spread_xz": 5, "spread_y": 2}
@@ -131,7 +136,8 @@ WILD_COMPOST = "medium"
 # often as vanilla wheat seeds (0.125), however many crops there are. Every crop is reachable in any
 # biome and in worlds generated before this feature.
 GRASS_SEEDS = ["corn_kernels", "sunflower_seeds", "beans", "sweet_potato", "flax_seeds",
-               "tomato_seeds", "pepper_seeds", "onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds"]
+               "tomato_seeds", "pepper_seeds", "onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds",
+               "butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut"]
 GRASS_SEED_CHANCE = 0.125
 
 # Plain and food items. food: [nutrition, saturation modifier] (vanilla carrot is [3, 0.6],
@@ -188,7 +194,101 @@ ITEMS = {
     "oat_porridge": {"display": "Oat Porridge", "food": [6, 0.6], "stew": True, "tags": ["c:foods/soup"]},
     "chili": {"display": "Chili", "food": [10, 0.8], "stew": True, "tags": ["c:foods/soup"]},
     "cabbage_rolls": {"display": "Cabbage Rolls", "food": [6, 0.8], "tags": ["c:foods"]},
+    # Festival crops. Gourd seeds plant stems; a chestnut plants a chestnut tree sapling; cranberries are
+    # planted in shallow water ("bog_seed").
+    "butternut_squash_seeds": {"display": "Butternut Squash Seeds", "plants": "butternut_squash_stem", "compost": "low",
+                               "tags": ["c:seeds/butternut_squash", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "acorn_squash_seeds": {"display": "Acorn Squash Seeds", "plants": "acorn_squash_stem", "compost": "low",
+                           "tags": ["c:seeds/acorn_squash", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "warty_gourd_seeds": {"display": "Warty Gourd Seeds", "plants": "warty_gourd_stem", "compost": "low",
+                          "tags": ["c:seeds/warty_gourd", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "turnip": {"display": "Turnip", "plants": "turnip_crop", "food": [3, 0.6], "compost": "medium",
+               "tags": ["c:crops/turnip", "c:foods/vegetable", "minecraft:pig_food", "minecraft:rabbit_food"]},
+    "cranberries": {"display": "Cranberries", "plants": "cranberry_bush", "bog_seed": True, "food": [2, 0.1], "compost": "low",
+                    "tags": ["c:crops/cranberry", "c:foods/berry", "minecraft:fox_food"]},
+    "chestnut": {"display": "Chestnut", "plants": "chestnut_sapling", "compost": "low",
+                 "tags": ["c:crops/chestnut", "minecraft:pig_food"]},
+    "roasted_chestnuts": {"display": "Roasted Chestnuts", "food": [4, 0.6], "compost": "medium_high", "tags": ["c:foods"]},
+    "baked_acorn_squash": {"display": "Baked Acorn Squash", "food": [6, 0.6], "compost": "medium_high", "tags": ["c:foods"]},
+    "squash_pie": {"display": "Squash Pie", "food": [8, 0.3], "compost": "medium_high", "tags": ["c:foods"]},
+    "candy_corn": {"display": "Candy Corn", "food": [2, 0.1], "compost": "medium_high", "tags": ["c:foods/candy"]},
+    "butternut_squash_soup": {"display": "Butternut Squash Soup", "food": [8, 0.6], "stew": True, "tags": ["c:foods/soup"]},
+    "harvest_stew": {"display": "Harvest Stew", "food": [10, 0.6], "stew": True, "tags": ["c:foods/soup"]},
+    "cranberry_sauce": {"display": "Cranberry Sauce", "food": [5, 0.6], "stew": True, "tags": ["c:foods"]},
 }
+
+# ---------------------------------------------------------------- Festival crops (slice 3)
+
+# Gourds grow from stems like vanilla pumpkins. A stem on farmland grows through ages 0-7, then puts its
+# gourd on a free neighbouring block that supports vegetation (vanilla tag minecraft:supports_stem_fruit)
+# and bends towards it; breaking the gourd lets the stem grow another. Stems grow by CropGrowth, so
+# squash next to beans grows 1.5x as fast (the Three Sisters with corn). Gourds are blocks: decorations
+# for fall displays, and food. growth_time: times wheat's time per stage.
+GOURDS = {
+    "butternut_squash": {"display": "Butternut Squash", "seed": "butternut_squash_seeds", "growth_time": 1.0,
+                         "compost": "medium", "tags": ["c:crops/squash", "c:crops/butternut_squash", "c:foods/vegetable"]},
+    "acorn_squash": {"display": "Acorn Squash", "seed": "acorn_squash_seeds", "growth_time": 1.0,
+                     "compost": "medium", "tags": ["c:crops/squash", "c:crops/acorn_squash", "c:foods/vegetable"]},
+    "warty_gourd": {"display": "Warty Gourd", "seed": "warty_gourd_seeds", "growth_time": 1.0,
+                    "compost": "medium", "tags": ["c:crops/gourd", "c:crops/warty_gourd"]},
+}
+STEM_TEXTURES = ["gourd_stem", "gourd_stem_attached", "gourd_stalk"]
+
+
+def stem(gourd):
+    return f"{gourd}_stem"
+
+
+def attached_stem(gourd):
+    return f"attached_{gourd}_stem"
+
+
+# Cranberries are a bog crop. The bush stands in a still water source one block deep, rooted in bog soil
+# (block tag jugcraft:bog_soil), and grows only with open air above the water. Ripe bushes are picked
+# with a right-click or a sickle and flower again, like vanilla sweet berries. Breaking one leaves its
+# water. growth_chance: one stage in this many random ticks with light 9 or more (sweet berries: 5).
+CRANBERRY = {"block": "cranberry_bush", "display": "Cranberry Bush", "seed": "cranberries",
+             "pick": {"item": "cranberries", "min": 2, "max": 3}, "pick_reset": 1, "growth_chance": 5,
+             "stages": ["cranberry_stage0", "cranberry_stage1", "cranberry_stage2", "cranberry_stage3"]}
+BOG_SOIL_TAG = "jugcraft:bog_soil"
+BOG_SOIL = ["#minecraft:dirt", "#minecraft:mud", "#minecraft:grass_blocks", "#minecraft:sand", "minecraft:clay", "minecraft:gravel"]
+
+# The chestnut tree, the branch's first fruit tree (orchards in slice 4 follow the same rules). A chestnut
+# is its seed: it plants a chestnut sapling on dirt or grass, which grows into a tree like vanilla
+# saplings (bone meal works). Leaves the tree grew (not ones a player placed) with air under them grow
+# spiny burs that ripen, fruit 0 -> 1 -> 2, one step in fruit_chance random ticks (about a Minecraft day
+# in all); a right-click picks the ripe ones. The tree is never cut down to harvest it.
+CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": "chestnut", "fruit_chance": 10,
+            "pick": {"item": "chestnut", "min": 1, "max": 2},
+            # worldgen/feature/chestnut.json: a broad crown on a straight trunk.
+            "trunk": {"base_height": 5, "height_rand_a": 2}, "foliage": {"radius": 3, "height": 3}}
+# The chestnut wood set: display names. Logs and wood strip with an axe; logs saw into planks (sawmill).
+WOOD = {
+    "chestnut_log": "Chestnut Log", "chestnut_wood": "Chestnut Wood", "stripped_chestnut_log": "Stripped Chestnut Log",
+    "stripped_chestnut_wood": "Stripped Chestnut Wood", "chestnut_planks": "Chestnut Planks", "chestnut_stairs": "Chestnut Stairs",
+    "chestnut_slab": "Chestnut Slab", "chestnut_fence": "Chestnut Fence", "chestnut_fence_gate": "Chestnut Fence Gate",
+}
+WOOD_TAG = "jugcraft:chestnut_logs"
+STRIPPED = {"chestnut_log": "stripped_chestnut_log", "chestnut_wood": "stripped_chestnut_wood"}
+TREE_BLOCKS = {"chestnut_sapling": "Chestnut Sapling", "chestnut_leaves": "Chestnut Leaves"}
+TREE_TEXTURES = ["chestnut_log", "chestnut_log_top", "stripped_chestnut_log", "stripped_chestnut_log_top", "chestnut_planks",
+                 "chestnut_leaves", "chestnut_leaves_burs", "chestnut_leaves_ripe", "chestnut_sapling"]
+
+# Decorations. The Turnip Lantern is the original jack-o'-lantern: a carved turnip with a candle inside.
+DECOR = {"turnip_lantern": {"display": "Turnip Lantern", "light": 13}}
+DECOR_TEXTURES = ["turnip_lantern_side", "turnip_lantern_face", "turnip_lantern_top"]
+
+# Festival crops that also grow wild as themselves, in new chunks: gourds lie on grass like vanilla
+# pumpkins, ripe cranberry bushes stand in swamp shallows, and chestnut trees grow in forests.
+FOUND_WILD = {
+    "butternut_squash": {"biomes": ["IS_PLAINS", "IS_SAVANNA"], "on": "grass"},
+    "acorn_squash": {"biomes": ["IS_FOREST", "IS_TAIGA"], "on": "grass"},
+    "warty_gourd": {"biomes": ["IS_SWAMP", "IS_SPOOKY"], "on": "grass"},
+    "cranberry_bush": {"biomes": ["IS_SWAMP"], "on": "bog"},
+}
+GOURD_PATCH = {"rarity": 32, "tries": 8, "spread_xz": 4, "spread_y": 2}
+CRANBERRY_PATCH = {"rarity": 4, "tries": 32, "spread_xz": 6}
+CHESTNUT_TREES = {"biomes": ["IS_FOREST"], "rarity": 3}
 
 # Kitchen Garden equipment: blocks with an item of their own.
 # Trellis: a square wooden lattice. It stands on farmland, on any sturdy top face or on another
@@ -223,6 +323,8 @@ COOKING = {
     "popcorn": {"input": "corn_kernels", "xp": 0.1},
     "baked_sweet_potato": {"input": "sweet_potato", "xp": 0.35},
     "roasted_sunflower_seeds": {"input": "sunflower_seeds", "xp": 0.1},
+    "roasted_chestnuts": {"input": "chestnut", "xp": 0.35},
+    "baked_acorn_squash": {"input": "acorn_squash", "xp": 0.35},
 }
 COOK_TIMES = {"smelting": 200, "smoking": 100, "campfire_cooking": 600}
 
@@ -241,6 +343,12 @@ POT_RECIPES = {
                          "jugcraft:onion": 1, "minecraft:beef": 1}, "time": 300},
     "cabbage_rolls": {"inputs": {"jugcraft:cabbage": 1, "minecraft:beef": 1, "jugcraft:onion": 1, "jugcraft:garlic": 1},
                       "count": 2, "time": 300},
+    # Festival crops.
+    "butternut_squash_soup": {"inputs": {"minecraft:bowl": 1, "jugcraft:butternut_squash": 1, "jugcraft:onion": 1,
+                                         "jugcraft:garlic": 1}, "time": 200},
+    "harvest_stew": {"inputs": {"minecraft:bowl": 1, "jugcraft:turnip": 1, "minecraft:carrot": 1, "jugcraft:onion": 1,
+                                "minecraft:mutton": 1}, "time": 300},
+    "cranberry_sauce": {"inputs": {"minecraft:bowl": 1, "jugcraft:cranberries": 2, "minecraft:sugar": 1}, "time": 200},
 }
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
@@ -256,6 +364,16 @@ SHAPELESS = [
     # Jugcraft's salt (the mining branch) pickles cabbage.
     {"id": "sauerkraut", "inputs": ["jugcraft:cabbage", "jugcraft:cabbage", "#c:dusts/salt"], "result": "sauerkraut", "count": 2,
      "features": ["salt"]},
+    # Festival crops. A gourd gives four seeds, like a vanilla pumpkin.
+    {"id": "butternut_squash_seeds", "inputs": ["jugcraft:butternut_squash"], "result": "butternut_squash_seeds", "count": 4},
+    {"id": "acorn_squash_seeds", "inputs": ["jugcraft:acorn_squash"], "result": "acorn_squash_seeds", "count": 4},
+    {"id": "warty_gourd_seeds", "inputs": ["jugcraft:warty_gourd"], "result": "warty_gourd_seeds", "count": 4},
+    {"id": "squash_pie", "inputs": ["jugcraft:butternut_squash", "minecraft:sugar", "#minecraft:eggs"], "result": "squash_pie",
+     "count": 1},
+    {"id": "candy_corn", "inputs": ["jugcraft:corn", "minecraft:sugar", "minecraft:honey_bottle"], "result": "candy_corn",
+     "count": 4},
+    {"id": "chestnut_planks", "inputs": ["#jugcraft:chestnut_logs"], "result": "chestnut_planks", "count": 4,
+     "category": "building", "group": "planks"},
 ]
 SHAPED = [
     {"id": "barley_bread", "pattern": ["BBB"], "key": {"B": "jugcraft:barley"}, "result": "barley_bread", "count": 1,
@@ -264,6 +382,21 @@ SHAPED = [
      "category": "misc"},
     {"id": "cooking_pot", "pattern": ["S S", "I I", "III"], "key": {"S": "minecraft:stick", "I": "#c:ingots/iron"},
      "result": "cooking_pot", "count": 1, "category": "misc"},
+    # Festival crops: the lantern (like vanilla's jack o'lantern recipe) and the chestnut wood set (like oak's).
+    {"id": "turnip_lantern", "pattern": ["T", "B"], "key": {"T": "jugcraft:turnip", "B": "minecraft:torch"},
+     "result": "turnip_lantern", "count": 1, "category": "building"},
+    {"id": "chestnut_wood", "pattern": ["##", "##"], "key": {"#": "jugcraft:chestnut_log"}, "result": "chestnut_wood",
+     "count": 3, "category": "building", "group": "bark"},
+    {"id": "stripped_chestnut_wood", "pattern": ["##", "##"], "key": {"#": "jugcraft:stripped_chestnut_log"},
+     "result": "stripped_chestnut_wood", "count": 3, "category": "building", "group": "bark"},
+    {"id": "chestnut_stairs", "pattern": ["#  ", "## ", "###"], "key": {"#": "jugcraft:chestnut_planks"}, "result": "chestnut_stairs",
+     "count": 4, "category": "building", "group": "wooden_stairs"},
+    {"id": "chestnut_slab", "pattern": ["###"], "key": {"#": "jugcraft:chestnut_planks"}, "result": "chestnut_slab",
+     "count": 6, "category": "building", "group": "wooden_slab"},
+    {"id": "chestnut_fence", "pattern": ["W#W", "W#W"], "key": {"W": "jugcraft:chestnut_planks", "#": "minecraft:stick"},
+     "result": "chestnut_fence", "count": 3, "category": "misc", "group": "wooden_fence"},
+    {"id": "chestnut_fence_gate", "pattern": ["#W#", "#W#"], "key": {"W": "jugcraft:chestnut_planks", "#": "minecraft:stick"},
+     "result": "chestnut_fence_gate", "count": 1, "category": "redstone", "group": "wooden_fence_gate"},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -284,13 +417,29 @@ def trellis_crops():
     return [info["block"] for info in TALL_CROPS.values() if info.get("trellis")]
 
 
+def stem_blocks():
+    return [block for gourd in GOURDS for block in (stem(gourd), attached_stem(gourd))]
+
+
+def planted_blocks():
+    """Blocks that a seed item places: crops, gourd stems, the cranberry bush and the chestnut sapling."""
+    return crop_blocks() + [stem(gourd) for gourd in GOURDS] + [CRANBERRY["block"], CHESTNUT["sapling"]]
+
+
+def itemless_blocks():
+    """Blocks without an item of their own: the item that plants them stands in for them."""
+    return crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"]]
+
+
 def all_blocks():
     """Every registered agriculture block. Crops have no block item (seeds place them); wild plants and equipment do."""
-    return crop_blocks() + list(WILD_CROPS) + list(EQUIPMENT)
+    return (crop_blocks() + stem_blocks() + [CRANBERRY["block"]] + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS)
+            + list(TREE_BLOCKS) + list(WOOD) + list(DECOR))
 
 
 def all_items():
-    return list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT)
+    return (list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
+            + list(WOOD) + list(DECOR))
 
 
 def owns(entry_id):
@@ -306,7 +455,8 @@ def textures():
     for info in CROPS.values():
         out += [f"{info['block'].removesuffix('_crop')}_stage{n}" for n in sorted(set(info["stages"]))]
     out += [w["texture"] for w in WILD_CROPS.values() if w["texture"] not in out]
-    return out + EQUIPMENT_TEXTURES
+    out += [f"{gourd}_{part}" for gourd in GOURDS for part in ("side", "top")] + STEM_TEXTURES + CRANBERRY["stages"]
+    return out + EQUIPMENT_TEXTURES + TREE_TEXTURES + DECOR_TEXTURES
 
 
 EQUIPMENT_TEXTURES = ["trellis", "trellis_post", "cooking_pot_side", "cooking_pot_rim", "cooking_pot_empty", "cooking_pot_soup"]

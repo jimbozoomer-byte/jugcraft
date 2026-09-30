@@ -828,4 +828,6 @@ def crop_textures():
         out[("block", f"flax_stage{stage}")] = flax_stage(stage)
     from kitchen_textures import kitchen_textures  # the Kitchen Garden slice builds on the helpers above
     out.update(kitchen_textures())
+    from festival_textures import festival_textures  # so do the festival crops
+    out.update(festival_textures())
     return out

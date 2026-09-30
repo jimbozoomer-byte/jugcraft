@@ -9,6 +9,9 @@
     "#c:seeds/pepper",
     "#c:seeds/cabbage",
     "#c:seeds/oat",
-    "#c:seeds/barley"
+    "#c:seeds/barley",
+    "#c:seeds/butternut_squash",
+    "#c:seeds/acorn_squash",
+    "#c:seeds/warty_gourd"
   ]
 }

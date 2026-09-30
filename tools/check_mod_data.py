@@ -31,7 +31,8 @@ STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
 
 # Tags that Jugcraft reads but that vanilla/Fabric API define.
 EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_replaceables",
-                  "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires"}
+                  "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires", "minecraft:eggs",
+                  "minecraft:dirt", "minecraft:mud", "minecraft:grass_blocks", "minecraft:sand"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -101,8 +102,8 @@ def check_assets(registered):
             err(f"Missing name for block {block}")
         if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
             err(f"Missing loot table for {block}")
-    # Crops have no item of their own: their seeds place them.
-    for item in [entry for entry in registered if entry not in ag.crop_blocks()]:
+    # Crops, stems, the cranberry bush and the chestnut sapling have no item of their own: what plants them stands in.
+    for item in [entry for entry in registered if entry not in ag.itemless_blocks()]:
         definition = load(ASSETS / "items" / f"{item}.json")
         if definition:
             model(definition["model"]["model"])
@@ -129,8 +130,8 @@ NON_METAL = {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | s
 def item_units(ref):
     """Returns {metal: units} for an item or tag reference."""
     ns, path = split(ref.lstrip("#"))
-    if ref.startswith("#") and ns == "minecraft":
-        return {}  # vanilla tags used here (logs, planks) hold no metal
+    if ref.startswith("#") and (ns == "minecraft" or ref[1:] == ag.WOOD_TAG):
+        return {}  # vanilla tags used here (logs, planks) and chestnut logs hold no metal
     if ref.startswith("#"):
         form, _, metal = path.partition("/")
         if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()}:
@@ -525,7 +526,10 @@ def check_agriculture():
         err("JugcraftAgriculture.java wild plants differ from tools/agriculture.py")
     patches = {name: re.findall(r"ConventionalBiomeTags\.(\w+)", biomes)
                for name, biomes in re.findall(r'wildPatch\("([a-z_]+)", ([^;]*)\);', main)}
-    if patches != {name: info["biomes"] for name, info in ag.WILD_CROPS.items()}:
+    expected = {name: info["biomes"] for name, info in ag.WILD_CROPS.items()}
+    expected.update({name: info["biomes"] for name, info in ag.FOUND_WILD.items()})
+    expected["chestnut_tree"] = ag.CHESTNUT_TREES["biomes"]
+    if patches != expected:
         err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
     seeds = re.search(r'GRASS_SEEDS = List\.of\(([^)]*)\)', main)
     chance = re.search(r'GRASS_SEED_CHANCE = ([\d.]+)F', main)
@@ -535,6 +539,9 @@ def check_agriculture():
         plants = info.get("plants")
         if plants and bool(info.get("trellis_seed")) != (plants in ag.trellis_crops()):
             err(f"{name}: a seed is a trellis seed exactly when it plants a climbing crop")
+        if plants and bool(info.get("bog_seed")) != (plants == ag.CRANBERRY["block"]):
+            err(f"{name}: a seed is a bog seed exactly when it plants the cranberry bush")
+    check_festival(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -558,7 +565,7 @@ def check_agriculture():
         if variants != {f"age={a}" for a in range(8)}:
             err(f"{info['block']}: blockstate does not cover every age")
     for name, info in ag.ITEMS.items():
-        if "plants" in info and info["plants"] not in ag.crop_blocks():
+        if "plants" in info and info["plants"] not in ag.planted_blocks():
             err(f"{name} plants unknown crop {info['plants']}")
     for texture in ag.textures():
         if not (ASSETS / "textures" / "block" / f"{texture}.png").is_file():
@@ -610,6 +617,41 @@ def check_agriculture():
     for start in edges:
         if reaches(start, start, {start}):
             err(f"Agriculture recipes form a loop through {start}")
+
+
+def check_festival(java, main):
+    """Festival crops: Java matches tools/agriculture.py, and every stage and fruit state has a model."""
+    gourds = {name: (seed, float(growth)) for name, seed, growth in
+              re.findall(r'\bgourd\("([a-z_]+)", "([a-z_]+)", ([\d.]+)F, MapColor\.\w+\)', main)}
+    if gourds != {name: (info["seed"], info["growth_time"]) for name, info in ag.GOURDS.items()}:
+        err(f"JugcraftAgriculture.java gourds {gourds} differ from GOURDS in tools/agriculture.py")
+    for gourd, info in ag.GOURDS.items():
+        if ag.ITEMS.get(info["seed"], {}).get("plants") != ag.stem(gourd):
+            err(f"{info['seed']} must plant {ag.stem(gourd)}")
+    bush = java.get("CranberryBushBlock", "")
+    numbers = {name: int(value) for name, value in re.findall(r'int (GROWTH_CHANCE|PICK_MIN|PICK_MAX|PICK_RESET) = (\d+);', bush)}
+    cranberry = ag.CRANBERRY
+    if (numbers != {"GROWTH_CHANCE": cranberry["growth_chance"], "PICK_MIN": cranberry["pick"]["min"],
+                    "PICK_MAX": cranberry["pick"]["max"], "PICK_RESET": cranberry["pick_reset"]}
+            or f'Jugcraft.id("{ag.BOG_SOIL_TAG.split(":")[1]}")' not in bush):
+        err("CranberryBushBlock.java differs from CRANBERRY or BOG_SOIL_TAG in tools/agriculture.py")
+    leaves = java.get("ChestnutLeavesBlock", "")
+    numbers = {name: int(value) for name, value in re.findall(r'int (FRUIT_CHANCE|PICK_MIN|PICK_MAX) = (\d+);', leaves)}
+    chestnut = ag.CHESTNUT
+    if numbers != {"FRUIT_CHANCE": chestnut["fruit_chance"], "PICK_MIN": chestnut["pick"]["min"], "PICK_MAX": chestnut["pick"]["max"]}:
+        err("ChestnutLeavesBlock.java differs from CHESTNUT in tools/agriculture.py")
+    for block in list(ag.WOOD) + list(ag.TREE_BLOCKS) + list(ag.DECOR) + [ag.CRANBERRY["block"]]:
+        if f'registerBlock("{block}"' not in main:
+            err(f"JugcraftAgriculture.java does not register {block}")
+    for block, info in ag.DECOR.items():
+        if f"lightLevel(state -> {info['light']})" not in main:
+            err(f"{block}: light level differs from DECOR in tools/agriculture.py")
+    expected_states = {ag.stem(g): {f"age={a}" for a in range(8)} for g in ag.GOURDS}
+    expected_states[ag.CRANBERRY["block"]] = {f"age={a}" for a in range(len(ag.CRANBERRY["stages"]))}
+    expected_states[ag.CHESTNUT["leaves"]] = {f"fruit={f}" for f in range(3)}
+    for block, variants in expected_states.items():
+        if set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})) != variants:
+            err(f"{block}: blockstate does not cover every stage")
 
 
 def main():

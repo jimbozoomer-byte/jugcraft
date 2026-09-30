@@ -433,12 +433,15 @@ SIEVE = [
 
 
 def _sawmill():
-    """Logs -> 6 planks (4 by hand) with sawdust; planks -> 3 sticks (2 by hand)."""
+    """Logs -> 6 planks (4 by hand) with sawdust; planks -> 3 sticks (2 by hand). Vanilla woods and chestnut."""
     recipes = []
     for wood, tag in WOODS.items():
         planks = 3 if wood == "bamboo" else 6
         recipes.append({"input": f"#minecraft:{tag}", "output": f"minecraft:{wood}_planks", "count": planks, "ticks": 100,
                         "features": [FEATURE], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
+    # Jugcraft's own wood: the Agriculture branch's chestnut tree.
+    recipes.append({"input": "#jugcraft:chestnut_logs", "output": "jugcraft:chestnut_planks", "count": 6, "ticks": 100,
+                    "features": [FEATURE], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
     recipes.append({"input": "#minecraft:planks", "output": "minecraft:stick", "count": 3, "ticks": 60,
                     "features": [FEATURE]})
     return recipes
