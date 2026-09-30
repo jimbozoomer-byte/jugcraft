@@ -11,8 +11,46 @@ No numbered release yet. Everything below is on `main`.
 ### Fix: ore loot tables in the 26.x format (pull request pending)
 - **Ores now drop their raw material.** Before this, mining tin, zinc, lead, silver, nickel, tungsten, uranium, salt, phosphate, lepidolite or monazite ore, or oil sand, dropped the block itself, as if with Silk Touch. Fortune and multi-drops (2–4 salt, 1–2 bitumen) did nothing either.
 - **Cause:** Minecraft 26.x renamed the loot keys (`conditions` → `condition`, `functions` → `modifier`, and Silk Touch is now the `minecraft:tool/can_silk_touch` predicate). The old keys were silently ignored. The game test server had been logging "Unreachable entry!" for all 23 ore tables.
-- Every generated loot table (86 now) uses the 26.x format. Storage blocks and machines still drop themselves, and now respect explosions again.
+- Every generated loot table (95 now) uses the 26.x format. Storage blocks and machines still drop themselves, and now respect explosions again.
 - `tools/check_mod_data.py` fails on any pre-26.x loot key, and a new game test mines ores and checks what drops.
+
+### #36 Belts and the Electric Motor
+- **Belt Pulley** and **Leather Belt:** link two pulleys up to 16 blocks apart to carry rotation; the belt is drawn between them.
+- **Electric Motor:** JE → KE at 75%, up to 96 KE/t.
+- Three game tests.
+
+### #35 Bigger machines, a spinning wind turbine, the Large Steam Engine and JEI
+- Machines can now fill up to 64 blocks. Resized:
+  - **Alloy Smelter:** 3×2×6, with a big copper crucible tank pouring into one funnel over the furnace.
+  - **Geothermal Generator:** 2×2×2.
+  - **Steel Foundry:** 2×2×5.
+  - **Coke Oven:** 2×2×2, with its chimney in a block on top.
+  - **Wind Turbine:** 9 tall, with a 7-block rotor that spins (block entity renderer); 12–72 JE/t.
+- **Large Steam Engine** (2×2×2): 256 KE/t, four times the small one.
+- Machine screens: amber energy readout without a shadow; vanilla tooltips on gauges.
+- **JEI:** a recipe page per machine (optional; EMI has no 26.3 build yet).
+- Multi-blocks placed with earlier builds need re-placing.
+
+### #32 Polish
+- Machines with a fire, and the steam engine, smoke and crackle while running.
+- Hovering the energy bar or a tank gauge shows exact JE or mB.
+- The eject button reads "Eject" (green on, gray off) instead of a cut-off "Eject: off".
+- The CI screenshots no longer show the chat log.
+
+### #30 Auto-Crafter
+- **Auto-Crafter:** crafts any crafting-table recipe laid out in its 3×3 grid, one every 2 seconds.
+  - Each grid slot keeps one item as the pattern, and pipes and hoppers only top up matching slots.
+  - Remainders such as empty bottles get their own slot.
+- A powered processor with upgrades, sides, eject, redstone and kinetic power; a new grid layout on its screen.
+- Three game tests and a client screenshot of its screen.
+
+### #29 Kinetic power
+- A mechanical power layer in **KE** per tick. **Iron Shafts** carry it along their axis and **Brass Gearboxes** out of all six sides; both animate while turning.
+- Sources:
+  - **Hand Crank:** 16 KE/t while cranked.
+  - **Steam Engine:** 64 KE/t from fuel and water, burning only while something takes the power.
+- Every powered machine runs straight off a shaft (1 KE = 1 JE). The **Dynamo** bridges KE into JE cables at 75%.
+- Three game tests, a client screenshot of a running line, and handbook pages under Power.
 
 ### #28 Renewable resources
 - **Water Wheel** (2 tall): up to 24 JE/t from flowing or falling water beside its wheel, with no fuel.

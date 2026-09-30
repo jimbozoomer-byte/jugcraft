@@ -35,6 +35,10 @@ MACHINES = {
     "cobblestone_generator": {"display": "Cobblestone Generator", "lit": True},
     "tree_farm": {"display": "Tree Farm", "lit": True},
     "water_wheel": {"display": "Water Wheel", "lit": False},
+    # Crafts the recipe laid out in its 3x3 grid, keeping one of each item as the pattern.
+    "auto_crafter": {"display": "Auto-Crafter", "lit": True},
+    # Kinetic: a 2x2x2 steam engine, four times the small one (kinetic/SteamEngineBlock).
+    "large_steam_engine": {"display": "Large Steam Engine", "lit": True},
     # Multi-block machines: models and footprints live in tools/large_machines.py.
     "geothermal_generator": {"display": "Geothermal Generator", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
@@ -63,7 +67,22 @@ LOGISTICS_BLOCKS = {
 }
 TOOLS = {"brass_wrench": "Brass Wrench", "engineers_handbook": "Engineer's Handbook",
          # Mining & prospecting: a vague 3x3-chunk ore survey (prospecting/OreSurvey).
-         "prospector": "Geo-Resonance Prospector"}
+         "prospector": "Geo-Resonance Prospector",
+         # Kinetic: links two belt pulleys.
+         "belt": "Leather Belt"}
+# Kinetic power (kinetic/): rotation in KE per tick, carried by shafts and gearboxes. Models: tools/kinetic_models.py.
+# "axis": placed like a log; "facing": six directions; "horizontal": four.
+KINETIC_BLOCKS = {
+    "iron_shaft": {"display": "Iron Shaft", "states": "axis"},
+    "brass_gearbox": {"display": "Brass Gearbox", "states": "none"},
+    "hand_crank": {"display": "Hand Crank", "states": "facing"},
+    "steam_engine": {"display": "Steam Engine", "states": "horizontal"},
+    "dynamo": {"display": "Dynamo", "states": "horizontal"},
+    # A shaft with a grooved wheel; a belt links two of them (kinetic/BeltItem).
+    "belt_pulley": {"display": "Belt Pulley", "states": "axis"},
+    # JE -> KE at 75%; its shaft points the way the player looked when placing it.
+    "electric_motor": {"display": "Electric Motor", "states": "facing"},
+}
 # Plain storage blocks with their own block entity (storage/). Models: tools/storage_models.py.
 STORAGE_BLOCKS = {"item_crate": {"display": "Item Crate"}}
 # Machine upgrades (docs/TECH_TREE.md#machine-control): go in a powered processor's two upgrade slots.
@@ -120,14 +139,19 @@ STATS = {
     "tree_farm": {"capacity": 10_000, "input_per_tick": 128, "use_per_tick": 16},
     # 2 tall. 8 JE/t per block of flowing water on its right (12 if falling), both blocks: up to 24 JE/t.
     "water_wheel": {"capacity": 8_000, "output_per_tick": 64, "generation_per_tick": 24},
+    # One craft per 40 ticks at 8 JE/t.
+    "auto_crafter": {"capacity": 10_000, "input_per_tick": 128, "use_per_tick": 8, "ticks": 40},
+    # 2x2x2. 256 KE/t out of the back of its upper right block; 40 mB water per tick; no JE of its own.
+    "large_steam_engine": {"capacity": 0, "use_per_tick": 0, "output_ke": 256, "water_per_tick": 40, "tank": 16_000},
     # Unpowered: heat comes from the charge itself. No battery, no cable connection.
     "coke_oven": {"capacity": 0, "use_per_tick": 0},
     "steel_foundry": {"capacity": 0, "use_per_tick": 0},
     # Two blocks wide. Burns 1 mB of lava per tick for 64 JE: a bucket lasts 1,000 ticks.
     "geothermal_generator": {"capacity": 30_000, "output_per_tick": 128, "generation_per_tick": 64,
                              "lava_per_tick": 1, "tank": 4_000},
-    # Three blocks tall. 4 JE/t at sea level, +1 per 4 blocks higher, capped at 24; x1.5 rain, x2 thunder.
-    "wind_turbine": {"capacity": 16_000, "output_per_tick": 64, "generation_per_tick": 24},
+    # Nine blocks tall with a 7-block rotor. 12 JE/t at sea level, +1 per 2 blocks higher, capped at 72;
+    # x1.5 rain, x2 thunder. The 7x7 square the rotor sweeps must be clear.
+    "wind_turbine": {"capacity": 48_000, "output_per_tick": 192, "generation_per_tick": 72},
 }
 
 # Fuel for the coal generator: burn ticks per item (coal matches the vanilla furnace's 1600).
@@ -245,6 +269,23 @@ CRAFTING = {
     "capacitor_bank": (["PBP", "BCB", "PBP"], {"P": "#c:plates/steel", "B": "jugcraft:battery_box",
                                                "C": "jugcraft:advanced_circuit"}, 1),
     "steel_tank": (["PPP", "PTP", "PPP"], {"P": "#c:plates/steel", "T": "jugcraft:fluid_tank"}, 1),
+    # Automation: after the workshop tier (a circuit and brass plates).
+    "auto_crafter": (["PCP", "TMT", "PHP"], {"P": "#c:plates/brass", "C": "jugcraft:basic_circuit",
+                                           "T": "minecraft:crafting_table", "M": "jugcraft:machine_casing",
+                                           "H": "minecraft:hopper"}, 1),
+    "large_steam_engine": (["SPS", "PCP", "SPS"], {"S": "jugcraft:steam_engine", "P": "#c:plates/iron",
+                                                 "C": "jugcraft:machine_casing"}, 1),
+    # Kinetic power: all bronze-age, so it can come before electricity.
+    "iron_shaft": (["I", "I"], {"I": "#c:ingots/iron"}, 4),
+    "brass_gearbox": (["PGP", "GSG", "PGP"], {"P": "#c:plates/brass", "G": "#c:gears/bronze", "S": "jugcraft:iron_shaft"}, 1),
+    "hand_crank": (["PS"], {"P": "#minecraft:planks", "S": "jugcraft:iron_shaft"}, 1),
+    "steam_engine": (["BUB", "PFP", "BSB"], {"B": "#c:ingots/bronze", "U": "minecraft:bucket", "P": "minecraft:piston",
+                                           "F": "minecraft:furnace", "S": "jugcraft:iron_shaft"}, 1),
+    "belt_pulley": (["PSP"], {"P": "#minecraft:planks", "S": "jugcraft:iron_shaft"}, 1),
+    "belt": (["LSL"], {"L": "minecraft:leather", "S": "minecraft:string"}, 1),
+    "electric_motor": (["PWP", "WSW", "PCP"], {"P": "#c:plates/iron", "W": "#c:wires/copper", "S": "jugcraft:iron_shaft",
+                                             "C": "jugcraft:copper_cable"}, 1),
+    "dynamo": (["CRC", "RSR", "CRC"], {"C": "#c:ingots/copper", "R": "minecraft:redstone", "S": "jugcraft:iron_shaft"}, 1),
     # Renewables: the water wheel and cobblestone generator are early (bronze); the tree farm needs a circuit.
     "cobblestone_generator": (["BWB", "CMC", "BLB"], {"B": "#c:ingots/bronze", "W": "minecraft:water_bucket",
                                                    "C": "jugcraft:copper_cable", "M": "jugcraft:machine_casing",
@@ -447,7 +488,7 @@ def _arc_dusts():
 
 def machine_blocks():
     return (list(MACHINES) + list(PARTS) + list(CABLES) + list(PIPES) + list(FLUID_BLOCKS)
-            + list(ITEM_PIPES) + list(LOGISTICS_BLOCKS) + list(STORAGE_BLOCKS))
+            + list(ITEM_PIPES) + list(LOGISTICS_BLOCKS) + list(STORAGE_BLOCKS) + list(KINETIC_BLOCKS))
 
 
 def machine_items():
