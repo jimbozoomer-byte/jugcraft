@@ -64,7 +64,7 @@ public class CrateBlock extends BaseEntityBlock implements ItemConnectable {
 				transaction.commit();
 				ItemStack stack = variant.toStack((int) taken);
 				if (!player.getInventory().add(stack)) {
-					player.drop(stack, false);
+					popResource(level, pos.above(), stack); // Full inventory: drop it on top of the crate.
 				}
 			}
 		}
