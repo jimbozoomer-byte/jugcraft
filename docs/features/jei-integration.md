@@ -1,6 +1,6 @@
 # JEI integration
 
-Status: implemented in source; **not yet tried in a client with JEI installed**. It compiles against the JEI API in CI. JEI is not in the test runs, so nothing verifies it at runtime yet.
+Status: implemented in source (PR #35); **not yet tried in a client with JEI installed**. It compiles against the JEI API in CI. JEI is not in the test runs, so nothing verifies it at runtime yet.
 Proposal issue: none. The owner asked for "JEI/EMI recipes" on 30 September 2026. EMI has no build for Minecraft 26.3 yet (checked on its maven), so this is JEI only.
 Owner: @jimbozoomer-byte
 Target milestone and tier: all tiers (it only displays recipes).
