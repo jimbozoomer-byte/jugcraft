@@ -7,7 +7,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -33,7 +33,7 @@ public record FeatureEnabledCondition(String feature) implements ResourceConditi
 	}
 
 	@Override
-	public boolean test(HolderLookup.@Nullable Provider registryLookup) {
+	public boolean test(RegistryOps.@Nullable RegistryInfoLookup registryInfo) {
 		return JugcraftConfig.isFeatureEnabled(feature);
 	}
 }

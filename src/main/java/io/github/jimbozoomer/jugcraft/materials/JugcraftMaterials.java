@@ -1,6 +1,6 @@
 package io.github.jimbozoomer.jugcraft.materials;
 
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.world.item.CreativeModeTabs;
 
 /** Jugcraft's canonical metals. IDs here are permanent once released. */
@@ -15,22 +15,24 @@ public final class JugcraftMaterials {
 		TIN = MetalFamily.builder("tin").mined().build();
 		BRONZE = MetalFamily.builder("bronze").extraItem("bronze_blend").build();
 
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.NATURAL_BLOCKS).register(entries -> {
-			entries.accept(TIN.ore);
-			entries.accept(TIN.deepslateOre);
-			entries.accept(TIN.rawBlock);
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> {
+			output.accept(TIN.ore);
+			output.accept(TIN.deepslateOre);
+			output.accept(TIN.rawBlock);
 		});
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
-			entries.accept(TIN.raw);
-			entries.accept(TIN.ingot);
-			entries.accept(TIN.nugget);
-			BRONZE.extras.forEach(entries::accept);
-			entries.accept(BRONZE.ingot);
-			entries.accept(BRONZE.nugget);
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
+			output.accept(TIN.raw);
+			output.accept(TIN.ingot);
+			output.accept(TIN.nugget);
+			for (var extra : BRONZE.extras) {
+				output.accept(extra);
+			}
+			output.accept(BRONZE.ingot);
+			output.accept(BRONZE.nugget);
 		});
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.BUILDING_BLOCKS).register(entries -> {
-			entries.accept(TIN.storageBlock);
-			entries.accept(BRONZE.storageBlock);
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.BUILDING_BLOCKS).register(output -> {
+			output.accept(TIN.storageBlock);
+			output.accept(BRONZE.storageBlock);
 		});
 	}
 }
