@@ -120,7 +120,7 @@ def _textures(elements, front):
     names = set()
     for _, _, texture in elements:
         names |= set(texture.values()) if isinstance(texture, dict) else {texture}
-    textures = {name: rid(f"block/{name}") for name in names if not name.startswith("#")}
+    textures = {name: rid(f"block/{name}") for name in sorted(names) if not name.startswith("#")}
     textures["front"] = rid(f"block/{front}")
     textures["particle"] = rid("block/machine_side")
     return textures
