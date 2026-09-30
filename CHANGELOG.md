@@ -12,7 +12,7 @@ No numbered release yet. Everything below is on `main`.
 - **Ores now drop their raw material.** Before this, mining tin, zinc, lead, silver, nickel, tungsten, uranium, salt, phosphate, lepidolite or monazite ore, or oil sand, dropped the block itself, as if with Silk Touch. Fortune and multi-drops (2–4 salt, 1–2 bitumen) did nothing either.
 - **Cause:** Minecraft 26.x renamed the loot keys (`conditions` → `condition`, `functions` → `modifier`, and Silk Touch is now the `minecraft:tool/can_silk_touch` predicate). The old keys were silently ignored. The game test server had been logging "Unreachable entry!" for all 23 ore tables.
 - Every generated loot table (98 now) uses the 26.x format. Storage blocks and machines still drop themselves, and now respect explosions again.
-- **Charging Station (#40):** its "lower half only" condition used the old keys too, so breaking the top half dropped two stations. It now drops one.
+- **Charging Station (#40):** its "lower half only" condition used the old keys too, so breaking the top half dropped two stations. It now drops one (game test `chargingStationDropsOnce`).
 - `tools/check_mod_data.py` fails on any pre-26.x loot key, and a new game test mines ores and checks what drops.
 
 ### #40 Powered tools (the first dieselpunk gear)

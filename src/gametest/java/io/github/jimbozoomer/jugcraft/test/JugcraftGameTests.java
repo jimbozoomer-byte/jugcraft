@@ -578,6 +578,24 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * The Charging Station drops once, from its lower half. Its top half's "lower half only" condition used
+	 * the pre-26.x loot keys, which Minecraft ignored, so breaking the top half dropped two stations.
+	 */
+	@GameTest
+	public void chargingStationDropsOnce(GameTestHelper helper) {
+		BlockPos lower = new BlockPos(2, 1, 2);
+		BlockState state = JugcraftTools.CHARGING_STATION.defaultBlockState();
+		helper.setBlock(lower, state);
+		helper.setBlock(lower.above(), state.setValue(ChargingStationBlock.HALF, DoubleBlockHalf.UPPER));
+		List<ItemStack> top = Block.getDrops(helper.getBlockState(lower.above()), helper.getLevel(), helper.absolutePos(lower.above()), null);
+		List<ItemStack> bottom = Block.getDrops(helper.getBlockState(lower), helper.getLevel(), helper.absolutePos(lower), null);
+		helper.assertTrue(top.isEmpty(), "The top half should drop nothing, dropped " + top);
+		helper.assertTrue(bottom.size() == 1 && bottom.get(0).is(JugcraftTools.CHARGING_STATION.asItem()) && bottom.get(0).getCount() == 1,
+				"The lower half should drop one station, dropped " + bottom);
+		helper.succeed();
+	}
+
 	/** Breaking {@code block} with no tool drops only {@code drop}, between {@code min} and {@code max} of it. */
 	private static void assertDrops(GameTestHelper helper, BlockPos pos, String block, String drop, int min, int max) {
 		helper.setBlock(pos, BuiltInRegistries.BLOCK.getValue(Jugcraft.id(block)));
