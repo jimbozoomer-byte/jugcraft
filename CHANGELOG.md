@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### #42 Tool upgrades and a 3D rocket pack
+- **Upgrade modules** for the powered tools, fitted at the charging station: Overclock, Range (5×5 drilling), Capacity, Silk Touch and Fortune.
+- The worn rocket pack is now a 3D model on the wearer's back.
+- The mining drill sits higher in first person.
+- Four game tests.
+
 ### #40 Powered tools (the first dieselpunk gear)
 - **Mining Drill:** a JE pickaxe and shovel, faster than netherite; modes for one block, 3×3 or a whole ore vein.
 - **Chainsaw:** a JE axe that also cuts leaves and fells whole trees.
