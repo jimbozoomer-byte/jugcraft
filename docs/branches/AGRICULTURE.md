@@ -1,6 +1,6 @@
 # Agriculture branch
 
-Status: **two slices implemented in source: the Fall Harvest (crops, wild plants, sickles) and the Kitchen Garden (trellises, seven crops, the Cooking Pot).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md) and [../features/kitchen-garden.md](../features/kitchen-garden.md) for the implemented slices and their test evidence.
+Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md) and [../features/festival-crops.md](../features/festival-crops.md) for the implemented slices and their test evidence.
 
 Agriculture is Jugcraft's third starting branch, alongside technology and magic ([DESIGN.md](../DESIGN.md)). A farmer can begin on day one with a hoe and whatever grows nearby, and never needs a machine or a spell. Industrial farming (powered harvesters, planters, sprinklers, crop processors) comes later and belongs to the engineering branch; see [Boundaries](#boundaries).
 
@@ -56,7 +56,7 @@ Every crop has two independent entry points, so none is locked behind a biome, a
 | Wild Sweet Potato | savanna, jungle | A warm, tropical vine |
 | Wild Flax | plains, flower-rich biomes | A meadow flower |
 
-2. **Short grass.** Breaking short grass has a 12.5 % chance to drop one Jugcraft seed, as often as vanilla wheat seeds, chosen evenly from every Jugcraft crop (twelve so far). Adding crops never makes grass drop more seeds overall. This works in any biome and in worlds created before this feature.
+2. **Short grass.** Breaking short grass has a 12.5 % chance to drop one Jugcraft seed, as often as vanilla wheat seeds, chosen evenly from every Jugcraft crop (eighteen so far). Adding crops never makes grass drop more seeds overall. This works in any biome and in worlds created before this feature.
 
 ### Systems
 
@@ -64,8 +64,8 @@ Every crop has two independent entry points, so none is locked behind a biome, a
 - **Picking.** Ripe tall crops go back to a younger stage *of the same height* when picked (corn and sunflowers go back to stage 5 of 7), so they regrow produce without shrinking.
 - **Legumes feed their neighbours.** Crops next to beans (any of the 8 surrounding blocks) grow **1.5× as fast**. Beans themselves do not get the bonus, so the best field mixes crops. This is the classic *Three Sisters* planting (corn, beans and squash) that the stew is named after. The legume list is the block tag `jugcraft:nitrogen_fixing_crops`, so data packs and later crops can join it.
 - **Growth.** Otherwise Jugcraft crops grow like vanilla crops: farmland under and around the plant, moisture, and light 9 or more. Corn takes 1.5× and sunflowers 1.25× as long as wheat per stage, because they are bigger plants that regrow after picking. Bone meal works: 1–2 stages on tall crops, as far as there is room above.
-- **Sickles.** Right-click a crop with a sickle to harvest every *ripe* crop around it: 3×3 for the **Flint Sickle**, 5×5 for the **Bronze Sickle**, one block up or down. One-block crops (including vanilla wheat, carrots, potatoes and beetroots) are replanted automatically with a seed from their own drops; tall crops are picked and stay standing; unripe crops are left alone. Each use costs 1 durability. The sickle checks spawn protection and claims for every block it touches.
-- **Composting and animal feed.** Every crop item composts at vanilla-like rates (seeds 30 %, produce 65 %, cooked food 85 %). Pigs eat corn, sweet potatoes and cabbage; rabbits eat cabbage; cows, sheep and goats eat oats and barley; horses eat oats; chickens and parrots eat every Jugcraft seed (vanilla animal-food tags, so breeding works).
+- **Sickles.** Right-click a crop with a sickle to harvest every *ripe* crop around it: 3×3 for the **Flint Sickle**, 5×5 for the **Bronze Sickle**, one block up or down. One-block crops (including vanilla wheat, carrots, potatoes and beetroots) are replanted automatically with a seed from their own drops; tall crops and cranberry bushes are picked and stay standing; squash and gourds still on their stems are cut off (gourds set down as decoration are left alone); unripe crops are left alone. Each use costs 1 durability. The sickle checks spawn protection and claims for every block it touches.
+- **Composting and animal feed.** Every crop item composts at vanilla-like rates (seeds 30 %, produce 65 %, cooked food 85 %). Pigs eat corn, sweet potatoes, cabbage, turnips and chestnuts; rabbits eat cabbage and turnips; foxes eat cranberries; cows, sheep and goats eat oats and barley; horses eat oats; chickens and parrots eat every Jugcraft seed (vanilla animal-food tags, so breeding works).
 
 ### Food
 
@@ -164,6 +164,75 @@ Every bowl dish returns its bowl and stacks to 1, like vanilla stews.
 
 Short grass drops these seeds too (see [Getting your first seeds](#getting-your-first-seeds)).
 
+## What exists now: the Festival Crops
+
+The third slice fills the autumn and winter table and yard: squash and gourds for fall displays, turnips carved into the original jack-o'-lanterns, cranberries from a bog, and a chestnut tree to roast from. **Nothing here is seasonal.** Everything grows all year and stays in the world; the planned Halloween and December events ([CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md#seasonal-content)) can build on these permanent crops, never the other way round.
+
+SCREENSHOTS
+
+| Crop | Grows | Plant with | Harvest | Uses now |
+| --- | --- | --- | --- | --- |
+| **Butternut Squash** | A stem on farmland that grows a squash on the ground beside it, like a pumpkin | Butternut Squash Seeds | Break the squash (or sweep a sickle); the stem grows another | Squash soup, squash pie; a fall decoration; 1 squash → 4 seeds |
+| **Acorn Squash** | The same, a dark green ribbed squash | Acorn Squash Seeds | The same | Baked acorn squash; decoration; 1 squash → 4 seeds |
+| **Warty Gourd** | The same, a knobbly orange-and-green gourd | Warty Gourd Seeds | The same | Decoration for fall displays; composting; 1 gourd → 4 seeds |
+| **Turnip** | 1 block of lobed leaves; the purple shoulder shows when ripe | Turnip | Break when ripe (like carrots) | Raw, harvest stew, the **Turnip Lantern**; pig and rabbit feed |
+| **Cranberry** | A low bush **standing in water one block deep** over bog soil; white-pink flowers, then red berries | Cranberries, used on the bottom of the water | Right-click (or sickle) to pick 2–3; the bush flowers again | Raw, cranberry sauce; fox feed |
+| **Chestnut tree** | A sapling that grows into a broad tree; its leaves grow burs that ripen | Chestnut, planted like a sapling | Right-click a ripe (split, brown) bur to pick 1–2 chestnuts; the tree is never cut down | Roasted chestnuts; pig feed; a wood set |
+
+### Gourds on stems
+
+- **Planting.** Gourd seeds go on farmland. The stem grows through eight stages, then puts its gourd on a free block beside it that could hold a plant (grass, dirt, farmland, moss and so on) and bends towards it. Leave room around each stem.
+- **Harvest.** Break the gourd, or sweep a sickle: the stem straightens and grows another. The stem itself stays.
+- **The Three Sisters.** Stems grow by the same rules as Jugcraft crops, so squash planted next to beans grows **1.5× as fast**, and corn, beans and squash make the classic companion field.
+- **Decoration.** Gourds are blocks that face the way you place them. Stack them on hay, line a porch or fill a market stall.
+
+### Cranberry bogs
+
+- **A bog crop.** A cranberry bush lives in a still **water source one block deep**, rooted in bog soil: dirt, mud, grass, sand, clay or gravel (block tag `jugcraft:bog_soil`). Plant it by using cranberries on the bottom of such water. It will not go on dry land or into deeper water.
+- **Growth.** It grows only while there is **open air above the water** and light 9 or more, a stage in about 5 random ticks like sweet berries. Deep water or a block above stops it.
+- **Its water.** The bush holds its own water, like seagrass: breaking it leaves the water behind, and it never drains a pond.
+- **Where to find them.** Ripe bushes grow wild in swamp shallows, and grass drops cranberries anywhere.
+
+### The chestnut tree
+
+- **Planting.** A chestnut is the tree's seed: use it on dirt or grass to plant a chestnut sapling, which grows like a vanilla sapling (bone meal works) into a broad tree 6–8 blocks tall.
+- **Fruit.** Leaves the tree grew itself, with air below them, grow a green spiny bur that ripens and splits open, about a Minecraft day in all. Right-click a ripe bur to pick 1–2 chestnuts; the leaves start again. Leaves a player places never fruit, so a hedge of chestnut leaves is only a hedge. Broken leaves drop chestnuts and sticks like oak leaves drop saplings.
+- **Wood.** Chestnut logs, wood, stripped logs and wood, planks, stairs, slabs, fences and fence gates. Any axe strips a log, and the sawmill saws a log into 6 planks. The wood joins vanilla's wood tags, so it makes sticks, crafting tables and chests, burns as fuel and catches fire like oak.
+- **Where to find it.** Chestnut trees grow wild in forests, and grass drops chestnuts anywhere.
+
+### The Turnip Lantern
+
+A turnip over a torch makes a **Turnip Lantern**: a hollowed turnip with a carved, candle-lit face, the jack-o'-lantern of the old autumn festivals before pumpkins came from America. It gives light 13 (a torch gives 14) and faces the player who placed it.
+
+### Festival food
+
+| Food | Made from | Hunger | Saturation modifier | Vanilla comparison |
+| --- | --- | --- | --- | --- |
+| Turnip (raw) | harvested | 3 | 0.6 | Carrot |
+| Cranberries (raw) | picked | 2 | 0.1 | Sweet berries |
+| Roasted Chestnuts | cook a chestnut (furnace, smoker or campfire) | 4 | 0.6 | Between a carrot and a baked potato |
+| Baked Acorn Squash | cook an acorn squash | 6 | 0.6 | Cooked mutton's hunger |
+| Squash Pie | butternut squash, sugar, egg | 8 | 0.3 | Pumpkin pie |
+| Candy Corn (4) | corn, sugar, honey bottle | 2 | 0.1 | A sweet, like a cookie |
+| Butternut Squash Soup | Cooking Pot: bowl, butternut squash, onion, garlic | 8 | 0.6 | Between mushroom stew and rabbit stew |
+| Harvest Stew | Cooking Pot: bowl, turnip, carrot, onion, raw mutton | 10 | 0.6 | Rabbit stew (five ingredients) |
+| Cranberry Sauce | Cooking Pot: bowl, 2 cranberries, sugar | 5 | 0.6 | A side dish |
+
+Raw chestnuts are not food; roast them.
+
+### Festival seed sources
+
+| Wild source | Found in | Why there |
+| --- | --- | --- |
+| Butternut Squash | plains, savanna | Squash is a warm-country crop of the Americas |
+| Acorn Squash | forest, taiga | Grown by the forest peoples of North America |
+| Warty Gourd | swamp, spooky biomes (dark forest) | Gnarled gourds for the gloomiest places |
+| Wild Turnip | taiga, birch forest | Turnips are a northern European field crop |
+| Cranberry bushes | swamp shallows | Cranberries are bog plants |
+| Chestnut trees | forest | A broadleaf woodland tree |
+
+Gourds lie on grass like vanilla pumpkins (break one and craft it into seeds). Short grass drops all six new seeds too.
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
@@ -172,7 +241,7 @@ The branch grows in small slices that each stand on their own. Each crop needs a
 | --- | --- | --- | --- |
 | **1. Fall Harvest** ✅ | Corn, sunflower, beans, sweet potato, flax | Tall crops, picking, legumes, wild plants, sickles | Starter farming; mazes and fields; string, feed and stew |
 | **2. Kitchen garden** ✅ | Tomato, onion, garlic, cabbage, pepper, oats, barley | Trellises for climbing crops; the **Cooking Pot** for multi-ingredient meals | A real kitchen: soups, salads, porridge. Cabbage + salt → sauerkraut uses Jugcraft's salt. Garlic can later double as a ward against the planned Vampirism school (not built yet) |
-| **3. Autumn & winter festivals** | Decorative gourds (butternut, acorn, warty), turnip, cranberry, chestnut tree | Gourds grow from stems like pumpkins; bog crops in shallow water | Halloween: carved turnip lanterns (the original jack-o'-lantern), gourd displays, candy corn. December: cranberry sauce, roasted chestnuts. Earned items stay after the season |
+| **3. Festival Crops** ✅ | Butternut and acorn squash, warty gourds, turnip, cranberry, chestnut tree | Gourds grow from stems like pumpkins; bog crops in shallow water; a fruit tree | Halloween: Turnip Lanterns (the original jack-o'-lantern), gourd displays, candy corn. December: cranberry sauce, roasted chestnuts. All permanent, so nothing is lost after a season |
 | **4. Orchards and vines** | Apple, pear, peach, lemon and orange trees; grapes and hops on trellises; blueberries and raspberries | Fruit trees that grow from saplings and fruit every year without being cut down | Juices, pies, preserves; the cider press; long-term homestead beauty |
 | **5. Fibre, oil and industrial crops** | Cotton, canola, sugar beet, rubber tree, indigo and madder | Tapping (rubber) and retting (flax to linen) | What engineers need from farmers: rubber for insulated cables and belts, plant oil for lubricant and biodiesel, sugar and corn for ethanol, fibres for canvas, dyes |
 | **6. Magical botany** | One herb per magic school (proposal names: Emberroot, Frostcap, Stormreed, Stonebloom, Gravemoss, Bloodthorn, Nightshade, Moonpetal) | Attunement: an herb grows only near its school's influence or with a ritual catalyst | Reagents for the magic branch; see [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md#magical-workshops-and-schools) |
@@ -217,7 +286,7 @@ The farmer's goods are useful elsewhere; nothing here *requires* another branch.
 - **Reachable from day one.** Every crop has a wild source and a grass-drop source. No crop needs another branch, a rare biome or a seasonal event to start.
 - **No free loops.** Crops multiply through time and light, as in vanilla; recipes only convert downhill (corn → kernels, flax → string). `tools/check_mod_data.py` fails if agriculture recipes ever form a loop.
 - **No chores.** Farmland under crops does not decay; crops do not die of neglect; fertilizer and irrigation speed things up but are never required.
-- **Bounded server work.** Growth runs on vanilla random ticks. A tall crop ticks only in its bottom block and reads at most 17 block states per tick. A sickle touches at most 75 blocks per use (5×5×3). A Cooking Pot reads one block (its heat source) per tick and looks up its recipe only when its slots change. Nothing scans the world.
+- **Bounded server work.** Growth runs on vanilla random ticks. A tall crop ticks only in its bottom block and reads at most 17 block states per tick. A sickle touches at most 75 blocks per use (5×5×3). A Cooking Pot reads one block (its heat source) per tick and looks up its recipe only when its slots change. A gourd stem reads the same 17 block states plus 2 when it places a gourd; a cranberry bush reads the block above it; chestnut leaves read the block below them, and only leaves a tree grew tick at all. Nothing scans the world.
 - **One source of truth.** IDs, heights, yields, foods and biomes live in [`tools/agriculture.py`](../../tools/agriculture.py); the Java must match it, and the checker compares them.
 - **Stable IDs.** Crop blocks keep their IDs after release. The `agriculture` switch in `config/jugcraft.properties` turns off recipes, wild plants in new chunks and grass drops, but never removes registered blocks or items, so planted fields survive.
 

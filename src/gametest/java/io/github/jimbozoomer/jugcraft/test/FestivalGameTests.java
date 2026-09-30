@@ -238,17 +238,27 @@ public class FestivalGameTests {
 
 	// ---------------------------------------------------------------- the chestnut tree
 
-	/** A chestnut sapling grows into a chestnut tree of logs and leaves (worldgen/feature/chestnut.json). */
+	/**
+	 * A chestnut sapling grows into a chestnut tree of logs and leaves (worldgen/feature/chestnut.json). A tree
+	 * needs about 10 free blocks above it, more than the test area's height, so the sapling goes on top of
+	 * whatever closes the test area above (its barrier ceiling) if there is one.
+	 */
 	@GameTest
 	public void chestnutSaplingsGrowTrees(GameTestHelper helper) {
 		BlockPos sapling = new BlockPos(3, 2, 3);
+		for (int dy = 0; dy <= 24; dy++) {
+			if (!helper.getBlockState(sapling.above(dy)).isAir()) {
+				sapling = sapling.above(dy + 1);
+				break;
+			}
+		}
 		helper.setBlock(sapling.below(), Blocks.DIRT);
 		helper.setBlock(sapling, block("chestnut_sapling"));
 		ServerLevel level = helper.getLevel();
 		BlockPos absolute = helper.absolutePos(sapling);
 		boolean grown = JugcraftAgriculture.CHESTNUT_GROWER.growTree(level, level.getChunkSource().getGenerator(), absolute,
 				level.getBlockState(absolute), level.getRandom());
-		helper.assertTrue(grown, "The chestnut sapling should grow into a tree");
+		helper.assertTrue(grown, "The chestnut sapling at " + sapling + " should grow into a tree");
 		helper.assertBlockPresent(block("chestnut_log"), sapling);
 		int leaves = 0;
 		for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-4, 0, -4), absolute.offset(4, 12, 4))) {
