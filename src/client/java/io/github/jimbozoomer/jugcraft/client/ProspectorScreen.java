@@ -27,6 +27,8 @@ public class ProspectorScreen extends Screen {
 	private static final int GLASS = 0xFF0C0A06;
 	private static final int AMBER = 0xFFFFB340;
 	private static final int AMBER_DIM = 0xFF5C3A12;
+	/** Secondary text: dimmer than the readings but still legible on the glass. */
+	private static final int AMBER_MID = 0xFFC8862C;
 	private static final int AMBER_GLOW = 0x33FF9A20;
 	private static final int SCANLINE = 0x44000000;
 	private static final String[] DEPTHS = {"SHALLOW", "MIDDLE", "DEEP"};
@@ -125,16 +127,16 @@ public class ProspectorScreen extends Screen {
 					graphics.fill(bx + 1, y + 10, bx + 8, y + 11, 0xFFFFE0A0);
 				}
 			}
-			graphics.text(font, DEPTHS[Math.max(0, Math.min(2, reading.depth()))], x + 76, y + 9, AMBER_DIM, false);
+			graphics.text(font, DEPTHS[Math.max(0, Math.min(2, reading.depth()))], x + 76, y + 9, AMBER_MID, false);
 			if (mouseX >= x && mouseX < x + 16 && mouseY >= y && mouseY < y + 16) {
 				graphics.setTooltipForNextFrame(font, icon, mouseX, mouseY);
 			}
 		}
 		if (readings.size() > shown) {
 			String more = "+" + (readings.size() - shown) + " FAINTER";
-			graphics.text(font, more, sx + sw - 6 - font.width(more), sy + sh - 11, AMBER_DIM, false);
+			graphics.text(font, more, sx + sw - 6 - font.width(more), sy + sh - 11, AMBER_MID, false);
 		}
-		graphics.text(font, "READINGS ARE APPROXIMATE", sx + 6, sy + sh - 11, AMBER_DIM, false);
+		graphics.text(font, "READINGS ARE APPROXIMATE", sx + 6, sy + sh - 11, AMBER_MID, false);
 
 		// Scanlines and a sweeping scan beam.
 		for (int y = sy; y < sy + sh; y += 2) {
