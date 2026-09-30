@@ -19,16 +19,15 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
-      - name: Stripping and fuel (3)
+      - name: Stripping users (4)
         run: |
           COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
           CP="$CLIENT:$COMMON"
           FAPI=$(find ~/.gradle/caches -name 'fabric-*.jar' -path '*net.fabricmc.fabric-api*' | grep -v sources | tr '\n' ':')
-          echo "=== fabric jars"; echo $FAPI | tr ':' '\n' | sed 's#.*/##' | sort | head -80
-          echo "=== minecraft classes named Axe/Strip/Fuel/Weathering"; unzip -l "$COMMON" | awk '{print $4}' | grep -E '(Axe|Strip|Fuel|Flammab)[A-Za-z$]*\.class$' | head -40
-          echo "=== minecraft data named strip"; unzip -l "$COMMON" | awk '{print $4}' | grep -iE 'strip|axe' | grep -v '\.class$' | head -40
-          echo "=== fabric registry package"; for j in $(echo $FAPI | tr ':' ' '); do unzip -l "$j" | awk '{print $4}' | grep -E 'fabric/api/registry/' ; done | sort -u | head -60
-          for c in $(unzip -l "$COMMON" | awk '{print $4}' | grep -E '/(AxeItem|[A-Za-z]*Strip[A-Za-z]*|FuelValues)\.class$' | sed 's/\.class$//; s#/#.#g'); do echo "=== $c"; javap -cp "$CP" -p "$c" | head -40; done
-          echo "=== FuelValues bytecode tags"; javap -cp "$CP" -c -p net.minecraft.world.level.block.entity.FuelValues 2>/dev/null | grep -E 'ItemTags\.' | sed 's/.*Field //' | sort -u | head -30
-          echo "=== WeightedList of"; javap -cp "$CP" -p net.minecraft.util.random.WeightedList | grep -E ' of\(' 
+          mkdir -p /tmp/x && cd /tmp/x && unzip -q -o "$COMMON" 'net/*'
+          echo "=== classes using STRIPPED_OAK_LOG"; grep -rl --include='*.class' 'STRIPPED_OAK_LOG' net | head -20
+          for f in $(grep -rl --include='*.class' 'STRIPPED_OAK_LOG' net | grep -v '/Blocks.class' | head -4); do c=$(echo ${f%.class} | tr '/' '.'); echo "=== $c"; javap -cp "$CP" -p "$c" | head -40; done
+          echo "=== classes named Fuel"; find net -name '*Fuel*.class' | head
+          echo "=== content registries jar"; J=$(echo $FAPI | tr ':' '\n' | grep content-registries); jar tf "$J" | grep -E '\.class$' | head -60
+          J2=$(echo $FAPI | tr ':' '\n' | grep content-registries); for c in $(jar tf "$J2" | grep -E 'api/.*\.class$' | grep -v '\$' | sed 's/\.class$//; s#/#.#g'); do echo "=== $c"; javap -cp "$CP:$FAPI" "$c" | grep -E 'public' | head -8; done
