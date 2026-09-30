@@ -292,14 +292,13 @@ def barley_stage(stage):
 # ---------------------------------------------------------------- equipment
 
 def trellis():
-    """A lattice of thin wooden laths crossing diagonally, with gaps to see the plant through."""
+    """A lattice of thin wooden laths crossing diagonally, with wide gaps to see the plant through."""
     c = Canvas()
-    for i in range(-16, 32, 5):
+    for i in range(-16, 32, 8):
         for t in range(16):
-            c.px(i + t, t, WOOD[2])
-            c.px(i + 15 - t, t, WOOD[3] if (t // 2) % 2 else WOOD[2])
+            c.px(i + t, t, WOOD[3])
+            c.px(i + 15 - t, t, WOOD[2])
     for x in range(16):
-        c.px(x, 0, WOOD[1])
         c.px(x, 15, WOOD[1])
     return c.img
 
