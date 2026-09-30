@@ -47,15 +47,19 @@ public class FestivalClientGameTests implements FabricClientGameTest {
 			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 6, y - 1, z - 32, x + 42, y - 1, z + 6));
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 6, y, z - 32, x + 42, y + 14, z + 6));
 			server.runOnServer(minecraft -> buildFestival(minecraft.overworld(), origin));
+			System.out.println("[festival test] cranberry bushes after building: "
+					+ server.computeOnServer(minecraft -> countBushes(minecraft.overworld(), origin)));
 
 			server.runCommand("gamerule sendCommandFeedback false");
 			server.runCommand("gamerule minecraft:send_command_feedback false");
 			server.runCommand("tp @p %d %d %d 180 30".formatted(x + 12, y, z + 2));
 			context.waitTicks(220);
 			singleplayer.getConnection().waitForChunksRender();
+			System.out.println("[festival test] cranberry bushes after 220 ticks: "
+					+ server.computeOnServer(minecraft -> countBushes(minecraft.overworld(), origin)));
 
 			shoot(context, singleplayer, x + 20, y + 13, z + 6, 180, 40, "jugcraft_festival_harvest");
-			shoot(context, singleplayer, x + 5, y + 3, z - 11, 180, 30, "jugcraft_gourd_patch");
+			shoot(context, singleplayer, x + 5, y + 3, z - 14, 180, 32, "jugcraft_gourd_patch");
 			shoot(context, singleplayer, x + 19, y + 4, z - 11, 180, 38, "jugcraft_cranberry_bog");
 			shoot(context, singleplayer, x + 33, y + 2, z - 7, 180, -8, "jugcraft_chestnut_trees");
 			shoot(context, singleplayer, x + 12, y + 3, z + 3, 180, 38, "jugcraft_festival_stages");
@@ -73,6 +77,17 @@ public class FestivalClientGameTests implements FabricClientGameTest {
 		context.waitTicks(40);
 		singleplayer.getConnection().waitForChunksRender();
 		context.takeScreenshot(name);
+	}
+
+	/** Cranberry bushes in the bog and the growth-stage trench (for the CI log). */
+	private static int countBushes(ServerLevel level, BlockPos origin) {
+		int count = 0;
+		for (BlockPos pos : BlockPos.betweenClosed(origin.offset(14, 0, -26), origin.offset(24, 0, -2))) {
+			if (level.getBlockState(pos).getBlock() instanceof CranberryBushBlock) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	private static void set(ServerLevel level, BlockPos pos, BlockState state) {
@@ -111,9 +126,16 @@ public class FestivalClientGameTests implements FabricClientGameTest {
 					continue;
 				}
 				set(level, pos.below(), Blocks.MUD.defaultBlockState());
+				set(level, pos, Blocks.WATER.defaultBlockState());
+			}
+		}
+		// Planted into the water, as a player plants cranberries.
+		for (int dx = 15; dx <= 23; dx++) {
+			for (int dz = -25; dz <= -17; dz++) {
 				int age = (dx + dz) % 7 == 0 ? -1 : (dx * 3 + dz) % 5 == 0 ? 2 : 3;
-				set(level, pos, age < 0 ? Blocks.WATER.defaultBlockState()
-						: state("cranberry_bush").setValue(CranberryBushBlock.AGE, age));
+				if (age >= 0) {
+					set(level, origin.offset(dx, 0, dz), state("cranberry_bush").setValue(CranberryBushBlock.AGE, age));
+				}
 			}
 		}
 
@@ -177,6 +199,7 @@ public class FestivalClientGameTests implements FabricClientGameTest {
 					set(level, pos, Blocks.GRASS_BLOCK.defaultBlockState());
 				} else {
 					set(level, pos.below(), Blocks.MUD.defaultBlockState());
+					set(level, pos, Blocks.WATER.defaultBlockState());
 					set(level, pos, state("cranberry_bush").setValue(CranberryBushBlock.AGE, dx - 19));
 				}
 			}
