@@ -1,0 +1,74 @@
+name: API probe (temporary, kitchen garden)
+on:
+  push:
+    branches: ['claude/agriculture-kitchen-garden']
+    paths: ['.github/workflows/probe.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Resolve Minecraft
+        run: ./gradlew compileJava --no-daemon -q
+      - name: Farmland, tags, recipes, containers
+        run: |
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
+          CP="$CLIENT:$COMMON"
+          FAPI=$(find ~/.gradle/caches -name 'fabric-*.jar' -path '*net.fabricmc.fabric-api*' | grep -v sources | tr '\n' ':')
+          p() { echo "=== $1"; javap -cp "$CP:$FAPI" -protected "$1" 2>&1 | head -${2:-80}; }
+          g() { echo "=== $1 | $2"; javap -cp "$CP:$FAPI" -protected "$1" 2>&1 | grep -E "$2" | head -${3:-40}; }
+          echo "=== FarmBlock.canSurvive bytecode"; javap -cp "$CP" -c -p net.minecraft.world.level.block.FarmBlock | sed -n '/canSurvive(/,/^$/p' | head -40
+          echo "=== BlockStateBase solid bytecode"; javap -cp "$CP" -c -p 'net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase' | sed -n '/calculateSolid(/,/^$/p' | head -60
+          g 'net.minecraft.world.level.block.state.BlockBehaviour$Properties' 'olid|ynamicShape|noCollision|isViewBlocking|isSuffocating|instabreak|strength\(' 30
+          g 'net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase' 'isSolid|blocksMotion|isFaceSturdy|isSolidRender' 20
+          echo "=== ConventionalBiomeTags"; javap -cp "$FAPI" -public net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags | grep -oE 'IS_[A-Z_]+' | sort -u | tr '\n' ' '; echo
+          g net.minecraft.tags.ItemTags '_FOOD|TEMPT|VILLAGER|MEAT|FISHES|EGGS' 60
+          g net.minecraft.tags.BlockTags 'CAMPFIRE|FIRE|SUPPORTS_CROPS|MAINTAINS_FARMLAND|GROWS_CROPS|CLIMBABLE|CROPS|SUPPORTS_VEG|HOE' 30
+          g net.minecraft.world.level.block.CampfireBlock 'isLit|LIT|static' 20
+          g net.minecraft.world.item.Items ' (SUGAR|BREAD|BEEF|BROWN_MUSHROOM|RED_MUSHROOM|CARROT|POTATO|BOWL|STICK|IRON_INGOT|COPPER_INGOT|MILK_BUCKET|HONEY_BOTTLE|EGG|MUTTON|CHICKEN|RABBIT|BAKED_POTATO|SALMON|COD|PORKCHOP);' 40
+          g net.minecraft.sounds.SoundEvents 'CROP_PLANTED|ITEM_PLANT|BUBBLE_COLUMN|BREWING|CAMPFIRE_CRACKLE|SMOKER|FURNACE|SCAFFOLDING|LADDER|BAMBOO_WOOD|WOOD_PLACE|HANGING|CAVE_VINES' 30
+          g net.minecraft.world.level.block.SoundType 'SCAFFOLDING|LADDER|WOOD|BAMBOO|VINE|CROP|LANTERN|METAL|COPPER|CHAIN|DECORATED_POT' 30
+          p net.minecraft.world.item.crafting.Recipe 60
+          p 'net.minecraft.world.item.crafting.Recipe$CommonInfo' 20
+          p net.minecraft.world.item.crafting.RecipeSerializer 20
+          g net.minecraft.world.item.crafting.RecipeBookCategories 'static' 20
+          g net.minecraft.world.item.crafting.RecipeManager 'getRecipeFor|getRecipes|byKey|public' 30
+          g net.minecraft.world.item.crafting.Ingredient 'public' 30
+          g net.minecraft.world.item.Item 'Remainder|useOn|getDefaultInstance|getName' 20
+          g net.minecraft.world.item.ItemStack 'Remainder|isSameItemSameComponents|isSameItem\(|limitSize|getMaxStackSize|split|grow' 20
+          g net.minecraft.world.item.ItemStackTemplate 'public' 20
+          p net.minecraft.world.level.block.entity.BaseContainerBlockEntity 60
+          g net.minecraft.world.level.block.entity.BlockEntity 'getUpdatePacket|getUpdateTag|preRemoveSideEffects|setChanged|saveCustomOnly|loadAdditional|saveAdditional' 20
+          g net.minecraft.world.Containers 'static' 20
+          g net.minecraft.world.level.block.Block 'animateTick|popResource|getId|box|setPlacedBy|stepOn|fallOn' 20
+          g net.minecraft.world.level.block.state.BlockBehaviour 'onPlace|affectNeighborsAfterRemoval|hasAnalogOutputSignal|getAnalogOutputSignal|entityInside|onRemove|getRenderShape|getOcclusionShape|getVisualShape|useShapeForLightOcclusion|propagatesSkylightDown|getShadeBrightness|skipRendering|getInteractionShape|neighborChanged' 30
+          g net.minecraft.core.particles.ParticleTypes 'BUBBLE|SMOKE|SPLASH|STEAM|CLOUD|BUBBLE_POP|EFFECT|HAPPY' 20
+          g net.minecraft.world.inventory.AbstractContainerMenu 'addStandardInventorySlots|addDataSlots|moveItemStackTo|checkContainerSize|quickMoveStack|stillValid' 20
+          g net.minecraft.world.inventory.Slot 'public|protected' 40
+          g net.minecraft.world.inventory.FurnaceResultSlot 'public|protected' 20
+          g net.minecraft.world.level.block.BaseEntityBlock 'createTickerHelper|codec|getRenderShape|newBlockEntity' 20
+          g net.minecraft.world.level.block.LanternBlock 'SHAPE|codec' 10
+          g net.minecraft.world.level.block.ScaffoldingBlock 'public|protected' 30
+          g net.minecraft.world.level.block.FenceBlock 'protected|public' 20
+          g net.fabricmc.fabric.api.menu.v1.ExtendedMenuType 'public' 10
+          g net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder 'public' 10
+          echo "=== vanilla crop models"; unzip -p "$CLIENT" assets/minecraft/models/block/crop.json; unzip -p "$CLIENT" assets/minecraft/models/block/cross.json; echo
+          echo "=== vanilla scaffolding/lantern/cauldron model names"; unzip -l "$CLIENT" | grep -E 'models/block/(cauldron|decorated_pot|template_|lantern|scaffolding|campfire)' | awk '{print $4}' | head -20
+          echo "=== vanilla item tags"; unzip -l "$COMMON" | grep -E 'data/minecraft/tags/item/.*(food|tempt)' | awk '{print $4}' | head -40
+          echo "=== cow_food"; unzip -p "$COMMON" data/minecraft/tags/item/cow_food.json; echo
+          echo "=== horse_food"; unzip -p "$COMMON" data/minecraft/tags/item/horse_food.json; echo
+          echo "=== campfires tag"; unzip -p "$COMMON" data/minecraft/tags/block/campfires.json; echo
+          echo "=== supports_crops"; unzip -p "$COMMON" data/minecraft/tags/block/supports_crops.json; echo
+          echo "=== villager_plantable_seeds"; unzip -p "$COMMON" data/minecraft/tags/item/villager_plantable_seeds.json; echo
+          echo "=== mushroom_stew recipe"; unzip -p "$COMMON" data/minecraft/recipe/mushroom_stew.json; echo
+          echo "=== scaffolding loot"; unzip -p "$COMMON" data/minecraft/loot_table/blocks/scaffolding.json; echo
