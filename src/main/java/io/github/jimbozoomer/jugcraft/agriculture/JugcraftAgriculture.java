@@ -51,7 +51,6 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
@@ -278,7 +277,7 @@ public final class JugcraftAgriculture {
 	/** The Turnip Lantern: a carved turnip that gives light, the original jack-o'-lantern. */
 	private static void registerDecorations() {
 		Block lantern = registerBlock("turnip_lantern", TurnipLanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
-				.strength(0.5F).sound(SoundType.WOOD).lightLevel(state -> 13).noOcclusion().pushReaction(PushReaction.DESTROY));
+				.strength(0.5F).sound(SoundType.WOOD).lightLevel(state -> 13).noOcclusion());
 		registerItem("turnip_lantern", props -> new BlockItem(lantern, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
 	}
 
