@@ -166,7 +166,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case SOLAR_PANEL -> tickSolar(level, pos);
 			case STEAM_GENERATOR -> tickSteam(level, pos);
 			case BATTERY_BOX -> tickBattery(level, pos, state);
-			case ELECTRIC_FURNACE, CRUSHER, ARC_FURNACE -> tickProcessor(level, pos, state);
+			default -> tickProcessor(level, pos, state);
 		};
 		if (state.getValue(MachineBlock.LIT) != active) {
 			level.setBlock(pos, state.setValue(MachineBlock.LIT, active), 3);
