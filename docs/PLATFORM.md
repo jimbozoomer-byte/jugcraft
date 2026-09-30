@@ -1,22 +1,24 @@
 # Platform decision and bootstrap gate
 
-Status: pending dependency compatibility assessment. Minecraft Java Edition is the target. No game or loader versions are pinned yet; there is no Gradle build in this foundation.
+## Selected platform
 
-The earlier Fabric suggestion was a starting option. The emphasis on tech/magic integrations means the first approved external mods must inform the loader and Minecraft version. Evaluate Fabric and NeoForge against those actual dependencies rather than promising compatibility in advance.
+The owner has selected **Minecraft Java Edition 26.3 + Fabric** for Jugcraft. Build original systems from scratch; availability of third-party content mods does not determine this choice. Jugcraft remains one original mod with internal feature packages, using Fabric API where appropriate.
+
+This is a recorded design decision, not a runnable build. Exact Fabric Loader/API versions, Java toolchain, Loom and Gradle wrapper/checksum must be verified together and pinned in the bootstrap PR. Do not use a floating `latest` version or assume Minecraft's version number is the Java/JDK version. Do not automatically upgrade the project when Minecraft releases a new version.
 
 ## Required bootstrap PR
 
-1. List the initial required and optional external mods, official links, exact supported versions, and licenses. It is also valid to choose an original-content-only first milestone.
-2. Record a decision here for one Minecraft version, loader and exact version, Java major, build plugin, mappings, and Gradle wrapper version/checksum.
-3. Generate a project from that loader's official template; preserve its required notices and record provenance.
-4. Add `jugcraft` mod metadata, separated client code, and one minimal registered item/recipe.
-5. Document actual Windows and Unix build, client launch, server launch, and game-test commands after verifying them.
-6. Add CI compilation and applicable unit/game tests; require their stable check names on main. Do not treat repository checks as a mod build.
-7. Run a dedicated server with two clients, test save/restart, and record exact versions and evidence.
-8. Select the project license before accepting implementation/assets. Publish client/server installation manifests when needed.
+1. Generate a Minecraft 26.3 Fabric project from the official template, preserving required notices and provenance.
+2. Pin and verify the full toolchain: Loader, Fabric API, JDK major, Loom, Gradle wrapper/version/checksum and any applicable naming/mapping configuration.
+3. Add `jugcraft` metadata, separated client code and one minimal item/recipe. Keep original content independent of third-party gameplay mods.
+4. Document tested Windows and Unix build, client launch, dedicated-server launch and game-test commands.
+5. Replace the foundation-only source gate with actual compilation and relevant unit/game tests. Require those stable check names on main; do not weaken review or security requirements.
+6. Run a dedicated server with two clients, test save/restart, and record exact versions and evidence.
+7. Select the project license before accepting implementation/assets and publish accurate installation requirements.
 
-Only after this PR is reviewed and merged should feature implementation begin.
+After bootstrap, establish shared material, recipe, resource, progression and persistence interfaces before accepting disconnected large systems. Follow the owner-directed [design](DESIGN.md) and [specialties](CONTENT_BRANCHES.md).
 
-Official references:
+Official references used for platform selection:
+- https://www.minecraft.net/en-us/article/minecraft-java-edition-26-3
+- https://www.fabricmc.net/2026/09/15/263.html
 - https://docs.fabricmc.net/develop/getting-started/creating-a-project
-- https://docs.neoforged.net/docs/gettingstarted/

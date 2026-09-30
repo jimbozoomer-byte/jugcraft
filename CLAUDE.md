@@ -5,6 +5,9 @@ Read CONTRIBUTING.md, docs/DESIGN.md, docs/ARCHITECTURE.md and docs/PLATFORM.md 
 - AI-assisted feature implementation uses Claude Opus 5.5. State actual model use; do not pretend this file changes or verifies the running model. Ask maintainers for an exception if unavailable.
 - This repository is currently a contribution foundation, not a playable mod. Do not invent build commands, dependency versions, or test results. Platform bootstrap and license selection precede implementation.
 - Work on one approved issue per branch/PR. Do not merge, publish releases, or deploy servers as part of a contribution.
+- Target Minecraft Java Edition 26.3 + Fabric; exact Loader/API/JDK/build pins still require the verified bootstrap. Original content is the priority, not external-mod availability.
+- Read docs/CONTENT_BRANCHES.md for factories, farming, biomes, caves, creatures, space, realms, loot, schools and seasons. Preserve independently useful specialties with selected collaboration milestones; do not force every player through every branch.
+- Every required dependency has a reachable route, including trading or staged solo production where appropriate. Seasonal content must preserve earned items/world data after events end and cannot be the sole gate to core progression.
 - Connect additions to shared tech/magic progression. Every gameplay feature records tier, input producer, output consumer, costs, unlocks, failure behavior, and test evidence in docs/features/.
 - Extend shared material tags, progression, configuration, recipes, and energy interfaces. Avoid duplicate currencies, ores, registries, and incompatible power systems.
 - Prevent circular unlocks: each tier needs a reachable entry path before its machines or rituals exist. Late-game convenience may automate earlier work without eliminating its purpose.

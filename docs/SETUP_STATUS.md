@@ -10,7 +10,8 @@
 - Merge strategy: squash only; merged branches automatically deleted; auto-merge disabled.
 - Workflow permissions: read-only; workflow PR approval disabled.
 - Project license: pending owner's selection.
-- Minecraft/loader/build pins and playable mod: pending platform bootstrap.
+- Minecraft/loader decision: Minecraft Java Edition 26.3 + Fabric, selected by the owner.
+- Exact Loader/API/JDK/build pins and playable mod: pending verified platform bootstrap.
 
 This status distinguishes prepared files from controls actually active on GitHub.
 

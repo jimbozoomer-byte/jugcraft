@@ -2,7 +2,7 @@
 
 ## 1. Propose the idea first
 
-Open a Feature proposal or Existing mod integration issue using the Issues tab. Search existing issues first. Describe the player experience, progression tier, inputs, outputs, and connections to other systems. Small documentation corrections and bug fixes can go straight to a PR.
+Open a Feature proposal or Existing mod integration issue using the Issues tab. Search existing issues first. Describe the player experience, specialty, progression tier, inputs, outputs, and connections to other systems. Read docs/CONTENT_BRANCHES.md for the content scope. State which connections are required or optional, how trade/solo routes work, and why the specialty remains useful without mastering every branch. Small documentation corrections and bug fixes can go straight to a PR.
 
 Wait for a maintainer to approve the scope in the issue before starting substantial work. Maintainers should assign one lead contributor to avoid duplicate work. While the platform and license milestones are open, contribute proposals and documentation; implementation is gated on those decisions.
 
