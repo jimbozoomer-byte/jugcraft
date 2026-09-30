@@ -8,7 +8,7 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### #23 Storage
+### #24 Storage
 - **Capacitor Bank** (2×2): 4,000,000 JE. It charges from any side and gives power out of its front sockets at 4,096 JE/t.
 - **Steel Tank** (2×2 squat riveted tank): 128 buckets.
 - **Item Crate:** 32 stacks of one item, with right-click in and out and support for pipes, hoppers and comparators.

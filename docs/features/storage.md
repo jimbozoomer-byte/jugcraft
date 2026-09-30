@@ -1,6 +1,6 @@
 # Storage
 
-Status: implemented in source (PR #23); **not yet played**. Compiles in CI; game tests cover it.
+Status: implemented in source (PR #24); **not yet played**. Compiles in CI; game tests cover it.
 Proposal issue: none; the owner selected "Storage" directly on 30 September 2026.
 Owner: @jimbozoomer-byte
 Target milestone and tier: the crate is early (iron and planks); the capacitor bank and steel tank need steel.
