@@ -45,9 +45,6 @@ import net.minecraft.world.level.block.state.BlockState;
  * screenshots, so the looks can be checked from actual game renders rather than previews.
  */
 public class JugcraftClientGameTests implements FabricClientGameTest {
-	/** GLFW key code of F1 (hide the HUD). */
-	private static final int GLFW_KEY_F1 = 290;
-
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		try (TestSingleplayerContext singleplayer = context.worldBuilder()
@@ -68,8 +65,9 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 10, y, z - 10, x + 64, y + 14, z + 8));
 			server.runOnServer(minecraft -> buildShowroom(minecraft.overworld(), new BlockPos(x, y, z - 5)));
 
-			// Hide the HUD, hand and chat (F1) so the screenshots show only the machines.
-			context.getInput().pressKey(GLFW_KEY_F1);
+			// Hide the HUD, hand and chat (what F1 does) so the screenshots show only the machines. Set directly: a
+			// simulated F1 press did not always take effect.
+			context.runOnClient(client -> client.options.hideGui = true);
 
 			// One-block machines, facing the camera, in two halves.
 			server.runCommand("tp @p %d %d %d 180 25".formatted(x - 4, y, z - 2));
@@ -105,7 +103,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 
 			// Multi-block machines, ten blocks away, in three views along the row (the wind turbine is nine tall).
 			for (int view = 0; view < 3; view++) {
-				server.runCommand("tp @p %d %d %d 180 8".formatted(x + 25 + view * 15, y + 3, z + 5));
+				server.runCommand("tp @p %d %d %d 180 8".formatted(x + 24 + view * 12, y + 3, z + 5));
 				context.waitTicks(20);
 				singleplayer.getConnection().waitForChunksRender();
 				context.takeScreenshot("jugcraft_multiblocks_" + (view + 1));
