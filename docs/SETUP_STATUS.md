@@ -9,7 +9,7 @@
 - CODEOWNERS: @jimbozoomer-byte owns review of all files.
 - Merge strategy: squash only; merged branches automatically deleted; auto-merge disabled.
 - Workflow permissions: read-only; workflow PR approval disabled.
-- Project license: pending owner's selection.
+- Project license: MIT, selected by the owner on 30 September 2026 (see LICENSE and LICENSE_POLICY.md).
 - Minecraft/loader/build pins and playable mod: pending platform bootstrap.
 
 This status distinguishes prepared files from controls actually active on GitHub.

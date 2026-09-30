@@ -42,4 +42,4 @@ This checks the contribution foundation only. It does **not** compile Minecraft 
 
 ## Rights and conduct
 
-Be constructive and credit contributors. Follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [SECURITY.md](SECURITY.md). See [LICENSE_POLICY.md](LICENSE_POLICY.md): maintainers must choose and publish the project license before accepting implementation or asset contributions.
+Be constructive and credit contributors. Follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [SECURITY.md](SECURITY.md). Jugcraft is licensed under the [MIT License](LICENSE); contributions are accepted under the same license. See [LICENSE_POLICY.md](LICENSE_POLICY.md) for third-party material and asset rules.
