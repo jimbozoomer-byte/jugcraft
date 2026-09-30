@@ -19,33 +19,16 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
-      - name: Trees, leaves, stripping (2)
+      - name: Stripping and fuel (3)
         run: |
           COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
           CP="$CLIENT:$COMMON"
           FAPI=$(find ~/.gradle/caches -name 'fabric-*.jar' -path '*net.fabricmc.fabric-api*' | grep -v sources | tr '\n' ':')
-          p() { echo "=== $1"; javap -cp "$CP:$FAPI" -p "$1" 2>&1 | head -${2:-80}; }
-          g() { echo "=== $1 | $2"; javap -cp "$CP:$FAPI" -p "$1" 2>&1 | grep -E "$2" | head -${3:-40}; }
-          B=net.minecraft.world.level.block
-          p $B.grower.TreeGrower 60
-          echo "=== TreeGrower clinit"; javap -cp "$CP" -c -p $B.grower.TreeGrower | sed -n '/static {}/,$p' | grep -E 'ldc|invoke|getstatic|putstatic' | head -40
-          echo "=== TreeGrower growTree"; javap -cp "$CP" -c -p $B.grower.TreeGrower | sed -n '/boolean growTree(/,/^$/p' | grep -E 'invoke|getfield|getstatic' | head -60
-          p $B.FallingParticlesLeavesBlock 30
-          p $B.sounds.AmbientLeavesBlockSoundPlayer 30
-          echo "=== Blocks oak_leaves / oak_sapling / pumpkin construction"; javap -cp "$CP" -c -p $B.Blocks | grep -E -A14 'String (oak_leaves|oak_sapling|pumpkin|jack_o_lantern|sweet_berry_bush|oak_fence_gate)$' | grep -E 'ldc|invoke|getstatic|new ' | head -90
-          p net.minecraft.world.level.levelgen.feature.Feature 60
-          g net.minecraft.world.item.AxeItem 'STRIP|strip|Map|static|protected|public' 30
-          echo "=== fabric classes"; for j in $(echo $FAPI | tr ':' ' '); do unzip -l "$j" 2>/dev/null | grep -iE '(Strip|Tillable|Flammable|Fuel|Compost|Waxable|Oxidizable)[A-Za-z]*\.class' ; done | awk '{print $4}' | sort -u
-          for c in $(for j in $(echo $FAPI | tr ':' ' '); do unzip -l "$j" 2>/dev/null | grep -iE 'api/.*(Strip|Fuel)[A-Za-z]*\.class' ; done | awk '{print $4}' | sed 's/\.class$//; s#/#.#g' | sort -u); do p "$c" 20; done
-          g net.minecraft.tags.ItemTags 'FOX|CHICKEN|RABBIT|PARROT|HORSE' 20
-          g net.minecraft.tags.BlockTags 'GRASS|SUPPORTS_VEGETATION|FROGS|MOSS|LILY' 20
-          g net.minecraft.tags.FluidTags 'WATER' 5
-          mkdir -p /tmp/d && cd /tmp/d
-          unzip -q -o "$COMMON" 'data/minecraft/tags/block/supports_vegetation.json' 'data/minecraft/tags/block/supports_crops.json' 'data/minecraft/tags/block/grass_blocks.json' \
-            'data/minecraft/tags/block/mud.json' 'data/minecraft/tags/block/sand.json' 'data/minecraft/tags/block/overworld_natural_logs.json' 'data/minecraft/tags/item/fox_food.json' \
-            'data/minecraft/tags/item/pig_food.json' 'data/minecraft/tags/block/supports_lily_pad.json' 'data/minecraft/worldgen/block_state_provider/*.json' \
-            'data/minecraft/tags/block/wooden_stairs.json' 'data/minecraft/tags/block/wooden_slabs.json' 'data/minecraft/tags/item/fence_gates.json' 'data/minecraft/tags/item/wooden_fences.json' \
-            'data/minecraft/tags/block/fences.json' 'data/minecraft/tags/item/fences.json' 'data/minecraft/recipe/charcoal.json' 'data/minecraft/recipe/stick.json' 2>&1 | head -5
-          for f in $(find /tmp/d -name '*.json' | sort); do echo "=== $f"; tr -d ' \n' < "$f" | head -c 1500; echo; done
-          unzip -l "$COMMON" | grep -oE 'data/minecraft/tags/item/[a-z_]*food[a-z_]*\.json' | sort -u | tr '\n' ' '
+          echo "=== fabric jars"; echo $FAPI | tr ':' '\n' | sed 's#.*/##' | sort | head -80
+          echo "=== minecraft classes named Axe/Strip/Fuel/Weathering"; unzip -l "$COMMON" | awk '{print $4}' | grep -E '(Axe|Strip|Fuel|Flammab)[A-Za-z$]*\.class$' | head -40
+          echo "=== minecraft data named strip"; unzip -l "$COMMON" | awk '{print $4}' | grep -iE 'strip|axe' | grep -v '\.class$' | head -40
+          echo "=== fabric registry package"; for j in $(echo $FAPI | tr ':' ' '); do unzip -l "$j" | awk '{print $4}' | grep -E 'fabric/api/registry/' ; done | sort -u | head -60
+          for c in $(unzip -l "$COMMON" | awk '{print $4}' | grep -E '/(AxeItem|[A-Za-z]*Strip[A-Za-z]*|FuelValues)\.class$' | sed 's/\.class$//; s#/#.#g'); do echo "=== $c"; javap -cp "$CP" -p "$c" | head -40; done
+          echo "=== FuelValues bytecode tags"; javap -cp "$CP" -c -p net.minecraft.world.level.block.entity.FuelValues 2>/dev/null | grep -E 'ItemTags\.' | sed 's/.*Field //' | sort -u | head -30
+          echo "=== WeightedList of"; javap -cp "$CP" -p net.minecraft.util.random.WeightedList | grep -E ' of\(' 
