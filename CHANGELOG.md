@@ -8,7 +8,7 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### #21 Transmitter tiers
+### #22 Transmitter tiers
 - **Silver Cable** (1,024 JE/t) and **Aluminum Cable** (4,096 JE/t). All cable tiers join one network, which runs at its slowest cable.
 - **High-Pressure Extractor** (steel): 32 items every 4 ticks, four times the brass extractor.
 - There is no faster fluid pipe: pumps (100 mB/t) are the limit, not pipes.
