@@ -30,6 +30,23 @@ One feature per PR. Include the proposal, integration contract, and actual test 
 
 Use **Claude Opus 5.5** for AI-assisted feature implementation and review your output yourself. Follow [CLAUDE.md](CLAUDE.md). Declare model use honestly; documentation, ideas, and hand-made art do not require an AI subscription. Git history cannot prove model provenance. This initial repository foundation was prepared with OpenAI Codex, not Opus 5.5.
 
+## Building the mod (unverified)
+
+The first content, tin and bronze, is in source but has **not been compiled or played yet**. With JDK 25 installed:
+
+```sh
+./gradlew build          # Windows: gradlew.bat build
+./gradlew runClient
+./gradlew runServer
+```
+
+These are the standard Fabric Loom commands; they have not been run for this project yet. Data checks that do not need Minecraft:
+
+```sh
+python3 -m pip install pillow
+python3 tools/check_mod_data.py
+```
+
 ## Local repository checks
 
 Install Python 3.11 or newer, then run:

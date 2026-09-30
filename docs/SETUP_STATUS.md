@@ -10,7 +10,7 @@
 - Merge strategy: squash only; merged branches automatically deleted; auto-merge disabled.
 - Workflow permissions: read-only; workflow PR approval disabled.
 - Project license: MIT, selected by the owner on 30 September 2026 (see LICENSE and LICENSE_POLICY.md).
-- Minecraft/loader/build pins and playable mod: pending platform bootstrap.
+- Minecraft/loader/build pins: Minecraft 26.3 + Fabric scaffold added with unverified pins (see PLATFORM.md). Not yet compiled; playable mod pending a successful build and two-client test.
 
 This status distinguishes prepared files from controls actually active on GitHub.
 
