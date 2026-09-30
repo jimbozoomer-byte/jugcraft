@@ -245,7 +245,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Bronze is never turned back into its ingredients.
 - Every recipe has a feature-switch condition that includes its result's feature.
 - Python lists must match Java: `MachineKind` numbers and recipe types, `JugcraftComponents` lists, materials, features, worldgen.
-- Every ID has a model, a texture, a name, and a loot table (for blocks). Both machine styles cover every block state. Model elements stay within −16..32.
+- Every ID has a model, a texture, a name, and a loot table (for blocks). Loot tables use the **26.x keys** (`condition`, `modifier`, predicates such as `minecraft:tool/can_silk_touch`); the old `conditions`/`functions` keys are rejected because 26.x silently ignores them. Both machine styles cover every block state. Model elements stay within −16..32.
 
 ## File map
 

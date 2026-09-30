@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Fix: ore loot tables in the 26.x format (pull request pending)
+- **Ores now drop their raw material.** Before this, mining tin, zinc, lead, silver, nickel, tungsten, uranium, salt, phosphate, lepidolite or monazite ore, or oil sand, dropped the block itself, as if with Silk Touch. Fortune and multi-drops (2–4 salt, 1–2 bitumen) did nothing either.
+- **Cause:** Minecraft 26.x renamed the loot keys (`conditions` → `condition`, `functions` → `modifier`, and Silk Touch is now the `minecraft:tool/can_silk_touch` predicate). The old keys were silently ignored. The game test server had been logging "Unreachable entry!" for all 23 ore tables.
+- All 82 generated loot tables now use the 26.x format. Storage blocks and machines still drop themselves, and now respect explosions again.
+- `tools/check_mod_data.py` fails on any pre-26.x loot key, and a new game test mines ores and checks what drops.
+
 ### #24 Storage
 - **Capacitor Bank** (2×2): 4,000,000 JE. It charges from any side and gives power out of its front sockets at 4,096 JE/t.
 - **Steel Tank** (2×2 squat riveted tank): 128 buckets.

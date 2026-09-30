@@ -259,14 +259,16 @@ def machine_recipe_files(out):
 
 # ---------------------------------------------------------------- loot tables
 
-SILK = {"condition": "minecraft:match_tool", "predicate": {"predicates": {
-    "minecraft:enchantments": [{"enchantments": "minecraft:silk_touch", "levels": {"min": 1}}]}}}
+# Minecraft 26.x loot format, as in vanilla 26.3's own tables: a singular "condition" (an object or a
+# predicate ID such as minecraft:tool/can_silk_touch) and "modifier" instead of "conditions"/"functions".
+# 26.x ignores the old keys, which made every ore drop itself as if mined with Silk Touch.
+SILK = "minecraft:tool/can_silk_touch"
 
 
 def loot(block, entries, explosion_condition=False):
-    pool = {"rolls": 1.0, "bonus_rolls": 0.0, "entries": entries}
+    pool = {"entries": entries, "rolls": 1}
     if explosion_condition:
-        pool["conditions"] = [{"condition": "minecraft:survives_explosion"}]
+        pool["condition"] = {"type": "minecraft:survives_explosion"}
     return {"type": "minecraft:block", "pools": [pool], "random_sequence": rid(f"blocks/{block}")}
 
 
@@ -275,15 +277,14 @@ def self_drop(block):
 
 
 def ore_drop(block, item, low=1, high=1):
-    functions = []
+    modifiers = []
     if (low, high) != (1, 1):
-        functions.append({"function": "minecraft:set_count",
-                          "count": {"type": "minecraft:uniform", "min": float(low), "max": float(high)}})
-    functions += [{"function": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"},
-                  {"function": "minecraft:explosion_decay"}]
+        modifiers.append({"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}})
+    modifiers += [{"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"},
+                  {"type": "minecraft:explosion_decay"}]
     return loot(block, [{"type": "minecraft:alternatives", "children": [
-        {"type": "minecraft:item", "name": rid(block), "conditions": [SILK]},
-        {"type": "minecraft:item", "name": rid(item), "functions": functions},
+        {"type": "minecraft:item", "name": rid(block), "condition": SILK},
+        {"type": "minecraft:item", "name": rid(item), "modifier": modifiers},
     ]}])
 
 

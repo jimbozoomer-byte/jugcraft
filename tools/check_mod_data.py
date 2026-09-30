@@ -102,12 +102,28 @@ def check_assets(registered):
             err(f"Missing name for item {item}")
 
 
+# Minecraft 26.x silently ignores these pre-26.x loot keys, so a table using them loads but misbehaves
+# (ores dropped themselves). The 26.x keys are "condition" and "modifier".
+OLD_LOOT_KEYS = {"conditions", "functions", "function"}
+
+
+def old_loot_keys(node):
+    if isinstance(node, dict):
+        return (OLD_LOOT_KEYS & set(node)) | {k for value in node.values() for k in old_loot_keys(value)}
+    if isinstance(node, list):
+        return {k for value in node for k in old_loot_keys(value)}
+    return set()
+
+
 def check_loot(registered):
     for path in sorted((DATA / MOD / "loot_table").rglob("*.json")):
         text = path.read_text(encoding="utf-8")
         for name in re.findall(r'"name": "jugcraft:([a-z_]+)"', text):
             if name not in registered:
                 err(f"{path.name} drops unknown item {name}")
+        old = old_loot_keys(load(path))
+        if old:
+            err(f"{path.name} uses pre-26.x loot keys {sorted(old)}; use \"condition\" and \"modifier\"")
 
 
 # Metal content in nugget units. Tags stand for the same forms from any mod.

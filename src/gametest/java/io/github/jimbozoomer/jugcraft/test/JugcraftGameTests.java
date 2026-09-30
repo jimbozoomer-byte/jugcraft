@@ -20,6 +20,7 @@ import io.github.jimbozoomer.jugcraft.machine.MachineRecipes;
 import io.github.jimbozoomer.jugcraft.machine.MachineUpgrades;
 import io.github.jimbozoomer.jugcraft.machine.SideConfig;
 import io.github.jimbozoomer.jugcraft.storage.JugcraftStorage;
+import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -36,6 +37,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -531,5 +533,27 @@ public class JugcraftGameTests {
 		}
 		helper.assertTrue(StorageUtil.getRedstoneSignal(crate) == 15, "A full crate should signal 15");
 		helper.succeed();
+	}
+
+	/**
+	 * Ores drop their raw material, not themselves, and storage blocks drop themselves. Before the
+	 * loot tables used the 26.x keys, Minecraft ignored their conditions and every ore dropped itself.
+	 */
+	@GameTest
+	public void oresDropRawMaterial(GameTestHelper helper) {
+		assertDrops(helper, new BlockPos(1, 1, 1), "tin_ore", "raw_tin", 1, 1);
+		assertDrops(helper, new BlockPos(3, 1, 1), "deepslate_zinc_ore", "raw_zinc", 1, 1);
+		assertDrops(helper, new BlockPos(5, 1, 1), "salt_ore", "salt", 2, 4);
+		assertDrops(helper, new BlockPos(1, 1, 3), "oil_sand", "bitumen", 1, 2);
+		assertDrops(helper, new BlockPos(3, 1, 3), "tin_block", "tin_block", 1, 1);
+		helper.succeed();
+	}
+
+	/** Breaking {@code block} with no tool drops only {@code drop}, between {@code min} and {@code max} of it. */
+	private static void assertDrops(GameTestHelper helper, BlockPos pos, String block, String drop, int min, int max) {
+		helper.setBlock(pos, BuiltInRegistries.BLOCK.getValue(Jugcraft.id(block)));
+		List<ItemStack> drops = Block.getDrops(helper.getBlockState(pos), helper.getLevel(), helper.absolutePos(pos), null);
+		helper.assertTrue(drops.size() == 1 && drops.get(0).is(item(drop)) && drops.get(0).getCount() >= min
+				&& drops.get(0).getCount() <= max, block + " should drop " + min + "-" + max + " " + drop + ", dropped " + drops);
 	}
 }
