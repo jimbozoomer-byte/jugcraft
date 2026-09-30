@@ -3,8 +3,16 @@
   "values": [
     "jugcraft:corn_crop",
     "jugcraft:sunflower_crop",
+    "jugcraft:tomato_crop",
+    "jugcraft:pepper_crop",
     "jugcraft:bean_crop",
     "jugcraft:sweet_potato_crop",
-    "jugcraft:flax_crop"
+    "jugcraft:flax_crop",
+    "jugcraft:onion_crop",
+    "jugcraft:garlic_crop",
+    "jugcraft:cabbage_crop",
+    "jugcraft:oat_crop",
+    "jugcraft:barley_crop",
+    "jugcraft:trellis"
   ]
 }

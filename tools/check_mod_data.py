@@ -31,7 +31,7 @@ STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
 
 # Tags that Jugcraft reads but that vanilla/Fabric API define.
 EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_replaceables",
-                  "minecraft:deepslate_ore_replaceables", "minecraft:planks"}
+                  "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -218,7 +218,8 @@ def check_machine_recipe_files(registered):
         if f'"{kind}"' not in kinds:
             err(f"MachineKind.recipeType() has no \"{kind}\" (tools say {machine} uses it)")
     expected = sum(len(recipes) for recipes in machine_recipes().values())
-    files = sorted((DATA / MOD / "recipe").glob("*/*.json"))
+    # Cooking Pot recipes (recipe/pot_cooking/) belong to Agriculture; check_agriculture() checks them.
+    files = sorted(path for path in (DATA / MOD / "recipe").glob("*/*.json") if path.parent.name != "pot_cooking")
     if len(files) != expected:
         err(f"{len(files)} machine recipe files, but tools/machines.py defines {expected}")
     for path in files:
@@ -461,13 +462,13 @@ def check_agriculture():
     java = {path.stem: path.read_text(encoding="utf-8") for path in AGRICULTURE_JAVA.glob("*.java")}
 
     tall = {name.lower(): {"block": block, "seed": seed, "heights": [int(h) for h in heights.split(",")], "produce": produce,
-                           "pick": [int(low), int(high)], "reset": int(reset), "growth": float(growth)}
-            for name, block, seed, heights, produce, low, high, reset, growth in re.findall(
-                r'(\w+)\("([a-z_]+)", "([a-z_]+)", new int\[\] \{([\d, ]+)\}, "([a-z_]+)", (\d+), (\d+), (\d+), ([\d.]+)F\)',
+                           "pick": [int(low), int(high)], "reset": int(reset), "growth": float(growth), "trellis": trellis == "true"}
+            for name, block, seed, heights, produce, low, high, reset, growth, trellis in re.findall(
+                r'(\w+)\("([a-z_]+)", "([a-z_]+)", new int\[\] \{([\d, ]+)\}, "([a-z_]+)", (\d+), (\d+), (\d+), ([\d.]+)F, (true|false)\)',
                 java.get("TallCrop", ""))}
     expected = {name: {"block": info["block"], "seed": info["seed"], "heights": info["heights"], "produce": info["pick"]["item"],
                        "pick": [info["pick"]["min"], info["pick"]["max"]], "reset": info["pick_reset"],
-                       "growth": info["growth_time"]} for name, info in ag.TALL_CROPS.items()}
+                       "growth": info["growth_time"], "trellis": bool(info.get("trellis"))} for name, info in ag.TALL_CROPS.items()}
     if tall != expected:
         err(f"TallCrop.java {tall} != tools/agriculture.py {expected}")
     for name, info in ag.TALL_CROPS.items():
@@ -490,6 +491,10 @@ def check_agriculture():
         items[name] = ("food", int(n), float(sat), compost.lower(), None)
     for name, crop, compost in re.findall(r'\bseeds\("([a-z_]+)", "([a-z_]+)", COMPOST_(\w+)\)', main):
         items[name] = ("seeds", None, None, compost.lower(), crop)
+    for name, crop, compost in re.findall(r'\btrellisSeeds\("([a-z_]+)", TallCrop\.(\w+), COMPOST_(\w+)\)', main):
+        items[name] = ("seeds", None, None, compost.lower(), ag.TALL_CROPS.get(crop.lower(), {}).get("block"))
+    for name, n, sat in re.findall(r'\bmeal\("([a-z_]+)", (\d+), ([\d.]+)F\)', main):
+        items[name] = ("food", int(n), float(sat), None, None)
     for name, crop, n, sat, compost in re.findall(r'\bedibleSeeds\("([a-z_]+)", "([a-z_]+)", (\d+), ([\d.]+)F, COMPOST_(\w+)\)', main):
         items[name] = ("seeds", int(n), float(sat), compost.lower(), crop)
     for name, compost in re.findall(r'\bplain\("([a-z_]+)", COMPOST_(\w+)\)', main):
@@ -518,6 +523,16 @@ def check_agriculture():
     chance = re.search(r'GRASS_SEED_CHANCE = ([\d.]+)F', main)
     if not seeds or re.findall(r'"([a-z_]+)"', seeds.group(1)) != ag.GRASS_SEEDS or not chance or float(chance.group(1)) != ag.GRASS_SEED_CHANCE:
         err("JugcraftAgriculture.java grass seeds differ from tools/agriculture.py")
+    for name, info in ag.ITEMS.items():
+        plants = info.get("plants")
+        if plants and bool(info.get("trellis_seed")) != (plants in ag.trellis_crops()):
+            err(f"{name}: a seed is a trellis seed exactly when it plants a climbing crop")
+    pot = java.get("CookingPotBlockEntity", "")
+    inputs = re.search(r'int INPUTS = (\d+);', pot)
+    cooling = re.search(r'int COOLING = (\d+);', pot)
+    if (not inputs or int(inputs.group(1)) != ag.POT_INPUTS or not cooling or int(cooling.group(1)) != ag.POT_COOLING
+            or f'Jugcraft.id("{ag.HEAT_TAG.split(":")[1]}")' not in pot):
+        err("CookingPotBlockEntity.java differs from POT_INPUTS, POT_COOLING or HEAT_TAG in tools/agriculture.py")
     growth = java.get("CropGrowth", "")
     bonus = re.search(r'LEGUME_BONUS = ([\d.]+)F', growth)
     if not bonus or float(bonus.group(1)) != ag.LEGUME_BONUS or f'Jugcraft.id("{ag.LEGUME_TAG.split(":")[1]}")' not in growth:
@@ -539,11 +554,41 @@ def check_agriculture():
         if not (ASSETS / "textures" / "block" / f"{texture}.png").is_file():
             err(f"Missing crop texture {texture}")
 
+    # Cooking Pot recipes: one file each, known items, room in the pot, and no two with the same ingredients.
+    registered = set(ag.all_items()) | set(all_items()) | set(all_blocks())
+    folder = DATA / MOD / "recipe" / "pot_cooking"
+    if sorted(path.stem for path in folder.glob("*.json")) != sorted(ag.POT_RECIPES):
+        err("recipe/pot_cooking/ files differ from POT_RECIPES in tools/agriculture.py")
+    seen = {}
+    for result, info in ag.POT_RECIPES.items():
+        refs = list(info["inputs"])
+        for ref in refs + [f"{MOD}:{result}"]:
+            if split(ref)[0] == MOD and split(ref)[1] not in registered:
+                err(f"pot_cooking/{result}: unknown item {ref}")
+        if len(refs) > ag.POT_INPUTS:
+            err(f"pot_cooking/{result}: {len(refs)} ingredients do not fit in {ag.POT_INPUTS} slots")
+        key = frozenset(refs)
+        if key in seen:
+            err(f"pot_cooking/{result} uses the same ingredients as {seen[key]}; the pot could not tell them apart")
+        seen[key] = result
+        recipe = load(folder / f"{result}.json") or {}
+        if recipe.get("type") != f"{MOD}:pot_cooking" or not recipe.get("fabric:load_conditions"):
+            err(f"pot_cooking/{result}: wrong type or missing feature switch condition")
+
     # No recipe loop among agriculture items: every conversion leads away from where it started.
     edges = {}
+
+    def edge(ref, result):
+        edges.setdefault(split(ref.lstrip("#"))[1], set()).add(split(result)[1] if ":" in result else result)
     for recipe in ag.SHAPELESS:
         for ref in recipe["inputs"]:
-            edges.setdefault(split(ref)[1], set()).add(split(recipe["result"])[1] if ":" in recipe["result"] else recipe["result"])
+            edge(ref, recipe["result"])
+    for recipe in ag.SHAPED:
+        for ref in recipe["key"].values():
+            edge(ref, recipe["result"])
+    for result, info in ag.POT_RECIPES.items():
+        for ref in info["inputs"]:
+            edge(ref, result)
     for result, info in ag.COOKING.items():
         edges.setdefault(info["input"], set()).add(result)
 

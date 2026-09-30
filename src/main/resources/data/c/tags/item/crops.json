@@ -5,6 +5,13 @@
     "#c:crops/sunflower",
     "#c:crops/beans",
     "#c:crops/sweet_potato",
-    "#c:crops/flax"
+    "#c:crops/flax",
+    "#c:crops/tomato",
+    "#c:crops/pepper",
+    "#c:crops/onion",
+    "#c:crops/garlic",
+    "#c:crops/cabbage",
+    "#c:crops/oat",
+    "#c:crops/barley"
   ]
 }

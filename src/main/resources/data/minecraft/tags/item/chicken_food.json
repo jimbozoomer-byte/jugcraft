@@ -3,6 +3,11 @@
   "values": [
     "jugcraft:corn_kernels",
     "jugcraft:sunflower_seeds",
-    "jugcraft:flax_seeds"
+    "jugcraft:flax_seeds",
+    "jugcraft:tomato_seeds",
+    "jugcraft:pepper_seeds",
+    "jugcraft:cabbage_seeds",
+    "jugcraft:oat_seeds",
+    "jugcraft:barley_seeds"
   ]
 }

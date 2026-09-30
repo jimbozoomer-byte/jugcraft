@@ -1,6 +1,12 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:three_sisters_stew"
+    "jugcraft:three_sisters_stew",
+    "jugcraft:tomato_soup",
+    "jugcraft:onion_soup",
+    "jugcraft:vegetable_soup",
+    "jugcraft:mushroom_barley_soup",
+    "jugcraft:oat_porridge",
+    "jugcraft:chili"
   ]
 }

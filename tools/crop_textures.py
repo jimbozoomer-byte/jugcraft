@@ -826,4 +826,6 @@ def crop_textures():
         out[("block", f"bean_stage{stage}")] = bean_stage(stage)
         out[("block", f"sweet_potato_stage{stage}")] = sweet_potato_stage(stage)
         out[("block", f"flax_stage{stage}")] = flax_stage(stage)
+    from kitchen_textures import kitchen_textures  # the Kitchen Garden slice builds on the helpers above
+    out.update(kitchen_textures())
     return out

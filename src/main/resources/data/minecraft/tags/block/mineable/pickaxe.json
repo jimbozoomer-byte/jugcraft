@@ -85,6 +85,7 @@
     "jugcraft:pneumatic_extractor",
     "jugcraft:high_pressure_extractor",
     "jugcraft:item_sorter",
-    "jugcraft:item_crate"
+    "jugcraft:item_crate",
+    "jugcraft:cooking_pot"
   ]
 }

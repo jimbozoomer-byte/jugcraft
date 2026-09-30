@@ -4,6 +4,11 @@
     "#c:seeds/corn",
     "#c:seeds/sunflower",
     "#c:seeds/beans",
-    "#c:seeds/flax"
+    "#c:seeds/flax",
+    "#c:seeds/tomato",
+    "#c:seeds/pepper",
+    "#c:seeds/cabbage",
+    "#c:seeds/oat",
+    "#c:seeds/barley"
   ]
 }
