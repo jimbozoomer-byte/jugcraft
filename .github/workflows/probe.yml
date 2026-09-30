@@ -1,4 +1,4 @@
-name: API probe (temporary, kitchen garden)
+name: API probe (temporary, kitchen garden 2)
 on:
   push:
     branches: ['claude/agriculture-kitchen-garden']
@@ -27,7 +27,8 @@ jobs:
           FAPI=$(find ~/.gradle/caches -name 'fabric-*.jar' -path '*net.fabricmc.fabric-api*' | grep -v sources | tr '\n' ':')
           p() { echo "=== $1"; javap -cp "$CP:$FAPI" -protected "$1" 2>&1 | head -${2:-80}; }
           g() { echo "=== $1 | $2"; javap -cp "$CP:$FAPI" -protected "$1" 2>&1 | grep -E "$2" | head -${3:-40}; }
-          echo "=== FarmBlock.canSurvive bytecode"; javap -cp "$CP" -c -p net.minecraft.world.level.block.FarmBlock | sed -n '/canSurvive(/,/^$/p' | head -40
+          echo "=== farmland classes"; unzip -l "$COMMON" | grep -iE 'level/block/[A-Za-z]*Farm[A-Za-z]*\.class' | awk '{print $4}'
+          for c in FarmlandBlock FarmBlock; do javap -cp "$CP" -c -p net.minecraft.world.level.block.$c 2>/dev/null | sed -n '/boolean canSurvive(/,/^$/p' | head -40; done
           echo "=== BlockStateBase solid bytecode"; javap -cp "$CP" -c -p 'net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase' | sed -n '/calculateSolid(/,/^$/p' | head -60
           g 'net.minecraft.world.level.block.state.BlockBehaviour$Properties' 'olid|ynamicShape|noCollision|isViewBlocking|isSuffocating|instabreak|strength\(' 30
           g 'net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase' 'isSolid|blocksMotion|isFaceSturdy|isSolidRender' 20

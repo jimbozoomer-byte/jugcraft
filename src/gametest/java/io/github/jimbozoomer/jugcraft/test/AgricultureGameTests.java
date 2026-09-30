@@ -130,6 +130,17 @@ public class AgricultureGameTests {
 		helper.succeed();
 	}
 
+	/** A two- or three-block plant blocks movement, but it is still a plant: the farmland under it stays farmland. */
+	@GameTest(maxTicks = 60)
+	public void tallCornKeepsItsFarmland(GameTestHelper helper) {
+		plantCorn(helper, 7);
+		helper.runAtTickTime(40, () -> {
+			helper.assertBlockPresent(Blocks.FARMLAND, SOIL);
+			assertCorn(helper, 7, 3);
+			helper.succeed();
+		});
+	}
+
 	/** Corn kernels plant corn on farmland. */
 	@GameTest
 	public void kernelsPlantCorn(GameTestHelper helper) {
