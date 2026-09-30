@@ -1,6 +1,6 @@
 # Kinetic power
 
-Status: implemented in source (PR number in CHANGELOG); **not yet played**. Compiles in CI; game tests cover it, and the client test screenshots a running shaft line.
+Status: implemented in source (PR #29); **not yet played**. Compiles in CI; game tests cover it, and the client test screenshots a running shaft line.
 Proposal issue: none. The owner selected "Kinetic power" directly on 30 September 2026.
 Owner: @jimbozoomer-byte
 Target milestone and tier: bronze age. The shaft needs iron, the steam engine bronze and a piston, and the dynamo copper and redstone. It can all come before electricity.
