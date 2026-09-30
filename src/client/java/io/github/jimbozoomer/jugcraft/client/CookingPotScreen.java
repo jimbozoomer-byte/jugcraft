@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
-/** The Cooking Pot: a 3x2 ingredient grid, a progress arrow, the meal, and a flame that shows whether the pot has heat. */
+/** The Cooking Pot: a 3x2 ingredient grid, a progress arrow, 2x2 meal slots, and a flame that shows whether the pot has heat. */
 public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
 	private static final Identifier TEXTURE = Jugcraft.id("textures/gui/machine.png");
 	private static final int DARK = 0xFF373737;
@@ -20,9 +20,9 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
 	private static final int FLAME = 0xFFE06020;
 	private static final int COLD = 0xFF6A6A6A;
 	private static final int TEXT = 0xFF404040;
-	private static final int ARROW_X = 90;
+	private static final int ARROW_X = 88;
 	private static final int ARROW_Y = 41;
-	private static final int ARROW_WIDTH = 26;
+	private static final int ARROW_WIDTH = 22;
 
 	public CookingPotScreen(CookingPotMenu menu, Inventory inventory, Component title) {
 		super(menu, inventory, title);
@@ -49,7 +49,9 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
 		for (int slot = 0; slot < CookingPotBlockEntity.INPUTS; slot++) {
 			slotFrame(graphics, x + CookingPotMenu.INPUT_X + (slot % 3) * 18, y + CookingPotMenu.INPUT_Y + (slot / 3) * 18);
 		}
-		slotFrame(graphics, x + CookingPotMenu.RESULT_X, y + CookingPotMenu.RESULT_Y);
+		for (int index = 0; index < CookingPotBlockEntity.OUTPUTS; index++) {
+			slotFrame(graphics, x + CookingPotMenu.RESULT_X + (index % 2) * 18, y + CookingPotMenu.RESULT_Y + (index / 2) * 18);
+		}
 		graphics.fill(x + ARROW_X, y + ARROW_Y, x + ARROW_X + ARROW_WIDTH, y + ARROW_Y + 4, DARK);
 		graphics.fill(x + ARROW_X, y + ARROW_Y, x + ARROW_X + menu.progress(ARROW_WIDTH), y + ARROW_Y + 4, PROGRESS);
 		// A small flame under the arrow: bright with heat below the pot, grey without.

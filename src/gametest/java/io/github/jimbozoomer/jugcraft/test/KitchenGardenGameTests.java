@@ -238,7 +238,10 @@ public class KitchenGardenGameTests {
 		helper.succeed();
 	}
 
-	/** On a lit campfire the pot cooks batch after batch from stacked ingredients, spread over any slots. */
+	/**
+	 * On a lit campfire the pot cooks batch after batch from stacked ingredients spread over any slots.
+	 * Soups do not stack, so each bowl takes its own result slot.
+	 */
 	@GameTest(maxTicks = 600)
 	public void potCooksOnACampfire(GameTestHelper helper) {
 		BlockPos pos = new BlockPos(2, 2, 2);
@@ -250,8 +253,11 @@ public class KitchenGardenGameTests {
 		pot.setItem(3, new ItemStack(item("tomato"), 2));
 		pot.setItem(5, new ItemStack(item("onion"), 2));
 		helper.succeedWhen(() -> {
-			ItemStack result = pot.getItem(CookingPotBlockEntity.RESULT);
-			helper.assertTrue(result.is(item("tomato_soup")) && result.getCount() == 2, "Expected 2 tomato soup, found " + result);
+			int soups = 0;
+			for (int slot = CookingPotBlockEntity.RESULT; slot < CookingPotBlockEntity.SLOTS; slot++) {
+				soups += pot.getItem(slot).is(item("tomato_soup")) ? pot.getItem(slot).getCount() : 0;
+			}
+			helper.assertTrue(soups == 2, "Expected 2 tomato soup, found " + soups);
 			for (int slot = 0; slot < CookingPotBlockEntity.INPUTS; slot++) {
 				helper.assertTrue(pot.getItem(slot).isEmpty(), "Slot " + slot + " should be used up, holds " + pot.getItem(slot));
 			}

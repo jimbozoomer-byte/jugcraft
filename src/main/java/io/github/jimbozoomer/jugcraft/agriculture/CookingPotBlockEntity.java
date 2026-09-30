@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * The Cooking Pot's contents and cooking. Every tick (server only) it checks the one block under it
  * for heat; with heat and a {@link CookingPotRecipe} in its ingredient slots it cooks, and after the
- * recipe's time it takes one batch of ingredients and adds the meal to the result slot. Without
+ * recipe's time it takes one batch of ingredients and adds the meal to a result slot. Without
  * heat, progress falls back {@value #COOLING} per tick, like a furnace going out. The recipe is looked
  * up again only when the slots change.
  * <p>
@@ -41,10 +41,15 @@ import org.jspecify.annotations.Nullable;
 public class CookingPotBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, ExtendedMenuProvider<BlockPos> {
 	/** What heats the pot from directly below. Keep in sync with HEAT_TAG in tools/agriculture.py. */
 	public static final TagKey<Block> HEAT_SOURCES = TagKey.create(Registries.BLOCK, Jugcraft.id("heat_sources"));
-	/** Ingredient slots, then the result slot. Keep in sync with POT_INPUTS in tools/agriculture.py. */
+	/**
+	 * Ingredient slots, then result slots: four, because soups do not stack and a pot should cook several
+	 * bowls in a row. Keep in sync with POT_INPUTS and POT_OUTPUTS in tools/agriculture.py.
+	 */
 	public static final int INPUTS = 6;
+	public static final int OUTPUTS = 4;
+	/** The first result slot. */
 	public static final int RESULT = INPUTS;
-	public static final int SLOTS = INPUTS + 1;
+	public static final int SLOTS = INPUTS + OUTPUTS;
 	/** Progress lost per tick without heat. Keep in sync with POT_COOLING in tools/agriculture.py. */
 	public static final int COOLING = 2;
 
@@ -54,7 +59,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 	public static final int DATA_COUNT = 3;
 
 	private static final int[] INPUT_SLOTS = {0, 1, 2, 3, 4, 5};
-	private static final int[] RESULT_SLOTS = {RESULT};
+	private static final int[] RESULT_SLOTS = {6, 7, 8, 9};
 
 	private NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
 	private int progress;
@@ -128,12 +133,21 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 	}
 
 	private boolean hasRoomFor(ItemStackTemplate output) {
-		ItemStack result = items.get(RESULT);
-		if (result.isEmpty()) {
-			return true;
+		return resultSlotFor(output.create()) >= 0;
+	}
+
+	/** A result slot that can take the whole meal: one already holding it with room, else an empty one, else -1. */
+	private int resultSlotFor(ItemStack meal) {
+		int empty = -1;
+		for (int slot = RESULT; slot < SLOTS; slot++) {
+			ItemStack result = items.get(slot);
+			if (result.isEmpty()) {
+				empty = empty < 0 ? slot : empty;
+			} else if (ItemStack.isSameItemSameComponents(result, meal) && result.getCount() + meal.getCount() <= result.getMaxStackSize()) {
+				return slot;
+			}
 		}
-		ItemStack meal = output.create();
-		return ItemStack.isSameItemSameComponents(result, meal) && result.getCount() + meal.getCount() <= result.getMaxStackSize();
+		return empty;
 	}
 
 	/** Takes one batch of ingredients (leaving containers such as buckets behind) and adds the meal. */
@@ -160,19 +174,28 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 			}
 		}
 		ItemStack meal = cooked.output().create();
-		if (items.get(RESULT).isEmpty()) {
-			items.set(RESULT, meal);
+		int slot = resultSlotFor(meal);
+		if (items.get(slot).isEmpty()) {
+			items.set(slot, meal);
 		} else {
-			items.get(RESULT).grow(meal.getCount());
+			items.get(slot).grow(meal.getCount());
 		}
 		level.playSound(null, pos, SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.BLOCKS, 0.8F, 0.9F + level.getRandom().nextFloat() * 0.2F);
 		recheck = true;
 	}
 
-	/** 0 when the result slot is empty, up to 15 when it is full. */
+	/** 0 when the result slots are empty, up to 15 when they are full, like a container's comparator reading. */
 	public int comparatorSignal() {
-		ItemStack result = items.get(RESULT);
-		return result.isEmpty() ? 0 : 1 + result.getCount() * 14 / result.getMaxStackSize();
+		float fullness = 0.0F;
+		boolean any = false;
+		for (int slot = RESULT; slot < SLOTS; slot++) {
+			ItemStack result = items.get(slot);
+			if (!result.isEmpty()) {
+				fullness += (float) result.getCount() / result.getMaxStackSize();
+				any = true;
+			}
+		}
+		return any ? 1 + (int) (fullness / OUTPUTS * 14.0F) : 0;
 	}
 
 	// ---------------------------------------------------------------- inventory
@@ -234,7 +257,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 
 	@Override
 	public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
-		return side == Direction.DOWN && slot == RESULT;
+		return side == Direction.DOWN && slot >= RESULT;
 	}
 
 	// ---------------------------------------------------------------- menu

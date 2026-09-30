@@ -203,7 +203,8 @@ EQUIPMENT = {
 HEAT_TAG = "jugcraft:heat_sources"
 HEAT_SOURCES = ["#minecraft:campfires", "minecraft:fire", "minecraft:soul_fire", "minecraft:lava", "minecraft:magma_block"]
 # Cooking Pot numbers, shared with Java (agriculture/CookingPotBlockEntity.java).
-POT_INPUTS = 6       # ingredient slots; the result slot comes after them
+POT_INPUTS = 6       # ingredient slots
+POT_OUTPUTS = 4      # result slots after them: soups do not stack, so a pot cooks up to four bowls in a row
 POT_COOLING = 2      # progress lost per tick without heat, like a furnace going out
 
 # Sickles: right-click harvests every ripe crop in a square of side 2 * radius + 1. Low crops are

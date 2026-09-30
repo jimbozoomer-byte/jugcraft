@@ -10,12 +10,12 @@ import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-/** The Cooking Pot's screen: six ingredient slots (3x2) at the left, the result at the right. */
+/** The Cooking Pot's screen: six ingredient slots (3x2) at the left, four result slots (2x2) at the right. */
 public class CookingPotMenu extends AbstractContainerMenu {
 	public static final int INPUT_X = 30;
 	public static final int INPUT_Y = 26;
-	public static final int RESULT_X = 124;
-	public static final int RESULT_Y = 35;
+	public static final int RESULT_X = 116;
+	public static final int RESULT_Y = 26;
 
 	private final Container container;
 	private final ContainerData data;
@@ -40,12 +40,14 @@ public class CookingPotMenu extends AbstractContainerMenu {
 				}
 			});
 		}
-		addSlot(new Slot(container, CookingPotBlockEntity.RESULT, RESULT_X, RESULT_Y) {
-			@Override
-			public boolean mayPlace(ItemStack stack) {
-				return false;
-			}
-		});
+		for (int index = 0; index < CookingPotBlockEntity.OUTPUTS; index++) {
+			addSlot(new Slot(container, CookingPotBlockEntity.RESULT + index, RESULT_X + (index % 2) * 18, RESULT_Y + (index / 2) * 18) {
+				@Override
+				public boolean mayPlace(ItemStack stack) {
+					return false;
+				}
+			});
+		}
 		addStandardInventorySlots(inventory, 8, 84);
 		addDataSlots(data);
 	}

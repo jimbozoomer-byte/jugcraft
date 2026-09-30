@@ -529,10 +529,12 @@ def check_agriculture():
             err(f"{name}: a seed is a trellis seed exactly when it plants a climbing crop")
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
+    outputs = re.search(r'int OUTPUTS = (\d+);', pot)
     cooling = re.search(r'int COOLING = (\d+);', pot)
-    if (not inputs or int(inputs.group(1)) != ag.POT_INPUTS or not cooling or int(cooling.group(1)) != ag.POT_COOLING
+    if (not inputs or int(inputs.group(1)) != ag.POT_INPUTS or not outputs or int(outputs.group(1)) != ag.POT_OUTPUTS
+            or not cooling or int(cooling.group(1)) != ag.POT_COOLING
             or f'Jugcraft.id("{ag.HEAT_TAG.split(":")[1]}")' not in pot):
-        err("CookingPotBlockEntity.java differs from POT_INPUTS, POT_COOLING or HEAT_TAG in tools/agriculture.py")
+        err("CookingPotBlockEntity.java differs from POT_INPUTS, POT_OUTPUTS, POT_COOLING or HEAT_TAG in tools/agriculture.py")
     growth = java.get("CropGrowth", "")
     bonus = re.search(r'LEGUME_BONUS = ([\d.]+)F', growth)
     if not bonus or float(bonus.group(1)) != ag.LEGUME_BONUS or f'Jugcraft.id("{ag.LEGUME_TAG.split(":")[1]}")' not in growth:
