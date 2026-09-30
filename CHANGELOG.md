@@ -28,6 +28,10 @@ No numbered release yet. Everything below is on `main`.
 - Also: composting, pig, chicken and parrot feed, `c:` crop, seed and food tags, and a new `agriculture` feature switch.
 - Original textures from `tools/crop_textures.py`. Twelve game tests, plus a client game test with screenshots of a corn maze, the fields and every growth stage.
 
+### #37 Spinning shafts and closer screenshots
+- Shafts, belt pulleys, the hand crank, the electric motor's shaft and the steam engine's flywheel now really spin (a block entity renderer) instead of scrolling a texture. Shafts placed with earlier builds need re-placing to spin.
+- The client test photographs a belt-and-motor line and the multi-blocks from closer, in three views.
+
 ### #36 Belts and the Electric Motor
 - **Belt Pulley** and **Leather Belt:** link two pulleys up to 16 blocks apart to carry rotation; the belt is drawn between them.
 - **Electric Motor:** JE → KE at 75%, up to 96 KE/t.
