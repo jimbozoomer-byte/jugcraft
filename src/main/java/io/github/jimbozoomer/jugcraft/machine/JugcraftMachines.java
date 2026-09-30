@@ -23,7 +23,6 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraft.world.level.material.PushReaction;
 
 /** Registers the electricity system: cables, machine blocks, their block entity, menus and energy lookup. */
 public final class JugcraftMachines {
@@ -50,9 +49,10 @@ public final class JugcraftMachines {
 		for (MachineKind kind : MachineKind.values()) {
 			// Furnace properties include light emission while LIT, which machines share.
 			BlockBehaviour.Properties props = properties(kind.id, BlockBehaviour.Properties.ofFullCopy(Blocks.FURNACE));
-			// Multi-block machines have detailed, not full-cube, models and must not be pushed apart.
+			// Multi-block machines have detailed, not full-cube, models. Pistons already refuse to move them:
+			// every part is an entity block (even dummies without a block entity), which pistons never push.
 			MachineBlock machine = kind.isLarge()
-					? new LargeMachineBlock(props.noOcclusion().pushReaction(PushReaction.BLOCK), kind)
+					? new LargeMachineBlock(props.noOcclusion(), kind)
 					: new MachineBlock(props, kind);
 			MACHINES.put(kind, (MachineBlock) block(kind.id, machine));
 

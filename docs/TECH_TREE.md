@@ -91,7 +91,7 @@ Most machines stay **simple one-block machines**. The ones where size is part of
 - **Placing:**
   - The item places only if every block of the machine is free (air, grass, water and so on) and inside the world.
   - The machine faces you, and its extra blocks turn with it.
-- **Breaking:** breaking **any** part removes the whole machine and drops **one** item, so nothing is lost and nothing is duplicated. Pistons can't push the parts.
+- **Breaking:** breaking **any** part removes the whole machine and drops **one** item, so nothing is lost and nothing is duplicated. Pistons leave the parts alone (vanilla never pushes entity blocks; not yet checked in game).
 - **Using:**
   - Every part acts as the machine. Right-click any part to open the screen.
   - Cables and pipes connect to any part, and comparators read the machine through any part.
