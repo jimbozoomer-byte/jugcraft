@@ -1,6 +1,6 @@
 # Auto-Crafter
 
-Status: implemented in source (PR number in CHANGELOG); **not yet played**. Compiles in CI; game tests cover it, and the client test screenshots its screen.
+Status: implemented in source (PR #30); **not yet played**. Compiles in CI; game tests cover it, and the client test screenshots its screen.
 Proposal issue: none. The owner selected "Auto-crafter" directly on 30 September 2026.
 Owner: @jimbozoomer-byte
 Target milestone and tier: workshop tier (brass plates, a basic circuit, a casing).
