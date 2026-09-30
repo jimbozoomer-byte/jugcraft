@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
@@ -357,7 +357,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	 */
 	private void eject(ServerLevel level, BlockPos pos, BlockState state) {
 		Direction facing = state.getValue(MachineBlock.FACING);
-		InventoryStorage inventory = InventoryStorage.of(this, null);
+		ContainerStorage inventory = ContainerStorage.of(this, null);
 		List<Storage<ItemVariant>> outputs = new ArrayList<>();
 		for (int slot = kind.outputSlot(); slot < kind.slots; slot++) {
 			if (!items.get(slot).isEmpty()) {
