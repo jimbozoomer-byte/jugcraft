@@ -10,7 +10,7 @@ from pathlib import Path
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, EXTRA_NAMES, MINERAL_TAGS, PROCESSING, COMPONENTS, CIRCUITS,
                        metal_blocks, metal_items, mineral_blocks, all_blocks, all_items, feature_of, ingot_id)
 
-from machines import MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, TOOLS, UPGRADES, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
+from machines import MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
 import model_writer
 import agriculture_data
 
@@ -182,6 +182,51 @@ def machine_assets(lang):
             "elements": model_writer.slice_model(block, elements, [(0, 0, 0)])[0]})
         write(ASSETS / "blockstates" / f"{block}.json", {"variants": {"": {"model": rid(f"block/{block}")}}})
         write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+    # Kinetic blocks: one model each, a turning or lit variant where they have one, and rotations.
+    import kinetic_models
+    for block, info in KINETIC_BLOCKS.items():
+        lang[f"block.{MOD}.{block}"] = info["display"]
+        elements = kinetic_models.MODELS[block]
+        textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
+        textures["particle"] = rid("block/sp_iron")
+        write(ASSETS / "models" / "block" / f"{block}.json", {
+            "parent": "minecraft:block/block", "textures": textures,
+            "elements": model_writer.slice_model(block, elements, [(0, 0, 0)])[0]})
+        swap = kinetic_models.TURNING.get(block) or kinetic_models.LIT.get(block)
+        if swap:
+            write(ASSETS / "models" / "block" / f"{block}_active.json", {
+                "parent": rid(f"block/{block}"), "textures": {swap[0]: rid(f"block/{swap[1]}")}})
+        # The block state property the variants depend on (the Java blocks define the same ones).
+        prop = "lit" if block in kinetic_models.LIT else "turning" if block in kinetic_models.STATES_TURNING else None
+
+        def model(active):
+            return rid(f"block/{block}_active") if active and swap else rid(f"block/{block}")
+        variants = {}
+        for active in ((False, True) if prop else (None,)):
+            suffix = f"{prop}={str(active).lower()}" if prop else ""
+            if info["states"] == "axis":
+                for axis, rotation in (("x", {"y": 90}), ("y", {"x": 90}), ("z", {})):
+                    variants[f"axis={axis}," + suffix] = {"model": model(active), **rotation}
+            elif info["states"] in ("facing", "horizontal"):
+                for facing, rotation in FACING_ROTATION.items():
+                    if info["states"] == "horizontal" and facing in ("up", "down"):
+                        continue
+                    variants[f"facing={facing}," + suffix if suffix else f"facing={facing}"] = {"model": model(active), **rotation}
+            else:
+                variants[suffix] = {"model": model(active)}
+        write(ASSETS / "blockstates" / f"{block}.json", {"variants": {k.rstrip(","): v for k, v in variants.items()}})
+        write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+    lang[f"message.{MOD}.hand_crank"] = "Turning for %s more seconds"
+    lang[f"message.{MOD}.steam_engine"] = "Steam engine: %s fuel, %s / %s mB water"
+    lang[f"message.{MOD}.dynamo"] = "Dynamo: %s / %s JE"
+    lang[f"message.{MOD}.electric_motor"] = "Electric motor: %s / %s JE"
+    lang[f"message.{MOD}.belt.first"] = "Now use the belt on the second pulley"
+    lang[f"message.{MOD}.belt.linked"] = "Belt fitted"
+    lang[f"message.{MOD}.belt.same"] = "Pick a different pulley"
+    lang[f"message.{MOD}.belt.not_pulley"] = "Both ends of a belt need a belt pulley"
+    lang[f"message.{MOD}.belt.taken"] = "That pulley already has a belt"
+    lang[f"message.{MOD}.belt.axis"] = "The pulleys must share an axis and be level with each other along it"
+    lang[f"message.{MOD}.belt.far"] = "Too far: a belt reaches 16 blocks"
     lang[f"message.{MOD}.crate"] = "%s × %s (holds up to %s)"
     lang[f"message.{MOD}.crate.empty"] = "Empty crate: holds %s stacks of one item"
     for tool, display in TOOLS.items():
@@ -216,6 +261,7 @@ def machine_assets(lang):
         lang[f"container.{MOD}.side.{face}"] = name
     for mode, name in (("input", "input"), ("output", "output"), ("both", "input and output"), ("none", "closed")):
         lang[f"container.{MOD}.mode.{mode}"] = name
+    lang[f"container.{MOD}.eject"] = "Eject"
     lang[f"container.{MOD}.eject.on"] = "Eject: on"
     lang[f"container.{MOD}.eject.off"] = "Eject: off"
     lang[f"container.{MOD}.eject.tooltip"] = "Push results out of output faces into pipes and inventories"
@@ -538,6 +584,8 @@ def main():
     assets()
     import handbook
     write(ASSETS / "handbook" / "en_us.json", handbook.build())
+    import recipe_view
+    write(ASSETS / "recipe_view.json", recipe_view.build())
     loot_tables()
     recipes()
     tags()

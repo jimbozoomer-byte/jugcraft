@@ -67,8 +67,13 @@ def texture(ref):
     if not png.is_file():
         err(f"Missing texture {ref}")
         return
+    animated = png.with_name(png.name + ".mcmeta").is_file()
     with Image.open(png) as img:
-        if img.size != (16, 16):
+        # Animated textures are a vertical strip of 16x16 frames with an .mcmeta beside them.
+        width, height = img.size
+        if animated and not (width == 16 and height % 16 == 0 and height > 16):
+            err(f"Animated texture {ref} is {img.size}, expected a 16-wide strip of 16x16 frames")
+        elif not animated and img.size != (16, 16):
             err(f"Texture {ref} is {img.size}, expected 16x16")
 
 
@@ -371,12 +376,15 @@ def check_large_machines():
     from large_machines import FOOTPRINTS
     kinds = MACHINE_JAVA.read_text(encoding="utf-8")
     for machine, footprint in FOOTPRINTS.items():
-        match = re.search(r"case " + machine.upper() + r" -> Footprint\.(tall|of)\((.*?)\);", kinds)
+        match = re.search(r"case " + machine.upper() + r" -> Footprint\.(tall|of|cuboid)\((.*?)\);", kinds, re.S)
         if not match:
             err(f"MachineKind.footprint() has no case for {machine}")
             continue
         if match.group(1) == "tall":
             java = [(0, y, 0) for y in range(int(match.group(2)))]
+        elif match.group(1) == "cuboid":
+            from large_machines import cuboid
+            java = cuboid(*(int(v) for v in match.group(2).split(",")))
         else:
             java = [(0, 0, 0) if part.strip() == "Vec3i.ZERO"
                     else tuple(int(v) for v in re.fullmatch(r"\s*new Vec3i\((-?\d+), (-?\d+), (-?\d+)\)\s*", part).groups())
