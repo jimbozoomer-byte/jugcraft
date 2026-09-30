@@ -16,6 +16,8 @@ import io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;
 import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
 import io.github.jimbozoomer.jugcraft.kinetic.ShaftBlock;
 import io.github.jimbozoomer.jugcraft.kinetic.SteamEngineBlock;
+import io.github.jimbozoomer.jugcraft.logistics.ConveyorBlock;
+import io.github.jimbozoomer.jugcraft.logistics.ConveyorBlockEntity;
 import io.github.jimbozoomer.jugcraft.logistics.ItemSorterBlockEntity;
 import io.github.jimbozoomer.jugcraft.logistics.JugcraftLogistics;
 import io.github.jimbozoomer.jugcraft.logistics.PneumaticExtractorBlock;
@@ -31,6 +33,12 @@ import io.github.jimbozoomer.jugcraft.machine.MachineUpgrades;
 import io.github.jimbozoomer.jugcraft.machine.SideConfig;
 import io.github.jimbozoomer.jugcraft.prospecting.OreSurvey;
 import io.github.jimbozoomer.jugcraft.storage.JugcraftStorage;
+import io.github.jimbozoomer.jugcraft.tools.Chargeable;
+import io.github.jimbozoomer.jugcraft.tools.ChargingStationBlock;
+import io.github.jimbozoomer.jugcraft.tools.ChargingStationBlockEntity;
+import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
+import io.github.jimbozoomer.jugcraft.tools.MiningDrillItem;
+import io.github.jimbozoomer.jugcraft.tools.RocketPackItem;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
@@ -46,14 +54,19 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.material.Fluids;
 
 /**
@@ -786,6 +799,178 @@ public class JugcraftGameTests {
 		String reason = BeltPulleyBlockEntity.cannotLink(helper.getLevel(), helper.absolutePos(new BlockPos(1, 1, 1)),
 				helper.absolutePos(new BlockPos(3, 2, 1)));
 		helper.assertTrue("axis".equals(reason), "Pulleys at different heights linked: " + reason);
+		helper.succeed();
+	}
+
+	// ------------------------------------------------------------------ conveyors
+
+	/** A charged electric motor at {@code pos} facing east, driving whatever is east of it. */
+	private static void motorFacingEast(GameTestHelper helper, BlockPos pos) {
+		helper.setBlock(pos, JugcraftKinetics.ELECTRIC_MOTOR.defaultBlockState().setValue(ElectricMotorBlock.FACING, Direction.EAST));
+		helper.getBlockEntity(pos, ElectricMotorBlockEntity.class).energy().setAmount(ElectricMotorBlockEntity.CAPACITY);
+	}
+
+	private static ConveyorBlockEntity conveyor(GameTestHelper helper, BlockPos pos, Direction facing, boolean splitter) {
+		helper.setBlock(pos, (splitter ? JugcraftLogistics.CONVEYOR_SPLITTER : JugcraftLogistics.CONVEYOR).defaultBlockState()
+				.setValue(ConveyorBlock.FACING, facing));
+		return helper.getBlockEntity(pos, ConveyorBlockEntity.class);
+	}
+
+	/** Items put in at the back of a driven two-conveyor line (as a pipe would) end up in the chest at its end. */
+	@GameTest(maxTicks = 200)
+	public void conveyorCarriesItemsIntoChest(GameTestHelper helper) {
+		conveyor(helper, new BlockPos(2, 1, 2), Direction.EAST, false);
+		conveyor(helper, new BlockPos(3, 1, 2), Direction.EAST, false);
+		ChestBlockEntity chest = chest(helper, new BlockPos(4, 1, 2));
+		motorFacingEast(helper, new BlockPos(1, 1, 2));
+		Storage<ItemVariant> belt = ItemStorage.SIDED.find(helper.getLevel(), helper.absolutePos(new BlockPos(2, 1, 2)), Direction.UP);
+		helper.assertTrue(belt != null, "The conveyor takes no items");
+		try (Transaction transaction = Transaction.openOuter()) {
+			helper.assertTrue(belt.insert(ItemVariant.of(Items.COBBLESTONE), 16, transaction) == 16, "The conveyor refused cobblestone");
+			transaction.commit();
+		}
+		helper.succeedWhen(() -> helper.assertTrue(count(chest, Items.COBBLESTONE) == 16,
+				"The chest holds " + count(chest, Items.COBBLESTONE) + " cobblestone"));
+	}
+
+	/** Without a drive, items stay on the belt. */
+	@GameTest(maxTicks = 100)
+	public void conveyorNeedsRotation(GameTestHelper helper) {
+		ConveyorBlockEntity belt = conveyor(helper, new BlockPos(2, 1, 2), Direction.EAST, false);
+		ChestBlockEntity chest = chest(helper, new BlockPos(3, 1, 2));
+		helper.assertTrue(belt.accept(new ItemStack(Items.COBBLESTONE), 0.5F), "The conveyor refused an item");
+		helper.runAtTickTime(60, () -> {
+			helper.assertTrue(count(chest, Items.COBBLESTONE) == 0, "An undriven conveyor moved an item");
+			helper.assertTrue(belt.items().size() == 1, "The item left the belt");
+			helper.succeed();
+		});
+	}
+
+	/** An item entity dropped on a driven conveyor is picked up and carried off. */
+	@GameTest(maxTicks = 200)
+	public void conveyorPicksUpDroppedItems(GameTestHelper helper) {
+		conveyor(helper, new BlockPos(2, 1, 2), Direction.EAST, false);
+		ChestBlockEntity chest = chest(helper, new BlockPos(3, 1, 2));
+		motorFacingEast(helper, new BlockPos(1, 1, 2));
+		helper.spawnItem(Items.IRON_INGOT, 2.5F, 1.5F, 2.5F);
+		helper.succeedWhen(() -> helper.assertTrue(count(chest, Items.IRON_INGOT) == 1, "The dropped ingot did not arrive"));
+	}
+
+	/** A splitter sends one stack left, one straight on and one right. */
+	@GameTest(maxTicks = 200)
+	public void splitterTakesTurns(GameTestHelper helper) {
+		ConveyorBlockEntity splitter = conveyor(helper, new BlockPos(2, 1, 2), Direction.EAST, true);
+		ChestBlockEntity left = chest(helper, new BlockPos(2, 1, 1));
+		ChestBlockEntity ahead = chest(helper, new BlockPos(3, 1, 2));
+		ChestBlockEntity right = chest(helper, new BlockPos(2, 1, 3));
+		for (float progress : new float[] {0.75F, 0.5F, 0.25F}) {
+			helper.assertTrue(splitter.accept(new ItemStack(Items.COBBLESTONE), progress), "The splitter refused an item");
+		}
+		motorFacingEast(helper, new BlockPos(1, 1, 2));
+		helper.succeedWhen(() -> {
+			for (ChestBlockEntity chest : List.of(left, ahead, right)) {
+				helper.assertTrue(count(chest, Items.COBBLESTONE) == 1, "Split unevenly: " + count(left, Items.COBBLESTONE) + " left, "
+						+ count(ahead, Items.COBBLESTONE) + " ahead, " + count(right, Items.COBBLESTONE) + " right");
+			}
+		});
+	}
+
+	// ------------------------------------------------------------------ powered tools
+
+	private static ItemStack charged(Item item) {
+		ItemStack stack = new ItemStack(item);
+		Chargeable.setEnergy(stack, ((Chargeable) item).capacity());
+		return stack;
+	}
+
+	/** A survival mock player at {@code pos}, facing south (+z), holding {@code tool}. */
+	private static ServerPlayer miner(GameTestHelper helper, ItemStack tool) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL);
+		player.setYRot(0);
+		player.setXRot(0);
+		player.setItemInHand(InteractionHand.MAIN_HAND, tool);
+		return player;
+	}
+
+	/** A charging station on cables' power fills the tool on its cradle and lights up. */
+	@GameTest(maxTicks = 100)
+	public void chargingStationChargesTool(GameTestHelper helper) {
+		BlockPos lower = new BlockPos(2, 1, 2);
+		BlockState state = JugcraftTools.CHARGING_STATION.defaultBlockState();
+		helper.setBlock(lower, state);
+		helper.setBlock(lower.above(), state.setValue(ChargingStationBlock.HALF, DoubleBlockHalf.UPPER));
+		charge(helper, lower.above(), Direction.WEST);
+		ChargingStationBlockEntity station = helper.getBlockEntity(lower, ChargingStationBlockEntity.class);
+		station.setTool(new ItemStack(JugcraftTools.MINING_DRILL));
+		helper.succeedWhen(() -> {
+			long energy = Chargeable.energy(station.tool());
+			helper.assertTrue(energy >= ChargingStationBlockEntity.CHARGE_RATE * 10, "The drill holds only " + energy + " JE");
+			helper.assertTrue(helper.getBlockState(lower).getValue(ChargingStationBlock.LIT), "The station is not lit while charging");
+		});
+	}
+
+	/** An empty drill mines like a bare hand and gets no ore drops; a charged one is fast and correct. */
+	@GameTest
+	public void emptyDrillIsSlow(GameTestHelper helper) {
+		BlockState stone = Blocks.STONE.defaultBlockState();
+		ItemStack empty = new ItemStack(JugcraftTools.MINING_DRILL);
+		ItemStack full = charged(JugcraftTools.MINING_DRILL);
+		helper.assertTrue(empty.getDestroySpeed(stone) == 1.0F, "An empty drill mines at " + empty.getDestroySpeed(stone));
+		helper.assertTrue(!empty.isCorrectToolForDrops(Blocks.IRON_ORE.defaultBlockState()), "An empty drill gets ore drops");
+		helper.assertTrue(full.getDestroySpeed(stone) > 8.0F, "A charged drill mines at only " + full.getDestroySpeed(stone));
+		helper.assertTrue(full.isCorrectToolForDrops(Blocks.DIAMOND_ORE.defaultBlockState()), "A charged drill cannot mine diamond ore");
+		helper.succeed();
+	}
+
+	/** In 3x3 mode, breaking one block of a wall breaks the square around it, for the energy of nine blocks. */
+	@GameTest
+	public void drillMinesThreeByThree(GameTestHelper helper) {
+		for (int x = 1; x <= 3; x++) {
+			for (int y = 1; y <= 3; y++) {
+				helper.setBlock(new BlockPos(x, y, 3), Blocks.STONE);
+			}
+		}
+		ItemStack drill = charged(JugcraftTools.MINING_DRILL);
+		drill.set(JugcraftTools.DRILL_MODE, MiningDrillItem.AREA);
+		ServerPlayer player = miner(helper, drill);
+		helper.assertTrue(player.gameMode.destroyBlock(helper.absolutePos(new BlockPos(2, 2, 3))), "The drill broke nothing");
+		for (int x = 1; x <= 3; x++) {
+			for (int y = 1; y <= 3; y++) {
+				helper.assertBlockPresent(Blocks.AIR, new BlockPos(x, y, 3));
+			}
+		}
+		long used = JugcraftTools.DRILL_CAPACITY - Chargeable.energy(player.getMainHandItem());
+		helper.assertTrue(used == 9 * JugcraftTools.DRILL_ENERGY_PER_BLOCK, "The drill used " + used + " JE for nine blocks");
+		helper.succeed();
+	}
+
+	/** Cutting the bottom log with the chainsaw fells the whole tree, branches too. */
+	@GameTest
+	public void chainsawFellsTree(GameTestHelper helper) {
+		for (int y = 1; y <= 5; y++) {
+			helper.setBlock(new BlockPos(2, y, 2), Blocks.OAK_LOG);
+		}
+		helper.setBlock(new BlockPos(3, 4, 3), Blocks.OAK_LOG);
+		ServerPlayer player = miner(helper, charged(JugcraftTools.CHAINSAW));
+		player.gameMode.destroyBlock(helper.absolutePos(new BlockPos(2, 1, 2)));
+		for (int y = 1; y <= 5; y++) {
+			helper.assertBlockPresent(Blocks.AIR, new BlockPos(2, y, 2));
+		}
+		helper.assertBlockPresent(Blocks.AIR, new BlockPos(3, 4, 3));
+		helper.succeed();
+	}
+
+	/** A tick of rocket thrust costs its JE and cancels a fall. */
+	@GameTest
+	public void rocketPackThrustUsesEnergy(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setItemSlot(EquipmentSlot.CHEST, charged(JugcraftTools.ROCKET_PACK));
+		player.fallDistance = 10;
+		RocketPackItem.thrust(player);
+		long left = Chargeable.energy(player.getItemBySlot(EquipmentSlot.CHEST));
+		helper.assertTrue(left == RocketPackItem.CAPACITY - RocketPackItem.ENERGY_PER_TICK, "The pack holds " + left + " JE");
+		helper.assertTrue(player.fallDistance == 0, "The fall was not cancelled");
 		helper.succeed();
 	}
 

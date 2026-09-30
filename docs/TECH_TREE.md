@@ -338,6 +338,21 @@ Steel is the second material tier. It needs **no power** and no new ore, only ir
 - **Unpowered machines** have no battery, and cables never connect to them. Their screens show no energy bar.
 - Both work with hoppers, pipes, side configuration and eject like any processing machine.
 
+## Powered tools
+
+The first dieselpunk gear (see [ART_DIRECTION.md](ART_DIRECTION.md)). The tools hold JE instead of wearing out, and are charged at a charging station fed by cables.
+
+| Item / block | What it does | Details | Built from |
+| --- | --- | --- | --- |
+| Mining Drill | JE pickaxe and shovel, faster than netherite, diamond-tier drops | 100,000 JE, 60 JE a block. Sneak + use cycles one block / 3×3 / whole ore vein (32) | tungsten plate, 3 steel plates, steel gear, advanced circuit, lead ingot |
+| Chainsaw | JE axe that also cuts leaves; fells whole trees | 100,000 JE, 40 JE a block; sneak to cut one log | 3 tungsten plates, 3 steel plates, steel gear, advanced circuit, lead ingot |
+| Rocket Pack | Chest slot: hold jump in the air to fly | 200,000 JE, 50 JE a tick; no fall damage while firing; dedicated servers need `allow-flight=true` | 2 steel plates, advanced circuit, 2 fluid tanks, leather, 2 tungsten plates |
+| Charging Station | Two blocks tall; charges the tool on its cradle from cables | 50,000 JE buffer, 1,024 JE/t in, 512 JE/t into the tool; lamp lights while charging | 4 steel plates, redstone lamp, 2 copper cables, advanced circuit, battery box |
+
+Empty tools mine like a bare hand and get no drops. See [powered tools](features/powered-tools.md).
+
+**Code:** `tools/` (`JugcraftTools`, `Chargeable`, `PoweredToolItem`, `MiningDrillItem`, `ChainsawItem`, `RocketPackItem`, `RocketThrustPayload`, `ChargingStationBlock(Entity)`); client `ChargingStationRenderer`, `RocketPackClient`.
+
 ## Ore processing
 
 Ore processing gives more metal per ore and turns everyday blocks into useful things, without chemistry. There are three routes for an ore, each needing more machines:
@@ -392,6 +407,8 @@ Item logistics moves finished goods around without hoppers everywhere. Like powe
 | Pneumatic Extractor | Pulls from the inventory it faces and pushes out of its other five sides into pipes or inventories; a redstone signal pauses it | 16 items every 8 ticks | 4 brass plates, hopper, item pipe |
 | High-Pressure Extractor | The same, four times as fast (steel tier) | 32 items every 4 ticks | 4 steel plates, piston, pneumatic extractor |
 | Item Sorter | Accepts items from pipes on any side but its front, and passes only items that match its 9-slot filter into the inventory it faces | An empty filter matches nothing | 5 brass plates, comparator, hopper, 2 item pipes |
+| Conveyor | Carries items the way it faces while rotation drives it; loaded by pipes, hoppers, machines or dropped items; unloads into the conveyor or inventory ahead, or onto the ground | 2.5 blocks/s, 4 stacks per conveyor; 1 KE per conveyor per tick for the whole joined run (up to 64) | 3 leather belts, 2 iron plates, iron shaft → 6 |
+| Conveyor Splitter | A conveyor that sends items left, straight on and right in turn | As the conveyor | conveyor, 2 bronze gears, brass plate |
 | Brass Wrench | Right-click turns a machine, extractor or sorter; sneak + right-click dismantles a Jugcraft block, dropping it and its contents | Multi-block machines cannot be turned | 4 brass ingots |
 
 **Routing.** A network offers each item first to a sorter whose filter matches it, then to the other inventories in turn (round-robin), so one chest does not fill before the rest. The inventory the items came from never receives them back. If nothing accepts an item, it stays where it was.
@@ -407,7 +424,9 @@ The defaults keep the old behavior: ingredients in from the top and sides, resul
 
 **Eject.** The *Eject* button makes the machine push its results itself, 16 items every 8 ticks, out of every face set to Out or Both, into adjacent inventories or pipes. Multi-block machines eject from every block they occupy.
 
-**Code:** `logistics/` (`ItemNetworks`, `ItemPipeBlock`, `PneumaticExtractorBlock`, `ItemSorterBlock(Entity)`, `BrassWrenchItem`, `JugcraftLogistics`) and `machine/SideConfig.java`. Items move through Fabric's `ItemStorage.SIDED` lookup, so other mods' inventories take part automatically.
+**Conveyors.** Items ride the belt as whole stacks, drawn by the client. A conveyor feeding another from the side puts items onto its middle. A running conveyor carries players and mobs too; sneak to stand still. See [conveyors](features/conveyors.md).
+
+**Code:** `logistics/` (`ItemNetworks`, `ItemPipeBlock`, `PneumaticExtractorBlock`, `ItemSorterBlock(Entity)`, `ConveyorBlock(Entity)`, `BrassWrenchItem`, `JugcraftLogistics`; client `ConveyorRenderer`) and `machine/SideConfig.java`. Items move through Fabric's `ItemStorage.SIDED` lookup, so other mods' inventories take part automatically.
 
 ## Components
 

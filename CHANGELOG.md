@@ -11,8 +11,23 @@ No numbered release yet. Everything below is on `main`.
 ### Fix: ore loot tables in the 26.x format (pull request pending)
 - **Ores now drop their raw material.** Before this, mining tin, zinc, lead, silver, nickel, tungsten, uranium, salt, phosphate, lepidolite or monazite ore, or oil sand, dropped the block itself, as if with Silk Touch. Fortune and multi-drops (2–4 salt, 1–2 bitumen) did nothing either.
 - **Cause:** Minecraft 26.x renamed the loot keys (`conditions` → `condition`, `functions` → `modifier`, and Silk Touch is now the `minecraft:tool/can_silk_touch` predicate). The old keys were silently ignored. The game test server had been logging "Unreachable entry!" for all 23 ore tables.
-- Every generated loot table (95 now) uses the 26.x format. Storage blocks and machines still drop themselves, and now respect explosions again.
+- Every generated loot table (98 now) uses the 26.x format. Storage blocks and machines still drop themselves, and now respect explosions again.
+- **Charging Station (#40):** its "lower half only" condition used the old keys too, so breaking the top half dropped two stations. It now drops one.
 - `tools/check_mod_data.py` fails on any pre-26.x loot key, and a new game test mines ores and checks what drops.
+
+### #40 Powered tools (the first dieselpunk gear)
+- **Mining Drill:** a JE pickaxe and shovel, faster than netherite; modes for one block, 3×3 or a whole ore vein.
+- **Chainsaw:** a JE axe that also cuts leaves and fells whole trees.
+- **Rocket Pack:** worn on the chest; hold jump in the air to fly.
+- **Charging Station:** a two-block-tall station that charges the tool on its cradle from cables.
+- The tools hold JE instead of wearing out; empty, they mine like a bare hand.
+- New dieselpunk textures and detailed 3D item models; [docs/ART_DIRECTION.md](docs/ART_DIRECTION.md) records the rule that higher tiers look dieselpunk.
+- Five game tests and three client screenshots.
+
+### #38 Conveyors
+- **Conveyor:** carries items (drawn riding on it) the way it faces, 2.5 blocks a second, while rotation drives it: 1 KE per conveyor per tick for a whole joined run. Pipes, hoppers, machines and dropped items load it; it unloads into the conveyor or inventory ahead, or onto the ground. It carries players and mobs too.
+- **Conveyor Splitter:** sends items left, straight on and right in turn.
+- Four game tests and a client screenshot.
 
 ### #37 Spinning shafts and closer screenshots
 - Shafts, belt pulleys, the hand crank, the electric motor's shaft and the steam engine's flywheel now really spin (a block entity renderer) instead of scrolling a texture. Shafts placed with earlier builds need re-placing to spin.
