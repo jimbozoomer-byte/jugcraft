@@ -51,6 +51,10 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			int y = origin.getY();
 			int z = origin.getZ();
 			TestServerContext server = singleplayer.getServer();
+			// No command feedback in chat, so it does not cover the screenshots (the rule's name differs across
+			// versions; whichever does not exist just fails).
+			server.runCommand("gamerule sendCommandFeedback false");
+			server.runCommand("gamerule minecraft:send_command_feedback false");
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
 			server.runCommand("fill %d %d %d %d %d %d minecraft:smooth_stone".formatted(x - 10, y - 1, z - 10, x + 40, y - 1, z + 4));
@@ -71,8 +75,9 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_machines_2");
 
 			// A running kinetic line: steam engine, shafts, a gearbox with a hand crank, a dynamo and a crusher.
-			server.runOnServer(minecraft -> buildKineticLine(minecraft.overworld(), new BlockPos(x + 30, y, z - 5)));
-			server.runCommand("tp @p %d %d %d 180 30".formatted(x + 33, y + 1, z - 1));
+			// Its own row behind the multi-block camera (the showroom rows are at z - 5).
+			server.runOnServer(minecraft -> buildKineticLine(minecraft.overworld(), new BlockPos(x + 30, y, z + 2)));
+			server.runCommand("tp @p %d %d %d 180 35".formatted(x + 32, y + 2, z + 7));
 			context.waitTicks(60);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_kinetics");
