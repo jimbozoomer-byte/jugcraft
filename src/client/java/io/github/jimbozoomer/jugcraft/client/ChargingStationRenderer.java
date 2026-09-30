@@ -54,8 +54,9 @@ public class ChargingStationRenderer implements BlockEntityRenderer<ChargingStat
 		// Turn the north-facing layout to the station's facing, as its block model is turned.
 		pose.translate(0.5F, 0.0F, 0.5F);
 		pose.rotateDegrees(Axis.YP, -yRotation(state.facing));
-		pose.translate(0.0F, 1.45F, -0.27F);
+		pose.translate(0.0F, 1.5F, -0.32F);
 		pose.rotateDegrees(Axis.YP, 90);
+		pose.scale(1.2F, 1.2F, 1.2F);
 		state.tool.submit(pose, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		pose.popPose();
 	}
