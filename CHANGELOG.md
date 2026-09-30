@@ -14,6 +14,10 @@ No numbered release yet. Everything below is on `main`.
 - Every generated loot table (95 now) uses the 26.x format. Storage blocks and machines still drop themselves, and now respect explosions again.
 - `tools/check_mod_data.py` fails on any pre-26.x loot key, and a new game test mines ores and checks what drops.
 
+### #37 Spinning shafts and closer screenshots
+- Shafts, belt pulleys, the hand crank, the electric motor's shaft and the steam engine's flywheel now really spin (a block entity renderer) instead of scrolling a texture. Shafts placed with earlier builds need re-placing to spin.
+- The client test photographs a belt-and-motor line and the multi-blocks from closer, in three views.
+
 ### #36 Belts and the Electric Motor
 - **Belt Pulley** and **Leather Belt:** link two pulleys up to 16 blocks apart to carry rotation; the belt is drawn between them.
 - **Electric Motor:** JE → KE at 75%, up to 96 KE/t.
