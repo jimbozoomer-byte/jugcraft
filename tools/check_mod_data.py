@@ -238,14 +238,19 @@ def check_tags():
 
 
 def check_worldgen():
-    for path in sorted((DATA / MOD / "worldgen" / "configured_feature").glob("*.json")):
-        for target in (load(path) or {})["config"]["targets"]:
+    if (DATA / MOD / "worldgen" / "configured_feature").exists():
+        err("worldgen/configured_feature/ is the pre-26.x layout; Minecraft 26.3 reads worldgen/feature/")
+    for path in sorted((DATA / MOD / "worldgen" / "feature").glob("*.json")):
+        feature = load(path) or {}
+        if "config" in feature:
+            err(f"{path.name}: 26.x features have no \"config\" wrapper")
+        for target in feature.get("targets", []):
             block = split(target["state"]["Name"])[1]
             if block not in all_blocks():
                 err(f"{path.name}: places unknown block {block}")
     for path in sorted((DATA / MOD / "worldgen" / "placed_feature").glob("*.json")):
         feature = split((load(path) or {})["feature"])[1]
-        if not (DATA / MOD / "worldgen" / "configured_feature" / f"{feature}.json").is_file():
+        if not (DATA / MOD / "worldgen" / "feature" / f"{feature}.json").is_file():
             err(f"{path.name}: unknown configured feature {feature}")
 
 

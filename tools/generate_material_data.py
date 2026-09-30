@@ -395,9 +395,10 @@ def tags():
 # ---------------------------------------------------------------- worldgen
 
 def ore_feature(name, size, targets):
-    write(DATA / MOD / "worldgen" / "configured_feature" / f"ore_{name}.json", {
+    # Minecraft 26.x: configured features live in worldgen/feature/ and have no "config" wrapper.
+    write(DATA / MOD / "worldgen" / "feature" / f"ore_{name}.json", {
         "type": "minecraft:ore",
-        "config": {"size": size, "discard_chance_on_air_exposure": 0.0, "targets": targets},
+        "size": size, "discard_chance_on_air_exposure": 0.0, "targets": targets,
     })
 
 
