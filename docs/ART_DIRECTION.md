@@ -12,7 +12,7 @@ Jugcraft's look changes with its tiers, the way real technology did: the early g
 Brass, copper and riveted iron; glass portholes and valve wheels; firebrick and wood. Textures start with `sp_` (`tools/steampunk_textures.py`). The classic style pack keeps the older plain look for anyone who prefers it.
 
 ## Dieselpunk: steel tier and above
-As the tech gets higher tier, it becomes more dieselpunk and less steampunk. The powered tools and the charging station (#39) are the first dieselpunk content.
+As the tech gets higher tier, it becomes more dieselpunk and less steampunk. The powered tools and the charging station (#40) are the first dieselpunk content.
 - **Materials:** gunmetal and olive-drab paint worn through to bare metal at the edges; chrome trim; yellow-and-black hazard stripes; black rubber hoses and grips; bakelite handles; louvred grilles; soot-stained exhaust stacks.
 - **Details:** green phosphor gauges, caged amber warning lamps, stencilled serials, heavy bolts rather than decorative rivets.
 - Textures start with `dp_` (`tools/dieselpunk_textures.py`); models for tools and stations are in `tools/tool_models.py`.

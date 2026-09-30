@@ -8,7 +8,7 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### #39 Powered tools (the first dieselpunk gear)
+### #40 Powered tools (the first dieselpunk gear)
 - **Mining Drill:** a JE pickaxe and shovel, faster than netherite; modes for one block, 3×3 or a whole ore vein.
 - **Chainsaw:** a JE axe that also cuts leaves and fells whole trees.
 - **Rocket Pack:** worn on the chest; hold jump in the air to fly.

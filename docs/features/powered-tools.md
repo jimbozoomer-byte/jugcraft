@@ -1,6 +1,6 @@
 # Powered tools
 
-Status: implemented in source (PR #39); **not yet played**. Compiles in CI; game tests cover it, and the client test screenshots the tools.
+Status: implemented in source (PR #40); **not yet played**. Compiles in CI; game tests cover it, and the client test screenshots the tools.
 Proposal issue: none. The owner selected "Powered tools & armor" directly on 30 September 2026, with the direction that higher tiers look dieselpunk, very detailed, with things that are big in real life being big blocks.
 Owner: @jimbozoomer-byte
 Target milestone and tier: steel. Every tool needs steel plates, a steel gear or tungsten plates, and an advanced circuit.
