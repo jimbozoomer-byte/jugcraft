@@ -418,8 +418,16 @@ def chestnut_item(roasted=False):
 # ---------------------------------------------------------------- the turnip lantern
 
 def lantern_side(face):
-    """A turnip skin (purple above, cream below) where the model shows it: columns 4-11, rows 8-15."""
+    """A turnip skin (purple above, cream below) where the model's sides show it, columns 4-11 and rows 8-15,
+    and the root end for its bottom in rows 0-7. The rest is filled so the texture stays opaque."""
     c = Canvas()
+    c.rect(0, 0, 15, 15, TURNIP_WHITE[1])
+    for y in range(0, 8):
+        for x in range(4, 12):
+            ring = max(abs(x - 7.5), abs(y - 3.5))
+            c.px(x, y, TURNIP_WHITE[0 if ring > 3 else 1 if ring > 2 else 2])
+    for x, y in ((7, 3), (8, 4), (8, 3)):
+        c.px(x, y, rgb("8a7a62"))
     for y in range(8, 16):
         for x in range(4, 12):
             purple = y < 11 or (y == 11 and x % 3 == 0)
@@ -440,8 +448,10 @@ def lantern_side(face):
 
 
 def lantern_top():
-    """The turnip's crown (columns and rows 4-11) with the leaf-stalk stubs in the middle, as a lid."""
+    """The turnip's crown (columns and rows 4-11) with the leaf-stalk stubs in the middle, as a lid.
+    The rest is filled so the texture stays opaque."""
     c = Canvas()
+    c.rect(0, 0, 15, 15, TURNIP_PURPLE[3])
     for y in range(4, 12):
         for x in range(4, 12):
             ring = max(abs(x - 7.5), abs(y - 7.5))

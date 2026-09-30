@@ -86,9 +86,11 @@ def bog_bush_model():
 
 
 def lantern_model():
-    """A carved turnip, 8 pixels wide, with its face on the north side and a tuft of leaf stalks on top."""
+    """A carved turnip, 8 pixels wide, with its face on the north side and a tuft of leaf stalks on top.
+    The bottom shows the root end, drawn in the side texture's top rows."""
     side, face, top = rid("block/turnip_lantern_side"), rid("block/turnip_lantern_face"), rid("block/turnip_lantern_top")
     body = box((4, 0, 4), (12, 8, 12), {"north": "#face", "south": "#side", "east": "#side", "west": "#side", "up": "#top", "down": "#side"})
+    body["faces"]["down"]["uv"] = [4, 0, 12, 8]
     tuft = box((7, 8, 7), (9, 11, 9), {"north": "#top", "south": "#top", "east": "#top", "west": "#top", "up": "#top"})
     return {"parent": "minecraft:block/block", "textures": {"particle": side, "side": side, "face": face, "top": top},
             "elements": [body, tuft]}

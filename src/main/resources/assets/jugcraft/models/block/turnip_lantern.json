@@ -35,7 +35,13 @@
           "texture": "#top"
         },
         "down": {
-          "texture": "#side"
+          "texture": "#side",
+          "uv": [
+            4,
+            0,
+            12,
+            8
+          ]
         }
       }
     },
