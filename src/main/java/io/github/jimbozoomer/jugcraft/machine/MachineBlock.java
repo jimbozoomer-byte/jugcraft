@@ -1,13 +1,10 @@
 package io.github.jimbozoomer.jugcraft.machine;
 
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.energy.EnergyConnectable;
 import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -35,10 +32,6 @@ import org.jspecify.annotations.Nullable;
 public class MachineBlock extends BaseEntityBlock implements EnergyConnectable {
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;
-	public static final MapCodec<MachineBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			propertiesCodec(),
-			StringRepresentable.fromEnum(MachineKind::values).fieldOf("kind").forGetter(block -> block.kind)
-	).apply(instance, MachineBlock::new));
 
 	private final MachineKind kind;
 
@@ -50,11 +43,6 @@ public class MachineBlock extends BaseEntityBlock implements EnergyConnectable {
 
 	public MachineKind kind() {
 		return kind;
-	}
-
-	@Override
-	protected MapCodec<? extends BaseEntityBlock> codec() {
-		return CODEC;
 	}
 
 	@Override

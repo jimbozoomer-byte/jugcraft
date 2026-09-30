@@ -1,6 +1,5 @@
 package io.github.jimbozoomer.jugcraft.energy;
 
-import com.mojang.serialization.MapCodec;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,7 +23,6 @@ import net.minecraft.world.level.redstone.Orientation;
  * refresh when its surroundings change.
  */
 public class CableBlock extends PipeBlock implements EnergyConnectable {
-	public static final MapCodec<CableBlock> CODEC = simpleCodec(CableBlock::new);
 	/** JE per tick one push may send through a copper cable network. */
 	public static final long COPPER_RATE = 256;
 
@@ -35,11 +33,6 @@ public class CableBlock extends PipeBlock implements EnergyConnectable {
 			state = state.setValue(property, false);
 		}
 		this.registerDefaultState(state);
-	}
-
-	@Override
-	protected MapCodec<? extends PipeBlock> codec() {
-		return CODEC;
 	}
 
 	public long transferRate() {
