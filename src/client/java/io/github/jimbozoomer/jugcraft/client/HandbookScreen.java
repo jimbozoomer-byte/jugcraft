@@ -27,9 +27,9 @@ import net.minecraft.world.item.ItemStack;
  */
 public class HandbookScreen extends Screen {
 	private static final Identifier CONTENT = Jugcraft.id("handbook/en_us.json");
-	private static final int WIDTH = 300;
+	private static final int WIDTH = 330;
 	private static final int HEIGHT = 190;
-	private static final int CHAPTER_WIDTH = 84;
+	private static final int CHAPTER_WIDTH = 112;
 
 	private static final int BRASS = 0xFFB08A3A;
 	private static final int BRASS_DARK = 0xFF6E5220;
@@ -81,7 +81,7 @@ public class HandbookScreen extends Screen {
 		for (int i = 0; i < chapters.size(); i++) {
 			int index = i;
 			addRenderableWidget(Button.builder(Component.literal(chapters.get(i).get("title").getAsString()), button -> openChapter(index))
-					.bounds(left + 6, top + 22 + i * 17, CHAPTER_WIDTH - 10, 15).build());
+					.bounds(left + 6, top + 10 + i * 18, CHAPTER_WIDTH - 12, 16).build());
 		}
 		previous = addRenderableWidget(Button.builder(Component.literal("<"), button -> turn(-1))
 				.bounds(left + CHAPTER_WIDTH + 8, top + HEIGHT - 20, 16, 14).build());
@@ -114,7 +114,7 @@ public class HandbookScreen extends Screen {
 		graphics.fill(left, top, left + WIDTH, top + HEIGHT, LEATHER);
 		graphics.fill(left + CHAPTER_WIDTH, top + 4, left + WIDTH - 4, top + HEIGHT - 4, PAPER);
 		graphics.fill(left + CHAPTER_WIDTH, top + 4, left + CHAPTER_WIDTH + 3, top + HEIGHT - 4, PAPER_SHADE);
-		graphics.text(font, title, left + 8, top + 8, BRASS, false);
+		graphics.text(font, title, left + (WIDTH - font.width(title)) / 2, top - 13, 0xFFF4E2B0, true);
 	}
 
 	@Override
