@@ -40,6 +40,7 @@ Nothing is seasonal: every crop, block and recipe is available all year and stay
 ## Multiplayer and persistence
 - All growth, planting, picking and stripping runs on the server. Planting uses vanilla block items (with the usual build checks), and the sickle checks `mayInteract` for each block it touches.
 - Everything stores its state in block states: stem age and direction, bush age, leaf fruit. There are no block entities and no saved data.
+- Server work is random ticks only, each reading a few blocks: a stem reads its soil like any Jugcraft crop, a bush the block above it, and chestnut leaves the block below them. A chestnut tree's natural leaves tick all the time to grow burs (vanilla leaves tick only while decaying); leaves players place never tick.
 - A cranberry bush holds a water source like seagrass: breaking it leaves the water, and it cannot be used to create or remove water.
 - New IDs only. The only existing behaviour that changes is which seeds short grass can drop (18 instead of 12, at the same overall rate). The `agriculture` switch stops recipes, wild plants, gourd and cranberry patches and chestnut trees in new chunks, and grass drops. Registered blocks and items stay, so saved fields, bogs and trees survive.
 
