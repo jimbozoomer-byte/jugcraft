@@ -55,7 +55,7 @@ public class CableBlock extends PipeBlock implements EnergyConnectable {
 		if (level instanceof Level realLevel) {
 			EnergyNetworks.invalidate(realLevel);
 		}
-		return state.setValue(PROPERTY_BY_DIRECTION.get(direction), connectsTo(neighborState));
+		return state.setValue(PROPERTY_BY_DIRECTION.get(direction), connectsTo(level, pos, direction, neighborState));
 	}
 
 	@Override
@@ -76,13 +76,23 @@ public class CableBlock extends PipeBlock implements EnergyConnectable {
 
 	private static BlockState connections(BlockGetter level, BlockPos pos, BlockState state) {
 		for (Map.Entry<Direction, BooleanProperty> entry : PROPERTY_BY_DIRECTION.entrySet()) {
-			BlockState neighbor = level.getBlockState(pos.relative(entry.getKey()));
-			state = state.setValue(entry.getValue(), connectsTo(neighbor));
+			Direction direction = entry.getKey();
+			BlockState neighbor = level.getBlockState(pos.relative(direction));
+			state = state.setValue(entry.getValue(), connectsTo(level, pos, direction, neighbor));
 		}
 		return state;
 	}
 
-	private static boolean connectsTo(BlockState neighbor) {
-		return neighbor.getBlock() instanceof EnergyConnectable;
+	/**
+	 * Connects like other tech mods' transmitters: to its own kind, and to any block that exposes
+	 * an energy storage on the touching face (Jugcraft machines or other mods' blocks).
+	 * World generation has no full level to query, so there only the marker interface counts.
+	 */
+	private static boolean connectsTo(BlockGetter level, BlockPos pos, Direction direction, BlockState neighbor) {
+		if (neighbor.getBlock() instanceof EnergyConnectable) {
+			return true;
+		}
+		return level instanceof Level realLevel && !neighbor.isAir()
+				&& EnergyStorage.SIDED.find(realLevel, pos.relative(direction), direction.getOpposite()) != null;
 	}
 }

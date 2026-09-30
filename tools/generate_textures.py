@@ -386,60 +386,47 @@ def bricks(seed):
     return img
 
 
-def cable_texture():
+def _transmitter(palette, node, ring):
+    """Texture for a 4-px transmitter. Its arms read the bands at rows/columns 6-9 (the cable
+    model's UVs), shaded lengthwise like a round cross-section; the 6-9 center square is the
+    junction node seen on the core; ring colors the outer ends where the arm meets a neighbor."""
     img = new()
-    rubber = [(40, 36, 34), (52, 48, 44)]
-    copper = COPPER
-    rng = random.Random(400)
+    shade = {6: palette[3], 7: palette[2], 8: palette[1], 9: palette[0]}
     for y in range(16):
         for x in range(16):
-            band = (x + y) % 6 == 0
-            img.putpixel((x, y), (rng.choice(copper) if band else rng.choice(rubber)) + (255,))
-    return img
-
-
-def cable_item():
-    img = new()
-    for i in range(2, 14):
-        for w in (-1, 0, 1):
-            x, y = i, 15 - i + w
-            if 0 <= y < 16:
-                img.putpixel((x, y), ((52, 48, 44) if w else (40, 36, 34)) + (255,))
-    for i in (1, 14):
-        img.putpixel((i, 15 - i), COPPER[2] + (255,))
-        img.putpixel((i + (1 if i == 1 else -1), 15 - i), COPPER[1] + (255,))
-    return img
-
-
-def pipe_texture():
-    """Bronze pipe wall with a darker seam band, matching the cable model's UV layout."""
-    img = new()
-    rng = random.Random(420)
-    for y in range(16):
-        for x in range(16):
-            if x in (6, 9) and 6 <= y <= 9 or y in (6, 9) and 6 <= x <= 9:
-                c = BRONZE[0]
-            elif (x + y) % 7 == 0:
-                c = BRONZE[3]
+            in_x, in_y = 6 <= x <= 9, 6 <= y <= 9
+            if in_x and in_y:
+                c = node(x, y)
+            elif in_y:
+                c = ring[y - 6] if x in (0, 15) else shade[y]
+            elif in_x:
+                c = ring[x - 6] if y in (0, 15) else shade[x]
             else:
-                c = BRONZE[rng.choice([1, 2, 2])]
+                c = palette[1]
             img.putpixel((x, y), c + (255,))
     return img
 
 
-def pipe_item():
-    img = new()
-    for i in range(2, 14):
-        for w in (-1, 0, 1):
-            x, y = i, 15 - i + w
-            if 0 <= y < 16:
-                img.putpixel((x, y), BRONZE[3 if w < 0 else (2 if w == 0 else 0)] + (255,))
-    for i in (2, 13):  # flanged ends
-        for w in (-2, 2):
-            y = 15 - i + w
-            if 0 <= y < 16:
-                img.putpixel((i, y), BRONZE[1] + (255,))
-    return img
+RUBBER = [(22, 20, 20), (36, 34, 33), (52, 50, 48), (74, 72, 70)]
+
+
+def cable_texture():
+    """Black rubber insulation with a copper junction node."""
+    def node(x, y):
+        edge = x in (6, 9) or y in (6, 9)
+        return COPPER[0] if edge else COPPER[2 if (x + y) % 2 else 1]
+    return _transmitter(RUBBER, node, [COPPER[0], COPPER[1], COPPER[1], COPPER[0]])
+
+
+def pipe_texture():
+    """Bronze pipe with a riveted junction node and darker flanges at connections."""
+    def node(x, y):
+        if (x, y) in ((6, 6), (9, 6), (6, 9), (9, 9)):
+            return BRONZE[4]
+        edge = x in (6, 9) or y in (6, 9)
+        return BRONZE[1] if edge else BRONZE[3]
+    return _transmitter([BRONZE[0], BRONZE[1], BRONZE[2], BRONZE[4]], node,
+                        [BRONZE[0], BRONZE[0], BRONZE[0], BRONZE[0]])
 
 
 def tank_side(seed):
@@ -711,9 +698,7 @@ def machines():
     save(circuit(False), "item", "basic_circuit")
     save(circuit(True), "item", "advanced_circuit")
     save(cable_texture(), "block", "copper_cable")
-    save(cable_item(), "item", "copper_cable")
     save(pipe_texture(), "block", "bronze_fluid_pipe")
-    save(pipe_item(), "item", "bronze_fluid_pipe")
     save(tank_side(520), "block", "fluid_tank_side")
     save(tank_cap(521, True), "block", "fluid_tank_top")
     save(tank_cap(522, False), "block", "fluid_tank_bottom")

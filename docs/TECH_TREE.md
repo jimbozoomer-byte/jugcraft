@@ -72,6 +72,24 @@ All machines hold their own internal battery and accept power from cables or dir
 | Circuit Assembler | Mechanical | Up to three ingredient stacks (any order) → circuits | 32 JE/t | tin plates, bronze gear, cable, casing, redstone |
 | Arc Furnace (3×3×3 multiblock) | Mechanical (with chemistry stand-ins) | Quartz → 2 silicon; raw nickel, tungsten or uranium → ingot; bauxite, lepidolite and monazite stand-ins | 64 JE/t | 26 arc furnace casings (bricks + nickel) + controller |
 
+## Cables and pipes
+
+Copper Cable and the Bronze Fluid Pipe are *transmitters*, built like the ones in other tech mods (Mekanism, Thermal, IC2):
+
+- **Thin, not full blocks.** Each is a 4-pixel (¼-block) core. An arm reaches out toward each connected neighbor, and the hitbox follows the same shape. For comparison, Mekanism's cables and pipes are 6 pixels.
+- **Connect automatically.**
+  - A cable joins other cables and any block that stores or uses energy on the touching face.
+  - A pipe joins other pipes and any block with a fluid storage on that face, including tanks, pumps, the steam generator, vanilla cauldrons and other mods' fluid blocks.
+  - Cables and pipes never connect to each other, so they can run side by side.
+- **Visual connection = real connection.** The arms use the same lookup (`EnergyStorage.SIDED` / `FluidStorage.SIDED`) as the transfer code, so if it looks connected it is connected.
+![Cables between a coal generator and machines; a pipe from a pump to a tank](images/transmitters.png)
+
+*Approximate isometric render made from the mod's own textures and model boxes, not a game screenshot.*
+
+- **Look:**
+  - The cable is black rubber insulation with copper connectors. The pipe is bronze, darker at its flanged ends.
+  - In the inventory both show as a short 3D segment.
+
 ## Fluids
 
 The fluid branch moves liquids around. It never changes what a liquid *is*: that is chemistry.

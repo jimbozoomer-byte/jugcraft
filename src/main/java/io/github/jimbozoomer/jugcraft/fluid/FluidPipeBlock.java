@@ -1,8 +1,7 @@
 package io.github.jimbozoomer.jugcraft.fluid;
 
-import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
-import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import java.util.Map;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -58,7 +57,7 @@ public class FluidPipeBlock extends PipeBlock implements FluidConnectable {
 		if (level instanceof Level realLevel) {
 			FluidNetworks.invalidate(realLevel);
 		}
-		return state.setValue(PROPERTY_BY_DIRECTION.get(direction), connectsTo(neighborState));
+		return state.setValue(PROPERTY_BY_DIRECTION.get(direction), connectsTo(level, pos, direction, neighborState));
 	}
 
 	@Override
@@ -79,14 +78,23 @@ public class FluidPipeBlock extends PipeBlock implements FluidConnectable {
 
 	private static BlockState connections(BlockGetter level, BlockPos pos, BlockState state) {
 		for (Map.Entry<Direction, BooleanProperty> entry : PROPERTY_BY_DIRECTION.entrySet()) {
-			BlockState neighbor = level.getBlockState(pos.relative(entry.getKey()));
-			state = state.setValue(entry.getValue(), connectsTo(neighbor));
+			Direction direction = entry.getKey();
+			BlockState neighbor = level.getBlockState(pos.relative(direction));
+			state = state.setValue(entry.getValue(), connectsTo(level, pos, direction, neighbor));
 		}
 		return state;
 	}
 
-	private static boolean connectsTo(BlockState neighbor) {
-		return neighbor.getBlock() instanceof FluidConnectable
-				|| neighbor.getBlock() instanceof MachineBlock machine && machine.kind() == MachineKind.STEAM_GENERATOR;
+	/**
+	 * Connects like other tech mods' transmitters: to its own kind, and to any block that exposes
+	 * a fluid storage on the touching face (Jugcraft machines or other mods' blocks).
+	 * World generation has no full level to query, so there only the marker interface counts.
+	 */
+	private static boolean connectsTo(BlockGetter level, BlockPos pos, Direction direction, BlockState neighbor) {
+		if (neighbor.getBlock() instanceof FluidConnectable) {
+			return true;
+		}
+		return level instanceof Level realLevel && !neighbor.isAir()
+				&& FluidStorage.SIDED.find(realLevel, pos.relative(direction), direction.getOpposite()) != null;
 	}
 }

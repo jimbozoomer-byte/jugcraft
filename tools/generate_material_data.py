@@ -154,8 +154,19 @@ def machine_assets(lang):
         for direction, rotation in CABLE_ROTATION.items():
             parts.append({"when": {direction: "true"}, "apply": {"model": rid(f"block/{cable}_arm"), **rotation}})
         write(ASSETS / "blockstates" / f"{cable}.json", {"multipart": parts})
-        write(ASSETS / "models" / "item" / f"{cable}.json",
-              {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{cable}")}})
+        # A 3D straight segment in hand and inventory, like other tech mods' transmitters.
+        write(ASSETS / "models" / "item" / f"{cable}.json", {
+            "parent": "minecraft:block/block",
+            "textures": {"cable": texture, "particle": texture},
+            "elements": [{"from": [6, 6, 0], "to": [10, 10, 16], "faces": {
+                "north": {"uv": [6, 6, 10, 10], "texture": "#cable"},
+                "south": {"uv": [6, 6, 10, 10], "texture": "#cable"},
+                "east": {"uv": [0, 6, 16, 10], "texture": "#cable"},
+                "west": {"uv": [0, 6, 16, 10], "texture": "#cable"},
+                "up": {"uv": [6, 0, 10, 16], "texture": "#cable"},
+                "down": {"uv": [6, 0, 10, 16], "texture": "#cable"},
+            }}],
+        })
         write(ASSETS / "items" / f"{cable}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{cable}")}})
 
     lang[f"tooltip.{MOD}.energy"] = "%s / %s JE"
