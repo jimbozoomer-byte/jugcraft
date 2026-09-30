@@ -8,7 +8,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 
 > **Status.** Everything here compiles and loads in CI. Where a feature has an automated game test, that test passes on a headless server. Nothing has been play-tested in a client or on a dedicated server with two players yet.
 >
-> This document describes the tip of the open PR stack (`feature/what-exists`). Until those PRs merge, `main` has only the content from PRs #4–#7. See [CHANGELOG.md](../CHANGELOG.md#unreleased) for which PR adds what.
+> This document describes `main` after PRs #4–#17. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
 
 ## Quick facts
 

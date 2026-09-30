@@ -6,13 +6,17 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 ## Unreleased
 
-These PRs are open and **stacked**: each builds on the one before it, so they merge in order (#8 first). Until #14 merges, `main` has two launch-blocking bugs: the old Fabric Loader and the old worldgen format (see #14).
+No numbered release yet. Everything below is on `main`.
 
-### #17 Changelog and "What Exists" guide
+### Merged 30 September 2026: PRs #8–#17
+
+These were built as a stack, each on the one before, and merged in order (#8 first).
+
+#### #17 Changelog and "What Exists" guide
 - Adds this `CHANGELOG.md` and [`docs/WHAT_EXISTS.md`](docs/WHAT_EXISTS.md). WHAT_EXISTS is a map of all content, shared APIs, data formats, file locations and check rules, so contributors and AI agents can build alongside the existing systems.
 - Adds feature records for [item logistics](docs/features/item-logistics.md) and [ore processing](docs/features/ore-processing.md).
 
-### #16 Ore processing depth
+#### #16 Ore processing depth
 - **New machines:**
   - **Pulverizer:** ore → 2 dust, plus a byproduct roll.
   - **Ore Washer:** ore + water → 3 washed ore, which the pulverizer grinds.
@@ -31,7 +35,7 @@ These PRs are open and **stacked**: each builds on the one before it, so they me
 - **Balance checks:** only ores get a bonus (×3 at most); byproducts add at most 25% of the input's metal; renewable sieve finds average under a nugget per operation.
 - Seven new game tests.
 
-### #15 Item logistics
+#### #15 Item logistics
 - **Side configuration:** every processing machine's screen has six face buttons (front, back, left, right, top, bottom). Each cycles between In, Out, Both and Off. The defaults keep the old hopper behavior.
 - **Eject:** when on, the machine pushes its results out of its Out faces, 16 items every 8 ticks.
 - **New blocks and items:**
@@ -42,52 +46,52 @@ These PRs are open and **stacked**: each builds on the one before it, so they me
 - Three new game tests.
 - Fix: a multi-block machine's eject never feeds back into its own other blocks.
 
-### #14 Machine recipes as data, and in-game tests
+#### #14 Machine recipes as data, and in-game tests
 - Machine recipes are now real Minecraft recipe types (`jugcraft:crushing`, `alloying`, …), one JSON file each under `data/<ns>/recipe/<type>/`. Data packs can add, change or remove them, and ingredients may be tags.
 - In-game tests (Fabric game test API) run in CI with `./gradlew build`.
-- **Launch-blocking fixes found by those tests** (these bugs are also on `main`):
+- **Launch-blocking fixes found by those tests** (before this PR, `main` could not start a server):
   - Fabric Loader 0.18.4 → **0.19.3**, which Fabric API 0.161.0+26.3 requires.
   - Ore worldgen moved to the 26.x format: `worldgen/feature/`, no `config` wrapper, block states as plain IDs.
 
-### #13 Steampunk machines
+#### #13 Steampunk machines
 - Every machine redrawn as a detailed steampunk model: brass, copper, riveted iron, gauges, gears, valve wheels, and fireboxes that glow while running. Includes 37 original textures.
 - The previous look stays available as the built-in resource pack **Jugcraft: Classic Machines**, so the change can be reverted.
 
-### #12 2×2 alloy smelter and power sockets
+#### #12 2×2 alloy smelter and power sockets
 - The alloy smelter becomes a 2×2 multi-block with a visible copper **power socket**, the only place cables connect to it.
 - Clear power-connection rules for every machine: each one either has a socket or takes power on any face that touches a cable.
 
-### #11 Multi-block machines
+#### #11 Multi-block machines
 - Machines can occupy several blocks and are placed as one item, in the style of Immersive Engineering. Breaking any part removes the whole machine.
 - **Geothermal Generator** (2 wide, lava → 64 JE/t) and **Wind Turbine** (3 tall, 4–24 JE/t by height and weather).
 
-### #10 Fluids, and tech-mod style cables and pipes
+#### #10 Fluids, and tech-mod style cables and pipes
 - **Bronze Fluid Pipe**, **Tinplate Tank** (16 buckets) and **Electric Pump**.
 - Cables and pipes are thin (4 px) and connect to each other and to anything with energy or fluid storage, as in other tech mods. Items show as 3D segments.
 
-### #9 Parts and circuits
+#### #9 Parts and circuits
 - **Metal Press** (ingot → plate), **Wire Drawer** (ingot → 3 wires), **Circuit Assembler** (basic and advanced circuits).
 - Gears are crafted from four plates.
 
-### #8 Alloy smelter
+#### #8 Alloy smelter
 - **Alloy Smelter** makes bronze, **brass**, **invar** and **solder** at metal-conserving ratios.
 
-## Merged
+### Merged earlier on 30 September 2026
 
-### #7 Solar panel and steam generator
+#### #7 Solar panel and steam generator
 - **Solar Panel** (8 JE/t in sun) and **Steam Generator** (coal or bitumen plus water → 64 JE/t), plus a machine roadmap.
 
-### #6 Electricity and the first machines
+#### #6 Electricity and the first machines
 - Jugcraft Energy (JE) with a shared `EnergyStorage` API, **Copper Cable** networks, **Coal Generator**, **Battery Box**, **Electric Furnace**, **Crusher** (ore doubling) and the **Arc Furnace** 3×3×3 multiblock.
 
-### #5 Base materials
+#### #5 Base materials
 - Zinc, lead, silver, nickel, tungsten, uranium, aluminum (bauxite), salt, phosphate, lithium (lepidolite), rare earths (monazite), sulfur, silicon and oil sand (bitumen).
 - Feature switches in `config/jugcraft.properties`.
 
-### #4 Fabric 26.3 scaffold, tin and bronze
+#### #4 Fabric 26.3 scaffold, tin and bronze
 - Pinned toolchain and the CI Build workflow.
 - Tin ore, raw tin, ingots and blocks, and bronze from a 3:1 copper/tin blend.
 - The offline data generator and checker (`tools/`).
 
-### #1 Vision and development setup
+#### #1 Vision and development setup
 - Project vision, contribution rules, design and architecture documents, and owner-directed Fabric development.
