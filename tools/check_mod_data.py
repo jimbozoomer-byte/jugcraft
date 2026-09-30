@@ -197,6 +197,35 @@ def check_recipes(registered):
             err(f"{name}: turns bronze back into its ingredients")
 
 
+def check_machine_recipe_files(registered):
+    """Machine recipes are data-driven files under recipe/<type>/; each must resolve and match its type."""
+    from generate_material_data import RECIPE_TYPES
+    kinds = MACHINE_JAVA.read_text(encoding="utf-8")
+    for machine, kind in RECIPE_TYPES.items():
+        if f'"{kind}"' not in kinds:
+            err(f"MachineKind.recipeType() has no \"{kind}\" (tools say {machine} uses it)")
+    expected = sum(len(recipes) for recipes in machine_recipes().values())
+    files = sorted((DATA / MOD / "recipe").glob("*/*.json"))
+    if len(files) != expected:
+        err(f"{len(files)} machine recipe files, but tools/machines.py defines {expected}")
+    for path in files:
+        recipe = load(path)
+        if recipe is None:
+            continue
+        label = f"recipe/{path.parent.name}/{path.name}"
+        if recipe.get("type") != f"{MOD}:{path.parent.name}":
+            err(f"{label}: type {recipe.get('type')} does not match its folder")
+        if not recipe.get("fabric:load_conditions"):
+            err(f"{label}: missing feature switch condition")
+        refs = [part["ingredient"] for part in recipe.get("ingredients", [])] or [recipe.get("ingredient", "")]
+        for ref in refs + [recipe["result"]["id"]]:
+            if ref.startswith("#"):
+                if not tag_exists("item", ref[1:]):
+                    err(f"{label}: unknown tag {ref}")
+            elif split(ref)[0] == MOD and split(ref)[1] not in registered:
+                err(f"{label}: unknown item {ref}")
+
+
 def check_tags():
     for path in sorted(DATA.rglob("tags/*/**/*.json")):
         registry = path.relative_to(DATA).parts[2]
@@ -262,10 +291,7 @@ def check_java():
 
 
 def check_machines(registered):
-    """Audits crusher/arc furnace recipes and keeps Java machine stats in sync with tools/machines.py."""
-    generated = load(RES / MOD / "machine_recipes.json") or {}
-    if generated != machine_recipes():
-        err("jugcraft/machine_recipes.json is stale; run tools/generate_material_data.py")
+    """Audits machine recipes for metal and keeps Java machine stats in sync with tools/machines.py."""
     for machine, recipes in machine_recipes().items():
         for recipe in recipes:
             inputs = recipe.get("inputs") or [[recipe["input"], 1]]
@@ -374,6 +400,7 @@ def main():
     check_assets(sorted(registered))
     check_loot(registered)
     check_recipes(registered)
+    check_machine_recipe_files(registered)
     check_tags()
     check_worldgen()
     check_java()
