@@ -1,6 +1,6 @@
 # Tin and Bronze
 
-Status: implemented in source, **not yet built or played**. The first successful CI build and a two-client dedicated-server test are still required.
+Status: implemented and compiles; **not yet played**. A client launch and a two-client dedicated-server test are still required.
 Proposal issue: #2
 Owner: @jimbozoomer-byte
 Target milestone and tier: shared materials; Discovery stage
@@ -40,7 +40,9 @@ Actually run (30 September 2026, in a sandbox without access to Minecraft or Fab
 - `python3 scripts/check_repository.py`: PASS.
 - `javac` over the sources without Minecraft on the classpath: only missing-library errors, no syntax errors.
 
-Not run yet: `./gradlew build` (expected in the Build workflow), GameTests, client launch, dedicated server with two clients, restart/persistence, config toggle, worldgen sampling, performance. The planned scenarios are listed in #2.
+- GitHub Build workflow (PR #4): the first run failed on two renamed Fabric API 26.3 names (creative tabs, resource-condition signature); after fixing them from the fabric-api 0.161.0+26.3 source, `./gradlew build` → BUILD SUCCESSFUL.
+
+Not run yet: GameTests, client launch, dedicated server with two clients, restart/persistence, config toggle, worldgen sampling, performance. The planned scenarios are listed in #2.
 
 ## World and event applicability
 Ore generation only in newly generated Overworld chunks. Not seasonal; no creatures, bosses, loot or dimensions.

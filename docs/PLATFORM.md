@@ -1,6 +1,6 @@
 # Platform decision and bootstrap gate
 
-## Current pins (unverified)
+## Current pins (compile-verified)
 
 The bootstrap scaffold targets **Minecraft Java Edition 26.3 + Fabric** with these pins in `gradle.properties`:
 
@@ -9,11 +9,11 @@ The bootstrap scaffold targets **Minecraft Java Edition 26.3 + Fabric** with the
 | Minecraft | 26.3 | Owner decision (PR #1) |
 | Java | 25 | Minecraft 26.1+ requirement |
 | Gradle wrapper | 9.6.0, sha256 `bbaeb2fef8710818cf0e261201dab964c572f92b942812df0c3620d62a529a01` | Fabric 26.3 announcement; checksum computed from the downloaded distribution |
-| Fabric Loom | 1.17 (`net.fabricmc.fabric-loom`, no mappings: 26.x is unobfuscated) | Fabric 26.3 announcement |
+| Fabric Loom | 1.17 (`net.fabricmc.fabric-loom`, resolved to 1.17.21; no mappings: 26.x is unobfuscated) | Fabric 26.3 announcement |
 | Fabric API | 0.161.0+26.3 | Modrinth listing |
-| Fabric Loader | 0.18.4 | Best guess; not confirmed |
+| Fabric Loader | 0.18.4 | Resolved by the build |
 
-These were gathered by web search on 30 September 2026 in an environment that could not reach Fabric or Mojang servers, so **nothing has been resolved or compiled yet**. The Build workflow is the first real check. Correct any pin it rejects before merging.
+All pins resolved and the mod compiled in the Build workflow on 30 September 2026 (`./gradlew build` → BUILD SUCCESSFUL, Temurin JDK 25.0.4; PR #4). That proves compilation only: the client, dedicated server and two-client test have not been run yet.
 
 Status: pending dependency compatibility assessment. Minecraft Java Edition is the target. No game or loader versions are pinned yet; there is no Gradle build in this foundation.
 
