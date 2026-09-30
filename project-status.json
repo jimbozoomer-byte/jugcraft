@@ -1,7 +1,7 @@
 {
-  "phase": "contribution-foundation",
+  "phase": "bootstrap",
   "playable": false,
   "minecraft": "26.3",
   "loader": "fabric",
-  "java": null
+  "java": 25
 }

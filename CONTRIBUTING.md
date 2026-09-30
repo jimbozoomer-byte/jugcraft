@@ -1,12 +1,8 @@
 # Contributing to Jugcraft
 
-## Owner-authorized development: start now
+## Owner-authorized development
 
-The owner has explicitly authorized Claude to begin the Minecraft 26.3 + Fabric bootstrap, commit on a feature branch, push that branch and open a PR. No separate proposal issue or second maintainer is required for this task. If issue-writing access is unavailable, put the plan in the PR and continue development. This authorization does not supply missing GitHub authentication.
-
-Create the missing scaffold as the first implementation task; do not wait for someone else to create it. Verify and pin Loader/API/JDK/Loom/Gradle, register one original item and recipe, add a real build workflow, and document what actually ran. Update the foundation checker as part of bootstrap to support the implemented build phase. Do not pretend the documentation checker compiles the mod.
-
-Owner-directed original implementation may start while the long-term license is undecided. Preserve upstream template notices; do not choose a license on the owner's behalf. License selection remains required before accepting unrelated third-party code/assets or publishing a general reusable release.
+The owner authorized Claude to build the Minecraft 26.3 + Fabric bootstrap without a separate proposal issue or second maintainer. That bootstrap is done: the scaffold, pinned toolchain, Build workflow, base materials, machines and power were merged in PRs #4–#7 (see [docs/PLATFORM.md](docs/PLATFORM.md)). The project license is MIT (see [LICENSE_POLICY.md](LICENSE_POLICY.md)). Still outstanding: running the client and dedicated server, and the two-client playtest.
 
 Main requires a PR and passing checks, but zero independent approvals while there is one maintainer. The owner can merge their own PR after reviewing it. CODEOWNERS routes review; its approval is not mandatory. Keep no-force-push/no-deletion and CI protections. Restore independent review when the owner chooses to add maintainers.
 
@@ -15,7 +11,7 @@ Main requires a PR and passing checks, but zero independent approvals while ther
 
 Open a Feature proposal or Existing mod integration issue using the Issues tab. Search existing issues first. Describe the player experience, specialty, progression tier, inputs, outputs, and connections to other systems. Read docs/CONTENT_BRANCHES.md for the content scope. State which connections are required or optional, how trade/solo routes work, and why the specialty remains useful without mastering every branch. Small documentation corrections and bug fixes can go straight to a PR.
 
-Wait for a maintainer to approve the scope in the issue before starting substantial work. Maintainers should assign one lead contributor to avoid duplicate work. Community proposals remain welcome. The owner-authorized bootstrap above may proceed immediately; other features build on that foundation.
+Wait for a maintainer to approve the scope in the issue before starting substantial work. Maintainers should assign one lead contributor to avoid duplicate work. Community proposals remain welcome. The project license is MIT (see LICENSE_POLICY.md), and the platform bootstrap is merged, so implementation proposals can now build on it.
 
 ## 2. Fork, branch, commit
 
