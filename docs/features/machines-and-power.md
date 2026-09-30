@@ -13,7 +13,7 @@ Burn coal in a **Coal Generator**, run **Copper Cable** to your machines, and st
 | --- | --- | --- |
 | Coal Generator | Burns coal/charcoal (1600 ticks) or coal blocks (16000 ticks) | Makes 32/t while burning, holds 16,000, outputs 64/t to every side. Stops burning when full, so fuel is never wasted |
 | Solar Panel | Generates under open sky in daylight; no fuel. Crafted with silicon (from the arc furnace) | 8/t in sun, 4/t in rain, 0 at night; holds 4,000; outputs 32/t |
-| Steam Generator | Boils water with coal, charcoal, coal blocks or **bitumen** (800 ticks) | 64/t while boiling (twice the coal generator per fuel); uses 10 mB water per tick from an 8-bucket tank; holds 40,000; outputs 128/t. Water comes from buckets (top slot) a **water source block directly beneath** (20 mB/t), or any pump or pipe on any side; empty buckets come out the bottom |
+| Steam Generator | Boils water with coal, charcoal, coal blocks or **bitumen** (800 ticks) | 64/t while boiling (twice the coal generator per fuel); uses 10 mB water per tick from an 8-bucket tank; holds 40,000; outputs 128/t. Water comes from buckets (top slot), a **water source block directly beneath** (20 mB/t), or any pump or pipe on any side; empty buckets come out the bottom |
 | Copper Cable | Connects generators, batteries and machines; shows connections visually | Up to 256/t per push; energy is split evenly between receivers |
 | Battery Box | Stores energy | Holds 400,000; charges from any side except the front, discharges 256/t out of the **front** |
 | Electric Furnace | Smelts anything the vanilla furnace can | 10/t, 100 ticks per item (twice the vanilla furnace's speed); holds 10,000 |
