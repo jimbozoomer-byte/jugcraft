@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
@@ -357,7 +357,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return;
 		}
 		Direction facing = state.getValue(MachineBlock.FACING);
-		Storage<ItemVariant> output = InventoryStorage.of(this, null).getSlot(kind.outputSlot());
+		Storage<ItemVariant> output = ContainerStorage.of(this, null).getSlot(kind.outputSlot());
 		Footprint footprint = kind.footprint();
 		// Never hand results back to this machine through a pipe that touches another of its blocks.
 		Set<BlockPos> self = new HashSet<>();
