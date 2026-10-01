@@ -1,6 +1,5 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
-import com.mojang.serialization.MapCodec;
 import io.github.jimbozoomer.jugcraft.energy.EnergyConnectable;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
@@ -35,7 +34,6 @@ import org.jspecify.annotations.Nullable;
  * ({@link StringLightHookBlockEntity}); cables connect to it. Sneak-use it with an empty hand to take down its strand.
  */
 public class StringLightHookBlock extends FaceAttachedHorizontalDirectionalBlock implements EntityBlock, EnergyConnectable {
-	public static final MapCodec<StringLightHookBlock> CODEC = simpleCodec(StringLightHookBlock::new);
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 	public static final int LIGHT = 10;
 	private static final VoxelShape FLOOR = Block.box(5.0, 0.0, 5.0, 11.0, 8.0, 11.0);
@@ -48,11 +46,6 @@ public class StringLightHookBlock extends FaceAttachedHorizontalDirectionalBlock
 	public StringLightHookBlock(Properties properties) {
 		super(properties);
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(FACE, AttachFace.WALL).setValue(LIT, false));
-	}
-
-	@Override
-	protected MapCodec<StringLightHookBlock> codec() {
-		return CODEC;
 	}
 
 	public static int light(BlockState state) {

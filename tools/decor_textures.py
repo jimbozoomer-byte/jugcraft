@@ -170,6 +170,12 @@ def coffin_lid():
     return c.img
 
 
+def coffin_lid_plain():
+    c = Canvas()
+    wood_grain(c, COFFIN_WOOD, 8305, vertical=True)
+    return c.img
+
+
 def velvet():
     c = Canvas()
     noise(c, 0, 0, 15, 15, VELVET, 8303, [1, 3, 3, 1])
@@ -406,6 +412,7 @@ def decor_textures():
         ("item", "candy_bowl"): bowl_item(),
         ("block", "coffin_wood"): coffin_wood(),
         ("block", "coffin_lid"): coffin_lid(),
+        ("block", "coffin_lid_plain"): coffin_lid_plain(),
         ("block", "coffin_velvet"): velvet(),
         ("block", "coffin_brass"): brass(),
         ("item", "coffin"): coffin_item(),

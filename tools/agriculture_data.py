@@ -9,6 +9,7 @@ import festival_data
 import festivity_data
 import halloween_data
 import night_data
+import decor_data
 import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -142,6 +143,7 @@ def assets(root, write, lang):
     regatta_data.assets(root, write, lang)
     festivity_data.assets(root, write, lang)
     night_data.assets(root, write, lang)
+    decor_data.assets(root, write, lang)
 
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
@@ -243,6 +245,7 @@ def loot(data, write):
     festivity_data.loot(out, write)
     festivity_data.trades(data, write)
     night_data.loot(out, write)
+    decor_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -314,6 +317,7 @@ def tags(tags):
     regatta_data.tags(tags)
     festivity_data.tags(tags)
     night_data.tags(tags)
+    decor_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

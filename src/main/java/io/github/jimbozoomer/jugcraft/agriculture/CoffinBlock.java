@@ -1,6 +1,5 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
-import com.mojang.serialization.MapCodec;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -35,7 +34,6 @@ import org.jspecify.annotations.Nullable;
  * passes the night under vanilla's bed rules. Where a bed would explode (the Nether, the End) the coffin only refuses.
  */
 public class CoffinBlock extends AbstractBedBlock implements EntityBlock {
-	public static final MapCodec<CoffinBlock> CODEC = simpleCodec(CoffinBlock::new);
 	public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
 	private static final Map<Direction.Axis, VoxelShape> SHAPES = Map.of(
 			Direction.Axis.Z, Block.box(1.0, 0.0, 0.0, 15.0, 10.0, 16.0), Direction.Axis.X, Block.box(0.0, 0.0, 1.0, 16.0, 10.0, 15.0));
@@ -44,11 +42,6 @@ public class CoffinBlock extends AbstractBedBlock implements EntityBlock {
 		super(properties);
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, BedPart.FOOT).setValue(OCCUPIED, false)
 				.setValue(OPEN, false));
-	}
-
-	@Override
-	protected MapCodec<CoffinBlock> codec() {
-		return CODEC;
 	}
 
 	@Override

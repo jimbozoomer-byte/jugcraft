@@ -320,7 +320,7 @@ public final class JugcraftAgriculture {
 		registerTrickOrTreat();
 		registerFestivities();
 		registerNight();
-		registerDecorations();
+		registerHalloweenDecorations();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> FOOD_TAB.forEach(output::accept));
@@ -637,9 +637,9 @@ public final class JugcraftAgriculture {
 	 * them, the Candy Bowl, the Coffin, the Haunted Portrait and the Fog Machine. The hooks and the fog machine take
 	 * electricity through the shared energy interface.
 	 */
-	private static void registerDecorations() {
+	private static void registerHalloweenDecorations() {
 		Block hook = registerBlock("string_light_hook", StringLightHookBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
-				.strength(0.5F).sound(SoundType.LANTERN).noCollision().lightLevel(StringLightHookBlock::light).pushReaction(PushReaction.DESTROY));
+				.strength(0.5F).sound(SoundType.LANTERN).noCollision().lightLevel(StringLightHookBlock::light).pushReaction(PushReaction.POPPED));
 		registerItem("string_light_hook", props -> new BlockItem(hook, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		STRING_LIGHT_HOOK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("string_light_hook"),
 				FabricBlockEntityTypeBuilder.create(StringLightHookBlockEntity::new, hook).build());
@@ -647,19 +647,19 @@ public final class JugcraftAgriculture {
 		registerItem("jack_o_lantern_string_lights", StringLightsItem::new, new Item.Properties(), BUILDING_TAB);
 
 		Block bowl = registerBlock("candy_bowl", CandyBowlBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
-				.strength(0.8F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.DESTROY));
+				.strength(0.8F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.POPPED));
 		registerItem("candy_bowl", props -> new BlockItem(bowl, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
 		CANDY_BOWL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("candy_bowl"),
 				FabricBlockEntityTypeBuilder.create(CandyBowlBlockEntity::new, bowl).build());
 
 		Block coffin = registerBlock("coffin", CoffinBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
-				.strength(2.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
+				.strength(2.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
 		registerItem("coffin", props -> new BlockItem(coffin, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), EQUIPMENT_TAB);
 		COFFIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("coffin"),
 				FabricBlockEntityTypeBuilder.create(CoffinBlockEntity::new, coffin).build());
 
 		Block portrait = registerBlock("haunted_portrait", HauntedPortraitBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
-				.strength(1.0F).sound(SoundType.WOOD).noCollision().ignitedByLava().pushReaction(PushReaction.DESTROY));
+				.strength(1.0F).sound(SoundType.WOOD).noCollision().ignitedByLava().pushReaction(PushReaction.POPPED));
 		registerItem("haunted_portrait", props -> new BlockItem(portrait, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		HAUNTED_PORTRAIT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("haunted_portrait"),
 				FabricBlockEntityTypeBuilder.create(HauntedPortraitBlockEntity::new, portrait).build());
