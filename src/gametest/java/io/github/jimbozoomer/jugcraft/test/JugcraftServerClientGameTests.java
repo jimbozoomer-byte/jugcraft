@@ -23,13 +23,13 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.entity.EntityTypeTest;
-import org.lwjgl.glfw.GLFW;
 
 /**
  * Multiplayer and persistence checks with a real client. First a world holding a Retro Trader, a machine with items
@@ -39,6 +39,9 @@ import org.lwjgl.glfw.GLFW;
  * the two-client test is manual (docs/TESTING.md). Results are logged with the prefix "[server-check]".
  */
 public class JugcraftServerClientGameTests implements FabricClientGameTest {
+	/** GLFW's key code for Escape (LWJGL is not on the test classpath). */
+	private static final int KEY_ESCAPE = 256;
+
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		saveAndReopen(context);
@@ -97,7 +100,7 @@ public class JugcraftServerClientGameTests implements FabricClientGameTest {
 						.anyMatch(slot -> slot.getItem().is(Items.FEATHER) && slot.getItem().getCount() == 3));
 				check(machineSynced, "The crusher's screen on the dedicated server does not show its 3 feathers");
 				context.takeScreenshot("jugcraft_dedicated_server_machine");
-				context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+				context.getInput().pressKey(KEY_ESCAPE);
 				context.waitForScreen(null);
 
 				// The Retro Trader's offers reach the client.
@@ -106,13 +109,13 @@ public class JugcraftServerClientGameTests implements FabricClientGameTest {
 				context.getInput().pressKey(options -> options.keyUse);
 				context.waitForScreen(MerchantScreen.class);
 				context.waitTicks(10);
-				List<String> offers = context.computeOnClient(client -> ((MerchantScreen) client.screen).getMenu().getOffers().stream()
-						.map(offer -> offer.getResult().toString()).toList());
+				List<String> offers = context.computeOnClient(client -> client.player.containerMenu instanceof MerchantMenu menu
+						? menu.getOffers().stream().map(offer -> offer.getResult().toString()).toList() : List.of());
 				Jugcraft.LOGGER.info("[server-check] Retro Trader offers on the dedicated server: {}", offers);
 				check(!offers.isEmpty() && offers.stream().allMatch(offer -> offer.contains("jugcraft:")),
 						"The Retro Trader's offers did not reach the client: " + offers);
 				context.takeScreenshot("jugcraft_dedicated_server_trader");
-				context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+				context.getInput().pressKey(KEY_ESCAPE);
 				context.waitForScreen(null);
 
 				server.runCommand("give @a jugcraft:pixel_shard 7");
