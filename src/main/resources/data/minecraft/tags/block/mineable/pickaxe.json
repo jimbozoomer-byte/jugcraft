@@ -72,6 +72,7 @@
     "jugcraft:capacitor_bank",
     "jugcraft:steel_tank",
     "jugcraft:ore_drill",
+    "jugcraft:deposit_drill",
     "jugcraft:cobblestone_generator",
     "jugcraft:tree_farm",
     "jugcraft:water_wheel",
@@ -97,6 +98,9 @@
     "jugcraft:crystal_grower",
     "jugcraft:lithography_station",
     "jugcraft:gas_holder",
+    "jugcraft:advanced_solar_panel",
+    "jugcraft:advanced_engine",
+    "jugcraft:crop_harvester",
     "jugcraft:diesel_engine",
     "jugcraft:wind_turbine",
     "jugcraft:machine_casing",
@@ -130,12 +134,17 @@
     "jugcraft:charging_station",
     "jugcraft:conveyor_slope",
     "jugcraft:network_terminal",
+    "jugcraft:sprinkler",
     "jugcraft:circuitstone",
     "jugcraft:polished_circuitstone",
     "jugcraft:circuitstone_bricks",
     "jugcraft:pixel_crystal_cluster",
     "jugcraft:asphalt",
     "jugcraft:asphalt_slab",
-    "jugcraft:asphalt_road_line"
+    "jugcraft:asphalt_road_line",
+    "jugcraft:coal_deposit",
+    "jugcraft:iron_deposit",
+    "jugcraft:copper_deposit",
+    "jugcraft:tin_deposit"
   ]
 }

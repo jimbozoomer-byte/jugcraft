@@ -9,19 +9,18 @@
           "children": [
             {
               "type": "minecraft:item",
-              "name": "jugcraft:deepslate_lepidolite_ore",
-              "condition": "minecraft:tool/can_silk_touch"
+              "condition": "minecraft:tool/can_silk_touch",
+              "name": "jugcraft:deepslate_lepidolite_ore"
             },
             {
               "type": "minecraft:item",
-              "name": "jugcraft:lepidolite",
               "modifier": [
                 {
                   "type": "minecraft:set_count",
                   "count": {
                     "type": "minecraft:uniform",
-                    "min": 1.0,
-                    "max": 2.0
+                    "min": 1,
+                    "max": 2
                   }
                 },
                 {
@@ -32,7 +31,8 @@
                 {
                   "type": "minecraft:explosion_decay"
                 }
-              ]
+              ],
+              "name": "jugcraft:lepidolite"
             }
           ]
         }

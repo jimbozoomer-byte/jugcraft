@@ -12,9 +12,27 @@ No numbered release yet. Everything below is on `main`.
 - **Pixel Hollows:** a rare cave biome deep under the driest land, lined with **circuitstone** and lit only by scattered, faintly glowing **pixel crystal clusters**, with an original chiptune hum. It holds 1.5× the usual copper and redstone (and tin). New building blocks: circuitstone, polished circuitstone, circuitstone bricks and the **pixel lamp**; clusters drop **pixel shards**. One mixin adds the biome to the Overworld (Fabric API has no Overworld biome API).
 - **Retro Trader:** a villager profession at the new two-block-tall **arcade cabinet**. He sells a **Pixel Hollows Map** (use it to mark the nearest cave), circuitstone, lamps and shards, and buys shards back without any profit loop. Trades are 26.1+ data files.
 - **Retro Game Shop:** a small storefront in every new village (one per village, all five village types; not zombie villages), with the cabinet and a villager inside.
-- **Fix (all Jugcraft block loot):** 26.3 changed the loot table format (an entry's `condition` and `modifier`, and `type` in place of `function`/`condition`) and silently ignores the old keys. So far every ore dropped itself to any tool, Fortune did nothing, the charging station's lower-half-only drop rule was ignored, and a double asphalt slab dropped one slab. The tables are now written in 26.3's form, with vanilla's `minecraft:tool/can_silk_touch` predicate, and the data checker rejects the old keys; game tests cover Silk Touch, Fortune, the 2-tall drops and double slabs.
+- **Loot:** the cluster and cabinet use the 26.x loot format (main fixed the other tables in #60), and new game tests check ore Silk Touch and Fortune and double slabs.
 - **Dedicated-server check (CI):** a real client joins the game's own dedicated server, opens a machine and trades with the Retro Trader over the network, leaves and rejoins; and a world is saved and reopened with its trader, machine contents and cabinet intact. The two-client checklist is in [docs/TESTING.md](docs/TESTING.md#dedicated-server-and-two-clients).
 - Fourteen game tests, seven client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
+
+### Unmerged: Surface deposits, batch 11
+- **Coal, Iron, Copper and Tin Deposits:** flat patches in the top layer of stony hills (windswept hills, stony peaks, stony shores). Picks only break them, for nothing; each block holds 1,000 units.
+- **Deposit drill** (3×3, two tall): takes one coal or raw ore of each kind every 15 seconds from the deposits under it and one block round it, and pushes them into a chest, pipe, conveyor or machine beside it. Empty deposit blocks turn to stone.
+- `deposits.enabled` switch, an advancement, a handbook page and game tests.
+
+### #60 Advanced power, batch 10: big solar, a four-cylinder engine and tanks that keep their fluid
+- **Advanced solar panel:** a white pedestal carrying a 3×3 array of cells, 64 JE/t in full sun (eight solar panels).
+- **Advanced combustion engine** (2 long): gasoline or diesel → up to 1,024 KE/t on a shaft; through a magnet dynamo, the best JE per mB of either fuel.
+- **Tanks** have a new look (white with checker bands) and **keep their fluid when broken**: the item carries the fluid and amount, shown in its tooltip.
+- **Fix:** loot tables now use the Minecraft 26.x format; the old keys were silently ignored, so ore drop counts, the charging station's upper half and slab doubles were wrong. A data check and a game test guard it.
+- Two advancements, handbook pages and game tests.
+
+### #58 Farming, batch 9: harvesters, sprinklers and cotton
+- **Crop harvester** (1×2): harvests and replants the ripe crops in the 9×9 field in front of it.
+- **Sprinkler:** pipe-fed water gives nearby crops extra growth ticks; it also spreads fertilizer from its hopper.
+- **Cotton:** a new crop; seeds from sifting coarse dirt; cotton spins into string.
+- Three advancements, a Farming handbook chapter and a game test for each.
 
 ### #57 Fluid logistics, batch 8: gas holders, valves and filters
 - **Gas holder** (3×3×3 Horton sphere): 1,024 buckets of one gas, and only gases.

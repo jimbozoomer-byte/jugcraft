@@ -10,7 +10,7 @@ from pathlib import Path
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, EXTRA_NAMES, MINERAL_TAGS, PROCESSING, COMPONENTS, CIRCUITS,
                        metal_blocks, metal_items, mineral_blocks, all_blocks, all_items, feature_of, ingot_id)
 
-from machines import ELECTRONICS_BLOCKS, MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
+from machines import CROPS, ELECTRONICS_BLOCKS, FARMING_BLOCKS, MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
 import model_writer
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -132,6 +132,8 @@ def assets():
         lang[f"item.{MOD}.{item}"] = item_name(item)
     machine_assets(lang)
     pixel_hollows_assets(lang)
+    import deposits
+    deposits.write_all(write, ASSETS, DATA / MOD, lang)
     import advancements
     lang.update(advancements.generate(MOD)[1])
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
@@ -255,6 +257,33 @@ def machine_assets(lang):
             f"facing={facing}": {"model": rid(f"block/{block}"), **rotation}
             for facing, rotation in FACING_ROTATION.items() if facing not in ("up", "down")}})
         write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+    # Farming blocks: one model each, the same for every value of their one boolean state.
+    import farming_models
+    for block, info in FARMING_BLOCKS.items():
+        lang[f"block.{MOD}.{block}"] = info["display"]
+        elements = farming_models.MODELS[block]
+        textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
+        textures["particle"] = rid("block/dp_gunmetal")
+        write(ASSETS / "models" / "block" / f"{block}.json", {
+            "parent": "minecraft:block/block", "textures": textures,
+            "elements": model_writer.slice_model(block, elements, [(0, 0, 0)])[0]})
+        write(ASSETS / "blockstates" / f"{block}.json", {"variants": {
+            f"{info['states']}={value}": {"model": rid(f"block/{block}")} for value in ("false", "true")}})
+        write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+    # Crops: a cross model per growth stage, the ages mapped onto the stages, and flat seed and product items.
+    for crop, info in CROPS.items():
+        lang[f"block.{MOD}.{crop}"] = info["display"]
+        lang[f"item.{MOD}.{info['seeds']}"] = info["seeds_display"]
+        lang[f"item.{MOD}.{info['product']}"] = info["product_display"]
+        for stage in sorted(set(info["stages"])):
+            write(ASSETS / "models" / "block" / f"{crop}_stage{stage}.json", {
+                "parent": "minecraft:block/crop", "textures": {"crop": rid(f"block/{crop}_stage{stage}")}})
+        write(ASSETS / "blockstates" / f"{crop}.json", {"variants": {
+            f"age={age}": {"model": rid(f"block/{crop}_stage{stage}")} for age, stage in enumerate(info["stages"])}})
+        for item in (info["seeds"], info["product"]):
+            write(ASSETS / "models" / "item" / f"{item}.json",
+                  {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
+            write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
     # Kinetic blocks: one model each, a turning or lit variant where they have one, and rotations.
     import kinetic_models
     import kinetic_rotors
@@ -336,7 +365,9 @@ def machine_assets(lang):
     lang[f"message.{MOD}.electric_motor"] = "Electric motor: %s / %s JE"
     lang[f"message.{MOD}.network_terminal"] = "Network: %s cables at %s JE/t, %s devices holding %s / %s JE (%s%%)"
     lang[f"message.{MOD}.network_terminal.none"] = "No cable connected"
+    lang[f"tooltip.{MOD}.stored_fluid"] = "%s: %s mB"
     lang[f"message.{MOD}.fluid_filter"] = "Filter: only %s"
+    lang[f"message.{MOD}.sprinkler"] = "Sprinkler: %s mB of water, %s fertilizer"
     lang[f"message.{MOD}.fluid_filter.none"] = ("Filter: not set, lets nothing out. Use a filled bucket on it, or "
                                                 "right-click it beside a tank of the fluid")
     lang[f"message.{MOD}.belt.first"] = "Now use the belt on the second pulley"
@@ -436,50 +467,39 @@ def machine_recipe_files(out):
 
 # ---------------------------------------------------------------- loot tables
 
-# 26.x loot tables: a pool or an entry has one "condition", an entry has a "modifier" list, and conditions and
-# modifiers name their kind with "type" (as vanilla 26.3's own block loot tables do). 26.3 silently ignores the older
-# "conditions", "functions" and "function" keys, so tables in that form drop as if they had no conditions or functions.
-SILK = "minecraft:tool/can_silk_touch"  # vanilla's own Silk Touch predicate
+# Loot tables in the Minecraft 26.x format (as vanilla's own): each pool or entry has at most one "condition" and a
+# "modifier" (one function or a list), and conditions and functions are typed with "type". The older "conditions" and
+# "functions" keys are silently ignored by 26.x, so check_mod_data rejects them.
+SILK = "minecraft:tool/can_silk_touch"
+SURVIVES_EXPLOSION = {"type": "minecraft:survives_explosion"}
+
+
+def block_state(block, state):
+    """A condition that the broken block was in this state, such as {"half": "lower"}."""
+    return {"type": "minecraft:match_block", "blocks": rid(block), "state": state}
 
 
 def loot(block, entries, explosion_condition=False):
     pool = {"rolls": 1, "entries": entries}
     if explosion_condition:
-        pool["condition"] = {"type": "minecraft:survives_explosion"}
+        pool["condition"] = SURVIVES_EXPLOSION
     return {"type": "minecraft:block", "pools": [pool], "random_sequence": rid(f"blocks/{block}")}
 
 
-def self_drop(block, lower_half_only=False):
-    entry = {"type": "minecraft:item", "name": rid(block)}
-    if lower_half_only:  # a 2-tall block drops once, from its lower half (like vanilla doors)
-        entry["condition"] = {"type": "minecraft:match_block", "blocks": rid(block), "state": {"half": "lower"}}
-    return loot(block, [entry], explosion_condition=True)
-
-
-def slab_drop(block):
-    """One slab, or two from a double slab (like vanilla 26.3's slabs)."""
-    return loot(block, [{"type": "minecraft:item", "name": rid(block), "modifier": [
-        {"type": "minecraft:set_count", "count": 2,
-         "condition": {"type": "minecraft:match_block", "blocks": rid(block), "state": {"type": "double"}}},
-        {"type": "minecraft:explosion_decay"}]}])
-
-
-def silk_or(block, item, modifier):
-    """Silk Touch takes the block itself; anything else drops the item with the given modifiers."""
-    return loot(block, [{"type": "minecraft:alternatives", "children": [
-        {"type": "minecraft:item", "name": rid(block), "condition": SILK},
-        {"type": "minecraft:item", "name": rid(item), "modifier": modifier},
-    ]}])
+def self_drop(block):
+    return loot(block, [{"type": "minecraft:item", "name": rid(block)}], explosion_condition=True)
 
 
 def ore_drop(block, item, low=1, high=1):
-    modifier = []
+    functions = []
     if (low, high) != (1, 1):
-        modifier.append({"type": "minecraft:set_count",
-                         "count": {"type": "minecraft:uniform", "min": float(low), "max": float(high)}})
-    modifier += [{"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"},
-                 {"type": "minecraft:explosion_decay"}]
-    return silk_or(block, item, modifier)
+        functions.append({"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}})
+    functions += [{"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"},
+                  {"type": "minecraft:explosion_decay"}]
+    return loot(block, [{"type": "minecraft:alternatives", "children": [
+        {"type": "minecraft:item", "condition": SILK, "name": rid(block)},
+        {"type": "minecraft:item", "modifier": functions, "name": rid(item)},
+    ]}])
 
 
 def powered_tools(lang):
@@ -654,6 +674,37 @@ def petro_assets(lang):
         lang[f"block.{MOD}.{gas}"] = info["display"]
 
 
+# Tanks that keep their fluid when broken (batch 10): the drop copies the block entity's jugcraft:stored_fluid. The
+# multi-block ones drop only from their master block (part 0), which holds the block entity; breaking any other part
+# breaks the master too (machine/LargeMachineBlock).
+TANKS = {"fluid_tank": False, "steel_tank": True, "gas_holder": True}
+
+
+def tank_drop(block):
+    table = self_drop(block)
+    table["pools"][0]["entries"][0]["modifier"] = {
+        "type": "minecraft:copy_components", "source": "block_entity", "include": [rid("stored_fluid")]}
+    if TANKS[block]:
+        table["pools"][0]["condition"] = {"type": "minecraft:all_of",
+                                          "terms": [SURVIVES_EXPLOSION, block_state(block, {"part": "0"})]}
+    return table
+
+
+def crop_drop(block, info):
+    """Like vanilla wheat: a ripe crop drops its product (1-3) and seeds (more with Fortune); an unripe one, a seed."""
+    ripe = block_state(block, {"age": "7"})
+    return {"type": "minecraft:block", "modifier": {"type": "minecraft:explosion_decay"}, "pools": [
+        {"rolls": 1, "entries": [{"type": "minecraft:alternatives", "children": [
+            {"type": "minecraft:item", "condition": ripe, "name": rid(info["product"]), "modifier": {
+                "type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 3}}},
+            {"type": "minecraft:item", "name": rid(info["seeds"])}]}]},
+        {"rolls": 1, "condition": ripe, "entries": [
+            {"type": "minecraft:item", "name": rid(info["seeds"]), "modifier": {
+                "type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune",
+                "formula": "minecraft:binomial_with_bonus_count", "parameters": {"extra": 3, "probability": 0.5714286}}}]}],
+        "random_sequence": rid(f"blocks/{block}")}
+
+
 def loot_tables():
     out = DATA / MOD / "loot_table" / "blocks"
     for metal, info in METALS.items():
@@ -666,13 +717,28 @@ def loot_tables():
             table = ore_drop(block, mineral, low, high) if block.endswith("_ore") else self_drop(block)
             write(out / f"{block}.json", table)
     for block in machine_blocks():
-        write(out / f"{block}.json", self_drop(block))
+        if block in TANKS:
+            table = tank_drop(block)
+        elif block in CROPS:
+            table = crop_drop(block, CROPS[block])
+        else:
+            table = self_drop(block)
+        write(out / f"{block}.json", table)
     # The 2-tall charging station drops once, from its lower half.
     for block in TOOL_BLOCKS:
-        write(out / f"{block}.json", self_drop(block, lower_half_only=True))
+        table = self_drop(block)
+        table["pools"][0]["condition"] = {"type": "minecraft:all_of",
+                                          "terms": [SURVIVES_EXPLOSION, block_state(block, {"half": "lower"})]}
+        write(out / f"{block}.json", table)
     import petro
     for block, info in petro.BLOCKS.items():
-        write(out / f"{block}.json", slab_drop(block) if info["shape"] == "slab" else self_drop(block))
+        table = self_drop(block)
+        if info["shape"] == "slab":
+            table["pools"][0]["entries"][0]["modifier"] = [
+                {"type": "minecraft:set_count", "count": 2, "add": False,
+                 "condition": block_state(block, {"type": "double"})},
+                {"type": "minecraft:explosion_decay"}]
+        write(out / f"{block}.json", table)
     for rock, info in ROCKS.items():
         drop = info["drop"]
         table = ore_drop(rock, drop["item"], drop["min"], drop["max"]) if drop else self_drop(rock)
@@ -683,12 +749,18 @@ def loot_tables():
     for block in ph.CUBES:
         write(out / f"{block}.json", self_drop(block))
     low, high = ph.CLUSTER_DROPS
-    write(out / f"{ph.CLUSTER}.json", silk_or(ph.CLUSTER, ph.SHARD, [
-        {"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": float(low), "max": float(high)}},
-        {"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune",
-         "formula": "minecraft:uniform_bonus_count", "parameters": {"bonusMultiplier": 1}},
-        {"type": "minecraft:explosion_decay"}]))
-    write(out / f"{ph.CABINET}.json", self_drop(ph.CABINET, lower_half_only=True))
+    write(out / f"{ph.CLUSTER}.json", loot(ph.CLUSTER, [{"type": "minecraft:alternatives", "children": [
+        {"type": "minecraft:item", "condition": SILK, "name": rid(ph.CLUSTER)},
+        {"type": "minecraft:item", "modifier": [
+            {"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}},
+            {"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune",
+             "formula": "minecraft:uniform_bonus_count", "parameters": {"bonusMultiplier": 1}},
+            {"type": "minecraft:explosion_decay"}], "name": rid(ph.SHARD)},
+    ]}]))
+    table = self_drop(ph.CABINET)
+    table["pools"][0]["condition"] = {"type": "minecraft:all_of",
+                                      "terms": [SURVIVES_EXPLOSION, block_state(ph.CABINET, {"half": "lower"})]}
+    write(out / f"{ph.CABINET}.json", table)
 
 
 # ---------------------------------------------------------------- recipes
@@ -776,6 +848,10 @@ def recipes():
     paper = shaped(MACHINE_FEATURE, ["SS", "SS"], {"S": rid("sawdust")}, "sawdust")
     paper["result"] = {"id": "minecraft:paper", "count": 1}
     write(out / "paper_from_sawdust.json", paper)
+    # Farming (batch 9): cotton spins into string, one each.
+    string = shaped(MACHINE_FEATURE, ["C"], {"C": rid("cotton")}, "cotton")
+    string["result"] = {"id": "minecraft:string", "count": 1}
+    write(out / "string_from_cotton.json", string)
 
     # Pixel Hollows decor and the arcade cabinet. Nothing makes pixel shards: they only come from clusters (and trade).
     import pixel_hollows as ph
@@ -870,7 +946,13 @@ def tags():
         tags.add("block", f"minecraft:mineable/{info['tool']}", rid(rock))
 
     for block in machine_blocks():
-        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+        if block not in CROPS:
+            tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    # Crops grow on farmland, take bone meal and fertilizer, and keep the farmland under them.
+    for crop, info in CROPS.items():
+        tags.add("block", "minecraft:crops", rid(crop))
+        tags.add("block", "minecraft:maintains_farmland", rid(crop))
+        tags.add("item", "c:seeds", rid(info["seeds"]))
 
     # What the powered tools mine fast (tools/JugcraftTools): the drill is a pickaxe and shovel, the chainsaw an axe
     # that also cuts leaves.
@@ -909,6 +991,10 @@ def tags():
     for gas in petro.GASES:
         tags.add("fluid", f"c:{gas}", rid(gas))
     for block in petro.BLOCKS:
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    # Deposits break (slowly, for nothing) with a pickaxe; only a deposit drill gets their ore.
+    import deposits
+    for block in deposits.DEPOSITS:
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     tags.write()
 

@@ -14,7 +14,8 @@ from PIL import Image
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS, PART_UNITS, CIRCUITS, WASHED_ORES,
                        all_blocks, all_items, feature_of)
 import petro
-from machines import (MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
+import deposits
+from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 import pixel_hollows as ph
 
@@ -92,7 +93,7 @@ def model(ref):
 
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
-    for block in all_blocks() + machine_blocks() + petro.petro_blocks() + ph.blocks():
+    for block in all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + ph.blocks():
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -104,10 +105,12 @@ def check_assets(registered):
         if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
             err(f"Missing loot table for {block}")
     for item in registered:
+        if item in CROPS:
+            continue  # A crop block has no item of its own: its seeds plant it.
         definition = load(ASSETS / "items" / f"{item}.json")
         if definition:
             model(definition["model"]["model"])
-        if item not in all_blocks() + machine_blocks() + petro.petro_blocks() + ph.blocks() and f"item.{MOD}.{item}" not in lang:
+        if item not in all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + ph.blocks() and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -136,7 +139,8 @@ def check_petro():
             if fuel not in petro.FLUIDS and fuel not in petro.GASES:
                 err(f"{machine}: unknown fuel {fuel}")
             accessor = "fluid()" if fuel in petro.GASES else "source()"
-            if not re.search(rf"int {fuel.upper()} = {value};", fuels_java) or f"PetroFluids.{fuel.upper()}.{accessor}" not in fuels_java:
+            # A machine may have its own constant for a fuel, such as ADVANCED_DIESEL.
+            if not re.search(rf"int (\w+_)?{fuel.upper()} = {value};", fuels_java) or f"PetroFluids.{fuel.upper()}.{accessor}" not in fuels_java:
                 err(f"{machine}: {fuel} at {value} JE/mB in tools/petro.py does not match FluidFuels.java")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for gas in petro.GASES:
@@ -158,25 +162,25 @@ def rid_of(path):
     return f"{MOD}:{path}"
 
 
-# Loot table keys from before 26.x. 26.3 ignores them without an error, so a table using them loses its
-# conditions (Silk Touch, explosions, the lower half of a 2-tall block) and functions (counts, Fortune).
-OLD_LOOT_KEYS = ("conditions", "functions", "function")
+# Keys of the pre-26.x loot format: Minecraft 26.x ignores them without a warning, so a table that used them would lose
+# its conditions and functions (counts, Fortune, which half of a block drops) silently.
+OLD_LOOT_KEYS = {"conditions", "functions", "function"}
 
 
-def old_loot_keys(value):
-    if isinstance(value, dict):
-        return {key for key in value if key in OLD_LOOT_KEYS} | {k for v in value.values() for k in old_loot_keys(v)}
-    if isinstance(value, list):
-        return {k for v in value for k in old_loot_keys(v)}
+def old_loot_keys(node):
+    if isinstance(node, dict):
+        return (OLD_LOOT_KEYS & set(node)) | {key for value in node.values() for key in old_loot_keys(value)}
+    if isinstance(node, list):
+        return {key for value in node for key in old_loot_keys(value)}
     return set()
 
 
 def check_loot(registered):
     for path in sorted((DATA / MOD / "loot_table").rglob("*.json")):
         text = path.read_text(encoding="utf-8")
-        old = old_loot_keys(json.loads(text))
-        if old:
-            err(f"{path.name} uses pre-26 loot keys {sorted(old)} that 26.3 ignores (use condition/modifier/type)")
+        stale = old_loot_keys(load(path))
+        if stale:
+            err(f"{path.name}: uses the pre-26.x loot keys {sorted(stale)}; use \"condition\" and \"modifier\"")
         for name in re.findall(r'"name": "jugcraft:([a-z_]+)"', text):
             if name not in registered:
                 err(f"{path.name} drops unknown item {name}")
@@ -397,7 +401,8 @@ def check_fluid_recipes(registered):
 def check_tags():
     for path in sorted(DATA.rglob("tags/*/**/*.json")):
         registry = path.relative_to(DATA).parts[2]
-        known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + petro.petro_blocks()
+        known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + machine_items()
+                                                    + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + ph.blocks() + ph.items())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -690,9 +695,40 @@ def json_result(path):
     return json.dumps(data.get("result", {}))
 
 
+def check_deposits():
+    """Surface deposits: Java registration, worldgen and capacity match tools/deposits.py."""
+    java = (JAVA_ROOT / "deposit" / "JugcraftDeposits.java").read_text(encoding="utf-8")
+    found = dict(re.findall(r'DEPOSITS\.put\("([a-z_]+)", [^;]*?"([a-z_]+)"\)\);', java))
+    expected = {name: info["yield"].split(":")[1] for name, info in deposits.DEPOSITS.items()}
+    if found != expected:
+        err(f"JugcraftDeposits.java deposits {found} != tools/deposits.py {expected}")
+    if f"CAPACITY = {deposits.CAPACITY:_}" not in (JAVA_ROOT / "deposit" / "Deposits.java").read_text(encoding="utf-8"):
+        err(f"Deposits.CAPACITY is not {deposits.CAPACITY:_} as in tools/deposits.py")
+    worldgen = WORLDGEN.read_text(encoding="utf-8")
+    for name, info in deposits.DEPOSITS.items():
+        call = "addDeposit(stonyHills, " + ", ".join(f'"{v}"' for v in [name] + info["features"]) + ");"
+        if call not in worldgen:
+            err(f"JugcraftWorldgen does not add {name} with features {info['features']}")
+        for feature in info["features"]:
+            if feature not in FEATURES:
+                err(f"{name}: unknown feature {feature}")
+        if not (DATA / MOD / "worldgen" / "placed_feature" / f"{name}.json").is_file():
+            err(f"{name}: no placed feature")
+    for item in (info["yield"] for info in deposits.DEPOSITS.values()):
+        if split(item)[0] == MOD and split(item)[1] not in all_items():
+            err(f"Deposit yield {item} is not a Jugcraft item")
+    stats = STATS["deposit_drill"]
+    kinds = MACHINE_JAVA.read_text(encoding="utf-8")
+    for key, constant in (("ticks", "DEPOSIT_TICKS"), ("units", "DEPOSIT_UNITS"), ("reach", "DEPOSIT_REACH"),
+                          ("depth", "DEPOSIT_DEPTH")):
+        if f"int {constant} = {stats[key]};" not in kinds:
+            err(f"MachineKind.{constant} is not {stats[key]} as in tools/machines.py")
+
+
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
-                  | set(petro.petro_items()) | set(petro.petro_blocks()) | set(ph.blocks()) | set(ph.items()))
+                  | set(petro.petro_items()) | set(petro.petro_blocks()) | set(deposits.DEPOSITS)
+                  | set(ph.blocks()) | set(ph.items()))
     check_assets(sorted(registered))
     check_petro()
     check_loot(registered)
@@ -702,6 +738,7 @@ def main():
     check_tags()
     check_worldgen()
     check_java()
+    check_deposits()
     check_machines(registered)
     check_large_machines()
     check_style_pack()

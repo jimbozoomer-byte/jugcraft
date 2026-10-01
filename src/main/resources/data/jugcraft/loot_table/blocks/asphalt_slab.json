@@ -11,6 +11,7 @@
             {
               "type": "minecraft:set_count",
               "count": 2,
+              "add": false,
               "condition": {
                 "type": "minecraft:match_block",
                 "blocks": "jugcraft:asphalt_slab",
@@ -24,7 +25,10 @@
             }
           ]
         }
-      ]
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
   ],
   "random_sequence": "jugcraft:blocks/asphalt_slab"

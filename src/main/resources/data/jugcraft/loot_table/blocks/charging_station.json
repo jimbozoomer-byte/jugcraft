@@ -6,18 +6,23 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "jugcraft:charging_station",
-          "condition": {
+          "name": "jugcraft:charging_station"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
             "type": "minecraft:match_block",
             "blocks": "jugcraft:charging_station",
             "state": {
               "half": "lower"
             }
           }
-        }
-      ],
-      "condition": {
-        "type": "minecraft:survives_explosion"
+        ]
       }
     }
   ],

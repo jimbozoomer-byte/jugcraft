@@ -9,12 +9,11 @@
           "children": [
             {
               "type": "minecraft:item",
-              "name": "jugcraft:deepslate_monazite_ore",
-              "condition": "minecraft:tool/can_silk_touch"
+              "condition": "minecraft:tool/can_silk_touch",
+              "name": "jugcraft:deepslate_monazite_ore"
             },
             {
               "type": "minecraft:item",
-              "name": "jugcraft:monazite",
               "modifier": [
                 {
                   "type": "minecraft:apply_bonus",
@@ -24,7 +23,8 @@
                 {
                   "type": "minecraft:explosion_decay"
                 }
-              ]
+              ],
+              "name": "jugcraft:monazite"
             }
           ]
         }
