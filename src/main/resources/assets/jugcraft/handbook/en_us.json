@@ -2094,6 +2094,29 @@
           }
         },
         {
+          "title": "Diesel Engine",
+          "icon": "jugcraft:diesel_engine",
+          "text": [
+            "Two wide, two tall and three long. Burns diesel (256 KE a mB) or heavy fuel oil (128) piped into its 8-bucket tank and turns a shaft out of the back of its upper right back block: up to 512 KE/t, twice the large steam engine. It burns only for the rotation the line takes.",
+            "Needs no power."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:plastic_sheet",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_gear",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_gear",
+              "jugcraft:steel_plate",
+              "jugcraft:plastic_sheet",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:diesel_engine",
+            "count": 1
+          }
+        },
+        {
           "title": "Asphalt",
           "icon": "jugcraft:asphalt",
           "text": [

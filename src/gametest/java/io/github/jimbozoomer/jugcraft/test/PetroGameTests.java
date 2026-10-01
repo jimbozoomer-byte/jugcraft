@@ -2,8 +2,8 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidFuels;
-import io.github.jimbozoomer.jugcraft.chemistry.PetroBlocks;
 import io.github.jimbozoomer.jugcraft.chemistry.OilReservoirs;
+import io.github.jimbozoomer.jugcraft.chemistry.PetroBlocks;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroItems;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
@@ -11,6 +11,8 @@ import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
 import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidTankBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
+import io.github.jimbozoomer.jugcraft.kinetic.DynamoBlockEntity;
+import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
 import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
 import io.github.jimbozoomer.jugcraft.machine.LargeMachineBlock;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
@@ -149,6 +151,14 @@ public class PetroGameTests {
 		EnergyStorage storage = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.UP);
 		helper.assertTrue(storage instanceof SimpleEnergyStorage, "The " + kind.id + " takes no power");
 		((SimpleEnergyStorage) storage).setAmount(storage.getCapacity());
+		return helper.getBlockEntity(master, MachineBlockEntity.class);
+	}
+
+	/** Places and forms a multi-block machine that runs without power (no energy storage to fill). */
+	private static MachineBlockEntity placeUnpowered(GameTestHelper helper, MachineKind kind, BlockPos master) {
+		LargeMachineBlock block = (LargeMachineBlock) JugcraftMachines.MACHINES.get(kind);
+		helper.setBlock(master, block.defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH));
+		block.setPlacedBy(helper.getLevel(), helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
 		return helper.getBlockEntity(master, MachineBlockEntity.class);
 	}
 
@@ -407,5 +417,26 @@ public class PetroGameTests {
 			helper.assertTrue(block.defaultBlockState().is(BlockTags.MINEABLE_WITH_PICKAXE), block + " is not mined with a pickaxe");
 		}
 		helper.succeed();
+	}
+
+	/** The diesel engine turns a dynamo behind its upper right back block, burning diesel only for what it delivers. */
+	@GameTest(maxTicks = 200)
+	public void dieselEngineTurnsADynamo(GameTestHelper helper) {
+		BlockPos master = new BlockPos(4, 1, 1);
+		// Part 11 is one block right, one up and two back of the master; the shaft leaves its back face.
+		BlockPos dynamoPos = master.offset(-1, 1, 3);
+		helper.setBlock(dynamoPos, JugcraftKinetics.DYNAMO);
+		DynamoBlockEntity dynamo = helper.getBlockEntity(dynamoPos, DynamoBlockEntity.class);
+		MachineBlockEntity engine = placeUnpowered(helper, MachineKind.DIESEL_ENGINE, master);
+		engine.tanks().input(0).fill(PetroFluids.DIESEL.source(), 1000);
+		helper.runAfterDelay(40, () -> {
+			helper.assertTrue(dynamo.energy().getAmount() > 0, "The dynamo made no JE");
+			int burnt = 1000 - engine.tanks().input(0).millibuckets();
+			// The dynamo takes at most 128 KE/t (half a millibucket of diesel), not the engine's full 512: about
+			// 20 mB in 40 ticks plus the 2 mB the engine holds in hand, far below the 80 mB of full output.
+			long most = 40L * DynamoBlockEntity.RATE / FluidFuels.DIESEL + 3;
+			helper.assertTrue(burnt > 0 && burnt <= most, "Diesel burnt in 40 ticks: " + burnt + " mB (at most " + most + ")");
+			helper.succeed();
+		});
 	}
 }

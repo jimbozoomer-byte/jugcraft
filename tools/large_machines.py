@@ -55,6 +55,7 @@ FOOTPRINTS = {
     "diesel_generator": cuboid(3, 2, 2),
     "gas_turbine": cuboid(4, 2, 2),
     "polymerization_reactor": cuboid(2, 3, 2),
+    "diesel_engine": cuboid(2, 2, 3),
 }
 
 # Machines that take power at one marked socket only: (part, face) for a north-facing machine.
@@ -276,6 +277,14 @@ MODELS["polymerization_reactor"] = [
     ((-4, 40, 14), (4, 46, 22), STEEL),
 ]
 
+MODELS["diesel_engine"] = [
+    ((-16, 0, 0), (16, 2, 48), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-12, 2, 9), (12, 22, 42), STEEL),
+    ((-15, 2, 1), (-1, 24, 7), "fluid_tank_side"),
+    ((-9.5, 22.5, 42), (-6.5, 25.5, 48), PIPE),
+]
+
 # Textures the front face uses: "#front" in MODELS. Lit machines also get <front>_on.
 FRONTS = {
     "geothermal_generator": "geothermal_generator_front",
@@ -300,4 +309,5 @@ FRONTS = {
     "diesel_generator": "diesel_generator_front",
     "gas_turbine": "gas_turbine_front",
     "polymerization_reactor": "polymerization_reactor_front",
+    "diesel_engine": "diesel_engine_front",
 }

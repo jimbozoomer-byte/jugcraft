@@ -72,7 +72,9 @@ public enum MachineKind implements StringRepresentable {
 	DIESEL_GENERATOR("diesel_generator", 60_000, 0, 1_024, 0, 0),
 	GAS_TURBINE("gas_turbine", 120_000, 0, 2_048, 0, 0),
 	// A 2x2x3 jacketed reactor: refinery gas in, plastic pellets out.
-	POLYMERIZATION_REACTOR("polymerization_reactor", 30_000, 512, 0, 96, 1);
+	POLYMERIZATION_REACTOR("polymerization_reactor", 30_000, 512, 0, 96, 1),
+	// A 2x2x3 V8 diesel engine: burns diesel or heavy fuel oil and turns a shaft out of its back.
+	DIESEL_ENGINE("diesel_engine", 0, 0, 0, 0, 0);
 
 	/** JE produced per tick while the coal generator burns. */
 	public static final int GENERATION_PER_TICK = 32;
@@ -172,6 +174,10 @@ public enum MachineKind implements StringRepresentable {
 	public static final int TURBINE_OUTPUT = 512;
 	public static final int TURBINE_TANK = 16_000;
 	public static final int TURBINE_LUBRICANT_TANK = 4_000;
+	/** Diesel engine: KE per tick out of its back, its fuel tank, and the part the shaft leaves from (upper right back). */
+	public static final int DIESEL_ENGINE_OUTPUT = 512;
+	public static final int DIESEL_ENGINE_TANK = 8_000;
+	public static final int DIESEL_ENGINE_OUTPUT_PART = 11;
 	/** Polymerization reactor: its refinery gas tank. */
 	public static final int REACTOR_TANK = 8_000;
 	/** Ticks the electric furnace needs per item (the vanilla furnace needs 200). */
@@ -279,6 +285,7 @@ public enum MachineKind implements StringRepresentable {
 			case DIESEL_GENERATOR -> new FluidMachineSpec(List.of(DIESEL_TANK), List.of(), 0, 0);
 			case GAS_TURBINE -> new FluidMachineSpec(List.of(TURBINE_TANK, TURBINE_LUBRICANT_TANK), List.of(), 0, 0);
 			case POLYMERIZATION_REACTOR -> new FluidMachineSpec(List.of(REACTOR_TANK), List.of(), 0, 1);
+			case DIESEL_ENGINE -> new FluidMachineSpec(List.of(DIESEL_ENGINE_TANK), List.of(), 0, 0);
 			default -> null;
 		};
 	}
@@ -371,6 +378,7 @@ public enum MachineKind implements StringRepresentable {
 			case DIESEL_GENERATOR -> Footprint.cuboid(3, 2, 2);
 			case GAS_TURBINE -> Footprint.cuboid(4, 2, 2);
 			case POLYMERIZATION_REACTOR -> Footprint.cuboid(2, 3, 2);
+			case DIESEL_ENGINE -> Footprint.cuboid(2, 2, 3);
 			default -> Footprint.SINGLE;
 		};
 	}
@@ -392,7 +400,7 @@ public enum MachineKind implements StringRepresentable {
 	public boolean burnsFuel() {
 		return this == COAL_GENERATOR || this == STEAM_GENERATOR || this == GEOTHERMAL_GENERATOR
 				|| this == LARGE_STEAM_ENGINE || this == COKE_OVEN || this == STEEL_FOUNDRY || this == ARC_FURNACE
-				|| this == DIESEL_GENERATOR || this == GAS_TURBINE;
+				|| this == DIESEL_GENERATOR || this == GAS_TURBINE || this == DIESEL_ENGINE;
 	}
 
 	/** Height of the machine in blocks (the tallest part plus one). */

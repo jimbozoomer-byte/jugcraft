@@ -130,6 +130,9 @@ ABOUT = {
     "diesel_generator": "Three wide, two tall and two deep. Burns diesel or heavy fuel oil piped into its 8-bucket tank: "
                         "256 JE/t, a bucket of diesel every 1,000 ticks (256,000 JE) or heavy fuel oil twice as fast "
                         "(128,000 JE a bucket). It refuses crude oil and other fluids.",
+    "diesel_engine": "Two wide, two tall and three long. Burns diesel (256 KE a mB) or heavy fuel oil (128) piped into "
+                     "its 8-bucket tank and turns a shaft out of the back of its upper right back block: up to "
+                     "512 KE/t, twice the large steam engine. It burns only for the rotation the line takes.",
     "polymerization_reactor": "Two by two and three blocks tall. Polymerizes refinery gas into plastic: a bucket of gas "
                               "gives four plastic pellets, every 5 seconds. The metal press flattens each pellet "
                               "into a plastic sheet.",
@@ -345,6 +348,7 @@ def build():
             machine_page("diesel_generator"),
             machine_page("gas_turbine"),
             machine_page("polymerization_reactor"),
+            machine_page("diesel_engine"),
             {"title": "Asphalt", "icon": f"{MOD}:asphalt", "text": [
                 "Eight gravel around an asphalt binder (from the vacuum distillation unit) make eight asphalt.",
                 "Walking on asphalt, its slabs or road line is 1.3 times as fast. Three asphalt make six slabs.",

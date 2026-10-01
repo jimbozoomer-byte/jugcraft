@@ -648,6 +648,41 @@ def polymerization_reactor():
     return m
 
 
+def diesel_engine():
+    """Two wide, two tall and three long: a V8 diesel engine on a hazard-striped skid. Gunmetal crankcase, two olive
+    cylinder banks with chrome rocker covers and a gunmetal intake manifold between them, four short sooty exhaust
+    stacks, a grilled radiator and the control panel (the master block) at the front, a day tank down the left, and
+    a flywheel housing at the back with the chrome output shaft leaving the upper right back block."""
+    m = [box((-16, 0, 0), (16, 2, 48), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    # Control panel (master block, front left) and radiator (front right).
+    m.append(box((1, 2, 0.5), (15, 12, 6), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(dial("north", (5, 8.5, 0.25), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 8.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    m.append(box((-15, 2, 1), (-1, 24, 6), {"*": GUNMETAL, "north": GRILLE, "south": GRILLE}))
+    m.append(box((-15.5, 24, 0.5), (-0.5, 25, 6.5), HAZARD))
+    m.append(box((-9, 8, 6), (-6, 11, 9), RUBBER))
+    # Crankcase and the two cylinder banks.
+    m.append(box((-12, 2, 8), (12, 12, 41), {"*": GUNMETAL, "up": OLIVE}))
+    for x0, x1 in ((2, 12), (-12, -2)):
+        m.append(box((x0, 12, 10), (x1, 21, 39), OLIVE))
+        m.append(box((x0 + 1, 21, 11), (x1 - 1, 23, 38), CHROME))
+        for z in (14, 22, 30):
+            m.append(box((x0 + 2, 23, z), (x1 - 2, 23.5, z + 4), GUNMETAL))
+    m.append(box((-2, 12, 12), (2, 20, 37), GUNMETAL))
+    # Exhaust stacks off the outer side of each bank.
+    for x in (13.5, -13.5):
+        for z in (16, 32):
+            m.append(box((x - 1.5, 14, z - 1.5), (x + 1.5, 17, z + 1.5), EXHAUST))
+            m += cyl("y", x, z, 1.25, 17, 31, EXHAUST)
+    # Day tank down the left side, below the stacks.
+    m.append(box((12, 2, 20), (15.5, 11, 28), {"*": OLIVE, "up": STENCIL}))
+    # Flywheel housing at the back and the output shaft (centre of the upper right back block's back face).
+    m += cyl("z", -8, 22, 7.5, 41, 46, GUNMETAL, CHROME)
+    m.append(box((-12, 2, 41), (12, 12, 46), GUNMETAL))
+    m += cyl("z", -8, 24, 2, 46, 48, CHROME)
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
           "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump(),
@@ -656,4 +691,5 @@ MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), 
           "chemical_mixer": chemical_mixer(), "fracking_rig": fracking_rig(),
           "flowback_treatment_unit": flowback_treatment_unit(), "diesel_generator": diesel_generator(),
           "gas_turbine": gas_turbine(),
-          "polymerization_reactor": polymerization_reactor()}
+          "polymerization_reactor": polymerization_reactor(),
+          "diesel_engine": diesel_engine()}
