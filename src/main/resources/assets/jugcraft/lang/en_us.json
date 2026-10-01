@@ -335,6 +335,8 @@
   "message.jugcraft.tank.empty": "Empty (0 / %s mB)",
   "message.jugcraft.wrench.large": "Multi-block machines can't be turned; sneak to dismantle",
   "pack.jugcraft.alternate_machines": "Jugcraft: Classic Machines",
+  "prospector.jugcraft.oil": "Oil",
+  "prospector.jugcraft.shale_oil": "Shale oil",
   "tooltip.jugcraft.capacity_module": "Holds its base charge again (up to 2)",
   "tooltip.jugcraft.chainsaw": "Fells whole trees (sneak to cut one log)",
   "tooltip.jugcraft.drill_mode": "Mode: %s (sneak + use to change)",

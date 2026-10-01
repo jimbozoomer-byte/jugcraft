@@ -23,6 +23,13 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - Comparators read how full its tanks are. Breaking the machine loses the fluid inside, as with the tinplate tank.
 - These machines have no side configuration or upgrade slots: items go in and out of any face.
 
+### Oil reservoirs (batch 1, commit 3)
+- Oil lies in **hidden reservoirs under Overworld chunks**, fixed by the world seed. Nothing marks them on the surface.
+  - **Conventional oil** (about 1 chunk in 12): 50–250 buckets in porous rock, which a pumpjack can pump (commit 4).
+  - **Shale oil** (about 1 chunk in 4 of the rest): 200–800 buckets locked in tight rock, which only a fracking rig can free (batch 3).
+- Every reservoir is **finite**: once a chunk has given its capacity it is dry for good. How much each chunk has given is saved with the world (`data/jugcraft_oil_reservoirs.dat` in the dimension's folder); untouched chunks store nothing.
+- The **Geo-Resonance Prospector** now reports oil under the 3×3 chunks it surveys: an "Oil" reading (middle depth) for pumpable oil and a "Shale oil" reading (deep), with the same vague 1–5 signal as the ores, from how much is left.
+
 ## Connections
 - Existing input producer: none yet (crude oil comes from reservoirs and oil sand in commits 3–5).
 - Existing output consumer: the fluid system (tanks, steel tank, pumps, pipes); refining comes in batch 2.
@@ -46,6 +53,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 - `tools/check_mod_data.py` checks that the Java fluids match `tools/petro.py` and that every fluid has its name, block model and animated textures.
 - `tools/check_mod_data.py` audits fluid recipes (`tools/petro.py`): every item and fluid resolves, recipes fit the machine's slots and tank sizes, and no recipe gives out more fluid than it takes in (a recipe that releases fluid from an item, such as oil sand, must state how much as its `source`).
 - Game tests (`PetroGameTests`): `crudeOilFillsTanks` (a tinplate tank stores a bucket of crude oil) and `crudeOilMakesNoNewSources` (two sources with a gap leave flowing oil, not a new source).
+- Game tests: `oilReservoirsAreSeededAndFinite` (1,600 far-away chunks read the same twice, about one in twelve holds pumpable oil, a reservoir gives exactly what it holds and then nothing, and shale can't be taken as pumpable oil) and `surveyFindsOil`.
 - Not run: client play-testing of how the fluid looks and flows.
 
 ## World and event applicability
