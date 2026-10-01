@@ -175,7 +175,7 @@ public class NightClientGameTests implements FabricClientGameTest {
 		}
 	}
 
-	/** At midnight: will-o'-wisps over the corn and the Headless Horseman, posed facing the camera. */
+	/** At midnight: will-o'-wisps over the corn and the Headless Horseman, posed side-on between two of his lanterns. */
 	private static void creatures(ServerLevel level, BlockPos origin) {
 		int x = origin.getX();
 		int y = origin.getY();
@@ -189,13 +189,16 @@ public class NightClientGameTests implements FabricClientGameTest {
 				level.addFreshEntity(wisp);
 			}
 		}
+		for (int dx : new int[] {17, 24}) {
+			set(level, new BlockPos(x + dx, y, z - 14), state("horseman_lantern"));
+		}
 		HeadlessHorseman horseman = JugcraftAgriculture.HEADLESS_HORSEMAN.create(level, EntitySpawnReason.COMMAND);
 		if (horseman != null) {
 			horseman.setNoAi(true);
 			horseman.setPersistenceRequired();
-			horseman.snapTo(x + 20.5, y, z - 15.5, 0.0F, 0.0F);
-			horseman.setYHeadRot(0.0F);
-			horseman.setYBodyRot(0.0F);
+			horseman.snapTo(x + 20.5, y, z - 15.5, 90.0F, 0.0F);
+			horseman.setYHeadRot(90.0F);
+			horseman.setYBodyRot(90.0F);
 			horseman.setHome(new BlockPos(x + 20, y, z - 15));
 			level.addFreshEntity(horseman);
 		}

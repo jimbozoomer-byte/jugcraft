@@ -525,10 +525,22 @@
       ],
       "faces": {
         "up": {
-          "texture": "#rope"
+          "texture": "#rope",
+          "uv": [
+            4.5,
+            4.5,
+            11.5,
+            11.5
+          ]
         },
         "down": {
-          "texture": "#rope"
+          "texture": "#rope",
+          "uv": [
+            4.5,
+            4.5,
+            11.5,
+            11.5
+          ]
         }
       }
     }

@@ -27,14 +27,16 @@ def turned(model, facing):
     return variant
 
 
-def box(lo, hi, texture, faces=ALL, rotation=None, light=None, front=None, up=None, front_uv=None, side_uv=None):
+def box(lo, hi, texture, faces=ALL, rotation=None, light=None, front=None, up=None, front_uv=None, side_uv=None, all_uv=None):
     """A box whose faces take their UVs from its position; `front`/`up` texture its north/top faces. `front_uv` pins
-    the north face's UV and `side_uv` all four sides', so a raised copy shows the same part of the texture."""
+    the north face's UV, `side_uv` all four sides' and `all_uv` every face's, so a raised copy shows the same part of the
+    texture, and a box reaching outside the block never reads outside its texture (26.3 refuses to bake that for a
+    texture with see-through pixels)."""
     out = {"from": list(lo), "to": list(hi), "faces": {}}
     for side in faces:
         texture_here = front if side == "north" and front else up if side == "up" and up else texture
         out["faces"][side] = {"texture": texture_here}
-        uv = front_uv if side == "north" and front_uv else side_uv if side in SIDES else None
+        uv = front_uv if side == "north" and front_uv else side_uv if side in SIDES and side_uv else all_uv
         if uv:
             out["faces"][side]["uv"] = list(uv)
     if rotation:
@@ -100,7 +102,7 @@ def trebuchet_model(arm):
     else:
         elements += [box((7, 18, 3), (9, 20, 21), "#beam", rotation=tilt),
                      box((4.5, 15, 0), (11.5, 22, 5), "#iron", rotation=tilt),
-                     box((4.5, 2.5, 16.5), (11.5, 3, 23.5), "#rope", faces=("up", "down"))]
+                     box((4.5, 2.5, 16.5), (11.5, 3, 23.5), "#rope", faces=("up", "down"), all_uv=(4.5, 4.5, 11.5, 11.5))]
     if arm == "loaded":
         elements.append(box((5, 3, 17), (11, 9, 23), "#pumpkin", up="#pumpkin_top"))
     display = {"gui": {"rotation": [30, 225, 0], "translation": [0, -2, 0], "scale": [0.36, 0.36, 0.36]},

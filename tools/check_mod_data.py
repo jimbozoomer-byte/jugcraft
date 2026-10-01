@@ -1181,6 +1181,40 @@ def check_night(java, main):
     if not registration or f"entities/{registration.group(1)}" != horseman["table"] or "noLootTable" in registration.group(0):
         err(f"The Headless Horseman must be registered with his loot table {horseman['table']}")
 
+def check_model_uvs():
+    """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has
+    see-through pixels ("Cannot compute translucency out of bounds"). Faces without a "uv" take theirs from the
+    element's position, so a box reaching outside the block must pin its UVs."""
+    def default_uv(side, lo, hi):
+        fx, fy, fz = lo
+        tx, ty, tz = hi
+        return {"down": (fx, 16 - tz, tx, 16 - fz), "up": (fx, fz, tx, tz), "north": (16 - tx, 16 - ty, 16 - fx, 16 - fy),
+                "south": (fx, 16 - ty, tx, 16 - fy), "west": (fz, 16 - ty, tz, 16 - fy), "east": (16 - tz, 16 - ty, 16 - fz, 16 - fy)}[side]
+
+    see_through = {}
+
+    def translucent(texture):
+        if texture not in see_through:
+            namespace, path = split(texture) if ":" in texture else (MOD, texture)
+            image = ASSETS.parent / namespace / "textures" / f"{path}.png"
+            see_through[texture] = image.exists() and Image.open(image).convert("RGBA").getextrema()[3][0] < 255
+        return see_through[texture]
+
+    for path in sorted((ASSETS / "models" / "block").glob("*.json")):
+        model = load(path) or {}
+        textures = model.get("textures", {})
+        for element in model.get("elements", []):
+            for side, face in element.get("faces", {}).items():
+                texture = face.get("texture", "")
+                for _ in range(4):
+                    if texture.startswith("#"):
+                        texture = textures.get(texture[1:], "")
+                if not texture or not translucent(texture):
+                    continue
+                uv = face.get("uv") or default_uv(side, element["from"], element["to"])
+                if min(uv) < 0 or max(uv) > 16:
+                    err(f"{path.relative_to(ROOT)}: the {side} face reads {list(uv)} outside its see-through texture {texture}; pin its uv")
+
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks()))
@@ -1200,6 +1234,7 @@ def main():
     check_agriculture()
     check_recipe_categories()
     check_advancements(registered)
+    check_model_uvs()
     for path in RES.rglob("*.json"):
         load(path)
     if errors:
