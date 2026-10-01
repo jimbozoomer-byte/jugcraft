@@ -227,6 +227,8 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 
 			// The Retro Game Shop as a village places it (its floor replaces the ground layer).
 			server.runCommand("place template jugcraft:village/plains/retro_game_shop %d %d %d".formatted(x - 8, y - 1, z + 24));
+			// A village turns the street jigsaw at the doorstep into its final state (air); a bare template keeps it.
+			server.runCommand("setblock %d %d %d minecraft:air".formatted(x - 4, y, z + 31));
 			server.runCommand("tp @p %d %d %d 180 8".formatted(x - 4, y + 1, z + 39));
 			context.waitTicks(20);
 			singleplayer.getConnection().waitForChunksRender();
