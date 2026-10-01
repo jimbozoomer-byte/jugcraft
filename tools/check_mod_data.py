@@ -246,7 +246,8 @@ def check_machine_recipe_files(registered):
 
 
 # Jugcraft entries of registries other than blocks and items that tags may name.
-OTHER_ENTRIES = {"worldgen": {"pixel_hollows"}, "point_of_interest_type": {"arcade_cabinet"}}
+OTHER_ENTRIES = {"worldgen": {"pixel_hollows"}, "point_of_interest_type": {"arcade_cabinet"},
+                 "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES}}
 
 
 def check_tags():
@@ -254,6 +255,7 @@ def check_tags():
         registry = path.relative_to(DATA).parts[2]
         known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + ph.blocks() + ph.items())
         for value in (load(path) or {}).get("values", []):
+            value = value["id"] if isinstance(value, dict) else value
             if value.startswith("#"):
                 if not tag_exists(registry, value[1:]):
                     err(f"{path.relative_to(ROOT)}: unknown tag {value}")
@@ -270,7 +272,7 @@ def check_worldgen():
             err(f"{path.name}: 26.x features have no \"config\" wrapper")
         for target in feature.get("targets", []):
             block = split(target["state"])[1]
-            if block not in all_blocks():
+            if block not in all_blocks() + ph.blocks():
                 err(f"{path.name}: places unknown block {block}")
     for path in sorted((DATA / MOD / "worldgen" / "placed_feature").glob("*.json")):
         namespace, feature = split((load(path) or {})["feature"])
@@ -503,37 +505,33 @@ def check_pixel_hollows():
             err(f"{path.name}: makes pixel shards (they must only come from clusters and trade)")
 
     trader = (WORLD_JAVA / "RetroTrader.java").read_text(encoding="utf-8")
-    names = {"Items.EMERALD": "minecraft:emerald", "PixelHollows.CIRCUITSTONE": "jugcraft:circuitstone",
-             "PixelHollows.PIXEL_SHARD": "jugcraft:pixel_shard", "PixelHollows.PIXEL_LAMP": "jugcraft:pixel_lamp"}
-    java = []
-    for segment in trader.split("registerVillagerOffers(PROFESSION, ")[1:]:
-        level = int(segment.split(",")[0])
-        for wants, wn, gives, gn, uses, xp, mult in re.findall(
-                r"trade\(([\w.]+), (\d+), ([\w.]+), (\d+), (\d+), (\d+), ([\d.]+)F\)", segment):
-            java.append((level, names.get(wants, wants), int(wn), None, names.get(gives, gives), int(gn), int(uses), int(xp),
-                         float(mult)))
-    if java != ph.TRADES:
-        err(f"RetroTrader trades {java} != tools/pixel_hollows.py TRADES {ph.TRADES}")
-    if f"SHOP_WEIGHT = {ph.SHOP_WEIGHT};" not in trader or f"MAP_EMERALDS = {ph.MAP_TRADE['emeralds']};" not in trader:
-        err("RetroTrader.SHOP_WEIGHT or MAP_EMERALDS differs from tools/pixel_hollows.py")
+    if f"SHOP_WEIGHT = {ph.SHOP_WEIGHT};" not in trader:
+        err("RetroTrader.SHOP_WEIGHT differs from tools/pixel_hollows.py")
+    for level in ph.TRADE_LEVELS:
+        if f'"retro_trader/level_{level}"' not in trader:
+            err(f"RetroTrader's profession does not name the level {level} trade set")
     maps = (WORLD_JAVA / "PixelHollowsMaps.java").read_text(encoding="utf-8")
-    search = ph.MAP_SEARCH
-    heights = ", ".join(str(h) for h in search["heights"])
-    if (f"STEP = {search['step']};" not in maps or f"RINGS = {search['rings']};" not in maps
-            or f"HEIGHTS = {{{heights}}};" not in maps):
-        err("PixelHollowsMaps search bounds differ from MAP_SEARCH in tools/pixel_hollows.py")
+    for name, java in (("radius", "RADIUS"), ("step", "STEP"), ("vertical_step", "VERTICAL_STEP"), ("start_y", "START_Y")):
+        if f"{java} = {ph.MAP_SEARCH[name]};" not in maps:
+            err(f"PixelHollowsMaps.{java} differs from MAP_SEARCH in tools/pixel_hollows.py")
+    for path in sorted((DATA / MOD / "villager_trade").rglob("*.json")):
+        trade = load(path) or {}
+        for key in ("wants", "additional_wants", "gives"):
+            ref = trade.get(key, {}).get("id", "")
+            if split(ref)[0] == MOD and split(ref)[1] not in set(all_items()) | set(ph.blocks()) | set(ph.items()):
+                err(f"villager_trade {path.stem}: unknown item {ref}")
 
     # Cheapest shard sale: a discount can bring the price down to 1 emerald. Best buyback: price multiplier 0 means no
     # reputation discount; Hero of the Village V takes floor(0.55 * count) (at least 1) off.
-    sale = min(1 / gives_n for _, wants, _, _, gives, gives_n, _, _, _ in ph.TRADES
-               if wants == "minecraft:emerald" and gives == f"{MOD}:{ph.SHARD}")
-    for _, wants, wants_n, _, gives, gives_n, _, _, mult in ph.TRADES:
-        if wants == f"{MOD}:{ph.SHARD}":
-            if mult != 0:
-                err("The shard buyback needs price multiplier 0, or reputation discounts make a profit loop")
-            best = gives_n / max(1, wants_n - max(1, int(0.55 * wants_n)))
+    shard = f"{MOD}:{ph.SHARD}"
+    sale = min(1 / t["gives"][1] for t in ph.TRADES.values() if t["wants"][0] == "minecraft:emerald" and t["gives"][0] == shard)
+    for name, t in ph.TRADES.items():
+        if t["wants"][0] == shard:
+            if t["reputation_discount"] != 0:
+                err(f"{name}: the shard buyback needs reputation_discount 0, or discounts make a profit loop")
+            best = t["gives"][1] / max(1, t["wants"][1] - max(1, int(0.55 * t["wants"][1])))
             if best >= sale:
-                err(f"Shard buyback pays {best:.3f} emeralds per shard, the sale can cost {sale:.3f}: a profit loop")
+                err(f"{name} pays {best:.3f} emeralds per shard, but a shard can be bought for {sale:.3f}: a profit loop")
 
 
 def json_result(path):

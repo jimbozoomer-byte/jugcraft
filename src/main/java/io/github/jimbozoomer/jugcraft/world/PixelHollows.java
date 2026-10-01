@@ -24,13 +24,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 /**
  * Pixel Hollows: a rare cave biome deep under dry land that looks like the inside of an old console.
- * Circuitstone walls, faintly glowing pixel crystal clusters, and 1.5x the usual copper and redstone
- * (data in data/jugcraft/worldgen, generated from tools/pixel_hollows.py).
+ * Circuitstone walls, faintly glowing pixel crystal clusters, and 1.5x the usual copper and redstone.
+ * The biome and its features are data (data/jugcraft/worldgen, generated from tools/pixel_hollows.py).
  *
  * <p>The biome joins the Overworld's climate table through {@code mixin/OverworldBiomeBuilderMixin}, because
  * Fabric API has no Overworld biome API. The {@code pixel_hollows} feature switch stops new generation (and the
@@ -62,7 +60,6 @@ public final class PixelHollows {
 	public static Item PIXEL_SHARD;
 	public static SoundEvent AMBIENT_LOOP;
 	public static SoundEvent AMBIENT_ADDITIONS;
-	public static Feature<NoneFeatureConfiguration> LINING;
 
 	private PixelHollows() {
 	}
@@ -84,7 +81,6 @@ public final class PixelHollows {
 
 		AMBIENT_LOOP = sound("ambient.pixel_hollows.loop");
 		AMBIENT_ADDITIONS = sound("ambient.pixel_hollows.additions");
-		LINING = Registry.register(BuiltInRegistries.FEATURE, Jugcraft.id("pixel_hollows_lining"), new PixelHollowsLiningFeature());
 
 		// The biome lists its own copper and redstone bonus; the tin bonus exists only while tin does.
 		if (JugcraftConfig.isFeatureEnabled(FEATURE) && JugcraftConfig.isFeatureEnabled("tin")) {

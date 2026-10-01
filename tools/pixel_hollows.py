@@ -29,11 +29,13 @@ CUBES = {
 CLUSTER = "pixel_crystal_cluster"
 SHARD = "pixel_shard"
 CABINET = "arcade_cabinet"
+# Sold by the Retro Trader; used, it searches for the nearest Pixel Hollows and becomes a marked explorer map.
+MAP = "pixel_hollows_map"
 # Light: clusters glow faintly (3) so the cave stays dark enough for hostile mobs between patches.
 CLUSTER_LIGHT = 3
 CLUSTER_DROPS = (1, 2)
 
-NAMES = {CLUSTER: "Pixel Crystal Cluster", SHARD: "Pixel Shard", CABINET: "Arcade Cabinet"}
+NAMES = {CLUSTER: "Pixel Crystal Cluster", SHARD: "Pixel Shard", CABINET: "Arcade Cabinet", MAP: "Pixel Hollows Map"}
 
 
 def blocks():
@@ -41,7 +43,7 @@ def blocks():
 
 
 def items():
-    return [SHARD]
+    return [SHARD, MAP]
 
 
 def feature_of(entry):
@@ -49,7 +51,7 @@ def feature_of(entry):
         return CUBES[entry]["feature"]
     if entry in (CLUSTER, SHARD):
         return CAVE
-    if entry == CABINET:
+    if entry in (CABINET, MAP):
         return TRADER
     raise KeyError(entry)
 
@@ -89,8 +91,13 @@ BONUS_ORES = {
     "pixel_hollows_tin": {"feature": "jugcraft:ore_tin", "count": 4, "shape": "trapezoid", "min_y": -32, "max_y": 96,
                           "switch": "tin"},
 }
-# Circuitstone lining and crystal patches (Java: world/PixelHollowsLiningFeature), once per chunk.
+# The lining: big blobs of circuitstone replacing the stone and deepslate inside the biome, after the ores, so
+# exposed ore still shows. COUNT attempts per chunk, filtered to the biome.
 LINING = "pixel_hollows_lining"
+LINING_GEN = {"size": 64, "count": 96, "min_y": -56, "max_y": 56}
+# Crystal clusters on floors (facing up) and ceilings (facing down): attempts per chunk, filtered to the biome.
+CRYSTALS = {"pixel_crystals_floor": {"facing": "up", "scan": "down", "offset": 1, "count": 14},
+            "pixel_crystals_ceiling": {"facing": "down", "scan": "up", "offset": -1, "count": 8}}
 
 # The biome's features, one list per generation step. Vanilla entries keep vanilla's relative order (a different
 # order in two biomes is a "feature order cycle" crash); the JugcraftGameTests.overworldFeatureOrderHasNoCycle test
@@ -112,6 +119,7 @@ VANILLA_FEATURES = {
 OWN_FEATURES = {
     "underground_ores": ["pixel_hollows_copper", "pixel_hollows_redstone", "pixel_hollows_redstone_lower"],
     "underground_decoration": [LINING],
+    "vegetal_decoration": list(CRYSTALS),
 }
 
 
@@ -121,10 +129,10 @@ def biome_features():
 
 
 # Colours: a dim violet haze, like the inside of a dark CRT.
-FOG = 0x2B2340
-SKY = 0x7A6FA8
-WATER = 0x3A6EA5
-WATER_FOG = 0x12233A
+FOG = "#2b2340"
+SKY = "#7a6fa8"
+WATER = "#3a6ea5"
+WATER_FOG = "#12233a"
 
 SOUNDS = {
     # A quiet original chiptune hum (tools/pixel_hollows_sound.py writes the .ogg).
@@ -182,22 +190,29 @@ def biome():
 BIOME_TAGS = ["minecraft:is_overworld", "minecraft:has_structure/mineshaft", "c:is_cave", "c:is_underground"]
 
 # ---------------------------------------------------------------- the Retro Trader
-# Trades per level: (level, wants, wants count, extra want, gives, gives count, uses per restock, xp, price multiplier).
-# The novice and apprentice levels have exactly two trades each, so the trader always offers all of them (a villager
-# picks two per level). The map (Java: world/PixelHollowsMapListing) is built when the trade is made.
+# Trades are data (26.1+): one villager_trade file each, a tag per level listing them, and a trade set per level
+# that the profession names (world/RetroTrader). The novice and apprentice levels have exactly two trades, and
+# their trade sets draw two, so the trader always offers all of them.
 #
 # No profit loop: buying shards costs 4 emeralds for 2; reputation and Hero of the Village can lower that to
-# 1 emerald for 2 (0.5 each). The buyback has price multiplier 0, so reputation never lowers it, and Hero of the
-# Village V lowers 6 shards only to 3 (floor(0.55 * 6) = 3 off): at best 1/3 emerald per shard. 1/3 < 1/2.
-MAP_TRADE = {"level": 1, "emeralds": 12, "uses": 1, "xp": 5, "multiplier": 0.2}
-TRADES = [
-    (1, "minecraft:emerald", 1, None, "jugcraft:circuitstone", 8, 12, 1, 0.05),
-    (2, "jugcraft:pixel_shard", 6, None, "minecraft:emerald", 1, 12, 5, 0.0),
-    (2, "minecraft:emerald", 3, None, "jugcraft:pixel_lamp", 1, 4, 5, 0.05),
-    (3, "minecraft:emerald", 4, None, "jugcraft:pixel_shard", 2, 3, 10, 0.05),
-]
-# Bounded search for the map: rings of columns STEP blocks apart, out to RINGS rings, sampled at these heights.
-MAP_SEARCH = {"step": 64, "rings": 40, "heights": [-16, 0, -32, 16, -48]}
+# 1 emerald for 2 (0.5 each). The buyback's reputation_discount is 0, so reputation never lowers it, and Hero of
+# the Village V lowers 6 shards only to 3 (floor(0.55 * 6) = 3 off): at best 1/3 emerald per shard. 1/3 < 1/2.
+TRADES = {
+    "pixel_hollows_map": {"level": 1, "wants": ("minecraft:emerald", 12), "additional_wants": ("minecraft:compass", 1),
+                          "gives": (f"{MOD}:{MAP}", 1), "max_uses": 1, "xp": 5, "reputation_discount": 0.2,
+                          "features": [CAVE, TRADER]},
+    "circuitstone": {"level": 1, "wants": ("minecraft:emerald", 1), "gives": (f"{MOD}:circuitstone", 8), "max_uses": 12,
+                     "xp": 1, "reputation_discount": 0.05, "features": [CAVE]},
+    "pixel_shard_buyback": {"level": 2, "wants": (f"{MOD}:{SHARD}", 6), "gives": ("minecraft:emerald", 1), "max_uses": 12,
+                            "xp": 5, "reputation_discount": 0.0, "features": [CAVE]},
+    "pixel_lamp": {"level": 2, "wants": ("minecraft:emerald", 3), "gives": (f"{MOD}:pixel_lamp", 1), "max_uses": 4, "xp": 5,
+                   "reputation_discount": 0.05, "features": [CAVE]},
+    "pixel_shards": {"level": 3, "wants": ("minecraft:emerald", 4), "gives": (f"{MOD}:{SHARD}", 2), "max_uses": 3,
+                     "xp": 10, "reputation_discount": 0.05, "features": [CAVE]},
+}
+TRADE_LEVELS = sorted({trade["level"] for trade in TRADES.values()})
+# Bounded search behind the map (Java: world/PixelHollowsMaps): radius, column spacing, height spacing, start height.
+MAP_SEARCH = {"radius": 2048, "step": 64, "vertical_step": 32, "start_y": -16}
 # Village shop: weight in minecraft:village/plains/houses (vanilla houses weigh 1-3 each).
 SHOP_WEIGHT = 1
 SHOP = "village/plains/retro_game_shop"

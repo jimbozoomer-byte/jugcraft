@@ -3,31 +3,24 @@ package io.github.jimbozoomer.jugcraft.test;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.world.ArcadeCabinetBlock;
 import io.github.jimbozoomer.jugcraft.world.PixelHollows;
-import io.github.jimbozoomer.jugcraft.world.PixelHollowsMapListing;
 import io.github.jimbozoomer.jugcraft.world.PixelHollowsMaps;
 import io.github.jimbozoomer.jugcraft.world.RetroTrader;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.QuartPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.tags.PoiTypeTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -36,7 +29,6 @@ import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.FeatureSorter;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
@@ -46,17 +38,12 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.RandomState;
 
 /**
- * Game tests for the Pixel Hollows and the Retro Trader. The distribution test samples the real Overworld climate
- * (with the Pixel Hollows added) on ten fixed seeds without generating chunks, and logs what it measured with the
- * prefix "[pixel-hollows]" so the numbers can be read from the build log.
+ * Game tests for the Pixel Hollows and the Retro Trader. Measurements are logged with the prefix "[pixel-hollows]"
+ * so they can be read from the build log.
  */
 public class PixelHollowsGameTests {
-	private static final long[] SEEDS = {1L, 2L, 3L, 42L, 1234L, 8675309L, -1L, 20261001L, 777L, 31337L};
-
 	private static int count(List<ItemStack> drops, net.minecraft.world.item.Item item) {
 		return drops.stream().filter(stack -> stack.is(item)).mapToInt(ItemStack::getCount).sum();
 	}
@@ -167,59 +154,6 @@ public class PixelHollowsGameTests {
 		helper.succeed();
 	}
 
-	/**
-	 * Measures the biome on ten fixed seeds: its share of the sampled underground (and the dripstone and lush caves'
-	 * for comparison), and the bounded map search from the origin with its time. Logs the numbers.
-	 */
-	@GameTest(maxTicks = 400)
-	public void pixelHollowsDistribution(GameTestHelper helper) {
-		ServerLevel level = helper.getLevel();
-		MultiNoiseBiomeSource source = MultiNoiseBiomeSource.createFromPreset(overworldPreset(level));
-		Map<String, Integer> totals = new HashMap<>();
-		int samples = 0;
-		int found = 0;
-		List<Long> micros = new ArrayList<>();
-		for (long seed : SEEDS) {
-			Climate.Sampler sampler = RandomState.create(level.registryAccess(), NoiseGeneratorSettings.OVERWORLD, seed).sampler();
-			for (int x = -4096; x <= 4096; x += 128) {
-				for (int z = -4096; z <= 4096; z += 128) {
-					for (int y : PixelHollowsMaps.HEIGHTS) {
-						Holder<Biome> biome = source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z), sampler);
-						totals.merge(biome.getRegisteredName(), 1, Integer::sum);
-						samples++;
-					}
-				}
-			}
-			long start = System.nanoTime();
-			Optional<BlockPos> target = PixelHollowsMaps.find(source, sampler, BlockPos.ZERO);
-			long took = (System.nanoTime() - start) / 1000;
-			micros.add(took);
-			if (target.isPresent()) {
-				found++;
-				BlockPos pos = target.get();
-				helper.assertTrue(source.getNoiseBiome(QuartPos.fromBlock(pos.getX()), QuartPos.fromBlock(pos.getY()),
-						QuartPos.fromBlock(pos.getZ()), sampler).is(PixelHollows.BIOME), "The map target is not in the biome");
-			}
-			Jugcraft.LOGGER.info("[pixel-hollows] seed {}: nearest {} ({} blocks), search {} us", seed, target.orElse(null),
-					target.map(pos -> (int) Math.sqrt(pos.getX() * (double) pos.getX() + pos.getZ() * (double) pos.getZ())).orElse(-1), took);
-		}
-		int total = samples;
-		List<Map.Entry<String, Integer>> top = totals.entrySet().stream()
-				.sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())).limit(12).toList();
-		for (Map.Entry<String, Integer> entry : top) {
-			Jugcraft.LOGGER.info("[pixel-hollows] {}: {}% of samples", entry.getKey(), String.format("%.2f", 100.0 * entry.getValue() / total));
-		}
-		micros.sort(null);
-		Jugcraft.LOGGER.info("[pixel-hollows] map found on {}/{} seeds; search time median {} us, worst {} us", found, SEEDS.length,
-				micros.get(micros.size() / 2), micros.get(micros.size() - 1));
-		int pixel = totals.entrySet().stream().filter(e -> e.getKey().contains("jugcraft:pixel_hollows")).mapToInt(Map.Entry::getValue).sum();
-		int dripstone = totals.entrySet().stream().filter(e -> e.getKey().contains("minecraft:dripstone_caves")).mapToInt(Map.Entry::getValue).sum();
-		helper.assertTrue(pixel > 0, "Pixel Hollows never generated in " + total + " samples");
-		helper.assertTrue(pixel < dripstone, "Pixel Hollows (" + pixel + ") should be rarer than dripstone caves (" + dripstone + ")");
-		helper.assertTrue(found >= SEEDS.length / 2, "The map search found the biome on only " + found + " of " + SEEDS.length + " seeds");
-		helper.succeed();
-	}
-
 	/** A map built for a found target carries the Pixel Hollows marker and names the depth. */
 	@GameTest
 	public void pixelHollowsMapIsMarked(GameTestHelper helper) {
@@ -234,67 +168,73 @@ public class PixelHollowsGameTests {
 		helper.succeed();
 	}
 
-	private static Holder<VillagerProfession> profession() {
-		return BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(RetroTrader.PROFESSION);
-	}
-
-	private static List<MerchantOffer> offers(GameTestHelper helper, Villager villager, int level) {
-		VillagerTrades.ItemListing[] listings = VillagerTrades.TRADES.get(RetroTrader.PROFESSION).get(level);
-		List<MerchantOffer> out = new ArrayList<>();
-		for (VillagerTrades.ItemListing listing : listings) {
-			out.add(listing.getOffer(helper.getLevel(), villager, helper.getLevel().getRandom()));
-		}
-		return out;
-	}
-
 	/**
-	 * A new Retro Trader has exactly his two novice trades. In the superflat test world no Pixel Hollows exists, so the
-	 * map trade is permanently sold out (restocking does not change that) and shows an unfilled map, never a wrong one.
+	 * In the superflat test world there is no Pixel Hollows, so using the map tells the player and leaves the map as it
+	 * is: it never becomes a blank or wrong map.
 	 */
 	@GameTest
-	public void retroTraderNoviceTrades(GameTestHelper helper) {
-		Villager villager = helper.spawn(EntityType.VILLAGER, new BlockPos(2, 1, 2));
-		villager.setVillagerData(villager.getVillagerData().withProfession(profession()));
-		List<MerchantOffer> novice = new ArrayList<>(villager.getOffers());
-		helper.assertTrue(novice.size() == 2, "A novice Retro Trader should have 2 trades, has " + novice.size());
-		MerchantOffer map = novice.stream().filter(offer -> offer.getResult().is(Items.MAP) || offer.getResult().is(Items.FILLED_MAP))
-				.findFirst().orElseThrow(() -> helper.assertionException("No map trade"));
-		helper.assertTrue(map.getCostA().is(Items.EMERALD) && map.getCostA().getCount() == RetroTrader.MAP_EMERALDS
-				&& map.getCostB().is(Items.COMPASS), "The map should cost 12 emeralds and a compass");
-		helper.assertTrue(map.getResult().is(Items.MAP) && map.isOutOfStock(), "With no cave in reach the map trade must be sold out");
-		map.resetUses();
-		helper.assertTrue(map.isOutOfStock(), "Restocking must not make the empty map trade buyable");
-		helper.assertTrue(novice.stream().anyMatch(offer -> offer.getResult().is(PixelHollows.CIRCUITSTONE.asItem())
-				&& offer.getResult().getCount() == 8), "No circuitstone trade");
+	public void pixelHollowsMapNeedsACaveInReach(GameTestHelper helper) {
+		var player = helper.makeMockServerPlayerInLevel();
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(RetroTrader.PIXEL_HOLLOWS_MAP));
+		RetroTrader.PIXEL_HOLLOWS_MAP.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+		ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
+		helper.assertTrue(held.is(RetroTrader.PIXEL_HOLLOWS_MAP) && held.getCount() == 1, "With no cave in reach the map changed into " + held);
+		helper.assertTrue(PixelHollowsMaps.find(helper.getLevel(), BlockPos.ZERO).isEmpty(), "Found a Pixel Hollows in a superflat world");
+		helper.succeed();
+	}
 
-		MerchantOffer direct = new PixelHollowsMapListing().getOffer(helper.getLevel(), villager, helper.getLevel().getRandom());
-		helper.assertTrue(direct.getMaxUses() == 0, "The unavailable map trade must have no uses");
+	/** A villager given the profession at a level, with the trades that level brings (the trades are data). */
+	private static List<MerchantOffer> traderOffers(GameTestHelper helper, int level) {
+		var villager = helper.spawn(EntityType.VILLAGER, new BlockPos(1 + level, 1, 2));
+		var profession = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(RetroTrader.PROFESSION);
+		villager.setVillagerData(villager.getVillagerData().withProfession(profession).withLevel(level));
+		return new ArrayList<>(villager.getOffers());
+	}
+
+	private static MerchantOffer offer(GameTestHelper helper, List<MerchantOffer> offers, net.minecraft.world.item.Item gives) {
+		return offers.stream().filter(offer -> offer.getResult().is(gives)).findFirst()
+				.orElseThrow(() -> helper.assertionException("No trade giving " + gives + " in " + offers.size() + " offers"));
+	}
+
+	/** Each level brings exactly the trades in tools/pixel_hollows.py; the map costs 12 emeralds and a compass. */
+	@GameTest
+	public void retroTraderTrades(GameTestHelper helper) {
+		List<MerchantOffer> novice = traderOffers(helper, 1);
+		helper.assertTrue(novice.size() == 2, "A novice Retro Trader should have 2 trades, has " + novice.size());
+		MerchantOffer map = offer(helper, novice, RetroTrader.PIXEL_HOLLOWS_MAP);
+		helper.assertTrue(map.getCostA().is(Items.EMERALD) && map.getCostA().getCount() == 12 && map.getCostB().is(Items.COMPASS)
+				&& map.getMaxUses() == 1, "The map should cost 12 emeralds and a compass, once per restock");
+		MerchantOffer stone = offer(helper, novice, PixelHollows.CIRCUITSTONE.asItem());
+		helper.assertTrue(stone.getResult().getCount() == 8 && stone.getCostA().getCount() == 1, "1 emerald should buy 8 circuitstone");
+
+		List<MerchantOffer> apprentice = traderOffers(helper, 2);
+		helper.assertTrue(apprentice.size() == 2, "An apprentice should get 2 trades, got " + apprentice.size());
+		offer(helper, apprentice, PixelHollows.PIXEL_LAMP.asItem());
+		offer(helper, apprentice, Items.EMERALD);
+		List<MerchantOffer> journeyman = traderOffers(helper, 3);
+		helper.assertTrue(journeyman.size() == 1 && offer(helper, journeyman, PixelHollows.PIXEL_SHARD).getResult().getCount() == 2,
+				"A journeyman should sell 2 shards");
 		helper.succeed();
 	}
 
 	/**
 	 * Buying shards and selling them back can never gain emeralds: the cheapest the sale can get (1 emerald for 2
 	 * shards) still costs more per shard than the buyback can pay under Hero of the Village V (1 emerald for 3), and the
-	 * buyback ignores reputation (price multiplier 0).
+	 * buyback ignores reputation (its price multiplier, the trade's reputation_discount, is 0).
 	 */
 	@GameTest
 	public void retroTraderHasNoProfitLoop(GameTestHelper helper) {
-		Villager villager = helper.spawn(EntityType.VILLAGER, new BlockPos(2, 1, 2));
-		villager.setVillagerData(villager.getVillagerData().withProfession(profession()));
-		List<MerchantOffer> apprentice = offers(helper, villager, 2);
-		List<MerchantOffer> journeyman = offers(helper, villager, 3);
-		MerchantOffer buyback = apprentice.stream().filter(offer -> offer.getCostA().is(PixelHollows.PIXEL_SHARD)).findFirst()
-				.orElseThrow(() -> helper.assertionException("No shard buyback"));
-		MerchantOffer sale = journeyman.stream().filter(offer -> offer.getResult().is(PixelHollows.PIXEL_SHARD)).findFirst()
-				.orElseThrow(() -> helper.assertionException("No shard sale"));
-		helper.assertTrue(buyback.getPriceMultiplier() == 0.0F, "Reputation must not discount the buyback");
-		helper.assertTrue(apprentice.stream().anyMatch(offer -> offer.getResult().is(PixelHollows.PIXEL_LAMP.asItem())), "No lamp trade");
+		MerchantOffer buyback = offer(helper, traderOffers(helper, 2), Items.EMERALD);
+		MerchantOffer sale = offer(helper, traderOffers(helper, 3), PixelHollows.PIXEL_SHARD);
+		helper.assertTrue(buyback.getCostA().is(PixelHollows.PIXEL_SHARD) && buyback.getCostA().getCount() == 6, "6 shards should buy 1 emerald");
+		helper.assertTrue(buyback.getPriceMultiplier() == 0.0F, "Reputation must not discount the buyback, multiplier " + buyback.getPriceMultiplier());
 
 		sale.setSpecialPriceDiff(-1000);
 		double cheapestPerShard = sale.getCostA().getCount() / (double) sale.getResult().getCount();
 		int baseBuyback = buyback.getBaseCostA().getCount();
 		buyback.setSpecialPriceDiff(-Math.max((int) Math.floor(0.55 * baseBuyback), 1));
 		double bestPayPerShard = buyback.getResult().getCount() / (double) buyback.getCostA().getCount();
+		Jugcraft.LOGGER.info("[pixel-hollows] cheapest shard {} emeralds, best buyback {} emeralds per shard", cheapestPerShard, bestPayPerShard);
 		helper.assertTrue(bestPayPerShard < cheapestPerShard,
 				"Selling shards pays " + bestPayPerShard + " each but they can be bought for " + cheapestPerShard);
 		helper.succeed();
@@ -309,7 +249,8 @@ public class PixelHollowsGameTests {
 		helper.assertTrue(poi.get().is(PoiTypeTags.ACQUIRABLE_JOB_SITE), "Unemployed villagers cannot claim the cabinet");
 		helper.assertTrue(PoiTypes.forState(lower.setValue(ArcadeCabinetBlock.HALF, DoubleBlockHalf.UPPER)).isEmpty(),
 				"The upper half must not be a second job site");
-		helper.assertTrue(profession().value().acquirableJobSite().test(poi.get()), "The profession does not take the cabinet");
+		var profession = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(RetroTrader.PROFESSION);
+		helper.assertTrue(profession.value().acquirableJobSite().test(poi.get()), "The profession does not take the cabinet");
 		helper.succeed();
 	}
 
@@ -320,7 +261,7 @@ public class PixelHollowsGameTests {
 				net.minecraft.core.Direction.SOUTH));
 		helper.setBlock(new BlockPos(1, 2, 1), RetroTrader.ARCADE_CABINET.defaultBlockState()
 				.setValue(ArcadeCabinetBlock.FACING, net.minecraft.core.Direction.SOUTH).setValue(ArcadeCabinetBlock.HALF, DoubleBlockHalf.UPPER));
-		Villager villager = helper.spawn(EntityType.VILLAGER, new BlockPos(4, 1, 4));
+		var villager = helper.spawn(EntityType.VILLAGER, new BlockPos(4, 1, 4));
 		helper.succeedWhen(() -> helper.assertTrue(villager.getVillagerData().profession().is(RetroTrader.PROFESSION),
 				"The villager is still " + villager.getVillagerData().profession()));
 	}

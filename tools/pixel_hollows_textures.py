@@ -211,6 +211,32 @@ def pixel_shard():
     return img
 
 
+def pixel_hollows_map(seed=906):
+    """An unmarked parchment map, folded in three, stamped with a teal crystal."""
+    rng = random.Random(seed)
+    img = new(fill=(0, 0, 0, 0))
+    paper = [(196, 170, 120), (214, 190, 140), (228, 206, 160)]
+    for y in range(2, 14):
+        for x in range(1, 15):
+            c = paper[rng.choice([0, 1, 1, 2])]
+            if x in (5, 10):
+                c = shade(c, -26)  # the folds
+            put(img, x, y, c)
+    for x in range(1, 15):
+        put(img, x, 2, (150, 124, 82))
+        put(img, x, 13, (122, 98, 62))
+    for y in range(2, 14):
+        put(img, 1, y, (150, 124, 82))
+        put(img, 14, y, (122, 98, 62))
+    for x, y, c in ((7, 5, CRYSTAL[3]), (8, 5, CRYSTAL[3]), (6, 6, CRYSTAL[2]), (7, 6, CRYSTAL[4]), (8, 6, CRYSTAL[3]),
+                    (9, 6, CRYSTAL[2]), (6, 7, CRYSTAL[1]), (7, 7, CRYSTAL[2]), (8, 7, VIOLET[2]), (9, 7, CRYSTAL[1]),
+                    (7, 8, CRYSTAL[1]), (8, 8, CRYSTAL[1])):
+        put(img, x, y, c)
+    for x in (4, 6, 9, 11):
+        put(img, x, 11, (120, 72, 40))  # a dotted trail
+    return img
+
+
 def map_marker():
     """8x8 map icon: a little teal crystal with a dark outline."""
     rows = ["...00...",
@@ -526,6 +552,7 @@ def draw_all():
     save(crystal(904), "block/ph_crystal")
     save(crystal(905, bright=True), "block/ph_crystal_tip")
     save(pixel_shard(), "item/pixel_shard")
+    save(pixel_hollows_map(), "item/pixel_hollows_map")
     save(map_marker(), "map/decorations/pixel_hollows")
     save(flat(915, (22, 20, 28), 4), "block/rt_black")
     save(flat(916, (42, 42, 50), 3), "block/rt_bezel")

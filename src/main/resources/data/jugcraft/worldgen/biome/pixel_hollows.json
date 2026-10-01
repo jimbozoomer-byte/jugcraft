@@ -3,9 +3,9 @@
   "temperature": 0.8,
   "downfall": 0.4,
   "attributes": {
-    "minecraft:visual/fog_color": 2827072,
-    "minecraft:visual/sky_color": 8023976,
-    "minecraft:visual/water_fog_color": 1188666,
+    "minecraft:visual/fog_color": "#2b2340",
+    "minecraft:visual/sky_color": "#7a6fa8",
+    "minecraft:visual/water_fog_color": "#12233a",
     "minecraft:audio/ambient_sounds": {
       "loop": "jugcraft:ambient.pixel_hollows.loop",
       "mood": {
@@ -23,7 +23,7 @@
     }
   },
   "effects": {
-    "water_color": 3829413
+    "water_color": "#3a6ea5"
   },
   "spawners": {
     "monster": [
@@ -134,7 +134,10 @@
       "minecraft:spring_water",
       "minecraft:spring_lava"
     ],
-    [],
+    [
+      "jugcraft:pixel_crystals_floor",
+      "jugcraft:pixel_crystals_ceiling"
+    ],
     []
   ]
 }

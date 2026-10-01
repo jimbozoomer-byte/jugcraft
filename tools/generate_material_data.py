@@ -23,6 +23,7 @@ GENERATED_DIRS = [
     DATA / MOD / "advancement", ASSETS / "blockstates", ASSETS / "items", ASSETS / "models", ASSETS / "lang", ASSETS / "handbook",
     DATA / MOD / "loot_table", DATA / MOD / "recipe", DATA / MOD / "worldgen",
     DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD, PACKS,
+    DATA / MOD / "villager_trade", DATA / MOD / "trade_set", DATA / MOD / "tags" / "villager_trade",
 ]
 
 CABLE_ROTATION = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {"y": 270},
@@ -499,8 +500,8 @@ def pixel_hollows_assets(lang):
     lang[f"biome.{MOD}.pixel_hollows"] = "Pixel Hollows"
     lang[f"entity.{MOD}.villager.retro_trader"] = "Retro Trader"
     lang[f"filled_map.{MOD}.pixel_hollows"] = "Pixel Hollows, around Y %s"
-    lang[f"item.{MOD}.pixel_hollows_map"] = "Pixel Hollows Map"
-    lang[f"tooltip.{MOD}.pixel_hollows_map.none"] = "No Pixel Hollows within reach of this village"
+    lang[f"message.{MOD}.pixel_hollows_map.none"] = "No Pixel Hollows within %s blocks of here"
+    lang[f"message.{MOD}.pixel_hollows_map.found"] = "Pixel Hollows marked on the map, around Y %s"
     for event, subtitle in ph.SUBTITLES.items():
         lang[f"subtitles.{MOD}.{event}"] = subtitle
     write(ASSETS / "sounds.json", ph.SOUNDS)
@@ -813,9 +814,58 @@ def pixel_hollows_worldgen():
                 {"type": "minecraft:biome"},
             ],
         })
-    # Once per chunk, at the chunk's corner; the feature itself checks the biome per 4x4x4 cell.
-    write(folder / "feature" / f"{ph.LINING}.json", {"type": rid(ph.LINING)})
-    write(folder / "placed_feature" / f"{ph.LINING}.json", {"feature": rid(ph.LINING), "placement": []})
+    # The lining: circuitstone blobs replacing stone and deepslate (not ores), only inside the biome.
+    gen = ph.LINING_GEN
+    write(folder / "feature" / f"{ph.LINING}.json", {
+        "type": "minecraft:ore", "size": gen["size"], "discard_chance_on_air_exposure": 0.0,
+        "targets": [{"target": {"predicate_type": "minecraft:tag_match", "tag": "minecraft:base_stone_overworld"},
+                     "state": rid("circuitstone")}]})
+    write(folder / "placed_feature" / f"{ph.LINING}.json", {"feature": rid(ph.LINING), "placement": [
+        {"type": "minecraft:count", "count": gen["count"]},
+        {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"absolute": gen["min_y"]},
+                                                      "max_inclusive": {"absolute": gen["max_y"]}}},
+        {"type": "minecraft:biome"}]})
+    # Crystal clusters: find a floor (or ceiling) below (above) a random point in the cave, then sit on it.
+    for name, crystal in ph.CRYSTALS.items():
+        write(folder / "feature" / f"{name}.json", {"type": "minecraft:simple_block", "to_place": {
+            "type": "minecraft:simple_state_provider",
+            "state": {"Name": rid(ph.CLUSTER), "Properties": {"facing": crystal["facing"], "waterlogged": "false"}}}})
+        write(folder / "placed_feature" / f"{name}.json", {"feature": rid(name), "placement": [
+            {"type": "minecraft:count", "count": crystal["count"]},
+            {"type": "minecraft:in_square"},
+            {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"absolute": gen["min_y"]},
+                                                          "max_inclusive": {"absolute": gen["max_y"]}}},
+            {"type": "minecraft:environment_scan", "direction_of_search": crystal["scan"], "max_steps": 12,
+             "target_condition": {"type": "minecraft:solid"},
+             "allowed_search_condition": {"type": "minecraft:matching_blocks", "blocks": ["minecraft:air", "minecraft:cave_air"]}},
+            {"type": "minecraft:random_offset", "xz_spread": 0, "y_spread": crystal["offset"]},
+            {"type": "minecraft:biome"}]})
+    retro_trader_trades()
+
+
+def retro_trader_trades():
+    """The Retro Trader's trades (26.1+ data): villager_trade files, a tag per level and the trade sets his profession
+    names. Tag entries are optional, so a trade switched off by its feature simply drops out."""
+    import pixel_hollows as ph
+
+    def cost(entry):
+        return {"id": entry[0], "count": entry[1]}
+
+    for name, trade in ph.TRADES.items():
+        data = {"fabric:load_conditions": [c for f in trade["features"] for c in condition(f)], "wants": cost(trade["wants"])}
+        if "additional_wants" in trade:
+            data["additional_wants"] = cost(trade["additional_wants"])
+        data.update({"gives": cost(trade["gives"]), "max_uses": trade["max_uses"], "xp": trade["xp"],
+                     "reputation_discount": trade["reputation_discount"]})
+        write(DATA / MOD / "villager_trade" / "retro_trader" / f"{name}.json", data)
+    for level in ph.TRADE_LEVELS:
+        names = [name for name, trade in ph.TRADES.items() if trade["level"] == level]
+        write(DATA / MOD / "tags" / "villager_trade" / "retro_trader" / f"level_{level}.json",
+              {"replace": False, "values": [{"id": rid(f"retro_trader/{name}"), "required": False} for name in names]})
+        write(DATA / MOD / "trade_set" / "retro_trader" / f"level_{level}.json", {
+            "amount": len(names), "trades": f"#{MOD}:retro_trader/level_{level}",
+            "random_sequence": rid(f"trade_set/retro_trader/level_{level}")})
 
 
 def main():

@@ -41,13 +41,10 @@ import net.minecraft.client.CameraType;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -56,7 +53,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 /**
  * Client game tests: a real game client with real rendering (CI runs it with Mesa). It builds a
@@ -236,13 +232,18 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_retro_game_shop");
 
 			// Inside a Pixel Hollows cave: a carved cavity in one chunk, its biome set to the Pixel Hollows, lined by the
-			// biome's real worldgen feature; seen in spectator mode with night vision.
+			// biome's own circuitstone feature placed around the walls, with crystals on its floor and ceiling; seen in
+			// spectator mode with night vision.
 			int cx = Math.floorDiv(x + 48, 16) * 16;
 			int cz = Math.floorDiv(z + 16, 16) * 16;
 			server.runOnServer(minecraft -> carveCave(minecraft.overworld(), new BlockPos(cx, y, cz)));
 			server.runCommand("fillbiome %d %d %d %d %d %d jugcraft:pixel_hollows".formatted(cx, y - 1, cz, cx + 15, y + 12, cz + 15));
-			server.runOnServer(minecraft -> PixelHollows.LINING.place(NoneFeatureConfiguration.INSTANCE, minecraft.overworld(),
-					minecraft.overworld().getChunkSource().getGenerator(), RandomSource.create(7L), new BlockPos(cx, y, cz)));
+			int[][] blobs = {{2, 2, 2}, {13, 3, 3}, {2, 8, 13}, {13, 9, 12}, {8, 0, 8}, {8, 10, 8}, {3, 5, 8}, {13, 6, 8}, {8, 4, 2},
+					{8, 5, 15}, {4, 1, 12}, {12, 1, 4}, {5, 9, 4}, {11, 9, 13}};
+			for (int[] blob : blobs) {
+				server.runCommand("place feature jugcraft:pixel_hollows_lining %d %d %d".formatted(cx + blob[0], y + blob[1], cz + blob[2]));
+			}
+			server.runOnServer(minecraft -> growCrystals(minecraft.overworld(), new BlockPos(cx, y, cz)));
 			server.runCommand("gamemode spectator @p");
 			server.runCommand("effect give @p minecraft:night_vision infinite 0 true");
 			server.runCommand("tp @p %d %d %d 180 15".formatted(cx + 8, y + 4, cz + 13));
@@ -280,9 +281,29 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 
 	/** Gives every motionless (NoAI) villager the Retro Trader profession, at apprentice level. */
 	private static void makeRetroTraders(ServerLevel level) {
-		Holder<VillagerProfession> trader = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(RetroTrader.PROFESSION);
-		for (Villager villager : level.getEntities(EntityType.VILLAGER, Villager::isNoAi)) {
+		var trader = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(RetroTrader.PROFESSION);
+		for (var villager : level.getEntities(EntityType.VILLAGER, villager -> villager.isNoAi())) {
 			villager.setVillagerData(villager.getVillagerData().withProfession(trader).withLevel(2));
+		}
+	}
+
+	/** Clusters on about one in six of the cave's open floors and ceilings (worldgen places them the same way). */
+	private static void growCrystals(ServerLevel level, BlockPos corner) {
+		RandomSource random = RandomSource.create(7L);
+		for (int dx = 0; dx < 16; dx++) {
+			for (int dz = 0; dz < 16; dz++) {
+				for (int dy = 0; dy <= 10; dy++) {
+					BlockPos pos = corner.offset(dx, dy, dz);
+					if (!level.getBlockState(pos).isAir() || random.nextInt(6) != 0) {
+						continue;
+					}
+					Direction facing = level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP) ? Direction.UP
+							: level.getBlockState(pos.above()).isFaceSturdy(level, pos.above(), Direction.DOWN) ? Direction.DOWN : null;
+					if (facing != null) {
+						level.setBlock(pos, PixelHollows.PIXEL_CRYSTAL_CLUSTER.defaultBlockState().setValue(AmethystClusterBlock.FACING, facing), 2);
+					}
+				}
+			}
 		}
 	}
 

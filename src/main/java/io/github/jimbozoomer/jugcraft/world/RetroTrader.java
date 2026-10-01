@@ -5,14 +5,15 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.mixin.StructureTemplatePoolAccessor;
 import java.util.Collections;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
-import net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper;
+import net.fabricmc.fabric.api.object.builder.v1.world.poi.PoiHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -23,16 +24,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.trading.ItemCost;
-import net.minecraft.world.item.trading.MerchantOffer;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -45,10 +40,11 @@ import net.minecraft.world.level.saveddata.maps.MapDecorationType;
 /**
  * The Retro Trader: a villager profession whose job site is the arcade cabinet, and the Retro Game Shop that
  * brings one to some new plains villages. He always offers a Pixel Hollows map, sells a little of the cave's
- * palette and buys pixel shards back (trade numbers: TRADES in tools/pixel_hollows.py).
+ * palette and buys pixel shards back. His trades are data (villager_trade and trade_set files generated from
+ * TRADES in tools/pixel_hollows.py).
  *
- * <p>The {@code retro_trader} switch stops new shops, the map trade for new traders and the cabinet recipe. The
- * profession, the cabinet and existing traders and their offers stay.
+ * <p>The {@code retro_trader} switch stops new shops, the map trade and the cabinet recipe. The profession, the
+ * cabinet, the map item and existing traders and their offers stay.
  */
 public final class RetroTrader {
 	public static final String FEATURE = "retro_trader";
@@ -61,9 +57,9 @@ public final class RetroTrader {
 	public static final Identifier SHOP = Jugcraft.id("village/plains/retro_game_shop");
 	/** Weight among the plains houses (vanilla houses weigh 1 to 3 each); keep in sync with tools/pixel_hollows.py. */
 	public static final int SHOP_WEIGHT = 1;
-	public static final int MAP_EMERALDS = 12;
 
 	public static Block ARCADE_CABINET;
+	public static Item PIXEL_HOLLOWS_MAP;
 	public static SoundEvent WORK_SOUND;
 	public static Holder<MapDecorationType> MAP_MARKER;
 	private static final Set<StructureTemplatePool> EXTENDED = Collections.newSetFromMap(new WeakHashMap<>());
@@ -84,45 +80,28 @@ public final class RetroTrader {
 		Identifier workSound = Jugcraft.id("entity.villager.work_retro_trader");
 		WORK_SOUND = Registry.register(BuiltInRegistries.SOUND_EVENT, workSound, SoundEvent.createVariableRangeEvent(workSound));
 		MAP_MARKER = Registry.registerForHolder(BuiltInRegistries.MAP_DECORATION_TYPE, Jugcraft.id("pixel_hollows"),
-				new MapDecorationType(Jugcraft.id("pixel_hollows"), true, 0x2A9D8F, true, false));
+				new MapDecorationType(Jugcraft.id("pixel_hollows"), true, false));
 
 		// The lower half is the job site (unemployed villagers claim it through #minecraft:acquirable_job_site).
 		List<BlockState> jobSite = ARCADE_CABINET.getStateDefinition().getPossibleStates().stream()
 				.filter(state -> state.getValue(ArcadeCabinetBlock.HALF) == DoubleBlockHalf.LOWER).toList();
-		PointOfInterestHelper.register(Jugcraft.id("arcade_cabinet"), 1, 1, jobSite);
+		PoiHelper.register(Jugcraft.id("arcade_cabinet"), 1, 1, jobSite);
 		Registry.register(BuiltInRegistries.VILLAGER_PROFESSION, PROFESSION, new VillagerProfession(
 				Component.translatable("entity.jugcraft.villager.retro_trader"),
-				poi -> poi.is(JOB_SITE), poi -> poi.is(JOB_SITE), ImmutableSet.of(), ImmutableSet.of(), WORK_SOUND));
-		registerTrades();
+				poi -> poi.is(JOB_SITE), poi -> poi.is(JOB_SITE), ImmutableSet.of(), ImmutableSet.of(), WORK_SOUND,
+				// Trades are data: data/jugcraft/trade_set/retro_trader/level_<n>.json (from TRADES in tools/pixel_hollows.py).
+				new Int2ObjectOpenHashMap<>(Map.of(1, key(Registries.TRADE_SET, "retro_trader/level_1"),
+						2, key(Registries.TRADE_SET, "retro_trader/level_2"), 3, key(Registries.TRADE_SET, "retro_trader/level_3")))));
+		ResourceKey<Item> mapKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("pixel_hollows_map"));
+		PIXEL_HOLLOWS_MAP = Registry.register(BuiltInRegistries.ITEM, mapKey, new PixelHollowsMapItem(new Item.Properties().setId(mapKey)));
 
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> addShopToVillages(server.registryAccess()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(ARCADE_CABINET));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.accept(PIXEL_HOLLOWS_MAP));
 	}
 
-	/**
-	 * Two trades at novice and apprentice (a villager takes two per level, so these always appear), one at
-	 * journeyman. Keep in sync with TRADES and MAP_TRADE in tools/pixel_hollows.py.
-	 */
-	private static void registerTrades() {
-		TradeOfferHelper.registerVillagerOffers(PROFESSION, 1, factories -> {
-			if (JugcraftConfig.isFeatureEnabled(FEATURE)) {
-				factories.add(new PixelHollowsMapListing());
-			}
-			factories.add(trade(Items.EMERALD, 1, PixelHollows.CIRCUITSTONE, 8, 12, 1, 0.05F));
-		});
-		TradeOfferHelper.registerVillagerOffers(PROFESSION, 2, factories -> {
-			// Buyback: price multiplier 0, so reputation discounts never make selling shards pay more than buying them.
-			factories.add(trade(PixelHollows.PIXEL_SHARD, 6, Items.EMERALD, 1, 12, 5, 0.0F));
-			factories.add(trade(Items.EMERALD, 3, PixelHollows.PIXEL_LAMP, 1, 4, 5, 0.05F));
-		});
-		TradeOfferHelper.registerVillagerOffers(PROFESSION, 3, factories ->
-				factories.add(trade(Items.EMERALD, 4, PixelHollows.PIXEL_SHARD, 2, 3, 10, 0.05F)));
-	}
-
-	private static VillagerTrades.ItemListing trade(ItemLike wants, int wantsCount, ItemLike gives, int givesCount, int uses,
-			int xp, float priceMultiplier) {
-		return (level, trader, random) -> new MerchantOffer(new ItemCost(wants, wantsCount), new ItemStack(gives, givesCount),
-				uses, xp, priceMultiplier);
+	private static <T> ResourceKey<T> key(ResourceKey<? extends Registry<T>> registry, String path) {
+		return ResourceKey.create(registry, Jugcraft.id(path));
 	}
 
 	/** Adds the shop to the plains village houses once per server (village pools are fixed while a world runs). */
