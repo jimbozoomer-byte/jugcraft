@@ -1,0 +1,61 @@
+{
+  "ambient.pixel_hollows.loop": {
+    "sounds": [
+      {
+        "name": "jugcraft:ambient/pixel_hollows_loop",
+        "volume": 0.5
+      }
+    ],
+    "subtitle": "subtitles.jugcraft.ambient.pixel_hollows.loop"
+  },
+  "ambient.pixel_hollows.additions": {
+    "sounds": [
+      {
+        "name": "minecraft:note/bit",
+        "volume": 0.35,
+        "pitch": 0.5
+      },
+      {
+        "name": "minecraft:note/bit",
+        "volume": 0.35,
+        "pitch": 0.63
+      },
+      {
+        "name": "minecraft:note/bit",
+        "volume": 0.35,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:note/bit",
+        "volume": 0.35,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:note/bit",
+        "volume": 0.35,
+        "pitch": 1.26
+      }
+    ],
+    "subtitle": "subtitles.jugcraft.ambient.pixel_hollows.additions"
+  },
+  "entity.villager.work_retro_trader": {
+    "sounds": [
+      {
+        "name": "minecraft:note/bit",
+        "volume": 0.6,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:note/bit",
+        "volume": 0.6,
+        "pitch": 1.19
+      },
+      {
+        "name": "minecraft:note/bit",
+        "volume": 0.6,
+        "pitch": 1.5
+      }
+    ],
+    "subtitle": "subtitles.jugcraft.entity.villager.work_retro_trader"
+  }
+}

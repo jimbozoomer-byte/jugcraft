@@ -98,6 +98,10 @@
     "jugcraft:conveyor",
     "jugcraft:conveyor_splitter",
     "jugcraft:charging_station",
-    "jugcraft:conveyor_slope"
+    "jugcraft:conveyor_slope",
+    "jugcraft:circuitstone",
+    "jugcraft:polished_circuitstone",
+    "jugcraft:circuitstone_bricks",
+    "jugcraft:pixel_crystal_cluster"
   ]
 }

@@ -15,6 +15,7 @@ from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS
                        all_blocks, all_items, feature_of)
 from machines import (MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
+import pixel_hollows as ph
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -25,6 +26,7 @@ JAVA = JAVA_ROOT / "materials" / "JugcraftMaterials.java"
 CONFIG = JAVA_ROOT / "config" / "JugcraftConfig.java"
 WORLDGEN = JAVA_ROOT / "materials" / "JugcraftWorldgen.java"
 MACHINE_JAVA = JAVA_ROOT / "machine" / "MachineKind.java"
+WORLD_JAVA = JAVA_ROOT / "world"
 STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
 
 # Tags that Jugcraft reads but that vanilla/Fabric API define.
@@ -89,7 +91,7 @@ def model(ref):
 
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
-    for block in all_blocks() + machine_blocks():
+    for block in all_blocks() + machine_blocks() + ph.blocks():
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -104,7 +106,7 @@ def check_assets(registered):
         definition = load(ASSETS / "items" / f"{item}.json")
         if definition:
             model(definition["model"]["model"])
-        if item not in all_blocks() + machine_blocks() and f"item.{MOD}.{item}" not in lang:
+        if item not in all_blocks() + machine_blocks() + ph.blocks() and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -121,7 +123,7 @@ UNITS = {"ingots": 9, "nuggets": 1, "raw_materials": 9, "ores": 9, "storage_bloc
          **{f"{form}s": units for form, units in PART_UNITS.items()}}
 
 
-NON_METAL = {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"}
+NON_METAL = set(ph.blocks()) | set(ph.items()) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"}
 
 
 def item_units(ref):
@@ -243,14 +245,19 @@ def check_machine_recipe_files(registered):
                 err(f"{label}: unknown item {ref}")
 
 
+# Jugcraft entries of registries other than blocks and items that tags may name.
+OTHER_ENTRIES = {"worldgen": {"pixel_hollows"}, "point_of_interest_type": {"arcade_cabinet"}}
+
+
 def check_tags():
     for path in sorted(DATA.rglob("tags/*/**/*.json")):
         registry = path.relative_to(DATA).parts[2]
+        known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + ph.blocks() + ph.items())
         for value in (load(path) or {}).get("values", []):
             if value.startswith("#"):
                 if not tag_exists(registry, value[1:]):
                     err(f"{path.relative_to(ROOT)}: unknown tag {value}")
-            elif split(value)[0] == MOD and split(value)[1] not in all_blocks() + all_items() + machine_blocks():
+            elif split(value)[0] == MOD and split(value)[1] not in known:
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
 
@@ -266,9 +273,17 @@ def check_worldgen():
             if block not in all_blocks():
                 err(f"{path.name}: places unknown block {block}")
     for path in sorted((DATA / MOD / "worldgen" / "placed_feature").glob("*.json")):
-        feature = split((load(path) or {})["feature"])[1]
-        if not (DATA / MOD / "worldgen" / "feature" / f"{feature}.json").is_file():
+        namespace, feature = split((load(path) or {})["feature"])
+        # Vanilla configured features (the Pixel Hollows' bonus ores) are checked by the game tests, which load them.
+        if namespace == MOD and not (DATA / MOD / "worldgen" / "feature" / f"{feature}.json").is_file():
             err(f"{path.name}: unknown configured feature {feature}")
+    biome = load(DATA / MOD / "worldgen" / "biome" / "pixel_hollows.json") or {}
+    if len(biome.get("features", [])) != len(ph.STEPS):
+        err("pixel_hollows.json: needs one feature list per generation step")
+    for step in biome.get("features", []):
+        for ref in step:
+            if split(ref)[0] == MOD and not (DATA / MOD / "worldgen" / "placed_feature" / f"{split(ref)[1]}.json").is_file():
+                err(f"pixel_hollows.json: unknown placed feature {ref}")
 
 
 def check_java():
@@ -480,8 +495,55 @@ def check_style_pack():
             err(f"{block}: the two styles cover different block states")
 
 
+def check_pixel_hollows():
+    """The cave's shards stay finite, and the Retro Trader's Java numbers match tools/pixel_hollows.py without a
+    profit loop between his shard sale and buyback."""
+    for path in sorted((DATA / MOD / "recipe").rglob("*.json")):
+        if f'"{MOD}:{ph.SHARD}"' in json_result(path):
+            err(f"{path.name}: makes pixel shards (they must only come from clusters and trade)")
+
+    trader = (WORLD_JAVA / "RetroTrader.java").read_text(encoding="utf-8")
+    names = {"Items.EMERALD": "minecraft:emerald", "PixelHollows.CIRCUITSTONE": "jugcraft:circuitstone",
+             "PixelHollows.PIXEL_SHARD": "jugcraft:pixel_shard", "PixelHollows.PIXEL_LAMP": "jugcraft:pixel_lamp"}
+    java = []
+    for segment in trader.split("registerVillagerOffers(PROFESSION, ")[1:]:
+        level = int(segment.split(",")[0])
+        for wants, wn, gives, gn, uses, xp, mult in re.findall(
+                r"trade\(([\w.]+), (\d+), ([\w.]+), (\d+), (\d+), (\d+), ([\d.]+)F\)", segment):
+            java.append((level, names.get(wants, wants), int(wn), None, names.get(gives, gives), int(gn), int(uses), int(xp),
+                         float(mult)))
+    if java != ph.TRADES:
+        err(f"RetroTrader trades {java} != tools/pixel_hollows.py TRADES {ph.TRADES}")
+    if f"SHOP_WEIGHT = {ph.SHOP_WEIGHT};" not in trader or f"MAP_EMERALDS = {ph.MAP_TRADE['emeralds']};" not in trader:
+        err("RetroTrader.SHOP_WEIGHT or MAP_EMERALDS differs from tools/pixel_hollows.py")
+    maps = (WORLD_JAVA / "PixelHollowsMaps.java").read_text(encoding="utf-8")
+    search = ph.MAP_SEARCH
+    heights = ", ".join(str(h) for h in search["heights"])
+    if (f"STEP = {search['step']};" not in maps or f"RINGS = {search['rings']};" not in maps
+            or f"HEIGHTS = {{{heights}}};" not in maps):
+        err("PixelHollowsMaps search bounds differ from MAP_SEARCH in tools/pixel_hollows.py")
+
+    # Cheapest shard sale: a discount can bring the price down to 1 emerald. Best buyback: price multiplier 0 means no
+    # reputation discount; Hero of the Village V takes floor(0.55 * count) (at least 1) off.
+    sale = min(1 / gives_n for _, wants, _, _, gives, gives_n, _, _, _ in ph.TRADES
+               if wants == "minecraft:emerald" and gives == f"{MOD}:{ph.SHARD}")
+    for _, wants, wants_n, _, gives, gives_n, _, _, mult in ph.TRADES:
+        if wants == f"{MOD}:{ph.SHARD}":
+            if mult != 0:
+                err("The shard buyback needs price multiplier 0, or reputation discounts make a profit loop")
+            best = gives_n / max(1, wants_n - max(1, int(0.55 * wants_n)))
+            if best >= sale:
+                err(f"Shard buyback pays {best:.3f} emeralds per shard, the sale can cost {sale:.3f}: a profit loop")
+
+
+def json_result(path):
+    data = load(path) or {}
+    return json.dumps(data.get("result", {}))
+
+
 def main():
-    registered = set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
+    registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items()) | set(ph.blocks())
+                  | set(ph.items()))
     check_assets(sorted(registered))
     check_loot(registered)
     check_recipes(registered)
@@ -494,6 +556,7 @@ def main():
     check_style_pack()
     check_handbook(registered)
     check_advancements(registered)
+    check_pixel_hollows()
     for path in RES.rglob("*.json"):
         load(path)
     if errors:
