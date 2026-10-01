@@ -106,7 +106,7 @@ public class ScarecrowBlock extends TallDecorationBlock implements EntityBlock {
 		if (head) {
 			ItemStack old = scarecrow.setHead(stack);
 			stack.consume(1, player);
-			give(player, old);
+			give(player, old, level, pos);
 			level.playSound(null, pos, SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
 		} else if (torch) {
 			ItemStack lit = scarecrow.head().copy();
@@ -135,7 +135,7 @@ public class ScarecrowBlock extends TallDecorationBlock implements EntityBlock {
 					|| !(level.getBlockEntity(upper(pos, state)) instanceof ScarecrowBlockEntity scarecrow)) {
 				return InteractionResult.FAIL;
 			}
-			give(player, scarecrow.setHead(ItemStack.EMPTY));
+			give(player, scarecrow.setHead(ItemStack.EMPTY), level, pos);
 			level.playSound(null, pos, SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.BLOCKS, 1.0F, 0.8F);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
 		}
@@ -148,9 +148,10 @@ public class ScarecrowBlock extends TallDecorationBlock implements EntityBlock {
 				&& head.getOrDefault(JugcraftAgriculture.CARVING, PumpkinCarving.BLANK).glow() > 0;
 	}
 
-	private static void give(Player player, ItemStack stack) {
+	/** Gives {@code stack} to the player, or drops it at the scarecrow if their inventory is full. */
+	private static void give(Player player, ItemStack stack, Level level, BlockPos pos) {
 		if (!stack.isEmpty() && !player.getInventory().add(stack)) {
-			player.drop(stack, false);
+			Block.popResource(level, pos, stack);
 		}
 	}
 
