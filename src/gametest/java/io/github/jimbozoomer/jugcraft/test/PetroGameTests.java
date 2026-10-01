@@ -38,6 +38,7 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameType;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -463,6 +464,7 @@ public class PetroGameTests {
 		reactor.tanks().input(0).fill(PetroFluids.LYE.source(), 250);
 		reactor.setItem(0, new ItemStack(Items.ROTTEN_FLESH, 2));
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL); // A creative player's items are never used up.
 		player.addEffect(new MobEffectInstance(MobEffects.POISON, 600));
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(PetroItems.SOAP, 2));
 		PetroItems.SOAP.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
