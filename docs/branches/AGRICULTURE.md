@@ -245,7 +245,13 @@ Gourds lie on grass like vanilla pumpkins (break one and craft it into seeds). S
 
 Carve any face into a pumpkin, a pixel at a time, at Minecraft's own pixel size. Nothing here is seasonal either: carved pumpkins stay all year.
 
-CARVING_SCREENSHOTS
+| **The carving screen:** the Classic face pressed in, mirror on, candle preview lit | **A row of carved pumpkins** on hay bales by day: Classic, Cat, Ghost (shaved), Spooky, a bat and a star; the pumpkin at the left is carved on two sides |
+| --- | --- |
+| ![The carving screen with the Classic face](../images/ingame_carving_screen.jpg) | ![Carved pumpkins by day](../images/ingame_carved_pumpkins.jpg) |
+| **The same row at midnight**, each with a torch inside | **A pumpkin carved through the screen** above, lit |
+| ![Carved pumpkins lit at night](../images/ingame_carved_pumpkins_night.jpg) | ![A lit hand-carved pumpkin](../images/ingame_carved_pumpkin_close.jpg) |
+
+*Real screenshots from the client game test that CI runs (`CarvingClientGameTests`, software rendering, small previews, hotbar cropped). The close-up pumpkin was carved by pressing the screen's buttons and Done; the server then held the face.*
 
 ### The Carving Knife
 

@@ -56,7 +56,47 @@ Nothing is seasonal: the knife and carved pumpkins work all year and stay in the
 No new dependencies. Uses Fabric API's networking (two play payloads), block entity and creative tab APIs, which are already required. The hand-carved pumpkin uses vanilla's pumpkin model and textures by reference (so resource packs apply); the carving colours, the knife, the item icons and the starter faces are Jugcraft's own (`tools/carving_textures.py`, `CarvingTemplates.java`).
 
 ## Verification
-VERIFICATION
+Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions):
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also checks the carving numbers against Java (face size, glow formula, session length, knife durability), that every starter face is 16 rows of 16 pixels and named, that every refusal has a message, and the models of select item definitions) | Pass, 301 IDs |
+| `./gradlew build`, compile, with the Festival Crops, Kitchen Garden, Fall Harvest and `main` after #46 merged in (`734bc6e`) | Pass |
+| Game tests on the headless server, same commit: 107 in total, 10 of them new here | **All 107 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`, same commit and `dce9952`) | **Passes**; the screenshots in the branch document are from the `734bc6e` run |
+
+The 10 new game tests (`CarvingGameTests`):
+1. the first carve turns a plain pumpkin into a hand-carved one facing the carved side, keeps the face, records the carver, sets the glow from the design, gives no light without a torch, costs the knife one use and lets out 4 seeds;
+2. the knife does nothing on the top of a pumpkin, opens a session on its side, and one session allows one carve;
+3. filling a hole back in is refused, the same face changes nothing, and carving deeper works (a second use);
+4. every server check refuses with its reason: no session, a session for another side or block, a pixel value of 3, a 15-row face, the top side, no knife (shears), too far away, adventure mode, and a melon; a knife in the off hand carves;
+5. two sides keep their own faces, numbered from the front clockwise;
+6. a torch lights a carved pumpkin to its glow and is used up; an empty hand takes it back into the inventory; an uncarved hand-carved pumpkin can't be lit;
+7. a lit pumpkin carved on two sides drops itself with its design and its torch, and placed again is lit with the same design and glow;
+8. with `carving.free_draw` off, a free design is refused and a starter face carves;
+9. glow values (blank 0, one hole 4, 48 holes 15, 96 shaved 12), a design saves and loads unchanged, a wrong-sized design doesn't load, and the starter faces are valid and distinct;
+10. roasted pumpkin seeds restore 2, and their furnace, smoker and campfire recipes load.
+
+The client game test goes through the real path a player uses:
+- the server opens the carving screen for a plain pumpkin, as using the knife does (`PumpkinCarvings.open`);
+- the test presses Apply (the Classic face), Mirror and Candle, then Done;
+- it then checks on the server that the pumpkin holds the Classic face. The log reads `[carving test] face carved over the network: true`.
+
+The test also builds a row of carved pumpkins on hay bales and photographs it by day and lit at midnight.
+
+The first CI run did not compile: the client test used a field that 26.3's `Minecraft` doesn't have; it now waits for the screen with the test context's `waitForScreen`. The main and client code compiled, and every server test passed, on the first run that built.
+
+The client log shows no model or texture errors.
+
+**Not run:**
+- a person playing in a client: drawing by dragging the mouse wasn't exercised, since the test pressed the screen's buttons;
+- a dedicated server with two players, including two players carving the same side at once;
+- save and restart with carved pumpkins in the world (the design's save format and the item round trip are tested);
+- resource packs that retexture pumpkins;
+- performance with many different designs in view.
+
+These need a play session.
 
 ## World and event applicability
 No worldgen. Nothing is seasonal; a later Halloween event could add a carving contest on top, but carving never depends on an event.
