@@ -133,7 +133,16 @@
             "Pulling Strings: Grow a silicon boule in the crystal grower.",
             "Etched in Light: Etch microchips in the lithography station.",
             "Central Processing: Assemble a processor.",
-            "Hello, World: Build a network terminal."
+            "Hello, World: Build a network terminal.",
+            "Under Pressure: Build a gas holder."
+          ]
+        },
+        {
+          "title": "Milestones (10)",
+          "icon": "jugcraft:fluid_valve",
+          "text": [
+            "Shut-Off Valve: Make a fluid valve.",
+            "Strained Relations: Make a fluid filter."
           ]
         }
       ]

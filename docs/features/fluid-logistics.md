@@ -1,6 +1,6 @@
 # Fluid logistics: gas holders, valves and filters
 
-Status: in progress (batch 8)
+Status: implemented (batch 8, #57)
 Proposal issue: owner request, 1 October 2026 ("merge it and start the next batch"), following suggestion 4 from batch 5 ("Logistics: a multi-block gas storage tank, filters and valves for pipes")
 Owner: jimbozoomer-byte
 Target milestone and tier: steel tier and up, for the oil and chemistry lines
@@ -38,6 +38,9 @@ Primary specialty and supported player role: logistics; the player who plumbs fa
 - One pump line can now feed several machines with different fluids from one gas holder or tank farm, each through its own filter.
 - Code: `fluid/FluidFilterBlock` and `FluidFilterBlockEntity` (saves the chosen `FluidVariant`). `FluidNetworks` remembers which pipe reached each storage and only moves the filter's fluid through a filter.
 - Recipe: two steel plates, two iron bars and a steel fluid pipe.
+
+### Advancements
+Under Pressure (gas holder), Shut-Off Valve (fluid valve) and Strained Relations (fluid filter).
 
 ## Connections
 - Existing input producer: the electrolytic cell (chlorine, hydrogen), the distillation tower, cracker, reformer and fracking rig (refinery gas).
