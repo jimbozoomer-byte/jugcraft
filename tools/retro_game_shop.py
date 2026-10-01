@@ -11,8 +11,9 @@ Layout (x across, z from the back wall at 0 to the front wall at 6, y up from th
 the middle of the front, and the jigsaw block just outside it (4, 1, 7) joins the shop to a village street the
 way vanilla houses do (name minecraft:building_entrance). Positions not listed are left to the terrain.
 
-DataVersion: the blocks and block entities are written in 26.3's own format, so the version is set above any
-26.x world version and the data fixer leaves the template alone.
+DataVersion: the blocks and block entities are written in 26.3's own format, so the template carries 26.3's data
+version and the data fixer has nothing to do. (A version above the game's made the whole template load as air.) The
+game test retroGameShopTemplateLoads compares this number with the running game's; regenerate after a platform bump.
 """
 import gzip
 import io
@@ -21,7 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "src" / "main" / "resources" / "data" / "jugcraft" / "structure" / "village" / "plains" / "retro_game_shop.nbt"
-DATA_VERSION = 10000
+DATA_VERSION = 5023
 SIZE = (9, 8, 8)
 
 

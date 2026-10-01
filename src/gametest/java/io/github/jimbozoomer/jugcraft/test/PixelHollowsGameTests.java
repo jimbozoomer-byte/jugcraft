@@ -5,6 +5,8 @@ import io.github.jimbozoomer.jugcraft.world.ArcadeCabinetBlock;
 import io.github.jimbozoomer.jugcraft.world.PixelHollows;
 import io.github.jimbozoomer.jugcraft.world.PixelHollowsMaps;
 import io.github.jimbozoomer.jugcraft.world.RetroTrader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +18,10 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.tags.PoiTypeTags;
@@ -42,6 +48,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 /**
  * Game tests for the Pixel Hollows and the Retro Trader. Measurements are logged with the prefix "[pixel-hollows]"
@@ -111,6 +118,8 @@ public class PixelHollowsGameTests {
 	 */
 	@GameTest
 	public void pixelCrystalFeaturesFaceTheCave(GameTestHelper helper) {
+		// A cluster needs a solid face behind it: a floor block under the first, a ceiling block over the second.
+		helper.setBlock(new BlockPos(2, 0, 2), PixelHollows.CIRCUITSTONE.defaultBlockState());
 		helper.setBlock(new BlockPos(4, 3, 2), PixelHollows.CIRCUITSTONE.defaultBlockState());
 		BlockPos floor = helper.absolutePos(new BlockPos(2, 1, 2));
 		BlockPos ceiling = helper.absolutePos(new BlockPos(4, 2, 2));
@@ -300,6 +309,38 @@ public class PixelHollowsGameTests {
 		Villager villager = spawnVillager(helper, new BlockPos(4, 1, 4));
 		helper.succeedWhen(() -> helper.assertTrue(villager.getVillagerData().profession().is(RetroTrader.PROFESSION),
 				"The villager is still " + villager.getVillagerData().profession()));
+	}
+
+	/**
+	 * The shop template loads with its own blocks (an unreadable palette loads as air) and carries this game's data
+	 * version, so the data fixer leaves it alone. Both versions and the loaded palette are logged.
+	 */
+	@GameTest
+	public void retroGameShopTemplateLoads(GameTestHelper helper) {
+		var server = helper.getLevel().getServer();
+		StructureTemplate template = server.getStructureManager().get(RetroTrader.SHOP)
+				.orElseThrow(() -> helper.assertionException("The Retro Game Shop template did not load"));
+		int file;
+		Identifier path = Identifier.fromNamespaceAndPath(RetroTrader.SHOP.getNamespace(), "structure/" + RetroTrader.SHOP.getPath() + ".nbt");
+		try (InputStream in = server.getResourceManager().getResourceOrThrow(path).open()) {
+			file = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap()).getIntOr("DataVersion", -1);
+		} catch (IOException e) {
+			throw helper.assertionException("Could not read " + path + ": " + e);
+		}
+		CompoundTag saved = template.save(new CompoundTag());
+		int game = saved.getIntOr("DataVersion", -1);
+		ListTag palette = saved.getListOrEmpty("palette");
+		List<String> names = new ArrayList<>();
+		for (int i = 0; i < palette.size(); i++) {
+			names.add(palette.getCompoundOrEmpty(i).getStringOr("Name", "?"));
+		}
+		Jugcraft.LOGGER.info("[pixel-hollows] Retro Game Shop template: DataVersion {} (game {}), size {}, palette {}", file, game,
+				template.getSize(), names);
+		helper.assertTrue(names.contains("jugcraft:arcade_cabinet") && names.contains("minecraft:oak_planks"),
+				"The shop template loaded without its blocks: palette " + names);
+		helper.assertTrue(file == game, "The shop template's DataVersion is " + file + " but the game's is " + game
+				+ ": set DATA_VERSION in tools/retro_game_shop.py and regenerate");
+		helper.succeed();
 	}
 
 	/**

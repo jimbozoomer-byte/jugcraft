@@ -55,15 +55,19 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -88,6 +92,21 @@ public class JugcraftGameTests {
 
 	private static BlockState machine(MachineKind kind) {
 		return JugcraftMachines.MACHINES.get(kind).defaultBlockState();
+	}
+
+	/** Ores drop their raw material to a plain pickaxe; only Silk Touch takes the ore block itself. */
+	@GameTest
+	public void oresNeedSilkTouchToDropThemselves(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
+		BlockState ore = BuiltInRegistries.BLOCK.getValue(Jugcraft.id("tin_ore")).defaultBlockState();
+		List<ItemStack> plain = Block.getDrops(ore, level, pos, null, null, new ItemStack(Items.IRON_PICKAXE));
+		helper.assertTrue(plain.size() == 1 && plain.get(0).is(item("raw_tin")), "Tin ore gave a plain pickaxe " + plain);
+		ItemStack silk = new ItemStack(Items.IRON_PICKAXE);
+		silk.enchant(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH), 1);
+		List<ItemStack> silkDrops = Block.getDrops(ore, level, pos, null, null, silk);
+		helper.assertTrue(silkDrops.size() == 1 && silkDrops.get(0).is(item("tin_ore")), "Tin ore gave Silk Touch " + silkDrops);
+		helper.succeed();
 	}
 
 	/** Recipes are data-driven: the crushing recipe for tin ore loads from data/jugcraft/recipe/crushing. */

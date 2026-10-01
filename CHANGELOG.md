@@ -12,7 +12,8 @@ No numbered release yet. Everything below is on `main`.
 - **Pixel Hollows:** a rare cave biome deep under the driest land, lined with **circuitstone** and lit only by scattered, faintly glowing **pixel crystal clusters**, with an original chiptune hum. It holds 1.5× the usual copper and redstone (and tin). New building blocks: circuitstone, polished circuitstone, circuitstone bricks and the **pixel lamp**; clusters drop **pixel shards**. One mixin adds the biome to the Overworld (Fabric API has no Overworld biome API).
 - **Retro Trader:** a villager profession at the new two-block-tall **arcade cabinet**. He sells a **Pixel Hollows Map** (use it to mark the nearest cave), circuitstone, lamps and shards, and buys shards back without any profit loop. Trades are 26.1+ data files.
 - **Retro Game Shop:** a small storefront that can appear in new plains villages, with the cabinet and a villager inside.
-- Twelve game tests, four client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
+- **Fix (all Jugcraft ores):** ores dropped themselves to any tool, because 26.3 no longer reads the inline Silk Touch check in their loot tables. They now use vanilla's `minecraft:tool/can_silk_touch` predicate, so a plain pickaxe gives raw ore again; a game test covers it.
+- Fourteen game tests, four client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
 
 ### #46 Balance review
 - New [docs/BALANCE.md](docs/BALANCE.md): every generator, conversion, store and cost in one place, with the loops that were checked.

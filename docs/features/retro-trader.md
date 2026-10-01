@@ -71,7 +71,7 @@ Everything is original: no real shop names, logos, colours, uniforms, games or f
 ## Dependencies and assets
 - Fabric API's `PoiHelper` registers the cabinet as a job site; trades are vanilla data. Fabric API has no village pool API, so a mixin accessor (`mixin/StructureTemplatePoolAccessor`) adds the shop to the plains houses pool when the server starts.
 - Original assets: the trader's 64×64 villager overlay (also used for his zombie form) and the cabinet's textures are drawn by `tools/pixel_hollows_textures.py`; the cabinet model is in `tools/retro_models.py`; the shop is written by `tools/retro_game_shop.py` from vanilla blocks and Jugcraft's own; the work sound reuses the note block's "bit" sound by name. MIT.
-- The shop template is written in 26.3's format with a DataVersion above any 26.x version, so the data fixer leaves it alone.
+- The shop template is written in 26.3's format with 26.3's DataVersion (5023), so the data fixer leaves it alone. A DataVersion above the game's made the whole template load as air; the game test `retroGameShopTemplateLoads` compares the two numbers, so after a platform bump `DATA_VERSION` in `tools/retro_game_shop.py` must follow.
 
 ## Verification
 Results are recorded in the PR. The checks:
@@ -83,6 +83,7 @@ Results are recorded in the PR. The checks:
   - `pixelHollowsMapIsMarked`: a marked map carries the marker and the depth in its name.
   - `arcadeCabinetIsAJobSite`: the lower half is an acquirable job site for the profession; the upper half is not.
   - `villagerClaimsTheArcadeCabinet`: an unemployed villager walks to a cabinet and becomes a Retro Trader.
+  - `retroGameShopTemplateLoads`: the template loads with its blocks and carries the game's DataVersion.
   - `retroGameShopTemplate`: the shop placed as the test structure has the cabinet, the "Retro Games" sign, the street jigsaw and a villager, and the shop is in the plains houses pool.
 - Client screenshots: `jugcraft_retro_trader`, `jugcraft_retro_game_shop`, and the cabinet in `jugcraft_pixel_hollows_blocks`.
 - **Not run:** shop frequency across generated villages on ten seeds (only the per-house weight is known); a shop joined to a real village street; buying a map in a client and following it to a cave; the map search's time in a real world; a dedicated server with two clients trading with one trader; restock and restart with a saved map; old-world upgrade; disable-switch behaviour in a running world.

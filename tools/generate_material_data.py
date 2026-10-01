@@ -352,8 +352,9 @@ def machine_recipe_files(out):
 
 # ---------------------------------------------------------------- loot tables
 
-SILK = {"condition": "minecraft:match_tool", "predicate": {"predicates": {
-    "minecraft:enchantments": [{"enchantments": "minecraft:silk_touch", "levels": {"min": 1}}]}}}
+# Vanilla's own "tool has Silk Touch" predicate (26.x block loot tables reference it). The inline item-predicate form
+# used before 26.x no longer reads its enchantment check, so it matched every tool and ores always dropped themselves.
+SILK = {"condition": "minecraft:reference", "name": "minecraft:tool/can_silk_touch"}
 
 
 def loot(block, entries, explosion_condition=False):
