@@ -27,8 +27,6 @@ jobs:
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
           CP="$CLIENT:$COMMON"
           l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -iE "${2:-.}" | head -${3:-60}; }
-          l net.minecraft.world.level.material.PushReaction
-          l 'net.minecraft.world.level.block.state.BlockBehaviour$Properties' 'push|ignitedByLava|noCollision|replaceable'
-          javap -cp "$CP" -c -p net.minecraft.world.level.block.Blocks | grep -n -i "pushreaction\|PushReaction" | head -20
-          mkdir -p van && cd van && unzip -q -o "$CLIENT" 'assets/minecraft/blockstates/lantern.json' 'assets/minecraft/models/block/template_lantern.json' 'assets/minecraft/models/block/template_hanging_lantern.json' 'assets/minecraft/items/lantern.json' 2>/dev/null
-          for f in assets/minecraft/blockstates/lantern.json assets/minecraft/models/block/template_lantern.json assets/minecraft/models/block/template_hanging_lantern.json assets/minecraft/items/lantern.json; do echo "=== $f"; head -c 3000 $f; echo; done
+          javap -cp "$CP" -c -p net.minecraft.world.level.storage.loot.BuiltInLootTables | grep -n -i "carve\|shear" | head -10
+          mkdir -p van && cd van && unzip -q -o "$COMMON" 'data/minecraft/loot_table/*carve*' 'data/minecraft/loot_table/blocks/potted_dandelion.json' 'data/minecraft/loot_table/blocks/dandelion.json' 'data/minecraft/loot_table/blocks/lilac.json' 2>/dev/null
+          find data -name '*.json' | head; for f in $(find data -name '*.json'); do echo "=== $f"; head -c 2000 $f; echo; done

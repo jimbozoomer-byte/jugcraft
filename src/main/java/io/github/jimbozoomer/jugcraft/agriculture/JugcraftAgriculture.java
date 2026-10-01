@@ -382,7 +382,7 @@ public final class JugcraftAgriculture {
 	 */
 	private static void registerGiantPumpkin() {
 		Block giant = registerBlock("giant_pumpkin", GiantPumpkinBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.PUMPKIN)
-				.strength(3.0F).lightLevel(GiantPumpkinBlock::light).pushReaction(PushReaction.BLOCK));
+				.strength(3.0F).lightLevel(GiantPumpkinBlock::light).pushReaction(PushReaction.IMMOVEABLE));
 		registerBlock("giant_pumpkin_vine", GiantPumpkinVineBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.PUMPKIN_STEM));
 		registerBlock("attached_giant_pumpkin_vine", AttachedGiantPumpkinVineBlock::new,
 				BlockBehaviour.Properties.ofFullCopy(Blocks.ATTACHED_PUMPKIN_STEM));
@@ -415,15 +415,15 @@ public final class JugcraftAgriculture {
 		registerItem("gourd_canteen", GourdCanteenItem::new, new Item.Properties().stacksTo(1).component(CANTEEN_WATER, 0), TOOL_TAB);
 
 		Block scarecrow = registerBlock("scarecrow", ScarecrowBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
-				.strength(0.8F).sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
+				.strength(0.8F).sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
 		Block shock = registerBlock("corn_shock", props -> new TallDecorationBlock(props, Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0),
 				Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0)), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
-				.strength(0.5F).sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
+				.strength(0.5F).sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
 		Block bundle = registerBlock("ornamental_corn_bundle", props -> new WallDecorationBlock(props, 3.0, 2.0, 14.0),
 				BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(0.3F).sound(SoundType.GRASS).noCollision()
-						.noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
+						.noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
 		Block birdhouse = registerBlock("gourd_birdhouse", LanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_YELLOW)
-				.strength(0.5F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.DESTROY));
+				.strength(0.5F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.POPPED));
 		for (Block block : List.of(scarecrow, shock, bundle, birdhouse)) {
 			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
 			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
