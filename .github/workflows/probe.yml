@@ -26,4 +26,7 @@ jobs:
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
           CP="$CLIENT:$COMMON"
           l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
-          echo compile-only
+          unzip -l "$CLIENT" | grep -iE "TextSubmit|SubmitNodeStorage" | awk '{print $4}' | head
+          for c in $(unzip -l "$CLIENT" | grep -iE "TextSubmit" | awk '{print $4}' | sed 's/\.class$//;s#/#.#g' | head -3); do javap -cp "$CP" -p "$c" | head -30; done
+          javap -cp "$CP" -c -p net.minecraft.client.renderer.SubmitNodeStorage | grep -A30 "void submitText" | head -40
+          javap -cp "$CP" -c -p net.minecraft.client.renderer.blockentity.AbstractSignRenderer | grep -B40 "submitText" | grep -E "istore|iload|invoke|getstatic" | head -60
