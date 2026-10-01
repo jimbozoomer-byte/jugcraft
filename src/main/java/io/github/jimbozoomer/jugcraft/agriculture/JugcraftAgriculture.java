@@ -161,6 +161,11 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<FogMachineBlockEntity> FOG_MACHINE_ENTITY;
 	public static BlockEntityType<FloatingCandleBlockEntity> FLOATING_CANDLE_ENTITY;
 	public static BlockEntityType<PumpkinCrateBlockEntity> PUMPKIN_CRATE_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> ROCKING_CHAIR_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> LURKING_EYES_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> SILHOUETTE_WINDOW_ENTITY;
+	public static BlockEntityType<MusicBoxBlockEntity> MUSIC_BOX_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> GIANT_FAKE_SPIDER_ENTITY;
 	public static EntityType<Seat> SEAT;
 	public static BlockEntityType<ScarePropBlockEntity> SCARE_PROP_ENTITY;
 	/** Low ground fog from the Fog Machine (drawn by the client: client/FogParticle.java). */
@@ -771,6 +776,33 @@ public final class JugcraftAgriculture {
 			String id = BuiltInRegistries.BLOCK.getKey(pile).getPath();
 			registerItem(id, props -> new BlockItem(pile, props), new Item.Properties().useBlockDescriptionPrefix().compostable(COMPOST_LOW), BUILDING_TAB);
 			fire.add(pile, 30, 60);
+		}
+
+		// Batch 6, the haunted house and yard: the Rocking Chair, the Lurking Eyes, the Silhouette Window, the Spooky Music
+		// Box and the Giant Fake Spider.
+		Block chair = registerBlock("rocking_chair", RockingChairBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		ROCKING_CHAIR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("rocking_chair"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(ROCKING_CHAIR_ENTITY, pos, state), chair).build());
+		Block eyes = registerBlock("lurking_eyes", LurkingEyesBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
+				.strength(0.1F).sound(SoundType.GRASS).noCollision().noOcclusion().pushReaction(PushReaction.POPPED));
+		LURKING_EYES_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("lurking_eyes"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(LURKING_EYES_ENTITY, pos, state), eyes).build());
+		Block window = registerBlock("silhouette_window", SilhouetteWindowBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(0.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		SILHOUETTE_WINDOW_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("silhouette_window"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(SILHOUETTE_WINDOW_ENTITY, pos, state), window).build());
+		Block box = registerBlock("music_box", MusicBoxBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		MUSIC_BOX_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("music_box"),
+				FabricBlockEntityTypeBuilder.create(MusicBoxBlockEntity::new, box).build());
+		Block spider = registerBlock("giant_fake_spider", GiantFakeSpiderBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(0.2F).sound(SoundType.WOOL).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		GIANT_FAKE_SPIDER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("giant_fake_spider"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(GIANT_FAKE_SPIDER_ENTITY, pos, state), spider).build());
+		for (Block block : List.of(chair, eyes, window, box, spider)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
 	}
 

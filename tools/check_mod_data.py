@@ -757,6 +757,7 @@ def check_agriculture():
     check_decor3(java)
     check_decor4(java)
     check_decor5(java)
+    check_decor6(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1510,6 +1511,63 @@ def check_decor5(java):
     values = (load(DATA / MOD / "tags" / "item" / f"{crate['produce_tag'].split(':')[1]}.json") or {}).get("values", [])
     if sorted(values) != sorted(crate["produce"]):
         err(f"The item tag {crate['produce_tag']} differs from PUMPKIN_CRATE's produce")
+
+def check_decor6(java):
+    """The haunted house and yard: Java matches tools/agriculture.py (the chair's seat and rocking, the eyes' distance
+    and blinking, the window's designs and light, the music box's tune length and every note in range, the spider's
+    drop and sway), every block state has a model, and the quads, glowing papers and eye sprite the client draws exist."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    chair, eyes, window, box_, spider = ag.ROCKING_CHAIR, ag.LURKING_EYES, ag.SILHOUETTE_WINDOW, ag.MUSIC_BOX, ag.GIANT_FAKE_SPIDER
+    expected = {("RockingChairBlock", "HAUNTED_ROCK"): chair["haunted_rock"], ("RockingChairBlock", "SITTER_ROCK"): chair["sitter_rock"],
+                ("RockingChairBlock", "ROCK_PERIOD"): chair["rock_period"], ("LurkingEyesBlock", "HIDE_DISTANCE"): eyes["hide_distance"],
+                ("LurkingEyesBlock", "BLINK_PERIOD"): eyes["blink_period"], ("LurkingEyesBlock", "BLINK_TICKS"): eyes["blink_ticks"],
+                ("SilhouetteWindowBlock", "GLOW_LIGHT"): window["glow_light"], ("MusicBoxBlockEntity", "TICKS_PER_BEAT"): box_["ticks_per_beat"],
+                ("MusicBoxBlockEntity", "BEATS"): box_["beats"], ("GiantFakeSpiderBlock", "MAX_DROP"): spider["max_drop"],
+                ("GiantFakeSpiderBlock", "SWAY_PERIOD"): spider["sway_period"], ("GiantFakeSpiderBlock", "SWAY_DEGREES"): spider["sway_degrees"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    seat = re.search(r"SEAT_HEIGHT = ([\d.]+) / ([\d.]+);", java.get("RockingChairBlock", ""))
+    if not seat or abs(float(seat.group(1)) / float(seat.group(2)) - chair["seat_height"]) > 1e-9:
+        err(f"RockingChairBlock.SEAT_HEIGHT differs from ROCKING_CHAIR's seat_height ({chair['seat_height']})")
+    designs = re.search(r"enum Design implements StringRepresentable \{\s*([A-Z_, ]+);", java.get("SilhouetteWindowBlock", ""))
+    if not designs or [v.strip().lower() for v in designs.group(1).split(",")] != window["designs"]:
+        err("SilhouetteWindowBlock.Design differs from SILHOUETTE_WINDOW's designs")
+    tune = re.search(r"TUNE = \{(.*?)\};", java.get("MusicBoxBlockEntity", ""), re.S)
+    notes = re.findall(r"\{(\d+), (\d+), (BELL|HARP)\}", tune.group(1)) if tune else []
+    if not notes:
+        err("MusicBoxBlockEntity.TUNE has no notes")
+    for beat, note, _ in notes:
+        if not 0 <= int(beat) < box_["beats"] or not 0 <= int(note) <= 24:
+            err(f"Music box note {{{beat}, {note}}} is outside the tune or a note block's range")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    wanted = {
+        chair["block"]: {f"facing={f}" for f in horizontal},
+        eyes["block"]: {f"facing={f}" for f in horizontal + ("up", "down")},
+        window["block"]: {f"design={d},facing={f}" for f in horizontal for d in window["designs"]},
+        box_["block"]: {f"facing={f},open={o},powered={p}" for f in horizontal for o in ("false", "true") for p in ("false", "true")},
+        spider["block"]: {f"drop={n}" for n in range(1, spider["max_drop"] + 1)},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    quads = load(ASSETS / "decor_quads.json") or {}
+    for name in ("rocking_chair", "giant_fake_spider"):
+        if not quads.get(name):
+            err(f"decor_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"decor_quads.json: {name} uses a missing texture {quad['texture']}")
+                break
+    for texture in [f"silhouette_window_{d}_lit" for d in window["designs"]] + ["lurking_eyes"]:
+        if not (ASSETS / "textures" / "entity" / f"{texture}.png").exists():
+            err(f"Missing entity texture {texture}")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

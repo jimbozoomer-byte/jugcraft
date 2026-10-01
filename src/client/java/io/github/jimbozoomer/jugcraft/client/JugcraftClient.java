@@ -64,6 +64,10 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.HAUNTED_PORTRAIT_ENTITY, HauntedPortraitRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FLOATING_CANDLE_ENTITY, FloatingCandleRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_CRATE_ENTITY, PumpkinCrateRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.ROCKING_CHAIR_ENTITY, RockingChairRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.LURKING_EYES_ENTITY, LurkingEyesRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SILHOUETTE_WINDOW_ENTITY, SilhouetteWindowRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.GIANT_FAKE_SPIDER_ENTITY, GiantFakeSpiderRenderer::new);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.FOG, FogParticle::provider);
 		ModelLayerRegistry.registerModelLayer(WispModel.LAYER, WispModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(HorsemanModel.LAYER, HorsemanModel::createLayer);

@@ -768,6 +768,30 @@ def decor5_blocks():
 def decor5_items():
     return decor5_blocks()
 
+
+# ---------------------------------------------------------------- Halloween decorations, batch 6: the haunted house and yard
+# The Rocking Chair (RockingChairBlock): sat in at `seat_height`; rocks `sitter_rock` degrees under a sitter and
+# `haunted_rock` on its own at night, one rock every `rock_period` ticks (drawn by the client).
+ROCKING_CHAIR = {"block": "rocking_chair", "display": "Rocking Chair", "seat_height": 0.5625, "haunted_rock": 7.0, "sitter_rock": 4.0,
+                 "rock_period": 50}
+# Lurking Eyes (LurkingEyesBlock): show at night to viewers at least `hide_distance` away; blink every `blink_period`.
+LURKING_EYES = {"block": "lurking_eyes", "display": "Lurking Eyes", "hide_distance": 4.0, "blink_period": 90, "blink_ticks": 4}
+# The Silhouette Window (SilhouetteWindowBlock): a cut-out per design; glows on the side away from block light of at
+# least `glow_light`.
+SILHOUETTE_WINDOW = {"block": "silhouette_window", "display": "Silhouette Window", "designs": ["bat", "cat", "witch"], "glow_light": 8}
+# The Spooky Music Box (MusicBoxBlock + MusicBoxBlockEntity): an original tune of `beats` beats of `ticks_per_beat`.
+MUSIC_BOX = {"block": "music_box", "display": "Spooky Music Box", "ticks_per_beat": 6, "beats": 24}
+# The Giant Fake Spider (GiantFakeSpiderBlock): dangles 1 to `max_drop` blocks, swaying `sway_degrees` every `sway_period`.
+GIANT_FAKE_SPIDER = {"block": "giant_fake_spider", "display": "Giant Fake Spider", "max_drop": 4, "sway_period": 120, "sway_degrees": 6.0}
+
+
+def decor6_blocks():
+    return [ROCKING_CHAIR["block"], LURKING_EYES["block"], SILHOUETTE_WINDOW["block"], MUSIC_BOX["block"], GIANT_FAKE_SPIDER["block"]]
+
+
+def decor6_items():
+    return decor6_blocks()
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -963,6 +987,12 @@ SHAPELESS = [
     # A hay block and string tie two bale seats.
     {"id": "hay_bale_seat", "inputs": ["minecraft:hay_block", "minecraft:string"], "result": "hay_bale_seat", "count": 2,
      "category": "building"},
+    # Decorations batch 6: two spider eyes and a glow ink sac make two pairs of lurking eyes; a pane, paper and dyes a
+    # silhouette window.
+    {"id": "lurking_eyes", "inputs": ["minecraft:spider_eye", "minecraft:spider_eye", "minecraft:glow_ink_sac"], "result": "lurking_eyes",
+     "count": 2, "category": "building"},
+    {"id": "silhouette_window", "inputs": ["minecraft:glass_pane", "minecraft:paper", "minecraft:orange_dye", "minecraft:black_dye"],
+     "result": "silhouette_window", "count": 1, "category": "building"},
 ]
 SHAPED = [
     {"id": "barley_bread", "pattern": ["BBB"], "key": {"B": "jugcraft:barley"}, "result": "barley_bread", "count": 1,
@@ -1083,6 +1113,15 @@ SHAPED = [
                                                                           "M": "jugcraft:purple_mum"},
      "result": "autumn_wreath", "count": 1, "category": "building", "group": "autumn_wreath",
      "components": {"minecraft:block_state": {"flowers": "purple"}}},
+    # Decorations batch 6: a planked chair with a wool cushion on stick legs; a slab box round a note block with a
+    # gold catch; a black-wool spider on string legs with a spider eye.
+    {"id": "rocking_chair", "pattern": ["P  ", "PWP", "S S"], "key": {"P": "#minecraft:planks", "W": "#minecraft:wool", "S": "minecraft:stick"},
+     "result": "rocking_chair", "count": 1, "category": "building"},
+    {"id": "music_box", "pattern": ["SGS", "SNS"], "key": {"S": "#minecraft:wooden_slabs", "G": "minecraft:gold_nugget", "N": "minecraft:note_block"},
+     "result": "music_box", "count": 1, "category": "redstone"},
+    {"id": "giant_fake_spider", "pattern": ["S S", "WEW", "S S"], "key": {"S": "minecraft:string", "W": "minecraft:black_wool",
+                                                                       "E": "minecraft:spider_eye"},
+     "result": "giant_fake_spider", "count": 1, "category": "building"},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -1127,7 +1166,7 @@ def all_blocks():
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
-            + decor4_blocks() + decor5_blocks())
+            + decor4_blocks() + decor5_blocks() + decor6_blocks())
 
 
 def all_items():
@@ -1135,7 +1174,7 @@ def all_items():
             + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
-            + decor2_items() + decor3_items() + decor4_items() + decor5_items())
+            + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items())
 
 
 def owns(entry_id):
