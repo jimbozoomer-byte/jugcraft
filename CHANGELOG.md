@@ -13,7 +13,7 @@ No numbered release yet. Everything below is on `main`.
 - **Gaskets** (rubber + steel plate); rubber belts; gasketed steel pipe, four for two plates.
 - An advancement, a handbook page and a game test.
 
-### Unmerged: Oxygen-blown steel and argon, batch 13
+### #68 Oxygen-blown steel and argon, batch 13
 - The air separation unit also makes **argon**.
 - **Boost gases:** oxygen piped into the steel foundry, or argon into the crystal grower, doubles its speed.
 
