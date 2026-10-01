@@ -142,7 +142,10 @@
           "icon": "jugcraft:fluid_valve",
           "text": [
             "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter."
+            "Strained Relations: Make a fluid filter.",
+            "King Cotton: Grow cotton.",
+            "Make It Rain: Build a sprinkler.",
+            "Reaping What You Sow: Build a crop harvester."
           ]
         }
       ]

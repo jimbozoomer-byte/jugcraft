@@ -1,6 +1,6 @@
 # Farming: harvesters, sprinklers and cotton
 
-Status: in progress (batch 9)
+Status: implemented (batch 9, #58)
 Proposal issue: owner request, 1 October 2026 ("merge it and start the next batch"), following suggestion 6 from batch 5 ("Farming: greenhouses, a powered harvester and sprinklers that use fertilizer, plus new crops")
 Owner: jimbozoomer-byte
 Target milestone and tier: steel tier, beside the chemistry line's fertilizer
@@ -41,6 +41,9 @@ Greenhouses and rubber trees are left for later: rubber trees need worldgen, and
 - **A ripe plant** drops one to three cotton and more seeds (Fortune adds seeds), like wheat. The harvester, sprinkler and fertilizer all work on it (`minecraft:crops`, `minecraft:maintains_farmland`).
 - **One cotton spins into one string** (crafting).
 - Code: `farming/CottonCropBlock`; `JugcraftFarming` registers the crop, its seeds (which place it) and cotton. Textures: `tools/crop_textures.py`. `check_mod_data` now knows crops have no item of their own and that item tags may hold machine and chemistry items.
+
+### Advancements
+King Cotton (cotton), Make It Rain (sprinkler) and Reaping What You Sow (crop harvester).
 
 ## Connections
 - Existing input producer: vanilla crops on farmland; fertilizer (batch 5) ripens them faster.
