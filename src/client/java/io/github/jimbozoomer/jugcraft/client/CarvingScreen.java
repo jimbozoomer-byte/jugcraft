@@ -243,10 +243,10 @@ public class CarvingScreen extends Screen {
 		if (super.mouseClicked(event, doubleClick)) {
 			return true;
 		}
-		if (freeDraw && inGrid(event.x(), event.y()) && (event.button() == 0 || event.button() == 1)) {
+		if (freeDraw && inGrid(event.x(), event.y()) && (event.button() == MOUSE_LEFT || event.button() == MOUSE_RIGHT)) {
 			pushUndo();
 			painting = true;
-			erasing = event.button() == 1;
+			erasing = event.button() == MOUSE_RIGHT;
 			paint(event.x(), event.y());
 			return true;
 		}
@@ -277,7 +277,8 @@ public class CarvingScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(KeyEvent event) {
-		if (event.hasControlDown() && event.key() == 90) {
+		// Ctrl+Z (Cmd+Z on macOS), matched like vanilla's edit shortcuts: by the letter on the keyboard layout.
+		if (event.shortcutKey() == 'z' && event.hasControlDownWithQuirk() && !event.hasShiftDown() && !event.hasAltDown()) {
 			undo();
 			return true;
 		}
