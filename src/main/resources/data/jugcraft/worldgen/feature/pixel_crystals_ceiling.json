@@ -1,13 +1,10 @@
 {
   "type": "minecraft:simple_block",
   "to_place": {
-    "type": "minecraft:simple_state_provider",
-    "state": {
-      "Name": "jugcraft:pixel_crystal_cluster",
-      "Properties": {
-        "facing": "down",
-        "waterlogged": "false"
-      }
+    "id": "jugcraft:pixel_crystal_cluster",
+    "properties": {
+      "facing": "down",
+      "waterlogged": "false"
     }
   }
 }

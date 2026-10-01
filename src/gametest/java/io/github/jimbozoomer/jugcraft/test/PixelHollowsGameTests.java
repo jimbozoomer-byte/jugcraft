@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -35,6 +36,7 @@ import net.minecraft.world.level.biome.FeatureSorter;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
+import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -101,6 +103,30 @@ public class PixelHollowsGameTests {
 		helper.assertTrue(PixelHollows.PIXEL_CRYSTAL_CLUSTER.defaultBlockState().getLightEmission() == 3, "Clusters should glow faintly (3)");
 		helper.assertTrue(!PixelHollows.PIXEL_CRYSTAL_CLUSTER.defaultBlockState().isRandomlyTicking(), "Clusters must not grow");
 		helper.succeed();
+	}
+
+	/**
+	 * The worldgen crystal features (data) place a cluster on a floor facing up and under a ceiling facing down: their
+	 * block states, written the 26.3 way, load with the right facing.
+	 */
+	@GameTest
+	public void pixelCrystalFeaturesFaceTheCave(GameTestHelper helper) {
+		helper.setBlock(new BlockPos(4, 3, 2), PixelHollows.CIRCUITSTONE.defaultBlockState());
+		BlockPos floor = helper.absolutePos(new BlockPos(2, 1, 2));
+		BlockPos ceiling = helper.absolutePos(new BlockPos(4, 2, 2));
+		var server = helper.getLevel().getServer();
+		server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
+				"place feature jugcraft:pixel_crystals_floor %d %d %d".formatted(floor.getX(), floor.getY(), floor.getZ()));
+		server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
+				"place feature jugcraft:pixel_crystals_ceiling %d %d %d".formatted(ceiling.getX(), ceiling.getY(), ceiling.getZ()));
+		helper.succeedWhen(() -> {
+			BlockState up = helper.getBlockState(new BlockPos(2, 1, 2));
+			BlockState down = helper.getBlockState(new BlockPos(4, 2, 2));
+			helper.assertTrue(up.is(PixelHollows.PIXEL_CRYSTAL_CLUSTER) && up.getValue(AmethystClusterBlock.FACING) == Direction.UP,
+					"The floor feature placed " + up);
+			helper.assertTrue(down.is(PixelHollows.PIXEL_CRYSTAL_CLUSTER) && down.getValue(AmethystClusterBlock.FACING) == Direction.DOWN,
+					"The ceiling feature placed " + down);
+		});
 	}
 
 	/** 4 shards + glass make one lamp; the cabinet takes 2 shards; the stonecutter cuts circuitstone. */
@@ -268,9 +294,9 @@ public class PixelHollowsGameTests {
 	@GameTest(maxTicks = 1800)
 	public void villagerClaimsTheArcadeCabinet(GameTestHelper helper) {
 		helper.setBlock(new BlockPos(1, 1, 1), RetroTrader.ARCADE_CABINET.defaultBlockState().setValue(ArcadeCabinetBlock.FACING,
-				net.minecraft.core.Direction.SOUTH));
+				Direction.SOUTH));
 		helper.setBlock(new BlockPos(1, 2, 1), RetroTrader.ARCADE_CABINET.defaultBlockState()
-				.setValue(ArcadeCabinetBlock.FACING, net.minecraft.core.Direction.SOUTH).setValue(ArcadeCabinetBlock.HALF, DoubleBlockHalf.UPPER));
+				.setValue(ArcadeCabinetBlock.FACING, Direction.SOUTH).setValue(ArcadeCabinetBlock.HALF, DoubleBlockHalf.UPPER));
 		Villager villager = spawnVillager(helper, new BlockPos(4, 1, 4));
 		helper.succeedWhen(() -> helper.assertTrue(villager.getVillagerData().profession().is(RetroTrader.PROFESSION),
 				"The villager is still " + villager.getVillagerData().profession()));

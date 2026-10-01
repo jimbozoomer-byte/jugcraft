@@ -826,20 +826,21 @@ def pixel_hollows_worldgen():
         {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"absolute": gen["min_y"]},
                                                       "max_inclusive": {"absolute": gen["max_y"]}}},
         {"type": "minecraft:biome"}]})
-    # Crystal clusters: find a floor (or ceiling) below (above) a random point in the cave, then sit on it.
+    # Crystal clusters: scan down (up) from a random point to the air just above a floor (below a ceiling) and sit
+    # there. 26.3 writes block states directly ("id" and "properties") instead of a simple_state_provider.
+    air = {"type": "minecraft:matching_blocks", "blocks": ["minecraft:air", "minecraft:cave_air"]}
     for name, crystal in ph.CRYSTALS.items():
         write(folder / "feature" / f"{name}.json", {"type": "minecraft:simple_block", "to_place": {
-            "type": "minecraft:simple_state_provider",
-            "state": {"Name": rid(ph.CLUSTER), "Properties": {"facing": crystal["facing"], "waterlogged": "false"}}}})
+            "id": rid(ph.CLUSTER), "properties": {"facing": crystal["facing"], "waterlogged": "false"}}})
+        support = {"type": "minecraft:has_sturdy_face", "offset": [0, -crystal["offset"], 0], "direction": crystal["facing"]}
         write(folder / "placed_feature" / f"{name}.json", {"feature": rid(name), "placement": [
             {"type": "minecraft:count", "count": crystal["count"]},
             {"type": "minecraft:in_square"},
             {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"absolute": gen["min_y"]},
                                                           "max_inclusive": {"absolute": gen["max_y"]}}},
             {"type": "minecraft:environment_scan", "direction_of_search": crystal["scan"], "max_steps": 12,
-             "target_condition": {"type": "minecraft:solid"},
-             "allowed_search_condition": {"type": "minecraft:matching_blocks", "blocks": ["minecraft:air", "minecraft:cave_air"]}},
-            {"type": "minecraft:random_offset", "xz_spread": 0, "y_spread": crystal["offset"]},
+             "target_condition": {"type": "minecraft:all_of", "predicates": [air, support]},
+             "allowed_search_condition": air},
             {"type": "minecraft:biome"}]})
     retro_trader_trades()
 
