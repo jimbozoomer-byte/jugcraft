@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 226 items/blocks under `jugcraft:` (the checker counts them) |
+| Registered IDs | 246 items/blocks under `jugcraft:` (the checker counts them) |
 
 ## Build, generate, check
 
@@ -179,7 +179,12 @@ The Agriculture branch ([branches/AGRICULTURE.md](branches/AGRICULTURE.md)). Eve
 - **Fluid processing machines:** a `MachineKind` with a `fluidSpec()` (`FluidMachineSpec`: input and output tank capacities, item inputs and outputs). `MachineBlockEntity.tanks()` is a `FluidTanks`; `fluidFor(side)` exposes all tanks as one storage (inputs insert-only and filtered by recipes, outputs extract-only). Output tanks push out of every outer face every 4 ticks.
 - **Fluid recipes** (`FluidRecipe`, `FluidRecipes`): one recipe type per machine (`MachineKind.recipeType()`), JSON keys `items`, `fluids`, `fluid_results`, `results`, `time`. Written from `tools/petro.py`; `check_mod_data.py` audits them and forbids fluid from nothing (`source` declares fluid released from items).
 - **Oil reservoirs** (`OilReservoirs`): seeded per chunk, `get(level, chunk)` and `extract(level, chunk, kind, mb)`; depletion is `SavedData` (`jugcraft:oil_reservoirs`). `overrideForTest` is for game tests only.
-- **Machines:** `PUMPJACK` (custom tick), `OIL_SAND_EXTRACTOR` (`jugcraft:oil_sand_extraction`).
+- **Gases** (`PetroFluids.Gas`, `GasFluid`): fluids with no block or bucket (refinery gas); Fabric names them from `block.<ns>.<id>`.
+- **Draw-offs:** `MachineKind.outputLayer(tank)` makes an output tank push only from the faces of one block layer (distillation tower, cracker, reformer).
+- **Items** (`PetroItems`): cracking catalyst, asphalt binder.
+- **Machines:** `PUMPJACK` (custom tick), `OIL_SAND_EXTRACTOR` (`jugcraft:oil_sand_extraction`), `DISTILLATION_TOWER` (`distillation`), `CATALYTIC_CRACKER` (`catalytic_cracking`), `VACUUM_DISTILLATION_UNIT` (`vacuum_distillation`), `CATALYTIC_REFORMER` (`reforming`), `CHEMICAL_MIXER` (`chemical_mixing`), `FRACKING_RIG` (custom tick; works over shale), `FLOWBACK_TREATMENT_UNIT` (`water_treatment`).
+- **Fluid generators:** `DIESEL_GENERATOR` and `GAS_TURBINE` burn fuel from input tank 0 (`MachineBlockEntity.tickFluidGenerator`); JE per mB is `FluidFuels.jePerMb(kind, fluid)` (mirrored in `tools/petro.py` `FLUID_FUELS`). The turbine's tank 1 holds lubricant, used 1 mB per `FluidFuels.LUBRICANT_TICKS`.
+- **Pumps and pipes:** `ElectricPumpBlockEntity.Tier` (ELECTRIC, HEAVY); `FluidPipeBlock` takes a rate (bronze 250, steel 1,000 mB/t) and a network carries its slowest pipe's rate.
 
 ### Items (`logistics/`)
 
@@ -342,7 +347,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ## Not built yet
 
-- Chemistry branch: electrolysis and refining. Crude oil, reservoirs, the pumpjack and the oil sand extractor exist (see below); refining, fracking and diesel power are planned. Blast-furnace stand-ins mark the recipes that will move there.
+- Chemistry branch: electrolysis. The oil line's extraction, refining, fracking and fuel generators exist (see below); oil products (plastics, asphalt) and the diesel engine are planned. Blast-furnace stand-ins mark the recipes that will move there.
 - Recipe viewer plugin (EMI/JEI/REI).
 - A faster fluid pipe (pointless until pumps are faster).
 - Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md). Farming has its first slice; the rest of the crop roster and the farm equipment are planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md).

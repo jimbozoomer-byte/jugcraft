@@ -193,6 +193,9 @@ def feature_of(entry_id):
     from machines import machine_blocks, machine_items, FEATURE
     if entry_id in machine_blocks() or entry_id in machine_items():
         return FEATURE
+    import petro
+    if entry_id in petro.petro_items():
+        return FEATURE
     import agriculture
     if agriculture.owns(entry_id):
         return agriculture.FEATURE
