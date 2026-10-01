@@ -8,15 +8,16 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
- * Client to server: the finished face for the side the player opened with the Carving Knife. Always
- * exactly 16 rows; the server checks everything else ({@link PumpkinCarvings#carve}).
+ * Client to server: the finished face for the side the player opened with the Carving Knife. The face is
+ * one of the known sizes with exactly as many ints as that size takes ({@link CarvingFace.Sized}); the
+ * server checks everything else ({@link PumpkinCarvings#carve}).
  */
-public record CarvePayload(BlockPos pos, Direction side, int[] face) implements CustomPacketPayload {
+public record CarvePayload(BlockPos pos, Direction side, CarvingFace.Sized face) implements CustomPacketPayload {
 	public static final Type<CarvePayload> TYPE = new Type<>(Jugcraft.id("carve"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, CarvePayload> CODEC = StreamCodec.composite(
 			BlockPos.STREAM_CODEC, CarvePayload::pos,
 			Direction.STREAM_CODEC, CarvePayload::side,
-			PumpkinCarving.FACE_STREAM_CODEC, CarvePayload::face,
+			CarvingFace.Sized.STREAM_CODEC, CarvePayload::face,
 			CarvePayload::new);
 
 	@Override

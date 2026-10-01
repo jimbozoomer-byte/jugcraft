@@ -87,8 +87,13 @@ public final class CarvingTemplates {
 
 	/** Whether a face is exactly one of the starter faces. */
 	public static boolean isTemplate(int[] face) {
+		return isTemplate(face, PumpkinCarving.SIZE);
+	}
+
+	/** Whether a face of {@code size} is a starter face, blown up to that size (a giant pumpkin's are 3 times as big). */
+	public static boolean isTemplate(int[] face, int size) {
 		for (Template template : ALL) {
-			if (Arrays.equals(template.face(), face)) {
+			if (Arrays.equals(CarvingFace.scale(template.face(), size), face)) {
 				return true;
 			}
 		}
