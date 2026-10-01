@@ -3205,6 +3205,38 @@
       ]
     },
     {
+      "block": "jugcraft:lithography_station",
+      "type": "lithography",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:silicon_wafer",
+              1
+            ],
+            [
+              "jugcraft:copper_wire",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              100
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:microchip",
+              4
+            ]
+          ],
+          "ticks": 200
+        }
+      ]
+    },
+    {
       "block": "jugcraft:flowback_treatment_unit",
       "type": "water_treatment",
       "recipes": [

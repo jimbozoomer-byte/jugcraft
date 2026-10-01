@@ -75,6 +75,7 @@ MACHINES = {
     "lithium_battery_bank": {"display": "Lithium Battery Bank", "lit": False},
     # Electronics (batch 7, the cyan look).
     "crystal_grower": {"display": "Crystal Grower", "lit": True},
+    "lithography_station": {"display": "Lithography Station", "lit": True},
     # Kinetic: a 2x2x3 V8 diesel engine; its shaft leaves the back of the upper right back block.
     "diesel_engine": {"display": "Diesel Engine", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
@@ -253,6 +254,8 @@ STATS = {
     "lithium_battery_bank": {"capacity": 32_000_000, "io_per_tick": 16_384},
     # 2 tall. 4 silicon + 1 phosphate (the dopant) -> a silicon boule.
     "crystal_grower": {"capacity": 60_000, "input_per_tick": 512, "use_per_tick": 128},
+    # 3x2x2. Wafer + 2 copper wire + 100 mB sulfuric acid -> 4 microchips.
+    "lithography_station": {"capacity": 60_000, "input_per_tick": 1_024, "use_per_tick": 192, "tank": 4_000},
     # 2x2x3. Up to 512 KE/t: 2 mB of diesel a tick (256 KE/mB) or 4 mB of heavy fuel oil, only for what it delivers.
     "diesel_engine": {"capacity": 0, "use_per_tick": 0, "output_ke": 512, "tank": 8_000},
 }
@@ -464,6 +467,9 @@ CRAFTING = {
     "crystal_grower": (["GTG", "GHG", "PCP"], {"G": "minecraft:glass", "T": "#c:ingots/titanium",
                                                "H": "jugcraft:arc_furnace_casing", "P": "#c:plates/aluminum",
                                                "C": "jugcraft:advanced_circuit"}, 1),
+    "lithography_station": (["GSG", "TCT", "PMP"], {"G": "minecraft:glass", "S": "minecraft:redstone_lamp",
+                                                    "T": "#c:ingots/titanium", "C": "jugcraft:advanced_circuit",
+                                                    "P": "#c:plates/aluminum", "M": "jugcraft:machine_casing"}, 1),
     "lithium_cell": (["PLP", "LWL", "PLP"], {"P": "#c:plates/aluminum", "L": "jugcraft:lithium_carbonate",
                                              "W": "#c:wires/copper"}, 2),
     "lithium_battery_bank": (["TCT", "CBC", "TCT"], {"T": "#c:ingots/titanium", "C": "jugcraft:lithium_cell",

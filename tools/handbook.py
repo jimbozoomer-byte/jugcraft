@@ -139,6 +139,9 @@ ABOUT = {
     "crystal_grower": "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single "
                       "crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 "
                       "wafers in the sawmill.",
+    "lithography_station": "Three wide, two tall and two deep: a cleanroom and an operator's desk with a monitor bank. "
+                           "A silicon wafer, two copper wire and 100 mB of sulfuric acid make four microchips, every "
+                           "10 seconds at 192 JE/t. Pipe the acid into its tank.",
     "lithium_battery_bank": "Three wide, two tall, one deep: six lithium battery modules holding 32,000,000 JE, eight "
                             "capacitor banks. It charges from any side and gives power out of the sockets on its "
                             "front, 16,384 JE/t.",
@@ -423,6 +426,7 @@ def build():
                 "Grow a silicon boule from 4 silicon and a phosphate in the crystal grower, then saw it into 8 silicon "
                 "wafers in the sawmill."]},
             machine_page("crystal_grower"),
+            machine_page("lithography_station"),
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

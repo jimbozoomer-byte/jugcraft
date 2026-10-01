@@ -2429,6 +2429,29 @@
             "result": "jugcraft:crystal_grower",
             "count": 1
           }
+        },
+        {
+          "title": "Lithography Station",
+          "icon": "jugcraft:lithography_station",
+          "text": [
+            "Three wide, two tall and two deep: a cleanroom and an operator's desk with a monitor bank. A silicon wafer, two copper wire and 100 mB of sulfuric acid make four microchips, every 10 seconds at 192 JE/t. Pipe the acid into its tank.",
+            "Uses 192 JE/t while working. Holds 60,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:glass",
+              "minecraft:redstone_lamp",
+              "minecraft:glass",
+              "jugcraft:titanium_ingot",
+              "jugcraft:advanced_circuit",
+              "jugcraft:titanium_ingot",
+              "jugcraft:aluminum_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:aluminum_plate"
+            ],
+            "result": "jugcraft:lithography_station",
+            "count": 1
+          }
         }
       ]
     },

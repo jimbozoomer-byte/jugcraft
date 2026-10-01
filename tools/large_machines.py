@@ -62,6 +62,7 @@ FOOTPRINTS = {
     "lithium_battery_bank": cuboid(3, 2, 1),
     # Electronics: a two-block crystal grower.
     "crystal_grower": [(0, 0, 0), (0, 1, 0)],
+    "lithography_station": cuboid(3, 2, 2),
 }
 
 # Machines that take power at one marked socket only: (part, face) for a north-facing machine.
@@ -319,6 +320,12 @@ MODELS["crystal_grower"] = [
     ((6, 28, 6), (10, 32, 10), "geothermal_stack"),
 ]
 
+MODELS["lithography_station"] = [
+    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-30, 2, 4), (-2, 28, 30), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+]
+
 # Textures the front face uses: "#front" in MODELS. Lit machines also get <front>_on.
 FRONTS = {
     "geothermal_generator": "geothermal_generator_front",
@@ -348,4 +355,5 @@ FRONTS = {
     "chemical_reactor": "chemical_reactor_front",
     "lithium_battery_bank": "lithium_battery_bank_front",
     "crystal_grower": "crystal_grower_front",
+    "lithography_station": "lithography_station_front",
 }

@@ -28,6 +28,8 @@ public final class PetroItems {
 	/** Electronics (batch 7): a doped silicon crystal from the crystal grower, sawn into wafers. */
 	public static Item SILICON_BOULE;
 	public static Item SILICON_WAFER;
+	/** Wafers etched in the lithography station: four chips each. */
+	public static Item MICROCHIP;
 
 	private PetroItems() {
 	}
@@ -44,6 +46,7 @@ public final class PetroItems {
 		NEODYMIUM_MAGNET = JugcraftRegistry.item("neodymium_magnet");
 		SILICON_BOULE = JugcraftRegistry.item("silicon_boule");
 		SILICON_WAFER = JugcraftRegistry.item("silicon_wafer");
+		MICROCHIP = JugcraftRegistry.item("microchip");
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(CRACKING_CATALYST);
@@ -57,6 +60,7 @@ public final class PetroItems {
 			output.accept(NEODYMIUM_MAGNET);
 			output.accept(SILICON_BOULE);
 			output.accept(SILICON_WAFER);
+			output.accept(MICROCHIP);
 		});
 	}
 }

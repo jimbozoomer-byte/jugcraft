@@ -324,7 +324,23 @@ def silicon_wafer():
     return img
 
 
+def microchip():
+    """A microchip: a black package with silver pins down both sides and a cyan die mark."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(3, 13):
+        for x in range(4, 12):
+            c = (30, 32, 38) if (x, y) != (5, 4) else (90, 96, 110)
+            if 6 <= x <= 9 and 6 <= y <= 9:
+                c = (40, 120, 140) if (x + y) % 2 else (56, 170, 190)
+            img.putpixel((x, y), c + (255,))
+        if y % 2:
+            for x in (2, 3, 12, 13):
+                img.putpixel((x, y), (190, 196, 206, 255) if x in (3, 12) else (140, 146, 156, 255))
+    return img
+
+
 def draw_all(save, save_animation):
+    save(microchip(), "item", "microchip")
     save(silicon_boule(), "item", "silicon_boule")
     save(silicon_wafer(), "item", "silicon_wafer")
     save(neodymium_magnet(), "item", "neodymium_magnet")

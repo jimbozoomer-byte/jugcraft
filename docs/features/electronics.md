@@ -27,9 +27,15 @@ The owner's references for the tier after oil: dark sci-fi casings with cyan gla
 - The **sawmill** cuts a boule into **8 silicon wafers** (200 ticks).
 - Recipe: glass, titanium ingot, an arc furnace casing, aluminum plates and an advanced circuit.
 
+### Lithography (commit 32)
+- **Lithography station** (three wide, two tall, two deep): a cleanroom with a long cyan glass window that glows while the stepper inside works, a pass-through hatch and a filter unit on the roof; beside it the operator's desk with a keyboard and a bank of four cyan monitors; violet and cyan conduits along the top.
+- **1 silicon wafer + 2 copper wire + 100 mB sulfuric acid → 4 microchips**, 200 ticks at 192 JE/t (38,400 JE). Its 4-bucket tank takes the acid by pipe.
+- A fluid processor like the chemical reactor (`FluidMachineSpec([4000], [], 2, 1)`, recipe type `jugcraft:lithography`), so pipes, side config, the recipe viewer and the metal audit all work as they do there.
+- Recipe: glass, a redstone lamp, titanium ingots, an advanced circuit, aluminum plates and a machine casing.
+
 ## Connections
 - Existing input producer: silicon (arc furnace from quartz), phosphate (mined), titanium (batch 6), the sawmill.
-- Existing output consumer: wafers go to lithography (commit 32).
+- Existing output consumer: wafers go to lithography, microchips to processors (commit 33).
 - Technology connection: power network, processing machines, recipe viewer.
 - Magic connection: none.
 - Reachable entry path: silicon, phosphate and titanium are all reachable before this tier; no circular unlock.
@@ -37,6 +43,8 @@ The owner's references for the tier after oil: dark sci-fi casings with cyan gla
 
 ## Balance and automation
 - A boule costs 4 silicon and 51,200 JE and gives 8 wafers: each wafer costs half a silicon and 6,400 JE before the sawmill.
+- A microchip costs a quarter wafer, half a copper wire, 25 mB of sulfuric acid and 9,600 JE of etching: about 11,200 JE a chip in all, plus the acid's own cost.
+- The metal audit allows the lithography recipe: copper wire goes in and no metal comes out.
 - No item turns back into silicon, and no machine here makes power, so there is no loop.
 
 ## Multiplayer and persistence
@@ -47,7 +55,7 @@ No new dependencies. Textures and models are original (`tools/electric_textures.
 
 ## Verification
 - `tools/check_mod_data.py` checks the new IDs, recipes and models.
-- Game test `crystalGrowerPullsABoule` (JugcraftGameTests), which also checks the sawmill's boule recipe.
+- Game tests `crystalGrowerPullsABoule` (JugcraftGameTests), which also checks the sawmill's boule recipe, and `lithographyMakesMicrochips` (PetroGameTests).
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.
