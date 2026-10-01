@@ -6,9 +6,10 @@ vanilla 26.3's own crop and berry-bush files.
 """
 import carving_data
 import festival_data
+import halloween_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
-                         HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, crop_blocks)
+                         HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, STALKS, WILD_BONUS, crop_blocks)
 
 MOD = "jugcraft"
 
@@ -134,6 +135,7 @@ def assets(root, write, lang):
 
     festival_data.assets(root, write, lang)
     carving_data.assets(root, write, lang)
+    halloween_data.assets(root, write, lang)
 
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
@@ -192,6 +194,10 @@ def loot(data, write):
         pools = [pool(entry(info["seed"]), condition=match_block(block, section=0)),
                  pool(entry(pick["item"], uniform(pick["min"], pick["max"]), FORTUNE_UNIFORM),
                       condition=match_block(block, section=0, age=7))]
+        if info["seed"] in [TALL_CROPS[c]["seed"] for c in STALKS["crops"]]:
+            # A plant three blocks tall (picked or not) gives dry stalks for corn shocks.
+            pools.append(pool(entry(STALKS["item"], uniform(STALKS["min"], STALKS["max"])), condition={
+                "type": "minecraft:any_of", "terms": [match_block(block, section=0, age=age) for age in range(STALKS["from_age"], 8)]}))
         if info.get("trellis"):
             # Every block of a climbing plant stands in a trellis, which drops again.
             pools.append(pool(entry("trellis"), condition={"type": "minecraft:survives_explosion"}))
@@ -210,15 +216,23 @@ def loot(data, write):
                 pool(entry(seed, FORTUNE_BINOMIAL), condition=ripe)))
     for wild, info in WILD_CROPS.items():
         seed = TALL_CROPS[info["crop"]]["seed"] if info["crop"] in TALL_CROPS else CROPS[info["crop"]]["seed"]
-        write(out / f"{wild}.json", table(wild, pool({"type": "minecraft:alternatives", "children": [
+        pools = [pool({"type": "minecraft:alternatives", "children": [
             entry(wild, condition="minecraft:tool/can_shear"),
             entry(seed, uniform(1, 2), {"type": "minecraft:explosion_decay"}),
-        ]}), decay=False))
+        ]})]
+        if wild in WILD_BONUS:
+            # Now and then a different seed, unless shears took the plant.
+            bonus = WILD_BONUS[wild]
+            pools.append(pool(entry(bonus["item"], {"type": "minecraft:explosion_decay"}), condition={"type": "minecraft:all_of", "terms": [
+                {"type": "minecraft:inverted", "term": "minecraft:tool/can_shear"},
+                {"type": "minecraft:random_chance", "chance": bonus["chance"]}]}))
+        write(out / f"{wild}.json", table(wild, *pools, decay=False))
     for block in EQUIPMENT:
         # Like vanilla scaffolding and cauldrons: the block itself, unless an explosion destroys it.
         write(out / f"{block}.json", table(block, pool(entry(block), condition={"type": "minecraft:survives_explosion"}), decay=False))
     festival_data.loot(out, write)
     carving_data.loot(out, write)
+    halloween_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -227,7 +241,8 @@ def recipes(out, write):
     for result, info in COOKING.items():
         for kind, time in COOK_TIMES.items():
             name = result if kind == "smelting" else f"{result}_from_{kind}"
-            write(out / f"{name}.json", {"fabric:load_conditions": conditions(), "type": f"minecraft:{kind}", "category": "food",
+            write(out / f"{name}.json", {"fabric:load_conditions": conditions(), "type": f"minecraft:{kind}",
+                                         "category": info.get("category", "food"),
                                          "ingredient": rid(info["input"]), "result": {"id": rid(result)},
                                          "experience": info["xp"], "cookingtime": time})
     for recipe in SHAPELESS:
@@ -284,12 +299,14 @@ def tags(tags):
             tags.add("block", LEGUME_TAG, rid(info["block"]))
     festival_data.tags(tags)
     carving_data.tags(tags)
+    halloween_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen
 
 def worldgen(data, write):
     festival_data.worldgen(data, write)
+    halloween_data.worldgen(data, write)
     spread = WILD_PATCH["spread_xz"]
     for wild in WILD_CROPS:
         write(data / MOD / "worldgen" / "feature" / f"{wild}.json",

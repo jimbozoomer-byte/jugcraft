@@ -345,7 +345,7 @@ public final class JugcraftAgriculture {
 		carved.add(carvedPumpkin("hand_carved_pumpkin", Blocks.PUMPKIN, BuiltInLootTables.CARVE_PUMPKIN, MapColor.COLOR_ORANGE));
 		for (String variety : List.of("white_pumpkin", "jarrahdale_pumpkin", "cinderella_pumpkin")) {
 			carved.add(carvedPumpkin("hand_carved_" + variety, block(variety),
-					ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id("carving/" + variety)), block(variety).defaultMapColor()));
+					ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id("carve/" + variety)), block(variety).defaultMapColor()));
 		}
 		CARVED_PUMPKIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("hand_carved_pumpkin"),
 				FabricBlockEntityTypeBuilder.create(CarvedPumpkinBlockEntity::new, carved.toArray(Block[]::new)).build());

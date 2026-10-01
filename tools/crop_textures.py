@@ -832,4 +832,6 @@ def crop_textures():
     out.update(festival_textures())
     from carving_textures import carving_textures  # and pumpkin carving
     out.update(carving_textures())
+    from halloween_textures import halloween_textures  # and the Halloween harvest
+    out.update(halloween_textures())
     return out

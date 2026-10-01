@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:candy_corn"
+    "jugcraft:candy_corn",
+    "jugcraft:caramel",
+    "jugcraft:caramel_apple",
+    "jugcraft:popcorn_ball"
   ]
 }

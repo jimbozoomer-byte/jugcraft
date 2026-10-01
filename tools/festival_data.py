@@ -41,11 +41,16 @@ GOURD_SHAPES = {
     "butternut_squash": [((6, 0, 1), (10, 5, 8)), ((4, 0, 7), (12, 8, 15)), ((7.5, 5, 1.5), (8.5, 6.5, 3))],
     "acorn_squash": [((3, 0, 3), (13, 9, 13)), ((7, 9, 7), (9, 11, 9))],
     "warty_gourd": [((4, 0, 4), (12, 8, 12)), ((6, 8, 6), (10, 12, 10)), ((7, 12, 7), (9, 14, 9))],
+    # A round bottom, a narrow neck, a small top bulb and the stalk (Halloween harvest).
+    "bottle_gourd": [((4, 0, 4), (12, 7, 12)), ((6, 7, 6), (10, 11, 10)), ((5, 11, 5), (11, 15, 11)), ((7.5, 15, 7.5), (8.5, 16.5, 8.5))],
 }
 
 
 def gourd_model(gourd):
     side, top = rid(f"block/{gourd}_side"), rid(f"block/{gourd}_top")
+    if GOURDS[gourd].get("cube"):
+        # Heirloom pumpkins are whole blocks like vanilla's: vanilla's cube_column shape, our textures.
+        return {"parent": "minecraft:block/cube_column", "textures": {"end": top, "side": side}}
     elements = []
     for index, (lo, hi) in enumerate(GOURD_SHAPES[gourd]):
         texture = "#stem" if index == len(GOURD_SHAPES[gourd]) - 1 and gourd != "warty_gourd" else "#side"

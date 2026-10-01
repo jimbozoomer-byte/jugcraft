@@ -34,7 +34,7 @@ STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
 EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_replaceables",
                   "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires", "minecraft:mineable/axe",
                   "minecraft:mineable/shovel", "minecraft:leaves", "minecraft:eggs", "minecraft:dirt", "minecraft:mud",
-                  "minecraft:grass_blocks", "minecraft:sand"}
+                  "minecraft:grass_blocks", "minecraft:sand", "minecraft:wool"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -185,8 +185,8 @@ NON_METAL = {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | s
 def item_units(ref):
     """Returns {metal: units} for an item or tag reference."""
     ns, path = split(ref.lstrip("#"))
-    if ref.startswith("#") and (ns == "minecraft" or ref[1:] == ag.WOOD_TAG):
-        return {}  # vanilla tags used here (logs, planks) and chestnut logs hold no metal
+    if ref.startswith("#") and (ns == "minecraft" or ref[1:] in (ag.WOOD_TAG, ag.HEIRLOOM_TAG)):
+        return {}  # vanilla tags used here (logs, planks), chestnut logs and heirloom pumpkins hold no metal
     if ref.startswith("#"):
         form, _, metal = path.partition("/")
         if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()}:
@@ -648,10 +648,13 @@ def check_agriculture():
         items[name] = ("plain", None, None, compost.lower(), None)
     for name, n, sat in re.findall(r'\bstew\("([a-z_]+)", (\d+), ([\d.]+)F\)', main):
         items[name] = ("stew", int(n), float(sat), None, None)
+    for name, n, sat in re.findall(r'\btreat\("([a-z_]+)", (\d+), ([\d.]+)F\)', main):
+        items[name] = ("treat", int(n), float(sat), None, None)
     expected = {}
     for name, info in ag.ITEMS.items():
         food = info.get("food") or [None, None]
-        kind = "stew" if info.get("stew") else "seeds" if "plants" in info else "food" if "food" in info else "plain"
+        kind = ("stew" if info.get("stew") else "treat" if info.get("treat") else "seeds" if "plants" in info
+                else "food" if "food" in info else "plain")
         expected[name] = (kind, food[0], food[1], info.get("compost"), info.get("plants"))
     if items != expected:
         err(f"JugcraftAgriculture.java items {items} != tools/agriculture.py {expected}")
@@ -667,6 +670,7 @@ def check_agriculture():
     expected = {name: info["biomes"] for name, info in ag.WILD_CROPS.items()}
     expected.update({name: info["biomes"] for name, info in ag.FOUND_WILD.items()})
     expected["chestnut_tree"] = ag.CHESTNUT_TREES["biomes"]
+    expected["mums"] = ag.MUM_PATCH["biomes"]
     if patches != expected:
         err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
     seeds = re.search(r'GRASS_SEEDS = List\.of\(([^)]*)\)', main)
@@ -681,6 +685,7 @@ def check_agriculture():
             err(f"{name}: a seed is a bog seed exactly when it plants the cranberry bush")
     check_festival(java, main)
     check_carving(java, main)
+    check_halloween(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -830,6 +835,74 @@ def check_carving(java, main):
     for result in re.findall(r"\b([A-Z_]+)\b", results):
         if result not in ("CARVED", "UNCHANGED") and f"message.{MOD}.carving.{result.lower()}" not in lang:
             err(f"Missing carving message for {result}")
+
+
+def check_halloween(java, main):
+    """Halloween harvest: Java matches tools/agriculture.py, and every giant pumpkin and scarecrow state has a model."""
+    def number(source, name, kind=r"\d+"):
+        match = re.search(rf"\b{name} = ({kind})[FL]?;", java.get(source, ""))
+        return match.group(1) if match else None
+
+    giant = ag.GIANT_PUMPKIN
+    entity = {name: number("GiantPumpkinBlockEntity", name) for name in
+              ("GROW_TO_TWO", "GROW_TO_THREE", "BONE_MEAL_POINTS", "START_WEIGHT", "WEIGHT_PER_POINT", "MAX_WEIGHT", "WATERED_TICKS")}
+    expected = {"GROW_TO_TWO": giant["grow_to_two"], "GROW_TO_THREE": giant["grow_to_three"], "BONE_MEAL_POINTS": giant["bone_meal_points"],
+                "START_WEIGHT": giant["start_weight"], "WEIGHT_PER_POINT": giant["weight_per_point"], "MAX_WEIGHT": giant["max_weight"],
+                "WATERED_TICKS": giant["watered_ticks"]}
+    if {k: int(v) if v else None for k, v in entity.items()} != expected:
+        err(f"GiantPumpkinBlockEntity.java {entity} differs from GIANT_PUMPKIN in tools/agriculture.py")
+    if number("GiantPumpkinBlock", "MAX_SIZE") != str(giant["max_size"]) or giant["face_size"] != 16 * giant["max_size"]:
+        err("GiantPumpkinBlock.MAX_SIZE differs from GIANT_PUMPKIN['max_size'], or face_size is not 16 per block")
+    if number("GiantPumpkinVineBlock", "GROWTH_TIME", r"[\d.]+") is None or \
+            float(number("GiantPumpkinVineBlock", "GROWTH_TIME", r"[\d.]+")) != giant["vine_growth_time"]:
+        err("GiantPumpkinVineBlock.GROWTH_TIME differs from GIANT_PUMPKIN['vine_growth_time']")
+    reach = number("PumpkinCarvings", "GIANT_REACH", r"[\d.]+")
+    if reach is None or float(reach) != giant["reach"] or f'SCOOP_TABLE = "{ag.SCOOP["table"]}"' not in java.get("PumpkinCarvings", ""):
+        err("PumpkinCarvings.GIANT_REACH or SCOOP_TABLE differs from tools/agriculture.py")
+    glow = giant["glow"]
+    expected_glow = f"Math.min({glow['max']}, {glow['base']} + cut / {glow['per_holes']} + shaved / {glow['per_shaved']})"
+    if expected_glow not in java.get("GiantPumpkinBlockEntity", ""):
+        err(f"GiantPumpkinBlockEntity.glow() differs from GIANT_PUMPKIN['glow'] (expected {expected_glow})")
+    if sorted(giant["drops"]) != list(range(1, giant["max_size"] + 1)):
+        err("GIANT_PUMPKIN['drops'] needs one entry per size")
+
+    scale = ag.HARVEST_SCALE
+    ribbons = re.search(r"RIBBONS = List\.of\(([^)]*)\)", java.get("HarvestScaleBlockEntity", ""))
+    if (number("HarvestScaleBlockEntity", "BOARD") != str(scale["board"]) or number("HarvestScaleBlockEntity", "REMEMBERED") != str(scale["remembered"])
+            or not ribbons or re.findall(r'"([a-z_]+)"', ribbons.group(1)) != list(scale["ribbons"]) or len(scale["ribbons"]) != scale["board"]):
+        err("HarvestScaleBlockEntity.java differs from HARVEST_SCALE in tools/agriculture.py (one ribbon per place on the board)")
+    if number("GourdCanteenItem", "CAPACITY") != str(ag.CANTEEN["capacity"]):
+        err("GourdCanteenItem.CAPACITY differs from CANTEEN['capacity']")
+    varieties = re.search(r'for \(String variety : List\.of\(([^)]*)\)\)', main)
+    if (not varieties or re.findall(r'"([a-z_]+)"', varieties.group(1)) != list(ag.CARVED_VARIETIES)
+            or any(carved != f"hand_carved_{variety}" for variety, carved in ag.CARVED_VARIETIES.items())
+            or any(not ag.GOURDS.get(variety, {}).get("cube") for variety in ag.CARVED_VARIETIES)):
+        err("JugcraftAgriculture.java carvable heirloom pumpkins differ from CARVED_VARIETIES (each a whole-block gourd)")
+    mums = {name: (effect, float(seconds)) for name, effect, seconds in
+            re.findall(r'\bmum\("([a-z_]+)", MobEffects\.(\w+), ([\d.]+)F\)', main)}
+    if mums != {name: (info["effect"], info["seconds"]) for name, info in ag.MUMS.items()}:
+        err(f"JugcraftAgriculture.java mums {mums} differ from MUMS in tools/agriculture.py")
+    if f"DEFAULT_SHIRT = DyeColor.{ag.SCARECROW_SHIRT.upper()};" not in java.get("ScarecrowBlock", ""):
+        err("ScarecrowBlock.DEFAULT_SHIRT differs from SCARECROW_SHIRT")
+    for block in [giant["block"], scale["block"]] + list(ag.HALLOWEEN_DECOR):
+        if f'"{block}"' not in main:
+            err(f"JugcraftAgriculture.java does not register {block}")
+    for crop in ag.STALKS["crops"]:
+        if crop not in ag.TALL_CROPS:
+            err(f"STALKS: {crop} is not a tall crop")
+    for wild in ag.WILD_BONUS:
+        if wild not in ag.WILD_CROPS:
+            err(f"WILD_BONUS: {wild} is not a wild plant")
+
+    max_size = giant["max_size"]
+    states = set((load(ASSETS / "blockstates" / f"{giant['block']}.json") or {}).get("variants", {}))
+    if states != {f"part={p},size={size}" for size in range(1, max_size + 1) for p in range(max_size ** 3)}:
+        err("giant_pumpkin: blockstate does not cover every size and part")
+    states = set((load(ASSETS / "blockstates" / "scarecrow.json") or {}).get("variants", {}))
+    expected = {f"facing={f},half=lower" for f in ("north", "east", "south", "west")}
+    expected |= {f"facing={f},half=upper,shirt={c}" for f in ("north", "east", "south", "west") for c in ag.DYE_COLORS}
+    if states != expected:
+        err("scarecrow: blockstate does not cover every facing, half and shirt colour")
 
 
 def main():

@@ -69,6 +69,25 @@ TALL_CROPS["pepper"] = {
     "textures": [["pepper_stage0"], ["pepper_stage0"], ["pepper_stage1"], ["pepper_stage1"],
                  ["pepper_stage2"], ["pepper_stage3"], ["pepper_stage4"], ["pepper_stage5"]],
 }
+# Halloween harvest. Ornamental (flint) corn grows like corn but ripens into multicoloured ears for
+# decoration. Its kernels come from grass and, now and then, from breaking Wild Corn (WILD_BONUS).
+TALL_CROPS["ornamental_corn"] = {
+    "block": "ornamental_corn_crop", "display": "Ornamental Corn Crop", "seed": "ornamental_corn_kernels",
+    "heights": [1, 1, 1, 2, 2, 3, 3, 3],
+    "pick": {"item": "ornamental_corn", "min": 1, "max": 2}, "pick_reset": 5,
+    "growth_time": 1.5,
+    "textures": [
+        ["corn_sprout"], ["corn_seedling"], ["corn_young"],
+        ["corn_stalk", "corn_young_top"],
+        ["corn_stalk", "corn_leafy_top"],
+        ["corn_stalk", "corn_stalk_middle", "corn_top"],
+        ["corn_stalk", "corn_middle_silk", "corn_tassel"],
+        ["corn_stalk_ripe", "ornamental_corn_middle_ears", "corn_tassel_ripe"],
+    ],
+}
+# Breaking a corn plant three blocks tall (age 5 or more, so also after picking) drops dry stalks for
+# Corn Shocks, from its bottom block only.
+STALKS = {"item": "corn_stalks", "min": 1, "max": 2, "from_age": 5, "crops": ["corn", "ornamental_corn"]}
 TALL_SECTIONS = 3  # The shared "section" block state property runs 0..2.
 
 # One-block crops follow vanilla crop rules (farmland, light, bone meal) plus the legume bonus.
@@ -129,6 +148,8 @@ WILD_CROPS = {
     "wild_turnip": {"display": "Wild Turnip", "crop": "turnip", "texture": "turnip_stage3",
                     "biomes": ["IS_TAIGA", "IS_BIRCH_FOREST"]},
 }
+# Extra drop when a wild plant is broken without shears: Wild Corn sometimes gives ornamental corn kernels.
+WILD_BONUS = {"wild_corn": {"item": "ornamental_corn_kernels", "chance": 0.1}}
 # One patch in about 1 of `rarity` chunks of a matching biome; `tries` placement attempts per patch.
 WILD_PATCH = {"rarity": 24, "tries": 24, "spread_xz": 5, "spread_y": 2}
 WILD_COMPOST = "medium"
@@ -137,7 +158,9 @@ WILD_COMPOST = "medium"
 # biome and in worlds generated before this feature.
 GRASS_SEEDS = ["corn_kernels", "sunflower_seeds", "beans", "sweet_potato", "flax_seeds",
                "tomato_seeds", "pepper_seeds", "onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds",
-               "butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut"]
+               "butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
+               "giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "bottle_gourd_seeds",
+               "ornamental_corn_kernels"]
 GRASS_SEED_CHANCE = 0.125
 
 # Plain and food items. food: [nutrition, saturation modifier] (vanilla carrot is [3, 0.6],
@@ -216,6 +239,27 @@ ITEMS = {
     "butternut_squash_soup": {"display": "Butternut Squash Soup", "food": [8, 0.6], "stew": True, "tags": ["c:foods/soup"]},
     "harvest_stew": {"display": "Harvest Stew", "food": [10, 0.6], "stew": True, "tags": ["c:foods/soup"]},
     "cranberry_sauce": {"display": "Cranberry Sauce", "food": [5, 0.6], "stew": True, "tags": ["c:foods"]},
+    # Halloween harvest. "treat": eaten off a stick, which is left in the hand.
+    "giant_pumpkin_seeds": {"display": "Giant Pumpkin Seeds", "plants": "giant_pumpkin_vine", "compost": "low",
+                            "tags": ["c:seeds/giant_pumpkin", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "pumpkin_guts": {"display": "Pumpkin Guts", "compost": "medium", "tags": []},
+    "pumpkin_soup": {"display": "Pumpkin Soup", "food": [8, 0.6], "stew": True, "tags": ["c:foods/soup"]},
+    "white_pumpkin_seeds": {"display": "White Pumpkin Seeds", "plants": "white_pumpkin_stem", "compost": "low",
+                            "tags": ["c:seeds/white_pumpkin", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "jarrahdale_pumpkin_seeds": {"display": "Jarrahdale Pumpkin Seeds", "plants": "jarrahdale_pumpkin_stem", "compost": "low",
+                                 "tags": ["c:seeds/jarrahdale_pumpkin", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "cinderella_pumpkin_seeds": {"display": "Cinderella Pumpkin Seeds", "plants": "cinderella_pumpkin_stem", "compost": "low",
+                                 "tags": ["c:seeds/cinderella_pumpkin", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "bottle_gourd_seeds": {"display": "Bottle Gourd Seeds", "plants": "bottle_gourd_stem", "compost": "low",
+                           "tags": ["c:seeds/bottle_gourd", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "dried_bottle_gourd": {"display": "Dried Bottle Gourd", "compost": "medium", "tags": []},
+    "ornamental_corn": {"display": "Ornamental Corn", "compost": "medium", "tags": ["c:crops/ornamental_corn"]},
+    "ornamental_corn_kernels": {"display": "Ornamental Corn Kernels", "plants": "ornamental_corn_crop", "compost": "low",
+                                "tags": ["c:seeds/ornamental_corn", "minecraft:chicken_food", "minecraft:parrot_food"]},
+    "corn_stalks": {"display": "Corn Stalks", "compost": "medium", "tags": []},
+    "caramel": {"display": "Caramel", "food": [2, 0.1], "compost": "medium_high", "tags": ["c:foods/candy"]},
+    "caramel_apple": {"display": "Caramel Apple", "food": [6, 0.6], "treat": True, "tags": ["c:foods/candy"]},
+    "popcorn_ball": {"display": "Popcorn Ball", "food": [5, 0.6], "compost": "medium_high", "tags": ["c:foods/candy"]},
 }
 
 # ---------------------------------------------------------------- Festival crops (slice 3)
@@ -232,6 +276,16 @@ GOURDS = {
                      "compost": "medium", "tags": ["c:crops/squash", "c:crops/acorn_squash", "c:foods/vegetable"]},
     "warty_gourd": {"display": "Warty Gourd", "seed": "warty_gourd_seeds", "growth_time": 1.0,
                     "compost": "medium", "tags": ["c:crops/gourd", "c:crops/warty_gourd"]},
+    # Halloween harvest: three heirloom pumpkins, whole blocks like vanilla's ("cube"), that the Carving Knife
+    # carves like a pumpkin; and the bottle gourd, dried into canteens and birdhouses.
+    "white_pumpkin": {"display": "White Pumpkin", "seed": "white_pumpkin_seeds", "growth_time": 1.0, "cube": True,
+                      "compost": "medium", "tags": ["c:crops/pumpkin", "c:crops/white_pumpkin", "jugcraft:heirloom_pumpkins"]},
+    "jarrahdale_pumpkin": {"display": "Jarrahdale Pumpkin", "seed": "jarrahdale_pumpkin_seeds", "growth_time": 1.0, "cube": True,
+                           "compost": "medium", "tags": ["c:crops/pumpkin", "c:crops/jarrahdale_pumpkin", "jugcraft:heirloom_pumpkins"]},
+    "cinderella_pumpkin": {"display": "Cinderella Pumpkin", "seed": "cinderella_pumpkin_seeds", "growth_time": 1.0, "cube": True,
+                           "compost": "medium", "tags": ["c:crops/pumpkin", "c:crops/cinderella_pumpkin", "jugcraft:heirloom_pumpkins"]},
+    "bottle_gourd": {"display": "Bottle Gourd", "seed": "bottle_gourd_seeds", "growth_time": 1.0,
+                     "compost": "medium", "tags": ["c:crops/gourd", "c:crops/bottle_gourd"]},
 }
 STEM_TEXTURES = ["gourd_stem", "gourd_stem_attached", "gourd_stalk"]
 
@@ -286,6 +340,10 @@ FOUND_WILD = {
     "acorn_squash": {"biomes": ["IS_FOREST", "IS_TAIGA"], "on": "grass"},
     "warty_gourd": {"biomes": ["IS_SWAMP", "IS_SPOOKY"], "on": "grass"},
     "cranberry_bush": {"biomes": ["IS_SWAMP"], "on": "bog"},
+    "white_pumpkin": {"biomes": ["IS_BIRCH_FOREST", "IS_SNOWY"], "on": "grass"},
+    "jarrahdale_pumpkin": {"biomes": ["IS_SAVANNA", "IS_WINDSWEPT"], "on": "grass"},
+    "cinderella_pumpkin": {"biomes": ["IS_PLAINS", "IS_FLORAL"], "on": "grass"},
+    "bottle_gourd": {"biomes": ["IS_JUNGLE", "IS_SAVANNA"], "on": "grass"},
 }
 GOURD_PATCH = {"rarity": 32, "tries": 8, "spread_xz": 4, "spread_y": 2}
 CRANBERRY_PATCH = {"rarity": 4, "tries": 32, "spread_xz": 6}
@@ -304,6 +362,93 @@ CARVING = {
     "knife_pattern": ["I", "S"], "knife_key": {"I": "minecraft:iron_ingot", "S": "minecraft:stick"},
 }
 CARVING_TEXTURES = ["carving_knife", "hand_carved_pumpkin", "hand_carved_pumpkin_lit"]
+# Heirloom pumpkins the knife carves: each becomes its own hand-carved block (same rules, its own skin),
+# and its first cut drops 4 of its seeds (loot table carve/<pumpkin>), like vanilla's carve/pumpkin.
+CARVED_VARIETIES = {"white_pumpkin": "hand_carved_white_pumpkin", "jarrahdale_pumpkin": "hand_carved_jarrahdale_pumpkin",
+                    "cinderella_pumpkin": "hand_carved_cinderella_pumpkin"}
+CARVE_SEEDS = 4
+# Item tag of the heirloom pumpkins, which bake into vanilla pumpkin pie like a pumpkin does.
+HEIRLOOM_TAG = "jugcraft:heirloom_pumpkins"
+
+# ---------------------------------------------------------------- Halloween harvest (slice 4)
+
+# The giant pumpkin. Giant Pumpkin Seeds (scooped out of pumpkins, or dropped by grass) plant a vine on
+# farmland that grows like a pumpkin stem but vine_growth_time times slower, then sets one small fruit on a
+# free side. While the vine holds it, each random tick of the fruit's master block gives 1 growth point, +1
+# if the vine's farmland is moist, +1 if watered (Gourd Canteen) in the last watered_ticks; bone meal gives
+# bone_meal_points. At grow_to_two points it swells to 2x2x2, at grow_to_three more to 3x3x3, if there is
+# room (air, grass, flowers; never water) on ground fruit can lie on. Full grown it weighs start_weight
+# (+0-20) kg and puts on weight_per_point kg a point up to max_weight, until carved. Each side carves as one
+# face_size x face_size face; a torch lights it with glow = base + holes / per_holes + shaved / per_shaved.
+# Breaking any block breaks it all and drops `drops[size]` pumpkins (and giant seeds when full grown).
+GIANT_PUMPKIN = {
+    "block": "giant_pumpkin", "vine": "giant_pumpkin_vine", "attached_vine": "attached_giant_pumpkin_vine",
+    "seed": "giant_pumpkin_seeds", "display": "Giant Pumpkin", "vine_growth_time": 1.5,
+    "grow_to_two": 16, "grow_to_three": 48, "bone_meal_points": 4,
+    "start_weight": 100, "weight_per_point": 2, "max_weight": 1000, "watered_ticks": 24000,
+    "max_size": 3, "face_size": 48, "reach": 3.5,
+    "glow": {"base": 4, "per_holes": 27, "per_shaved": 108, "max": 15},
+    "drops": {1: 1, 2: 4, 3: 9}, "seeds": [1, 3],
+}
+# The first cut into any plain pumpkin scoops it out: besides its seeds, 1-2 Pumpkin Guts and sometimes a
+# giant pumpkin seed (loot table gameplay/scoop_pumpkin).
+SCOOP = {"table": "gameplay/scoop_pumpkin", "guts": [1, 2], "giant_seed_chance": 0.1}
+
+# The Harvest Scale weighs a full-grown giant pumpkin beside it and keeps the heaviest `board` it has
+# weighed. The first time a pumpkin places, the player weighing it gets that place's ribbon (a trophy
+# only); the scale remembers the last `remembered` pumpkins it gave ribbons to. Comparators read the last
+# weight: weight * 15 / max_weight, at least 1.
+HARVEST_SCALE = {"block": "harvest_scale", "display": "Harvest Scale", "board": 3, "remembered": 64,
+                 "ribbons": {"first_prize_ribbon": "First Prize Ribbon", "second_prize_ribbon": "Second Prize Ribbon",
+                             "third_prize_ribbon": "Third Prize Ribbon"}}
+
+# Stencils: a Blank Stencil used on a carved side of a hand-carved pumpkin traces it into a Pumpkin
+# Stencil (component jugcraft:stencil); held in the other hand while carving, the screen offers it.
+STENCILS = {"blank": "blank_stencil", "blank_display": "Blank Stencil", "stencil": "pumpkin_stencil",
+            "stencil_display": "Pumpkin Stencil"}
+# The Gourd Canteen holds `capacity` sips of water (component jugcraft:canteen_water).
+CANTEEN = {"item": "gourd_canteen", "display": "Gourd Canteen", "capacity": 3}
+
+# Decorations of the Halloween harvest, with their display names. The scarecrow's shirt takes any of the 16
+# dye colours (block state "shirt", red when placed).
+HALLOWEEN_DECOR = {"scarecrow": "Scarecrow", "corn_shock": "Corn Shock", "ornamental_corn_bundle": "Ornamental Corn Bundle",
+                   "gourd_birdhouse": "Gourd Birdhouse"}
+SCARECROW_SHIRT = "red"
+DYE_COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan",
+              "purple", "blue", "brown", "green", "red", "black"]
+
+# Mums (garden chrysanthemums): small flowers that go in flower pots, make dye and suspicious stew. They
+# grow wild in flower forests, meadows and forests (one patch mixes all four colours).
+MUMS = {
+    "yellow_mum": {"display": "Yellow Mum", "dye": "yellow", "effect": "SATURATION", "seconds": 0.35},
+    "orange_mum": {"display": "Orange Mum", "dye": "orange", "effect": "FIRE_RESISTANCE", "seconds": 4.0},
+    "red_mum": {"display": "Red Mum", "dye": "red", "effect": "REGENERATION", "seconds": 8.0},
+    "purple_mum": {"display": "Purple Mum", "dye": "purple", "effect": "NIGHT_VISION", "seconds": 5.0},
+}
+MUM_PATCH = {"biomes": ["IS_FLORAL", "IS_FOREST"], "rarity": 16, "tries": 32, "spread_xz": 5, "spread_y": 2}
+
+
+def potted(mum):
+    return f"potted_{mum}"
+
+
+def giant_tile(kind, size, a, b):
+    """A 16x16 tile of a giant pumpkin's side (column a from the left, row b from the top) or top (a = x, b = z)."""
+    return f"giant_pumpkin_{kind}_{size}_{a}_{b}"
+
+
+def halloween_textures():
+    """Every block texture of the Halloween harvest that its models reference (the gourds' come with GOURDS)."""
+    out = ["giant_pumpkin_bottom"]
+    for size in range(2, GIANT_PUMPKIN["max_size"] + 1):
+        for a in range(size):
+            for b in range(size):
+                out += [giant_tile("side", size, a, b), giant_tile("top", size, a, b)]
+    out += ["harvest_scale_side", "harvest_scale_top", "harvest_scale_dial", "scarecrow_post", "scarecrow_trousers", "scarecrow_straw"]
+    out += [f"scarecrow_shirt_{color}" for color in DYE_COLORS]
+    out += ["corn_shock_lower", "corn_shock_upper", "ornamental_corn_bundle", "gourd_birdhouse_front", "gourd_birdhouse_side",
+            "gourd_birdhouse_top", "gourd_birdhouse_string"]
+    return out + list(MUMS)
 
 # Kitchen Garden equipment: blocks with an item of their own.
 # Trellis: a square wooden lattice. It stands on farmland, on any sturdy top face or on another
@@ -341,6 +486,9 @@ COOKING = {
     "roasted_chestnuts": {"input": "chestnut", "xp": 0.35},
     "baked_acorn_squash": {"input": "acorn_squash", "xp": 0.35},
     "roasted_pumpkin_seeds": {"input": "minecraft:pumpkin_seeds", "xp": 0.1},
+    # Halloween harvest. Sugar melts into caramel; a bottle gourd dries hard enough to hollow out.
+    "caramel": {"input": "minecraft:sugar", "xp": 0.1},
+    "dried_bottle_gourd": {"input": "bottle_gourd", "xp": 0.1, "category": "misc"},
 }
 COOK_TIMES = {"smelting": 200, "smoking": 100, "campfire_cooking": 600}
 
@@ -365,6 +513,8 @@ POT_RECIPES = {
     "harvest_stew": {"inputs": {"minecraft:bowl": 1, "jugcraft:turnip": 1, "minecraft:carrot": 1, "jugcraft:onion": 1,
                                 "minecraft:mutton": 1}, "time": 300},
     "cranberry_sauce": {"inputs": {"minecraft:bowl": 1, "jugcraft:cranberries": 2, "minecraft:sugar": 1}, "time": 200},
+    # Halloween harvest: the guts scooped from carved pumpkins make soup.
+    "pumpkin_soup": {"inputs": {"minecraft:bowl": 1, "jugcraft:pumpkin_guts": 2, "jugcraft:onion": 1}, "time": 200},
 }
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
@@ -390,6 +540,28 @@ SHAPELESS = [
      "count": 4},
     {"id": "chestnut_planks", "inputs": ["#jugcraft:chestnut_logs"], "result": "chestnut_planks", "count": 4,
      "category": "building", "group": "planks"},
+    # Halloween harvest.
+    {"id": "white_pumpkin_seeds", "inputs": ["jugcraft:white_pumpkin"], "result": "white_pumpkin_seeds", "count": 4},
+    {"id": "jarrahdale_pumpkin_seeds", "inputs": ["jugcraft:jarrahdale_pumpkin"], "result": "jarrahdale_pumpkin_seeds", "count": 4},
+    {"id": "cinderella_pumpkin_seeds", "inputs": ["jugcraft:cinderella_pumpkin"], "result": "cinderella_pumpkin_seeds", "count": 4},
+    {"id": "bottle_gourd_seeds", "inputs": ["jugcraft:bottle_gourd"], "result": "bottle_gourd_seeds", "count": 4},
+    {"id": "pumpkin_pie_from_heirloom_pumpkins", "inputs": ["#jugcraft:heirloom_pumpkins", "minecraft:sugar", "#minecraft:eggs"],
+     "result": "minecraft:pumpkin_pie", "count": 1, "category": "food"},
+    {"id": "ornamental_corn_kernels", "inputs": ["jugcraft:ornamental_corn"], "result": "ornamental_corn_kernels", "count": 2},
+    {"id": "ornamental_corn_bundle", "inputs": ["jugcraft:ornamental_corn", "jugcraft:ornamental_corn", "jugcraft:ornamental_corn",
+                                                "minecraft:string"], "result": "ornamental_corn_bundle", "count": 1, "category": "building"},
+    {"id": "caramel_apple", "inputs": ["minecraft:apple", "jugcraft:caramel", "minecraft:stick"], "result": "caramel_apple", "count": 1,
+     "category": "food"},
+    {"id": "popcorn_ball", "inputs": ["jugcraft:popcorn", "jugcraft:popcorn", "jugcraft:caramel"], "result": "popcorn_ball", "count": 1,
+     "category": "food"},
+    {"id": "gourd_canteen", "inputs": ["jugcraft:dried_bottle_gourd", "minecraft:leather"], "result": "gourd_canteen", "count": 1,
+     "category": "equipment"},
+    {"id": "blank_stencil", "inputs": ["minecraft:paper", "minecraft:paper"], "result": "blank_stencil", "count": 1},
+    {"id": "yellow_dye_from_yellow_mum", "inputs": ["jugcraft:yellow_mum"], "result": "minecraft:yellow_dye", "count": 1, "group": "yellow_dye"},
+    {"id": "orange_dye_from_orange_mum", "inputs": ["jugcraft:orange_mum"], "result": "minecraft:orange_dye", "count": 1, "group": "orange_dye"},
+    {"id": "red_dye_from_red_mum", "inputs": ["jugcraft:red_mum"], "result": "minecraft:red_dye", "count": 1, "group": "red_dye"},
+    {"id": "purple_dye_from_purple_mum", "inputs": ["jugcraft:purple_mum"], "result": "minecraft:purple_dye", "count": 1,
+     "group": "purple_dye"},
 ]
 SHAPED = [
     {"id": "barley_bread", "pattern": ["BBB"], "key": {"B": "jugcraft:barley"}, "result": "barley_bread", "count": 1,
@@ -413,6 +585,17 @@ SHAPED = [
      "result": "chestnut_fence", "count": 3, "category": "misc", "group": "wooden_fence"},
     {"id": "chestnut_fence_gate", "pattern": ["#W#", "#W#"], "key": {"W": "jugcraft:chestnut_planks", "#": "minecraft:stick"},
      "result": "chestnut_fence_gate", "count": 1, "category": "redstone", "group": "wooden_fence_gate"},
+    # Halloween harvest: a platform scale with a clock for a dial, a straw man on a post, a stook of stalks
+    # and a hollowed gourd on a string.
+    {"id": "harvest_scale", "pattern": [" C ", "III", "PPP"], "key": {"C": "minecraft:clock", "I": "#c:ingots/iron",
+                                                                      "P": "#minecraft:planks"},
+     "result": "harvest_scale", "count": 1, "category": "misc"},
+    {"id": "scarecrow", "pattern": [" W ", "SHS", " S "], "key": {"W": "#minecraft:wool", "S": "minecraft:stick", "H": "minecraft:hay_block"},
+     "result": "scarecrow", "count": 1, "category": "building"},
+    {"id": "corn_shock", "pattern": [" T ", "SSS", "S S"], "key": {"T": "minecraft:string", "S": "jugcraft:corn_stalks"},
+     "result": "corn_shock", "count": 1, "category": "building"},
+    {"id": "gourd_birdhouse", "pattern": ["T", "G"], "key": {"T": "minecraft:string", "G": "jugcraft:dried_bottle_gourd"},
+     "result": "gourd_birdhouse", "count": 1, "category": "building"},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -437,25 +620,32 @@ def stem_blocks():
     return [block for gourd in GOURDS for block in (stem(gourd), attached_stem(gourd))]
 
 
+def giant_blocks():
+    return [GIANT_PUMPKIN["block"], GIANT_PUMPKIN["vine"], GIANT_PUMPKIN["attached_vine"]]
+
+
 def planted_blocks():
-    """Blocks that a seed item places: crops, gourd stems, the cranberry bush and the chestnut sapling."""
-    return crop_blocks() + [stem(gourd) for gourd in GOURDS] + [CRANBERRY["block"], CHESTNUT["sapling"]]
+    """Blocks that a seed item places: crops, gourd stems and vines, the cranberry bush and the chestnut sapling."""
+    return crop_blocks() + [stem(gourd) for gourd in GOURDS] + [CRANBERRY["block"], CHESTNUT["sapling"], GIANT_PUMPKIN["vine"]]
 
 
 def itemless_blocks():
-    """Blocks without an item of their own: the item that plants them stands in for them."""
-    return crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"]]
+    """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
+    return crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"]] + giant_blocks() + [potted(m) for m in MUMS]
 
 
 def all_blocks():
     """Every registered agriculture block. Crops have no block item (seeds place them); wild plants and equipment do."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"]] + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS)
-            + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]])
+            + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
+            + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS])
 
 
 def all_items():
     return (list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
-            + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]])
+            + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
+            + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
+            + list(HALLOWEEN_DECOR) + list(MUMS))
 
 
 def owns(entry_id):
@@ -472,7 +662,7 @@ def textures():
         out += [f"{info['block'].removesuffix('_crop')}_stage{n}" for n in sorted(set(info["stages"]))]
     out += [w["texture"] for w in WILD_CROPS.values() if w["texture"] not in out]
     out += [f"{gourd}_{part}" for gourd in GOURDS for part in ("side", "top")] + STEM_TEXTURES + CRANBERRY["stages"]
-    return out + EQUIPMENT_TEXTURES + TREE_TEXTURES + DECOR_TEXTURES
+    return out + EQUIPMENT_TEXTURES + TREE_TEXTURES + DECOR_TEXTURES + halloween_textures()
 
 
 EQUIPMENT_TEXTURES = ["trellis", "trellis_post", "cooking_pot_side", "cooking_pot_rim", "cooking_pot_empty", "cooking_pot_soup"]
