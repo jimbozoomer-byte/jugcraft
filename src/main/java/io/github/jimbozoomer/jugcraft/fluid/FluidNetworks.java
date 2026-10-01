@@ -97,10 +97,10 @@ public final class FluidNetworks {
 				BlockPos pipe = queue.poll();
 				for (Direction direction : Direction.values()) {
 					BlockPos next = pipe.relative(direction).immutable();
-					if (level.getBlockState(next).getBlock() instanceof FluidPipeBlock pipe) {
+					if (level.getBlockState(next).getBlock() instanceof FluidPipeBlock nextPipe) {
 						if (network.pipes.add(next)) {
 							queue.add(next);
-							network.rate = Math.min(network.rate, pipe.transferRate());
+							network.rate = Math.min(network.rate, nextPipe.transferRate());
 						}
 					} else if (FluidStorage.SIDED.find(level, next, direction.getOpposite()) != null) {
 						network.endpoints.add(new Endpoint(next, direction.getOpposite()));
