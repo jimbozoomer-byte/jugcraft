@@ -7,7 +7,7 @@ Target milestone and tier: Milestone 3 (first homestead); Discovery tier (wood, 
 Primary specialty and supported player role: farming and decoration; supports builders (fall displays, light) and groups (weigh-offs between growers)
 
 ## Player experience
-Ten additions for a fall pumpkin patch. Nothing is seasonal: everything works all year and stays in the world.
+Eleven additions for a fall pumpkin patch. Nothing is seasonal: everything works all year and stays in the world.
 
 1. **Giant pumpkins.** Giant Pumpkin Seeds plant a vine on farmland. It grows like a pumpkin stem, but 1.5× slower, then sets **one** small fruit on a free side and bends to it. While the vine holds it, the fruit grows on every random tick of its corner block: 1 point, +1 if the vine's farmland is moist, +1 if it was watered from a Gourd Canteen in the last day. Bone meal gives 4 points.
    - At 16 points it swells to **2×2×2**, at 48 to **3×3×3**, away from the vine and centred on it. It needs room (air, grass or flowers, never water) on ground fruit can lie on, or it waits.

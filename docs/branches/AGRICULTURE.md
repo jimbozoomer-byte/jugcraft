@@ -283,7 +283,7 @@ The server checks every carving before anything changes (the knife in hand, reac
 
 ## What exists now: the Halloween harvest
 
-Ten additions for a fall pumpkin patch, all permanent. Details, numbers and test evidence: [../features/halloween-harvest.md](../features/halloween-harvest.md).
+Eleven additions for a fall pumpkin patch, all permanent. Details, numbers and test evidence: [../features/halloween-harvest.md](../features/halloween-harvest.md).
 
 | **The pumpkin patch** from above: giant pumpkins, scarecrows, heirlooms, ornamental corn and the shed | **Giant pumpkins:** one carved with a jack o'lantern face, one by its Harvest Scale, a 2×2×2 and a seedling, with heirloom pumpkins on the right |
 | --- | --- |
