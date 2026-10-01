@@ -14,7 +14,7 @@ No numbered release yet. Everything below is on `main`.
 - **Ferroboron** (iron + borax): with a rare earth oxide it makes **two** neodymium magnets.
 - Multi-input recipes now try the one with the most ingredients first.
 
-### Unmerged: Chlorine and lye, batch 15
+### #70 Chlorine and lye, batch 15
 - **PVC:** refinery gas + chlorine → vinyl chloride (synthesis converter) → PVC resin (polymerization reactor) → two plastic sheets each (metal press).
 - **Soap** from lye and rotten flesh; a bar washes off every status effect.
 - Two advancements, a handbook page and game tests.
