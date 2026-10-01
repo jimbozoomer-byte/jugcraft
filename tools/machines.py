@@ -110,6 +110,8 @@ LOGISTICS_BLOCKS = {
 }
 # Electronics (batch 7): a beige retro computer that reads out its power network (electronics/NetworkTerminalBlock).
 ELECTRONICS_BLOCKS = {"network_terminal": {"display": "Network Terminal"}}
+# Farming (batch 9): a pipe-fed sprinkler with a fertilizer hopper (farming/SprinklerBlock); "wet" shows spray.
+FARMING_BLOCKS = {"sprinkler": {"display": "Sprinkler", "states": "wet"}}
 TOOLS = {"brass_wrench": "Brass Wrench", "engineers_handbook": "Engineer's Handbook",
          # Mining & prospecting: a vague 3x3-chunk ore survey (prospecting/OreSurvey).
          "prospector": "Geo-Resonance Prospector",
@@ -401,6 +403,8 @@ CRAFTING = {
     "crop_harvester": (["GSG", "HMH", "PCP"], {"G": "#c:gears/steel", "S": "minecraft:shears",
                                                "H": "minecraft:hopper", "M": "jugcraft:machine_casing",
                                                "P": "#c:plates/steel", "C": "jugcraft:basic_circuit"}, 1),
+    "sprinkler": ([" R ", "PTP", " S "], {"R": "jugcraft:bronze_fluid_pipe", "P": "#c:plates/steel",
+                                          "T": "jugcraft:fluid_tank", "S": "minecraft:hopper"}, 1),
     "gas_holder": (["PTP", "TVT", "PTP"], {"P": "#c:plates/steel", "T": "jugcraft:steel_tank",
                                            "V": "jugcraft:steel_fluid_pipe"}, 1),
     # Automation: after the workshop tier (a circuit and brass plates).
@@ -739,7 +743,7 @@ def _arc_dusts():
 def machine_blocks():
     return (list(MACHINES) + list(PARTS) + list(CABLES) + list(PIPES) + list(FLUID_BLOCKS)
             + list(ITEM_PIPES) + list(LOGISTICS_BLOCKS) + list(STORAGE_BLOCKS) + list(KINETIC_BLOCKS) + list(TOOL_BLOCKS)
-            + list(SLOPE_BLOCKS) + list(ELECTRONICS_BLOCKS))
+            + list(SLOPE_BLOCKS) + list(ELECTRONICS_BLOCKS) + list(FARMING_BLOCKS))
 
 
 def machine_items():

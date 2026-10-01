@@ -27,6 +27,14 @@ Greenhouses and rubber trees are left for later: rubber trees need worldgen, and
 - Side configuration, eject, redstone control and upgrades work as on other machines.
 - Recipe: steel gears, shears, two hoppers, a machine casing, steel plates and a basic circuit.
 
+### Sprinkler (commit 47)
+- **A sprinkler on a post** (dieselpunk look): flanged inlets on every side for pipes, an olive water tank, a fertilizer hopper and a rotor head with two spray arms. It shows spray while it holds water.
+- **Water:** pipes (or a water bucket) fill its 4-bucket tank. Every 5 seconds it uses 50 mB and gives each growing crop within 4 blocks (at its height and one below) one extra growth tick, as if the game had picked it. Crops still need light to grow, as in vanilla.
+- **Fertilizer:** load up to 16 by hand or by hopper; every 30 seconds it spreads one over the 5×5 crops around it (`FertilizerItem.fertilize`), and only uses it if something grows.
+- Right-click with an empty hand to read its water and fertilizer.
+- Code: `farming/SprinklerBlock`, `SprinklerBlockEntity`, `JugcraftFarming`.
+- Recipe: a bronze fluid pipe, steel plates, a tinplate tank and a hopper.
+
 ## Connections
 - Existing input producer: vanilla crops on farmland; fertilizer (batch 5) ripens them faster.
 - Existing output consumer: food and seeds for players, the auto-crafter, and anything that takes wheat.
@@ -37,15 +45,17 @@ Greenhouses and rubber trees are left for later: rubber trees need worldgen, and
 
 ## Balance and automation
 - The harvester only gathers what vanilla crops grow on their own; it makes nothing from power. 480 JE a crop.
+- A sprinkler's extra growth tick every 5 seconds is about thirteen times the vanilla average for a crop (a random tick roughly every 68 seconds), for 600 mB of water a minute. Water is renewable but has to be pumped and piped there.
 
 ## Multiplayer and persistence
-Server-side machine; its scan position saves with its block entity like the ore drill's. It only touches crop blocks in its loaded field.
+Server-side. The harvester's scan position saves with its block entity like the ore drill's, and it only touches crop blocks in its loaded field. The sprinkler's water, fertilizer and pulse count save with its block entity; its spray is a client-side effect of its `wet` block state.
 
 ## Dependencies and assets
-No new dependencies. Textures and models are original (`tools/dieselpunk_models.py`).
+No new dependencies. Textures and models are original (`tools/dieselpunk_models.py`, `tools/farming_models.py`).
 
 ## Verification
 - Game test `cropHarvesterHarvestsAndReplants` (JugcraftGameTests): a ripe wheat crop in its field is harvested, replanted at age 0, and the wheat kept.
+- Game test `sprinklerWatersAndFertilizes` (PetroGameTests): with water and three fertilizer, it uses at least six pulses of water and one fertilizer, and the wheat beside it grows.
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.
