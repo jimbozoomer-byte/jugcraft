@@ -46,6 +46,11 @@ public final class HorsemanSummoning {
 
 	/** Tries to summon the Horseman with the scarecrow whose lower half is at {@code scarecrow}. */
 	public static Result summon(ServerPlayer player, BlockPos scarecrow) {
+		return summon(player, scarecrow, player.level().getOverworldClockTime());
+	}
+
+	/** Tries to summon the Horseman as if the overworld clock read {@code dayTime}. */
+	public static Result summon(ServerPlayer player, BlockPos scarecrow, long dayTime) {
 		ServerLevel level = player.level();
 		if (!HalloweenSeason.active()) {
 			return Result.OUT_OF_SEASON;
@@ -53,7 +58,7 @@ public final class HorsemanSummoning {
 		if (level.dimension() != Level.OVERWORLD) {
 			return Result.WRONG_PLACE;
 		}
-		long hour = Math.floorMod(level.getOverworldClockTime(), TrickOrTreat.DAY);
+		long hour = Math.floorMod(dayTime, TrickOrTreat.DAY);
 		if (Math.abs(hour - MIDNIGHT) > HOUR_WINDOW) {
 			return Result.WRONG_HOUR;
 		}
@@ -64,10 +69,10 @@ public final class HorsemanSummoning {
 		if (!litPumpkin(level.getBlockState(head))) {
 			return Result.NO_HEAD;
 		}
-		if (!level.canSeeSky(head.above())) {
+		if (!Wisps.openSky(level, head.above())) {
 			return Result.ROOFED;
 		}
-		if (!level.getEntitiesOfClass(HeadlessHorseman.class, new AABB(scarecrow).inflate(ONE_AT_A_TIME)).isEmpty()) {
+		if (!level.getEntitiesOfClass(HeadlessHorseman.class, new AABB(scarecrow).inflate(ONE_AT_A_TIME), HeadlessHorseman::isAlive).isEmpty()) {
 			return Result.ALREADY_RIDING;
 		}
 		HeadlessHorseman horseman = JugcraftAgriculture.HEADLESS_HORSEMAN.create(level, EntitySpawnReason.TRIGGERED);

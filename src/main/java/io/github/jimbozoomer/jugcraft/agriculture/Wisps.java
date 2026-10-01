@@ -56,8 +56,18 @@ public final class Wisps {
 
 	/** Whether wisps are about: the event runs and it is night on the overworld clock. */
 	public static boolean night(Level level) {
-		long hour = Math.floorMod(level.getOverworldClockTime(), TrickOrTreat.DAY);
+		return night(level.getOverworldClockTime());
+	}
+
+	/** Whether wisps are about at {@code dayTime} on the overworld clock. */
+	public static boolean night(long dayTime) {
+		long hour = Math.floorMod(dayTime, TrickOrTreat.DAY);
 		return HalloweenSeason.active() && hour >= HarvestMoon.DUSK && hour < HarvestMoon.DAWN;
+	}
+
+	/** Whether nothing that blocks movement (leaves included) is above {@code pos}: open to the sky, by the heightmap. */
+	public static boolean openSky(ServerLevel level, BlockPos pos) {
+		return level.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ()) <= pos.getY();
 	}
 
 	/** Tries to put one wisp somewhere around {@code near}; returns whether it did. */
@@ -90,7 +100,7 @@ public final class Wisps {
 
 	/** Whether {@code spot} (the first free block above the ground) suits a wisp: open sky, over a swamp or by corn. */
 	public static boolean canSpawnAt(ServerLevel level, BlockPos spot) {
-		if (!level.getBlockState(spot).isAir() || !level.canSeeSky(spot)) {
+		if (!level.getBlockState(spot).isAir() || !openSky(level, spot)) {
 			return false;
 		}
 		if (level.getBiome(spot).is(ConventionalBiomeTags.IS_SWAMP)) {

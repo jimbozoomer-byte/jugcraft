@@ -84,10 +84,19 @@ public class CandyBagItem extends BundleItem {
 	@Override
 	public void inventoryTick(ItemStack bag, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
 		super.inventoryTick(bag, level, owner, slot);
-		Night night = bag.get(JugcraftAgriculture.CANDY_BAG_NIGHT);
-		if (night != null && level.getGameTime() % 20 == 0 && night.night() != TrickOrTreat.night(level.getOverworldClockTime())) {
-			bag.remove(JugcraftAgriculture.CANDY_BAG_NIGHT);
+		if (level.getGameTime() % 20 == 0) {
+			forget(bag, TrickOrTreat.night(level.getOverworldClockTime()));
 		}
+	}
+
+	/** If the bag's count belongs to another night than {@code night}, forgets it. Returns whether it did. */
+	public static boolean forget(ItemStack bag, long night) {
+		Night counted = bag.get(JugcraftAgriculture.CANDY_BAG_NIGHT);
+		if (counted != null && counted.night() != night) {
+			bag.remove(JugcraftAgriculture.CANDY_BAG_NIGHT);
+			return true;
+		}
+		return false;
 	}
 
 	@Override

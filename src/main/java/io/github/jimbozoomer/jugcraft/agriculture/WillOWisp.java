@@ -51,10 +51,19 @@ public class WillOWisp extends AmbientCreature {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
-		if (tickCount % 20 == 0 && !Wisps.night(level)) {
+		step(level, tickCount % 20 != 0 || Wisps.night(level));
+	}
+
+	/**
+	 * One tick of steering: out of the {@code night} it fades; otherwise it darts away from a player inside its flee
+	 * radius (a sneaking one only from close by) or drifts. Returns whether it is fleeing.
+	 */
+	public boolean step(ServerLevel level, boolean night) {
+		if (!night) {
 			fade(level);
-			return;
+			return false;
 		}
+		boolean fleeing = false;
 		Player near = level.getNearestPlayer(this, FLEE_RADIUS);
 		double flee = near == null ? 0 : near.isShiftKeyDown() ? SNEAK_FLEE_RADIUS : FLEE_RADIUS;
 		Vec3 here = position();
@@ -65,6 +74,7 @@ public class WillOWisp extends AmbientCreature {
 			away = away.lengthSqr() < 1.0E-4 ? new Vec3(random.nextDouble() - 0.5, 0.0, random.nextDouble() - 0.5) : away;
 			target = here.add(away.normalize().scale(8.0)).add(0.0, 1.0, 0.0);
 			speed = FLEE_SPEED;
+			fleeing = true;
 		} else if (target == null || target.distanceToSqr(here) < 1.0 || random.nextInt(80) == 0) {
 			// Drift to a new spot one to three blocks above the ground nearby.
 			double x = getX() + random.nextInt(9) - 4;
@@ -75,6 +85,7 @@ public class WillOWisp extends AmbientCreature {
 		Vec3 wanted = target.subtract(here);
 		wanted = wanted.lengthSqr() > speed * speed ? wanted.normalize().scale(speed) : wanted;
 		setDeltaMovement(getDeltaMovement().add(wanted.subtract(getDeltaMovement()).scale(0.2)));
+		return fleeing;
 	}
 
 	/** Vanishes in a puff of light (server side). */

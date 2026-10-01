@@ -107,15 +107,13 @@ public class HeadlessHorseman extends Monster implements RangedAttackMob {
 		bossBar.setProgress(getHealth() / getMaxHealth());
 		if (tickCount % 20 == 0) {
 			lonely = level.getNearestPlayer(home.getX() + 0.5, home.getY(), home.getZ() + 0.5, LEAVE_RANGE, true) == null ? lonely + 20 : 0;
-			if (shouldLeave(level)) {
+			if (shouldLeave(level.getOverworldClockTime())) {
 				rideOff(level);
 				return;
 			}
 		}
 		keepToArena();
-		if (!enraged && getHealth() <= getMaxHealth() / 2.0F) {
-			enrage(level);
-		}
+		updateRage(level);
 		LivingEntity target = getTarget();
 		if (--throwCooldown <= 0 && target != null && target.isAlive()) {
 			double distance = distanceTo(target);
@@ -126,9 +124,18 @@ public class HeadlessHorseman extends Monster implements RangedAttackMob {
 		}
 	}
 
-	/** At dawn, when the event ends, or after a long while with nobody near, he leaves. */
-	public boolean shouldLeave(ServerLevel level) {
-		return !Wisps.night(level) || lonely >= LONELY_TICKS;
+	/** At dawn ({@code dayTime} on the overworld clock), when the event ends, or after a long while with nobody near, he leaves. */
+	public boolean shouldLeave(long dayTime) {
+		return !Wisps.night(dayTime) || lonely >= LONELY_TICKS;
+	}
+
+	/** How long nobody has been near his arena, in ticks. */
+	public int lonely() {
+		return lonely;
+	}
+
+	public void setLonely(int ticks) {
+		lonely = ticks;
 	}
 
 	/** He rides back into his arena, and gives up on a target that has run far beyond it. */
@@ -146,6 +153,14 @@ public class HeadlessHorseman extends Monster implements RangedAttackMob {
 		if (away > ARENA_RADIUS * ARENA_RADIUS && getTarget() == null) {
 			getNavigation().moveTo(centre.getX() + 0.5, centre.getY(), centre.getZ() + 0.5, 1.2);
 		}
+	}
+
+	/** At half health or less he is enraged, once. Returns whether he is enraged. */
+	public boolean updateRage(ServerLevel level) {
+		if (!enraged && getHealth() <= getMaxHealth() / 2.0F) {
+			enrage(level);
+		}
+		return enraged;
 	}
 
 	private void enrage(ServerLevel level) {

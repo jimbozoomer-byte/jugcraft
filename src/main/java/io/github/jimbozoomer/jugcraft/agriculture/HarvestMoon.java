@@ -72,7 +72,12 @@ public final class HarvestMoon {
 
 	/** Works the state out again; if it changed, tells every player. Returns the new state. */
 	public static boolean update(MinecraftServer server) {
-		boolean now = rising(server.overworld().getOverworldClockTime());
+		return update(server, server.overworld().getOverworldClockTime());
+	}
+
+	/** Works the state out as if the overworld clock read {@code dayTime}; if it changed, tells every player. */
+	public static boolean update(MinecraftServer server, long dayTime) {
+		boolean now = rising(dayTime);
 		if (now != active) {
 			active = now;
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {

@@ -28,10 +28,14 @@ jobs:
           FENT=$(find ~/.gradle/caches -name 'fabric-object-builder-api*.jar' | grep -v sources | head -2 | tr '\n' ':')
           CP="$CLIENT:$COMMON:$FAPI:$FENT"
           l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
-          l net.minecraft.client.renderer.entity.layers.EyesLayer 'public|protected' 10
-          l net.minecraft.client.renderer.rendertype.RenderTypes 'public static .* (eyes|entityTranslucentEmissive)' 10
-          javap -cp "$CP" -p net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry | head -20
-          javap -cp "$CP" -p net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry | head -10
-          l net.minecraft.world.item.Item 'inventoryTick' 5
-          l net.minecraft.world.item.ItemStack 'CODEC' 10
-          l net.minecraft.world.entity.Entity 'snapTo|lookAt|isIgnoringBlockTriggers|getRandomX|shouldShowName' 10
+          GT=$(find ~/.gradle/caches -name 'fabric-gametest-api-v1*.jar' | grep -v sources | head -2 | tr '\n' ':')
+          CP="$CP:$GT"
+          l net.minecraft.world.entity.player.Player 'interactOn' 5
+          l net.minecraft.world.entity.Mob ' interact' 5
+          l net.minecraft.world.level.block.entity.BlockEntity 'saveWithoutMetadata|loadWithComponents|saveWithFullMetadata' 10
+          l net.minecraft.world.item.component.BundleContents 'public' 30
+          l net.minecraft.server.MinecraftServer 'setDifficulty' 5
+          l net.minecraft.util.ProblemReporter 'DISCARDING' 5
+          javap -cp "$CP" -p net.fabricmc.fabric.api.gametest.v1.GameTest | head -20
+          l net.minecraft.world.entity.LivingEntity 'aiStep|isImmobile|serverAiStep' 10
+          l net.minecraft.world.entity.Mob 'serverAiStep|isNoAi|isImmobile' 10
