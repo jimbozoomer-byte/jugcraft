@@ -10,7 +10,7 @@ Primary specialty and supported player role: combat
 - **Guncotton:** two cotton nitrated in 250 mB of nitric acid in the chemical reactor make two guncotton (nitrocellulose).
 - **Grenade:** a guncotton in a steel case: two steel plates, a guncotton and an iron nugget for the pin, four at a time.
   - Right-click to throw it like a snowball, one a second. It goes off when it hits a block or a mob.
-  - **The blast hurts living things and nothing else.** Up to 16 damage (eight hearts) at the centre, falling to none at 4 blocks. Walls shield from it, and blast protection armour reduces it. It knocks targets back.
+  - **The blast hurts living things and nothing else.** Up to 16 damage (eight hearts) at the centre, falling to none at 4 blocks. Walls shield from it, and blast protection armour reduces it. Targets are knocked back from the grenade.
   - It **never breaks, moves or burns a block**, and leaves armor stands, item frames, paintings and dropped items alone. It is not a Minecraft explosion, so nothing can turn it into one.
   - The thrower is hurt too if they stand in the blast.
 - **Grenade launcher:** steel plates, a steel gear, a rubber grip, a basic circuit and a steel ingot.

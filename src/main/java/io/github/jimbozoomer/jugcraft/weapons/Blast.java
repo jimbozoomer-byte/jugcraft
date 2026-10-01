@@ -53,12 +53,8 @@ public final class Blast {
 				continue;
 			}
 			if (target.hurtServer(level, source, DAMAGE * strength)) {
+				// Vanilla knocks the target back from the grenade as it hurts it.
 				hurt++;
-			}
-			// Knocked away from the centre (knockback takes the direction to push away from).
-			Vec3 toCenter = center.subtract(target.position());
-			if (toCenter.horizontalDistanceSqr() > 1.0E-4) {
-				target.knockback(0.8 * strength, toCenter.x, toCenter.z);
 			}
 		}
 		return hurt;
