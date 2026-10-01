@@ -12,6 +12,7 @@ import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import io.github.jimbozoomer.jugcraft.prospecting.SurveyPayload;
 import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
+import io.github.jimbozoomer.jugcraft.weapons.JugcraftWeapons;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -43,6 +44,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftLogistics.CONVEYOR_ENTITY, ConveyorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftTools.CHARGING_STATION_ENTITY, ChargingStationRenderer::new);
 		RocketPackClient.register();
+		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);
 		PetroFluidsClient.register();
 		RocketPackLayer.register();
 		BlockEntityRendererRegistry.register(JugcraftKinetics.HAND_CRANK_ENTITY, KineticRotorRenderer::new);
