@@ -193,5 +193,8 @@ def feature_of(entry_id):
     from machines import machine_blocks, machine_items, FEATURE
     if entry_id in machine_blocks() or entry_id in machine_items():
         return FEATURE
+    import petro
+    if entry_id in petro.petro_items() or entry_id in petro.petro_blocks():
+        return FEATURE
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

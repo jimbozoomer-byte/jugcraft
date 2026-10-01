@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.machine;
 
+import io.github.jimbozoomer.jugcraft.chemistry.FluidMachineSpec;
+import java.util.List;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.StringRepresentable;
@@ -46,7 +48,33 @@ public enum MachineKind implements StringRepresentable {
 	// Auto-crafter: a 3x3 pattern grid (each slot keeps one item as the pattern), the result and a remainder slot.
 	AUTO_CRAFTER("auto_crafter", 10_000, 128, 0, 8, 11),
 	// Kinetic: a 2x2x2 steam engine turning a shaft out of its back (fuel, water bucket, empty bucket).
-	LARGE_STEAM_ENGINE("large_steam_engine", 0, 0, 0, 0, 3);
+	LARGE_STEAM_ENGINE("large_steam_engine", 0, 0, 0, 0, 3),
+	// Petrochemistry (chemistry/, docs/branches/CHEMISTRY.md): a pumpjack, 1 wide, 3 tall and 3 long, that pumps the
+	// conventional oil reservoir under its chunk into its output tank.
+	PUMPJACK("pumpjack", 20_000, 256, 0, 32, 0),
+	// A 2x2x2 hot-water extraction plant: oil sand or bitumen and water in, crude oil and sand out.
+	OIL_SAND_EXTRACTOR("oil_sand_extractor", 20_000, 256, 0, 32, 2),
+	// A 2x2 column seven blocks tall: crude oil in, four fractions out, each drawn off at its own height.
+	DISTILLATION_TOWER("distillation_tower", 40_000, 512, 0, 128, 0),
+	// A 2x2x4 fluid catalytic cracker: heavy fuel oil, water (steam) and catalyst in; diesel, naphtha and gas out.
+	CATALYTIC_CRACKER("catalytic_cracker", 40_000, 512, 0, 160, 1),
+	// A 2x2x3 vacuum distillation unit: heavy fuel oil in; lubricant and asphalt binder out.
+	VACUUM_DISTILLATION_UNIT("vacuum_distillation_unit", 30_000, 512, 0, 96, 1),
+	// A 3x2x2 catalytic reformer: naphtha in; gasoline (base) and refinery gas (top) out.
+	CATALYTIC_REFORMER("catalytic_reformer", 30_000, 512, 0, 120, 0),
+	// A 2x2x2 stirred mixing vessel: water and powders in, mixtures (fracking fluid) out.
+	CHEMICAL_MIXER("chemical_mixer", 20_000, 256, 0, 64, 2),
+	// A 3x3x5 fracking derrick over a shale reservoir: fracking fluid down; crude oil, gas and flowback water up.
+	FRACKING_RIG("fracking_rig", 80_000, 1_024, 0, 256, 0),
+	// A 3x1x2 row of settling basins and a filter press: flowback water in; clean water and salt out.
+	FLOWBACK_TREATMENT_UNIT("flowback_treatment_unit", 20_000, 256, 0, 48, 1),
+	// A 3x2x2 six-cylinder diesel engine and generator: burns diesel or heavy fuel oil for 256 JE/t.
+	DIESEL_GENERATOR("diesel_generator", 60_000, 0, 1_024, 0, 0),
+	GAS_TURBINE("gas_turbine", 120_000, 0, 2_048, 0, 0),
+	// A 2x2x3 jacketed reactor: refinery gas in, plastic pellets out.
+	POLYMERIZATION_REACTOR("polymerization_reactor", 30_000, 512, 0, 96, 1),
+	// A 2x2x3 V8 diesel engine: burns diesel or heavy fuel oil and turns a shaft out of its back.
+	DIESEL_ENGINE("diesel_engine", 0, 0, 0, 0, 0);
 
 	/** JE produced per tick while the coal generator burns. */
 	public static final int GENERATION_PER_TICK = 32;
@@ -104,6 +132,54 @@ public enum MachineKind implements StringRepresentable {
 	public static final int LARGE_ENGINE_OUTPUT_PART = 7;
 	/** Auto-crafter: ticks per craft (before speed upgrades). */
 	public static final int CRAFT_TICKS = 40;
+	/** Pumpjack: mB of crude oil pumped per powered tick (a bucket every 25 seconds), and its tank. */
+	public static final int PUMPJACK_RATE = 2;
+	public static final int PUMPJACK_TANK = 16_000;
+	/** Oil sand extractor: its water tank and its crude oil tank. */
+	public static final int EXTRACTOR_TANK = 8_000;
+	/** Distillation tower: its crude oil tank and each fraction's tank. */
+	public static final int TOWER_INPUT_TANK = 16_000;
+	public static final int TOWER_OUTPUT_TANK = 8_000;
+	/** Distillation tower: the height (block layer) each fraction is drawn off at: gas at the top, heavy oil at the base. */
+	private static final int[] TOWER_DRAW_OFFS = {6, 4, 2, 0};
+	/** Catalytic cracker: each tank's capacity, and the layer each product is drawn off at (diesel, naphtha, gas). */
+	public static final int CRACKER_TANK = 8_000;
+	private static final int[] CRACKER_DRAW_OFFS = {0, 2, 3};
+	/** Vacuum distillation unit: its heavy fuel oil tank and its lubricant tank. */
+	public static final int VACUUM_TANK = 8_000;
+	/** Catalytic reformer: each tank, and the layer each product is drawn off at (gasoline, refinery gas). */
+	public static final int REFORMER_TANK = 8_000;
+	private static final int[] REFORMER_DRAW_OFFS = {0, 1};
+	/** Chemical mixer: its water tank and its product tank. */
+	public static final int MIXER_TANK = 8_000;
+	/**
+	 * Fracking rig, per powered tick over shale: fracking fluid pumped down, oil freed from the reservoir (three
+	 * quarters crude oil, a quarter refinery gas) and flowback water returned. A quarter of the fluid stays in the rock.
+	 */
+	public static final int FRACK_FLUID_PER_TICK = 4;
+	public static final int FRACK_OIL_PER_TICK = 8;
+	public static final int FRACK_FLOWBACK_PER_TICK = 3;
+	public static final int FRACK_INPUT_TANK = 16_000;
+	public static final int FRACK_OIL_TANK = 16_000;
+	public static final int FRACK_GAS_TANK = 8_000;
+	public static final int FRACK_FLOWBACK_TANK = 16_000;
+	/** Fracking rig draw-offs: crude oil at the base, flowback water one block up, gas at the top. */
+	private static final int[] FRACK_DRAW_OFFS = {0, 4, 1};
+	/** Flowback treatment unit: its flowback tank and its clean water tank. */
+	public static final int TREATMENT_TANK = 8_000;
+	/** Diesel generator: JE per tick while running, and its fuel tank. Fuel values: chemistry/FluidFuels. */
+	public static final int DIESEL_OUTPUT = 256;
+	public static final int DIESEL_TANK = 8_000;
+	/** Gas turbine: JE per tick while running, its fuel tank and its lubricant tank (FluidFuels.LUBRICANT_TICKS). */
+	public static final int TURBINE_OUTPUT = 512;
+	public static final int TURBINE_TANK = 16_000;
+	public static final int TURBINE_LUBRICANT_TANK = 4_000;
+	/** Diesel engine: KE per tick out of its back, its fuel tank, and the part the shaft leaves from (upper right back). */
+	public static final int DIESEL_ENGINE_OUTPUT = 512;
+	public static final int DIESEL_ENGINE_TANK = 8_000;
+	public static final int DIESEL_ENGINE_OUTPUT_PART = 11;
+	/** Polymerization reactor: its refinery gas tank. */
+	public static final int REACTOR_TANK = 8_000;
 	/** Ticks the electric furnace needs per item (the vanilla furnace needs 200). */
 	public static final int ELECTRIC_FURNACE_TICKS = 100;
 
@@ -166,6 +242,14 @@ public enum MachineKind implements StringRepresentable {
 			case COKE_OVEN -> "coking";
 			case STEEL_FOUNDRY -> "steelmaking";
 			case TREE_FARM -> "tree_growing";
+			case OIL_SAND_EXTRACTOR -> "oil_sand_extraction";
+			case DISTILLATION_TOWER -> "distillation";
+			case CATALYTIC_CRACKER -> "catalytic_cracking";
+			case VACUUM_DISTILLATION_UNIT -> "vacuum_distillation";
+			case CATALYTIC_REFORMER -> "reforming";
+			case CHEMICAL_MIXER -> "chemical_mixing";
+			case FLOWBACK_TREATMENT_UNIT -> "water_treatment";
+			case POLYMERIZATION_REACTOR -> "polymerization";
 			default -> null;
 		};
 	}
@@ -180,8 +264,56 @@ public enum MachineKind implements StringRepresentable {
 		return slots + upgradeSlots();
 	}
 
-	/** The output slot of a processor: after the inputs, before any byproduct slots. */
+	/**
+	 * The tanks and item slots of a fluid processing machine (the Chemistry branch's oil line: docs/branches/CHEMISTRY.md),
+	 * or null for every other machine. Such machines run {@link io.github.jimbozoomer.jugcraft.chemistry.FluidRecipe}s.
+	 */
+	public @Nullable FluidMachineSpec fluidSpec() {
+		return switch (this) {
+			case PUMPJACK -> new FluidMachineSpec(List.of(), List.of(PUMPJACK_TANK), 0, 0);
+			case OIL_SAND_EXTRACTOR -> new FluidMachineSpec(List.of(EXTRACTOR_TANK), List.of(EXTRACTOR_TANK), 1, 1);
+			case DISTILLATION_TOWER -> new FluidMachineSpec(List.of(TOWER_INPUT_TANK),
+					List.of(TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK), 0, 0);
+			case CATALYTIC_CRACKER -> new FluidMachineSpec(List.of(CRACKER_TANK, CRACKER_TANK),
+					List.of(CRACKER_TANK, CRACKER_TANK, CRACKER_TANK), 1, 0);
+			case VACUUM_DISTILLATION_UNIT -> new FluidMachineSpec(List.of(VACUUM_TANK), List.of(VACUUM_TANK), 0, 1);
+			case CATALYTIC_REFORMER -> new FluidMachineSpec(List.of(REFORMER_TANK), List.of(REFORMER_TANK, REFORMER_TANK), 0, 0);
+			case CHEMICAL_MIXER -> new FluidMachineSpec(List.of(MIXER_TANK), List.of(MIXER_TANK), 2, 0);
+			case FRACKING_RIG -> new FluidMachineSpec(List.of(FRACK_INPUT_TANK),
+					List.of(FRACK_OIL_TANK, FRACK_GAS_TANK, FRACK_FLOWBACK_TANK), 0, 0);
+			case FLOWBACK_TREATMENT_UNIT -> new FluidMachineSpec(List.of(TREATMENT_TANK), List.of(TREATMENT_TANK), 0, 1);
+			case DIESEL_GENERATOR -> new FluidMachineSpec(List.of(DIESEL_TANK), List.of(), 0, 0);
+			case GAS_TURBINE -> new FluidMachineSpec(List.of(TURBINE_TANK, TURBINE_LUBRICANT_TANK), List.of(), 0, 0);
+			case POLYMERIZATION_REACTOR -> new FluidMachineSpec(List.of(REACTOR_TANK), List.of(), 0, 1);
+			case DIESEL_ENGINE -> new FluidMachineSpec(List.of(DIESEL_ENGINE_TANK), List.of(), 0, 0);
+			default -> null;
+		};
+	}
+
+	/**
+	 * The block layer (height above the master) that output tank {@code tank} is pushed from, or -1 for every outer
+	 * face of the machine.
+	 */
+	public int outputLayer(int tank) {
+		return switch (this) {
+			case DISTILLATION_TOWER -> TOWER_DRAW_OFFS[tank];
+			case CATALYTIC_CRACKER -> CRACKER_DRAW_OFFS[tank];
+			case CATALYTIC_REFORMER -> REFORMER_DRAW_OFFS[tank];
+			case FRACKING_RIG -> FRACK_DRAW_OFFS[tank];
+			default -> -1;
+		};
+	}
+
+	public boolean isFluidProcessor() {
+		return fluidSpec() != null;
+	}
+
+	/** The output slot of a processor: after the inputs, before any byproduct slots. Fluid processors: the first output slot. */
 	public int outputSlot() {
+		FluidMachineSpec spec = fluidSpec();
+		if (spec != null) {
+			return spec.itemInputs();
+		}
 		return slots - 1 - byproductSlots();
 	}
 
@@ -208,7 +340,8 @@ public enum MachineKind implements StringRepresentable {
 	/** Generators only produce energy; they never accept it. */
 	public boolean isGenerator() {
 		return this == COAL_GENERATOR || this == SOLAR_PANEL || this == STEAM_GENERATOR
-				|| this == GEOTHERMAL_GENERATOR || this == WIND_TURBINE || this == WATER_WHEEL;
+				|| this == GEOTHERMAL_GENERATOR || this == WIND_TURBINE || this == WATER_WHEEL || this == DIESEL_GENERATOR
+				|| this == GAS_TURBINE;
 	}
 
 	/**
@@ -232,6 +365,20 @@ public enum MachineKind implements StringRepresentable {
 			case STEEL_TANK -> Footprint.of(Vec3i.ZERO, new Vec3i(-1, 0, 0), new Vec3i(0, 0, 1), new Vec3i(-1, 0, 1));
 			// Three wide, six tall, two deep: the furnace column (left) and a 2x2 crucible tank tower (right).
 			case ALLOY_SMELTER -> Footprint.cuboid(3, 6, 2);
+			// One wide, three tall, three long: wellhead at the front (the master), samson post, then crank and motor.
+			case PUMPJACK -> Footprint.cuboid(1, 3, 3);
+			case OIL_SAND_EXTRACTOR -> Footprint.cuboid(2, 2, 2);
+			case DISTILLATION_TOWER -> Footprint.cuboid(2, 7, 2);
+			case CATALYTIC_CRACKER -> Footprint.cuboid(2, 4, 2);
+			case VACUUM_DISTILLATION_UNIT -> Footprint.cuboid(2, 3, 2);
+			case CATALYTIC_REFORMER -> Footprint.cuboid(3, 2, 2);
+			case CHEMICAL_MIXER -> Footprint.cuboid(2, 2, 2);
+			case FRACKING_RIG -> Footprint.cuboid(3, 5, 3);
+			case FLOWBACK_TREATMENT_UNIT -> Footprint.cuboid(3, 1, 2);
+			case DIESEL_GENERATOR -> Footprint.cuboid(3, 2, 2);
+			case GAS_TURBINE -> Footprint.cuboid(4, 2, 2);
+			case POLYMERIZATION_REACTOR -> Footprint.cuboid(2, 3, 2);
+			case DIESEL_ENGINE -> Footprint.cuboid(2, 2, 3);
 			default -> Footprint.SINGLE;
 		};
 	}
@@ -252,7 +399,8 @@ public enum MachineKind implements StringRepresentable {
 	/** Machines with a real fire: they smoke and crackle while running (client-side effects only). */
 	public boolean burnsFuel() {
 		return this == COAL_GENERATOR || this == STEAM_GENERATOR || this == GEOTHERMAL_GENERATOR
-				|| this == LARGE_STEAM_ENGINE || this == COKE_OVEN || this == STEEL_FOUNDRY || this == ARC_FURNACE;
+				|| this == LARGE_STEAM_ENGINE || this == COKE_OVEN || this == STEEL_FOUNDRY || this == ARC_FURNACE
+				|| this == DIESEL_GENERATOR || this == GAS_TURBINE || this == DIESEL_ENGINE;
 	}
 
 	/** Height of the machine in blocks (the tallest part plus one). */

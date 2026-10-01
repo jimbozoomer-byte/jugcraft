@@ -68,18 +68,20 @@ def steam_engine():
 
 
 def dynamo():
-    """A copper-wound coil on an iron frame, with an axle through it for shafts at the front and back, and brass
-    terminals where cables meet it."""
-    m = [box((1, 0, 1), (15, 1.5, 15), IRON_PLATE)]
-    m += cyl("z", 8, 8.5, 5.25, 2, 14, "sp_coil", BRASS)
+    """In the electric look of the power gear: a graphite generator housing with glowing bands on a trim base, an axle
+    through it for shafts at the front and back, a vented top and power ports where cables meet it."""
+    m = [box((1, 0, 1), (15, 1.5, 15), "el_frame")]
+    m += cyl("z", 8, 8.5, 5.25, 2, 14, "el_casing", "el_frame")
+    for z in (4.5, 11):
+        m += cyl("z", 8, 8.5, 5.5, z, z + 0.5, "el_glow")
     for z in (2, 13.25):
-        m.append(box((2, 1.5, z), (14, 14.5, z + 0.75), IRON))
+        m.append(box((2, 1.5, z), (14, 14.5, z + 0.75), "el_frame"))
     m += cyl("z", 8, 8.5, 1.25, 0, 16, IRON)
-    # Terminals in the middle of the other faces so cables meet the dynamo.
-    m.append(box((0.25, 6, 6.5), (2, 10, 9.5), {"*": BRASS, "west": BRASS_PLATE}))
-    m.append(box((14, 6, 6.5), (15.75, 10, 9.5), {"*": BRASS, "east": BRASS_PLATE}))
-    m.append(box((6.5, 13.75, 6.5), (9.5, 15.75, 9.5), {"*": BRASS, "up": BRASS_PLATE}))
-    m.append(box((5, 1.5, 5), (11, 3, 11), COPPER))
+    # Ports in the middle of the other faces so cables meet the dynamo.
+    m.append(box((0.25, 6, 6.5), (2, 10, 9.5), {"*": "el_frame", "west": "el_port!"}))
+    m.append(box((14, 6, 6.5), (15.75, 10, 9.5), {"*": "el_frame", "east": "el_port!"}))
+    m.append(box((6.5, 13.75, 6.5), (9.5, 15.75, 9.5), {"*": "el_frame", "up": "el_vent!"}))
+    m.append(box((5, 1.5, 5), (11, 3, 11), "el_casing"))
     return m
 
 
@@ -98,18 +100,20 @@ def belt_pulley():
 
 
 def electric_motor():
-    """A copper-wound motor on iron feet; its shaft comes out of the front (north), with brass terminals where cables
-    meet it."""
-    m = [box((2, 0, 3), (14, 1.5, 15), IRON_PLATE)]
-    m += cyl("z", 8, 8.5, 5.5, 3.5, 14.5, "sp_coil", BRASS_PLATE)
+    """In the electric look of the power gear: a graphite motor housing with glowing bands and end rings on trim feet;
+    its shaft comes out of the front (north), with power ports where cables meet it."""
+    m = [box((2, 0, 3), (14, 1.5, 15), "el_frame")]
+    m += cyl("z", 8, 8.5, 5.5, 3.5, 14.5, "el_casing", "el_frame")
     for z in (3, 14):
-        m += cyl("z", 8, 8.5, 5.9, z, z + 1, IRON)
-    m.append(box((0.25, 6, 7), (2.5, 11, 11), {"*": BRASS, "west": BRASS_PLATE}))
-    m.append(box((13.5, 6, 7), (15.75, 11, 11), {"*": BRASS, "east": BRASS_PLATE}))
-    m.append(box((6, 14, 7), (10, 15.75, 11), {"*": BRASS, "up": BRASS_PLATE}))
-    m.append(box((6, 6.5, 14.5), (10, 10.5, 15.75), {"*": BRASS, "south": BRASS_PLATE}))
+        m += cyl("z", 8, 8.5, 5.9, z, z + 1, "el_frame")
+    for z in (6.5, 10.5):
+        m += cyl("z", 8, 8.5, 5.75, z, z + 0.5, "el_glow")
+    m.append(box((0.25, 6, 7), (2.5, 11, 11), {"*": "el_frame", "west": "el_port!"}))
+    m.append(box((13.5, 6, 7), (15.75, 11, 11), {"*": "el_frame", "east": "el_port!"}))
+    m.append(box((6, 14, 7), (10, 15.75, 11), {"*": "el_frame", "up": "el_vent!"}))
+    m.append(box((6, 6.5, 14.5), (10, 10.5, 15.75), {"*": "el_frame", "south": "el_port!"}))
     # The output shaft spins, with a coupling on it.
-    rotor = [box((6, 6.5, 0), (10, 10.5, 3.5), "iron_shaft"), box((5.5, 6, 1), (10.5, 11, 2.5), BRASS)]
+    rotor = [box((6, 6.5, 0), (10, 10.5, 3.5), "iron_shaft"), box((5.5, 6, 1), (10.5, 11, 2.5), "el_frame")]
     return m, rotor
 
 
@@ -141,19 +145,27 @@ def conveyor_splitter():
     return m
 
 
+# How far the slope's tilted belt and rails sit above the block's centre line (pixels): without it the belt's top
+# met the block's low edge at 1 pixel, below the flat conveyor's 5, and the two did not join.
+SLOPE_LIFT = 4
+
+
 def conveyor_slope(ascending):
     """A conveyor ramp, one block up (ascending: rising towards the front, north) or down: the belt and its side rails
     tilted 45 degrees across the block's diagonal, on iron legs. Items ride it the same way as a flat conveyor."""
     angle = 45 if ascending else -45
-    tilt = ("x", angle, (8, 8, 8), True)
-    m = [box((2, 6.5, 0.25), (14, 8.5, 15.75), {"*": "belt", "up": "conveyor_belt"}, rotation=tilt)]
+    # Raised by SLOPE_LIFT so the belt's top meets the flat conveyors' (5 pixels up) at both ends: 5 at the low edge,
+    # 21 (one block plus 5) at the high edge. Items ride at the same heights (ConveyorBlockEntity.riseAt).
+    lift = SLOPE_LIFT
+    tilt = ("x", angle, (8, 8 + lift, 8), True)
+    m = [box((2, 6.5 + lift, 0.25), (14, 8.5 + lift, 15.75), {"*": "belt", "up": "conveyor_belt"}, rotation=tilt)]
     for x0, x1 in ((0.5, 2), (14, 15.5)):
-        m.append(box((x0, 6.25, 0), (x1, 9.5, 16), {"*": IRON_PLATE, "up": IRON}, rotation=tilt))
-    # Legs: tall at the high end, short in the middle.
+        m.append(box((x0, 6.25 + lift, 0), (x1, 9.5 + lift, 16), {"*": IRON_PLATE, "up": IRON}, rotation=tilt))
+    # Legs up to the underside of the rails: tall at the high end, short in the middle.
     high, mid = (1, 3) if ascending else (13, 15), (7, 9)
     for x0, x1 in ((0.5, 2), (14, 15.5)):
-        m.append(box((x0, 0, high[0]), (x1, 12, high[1]), IRON))
-        m.append(box((x0, 0, mid[0]), (x1, 5, mid[1]), IRON))
+        m.append(box((x0, 0, high[0]), (x1, 15, high[1]), IRON))
+        m.append(box((x0, 0, mid[0]), (x1, 8.5, mid[1]), IRON))
     m.append(box((2, 0, high[0]), (14, 1.5, high[1]), IRON_PLATE))
     return m
 

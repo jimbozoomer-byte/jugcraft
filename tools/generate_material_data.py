@@ -30,7 +30,47 @@ CABLE_ROTATION = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {
                   "up": {"x": 270}, "down": {"x": 90}}
 
 
+# Glowing strips on cables (electric look): this far proud of the sheath, in pixels, and at full light emission.
+GLOW_LIFT = 0.1
+GLOW_EMISSION = 15
+
+
+def glow_strip(frm, to, face):
+    """A thin lit strip lying on one face of a cable box: drawn on its outer face and its two long edges."""
+    return {"from": frm, "to": to, "light_emission": GLOW_EMISSION,
+            "faces": {f: {"uv": [0, 0, 16, 16], "texture": "#glow"}
+                      for f in ("north", "south", "east", "west", "up", "down") if f != face}}
+
+
+def cable_glow(lo, hi, z0, z1):
+    """Strips along a cable piece running north-south from z0 to z1: one centred on each of its four long faces."""
+    a, b, t = 7, 9, GLOW_LIFT
+    return [glow_strip([a, hi, z0], [b, hi + t, z1], "down"), glow_strip([a, lo - t, z0], [b, lo, z1], "up"),
+            glow_strip([hi, a, z0], [hi + t, b, z1], "west"), glow_strip([lo - t, a, z0], [lo, b, z1], "east")]
+
+
+def core_glow(lo, hi):
+    """The glowing cross on each face of a cable's core: a full-width bar one way, two short bars the other (no
+    overlap, so no two lit faces share a plane)."""
+    a, b, t = 7, 9, GLOW_LIFT
+    out = []
+    for axis in range(3):
+        for side, outer in ((lo, lo - t), (hi, hi + t)):
+            u, v = [i for i in range(3) if i != axis]
+            for (u0, u1), (v0, v1) in (((lo, hi), (a, b)), ((a, b), (lo, a)), ((a, b), (b, hi))):
+                frm, to = [0.0] * 3, [0.0] * 3
+                frm[axis], to[axis] = min(side, outer), max(side, outer)
+                frm[u], to[u] = u0, u1
+                frm[v], to[v] = v0, v1
+                facing = {0: ("west", "east"), 1: ("down", "up"), 2: ("north", "south")}[axis]
+                inner = facing[1] if side == lo else facing[0]
+                out.append(glow_strip(frm, to, inner))
+    return out
+
+
 def write(path, obj):
+    if isinstance(obj, dict) and obj.get("elements"):
+        model_writer.separate_coplanar(obj["elements"])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
 
@@ -124,21 +164,25 @@ def machine_assets(lang):
         # Transmitters are `size` pixels thick (4 for cables and fluid pipes, 6 for item pipes).
         lo = 8 - info.get("size", 4) // 2
         hi = 16 - lo
+        textures = {"cable": texture, "particle": texture}
+        glowing = cable in CABLES
+        if glowing:
+            textures["glow"] = rid("block/el_glow")
         write(ASSETS / "models" / "block" / f"{cable}_core.json", {
-            "textures": {"cable": texture, "particle": texture},
+            "textures": textures,
             "elements": [{"from": [lo, lo, lo], "to": [hi, hi, hi], "faces": {
                 face: {"uv": [lo, lo, hi, hi], "texture": "#cable"}
-                for face in ("north", "east", "south", "west", "up", "down")}}],
+                for face in ("north", "east", "south", "west", "up", "down")}}] + (core_glow(lo, hi) if glowing else []),
         })
         write(ASSETS / "models" / "block" / f"{cable}_arm.json", {
-            "textures": {"cable": texture, "particle": texture},
+            "textures": textures,
             "elements": [{"from": [lo, lo, 0], "to": [hi, hi, lo], "faces": {
                 "north": {"uv": [lo, lo, hi, hi], "texture": "#cable"},
                 "east": {"uv": [0, lo, lo, hi], "texture": "#cable"},
                 "west": {"uv": [0, lo, lo, hi], "texture": "#cable"},
                 "up": {"uv": [lo, 0, hi, lo], "texture": "#cable"},
                 "down": {"uv": [lo, 0, hi, lo], "texture": "#cable"},
-            }}],
+            }}] + (cable_glow(lo, hi, 1, lo) if glowing else []),
         })
         parts = [{"apply": {"model": rid(f"block/{cable}_core")}}]
         for direction, rotation in CABLE_ROTATION.items():
@@ -147,7 +191,7 @@ def machine_assets(lang):
         # A 3D straight segment in hand and inventory, like other tech mods' transmitters.
         write(ASSETS / "models" / "item" / f"{cable}.json", {
             "parent": "minecraft:block/block",
-            "textures": {"cable": texture, "particle": texture},
+            "textures": textures,
             "elements": [{"from": [lo, lo, 0], "to": [hi, hi, 16], "faces": {
                 "north": {"uv": [lo, lo, hi, hi], "texture": "#cable"},
                 "south": {"uv": [lo, lo, hi, hi], "texture": "#cable"},
@@ -155,7 +199,7 @@ def machine_assets(lang):
                 "west": {"uv": [0, lo, 16, hi], "texture": "#cable"},
                 "up": {"uv": [lo, 0, hi, 16], "texture": "#cable"},
                 "down": {"uv": [lo, 0, hi, 16], "texture": "#cable"},
-            }}],
+            }}] + (cable_glow(lo, hi, 1, 15) if glowing else []),
         })
         write(ASSETS / "items" / f"{cable}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{cable}")}})
 
@@ -258,6 +302,7 @@ def machine_assets(lang):
     lang[f"message.{MOD}.conveyor_slope.up"] = "up"
     lang[f"message.{MOD}.conveyor_slope.down"] = "down"
     powered_tools(lang)
+    petro_assets(lang)
     lang[f"message.{MOD}.hand_crank"] = "Turning for %s more seconds"
     lang[f"message.{MOD}.steam_engine"] = "Steam engine: %s fuel, %s / %s mB water"
     lang[f"message.{MOD}.dynamo"] = "Dynamo: %s / %s JE"
@@ -284,6 +329,13 @@ def machine_assets(lang):
         write(ASSETS / "items" / f"{upgrade}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{upgrade}")}})
     lang[f"tooltip.{MOD}.speed_upgrade"] = "Each: faster, uses more energy per item (up to 4 count)"
     lang[f"tooltip.{MOD}.efficiency_upgrade"] = "Each: 20% less energy (up to 4 count)"
+    lang[f"container.{MOD}.tank.empty"] = "Empty"
+    lang[f"prospector.{MOD}.oil"] = "Oil"
+    lang[f"container.{MOD}.pumpjack.oil"] = "Pumping oil"
+    lang[f"container.{MOD}.pumpjack.dry"] = "No pumpable oil here"
+    lang[f"container.{MOD}.fracking_rig.shale"] = "Fracking shale"
+    lang[f"container.{MOD}.fracking_rig.none"] = "No shale oil here"
+    lang[f"prospector.{MOD}.shale_oil"] = "Shale oil"
     lang[f"container.{MOD}.redstone"] = "Redstone: %s"
     lang[f"container.{MOD}.redstone.ignored"] = "ignored (always runs)"
     lang[f"container.{MOD}.redstone.high"] = "runs only with a signal"
@@ -370,6 +422,14 @@ def self_drop(block, lower_half_only=False):
     if lower_half_only:  # a 2-tall block drops once, from its lower half (like vanilla doors)
         entry["condition"] = {"type": "minecraft:match_block", "blocks": rid(block), "state": {"half": "lower"}}
     return loot(block, [entry], explosion_condition=True)
+
+
+def slab_drop(block):
+    """One slab, or two from a double slab (like vanilla 26.3's slabs)."""
+    return loot(block, [{"type": "minecraft:item", "name": rid(block), "modifier": [
+        {"type": "minecraft:set_count", "count": 2,
+         "condition": {"type": "minecraft:match_block", "blocks": rid(block), "state": {"type": "double"}}},
+        {"type": "minecraft:explosion_decay"}]}])
 
 
 def silk_or(block, item, modifier):
@@ -517,6 +577,51 @@ def pixel_hollows_assets(lang):
     write(ASSETS / "sounds.json", ph.SOUNDS)
 
 
+def petro_assets(lang):
+    """Petroleum fluids (tools/petro.py): the liquid block (particles only; the fluid renderer draws the liquid) and
+    the bucket."""
+    import petro
+    for fluid, info in petro.FLUIDS.items():
+        lang[f"block.{MOD}.{fluid}"] = info["display"]
+        write(ASSETS / "blockstates" / f"{fluid}.json", {"variants": {"": {"model": rid(f"block/{fluid}")}}})
+        write(ASSETS / "models" / "block" / f"{fluid}.json", {"textures": {"particle": rid(f"block/{fluid}_still")}})
+        bucket = f"{fluid}_bucket"
+        lang[f"item.{MOD}.{bucket}"] = f"{info['display']} Bucket"
+        write(ASSETS / "models" / "item" / f"{bucket}.json",
+              {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{bucket}")}})
+        write(ASSETS / "items" / f"{bucket}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{bucket}")}})
+    for item, display in petro.ITEMS.items():
+        lang[f"item.{MOD}.{item}"] = display
+        write(ASSETS / "models" / "item" / f"{item}.json",
+              {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
+        write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
+    for block, info in petro.BLOCKS.items():
+        lang[f"block.{MOD}.{block}"] = info["display"]
+        models = ASSETS / "models" / "block"
+        if info["shape"] == "cube":
+            write(models / f"{block}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{block}")}})
+            state = {"variants": {"": {"model": rid(f"block/{block}")}}}
+        elif info["shape"] == "slab":
+            full = block.removesuffix("_slab")
+            textures = {"bottom": rid(f"block/{full}"), "top": rid(f"block/{full}"), "side": rid(f"block/{full}")}
+            write(models / f"{block}.json", {"parent": "minecraft:block/slab", "textures": textures})
+            write(models / f"{block}_top.json", {"parent": "minecraft:block/slab_top", "textures": textures})
+            state = {"variants": {"type=bottom": {"model": rid(f"block/{block}")},
+                                  "type=top": {"model": rid(f"block/{block}_top")},
+                                  "type=double": {"model": rid(f"block/{full}")}}}
+        else:
+            write(models / f"{block}.json", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+                "top": rid(f"block/{block}"), "bottom": rid("block/asphalt"), "side": rid("block/asphalt")}})
+            state = {"variants": {f"facing={face}": {"model": rid(f"block/{block}"), **({"y": y} if y else {})}
+                                  for face, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270))}}
+        write(ASSETS / "blockstates" / f"{block}.json", state)
+        write(ASSETS / "models" / "item" / f"{block}.json", {"parent": rid(f"block/{block}")})
+        write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    # Gases have no block, so Fabric names them from this key.
+    for gas, info in petro.GASES.items():
+        lang[f"block.{MOD}.{gas}"] = info["display"]
+
+
 def loot_tables():
     out = DATA / MOD / "loot_table" / "blocks"
     for metal, info in METALS.items():
@@ -533,6 +638,9 @@ def loot_tables():
     # The 2-tall charging station drops once, from its lower half.
     for block in TOOL_BLOCKS:
         write(out / f"{block}.json", self_drop(block, lower_half_only=True))
+    import petro
+    for block, info in petro.BLOCKS.items():
+        write(out / f"{block}.json", slab_drop(block) if info["shape"] == "slab" else self_drop(block))
     for rock, info in ROCKS.items():
         drop = info["drop"]
         table = ore_drop(rock, drop["item"], drop["min"], drop["max"]) if drop else self_drop(rock)
@@ -606,6 +714,19 @@ def recipes():
         recipe["fabric:load_conditions"] = [c for f in features for c in condition(f)]
         write(out / f"{result}.json", recipe)
     machine_recipe_files(out)
+    import petro
+    for kind, name, data in petro.fluid_recipe_files(condition):
+        write(out / kind / f"{name}.json", data)
+    # Asphalt: gravel bound with asphalt binder; a slab is half a block; yellow dye paints the centre line.
+    oil = [c for f in (MACHINE_FEATURE, "crude_oil") for c in condition(f)]
+    for name, recipe in (
+            ("asphalt", shaped(MACHINE_FEATURE, ["GGG", "GBG", "GGG"],
+                               {"G": "minecraft:gravel", "B": rid("asphalt_binder")}, "asphalt", 8, "building")),
+            ("asphalt_slab", shaped(MACHINE_FEATURE, ["AAA"], {"A": rid("asphalt")}, "asphalt_slab", 6, "building")),
+            ("asphalt_road_line", shapeless(MACHINE_FEATURE, [rid("asphalt")] * 4 + ["minecraft:yellow_dye"],
+                                            "asphalt_road_line", 4, "building"))):
+        recipe["fabric:load_conditions"] = oil
+        write(out / f"{name}.json", recipe)
 
     # Dusts smelt back into ingots wherever the metal's ore could be smelted; the others use the arc furnace.
     for metal in COMPONENTS["dust"]:
@@ -744,6 +865,16 @@ def tags():
             tags.add("item", f"c:{info['tag']}", rid(item))
             if info["tag"].startswith("dusts/"):
                 tags.add("item", "c:dusts", f"#c:{info['tag']}")
+
+    # Petroleum fluids, so other mods' machines can recognise them (c:crude_oil and so on).
+    import petro
+    for fluid in petro.FLUIDS:
+        tags.add("fluid", f"c:{fluid}", rid(fluid))
+        tags.add("fluid", f"c:{fluid}", rid(f"flowing_{fluid}"))
+    for gas in petro.GASES:
+        tags.add("fluid", f"c:{gas}", rid(gas))
+    for block in petro.BLOCKS:
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     tags.write()
 
 

@@ -102,7 +102,7 @@ Other blocks:
 | ID | Class | What |
 | --- | --- | --- |
 | `machine_casing`, `arc_furnace_casing` | plain blocks | crafting part; arc furnace structure |
-| `copper_cable`, `silver_cable`, `aluminum_cable` | `energy/CableBlock` | 4 px energy transmitters: 256 / 1,024 / 4,096 JE/t; a network runs at its slowest cable |
+| `copper_cable`, `silver_cable`, `aluminum_cable` | `energy/CableBlock` | 6 px energy transmitters (glowing green core, emissive strips): 256 / 1,024 / 4,096 JE/t; a network runs at its slowest cable |
 | `bronze_fluid_pipe` | `fluid/FluidPipeBlock` | 4 px fluid transmitter, 250 mB per push |
 | `fluid_tank` | `fluid/FluidTankBlock(Entity)` | 16,000 mB, one fluid, comparator output |
 | `electric_pump` | `fluid/ElectricPumpBlock(Entity)` | pulls from below, 100 mB/t, 8 JE/t |
@@ -181,6 +181,19 @@ Records: [pixel-hollows.md](features/pixel-hollows.md), [retro-trader.md](featur
   - Kinds with a tank: steam generator (water), geothermal generator (lava), ore washer (water). Capacity is `MachineKind.tankCapacity()`.
   - A water source block directly below the steam generator or ore washer is a spring: 20 mB/t, never used up.
 
+### Oil and fluid processing (`chemistry/`, `tools/petro.py`)
+
+- **Petroleum fluids** (`PetroFluids`): `Entry` per fluid with source, flowing, `LiquidBlock` and bucket; `OilFluid` never makes new sources. Client: `PetroFluidsClient` registers the still/flow textures. Fluid tags `c:<fluid>`.
+- **Fluid processing machines:** a `MachineKind` with a `fluidSpec()` (`FluidMachineSpec`: input and output tank capacities, item inputs and outputs). `MachineBlockEntity.tanks()` is a `FluidTanks`; `fluidFor(side)` exposes all tanks as one storage (inputs insert-only and filtered by recipes, outputs extract-only). Output tanks push out of every outer face every 4 ticks.
+- **Fluid recipes** (`FluidRecipe`, `FluidRecipes`): one recipe type per machine (`MachineKind.recipeType()`), JSON keys `items`, `fluids`, `fluid_results`, `results`, `time`. Written from `tools/petro.py`; `check_mod_data.py` audits them and forbids fluid from nothing (`source` declares fluid released from items).
+- **Oil reservoirs** (`OilReservoirs`): seeded per chunk, `get(level, chunk)` and `extract(level, chunk, kind, mb)`; depletion is `SavedData` (`jugcraft:oil_reservoirs`). `overrideForTest` is for game tests only.
+- **Gases** (`PetroFluids.Gas`, `GasFluid`): fluids with no block or bucket (refinery gas); Fabric names them from `block.<ns>.<id>`.
+- **Draw-offs:** `MachineKind.outputLayer(tank)` makes an output tank push only from the faces of one block layer (distillation tower, cracker, reformer).
+- **Items** (`PetroItems`): cracking catalyst, asphalt binder.
+- **Machines:** `PUMPJACK` (custom tick), `OIL_SAND_EXTRACTOR` (`jugcraft:oil_sand_extraction`), `DISTILLATION_TOWER` (`distillation`), `CATALYTIC_CRACKER` (`catalytic_cracking`), `VACUUM_DISTILLATION_UNIT` (`vacuum_distillation`), `CATALYTIC_REFORMER` (`reforming`), `CHEMICAL_MIXER` (`chemical_mixing`), `FRACKING_RIG` (custom tick; works over shale), `FLOWBACK_TREATMENT_UNIT` (`water_treatment`).
+- **Fluid generators:** `DIESEL_GENERATOR` and `GAS_TURBINE` burn fuel from input tank 0 (`MachineBlockEntity.tickFluidGenerator`); JE per mB is `FluidFuels.jePerMb(kind, fluid)` (mirrored in `tools/petro.py` `FLUID_FUELS`). The turbine's tank 1 holds lubricant, used 1 mB per `FluidFuels.LUBRICANT_TICKS`.
+- **Pumps and pipes:** `ElectricPumpBlockEntity.Tier` (ELECTRIC, HEAVY); `FluidPipeBlock` takes a rate (bronze 250, steel 1,000 mB/t) and a network carries its slowest pipe's rate.
+
 ### Items (`logistics/`)
 
 - Uses **Fabric's** `ItemStorage.SIDED`. Machines expose their slots via `WorldlyContainer`, following the side configuration.
@@ -233,7 +246,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
   - The machine waits unless every possible byproduct fits in its byproduct slots.
 - **Lookup:** use `MachineRecipes.find(serverLevel, kind, stack)` and `findMulti(...)`. Types and serializers are registered per kind in `MachineRecipeTypes`.
 - **Resource condition:** `{"condition": "jugcraft:feature_enabled", "feature": "<name>"}` in `fabric:load_conditions` gates any JSON by a feature switch.
-- **Recipe viewers:** no EMI/JEI/REI plugin exists yet, because no viewer build for 26.3 has been confirmed.
+- **Recipe viewers:** an optional JEI plugin (`client/compat/JugcraftJeiPlugin`, JEI 31.8 compile-time API) shows one category per machine, read from `assets/jugcraft/recipe_view.json` (`tools/recipe_view.py`). Fluid machines get their own categories with fluid slots (amounts converted with `IPlatformFluidHelper.bucketVolume()`). Refinery gas has a still texture registered so viewers can draw it. EMI and REI have no plugin.
 
 ### Feature switches (`config/`)
 
@@ -329,8 +342,8 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ## Not built yet
 
-- Chemistry branch: electrolysis, real refining, liquid crude oil. Blast-furnace stand-ins mark the recipes that will move there.
-- Recipe viewer plugin (EMI/JEI/REI).
+- Chemistry branch: electrolysis. The oil line's extraction, refining, fracking and fuel generators exist (see below); oil products (plastics, asphalt) and the diesel engine are planned. Blast-furnace stand-ins mark the recipes that will move there.
+- EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
 - Any magic, farming, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md). (The Pixel Hollows is the first cave biome; it has no creatures, structures or bosses yet.)
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).

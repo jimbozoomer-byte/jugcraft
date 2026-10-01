@@ -13,6 +13,7 @@ from PIL import Image
 
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS, PART_UNITS, CIRCUITS, WASHED_ORES,
                        all_blocks, all_items, feature_of)
+import petro
 from machines import (MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 import pixel_hollows as ph
@@ -91,7 +92,7 @@ def model(ref):
 
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
-    for block in all_blocks() + machine_blocks() + ph.blocks():
+    for block in all_blocks() + machine_blocks() + petro.petro_blocks() + ph.blocks():
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -106,8 +107,55 @@ def check_assets(registered):
         definition = load(ASSETS / "items" / f"{item}.json")
         if definition:
             model(definition["model"]["model"])
-        if item not in all_blocks() + machine_blocks() + ph.blocks() and f"item.{MOD}.{item}" not in lang:
+        if item not in all_blocks() + machine_blocks() + petro.petro_blocks() + ph.blocks() and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
+
+
+def check_petro():
+    """Petroleum fluids: Java registers exactly tools/petro.py's fluids, each with its block, textures and names."""
+    java = (JAVA_ROOT / "chemistry" / "PetroFluids.java").read_text(encoding="utf-8")
+    declared = re.findall(r'= fluid\("([a-z_]+)", (\d+), (\d+), (\d+)', java)
+    expected = [(f, str(i["tick_delay"]), str(i["slope"]), str(i["drop_off"])) for f, i in petro.FLUIDS.items()]
+    if declared != expected:
+        err(f"PetroFluids.java fluids {declared} != tools/petro.py {expected}")
+    items_java = re.findall(r'JugcraftRegistry\.item\("([a-z_]+)"\)',
+                            (JAVA_ROOT / "chemistry" / "PetroItems.java").read_text(encoding="utf-8"))
+    if items_java != list(petro.ITEMS):
+        err(f"PetroItems.java items {items_java} != tools/petro.py {list(petro.ITEMS)}")
+    blocks_java = re.findall(r'= register\("([a-z_]+)"', (JAVA_ROOT / "chemistry" / "PetroBlocks.java").read_text(encoding="utf-8"))
+    if blocks_java != list(petro.BLOCKS):
+        err(f"PetroBlocks.java blocks {blocks_java} != tools/petro.py {list(petro.BLOCKS)}")
+    gases = re.findall(r'= gas\("([a-z_]+)"', java)
+    if gases != list(petro.GASES):
+        err(f"PetroFluids.java gases {gases} != tools/petro.py {list(petro.GASES)}")
+    fuels_java = (JAVA_ROOT / "chemistry" / "FluidFuels.java").read_text(encoding="utf-8")
+    for machine, fuels in petro.FLUID_FUELS.items():
+        if f"case {machine.upper()} ->" not in fuels_java:
+            err(f"FluidFuels.java has no case for {machine}")
+        for fuel, value in fuels.items():
+            if fuel not in petro.FLUIDS and fuel not in petro.GASES:
+                err(f"{machine}: unknown fuel {fuel}")
+            accessor = "fluid()" if fuel in petro.GASES else "source()"
+            if not re.search(rf"int {fuel.upper()} = {value};", fuels_java) or f"PetroFluids.{fuel.upper()}.{accessor}" not in fuels_java:
+                err(f"{machine}: {fuel} at {value} JE/mB in tools/petro.py does not match FluidFuels.java")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for gas in petro.GASES:
+        if f"block.{MOD}.{gas}" not in lang:
+            err(f"Missing name for gas {gas}")
+    for fluid in petro.FLUIDS:
+        if f"block.{MOD}.{fluid}" not in lang:
+            err(f"Missing name for fluid {fluid}")
+        for form in ("still", "flow"):
+            texture(rid_of(f"block/{fluid}_{form}"))
+            if not (ASSETS / "textures" / "block" / f"{fluid}_{form}.png.mcmeta").is_file():
+                err(f"Fluid texture {fluid}_{form} is not animated")
+        state = load(ASSETS / "blockstates" / f"{fluid}.json")
+        if state:
+            model(state["variants"][""]["model"])
+
+
+def rid_of(path):
+    return f"{MOD}:{path}"
 
 
 # Loot table keys from before 26.x. 26.3 ignores them without an error, so a table using them loses its
@@ -139,7 +187,7 @@ UNITS = {"ingots": 9, "nuggets": 1, "raw_materials": 9, "ores": 9, "storage_bloc
          **{f"{form}s": units for form, units in PART_UNITS.items()}}
 
 
-NON_METAL = set(ph.blocks()) | set(ph.items()) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"}
+NON_METAL = {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(petro.petro_blocks()) | set(ph.blocks()) | set(ph.items())
 
 
 def item_units(ref):
@@ -239,7 +287,7 @@ def check_machine_recipe_files(registered):
         if f'"{kind}"' not in kinds:
             err(f"MachineKind.recipeType() has no \"{kind}\" (tools say {machine} uses it)")
     expected = sum(len(recipes) for recipes in machine_recipes().values())
-    files = sorted((DATA / MOD / "recipe").glob("*/*.json"))
+    files = sorted(path for path in (DATA / MOD / "recipe").glob("*/*.json") if path.parent.name in RECIPE_TYPES.values())
     if len(files) != expected:
         err(f"{len(files)} machine recipe files, but tools/machines.py defines {expected}")
     for path in files:
@@ -266,15 +314,82 @@ OTHER_ENTRIES = {"worldgen": {"pixel_hollows"}, "point_of_interest_type": {"arca
                  "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES}}
 
 
+def check_fluid_recipes(registered):
+    """Fluid recipes (tools/petro.py): every item and fluid resolves, slots and tanks exist, and none makes fluid from
+    nothing. Recipes with no item input must not give out more fluid than they take in; recipes with item input must
+    say how much fluid they release from it ("source")."""
+    from generate_material_data import RECIPE_TYPES
+    java = MACHINE_JAVA.read_text(encoding="utf-8")
+    fluids = {f"{MOD}:{f}" for f in list(petro.FLUIDS) + list(petro.GASES)} | {"minecraft:water", "minecraft:lava"}
+    for machine, spec in petro.FLUID_MACHINES.items():
+        match = re.search(r"case " + machine.upper() + r" -> new FluidMachineSpec\(List\.of\(([^)]*)\),\s*List\.of\(([^)]*)\),\s*"
+                          r"(\d+), (\d+)\)", java)
+        if not match:
+            err(f"MachineKind.fluidSpec() has no case for {machine}")
+        else:
+            def tanks(text):
+                return [CONSTANTS.get(v.strip(), None) or int(v.strip().replace("_", "")) for v in text.split(",") if v.strip()]
+            CONSTANTS = {name: int(value.replace("_", "")) for name, value in
+                         re.findall(r"public static final int (\w+) = ([\d_]+);", java)}
+            found = (tanks(match.group(1)), tanks(match.group(2)), int(match.group(3)), int(match.group(4)))
+            if found != (spec["inputs"], spec["outputs"], spec["item_inputs"], spec["item_outputs"]):
+                err(f"{machine}: fluid spec {found} in Java, {spec} in tools/petro.py")
+        if spec["recipe_type"] is None:
+            continue
+        if f'"{spec["recipe_type"]}"' not in java:
+            err(f"MachineKind.recipeType() has no \"{spec['recipe_type']}\" for {machine}")
+        if spec["recipe_type"] in RECIPE_TYPES.values():
+            err(f"Fluid recipe type {spec['recipe_type']} is also an item machine's")
+    expected = sum(len(r) for r in petro.FLUID_RECIPES.values())
+    types = {spec["recipe_type"] for spec in petro.FLUID_MACHINES.values() if spec["recipe_type"]}
+    files = [p for p in (DATA / MOD / "recipe").glob("*/*.json") if p.parent.name in types]
+    if len(files) != expected:
+        err(f"{len(files)} fluid recipe files, but tools/petro.py defines {expected}")
+    for machine, recipes in petro.FLUID_RECIPES.items():
+        spec = petro.FLUID_MACHINES[machine]
+        for recipe in recipes:
+            label = f"{machine} recipe {recipe['name']}"
+            if len(recipe.get("items", [])) > spec["item_inputs"] or len(recipe.get("results", [])) > spec["item_outputs"]:
+                err(f"{label}: more items than the machine has slots")
+            if len(recipe.get("fluids", [])) > len(spec["inputs"]) or len(recipe.get("fluid_results", [])) > len(spec["outputs"]):
+                err(f"{label}: more fluids than the machine has tanks")
+            for i, (fluid, mb) in enumerate(recipe.get("fluids", [])):
+                if fluid not in fluids:
+                    err(f"{label}: unknown fluid {fluid}")
+                if mb > spec["inputs"][i]:
+                    err(f"{label}: needs {mb} mB of {fluid} but its tank holds {spec['inputs'][i]}")
+            for i, (fluid, mb) in enumerate(recipe.get("fluid_results", [])):
+                if fluid not in fluids:
+                    err(f"{label}: unknown fluid {fluid}")
+                if mb > spec["outputs"][i]:
+                    err(f"{label}: makes {mb} mB of {fluid} but its tank holds {spec['outputs'][i]}")
+            for ref, _ in recipe.get("items", []) + recipe.get("results", []):
+                if ref.startswith("#"):
+                    if not tag_exists("item", ref[1:]):
+                        err(f"{label}: unknown tag {ref}")
+                elif split(ref)[0] == MOD and split(ref)[1] not in registered:
+                    err(f"{label}: unknown item {ref}")
+            fluid_in = sum(mb for _, mb in recipe.get("fluids", [])) + recipe.get("source", 0)
+            fluid_out = sum(mb for _, mb in recipe.get("fluid_results", []))
+            if recipe.get("items") and "source" not in recipe and fluid_out > sum(mb for _, mb in recipe.get("fluids", [])):
+                err(f"{label}: makes fluid from items without saying how much (\"source\")")
+            if fluid_out > fluid_in:
+                err(f"{label}: {fluid_out} mB out from {fluid_in} mB in")
+
+
 def check_tags():
     for path in sorted(DATA.rglob("tags/*/**/*.json")):
         registry = path.relative_to(DATA).parts[2]
-        known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + ph.blocks() + ph.items())
+        known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + petro.petro_blocks()
+                                                    + ph.blocks() + ph.items())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
             if value.startswith("#"):
                 if not tag_exists(registry, value[1:]):
                     err(f"{path.relative_to(ROOT)}: unknown tag {value}")
+            elif registry == "fluid":
+                if split(value)[1] not in petro.fluid_ids():
+                    err(f"{path.relative_to(ROOT)}: unknown fluid {value}")
             elif split(value)[0] == MOD and split(value)[1] not in known:
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
@@ -556,12 +671,14 @@ def json_result(path):
 
 
 def main():
-    registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items()) | set(ph.blocks())
-                  | set(ph.items()))
+    registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
+                  | set(petro.petro_items()) | set(petro.petro_blocks()) | set(ph.blocks()) | set(ph.items()))
     check_assets(sorted(registered))
+    check_petro()
     check_loot(registered)
     check_recipes(registered)
     check_machine_recipe_files(registered)
+    check_fluid_recipes(registered)
     check_tags()
     check_worldgen()
     check_java()

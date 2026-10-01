@@ -12,8 +12,44 @@ No numbered release yet. Everything below is on `main`.
 - **Pixel Hollows:** a rare cave biome deep under the driest land, lined with **circuitstone** and lit only by scattered, faintly glowing **pixel crystal clusters**, with an original chiptune hum. It holds 1.5× the usual copper and redstone (and tin). New building blocks: circuitstone, polished circuitstone, circuitstone bricks and the **pixel lamp**; clusters drop **pixel shards**. One mixin adds the biome to the Overworld (Fabric API has no Overworld biome API).
 - **Retro Trader:** a villager profession at the new two-block-tall **arcade cabinet**. He sells a **Pixel Hollows Map** (use it to mark the nearest cave), circuitstone, lamps and shards, and buys shards back without any profit loop. Trades are 26.1+ data files.
 - **Retro Game Shop:** a small storefront that can appear in new plains villages, with the cabinet and a villager inside.
-- **Fix (all Jugcraft block loot):** 26.3 changed the loot table format (an entry's `condition` and `modifier`, and `type` in place of `function`/`condition`) and silently ignores the old keys. So far every ore dropped itself to any tool, Fortune did nothing, and the charging station's lower-half-only drop rule was ignored. The tables are now written in 26.3's form, with vanilla's `minecraft:tool/can_silk_touch` predicate, and the data checker rejects the old keys; game tests cover Silk Touch, Fortune and the 2-tall drops.
+- **Fix (all Jugcraft block loot):** 26.3 changed the loot table format (an entry's `condition` and `modifier`, and `type` in place of `function`/`condition`) and silently ignores the old keys. So far every ore dropped itself to any tool, Fortune did nothing, the charging station's lower-half-only drop rule was ignored, and a double asphalt slab dropped one slab. The tables are now written in 26.3's form, with vanilla's `minecraft:tool/can_silk_touch` predicate, and the data checker rejects the old keys; game tests cover Silk Touch, Fortune and the 2-tall drops.
 - Fourteen game tests, four client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
+
+### #51 Oil line, batch 4: industry, and the electric look
+- **Polymerization reactor** (2×2×3): refinery gas → plastic pellets; the metal press makes **plastic sheets**.
+- **Asphalt**, **asphalt slab** and **asphalt road line**: walking on them is 1.3× as fast.
+- **Diesel engine** (2×2×3): up to 512 KE/t into a shaft line from diesel or heavy fuel oil, burning only for what is used.
+- Nine oil **advancements**, a **Fuel Values** handbook page, JEI categories for every **fluid machine**, and the oil audit in [docs/BALANCE.md](docs/BALANCE.md#oil).
+- **Electric look** (owner request): cables are 6 px graphite with a glowing green core (emissive), with copper, silver or aluminum collars; the battery box, capacitor bank, charging station, solar panel, electric pump, electric motor and dynamo are restyled in graphite and green light.
+- Fix: a dynamo took up to twice its 128 KE/t on a strong shaft line; it is now capped per tick.
+- Screenshots: a power-gear scene, and the multi-block showroom spaced to fit the oil machines.
+
+### #50 Oil line, batch 3: fracking and diesel power
+- New fluids: **fracking fluid** and **flowback water** (with buckets).
+- **Chemical mixer** (2×2×2): water + sand + dried kelp → fracking fluid.
+- **Fracking rig** (3×3×5): over shale oil, pumps fracking fluid down and brings up crude oil, refinery gas and flowback water.
+- **Flowback treatment unit** (3×1×2): flowback water → clean water (a quarter lost) + salt.
+- **Diesel generator** (3×2×2): 256 JE/t from diesel (256 JE/mB) or heavy fuel oil (128 JE/mB).
+- **Gas turbine** (4×2×2): 512 JE/t from gasoline (384 JE/mB) or refinery gas (192 JE/mB), with lubricant upkeep.
+- Game tests for each.
+
+### #49 Oil line, batch 2: refining
+- **Steel fluid pipes** (1,000 mB/t) and the **heavy pump** (1,000 mB/t); a pipe line now carries as much as its slowest pipe.
+- New fluids: **naphtha, diesel, heavy fuel oil, lubricant, gasoline** (with buckets) and **refinery gas** (a gas: tanks and pipes only).
+- **Distillation tower** (2×2×7): crude oil → gas, naphtha, diesel and heavy fuel oil, each drawn off at its own height.
+- **Catalytic cracker** (2×2×4): heavy fuel oil + steam + catalyst → diesel, naphtha and gas. **Cracking catalyst** from bauxite, sand and nickel.
+- **Vacuum distillation unit** (2×2×3): heavy fuel oil → lubricant + asphalt binder.
+- **Catalytic reformer** (3×2×2): naphtha → gasoline + gas.
+- Game tests for each.
+
+### #47 Oil line, batch 1: oil in the world
+The first five commits of the dieselpunk Chemistry branch ([plan](docs/branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line)).
+- **Crude oil:** a real fluid with a bucket; slow, thick, never makes new sources; works in every tank and pipe.
+- **Fluid processing machines:** machines with input and output tanks, data-driven fluid recipes and tank gauges on their screens.
+- **Oil reservoirs:** hidden, finite oil under Overworld chunks (pumpable or shale), fixed by the seed; the prospector reports them.
+- **Pumpjack:** a 1×3×3 dieselpunk nodding donkey that pumps crude oil from the reservoir under it.
+- **Oil sand extractor:** a 2×2×2 hot-water plant that washes crude oil out of oil sand and bitumen.
+- Game tests for each; a new Oil chapter in the handbook.
 
 ### #46 Balance review
 - New [docs/BALANCE.md](docs/BALANCE.md): every generator, conversion, store and cost in one place, with the loops that were checked.

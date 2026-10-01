@@ -61,6 +61,10 @@ ABOUT = {
     "bronze_fluid_pipe": "Carries fluid that a pump pushes into it to every tank and fluid machine it touches.",
     "fluid_tank": "Holds 16 buckets of one fluid. Fill or empty it with buckets; right-click with an empty hand to read it.",
     "electric_pump": "Pulls water or lava from the block below it and pushes it out of its top and sides.",
+    "steel_fluid_pipe": "Like the bronze pipe, but carries 1,000 mB a tick for refinery flows. A pipe line carries as much "
+                        "as its slowest pipe, so one bronze pipe holds a steel line back to 250 mB.",
+    "heavy_pump": "A steel-tier pump: 1,000 mB a tick from below (water, lava or a tank) out of its top and sides, at "
+                  "40 JE a tick, with a 16-bucket buffer.",
     "brass_item_pipe": "Joins inventories into a network. Items go to matching sorters first, then take turns between the "
                        "other inventories.",
     "pneumatic_extractor": "Pulls 16 items every 8 ticks from what it faces and pushes them out of its other sides. A "
@@ -92,6 +96,49 @@ ABOUT = {
     "efficiency_upgrade": "In a machine's upgrade slot: each card cuts energy use by a fifth. Four cards: 41% of the energy.",
     "prospector": "Right-click to survey the 3x3 chunks around you, from the bottom of the world to a little above you. "
                   "It shows which ores resonate, how strongly (1 to 5 bars) and roughly how deep, never exactly where.",
+    "pumpjack": "One block wide, three tall and three long; place it with the wellhead where you want the well. If "
+                "the chunk under the wellhead holds pumpable oil (the prospector's Oil reading), it pumps 2 mB of crude "
+                "oil a tick into its 16-bucket tank and pushes it into pipes and tanks touching it. A reservoir runs dry "
+                "for good after 50 to 250 buckets; shale oil needs a fracking rig instead.",
+    "oil_sand_extractor": "Two by two by two. Washes crude oil out of oil sand with hot water: a block of oil sand "
+                          "(mined with silk touch) and 250 mB of water give 500 mB of crude oil and a block of sand; a "
+                          "piece of bitumen and 100 mB of water give 150 mB. Pipe water in; it pushes the oil out into "
+                          "pipes and tanks touching it.",
+    "distillation_tower": "Two by two and seven blocks tall. Heats crude oil and splits each bucket into 100 mB of "
+                          "refinery gas, 250 mB of naphtha, 400 mB of diesel and 250 mB of heavy fuel oil, a bucket every "
+                          "5 seconds. Each fraction comes out at its own height: heavy fuel oil at the base, diesel two "
+                          "blocks up, naphtha four up, and refinery gas at the top. Give each its own pipe or tank.",
+    "catalytic_cracker": "Two by two and four blocks tall. Cracks heavy fuel oil into lighter fuels with steam and a "
+                         "catalyst: 1,000 mB of heavy fuel oil, 250 mB of water and a cracking catalyst give 500 mB of "
+                         "diesel (out at the base), 300 mB of naphtha (two blocks up) and 200 mB of refinery gas (at the "
+                         "top), every 8 seconds.",
+    "vacuum_distillation_unit": "Two by two and three blocks tall. Boils heavy fuel oil under vacuum: each bucket gives "
+                                "400 mB of lubricant and two asphalt binder, every 6 seconds. Lubricant keeps the gas "
+                                "turbine running; asphalt binder makes roads.",
+    "catalytic_reformer": "Three wide, two tall and two deep. Reforms naphtha into high-octane gasoline: each bucket of "
+                          "naphtha gives 900 mB of gasoline (out of the bottom row) and 100 mB of refinery gas (out of "
+                          "the top row), every 6 seconds.",
+    "chemical_mixer": "Two by two by two. Stirs powders into water: two sand (first slot) and a dried kelp (second "
+                      "slot) with a bucket of water make a bucket of fracking fluid, every 4 seconds.",
+    "fracking_rig": "Three by three and five blocks tall. Place it with its front left block over shale oil (the "
+                    "prospector's Shale oil reading). Each powered tick it pumps 4 mB of fracking fluid down the well "
+                    "and brings up 6 mB of crude oil (out at the base), 2 mB of refinery gas (out at the top) and 3 mB "
+                    "of flowback water (out one block up), until the shale is spent.",
+    "flowback_treatment_unit": "Three wide, one tall and two deep. Settles and filters the flowback water from a "
+                               "fracking rig: each bucket gives 750 mB of clean water and a salt, every 4 seconds. "
+                               "Pipe the water back to the chemical mixer; a quarter is lost each time round.",
+    "diesel_generator": "Three wide, two tall and two deep. Burns diesel or heavy fuel oil piped into its 8-bucket tank: "
+                        "256 JE/t, a bucket of diesel every 1,000 ticks (256,000 JE) or heavy fuel oil twice as fast "
+                        "(128,000 JE a bucket). It refuses crude oil and other fluids.",
+    "diesel_engine": "Two wide, two tall and three long. Burns diesel (256 KE a mB) or heavy fuel oil (128) piped into "
+                     "its 8-bucket tank and turns a shaft out of the back of its upper right back block: up to "
+                     "512 KE/t, twice the large steam engine. It burns only for the rotation the line takes.",
+    "polymerization_reactor": "Two by two and three blocks tall. Polymerizes refinery gas into plastic: a bucket of gas "
+                              "gives four plastic pellets, every 5 seconds. The metal press flattens each pellet "
+                              "into a plastic sheet.",
+    "gas_turbine": "Four wide, two tall and two deep. Burns gasoline or refinery gas from its 16-bucket tank: 512 JE/t, "
+                   "384,000 JE a bucket of gasoline or 192,000 JE a bucket of gas. Its second tank takes lubricant "
+                   "from the vacuum distillation unit: 1 mB every second of running, and it stops when it runs dry.",
     "ore_drill": "Two blocks tall. Mines the ore blocks in a 9x9 column below it, one layer at a time down to the bottom "
                  "of the world, one ore every 2 seconds. Each hole is refilled with stone or deepslate. The ores come "
                  "out whole, ready for ore processing.",
@@ -281,8 +328,44 @@ def build():
             + [block_page(t, POWERED_TOOLS[t]) for t in POWERED_TOOLS]
             + [block_page(m, UPGRADE_MODULES[m][0]) for m in UPGRADE_MODULES]},
         {"title": "Fluids", "icon": f"{MOD}:fluid_tank", "pages":
-            [block_page("bronze_fluid_pipe", PIPES["bronze_fluid_pipe"]["display"])]
-            + [block_page(b, FLUID_BLOCKS[b]["display"]) for b in ("fluid_tank", "electric_pump")]},
+            [block_page(p, PIPES[p]["display"]) for p in ("bronze_fluid_pipe", "steel_fluid_pipe")]
+            + [block_page(b, FLUID_BLOCKS[b]["display"]) for b in ("fluid_tank", "electric_pump", "heavy_pump")]},
+        {"title": "Oil", "icon": f"{MOD}:crude_oil_bucket", "pages": [
+            {"title": "Crude Oil", "icon": f"{MOD}:crude_oil_bucket", "text": [
+                "Crude oil lies in hidden reservoirs under some Overworld chunks. The prospector reports Oil (pumpable) "
+                "and Shale oil (needs fracking) under the 3x3 chunks around you.",
+                "It is a thick, slow fluid that never makes new sources, so every reservoir runs dry in the end.",
+                "Pipes, pumps and tanks carry it like water; refineries turn it into fuels."]},
+            machine_page("pumpjack"),
+            machine_page("oil_sand_extractor"),
+            machine_page("distillation_tower"),
+            machine_page("catalytic_cracker"),
+            machine_page("vacuum_distillation_unit"),
+            machine_page("catalytic_reformer"),
+            machine_page("chemical_mixer"),
+            machine_page("fracking_rig"),
+            machine_page("flowback_treatment_unit"),
+            {"title": "Fuel Values", "icon": f"{MOD}:diesel_bucket", "text": [
+                "What a bucket is worth: diesel 256,000 JE (diesel generator) or KE (diesel engine); heavy fuel oil "
+                "128,000; gasoline 384,000 and refinery gas 192,000 (gas turbine).",
+                "Refined all the way, a bucket of crude oil gives about 525 mB of diesel, 293 mB of gasoline and 183 mB "
+                "of gas: about 282,000 JE, for about 40,000 JE of pumping and refining.",
+                "Oil never comes back: every reservoir runs dry."]},
+            machine_page("diesel_generator"),
+            machine_page("gas_turbine"),
+            machine_page("polymerization_reactor"),
+            machine_page("diesel_engine"),
+            {"title": "Asphalt", "icon": f"{MOD}:asphalt", "text": [
+                "Eight gravel around an asphalt binder (from the vacuum distillation unit) make eight asphalt.",
+                "Walking on asphalt, its slabs or road line is 1.3 times as fast. Three asphalt make six slabs.",
+                "Four asphalt and a yellow dye make four road line blocks; the dashed line points the way you face "
+                "when you place it."],
+             "craft": {"grid": ["minecraft:gravel"] * 4 + [f"{MOD}:asphalt_binder"] + ["minecraft:gravel"] * 4,
+                       "result": f"{MOD}:asphalt", "count": 8}},
+            {"title": "Cracking Catalyst", "icon": f"{MOD}:cracking_catalyst", "text": [
+                "Bauxite (alumina) and sand (silica) with a nickel ingot make four. The catalytic cracker uses one for "
+                "each bucket of heavy fuel oil it cracks."], "craft": craft("cracking_catalyst")},
+        ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [
                 "Every processing machine's screen has six face buttons: front, back, left, right, top and bottom.",

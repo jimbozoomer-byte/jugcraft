@@ -41,6 +41,32 @@ MACHINES = {
     "large_steam_engine": {"display": "Large Steam Engine", "lit": True},
     # Multi-block machines: models and footprints live in tools/large_machines.py.
     "geothermal_generator": {"display": "Geothermal Generator", "lit": True},
+    # Petrochemistry (tools/petro.py): a 1x3x3 pumpjack over a conventional oil reservoir.
+    "pumpjack": {"display": "Pumpjack", "lit": True},
+    # A 2x2x2 hot-water extraction plant: oil sand or bitumen + water -> crude oil (+ sand).
+    "oil_sand_extractor": {"display": "Oil Sand Extractor", "lit": True},
+    # A 2x2 column seven blocks tall: crude oil -> refinery gas, naphtha, diesel and heavy fuel oil.
+    "distillation_tower": {"display": "Distillation Tower", "lit": True},
+    # A 2x2x4 fluid catalytic cracker: heavy fuel oil + steam + catalyst -> diesel, naphtha, refinery gas.
+    "catalytic_cracker": {"display": "Catalytic Cracker", "lit": True},
+    # A 2x2x3 vacuum column: heavy fuel oil -> lubricant + asphalt binder.
+    "vacuum_distillation_unit": {"display": "Vacuum Distillation Unit", "lit": True},
+    # A 3x2x2 row of reactors: naphtha -> gasoline + refinery gas.
+    "catalytic_reformer": {"display": "Catalytic Reformer", "lit": True},
+    # A 2x2x2 stirred mixing vessel: water + sand + dried kelp -> fracking fluid.
+    "chemical_mixer": {"display": "Chemical Mixer", "lit": True},
+    # A 3x3x5 derrick over shale oil: fracking fluid down; crude oil, refinery gas and flowback water up.
+    "fracking_rig": {"display": "Fracking Rig", "lit": True},
+    # 3x1x2 settling basins and a filter press: flowback water -> water + salt.
+    "flowback_treatment_unit": {"display": "Flowback Treatment Unit", "lit": True},
+    # A 3x2x2 inline six on a skid: burns diesel or heavy fuel oil from its tank.
+    "diesel_generator": {"display": "Diesel Generator", "lit": True},
+    # A 4x2x2 gas turbine: burns gasoline or refinery gas, with a lubricant tank.
+    "gas_turbine": {"display": "Gas Turbine", "lit": True},
+    # A 2x2x3 jacketed reactor: refinery gas -> plastic pellets.
+    "polymerization_reactor": {"display": "Polymerization Reactor", "lit": True},
+    # Kinetic: a 2x2x3 V8 diesel engine; its shaft leaves the back of the upper right back block.
+    "diesel_engine": {"display": "Diesel Engine", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
 }
 
@@ -52,9 +78,11 @@ PARTS = {
 
 # Cables: display name and JE per tick one push may send through the network.
 # Tiers connect to each other; a network carries as much as its slowest cable (energy/EnergyNetworks).
-CABLES = {"copper_cable": {"display": "Copper Cable", "rate": 256},
-          "silver_cable": {"display": "Silver Cable", "rate": 1_024},
-          "aluminum_cable": {"display": "Aluminum Cable", "rate": 4_096}}
+# Electric look (tools/electric_textures.py): 6 pixels thick, graphite with a glowing green core; the collars at the
+# ends show the tier's metal.
+CABLES = {"copper_cable": {"display": "Copper Cable", "rate": 256, "size": 6},
+          "silver_cable": {"display": "Silver Cable", "rate": 1_024, "size": 6},
+          "aluminum_cable": {"display": "Aluminum Cable", "rate": 4_096, "size": 6}}
 
 # Item logistics (see docs/TECH_TREE.md#item-logistics). The tube is a 6-pixel transmitter; the
 # extractor and sorter face any of six directions. Models: tools/logistics_models.py.
@@ -110,11 +138,14 @@ UPGRADES = {"speed_upgrade": "Speed Upgrade", "efficiency_upgrade": "Efficiency 
 
 # Fluid logistics (physical branch; see docs/TECH_TREE.md). Amounts are millibuckets (mB);
 # 1 bucket = 1000 mB = 81000 Fabric droplets. Pipes are passive: pumps push through them.
-PIPES = {"bronze_fluid_pipe": {"display": "Bronze Fluid Pipe", "rate": 250}}
+PIPES = {"bronze_fluid_pipe": {"display": "Bronze Fluid Pipe", "rate": 250},
+         # Steel tier, for refinery flows; a network carries as much as its slowest pipe.
+         "steel_fluid_pipe": {"display": "Steel Fluid Pipe", "rate": 1_000}}
 # Fluid blocks with their own block entities. top/side/bottom name the textures.
 FLUID_BLOCKS = {
     "fluid_tank": {"display": "Tinplate Tank"},
     "electric_pump": {"display": "Electric Pump"},
+    "heavy_pump": {"display": "Heavy Pump"},
 }
 FLUID_STATS = {
     # Holds 16 buckets of one fluid; filled and emptied with buckets or by pumps.
@@ -122,6 +153,9 @@ FLUID_STATS = {
     # Draws a water/lava source (or the tank) below it and pushes into pipes/storages on its other sides.
     "electric_pump": {"energy_capacity": 4_000, "input_per_tick": 64, "use_per_tick": 8,
                       "pump_per_tick": 100, "buffer_mb": 4_000},
+    # Steel tier: ten times the pump, for refineries.
+    "heavy_pump": {"energy_capacity": 32_000, "input_per_tick": 512, "use_per_tick": 40,
+                   "pump_per_tick": 1_000, "buffer_mb": 16_000},
 }
 
 # Balance numbers shared with the Java code (MachineStats.java). Keep in sync.
@@ -171,6 +205,33 @@ STATS = {
     # Nine blocks tall with a 7-block rotor. 12 JE/t at sea level, +1 per 2 blocks higher, capped at 72;
     # x1.5 rain, x2 thunder. The 7x7 square the rotor sweeps must be clear.
     "wind_turbine": {"capacity": 48_000, "output_per_tick": 192, "generation_per_tick": 72},
+    # 1x3x3. Pumps 2 mB of crude oil a tick (a bucket every 25 s) from the conventional reservoir under its chunk.
+    "pumpjack": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "pump_per_tick": 2, "tank": 16_000},
+    # 2x2x2. Recipes in tools/petro.py; 8,000 mB water tank and 8,000 mB crude oil tank.
+    "oil_sand_extractor": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "tank": 8_000},
+    # 2x2x7. 128 JE/t heats the reboiler; a bucket of crude oil per 100 ticks.
+    "distillation_tower": {"capacity": 40_000, "input_per_tick": 512, "use_per_tick": 128, "tank": 16_000},
+    # 2x2x4. 160 JE/t; a bucket of heavy fuel oil per 160 ticks.
+    "catalytic_cracker": {"capacity": 40_000, "input_per_tick": 512, "use_per_tick": 160, "tank": 8_000},
+    # 2x2x3. 96 JE/t; a bucket of heavy fuel oil per 120 ticks.
+    "vacuum_distillation_unit": {"capacity": 30_000, "input_per_tick": 512, "use_per_tick": 96, "tank": 8_000},
+    # 3x2x2. 120 JE/t; a bucket of naphtha per 120 ticks.
+    "catalytic_reformer": {"capacity": 30_000, "input_per_tick": 512, "use_per_tick": 120, "tank": 8_000},
+    # 2x2x2. 64 JE/t; a bucket of mixture per 80 ticks.
+    "chemical_mixer": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 64, "tank": 8_000},
+    # 3x3x5. 256 JE/t; 4 mB/t fracking fluid down, 8 mB/t oil freed, 3 mB/t flowback.
+    "fracking_rig": {"capacity": 80_000, "input_per_tick": 1_024, "use_per_tick": 256, "tank": 16_000},
+    # 3x1x2. 48 JE/t; a bucket of flowback water per 80 ticks.
+    "flowback_treatment_unit": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 48, "tank": 8_000},
+    # 3x2x2. 256 JE/t: 1 mB of diesel a tick (256 JE/mB) or 2 mB of heavy fuel oil (128 JE/mB).
+    "diesel_generator": {"capacity": 60_000, "output_per_tick": 1_024, "generation_per_tick": 256, "tank": 8_000},
+    # 4x2x2. 512 JE/t: 1.33 mB of gasoline a tick (384 JE/mB) or 2.67 mB of refinery gas (192 JE/mB);
+    # 1 mB of lubricant every 20 ticks.
+    "gas_turbine": {"capacity": 120_000, "output_per_tick": 2_048, "generation_per_tick": 512, "tank": 16_000},
+    # 2x2x3. 96 JE/t; a bucket of refinery gas per 100 ticks.
+    "polymerization_reactor": {"capacity": 30_000, "input_per_tick": 512, "use_per_tick": 96, "tank": 8_000},
+    # 2x2x3. Up to 512 KE/t: 2 mB of diesel a tick (256 KE/mB) or 4 mB of heavy fuel oil, only for what it delivers.
+    "diesel_engine": {"capacity": 0, "use_per_tick": 0, "output_ke": 512, "tank": 8_000},
 }
 
 # Fuel for the coal generator: burn ticks per item (coal matches the vanilla furnace's 1600).
@@ -242,6 +303,9 @@ CRAFTING = {
     # Fluid branch: pipes and tanks come from press-made plates; the pump adds gears and a casing.
     "bronze_fluid_pipe": (["PGP"], {"P": "#c:plates/bronze", "G": "minecraft:glass"}, 4),
     "fluid_tank": (["PPP", "PGP", "PPP"], {"P": "#c:plates/tin", "G": "minecraft:glass"}, 1),
+    "steel_fluid_pipe": (["PGP"], {"P": "#c:plates/steel", "G": "jugcraft:bronze_fluid_pipe"}, 3),
+    "heavy_pump": (["PCP", "GUG", "PMP"], {"P": "#c:plates/steel", "C": "jugcraft:silver_cable", "G": "#c:gears/steel",
+                                          "U": "jugcraft:electric_pump", "M": "jugcraft:machine_casing"}, 1),
     "electric_pump": (["PUP", "GMG", "PCP"],
                       {"P": "#c:plates/bronze", "U": "minecraft:bucket", "G": "#c:gears/iron",
                        "M": "jugcraft:machine_casing", "C": "jugcraft:copper_cable"}, 1),
@@ -329,6 +393,45 @@ CRAFTING = {
                                                 "A": "jugcraft:advanced_circuit"}, 1),
     "fortune_module": (["SLS", "GAG", "SLS"], {"S": "#c:plates/steel", "L": "minecraft:lapis_block",
                                              "G": "minecraft:gold_ingot", "A": "jugcraft:advanced_circuit"}, 1),
+    # Petrochemistry: steel frame and gears around an electric pump; after the steel tier.
+    "pumpjack": (["PPP", "GUG", "PMP"], {"P": "#c:plates/steel", "G": "#c:gears/steel", "U": "jugcraft:electric_pump",
+                                         "M": "jugcraft:machine_casing"}, 1),
+    "oil_sand_extractor": (["PHP", "TMT", "PGP"], {"P": "#c:plates/steel", "H": "minecraft:hopper",
+                                                   "T": "jugcraft:fluid_tank", "M": "jugcraft:machine_casing",
+                                                   "G": "#c:gears/steel"}, 1),
+    "distillation_tower": (["PTP", "PCP", "PFP"], {"P": "#c:plates/steel", "T": "jugcraft:steel_tank",
+                                                   "C": "jugcraft:advanced_circuit", "F": "minecraft:blast_furnace"}, 1),
+    "catalytic_cracker": (["PCP", "TAT", "PMP"], {"P": "#c:plates/steel", "C": "jugcraft:advanced_circuit",
+                                                  "T": "jugcraft:steel_tank", "A": "jugcraft:arc_furnace_casing",
+                                                  "M": "jugcraft:machine_casing"}, 1),
+    "vacuum_distillation_unit": (["PEP", "TCT", "PMP"], {"P": "#c:plates/steel", "E": "jugcraft:heavy_pump",
+                                                         "T": "jugcraft:fluid_tank", "C": "jugcraft:advanced_circuit",
+                                                         "M": "jugcraft:machine_casing"}, 1),
+    "catalytic_reformer": (["PCP", "TFT", "PMP"], {"P": "#c:plates/steel", "C": "jugcraft:advanced_circuit",
+                                                   "T": "jugcraft:fluid_tank", "F": "minecraft:blast_furnace",
+                                                   "M": "jugcraft:machine_casing"}, 1),
+    "chemical_mixer": (["PMP", "TCT", "PHP"], {"P": "#c:plates/steel", "M": "jugcraft:electric_motor",
+                                               "T": "jugcraft:fluid_tank", "C": "jugcraft:machine_casing",
+                                               "H": "minecraft:hopper"}, 1),
+    "fracking_rig": (["SDS", "UCU", "SMS"], {"S": "#c:plates/steel", "D": "jugcraft:ore_drill",
+                                             "U": "jugcraft:heavy_pump", "C": "jugcraft:advanced_circuit",
+                                             "M": "jugcraft:machine_casing"}, 1),
+    "flowback_treatment_unit": (["PFP", "TST", "PMP"], {"P": "#c:plates/steel", "F": "minecraft:iron_bars",
+                                                        "T": "jugcraft:fluid_tank", "S": "jugcraft:sieve",
+                                                        "M": "jugcraft:machine_casing"}, 1),
+    "diesel_generator": (["PEP", "TMT", "PGP"], {"P": "#c:plates/steel", "E": "jugcraft:electric_motor",
+                                                 "T": "jugcraft:fluid_tank", "M": "jugcraft:machine_casing",
+                                                 "G": "#c:gears/steel"}, 1),
+    "gas_turbine": (["PBP", "DCD", "PGP"], {"P": "#c:plates/steel", "B": "minecraft:iron_bars",
+                                            "D": "jugcraft:diesel_generator", "C": "jugcraft:advanced_circuit",
+                                            "G": "#c:gears/steel"}, 1),
+    "diesel_engine": (["PXP", "GCG", "PXP"], {"P": "#c:plates/steel", "X": "jugcraft:plastic_sheet",
+                                              "G": "#c:gears/steel", "C": "jugcraft:machine_casing"}, 1),
+    "polymerization_reactor": (["PCP", "TGT", "PMP"], {"P": "#c:plates/steel", "C": "jugcraft:cracking_catalyst",
+                                                       "T": "jugcraft:steel_tank", "G": "minecraft:glass",
+                                                       "M": "jugcraft:machine_casing"}, 1),
+    "cracking_catalyst": (["BSB", "SNS", "BSB"], {"B": "jugcraft:bauxite", "S": "minecraft:sand",
+                                                  "N": "#c:ingots/nickel"}, 4),
     "charging_station": (["SLS", "WAW", "SBS"], {"S": "#c:plates/steel", "L": "minecraft:redstone_lamp",
                                                 "W": "jugcraft:copper_cable", "A": "jugcraft:advanced_circuit",
                                                 "B": "jugcraft:battery_box"}, 1),
@@ -414,7 +517,10 @@ ALLOY_SMELTER = [
 def _metal_press():
     from materials import COMPONENTS, ingot_id
     return [{"input": ingot_id(metal), "output": f"jugcraft:{metal}_plate", "count": 1, "ticks": 100,
-             "features": [FEATURE]} for metal in COMPONENTS["plate"]]
+             "features": [FEATURE]} for metal in COMPONENTS["plate"]] + [
+        # Petrochemistry: plastic pellets from the polymerization reactor are pressed into sheets.
+        {"input": "jugcraft:plastic_pellets", "output": "jugcraft:plastic_sheet", "count": 1, "ticks": 60,
+         "features": [FEATURE, "crude_oil"]}]
 
 
 def _wire_drawer():
