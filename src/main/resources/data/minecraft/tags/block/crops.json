@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:cotton_crop",
     "jugcraft:bean_crop",
     "jugcraft:sweet_potato_crop",
     "jugcraft:flax_crop"
