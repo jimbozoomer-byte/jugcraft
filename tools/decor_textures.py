@@ -118,17 +118,25 @@ def bowl_face():
 
 
 def candy():
-    """A heap of wrapped sweets and candy corn."""
+    """A heap of sweets: wrapped toffees in bright foil and candy corn, packed edge to edge."""
     c = Canvas()
     rng = random.Random(8203)
-    noise(c, 0, 0, 15, 15, [rgb("6a3a14"), rgb("7a4a1c")], 8204)
-    for _ in range(26):
+    foils = [rgb("8a3cc0"), rgb("4cb84a"), rgb("d8344a"), rgb("2f7ad8"), rgb("e8b020"), rgb("e05a9a")]
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, shade(foils[rng.randrange(len(foils))], 0.55))
+    for _ in range(34):
         x, y = rng.randrange(16), rng.randrange(16)
-        color = CANDY[rng.randrange(len(CANDY))]
-        c.px(x, y, color)
-        c.px(x + 1, y, shade(color, 0.8))
-        if rng.random() < 0.4:
-            c.px(x, y + 1, CANDY[1])
+        if rng.random() < 0.45:
+            # Candy corn: white tip, orange middle, yellow base.
+            c.px(x, y, rgb("f4f0e0"))
+            c.px(x, y + 1, rgb("e8601a"))
+            c.px(x, y + 2, rgb("f7b21e"))
+        else:
+            foil = foils[rng.randrange(len(foils))]
+            c.px(x, y, foil)
+            c.px(x + 1, y, shade(foil, 1.25))
+            c.px(x - 1, y, shade(foil, 0.8))
     return c.img
 
 

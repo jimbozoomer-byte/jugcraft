@@ -719,6 +719,7 @@ def check_agriculture():
     check_regatta(java, main)
     check_festivities(java, main)
     check_night(java, main)
+    check_decor(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1180,6 +1181,76 @@ def check_night(java, main):
     registration = re.search(r'HEADLESS_HORSEMAN = entity\("([a-z_]+)"[^;]*;', main)
     if not registration or f"entities/{registration.group(1)}" != horseman["table"] or "noLootTable" in registration.group(0):
         err(f"The Headless Horseman must be registered with his loot table {horseman['table']}")
+
+def check_decor(java):
+    """The first decorations batch: Java matches tools/agriculture.py, every block state has a model, every result has
+    its message, and the portraits' eyes sit inside their frames where the textures paint them."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    def numbers(source, name):
+        match = re.search(rf"\b{name} = \{{([\d, ]+)\}};", java.get(source, ""))
+        return [int(v) for v in match.group(1).split(",")] if match else None
+
+    lights, bowl, coffin, portrait, fog = ag.STRING_LIGHTS, ag.CANDY_BOWL, ag.COFFIN, ag.HAUNTED_PORTRAIT, ag.FOG_MACHINE
+    expected = {("StringLightHookBlockEntity", "MAX_LENGTH"): lights["max_length"], ("StringLightHookBlockEntity", "USE"): lights["use"],
+                ("StringLightHookBlockEntity", "CAPACITY"): lights["capacity"], ("StringLightHookBlockEntity", "INPUT"): lights["input"],
+                ("StringLightHookBlockEntity", "CHECK_TICKS"): lights["check_ticks"], ("StringLightHookBlock", "LIGHT"): lights["light"],
+                ("CandyBowlBlockEntity", "CAPACITY"): bowl["capacity"], ("CandyBowlBlockEntity", "VISITORS"): bowl["visitors"],
+                ("CoffinBlockEntity", "SLOTS"): coffin["slots"], ("FogMachineBlockEntity", "USE"): fog["use"],
+                ("FogMachineBlockEntity", "CAPACITY"): fog["capacity"], ("FogMachineBlockEntity", "INPUT"): fog["input"],
+                ("FogMachineBlockEntity", "PARTICLES_PER_TICK"): fog["particles_per_tick"], ("FogMachineBlockEntity", "BUDGET"): fog["budget"],
+                ("FogMachineBlockEntity", "VIEW"): fog["view"]}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    if numbers("CandyBowlBlockEntity", "FILL") != bowl["fill"] or numbers("FogMachineBlockEntity", "RADII") != fog["radii"]:
+        err("CandyBowlBlockEntity.FILL or FogMachineBlockEntity.RADII differs from tools/agriculture.py")
+    if fog["particles_per_tick"] > fog["budget"] or 2 + len(fog["radii"]) - 1 > fog["particles_per_tick"]:
+        err("The fog machine's per-machine puffs must fit its per-tick budget")
+
+    # The portraits: Java's eyes are the table's, inside the frame, and the textures paint a white where each eye is.
+    found = {name: [tuple(int(v) for v in eye.split(",")) for eye in re.findall(r"new int\[\] \{([\d, ]+)\}", eyes)]
+             for name, eyes in re.findall(r'[A-Z]+\("([a-z]+)", List\.of\(([^;]*?)\)\)', java.get("HauntedPortraitBlock", ""))}
+    if found != {name: [tuple(e) for e in eyes] for name, eyes in portrait["portraits"].items()}:
+        err(f"HauntedPortraitBlock.Portrait eyes {found} differ from tools/agriculture.py")
+    for name, eyes in portrait["portraits"].items():
+        image = ASSETS / "textures" / "block" / f"{portrait['block']}_{name}.png"
+        pixels = Image.open(image).convert("RGBA") if image.exists() else None
+        for x, y, w, h in eyes:
+            if x < 1 or y < 1 or x + w > 15 or y + h > 15:
+                err(f"{name}: an eye at {(x, y, w, h)} runs into the frame")
+            elif pixels is not None and len({pixels.getpixel((x + i, y + j)) for i in range(w) for j in range(h)}) != 1:
+                err(f"{name}: the eye at {(x, y, w, h)} is not one painted white")
+
+    # Every combination of each block's state properties has a model.
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    wanted = {
+        lights["hook"]: {f"face={a},facing={f},lit={l}" for a in ("floor", "wall", "ceiling") for f in horizontal for l in ("false", "true")},
+        bowl["block"]: {f"facing={f},fill={n}" for f in horizontal for n in range(4)},
+        coffin["block"]: {f"facing={f},open={o},part={p}" for f in horizontal for o in ("false", "true") for p in ("head", "foot")},
+        portrait["block"]: {f"facing={f},portrait={n}" for f in horizontal for n in portrait["portraits"]},
+        fog["block"]: {f"facing={f},running={r}" for f in horizontal for r in ("false", "true")},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+
+    # Every outcome a player can be told about has its text.
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for source, enum, prefix in (("StringLightsItem", "Result", "message.jugcraft.string_lights."), ("CandyBowlBlockEntity", "Taken", "message.jugcraft.candy_bowl.")):
+        values = re.search(rf"enum {enum} \{{([A-Z_,\s]+)\}}", java.get(source, ""))
+        for value in re.findall(r"[A-Z_]+", values.group(1)) if values else []:
+            if prefix + value.lower() not in lang:
+                err(f"{source}.{enum}.{value} has no {prefix}{value.lower()} text")
+        if not values:
+            err(f"{source}.{enum} not found")
+    for name in portrait["portraits"]:
+        if f"message.jugcraft.haunted_portrait.{name}" not in lang:
+            err(f"The {name} portrait has no name")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has
