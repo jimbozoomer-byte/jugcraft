@@ -59,7 +59,18 @@ No numbered release yet. Everything below is on `main`.
 - Also: composting, pig, chicken and parrot feed, `c:` crop, seed and food tags, and a new `agriculture` feature switch.
 - Original textures from `tools/crop_textures.py`. Twelve game tests, plus a client game test with screenshots of a corn maze, the fields and every growth stage.
 
-### Unmerged: Rubber and polymers, batch 14
+### Unmerged: Glass chemistry, batch 16
+- **Tincal**, natural borax, in desert and badlands sand; **borax**.
+- **Borosilicate glass** (2 sand + borax, alloy smelter) drawn into **optical fibre**, which can replace gold in processors.
+- **Ferroboron** (iron + borax): with a rare earth oxide it makes **two** neodymium magnets.
+- Multi-input recipes now try the one with the most ingredients first.
+
+### #70 Chlorine and lye, batch 15
+- **PVC:** refinery gas + chlorine → vinyl chloride (synthesis converter) → PVC resin (polymerization reactor) → two plastic sheets each (metal press).
+- **Soap** from lye and rotten flesh; a bar washes off every status effect.
+- Two advancements, a handbook page and game tests.
+
+### #69 Rubber and polymers, batch 14
 - **Butadiene** from naphtha (chemical reactor) and **synthetic rubber** from butadiene (polymerization reactor).
 - **Gaskets** (rubber + steel plate); rubber belts; gasketed steel pipe, four for two plates.
 - An advancement, a handbook page and a game test.
