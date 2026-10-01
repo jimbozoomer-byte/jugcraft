@@ -30,25 +30,15 @@ jobs:
           l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
           GT=$(find ~/.gradle/caches -name 'fabric-gametest-api-v1*.jar' | grep -v sources | head -2 | tr '\n' ':')
           CP="$CP:$GT"
-          l net.minecraft.world.level.block.BedBlock 'public|protected' 60
-          l net.minecraft.world.item.BedItem 'public' 10
-          l net.minecraft.world.level.block.entity.BaseContainerBlockEntity 'public|protected' 40
-          l net.minecraft.world.Container 'startOpen|stopOpen|getEntitiesWithContainerOpen' 10
-          l net.minecraft.world.inventory.ChestMenu 'public static' 10
-          l net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock 'public|protected' 30
-          l net.minecraft.client.particle.SingleQuadParticle 'public|protected' 50
-          l net.minecraft.client.particle.TextureSheetParticle 'public|protected' 20
-          l net.minecraft.client.particle.Particle 'protected|public' 70
-          l net.minecraft.client.particle.ParticleProvider 'public' 10
-          l net.minecraft.client.particle.SpriteSet 'public' 10
-          l net.minecraft.core.particles.SimpleParticleType 'public' 10
-          for c in $(echo "$FENT" | tr ':' '\n'); do unzip -l "$c" 2>/dev/null | grep -iE 'particle.*\.class' | head -20; done
-          javap -cp "$CP" -p net.fabricmc.fabric.api.particle.v1.FabricParticleTypes 2>&1 | head -20
-          javap -cp "$CP" -p net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry 2>&1 | head -20
-          javap -cp "$CP" -p net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry 2>&1 | head -20
-          javap -cp "$CP" -p 'net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry$PendingParticleFactory' 2>&1 | head -10
-          javap -cp "$CP" -p 'net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry$PendingParticleProvider' 2>&1 | head -10
-          l net.minecraft.client.particle.ParticleRenderType 'public static' 20
-          l net.minecraft.world.level.block.LecternBlock 'useWithoutItem|useItemOn' 5
-          l net.minecraft.world.entity.player.Player 'startSleepInBed|isSleeping' 5
-          l net.minecraft.server.level.ServerPlayer 'startSleepInBed|setRespawnPosition|getRespawnConfig' 8
+          javap -cp "$CP" -p net.minecraft.world.level.block.AbstractBedBlock 2>&1 | head -60
+          javap -cp "$CP" -p 'net.minecraft.client.particle.SingleQuadParticle$Layer' 2>&1 | head -20
+          javap -cp "$CP" -p -c net.minecraft.world.item.Items | grep -A14 'String red_bed' | head -30
+          javap -cp "$CP" -p net.minecraft.world.attribute.BedRule 2>&1 | head -30
+          javap -cp "$CP" -p net.minecraft.world.attribute.EnvironmentAttributes 2>&1 | grep -i bed
+          javap -cp "$CP" -p net.minecraft.world.entity.ContainerUser 2>&1 | head -20
+          javap -cp "$CP" -p net.minecraft.world.level.block.entity.ContainerOpenersCounter 2>&1 | head -30
+          javap -cp "$CP" -p net.minecraft.world.level.block.BedBlock 2>&1 | head -40
+          javap -cp "$CP" -p -c net.minecraft.world.level.block.Blocks | grep -B3 -A20 'String red_bed' | head -40
+          javap -cp "$CP" -p 'net.minecraft.world.entity.player.Player$BedSleepingProblem' 2>&1 | head -20
+          javap -cp "$CP" -p net.minecraft.world.level.block.ButtonBlock 2>&1 | grep -E 'codec|MapCodec|ButtonBlock\(' | head
+          javap -cp "$CP" -p net.fabricmc.fabric.api.client.particle.v1.FabricSpriteSet 2>&1 | head

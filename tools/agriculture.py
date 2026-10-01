@@ -603,6 +603,42 @@ HORSEMAN = {"health": 160, "arena_radius": 32, "leave_range": 48, "lonely_ticks"
                      ("jugcraft:candy_corn", [3, 6])]}
 
 
+# ---------------------------------------------------------------- Halloween decorations, batch 1
+# Jack-o'-Lantern String Lights (agriculture/StringLightHookBlock.java, StringLightHookBlockEntity.java,
+# StringLightsItem.java): the strand item strings one hook to another at most max_length blocks away (one strand from
+# each hook). A hook lights (light level `light`) from a redstone signal, or from the electric network at `use` JE a
+# tick (buffer `capacity`, taking up to `input` a tick). A strand glows while either of its hooks is lit. Every
+# check_ticks a hook drops a strand whose far hook is gone.
+STRING_LIGHTS = {"hook": "string_light_hook", "hook_display": "String Light Hook", "strand": "jack_o_lantern_string_lights",
+                 "strand_display": "Jack-o'-Lantern String Lights", "max_length": 16, "light": 10, "use": 1, "capacity": 200,
+                 "input": 20, "check_ticks": 100}
+# The Candy Bowl (CandyBowlBlock, CandyBowlBlockEntity): holds up to `capacity` treats (CANDY_BAG's treat tag). Anyone
+# may add treats; each visitor takes one a night (the trick-or-treat night), its owner (whoever placed it) any time.
+# It remembers the last `visitors` visitors. Its look shows how full it is: `fill` are the counts for levels 1-3.
+CANDY_BOWL = {"block": "candy_bowl", "display": "Candy Bowl", "capacity": 64, "visitors": 256, "fill": [1, 16, 48]}
+# The Coffin (CoffinBlock, a bed; CoffinBlockEntity on its head half): `slots` slots behind the lid; sneak-use to lie
+# down and set your spawn, like a bed.
+COFFIN = {"block": "coffin", "display": "Coffin", "slots": 27}
+# The Haunted Portrait (HauntedPortraitBlock + client HauntedPortraitRenderer): a framed painting in four portraits
+# whose pupils follow whoever looks at it. Each eye is (x, y, width, height) in the portrait's 16x16 texture.
+HAUNTED_PORTRAIT = {"block": "haunted_portrait", "display": "Haunted Portrait",
+                    "portraits": {"lady": [(6, 6, 2, 1), (9, 6, 2, 1)], "captain": [(5, 6, 2, 1), (9, 6, 2, 1)],
+                                  "cat": [(5, 7, 2, 2), (9, 7, 2, 2)], "owl": [(4, 5, 3, 3), (9, 5, 3, 3)]}}
+# The Fog Machine (FogMachineBlock, FogMachineBlockEntity, client FogParticle): switched on by hand or by redstone, it
+# runs at `use` JE a tick (buffer `capacity`, taking up to `input` a tick) and rolls ground fog over a radius from
+# `radii` (sneak-use to change). Fog is drawn only by clients near it: at most particles_per_tick a machine, and
+# `budget` a tick for all machines together.
+FOG_MACHINE = {"block": "fog_machine", "display": "Fog Machine", "use": 16, "capacity": 4000, "input": 64, "radii": [4, 8, 12, 16],
+               "particles_per_tick": 6, "budget": 24, "view": 48}
+
+
+def decor1_blocks():
+    return [STRING_LIGHTS["hook"], CANDY_BOWL["block"], COFFIN["block"], HAUNTED_PORTRAIT["block"], FOG_MACHINE["block"]]
+
+
+def decor1_items():
+    return decor1_blocks() + [STRING_LIGHTS["strand"]]
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -768,6 +804,11 @@ SHAPELESS = [
      "count": 2, "category": "building"},
     {"id": "candle_skull", "inputs": ["minecraft:bone_block", "minecraft:candle"], "result": "candle_skull", "count": 1,
      "category": "building"},
+    # Halloween decorations: a strand of tiny pumpkin bulbs, and a painting whose eyes are a spider's.
+    {"id": "jack_o_lantern_string_lights", "inputs": ["minecraft:string", "minecraft:string", "minecraft:glowstone_dust", "minecraft:orange_dye"],
+     "result": "jack_o_lantern_string_lights", "count": 1, "category": "building"},
+    {"id": "haunted_portrait", "inputs": ["minecraft:painting", "minecraft:gold_nugget", "minecraft:spider_eye"], "result": "haunted_portrait",
+     "count": 1, "category": "building"},
 ]
 SHAPED = [
     {"id": "barley_bread", "pattern": ["BBB"], "key": {"B": "jugcraft:barley"}, "result": "barley_bread", "count": 1,
@@ -824,6 +865,17 @@ SHAPED = [
     {"id": "trebuchet", "pattern": ["  S", "LLI", "PPP"], "key": {"S": "minecraft:string", "L": "#minecraft:logs", "I": "#c:ingots/iron",
                                                                  "P": "#minecraft:planks"},
      "result": "trebuchet", "count": 1, "category": "misc"},
+    # Halloween decorations: an iron hook for string lights; a bowl of orange terracotta; a plank coffin lined in red
+    # around a chest; a fog machine of iron with a bucket for its tank, copper heaters and a grille nozzle.
+    {"id": "string_light_hook", "pattern": ["N", "I"], "key": {"N": "minecraft:iron_nugget", "I": "#c:ingots/iron"},
+     "result": "string_light_hook", "count": 4, "category": "building"},
+    {"id": "candy_bowl", "pattern": ["T T", " T "], "key": {"T": "minecraft:orange_terracotta"}, "result": "candy_bowl", "count": 1,
+     "category": "misc"},
+    {"id": "coffin", "pattern": ["PWP", "PCP"], "key": {"P": "#minecraft:planks", "W": "minecraft:red_wool", "C": "minecraft:chest"},
+     "result": "coffin", "count": 1, "category": "misc"},
+    {"id": "fog_machine", "pattern": ["IGI", "CBC", "III"], "key": {"I": "#c:ingots/iron", "G": "minecraft:iron_bars",
+                                                                   "C": "jugcraft:copper_cable", "B": "minecraft:bucket"},
+     "result": "fog_machine", "count": 1, "category": "redstone"},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -867,14 +919,14 @@ def all_blocks():
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"]] + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS)
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
-            + regatta_blocks() + festivity_blocks() + night_blocks())
+            + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks())
 
 
 def all_items():
     return (list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
             + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
-            + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items())
+            + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items())
 
 
 def owns(entry_id):
