@@ -74,11 +74,11 @@ Everything is original: no real shop names, logos, colours, uniforms, games or f
 - The shop template is written in 26.3's format with 26.3's DataVersion (5023), so the data fixer leaves it alone. A DataVersion above the game's made the whole template load as air; the game test `retroGameShopTemplateLoads` compares the two numbers, so after a platform bump `DATA_VERSION` in `tools/retro_game_shop.py` must follow.
 
 ## Verification
-Build workflow run 36811774557 on commit 4a50d04 (1 October 2026, merged with `main` after the oil line): Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub-hosted Ubuntu; game tests on the headless test server, client tests with Mesa software rendering.
+Build workflow run 36815372169 on commit 568409c (1 October 2026, merged with `main` after chemistry batch 5): Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub-hosted Ubuntu; game tests on the headless test server, client tests with Mesa software rendering.
 
 **Passed:**
 - `python3 tools/check_mod_data.py`: the Java trade table against `tools/pixel_hollows.py`, the search bounds, and the buyback against the cheapest sale.
-- `./gradlew build`: all 96 game tests, including:
+- `./gradlew build`: all 103 game tests, including:
   - `retroTraderTrades`: novice, apprentice and journeyman traders get exactly their trades; the map costs 12 emeralds and a compass, once per restock.
   - `retroTraderHasNoProfitLoop`: the buyback's multiplier is 0; logged "cheapest shard 0.5 emeralds, best buyback 0.333 emeralds per shard".
   - `pixelHollowsMapNeedsACaveInReach`: in the superflat test world, using the map leaves it unmarked.
@@ -87,13 +87,14 @@ Build workflow run 36811774557 on commit 4a50d04 (1 October 2026, merged with `m
   - `villagerClaimsTheArcadeCabinet`: an unemployed villager walks to a cabinet and becomes a Retro Trader.
   - `retroGameShopTemplateLoads`: the template's DataVersion is 5023, the same as the game's, and its palette reads as its own blocks.
   - `retroGameShopTemplate`: placed as the test structure, the shop has the cabinet, door, sign, street jigsaw and a villager, and it is in the plains houses pool: logged "weight 1 of 88 in plains houses (1.14% per house)".
+- Dedicated server (client job, `JugcraftServerClientGameTests`, one client): the game's own dedicated server started in-process on port 25565 and the client joined. The Retro Trader's novice offers reached the client after a real right-click (`[1 jugcraft:pixel_hollows_map, 8 jugcraft:circuitstone]`, screenshot `jugcraft_dedicated_server_trader`), a machine's screen showed the server's items, and after leaving and joining again the player still had the 7 pixel shards given before leaving and the world was unchanged. A singleplayer world holding a trader, a machine and an arcade cabinet was saved, closed and reopened with identical contents (the trader kept his offers).
 - Client screenshots, looked at: `jugcraft_retro_trader` (the trader beside his cabinet, matching the reference picture), `jugcraft_retro_game_shop` (the storefront with its door, windows, shelves, lamps and sign) and the cabinet in `jugcraft_pixel_hollows_blocks`.
 
 **Failed, then fixed on this branch:** the shop first placed as air: 26.3 templates name palette entries `id`/`properties`, and the template had used the older `Name`/`Properties` with a DataVersion the data fixer would not upgrade. It now matches vanilla 26.3's own village templates.
 
 **Shop frequency, estimated, not measured:** the shop is 1 of 88 weighted entries in the plains houses pool (1.14% per house slot). A plains village with about 15 house slots would then have a shop about 1 time in 6 (1 − (87/88)^15 ≈ 16%), which matches the proposal; villages vary in size, and this was not counted on real seeds.
 
-**Not run:** shop frequency across generated villages on real seeds; a shop joined to a real village street (whether its floor sits level with the path); buying a map in a client and following it to a cave; the map search's time in a real world; a dedicated server with two clients trading with one trader; restock and restart with a saved map; old-world upgrade; disable-switch behaviour in a running world.
+**Not run:** shop frequency across generated villages on real seeds; a shop joined to a real village street (whether its floor sits level with the path); buying a map in a client and following it to a cave; the map search's time in a real world; two clients trading with one trader on a dedicated server (the checklist is in docs/TESTING.md); restock; a marked map across a restart; old-world upgrade; disable-switch behaviour in a running world.
 
 ## World and event applicability
 - Village fit: plains villages only; the shop uses their oak and cobblestone with a few Jugcraft blocks inside.

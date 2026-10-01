@@ -43,7 +43,7 @@ The first content, tin and bronze plus the base materials (zinc, lead, silver, n
 ./gradlew runServer
 ```
 
-`build` is verified in CI; `runClient` and `runServer` are the standard Loom commands and have not been tried yet. Data checks that do not need Minecraft:
+`build` is verified in CI, and CI also runs a real client (`./gradlew runClientGameTest`) that joins an in-process dedicated server; `runClient` and `runServer` are the standard Loom commands and have not been tried by hand yet. The two-client checklist is in [docs/TESTING.md](docs/TESTING.md#dedicated-server-and-two-clients). Data checks that do not need Minecraft:
 
 ```sh
 python3 -m pip install pillow
