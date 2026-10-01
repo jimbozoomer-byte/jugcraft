@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 324 items/blocks under `jugcraft:` (the checker counts them) |
+| Registered IDs | 331 items/blocks under `jugcraft:` (the checker counts them) |
 
 ## Build, generate, check
 
@@ -102,7 +102,7 @@ Other blocks:
 | ID | Class | What |
 | --- | --- | --- |
 | `machine_casing`, `arc_furnace_casing` | plain blocks | crafting part; arc furnace structure |
-| `copper_cable`, `silver_cable`, `aluminum_cable` | `energy/CableBlock` | 4 px energy transmitters: 256 / 1,024 / 4,096 JE/t; a network runs at its slowest cable |
+| `copper_cable`, `silver_cable`, `aluminum_cable` | `energy/CableBlock` | 6 px energy transmitters (glowing green core, emissive strips): 256 / 1,024 / 4,096 JE/t; a network runs at its slowest cable |
 | `bronze_fluid_pipe` | `fluid/FluidPipeBlock` | 4 px fluid transmitter, 250 mB per push |
 | `fluid_tank` | `fluid/FluidTankBlock(Entity)` | 16,000 mB, one fluid, comparator output |
 | `electric_pump` | `fluid/ElectricPumpBlock(Entity)` | pulls from below, 100 mB/t, 8 JE/t |
@@ -244,7 +244,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
   - The machine waits unless every possible byproduct fits in its byproduct slots.
 - **Lookup:** use `MachineRecipes.find(serverLevel, kind, stack)` and `findMulti(...)`. Types and serializers are registered per kind in `MachineRecipeTypes`.
 - **Resource condition:** `{"condition": "jugcraft:feature_enabled", "feature": "<name>"}` in `fabric:load_conditions` gates any JSON by a feature switch.
-- **Recipe viewers:** no EMI/JEI/REI plugin exists yet, because no viewer build for 26.3 has been confirmed.
+- **Recipe viewers:** an optional JEI plugin (`client/compat/JugcraftJeiPlugin`, JEI 31.8 compile-time API) shows one category per machine, read from `assets/jugcraft/recipe_view.json` (`tools/recipe_view.py`). Fluid machines get their own categories with fluid slots (amounts converted with `IPlatformFluidHelper.bucketVolume()`). Refinery gas has a still texture registered so viewers can draw it. EMI and REI have no plugin.
 
 ### Crops (`agriculture/`)
 
@@ -372,7 +372,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 ## Not built yet
 
 - Chemistry branch: electrolysis. The oil line's extraction, refining, fracking and fuel generators exist (see below); oil products (plastics, asphalt) and the diesel engine are planned. Blast-furnace stand-ins mark the recipes that will move there.
-- Recipe viewer plugin (EMI/JEI/REI).
+- EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
 - Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md). Farming has its first three slices; the rest of the crop roster and the farm equipment are planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md).
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).
