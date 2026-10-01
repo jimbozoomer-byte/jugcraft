@@ -1,9 +1,9 @@
 # Halloween decorations
 
 Status: implemented in source, not yet played. The Build workflow compiles it, and CI's game tests are recorded below.
-Proposal issue: none; requested directly by the owner on 1 October 2026 ("Come up with 30 halloween decorations and props and blocks that would be good ideas to make it more seasonal", then "after that lets do the 30 I just said"). They ship five at a time, one pull request per batch, like the earlier Halloween batches. This record covers the first fifteen. Batch 1: the Jack-o'-Lantern String Lights, the Candy Bowl, the Coffin, the Haunted Portrait and the Fog Machine. Batch 2: the Luminaria, Floating Candles, the Skeleton Hand Sconce, Soul-Flame Carvings and Bat Bunting. Batch 3, the graveyard: the Wrought-Iron Cemetery Fence and Gate, the crypt set, the Grave Mound, the Mourning Angel and the Pop-Up Skeleton. The other 15 come in later batches and will be added here.
+Proposal issue: none; requested directly by the owner on 1 October 2026 ("Come up with 30 halloween decorations and props and blocks that would be good ideas to make it more seasonal", then "after that lets do the 30 I just said"). They ship five at a time, one pull request per batch, like the earlier Halloween batches. This record covers the first twenty. Batch 1: the Jack-o'-Lantern String Lights, the Candy Bowl, the Coffin, the Haunted Portrait and the Fog Machine. Batch 2: the Luminaria, Floating Candles, the Skeleton Hand Sconce, Soul-Flame Carvings and Bat Bunting. Batch 3, the graveyard: the Wrought-Iron Cemetery Fence and Gate, the crypt set, the Grave Mound, the Mourning Angel and the Pop-Up Skeleton. Batch 4, the witch's cottage: the Bubbling Cauldron, the Apothecary Shelf, the Crystal Ball, the Grimoire Stand and the Witch's Broom. The other 10 come in later batches and will be added here.
 Owner: @jimbozoomer-byte
-Target milestone and tier: Milestone 3 (first homestead) for the bowl, coffin and portrait (Discovery tier: terracotta, planks, wool, a chest, a painting); the string lights' hooks need iron; the Fog Machine needs the electric network (copper cable, a generator). Batch 2 is all Discovery tier (paper, sand, candles, feathers, torches, bones, string, dye); soul-flame carvings need a soul torch (soul sand or soil, from the Nether or a soul sand valley). Batch 3 is Discovery tier too (stone bricks, bone meal, calcite, dirt, rotten flesh, bones, planks, a slime ball), with iron for the fence and gate.
+Target milestone and tier: Milestone 3 (first homestead) for the bowl, coffin and portrait (Discovery tier: terracotta, planks, wool, a chest, a painting); the string lights' hooks need iron; the Fog Machine needs the electric network (copper cable, a generator). Batch 2 is all Discovery tier (paper, sand, candles, feathers, torches, bones, string, dye); soul-flame carvings need a soul torch (soul sand or soil, from the Nether or a soul sand valley). Batch 3 is Discovery tier too (stone bricks, bone meal, calcite, dirt, rotten flesh, bones, planks, a slime ball), with iron for the fence and gate. Batch 4 is Discovery tier as well (a cauldron and iron, glass bottles, glass, an amethyst shard and gold, a book and feathers, sticks and wheat); its brews take ingredients from the Overworld (spider eyes, fermented spider eyes, slime balls, amethyst shards), the Nether (nether wart, glowstone dust, blaze powder, magma cream) and the End (chorus fruit). Every colour can be made without leaving the Overworld (orange from the glowstone dust witches drop).
 Primary specialty and supported player role: building and play; supports groups (a candy bowl at your door for other players), builders (graveyards, haunted houses, yards) and engineers (powered lights and effects).
 
 ## Player experience
@@ -66,9 +66,24 @@ Primary specialty and supported player role: building and play; supports groups 
 ### Batch 3: the Pop-Up Skeleton
 29. **Pop-Up Skeleton** (planks, bones and a slime ball for its spring): a weathered crate on the lawn. Come within two and a half blocks and its lid bangs open and a skeleton springs out on its spring, arms flung up, rattling, for two seconds; then it rests five seconds. Sneaking players creep past; redstone holds it up, so it can be set off with a pressure plate or tripwire too.
 
+### Batch 4: the Bubbling Cauldron
+30. **Bubbling Cauldron** (a cauldron on two iron ingots for legs): a witch's iron pot on three feet. A **water bucket** fills it (the bucket comes back empty), then a **brew ingredient** turns the water to a glowing brew (light 7, one ingredient used): **green** from spider eyes, fermented spider eyes or slime balls; **purple** from nether wart, chorus fruit or amethyst shards; **orange** from glowstone dust, blaze powder or magma cream. Another colour's ingredient changes the brew; the same one does nothing. An **empty bucket** pours it out as a water bucket. Over a lit fire, campfire, magma block or lava (the Cooking Pot's heat sources) it bubbles, pops and steams, and a brew gives off witch's sparkles. Brews are only for show: they make no potions.
+
+### Batch 4: the Apothecary Shelf
+31. **Apothecary Shelf** (three glass bottles over three wooden slabs): two plank shelves on iron brackets, crowded with corked jars and bottles of green, purple, red and amber tinctures, a little skull and a candle stub. It hangs only on the side of a block, facing out, and falls if its wall goes. **Sneak-use it** with an empty hand to set the jars out another way (four arrangements).
+
+### Batch 4: the Crystal Ball
+32. **Crystal Ball** (glass round an amethyst shard on a gold ingot): a glass orb full of violet mist on a gilt claw stand, glowing softly (light 6). **Use it to gaze in:** the mist flares (light 12), it chimes, and it tells you one of ten fortunes (chosen by the server; a few are Halloween in-jokes, none is a real hint). Then it rests two seconds before it can be read again.
+
+### Batch 4: the Grimoire Stand
+33. **Grimoire Stand** (a book between two feathers, on a slab stand): an old spellbook lying open on a carved stand, facing whoever placed it. **Use it to turn the page:** four spreads (an *Almanac of Moons*, *A Treatise on Bats*, the *Brew of the Seven Shadows* and a *Charm for a Lantern Pumpkin*), each with its own drawings, named as it turns. Its runes give a faint glow (light 3), and at night motes rise from its pages.
+
+### Batch 4: the Witch's Broom
+34. **Witch's Broom** (wheat bound to two sticks): a twig besom on a crooked handle, standing on its bristles and leaning back, facing whoever placed it. It needs a solid floor and falls if the floor goes.
+
 ## Connections
-- Existing input producer: the electric network and its cables (hooks, fog machine), redstone, the trick-or-treat night count, Halloween candy and cookies (the bowl), vanilla terracotta, planks, red wool, chests, paintings, gold nuggets, spider eyes, iron, glowstone and dye. Batch 2: paper, sand, candles, feathers, torches, soul torches, bones, string and dye; flint and steel or fire charges to light; the hand-carved and giant pumpkins of pumpkin carving and the Halloween harvest; the String Light Hooks of batch 1. Batch 3: stone bricks, bone meal, iron bars and ingots, calcite, feathers, dirt, rotten flesh, bones, planks and slime balls; redstone (pressure plates, tripwires) to set off or hold up the scare props.
-- Existing output consumer: decoration, light (hooks, luminarias, floating candles, the sconce, soul-lit carvings), storage (the coffin), a respawn point (the coffin), a way to share treats with other players.
+- Existing input producer: the electric network and its cables (hooks, fog machine), redstone, the trick-or-treat night count, Halloween candy and cookies (the bowl), vanilla terracotta, planks, red wool, chests, paintings, gold nuggets, spider eyes, iron, glowstone and dye. Batch 2: paper, sand, candles, feathers, torches, soul torches, bones, string and dye; flint and steel or fire charges to light; the hand-carved and giant pumpkins of pumpkin carving and the Halloween harvest; the String Light Hooks of batch 1. Batch 3: stone bricks, bone meal, iron bars and ingots, calcite, feathers, dirt, rotten flesh, bones, planks and slime balls; redstone (pressure plates, tripwires) to set off or hold up the scare props. Batch 4: cauldrons, iron, glass bottles, glass, amethyst, gold, books, feathers, sticks, wheat, water and brew ingredients from the Overworld, the Nether and the End; fires, campfires, magma and lava (the Cooking Pot's heat sources) to make a cauldron bubble.
+- Existing output consumer: decoration, light (hooks, luminarias, floating candles, the sconce, soul-lit carvings, brews, the crystal ball, the grimoire), storage (the coffin), a respawn point (the coffin), a way to share treats with other players.
 - Technology connection: the hooks and the Fog Machine use the shared energy interface (`EnergyStorage.SIDED`), so any Jugcraft generator powers them, and the Fog Machine's recipe needs copper cable.
 - Magic connection: none yet; the portrait is a natural hook for later haunting.
 - Reachable entry path: everything is crafted from vanilla materials, plus copper cable (from the tin and bronze tier) for the Fog Machine.
@@ -84,6 +99,7 @@ Primary specialty and supported player role: building and play; supports groups 
 - Light: luminaria 10, floating candles 3 a candle (at most 12), the sconce 14 (a torch's), a soul-lit carving at most 10.
 - Breaking gives back exactly what was placed: one luminaria (with its colour), one floating candle per candle, one sconce, one bunting. None of them gives back its ingredients.
 - Batch 3 uses no energy. Six fences cost four iron bars (1.5 ingots) and two ingots; a gate two bars and four ingots. Four crypt stones cost four stone bricks and a bone meal; the stonecutter turns one crypt stone into one chiseled stone or one pillar (crafting makes two pillars from two). The scare props are purely cosmetic: they make no items, hurt nobody and summon nothing.
+- Batch 4 uses no energy. A Bubbling Cauldron costs a cauldron and two iron ingots (nine ingots in all); a shelf three glass bottles and three slabs; a crystal ball four glass, an amethyst shard and a gold ingot; a grimoire stand a book, two feathers and four slabs; a broom two sticks and a wheat. Each brew uses one ingredient; filling and pouring move one bucket of water each way, so water is never made or lost. Light: brew 7, crystal ball 6 (12 while gazing), grimoire 3.
 - No conversion loops; nothing here makes items or energy.
 
 ## Multiplayer and persistence
@@ -93,6 +109,7 @@ Primary specialty and supported player role: building and play; supports groups 
   - Who owns a bowl and who has had a treat tonight are recorded on the server, never claimed by clients.
 - Batch 2: lighting, snuffing, dyeing, adding candles, putting a torch in a carving and stringing bunting all go through vanilla's block and item use paths and are decided on the server.
 - Batch 3: the scare props are watched by the server alone, from where players really are; clients only see the block change. The fence, gate and door are vanilla blocks.
+- Batch 4: filling, brewing and pouring the cauldron, rearranging a shelf, gazing and turning pages go through vanilla's block use path (reach, spawn protection) and are decided on the server; the fortune is picked by the server and sent to the gazer alone. A gazing crystal ball ignores further gazes until it settles, so nobody can flood the area with its chimes.
 - **Client only.** The strands (and bunting), the portrait's pupils, the floating candles' bob and the fog are drawn by each client; the bob is worked out from the game time and the block's position, so every client sees the same. The pupils use only that client's camera, and the fog is only particles: it changes no block, hides nothing from the server and lets nobody through walls.
 - **Saved state.**
   - A hook keeps its strand and energy; a bowl its treats, owner and visitors (with the night); the coffin its slots (in its head half); the fog machine its energy.
@@ -105,6 +122,7 @@ Primary specialty and supported player role: building and play; supports groups 
   - A strand draws at most 3 segments per block of length plus its bulbs.
   - Batch 2: floating candles redraw only while in view and run no server ticks; luminarias, the sconce and soul-lit carvings tick only on clients for their particles, like vanilla torches and candles.
   - Batch 3: each Grave Mound and Pop-Up Skeleton looks every 10 ticks, at the level's player list (no entity search), and on neighbour changes for redstone. The angel's tears are client particles at night.
+  - Batch 4 has no block entities and no server ticks except the one scheduled tick that settles a gazing crystal ball. The cauldron's bubbles, the ball's motes and the grimoire's night motes are client particles, like vanilla's.
 - New IDs only:
   - blocks with items: `string_light_hook`, `candy_bowl`, `coffin`, `haunted_portrait`, `fog_machine`; batch 2: `luminaria`, `floating_candle`, `skeleton_hand_sconce`;
   - items: `jack_o_lantern_string_lights`; batch 2: `bat_bunting`;
@@ -112,10 +130,11 @@ Primary specialty and supported player role: building and play; supports groups 
   - particle type: `fog`.
   - Batch 2 adds the `soul` block state property to the four hand-carved pumpkins (default `false`).
   - Batch 3: blocks with items `cemetery_fence`, `cemetery_gate`, `crypt_stone`, `chiseled_crypt_stone`, `crypt_stone_pillar`, `crypt_door`, `grave_mound`, `mourning_angel`, `pop_up_skeleton`; block entity `scare_prop` (the mound's and skeleton's timers, saved as `down_at` and `ready_at`).
+  - Batch 4: blocks with items `bubbling_cauldron`, `apothecary_shelf`, `crystal_ball`, `grimoire_stand`, `witchs_broom`; item tags `jugcraft:brew/green`, `jugcraft:brew/purple`, `jugcraft:brew/orange` (the brew ingredients, so packs can add more). The cauldron's contents, the shelf's arrangement, the ball's gazing and the grimoire's page are block states.
 - **The `agriculture` switch** turns off their recipes; placed blocks stay and work. Soul torches still light carvings with it off (it is the carvings' own use, like the torch).
 
 ## Dependencies and assets
-No new dependencies. Every texture is drawn by code (`tools/decor_textures.py`, batch 2 `tools/decor2_textures.py`, batch 3 `tools/decor3_textures.py`, and the soul-lit carving icon in `tools/carving_textures.py`), and the models, loot, tags and recipes come from `tools/decor_data.py`, `tools/decor2_data.py` and `tools/decor3_data.py`. The door uses vanilla's door model shapes (`minecraft:block/door_*`, by reference) with its own textures. The strands and bunting and the pupils are drawn by the client (`StringLightsRenderer`, `HauntedPortraitRenderer`), the floating candles by `FloatingCandleRenderer`, the soul-lit carvings by `CarvingTextures` (blue colours), and the fog by `FogParticle`.
+No new dependencies. Every texture is drawn by code (`tools/decor_textures.py`, batch 2 `tools/decor2_textures.py`, batch 3 `tools/decor3_textures.py`, batch 4 `tools/decor4_textures.py`, and the soul-lit carving icon in `tools/carving_textures.py`), and the models, loot, tags and recipes come from `tools/decor_data.py`, `tools/decor2_data.py`, `tools/decor3_data.py` and `tools/decor4_data.py`. The door uses vanilla's door model shapes (`minecraft:block/door_*`, by reference) with its own textures. The strands and bunting and the pupils are drawn by the client (`StringLightsRenderer`, `HauntedPortraitRenderer`), the floating candles by `FloatingCandleRenderer`, the soul-lit carvings by `CarvingTextures` (blue colours), and the fog by `FogParticle`.
 
 ## Verification
 Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions):
@@ -219,11 +238,43 @@ Found by CI and fixed before this record:
 - the scare props wired to pressure plates or tripwires (the test powers them with a redstone block);
 - the Crypt Door on redstone (vanilla's door behaviour, not exercised).
 
+### Batch 4 verification
+
+Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on this branch after `main` (#70, #72) was merged down the stack:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the cauldron's brews and light, the shelf's arrangements, the crystal ball's lights, gaze time and fortune count, and the grimoire's spreads and light with Java, and checks every state has a blockstate entry, every fortune and spread has its text, and the brew tags hold their ingredients) | Pass, 487 IDs |
+| `./gradlew build` on `57c58e4` (later commits only change docs and screenshots) | Pass |
+| Game tests on the headless server, same commit: 249 in total, 6 of them new here (`Decor4GameTests`) | **All 249 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `57c58e4`; no model, texture or particle errors in the log |
+
+The 6 new game tests (`Decor4GameTests`):
+1. a brew ingredient does nothing in an empty cauldron; a water bucket fills it and comes back empty; a spider eye makes a green brew that glows (light 7, one eye used); the same again does nothing; nether wart turns it purple; an empty bucket pours it out as a water bucket and it goes dark; a lit campfire underneath heats it, an unlit one doesn't;
+2. the Apothecary Shelf won't stand on a floor, hangs on a wall facing out, turns through its four arrangements and back on sneak-use, and falls (dropping once) when its wall is broken;
+3. the Crystal Ball glows (light 6); gazing flares it (light 12); while it rests a second gaze does nothing; it settles after its time;
+4. the Grimoire Stand faces whoever placed it, glows (light 3), and each use turns to another spread, coming round to the first after four;
+5. the Witch's Broom stands on a floor facing whoever placed it, won't stand in the air, and falls (dropping once) when its floor goes;
+6. the five recipes and five loot tables load, and the brew tags make a spider eye green, glowstone dust orange and dirt nothing.
+
+The client game test (`Decor4ClientGameTests`) builds a witch's cottage on a plank floor before a dark wall: four Apothecary Shelves, each set out its own way; Bubbling Cauldrons of green brew (over a campfire), purple and orange brew and water; two Crystal Balls on stumps, one being gazed into; the Grimoire Stand open at its pumpkin charm; and the broom by the wall. It photographs them by day and at midnight: the brews and the gazing ball glow at night, steam and bubbles rise from the heated cauldron, and motes swirl round the gazing ball.
+
+Found by CI and fixed before this record:
+- The broom test first tried its "floorless" spot on top of the test's own stone floor, where the broom rightly stood; the spot is now a block higher.
+- The first cottage screenshot hid the broom behind a stump; it now stands in the open by the wall.
+
+**Not run (batch 4):**
+- a person playing it in a client;
+- a dedicated server with two players (one gazing or brewing while the other watches);
+- a cauldron over fire, magma or lava in a client (the test checks the heat rule; the screenshots show a campfire).
+
 ## World and event applicability
 - Decorations work all year, anywhere. The candy bowl uses the trick-or-treat night count but is not limited to the Halloween event.
 - The coffin respects each dimension's bed rules.
 - Batch 2's decorations work anywhere; nothing about them depends on the Halloween event.
 - Batch 3 too: the scare props go off any time of day, and the angel weeps every night, event or not.
+- Batch 4 works anywhere too. The cauldron bubbles over heat in any dimension; the grimoire's night motes follow the Overworld's clock (as the angel's tears do).
 - Fog is cosmetic and capped per client.
 
 ## Rollout and open questions
@@ -234,4 +285,6 @@ Found by CI and fixed before this record:
 - A dyed luminaria's item stacks only with bags of the same colour.
 - The scare props react to players only, not to mobs or villagers; they count spectators and sneaking players as nobody.
 - The Cemetery Gate makes a fence gate's wooden creak (vanilla gates take their sounds from a wood type).
-- The other 15 decorations follow in later batches.
+- Brews are decoration only: they can't be bottled or drunk, and a cauldron of brew doesn't fill bottles like vanilla's.
+- Breaking a Bubbling Cauldron loses its water or brew, like breaking a vanilla cauldron.
+- The other 10 decorations follow in later batches.

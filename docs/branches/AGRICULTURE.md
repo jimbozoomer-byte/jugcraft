@@ -1,6 +1,6 @@
 # Agriculture branch
 
-Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife), the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations), the pumpkin regatta and trick-or-treating, the Halloween festivities (the carving contest, costumed mobs, the Halloween Peddler, spooky decorations and sweets), Halloween nights (will-o'-wisps, the Pumpkin Chunkin' Trebuchet, a bigger Candy Bag, the Harvest Moon and the Headless Horseman), and the first fifteen Halloween decorations (string lights, the Candy Bowl, the Coffin, the Haunted Portrait, the Fog Machine, luminarias, floating candles, the Skeleton Hand Sconce, soul-flame carvings, bat bunting, and the graveyard: the cemetery fence and gate, the crypt set, the Grave Mound, the Mourning Angel and the Pop-Up Skeleton).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md), [../features/halloween-harvest.md](../features/halloween-harvest.md) , [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md) [../features/halloween-festivities.md](../features/halloween-festivities.md) [../features/halloween-nights.md](../features/halloween-nights.md) and [../features/halloween-decorations.md](../features/halloween-decorations.md) for the implemented slices and their test evidence.
+Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife), the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations), the pumpkin regatta and trick-or-treating, the Halloween festivities (the carving contest, costumed mobs, the Halloween Peddler, spooky decorations and sweets), Halloween nights (will-o'-wisps, the Pumpkin Chunkin' Trebuchet, a bigger Candy Bag, the Harvest Moon and the Headless Horseman), and the first twenty Halloween decorations (string lights, the Candy Bowl, the Coffin, the Haunted Portrait, the Fog Machine, luminarias, floating candles, the Skeleton Hand Sconce, soul-flame carvings, bat bunting, the graveyard: the cemetery fence and gate, the crypt set, the Grave Mound, the Mourning Angel and the Pop-Up Skeleton, and the witch's cottage: the Bubbling Cauldron, the Apothecary Shelf, the Crystal Ball, the Grimoire Stand and the Witch's Broom).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md), [../features/halloween-harvest.md](../features/halloween-harvest.md) , [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md) [../features/halloween-festivities.md](../features/halloween-festivities.md) [../features/halloween-nights.md](../features/halloween-nights.md) and [../features/halloween-decorations.md](../features/halloween-decorations.md) for the implemented slices and their test evidence.
 
 Agriculture is Jugcraft's third starting branch, alongside technology and magic ([DESIGN.md](../DESIGN.md)). A farmer can begin on day one with a hoe and whatever grows nearby, and never needs a machine or a spell. Industrial farming (powered harvesters, planters, sprinklers, crop processors) comes later and belongs to the engineering branch; see [Boundaries](#boundaries).
 
@@ -463,6 +463,24 @@ The graveyard:
 - **Grave Mound:** a zombie's hand claws up out of the earth as you walk past (sneak to creep by).
 - **Mourning Angel:** a marble statue with its head in its hands that weeps at night.
 - **Pop-Up Skeleton:** a crate on the lawn whose skeleton springs out at passers-by.
+
+The witch's cottage:
+
+| **The witch's cottage** by day | **At midnight:** the brews and the gazing crystal ball glow |
+| --- | --- |
+| ![The witch's cottage](../images/ingame_witchs_cottage.jpg) | ![The witch's cottage at night](../images/ingame_witchs_cottage_night.jpg) |
+| **Bubbling Cauldrons:** a green brew over a campfire, purple, orange and water | **Apothecary Shelves,** each set out its own way, and the broom |
+| ![Bubbling Cauldrons](../images/ingame_bubbling_cauldrons.jpg) | ![Apothecary Shelves](../images/ingame_apothecary_shelves.jpg) |
+| **Crystal Balls** (one being gazed into) and the **Grimoire Stand** | **The cauldrons at night** |
+| ![Crystal balls and grimoire](../images/ingame_crystal_balls_and_grimoire.jpg) | ![Bubbling Cauldrons at night](../images/ingame_bubbling_cauldrons_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor4ClientGameTests`, software rendering, small previews).*
+
+- **Bubbling Cauldron:** water from a bucket, then a spider eye, nether wart or glowstone makes a glowing green, purple or orange brew that bubbles over a fire.
+- **Apothecary Shelf:** wall shelves of jars and tinctures; sneak-use to set them out another way.
+- **Crystal Ball:** gaze into its violet mist for one of ten fortunes.
+- **Grimoire Stand:** an open spellbook; use it to turn through four spreads.
+- **Witch's Broom:** a twig besom leaning on its bristles.
 
 ## Crop roster: what comes next (planned)
 

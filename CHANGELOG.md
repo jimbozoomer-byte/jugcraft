@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: Halloween decorations, batch 4, the witch's cottage (pull request pending, stacked on batch 3)
+- **Bubbling Cauldron:** fill it with a water bucket, then a spider eye, nether wart or glowstone (among others) turns it into a glowing green, purple or orange brew; over a fire it bubbles and steams. An empty bucket pours it out.
+- **Apothecary Shelf:** wall shelves of corked jars, tinctures, a little skull and a candle; sneak-use to set them out four ways.
+- **Crystal Ball:** a violet-misted orb on a gilt stand; gaze into it and it flares and tells you one of ten fortunes.
+- **Grimoire Stand:** an open spellbook on a carved stand; use it to turn through four spreads. Its pages glow faintly and give off motes at night.
+- **Witch's Broom:** a twig besom leaning on its bristles.
+- The checker compares the numbers, fortunes, spreads and brew tags with Java and checks every state has a model. New server game tests and a client test with screenshots.
+
 ### Agriculture: Halloween decorations, batch 3, the graveyard (pull request pending, stacked on batch 2)
 - **Wrought-Iron Cemetery Fence and Gate:** spear-topped iron pickets on finialed posts; a real fence and fence gate (vanilla's fence and gate blocks and tags).
 - **Crypt set:** Crypt Stone, Chiseled Crypt Stone (a carved skull), Crypt Stone Pillars (also from the stonecutter) and a stone Crypt Door that opens by hand.
