@@ -1,6 +1,6 @@
 # Balance
 
-Energy is in **JE** (Jugcraft Energy) and rotation in **KE**, both per tick (20 ticks a second). The source of truth for these numbers is `tools/machines.py` and the Java constants it mirrors. This page was last reviewed on 1 October 2026 (PR #45).
+Energy is in **JE** (Jugcraft Energy) and rotation in **KE**, both per tick (20 ticks a second). The source of truth for these numbers is `tools/machines.py` and the Java constants it mirrors. This page was last reviewed on 1 October 2026 (PR #46).
 
 ## Generators
 
