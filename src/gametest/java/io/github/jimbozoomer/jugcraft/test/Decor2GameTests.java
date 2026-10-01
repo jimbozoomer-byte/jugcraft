@@ -328,9 +328,15 @@ public class Decor2GameTests {
 		giant.setFace(Direction.SOUTH, CarvingFace.scale(CarvingTemplates.ALL.get(0).face(), GiantPumpkinBlockEntity.FACE_SIZE), null);
 		int glow = giant.glow();
 
-		BlockPos side = helper.relativePos(giant.getBlockPos()).offset(1, 1, 2);
-		ServerPlayer player = player(helper, side.south(2), new ItemStack(Items.SOUL_TORCH));
-		use(helper, player, side, Direction.SOUTH);
+		// The middle of its south side, worked out from the master block (absolute positions throughout).
+		BlockPos side = giant.getBlockPos().offset(1, 1, 2);
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL);
+		player.setPos(side.getX() + 0.5, side.getY(), side.getZ() + 2.5);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.SOUL_TORCH));
+		BlockHitResult face = new BlockHitResult(Vec3.atCenterOf(side).relative(Direction.SOUTH, 0.5), Direction.SOUTH, side, false);
+		helper.assertTrue(level.getBlockState(side).is(block("giant_pumpkin")), "The south side is part of the pumpkin: " + level.getBlockState(side));
+		player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND, face);
 		int expected = Math.min(glow, CarvedPumpkinBlock.SOUL_LIGHT);
 		helper.assertTrue(giant.lit() && giant.soul(), "A soul torch lights it with a soul flame");
 		for (BlockPos part : BlockPos.betweenClosed(giant.getBlockPos(), giant.getBlockPos().offset(2, 2, 2))) {
@@ -344,7 +350,7 @@ public class Decor2GameTests {
 		helper.assertTrue(copy.lit() && copy.soul(), "Its soul flame is saved");
 
 		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-		use(helper, player, side, Direction.SOUTH);
+		player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND, face);
 		helper.assertTrue(!giant.lit() && !giant.soul() && player.getInventory().countItem(Items.SOUL_TORCH) == 1,
 				"An empty hand gives the soul torch back");
 		helper.assertTrue(level.getBlockState(giant.getBlockPos()).getLightEmission() == 0, "and it goes dark");
