@@ -48,6 +48,12 @@ Salt, sulfur, phosphate and bauxite have been in the world since the first ores,
 - **No furnace smelts it**, not even the arc furnace: titanium is made with chlorine (commit 27). The crusher still doubles the ore. The prospector reports it.
 - A new feature switch, `titanium.enabled`.
 
+### The Kroll process (batch 6, commit 27)
+- **1 raw titanium + 1 coal coke + 250 mB of chlorine → 1 titanium sponge** in the chemical reactor, 160 ticks. Chlorine's first real use (it is used up).
+- The **arc furnace** melts a titanium sponge into a titanium ingot (160 ticks). Nothing else turns raw titanium into metal.
+- Each titanium costs a quarter bucket of chlorine: a bucket of brine in the electrolytic cell (51,200 JE) makes enough for one.
+- The metal audit counts a sponge as one ingot of titanium.
+
 ### Advancements
 Split Decision (electrolytic cell), Oil of Vitriol (sulfuric acid), Green Revolution (fertilizer), The Bayer Way (alumina) and Clean Burn (fuel cell), under Forged in Coke.
 
@@ -73,10 +79,10 @@ No new dependencies. Textures and models are original (`tools/petro_textures.py`
 
 ## Verification
 - `tools/check_mod_data.py` audits the new fluids, gases and recipes like the oil line's.
-- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` `bayerRouteMakesAluminum`, `reactorMakesFertilizer`, `fertilizerGrowsTheCropsAround` and `fuelCellBurnsHydrogen` (PetroGameTests).
+- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` `bayerRouteMakesAluminum`, `reactorMakesFertilizer`, `fertilizerGrowsTheCropsAround` `fuelCellBurnsHydrogen` and `reactorMakesTitaniumSponge` (PetroGameTests).
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.
 
 ## Rollout and open questions
-- Chlorine has no consumer yet; PVC, bleach and titanium refining are candidates for a later batch.
+- Chlorine's consumer is the Kroll process (titanium); PVC and bleach remain candidates.

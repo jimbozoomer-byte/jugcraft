@@ -227,7 +227,25 @@ def fertilizer():
     return img
 
 
+def titanium_sponge():
+    """Titanium sponge: a porous, crumbly blue-grey lump full of dark pits."""
+    rng = random.Random(967)
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            d = ((x - 7.5) / 6.5) ** 2 + ((y - 8.5) / 5.5) ** 2 + rng.uniform(-0.12, 0.12)
+            if d <= 1:
+                c = (150, 156, 168) if rng.random() < 0.55 else (118, 124, 138)
+                if rng.random() < 0.18:
+                    c = (52, 56, 66)
+                if d < 0.3 and x < 8 and y < 8:
+                    c = (196, 202, 212)
+                img.putpixel((x, y), c + (255,))
+    return img
+
+
 def draw_all(save, save_animation):
+    save(titanium_sponge(), "item", "titanium_sponge")
     save(fertilizer(), "item", "fertilizer")
     save(alumina(), "item", "alumina")
     save(asphalt(), "block", "asphalt")

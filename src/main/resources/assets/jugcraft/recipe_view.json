@@ -531,6 +531,20 @@
         {
           "in": [
             [
+              "jugcraft:titanium_sponge",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:titanium_ingot",
+            1
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
               "jugcraft:lepidolite",
               1
             ]
@@ -3085,6 +3099,32 @@
             ]
           ],
           "ticks": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:raw_titanium",
+              1
+            ],
+            [
+              "jugcraft:coke",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:chlorine",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:titanium_sponge",
+              1
+            ]
+          ],
+          "ticks": 160
         }
       ]
     },

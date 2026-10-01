@@ -515,6 +515,9 @@ ARC_FURNACE = [
      "features": [FEATURE, "nickel"]},
     {"input": "jugcraft:raw_uranium", "output": "jugcraft:uranium_ingot", "count": 1, "ticks": 120,
      "features": [FEATURE, "uranium"]},
+    # Kroll-process titanium sponge (chemical reactor) melts into ingots; raw titanium itself never does.
+    {"input": "jugcraft:titanium_sponge", "output": "jugcraft:titanium_ingot", "count": 1, "ticks": 160,
+     "features": [FEATURE, "titanium"]},
     {"input": "jugcraft:lepidolite", "output": "jugcraft:lithium_carbonate", "count": 2, "ticks": 160,
      "features": [FEATURE, "lithium"]},
     {"input": "jugcraft:monazite", "output": "jugcraft:rare_earth_oxide", "count": 2, "ticks": 200,

@@ -73,6 +73,8 @@ ITEMS = {
     "alumina": "Alumina",
     # Superphosphate fertilizer (batch 5): ripens crops in a 5x5 area (chemistry/FertilizerItem).
     "fertilizer": "Fertilizer",
+    # The Kroll process (batch 6): the arc furnace melts the sponge into titanium ingots.
+    "titanium_sponge": "Titanium Sponge",
 }
 
 
@@ -234,6 +236,11 @@ FLUID_RECIPES = {
         # Superphosphate: phosphate rock treated with sulfuric acid becomes a soluble fertilizer.
         {"name": "fertilizer", "items": [("jugcraft:phosphate", 2)], "fluids": [("jugcraft:sulfuric_acid", 250)],
          "results": [("jugcraft:fertilizer", 4)], "ticks": 80, "features": ["phosphate", "sulfur"]},
+        # The Kroll process, in one step: rutile chlorinated over hot coke to titanium tetrachloride, then reduced to
+        # a porous titanium sponge. The chlorine is used up.
+        {"name": "titanium_sponge", "items": [("jugcraft:raw_titanium", 1), ("jugcraft:coke", 1)],
+         "fluids": [("jugcraft:chlorine", 250)], "results": [("jugcraft:titanium_sponge", 1)], "ticks": 160,
+         "features": ["titanium", "salt"]},
     ],
     # Flowback water settles and is filtered: most of it comes back as clean water; the brine leaves salt. A quarter
     # is lost (sludge), so fracking water is never free.

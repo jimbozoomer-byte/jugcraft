@@ -549,4 +549,18 @@ public class PetroGameTests {
 			helper.succeed();
 		});
 	}
+
+	/** The Kroll process: raw titanium, coke and 250 mB of chlorine in the chemical reactor make a titanium sponge. */
+	@GameTest(maxTicks = 300)
+	public void reactorMakesTitaniumSponge(GameTestHelper helper) {
+		MachineBlockEntity reactor = place(helper, MachineKind.CHEMICAL_REACTOR, new BlockPos(4, 1, 2));
+		reactor.tanks().input(0).fill(PetroFluids.CHLORINE.fluid(), 250);
+		reactor.setItem(0, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("raw_titanium"))));
+		reactor.setItem(1, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("coke"))));
+		helper.succeedWhen(() -> {
+			ItemStack out = reactor.getItem(reactor.kind().outputSlot());
+			helper.assertTrue(out.is(PetroItems.TITANIUM_SPONGE), "Sponge: " + out);
+			helper.assertTrue(reactor.tanks().input(0).isResourceBlank(), "Chlorine left: " + reactor.tanks().input(0).millibuckets());
+		});
+	}
 }

@@ -2297,6 +2297,14 @@
           ]
         },
         {
+          "title": "Titanium",
+          "icon": "jugcraft:titanium_ingot",
+          "text": [
+            "No furnace can smelt titanium. Chlorinate it instead: a raw titanium, a coal coke and 250 mB of chlorine in the chemical reactor make a titanium sponge.",
+            "The arc furnace melts the sponge into a titanium ingot. Titanium plates go into the most advanced machines."
+          ]
+        },
+        {
           "title": "Fertilizer",
           "icon": "jugcraft:fertilizer",
           "text": [

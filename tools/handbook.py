@@ -388,6 +388,11 @@ def build():
                 "seconds.",
                 "That is two ingots from each bauxite, twice what the arc furnace gets and far more than the blast "
                 "furnace's nugget."]},
+            {"title": "Titanium", "icon": f"{MOD}:titanium_ingot", "text": [
+                "No furnace can smelt titanium. Chlorinate it instead: a raw titanium, a coal coke and 250 mB of "
+                "chlorine in the chemical reactor make a titanium sponge.",
+                "The arc furnace melts the sponge into a titanium ingot. Titanium plates go into the most advanced "
+                "machines."]},
             {"title": "Fertilizer", "icon": f"{MOD}:fertilizer", "text": [
                 "Two phosphate and 250 mB of sulfuric acid in the chemical reactor make four fertilizer.",
                 "Use one on the ground or a crop: every crop in the 5x5 area around it (a block up or down too) gets "
