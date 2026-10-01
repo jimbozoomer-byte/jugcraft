@@ -1910,6 +1910,29 @@
           }
         },
         {
+          "title": "Vacuum Distillation Unit",
+          "icon": "jugcraft:vacuum_distillation_unit",
+          "text": [
+            "Two by two and three blocks tall. Boils heavy fuel oil under vacuum: each bucket gives 400 mB of lubricant and two asphalt binder, every 6 seconds. Lubricant keeps the gas turbine running; asphalt binder makes roads.",
+            "Uses 96 JE/t while working. Holds 30,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:heavy_pump",
+              "jugcraft:steel_plate",
+              "jugcraft:fluid_tank",
+              "jugcraft:advanced_circuit",
+              "jugcraft:fluid_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:vacuum_distillation_unit",
+            "count": 1
+          }
+        },
+        {
           "title": "Cracking Catalyst",
           "icon": "jugcraft:cracking_catalyst",
           "text": [

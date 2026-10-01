@@ -57,7 +57,9 @@ public enum MachineKind implements StringRepresentable {
 	// A 2x2 column seven blocks tall: crude oil in, four fractions out, each drawn off at its own height.
 	DISTILLATION_TOWER("distillation_tower", 40_000, 512, 0, 128, 0),
 	// A 2x2x4 fluid catalytic cracker: heavy fuel oil, water (steam) and catalyst in; diesel, naphtha and gas out.
-	CATALYTIC_CRACKER("catalytic_cracker", 40_000, 512, 0, 160, 1);
+	CATALYTIC_CRACKER("catalytic_cracker", 40_000, 512, 0, 160, 1),
+	// A 2x2x3 vacuum distillation unit: heavy fuel oil in; lubricant and asphalt binder out.
+	VACUUM_DISTILLATION_UNIT("vacuum_distillation_unit", 30_000, 512, 0, 96, 1);
 
 	/** JE produced per tick while the coal generator burns. */
 	public static final int GENERATION_PER_TICK = 32;
@@ -128,6 +130,8 @@ public enum MachineKind implements StringRepresentable {
 	/** Catalytic cracker: each tank's capacity, and the layer each product is drawn off at (diesel, naphtha, gas). */
 	public static final int CRACKER_TANK = 8_000;
 	private static final int[] CRACKER_DRAW_OFFS = {0, 2, 3};
+	/** Vacuum distillation unit: its heavy fuel oil tank and its lubricant tank. */
+	public static final int VACUUM_TANK = 8_000;
 	/** Ticks the electric furnace needs per item (the vanilla furnace needs 200). */
 	public static final int ELECTRIC_FURNACE_TICKS = 100;
 
@@ -193,6 +197,7 @@ public enum MachineKind implements StringRepresentable {
 			case OIL_SAND_EXTRACTOR -> "oil_sand_extraction";
 			case DISTILLATION_TOWER -> "distillation";
 			case CATALYTIC_CRACKER -> "catalytic_cracking";
+			case VACUUM_DISTILLATION_UNIT -> "vacuum_distillation";
 			default -> null;
 		};
 	}
@@ -219,6 +224,7 @@ public enum MachineKind implements StringRepresentable {
 					List.of(TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK), 0, 0);
 			case CATALYTIC_CRACKER -> new FluidMachineSpec(List.of(CRACKER_TANK, CRACKER_TANK),
 					List.of(CRACKER_TANK, CRACKER_TANK, CRACKER_TANK), 1, 0);
+			case VACUUM_DISTILLATION_UNIT -> new FluidMachineSpec(List.of(VACUUM_TANK), List.of(VACUUM_TANK), 0, 1);
 			default -> null;
 		};
 	}
@@ -300,6 +306,7 @@ public enum MachineKind implements StringRepresentable {
 			case OIL_SAND_EXTRACTOR -> Footprint.cuboid(2, 2, 2);
 			case DISTILLATION_TOWER -> Footprint.cuboid(2, 7, 2);
 			case CATALYTIC_CRACKER -> Footprint.cuboid(2, 4, 2);
+			case VACUUM_DISTILLATION_UNIT -> Footprint.cuboid(2, 3, 2);
 			default -> Footprint.SINGLE;
 		};
 	}

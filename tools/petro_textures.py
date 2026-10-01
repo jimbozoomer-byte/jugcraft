@@ -115,8 +115,26 @@ def catalyst():
     return img
 
 
+def asphalt_binder():
+    """Asphalt binder: a glossy black lump of tar with a dull sheen and a few stuck grains."""
+    rng = random.Random(961)
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            d = ((x - 8) / 6.5) ** 2 + ((y - 9) / 5) ** 2
+            if d <= 1:
+                c = (36, 32, 30) if rng.random() < 0.7 else (22, 20, 19)
+                if d < 0.35 and x < 8 and y < 9:
+                    c = (78, 74, 70)
+                if rng.random() < 0.05:
+                    c = (120, 112, 98)
+                img.putpixel((x, y), c + (255,))
+    return img
+
+
 def draw_all(save, save_animation):
     save(catalyst(), "item", "cracking_catalyst")
+    save(asphalt_binder(), "item", "asphalt_binder")
     for index, (fluid, info) in enumerate(FLUIDS.items()):
         save_animation(still(info["colors"], 800 + index), f"{fluid}_still", frametime=3)
         save_animation(flowing(info["colors"], 850 + index), f"{fluid}_flow", frametime=2)

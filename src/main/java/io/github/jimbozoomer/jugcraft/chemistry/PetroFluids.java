@@ -97,6 +97,8 @@ public final class PetroFluids {
 	public static Entry NAPHTHA;
 	public static Entry DIESEL;
 	public static Entry HEAVY_FUEL_OIL;
+	/** Vacuum distillation of heavy fuel oil: lubricant (machine upkeep). */
+	public static Entry LUBRICANT;
 	/** The lightest fraction: refinery gas (fuel gas, and later plastics). */
 	public static Gas REFINERY_GAS;
 
@@ -132,6 +134,7 @@ public final class PetroFluids {
 		NAPHTHA = fluid("naphtha", 5, 4, 1, 0xFFBEAA64, MapColor.COLOR_YELLOW);
 		DIESEL = fluid("diesel", 8, 3, 1, 0xFFAA6E19, MapColor.COLOR_ORANGE);
 		HEAVY_FUEL_OIL = fluid("heavy_fuel_oil", 30, 2, 2, 0xFF261E12, MapColor.COLOR_BLACK);
+		LUBRICANT = fluid("lubricant", 25, 2, 2, 0xFF8C7D28, MapColor.COLOR_YELLOW);
 		REFINERY_GAS = gas("refinery_gas", 0xFFB8C4D0);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {

@@ -259,4 +259,17 @@ public class PetroGameTests {
 			helper.assertTrue(cracker.tanks().input(1).millibuckets() == 750, "Water left: " + cracker.tanks().input(1).millibuckets());
 		});
 	}
+
+	/** The vacuum distillation unit turns a bucket of heavy fuel oil into 400 mB of lubricant and two asphalt binder. */
+	@GameTest(maxTicks = 300)
+	public void vacuumUnitMakesLubricantAndAsphalt(GameTestHelper helper) {
+		MachineBlockEntity unit = place(helper, MachineKind.VACUUM_DISTILLATION_UNIT, new BlockPos(4, 1, 2));
+		unit.tanks().input(0).fill(PetroFluids.HEAVY_FUEL_OIL.source(), 1000);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(unit.tanks().output(0).has(PetroFluids.LUBRICANT.source(), 400), "No lubricant");
+			helper.assertTrue(unit.getItem(0).is(PetroItems.ASPHALT_BINDER) && unit.getItem(0).getCount() == 2,
+					"The unit holds " + unit.getItem(0));
+			helper.assertTrue(unit.tanks().input(0).isResourceBlank(), "Heavy fuel oil left over");
+		});
+	}
 }

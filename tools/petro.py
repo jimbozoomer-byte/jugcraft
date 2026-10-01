@@ -22,6 +22,9 @@ FLUIDS = {
     "heavy_fuel_oil": {"display": "Heavy Fuel Oil", "feature": "crude_oil",
                        "colors": [(20, 16, 10), (38, 30, 18), (58, 46, 28), (96, 84, 62)],
                        "tick_delay": 30, "slope": 2, "drop_off": 2},
+    "lubricant": {"display": "Lubricant", "feature": "crude_oil",
+                  "colors": [(90, 80, 20), (140, 125, 40), (180, 165, 70), (222, 212, 134)],
+                  "tick_delay": 25, "slope": 2, "drop_off": 2},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -34,6 +37,8 @@ GASES = {
 ITEMS = {
     # Bauxite (alumina) and sand (silica) with a little nickel: used up, one per bucket of heavy fuel oil cracked.
     "cracking_catalyst": "Cracking Catalyst",
+    # The residue of vacuum distillation; asphalt roads come in batch 4.
+    "asphalt_binder": "Asphalt Binder",
 }
 
 
@@ -69,6 +74,9 @@ FLUID_MACHINES = {
     # Heavy fuel oil + water (steam) + catalyst -> diesel (base), naphtha (layer 2), refinery gas (top). 160 JE/t.
     "catalytic_cracker": {"inputs": [8_000, 8_000], "outputs": [8_000, 8_000, 8_000], "item_inputs": 1,
                           "item_outputs": 0, "recipe_type": "catalytic_cracking"},
+    # Heavy fuel oil -> lubricant + asphalt binder. 96 JE/t.
+    "vacuum_distillation_unit": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 0, "item_outputs": 1,
+                                 "recipe_type": "vacuum_distillation"},
 }
 
 # Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],
@@ -96,6 +104,12 @@ FLUID_RECIPES = {
          "fluids": [("jugcraft:heavy_fuel_oil", 1000), ("minecraft:water", 250)],
          "fluid_results": [("jugcraft:diesel", 500), ("jugcraft:naphtha", 300), ("jugcraft:refinery_gas", 200)],
          "source": 0, "ticks": 160, "features": ["crude_oil"]},
+    ],
+    # The heaviest part of heavy fuel oil, boiled under vacuum: lubricant, and a residue of asphalt binder.
+    "vacuum_distillation_unit": [
+        {"name": "heavy_fuel_oil", "fluids": [("jugcraft:heavy_fuel_oil", 1000)],
+         "fluid_results": [("jugcraft:lubricant", 400)], "results": [("jugcraft:asphalt_binder", 2)], "ticks": 120,
+         "features": ["crude_oil"]},
     ],
 }
 

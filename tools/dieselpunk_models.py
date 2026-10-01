@@ -368,7 +368,39 @@ def catalytic_cracker():
     return m
 
 
+def vacuum_distillation_unit():
+    """A two by two vacuum distillation unit three blocks tall: a squat olive column, wide at the base and stepping in
+    towards the top, under a nest of chrome steam ejectors and a condenser drum that keep it under vacuum. A fired
+    heater with a glowing window, gauge and lamp stands at its foot, a residue chute drops asphalt binder at the back,
+    and a chrome draw-off with a red valve gives lubricant out of the front."""
+    m = [box((-16, 0, 0), (16, 2, 32), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    m.append(box((1, 2, 0.5), (15, 14, 9), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(box((4, 3, 0.25), (12, 9, 0.5), {"*": GUNMETAL, "north": "sp_window!"}))
+    m.append(dial("north", (5, 11.5, 0.25), 2.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 11.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    # The column: wide below, stepping in.
+    m += cyl("y", -2, 18, 12, 2, 18, OLIVE, GUNMETAL)
+    m += cyl("y", -2, 18, 12.4, 10, 11, HAZARD)
+    m += cyl("y", -2, 18, 10, 18, 30, OLIVE, GUNMETAL)
+    m += cyl("y", -2, 18, 10.4, 24, 25, GUNMETAL)
+    m += cyl("y", -2, 18, 7, 30, 38, OLIVE, GUNMETAL)
+    m += cyl("y", -2, 18, 4, 38, 41, CHROME)
+    # Steam ejectors: three chrome nozzles on top, feeding a condenser drum lying across the back.
+    for x in (-7, -2, 3):
+        m.append(box((x - 0.75, 41, 17), (x + 0.75, 46, 19), CHROME))
+        m.append(box((x - 1.25, 44, 19), (x + 1.25, 45.5, 26), CHROME))
+    m += cyl("x", 44, 27, 3, -12, 8, GUNMETAL, CHROME)
+    # Residue chute at the back: asphalt binder drops out here.
+    m.append(box((-6, 2, 29), (2, 8, 32), {"*": GUNMETAL, "south": "sp_hopper_inside"}))
+    # Lubricant draw-off on the front with its red valve.
+    m.append(box((-12, 7, 0.5), (-8, 11, 6.5), CHROME))
+    m.append(box((-13, 6, 0), (-7, 12, 0.5), GUNMETAL))
+    m += wheel("z", -10, 13.5, 1.5, 2.5, 3.25, "sp_red_iron", CHROME, spokes=False)
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
           "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump(),
-          "distillation_tower": distillation_tower(), "catalytic_cracker": catalytic_cracker()}
+          "distillation_tower": distillation_tower(), "catalytic_cracker": catalytic_cracker(),
+          "vacuum_distillation_unit": vacuum_distillation_unit()}

@@ -49,6 +49,8 @@ MACHINES = {
     "distillation_tower": {"display": "Distillation Tower", "lit": True},
     # A 2x2x4 fluid catalytic cracker: heavy fuel oil + steam + catalyst -> diesel, naphtha, refinery gas.
     "catalytic_cracker": {"display": "Catalytic Cracker", "lit": True},
+    # A 2x2x3 vacuum column: heavy fuel oil -> lubricant + asphalt binder.
+    "vacuum_distillation_unit": {"display": "Vacuum Distillation Unit", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
 }
 
@@ -193,6 +195,8 @@ STATS = {
     "distillation_tower": {"capacity": 40_000, "input_per_tick": 512, "use_per_tick": 128, "tank": 16_000},
     # 2x2x4. 160 JE/t; a bucket of heavy fuel oil per 160 ticks.
     "catalytic_cracker": {"capacity": 40_000, "input_per_tick": 512, "use_per_tick": 160, "tank": 8_000},
+    # 2x2x3. 96 JE/t; a bucket of heavy fuel oil per 120 ticks.
+    "vacuum_distillation_unit": {"capacity": 30_000, "input_per_tick": 512, "use_per_tick": 96, "tank": 8_000},
 }
 
 # Fuel for the coal generator: burn ticks per item (coal matches the vanilla furnace's 1600).
@@ -365,6 +369,9 @@ CRAFTING = {
     "catalytic_cracker": (["PCP", "TAT", "PMP"], {"P": "#c:plates/steel", "C": "jugcraft:advanced_circuit",
                                                   "T": "jugcraft:steel_tank", "A": "jugcraft:arc_furnace_casing",
                                                   "M": "jugcraft:machine_casing"}, 1),
+    "vacuum_distillation_unit": (["PEP", "TCT", "PMP"], {"P": "#c:plates/steel", "E": "jugcraft:heavy_pump",
+                                                         "T": "jugcraft:fluid_tank", "C": "jugcraft:advanced_circuit",
+                                                         "M": "jugcraft:machine_casing"}, 1),
     "cracking_catalyst": (["BSB", "SNS", "BSB"], {"B": "jugcraft:bauxite", "S": "minecraft:sand",
                                                   "N": "#c:ingots/nickel"}, 4),
     "charging_station": (["SLS", "WAW", "SBS"], {"S": "#c:plates/steel", "L": "minecraft:redstone_lamp",

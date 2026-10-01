@@ -112,6 +112,9 @@ ABOUT = {
                          "catalyst: 1,000 mB of heavy fuel oil, 250 mB of water and a cracking catalyst give 500 mB of "
                          "diesel (out at the base), 300 mB of naphtha (two blocks up) and 200 mB of refinery gas (at the "
                          "top), every 8 seconds.",
+    "vacuum_distillation_unit": "Two by two and three blocks tall. Boils heavy fuel oil under vacuum: each bucket gives "
+                                "400 mB of lubricant and two asphalt binder, every 6 seconds. Lubricant keeps the gas "
+                                "turbine running; asphalt binder makes roads.",
     "ore_drill": "Two blocks tall. Mines the ore blocks in a 9x9 column below it, one layer at a time down to the bottom "
                  "of the world, one ore every 2 seconds. Each hole is refilled with stone or deepslate. The ores come "
                  "out whole, ready for ore processing.",
@@ -313,6 +316,7 @@ def build():
             machine_page("oil_sand_extractor"),
             machine_page("distillation_tower"),
             machine_page("catalytic_cracker"),
+            machine_page("vacuum_distillation_unit"),
             {"title": "Cracking Catalyst", "icon": f"{MOD}:cracking_catalyst", "text": [
                 "Bauxite (alumina) and sand (silica) with a nickel ingot make four. The catalytic cracker uses one for "
                 "each bucket of heavy fuel oil it cracks."], "craft": craft("cracking_catalyst")},

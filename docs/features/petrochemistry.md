@@ -62,6 +62,13 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - **Cracking Catalyst:** four from bauxite, sand and a nickel ingot; one is used per bucket of heavy fuel oil. It ties the cracker to the bauxite and nickel the earlier tiers already mine.
 - Recipe: steel plates, an advanced circuit, two steel tanks, an arc furnace casing and a machine casing.
 
+### Vacuum distillation (batch 2, commit 9)
+- **Lubricant**: a thick golden fluid with a bucket. It is for machine upkeep (the gas turbine in batch 3 needs it).
+- **Asphalt Binder**: a black lump of tar, the residue. Asphalt roads come in batch 4.
+- The **vacuum distillation unit** is 2×2 and three blocks tall: a squat olive column stepping in towards the top, chrome steam ejectors and a condenser drum that keep it under vacuum, a fired heater at its foot and a residue chute at the back.
+- **1,000 mB of heavy fuel oil → 400 mB of lubricant + 2 asphalt binder**, every 120 ticks at 96 JE/t (11,520 JE a bucket). The binder comes out of its item slot (hoppers and pipes can take it); the lubricant is pushed out of every face.
+- Recipe: steel plates, a heavy pump, two tinplate tanks, an advanced circuit and a machine casing.
+
 ## Connections
 - Existing input producer: oil reservoirs (commit 3) through the pumpjack; oil sand and bitumen (existing rock and item) through the extractor; water from pumps.
 - Existing output consumer: the fluid system (tanks, steel tank, pumps, pipes); refining comes in batch 2.
@@ -90,6 +97,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 - Game tests: `oilReservoirsAreSeededAndFinite` (1,600 far-away chunks read the same twice, about one in twelve holds pumpable oil, a reservoir gives exactly what it holds and then nothing, and shale can't be taken as pumpable oil) and `surveyFindsOil`.
 - Game tests `heavyPumpFillsFastThroughSteelPipes`, `bronzePipeLimitsASteelLine`, and `distillationTowerSplitsCrude` (a bucket of crude oil becomes 100/250/400/250 mB, and a tank at the diesel draw-off gets only the diesel).
 - Game test `crackerCracksHeavyFuelOil` (heavy fuel oil, water and one catalyst become 500/300/200 mB of diesel, naphtha and gas).
+- Game test `vacuumUnitMakesLubricantAndAsphalt` (a bucket of heavy fuel oil becomes 400 mB of lubricant and two asphalt binder).
 - Game test `pumpjackPumpsOil`: a powered pumpjack over pumpable oil fills its tank with crude oil and the reservoir goes down by as much.
 - Game tests `extractorTanksOnlyTakeWhatTheyUse` (its tanks take water but not lava or crude oil, through Fabric's fluid API) and `extractorWashesOilFromOilSand` (a block of oil sand and water become 500 mB of crude oil and sand, using 250 mB of water).
 - Not run: client play-testing of how the fluid looks and flows.
