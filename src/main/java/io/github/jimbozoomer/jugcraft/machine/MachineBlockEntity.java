@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.chemistry.FluidRecipe;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidRecipes;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidTank;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidTanks;
+import io.github.jimbozoomer.jugcraft.chemistry.GasFluid;
 import io.github.jimbozoomer.jugcraft.chemistry.OilReservoirs;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
@@ -176,9 +177,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		long insert = kind.isGenerator() ? 0 : kind.maxInput;
 		long extract = kind.isProcessor() ? 0 : kind.maxOutput;
 		this.energy = new SimpleEnergyStorage(kind.capacity, insert, extract, this::setChanged);
-		this.reservoir = kind == MachineKind.STEEL_TANK
-				? SingleFluidStorage.withFixedCapacity(MachineKind.STEEL_TANK_CAPACITY * FluidNetworks.DROPLETS_PER_MB, this::setChanged)
-				: null;
+		this.reservoir = switch (kind) {
+			case STEEL_TANK -> SingleFluidStorage.withFixedCapacity(MachineKind.STEEL_TANK_CAPACITY * FluidNetworks.DROPLETS_PER_MB, this::setChanged);
+			case GAS_HOLDER -> gasReservoir(MachineKind.GAS_HOLDER_CAPACITY * FluidNetworks.DROPLETS_PER_MB);
+			default -> null;
+		};
 		this.inlet = switch (kind) {
 			case STEAM_GENERATOR -> new TankInlet(Fluids.WATER, MachineKind.STEAM_TANK);
 			case LARGE_STEAM_ENGINE -> new TankInlet(Fluids.WATER, MachineKind.LARGE_ENGINE_TANK);
@@ -200,7 +203,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		return switch (kind) {
 			case FRACKING_RIG -> variant.isOf(PetroFluids.FRACKING_FLUID.source());
 			case DIESEL_GENERATOR -> tank == 0 && FluidFuels.jePerMb(kind, variant.getFluid()) > 0;
-			case DIESEL_ENGINE -> tank == 0 && FluidFuels.jePerMb(kind, variant.getFluid()) > 0;
+			case DIESEL_ENGINE, FUEL_CELL -> tank == 0 && FluidFuels.jePerMb(kind, variant.getFluid()) > 0;
 			case GAS_TURBINE -> tank == 0 ? FluidFuels.jePerMb(kind, variant.getFluid()) > 0
 					: variant.isOf(PetroFluids.LUBRICANT.source());
 			default -> FluidRecipes.usesFluid(server.getServer(), kind, tank, variant);
@@ -233,6 +236,26 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return tanks.exposed();
 		}
 		return reservoir != null ? reservoir : inlet;
+	}
+
+	/** The gas holder's store: one gas at a time, and nothing that is not a gas (liquids belong in the steel tank). */
+	private SingleFluidStorage gasReservoir(long capacity) {
+		return new SingleFluidStorage() {
+			@Override
+			protected long getCapacity(FluidVariant variant) {
+				return capacity;
+			}
+
+			@Override
+			protected boolean canInsert(FluidVariant variant) {
+				return variant.getFluid() instanceof GasFluid;
+			}
+
+			@Override
+			protected void onFinalCommit() {
+				setChanged();
+			}
+		};
 	}
 
 	/** A fluid processor's tanks, or null for other machines. */
@@ -341,8 +364,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case SOLAR_PANEL -> tickSolar(level, pos);
 			case STEAM_GENERATOR -> tickSteam(level, pos);
 			case LARGE_STEAM_ENGINE -> tickLargeEngine(level, pos, state);
-			case BATTERY_BOX, CAPACITOR_BANK -> tickBattery(level, pos, state);
-			case STEEL_TANK -> false;
+			case BATTERY_BOX, CAPACITOR_BANK, LITHIUM_BATTERY_BANK -> tickBattery(level, pos, state);
+			case STEEL_TANK, GAS_HOLDER -> false;
 			case GEOTHERMAL_GENERATOR -> tickGeothermal(level, pos, state);
 			case WIND_TURBINE -> tickWind(level, pos, state);
 			case ORE_DRILL -> tickDrill(level, pos, state);
@@ -354,6 +377,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case DIESEL_GENERATOR -> tickFluidGenerator(level, pos, state, MachineKind.DIESEL_OUTPUT);
 			case GAS_TURBINE -> tickFluidGenerator(level, pos, state, MachineKind.TURBINE_OUTPUT);
 			case DIESEL_ENGINE -> tickDieselEngine(level, pos, state);
+			case FUEL_CELL -> tickFluidGenerator(level, pos, state, MachineKind.FUEL_CELL_OUTPUT);
 			default -> kind.isFluidProcessor() ? tickFluidProcessor(level, pos, state) : tickProcessor(level, pos, state);
 		};
 		if (state.getValue(MachineBlock.LIT) != active) {

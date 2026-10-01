@@ -10,7 +10,7 @@ from pathlib import Path
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, EXTRA_NAMES, MINERAL_TAGS, PROCESSING, COMPONENTS, CIRCUITS,
                        metal_blocks, metal_items, mineral_blocks, all_blocks, all_items, feature_of, ingot_id)
 
-from machines import MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
+from machines import ELECTRONICS_BLOCKS, MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
 import model_writer
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -156,9 +156,11 @@ def machine_assets(lang):
     model_writer.WRITERS[model_writer.DEFAULT_STYLE](ASSETS, MACHINES, PARTS, FLUID_BLOCKS)
     write_alternate_pack(lang)
 
+    import pipe_models
     for cable, info in {**CABLES, **PIPES, **ITEM_PIPES}.items():
         lang[f"block.{MOD}.{cable}"] = info["display"]
-        texture = rid(f"block/{cable}")
+        # A valve or filter uses the pipe texture of the pipe it is built from.
+        texture = rid(f"block/{info.get('texture', cable)}")
         # Transmitters are `size` pixels thick (4 for cables and fluid pipes, 6 for item pipes).
         lo = 8 - info.get("size", 4) // 2
         hi = 16 - lo
@@ -185,12 +187,23 @@ def machine_assets(lang):
         parts = [{"apply": {"model": rid(f"block/{cable}_core")}}]
         for direction, rotation in CABLE_ROTATION.items():
             parts.append({"when": {direction: "true"}, "apply": {"model": rid(f"block/{cable}_arm"), **rotation}})
+        # Valve and filter bodies over the core (tools/pipe_models.py).
+        body_elements = {}
+        for body, when in pipe_models.BODIES.get(cable, []):
+            elements = pipe_models.MODELS[body]
+            body_textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
+            body_textures["particle"] = texture
+            body_elements[body] = (model_writer.slice_model(body, elements, [(0, 0, 0)])[0], body_textures)
+            write(ASSETS / "models" / "block" / f"{body}.json", {
+                "parent": "minecraft:block/block", "textures": body_textures, "elements": body_elements[body][0]})
+            parts.append({**({"when": when} if when else {}), "apply": {"model": rid(f"block/{body}")}})
         write(ASSETS / "blockstates" / f"{cable}.json", {"multipart": parts})
         # A 3D straight segment in hand and inventory, like other tech mods' transmitters.
+        item_body, item_textures = body_elements.get(pipe_models.ITEM_BODY.get(cable), ([], {}))
         write(ASSETS / "models" / "item" / f"{cable}.json", {
             "parent": "minecraft:block/block",
-            "textures": textures,
-            "elements": [{"from": [lo, lo, 0], "to": [hi, hi, 16], "faces": {
+            "textures": {**item_textures, **textures},
+            "elements": item_body + [{"from": [lo, lo, 0], "to": [hi, hi, 16], "faces": {
                 "north": {"uv": [lo, lo, hi, hi], "texture": "#cable"},
                 "south": {"uv": [lo, lo, hi, hi], "texture": "#cable"},
                 "east": {"uv": [0, lo, 16, hi], "texture": "#cable"},
@@ -225,6 +238,20 @@ def machine_assets(lang):
             "parent": "minecraft:block/block", "textures": textures,
             "elements": model_writer.slice_model(block, elements, [(0, 0, 0)])[0]})
         write(ASSETS / "blockstates" / f"{block}.json", {"variants": {"": {"model": rid(f"block/{block}")}}})
+        write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+    # Electronics blocks (cyan look): one model each, turned to the four horizontal directions.
+    import hightech_models
+    for block, info in ELECTRONICS_BLOCKS.items():
+        lang[f"block.{MOD}.{block}"] = info["display"]
+        elements = hightech_models.BLOCKS[block]
+        textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
+        textures["particle"] = rid("block/rt_beige")
+        write(ASSETS / "models" / "block" / f"{block}.json", {
+            "parent": "minecraft:block/block", "textures": textures,
+            "elements": model_writer.slice_model(block, elements, [(0, 0, 0)])[0]})
+        write(ASSETS / "blockstates" / f"{block}.json", {"variants": {
+            f"facing={facing}": {"model": rid(f"block/{block}"), **rotation}
+            for facing, rotation in FACING_ROTATION.items() if facing not in ("up", "down")}})
         write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
     # Kinetic blocks: one model each, a turning or lit variant where they have one, and rotations.
     import kinetic_models
@@ -305,6 +332,11 @@ def machine_assets(lang):
     lang[f"message.{MOD}.steam_engine"] = "Steam engine: %s fuel, %s / %s mB water"
     lang[f"message.{MOD}.dynamo"] = "Dynamo: %s / %s JE"
     lang[f"message.{MOD}.electric_motor"] = "Electric motor: %s / %s JE"
+    lang[f"message.{MOD}.network_terminal"] = "Network: %s cables at %s JE/t, %s devices holding %s / %s JE (%s%%)"
+    lang[f"message.{MOD}.network_terminal.none"] = "No cable connected"
+    lang[f"message.{MOD}.fluid_filter"] = "Filter: only %s"
+    lang[f"message.{MOD}.fluid_filter.none"] = ("Filter: not set, lets nothing out. Use a filled bucket on it, or "
+                                                "right-click it beside a tank of the fluid")
     lang[f"message.{MOD}.belt.first"] = "Now use the belt on the second pulley"
     lang[f"message.{MOD}.belt.linked"] = "Belt fitted"
     lang[f"message.{MOD}.belt.same"] = "Pick a different pulley"
@@ -369,7 +401,7 @@ RECIPE_TYPES = {"crusher": "crushing", "arc_furnace": "arc_smelting", "alloy_sme
                 "metal_press": "pressing", "wire_drawer": "wire_drawing", "circuit_assembler": "circuit_assembly",
                 "pulverizer": "pulverizing", "ore_washer": "ore_washing", "sieve": "sifting", "sawmill": "sawing",
                 "coke_oven": "coking", "steel_foundry": "steelmaking",
-                "tree_farm": "tree_growing"}
+                "tree_farm": "tree_growing", "crystal_grower": "crystal_growing"}
 
 
 def machine_recipe_files(out):
@@ -628,8 +660,11 @@ def recipes():
 
     for result, (pattern, key, count) in CRAFTING.items():
         features = [MACHINE_FEATURE] + sorted({
-            feature_of(f"{ref.split('/')[-1]}_ingot") for ref in key.values() if ref.startswith("#c:ingots/")
-            and ref.split("/")[-1] not in ("copper", "iron", "gold")} | ({"silicon"} if "#c:silicon" in key.values() else set()))
+            feature_of(f"{ref.split('/')[-1]}_ingot") for ref in key.values()
+            if ref.startswith("#c:ingots/") and ref.split("/")[-1] not in ("copper", "iron", "gold")}
+            | {ITEMS[ref.split(":")[1]]["feature"] for ref in key.values() if ref.startswith(f"{MOD}:")
+               and ref.split(":")[1] in ITEMS}
+            | ({"silicon"} if "#c:silicon" in key.values() else set()))
         recipe = shaped(MACHINE_FEATURE, pattern, key, result, count)
         recipe["fabric:load_conditions"] = [c for f in features for c in condition(f)]
         write(out / f"{result}.json", recipe)

@@ -15,6 +15,21 @@ public final class PetroItems {
 	public static Item PLASTIC_PELLETS;
 	/** Pressed plastic, for parts of later machines (first used in the diesel engine). */
 	public static Item PLASTIC_SHEET;
+	/** Bauxite digested in hot lye (the Bayer process): smelted into aluminum in the electrolytic cell. */
+	public static Item ALUMINA;
+	/** Superphosphate: ripens the crops in a 5x5 area ({@link FertilizerItem}). */
+	public static Item FERTILIZER;
+	/** The Kroll process: raw titanium chlorinated with coke and reduced, a porous sponge the arc furnace melts. */
+	public static Item TITANIUM_SPONGE;
+	/** A lithium cell in an aluminum can: crafted from lithium carbonate, built into the lithium battery bank. */
+	public static Item LITHIUM_CELL;
+	/** Rare earths alloyed with iron in the alloy smelter: for the magnet dynamo and magnet motor. */
+	public static Item NEODYMIUM_MAGNET;
+	/** Electronics (batch 7): a doped silicon crystal from the crystal grower, sawn into wafers. */
+	public static Item SILICON_BOULE;
+	public static Item SILICON_WAFER;
+	/** Wafers etched in the lithography station: four chips each. */
+	public static Item MICROCHIP;
 
 	private PetroItems() {
 	}
@@ -24,12 +39,28 @@ public final class PetroItems {
 		ASPHALT_BINDER = JugcraftRegistry.item("asphalt_binder");
 		PLASTIC_PELLETS = JugcraftRegistry.item("plastic_pellets");
 		PLASTIC_SHEET = JugcraftRegistry.item("plastic_sheet");
+		ALUMINA = JugcraftRegistry.item("alumina");
+		FERTILIZER = JugcraftRegistry.item("fertilizer", FertilizerItem::new);
+		TITANIUM_SPONGE = JugcraftRegistry.item("titanium_sponge");
+		LITHIUM_CELL = JugcraftRegistry.item("lithium_cell");
+		NEODYMIUM_MAGNET = JugcraftRegistry.item("neodymium_magnet");
+		SILICON_BOULE = JugcraftRegistry.item("silicon_boule");
+		SILICON_WAFER = JugcraftRegistry.item("silicon_wafer");
+		MICROCHIP = JugcraftRegistry.item("microchip");
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(CRACKING_CATALYST);
 			output.accept(ASPHALT_BINDER);
 			output.accept(PLASTIC_PELLETS);
 			output.accept(PLASTIC_SHEET);
+			output.accept(ALUMINA);
+			output.accept(FERTILIZER);
+			output.accept(TITANIUM_SPONGE);
+			output.accept(LITHIUM_CELL);
+			output.accept(NEODYMIUM_MAGNET);
+			output.accept(SILICON_BOULE);
+			output.accept(SILICON_WAFER);
+			output.accept(MICROCHIP);
 		});
 	}
 }

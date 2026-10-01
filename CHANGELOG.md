@@ -9,12 +9,42 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 No numbered release yet. Everything below is on `main`.
 
 ### Fix: ore loot tables in the 26.x format (pull request pending)
-- **Ores now drop their raw material.** Before this, mining tin, zinc, lead, silver, nickel, tungsten, uranium, salt, phosphate, lepidolite or monazite ore, or oil sand, dropped the block itself, as if with Silk Touch. Fortune and multi-drops (2–4 salt, 1–2 bitumen) did nothing either.
+- **Ores now drop their raw material.** Before this, mining tin, zinc, lead, silver, nickel, tungsten, uranium, salt, phosphate, lepidolite, monazite or titanium ore (#54), or oil sand, dropped the block itself, as if with Silk Touch. Fortune and multi-drops (2–4 salt, 1–2 bitumen) did nothing either.
 - **Cause:** Minecraft 26.x renamed the loot keys (`conditions` → `condition`, `functions` → `modifier`, and Silk Touch is now the `minecraft:tool/can_silk_touch` predicate). The old keys were silently ignored. The game test server had been logging "Unreachable entry!" for all 23 ore tables.
-- Every generated loot table (117 now) uses the 26.x format. Storage blocks, machines, the conveyor slope (#44) and the oil line's machines and pipes (#47, #49, #50), whose tables also used the old keys, still drop themselves, and now respect explosions again.
+- Every generated loot table (133 now) uses the 26.x format. Storage blocks, machines, the conveyor slope (#44), the oil line's machines and pipes (#47, #49, #50) and the chemistry, electronics and fluid logistics blocks (#52, #54, #56, #57), whose tables also used the old keys, still drop themselves, and now respect explosions again.
 - **Asphalt slab (#51):** a double slab now drops two slabs; its table used the old keys, so it dropped one.
 - **Charging Station (#40):** its "lower half only" condition used the old keys too, so breaking the top half dropped two stations. It now drops one (game test `chargingStationDropsOnce`).
 - `tools/check_mod_data.py` fails on any pre-26.x loot key, and a new game test mines ores and checks what drops.
+
+### #57 Fluid logistics, batch 8: gas holders, valves and filters
+- **Gas holder** (3×3×3 Horton sphere): 1,024 buckets of one gas, and only gases.
+- **Fluid valve:** a steel pipe segment that a redstone signal closes, splitting the line in two.
+- **Fluid filter:** a steel pipe segment whose neighbouring tanks and machines only receive its chosen fluid; set it with a bucket or from a tank beside it (for gases).
+- Three advancements, handbook pages and a game test for each.
+
+### #56 Electronics, batch 7: silicon, chips and the cyan look
+- **The cyan look** for the electronics tier, following the owner's references: near-black casings with cyan seams, cyan glass that glows while working, cyan screens, violet conduits, and a beige retro computer.
+- **Crystal grower** (1×2): 4 silicon + a phosphate dopant → a silicon boule; the sawmill cuts it into 8 **silicon wafers**.
+- **Lithography station** (3×2×2, a cleanroom with a monitor bank): wafer + copper wire + sulfuric acid → 4 **microchips**.
+- **Processors:** the third circuit tier (circuit assembler).
+- **Network terminal:** a beige retro computer that reads out the power network it is cabled to.
+- Four advancements, an Electronics handbook chapter and game tests for each.
+
+### #54 Chemistry, batch 6: advanced materials
+- **Titanium:** a new mined metal (deep ore, iron pickaxe, `titanium.enabled`). No furnace smelts it.
+- **The Kroll process:** raw titanium + coke + 250 mB chlorine → titanium sponge (chemical reactor); the arc furnace melts it into ingots. Chlorine's first use.
+- **Leaching:** lepidolite or monazite + sulfuric acid → 2 lithium carbonate or 2 rare earth oxide.
+- **Lithium battery bank** (3×2×1, electric look): 32,000,000 JE, 16,384 JE/t out of its front; built from lithium cells and titanium.
+- **Neodymium magnets** (alloy smelter), and the **magnet dynamo** and **magnet motor**: 95% each way, four times the copper-wound rates, cyan-banded.
+- Four advancements, handbook pages and game tests for each.
+
+### #52 Chemistry, batch 5: electrochemistry and acids
+- **Brine** (chemical mixer: salt + water) and the **electrolytic cell** (3×3×2): brine → **chlorine**, **hydrogen** (gases) and **lye**, each out of its own row.
+- **Chemical reactor** (2×2×2): sulfur dust + water → **sulfuric acid**.
+- **Alumina and real aluminum:** bauxite + lye → 2 alumina; 2 alumina + coke → 2 aluminum ingots in the cell. Two ingots per bauxite, twice the arc furnace.
+- **Fertilizer:** phosphate + sulfuric acid; ripens every crop in a 5×5 area.
+- **Fuel cell** (one block, electric look): hydrogen → 128 JE/t.
+- Five advancements, a Chemistry chapter in the handbook, and a metal audit for fluid recipes.
 
 ### #51 Oil line, batch 4: industry, and the electric look
 - **Polymerization reactor** (2×2×3): refinery gas → plastic pellets; the metal press makes **plastic sheets**.

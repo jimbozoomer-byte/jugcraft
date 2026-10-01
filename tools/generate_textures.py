@@ -225,6 +225,9 @@ METAL_COLORS = {
                  [(38, 40, 44), (64, 68, 74), (92, 96, 104), (120, 124, 132), (156, 160, 168)]),
     "uranium": ([(24, 24, 20), (40, 40, 30), (186, 208, 58)], (232, 242, 122),
                 [(66, 70, 60), (106, 112, 96), (146, 152, 132), (184, 190, 168), (214, 220, 196)]),
+    # Rutile: reddish-brown to black needles in the stone; the metal a cool blue-grey.
+    "titanium": ([(70, 30, 20), (120, 54, 30), (168, 86, 44)], (226, 150, 92),
+                 [(58, 62, 72), (96, 102, 116), (138, 144, 158), (178, 184, 196), (214, 218, 228)]),
     "aluminum": (None, None,
                  [(118, 124, 130), (166, 172, 178), (198, 202, 208), (220, 224, 228), (238, 240, 244)]),
 }
@@ -1139,6 +1142,25 @@ def circuit(advanced):
     return img
 
 
+def processor():
+    """A processor: a square black package with a cyan die window, on a dark green board with gold pins all round."""
+    img = new()
+    gold = (226, 188, 72)
+    for y in range(1, 15):
+        for x in range(1, 15):
+            img.putpixel((x, y), ((22, 60, 46) if (x + y) % 2 else (26, 70, 52)) + (255,))
+    for i in range(3, 13, 2):
+        for x, y in ((i, 2), (i, 13), (2, i), (13, i)):
+            img.putpixel((x, y), gold + (255,))
+    for y in range(4, 12):
+        for x in range(4, 12):
+            c = (34, 36, 42) if x in (4, 11) or y in (4, 11) else (24, 26, 30)
+            if 6 <= x <= 9 and 6 <= y <= 9:
+                c = (56, 200, 218) if (x, y) in ((6, 6), (7, 6), (6, 7)) else (28, 128, 148)
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
 def press_front(seed, lit):
     img = window(seed, [(40, 40, 44), (50, 50, 56)])
     head = STEEL[4] if lit else STEEL[3]
@@ -1218,7 +1240,13 @@ def machines():
     save(grate(952, glow=ember), "block", "coke_oven_front_on")
     save(window(953, [(30, 26, 26), (44, 36, 34)]), "block", "steel_foundry_front")
     save(battery_front(954), "block", "capacitor_bank_front")
+    save(battery_front(978), "block", "lithium_battery_bank_front")
+    save(window(979, [(40, 46, 50), (52, 60, 64)]), "block", "crystal_grower_front")
+    save(window(979, [(40, 46, 50)], glow=[(80, 210, 230), (150, 240, 250), (60, 170, 200)]), "block", "crystal_grower_front_on")
+    save(window(980, [(40, 46, 50), (52, 60, 64)]), "block", "lithography_station_front")
+    save(window(980, [(40, 46, 50)], glow=[(80, 210, 230), (150, 240, 250), (60, 170, 200)]), "block", "lithography_station_front_on")
     save(tank_side(955), "block", "steel_tank_front")
+    save(tank_side(981), "block", "gas_holder_front")
     save(grate(957), "block", "cobblestone_generator_front")
     save(grate(957, glow=[(250, 140, 30), (255, 190, 60), (220, 80, 20)]), "block", "cobblestone_generator_front_on")
     save(window(958, [(28, 44, 30), (36, 56, 38)]), "block", "tree_farm_front")
@@ -1254,11 +1282,18 @@ def machines():
     save(window(973, [(44, 46, 40)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "polymerization_reactor_front_on")
     save(window(974, [(36, 40, 30), (48, 54, 40)]), "block", "diesel_engine_front")
     save(window(974, [(36, 40, 30)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "diesel_engine_front_on")
+    save(window(975, [(40, 46, 50), (52, 60, 64)]), "block", "electrolytic_cell_front")
+    save(window(975, [(40, 46, 50)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "electrolytic_cell_front_on")
+    save(window(976, [(52, 50, 30), (66, 62, 40)]), "block", "chemical_reactor_front")
+    save(window(976, [(52, 50, 30)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "chemical_reactor_front_on")
+    save(window(977, [(40, 46, 50), (52, 60, 64)]), "block", "fuel_cell_front")
+    save(window(977, [(40, 46, 50)], glow=[(90, 230, 140), (160, 255, 190), (60, 200, 120)]), "block", "fuel_cell_front_on")
     save(jaws(956, False), "block", "ore_drill_front")
     save(jaws(956, True), "block", "ore_drill_front_on")
     save(window(953, [(30, 26, 26)], glow=[(255, 200, 80), (255, 236, 150), (250, 150, 40)]), "block", "steel_foundry_front_on")
     save(circuit(False), "item", "basic_circuit")
     save(circuit(True), "item", "advanced_circuit")
+    save(processor(), "item", "processor")
     save(electric_textures.cable(electric_textures.COPPER), "block", "copper_cable")
     save(electric_textures.cable(electric_textures.SILVER), "block", "silver_cable")
     save(electric_textures.cable(electric_textures.ALUMINUM), "block", "aluminum_cable")
