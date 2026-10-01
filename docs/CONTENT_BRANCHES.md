@@ -33,7 +33,7 @@ Start from useful ordinary crops, food, livestock and soils. Branch into magical
 
 Proposals may cover orchards, culinary specialties, animal products, breeding, magical herbs, climate cultivation, fiber/fuel crops and off-world farming. Explain planting conditions, growth limits, harvesting automation, outputs, regional role and interactions with both industry and magic. Prevent infinite growth/yield feedback loops. Avoid excessive breeding/entity counts as the optimal farming strategy.
 
-The branch's first three slices (the Fall Harvest: tall corn, wild plants and sickles; the Kitchen Garden: trellis crops, vegetables, grains and the Cooking Pot; the Festival Crops: gourds, turnips and Turnip Lanterns, cranberry bogs and the chestnut tree) and its planned crop roster and farm equipment are in [branches/AGRICULTURE.md](branches/AGRICULTURE.md).
+The branch's first three slices (the Fall Harvest: tall corn, wild plants and sickles; the Kitchen Garden: trellis crops, vegetables, grains and the Cooking Pot; the Festival Crops: gourds, turnips and Turnip Lanterns, cranberry bogs and the chestnut tree; and pumpkin carving) and its planned crop roster and farm equipment are in [branches/AGRICULTURE.md](branches/AGRICULTURE.md).
 
 ## Cozy surface biomes
 

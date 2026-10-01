@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.CarvingTemplates;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.PumpkinCarving;
 import io.github.jimbozoomer.jugcraft.agriculture.PumpkinCarvings;
+import io.github.jimbozoomer.jugcraft.client.CarvingScreen;
 import java.util.Arrays;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -70,14 +71,14 @@ public class CarvingClientGameTests implements FabricClientGameTest {
 				player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftAgriculture.item("carving_knife")));
 				PumpkinCarvings.open(player, target, Direction.SOUTH);
 			});
-			context.waitFor(client -> client.screen != null && client.screen.getClass().getSimpleName().equals("CarvingScreen"));
+			context.waitForScreen(CarvingScreen.class);
 			context.clickScreenButton("Apply");
 			context.clickScreenButton("Mirror: Off");
 			context.clickScreenButton("Candle: Off");
 			context.waitTicks(5);
 			context.takeScreenshot("jugcraft_carving_screen");
 			context.clickScreenButton("Done");
-			context.waitFor(client -> client.screen == null);
+			context.waitForScreen(null);
 			context.waitTicks(20);
 			boolean carved = server.computeOnServer(minecraft -> {
 				BlockState state = minecraft.overworld().getBlockState(target);

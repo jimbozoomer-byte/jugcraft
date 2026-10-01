@@ -8,7 +8,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 
 > **Status.** Everything here compiles and loads in CI. Where a feature has an automated game test, that test passes on a headless server. Nothing has been play-tested in a client or on a dedicated server with two players yet.
 >
-> This document describes `main` after PRs #4–#36 (the conveyors and powered tools of #38 and #40 are not described here yet), plus the Agriculture branch's Fall Harvest, Kitchen Garden and Festival Crops. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
+> This document describes `main` after PRs #4–#36 (the conveyors and powered tools of #38 and #40 are not described here yet), plus the Agriculture branch's Fall Harvest, Kitchen Garden, Festival Crops and pumpkin carving. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
 
 ## Quick facts
 
@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 298 items/blocks under `jugcraft:` (the checker counts them) |
+| Registered IDs | 301 items/blocks under `jugcraft:` (the checker counts them) |
 
 ## Build, generate, check
 
@@ -139,9 +139,10 @@ The Agriculture branch ([branches/AGRICULTURE.md](branches/AGRICULTURE.md)). Eve
 | Bog crop | `cranberry_bush` | `CranberryBushBlock` | `age` 0–3; stands in a water source one deep over `jugcraft:bog_soil`; holds its water like seagrass; picked when ripe |
 | Chestnut tree | `chestnut_sapling`, `chestnut_leaves`; wood: `chestnut_log`, `chestnut_wood`, `stripped_chestnut_log`, `stripped_chestnut_wood`, `chestnut_planks`, `chestnut_stairs`, `chestnut_slab`, `chestnut_fence`, `chestnut_fence_gate` | vanilla `SaplingBlock` with `JugcraftAgriculture.CHESTNUT_GROWER`; `ChestnutLeavesBlock` (`fruit` 0–2); `StrippableLogBlock` | tree: `worldgen/feature/chestnut.json`; wood in vanilla wood tags and `jugcraft:chestnut_logs`; fuel and flammability like oak |
 | Decorations | `turnip_lantern` | `TurnipLanternBlock` | light 13, faces the player |
+| Carving | `hand_carved_pumpkin` (block with item); `carving_knife` | `CarvedPumpkinBlock` + `CarvedPumpkinBlockEntity`; `CarvingKnifeItem` | four carved sides (`PumpkinCarving`); `facing`, `lit`, `glow` 0–15; light only with a torch inside; data component `jugcraft:carving` |
 | Wild plants | `wild_corn`, `wild_sunflower`, `wild_beans`, `wild_sweet_potato`, `wild_flax`, `wild_tomato`, `wild_pepper`, `wild_onion`, `wild_garlic`, `wild_cabbage`, `wild_oats`, `wild_barley`, `wild_turnip` | `WildCropBlock` | patches on grass (`worldgen/placed_feature/patch_wild_*`); shears take the plant. Gourds, ripe cranberry bushes and chestnut trees also generate as themselves (`patch_<gourd>`, `patch_cranberry_bush`, `patch_chestnut_tree`) |
 | Seeds (place the crop) | `corn_kernels`, `sunflower_seeds`, `beans`, `sweet_potato`, `flax_seeds`, `pepper_seeds`, `onion`, `garlic`, `cabbage_seeds`, `oat_seeds`, `barley_seeds`, `butternut_squash_seeds`, `acorn_squash_seeds`, `warty_gourd_seeds`, `turnip`, `cranberries` (into shallow water), `chestnut` (plants the sapling); `tomato_seeds` | `BlockItem`; `TrellisSeedItem` (plants on a trellis) | `c:seeds/*`, and animal food tags |
-| Produce and food | `corn`, `roasted_corn`, `popcorn`, `roasted_sunflower_seeds`, `baked_sweet_potato`, `flax`, `three_sisters_stew`, `tomato`, `pepper`, `cabbage`, `oats`, `barley`, `barley_bread`, `sauerkraut`, `garden_salad`, `tomato_soup`, `onion_soup`, `vegetable_soup`, `mushroom_barley_soup`, `oat_porridge`, `chili`, `cabbage_rolls`, `roasted_chestnuts`, `baked_acorn_squash`, `squash_pie`, `candy_corn`, `butternut_squash_soup`, `harvest_stew`, `cranberry_sauce` | plain items with food components | `c:crops/*`, `c:foods/*` |
+| Produce and food | `corn`, `roasted_corn`, `popcorn`, `roasted_sunflower_seeds`, `baked_sweet_potato`, `flax`, `three_sisters_stew`, `tomato`, `pepper`, `cabbage`, `oats`, `barley`, `barley_bread`, `sauerkraut`, `garden_salad`, `tomato_soup`, `onion_soup`, `vegetable_soup`, `mushroom_barley_soup`, `oat_porridge`, `chili`, `cabbage_rolls`, `roasted_chestnuts`, `baked_acorn_squash`, `squash_pie`, `candy_corn`, `butternut_squash_soup`, `harvest_stew`, `cranberry_sauce`, `roasted_pumpkin_seeds` | plain items with food components | `c:crops/*`, `c:foods/*` |
 | Tools | `flint_sickle` (3×3), `bronze_sickle` (5×5) | `SickleItem` | harvests and replants ripe crops, vanilla crops included |
 | Equipment | `trellis`, `cooking_pot` | `TrellisBlock`; `CookingPotBlock`, `CookingPotBlockEntity`, `CookingPotMenu`, `client/CookingPotScreen` | the pot cooks `jugcraft:pot_cooking` recipes over a block in `jugcraft:heat_sources` |
 
@@ -243,6 +244,12 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - **Cranberries:** `CranberryBushBlock.isShallowWater(level, pos)` is the planting rule; `canGrow(level, pos)` needs air above and light 9; `pick(level, pos, dropPos)` harvests. Bog soil is the block tag `jugcraft:bog_soil`.
 - **Chestnuts:** `ChestnutLeavesBlock.canFruit(state, level, pos)` (natural leaves near a log with air below) and `pick(level, pos)`. The sapling grows `worldgen/feature/chestnut.json` through `CHESTNUT_GROWER`. Any axe strips a `StrippableLogBlock` (the block handles the axe itself). The sawmill saws `#jugcraft:chestnut_logs` into 6 planks (`tools/machines.py`).
 
+### Pumpkin carving (`agriculture/PumpkinCarving*`, `CarvedPumpkin*`, `CarvingTemplates`)
+
+- **Design:** `PumpkinCarving` is an immutable design of four 16×16 faces (front, then clockwise seen from above: `faceIndex(facing, side)` and `side(facing, face)`), each pixel `SKIN`, `SHAVED` or `CUT`, a face row being one int of 2-bit pixels. `glow()` gives the light with a torch inside. `CODEC` saves it as an int array; equal designs are equal, so clients share their textures.
+- **Carving:** `PumpkinCarvings.open(player, pos, side)` starts a session and sends `OpenCarvingPayload`; the client's `CarvingScreen` sends back a `CarvePayload` (exactly 16 rows), and `PumpkinCarvings.carve(player, pos, side, face)` checks it and returns a `Result` (`CARVED`, or why not). `startSession(...)` alone is for tests. The server option `carving.free_draw` (`JugcraftConfig.option`) allows only `CarvingTemplates.ALL` when false.
+- **Client:** `CarvedPumpkinRenderer` draws each carved side as one quad textured by `CarvingTextures` (one 64×16 dynamic texture per design and lit state, at most 256).
+
 ### Cooking Pot (`agriculture/CookingPot*`)
 
 - **Recipes:** type `jugcraft:pot_cooking` (`CookingPotRecipe`), files in `data/jugcraft/recipe/pot_cooking/`, generated from `POT_RECIPES` in `tools/agriculture.py`. The format is the multi-input machine format: `ingredients` (each an `ingredient` and a `count`), `result` and `time`. Ingredients may sit in any of the six slots and spread over several; every filled slot must hold an ingredient. `CookingPotRecipe.find(server, slots)` returns the recipe and how much to take from each slot; the recipe list is cached and rebuilt after `/reload`.
@@ -252,6 +259,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 ### Feature switches (`config/`)
 
 - `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 15 materials plus `machines` and `agriculture`.
+- It also holds other server options, `JugcraftConfig.OPTIONS` (read with `JugcraftConfig.option(key)`): `carving.free_draw` (default `true`).
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
 
@@ -291,7 +299,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 1. Mirror it in Java: a `TallCrop` constant, or a `crop(...)` call plus item calls in `JugcraftAgriculture` (`trellisSeeds(...)` for a climbing crop's seed).
 2. Draw its stage textures in `tools/crop_textures.py`, `tools/kitchen_textures.py` or `tools/festival_textures.py`.
 3. Run both generators and the checker, which compares the Python and the Java.
-4. Add a game test to `AgricultureGameTests`, `KitchenGardenGameTests` or `FestivalGameTests`.
+4. Add a game test to `AgricultureGameTests`, `KitchenGardenGameTests`, `FestivalGameTests` or `CarvingGameTests`.
 
 **A Cooking Pot dish:** add it to `POT_RECIPES` (and its item to `ITEMS`) in `tools/agriculture.py`, or drop a `jugcraft:pot_cooking` recipe into a data pack. The checker refuses two recipes with the same ingredients.
 
@@ -316,7 +324,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
   - renewable sieve finds, which average under one nugget per operation.
 - Bronze is never turned back into its ingredients.
 - Every recipe has a feature-switch condition that includes its result's feature.
-- Python lists must match Java: `MachineKind` numbers and recipe types, `JugcraftComponents` lists, materials, features, worldgen, and every agriculture number (`TallCrop`, items, foods, compost tiers, sickles, wild-plant and wild-patch biomes, grass seeds, legume bonus, gourds, cranberry and chestnut numbers, the lantern's light).
+- Python lists must match Java: `MachineKind` numbers and recipe types, `JugcraftComponents` lists, materials, features, worldgen, and every agriculture number (`TallCrop`, items, foods, compost tiers, sickles, wild-plant and wild-patch biomes, grass seeds, legume bonus, gourds, cranberry and chestnut numbers, the lantern's light, and the carving numbers, starter faces and messages).
 - Every tall-crop age and section, and every crop age, has a model. Agriculture recipes (crafting, cooking and Cooking Pot) never form a loop, no two Cooking Pot recipes share their ingredients, a seed is a trellis seed exactly when it plants a climbing crop, and a bog seed exactly when it plants the cranberry bush. Every stem age, cranberry age and leaf fruit state has a model.
 - Every ID has a model, a texture, a name, and a loot table (for blocks). Both machine styles cover every block state. Model elements stay within −16..32.
 
@@ -335,7 +343,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `src/gametest/java/.../test/JugcraftGameTests.java` | game tests (run by `./gradlew build`) |
 | `src/gametest/java/.../test/JugcraftClientGameTests.java` | client game tests with screenshots (CI job `client`) |
 | `…/guide/`, `src/client/.../HandbookScreen.java`, `tools/handbook.py` | Engineer's Handbook |
-| `…/agriculture/`, `tools/agriculture.py`, `tools/agriculture_data.py`, `tools/festival_data.py`, `tools/crop_textures.py`, `tools/kitchen_textures.py`, `tools/festival_textures.py`, `tools/render_agriculture.py` | Agriculture branch: crops, wild plants, sickles, trellis, Cooking Pot, gourds, cranberries, the chestnut tree, their data, textures and doc previews |
+| `…/agriculture/`, `tools/agriculture.py`, `tools/agriculture_data.py`, `tools/festival_data.py`, `tools/carving_data.py`, `tools/crop_textures.py`, `tools/kitchen_textures.py`, `tools/festival_textures.py`, `tools/carving_textures.py`, `tools/render_agriculture.py` | Agriculture branch: crops, wild plants, sickles, trellis, Cooking Pot, gourds, cranberries, the chestnut tree, pumpkin carving, their data, textures and doc previews |
 | `src/test/java/.../VanillaReferences.java` | compile-time guard that vanilla items used by recipes still exist |
 | `src/main/resources/assets/jugcraft/` | generated models, blockstates, lang, textures |
 | `src/main/resources/data/jugcraft/` | generated recipes (`recipe/<type>/` for machines), loot, tags, worldgen |
@@ -346,7 +354,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `docs/TECH_TREE.md` | player-facing guide |
 | `docs/features/` | feature records (required for gameplay features) |
 | `docs/MACHINE_ROADMAP.md`, `docs/branches/CHEMISTRY.md` | planned, not built |
-| `docs/branches/AGRICULTURE.md` | Agriculture: the implemented Fall Harvest, Kitchen Garden and Festival Crops, and the planned roster and equipment |
+| `docs/branches/AGRICULTURE.md` | Agriculture: the implemented Fall Harvest, Kitchen Garden, Festival Crops and pumpkin carving, and the planned roster and equipment |
 
 ## Not built yet
 
