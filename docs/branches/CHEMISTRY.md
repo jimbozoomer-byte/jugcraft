@@ -85,7 +85,7 @@ Every machine here is steel tier or later and follows [ART_DIRECTION.md](../ART_
 
 After the oil line (owner request, 1 October 2026: "start the next batch immediately"), the branch turns to the items that have been waiting for chemistry since the start: salt, sulfur, phosphate and bauxite. These machines are steel tier and dieselpunk like the oil line, and they use the same fluid machine system, tanks and pipes.
 
-### Batch 5: electrochemistry and acids
+### Batch 5: electrochemistry and acids (#52)
 
 | # | Commit | What it adds |
 | --- | --- | --- |

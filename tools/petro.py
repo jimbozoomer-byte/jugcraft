@@ -148,6 +148,8 @@ FLUID_MACHINES = {
     # Brine -> chlorine (top), hydrogen (middle) and lye (base); alumina + coke -> aluminum (batch 5). 256 JE/t.
     "electrolytic_cell": {"inputs": [8_000], "outputs": [8_000, 8_000, 8_000], "item_inputs": 2, "item_outputs": 1,
                           "recipe_type": "electrolysis"},
+    # Burns hydrogen (128 JE/mB) at 128 JE/t; one block, electric look (batch 5).
+    "fuel_cell": {"inputs": [8_000], "outputs": [], "item_inputs": 0, "item_outputs": 0, "recipe_type": None},
     # Sulfur + water -> sulfuric acid; bauxite + lye -> alumina; phosphate + acid -> fertilizer (batch 5). 96 JE/t.
     "chemical_reactor": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 1,
                          "recipe_type": "chemical_reaction"},
@@ -161,6 +163,7 @@ FLUID_FUELS = {
     "diesel_generator": {"diesel": 256, "heavy_fuel_oil": 128},
     "gas_turbine": {"gasoline": 384, "refinery_gas": 192},
     "diesel_engine": {"diesel": 256, "heavy_fuel_oil": 128},
+    "fuel_cell": {"hydrogen": 128},
 }
 
 # Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],

@@ -108,7 +108,18 @@
           "title": "Milestones (7)",
           "icon": "jugcraft:asphalt",
           "text": [
-            "Hit the Road: Lay asphalt, and walk faster on it."
+            "Hit the Road: Lay asphalt, and walk faster on it.",
+            "Split Decision: Build an electrolytic cell.",
+            "Oil of Vitriol: Make sulfuric acid.",
+            "Green Revolution: Make fertilizer.",
+            "The Bayer Way: Digest bauxite into alumina."
+          ]
+        },
+        {
+          "title": "Milestones (8)",
+          "icon": "jugcraft:fuel_cell",
+          "text": [
+            "Clean Burn: Build a hydrogen fuel cell."
           ]
         }
       ]
@@ -2249,6 +2260,29 @@
               "jugcraft:steel_plate"
             ],
             "result": "jugcraft:chemical_reactor",
+            "count": 1
+          }
+        },
+        {
+          "title": "Fuel Cell",
+          "icon": "jugcraft:fuel_cell",
+          "text": [
+            "One block. Combines hydrogen with the air: 128 JE/t, burning a millibucket of hydrogen a tick (128,000 JE a bucket). Pipe hydrogen from the electrolytic cell into it. Its screen lights while it runs.",
+            "Makes up to 128 JE/t. Holds 40,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:aluminum_plate",
+              "jugcraft:aluminum_cable",
+              "jugcraft:aluminum_plate",
+              "jugcraft:steel_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate",
+              "jugcraft:aluminum_plate",
+              "jugcraft:fluid_tank",
+              "jugcraft:aluminum_plate"
+            ],
+            "result": "jugcraft:fuel_cell",
             "count": 1
           }
         },

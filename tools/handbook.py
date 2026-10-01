@@ -136,6 +136,8 @@ ABOUT = {
                          "and a bucket of water.",
     "chemical_reactor": "Two by two by two, lined with lead against the acid. Burns sulfur and absorbs it in water: two "
                         "sulfur dust and a bucket of water make a bucket of sulfuric acid, every 5 seconds.",
+    "fuel_cell": "One block. Combines hydrogen with the air: 128 JE/t, burning a millibucket of hydrogen a tick (128,000 "
+                 "JE a bucket). Pipe hydrogen from the electrolytic cell into it. Its screen lights while it runs.",
     "diesel_engine": "Two wide, two tall and three long. Burns diesel (256 KE a mB) or heavy fuel oil (128) piped into "
                      "its 8-bucket tank and turns a shaft out of the back of its upper right back block: up to "
                      "512 KE/t, twice the large steam engine. It burns only for the rotation the line takes.",
@@ -379,6 +381,7 @@ def build():
                 "chlorine, hydrogen and lye. Gases live only in tanks and pipes."]},
             machine_page("electrolytic_cell"),
             machine_page("chemical_reactor"),
+            machine_page("fuel_cell"),
             {"title": "Aluminum, the Real Way", "icon": f"{MOD}:alumina", "text": [
                 "Digest a bauxite in 250 mB of lye in the chemical reactor: two alumina.",
                 "Smelt two alumina with a coal coke anode in the electrolytic cell: two aluminum ingots, every 8 "

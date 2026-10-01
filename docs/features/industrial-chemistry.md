@@ -1,6 +1,6 @@
 # Industrial chemistry: electrochemistry and acids
 
-Status: in progress (batch 5 of the Chemistry branch, PR to follow)
+Status: implemented (batch 5 of the Chemistry branch, #52)
 Proposal issue: owner request, 1 October 2026 ("merge it and start the next batch immediately"); plan in [CHEMISTRY.md](../branches/CHEMISTRY.md#industrial-chemistry-electrochemistry-and-acids)
 Owner: jimbozoomer-byte
 Target milestone and tier: steel tier, after the oil line
@@ -37,6 +37,15 @@ Salt, sulfur, phosphate and bauxite have been in the world since the first ores,
 - Up to 25 crops for one item, against one crop per bone meal: the reason to build the acid chain for a farm.
 - Code: `chemistry/FertilizerItem`.
 
+### Hydrogen fuel cell (commit 25)
+- **Fuel cell** (one block, the electric look): a stack of graphite cell plates with glowing seams, tie rods, a hydrogen inlet on top, a status screen that lights while it runs and power ports on the other sides.
+- **128 JE/t**, burning 1 mB of hydrogen a tick: **128 JE per mB**, 128,000 JE a bucket. Its 8-bucket tank takes only hydrogen.
+- Making a bucket of hydrogen takes four buckets of brine in the electrolytic cell (204,800 JE), so the fuel cell pays back part of the cell's power and is never a loop.
+- Recipe: aluminum plates, two aluminum cables, steel plates, an advanced circuit and a tinplate tank.
+
+### Advancements
+Split Decision (electrolytic cell), Oil of Vitriol (sulfuric acid), Green Revolution (fertilizer), The Bayer Way (alumina) and Clean Burn (fuel cell), under Forged in Coke.
+
 ## Connections
 - Existing input producer: rock salt ore and the flowback treatment unit (salt); crushed sulfur (sulfur dust); water pumps.
 - Existing output consumer: lye goes to bauxite digestion, sulfuric acid to fertilizer, fertilizer to vanilla crops, hydrogen to the fuel cell (commit 25), chlorine to later chemistry.
@@ -48,7 +57,8 @@ Salt, sulfur, phosphate and bauxite have been in the world since the first ores,
 
 ## Balance and automation
 - Volume is conserved: a bucket of brine gives 1,000 mB of products in all.
-- Salt is renewable only through mining and fracking flowback; the cell costs 51,200 JE a bucket. Any fuel made from its hydrogen (commit 25) returns less than that, so electrolysis is never a power loop.
+- Salt comes only from mining and fracking flowback; the cell costs 51,200 JE a bucket of brine. Its 250 mB of hydrogen give 32,000 JE in the fuel cell, so electrolysis is never a power loop.
+- Metal: the fluid recipe audit (`check_mod_data`) holds every recipe to the metal its items carry.
 
 ## Multiplayer and persistence
 Server-side machines like the oil line's; tanks and inventories save with the block entity. No new persistent state.
@@ -58,7 +68,7 @@ No new dependencies. Textures and models are original (`tools/petro_textures.py`
 
 ## Verification
 - `tools/check_mod_data.py` audits the new fluids, gases and recipes like the oil line's.
-- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` `bayerRouteMakesAluminum`, `reactorMakesFertilizer` and `fertilizerGrowsTheCropsAround` (PetroGameTests).
+- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` `bayerRouteMakesAluminum`, `reactorMakesFertilizer`, `fertilizerGrowsTheCropsAround` and `fuelCellBurnsHydrogen` (PetroGameTests).
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.

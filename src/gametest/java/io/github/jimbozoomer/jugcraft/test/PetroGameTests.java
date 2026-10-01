@@ -526,4 +526,27 @@ public class PetroGameTests {
 		}
 		helper.succeed();
 	}
+
+	/** The fuel cell turns each millibucket of hydrogen into 128 JE and refuses other fluids. */
+	@GameTest(maxTicks = 200)
+	public void fuelCellBurnsHydrogen(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(2, 1, 2);
+		helper.setBlock(pos, JugcraftMachines.MACHINES.get(MachineKind.FUEL_CELL).defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH));
+		MachineBlockEntity cell = helper.getBlockEntity(pos, MachineBlockEntity.class);
+		SimpleEnergyStorage energy = (SimpleEnergyStorage) EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(pos), Direction.UP);
+		Storage<FluidVariant> tanks = FluidStorage.SIDED.find(helper.getLevel(), helper.absolutePos(pos), Direction.NORTH);
+		try (Transaction transaction = Transaction.openOuter()) {
+			long diesel = tanks.insert(FluidVariant.of(PetroFluids.DIESEL.source()), FluidConstants.BUCKET, transaction);
+			long hydrogen = tanks.insert(FluidVariant.of(PetroFluids.HYDROGEN.fluid()), FluidConstants.BUCKET, transaction);
+			helper.assertTrue(diesel == 0, "The fuel cell took diesel");
+			helper.assertTrue(hydrogen == FluidConstants.BUCKET, "The fuel cell took " + hydrogen + " droplets of hydrogen");
+			transaction.commit();
+		}
+		helper.runAfterDelay(40, () -> {
+			int burnt = 1000 - cell.tanks().input(0).millibuckets();
+			helper.assertTrue(burnt > 0, "Burnt no hydrogen");
+			helper.assertTrue(energy.getAmount() == (long) burnt * FluidFuels.HYDROGEN, "Energy " + energy.getAmount() + " for " + burnt + " mB");
+			helper.succeed();
+		});
+	}
 }
