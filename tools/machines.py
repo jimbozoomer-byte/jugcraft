@@ -45,6 +45,8 @@ MACHINES = {
     "pumpjack": {"display": "Pumpjack", "lit": True},
     # A 2x2x2 hot-water extraction plant: oil sand or bitumen + water -> crude oil (+ sand).
     "oil_sand_extractor": {"display": "Oil Sand Extractor", "lit": True},
+    # A 2x2 column seven blocks tall: crude oil -> refinery gas, naphtha, diesel and heavy fuel oil.
+    "distillation_tower": {"display": "Distillation Tower", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
 }
 
@@ -185,6 +187,8 @@ STATS = {
     "pumpjack": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "pump_per_tick": 2, "tank": 16_000},
     # 2x2x2. Recipes in tools/petro.py; 8,000 mB water tank and 8,000 mB crude oil tank.
     "oil_sand_extractor": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "tank": 8_000},
+    # 2x2x7. 128 JE/t heats the reboiler; a bucket of crude oil per 100 ticks.
+    "distillation_tower": {"capacity": 40_000, "input_per_tick": 512, "use_per_tick": 128, "tank": 16_000},
 }
 
 # Fuel for the coal generator: burn ticks per item (coal matches the vanilla furnace's 1600).
@@ -352,6 +356,8 @@ CRAFTING = {
     "oil_sand_extractor": (["PHP", "TMT", "PGP"], {"P": "#c:plates/steel", "H": "minecraft:hopper",
                                                    "T": "jugcraft:fluid_tank", "M": "jugcraft:machine_casing",
                                                    "G": "#c:gears/steel"}, 1),
+    "distillation_tower": (["PTP", "PCP", "PFP"], {"P": "#c:plates/steel", "T": "jugcraft:steel_tank",
+                                                   "C": "jugcraft:advanced_circuit", "F": "minecraft:blast_furnace"}, 1),
     "charging_station": (["SLS", "WAW", "SBS"], {"S": "#c:plates/steel", "L": "minecraft:redstone_lamp",
                                                 "W": "jugcraft:copper_cable", "A": "jugcraft:advanced_circuit",
                                                 "B": "jugcraft:battery_box"}, 1),

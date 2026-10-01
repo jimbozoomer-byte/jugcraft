@@ -104,6 +104,10 @@ ABOUT = {
                           "(mined with silk touch) and 250 mB of water give 500 mB of crude oil and a block of sand; a "
                           "piece of bitumen and 100 mB of water give 150 mB. Pipe water in; it pushes the oil out into "
                           "pipes and tanks touching it.",
+    "distillation_tower": "Two by two and seven blocks tall. Heats crude oil and splits each bucket into 100 mB of "
+                          "refinery gas, 250 mB of naphtha, 400 mB of diesel and 250 mB of heavy fuel oil, a bucket every "
+                          "5 seconds. Each fraction comes out at its own height: heavy fuel oil at the base, diesel two "
+                          "blocks up, naphtha four up, and refinery gas at the top. Give each its own pipe or tank.",
     "ore_drill": "Two blocks tall. Mines the ore blocks in a 9x9 column below it, one layer at a time down to the bottom "
                  "of the world, one ore every 2 seconds. Each hole is refilled with stone or deepslate. The ores come "
                  "out whole, ready for ore processing.",
@@ -303,6 +307,7 @@ def build():
                 "Pipes, pumps and tanks carry it like water; refineries turn it into fuels."]},
             machine_page("pumpjack"),
             machine_page("oil_sand_extractor"),
+            machine_page("distillation_tower"),
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

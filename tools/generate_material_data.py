@@ -464,6 +464,9 @@ def petro_assets(lang):
         write(ASSETS / "models" / "item" / f"{bucket}.json",
               {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{bucket}")}})
         write(ASSETS / "items" / f"{bucket}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{bucket}")}})
+    # Gases have no block, so Fabric names them from this key.
+    for gas, info in petro.GASES.items():
+        lang[f"block.{MOD}.{gas}"] = info["display"]
 
 
 def loot_tables():
@@ -672,6 +675,8 @@ def tags():
     for fluid in petro.FLUIDS:
         tags.add("fluid", f"c:{fluid}", rid(fluid))
         tags.add("fluid", f"c:{fluid}", rid(f"flowing_{fluid}"))
+    for gas in petro.GASES:
+        tags.add("fluid", f"c:{gas}", rid(gas))
     tags.write()
 
 

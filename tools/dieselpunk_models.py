@@ -283,6 +283,52 @@ def heavy_pump():
     return m
 
 
+def distillation_tower():
+    """A two by two fractionating column seven blocks tall. A hazard-striped skid carries the fired reboiler (glowing
+    firebox window, gauge, caged lamp, exhaust stack) at the foot of a banded olive-and-gunmetal column. Grated
+    platforms with hazard rails ring it at three heights, a ladder climbs the back, and a chrome draw-off pipe with a
+    red valve comes out of the front at each fraction's height: heavy fuel oil at the base, then diesel, naphtha and
+    refinery gas at the top, under a domed cap with a vent."""
+    m = [box((-16, 0, 0), (16, 2, 32), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    # Reboiler at the foot, front left (seen from the front): firebox, gauge and lamp, and its stack.
+    m.append(box((1, 2, 0.5), (15, 14, 9), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(box((4, 3, 0.25), (12, 9, 0.5), {"*": GUNMETAL, "north": "sp_window!"}))
+    m.append(dial("north", (5, 11.5, 0.25), 2.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 11.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    m += cyl("y", 12.5, 5, 1, 14, 26, EXHAUST, "sp_hopper_inside")
+    # The column: olive sections between gunmetal flanges, hazard bands at the platforms.
+    for y0, y1, texture in ((2, 30, OLIVE), (30, 34, GUNMETAL), (34, 62, OLIVE), (62, 66, GUNMETAL),
+                            (66, 94, OLIVE), (94, 98, GUNMETAL), (98, 106, OLIVE)):
+        m += cyl("y", 0, 16, 10, y0, y1, texture)
+    for y in (16, 48, 80):
+        m += cyl("y", 0, 16, 10.4, y, y + 1, HAZARD)
+    # Domed cap and vent.
+    m += cyl("y", 0, 16, 8, 106, 108, GUNMETAL)
+    m += cyl("y", 0, 16, 5, 108, 110, CHROME)
+    m += cyl("y", 0, 16, 1, 110, 116, EXHAUST, "sp_hopper_inside")
+    # Platforms: grated decks with hazard rails on the front and sides.
+    for y in (31, 63, 95):
+        m.append(box((-15.5, y, 0.5), (15.5, y + 1, 31.5), {"*": GUNMETAL, "up": GRILLE, "down": GRILLE}))
+        for x in (-15.5, 14.5):
+            m.append(box((x, y + 1, 0.5), (x + 1, y + 7, 1.5), GUNMETAL))
+            m.append(box((x, y + 1, 30.5), (x + 1, y + 7, 31.5), GUNMETAL))
+        m.append(box((-15.5, y + 6, 0.5), (15.5, y + 7, 1.25), HAZARD))
+        m.append(box((-15.5, y + 6, 1.25), (-14.75, y + 7, 30.75), HAZARD))
+        m.append(box((14.75, y + 6, 1.25), (15.5, y + 7, 30.75), HAZARD))
+    # Ladder up the back.
+    for x in (-3, 2):
+        m.append(box((x, 2, 29.5), (x + 1, 102, 30.5), GUNMETAL))
+    for y in range(6, 102, 4):
+        m.append(box((-2, y, 29.75), (2, y + 0.75, 30.25), CHROME))
+    # Draw-offs out of the front at each fraction's height (block layers 0, 2, 4 and 6), each with a red valve.
+    for y in (9, 40, 72, 104):
+        m.append(box((-12, y - 2, 0.5), (-8, y + 2, 6.5), CHROME))
+        m.append(box((-13, y - 3, 0), (-7, y + 3, 0.5), GUNMETAL))
+        m += wheel("z", -10, y + 4.5, 1.5, 2.5, 3.25, "sp_red_iron", CHROME, spokes=False)
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
-          "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump()}
+          "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump(),
+          "distillation_tower": distillation_tower()}

@@ -220,4 +220,26 @@ public class PetroGameTests {
 			helper.succeed();
 		});
 	}
+
+	/**
+	 * The distillation tower splits a bucket of crude oil into its four fractions, and each comes out only at its own
+	 * height: a tank against the front two blocks up (the diesel draw-off) fills with diesel and nothing else.
+	 */
+	@GameTest(maxTicks = 300)
+	public void distillationTowerSplitsCrude(GameTestHelper helper) {
+		BlockPos master = new BlockPos(4, 1, 2);
+		MachineBlockEntity tower = place(helper, MachineKind.DISTILLATION_TOWER, master);
+		BlockPos tank = master.above(2).north();
+		helper.setBlock(tank, JugcraftFluids.FLUID_TANK);
+		FluidTankBlockEntity diesel = helper.getBlockEntity(tank, FluidTankBlockEntity.class);
+		tower.tanks().input(0).fill(PetroFluids.CRUDE_OIL.source(), 1000);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(tower.tanks().output(0).has(PetroFluids.REFINERY_GAS.fluid(), 100), "No refinery gas");
+			helper.assertTrue(tower.tanks().output(1).has(PetroFluids.NAPHTHA.source(), 250), "No naphtha");
+			helper.assertTrue(tower.tanks().output(3).has(PetroFluids.HEAVY_FUEL_OIL.source(), 250), "No heavy fuel oil");
+			helper.assertTrue(diesel.storage.variant.isOf(PetroFluids.DIESEL.source()) && diesel.storage.amount == 400 * 81,
+					"The tank at the diesel draw-off holds " + diesel.storage.amount / 81 + " mB of " + diesel.storage.variant);
+			helper.assertTrue(tower.tanks().output(2).isResourceBlank(), "Diesel stayed in the tower");
+		});
+	}
 }

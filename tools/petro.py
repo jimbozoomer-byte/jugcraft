@@ -12,7 +12,27 @@ FLUIDS = {
     "crude_oil": {"display": "Crude Oil", "feature": "crude_oil",
                   "colors": [(14, 11, 9), (30, 23, 17), (48, 38, 28), (70, 62, 84)],
                   "tick_delay": 20, "slope": 2, "drop_off": 2},
+    # Distillation fractions (batch 2).
+    "naphtha": {"display": "Naphtha", "feature": "crude_oil",
+                "colors": [(150, 130, 70), (190, 170, 100), (220, 205, 140), (244, 236, 196)],
+                "tick_delay": 5, "slope": 4, "drop_off": 1},
+    "diesel": {"display": "Diesel", "feature": "crude_oil",
+               "colors": [(120, 70, 10), (170, 110, 25), (210, 150, 50), (242, 204, 112)],
+               "tick_delay": 8, "slope": 3, "drop_off": 1},
+    "heavy_fuel_oil": {"display": "Heavy Fuel Oil", "feature": "crude_oil",
+                       "colors": [(20, 16, 10), (38, 30, 18), (58, 46, 28), (96, 84, 62)],
+                       "tick_delay": 30, "slope": 2, "drop_off": 2},
 }
+
+# Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
+GASES = {
+    "refinery_gas": {"display": "Refinery Gas", "feature": "crude_oil"},
+}
+
+
+def fluid_ids():
+    """Every fluid id this line registers (sources, flowing forms and gases), for tags and recipe checks."""
+    return [f for fluid in FLUIDS for f in (fluid, f"flowing_{fluid}")] + list(GASES)
 
 
 def fluid_blocks():
@@ -36,6 +56,9 @@ FLUID_MACHINES = {
     # Hot-water extraction: oil sand or bitumen + water -> crude oil (+ sand). 32 JE/t.
     "oil_sand_extractor": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 1, "item_outputs": 1,
                            "recipe_type": "oil_sand_extraction"},
+    # Crude oil -> four fractions, each drawn off at its own height (Java: MachineKind.outputLayer). 128 JE/t.
+    "distillation_tower": {"inputs": [16_000], "outputs": [8_000, 8_000, 8_000, 8_000], "item_inputs": 0,
+                           "item_outputs": 0, "recipe_type": "distillation"},
 }
 
 # Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],
@@ -50,6 +73,12 @@ FLUID_RECIPES = {
         # Bitumen (what oil sand drops, or crushes into, three to a block) gives less per block.
         {"name": "bitumen", "items": [("jugcraft:bitumen", 1)], "fluids": [("minecraft:water", 100)],
          "fluid_results": [("jugcraft:crude_oil", 150)], "source": 150, "ticks": 80, "features": ["crude_oil"]},
+    ],
+    # One bucket of crude oil splits into fractions that add up to one bucket, in the tower's output tank order.
+    "distillation_tower": [
+        {"name": "crude_oil", "fluids": [("jugcraft:crude_oil", 1000)],
+         "fluid_results": [("jugcraft:refinery_gas", 100), ("jugcraft:naphtha", 250), ("jugcraft:diesel", 400),
+                           ("jugcraft:heavy_fuel_oil", 250)], "ticks": 100, "features": ["crude_oil"]},
     ],
 }
 

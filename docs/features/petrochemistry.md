@@ -48,6 +48,13 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - **A pipe line now carries as much as its slowest pipe** (like cables): one bronze pipe in a steel line holds it to 250 mB a tick. Before, the rate came from whichever pipe the pump touched.
 - **Heavy Pump:** a steel-tier pump with an olive volute, a chrome motor bell and hazard-striped guards. It pumps **1,000 mB a tick** from below (water as a spring, lava sources, or a tank) out of its top and sides, at **40 JE a tick**, with a 32,000 JE battery and a 16-bucket buffer. Made from steel plates, silver cable, steel gears, an electric pump and a machine casing.
 
+### Distillation tower and the refined fluids (batch 2, commit 7)
+- Four new fluids: **naphtha** (pale, runny), **diesel** (amber), **heavy fuel oil** (black and thick), each with a bucket and original textures, and **refinery gas**, a gas: it only lives in tanks and pipes, with no block and no bucket.
+- The **distillation tower** is a 2×2 dieselpunk column seven blocks tall: a fired reboiler with a glowing firebox at its foot, olive sections between gunmetal flanges, three grated platforms with hazard rails, a ladder up the back and a domed cap with a vent.
+- It turns **1,000 mB of crude oil into 100 mB of refinery gas, 250 mB of naphtha, 400 mB of diesel and 250 mB of heavy fuel oil** every 100 ticks, at 128 JE/t (12,800 JE a bucket). Volume is conserved.
+- **Each fraction comes out at its own height**, at a chrome draw-off with a red valve on the front: heavy fuel oil at the base (layer 0), diesel two blocks up, naphtha four up and refinery gas at the top (layer 6). It pushes each only from the faces of its own layer, so one pipe or tank per draw-off keeps them apart. Crude oil goes in at any face.
+- Recipe: steel plates, a steel tank, an advanced circuit and a blast furnace.
+
 ## Connections
 - Existing input producer: oil reservoirs (commit 3) through the pumpjack; oil sand and bitumen (existing rock and item) through the extractor; water from pumps.
 - Existing output consumer: the fluid system (tanks, steel tank, pumps, pipes); refining comes in batch 2.
@@ -74,6 +81,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 - `tools/check_mod_data.py` audits fluid recipes (`tools/petro.py`): every item and fluid resolves, recipes fit the machine's slots and tank sizes, and no recipe gives out more fluid than it takes in (a recipe that releases fluid from an item, such as oil sand, must state how much as its `source`).
 - Game tests (`PetroGameTests`): `crudeOilFillsTanks` (a tinplate tank stores a bucket of crude oil) and `crudeOilMakesNoNewSources` (two sources with a gap leave flowing oil, not a new source).
 - Game tests: `oilReservoirsAreSeededAndFinite` (1,600 far-away chunks read the same twice, about one in twelve holds pumpable oil, a reservoir gives exactly what it holds and then nothing, and shale can't be taken as pumpable oil) and `surveyFindsOil`.
+- Game tests `heavyPumpFillsFastThroughSteelPipes`, `bronzePipeLimitsASteelLine`, and `distillationTowerSplitsCrude` (a bucket of crude oil becomes 100/250/400/250 mB, and a tank at the diesel draw-off gets only the diesel).
 - Game test `pumpjackPumpsOil`: a powered pumpjack over pumpable oil fills its tank with crude oil and the reservoir goes down by as much.
 - Game tests `extractorTanksOnlyTakeWhatTheyUse` (its tanks take water but not lava or crude oil, through Fabric's fluid API) and `extractorWashesOilFromOilSand` (a block of oil sand and water become 500 mB of crude oil and sand, using 250 mB of water).
 - Not run: client play-testing of how the fluid looks and flows.

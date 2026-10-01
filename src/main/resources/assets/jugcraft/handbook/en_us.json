@@ -1862,6 +1862,29 @@
             "result": "jugcraft:oil_sand_extractor",
             "count": 1
           }
+        },
+        {
+          "title": "Distillation Tower",
+          "icon": "jugcraft:distillation_tower",
+          "text": [
+            "Two by two and seven blocks tall. Heats crude oil and splits each bucket into 100 mB of refinery gas, 250 mB of naphtha, 400 mB of diesel and 250 mB of heavy fuel oil, a bucket every 5 seconds. Each fraction comes out at its own height: heavy fuel oil at the base, diesel two blocks up, naphtha four up, and refinery gas at the top. Give each its own pipe or tank.",
+            "Uses 128 JE/t while working. Holds 40,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_plate",
+              "minecraft:blast_furnace",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:distillation_tower",
+            "count": 1
+          }
         }
       ]
     },

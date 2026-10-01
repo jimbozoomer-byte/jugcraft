@@ -366,9 +366,12 @@ The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches
 | Thing | What it does | Details | Built from |
 | --- | --- | --- | --- |
 | Crude Oil | A thick black fluid with a bucket; flows slowly and never makes new sources | `c:crude_oil` | reservoirs, oil sand |
+| Naphtha, Diesel, Heavy Fuel Oil | Refined liquids with buckets, tagged `c:<name>` | runny / amber / thick | distillation tower |
+| Refinery Gas | A gas: tanks and pipes only, no block or bucket | `c:refinery_gas` | distillation tower |
 | Oil reservoirs | Hidden under Overworld chunks, fixed by the seed: conventional (about 1 chunk in 12, 50–250 buckets) or shale (about 1 in 4 of the rest, 200–800 buckets, fracking only) | finite; the prospector reports Oil and Shale oil | – |
 | Pumpjack | 1 wide, 3 tall, 3 long; pumps the conventional reservoir under its wellhead | 2 mB/t at 32 JE/t, 16-bucket tank, pushes into pipes | 4 steel plates, 2 steel gears, electric pump, casing |
 | Oil Sand Extractor | 2×2×2 hot-water extraction | oil sand + 250 mB water → 500 mB crude oil + sand (160 ticks); bitumen + 100 mB water → 150 mB (80 ticks); 32 JE/t | 4 steel plates, hopper, 2 tinplate tanks, casing, steel gear |
+| Distillation Tower | 2×2, seven tall; splits crude oil into fractions, each drawn off at its own height | 1,000 mB crude → 100 refinery gas (top), 250 naphtha (layer 4), 400 diesel (layer 2), 250 heavy fuel oil (base); 100 ticks at 128 JE/t | 6 steel plates, steel tank, advanced circuit, blast furnace |
 
 **Fluid processing machines** (the pumpjack and extractor are the first): input tanks take only fluids the machine's recipes use; output tanks push into neighbouring tanks and pipes; the screen shows a gauge per tank. Recipes are data in `data/jugcraft/recipe/<type>/` (see [petrochemistry.md](features/petrochemistry.md)).
 
