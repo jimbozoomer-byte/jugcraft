@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Nitrogen chemistry, batch 12
+- **Air separation unit** (2×2, six tall): splits air into nitrogen and oxygen, four to one, needing only power.
+- **Synthesis converter** (3×4×2): Haber–Bosch ammonia (hydrogen + nitrogen) and Ostwald nitric acid (ammonia + oxygen + water).
+- New gases nitrogen, oxygen and ammonia; nitric acid with a bucket.
+- Ammonia + phosphate → 6 fertilizer; nitric acid etches microchips with half the acid.
+- Three advancements, a handbook section and game tests.
+
 ### #58 Farming, batch 9: harvesters, sprinklers and cotton
 - **Crop harvester** (1×2): harvests and replants the ripe crops in the 9×9 field in front of it.
 - **Sprinkler:** pipe-fed water gives nearby crops extra growth ticks; it also spreads fertilizer from its hopper.
