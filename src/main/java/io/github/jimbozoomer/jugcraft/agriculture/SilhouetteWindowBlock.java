@@ -9,7 +9,6 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
@@ -80,7 +79,7 @@ public class SilhouetteWindowBlock extends BaseEntityBlock {
 	 * Whether the side of the window facing {@code side} glows: the block light on the other side is bright enough, and
 	 * brighter than on this side (light seeps through the pane, so only the far side's lamp counts).
 	 */
-	public static boolean glows(BlockAndTintGetter level, BlockPos pos, Direction side) {
+	public static boolean glows(Level level, BlockPos pos, Direction side) {
 		int far = level.getBrightness(LightLayer.BLOCK, pos.relative(side.getOpposite()));
 		int near = level.getBrightness(LightLayer.BLOCK, pos.relative(side));
 		return far >= GLOW_LIGHT && far > near;
