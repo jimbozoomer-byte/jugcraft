@@ -8,7 +8,7 @@ Format: {"chapters": [{"title", "icon", "pages": [{"title", "icon", "text": [par
 "craft": {"grid": [9 item ids or null], "result", "count"}, "recipes": [{"in": [[id, count]], "out": [id, count]}]}]}]}
 """
 from materials import COMPONENTS, METALS, MINERALS, ingot_id, ore_ids
-from machines import (CRAFTING, MACHINES, STATS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS,
+from machines import (ELECTRONICS_BLOCKS, CRAFTING, MACHINES, STATS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS,
                       UPGRADES, BYPRODUCTS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, machine_recipes)
 
 MOD = "jugcraft"
@@ -54,6 +54,9 @@ ABOUT = {
     "high_pressure_extractor": "A steel extractor: 32 items every 4 ticks, four times the brass one.",
     "capacitor_bank": "A 2x2 bank of Leyden jars: 4,000,000 JE. It charges from any side and gives power out of the "
                       "sockets on its front, 4,096 JE/t.",
+    "gas_holder": "A 3x3x3 sphere on legs: 1,024 buckets of one gas, and nothing but gases (liquids go in the steel "
+                  "tank). Pumps and pipes fill and empty it from any face; right-click with an empty hand to read it. "
+                  "Comparators read how full it is.",
     "steel_tank": "A 2x2 riveted tank: 128 buckets of one fluid. Buckets, pumps and pipes fill and empty it; right-click "
                   "with an empty hand to read it.",
     "item_crate": "Holds 32 stacks of one item. Right-click with an item to put it in, with an empty hand to take a "
@@ -61,6 +64,12 @@ ABOUT = {
     "bronze_fluid_pipe": "Carries fluid that a pump pushes into it to every tank and fluid machine it touches.",
     "fluid_tank": "Holds 16 buckets of one fluid. Fill or empty it with buckets; right-click with an empty hand to read it.",
     "electric_pump": "Pulls water or lava from the block below it and pushes it out of its top and sides.",
+    "fluid_valve": "A steel pipe segment with a valve. Open, it carries fluid like a steel pipe; a redstone signal "
+                   "closes it, and the pipes on either side become separate lines. Its lamp is green while open and "
+                   "amber while closed.",
+    "fluid_filter": "A steel pipe segment with a strainer. Fluid passes along it, but the tanks and machines it touches "
+                    "only get its chosen fluid (nothing until one is chosen). Use a filled bucket on it, or right-click "
+                    "it beside a tank holding the fluid (the way to choose a gas); sneak and right-click to clear it.",
     "steel_fluid_pipe": "Like the bronze pipe, but carries 1,000 mB a tick for refinery flows. A pipe line carries as much "
                         "as its slowest pipe, so one bronze pipe holds a steel line back to 250 mB.",
     "heavy_pump": "A steel-tier pump: 1,000 mB a tick from below (water, lava or a tank) out of its top and sides, at "
@@ -136,6 +145,18 @@ ABOUT = {
                          "and a bucket of water.",
     "chemical_reactor": "Two by two by two, lined with lead against the acid. Burns sulfur and absorbs it in water: two "
                         "sulfur dust and a bucket of water make a bucket of sulfuric acid, every 5 seconds.",
+    "crystal_grower": "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single "
+                      "crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 "
+                      "wafers in the sawmill.",
+    "network_terminal": "A beige retro computer. Cable it into a power network and right-click it: it shows the "
+                        "network's cables, the rate its slowest cable sets, how many devices it reaches and the "
+                        "energy they hold. It uses no power.",
+    "lithography_station": "Three wide, two tall and two deep: a cleanroom and an operator's desk with a monitor bank. "
+                           "A silicon wafer, two copper wire and 100 mB of sulfuric acid make four microchips, every "
+                           "10 seconds at 192 JE/t. Pipe the acid into its tank.",
+    "lithium_battery_bank": "Three wide, two tall, one deep: six lithium battery modules holding 32,000,000 JE, eight "
+                            "capacitor banks. It charges from any side and gives power out of the sockets on its "
+                            "front, 16,384 JE/t.",
     "fuel_cell": "One block. Combines hydrogen with the air: 128 JE/t, burning a millibucket of hydrogen a tick (128,000 "
                  "JE a bucket). Pipe hydrogen from the electrolytic cell into it. Its screen lights while it runs.",
     "diesel_engine": "Two wide, two tall and three long. Burns diesel (256 KE a mB) or heavy fuel oil (128) piped into "
@@ -174,6 +195,10 @@ ABOUT = {
     "belt": "Links two belt pulleys: use it on one, then on the other. Breaking a pulley drops the belt.",
     "electric_motor": "Turns JE from cables back into rotation at 75%, up to 96 KE/t out of its shaft, which points "
                       "the way you looked when placing it. Motor and dynamo together always lose power.",
+    "magnet_dynamo": "A dynamo wound round rare-earth magnets: 512 KE/t into JE at 95%, against the copper "
+                     "dynamo's 128 at 75%. It pushes the JE into cables on every side.",
+    "magnet_motor": "An electric motor with rare-earth magnets: takes 1,024 JE/t and turns it into up to 384 KE/t at "
+                    "95%. Paired with a magnet dynamo it still loses a tenth every round.",
     "dynamo": "Turns rotation reaching any face into JE at 75% and pushes it into cables on every side: the bridge "
               "from a shaft line to the electric network.",
     "auto_crafter": "Crafts the crafting recipe laid out in its 3x3 grid. Set the pattern by hand; each grid slot "
@@ -324,7 +349,8 @@ def build():
             + [block_page(b, KINETIC_BLOCKS[b]["display"]) for b in ("hand_crank", "iron_shaft", "brass_gearbox",
                                                                      "belt_pulley")]
             + [block_page("belt", TOOLS["belt"])]
-            + [block_page(b, KINETIC_BLOCKS[b]["display"]) for b in ("dynamo", "electric_motor")]},
+            + [block_page(b, KINETIC_BLOCKS[b]["display"]) for b in ("dynamo", "electric_motor", "magnet_dynamo",
+                                                                     "magnet_motor")]},
         {"title": "Processing", "icon": f"{MOD}:crusher", "pages":
             [machine_page(m) for m in ("electric_furnace", "crusher", "alloy_smelter", "metal_press", "wire_drawer",
                                        "circuit_assembler", "arc_furnace_controller", "auto_crafter")]},
@@ -336,7 +362,8 @@ def build():
             + [block_page(t, POWERED_TOOLS[t]) for t in POWERED_TOOLS]
             + [block_page(m, UPGRADE_MODULES[m][0]) for m in UPGRADE_MODULES]},
         {"title": "Fluids", "icon": f"{MOD}:fluid_tank", "pages":
-            [block_page(p, PIPES[p]["display"]) for p in ("bronze_fluid_pipe", "steel_fluid_pipe")]
+            [block_page(p, PIPES[p]["display"]) for p in ("bronze_fluid_pipe", "steel_fluid_pipe", "fluid_valve",
+                                                          "fluid_filter")]
             + [block_page(b, FLUID_BLOCKS[b]["display"]) for b in ("fluid_tank", "electric_pump", "heavy_pump")]},
         {"title": "Oil", "icon": f"{MOD}:crude_oil_bucket", "pages": [
             {"title": "Crude Oil", "icon": f"{MOD}:crude_oil_bucket", "text": [
@@ -388,10 +415,35 @@ def build():
                 "seconds.",
                 "That is two ingots from each bauxite, twice what the arc furnace gets and far more than the blast "
                 "furnace's nugget."]},
+            {"title": "Titanium", "icon": f"{MOD}:titanium_ingot", "text": [
+                "No furnace can smelt titanium. Chlorinate it instead: a raw titanium, a coal coke and 250 mB of "
+                "chlorine in the chemical reactor make a titanium sponge.",
+                "The arc furnace melts the sponge into a titanium ingot. Titanium frames the lithium battery bank."]},
+            {"title": "Leaching", "icon": f"{MOD}:lithium_carbonate", "text": [
+                "Dissolve ores in sulfuric acid in the chemical reactor: a lepidolite and 250 mB of acid give two "
+                "lithium carbonate, a monazite two rare earth oxide.",
+                "That is twice what the blast furnace gets.",
+                "Two lithium carbonate, four aluminum plates and a copper wire make two lithium cells.",
+                "The alloy smelter melts a rare earth oxide with an iron ingot into a neodymium magnet, for the "
+                "magnet dynamo and magnet motor."]},
+            machine_page("lithium_battery_bank"),
             {"title": "Fertilizer", "icon": f"{MOD}:fertilizer", "text": [
                 "Two phosphate and 250 mB of sulfuric acid in the chemical reactor make four fertilizer.",
                 "Use one on the ground or a crop: every crop in the 5x5 area around it (a block up or down too) gets "
                 "two doses of bone meal. Grass and saplings are left alone."]},
+        ]},
+        {"title": "Electronics", "icon": f"{MOD}:silicon_wafer", "pages": [
+            {"title": "From Sand to Silicon", "icon": f"{MOD}:silicon_boule", "text": [
+                "The electronics tier turns silicon into chips. It has the cyan look: dark casings, cyan glass and "
+                "screens, violet conduits.",
+                "Grow a silicon boule from 4 silicon and a phosphate in the crystal grower, then saw it into 8 silicon "
+                "wafers in the sawmill."]},
+            machine_page("crystal_grower"),
+            machine_page("lithography_station"),
+            {"title": "Processors", "icon": f"{MOD}:processor", "text": [
+                "Four microchips, an advanced circuit and a gold ingot make a processor in the circuit assembler: the "
+                "third circuit tier."]},
+            block_page("network_terminal", ELECTRONICS_BLOCKS["network_terminal"]["display"]),
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [
@@ -410,7 +462,7 @@ def build():
         ]},
         {"title": "Storage", "icon": f"{MOD}:item_crate", "pages":
             [block_page("item_crate", STORAGE_BLOCKS["item_crate"]["display"])]
-            + [machine_page(m) for m in ("capacitor_bank", "steel_tank")]},
+            + [machine_page(m) for m in ("capacitor_bank", "steel_tank", "gas_holder")]},
         {"title": "Renewables", "icon": f"{MOD}:tree_farm", "pages":
             [machine_page(m) for m in ("water_wheel", "cobblestone_generator", "tree_farm")]},
         {"title": "Upgrades", "icon": f"{MOD}:speed_upgrade", "pages":

@@ -120,7 +120,30 @@
           "icon": "jugcraft:alumina",
           "text": [
             "The Bayer Way: Digest bauxite into alumina.",
-            "Clean Burn: Build a hydrogen fuel cell."
+            "Clean Burn: Build a hydrogen fuel cell.",
+            "Kroll Call: Chlorinate titanium and melt the sponge.",
+            "Power Wall: Build a lithium battery bank.",
+            "Strong Attraction: Make a neodymium magnet."
+          ]
+        },
+        {
+          "title": "Milestones (9)",
+          "icon": "jugcraft:magnet_dynamo",
+          "text": [
+            "Lossless (Almost): Build a magnet dynamo or magnet motor.",
+            "Pulling Strings: Grow a silicon boule in the crystal grower.",
+            "Etched in Light: Etch microchips in the lithography station.",
+            "Central Processing: Assemble a processor.",
+            "Hello, World: Build a network terminal."
+          ]
+        },
+        {
+          "title": "Milestones (10)",
+          "icon": "jugcraft:gas_holder",
+          "text": [
+            "Under Pressure: Build a gas holder.",
+            "Shut-Off Valve: Make a fluid valve.",
+            "Strained Relations: Make a fluid filter."
           ]
         }
       ]
@@ -141,6 +164,7 @@
             "Nickel: Y -64 to 16, needs a iron pickaxe.",
             "Tungsten: Y -64 to 0, needs a iron pickaxe.",
             "Uranium: Y -64 to -16, needs a iron pickaxe.",
+            "Titanium: Y -64 to -8, needs a iron pickaxe.",
             "Rock Salt: Y 0 to 64.",
             "Phosphorite: Y -16 to 48.",
             "Lepidolite: Y -48 to 32.",
@@ -206,7 +230,7 @@
           "title": "Parts",
           "icon": "jugcraft:bronze_gear",
           "text": [
-            "Plates (Metal Press): copper, iron, tin, bronze, brass, invar, aluminum, nickel, lead, tungsten, steel.",
+            "Plates (Metal Press): copper, iron, tin, bronze, brass, invar, aluminum, nickel, lead, tungsten, steel, titanium.",
             "Gears (four plates): iron, bronze, brass, invar, steel.",
             "Wires (Wire Drawer): copper, silver, aluminum.",
             "Every part works with other mods' parts through c: tags."
@@ -620,6 +644,50 @@
             "result": "jugcraft:electric_motor",
             "count": 1
           }
+        },
+        {
+          "title": "Magnet Dynamo",
+          "icon": "jugcraft:magnet_dynamo",
+          "text": [
+            "A dynamo wound round rare-earth magnets: 512 KE/t into JE at 95%, against the copper dynamo's 128 at 75%. It pushes the JE into cables on every side."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:aluminum_plate",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:aluminum_plate",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:dynamo",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:aluminum_plate",
+              "jugcraft:aluminum_cable",
+              "jugcraft:aluminum_plate"
+            ],
+            "result": "jugcraft:magnet_dynamo",
+            "count": 1
+          }
+        },
+        {
+          "title": "Magnet Motor",
+          "icon": "jugcraft:magnet_motor",
+          "text": [
+            "An electric motor with rare-earth magnets: takes 1,024 JE/t and turns it into up to 384 KE/t at 95%. Paired with a magnet dynamo it still loses a tenth every round."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:aluminum_plate",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:aluminum_plate",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:electric_motor",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:aluminum_plate",
+              "jugcraft:aluminum_cable",
+              "jugcraft:aluminum_plate"
+            ],
+            "result": "jugcraft:magnet_motor",
+            "count": 1
+          }
         }
       ]
     },
@@ -1006,6 +1074,26 @@
               ],
               "out": [
                 "jugcraft:advanced_circuit",
+                1
+              ]
+            },
+            {
+              "in": [
+                [
+                  "jugcraft:microchip",
+                  4
+                ],
+                [
+                  "jugcraft:advanced_circuit",
+                  1
+                ],
+                [
+                  "minecraft:gold_ingot",
+                  1
+                ]
+              ],
+              "out": [
+                "jugcraft:processor",
                 1
               ]
             }
@@ -1770,6 +1858,50 @@
           }
         },
         {
+          "title": "Fluid Valve",
+          "icon": "jugcraft:fluid_valve",
+          "text": [
+            "A steel pipe segment with a valve. Open, it carries fluid like a steel pipe; a redstone signal closes it, and the pipes on either side become separate lines. Its lamp is green while open and amber while closed."
+          ],
+          "craft": {
+            "grid": [
+              null,
+              "minecraft:lever",
+              null,
+              "jugcraft:steel_plate",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate",
+              null,
+              "minecraft:redstone",
+              null
+            ],
+            "result": "jugcraft:fluid_valve",
+            "count": 2
+          }
+        },
+        {
+          "title": "Fluid Filter",
+          "icon": "jugcraft:fluid_filter",
+          "text": [
+            "A steel pipe segment with a strainer. Fluid passes along it, but the tanks and machines it touches only get its chosen fluid (nothing until one is chosen). Use a filled bucket on it, or right-click it beside a tank holding the fluid (the way to choose a gas); sneak and right-click to clear it."
+          ],
+          "craft": {
+            "grid": [
+              null,
+              "jugcraft:steel_plate",
+              null,
+              "minecraft:iron_bars",
+              "jugcraft:steel_fluid_pipe",
+              "minecraft:iron_bars",
+              null,
+              "jugcraft:steel_plate",
+              null
+            ],
+            "result": "jugcraft:fluid_filter",
+            "count": 1
+          }
+        },
+        {
           "title": "Tinplate Tank",
           "icon": "jugcraft:fluid_tank",
           "text": [
@@ -2297,12 +2429,142 @@
           ]
         },
         {
+          "title": "Titanium",
+          "icon": "jugcraft:titanium_ingot",
+          "text": [
+            "No furnace can smelt titanium. Chlorinate it instead: a raw titanium, a coal coke and 250 mB of chlorine in the chemical reactor make a titanium sponge.",
+            "The arc furnace melts the sponge into a titanium ingot. Titanium frames the lithium battery bank."
+          ]
+        },
+        {
+          "title": "Leaching",
+          "icon": "jugcraft:lithium_carbonate",
+          "text": [
+            "Dissolve ores in sulfuric acid in the chemical reactor: a lepidolite and 250 mB of acid give two lithium carbonate, a monazite two rare earth oxide.",
+            "That is twice what the blast furnace gets.",
+            "Two lithium carbonate, four aluminum plates and a copper wire make two lithium cells.",
+            "The alloy smelter melts a rare earth oxide with an iron ingot into a neodymium magnet, for the magnet dynamo and magnet motor."
+          ]
+        },
+        {
+          "title": "Lithium Battery Bank",
+          "icon": "jugcraft:lithium_battery_bank",
+          "text": [
+            "Three wide, two tall, one deep: six lithium battery modules holding 32,000,000 JE, eight capacitor banks. It charges from any side and gives power out of the sockets on its front, 16,384 JE/t.",
+            "Holds 32,000,000 JE; 16384 JE/t in and out."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:titanium_ingot",
+              "jugcraft:lithium_cell",
+              "jugcraft:titanium_ingot",
+              "jugcraft:lithium_cell",
+              "jugcraft:capacitor_bank",
+              "jugcraft:lithium_cell",
+              "jugcraft:titanium_ingot",
+              "jugcraft:lithium_cell",
+              "jugcraft:titanium_ingot"
+            ],
+            "result": "jugcraft:lithium_battery_bank",
+            "count": 1
+          }
+        },
+        {
           "title": "Fertilizer",
           "icon": "jugcraft:fertilizer",
           "text": [
             "Two phosphate and 250 mB of sulfuric acid in the chemical reactor make four fertilizer.",
             "Use one on the ground or a crop: every crop in the 5x5 area around it (a block up or down too) gets two doses of bone meal. Grass and saplings are left alone."
           ]
+        }
+      ]
+    },
+    {
+      "title": "Electronics",
+      "icon": "jugcraft:silicon_wafer",
+      "pages": [
+        {
+          "title": "From Sand to Silicon",
+          "icon": "jugcraft:silicon_boule",
+          "text": [
+            "The electronics tier turns silicon into chips. It has the cyan look: dark casings, cyan glass and screens, violet conduits.",
+            "Grow a silicon boule from 4 silicon and a phosphate in the crystal grower, then saw it into 8 silicon wafers in the sawmill."
+          ]
+        },
+        {
+          "title": "Crystal Grower",
+          "icon": "jugcraft:crystal_grower",
+          "text": [
+            "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 wafers in the sawmill.",
+            "Uses 128 JE/t while working. Holds 60,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:glass",
+              "jugcraft:titanium_ingot",
+              "minecraft:glass",
+              "minecraft:glass",
+              "jugcraft:arc_furnace_casing",
+              "minecraft:glass",
+              "jugcraft:aluminum_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:aluminum_plate"
+            ],
+            "result": "jugcraft:crystal_grower",
+            "count": 1
+          }
+        },
+        {
+          "title": "Lithography Station",
+          "icon": "jugcraft:lithography_station",
+          "text": [
+            "Three wide, two tall and two deep: a cleanroom and an operator's desk with a monitor bank. A silicon wafer, two copper wire and 100 mB of sulfuric acid make four microchips, every 10 seconds at 192 JE/t. Pipe the acid into its tank.",
+            "Uses 192 JE/t while working. Holds 60,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:glass",
+              "minecraft:redstone_lamp",
+              "minecraft:glass",
+              "jugcraft:titanium_ingot",
+              "jugcraft:advanced_circuit",
+              "jugcraft:titanium_ingot",
+              "jugcraft:aluminum_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:aluminum_plate"
+            ],
+            "result": "jugcraft:lithography_station",
+            "count": 1
+          }
+        },
+        {
+          "title": "Processors",
+          "icon": "jugcraft:processor",
+          "text": [
+            "Four microchips, an advanced circuit and a gold ingot make a processor in the circuit assembler: the third circuit tier."
+          ]
+        },
+        {
+          "title": "Network Terminal",
+          "icon": "jugcraft:network_terminal",
+          "text": [
+            "A beige retro computer. Cable it into a power network and right-click it: it shows the network's cables, the rate its slowest cable sets, how many devices it reaches and the energy they hold. It uses no power."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:glass_pane",
+              "jugcraft:processor",
+              "minecraft:glass_pane",
+              "jugcraft:plastic_sheet",
+              "minecraft:redstone",
+              "jugcraft:plastic_sheet",
+              "jugcraft:copper_cable",
+              "minecraft:stone_button",
+              "jugcraft:copper_cable"
+            ],
+            "result": "jugcraft:network_terminal",
+            "count": 1
+          }
         }
       ]
     },
@@ -2567,6 +2829,29 @@
               "jugcraft:steel_plate"
             ],
             "result": "jugcraft:steel_tank",
+            "count": 1
+          }
+        },
+        {
+          "title": "Gas Holder",
+          "icon": "jugcraft:gas_holder",
+          "text": [
+            "A 3x3x3 sphere on legs: 1,024 buckets of one gas, and nothing but gases (liquids go in the steel tank). Pumps and pipes fill and empty it from any face; right-click with an empty hand to read it. Comparators read how full it is.",
+            "Needs no power."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:gas_holder",
             "count": 1
           }
         }

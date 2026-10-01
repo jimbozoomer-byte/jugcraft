@@ -506,6 +506,41 @@ public class PetroGameTests {
 		});
 	}
 
+	/** The lithography station etches a wafer and two copper wire with 100 mB of sulfuric acid into four microchips. */
+	@GameTest(maxTicks = 400)
+	public void lithographyMakesMicrochips(GameTestHelper helper) {
+		MachineBlockEntity station = place(helper, MachineKind.LITHOGRAPHY_STATION, new BlockPos(5, 1, 2));
+		station.tanks().input(0).fill(PetroFluids.SULFURIC_ACID.source(), 1_000);
+		station.setItem(0, new ItemStack(PetroItems.SILICON_WAFER));
+		station.setItem(1, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("copper_wire")), 2));
+		helper.succeedWhen(() -> {
+			ItemStack out = station.getItem(station.kind().outputSlot());
+			helper.assertTrue(out.is(PetroItems.MICROCHIP) && out.getCount() == 4, "Microchips: " + out);
+			helper.assertTrue(station.tanks().input(0).millibuckets() == 900, "Acid left: " + station.tanks().input(0).millibuckets());
+		});
+	}
+
+	/** The 3x3x3 gas holder holds 1,024 buckets of one gas, through any of its blocks, and refuses liquids. */
+	@GameTest
+	public void gasHolderHoldsOnlyGas(GameTestHelper helper) {
+		BlockPos master = new BlockPos(5, 1, 1);
+		placeUnpowered(helper, MachineKind.GAS_HOLDER, master);
+		// The top back corner block, two blocks from the master each way.
+		Storage<FluidVariant> holder = FluidStorage.SIDED.find(helper.getLevel(),
+				helper.absolutePos(master.west(2).above(2).south(2)), Direction.UP);
+		helper.assertTrue(holder != null, "No fluid storage on the gas holder's far corner");
+		try (Transaction transaction = Transaction.openOuter()) {
+			long water = holder.insert(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET, transaction);
+			helper.assertTrue(water == 0, "The gas holder took water");
+			long hydrogen = holder.insert(FluidVariant.of(PetroFluids.HYDROGEN.fluid()), 2_000 * FluidConstants.BUCKET, transaction);
+			helper.assertTrue(hydrogen == 1_024 * FluidConstants.BUCKET, "Took " + hydrogen / FluidConstants.BUCKET + " buckets");
+			long chlorine = holder.insert(FluidVariant.of(PetroFluids.CHLORINE.fluid()), FluidConstants.BUCKET, transaction);
+			helper.assertTrue(chlorine == 0, "A hydrogen holder took chlorine");
+			transaction.commit();
+		}
+		helper.succeed();
+	}
+
 	/** Fertilizer grows every crop in the 5x5 area around where it is used. */
 	@GameTest
 	public void fertilizerGrowsTheCropsAround(GameTestHelper helper) {
@@ -547,6 +582,33 @@ public class PetroGameTests {
 			helper.assertTrue(burnt > 0, "Burnt no hydrogen");
 			helper.assertTrue(energy.getAmount() == (long) burnt * FluidFuels.HYDROGEN, "Energy " + energy.getAmount() + " for " + burnt + " mB");
 			helper.succeed();
+		});
+	}
+
+	/** The Kroll process: raw titanium, coke and 250 mB of chlorine in the chemical reactor make a titanium sponge. */
+	@GameTest(maxTicks = 300)
+	public void reactorMakesTitaniumSponge(GameTestHelper helper) {
+		MachineBlockEntity reactor = place(helper, MachineKind.CHEMICAL_REACTOR, new BlockPos(4, 1, 2));
+		reactor.tanks().input(0).fill(PetroFluids.CHLORINE.fluid(), 250);
+		reactor.setItem(0, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("raw_titanium"))));
+		reactor.setItem(1, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("coke"))));
+		helper.succeedWhen(() -> {
+			ItemStack out = reactor.getItem(reactor.kind().outputSlot());
+			helper.assertTrue(out.is(PetroItems.TITANIUM_SPONGE), "Sponge: " + out);
+			helper.assertTrue(reactor.tanks().input(0).isResourceBlank(), "Chlorine left: " + reactor.tanks().input(0).millibuckets());
+		});
+	}
+
+	/** Leaching: a lepidolite in 250 mB of sulfuric acid gives two lithium carbonate, twice the blast furnace. */
+	@GameTest(maxTicks = 300)
+	public void reactorLeachesLithium(GameTestHelper helper) {
+		MachineBlockEntity reactor = place(helper, MachineKind.CHEMICAL_REACTOR, new BlockPos(4, 1, 2));
+		reactor.tanks().input(0).fill(PetroFluids.SULFURIC_ACID.source(), 250);
+		reactor.setItem(0, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("lepidolite"))));
+		helper.succeedWhen(() -> {
+			ItemStack out = reactor.getItem(reactor.kind().outputSlot());
+			helper.assertTrue(out.is(BuiltInRegistries.ITEM.getValue(Jugcraft.id("lithium_carbonate"))) && out.getCount() == 2,
+					"Lithium carbonate: " + out);
 		});
 	}
 }

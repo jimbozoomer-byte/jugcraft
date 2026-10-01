@@ -11,7 +11,7 @@ blast furnace as a clearly marked stand-in, and liquid crude oil is not added.
 MOD = "jugcraft"
 
 # Feature switches (config/jugcraft.properties). Order is the config file order.
-FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "aluminum",
+FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
             "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines",
             "pixel_hollows", "retro_trader"]
 
@@ -32,6 +32,9 @@ METALS = {
                  "tool": "iron", "gen": {"size": 5, "count": 2, "min_y": -64, "max_y": 0}},
     "uranium": {"mined": True, "display": "Uranium", "feature": "uranium", "cook": ["blasting"], "xp": 1.0,
                 "tool": "iron", "gen": {"size": 4, "count": 1, "min_y": -64, "max_y": -16}},
+    # Rutile-bearing titanium ore: no furnace smelts it; only the Kroll process (chlorine, chemistry batch 6) does.
+    "titanium": {"mined": True, "display": "Titanium", "feature": "titanium", "cook": [], "xp": 1.0,
+                 "tool": "iron", "gen": {"size": 5, "count": 2, "min_y": -64, "max_y": -8}},
     "bronze": {"mined": False, "display": "Bronze", "feature": "tin", "extras": ["bronze_blend"]},
     "aluminum": {"mined": False, "display": "Aluminum", "feature": "aluminum"},
     # Alloys made only in the alloy smelter (tools/machines.py ALLOY_SMELTER).
@@ -83,7 +86,8 @@ EXTRA_NAMES = {"bronze_blend": "Bronze Blend"}
 # Metal content per item in nugget units; the checker uses these to audit recipes.
 PART_UNITS = {"plate": 9, "gear": 36, "wire": 3, "dust": 9}
 COMPONENTS = {
-    "plate": ["copper", "iron", "tin", "bronze", "brass", "invar", "aluminum", "nickel", "lead", "tungsten", "steel"],
+    "plate": ["copper", "iron", "tin", "bronze", "brass", "invar", "aluminum", "nickel", "lead", "tungsten", "steel",
+              "titanium"],
     "gear": ["iron", "bronze", "brass", "invar", "steel"],
     "wire": ["copper", "silver", "aluminum"],
     # Pulverizer output (see tools/machines.py); one dust smelts back into one ingot.
@@ -94,7 +98,7 @@ WASHED_ORES = list(COMPONENTS["dust"])
 # Sawmill byproduct.
 SAWDUST = "sawdust"
 # Assembled electronics (non-metal outputs; their metal is consumed).
-CIRCUITS = {"basic_circuit": "Basic Circuit", "advanced_circuit": "Advanced Circuit"}
+CIRCUITS = {"basic_circuit": "Basic Circuit", "advanced_circuit": "Advanced Circuit", "processor": "Processor"}
 # Vanilla metals that get Jugcraft parts: nugget units per vanilla ingot.
 VANILLA_METALS = {"copper", "iron", "gold"}
 

@@ -16,6 +16,28 @@ No numbered release yet. Everything below is on `main`.
 - **Dedicated-server check (CI):** a real client joins the game's own dedicated server, opens a machine and trades with the Retro Trader over the network, leaves and rejoins; and a world is saved and reopened with its trader, machine contents and cabinet intact. The two-client checklist is in [docs/TESTING.md](docs/TESTING.md#dedicated-server-and-two-clients).
 - Fourteen game tests, seven client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
 
+### #57 Fluid logistics, batch 8: gas holders, valves and filters
+- **Gas holder** (3×3×3 Horton sphere): 1,024 buckets of one gas, and only gases.
+- **Fluid valve:** a steel pipe segment that a redstone signal closes, splitting the line in two.
+- **Fluid filter:** a steel pipe segment whose neighbouring tanks and machines only receive its chosen fluid; set it with a bucket or from a tank beside it (for gases).
+- Three advancements, handbook pages and a game test for each.
+
+### #56 Electronics, batch 7: silicon, chips and the cyan look
+- **The cyan look** for the electronics tier, following the owner's references: near-black casings with cyan seams, cyan glass that glows while working, cyan screens, violet conduits, and a beige retro computer.
+- **Crystal grower** (1×2): 4 silicon + a phosphate dopant → a silicon boule; the sawmill cuts it into 8 **silicon wafers**.
+- **Lithography station** (3×2×2, a cleanroom with a monitor bank): wafer + copper wire + sulfuric acid → 4 **microchips**.
+- **Processors:** the third circuit tier (circuit assembler).
+- **Network terminal:** a beige retro computer that reads out the power network it is cabled to.
+- Four advancements, an Electronics handbook chapter and game tests for each.
+
+### #54 Chemistry, batch 6: advanced materials
+- **Titanium:** a new mined metal (deep ore, iron pickaxe, `titanium.enabled`). No furnace smelts it.
+- **The Kroll process:** raw titanium + coke + 250 mB chlorine → titanium sponge (chemical reactor); the arc furnace melts it into ingots. Chlorine's first use.
+- **Leaching:** lepidolite or monazite + sulfuric acid → 2 lithium carbonate or 2 rare earth oxide.
+- **Lithium battery bank** (3×2×1, electric look): 32,000,000 JE, 16,384 JE/t out of its front; built from lithium cells and titanium.
+- **Neodymium magnets** (alloy smelter), and the **magnet dynamo** and **magnet motor**: 95% each way, four times the copper-wound rates, cyan-banded.
+- Four advancements, handbook pages and game tests for each.
+
 ### #52 Chemistry, batch 5: electrochemistry and acids
 - **Brine** (chemical mixer: salt + water) and the **electrolytic cell** (3×3×2): brine → **chlorine**, **hydrogen** (gases) and **lye**, each out of its own row.
 - **Chemical reactor** (2×2×2): sulfur dust + water → **sulfuric acid**.

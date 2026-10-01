@@ -71,6 +71,13 @@ MACHINES = {
     "chemical_reactor": {"display": "Chemical Reactor", "lit": True},
     # A one-block hydrogen fuel cell in the electric look: hydrogen -> JE.
     "fuel_cell": {"display": "Fuel Cell", "lit": True},
+    # Storage (batch 6): a 3x2 lithium battery bank in the electric look.
+    "lithium_battery_bank": {"display": "Lithium Battery Bank", "lit": False},
+    # Electronics (batch 7, the cyan look).
+    "crystal_grower": {"display": "Crystal Grower", "lit": True},
+    "lithography_station": {"display": "Lithography Station", "lit": True},
+    # Fluid logistics (batch 8): a Horton sphere for gases.
+    "gas_holder": {"display": "Gas Holder", "lit": False},
     # Kinetic: a 2x2x3 V8 diesel engine; its shaft leaves the back of the upper right back block.
     "diesel_engine": {"display": "Diesel Engine", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
@@ -99,6 +106,8 @@ LOGISTICS_BLOCKS = {
     "high_pressure_extractor": {"display": "High-Pressure Extractor"},
     "item_sorter": {"display": "Item Sorter"},
 }
+# Electronics (batch 7): a beige retro computer that reads out its power network (electronics/NetworkTerminalBlock).
+ELECTRONICS_BLOCKS = {"network_terminal": {"display": "Network Terminal"}}
 TOOLS = {"brass_wrench": "Brass Wrench", "engineers_handbook": "Engineer's Handbook",
          # Mining & prospecting: a vague 3x3-chunk ore survey (prospecting/OreSurvey).
          "prospector": "Geo-Resonance Prospector",
@@ -116,6 +125,9 @@ KINETIC_BLOCKS = {
     "belt_pulley": {"display": "Belt Pulley", "states": "axis"},
     # JE -> KE at 75%; its shaft points the way the player looked when placing it.
     "electric_motor": {"display": "Electric Motor", "states": "facing"},
+    # Rare-earth magnet versions (batch 6): faster and far less lossy.
+    "magnet_dynamo": {"display": "Magnet Dynamo", "states": "horizontal"},
+    "magnet_motor": {"display": "Magnet Motor", "states": "facing"},
     # Item conveyors (logistics/ConveyorBlock): driven by rotation, facing the way items travel.
     "conveyor": {"display": "Conveyor", "states": "horizontal"},
     "conveyor_splitter": {"display": "Conveyor Splitter", "states": "horizontal"},
@@ -146,7 +158,11 @@ UPGRADES = {"speed_upgrade": "Speed Upgrade", "efficiency_upgrade": "Efficiency 
 # 1 bucket = 1000 mB = 81000 Fabric droplets. Pipes are passive: pumps push through them.
 PIPES = {"bronze_fluid_pipe": {"display": "Bronze Fluid Pipe", "rate": 250},
          # Steel tier, for refinery flows; a network carries as much as its slowest pipe.
-         "steel_fluid_pipe": {"display": "Steel Fluid Pipe", "rate": 1_000}}
+         "steel_fluid_pipe": {"display": "Steel Fluid Pipe", "rate": 1_000},
+         # Fluid logistics (batch 8): a steel pipe segment that redstone closes (tools/pipe_models.py draws its body).
+         "fluid_valve": {"display": "Fluid Valve", "rate": 1_000, "texture": "steel_fluid_pipe"},
+         # Lets only its chosen fluid out into the tanks and machines it touches (fluid/FluidFilterBlock).
+         "fluid_filter": {"display": "Fluid Filter", "rate": 1_000, "texture": "steel_fluid_pipe"}}
 # Fluid blocks with their own block entities. top/side/bottom name the textures.
 FLUID_BLOCKS = {
     "fluid_tank": {"display": "Tinplate Tank"},
@@ -190,6 +206,8 @@ STATS = {
     "capacitor_bank": {"capacity": 4_000_000, "io_per_tick": 4_096},
     # 2x2, one tall with a dome: 128 buckets of one fluid. No power.
     "steel_tank": {"capacity": 0, "tank": 128_000},
+    # 3x3x3 sphere on legs: 1,024 buckets of one gas, and only gases. No power.
+    "gas_holder": {"capacity": 0, "tank": 1_024_000},
     # 2 tall. Mines one c:ores block per 40 ticks from a 9x9 column below it, down to the bottom of the world.
     "ore_drill": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "ticks": 40, "radius": 4},
     # Needs water and lava touching it (neither is used): 1 cobblestone per 20 ticks.
@@ -242,6 +260,12 @@ STATS = {
     "chemical_reactor": {"capacity": 30_000, "input_per_tick": 512, "use_per_tick": 96, "tank": 8_000},
     # One block. 128 JE/t from 1 mB of hydrogen a tick (128 JE/mB).
     "fuel_cell": {"capacity": 40_000, "output_per_tick": 512, "generation_per_tick": 128, "tank": 8_000},
+    # 3x2, one deep. Outputs from its front (all six blocks), charges from any other face.
+    "lithium_battery_bank": {"capacity": 32_000_000, "io_per_tick": 16_384},
+    # 2 tall. 4 silicon + 1 phosphate (the dopant) -> a silicon boule.
+    "crystal_grower": {"capacity": 60_000, "input_per_tick": 512, "use_per_tick": 128},
+    # 3x2x2. Wafer + 2 copper wire + 100 mB sulfuric acid -> 4 microchips.
+    "lithography_station": {"capacity": 60_000, "input_per_tick": 1_024, "use_per_tick": 192, "tank": 4_000},
     # 2x2x3. Up to 512 KE/t: 2 mB of diesel a tick (256 KE/mB) or 4 mB of heavy fuel oil, only for what it delivers.
     "diesel_engine": {"capacity": 0, "use_per_tick": 0, "output_ke": 512, "tank": 8_000},
 }
@@ -366,6 +390,12 @@ CRAFTING = {
     "capacitor_bank": (["PBP", "BCB", "PBP"], {"P": "#c:plates/steel", "B": "jugcraft:battery_box",
                                                "C": "jugcraft:advanced_circuit"}, 1),
     "steel_tank": (["PPP", "PTP", "PPP"], {"P": "#c:plates/steel", "T": "jugcraft:fluid_tank"}, 1),
+    "fluid_valve": ([" W ", "PSP", " R "], {"W": "minecraft:lever", "P": "#c:plates/steel",
+                                            "S": "jugcraft:steel_fluid_pipe", "R": "minecraft:redstone"}, 2),
+    "fluid_filter": ([" P ", "ISI", " P "], {"P": "#c:plates/steel", "I": "minecraft:iron_bars",
+                                             "S": "jugcraft:steel_fluid_pipe"}, 1),
+    "gas_holder": (["PTP", "TVT", "PTP"], {"P": "#c:plates/steel", "T": "jugcraft:steel_tank",
+                                           "V": "jugcraft:steel_fluid_pipe"}, 1),
     # Automation: after the workshop tier (a circuit and brass plates).
     "auto_crafter": (["PCP", "TMT", "PHP"], {"P": "#c:plates/brass", "C": "jugcraft:basic_circuit",
                                            "T": "minecraft:crafting_table", "M": "jugcraft:machine_casing",
@@ -382,6 +412,10 @@ CRAFTING = {
     "belt": (["LSL"], {"L": "minecraft:leather", "S": "minecraft:string"}, 1),
     "electric_motor": (["PWP", "WSW", "PCP"], {"P": "#c:plates/iron", "W": "#c:wires/copper", "S": "jugcraft:iron_shaft",
                                              "C": "jugcraft:copper_cable"}, 1),
+    "magnet_dynamo": (["PMP", "MDM", "PWP"], {"P": "#c:plates/aluminum", "M": "jugcraft:neodymium_magnet",
+                                              "D": "jugcraft:dynamo", "W": "jugcraft:aluminum_cable"}, 1),
+    "magnet_motor": (["PMP", "MEM", "PWP"], {"P": "#c:plates/aluminum", "M": "jugcraft:neodymium_magnet",
+                                             "E": "jugcraft:electric_motor", "W": "jugcraft:aluminum_cable"}, 1),
     # Conveyors: leather belts over iron plates and a shaft; the splitter adds bronze gears and a brass plate.
     "conveyor": (["BBB", "PSP"], {"B": "jugcraft:belt", "P": "#c:plates/iron", "S": "jugcraft:iron_shaft"}, 6),
     "conveyor_slope": ([" C", "CP"], {"C": "jugcraft:conveyor", "P": "#c:plates/iron"}, 2),
@@ -446,6 +480,19 @@ CRAFTING = {
     "fuel_cell": (["PWP", "SCS", "PTP"], {"P": "#c:plates/aluminum", "W": "jugcraft:aluminum_cable",
                                           "S": "#c:plates/steel", "C": "jugcraft:advanced_circuit",
                                           "T": "jugcraft:fluid_tank"}, 1),
+    "crystal_grower": (["GTG", "GHG", "PCP"], {"G": "minecraft:glass", "T": "#c:ingots/titanium",
+                                               "H": "jugcraft:arc_furnace_casing", "P": "#c:plates/aluminum",
+                                               "C": "jugcraft:advanced_circuit"}, 1),
+    "lithography_station": (["GSG", "TCT", "PMP"], {"G": "minecraft:glass", "S": "minecraft:redstone_lamp",
+                                                    "T": "#c:ingots/titanium", "C": "jugcraft:advanced_circuit",
+                                                    "P": "#c:plates/aluminum", "M": "jugcraft:machine_casing"}, 1),
+    "network_terminal": (["GSG", "PXP", "WKW"], {"G": "minecraft:glass_pane", "S": "jugcraft:processor",
+                                                 "P": "jugcraft:plastic_sheet", "X": "minecraft:redstone",
+                                                 "W": "jugcraft:copper_cable", "K": "minecraft:stone_button"}, 1),
+    "lithium_cell": (["PLP", "LWL", "PLP"], {"P": "#c:plates/aluminum", "L": "jugcraft:lithium_carbonate",
+                                             "W": "#c:wires/copper"}, 2),
+    "lithium_battery_bank": (["TCT", "CBC", "TCT"], {"T": "#c:ingots/titanium", "C": "jugcraft:lithium_cell",
+                                                     "B": "jugcraft:capacitor_bank"}, 1),
     "diesel_engine": (["PXP", "GCG", "PXP"], {"P": "#c:plates/steel", "X": "jugcraft:plastic_sheet",
                                               "G": "#c:gears/steel", "C": "jugcraft:machine_casing"}, 1),
     "polymerization_reactor": (["PCP", "TGT", "PMP"], {"P": "#c:plates/steel", "C": "jugcraft:cracking_catalyst",
@@ -515,6 +562,9 @@ ARC_FURNACE = [
      "features": [FEATURE, "nickel"]},
     {"input": "jugcraft:raw_uranium", "output": "jugcraft:uranium_ingot", "count": 1, "ticks": 120,
      "features": [FEATURE, "uranium"]},
+    # Kroll-process titanium sponge (chemical reactor) melts into ingots; raw titanium itself never does.
+    {"input": "jugcraft:titanium_sponge", "output": "jugcraft:titanium_ingot", "count": 1, "ticks": 160,
+     "features": [FEATURE, "titanium"]},
     {"input": "jugcraft:lepidolite", "output": "jugcraft:lithium_carbonate", "count": 2, "ticks": 160,
      "features": [FEATURE, "lithium"]},
     {"input": "jugcraft:monazite", "output": "jugcraft:rare_earth_oxide", "count": 2, "ticks": 200,
@@ -532,6 +582,9 @@ ALLOY_SMELTER = [
      "count": 3, "ticks": 240, "features": [FEATURE, "nickel"]},
     {"inputs": [["jugcraft:tin_ingot", 1], ["jugcraft:lead_ingot", 1]], "output": "jugcraft:solder_ingot",
      "count": 2, "ticks": 120, "features": [FEATURE, "tin", "lead"]},
+    # Batch 6: rare earths alloyed with iron (and boron, left out) make neodymium magnets.
+    {"inputs": [["jugcraft:rare_earth_oxide", 1], ["minecraft:iron_ingot", 1]], "output": "jugcraft:neodymium_magnet",
+     "count": 1, "ticks": 200, "features": [FEATURE, "rare_earths"]},
 ]
 
 
@@ -556,6 +609,9 @@ CIRCUIT_ASSEMBLER = [
      "output": "jugcraft:basic_circuit", "count": 1, "ticks": 200, "features": [FEATURE, "silicon", "lead"]},
     {"inputs": [["jugcraft:basic_circuit", 2], ["jugcraft:silver_wire", 3], ["jugcraft:invar_plate", 1]],
      "output": "jugcraft:advanced_circuit", "count": 1, "ticks": 300, "features": [FEATURE, "silver", "nickel"]},
+    # Electronics (batch 7): four microchips bonded to an advanced circuit with gold.
+    {"inputs": [["jugcraft:microchip", 4], ["jugcraft:advanced_circuit", 1], ["minecraft:gold_ingot", 1]],
+     "output": "jugcraft:processor", "count": 1, "ticks": 400, "features": [FEATURE, "silicon", "sulfur", "silver", "nickel"]},
 ]
 
 
@@ -615,7 +671,17 @@ def _sawmill():
                         "features": [FEATURE], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
     recipes.append({"input": "#minecraft:planks", "output": "minecraft:stick", "count": 3, "ticks": 60,
                     "features": [FEATURE]})
+    # Electronics (batch 7): a wire saw slices a silicon boule into wafers.
+    recipes.append({"input": "jugcraft:silicon_boule", "output": "jugcraft:silicon_wafer", "count": 8, "ticks": 200,
+                    "features": [FEATURE, "silicon"]})
     return recipes
+
+
+# Crystal grower (batch 7): polysilicon melted with a phosphorus dopant and pulled into a single crystal.
+CRYSTAL_GROWER = [
+    {"inputs": [["jugcraft:silicon", 4], ["jugcraft:phosphate", 1]], "output": "jugcraft:silicon_boule",
+     "count": 1, "ticks": 400, "features": [FEATURE, "silicon", "phosphate"]},
+]
 
 
 # Coke oven: coal baked slowly into coke (no power, no fuel).
@@ -649,21 +715,24 @@ def machine_recipes():
     return {"crusher": _crusher(), "arc_furnace": ARC_FURNACE + _arc_dusts(), "alloy_smelter": ALLOY_SMELTER,
             "metal_press": _metal_press(), "wire_drawer": _wire_drawer(), "circuit_assembler": CIRCUIT_ASSEMBLER,
             "pulverizer": _pulverizer(), "ore_washer": _ore_washer(), "sieve": SIEVE, "sawmill": _sawmill(),
-            "coke_oven": COKE_OVEN, "steel_foundry": STEEL_FOUNDRY, "tree_farm": _tree_farm()}
+            "coke_oven": COKE_OVEN, "steel_foundry": STEEL_FOUNDRY, "tree_farm": _tree_farm(),
+            "crystal_grower": CRYSTAL_GROWER}
 
 
 def _arc_dusts():
-    """Dusts of metals a plain furnace cannot smelt (nickel, tungsten, uranium) melt in the arc furnace."""
-    from materials import METALS
+    """Dusts of metals a plain furnace cannot smelt (nickel, tungsten, uranium) melt in the arc furnace. (Titanium has
+    no dust: only the Kroll process frees it.)"""
+    from materials import COMPONENTS, METALS
     return [{"input": f"jugcraft:{metal}_dust", "output": f"jugcraft:{metal}_ingot", "count": 1, "ticks": 80,
              "features": [FEATURE, info["feature"]]}
-            for metal, info in METALS.items() if info["mined"] and "smelting" not in info["cook"]]
+            for metal, info in METALS.items()
+            if info["mined"] and "smelting" not in info["cook"] and metal in COMPONENTS["dust"]]
 
 
 def machine_blocks():
     return (list(MACHINES) + list(PARTS) + list(CABLES) + list(PIPES) + list(FLUID_BLOCKS)
             + list(ITEM_PIPES) + list(LOGISTICS_BLOCKS) + list(STORAGE_BLOCKS) + list(KINETIC_BLOCKS) + list(TOOL_BLOCKS)
-            + list(SLOPE_BLOCKS))
+            + list(SLOPE_BLOCKS) + list(ELECTRONICS_BLOCKS))
 
 
 def machine_items():

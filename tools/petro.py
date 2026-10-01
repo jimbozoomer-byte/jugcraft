@@ -73,6 +73,17 @@ ITEMS = {
     "alumina": "Alumina",
     # Superphosphate fertilizer (batch 5): ripens crops in a 5x5 area (chemistry/FertilizerItem).
     "fertilizer": "Fertilizer",
+    # The Kroll process (batch 6): the arc furnace melts the sponge into titanium ingots.
+    "titanium_sponge": "Titanium Sponge",
+    # Lithium cells (batch 6): crafted from lithium carbonate, built into the lithium battery bank.
+    "lithium_cell": "Lithium Cell",
+    # Neodymium magnets (batch 6): the alloy smelter makes them; the magnet dynamo and motor use them.
+    "neodymium_magnet": "Neodymium Magnet",
+    # Electronics (batch 7): the crystal grower pulls doped silicon boules; the sawmill cuts them into wafers.
+    "silicon_boule": "Silicon Boule",
+    "silicon_wafer": "Silicon Wafer",
+    # Etched in the lithography station (batch 7).
+    "microchip": "Microchip",
 }
 
 
@@ -153,6 +164,9 @@ FLUID_MACHINES = {
     # Sulfur + water -> sulfuric acid; bauxite + lye -> alumina; phosphate + acid -> fertilizer (batch 5). 96 JE/t.
     "chemical_reactor": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 1,
                          "recipe_type": "chemical_reaction"},
+    # Electronics (batch 7): a wafer and copper wire etched with sulfuric acid into microchips. 192 JE/t.
+    "lithography_station": {"inputs": [4_000], "outputs": [], "item_inputs": 2, "item_outputs": 1,
+                            "recipe_type": "lithography"},
     # Refinery gas -> plastic pellets. 96 JE/t.
     "polymerization_reactor": {"inputs": [8_000], "outputs": [], "item_inputs": 0, "item_outputs": 1,
                                "recipe_type": "polymerization"},
@@ -234,6 +248,23 @@ FLUID_RECIPES = {
         # Superphosphate: phosphate rock treated with sulfuric acid becomes a soluble fertilizer.
         {"name": "fertilizer", "items": [("jugcraft:phosphate", 2)], "fluids": [("jugcraft:sulfuric_acid", 250)],
          "results": [("jugcraft:fertilizer", 4)], "ticks": 80, "features": ["phosphate", "sulfur"]},
+        # The Kroll process, in one step: rutile chlorinated over hot coke to titanium tetrachloride, then reduced to
+        # a porous titanium sponge. The chlorine is used up.
+        {"name": "titanium_sponge", "items": [("jugcraft:raw_titanium", 1), ("jugcraft:coke", 1)],
+         "fluids": [("jugcraft:chlorine", 250)], "results": [("jugcraft:titanium_sponge", 1)], "ticks": 160,
+         "features": ["titanium", "salt"]},
+        # Acid leaching (batch 6): lithium mica and monazite dissolved in sulfuric acid and precipitated, twice what
+        # the blast-furnace stand-ins recover.
+        {"name": "lithium_carbonate", "items": [("jugcraft:lepidolite", 1)], "fluids": [("jugcraft:sulfuric_acid", 250)],
+         "results": [("jugcraft:lithium_carbonate", 2)], "ticks": 100, "features": ["lithium", "sulfur"]},
+        {"name": "rare_earth_oxide", "items": [("jugcraft:monazite", 1)], "fluids": [("jugcraft:sulfuric_acid", 250)],
+         "results": [("jugcraft:rare_earth_oxide", 2)], "ticks": 140, "features": ["rare_earths", "sulfur"]},
+    ],
+    # Photolithography (batch 7): a wafer patterned and etched with sulfuric acid, with copper wire for the bonds.
+    "lithography_station": [
+        {"name": "microchip", "items": [("jugcraft:silicon_wafer", 1), ("jugcraft:copper_wire", 2)],
+         "fluids": [("jugcraft:sulfuric_acid", 100)], "results": [("jugcraft:microchip", 4)], "ticks": 200,
+         "features": ["silicon", "sulfur"]},
     ],
     # Flowback water settles and is filtered: most of it comes back as clean water; the brine leaves salt. A quarter
     # is lost (sludge), so fracking water is never free.
