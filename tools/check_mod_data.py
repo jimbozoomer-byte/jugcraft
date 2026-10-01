@@ -15,6 +15,7 @@ from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS
                        all_blocks, all_items, feature_of)
 import petro
 import deposits
+import seasons
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 
@@ -25,6 +26,7 @@ DATA = RES / "data"
 JAVA_ROOT = ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft"
 JAVA = JAVA_ROOT / "materials" / "JugcraftMaterials.java"
 CONFIG = JAVA_ROOT / "config" / "JugcraftConfig.java"
+SEASON_JAVA = JAVA_ROOT / "season"
 WORLDGEN = JAVA_ROOT / "materials" / "JugcraftWorldgen.java"
 MACHINE_JAVA = JAVA_ROOT / "machine" / "MachineKind.java"
 STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
@@ -424,6 +426,27 @@ def check_worldgen():
             err(f"{path.name}: unknown configured feature {feature}")
 
 
+def check_seasons():
+    """The seasons biome tag matches tools/seasons.py, and the palette and calendar days are in the year."""
+    ns, path = split(seasons.TAG)
+    tag = load(DATA / ns / "tags" / "worldgen" / "biome" / f"{path}.json") or {}
+    if tag.get("values") != seasons.BIOMES:
+        err(f"#{seasons.TAG} {tag.get('values')} != tools/seasons.py {seasons.BIOMES}")
+    if f'Jugcraft.id("{path}")' not in (SEASON_JAVA / "JugcraftSeasons.java").read_text(encoding="utf-8"):
+        err(f"JugcraftSeasons.HAS_SEASONS is not #{seasons.TAG}")
+    days = [int(day) for day in re.findall(r"new Keyframe\((\d+),", (SEASON_JAVA / "SeasonPalette.java").read_text(encoding="utf-8"))]
+    if not days or days != sorted(set(days)) or days[0] < 1 or days[-1] > 365:
+        err(f"SeasonPalette keyframe days {days} must rise strictly within 1..365")
+    modes = re.findall(r"([A-Z]+)\((-?\d+)\)", (SEASON_JAVA / "SeasonCalendar.java").read_text(encoding="utf-8"))
+    for mode, day in modes:
+        if not (int(day) == -1 if mode == "AUTO" else 0 <= int(day) <= 365):
+            err(f"SeasonCalendar.Mode.{mode} day {day} is outside the year")
+    options = CONFIG.read_text(encoding="utf-8")
+    for option in ("seasons.mode", "seasons.hemisphere", "seasons.timezone"):
+        if f'"{option}"' not in options:
+            err(f"JugcraftConfig.TEXT_OPTIONS has no {option}")
+
+
 def check_java():
     source = JAVA.read_text(encoding="utf-8")
     declared = {}
@@ -685,6 +708,7 @@ def main():
     check_worldgen()
     check_java()
     check_deposits()
+    check_seasons()
     check_machines(registered)
     check_large_machines()
     check_style_pack()

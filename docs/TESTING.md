@@ -28,6 +28,7 @@ Use the cases relevant to the feature; do not claim a scenario was run just beca
 - Loot/spells: reward weights, duplicate handling, stacking/cooldowns, ability persistence, permission checks and conversion/healing feedback loops.
 - Rockets/portals: outbound and return travel, invalid destinations, disconnect during transfer, destination access, stranded-player recovery and dimension/chunk budgets.
 - Seasons: server timezone/manual override, activation/deactivation and restart at the boundary, reward replay prevention, and preservation of earned content and occupied destinations.
+  - Seasonal colours ([features/seasons.md](features/seasons.md)): `SeasonGameTests` covers the calendar, zones, overrides and palette. `SeasonClientGameTests` switches each mode in a real client, checks the synced day and tints, and saves `jugcraft_season_<mode>` screenshots. Not covered: a dedicated server with two clients, and a restart across midnight.
 
 ## Release process
 

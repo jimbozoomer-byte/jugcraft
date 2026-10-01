@@ -921,6 +921,10 @@ def tags():
     import deposits
     for block in deposits.DEPOSITS:
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    # Biomes whose grass and leaves change colour with the seasons (client/SeasonColors).
+    import seasons
+    for biome in seasons.BIOMES:
+        tags.add("worldgen/biome", seasons.TAG, biome)
     tags.write()
 
 

@@ -19,7 +19,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 
-/** Client entrypoint: machine menus to their screens, the handbook to its book, and ore surveys to the prospector screen. */
+/**
+ * Client entrypoint: machine menus to their screens, the handbook to its book, ore surveys to the prospector screen and
+ * the server's season to grass and foliage colours.
+ */
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
@@ -45,6 +48,7 @@ public final class JugcraftClient implements ClientModInitializer {
 			}
 		});
 		EngineersHandbookItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
+		SeasonColors.register();
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
 	}

@@ -8,6 +8,18 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Seasonal colours
+- **Grass and leaves change colour with the server's date** in temperate biomes: plains, meadows, forests, taigas, windswept hills and rivers.
+  - Winter is dull and dormant, spring is fresh green and summer is vanilla.
+  - Autumn turns oak leaves gold, orange and red in patches, then russet.
+  - Colours change a little each day.
+- **Server settings** in `config/jugcraft.properties`:
+  - `seasons.mode`: `auto` follows the date; `spring`, `summer`, `autumn` or `winter` hold one season; `off` gives vanilla colours.
+  - `seasons.hemisphere`: `north` or `south`.
+  - `seasons.timezone`.
+- The server decides the season; clients never use their own clock. Nothing is saved to the world.
+- Server and client game tests, with a screenshot per season.
+
 ### Unmerged: Explosive weapons, batch 18
 - **Guncotton** (2 cotton + 250 mB nitric acid, chemical reactor).
 - **Grenades**, thrown by hand, and the **grenade launcher**, which fires them further. The blast hurts living things only: up to 16 damage, walls shield, and no block, armor stand, frame or dropped item is ever touched.
