@@ -8,6 +8,10 @@ Use the contributor's GitHub identity and fork. The owner's Claude installation 
 
 ## Owner-authorized development
 
+## Local testing before submission
+
+Build and test changes on the contributor's PC when tools and access permit. Run relevant automated checks and, when possible, launch Minecraft to exercise the feature and inspect models/textures in-game. Fix problems within the change's scope. Report exactly what ran, results, and what remains unverified. If local building or gameplay testing is unavailable, continue implementing and submit a draft PR with that limitation; inability to launch Minecraft must not block coding, modeling, or submitting work. Never claim an unperformed test passed. Maintainers still assess integration and release readiness.
+
 The owner authorized Claude to build the Minecraft 26.3 + Fabric bootstrap without a separate proposal issue or second maintainer. That bootstrap is done: the scaffold, pinned toolchain, Build workflow, base materials, machines and power were merged in PRs #4–#7 (see [docs/PLATFORM.md](docs/PLATFORM.md)). The project license is MIT (see [LICENSE_POLICY.md](LICENSE_POLICY.md)). Still outstanding: running the client and dedicated server, and the two-client playtest.
 
 Main requires a PR and passing checks, but zero independent approvals while there is one maintainer. The owner can merge their own PR after reviewing it. CODEOWNERS routes review; its approval is not mandatory. Keep no-force-push/no-deletion and CI protections. Restore independent review when the owner chooses to add maintainers.
