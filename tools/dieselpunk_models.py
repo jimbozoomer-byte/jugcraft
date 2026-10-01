@@ -721,6 +721,33 @@ def electrolytic_cell():
     return m
 
 
+def chemical_reactor():
+    """Two by two by two: an acid plant. A squat lead-grey reactor vessel with gunmetal bands and a yellow acid sight
+    glass, a sulfur burner (a firebrick box with a hopper on top) beside it feeding hot gas through a chrome duct, a
+    slim absorption tower at the back with a red valve, and the control panel (the master block) at the front left."""
+    m = [box((-16, 0, 0), (16, 2, 32), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    m.append(box((1, 2, 0.5), (15, 12, 6), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(dial("north", (5, 8.5, 0.25), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 8.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    # Reactor vessel (lead-lined: gunmetal shell) with bands and a sight glass of acid.
+    m += cyl("y", -2, 19, 10, 2, 22, GUNMETAL, CHROME)
+    for y in (6, 13, 20):
+        m += cyl("y", -2, 19, 10.4, y, y + 1, OLIVE)
+    m.append(box((-4, 8, 8.75), (0, 18, 9.25), {"*": CHROME, "north": "sulfuric_acid_still"}))
+    m += cyl("y", -2, 19, 6, 22, 24, GUNMETAL, CHROME)
+    # Sulfur burner on the right with its hopper, and the duct into the vessel.
+    m.append(box((-15, 2, 2), (-7, 12, 10), {"*": "sp_firebrick", "north": "sp_firebox!"}))
+    m.append(box((-14, 12, 3), (-8, 16, 9), {"*": GUNMETAL, "up": "sp_hopper_inside"}))
+    m.append(box((-12, 16, 5), (-10, 26, 7), CHROME))
+    m.append(box((-12, 24, 7), (-10, 26, 14), CHROME))
+    # Absorption tower at the back.
+    m += cyl("y", 9, 27, 3, 2, 30, OLIVE, GUNMETAL)
+    m.append(box((7, 30, 25), (11, 31, 29), HAZARD))
+    m.append(box((4, 14, 25), (6, 16, 27), CHROME))
+    m += wheel("x", 15, 26, 1.5, 3.25, 4, "sp_red_iron", CHROME, spokes=False)
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
           "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump(),
@@ -731,4 +758,5 @@ MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), 
           "gas_turbine": gas_turbine(),
           "polymerization_reactor": polymerization_reactor(),
           "diesel_engine": diesel_engine(),
-          "electrolytic_cell": electrolytic_cell()}
+          "electrolytic_cell": electrolytic_cell(),
+          "chemical_reactor": chemical_reactor()}

@@ -460,4 +460,16 @@ public class PetroGameTests {
 			helper.assertTrue(cell.tanks().output(2).has(PetroFluids.LYE.source(), 500), "Lye: " + cell.tanks().output(2).millibuckets());
 		});
 	}
+
+	/** The chemical reactor turns two sulfur dust and a bucket of water into a bucket of sulfuric acid. */
+	@GameTest(maxTicks = 300)
+	public void reactorMakesSulfuricAcid(GameTestHelper helper) {
+		MachineBlockEntity reactor = place(helper, MachineKind.CHEMICAL_REACTOR, new BlockPos(4, 1, 2));
+		reactor.tanks().input(0).fill(Fluids.WATER, 1000);
+		reactor.setItem(0, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("sulfur_dust")), 2));
+		helper.succeedWhen(() -> {
+			helper.assertTrue(reactor.tanks().output(0).has(PetroFluids.SULFURIC_ACID.source(), 1000), "No sulfuric acid");
+			helper.assertTrue(reactor.getItem(0).isEmpty(), "The reactor kept its sulfur");
+		});
+	}
 }

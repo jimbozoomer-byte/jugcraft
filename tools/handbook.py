@@ -134,6 +134,8 @@ ABOUT = {
                          "chlorine (out of the top row), 250 mB of hydrogen (the middle row) and 500 mB of lye (the "
                          "bottom row), every 10 seconds at 256 JE/t. Make brine in the chemical mixer from two salt "
                          "and a bucket of water.",
+    "chemical_reactor": "Two by two by two, lined with lead against the acid. Burns sulfur and absorbs it in water: two "
+                        "sulfur dust and a bucket of water make a bucket of sulfuric acid, every 5 seconds.",
     "diesel_engine": "Two wide, two tall and three long. Burns diesel (256 KE a mB) or heavy fuel oil (128) piped into "
                      "its 8-bucket tank and turns a shaft out of the back of its upper right back block: up to "
                      "512 KE/t, twice the large steam engine. It burns only for the rotation the line takes.",
@@ -376,6 +378,7 @@ def build():
                 "Dissolve salt in water to make brine (chemical mixer), then split it in the electrolytic cell into "
                 "chlorine, hydrogen and lye. Gases live only in tanks and pipes."]},
             machine_page("electrolytic_cell"),
+            machine_page("chemical_reactor"),
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

@@ -2954,6 +2954,34 @@
       ]
     },
     {
+      "block": "jugcraft:chemical_reactor",
+      "type": "chemical_reaction",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:sulfur_dust",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:sulfuric_acid",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 100
+        }
+      ]
+    },
+    {
       "block": "jugcraft:flowback_treatment_unit",
       "type": "water_treatment",
       "recipes": [

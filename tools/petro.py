@@ -42,6 +42,9 @@ FLUIDS = {
     "lye": {"display": "Lye", "feature": "salt",
             "colors": [(170, 170, 140), (200, 200, 170), (224, 224, 198), (246, 246, 228)],
             "tick_delay": 6, "slope": 4, "drop_off": 1},
+    "sulfuric_acid": {"display": "Sulfuric Acid", "feature": "sulfur",
+                      "colors": [(150, 140, 40), (190, 180, 70), (214, 206, 104), (240, 236, 170)],
+                      "tick_delay": 6, "slope": 4, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -141,6 +144,9 @@ FLUID_MACHINES = {
     # Brine -> chlorine (top), hydrogen (middle) and lye (base); alumina + coke -> aluminum (batch 5). 256 JE/t.
     "electrolytic_cell": {"inputs": [8_000], "outputs": [8_000, 8_000, 8_000], "item_inputs": 2, "item_outputs": 1,
                           "recipe_type": "electrolysis"},
+    # Sulfur + water -> sulfuric acid; bauxite + lye -> alumina; phosphate + acid -> fertilizer (batch 5). 96 JE/t.
+    "chemical_reactor": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 1,
+                         "recipe_type": "chemical_reaction"},
     # Refinery gas -> plastic pellets. 96 JE/t.
     "polymerization_reactor": {"inputs": [8_000], "outputs": [], "item_inputs": 0, "item_outputs": 1,
                                "recipe_type": "polymerization"},
@@ -206,6 +212,12 @@ FLUID_RECIPES = {
         {"name": "brine", "fluids": [("jugcraft:brine", 1000)],
          "fluid_results": [("jugcraft:chlorine", 250), ("jugcraft:hydrogen", 250), ("jugcraft:lye", 500)],
          "ticks": 200, "features": ["salt"]},
+    ],
+    # Sulfur burnt to sulfur trioxide and absorbed in water (the contact process, simplified): two sulfur dust and a
+    # bucket of water make a bucket of sulfuric acid.
+    "chemical_reactor": [
+        {"name": "sulfuric_acid", "items": [("jugcraft:sulfur_dust", 2)], "fluids": [("minecraft:water", 1000)],
+         "fluid_results": [("jugcraft:sulfuric_acid", 1000)], "source": 0, "ticks": 100, "features": ["sulfur"]},
     ],
     # Flowback water settles and is filtered: most of it comes back as clean water; the brine leaves salt. A quarter
     # is lost (sludge), so fracking water is never free.

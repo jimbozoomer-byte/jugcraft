@@ -2228,6 +2228,29 @@
             "result": "jugcraft:electrolytic_cell",
             "count": 1
           }
+        },
+        {
+          "title": "Chemical Reactor",
+          "icon": "jugcraft:chemical_reactor",
+          "text": [
+            "Two by two by two, lined with lead against the acid. Burns sulfur and absorbs it in water: two sulfur dust and a bucket of water make a bucket of sulfuric acid, every 5 seconds.",
+            "Uses 96 JE/t while working. Holds 30,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "minecraft:glass",
+              "jugcraft:steel_plate",
+              "jugcraft:fluid_tank",
+              "jugcraft:machine_casing",
+              "jugcraft:fluid_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:lead_ingot",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:chemical_reactor",
+            "count": 1
+          }
         }
       ]
     },

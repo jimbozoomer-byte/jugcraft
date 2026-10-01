@@ -18,8 +18,14 @@ Salt, sulfur, phosphate and bauxite have been in the world since the first ores,
 - The cell also has two item slots and an output slot, for alumina smelting (commit 23).
 - Recipe: steel plates, two aluminum cables, two steel tanks, an advanced circuit and a machine casing.
 
+### Sulfuric acid (commit 22)
+- **Chemical reactor** (two by two by two): a lead-lined vessel with an acid sight glass, a firebrick sulfur burner with a hopper, a chrome duct, an absorption tower and the control panel.
+- **2 sulfur dust + 1,000 mB of water → 1,000 mB of sulfuric acid**, every 100 ticks at 96 JE/t (the contact process, simplified). A fluid with a bucket.
+- The reactor has one tank in, one tank out, two item slots and an output slot; bauxite digestion (commit 23) and fertilizer (commit 24) run in it too.
+- Recipe: steel plates, glass, two tinplate tanks, a machine casing and a lead ingot.
+
 ## Connections
-- Existing input producer: rock salt ore and the flowback treatment unit (salt); water pumps.
+- Existing input producer: rock salt ore and the flowback treatment unit (salt); crushed sulfur (sulfur dust); water pumps.
 - Existing output consumer: tanks and pipes now; lye goes to bauxite digestion (commit 23), hydrogen to the fuel cell (commit 25), chlorine to later chemistry.
 - Technology connection: the oil line's fluid machines and the chemical mixer.
 - Magic connection: none.
@@ -39,7 +45,7 @@ No new dependencies. Textures and models are original (`tools/petro_textures.py`
 
 ## Verification
 - `tools/check_mod_data.py` audits the new fluids, gases and recipes like the oil line's.
-- Game tests `mixerMakesBrine` and `cellSplitsBrine` (PetroGameTests).
+- Game tests `mixerMakesBrine`, `cellSplitsBrine` and `reactorMakesSulfuricAcid` (PetroGameTests).
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.

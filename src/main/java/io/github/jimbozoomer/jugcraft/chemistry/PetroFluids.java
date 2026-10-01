@@ -114,6 +114,8 @@ public final class PetroFluids {
 	/** Gases from brine electrolysis: chlorine (at the anode) and hydrogen (at the cathode). */
 	public static Gas CHLORINE;
 	public static Gas HYDROGEN;
+	/** Sulfur burnt and absorbed in water: the acid for fertilizer and leaching. */
+	public static Entry SULFURIC_ACID;
 
 	private PetroFluids() {
 	}
@@ -156,6 +158,7 @@ public final class PetroFluids {
 		LYE = fluid("lye", 6, 4, 1, 0xFFDCDCC0, MapColor.SNOW);
 		CHLORINE = gas("chlorine", 0xFFB4D25A);
 		HYDROGEN = gas("hydrogen", 0xFFDCE6F0);
+		SULFURIC_ACID = fluid("sulfuric_acid", 6, 4, 1, 0xFFD2C850, MapColor.COLOR_YELLOW);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

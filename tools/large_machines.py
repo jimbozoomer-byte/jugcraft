@@ -57,6 +57,7 @@ FOOTPRINTS = {
     "polymerization_reactor": cuboid(2, 3, 2),
     "diesel_engine": cuboid(2, 2, 3),
     "electrolytic_cell": cuboid(3, 3, 2),
+    "chemical_reactor": cuboid(2, 2, 2),
 }
 
 # Machines that take power at one marked socket only: (part, face) for a north-facing machine.
@@ -294,6 +295,12 @@ MODELS["electrolytic_cell"] = [
     ((-31, 22, 24), (15, 26, 28), PIPE),
 ]
 
+MODELS["chemical_reactor"] = [
+    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-14, 2, 8), (12, 26, 30), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+]
+
 # Textures the front face uses: "#front" in MODELS. Lit machines also get <front>_on.
 FRONTS = {
     "geothermal_generator": "geothermal_generator_front",
@@ -320,4 +327,5 @@ FRONTS = {
     "polymerization_reactor": "polymerization_reactor_front",
     "diesel_engine": "diesel_engine_front",
     "electrolytic_cell": "electrolytic_cell_front",
+    "chemical_reactor": "chemical_reactor_front",
 }
