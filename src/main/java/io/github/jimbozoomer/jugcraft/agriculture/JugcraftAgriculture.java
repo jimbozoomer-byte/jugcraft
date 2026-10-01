@@ -552,7 +552,9 @@ public final class JugcraftAgriculture {
 		for (String costume : COSTUMES) {
 			Equippable.Builder worn = Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER);
 			if (costume.equals("ghost_sheet")) {
-				worn.setCameraOverlay(Jugcraft.id("misc/ghost_sheet"));
+				// Its equipment asset has no layers: nothing is drawn by the armor layer or as a block on the head, and the
+				// client's GhostSheetLayer drapes the whole sheet over the wearer (it reads equipment that has an asset).
+				worn.setCameraOverlay(Jugcraft.id("misc/ghost_sheet")).setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id("ghost_sheet")));
 			}
 			registerItem(costume, Item::new, new Item.Properties().stacksTo(1).component(DataComponents.EQUIPPABLE, worn.build()), TOOL_TAB);
 		}
