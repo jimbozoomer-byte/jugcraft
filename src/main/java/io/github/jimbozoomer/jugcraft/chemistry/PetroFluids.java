@@ -85,9 +85,28 @@ public final class PetroFluids {
 		}
 	}
 
+	/** A gas: a fluid with no block or bucket (see {@link GasFluid}), and its gauge colour. */
+	public record Gas(String id, Fluid fluid, int color) {
+	}
+
 	public static final Map<String, Entry> FLUIDS = new LinkedHashMap<>();
+	public static final Map<String, Gas> GASES = new LinkedHashMap<>();
 	/** Liquid crude oil: from reservoirs and oil sand; refined into fuels. */
 	public static Entry CRUDE_OIL;
+	/** Distillation fractions: light naphtha (for gasoline), diesel, and heavy fuel oil (for cracking). */
+	public static Entry NAPHTHA;
+	public static Entry DIESEL;
+	public static Entry HEAVY_FUEL_OIL;
+	/** Reformed naphtha: high-octane gasoline. */
+	public static Entry GASOLINE;
+	/** Water thickened with sand and a gelling agent: what the fracking rig pumps down the well. */
+	public static Entry FRACKING_FLUID;
+	/** What comes back up a fracked well with the oil: dirty water, to be treated. */
+	public static Entry FLOWBACK_WATER;
+	/** Vacuum distillation of heavy fuel oil: lubricant (machine upkeep). */
+	public static Entry LUBRICANT;
+	/** The lightest fraction: refinery gas (fuel gas, and later plastics). */
+	public static Gas REFINERY_GAS;
 
 	private PetroFluids() {
 	}
@@ -102,14 +121,42 @@ public final class PetroFluids {
 		return null;
 	}
 
+	/** ARGB gauge colour for a petroleum fluid or gas, or 0 if it is neither. */
+	public static int gaugeColor(Fluid fluid) {
+		Entry entry = of(fluid);
+		if (entry != null) {
+			return entry.color();
+		}
+		for (Gas gas : GASES.values()) {
+			if (gas.fluid() == fluid) {
+				return gas.color();
+			}
+		}
+		return 0;
+	}
+
 	public static void register() {
 		CRUDE_OIL = fluid("crude_oil", 20, 2, 2, 0xFF1E1711, MapColor.COLOR_BLACK);
+		NAPHTHA = fluid("naphtha", 5, 4, 1, 0xFFBEAA64, MapColor.COLOR_YELLOW);
+		DIESEL = fluid("diesel", 8, 3, 1, 0xFFAA6E19, MapColor.COLOR_ORANGE);
+		HEAVY_FUEL_OIL = fluid("heavy_fuel_oil", 30, 2, 2, 0xFF261E12, MapColor.COLOR_BLACK);
+		LUBRICANT = fluid("lubricant", 25, 2, 2, 0xFF8C7D28, MapColor.COLOR_YELLOW);
+		GASOLINE = fluid("gasoline", 4, 4, 1, 0xFFC86446, MapColor.COLOR_RED);
+		FRACKING_FLUID = fluid("fracking_fluid", 6, 3, 1, 0xFF8296A0, MapColor.COLOR_LIGHT_GRAY);
+		FLOWBACK_WATER = fluid("flowback_water", 5, 4, 1, 0xFF645C48, MapColor.COLOR_BROWN);
+		REFINERY_GAS = gas("refinery_gas", 0xFFB8C4D0);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {
 				output.accept(entry.bucket());
 			}
 		});
+	}
+
+	private static Gas gas(String id, int color) {
+		Gas gas = new Gas(id, Registry.register(BuiltInRegistries.FLUID, Jugcraft.id(id), new GasFluid()), color);
+		GASES.put(id, gas);
+		return gas;
 	}
 
 	private static Entry fluid(String id, int tickDelay, int slope, int dropOff, int gauge, MapColor color) {
