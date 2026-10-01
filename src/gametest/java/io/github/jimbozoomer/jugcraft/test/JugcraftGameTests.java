@@ -70,9 +70,11 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PipeBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.material.Fluids;
 
 /**
@@ -117,6 +119,21 @@ public class JugcraftGameTests {
 			most = Math.max(most, drops.get(0).getCount());
 		}
 		helper.assertTrue(most > 1, "Fortune III never gave more than one raw tin");
+		helper.succeed();
+	}
+
+	/** A double asphalt slab drops two slabs, a single one drops one (26.3's slab loot form). */
+	@GameTest
+	public void doubleSlabsDropTwo(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
+		BlockState slab = BuiltInRegistries.BLOCK.getValue(Jugcraft.id("asphalt_slab")).defaultBlockState();
+		List<ItemStack> single = Block.getDrops(slab.setValue(SlabBlock.TYPE, SlabType.BOTTOM), level, pos, null, null,
+				new ItemStack(Items.IRON_PICKAXE));
+		List<ItemStack> twin = Block.getDrops(slab.setValue(SlabBlock.TYPE, SlabType.DOUBLE), level, pos, null, null,
+				new ItemStack(Items.IRON_PICKAXE));
+		helper.assertTrue(single.size() == 1 && single.get(0).getCount() == 1, "A single slab dropped " + single);
+		helper.assertTrue(twin.size() == 1 && twin.get(0).getCount() == 2, "A double slab dropped " + twin);
 		helper.succeed();
 	}
 
