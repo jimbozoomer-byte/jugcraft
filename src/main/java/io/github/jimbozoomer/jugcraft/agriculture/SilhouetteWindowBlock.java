@@ -80,9 +80,14 @@ public class SilhouetteWindowBlock extends BaseEntityBlock {
 	 * brighter than on this side (light seeps through the pane, so only the far side's lamp counts).
 	 */
 	public static boolean glows(Level level, BlockPos pos, Direction side) {
-		int far = level.getBrightness(LightLayer.BLOCK, pos.relative(side.getOpposite()));
-		int near = level.getBrightness(LightLayer.BLOCK, pos.relative(side));
+		int far = light(level, pos.relative(side.getOpposite()));
+		int near = light(level, pos.relative(side));
 		return far >= GLOW_LIGHT && far > near;
+	}
+
+	/** The block light at {@code pos}, or what a lamp there gives off (a solid lamp's own cell may hold no light). */
+	public static int light(Level level, BlockPos pos) {
+		return Math.max(level.getBrightness(LightLayer.BLOCK, pos), level.getBlockState(pos).getLightEmission());
 	}
 
 	@Override

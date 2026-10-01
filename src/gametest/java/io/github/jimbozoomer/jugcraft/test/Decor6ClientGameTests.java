@@ -46,6 +46,12 @@ public class Decor6ClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 
+			// What the client makes of the first window's light (written to the log, to check against the screenshots).
+			BlockPos window = new BlockPos(x + 4, y + 2, z - 6);
+			String light = context.computeOnClient(client -> "far %d, near %d, glows %s".formatted(
+					SilhouetteWindowBlock.light(client.level, window.north()), SilhouetteWindowBlock.light(client.level, window.south()),
+					SilhouetteWindowBlock.glows(client.level, window, Direction.SOUTH)));
+			System.out.println("Silhouette window light on the client: " + light);
 			shoot(context, singleplayer, x + 7, y + 4, z + 6, 180, 20, "jugcraft_haunted_house");
 			shoot(context, singleplayer, x + 4, y + 2, z - 1, 180, 20, "jugcraft_rocking_chairs");
 			shoot(context, singleplayer, x + 9, y + 2, z - 1, 180, 25, "jugcraft_music_box_and_spider");
