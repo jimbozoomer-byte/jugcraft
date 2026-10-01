@@ -65,7 +65,7 @@ public final class SeasonColors {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft.level != null) {
 			minecraft.level.clearTintCaches();
-			minecraft.levelRenderer.allChanged();
+			minecraft.levelExtractor.allChanged();
 		}
 	}
 
