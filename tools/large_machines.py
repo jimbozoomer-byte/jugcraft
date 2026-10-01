@@ -38,6 +38,8 @@ FOOTPRINTS = {
     "steel_tank": [(0, 0, 0), (-1, 0, 0), (0, 0, 1), (-1, 0, 1)],
     # Mining: a two-block derrick over the drilled column.
     "ore_drill": [(0, 0, 0), (0, 1, 0)],
+    # A 3x3 rig two blocks tall, standing on the deposit it works.
+    "deposit_drill": cuboid(3, 2, 3),
     # Renewables: a two-block water wheel house (the wheel turns in the water column on its right).
     "water_wheel": [(0, 0, 0), (0, 1, 0)],
     # Kinetic: a 2x2x2 steam engine; its shaft comes out of the back of part 7 (upper right back).
@@ -68,6 +70,10 @@ FOOTPRINTS = {
     "lithography_station": cuboid(3, 2, 2),
     # Fluid logistics: a 3x3x3 gas holder.
     "gas_holder": cuboid(3, 3, 3),
+    "advanced_engine": cuboid(2, 1, 1),
+    # Power: the advanced solar panel's pedestal and the 3x3 layer of cells above it.
+    "advanced_solar_panel": [(0, 0, 0), (0, 1, 0), (-1, 1, 0), (1, 1, 0), (0, 1, -1), (0, 1, 1), (-1, 1, -1),
+                             (1, 1, -1), (-1, 1, 1), (1, 1, 1)],
     # Farming: a two-block crop harvester.
     "crop_harvester": [(0, 0, 0), (0, 1, 0)],
 }
@@ -166,6 +172,13 @@ MODELS["ore_drill"] = [
     ((1, 2, 1), (15, 12, 15), {"*": STEEL, "north": "#front", "up": TOP}),
     ((3, 12, 3), (13, 26, 13), "wind_turbine_mast"),
     ((6, 26, 6), (10, 32, 10), "geothermal_stack"),
+]
+
+MODELS["deposit_drill"] = [
+    ((-32, 0, 0), (16, 2, 48), "heavy_plinth"),
+    ((-15, 2, 1), (15, 14, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-12, 2, 18), (12, 28, 42), STEEL),
+    ((-4, 28, 26), (4, 32, 34), "geothermal_stack"),
 ]
 
 MODELS["water_wheel"] = [
@@ -351,6 +364,18 @@ MODELS["gas_holder"] = [
     ((-30, 2, 2), (14, 46, 46), {"*": "fluid_tank_side", "north": "#front", "up": "fluid_tank_top"}),
 ]
 
+MODELS["advanced_solar_panel"] = [
+    ((2, 0, 2), (14, 2, 14), "heavy_plinth"),
+    ((5, 2, 5), (11, 20, 11), {"*": STEEL, "north": "#front"}),
+    ((-14, 20, -14), (30, 22, 30), {"*": "heavy_plinth", "up": "solar_panel_top"}),
+]
+
+MODELS["advanced_engine"] = [
+    ((-16, 0, 0), (16, 2, 16), "heavy_plinth"),
+    ((-15, 2, 1), (15, 12, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((6, 6, 15), (10, 10, 16), "iron_shaft"),
+]
+
 MODELS["crop_harvester"] = [
     ((0, 0, 0), (16, 2, 16), "heavy_plinth"),
     ((1, 2, 1), (15, 14, 15), {"*": STEEL, "north": "#front", "up": TOP}),
@@ -380,6 +405,7 @@ FRONTS = {
     "fracking_rig": "fracking_rig_front",
     "flowback_treatment_unit": "flowback_treatment_unit_front",
     "diesel_generator": "diesel_generator_front",
+    "deposit_drill": "deposit_drill_front",
     "gas_turbine": "gas_turbine_front",
     "polymerization_reactor": "polymerization_reactor_front",
     "diesel_engine": "diesel_engine_front",
@@ -391,5 +417,7 @@ FRONTS = {
     "crystal_grower": "crystal_grower_front",
     "lithography_station": "lithography_station_front",
     "gas_holder": "gas_holder_front",
+    "advanced_solar_panel": "advanced_solar_panel_front",
+    "advanced_engine": "advanced_engine_front",
     "crop_harvester": "crop_harvester_front",
 }

@@ -9,10 +9,14 @@ import io.github.jimbozoomer.jugcraft.chemistry.FluidTanks;
 import io.github.jimbozoomer.jugcraft.chemistry.GasFluid;
 import io.github.jimbozoomer.jugcraft.chemistry.OilReservoirs;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
+import io.github.jimbozoomer.jugcraft.deposit.DepositBlock;
+import io.github.jimbozoomer.jugcraft.deposit.Deposits;
 import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
 import io.github.jimbozoomer.jugcraft.fluid.FluidNetworks;
+import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
+import io.github.jimbozoomer.jugcraft.fluid.StoredFluid;
 import io.github.jimbozoomer.jugcraft.kinetic.KineticConsumer;
 import io.github.jimbozoomer.jugcraft.kinetic.KineticNetworks;
 import io.github.jimbozoomer.jugcraft.logistics.ItemNetworks;
@@ -38,6 +42,8 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponentGetter;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -69,6 +75,8 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -134,9 +142,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	/** mB in the machine's tank: water for the steam generator and ore washer, lava for the geothermal generator. Saved as "water". */
 	private int tank;
 	/** Processors: which faces take input or give output, and whether results are pushed out. */
-	private final SideConfig sides = new SideConfig();
+	private final SideConfig sides;
 	/** Ore drill: the next block to check, counted from the top layer below the drill (see {@link OreDrilling}). */
 	private int cursor;
+	/** Deposit drill: the deposit block it is working (found again after loading; not saved). */
+	private @Nullable BlockPos depositTarget;
 	/** Wind turbine, water wheel, cobblestone generator: whether the surroundings check has run since loading. */
 	private boolean checked;
 	/** Water wheel: JE per tick from the water found at the last check. */
@@ -177,6 +187,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		super(JugcraftMachines.MACHINE_ENTITY, pos, state);
 		this.kind = ((MachineBlock) state.getBlock()).kind();
 		this.items = NonNullList.withSize(kind.containerSize(), ItemStack.EMPTY);
+		this.sides = kind == MachineKind.DEPOSIT_DRILL ? SideConfig.allOutputs() : new SideConfig();
 		// Producers only give energy out; consumers only take it in; the battery box does both.
 		long insert = kind.isGenerator() ? 0 : kind.maxInput;
 		long extract = kind.isProcessor() ? 0 : kind.maxOutput;
@@ -207,7 +218,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		return switch (kind) {
 			case FRACKING_RIG -> variant.isOf(PetroFluids.FRACKING_FLUID.source());
 			case DIESEL_GENERATOR -> tank == 0 && FluidFuels.jePerMb(kind, variant.getFluid()) > 0;
-			case DIESEL_ENGINE, FUEL_CELL -> tank == 0 && FluidFuels.jePerMb(kind, variant.getFluid()) > 0;
+			case DIESEL_ENGINE, FUEL_CELL, ADVANCED_ENGINE -> tank == 0 && FluidFuels.jePerMb(kind, variant.getFluid()) > 0;
 			case GAS_TURBINE -> tank == 0 ? FluidFuels.jePerMb(kind, variant.getFluid()) > 0
 					: variant.isOf(PetroFluids.LUBRICANT.source());
 			default -> FluidRecipes.usesFluid(server.getServer(), kind, tank, variant);
@@ -260,6 +271,25 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				setChanged();
 			}
 		};
+	}
+
+	/** A steel tank or gas holder drops with its fluid (see {@link StoredFluid}) and gets it back when placed again. */
+	@Override
+	protected void collectImplicitComponents(DataComponentMap.Builder components) {
+		super.collectImplicitComponents(components);
+		StoredFluid stored = reservoir == null ? null : StoredFluid.of(reservoir);
+		if (stored != null) {
+			components.set(JugcraftFluids.STORED_FLUID, stored);
+		}
+	}
+
+	@Override
+	protected void applyImplicitComponents(DataComponentGetter components) {
+		super.applyImplicitComponents(components);
+		StoredFluid stored = components.get(JugcraftFluids.STORED_FLUID);
+		if (stored != null && reservoir != null) {
+			stored.restore(reservoir);
+		}
 	}
 
 	/** A fluid processor's tanks, or null for other machines. */
@@ -366,6 +396,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		boolean active = switch (kind) {
 			case COAL_GENERATOR -> tickGenerator(level, pos);
 			case SOLAR_PANEL -> tickSolar(level, pos);
+			case ADVANCED_SOLAR_PANEL -> tickSolar(level, pos);
 			case STEAM_GENERATOR -> tickSteam(level, pos);
 			case LARGE_STEAM_ENGINE -> tickLargeEngine(level, pos, state);
 			case BATTERY_BOX, CAPACITOR_BANK, LITHIUM_BATTERY_BANK -> tickBattery(level, pos, state);
@@ -373,6 +404,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case GEOTHERMAL_GENERATOR -> tickGeothermal(level, pos, state);
 			case WIND_TURBINE -> tickWind(level, pos, state);
 			case ORE_DRILL -> tickDrill(level, pos, state);
+			case DEPOSIT_DRILL -> tickDepositDrill(level, pos, state);
 			case CROP_HARVESTER -> tickHarvester(level, pos, state);
 			case COBBLESTONE_GENERATOR -> tickCobble(level, pos, state);
 			case WATER_WHEEL -> tickWaterWheel(level, pos, state);
@@ -382,7 +414,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case FRACKING_RIG -> tickFrackingRig(level, pos, state);
 			case DIESEL_GENERATOR -> tickFluidGenerator(level, pos, state, MachineKind.DIESEL_OUTPUT);
 			case GAS_TURBINE -> tickFluidGenerator(level, pos, state, MachineKind.TURBINE_OUTPUT);
-			case DIESEL_ENGINE -> tickDieselEngine(level, pos, state);
+			case DIESEL_ENGINE, ADVANCED_ENGINE -> tickDieselEngine(level, pos, state);
 			case FUEL_CELL -> tickFluidGenerator(level, pos, state, MachineKind.FUEL_CELL_OUTPUT);
 			default -> kind.isFluidProcessor() ? tickFluidProcessor(level, pos, state) : tickProcessor(level, pos, state);
 		};
@@ -415,9 +447,12 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 
 	private boolean tickSolar(ServerLevel level, BlockPos pos) {
 		// Checked every tick but only reads the sky and weather: no scanning.
-		boolean sunlit = level.isBrightOutside() && level.canSeeSky(pos.above());
+		// The advanced panel's cells are on the layer above its pedestal: the sky must be open above them.
+		boolean advanced = kind == MachineKind.ADVANCED_SOLAR_PANEL;
+		boolean sunlit = level.isBrightOutside() && level.canSeeSky(advanced ? pos.above(2) : pos.above());
 		if (sunlit && energy.getAmount() < energy.getCapacity()) {
-			int rate = level.isRaining() ? MachineKind.SOLAR_PER_TICK / 2 : MachineKind.SOLAR_PER_TICK;
+			int full = advanced ? MachineKind.ADVANCED_SOLAR_PER_TICK : MachineKind.SOLAR_PER_TICK;
+			int rate = level.isRaining() ? full / 2 : full;
 			energy.setAmount(energy.getAmount() + rate);
 			setChanged();
 		}
@@ -594,7 +629,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	 * upper right back block into a shaft line. Only what the line takes is spent, so an idle engine burns nothing.
 	 */
 	private boolean tickDieselEngine(ServerLevel level, BlockPos pos, BlockState state) {
-		int output = MachineKind.DIESEL_ENGINE_OUTPUT;
+		boolean advanced = kind == MachineKind.ADVANCED_ENGINE;
+		int output = advanced ? MachineKind.ADVANCED_ENGINE_OUTPUT : MachineKind.DIESEL_ENGINE_OUTPUT;
 		maxBurn = output;
 		maxProgress = output;
 		if (!sides.redstone().allows(poweredByRedstone(level, pos, state))) {
@@ -615,7 +651,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false;
 		}
 		Direction facing = facing(state);
-		BlockPos shaft = kind.footprint().partPos(pos, facing, MachineKind.DIESEL_ENGINE_OUTPUT_PART);
+		BlockPos shaft = advanced ? pos : kind.footprint().partPos(pos, facing, MachineKind.DIESEL_ENGINE_OUTPUT_PART);
 		long taken = KineticNetworks.push(level, shaft, facing.getOpposite(), Math.min(burn, output));
 		if (taken <= 0) {
 			return false;
@@ -1140,6 +1176,94 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	}
 
 	/**
+	 * The deposit drill: every {@link MachineKind#DEPOSIT_TICKS} powered ticks it takes {@link MachineKind#DEPOSIT_UNITS}
+	 * from one block of each kind of deposit under or around it (see {@link #findDeposits}), so a drill over coal and
+	 * iron gives one coal and one raw iron. What it mines goes in its result slots, which it pushes out of every face
+	 * into chests, pipes and machines beside it. A full drill waits; a drill with no deposit left in reach stops.
+	 */
+	private boolean tickDepositDrill(ServerLevel level, BlockPos pos, BlockState state) {
+		if (sides.eject() && level.getGameTime() % EJECT_INTERVAL == 0) {
+			eject(level, pos, state);
+		}
+		if (depositTarget == null || !(level.getBlockState(depositTarget).getBlock() instanceof DepositBlock)) {
+			// Look again at most once a second, so a drill with nothing left costs almost nothing.
+			if (level.getGameTime() % MachineKind.SOURCE_CHECK_INTERVAL != 0) {
+				return false;
+			}
+			List<BlockPos> found = findDeposits(level, pos, state);
+			depositTarget = found.isEmpty() ? null : found.get(0);
+			progress = 0;
+			if (depositTarget == null) {
+				return false;
+			}
+		}
+		ItemStack first = new ItemStack(((DepositBlock) level.getBlockState(depositTarget).getBlock()).yield());
+		if (resultSlotFor(first) < 0 || !sides.redstone().allows(poweredByRedstone(level, pos, state))) {
+			return false;
+		}
+		MachineUpgrades.Effect upgrades = upgrades();
+		maxProgress = upgrades.ticks(MachineKind.DEPOSIT_TICKS);
+		long use = upgrades.use(kind.usePerTick);
+		if (energy.getAmount() < use) {
+			return false;
+		}
+		energy.setAmount(energy.getAmount() - use);
+		if (++progress >= maxProgress) {
+			progress = 0;
+			for (BlockPos source : findDeposits(level, pos, state)) {
+				ItemStack mined = new ItemStack(((DepositBlock) level.getBlockState(source).getBlock()).yield(),
+						MachineKind.DEPOSIT_UNITS);
+				int slot = resultSlotFor(mined);
+				if (slot < 0) {
+					continue; // No room for this kind; the others still come out.
+				}
+				int got = Deposits.extract(level, source, mined.getCount());
+				if (got > 0) {
+					if (items.get(slot).isEmpty()) {
+						items.set(slot, mined.copyWithCount(got));
+					} else {
+						items.get(slot).grow(got);
+					}
+				}
+			}
+		}
+		setChanged();
+		return true;
+	}
+
+	/**
+	 * The deposit blocks the drill works next, one of each kind (coal, iron, ...): for each, the highest in the area
+	 * under its 3x3 base and {@link MachineKind#DEPOSIT_REACH} blocks round it, down to {@link MachineKind#DEPOSIT_DEPTH}
+	 * layers. Empty when none is left.
+	 */
+	public List<BlockPos> findDeposits(ServerLevel level, BlockPos pos, BlockState state) {
+		Direction facing = state.getValue(MachineBlock.FACING);
+		Footprint footprint = kind.footprint();
+		int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, minZ = Integer.MAX_VALUE, maxZ = Integer.MIN_VALUE;
+		for (int part = 0; part < footprint.size(); part++) {
+			BlockPos partPos = footprint.partPos(pos, facing, part);
+			minX = Math.min(minX, partPos.getX());
+			maxX = Math.max(maxX, partPos.getX());
+			minZ = Math.min(minZ, partPos.getZ());
+			maxZ = Math.max(maxZ, partPos.getZ());
+		}
+		int reach = MachineKind.DEPOSIT_REACH;
+		Map<Block, BlockPos> byKind = new LinkedHashMap<>();
+		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
+		for (int y = pos.getY() - 1; y >= pos.getY() - MachineKind.DEPOSIT_DEPTH; y--) {
+			for (int x = minX - reach; x <= maxX + reach; x++) {
+				for (int z = minZ - reach; z <= maxZ + reach; z++) {
+					Block block = level.getBlockState(at.set(x, y, z)).getBlock();
+					if (block instanceof DepositBlock && !byKind.containsKey(block)) {
+						byKind.put(block, at.immutable());
+					}
+				}
+			}
+		}
+		return new ArrayList<>(byKind.values());
+	}
+
+	/**
 	 * The cobblestone generator: with water and lava touching it (checked every second; neither is used up), it
 	 * makes one cobblestone per {@link MachineKind#COBBLE_TICKS} powered ticks, like a vanilla cobblestone generator.
 	 */
@@ -1584,7 +1708,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		burn = input.getInt("burn").orElse(0);
 		maxBurn = input.getInt("max_burn").orElse(0);
 		tank = input.getInt("water").orElse(0);
-		sides.unpack(input.getInt("sides").orElse(SideConfig.defaults()));
+		sides.unpack(input.getInt("sides").orElse(sides.pack()));
 		cursor = input.getInt("cursor").orElse(0);
 		if (reservoir != null) {
 			reservoir.readValue(input);

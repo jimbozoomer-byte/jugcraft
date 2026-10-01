@@ -171,6 +171,12 @@ ABOUT = {
     "lithium_battery_bank": "Three wide, two tall, one deep: six lithium battery modules holding 32,000,000 JE, eight "
                             "capacitor banks. It charges from any side and gives power out of the sockets on its "
                             "front, 16,384 JE/t.",
+    "advanced_solar_panel": "A white pedestal carrying a 3x3 array of solar cells on the layer above it: 64 JE/t in full "
+                            "sun (eight solar panels), half in rain, none at night. The cells need open sky. Cables meet "
+                            "the pedestal's foot.",
+    "advanced_engine": "Two blocks long, four cylinders. Burns gasoline (448 KE a mB) or diesel (320) piped into its "
+                       "8-bucket tank and turns a shaft out of the back of its right-hand block at up to 1,024 KE/t, "
+                       "burning only for what the line takes. Through a magnet dynamo it is the best use of either fuel.",
     "fuel_cell": "One block. Combines hydrogen with the air: 128 JE/t, burning a millibucket of hydrogen a tick (128,000 "
                  "JE a bucket). Pipe hydrogen from the electrolytic cell into it. Its screen lights while it runs.",
     "diesel_engine": "Two wide, two tall and three long. Burns diesel (256 KE a mB) or heavy fuel oil (128) piped into "
@@ -182,6 +188,11 @@ ABOUT = {
     "gas_turbine": "Four wide, two tall and two deep. Burns gasoline or refinery gas from its 16-bucket tank: 512 JE/t, "
                    "384,000 JE a bucket of gasoline or 192,000 JE a bucket of gas. Its second tank takes lubricant "
                    "from the vacuum distillation unit: 1 mB every second of running, and it stops when it runs dry.",
+    "deposit_drill": "Three blocks square and two tall. Build it on a surface deposit (coal, iron, copper or tin, on "
+                     "stony hills): every 15 seconds it takes one coal or raw ore from each kind of deposit under it "
+                     "or one block round it, down to 3 blocks deep, using 16 JE/t. It pushes what it mines out of every side "
+                     "into a chest, item pipe, conveyor or machine beside it. Each deposit block holds 1,000 and then "
+                     "turns to stone; right-click one to see how much is left. Picks only break deposits, for nothing.",
     "ore_drill": "Two blocks tall. Mines the ore blocks in a 9x9 column below it, one layer at a time down to the bottom "
                  "of the world, one ore every 2 seconds. Each hole is refilled with stone or deepslate. The ores come "
                  "out whole, ready for ore processing.",
@@ -341,6 +352,7 @@ def build():
         {"title": "Materials", "icon": f"{MOD}:bronze_ingot", "pages": [
             ores_page(),
             block_page("prospector", TOOLS["prospector"]),
+            machine_page("deposit_drill"),
             machine_page("ore_drill"),
             {"title": "Ore Processing", "icon": f"{MOD}:tin_dust", "text": [
                 "Smelting an ore gives one ingot.",
@@ -356,7 +368,7 @@ def build():
         ]},
         {"title": "Power", "icon": f"{MOD}:coal_generator", "pages":
             [machine_page(m) for m in ("coal_generator", "solar_panel", "steam_generator", "geothermal_generator",
-                                       "wind_turbine", "battery_box")]
+                                       "wind_turbine", "battery_box", "advanced_solar_panel")]
             + [block_page(c, CABLES[c]["display"]) for c in CABLES]
             + [block_page(b, KINETIC_BLOCKS[b]["display"]) for b in ("steam_engine",)]
             + [machine_page("large_steam_engine")]
@@ -404,6 +416,7 @@ def build():
             machine_page("gas_turbine"),
             machine_page("polymerization_reactor"),
             machine_page("diesel_engine"),
+            machine_page("advanced_engine"),
             {"title": "Asphalt", "icon": f"{MOD}:asphalt", "text": [
                 "Eight gravel around an asphalt binder (from the vacuum distillation unit) make eight asphalt.",
                 "Walking on asphalt, its slabs or road line is 1.3 times as fast. Three asphalt make six slabs.",
