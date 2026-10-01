@@ -2396,6 +2396,43 @@
       ]
     },
     {
+      "title": "Electronics",
+      "icon": "jugcraft:silicon_wafer",
+      "pages": [
+        {
+          "title": "From Sand to Silicon",
+          "icon": "jugcraft:silicon_boule",
+          "text": [
+            "The electronics tier turns silicon into chips. It has the cyan look: dark casings, cyan glass and screens, violet conduits.",
+            "Grow a silicon boule from 4 silicon and a phosphate in the crystal grower, then saw it into 8 silicon wafers in the sawmill."
+          ]
+        },
+        {
+          "title": "Crystal Grower",
+          "icon": "jugcraft:crystal_grower",
+          "text": [
+            "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 wafers in the sawmill.",
+            "Uses 128 JE/t while working. Holds 60,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:glass",
+              "jugcraft:titanium_ingot",
+              "minecraft:glass",
+              "minecraft:glass",
+              "jugcraft:arc_furnace_casing",
+              "minecraft:glass",
+              "jugcraft:aluminum_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:aluminum_plate"
+            ],
+            "result": "jugcraft:crystal_grower",
+            "count": 1
+          }
+        }
+      ]
+    },
+    {
       "title": "Logistics",
       "icon": "jugcraft:brass_item_pipe",
       "pages": [

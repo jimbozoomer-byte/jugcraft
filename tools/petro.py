@@ -79,6 +79,9 @@ ITEMS = {
     "lithium_cell": "Lithium Cell",
     # Neodymium magnets (batch 6): the alloy smelter makes them; the magnet dynamo and motor use them.
     "neodymium_magnet": "Neodymium Magnet",
+    # Electronics (batch 7): the crystal grower pulls doped silicon boules; the sawmill cuts them into wafers.
+    "silicon_boule": "Silicon Boule",
+    "silicon_wafer": "Silicon Wafer",
 }
 
 

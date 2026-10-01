@@ -136,6 +136,9 @@ ABOUT = {
                          "and a bucket of water.",
     "chemical_reactor": "Two by two by two, lined with lead against the acid. Burns sulfur and absorbs it in water: two "
                         "sulfur dust and a bucket of water make a bucket of sulfuric acid, every 5 seconds.",
+    "crystal_grower": "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single "
+                      "crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 "
+                      "wafers in the sawmill.",
     "lithium_battery_bank": "Three wide, two tall, one deep: six lithium battery modules holding 32,000,000 JE, eight "
                             "capacitor banks. It charges from any side and gives power out of the sockets on its "
                             "front, 16,384 JE/t.",
@@ -412,6 +415,14 @@ def build():
                 "Two phosphate and 250 mB of sulfuric acid in the chemical reactor make four fertilizer.",
                 "Use one on the ground or a crop: every crop in the 5x5 area around it (a block up or down too) gets "
                 "two doses of bone meal. Grass and saplings are left alone."]},
+        ]},
+        {"title": "Electronics", "icon": f"{MOD}:silicon_wafer", "pages": [
+            {"title": "From Sand to Silicon", "icon": f"{MOD}:silicon_boule", "text": [
+                "The electronics tier turns silicon into chips. It has the cyan look: dark casings, cyan glass and "
+                "screens, violet conduits.",
+                "Grow a silicon boule from 4 silicon and a phosphate in the crystal grower, then saw it into 8 silicon "
+                "wafers in the sawmill."]},
+            machine_page("crystal_grower"),
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

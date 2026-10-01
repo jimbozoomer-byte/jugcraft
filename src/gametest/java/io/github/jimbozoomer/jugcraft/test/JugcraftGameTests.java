@@ -175,6 +175,25 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/** The two-block crystal grower pulls a silicon boule from 4 silicon and a phosphate; the sawmill cuts it into 8 wafers. */
+	@GameTest(maxTicks = 600)
+	public void crystalGrowerPullsABoule(GameTestHelper helper) {
+		BlockPos master = new BlockPos(2, 1, 2);
+		MachineBlockEntity grower = large(helper, master, MachineKind.CRYSTAL_GROWER);
+		charge(helper, master.above(), Direction.WEST);
+		grower.setItem(0, new ItemStack(item("silicon"), 4));
+		grower.setItem(1, new ItemStack(item("phosphate")));
+		MachineRecipe wafers = MachineRecipes.find(helper.getLevel(), MachineKind.SAWMILL, new ItemStack(item("silicon_boule")))
+				.orElseThrow(() -> helper.assertionException("No sawing recipe for a silicon boule"));
+		ItemStack sawn = wafers.output().create();
+		helper.assertTrue(sawn.is(item("silicon_wafer")) && sawn.getCount() == 8, "A boule saws into " + sawn);
+		helper.succeedWhen(() -> {
+			ItemStack output = grower.getItem(MachineKind.CRYSTAL_GROWER.outputSlot());
+			helper.assertTrue(output.is(item("silicon_boule")), "Crystal grower output is " + output);
+			helper.assertTrue(grower.getItem(0).isEmpty() && grower.getItem(1).isEmpty(), "The inputs were not used up");
+		});
+	}
+
 	/** Breaking any block of a multi-block machine removes the whole machine (here the nine-block wind turbine). */
 	@GameTest(maxTicks = 40)
 	public void breakingOnePartRemovesTheMachine(GameTestHelper helper) {
