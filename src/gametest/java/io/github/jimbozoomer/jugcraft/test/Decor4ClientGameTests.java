@@ -107,6 +107,6 @@ public class Decor4ClientGameTests implements FabricClientGameTest {
 		set(level, new BlockPos(x + 9, y, z - 5), state("grimoire_stand").setValue(GrimoireStandBlock.FACING, Direction.SOUTH)
 				.setValue(GrimoireStandBlock.PAGE, GrimoireStandBlock.Spread.PUMPKIN));
 		// The broom leaning by the wall.
-		set(level, new BlockPos(x + 12, y, z - 7), state("witchs_broom").setValue(WitchsBroomBlock.FACING, Direction.SOUTH));
+		set(level, new BlockPos(x + 7, y, z - 7), state("witchs_broom").setValue(WitchsBroomBlock.FACING, Direction.SOUTH));
 	}
 }
