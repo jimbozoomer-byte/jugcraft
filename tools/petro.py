@@ -49,6 +49,11 @@ FLUIDS = {
     "nitric_acid": {"display": "Nitric Acid", "feature": "machines",
                     "colors": [(170, 150, 70), (204, 186, 104), (226, 212, 140), (246, 238, 196)],
                     "tick_delay": 5, "slope": 4, "drop_off": 1},
+    # Flow batteries (batch 17): vanadium leached out of asphalt binder (heavy oil residue is rich in it) into
+    # sulfuric acid, a deep blue.
+    "vanadium_electrolyte": {"display": "Vanadium Electrolyte", "feature": "machines",
+                             "colors": [(30, 40, 110), (44, 62, 150), (70, 92, 186), (130, 150, 224)],
+                             "tick_delay": 6, "slope": 4, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -110,6 +115,11 @@ ITEMS = {
     # Chlor-alkali (batch 15): PVC resin (pressed into plastic sheets) and soap (washes off status effects).
     "pvc_resin": "PVC Resin",
     "soap": "Soap",
+    # Explosive weapons (batch 18): cotton nitrated into guncotton, packed into grenades that hurt living things but
+    # never break blocks; the grenade launcher throws them further (weapons/).
+    "guncotton": "Guncotton",
+    "grenade": "Grenade",
+    "grenade_launcher": "Grenade Launcher",
 }
 
 
@@ -313,6 +323,14 @@ FLUID_RECIPES = {
          "results": [("jugcraft:lithium_carbonate", 2)], "ticks": 100, "features": ["lithium", "sulfur"]},
         {"name": "rare_earth_oxide", "items": [("jugcraft:monazite", 1)], "fluids": [("jugcraft:sulfuric_acid", 250)],
          "results": [("jugcraft:rare_earth_oxide", 2)], "ticks": 140, "features": ["rare_earths", "sulfur"]},
+        # Guncotton (batch 18): cotton nitrated in nitric acid (nitrocellulose), the grenade's charge.
+        {"name": "guncotton", "items": [("jugcraft:cotton", 2)], "fluids": [("jugcraft:nitric_acid", 250)],
+         "results": [("jugcraft:guncotton", 2)], "ticks": 100, "features": ["machines", "explosives"]},
+        # Vanadium electrolyte (batch 17): the vanadium in heavy oil residue leached into sulfuric acid, for the flow
+        # battery. As much electrolyte as acid goes in.
+        {"name": "vanadium_electrolyte", "items": [("jugcraft:asphalt_binder", 2)],
+         "fluids": [("jugcraft:sulfuric_acid", 1000)], "fluid_results": [("jugcraft:vanadium_electrolyte", 1000)],
+         "ticks": 160, "features": ["crude_oil", "sulfur"]},
     ],
     # Photolithography (batch 7): a wafer patterned and etched with sulfuric acid, with copper wire for the bonds.
     "lithography_station": [
