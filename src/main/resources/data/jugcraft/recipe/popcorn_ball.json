@@ -6,7 +6,7 @@
     }
   ],
   "type": "minecraft:crafting_shapeless",
-  "category": "food",
+  "category": "misc",
   "ingredients": [
     "jugcraft:popcorn",
     "jugcraft:popcorn",

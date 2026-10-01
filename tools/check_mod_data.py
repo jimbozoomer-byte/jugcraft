@@ -837,6 +837,23 @@ def check_carving(java, main):
             err(f"Missing carving message for {result}")
 
 
+CRAFTING_CATEGORIES = {"building", "redstone", "equipment", "misc"}
+COOKING_CATEGORIES = {"food", "blocks", "misc"}
+
+
+def check_recipe_categories():
+    """Minecraft 26.3 refuses a whole datapack over one recipe with a category its type doesn't have."""
+    for path in sorted((DATA / MOD / "recipe").rglob("*.json")):
+        recipe = load(path) or {}
+        kind, category = recipe.get("type", ""), recipe.get("category")
+        if category is None:
+            continue
+        allowed = CRAFTING_CATEGORIES if kind.startswith("minecraft:crafting") else COOKING_CATEGORIES \
+            if kind in ("minecraft:smelting", "minecraft:smoking", "minecraft:blasting", "minecraft:campfire_cooking") else None
+        if allowed is not None and category not in allowed:
+            err(f"{path.relative_to(ROOT)}: category {category} is not one of {sorted(allowed)} for {kind}")
+
+
 def check_halloween(java, main):
     """Halloween harvest: Java matches tools/agriculture.py, and every giant pumpkin and scarecrow state has a model."""
     def number(source, name, kind=r"\d+"):
@@ -922,6 +939,7 @@ def main():
     check_style_pack()
     check_handbook(registered)
     check_agriculture()
+    check_recipe_categories()
     check_advancements(registered)
     for path in RES.rglob("*.json"):
         load(path)
