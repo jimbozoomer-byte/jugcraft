@@ -448,6 +448,16 @@ The second five:
 
 The graveyard:
 
+| **The graveyard** by day | **The fence** with a shut and an open gate |
+| --- | --- |
+| ![The graveyard](../images/ingame_graveyard.jpg) | ![Cemetery fence and gates](../images/ingame_cemetery_fence.jpg) |
+| **Grave Mounds:** three hands up, two down | **The crypt front:** crypt stone, pillars, a chiseled frieze and the Crypt Door |
+| ![Grave Mounds](../images/ingame_grave_mounds.jpg) | ![Crypt](../images/ingame_crypt.jpg) |
+| **The Mourning Angel** | **Pop-Up Skeletons:** one sprung, one in its crate |
+| ![Mourning Angel](../images/ingame_mourning_angel.jpg) | ![Pop-Up Skeletons](../images/ingame_pop_up_skeletons.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor3ClientGameTests`, software rendering, small previews).*
+
 - **Wrought-Iron Cemetery Fence and Gate:** spear-topped iron railings and a two-leaf gate.
 - **Crypt set:** crypt stone, a chiseled skull stone, fluted pillars and a heavy stone Crypt Door.
 - **Grave Mound:** a zombie's hand claws up out of the earth as you walk past (sneak to creep by).

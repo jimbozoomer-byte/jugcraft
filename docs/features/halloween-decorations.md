@@ -187,7 +187,37 @@ Found by CI and fixed before this record:
 
 ### Batch 3 verification
 
-Pending: the CI results for batch 3 are added here when its build has run.
+Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions):
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the scare props' reach and timings with Java, and checks every state of the gate, pillar, door, mound, angel and pop-up skeleton has a model, the fence's multipart has its post and four sides, and the fence, gate and door are in vanilla's tags) | Pass, 470 IDs |
+| `./gradlew build` on `2d8c31c` (later commits only change docs and screenshots) | Pass |
+| Game tests on the headless server, same commit: 233 in total, 7 of them new here (`Decor3GameTests`) | **All 233 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `2d8c31c`; no model, texture or particle errors in the log |
+
+The 7 new game tests (`Decor3GameTests`):
+1. a cemetery fence joins its neighbour and a nether brick fence but not an oak fence; the fences on both sides of a cemetery gate join it; the fence and gate are in vanilla's fence tags (not the wooden one); the gate opens by hand; between two walls it sits in the wall;
+2. the Crypt Door is placed two tall, opens by hand (both halves) and shuts again; a crypt stone pillar placed against the side of a block lies along it; breaking the door's top drops one door;
+3. a sneaking player doesn't set off a Grave Mound, walking past does (the hand rises); its timers survive a save and load; once the player has gone it sinks after its time, and stays down through its rest even with the player back beside it;
+4. a redstone signal springs a Pop-Up Skeleton up with nobody near and holds it up past its time; without the signal it drops back;
+5. a Pop-Up Skeleton four blocks from a player does nothing, two blocks off it springs up, keeping its facing;
+6. the Mourning Angel is placed two tall facing the player, can't be placed under a block, and drops once when its head is broken;
+7. the eight recipes, the two stonecutter recipes, the nine loot tables and the tool and door tags load.
+
+The client game test (`Decor3ClientGameTests`) builds a graveyard (the fence with a shut and an open gate, five Grave Mounds with three hands up, the Mourning Angel, a crypt front with pillars, a chiseled frieze and the Crypt Door) and two Pop-Up Skeletons on the lawn, one sprung, and photographs them by day and at night.
+
+Found by CI and fixed before this record:
+- 26.3 has no `PushReaction.BLOCK` (a compile error); the angel pops off a piston like the other two-block decorations.
+- The fence test set its last post with `setBlock`, which keeps the state it is given, so it didn't join the gate (real placement works it out from its neighbours); the tests now set fences from their neighbours, as placement does. The client shot's fence had gaps for the same reason.
+- The first screenshots showed a zombie hand too small to read, angel wings rising above its head like raised arms, and the tops of the redstone blocks used to hold props up round their edges: the hand is bigger, the wings fold no higher than the head, and the test holds its props up by their saved timers.
+
+**Not run (batch 3):**
+- a person playing it in a client;
+- a dedicated server with two players (one setting off a prop the other watches);
+- the scare props wired to pressure plates or tripwires (the test powers them with a redstone block);
+- the Crypt Door on redstone (vanilla's door behaviour, not exercised).
 
 ## World and event applicability
 - Decorations work all year, anywhere. The candy bowl uses the trick-or-treat night count but is not limited to the Halloween event.
