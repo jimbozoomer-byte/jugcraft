@@ -54,6 +54,9 @@ ABOUT = {
     "high_pressure_extractor": "A steel extractor: 32 items every 4 ticks, four times the brass one.",
     "capacitor_bank": "A 2x2 bank of Leyden jars: 4,000,000 JE. It charges from any side and gives power out of the "
                       "sockets on its front, 4,096 JE/t.",
+    "gas_holder": "A 3x3x3 sphere on legs: 1,024 buckets of one gas, and nothing but gases (liquids go in the steel "
+                  "tank). Pumps and pipes fill and empty it from any face; right-click with an empty hand to read it. "
+                  "Comparators read how full it is.",
     "steel_tank": "A 2x2 riveted tank: 128 buckets of one fluid. Buckets, pumps and pipes fill and empty it; right-click "
                   "with an empty hand to read it.",
     "item_crate": "Holds 32 stacks of one item. Right-click with an item to put it in, with an empty hand to take a "
@@ -452,7 +455,7 @@ def build():
         ]},
         {"title": "Storage", "icon": f"{MOD}:item_crate", "pages":
             [block_page("item_crate", STORAGE_BLOCKS["item_crate"]["display"])]
-            + [machine_page(m) for m in ("capacitor_bank", "steel_tank")]},
+            + [machine_page(m) for m in ("capacitor_bank", "steel_tank", "gas_holder")]},
         {"title": "Renewables", "icon": f"{MOD}:tree_farm", "pages":
             [machine_page(m) for m in ("water_wheel", "cobblestone_generator", "tree_farm")]},
         {"title": "Upgrades", "icon": f"{MOD}:speed_upgrade", "pages":
