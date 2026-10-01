@@ -38,6 +38,24 @@ No numbered release yet. Everything below is on `main`.
 - Also: composting, pig, chicken and parrot feed, `c:` crop, seed and food tags, and a new `agriculture` feature switch.
 - Original textures from `tools/crop_textures.py`. Twelve game tests, plus a client game test with screenshots of a corn maze, the fields and every growth stage.
 
+### Unmerged: Surface deposits, batch 11
+- **Coal, Iron, Copper and Tin Deposits:** flat patches in the top layer of stony hills (windswept hills, stony peaks, stony shores). Picks only break them, for nothing; each block holds 1,000 units.
+- **Deposit drill** (3×3, two tall): takes one coal or raw ore of each kind every 15 seconds from the deposits under it and one block round it, and pushes them into a chest, pipe, conveyor or machine beside it. Empty deposit blocks turn to stone.
+- `deposits.enabled` switch, an advancement, a handbook page and game tests.
+
+### #60 Advanced power, batch 10: big solar, a four-cylinder engine and tanks that keep their fluid
+- **Advanced solar panel:** a white pedestal carrying a 3×3 array of cells, 64 JE/t in full sun (eight solar panels).
+- **Advanced combustion engine** (2 long): gasoline or diesel → up to 1,024 KE/t on a shaft; through a magnet dynamo, the best JE per mB of either fuel.
+- **Tanks** have a new look (white with checker bands) and **keep their fluid when broken**: the item carries the fluid and amount, shown in its tooltip.
+- **Fix:** loot tables now use the Minecraft 26.x format; the old keys were silently ignored, so ore drop counts, the charging station's upper half and slab doubles were wrong. A data check and a game test guard it.
+- Two advancements, handbook pages and game tests.
+
+### #58 Farming, batch 9: harvesters, sprinklers and cotton
+- **Crop harvester** (1×2): harvests and replants the ripe crops in the 9×9 field in front of it.
+- **Sprinkler:** pipe-fed water gives nearby crops extra growth ticks; it also spreads fertilizer from its hopper.
+- **Cotton:** a new crop; seeds from sifting coarse dirt; cotton spins into string.
+- Three advancements, a Farming handbook chapter and a game test for each.
+
 ### #57 Fluid logistics, batch 8: gas holders, valves and filters
 - **Gas holder** (3×3×3 Horton sphere): 1,024 buckets of one gas, and only gases.
 - **Fluid valve:** a steel pipe segment that a redstone signal closes, splitting the line in two.

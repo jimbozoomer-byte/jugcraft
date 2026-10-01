@@ -66,6 +66,7 @@ All machines hold their own internal battery and accept power from cables or dir
 | Coal Generator | Power | Burns coal, charcoal (¾ as long), coal blocks or coke → 32 JE/t | produces | bronze, cable, furnace, casing |
 | Steam Generator | Power | Boils water with coal or bitumen → 64 JE/t | produces | coal generator, bronze, bucket, cable, casing |
 | Solar Panel | Power | Daylight under open sky → 8 JE/t (4 in rain) | produces | glass, silicon, bronze, cable |
+| Advanced Solar Panel (pedestal + 3×3 array) | Power | A white pedestal carrying nine blocks of cells: 64 JE/t in full sun (half in rain), 400,000 JE buffer, 512 JE/t out of the pedestal | produces | 3 solar panels, aluminum plates, processor, aluminum cable, titanium |
 | Battery Box | Power | Stores 400,000 JE; outputs from its front | stores | lead, cable, redstone block, casing |
 | Electric Furnace | Mechanical | Any vanilla smelting recipe, 100 ticks | 10 JE/t | bronze, redstone, cable, furnace, casing |
 | Crusher | Mechanical | Ore → 2 raw; minerals, sulfur, oil sand, cobble → gravel → sand | 16 JE/t | flint, cable, casing, bronze, redstone |
@@ -241,6 +242,8 @@ The fluid branch moves liquids around. It never changes what a liquid *is*: that
 | Gas Holder (3×3×3) | 1,024 buckets of one gas, only gases | A Horton sphere on legs. Pumps and pipes fill and empty it from any face; right-click to read it; comparators read how full it is. | steel plates, 4 steel tanks, steel pipe |
 | Steel Tank (2 wide, 2 deep) | 128 buckets of one fluid | Buckets, pumps and pipes fill and empty it from any face; right-click with an empty hand to read it. Comparators read how full it is. | 8 steel plates, tinplate tank |
 
+**Tanks keep their fluid.** Break a tinplate tank, steel tank or gas holder and it drops as one item carrying its fluid (the tooltip shows which and how much); place it again and the fluid is back. Empty tanks still stack.
+
 ![Capacitor Bank, Steel Tank and Item Crate](images/storage.png)
 
 *Approximate isometric render made from the mod's own textures and model boxes, not a game screenshot.*
@@ -250,6 +253,7 @@ The fluid branch moves liquids around. It never changes what a liquid *is*: that
 | Block or tool | What it does | Details | Built from |
 | --- | --- | --- | --- |
 | Geo-Resonance Prospector (hand tool) | Surveys the 3×3 chunks around you | Shows each ore family found as 1–5 bars with a rough depth (shallow Y ≥ 40, middle 0–39, deep below 0). Readings are deliberately vague: every second column is sampled, a quarter of readings are one bar off, and no positions are given. 3-second cooldown. | brass plates, copper wire, glass pane, basic circuit |
+| Deposit Drill (3×3, 2 tall) | Works a surface deposit under it | Built on a patch of Coal, Iron, Copper or Tin Deposit (stony hills). Every 15 seconds at 16 JE/t it takes one coal or raw ore from each kind of deposit under it or one block round it, down to 3 deep. It pushes them out of every side into chests, pipes, conveyors or machines beside it. Each deposit block holds 1,000 and then turns to stone; right-click one to read what is left. Picks break deposits for nothing. Upgrades, side configuration, redstone modes and comparator output as on other machines. | iron plates, bronze gears, 2 iron pickaxes, machine casing, basic circuit |
 | Ore Drill (2 tall) | Mines the ores in a 9×9 column below it | One `c:ores` block every 40 ticks at 32 JE/t, from the layer under it down to the bottom of the world. Ores come out whole (like silk touch) into three result slots, and each hole is refilled with stone, deepslate or netherrack. It has upgrades, side configuration, eject, redstone modes and comparator output. It stops when full. | steel plates, steel gear, 2 basic circuits, machine casing, diamond pickaxe |
 
 ![Ore Drill](images/mining.png)
@@ -283,6 +287,7 @@ A second, mechanical power system measured in **KE** (kinetic energy) per tick. 
 | Magnet Dynamo | KE → JE at 95%, 512/t | The dynamo with rare-earth magnets; pushes JE into cables on every side. Cyan-banded. | aluminum plates, 4 neodymium magnets, dynamo, aluminum cable |
 | Magnet Motor | JE → KE at 95%, up to 384 KE/t | Takes up to 1,024 JE/t and drives the block it faces. With a magnet dynamo it still loses a tenth each round. | aluminum plates, 4 neodymium magnets, electric motor, aluminum cable |
 | Diesel Engine (2×2×3) | Up to 512 KE/t out of the back of its upper right back block | Burns diesel or heavy fuel oil ([Oil](#oil)), only for what the line takes. | steel plates, plastic sheets, steel gears, casing |
+| Advanced Combustion Engine (2 long) | Up to 1,024 KE/t out of the back of its right-hand block | Four cylinders; burns gasoline (448 KE/mB) or diesel (320), only for what the line takes. 8-bucket tank. | titanium, processor, 2 neodymium magnets, diesel engine, casing |
 
 ![Kinetic blocks](images/kinetic.png)
 
@@ -297,6 +302,16 @@ A second, mechanical power system measured in **KE** (kinetic energy) per tick. 
 | Water Wheel (2 tall) | Power from flowing water | The wheel on its right side (seen from the front) turns in the column of blocks beside it: 8 JE/t per block of flowing water there, 12 if falling, up to 24 JE/t. Source water does not count. Cables connect to its house. | planks, sticks, bronze gear, copper cable |
 | Cobblestone Generator | 1 cobblestone per 20 ticks, 4 JE/t | Needs water and lava touching any sides; neither is used up. | bronze, water bucket, lava bucket, cable, casing |
 | Tree Farm | Sapling → 6 logs in 400 ticks, 16 JE/t | The sapling comes back (byproduct slot) with a 10% chance of the tree's extra (apple, cocoa beans, pink petals, pale moss carpet or a stick). Recipes are data (`jugcraft:tree_growing`) for all nine vanilla trees. | glass, glowstone, dirt, bronze, casing, basic circuit |
+
+### Farming
+
+See [farming.md](features/farming.md).
+
+| Block or item | What it does | Details | Built from |
+| --- | --- | --- | --- |
+| Crop Harvester (2 tall) | Harvests and replants ripe crops in the 9×9 field in front of it | One crop per 20 ticks at 24 JE/t; keeps the drops less one seed, which it replants; waits when its three result slots are full | steel gears, shears, 2 hoppers, casing, steel plates, basic circuit |
+| Sprinkler | Waters the crops within 4 blocks | Every 5 s uses 50 mB of water and gives each growing crop an extra growth tick; with fertilizer loaded, spreads one every 30 s over the 5×5 around it. 4-bucket tank, 16 fertilizer. | bronze pipe, steel plates, tinplate tank, hopper |
+| Cotton | A crop like wheat | Seeds from sifting coarse dirt (15%); a ripe plant gives 1–3 cotton and seeds; 1 cotton → 1 string | – |
 
 ![Cobblestone Generator, Tree Farm and Water Wheel](images/renewables.png)
 
