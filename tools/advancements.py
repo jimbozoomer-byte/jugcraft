@@ -41,6 +41,7 @@ TREE = {
     "gas_turbine": ("diesel_generator", "gas_turbine", "Spool Up", "Build a gas turbine", "goal"),
     "diesel_engine": ("diesel_generator", "diesel_engine", "Eight Cylinders", "Build a diesel engine", "goal"),
     "plastic": ("distillation_tower", "plastic_sheet", "Fantastic Plastic", "Press a plastic sheet", "task"),
+    "rubber": ("plastic", "rubber", "Bouncing Back", "Make synthetic rubber", "task"),
     "asphalt": ("distillation_tower", "asphalt", "Hit the Road", "Lay asphalt, and walk faster on it", "task"),
     # Industrial chemistry (batch 5).
     "electrolytic_cell": ("steel", "electrolytic_cell", "Split Decision", "Build an electrolytic cell", "goal"),
@@ -48,6 +49,12 @@ TREE = {
     "fertilizer": ("sulfuric_acid", "fertilizer", "Green Revolution", "Make fertilizer", "task"),
     "alumina": ("electrolytic_cell", "alumina", "The Bayer Way", "Digest bauxite into alumina", "task"),
     "fuel_cell": ("electrolytic_cell", "fuel_cell", "Clean Burn", "Build a hydrogen fuel cell", "goal"),
+    # Nitrogen chemistry (batch 12).
+    "air_separation_unit": ("electrolytic_cell", "air_separation_unit", "Thin Air",
+                            "Build an air separation unit", "goal"),
+    "synthesis_converter": ("air_separation_unit", "synthesis_converter", "Bread from Air",
+                            "Build a synthesis converter, to make ammonia from air", "goal"),
+    "nitric_acid": ("synthesis_converter", "nitric_acid_bucket", "Aqua Fortis", "Make nitric acid", "task"),
     # Advanced materials (batch 6).
     "titanium": ("electrolytic_cell", "titanium_ingot", "Kroll Call", "Chlorinate titanium and melt the sponge", "task"),
     "lithium_battery_bank": ("titanium", "lithium_battery_bank", "Power Wall", "Build a lithium battery bank", "goal"),
