@@ -109,50 +109,60 @@
           "icon": "jugcraft:plastic_sheet",
           "text": [
             "Fantastic Plastic: Press a plastic sheet.",
+            "Bouncing Back: Make synthetic rubber.",
             "Hit the Road: Lay asphalt, and walk faster on it.",
             "Split Decision: Build an electrolytic cell.",
-            "Oil of Vitriol: Make sulfuric acid.",
-            "Green Revolution: Make fertilizer."
+            "Oil of Vitriol: Make sulfuric acid."
           ]
         },
         {
           "title": "Milestones (8)",
-          "icon": "jugcraft:alumina",
+          "icon": "jugcraft:fertilizer",
           "text": [
+            "Green Revolution: Make fertilizer.",
             "The Bayer Way: Digest bauxite into alumina.",
             "Clean Burn: Build a hydrogen fuel cell.",
-            "Kroll Call: Chlorinate titanium and melt the sponge.",
-            "Power Wall: Build a lithium battery bank.",
-            "Strong Attraction: Make a neodymium magnet."
+            "Thin Air: Build an air separation unit.",
+            "Bread from Air: Build a synthesis converter, to make ammonia from air."
           ]
         },
         {
           "title": "Milestones (9)",
-          "icon": "jugcraft:magnet_dynamo",
+          "icon": "jugcraft:nitric_acid_bucket",
           "text": [
-            "Lossless (Almost): Build a magnet dynamo or magnet motor.",
-            "Pulling Strings: Grow a silicon boule in the crystal grower.",
-            "Etched in Light: Etch microchips in the lithography station.",
-            "Central Processing: Assemble a processor.",
-            "Hello, World: Build a network terminal."
+            "Aqua Fortis: Make nitric acid.",
+            "Kroll Call: Chlorinate titanium and melt the sponge.",
+            "Power Wall: Build a lithium battery bank.",
+            "Strong Attraction: Make a neodymium magnet.",
+            "Lossless (Almost): Build a magnet dynamo or magnet motor."
           ]
         },
         {
           "title": "Milestones (10)",
-          "icon": "jugcraft:gas_holder",
+          "icon": "jugcraft:silicon_boule",
           "text": [
-            "Under Pressure: Build a gas holder.",
-            "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter.",
-            "Here Comes the Sun: Build an advanced solar panel.",
-            "Four on the Floor: Build an advanced combustion engine."
+            "Pulling Strings: Grow a silicon boule in the crystal grower.",
+            "Etched in Light: Etch microchips in the lithography station.",
+            "Central Processing: Assemble a processor.",
+            "Hello, World: Build a network terminal.",
+            "Under Pressure: Build a gas holder."
           ]
         },
         {
           "title": "Milestones (11)",
-          "icon": "jugcraft:cotton",
+          "icon": "jugcraft:fluid_valve",
           "text": [
-            "King Cotton: Grow cotton.",
+            "Shut-Off Valve: Make a fluid valve.",
+            "Strained Relations: Make a fluid filter.",
+            "Here Comes the Sun: Build an advanced solar panel.",
+            "Four on the Floor: Build an advanced combustion engine.",
+            "King Cotton: Grow cotton."
+          ]
+        },
+        {
+          "title": "Milestones (12)",
+          "icon": "jugcraft:sprinkler",
+          "text": [
             "Make It Rain: Build a sprinkler.",
             "Reaping What You Sow: Build a crop harvester."
           ]
@@ -1651,7 +1661,7 @@
           "title": "Steel Foundry",
           "icon": "jugcraft:steel_foundry",
           "text": [
-            "Three blocks tall, needs no power. Refines one iron ingot with one coke into one steel ingot.",
+            "Two by two and five tall, needs no power. Refines one iron ingot with one coke into one steel ingot. Pipe oxygen into it (from the air separation unit) and it blows the charge: twice as fast, for 2 mB of oxygen a tick.",
             "Needs no power."
           ],
           "craft": {
@@ -2522,6 +2532,84 @@
           }
         },
         {
+          "title": "Rubber",
+          "icon": "jugcraft:rubber",
+          "text": [
+            "Crack a bucket of naphtha in the chemical reactor: 500 mB of butadiene. The polymerization reactor turns 500 mB of butadiene into four synthetic rubber.",
+            "Rubber and string make two belts. A steel plate faced with rubber cuts into four gaskets, and gasketed steel pipe comes four to a steel plate pair, without a bronze pipe."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:rubber",
+              "jugcraft:steel_plate",
+              "jugcraft:rubber",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "result": "jugcraft:gasket",
+            "count": 4
+          }
+        },
+        {
+          "title": "Nitrogen Chemistry",
+          "icon": "jugcraft:nitric_acid_bucket",
+          "text": [
+            "Air is four parts nitrogen to one of oxygen. The air separation unit splits it; hydrogen comes from the electrolytic cell.",
+            "The synthesis converter joins hydrogen and nitrogen into ammonia, and burns ammonia in oxygen over water into nitric acid.",
+            "Ammonia and phosphate make fertilizer (six for two phosphate, against four with sulfuric acid). Nitric acid etches microchips with half as much acid as sulfuric."
+          ]
+        },
+        {
+          "title": "Air Separation Unit",
+          "icon": "jugcraft:air_separation_unit",
+          "text": [
+            "Two by two and six tall: a cold box and its distillation column. It needs no input: it liquefies air and splits it, 8 mB of nitrogen a tick out of the top row, 2 mB of oxygen out of the bottom row and a little argon (1 mB every 2 ticks) out of the middle, at 64 JE/t. Pipe the gases to the synthesis converter, the steel foundry, the crystal grower or a gas holder; it stops while any tank is full.",
+            "Uses 64 JE/t while working. Holds 40,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate",
+              "jugcraft:fluid_tank",
+              "jugcraft:machine_casing",
+              "jugcraft:fluid_tank",
+              "jugcraft:electric_motor",
+              "jugcraft:advanced_circuit",
+              "jugcraft:electric_motor"
+            ],
+            "result": "jugcraft:air_separation_unit",
+            "count": 1
+          }
+        },
+        {
+          "title": "Synthesis Converter",
+          "icon": "jugcraft:synthesis_converter",
+          "text": [
+            "Three wide, four tall and two deep: a high-pressure catalytic converter. Haber-Bosch: 300 mB of hydrogen and 100 mB of nitrogen make 200 mB of ammonia. Ostwald: 100 mB of ammonia, 200 mB of oxygen and 100 mB of water make 200 mB of nitric acid. Each takes 2 seconds at 128 JE/t.",
+            "Uses 128 JE/t while working. Holds 60,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:titanium_ingot",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:synthesis_converter",
+            "count": 1
+          }
+        },
+        {
           "title": "Aluminum, the Real Way",
           "icon": "jugcraft:alumina",
           "text": [
@@ -2597,7 +2685,7 @@
           "title": "Crystal Grower",
           "icon": "jugcraft:crystal_grower",
           "text": [
-            "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 wafers in the sawmill.",
+            "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 wafers in the sawmill. Pipe argon in to shield the melt and it grows twice as fast, for 1 mB of argon a tick.",
             "Uses 128 JE/t while working. Holds 60,000 JE."
           ],
           "craft": {
