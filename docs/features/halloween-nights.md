@@ -31,7 +31,7 @@ Primary specialty and supported player role: farming and play; supports groups (
 15. Under it, Jugcraft crops, trellis crops, gourd stems and giant pumpkin vines **grow twice as fast**, giant pumpkins **swell twice as fast**, and lit carved and giant pumpkins **throw off sparks**.
 
 ### The Headless Horseman (only at midnight in the event)
-16. **Summon him.** During the event, in the overworld, within about a minute of midnight (game time 17000 to 19000), not in Peaceful: give a Scarecrow a **jack o'lantern or a lit hand-carved pumpkin** for a head, under the open sky, then **sneak and use the scarecrow with an empty hand**. The head is taken in a flash of (harmless) lightning, and he rides in 12 to 16 blocks away, hunting whoever called him. If something is missing, the scarecrow says what.
+16. **Summon him.** During the event, in the overworld, within about a minute of midnight (game time 17000 to 19000), not in Peaceful: give a Scarecrow a **jack o'lantern or a lit hand-carved pumpkin** for a head, under the open sky, then **sneak and use the scarecrow with an empty hand**. The head is taken in a flash of (harmless) lightning, and he rides in 12 to 16 blocks away, hunting whoever called him (he remembers them, and goes back for them whenever they are in his arena). If something is missing, the scarecrow says what.
 17. **The fight.** A headless rider on a black horse with a burning lantern: 160 health, armour 8, strong charges (9 damage), and **flaming pumpkins** thrown from 4 to 28 blocks every 3 seconds (6 damage and 3 seconds of fire to everything within 2 blocks of where one bursts; they never break or light blocks). At half health he is **enraged**: a quarter faster, throwing three at a time twice as often. He keeps to his arena (32 blocks around the scarecrow), and a boss bar shows his health. Only one rides within 128 blocks.
 18. **He rides off**, leaving nothing, at dawn, when the event ends, or after 30 seconds with nobody within 48 blocks of his arena.
 19. **Defeat him** and he drops the **Horseman's Lantern** (light 15, stands or hangs, epic), the **Horseman's Cloak** (worn on the chest, for looks), 1–2 king-size candy bars and 3–6 candy corn; everyone within 48 blocks earns **Lost His Head**.
@@ -63,7 +63,7 @@ Primary specialty and supported player role: farming and play; supports groups (
   - The only new packet is server-to-client: whether the Harvest Moon is up (`jugcraft:harvest_moon`), for the sparks. Clients send nothing new.
 - **Saved state.**
   - A trebuchet keeps its loaded pumpkin, angle, board and ribbon list (block entity `jugcraft:trebuchet`); breaking it drops the pumpkin.
-  - The Horseman is saved with his arena, rage and loneliness; a flying pumpkin with where it left and its trebuchet; wisps like any mob.
+  - The Horseman is saved with his arena, the player he hunts, his rage and loneliness; a flying pumpkin with where it left and its trebuchet; wisps like any mob.
   - A Candy Bag keeps its treats (`minecraft:bundle_contents`) and tonight's count (`jugcraft:candy_bag_night`) on the item.
   - The Harvest Moon keeps no state: it is worked out from the date and the overworld clock. Landing markers are not saved.
 - **Bounded work.**
@@ -80,7 +80,51 @@ Primary specialty and supported player role: farming and play; supports groups (
 No new dependencies. Every texture is drawn by code (`tools/night_textures.py`): the wisp, the Horseman and his glowing eyes and lantern, the landing marker, the cloak (worn and as an item), the jar's glass, light, lid and string, the trebuchet's wood, beams, iron and rope, and the lantern's pumpkin, face, glow and iron. Models and data come from `tools/night_data.py`; the Horseman, wisp and marker are drawn by Java models in the client (`HorsemanModel`, `WispModel`, `ThrowMarkerRenderer`).
 
 ## Verification
-VERIFICATION_PENDING
+Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions):
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the wisps, trebuchet, Harvest Moon and Horseman numbers with Java, the throwing factors with the ammunition tag, the Candy Bag's treat tag, every trebuchet arm and facing with a model, the Harvest Moon's config default, the Horseman's loot (player kills only), a message for every failed summoning, and, for every block model, that no face reads outside a see-through texture) | Pass, 439 IDs |
+| `./gradlew build` on `0bc19af` (the code of this pull request; later commits only change docs and screenshots and remove a temporary probe workflow) | Pass |
+| Game tests on the headless server, same commit: 201 in total, 17 of them new here (`NightGameTests`) | **All 201 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `0bc19af`; no model or texture errors in the log; `[nights test] Harvest Moon on the client: true, wisps: 3` |
+
+The 17 new game tests (`NightGameTests`):
+1. the Harvest Moon rises at dusk on 31 October and is up at midnight, not by day or at dawn, not the night before; the operator can move it; never with the event off or outside the event's window;
+2. at midnight on Halloween a crop grows exactly twice as fast; at dawn it sets and growth is normal; ending the event sets it;
+3. wisps are about on event nights only; one may appear over corn and beside it under the open sky, not inside the plant, not over bare stone, not under a roof; with four near, no more spawn;
+4. a wisp flees a player three blocks off, not a sneaking one, but does flee a sneaking one within 2.5; a glass bottle (one of two) becomes a Wisp in a Jar and earns Bottled Light, and the wisp is gone; out of the night it fades; a blow puts it out with no drops or experience;
+5. dirt doesn't load a trebuchet; a pumpkin does (one); a loaded sling takes no second; sneaking with an empty hand steps 45° up to 60° and wraps to 30° without throwing; an empty hand lets fly (one pumpkin, up and north, owned by the player); nothing loads while the arm swings back, and it swings back;
+6. a throw's speed and direction follow the facing, angle, pumpkin (carved faster, heavy slower) and a gust of at most 4 %; all ten ammunition kinds are in the tag, a melon isn't;
+7. a pumpkin landing 52 blocks out is measured across the ground, goes on the board, gives First Prize and Pumpkin Chunkin', and leaves a named marker; a shorter throw keeps the best; second and third places get their ribbons; off the board gets none; a new best takes first and its ribbon; the board keeps three; taking first again gives no second ribbon; after a save and load the board is the same and it still remembers who has a ribbon;
+8. breaking a loaded trebuchet drops it and its pumpkin;
+9. only treats go in the Candy Bag, by filling or by clicking in an inventory; dirt stays out;
+10. trick-or-treating with the bag in hand puts the treat in the bag and writes one home tonight on it; the count and treats survive a save and load; the next night the count is forgotten and the treats kept;
+11. **every summoning rule** in order: not out of season (also through sneak-using the scarecrow), not at noon or well after midnight, not in Peaceful, not for a dark or unlit head, not under a roof; then he comes within the hour, takes the head, rides in within 16 blocks, has the scarecrow as his arena, remembers the summoner and stays; a second summoning nearby is refused and keeps its head;
+12. he stays at midnight in the event, and leaves at dawn, after 600 ticks alone, or when the event ends; riding off leaves no lantern or cloak;
+13. killed by no one he drops no lantern; killed by a player he drops one lantern and one cloak and earns Lost His Head; his loot table loads;
+14. a flaming pumpkin's burst takes exactly 6 health from a cow and sets it alight, leaves the Horseman unhurt, breaks no block and lights no fire;
+15. calm he throws one pumpkin; at half health he is enraged, faster (the rage modifier), and throws three;
+16. **restart across the boundary:** saved and loaded, he keeps his arena, the player he hunts, his rage, loneliness and health; loaded during the event at midnight he rides on, loaded after it he leaves;
+17. **earned content kept:** with the event off, a Wisp in a Jar (light 13) and a Horseman's Lantern (light 15) stand and glow, and the cloak is worn on the chest; the recipe, the three block loot tables, three advancements and the treat tag load.
+
+The client game test (`NightClientGameTests`) builds a cornfield with a scarecrow and lit carvings, three trebuchets (loaded, ready, thrown) and a landing marker, Wisps in Jars and Horseman's Lanterns standing and hanging, and an armor stand in the cloak. It photographs them at noon, then at midnight on Halloween (a fixed server clock) with three posed wisps and the Horseman. It also prints whether the client got the Harvest Moon and how many wisps it sees.
+
+Found by CI and fixed before this record:
+- Three test API differences in 26.3 (`BundleContents.itemCopies`, `Player.interactOn` taking a hit location, no `Blocks.WHITE_WOOL` constant).
+- The ready and loaded trebuchets failed to bake ("Cannot compute translucency out of bounds"): the rope's faces read outside its see-through texture. The UVs are now pinned, and the checker now catches this in any block model.
+- 26.3's `Mob.asValidTarget` refused the test's mock player as a target (it refuses creative or spectator players and any that can't be attacked). So the Horseman now remembers who summoned him and goes back for them once they can be attacked and are in his arena, rather than giving up.
+- The first night screenshots showed the Horseman head-on in the dark; he is now posed side-on between two of his lanterns.
+
+**Not run:**
+- a person playing it in a client;
+- a dedicated server with two players (two players fighting the Horseman, two throwing on one board);
+- wisps spawning on their own over a real swamp or cornfield (the test world has no swamp; the tests check the spot rules and the cap directly);
+- a thrown pumpkin's whole flight (the tests check its launch, then land it directly);
+- the Horseman's AI in a real fight: chasing, keeping to his arena, timed throws, the boss bar (the tests call his rules directly, and every test Horseman is removed in the same tick so none hunts another test's players);
+- the giant pumpkin's doubled swelling under the Harvest Moon (the code is one line beside the crop bonus, which is tested);
+- the event and the Harvest Moon on a real calendar date (the tests set the clock and the mode).
 
 ## World and event applicability
 - **Seasonal rules** (docs/CONTENT_BRANCHES.md): the same operator settings as trick-or-treating (`halloween.start`, `halloween.end`, `halloween.timezone`, `halloween.mode`) plus `halloween.harvest_moon`. Clients' clocks never count. Ending the event stops wisps, summoning and the Harvest Moon; everything earned stays. Nothing in progression needs the event.

@@ -376,7 +376,17 @@ During the event, 15 % of zombies, husks, skeletons, strays and zombie villagers
 
 Things that happen on Halloween nights, and a throwing contest for any time of year. Wisps, the Horseman and the Harvest Moon only come while the Halloween event runs; everything they leave behind stays. Details, numbers and test evidence: [../features/halloween-nights.md](../features/halloween-nights.md).
 
-SCREENSHOTS_PENDING
+| **Halloween nights** by day: the cornfield and scarecrow, three trebuchets, jars and lanterns, the cloak | **At midnight:** wisps over the corn, the Horseman, glowing jars and lanterns |
+| --- | --- |
+| ![Halloween nights](../images/ingame_halloween_nights.jpg) | ![Halloween nights at midnight](../images/ingame_halloween_nights_night.jpg) |
+| **Trebuchets:** loaded, ready and just thrown, with a landing marker | **Wisps in Jars and Horseman's Lanterns**, standing and hanging, and the cloak on an armor stand |
+| ![Three trebuchets](../images/ingame_trebuchets.jpg) | ![Jars and lanterns](../images/ingame_wisp_jars_and_lanterns.jpg) |
+| **Will-o'-wisps** over the corn at midnight | **The Headless Horseman** between two of his lanterns |
+| ![Will-o'-wisps over corn](../images/ingame_wisps.jpg) | ![The Headless Horseman](../images/ingame_headless_horseman.jpg) |
+| **The Harvest Moon:** sparks over lit carvings | |
+| ![Harvest Moon sparks](../images/ingame_harvest_moon_sparks.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`NightClientGameTests`, software rendering, small previews).*
 
 ### Will-o'-wisps
 
