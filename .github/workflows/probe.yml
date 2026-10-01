@@ -1,0 +1,59 @@
+name: Probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - run: |
+          set +e
+          ./gradlew compileGametestJava --no-daemon > compile.txt 2>&1
+          echo "exit $?"
+          grep -E "error:" -A4 compile.txt | head -200
+      - run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
+          FAPI=$(find ~/.gradle/caches -name 'fabric-rendering-v1*.jar' | head -1)
+          CP="$CLIENT:$COMMON:$FAPI"
+          l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
+          unzip -l "$COMMON" | grep -iE "vehicle/.*Boat|boat/" | awk '{print $4}' | head -20
+          unzip -l "$CLIENT" | grep -iE "renderer/entity/.*Boat|renderer/entity/state/.*Boat" | awk '{print $4}' | head -10
+          l net.minecraft.world.entity.vehicle.boat.AbstractBoat '' 140
+          l net.minecraft.world.entity.vehicle.boat.Boat '' 30
+          l net.minecraft.world.item.BoatItem
+          l 'net.minecraft.world.entity.EntityType$Builder' 'public' 60
+          l net.minecraft.client.renderer.entity.EntityRenderer 'public|protected' 60
+          l net.minecraft.client.renderer.entity.AbstractBoatRenderer
+          l net.minecraft.client.renderer.entity.state.BoatRenderState
+          l net.minecraft.client.renderer.entity.state.EntityRenderState 'public' 40
+          unzip -l "$FAPI" | grep -i "EntityRenderer" | awk '{print $4}' | head
+          l net.minecraft.world.entity.ai.Brain 'getMemory|setMemory'
+          l net.minecraft.world.entity.ai.memory.MemoryModuleType 'HOME|JOB_SITE'
+          l net.minecraft.world.level.saveddata.SavedData '' 30
+          l net.minecraft.world.level.saveddata.SavedDataType '' 30
+          l net.minecraft.world.level.storage.DimensionDataStorage 'computeIfAbsent|get\(' 20
+          l net.minecraft.world.item.equipment.Equippable '' 60
+          l 'net.minecraft.world.item.equipment.Equippable$Builder' 'public' 40
+          javap -cp "$CP" -c -p net.minecraft.world.item.Items | grep -n -B2 -A12 'String carved_pumpkin' | head -60
+          l net.minecraft.world.level.Level 'Time|time' 30
+          l net.minecraft.world.level.LevelReader 'Time|time' 20
+          l net.minecraft.server.level.ServerLevel 'Time|time|Clock|clock' 30
+          l net.minecraft.world.level.block.DoorBlock 'public static|isWoodenDoor|OPEN|HALF'
+          l net.minecraft.server.PlayerAdvancements 'award'
+          l net.minecraft.server.ServerAdvancementManager 'get'
+          l net.minecraft.sounds.SoundEvents 'WOODEN_DOOR|WITCH_CELEBRATE|WITCH_AMBIENT|VILLAGER_YES|VILLAGER_CELEBRATE|DOOR|BAT_TAKEOFF|PADDLE|BOAT' 40
+          l net.minecraft.core.particles.ParticleTypes 'HAPPY|SMOKE|WITCH|SOUL|SPLASH' 20
+          l net.minecraft.world.entity.npc.villager.Villager 'public' 30
+          l net.minecraft.world.entity.npc.Villager 'public' 30
+          l net.minecraft.world.entity.Entity 'getPassengerAttachmentPoint|positionRider|canAddPassenger|getControllingPassenger|getDimensions|getMaxPassengers|addAdditionalSaveData|readAdditionalSaveData|defineSynchedData|getPickResult|getDefaultPassengerAttachmentPoint' 40
