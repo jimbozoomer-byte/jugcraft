@@ -65,11 +65,11 @@ The theme is original: no real consoles, games, brands or characters.
 - Original assets: textures drawn by `tools/pixel_hollows_textures.py` and models built in `tools/retro_models.py`; the ambient loop synthesised by `tools/pixel_hollows_sound.py` (written to an Ogg file with ffmpeg). The bleeps reuse the game's own note-block "bit" sound by name in `sounds.json`; no Mojang file is copied. MIT.
 
 ## Verification
-Build workflow run 36811250794 on commit e034b19 (1 October 2026): Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub-hosted Ubuntu; game tests on the headless test server, client tests with Mesa software rendering.
+Build workflow run 36811774557 on commit 4a50d04 (1 October 2026, merged with `main` after the oil line): Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub-hosted Ubuntu; game tests on the headless test server, client tests with Mesa software rendering.
 
 **Passed:**
 - `python3 scripts/check_repository.py`, `python3 tools/check_mod_data.py` (IDs, assets, loot, tags, the biome's feature references, no recipe makes shards, no pre-26 loot keys) and the generated-JSON check.
-- `./gradlew build`: all 74 game tests, including `PixelHollowsGameTests`:
+- `./gradlew build`: all 96 game tests, including `PixelHollowsGameTests`:
   - `pixelCrystalClusterDrops`: 1–2 shards (both seen in 64 breaks), Silk Touch takes the cluster, Fortune III at most 5.
   - `pixelHollowsBlocksDropThemselves`: circuitstone needs a pickaxe and drops itself; lamp light 15; cluster light 3 and no random ticks; the cabinet drops once, from its lower half.
   - `pixelCrystalFeaturesFaceTheCave`: the floor and ceiling features place clusters facing up and down.

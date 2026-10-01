@@ -74,11 +74,11 @@ Everything is original: no real shop names, logos, colours, uniforms, games or f
 - The shop template is written in 26.3's format with 26.3's DataVersion (5023), so the data fixer leaves it alone. A DataVersion above the game's made the whole template load as air; the game test `retroGameShopTemplateLoads` compares the two numbers, so after a platform bump `DATA_VERSION` in `tools/retro_game_shop.py` must follow.
 
 ## Verification
-Build workflow run 36811250794 on commit e034b19 (1 October 2026): Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub-hosted Ubuntu; game tests on the headless test server, client tests with Mesa software rendering.
+Build workflow run 36811774557 on commit 4a50d04 (1 October 2026, merged with `main` after the oil line): Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub-hosted Ubuntu; game tests on the headless test server, client tests with Mesa software rendering.
 
 **Passed:**
 - `python3 tools/check_mod_data.py`: the Java trade table against `tools/pixel_hollows.py`, the search bounds, and the buyback against the cheapest sale.
-- `./gradlew build`: all 74 game tests, including:
+- `./gradlew build`: all 96 game tests, including:
   - `retroTraderTrades`: novice, apprentice and journeyman traders get exactly their trades; the map costs 12 emeralds and a compass, once per restock.
   - `retroTraderHasNoProfitLoop`: the buyback's multiplier is 0; logged "cheapest shard 0.5 emeralds, best buyback 0.333 emeralds per shard".
   - `pixelHollowsMapNeedsACaveInReach`: in the superflat test world, using the map leaves it unmarked.
