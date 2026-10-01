@@ -280,7 +280,8 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ### Feature switches (`config/`)
 
-| Registered IDs | 363 items/blocks under `jugcraft:` (the checker counts them) |
+- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines` and `agriculture`.
+- It also holds other server options, `JugcraftConfig.OPTIONS` (read with `JugcraftConfig.option(key)`): `carving.free_draw` (default `true`).
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
 
