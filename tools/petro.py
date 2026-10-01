@@ -30,6 +30,13 @@ GASES = {
 }
 
 
+# Plain items (chemistry/PetroItems.java): display name.
+ITEMS = {
+    # Bauxite (alumina) and sand (silica) with a little nickel: used up, one per bucket of heavy fuel oil cracked.
+    "cracking_catalyst": "Cracking Catalyst",
+}
+
+
 def fluid_ids():
     """Every fluid id this line registers (sources, flowing forms and gases), for tags and recipe checks."""
     return [f for fluid in FLUIDS for f in (fluid, f"flowing_{fluid}")] + list(GASES)
@@ -45,7 +52,7 @@ def buckets():
 
 def petro_items():
     """Items of the petrochemistry line that are not blocks."""
-    return buckets()
+    return buckets() + list(ITEMS)
 
 
 # Fluid processing machines (MachineKind.fluidSpec() in Java mirrors this): input and output tank capacities in mB,
@@ -59,6 +66,9 @@ FLUID_MACHINES = {
     # Crude oil -> four fractions, each drawn off at its own height (Java: MachineKind.outputLayer). 128 JE/t.
     "distillation_tower": {"inputs": [16_000], "outputs": [8_000, 8_000, 8_000, 8_000], "item_inputs": 0,
                            "item_outputs": 0, "recipe_type": "distillation"},
+    # Heavy fuel oil + water (steam) + catalyst -> diesel (base), naphtha (layer 2), refinery gas (top). 160 JE/t.
+    "catalytic_cracker": {"inputs": [8_000, 8_000], "outputs": [8_000, 8_000, 8_000], "item_inputs": 1,
+                          "item_outputs": 0, "recipe_type": "catalytic_cracking"},
 }
 
 # Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],
@@ -79,6 +89,13 @@ FLUID_RECIPES = {
         {"name": "crude_oil", "fluids": [("jugcraft:crude_oil", 1000)],
          "fluid_results": [("jugcraft:refinery_gas", 100), ("jugcraft:naphtha", 250), ("jugcraft:diesel", 400),
                            ("jugcraft:heavy_fuel_oil", 250)], "ticks": 100, "features": ["crude_oil"]},
+    ],
+    # Cracking breaks heavy oil into lighter fuels; the steam's water is not counted as product.
+    "catalytic_cracker": [
+        {"name": "heavy_fuel_oil", "items": [("jugcraft:cracking_catalyst", 1)],
+         "fluids": [("jugcraft:heavy_fuel_oil", 1000), ("minecraft:water", 250)],
+         "fluid_results": [("jugcraft:diesel", 500), ("jugcraft:naphtha", 300), ("jugcraft:refinery_gas", 200)],
+         "source": 0, "ticks": 160, "features": ["crude_oil"]},
     ],
 }
 

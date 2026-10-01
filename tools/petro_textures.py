@@ -100,7 +100,23 @@ def bucket(colors, seed):
     return img
 
 
+def catalyst():
+    """Cracking catalyst: a heap of small grey-white alumina pellets with a faint green nickel tint."""
+    rng = random.Random(960)
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    shades = [(150, 158, 150), (186, 194, 184), (214, 222, 210), (120, 132, 122)]
+    centres = [(rng.uniform(3, 13), rng.uniform(5 + abs(8 - x) * 0.4, 14)) for x in range(22)]
+    for cx, cy in sorted(centres, key=lambda c: c[1]):
+        for y in range(16):
+            for x in range(16):
+                if (x - cx) ** 2 + (y - cy) ** 2 <= 2.2:
+                    shade = shades[2] if x < cx and y < cy else shades[1] if (x + y) % 3 else shades[0]
+                    img.putpixel((x, y), shade + (255,))
+    return img
+
+
 def draw_all(save, save_animation):
+    save(catalyst(), "item", "cracking_catalyst")
     for index, (fluid, info) in enumerate(FLUIDS.items()):
         save_animation(still(info["colors"], 800 + index), f"{fluid}_still", frametime=3)
         save_animation(flowing(info["colors"], 850 + index), f"{fluid}_flow", frametime=2)

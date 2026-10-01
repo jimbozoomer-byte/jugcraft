@@ -1262,6 +1262,8 @@ def machines():
     save(window(963, [(40, 34, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "oil_sand_extractor_front_on")
     save(window(964, [(30, 26, 26), (44, 36, 34)]), "block", "distillation_tower_front")
     save(window(964, [(30, 26, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "distillation_tower_front_on")
+    save(window(965, [(30, 26, 26), (44, 36, 34)]), "block", "catalytic_cracker_front")
+    save(window(965, [(30, 26, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "catalytic_cracker_front_on")
     save(jaws(956, False), "block", "ore_drill_front")
     save(jaws(956, True), "block", "ore_drill_front_on")
     save(window(953, [(30, 26, 26)], glow=[(255, 200, 80), (255, 236, 150), (250, 150, 40)]), "block", "steel_foundry_front_on")

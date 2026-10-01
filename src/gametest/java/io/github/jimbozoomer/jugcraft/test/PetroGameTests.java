@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.test;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.chemistry.OilReservoirs;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
+import io.github.jimbozoomer.jugcraft.chemistry.PetroItems;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
 import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
@@ -240,6 +241,22 @@ public class PetroGameTests {
 			helper.assertTrue(diesel.storage.variant.isOf(PetroFluids.DIESEL.source()) && diesel.storage.amount == 400 * 81,
 					"The tank at the diesel draw-off holds " + diesel.storage.amount / 81 + " mB of " + diesel.storage.variant);
 			helper.assertTrue(tower.tanks().output(2).isResourceBlank(), "Diesel stayed in the tower");
+		});
+	}
+
+	/** The catalytic cracker turns heavy fuel oil, water and one catalyst into diesel, naphtha and refinery gas. */
+	@GameTest(maxTicks = 300)
+	public void crackerCracksHeavyFuelOil(GameTestHelper helper) {
+		MachineBlockEntity cracker = place(helper, MachineKind.CATALYTIC_CRACKER, new BlockPos(4, 1, 2));
+		cracker.tanks().input(0).fill(PetroFluids.HEAVY_FUEL_OIL.source(), 1000);
+		cracker.tanks().input(1).fill(Fluids.WATER, 1000);
+		cracker.setItem(0, new ItemStack(PetroItems.CRACKING_CATALYST, 2));
+		helper.succeedWhen(() -> {
+			helper.assertTrue(cracker.tanks().output(0).has(PetroFluids.DIESEL.source(), 500), "No diesel");
+			helper.assertTrue(cracker.tanks().output(1).has(PetroFluids.NAPHTHA.source(), 300), "No naphtha");
+			helper.assertTrue(cracker.tanks().output(2).has(PetroFluids.REFINERY_GAS.fluid(), 200), "No refinery gas");
+			helper.assertTrue(cracker.getItem(0).getCount() == 1, "The cracker used " + (2 - cracker.getItem(0).getCount()) + " catalysts");
+			helper.assertTrue(cracker.tanks().input(1).millibuckets() == 750, "Water left: " + cracker.tanks().input(1).millibuckets());
 		});
 	}
 }

@@ -47,6 +47,8 @@ MACHINES = {
     "oil_sand_extractor": {"display": "Oil Sand Extractor", "lit": True},
     # A 2x2 column seven blocks tall: crude oil -> refinery gas, naphtha, diesel and heavy fuel oil.
     "distillation_tower": {"display": "Distillation Tower", "lit": True},
+    # A 2x2x4 fluid catalytic cracker: heavy fuel oil + steam + catalyst -> diesel, naphtha, refinery gas.
+    "catalytic_cracker": {"display": "Catalytic Cracker", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
 }
 
@@ -189,6 +191,8 @@ STATS = {
     "oil_sand_extractor": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "tank": 8_000},
     # 2x2x7. 128 JE/t heats the reboiler; a bucket of crude oil per 100 ticks.
     "distillation_tower": {"capacity": 40_000, "input_per_tick": 512, "use_per_tick": 128, "tank": 16_000},
+    # 2x2x4. 160 JE/t; a bucket of heavy fuel oil per 160 ticks.
+    "catalytic_cracker": {"capacity": 40_000, "input_per_tick": 512, "use_per_tick": 160, "tank": 8_000},
 }
 
 # Fuel for the coal generator: burn ticks per item (coal matches the vanilla furnace's 1600).
@@ -358,6 +362,11 @@ CRAFTING = {
                                                    "G": "#c:gears/steel"}, 1),
     "distillation_tower": (["PTP", "PCP", "PFP"], {"P": "#c:plates/steel", "T": "jugcraft:steel_tank",
                                                    "C": "jugcraft:advanced_circuit", "F": "minecraft:blast_furnace"}, 1),
+    "catalytic_cracker": (["PCP", "TAT", "PMP"], {"P": "#c:plates/steel", "C": "jugcraft:advanced_circuit",
+                                                  "T": "jugcraft:steel_tank", "A": "jugcraft:arc_furnace_casing",
+                                                  "M": "jugcraft:machine_casing"}, 1),
+    "cracking_catalyst": (["BSB", "SNS", "BSB"], {"B": "jugcraft:bauxite", "S": "minecraft:sand",
+                                                  "N": "#c:ingots/nickel"}, 4),
     "charging_station": (["SLS", "WAW", "SBS"], {"S": "#c:plates/steel", "L": "minecraft:redstone_lamp",
                                                 "W": "jugcraft:copper_cable", "A": "jugcraft:advanced_circuit",
                                                 "B": "jugcraft:battery_box"}, 1),

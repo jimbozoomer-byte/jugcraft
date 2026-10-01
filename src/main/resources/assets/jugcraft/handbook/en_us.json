@@ -1885,6 +1885,51 @@
             "result": "jugcraft:distillation_tower",
             "count": 1
           }
+        },
+        {
+          "title": "Catalytic Cracker",
+          "icon": "jugcraft:catalytic_cracker",
+          "text": [
+            "Two by two and four blocks tall. Cracks heavy fuel oil into lighter fuels with steam and a catalyst: 1,000 mB of heavy fuel oil, 250 mB of water and a cracking catalyst give 500 mB of diesel (out at the base), 300 mB of naphtha (two blocks up) and 200 mB of refinery gas (at the top), every 8 seconds.",
+            "Uses 160 JE/t while working. Holds 40,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "jugcraft:arc_furnace_casing",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:catalytic_cracker",
+            "count": 1
+          }
+        },
+        {
+          "title": "Cracking Catalyst",
+          "icon": "jugcraft:cracking_catalyst",
+          "text": [
+            "Bauxite (alumina) and sand (silica) with a nickel ingot make four. The catalytic cracker uses one for each bucket of heavy fuel oil it cracks."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:bauxite",
+              "minecraft:sand",
+              "jugcraft:bauxite",
+              "minecraft:sand",
+              "jugcraft:nickel_ingot",
+              "minecraft:sand",
+              "jugcraft:bauxite",
+              "minecraft:sand",
+              "jugcraft:bauxite"
+            ],
+            "result": "jugcraft:cracking_catalyst",
+            "count": 4
+          }
         }
       ]
     },

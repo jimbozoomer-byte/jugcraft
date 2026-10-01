@@ -372,6 +372,8 @@ The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches
 | Pumpjack | 1 wide, 3 tall, 3 long; pumps the conventional reservoir under its wellhead | 2 mB/t at 32 JE/t, 16-bucket tank, pushes into pipes | 4 steel plates, 2 steel gears, electric pump, casing |
 | Oil Sand Extractor | 2×2×2 hot-water extraction | oil sand + 250 mB water → 500 mB crude oil + sand (160 ticks); bitumen + 100 mB water → 150 mB (80 ticks); 32 JE/t | 4 steel plates, hopper, 2 tinplate tanks, casing, steel gear |
 | Distillation Tower | 2×2, seven tall; splits crude oil into fractions, each drawn off at its own height | 1,000 mB crude → 100 refinery gas (top), 250 naphtha (layer 4), 400 diesel (layer 2), 250 heavy fuel oil (base); 100 ticks at 128 JE/t | 6 steel plates, steel tank, advanced circuit, blast furnace |
+| Catalytic Cracker | 2×2, four tall; cracks heavy fuel oil into lighter fuels | 1,000 mB heavy fuel oil + 250 mB water + 1 catalyst → 500 diesel (base), 300 naphtha (layer 2), 200 refinery gas (top); 160 ticks at 160 JE/t | steel plates, advanced circuit, 2 steel tanks, arc furnace casing, casing |
+| Cracking Catalyst | Used up by the cracker, one per bucket | – | 4 bauxite, 4 sand, nickel ingot → 4 |
 
 **Fluid processing machines** (the pumpjack and extractor are the first): input tanks take only fluids the machine's recipes use; output tanks push into neighbouring tanks and pipes; the screen shows a gauge per tank. Recipes are data in `data/jugcraft/recipe/<type>/` (see [petrochemistry.md](features/petrochemistry.md)).
 

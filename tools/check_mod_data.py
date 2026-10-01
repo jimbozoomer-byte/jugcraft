@@ -116,6 +116,10 @@ def check_petro():
     expected = [(f, str(i["tick_delay"]), str(i["slope"]), str(i["drop_off"])) for f, i in petro.FLUIDS.items()]
     if declared != expected:
         err(f"PetroFluids.java fluids {declared} != tools/petro.py {expected}")
+    items_java = re.findall(r'JugcraftRegistry\.item\("([a-z_]+)"\)',
+                            (JAVA_ROOT / "chemistry" / "PetroItems.java").read_text(encoding="utf-8"))
+    if items_java != list(petro.ITEMS):
+        err(f"PetroItems.java items {items_java} != tools/petro.py {list(petro.ITEMS)}")
     gases = re.findall(r'= gas\("([a-z_]+)"', java)
     if gases != list(petro.GASES):
         err(f"PetroFluids.java gases {gases} != tools/petro.py {list(petro.GASES)}")
@@ -152,7 +156,7 @@ UNITS = {"ingots": 9, "nuggets": 1, "raw_materials": 9, "ores": 9, "storage_bloc
          **{f"{form}s": units for form, units in PART_UNITS.items()}}
 
 
-NON_METAL = {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"}
+NON_METAL = {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items())
 
 
 def item_units(ref):

@@ -328,7 +328,47 @@ def distillation_tower():
     return m
 
 
+def catalytic_cracker():
+    """A two by two fluid catalytic cracker four blocks tall: the slim riser-reactor (front left) and the fat
+    regenerator vessel (right), both olive with gunmetal and hazard bands, joined at the top by a chrome crossover
+    with cyclone caps. A catalyst hopper and a steam line feed the reactor; the firebox and control panel sit at its
+    foot; chrome draw-offs with red valves at the base, two blocks up and at the top give diesel, naphtha and gas."""
+    m = [box((-16, 0, 0), (16, 2, 32), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    # Feed heater at the foot of the reactor: firebox window, gauge and lamp.
+    m.append(box((1, 2, 0.5), (15, 14, 9), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(box((4, 3, 0.25), (12, 9, 0.5), {"*": GUNMETAL, "north": "sp_window!"}))
+    m.append(dial("north", (5, 11.5, 0.25), 2.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 11.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    # Riser-reactor: a slim column behind the heater.
+    m += cyl("y", 8, 18, 6, 2, 56, OLIVE, GUNMETAL)
+    for y in (14, 30, 46):
+        m += cyl("y", 8, 18, 6.4, y, y + 1, HAZARD)
+    m += cyl("y", 8, 18, 4, 56, 60, CHROME)
+    # Regenerator: a fat vessel on legs on the right.
+    for x, z in ((-14, 4), (-4, 4), (-14, 27), (-4, 27)):
+        m.append(box((x, 2, z), (x + 2, 10, z + 2), GUNMETAL))
+    m += cyl("y", -8, 17, 9, 10, 46, OLIVE, GUNMETAL)
+    for y in (20, 36):
+        m += cyl("y", -8, 17, 9.4, y, y + 1, HAZARD)
+    m += cyl("y", -8, 17, 6, 46, 50, GUNMETAL)
+    # Crossover duct between the tops, and two cyclone caps on the regenerator.
+    m.append(box((-6, 50, 15.5), (8, 54, 20.5), CHROME))
+    m.append(box((-7, 46, 15.5), (-3, 54, 20.5), CHROME))
+    for x in (-12, -5):
+        m += cyl("y", x, 22, 2, 50, 56, GUNMETAL, CHROME)
+    # Catalyst hopper and the steam line into the reactor.
+    m.append(box((10, 30, 26), (15, 36, 31), {"*": GUNMETAL, "up": "sp_hopper_inside"}))
+    m.append(box((11.5, 24, 22), (13.5, 30, 28), RUBBER))
+    m.append(box((14, 14, 16), (15.5, 40, 18), RUBBER))
+    # Draw-offs out of the front at the base, two blocks up and at the top (layers 0, 2 and 3), with red valves.
+    for y in (9, 40, 57):
+        m.append(box((-12, y - 2, 0.5), (-8, y + 2, 6.5), CHROME))
+        m.append(box((-13, y - 3, 0), (-7, y + 3, 0.5), GUNMETAL))
+        m += wheel("z", -10, y + 4.5, 1.5, 2.5, 3.25, "sp_red_iron", CHROME, spokes=False)
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
           "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump(),
-          "distillation_tower": distillation_tower()}
+          "distillation_tower": distillation_tower(), "catalytic_cracker": catalytic_cracker()}
