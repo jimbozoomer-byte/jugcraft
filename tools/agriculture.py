@@ -546,13 +546,13 @@ PEDDLER = {"display": "Halloween Peddler", "trade_set": "halloween_peddler", "am
 GRAVESTONES = {
     "rounded_gravestone": {"display": "Rounded Gravestone", "style": "ROUNDED",
                            "boxes": [(1, 0, 4, 15, 2, 12), (2, 2, 6, 14, 12, 10), (3, 12, 6, 13, 14, 10), (5, 14, 6, 11, 15, 10)],
-                           "engraving": [2.0, 7.5, 10.0, 6, "1.0F / 128"]},
+                           "engraving": [2.0, 7.5, 10.0, 6, "1.0F / 96"]},
     "cross_gravestone": {"display": "Cross Gravestone", "style": "CROSS",
                          "boxes": [(2, 0, 4, 14, 4, 12), (6.5, 4, 6.5, 9.5, 16, 9.5), (2.5, 10, 6.5, 13.5, 13, 9.5)],
-                         "engraving": [4.0, 2.0, 11.0, 3, "1.0F / 144"]},
+                         "engraving": [4.0, 2.0, 11.0, 3, "1.0F / 112"]},
     "obelisk_gravestone": {"display": "Obelisk Gravestone", "style": "OBELISK",
                            "boxes": [(2, 0, 2, 14, 3, 14), (4, 3, 4, 12, 13, 12), (5, 13, 5, 11, 15, 11), (6.5, 15, 6.5, 9.5, 16, 9.5)],
-                           "engraving": [4.0, 8.0, 7.0, 7, "1.0F / 128"]},
+                           "engraving": [4.0, 8.0, 7.0, 6, "1.0F / 112"]},
 }
 ENGRAVING = {"max_length": 50, "stone": "minecraft:stone"}
 # Decorations for any time of year: cobwebs that never slow anyone, a ghost hanging under a block, and a

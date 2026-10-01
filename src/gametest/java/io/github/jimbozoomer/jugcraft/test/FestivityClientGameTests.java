@@ -59,9 +59,13 @@ public class FestivityClientGameTests implements FabricClientGameTest {
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
 			context.waitTicks(60);
 			singleplayer.getConnection().waitForChunksRender();
+			BlockPos first = new BlockPos(x + 2, y, z - 8);
+			System.out.println("[festivities test] engraving on the client: " + context.computeOnClient(client ->
+					client.level.getBlockEntity(first) instanceof GravestoneBlockEntity stone ? stone.text() : "(no gravestone)"));
 
 			shoot(context, singleplayer, x + 9, y + 5, z + 6, 180, 18, "jugcraft_halloween_festivities");
 			shoot(context, singleplayer, x + 5, y, z - 4, 180, 16, "jugcraft_gravestones");
+			shoot(context, singleplayer, x + 2, y, z - 6, 180, 20, "jugcraft_gravestone_engraving");
 			shoot(context, singleplayer, x + 21, y, z - 4, 180, 14, "jugcraft_judging_stand");
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 9, y + 5, z + 6, 180, 18, "jugcraft_halloween_festivities_night");

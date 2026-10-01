@@ -13,8 +13,8 @@ from halloween_textures import PLANK, shade, wood_grain
 
 VELVET = [rgb("2e1240"), rgb("3e1a56"), rgb("4e246c"), rgb("5e3080")]
 GOLD = [rgb("8a6416"), rgb("c09228"), rgb("e8c050"), rgb("fbe8a0")]
-STONE = [rgb("5e5f62"), rgb("727477"), rgb("85878a"), rgb("97999b"), rgb("a9abac")]
-LICHEN = [rgb("6e7a3a"), rgb("8a9448")]
+STONE = [rgb("8e8f8c"), rgb("a2a39f"), rgb("b2b3af"), rgb("c1c2be"), rgb("cfd0cc")]
+LICHEN = [rgb("7e8a46"), rgb("98a256")]
 SHEET = [rgb("cfd2d8"), rgb("e0e2e6"), rgb("eeeff2"), rgb("fafafb")]
 BONE = [rgb("a89c78"), rgb("c4b894"), rgb("dcd2b0"), rgb("ece6cc")]
 WAX = [rgb("d8d2c0"), rgb("ece8da"), rgb("f8f6ee")]
@@ -77,7 +77,7 @@ def stand_rosette():
 # ---------------------------------------------------------------- gravestones and other decorations
 
 def gravestone():
-    """Weathered grey stone with darker pits and a few spots of lichen."""
+    """Pale weathered limestone with darker pits and a few spots of lichen, so an engraving stands out."""
     rng = random.Random(7203)
     c = speckle(STONE, 7204)
     for _ in range(10):

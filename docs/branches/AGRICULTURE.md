@@ -1,6 +1,6 @@
 # Agriculture branch
 
-Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife), the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations), and the pumpkin regatta and trick-or-treating.** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md), [../features/halloween-harvest.md](../features/halloween-harvest.md) and [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md) for the implemented slices and their test evidence.
+Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife), the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations), the pumpkin regatta and trick-or-treating, and the Halloween festivities (the carving contest, costumed mobs, the Halloween Peddler, spooky decorations and sweets).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md), [../features/halloween-harvest.md](../features/halloween-harvest.md) , [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md) and [../features/halloween-festivities.md](../features/halloween-festivities.md) for the implemented slices and their test evidence.
 
 Agriculture is Jugcraft's third starting branch, alongside technology and magic ([DESIGN.md](../DESIGN.md)). A farmer can begin on day one with a hoe and whatever grows nearby, and never needs a machine or a spell. Industrial farming (powered harvesters, planters, sprinklers, crop processors) comes later and belongs to the engineering branch; see [Boundaries](#boundaries).
 
@@ -345,6 +345,22 @@ For a race, put a **Regatta Flag** on the shore and **Regatta Buoys** on still w
 ### Trick-or-treating
 
 While the Halloween event runs (by default 20 October to 3 November; the server operator sets the dates), use a **Candy Bag** on a villager's wooden door between dusk and midnight. Wear a costume on your head (a carved pumpkin, any hand-carved one, or a **Witch Hat**, **Ghost Sheet** or **Scarecrow Hat**), and make sure a porch light burns by the door (a jack o'lantern, a turnip lantern, or a lit hand-carved or giant pumpkin). The villager whose bed is inside opens up and hands you a treat: candy, caramel, cookies, a popcorn ball, a caramel apple or, rarely, a **King-Size Candy Bar**. Each home gives each player one treat a night; knock again and you get a harmless prank. Ten homes in one night earn **Full Bag**. When the event ends, nobody answers, but every treat and costume stays.
+
+## What exists now: the Halloween festivities
+
+More to do around Halloween, and decorations and sweets for any time of year. Voting, costumed mobs and the Peddler only happen while the Halloween event runs. Details, numbers and test evidence: [../features/halloween-festivities.md](../features/halloween-festivities.md).
+
+### The carving contest
+
+Put a hand-carved pumpkin on a **Judging Stand** and use the stand with an empty hand to enter it (only its carver can). While the event runs, everyone else uses the stand to vote for its carver: one vote per player per Halloween, moved by voting elsewhere, never for yourself. Sneak-use a stand for the standings. When the event ends, the three carvers with the most votes get the Harvest Scale's ribbons, once.
+
+### Costumed mobs and the Halloween Peddler
+
+During the event, 15 % of zombies, husks, skeletons, strays and zombie villagers wear a Witch Hat, Ghost Sheet, Scarecrow Hat or carved pumpkin, and drop a sweet when a player kills them. Wandering traders arrive as the **Halloween Peddler**, in a Witch Hat, selling four Halloween goods for emeralds: pumpkin seeds (giant and heirloom), costumes, decorations and sweets.
+
+### Spooky decorations and sweets
+
+**Gravestones** (Rounded, Cross and Obelisk, from a stonecutter) take a name: use a Name Tag named in an anvil on one, and its name is engraved on the stone. The **Spun Cobweb** looks like a cobweb but never slows anyone; the **Hanging Ghost** hangs under a block; the **Candle Skull** lights and snuffs like a candle. The Cooking Pot boils sugar into four sweets that work even on a full stomach: **Glow Gum** (Glowing), **Ghost Taffy** (a moment of invisibility), **Fizz Rocks** (Jump Boost) and **Witch's Licorice** (Night Vision).
 
 ## Crop roster: what comes next (planned)
 

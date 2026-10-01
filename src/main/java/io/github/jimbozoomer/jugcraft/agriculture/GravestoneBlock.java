@@ -46,11 +46,11 @@ public class GravestoneBlock extends BaseEntityBlock {
 	 */
 	public enum Style {
 		ROUNDED("rounded_gravestone", new double[][] {{1, 0, 4, 15, 2, 12}, {2, 2, 6, 14, 12, 10}, {3, 12, 6, 13, 14, 10}, {5, 14, 6, 11, 15, 10}},
-				2.0F, 7.5F, 10.0F, 6, 1.0F / 128),
+				2.0F, 7.5F, 10.0F, 6, 1.0F / 96),
 		CROSS("cross_gravestone", new double[][] {{2, 0, 4, 14, 4, 12}, {6.5, 4, 6.5, 9.5, 16, 9.5}, {2.5, 10, 6.5, 13.5, 13, 9.5}},
-				4.0F, 2.0F, 11.0F, 3, 1.0F / 144),
+				4.0F, 2.0F, 11.0F, 3, 1.0F / 112),
 		OBELISK("obelisk_gravestone", new double[][] {{2, 0, 2, 14, 3, 14}, {4, 3, 4, 12, 13, 12}, {5, 13, 5, 11, 15, 11}, {6.5, 15, 6.5, 9.5, 16, 9.5}},
-				4.0F, 8.0F, 7.0F, 7, 1.0F / 128);
+				4.0F, 8.0F, 7.0F, 6, 1.0F / 112);
 
 		public final String id;
 		final double[][] boxes;

@@ -24,8 +24,8 @@ import org.jspecify.annotations.Nullable;
  * its {@link GravestoneBlock.Style} gives; lines past the last that fits are left off.
  */
 public class GravestoneRenderer implements BlockEntityRenderer<GravestoneBlockEntity, GravestoneRenderer.State> {
-	/** Dark grey, as if cut into the stone. */
-	private static final int INK = 0xFF2A2A2E;
+	/** Near black, as if cut deep into the pale stone. */
+	private static final int INK = 0xFF1C1C20;
 	/** How far in front of the face the letters sit, so they never sink into the stone. */
 	private static final float OUT = 0.005F;
 
