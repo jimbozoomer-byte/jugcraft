@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags;
 import net.minecraft.core.BlockPos;
@@ -47,10 +48,12 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -139,6 +142,13 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<RegattaBuoyBlockEntity> REGATTA_BUOY_ENTITY;
 	public static BlockEntityType<JudgingStandBlockEntity> JUDGING_STAND_ENTITY;
 	public static BlockEntityType<GravestoneBlockEntity> GRAVESTONE_ENTITY;
+	public static DataComponentType<CandyBagItem.Night> CANDY_BAG_NIGHT;
+	public static EntityType<WillOWisp> WILL_O_WISP;
+	public static EntityType<FlyingPumpkin> FLYING_PUMPKIN;
+	public static EntityType<ThrowMarker> THROW_MARKER;
+	public static EntityType<HeadlessHorseman> HEADLESS_HORSEMAN;
+	public static EntityType<FlamingPumpkin> FLAMING_PUMPKIN;
+	public static BlockEntityType<TrebuchetBlockEntity> TREBUCHET_ENTITY;
 	/** What each kind of pumpkin becomes when first carved by hand, and the loot table its seeds come from. */
 	private static final Map<Block, Block> CARVED_FROM = new HashMap<>();
 	private static final Map<Block, ResourceKey<LootTable>> CARVE_LOOT = new HashMap<>();
@@ -299,6 +309,7 @@ public final class JugcraftAgriculture {
 		registerRegatta();
 		registerTrickOrTreat();
 		registerFestivities();
+		registerNight();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> FOOD_TAB.forEach(output::accept));
@@ -521,7 +532,11 @@ public final class JugcraftAgriculture {
 			}
 			registerItem(costume, Item::new, new Item.Properties().stacksTo(1).component(DataComponents.EQUIPPABLE, worn.build()), TOOL_TAB);
 		}
-		registerItem("candy_bag", Item::new, new Item.Properties().stacksTo(1), TOOL_TAB);
+		CANDY_BAG_NIGHT = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("candy_bag_night"),
+				DataComponentType.<CandyBagItem.Night>builder().persistent(CandyBagItem.Night.CODEC)
+						.networkSynchronized(CandyBagItem.Night.STREAM_CODEC).build());
+		registerItem("candy_bag", CandyBagItem::new, new Item.Properties().stacksTo(1)
+				.component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY), TOOL_TAB);
 		TrickOrTreat.register();
 	}
 
@@ -564,6 +579,54 @@ public final class JugcraftAgriculture {
 		FlammableBlockRegistry fire = FlammableBlockRegistry.getDefaultInstance();
 		fire.add(cobweb, 30, 60);
 		fire.add(ghost, 30, 60);
+	}
+
+	/**
+	 * Halloween nights: will-o'-wisps (and the Wisp in a Jar they are caught into), the Pumpkin Chunkin' Trebuchet
+	 * with its flying pumpkins and landing markers, the Headless Horseman with his flaming pumpkins, lantern and
+	 * cloak, and the Harvest Moon.
+	 */
+	private static void registerNight() {
+		WILL_O_WISP = entity("will_o_wisp", EntityType.Builder.<WillOWisp>of(WillOWisp::new, MobCategory.AMBIENT).noLootTable()
+				.sized(0.4F, 0.4F).eyeHeight(0.2F).clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(WILL_O_WISP, WillOWisp.createAttributes());
+		Block jar = registerBlock("wisp_in_a_jar", LanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
+				.strength(0.3F).sound(SoundType.GLASS).lightLevel(state -> WISP_JAR_LIGHT).noOcclusion().pushReaction(PushReaction.POPPED));
+		registerItem("wisp_in_a_jar", props -> new BlockItem(jar, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		Wisps.register();
+
+		Block trebuchet = registerBlock("trebuchet", TrebuchetBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		registerItem("trebuchet", props -> new BlockItem(trebuchet, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		TREBUCHET_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("trebuchet"),
+				FabricBlockEntityTypeBuilder.create(TrebuchetBlockEntity::new, trebuchet).build());
+		FLYING_PUMPKIN = entity("flying_pumpkin", EntityType.Builder.<FlyingPumpkin>of(FlyingPumpkin::new, MobCategory.MISC).noLootTable()
+				.sized(0.5F, 0.5F).clientTrackingRange(10).updateInterval(5));
+		THROW_MARKER = entity("throw_marker", EntityType.Builder.<ThrowMarker>of(ThrowMarker::new, MobCategory.MISC).noLootTable().noSave()
+				.sized(0.4F, 1.2F).clientTrackingRange(8).updateInterval(40));
+
+		HEADLESS_HORSEMAN = entity("headless_horseman", EntityType.Builder.<HeadlessHorseman>of(HeadlessHorseman::new, MobCategory.MONSTER)
+				.sized(1.4F, 2.9F).eyeHeight(2.5F).fireImmune().notInPeaceful().clientTrackingRange(10));
+		FabricDefaultAttributeRegistry.register(HEADLESS_HORSEMAN, HeadlessHorseman.createAttributes());
+		FLAMING_PUMPKIN = entity("flaming_pumpkin", EntityType.Builder.<FlamingPumpkin>of(FlamingPumpkin::new, MobCategory.MISC).noLootTable()
+				.sized(0.5F, 0.5F).fireImmune().clientTrackingRange(8).updateInterval(5));
+		Block lantern = registerBlock("horseman_lantern", LanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(1.0F).sound(SoundType.LANTERN).lightLevel(state -> 15).noOcclusion().pushReaction(PushReaction.POPPED));
+		registerItem("horseman_lantern", props -> new BlockItem(lantern, props), new Item.Properties().useBlockDescriptionPrefix()
+				.rarity(Rarity.EPIC), EQUIPMENT_TAB);
+		Equippable cloak = Equippable.builder(EquipmentSlot.CHEST).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER)
+				.setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id("horseman_cloak"))).build();
+		registerItem("horseman_cloak", Item::new, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).component(DataComponents.EQUIPPABLE, cloak),
+				TOOL_TAB);
+		HarvestMoon.register();
+	}
+
+	/** How brightly a Wisp in a Jar glows. */
+	public static final int WISP_JAR_LIGHT = 13;
+
+	private static <T extends net.minecraft.world.entity.Entity> EntityType<T> entity(String id, EntityType.Builder<T> builder) {
+		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id(id));
+		return Registry.register(BuiltInRegistries.ENTITY_TYPE, key, builder.build(key));
 	}
 
 	/** The costume hats, in the order of their tag. */

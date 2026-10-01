@@ -1,8 +1,11 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import java.util.Locale;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -14,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
@@ -22,8 +26,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * The Scarecrow: a straw figure on a post, two blocks tall, in a flannel shirt. Use any dye on it to
  * change the shirt's colour ({@link #SHIRT}). Its head is whatever is put on top: a pumpkin, a hand-carved
- * pumpkin or a jack o'lantern sits on the post at head height. It is a decoration for now; once
- * crop-eating birds exist, it will keep them off nearby fields (docs/branches/AGRICULTURE.md).
+ * pumpkin or a jack o'lantern sits on the post at head height. With a lit one, sneak-used at midnight during the
+ * Halloween event, it summons the Headless Horseman ({@link HorsemanSummoning}). Once crop-eating birds exist, it
+ * will keep them off nearby fields (docs/branches/AGRICULTURE.md).
  */
 public class ScarecrowBlock extends TallDecorationBlock {
 	public static final EnumProperty<DyeColor> SHIRT = EnumProperty.create("shirt", DyeColor.class);
@@ -60,6 +65,25 @@ public class ScarecrowBlock extends TallDecorationBlock {
 			stack.consume(1, player);
 			level.playSound(null, pos, SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
+		}
+		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * Sneak-use with an empty hand at midnight during the Halloween event, wearing a lit pumpkin for a head, and the
+	 * Headless Horseman comes for it ({@link HorsemanSummoning}).
+	 */
+	@Override
+	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		if (!player.isSecondaryUseActive()) {
+			return InteractionResult.PASS;
+		}
+		if (player instanceof ServerPlayer caller) {
+			BlockPos lower = state.getValue(HALF) == DoubleBlockHalf.LOWER ? pos : pos.below();
+			HorsemanSummoning.Result result = HorsemanSummoning.summon(caller, lower);
+			if (result != HorsemanSummoning.Result.SUMMONED) {
+				caller.sendOverlayMessage(Component.translatable("message.jugcraft.horseman." + result.name().toLowerCase(Locale.ROOT)));
+			}
 		}
 		return InteractionResult.SUCCESS;
 	}

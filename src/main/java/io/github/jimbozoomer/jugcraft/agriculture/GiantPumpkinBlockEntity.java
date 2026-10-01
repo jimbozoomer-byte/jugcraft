@@ -152,6 +152,9 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 		if (watered(level)) {
 			gain++;
 		}
+		if (HarvestMoon.active()) {
+			gain *= 2; // The Harvest Moon swells it twice as fast.
+		}
 		feed(level, gain, random);
 	}
 

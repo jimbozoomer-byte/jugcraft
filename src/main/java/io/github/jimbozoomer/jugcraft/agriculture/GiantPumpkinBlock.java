@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -184,5 +185,14 @@ public class GiantPumpkinBlock extends BaseEntityBlock implements BonemealableBl
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(SIZE, PART, LIGHT);
+	}
+
+	/** Under the Harvest Moon a lit giant pumpkin throws off sparks from its top. */
+	@Override
+	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+		if (HarvestMoon.clientActive && state.getValue(LIGHT) > 0 && random.nextInt(6) == 0) {
+			level.addParticle(random.nextBoolean() ? ParticleTypes.SMALL_FLAME : ParticleTypes.WAX_ON, pos.getX() + random.nextDouble(),
+					pos.getY() + 1.0, pos.getZ() + random.nextDouble(), 0.0, 0.04, 0.0);
+		}
 	}
 }

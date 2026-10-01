@@ -2,8 +2,10 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -104,5 +106,14 @@ public class CarvedPumpkinBlock extends BaseEntityBlock {
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/** Under the Harvest Moon a lit carving throws off sparks. */
+	@Override
+	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+		if (HarvestMoon.clientActive && state.getValue(LIT) && random.nextInt(3) == 0) {
+			level.addParticle(random.nextBoolean() ? ParticleTypes.SMALL_FLAME : ParticleTypes.WAX_ON, pos.getX() + random.nextDouble(),
+					pos.getY() + 0.9 + random.nextDouble() * 0.3, pos.getZ() + random.nextDouble(), 0.0, 0.03, 0.0);
+		}
 	}
 }
