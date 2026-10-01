@@ -102,7 +102,7 @@ Other blocks:
 | ID | Class | What |
 | --- | --- | --- |
 | `machine_casing`, `arc_furnace_casing` | plain blocks | crafting part; arc furnace structure |
-| `copper_cable`, `silver_cable`, `aluminum_cable` | `energy/CableBlock` | 4 px energy transmitters: 256 / 1,024 / 4,096 JE/t; a network runs at its slowest cable |
+| `copper_cable`, `silver_cable`, `aluminum_cable` | `energy/CableBlock` | 6 px energy transmitters (glowing green core, emissive strips): 256 / 1,024 / 4,096 JE/t; a network runs at its slowest cable |
 | `bronze_fluid_pipe` | `fluid/FluidPipeBlock` | 4 px fluid transmitter, 250 mB per push |
 | `fluid_tank` | `fluid/FluidTankBlock(Entity)` | 16,000 mB, one fluid, comparator output |
 | `electric_pump` | `fluid/ElectricPumpBlock(Entity)` | pulls from below, 100 mB/t, 8 JE/t |

@@ -86,7 +86,7 @@ All machines hold their own internal battery and accept power from cables or dir
 
 Machines are drawn in a **steampunk** style by default: brass, copper and riveted iron, with gauges, gears, valve wheels, glowing fireboxes and portholes. The look is purely visual. Blocks, recipes, footprints, screens and power connections are the same in both styles.
 
-From the steel tier up, machines are **dieselpunk** instead: gunmetal and olive paint, hazard stripes, chrome, phosphor gauges and caged lamps (see [ART_DIRECTION.md](ART_DIRECTION.md)). The steel foundry, capacitor bank, steel tank, ore drill and high-pressure extractor already use it; the renders below predate that.
+Power gear (cables, battery box, capacitor bank, charging station, solar panel, electric pump, electric motor and dynamo) has an **electric** look: graphite with glowing green strips, screens and ports. From the steel tier up, other machines are **dieselpunk** instead: gunmetal and olive paint, hazard stripes, chrome, phosphor gauges and caged lamps (see [ART_DIRECTION.md](ART_DIRECTION.md)). The steel foundry, capacitor bank, steel tank, ore drill and high-pressure extractor already use it; the renders below predate that.
 
 ![Steampunk machines, each shown from the front-left and front-right](images/steampunk_machines.png)
 
@@ -186,7 +186,7 @@ There is no faster fluid pipe yet. A pump moves 100 mB/t, less than the bronze p
 
 **Transmitter design:**
 
-- **Thin, not full blocks.** Each is a 4-pixel (¼-block) core. An arm reaches out toward each connected neighbor, and the hitbox follows the same shape. For comparison, Mekanism's cables and pipes are 6 pixels.
+- **Thin, not full blocks.** Cables are 6 pixels thick, fluid pipes 4 and item pipes 6. An arm reaches out toward each connected neighbor, and the hitbox follows the same shape (Mekanism's are 6 pixels).
 - **Connect automatically.**
   - A cable joins other cables and any block that stores or uses energy on the touching face.
   - A pipe joins other pipes and any block with a fluid storage on that face, including tanks, pumps, the steam generator, vanilla cauldrons and other mods' fluid blocks.
@@ -197,7 +197,7 @@ There is no faster fluid pipe yet. A pump moves 100 mB/t, less than the bronze p
 *Approximate isometric render made from the mod's own textures and model boxes, not a game screenshot.*
 
 - **Look:**
-  - The cable is black rubber insulation with copper connectors. The pipe is bronze, darker at its flanged ends.
+  - Cables have the electric look: a graphite sheath with a glowing green core strip along every side, a glowing cross on the junction, and collars of the tier's metal (copper, silver, aluminum) where they meet a neighbour. The strips are emissive, so they glow in the dark. The pipe is bronze, darker at its flanged ends.
   - In the inventory both show as a short 3D segment.
 
 ## Fluids

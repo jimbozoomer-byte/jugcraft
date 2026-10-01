@@ -29,6 +29,44 @@ CABLE_ROTATION = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {
                   "up": {"x": 270}, "down": {"x": 90}}
 
 
+# Glowing strips on cables (electric look): this far proud of the sheath, in pixels, and at full light emission.
+GLOW_LIFT = 0.1
+GLOW_EMISSION = 15
+
+
+def glow_strip(frm, to, face):
+    """A thin lit strip lying on one face of a cable box: drawn on its outer face and its two long edges."""
+    return {"from": frm, "to": to, "light_emission": GLOW_EMISSION,
+            "faces": {f: {"uv": [0, 0, 16, 16], "texture": "#glow"}
+                      for f in ("north", "south", "east", "west", "up", "down") if f != face}}
+
+
+def cable_glow(lo, hi, z0, z1):
+    """Strips along a cable piece running north-south from z0 to z1: one centred on each of its four long faces."""
+    a, b, t = 7, 9, GLOW_LIFT
+    return [glow_strip([a, hi, z0], [b, hi + t, z1], "down"), glow_strip([a, lo - t, z0], [b, lo, z1], "up"),
+            glow_strip([hi, a, z0], [hi + t, b, z1], "west"), glow_strip([lo - t, a, z0], [lo, b, z1], "east")]
+
+
+def core_glow(lo, hi):
+    """The glowing cross on each face of a cable's core: a full-width bar one way, two short bars the other (no
+    overlap, so no two lit faces share a plane)."""
+    a, b, t = 7, 9, GLOW_LIFT
+    out = []
+    for axis in range(3):
+        for side, outer in ((lo, lo - t), (hi, hi + t)):
+            u, v = [i for i in range(3) if i != axis]
+            for (u0, u1), (v0, v1) in (((lo, hi), (a, b)), ((a, b), (lo, a)), ((a, b), (b, hi))):
+                frm, to = [0.0] * 3, [0.0] * 3
+                frm[axis], to[axis] = min(side, outer), max(side, outer)
+                frm[u], to[u] = u0, u1
+                frm[v], to[v] = v0, v1
+                facing = {0: ("west", "east"), 1: ("down", "up"), 2: ("north", "south")}[axis]
+                inner = facing[1] if side == lo else facing[0]
+                out.append(glow_strip(frm, to, inner))
+    return out
+
+
 def write(path, obj):
     if isinstance(obj, dict) and obj.get("elements"):
         model_writer.separate_coplanar(obj["elements"])
@@ -124,21 +162,25 @@ def machine_assets(lang):
         # Transmitters are `size` pixels thick (4 for cables and fluid pipes, 6 for item pipes).
         lo = 8 - info.get("size", 4) // 2
         hi = 16 - lo
+        textures = {"cable": texture, "particle": texture}
+        glowing = cable in CABLES
+        if glowing:
+            textures["glow"] = rid("block/el_glow")
         write(ASSETS / "models" / "block" / f"{cable}_core.json", {
-            "textures": {"cable": texture, "particle": texture},
+            "textures": textures,
             "elements": [{"from": [lo, lo, lo], "to": [hi, hi, hi], "faces": {
                 face: {"uv": [lo, lo, hi, hi], "texture": "#cable"}
-                for face in ("north", "east", "south", "west", "up", "down")}}],
+                for face in ("north", "east", "south", "west", "up", "down")}}] + (core_glow(lo, hi) if glowing else []),
         })
         write(ASSETS / "models" / "block" / f"{cable}_arm.json", {
-            "textures": {"cable": texture, "particle": texture},
+            "textures": textures,
             "elements": [{"from": [lo, lo, 0], "to": [hi, hi, lo], "faces": {
                 "north": {"uv": [lo, lo, hi, hi], "texture": "#cable"},
                 "east": {"uv": [0, lo, lo, hi], "texture": "#cable"},
                 "west": {"uv": [0, lo, lo, hi], "texture": "#cable"},
                 "up": {"uv": [lo, 0, hi, lo], "texture": "#cable"},
                 "down": {"uv": [lo, 0, hi, lo], "texture": "#cable"},
-            }}],
+            }}] + (cable_glow(lo, hi, 1, lo) if glowing else []),
         })
         parts = [{"apply": {"model": rid(f"block/{cable}_core")}}]
         for direction, rotation in CABLE_ROTATION.items():
@@ -147,7 +189,7 @@ def machine_assets(lang):
         # A 3D straight segment in hand and inventory, like other tech mods' transmitters.
         write(ASSETS / "models" / "item" / f"{cable}.json", {
             "parent": "minecraft:block/block",
-            "textures": {"cable": texture, "particle": texture},
+            "textures": textures,
             "elements": [{"from": [lo, lo, 0], "to": [hi, hi, 16], "faces": {
                 "north": {"uv": [lo, lo, hi, hi], "texture": "#cable"},
                 "south": {"uv": [lo, lo, hi, hi], "texture": "#cable"},
@@ -155,7 +197,7 @@ def machine_assets(lang):
                 "west": {"uv": [0, lo, 16, hi], "texture": "#cable"},
                 "up": {"uv": [lo, 0, hi, 16], "texture": "#cable"},
                 "down": {"uv": [lo, 0, hi, 16], "texture": "#cable"},
-            }}],
+            }}] + (cable_glow(lo, hi, 1, 15) if glowing else []),
         })
         write(ASSETS / "items" / f"{cable}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{cable}")}})
 

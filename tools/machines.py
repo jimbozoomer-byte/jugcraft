@@ -78,9 +78,11 @@ PARTS = {
 
 # Cables: display name and JE per tick one push may send through the network.
 # Tiers connect to each other; a network carries as much as its slowest cable (energy/EnergyNetworks).
-CABLES = {"copper_cable": {"display": "Copper Cable", "rate": 256},
-          "silver_cable": {"display": "Silver Cable", "rate": 1_024},
-          "aluminum_cable": {"display": "Aluminum Cable", "rate": 4_096}}
+# Electric look (tools/electric_textures.py): 6 pixels thick, graphite with a glowing green core; the collars at the
+# ends show the tier's metal.
+CABLES = {"copper_cable": {"display": "Copper Cable", "rate": 256, "size": 6},
+          "silver_cable": {"display": "Silver Cable", "rate": 1_024, "size": 6},
+          "aluminum_cable": {"display": "Aluminum Cable", "rate": 4_096, "size": 6}}
 
 # Item logistics (see docs/TECH_TREE.md#item-logistics). The tube is a 6-pixel transmitter; the
 # extractor and sorter face any of six directions. Models: tools/logistics_models.py.
