@@ -10,7 +10,7 @@ How every implemented material, machine and part works and connects. **Implement
 | **Power** | Implemented | Generators, batteries and cables (JE energy). See [machines-and-power.md](features/machines-and-power.md). |
 | **Mechanical processing** | Implemented | Physical transformation of materials: smelting, crushing, alloying, pressing, drawing, assembling. |
 | **Fluids** | Implemented | Pipes, tanks and pumps that move and store water, lava and other mods' fluids; physical only, no reactions. See [Fluids](#fluids) below. |
-| **Chemistry** | **Planned** | Reactions that change what a substance *is*: electrolysis, acids, fertilizer, refining. See [branches/CHEMISTRY.md](branches/CHEMISTRY.md). |
+| **Chemistry** | **In progress** | Reactions that change what a substance *is*: electrolysis, acids, fertilizer, refining. The dieselpunk oil line is being built first: see [branches/CHEMISTRY.md](branches/CHEMISTRY.md) and [petrochemistry.md](features/petrochemistry.md). |
 
 The mechanical branch changes the **shape or mix** of materials (crush, melt, alloy, press, draw, assemble). Anything that needs a chemical reaction belongs to the Chemistry branch, even when it currently has a temporary blast-furnace or arc-furnace stand-in.
 
@@ -52,8 +52,8 @@ flowchart LR
 8. **Better power:**
    - **Steam Generator:** an upgraded coal generator that also burns bitumen.
    - **Solar Panel:** needs silicon.
-   - **Wind Turbine** (3 blocks tall, aluminum plates): free power that grows with height.
-   - **Geothermal Generator** (2 blocks wide, needs a basic circuit): runs on lava. An electric pump on lava feeds it through pipes.
+   - **Wind Turbine** (9 blocks tall with a 7-block rotor, aluminum plates): free power that grows with height.
+   - **Geothermal Generator** (2×2×2, needs a basic circuit): runs on lava. An electric pump on lava feeds it through pipes.
 9. **Fluids:** **Bronze Fluid Pipes** and the **Tinplate Tank** are crafted from press-made plates; the **Electric Pump** adds iron gears, a bucket and a casing. A pump on water, piped to a steam generator, keeps the boiler full without buckets.
 
 ## Machines
@@ -62,13 +62,13 @@ All machines hold their own internal battery and accept power from cables or dir
 
 | Machine | Branch | Does | Power | Built from |
 | --- | --- | --- | --- | --- |
-| Coal Generator | Power | Burns coal, charcoal or coal blocks → 32 JE/t | produces | bronze, cable, furnace, casing |
+| Coal Generator | Power | Burns coal, charcoal (¾ as long), coal blocks or coke → 32 JE/t | produces | bronze, cable, furnace, casing |
 | Steam Generator | Power | Boils water with coal or bitumen → 64 JE/t | produces | coal generator, bronze, bucket, cable, casing |
 | Solar Panel | Power | Daylight under open sky → 8 JE/t (4 in rain) | produces | glass, silicon, bronze, cable |
 | Battery Box | Power | Stores 400,000 JE; outputs from its front | stores | lead, cable, redstone block, casing |
 | Electric Furnace | Mechanical | Any vanilla smelting recipe, 100 ticks | 10 JE/t | bronze, redstone, cable, furnace, casing |
 | Crusher | Mechanical | Ore → 2 raw; minerals, sulfur, oil sand, cobble → gravel → sand | 16 JE/t | flint, cable, casing, bronze, redstone |
-| Alloy Smelter (2×2 multi-block) | Mechanical | Two ingredients (any order) → bronze, brass, invar, solder. Power **only** through its copper socket | 20 JE/t | bronze, cable, 2 furnaces, casing, redstone |
+| Alloy Smelter (3 wide, 2 deep, 6 tall) | Mechanical | Two ingredients (any order) → bronze, brass, invar, solder. Power **only** through its copper socket | 20 JE/t | bronze, cable, 2 furnaces, casing, redstone |
 | Metal Press | Mechanical | Ingot → plate (1:1) | 16 JE/t | bronze, piston, cable, casing, anvil |
 | Wire Drawer | Mechanical | Ingot → 3 wires | 12 JE/t | brass, shears, cable, casing, redstone |
 | Circuit Assembler | Mechanical | Up to three ingredient stacks (any order) → circuits | 32 JE/t | tin plates, bronze gear, cable, casing, redstone |
@@ -76,15 +76,17 @@ All machines hold their own internal battery and accept power from cables or dir
 | Ore Washer | Mechanical | Ore + 500 mB water → 3 washed ore | 16 JE/t | invar plates, bucket, bronze gears, basic circuit, casing |
 | Sieve | Mechanical | Gravel → flint, soul sand → soul soil, with small finds | 8 JE/t | iron plates, iron bars, hopper, cable, casing |
 | Sawmill | Mechanical | Log → 6 planks + sawdust; planks → 3 sticks | 12 JE/t | iron, iron gear, iron plates, cable, casing |
-| Coke Oven (2 tall) | Steel | Coal → coke, 600 ticks ([Steel tier](#steel-tier)) | none | bricks, iron, furnace |
-| Steel Foundry (3 tall) | Steel | Iron ingot + coke → steel ingot, 400 ticks | none | bricks, hopper, iron plates, blast furnace |
-| Geothermal Generator (2 blocks wide) | Power | Lava → 64 JE/t (1 mB/t; a bucket lasts 1,000 ticks) | produces | invar plates, tinplate tank, bronze gears, casing, basic circuit |
-| Wind Turbine (3 blocks tall) | Power | 4–24 JE/t by height above sea level; more in rain and thunder; rotor needs clear air | produces | aluminum plates, bronze gears, casing, bronze plates, cable |
+| Coke Oven (2×2, 2 tall, chimney on top) | Steel | Coal → coke, 600 ticks ([Steel tier](#steel-tier)) | none | bricks, iron, furnace |
+| Steel Foundry (2×2, 5 tall) | Steel | Iron ingot + coke → steel ingot, 400 ticks | none | bricks, hopper, iron plates, blast furnace |
+| Geothermal Generator (2×2×2) | Power | Lava → 64 JE/t (1 mB/t; a bucket lasts 1,000 ticks) | produces | invar plates, tinplate tank, bronze gears, casing, basic circuit |
+| Wind Turbine (9 tall, 7-block rotor) | Power | 12–72 JE/t by height above sea level; ×1.5 in rain, ×2 in thunder; the rotor turns (drawn by the client) and needs a clear 7×7 square in front of the top | produces | aluminum plates, bronze gears, casing, bronze plates, cable |
 | Arc Furnace (3×3×3 multiblock) | Mechanical (with chemistry stand-ins) | Quartz → 2 silicon; raw nickel, tungsten or uranium → ingot; bauxite, lepidolite and monazite stand-ins | 64 JE/t | 26 arc furnace casings (bricks + nickel) + controller |
 
 ## Machine looks: steampunk and classic
 
 Machines are drawn in a **steampunk** style by default: brass, copper and riveted iron, with gauges, gears, valve wheels, glowing fireboxes and portholes. The look is purely visual. Blocks, recipes, footprints, screens and power connections are the same in both styles.
+
+From the steel tier up, machines are **dieselpunk** instead: gunmetal and olive paint, hazard stripes, chrome, phosphor gauges and caged lamps (see [ART_DIRECTION.md](ART_DIRECTION.md)). The steel foundry, capacitor bank, steel tank, ore drill and high-pressure extractor already use it; the renders below predate that.
 
 ![Steampunk machines, each shown from the front-left and front-right](images/steampunk_machines.png)
 
@@ -164,13 +166,25 @@ Every powered block follows one of two rules, and a cable shows which by where i
 | **No power** | The Coke Oven and Steel Foundry | Cables never connect; the machines run on the heat of their charge. |
 | **Power socket only** | The Alloy Smelter | Its **copper socket in a brass frame** (a yellow-and-black frame in the classic look), on the outer side of its lower right block (seen from the front). Cables connect only there; a cable along any other face doesn't bend toward it. |
 
-The battery box is "any side" for charging. It gives power out only through its front, and a cable at the front still connects.
+The battery box and capacitor bank are "any side" for charging. It gives power out only through its front, and a cable at the front still connects.
 
 In code, one check decides both the drawn connection and the flow: `MachineBlock.acceptsPower(state, side)`, built from `MachineKind.usesPower()` and `MachineKind.powerPort()` (null means any side). The energy lookup and the cable's connection arms both use it. `tools/large_machines.py` (`POWER_PORTS`) places the socket in the model, and `check_mod_data.py` keeps the two in sync.
 
 ## Cables and pipes
 
-Copper Cable and the Bronze Fluid Pipe are *transmitters*, built like the ones in other tech mods (Mekanism, Thermal, IC2):
+Cables, the Bronze Fluid Pipe and the Brass Item Pipe are *transmitters*, built like the ones in other tech mods (Mekanism, Thermal, IC2).
+
+**Cable tiers.** Tiers connect to each other, and a network carries as much as its slowest cable:
+
+| Cable | JE per tick | Built from |
+| --- | --- | --- |
+| Copper Cable | 256 | 2 copper + 1 tin → 6 |
+| Silver Cable | 1,024 | 3 silver wire + 3 copper cable → 3 |
+| Aluminum Cable | 4,096 | 2 aluminum wire + 1 steel plate + 3 silver cable → 3 |
+
+There is no faster fluid pipe yet. A pump moves 100 mB/t, less than the bronze pipe's 250, so a faster pipe would change nothing until faster pumps exist.
+
+**Transmitter design:**
 
 - **Thin, not full blocks.** Each is a 4-pixel (¼-block) core. An arm reaches out toward each connected neighbor, and the hitbox follows the same shape. For comparison, Mekanism's cables and pipes are 6 pixels.
 - **Connect automatically.**
@@ -212,6 +226,72 @@ The fluid branch moves liquids around. It never changes what a liquid *is*: that
 
 **Performance.** Pipe networks are found once by a bounded search and cached per dimension. They are rebuilt only after a pipe, tank, pump or machine is placed or removed, or a pipe's neighbor changes. A pump does two storage moves per tick at most, plus one per network endpoint.
 
+## Storage
+
+| Block | Holds | Details | Built from |
+| --- | --- | --- | --- |
+| Item Crate | 32 stacks of one item | Right-click with an item to put it in; with an empty hand to take a stack (sneak to just look). Pipes, extractors and hoppers use it; comparators read how full it is. Breaking it drops everything. | iron plates, planks |
+| Capacitor Bank (2 wide, 2 tall) | 4,000,000 JE | Charges from any side; gives power out of the copper sockets on its front, 4,096 JE/t (a job for aluminum cable). Comparators read its charge. | steel plates, 4 battery boxes, advanced circuit |
+| Steel Tank (2 wide, 2 deep) | 128 buckets of one fluid | Buckets, pumps and pipes fill and empty it from any face; right-click with an empty hand to read it. Comparators read how full it is. | 8 steel plates, tinplate tank |
+
+![Capacitor Bank, Steel Tank and Item Crate](images/storage.png)
+
+*Approximate isometric render made from the mod's own textures and model boxes, not a game screenshot.*
+
+## Mining and prospecting
+
+| Block or tool | What it does | Details | Built from |
+| --- | --- | --- | --- |
+| Geo-Resonance Prospector (hand tool) | Surveys the 3×3 chunks around you | Shows each ore family found as 1–5 bars with a rough depth (shallow Y ≥ 40, middle 0–39, deep below 0). Readings are deliberately vague: every second column is sampled, a quarter of readings are one bar off, and no positions are given. 3-second cooldown. | brass plates, copper wire, glass pane, basic circuit |
+| Ore Drill (2 tall) | Mines the ores in a 9×9 column below it | One `c:ores` block every 40 ticks at 32 JE/t, from the layer under it down to the bottom of the world. Ores come out whole (like silk touch) into three result slots, and each hole is refilled with stone, deepslate or netherrack. It has upgrades, side configuration, eject, redstone modes and comparator output. It stops when full. | steel plates, steel gear, 2 basic circuits, machine casing, diamond pickaxe |
+
+![Ore Drill](images/mining.png)
+
+*Approximate isometric render made from the mod's own textures and model boxes, not a game screenshot. The prospector's screen appears in the CI client screenshots.*
+
+**Code:** `prospecting/` (`OreSurvey`, `SurveyPayload`, `ProspectorItem`, `JugcraftProspecting`), `client/ProspectorScreen`, and `machine/OreDrilling` with `MachineKind.ORE_DRILL`.
+
+## Automation
+
+| Block | What it does | Details | Built from |
+| --- | --- | --- | --- |
+| Auto-Crafter | Crafts the recipe in its 3×3 grid, 40 ticks per craft, 8 JE/t | Each grid slot keeps one item as the pattern, so it crafts while every filled slot has two or more. Pipes and hoppers only top up slots that already hold that item. Remainders (empty buckets, bottles) go to the slot above the output. Any crafting-table recipe the server knows. Unstackable ingredients can't be automated yet. | brass plates, basic circuit, 2 crafting tables, casing, hopper |
+
+**Code:** `MachineKind.AUTO_CRAFTER` and `MachineBlockEntity.tickCrafter` (vanilla `RecipeType.CRAFTING`). The grid layout is in `MachineMenu.inputX/inputY(kind, slot)`.
+
+## Kinetic power
+
+A second, mechanical power system measured in **KE** (kinetic energy) per tick. Shafts carry rotation along their length and gearboxes out of all six sides. Machines at the end of a line run straight off it (1 KE = 1 JE, no loss), and a dynamo bridges it into JE cables at 75%.
+
+| Block | What it does | Details | Built from |
+| --- | --- | --- | --- |
+| Hand Crank | 16 KE/t into the block it faces | Each right-click turns it for 5 s (up to 20 s); costs a little food. | planks, iron shaft |
+| Steam Engine | 64 KE/t out of its back | Burns generator fuel and 10 mB water per tick, only while something takes the power. Loaded by right-click, hoppers, pipes and pumps, or a water source below. | bronze, bucket, 2 pistons, furnace, iron shaft |
+| Iron Shaft | Carries rotation along its axis | Placed like a log; shows turning while driven. | 2 iron ingots → 4 |
+| Brass Gearbox | Passes rotation out of all six sides | Branches and turns lines; power is shared evenly. | brass plates, bronze gears, iron shaft |
+| Dynamo | KE → JE at 75%, 128/t | Pushes JE into cables on every side. | copper, redstone, iron shaft |
+| Belt Pulley | A shaft that can hold a belt | Carries rotation along its axis like a shaft, and to the pulley it is belted to. | planks, iron shaft |
+| Leather Belt | Links two pulleys | Use on one pulley, then another: same axis, level along it, up to 16 blocks apart. Breaking a pulley drops the belt. | leather, string |
+| Electric Motor | JE → KE at 75%, up to 96 KE/t | Takes JE from cables and drives the block it faces. | iron plates, copper wire, iron shaft, copper cable |
+
+![Kinetic blocks](images/kinetic.png)
+
+*Approximate isometric render made from the mod's own textures and model boxes, not a game screenshot.*
+
+**Code:** `kinetic/` (`KineticNetworks`, `KineticConsumer`, `ShaftBlock`, `GearboxBlock`, `HandCrankBlock(Entity)`, `SteamEngineBlock(Entity)`, `DynamoBlock(Entity)`, `BeltPulleyBlock(Entity)`, `BeltItem`, `ElectricMotorBlock(Entity)`, `JugcraftKinetics`; client `BeltRenderer`). `MachineBlockEntity` implements `KineticConsumer`.
+
+## Renewable resources
+
+| Block | What it does | Details | Built from |
+| --- | --- | --- | --- |
+| Water Wheel (2 tall) | Power from flowing water | The wheel on its right side (seen from the front) turns in the column of blocks beside it: 8 JE/t per block of flowing water there, 12 if falling, up to 24 JE/t. Source water does not count. Cables connect to its house. | planks, sticks, bronze gear, copper cable |
+| Cobblestone Generator | 1 cobblestone per 20 ticks, 4 JE/t | Needs water and lava touching any sides; neither is used up. | bronze, water bucket, lava bucket, cable, casing |
+| Tree Farm | Sapling → 6 logs in 400 ticks, 16 JE/t | The sapling comes back (byproduct slot) with a 10% chance of the tree's extra (apple, cocoa beans, pink petals, pale moss carpet or a stick). Recipes are data (`jugcraft:tree_growing`) for all nine vanilla trees. | glass, glowstone, dirt, bronze, casing, basic circuit |
+
+![Cobblestone Generator, Tree Farm and Water Wheel](images/renewables.png)
+
+*Approximate isometric render made from the mod's own textures and model boxes, not a game screenshot.*
+
 ## Machine control
 
 Every **powered processing machine** now has two **upgrade slots** (below the output) and a **redstone button** (the "R" above the face buttons). Comparators read every machine.
@@ -245,20 +325,50 @@ A paused machine keeps its progress. The mode is saved with the side configurati
 
 Steel is the second material tier. It needs **no power** and no new ore, only iron, coal and two brick multi-blocks. Machines placed as one item fill several blocks and break together, like the other [multi-block machines](#multi-block-machines).
 
-![Coke Oven (2 tall) and Steel Foundry (3 tall)](images/steel_tier.png)
+![Coke Oven and Steel Foundry (earlier sizes: the render predates the 2×2 versions)](images/steel_tier.png)
 
 *Approximate isometric render made from the mod's own textures and model boxes, not a game screenshot.*
 
 | Block | Does | Numbers | Built from |
 | --- | --- | --- | --- |
-| Coke Oven (2 tall) | Bakes coal into **Coal Coke** | 600 ticks per coal; no power, no fuel | bricks, iron, furnace |
-| Steel Foundry (3 tall) | 1 iron ingot + 1 coke → 1 **steel ingot** (either slot) | 400 ticks; no power | bricks, hopper, iron plates, blast furnace |
+| Coke Oven (2×2, 2 tall + chimney) | Bakes coal into **Coal Coke** | 600 ticks per coal; no power, no fuel | bricks, iron, furnace |
+| Steel Foundry (2×2, 5 tall) | 1 iron ingot + 1 coke → 1 **steel ingot** (either slot) | 400 ticks; no power | bricks, hopper, iron plates, blast furnace |
 
 - **Coal Coke** (`c:coal_coke`) burns twice as long as coal in the Coal and Steam Generators (3,200 ticks). It is the carbon for steel.
 - **Steel** has the usual ingot, nugget and block, plus a **steel plate** (Metal Press) and a **steel gear**. The first things built from steel are the [machine upgrades](#machine-control).
 - **Metal accounting:** one iron ingot's metal becomes one steel ingot's. The coke is carbon, not metal, so nothing is gained.
 - **Unpowered machines** have no battery, and cables never connect to them. Their screens show no energy bar.
 - Both work with hoppers, pipes, side configuration and eject like any processing machine.
+
+## Powered tools
+
+The first dieselpunk gear (see [ART_DIRECTION.md](ART_DIRECTION.md)). The tools hold JE instead of wearing out, and are charged at a charging station fed by cables.
+
+| Item / block | What it does | Details | Built from |
+| --- | --- | --- | --- |
+| Mining Drill | JE pickaxe and shovel, faster than netherite, diamond-tier drops | 100,000 JE, 60 JE a block. Sneak + use cycles one block / 3×3 / whole ore vein (32) | tungsten plate, 3 steel plates, steel gear, advanced circuit, lead ingot |
+| Chainsaw | JE axe that also cuts leaves; fells whole trees | 100,000 JE, 40 JE a block; sneak to cut one log | 3 tungsten plates, 3 steel plates, steel gear, advanced circuit, lead ingot |
+| Rocket Pack | Chest slot: hold jump in the air to fly | 200,000 JE, 50 JE a tick; no fall damage while firing; dedicated servers need `allow-flight=true` | 2 steel plates, advanced circuit, 2 fluid tanks, leather, 2 tungsten plates |
+| Charging Station | Two blocks tall; charges the tool on its cradle from cables | 50,000 JE buffer, 1,024 JE/t in, 512 JE/t into the tool; lamp lights while charging | 4 steel plates, redstone lamp, 2 copper cables, advanced circuit, battery box |
+
+Empty tools mine like a bare hand and get no drops.
+
+**Upgrade modules** fit at the charging station (use one on a station holding the tool): Overclock (+50% speed, +100% JE a block; up to 2), Range (drill area mode 5×5), Capacity (base charge again; up to 2), Silk Touch (drill, chainsaw), Fortune (drill, up to III; not with Silk Touch). See [powered tools](features/powered-tools.md).
+
+**Code:** `tools/` (`JugcraftTools`, `Chargeable`, `PoweredToolItem`, `MiningDrillItem`, `ChainsawItem`, `RocketPackItem`, `RocketThrustPayload`, `ChargingStationBlock(Entity)`); client `ChargingStationRenderer`, `RocketPackClient`.
+
+## Oil
+
+The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line), [feature record](features/petrochemistry.md)). Refining, fracking and diesel power are still to come.
+
+| Thing | What it does | Details | Built from |
+| --- | --- | --- | --- |
+| Crude Oil | A thick black fluid with a bucket; flows slowly and never makes new sources | `c:crude_oil` | reservoirs, oil sand |
+| Oil reservoirs | Hidden under Overworld chunks, fixed by the seed: conventional (about 1 chunk in 12, 50–250 buckets) or shale (about 1 in 4 of the rest, 200–800 buckets, fracking only) | finite; the prospector reports Oil and Shale oil | – |
+| Pumpjack | 1 wide, 3 tall, 3 long; pumps the conventional reservoir under its wellhead | 2 mB/t at 32 JE/t, 16-bucket tank, pushes into pipes | 4 steel plates, 2 steel gears, electric pump, casing |
+| Oil Sand Extractor | 2×2×2 hot-water extraction | oil sand + 250 mB water → 500 mB crude oil + sand (160 ticks); bitumen + 100 mB water → 150 mB (80 ticks); 32 JE/t | 4 steel plates, hopper, 2 tinplate tanks, casing, steel gear |
+
+**Fluid processing machines** (the pumpjack and extractor are the first): input tanks take only fluids the machine's recipes use; output tanks push into neighbouring tanks and pipes; the screen shows a gauge per tank. Recipes are data in `data/jugcraft/recipe/<type>/` (see [petrochemistry.md](features/petrochemistry.md)).
 
 ## Ore processing
 
@@ -312,7 +422,11 @@ Item logistics moves finished goods around without hoppers everywhere. Like powe
 | --- | --- | --- | --- |
 | Brass Item Pipe | Joins pushers to every inventory it touches (chests, machines, other mods' storage) | 6-pixel core, up to 1,024 pipes per network; items arrive instantly | 2 brass plates + glass → 6 |
 | Pneumatic Extractor | Pulls from the inventory it faces and pushes out of its other five sides into pipes or inventories; a redstone signal pauses it | 16 items every 8 ticks | 4 brass plates, hopper, item pipe |
+| High-Pressure Extractor | The same, four times as fast (steel tier) | 32 items every 4 ticks | 4 steel plates, piston, pneumatic extractor |
 | Item Sorter | Accepts items from pipes on any side but its front, and passes only items that match its 9-slot filter into the inventory it faces | An empty filter matches nothing | 5 brass plates, comparator, hopper, 2 item pipes |
+| Conveyor | Carries items the way it faces while rotation drives it; loaded by pipes, hoppers, machines or dropped items; unloads into the conveyor or inventory ahead, or onto the ground | 2.5 blocks/s, 4 stacks per conveyor; 1 KE per conveyor per tick for the whole joined run (up to 64) | 3 leather belts, 2 iron plates, iron shaft → 6 |
+| Conveyor Slope | Carries items one block up or down; use with an empty hand to switch | As the conveyor | 2 conveyors, iron plate → 2 |
+| Conveyor Splitter | A conveyor that sends items left, straight on and right in turn | As the conveyor | conveyor, 2 bronze gears, brass plate |
 | Brass Wrench | Right-click turns a machine, extractor or sorter; sneak + right-click dismantles a Jugcraft block, dropping it and its contents | Multi-block machines cannot be turned | 4 brass ingots |
 
 **Routing.** A network offers each item first to a sorter whose filter matches it, then to the other inventories in turn (round-robin), so one chest does not fill before the rest. The inventory the items came from never receives them back. If nothing accepts an item, it stays where it was.
@@ -328,7 +442,9 @@ The defaults keep the old behavior: ingredients in from the top and sides, resul
 
 **Eject.** The *Eject* button makes the machine push its results itself, 16 items every 8 ticks, out of every face set to Out or Both, into adjacent inventories or pipes. Multi-block machines eject from every block they occupy.
 
-**Code:** `logistics/` (`ItemNetworks`, `ItemPipeBlock`, `PneumaticExtractorBlock`, `ItemSorterBlock(Entity)`, `BrassWrenchItem`, `JugcraftLogistics`) and `machine/SideConfig.java`. Items move through Fabric's `ItemStorage.SIDED` lookup, so other mods' inventories take part automatically.
+**Conveyors.** Items ride the belt as whole stacks, drawn by the client. A conveyor feeding another from the side puts items onto its middle. A running conveyor carries players and mobs too; sneak to stand still. See [conveyors](features/conveyors.md).
+
+**Code:** `logistics/` (`ItemNetworks`, `ItemPipeBlock`, `PneumaticExtractorBlock`, `ItemSorterBlock(Entity)`, `ConveyorBlock(Entity)`, `BrassWrenchItem`, `JugcraftLogistics`; client `ConveyorRenderer`) and `machine/SideConfig.java`. Items move through Fabric's `ItemStorage.SIDED` lookup, so other mods' inventories take part automatically.
 
 ## Components
 
@@ -394,7 +510,7 @@ The content (`assets/jugcraft/handbook/en_us.json`) is **generated by `tools/han
 - the crusher doubling ore;
 - a coal generator powering an electric furnace through cables;
 - a pump filling a tank through pipes;
-- the 2×2 alloy smelter placing, taking power only at its socket, and making bronze;
+- the 3×2×6 alloy smelter placing all 36 blocks, taking power only at its socket, and making bronze;
 - a multi-block machine disappearing whole when one block breaks;
 - an extractor moving items through pipes into a chest;
 - a sorter routing matching items to its inventory and the rest elsewhere;
@@ -405,7 +521,8 @@ The content (`assets/jugcraft/handbook/en_us.json`) is **generated by `tools/han
 - the sawmill and the sieve;
 - the coke oven and steel foundry working without power;
 - cables connecting only where power goes in (never to unpowered machines; only to the alloy smelter's socket);
-- speed and efficiency upgrades, the "high" redstone mode, comparator output and upgrade-slot isolation.
+- speed and efficiency upgrades, the "high" redstone mode, comparator output and upgrade-slot isolation;
+- cable tiers setting a network's rate, and the high-pressure extractor.
 
 **Client game tests** (`JugcraftClientGameTests`) start a real game client with software rendering in CI (job `client`). They:
 
@@ -418,6 +535,8 @@ These are real game renders, but they are not play-testing: nobody is steering t
 To add a test, write a public method annotated `@GameTest` in `JugcraftGameTests` that builds its setup and ends with `helper.succeed()` or `helper.succeedWhen(...)`.
 
 ## Rules that keep it balanced
+
+Full numbers, conversion losses and the loops that were checked: [BALANCE.md](BALANCE.md).
 
 - **No free metal.** Every recipe keeps or loses metal: plates 1:1, 4 plates → 1 gear, 1 ingot → 3 wires, and alloys at exact ratios. The only gain is the crusher's ore doubling, defined once for all ores. `tools/check_mod_data.py` audits every recipe, including two- and three-input machine recipes.
 - **Nothing is hand-only or machine-only without reason.** Bronze has a hand route; plates, wires and circuits need their machines, because processing is what those machines are for.

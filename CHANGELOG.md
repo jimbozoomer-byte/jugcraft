@@ -8,6 +8,120 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### #47 Oil line, batch 1: oil in the world
+The first five commits of the dieselpunk Chemistry branch ([plan](docs/branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line)).
+- **Crude oil:** a real fluid with a bucket; slow, thick, never makes new sources; works in every tank and pipe.
+- **Fluid processing machines:** machines with input and output tanks, data-driven fluid recipes and tank gauges on their screens.
+- **Oil reservoirs:** hidden, finite oil under Overworld chunks (pumpable or shale), fixed by the seed; the prospector reports them.
+- **Pumpjack:** a 1×3×3 dieselpunk nodding donkey that pumps crude oil from the reservoir under it.
+- **Oil sand extractor:** a 2×2×2 hot-water plant that washes crude oil out of oil sand and bitumen.
+- Game tests for each; a new Oil chapter in the handbook.
+
+### #46 Balance review
+- New [docs/BALANCE.md](docs/BALANCE.md): every generator, conversion, store and cost in one place, with the loops that were checked.
+- Charcoal burns three quarters as long as coal in Jugcraft's generators and engines. This makes tree-farm wood power slightly weaker (net about +545 JE/t per tree farm, down from +737), as the owner chose. Vanilla furnaces are unchanged.
+
+### #44 Conveyor slopes
+- **Conveyor Slope:** carries items one block up or down; use it with an empty hand to switch. Slopes join conveyor runs, and items climb and descend them visibly.
+- A game test and a client screenshot.
+
+### #43 Advancements
+- A **Jugcraft** advancement tab: 22 steps from the first tin to the rocket pack, earned by having each item. Goals for steel, the steel foundry and the large steam engine; a challenge for the rocket pack.
+- The handbook's Getting Started chapter lists the steps on its Milestones pages.
+- A game test checks the tree loads; the data checker checks every step's items, title and parent.
+
+### #42 Tool upgrades and a 3D rocket pack
+- **Upgrade modules** for the powered tools, fitted at the charging station: Overclock, Range (5×5 drilling), Capacity, Silk Touch and Fortune.
+- The worn rocket pack is now a 3D model on the wearer's back.
+- The mining drill sits higher in first person.
+- Four game tests.
+
+### #41 Dieselpunk steel machines
+- The steel foundry, capacitor bank, steel tank, ore drill and high-pressure extractor now look dieselpunk: gunmetal and olive paint, hazard stripes, chrome, phosphor gauges and caged lamps, an exhaust stack on the foundry and a diesel motor on the drill. Same footprints and ports; looks only.
+
+### #40 Powered tools (the first dieselpunk gear)
+- **Mining Drill:** a JE pickaxe and shovel, faster than netherite; modes for one block, 3×3 or a whole ore vein.
+- **Chainsaw:** a JE axe that also cuts leaves and fells whole trees.
+- **Rocket Pack:** worn on the chest; hold jump in the air to fly.
+- **Charging Station:** a two-block-tall station that charges the tool on its cradle from cables.
+- The tools hold JE instead of wearing out; empty, they mine like a bare hand.
+- New dieselpunk textures and detailed 3D item models; [docs/ART_DIRECTION.md](docs/ART_DIRECTION.md) records the rule that higher tiers look dieselpunk.
+- Five game tests and three client screenshots.
+
+### #38 Conveyors
+- **Conveyor:** carries items (drawn riding on it) the way it faces, 2.5 blocks a second, while rotation drives it: 1 KE per conveyor per tick for a whole joined run. Pipes, hoppers, machines and dropped items load it; it unloads into the conveyor or inventory ahead, or onto the ground. It carries players and mobs too.
+- **Conveyor Splitter:** sends items left, straight on and right in turn.
+- Four game tests and a client screenshot.
+
+### #37 Spinning shafts and closer screenshots
+- Shafts, belt pulleys, the hand crank, the electric motor's shaft and the steam engine's flywheel now really spin (a block entity renderer) instead of scrolling a texture. Shafts placed with earlier builds need re-placing to spin.
+- The client test photographs a belt-and-motor line and the multi-blocks from closer, in three views.
+
+### #36 Belts and the Electric Motor
+- **Belt Pulley** and **Leather Belt:** link two pulleys up to 16 blocks apart to carry rotation; the belt is drawn between them.
+- **Electric Motor:** JE → KE at 75%, up to 96 KE/t.
+- Three game tests.
+
+### #35 Bigger machines, a spinning wind turbine, the Large Steam Engine and JEI
+- Machines can now fill up to 64 blocks. Resized:
+  - **Alloy Smelter:** 3×2×6, with a big copper crucible tank pouring into one funnel over the furnace.
+  - **Geothermal Generator:** 2×2×2.
+  - **Steel Foundry:** 2×2×5.
+  - **Coke Oven:** 2×2×2, with its chimney in a block on top.
+  - **Wind Turbine:** 9 tall, with a 7-block rotor that spins (block entity renderer); 12–72 JE/t.
+- **Large Steam Engine** (2×2×2): 256 KE/t, four times the small one.
+- Machine screens: amber energy readout without a shadow; vanilla tooltips on gauges.
+- **JEI:** a recipe page per machine (optional; EMI has no 26.3 build yet).
+- Multi-blocks placed with earlier builds need re-placing.
+
+### #32 Polish
+- Machines with a fire, and the steam engine, smoke and crackle while running.
+- Hovering the energy bar or a tank gauge shows exact JE or mB.
+- The eject button reads "Eject" (green on, gray off) instead of a cut-off "Eject: off".
+- The CI screenshots no longer show the chat log.
+
+### #30 Auto-Crafter
+- **Auto-Crafter:** crafts any crafting-table recipe laid out in its 3×3 grid, one every 2 seconds.
+  - Each grid slot keeps one item as the pattern, and pipes and hoppers only top up matching slots.
+  - Remainders such as empty bottles get their own slot.
+- A powered processor with upgrades, sides, eject, redstone and kinetic power; a new grid layout on its screen.
+- Three game tests and a client screenshot of its screen.
+
+### #29 Kinetic power
+- A mechanical power layer in **KE** per tick. **Iron Shafts** carry it along their axis and **Brass Gearboxes** out of all six sides; both animate while turning.
+- Sources:
+  - **Hand Crank:** 16 KE/t while cranked.
+  - **Steam Engine:** 64 KE/t from fuel and water, burning only while something takes the power.
+- Every powered machine runs straight off a shaft (1 KE = 1 JE). The **Dynamo** bridges KE into JE cables at 75%.
+- Three game tests, a client screenshot of a running line, and handbook pages under Power.
+
+### #28 Renewable resources
+- **Water Wheel** (2 tall): up to 24 JE/t from flowing or falling water beside its wheel, with no fuel.
+- **Cobblestone Generator:** one cobblestone a second from water and lava touching it; neither is used up.
+- **Tree Farm:** grows a sapling into six logs and gives the sapling back, sometimes with an extra (apple, cocoa beans, …). Recipes are data for all nine vanilla trees.
+- Steampunk models (timber water wheel with a coil dynamo, cistern-and-crucible generator, open brass growth cabinet with a grow lamp) and classic models.
+- The handbook gains a "Renewables" chapter; its chapter buttons are packed tighter to fit 11 chapters.
+- Three game tests.
+
+### #25 Mining and prospecting
+- **Geo-Resonance Prospector:** a hand tool that surveys the 3×3 chunks around you. It opens a steampunk-digital screen: a brass instrument with an amber CRT, valve-tube signal bars, a sweeping scan line and a resonance needle gauge.
+  - Readings are deliberately vague: 1–5 bars and shallow, middle or deep for each ore family, never a chunk or block.
+- **Ore Drill** (2-tall derrick): mines every ore in a 9×9 column below it, down to the bottom of the world, and refills the holes with rock. It gives whole ore blocks, so ore processing still decides the yield. It has upgrades, side configuration, eject and redstone control.
+- Two game tests, a prospector screenshot in the client test, and handbook pages under Materials.
+
+### #24 Storage
+- **Capacitor Bank** (2×2): 4,000,000 JE. It charges from any side and gives power out of its front sockets at 4,096 JE/t.
+- **Steel Tank** (2×2 squat riveted tank): 128 buckets.
+- **Item Crate:** 32 stacks of one item, with right-click in and out and support for pipes, hoppers and comparators.
+- Steampunk models (Leyden-jar bank, domed tank, banded crate) and classic models.
+- Three game tests, a handbook "Storage" chapter, and a feature record.
+
+### #22 Transmitter tiers
+- **Silver Cable** (1,024 JE/t) and **Aluminum Cable** (4,096 JE/t). All cable tiers join one network, which runs at its slowest cable.
+- **High-Pressure Extractor** (steel): 32 items every 4 ticks, four times the brass extractor.
+- There is no faster fluid pipe: pumps (100 mB/t) are the limit, not pipes.
+- Two game tests; handbook pages.
+
 ### #20 Engineer's Handbook and in-game screenshots
 - **Engineer's Handbook** (book + copper ingot): an in-game guide with 9 chapters and 36 pages. Each page gives what a block does, its power use, its crafting grid and example recipes, and you can hover over items.
 - The content is generated from the mod's own tables, so it can't go out of date.

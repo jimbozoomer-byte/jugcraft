@@ -13,7 +13,8 @@ Model elements are tuples (from, to, texture) or (from, to, texture, options):
 - texture is a texture name, or a dict {face: name} with "*" as the default. A name ending in "!"
   stretches the whole 16x16 texture over that face (gauges, doors, windows); otherwise the texture
   is mapped by position, like vanilla's automatic UVs.
-- options may hold "rotation": (axis, angle, origin). Rotated elements are never sliced between
+- options may hold "rotation": (axis, angle, origin) or (axis, angle, origin, rescale); rescale stretches a 45-degree
+  element to span the block's diagonal (conveyor slopes). Rotated elements are never sliced between
   blocks, so keep each one inside a single block's reach.
 """
 import json
@@ -31,7 +32,7 @@ FACES = ("north", "south", "east", "west", "up", "down")
 FACE_AXES = {"north": (0, 1, 2, 0), "south": (0, 1, 2, 1), "east": (2, 1, 0, 1), "west": (2, 1, 0, 0),
              "up": (0, 2, 1, 1), "down": (0, 2, 1, 0)}
 # LargeMachineBlock.PART is 0..3.
-PART_STATES = 4
+PART_STATES = 64
 
 
 def alternate_style():
@@ -81,8 +82,10 @@ def element(frm, to, texture, uv=False, skip=(), rotation=None):
         faces[face] = entry
     out = {"from": [round(v, 4) for v in frm], "to": [round(v, 4) for v in to], "faces": faces}
     if rotation:
-        axis, angle, origin = rotation
+        axis, angle, origin = rotation[:3]
         out["rotation"] = {"origin": [round(v, 4) for v in origin], "axis": axis, "angle": angle}
+        if len(rotation) > 3 and rotation[3]:
+            out["rotation"]["rescale"] = True
     return out
 
 
@@ -135,7 +138,7 @@ def slice_model(name, elements, footprint):
             raise ValueError(f"{name}: element {frm}..{to} is too far from its part")
         local_rotation = None
         if rotation:
-            local_rotation = (rotation[0], rotation[1], [rotation[2][axis] - low[axis] for axis in range(3)])
+            local_rotation = (rotation[0], rotation[1], [rotation[2][axis] - low[axis] for axis in range(3)], *rotation[3:])
         inside = min(local_a) >= 0 and max(local_b) <= 16
         parts[index].append(element(local_a, local_b, texture, uv=not inside, rotation=local_rotation))
     return parts
@@ -156,7 +159,7 @@ def scaled_elements(elements):
     for frm, to, texture, options in items:
         rotation = options.get("rotation")
         if rotation:
-            rotation = (rotation[0], rotation[1], place(rotation[2]))
+            rotation = (rotation[0], rotation[1], place(rotation[2]), *rotation[3:])
         out.append(element(place(frm), place(to), texture, uv=True, rotation=rotation))
     return out
 

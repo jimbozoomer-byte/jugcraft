@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.machine;
 
+import io.github.jimbozoomer.jugcraft.chemistry.FluidMachineSpec;
+import java.util.List;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.StringRepresentable;
@@ -24,7 +26,7 @@ public enum MachineKind implements StringRepresentable {
 	CIRCUIT_ASSEMBLER("circuit_assembler", 20_000, 256, 0, 32, 4),
 	// Multi-block machines (see Footprint and LargeMachineBlock).
 	GEOTHERMAL_GENERATOR("geothermal_generator", 30_000, 0, 128, 0, 0),
-	WIND_TURBINE("wind_turbine", 16_000, 0, 64, 0, 0),
+	WIND_TURBINE("wind_turbine", 48_000, 0, 192, 0, 0),
 	// Processing depth. Pulverizer, sieve and sawmill have an input, an output and two byproduct slots.
 	PULVERIZER("pulverizer", 10_000, 128, 0, 20, 4),
 	ORE_WASHER("ore_washer", 10_000, 128, 0, 16, 2),
@@ -32,7 +34,26 @@ public enum MachineKind implements StringRepresentable {
 	SAWMILL("sawmill", 10_000, 128, 0, 12, 4),
 	// Steel tier: unpowered brick multi-blocks.
 	COKE_OVEN("coke_oven", 0, 0, 0, 0, 2),
-	STEEL_FOUNDRY("steel_foundry", 0, 0, 0, 0, 3);
+	STEEL_FOUNDRY("steel_foundry", 0, 0, 0, 0, 3),
+	// Storage: a 2x2 capacitor bank (outputs from its front, like the battery box) and a 2x2 steel tank.
+	CAPACITOR_BANK("capacitor_bank", 4_000_000, 4_096, 4_096, 0, 0),
+	STEEL_TANK("steel_tank", 0, 0, 0, 0, 0),
+	// Mining: a 2-tall derrick that mines the ores in a 9x9 column below it. No inputs; three result slots.
+	ORE_DRILL("ore_drill", 20_000, 256, 0, 32, 3),
+	// Renewables: a cobblestone generator (no inputs, one result slot), a tree farm (sapling in; logs out, with the
+	// sapling and extras in two byproduct slots) and a 2-tall water wheel that generates from flowing water.
+	COBBLESTONE_GENERATOR("cobblestone_generator", 4_000, 64, 0, 4, 1),
+	TREE_FARM("tree_farm", 10_000, 128, 0, 16, 4),
+	WATER_WHEEL("water_wheel", 8_000, 0, 64, 0, 0),
+	// Auto-crafter: a 3x3 pattern grid (each slot keeps one item as the pattern), the result and a remainder slot.
+	AUTO_CRAFTER("auto_crafter", 10_000, 128, 0, 8, 11),
+	// Kinetic: a 2x2x2 steam engine turning a shaft out of its back (fuel, water bucket, empty bucket).
+	LARGE_STEAM_ENGINE("large_steam_engine", 0, 0, 0, 0, 3),
+	// Petrochemistry (chemistry/, docs/branches/CHEMISTRY.md): a pumpjack, 1 wide, 3 tall and 3 long, that pumps the
+	// conventional oil reservoir under its chunk into its output tank.
+	PUMPJACK("pumpjack", 20_000, 256, 0, 32, 0),
+	// A 2x2x2 hot-water extraction plant: oil sand or bitumen and water in, crude oil and sand out.
+	OIL_SAND_EXTRACTOR("oil_sand_extractor", 20_000, 256, 0, 32, 2);
 
 	/** JE produced per tick while the coal generator burns. */
 	public static final int GENERATION_PER_TICK = 32;
@@ -52,18 +73,49 @@ public enum MachineKind implements StringRepresentable {
 	public static final int GEOTHERMAL_LAVA_PER_TICK = 1;
 	/** Geothermal generator lava tank (mB). */
 	public static final int GEOTHERMAL_TANK = 4_000;
-	/** Wind turbine JE per tick at or below sea level; one more per 4 blocks higher. */
-	public static final int WIND_BASE_PER_TICK = 4;
+	/** Wind turbine JE per tick with its rotor at sea level; one more per 2 blocks higher. */
+	public static final int WIND_BASE_PER_TICK = 12;
 	/** Wind turbine output cap before weather. */
-	public static final int WIND_MAX_PER_TICK = 24;
+	public static final int WIND_MAX_PER_TICK = 72;
+	/** The rotor's reach in blocks from the hub: the square it sweeps in front of the top block must be clear. */
+	public static final int WIND_ROTOR_REACH = 3;
 	/** Ticks between checks that the wind turbine's rotor has room to turn. */
 	public static final int WIND_CHECK_INTERVAL = 100;
+	/** Steel tank capacity (mB): 128 buckets. */
+	public static final int STEEL_TANK_CAPACITY = 128_000;
 	/** Ore washer water tank (mB). */
 	public static final int WASHER_TANK = 8_000;
 	/** Water (mB) the ore washer uses per operation, taken when the operation finishes. */
 	public static final int WASHER_WATER_PER_OPERATION = 500;
 	/** mB per tick drawn from a water source block directly beneath the ore washer. */
 	public static final int WASHER_SOURCE_REFILL = 20;
+	/** Ore drill: blocks mined in each direction from the drill's column, so 4 means a 9x9 area. */
+	public static final int DRILL_RADIUS = 4;
+	/** Ore drill: ticks to mine one ore block (before speed upgrades). */
+	public static final int DRILL_TICKS = 40;
+	/** Ore drill: blocks the drill head checks per tick while looking for the next ore (one layer). */
+	public static final int DRILL_SCAN_PER_TICK = (2 * DRILL_RADIUS + 1) * (2 * DRILL_RADIUS + 1);
+	/** Cobblestone generator: ticks per cobblestone (before speed upgrades), with water and lava beside it. */
+	public static final int COBBLE_TICKS = 20;
+	/** Water wheel: JE per tick for each block of flowing water at the wheel; falling water gives more. */
+	public static final int WATER_WHEEL_FLOWING = 8;
+	public static final int WATER_WHEEL_FALLING = 12;
+	/** Ticks between checks of the water at the wheel (and of the cobblestone generator's water and lava). */
+	public static final int SOURCE_CHECK_INTERVAL = 20;
+	/** Large steam engine: KE per tick out of its back, water per tick, tank, and burn ticks used per tick. */
+	public static final int LARGE_ENGINE_OUTPUT = 256;
+	public static final int LARGE_ENGINE_WATER_PER_TICK = 40;
+	public static final int LARGE_ENGINE_TANK = 16_000;
+	public static final int LARGE_ENGINE_BURN_PER_TICK = 4;
+	/** The large steam engine's output: the upper right back block (part 7), through its back face. */
+	public static final int LARGE_ENGINE_OUTPUT_PART = 7;
+	/** Auto-crafter: ticks per craft (before speed upgrades). */
+	public static final int CRAFT_TICKS = 40;
+	/** Pumpjack: mB of crude oil pumped per powered tick (a bucket every 25 seconds), and its tank. */
+	public static final int PUMPJACK_RATE = 2;
+	public static final int PUMPJACK_TANK = 16_000;
+	/** Oil sand extractor: its water tank and its crude oil tank. */
+	public static final int EXTRACTOR_TANK = 8_000;
 	/** Ticks the electric furnace needs per item (the vanilla furnace needs 200). */
 	public static final int ELECTRIC_FURNACE_TICKS = 100;
 
@@ -88,7 +140,13 @@ public enum MachineKind implements StringRepresentable {
 		return this == ELECTRIC_FURNACE || this == CRUSHER || this == ARC_FURNACE || this == ALLOY_SMELTER
 				|| this == METAL_PRESS || this == WIRE_DRAWER || this == CIRCUIT_ASSEMBLER
 				|| this == PULVERIZER || this == ORE_WASHER || this == SIEVE || this == SAWMILL
-				|| this == COKE_OVEN || this == STEEL_FOUNDRY;
+				|| this == COKE_OVEN || this == STEEL_FOUNDRY || this == ORE_DRILL
+				|| this == COBBLESTONE_GENERATOR || this == TREE_FARM || this == AUTO_CRAFTER;
+	}
+
+	/** Stores energy and gives it out of its front face only. */
+	public boolean isBattery() {
+		return this == BATTERY_BOX || this == CAPACITOR_BANK;
 	}
 
 	/** Whether the machine runs on JE at all. Unpowered machines have no battery and cables never connect to them. */
@@ -119,6 +177,8 @@ public enum MachineKind implements StringRepresentable {
 			case SAWMILL -> "sawing";
 			case COKE_OVEN -> "coking";
 			case STEEL_FOUNDRY -> "steelmaking";
+			case TREE_FARM -> "tree_growing";
+			case OIL_SAND_EXTRACTOR -> "oil_sand_extraction";
 			default -> null;
 		};
 	}
@@ -133,20 +193,45 @@ public enum MachineKind implements StringRepresentable {
 		return slots + upgradeSlots();
 	}
 
-	/** The output slot of a processor: after the inputs, before any byproduct slots. */
+	/**
+	 * The tanks and item slots of a fluid processing machine (the Chemistry branch's oil line: docs/branches/CHEMISTRY.md),
+	 * or null for every other machine. Such machines run {@link io.github.jimbozoomer.jugcraft.chemistry.FluidRecipe}s.
+	 */
+	public @Nullable FluidMachineSpec fluidSpec() {
+		return switch (this) {
+			case PUMPJACK -> new FluidMachineSpec(List.of(), List.of(PUMPJACK_TANK), 0, 0);
+			case OIL_SAND_EXTRACTOR -> new FluidMachineSpec(List.of(EXTRACTOR_TANK), List.of(EXTRACTOR_TANK), 1, 1);
+			default -> null;
+		};
+	}
+
+	public boolean isFluidProcessor() {
+		return fluidSpec() != null;
+	}
+
+	/** The output slot of a processor: after the inputs, before any byproduct slots. Fluid processors: the first output slot. */
 	public int outputSlot() {
+		FluidMachineSpec spec = fluidSpec();
+		if (spec != null) {
+			return spec.itemInputs();
+		}
 		return slots - 1 - byproductSlots();
 	}
 
 	/** Slots after the output that collect recipe byproducts (see {@link MachineRecipe#byproducts()}). */
 	public int byproductSlots() {
-		return this == PULVERIZER || this == SIEVE || this == SAWMILL ? 2 : 0;
+		// The ore drill has no inputs; its "byproduct" slots are just two more result slots.
+		if (this == AUTO_CRAFTER) {
+			return 1; // Container remainders, such as the empty bucket from a cake.
+		}
+		return this == PULVERIZER || this == SIEVE || this == SAWMILL || this == ORE_DRILL || this == TREE_FARM ? 2 : 0;
 	}
 
 	/** mB the machine's fluid tank holds, or 0 without one. */
 	public int tankCapacity() {
 		return switch (this) {
 			case STEAM_GENERATOR -> STEAM_TANK;
+			case LARGE_STEAM_ENGINE -> LARGE_ENGINE_TANK;
 			case GEOTHERMAL_GENERATOR -> GEOTHERMAL_TANK;
 			case ORE_WASHER -> WASHER_TANK;
 			default -> 0;
@@ -156,7 +241,7 @@ public enum MachineKind implements StringRepresentable {
 	/** Generators only produce energy; they never accept it. */
 	public boolean isGenerator() {
 		return this == COAL_GENERATOR || this == SOLAR_PANEL || this == STEAM_GENERATOR
-				|| this == GEOTHERMAL_GENERATOR || this == WIND_TURBINE;
+				|| this == GEOTHERMAL_GENERATOR || this == WIND_TURBINE || this == WATER_WHEEL;
 	}
 
 	/**
@@ -165,12 +250,24 @@ public enum MachineKind implements StringRepresentable {
 	 */
 	public Footprint footprint() {
 		return switch (this) {
-			case GEOTHERMAL_GENERATOR -> Footprint.of(Vec3i.ZERO, new Vec3i(-1, 0, 0));
-			case WIND_TURBINE -> Footprint.tall(3);
-			case COKE_OVEN -> Footprint.tall(2);
-			case STEEL_FOUNDRY -> Footprint.tall(3);
-			// Two wide and two tall: furnace body, crucible tower on its right, hoppers above.
-			case ALLOY_SMELTER -> Footprint.of(Vec3i.ZERO, new Vec3i(-1, 0, 0), new Vec3i(0, 1, 0), new Vec3i(-1, 1, 0));
+			case GEOTHERMAL_GENERATOR -> Footprint.cuboid(2, 2, 2);
+			case WIND_TURBINE -> Footprint.tall(9);
+			// A 2x2 beehive two blocks high, with its chimney in one block on top (part 8).
+			case COKE_OVEN -> Footprint.of(Vec3i.ZERO, new Vec3i(-1, 0, 0), new Vec3i(0, 0, 1), new Vec3i(-1, 0, 1),
+					new Vec3i(0, 1, 0), new Vec3i(-1, 1, 0), new Vec3i(0, 1, 1), new Vec3i(-1, 1, 1), new Vec3i(0, 2, 0));
+			case ORE_DRILL -> Footprint.tall(2);
+			case LARGE_STEAM_ENGINE -> Footprint.cuboid(2, 2, 2);
+			case WATER_WHEEL -> Footprint.tall(2);
+			case STEEL_FOUNDRY -> Footprint.cuboid(2, 5, 2);
+			// Two wide, two tall.
+			case CAPACITOR_BANK -> Footprint.of(Vec3i.ZERO, new Vec3i(-1, 0, 0), new Vec3i(0, 1, 0), new Vec3i(-1, 1, 0));
+			// Two wide, two deep, one tall (plus its dome).
+			case STEEL_TANK -> Footprint.of(Vec3i.ZERO, new Vec3i(-1, 0, 0), new Vec3i(0, 0, 1), new Vec3i(-1, 0, 1));
+			// Three wide, six tall, two deep: the furnace column (left) and a 2x2 crucible tank tower (right).
+			case ALLOY_SMELTER -> Footprint.cuboid(3, 6, 2);
+			// One wide, three tall, three long: wellhead at the front (the master), samson post, then crank and motor.
+			case PUMPJACK -> Footprint.cuboid(1, 3, 3);
+			case OIL_SAND_EXTRACTOR -> Footprint.cuboid(2, 2, 2);
 			default -> Footprint.SINGLE;
 		};
 	}
@@ -180,7 +277,27 @@ public enum MachineKind implements StringRepresentable {
 	 * smelter's copper power socket is on the outer side of its lower right block.
 	 */
 	public @Nullable PowerPort powerPort() {
-		return this == ALLOY_SMELTER ? new PowerPort(1, Direction.WEST) : null;
+		return this == ALLOY_SMELTER ? new PowerPort(2, Direction.WEST) : null;
+	}
+
+	/** Boilers: a fuel slot, a water-bucket slot and an empty-bucket slot, and a water tank. */
+	public boolean isBoiler() {
+		return this == STEAM_GENERATOR || this == LARGE_STEAM_ENGINE;
+	}
+
+	/** Machines with a real fire: they smoke and crackle while running (client-side effects only). */
+	public boolean burnsFuel() {
+		return this == COAL_GENERATOR || this == STEAM_GENERATOR || this == GEOTHERMAL_GENERATOR
+				|| this == LARGE_STEAM_ENGINE || this == COKE_OVEN || this == STEEL_FOUNDRY || this == ARC_FURNACE;
+	}
+
+	/** Height of the machine in blocks (the tallest part plus one). */
+	public int height() {
+		int top = 0;
+		for (Vec3i offset : footprint().offsets()) {
+			top = Math.max(top, offset.getY());
+		}
+		return top + 1;
 	}
 
 	public boolean isLarge() {

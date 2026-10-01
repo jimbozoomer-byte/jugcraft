@@ -1,14 +1,19 @@
 package io.github.jimbozoomer.jugcraft;
 
+import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.config.FeatureEnabledCondition;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
 import io.github.jimbozoomer.jugcraft.guide.JugcraftGuide;
+import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
 import io.github.jimbozoomer.jugcraft.logistics.JugcraftLogistics;
 import io.github.jimbozoomer.jugcraft.materials.JugcraftComponents;
 import io.github.jimbozoomer.jugcraft.materials.JugcraftMaterials;
 import io.github.jimbozoomer.jugcraft.materials.JugcraftWorldgen;
 import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
+import io.github.jimbozoomer.jugcraft.prospecting.JugcraftProspecting;
+import io.github.jimbozoomer.jugcraft.storage.JugcraftStorage;
+import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.fabric.api.resource.v1.pack.PackActivationType;
@@ -35,7 +40,12 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftComponents.register();
 		JugcraftMachines.register();
 		JugcraftFluids.register();
+		PetroFluids.register();
 		JugcraftLogistics.register();
+		JugcraftStorage.register();
+		JugcraftProspecting.register();
+		JugcraftKinetics.register();
+		JugcraftTools.register();
 		JugcraftGuide.register();
 		FeatureEnabledCondition.register();
 		JugcraftWorldgen.register();

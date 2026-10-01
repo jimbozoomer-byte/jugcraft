@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.machine;
 
 import io.github.jimbozoomer.jugcraft.energy.EnergyConnectable;
+import io.github.jimbozoomer.jugcraft.fluid.FluidTankBlock;
 import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import io.github.jimbozoomer.jugcraft.fluid.FluidNetworks;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorageUtil;
@@ -8,7 +9,11 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -72,6 +77,27 @@ public class MachineBlock extends BaseEntityBlock implements EnergyConnectable {
 		return port == null || port.allows(part(state), state.getValue(FACING), side);
 	}
 
+	/**
+	 * Running machines with a fire smoke from their top and crackle now and then, like a furnace.
+	 * Client-side only: {@link #LIT} is set on the master block, so the effects come from there.
+	 */
+	@Override
+	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+		if (!kind.burnsFuel() || !state.getValue(LIT) || part(state) != 0) {
+			return;
+		}
+		double x = pos.getX() + 0.5;
+		double y = pos.getY() + kind.height();
+		double z = pos.getZ() + 0.5;
+		if (random.nextInt(3) == 0) {
+			level.addParticle(ParticleTypes.SMOKE, x + (random.nextDouble() - 0.5) * 0.3, y + 0.1,
+					z + (random.nextDouble() - 0.5) * 0.3, 0.0, 0.04, 0.0);
+		}
+		if (random.nextInt(40) == 0) {
+			level.playLocalSound(x, pos.getY() + 0.5, z, SoundEvents.FURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 0.8F, 1.0F, false);
+		}
+	}
+
 	/** The machine a block belongs to, from any of its parts, or null. */
 	public static @Nullable MachineBlockEntity machineAt(Level level, BlockPos pos, BlockState state) {
 		if (!(state.getBlock() instanceof MachineBlock machine)) {
@@ -108,6 +134,14 @@ public class MachineBlock extends BaseEntityBlock implements EnergyConnectable {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		if (kind == MachineKind.STEEL_TANK) {
+			// A tank has no screen: show what it holds, like the tinplate tank.
+			// LargeMachineBlock passes the master's position here.
+			if (!level.isClientSide() && level.getBlockEntity(pos) instanceof MachineBlockEntity tank && tank.reservoir() != null) {
+				player.sendOverlayMessage(FluidTankBlock.describe(tank.reservoir()));
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (!level.isClientSide() && level.getBlockEntity(pos) instanceof MenuProvider provider) {
 			player.openMenu(provider);
 		}

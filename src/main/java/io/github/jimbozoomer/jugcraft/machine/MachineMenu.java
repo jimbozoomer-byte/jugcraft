@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.machine;
 
+import io.github.jimbozoomer.jugcraft.chemistry.FluidMachineSpec;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -41,6 +42,45 @@ public class MachineMenu extends AbstractContainerMenu {
 		return INPUT_LAYOUT[inputs][slot];
 	}
 
+	/** Input slot position for a kind: a row before the arrow, or the auto-crafter's 3x3 pattern grid. */
+	public static int inputX(MachineKind kind, int slot) {
+		return kind == MachineKind.AUTO_CRAFTER ? GRID_X + (slot % 3) * 18 : inputX(kind.outputSlot(), slot);
+	}
+
+	public static int inputY(MachineKind kind, int slot) {
+		return kind == MachineKind.AUTO_CRAFTER ? 17 + (slot / 3) * 18 : SLOT_Y;
+	}
+
+	/** Left edge of the auto-crafter's grid, and where its progress arrow starts (after the grid). */
+	public static final int GRID_X = 30;
+
+	public static int arrowX(MachineKind kind) {
+		return kind == MachineKind.AUTO_CRAFTER ? 88 : 80;
+	}
+
+	/** Fluid processors: tank gauges, 12 wide and 52 tall, input tanks from the left and output tanks from the right. */
+	public static final int TANK_WIDTH = 12;
+	public static final int TANK_Y = 17;
+	public static final int TANK_HEIGHT = 52;
+	/** Fluid processors: where the progress arrow starts. */
+	public static final int FLUID_ARROW_X = 84;
+
+	public static int inputTankX(int index) {
+		return 28 + index * 16;
+	}
+
+	public static int outputTankX(FluidMachineSpec spec, int index) {
+		return 160 - (spec.outputTanks().size() - 1 - index) * 16;
+	}
+
+	public static int fluidItemInputX(FluidMachineSpec spec, int slot) {
+		return inputTankX(spec.inputTanks().size()) + 2 + slot * 18;
+	}
+
+	public static int fluidItemOutputX(FluidMachineSpec spec, int slot) {
+		return outputTankX(spec, 0) - 22 - (spec.itemOutputs() - 1 - slot) * 18;
+	}
+
 	private final MachineKind kind;
 	private final Container container;
 	private final ContainerData data;
@@ -65,7 +105,7 @@ public class MachineMenu extends AbstractContainerMenu {
 					return GeneratorFuels.burnTicks(stack) > 0;
 				}
 			});
-		} else if (kind == MachineKind.STEAM_GENERATOR) {
+		} else if (kind.isBoiler()) {
 			addSlot(new Slot(container, MachineBlockEntity.SLOT_FUEL, INPUT_X, 53) {
 				@Override
 				public boolean mayPlace(ItemStack stack) {
@@ -84,10 +124,28 @@ public class MachineMenu extends AbstractContainerMenu {
 					return false;
 				}
 			});
+		} else if (kind.isFluidProcessor()) {
+			FluidMachineSpec spec = kind.fluidSpec();
+			for (int slot = 0; slot < spec.itemInputs(); slot++) {
+				addSlot(new Slot(container, slot, fluidItemInputX(spec, slot), SLOT_Y) {
+					@Override
+					public boolean mayPlace(ItemStack stack) {
+						return container.canPlaceItem(getContainerSlot(), stack);
+					}
+				});
+			}
+			for (int slot = 0; slot < spec.itemOutputs(); slot++) {
+				addSlot(new Slot(container, spec.itemInputs() + slot, fluidItemOutputX(spec, slot), SLOT_Y) {
+					@Override
+					public boolean mayPlace(ItemStack stack) {
+						return false;
+					}
+				});
+			}
 		} else if (kind.isProcessor()) {
 			int inputs = kind.outputSlot();
 			for (int slot = 0; slot < inputs; slot++) {
-				addSlot(new Slot(container, slot, inputX(inputs, slot), SLOT_Y) {
+				addSlot(new Slot(container, slot, inputX(kind, slot), inputY(kind, slot)) {
 					@Override
 					public boolean mayPlace(ItemStack stack) {
 						return container.canPlaceItem(getContainerSlot(), stack);
@@ -146,6 +204,16 @@ public class MachineMenu extends AbstractContainerMenu {
 			}
 		}
 		return false;
+	}
+
+	/** Fluid processors: the registry id of the fluid in tank {@code index} (0 when empty). */
+	public int tankFluid(int index) {
+		return data.get(MachineBlockEntity.DATA_TANKS + 2 * index) & 0xFFFF;
+	}
+
+	/** Fluid processors: millibuckets in tank {@code index}. */
+	public int tankAmount(int index) {
+		return data.get(MachineBlockEntity.DATA_TANKS + 2 * index + 1) & 0xFFFF;
 	}
 
 	/** Energy stored, reassembled from the two synced 16-bit halves. */

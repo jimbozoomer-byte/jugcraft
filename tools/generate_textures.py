@@ -466,6 +466,28 @@ def cable_texture():
     return _transmitter(RUBBER, node, [COPPER[0], COPPER[1], COPPER[1], COPPER[0]])
 
 
+def silver_cable_texture():
+    """Dark blue-gray insulation with a bright silver junction node."""
+    insulation = [(28, 32, 44), (42, 48, 64), (58, 66, 86), (80, 90, 112)]
+    silver = [(150, 154, 164), (200, 204, 212), (236, 238, 244)]
+    def node(x, y):
+        edge = x in (6, 9) or y in (6, 9)
+        return silver[0] if edge else silver[2 if (x + y) % 2 else 1]
+    return _transmitter(insulation, node, [silver[0], silver[1], silver[1], silver[0]])
+
+
+def aluminum_cable_texture():
+    """Armored power line: steel-gray sheath with a red high-power stripe and an aluminum node."""
+    sheath = [(52, 56, 62), (78, 84, 92), (104, 110, 118), (130, 136, 144)]
+    aluminum = [(170, 176, 182), (208, 212, 218), (236, 238, 242)]
+    def node(x, y):
+        edge = x in (6, 9) or y in (6, 9)
+        if edge:
+            return (170, 40, 30)
+        return aluminum[2 if (x + y) % 2 else 1]
+    return _transmitter(sheath, node, [(170, 40, 30), aluminum[1], aluminum[1], (170, 40, 30)])
+
+
 def item_tube_texture():
     """6-pixel brass pneumatic tube: bands at rows/columns 5-10 with a glass window down the middle,
     a riveted junction node in the centre square and darker flanges at the ends."""
@@ -526,6 +548,158 @@ def handbook_item():
     return img
 
 
+def prospector_item():
+    """A brass hand instrument: amber screen with a signal trace, a knob and a copper aerial."""
+    from steampunk_textures import BRASS as SP_BRASS
+    img = new()
+    for y in range(5, 15):
+        for x in range(3, 13):
+            edge = x in (3, 12) or y in (5, 14)
+            img.putpixel((x, y), (SP_BRASS[1] if edge else SP_BRASS[3]) + (255,))
+    for y in range(7, 11):
+        for x in range(5, 11):
+            img.putpixel((x, y), (28, 20, 8, 255))
+    for x, y in ((5, 10), (6, 9), (7, 8), (8, 9), (9, 7), (10, 8)):
+        img.putpixel((x, y), (255, 179, 64, 255))
+    for x, y in ((5, 12), (6, 12), (10, 12)):
+        img.putpixel((x, y), SP_BRASS[0] + (255,))
+    img.putpixel((9, 12), (176, 32, 24, 255))
+    for i in range(0, 5):
+        img.putpixel((11 + i // 2, 4 - i), (184, 104, 60, 255))
+    img.putpixel((13, 0), (255, 179, 64, 255))
+    img.putpixel((3, 5), SP_BRASS[4] + (255,))
+    return img
+
+
+def shaft_frame(shift):
+    """Iron shaft with diagonal brass-and-dark bands; shifting the bands one pixel per frame makes it turn."""
+    from steampunk_textures import BRASS as SP_BRASS
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            phase = (x + y + shift) % 8
+            c = SP_BRASS[3] if phase == 0 else SP_BRASS[2] if phase == 1 else IRON_METAL[1] if phase < 5 else IRON_METAL[2]
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
+def gearbox_frame(angle):
+    """Brass plate with a riveted rim and an eight-toothed iron gear turned by `angle` degrees."""
+    import math
+    from steampunk_textures import BRASS as SP_BRASS
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            edge = x in (0, 15) or y in (0, 15)
+            img.putpixel((x, y), (SP_BRASS[1] if edge else SP_BRASS[3]) + (255,))
+    for x, y in ((1, 1), (14, 1), (1, 14), (14, 14)):
+        img.putpixel((x, y), SP_BRASS[0] + (255,))
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x + 0.5 - 8, y + 0.5 - 8
+            r = math.hypot(dx, dy)
+            a = (math.degrees(math.atan2(dy, dx)) - angle) % 45
+            tooth = a < 18
+            if r <= 4.2 or (r <= 6.3 and tooth):
+                c = IRON_METAL[1] if r > 5 else IRON_METAL[2]
+                if r <= 1.5:
+                    c = SP_BRASS[4]
+                img.putpixel((x, y), c + (255,))
+    return img
+
+
+def save_animation(frames, name, frametime=2):
+    """A vertical strip of 16x16 frames plus its .mcmeta, so the texture animates in game."""
+    import json
+    strip = Image.new("RGBA", (16, 16 * len(frames)), (0, 0, 0, 0))
+    for index, frame in enumerate(frames):
+        strip.paste(frame, (0, 16 * index))
+    path = TEX / "block" / f"{name}.png"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    strip.save(path, optimize=True)
+    (TEX / "block" / f"{name}.png.mcmeta").write_text(
+        json.dumps({"animation": {"frametime": frametime}}, indent=2) + "\n", encoding="utf-8")
+
+
+def belt_texture():
+    """A dark leather belt: brown with a lighter stitch line along each edge (length runs down the texture)."""
+    rng = random.Random(970)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            c = (74, 46, 28) if rng.random() < 0.7 else (86, 54, 32)
+            if x in (1, 14):
+                c = (168, 136, 96) if y % 3 else (74, 46, 28)
+            if x in (0, 15):
+                c = (52, 32, 20)
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
+def conveyor_frame(shift):
+    """Rubberised conveyor belt, seen from above with the front (where items go) at the top: dark rubber with
+    chevron ribs pointing forwards. Shifting the ribs two pixels a frame makes them run at the items' speed."""
+    rng = random.Random(975)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            c = (38, 36, 34) if rng.random() < 0.75 else (46, 43, 40)
+            phase = (y - int(abs(x - 7.5) / 2) + shift) % 8
+            if phase == 0:
+                c = (78, 74, 68)
+            elif phase == 1:
+                c = (58, 55, 51)
+            if x in (0, 15):
+                c = (26, 24, 22)
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
+def rocket_pack_armor():
+    """The worn rocket pack's harness, on the 64x32 humanoid armor layout: rubber straps and a chrome buckle on the
+    front, back, sides and top (the tanks are a 3D model on the back, drawn by client/RocketPackLayer)."""
+    from dieselpunk_textures import CHROME, RUBBER
+    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+
+    def px(x, y, c):
+        img.putpixel((x, y), tuple(c) + (255,))
+    # Straps down the back (the pack itself is drawn in 3D by client/RocketPackLayer).
+    for y in range(20, 32):
+        for x in (33, 38):
+            px(x, y, RUBBER[2] if y % 2 else RUBBER[1])
+    # Straps: down the front (x 20..27), over the shoulders (top, x 20..27, y 16..19) and down the sides.
+    for y in range(20, 32):
+        for x in (21, 26):
+            px(x, y, RUBBER[2] if y % 2 else RUBBER[1])
+    for x in range(21, 27):
+        px(x, 24, CHROME[2])
+    px(23, 24, CHROME[4])
+    px(24, 24, CHROME[4])
+    for y in range(16, 20):
+        for x in (21, 26):
+            px(x, y, RUBBER[1])
+    for y in range(20, 32):
+        px(17, y, RUBBER[1])
+        px(30, y, RUBBER[1])
+    return img
+
+
+def belt_item():
+    """A coiled leather belt with a brass buckle."""
+    from steampunk_textures import BRASS as SP_BRASS
+    import math
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            r = math.hypot(x - 7.5, y - 8.5)
+            if 3 <= r <= 6.5:
+                shade = (86, 54, 32) if int(r) % 2 else (70, 44, 26)
+                img.putpixel((x, y), shade + (255,))
+    for x, y in ((12, 3), (13, 3), (14, 3), (12, 4), (14, 4), (12, 5), (13, 5), (14, 5)):
+        img.putpixel((x, y), SP_BRASS[3] + (255,))
+    return img
+
+
 def upgrade_card(accent, symbol):
     """A brass-framed punch card with a colored accent and a small symbol (speed: arrow, efficiency: leaf)."""
     from steampunk_textures import BRASS as SP_BRASS
@@ -541,6 +715,28 @@ def upgrade_card(accent, symbol):
         img.putpixel((x, y), accent[1] + (255,))
     for x, y in ((4, 11), (6, 11), (8, 11), (10, 11)):
         img.putpixel((x, y), (40, 30, 20, 255))
+    return img
+
+
+def module_card(lamp, glyph):
+    """A dieselpunk upgrade module: a gunmetal cartridge with a chrome rim and a hazard-striped grip, a green
+    circuit window showing a glyph for what it does, and an indicator lamp."""
+    from dieselpunk_textures import CHROME, GUNMETAL, HAZARD, PHOSPHOR
+    img = new()
+    for y in range(2, 15):
+        for x in range(3, 13):
+            rim = x in (3, 12) or y in (2, 14)
+            c = CHROME[2] if rim else GUNMETAL[2] if (x + y) % 4 else GUNMETAL[3]
+            if y in (12, 13) and not rim:
+                c = HAZARD[0] if (x + y) % 4 < 2 else HAZARD[2]
+            img.putpixel((x, y), c + (255,))
+    for y in range(4, 11):
+        for x in range(5, 11):
+            img.putpixel((x, y), PHOSPHOR[0] + (255,))
+    for x, y in glyph:
+        img.putpixel((x, y), PHOSPHOR[3] + (255,))
+    img.putpixel((11, 3), lamp + (255,))
+    img.putpixel((4, 3), CHROME[4] + (255,))
     return img
 
 
@@ -1038,16 +1234,56 @@ def machines():
     save(grate(952), "block", "coke_oven_front")
     save(grate(952, glow=ember), "block", "coke_oven_front_on")
     save(window(953, [(30, 26, 26), (44, 36, 34)]), "block", "steel_foundry_front")
+    save(battery_front(954), "block", "capacitor_bank_front")
+    save(tank_side(955), "block", "steel_tank_front")
+    save(grate(957), "block", "cobblestone_generator_front")
+    save(grate(957, glow=[(250, 140, 30), (255, 190, 60), (220, 80, 20)]), "block", "cobblestone_generator_front_on")
+    save(window(958, [(28, 44, 30), (36, 56, 38)]), "block", "tree_farm_front")
+    save(window(958, [(28, 44, 30)], glow=[(120, 200, 90), (170, 230, 120), (90, 170, 70)]), "block", "tree_farm_front_on")
+    save(tank_side(959), "block", "water_wheel_front")
+    save(boiler(961, False), "block", "large_steam_engine_front")
+    save(boiler(961, True), "block", "large_steam_engine_front_on")
+    save(assembler_front(960, False), "block", "auto_crafter_front")
+    save(assembler_front(960, True), "block", "auto_crafter_front_on")
+    save(window(962, [(20, 16, 12), (30, 24, 18)]), "block", "pumpjack_front")
+    save(window(962, [(20, 16, 12)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "pumpjack_front_on")
+    save(window(963, [(40, 34, 26), (52, 44, 32)]), "block", "oil_sand_extractor_front")
+    save(window(963, [(40, 34, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "oil_sand_extractor_front_on")
+    save(jaws(956, False), "block", "ore_drill_front")
+    save(jaws(956, True), "block", "ore_drill_front_on")
     save(window(953, [(30, 26, 26)], glow=[(255, 200, 80), (255, 236, 150), (250, 150, 40)]), "block", "steel_foundry_front_on")
     save(circuit(False), "item", "basic_circuit")
     save(circuit(True), "item", "advanced_circuit")
     save(cable_texture(), "block", "copper_cable")
+    save(silver_cable_texture(), "block", "silver_cable")
+    save(aluminum_cable_texture(), "block", "aluminum_cable")
     save(pipe_texture(), "block", "bronze_fluid_pipe")
     save(item_tube_texture(), "block", "brass_item_pipe")
     save(wrench_item(), "item", "brass_wrench")
     save(handbook_item(), "item", "engineers_handbook")
+    save(prospector_item(), "item", "prospector")
+    save(belt_texture(), "block", "belt")
+    save(belt_item(), "item", "belt")
+    armor = TEX / "entity" / "equipment" / "humanoid"
+    armor.mkdir(parents=True, exist_ok=True)
+    rocket_pack_armor().save(armor / "rocket_pack.png", optimize=True)
+    save(conveyor_frame(0), "block", "conveyor_belt")
+    save_animation([conveyor_frame(2 * i) for i in range(4)], "conveyor_belt_moving", frametime=1)
+    save(shaft_frame(0), "block", "iron_shaft")
+    save(gearbox_frame(0), "block", "brass_gearbox")
+    save_animation([gearbox_frame(i * 11.25) for i in range(4)], "brass_gearbox_turning")
     arrow = [(5, 8), (6, 8), (7, 8), (8, 8), (9, 8), (10, 8), (9, 7), (8, 6), (9, 9), (8, 10)]
     leaf = [(7, 7), (8, 7), (6, 8), (7, 8), (8, 8), (9, 8), (7, 9), (8, 9), (6, 10), (5, 10)]
+    glyphs = {
+        "overclock_module": ((255, 90, 40), [(8, 4), (7, 5), (6, 6), (7, 6), (8, 6), (9, 6), (8, 7), (7, 8), (6, 9)]),
+        "range_module": ((80, 170, 255), [(x, y) for x in (6, 8, 10) for y in (5, 7, 9) if (x, y) != (8, 7)] + [(8, 7)]),
+        "capacity_module": ((255, 200, 60), [(7, 4), (8, 4)] + [(x, y) for y in range(5, 11) for x in (6, 9)]
+                            + [(7, 10), (8, 10), (7, 8), (8, 8), (7, 9), (8, 9)]),
+        "silk_touch_module": ((120, 240, 200), [(8, 4), (7, 5), (9, 5), (6, 6), (10, 6), (6, 7), (10, 7), (7, 8), (9, 8), (8, 9)]),
+        "fortune_module": ((80, 220, 90), [(7, 5), (8, 5), (6, 6), (9, 6), (7, 7), (8, 7), (5, 8), (10, 8), (8, 8), (8, 9), (8, 10)]),
+    }
+    for module, (lamp, glyph) in glyphs.items():
+        save(module_card(lamp, glyph), "item", module)
     save(upgrade_card([(160, 40, 30), (220, 70, 40)], arrow), "item", "speed_upgrade")
     save(upgrade_card([(40, 120, 60), (70, 180, 90)], leaf), "item", "efficiency_upgrade")
     save(hazard_plinth(530), "block", "geothermal_plinth")
@@ -1096,6 +1332,10 @@ def main():
     machines()
     import steampunk_textures
     steampunk_textures.draw_all()
+    import dieselpunk_textures
+    dieselpunk_textures.draw_all()
+    import petro_textures
+    petro_textures.draw_all(save, save_animation)
 
 
 if __name__ == "__main__":

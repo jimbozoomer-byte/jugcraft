@@ -1,10 +1,14 @@
 package io.github.jimbozoomer.jugcraft.client;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.chemistry.FluidMachineSpec;
+import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import io.github.jimbozoomer.jugcraft.machine.MachineMenu;
 import io.github.jimbozoomer.jugcraft.machine.SideConfig;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -12,7 +16,10 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 
 /** Screen for every machine: energy bar on the left, slots and progress in the middle. */
 public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
@@ -31,6 +38,8 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 	private static final int WATER = 0xFF3060D0;
 	private static final int LAVA = 0xFFE87010;
 	private static final int TEXT = 0xFF404040;
+	/** Energy readout: amber like the energy bar, a shade darker so it reads on the gray panel; no shadow. */
+	private static final int READOUT = 0xFFB8740A;
 
 	// Side configuration: a cross of face buttons (front in the middle) and an eject toggle, on the right.
 	private static final int[][] FACE_BUTTON_XY = {{150, 28}, {162, 40}, {138, 28}, {162, 28}, {150, 16}, {150, 40}};
@@ -87,12 +96,14 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 					Component.translatable("container.jugcraft.side." + face.name().toLowerCase()),
 					Component.translatable("container.jugcraft.mode." + mode.name().toLowerCase()))));
 		}
-		ejectButton.setMessage(Component.translatable(config.eject() ? "container.jugcraft.eject.on" : "container.jugcraft.eject.off"));
+		// "Eject" fits the button; green when on, gray when off, and the tooltip says which.
+		ejectButton.setMessage(Component.translatable("container.jugcraft.eject").withColor(config.eject() ? 0x70E070 : 0x9A9A9A));
 		SideConfig.Redstone redstone = config.redstone();
 		redstoneButton.setMessage(Component.literal("R").withColor(REDSTONE_COLORS[redstone.ordinal()]));
 		redstoneButton.setTooltip(Tooltip.create(Component.translatable("container.jugcraft.redstone",
 				Component.translatable("container.jugcraft.redstone." + redstone.name().toLowerCase()))));
-		ejectButton.setTooltip(Tooltip.create(Component.translatable("container.jugcraft.eject.tooltip")));
+		ejectButton.setTooltip(Tooltip.create(Component.translatable(config.eject() ? "container.jugcraft.eject.on" : "container.jugcraft.eject.off")
+				.append(". ").append(Component.translatable("container.jugcraft.eject.tooltip"))));
 	}
 
 	@Override
@@ -100,6 +111,38 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		extractBackground(graphics, mouseX, mouseY, delta);
 		super.extractRenderState(graphics, mouseX, mouseY, delta);
 		extractTooltip(graphics, mouseX, mouseY);
+		extractGaugeTooltip(graphics, mouseX, mouseY);
+	}
+
+	/** Exact numbers when hovering the energy bar or a tank gauge. */
+	private void extractGaugeTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		int mx = mouseX - leftPos;
+		int my = mouseY - topPos;
+		MachineKind kind = menu.kind();
+		String line = null;
+		if (kind.usesPower() && mx >= BAR_X - 1 && mx <= BAR_X + BAR_WIDTH && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT) {
+			line = String.format("%,d / %,d JE", menu.energy(), menu.capacity());
+		} else if (kind.tankCapacity() > 0 && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT
+				&& (kind.isProcessor() ? mx >= 29 && mx < 37 : mx >= 149 && mx < 163)) {
+			line = String.format("%,d / %,d mB", menu.data(MachineBlockEntity.DATA_TANK), kind.tankCapacity());
+		}
+		FluidMachineSpec spec = kind.fluidSpec();
+		if (line == null && spec != null && my >= MachineMenu.TANK_Y - 1 && my <= MachineMenu.TANK_Y + MachineMenu.TANK_HEIGHT) {
+			for (int tank = 0; tank < spec.tanks(); tank++) {
+				int tankX = tankX(spec, tank);
+				if (mx >= tankX - 1 && mx <= tankX + MachineMenu.TANK_WIDTH) {
+					Component name = menu.tankFluid(tank) == 0 ? Component.translatable("container.jugcraft.tank.empty")
+							: FluidVariantAttributes.getName(FluidVariant.of(fluid(tank)));
+					graphics.setTooltipForNextFrame(font, name.copy().append(String.format(": %,d / %,d mB",
+							menu.tankAmount(tank), spec.capacity(tank))), mouseX, mouseY);
+					return;
+				}
+			}
+		}
+		if (line == null) {
+			return;
+		}
+		graphics.setTooltipForNextFrame(font, Component.literal(line), mouseX, mouseY);
 	}
 
 	@Override
@@ -122,7 +165,7 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 			int maxBurn = Math.max(1, menu.data(MachineBlockEntity.DATA_MAX_BURN));
 			int flame = menu.data(MachineBlockEntity.DATA_BURN) * 14 / maxBurn;
 			graphics.fill(x + 57, y + 20 + 14 - flame, x + 71, y + 34, FLAME);
-		} else if (kind == MachineKind.STEAM_GENERATOR) {
+		} else if (kind.isBoiler()) {
 			slotFrame(graphics, x + MachineMenu.INPUT_X, y + 17);
 			slotFrame(graphics, x + MachineMenu.INPUT_X, y + 53);
 			slotFrame(graphics, x + MachineMenu.OUTPUT_X, y + MachineMenu.SLOT_Y);
@@ -131,17 +174,40 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 			graphics.fill(x + 57, y + 37 + 14 - flame, x + 71, y + 51, FLAME);
 			// Water tank gauge on the right.
 			graphics.fill(x + 149, y + BAR_Y - 1, x + 163, y + BAR_Y + BAR_HEIGHT + 1, DARK);
-			int water = menu.data(MachineBlockEntity.DATA_TANK) * BAR_HEIGHT / MachineKind.STEAM_TANK;
+			int water = menu.data(MachineBlockEntity.DATA_TANK) * BAR_HEIGHT / kind.tankCapacity();
 			graphics.fill(x + 150, y + BAR_Y + BAR_HEIGHT - water, x + 162, y + BAR_Y + BAR_HEIGHT, WATER);
 		} else if (kind == MachineKind.GEOTHERMAL_GENERATOR) {
 			// Lava tank gauge on the right.
 			graphics.fill(x + 149, y + BAR_Y - 1, x + 163, y + BAR_Y + BAR_HEIGHT + 1, DARK);
 			int lava = menu.data(MachineBlockEntity.DATA_TANK) * BAR_HEIGHT / MachineKind.GEOTHERMAL_TANK;
 			graphics.fill(x + 150, y + BAR_Y + BAR_HEIGHT - lava, x + 162, y + BAR_Y + BAR_HEIGHT, LAVA);
+		} else if (kind.isFluidProcessor()) {
+			FluidMachineSpec spec = kind.fluidSpec();
+			for (int tank = 0; tank < spec.tanks(); tank++) {
+				int tankX = x + tankX(spec, tank);
+				graphics.fill(tankX - 1, y + MachineMenu.TANK_Y - 1, tankX + MachineMenu.TANK_WIDTH + 1,
+						y + MachineMenu.TANK_Y + MachineMenu.TANK_HEIGHT + 1, DARK);
+				int level = menu.tankAmount(tank) * MachineMenu.TANK_HEIGHT / Math.max(1, spec.capacity(tank));
+				if (menu.tankFluid(tank) != 0 && level > 0) {
+					graphics.fill(tankX, y + MachineMenu.TANK_Y + MachineMenu.TANK_HEIGHT - level, tankX + MachineMenu.TANK_WIDTH,
+							y + MachineMenu.TANK_Y + MachineMenu.TANK_HEIGHT, fluidColor(fluid(tank)));
+				}
+			}
+			for (int slot = 0; slot < spec.itemInputs(); slot++) {
+				slotFrame(graphics, x + MachineMenu.fluidItemInputX(spec, slot), y + MachineMenu.SLOT_Y);
+			}
+			for (int slot = 0; slot < spec.itemOutputs(); slot++) {
+				slotFrame(graphics, x + MachineMenu.fluidItemOutputX(spec, slot), y + MachineMenu.SLOT_Y);
+			}
+			int maxProgress = Math.max(1, menu.data(MachineBlockEntity.DATA_MAX_PROGRESS));
+			int arrow = menu.data(MachineBlockEntity.DATA_PROGRESS) * 24 / maxProgress;
+			int arrowX = x + MachineMenu.FLUID_ARROW_X;
+			graphics.fill(arrowX, y + 41, arrowX + 24, y + 45, DARK);
+			graphics.fill(arrowX, y + 41, arrowX + arrow, y + 45, PROGRESS);
 		} else if (kind.isProcessor()) {
 			int inputs = kind.outputSlot();
 			for (int slot = 0; slot < inputs; slot++) {
-				slotFrame(graphics, x + MachineMenu.inputX(inputs, slot), y + MachineMenu.SLOT_Y);
+				slotFrame(graphics, x + MachineMenu.inputX(kind, slot), y + MachineMenu.inputY(kind, slot));
 			}
 			slotFrame(graphics, x + MachineMenu.OUTPUT_X, y + MachineMenu.SLOT_Y);
 			for (int index = 0; index < kind.byproductSlots(); index++) {
@@ -158,26 +224,41 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 			}
 			int maxProgress = Math.max(1, menu.data(MachineBlockEntity.DATA_MAX_PROGRESS));
 			int arrow = menu.data(MachineBlockEntity.DATA_PROGRESS) * 24 / maxProgress;
-			graphics.fill(x + 80, y + 41, x + 104, y + 45, DARK);
-			graphics.fill(x + 80, y + 41, x + 80 + arrow, y + 45, PROGRESS);
+			int arrowX = x + MachineMenu.arrowX(kind);
+			graphics.fill(arrowX, y + 41, arrowX + 24, y + 45, DARK);
+			graphics.fill(arrowX, y + 41, arrowX + arrow, y + 45, PROGRESS);
 		}
 	}
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		super.extractLabels(graphics, mouseX, mouseY);
-		if (menu.kind().usesPower()) {
+		// The auto-crafter's grid covers the energy readout's place; its bar still shows the charge.
+		if (menu.kind().usesPower() && menu.kind() != MachineKind.AUTO_CRAFTER) {
 			String energy = compact(menu.energy()) + " / " + compact(menu.capacity()) + " JE";
-			graphics.text(font, energy, 28, 60, TEXT);
+			if (menu.kind().isFluidProcessor()) {
+				// The tank gauges fill the machine area; the readout sits at the right of the inventory label row.
+				graphics.text(font, energy, imageWidth - 8 - font.width(energy), inventoryLabelY, READOUT, false);
+			} else {
+				graphics.text(font, energy, 28, 60, READOUT, false);
+			}
 		}
 		if (menu.kind() == MachineKind.ARC_FURNACE) {
 			String key = menu.data(MachineBlockEntity.DATA_FORMED) == 1
 					? "container.jugcraft.arc_furnace.formed" : "container.jugcraft.arc_furnace.incomplete";
-			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT);
+			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT, false);
 		} else if (menu.kind() == MachineKind.WIND_TURBINE) {
 			String key = menu.data(MachineBlockEntity.DATA_FORMED) == 1
 					? "container.jugcraft.wind_turbine.clear" : "container.jugcraft.wind_turbine.blocked";
-			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT);
+			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT, false);
+		} else if (menu.kind() == MachineKind.PUMPJACK) {
+			String key = menu.data(MachineBlockEntity.DATA_FORMED) == 1
+					? "container.jugcraft.pumpjack.oil" : "container.jugcraft.pumpjack.dry";
+			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT, false);
+		} else if (menu.kind() == MachineKind.WATER_WHEEL) {
+			String key = menu.data(MachineBlockEntity.DATA_FORMED) == 1
+					? "container.jugcraft.water_wheel.turning" : "container.jugcraft.water_wheel.still";
+			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT, false);
 		}
 	}
 
@@ -191,6 +272,27 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 			return tenths % 10 == 0 ? tenths / 10 + "k" : tenths / 10 + "." + tenths % 10 + "k";
 		}
 		return value / 1_000 + "k";
+	}
+
+	/** Left edge of a fluid processor's tank gauge (input tanks first). */
+	private static int tankX(FluidMachineSpec spec, int tank) {
+		return spec.isInput(tank) ? MachineMenu.inputTankX(tank) : MachineMenu.outputTankX(spec, tank - spec.inputTanks().size());
+	}
+
+	private Fluid fluid(int tank) {
+		return BuiltInRegistries.FLUID.byId(menu.tankFluid(tank));
+	}
+
+	/** Gauge colour: water and lava as on the boilers, petroleum fluids their own, anything else a neutral blue-grey. */
+	private static int fluidColor(Fluid fluid) {
+		if (fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER) {
+			return WATER;
+		}
+		if (fluid == Fluids.LAVA || fluid == Fluids.FLOWING_LAVA) {
+			return LAVA;
+		}
+		PetroFluids.Entry entry = PetroFluids.of(fluid);
+		return entry != null ? entry.color() : 0xFF8090A8;
 	}
 
 	private static void slotFrame(GuiGraphicsExtractor graphics, int slotX, int slotY) {

@@ -26,8 +26,25 @@ MACHINES = {
     # Steel tier: unpowered brick multi-blocks (tools/large_machines.py).
     "coke_oven": {"display": "Coke Oven", "lit": True},
     "steel_foundry": {"display": "Steel Foundry", "lit": True},
+    # Storage multi-blocks (2x2): a capacitor bank and a steel tank.
+    "capacitor_bank": {"display": "Capacitor Bank", "lit": False},
+    "steel_tank": {"display": "Steel Tank", "lit": False},
+    # Mining: a 2-tall powered derrick that mines ores in a 9x9 column below it.
+    "ore_drill": {"display": "Ore Drill", "lit": True},
+    # Renewables: cobblestone from water and lava, wood from saplings, power from flowing water.
+    "cobblestone_generator": {"display": "Cobblestone Generator", "lit": True},
+    "tree_farm": {"display": "Tree Farm", "lit": True},
+    "water_wheel": {"display": "Water Wheel", "lit": False},
+    # Crafts the recipe laid out in its 3x3 grid, keeping one of each item as the pattern.
+    "auto_crafter": {"display": "Auto-Crafter", "lit": True},
+    # Kinetic: a 2x2x2 steam engine, four times the small one (kinetic/SteamEngineBlock).
+    "large_steam_engine": {"display": "Large Steam Engine", "lit": True},
     # Multi-block machines: models and footprints live in tools/large_machines.py.
     "geothermal_generator": {"display": "Geothermal Generator", "lit": True},
+    # Petrochemistry (tools/petro.py): a 1x3x3 pumpjack over a conventional oil reservoir.
+    "pumpjack": {"display": "Pumpjack", "lit": True},
+    # A 2x2x2 hot-water extraction plant: oil sand or bitumen + water -> crude oil (+ sand).
+    "oil_sand_extractor": {"display": "Oil Sand Extractor", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
 }
 
@@ -38,16 +55,59 @@ PARTS = {
 }
 
 # Cables: display name and JE per tick one push may send through the network.
-CABLES = {"copper_cable": {"display": "Copper Cable", "rate": 256}}
+# Tiers connect to each other; a network carries as much as its slowest cable (energy/EnergyNetworks).
+CABLES = {"copper_cable": {"display": "Copper Cable", "rate": 256},
+          "silver_cable": {"display": "Silver Cable", "rate": 1_024},
+          "aluminum_cable": {"display": "Aluminum Cable", "rate": 4_096}}
 
 # Item logistics (see docs/TECH_TREE.md#item-logistics). The tube is a 6-pixel transmitter; the
 # extractor and sorter face any of six directions. Models: tools/logistics_models.py.
 ITEM_PIPES = {"brass_item_pipe": {"display": "Brass Item Pipe", "size": 6}}
 LOGISTICS_BLOCKS = {
     "pneumatic_extractor": {"display": "Pneumatic Extractor"},
+    # Steel tier: 32 items every 4 ticks (the brass one: 16 every 8).
+    "high_pressure_extractor": {"display": "High-Pressure Extractor"},
     "item_sorter": {"display": "Item Sorter"},
 }
-TOOLS = {"brass_wrench": "Brass Wrench", "engineers_handbook": "Engineer's Handbook"}
+TOOLS = {"brass_wrench": "Brass Wrench", "engineers_handbook": "Engineer's Handbook",
+         # Mining & prospecting: a vague 3x3-chunk ore survey (prospecting/OreSurvey).
+         "prospector": "Geo-Resonance Prospector",
+         # Kinetic: links two belt pulleys.
+         "belt": "Leather Belt"}
+# Kinetic power (kinetic/): rotation in KE per tick, carried by shafts and gearboxes. Models: tools/kinetic_models.py.
+# "axis": placed like a log; "facing": six directions; "horizontal": four.
+KINETIC_BLOCKS = {
+    "iron_shaft": {"display": "Iron Shaft", "states": "axis"},
+    "brass_gearbox": {"display": "Brass Gearbox", "states": "none"},
+    "hand_crank": {"display": "Hand Crank", "states": "facing"},
+    "steam_engine": {"display": "Steam Engine", "states": "horizontal"},
+    "dynamo": {"display": "Dynamo", "states": "horizontal"},
+    # A shaft with a grooved wheel; a belt links two of them (kinetic/BeltItem).
+    "belt_pulley": {"display": "Belt Pulley", "states": "axis"},
+    # JE -> KE at 75%; its shaft points the way the player looked when placing it.
+    "electric_motor": {"display": "Electric Motor", "states": "facing"},
+    # Item conveyors (logistics/ConveyorBlock): driven by rotation, facing the way items travel.
+    "conveyor": {"display": "Conveyor", "states": "horizontal"},
+    "conveyor_splitter": {"display": "Conveyor Splitter", "states": "horizontal"},
+}
+# Conveyor slopes (logistics/ConveyorSlopeBlock): carry items one block up or down; use with an empty hand to flip.
+SLOPE_BLOCKS = {"conveyor_slope": {"display": "Conveyor Slope"}}
+# Powered tools (tools/), dieselpunk 3D item models in tools/tool_models.py: JE in an "energy" item component,
+# charged at the charging station.
+POWERED_TOOLS = {"mining_drill": "Mining Drill", "chainsaw": "Chainsaw", "rocket_pack": "Rocket Pack"}
+# Upgrade modules for the powered tools, fitted at the charging station (tools/ToolUpgrades): display name, short
+# name for tooltips, and what it does.
+UPGRADE_MODULES = {
+    "overclock_module": ("Overclock Module", "Overclock", "Mines 50% faster for twice the JE a block (up to 2)"),
+    "range_module": ("Range Module", "Range", "The drill's area mode mines 5×5 (drill only)"),
+    "capacity_module": ("Capacity Module", "Capacity", "Holds its base charge again (up to 2)"),
+    "silk_touch_module": ("Silk Touch Module", "Silk Touch", "Blocks drop themselves (drill or chainsaw; not with fortune)"),
+    "fortune_module": ("Fortune Module", "Fortune", "More ore drops, up to Fortune III (drill only; not with silk touch)"),
+}
+# Blocks of the powered-tools feature: the 2-tall charging station (lower and upper halves, one item).
+TOOL_BLOCKS = {"charging_station": {"display": "Charging Station"}}
+# Plain storage blocks with their own block entity (storage/). Models: tools/storage_models.py.
+STORAGE_BLOCKS = {"item_crate": {"display": "Item Crate"}}
 # Machine upgrades (docs/TECH_TREE.md#machine-control): go in a powered processor's two upgrade slots.
 # At most 4 of each kind count. Numbers are in machine/MachineUpgrades.java.
 UPGRADES = {"speed_upgrade": "Speed Upgrade", "efficiency_upgrade": "Efficiency Upgrade"}
@@ -90,18 +150,41 @@ STATS = {
                    "tank": 8_000},
     "sieve": {"capacity": 10_000, "input_per_tick": 128, "use_per_tick": 8},
     "sawmill": {"capacity": 10_000, "input_per_tick": 128, "use_per_tick": 12},
+    # 2x2. Outputs from its front (all four blocks), charges from any other face.
+    "capacitor_bank": {"capacity": 4_000_000, "io_per_tick": 4_096},
+    # 2x2, one tall with a dome: 128 buckets of one fluid. No power.
+    "steel_tank": {"capacity": 0, "tank": 128_000},
+    # 2 tall. Mines one c:ores block per 40 ticks from a 9x9 column below it, down to the bottom of the world.
+    "ore_drill": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "ticks": 40, "radius": 4},
+    # Needs water and lava touching it (neither is used): 1 cobblestone per 20 ticks.
+    "cobblestone_generator": {"capacity": 4_000, "input_per_tick": 64, "use_per_tick": 4, "ticks": 20},
+    # Sapling -> logs in 400 ticks; the sapling comes back.
+    "tree_farm": {"capacity": 10_000, "input_per_tick": 128, "use_per_tick": 16},
+    # 2 tall. 8 JE/t per block of flowing water on its right (12 if falling), both blocks: up to 24 JE/t.
+    "water_wheel": {"capacity": 8_000, "output_per_tick": 64, "generation_per_tick": 24},
+    # One craft per 40 ticks at 8 JE/t.
+    "auto_crafter": {"capacity": 10_000, "input_per_tick": 128, "use_per_tick": 8, "ticks": 40},
+    # 2x2x2. 256 KE/t out of the back of its upper right block; 40 mB water per tick; no JE of its own.
+    "large_steam_engine": {"capacity": 0, "use_per_tick": 0, "output_ke": 256, "water_per_tick": 40, "tank": 16_000},
     # Unpowered: heat comes from the charge itself. No battery, no cable connection.
     "coke_oven": {"capacity": 0, "use_per_tick": 0},
     "steel_foundry": {"capacity": 0, "use_per_tick": 0},
     # Two blocks wide. Burns 1 mB of lava per tick for 64 JE: a bucket lasts 1,000 ticks.
     "geothermal_generator": {"capacity": 30_000, "output_per_tick": 128, "generation_per_tick": 64,
                              "lava_per_tick": 1, "tank": 4_000},
-    # Three blocks tall. 4 JE/t at sea level, +1 per 4 blocks higher, capped at 24; x1.5 rain, x2 thunder.
-    "wind_turbine": {"capacity": 16_000, "output_per_tick": 64, "generation_per_tick": 24},
+    # Nine blocks tall with a 7-block rotor. 12 JE/t at sea level, +1 per 2 blocks higher, capped at 72;
+    # x1.5 rain, x2 thunder. The 7x7 square the rotor sweeps must be clear.
+    "wind_turbine": {"capacity": 48_000, "output_per_tick": 192, "generation_per_tick": 72},
+    # 1x3x3. Pumps 2 mB of crude oil a tick (a bucket every 25 s) from the conventional reservoir under its chunk.
+    "pumpjack": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "pump_per_tick": 2, "tank": 16_000},
+    # 2x2x2. Recipes in tools/petro.py; 8,000 mB water tank and 8,000 mB crude oil tank.
+    "oil_sand_extractor": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "tank": 8_000},
 }
 
 # Fuel for the coal generator: burn ticks per item (coal matches the vanilla furnace's 1600).
-GENERATOR_FUELS = {"minecraft:coal": 1600, "minecraft:charcoal": 1600, "minecraft:coal_block": 16000,
+# Charcoal burns three quarters as long as coal here (vanilla furnaces are unchanged): tree farm charcoal is wood
+# power, kept on purpose but a little weaker (owner decision, 1 October 2026; see docs/BALANCE.md).
+GENERATOR_FUELS = {"minecraft:coal": 1600, "minecraft:charcoal": 1200, "minecraft:coal_block": 16000,
                    "jugcraft:coke": 3200}
 # The steam generator also burns bitumen from oil sand.
 STEAM_FUELS = {**GENERATOR_FUELS, "jugcraft:bitumen": 800}
@@ -130,6 +213,9 @@ FEATURE = "machines"
 CRAFTING = {
     "machine_casing": (["BZB", "Z Z", "BZB"], {"B": "#c:ingots/bronze", "Z": "#c:ingots/zinc"}, 1),
     "copper_cable": (["CTC"], {"C": "#c:ingots/copper", "T": "#c:ingots/tin"}, 6),
+    # Faster cables: silver wire (wire drawer), then aluminum wire armored with steel.
+    "silver_cable": (["WWW", "RRR"], {"W": "#c:wires/silver", "R": "jugcraft:copper_cable"}, 3),
+    "aluminum_cable": (["WPW", "RRR"], {"W": "#c:wires/aluminum", "P": "#c:plates/steel", "R": "jugcraft:silver_cable"}, 3),
     "coal_generator": (["BCB", "BFB", "BMB"],
                        {"B": "#c:ingots/bronze", "C": "jugcraft:copper_cable", "F": "minecraft:furnace",
                         "M": "jugcraft:machine_casing"}, 1),
@@ -178,11 +264,16 @@ CRAFTING = {
     "brass_item_pipe": (["PGP"], {"P": "#c:plates/brass", "G": "minecraft:glass"}, 6),
     "pneumatic_extractor": (["PHP", "PTP"], {"P": "#c:plates/brass", "H": "minecraft:hopper",
                                              "T": "jugcraft:brass_item_pipe"}, 1),
+    "high_pressure_extractor": (["PKP", "PEP"], {"P": "#c:plates/steel", "K": "minecraft:piston",
+                                                 "E": "jugcraft:pneumatic_extractor"}, 1),
     "item_sorter": (["PCP", "THT", "PPP"], {"P": "#c:plates/brass", "C": "minecraft:comparator",
                                            "T": "jugcraft:brass_item_pipe", "H": "minecraft:hopper"}, 1),
     "brass_wrench": (["B B", " B ", " B "], {"B": "#c:ingots/brass"}, 1),
     # The in-game guide (tools/handbook.py): available from the start.
     "engineers_handbook": (["BC"], {"B": "minecraft:book", "C": "#c:ingots/copper"}, 1),
+    # Prospecting: brass instrument with a glass screen; the circuit puts it after the workshop tier.
+    "prospector": ([" W ", "PGP", "PCP"], {"W": "#c:wires/copper", "P": "#c:plates/brass", "G": "minecraft:glass_pane",
+                                        "C": "jugcraft:basic_circuit"}, 1),
     # Processing depth. The pulverizer follows the metal press (plates, gears); the ore washer needs
     # invar and a circuit, so the three-fold route comes after the workshop tier.
     "pulverizer": (["FGF", "CMC", "PGP"], {"F": "minecraft:flint", "G": "#c:gears/iron", "C": "jugcraft:copper_cable",
@@ -202,6 +293,72 @@ CRAFTING = {
                                               "C": "jugcraft:basic_circuit"}, 1),
     "efficiency_upgrade": (["PWP", "WCW", "PWP"], {"P": "#c:plates/steel", "W": "#c:wires/copper",
                                                    "C": "jugcraft:basic_circuit"}, 1),
+    # Storage.
+    "item_crate": (["PWP", "W W", "PWP"], {"P": "#c:plates/iron", "W": "#minecraft:planks"}, 1),
+    "capacitor_bank": (["PBP", "BCB", "PBP"], {"P": "#c:plates/steel", "B": "jugcraft:battery_box",
+                                               "C": "jugcraft:advanced_circuit"}, 1),
+    "steel_tank": (["PPP", "PTP", "PPP"], {"P": "#c:plates/steel", "T": "jugcraft:fluid_tank"}, 1),
+    # Automation: after the workshop tier (a circuit and brass plates).
+    "auto_crafter": (["PCP", "TMT", "PHP"], {"P": "#c:plates/brass", "C": "jugcraft:basic_circuit",
+                                           "T": "minecraft:crafting_table", "M": "jugcraft:machine_casing",
+                                           "H": "minecraft:hopper"}, 1),
+    "large_steam_engine": (["SPS", "PCP", "SPS"], {"S": "jugcraft:steam_engine", "P": "#c:plates/iron",
+                                                 "C": "jugcraft:machine_casing"}, 1),
+    # Kinetic power: all bronze-age, so it can come before electricity.
+    "iron_shaft": (["I", "I"], {"I": "#c:ingots/iron"}, 4),
+    "brass_gearbox": (["PGP", "GSG", "PGP"], {"P": "#c:plates/brass", "G": "#c:gears/bronze", "S": "jugcraft:iron_shaft"}, 1),
+    "hand_crank": (["PS"], {"P": "#minecraft:planks", "S": "jugcraft:iron_shaft"}, 1),
+    "steam_engine": (["BUB", "PFP", "BSB"], {"B": "#c:ingots/bronze", "U": "minecraft:bucket", "P": "minecraft:piston",
+                                           "F": "minecraft:furnace", "S": "jugcraft:iron_shaft"}, 1),
+    "belt_pulley": (["PSP"], {"P": "#minecraft:planks", "S": "jugcraft:iron_shaft"}, 1),
+    "belt": (["LSL"], {"L": "minecraft:leather", "S": "minecraft:string"}, 1),
+    "electric_motor": (["PWP", "WSW", "PCP"], {"P": "#c:plates/iron", "W": "#c:wires/copper", "S": "jugcraft:iron_shaft",
+                                             "C": "jugcraft:copper_cable"}, 1),
+    # Conveyors: leather belts over iron plates and a shaft; the splitter adds bronze gears and a brass plate.
+    "conveyor": (["BBB", "PSP"], {"B": "jugcraft:belt", "P": "#c:plates/iron", "S": "jugcraft:iron_shaft"}, 6),
+    "conveyor_slope": ([" C", "CP"], {"C": "jugcraft:conveyor", "P": "#c:plates/iron"}, 2),
+    "conveyor_splitter": ([" R ", "GCG"], {"R": "#c:plates/brass", "G": "#c:gears/bronze", "C": "jugcraft:conveyor"}, 1),
+    # Powered tools (steel tier, dieselpunk): tungsten cutting edges, steel bodies, an advanced circuit each.
+    "mining_drill": ([" T ", "SGS", "ALS"], {"T": "#c:plates/tungsten", "S": "#c:plates/steel", "G": "#c:gears/steel",
+                                            "A": "jugcraft:advanced_circuit", "L": "#c:ingots/lead"}, 1),
+    "chainsaw": (["TTT", "SGS", "ALS"], {"T": "#c:plates/tungsten", "S": "#c:plates/steel", "G": "#c:gears/steel",
+                                        "A": "jugcraft:advanced_circuit", "L": "#c:ingots/lead"}, 1),
+    "rocket_pack": (["SAS", "FLF", "N N"], {"S": "#c:plates/steel", "A": "jugcraft:advanced_circuit",
+                                           "F": "jugcraft:fluid_tank", "L": "minecraft:leather",
+                                           "N": "#c:plates/tungsten"}, 1),
+    # Upgrade modules: an advanced circuit on a steel card, with what the upgrade is about.
+    "overclock_module": (["SRS", "RAR", "SRS"], {"S": "#c:plates/steel", "R": "minecraft:redstone_block",
+                                               "A": "jugcraft:advanced_circuit"}, 1),
+    "range_module": (["STS", "TAT", "STS"], {"S": "#c:plates/steel", "T": "#c:plates/tungsten",
+                                           "A": "jugcraft:advanced_circuit"}, 1),
+    "capacity_module": (["SLS", "LAL", "SLS"], {"S": "#c:plates/steel", "L": "#c:ingots/lead",
+                                              "A": "jugcraft:advanced_circuit"}, 1),
+    "silk_touch_module": (["SES", "EAE", "SES"], {"S": "#c:plates/steel", "E": "minecraft:emerald",
+                                                "A": "jugcraft:advanced_circuit"}, 1),
+    "fortune_module": (["SLS", "GAG", "SLS"], {"S": "#c:plates/steel", "L": "minecraft:lapis_block",
+                                             "G": "minecraft:gold_ingot", "A": "jugcraft:advanced_circuit"}, 1),
+    # Petrochemistry: steel frame and gears around an electric pump; after the steel tier.
+    "pumpjack": (["PPP", "GUG", "PMP"], {"P": "#c:plates/steel", "G": "#c:gears/steel", "U": "jugcraft:electric_pump",
+                                         "M": "jugcraft:machine_casing"}, 1),
+    "oil_sand_extractor": (["PHP", "TMT", "PGP"], {"P": "#c:plates/steel", "H": "minecraft:hopper",
+                                                   "T": "jugcraft:fluid_tank", "M": "jugcraft:machine_casing",
+                                                   "G": "#c:gears/steel"}, 1),
+    "charging_station": (["SLS", "WAW", "SBS"], {"S": "#c:plates/steel", "L": "minecraft:redstone_lamp",
+                                                "W": "jugcraft:copper_cable", "A": "jugcraft:advanced_circuit",
+                                                "B": "jugcraft:battery_box"}, 1),
+    "dynamo": (["CRC", "RSR", "CRC"], {"C": "#c:ingots/copper", "R": "minecraft:redstone", "S": "jugcraft:iron_shaft"}, 1),
+    # Renewables: the water wheel and cobblestone generator are early (bronze); the tree farm needs a circuit.
+    "cobblestone_generator": (["BWB", "CMC", "BLB"], {"B": "#c:ingots/bronze", "W": "minecraft:water_bucket",
+                                                   "C": "jugcraft:copper_cable", "M": "jugcraft:machine_casing",
+                                                   "L": "minecraft:lava_bucket"}, 1),
+    "water_wheel": (["PSP", "SGS", "PCP"], {"P": "#minecraft:planks", "S": "minecraft:stick", "G": "#c:gears/bronze",
+                                             "C": "jugcraft:copper_cable"}, 1),
+    "tree_farm": (["GLG", "DMD", "BCB"], {"G": "minecraft:glass", "L": "minecraft:glowstone", "D": "minecraft:dirt",
+                                         "M": "jugcraft:machine_casing", "B": "#c:ingots/bronze",
+                                         "C": "jugcraft:basic_circuit"}, 1),
+    # Mining: steel frame, a pulverizer-grade drill head and a circuit; after the steel tier.
+    "ore_drill": (["SGS", "CMC", "SDS"], {"S": "#c:plates/steel", "G": "#c:gears/steel", "C": "jugcraft:basic_circuit",
+                                         "M": "jugcraft:machine_casing", "D": "minecraft:diamond_pickaxe"}, 1),
     "arc_furnace_casing": (["KNK", "N N", "KNK"], {"K": "minecraft:bricks", "N": "#c:ingots/nickel"}, 8),
     "arc_furnace_controller": (["NCN", "RMR", "NFN"],
                                {"N": "#c:ingots/nickel", "C": "jugcraft:copper_cable", "R": "minecraft:redstone",
@@ -360,11 +517,26 @@ STEEL_FOUNDRY = [
 ]
 
 
+# Tree farm: a sapling grows into logs in 400 ticks and comes back, with a chance of the tree's extras.
+TREES = {"oak": ("oak_sapling", "minecraft:apple"), "spruce": ("spruce_sapling", "minecraft:stick"),
+         "birch": ("birch_sapling", "minecraft:stick"), "jungle": ("jungle_sapling", "minecraft:cocoa_beans"),
+         "acacia": ("acacia_sapling", "minecraft:stick"), "dark_oak": ("dark_oak_sapling", "minecraft:apple"),
+         "cherry": ("cherry_sapling", "minecraft:pink_petals"), "mangrove": ("mangrove_propagule", "minecraft:stick"),
+         "pale_oak": ("pale_oak_sapling", "minecraft:pale_moss_carpet")}
+
+
+def _tree_farm():
+    return [{"input": f"minecraft:{sapling}", "output": f"minecraft:{wood}_log", "count": 6, "ticks": 400,
+             "features": [FEATURE], "renewable": True,
+             "byproducts": [[f"minecraft:{sapling}", 1, 1.0, None], [extra, 1, 0.1, None]]}
+            for wood, (sapling, extra) in TREES.items()]
+
+
 def machine_recipes():
     return {"crusher": _crusher(), "arc_furnace": ARC_FURNACE + _arc_dusts(), "alloy_smelter": ALLOY_SMELTER,
             "metal_press": _metal_press(), "wire_drawer": _wire_drawer(), "circuit_assembler": CIRCUIT_ASSEMBLER,
             "pulverizer": _pulverizer(), "ore_washer": _ore_washer(), "sieve": SIEVE, "sawmill": _sawmill(),
-            "coke_oven": COKE_OVEN, "steel_foundry": STEEL_FOUNDRY}
+            "coke_oven": COKE_OVEN, "steel_foundry": STEEL_FOUNDRY, "tree_farm": _tree_farm()}
 
 
 def _arc_dusts():
@@ -377,9 +549,10 @@ def _arc_dusts():
 
 def machine_blocks():
     return (list(MACHINES) + list(PARTS) + list(CABLES) + list(PIPES) + list(FLUID_BLOCKS)
-            + list(ITEM_PIPES) + list(LOGISTICS_BLOCKS))
+            + list(ITEM_PIPES) + list(LOGISTICS_BLOCKS) + list(STORAGE_BLOCKS) + list(KINETIC_BLOCKS) + list(TOOL_BLOCKS)
+            + list(SLOPE_BLOCKS))
 
 
 def machine_items():
     """Items of the machine feature that are not blocks (tools and upgrades)."""
-    return list(TOOLS) + list(UPGRADES)
+    return list(TOOLS) + list(UPGRADES) + list(POWERED_TOOLS) + list(UPGRADE_MODULES)
