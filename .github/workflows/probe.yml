@@ -15,32 +15,20 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
-      - run: ./gradlew compileGametestJava --no-daemon -q
+      - run: |
+          set +e
+          ./gradlew compileGametestJava --no-daemon > compile.txt 2>&1
+          echo "exit $?"
+          grep -E "error:|\.java:[0-9]+: error" -A4 compile.txt | head -300
+          tail -20 compile.txt
       - run: |
           set +e
           COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
           CP="$CLIENT:$COMMON"
-          p() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | head -${2:-80}; }
-          m() { echo "=== $1 /$2/"; javap -cp "$CP" -c -p "$1" 2>&1 | awk -v re="$2" '/^  [a-z].*[(]/{p=($0 ~ re)} p' | head -${3:-120}; }
           l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -iE "${2:-.}" | head -${3:-60}; }
-          l net.minecraft.world.item.Item 'isBarVisible|getBarWidth|getBarColor|appendHoverText|getPlayerPOVHitResult| use[(]|useOn|finishUsingItem|getUseDuration|interactLivingEntity|inventoryTick'
-          l net.minecraft.world.level.block.FlowerBlock 'FlowerBlock[(]|codec'
-          l net.minecraft.world.level.block.FlowerPotBlock 'FlowerPotBlock[(]|POTTED|getPotted|content'
-          l net.minecraft.world.level.block.DoublePlantBlock 'DoublePlantBlock[(]|HALF|placeAt|preventDrop|playerWillDestroy'
-          l net.minecraft.world.level.block.state.properties.BlockStateProperties 'HALF|HANGING|WATERLOGGED|MOISTURE|LEVEL_CAULDRON'
-          l net.minecraft.world.level.block.state.properties.DoubleBlockHalf
-          l net.minecraft.world.level.block.LanternBlock 'LanternBlock[(]|HANGING|canSurvive|getStateForPlacement'
-          l net.minecraft.world.level.block.LayeredCauldronBlock 'LEVEL|lowerFillLevel|LayeredCauldronBlock[(]|isFull'
-          l net.minecraft.world.level.block.FarmBlock 'MOISTURE|isNearWater|turnToDirt'
-          l net.minecraft.world.level.block.BaseFireBlock 'canBePlacedAt|BaseFireBlock'
-          l net.minecraft.world.item.component.SuspiciousStewEffects 'SuspiciousStewEffects[(]|Entry'
-          l net.minecraft.world.level.block.HorizontalDirectionalBlock 'codec|FACING'
-          l net.minecraft.world.level.block.state.BlockBehaviour 'isRandomlyTicking|randomTick|playerWillDestroy|affectNeighborsAfterRemoval|getAnalogOutputSignal|hasAnalogOutputSignal|onRemove|spawnAfterBreak|getDestroyProgress'
-          l net.minecraft.world.level.block.Block 'popResource[(]|dropResources|getDrops'
-          l net.minecraft.world.item.DyeItem 'getDyeColor|DyeItem[(]'
-          l net.minecraft.world.item.component.TooltipDisplay '' 20
-          l net.minecraft.world.item.Item\$TooltipContext '' 20
-          mkdir -p /tmp/c && cd /tmp/c && unzip -q -o "$CLIENT" 'assets/minecraft/*' 'data/minecraft/*' 2>/dev/null; unzip -q -o "$COMMON" 'data/minecraft/*' 2>/dev/null
-          for f in assets/minecraft/blockstates/potted_poppy.json assets/minecraft/models/block/potted_poppy.json assets/minecraft/models/block/flower_pot_cross.json assets/minecraft/blockstates/poppy.json assets/minecraft/models/block/poppy.json assets/minecraft/items/poppy.json assets/minecraft/blockstates/lantern.json assets/minecraft/models/block/lantern.json assets/minecraft/models/block/lantern_hanging.json assets/minecraft/blockstates/tall_grass.json assets/minecraft/items/tall_grass.json data/minecraft/loot_table/blocks/sea_pickle.json data/minecraft/loot_table/blocks/potted_poppy.json data/minecraft/loot_table/blocks/tall_grass.json data/minecraft/loot_table/blocks/lilac.json data/minecraft/worldgen/configured_feature/flower_default.json data/minecraft/worldgen/placed_feature/flower_default.json data/minecraft/recipe/red_dye_from_poppy.json assets/minecraft/items/clock.json assets/minecraft/items/fishing_rod.json; do echo "=== $f"; cat "$f"; echo; done
-          ls data/minecraft/tags/block | grep -iE 'flower|small_flowers|replaceable' ; cat data/minecraft/tags/block/small_flowers.json 2>/dev/null | head -30
+          l net.minecraft.world.item.crafting.TransmuteResult
+          l net.minecraft.world.item.crafting.TransmuteRecipe 'TransmuteRecipe[(]|CODEC|result'
+          mkdir -p van && cd van && unzip -q -o "$COMMON" 'data/minecraft/recipe/*shulker_box*' 'data/minecraft/tags/block/flower_pots.json' 'data/minecraft/tags/block/small_flowers.json' 'data/minecraft/tags/item/small_flowers.json' 'data/minecraft/tags/block/bee_attractive.json' 'assets/minecraft/blockstates/lantern.json' 'assets/minecraft/models/block/template_lantern.json' 'assets/minecraft/items/lantern.json' 'data/minecraft/loot_table/blocks/lantern.json' 'data/minecraft/worldgen/placed_feature/flower_plains.json' 'data/minecraft/worldgen/configured_feature/flower_plain.json' 'data/minecraft/worldgen/configured_feature/flower_flower_forest.json' 2>/dev/null
+          for f in data/minecraft/recipe/red_shulker_box.json data/minecraft/tags/block/flower_pots.json data/minecraft/tags/block/small_flowers.json data/minecraft/tags/block/bee_attractive.json assets/minecraft/blockstates/lantern.json assets/minecraft/models/block/template_lantern.json assets/minecraft/items/lantern.json data/minecraft/loot_table/blocks/lantern.json data/minecraft/worldgen/configured_feature/flower_plain.json data/minecraft/worldgen/placed_feature/flower_plains.json; do echo "=== $f"; head -c 2500 $f; echo; done
+          ls data/minecraft/worldgen/configured_feature/ | head -30
