@@ -18,10 +18,12 @@ import io.github.jimbozoomer.jugcraft.kinetic.ShaftBlock;
 import io.github.jimbozoomer.jugcraft.kinetic.SteamEngineBlock;
 import io.github.jimbozoomer.jugcraft.logistics.ConveyorBlock;
 import io.github.jimbozoomer.jugcraft.logistics.ConveyorBlockEntity;
+import io.github.jimbozoomer.jugcraft.logistics.ConveyorSlopeBlock;
 import io.github.jimbozoomer.jugcraft.logistics.ItemSorterBlockEntity;
 import io.github.jimbozoomer.jugcraft.logistics.JugcraftLogistics;
 import io.github.jimbozoomer.jugcraft.logistics.PneumaticExtractorBlock;
 import io.github.jimbozoomer.jugcraft.machine.Footprint;
+import io.github.jimbozoomer.jugcraft.machine.GeneratorFuels;
 import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
 import io.github.jimbozoomer.jugcraft.machine.LargeMachineBlock;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
@@ -894,6 +896,22 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/** Items climb an up slope onto a raised conveyor, come down a down slope and land in a chest. */
+	@GameTest(maxTicks = 300)
+	public void conveyorSlopesGoUpAndDown(GameTestHelper helper) {
+		conveyor(helper, new BlockPos(2, 1, 2), Direction.EAST, false);
+		helper.setBlock(new BlockPos(3, 1, 2), JugcraftLogistics.CONVEYOR_SLOPE.defaultBlockState()
+				.setValue(ConveyorBlock.FACING, Direction.EAST).setValue(ConveyorSlopeBlock.ASCENDING, true));
+		conveyor(helper, new BlockPos(4, 2, 2), Direction.EAST, false);
+		helper.setBlock(new BlockPos(5, 1, 2), JugcraftLogistics.CONVEYOR_SLOPE.defaultBlockState()
+				.setValue(ConveyorBlock.FACING, Direction.EAST).setValue(ConveyorSlopeBlock.ASCENDING, false));
+		ChestBlockEntity chest = chest(helper, new BlockPos(6, 1, 2));
+		motorFacingEast(helper, new BlockPos(1, 1, 2));
+		helper.getBlockEntity(new BlockPos(2, 1, 2), ConveyorBlockEntity.class).accept(new ItemStack(Items.COBBLESTONE, 8), 0);
+		helper.succeedWhen(() -> helper.assertTrue(count(chest, Items.COBBLESTONE) == 8,
+				"The chest holds " + count(chest, Items.COBBLESTONE) + " cobblestone"));
+	}
+
 	// ------------------------------------------------------------------ powered tools
 
 	private static ItemStack charged(Item item) {
@@ -1059,6 +1077,15 @@ public class JugcraftGameTests {
 		helper.assertTrue(Math.abs(ratio - 1.5F) < 0.01F, "Overclocked speed ratio " + ratio);
 		helper.assertTrue(((MiningDrillItem) fast.getItem()).energyPerBlock(fast) == 2 * JugcraftTools.DRILL_ENERGY_PER_BLOCK,
 				"Overclocked JE per block " + ((MiningDrillItem) fast.getItem()).energyPerBlock(fast));
+		helper.succeed();
+	}
+
+	/** Charcoal burns three quarters as long as coal in generators (tree farm wood power, slightly weakened). */
+	@GameTest
+	public void charcoalBurnsShorterThanCoal(GameTestHelper helper) {
+		int coal = GeneratorFuels.burnTicks(new ItemStack(Items.COAL));
+		int charcoal = GeneratorFuels.burnTicks(new ItemStack(Items.CHARCOAL));
+		helper.assertTrue(coal == 1600 && charcoal == 1200, "Coal burns " + coal + " ticks and charcoal " + charcoal);
 		helper.succeed();
 	}
 
