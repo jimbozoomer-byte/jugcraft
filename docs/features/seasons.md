@@ -1,6 +1,6 @@
 # Seasonal colours
 
-Status: implemented on branch `claude/seasons`. Compiles and passes in-game tests in CI (see Verification). **Not yet played.**
+Status: implemented on branch `claude/seasons`. Compiles and passes its server and client game tests in CI (see Results). **Not yet played.**
 Proposal issue: none. On 1 October 2026 the owner asked for seasonal biomes that change colour with the real date, and chose "Seasonal colours first" on a new branch.
 Owner: @jimbozoomer-byte
 Target milestone and tier: none; world atmosphere for every tier.
@@ -86,7 +86,29 @@ Results are recorded under "Results" below after CI runs.
   - real biomes in a normal world (the test uses the flat world's plains).
 
 ### Results
-Not yet run in CI.
+From Build run [36915807158](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/36915807158) on 86eae42 (Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25, GitHub-hosted Ubuntu, Mesa for the client), run on 1 October 2026:
+- `./gradlew build`: all 125 game tests pass, including the five `SeasonGameTests`.
+- `./gradlew runClientGameTest`: pass.
+  - The client had the server's season day as soon as it joined.
+  - After each mode change, the client's day matched the server's.
+  - Logged tints at one leaf and one grass block (vanilla plains foliage #77ab2f, grass #91bd59):
+
+    | Mode | Day | Foliage | Grass |
+    | --- | --- | --- | --- |
+    | summer | 196 | #77ab2f | #91bd59 |
+    | spring | 105 | #7aba35 | #8ec458 |
+    | autumn | 293 | #e2aa27 | #a9b053 |
+    | winter | 15 | #828243 | #98a468 |
+    | off | 0 | #77ab2f | #91bd59 |
+    | auto (1 October) | 274 | #ccab2a | #a4b354 |
+
+- I looked at the screenshots (`jugcraft_season_<mode>`):
+  - summer and off are identical and vanilla;
+  - spring is a brighter green;
+  - autumn shows orange-red and gold oaks side by side, with straw-coloured grass;
+  - winter is dull olive-brown;
+  - today's date (1 October) shows the oaks partly turned.
+- An earlier screenshot round (run 36914731990) showed autumn as a flat olive-gold, because leaf textures darken the tint. The palette was strengthened, and the autumn patches made smaller, before these results.
 
 ## World and event applicability
 - **Seasonal rules** ([CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md)):
