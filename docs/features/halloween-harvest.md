@@ -68,7 +68,43 @@ Ten additions for a fall pumpkin patch. Nothing is seasonal: everything works al
 No new dependencies. Every texture is drawn by code (`tools/halloween_textures.py`): giant pumpkin sides and tops as one big picture per size cut into 16×16 tiles, the heirloom skins, flannel in 16 dye colours, the scale, straw, stalks, flint corn, mums and every item icon. Models use vanilla's templates by reference where the shape is the same (cube column, cross, flower pot, pumpkin for a seedling giant).
 
 ## Verification
-Pending: see the pull request for CI results.
+Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions):
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the giant pumpkin, scale, canteen, mum, heirloom and scarecrow numbers with Java, checks every giant pumpkin and scarecrow state has a model, and fails on a recipe category its recipe type doesn't have) | Pass, 383 IDs |
+| `./gradlew build`, compile, on `5472054` (with Pumpkin Carving, the Festival Crops, Kitchen Garden, Fall Harvest and `main` after #51 merged in) | Pass |
+| Game tests on the headless server, same commit: 142 in total, 14 of them new here (`HalloweenGameTests`) | **All 142 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | <!-- client result --> |
+
+The 14 new game tests (`HalloweenGameTests`):
+1. Giant Pumpkin Seeds plant a vine on farmland, not on grass;
+2. a grown vine sets one fruit and bends to it; ticks give 2 points on moist farmland and 3 when watered; the fruit swells to 2×2×2 and 3×3×3 away from the vine with its master at the lowest north-west corner, weighs 100–120 kg full grown, stays attached and turns further points into weight;
+3. stone in the way on both sides stops it growing, room on one side lets it grow that way, and cut from its vine it stops growing;
+4. breaking one block breaks all 27, drops 9 pumpkins and giant seeds once, and the vine straightens;
+5. a 48×48 face carves a full-grown giant's side through its master block; a 16×16 face is refused; a torch lights every block to the carving's glow; carved, it stops putting on weight;
+6. a white pumpkin carves into a hand-carved white pumpkin that keeps its face and drops itself; the first cut lets out 4 white pumpkin seeds and 1–2 pumpkin guts;
+7. the Harvest Scale weighs the giant beside it, lists it at its weight, gives one First Prize Ribbon, drives a comparator, updates the entry when weighed again without a second ribbon, and weighs nothing with no pumpkin beside it;
+8. a Blank Stencil does nothing on an uncarved side, traces a carved one into a Pumpkin Stencil (using one blank), and the carving screen is offered the stencil from the other hand;
+9. a scarecrow placed from its item stands two blocks tall in the default shirt; blue dye (looked up by its ID) recolours both halves and is used up; breaking the top half with a pumpkin head on it drops one scarecrow;
+10. a corn shock stands two tall; an ornamental corn bundle hangs on a wall and drops when the wall goes; a gourd birdhouse hangs under a beam;
+11. an orange mum goes into a flower pot, which drops the pot and the mum; the four dye recipes load;
+12. ornamental corn is a tall crop picked for its ears; ripe corn and ornamental corn drop stalks and their ears when broken;
+13. caramel, caramel apples, popcorn balls and pumpkin soup restore 2, 6, 5 and 8; eating a caramel apple leaves its stick; all 18 new recipes load; pumpkin guts cook into soup in the Cooking Pot; the five new wild patches load;
+14. the Gourd Canteen fills at a water source, moistens farmland, fills a cauldron a level and puts out fire, one sip each, does nothing when empty, and waters a giant pumpkin.
+
+Found by CI and fixed before this record:
+- `PushReaction.BLOCK` and `DESTROY` are `IMMOVEABLE` and `POPPED` in 26.3 (found by compiling, `fc3d9fd`).
+- 26.3 has no `Items.BLUE_DYE` field; the dye is looked up by its ID, as the scarecrow does (`76afe24`).
+- The game test server refused to load the datapack: three crafting recipes used the category `food`, which only cooking recipes have (`8855eb4`). The checker now fails on any such category.
+
+**Not run:**
+- a person playing it in a client (the client test drives the real carving screen with simulated input);
+- a dedicated server with two players, including a weigh-off between two growers;
+- save and restart with growing and carved giants in the world;
+- worldgen in fresh chunks (the placed features load; their placement was not looked at in a new world);
+- performance with many carved giants in view.
 
 ## World and event applicability
 Wild heirloom pumpkins, bottle gourds and mums appear in chunks generated after this feature. Nothing depends on a date or an event; a later Halloween event could hold weigh-offs and carving contests on top.
