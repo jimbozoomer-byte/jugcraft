@@ -434,14 +434,22 @@ def machine_recipe_files(out):
 
 # ---------------------------------------------------------------- loot tables
 
-SILK = {"condition": "minecraft:match_tool", "predicate": {"predicates": {
-    "minecraft:enchantments": [{"enchantments": "minecraft:silk_touch", "levels": {"min": 1}}]}}}
+# Loot tables in the Minecraft 26.x format (as vanilla's own): each pool or entry has at most one "condition" and a
+# "modifier" (one function or a list), and conditions and functions are typed with "type". The older "conditions" and
+# "functions" keys are silently ignored by 26.x, so check_mod_data rejects them.
+SILK = "minecraft:tool/can_silk_touch"
+SURVIVES_EXPLOSION = {"type": "minecraft:survives_explosion"}
+
+
+def block_state(block, state):
+    """A condition that the broken block was in this state, such as {"half": "lower"}."""
+    return {"type": "minecraft:match_block", "blocks": rid(block), "state": state}
 
 
 def loot(block, entries, explosion_condition=False):
-    pool = {"rolls": 1.0, "bonus_rolls": 0.0, "entries": entries}
+    pool = {"rolls": 1, "entries": entries}
     if explosion_condition:
-        pool["conditions"] = [{"condition": "minecraft:survives_explosion"}]
+        pool["condition"] = SURVIVES_EXPLOSION
     return {"type": "minecraft:block", "pools": [pool], "random_sequence": rid(f"blocks/{block}")}
 
 
@@ -452,13 +460,12 @@ def self_drop(block):
 def ore_drop(block, item, low=1, high=1):
     functions = []
     if (low, high) != (1, 1):
-        functions.append({"function": "minecraft:set_count",
-                          "count": {"type": "minecraft:uniform", "min": float(low), "max": float(high)}})
-    functions += [{"function": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"},
-                  {"function": "minecraft:explosion_decay"}]
+        functions.append({"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}})
+    functions += [{"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"},
+                  {"type": "minecraft:explosion_decay"}]
     return loot(block, [{"type": "minecraft:alternatives", "children": [
-        {"type": "minecraft:item", "name": rid(block), "conditions": [SILK]},
-        {"type": "minecraft:item", "name": rid(item), "functions": functions},
+        {"type": "minecraft:item", "condition": SILK, "name": rid(block)},
+        {"type": "minecraft:item", "modifier": functions, "name": rid(item)},
     ]}])
 
 
@@ -590,17 +597,17 @@ def loot_tables():
     # The 2-tall charging station drops once, from its lower half.
     for block in TOOL_BLOCKS:
         table = self_drop(block)
-        table["pools"][0]["conditions"].append({"condition": "minecraft:block_state_property", "block": rid(block),
-                                                "properties": {"half": "lower"}})
+        table["pools"][0]["condition"] = {"type": "minecraft:all_of",
+                                          "terms": [SURVIVES_EXPLOSION, block_state(block, {"half": "lower"})]}
         write(out / f"{block}.json", table)
     import petro
     for block, info in petro.BLOCKS.items():
         table = self_drop(block)
         if info["shape"] == "slab":
-            table["pools"][0]["entries"][0]["functions"] = [
-                {"function": "minecraft:set_count", "count": 2.0, "add": False, "conditions": [
-                    {"condition": "minecraft:block_state_property", "block": rid(block), "properties": {"type": "double"}}]},
-                {"function": "minecraft:explosion_decay"}]
+            table["pools"][0]["entries"][0]["modifier"] = [
+                {"type": "minecraft:set_count", "count": 2, "add": False,
+                 "condition": block_state(block, {"type": "double"})},
+                {"type": "minecraft:explosion_decay"}]
         write(out / f"{block}.json", table)
     for rock, info in ROCKS.items():
         drop = info["drop"]
