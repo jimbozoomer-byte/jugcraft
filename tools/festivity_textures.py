@@ -94,10 +94,12 @@ def spun_cobweb():
     c = Canvas()
     cx, cy = 7.5, 7.5
     spokes = [i * math.pi / 4 + 0.2 for i in range(8)]
+    c.px(7, 7, WEB)
+    c.px(8, 8, WEB)
     for a in spokes:
-        for r in [i * 0.5 for i in range(1, 17)]:
+        for r in [i * 0.5 for i in range(4, 17)]:
             c.px(cx + math.cos(a) * r, cy + math.sin(a) * r, WEB)
-    for ring in (2.5, 4.8, 7.0):
+    for ring in (3.2, 5.6):
         for i, a in enumerate(spokes):
             b = spokes[(i + 1) % 8] + (2 * math.pi if i == 7 else 0)
             x0, y0 = cx + math.cos(a) * ring, cy + math.sin(a) * ring
@@ -117,10 +119,9 @@ def ghost_sheet(face=False):
             if rng.random() < 0.5:
                 c.img.putpixel((x, 14), (0, 0, 0, 0))
     if face:
-        for x, y in ((6, 4), (6, 5), (9, 4), (9, 5), (7, 4), (10, 4)):
+        for x, y in ((6, 4), (7, 4), (6, 5), (7, 5), (9, 4), (10, 4), (9, 5), (10, 5)):
             c.px(x, y, rgb("141418"))
-        for x, y in ((8, 6), (8, 7), (7, 7)):
-            c.px(x, y, rgb("2a2a30"))
+        c.px(8, 7, rgb("2a2a30"))
     return c.img
 
 
@@ -208,16 +209,15 @@ def ghost_taffy_item():
 
 
 def fizz_rocks_item():
-    """A heap of sugary crystal shards in pink, blue and white."""
+    """A little heap of sugary crystal pebbles in pink, blue and white, lighter on top."""
     rng = random.Random(7209)
     c = Canvas()
-    colors = [[rgb("c04a8a"), rgb("f07ab8")], [rgb("3a7ac8"), rgb("7ab4f4")], [rgb("c8c8d4"), rgb("f4f4fa")]]
-    for _ in range(14):
-        cx, cy = rng.uniform(3, 12), rng.uniform(6, 13)
-        dark, light = rng.choice(colors)
-        for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
-            if rng.random() < 0.85:
-                c.px(cx + dx, cy + dy, light if dy == 0 else dark)
+    colors = [[rgb("b0407c"), rgb("f07ab8")], [rgb("3268b4"), rgb("7ab4f4")], [rgb("a8a8b8"), rgb("f4f4fa")]]
+    for y in range(6, 14):
+        half = (y - 5) * 0.8
+        for x in range(int(8 - half), int(8 + half) + 1):
+            dark, light = colors[(x // 2 + y // 2 + rng.randrange(2)) % 3]
+            c.px(x, y, light if (x + y) % 2 else dark)
     outline(c, rgb("3a2a40"))
     return c.img
 
