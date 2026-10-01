@@ -27,11 +27,17 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - Oil lies in **hidden reservoirs under Overworld chunks**, fixed by the world seed. Nothing marks them on the surface.
   - **Conventional oil** (about 1 chunk in 12): 50–250 buckets in porous rock, which a pumpjack can pump (commit 4).
   - **Shale oil** (about 1 chunk in 4 of the rest): 200–800 buckets locked in tight rock, which only a fracking rig can free (batch 3).
-- Every reservoir is **finite**: once a chunk has given its capacity it is dry for good. How much each chunk has given is saved with the world (`data/jugcraft_oil_reservoirs.dat` in the dimension's folder); untouched chunks store nothing.
+- Every reservoir is **finite**: once a chunk has given its capacity it is dry for good. How much each chunk has given is saved with the world (as `jugcraft:oil_reservoirs` in the dimension's saved data); untouched chunks store nothing.
 - The **Geo-Resonance Prospector** now reports oil under the 3×3 chunks it surveys: an "Oil" reading (middle depth) for pumpable oil and a "Shale oil" reading (deep), with the same vague 1–5 signal as the ores, from how much is left.
 
+### Pumpjack (batch 1, commit 4)
+- A **dieselpunk pumpjack** (nodding donkey), one block wide, three tall and three long: a hazard-striped skid, the wellhead with its valve tree and polished rod at the front, an olive walking beam with a horse head and bridle lines on an A-frame samson post, and at the back the gear reducer, crank arms with two heavy counterweights, pitman arms and a diesel motor with an exhaust stack. A caged lamp glows while it pumps. The classic style pack has a plain version.
+- Place it with the wellhead (the front block) in a chunk the prospector shows Oil under. It pumps **2 mB of crude oil a tick** (a bucket every 25 seconds) at **32 JE/t** into its 16-bucket tank, and pushes the oil into pipes and tanks touching it.
+- Its screen says "Pumping oil" or "No pumpable oil here". It stops when the reservoir is dry, when its tank is full, without power, or as its redstone setting says. It can't draw on shale oil.
+- Recipe: steel plates, two steel gears, an electric pump and a machine casing. Steel tier.
+
 ## Connections
-- Existing input producer: none yet (crude oil comes from reservoirs and oil sand in commits 3–5).
+- Existing input producer: oil reservoirs (commit 3) through the pumpjack; oil sand in commit 5.
 - Existing output consumer: the fluid system (tanks, steel tank, pumps, pipes); refining comes in batch 2.
 - Technology connection: steel tier; extends the fluid branch with the first fluids Jugcraft adds itself.
 - Magic connection: none planned.
@@ -40,7 +46,8 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - For infrastructure: the fluid has no recipe of its own; balance is recorded with each machine.
 
 ## Balance and automation
-- Crude oil is finite: it never forms new sources, and (from commit 3) reservoirs run dry.
+- Crude oil is finite: it never forms new sources, and reservoirs run dry.
+- Pumpjack: 32 JE/t for 2 mB/t, so 16,000 JE per bucket of crude oil. A conventional reservoir (50–250 buckets) lasts about 21 minutes to 1 hour 45 minutes of pumping. What a bucket of crude oil is worth arrives with refining (batch 2); the whole chain will be audited in BALANCE.md.
 - Units: millibuckets (1 bucket = 1,000 mB).
 
 ## Multiplayer and persistence
@@ -54,6 +61,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 - `tools/check_mod_data.py` audits fluid recipes (`tools/petro.py`): every item and fluid resolves, recipes fit the machine's slots and tank sizes, and no recipe gives out more fluid than it takes in (a recipe that releases fluid from an item, such as oil sand, must state how much as its `source`).
 - Game tests (`PetroGameTests`): `crudeOilFillsTanks` (a tinplate tank stores a bucket of crude oil) and `crudeOilMakesNoNewSources` (two sources with a gap leave flowing oil, not a new source).
 - Game tests: `oilReservoirsAreSeededAndFinite` (1,600 far-away chunks read the same twice, about one in twelve holds pumpable oil, a reservoir gives exactly what it holds and then nothing, and shale can't be taken as pumpable oil) and `surveyFindsOil`.
+- Game test `pumpjackPumpsOil`: a powered pumpjack over pumpable oil fills its tank with crude oil and the reservoir goes down by as much.
 - Not run: client play-testing of how the fluid looks and flows.
 
 ## World and event applicability

@@ -276,12 +276,26 @@ def check_fluid_recipes(registered):
     java = MACHINE_JAVA.read_text(encoding="utf-8")
     fluids = {f"{MOD}:{f}" for f in petro.FLUIDS} | {"minecraft:water", "minecraft:lava"}
     for machine, spec in petro.FLUID_MACHINES.items():
+        match = re.search(r"case " + machine.upper() + r" -> new FluidMachineSpec\(List\.of\(([^)]*)\), List\.of\(([^)]*)\), "
+                          r"(\d+), (\d+)\)", java)
+        if not match:
+            err(f"MachineKind.fluidSpec() has no case for {machine}")
+        else:
+            def tanks(text):
+                return [CONSTANTS.get(v.strip(), None) or int(v.strip().replace("_", "")) for v in text.split(",") if v.strip()]
+            CONSTANTS = {name: int(value.replace("_", "")) for name, value in
+                         re.findall(r"public static final int (\w+) = ([\d_]+);", java)}
+            found = (tanks(match.group(1)), tanks(match.group(2)), int(match.group(3)), int(match.group(4)))
+            if found != (spec["inputs"], spec["outputs"], spec["item_inputs"], spec["item_outputs"]):
+                err(f"{machine}: fluid spec {found} in Java, {spec} in tools/petro.py")
+        if spec["recipe_type"] is None:
+            continue
         if f'"{spec["recipe_type"]}"' not in java:
             err(f"MachineKind.recipeType() has no \"{spec['recipe_type']}\" for {machine}")
         if spec["recipe_type"] in RECIPE_TYPES.values():
             err(f"Fluid recipe type {spec['recipe_type']} is also an item machine's")
     expected = sum(len(r) for r in petro.FLUID_RECIPES.values())
-    types = {spec["recipe_type"] for spec in petro.FLUID_MACHINES.values()}
+    types = {spec["recipe_type"] for spec in petro.FLUID_MACHINES.values() if spec["recipe_type"]}
     files = [p for p in (DATA / MOD / "recipe").glob("*/*.json") if p.parent.name in types]
     if len(files) != expected:
         err(f"{len(files)} fluid recipe files, but tools/petro.py defines {expected}")

@@ -30,7 +30,10 @@ def petro_items():
 
 # Fluid processing machines (MachineKind.fluidSpec() in Java mirrors this): input and output tank capacities in mB,
 # item input and output slots, and their recipe type (data/jugcraft/recipe/<type>/).
-FLUID_MACHINES = {}
+FLUID_MACHINES = {
+    # Pumps the conventional reservoir under its chunk (no recipes): 2 mB a tick at 32 JE/t.
+    "pumpjack": {"inputs": [], "outputs": [16_000], "item_inputs": 0, "item_outputs": 0, "recipe_type": None},
+}
 
 # Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],
 # fluids out [(fluid, mB)], item results [(item, count)], ticks, feature switches.

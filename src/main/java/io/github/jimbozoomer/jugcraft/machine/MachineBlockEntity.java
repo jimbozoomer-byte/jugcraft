@@ -3,7 +3,10 @@ package io.github.jimbozoomer.jugcraft.machine;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidMachineSpec;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidRecipe;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidRecipes;
+import io.github.jimbozoomer.jugcraft.chemistry.FluidTank;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidTanks;
+import io.github.jimbozoomer.jugcraft.chemistry.OilReservoirs;
+import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
@@ -50,6 +53,7 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
@@ -328,6 +332,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case COBBLESTONE_GENERATOR -> tickCobble(level, pos, state);
 			case WATER_WHEEL -> tickWaterWheel(level, pos, state);
 			case AUTO_CRAFTER -> tickCrafter(level, pos, state);
+			case PUMPJACK -> tickPumpjack(level, pos, state);
 			default -> kind.isFluidProcessor() ? tickFluidProcessor(level, pos, state) : tickProcessor(level, pos, state);
 		};
 		if (state.getValue(MachineBlock.LIT) != active) {
@@ -682,6 +687,45 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		setChanged();
 		return true;
 	}
+
+	/**
+	 * The pumpjack: while the chunk under its wellhead (the master block) holds conventional oil, it pumps
+	 * {@link MachineKind#PUMPJACK_RATE} mB of crude oil a tick into its tank, at its JE per tick. {@link #formed} says
+	 * whether there is oil to pump (checked once a second); the progress arrow shows the pump's stroke.
+	 */
+	private boolean tickPumpjack(ServerLevel level, BlockPos pos, BlockState state) {
+		pushFluids(level, pos, state);
+		ChunkPos chunk = ChunkPos.containing(pos);
+		if (!checked || level.getGameTime() % MachineKind.SOURCE_CHECK_INTERVAL == 0) {
+			checked = true;
+			OilReservoirs.Reservoir reservoir = OilReservoirs.get(level, chunk);
+			boolean oil = reservoir.kind() == OilReservoirs.Kind.CONVENTIONAL && !reservoir.isDry();
+			if (oil != formed) {
+				formed = oil;
+				setChanged();
+			}
+		}
+		FluidTank tank = tanks.output(0);
+		if (!formed || !tank.fits(PetroFluids.CRUDE_OIL.source(), MachineKind.PUMPJACK_RATE)
+				|| !sides.redstone().allows(poweredByRedstone(level, pos, state)) || energy.getAmount() < kind.usePerTick) {
+			return false;
+		}
+		int pumped = OilReservoirs.extract(level, chunk, OilReservoirs.Kind.CONVENTIONAL, MachineKind.PUMPJACK_RATE);
+		if (pumped <= 0) {
+			formed = false;
+			setChanged();
+			return false;
+		}
+		energy.setAmount(energy.getAmount() - kind.usePerTick);
+		tank.fill(PetroFluids.CRUDE_OIL.source(), pumped);
+		maxProgress = PUMPJACK_STROKE;
+		progress = (progress + 1) % PUMPJACK_STROKE;
+		setChanged();
+		return true;
+	}
+
+	/** Ticks per stroke of the pumpjack, for its screen's progress arrow. */
+	private static final int PUMPJACK_STROKE = 40;
 
 	/** Whether every item result of the recipe fits its output slot. */
 	private boolean itemResultsFit(FluidRecipe recipe) {

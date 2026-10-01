@@ -285,6 +285,8 @@ def machine_assets(lang):
     lang[f"tooltip.{MOD}.efficiency_upgrade"] = "Each: 20% less energy (up to 4 count)"
     lang[f"container.{MOD}.tank.empty"] = "Empty"
     lang[f"prospector.{MOD}.oil"] = "Oil"
+    lang[f"container.{MOD}.pumpjack.oil"] = "Pumping oil"
+    lang[f"container.{MOD}.pumpjack.dry"] = "No pumpable oil here"
     lang[f"prospector.{MOD}.shale_oil"] = "Shale oil"
     lang[f"container.{MOD}.redstone"] = "Redstone: %s"
     lang[f"container.{MOD}.redstone.ignored"] = "ignored (always runs)"

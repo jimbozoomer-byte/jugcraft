@@ -2,8 +2,15 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.chemistry.OilReservoirs;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
+import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
+import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
 import io.github.jimbozoomer.jugcraft.fluid.FluidTankBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
+import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
+import io.github.jimbozoomer.jugcraft.machine.LargeMachineBlock;
+import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
+import io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity;
+import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import io.github.jimbozoomer.jugcraft.prospecting.OreSurvey;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -11,9 +18,11 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 
@@ -98,5 +107,31 @@ public class PetroGameTests {
 		helper.assertTrue(readings.stream().anyMatch(reading -> reading.label().equals("prospector.jugcraft.oil")),
 				"No oil reading in " + readings);
 		helper.succeed();
+	}
+
+	/**
+	 * A powered pumpjack over pumpable oil fills its tank with crude oil, and the reservoir under it goes down by what
+	 * it pumped. (Tests share chunks, so this one only checks that oil flows and is taken from the reservoir.)
+	 */
+	@GameTest(maxTicks = 200)
+	public void pumpjackPumpsOil(GameTestHelper helper) {
+		BlockPos master = new BlockPos(2, 1, 1);
+		ChunkPos chunk = ChunkPos.containing(helper.absolutePos(master));
+		OilReservoirs.overrideForTest(chunk, OilReservoirs.Kind.CONVENTIONAL, 200_000);
+		LargeMachineBlock block = (LargeMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.PUMPJACK);
+		helper.setBlock(master, block.defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH));
+		block.setPlacedBy(helper.getLevel(), helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
+		EnergyStorage storage = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.UP);
+		helper.assertTrue(storage instanceof SimpleEnergyStorage, "The pumpjack takes no power");
+		((SimpleEnergyStorage) storage).setAmount(storage.getCapacity());
+		MachineBlockEntity pumpjack = helper.getBlockEntity(master, MachineBlockEntity.class);
+		long before = OilReservoirs.get(helper.getLevel(), chunk).remaining();
+		helper.succeedWhen(() -> {
+			int oil = pumpjack.tanks().output(0).millibuckets();
+			helper.assertTrue(oil >= 40 && pumpjack.tanks().output(0).variant.isOf(PetroFluids.CRUDE_OIL.source()),
+					"The pumpjack holds " + oil + " mB");
+			long after = OilReservoirs.get(helper.getLevel(), chunk).remaining();
+			helper.assertTrue(after <= before - 40, "The reservoir went from " + before + " to " + after + " mB");
+		});
 	}
 }

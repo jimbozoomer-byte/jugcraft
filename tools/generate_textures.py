@@ -1245,6 +1245,8 @@ def machines():
     save(boiler(961, True), "block", "large_steam_engine_front_on")
     save(assembler_front(960, False), "block", "auto_crafter_front")
     save(assembler_front(960, True), "block", "auto_crafter_front_on")
+    save(window(962, [(20, 16, 12), (30, 24, 18)]), "block", "pumpjack_front")
+    save(window(962, [(20, 16, 12)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "pumpjack_front_on")
     save(jaws(956, False), "block", "ore_drill_front")
     save(jaws(956, True), "block", "ore_drill_front_on")
     save(window(953, [(30, 26, 26)], glow=[(255, 200, 80), (255, 236, 150), (250, 150, 40)]), "block", "steel_foundry_front_on")

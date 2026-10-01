@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.machine;
 
 import io.github.jimbozoomer.jugcraft.chemistry.FluidMachineSpec;
+import java.util.List;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.StringRepresentable;
@@ -47,7 +48,10 @@ public enum MachineKind implements StringRepresentable {
 	// Auto-crafter: a 3x3 pattern grid (each slot keeps one item as the pattern), the result and a remainder slot.
 	AUTO_CRAFTER("auto_crafter", 10_000, 128, 0, 8, 11),
 	// Kinetic: a 2x2x2 steam engine turning a shaft out of its back (fuel, water bucket, empty bucket).
-	LARGE_STEAM_ENGINE("large_steam_engine", 0, 0, 0, 0, 3);
+	LARGE_STEAM_ENGINE("large_steam_engine", 0, 0, 0, 0, 3),
+	// Petrochemistry (chemistry/, docs/branches/CHEMISTRY.md): a pumpjack, 1 wide, 3 tall and 3 long, that pumps the
+	// conventional oil reservoir under its chunk into its output tank.
+	PUMPJACK("pumpjack", 20_000, 256, 0, 32, 0);
 
 	/** JE produced per tick while the coal generator burns. */
 	public static final int GENERATION_PER_TICK = 32;
@@ -105,6 +109,9 @@ public enum MachineKind implements StringRepresentable {
 	public static final int LARGE_ENGINE_OUTPUT_PART = 7;
 	/** Auto-crafter: ticks per craft (before speed upgrades). */
 	public static final int CRAFT_TICKS = 40;
+	/** Pumpjack: mB of crude oil pumped per powered tick (a bucket every 25 seconds), and its tank. */
+	public static final int PUMPJACK_RATE = 2;
+	public static final int PUMPJACK_TANK = 16_000;
 	/** Ticks the electric furnace needs per item (the vanilla furnace needs 200). */
 	public static final int ELECTRIC_FURNACE_TICKS = 100;
 
@@ -187,6 +194,7 @@ public enum MachineKind implements StringRepresentable {
 	 */
 	public @Nullable FluidMachineSpec fluidSpec() {
 		return switch (this) {
+			case PUMPJACK -> new FluidMachineSpec(List.of(), List.of(PUMPJACK_TANK), 0, 0);
 			default -> null;
 		};
 	}
@@ -251,6 +259,8 @@ public enum MachineKind implements StringRepresentable {
 			case STEEL_TANK -> Footprint.of(Vec3i.ZERO, new Vec3i(-1, 0, 0), new Vec3i(0, 0, 1), new Vec3i(-1, 0, 1));
 			// Three wide, six tall, two deep: the furnace column (left) and a 2x2 crucible tank tower (right).
 			case ALLOY_SMELTER -> Footprint.cuboid(3, 6, 2);
+			// One wide, three tall, three long: wellhead at the front (the master), samson post, then crank and motor.
+			case PUMPJACK -> Footprint.cuboid(1, 3, 3);
 			default -> Footprint.SINGLE;
 		};
 	}
