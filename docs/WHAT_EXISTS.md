@@ -312,7 +312,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `…/mixin/` | the two mixins (Overworld biome table, village pool accessor) |
 | `src/client/java/.../client/` | `JugcraftClient` (screen registration), `MachineScreen` |
 | `src/gametest/java/.../test/JugcraftGameTests.java` | game tests (run by `./gradlew build`) |
-| `src/gametest/java/.../test/PixelHollowsGameTests.java` | Pixel Hollows and Retro Trader game tests, incl. the ten-seed distribution measurement |
+| `src/gametest/java/.../test/PixelHollowsGameTests.java` | Pixel Hollows and Retro Trader game tests (drops, recipes, worldgen order, map, trades, job site, shop template) |
 | `src/gametest/java/.../test/JugcraftClientGameTests.java` | client game tests with screenshots (CI job `client`) |
 | `…/guide/`, `src/client/.../HandbookScreen.java`, `tools/handbook.py` | Engineer's Handbook |
 | `src/test/java/.../VanillaReferences.java` | compile-time guard that vanilla items used by recipes still exist |

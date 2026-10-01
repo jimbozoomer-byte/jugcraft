@@ -83,5 +83,5 @@ Results are recorded in the PR. The checks:
 
 ## Rollout and open questions
 - The lining's cost (96 ore attempts per chunk inside the biome) has not been measured.
-- The climate numbers are a first guess, tuned by the distribution test; they may need adjusting once someone has played it.
+- The climate numbers are a first guess and have not been measured on real seeds (see Verification); they may need adjusting once someone has played it.
 - A magic use for pixel shards, hostile cave creatures, an abandoned-arcade ruin and a boss are later proposals.
