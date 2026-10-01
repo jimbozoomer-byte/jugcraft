@@ -1235,12 +1235,14 @@ def machines():
     save(pile(950, [(196, 160, 108), (214, 180, 126), (176, 140, 92), (230, 200, 150)]), "item", "sawdust")
     # Coke: porous gray-black lumps with a dull silver sheen.
     save(raw_chunk(951, [(28, 28, 30), (48, 48, 52), (74, 74, 80)], (150, 150, 158)), "item", "coke")
+    glass_textures()
     ember = [(250, 140, 30), (255, 190, 60), (220, 80, 20)]
     save(grate(952), "block", "coke_oven_front")
     save(grate(952, glow=ember), "block", "coke_oven_front_on")
     save(window(953, [(30, 26, 26), (44, 36, 34)]), "block", "steel_foundry_front")
     save(battery_front(954), "block", "capacitor_bank_front")
     save(battery_front(978), "block", "lithium_battery_bank_front")
+    save(battery_front(985), "block", "flow_battery_front")
     save(window(979, [(40, 46, 50), (52, 60, 64)]), "block", "crystal_grower_front")
     save(window(979, [(40, 46, 50)], glow=[(80, 210, 230), (150, 240, 250), (60, 170, 200)]), "block", "crystal_grower_front_on")
     save(window(980, [(40, 46, 50), (52, 60, 64)]), "block", "lithography_station_front")
@@ -1289,6 +1291,10 @@ def machines():
     save(window(974, [(36, 40, 30)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "diesel_engine_front_on")
     save(window(975, [(40, 46, 50), (52, 60, 64)]), "block", "electrolytic_cell_front")
     save(window(975, [(40, 46, 50)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "electrolytic_cell_front_on")
+    save(window(985, [(36, 44, 56), (48, 58, 72)]), "block", "air_separation_unit_front")
+    save(window(985, [(36, 44, 56)], glow=[(120, 200, 255), (180, 230, 255), (90, 160, 230)]), "block", "air_separation_unit_front_on")
+    save(window(986, [(52, 46, 40), (66, 58, 50)]), "block", "synthesis_converter_front")
+    save(window(986, [(52, 46, 40)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "synthesis_converter_front_on")
     save(window(976, [(52, 50, 30), (66, 62, 40)]), "block", "chemical_reactor_front")
     save(window(976, [(52, 50, 30)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "chemical_reactor_front_on")
     save(window(977, [(40, 46, 50), (52, 60, 64)]), "block", "fuel_cell_front")
@@ -1362,6 +1368,32 @@ def machines():
     save(pump_port(527, False), "block", "heavy_pump_top")
     save(pump_port(528, True), "block", "heavy_pump_bottom")
     gui()
+
+
+def glass_textures():
+    """Glass chemistry (batch 16): tincal crust, borax crystals, borosilicate glass and a coil of optical fibre."""
+    save(speckled([(214, 206, 186), (224, 216, 196), (204, 196, 176), (232, 226, 210), (196, 188, 168)], 1601,
+                  [(246, 246, 240), (236, 240, 244), (180, 176, 164)], count=36), "block", "tincal")
+    save(raw_chunk(1602, [(196, 200, 204), (226, 230, 234), (246, 248, 250)], (255, 255, 255)), "item", "borax")
+    glass = new()
+    for y in range(2, 14):
+        shift = (13 - y) // 4
+        for x in range(3 + shift, 13 + shift):
+            edge = y in (2, 13) or x in (3 + shift, 12 + shift)
+            c = (120, 170, 176, 255) if edge else (200, 232, 236, 150) if (x + y) % 7 else (240, 252, 252, 200)
+            glass.putpixel((x, y), c)
+    save(glass, "item", "borosilicate_glass")
+    fibre = new()
+    import math
+    for t in range(0, 360, 6):
+        for r, c in ((5.5, (120, 220, 240)), (3.5, (90, 190, 220))):
+            x = 8 + r * math.cos(math.radians(t))
+            y = 8 + r * 0.6 * math.sin(math.radians(t))
+            fibre.putpixel((int(round(x)), int(round(y))), c + (255,))
+    for x, y in ((13, 7), (14, 6), (15, 5)):
+        fibre.putpixel((x, y), (200, 250, 255, 255))
+    save(fibre, "item", "optical_fibre")
+    save(raw_chunk(1603, [(70, 72, 78), (104, 106, 114), (140, 142, 150)], (210, 214, 222)), "item", "ferroboron")
 
 
 def main():

@@ -45,6 +45,15 @@ FLUIDS = {
     "sulfuric_acid": {"display": "Sulfuric Acid", "feature": "sulfur",
                       "colors": [(150, 140, 40), (190, 180, 70), (214, 206, 104), (240, 236, 170)],
                       "tick_delay": 6, "slope": 4, "drop_off": 1},
+    # Nitrogen chemistry (batch 12): the Ostwald process's acid, a fuming pale yellow.
+    "nitric_acid": {"display": "Nitric Acid", "feature": "machines",
+                    "colors": [(170, 150, 70), (204, 186, 104), (226, 212, 140), (246, 238, 196)],
+                    "tick_delay": 5, "slope": 4, "drop_off": 1},
+    # Flow batteries (batch 17): vanadium leached out of asphalt binder (heavy oil residue is rich in it) into
+    # sulfuric acid, a deep blue.
+    "vanadium_electrolyte": {"display": "Vanadium Electrolyte", "feature": "machines",
+                             "colors": [(30, 40, 110), (44, 62, 150), (70, 92, 186), (130, 150, 224)],
+                             "tick_delay": 6, "slope": 4, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -57,6 +66,22 @@ GASES = {
                  "colors": [(130, 160, 60), (160, 190, 80), (186, 214, 104), (214, 236, 150)]},
     "hydrogen": {"display": "Hydrogen", "feature": "salt",
                  "colors": [(190, 200, 214), (210, 220, 232), (228, 236, 244), (246, 250, 254)]},
+    # Nitrogen chemistry (batch 12): air separated into nitrogen and oxygen; ammonia from Haber-Bosch.
+    "nitrogen": {"display": "Nitrogen", "feature": "machines",
+                 "colors": [(120, 140, 190), (150, 168, 214), (182, 196, 232), (214, 224, 246)]},
+    "oxygen": {"display": "Oxygen", "feature": "machines",
+               "colors": [(90, 150, 200), (120, 180, 224), (160, 206, 238), (204, 232, 250)]},
+    "ammonia": {"display": "Ammonia", "feature": "machines",
+                "colors": [(150, 120, 190), (176, 150, 212), (202, 182, 230), (228, 216, 244)]},
+    # Batch 13: the scarce third part of air, a shielding gas.
+    "argon": {"display": "Argon", "feature": "machines",
+              "colors": [(170, 120, 200), (190, 150, 220), (212, 182, 236), (234, 216, 248)]},
+    # Batch 14: cracked out of naphtha, polymerized into synthetic rubber.
+    "butadiene": {"display": "Butadiene", "feature": "crude_oil",
+                  "colors": [(150, 160, 120), (176, 186, 144), (200, 208, 170), (226, 232, 204)]},
+    # Batch 15: chlorine joined to refinery gas (standing in for ethylene), polymerized into PVC.
+    "vinyl_chloride": {"display": "Vinyl Chloride", "feature": "salt",
+                       "colors": [(170, 180, 130), (194, 204, 156), (214, 222, 182), (236, 240, 214)]},
 }
 
 
@@ -84,6 +109,17 @@ ITEMS = {
     "silicon_wafer": "Silicon Wafer",
     # Etched in the lithography station (batch 7).
     "microchip": "Microchip",
+    # Rubber and polymers (batch 14): synthetic rubber, and gaskets pressed from it with steel.
+    "rubber": "Synthetic Rubber",
+    "gasket": "Gasket",
+    # Chlor-alkali (batch 15): PVC resin (pressed into plastic sheets) and soap (washes off status effects).
+    "pvc_resin": "PVC Resin",
+    "soap": "Soap",
+    # Explosive weapons (batch 18): cotton nitrated into guncotton, packed into grenades that hurt living things but
+    # never break blocks; the grenade launcher throws them further (weapons/).
+    "guncotton": "Guncotton",
+    "grenade": "Grenade",
+    "grenade_launcher": "Grenade Launcher",
 }
 
 
@@ -169,6 +205,15 @@ FLUID_MACHINES = {
     # Electronics (batch 7): a wafer and copper wire etched with sulfuric acid into microchips. 192 JE/t.
     "lithography_station": {"inputs": [4_000], "outputs": [], "item_inputs": 2, "item_outputs": 1,
                             "recipe_type": "lithography"},
+    # Nitrogen chemistry (batch 12). Air separation (no recipes): from the air alone, 8 mB/t nitrogen drawn off the
+    # top, 2 mB/t oxygen off the base and (batch 13) 1 mB of argon every 2 ticks off the middle (Java:
+    # MachineKind.outputLayer) at 64 JE/t, like the pumpjack's oil.
+    "air_separation_unit": {"inputs": [], "outputs": [16_000, 16_000, 16_000], "item_inputs": 0, "item_outputs": 0,
+                            "recipe_type": None},
+    # A high-pressure catalytic converter: hydrogen + nitrogen -> ammonia (Haber-Bosch); ammonia + oxygen + water
+    # -> nitric acid (Ostwald). 128 JE/t.
+    "synthesis_converter": {"inputs": [8_000, 8_000, 8_000], "outputs": [8_000], "item_inputs": 0,
+                            "item_outputs": 0, "recipe_type": "gas_synthesis"},
     # Refinery gas -> plastic pellets. 96 JE/t.
     "polymerization_reactor": {"inputs": [8_000], "outputs": [], "item_inputs": 0, "item_outputs": 1,
                                "recipe_type": "polymerization"},
@@ -219,6 +264,12 @@ FLUID_RECIPES = {
     "polymerization_reactor": [
         {"name": "refinery_gas", "fluids": [("jugcraft:refinery_gas", 1000)], "fluid_results": [],
          "results": [("jugcraft:plastic_pellets", 4)], "source": 0, "ticks": 100, "features": ["crude_oil"]},
+        # PVC (batch 15): vinyl chloride polymerized into resin.
+        {"name": "vinyl_chloride", "fluids": [("jugcraft:vinyl_chloride", 500)], "fluid_results": [],
+         "results": [("jugcraft:pvc_resin", 4)], "source": 0, "ticks": 100, "features": ["crude_oil", "salt"]},
+        # Synthetic rubber (batch 14): butadiene polymerized into crumbs of rubber.
+        {"name": "butadiene", "fluids": [("jugcraft:butadiene", 500)], "fluid_results": [],
+         "results": [("jugcraft:rubber", 4)], "source": 0, "ticks": 100, "features": ["crude_oil"]},
     ],
     # Fracking fluid: water carrying sand (to prop the cracks open) and a gelling agent (dried kelp, standing in for
     # guar gum) to carry the sand.
@@ -251,6 +302,16 @@ FLUID_RECIPES = {
         # Superphosphate: phosphate rock treated with sulfuric acid becomes a soluble fertilizer.
         {"name": "fertilizer", "items": [("jugcraft:phosphate", 2)], "fluids": [("jugcraft:sulfuric_acid", 250)],
          "results": [("jugcraft:fertilizer", 4)], "ticks": 80, "features": ["phosphate", "sulfur"]},
+        # Saponification (batch 15): fat (rotten flesh, rendered) boiled in lye sets into soap.
+        {"name": "soap", "items": [("minecraft:rotten_flesh", 2)], "fluids": [("jugcraft:lye", 250)],
+         "results": [("jugcraft:soap", 4)], "ticks": 80, "features": ["salt"]},
+        # Steam cracking (batch 14): naphtha broken down at high heat; the butadiene is kept, the rest is lost as
+        # fuel for the cracking furnace.
+        {"name": "butadiene", "fluids": [("jugcraft:naphtha", 1000)], "fluid_results": [("jugcraft:butadiene", 500)],
+         "ticks": 100, "features": ["crude_oil"]},
+        # Ammonium phosphate (batch 12): phosphate rock with ammonia, a richer fertilizer than superphosphate.
+        {"name": "ammonium_phosphate", "items": [("jugcraft:phosphate", 2)], "fluids": [("jugcraft:ammonia", 250)],
+         "results": [("jugcraft:fertilizer", 6)], "ticks": 80, "features": ["phosphate", "salt", "machines"]},
         # The Kroll process, in one step: rutile chlorinated over hot coke to titanium tetrachloride, then reduced to
         # a porous titanium sponge. The chlorine is used up.
         {"name": "titanium_sponge", "items": [("jugcraft:raw_titanium", 1), ("jugcraft:coke", 1)],
@@ -262,12 +323,38 @@ FLUID_RECIPES = {
          "results": [("jugcraft:lithium_carbonate", 2)], "ticks": 100, "features": ["lithium", "sulfur"]},
         {"name": "rare_earth_oxide", "items": [("jugcraft:monazite", 1)], "fluids": [("jugcraft:sulfuric_acid", 250)],
          "results": [("jugcraft:rare_earth_oxide", 2)], "ticks": 140, "features": ["rare_earths", "sulfur"]},
+        # Guncotton (batch 18): cotton nitrated in nitric acid (nitrocellulose), the grenade's charge.
+        {"name": "guncotton", "items": [("jugcraft:cotton", 2)], "fluids": [("jugcraft:nitric_acid", 250)],
+         "results": [("jugcraft:guncotton", 2)], "ticks": 100, "features": ["machines", "explosives"]},
+        # Vanadium electrolyte (batch 17): the vanadium in heavy oil residue leached into sulfuric acid, for the flow
+        # battery. As much electrolyte as acid goes in.
+        {"name": "vanadium_electrolyte", "items": [("jugcraft:asphalt_binder", 2)],
+         "fluids": [("jugcraft:sulfuric_acid", 1000)], "fluid_results": [("jugcraft:vanadium_electrolyte", 1000)],
+         "ticks": 160, "features": ["crude_oil", "sulfur"]},
     ],
     # Photolithography (batch 7): a wafer patterned and etched with sulfuric acid, with copper wire for the bonds.
     "lithography_station": [
         {"name": "microchip", "items": [("jugcraft:silicon_wafer", 1), ("jugcraft:copper_wire", 2)],
          "fluids": [("jugcraft:sulfuric_acid", 100)], "results": [("jugcraft:microchip", 4)], "ticks": 200,
          "features": ["silicon", "sulfur"]},
+        # Nitric acid etches as well, and twice as far (batch 12).
+        {"name": "microchip_nitric", "items": [("jugcraft:silicon_wafer", 1), ("jugcraft:copper_wire", 2)],
+         "fluids": [("jugcraft:nitric_acid", 50)], "results": [("jugcraft:microchip", 4)], "ticks": 200,
+         "features": ["silicon", "machines"]},
+    ],
+    # Nitrogen chemistry (batch 12). Fluid volumes shrink: 400 mB of gas in gives 200 of ammonia, so no recipe
+    # makes fluid from nothing.
+    "synthesis_converter": [
+        # Haber-Bosch: three parts hydrogen to one of nitrogen over an iron catalyst at high pressure.
+        {"name": "ammonia", "fluids": [("jugcraft:hydrogen", 300), ("jugcraft:nitrogen", 100)],
+         "fluid_results": [("jugcraft:ammonia", 200)], "ticks": 40, "features": ["salt", "machines"]},
+        # Vinyl chloride (batch 15): chlorine added to refinery gas (its ethylene), at heat over a catalyst.
+        {"name": "vinyl_chloride", "fluids": [("jugcraft:refinery_gas", 250), ("jugcraft:chlorine", 250)],
+         "fluid_results": [("jugcraft:vinyl_chloride", 250)], "ticks": 40, "features": ["crude_oil", "salt"]},
+        # Ostwald: ammonia burnt over platinum gauze in oxygen, the gases absorbed in water.
+        {"name": "nitric_acid", "fluids": [("jugcraft:ammonia", 100), ("jugcraft:oxygen", 200),
+                                           ("minecraft:water", 100)],
+         "fluid_results": [("jugcraft:nitric_acid", 200)], "ticks": 40, "features": ["salt", "machines"]},
     ],
     # Flowback water settles and is filtered: most of it comes back as clean water; the brine leaves salt. A quarter
     # is lost (sludge), so fracking water is never free.

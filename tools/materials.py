@@ -13,6 +13,7 @@ MOD = "jugcraft"
 # Feature switches (config/jugcraft.properties). Order is the config file order.
 FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
             "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines", "deposits",
+            "explosives",
             "pixel_hollows", "retro_trader"]
 
 # Metals use the vanilla form set. "mined" adds ore, deepslate ore, raw item and raw block.
@@ -66,6 +67,11 @@ ROCKS = {
                  "drop": {"item": "bitumen", "min": 1, "max": 2},
                  "gen": {"size": 24, "count": 3, "min_y": 50, "max_y": 90, "target": "minecraft:sand",
                          "biomes": ["IS_DESERT", "IS_BADLANDS"]}},
+    # Glass chemistry (batch 16): tincal, natural borax, crusts the sand of dry deserts.
+    "tincal": {"display": "Tincal", "feature": "silicon", "copy": "SANDSTONE", "tool": "pickaxe",
+               "drop": {"item": "borax", "min": 1, "max": 3},
+               "gen": {"size": 14, "count": 2, "min_y": 55, "max_y": 100, "target": "minecraft:sand",
+                       "biomes": ["IS_DESERT", "IS_BADLANDS"]}},
 }
 
 # Plain items: display name, feature, optional c: tag path.
@@ -77,6 +83,11 @@ ITEMS = {
     "rare_earth_oxide": {"display": "Rare Earth Oxide", "feature": "rare_earths", "tag": "dusts/rare_earth_oxide"},
     # Coal baked in the coke oven: a hotter fuel and the carbon for steel.
     "coke": {"display": "Coal Coke", "feature": "machines", "tag": "coal_coke"},
+    # Glass chemistry (batch 16): borax, glass made with it, and fibre drawn from that glass.
+    "borax": {"display": "Borax", "feature": "silicon", "tag": "dusts/borax"},
+    "borosilicate_glass": {"display": "Borosilicate Glass", "feature": "silicon", "tag": None},
+    "optical_fibre": {"display": "Optical Fibre", "feature": "silicon", "tag": None},
+    "ferroboron": {"display": "Ferroboron", "feature": "silicon", "tag": None},
 }
 
 EXTRA_NAMES = {"bronze_blend": "Bronze Blend"}

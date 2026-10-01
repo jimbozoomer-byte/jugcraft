@@ -10,7 +10,7 @@ from pathlib import Path
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, EXTRA_NAMES, MINERAL_TAGS, PROCESSING, COMPONENTS, CIRCUITS,
                        metal_blocks, metal_items, mineral_blocks, all_blocks, all_items, feature_of, ingot_id)
 
-from machines import CROPS, ELECTRONICS_BLOCKS, FARMING_BLOCKS, MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
+from machines import CROPS, ELECTRONICS_BLOCKS, FARMING_BLOCKS, MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS, CRAFTING, ALT_CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
 import model_writer
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -444,7 +444,13 @@ def machine_recipe_files(out):
         for recipe in recipes:
             data = {"fabric:load_conditions": [c for f in recipe["features"] for c in condition(f)],
                     "type": rid(kind)}
-            if "inputs" in recipe:
+            if "name" in recipe:
+                name = recipe["name"]
+                if "inputs" in recipe:
+                    data["ingredients"] = [{"ingredient": item, "count": count} for item, count in recipe["inputs"]]
+                else:
+                    data["ingredient"] = recipe["input"]
+            elif "inputs" in recipe:
                 name = recipe["output"].split(":")[1]
                 data["ingredients"] = [{"ingredient": item, "count": count} for item, count in recipe["inputs"]]
             else:
@@ -644,9 +650,12 @@ def petro_assets(lang):
         write(ASSETS / "items" / f"{bucket}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{bucket}")}})
     for item, display in petro.ITEMS.items():
         lang[f"item.{MOD}.{item}"] = display
+        parent = "minecraft:item/handheld" if item == "grenade_launcher" else "minecraft:item/generated"
         write(ASSETS / "models" / "item" / f"{item}.json",
-              {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
+              {"parent": parent, "textures": {"layer0": rid(f"item/{item}")}})
         write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
+    lang["message.jugcraft.grenade_launcher.empty"] = "No grenades to fire"
+    lang["entity.jugcraft.grenade"] = "Grenade"
     for block, info in petro.BLOCKS.items():
         lang[f"block.{MOD}.{block}"] = info["display"]
         models = ASSETS / "models" / "block"
@@ -677,7 +686,7 @@ def petro_assets(lang):
 # Tanks that keep their fluid when broken (batch 10): the drop copies the block entity's jugcraft:stored_fluid. The
 # multi-block ones drop only from their master block (part 0), which holds the block entity; breaking any other part
 # breaks the master too (machine/LargeMachineBlock).
-TANKS = {"fluid_tank": False, "steel_tank": True, "gas_holder": True}
+TANKS = {"fluid_tank": False, "steel_tank": True, "gas_holder": True, "flow_battery": True}
 
 
 def tank_drop(block):
@@ -820,6 +829,10 @@ def recipes():
         recipe = shaped(MACHINE_FEATURE, pattern, key, result, count)
         recipe["fabric:load_conditions"] = [c for f in features for c in condition(f)]
         write(out / f"{result}.json", recipe)
+    for name, (result, pattern, key, count) in ALT_CRAFTING.items():
+        recipe = shaped(MACHINE_FEATURE, pattern, key, result, count)
+        recipe["fabric:load_conditions"] = condition(MACHINE_FEATURE) + condition("crude_oil")
+        write(out / f"{name}.json", recipe)
     machine_recipe_files(out)
     import petro
     for kind, name, data in petro.fluid_recipe_files(condition):
@@ -833,6 +846,19 @@ def recipes():
             ("asphalt_road_line", shapeless(MACHINE_FEATURE, [rid("asphalt")] * 4 + ["minecraft:yellow_dye"],
                                             "asphalt_road_line", 4, "building"))):
         recipe["fabric:load_conditions"] = oil
+        write(out / f"{name}.json", recipe)
+
+    # Explosive weapons (batch 18): grenades and the launcher, behind the explosives switch.
+    boom = [c for f in (MACHINE_FEATURE, "explosives") for c in condition(f)]
+    for name, recipe in (
+            ("grenade", shaped(MACHINE_FEATURE, [" N ", "PGP", " P "],
+                               {"N": "minecraft:iron_nugget", "P": "#c:plates/steel", "G": rid("guncotton")},
+                               "grenade", 4, "equipment")),
+            ("grenade_launcher", shaped(MACHINE_FEATURE, ["PPG", "RCS"],
+                                        {"P": "#c:plates/steel", "G": "#c:gears/steel", "R": rid("rubber"),
+                                         "C": rid("basic_circuit"), "S": "#c:ingots/steel"},
+                                        "grenade_launcher", 1, "equipment"))):
+        recipe["fabric:load_conditions"] = boom
         write(out / f"{name}.json", recipe)
 
     # Dusts smelt back into ingots wherever the metal's ore could be smelted; the others use the arc furnace.

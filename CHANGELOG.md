@@ -17,6 +17,45 @@ No numbered release yet. Everything below is on `main`.
 - Fourteen game tests, seven client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
 
 ### Unmerged: Surface deposits, batch 11
+
+### Unmerged: Explosive weapons, batch 18
+- **Guncotton** (2 cotton + 250 mB nitric acid, chemical reactor).
+- **Grenades**, thrown by hand, and the **grenade launcher**, which fires them further. The blast hurts living things only: up to 16 damage, walls shield, and no block, armor stand, frame or dropped item is ever touched.
+- New switch `explosives.enabled`. An advancement, a handbook page and a game test.
+
+### #73 Flow batteries, batch 17
+- **Vanadium electrolyte:** two asphalt binder and a bucket of sulfuric acid in the chemical reactor.
+- **Flow battery** (3×3×2): 1,000 JE per mB of electrolyte in it, up to 64,000,000 JE with 64 buckets; 8,192 JE/t in and out. Keeps its electrolyte when broken.
+- An advancement, a handbook page and a game test.
+
+### #72 Glass chemistry, batch 16
+- **Tincal**, natural borax, in desert and badlands sand; **borax**.
+- **Borosilicate glass** (2 sand + borax, alloy smelter) drawn into **optical fibre**, which can replace gold in processors.
+- **Ferroboron** (iron + borax): with a rare earth oxide it makes **two** neodymium magnets.
+- Multi-input recipes now try the one with the most ingredients first.
+
+### #70 Chlorine and lye, batch 15
+- **PVC:** refinery gas + chlorine → vinyl chloride (synthesis converter) → PVC resin (polymerization reactor) → two plastic sheets each (metal press).
+- **Soap** from lye and rotten flesh; a bar washes off every status effect.
+- Two advancements, a handbook page and game tests.
+
+### #69 Rubber and polymers, batch 14
+- **Butadiene** from naphtha (chemical reactor) and **synthetic rubber** from butadiene (polymerization reactor).
+- **Gaskets** (rubber + steel plate); rubber belts; gasketed steel pipe, four for two plates.
+- An advancement, a handbook page and a game test.
+
+### #68 Oxygen-blown steel and argon, batch 13
+- The air separation unit also makes **argon**.
+- **Boost gases:** oxygen piped into the steel foundry, or argon into the crystal grower, doubles its speed.
+
+### #65 Nitrogen chemistry, batch 12: air separation, ammonia and nitric acid
+- **Air separation unit** (2×2, six tall): splits air into nitrogen and oxygen, four to one, needing only power.
+- **Synthesis converter** (3×4×2): Haber–Bosch ammonia (hydrogen + nitrogen) and Ostwald nitric acid (ammonia + oxygen + water).
+- New gases nitrogen, oxygen and ammonia; nitric acid with a bucket.
+- Ammonia + phosphate → 6 fertilizer; nitric acid etches microchips with half the acid.
+- Three advancements, a handbook section and game tests.
+
+### #62 Surface deposits, batch 11
 - **Coal, Iron, Copper and Tin Deposits:** flat patches in the top layer of stony hills (windswept hills, stony peaks, stony shores). Picks only break them, for nothing; each block holds 1,000 units.
 - **Deposit drill** (3×3, two tall): takes one coal or raw ore of each kind every 15 seconds from the deposits under it and one block round it, and pushes them into a chest, pipe, conveyor or machine beside it. Empty deposit blocks turn to stone.
 - `deposits.enabled` switch, an advancement, a handbook page and game tests.

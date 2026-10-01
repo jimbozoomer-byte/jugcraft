@@ -191,10 +191,13 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		// Producers only give energy out; consumers only take it in; the battery box does both.
 		long insert = kind.isGenerator() ? 0 : kind.maxInput;
 		long extract = kind.isProcessor() ? 0 : kind.maxOutput;
-		this.energy = new SimpleEnergyStorage(kind.capacity, insert, extract, this::setChanged);
+		this.energy = kind == MachineKind.FLOW_BATTERY
+				? new SimpleEnergyStorage(kind.capacity, insert, extract, this::setChanged, this::electrolyteCeiling)
+				: new SimpleEnergyStorage(kind.capacity, insert, extract, this::setChanged);
 		this.reservoir = switch (kind) {
 			case STEEL_TANK -> SingleFluidStorage.withFixedCapacity(MachineKind.STEEL_TANK_CAPACITY * FluidNetworks.DROPLETS_PER_MB, this::setChanged);
 			case GAS_HOLDER -> gasReservoir(MachineKind.GAS_HOLDER_CAPACITY * FluidNetworks.DROPLETS_PER_MB);
+			case FLOW_BATTERY -> electrolyteReservoir(MachineKind.FLOW_BATTERY_TANK * FluidNetworks.DROPLETS_PER_MB);
 			default -> null;
 		};
 		this.inlet = switch (kind) {
@@ -202,6 +205,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case LARGE_STEAM_ENGINE -> new TankInlet(Fluids.WATER, MachineKind.LARGE_ENGINE_TANK);
 			case GEOTHERMAL_GENERATOR -> new TankInlet(Fluids.LAVA, MachineKind.GEOTHERMAL_TANK);
 			case ORE_WASHER -> new TankInlet(Fluids.WATER, MachineKind.WASHER_TANK);
+			case STEEL_FOUNDRY -> new TankInlet(PetroFluids.OXYGEN.fluid(), MachineKind.BOOST_TANK);
+			case CRYSTAL_GROWER -> new TankInlet(PetroFluids.ARGON.fluid(), MachineKind.BOOST_TANK);
 			default -> null;
 		};
 		FluidMachineSpec spec = kind.fluidSpec();
@@ -244,7 +249,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 
 	/**
 	 * Fluid exposed on a side (the same on every side and every part): the steam generator and ore
-	 * washer take water and the geothermal generator takes lava into their tanks. Other machines have none.
+	 * washer take water and the geothermal generator takes lava into their tanks; the steel foundry takes oxygen and
+	 * the crystal grower argon as boost gases. Other machines have none.
 	 */
 	public @Nullable Storage<FluidVariant> fluidFor(@Nullable Direction side) {
 		if (tanks != null) {
@@ -271,6 +277,39 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				setChanged();
 			}
 		};
+	}
+
+	/**
+	 * The flow battery's electrolyte tanks: vanadium electrolyte only, and it cannot be pumped back out (it stays in the
+	 * battery, and goes with it when broken).
+	 */
+	private SingleFluidStorage electrolyteReservoir(long capacity) {
+		return new SingleFluidStorage() {
+			@Override
+			protected long getCapacity(FluidVariant variant) {
+				return capacity;
+			}
+
+			@Override
+			protected boolean canInsert(FluidVariant variant) {
+				return variant.isOf(PetroFluids.VANADIUM_ELECTROLYTE.source());
+			}
+
+			@Override
+			protected boolean canExtract(FluidVariant variant) {
+				return false;
+			}
+
+			@Override
+			protected void onFinalCommit() {
+				setChanged();
+			}
+		};
+	}
+
+	/** The flow battery holds {@link MachineKind#FLOW_BATTERY_JE_PER_MB} JE for each millibucket of electrolyte. */
+	private long electrolyteCeiling() {
+		return reservoir == null ? 0 : reservoir.amount / FluidNetworks.DROPLETS_PER_MB * MachineKind.FLOW_BATTERY_JE_PER_MB;
 	}
 
 	/** A steel tank or gas holder drops with its fluid (see {@link StoredFluid}) and gets it back when placed again. */
@@ -399,7 +438,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case ADVANCED_SOLAR_PANEL -> tickSolar(level, pos);
 			case STEAM_GENERATOR -> tickSteam(level, pos);
 			case LARGE_STEAM_ENGINE -> tickLargeEngine(level, pos, state);
-			case BATTERY_BOX, CAPACITOR_BANK, LITHIUM_BATTERY_BANK -> tickBattery(level, pos, state);
+			case BATTERY_BOX, CAPACITOR_BANK, LITHIUM_BATTERY_BANK, FLOW_BATTERY -> tickBattery(level, pos, state);
 			case STEEL_TANK, GAS_HOLDER -> false;
 			case GEOTHERMAL_GENERATOR -> tickGeothermal(level, pos, state);
 			case WIND_TURBINE -> tickWind(level, pos, state);
@@ -410,6 +449,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case WATER_WHEEL -> tickWaterWheel(level, pos, state);
 			case AUTO_CRAFTER -> tickCrafter(level, pos, state);
 			case PUMPJACK -> tickPumpjack(level, pos, state);
+			case AIR_SEPARATION_UNIT -> tickAirSeparation(level, pos, state);
 			case FRACKING_RIG -> tickFrackingRig(level, pos, state);
 			case DIESEL_GENERATOR -> tickFluidGenerator(level, pos, state, MachineKind.DIESEL_OUTPUT);
 			case GAS_TURBINE -> tickFluidGenerator(level, pos, state, MachineKind.TURBINE_OUTPUT);
@@ -736,6 +776,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 		energy.setAmount(energy.getAmount() - use);
 		progress++;
+		// Boost gas (oxygen in the foundry, argon in the crystal grower): a second step this tick, for the gas.
+		if (kind.boostPerTick() > 0 && tank >= kind.boostPerTick() && progress < maxProgress) {
+			tank -= kind.boostPerTick();
+			progress++;
+		}
 		if (progress >= maxProgress) {
 			progress = 0;
 			int out = kind.outputSlot();
@@ -841,6 +886,38 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 		energy.setAmount(energy.getAmount() - kind.usePerTick);
 		tank.fill(PetroFluids.CRUDE_OIL.source(), pumped);
+		maxProgress = PUMPJACK_STROKE;
+		progress = (progress + 1) % PUMPJACK_STROKE;
+		setChanged();
+		return true;
+	}
+
+	/**
+	 * The air separation unit: each powered tick it liquefies air and splits it, filling its first tank with
+	 * {@link MachineKind#ASU_NITROGEN_PER_TICK} mB of nitrogen (drawn off the top of the column), its second with
+	 * {@link MachineKind#ASU_OXYGEN_PER_TICK} mB of oxygen (drawn off the base) and its third with a mB of argon every
+	 * {@link MachineKind#ASU_ARGON_INTERVAL} ticks (drawn off the middle). Air is everywhere, so it needs no input; it
+	 * stops while any tank is full.
+	 */
+	private boolean tickAirSeparation(ServerLevel level, BlockPos pos, BlockState state) {
+		pushFluids(level, pos, state);
+		FluidTank nitrogen = tanks.output(0);
+		FluidTank oxygen = tanks.output(1);
+		FluidTank argon = tanks.output(2);
+		Fluid n2 = PetroFluids.NITROGEN.fluid();
+		Fluid o2 = PetroFluids.OXYGEN.fluid();
+		Fluid ar = PetroFluids.ARGON.fluid();
+		if (!nitrogen.fits(n2, MachineKind.ASU_NITROGEN_PER_TICK) || !oxygen.fits(o2, MachineKind.ASU_OXYGEN_PER_TICK)
+				|| !argon.fits(ar, 1)
+				|| !sides.redstone().allows(poweredByRedstone(level, pos, state)) || energy.getAmount() < kind.usePerTick) {
+			return false;
+		}
+		energy.setAmount(energy.getAmount() - kind.usePerTick);
+		nitrogen.fill(n2, MachineKind.ASU_NITROGEN_PER_TICK);
+		oxygen.fill(o2, MachineKind.ASU_OXYGEN_PER_TICK);
+		if (level.getGameTime() % MachineKind.ASU_ARGON_INTERVAL == 0) {
+			argon.fill(ar, 1);
+		}
 		maxProgress = PUMPJACK_STROKE;
 		progress = (progress + 1) % PUMPJACK_STROKE;
 		setChanged();
@@ -1676,7 +1753,6 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		super.loadAdditional(input);
 		items = NonNullList.withSize(kind.containerSize(), ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(input, items);
-		energy.setAmount(input.getLong("energy").orElse(0L));
 		progress = input.getInt("progress").orElse(0);
 		maxProgress = input.getInt("max_progress").orElse(0);
 		burn = input.getInt("burn").orElse(0);
@@ -1687,6 +1763,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		if (reservoir != null) {
 			reservoir.readValue(input);
 		}
+		// After the reservoir: the flow battery's charge is capped by its electrolyte.
+		energy.setAmount(input.getLong("energy").orElse(0L));
 		if (tanks != null) {
 			tanks.load(input);
 		}

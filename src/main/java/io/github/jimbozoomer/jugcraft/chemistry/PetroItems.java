@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.chemistry;
 
 import io.github.jimbozoomer.jugcraft.materials.JugcraftRegistry;
+import io.github.jimbozoomer.jugcraft.weapons.GrenadeItem;
+import io.github.jimbozoomer.jugcraft.weapons.GrenadeLauncherItem;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -30,6 +32,14 @@ public final class PetroItems {
 	public static Item SILICON_WAFER;
 	/** Wafers etched in the lithography station: four chips each. */
 	public static Item MICROCHIP;
+	public static Item RUBBER;
+	public static Item GASKET;
+	public static Item PVC_RESIN;
+	public static Item SOAP;
+	/** Explosive weapons (batch 18): nitrated cotton, the grenade's charge; grenades and their launcher. */
+	public static Item GUNCOTTON;
+	public static Item GRENADE;
+	public static Item GRENADE_LAUNCHER;
 
 	private PetroItems() {
 	}
@@ -47,6 +57,13 @@ public final class PetroItems {
 		SILICON_BOULE = JugcraftRegistry.item("silicon_boule");
 		SILICON_WAFER = JugcraftRegistry.item("silicon_wafer");
 		MICROCHIP = JugcraftRegistry.item("microchip");
+		RUBBER = JugcraftRegistry.item("rubber");
+		GASKET = JugcraftRegistry.item("gasket");
+		PVC_RESIN = JugcraftRegistry.item("pvc_resin");
+		SOAP = JugcraftRegistry.item("soap", SoapItem::new);
+		GUNCOTTON = JugcraftRegistry.item("guncotton");
+		GRENADE = JugcraftRegistry.item("grenade", GrenadeItem::new);
+		GRENADE_LAUNCHER = JugcraftRegistry.item("grenade_launcher", GrenadeLauncherItem::new);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(CRACKING_CATALYST);
@@ -61,6 +78,11 @@ public final class PetroItems {
 			output.accept(SILICON_BOULE);
 			output.accept(SILICON_WAFER);
 			output.accept(MICROCHIP);
+			output.accept(GUNCOTTON);
+		});
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
+			output.accept(GRENADE);
+			output.accept(GRENADE_LAUNCHER);
 		});
 	}
 }

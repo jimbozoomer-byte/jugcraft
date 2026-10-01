@@ -45,7 +45,9 @@ ABOUT = {
     "sieve": "Sifts gravel into flint and soul sand into soul soil, with a small chance of nuggets or quartz.",
     "sawmill": "Cuts logs into six planks (four by hand) with sawdust, and planks into three sticks.",
     "coke_oven": "Two blocks tall, needs no power. Bakes coal into coal coke, a hotter fuel and the carbon for steel.",
-    "steel_foundry": "Three blocks tall, needs no power. Refines one iron ingot with one coke into one steel ingot.",
+    "steel_foundry": "Two by two and five tall, needs no power. Refines one iron ingot with one coke into one steel "
+                     "ingot. Pipe oxygen into it (from the air separation unit) and it blows the charge: twice as "
+                     "fast, for 2 mB of oxygen a tick.",
     "copper_cable": "Carries power between generators, batteries and machines. It connects by itself to anything that stores "
                     "or uses power on the touching face.",
     "silver_cable": "A faster cable: 1,024 JE/t, four times copper. Cable tiers join into one network, which carries "
@@ -151,9 +153,19 @@ ABOUT = {
                          "and a bucket of water.",
     "chemical_reactor": "Two by two by two, lined with lead against the acid. Burns sulfur and absorbs it in water: two "
                         "sulfur dust and a bucket of water make a bucket of sulfuric acid, every 5 seconds.",
+    "air_separation_unit": "Two by two and six tall: a cold box and its distillation column. It needs no input: it "
+                           "liquefies air and splits it, 8 mB of nitrogen a tick out of the top row, 2 mB of oxygen "
+                           "out of the bottom row and a little argon (1 mB every 2 ticks) out of the middle, at 64 "
+                           "JE/t. Pipe the gases to the synthesis converter, the steel foundry, the crystal grower or "
+                           "a gas holder; it stops while any tank is full.",
+    "synthesis_converter": "Three wide, four tall and two deep: a high-pressure catalytic converter. Haber-Bosch: 300 mB "
+                           "of hydrogen and 100 mB of nitrogen make 200 mB of ammonia. Ostwald: 100 mB of ammonia, 200 "
+                           "mB of oxygen and 100 mB of water make 200 mB of nitric acid. Each takes 2 seconds at 128 "
+                           "JE/t.",
     "crystal_grower": "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single "
                       "crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 "
-                      "wafers in the sawmill.",
+                      "wafers in the sawmill. Pipe argon in to shield the melt and it grows twice as fast, for 1 mB "
+                      "of argon a tick.",
     "network_terminal": "A beige retro computer. Cable it into a power network and right-click it: it shows the "
                         "network's cables, the rate its slowest cable sets, how many devices it reaches and the "
                         "energy they hold. It uses no power.",
@@ -163,6 +175,11 @@ ABOUT = {
     "lithium_battery_bank": "Three wide, two tall, one deep: six lithium battery modules holding 32,000,000 JE, eight "
                             "capacitor banks. It charges from any side and gives power out of the sockets on its "
                             "front, 16,384 JE/t.",
+    "flow_battery": "Three wide, three tall, two deep: a vanadium redox flow battery. It holds 1,000 JE for every mB "
+                    "of vanadium electrolyte in its tank, so 64,000,000 JE with all 64 buckets in. Fill it by pipe or "
+                    "bucket; the electrolyte stays in it (also when broken). It charges from any side and gives power "
+                    "out of its front, 8,192 JE/t. Make the electrolyte in the chemical reactor from two asphalt "
+                    "binder and a bucket of sulfuric acid.",
     "advanced_solar_panel": "A white pedestal carrying a 3x3 array of solar cells on the layer above it: 64 JE/t in full "
                             "sun (eight solar panels), half in rain, none at night. The cells need open sky. Cables meet "
                             "the pedestal's foot.",
@@ -428,6 +445,40 @@ def build():
             machine_page("electrolytic_cell"),
             machine_page("chemical_reactor"),
             machine_page("fuel_cell"),
+            {"title": "Rubber", "icon": f"{MOD}:rubber", "text": [
+                "Crack a bucket of naphtha in the chemical reactor: 500 mB of butadiene. The polymerization reactor "
+                "turns 500 mB of butadiene into four synthetic rubber.",
+                "Rubber and string make two belts. A steel plate faced with rubber cuts into four gaskets, and "
+                "gasketed steel pipe comes four to a steel plate pair, without a bronze pipe."],
+             "craft": craft("gasket")},
+            {"title": "Glass Chemistry", "icon": f"{MOD}:borosilicate_glass", "text": [
+                "Tincal, natural borax, crusts the sand of deserts and badlands; mine it for 1-3 borax.",
+                "Two sand and a borax melt into two borosilicate glass in the alloy smelter; the wire drawer pulls "
+                "each into four optical fibre, which can carry a processor's signals instead of gold.",
+                "Iron and borax make ferroboron; a rare earth oxide with ferroboron gives two neodymium magnets, "
+                "twice the old recipe."]},
+            {"title": "Chlorine and Lye", "icon": f"{MOD}:pvc_resin", "text": [
+                "PVC: the synthesis converter joins 250 mB of refinery gas and 250 mB of chlorine into 250 mB of vinyl "
+                "chloride; the polymerization reactor turns 500 mB of it into four PVC resin, and the metal press "
+                "makes two plastic sheets from each.",
+                "Soap: boil two rotten flesh in 250 mB of lye in the chemical reactor for four bars. Use a bar to "
+                "wash every status effect off, as milk does."]},
+            {"title": "Nitrogen Chemistry", "icon": f"{MOD}:nitric_acid_bucket", "text": [
+                "Air is four parts nitrogen to one of oxygen. The air separation unit splits it; hydrogen comes from "
+                "the electrolytic cell.",
+                "The synthesis converter joins hydrogen and nitrogen into ammonia, and burns ammonia in oxygen over "
+                "water into nitric acid.",
+                "Ammonia and phosphate make fertilizer (six for two phosphate, against four with sulfuric acid). "
+                "Nitric acid etches microchips with half as much acid as sulfuric."]},
+            machine_page("air_separation_unit"),
+            machine_page("synthesis_converter"),
+            {"title": "Grenades", "icon": f"{MOD}:grenade", "text": [
+                "Two cotton in 250 mB of nitric acid in the chemical reactor make two guncotton.",
+                "Two steel plates, a guncotton and an iron nugget make four grenades. Throw one with right-click; it "
+                "goes off where it hits.",
+                "The blast hurts living things within 4 blocks, up to eight hearts at the centre, and walls shield "
+                "from it. It never breaks a block.",
+                "The grenade launcher fires grenades from your inventory much further."]},
             {"title": "Aluminum, the Real Way", "icon": f"{MOD}:alumina", "text": [
                 "Digest a bauxite in 250 mB of lye in the chemical reactor: two alumina.",
                 "Smelt two alumina with a coal coke anode in the electrolytic cell: two aluminum ingots, every 8 "
@@ -446,6 +497,7 @@ def build():
                 "The alloy smelter melts a rare earth oxide with an iron ingot into a neodymium magnet, for the "
                 "magnet dynamo and magnet motor."]},
             machine_page("lithium_battery_bank"),
+            machine_page("flow_battery"),
             {"title": "Fertilizer", "icon": f"{MOD}:fertilizer", "text": [
                 "Two phosphate and 250 mB of sulfuric acid in the chemical reactor make four fertilizer.",
                 "Use one on the ground or a crop: every crop in the 5x5 area around it (a block up or down too) gets "
