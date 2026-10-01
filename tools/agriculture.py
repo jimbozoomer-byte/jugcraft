@@ -391,7 +391,7 @@ GIANT_PUMPKIN = {
     "start_weight": 100, "weight_per_point": 2, "max_weight": 1000, "watered_ticks": 24000,
     "max_size": 3, "face_size": 48, "reach": 3.5,
     "glow": {"base": 4, "per_holes": 27, "per_shaved": 108, "max": 15},
-    "drops": {1: 1, 2: 4, 3: 9}, "seeds": [1, 3],
+    "drops": {1: 1, 2: 4, 3: 9}, "seeds": [1, 3], "chop_table": "gameplay/chop_giant_pumpkin",
 }
 # The first cut into any plain pumpkin scoops it out: besides its seeds, 1-2 Pumpkin Guts and sometimes a
 # giant pumpkin seed (loot table gameplay/scoop_pumpkin).
@@ -417,6 +417,8 @@ CANTEEN = {"item": "gourd_canteen", "display": "Gourd Canteen", "capacity": 3}
 HALLOWEEN_DECOR = {"scarecrow": "Scarecrow", "corn_shock": "Corn Shock", "ornamental_corn_bundle": "Ornamental Corn Bundle",
                    "gourd_birdhouse": "Gourd Birdhouse"}
 SCARECROW_SHIRT = "red"
+# Item tag of what a scarecrow wears for a head (drawn on its shoulders the way an armor stand wears a pumpkin).
+SCARECROW_HEADS = "jugcraft:scarecrow_heads"
 DYE_COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan",
               "purple", "blue", "brown", "green", "red", "black"]
 
