@@ -334,6 +334,9 @@ def machine_assets(lang):
     lang[f"message.{MOD}.electric_motor"] = "Electric motor: %s / %s JE"
     lang[f"message.{MOD}.network_terminal"] = "Network: %s cables at %s JE/t, %s devices holding %s / %s JE (%s%%)"
     lang[f"message.{MOD}.network_terminal.none"] = "No cable connected"
+    lang[f"message.{MOD}.fluid_filter"] = "Filter: only %s"
+    lang[f"message.{MOD}.fluid_filter.none"] = ("Filter: not set, lets nothing out. Use a filled bucket on it, or "
+                                                "right-click it beside a tank of the fluid")
     lang[f"message.{MOD}.belt.first"] = "Now use the belt on the second pulley"
     lang[f"message.{MOD}.belt.linked"] = "Belt fitted"
     lang[f"message.{MOD}.belt.same"] = "Pick a different pulley"

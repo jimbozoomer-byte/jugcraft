@@ -1870,6 +1870,28 @@
           }
         },
         {
+          "title": "Fluid Filter",
+          "icon": "jugcraft:fluid_filter",
+          "text": [
+            "A steel pipe segment with a strainer. Fluid passes along it, but the tanks and machines it touches only get its chosen fluid (nothing until one is chosen). Use a filled bucket on it, or right-click it beside a tank holding the fluid (the way to choose a gas); sneak and right-click to clear it."
+          ],
+          "craft": {
+            "grid": [
+              null,
+              "jugcraft:steel_plate",
+              null,
+              "minecraft:iron_bars",
+              "jugcraft:steel_fluid_pipe",
+              "minecraft:iron_bars",
+              null,
+              "jugcraft:steel_plate",
+              null
+            ],
+            "result": "jugcraft:fluid_filter",
+            "count": 1
+          }
+        },
+        {
           "title": "Tinplate Tank",
           "icon": "jugcraft:fluid_tank",
           "text": [

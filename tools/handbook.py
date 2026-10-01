@@ -67,6 +67,9 @@ ABOUT = {
     "fluid_valve": "A steel pipe segment with a valve. Open, it carries fluid like a steel pipe; a redstone signal "
                    "closes it, and the pipes on either side become separate lines. Its lamp is green while open and "
                    "amber while closed.",
+    "fluid_filter": "A steel pipe segment with a strainer. Fluid passes along it, but the tanks and machines it touches "
+                    "only get its chosen fluid (nothing until one is chosen). Use a filled bucket on it, or right-click "
+                    "it beside a tank holding the fluid (the way to choose a gas); sneak and right-click to clear it.",
     "steel_fluid_pipe": "Like the bronze pipe, but carries 1,000 mB a tick for refinery flows. A pipe line carries as much "
                         "as its slowest pipe, so one bronze pipe holds a steel line back to 250 mB.",
     "heavy_pump": "A steel-tier pump: 1,000 mB a tick from below (water, lava or a tank) out of its top and sides, at "
@@ -359,7 +362,8 @@ def build():
             + [block_page(t, POWERED_TOOLS[t]) for t in POWERED_TOOLS]
             + [block_page(m, UPGRADE_MODULES[m][0]) for m in UPGRADE_MODULES]},
         {"title": "Fluids", "icon": f"{MOD}:fluid_tank", "pages":
-            [block_page(p, PIPES[p]["display"]) for p in ("bronze_fluid_pipe", "steel_fluid_pipe", "fluid_valve")]
+            [block_page(p, PIPES[p]["display"]) for p in ("bronze_fluid_pipe", "steel_fluid_pipe", "fluid_valve",
+                                                          "fluid_filter")]
             + [block_page(b, FLUID_BLOCKS[b]["display"]) for b in ("fluid_tank", "electric_pump", "heavy_pump")]},
         {"title": "Oil", "icon": f"{MOD}:crude_oil_bucket", "pages": [
             {"title": "Crude Oil", "icon": f"{MOD}:crude_oil_bucket", "text": [

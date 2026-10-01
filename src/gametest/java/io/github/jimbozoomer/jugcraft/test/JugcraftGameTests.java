@@ -7,6 +7,7 @@ import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
 import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
+import io.github.jimbozoomer.jugcraft.fluid.FluidFilterBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidTankBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidValveBlock;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
@@ -178,6 +179,43 @@ public class JugcraftGameTests {
 		helper.succeedWhen(() -> {
 			helper.assertTrue(opened.get(), "The valve has not been opened yet");
 			helper.assertTrue(tankEntity.storage.amount > 0, "The tank is still empty with the valve open");
+		});
+	}
+
+	/**
+	 * A fluid filter lets nothing into the tank it touches until it is set, and then only its fluid; a tank on an
+	 * ordinary pipe of the same line fills all along.
+	 */
+	@GameTest(maxTicks = 300)
+	public void fluidFilterLetsOnlyItsFluidOut(GameTestHelper helper) {
+		helper.setBlock(new BlockPos(1, 1, 3), Blocks.WATER);
+		BlockPos pump = new BlockPos(1, 2, 3);
+		helper.setBlock(pump, JugcraftFluids.ELECTRIC_PUMP);
+		helper.getBlockEntity(pump, ElectricPumpBlockEntity.class).energy().setAmount(ElectricPumpBlockEntity.ENERGY_CAPACITY);
+		helper.setBlock(new BlockPos(2, 2, 3), JugcraftFluids.STEEL_FLUID_PIPE);
+		BlockPos filter = new BlockPos(3, 2, 3);
+		helper.setBlock(filter, JugcraftFluids.FLUID_FILTER);
+		BlockPos open = new BlockPos(2, 2, 2);
+		BlockPos filtered = new BlockPos(4, 2, 3);
+		helper.setBlock(open, JugcraftFluids.FLUID_TANK);
+		helper.setBlock(filtered, JugcraftFluids.FLUID_TANK);
+		FluidTankBlockEntity openTank = helper.getBlockEntity(open, FluidTankBlockEntity.class);
+		FluidTankBlockEntity filteredTank = helper.getBlockEntity(filtered, FluidTankBlockEntity.class);
+		FluidFilterBlockEntity filterEntity = helper.getBlockEntity(filter, FluidFilterBlockEntity.class);
+		java.util.concurrent.atomic.AtomicBoolean set = new java.util.concurrent.atomic.AtomicBoolean();
+		helper.runAfterDelay(40, () -> {
+			helper.assertTrue(openTank.storage.amount > 0, "The tank on the ordinary pipe is empty");
+			helper.assertTrue(filteredTank.storage.amount == 0, "An unset filter let water out");
+			filterEntity.setFilter(FluidVariant.of(Fluids.LAVA));
+		});
+		helper.runAfterDelay(80, () -> {
+			helper.assertTrue(filteredTank.storage.amount == 0, "A lava filter let water out");
+			filterEntity.setFilter(FluidVariant.of(Fluids.WATER));
+			set.set(true);
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(set.get(), "The filter is not set to water yet");
+			helper.assertTrue(filteredTank.storage.amount > 0, "A water filter let no water out");
 		});
 	}
 
