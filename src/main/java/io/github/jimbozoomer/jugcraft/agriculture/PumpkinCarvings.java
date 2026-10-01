@@ -59,6 +59,9 @@ public final class PumpkinCarvings {
 	/** What the first cut scoops out of any pumpkin, besides its seeds (data/jugcraft/loot_table/gameplay/scoop_pumpkin.json). */
 	public static final String SCOOP_TABLE = "gameplay/scoop_pumpkin";
 	public static final ResourceKey<LootTable> SCOOP = ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id(SCOOP_TABLE));
+	/** What hollowing a giant pumpkin into a boat scoops out (data/jugcraft/loot_table/gameplay/hollow_giant_pumpkin.json). */
+	public static final String HOLLOW_TABLE = "gameplay/hollow_giant_pumpkin";
+	public static final ResourceKey<LootTable> HOLLOW = ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id(HOLLOW_TABLE));
 	/** Server switch: false allows only the starter faces. Tests may change it. */
 	public static boolean freeDraw = true;
 
@@ -69,6 +72,10 @@ public final class PumpkinCarvings {
 
 	public enum Result {
 		CARVED, UNCHANGED, NO_SESSION, NO_KNIFE, TOO_FAR, NOT_ALLOWED, NOT_A_PUMPKIN, INVALID, UNCARVING, NOT_A_TEMPLATE
+	}
+
+	public enum HollowResult {
+		HOLLOWED, NO_KNIFE, NOT_ALLOWED, TOO_SMALL, NOT_A_PUMPKIN
 	}
 
 	private PumpkinCarvings() {
@@ -219,6 +226,65 @@ public final class PumpkinCarvings {
 		level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
 		player.awardStat(Stats.ITEM_USED.get(knife.getItem()));
 		return Result.CARVED;
+	}
+
+	/**
+	 * Hollows out a giant pumpkin 2 or 3 blocks wide into a boat, for a player using a Carving Knife on its
+	 * top (the knife item asks for sneaking first, so a prize pumpkin is not hollowed by accident). A
+	 * full-grown 3x3x3 pumpkin becomes a {@link PumpkinBoat.Kind#BARGE} keeping its weight, carving and torch;
+	 * a 2x2x2 one a {@link PumpkinBoat.Kind#RACER} weighing {@link PumpkinBoat#RACER_BASE_WEIGHT} kg plus its
+	 * growth. The pumpkin is removed without its usual drops; instead the hollowing table ({@value #HOLLOW_TABLE})
+	 * gives its guts (and, from a full-grown one, its giant seeds). The player must still hold the knife and
+	 * may build there; reach was checked when the block was used.
+	 */
+	public static HollowResult hollow(ServerPlayer player, BlockPos pos, InteractionHand hand) {
+		ServerLevel level = player.level();
+		ItemStack knife = player.getItemInHand(hand);
+		if (!(knife.getItem() instanceof CarvingKnifeItem)) {
+			return HollowResult.NO_KNIFE;
+		}
+		BlockState state = level.getBlockState(pos);
+		if (!(state.getBlock() instanceof GiantPumpkinBlock)) {
+			return HollowResult.NOT_A_PUMPKIN;
+		}
+		int size = state.getValue(GiantPumpkinBlock.SIZE);
+		if (size < 2) {
+			return HollowResult.TOO_SMALL;
+		}
+		BlockPos master = GiantPumpkinBlock.masterPos(pos, state);
+		if (!player.mayUseItemAt(pos, Direction.UP, knife) || !level.mayInteract(player, master)) {
+			return HollowResult.NOT_ALLOWED;
+		}
+		if (!(level.getBlockEntity(master) instanceof GiantPumpkinBlockEntity giant)) {
+			return HollowResult.NOT_A_PUMPKIN;
+		}
+		PumpkinBoat.Kind kind = size == GiantPumpkinBlock.MAX_SIZE ? PumpkinBoat.Kind.BARGE : PumpkinBoat.Kind.RACER;
+		PumpkinBoatData data;
+		if (kind == PumpkinBoat.Kind.BARGE) {
+			int[][] faces = new int[4][];
+			for (Direction side : Direction.Plane.HORIZONTAL) {
+				faces[side.get2DDataValue()] = giant.face(side);
+			}
+			data = PumpkinBoatData.of(giant.weight(), giant.lit(), faces);
+		} else {
+			data = PumpkinBoatData.plain(PumpkinBoat.RACER_BASE_WEIGHT + giant.points() * GiantPumpkinBlockEntity.WEIGHT_PER_POINT);
+		}
+		ItemStack boat = new ItemStack(JugcraftAgriculture.item(kind.id));
+		boat.set(JugcraftAgriculture.PUMPKIN_BOAT, data);
+		BlockState masterState = level.getBlockState(master);
+		BlockPos top = master.offset(size / 2, size - 1, size / 2);
+		Block.dropFromBlockInteractLootTable(level, HOLLOW, master, masterState, giant, knife, player,
+				(serverLevel, stack) -> Block.popResource(serverLevel, top, stack));
+		// Removing the master removes the rest of the pumpkin, without drops.
+		level.removeBlock(master, false);
+		if (!player.getInventory().add(boat)) {
+			Block.popResource(level, top, boat);
+		}
+		knife.hurtAndBreak(1, player, hand.asEquipmentSlot());
+		level.playSound(null, top, SoundEvents.PUMPKIN_CARVE, SoundSource.BLOCKS, 1.0F, 0.6F);
+		level.gameEvent(player, GameEvent.BLOCK_DESTROY, top);
+		player.awardStat(Stats.ITEM_USED.get(knife.getItem()));
+		return HollowResult.HOLLOWED;
 	}
 
 	private static @Nullable InteractionHand knifeHand(ServerPlayer player) {

@@ -17,56 +17,6 @@ jobs:
           java-version: '25'
       - run: |
           set +e
-          ./gradlew compileGametestJava --no-daemon > compile.txt 2>&1
+          ./gradlew compileClientJava compileGametestJava --no-daemon > compile.txt 2>&1
           echo "exit $?"
-          grep -E "error:" -A4 compile.txt | head -200
-      - run: |
-          set +e
-          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
-          CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
-          FAPI=$(find ~/.gradle/caches -name 'fabric-rendering-v1*.jar' | head -1)
-          GT=$(find ~/.gradle/caches -name 'fabric-gametest-api-v1*.jar' | head -1)
-          CP="$CLIENT:$COMMON:$FAPI:$GT"
-          l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
-          c() { echo "=== CODE $1 $2"; javap -cp "$CP" -c -p "$1" 2>&1 | awk -v m="$2" '$0 ~ m {f=1} f {print; n++} n>=${3:-60} {exit}'; }
-          unzip -l "$COMMON" | grep -iE "DataStorage|saveddata/|world/clock/" | awk '{print $4}' | head -40
-          javap -cp "$CP" net.minecraft.world.level.Level | head -2
-          l net.minecraft.server.level.ServerLevel 'Data|Storage|Outside|Dark|Bright|getServer|sendParticles' 30
-          l net.minecraft.world.level.Level 'Outside|Dark|Bright|isDay|isNight|DayTime' 20
-          l net.minecraft.world.level.LevelTimeAccess '' 20
-          l net.minecraft.world.level.LevelAccessor 'Time|time' 20
-          l net.minecraft.world.clock.ClockManager '' 30
-          l net.minecraft.world.clock.ServerClockManager 'public' 30
-          l net.minecraft.world.clock.WorldClock '' 20
-          l net.minecraft.world.clock.WorldClocks '' 20
-          l net.minecraft.server.MinecraftServer 'DataStorage|getAdvancements|overworld|reloadableRegistries|SavedData' 20
-          l net.minecraft.world.level.storage.DimensionDataStorage 'public' 20
-          l net.minecraft.world.level.saveddata.SavedDataStorage 'public' 20
-          l net.minecraft.world.entity.vehicle.VehicleEntity '' 50
-          l 'net.minecraft.world.level.storage.loot.LootParams$Builder' 'public' 20
-          l net.minecraft.world.level.storage.loot.parameters.LootContextParamSets 'public static' 40
-          l net.minecraft.world.level.storage.loot.LootTable 'getRandomItems' 10
-          l 'net.minecraft.server.ReloadableServerRegistries$Holder' 'public' 10
-          l 'net.minecraft.client.renderer.entity.EntityRendererProvider$Context' 'public' 30
-          l net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry '' 10
-          l net.minecraft.client.renderer.SubmitNodeCollector '' 30
-          l net.minecraft.client.renderer.OrderedSubmitNodeCollector '' 30
-          l net.minecraft.client.renderer.rendertype.RenderTypes 'water|Water|entityCutout|entitySolid|entityTranslucent|NoCull' 20
-          javap -cp "$CP" -c -p net.minecraft.world.item.Items | grep -n -B3 -A30 'Field net/minecraft/world/level/block/Blocks.CARVED_PUMPKIN' | head -50
-          l net.minecraft.tags.ItemTags 'GAZE|DISGUISE|HEAD' 10
-          l net.minecraft.network.syncher.EntityDataSerializers 'public static final' 50
-          l net.minecraft.world.item.Item 'getPlayerPOVHitResult|use\(' 10
-          l net.minecraft.world.entity.Entity 'hurtMarked|snapTo|moveTo|absSnap|setPos\(|isInWater|getPassengers|isVehicle|ejectPassengers|startRiding' 30
-          c net.minecraft.world.entity.vehicle.boat.AbstractBoat 'modifyPassengerFluidInteractionBox' 30
-          c net.minecraft.world.entity.vehicle.boat.Boat 'rideHeight' 20
-          c net.minecraft.world.entity.vehicle.boat.AbstractBoat 'getPassengerAttachmentPoint' 50
-          l net.minecraft.world.item.ItemCooldowns 'public' 20
-          l net.minecraft.world.entity.LivingEntity 'getItemBySlot|setItemSlot' 5
-          l net.minecraft.gametest.framework.GameTestHelper 'spawn|setDayTime|setNight|Time|Mock' 40
-          l net.minecraft.client.renderer.entity.state.EntityRenderState 'passengerOffset' 5
-          l net.minecraft.world.entity.npc.villager.Villager 'isBaby|isSleeping|getBrain' 5
-          l net.minecraft.world.entity.ai.village.poi.PoiTypes 'HOME' 5
-          l net.minecraft.server.level.ServerPlayer 'connection|sendOverlayMessage|sendSystemMessage|getAdvancements' 8
-          l net.minecraft.world.entity.EntityType 'BOAT|OAK_BOAT|public static .*register' 10
-          l net.minecraft.world.level.block.DoorBlock 'type|BlockSetType|isOpen|setOpen' 10
-          c net.minecraft.world.entity.vehicle.VehicleEntity 'destroy' 60
+          grep -E "error:|warning: \[" -A3 compile.txt | head -300

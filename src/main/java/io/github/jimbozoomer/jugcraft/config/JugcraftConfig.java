@@ -29,9 +29,19 @@ public final class JugcraftConfig {
 	 */
 	public static final Map<String, Boolean> OPTIONS = Map.of("carving.free_draw", true);
 
+	/**
+	 * Text options, with their defaults. The Halloween event (trick-or-treating) runs from
+	 * {@code halloween.start} to {@code halloween.end} (month-day, both included) in {@code halloween.timezone}
+	 * on the server's clock; {@code halloween.mode} is {@code auto} (follow the dates), {@code on} or {@code off}
+	 * (for testing and off-season worlds). Treats already given are kept whatever the setting.
+	 */
+	public static final Map<String, String> TEXT_OPTIONS = Map.of(
+			"halloween.start", "10-20", "halloween.end", "11-03", "halloween.timezone", "UTC", "halloween.mode", "auto");
+
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
 	private static final Map<String, Boolean> OPTION_VALUES = new LinkedHashMap<>(OPTIONS);
+	private static final Map<String, String> TEXT_VALUES = new LinkedHashMap<>(TEXT_OPTIONS);
 
 	private JugcraftConfig() {
 	}
@@ -43,6 +53,15 @@ public final class JugcraftConfig {
 	/** A server option from {@link #OPTIONS}, as set in the file (its default before {@link #load}). */
 	public static boolean option(String key) {
 		Boolean value = OPTION_VALUES.get(key);
+		if (value == null) {
+			throw new IllegalArgumentException("No Jugcraft option " + key);
+		}
+		return value;
+	}
+
+	/** A text option from {@link #TEXT_OPTIONS}, as set in the file (its default before {@link #load}). */
+	public static String textOption(String key) {
+		String value = TEXT_VALUES.get(key);
 		if (value == null) {
 			throw new IllegalArgumentException("No Jugcraft option " + key);
 		}
@@ -74,9 +93,16 @@ public final class JugcraftConfig {
 			properties.setProperty(option.getKey(), Boolean.toString(value));
 		}
 
+		for (Map.Entry<String, String> option : TEXT_OPTIONS.entrySet()) {
+			String value = properties.getProperty(option.getKey(), option.getValue()).trim();
+			TEXT_VALUES.put(option.getKey(), value);
+			properties.setProperty(option.getKey(), value);
+		}
+
 		try (Writer writer = Files.newBufferedWriter(path)) {
 			properties.store(writer, "Jugcraft feature switches (false stops new worldgen and recipes; existing items and blocks stay)"
-					+ " and server options (carving.free_draw=false allows only the starter pumpkin faces).");
+					+ " and server options (carving.free_draw=false allows only the starter pumpkin faces; halloween.* sets when"
+					+ " trick-or-treating runs: start and end as MM-DD, a timezone, and mode auto, on or off).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}

@@ -12,13 +12,15 @@ import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 
 /**
  * Client entrypoint: machine and Cooking Pot menus to their screens, the wind turbine and belt renderers,
- * the handbook to its book, ore surveys to the prospector screen, and carved and giant pumpkins to their renderers and carving screen.
+ * the handbook to its book, ore surveys to the prospector screen, carved and giant pumpkins to their renderers and carving screen,
+ * and pumpkin boats to theirs.
  */
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
@@ -43,6 +45,8 @@ public final class JugcraftClient implements ClientModInitializer {
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.GIANT_PUMPKIN_ENTITY, GiantPumpkinRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_BARGE, PumpkinBoatRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_RACER, PumpkinBoatRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(OpenCarvingPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new CarvingScreen(payload)));
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(CarvingTextures::clear));

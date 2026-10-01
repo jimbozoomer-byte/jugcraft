@@ -24,23 +24,30 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -120,6 +127,12 @@ public final class JugcraftAgriculture {
 	public static DataComponentType<Integer> CANTEEN_WATER;
 	public static BlockEntityType<GiantPumpkinBlockEntity> GIANT_PUMPKIN_ENTITY;
 	public static BlockEntityType<HarvestScaleBlockEntity> HARVEST_SCALE_ENTITY;
+	/** A pumpkin boat's weight, torch and carving, on its item and its entity. */
+	public static DataComponentType<PumpkinBoatData> PUMPKIN_BOAT;
+	public static EntityType<PumpkinBoat> PUMPKIN_BARGE;
+	public static EntityType<PumpkinBoat> PUMPKIN_RACER;
+	public static BlockEntityType<RegattaFlagBlockEntity> REGATTA_FLAG_ENTITY;
+	public static BlockEntityType<RegattaBuoyBlockEntity> REGATTA_BUOY_ENTITY;
 	/** What each kind of pumpkin becomes when first carved by hand, and the loot table its seeds come from. */
 	private static final Map<Block, Block> CARVED_FROM = new HashMap<>();
 	private static final Map<Block, ResourceKey<LootTable>> CARVE_LOOT = new HashMap<>();
@@ -246,6 +259,8 @@ public final class JugcraftAgriculture {
 		food("caramel", 2, 0.1F, COMPOST_MEDIUM_HIGH);
 		treat("caramel_apple", 6, 0.6F);
 		food("popcorn_ball", 5, 0.6F, COMPOST_MEDIUM_HIGH);
+		// Trick-or-treating's rare prize (only villagers hand it out).
+		food("king_size_candy_bar", 8, 0.4F, COMPOST_MEDIUM_HIGH);
 
 		// Farm tools.
 		sickle("flint_sickle", 1, 131);
@@ -270,6 +285,8 @@ public final class JugcraftAgriculture {
 		registerDecorations();
 		registerCarving();
 		registerHalloween();
+		registerRegatta();
+		registerTrickOrTreat();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> FOOD_TAB.forEach(output::accept));
@@ -357,7 +374,11 @@ public final class JugcraftAgriculture {
 	private static Block carvedPumpkin(String id, Block pumpkin, ResourceKey<LootTable> seeds, MapColor color) {
 		Block carved = registerBlock(id, CarvedPumpkinBlock::new,
 				BlockBehaviour.Properties.ofFullCopy(Blocks.CARVED_PUMPKIN).mapColor(color).lightLevel(CarvedPumpkinBlock::light));
-		registerItem(id, props -> new BlockItem(carved, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		// Worn like a vanilla carved pumpkin: on the head, seen through, never swapped on by a right click (that places it).
+		Equippable worn = Equippable.builder(EquipmentSlot.HEAD).setSwappable(false)
+				.setCameraOverlay(Identifier.withDefaultNamespace("misc/pumpkinblur")).build();
+		registerItem(id, props -> new BlockItem(carved, props), new Item.Properties().useBlockDescriptionPrefix()
+				.component(DataComponents.EQUIPPABLE, worn), EQUIPMENT_TAB);
 		CARVED_FROM.put(pumpkin, carved);
 		CARVE_LOOT.put(pumpkin, seeds);
 		return carved;
@@ -439,6 +460,61 @@ public final class JugcraftAgriculture {
 		mum("red_mum", MobEffects.REGENERATION, 8.0F);
 		mum("purple_mum", MobEffects.NIGHT_VISION, 5.0F);
 	}
+
+	/**
+	 * The pumpkin regatta: Pumpkin Barge and Pumpkin Racer (entities and their items, hollowed from giant
+	 * pumpkins), the Regatta Flag that starts and times a run, and the numbered Regatta Buoys of its course.
+	 */
+	private static void registerRegatta() {
+		PUMPKIN_BOAT = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("pumpkin_boat"),
+				DataComponentType.<PumpkinBoatData>builder().persistent(PumpkinBoatData.CODEC).networkSynchronized(PumpkinBoatData.STREAM_CODEC)
+						.build());
+		PUMPKIN_BARGE = boat(PumpkinBoat.Kind.BARGE, 2.75F, 1.125F);
+		PUMPKIN_RACER = boat(PumpkinBoat.Kind.RACER, 1.75F, 0.9F);
+		for (PumpkinBoat.Kind kind : PumpkinBoat.Kind.values()) {
+			registerItem(kind.id, props -> new PumpkinBoatItem(kind, props), new Item.Properties().stacksTo(1)
+					.component(PUMPKIN_BOAT, kind.defaultData()), TOOL_TAB);
+		}
+		Block flag = registerBlock("regatta_flag", RegattaFlagBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SNOW)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		registerItem("regatta_flag", props -> new BlockItem(flag, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		Block buoy = registerBlock("regatta_buoy", RegattaBuoyBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.strength(0.5F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.DESTROY));
+		registerItem("regatta_buoy", props -> new PlaceOnWaterBlockItem(buoy, props), new Item.Properties().useBlockDescriptionPrefix(),
+				EQUIPMENT_TAB);
+		REGATTA_FLAG_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("regatta_flag"),
+				FabricBlockEntityTypeBuilder.create(RegattaFlagBlockEntity::new, flag).build());
+		REGATTA_BUOY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("regatta_buoy"),
+				FabricBlockEntityTypeBuilder.create(RegattaBuoyBlockEntity::new, buoy).build());
+	}
+
+	private static EntityType<PumpkinBoat> boat(PumpkinBoat.Kind kind, float width, float height) {
+		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id(kind.id));
+		return Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder.<PumpkinBoat>of(
+				(type, level) -> new PumpkinBoat(type, level, kind), MobCategory.MISC)
+				.noLootTable().sized(width, height).eyeHeight(height).clientTrackingRange(10).build(key));
+	}
+
+	/** The entity type of a kind of pumpkin boat. */
+	public static EntityType<PumpkinBoat> boatType(PumpkinBoat.Kind kind) {
+		return kind == PumpkinBoat.Kind.BARGE ? PUMPKIN_BARGE : PUMPKIN_RACER;
+	}
+
+	/** Costumes (worn on the head, nothing else) and the Candy Bag that knocks on villagers' doors. */
+	private static void registerTrickOrTreat() {
+		for (String costume : COSTUMES) {
+			Equippable.Builder worn = Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER);
+			if (costume.equals("ghost_sheet")) {
+				worn.setCameraOverlay(Jugcraft.id("misc/ghost_sheet"));
+			}
+			registerItem(costume, Item::new, new Item.Properties().stacksTo(1).component(DataComponents.EQUIPPABLE, worn.build()), TOOL_TAB);
+		}
+		registerItem("candy_bag", Item::new, new Item.Properties().stacksTo(1), TOOL_TAB);
+		TrickOrTreat.register();
+	}
+
+	/** The costume hats, in the order of their tag. */
+	public static final List<String> COSTUMES = List.of("witch_hat", "ghost_sheet", "scarecrow_hat");
 
 	/** A mum (garden chrysanthemum): a small flower with its item, and its potted form (no item, like vanilla's). */
 	private static void mum(String id, Holder<MobEffect> stewEffect, float seconds) {
