@@ -21,7 +21,8 @@ jobs:
           COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
           CP="$CLIENT:$COMMON"
-          p() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | head -${2:          m() { echo "=== $1 /$2/"; javap -cp "$CP" -c -p "$1" 2>&1 | awk -v re="$2" '/^  [a-z].*[(]/{p=($0 ~ re)} p' | head -${3:-120}; }
+          p() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | head -${2:-80}; }
+          m() { echo "=== $1 /$2/"; javap -cp "$CP" -c -p "$1" 2>&1 | awk -v re="$2" '/^  [a-z].*[(]/{p=($0 ~ re)} p' | head -${3:-120}; }
           l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -iE "${2:-.}" | head -${3:-60}; }
           l net.minecraft.world.item.Item 'isBarVisible|getBarWidth|getBarColor|appendHoverText|getPlayerPOVHitResult| use[(]|useOn|finishUsingItem|getUseDuration|interactLivingEntity|inventoryTick'
           l net.minecraft.world.level.block.FlowerBlock 'FlowerBlock[(]|codec'
