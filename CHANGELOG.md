@@ -46,7 +46,17 @@ No numbered release yet. Everything below is on `main`.
 - Also: composting, pig, chicken and parrot feed, `c:` crop, seed and food tags, and a new `agriculture` feature switch.
 - Original textures from `tools/crop_textures.py`. Twelve game tests, plus a client game test with screenshots of a corn maze, the fields and every growth stage.
 
-### Unmerged: Glass chemistry, batch 16
+### Unmerged: Explosive weapons, batch 18
+- **Guncotton** (2 cotton + 250 mB nitric acid, chemical reactor).
+- **Grenades**, thrown by hand, and the **grenade launcher**, which fires them further. The blast hurts living things only: up to 16 damage, walls shield, and no block, armor stand, frame or dropped item is ever touched.
+- New switch `explosives.enabled`. An advancement, a handbook page and a game test.
+
+### #73 Flow batteries, batch 17
+- **Vanadium electrolyte:** two asphalt binder and a bucket of sulfuric acid in the chemical reactor.
+- **Flow battery** (3×3×2): 1,000 JE per mB of electrolyte in it, up to 64,000,000 JE with 64 buckets; 8,192 JE/t in and out. Keeps its electrolyte when broken.
+- An advancement, a handbook page and a game test.
+
+### #72 Glass chemistry, batch 16
 - **Tincal**, natural borax, in desert and badlands sand; **borax**.
 - **Borosilicate glass** (2 sand + borax, alloy smelter) drawn into **optical fibre**, which can replace gold in processors.
 - **Ferroboron** (iron + borax): with a rare earth oxide it makes **two** neodymium magnets.
