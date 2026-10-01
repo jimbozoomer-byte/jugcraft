@@ -350,6 +350,16 @@ While the Halloween event runs (by default 20 October to 3 November; the server 
 
 More to do around Halloween, and decorations and sweets for any time of year. Voting, costumed mobs and the Peddler only happen while the Halloween event runs. Details, numbers and test evidence: [../features/halloween-festivities.md](../features/halloween-festivities.md).
 
+| **The festivities:** costumed mobs, the graveyard, a haunted arch, the Judging Stand, the sweets and the Peddler | **At midnight:** the Candle Skulls and the carved pumpkin on the stand glow |
+| --- | --- |
+| ![The Halloween festivities](../images/ingame_halloween_festivities.jpg) | ![The festivities at night](../images/ingame_halloween_festivities_night.jpg) |
+| **The graveyard:** Rounded, Cross and Obelisk Gravestones, engraved, with Candle Skulls | **An engraving** up close: "Here lies Jack O'Lantern, carved too deep" |
+| ![Gravestones and Candle Skulls](../images/ingame_gravestones.jpg) | ![An engraved gravestone](../images/ingame_gravestone_engraving.jpg) |
+| **The Judging Stand** with a lit carving, the four sweets, and the Halloween Peddler in his Witch Hat | |
+| ![The Judging Stand, the sweets and the Peddler](../images/ingame_judging_stand.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`FestivityClientGameTests`, software rendering, small previews).*
+
 ### The carving contest
 
 Put a hand-carved pumpkin on a **Judging Stand** and use the stand with an empty hand to enter it (only its carver can). While the event runs, everyone else uses the stand to vote for its carver: one vote per player per Halloween, moved by voting elsewhere, never for yourself. Sneak-use a stand for the standings. When the event ends, the three carvers with the most votes get the Harvest Scale's ribbons, once.
