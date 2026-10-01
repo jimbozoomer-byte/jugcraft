@@ -67,6 +67,12 @@ FOOTPRINTS = {
     "lithography_station": cuboid(3, 2, 2),
     # Fluid logistics: a 3x3x3 gas holder.
     "gas_holder": cuboid(3, 3, 3),
+    "advanced_engine": cuboid(2, 1, 1),
+    # Power: the advanced solar panel's pedestal and the 3x3 layer of cells above it.
+    "advanced_solar_panel": [(0, 0, 0), (0, 1, 0), (-1, 1, 0), (1, 1, 0), (0, 1, -1), (0, 1, 1), (-1, 1, -1),
+                             (1, 1, -1), (-1, 1, 1), (1, 1, 1)],
+    # Farming: a two-block crop harvester.
+    "crop_harvester": [(0, 0, 0), (0, 1, 0)],
 }
 
 # Machines that take power at one marked socket only: (part, face) for a north-facing machine.
@@ -342,6 +348,25 @@ MODELS["gas_holder"] = [
     ((-30, 2, 2), (14, 46, 46), {"*": "fluid_tank_side", "north": "#front", "up": "fluid_tank_top"}),
 ]
 
+MODELS["advanced_solar_panel"] = [
+    ((2, 0, 2), (14, 2, 14), "heavy_plinth"),
+    ((5, 2, 5), (11, 20, 11), {"*": STEEL, "north": "#front"}),
+    ((-14, 20, -14), (30, 22, 30), {"*": "heavy_plinth", "up": "solar_panel_top"}),
+]
+
+MODELS["advanced_engine"] = [
+    ((-16, 0, 0), (16, 2, 16), "heavy_plinth"),
+    ((-15, 2, 1), (15, 12, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((6, 6, 15), (10, 10, 16), "iron_shaft"),
+]
+
+MODELS["crop_harvester"] = [
+    ((0, 0, 0), (16, 2, 16), "heavy_plinth"),
+    ((1, 2, 1), (15, 14, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((3, 14, 3), (13, 28, 13), "wind_turbine_mast"),
+    ((0, 22, 1), (16, 26, 5), "sp_red_iron"),
+]
+
 # Textures the front face uses: "#front" in MODELS. Lit machines also get <front>_on.
 FRONTS = {
     "geothermal_generator": "geothermal_generator_front",
@@ -374,4 +399,7 @@ FRONTS = {
     "crystal_grower": "crystal_grower_front",
     "lithography_station": "lithography_station_front",
     "gas_holder": "gas_holder_front",
+    "advanced_solar_panel": "advanced_solar_panel_front",
+    "advanced_engine": "advanced_engine_front",
+    "crop_harvester": "crop_harvester_front",
 }

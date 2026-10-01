@@ -75,6 +75,8 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | CRUSHER | crusher | ore ×2, minerals, gravel/sand | 10k / 128 / 0 / 16 | in, out | `jugcraft:crushing` |
 | ARC_FURNACE | arc_furnace_controller | 3×3×3 casing structure | 50k / 512 / 0 / 64 | in, out | `jugcraft:arc_smelting` |
 | SOLAR_PANEL | solar_panel | 8 JE/t in sun | 4k / 0 / 32 / – | – | – |
+| ADVANCED_SOLAR_PANEL | advanced_solar_panel | **pedestal + 3×3 layer (10 parts)**, 64 JE/t in sun (sky checked above the array) | 400k / 0 / 512 / – | – | – |
+| ADVANCED_ENGINE | advanced_engine | **2×1×1** KE generator: gasoline/diesel → up to 1,024 KE/t out of the master's back | none (KE) | – (8,000 mB fuel tank) | – |
 | STEAM_GENERATOR | steam_generator | coal/bitumen + water → 64 JE/t | 40k / 0 / 128 / – | fuel, water bucket, empty bucket | – |
 | ALLOY_SMELTER | alloy_smelter | **3×2×6 multi-block (36 parts)**, power socket only | 10k / 128 / 0 / 20 | 2 in, out | `jugcraft:alloying` (multi) |
 | METAL_PRESS | metal_press | ingot → plate | 10k / 128 / 0 / 16 | in, out | `jugcraft:pressing` |
@@ -91,10 +93,11 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | CRYSTAL_GROWER | crystal_grower | **1×2** (cyan look): 4 silicon + phosphate → silicon boule | 60k / 512 / 0 / 128 | 2 in, out | `jugcraft:crystal_growing` (multi) |
 | LITHOGRAPHY_STATION | lithography_station | **3×2×2** fluid processor (cyan look): wafer + 2 copper wire + 100 mB acid → 4 microchips | 60k / 1,024 / 0 / 192 | 2 in, out, 4,000 mB tank | `jugcraft:lithography` |
 | GAS_HOLDER | gas_holder | **3×3×3** tank, 1,024 buckets of one gas (`GasFluid` only), no power, no screen | none | – (gas) | – |
-| STEEL_TANK | steel_tank | **2×2** tank, 128 buckets, no power, no screen | none | – (fluid) | – |
+| STEEL_TANK | steel_tank | **2×2** tank, 128 buckets, no power, no screen; drops with its fluid (`MachineKind.keepsContents`) | none | – (fluid) | – |
 | COKE_OVEN | coke_oven | **2×2, 2 tall + chimney block (9 parts)**, unpowered: coal → coke | none | in, out | `jugcraft:coking` |
 | STEEL_FOUNDRY | steel_foundry | **2×2×5**, unpowered: iron + coke → steel | none | 2 in, out | `jugcraft:steelmaking` (multi) |
 | COBBLESTONE_GENERATOR | cobblestone_generator | water + lava beside it → cobblestone, 20 ticks | 4k / 64 / 0 / 4 | 1 result slot (no inputs) | – |
+| CROP_HARVESTER | crop_harvester | **1×2**: harvests and replants ripe `CropBlock`s in the 9×9 field in front (`MachineBlockEntity.tickHarvester`, `harvestTarget`) | 20k / 256 / 0 / 24 | 3 result slots | – |
 | TREE_FARM | tree_farm | sapling → 6 logs, sapling back + extra | 10k / 128 / 0 / 16 | in, out, 2 byproduct | `jugcraft:tree_growing` |
 | WATER_WHEEL | water_wheel | **2 tall** generator: 8–12 JE/t per flowing-water block on its right | 8k / 0 / 64 / – | – | – |
 | AUTO_CRAFTER | auto_crafter | crafts the vanilla recipe in its 3×3 grid; each slot keeps one item as the pattern | 10k / 128 / 0 / 8 | 9 grid, out, 1 remainder | vanilla `crafting` |
@@ -110,6 +113,8 @@ Other blocks:
 | `copper_cable`, `silver_cable`, `aluminum_cable` | `energy/CableBlock` | 6 px energy transmitters (glowing green core, emissive strips): 256 / 1,024 / 4,096 JE/t; a network runs at its slowest cable |
 | `bronze_fluid_pipe` | `fluid/FluidPipeBlock` | 4 px fluid transmitter, 250 mB per push |
 | `fluid_tank` | `fluid/FluidTankBlock(Entity)` | 16,000 mB, one fluid, comparator output |
+| `sprinkler` | `farming/SprinklerBlock(Entity)`, `JugcraftFarming` | water tank (pipes) and fertilizer hopper; pulses random ticks on nearby crops; `wet` state shows spray |
+| `cotton_crop`, `cotton_seeds`, `cotton` | `farming/CottonCropBlock`, `JugcraftFarming` | a `CropBlock` with no item of its own (the seeds place it); `CROPS` in `tools/machines.py` drives its models, loot and tags |
 | `fluid_valve` | `fluid/FluidValveBlock` | a steel pipe; `carries(state)` is false while `powered`, so `FluidNetworks` stops there |
 | `fluid_filter` | `fluid/FluidFilterBlock(Entity)` | a steel pipe whose touching storages only take its saved `FluidVariant`; `FluidNetworks` endpoints remember their pipe |
 | `electric_pump` | `fluid/ElectricPumpBlock(Entity)` | pulls from below, 100 mB/t, 8 JE/t |
@@ -331,6 +336,11 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Electronics beyond processors: a monitor-bank multi-block, computers that control machines, and uses for processors in the tiers above.
 - EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
-- Any magic, farming, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md).
+- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md). Farming has a harvester, sprinkler and cotton; greenhouses and rubber trees are not built.
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).
 - Handbook translations (English only).
+
+### Stored fluid on items
+- `fluid/StoredFluid` (record: `FluidVariant`, droplets) is the `jugcraft:stored_fluid` data component (`JugcraftFluids.STORED_FLUID`, persistent and synced).
+- `FluidTankBlockEntity` and `MachineBlockEntity` (steel tank, gas holder reservoirs) write it in `collectImplicitComponents` and read it in `applyImplicitComponents`; loot tables copy it with `copy_components` (multi-block tanks only from part 0, and `LargeMachineBlock` breaks the master when another part goes).
+- `client/JugcraftClient` adds its tooltip line through `ItemTooltipCallback`.

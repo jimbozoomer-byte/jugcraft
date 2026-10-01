@@ -15,6 +15,8 @@ import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
 import io.github.jimbozoomer.jugcraft.fluid.FluidNetworks;
+import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
+import io.github.jimbozoomer.jugcraft.fluid.StoredFluid;
 import io.github.jimbozoomer.jugcraft.kinetic.KineticConsumer;
 import io.github.jimbozoomer.jugcraft.kinetic.KineticNetworks;
 import io.github.jimbozoomer.jugcraft.logistics.ItemNetworks;
@@ -40,6 +42,8 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponentGetter;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -49,6 +53,7 @@ import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -59,6 +64,9 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
@@ -69,7 +77,6 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import net.minecraft.world.level.block.Block;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -211,7 +218,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		return switch (kind) {
 			case FRACKING_RIG -> variant.isOf(PetroFluids.FRACKING_FLUID.source());
 			case DIESEL_GENERATOR -> tank == 0 && FluidFuels.jePerMb(kind, variant.getFluid()) > 0;
-			case DIESEL_ENGINE, FUEL_CELL -> tank == 0 && FluidFuels.jePerMb(kind, variant.getFluid()) > 0;
+			case DIESEL_ENGINE, FUEL_CELL, ADVANCED_ENGINE -> tank == 0 && FluidFuels.jePerMb(kind, variant.getFluid()) > 0;
 			case GAS_TURBINE -> tank == 0 ? FluidFuels.jePerMb(kind, variant.getFluid()) > 0
 					: variant.isOf(PetroFluids.LUBRICANT.source());
 			default -> FluidRecipes.usesFluid(server.getServer(), kind, tank, variant);
@@ -264,6 +271,25 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				setChanged();
 			}
 		};
+	}
+
+	/** A steel tank or gas holder drops with its fluid (see {@link StoredFluid}) and gets it back when placed again. */
+	@Override
+	protected void collectImplicitComponents(DataComponentMap.Builder components) {
+		super.collectImplicitComponents(components);
+		StoredFluid stored = reservoir == null ? null : StoredFluid.of(reservoir);
+		if (stored != null) {
+			components.set(JugcraftFluids.STORED_FLUID, stored);
+		}
+	}
+
+	@Override
+	protected void applyImplicitComponents(DataComponentGetter components) {
+		super.applyImplicitComponents(components);
+		StoredFluid stored = components.get(JugcraftFluids.STORED_FLUID);
+		if (stored != null && reservoir != null) {
+			stored.restore(reservoir);
+		}
 	}
 
 	/** A fluid processor's tanks, or null for other machines. */
@@ -370,6 +396,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		boolean active = switch (kind) {
 			case COAL_GENERATOR -> tickGenerator(level, pos);
 			case SOLAR_PANEL -> tickSolar(level, pos);
+			case ADVANCED_SOLAR_PANEL -> tickSolar(level, pos);
 			case STEAM_GENERATOR -> tickSteam(level, pos);
 			case LARGE_STEAM_ENGINE -> tickLargeEngine(level, pos, state);
 			case BATTERY_BOX, CAPACITOR_BANK, LITHIUM_BATTERY_BANK -> tickBattery(level, pos, state);
@@ -378,6 +405,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case WIND_TURBINE -> tickWind(level, pos, state);
 			case ORE_DRILL -> tickDrill(level, pos, state);
 			case DEPOSIT_DRILL -> tickDepositDrill(level, pos, state);
+			case CROP_HARVESTER -> tickHarvester(level, pos, state);
 			case COBBLESTONE_GENERATOR -> tickCobble(level, pos, state);
 			case WATER_WHEEL -> tickWaterWheel(level, pos, state);
 			case AUTO_CRAFTER -> tickCrafter(level, pos, state);
@@ -385,7 +413,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case FRACKING_RIG -> tickFrackingRig(level, pos, state);
 			case DIESEL_GENERATOR -> tickFluidGenerator(level, pos, state, MachineKind.DIESEL_OUTPUT);
 			case GAS_TURBINE -> tickFluidGenerator(level, pos, state, MachineKind.TURBINE_OUTPUT);
-			case DIESEL_ENGINE -> tickDieselEngine(level, pos, state);
+			case DIESEL_ENGINE, ADVANCED_ENGINE -> tickDieselEngine(level, pos, state);
 			case FUEL_CELL -> tickFluidGenerator(level, pos, state, MachineKind.FUEL_CELL_OUTPUT);
 			default -> kind.isFluidProcessor() ? tickFluidProcessor(level, pos, state) : tickProcessor(level, pos, state);
 		};
@@ -418,9 +446,12 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 
 	private boolean tickSolar(ServerLevel level, BlockPos pos) {
 		// Checked every tick but only reads the sky and weather: no scanning.
-		boolean sunlit = level.isBrightOutside() && level.canSeeSky(pos.above());
+		// The advanced panel's cells are on the layer above its pedestal: the sky must be open above them.
+		boolean advanced = kind == MachineKind.ADVANCED_SOLAR_PANEL;
+		boolean sunlit = level.isBrightOutside() && level.canSeeSky(advanced ? pos.above(2) : pos.above());
 		if (sunlit && energy.getAmount() < energy.getCapacity()) {
-			int rate = level.isRaining() ? MachineKind.SOLAR_PER_TICK / 2 : MachineKind.SOLAR_PER_TICK;
+			int full = advanced ? MachineKind.ADVANCED_SOLAR_PER_TICK : MachineKind.SOLAR_PER_TICK;
+			int rate = level.isRaining() ? full / 2 : full;
 			energy.setAmount(energy.getAmount() + rate);
 			setChanged();
 		}
@@ -597,7 +628,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	 * upper right back block into a shaft line. Only what the line takes is spent, so an idle engine burns nothing.
 	 */
 	private boolean tickDieselEngine(ServerLevel level, BlockPos pos, BlockState state) {
-		int output = MachineKind.DIESEL_ENGINE_OUTPUT;
+		boolean advanced = kind == MachineKind.ADVANCED_ENGINE;
+		int output = advanced ? MachineKind.ADVANCED_ENGINE_OUTPUT : MachineKind.DIESEL_ENGINE_OUTPUT;
 		maxBurn = output;
 		maxProgress = output;
 		if (!sides.redstone().allows(poweredByRedstone(level, pos, state))) {
@@ -618,7 +650,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false;
 		}
 		Direction facing = facing(state);
-		BlockPos shaft = kind.footprint().partPos(pos, facing, MachineKind.DIESEL_ENGINE_OUTPUT_PART);
+		BlockPos shaft = advanced ? pos : kind.footprint().partPos(pos, facing, MachineKind.DIESEL_ENGINE_OUTPUT_PART);
 		long taken = KineticNetworks.push(level, shaft, facing.getOpposite(), Math.min(burn, output));
 		if (taken <= 0) {
 			return false;
@@ -1004,6 +1036,116 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			cursor++;
 		}
 		setChanged();
+		return true;
+	}
+
+	/**
+	 * The crop harvester: works through the 9x9 field in front of it (at its own height, where crops on farmland sit),
+	 * and each ripe crop it finds takes {@link MachineKind#HARVEST_TICKS} powered ticks to harvest. The crop's drops go
+	 * into the result slots, less one seed, which it plants again; when the drops would not all fit, it waits.
+	 */
+	private boolean tickHarvester(ServerLevel level, BlockPos pos, BlockState state) {
+		if (sides.eject() && level.getGameTime() % EJECT_INTERVAL == 0) {
+			eject(level, pos, state);
+		}
+		if (!sides.redstone().allows(poweredByRedstone(level, pos, state))) {
+			return false;
+		}
+		BlockPos target = null;
+		for (int step = 0; step < MachineKind.HARVEST_SCAN_PER_TICK; step++) {
+			BlockPos at = harvestTarget(pos, facing(state), cursor);
+			if (level.isLoaded(at) && isRipe(level.getBlockState(at))) {
+				target = at;
+				break;
+			}
+			cursor = (cursor + 1) % HARVEST_AREA;
+		}
+		if (target == null) {
+			if (progress != 0) {
+				progress = 0;
+				setChanged();
+			}
+			return false;
+		}
+		MachineUpgrades.Effect upgrades = upgrades();
+		maxProgress = upgrades.ticks(MachineKind.HARVEST_TICKS);
+		long use = upgrades.use(kind.usePerTick);
+		if (progress < maxProgress) {
+			if (energy.getAmount() < use) {
+				return false;
+			}
+			energy.setAmount(energy.getAmount() - use);
+			progress++;
+		}
+		if (progress >= maxProgress) {
+			BlockState crop = level.getBlockState(target);
+			List<ItemStack> drops = new ArrayList<>(Block.getDrops(crop, level, target, null));
+			Item seed = crop.getBlock().asItem();
+			boolean replant = false;
+			for (ItemStack drop : drops) {
+				if (!replant && drop.is(seed)) {
+					drop.shrink(1);
+					replant = true;
+				}
+			}
+			if (!storeAll(drops)) {
+				setChanged();
+				return false; // Full: wait with the harvest ready.
+			}
+			level.setBlock(target, replant && crop.getBlock() instanceof CropBlock block ? block.getStateForAge(0)
+					: Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+			progress = 0;
+			cursor = (cursor + 1) % HARVEST_AREA;
+		}
+		setChanged();
+		return true;
+	}
+
+	private static final int HARVEST_AREA = (2 * MachineKind.HARVEST_RADIUS + 1) * (2 * MachineKind.HARVEST_RADIUS + 1);
+
+	/** Field block {@code index} of a harvester at {@code pos} facing {@code front}: the 9x9 square starting in front. */
+	static BlockPos harvestTarget(BlockPos pos, Direction front, int index) {
+		int side = 2 * MachineKind.HARVEST_RADIUS + 1;
+		int across = index % side - MachineKind.HARVEST_RADIUS;
+		int forward = index / side + 1;
+		return pos.relative(front, forward).relative(front.getClockWise(), across);
+	}
+
+	private static boolean isRipe(BlockState state) {
+		return state.getBlock() instanceof CropBlock crop && crop.isMaxAge(state);
+	}
+
+	/** Puts every stack into the result slots, or changes nothing and returns false if they would not all fit. */
+	private boolean storeAll(List<ItemStack> stacks) {
+		int first = kind.outputSlot();
+		List<ItemStack> slots = new ArrayList<>();
+		for (int slot = first; slot < kind.slots; slot++) {
+			slots.add(items.get(slot).copy());
+		}
+		for (ItemStack stack : stacks) {
+			ItemStack left = stack.copy();
+			for (int i = 0; i < slots.size() && !left.isEmpty(); i++) {
+				ItemStack held = slots.get(i);
+				int limit = Math.min(getMaxStackSize(), left.getMaxStackSize());
+				if (held.isEmpty()) {
+					int moved = Math.min(limit, left.getCount());
+					slots.set(i, left.copyWithCount(moved));
+					left.shrink(moved);
+				} else if (ItemStack.isSameItemSameComponents(held, left)) {
+					int moved = Math.min(limit - held.getCount(), left.getCount());
+					if (moved > 0) {
+						held.grow(moved);
+						left.shrink(moved);
+					}
+				}
+			}
+			if (!left.isEmpty()) {
+				return false;
+			}
+		}
+		for (int i = 0; i < slots.size(); i++) {
+			items.set(first + i, slots.get(i));
+		}
 		return true;
 	}
 
@@ -1561,7 +1703,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		output.putInt("max_burn", maxBurn);
 		output.putInt("water", tank);
 		output.putInt("sides", sides.pack());
-		if (kind == MachineKind.ORE_DRILL) {
+		if (kind == MachineKind.ORE_DRILL || kind == MachineKind.CROP_HARVESTER) {
 			output.putInt("cursor", cursor);
 		}
 		if (reservoir != null) {

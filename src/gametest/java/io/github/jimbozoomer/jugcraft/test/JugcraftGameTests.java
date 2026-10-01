@@ -8,11 +8,13 @@ import io.github.jimbozoomer.jugcraft.electronics.NetworkTerminalBlock;
 import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
+import io.github.jimbozoomer.jugcraft.farming.JugcraftFarming;
 import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidFilterBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidTankBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidValveBlock;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
+import io.github.jimbozoomer.jugcraft.fluid.StoredFluid;
 import io.github.jimbozoomer.jugcraft.kinetic.BeltPulleyBlockEntity;
 import io.github.jimbozoomer.jugcraft.kinetic.DynamoBlockEntity;
 import io.github.jimbozoomer.jugcraft.kinetic.ElectricMotorBlock;
@@ -65,6 +67,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
@@ -73,6 +76,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -227,6 +231,58 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/** The crop harvester harvests a ripe wheat crop in its field, keeps the wheat, and plants one of the seeds again. */
+	@GameTest(maxTicks = 200)
+	public void cropHarvesterHarvestsAndReplants(GameTestHelper helper) {
+		BlockPos master = new BlockPos(4, 1, 0);
+		LargeMachineBlock block = (LargeMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.CROP_HARVESTER);
+		helper.setBlock(master, block.defaultBlockState().setValue(MachineBlock.FACING, Direction.SOUTH));
+		block.setPlacedBy(helper.getLevel(), helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
+		charge(helper, master.above(), Direction.UP);
+		MachineBlockEntity harvester = helper.getBlockEntity(master, MachineBlockEntity.class);
+		// The field starts the block in front (south); a ripe crop two blocks out and one to the side.
+		BlockPos crop = new BlockPos(3, 1, 2);
+		helper.setBlock(crop.below(), Blocks.FARMLAND);
+		helper.setBlock(crop, ((CropBlock) Blocks.WHEAT).getStateForAge(7));
+		helper.succeedWhen(() -> {
+			BlockState replanted = helper.getBlockState(crop);
+			helper.assertTrue(replanted.is(Blocks.WHEAT) && ((CropBlock) Blocks.WHEAT).getAge(replanted) == 0,
+					"The crop is now " + replanted);
+			boolean wheat = false;
+			for (int slot = 0; slot < MachineKind.CROP_HARVESTER.slots; slot++) {
+				wheat |= harvester.getItem(slot).is(Items.WHEAT);
+			}
+			helper.assertTrue(wheat, "The harvester kept no wheat");
+		});
+	}
+
+	/**
+	 * Cotton: the seeds plant the crop on farmland, a ripe crop drops cotton and seeds (an unripe one only a seed), cotton counts as a crop for
+	 * fertilizer, and sifting coarse dirt can turn up the seeds.
+	 */
+	@GameTest
+	public void cottonGrowsFromSeedsAndDropsCotton(GameTestHelper helper) {
+		BlockPos crop = new BlockPos(2, 2, 2);
+		helper.setBlock(crop.below(), Blocks.FARMLAND);
+		helper.setBlock(crop, JugcraftFarming.COTTON_CROP);
+		helper.assertTrue(helper.getBlockState(crop).is(BlockTags.CROPS), "Cotton is not in minecraft:crops");
+		CropBlock cotton = (CropBlock) JugcraftFarming.COTTON_CROP;
+		helper.assertTrue(cotton.asItem() == JugcraftFarming.COTTON_SEEDS, "Cotton seeds do not plant cotton");
+		BlockState ripe = cotton.getStateForAge(cotton.getMaxAge());
+		helper.setBlock(crop, ripe);
+		List<ItemStack> drops = Block.getDrops(ripe, helper.getLevel(), helper.absolutePos(crop), null);
+		helper.assertTrue(drops.stream().anyMatch(stack -> stack.is(JugcraftFarming.COTTON)), "A ripe crop dropped " + drops);
+		helper.assertTrue(drops.stream().anyMatch(stack -> stack.is(JugcraftFarming.COTTON_SEEDS)), "A ripe crop dropped " + drops);
+		List<ItemStack> unripe = Block.getDrops(cotton.getStateForAge(3), helper.getLevel(), helper.absolutePos(crop), null);
+		helper.assertTrue(unripe.stream().noneMatch(stack -> stack.is(JugcraftFarming.COTTON))
+				&& unripe.stream().anyMatch(stack -> stack.is(JugcraftFarming.COTTON_SEEDS)), "An unripe crop dropped " + unripe);
+		MachineRecipe sifting = MachineRecipes.find(helper.getLevel(), MachineKind.SIEVE, new ItemStack(Items.COARSE_DIRT))
+				.orElseThrow(() -> helper.assertionException("No sifting recipe for coarse dirt"));
+		helper.assertTrue(sifting.byproducts().stream().anyMatch(b -> b.result().create().is(JugcraftFarming.COTTON_SEEDS)),
+				"Sifting coarse dirt never gives cotton seeds");
+		helper.succeed();
+	}
+
 	/** The 3x2x6 alloy smelter: places all 36 blocks, takes power only at its socket, makes bronze. */
 	@GameTest(maxTicks = 400)
 	public void alloySmelterMakesBronze(GameTestHelper helper) {
@@ -309,6 +365,85 @@ public class JugcraftGameTests {
 		helper.assertTrue(reading.stored() == 1_100_000, "Stored: " + reading.stored());
 		helper.assertTrue(reading.capacity() == 4_400_000, "Capacity: " + reading.capacity());
 		helper.succeed();
+	}
+
+	/**
+	 * Loot tables load in Minecraft 26.x's format: the charging station drops once (from its lower half only) and salt
+	 * ore drops two to four salt. With the older keys, which 26.x ignores, both halves dropped and the ore dropped one.
+	 */
+	@GameTest
+	public void lootTablesKeepTheirConditionsAndCounts(GameTestHelper helper) {
+		BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
+		BlockState lower = JugcraftTools.CHARGING_STATION.defaultBlockState();
+		BlockState upper = lower.setValue(ChargingStationBlock.HALF, DoubleBlockHalf.UPPER);
+		helper.assertTrue(Block.getDrops(lower, helper.getLevel(), pos, null).size() == 1, "The lower half did not drop the station");
+		helper.assertTrue(Block.getDrops(upper, helper.getLevel(), pos, null).isEmpty(), "The upper half dropped a second station");
+		BlockState saltOre = BuiltInRegistries.BLOCK.getValue(Jugcraft.id("salt_ore")).defaultBlockState();
+		for (int i = 0; i < 8; i++) {
+			int salt = Block.getDrops(saltOre, helper.getLevel(), pos, null).stream().mapToInt(ItemStack::getCount).sum();
+			helper.assertTrue(salt >= 2 && salt <= 4, "Salt ore dropped " + salt + " salt");
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * A broken tank drops with its fluid and a placed one takes it back: a tinplate tank with five buckets of water
+	 * and a steel tank broken from any of its blocks both keep what they held, and an empty tank's item carries nothing.
+	 */
+	@GameTest(maxTicks = 40)
+	public void tanksKeepTheirFluidWhenBroken(GameTestHelper helper) {
+		BlockPos tank = new BlockPos(1, 1, 1);
+		helper.setBlock(tank, JugcraftFluids.FLUID_TANK);
+		FluidTankBlockEntity tankEntity = helper.getBlockEntity(tank, FluidTankBlockEntity.class);
+		List<ItemStack> empty = Block.getDrops(helper.getBlockState(tank), helper.getLevel(), helper.absolutePos(tank), tankEntity);
+		helper.assertTrue(empty.size() == 1 && !empty.get(0).has(JugcraftFluids.STORED_FLUID), "An empty tank dropped with fluid");
+		try (Transaction transaction = Transaction.openOuter()) {
+			tankEntity.storage.insert(FluidVariant.of(Fluids.WATER), 5 * FluidConstants.BUCKET, transaction);
+			transaction.commit();
+		}
+		List<ItemStack> drops = Block.getDrops(helper.getBlockState(tank), helper.getLevel(), helper.absolutePos(tank), tankEntity);
+		helper.assertTrue(drops.size() == 1, "The tank dropped " + drops.size() + " stacks");
+		StoredFluid stored = drops.get(0).get(JugcraftFluids.STORED_FLUID);
+		helper.assertTrue(stored != null && stored.variant().isOf(Fluids.WATER) && stored.amount() == 5 * FluidConstants.BUCKET,
+				"The tank's item does not carry its water: " + stored);
+		BlockPos placed = new BlockPos(3, 1, 1);
+		helper.setBlock(placed, JugcraftFluids.FLUID_TANK);
+		FluidTankBlockEntity placedEntity = helper.getBlockEntity(placed, FluidTankBlockEntity.class);
+		placedEntity.applyComponentsFromItemStack(drops.get(0));
+		helper.assertTrue(placedEntity.storage.variant.isOf(Fluids.WATER) && placedEntity.storage.amount == 5 * FluidConstants.BUCKET,
+				"The placed tank did not take back its water");
+
+		BlockPos base = new BlockPos(5, 1, 1);
+		LargeMachineBlock steel = (LargeMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.STEEL_TANK);
+		helper.setBlock(base, steel.defaultBlockState());
+		steel.setPlacedBy(helper.getLevel(), helper.absolutePos(base), helper.getBlockState(base), null, ItemStack.EMPTY);
+		MachineBlockEntity steelEntity = helper.getBlockEntity(base, MachineBlockEntity.class);
+		try (Transaction transaction = Transaction.openOuter()) {
+			steelEntity.reservoir().insert(FluidVariant.of(Fluids.LAVA), 20 * FluidConstants.BUCKET, transaction);
+			transaction.commit();
+		}
+		List<ItemStack> steelDrops = Block.getDrops(helper.getBlockState(base), helper.getLevel(), helper.absolutePos(base), steelEntity);
+		StoredFluid lava = steelDrops.isEmpty() ? null : steelDrops.get(0).get(JugcraftFluids.STORED_FLUID);
+		helper.assertTrue(steelDrops.size() == 1 && lava != null && lava.variant().isOf(Fluids.LAVA) && lava.amount() == 20 * FluidConstants.BUCKET,
+				"The steel tank's item does not carry its lava: " + steelDrops);
+		// Break another block of the 2x2 tank (not the master, which holds the fluid): the whole tank drops once.
+		BlockPos other = null;
+		for (BlockPos near : BlockPos.betweenClosed(base.offset(-1, 0, -1), base.offset(1, 0, 1))) {
+			if (!near.equals(base) && helper.getBlockState(near).is(steel)) {
+				other = near.immutable();
+			}
+		}
+		helper.assertTrue(other != null, "The steel tank did not form");
+		BlockPos broken = other;
+		helper.destroyBlock(broken);
+		helper.succeedWhen(() -> {
+			helper.assertBlockNotPresent(steel, base);
+			helper.assertBlockNotPresent(steel, broken);
+			int tanks = helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+					new net.minecraft.world.phys.AABB(helper.absolutePos(base)).inflate(3),
+					item -> item.getItem().has(JugcraftFluids.STORED_FLUID) && item.getItem().get(JugcraftFluids.STORED_FLUID).amount() == 20 * FluidConstants.BUCKET).size();
+			helper.assertTrue(tanks == 1, "Breaking the steel tank's top dropped " + tanks + " full tanks");
+		});
 	}
 
 	/** Breaking any block of a multi-block machine removes the whole machine (here the nine-block wind turbine). */
