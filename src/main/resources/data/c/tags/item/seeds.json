@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:cotton_seeds",
     "#c:seeds/corn",
     "#c:seeds/sunflower",
     "#c:seeds/beans",
