@@ -10,6 +10,7 @@ import io.github.jimbozoomer.jugcraft.world.ArcadeCabinetBlock;
 import io.github.jimbozoomer.jugcraft.world.PixelHollows;
 import io.github.jimbozoomer.jugcraft.world.RetroTrader;
 import java.util.List;
+import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerConnection;
@@ -84,7 +85,7 @@ public class JugcraftServerClientGameTests implements FabricClientGameTest {
 				server.runOnServer(minecraft -> placeFixture(minecraft.overworld(), origin));
 				server.waitFor(minecraft -> !traders(minecraft.overworld()).isEmpty(), 100);
 				server.runOnServer(minecraft -> makeRetroTraders(minecraft.overworld()));
-				server.runCommand("tp @a %d.5 %d %d.5 180 20".formatted(origin.getX(), origin.getY(), origin.getZ()));
+				server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 180 20", origin.getX() + 0.5, origin.getY(), origin.getZ() + 0.5));
 				context.waitTicks(20);
 				connection.waitForChunksRender();
 
@@ -101,15 +102,12 @@ public class JugcraftServerClientGameTests implements FabricClientGameTest {
 				context.runOnClient(client -> client.player.closeContainer()); // as Escape does: tells the server too
 				context.waitForScreen(null);
 
-				// The Retro Trader's offers reach the client. First a real right-click; if his screen does not open, log
-				// what the client and server see and have the server open it as a right-click does, so the offers still
-				// travel over the network.
+				// The Retro Trader's offers reach the client after a real right-click on him.
 				context.getInput().lookAt(trader(origin));
 				context.waitTick();
 				context.getInput().pressKey(options -> options.keyUse);
 				try {
-					context.waitFor(client -> client.player.containerMenu instanceof MerchantMenu, 60);
-					Jugcraft.LOGGER.info("[server-check] right-clicking the Retro Trader opened his trades");
+					context.waitFor(client -> client.player.containerMenu instanceof MerchantMenu, 100);
 				} catch (AssertionError timedOut) {
 					String client = context.computeOnClient(minecraft -> "client player at " + minecraft.player.position() + " looking "
 							+ minecraft.player.getYRot() + "/" + minecraft.player.getXRot());
@@ -119,14 +117,8 @@ public class JugcraftServerClientGameTests implements FabricClientGameTest {
 						return "server player at " + player.position() + ", villager at " + villager.position() + ", distance "
 								+ player.distanceTo(villager) + ", offers " + villager.getOffers().size() + ", trading " + villager.isTrading();
 					});
-					Jugcraft.LOGGER.warn("[server-check] right-clicking the Retro Trader did not open his trades ({}; {}); the server opens them",
-							client, serverSide);
-					server.runOnServer(minecraft -> {
-						ServerPlayer player = minecraft.getPlayerList().getPlayers().get(0);
-						Villager villager = traders(minecraft.overworld()).get(0);
-						villager.setTradingPlayer(player);
-						villager.openTradingScreen(player, villager.getDisplayName(), villager.getVillagerData().level());
-					});
+					throw new AssertionError("Right-clicking the Retro Trader did not open his trades (" + client + "; " + serverSide + ")",
+							timedOut);
 				}
 				context.waitForScreen(MerchantScreen.class);
 				context.waitTicks(10);
@@ -181,7 +173,9 @@ public class JugcraftServerClientGameTests implements FabricClientGameTest {
 		BlockPos trader = trader(origin);
 		var server = level.getServer();
 		server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
-				"summon minecraft:villager %d.5 %d %d.5 {NoAI:1b,Rotation:[0f,0f]}".formatted(trader.getX(), trader.getY(), trader.getZ()));
+				// The block's centre: "%d.5" would put a negative coordinate half a block on the wrong side.
+				String.format(Locale.ROOT, "summon minecraft:villager %.1f %d %.1f {NoAI:1b,Rotation:[0f,0f]}", trader.getX() + 0.5, trader.getY(),
+						trader.getZ() + 0.5));
 	}
 
 	/** Motionless villagers, which only this test makes. */
