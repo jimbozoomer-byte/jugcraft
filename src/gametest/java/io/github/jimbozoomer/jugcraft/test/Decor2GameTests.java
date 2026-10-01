@@ -21,9 +21,11 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -135,7 +137,7 @@ public class Decor2GameTests {
 		use(helper, player, pos, Direction.UP);
 		helper.assertTrue(!helper.getBlockState(pos).getValue(LuminariaBlock.LIT), "An empty hand snuffs it");
 
-		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.ORANGE_DYE, 2));
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("orange_dye")), 2));
 		use(helper, player, pos, Direction.UP);
 		helper.assertTrue(helper.getBlockState(pos).getValue(LuminariaBlock.COLOR) == DyeColor.ORANGE && player.getMainHandItem().getCount() == 1,
 				"Orange dye colours it orange, using one dye");
