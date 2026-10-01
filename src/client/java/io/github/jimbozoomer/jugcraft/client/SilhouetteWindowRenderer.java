@@ -83,7 +83,9 @@ public class SilhouetteWindowRenderer implements BlockEntityRenderer<DecorationB
 			if (front) {
 				// The north side, as the block model maps a north face: u runs from east to west.
 				float z = 7.25F / 16; // a quarter pixel proud of the paper, so it never sinks into it
-				float[][] corners = {{lo, hi}, {lo, lo}, {hi, lo}, {hi, hi}};
+				// Corners in the order the generated quads use (tools/decor6_data.py FACE_CORNERS), which these render types
+				// show from the front.
+				float[][] corners = {{lo, lo}, {lo, hi}, {hi, hi}, {hi, lo}};
 				for (float[] c : corners) {
 					buffer.addVertex(matrix, c[0], c[1], z).setColor(0xFFFFFFFF).setUv(1.0F - c[0], 1.0F - c[1])
 							.setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(matrix, 0, 0, -1);
@@ -92,7 +94,7 @@ public class SilhouetteWindowRenderer implements BlockEntityRenderer<DecorationB
 			if (back) {
 				// The south side: u runs from west to east.
 				float z = 8.75F / 16;
-				float[][] corners = {{hi, hi}, {hi, lo}, {lo, lo}, {lo, hi}};
+				float[][] corners = {{hi, lo}, {hi, hi}, {lo, hi}, {lo, lo}};
 				for (float[] c : corners) {
 					buffer.addVertex(matrix, c[0], c[1], z).setColor(0xFFFFFFFF).setUv(c[0], 1.0F - c[1])
 							.setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(matrix, 0, 0, 1);
