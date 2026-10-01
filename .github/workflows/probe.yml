@@ -24,41 +24,21 @@ jobs:
           set +e
           COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
-          FAPI=$(find ~/.gradle/caches -name 'fabric-*.jar' -path '*net.fabricmc.fabric-api*' | tr '\n' ':')
-          CP="$CLIENT:$COMMON:$FAPI"
+          CP="$CLIENT:$COMMON"
           l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
-          unzip -l "$COMMON" | grep -iE "trading/|villager_trade|TradeSet|npc/.*Trade|WanderingTrader" | awk '{print $4}' | head -40
-          unzip -l "$COMMON" | grep -iE "data/minecraft/(villager_trade|trade)" | awk '{print $4}' | head -10
-          l net.minecraft.world.item.trading.MerchantOffer 'public' 30
-          l net.minecraft.world.item.trading.ItemCost 'public' 20
-          l net.minecraft.world.item.trading.MerchantOffers 'public' 10
-          l net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader 'public|protected' 40
-          l net.minecraft.world.entity.npc.WanderingTrader 'public|protected' 40
-          l net.minecraft.world.entity.npc.villager.AbstractVillager 'getOffers|updateTrades|offers' 10
-          l net.minecraft.world.entity.Mob 'DropChance|dropChance|setGuaranteed|equip' 20
-          l net.minecraft.world.entity.EquipmentSlot 'HEAD' 5
-          l net.minecraft.world.item.component.Consumable 'public' 20
-          l 'net.minecraft.world.item.component.Consumable$Builder' 'public' 20
-          l net.minecraft.world.item.component.Consumables 'public static' 20
-          l net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect 'public' 10
-          l 'net.minecraft.world.item.Item$Properties' 'food' 5
-          l net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents '' 10
-          l net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents '' 20
-          l 'net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents$AfterDeath' '' 5
-          unzip -l $(find ~/.gradle/caches -name 'fabric-resource-loader*.jar' | head -1) | grep -i "api/" | awk '{print $4}' | head -20
-          l net.fabricmc.fabric.api.resource.v1.ResourceLoader '' 20
-          l net.fabricmc.fabric.api.resource.ResourceManagerHelper '' 20
-          l net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener '' 10
-          l net.minecraft.server.packs.resources.ResourceManagerReloadListener '' 10
-          l net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener 'public|protected' 20
-          l net.minecraft.client.renderer.blockentity.SignRenderer 'submit|Text|text' 20
-          l net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider\$Context 'public' 20
-          l net.minecraft.world.entity.Entity 'Tag|tag' 20
-          l net.minecraft.world.entity.monster.zombie.Zombie 'public' 5
-          l net.minecraft.world.entity.monster.Zombie 'public' 5
-          l net.minecraft.world.level.block.WebBlock '' 10
-          l net.minecraft.world.level.block.LanternBlock 'HANGING|public' 10
-          l net.minecraft.world.level.storage.loot.parameters.LootContextParamSets 'ENTITY' 3
-          l net.minecraft.world.entity.LivingEntity 'getLootTable|dropFromLootTable|lastHurtByPlayer' 10
-          l net.minecraft.server.players.PlayerList 'getPlayer' 5
-          l net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents '' 10
+          for f in data/minecraft/villager_trade/wandering_trader/emerald_oak_sapling.json data/minecraft/villager_trade/farmer/2/emerald_apple.json data/minecraft/tags/villager_trade/librarian/level_3.json; do echo "--- $f"; unzip -p "$COMMON" "$f"; echo; done
+          unzip -l "$COMMON" | grep -iE "data/minecraft/(trade_set|villager_trade)/[a-z_]+\.json|trade_set" | awk '{print $4}' | head -20
+          for f in $(unzip -l "$COMMON" | grep -iE "data/minecraft/trade_set/.*json" | awk '{print $4}' | head -3); do echo "--- $f"; unzip -p "$COMMON" "$f"; echo; done
+          unzip -l "$COMMON" | grep -iE "tags/villager_trade/wandering|villager_trade/wandering_trader" | awk '{print $4}' | head -40
+          for f in $(unzip -l "$COMMON" | grep -iE "tags/villager_trade/wandering.*json" | awk '{print $4}' | head -3); do echo "--- $f"; unzip -p "$COMMON" "$f"; echo; done
+          l net.minecraft.world.item.trading.VillagerTrade '' 40
+          l net.minecraft.world.item.trading.TradeSet '' 30
+          l net.minecraft.world.item.trading.TradeSets 'public static' 30
+          javap -cp "$CP" -c -p net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader | grep -A40 "void updateTrades" | head -50
+          javap -cp "$CP" -c -p net.minecraft.world.entity.npc.villager.AbstractVillager | grep -A45 "void addOffersFromTradeSet" | head -50
+          l net.minecraft.world.entity.Entity 'getTags|addTag|removeTag|entityTags' 10
+          l net.minecraft.world.entity.DropChances 'public' 20
+          l net.minecraft.client.gui.Font 'public .* split|public int width|lineHeight|public .* plainSubstrByWidth' 10
+          unzip -l "$CLIENT" | grep -iE "renderer/blockentity/.*Sign" | awk '{print $4}'
+          javap -cp "$CP" -c -p net.minecraft.client.renderer.blockentity.AbstractSignRenderer | grep -B12 "submitText" | head -60
+          l net.minecraft.core.registries.Registries 'TRADE|VILLAGER_TRADE' 5
