@@ -125,7 +125,7 @@ public final class PumpkinCarvings {
 	}
 
 	/** The design of a Pumpkin Stencil in the player's off hand, which the screen offers to press in. */
-	static Optional<int[]> stencil(Player player) {
+	public static Optional<int[]> stencil(Player player) {
 		ItemStack held = player.getOffhandItem();
 		PumpkinCarving design = held.get(JugcraftAgriculture.STENCIL);
 		return design == null || design.isBlank(0) ? Optional.empty() : Optional.of(design.face(0));

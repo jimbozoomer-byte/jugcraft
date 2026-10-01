@@ -376,11 +376,12 @@ HEIRLOOM_TAG = "jugcraft:heirloom_pumpkins"
 # farmland that grows like a pumpkin stem but vine_growth_time times slower, then sets one small fruit on a
 # free side. While the vine holds it, each random tick of the fruit's master block gives 1 growth point, +1
 # if the vine's farmland is moist, +1 if watered (Gourd Canteen) in the last watered_ticks; bone meal gives
-# bone_meal_points. At grow_to_two points it swells to 2x2x2, at grow_to_three more to 3x3x3, if there is
-# room (air, grass, flowers; never water) on ground fruit can lie on. Full grown it weighs start_weight
-# (+0-20) kg and puts on weight_per_point kg a point up to max_weight, until carved. Each side carves as one
-# face_size x face_size face; a torch lights it with glow = base + holes / per_holes + shaved / per_shaved.
-# Breaking any block breaks it all and drops `drops[size]` pumpkins (and giant seeds when full grown).
+# bone_meal_points. Points count up from planting: at grow_to_two it swells to 2x2x2, at grow_to_three to
+# 3x3x3, if there is room (air, grass, flowers; never water) on ground fruit can lie on. Full grown it weighs
+# start_weight (+0-20) kg and puts on weight_per_point kg a point up to max_weight, until carved. Each side
+# carves as one face_size x face_size face; a torch lights it with glow = base + holes / per_holes +
+# shaved / per_shaved. Breaking any block breaks it all and drops `drops[size]` pumpkins (and giant seeds
+# when full grown).
 GIANT_PUMPKIN = {
     "block": "giant_pumpkin", "vine": "giant_pumpkin_vine", "attached_vine": "attached_giant_pumpkin_vine",
     "seed": "giant_pumpkin_seeds", "display": "Giant Pumpkin", "vine_growth_time": 1.5,
