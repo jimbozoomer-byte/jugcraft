@@ -1,0 +1,88 @@
+name: Probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - run: |
+          set +e
+          ./gradlew compileClientJava compileGametestJava --no-daemon > compile.txt 2>&1
+          echo "exit $?"
+          grep -E "error:" -A3 compile.txt | head -300
+      - run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
+          FAPI=$(find ~/.gradle/caches -name 'fabric-*rendering-v1*.jar' | grep -v sources | head -3 | tr '\n' ':')
+          FENT=$(find ~/.gradle/caches -name 'fabric-object-builder-api*.jar' | grep -v sources | head -2 | tr '\n' ':')
+          CP="$CLIENT:$COMMON:$FAPI:$FENT"
+          l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
+          find ~/.gradle/caches -name 'fabric-*.jar' | grep -v sources | xargs -I{} sh -c 'unzip -l {} 2>/dev/null | grep -iE "ModelLayer|DefaultAttribute" | awk "{print \$4}" | sed "s#^#{}: #"' | head -20
+          l net.minecraft.client.renderer.entity.LivingEntityRenderer 'public|protected' 40
+          l net.minecraft.client.renderer.entity.MobRenderer 'public|protected' 20
+          l net.minecraft.client.renderer.entity.state.LivingEntityRenderState 'public' 40
+          l net.minecraft.client.renderer.entity.state.EntityRenderState 'public' 40
+          l net.minecraft.client.model.EntityModel 'public|protected' 20
+          l net.minecraft.client.model.Model 'public|protected' 30
+          l net.minecraft.client.model.geom.ModelPart 'public' 40
+          l net.minecraft.client.model.geom.builders.PartDefinition 'public' 20
+          l net.minecraft.client.model.geom.builders.CubeListBuilder 'public' 40
+          l net.minecraft.client.model.geom.PartPose 'public static' 20
+          l net.minecraft.client.model.geom.builders.LayerDefinition 'public' 10
+          l net.minecraft.client.model.geom.builders.MeshDefinition 'public' 10
+          l net.minecraft.client.model.geom.ModelLayerLocation 'public' 10
+          l net.minecraft.client.renderer.entity.EntityRendererProvider\$Context 'public' 30
+          l net.minecraft.client.renderer.entity.ThrownItemRenderer 'public' 10
+          l net.minecraft.client.renderer.entity.EntityRenderer 'protected|public' 40
+          l net.minecraft.client.renderer.rendertype.RenderTypes 'eyes|emissive|translucent|entityCutout' 20
+          l net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile 'public|protected' 30
+          l net.minecraft.world.entity.projectile.ThrowableItemProjectile 'public|protected' 30
+          unzip -l "$COMMON" | grep -iE "ThrowableItemProjectile|/Snowball.class|BundleItem|BundleContents|EquipmentAsset|LightningBolt.class|ServerBossEvent|wanderingtrader/|/Bat.class|AmbientCreature|TagValueOutput|TagValueInput|FlyingMob|/Vex.class" | awk '{print $4}'
+          l net.minecraft.world.item.BundleItem 'public|protected' 40
+          l net.minecraft.world.item.component.BundleContents 'public' 40
+          l net.minecraft.world.item.component.BundleContents\$Mutable 'public' 20
+          l net.minecraft.server.level.ServerBossEvent 'public' 20
+          l net.minecraft.world.BossEvent 'public' 20
+          l net.minecraft.world.entity.Entity 'startSeenByPlayer|stopSeenByPlayer|setRemainingFireTicks|igniteForSeconds|spawnAtLocation|isOnFire|fireImmune' 20
+          l net.minecraft.world.entity.Mob 'customServerAiStep|mobInteract|registerGoals|setPersistenceRequired|removeWhenFarAway|checkDespawn|getNavigation|createMobAttributes|goalSelector|targetSelector|setTarget|doHurtTarget|isSunBurnTick|requiresCustomPersistence|shouldDespawnInPeaceful' 30
+          l net.minecraft.world.entity.LivingEntity 'die\(|dropCustomDeathLoot|hurtServer|isInvulnerableTo|getBlockLightLevel|tickDeath|calculateFallDamage|causeFallDamage|checkFallDamage' 20
+          l net.minecraft.world.entity.ai.attributes.Attributes 'MAX_HEALTH|MOVEMENT_SPEED|ATTACK_DAMAGE|ARMOR;|FOLLOW_RANGE|KNOCKBACK_RESISTANCE|STEP_HEIGHT|FLYING_SPEED|ATTACK_KNOCKBACK' 20
+          l net.minecraft.world.entity.ai.goal.MeleeAttackGoal 'public' 5
+          l net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal 'public' 5
+          l net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal 'public' 5
+          l net.minecraft.world.entity.ai.goal.LookAtPlayerGoal 'public' 5
+          l net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal 'public' 5
+          l net.minecraft.world.entity.ai.goal.Goal 'public' 20
+          l net.minecraft.world.entity.monster.Monster 'public|protected' 20
+          l net.minecraft.world.item.equipment.Equippable\$Builder 'public' 20
+          l net.minecraft.world.item.equipment.EquipmentAssets 'ROOT|public static' 10
+          l net.minecraft.world.item.equipment.EquipmentAsset 'public' 10
+          l net.minecraft.world.entity.LightningBolt 'public' 20
+          l net.minecraft.world.level.storage.TagValueOutput 'public static' 10
+          l net.minecraft.world.level.storage.TagValueInput 'public static' 10
+          l net.minecraft.world.entity.Entity 'saveWithoutId|public void load|addAdditionalSaveData|readAdditionalSaveData' 10
+          l net.minecraft.world.level.levelgen.Heightmap\$Types 'public static final' 10
+          l net.minecraft.world.item.Item 'appendHoverText|overrideStackedOnOther|overrideOtherStackedOnMe|getTooltipImage|isBarVisible' 10
+          l net.minecraft.world.level.Level 'blockEvent|playLocalSound|getMoonPhase|getMoonBrightness|isDarkOutside|isBrightOutside' 10
+          l net.minecraft.world.level.block.Block 'triggerEvent' 5
+          l net.minecraft.world.level.block.state.BlockBehaviour 'triggerEvent' 5
+          l net.minecraft.world.entity.EntityType\$Builder 'public' 30
+          l net.minecraft.world.entity.projectile.Projectile 'onHit|shoot\(|shootFromRotation|setOwner|getOwner|ownedBy' 20
+          l net.minecraft.world.damagesource.DamageSources 'mobProjectile|thrown|onFire|magic|indirectMagic' 10
+          l net.minecraft.world.entity.ambient.Bat 'customServerAiStep|targetPosition|aiStep' 10
+          javap -cp "$CP" -c -p net.minecraft.world.entity.ambient.Bat | grep -A60 "void customServerAiStep" | head -70
+          l net.minecraft.client.renderer.item.ItemModelResolver 'public' 10
+          l net.minecraft.client.renderer.item.ItemStackRenderState 'public' 10
+          l net.minecraft.world.entity.monster.RangedAttackMob 'public' 5
+          for c in $(find ~/.gradle/caches -name 'fabric-*.jar' | grep -v sources); do unzip -l $c 2>/dev/null | grep -iE "EntityModelLayerRegistry|ModelLayerRegistry|FabricDefaultAttributeRegistry" | awk '{print $4}'; done | sort -u
