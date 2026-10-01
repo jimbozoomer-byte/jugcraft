@@ -37,6 +37,14 @@ The owner's references for the tier after oil: dark sci-fi casings with cyan gla
 - **4 microchips + 1 advanced circuit + 1 gold ingot → 1 processor** in the circuit assembler (400 ticks at 32 JE/t). The third circuit tier, after basic and advanced; tagged with the other circuits in `JugcraftComponents.CIRCUITS`.
 - Used by the network terminal (commit 34) and kept for the tiers above this one.
 
+### Network terminal (commit 34)
+- **A beige retro computer** (one block, one of the owner's references): a desktop case with drive bays and a power lamp, a CRT monitor showing a cyan readout, a keyboard in front, and power ports on its sides.
+- **Cable it into a power network and right-click it:** it shows the network's cables, the rate its slowest cable sets, how many devices the network reaches, and the energy they hold (with a percentage).
+  - Each device counts once, even a multi-block machine touching the cables with several blocks.
+- It uses no power, stores none, and is not a device on the network; cables connect to it on every side.
+- Recipe: glass panes, a processor, plastic sheets, redstone, copper cables and a button.
+- Code: `electronics/NetworkTerminalBlock`, `JugcraftElectronics`; `EnergyNetworks.view` exposes a network's cables, rate and storage faces.
+
 ## Connections
 - Existing input producer: silicon (arc furnace from quartz), phosphate (mined), titanium (batch 6), the sawmill.
 - Existing output consumer: wafers go to lithography, microchips to processors, processors to the network terminal (commit 34).
@@ -53,14 +61,14 @@ The owner's references for the tier after oil: dark sci-fi casings with cyan gla
 - No item turns back into silicon, and no machine here makes power, so there is no loop.
 
 ## Multiplayer and persistence
-Server-side machines like the others; the crystal grower is an ordinary powered processor that saves with its block entity. No new persistent state.
+Server-side machines like the others; the crystal grower and lithography station save with their block entities. The terminal reads the network on the server when used and sends the result to that player only. It has no block entity and no saved state.
 
 ## Dependencies and assets
 No new dependencies. Textures and models are original (`tools/electric_textures.py`, `tools/hightech_models.py`, `tools/petro_textures.py`).
 
 ## Verification
 - `tools/check_mod_data.py` checks the new IDs, recipes and models.
-- Game tests `crystalGrowerPullsABoule` (JugcraftGameTests), which also checks the sawmill's boule recipe, and `lithographyMakesMicrochips` (PetroGameTests) and `circuitAssemblerMakesAProcessor` (JugcraftGameTests).
+- Game tests `crystalGrowerPullsABoule` (JugcraftGameTests), which also checks the sawmill's boule recipe, and `lithographyMakesMicrochips` (PetroGameTests) `circuitAssemblerMakesAProcessor` and `networkTerminalReadsItsNetwork` (JugcraftGameTests).
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.

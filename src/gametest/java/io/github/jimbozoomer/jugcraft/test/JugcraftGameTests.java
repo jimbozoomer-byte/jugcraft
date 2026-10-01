@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.electronics.JugcraftElectronics;
+import io.github.jimbozoomer.jugcraft.electronics.NetworkTerminalBlock;
 import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
@@ -205,6 +207,32 @@ public class JugcraftGameTests {
 			ItemStack output = assembler.getItem(MachineKind.CIRCUIT_ASSEMBLER.outputSlot());
 			helper.assertTrue(output.is(item("processor")), "Circuit assembler output is " + output);
 		});
+	}
+
+	/**
+	 * The network terminal reads the network it is cabled to: four cables, a battery box and a capacitor bank whose two
+	 * lower blocks both touch the cables. The bank counts once.
+	 */
+	@GameTest
+	public void networkTerminalReadsItsNetwork(GameTestHelper helper) {
+		BlockPos terminal = new BlockPos(1, 1, 2);
+		helper.setBlock(terminal, JugcraftElectronics.NETWORK_TERMINAL);
+		helper.assertTrue(NetworkTerminalBlock.read(helper.getLevel(), helper.absolutePos(terminal)) == null,
+				"A terminal with no cable read a network");
+		for (BlockPos cable : List.of(new BlockPos(2, 1, 2), new BlockPos(2, 1, 3), new BlockPos(3, 1, 3), new BlockPos(4, 1, 3))) {
+			helper.setBlock(cable, JugcraftMachines.COPPER_CABLE);
+		}
+		helper.setBlock(new BlockPos(2, 1, 1), machine(MachineKind.BATTERY_BOX));
+		((SimpleEnergyStorage) helper.getBlockEntity(new BlockPos(2, 1, 1), MachineBlockEntity.class).energyFor(null)).setAmount(100_000);
+		MachineBlockEntity bank = large(helper, new BlockPos(4, 1, 4), MachineKind.CAPACITOR_BANK);
+		((SimpleEnergyStorage) bank.energyFor(null)).setAmount(1_000_000);
+		NetworkTerminalBlock.Reading reading = NetworkTerminalBlock.read(helper.getLevel(), helper.absolutePos(terminal));
+		helper.assertTrue(reading != null, "The terminal found no network");
+		helper.assertTrue(reading.cables() == 4, "Cables: " + reading.cables());
+		helper.assertTrue(reading.devices() == 2, "Devices: " + reading.devices());
+		helper.assertTrue(reading.stored() == 1_100_000, "Stored: " + reading.stored());
+		helper.assertTrue(reading.capacity() == 4_400_000, "Capacity: " + reading.capacity());
+		helper.succeed();
 	}
 
 	/** Breaking any block of a multi-block machine removes the whole machine (here the nine-block wind turbine). */

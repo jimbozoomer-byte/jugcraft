@@ -8,7 +8,7 @@ Format: {"chapters": [{"title", "icon", "pages": [{"title", "icon", "text": [par
 "craft": {"grid": [9 item ids or null], "result", "count"}, "recipes": [{"in": [[id, count]], "out": [id, count]}]}]}]}
 """
 from materials import COMPONENTS, METALS, MINERALS, ingot_id, ore_ids
-from machines import (CRAFTING, MACHINES, STATS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS,
+from machines import (ELECTRONICS_BLOCKS, CRAFTING, MACHINES, STATS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS,
                       UPGRADES, BYPRODUCTS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, machine_recipes)
 
 MOD = "jugcraft"
@@ -139,6 +139,9 @@ ABOUT = {
     "crystal_grower": "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single "
                       "crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 "
                       "wafers in the sawmill.",
+    "network_terminal": "A beige retro computer. Cable it into a power network and right-click it: it shows the "
+                        "network's cables, the rate its slowest cable sets, how many devices it reaches and the "
+                        "energy they hold. It uses no power.",
     "lithography_station": "Three wide, two tall and two deep: a cleanroom and an operator's desk with a monitor bank. "
                            "A silicon wafer, two copper wire and 100 mB of sulfuric acid make four microchips, every "
                            "10 seconds at 192 JE/t. Pipe the acid into its tank.",
@@ -427,6 +430,10 @@ def build():
                 "wafers in the sawmill."]},
             machine_page("crystal_grower"),
             machine_page("lithography_station"),
+            {"title": "Processors", "icon": f"{MOD}:processor", "text": [
+                "Four microchips, an advanced circuit and a gold ingot make a processor in the circuit assembler: the "
+                "third circuit tier."]},
+            block_page("network_terminal", ELECTRONICS_BLOCKS["network_terminal"]["display"]),
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

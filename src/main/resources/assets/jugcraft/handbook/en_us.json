@@ -2472,6 +2472,35 @@
             "result": "jugcraft:lithography_station",
             "count": 1
           }
+        },
+        {
+          "title": "Processors",
+          "icon": "jugcraft:processor",
+          "text": [
+            "Four microchips, an advanced circuit and a gold ingot make a processor in the circuit assembler: the third circuit tier."
+          ]
+        },
+        {
+          "title": "Network Terminal",
+          "icon": "jugcraft:network_terminal",
+          "text": [
+            "A beige retro computer. Cable it into a power network and right-click it: it shows the network's cables, the rate its slowest cable sets, how many devices it reaches and the energy they hold. It uses no power."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:glass_pane",
+              "jugcraft:processor",
+              "minecraft:glass_pane",
+              "jugcraft:plastic_sheet",
+              "minecraft:redstone",
+              "jugcraft:plastic_sheet",
+              "jugcraft:copper_cable",
+              "minecraft:stone_button",
+              "jugcraft:copper_cable"
+            ],
+            "result": "jugcraft:network_terminal",
+            "count": 1
+          }
         }
       ]
     },

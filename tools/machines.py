@@ -104,6 +104,8 @@ LOGISTICS_BLOCKS = {
     "high_pressure_extractor": {"display": "High-Pressure Extractor"},
     "item_sorter": {"display": "Item Sorter"},
 }
+# Electronics (batch 7): a beige retro computer that reads out its power network (electronics/NetworkTerminalBlock).
+ELECTRONICS_BLOCKS = {"network_terminal": {"display": "Network Terminal"}}
 TOOLS = {"brass_wrench": "Brass Wrench", "engineers_handbook": "Engineer's Handbook",
          # Mining & prospecting: a vague 3x3-chunk ore survey (prospecting/OreSurvey).
          "prospector": "Geo-Resonance Prospector",
@@ -470,6 +472,9 @@ CRAFTING = {
     "lithography_station": (["GSG", "TCT", "PMP"], {"G": "minecraft:glass", "S": "minecraft:redstone_lamp",
                                                     "T": "#c:ingots/titanium", "C": "jugcraft:advanced_circuit",
                                                     "P": "#c:plates/aluminum", "M": "jugcraft:machine_casing"}, 1),
+    "network_terminal": (["GSG", "PXP", "WKW"], {"G": "minecraft:glass_pane", "S": "jugcraft:processor",
+                                                 "P": "jugcraft:plastic_sheet", "X": "minecraft:redstone",
+                                                 "W": "jugcraft:copper_cable", "K": "minecraft:stone_button"}, 1),
     "lithium_cell": (["PLP", "LWL", "PLP"], {"P": "#c:plates/aluminum", "L": "jugcraft:lithium_carbonate",
                                              "W": "#c:wires/copper"}, 2),
     "lithium_battery_bank": (["TCT", "CBC", "TCT"], {"T": "#c:ingots/titanium", "C": "jugcraft:lithium_cell",
@@ -713,7 +718,7 @@ def _arc_dusts():
 def machine_blocks():
     return (list(MACHINES) + list(PARTS) + list(CABLES) + list(PIPES) + list(FLUID_BLOCKS)
             + list(ITEM_PIPES) + list(LOGISTICS_BLOCKS) + list(STORAGE_BLOCKS) + list(KINETIC_BLOCKS) + list(TOOL_BLOCKS)
-            + list(SLOPE_BLOCKS))
+            + list(SLOPE_BLOCKS) + list(ELECTRONICS_BLOCKS))
 
 
 def machine_items():

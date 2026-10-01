@@ -92,4 +92,26 @@ def lithography_station():
     return m
 
 
+def network_terminal():
+    """A beige retro computer (one of the owner's references): a desktop case with two drive bays and a power lamp,
+    a CRT monitor on top showing the network's cyan readout, a keyboard in front, and power ports on its sides where
+    cables meet it."""
+    beige = "rt_beige"
+    m = [box((1, 0, 5), (15, 5, 15.5), {"*": beige, "north": "rt_floppy"})]
+    # The CRT: a deep cabinet tapering to the back, with the screen set into its bezel.
+    m.append(box((2.5, 5, 5.5), (13.5, 14.5, 13), beige))
+    m.append(box((4, 6, 13), (12, 13, 15), beige))
+    m.append(box((3.5, 6, 5), (12.5, 13.5, 5.5), {"*": beige, "north": "el_screen_cyan_on!"}))
+    m.append(dial("north", (11.5, 5.75, 5), 0.4, texture=LAMP, body=beige))
+    # The keyboard on the desk in front.
+    m.append(box((2, 0, 0.75), (14, 1.25, 4.25), {"*": beige, "up": "rt_keys"}))
+    # Power ports where cables meet it.
+    for x0, x1, face in ((0.25, 1, "west"), (15, 15.75, "east")):
+        m.append(box((x0, 1, 8), (x1, 4, 12), {"*": FRAME, face: PORT + "!"}))
+    m.append(box((6, 1, 15.5), (10, 4, 16), {"*": FRAME, "south": PORT + "!"}))
+    return m
+
+
 MODELS = {"crystal_grower": crystal_grower(), "lithography_station": lithography_station()}
+# Blocks outside the machine framework (generate_material_data: ELECTRONICS_BLOCKS).
+BLOCKS = {"network_terminal": network_terminal()}
