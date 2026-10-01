@@ -134,14 +134,14 @@ Records: [pixel-hollows.md](features/pixel-hollows.md), [retro-trader.md](featur
 | ID | Class / data | What |
 | --- | --- | --- |
 | `pixel_hollows` (biome) | `data/jugcraft/worldgen/biome/pixel_hollows.json`; `world/PixelHollows.PARAMETERS`; `mixin/OverworldBiomeBuilderMixin` | rare cave biome under the driest land, depth 0.3–0.9; added to the Overworld climate table by the mixin (Fabric API has no Overworld biome API) |
-| `pixel_hollows_lining` (feature) | `world/PixelHollowsLiningFeature` | once per chunk: open stone faces in the biome → circuitstone; clusters in scattered patches |
+| `pixel_hollows_lining`, `pixel_crystals_floor`, `pixel_crystals_ceiling` (features) | data only | a circuitstone ore feature (96 × size 64, after the ores, biome-filtered); `simple_block` clusters found by `environment_scan` on floors and ceilings |
 | `pixel_hollows_copper`, `…_redstone`, `…_redstone_lower`, `…_tin` (placed features) | vanilla ore features (and `jugcraft:ore_tin`) | half the vanilla attempts again, biome-filtered: 1.5× ore inside the biome; tin added from Java only while `tin` is on |
 | `circuitstone`, `polished_circuitstone`, `circuitstone_bricks`, `pixel_lamp` | `JugcraftRegistry.block` (copies deepslate, polished deepslate, deepslate bricks, sea lantern) | building palette; stonecutter and 2×2 recipes; lamp = 4 shards + glass |
 | `pixel_crystal_cluster`, `pixel_shard` | vanilla `AmethystClusterBlock(13, 2)`, light 3 | static clusters (no ticks) drop 1–2 shards, Fortune bonus, Silk Touch takes the cluster |
 | `arcade_cabinet` | `world/ArcadeCabinetBlock` (2-tall, `facing`, `half`) | the Retro Trader's job site (POI `jugcraft:arcade_cabinet`, lower half only, in `#minecraft:acquirable_job_site`) |
-| `retro_trader` (profession) | `world/RetroTrader` (Fabric `PointOfInterestHelper`, `TradeOfferHelper`) | trades in `TRADES` (`tools/pixel_hollows.py`); the buyback's price multiplier is 0 so there is no profit loop |
+| `retro_trader` (profession) | `world/RetroTrader` (Fabric `PoiHelper`; `VillagerProfession` constructor naming its trade sets) | trades are data (26.1+): `villager_trade/retro_trader/*`, tags `#jugcraft:retro_trader/level_<n>`, `trade_set/retro_trader/level_<n>`, all from `TRADES` in `tools/pixel_hollows.py`; the buyback's `reputation_discount` is 0 so there is no profit loop |
 | `pixel_hollows` (map decoration) | `RetroTrader.MAP_MARKER`; `textures/map/decorations/pixel_hollows.png` | the map's marker |
-| Pixel Hollows map | `world/PixelHollowsMapListing`, `PixelHollowsMaps` | bounded biome-noise search (64-block steps, 40 rings, 5 heights) run once when the trade is made; no cave → a sold-out trade with zero uses |
+| `pixel_hollows_map` (item) | `world/PixelHollowsMapItem`, `PixelHollowsMaps` | used: `ServerLevel.findClosestBiome3d` from the player (radius 2,048, 64-block columns, every 32 blocks of height) → a marked explorer map; none in reach → a message, item kept; 5 s cooldown |
 | `village/plains/retro_game_shop` (template) | `data/jugcraft/structure/…/retro_game_shop.nbt` from `tools/retro_game_shop.py`; `mixin/StructureTemplatePoolAccessor` | added to `minecraft:village/plains/houses` (weight 1) at server start |
 | sounds | `assets/jugcraft/sounds.json`; `sounds/ambient/pixel_hollows_loop.ogg` from `tools/pixel_hollows_sound.py` | biome loop and bleeps; the trader's work sound |
 | textures | `tools/pixel_hollows_textures.py` (`ph_*`, `rt_*`, the villager overlay `entity/villager/profession/retro_trader.png` and its zombie twin) | original |

@@ -39,10 +39,11 @@ The theme is original: no real consoles, games, brands or characters.
 - How this specialty stays useful without mastering every other branch: it is a mining destination and a decor source; nothing else requires it.
 
 ## Balance and automation
-- **Where:** a cave biome in the Overworld's climate table (`PixelHollows.PARAMETERS`): the driest land (humidity −1.0 to −0.6), coast or inland (continentalness −0.11 to 1.0), at depth 0.3 to 0.9, which is about 40 to 115 blocks below the surface. On ordinary terrain that is mostly below Y 32 and in the deepslate band. The game test `pixelHollowsDistribution` measures its share against the dripstone and lush caves on ten seeds; see Verification.
+- **Where:** a cave biome in the Overworld's climate table (`PixelHollows.PARAMETERS`): the driest land (humidity −1.0 to −0.6), coast or inland (continentalness −0.11 to 1.0), at depth 0.3 to 0.9, which is about 40 to 115 blocks below the surface. On ordinary terrain that is mostly below Y 32 and in the deepslate band. For comparison, vanilla's dripstone caves take continentalness 0.8 to 1.0 and lush caves humidity 0.7 to 1.0, each over the whole depth band, so the Pixel Hollows should be rarer than either; its real frequency has not been measured (see Verification).
 - **Ore bonus:** the biome lists vanilla's copper and redstone features, plus extra attempts of the same vanilla features with half the vanilla count and the same height spread, filtered to the biome (`pixel_hollows_copper`: 8 × `ore_copper_small`, trapezoid −16..112; `pixel_hollows_redstone`: 2 × `ore_redstone`, uniform −64..15; `pixel_hollows_redstone_lower`: 4, trapezoid −96..−32). Inside the biome that is 1.5× the usual average. Tin likewise (`pixel_hollows_tin`: 4 × `jugcraft:ore_tin`, trapezoid −32..96) while `tin` is on. No new ore.
-- **Other vanilla features kept:** lava lakes, amethyst geodes, monster rooms, the vanilla ores (coal, iron, gold, redstone, diamond, lapis, copper) and water and lava springs, in vanilla's order. Left out on purpose: stone-variety blobs (the walls are circuitstone), glow lichen (the only light is the crystals) and surface plants.
-- **Lining:** once per chunk, the feature `jugcraft:pixel_hollows_lining` turns every stone or deepslate face open to air or water inside the biome into circuitstone. Ores are left alone, so exposed ore still shows. About one 4×4×4 cell in 7 of the lining is a crystal patch, where one open face in 4 grows a cluster pointing away from the wall.
+- **Other vanilla features kept:** lava lakes, amethyst geodes, monster rooms, the vanilla ores (coal, iron, gold, redstone, diamond, lapis, copper) and water and lava springs, in vanilla's order. Left out on purpose: stone-variety blobs (the walls are circuitstone), glow lichen (the only light is the crystals) and surface plants. The game test `overworldFeatureOrderHasNoCycle` proves the order is consistent with every other Overworld biome.
+- **Lining:** `jugcraft:pixel_hollows_lining` is a vanilla ore feature of circuitstone (vein size 64) that replaces stone and deepslate, but not ores: 96 attempts per chunk between Y −56 and 56, kept only where they land in the biome, run after the ores so exposed ore still shows. Walls are mostly circuitstone with streaks of the rock around it.
+- **Crystals:** `pixel_crystals_floor` (14 attempts per chunk) and `pixel_crystals_ceiling` (8) look up to 12 blocks down (or up) from a random point for a solid floor (ceiling) and put a cluster on it, inside the biome only. Many attempts find no cave and place nothing, so clusters stay sparse.
 - **Pixel crystal clusters:** static: no growth, no random ticks, no block entity. Light 3. They drop 1–2 pixel shards (Fortune adds up to one per level); Silk Touch takes the cluster. Clusters are finite, so shards are finite.
 - **Recipes (data-driven):**
   - Stonecutter: circuitstone → polished circuitstone or circuitstone bricks, and polished → bricks, 1:1.
@@ -54,12 +55,13 @@ The theme is original: no real consoles, games, brands or characters.
 ## Multiplayer and persistence
 - Server-side only: world generation, drops and recipes. No custom packets; clients get models, textures and sounds.
 - Ordinary blocks: no ownership or concurrent-use rules needed.
-- **Stable IDs:** `jugcraft:pixel_hollows` (biome), `jugcraft:circuitstone`, `jugcraft:polished_circuitstone`, `jugcraft:circuitstone_bricks`, `jugcraft:pixel_crystal_cluster`, `jugcraft:pixel_shard`, `jugcraft:pixel_lamp`; worldgen `jugcraft:pixel_hollows_lining`, `jugcraft:pixel_hollows_copper`, `…_redstone`, `…_redstone_lower`, `…_tin`.
+- **Stable IDs:** `jugcraft:pixel_hollows` (biome), `jugcraft:circuitstone`, `jugcraft:polished_circuitstone`, `jugcraft:circuitstone_bricks`, `jugcraft:pixel_crystal_cluster`, `jugcraft:pixel_shard`, `jugcraft:pixel_lamp`; worldgen `jugcraft:pixel_hollows_lining`, `jugcraft:pixel_crystals_floor`, `…_ceiling`, `jugcraft:pixel_hollows_copper`, `…_redstone`, `…_redstone_lower`, `…_tin`.
 - **Existing worlds:** the biome appears only in newly generated chunks. Generated chunks are never rewritten, so where old and new chunks meet underground a cave can end abruptly at the old chunk's edge.
 - **Disable switch:** `pixel_hollows.enabled=false` in `config/jugcraft.properties` stops new generation (the biome leaves the climate table and the tin bonus is not added) and its recipes. The blocks, items and the biome stay registered, so builds and generated caves survive. (The proposal kept the recipes on when disabled; Jugcraft's rule is that a switch stops acquisition, recipes included.)
 
 ## Dependencies and assets
 - No new dependency. Fabric API places features but has no way to add an Overworld biome, so one small mixin, `mixin/OverworldBiomeBuilderMixin`, appends the biome's climate entry after vanilla's (`jugcraft.mixins.json`). No TerraBlender or Biolith.
+- The biome, lining, crystals and bonus ores are all data (`data/jugcraft/worldgen/`), generated from `tools/pixel_hollows.py`.
 - Original assets: textures drawn by `tools/pixel_hollows_textures.py` and models built in `tools/retro_models.py`; the ambient loop synthesised by `tools/pixel_hollows_sound.py` (written to an Ogg file with ffmpeg). The bleeps reuse the game's own note-block "bit" sound by name in `sounds.json`; no Mojang file is copied. MIT.
 
 ## Verification
@@ -71,9 +73,8 @@ Results are recorded in the PR. The checks:
   - `pixelHollowsRecipes`: lamp (4 shards + glass → 1), cabinet, stonecutting.
   - `pixelHollowsJoinsTheOverworld`: the biome is registered and in the Overworld's climate table.
   - `overworldFeatureOrderHasNoCycle`: every Overworld biome's features sort into one order (a mistake here would crash world generation).
-  - `pixelHollowsDistribution`: on ten fixed seeds, the biome's share of 21,125 underground samples per seed against the dripstone and lush caves, and the map search from the origin with its time. It logs lines starting `[pixel-hollows]`.
-- Client test screenshots: `jugcraft_pixel_hollows_blocks` and `jugcraft_pixel_hollows_cave` (a carved cavity whose biome is set to the Pixel Hollows, lined by the real `pixel_hollows_lining` feature).
-- **Not run:** a survival playthrough; finding the biome in naturally generated terrain in a client; the old-chunk upgrade test; hostile-spawn checks in dark pockets; a dedicated server with two clients; chunk-generation timing with and without the feature.
+- Client test screenshots: `jugcraft_pixel_hollows_blocks` and `jugcraft_pixel_hollows_cave` (a carved cavity whose biome is set to the Pixel Hollows, lined by placing the real `pixel_hollows_lining` feature around its walls, with clusters on its floor and ceiling).
+- **Not run:** how often and where the biome appears on real seeds (26.3's climate sampler is not public API in the form the plan assumed, and the test worlds are superflat); a survival playthrough; finding the biome in naturally generated terrain in a client; the old-chunk upgrade test; hostile-spawn checks in dark pockets; a dedicated server with two clients; chunk-generation timing with and without the feature.
 
 ## World and event applicability
 - Biome fit: a deep cave under dry land; the surface above is desert, savanna, badlands or dry plains, so the cave has no surface tell. It is not under oceans.
@@ -81,6 +82,6 @@ Results are recorded in the PR. The checks:
 - Not seasonal; no pets, bosses or dimensions.
 
 ## Rollout and open questions
-- The lining checks each 4×4×4 biome cell and the open faces in it. Its cost per chunk has not been measured.
+- The lining's cost (96 ore attempts per chunk inside the biome) has not been measured.
 - The climate numbers are a first guess, tuned by the distribution test; they may need adjusting once someone has played it.
 - A magic use for pixel shards, hostile cave creatures, an abandoned-arcade ruin and a boss are later proposals.

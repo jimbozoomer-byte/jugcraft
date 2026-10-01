@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 
 /**
  * The Pixel Hollows Map the Retro Trader sells: an unmarked map that, used, looks for the nearest Pixel Hollows
@@ -40,7 +41,7 @@ public class PixelHollowsMapItem extends Item {
 			if (stack.isEmpty()) {
 				player.setItemInHand(hand, map);
 			} else if (!player.getInventory().add(map)) {
-				player.drop(map, false);
+				Block.popResource(level, player.blockPosition(), map);
 			}
 			player.sendOverlayMessage(Component.translatable("message.jugcraft.pixel_hollows_map.found", target.get().getY()));
 		}
