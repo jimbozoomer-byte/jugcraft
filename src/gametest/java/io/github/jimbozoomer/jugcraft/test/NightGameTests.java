@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.test;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.CandyBagItem;
 import io.github.jimbozoomer.jugcraft.agriculture.CarvedPumpkinBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.CarvingTemplates;
 import io.github.jimbozoomer.jugcraft.agriculture.CropGrowth;
 import io.github.jimbozoomer.jugcraft.agriculture.FlamingPumpkin;
 import io.github.jimbozoomer.jugcraft.agriculture.FlyingPumpkin;
@@ -12,6 +13,8 @@ import io.github.jimbozoomer.jugcraft.agriculture.HarvestScaleBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.HeadlessHorseman;
 import io.github.jimbozoomer.jugcraft.agriculture.HorsemanSummoning;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.PumpkinCarving;
+import io.github.jimbozoomer.jugcraft.agriculture.ScarecrowBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.ThrowMarker;
 import io.github.jimbozoomer.jugcraft.agriculture.TrebuchetBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.TrebuchetBlockEntity;
@@ -58,6 +61,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
@@ -523,15 +527,28 @@ public class NightGameTests {
 
 	// ---------------------------------------------------------------- the Headless Horseman
 
-	/** A scarecrow at {@code lower} (and above it) with {@code head} on top. */
-	private static void scarecrow(GameTestHelper helper, BlockPos lower, BlockState head) {
+	/** A scarecrow at {@code lower} (and above it) wearing {@code head}. */
+	private static void scarecrow(GameTestHelper helper, BlockPos lower, ItemStack head) {
 		ServerPlayer builder = player(helper, new BlockPos(0, 2, 0), new ItemStack(item("scarecrow")));
 		builder.getMainHandItem().useOn(new UseOnContext(builder, InteractionHand.MAIN_HAND, hit(helper, lower.below(), Direction.UP)));
-		helper.setBlock(lower.above(2), head);
+		wear(helper, lower, head);
 	}
 
-	private static BlockState litCarving(boolean lit) {
-		return block("hand_carved_pumpkin").defaultBlockState().setValue(CarvedPumpkinBlock.LIT, lit);
+	/** Puts {@code head} on the scarecrow at {@code lower} (an empty stack takes it off). */
+	private static void wear(GameTestHelper helper, BlockPos lower, ItemStack head) {
+		helper.getBlockEntity(lower.above(), ScarecrowBlockEntity.class).setHead(head);
+	}
+
+	private static ItemStack worn(GameTestHelper helper, BlockPos lower) {
+		return helper.getBlockEntity(lower.above(), ScarecrowBlockEntity.class).head();
+	}
+
+	/** A hand-carved pumpkin with the Classic face, with or without a torch inside. */
+	private static ItemStack litCarving(boolean lit) {
+		ItemStack head = new ItemStack(item("hand_carved_pumpkin"));
+		head.set(JugcraftAgriculture.CARVING, PumpkinCarving.BLANK.withFace(0, CarvingTemplates.ALL.get(0).face()));
+		head.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(CarvedPumpkinBlock.LIT, lit));
+		return head;
 	}
 
 	/**
@@ -545,7 +562,7 @@ public class NightGameTests {
 		MinecraftServer server = level.getServer();
 		floor(helper);
 		BlockPos lower = new BlockPos(3, 2, 3);
-		scarecrow(helper, lower, Blocks.JACK_O_LANTERN.defaultBlockState());
+		scarecrow(helper, lower, new ItemStack(Items.JACK_O_LANTERN));
 		BlockPos scarecrow = helper.absolutePos(lower);
 		ServerPlayer caller = player(helper, lower.south(2), ItemStack.EMPTY);
 		Difficulty difficulty = level.getDifficulty();
@@ -554,7 +571,7 @@ public class NightGameTests {
 			helper.assertTrue(HorsemanSummoning.summon(caller, scarecrow, MIDNIGHT) == HorsemanSummoning.Result.OUT_OF_SEASON, "Not out of season");
 			caller.setShiftKeyDown(true);
 			helper.assertTrue(use(helper, caller, lower.above(), Direction.SOUTH).consumesAction(), "Sneak-using the scarecrow tries");
-			helper.assertTrue(helper.getBlockState(lower.above(2)).is(Blocks.JACK_O_LANTERN), "and out of season nothing happens to it");
+			helper.assertTrue(worn(helper, lower).is(Items.JACK_O_LANTERN), "and out of season nothing happens to it");
 			caller.setShiftKeyDown(false);
 
 			HalloweenSeason.setMode(HalloweenSeason.Mode.ON);
@@ -564,18 +581,18 @@ public class NightGameTests {
 			server.setDifficulty(Difficulty.PEACEFUL, true);
 			helper.assertTrue(HorsemanSummoning.summon(caller, scarecrow, MIDNIGHT) == HorsemanSummoning.Result.PEACEFUL, "Not in peaceful");
 			server.setDifficulty(difficulty, true);
-			helper.setBlock(lower.above(2), Blocks.CARVED_PUMPKIN);
+			wear(helper, lower, new ItemStack(Items.CARVED_PUMPKIN));
 			helper.assertTrue(HorsemanSummoning.summon(caller, scarecrow, MIDNIGHT) == HorsemanSummoning.Result.NO_HEAD, "Not for a dark carved pumpkin");
-			helper.setBlock(lower.above(2), litCarving(false));
+			wear(helper, lower, litCarving(false));
 			helper.assertTrue(HorsemanSummoning.summon(caller, scarecrow, MIDNIGHT) == HorsemanSummoning.Result.NO_HEAD, "nor an unlit carving");
-			helper.setBlock(lower.above(2), litCarving(true));
+			wear(helper, lower, litCarving(true));
 			helper.setBlock(lower.above(5), Blocks.OAK_PLANKS);
 			helper.assertTrue(HorsemanSummoning.summon(caller, scarecrow, MIDNIGHT) == HorsemanSummoning.Result.ROOFED, "Not under a roof");
 			helper.setBlock(lower.above(5), Blocks.AIR);
 
 			HorsemanSummoning.Result result = HorsemanSummoning.summon(caller, scarecrow, MIDNIGHT - HorsemanSummoning.HOUR_WINDOW);
 			helper.assertTrue(result == HorsemanSummoning.Result.SUMMONED, "Within the hour of midnight, with a lit head, he comes: " + result);
-			helper.assertTrue(helper.getBlockState(lower.above(2)).isAir(), "He takes the head");
+			helper.assertTrue(worn(helper, lower).isEmpty(), "He takes the head");
 			List<HeadlessHorseman> riders = level.getEntitiesOfClass(HeadlessHorseman.class, new AABB(scarecrow).inflate(HorsemanSummoning.MAX_DISTANCE + 2));
 			helper.assertTrue(riders.size() == 1, "One Horseman rides in: " + riders.size());
 			HeadlessHorseman horseman = riders.get(0);
@@ -584,9 +601,9 @@ public class NightGameTests {
 			helper.assertTrue(horseman.home().equals(scarecrow), "His arena is the scarecrow: " + horseman.home() + " vs " + scarecrow);
 			helper.assertTrue(horseman.quarry().map(caller.getUUID()::equals).orElse(false), "He hunts the summoner: " + horseman.quarry());
 			helper.assertTrue(horseman.isPersistenceRequired(), "and he stays");
-			helper.setBlock(lower.above(2), Blocks.JACK_O_LANTERN);
+			wear(helper, lower, new ItemStack(Items.JACK_O_LANTERN));
 			helper.assertTrue(HorsemanSummoning.summon(caller, scarecrow, MIDNIGHT) == HorsemanSummoning.Result.ALREADY_RIDING, "Only one rides at a time");
-			helper.assertTrue(helper.getBlockState(lower.above(2)).is(Blocks.JACK_O_LANTERN), "and the second head is kept");
+			helper.assertTrue(worn(helper, lower).is(Items.JACK_O_LANTERN), "and the second head is kept");
 		} finally {
 			server.setDifficulty(difficulty, true);
 			HalloweenSeason.reset();

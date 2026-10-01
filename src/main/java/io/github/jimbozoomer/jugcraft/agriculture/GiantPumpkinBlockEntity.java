@@ -3,12 +3,17 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.component.DataComponentGetter;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -185,6 +190,19 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 	 * north-west corner. Returns whether it grew.
 	 */
 	boolean expand(ServerLevel level, int size, RandomSource random) {
+		List<BlockPos> blocks = room(level, size);
+		if (blocks == null) {
+			return false;
+		}
+		grow(level, size, blocks, random);
+		return true;
+	}
+
+	/**
+	 * The blocks the pumpkin would fill at {@code size} blocks a side: away from its vine, centred on the line the vine
+	 * points along (2 wide: either side of it), or null if something is in the way on every side.
+	 */
+	private @Nullable List<BlockPos> room(BlockGetter level, int size) {
 		Direction side = toward.getClockWise();
 		int[][] laterals = size == 2 ? new int[][] {{0, 1}, {-1, 0}} : new int[][] {{-1, 0, 1}};
 		for (int[] lateral : laterals) {
@@ -202,14 +220,19 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 				}
 			}
 			if (room) {
-				grow(level, size, blocks, random);
-				return true;
+				return blocks;
 			}
 		}
-		return false;
+		return null;
 	}
 
-	private boolean canGrowInto(Level level, BlockPos pos, boolean bottom) {
+	/** Whether the pumpkin has every point it needs to swell to its next size but no room to: feeding it does nothing more. */
+	public boolean stuck(BlockGetter level) {
+		int size = size();
+		return size < GiantPumpkinBlock.MAX_SIZE && points >= (size == 1 ? GROW_TO_TWO : GROW_TO_THREE) && room(level, size + 1) == null;
+	}
+
+	private boolean canGrowInto(BlockGetter level, BlockPos pos, boolean bottom) {
 		BlockState state = level.getBlockState(pos);
 		boolean own = state.getBlock() instanceof GiantPumpkinBlock && GiantPumpkinBlock.masterPos(pos, state).equals(worldPosition);
 		if (!own && !(state.isAir() || state.canBeReplaced() && state.getFluidState().isEmpty())) {
@@ -375,6 +398,59 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 		if (carverId != null) {
 			output.store("carved_by", UUIDUtil.CODEC, carverId);
 			output.putString("carved_by_name", carverName);
+		}
+	}
+
+	/** This pumpkin as an item carries it (see {@link GiantPumpkinData}). */
+	public GiantPumpkinData data() {
+		Map<Direction, int[]> carving = new EnumMap<>(Direction.class);
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			int[] face = faces[side.get2DDataValue()];
+			if (face != null) {
+				carving.put(side, face);
+			}
+		}
+		return new GiantPumpkinData(size(), points, weight, Optional.of(id), lit, carving, Optional.ofNullable(carverId), carverName, soul());
+	}
+
+	@Override
+	protected void collectImplicitComponents(DataComponentMap.Builder components) {
+		super.collectImplicitComponents(components);
+		components.set(JugcraftAgriculture.GIANT_PUMPKIN, data());
+	}
+
+	/**
+	 * Takes on a pumpkin carried as an item. Its size is the block's own; lighting the blocks for a torch inside waits
+	 * until every block is placed ({@link GiantPumpkinBlock#setPlacedBy}).
+	 */
+	@Override
+	protected void applyImplicitComponents(DataComponentGetter components) {
+		super.applyImplicitComponents(components);
+		GiantPumpkinData data = components.get(JugcraftAgriculture.GIANT_PUMPKIN);
+		if (data == null) {
+			return;
+		}
+		points = data.points();
+		weight = data.weight();
+		lit = data.lit();
+		soul = data.lit() && data.soul();
+		data.id().ifPresent(value -> id = value);
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			int[] face = data.faces().get(side);
+			faces[side.get2DDataValue()] = face == null ? null : face.clone();
+		}
+		carverId = data.carverId().orElse(null);
+		carverName = data.carverName();
+	}
+
+	@Override
+	public void removeComponentsFromTag(ValueOutput output) {
+		super.removeComponentsFromTag(output);
+		for (String key : List.of("points", "weight", "lit", "soul", "id", "carved_by", "carved_by_name")) {
+			output.discard(key);
+		}
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			output.discard("carving_" + side.getName());
 		}
 	}
 

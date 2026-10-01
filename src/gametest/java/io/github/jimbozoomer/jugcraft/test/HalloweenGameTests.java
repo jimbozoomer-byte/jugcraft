@@ -10,6 +10,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.CookingPotRecipe;
 import io.github.jimbozoomer.jugcraft.agriculture.GiantPumpkinBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.GiantPumpkinBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.GiantPumpkinData;
 import io.github.jimbozoomer.jugcraft.agriculture.GiantPumpkinVineBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.GourdCanteenItem;
 import io.github.jimbozoomer.jugcraft.agriculture.HarvestScaleBlockEntity;
@@ -18,6 +19,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.PumpkinCarving;
 import io.github.jimbozoomer.jugcraft.agriculture.PumpkinCarvings;
 import io.github.jimbozoomer.jugcraft.agriculture.PumpkinCarvings.Result;
 import io.github.jimbozoomer.jugcraft.agriculture.ScarecrowBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ScarecrowBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.TallCrop;
 import io.github.jimbozoomer.jugcraft.agriculture.TallCropBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.TallDecorationBlock;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -236,14 +239,89 @@ public class HalloweenGameTests {
 		helper.succeed();
 	}
 
-	/** Breaking any block breaks the whole pumpkin once: nine pumpkins and giant seeds, and the vine straightens. */
+	/**
+	 * Bone meal alone grows a giant pumpkin all the way: the vine to full growth, then its fruit (bone meal on a full-grown
+	 * vine sets it), then, given to the vine or to the pumpkin, from one block to two and three wide, and full grown it
+	 * keeps putting on weight.
+	 */
+	@GameTest
+	public void boneMealGrowsAGiantPumpkin(GameTestHelper helper) {
+		helper.setBlock(VINE.below(), Blocks.FARMLAND.defaultBlockState().setValue(BlockStateProperties.MOISTURE, 7));
+		for (int x = 2; x <= 4; x++) {
+			for (int z = 1; z <= 3; z++) {
+				helper.setBlock(new BlockPos(x, 1, z), Blocks.GRASS_BLOCK);
+			}
+		}
+		// Only the east side is free, so the fruit sets there.
+		for (Direction side : List.of(Direction.NORTH, Direction.SOUTH, Direction.WEST)) {
+			helper.setBlock(VINE.relative(side), Blocks.STONE);
+		}
+		helper.setBlock(VINE, block("giant_pumpkin_vine"));
+		Player player = holding(helper, new ItemStack(Items.BONE_MEAL, 64));
+		for (int i = 0; i < 12 && !helper.getBlockState(VINE).is(block("attached_giant_pumpkin_vine")); i++) {
+			helper.useBlock(VINE, player, hit(helper, VINE, Direction.UP));
+		}
+		BlockState attached = helper.getBlockState(VINE);
+		helper.assertTrue(attached.is(block("attached_giant_pumpkin_vine")) && attached.getValue(AttachedGiantPumpkinVineBlock.FACING) == Direction.EAST,
+				"Bone meal should grow the vine and set its fruit east: " + attached);
+		helper.assertTrue(helper.getBlockState(VINE.east()).is(block("giant_pumpkin")), "The fruit should be set");
+
+		int need = GiantPumpkinBlockEntity.GROW_TO_TWO / GiantPumpkinBlockEntity.BONE_MEAL_POINTS;
+		for (int i = 0; i < need; i++) {
+			helper.useBlock(VINE, player, hit(helper, VINE, Direction.UP));
+		}
+		helper.assertTrue(master(helper, VINE.east()).size() == 2, "Bone meal on the vine feeds its pumpkin to two blocks wide");
+		need = (GiantPumpkinBlockEntity.GROW_TO_THREE - GiantPumpkinBlockEntity.GROW_TO_TWO) / GiantPumpkinBlockEntity.BONE_MEAL_POINTS;
+		for (int i = 0; i < need; i++) {
+			helper.useBlock(VINE.east(), player, hit(helper, VINE.east(), Direction.UP));
+		}
+		GiantPumpkinBlockEntity master = master(helper, VINE.east());
+		helper.assertTrue(master.fullGrown(), "Bone meal on the pumpkin grows it to three blocks wide, got " + master.size());
+		int before = master.weight();
+		helper.useBlock(VINE.east(), player, hit(helper, VINE.east(), Direction.UP));
+		helper.assertTrue(master.weight() == before + GiantPumpkinBlockEntity.BONE_MEAL_POINTS * GiantPumpkinBlockEntity.WEIGHT_PER_POINT,
+				"Full grown, bone meal puts on weight: " + before + " -> " + master.weight());
+		helper.succeed();
+	}
+
+	/** A full-grown vine boxed in has nowhere to set its fruit: bone meal does nothing and is not used up. */
+	@GameTest
+	public void boxedInVineWaitsForRoom(GameTestHelper helper) {
+		helper.setBlock(VINE.below(), Blocks.FARMLAND.defaultBlockState().setValue(BlockStateProperties.MOISTURE, 7));
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			helper.setBlock(VINE.relative(side), Blocks.STONE);
+		}
+		helper.setBlock(VINE, block("giant_pumpkin_vine").defaultBlockState().setValue(GiantPumpkinVineBlock.AGE, GiantPumpkinVineBlock.MAX_AGE));
+		Player player = holding(helper, new ItemStack(Items.BONE_MEAL, 3));
+		helper.useBlock(VINE, player, hit(helper, VINE, Direction.UP));
+		helper.assertTrue(helper.getBlockState(VINE).is(block("giant_pumpkin_vine")) && player.getMainHandItem().getCount() == 3,
+				"Boxed in, the vine cannot set a fruit and keeps the bone meal");
+		helper.setBlock(VINE.east(), Blocks.AIR);
+		helper.setBlock(VINE.east().below(), Blocks.GRASS_BLOCK);
+		helper.useBlock(VINE, player, hit(helper, VINE, Direction.UP));
+		helper.assertTrue(helper.getBlockState(VINE.east()).is(block("giant_pumpkin")) && player.getMainHandItem().getCount() == 2,
+				"With room, bone meal sets the fruit");
+		helper.succeed();
+	}
+
+	/**
+	 * Breaking any block picks the whole pumpkin up as one Giant Pumpkin item that keeps its size, weight, carving and
+	 * name for the scale, and the vine straightens; placing the item puts the same pumpkin back, reaching away from the
+	 * player, cut from any vine; an axe chops it up for nine pumpkins and its seeds.
+	 */
 	@GameTest(maxTicks = 40)
-	public void giantPumpkinBreaksWhole(GameTestHelper helper) {
-		fullGrown(helper);
-		BlockState state = helper.getBlockState(new BlockPos(4, 4, 3));
-		List<ItemStack> drops = Block.getDrops(state, helper.getLevel(), helper.absolutePos(new BlockPos(4, 4, 3)), null);
-		helper.assertTrue(count(drops, Items.PUMPKIN) == 9 && count(drops, item("giant_pumpkin_seeds")) >= 1, "Expected 9 pumpkins and seeds: " + drops);
-		helper.getLevel().destroyBlock(helper.absolutePos(new BlockPos(4, 4, 3)), true);
+	public void giantPumpkinIsPickedUpWhole(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		GiantPumpkinBlockEntity grown = fullGrown(helper);
+		grown.feed(level, 25, level.getRandom());
+		int weight = grown.weight();
+		UUID id = grown.id();
+		int[] face = CarvingFace.scale(CLASSIC, GiantPumpkinBlockEntity.FACE_SIZE);
+		grown.setFace(Direction.NORTH, face, null);
+		BlockPos corner = new BlockPos(4, 4, 3);
+		helper.assertTrue(Block.getDrops(helper.getBlockState(corner), level, helper.absolutePos(corner), null).isEmpty(),
+				"Only the master block drops the pumpkin");
+		level.destroyBlock(helper.absolutePos(corner), true);
 		for (int x = 2; x <= 4; x++) {
 			for (int y = 2; y <= 4; y++) {
 				for (int z = 1; z <= 3; z++) {
@@ -254,8 +332,39 @@ public class HalloweenGameTests {
 		BlockState vine = helper.getBlockState(VINE);
 		helper.assertTrue(vine.is(block("giant_pumpkin_vine")) && vine.getValue(GiantPumpkinVineBlock.AGE) == GiantPumpkinVineBlock.MAX_AGE,
 				"The vine should straighten to set another: " + vine);
-		helper.succeedWhen(() -> helper.assertTrue(itemsAround(helper, new BlockPos(3, 3, 2), Items.PUMPKIN) == 9,
-				"Breaking it should drop 9 pumpkins once, found " + itemsAround(helper, new BlockPos(3, 3, 2), Items.PUMPKIN)));
+		List<ItemEntity> dropped = level.getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(new BlockPos(3, 3, 2))).inflate(4.0));
+		helper.assertTrue(dropped.size() == 1 && dropped.get(0).getItem().is(item("giant_pumpkin")) && dropped.get(0).getItem().getCount() == 1,
+				"Breaking it should drop one Giant Pumpkin: " + dropped.stream().map(ItemEntity::getItem).toList());
+		ItemStack carried = dropped.get(0).getItem().copy();
+		dropped.get(0).discard();
+		GiantPumpkinData data = carried.get(JugcraftAgriculture.GIANT_PUMPKIN);
+		helper.assertTrue(data != null && data.size() == 3 && data.weight() == weight && data.id().equals(Optional.of(id))
+				&& Arrays.equals(data.faces().get(Direction.NORTH), face), "The item keeps the pumpkin: " + data);
+
+		// Placed back from the south-facing player aiming at the middle of the near edge, it fills x 2-4, z 1-3 again.
+		Player player = holding(helper, carried);
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, new BlockPos(3, 1, 1), Direction.UP)));
+		for (int x = 2; x <= 4; x++) {
+			for (int y = 2; y <= 4; y++) {
+				for (int z = 1; z <= 3; z++) {
+					BlockState state = helper.getBlockState(new BlockPos(x, y, z));
+					helper.assertTrue(state.is(block("giant_pumpkin")) && state.getValue(GiantPumpkinBlock.SIZE) == 3,
+							"Expected the pumpkin placed back at " + x + "," + y + "," + z + ": " + state);
+				}
+			}
+		}
+		GiantPumpkinBlockEntity placed = helper.getBlockEntity(new BlockPos(2, 2, 1), GiantPumpkinBlockEntity.class);
+		helper.assertTrue(placed.weight() == weight && placed.id().equals(id) && Arrays.equals(placed.face(Direction.NORTH), face)
+				&& !placed.attached(level), "Placed back it is the same pumpkin, off the vine");
+		helper.assertTrue(player.getMainHandItem().isEmpty(), "Placing uses the item");
+
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
+		helper.useBlock(new BlockPos(3, 3, 1), player, hit(helper, new BlockPos(3, 3, 1), Direction.NORTH));
+		helper.assertBlockNotPresent(block("giant_pumpkin"), new BlockPos(2, 2, 1));
+		helper.assertBlockNotPresent(block("giant_pumpkin"), new BlockPos(4, 4, 3));
+		helper.succeedWhen(() -> helper.assertTrue(itemsAround(helper, new BlockPos(3, 3, 2), Items.PUMPKIN) == 9
+				&& itemsAround(helper, new BlockPos(3, 3, 2), item("giant_pumpkin_seeds")) >= 1,
+				"Chopping it should give 9 pumpkins and seeds, found " + itemsAround(helper, new BlockPos(3, 3, 2), Items.PUMPKIN)));
 	}
 
 	/**
@@ -399,11 +508,56 @@ public class HalloweenGameTests {
 				&& helper.getBlockState(ground.above(2)).getValue(ScarecrowBlock.SHIRT) == DyeColor.BLUE, "Both halves wear the blue shirt");
 		helper.assertTrue(player.getMainHandItem().getCount() == 1, "Dyeing uses one dye");
 
-		helper.setBlock(ground.above(3), Blocks.CARVED_PUMPKIN);
 		helper.getLevel().destroyBlock(helper.absolutePos(ground.above(2)), true);
 		helper.assertBlockNotPresent(block("scarecrow"), ground.above());
 		helper.succeedWhen(() -> helper.assertTrue(itemsAround(helper, ground, item("scarecrow")) == 1,
 				"Breaking it drops one scarecrow, found " + itemsAround(helper, ground, item("scarecrow"))));
+	}
+
+	/**
+	 * A scarecrow wears a pumpkin for a head: a jack o'lantern lights it, another pumpkin swaps in (the old one comes
+	 * back), a torch lights a hand-carved head by its carving, an empty hand takes the head off, and breaking the
+	 * scarecrow drops its head.
+	 */
+	@GameTest(maxTicks = 40)
+	public void scarecrowWearsAPumpkinHead(GameTestHelper helper) {
+		BlockPos ground = new BlockPos(3, 1, 3);
+		helper.setBlock(ground, Blocks.STONE);
+		Player player = holding(helper, new ItemStack(item("scarecrow")));
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit(helper, ground, Direction.UP)));
+		BlockPos lower = ground.above();
+		BlockPos upper = ground.above(2);
+		ScarecrowBlockEntity scarecrow = helper.getBlockEntity(upper, ScarecrowBlockEntity.class);
+
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.JACK_O_LANTERN, 2));
+		helper.useBlock(lower, player, hit(helper, lower, Direction.NORTH));
+		helper.assertTrue(scarecrow.head().is(Items.JACK_O_LANTERN) && scarecrow.head().getCount() == 1 && player.getMainHandItem().getCount() == 1,
+				"The scarecrow should wear one jack o'lantern: " + scarecrow.head());
+		helper.assertTrue(helper.getBlockState(upper).getLightEmission() == 15 && helper.getBlockState(lower).getLightEmission() == 0,
+				"A jack o'lantern head lights the scarecrow's upper half");
+
+		ItemStack carved = new ItemStack(item("hand_carved_pumpkin"));
+		PumpkinCarving carving = PumpkinCarving.BLANK.withFace(0, CLASSIC);
+		carved.set(JugcraftAgriculture.CARVING, carving);
+		player.setItemInHand(InteractionHand.MAIN_HAND, carved);
+		helper.useBlock(upper, player, hit(helper, upper, Direction.NORTH));
+		helper.assertTrue(scarecrow.head().is(item("hand_carved_pumpkin")) && player.getInventory().countItem(Items.JACK_O_LANTERN) == 1
+				&& helper.getBlockState(upper).getLightEmission() == 0, "A hand-carved head swaps in, unlit, and the jack o'lantern comes back");
+
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.TORCH));
+		helper.useBlock(upper, player, hit(helper, upper, Direction.NORTH));
+		helper.assertTrue(ScarecrowBlockEntity.lit(scarecrow.head()) && player.getMainHandItem().isEmpty()
+				&& helper.getBlockState(upper).getLightEmission() == carving.glow(), "A torch lights the carved head by its carving");
+
+		helper.useBlock(upper, player, hit(helper, upper, Direction.NORTH));
+		helper.assertTrue(scarecrow.head().isEmpty() && player.getInventory().countItem(item("hand_carved_pumpkin")) == 1
+				&& helper.getBlockState(upper).getLightEmission() == 0, "An empty hand takes the head off");
+
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CARVED_PUMPKIN));
+		helper.useBlock(upper, player, hit(helper, upper, Direction.NORTH));
+		helper.getLevel().destroyBlock(helper.absolutePos(lower), true);
+		helper.succeedWhen(() -> helper.assertTrue(itemsAround(helper, ground, item("scarecrow")) == 1
+				&& itemsAround(helper, ground, Items.CARVED_PUMPKIN) == 1, "Breaking it drops the scarecrow and its head"));
 	}
 
 	/** Corn shocks stand two tall; ornamental corn bundles hang on a wall and fall when it goes; birdhouses hang or stand. */

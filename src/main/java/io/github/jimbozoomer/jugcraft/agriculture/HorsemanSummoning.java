@@ -11,9 +11,8 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -41,9 +40,9 @@ public final class HorsemanSummoning {
 	private HorsemanSummoning() {
 	}
 
-	/** Whether {@code state} can be the Horseman's head: a lit jack o'lantern or lit hand-carved pumpkin. */
-	public static boolean litPumpkin(BlockState state) {
-		return state.is(Blocks.JACK_O_LANTERN) || state.getBlock() instanceof CarvedPumpkinBlock && state.getValue(CarvedPumpkinBlock.LIT);
+	/** Whether {@code head} (what a scarecrow wears) can be the Horseman's head: a jack o'lantern or lit hand-carved pumpkin. */
+	public static boolean litPumpkin(ItemStack head) {
+		return ScarecrowBlockEntity.lit(head);
 	}
 
 	/** Tries to summon the Horseman with the scarecrow whose lower half is at {@code scarecrow}. */
@@ -70,8 +69,9 @@ public final class HorsemanSummoning {
 		if (level.getDifficulty() == Difficulty.PEACEFUL) {
 			return Result.PEACEFUL;
 		}
-		BlockPos head = scarecrow.above(2);
-		if (!litPumpkin(level.getBlockState(head))) {
+		// The head is the one the scarecrow wears, on its upper half.
+		BlockPos head = scarecrow.above();
+		if (!(level.getBlockEntity(head) instanceof ScarecrowBlockEntity worn) || !litPumpkin(worn.head())) {
 			return Result.NO_HEAD;
 		}
 		if (!Wisps.openSky(level, head.above())) {
@@ -84,11 +84,11 @@ public final class HorsemanSummoning {
 		if (horseman == null) {
 			return Result.WRONG_PLACE;
 		}
-		level.removeBlock(head, false);
+		worn.setHead(ItemStack.EMPTY);
 		Entity bolt = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("lightning_bolt")).create(level, EntitySpawnReason.TRIGGERED);
 		if (bolt instanceof LightningBolt lightning) {
 			lightning.setVisualOnly(true);
-			lightning.snapTo(Vec3.atBottomCenterOf(head));
+			lightning.snapTo(Vec3.atBottomCenterOf(head.above()));
 			level.addFreshEntity(lightning);
 		}
 		Vec3 spot = rideInSpot(level, scarecrow);
