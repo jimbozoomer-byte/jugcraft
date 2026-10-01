@@ -8,7 +8,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -41,7 +41,7 @@ public final class Blast {
 				2.0F, 1.2F + level.getRandom().nextFloat() * 0.2F);
 		DamageSource source = level.damageSources().explosion(direct, owner);
 		List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(RADIUS),
-				target -> target.isAlive() && !target.isSpectator() && target.getType() != EntityType.ARMOR_STAND);
+				target -> target.isAlive() && !target.isSpectator() && target.getType() != EntityTypes.ARMOR_STAND);
 		int hurt = 0;
 		for (LivingEntity target : targets) {
 			double distance = Math.sqrt(target.distanceToSqr(center));
@@ -55,10 +55,11 @@ public final class Blast {
 			if (target.hurtServer(level, source, DAMAGE * strength)) {
 				hurt++;
 			}
-			Vec3 away = target.position().subtract(center);
-			Vec3 push = (away.lengthSqr() < 1.0E-4 ? new Vec3(0, 1, 0) : away.normalize()).scale(0.8 * strength);
-			target.push(push.x, push.y + 0.25 * strength, push.z);
-			target.hurtMarked = true;
+			// Knocked away from the centre (knockback takes the direction to push away from).
+			Vec3 toCenter = center.subtract(target.position());
+			if (toCenter.horizontalDistanceSqr() > 1.0E-4) {
+				target.knockback(0.8 * strength, toCenter.x, toCenter.z);
+			}
 		}
 		return hurt;
 	}

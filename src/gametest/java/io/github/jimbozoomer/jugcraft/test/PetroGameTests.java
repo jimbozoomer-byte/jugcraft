@@ -24,7 +24,7 @@ import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import io.github.jimbozoomer.jugcraft.prospecting.OreSurvey;
 import java.util.List;
 import io.github.jimbozoomer.jugcraft.weapons.Blast;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
@@ -533,9 +533,9 @@ public class PetroGameTests {
 				helper.setBlock(new BlockPos(6, y, z), Blocks.STONE);
 			}
 		}
-		Mob exposed = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(4, 1, 6));
-		Mob sheltered = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(7, 1, 4));
-		Entity stand = helper.spawn(EntityType.ARMOR_STAND, new BlockPos(2, 1, 4));
+		Mob exposed = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(4, 1, 6));
+		Mob sheltered = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(7, 1, 4));
+		Entity stand = helper.spawn(EntityTypes.ARMOR_STAND, new BlockPos(2, 1, 4));
 		ItemEntity diamond = helper.spawnItem(Items.DIAMOND, 4.5F, 1.2F, 3.5F);
 		float full = exposed.getHealth();
 		int hurt = Blast.detonate(helper.getLevel(), helper.absoluteVec(new Vec3(4.5, 1.5, 4.5)), null, null);
