@@ -88,7 +88,7 @@ public class CarvedPumpkinRenderer implements BlockEntityRenderer<CarvedPumpkinB
 	 * One face of the texture on one side, seen the right way round from outside: corners top-left,
 	 * bottom-left, bottom-right, top-right (counter-clockwise seen from outside).
 	 */
-	private static void side(VertexConsumer buffer, PoseStack.Pose matrix, Direction side, int face, int light) {
+	static void side(VertexConsumer buffer, PoseStack.Pose matrix, Direction side, int face, int light) {
 		float u0 = face / (float) PumpkinCarving.FACES;
 		float u1 = (face + 1) / (float) PumpkinCarving.FACES;
 		float[][] corners = switch (side) {

@@ -11,6 +11,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.PumpkinCarving;
 import io.github.jimbozoomer.jugcraft.agriculture.PumpkinCarvings;
 import io.github.jimbozoomer.jugcraft.agriculture.ScarecrowBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.ScarecrowBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.TallCrop;
 import io.github.jimbozoomer.jugcraft.agriculture.TallCropBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.TallDecorationBlock;
@@ -24,11 +25,13 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
@@ -39,7 +42,7 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 /**
  * Client game test for the Halloween harvest: a pumpkin patch with full-grown giant pumpkins (one carved on
- * its 48x48 side), a Harvest Scale, the giant's growth stages, scarecrows in four shirts with carved heads,
+ * its 48x48 side), a Harvest Scale, the giant's growth stages, scarecrows in four shirts wearing carved heads,
  * heirloom pumpkins, ornamental corn and corn shocks, a shed hung with corn bundles and gourd birdhouses, and
  * mums; photographed by day and lit at midnight. Then the giant carving screen, opened by the server as the
  * knife does with a Pumpkin Stencil in the other hand: the stencil is pressed in, photographed and finished,
@@ -73,6 +76,7 @@ public class HalloweenClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 14, y + 12, z + 7, 180, 38, "jugcraft_halloween_harvest");
 			shoot(context, singleplayer, x + 11, y + 4, z - 4, 180, 18, "jugcraft_giant_pumpkins");
 			shoot(context, singleplayer, x + 7, y + 1, z - 1, 180, 4, "jugcraft_scarecrows");
+			shoot(context, singleplayer, x + 2, y + 1, z - 3, 180, 14, "jugcraft_scarecrow_head");
 			shoot(context, singleplayer, x + 19, y + 3, z - 4, 180, 30, "jugcraft_heirloom_pumpkins");
 			shoot(context, singleplayer, x + 18, y + 2, z + 3, 180, 10, "jugcraft_harvest_decorations");
 
@@ -82,6 +86,7 @@ public class HalloweenClientGameTests implements FabricClientGameTest {
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 6, y + 2, z - 6, 180, 12, "jugcraft_giant_pumpkin_night");
 			shoot(context, singleplayer, x + 7, y + 1, z - 1, 180, 4, "jugcraft_scarecrows_night");
+			shoot(context, singleplayer, x + 2, y + 1, z - 3, 180, 14, "jugcraft_scarecrow_head_night");
 		}
 	}
 
@@ -183,6 +188,13 @@ public class HalloweenClientGameTests implements FabricClientGameTest {
 		}
 	}
 
+	/** A hand-carved pumpkin item of one kind with a starter face, for a scarecrow to wear. */
+	private static ItemStack carvedHead(String id, int template) {
+		ItemStack head = new ItemStack(JugcraftAgriculture.item(id));
+		head.set(JugcraftAgriculture.CARVING, PumpkinCarving.BLANK.withFace(0, CarvingTemplates.ALL.get(template).face()));
+		return head;
+	}
+
 	private static void buildPatch(ServerLevel level, BlockPos origin) {
 		// Giant pumpkins, all grown east of their vines: one to carve with a jack o'lantern face, one by the
 		// scale (carved later through the screen), one 2x2x2 and a seedling; the vine's stages behind them.
@@ -206,11 +218,14 @@ public class HalloweenClientGameTests implements FabricClientGameTest {
 			BlockState lower = state("scarecrow").setValue(TallDecorationBlock.FACING, Direction.SOUTH).setValue(ScarecrowBlock.SHIRT, SHIRTS[i]);
 			set(level, foot, lower);
 			set(level, foot.above(), lower.setValue(TallDecorationBlock.HALF, DoubleBlockHalf.UPPER));
-			switch (i) {
-				case 0 -> carvedPumpkin(level, foot.above(2), "hand_carved_pumpkin", 0);
-				case 1 -> carvedPumpkin(level, foot.above(2), "hand_carved_white_pumpkin", 2);
-				case 2 -> set(level, foot.above(2), Blocks.JACK_O_LANTERN.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH));
-				default -> carvedPumpkin(level, foot.above(2), "hand_carved_cinderella_pumpkin", 1);
+			ItemStack head = switch (i) {
+				case 0 -> carvedHead("hand_carved_pumpkin", 0);
+				case 1 -> carvedHead("hand_carved_white_pumpkin", 2);
+				case 2 -> new ItemStack(Blocks.JACK_O_LANTERN);
+				default -> carvedHead("hand_carved_cinderella_pumpkin", 1);
+			};
+			if (level.getBlockEntity(foot.above()) instanceof ScarecrowBlockEntity scarecrow) {
+				scarecrow.setHead(head);
 			}
 		}
 
@@ -275,6 +290,13 @@ public class HalloweenClientGameTests implements FabricClientGameTest {
 			BlockState state = level.getBlockState(pos);
 			if (state.getBlock() instanceof CarvedPumpkinBlock && state.getValue(CarvedPumpkinBlock.GLOW) > 0) {
 				set(level, pos, state.setValue(CarvedPumpkinBlock.LIT, true));
+			}
+			// A candle in each carved head the scarecrows wear.
+			if (level.getBlockEntity(pos) instanceof ScarecrowBlockEntity scarecrow && scarecrow.head().has(JugcraftAgriculture.CARVING)) {
+				ItemStack lit = scarecrow.head().copy();
+				lit.set(DataComponents.BLOCK_STATE, lit.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY)
+						.with(CarvedPumpkinBlock.LIT, true));
+				scarecrow.setHead(lit);
 			}
 		}
 	}

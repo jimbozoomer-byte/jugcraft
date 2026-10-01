@@ -288,20 +288,22 @@ Eleven additions for a fall pumpkin patch, all permanent. Details, numbers and t
 | **The pumpkin patch** from above: giant pumpkins, scarecrows, heirlooms, ornamental corn and the shed | **Giant pumpkins:** one carved with a jack o'lantern face, one by its Harvest Scale, a 2×2×2 and a seedling, with heirloom pumpkins on the right |
 | --- | --- |
 | ![The Halloween pumpkin patch from above](../images/ingame_halloween_harvest.jpg) | ![Giant pumpkins and the Harvest Scale](../images/ingame_giant_pumpkins.jpg) |
-| **Scarecrows** in four shirts, with a hand-carved pumpkin, a carved white pumpkin, a jack o'lantern and a carved Cinderella pumpkin for heads | **Heirloom pumpkins** and bottle gourds, hand-carved heirlooms on hay bales, corn shocks and ripe ornamental corn |
+| **Scarecrows** in four shirts, wearing a hand-carved pumpkin, a carved white pumpkin, a jack o'lantern and a carved Cinderella pumpkin on their shoulders | **Heirloom pumpkins** and bottle gourds, hand-carved heirlooms on hay bales, corn shocks and ripe ornamental corn |
 | ![Scarecrows](../images/ingame_scarecrows.jpg) | ![Heirloom pumpkins, corn shocks and ornamental corn](../images/ingame_heirloom_pumpkins.jpg) |
 | **The shed:** ornamental corn bundles, gourd birdhouses under the eaves, potted mums and wild mums | **Carving a giant pumpkin:** the 48×48 screen with a stencil from the other hand pressed in |
 | ![Corn bundles, birdhouses and mums](../images/ingame_harvest_decorations.jpg) | ![The giant carving screen](../images/ingame_carving_giant_screen.jpg) |
 | **At midnight:** the carved giant with a torch inside, and the one carved from the stencil | **The scarecrows at midnight** |
 | ![Giant pumpkins at night](../images/ingame_giant_pumpkin_night.jpg) | ![Scarecrows at night](../images/ingame_scarecrows_night.jpg) |
+| **A scarecrow's head:** worn like an armor stand's pumpkin, bigger than a head, its carving facing out | **The same at midnight,** the carving lit and the scarecrow lit by it |
+| ![A scarecrow wearing a hand-carved pumpkin](../images/ingame_scarecrow_head.jpg) | ![The scarecrow's head lit at midnight](../images/ingame_scarecrow_head_night.jpg) |
 
 *Real screenshots from the client game test that CI runs (`HalloweenClientGameTests`, software rendering, small previews, hotbar cropped). The giant was carved from the stencil through the screen; the server then held the face.*
 
 ### Giant pumpkins
 
-Plant **Giant Pumpkin Seeds** on farmland. The vine grows like a pumpkin stem (1.5× slower), then sets **one** small fruit beside it. While the vine holds it, the fruit grows: faster on moist farmland, faster still when watered from a **Gourd Canteen**, and bone meal feeds it too. It swells to **2×2×2**, then **3×3×3**, away from its vine, if there is room on ground fruit can lie on. Full grown, it weighs 100–120 kg and keeps putting on weight, up to 1000 kg, until it is carved.
+Plant **Giant Pumpkin Seeds** on farmland. The vine grows like a pumpkin stem (1.5× slower), then sets **one** small fruit beside it. While the vine holds it, the fruit grows: faster on moist farmland, faster still when watered from a **Gourd Canteen**. Bone meal works all the way: it grows the vine, sets the fruit on a full-grown vine, and feeds the fruit (given to the vine or the pumpkin). It swells to **2×2×2**, then **3×3×3**, away from its vine, if there is room on ground fruit can lie on. Full grown, it weighs 100–120 kg and keeps putting on weight, up to 1000 kg, until it is carved.
 
-Break any block of it to harvest the whole pumpkin: 9 pumpkins and 1–3 giant seeds when full grown. Pistons can't move it.
+A giant pumpkin is **one prop**: break any block and you pick up the whole pumpkin as one **Giant Pumpkin** item that keeps its size, weight and carving; place it anywhere and the whole cube goes back down, reaching away from you. Chop it up with an **axe** instead for 9 pumpkins and 1–3 giant seeds when full grown. Pistons can't move it.
 
 Every side of a full-grown giant carves with the Carving Knife as **one 48×48 face**, three times as fine as a pumpkin's; the screen shrinks its cells and offers bigger brushes, and the starter faces come blown up. A torch inside lights every block of it.
 
@@ -309,7 +311,7 @@ Where the seeds come from: the first cut into any pumpkin **scoops** it, and som
 
 ### The weigh-off
 
-Put a **Harvest Scale** beside a full-grown giant pumpkin and use it. It weighs the pumpkin and keeps the three heaviest it has weighed on its board. The first time a pumpkin places, whoever weighed it wins a **First, Second or Third Prize Ribbon**. A comparator reads the last weight.
+Put a **Harvest Scale** beside a full-grown giant pumpkin (or carry the pumpkin over and set it down beside the scale) and use it. It weighs the pumpkin and keeps the three heaviest it has weighed on its board. The first time a pumpkin places, whoever weighed it wins a **First, Second or Third Prize Ribbon**. A comparator reads the last weight.
 
 ### Fall decorations and treats
 
@@ -317,7 +319,7 @@ Put a **Harvest Scale** beside a full-grown giant pumpkin and use it. It weighs 
 | --- | --- | --- |
 | **Pumpkin Stencil** | Use a Blank Stencil (two paper) on a carved side | Traces the design; hold it in your other hand while carving to press it in, on any pumpkin or a giant |
 | **White, Jarrahdale and Cinderella pumpkins** | Wild in birch forests and snowy places, savannas and windswept hills, plains and flower forests; grass drops their seeds | Grow from stems; carve like pumpkins into their own hand-carved blocks; bake into pumpkin pie |
-| **Scarecrow** | Wool over hay between sticks | Two blocks tall; dye its flannel shirt any colour; put any pumpkin on top for a head |
+| **Scarecrow** | Wool over hay between sticks | Two blocks tall; dye its flannel shirt any colour; give it any pumpkin and it wears it for a head (a lit one lights it) |
 | **Ornamental corn** | Wild Corn sometimes drops its kernels; grass drops them | Grows like corn; its multicoloured ears tie into an **Ornamental Corn Bundle** for walls and door frames |
 | **Corn Shock** | Six Corn Stalks (from breaking any corn 3 blocks tall) and string | A two-block stook for porches |
 | **Caramel, Caramel Apple, Popcorn Ball** | Smelt sugar; add an apple and a stick, or two popcorn | Treats (2, 6 and 5 hunger); the apple's stick comes back |
