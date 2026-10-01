@@ -1,6 +1,6 @@
 # Agriculture branch
 
-Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife), the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations), the pumpkin regatta and trick-or-treating, the Halloween festivities (the carving contest, costumed mobs, the Halloween Peddler, spooky decorations and sweets), and Halloween nights (will-o'-wisps, the Pumpkin Chunkin' Trebuchet, a bigger Candy Bag, the Harvest Moon and the Headless Horseman).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md), [../features/halloween-harvest.md](../features/halloween-harvest.md) , [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md) [../features/halloween-festivities.md](../features/halloween-festivities.md) and [../features/halloween-nights.md](../features/halloween-nights.md) for the implemented slices and their test evidence.
+Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife), the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations), the pumpkin regatta and trick-or-treating, the Halloween festivities (the carving contest, costumed mobs, the Halloween Peddler, spooky decorations and sweets), Halloween nights (will-o'-wisps, the Pumpkin Chunkin' Trebuchet, a bigger Candy Bag, the Harvest Moon and the Headless Horseman), and the first Halloween decorations (string lights, the Candy Bowl, the Coffin, the Haunted Portrait and the Fog Machine).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md), [../features/halloween-harvest.md](../features/halloween-harvest.md) , [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md) [../features/halloween-festivities.md](../features/halloween-festivities.md) [../features/halloween-nights.md](../features/halloween-nights.md) and [../features/halloween-decorations.md](../features/halloween-decorations.md) for the implemented slices and their test evidence.
 
 Agriculture is Jugcraft's third starting branch, alongside technology and magic ([DESIGN.md](../DESIGN.md)). A farmer can begin on day one with a hoe and whatever grows nearby, and never needs a machine or a spell. Industrial farming (powered harvesters, planters, sprinklers, crop processors) comes later and belongs to the engineering branch; see [Boundaries](#boundaries).
 
@@ -403,6 +403,18 @@ The **Candy Bag** now holds treats like a bundle; trick-or-treating fills it, an
 ### The Headless Horseman
 
 Near midnight during the event, give a Scarecrow a lit pumpkin for a head and sneak-use it under the open sky. The **Headless Horseman** rides in for his head: a boss with a boss bar who charges and throws flaming pumpkins (they burn creatures, never blocks), and throws three at once when enraged at half health. He keeps to his arena and rides off at dawn. Defeat him for the **Horseman's Lantern** and **Horseman's Cloak** and the **Lost His Head** advancement.
+
+## What exists now: Halloween decorations
+
+The first five of thirty Halloween decorations; the rest follow five at a time. All of them work all year. Details, numbers and test evidence: [../features/halloween-decorations.md](../features/halloween-decorations.md).
+
+DECOR_SCREENSHOTS_PENDING
+
+- **Jack-o'-Lantern String Lights:** fix **String Light Hooks** to floors, walls or ceilings and string a strand of tiny pumpkin bulbs between them (up to 16 blocks apart). A hook lights from redstone or from a trickle of electricity, and a strand glows while either end is lit.
+- **Candy Bowl:** fill it with candy and cookies for trick-or-treaters at your home. Each visitor may take one treat a night; you take any time.
+- **Coffin:** two blocks long; its lid lifts on a 27-slot chest, and sneak-using it lets you lie down in it like a bed to set your spawn.
+- **Haunted Portrait:** four sitters in a gilt frame whose eyes follow you, glowing red at night.
+- **Fog Machine:** a dieselpunk machine on the electric network that rolls low fog over the ground, 4 to 16 blocks around it.
 
 ## Crop roster: what comes next (planned)
 
