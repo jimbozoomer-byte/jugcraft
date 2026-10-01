@@ -13,6 +13,8 @@ import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
 import io.github.jimbozoomer.jugcraft.fluid.FluidNetworks;
+import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
+import io.github.jimbozoomer.jugcraft.fluid.StoredFluid;
 import io.github.jimbozoomer.jugcraft.kinetic.KineticConsumer;
 import io.github.jimbozoomer.jugcraft.kinetic.KineticNetworks;
 import io.github.jimbozoomer.jugcraft.logistics.ItemNetworks;
@@ -38,6 +40,8 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponentGetter;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -256,6 +260,25 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				setChanged();
 			}
 		};
+	}
+
+	/** A steel tank or gas holder drops with its fluid (see {@link StoredFluid}) and gets it back when placed again. */
+	@Override
+	protected void collectImplicitComponents(DataComponentMap.Builder components) {
+		super.collectImplicitComponents(components);
+		StoredFluid stored = reservoir == null ? null : StoredFluid.of(reservoir);
+		if (stored != null) {
+			components.set(JugcraftFluids.STORED_FLUID, stored);
+		}
+	}
+
+	@Override
+	protected void applyImplicitComponents(DataComponentGetter components) {
+		super.applyImplicitComponents(components);
+		StoredFluid stored = components.get(JugcraftFluids.STORED_FLUID);
+		if (stored != null && reservoir != null) {
+			stored.restore(reservoir);
+		}
 	}
 
 	/** A fluid processor's tanks, or null for other machines. */

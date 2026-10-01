@@ -334,6 +334,7 @@ def machine_assets(lang):
     lang[f"message.{MOD}.electric_motor"] = "Electric motor: %s / %s JE"
     lang[f"message.{MOD}.network_terminal"] = "Network: %s cables at %s JE/t, %s devices holding %s / %s JE (%s%%)"
     lang[f"message.{MOD}.network_terminal.none"] = "No cable connected"
+    lang[f"tooltip.{MOD}.stored_fluid"] = "%s: %s mB"
     lang[f"message.{MOD}.fluid_filter"] = "Filter: only %s"
     lang[f"message.{MOD}.fluid_filter.none"] = ("Filter: not set, lets nothing out. Use a filled bucket on it, or "
                                                 "right-click it beside a tank of the fluid")
@@ -581,6 +582,22 @@ def petro_assets(lang):
         lang[f"block.{MOD}.{gas}"] = info["display"]
 
 
+# Tanks that keep their fluid when broken (batch 10): the drop copies the block entity's jugcraft:stored_fluid. The
+# multi-block ones drop only from their master block (part 0), which holds the block entity; breaking any other part
+# breaks the master too (machine/LargeMachineBlock).
+TANKS = {"fluid_tank": False, "steel_tank": True, "gas_holder": True}
+
+
+def tank_drop(block):
+    table = self_drop(block)
+    table["pools"][0]["entries"][0]["modifier"] = {
+        "type": "minecraft:copy_components", "source": "block_entity", "include": [rid("stored_fluid")]}
+    if TANKS[block]:
+        table["pools"][0]["condition"] = {"type": "minecraft:all_of",
+                                          "terms": [SURVIVES_EXPLOSION, block_state(block, {"part": "0"})]}
+    return table
+
+
 def loot_tables():
     out = DATA / MOD / "loot_table" / "blocks"
     for metal, info in METALS.items():
@@ -593,7 +610,7 @@ def loot_tables():
             table = ore_drop(block, mineral, low, high) if block.endswith("_ore") else self_drop(block)
             write(out / f"{block}.json", table)
     for block in machine_blocks():
-        write(out / f"{block}.json", self_drop(block))
+        write(out / f"{block}.json", tank_drop(block) if block in TANKS else self_drop(block))
     # The 2-tall charging station drops once, from its lower half.
     for block in TOOL_BLOCKS:
         table = self_drop(block)

@@ -451,6 +451,14 @@ public enum MachineKind implements StringRepresentable {
 		return this == ALLOY_SMELTER ? new PowerPort(2, Direction.WEST) : null;
 	}
 
+	/**
+	 * Tanks that keep their fluid when broken. Only their master block has the block entity, so only it drops the item
+	 * (with the fluid on it): breaking any other block of one breaks the master too (see LargeMachineBlock).
+	 */
+	public boolean keepsContents() {
+		return this == STEEL_TANK || this == GAS_HOLDER;
+	}
+
 	/** Boilers: a fuel slot, a water-bucket slot and an empty-bucket slot, and a water tank. */
 	public boolean isBoiler() {
 		return this == STEAM_GENERATOR || this == LARGE_STEAM_ENGINE;

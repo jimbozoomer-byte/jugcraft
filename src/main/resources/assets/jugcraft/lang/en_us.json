@@ -505,5 +505,6 @@
   "tooltip.jugcraft.rocket_pack": "Hold jump in the air to fly",
   "tooltip.jugcraft.silk_touch_module": "Blocks drop themselves (drill or chainsaw; not with fortune)",
   "tooltip.jugcraft.speed_upgrade": "Each: faster, uses more energy per item (up to 4 count)",
+  "tooltip.jugcraft.stored_fluid": "%s: %s mB",
   "tooltip.jugcraft.upgrades": "Upgrades:"
 }
