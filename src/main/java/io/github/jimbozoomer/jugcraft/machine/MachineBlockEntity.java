@@ -202,6 +202,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case LARGE_STEAM_ENGINE -> new TankInlet(Fluids.WATER, MachineKind.LARGE_ENGINE_TANK);
 			case GEOTHERMAL_GENERATOR -> new TankInlet(Fluids.LAVA, MachineKind.GEOTHERMAL_TANK);
 			case ORE_WASHER -> new TankInlet(Fluids.WATER, MachineKind.WASHER_TANK);
+			case STEEL_FOUNDRY -> new TankInlet(PetroFluids.OXYGEN.fluid(), MachineKind.BOOST_TANK);
+			case CRYSTAL_GROWER -> new TankInlet(PetroFluids.ARGON.fluid(), MachineKind.BOOST_TANK);
 			default -> null;
 		};
 		FluidMachineSpec spec = kind.fluidSpec();
@@ -244,7 +246,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 
 	/**
 	 * Fluid exposed on a side (the same on every side and every part): the steam generator and ore
-	 * washer take water and the geothermal generator takes lava into their tanks. Other machines have none.
+	 * washer take water and the geothermal generator takes lava into their tanks; the steel foundry takes oxygen and
+	 * the crystal grower argon as boost gases. Other machines have none.
 	 */
 	public @Nullable Storage<FluidVariant> fluidFor(@Nullable Direction side) {
 		if (tanks != null) {
@@ -410,6 +413,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case WATER_WHEEL -> tickWaterWheel(level, pos, state);
 			case AUTO_CRAFTER -> tickCrafter(level, pos, state);
 			case PUMPJACK -> tickPumpjack(level, pos, state);
+			case AIR_SEPARATION_UNIT -> tickAirSeparation(level, pos, state);
 			case FRACKING_RIG -> tickFrackingRig(level, pos, state);
 			case DIESEL_GENERATOR -> tickFluidGenerator(level, pos, state, MachineKind.DIESEL_OUTPUT);
 			case GAS_TURBINE -> tickFluidGenerator(level, pos, state, MachineKind.TURBINE_OUTPUT);
@@ -736,6 +740,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 		energy.setAmount(energy.getAmount() - use);
 		progress++;
+		// Boost gas (oxygen in the foundry, argon in the crystal grower): a second step this tick, for the gas.
+		if (kind.boostPerTick() > 0 && tank >= kind.boostPerTick() && progress < maxProgress) {
+			tank -= kind.boostPerTick();
+			progress++;
+		}
 		if (progress >= maxProgress) {
 			progress = 0;
 			int out = kind.outputSlot();
@@ -841,6 +850,38 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 		energy.setAmount(energy.getAmount() - kind.usePerTick);
 		tank.fill(PetroFluids.CRUDE_OIL.source(), pumped);
+		maxProgress = PUMPJACK_STROKE;
+		progress = (progress + 1) % PUMPJACK_STROKE;
+		setChanged();
+		return true;
+	}
+
+	/**
+	 * The air separation unit: each powered tick it liquefies air and splits it, filling its first tank with
+	 * {@link MachineKind#ASU_NITROGEN_PER_TICK} mB of nitrogen (drawn off the top of the column), its second with
+	 * {@link MachineKind#ASU_OXYGEN_PER_TICK} mB of oxygen (drawn off the base) and its third with a mB of argon every
+	 * {@link MachineKind#ASU_ARGON_INTERVAL} ticks (drawn off the middle). Air is everywhere, so it needs no input; it
+	 * stops while any tank is full.
+	 */
+	private boolean tickAirSeparation(ServerLevel level, BlockPos pos, BlockState state) {
+		pushFluids(level, pos, state);
+		FluidTank nitrogen = tanks.output(0);
+		FluidTank oxygen = tanks.output(1);
+		FluidTank argon = tanks.output(2);
+		Fluid n2 = PetroFluids.NITROGEN.fluid();
+		Fluid o2 = PetroFluids.OXYGEN.fluid();
+		Fluid ar = PetroFluids.ARGON.fluid();
+		if (!nitrogen.fits(n2, MachineKind.ASU_NITROGEN_PER_TICK) || !oxygen.fits(o2, MachineKind.ASU_OXYGEN_PER_TICK)
+				|| !argon.fits(ar, 1)
+				|| !sides.redstone().allows(poweredByRedstone(level, pos, state)) || energy.getAmount() < kind.usePerTick) {
+			return false;
+		}
+		energy.setAmount(energy.getAmount() - kind.usePerTick);
+		nitrogen.fill(n2, MachineKind.ASU_NITROGEN_PER_TICK);
+		oxygen.fill(o2, MachineKind.ASU_OXYGEN_PER_TICK);
+		if (level.getGameTime() % MachineKind.ASU_ARGON_INTERVAL == 0) {
+			argon.fill(ar, 1);
+		}
 		maxProgress = PUMPJACK_STROKE;
 		progress = (progress + 1) % PUMPJACK_STROKE;
 		setChanged();
