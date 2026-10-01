@@ -705,7 +705,7 @@ public class PetroGameTests {
 	 * roofed over), makes nothing without water, and with water makes 12 JE/t a heliostat in daylight (half in rain),
 	 * boiling water for it. The test world's time and weather are not fixed, so daylight is read from the level.
 	 */
-	@GameTest(maxTicks = 100)
+	@GameTest(maxTicks = 200)
 	public void heliostatsHeatASolarReceiver(GameTestHelper helper) {
 		BlockPos receiverPos = new BlockPos(4, 5, 4);
 		helper.setBlock(receiverPos, JugcraftSolar.SOLAR_RECEIVER);
@@ -714,10 +714,11 @@ public class PetroGameTests {
 		}
 		helper.setBlock(new BlockPos(6, 2, 1), Blocks.STONE);
 		BlockPos absolute = helper.absolutePos(receiverPos);
-		int count = SolarReceiverBlockEntity.countHeliostats(helper.getLevel(), absolute);
-		helper.assertTrue(count == 3, "The receiver counted " + count + " heliostats under open sky");
 		SolarReceiverBlockEntity receiver = helper.getBlockEntity(receiverPos, SolarReceiverBlockEntity.class);
-		helper.runAfterDelay(5, () -> {
+		// Sky light (what "open sky" reads) catches up with the new roof a few ticks after it is placed.
+		helper.runAfterDelay(20, () -> {
+			int count = SolarReceiverBlockEntity.countHeliostats(helper.getLevel(), absolute);
+			helper.assertTrue(count == 3, "The receiver counted " + count + " heliostats under open sky");
 			helper.assertTrue(receiver.lastOutput() == 0 && receiver.energy().getAmount() == 0, "It made power without water");
 			receiver.water().variant = FluidVariant.of(Fluids.WATER);
 			receiver.water().amount = 4 * FluidConstants.BUCKET;
