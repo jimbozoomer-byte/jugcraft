@@ -707,6 +707,60 @@
           ],
           "extra": [],
           "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "minecraft:iron_ingot",
+              1
+            ],
+            [
+              "jugcraft:borax",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:ferroboron",
+            1
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:rare_earth_oxide",
+              1
+            ],
+            [
+              "jugcraft:ferroboron",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:neodymium_magnet",
+            2
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "minecraft:sand",
+              2
+            ],
+            [
+              "jugcraft:borax",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:borosilicate_glass",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
         }
       ]
     },
@@ -895,6 +949,20 @@
           ],
           "extra": [],
           "ticks": 60
+        },
+        {
+          "in": [
+            [
+              "jugcraft:pvc_resin",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:plastic_sheet",
+            2
+          ],
+          "extra": [],
+          "ticks": 60
         }
       ]
     },
@@ -940,6 +1008,20 @@
           "out": [
             "jugcraft:aluminum_wire",
             3
+          ],
+          "extra": [],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:borosilicate_glass",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:optical_fibre",
+            4
           ],
           "extra": [],
           "ticks": 100
@@ -1007,6 +1089,28 @@
             [
               "minecraft:gold_ingot",
               1
+            ]
+          ],
+          "out": [
+            "jugcraft:processor",
+            1
+          ],
+          "extra": [],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:microchip",
+              4
+            ],
+            [
+              "jugcraft:advanced_circuit",
+              1
+            ],
+            [
+              "jugcraft:optical_fibre",
+              2
             ]
           ],
           "out": [
@@ -3005,6 +3109,23 @@
           "items": [],
           "fluids": [
             [
+              "jugcraft:vinyl_chloride",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:pvc_resin",
+              4
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
               "jugcraft:butadiene",
               500
             ]
@@ -3191,6 +3312,28 @@
           "results": [
             [
               "jugcraft:fertilizer",
+              4
+            ]
+          ],
+          "ticks": 80
+        },
+        {
+          "items": [
+            [
+              "minecraft:rotten_flesh",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:lye",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:soap",
               4
             ]
           ],
@@ -3385,6 +3528,27 @@
             [
               "jugcraft:ammonia",
               200
+            ]
+          ],
+          "results": [],
+          "ticks": 40
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:refinery_gas",
+              250
+            ],
+            [
+              "jugcraft:chlorine",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:vinyl_chloride",
+              250
             ]
           ],
           "results": [],
