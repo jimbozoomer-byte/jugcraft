@@ -1,0 +1,356 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jugcraft:block/grave_mound_side",
+    "top": "jugcraft:block/grave_mound_top",
+    "side": "jugcraft:block/grave_mound_side",
+    "hand": "jugcraft:block/grave_mound_hand",
+    "sleeve": "jugcraft:block/grave_mound_sleeve"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        3,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#side"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        3,
+        2
+      ],
+      "to": [
+        13,
+        5,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#top"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        5,
+        6.5
+      ],
+      "to": [
+        9.5,
+        7,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#sleeve"
+        },
+        "south": {
+          "texture": "#sleeve"
+        },
+        "east": {
+          "texture": "#sleeve"
+        },
+        "west": {
+          "texture": "#sleeve"
+        },
+        "up": {
+          "texture": "#sleeve"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        7,
+        7
+      ],
+      "to": [
+        9,
+        10.5,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hand"
+        },
+        "south": {
+          "texture": "#hand"
+        },
+        "east": {
+          "texture": "#hand"
+        },
+        "west": {
+          "texture": "#hand"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        10.5,
+        7
+      ],
+      "to": [
+        9.5,
+        12.5,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hand"
+        },
+        "south": {
+          "texture": "#hand"
+        },
+        "east": {
+          "texture": "#hand"
+        },
+        "west": {
+          "texture": "#hand"
+        },
+        "up": {
+          "texture": "#hand"
+        },
+        "down": {
+          "texture": "#hand"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        12.5,
+        7.25
+      ],
+      "to": [
+        7.1,
+        15,
+        8.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hand"
+        },
+        "south": {
+          "texture": "#hand"
+        },
+        "east": {
+          "texture": "#hand"
+        },
+        "west": {
+          "texture": "#hand"
+        },
+        "up": {
+          "texture": "#hand"
+        },
+        "down": {
+          "texture": "#hand"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          12.5,
+          7.5
+        ],
+        "axis": "x",
+        "angle": -22.5
+      }
+    },
+    {
+      "from": [
+        7.25,
+        12.5,
+        7.25
+      ],
+      "to": [
+        7.85,
+        15,
+        8.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hand"
+        },
+        "south": {
+          "texture": "#hand"
+        },
+        "east": {
+          "texture": "#hand"
+        },
+        "west": {
+          "texture": "#hand"
+        },
+        "up": {
+          "texture": "#hand"
+        },
+        "down": {
+          "texture": "#hand"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          12.5,
+          7.5
+        ],
+        "axis": "x",
+        "angle": -22.5
+      }
+    },
+    {
+      "from": [
+        8.0,
+        12.5,
+        7.25
+      ],
+      "to": [
+        8.6,
+        15,
+        8.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hand"
+        },
+        "south": {
+          "texture": "#hand"
+        },
+        "east": {
+          "texture": "#hand"
+        },
+        "west": {
+          "texture": "#hand"
+        },
+        "up": {
+          "texture": "#hand"
+        },
+        "down": {
+          "texture": "#hand"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          12.5,
+          7.5
+        ],
+        "axis": "x",
+        "angle": -22.5
+      }
+    },
+    {
+      "from": [
+        8.75,
+        12.5,
+        7.25
+      ],
+      "to": [
+        9.35,
+        15,
+        8.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hand"
+        },
+        "south": {
+          "texture": "#hand"
+        },
+        "east": {
+          "texture": "#hand"
+        },
+        "west": {
+          "texture": "#hand"
+        },
+        "up": {
+          "texture": "#hand"
+        },
+        "down": {
+          "texture": "#hand"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          12.5,
+          7.5
+        ],
+        "axis": "x",
+        "angle": -22.5
+      }
+    },
+    {
+      "from": [
+        9.5,
+        10.5,
+        7.5
+      ],
+      "to": [
+        10.25,
+        12.5,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hand"
+        },
+        "south": {
+          "texture": "#hand"
+        },
+        "east": {
+          "texture": "#hand"
+        },
+        "west": {
+          "texture": "#hand"
+        },
+        "up": {
+          "texture": "#hand"
+        },
+        "down": {
+          "texture": "#hand"
+        }
+      }
+    }
+  ]
+}

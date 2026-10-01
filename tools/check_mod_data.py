@@ -745,6 +745,7 @@ def check_agriculture():
     check_night(java, main)
     check_decor(java)
     check_decor2(java)
+    check_decor3(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1349,6 +1350,52 @@ def check_decor2(java):
             err("The soul-lit carved pumpkin icon should use CarvingTextures' HOLE_SOUL and HOLE_WALL_SOUL")
     else:
         err("Missing texture hand_carved_pumpkin_soul.png")
+
+
+def check_decor3(java):
+    """The graveyard batch: the scare props' timings match tools/agriculture.py, every block state of the fence, gate,
+    pillar, door, mound, angel and pop-up skeleton has a model, and the fence, gate and door are in vanilla's tags."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("ScarePropBlockEntity", "PERIOD"): ag.SCARE_PERIOD}
+    for source, info in (("GraveMoundBlock", ag.GRAVE_MOUND), ("PopUpSkeletonBlock", ag.POP_UP_SKELETON)):
+        expected.update({(source, "REACH"): info["reach"], (source, "UP_TICKS"): info["up_ticks"],
+                         (source, "COOLDOWN_TICKS"): info["cooldown_ticks"]})
+        if f"implements ScareProp" not in java.get(source, ""):
+            err(f"{source} is not a ScareProp")
+        if info["up_ticks"] < ag.SCARE_PERIOD:
+            err(f"{source}: it must stay up at least one look ({ag.SCARE_PERIOD} ticks)")
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    fence, gate, crypt = ag.CEMETERY_FENCE["fence"], ag.CEMETERY_FENCE["gate"], ag.CRYPT
+    wanted = {
+        gate: {f"facing={f},in_wall={w},open={o}" for f in horizontal for w in booleans for o in booleans},
+        crypt["pillar"]: {"axis=x", "axis=y", "axis=z"},
+        crypt["door"]: {f"facing={f},half={h},hinge={g},open={o}" for f in horizontal for h in ("lower", "upper") for g in ("left", "right")
+                        for o in booleans},
+        ag.GRAVE_MOUND["block"]: {f"facing={f},raised={r}" for f in horizontal for r in booleans},
+        ag.POP_UP_SKELETON["block"]: {f"facing={f},raised={r}" for f in horizontal for r in booleans},
+        ag.MOURNING_ANGEL["block"]: {f"facing={f},half={h}" for f in horizontal for h in ("lower", "upper")},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    parts = (load(ASSETS / "blockstates" / f"{fence}.json") or {}).get("multipart", [])
+    if sorted(next(iter(p.get("when", {"post": 1}))) for p in parts) != sorted(["post", "north", "east", "south", "west"]):
+        err(f"{fence}: the multipart needs the post and a side for each direction")
+    for tag, entry in (("fences", fence), ("fence_gates", gate), ("doors", crypt["door"])):
+        for registry in ("block", "item"):
+            values = (load(RES / "data" / "minecraft" / "tags" / registry / f"{tag}.json") or {}).get("values", [])
+            if f"{MOD}:{entry}" not in values:
+                err(f"{entry} is missing from the {registry} tag minecraft:{tag}")
 
 
 def check_model_uvs():

@@ -61,6 +61,7 @@ import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.FlowerBlock;
@@ -74,6 +75,7 @@ import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -158,6 +160,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<HauntedPortraitBlockEntity> HAUNTED_PORTRAIT_ENTITY;
 	public static BlockEntityType<FogMachineBlockEntity> FOG_MACHINE_ENTITY;
 	public static BlockEntityType<FloatingCandleBlockEntity> FLOATING_CANDLE_ENTITY;
+	public static BlockEntityType<ScarePropBlockEntity> SCARE_PROP_ENTITY;
 	/** Low ground fog from the Fog Machine (drawn by the client: client/FogParticle.java). */
 	public static final SimpleParticleType FOG = FabricParticleTypes.simple();
 	/** What each kind of pumpkin becomes when first carved by hand, and the loot table its seeds come from. */
@@ -690,6 +693,33 @@ public final class JugcraftAgriculture {
 		registerItem("skeleton_hand_sconce", props -> new BlockItem(sconce, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		registerItem("bat_bunting", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.BUNTING), new Item.Properties(),
 				BUILDING_TAB);
+
+		// Batch 3, the graveyard: a wrought-iron fence and gate, the crypt set, the Grave Mound, the Mourning Angel and
+		// the Pop-Up Skeleton.
+		BlockBehaviour.Properties iron = BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).forceSolidOn().strength(5.0F, 6.0F)
+				.sound(SoundType.METAL).requiresCorrectToolForDrops();
+		Block fence = registerBlock("cemetery_fence", FenceBlock::new, iron);
+		Block gate = registerBlock("cemetery_gate", props -> new FenceGateBlock(WoodType.OAK, props), iron);
+		BlockBehaviour.Properties crypt = BlockBehaviour.Properties.ofFullCopy(Blocks.STONE_BRICKS).mapColor(MapColor.DEEPSLATE);
+		Block cryptStone = registerBlock("crypt_stone", Block::new, crypt);
+		Block chiseled = registerBlock("chiseled_crypt_stone", Block::new, crypt);
+		Block pillar = registerBlock("crypt_stone_pillar", RotatedPillarBlock::new, crypt);
+		Block door = registerBlock("crypt_door", props -> new DoorBlock(BlockSetType.STONE, props), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.DEEPSLATE).strength(3.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.STONE).noOcclusion()
+				.pushReaction(PushReaction.POPPED));
+		Block mound = registerBlock("grave_mound", GraveMoundBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.DIRT).strength(0.6F)
+				.sound(SoundType.ROOTED_DIRT).noOcclusion());
+		Block angel = registerBlock("mourning_angel", MourningAngelBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ)
+				.strength(2.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.CALCITE).noOcclusion().pushReaction(PushReaction.BLOCK));
+		Block skeleton = registerBlock("pop_up_skeleton", PopUpSkeletonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		// The door places its upper half itself (DoorBlock.setPlacedBy), like the Scarecrow.
+		for (Block block : List.of(fence, gate, cryptStone, chiseled, pillar, door, mound, angel, skeleton)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		SCARE_PROP_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("scare_prop"),
+				FabricBlockEntityTypeBuilder.create(ScarePropBlockEntity::new, mound, skeleton).build());
 	}
 
 	/** How brightly a Wisp in a Jar glows. */

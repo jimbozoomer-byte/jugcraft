@@ -844,4 +844,6 @@ def crop_textures():
     out.update(decor_textures())
     from decor2_textures import decor2_textures  # and their second batch
     out.update(decor2_textures())
+    from decor3_textures import decor3_textures  # and the graveyard
+    out.update(decor3_textures())
     return out
