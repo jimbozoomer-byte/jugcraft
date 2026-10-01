@@ -111,7 +111,7 @@ public final class TrickOrTreat {
 		HalloweenSeason.load();
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			ItemStack held = player.getItemInHand(hand);
-			if (!held.is(JugcraftAgriculture.item("candy_bag")) || !isWoodenDoor(level.getBlockState(hit.getBlockPos()))) {
+			if (player.isSpectator() || !held.is(JugcraftAgriculture.item("candy_bag")) || !isWoodenDoor(level.getBlockState(hit.getBlockPos()))) {
 				return InteractionResult.PASS;
 			}
 			if (player.getCooldowns().isOnCooldown(held)) {
