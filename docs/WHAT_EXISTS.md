@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 222 items/blocks under `jugcraft:` (the checker counts them) |
+| Registered IDs | 223 items/blocks under `jugcraft:` (the checker counts them) |
 
 ## Build, generate, check
 
@@ -109,6 +109,7 @@ Other blocks:
 | `brass_item_pipe` | `logistics/ItemPipeBlock` | 6 px item transmitter |
 | `pneumatic_extractor`, `high_pressure_extractor` | `logistics/PneumaticExtractorBlock` | pull 16 items / 8 ticks (brass) or 32 / 4 (steel) from what they face |
 | `item_sorter` | `logistics/ItemSorterBlock(Entity)` | 9-slot filter into the inventory it faces |
+| `conveyor_slope` | `logistics/ConveyorSlopeBlock` (`ascending`) | up slopes hand items to the block in front one higher; down slopes take them from one higher behind |
 | `conveyor`, `conveyor_splitter` | `logistics/ConveyorBlock(Entity)` | KE-driven belts; 4 stacks each; `ConveyorBlockEntity.accept(stack, progress)`; insert-only `ItemStorage`; client `ConveyorRenderer` |
 | `brass_wrench` (item) | `logistics/BrassWrenchItem` | rotate; sneak to dismantle |
 | `mining_drill`, `chainsaw` (items) | `tools/MiningDrillItem`, `ChainsawItem` (`PoweredToolItem`) | JE in the `jugcraft:energy` component; unbreakable; extra blocks via `ServerPlayerGameMode.destroyBlock`; drill mode in `jugcraft:drill_mode` |
