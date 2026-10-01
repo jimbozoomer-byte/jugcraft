@@ -69,6 +69,23 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - **1,000 mB of heavy fuel oil → 400 mB of lubricant + 2 asphalt binder**, every 120 ticks at 96 JE/t (11,520 JE a bucket). The binder comes out of its item slot (hoppers and pipes can take it); the lubricant is pushed out of every face.
 - Recipe: steel plates, a heavy pump, two tinplate tanks, an advanced circuit and a machine casing.
 
+### Catalytic reformer (batch 2, commit 10)
+- **Gasoline**: a thin, red-orange fluid with a bucket.
+- The **catalytic reformer** is three wide, two tall and two deep: three olive reactor drums under chrome caps joined by a header, a fired heater with an exhaust stack, and a product manifold with two draw-offs.
+- **1,000 mB of naphtha → 900 mB of gasoline + 100 mB of refinery gas**, every 120 ticks at 120 JE/t (14,400 JE a bucket). Gasoline comes out of the bottom row and refinery gas out of the top row.
+- Recipe: steel plates, an advanced circuit, two tinplate tanks, a blast furnace and a machine casing.
+
+### What refining gives (batch 2 summary)
+From one bucket of crude oil, with every byproduct refined:
+
+| Step | In | Out |
+| --- | --- | --- |
+| Distillation | 1,000 crude | 100 gas, 250 naphtha, 400 diesel, 250 heavy fuel oil |
+| Cracking (or vacuum) the heavy fuel oil | 250 heavy + 62.5 water + ¼ catalyst | 125 diesel, 75 naphtha, 50 gas (or 100 lubricant + ½ asphalt binder) |
+| Reforming all the naphtha | 325 naphtha | 292.5 gasoline, 32.5 gas |
+
+So a bucket of crude oil cracked all the way gives about 525 mB of diesel, 293 mB of gasoline and 183 mB of refinery gas, for about 12,800 + 6,400 + 4,680 = 23,880 JE of refining. What those fuels are worth in generators is set in batch 3 (diesel generator, gas turbine) and audited in BALANCE.md (commit 19).
+
 ## Connections
 - Existing input producer: oil reservoirs (commit 3) through the pumpjack; oil sand and bitumen (existing rock and item) through the extractor; water from pumps.
 - Existing output consumer: the fluid system (tanks, steel tank, pumps, pipes); refining comes in batch 2.
@@ -98,6 +115,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 - Game tests `heavyPumpFillsFastThroughSteelPipes`, `bronzePipeLimitsASteelLine`, and `distillationTowerSplitsCrude` (a bucket of crude oil becomes 100/250/400/250 mB, and a tank at the diesel draw-off gets only the diesel).
 - Game test `crackerCracksHeavyFuelOil` (heavy fuel oil, water and one catalyst become 500/300/200 mB of diesel, naphtha and gas).
 - Game test `vacuumUnitMakesLubricantAndAsphalt` (a bucket of heavy fuel oil becomes 400 mB of lubricant and two asphalt binder).
+- Game test `reformerMakesGasoline` (a bucket of naphtha becomes 900 mB of gasoline and 100 mB of refinery gas).
 - Game test `pumpjackPumpsOil`: a powered pumpjack over pumpable oil fills its tank with crude oil and the reservoir goes down by as much.
 - Game tests `extractorTanksOnlyTakeWhatTheyUse` (its tanks take water but not lava or crude oil, through Fabric's fluid API) and `extractorWashesOilFromOilSand` (a block of oil sand and water become 500 mB of crude oil and sand, using 250 mB of water).
 - Not run: client play-testing of how the fluid looks and flows.

@@ -1933,6 +1933,29 @@
           }
         },
         {
+          "title": "Catalytic Reformer",
+          "icon": "jugcraft:catalytic_reformer",
+          "text": [
+            "Three wide, two tall and two deep. Reforms naphtha into high-octane gasoline: each bucket of naphtha gives 900 mB of gasoline (out of the bottom row) and 100 mB of refinery gas (out of the top row), every 6 seconds.",
+            "Uses 120 JE/t while working. Holds 30,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate",
+              "jugcraft:fluid_tank",
+              "minecraft:blast_furnace",
+              "jugcraft:fluid_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:catalytic_reformer",
+            "count": 1
+          }
+        },
+        {
           "title": "Cracking Catalyst",
           "icon": "jugcraft:cracking_catalyst",
           "text": [

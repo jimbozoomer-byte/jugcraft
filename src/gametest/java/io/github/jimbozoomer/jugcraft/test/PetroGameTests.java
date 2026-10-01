@@ -272,4 +272,15 @@ public class PetroGameTests {
 			helper.assertTrue(unit.tanks().input(0).isResourceBlank(), "Heavy fuel oil left over");
 		});
 	}
+
+	/** The catalytic reformer turns a bucket of naphtha into 900 mB of gasoline and 100 mB of refinery gas. */
+	@GameTest(maxTicks = 300)
+	public void reformerMakesGasoline(GameTestHelper helper) {
+		MachineBlockEntity reformer = place(helper, MachineKind.CATALYTIC_REFORMER, new BlockPos(4, 1, 2));
+		reformer.tanks().input(0).fill(PetroFluids.NAPHTHA.source(), 1000);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(reformer.tanks().output(0).has(PetroFluids.GASOLINE.source(), 900), "No gasoline");
+			helper.assertTrue(reformer.tanks().output(1).has(PetroFluids.REFINERY_GAS.fluid(), 100), "No refinery gas");
+		});
+	}
 }

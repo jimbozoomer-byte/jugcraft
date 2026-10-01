@@ -25,6 +25,9 @@ FLUIDS = {
     "lubricant": {"display": "Lubricant", "feature": "crude_oil",
                   "colors": [(90, 80, 20), (140, 125, 40), (180, 165, 70), (222, 212, 134)],
                   "tick_delay": 25, "slope": 2, "drop_off": 2},
+    "gasoline": {"display": "Gasoline", "feature": "crude_oil",
+                 "colors": [(150, 60, 40), (200, 100, 70), (230, 150, 110), (250, 212, 184)],
+                 "tick_delay": 4, "slope": 4, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -77,6 +80,9 @@ FLUID_MACHINES = {
     # Heavy fuel oil -> lubricant + asphalt binder. 96 JE/t.
     "vacuum_distillation_unit": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 0, "item_outputs": 1,
                                  "recipe_type": "vacuum_distillation"},
+    # Naphtha -> gasoline (base) + refinery gas (top). 120 JE/t.
+    "catalytic_reformer": {"inputs": [8_000], "outputs": [8_000, 8_000], "item_inputs": 0, "item_outputs": 0,
+                           "recipe_type": "reforming"},
 }
 
 # Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],
@@ -109,6 +115,12 @@ FLUID_RECIPES = {
     "vacuum_distillation_unit": [
         {"name": "heavy_fuel_oil", "fluids": [("jugcraft:heavy_fuel_oil", 1000)],
          "fluid_results": [("jugcraft:lubricant", 400)], "results": [("jugcraft:asphalt_binder", 2)], "ticks": 120,
+         "features": ["crude_oil"]},
+    ],
+    # Reforming rearranges naphtha into high-octane gasoline, giving off a little gas.
+    "catalytic_reformer": [
+        {"name": "naphtha", "fluids": [("jugcraft:naphtha", 1000)],
+         "fluid_results": [("jugcraft:gasoline", 900), ("jugcraft:refinery_gas", 100)], "ticks": 120,
          "features": ["crude_oil"]},
     ],
 }

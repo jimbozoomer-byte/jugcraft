@@ -399,8 +399,43 @@ def vacuum_distillation_unit():
     return m
 
 
+def catalytic_reformer():
+    """Three wide, two tall and two deep: three olive reactor drums in a row, hazard-banded under domed chrome caps,
+    joined across the top by a gunmetal header, with a fired heater (glowing window, gauge, lamp, exhaust stack) at
+    the front left. Chrome draw-offs with red valves on the front right give gasoline (bottom row) and refinery gas
+    (top row)."""
+    m = [box((-32, 0, 0), (16, 2, 32), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    # Fired heater at the front left (the master block).
+    m.append(box((1, 2, 0.5), (15, 14, 9), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(box((4, 3, 0.25), (12, 9, 0.5), {"*": GUNMETAL, "north": "sp_window!"}))
+    m.append(dial("north", (5, 11.5, 0.25), 2.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 11.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    m += cyl("y", 12.5, 5, 1, 14, 28, EXHAUST, "sp_hopper_inside")
+    # Three reactor drums, front to back across the row (centres at x = 8, -8, -24).
+    for x in (8, -8, -24):
+        y0 = 14 if x == 8 else 2
+        m += cyl("y", x, 20, 6, y0, 24, OLIVE, GUNMETAL)
+        m += cyl("y", x, 20, 6.4, 18, 19, HAZARD)
+        m += cyl("y", x, 20, 4.5, 24, 26, CHROME)
+        m += cyl("y", x, 20, 2.5, 26, 27.5, CHROME)
+    # The first drum stands on the heater's plinth behind it.
+    m.append(box((2, 2, 12), (14, 14, 28), GUNMETAL))
+    # Header across the tops, with risers into each drum.
+    m.append(box((-27, 28, 18.5), (11, 30.5, 21.5), GUNMETAL))
+    for x in (8, -8, -24):
+        m.append(box((x - 1, 27.5, 19), (x + 1, 28, 21), CHROME))
+    # Draw-offs on the front right, off a product manifold in front of the last drum: gasoline at the bottom,
+    # refinery gas in the top row.
+    m.append(box((-29.5, 2, 6.5), (-22.5, 27, 14.5), {"*": GUNMETAL, "north": STENCIL}))
+    for y in (9, 23):
+        m.append(box((-28, y - 2, 0.5), (-24, y + 2, 6.5), CHROME))
+        m.append(box((-29, y - 3, 0), (-23, y + 3, 0.5), GUNMETAL))
+        m += wheel("z", -26, y + 4.5, 1.5, 2.5, 3.25, "sp_red_iron", CHROME, spokes=False)
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
           "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump(),
           "distillation_tower": distillation_tower(), "catalytic_cracker": catalytic_cracker(),
-          "vacuum_distillation_unit": vacuum_distillation_unit()}
+          "vacuum_distillation_unit": vacuum_distillation_unit(), "catalytic_reformer": catalytic_reformer()}

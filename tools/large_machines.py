@@ -48,6 +48,7 @@ FOOTPRINTS = {
     "distillation_tower": cuboid(2, 7, 2),
     "catalytic_cracker": cuboid(2, 4, 2),
     "vacuum_distillation_unit": cuboid(2, 3, 2),
+    "catalytic_reformer": cuboid(3, 2, 2),
 }
 
 # Machines that take power at one marked socket only: (part, face) for a north-facing machine.
@@ -210,6 +211,17 @@ MODELS["vacuum_distillation_unit"] = [
     ((-13, 7, 0), (-7, 11, 5), PIPE),
 ]
 
+MODELS["catalytic_reformer"] = [
+    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 14, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-14, 2, 10), (-2, 26, 22), "fluid_tank_side"),
+    ((-30, 2, 10), (-18, 26, 22), "fluid_tank_side"),
+    ((2, 14, 12), (14, 26, 22), "fluid_tank_side"),
+    ((-28, 26, 14), (12, 29, 18), PIPE),
+    ((-29, 7, 0), (-23, 11, 5), PIPE),
+    ((-29, 21, 0), (-23, 25, 5), PIPE),
+]
+
 # Textures the front face uses: "#front" in MODELS. Lit machines also get <front>_on.
 FRONTS = {
     "geothermal_generator": "geothermal_generator_front",
@@ -227,4 +239,5 @@ FRONTS = {
     "distillation_tower": "distillation_tower_front",
     "catalytic_cracker": "catalytic_cracker_front",
     "vacuum_distillation_unit": "vacuum_distillation_unit_front",
+    "catalytic_reformer": "catalytic_reformer_front",
 }

@@ -51,6 +51,8 @@ MACHINES = {
     "catalytic_cracker": {"display": "Catalytic Cracker", "lit": True},
     # A 2x2x3 vacuum column: heavy fuel oil -> lubricant + asphalt binder.
     "vacuum_distillation_unit": {"display": "Vacuum Distillation Unit", "lit": True},
+    # A 3x2x2 row of reactors: naphtha -> gasoline + refinery gas.
+    "catalytic_reformer": {"display": "Catalytic Reformer", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
 }
 
@@ -197,6 +199,8 @@ STATS = {
     "catalytic_cracker": {"capacity": 40_000, "input_per_tick": 512, "use_per_tick": 160, "tank": 8_000},
     # 2x2x3. 96 JE/t; a bucket of heavy fuel oil per 120 ticks.
     "vacuum_distillation_unit": {"capacity": 30_000, "input_per_tick": 512, "use_per_tick": 96, "tank": 8_000},
+    # 3x2x2. 120 JE/t; a bucket of naphtha per 120 ticks.
+    "catalytic_reformer": {"capacity": 30_000, "input_per_tick": 512, "use_per_tick": 120, "tank": 8_000},
 }
 
 # Fuel for the coal generator: burn ticks per item (coal matches the vanilla furnace's 1600).
@@ -372,6 +376,9 @@ CRAFTING = {
     "vacuum_distillation_unit": (["PEP", "TCT", "PMP"], {"P": "#c:plates/steel", "E": "jugcraft:heavy_pump",
                                                          "T": "jugcraft:fluid_tank", "C": "jugcraft:advanced_circuit",
                                                          "M": "jugcraft:machine_casing"}, 1),
+    "catalytic_reformer": (["PCP", "TFT", "PMP"], {"P": "#c:plates/steel", "C": "jugcraft:advanced_circuit",
+                                                   "T": "jugcraft:fluid_tank", "F": "minecraft:blast_furnace",
+                                                   "M": "jugcraft:machine_casing"}, 1),
     "cracking_catalyst": (["BSB", "SNS", "BSB"], {"B": "jugcraft:bauxite", "S": "minecraft:sand",
                                                   "N": "#c:ingots/nickel"}, 4),
     "charging_station": (["SLS", "WAW", "SBS"], {"S": "#c:plates/steel", "L": "minecraft:redstone_lamp",

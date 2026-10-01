@@ -115,6 +115,9 @@ ABOUT = {
     "vacuum_distillation_unit": "Two by two and three blocks tall. Boils heavy fuel oil under vacuum: each bucket gives "
                                 "400 mB of lubricant and two asphalt binder, every 6 seconds. Lubricant keeps the gas "
                                 "turbine running; asphalt binder makes roads.",
+    "catalytic_reformer": "Three wide, two tall and two deep. Reforms naphtha into high-octane gasoline: each bucket of "
+                          "naphtha gives 900 mB of gasoline (out of the bottom row) and 100 mB of refinery gas (out of "
+                          "the top row), every 6 seconds.",
     "ore_drill": "Two blocks tall. Mines the ore blocks in a 9x9 column below it, one layer at a time down to the bottom "
                  "of the world, one ore every 2 seconds. Each hole is refilled with stone or deepslate. The ores come "
                  "out whole, ready for ore processing.",
@@ -317,6 +320,7 @@ def build():
             machine_page("distillation_tower"),
             machine_page("catalytic_cracker"),
             machine_page("vacuum_distillation_unit"),
+            machine_page("catalytic_reformer"),
             {"title": "Cracking Catalyst", "icon": f"{MOD}:cracking_catalyst", "text": [
                 "Bauxite (alumina) and sand (silica) with a nickel ingot make four. The catalytic cracker uses one for "
                 "each bucket of heavy fuel oil it cracks."], "craft": craft("cracking_catalyst")},
