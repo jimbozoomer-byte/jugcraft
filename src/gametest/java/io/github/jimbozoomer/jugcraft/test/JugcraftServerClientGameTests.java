@@ -39,9 +39,6 @@ import net.minecraft.world.level.entity.EntityTypeTest;
  * the two-client test is manual (docs/TESTING.md). Results are logged with the prefix "[server-check]".
  */
 public class JugcraftServerClientGameTests implements FabricClientGameTest {
-	/** GLFW's key code for Escape (LWJGL is not on the test classpath). */
-	private static final int KEY_ESCAPE = 256;
-
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		saveAndReopen(context);
@@ -100,7 +97,7 @@ public class JugcraftServerClientGameTests implements FabricClientGameTest {
 						.anyMatch(slot -> slot.getItem().is(Items.FEATHER) && slot.getItem().getCount() == 3));
 				check(machineSynced, "The crusher's screen on the dedicated server does not show its 3 feathers");
 				context.takeScreenshot("jugcraft_dedicated_server_machine");
-				context.getInput().pressKey(KEY_ESCAPE);
+				context.runOnClient(client -> client.player.closeContainer()); // as Escape does: tells the server too
 				context.waitForScreen(null);
 
 				// The Retro Trader's offers reach the client.
@@ -115,7 +112,7 @@ public class JugcraftServerClientGameTests implements FabricClientGameTest {
 				check(!offers.isEmpty() && offers.stream().allMatch(offer -> offer.contains("jugcraft:")),
 						"The Retro Trader's offers did not reach the client: " + offers);
 				context.takeScreenshot("jugcraft_dedicated_server_trader");
-				context.getInput().pressKey(KEY_ESCAPE);
+				context.runOnClient(client -> client.player.closeContainer()); // as Escape does: tells the server too
 				context.waitForScreen(null);
 
 				server.runCommand("give @a jugcraft:pixel_shard 7");
