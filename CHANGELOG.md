@@ -59,7 +59,23 @@ No numbered release yet. Everything below is on `main`.
 - Also: composting, pig, chicken and parrot feed, `c:` crop, seed and food tags, and a new `agriculture` feature switch.
 - Original textures from `tools/crop_textures.py`. Twelve game tests, plus a client game test with screenshots of a corn maze, the fields and every growth stage.
 
-### Unmerged: Surface deposits, batch 11
+### Unmerged: Rubber and polymers, batch 14
+- **Butadiene** from naphtha (chemical reactor) and **synthetic rubber** from butadiene (polymerization reactor).
+- **Gaskets** (rubber + steel plate); rubber belts; gasketed steel pipe, four for two plates.
+- An advancement, a handbook page and a game test.
+
+### #68 Oxygen-blown steel and argon, batch 13
+- The air separation unit also makes **argon**.
+- **Boost gases:** oxygen piped into the steel foundry, or argon into the crystal grower, doubles its speed.
+
+### #65 Nitrogen chemistry, batch 12: air separation, ammonia and nitric acid
+- **Air separation unit** (2×2, six tall): splits air into nitrogen and oxygen, four to one, needing only power.
+- **Synthesis converter** (3×4×2): Haber–Bosch ammonia (hydrogen + nitrogen) and Ostwald nitric acid (ammonia + oxygen + water).
+- New gases nitrogen, oxygen and ammonia; nitric acid with a bucket.
+- Ammonia + phosphate → 6 fertilizer; nitric acid etches microchips with half the acid.
+- Three advancements, a handbook section and game tests.
+
+### #62 Surface deposits, batch 11
 - **Coal, Iron, Copper and Tin Deposits:** flat patches in the top layer of stony hills (windswept hills, stony peaks, stony shores). Picks only break them, for nothing; each block holds 1,000 units.
 - **Deposit drill** (3×3, two tall): takes one coal or raw ore of each kind every 15 seconds from the deposits under it and one block round it, and pushes them into a chest, pipe, conveyor or machine beside it. Empty deposit blocks turn to stone.
 - `deposits.enabled` switch, an advancement, a handbook page and game tests.
