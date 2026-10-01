@@ -61,6 +61,11 @@ TREE = {
     "gas_holder": ("electrolytic_cell", "gas_holder", "Under Pressure", "Build a gas holder", "goal"),
     "fluid_valve": ("crude_oil", "fluid_valve", "Shut-Off Valve", "Make a fluid valve", "task"),
     "fluid_filter": ("fluid_valve", "fluid_filter", "Strained Relations", "Make a fluid filter", "task"),
+    # Advanced power (batch 10).
+    "advanced_solar_panel": ("processor", "advanced_solar_panel", "Here Comes the Sun",
+                             "Build an advanced solar panel", "goal"),
+    "advanced_engine": ("diesel_engine", "advanced_engine", "Four on the Floor",
+                        "Build an advanced combustion engine", "goal"),
 }
 # Background of the tab (a block texture), shown behind the tree.
 BACKGROUND = "jugcraft:block/dp_gunmetal"
