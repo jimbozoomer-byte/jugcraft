@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: Halloween decorations, batch 2 (pull request pending, stacked on the first five)
+- **Luminaria:** a paper bag weighted with sand round a candle, a jack-o'-lantern face cut in its sides. Lit like a candle (light 10); any dye colours it, and it keeps its colour when broken.
+- **Floating Candles:** up to four candles hanging in the air, bobbing gently (drawn by the client); 3 light a candle while lit.
+- **Skeleton Hand Sconce:** a torch held out from a wall by a bony hand (light 14); snuff it by hand, relight it with flint and steel.
+- **Soul-Flame Carvings:** a soul torch lights hand-carved and giant pumpkins with an ice-blue glow (at most light 10) and comes back out as a soul torch. Hand-carved pumpkins gain a `soul` block state (old worlds load with a plain candle).
+- **Bat Bunting:** orange and black pennants and paper bats strung between String Light Hooks like the string lights; hooks remember which strand they hold.
+- The checker compares the new blocks' numbers and the floating candles' places with Java, checks every state has a model, that the bag's cut-out face lines up inside and out, and that the soul-lit icon uses the client's soul colours. New server game tests and a client test with screenshots.
+
 ### Agriculture: Halloween decorations, the first five (pull request pending, stacked on Halloween nights)
 - **Jack-o'-Lantern String Lights** strung between **String Light Hooks** (up to 16 blocks; hooks chain); a hook lights from redstone or 1 JE a tick from the electric network, and a strand glows while either end is lit.
 - **Candy Bowl:** fill it with treats; each visitor takes one a night (saved on the server), its owner any time.
