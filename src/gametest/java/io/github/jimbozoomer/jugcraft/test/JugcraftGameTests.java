@@ -356,6 +356,25 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Loot tables load in Minecraft 26.x's format: the charging station drops once (from its lower half only) and salt
+	 * ore drops two to four salt. With the older keys, which 26.x ignores, both halves dropped and the ore dropped one.
+	 */
+	@GameTest
+	public void lootTablesKeepTheirConditionsAndCounts(GameTestHelper helper) {
+		BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
+		BlockState lower = JugcraftTools.CHARGING_STATION.defaultBlockState();
+		BlockState upper = lower.setValue(ChargingStationBlock.HALF, DoubleBlockHalf.UPPER);
+		helper.assertTrue(Block.getDrops(lower, helper.getLevel(), pos, null).size() == 1, "The lower half did not drop the station");
+		helper.assertTrue(Block.getDrops(upper, helper.getLevel(), pos, null).isEmpty(), "The upper half dropped a second station");
+		BlockState saltOre = BuiltInRegistries.BLOCK.getValue(Jugcraft.id("salt_ore")).defaultBlockState();
+		for (int i = 0; i < 8; i++) {
+			int salt = Block.getDrops(saltOre, helper.getLevel(), pos, null).stream().mapToInt(ItemStack::getCount).sum();
+			helper.assertTrue(salt >= 2 && salt <= 4, "Salt ore dropped " + salt + " salt");
+		}
+		helper.succeed();
+	}
+
 	/** Breaking any block of a multi-block machine removes the whole machine (here the nine-block wind turbine). */
 	@GameTest(maxTicks = 40)
 	public void breakingOnePartRemovesTheMachine(GameTestHelper helper) {

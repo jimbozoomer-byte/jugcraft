@@ -158,9 +158,25 @@ def rid_of(path):
     return f"{MOD}:{path}"
 
 
+# Keys of the pre-26.x loot format: Minecraft 26.x ignores them without a warning, so a table that used them would lose
+# its conditions and functions (counts, Fortune, which half of a block drops) silently.
+OLD_LOOT_KEYS = {"conditions", "functions", "function"}
+
+
+def old_loot_keys(node):
+    if isinstance(node, dict):
+        return (OLD_LOOT_KEYS & set(node)) | {key for value in node.values() for key in old_loot_keys(value)}
+    if isinstance(node, list):
+        return {key for value in node for key in old_loot_keys(value)}
+    return set()
+
+
 def check_loot(registered):
     for path in sorted((DATA / MOD / "loot_table").rglob("*.json")):
         text = path.read_text(encoding="utf-8")
+        stale = old_loot_keys(load(path))
+        if stale:
+            err(f"{path.name}: uses the pre-26.x loot keys {sorted(stale)}; use \"condition\" and \"modifier\"")
         for name in re.findall(r'"name": "jugcraft:([a-z_]+)"', text):
             if name not in registered:
                 err(f"{path.name} drops unknown item {name}")
