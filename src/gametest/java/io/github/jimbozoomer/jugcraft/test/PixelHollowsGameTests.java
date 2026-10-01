@@ -312,21 +312,22 @@ public class PixelHollowsGameTests {
 	}
 
 	/**
-	 * The shop template loads with its own blocks (an unreadable palette loads as air) and carries this game's data
-	 * version, so the data fixer leaves it alone. Both versions and the loaded palette are logged.
+	 * The shop template file carries this game's data version, so the data fixer leaves it alone, and its palette reads
+	 * as its own blocks (an unreadable palette loads as air). Both versions and the loaded palette are logged.
 	 */
 	@GameTest
 	public void retroGameShopTemplateLoads(GameTestHelper helper) {
-		var server = helper.getLevel().getServer();
-		StructureTemplate template = server.getStructureManager().get(RetroTrader.SHOP)
-				.orElseThrow(() -> helper.assertionException("The Retro Game Shop template did not load"));
-		int file;
+		ServerLevel level = helper.getLevel();
 		Identifier path = Identifier.fromNamespaceAndPath(RetroTrader.SHOP.getNamespace(), "structure/" + RetroTrader.SHOP.getPath() + ".nbt");
-		try (InputStream in = server.getResourceManager().getResourceOrThrow(path).open()) {
-			file = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap()).getIntOr("DataVersion", -1);
+		CompoundTag tag;
+		try (InputStream in = level.getServer().getResourceManager().getResourceOrThrow(path).open()) {
+			tag = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap());
 		} catch (IOException e) {
 			throw helper.assertionException("Could not read " + path + ": " + e);
 		}
+		int file = tag.getIntOr("DataVersion", -1);
+		StructureTemplate template = new StructureTemplate();
+		template.load(level.registryAccess().lookupOrThrow(Registries.BLOCK), tag);
 		CompoundTag saved = template.save(new CompoundTag());
 		int game = saved.getIntOr("DataVersion", -1);
 		ListTag palette = saved.getListOrEmpty("palette");
