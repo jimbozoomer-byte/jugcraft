@@ -32,8 +32,12 @@ public class CarvingScreen extends Screen {
 	private static final int HEIGHT = 222;
 	private static final int PREVIEW_SCALE = 3;
 	private static final int UNDO_LIMIT = 64;
-	/** GLFW's key code for Z (Ctrl+Z undoes). */
-	private static final int KEY_Z = 90;
+	/**
+	 * Minecraft 26.3 numbers mouse buttons from 1: 1 is left, 2 middle, 3 right ({@code MouseHandler.onButton};
+	 * vanilla widgets take only button 1). Older versions counted from 0, so these are spelled out here.
+	 */
+	public static final int MOUSE_LEFT = 1;
+	public static final int MOUSE_RIGHT = 3;
 
 	private static final int RIND = 0xFF6B3A10;
 	private static final int PANEL = 0xFF2B1A0E;
@@ -185,6 +189,15 @@ public class CarvingScreen extends Screen {
 		}
 	}
 
+	/** The middle of a grid cell in GUI coordinates (the client game test clicks the grid through it). */
+	public double cellCentreX(int x) {
+		return gridX + x * CELL + CELL / 2.0;
+	}
+
+	public double cellCentreY(int y) {
+		return gridY + y * CELL + CELL / 2.0;
+	}
+
 	private boolean inGrid(double mouseX, double mouseY) {
 		return mouseX >= gridX && mouseX < gridX + GRID && mouseY >= gridY && mouseY < gridY + GRID;
 	}
@@ -264,7 +277,7 @@ public class CarvingScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(KeyEvent event) {
-		if (event.hasControlDown() && event.key() == KEY_Z) {
+		if (event.hasControlDown() && event.key() == 90) {
 			undo();
 			return true;
 		}
