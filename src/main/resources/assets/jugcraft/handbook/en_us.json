@@ -1715,6 +1715,28 @@
           }
         },
         {
+          "title": "Steel Fluid Pipe",
+          "icon": "jugcraft:steel_fluid_pipe",
+          "text": [
+            "Like the bronze pipe, but carries 1,000 mB a tick for refinery flows. A pipe line carries as much as its slowest pipe, so one bronze pipe holds a steel line back to 250 mB."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:bronze_fluid_pipe",
+              "jugcraft:steel_plate",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "result": "jugcraft:steel_fluid_pipe",
+            "count": 3
+          }
+        },
+        {
           "title": "Tinplate Tank",
           "icon": "jugcraft:fluid_tank",
           "text": [
@@ -1755,6 +1777,28 @@
               "jugcraft:bronze_plate"
             ],
             "result": "jugcraft:electric_pump",
+            "count": 1
+          }
+        },
+        {
+          "title": "Heavy Pump",
+          "icon": "jugcraft:heavy_pump",
+          "text": [
+            "A steel-tier pump: 1,000 mB a tick from below (water, lava or a tank) out of its top and sides, at 40 JE a tick, with a 16-bucket buffer."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:silver_cable",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_gear",
+              "jugcraft:electric_pump",
+              "jugcraft:steel_gear",
+              "jugcraft:steel_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:heavy_pump",
             "count": 1
           }
         }

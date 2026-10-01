@@ -260,6 +260,29 @@ def oil_sand_extractor():
     return m
 
 
+def heavy_pump():
+    """Heavy pump: a gunmetal skid under an olive pump casing with a ribbed rubber-sealed volute, a chrome motor bell
+    on top with an exhaust vent, hazard-striped corner guards and thick chrome flanges on its top and four sides."""
+    m = [box((0.5, 0, 0.5), (15.5, 1.5, 15.5), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD, "east": HAZARD,
+                                                  "west": HAZARD})]
+    m += cyl("y", 8, 8, 5.5, 1.5, 9.5, OLIVE, GUNMETAL)
+    for y in (3, 6.5):
+        m += cyl("y", 8, 8, 5.9, y, y + 0.75, RUBBER)
+    m += cyl("y", 8, 8, 3.75, 9.5, 13, CHROME, GRILLE)
+    m += cyl("y", 8, 8, 2, 13, 14.5, GUNMETAL)
+    m += cyl("y", 8, 8, 2.75, 14.5, 16, CHROME)
+    for frm, to in (((0, 5.5, 5.5), (2.5, 10.5, 10.5)), ((13.5, 5.5, 5.5), (16, 10.5, 10.5)),
+                    ((5.5, 5.5, 0), (10.5, 10.5, 2.5)), ((5.5, 5.5, 13.5), (10.5, 10.5, 16))):
+        m.append(box(frm, to, GUNMETAL))
+    for frm, to in (((0, 5, 5), (0.75, 11, 11)), ((15.25, 5, 5), (16, 11, 11)),
+                    ((5, 5, 0), (11, 11, 0.75)), ((5, 5, 15.25), (11, 11, 16))):
+        m.append(box(frm, to, CHROME))
+    for x, z in ((1, 1), (12.5, 1), (1, 12.5), (12.5, 12.5)):
+        m.append(box((x, 1.5, z), (x + 2.5, 5, z + 2.5), HAZARD))
+    m.append(dial("north", (8, 12, 4), 2.25, texture=GAUGE, body=CHROME))
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
-          "oil_sand_extractor": oil_sand_extractor()}
+          "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump()}

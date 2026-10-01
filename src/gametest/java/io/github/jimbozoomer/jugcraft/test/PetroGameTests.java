@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.chemistry.OilReservoirs;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
+import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidTankBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
 import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
@@ -176,6 +177,47 @@ public class PetroGameTests {
 					"The extractor holds " + oil + " mB of oil");
 			helper.assertTrue(extractor.tanks().input(0).millibuckets() == 750, "Water left: " + extractor.tanks().input(0).millibuckets());
 			helper.assertTrue(extractor.getItem(1).is(Items.SAND), "Output slot holds " + extractor.getItem(1));
+		});
+	}
+
+	/**
+	 * A heavy pump on water pushes 1,000 mB a tick through steel pipes: five buckets in well under the time a bronze
+	 * line (250 mB a tick) would need.
+	 */
+	@GameTest(maxTicks = 12)
+	public void heavyPumpFillsFastThroughSteelPipes(GameTestHelper helper) {
+		helper.setBlock(new BlockPos(1, 1, 3), Blocks.WATER);
+		BlockPos pump = new BlockPos(1, 2, 3);
+		helper.setBlock(pump, JugcraftFluids.HEAVY_PUMP);
+		ElectricPumpBlockEntity entity = helper.getBlockEntity(pump, ElectricPumpBlockEntity.class);
+		entity.energy().setAmount(entity.energy().getCapacity());
+		for (int x = 2; x <= 3; x++) {
+			helper.setBlock(new BlockPos(x, 2, 3), JugcraftFluids.STEEL_FLUID_PIPE);
+		}
+		BlockPos tank = new BlockPos(4, 2, 3);
+		helper.setBlock(tank, JugcraftFluids.FLUID_TANK);
+		FluidTankBlockEntity tankEntity = helper.getBlockEntity(tank, FluidTankBlockEntity.class);
+		helper.succeedWhen(() -> helper.assertTrue(tankEntity.storage.amount >= 5 * FluidConstants.BUCKET,
+				"The tank holds only " + tankEntity.storage.amount / 81 + " mB"));
+	}
+
+	/** A pipe line carries as much as its slowest pipe: one bronze pipe in a steel line holds it to 250 mB a tick. */
+	@GameTest(maxTicks = 12)
+	public void bronzePipeLimitsASteelLine(GameTestHelper helper) {
+		helper.setBlock(new BlockPos(1, 1, 3), Blocks.WATER);
+		BlockPos pump = new BlockPos(1, 2, 3);
+		helper.setBlock(pump, JugcraftFluids.HEAVY_PUMP);
+		ElectricPumpBlockEntity entity = helper.getBlockEntity(pump, ElectricPumpBlockEntity.class);
+		entity.energy().setAmount(entity.energy().getCapacity());
+		helper.setBlock(new BlockPos(2, 2, 3), JugcraftFluids.STEEL_FLUID_PIPE);
+		helper.setBlock(new BlockPos(3, 2, 3), JugcraftFluids.BRONZE_FLUID_PIPE);
+		BlockPos tank = new BlockPos(4, 2, 3);
+		helper.setBlock(tank, JugcraftFluids.FLUID_TANK);
+		FluidTankBlockEntity tankEntity = helper.getBlockEntity(tank, FluidTankBlockEntity.class);
+		helper.runAfterDelay(10, () -> {
+			long mb = tankEntity.storage.amount / 81;
+			helper.assertTrue(mb > 0 && mb <= 10 * 250, "The tank got " + mb + " mB in 10 ticks through a bronze pipe");
+			helper.succeed();
 		});
 	}
 }

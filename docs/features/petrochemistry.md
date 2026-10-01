@@ -43,6 +43,11 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - This is the route to crude oil for anyone without a reservoir nearby: oil sand is a surface rock in its biomes.
 - Recipe: steel plates, a hopper, two tinplate tanks, a machine casing and a steel gear. Steel tier.
 
+### Steel pipes and the heavy pump (batch 2, commit 6)
+- **Steel Fluid Pipe:** a gunmetal pipe with hazard-striped junctions that carries **1,000 mB a tick**, four times the bronze pipe, for refinery flows. Three are made from two steel plates and a bronze pipe.
+- **A pipe line now carries as much as its slowest pipe** (like cables): one bronze pipe in a steel line holds it to 250 mB a tick. Before, the rate came from whichever pipe the pump touched.
+- **Heavy Pump:** a steel-tier pump with an olive volute, a chrome motor bell and hazard-striped guards. It pumps **1,000 mB a tick** from below (water as a spring, lava sources, or a tank) out of its top and sides, at **40 JE a tick**, with a 32,000 JE battery and a 16-bucket buffer. Made from steel plates, silver cable, steel gears, an electric pump and a machine casing.
+
 ## Connections
 - Existing input producer: oil reservoirs (commit 3) through the pumpjack; oil sand and bitumen (existing rock and item) through the extractor; water from pumps.
 - Existing output consumer: the fluid system (tanks, steel tank, pumps, pipes); refining comes in batch 2.

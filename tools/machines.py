@@ -114,11 +114,14 @@ UPGRADES = {"speed_upgrade": "Speed Upgrade", "efficiency_upgrade": "Efficiency 
 
 # Fluid logistics (physical branch; see docs/TECH_TREE.md). Amounts are millibuckets (mB);
 # 1 bucket = 1000 mB = 81000 Fabric droplets. Pipes are passive: pumps push through them.
-PIPES = {"bronze_fluid_pipe": {"display": "Bronze Fluid Pipe", "rate": 250}}
+PIPES = {"bronze_fluid_pipe": {"display": "Bronze Fluid Pipe", "rate": 250},
+         # Steel tier, for refinery flows; a network carries as much as its slowest pipe.
+         "steel_fluid_pipe": {"display": "Steel Fluid Pipe", "rate": 1_000}}
 # Fluid blocks with their own block entities. top/side/bottom name the textures.
 FLUID_BLOCKS = {
     "fluid_tank": {"display": "Tinplate Tank"},
     "electric_pump": {"display": "Electric Pump"},
+    "heavy_pump": {"display": "Heavy Pump"},
 }
 FLUID_STATS = {
     # Holds 16 buckets of one fluid; filled and emptied with buckets or by pumps.
@@ -126,6 +129,9 @@ FLUID_STATS = {
     # Draws a water/lava source (or the tank) below it and pushes into pipes/storages on its other sides.
     "electric_pump": {"energy_capacity": 4_000, "input_per_tick": 64, "use_per_tick": 8,
                       "pump_per_tick": 100, "buffer_mb": 4_000},
+    # Steel tier: ten times the pump, for refineries.
+    "heavy_pump": {"energy_capacity": 32_000, "input_per_tick": 512, "use_per_tick": 40,
+                   "pump_per_tick": 1_000, "buffer_mb": 16_000},
 }
 
 # Balance numbers shared with the Java code (MachineStats.java). Keep in sync.
@@ -250,6 +256,9 @@ CRAFTING = {
     # Fluid branch: pipes and tanks come from press-made plates; the pump adds gears and a casing.
     "bronze_fluid_pipe": (["PGP"], {"P": "#c:plates/bronze", "G": "minecraft:glass"}, 4),
     "fluid_tank": (["PPP", "PGP", "PPP"], {"P": "#c:plates/tin", "G": "minecraft:glass"}, 1),
+    "steel_fluid_pipe": (["PGP"], {"P": "#c:plates/steel", "G": "jugcraft:bronze_fluid_pipe"}, 3),
+    "heavy_pump": (["PCP", "GUG", "PMP"], {"P": "#c:plates/steel", "C": "jugcraft:silver_cable", "G": "#c:gears/steel",
+                                          "U": "jugcraft:electric_pump", "M": "jugcraft:machine_casing"}, 1),
     "electric_pump": (["PUP", "GMG", "PCP"],
                       {"P": "#c:plates/bronze", "U": "minecraft:bucket", "G": "#c:gears/iron",
                        "M": "jugcraft:machine_casing", "C": "jugcraft:copper_cable"}, 1),

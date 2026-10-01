@@ -209,6 +209,8 @@ The fluid branch moves liquids around. It never changes what a liquid *is*: that
 | Bronze Fluid Pipe | Carries fluid pushed into it by a pump to every fluid storage it touches | 250 mB/t per push, up to 1,024 pipes per network | 2 bronze plates + glass → 4 |
 | Tinplate Tank | Stores one fluid; fill or empty with buckets, right-click with an empty hand to read it, comparators show how full it is | 16,000 mB (16 buckets); contents are lost if broken | 8 tin plates + glass |
 | Electric Pump | Pulls from below, pushes out of its top and four sides | 100 mB/t, 8 JE per tick it moves fluid, 4,000 JE battery, 4,000 mB buffer | bronze plates, bucket, 2 iron gears, casing, cable |
+| Steel Fluid Pipe | Like the bronze pipe, for refinery flows | 1,000 mB/t per push; a network carries as much as its slowest pipe | 2 steel plates + bronze pipe → 3 |
+| Heavy Pump | The steel-tier pump | 1,000 mB/t, 40 JE per tick it moves fluid, 32,000 JE battery, 16,000 mB buffer | steel plates, silver cable, 2 steel gears, electric pump, casing |
 
 **How the pieces work together**
 

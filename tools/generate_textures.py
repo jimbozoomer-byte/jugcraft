@@ -751,6 +751,17 @@ def pipe_texture():
                         [BRONZE[0], BRONZE[0], BRONZE[0], BRONZE[0]])
 
 
+def steel_pipe_texture():
+    """Gunmetal pipe with a hazard-striped junction collar and chrome flanges at connections (dieselpunk)."""
+    from dieselpunk_textures import CHROME, GUNMETAL, HAZARD
+    def node(x, y):
+        if x in (6, 9) and y in (6, 9):
+            return CHROME[3]
+        return HAZARD[0] if x in (6, 9) or y in (6, 9) else GUNMETAL[2]
+    return _transmitter([GUNMETAL[1], GUNMETAL[2], GUNMETAL[3], GUNMETAL[4]], node,
+                        [HAZARD[0], HAZARD[2], HAZARD[0], HAZARD[2]])
+
+
 def tank_side(seed):
     """Tinplate walls around a vertical glass gauge."""
     img = panel(seed, palette=TIN, trim=TIN)
@@ -1258,6 +1269,7 @@ def machines():
     save(silver_cable_texture(), "block", "silver_cable")
     save(aluminum_cable_texture(), "block", "aluminum_cable")
     save(pipe_texture(), "block", "bronze_fluid_pipe")
+    save(steel_pipe_texture(), "block", "steel_fluid_pipe")
     save(item_tube_texture(), "block", "brass_item_pipe")
     save(wrench_item(), "item", "brass_wrench")
     save(handbook_item(), "item", "engineers_handbook")
@@ -1310,6 +1322,9 @@ def machines():
     save(pump_side(523), "block", "electric_pump_side")
     save(pump_port(524, False), "block", "electric_pump_top")
     save(pump_port(525, True), "block", "electric_pump_bottom")
+    save(panel(526, palette=STEEL, trim=STEEL), "block", "heavy_pump_side")
+    save(pump_port(527, False), "block", "heavy_pump_top")
+    save(pump_port(528, True), "block", "heavy_pump_bottom")
     gui()
 
 

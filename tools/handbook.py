@@ -61,6 +61,10 @@ ABOUT = {
     "bronze_fluid_pipe": "Carries fluid that a pump pushes into it to every tank and fluid machine it touches.",
     "fluid_tank": "Holds 16 buckets of one fluid. Fill or empty it with buckets; right-click with an empty hand to read it.",
     "electric_pump": "Pulls water or lava from the block below it and pushes it out of its top and sides.",
+    "steel_fluid_pipe": "Like the bronze pipe, but carries 1,000 mB a tick for refinery flows. A pipe line carries as much "
+                        "as its slowest pipe, so one bronze pipe holds a steel line back to 250 mB.",
+    "heavy_pump": "A steel-tier pump: 1,000 mB a tick from below (water, lava or a tank) out of its top and sides, at "
+                  "40 JE a tick, with a 16-bucket buffer.",
     "brass_item_pipe": "Joins inventories into a network. Items go to matching sorters first, then take turns between the "
                        "other inventories.",
     "pneumatic_extractor": "Pulls 16 items every 8 ticks from what it faces and pushes them out of its other sides. A "
@@ -289,8 +293,8 @@ def build():
             + [block_page(t, POWERED_TOOLS[t]) for t in POWERED_TOOLS]
             + [block_page(m, UPGRADE_MODULES[m][0]) for m in UPGRADE_MODULES]},
         {"title": "Fluids", "icon": f"{MOD}:fluid_tank", "pages":
-            [block_page("bronze_fluid_pipe", PIPES["bronze_fluid_pipe"]["display"])]
-            + [block_page(b, FLUID_BLOCKS[b]["display"]) for b in ("fluid_tank", "electric_pump")]},
+            [block_page(p, PIPES[p]["display"]) for p in ("bronze_fluid_pipe", "steel_fluid_pipe")]
+            + [block_page(b, FLUID_BLOCKS[b]["display"]) for b in ("fluid_tank", "electric_pump", "heavy_pump")]},
         {"title": "Oil", "icon": f"{MOD}:crude_oil_bucket", "pages": [
             {"title": "Crude Oil", "icon": f"{MOD}:crude_oil_bucket", "text": [
                 "Crude oil lies in hidden reservoirs under some Overworld chunks. The prospector reports Oil (pumpable) "
