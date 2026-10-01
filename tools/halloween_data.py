@@ -8,7 +8,7 @@ flowers and potted flowers (cross and flower_pot_cross models, a pot that drops 
 copied; vanilla's templates are used by reference where a shape is the same (cross, flower pot, cube column).
 """
 from agriculture import (GIANT_PUMPKIN, SCOOP, HARVEST_SCALE, STENCILS, CANTEEN, HALLOWEEN_DECOR, SCARECROW_SHIRT, DYE_COLORS,
-                         MUMS, MUM_PATCH, CARVED_VARIETIES, CARVE_SEEDS, GOURDS, potted, giant_tile)
+                         MUMS, MUM_PATCH, CARVED_VARIETIES, CARVE_SEEDS, GOURDS, SCARECROW_HEADS, potted, giant_tile)
 
 MOD = "jugcraft"
 HORIZONTAL = ("north", "east", "south", "west")
@@ -104,6 +104,8 @@ def giant_assets(root, write, lang):
             variants[f"part={part},size={size}"] = {"model": model}
     write(root / "blockstates" / f"{block}.json", {"variants": variants})
     lang[f"block.{MOD}.{block}"] = GIANT_PUMPKIN["display"]
+    # The whole pumpkin as an item (picked up by breaking it): its own icon.
+    item_icon(write, root, block)
     # The vine looks like a gourd stem (the same models); its attached form bends towards the fruit.
     write(root / "blockstates" / f"{GIANT_PUMPKIN['vine']}.json", {"variants": {
         f"age={age}": {"model": rid(f"block/gourd_stem_stage{age}")} for age in range(8)}})
@@ -205,7 +207,13 @@ SCREEN_TEXT = {
     "item.jugcraft.pumpkin_stencil.holes": "%s holes, %s shaved",
     "item.jugcraft.pumpkin_stencil.hint": "Hold in your other hand while carving",
     "item.jugcraft.gourd_canteen.water": "Water: %s/%s",
-    "message.jugcraft.harvest_scale.no_pumpkin": "Put the scale beside a full-grown giant pumpkin.",
+    "message.jugcraft.harvest_scale.no_pumpkin": "Put the scale beside a full-grown giant pumpkin, or set one down beside it.",
+    "message.jugcraft.giant_pumpkin.no_room": "This giant pumpkin needs room to grow: clear the ground around it.",
+    "message.jugcraft.giant_pumpkin_vine.no_room": "A giant pumpkin needs open ground beside its vine to set its fruit.",
+    "item.jugcraft.giant_pumpkin.size": "%s × %s × %s blocks",
+    "item.jugcraft.giant_pumpkin.weight": "%s kg",
+    "item.jugcraft.giant_pumpkin.carved": "Carved",
+    "item.jugcraft.giant_pumpkin.carved_lit": "Carved, with a torch inside",
     "message.jugcraft.harvest_scale.weight": "This giant pumpkin weighs %s kg.",
     "message.jugcraft.harvest_scale.ribbon": "It places on this scale's board: you win a %s!",
     "message.jugcraft.harvest_scale.board": "%s. %s: %s kg",
@@ -312,14 +320,20 @@ def loot(out, write):
     """Block loot tables (out = loot_table/blocks) and the scooping and heirloom carving tables beside it."""
     tables = out.parent
     giant, seed = GIANT_PUMPKIN["block"], GIANT_PUMPKIN["seed"]
-    # One pool per size: a seedling giant gives back its pumpkin, a full one nine and its seeds.
+    # Breaking a giant pumpkin picks it up whole: its master block drops one Giant Pumpkin that keeps what it is
+    # (the other blocks drop nothing; breaking one breaks the master).
+    write(out / f"{giant}.json", {"type": "minecraft:block", "pools": [{
+        "condition": match_block(giant, part=0),
+        "entries": [item_entry(giant, None, {"type": "minecraft:copy_components", "include": [rid(giant)], "source": "block_entity"})],
+        "rolls": 1}], "random_sequence": rid(f"blocks/{giant}")})
+    # Chopping one up with an axe gives its pumpkins: one per block of a seedling (1, 4 or 9) and, full grown, seeds.
     pools = [{"condition": match_block(giant, size=size), "entries": [item_entry("minecraft:pumpkin", count if count > 1 else None)], "rolls": 1}
              for size, count in GIANT_PUMPKIN["drops"].items()]
     low, high = GIANT_PUMPKIN["seeds"]
     pools.append({"condition": match_block(giant, size=GIANT_PUMPKIN["max_size"]),
                   "entries": [item_entry(seed, {"type": "minecraft:uniform", "min": low, "max": high})], "rolls": 1})
-    write(out / f"{giant}.json", {"type": "minecraft:block", "modifier": {"type": "minecraft:explosion_decay"}, "pools": pools,
-                                  "random_sequence": rid(f"blocks/{giant}")})
+    write(tables / f"{GIANT_PUMPKIN['chop_table']}.json", {"type": "minecraft:block", "pools": pools,
+                                                          "random_sequence": rid(GIANT_PUMPKIN["chop_table"])})
     # The vine gives seeds back like a pumpkin stem: more the older it is.
     vine, attached = GIANT_PUMPKIN["vine"], GIANT_PUMPKIN["attached_vine"]
     write(out / f"{vine}.json", {"type": "minecraft:block", "pools": [{"entries": [{
@@ -378,6 +392,10 @@ def tags(tags):
         tags.add("block", "minecraft:mineable/axe", rid(carved))
     for block in (HARVEST_SCALE["block"], "scarecrow", "ornamental_corn_bundle", "gourd_birdhouse"):
         tags.add("block", "minecraft:mineable/axe", rid(block))
+    # What a scarecrow wears for a head: any pumpkin, carved or not, lit or not.
+    for head in (["minecraft:pumpkin", "minecraft:carved_pumpkin", "minecraft:jack_o_lantern", rid("hand_carved_pumpkin")]
+                 + [rid(variety) for variety in CARVED_VARIETIES] + [rid(carved) for carved in CARVED_VARIETIES.values()]):
+        tags.add("item", SCARECROW_HEADS, head)
     tags.add("block", "minecraft:mineable/hoe", rid("corn_shock"))
     tags.add("block", "minecraft:sword_efficient", rid("corn_shock"))
     for mum in MUMS:

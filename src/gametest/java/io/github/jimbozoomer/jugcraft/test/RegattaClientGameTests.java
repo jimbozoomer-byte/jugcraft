@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -67,6 +68,13 @@ public class RegattaClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 10, y + 6, z + 5, 180, 24, "jugcraft_pumpkin_regatta");
 			shoot(context, singleplayer, x + 7, y + 2, z - 4, 180, 14, "jugcraft_pumpkin_barge");
 			shoot(context, singleplayer, x + 26, y + 1, z + 2, 180, 6, "jugcraft_costumes");
+			shoot(context, singleplayer, x + 26, y, z - 3, 180, 2, "jugcraft_ghost_sheet");
+			// The player in the sheet, seen from the front in third person.
+			server.runCommand("item replace entity @p armor.head with jugcraft:ghost_sheet");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			shoot(context, singleplayer, x + 22, y, z - 1, 180, 10, "jugcraft_ghost_sheet_worn");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
+			server.runCommand("item replace entity @p armor.head with minecraft:air");
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 7, y + 3, z - 3, 180, 18, "jugcraft_pumpkin_barge_night");
 			shoot(context, singleplayer, x + 26, y + 1, z + 2, 180, 6, "jugcraft_trick_or_treat_night");

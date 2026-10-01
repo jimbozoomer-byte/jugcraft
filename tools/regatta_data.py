@@ -96,14 +96,17 @@ def witch_hat_model():
 
 
 def ghost_sheet_model():
-    """A sheet over the head with eye holes in front, hanging down over the shoulders."""
+    """A sheet over the head with eye holes in front, hanging down over the shoulders (the icon and the dropped
+    item). Worn, it draws nothing on the head: the client's GhostSheetLayer drapes the whole sheet over the wearer."""
     sheet = "#sheet"
+    display = hat_display(2)
+    display["head"] = {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0, 0, 0]}
     return {"textures": {"particle": rid("item/ghost_sheet"), "sheet": rid("item/ghost_sheet"), "face": rid("item/ghost_sheet_face")},
             "elements": [
                 box((1, 0, 1), (15, 15.5, 15), sheet, front="#face"),
                 box((0, -7, 0), (16, 1, 16), sheet, faces=("north", "south", "east", "west")),
             ],
-            "display": hat_display(2)}
+            "display": display}
 
 
 def scarecrow_hat_model():
