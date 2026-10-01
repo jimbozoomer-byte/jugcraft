@@ -479,7 +479,7 @@ public final class JugcraftAgriculture {
 				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
 		registerItem("regatta_flag", props -> new BlockItem(flag, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
 		Block buoy = registerBlock("regatta_buoy", RegattaBuoyBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
-				.strength(0.5F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.DESTROY));
+				.strength(0.5F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.POPPED));
 		registerItem("regatta_buoy", props -> new PlaceOnWaterBlockItem(buoy, props), new Item.Properties().useBlockDescriptionPrefix(),
 				EQUIPMENT_TAB);
 		REGATTA_FLAG_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("regatta_flag"),
