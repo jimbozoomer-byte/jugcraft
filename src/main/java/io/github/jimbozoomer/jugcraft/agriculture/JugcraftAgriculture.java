@@ -20,6 +20,7 @@ import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -94,6 +95,9 @@ public final class JugcraftAgriculture {
 	public static RecipeType<CookingPotRecipe> POT_COOKING;
 	public static RecipeSerializer<CookingPotRecipe> POT_SERIALIZER;
 	public static BlockEntityType<CookingPotBlockEntity> COOKING_POT_ENTITY;
+	public static BlockEntityType<CarvedPumpkinBlockEntity> CARVED_PUMPKIN_ENTITY;
+	/** A hand-carved pumpkin's design, on its item (copied from and to the block entity). */
+	public static DataComponentType<PumpkinCarving> CARVING;
 	public static ExtendedMenuType<CookingPotMenu, BlockPos> COOKING_POT_MENU;
 
 	private JugcraftAgriculture() {
@@ -195,6 +199,7 @@ public final class JugcraftAgriculture {
 		stew("butternut_squash_soup", 8, 0.6F);
 		stew("harvest_stew", 10, 0.6F);
 		stew("cranberry_sauce", 5, 0.6F);
+		food("roasted_pumpkin_seeds", 2, 0.3F, COMPOST_MEDIUM_HIGH);
 
 		// Farm tools.
 		sickle("flint_sickle", 1, 131);
@@ -217,6 +222,7 @@ public final class JugcraftAgriculture {
 
 		registerEquipment();
 		registerDecorations();
+		registerCarving();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> FOOD_TAB.forEach(output::accept));
@@ -280,6 +286,25 @@ public final class JugcraftAgriculture {
 				.strength(0.5F).sound(SoundType.WOOD).lightLevel(state -> 13).noOcclusion());
 		registerItem("turnip_lantern", props -> new BlockItem(lantern, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
 	}
+
+	/**
+	 * Pumpkin carving: the Carving Knife, and the hand-carved pumpkin it makes (any face on any side,
+	 * lit by a torch). See {@link PumpkinCarvings}.
+	 */
+	private static void registerCarving() {
+		CARVING = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("carving"),
+				DataComponentType.<PumpkinCarving>builder().persistent(PumpkinCarving.CODEC).networkSynchronized(PumpkinCarving.STREAM_CODEC).build());
+		Block pumpkin = registerBlock("hand_carved_pumpkin", CarvedPumpkinBlock::new,
+				BlockBehaviour.Properties.ofFullCopy(Blocks.CARVED_PUMPKIN).lightLevel(CarvedPumpkinBlock::light));
+		registerItem("hand_carved_pumpkin", props -> new BlockItem(pumpkin, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		CARVED_PUMPKIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("hand_carved_pumpkin"),
+				FabricBlockEntityTypeBuilder.create(CarvedPumpkinBlockEntity::new, pumpkin).build());
+		registerItem("carving_knife", CarvingKnifeItem::new, new Item.Properties().durability(CARVING_KNIFE_DURABILITY), TOOL_TAB);
+		PumpkinCarvings.register();
+	}
+
+	/** Uses of a Carving Knife: one per finished carving (shears' durability). */
+	public static final int CARVING_KNIFE_DURABILITY = 238;
 
 	/**
 	 * The chestnut tree: its sapling (planted from a chestnut), fruiting leaves and a small wood set.

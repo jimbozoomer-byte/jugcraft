@@ -154,6 +154,7 @@ ITEMS = {
                         "tags": ["c:seeds/sunflower", "c:crops/sunflower", "minecraft:chicken_food",
                                  "minecraft:parrot_food"]},
     "roasted_sunflower_seeds": {"display": "Roasted Sunflower Seeds", "food": [2, 0.3], "compost": "medium_high", "tags": ["c:foods"]},
+    "roasted_pumpkin_seeds": {"display": "Roasted Pumpkin Seeds", "food": [2, 0.3], "compost": "medium_high", "tags": ["c:foods"]},
     "beans": {"display": "Beans", "plants": "bean_crop", "compost": "medium", "tags": ["c:seeds/beans", "c:crops/beans"]},
     "sweet_potato": {"display": "Sweet Potato", "plants": "sweet_potato_crop", "food": [2, 0.3], "compost": "medium",
                      "tags": ["c:crops/sweet_potato", "c:foods/vegetable", "minecraft:pig_food"]},
@@ -290,6 +291,20 @@ GOURD_PATCH = {"rarity": 32, "tries": 8, "spread_xz": 4, "spread_y": 2}
 CRANBERRY_PATCH = {"rarity": 4, "tries": 32, "spread_xz": 6}
 CHESTNUT_TREES = {"biomes": ["IS_FOREST"], "rarity": 3}
 
+# Pumpkin carving: the Carving Knife opens a 16x16 carving screen for one side of a vanilla pumpkin;
+# the server checks the finished face and turns the pumpkin into a hand-carved pumpkin (a block entity
+# holds all four sides). A torch inside lights it: glow = 4 + holes / 3 + shaved / 12, up to 15.
+# Java: agriculture/PumpkinCarving.java, PumpkinCarvings.java, CarvedPumpkinBlock.java.
+CARVING = {
+    "knife": "carving_knife", "knife_display": "Carving Knife", "durability": 238,
+    "block": "hand_carved_pumpkin", "display": "Hand-Carved Pumpkin",
+    "size": 16, "faces": 4, "session_ticks": 6000,
+    "glow": {"base": 4, "per_holes": 3, "per_shaved": 12, "max": 15},
+    "templates": ["classic", "cat", "ghost", "spooky"],
+    "knife_pattern": ["I", "S"], "knife_key": {"I": "minecraft:iron_ingot", "S": "minecraft:stick"},
+}
+CARVING_TEXTURES = ["carving_knife", "hand_carved_pumpkin", "hand_carved_pumpkin_lit"]
+
 # Kitchen Garden equipment: blocks with an item of their own.
 # Trellis: a square wooden lattice. It stands on farmland, on any sturdy top face or on another
 # trellis; climbing crops are planted on it and grow up it. Tomatoes need two stacked.
@@ -325,6 +340,7 @@ COOKING = {
     "roasted_sunflower_seeds": {"input": "sunflower_seeds", "xp": 0.1},
     "roasted_chestnuts": {"input": "chestnut", "xp": 0.35},
     "baked_acorn_squash": {"input": "acorn_squash", "xp": 0.35},
+    "roasted_pumpkin_seeds": {"input": "minecraft:pumpkin_seeds", "xp": 0.1},
 }
 COOK_TIMES = {"smelting": 200, "smoking": 100, "campfire_cooking": 600}
 
@@ -434,12 +450,12 @@ def itemless_blocks():
 def all_blocks():
     """Every registered agriculture block. Crops have no block item (seeds place them); wild plants and equipment do."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"]] + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS)
-            + list(TREE_BLOCKS) + list(WOOD) + list(DECOR))
+            + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]])
 
 
 def all_items():
     return (list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
-            + list(WOOD) + list(DECOR))
+            + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]])
 
 
 def owns(entry_id):

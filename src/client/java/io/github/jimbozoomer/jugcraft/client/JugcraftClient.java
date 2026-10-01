@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.client;
 
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
 import io.github.jimbozoomer.jugcraft.guide.EngineersHandbookItem;
 import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
 import io.github.jimbozoomer.jugcraft.logistics.JugcraftLogistics;
@@ -8,6 +9,7 @@ import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import io.github.jimbozoomer.jugcraft.prospecting.SurveyPayload;
 import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.api.ClientModInitializer;
@@ -16,7 +18,7 @@ import net.minecraft.client.gui.screens.MenuScreens;
 
 /**
  * Client entrypoint: machine and Cooking Pot menus to their screens, the wind turbine and belt renderers,
- * the handbook to its book, and ore surveys to the prospector screen.
+ * the handbook to its book, ore surveys to the prospector screen, and carved pumpkins to their renderer and carving screen.
  */
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
@@ -38,5 +40,9 @@ public final class JugcraftClient implements ClientModInitializer {
 		EngineersHandbookItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);
+		ClientPlayNetworking.registerGlobalReceiver(OpenCarvingPayload.TYPE,
+				(payload, context) -> Minecraft.getInstance().gui.setScreen(new CarvingScreen(payload)));
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(CarvingTextures::clear));
 	}
 }

@@ -107,9 +107,17 @@ def check_assets(registered):
     for item in [entry for entry in registered if entry not in ag.itemless_blocks()]:
         definition = load(ASSETS / "items" / f"{item}.json")
         if definition:
-            model(definition["model"]["model"])
+            for ref in item_models(definition["model"]):
+                model(ref)
         if item not in all_blocks() + machine_blocks() + ag.all_blocks() and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
+
+
+def item_models(definition):
+    """Every model an item definition can show: a plain model, or each case and the fallback of a select."""
+    if definition.get("type") == "minecraft:select":
+        return [ref for case in definition["cases"] for ref in item_models(case["model"])] + item_models(definition["fallback"])
+    return [definition["model"]]
 
 
 def check_loot(registered):
@@ -561,6 +569,7 @@ def check_agriculture():
         if plants and bool(info.get("bog_seed")) != (plants == ag.CRANBERRY["block"]):
             err(f"{name}: a seed is a bog seed exactly when it plants the cranberry bush")
     check_festival(java, main)
+    check_carving(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -671,6 +680,45 @@ def check_festival(java, main):
     for block, variants in expected_states.items():
         if set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})) != variants:
             err(f"{block}: blockstate does not cover every stage")
+
+
+def check_carving(java, main):
+    """Pumpkin carving: Java matches CARVING in tools/agriculture.py."""
+    info = ag.CARVING
+    carving = java.get("PumpkinCarving", "")
+    numbers = {name: re.search(rf"int {name} = (\d+);", carving) for name in ("SIZE", "FACES")}
+    if any(match is None for match in numbers.values()) or int(numbers["SIZE"].group(1)) != info["size"] \
+            or int(numbers["FACES"].group(1)) != info["faces"]:
+        err("PumpkinCarving.java SIZE or FACES differ from CARVING in tools/agriculture.py")
+    glow = info["glow"]
+    expected = f"Math.min({glow['max']}, {glow['base']} + count(CUT) / {glow['per_holes']} + count(SHAVED) / {glow['per_shaved']})"
+    if expected not in carving:
+        err(f"PumpkinCarving.glow() differs from CARVING['glow'] (expected {expected})")
+    session = re.search(r"SESSION_TICKS = (\d+);", java.get("PumpkinCarvings", ""))
+    if not session or int(session.group(1)) != info["session_ticks"]:
+        err("PumpkinCarvings.SESSION_TICKS differs from CARVING['session_ticks']")
+    durability = re.search(r"CARVING_KNIFE_DURABILITY = (\d+);", main)
+    if not durability or int(durability.group(1)) != info["durability"]:
+        err("JugcraftAgriculture.CARVING_KNIFE_DURABILITY differs from CARVING['durability']")
+    for registered in (info["block"], info["knife"]):
+        if f'"{registered}"' not in main:
+            err(f"JugcraftAgriculture.java does not register {registered}")
+    templates = re.findall(r'template\("([a-z_]+)",', java.get("CarvingTemplates", ""))
+    if templates != info["templates"]:
+        err(f"CarvingTemplates.java {templates} differ from CARVING['templates'] {info['templates']}")
+    rows = re.findall(r'"([.s#]+)"[,)]', java.get("CarvingTemplates", ""))
+    if len(rows) != info["size"] * len(info["templates"]) or any(len(row) != info["size"] for row in rows):
+        err(f"CarvingTemplates.java: every starter face is {info['size']} rows of {info['size']} pixels")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for template in info["templates"]:
+        if f"carving.{MOD}.template.{template}" not in lang:
+            err(f"Missing name for carving template {template}")
+    results = java.get("PumpkinCarvings", "").partition("enum Result {")[2].partition("}")[0]
+    if not results:
+        err("PumpkinCarvings.java has no Result enum")
+    for result in re.findall(r"\b([A-Z_]+)\b", results):
+        if result not in ("CARVED", "UNCHANGED") and f"message.{MOD}.carving.{result.lower()}" not in lang:
+            err(f"Missing carving message for {result}")
 
 
 def main():

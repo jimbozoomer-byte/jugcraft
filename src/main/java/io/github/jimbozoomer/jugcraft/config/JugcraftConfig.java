@@ -23,14 +23,30 @@ public final class JugcraftConfig {
 			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "aluminum",
 			"salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines", "agriculture");
 
+	/**
+	 * Other server options, with their defaults. {@code carving.free_draw}: players may carve any face into a
+	 * pumpkin; false allows only the starter faces (for servers that want no free drawing).
+	 */
+	public static final Map<String, Boolean> OPTIONS = Map.of("carving.free_draw", true);
+
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
+	private static final Map<String, Boolean> OPTION_VALUES = new LinkedHashMap<>(OPTIONS);
 
 	private JugcraftConfig() {
 	}
 
 	public static boolean isFeatureEnabled(String feature) {
 		return ENABLED.getOrDefault(feature, false);
+	}
+
+	/** A server option from {@link #OPTIONS}, as set in the file (its default before {@link #load}). */
+	public static boolean option(String key) {
+		Boolean value = OPTION_VALUES.get(key);
+		if (value == null) {
+			throw new IllegalArgumentException("No Jugcraft option " + key);
+		}
+		return value;
 	}
 
 	public static void load() {
@@ -52,8 +68,15 @@ public final class JugcraftConfig {
 			properties.setProperty(key, Boolean.toString(enabled));
 		}
 
+		for (Map.Entry<String, Boolean> option : OPTIONS.entrySet()) {
+			boolean value = Boolean.parseBoolean(properties.getProperty(option.getKey(), option.getValue().toString()));
+			OPTION_VALUES.put(option.getKey(), value);
+			properties.setProperty(option.getKey(), Boolean.toString(value));
+		}
+
 		try (Writer writer = Files.newBufferedWriter(path)) {
-			properties.store(writer, "Jugcraft feature switches. false stops new worldgen and recipes; existing items and blocks stay.");
+			properties.store(writer, "Jugcraft feature switches (false stops new worldgen and recipes; existing items and blocks stay)"
+					+ " and server options (carving.free_draw=false allows only the starter pumpkin faces).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}

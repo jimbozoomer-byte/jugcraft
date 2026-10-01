@@ -4,6 +4,7 @@ Called by generate_material_data.py. Loot tables and worldgen use the Minecraft 
 (singular "condition", "modifier", minecraft:match_block, inline block states), copied from
 vanilla 26.3's own crop and berry-bush files.
 """
+import carving_data
 import festival_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -132,6 +133,7 @@ def assets(root, write, lang):
     lang[f"container.{MOD}.cooking_pot.cold"] = "Needs heat below"
 
     festival_data.assets(root, write, lang)
+    carving_data.assets(root, write, lang)
 
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
@@ -216,6 +218,7 @@ def loot(data, write):
         # Like vanilla scaffolding and cauldrons: the block itself, unless an explosion destroys it.
         write(out / f"{block}.json", table(block, pool(entry(block), condition={"type": "minecraft:survives_explosion"}), decay=False))
     festival_data.loot(out, write)
+    carving_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -257,6 +260,7 @@ def recipes(out, write):
         write(out / f"{sickle}.json", {"fabric:load_conditions": conditions(*info["features"]), "type": "minecraft:crafting_shaped",
                                        "category": "equipment", "pattern": SICKLE_PATTERN,
                                        "key": {"M": info["material"], "S": "minecraft:stick"}, "result": {"id": rid(sickle), "count": 1}})
+    carving_data.recipes(out, write, conditions)
 
 
 # ---------------------------------------------------------------- tags
@@ -279,6 +283,7 @@ def tags(tags):
         if info["legume"]:
             tags.add("block", LEGUME_TAG, rid(info["block"]))
     festival_data.tags(tags)
+    carving_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

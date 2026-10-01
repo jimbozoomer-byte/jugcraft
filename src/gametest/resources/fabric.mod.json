@@ -11,13 +11,15 @@
       "io.github.jimbozoomer.jugcraft.test.JugcraftGameTests",
       "io.github.jimbozoomer.jugcraft.test.AgricultureGameTests",
       "io.github.jimbozoomer.jugcraft.test.KitchenGardenGameTests",
-      "io.github.jimbozoomer.jugcraft.test.FestivalGameTests"
+      "io.github.jimbozoomer.jugcraft.test.FestivalGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CarvingGameTests"
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.AgricultureClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.KitchenGardenClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.FestivalClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.FestivalClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CarvingClientGameTests"
     ]
   },
   "depends": {
