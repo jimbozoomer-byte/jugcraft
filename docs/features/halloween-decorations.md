@@ -342,6 +342,40 @@ Found by CI and fixed before this record:
 - a real fall into a bale or a leaf pile (the test calls the fall rule directly), and the leaves kicked up by walking;
 - logging out while sitting and back in.
 
+### Batch 6 verification
+
+Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on this branch after `main` (#73, #74) was merged down the stack:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the chair's seat and rocking, the eyes' distance and blinking, the window's designs and light, the music box's tune length (and every note in range) and the spider's drop and sway with Java, checks every state has a blockstate entry, and that the quads, glowing papers and eye sprite the client draws exist) | Pass, 504 IDs |
+| `./gradlew build` on `4d6469b` (later commits only change docs and screenshots) | Pass |
+| Game tests on the headless server, same commit: 265 in total, 7 of them new here (`Decor6GameTests`) | **All 265 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `4d6469b`; no model, texture or particle errors in the log; the client reads the first window's light as far 15, near 13, glowing |
+
+The 7 new game tests (`Decor6GameTests`):
+1. a rocking chair faces whoever placed it and seats a player at its seat (9/16); empty by day it is still; under a sitter it rocks up to its gentle 4 degrees, and empty at night further, up to 7; broken, it stands its sitter up and drops once;
+2. lurking eyes peer out of leaves but can't be put on a fence post's side, and fall when their leaves go; they show only at night and only from four blocks away; they blink for four ticks in each 90;
+3. a silhouette window faces whoever placed it, a bat; in the dark neither side glows; sneak-use turns it to the cat, the witch, the bat and the cat; with glowstone on its north side its south side glows and its north side doesn't; broken, it keeps its cat;
+4. winding a music box opens it at the top of its tune and using it again shuts it; notes are pitched like a note block's, and every note of the tune is in range;
+5. a redstone signal opens a music box; it plays on past the end of its tune while powered and from the top again; without power it plays to the end of the tune and shuts;
+6. a giant fake spider hangs from a stone ceiling, oak leaves and a spun cobweb but not from the open sky; sneak-use lets its thread down to two, three, four and back to one; it never swings more than its sway; it falls with its ceiling, dropping once;
+7. the five recipes and five loot tables load.
+
+The client game test (`Decor6ClientGameTests`) builds a house front with three Silhouette Windows (bat, cat, witch) lit from inside by jack o'lanterns, a porch with two Rocking Chairs, a Spooky Music Box playing on a block of redstone and a Giant Fake Spider hanging from the porch roof, and a hedge with two pairs of Lurking Eyes; it photographs them by day and at midnight: the windows glow with their cut-outs black, the music box stands open with its ghost and notes rising, the spider hangs on its thread, and the eyes glow in the hedge.
+
+Found by CI and fixed before this record:
+- 26.3 has no `BlockAndTintGetter` where the window looked for it (a compile error); the window reads the light through `Level`.
+- The first screenshots showed the windows dim behind lit jack o'lanterns. The client test logged what the client reads (lit far side 15, near side 13, glowing), so the light rule was right: the glowing paper was wound the wrong way round, facing into the house, and was culled from outside. It now uses the same corner order as the generated quads, a quarter pixel in front of the pane, and a lamp's own cell counts as lit by its own light.
+
+**Not run (batch 6):**
+- a person playing it in a client;
+- a dedicated server with two players (both hearing the music box; each seeing the eyes by their own distance);
+- the chair rocking under a real sitter in a client (the test checks the rocking numbers; the screenshots show empty chairs);
+- the music box's sound (the CI client has no sound device);
+- windows lit by a torch further back in a room (the test uses a lamp right behind).
+
 ## World and event applicability
 - Decorations work all year, anywhere. The candy bowl uses the trick-or-treat night count but is not limited to the Halloween event.
 - The coffin respects each dimension's bed rules.

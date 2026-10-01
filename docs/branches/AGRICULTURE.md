@@ -500,6 +500,24 @@ The harvest party:
 - **Autumn Wreath:** leaves, corn and mums, on a wall or a door.
 - **Leaf Piles:** heaps of red, orange and yellow leaves to jump into.
 
+The haunted house and yard:
+
+| **The haunted house** by day | **At midnight:** the windows glow, eyes peer from the hedge |
+| --- | --- |
+| ![The haunted house](../images/ingame_haunted_house.jpg) | ![The haunted house at night](../images/ingame_haunted_house_night.jpg) |
+| **Rocking Chairs** on the porch | **The Spooky Music Box** playing, and the **Giant Fake Spider** |
+| ![Rocking chairs](../images/ingame_rocking_chairs.jpg) | ![Music box and spider](../images/ingame_music_box_and_spider.jpg) |
+| **Silhouette Windows** lit from inside: bat, cat and witch | **Lurking Eyes** in the hedge at night |
+| ![Silhouette windows](../images/ingame_silhouette_windows_night.jpg) | ![Lurking eyes](../images/ingame_lurking_eyes_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor6ClientGameTests`, software rendering, small previews).*
+
+- **Rocking Chair:** sit in it; at night, empty, it rocks on its own.
+- **Lurking Eyes:** glowing eyes in a hedge at night that vanish when you come close.
+- **Silhouette Window:** a bat, cat or witch cut-out that glows when a lamp lights the other side.
+- **Spooky Music Box:** an original waltz on note-block sounds, played by redstone or wound by hand.
+- **Giant Fake Spider:** a big hairy spider swaying on a silk thread.
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
