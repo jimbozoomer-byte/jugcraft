@@ -66,9 +66,8 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 	private int samples;
 
 	public MachineScreen(MachineMenu menu, Inventory inventory, Component title) {
-		super(menu, inventory, title);
+		super(menu, inventory, title, BAY_WIDTH + TERMINAL_WIDTH, 166);
 		this.theme = MachineScreenThemes.of(menu.kind());
-		this.imageWidth = BAY_WIDTH + TERMINAL_WIDTH;
 	}
 
 	@Override
