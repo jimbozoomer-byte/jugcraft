@@ -99,6 +99,8 @@ public final class PetroFluids {
 	public static Entry HEAVY_FUEL_OIL;
 	/** Reformed naphtha: high-octane gasoline. */
 	public static Entry GASOLINE;
+	/** Water thickened with sand and a gelling agent: what the fracking rig pumps down the well. */
+	public static Entry FRACKING_FLUID;
 	/** Vacuum distillation of heavy fuel oil: lubricant (machine upkeep). */
 	public static Entry LUBRICANT;
 	/** The lightest fraction: refinery gas (fuel gas, and later plastics). */
@@ -138,6 +140,7 @@ public final class PetroFluids {
 		HEAVY_FUEL_OIL = fluid("heavy_fuel_oil", 30, 2, 2, 0xFF261E12, MapColor.COLOR_BLACK);
 		LUBRICANT = fluid("lubricant", 25, 2, 2, 0xFF8C7D28, MapColor.COLOR_YELLOW);
 		GASOLINE = fluid("gasoline", 4, 4, 1, 0xFFC86446, MapColor.COLOR_RED);
+		FRACKING_FLUID = fluid("fracking_fluid", 6, 3, 1, 0xFF8296A0, MapColor.COLOR_LIGHT_GRAY);
 		REFINERY_GAS = gas("refinery_gas", 0xFFB8C4D0);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {

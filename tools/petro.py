@@ -28,6 +28,10 @@ FLUIDS = {
     "gasoline": {"display": "Gasoline", "feature": "crude_oil",
                  "colors": [(150, 60, 40), (200, 100, 70), (230, 150, 110), (250, 212, 184)],
                  "tick_delay": 4, "slope": 4, "drop_off": 1},
+    # Batch 3: fracking.
+    "fracking_fluid": {"display": "Fracking Fluid", "feature": "crude_oil",
+                       "colors": [(90, 110, 120), (130, 150, 160), (170, 185, 190), (212, 222, 226)],
+                       "tick_delay": 6, "slope": 3, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -83,6 +87,9 @@ FLUID_MACHINES = {
     # Naphtha -> gasoline (base) + refinery gas (top). 120 JE/t.
     "catalytic_reformer": {"inputs": [8_000], "outputs": [8_000, 8_000], "item_inputs": 0, "item_outputs": 0,
                            "recipe_type": "reforming"},
+    # Water + two powders/solids -> a mixture. 64 JE/t.
+    "chemical_mixer": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 0,
+                       "recipe_type": "chemical_mixing"},
 }
 
 # Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],
@@ -118,6 +125,13 @@ FLUID_RECIPES = {
          "features": ["crude_oil"]},
     ],
     # Reforming rearranges naphtha into high-octane gasoline, giving off a little gas.
+    # Fracking fluid: water carrying sand (to prop the cracks open) and a gelling agent (dried kelp, standing in for
+    # guar gum) to carry the sand.
+    "chemical_mixer": [
+        {"name": "fracking_fluid", "items": [("minecraft:sand", 2), ("minecraft:dried_kelp", 1)],
+         "fluids": [("minecraft:water", 1000)], "fluid_results": [("jugcraft:fracking_fluid", 1000)], "source": 0,
+         "ticks": 80, "features": ["crude_oil"]},
+    ],
     "catalytic_reformer": [
         {"name": "naphtha", "fluids": [("jugcraft:naphtha", 1000)],
          "fluid_results": [("jugcraft:gasoline", 900), ("jugcraft:refinery_gas", 100)], "ticks": 120,

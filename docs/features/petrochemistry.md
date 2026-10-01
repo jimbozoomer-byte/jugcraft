@@ -75,6 +75,12 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - **1,000 mB of naphtha → 900 mB of gasoline + 100 mB of refinery gas**, every 120 ticks at 120 JE/t (14,400 JE a bucket). Gasoline comes out of the bottom row and refinery gas out of the top row.
 - Recipe: steel plates, an advanced circuit, two tinplate tanks, a blast furnace and a machine casing.
 
+### Chemical mixer and fracking fluid (batch 3, commit 11)
+- **Fracking fluid**: a cloudy grey fluid with a bucket. It is water carrying sand, which props the rock's cracks open, and a gelling agent, which carries the sand. Dried kelp stands in for guar gum.
+- The **chemical mixer** is a 2×2×2 stirred vessel: an olive tank with a sight glass, an agitator motor on the lid, a sand hopper, a kelp chute and a control panel. It is general-purpose: later chemistry can add recipes.
+- **1,000 mB water + 2 sand (first slot) + 1 dried kelp (second slot) → 1,000 mB fracking fluid**, every 80 ticks at 64 JE/t.
+- Recipe: steel plates, an electric motor, two tinplate tanks, a machine casing and a hopper.
+
 ### What refining gives (batch 2 summary)
 From one bucket of crude oil, with every byproduct refined:
 
@@ -116,6 +122,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 - Game test `crackerCracksHeavyFuelOil` (heavy fuel oil, water and one catalyst become 500/300/200 mB of diesel, naphtha and gas).
 - Game test `vacuumUnitMakesLubricantAndAsphalt` (a bucket of heavy fuel oil becomes 400 mB of lubricant and two asphalt binder).
 - Game test `reformerMakesGasoline` (a bucket of naphtha becomes 900 mB of gasoline and 100 mB of refinery gas).
+- Game test `mixerMakesFrackingFluid`.
 - Game test `pumpjackPumpsOil`: a powered pumpjack over pumpable oil fills its tank with crude oil and the reservoir goes down by as much.
 - Game tests `extractorTanksOnlyTakeWhatTheyUse` (its tanks take water but not lava or crude oil, through Fabric's fluid API) and `extractorWashesOilFromOilSand` (a block of oil sand and water become 500 mB of crude oil and sand, using 250 mB of water).
 - Not run: client play-testing of how the fluid looks and flows.

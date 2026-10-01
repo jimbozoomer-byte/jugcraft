@@ -283,4 +283,17 @@ public class PetroGameTests {
 			helper.assertTrue(reformer.tanks().output(1).has(PetroFluids.REFINERY_GAS.fluid(), 100), "No refinery gas");
 		});
 	}
+
+	/** The chemical mixer stirs two sand and a dried kelp into a bucket of water to make a bucket of fracking fluid. */
+	@GameTest(maxTicks = 200)
+	public void mixerMakesFrackingFluid(GameTestHelper helper) {
+		MachineBlockEntity mixer = place(helper, MachineKind.CHEMICAL_MIXER, new BlockPos(4, 1, 2));
+		mixer.tanks().input(0).fill(Fluids.WATER, 1000);
+		mixer.setItem(0, new ItemStack(Items.SAND, 2));
+		mixer.setItem(1, new ItemStack(Items.DRIED_KELP));
+		helper.succeedWhen(() -> {
+			helper.assertTrue(mixer.tanks().output(0).has(PetroFluids.FRACKING_FLUID.source(), 1000), "No fracking fluid");
+			helper.assertTrue(mixer.getItem(0).isEmpty() && mixer.getItem(1).isEmpty(), "The mixer kept its sand or kelp");
+		});
+	}
 }

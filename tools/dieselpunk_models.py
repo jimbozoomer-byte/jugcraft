@@ -434,8 +434,33 @@ def catalytic_reformer():
     return m
 
 
+def chemical_mixer():
+    """A two by two stirred mixing vessel two blocks tall: an olive tank on a hazard skid with gunmetal bands and a
+    sight-glass stripe, a domed lid carrying the agitator's motor and gearbox, a sand hopper and a kelp chute feeding
+    the lid, and a control panel with a gauge and caged lamp at the front."""
+    m = [box((-16, 0, 0), (16, 2, 32), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    m.append(box((1, 2, 0.5), (15, 12, 6), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(dial("north", (5, 8.5, 0.25), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 8.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    # The vessel, with a sight glass showing the grey mixture.
+    m += cyl("y", -1, 18, 11, 2, 24, OLIVE, GUNMETAL)
+    for y in (8, 17):
+        m += cyl("y", -1, 18, 11.4, y, y + 1, GUNMETAL)
+    m.append(box((-2.5, 4, 6.5), (0.5, 22, 7), {"*": CHROME, "north": "fracking_fluid_still"}))
+    m += cyl("y", -1, 18, 8, 24, 26, GUNMETAL, CHROME)
+    # Agitator drive: motor and gearbox on the lid.
+    m.append(box((-5, 26, 14), (3, 30, 22), {"*": OLIVE, "east": GRILLE, "west": GRILLE}))
+    m += cyl("y", -1, 18, 2.5, 30, 32, CHROME)
+    # Sand hopper (right) and kelp chute (back), into the lid.
+    m.append(box((-15, 18, 10), (-9, 28, 16), {"*": GUNMETAL, "up": "sp_hopper_inside"}))
+    m.append(box((-11, 24, 15), (-8, 26, 18), RUBBER))
+    m.append(box((4, 24, 27), (9, 30, 31), {"*": GUNMETAL, "up": "sp_hopper_inside"}))
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
           "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump(),
           "distillation_tower": distillation_tower(), "catalytic_cracker": catalytic_cracker(),
-          "vacuum_distillation_unit": vacuum_distillation_unit(), "catalytic_reformer": catalytic_reformer()}
+          "vacuum_distillation_unit": vacuum_distillation_unit(), "catalytic_reformer": catalytic_reformer(),
+          "chemical_mixer": chemical_mixer()}

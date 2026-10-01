@@ -118,6 +118,8 @@ ABOUT = {
     "catalytic_reformer": "Three wide, two tall and two deep. Reforms naphtha into high-octane gasoline: each bucket of "
                           "naphtha gives 900 mB of gasoline (out of the bottom row) and 100 mB of refinery gas (out of "
                           "the top row), every 6 seconds.",
+    "chemical_mixer": "Two by two by two. Stirs powders into water: two sand (first slot) and a dried kelp (second "
+                      "slot) with a bucket of water make a bucket of fracking fluid, every 4 seconds.",
     "ore_drill": "Two blocks tall. Mines the ore blocks in a 9x9 column below it, one layer at a time down to the bottom "
                  "of the world, one ore every 2 seconds. Each hole is refilled with stone or deepslate. The ores come "
                  "out whole, ready for ore processing.",
@@ -321,6 +323,7 @@ def build():
             machine_page("catalytic_cracker"),
             machine_page("vacuum_distillation_unit"),
             machine_page("catalytic_reformer"),
+            machine_page("chemical_mixer"),
             {"title": "Cracking Catalyst", "icon": f"{MOD}:cracking_catalyst", "text": [
                 "Bauxite (alumina) and sand (silica) with a nickel ingot make four. The catalytic cracker uses one for "
                 "each bucket of heavy fuel oil it cracks."], "craft": craft("cracking_catalyst")},

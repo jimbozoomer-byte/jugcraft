@@ -53,6 +53,8 @@ MACHINES = {
     "vacuum_distillation_unit": {"display": "Vacuum Distillation Unit", "lit": True},
     # A 3x2x2 row of reactors: naphtha -> gasoline + refinery gas.
     "catalytic_reformer": {"display": "Catalytic Reformer", "lit": True},
+    # A 2x2x2 stirred mixing vessel: water + sand + dried kelp -> fracking fluid.
+    "chemical_mixer": {"display": "Chemical Mixer", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
 }
 
@@ -201,6 +203,8 @@ STATS = {
     "vacuum_distillation_unit": {"capacity": 30_000, "input_per_tick": 512, "use_per_tick": 96, "tank": 8_000},
     # 3x2x2. 120 JE/t; a bucket of naphtha per 120 ticks.
     "catalytic_reformer": {"capacity": 30_000, "input_per_tick": 512, "use_per_tick": 120, "tank": 8_000},
+    # 2x2x2. 64 JE/t; a bucket of mixture per 80 ticks.
+    "chemical_mixer": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 64, "tank": 8_000},
 }
 
 # Fuel for the coal generator: burn ticks per item (coal matches the vanilla furnace's 1600).
@@ -379,6 +383,9 @@ CRAFTING = {
     "catalytic_reformer": (["PCP", "TFT", "PMP"], {"P": "#c:plates/steel", "C": "jugcraft:advanced_circuit",
                                                    "T": "jugcraft:fluid_tank", "F": "minecraft:blast_furnace",
                                                    "M": "jugcraft:machine_casing"}, 1),
+    "chemical_mixer": (["PMP", "TCT", "PHP"], {"P": "#c:plates/steel", "M": "jugcraft:electric_motor",
+                                               "T": "jugcraft:fluid_tank", "C": "jugcraft:machine_casing",
+                                               "H": "minecraft:hopper"}, 1),
     "cracking_catalyst": (["BSB", "SNS", "BSB"], {"B": "jugcraft:bauxite", "S": "minecraft:sand",
                                                   "N": "#c:ingots/nickel"}, 4),
     "charging_station": (["SLS", "WAW", "SBS"], {"S": "#c:plates/steel", "L": "minecraft:redstone_lamp",
