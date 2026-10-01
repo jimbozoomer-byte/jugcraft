@@ -842,4 +842,6 @@ def crop_textures():
     out.update(night_textures())
     from decor_textures import decor_textures  # and the Halloween decorations
     out.update(decor_textures())
+    from decor2_textures import decor2_textures  # and their second batch
+    out.update(decor2_textures())
     return out

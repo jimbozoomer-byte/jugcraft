@@ -720,6 +720,7 @@ def check_agriculture():
     check_festivities(java, main)
     check_night(java, main)
     check_decor(java)
+    check_decor2(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1251,6 +1252,77 @@ def check_decor(java):
     for name in portrait["portraits"]:
         if f"message.jugcraft.haunted_portrait.{name}" not in lang:
             err(f"The {name} portrait has no name")
+
+def check_decor2(java):
+    """The second decorations batch: Java matches tools/agriculture.py (lights, the floating candles' places, the strand
+    kinds), every block state has a model, the bag's cut-out face is the same mirrored (so its holes line up seen from
+    inside), and the soul-lit carving icon uses the client's soul colours."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    bag, candle, sconce, soul, bunting = ag.LUMINARIA, ag.FLOATING_CANDLE, ag.SCONCE, ag.SOUL_CARVING, ag.BAT_BUNTING
+    expected = {("LuminariaBlock", "LIGHT"): bag["light"], ("FloatingCandleBlock", "MAX"): candle["max"],
+                ("FloatingCandleBlock", "LIGHT_PER_CANDLE"): candle["light_per_candle"], ("FloatingCandleBlock", "BOB"): candle["bob"],
+                ("FloatingCandleBlock", "BOB_TICKS"): candle["bob_ticks"], ("SkeletonHandSconceBlock", "LIGHT"): sconce["light"],
+                ("CarvedPumpkinBlock", "SOUL_LIGHT"): soul["light"]}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    source = java.get("FloatingCandleBlock", "")
+    table = re.search(r"CANDLE = \{(.*?)\};", source, re.S)
+    places = [[tuple(float(v.rstrip("F")) for v in spot.split(",")) for spot in re.findall(r"\{([\d., F]+)\}", group)]
+              for group in re.findall(r"\{(\{[^{}]*\}(?:, \{[^{}]*\})*)\}", table.group(1))] if table else []
+    if places != [[tuple(float(v) for v in spot) for spot in group] for group in candle["candles"]]:
+        err(f"FloatingCandleBlock.CANDLE {places} differs from tools/agriculture.py")
+    heights = re.search(r"HEIGHT = \{([\d., F]+)\};", source)
+    if not heights or [float(v.strip().rstrip("F")) for v in heights.group(1).split(",")] != [float(h) for h in candle["heights"]]:
+        err("FloatingCandleBlock.HEIGHT differs from tools/agriculture.py")
+    if any(len(group) != n + 1 for n, group in enumerate(candle["candles"])) or len(candle["heights"]) != candle["max"]:
+        err("FLOATING_CANDLE needs one place per candle and a height for each place")
+    if candle["max"] * candle["light_per_candle"] > 15:
+        err("Floating candles would give more than light 15")
+    strands = re.findall(r'[A-Z]+\("([a-z]+)", "([a-z_]+)"\)', java.get("StringLightHookBlockEntity", ""))
+    if dict(strands) != {"lights": ag.STRING_LIGHTS["strand"], "bunting": bunting["item"]}:
+        err(f"StringLightHookBlockEntity.Strand {strands} differs from the strand items in tools/agriculture.py")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    wanted = {
+        bag["block"]: {f"color={c},lit={l}" for c in ag.DYE_COLORS for l in booleans},
+        candle["block"]: {f"candles={n},lit={l}" for n in range(1, candle["max"] + 1) for l in booleans},
+        sconce["block"]: {f"facing={f},lit={l}" for f in horizontal for l in booleans},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+
+    # The bag's face is cut the same seen from inside: each hole's mirror image is a hole too.
+    for color in ag.DYE_COLORS:
+        for suffix in ("", "_lit"):
+            image = ASSETS / "textures" / "block" / f"luminaria_{color}{suffix}.png"
+            if not image.exists():
+                err(f"Missing texture {image.name}")
+                continue
+            pixels = Image.open(image).convert("RGBA")
+            holes = {(x, y) for x in range(4, 12) for y in range(6, 16) if pixels.getpixel((x, y))[3] == 0}
+            if not holes or holes != {(15 - x, y) for x, y in holes}:
+                err(f"{image.name}: the cut-out face is missing or not the same mirrored")
+
+    # The soul-lit icon and the client's soul colours agree.
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "CarvingTextures.java")
+    colors = dict(re.findall(r"int (HOLE_SOUL|HOLE_WALL_SOUL) = 0xFF([0-9A-Fa-f]{6});", client.read_text(encoding="utf-8")))
+    icon = ASSETS / "textures" / "item" / "hand_carved_pumpkin_soul.png"
+    if icon.exists():
+        pixels = Image.open(icon).convert("RGBA")
+        used = {"%02X%02X%02X" % pixels.getpixel((x, y))[:3] for x in range(16) for y in range(16) if pixels.getpixel((x, y))[3]}
+        if not {c.upper() for c in colors.values()} <= used or len(colors) != 2:
+            err("The soul-lit carved pumpkin icon should use CarvingTextures' HOLE_SOUL and HOLE_WALL_SOUL")
+    else:
+        err("Missing texture hand_carved_pumpkin_soul.png")
+
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

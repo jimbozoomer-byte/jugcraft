@@ -348,7 +348,7 @@ def loot(out, write):
             "condition": {"type": "minecraft:survives_explosion"},
             "entries": [{"type": "minecraft:item", "name": rid(carved), "modifier": [
                 {"type": "minecraft:copy_components", "include": [rid("carving")], "source": "block_entity"},
-                {"type": "minecraft:copy_state", "block": rid(carved), "properties": ["lit"]}]}],
+                {"type": "minecraft:copy_state", "block": rid(carved), "properties": ["lit", "soul"]}]}],
             "rolls": 1}], "random_sequence": rid(f"blocks/{carved}")})
 
     # The first cut into a pumpkin: its seeds (vanilla's carve_pumpkin for a pumpkin, these for heirlooms)

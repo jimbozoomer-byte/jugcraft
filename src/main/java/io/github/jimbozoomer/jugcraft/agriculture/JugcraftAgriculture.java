@@ -157,6 +157,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<CoffinBlockEntity> COFFIN_ENTITY;
 	public static BlockEntityType<HauntedPortraitBlockEntity> HAUNTED_PORTRAIT_ENTITY;
 	public static BlockEntityType<FogMachineBlockEntity> FOG_MACHINE_ENTITY;
+	public static BlockEntityType<FloatingCandleBlockEntity> FLOATING_CANDLE_ENTITY;
 	/** Low ground fog from the Fog Machine (drawn by the client: client/FogParticle.java). */
 	public static final SimpleParticleType FOG = FabricParticleTypes.simple();
 	/** What each kind of pumpkin becomes when first carved by hand, and the loot table its seeds come from. */
@@ -644,7 +645,8 @@ public final class JugcraftAgriculture {
 		STRING_LIGHT_HOOK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("string_light_hook"),
 				FabricBlockEntityTypeBuilder.create(StringLightHookBlockEntity::new, hook).build());
 		EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> entity.energy(), STRING_LIGHT_HOOK_ENTITY);
-		registerItem("jack_o_lantern_string_lights", StringLightsItem::new, new Item.Properties(), BUILDING_TAB);
+		registerItem("jack_o_lantern_string_lights", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.LIGHTS),
+				new Item.Properties(), BUILDING_TAB);
 
 		Block bowl = registerBlock("candy_bowl", CandyBowlBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
 				.strength(0.8F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.POPPED));
@@ -671,6 +673,23 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(FogMachineBlockEntity::new, fog).build());
 		EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> entity.energy(), FOG_MACHINE_ENTITY);
 		Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id("fog"), FOG);
+
+		// Batch 2: the Luminaria, Floating Candles, the Skeleton Hand Sconce and Bat Bunting (soul-flame carvings are
+		// the hand-carved and giant pumpkins' own).
+		Block luminaria = registerBlock("luminaria", LuminariaBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_WHITE)
+				.instabreak().sound(SoundType.WOOL).noOcclusion().lightLevel(LuminariaBlock::light).pushReaction(PushReaction.POPPED));
+		registerItem("luminaria", props -> new BlockItem(luminaria, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block candles = registerBlock("floating_candle", FloatingCandleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
+				.strength(0.1F).sound(SoundType.CANDLE).noCollision().noOcclusion().lightLevel(FloatingCandleBlock::light)
+				.pushReaction(PushReaction.POPPED));
+		registerItem("floating_candle", props -> new BlockItem(candles, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		FLOATING_CANDLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("floating_candle"),
+				FabricBlockEntityTypeBuilder.create(FloatingCandleBlockEntity::new, candles).build());
+		Block sconce = registerBlock("skeleton_hand_sconce", SkeletonHandSconceBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
+				.strength(0.5F).sound(SoundType.BONE_BLOCK).noCollision().lightLevel(SkeletonHandSconceBlock::light).pushReaction(PushReaction.POPPED));
+		registerItem("skeleton_hand_sconce", props -> new BlockItem(sconce, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem("bat_bunting", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.BUNTING), new Item.Properties(),
+				BUILDING_TAB);
 	}
 
 	/** How brightly a Wisp in a Jar glows. */

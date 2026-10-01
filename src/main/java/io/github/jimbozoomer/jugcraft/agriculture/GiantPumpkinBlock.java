@@ -33,7 +33,7 @@ import org.jspecify.annotations.Nullable;
  * is, counted from the lowest north-west corner (the master, part 0, which alone has the
  * {@link GiantPumpkinBlockEntity} and ticks). Breaking any block breaks the whole pumpkin and drops once
  * (the loot table reads the size). Full grown, each side can be carved as one 48x48 face, and a torch
- * inside lights every block of it ({@link #LIGHT}).
+ * inside lights every block of it ({@link #LIGHT}); a soul torch lights it blue, at most a soul torch's light.
  */
 public class GiantPumpkinBlock extends BaseEntityBlock implements BonemealableBlock {
 	public static final int MAX_SIZE = 3;
@@ -108,16 +108,16 @@ public class GiantPumpkinBlock extends BaseEntityBlock implements BonemealableBl
 		}
 	}
 
-	/** A torch lights a full-grown, carved giant pumpkin; every block of it then glows. */
+	/** A torch (or a soul torch) lights a full-grown, carved giant pumpkin; every block of it then glows. */
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
 			InteractionHand hand, BlockHitResult hit) {
 		GiantPumpkinBlockEntity master = master(level, pos, state);
-		if (!stack.is(Items.TORCH) || master == null || master.lit() || master.glow() == 0) {
+		if (!CarvedPumpkinBlock.isTorch(stack) || master == null || master.lit() || master.glow() == 0) {
 			return stack.isEmpty() ? InteractionResult.TRY_WITH_EMPTY_HAND : InteractionResult.PASS;
 		}
 		if (!level.isClientSide()) {
-			master.setLit(true);
+			master.setLit(true, stack.is(Items.SOUL_TORCH));
 			stack.consume(1, player);
 			level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 0.9F);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
@@ -125,7 +125,7 @@ public class GiantPumpkinBlock extends BaseEntityBlock implements BonemealableBl
 		return InteractionResult.SUCCESS;
 	}
 
-	/** An empty hand takes the torch back out. */
+	/** An empty hand takes the torch (or soul torch) back out. */
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
 		GiantPumpkinBlockEntity master = master(level, pos, state);
@@ -133,8 +133,8 @@ public class GiantPumpkinBlock extends BaseEntityBlock implements BonemealableBl
 			return InteractionResult.PASS;
 		}
 		if (!level.isClientSide()) {
-			master.setLit(false);
-			ItemStack torch = new ItemStack(Items.TORCH);
+			ItemStack torch = CarvedPumpkinBlock.torch(master.soul());
+			master.setLit(false, false);
 			if (!player.getInventory().add(torch)) {
 				Block.popResourceFromFace(level, pos, hit.getDirection(), torch);
 			}

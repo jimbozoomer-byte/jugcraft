@@ -17,7 +17,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
 /**
- * Jack-o'-Lantern String Lights: a strand of tiny pumpkin bulbs. Use it on one String Light Hook, then on another
+ * Jack-o'-Lantern String Lights (a strand of tiny pumpkin bulbs) or Bat Bunting (orange and black pennants and paper
+ * bats on a cord), by its {@link StringLightHookBlockEntity.Strand}. Use it on one String Light Hook, then on another
  * at most {@value StringLightHookBlockEntity#MAX_LENGTH} blocks away in the same dimension, and it is strung between
  * them (one strand is used). Each hook holds one strand of its own (the first hook's if it has none, else the
  * second's) and any number may run to it, so hooks chain; two hooks are strung together once. Everything is
@@ -30,8 +31,15 @@ public class StringLightsItem extends Item {
 		FIRST, STRUNG, SAME_HOOK, TOO_FAR, GONE, ALREADY_STRUNG
 	}
 
-	public StringLightsItem(Properties properties) {
+	private final StringLightHookBlockEntity.Strand strand;
+
+	public StringLightsItem(Properties properties, StringLightHookBlockEntity.Strand strand) {
 		super(properties);
+		this.strand = strand;
+	}
+
+	public StringLightHookBlockEntity.Strand strand() {
+		return strand;
 	}
 
 	@Override
@@ -51,7 +59,7 @@ public class StringLightsItem extends Item {
 			player.sendOverlayMessage(Component.translatable("message.jugcraft.string_lights.first", StringLightHookBlockEntity.MAX_LENGTH));
 			return InteractionResult.SUCCESS;
 		}
-		Result result = string(server, first.pos(), pos);
+		Result result = string(server, first.pos(), pos, strand);
 		player.sendOverlayMessage(Component.translatable("message.jugcraft.string_lights." + result.name().toLowerCase(java.util.Locale.ROOT),
 				StringLightHookBlockEntity.MAX_LENGTH));
 		if (result != Result.STRUNG) {
@@ -62,8 +70,13 @@ public class StringLightsItem extends Item {
 		return InteractionResult.SUCCESS;
 	}
 
-	/** Strings hook {@code from} to hook {@code to} if the rules allow; the strand item is the caller's to use up. */
+	/** Strings hook {@code from} to hook {@code to} with string lights if the rules allow. */
 	public static Result string(ServerLevel level, BlockPos from, BlockPos to) {
+		return string(level, from, to, StringLightHookBlockEntity.Strand.LIGHTS);
+	}
+
+	/** Strings hook {@code from} to hook {@code to} with {@code strand} if the rules allow; the item is the caller's to use up. */
+	public static Result string(ServerLevel level, BlockPos from, BlockPos to, StringLightHookBlockEntity.Strand strand) {
 		if (from.equals(to)) {
 			return Result.SAME_HOOK;
 		}
@@ -79,11 +92,11 @@ public class StringLightsItem extends Item {
 		}
 		// The strand belongs to whichever hook has none of its own yet, the first one first.
 		if (start.link() == null) {
-			start.stringTo(to);
+			start.stringTo(to, strand);
 			return Result.STRUNG;
 		}
 		if (end.link() == null) {
-			end.stringTo(from);
+			end.stringTo(from, strand);
 			return Result.STRUNG;
 		}
 		return Result.ALREADY_STRUNG;

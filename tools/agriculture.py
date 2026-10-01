@@ -639,6 +639,37 @@ def decor1_blocks():
 def decor1_items():
     return decor1_blocks() + [STRING_LIGHTS["strand"]]
 
+
+# ---------------------------------------------------------------- Halloween decorations, batch 2
+# The Luminaria (agriculture/LuminariaBlock.java): a paper bag weighted with sand round a candle, a jack-o'-lantern
+# face cut in its sides. Lit like a candle (flint and steel or a fire charge) it gives `light`; an empty hand snuffs
+# it. A dye colours the paper (any of DYE_COLORS); the bag keeps its colour when broken.
+LUMINARIA = {"block": "luminaria", "display": "Luminaria", "light": 10}
+# Floating Candles (FloatingCandleBlock, client FloatingCandleRenderer): 1 to `max` candles hanging in the air where
+# they are placed, bobbing `bob` pixels every `bob_ticks` ticks; `light_per_candle` light each while lit, like
+# vanilla candles. Each candle's place (x, z, bottom) and height in pixels: `candles` and `heights`.
+FLOATING_CANDLE = {"block": "floating_candle", "display": "Floating Candle", "max": 4, "light_per_candle": 3, "bob": 1.0, "bob_ticks": 80,
+                   "candles": [[(8, 8, 6)], [(6, 8, 7), (10, 8, 5)], [(8, 6, 7.5), (5.5, 10, 5), (10.5, 10, 6)],
+                               [(6, 6, 6), (10, 6, 7.5), (6, 10, 8), (10, 10, 5)]],
+                   "heights": [5, 4, 6, 4.5]}
+# The Skeleton Hand Sconce (SkeletonHandSconceBlock): a torch held out from a wall by a bony hand; placed burning
+# (light `light`); an empty hand snuffs it, flint and steel or a fire charge lights it again.
+SCONCE = {"block": "skeleton_hand_sconce", "display": "Skeleton Hand Sconce", "light": 14}
+# Soul-Flame Carvings: a soul torch lights any hand-carved or giant pumpkin with a blue glow, giving the carving's
+# glow but at most `light` (a soul torch's own); taking it out gives the soul torch back.
+SOUL_CARVING = {"light": 10}
+# Bat Bunting (StringLightsItem with the BUNTING strand): strung between String Light Hooks like the string lights,
+# by the same rules; orange and black pennants and paper bats on a twine cord. It gives no light.
+BAT_BUNTING = {"item": "bat_bunting", "display": "Bat Bunting"}
+
+
+def decor2_blocks():
+    return [LUMINARIA["block"], FLOATING_CANDLE["block"], SCONCE["block"]]
+
+
+def decor2_items():
+    return decor2_blocks() + [BAT_BUNTING["item"]]
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -809,6 +840,16 @@ SHAPELESS = [
      "result": "jack_o_lantern_string_lights", "count": 1, "category": "building"},
     {"id": "haunted_portrait", "inputs": ["minecraft:painting", "minecraft:gold_nugget", "minecraft:spider_eye"], "result": "haunted_portrait",
      "count": 1, "category": "building"},
+    # Decorations batch 2: a paper bag with sand and a candle; a candle with a feather to float it; a torch in a bony
+    # hand; pennants and paper bats on a string.
+    {"id": "luminaria", "inputs": ["minecraft:paper", "minecraft:paper", "minecraft:sand", "minecraft:candle"], "result": "luminaria",
+     "count": 1, "category": "building"},
+    {"id": "floating_candle", "inputs": ["minecraft:candle", "minecraft:feather"], "result": "floating_candle", "count": 1,
+     "category": "building"},
+    {"id": "skeleton_hand_sconce", "inputs": ["minecraft:torch", "minecraft:bone", "minecraft:bone"], "result": "skeleton_hand_sconce",
+     "count": 1, "category": "building"},
+    {"id": "bat_bunting", "inputs": ["minecraft:string", "minecraft:paper", "minecraft:paper", "minecraft:orange_dye", "minecraft:black_dye"],
+     "result": "bat_bunting", "count": 1, "category": "building"},
 ]
 SHAPED = [
     {"id": "barley_bread", "pattern": ["BBB"], "key": {"B": "jugcraft:barley"}, "result": "barley_bread", "count": 1,
@@ -919,14 +960,15 @@ def all_blocks():
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"]] + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS)
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
-            + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks())
+            + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks())
 
 
 def all_items():
     return (list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
             + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
-            + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items())
+            + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
+            + decor2_items())
 
 
 def owns(entry_id):

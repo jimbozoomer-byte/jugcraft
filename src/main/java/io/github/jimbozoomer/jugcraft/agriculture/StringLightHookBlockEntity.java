@@ -20,7 +20,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A String Light Hook's strand and power. A hook holds at most one strand, to another hook at most
- * {@value #MAX_LENGTH} blocks away ({@link #link}); the client draws it from here. Every {@value #PERIOD} ticks the
+ * {@value #MAX_LENGTH} blocks away ({@link #link}): Jack-o'-Lantern String Lights or Bat Bunting ({@link Strand});
+ * the client draws it from here. Every {@value #PERIOD} ticks the
  * hook lights if it has a redstone signal; failing that, if its buffer holds enough, it draws {@value #USE} JE a tick
  * from the electric network (buffer {@value #CAPACITY}, taking up to {@value #INPUT} a tick) and lights. Every
  * {@value #CHECK_TICKS} ticks a strand whose far hook is gone comes down (dropped as an item). Breaking the hook drops
@@ -34,8 +35,32 @@ public class StringLightHookBlockEntity extends BlockEntity {
 	public static final int PERIOD = 10;
 	public static final int CHECK_TICKS = 100;
 
+	/** What can be strung between hooks, and the item each is. */
+	public enum Strand {
+		LIGHTS("lights", "jack_o_lantern_string_lights"),
+		BUNTING("bunting", "bat_bunting");
+
+		public final String name;
+		public final String item;
+
+		Strand(String name, String item) {
+			this.name = name;
+			this.item = item;
+		}
+
+		public static Strand byName(String name) {
+			for (Strand strand : values()) {
+				if (strand.name.equals(name)) {
+					return strand;
+				}
+			}
+			return LIGHTS;
+		}
+	}
+
 	final SimpleEnergyStorage energy = new SimpleEnergyStorage(CAPACITY, INPUT, 0, this::setChanged);
 	private @Nullable BlockPos link;
+	private Strand strand = Strand.LIGHTS;
 
 	public StringLightHookBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.STRING_LIGHT_HOOK_ENTITY, pos, state);
@@ -50,9 +75,20 @@ public class StringLightHookBlockEntity extends BlockEntity {
 		return link;
 	}
 
-	/** Strings this hook to the hook at {@code other} (the caller has checked the rules). */
+	/** What this hook's strand is (meaningful while it has one). */
+	public Strand strand() {
+		return strand;
+	}
+
+	/** Strings this hook to the hook at {@code other} with string lights (the caller has checked the rules). */
 	public void stringTo(BlockPos other) {
+		stringTo(other, Strand.LIGHTS);
+	}
+
+	/** Strings this hook to the hook at {@code other} with {@code strand} (the caller has checked the rules). */
+	public void stringTo(BlockPos other, Strand strand) {
 		link = other.immutable();
+		this.strand = strand;
 		changed();
 	}
 
@@ -63,7 +99,7 @@ public class StringLightHookBlockEntity extends BlockEntity {
 		}
 		link = null;
 		if (drop && level != null) {
-			Block.popResource(level, worldPosition, new ItemStack(JugcraftAgriculture.item("jack_o_lantern_string_lights")));
+			Block.popResource(level, worldPosition, new ItemStack(JugcraftAgriculture.item(strand.item)));
 		}
 		changed();
 	}
@@ -113,7 +149,7 @@ public class StringLightHookBlockEntity extends BlockEntity {
 	@Override
 	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
 		if (link != null && level != null) {
-			Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(JugcraftAgriculture.item("jack_o_lantern_string_lights")));
+			Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(JugcraftAgriculture.item(strand.item)));
 			link = null;
 		}
 	}
@@ -122,6 +158,7 @@ public class StringLightHookBlockEntity extends BlockEntity {
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
 		link = input.getLong("link").map(BlockPos::of).orElse(null);
+		strand = Strand.byName(input.getStringOr("strand", Strand.LIGHTS.name));
 		energy.setAmount(input.getLong("energy").orElse(0L));
 	}
 
@@ -130,6 +167,7 @@ public class StringLightHookBlockEntity extends BlockEntity {
 		super.saveAdditional(output);
 		if (link != null) {
 			output.putLong("link", link.asLong());
+			output.putString("strand", strand.name);
 		}
 		output.putLong("energy", energy.getAmount());
 	}
