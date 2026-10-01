@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -70,6 +71,8 @@ public final class PumpkinCarvings {
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> SESSIONS.remove(handler.getPlayer().getUUID()));
+		// A new world (singleplayer) starts without the last one's sessions.
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> SESSIONS.clear());
 	}
 
 	/** Whether a block can be carved: a plain pumpkin or one already carved by hand. */

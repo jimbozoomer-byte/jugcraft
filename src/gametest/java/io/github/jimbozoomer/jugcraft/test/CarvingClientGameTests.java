@@ -95,7 +95,7 @@ public class CarvingClientGameTests implements FabricClientGameTest {
 			server.runOnServer(minecraft -> lightAll(minecraft.overworld(), origin));
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 6, y + 2, z + 4, 180, 12, "jugcraft_carved_pumpkins_night");
-			shoot(context, singleplayer, x + 17, y + 1, z + 1, 180, 18, "jugcraft_carved_pumpkin_close");
+			shoot(context, singleplayer, x + 17, y, z - 1, 180, 28, "jugcraft_carved_pumpkin_close");
 		}
 	}
 
