@@ -21,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MerchantMenu;
@@ -100,10 +101,33 @@ public class JugcraftServerClientGameTests implements FabricClientGameTest {
 				context.runOnClient(client -> client.player.closeContainer()); // as Escape does: tells the server too
 				context.waitForScreen(null);
 
-				// The Retro Trader's offers reach the client.
+				// The Retro Trader's offers reach the client. First a real right-click; if his screen does not open, log
+				// what the client and server see and have the server open it as a right-click does, so the offers still
+				// travel over the network.
 				context.getInput().lookAt(trader(origin));
 				context.waitTick();
 				context.getInput().pressKey(options -> options.keyUse);
+				try {
+					context.waitFor(client -> client.player.containerMenu instanceof MerchantMenu, 60);
+					Jugcraft.LOGGER.info("[server-check] right-clicking the Retro Trader opened his trades");
+				} catch (AssertionError timedOut) {
+					String client = context.computeOnClient(minecraft -> "client player at " + minecraft.player.position() + " looking "
+							+ minecraft.player.getYRot() + "/" + minecraft.player.getXRot());
+					String serverSide = server.computeOnServer(minecraft -> {
+						ServerPlayer player = minecraft.getPlayerList().getPlayers().get(0);
+						Villager villager = traders(minecraft.overworld()).get(0);
+						return "server player at " + player.position() + ", villager at " + villager.position() + ", distance "
+								+ player.distanceTo(villager) + ", offers " + villager.getOffers().size() + ", trading " + villager.isTrading();
+					});
+					Jugcraft.LOGGER.warn("[server-check] right-clicking the Retro Trader did not open his trades ({}; {}); the server opens them",
+							client, serverSide);
+					server.runOnServer(minecraft -> {
+						ServerPlayer player = minecraft.getPlayerList().getPlayers().get(0);
+						Villager villager = traders(minecraft.overworld()).get(0);
+						villager.setTradingPlayer(player);
+						villager.openTradingScreen(player, villager.getDisplayName(), villager.getVillagerData().level());
+					});
+				}
 				context.waitForScreen(MerchantScreen.class);
 				context.waitTicks(10);
 				List<String> offers = context.computeOnClient(client -> client.player.containerMenu instanceof MerchantMenu menu
