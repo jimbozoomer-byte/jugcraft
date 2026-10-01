@@ -11,9 +11,27 @@ No numbered release yet. Everything below is on `main`.
 ### Fix: ore loot tables in the 26.x format (pull request pending)
 - **Ores now drop their raw material.** Before this, mining tin, zinc, lead, silver, nickel, tungsten, uranium, salt, phosphate, lepidolite or monazite ore, or oil sand, dropped the block itself, as if with Silk Touch. Fortune and multi-drops (2–4 salt, 1–2 bitumen) did nothing either.
 - **Cause:** Minecraft 26.x renamed the loot keys (`conditions` → `condition`, `functions` → `modifier`, and Silk Touch is now the `minecraft:tool/can_silk_touch` predicate). The old keys were silently ignored. The game test server had been logging "Unreachable entry!" for all 23 ore tables.
-- Every generated loot table (101 now) uses the 26.x format. Storage blocks, machines, the conveyor slope (#44) and the pumpjack and oil sand extractor (#47), whose tables also used the old keys, still drop themselves, and now respect explosions again.
+- Every generated loot table (112 now) uses the 26.x format. Storage blocks, machines, the conveyor slope (#44) and the oil line's machines and pipes (#47, #49, #50), whose tables also used the old keys, still drop themselves, and now respect explosions again.
 - **Charging Station (#40):** its "lower half only" condition used the old keys too, so breaking the top half dropped two stations. It now drops one (game test `chargingStationDropsOnce`).
 - `tools/check_mod_data.py` fails on any pre-26.x loot key, and a new game test mines ores and checks what drops.
+
+### #50 Oil line, batch 3: fracking and diesel power
+- New fluids: **fracking fluid** and **flowback water** (with buckets).
+- **Chemical mixer** (2×2×2): water + sand + dried kelp → fracking fluid.
+- **Fracking rig** (3×3×5): over shale oil, pumps fracking fluid down and brings up crude oil, refinery gas and flowback water.
+- **Flowback treatment unit** (3×1×2): flowback water → clean water (a quarter lost) + salt.
+- **Diesel generator** (3×2×2): 256 JE/t from diesel (256 JE/mB) or heavy fuel oil (128 JE/mB).
+- **Gas turbine** (4×2×2): 512 JE/t from gasoline (384 JE/mB) or refinery gas (192 JE/mB), with lubricant upkeep.
+- Game tests for each.
+
+### #49 Oil line, batch 2: refining
+- **Steel fluid pipes** (1,000 mB/t) and the **heavy pump** (1,000 mB/t); a pipe line now carries as much as its slowest pipe.
+- New fluids: **naphtha, diesel, heavy fuel oil, lubricant, gasoline** (with buckets) and **refinery gas** (a gas: tanks and pipes only).
+- **Distillation tower** (2×2×7): crude oil → gas, naphtha, diesel and heavy fuel oil, each drawn off at its own height.
+- **Catalytic cracker** (2×2×4): heavy fuel oil + steam + catalyst → diesel, naphtha and gas. **Cracking catalyst** from bauxite, sand and nickel.
+- **Vacuum distillation unit** (2×2×3): heavy fuel oil → lubricant + asphalt binder.
+- **Catalytic reformer** (3×2×2): naphtha → gasoline + gas.
+- Game tests for each.
 
 ### #47 Oil line, batch 1: oil in the world
 The first five commits of the dieselpunk Chemistry branch ([plan](docs/branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line)).

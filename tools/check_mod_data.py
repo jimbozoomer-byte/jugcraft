@@ -129,7 +129,27 @@ def check_petro():
     expected = [(f, str(i["tick_delay"]), str(i["slope"]), str(i["drop_off"])) for f, i in petro.FLUIDS.items()]
     if declared != expected:
         err(f"PetroFluids.java fluids {declared} != tools/petro.py {expected}")
+    items_java = re.findall(r'JugcraftRegistry\.item\("([a-z_]+)"\)',
+                            (JAVA_ROOT / "chemistry" / "PetroItems.java").read_text(encoding="utf-8"))
+    if items_java != list(petro.ITEMS):
+        err(f"PetroItems.java items {items_java} != tools/petro.py {list(petro.ITEMS)}")
+    gases = re.findall(r'= gas\("([a-z_]+)"', java)
+    if gases != list(petro.GASES):
+        err(f"PetroFluids.java gases {gases} != tools/petro.py {list(petro.GASES)}")
+    fuels_java = (JAVA_ROOT / "chemistry" / "FluidFuels.java").read_text(encoding="utf-8")
+    for machine, fuels in petro.FLUID_FUELS.items():
+        if f"case {machine.upper()} ->" not in fuels_java:
+            err(f"FluidFuels.java has no case for {machine}")
+        for fuel, value in fuels.items():
+            if fuel not in petro.FLUIDS and fuel not in petro.GASES:
+                err(f"{machine}: unknown fuel {fuel}")
+            accessor = "fluid()" if fuel in petro.GASES else "source()"
+            if not re.search(rf"int {fuel.upper()} = {value};", fuels_java) or f"PetroFluids.{fuel.upper()}.{accessor}" not in fuels_java:
+                err(f"{machine}: {fuel} at {value} JE/mB in tools/petro.py does not match FluidFuels.java")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for gas in petro.GASES:
+        if f"block.{MOD}.{gas}" not in lang:
+            err(f"Missing name for gas {gas}")
     for fluid in petro.FLUIDS:
         if f"block.{MOD}.{fluid}" not in lang:
             err(f"Missing name for fluid {fluid}")
@@ -162,7 +182,7 @@ UNITS = {"ingots": 9, "nuggets": 1, "raw_materials": 9, "ores": 9, "storage_bloc
          **{f"{form}s": units for form, units in PART_UNITS.items()}}
 
 
-NON_METAL = {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"}
+NON_METAL = {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items())
 
 
 def item_units(ref):
@@ -290,9 +310,9 @@ def check_fluid_recipes(registered):
     say how much fluid they release from it ("source")."""
     from generate_material_data import RECIPE_TYPES
     java = MACHINE_JAVA.read_text(encoding="utf-8")
-    fluids = {f"{MOD}:{f}" for f in petro.FLUIDS} | {"minecraft:water", "minecraft:lava"}
+    fluids = {f"{MOD}:{f}" for f in list(petro.FLUIDS) + list(petro.GASES)} | {"minecraft:water", "minecraft:lava"}
     for machine, spec in petro.FLUID_MACHINES.items():
-        match = re.search(r"case " + machine.upper() + r" -> new FluidMachineSpec\(List\.of\(([^)]*)\), List\.of\(([^)]*)\), "
+        match = re.search(r"case " + machine.upper() + r" -> new FluidMachineSpec\(List\.of\(([^)]*)\),\s*List\.of\(([^)]*)\),\s*"
                           r"(\d+), (\d+)\)", java)
         if not match:
             err(f"MachineKind.fluidSpec() has no case for {machine}")
@@ -355,7 +375,7 @@ def check_tags():
                 if not tag_exists(registry, value[1:]):
                     err(f"{path.relative_to(ROOT)}: unknown tag {value}")
             elif registry == "fluid":
-                if split(value)[1] not in [f for fluid in petro.FLUIDS for f in (fluid, f"flowing_{fluid}")]:
+                if split(value)[1] not in petro.fluid_ids():
                     err(f"{path.relative_to(ROOT)}: unknown fluid {value}")
             elif split(value)[0] == MOD and split(value)[1] not in all_blocks() + all_items() + machine_blocks():
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
