@@ -1247,6 +1247,11 @@ def machines():
     save(window(980, [(40, 46, 50)], glow=[(80, 210, 230), (150, 240, 250), (60, 170, 200)]), "block", "lithography_station_front_on")
     save(tank_side(955), "block", "steel_tank_front")
     save(tank_side(981), "block", "gas_holder_front")
+    save(battery_front(983), "block", "advanced_solar_panel_front")
+    save(grate(984), "block", "advanced_engine_front")
+    save(grate(984, glow=[(250, 140, 30), (255, 190, 60), (220, 80, 20)]), "block", "advanced_engine_front_on")
+    save(grate(982), "block", "crop_harvester_front")
+    save(grate(982, glow=[(150, 220, 80), (200, 250, 130), (110, 180, 60)]), "block", "crop_harvester_front_on")
     save(grate(957), "block", "cobblestone_generator_front")
     save(grate(957, glow=[(250, 140, 30), (255, 190, 60), (220, 80, 20)]), "block", "cobblestone_generator_front_on")
     save(window(958, [(28, 44, 30), (36, 56, 38)]), "block", "tree_farm_front")
@@ -1288,6 +1293,8 @@ def machines():
     save(window(976, [(52, 50, 30)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "chemical_reactor_front_on")
     save(window(977, [(40, 46, 50), (52, 60, 64)]), "block", "fuel_cell_front")
     save(window(977, [(40, 46, 50)], glow=[(90, 230, 140), (160, 255, 190), (60, 200, 120)]), "block", "fuel_cell_front_on")
+    save(jaws(978, False), "block", "deposit_drill_front")
+    save(jaws(978, True), "block", "deposit_drill_front_on")
     save(jaws(956, False), "block", "ore_drill_front")
     save(jaws(956, True), "block", "ore_drill_front_on")
     save(window(953, [(30, 26, 26)], glow=[(255, 200, 80), (255, 236, 150), (250, 150, 40)]), "block", "steel_foundry_front_on")
@@ -1384,6 +1391,10 @@ def main():
         save(image, kind, name)
     import petro_textures
     petro_textures.draw_all(save, save_animation)
+    import cotton_textures
+    cotton_textures.draw_all(save)
+    import deposits
+    deposits.draw_all(save)
 
 
 if __name__ == "__main__":

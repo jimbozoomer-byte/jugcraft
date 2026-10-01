@@ -9,6 +9,8 @@ import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroItems;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
+import io.github.jimbozoomer.jugcraft.farming.JugcraftFarming;
+import io.github.jimbozoomer.jugcraft.farming.SprinklerBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidTankBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
@@ -442,6 +444,48 @@ public class PetroGameTests {
 		});
 	}
 
+	/**
+	 * The advanced combustion engine burns gasoline into a magnet dynamo behind its master block, only as fast as the
+	 * dynamo takes it, and refuses heavy fuel oil.
+	 */
+	@GameTest(maxTicks = 100)
+	public void advancedEngineTurnsAMagnetDynamo(GameTestHelper helper) {
+		BlockPos master = new BlockPos(4, 1, 1);
+		BlockPos dynamoPos = master.south();
+		helper.setBlock(dynamoPos, JugcraftKinetics.MAGNET_DYNAMO);
+		DynamoBlockEntity dynamo = helper.getBlockEntity(dynamoPos, DynamoBlockEntity.class);
+		MachineBlockEntity engine = placeUnpowered(helper, MachineKind.ADVANCED_ENGINE, master);
+		helper.assertTrue(FluidFuels.jePerMb(MachineKind.ADVANCED_ENGINE, PetroFluids.HEAVY_FUEL_OIL.source()) == 0,
+				"The advanced engine burns heavy fuel oil");
+		engine.tanks().input(0).fill(PetroFluids.GASOLINE.source(), 1000);
+		helper.runAfterDelay(40, () -> {
+			helper.assertTrue(dynamo.energy().getAmount() > 0, "The dynamo made no JE");
+			int burnt = 1000 - engine.tanks().input(0).millibuckets();
+			// The magnet dynamo takes at most 512 KE/t: about 46 mB of gasoline in 40 ticks, plus what the engine holds.
+			long most = 40L * DynamoBlockEntity.MAGNET.rate() / FluidFuels.ADVANCED_GASOLINE + 4;
+			helper.assertTrue(burnt > 0 && burnt <= most, "Gasoline burnt in 40 ticks: " + burnt + " mB (at most " + most + ")");
+			helper.succeed();
+		});
+	}
+
+	/** The advanced solar panel places its pedestal and the 3x3 layer of cells above it, and holds 400,000 JE. */
+	@GameTest
+	public void advancedSolarPanelFormsAndStores(GameTestHelper helper) {
+		BlockPos master = new BlockPos(3, 1, 3);
+		MachineBlockEntity panel = placeUnpowered(helper, MachineKind.ADVANCED_SOLAR_PANEL, master);
+		MachineBlock block = JugcraftMachines.MACHINES.get(MachineKind.ADVANCED_SOLAR_PANEL);
+		for (int x = -1; x <= 1; x++) {
+			for (int z = -1; z <= 1; z++) {
+				helper.assertTrue(helper.getBlockState(master.offset(x, 1, z)).is(block), "No cells at " + x + ", " + z);
+			}
+		}
+		EnergyStorage storage = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.NORTH);
+		helper.assertTrue(storage != null && storage.supportsExtraction() && !storage.supportsInsertion(),
+				"The pedestal must only give power");
+		helper.assertTrue(storage.getCapacity() == 400_000, "Capacity is " + storage.getCapacity());
+		helper.succeed();
+	}
+
 	/** The chemical mixer dissolves two salt in a bucket of water to make a bucket of brine. */
 	@GameTest(maxTicks = 200)
 	public void mixerMakesBrine(GameTestHelper helper) {
@@ -539,6 +583,27 @@ public class PetroGameTests {
 			transaction.commit();
 		}
 		helper.succeed();
+	}
+
+	/** A sprinkler with water and fertilizer uses its water a pulse at a time and spreads fertilizer on the crop beside it. */
+	@GameTest(maxTicks = 800)
+	public void sprinklerWatersAndFertilizes(GameTestHelper helper) {
+		BlockPos crop = new BlockPos(2, 1, 2);
+		helper.setBlock(crop.below(), Blocks.FARMLAND);
+		helper.setBlock(crop, Blocks.WHEAT);
+		BlockPos pos = crop.east();
+		helper.setBlock(pos, JugcraftFarming.SPRINKLER);
+		SprinklerBlockEntity sprinkler = helper.getBlockEntity(pos, SprinklerBlockEntity.class);
+		sprinkler.water().variant = FluidVariant.of(Fluids.WATER);
+		sprinkler.water().amount = 1_000 * FluidConstants.BUCKET / 1_000;
+		helper.assertTrue(sprinkler.addFertilizer(3) == 3, "The sprinkler did not take fertilizer");
+		helper.succeedWhen(() -> {
+			helper.assertTrue(sprinkler.fertilizer() == 2, "Fertilizer left: " + sprinkler.fertilizer());
+			helper.assertTrue(((CropBlock) Blocks.WHEAT).getAge(helper.getBlockState(crop)) > 0, "The wheat did not grow");
+			long used = 1_000 - sprinkler.water().amount * 1_000 / FluidConstants.BUCKET;
+			helper.assertTrue(used >= SprinklerBlockEntity.FERTILIZE_PULSES * SprinklerBlockEntity.WATER_PER_PULSE,
+					"Water used: " + used + " mB");
+		});
 	}
 
 	/** Fertilizer grows every crop in the 5x5 area around where it is used. */
