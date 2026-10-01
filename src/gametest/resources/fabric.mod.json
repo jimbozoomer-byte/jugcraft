@@ -23,7 +23,8 @@
       "io.github.jimbozoomer.jugcraft.test.KitchenGardenClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.FestivalClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CarvingClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.HalloweenClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.HalloweenClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.RegattaClientGameTests"
     ]
   },
   "depends": {

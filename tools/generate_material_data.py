@@ -844,6 +844,7 @@ def main():
     import advancements
     for key, advancement in advancements.generate(MOD)[0].items():
         write(DATA / MOD / "advancement" / f"{key}.json", advancement)
+    agriculture_data.advancements(DATA, write)
 
 
 if __name__ == "__main__":

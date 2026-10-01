@@ -31,16 +31,19 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -80,6 +83,14 @@ public class RegattaGameTests {
 	private static final BlockPos DOOR = new BlockPos(3, 2, 3);
 	private static final BlockPos BED = DOOR.north(3);
 	private static final Set<Item> TREATS = new HashSet<>();
+
+	private static final EntityType<Chicken> CHICKEN = vanilla("chicken");
+	private static final EntityType<Villager> VILLAGER = vanilla("villager");
+
+	@SuppressWarnings("unchecked")
+	private static <T extends Entity> EntityType<T> vanilla(String id) {
+		return (EntityType<T>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace(id));
+	}
 
 	private static Item item(String id) {
 		return JugcraftAgriculture.item(id);
@@ -262,14 +273,14 @@ public class RegattaGameTests {
 		PumpkinBoatData kept = PumpkinBoatData.of(345, true, faces);
 		PumpkinBoat barge = boat(helper, PumpkinBoat.Kind.BARGE, new BlockPos(2, 1, 2), kept);
 		for (int seat = 0; seat < 4; seat++) {
-			Chicken chicken = helper.spawnWithNoFreeWill(EntityType.CHICKEN, new BlockPos(6, 1, 6));
+			Chicken chicken = helper.spawnWithNoFreeWill(CHICKEN, new BlockPos(6, 1, 6));
 			helper.assertTrue(chicken.startRiding(barge), "The barge should seat crew member " + (seat + 1));
 		}
-		Chicken fifth = helper.spawnWithNoFreeWill(EntityType.CHICKEN, new BlockPos(6, 1, 6));
+		Chicken fifth = helper.spawnWithNoFreeWill(CHICKEN, new BlockPos(6, 1, 6));
 		helper.assertFalse(fifth.startRiding(barge), "A barge seats four");
 		PumpkinBoat racer = boat(helper, PumpkinBoat.Kind.RACER, new BlockPos(6, 1, 2), PumpkinBoat.Kind.RACER.defaultData());
 		helper.assertTrue(fifth.startRiding(racer), "A racer seats one");
-		helper.assertFalse(helper.spawnWithNoFreeWill(EntityType.CHICKEN, new BlockPos(6, 1, 6)).startRiding(racer), "and only one");
+		helper.assertFalse(helper.spawnWithNoFreeWill(CHICKEN, new BlockPos(6, 1, 6)).startRiding(racer), "and only one");
 
 		barge.ejectPassengers();
 		barge.hurtServer(level, level.damageSources().generic(), 10.0F);
@@ -409,7 +420,7 @@ public class RegattaGameTests {
 	}
 
 	private static Villager resident(GameTestHelper helper, BlockPos bed) {
-		Villager villager = helper.spawnWithNoFreeWill(EntityType.VILLAGER, DOOR.north(2));
+		Villager villager = helper.spawnWithNoFreeWill(VILLAGER, DOOR.north(2));
 		villager.getBrain().setMemory(MemoryModuleType.HOME, GlobalPos.of(helper.getLevel().dimension(), helper.absolutePos(bed)));
 		return villager;
 	}

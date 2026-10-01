@@ -545,6 +545,10 @@ def check_handbook(registered):
             err(f"handbook: unknown item {ref}")
 
 
+VANILLA_ADVANCEMENT_ROOTS = {"minecraft:story/root", "minecraft:nether/root", "minecraft:end/root", "minecraft:adventure/root",
+                             "minecraft:husbandry/root"}
+
+
 def check_advancements(registered):
     """Every advancement names real Jugcraft items, a translated title and a parent that exists."""
     lang = load(ASSETS / "lang" / "en_us.json") or {}
@@ -559,7 +563,8 @@ def check_advancements(registered):
         if data["display"]["title"]["translate"] not in lang:
             err(f"advancement {path.stem}: untranslated title")
         parent = data.get("parent")
-        if parent and split(parent)[1] not in names:
+        # A vanilla tab's root may be the parent (the Halloween advancements live in Husbandry).
+        if parent and parent not in VANILLA_ADVANCEMENT_ROOTS and split(parent)[1] not in names:
             err(f"advancement {path.stem}: missing parent {parent}")
 
 
@@ -686,6 +691,7 @@ def check_agriculture():
     check_festival(java, main)
     check_carving(java, main)
     check_halloween(java, main)
+    check_regatta(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -926,6 +932,68 @@ def check_halloween(java, main):
     expected |= {f"facing={f},half=upper,shirt={c}" for f in ("north", "east", "south", "west") for c in ag.DYE_COLORS}
     if states != expected:
         err("scarecrow: blockstate does not cover every facing, half and shirt colour")
+
+
+def check_regatta(java, main):
+    """The pumpkin regatta and trick-or-treating: Java matches tools/agriculture.py, and every buoy number has a model."""
+    def number(source, name, kind=r"[\d.]+"):
+        match = re.search(rf"\b{name} = ({kind})[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    regatta, trick = ag.REGATTA, ag.TRICK_OR_TREAT
+    expected = {("PumpkinBoat", "RACER_BASE_WEIGHT"): ag.RACER_BASE_WEIGHT, ("PumpkinBoat", "WATER_FRICTION"): ag.WATER_FRICTION,
+                ("PumpkinBoat", "MARK_RADIUS"): regatta["mark_radius"], ("PumpkinBoat", "FINISH_RADIUS"): regatta["finish_radius"],
+                ("PumpkinBoat", "COUNTDOWN_TICKS"): regatta["countdown_ticks"], ("PumpkinBoat", "MAX_RACE_TICKS"): regatta["max_race_ticks"],
+                ("PumpkinBoat", "MAX_SPEED"): regatta["max_speed"], ("RegattaBuoyBlock", "MAX_NUMBER"): regatta["max_number"],
+                ("RegattaFlagBlockEntity", "REMEMBERED"): regatta["remembered"], ("RegattaFlagBlockEntity", "COURSE_RANGE"): regatta["course_range"],
+                ("RegattaFlagBlockEntity", "COURSE_HEIGHT"): regatta["course_height"], ("TrickOrTreat", "DUSK"): trick["dusk"],
+                ("TrickOrTreat", "MIDNIGHT"): trick["midnight"], ("TrickOrTreat", "ANSWER_TICKS"): trick["answer_ticks"],
+                ("TrickOrTreat", "KNOCK_COOLDOWN"): trick["knock_cooldown"], ("TrickOrTreat", "PORCH_RADIUS"): trick["porch_radius"],
+                ("TrickOrTreat", "HOME_RADIUS"): trick["home_radius"], ("TrickOrTreat", "FULL_BAG"): trick["full_bag"],
+                ("TrickOrTreat", "COSTUME_BONUS_CHANCE"): trick["costume_bonus"]}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    if regatta["board"] != ag.HARVEST_SCALE["board"] or "BOARD = HarvestScaleBlockEntity.BOARD;" not in java.get("RegattaFlagBlockEntity", ""):
+        err("The regatta board must hand out the Harvest Scale's ribbons, one per place")
+    for source, name, value in (("TrickOrTreat", "TREAT_TABLE", trick["table"]), ("PumpkinCarvings", "HOLLOW_TABLE", ag.HOLLOW["table"])):
+        if f'{name} = "{value}"' not in java.get(source, ""):
+            err(f"{source}.{name} differs from tools/agriculture.py ({value})")
+    tags = {"COSTUMES": ag.COSTUME_TAG, "COSTUME_HATS": ag.COSTUME_HAT_TAG, "PORCH_LIGHTS": ag.PORCH_LIGHT_TAG}
+    for field, tag in tags.items():
+        if f'{field} = TagKey.create(Registries.{"BLOCK" if field == "PORCH_LIGHTS" else "ITEM"}, Jugcraft.id("{split(tag)[1]}"))' \
+                not in java.get("TrickOrTreat", ""):
+            err(f"TrickOrTreat.{field} is not the tag {tag}")
+
+    # Each boat kind: Java's Kind constant and entity size match PUMPKIN_BOATS.
+    kinds = {name: values for name, values in re.findall(r'^\t\t(BARGE|RACER)\("[a-z_]+", ([^;]*?)\)[,;]', java.get("PumpkinBoat", ""), re.M | re.S)}
+    for boat, info in ag.PUMPKIN_BOATS.items():
+        values = [v.strip().removesuffix("F") for v in re.sub(r"\s+", " ", kinds.get(info["kind"], "")).split(",")]
+        width, height, face_top = info["shell"]
+        want = [info["seats"], width, height, face_top, info["floor"], info["seat"], info["fastest"], info["slowest"]]
+        try:
+            got = [float(v) for v in values[:6] + values[-2:]]
+        except ValueError:
+            got = []
+        if got != want:
+            err(f"PumpkinBoat.Kind.{info['kind']} {values} differs from PUMPKIN_BOATS['{boat}'] in tools/agriculture.py")
+        if f'"{boat}"' not in java.get("PumpkinBoat", "") or \
+                f"boat(PumpkinBoat.Kind.{info['kind']}, {info['hitbox'][0]}F, {info['hitbox'][1]}F)" not in main:
+            err(f"JugcraftAgriculture.java registers {boat} with a different id or hitbox than {info['hitbox']}")
+    if 'List.of("' + '", "'.join(ag.COSTUMES) + '")' not in main:
+        err("JugcraftAgriculture.COSTUMES differs from COSTUMES in tools/agriculture.py")
+
+    # The Halloween window's defaults, and the treats: candy and sweets only, weights given.
+    config = (JAVA_ROOT / "config" / "JugcraftConfig.java").read_text(encoding="utf-8")
+    for key, value in trick["window"].items():
+        if f'"{key}", "{value}"' not in config:
+            err(f"JugcraftConfig.TEXT_OPTIONS {key} default differs from {value}")
+    for item, weight, (low, high) in trick["treats"]:
+        if weight <= 0 or not 1 <= low <= high:
+            err(f"trick-or-treat: {item} needs a positive weight and count")
+    states = set((load(ASSETS / "blockstates" / f"{regatta['buoy']}.json") or {}).get("variants", {}))
+    if states != {f"number={n}" for n in range(1, regatta["max_number"] + 1)}:
+        err("regatta_buoy: blockstate does not cover every number")
 
 
 def main():

@@ -260,6 +260,8 @@ ITEMS = {
     "caramel": {"display": "Caramel", "food": [2, 0.1], "compost": "medium_high", "tags": ["c:foods/candy"]},
     "caramel_apple": {"display": "Caramel Apple", "food": [6, 0.6], "treat": True, "tags": ["c:foods/candy"]},
     "popcorn_ball": {"display": "Popcorn Ball", "food": [5, 0.6], "compost": "medium_high", "tags": ["c:foods/candy"]},
+    # Trick-or-treating's rare prize: only villagers hand it out (an optional seasonal treat, nothing needs it).
+    "king_size_candy_bar": {"display": "King-Size Candy Bar", "food": [8, 0.4], "compost": "medium_high", "tags": ["c:foods/candy"]},
 }
 
 # ---------------------------------------------------------------- Festival crops (slice 3)
@@ -429,6 +431,72 @@ MUMS = {
 MUM_PATCH = {"biomes": ["IS_FLORAL", "IS_FOREST"], "rarity": 16, "tries": 32, "spread_xz": 5, "spread_y": 2}
 
 
+# ---------------------------------------------------------------- the pumpkin regatta
+
+# A giant pumpkin 2 or 3 blocks wide hollows out into a boat: sneak and use a Carving Knife on its top. The
+# 3x3x3 one becomes a Pumpkin Barge (4 seats) keeping its weight, carving and torch; the 2x2x2 one a Pumpkin
+# Racer (1 seat) weighing racer_base_weight + weight_per_point kg a growth point. Speed in water against a
+# vanilla boat runs from `fastest` at the lightest weight to `slowest` at the heaviest (each tick in water
+# the speed is multiplied by f, (1 - F) / (1 - F f) = ratio, F = water_friction). `hitbox`: width, height;
+# `shell`: drawn width, height and the row of the old face it starts at (blocks from the top); `seat`: height.
+# Hollowing drops the pumpkin without its usual drops; the hollowing table gives `guts` and `seeds` by size.
+PUMPKIN_BOATS = {
+    "pumpkin_barge": {"display": "Pumpkin Barge", "kind": "BARGE", "size": 3, "seats": 4, "hitbox": [2.75, 1.125],
+                      "shell": [3.0, 1.875, 0.625], "floor": 0.9, "seat": 1.0, "fastest": 0.95, "slowest": 0.70},
+    "pumpkin_racer": {"display": "Pumpkin Racer", "kind": "RACER", "size": 2, "seats": 1, "hitbox": [1.75, 0.9],
+                      "shell": [2.0, 1.5, 0.5], "floor": 0.7, "seat": 0.7, "fastest": 1.30, "slowest": 1.15},
+}
+RACER_BASE_WEIGHT = 30
+WATER_FRICTION = 0.9
+HOLLOW = {"table": "gameplay/hollow_giant_pumpkin", "guts": {2: [2, 4], 3: [4, 8]}, "seeds": {3: [1, 3]}}
+
+# The Regatta Flag starts and finishes a run; its course is the Regatta Buoys (numbered 1 to max_number,
+# floating on still water) within course_range blocks across and course_height up or down, in number order.
+# A run: a countdown_ticks countdown, then each buoy within mark_radius blocks in order and back within
+# finish_radius of the flag; over max_race_ticks, or faster than max_speed blocks in a tick, voids it. The
+# board keeps the best `board` times (each racer once); a racer's first place on it gives that place's
+# ribbon (the Harvest Scale's), once per flag; the flag remembers `remembered` racers.
+REGATTA = {"flag": "regatta_flag", "flag_display": "Regatta Flag", "buoy": "regatta_buoy", "buoy_display": "Regatta Buoy",
+           "max_number": 16, "course_range": 64, "course_height": 16, "mark_radius": 5.0, "finish_radius": 5.0,
+           "countdown_ticks": 60, "max_race_ticks": 12000, "max_speed": 2.0, "board": 3, "remembered": 64}
+
+# Trick-or-treating, only while the Halloween event runs (config/jugcraft.properties: halloween.start/end as
+# MM-DD, halloween.timezone, halloween.mode auto/on/off; defaults in `window`). A Candy Bag used on a wooden
+# door knocks; answer_ticks later, between dusk and midnight, in costume (item tag costume_tag), with a porch
+# light within porch_radius blocks (block tag porch_light_tag, or any lit hand-carved or giant pumpkin) and a
+# villager whose home bed is within home_radius blocks, that home gives each player one treat a night (loot
+# table `table`; a costume hat adds a second roll costume_bonus of the time) and a harmless trick after.
+# full_bag homes in one night earn the advancement of that name.
+TRICK_OR_TREAT = {"bag": "candy_bag", "bag_display": "Candy Bag", "table": "gameplay/trick_or_treat",
+                  "dusk": 12000, "midnight": 18000, "answer_ticks": 30, "knock_cooldown": 40, "porch_radius": 4,
+                  "home_radius": 12, "full_bag": 10, "costume_bonus": 0.25,
+                  "window": {"halloween.start": "10-20", "halloween.end": "11-03", "halloween.timezone": "UTC", "halloween.mode": "auto"},
+                  # (item, weight, count): one roll, so every treat is a single sweet or a small handful.
+                  "treats": [("jugcraft:candy_corn", 30, [1, 3]), ("jugcraft:caramel", 20, [1, 2]), ("minecraft:cookie", 15, [1, 3]),
+                             ("jugcraft:popcorn_ball", 15, [1, 1]), ("jugcraft:caramel_apple", 10, [1, 1]),
+                             ("jugcraft:king_size_candy_bar", 2, [1, 1])]}
+COSTUMES = {"witch_hat": "Witch Hat", "ghost_sheet": "Ghost Sheet", "scarecrow_hat": "Scarecrow Hat"}
+COSTUME_TAG = "jugcraft:trick_or_treat_costumes"
+COSTUME_HAT_TAG = "jugcraft:costume_hats"
+PORCH_LIGHT_TAG = "jugcraft:porch_lights"
+PORCH_LIGHTS = ["minecraft:jack_o_lantern", "jugcraft:turnip_lantern"]
+# Advancements granted from code (criterion "done"), in vanilla's Husbandry tab.
+HALLOWEEN_ADVANCEMENTS = {
+    "full_bag": {"icon": "jugcraft:candy_bag", "title": "Full Bag", "description": "Trick-or-treat at ten homes in one Halloween night",
+                 "frame": "goal"},
+    "pumpkin_regatta": {"icon": "jugcraft:pumpkin_racer", "title": "Pumpkin Regatta",
+                        "description": "Finish a regatta course in a hollowed-out giant pumpkin", "frame": "task"},
+}
+
+
+def regatta_blocks():
+    return [REGATTA["flag"], REGATTA["buoy"]]
+
+
+def regatta_items():
+    return list(PUMPKIN_BOATS) + regatta_blocks() + [TRICK_OR_TREAT["bag"]] + list(COSTUMES)
+
+
 def potted(mum):
     return f"potted_{mum}"
 
@@ -556,6 +624,9 @@ SHAPELESS = [
     {"id": "gourd_canteen", "inputs": ["jugcraft:dried_bottle_gourd", "minecraft:leather"], "result": "gourd_canteen", "count": 1,
      "category": "equipment"},
     {"id": "blank_stencil", "inputs": ["minecraft:paper", "minecraft:paper"], "result": "blank_stencil", "count": 1},
+    # Trick-or-treating: a paper bag with a string handle, dyed orange.
+    {"id": "candy_bag", "inputs": ["minecraft:paper", "minecraft:paper", "minecraft:string", "minecraft:orange_dye"],
+     "result": "candy_bag", "count": 1, "category": "equipment"},
     {"id": "yellow_dye_from_yellow_mum", "inputs": ["jugcraft:yellow_mum"], "result": "minecraft:yellow_dye", "count": 1, "group": "yellow_dye"},
     {"id": "orange_dye_from_orange_mum", "inputs": ["jugcraft:orange_mum"], "result": "minecraft:orange_dye", "count": 1, "group": "orange_dye"},
     {"id": "red_dye_from_red_mum", "inputs": ["jugcraft:red_mum"], "result": "minecraft:red_dye", "count": 1, "group": "red_dye"},
@@ -595,6 +666,19 @@ SHAPED = [
      "result": "corn_shock", "count": 1, "category": "building"},
     {"id": "gourd_birdhouse", "pattern": ["T", "G"], "key": {"T": "minecraft:string", "G": "jugcraft:dried_bottle_gourd"},
      "result": "gourd_birdhouse", "count": 1, "category": "building"},
+    # The regatta: a chequered flag on a pole, and red-and-white buoys of planks.
+    {"id": "regatta_flag", "pattern": ["SWB", "SBW", "S  "], "key": {"S": "minecraft:stick", "W": "minecraft:white_wool",
+                                                                    "B": "minecraft:black_wool"},
+     "result": "regatta_flag", "count": 1, "category": "misc"},
+    {"id": "regatta_buoy", "pattern": [" R ", "PWP"], "key": {"R": "minecraft:red_dye", "W": "minecraft:white_wool", "P": "#minecraft:planks"},
+     "result": "regatta_buoy", "count": 4, "category": "misc"},
+    # Costumes: a pointed witch's hat with a purple band, a sheet with eye holes, a straw hat.
+    {"id": "witch_hat", "pattern": [" W ", " W ", "WDW"], "key": {"W": "minecraft:black_wool", "D": "minecraft:purple_dye"},
+     "result": "witch_hat", "count": 1, "category": "equipment"},
+    {"id": "ghost_sheet", "pattern": ["WWW", "WBW"], "key": {"W": "minecraft:white_wool", "B": "minecraft:black_dye"},
+     "result": "ghost_sheet", "count": 1, "category": "equipment"},
+    {"id": "scarecrow_hat", "pattern": [" W ", "WWW"], "key": {"W": "minecraft:wheat"},
+     "result": "scarecrow_hat", "count": 1, "category": "equipment"},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -637,14 +721,15 @@ def all_blocks():
     """Every registered agriculture block. Crops have no block item (seeds place them); wild plants and equipment do."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"]] + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS)
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
-            + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS])
+            + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
+            + regatta_blocks())
 
 
 def all_items():
     return (list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
             + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
-            + list(HALLOWEEN_DECOR) + list(MUMS))
+            + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items())
 
 
 def owns(entry_id):
