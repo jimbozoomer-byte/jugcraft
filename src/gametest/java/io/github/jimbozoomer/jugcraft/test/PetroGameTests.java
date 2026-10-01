@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.chemistry.OilReservoirs;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
@@ -15,16 +16,21 @@ import io.github.jimbozoomer.jugcraft.prospecting.OreSurvey;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluids;
 
 /**
  * In-game tests for the Chemistry branch's oil line (docs/branches/CHEMISTRY.md). Like {@link JugcraftGameTests},
@@ -118,13 +124,7 @@ public class PetroGameTests {
 		BlockPos master = new BlockPos(2, 1, 1);
 		ChunkPos chunk = ChunkPos.containing(helper.absolutePos(master));
 		OilReservoirs.overrideForTest(chunk, OilReservoirs.Kind.CONVENTIONAL, 200_000);
-		LargeMachineBlock block = (LargeMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.PUMPJACK);
-		helper.setBlock(master, block.defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH));
-		block.setPlacedBy(helper.getLevel(), helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
-		EnergyStorage storage = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.UP);
-		helper.assertTrue(storage instanceof SimpleEnergyStorage, "The pumpjack takes no power");
-		((SimpleEnergyStorage) storage).setAmount(storage.getCapacity());
-		MachineBlockEntity pumpjack = helper.getBlockEntity(master, MachineBlockEntity.class);
+		MachineBlockEntity pumpjack = place(helper, MachineKind.PUMPJACK, master);
 		long before = OilReservoirs.get(helper.getLevel(), chunk).remaining();
 		helper.succeedWhen(() -> {
 			int oil = pumpjack.tanks().output(0).millibuckets();
@@ -132,6 +132,50 @@ public class PetroGameTests {
 					"The pumpjack holds " + oil + " mB");
 			long after = OilReservoirs.get(helper.getLevel(), chunk).remaining();
 			helper.assertTrue(after <= before - 40, "The reservoir went from " + before + " to " + after + " mB");
+		});
+	}
+
+	/** Places a multi-block machine facing north with all its parts, charged full; returns its block entity. */
+	private static MachineBlockEntity place(GameTestHelper helper, MachineKind kind, BlockPos master) {
+		LargeMachineBlock block = (LargeMachineBlock) JugcraftMachines.MACHINES.get(kind);
+		helper.setBlock(master, block.defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH));
+		block.setPlacedBy(helper.getLevel(), helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
+		EnergyStorage storage = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.UP);
+		helper.assertTrue(storage instanceof SimpleEnergyStorage, "The " + kind.id + " takes no power");
+		((SimpleEnergyStorage) storage).setAmount(storage.getCapacity());
+		return helper.getBlockEntity(master, MachineBlockEntity.class);
+	}
+
+	/** The extractor's water tank takes water from outside but not lava, and its oil tank takes nothing in. */
+	@GameTest
+	public void extractorTanksOnlyTakeWhatTheyUse(GameTestHelper helper) {
+		MachineBlockEntity extractor = place(helper, MachineKind.OIL_SAND_EXTRACTOR, new BlockPos(3, 1, 1));
+		Storage<FluidVariant> tanks = FluidStorage.SIDED.find(helper.getLevel(), helper.absolutePos(new BlockPos(3, 1, 1)), Direction.NORTH);
+		helper.assertTrue(tanks != null, "The extractor has no fluid storage");
+		try (Transaction transaction = Transaction.openOuter()) {
+			long water = tanks.insert(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET, transaction);
+			long lava = tanks.insert(FluidVariant.of(Fluids.LAVA), FluidConstants.BUCKET, transaction);
+			long oil = tanks.insert(FluidVariant.of(PetroFluids.CRUDE_OIL.source()), FluidConstants.BUCKET, transaction);
+			helper.assertTrue(water == FluidConstants.BUCKET, "The extractor took " + water + " droplets of water");
+			helper.assertTrue(lava == 0 && oil == 0, "The extractor took lava (" + lava + ") or crude oil (" + oil + ")");
+			transaction.abort();
+		}
+		helper.assertTrue(extractor.tanks().input(0).isResourceBlank(), "An aborted insert left fluid behind");
+		helper.succeed();
+	}
+
+	/** A powered oil sand extractor with water turns a block of oil sand into 500 mB of crude oil and a block of sand. */
+	@GameTest(maxTicks = 300)
+	public void extractorWashesOilFromOilSand(GameTestHelper helper) {
+		MachineBlockEntity extractor = place(helper, MachineKind.OIL_SAND_EXTRACTOR, new BlockPos(3, 1, 1));
+		extractor.tanks().input(0).fill(Fluids.WATER, 1000);
+		extractor.setItem(0, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("oil_sand"))));
+		helper.succeedWhen(() -> {
+			int oil = extractor.tanks().output(0).millibuckets();
+			helper.assertTrue(oil == 500 && extractor.tanks().output(0).variant.isOf(PetroFluids.CRUDE_OIL.source()),
+					"The extractor holds " + oil + " mB of oil");
+			helper.assertTrue(extractor.tanks().input(0).millibuckets() == 750, "Water left: " + extractor.tanks().input(0).millibuckets());
+			helper.assertTrue(extractor.getItem(1).is(Items.SAND), "Output slot holds " + extractor.getItem(1));
 		});
 	}
 }

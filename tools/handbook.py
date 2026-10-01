@@ -96,6 +96,10 @@ ABOUT = {
                 "the chunk under the wellhead holds pumpable oil (the prospector's Oil reading), it pumps 2 mB of crude "
                 "oil a tick into its 16-bucket tank and pushes it into pipes and tanks touching it. A reservoir runs dry "
                 "for good after 50 to 250 buckets; shale oil needs a fracking rig instead.",
+    "oil_sand_extractor": "Two by two by two. Washes crude oil out of oil sand with hot water: a block of oil sand "
+                          "(mined with silk touch) and 250 mB of water give 500 mB of crude oil and a block of sand; a "
+                          "piece of bitumen and 100 mB of water give 150 mB. Pipe water in; it pushes the oil out into "
+                          "pipes and tanks touching it.",
     "ore_drill": "Two blocks tall. Mines the ore blocks in a 9x9 column below it, one layer at a time down to the bottom "
                  "of the world, one ore every 2 seconds. Each hole is refilled with stone or deepslate. The ores come "
                  "out whole, ready for ore processing.",
@@ -294,6 +298,7 @@ def build():
                 "It is a thick, slow fluid that never makes new sources, so every reservoir runs dry in the end.",
                 "Pipes, pumps and tanks carry it like water; refineries turn it into fuels."]},
             machine_page("pumpjack"),
+            machine_page("oil_sand_extractor"),
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

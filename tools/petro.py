@@ -33,11 +33,25 @@ def petro_items():
 FLUID_MACHINES = {
     # Pumps the conventional reservoir under its chunk (no recipes): 2 mB a tick at 32 JE/t.
     "pumpjack": {"inputs": [], "outputs": [16_000], "item_inputs": 0, "item_outputs": 0, "recipe_type": None},
+    # Hot-water extraction: oil sand or bitumen + water -> crude oil (+ sand). 32 JE/t.
+    "oil_sand_extractor": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 1, "item_outputs": 1,
+                           "recipe_type": "oil_sand_extraction"},
 }
 
 # Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],
 # fluids out [(fluid, mB)], item results [(item, count)], ticks, feature switches.
-FLUID_RECIPES = {}
+# "source": mB of fluid the recipe releases from its items (the audit allows that much more fluid out than in).
+FLUID_RECIPES = {
+    "oil_sand_extractor": [
+        # A whole oil sand block (silk touch) gives the most: two buckets of crude oil from four blocks.
+        {"name": "oil_sand", "items": [("jugcraft:oil_sand", 1)], "fluids": [("minecraft:water", 250)],
+         "fluid_results": [("jugcraft:crude_oil", 500)], "results": [("minecraft:sand", 1)], "source": 500,
+         "ticks": 160, "features": ["crude_oil"]},
+        # Bitumen (what oil sand drops, or crushes into, three to a block) gives less per block.
+        {"name": "bitumen", "items": [("jugcraft:bitumen", 1)], "fluids": [("minecraft:water", 100)],
+         "fluid_results": [("jugcraft:crude_oil", 150)], "source": 150, "ticks": 80, "features": ["crude_oil"]},
+    ],
+}
 
 
 def fluid_recipe_files(condition):

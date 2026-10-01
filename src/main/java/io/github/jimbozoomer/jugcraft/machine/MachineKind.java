@@ -51,7 +51,9 @@ public enum MachineKind implements StringRepresentable {
 	LARGE_STEAM_ENGINE("large_steam_engine", 0, 0, 0, 0, 3),
 	// Petrochemistry (chemistry/, docs/branches/CHEMISTRY.md): a pumpjack, 1 wide, 3 tall and 3 long, that pumps the
 	// conventional oil reservoir under its chunk into its output tank.
-	PUMPJACK("pumpjack", 20_000, 256, 0, 32, 0);
+	PUMPJACK("pumpjack", 20_000, 256, 0, 32, 0),
+	// A 2x2x2 hot-water extraction plant: oil sand or bitumen and water in, crude oil and sand out.
+	OIL_SAND_EXTRACTOR("oil_sand_extractor", 20_000, 256, 0, 32, 2);
 
 	/** JE produced per tick while the coal generator burns. */
 	public static final int GENERATION_PER_TICK = 32;
@@ -112,6 +114,8 @@ public enum MachineKind implements StringRepresentable {
 	/** Pumpjack: mB of crude oil pumped per powered tick (a bucket every 25 seconds), and its tank. */
 	public static final int PUMPJACK_RATE = 2;
 	public static final int PUMPJACK_TANK = 16_000;
+	/** Oil sand extractor: its water tank and its crude oil tank. */
+	public static final int EXTRACTOR_TANK = 8_000;
 	/** Ticks the electric furnace needs per item (the vanilla furnace needs 200). */
 	public static final int ELECTRIC_FURNACE_TICKS = 100;
 
@@ -174,6 +178,7 @@ public enum MachineKind implements StringRepresentable {
 			case COKE_OVEN -> "coking";
 			case STEEL_FOUNDRY -> "steelmaking";
 			case TREE_FARM -> "tree_growing";
+			case OIL_SAND_EXTRACTOR -> "oil_sand_extraction";
 			default -> null;
 		};
 	}
@@ -195,6 +200,7 @@ public enum MachineKind implements StringRepresentable {
 	public @Nullable FluidMachineSpec fluidSpec() {
 		return switch (this) {
 			case PUMPJACK -> new FluidMachineSpec(List.of(), List.of(PUMPJACK_TANK), 0, 0);
+			case OIL_SAND_EXTRACTOR -> new FluidMachineSpec(List.of(EXTRACTOR_TANK), List.of(EXTRACTOR_TANK), 1, 1);
 			default -> null;
 		};
 	}
@@ -261,6 +267,7 @@ public enum MachineKind implements StringRepresentable {
 			case ALLOY_SMELTER -> Footprint.cuboid(3, 6, 2);
 			// One wide, three tall, three long: wellhead at the front (the master), samson post, then crank and motor.
 			case PUMPJACK -> Footprint.cuboid(1, 3, 3);
+			case OIL_SAND_EXTRACTOR -> Footprint.cuboid(2, 2, 2);
 			default -> Footprint.SINGLE;
 		};
 	}
