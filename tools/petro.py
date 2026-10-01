@@ -75,6 +75,8 @@ ITEMS = {
     "fertilizer": "Fertilizer",
     # The Kroll process (batch 6): the arc furnace melts the sponge into titanium ingots.
     "titanium_sponge": "Titanium Sponge",
+    # Lithium cells (batch 6): crafted from lithium carbonate, built into the lithium battery bank.
+    "lithium_cell": "Lithium Cell",
 }
 
 

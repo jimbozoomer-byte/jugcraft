@@ -234,6 +234,7 @@ The fluid branch moves liquids around. It never changes what a liquid *is*: that
 | --- | --- | --- | --- |
 | Item Crate | 32 stacks of one item | Right-click with an item to put it in; with an empty hand to take a stack (sneak to just look). Pipes, extractors and hoppers use it; comparators read how full it is. Breaking it drops everything. | iron plates, planks |
 | Capacitor Bank (2 wide, 2 tall) | 4,000,000 JE | Charges from any side; gives power out of the copper sockets on its front, 4,096 JE/t (a job for aluminum cable). Comparators read its charge. | steel plates, 4 battery boxes, advanced circuit |
+| Lithium Battery Bank (3 wide, 2 tall, 1 deep) | 32,000,000 JE | Charges from any side; gives power out of the six sockets on its front, 16,384 JE/t (four aluminum cables' worth). Comparators read its charge. Electric look. | titanium ingots, 4 lithium cells, a capacitor bank |
 | Steel Tank (2 wide, 2 deep) | 128 buckets of one fluid | Buckets, pumps and pipes fill and empty it from any face; right-click with an empty hand to read it. Comparators read how full it is. | 8 steel plates, tinplate tank |
 
 ![Capacitor Bank, Steel Tank and Item Crate](images/storage.png)
@@ -401,6 +402,7 @@ Salt, sulfur, phosphate and bauxite get their real reactions ([feature record](f
 | Sulfuric Acid | A fluid with a bucket | `c:sulfuric_acid` | chemical reactor |
 | Titanium | A metal mined as rutile-bearing ore (Y −64 to −8, iron pickaxe); no furnace smelts it | raw titanium + coke + 250 mB chlorine → titanium sponge (chemical reactor); sponge → ingot (arc furnace) | – |
 | Leaching | Lepidolite or monazite dissolved in sulfuric acid | 1 lepidolite + 250 mB acid → 2 lithium carbonate; 1 monazite + 250 mB acid → 2 rare earth oxide (chemical reactor) | – |
+| Lithium Cell, Lithium Battery Bank | Cells of lithium carbonate in aluminum cans; a 3×2×1 electric-look battery | 2 lithium carbonate + 4 aluminum plates + copper wire → 2 cells; the bank holds 32,000,000 JE, 16,384 JE/t out of its front (see Storage) | cells: as left; bank: 4 titanium ingots, 4 cells, capacitor bank |
 | Alumina | Bauxite digested in lye | 1 bauxite + 250 mB lye → 2 alumina (chemical reactor); 2 alumina + 1 coal coke → 2 aluminum ingots (electrolytic cell): two ingots per bauxite, twice the arc furnace | – |
 | Fuel Cell | One block, electric look; hydrogen → JE | 128 JE/t, 1 mB hydrogen a tick (128 JE/mB); 8-bucket tank | 4 aluminum plates, 2 aluminum cables, 2 steel plates, advanced circuit, tinplate tank |
 | Fertilizer | Superphosphate: two doses of bone meal on every crop in a 5×5 area | 2 phosphate + 250 mB sulfuric acid → 4 (chemical reactor) | – |

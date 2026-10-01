@@ -87,6 +87,7 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | SIEVE | sieve | gravel → flint + finds | 10k / 128 / 0 / 8 | in, out, 2 byproduct | `jugcraft:sifting` |
 | SAWMILL | sawmill | log → 6 planks + sawdust | 10k / 128 / 0 / 12 | in, out, 2 byproduct | `jugcraft:sawing` |
 | CAPACITOR_BANK | capacitor_bank | **2×2** battery: charges any side, outputs from its front | 4M / 4,096 / 4,096 / – | – | – |
+| LITHIUM_BATTERY_BANK | lithium_battery_bank | **3×2×1** battery (electric look): charges any side, outputs from all six front faces | 32M / 16,384 / 16,384 / – | – | – |
 | STEEL_TANK | steel_tank | **2×2** tank, 128 buckets, no power, no screen | none | – (fluid) | – |
 | COKE_OVEN | coke_oven | **2×2, 2 tall + chimney block (9 parts)**, unpowered: coal → coke | none | in, out | `jugcraft:coking` |
 | STEEL_FOUNDRY | steel_foundry | **2×2×5**, unpowered: iron + coke → steel | none | 2 in, out | `jugcraft:steelmaking` (multi) |
@@ -170,7 +171,7 @@ Other blocks:
 - **Draw-offs:** `MachineKind.outputLayer(tank)` makes an output tank push only from the faces of one block layer (distillation tower, cracker, reformer).
 - **Items** (`PetroItems`): cracking catalyst, asphalt binder.
 - **Machines:** `PUMPJACK` (custom tick), `OIL_SAND_EXTRACTOR` (`jugcraft:oil_sand_extraction`), `DISTILLATION_TOWER` (`distillation`), `CATALYTIC_CRACKER` (`catalytic_cracking`), `VACUUM_DISTILLATION_UNIT` (`vacuum_distillation`), `CATALYTIC_REFORMER` (`reforming`), `CHEMICAL_MIXER` (`chemical_mixing`), `FRACKING_RIG` (custom tick; works over shale), `FLOWBACK_TREATMENT_UNIT` (`water_treatment`).
-- **Industrial chemistry:** `ELECTROLYTIC_CELL` (`electrolysis`: brine → chlorine/hydrogen/lye by layer; alumina + coke → aluminum), `CHEMICAL_REACTOR` (`chemical_reaction`: sulfuric acid, alumina, fertilizer), `FUEL_CELL` (hydrogen → JE). Items `alumina`, `fertilizer` (`chemistry/FertilizerItem`, area bone meal on crops). Fluids `brine`, `lye`, `sulfuric_acid`; gases `chlorine`, `hydrogen`. `check_mod_data` audits metal in fluid recipes.
+- **Industrial chemistry:** `ELECTROLYTIC_CELL` (`electrolysis`: brine → chlorine/hydrogen/lye by layer; alumina + coke → aluminum), `CHEMICAL_REACTOR` (`chemical_reaction`: sulfuric acid, alumina, fertilizer), `FUEL_CELL` (hydrogen → JE). Items `alumina`, `fertilizer`, `titanium_sponge`, `lithium_cell` (`chemistry/FertilizerItem`, area bone meal on crops). Fluids `brine`, `lye`, `sulfuric_acid`; gases `chlorine`, `hydrogen`. `check_mod_data` audits metal in fluid recipes.
 - **Fluid generators:** `DIESEL_GENERATOR`, `GAS_TURBINE` and `FUEL_CELL` burn fuel from input tank 0 (`MachineBlockEntity.tickFluidGenerator`); JE per mB is `FluidFuels.jePerMb(kind, fluid)` (mirrored in `tools/petro.py` `FLUID_FUELS`). The turbine's tank 1 holds lubricant, used 1 mB per `FluidFuels.LUBRICANT_TICKS`.
 - **Pumps and pipes:** `ElectricPumpBlockEntity.Tier` (ELECTRIC, HEAVY); `FluidPipeBlock` takes a rate (bronze 250, steel 1,000 mB/t) and a network carries its slowest pipe's rate.
 

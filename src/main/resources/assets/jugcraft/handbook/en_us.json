@@ -2301,7 +2301,7 @@
           "icon": "jugcraft:titanium_ingot",
           "text": [
             "No furnace can smelt titanium. Chlorinate it instead: a raw titanium, a coal coke and 250 mB of chlorine in the chemical reactor make a titanium sponge.",
-            "The arc furnace melts the sponge into a titanium ingot. Titanium plates go into the most advanced machines."
+            "The arc furnace melts the sponge into a titanium ingot. Titanium frames the lithium battery bank."
           ]
         },
         {
@@ -2309,8 +2309,32 @@
           "icon": "jugcraft:lithium_carbonate",
           "text": [
             "Dissolve ores in sulfuric acid in the chemical reactor: a lepidolite and 250 mB of acid give two lithium carbonate, a monazite two rare earth oxide.",
-            "That is twice what the blast furnace gets."
+            "That is twice what the blast furnace gets.",
+            "Two lithium carbonate, four aluminum plates and a copper wire make two lithium cells."
           ]
+        },
+        {
+          "title": "Lithium Battery Bank",
+          "icon": "jugcraft:lithium_battery_bank",
+          "text": [
+            "Three wide, two tall, one deep: six lithium battery modules holding 32,000,000 JE, eight capacitor banks. It charges from any side and gives power out of the sockets on its front, 16,384 JE/t.",
+            "Holds 32,000,000 JE; 16384 JE/t in and out."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:titanium_ingot",
+              "jugcraft:lithium_cell",
+              "jugcraft:titanium_ingot",
+              "jugcraft:lithium_cell",
+              "jugcraft:capacitor_bank",
+              "jugcraft:lithium_cell",
+              "jugcraft:titanium_ingot",
+              "jugcraft:lithium_cell",
+              "jugcraft:titanium_ingot"
+            ],
+            "result": "jugcraft:lithium_battery_bank",
+            "count": 1
+          }
         },
         {
           "title": "Fertilizer",

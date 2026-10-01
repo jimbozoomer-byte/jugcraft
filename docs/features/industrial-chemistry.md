@@ -58,6 +58,14 @@ Salt, sulfur, phosphate and bauxite have been in the world since the first ores,
 - **Acid leaching** in the chemical reactor: **1 lepidolite + 250 mB sulfuric acid → 2 lithium carbonate** (100 ticks); **1 monazite + 250 mB sulfuric acid → 2 rare earth oxide** (140 ticks).
 - Twice the blast-furnace stand-ins, which stay as the simple route. Lithium goes to the battery bank (commit 29), rare earths to magnets (commit 30).
 
+### Lithium battery bank (batch 6, commit 29)
+- **Lithium cell** (an item): 2 lithium carbonate, 4 aluminum plates and a copper wire make 2.
+- **Lithium battery bank** (three wide, two tall, one deep, the electric look): six graphite battery modules, each with glowing charge bars either side of a power socket, a header with a status screen, lamps and a hazard edge, and vented side panels with ports.
+- **32,000,000 JE**, eight capacitor banks, giving out **16,384 JE/t** from the front of all six blocks and charging from any other face. Comparators read its charge, as with the other batteries.
+- Recipe: titanium ingots, 4 lithium cells and a capacitor bank (so it needs both the Kroll process and acid leaching).
+- One deep so every block's front is a socket: power never pushes from one of its blocks into another.
+- It only stores power; it makes none.
+
 ### Advancements
 Split Decision (electrolytic cell), Oil of Vitriol (sulfuric acid), Green Revolution (fertilizer), The Bayer Way (alumina) and Clean Burn (fuel cell), under Forged in Coke.
 
@@ -79,11 +87,11 @@ Split Decision (electrolytic cell), Oil of Vitriol (sulfuric acid), Green Revolu
 Server-side machines like the oil line's; tanks and inventories save with the block entity. No new persistent state.
 
 ## Dependencies and assets
-No new dependencies. Textures and models are original (`tools/petro_textures.py`, `tools/dieselpunk_models.py`).
+No new dependencies. Textures and models are original (`tools/petro_textures.py`, `tools/dieselpunk_models.py`, `tools/electric_models.py`).
 
 ## Verification
 - `tools/check_mod_data.py` audits the new fluids, gases and recipes like the oil line's.
-- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` `bayerRouteMakesAluminum`, `reactorMakesFertilizer`, `fertilizerGrowsTheCropsAround` `fuelCellBurnsHydrogen` `reactorMakesTitaniumSponge` and `reactorLeachesLithium` (PetroGameTests).
+- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` `bayerRouteMakesAluminum`, `reactorMakesFertilizer`, `fertilizerGrowsTheCropsAround` `fuelCellBurnsHydrogen` `reactorMakesTitaniumSponge` and `reactorLeachesLithium` (PetroGameTests); `lithiumBatteryBankOutputsFromItsFront` (JugcraftGameTests).
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.

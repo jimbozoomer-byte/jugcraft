@@ -1221,6 +1221,7 @@ def machines():
     save(grate(952, glow=ember), "block", "coke_oven_front_on")
     save(window(953, [(30, 26, 26), (44, 36, 34)]), "block", "steel_foundry_front")
     save(battery_front(954), "block", "capacitor_bank_front")
+    save(battery_front(978), "block", "lithium_battery_bank_front")
     save(tank_side(955), "block", "steel_tank_front")
     save(grate(957), "block", "cobblestone_generator_front")
     save(grate(957, glow=[(250, 140, 30), (255, 190, 60), (220, 80, 20)]), "block", "cobblestone_generator_front_on")

@@ -21,6 +21,8 @@ public final class PetroItems {
 	public static Item FERTILIZER;
 	/** The Kroll process: raw titanium chlorinated with coke and reduced, a porous sponge the arc furnace melts. */
 	public static Item TITANIUM_SPONGE;
+	/** A lithium cell in an aluminum can: crafted from lithium carbonate, built into the lithium battery bank. */
+	public static Item LITHIUM_CELL;
 
 	private PetroItems() {
 	}
@@ -33,6 +35,7 @@ public final class PetroItems {
 		ALUMINA = JugcraftRegistry.item("alumina");
 		FERTILIZER = JugcraftRegistry.item("fertilizer", FertilizerItem::new);
 		TITANIUM_SPONGE = JugcraftRegistry.item("titanium_sponge");
+		LITHIUM_CELL = JugcraftRegistry.item("lithium_cell");
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(CRACKING_CATALYST);
@@ -42,6 +45,7 @@ public final class PetroItems {
 			output.accept(ALUMINA);
 			output.accept(FERTILIZER);
 			output.accept(TITANIUM_SPONGE);
+			output.accept(LITHIUM_CELL);
 		});
 	}
 }

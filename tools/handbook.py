@@ -136,6 +136,9 @@ ABOUT = {
                          "and a bucket of water.",
     "chemical_reactor": "Two by two by two, lined with lead against the acid. Burns sulfur and absorbs it in water: two "
                         "sulfur dust and a bucket of water make a bucket of sulfuric acid, every 5 seconds.",
+    "lithium_battery_bank": "Three wide, two tall, one deep: six lithium battery modules holding 32,000,000 JE, eight "
+                            "capacitor banks. It charges from any side and gives power out of the sockets on its "
+                            "front, 16,384 JE/t.",
     "fuel_cell": "One block. Combines hydrogen with the air: 128 JE/t, burning a millibucket of hydrogen a tick (128,000 "
                  "JE a bucket). Pipe hydrogen from the electrolytic cell into it. Its screen lights while it runs.",
     "diesel_engine": "Two wide, two tall and three long. Burns diesel (256 KE a mB) or heavy fuel oil (128) piped into "
@@ -391,12 +394,13 @@ def build():
             {"title": "Titanium", "icon": f"{MOD}:titanium_ingot", "text": [
                 "No furnace can smelt titanium. Chlorinate it instead: a raw titanium, a coal coke and 250 mB of "
                 "chlorine in the chemical reactor make a titanium sponge.",
-                "The arc furnace melts the sponge into a titanium ingot. Titanium plates go into the most advanced "
-                "machines."]},
+                "The arc furnace melts the sponge into a titanium ingot. Titanium frames the lithium battery bank."]},
             {"title": "Leaching", "icon": f"{MOD}:lithium_carbonate", "text": [
                 "Dissolve ores in sulfuric acid in the chemical reactor: a lepidolite and 250 mB of acid give two "
                 "lithium carbonate, a monazite two rare earth oxide.",
-                "That is twice what the blast furnace gets."]},
+                "That is twice what the blast furnace gets.",
+                "Two lithium carbonate, four aluminum plates and a copper wire make two lithium cells."]},
+            machine_page("lithium_battery_bank"),
             {"title": "Fertilizer", "icon": f"{MOD}:fertilizer", "text": [
                 "Two phosphate and 250 mB of sulfuric acid in the chemical reactor make four fertilizer.",
                 "Use one on the ground or a crop: every crop in the 5x5 area around it (a block up or down too) gets "

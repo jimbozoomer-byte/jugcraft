@@ -244,7 +244,36 @@ def titanium_sponge():
     return img
 
 
+def lithium_cell():
+    """A lithium cell: an upright cylinder with an aluminum cap and button terminal, a graphite wrapper with a
+    shaded round edge and a green charge band (the electric look's colour)."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    wrap = [(30, 33, 37), (46, 50, 55), (64, 69, 75), (82, 88, 95)]
+    metal = [(132, 138, 146), (190, 196, 202), (236, 238, 242)]
+    green = [(34, 138, 84), (62, 204, 124), (128, 244, 172)]
+    for y in range(2, 15):
+        for x in range(4, 12):
+            shade = 0 if x in (4, 11) else 1 if x in (5, 10) else 3 if x == 6 else 2
+            if y <= 3:
+                c = metal[min(2, shade)] if y == 3 else metal[0]
+            elif y == 14:
+                c = metal[0]
+            elif 8 <= y <= 9:
+                c = green[0] if x in (4, 11) else green[2] if x == 6 else green[1]
+            else:
+                c = wrap[shade]
+            img.putpixel((x, y), c + (255,))
+    for x in range(6, 10):
+        img.putpixel((x, 1), metal[1] + (255,))
+    img.putpixel((7, 5), (236, 238, 242, 255))
+    img.putpixel((7, 6), (236, 238, 242, 255))
+    img.putpixel((6, 5), (236, 238, 242, 255))
+    img.putpixel((8, 5), (236, 238, 242, 255))
+    return img
+
+
 def draw_all(save, save_animation):
+    save(lithium_cell(), "item", "lithium_cell")
     save(titanium_sponge(), "item", "titanium_sponge")
     save(fertilizer(), "item", "fertilizer")
     save(alumina(), "item", "alumina")

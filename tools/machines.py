@@ -71,6 +71,8 @@ MACHINES = {
     "chemical_reactor": {"display": "Chemical Reactor", "lit": True},
     # A one-block hydrogen fuel cell in the electric look: hydrogen -> JE.
     "fuel_cell": {"display": "Fuel Cell", "lit": True},
+    # Storage (batch 6): a 3x2 lithium battery bank in the electric look.
+    "lithium_battery_bank": {"display": "Lithium Battery Bank", "lit": False},
     # Kinetic: a 2x2x3 V8 diesel engine; its shaft leaves the back of the upper right back block.
     "diesel_engine": {"display": "Diesel Engine", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
@@ -242,6 +244,8 @@ STATS = {
     "chemical_reactor": {"capacity": 30_000, "input_per_tick": 512, "use_per_tick": 96, "tank": 8_000},
     # One block. 128 JE/t from 1 mB of hydrogen a tick (128 JE/mB).
     "fuel_cell": {"capacity": 40_000, "output_per_tick": 512, "generation_per_tick": 128, "tank": 8_000},
+    # 3x2, one deep. Outputs from its front (all six blocks), charges from any other face.
+    "lithium_battery_bank": {"capacity": 32_000_000, "io_per_tick": 16_384},
     # 2x2x3. Up to 512 KE/t: 2 mB of diesel a tick (256 KE/mB) or 4 mB of heavy fuel oil, only for what it delivers.
     "diesel_engine": {"capacity": 0, "use_per_tick": 0, "output_ke": 512, "tank": 8_000},
 }
@@ -446,6 +450,10 @@ CRAFTING = {
     "fuel_cell": (["PWP", "SCS", "PTP"], {"P": "#c:plates/aluminum", "W": "jugcraft:aluminum_cable",
                                           "S": "#c:plates/steel", "C": "jugcraft:advanced_circuit",
                                           "T": "jugcraft:fluid_tank"}, 1),
+    "lithium_cell": (["PLP", "LWL", "PLP"], {"P": "#c:plates/aluminum", "L": "jugcraft:lithium_carbonate",
+                                             "W": "#c:wires/copper"}, 2),
+    "lithium_battery_bank": (["TCT", "CBC", "TCT"], {"T": "#c:ingots/titanium", "C": "jugcraft:lithium_cell",
+                                                     "B": "jugcraft:capacitor_bank"}, 1),
     "diesel_engine": (["PXP", "GCG", "PXP"], {"P": "#c:plates/steel", "X": "jugcraft:plastic_sheet",
                                               "G": "#c:gears/steel", "C": "jugcraft:machine_casing"}, 1),
     "polymerization_reactor": (["PCP", "TGT", "PMP"], {"P": "#c:plates/steel", "C": "jugcraft:cracking_catalyst",

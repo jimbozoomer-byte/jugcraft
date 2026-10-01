@@ -532,6 +532,21 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/** The 3x2 lithium battery bank holds 32,000,000 JE and gives up to 16,384 JE/t out of all six front sockets. */
+	@GameTest
+	public void lithiumBatteryBankOutputsFromItsFront(GameTestHelper helper) {
+		BlockPos master = new BlockPos(5, 1, 3);
+		large(helper, master, MachineKind.LITHIUM_BATTERY_BANK);
+		EnergyStorage front = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master.west().above()), Direction.NORTH);
+		EnergyStorage side = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master.west(2)), Direction.WEST);
+		EnergyStorage back = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master.above()), Direction.SOUTH);
+		helper.assertTrue(front != null && front.supportsExtraction() && !front.supportsInsertion(), "Front must only give power");
+		helper.assertTrue(side != null && side.supportsInsertion() && !side.supportsExtraction(), "Sides must only take power");
+		helper.assertTrue(back != null && back.supportsInsertion(), "The back must take power");
+		helper.assertTrue(front.getCapacity() == 32_000_000, "Capacity is " + front.getCapacity());
+		helper.succeed();
+	}
+
 	/** The steel tank holds exactly 128 buckets of one fluid. */
 	@GameTest
 	public void steelTankHolds128Buckets(GameTestHelper helper) {
