@@ -335,6 +335,8 @@ Two things to do with the Halloween harvest. The regatta works all year; trick-o
 | ![The regatta pond](../images/ingame_pumpkin_regatta.jpg) | ![A Pumpkin Barge and a Pumpkin Racer](../images/ingame_pumpkin_barge.jpg) |
 | **At midnight:** the barge's torch lights its carving | **Costumes:** a carved pumpkin, Witch Hat, Ghost Sheet, Scarecrow Hat and a hand-carved pumpkin, by a door with its jack o'lantern porch light |
 | ![The barge at night](../images/ingame_pumpkin_barge_night.jpg) | ![Costumes on armor stands](../images/ingame_costumes.jpg) |
+| **The Ghost Sheet** on its stand: a hood with eye holes, draped to the ground | **Worn by a player:** the sheet over the head, body and arms, moving with them |
+| ![The Ghost Sheet on an armor stand](../images/ingame_ghost_sheet.jpg) | ![A player wearing the Ghost Sheet](../images/ingame_ghost_sheet_worn.jpg) |
 
 *Real screenshots from the client game test that CI runs (`RegattaClientGameTests`, software rendering, small previews).*
 
