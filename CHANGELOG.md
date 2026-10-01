@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Chlorine and lye, batch 15
+- **PVC:** refinery gas + chlorine → vinyl chloride (synthesis converter) → PVC resin (polymerization reactor) → two plastic sheets each (metal press).
+- **Soap** from lye and rotten flesh; a bar washes off every status effect.
+- Two advancements, a handbook page and game tests.
+
 ### Unmerged: Rubber and polymers, batch 14
 - **Butadiene** from naphtha (chemical reactor) and **synthetic rubber** from butadiene (polymerization reactor).
 - **Gaskets** (rubber + steel plate); rubber belts; gasketed steel pipe, four for two plates.
