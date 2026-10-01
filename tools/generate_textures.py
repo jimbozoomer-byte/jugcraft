@@ -1250,6 +1250,8 @@ def machines():
     save(battery_front(983), "block", "advanced_solar_panel_front")
     save(grate(984), "block", "advanced_engine_front")
     save(grate(984, glow=[(250, 140, 30), (255, 190, 60), (220, 80, 20)]), "block", "advanced_engine_front_on")
+    save(grate(982), "block", "crop_harvester_front")
+    save(grate(982, glow=[(150, 220, 80), (200, 250, 130), (110, 180, 60)]), "block", "crop_harvester_front_on")
     save(grate(957), "block", "cobblestone_generator_front")
     save(grate(957, glow=[(250, 140, 30), (255, 190, 60), (220, 80, 20)]), "block", "cobblestone_generator_front_on")
     save(window(958, [(28, 44, 30), (36, 56, 38)]), "block", "tree_farm_front")
@@ -1384,6 +1386,8 @@ def main():
     electric_textures.draw_all()
     import petro_textures
     petro_textures.draw_all(save, save_animation)
+    import crop_textures
+    crop_textures.draw_all(save)
 
 
 if __name__ == "__main__":

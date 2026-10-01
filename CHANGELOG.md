@@ -15,6 +15,12 @@ No numbered release yet. Everything below is on `main`.
 - **Fix:** loot tables now use the Minecraft 26.x format; the old keys were silently ignored, so ore drop counts, the charging station's upper half and slab doubles were wrong. A data check and a game test guard it.
 - Two advancements, handbook pages and game tests.
 
+### #58 Farming, batch 9: harvesters, sprinklers and cotton
+- **Crop harvester** (1×2): harvests and replants the ripe crops in the 9×9 field in front of it.
+- **Sprinkler:** pipe-fed water gives nearby crops extra growth ticks; it also spreads fertilizer from its hopper.
+- **Cotton:** a new crop; seeds from sifting coarse dirt; cotton spins into string.
+- Three advancements, a Farming handbook chapter and a game test for each.
+
 ### #57 Fluid logistics, batch 8: gas holders, valves and filters
 - **Gas holder** (3×3×3 Horton sphere): 1,024 buckets of one gas, and only gases.
 - **Fluid valve:** a steel pipe segment that a redstone signal closes, splitting the line in two.

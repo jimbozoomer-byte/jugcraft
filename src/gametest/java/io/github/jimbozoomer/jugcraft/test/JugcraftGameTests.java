@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.electronics.NetworkTerminalBlock;
 import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
+import io.github.jimbozoomer.jugcraft.farming.JugcraftFarming;
 import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidFilterBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidTankBlockEntity;
@@ -63,6 +64,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
@@ -71,6 +73,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -219,6 +222,58 @@ public class JugcraftGameTests {
 			helper.assertTrue(set.get(), "The filter is not set to water yet");
 			helper.assertTrue(filteredTank.storage.amount > 0, "A water filter let no water out");
 		});
+	}
+
+	/** The crop harvester harvests a ripe wheat crop in its field, keeps the wheat, and plants one of the seeds again. */
+	@GameTest(maxTicks = 200)
+	public void cropHarvesterHarvestsAndReplants(GameTestHelper helper) {
+		BlockPos master = new BlockPos(4, 1, 0);
+		LargeMachineBlock block = (LargeMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.CROP_HARVESTER);
+		helper.setBlock(master, block.defaultBlockState().setValue(MachineBlock.FACING, Direction.SOUTH));
+		block.setPlacedBy(helper.getLevel(), helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
+		charge(helper, master.above(), Direction.UP);
+		MachineBlockEntity harvester = helper.getBlockEntity(master, MachineBlockEntity.class);
+		// The field starts the block in front (south); a ripe crop two blocks out and one to the side.
+		BlockPos crop = new BlockPos(3, 1, 2);
+		helper.setBlock(crop.below(), Blocks.FARMLAND);
+		helper.setBlock(crop, ((CropBlock) Blocks.WHEAT).getStateForAge(7));
+		helper.succeedWhen(() -> {
+			BlockState replanted = helper.getBlockState(crop);
+			helper.assertTrue(replanted.is(Blocks.WHEAT) && ((CropBlock) Blocks.WHEAT).getAge(replanted) == 0,
+					"The crop is now " + replanted);
+			boolean wheat = false;
+			for (int slot = 0; slot < MachineKind.CROP_HARVESTER.slots; slot++) {
+				wheat |= harvester.getItem(slot).is(Items.WHEAT);
+			}
+			helper.assertTrue(wheat, "The harvester kept no wheat");
+		});
+	}
+
+	/**
+	 * Cotton: the seeds plant the crop on farmland, a ripe crop drops cotton and seeds (an unripe one only a seed), cotton counts as a crop for
+	 * fertilizer, and sifting coarse dirt can turn up the seeds.
+	 */
+	@GameTest
+	public void cottonGrowsFromSeedsAndDropsCotton(GameTestHelper helper) {
+		BlockPos crop = new BlockPos(2, 2, 2);
+		helper.setBlock(crop.below(), Blocks.FARMLAND);
+		helper.setBlock(crop, JugcraftFarming.COTTON_CROP);
+		helper.assertTrue(helper.getBlockState(crop).is(BlockTags.CROPS), "Cotton is not in minecraft:crops");
+		CropBlock cotton = (CropBlock) JugcraftFarming.COTTON_CROP;
+		helper.assertTrue(cotton.asItem() == JugcraftFarming.COTTON_SEEDS, "Cotton seeds do not plant cotton");
+		BlockState ripe = cotton.getStateForAge(cotton.getMaxAge());
+		helper.setBlock(crop, ripe);
+		List<ItemStack> drops = Block.getDrops(ripe, helper.getLevel(), helper.absolutePos(crop), null);
+		helper.assertTrue(drops.stream().anyMatch(stack -> stack.is(JugcraftFarming.COTTON)), "A ripe crop dropped " + drops);
+		helper.assertTrue(drops.stream().anyMatch(stack -> stack.is(JugcraftFarming.COTTON_SEEDS)), "A ripe crop dropped " + drops);
+		List<ItemStack> unripe = Block.getDrops(cotton.getStateForAge(3), helper.getLevel(), helper.absolutePos(crop), null);
+		helper.assertTrue(unripe.stream().noneMatch(stack -> stack.is(JugcraftFarming.COTTON))
+				&& unripe.stream().anyMatch(stack -> stack.is(JugcraftFarming.COTTON_SEEDS)), "An unripe crop dropped " + unripe);
+		MachineRecipe sifting = MachineRecipes.find(helper.getLevel(), MachineKind.SIEVE, new ItemStack(Items.COARSE_DIRT))
+				.orElseThrow(() -> helper.assertionException("No sifting recipe for coarse dirt"));
+		helper.assertTrue(sifting.byproducts().stream().anyMatch(b -> b.result().create().is(JugcraftFarming.COTTON_SEEDS)),
+				"Sifting coarse dirt never gives cotton seeds");
+		helper.succeed();
 	}
 
 	/** The 3x2x6 alloy smelter: places all 36 blocks, takes power only at its socket, makes bronze. */

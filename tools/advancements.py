@@ -66,6 +66,10 @@ TREE = {
                              "Build an advanced solar panel", "goal"),
     "advanced_engine": ("diesel_engine", "advanced_engine", "Four on the Floor",
                         "Build an advanced combustion engine", "goal"),
+    # Farming (batch 9).
+    "cotton": ("bronze", "cotton", "King Cotton", "Grow cotton", "task"),
+    "sprinkler": ("cotton", "sprinkler", "Make It Rain", "Build a sprinkler", "task"),
+    "crop_harvester": ("steel", "crop_harvester", "Reaping What You Sow", "Build a crop harvester", "goal"),
 }
 # Background of the tab (a block texture), shown behind the tree.
 BACKGROUND = "jugcraft:block/dp_gunmetal"
