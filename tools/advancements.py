@@ -14,6 +14,8 @@ TREE = {
     "pulverizer": ("crusher", "pulverizer", "Down to Dust", "Build a pulverizer for byproducts", "task"),
     "battery_box": ("coal_generator", "battery_box", "Stored Lightning", "Build a battery box", "task"),
     "auto_crafter": ("coal_generator", "auto_crafter", "Hands Off", "Build an auto-crafter", "task"),
+    "deposit_drill": ("coal_generator", "deposit_drill", "Strike It Rich", "Build a deposit drill on a surface deposit",
+                      "goal"),
     "hand_crank": ("bronze", "hand_crank", "Elbow Grease", "Make a hand crank: power by hand", "task"),
     "steam_engine": ("hand_crank", "steam_engine", "Full Steam Ahead", "Build a steam engine to turn your shafts", "task"),
     "large_steam_engine": ("steam_engine", "large_steam_engine", "Iron Horse", "Build the large steam engine", "goal"),
@@ -61,6 +63,15 @@ TREE = {
     "gas_holder": ("electrolytic_cell", "gas_holder", "Under Pressure", "Build a gas holder", "goal"),
     "fluid_valve": ("crude_oil", "fluid_valve", "Shut-Off Valve", "Make a fluid valve", "task"),
     "fluid_filter": ("fluid_valve", "fluid_filter", "Strained Relations", "Make a fluid filter", "task"),
+    # Advanced power (batch 10).
+    "advanced_solar_panel": ("processor", "advanced_solar_panel", "Here Comes the Sun",
+                             "Build an advanced solar panel", "goal"),
+    "advanced_engine": ("diesel_engine", "advanced_engine", "Four on the Floor",
+                        "Build an advanced combustion engine", "goal"),
+    # Farming (batch 9).
+    "cotton": ("bronze", "cotton", "King Cotton", "Grow cotton", "task"),
+    "sprinkler": ("cotton", "sprinkler", "Make It Rain", "Build a sprinkler", "task"),
+    "crop_harvester": ("steel", "crop_harvester", "Reaping What You Sow", "Build a crop harvester", "goal"),
 }
 # Background of the tab (a block texture), shown behind the tree.
 BACKGROUND = "jugcraft:block/dp_gunmetal"
