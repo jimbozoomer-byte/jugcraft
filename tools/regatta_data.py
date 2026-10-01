@@ -96,14 +96,17 @@ def witch_hat_model():
 
 
 def ghost_sheet_model():
-    """A sheet over the head with eye holes in front, hanging down over the shoulders."""
+    """A sheet over the head with eye holes in front, hanging down over the shoulders (the icon and the dropped
+    item). Worn, it draws nothing on the head: the client's GhostSheetLayer drapes the whole sheet over the wearer."""
     sheet = "#sheet"
+    display = hat_display(2)
+    display["head"] = {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0, 0, 0]}
     return {"textures": {"particle": rid("item/ghost_sheet"), "sheet": rid("item/ghost_sheet"), "face": rid("item/ghost_sheet_face")},
             "elements": [
                 box((1, 0, 1), (15, 15.5, 15), sheet, front="#face"),
                 box((0, -7, 0), (16, 1, 16), sheet, faces=("north", "south", "east", "west")),
             ],
-            "display": hat_display(2)}
+            "display": display}
 
 
 def scarecrow_hat_model():
@@ -178,6 +181,9 @@ def assets(root, write, lang):
     write(root / "items" / f"{bag}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{bag}")}})
     lang[f"item.{MOD}.{bag}"] = TRICK_OR_TREAT["bag_display"]
 
+    # The ghost sheet's equipment asset has no layers: the armor layer draws nothing for it, which also keeps it from
+    # being drawn as a block on the head; the client's GhostSheetLayer drapes the sheet over the wearer instead.
+    write(root / "equipment" / "ghost_sheet.json", {"layers": {}})
     for hat, model in (("witch_hat", witch_hat_model()), ("ghost_sheet", ghost_sheet_model()), ("scarecrow_hat", scarecrow_hat_model())):
         write(models / "item" / f"{hat}.json", model)
         write(root / "items" / f"{hat}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{hat}")}})
