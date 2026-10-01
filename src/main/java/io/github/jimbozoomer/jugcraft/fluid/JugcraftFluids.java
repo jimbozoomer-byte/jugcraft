@@ -31,6 +31,8 @@ import net.minecraft.world.level.material.MapColor;
 public final class JugcraftFluids {
 	public static Block BRONZE_FLUID_PIPE;
 	public static Block STEEL_FLUID_PIPE;
+	/** A steel pipe segment that a redstone signal closes (batch 8). */
+	public static Block FLUID_VALVE;
 	public static Block HEAVY_PUMP;
 	public static Block FLUID_TANK;
 	public static Block ELECTRIC_PUMP;
@@ -45,6 +47,9 @@ public final class JugcraftFluids {
 				BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(1.0F).sound(SoundType.COPPER).noOcclusion()),
 				FluidPipeBlock.BRONZE_RATE_MB));
 		STEEL_FLUID_PIPE = block("steel_fluid_pipe", new FluidPipeBlock(properties("steel_fluid_pipe",
+				BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.5F).sound(SoundType.METAL).noOcclusion()),
+				FluidPipeBlock.STEEL_RATE_MB));
+		FLUID_VALVE = block("fluid_valve", new FluidValveBlock(properties("fluid_valve",
 				BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.5F).sound(SoundType.METAL).noOcclusion()),
 				FluidPipeBlock.STEEL_RATE_MB));
 		FLUID_TANK = block("fluid_tank", new FluidTankBlock(properties("fluid_tank",
@@ -70,6 +75,7 @@ public final class JugcraftFluids {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(BRONZE_FLUID_PIPE);
 			output.accept(STEEL_FLUID_PIPE);
+			output.accept(FLUID_VALVE);
 			output.accept(FLUID_TANK);
 			output.accept(ELECTRIC_PUMP);
 			output.accept(HEAVY_PUMP);

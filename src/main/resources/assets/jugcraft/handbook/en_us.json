@@ -1848,6 +1848,28 @@
           }
         },
         {
+          "title": "Fluid Valve",
+          "icon": "jugcraft:fluid_valve",
+          "text": [
+            "A steel pipe segment with a valve. Open, it carries fluid like a steel pipe; a redstone signal closes it, and the pipes on either side become separate lines. Its lamp is green while open and amber while closed."
+          ],
+          "craft": {
+            "grid": [
+              null,
+              "minecraft:lever",
+              null,
+              "jugcraft:steel_plate",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate",
+              null,
+              "minecraft:redstone",
+              null
+            ],
+            "result": "jugcraft:fluid_valve",
+            "count": 2
+          }
+        },
+        {
           "title": "Tinplate Tank",
           "icon": "jugcraft:fluid_tank",
           "text": [

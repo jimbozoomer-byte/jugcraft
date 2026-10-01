@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Moves fluid through connected pipes, mirroring {@code EnergyNetworks}: pipes are passive,
@@ -51,7 +52,11 @@ public final class FluidNetworks {
 				break;
 			}
 			BlockPos neighbor = pos.relative(side);
-			if (level.getBlockState(neighbor).getBlock() instanceof FluidPipeBlock) {
+			BlockState neighborState = level.getBlockState(neighbor);
+			if (neighborState.getBlock() instanceof FluidPipeBlock pipe) {
+				if (!pipe.carries(neighborState)) {
+					continue;
+				}
 				Network network = network(level, neighbor);
 				moved += network.distribute(level, pos, source, Math.min(budget, network.rate));
 			} else {
@@ -86,7 +91,8 @@ public final class FluidNetworks {
 
 		static Network discover(Level level, BlockPos start) {
 			Network network = new Network();
-			if (level.getBlockState(start).getBlock() instanceof FluidPipeBlock first) {
+			BlockState startState = level.getBlockState(start);
+			if (startState.getBlock() instanceof FluidPipeBlock first && first.carries(startState)) {
 				network.rate = first.transferRate();
 			}
 			ArrayDeque<BlockPos> queue = new ArrayDeque<>();
@@ -97,8 +103,10 @@ public final class FluidNetworks {
 				BlockPos pipe = queue.poll();
 				for (Direction direction : Direction.values()) {
 					BlockPos next = pipe.relative(direction).immutable();
-					if (level.getBlockState(next).getBlock() instanceof FluidPipeBlock nextPipe) {
-						if (network.pipes.add(next)) {
+					BlockState nextState = level.getBlockState(next);
+					if (nextState.getBlock() instanceof FluidPipeBlock nextPipe) {
+						// A closed valve ends the network: it is neither a pipe of it nor a storage on it.
+						if (nextPipe.carries(nextState) && network.pipes.add(next)) {
 							queue.add(next);
 							network.rate = Math.min(network.rate, nextPipe.transferRate());
 						}

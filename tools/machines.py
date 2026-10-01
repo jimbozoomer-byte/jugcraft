@@ -158,7 +158,9 @@ UPGRADES = {"speed_upgrade": "Speed Upgrade", "efficiency_upgrade": "Efficiency 
 # 1 bucket = 1000 mB = 81000 Fabric droplets. Pipes are passive: pumps push through them.
 PIPES = {"bronze_fluid_pipe": {"display": "Bronze Fluid Pipe", "rate": 250},
          # Steel tier, for refinery flows; a network carries as much as its slowest pipe.
-         "steel_fluid_pipe": {"display": "Steel Fluid Pipe", "rate": 1_000}}
+         "steel_fluid_pipe": {"display": "Steel Fluid Pipe", "rate": 1_000},
+         # Fluid logistics (batch 8): a steel pipe segment that redstone closes (tools/pipe_models.py draws its body).
+         "fluid_valve": {"display": "Fluid Valve", "rate": 1_000, "texture": "steel_fluid_pipe"}}
 # Fluid blocks with their own block entities. top/side/bottom name the textures.
 FLUID_BLOCKS = {
     "fluid_tank": {"display": "Tinplate Tank"},
@@ -386,6 +388,8 @@ CRAFTING = {
     "capacitor_bank": (["PBP", "BCB", "PBP"], {"P": "#c:plates/steel", "B": "jugcraft:battery_box",
                                                "C": "jugcraft:advanced_circuit"}, 1),
     "steel_tank": (["PPP", "PTP", "PPP"], {"P": "#c:plates/steel", "T": "jugcraft:fluid_tank"}, 1),
+    "fluid_valve": ([" W ", "PSP", " R "], {"W": "minecraft:lever", "P": "#c:plates/steel",
+                                            "S": "jugcraft:steel_fluid_pipe", "R": "minecraft:redstone"}, 2),
     "gas_holder": (["PTP", "TVT", "PTP"], {"P": "#c:plates/steel", "T": "jugcraft:steel_tank",
                                            "V": "jugcraft:steel_fluid_pipe"}, 1),
     # Automation: after the workshop tier (a circuit and brass plates).

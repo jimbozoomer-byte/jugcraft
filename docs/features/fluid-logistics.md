@@ -24,6 +24,13 @@ Primary specialty and supported player role: logistics; the player who plumbs fa
 - Chlorine and hydrogen from the electrolytic cell, and refinery gas from the refinery, now have somewhere big to wait.
 - Recipe: steel plates, four steel tanks and a steel fluid pipe.
 
+### Fluid valve (commit 37)
+- **A steel pipe segment with a valve**: a gunmetal body round the pipe, a bonnet with a red handwheel, and a lamp that is green while open and amber while closed.
+- **Open, it carries fluid like a steel pipe (1,000 mB a tick). A redstone signal closes it**, and the pipe network stops there: the pipes on either side are separate lines, so a pump on one side no longer reaches the tanks on the other.
+- Lets a factory shut off a line with a lever, a comparator on a tank, or any redstone logic.
+- Code: `fluid/FluidValveBlock` (a `FluidPipeBlock` whose `carries(state)` is false while powered); `FluidNetworks` skips pipes that do not carry, both when it searches a network and when a pump pushes into one. Models: `tools/pipe_models.py` adds the body to the pipe's multipart block state.
+- Recipe: a lever, two steel plates, a steel fluid pipe and redstone make two.
+
 ## Connections
 - Existing input producer: the electrolytic cell (chlorine, hydrogen), the distillation tower, cracker, reformer and fracking rig (refinery gas).
 - Existing output consumer: the fuel cell, gas turbine, chemical reactor and polymerization reactor, through pumps and pipes.
@@ -44,6 +51,7 @@ No new dependencies. Textures and models are original (`tools/dieselpunk_models.
 ## Verification
 - `tools/check_mod_data.py` checks IDs, recipes and models.
 - Game test `gasHolderHoldsOnlyGas` (PetroGameTests): through its far corner block it takes exactly 1,024 buckets of hydrogen, refuses water, and refuses a second gas.
+- Game test `fluidValveClosesOnRedstone` (JugcraftGameTests): with a redstone block on the valve, a pump's water does not reach the tank for 60 ticks; once the block is removed, it does.
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.
