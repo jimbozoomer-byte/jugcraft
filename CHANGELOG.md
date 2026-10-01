@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: Halloween decorations, batch 6, the haunted house and yard (pull request pending, stacked on batch 5)
+- **Rocking Chair:** sit in it and it rocks under you; at night, empty, it rocks on its own and creaks.
+- **Lurking Eyes:** glowing eyes that peer out of a hedge at night, blink, and vanish when you come within four blocks.
+- **Silhouette Window:** a bat, black cat or witch cut-out in orange paper that glows when a lamp lights the far side.
+- **Spooky Music Box:** plays an original waltz on note-block sounds while powered by redstone, or once when wound by hand.
+- **Giant Fake Spider:** a big hairy spider swaying on a silk thread from a ceiling, branch or cobweb; let its thread out up to four blocks.
+- The chair's rocking, the eyes, the windows' glow and the spider's sway are drawn by the client. The checker compares the numbers and the tune with Java. New server game tests and a client test with screenshots.
+
 ### Agriculture: Halloween decorations, batch 5, the harvest party (pull request pending, stacked on batch 4)
 - **Bobbing for Apples Tub:** drop apples in, then duck for one with an empty hand: one try in three catches an apple, and the tub splashes a moment between tries.
 - **Pumpkin Crate:** shows up to four of your pumpkins, squash, gourds or melons.
