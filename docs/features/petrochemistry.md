@@ -95,6 +95,13 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - Draw-offs: crude oil at the base, flowback water one block up and refinery gas at the top. Its tank takes only fracking fluid.
 - Recipe: steel plates, an ore drill, two heavy pumps, an advanced circuit and a machine casing.
 
+### Flowback treatment (batch 3, commit 13)
+- The **flowback treatment unit** is three wide, one tall and two deep: a filter press with a red-handled screw beside two open settling basins with hazard-striped rims, murky in the first and clearing in the second.
+- **1,000 mB of flowback water → 750 mB of clean water + 1 salt**, every 80 ticks at 48 JE/t.
+- Pipe the water back to the chemical mixer. A quarter is lost each time round (sludge), so fracking still needs a water supply: 4 mB of fracking fluid down gives 3 mB of flowback, which gives 2.25 mB of water back.
+- The salt is the same salt as rock salt ore, ready for the planned brine electrolysis.
+- Recipe: steel plates, iron bars, two tinplate tanks, a sieve and a machine casing.
+
 ### What refining gives (batch 2 summary)
 From one bucket of crude oil, with every byproduct refined:
 
@@ -138,6 +145,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 - Game test `reformerMakesGasoline` (a bucket of naphtha becomes 900 mB of gasoline and 100 mB of refinery gas).
 - Game test `mixerMakesFrackingFluid`.
 - Game test `frackingRigFreesShaleOil` (it takes fracking fluid through Fabric's fluid API, brings up crude oil, gas and flowback, and draws on the shale).
+- Game test `treatmentCleansFlowback`.
 - Game test `pumpjackPumpsOil`: a powered pumpjack over pumpable oil fills its tank with crude oil and the reservoir goes down by as much.
 - Game tests `extractorTanksOnlyTakeWhatTheyUse` (its tanks take water but not lava or crude oil, through Fabric's fluid API) and `extractorWashesOilFromOilSand` (a block of oil sand and water become 500 mB of crude oil and sand, using 250 mB of water).
 - Not run: client play-testing of how the fluid looks and flows.

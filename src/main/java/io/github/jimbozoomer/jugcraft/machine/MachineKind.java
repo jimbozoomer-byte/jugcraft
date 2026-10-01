@@ -65,7 +65,9 @@ public enum MachineKind implements StringRepresentable {
 	// A 2x2x2 stirred mixing vessel: water and powders in, mixtures (fracking fluid) out.
 	CHEMICAL_MIXER("chemical_mixer", 20_000, 256, 0, 64, 2),
 	// A 3x3x5 fracking derrick over a shale reservoir: fracking fluid down; crude oil, gas and flowback water up.
-	FRACKING_RIG("fracking_rig", 80_000, 1_024, 0, 256, 0);
+	FRACKING_RIG("fracking_rig", 80_000, 1_024, 0, 256, 0),
+	// A 3x1x2 row of settling basins and a filter press: flowback water in; clean water and salt out.
+	FLOWBACK_TREATMENT_UNIT("flowback_treatment_unit", 20_000, 256, 0, 48, 1);
 
 	/** JE produced per tick while the coal generator burns. */
 	public static final int GENERATION_PER_TICK = 32;
@@ -156,6 +158,8 @@ public enum MachineKind implements StringRepresentable {
 	public static final int FRACK_FLOWBACK_TANK = 16_000;
 	/** Fracking rig draw-offs: crude oil at the base, flowback water one block up, gas at the top. */
 	private static final int[] FRACK_DRAW_OFFS = {0, 4, 1};
+	/** Flowback treatment unit: its flowback tank and its clean water tank. */
+	public static final int TREATMENT_TANK = 8_000;
 	/** Ticks the electric furnace needs per item (the vanilla furnace needs 200). */
 	public static final int ELECTRIC_FURNACE_TICKS = 100;
 
@@ -224,6 +228,7 @@ public enum MachineKind implements StringRepresentable {
 			case VACUUM_DISTILLATION_UNIT -> "vacuum_distillation";
 			case CATALYTIC_REFORMER -> "reforming";
 			case CHEMICAL_MIXER -> "chemical_mixing";
+			case FLOWBACK_TREATMENT_UNIT -> "water_treatment";
 			default -> null;
 		};
 	}
@@ -255,6 +260,7 @@ public enum MachineKind implements StringRepresentable {
 			case CHEMICAL_MIXER -> new FluidMachineSpec(List.of(MIXER_TANK), List.of(MIXER_TANK), 2, 0);
 			case FRACKING_RIG -> new FluidMachineSpec(List.of(FRACK_INPUT_TANK),
 					List.of(FRACK_OIL_TANK, FRACK_GAS_TANK, FRACK_FLOWBACK_TANK), 0, 0);
+			case FLOWBACK_TREATMENT_UNIT -> new FluidMachineSpec(List.of(TREATMENT_TANK), List.of(TREATMENT_TANK), 0, 1);
 			default -> null;
 		};
 	}
@@ -342,6 +348,7 @@ public enum MachineKind implements StringRepresentable {
 			case CATALYTIC_REFORMER -> Footprint.cuboid(3, 2, 2);
 			case CHEMICAL_MIXER -> Footprint.cuboid(2, 2, 2);
 			case FRACKING_RIG -> Footprint.cuboid(3, 5, 3);
+			case FLOWBACK_TREATMENT_UNIT -> Footprint.cuboid(3, 1, 2);
 			default -> Footprint.SINGLE;
 		};
 	}

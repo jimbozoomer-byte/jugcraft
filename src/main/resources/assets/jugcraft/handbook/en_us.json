@@ -2002,6 +2002,29 @@
           }
         },
         {
+          "title": "Flowback Treatment Unit",
+          "icon": "jugcraft:flowback_treatment_unit",
+          "text": [
+            "Three wide, one tall and two deep. Settles and filters the flowback water from a fracking rig: each bucket gives 750 mB of clean water and a salt, every 4 seconds. Pipe the water back to the chemical mixer; a quarter is lost each time round.",
+            "Uses 48 JE/t while working. Holds 20,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "minecraft:iron_bars",
+              "jugcraft:steel_plate",
+              "jugcraft:fluid_tank",
+              "jugcraft:sieve",
+              "jugcraft:fluid_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:flowback_treatment_unit",
+            "count": 1
+          }
+        },
+        {
           "title": "Cracking Catalyst",
           "icon": "jugcraft:cracking_catalyst",
           "text": [

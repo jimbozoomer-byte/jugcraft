@@ -521,9 +521,39 @@ def fracking_rig():
     return m
 
 
+def flowback_treatment_unit():
+    """Three wide, one tall and two deep: a filter press (front left, the master block) with a gauge and caged lamp,
+    beside two open gunmetal settling basins with hazard-striped rims, murky flowback in the first and cleaner water
+    settling in the second, joined by a chrome weir, and a stack of chrome filter plates squeezed by a red-handled
+    screw at the back."""
+    m = [box((-32, 0, 0), (16, 2, 32), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    # Filter press control at the front left.
+    m.append(box((1, 2, 0.5), (15, 12, 8), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(dial("north", (5, 8.5, 0.25), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 8.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    # Filter press: a row of chrome plates between gunmetal heads, with its screw handwheel.
+    m.append(box((2, 2, 11), (14, 12, 13), GUNMETAL))
+    for z in range(13, 27, 2):
+        m.append(box((2.5, 3, z), (13.5, 11, z + 1.5), CHROME))
+    m.append(box((2, 2, 27), (14, 12, 29), GUNMETAL))
+    m.append(box((7, 6, 29), (9, 8, 31), CHROME))
+    m += wheel("z", 8, 7, 2.5, 31, 31.75, "sp_red_iron", CHROME)
+    # Two settling basins across the rest of the skid.
+    for x0, x1, surface in ((-31, -17, "flowback_water_still"), (-15.5, -1.5, "fracking_fluid_still")):
+        m.append(box((x0, 2, 1.5), (x1, 11, 30.5), {"*": GUNMETAL, "up": surface}))
+        m.append(box((x0 - 0.5, 11, 1), (x1 + 0.5, 12, 2), HAZARD))
+        m.append(box((x0 - 0.5, 11, 30), (x1 + 0.5, 12, 31), HAZARD))
+        m.append(box((x0 - 0.5, 11, 2), (x0 + 0.5, 12, 30), HAZARD))
+        m.append(box((x1 - 0.5, 11, 2), (x1 + 0.5, 12, 30), HAZARD))
+    m.append(box((-17.5, 9, 14), (-15, 12, 18), CHROME))
+    m.append(box((-1.5, 6, 18), (2, 8, 20), RUBBER))
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
           "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump(),
           "distillation_tower": distillation_tower(), "catalytic_cracker": catalytic_cracker(),
           "vacuum_distillation_unit": vacuum_distillation_unit(), "catalytic_reformer": catalytic_reformer(),
-          "chemical_mixer": chemical_mixer(), "fracking_rig": fracking_rig()}
+          "chemical_mixer": chemical_mixer(), "fracking_rig": fracking_rig(),
+          "flowback_treatment_unit": flowback_treatment_unit()}

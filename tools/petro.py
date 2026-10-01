@@ -94,6 +94,9 @@ FLUID_MACHINES = {
     # 256 JE/t. Draw-offs: crude at the base, flowback one block up, gas at the top (MachineKind.outputLayer).
     "fracking_rig": {"inputs": [16_000], "outputs": [16_000, 8_000, 16_000], "item_inputs": 0, "item_outputs": 0,
                      "recipe_type": None},
+    # Flowback water -> clean water + salt. 48 JE/t.
+    "flowback_treatment_unit": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 0, "item_outputs": 1,
+                                "recipe_type": "water_treatment"},
     # Water + two powders/solids -> a mixture. 64 JE/t.
     "chemical_mixer": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 0,
                        "recipe_type": "chemical_mixing"},
@@ -138,6 +141,13 @@ FLUID_RECIPES = {
         {"name": "fracking_fluid", "items": [("minecraft:sand", 2), ("minecraft:dried_kelp", 1)],
          "fluids": [("minecraft:water", 1000)], "fluid_results": [("jugcraft:fracking_fluid", 1000)], "source": 0,
          "ticks": 80, "features": ["crude_oil"]},
+    ],
+    # Flowback water settles and is filtered: most of it comes back as clean water; the brine leaves salt. A quarter
+    # is lost (sludge), so fracking water is never free.
+    "flowback_treatment_unit": [
+        {"name": "flowback_water", "fluids": [("jugcraft:flowback_water", 1000)],
+         "fluid_results": [("minecraft:water", 750)], "results": [("jugcraft:salt", 1)], "ticks": 80,
+         "features": ["crude_oil"]},
     ],
     "catalytic_reformer": [
         {"name": "naphtha", "fluids": [("jugcraft:naphtha", 1000)],

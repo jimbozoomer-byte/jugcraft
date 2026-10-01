@@ -322,4 +322,15 @@ public class PetroGameTests {
 			helper.assertTrue(OilReservoirs.get(helper.getLevel(), chunk).remaining() <= before - 40, "The shale gave nothing");
 		});
 	}
+
+	/** The flowback treatment unit turns a bucket of flowback water into 750 mB of clean water and a salt. */
+	@GameTest(maxTicks = 200)
+	public void treatmentCleansFlowback(GameTestHelper helper) {
+		MachineBlockEntity unit = place(helper, MachineKind.FLOWBACK_TREATMENT_UNIT, new BlockPos(4, 1, 2));
+		unit.tanks().input(0).fill(PetroFluids.FLOWBACK_WATER.source(), 1000);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(unit.tanks().output(0).has(Fluids.WATER, 750), "Water: " + unit.tanks().output(0).millibuckets());
+			helper.assertTrue(unit.getItem(0).is(BuiltInRegistries.ITEM.getValue(Jugcraft.id("salt"))), "No salt: " + unit.getItem(0));
+		});
+	}
 }
