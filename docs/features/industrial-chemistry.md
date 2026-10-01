@@ -54,6 +54,10 @@ Salt, sulfur, phosphate and bauxite have been in the world since the first ores,
 - Each titanium costs a quarter bucket of chlorine: a bucket of brine in the electrolytic cell (51,200 JE) makes enough for one.
 - The metal audit counts a sponge as one ingot of titanium.
 
+### Lithium and rare earths (batch 6, commit 28)
+- **Acid leaching** in the chemical reactor: **1 lepidolite + 250 mB sulfuric acid → 2 lithium carbonate** (100 ticks); **1 monazite + 250 mB sulfuric acid → 2 rare earth oxide** (140 ticks).
+- Twice the blast-furnace stand-ins, which stay as the simple route. Lithium goes to the battery bank (commit 29), rare earths to magnets (commit 30).
+
 ### Advancements
 Split Decision (electrolytic cell), Oil of Vitriol (sulfuric acid), Green Revolution (fertilizer), The Bayer Way (alumina) and Clean Burn (fuel cell), under Forged in Coke.
 
@@ -79,7 +83,7 @@ No new dependencies. Textures and models are original (`tools/petro_textures.py`
 
 ## Verification
 - `tools/check_mod_data.py` audits the new fluids, gases and recipes like the oil line's.
-- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` `bayerRouteMakesAluminum`, `reactorMakesFertilizer`, `fertilizerGrowsTheCropsAround` `fuelCellBurnsHydrogen` and `reactorMakesTitaniumSponge` (PetroGameTests).
+- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` `bayerRouteMakesAluminum`, `reactorMakesFertilizer`, `fertilizerGrowsTheCropsAround` `fuelCellBurnsHydrogen` `reactorMakesTitaniumSponge` and `reactorLeachesLithium` (PetroGameTests).
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.

@@ -241,6 +241,12 @@ FLUID_RECIPES = {
         {"name": "titanium_sponge", "items": [("jugcraft:raw_titanium", 1), ("jugcraft:coke", 1)],
          "fluids": [("jugcraft:chlorine", 250)], "results": [("jugcraft:titanium_sponge", 1)], "ticks": 160,
          "features": ["titanium", "salt"]},
+        # Acid leaching (batch 6): lithium mica and monazite dissolved in sulfuric acid and precipitated, twice what
+        # the blast-furnace stand-ins recover.
+        {"name": "lithium_carbonate", "items": [("jugcraft:lepidolite", 1)], "fluids": [("jugcraft:sulfuric_acid", 250)],
+         "results": [("jugcraft:lithium_carbonate", 2)], "ticks": 100, "features": ["lithium", "sulfur"]},
+        {"name": "rare_earth_oxide", "items": [("jugcraft:monazite", 1)], "fluids": [("jugcraft:sulfuric_acid", 250)],
+         "results": [("jugcraft:rare_earth_oxide", 2)], "ticks": 140, "features": ["rare_earths", "sulfur"]},
     ],
     # Flowback water settles and is filtered: most of it comes back as clean water; the brine leaves salt. A quarter
     # is lost (sludge), so fracking water is never free.

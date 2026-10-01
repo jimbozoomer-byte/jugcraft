@@ -3125,6 +3125,50 @@
             ]
           ],
           "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:lepidolite",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:lithium_carbonate",
+              2
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "jugcraft:monazite",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:rare_earth_oxide",
+              2
+            ]
+          ],
+          "ticks": 140
         }
       ]
     },

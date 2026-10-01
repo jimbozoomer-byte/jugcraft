@@ -2305,6 +2305,14 @@
           ]
         },
         {
+          "title": "Leaching",
+          "icon": "jugcraft:lithium_carbonate",
+          "text": [
+            "Dissolve ores in sulfuric acid in the chemical reactor: a lepidolite and 250 mB of acid give two lithium carbonate, a monazite two rare earth oxide.",
+            "That is twice what the blast furnace gets."
+          ]
+        },
+        {
           "title": "Fertilizer",
           "icon": "jugcraft:fertilizer",
           "text": [

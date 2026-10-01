@@ -393,6 +393,10 @@ def build():
                 "chlorine in the chemical reactor make a titanium sponge.",
                 "The arc furnace melts the sponge into a titanium ingot. Titanium plates go into the most advanced "
                 "machines."]},
+            {"title": "Leaching", "icon": f"{MOD}:lithium_carbonate", "text": [
+                "Dissolve ores in sulfuric acid in the chemical reactor: a lepidolite and 250 mB of acid give two "
+                "lithium carbonate, a monazite two rare earth oxide.",
+                "That is twice what the blast furnace gets."]},
             {"title": "Fertilizer", "icon": f"{MOD}:fertilizer", "text": [
                 "Two phosphate and 250 mB of sulfuric acid in the chemical reactor make four fertilizer.",
                 "Use one on the ground or a crop: every crop in the 5x5 area around it (a block up or down too) gets "
