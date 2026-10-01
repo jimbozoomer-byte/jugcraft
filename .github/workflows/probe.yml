@@ -26,5 +26,4 @@ jobs:
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
           CP="$CLIENT:$COMMON"
           l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
-          l net.minecraft.world.level.gamerules.GameRules 'DROP|LOOT' 10
-          for f in $(unzip -l "$COMMON" | grep -iE "data/minecraft/recipe/.*stonecutting.json" | awk '{print $4}' | head -2); do echo "--- $f"; unzip -p "$COMMON" "$f"; echo; done
+          echo compile-only

@@ -38,7 +38,9 @@ public class CandleSkullBlock extends Block {
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 	public static final int LIGHT = 12;
-	private static final VoxelShape SHAPE = Shapes.or(Block.box(4.0, 0.0, 4.0, 12.0, 8.0, 12.0), Block.box(6.5, 8.0, 6.5, 9.5, 13.0, 9.5));
+	/** The skull, the wax pooled on its crown, and the candle with its wick (model: tools/festivity_data.py). */
+	private static final VoxelShape SHAPE = Shapes.or(Block.box(4.0, 0.0, 4.0, 12.0, 7.0, 12.0), Block.box(5.5, 7.0, 5.5, 10.5, 8.0, 10.5),
+			Block.box(6.5, 8.0, 6.5, 9.5, 14.0, 9.5));
 
 	public CandleSkullBlock(Properties properties) {
 		super(properties);
@@ -99,7 +101,7 @@ public class CandleSkullBlock extends Block {
 			return;
 		}
 		double x = pos.getX() + 0.5;
-		double y = pos.getY() + 13.5 / 16.0;
+		double y = pos.getY() + 14.5 / 16.0;
 		double z = pos.getZ() + 0.5;
 		if (random.nextFloat() < 0.3F) {
 			level.addParticle(ParticleTypes.SMOKE, x, y, z, 0.0, 0.0, 0.0);

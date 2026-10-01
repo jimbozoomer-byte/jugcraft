@@ -15,6 +15,7 @@
       "io.github.jimbozoomer.jugcraft.test.CarvingGameTests",
       "io.github.jimbozoomer.jugcraft.test.HalloweenGameTests",
       "io.github.jimbozoomer.jugcraft.test.RegattaGameTests",
+      "io.github.jimbozoomer.jugcraft.test.FestivityGameTests",
       "io.github.jimbozoomer.jugcraft.test.PetroGameTests"
     ],
     "fabric-client-gametest": [

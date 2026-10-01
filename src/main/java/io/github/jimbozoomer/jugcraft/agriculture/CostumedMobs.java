@@ -58,8 +58,6 @@ public final class CostumedMobs {
 			}
 		});
 	}
-		});
-	}
 
 	/** Whether this kind of mob dresses up for Halloween. */
 	public static boolean wears(Mob mob) {

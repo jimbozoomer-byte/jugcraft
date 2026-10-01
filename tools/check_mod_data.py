@@ -391,6 +391,10 @@ def check_tags():
             elif registry == "fluid":
                 if split(value)[1] not in petro.fluid_ids():
                     err(f"{path.relative_to(ROOT)}: unknown fluid {value}")
+            elif registry == "villager_trade":
+                namespace, trade = split(value)
+                if namespace == MOD and not (DATA / MOD / "villager_trade" / f"{trade}.json").exists():
+                    err(f"{path.relative_to(ROOT)}: unknown villager trade {value}")
             elif split(value)[0] == MOD and split(value)[1] not in all_blocks() + all_items() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + ag.all_items():
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
@@ -672,10 +676,14 @@ def check_agriculture():
         items[name] = ("stew", int(n), float(sat), None, None)
     for name, n, sat in re.findall(r'\btreat\("([a-z_]+)", (\d+), ([\d.]+)F\)', main):
         items[name] = ("treat", int(n), float(sat), None, None)
+    for name, n, sat, effect, seconds in re.findall(r'\bsweet\("([a-z_]+)", (\d+), ([\d.]+)F, MobEffects\.(\w+), (\d+)\)', main):
+        items[name] = ("sweet", int(n), float(sat), None, None)
+        if ag.ITEMS.get(name, {}).get("sweet") != [effect, int(seconds)]:
+            err(f"JugcraftAgriculture.java sweet {name} gives {effect} for {seconds} s, not as tools/agriculture.py says")
     expected = {}
     for name, info in ag.ITEMS.items():
         food = info.get("food") or [None, None]
-        kind = ("stew" if info.get("stew") else "treat" if info.get("treat") else "seeds" if "plants" in info
+        kind = ("stew" if info.get("stew") else "treat" if info.get("treat") else "sweet" if info.get("sweet") else "seeds" if "plants" in info
                 else "food" if "food" in info else "plain")
         expected[name] = (kind, food[0], food[1], info.get("compost"), info.get("plants"))
     if items != expected:
@@ -709,6 +717,7 @@ def check_agriculture():
     check_carving(java, main)
     check_halloween(java, main)
     check_regatta(java, main)
+    check_festivities(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1011,6 +1020,63 @@ def check_regatta(java, main):
     states = set((load(ASSETS / "blockstates" / f"{regatta['buoy']}.json") or {}).get("variants", {}))
     if states != {f"number={n}" for n in range(1, regatta["max_number"] + 1)}:
         err("regatta_buoy: blockstate does not cover every number")
+
+
+def check_festivities(java, main):
+    """The Halloween festivities: Java matches tools/agriculture.py, the Peddler only sells, and the gravestones' shapes are their models."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    contest, mobs, peddler = ag.CONTEST, ag.COSTUMED_MOBS, ag.PEDDLER
+    expected = {("CarvingContest", "CHECK_TICKS"): contest["check_ticks"], ("CarvingContest", "MAX_VOTERS"): contest["max_voters"],
+                ("CarvingContest", "MAX_CONTESTS"): contest["max_contests"], ("CostumedMobs", "CHANCE"): mobs["chance"],
+                ("GravestoneBlockEntity", "MAX_LENGTH"): ag.ENGRAVING["max_length"], ("CandleSkullBlock", "LIGHT"): ag.CANDLE_SKULL["light"]}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    if contest["places"] != ag.HARVEST_SCALE["board"] or "PLACES = HarvestScaleBlockEntity.BOARD;" not in java.get("CarvingContest", ""):
+        err("The carving contest must hand out the Harvest Scale's ribbons, one per place")
+    source = java.get("CostumedMobs", "")
+    for field, values in (("MOBS", mobs["mobs"]), ("COSTUMES", mobs["costumes"])):
+        found = re.search(rf"{field} = List\.of\(([^;]*)\);", source)
+        if not found or re.findall(r'"([a-z_:]+)"', found.group(1)) != values:
+            err(f"CostumedMobs.{field} differs from COSTUMED_MOBS in tools/agriculture.py")
+    if f'COSTUMED = "{mobs["tag"]}"' not in source or f'Jugcraft.id("{mobs["table"]}")' not in source:
+        err("CostumedMobs's tag or candy table differs from tools/agriculture.py")
+    if f'Jugcraft.id("{peddler["trade_set"]}")' not in java.get("HalloweenPeddler", ""):
+        err("HalloweenPeddler.TRADES differs from tools/agriculture.py")
+    for item, weight, (low, high) in mobs["candy"]:
+        if weight <= 0 or not 1 <= low <= high or (split(item)[0] == MOD and split(item)[1] not in ag.ITEMS):
+            err(f"costumed mob candy: {item} needs to be a known food with a positive weight and count")
+    for costume in mobs["costumes"]:
+        if split(costume)[0] == MOD and costume.split(":")[1] not in ag.COSTUMES:
+            err(f"costumed mobs: {costume} is not a costume")
+
+    # The Peddler wants emeralds and gives Jugcraft goods that have another route; it never gives emeralds back.
+    if not 1 <= peddler["amount"] <= len(peddler["trades"]):
+        err("The Peddler must offer between one and all of its trades")
+    crafted = {r["result"] for r in ag.SHAPED + ag.SHAPELESS} | set(ag.POT_RECIPES)
+    for trade, info in peddler["trades"].items():
+        item, count = info["gives"]
+        name = split(item)[1]
+        if item == "minecraft:emerald" or count < 1 or info["wants"] < 1 or info["max_uses"] < 1:
+            err(f"Peddler trade {trade}: it must take emeralds and give something else")
+        elif name not in crafted and name not in ag.ITEMS:
+            err(f"Peddler trade {trade}: {item} has no route besides the Peddler")
+
+    # Gravestones: the Java styles' boxes and engraving places are tools/agriculture.py's, and so are the models.
+    source = java.get("GravestoneBlock", "")
+    for stone, info in ag.GRAVESTONES.items():
+        found = re.search(rf'{info["style"]}\("{stone}", new double\[\]\[\] (\{{\{{.*?\}}\}}),\s*([^)]*)\)', source, re.S)
+        boxes = [tuple(float(v) for v in b.split(",")) for b in re.findall(r"\{([^{}]*)\}", found.group(1))] if found else []
+        engraving = [v.strip() for v in found.group(2).split(",")] if found else []
+        want = [f"{v}F" if isinstance(v, float) else str(v) for v in info["engraving"]]
+        if boxes != [tuple(float(v) for v in b) for b in info["boxes"]] or engraving != want:
+            err(f"GravestoneBlock.Style.{info['style']} differs from GRAVESTONES['{stone}'] in tools/agriculture.py")
+        model = load(ASSETS / "models" / "block" / f"{stone}.json") or {}
+        if [tuple(e["from"] + e["to"]) for e in model.get("elements", [])] != [tuple(b) for b in info["boxes"]]:
+            err(f"{stone}: model boxes differ from its shape")
 
 
 def main():

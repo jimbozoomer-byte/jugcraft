@@ -6,6 +6,7 @@ vanilla 26.3's own crop and berry-bush files.
 """
 import carving_data
 import festival_data
+import festivity_data
 import halloween_data
 import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
@@ -138,6 +139,7 @@ def assets(root, write, lang):
     carving_data.assets(root, write, lang)
     halloween_data.assets(root, write, lang)
     regatta_data.assets(root, write, lang)
+    festivity_data.assets(root, write, lang)
 
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
@@ -236,6 +238,8 @@ def loot(data, write):
     carving_data.loot(out, write)
     halloween_data.loot(out, write)
     regatta_data.loot(out, write)
+    festivity_data.loot(out, write)
+    festivity_data.trades(data, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -279,6 +283,7 @@ def recipes(out, write):
                                        "category": "equipment", "pattern": SICKLE_PATTERN,
                                        "key": {"M": info["material"], "S": "minecraft:stick"}, "result": {"id": rid(sickle), "count": 1}})
     carving_data.recipes(out, write, conditions)
+    festivity_data.recipes(out, write, conditions)
 
 
 # ---------------------------------------------------------------- tags
@@ -304,6 +309,7 @@ def tags(tags):
     carving_data.tags(tags)
     halloween_data.tags(tags)
     regatta_data.tags(tags)
+    festivity_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

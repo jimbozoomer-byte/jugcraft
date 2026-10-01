@@ -131,6 +131,10 @@
     "jugcraft:conveyor_slope",
     "jugcraft:network_terminal",
     "jugcraft:cooking_pot",
+    "jugcraft:rounded_gravestone",
+    "jugcraft:cross_gravestone",
+    "jugcraft:obelisk_gravestone",
+    "jugcraft:candle_skull",
     "jugcraft:asphalt",
     "jugcraft:asphalt_slab",
     "jugcraft:asphalt_road_line"

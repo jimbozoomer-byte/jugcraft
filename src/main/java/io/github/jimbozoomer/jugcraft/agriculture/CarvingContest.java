@@ -113,7 +113,11 @@ public final class CarvingContest {
 			return Result.OWN_ENTRY;
 		}
 		Data data = data(level.getServer());
-		Contest contest = data.contest(HalloweenSeason.year());
+		int year = HalloweenSeason.year();
+		if (data.get(year) != null && data.get(year).awarded) {
+			return Result.CLOSED; // This Halloween's contest was already decided (the event was switched off and on again).
+		}
+		Contest contest = data.contest(year);
 		UUID before = contest.votes.get(voter.getUUID());
 		if (before == null && contest.votes.size() >= MAX_VOTERS) {
 			return Result.FULL;

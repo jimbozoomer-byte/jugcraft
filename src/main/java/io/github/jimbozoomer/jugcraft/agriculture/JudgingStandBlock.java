@@ -41,9 +41,9 @@ import org.jspecify.annotations.Nullable;
  */
 public class JudgingStandBlock extends BaseEntityBlock {
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
-	/** A foot, a post and a full top for the pumpkin to stand on. */
-	private static final VoxelShape SHAPE = Shapes.or(Block.box(1.0, 0.0, 1.0, 15.0, 2.0, 15.0), Block.box(3.0, 2.0, 3.0, 13.0, 13.0, 13.0),
-			Block.box(0.0, 13.0, 0.0, 16.0, 16.0, 16.0));
+	/** A foot, a post, the cloth's hem and a full top for the pumpkin to stand on (model: tools/festivity_data.py). */
+	private static final VoxelShape SHAPE = Shapes.or(Block.box(1.0, 0.0, 1.0, 15.0, 2.0, 15.0), Block.box(4.0, 2.0, 4.0, 12.0, 10.0, 12.0),
+			Block.box(1.0, 10.0, 1.0, 15.0, 13.0, 15.0), Block.box(0.0, 13.0, 0.0, 16.0, 16.0, 16.0));
 
 	public JudgingStandBlock(Properties properties) {
 		super(properties);
