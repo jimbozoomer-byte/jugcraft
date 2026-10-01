@@ -26,7 +26,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
  * paints the same {@link #HOOD}... boxes, the eyes on the hood's front.
  */
 public class GhostSheetLayer<S extends HumanoidRenderState, M extends HumanoidModel<S>> extends RenderLayer<S, M> {
-	private static final RenderType SHEET = RenderTypes.entityCutoutNoCull(Jugcraft.id("textures/entity/ghost_sheet.png"));
+	private static final RenderType SHEET = RenderTypes.entityCutout(Jugcraft.id("textures/entity/ghost_sheet.png"));
 	private static final float TEXTURE_WIDTH = 128;
 	private static final float TEXTURE_HEIGHT = 64;
 
