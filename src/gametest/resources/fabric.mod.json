@@ -13,7 +13,8 @@
       "io.github.jimbozoomer.jugcraft.test.PixelHollowsGameTests"
     ],
     "fabric-client-gametest": [
-      "io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JugcraftServerClientGameTests"
     ]
   },
   "depends": {
