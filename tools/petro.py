@@ -55,6 +55,15 @@ ITEMS = {
 }
 
 
+# Blocks (chemistry/PetroBlocks.java): asphalt road, walked on at 1.3x speed. shape: cube, slab or line (a cube
+# with a yellow centre line on top that turns to face the player placing it).
+BLOCKS = {
+    "asphalt": {"display": "Asphalt", "shape": "cube"},
+    "asphalt_slab": {"display": "Asphalt Slab", "shape": "slab"},
+    "asphalt_road_line": {"display": "Asphalt Road Line", "shape": "line"},
+}
+
+
 def fluid_ids():
     """Every fluid id this line registers (sources, flowing forms and gases), for tags and recipe checks."""
     return [f for fluid in FLUIDS for f in (fluid, f"flowing_{fluid}")] + list(GASES)
@@ -71,6 +80,11 @@ def buckets():
 def petro_items():
     """Items of the petrochemistry line that are not blocks."""
     return buckets() + list(ITEMS)
+
+
+def petro_blocks():
+    """Blocks of the petrochemistry line with block items (not fluids)."""
+    return list(BLOCKS)
 
 
 # Fluid processing machines (MachineKind.fluidSpec() in Java mirrors this): input and output tank capacities in mB,

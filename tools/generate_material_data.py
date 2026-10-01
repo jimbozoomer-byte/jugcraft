@@ -473,6 +473,28 @@ def petro_assets(lang):
         write(ASSETS / "models" / "item" / f"{item}.json",
               {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
         write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
+    for block, info in petro.BLOCKS.items():
+        lang[f"block.{MOD}.{block}"] = info["display"]
+        models = ASSETS / "models" / "block"
+        if info["shape"] == "cube":
+            write(models / f"{block}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{block}")}})
+            state = {"variants": {"": {"model": rid(f"block/{block}")}}}
+        elif info["shape"] == "slab":
+            full = block.removesuffix("_slab")
+            textures = {"bottom": rid(f"block/{full}"), "top": rid(f"block/{full}"), "side": rid(f"block/{full}")}
+            write(models / f"{block}.json", {"parent": "minecraft:block/slab", "textures": textures})
+            write(models / f"{block}_top.json", {"parent": "minecraft:block/slab_top", "textures": textures})
+            state = {"variants": {"type=bottom": {"model": rid(f"block/{block}")},
+                                  "type=top": {"model": rid(f"block/{block}_top")},
+                                  "type=double": {"model": rid(f"block/{full}")}}}
+        else:
+            write(models / f"{block}.json", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+                "top": rid(f"block/{block}"), "bottom": rid("block/asphalt"), "side": rid("block/asphalt")}})
+            state = {"variants": {f"facing={face}": {"model": rid(f"block/{block}"), **({"y": y} if y else {})}
+                                  for face, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270))}}
+        write(ASSETS / "blockstates" / f"{block}.json", state)
+        write(ASSETS / "models" / "item" / f"{block}.json", {"parent": rid(f"block/{block}")})
+        write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
     # Gases have no block, so Fabric names them from this key.
     for gas, info in petro.GASES.items():
         lang[f"block.{MOD}.{gas}"] = info["display"]
@@ -496,6 +518,15 @@ def loot_tables():
         table = self_drop(block)
         table["pools"][0]["conditions"].append({"condition": "minecraft:block_state_property", "block": rid(block),
                                                 "properties": {"half": "lower"}})
+        write(out / f"{block}.json", table)
+    import petro
+    for block, info in petro.BLOCKS.items():
+        table = self_drop(block)
+        if info["shape"] == "slab":
+            table["pools"][0]["entries"][0]["functions"] = [
+                {"function": "minecraft:set_count", "count": 2.0, "add": False, "conditions": [
+                    {"condition": "minecraft:block_state_property", "block": rid(block), "properties": {"type": "double"}}]},
+                {"function": "minecraft:explosion_decay"}]
         write(out / f"{block}.json", table)
     for rock, info in ROCKS.items():
         drop = info["drop"]
@@ -561,6 +592,16 @@ def recipes():
     import petro
     for kind, name, data in petro.fluid_recipe_files(condition):
         write(out / kind / f"{name}.json", data)
+    # Asphalt: gravel bound with asphalt binder; a slab is half a block; yellow dye paints the centre line.
+    oil = [c for f in (MACHINE_FEATURE, "crude_oil") for c in condition(f)]
+    for name, recipe in (
+            ("asphalt", shaped(MACHINE_FEATURE, ["GGG", "GBG", "GGG"],
+                               {"G": "minecraft:gravel", "B": rid("asphalt_binder")}, "asphalt", 8, "building")),
+            ("asphalt_slab", shaped(MACHINE_FEATURE, ["AAA"], {"A": rid("asphalt")}, "asphalt_slab", 6, "building")),
+            ("asphalt_road_line", shapeless(MACHINE_FEATURE, [rid("asphalt")] * 4 + ["minecraft:yellow_dye"],
+                                            "asphalt_road_line", 4, "building"))):
+        recipe["fabric:load_conditions"] = oil
+        write(out / f"{name}.json", recipe)
 
     # Dusts smelt back into ingots wherever the metal's ore could be smelted; the others use the arc furnace.
     for metal in COMPONENTS["dust"]:
@@ -686,6 +727,8 @@ def tags():
         tags.add("fluid", f"c:{fluid}", rid(f"flowing_{fluid}"))
     for gas in petro.GASES:
         tags.add("fluid", f"c:{gas}", rid(gas))
+    for block in petro.BLOCKS:
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     tags.write()
 
 

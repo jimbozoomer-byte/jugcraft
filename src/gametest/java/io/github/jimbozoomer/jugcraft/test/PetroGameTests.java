@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidFuels;
+import io.github.jimbozoomer.jugcraft.chemistry.PetroBlocks;
 import io.github.jimbozoomer.jugcraft.chemistry.OilReservoirs;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroItems;
@@ -32,6 +33,8 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 
@@ -394,5 +397,15 @@ public class PetroGameTests {
 					"Pellets: " + reactor.getItem(0));
 			helper.assertTrue(reactor.tanks().input(0).isResourceBlank(), "Gas left: " + reactor.tanks().input(0).millibuckets());
 		});
+	}
+
+	/** All three asphalt blocks speed up walking, and need a pickaxe. */
+	@GameTest
+	public void asphaltIsFasterToWalkOn(GameTestHelper helper) {
+		for (Block block : List.of(PetroBlocks.ASPHALT, PetroBlocks.ASPHALT_SLAB, PetroBlocks.ASPHALT_ROAD_LINE)) {
+			helper.assertTrue(block.getSpeedFactor() == PetroBlocks.ASPHALT_SPEED, block + " speed " + block.getSpeedFactor());
+			helper.assertTrue(block.defaultBlockState().is(BlockTags.MINEABLE_WITH_PICKAXE), block + " is not mined with a pickaxe");
+		}
+		helper.succeed();
 	}
 }

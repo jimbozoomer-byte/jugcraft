@@ -124,6 +124,13 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - Refinery gas now has two uses: burning it in the gas turbine (192,000 JE a bucket) or making four plastic sheets.
 - Recipe: steel plates, a cracking catalyst, two steel tanks, glass and a machine casing.
 
+### Asphalt (batch 4, commit 17)
+- **Asphalt:** 8 gravel around 1 asphalt binder → 8 asphalt. Dark grey with pale and rust-brown aggregate.
+- **Asphalt Slab:** 3 asphalt → 6 slabs. **Asphalt Road Line:** 4 asphalt + yellow dye → 4, with a dashed yellow centre line that points the way the player faced when placing it.
+- Walking on any of them is **1.3 times as fast** (vanilla block speed factor; soul sand is 0.4). Stone-hard, mined with a pickaxe.
+- A bucket of heavy fuel oil gives 2 binder, so 16 asphalt: the vacuum unit's residue now has a use.
+- Code: `chemistry/PetroBlocks` (`BLOCKS` in `tools/petro.py`).
+
 ### What refining gives (batch 2 summary)
 From one bucket of crude oil, with every byproduct refined:
 
@@ -169,6 +176,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 - Game test `frackingRigFreesShaleOil` (it takes fracking fluid through Fabric's fluid API, brings up crude oil, gas and flowback, and draws on the shale).
 - Game test `treatmentCleansFlowback`.
 - Game test `reactorMakesPlasticPellets`.
+- Game test `asphaltIsFasterToWalkOn` (all three blocks have the 1.3 speed factor and need a pickaxe).
 - Game test `gasTurbineNeedsLubricant` (no energy and no gasoline burnt without lubricant; with it, 384 JE per mB of gasoline and a little lubricant used).
 - Game test `dieselGeneratorBurnsDiesel` (its tank refuses crude oil through Fabric's fluid API, and each mB of diesel burnt adds exactly 256 JE).
 - Game test `pumpjackPumpsOil`: a powered pumpjack over pumpable oil fills its tank with crude oil and the reservoir goes down by as much.

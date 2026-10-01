@@ -161,7 +161,37 @@ def plastic_sheet():
     return img
 
 
+def asphalt(seed=963):
+    """Asphalt: dark grey-black binder with pale and rust-brown aggregate chips, worn a little lighter in patches.
+    Tiles seamlessly (no edge treatment)."""
+    rng = random.Random(seed)
+    img = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            base = 46 + rng.randint(-5, 5) + (6 if (x * 7 + y * 3) % 11 == 0 else 0)
+            img.putpixel((x, y), (base, base, base + 2, 255))
+    for _ in range(26):
+        x, y = rng.randrange(16), rng.randrange(16)
+        chip = rng.choice([(96, 94, 90), (118, 114, 106), (84, 70, 60), (70, 70, 72)])
+        img.putpixel((x, y), chip + (255,))
+    return img
+
+
+def asphalt_road_line():
+    """The top of a road-line block: asphalt with a dashed yellow centre line running north to south (the
+    blockstate turns it to the direction the player faced)."""
+    img = asphalt(964)
+    for y in range(16):
+        if y % 8 in (1, 2, 3, 4, 5):
+            for x in (7, 8):
+                shade = (226, 184, 40) if (x + y) % 5 else (196, 158, 34)
+                img.putpixel((x, y), shade + (255,))
+    return img
+
+
 def draw_all(save, save_animation):
+    save(asphalt(), "block", "asphalt")
+    save(asphalt_road_line(), "block", "asphalt_road_line")
     save(plastic_pellets(), "item", "plastic_pellets")
     save(plastic_sheet(), "item", "plastic_sheet")
     save(catalyst(), "item", "cracking_catalyst")

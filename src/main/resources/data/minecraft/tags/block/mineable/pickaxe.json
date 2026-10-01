@@ -112,6 +112,9 @@
     "jugcraft:conveyor",
     "jugcraft:conveyor_splitter",
     "jugcraft:charging_station",
-    "jugcraft:conveyor_slope"
+    "jugcraft:conveyor_slope",
+    "jugcraft:asphalt",
+    "jugcraft:asphalt_slab",
+    "jugcraft:asphalt_road_line"
   ]
 }

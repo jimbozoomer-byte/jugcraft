@@ -2094,6 +2094,30 @@
           }
         },
         {
+          "title": "Asphalt",
+          "icon": "jugcraft:asphalt",
+          "text": [
+            "Eight gravel around an asphalt binder (from the vacuum distillation unit) make eight asphalt.",
+            "Walking on asphalt, its slabs or road line is 1.3 times as fast. Three asphalt make six slabs.",
+            "Four asphalt and a yellow dye make four road line blocks; the dashed line points the way you face when you place it."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:gravel",
+              "minecraft:gravel",
+              "minecraft:gravel",
+              "minecraft:gravel",
+              "jugcraft:asphalt_binder",
+              "minecraft:gravel",
+              "minecraft:gravel",
+              "minecraft:gravel",
+              "minecraft:gravel"
+            ],
+            "result": "jugcraft:asphalt",
+            "count": 8
+          }
+        },
+        {
           "title": "Cracking Catalyst",
           "icon": "jugcraft:cracking_catalyst",
           "text": [

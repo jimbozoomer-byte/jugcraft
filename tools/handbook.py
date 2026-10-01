@@ -345,6 +345,13 @@ def build():
             machine_page("diesel_generator"),
             machine_page("gas_turbine"),
             machine_page("polymerization_reactor"),
+            {"title": "Asphalt", "icon": f"{MOD}:asphalt", "text": [
+                "Eight gravel around an asphalt binder (from the vacuum distillation unit) make eight asphalt.",
+                "Walking on asphalt, its slabs or road line is 1.3 times as fast. Three asphalt make six slabs.",
+                "Four asphalt and a yellow dye make four road line blocks; the dashed line points the way you face "
+                "when you place it."],
+             "craft": {"grid": ["minecraft:gravel"] * 4 + [f"{MOD}:asphalt_binder"] + ["minecraft:gravel"] * 4,
+                       "result": f"{MOD}:asphalt", "count": 8}},
             {"title": "Cracking Catalyst", "icon": f"{MOD}:cracking_catalyst", "text": [
                 "Bauxite (alumina) and sand (silica) with a nickel ingot make four. The catalytic cracker uses one for "
                 "each bucket of heavy fuel oil it cracks."], "craft": craft("cracking_catalyst")},
