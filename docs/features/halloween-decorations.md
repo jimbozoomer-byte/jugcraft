@@ -70,7 +70,38 @@ Primary specialty and supported player role: building and play; supports groups 
 No new dependencies. Every texture is drawn by code (`tools/decor_textures.py`), and the models, loot and tags come from `tools/decor_data.py`. The strand and pupils are drawn by the client (`StringLightsRenderer`, `HauntedPortraitRenderer`), and the fog by `FogParticle`.
 
 ## Verification
-VERIFICATION_PENDING
+Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions):
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the hooks', bowl's, coffin's and fog machine's numbers with Java, the portraits' eyes with Java and with the painted textures, every block state with a model, and every result a player can be told with its text) | Pass, 445 IDs |
+| `./gradlew build` on `853ebc9` (the code of this pull request; later commits only change docs and screenshots and remove a temporary probe workflow) | Pass |
+| Game tests on the headless server, same commit: 209 in total, 8 of them new here (`DecorGameTests`) | **All 209 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `853ebc9`; no model, texture or particle errors in the log |
+
+The 8 new game tests (`DecorGameTests`):
+1. using the strand on two hooks strings them and uses one strand; the same hook twice, more than 16 blocks, or a pair already strung (either way round) are refused; when the first hook already holds a strand the second takes it, so hooks chain; sneaking with an empty hand takes a strand down; breaking a hook drops its strand;
+2. a strand whose far hook is gone comes down within the next check and drops;
+3. a hook is dark unpowered, lights (light 10) on electricity using 1 JE a tick, goes dark without it, and lights at once from a redstone signal using none; a strand glows if either end is lit; the energy interface finds the hook's buffer;
+4. the bowl belongs to whoever placed it; dirt won't go in; treats fill it (up to 64) and its look follows; a visitor takes one treat a night and no second; its owner takes any time; the visitor ends up with exactly one treat; treats, owner and tonight's visitors survive a save and load; the next night the visitor may take another; breaking it spills every treat and drops the bowl;
+5. placing a coffin puts the head beside the foot; using it opens a 27-slot chest and lifts the lid on both halves, closing lowers it; sneak-using it sets the player's spawn; breaking it spills what is inside and drops one coffin;
+6. a portrait won't stand on the floor, hangs on the side of a block facing out, cycles through four sitters and back, keeps every eye inside its frame, and falls (dropping) when its wall is broken;
+7. switched on without power the fog machine doesn't run; with power it runs (light 6) using 16 JE a tick; switched off it stops; a redstone signal switches it on; it stops when its energy runs out; sneak-use widens the fog by 4 blocks and comes round again; the energy interface finds its buffer;
+8. the six recipes, five loot tables, tool tags and the fog particle load.
+
+The client game test (`DecorClientGameTests`) builds string lights on three fence posts, three Candy Bowls (empty, half full, heaped), an open and a closed Coffin, the four portraits on a wall and a running Fog Machine, and photographs them by day, up close and at midnight: the strands glow at night, the open coffin shows its velvet, the pupils are dark by day and red at night and lean toward the camera from the side, and fog lies on the ground round the machine.
+
+Found by CI and fixed before this record:
+- 26.3 blocks no longer have codecs, `PushReaction.DESTROY` is now `POPPED`, and `PoseStack` turns with `rotateDegrees` (compile errors).
+- Vanilla's bed rule makes beds explode in the Nether and the End; the coffin only refuses there, so 27 slots of belongings are never blown up.
+
+**Not run:**
+- a person playing it in a client;
+- a dedicated server with two players (one filling a bowl, another taking a treat; two players opening one coffin);
+- sleeping a whole night in a coffin, and respawning at one (the test checks that the spawn is set);
+- the coffin in the Nether or End (the refusal is one override, not exercised);
+- string lights powered through real cables from a generator, and the fog machine on a real network (the tests fill their buffers directly and check the energy interface finds them).
 
 ## World and event applicability
 - Decorations work all year, anywhere. The candy bowl uses the trick-or-treat night count but is not limited to the Halloween event.

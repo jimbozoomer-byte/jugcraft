@@ -408,7 +408,17 @@ Near midnight during the event, give a Scarecrow a lit pumpkin for a head and sn
 
 The first five of thirty Halloween decorations; the rest follow five at a time. All of them work all year. Details, numbers and test evidence: [../features/halloween-decorations.md](../features/halloween-decorations.md).
 
-DECOR_SCREENSHOTS_PENDING
+| **The decorations** by day: string lights on posts, Candy Bowls, Coffins, portraits and the Fog Machine's fog | **String lights** at midnight |
+| --- | --- |
+| ![Halloween decorations](../images/ingame_halloween_decorations.jpg) | ![String lights at night](../images/ingame_string_lights_night.jpg) |
+| **Candy Bowls:** empty, half full and heaped | **Coffins:** one open on its red velvet, one shut |
+| ![Candy Bowls](../images/ingame_candy_bowls.jpg) | ![Coffins](../images/ingame_coffins.jpg) |
+| **The Haunted Portraits:** the Lady in Black, the Old Captain, the Black Cat and the Owl | **At night** their eyes glow red |
+| ![Haunted Portraits](../images/ingame_haunted_portraits.jpg) | ![Haunted Portraits at night](../images/ingame_haunted_portraits_night.jpg) |
+| **The Fog Machine** at night, fog lying on the ground | |
+| ![Fog Machine at night](../images/ingame_fog_machine_night.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`DecorClientGameTests`, software rendering, small previews).*
 
 - **Jack-o'-Lantern String Lights:** fix **String Light Hooks** to floors, walls or ceilings and string a strand of tiny pumpkin bulbs between them (up to 16 blocks apart). A hook lights from redstone or from a trickle of electricity, and a strand glows while either end is lit.
 - **Candy Bowl:** fill it with candy and cookies for trick-or-treaters at your home. Each visitor may take one treat a night; you take any time.
