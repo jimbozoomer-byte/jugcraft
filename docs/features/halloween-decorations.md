@@ -1,9 +1,9 @@
 # Halloween decorations
 
 Status: implemented in source, not yet played. The Build workflow compiles it, and CI's game tests are recorded below.
-Proposal issue: none; requested directly by the owner on 1 October 2026 ("Come up with 30 halloween decorations and props and blocks that would be good ideas to make it more seasonal", then "after that lets do the 30 I just said"). They ship five at a time, one pull request per batch, like the earlier Halloween batches. This record covers the first ten. Batch 1: the Jack-o'-Lantern String Lights, the Candy Bowl, the Coffin, the Haunted Portrait and the Fog Machine. Batch 2: the Luminaria, Floating Candles, the Skeleton Hand Sconce, Soul-Flame Carvings and Bat Bunting. The other 20 come in later batches and will be added here.
+Proposal issue: none; requested directly by the owner on 1 October 2026 ("Come up with 30 halloween decorations and props and blocks that would be good ideas to make it more seasonal", then "after that lets do the 30 I just said"). They ship five at a time, one pull request per batch, like the earlier Halloween batches. This record covers the first fifteen. Batch 1: the Jack-o'-Lantern String Lights, the Candy Bowl, the Coffin, the Haunted Portrait and the Fog Machine. Batch 2: the Luminaria, Floating Candles, the Skeleton Hand Sconce, Soul-Flame Carvings and Bat Bunting. Batch 3, the graveyard: the Wrought-Iron Cemetery Fence and Gate, the crypt set, the Grave Mound, the Mourning Angel and the Pop-Up Skeleton. The other 15 come in later batches and will be added here.
 Owner: @jimbozoomer-byte
-Target milestone and tier: Milestone 3 (first homestead) for the bowl, coffin and portrait (Discovery tier: terracotta, planks, wool, a chest, a painting); the string lights' hooks need iron; the Fog Machine needs the electric network (copper cable, a generator). Batch 2 is all Discovery tier (paper, sand, candles, feathers, torches, bones, string, dye); soul-flame carvings need a soul torch (soul sand or soil, from the Nether or a soul sand valley).
+Target milestone and tier: Milestone 3 (first homestead) for the bowl, coffin and portrait (Discovery tier: terracotta, planks, wool, a chest, a painting); the string lights' hooks need iron; the Fog Machine needs the electric network (copper cable, a generator). Batch 2 is all Discovery tier (paper, sand, candles, feathers, torches, bones, string, dye); soul-flame carvings need a soul torch (soul sand or soil, from the Nether or a soul sand valley). Batch 3 is Discovery tier too (stone bricks, bone meal, calcite, dirt, rotten flesh, bones, planks, a slime ball), with iron for the fence and gate.
 Primary specialty and supported player role: building and play; supports groups (a candy bowl at your door for other players), builders (graveyards, haunted houses, yards) and engineers (powered lights and effects).
 
 ## Player experience
@@ -49,8 +49,25 @@ Primary specialty and supported player role: building and play; supports groups 
 ### Batch 2: Bat Bunting
 22. **Bat Bunting** (string, two paper, orange dye and black dye) is strung between String Light Hooks exactly like the string lights (the same rules, 16 blocks, one strand from each hook): a twine cord hung with orange and black pennants and little paper bats. A hook can hold bunting while lights run to it, so the two mix along a yard. It gives no light; taking it down or breaking its hook drops the bunting.
 
+### Batch 3: the Wrought-Iron Cemetery Fence and Gate
+23. **Cemetery Fence** (four iron bars and two iron ingots make six): spear-topped iron pickets between rails, on posts with finials. It is a real fence (it joins other fences, gates and walls the way nether brick fences do, not wooden ones, and stands 1.5 blocks high, so nothing jumps it).
+24. **Cemetery Gate** (two iron bars and four ingots): a two-leaf iron gate between spiked posts. It opens and shuts by hand or redstone like any fence gate and sits lower between walls.
+
+### Batch 3: the crypt set
+25. **Crypt Stone** (four stone bricks and bone meal make four): dark weathered bricks with cracks and lichen. **Chiseled Crypt Stone** (a carved skull in a sunken panel) and **Crypt Stone Pillars** (fluted; two from two stones, or one each in a stonecutter, which also makes the chiseled stone) build crypt fronts and mausoleums.
+26. **Crypt Door** (six crypt stones make three): a heavy stone slab door with iron bands, a carved cross and a barred grille. It opens by hand (and by redstone), like a wooden door, not an iron one.
+
+### Batch 3: the Grave Mound
+27. **Grave Mound** (two dirt and a rotten flesh): a low heap of fresh earth, low enough to walk over. Walk within three blocks of it and a zombie's hand claws up out of the earth, with a groan and a spray of dirt, for three seconds; then it rests five seconds before it can go again. **Sneak past and it stays down.** A redstone signal holds the hand up.
+
+### Batch 3: the Mourning Angel
+28. **Mourning Angel** (calcite, a feather and stone bricks): a two-block marble statue on a plinth, wings folded, head bowed into its hands. It faces whoever placed it, needs room above it, and drops once. **At night it weeps:** now and then a tear drips from its hands.
+
+### Batch 3: the Pop-Up Skeleton
+29. **Pop-Up Skeleton** (planks, bones and a slime ball for its spring): a weathered crate on the lawn. Come within two and a half blocks and its lid bangs open and a skeleton springs out on its spring, arms flung up, rattling, for two seconds; then it rests five seconds. Sneaking players creep past; redstone holds it up, so it can be set off with a pressure plate or tripwire too.
+
 ## Connections
-- Existing input producer: the electric network and its cables (hooks, fog machine), redstone, the trick-or-treat night count, Halloween candy and cookies (the bowl), vanilla terracotta, planks, red wool, chests, paintings, gold nuggets, spider eyes, iron, glowstone and dye. Batch 2: paper, sand, candles, feathers, torches, soul torches, bones, string and dye; flint and steel or fire charges to light; the hand-carved and giant pumpkins of pumpkin carving and the Halloween harvest; the String Light Hooks of batch 1.
+- Existing input producer: the electric network and its cables (hooks, fog machine), redstone, the trick-or-treat night count, Halloween candy and cookies (the bowl), vanilla terracotta, planks, red wool, chests, paintings, gold nuggets, spider eyes, iron, glowstone and dye. Batch 2: paper, sand, candles, feathers, torches, soul torches, bones, string and dye; flint and steel or fire charges to light; the hand-carved and giant pumpkins of pumpkin carving and the Halloween harvest; the String Light Hooks of batch 1. Batch 3: stone bricks, bone meal, iron bars and ingots, calcite, feathers, dirt, rotten flesh, bones, planks and slime balls; redstone (pressure plates, tripwires) to set off or hold up the scare props.
 - Existing output consumer: decoration, light (hooks, luminarias, floating candles, the sconce, soul-lit carvings), storage (the coffin), a respawn point (the coffin), a way to share treats with other players.
 - Technology connection: the hooks and the Fog Machine use the shared energy interface (`EnergyStorage.SIDED`), so any Jugcraft generator powers them, and the Fog Machine's recipe needs copper cable.
 - Magic connection: none yet; the portrait is a natural hook for later haunting.
@@ -66,6 +83,7 @@ Primary specialty and supported player role: building and play; supports groups 
 - Batch 2 uses no energy. A luminaria costs two paper, sand and a candle; a floating candle a candle and a feather; the sconce a torch and two bones; bunting string, two paper and two dyes. Dyeing a luminaria uses one dye; lighting uses flint and steel (one durability) or a fire charge.
 - Light: luminaria 10, floating candles 3 a candle (at most 12), the sconce 14 (a torch's), a soul-lit carving at most 10.
 - Breaking gives back exactly what was placed: one luminaria (with its colour), one floating candle per candle, one sconce, one bunting. None of them gives back its ingredients.
+- Batch 3 uses no energy. Six fences cost four iron bars (1.5 ingots) and two ingots; a gate two bars and four ingots. Four crypt stones cost four stone bricks and a bone meal; the stonecutter turns one crypt stone into one chiseled stone or one pillar (crafting makes two pillars from two). The scare props are purely cosmetic: they make no items, hurt nobody and summon nothing.
 - No conversion loops; nothing here makes items or energy.
 
 ## Multiplayer and persistence
@@ -74,6 +92,7 @@ Primary specialty and supported player role: building and play; supports groups 
   - Stringing (both hooks, 16 blocks, same dimension, not already strung), filling and taking treats, opening the coffin, lying down, changing portraits and switching the fog machine are all decided on the server.
   - Who owns a bowl and who has had a treat tonight are recorded on the server, never claimed by clients.
 - Batch 2: lighting, snuffing, dyeing, adding candles, putting a torch in a carving and stringing bunting all go through vanilla's block and item use paths and are decided on the server.
+- Batch 3: the scare props are watched by the server alone, from where players really are; clients only see the block change. The fence, gate and door are vanilla blocks.
 - **Client only.** The strands (and bunting), the portrait's pupils, the floating candles' bob and the fog are drawn by each client; the bob is worked out from the game time and the block's position, so every client sees the same. The pupils use only that client's camera, and the fog is only particles: it changes no block, hides nothing from the server and lets nobody through walls.
 - **Saved state.**
   - A hook keeps its strand and energy; a bowl its treats, owner and visitors (with the night); the coffin its slots (in its head half); the fog machine its energy.
@@ -85,16 +104,18 @@ Primary specialty and supported player role: building and play; supports groups 
   - Fog: at most 6 puffs a tick per machine and 24 a tick for all machines together on one client, only within 48 blocks of a player, each living 4 to 6 seconds.
   - A strand draws at most 3 segments per block of length plus its bulbs.
   - Batch 2: floating candles redraw only while in view and run no server ticks; luminarias, the sconce and soul-lit carvings tick only on clients for their particles, like vanilla torches and candles.
+  - Batch 3: each Grave Mound and Pop-Up Skeleton looks every 10 ticks, at the level's player list (no entity search), and on neighbour changes for redstone. The angel's tears are client particles at night.
 - New IDs only:
   - blocks with items: `string_light_hook`, `candy_bowl`, `coffin`, `haunted_portrait`, `fog_machine`; batch 2: `luminaria`, `floating_candle`, `skeleton_hand_sconce`;
   - items: `jack_o_lantern_string_lights`; batch 2: `bat_bunting`;
   - block entities: `string_light_hook`, `candy_bowl`, `coffin`, `haunted_portrait`, `fog_machine`; batch 2: `floating_candle`;
   - particle type: `fog`.
   - Batch 2 adds the `soul` block state property to the four hand-carved pumpkins (default `false`).
+  - Batch 3: blocks with items `cemetery_fence`, `cemetery_gate`, `crypt_stone`, `chiseled_crypt_stone`, `crypt_stone_pillar`, `crypt_door`, `grave_mound`, `mourning_angel`, `pop_up_skeleton`; block entity `scare_prop` (the mound's and skeleton's timers, saved as `down_at` and `ready_at`).
 - **The `agriculture` switch** turns off their recipes; placed blocks stay and work. Soul torches still light carvings with it off (it is the carvings' own use, like the torch).
 
 ## Dependencies and assets
-No new dependencies. Every texture is drawn by code (`tools/decor_textures.py`, batch 2 `tools/decor2_textures.py`, and the soul-lit carving icon in `tools/carving_textures.py`), and the models, loot and tags come from `tools/decor_data.py` and `tools/decor2_data.py`. The strands and bunting and the pupils are drawn by the client (`StringLightsRenderer`, `HauntedPortraitRenderer`), the floating candles by `FloatingCandleRenderer`, the soul-lit carvings by `CarvingTextures` (blue colours), and the fog by `FogParticle`.
+No new dependencies. Every texture is drawn by code (`tools/decor_textures.py`, batch 2 `tools/decor2_textures.py`, batch 3 `tools/decor3_textures.py`, and the soul-lit carving icon in `tools/carving_textures.py`), and the models, loot, tags and recipes come from `tools/decor_data.py`, `tools/decor2_data.py` and `tools/decor3_data.py`. The door uses vanilla's door model shapes (`minecraft:block/door_*`, by reference) with its own textures. The strands and bunting and the pupils are drawn by the client (`StringLightsRenderer`, `HauntedPortraitRenderer`), the floating candles by `FloatingCandleRenderer`, the soul-lit carvings by `CarvingTextures` (blue colours), and the fog by `FogParticle`.
 
 ## Verification
 Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions):
@@ -164,10 +185,15 @@ Found by CI and fixed before this record:
 - burning arrows or water on floating candles (they aren't handled, see below);
 - hollowing a soul-lit giant pumpkin into a barge (it keeps the torch as ordinary candlelight, see below).
 
+### Batch 3 verification
+
+Pending: the CI results for batch 3 are added here when its build has run.
+
 ## World and event applicability
 - Decorations work all year, anywhere. The candy bowl uses the trick-or-treat night count but is not limited to the Halloween event.
 - The coffin respects each dimension's bed rules.
 - Batch 2's decorations work anywhere; nothing about them depends on the Halloween event.
+- Batch 3 too: the scare props go off any time of day, and the angel weeps every night, event or not.
 - Fog is cosmetic and capped per client.
 
 ## Rollout and open questions
@@ -176,4 +202,6 @@ Found by CI and fixed before this record:
 - A soul-lit giant pumpkin hollowed into a Pumpkin Barge keeps its torch but glows with ordinary candlelight (the barge's saved data has no soul flame).
 - Floating candles can't be waterlogged: placed in water, they replace it. Unlike vanilla candles, a burning arrow doesn't light them and a water splash doesn't snuff them.
 - A dyed luminaria's item stacks only with bags of the same colour.
-- The other 20 decorations follow in later batches.
+- The scare props react to players only, not to mobs or villagers; they count spectators and sneaking players as nobody.
+- The Cemetery Gate makes a fence gate's wooden creak (vanilla gates take their sounds from a wood type).
+- The other 15 decorations follow in later batches.
