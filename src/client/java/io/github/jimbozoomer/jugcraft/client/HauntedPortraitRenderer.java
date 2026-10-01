@@ -82,7 +82,7 @@ public class HauntedPortraitRenderer implements BlockEntityRenderer<HauntedPortr
 		pose.pushPose();
 		pose.translate(0.5F, 0.5F, 0.5F);
 		// Turn so that +x is the viewer's right and +z points out of the painting.
-		pose.mulPose(Axis.YP.rotationDegrees(-state.facing.toYRot()));
+		pose.rotateDegrees(Axis.YP, -state.facing.toYRot());
 		int light = state.night ? FULL_BRIGHT : state.lightCoords;
 		int color = state.night ? 0xFFFF2A18 : 0xFF140E0A;
 		collector.submitCustomGeometry(pose, PUPIL, (matrix, buffer) -> {
