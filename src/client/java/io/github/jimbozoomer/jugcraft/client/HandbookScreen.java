@@ -44,9 +44,9 @@ public class HandbookScreen extends Screen {
 	private static final int FOOTER = 20;
 	private static final int SCROLL_STEP = 12;
 	/** Progression steps: the size of one step's card and the gap (with an arrow) between cards. */
-	private static final int STEP_WIDTH = 56;
+	private static final int STEP_WIDTH = 62;
 	private static final int STEP_HEIGHT = 50;
-	private static final int STEP_GAP = 10;
+	private static final int STEP_GAP = 8;
 
 	// GLFW key codes.
 	private static final int KEY_RIGHT = 262;
