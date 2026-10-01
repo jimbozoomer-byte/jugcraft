@@ -19,8 +19,9 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
  * Draws a worn Ghost Sheet over the whole wearer, not just the head: a hood with eye holes over the head, the sheet
  * hanging from the shoulders past the hips, and the cloth over the arms and thighs. Each piece is fixed to the body
  * part under it, so the sheet turns with the head, bends when sneaking and swings with the arms and legs. Added to
- * every humanoid renderer (players, costumed zombies and skeletons, armor stands). The item's own model is hidden when
- * worn (its "head" display is scaled to nothing), so only this is drawn.
+ * every humanoid renderer (players, costumed zombies and skeletons, armor stands). The sheet's equipment asset has no
+ * layers, so the armor layer draws nothing for it and the item is not drawn as a block on the head; having an asset is
+ * also what puts it in the render state's head equipment, which this layer reads.
  *
  * <p>The texture (entity/ghost_sheet, 128x64) is laid out like a vanilla model's boxes; tools/regatta_textures.py
  * paints the same {@link #HOOD}... boxes, the eyes on the hood's front.

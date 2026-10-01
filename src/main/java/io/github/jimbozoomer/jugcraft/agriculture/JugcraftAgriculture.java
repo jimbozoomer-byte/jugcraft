@@ -47,6 +47,7 @@ import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -529,7 +530,9 @@ public final class JugcraftAgriculture {
 		for (String costume : COSTUMES) {
 			Equippable.Builder worn = Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER);
 			if (costume.equals("ghost_sheet")) {
-				worn.setCameraOverlay(Jugcraft.id("misc/ghost_sheet"));
+				// Its equipment asset has no layers: nothing is drawn by the armor layer or as a block on the head, and the
+				// client's GhostSheetLayer drapes the whole sheet over the wearer (it reads equipment that has an asset).
+				worn.setCameraOverlay(Jugcraft.id("misc/ghost_sheet")).setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id("ghost_sheet")));
 			}
 			registerItem(costume, Item::new, new Item.Properties().stacksTo(1).component(DataComponents.EQUIPPABLE, worn.build()), TOOL_TAB);
 		}
