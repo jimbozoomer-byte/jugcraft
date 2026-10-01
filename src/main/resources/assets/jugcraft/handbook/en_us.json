@@ -125,6 +125,16 @@
             "Strong Attraction: Make a neodymium magnet.",
             "Lossless (Almost): Build a magnet dynamo or magnet motor."
           ]
+        },
+        {
+          "title": "Milestones (9)",
+          "icon": "jugcraft:silicon_boule",
+          "text": [
+            "Pulling Strings: Grow a silicon boule in the crystal grower.",
+            "Etched in Light: Etch microchips in the lithography station.",
+            "Central Processing: Assemble a processor.",
+            "Hello, World: Build a network terminal."
+          ]
         }
       ]
     },

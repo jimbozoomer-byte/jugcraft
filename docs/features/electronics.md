@@ -1,6 +1,6 @@
 # Electronics: silicon, chips and the cyan look
 
-Status: in progress (batch 7)
+Status: implemented (batch 7, #56)
 Proposal issue: owner request, 1 October 2026 ("merge it and start the next batch"), following suggestion 3 from batch 5 ("Electronics tier in the cyan look")
 Owner: jimbozoomer-byte
 Target milestone and tier: the high-tech tier after oil and chemistry
@@ -44,6 +44,9 @@ The owner's references for the tier after oil: dark sci-fi casings with cyan gla
 - It uses no power, stores none, and is not a device on the network; cables connect to it on every side.
 - Recipe: glass panes, a processor, plastic sheets, redstone, copper cables and a button.
 - Code: `electronics/NetworkTerminalBlock`, `JugcraftElectronics`; `EnergyNetworks.view` exposes a network's cables, rate and storage faces.
+
+### Advancements
+Pulling Strings (silicon boule), Etched in Light (microchips), Central Processing (processor) and Hello, World (network terminal), after Kroll Call.
 
 ## Connections
 - Existing input producer: silicon (arc furnace from quartz), phosphate (mined), titanium (batch 6), the sawmill.
