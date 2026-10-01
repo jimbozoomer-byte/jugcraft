@@ -71,7 +71,7 @@ public class PumpkinCrateBlock extends BaseEntityBlock {
 			return InteractionResult.PASS;
 		}
 		if (crate.isFull()) {
-			return InteractionResult.FAIL; // (not PASS: that would set the pumpkin down on top of the crate)
+			return InteractionResult.CONSUME; // (not PASS or FAIL: either would set the pumpkin down on top of the crate)
 		}
 		if (!level.isClientSide()) {
 			crate.add(stack.split(1));

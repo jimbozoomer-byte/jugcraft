@@ -20,8 +20,9 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * What a player sits on when they sit on a {@link Sittable} block: an invisible entity at the seat's surface. It is
- * made when someone sits down and goes as soon as nobody is on it or its block is no longer a seat, so it is never
- * saved and never outlives its sitter.
+ * made when someone sits down and goes as soon as nobody is on it or its block is no longer a seat, so it never
+ * outlives its sitter. (It can be saved, as players may only ride what can be: a player who leaves while sitting comes
+ * back sitting, and a seat saved empty goes on its first tick.)
  */
 public class Seat extends Entity {
 	public Seat(EntityType<? extends Seat> type, Level level) {

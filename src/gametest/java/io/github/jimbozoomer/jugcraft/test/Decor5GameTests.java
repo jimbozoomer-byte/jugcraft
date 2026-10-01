@@ -150,19 +150,21 @@ public class Decor5GameTests {
 		player.getInventory().clearContent();
 
 		int tries = 0;
+		int caught = 0;
 		while (apples(helper, pos) > 0 && tries < 80) {
 			tries++;
 			use(helper, player, pos, Direction.UP);
 			helper.assertTrue(helper.getBlockState(pos).getValue(BobbingTubBlock.SPLASHING), "Ducking splashes the water");
+			// A caught apple lands in the empty hand; put it away, so the next try is with an empty hand again.
+			caught += count(player, Items.APPLE);
+			player.getInventory().clearContent();
 			int before = apples(helper, pos);
 			helper.assertFalse(use(helper, player, pos, Direction.UP).consumesAction(), "While it splashes, nobody may try again");
-			helper.assertTrue(apples(helper, pos) == before, "and the second try does nothing");
-			helper.assertTrue(apples(helper, pos) + count(player, Items.APPLE) == BobbingTubBlock.MAX_APPLES,
-					"Every apple is either afloat or caught");
+			helper.assertTrue(apples(helper, pos) == before && count(player, Items.APPLE) == 0, "and the second try does nothing");
+			helper.assertTrue(apples(helper, pos) + caught == BobbingTubBlock.MAX_APPLES, "Every apple is either afloat or caught");
 			helper.setBlock(pos, helper.getBlockState(pos).setValue(BobbingTubBlock.SPLASHING, false));
 		}
-		helper.assertTrue(apples(helper, pos) == 0 && count(player, Items.APPLE) == BobbingTubBlock.MAX_APPLES,
-				"In time every apple is caught (" + tries + " tries)");
+		helper.assertTrue(apples(helper, pos) == 0 && caught == BobbingTubBlock.MAX_APPLES, "In time every apple is caught (" + tries + " tries)");
 
 		BlockPos full = new BlockPos(6, 2, 6);
 		helper.setBlock(full, block("bobbing_tub").defaultBlockState().setValue(BobbingTubBlock.APPLES, 2));
@@ -263,30 +265,37 @@ public class Decor5GameTests {
 		});
 	}
 
-	/** Pigs dropped eight blocks onto a hay bale and a full leaf pile are hurt less than one dropped onto stone. */
-	@GameTest(maxTicks = 200)
+	/**
+	 * The same ten-block fall hurts a pig less onto a hay bale or a full leaf pile than onto stone, and a single layer
+	 * of leaves softens it less than a full pile.
+	 */
+	@GameTest
 	public void balesAndLeafPilesSoftenFalls(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
 		floor(helper);
-		BlockPos bale = new BlockPos(1, 2, 1);
-		BlockPos pile = new BlockPos(4, 2, 1);
-		BlockPos stone = new BlockPos(1, 2, 5);
+		BlockPos stone = new BlockPos(1, 1, 1);
+		BlockPos bale = new BlockPos(3, 2, 1);
+		BlockPos full = new BlockPos(5, 2, 1);
+		BlockPos thin = new BlockPos(1, 2, 4);
 		helper.setBlock(bale, block("hay_bale_seat"));
-		helper.setBlock(pile, block("red_leaf_pile").defaultBlockState().setValue(LeafPileBlock.LAYERS, LeafPileBlock.MAX_LAYERS));
-		helper.setBlock(stone, Blocks.STONE);
+		helper.setBlock(full, block("red_leaf_pile").defaultBlockState().setValue(LeafPileBlock.LAYERS, LeafPileBlock.MAX_LAYERS));
+		helper.setBlock(thin, block("red_leaf_pile"));
 		EntityType<Mob> pigType = vanilla("pig");
-		Mob onBale = helper.spawn(pigType, bale.above(9));
-		Mob onPile = helper.spawn(pigType, pile.above(9));
-		Mob onStone = helper.spawn(pigType, stone.above(9));
-		float full = onStone.getMaxHealth();
-		helper.succeedWhen(() -> {
-			for (Mob pig : List.of(onBale, onPile, onStone)) {
-				helper.assertTrue(pig.onGround() && pig.tickCount > 20, "The pigs have landed");
-			}
-			float stoneHurt = full - onStone.getHealth();
-			helper.assertTrue(stoneHurt > 0, "The fall onto stone hurts");
-			helper.assertTrue(full - onBale.getHealth() < stoneHurt, "The bale softens the fall: " + onBale.getHealth() + " vs " + onStone.getHealth());
-			helper.assertTrue(full - onPile.getHealth() < stoneHurt, "The leaf pile softens the fall: " + onPile.getHealth() + " vs " + onStone.getHealth());
-		});
+		float[] hurt = new float[4];
+		BlockPos[] onto = {stone, bale, full, thin};
+		for (int i = 0; i < onto.length; i++) {
+			Mob pig = helper.spawnWithNoFreeWill(pigType, onto[i].above());
+			float before = pig.getHealth();
+			BlockPos at = helper.absolutePos(onto[i]);
+			BlockState state = level.getBlockState(at);
+			state.getBlock().fallOn(level, state, at, pig, 10.0);
+			hurt[i] = before - pig.getHealth();
+		}
+		helper.assertTrue(hurt[0] > 0, "Ten blocks onto stone hurts: " + hurt[0]);
+		helper.assertTrue(hurt[1] < hurt[0], "The bale softens it: " + hurt[1] + " against " + hurt[0]);
+		helper.assertTrue(hurt[2] < hurt[0] && hurt[2] < hurt[3], "A full leaf pile softens it most: " + hurt[2]);
+		helper.assertTrue(hurt[3] < hurt[0], "A single layer of leaves softens it a little: " + hurt[3]);
+		helper.succeed();
 	}
 
 	// ---------------------------------------------------------------- the autumn wreath
