@@ -13,7 +13,7 @@ No numbered release yet. Everything below is on `main`.
 - **Flow battery** (3×3×2): 1,000 JE per mB of electrolyte in it, up to 64,000,000 JE with 64 buckets; 8,192 JE/t in and out. Keeps its electrolyte when broken.
 - An advancement, a handbook page and a game test.
 
-### Unmerged: Glass chemistry, batch 16
+### #72 Glass chemistry, batch 16
 - **Tincal**, natural borax, in desert and badlands sand; **borax**.
 - **Borosilicate glass** (2 sand + borax, alloy smelter) drawn into **optical fibre**, which can replace gold in processors.
 - **Ferroboron** (iron + borax): with a rare earth oxide it makes **two** neodymium magnets.
