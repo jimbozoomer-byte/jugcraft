@@ -424,8 +424,8 @@ def progression_pages():
     overview = {"title": "The Road Ahead", "icon": f"{MOD}:engineers_handbook", "text": [
         "Jugcraft builds in stages; each needs the one before. Pick a stage on the left to see its steps.",
         "You do not have to finish a stage before starting the next, but its parts are needed later."],
-        "steps": [{"item": f"{MOD}:{icon}", "label": f"{n + 1}. {title}"}
-                  for n, (title, icon, _, _, _) in enumerate(PROGRESSION)]}
+        "steps": [{"item": f"{MOD}:{icon}", "label": title}
+                  for title, icon, _, _, _ in PROGRESSION]}
     pages = [overview]
     for n, (title, icon, summary, plan, steps) in enumerate(PROGRESSION):
         pages.append({"title": f"{n + 1}. {title}", "icon": f"{MOD}:{icon}", "text": [summary] + plan,

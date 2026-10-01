@@ -14,35 +14,35 @@
           "steps": [
             {
               "item": "jugcraft:bronze_ingot",
-              "label": "1. Bronze Age"
+              "label": "Bronze Age"
             },
             {
               "item": "jugcraft:basic_circuit",
-              "label": "2. Workshop"
+              "label": "Workshop"
             },
             {
               "item": "jugcraft:iron_shaft",
-              "label": "3. Rotation and Logistics"
+              "label": "Rotation and Logistics"
             },
             {
               "item": "jugcraft:steel_ingot",
-              "label": "4. Steel"
+              "label": "Steel"
             },
             {
               "item": "jugcraft:crude_oil_bucket",
-              "label": "5. Oil"
+              "label": "Oil"
             },
             {
               "item": "jugcraft:electrolytic_cell",
-              "label": "6. Chemistry"
+              "label": "Chemistry"
             },
             {
               "item": "jugcraft:processor",
-              "label": "7. Electronics"
+              "label": "Electronics"
             },
             {
               "item": "jugcraft:flow_battery",
-              "label": "8. Late Game"
+              "label": "Late Game"
             }
           ]
         },
