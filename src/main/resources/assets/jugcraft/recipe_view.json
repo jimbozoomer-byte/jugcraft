@@ -2950,6 +2950,27 @@
           ],
           "results": [],
           "ticks": 200
+        },
+        {
+          "items": [
+            [
+              "jugcraft:alumina",
+              2
+            ],
+            [
+              "jugcraft:coke",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:aluminum_ingot",
+              2
+            ]
+          ],
+          "ticks": 160
         }
       ]
     },
@@ -2978,6 +2999,28 @@
           ],
           "results": [],
           "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "jugcraft:bauxite",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:lye",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:alumina",
+              2
+            ]
+          ],
+          "ticks": 120
         }
       ]
     },

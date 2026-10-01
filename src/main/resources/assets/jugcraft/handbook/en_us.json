@@ -2251,6 +2251,15 @@
             "result": "jugcraft:chemical_reactor",
             "count": 1
           }
+        },
+        {
+          "title": "Aluminum, the Real Way",
+          "icon": "jugcraft:alumina",
+          "text": [
+            "Digest a bauxite in 250 mB of lye in the chemical reactor: two alumina.",
+            "Smelt two alumina with a coal coke anode in the electrolytic cell: two aluminum ingots, every 8 seconds.",
+            "That is two ingots from each bauxite, twice what the arc furnace gets and far more than the blast furnace's nugget."
+          ]
         }
       ]
     },

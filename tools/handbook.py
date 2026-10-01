@@ -379,6 +379,12 @@ def build():
                 "chlorine, hydrogen and lye. Gases live only in tanks and pipes."]},
             machine_page("electrolytic_cell"),
             machine_page("chemical_reactor"),
+            {"title": "Aluminum, the Real Way", "icon": f"{MOD}:alumina", "text": [
+                "Digest a bauxite in 250 mB of lye in the chemical reactor: two alumina.",
+                "Smelt two alumina with a coal coke anode in the electrolytic cell: two aluminum ingots, every 8 "
+                "seconds.",
+                "That is two ingots from each bauxite, twice what the arc furnace gets and far more than the blast "
+                "furnace's nugget."]},
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

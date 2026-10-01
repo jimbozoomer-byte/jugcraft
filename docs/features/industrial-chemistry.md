@@ -24,13 +24,20 @@ Salt, sulfur, phosphate and bauxite have been in the world since the first ores,
 - The reactor has one tank in, one tank out, two item slots and an output slot; bauxite digestion (commit 23) and fertilizer (commit 24) run in it too.
 - Recipe: steel plates, glass, two tinplate tanks, a machine casing and a lead ingot.
 
+### Alumina and real aluminum (commit 23)
+- **Bayer process** (chemical reactor): **1 bauxite + 250 mB of lye → 2 alumina**, 120 ticks.
+- **Hall–Héroult process** (electrolytic cell): **2 alumina + 1 coal coke → 2 aluminum ingots**, 160 ticks at 256 JE/t. The coke is the anode, which burns away.
+- **Two ingots from each bauxite**, against one from the arc furnace and a nugget from the blast furnace. Those two stay as the simpler stand-ins. The data audit now counts a bauxite as two ingots of aluminum (it is about half alumina) and an alumina as one.
+- Cost per pair of ingots: 40,960 JE in the cell, 3,840 in the reactor and half a bucket of brine's electrolysis for the lye (25,600 JE and a salt). That is about 35,000 JE an ingot, against 12,800 in the arc furnace: more power, twice the metal.
+- `check_mod_data` now audits metal in fluid recipes too: no fluid machine gives out more metal than its items hold.
+
 ## Connections
 - Existing input producer: rock salt ore and the flowback treatment unit (salt); crushed sulfur (sulfur dust); water pumps.
 - Existing output consumer: tanks and pipes now; lye goes to bauxite digestion (commit 23), hydrogen to the fuel cell (commit 25), chlorine to later chemistry.
 - Technology connection: the oil line's fluid machines and the chemical mixer.
 - Magic connection: none.
 - Reachable entry path: salt is mined from the start; the mixer and cell need only steel-tier parts. No circular unlock.
-- Required vs optional: optional; aluminum keeps its blast-furnace and arc-furnace stand-ins.
+- Required vs optional: optional; aluminum keeps its blast-furnace and arc-furnace stand-ins, now the lossy routes.
 - For infrastructure/cosmetics: not applicable.
 
 ## Balance and automation
@@ -45,7 +52,7 @@ No new dependencies. Textures and models are original (`tools/petro_textures.py`
 
 ## Verification
 - `tools/check_mod_data.py` audits the new fluids, gases and recipes like the oil line's.
-- Game tests `mixerMakesBrine`, `cellSplitsBrine` and `reactorMakesSulfuricAcid` (PetroGameTests).
+- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` and `bayerRouteMakesAluminum` (PetroGameTests).
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.

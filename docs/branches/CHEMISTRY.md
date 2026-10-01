@@ -19,7 +19,7 @@ These materials already exist and are obtainable. Chemistry will give them their
 | Item | Current source | Current stand-in use | Chemistry plan |
 | --- | --- | --- | --- |
 | Salt | Rock salt ore | None | Brine electrolysis → lye (sodium hydroxide) and chlorine |
-| Bauxite | Surface rock | Blast furnace → 1 aluminum nugget; arc furnace → 1 aluminum ingot | Lye digestion → alumina, then electrolysis → aluminum (the real route) |
+| Bauxite | Surface rock | Blast furnace → 1 aluminum nugget; arc furnace → 1 aluminum ingot | **Done (batch 5):** lye digestion → 2 alumina, electrolysis with a coke anode → 2 aluminum ingots |
 | Sulfur dust | Crushed vanilla sulfur | None | Sulfuric acid |
 | Phosphate | Phosphorite ore | None | Phosphate + sulfuric acid → fertilizer (for the farming pillar) |
 | Lepidolite / lithium carbonate | Lepidolite ore | Blast or arc furnace → lithium carbonate | Leaching and precipitation; battery compounds |

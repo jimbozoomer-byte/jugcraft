@@ -472,4 +472,23 @@ public class PetroGameTests {
 			helper.assertTrue(reactor.getItem(0).isEmpty(), "The reactor kept its sulfur");
 		});
 	}
+
+	/** The Bayer route: a bauxite digested in 250 mB of lye gives two alumina, and the electrolytic cell smelts two
+	 * alumina with a coke anode into two aluminum ingots. */
+	@GameTest(maxTicks = 400)
+	public void bayerRouteMakesAluminum(GameTestHelper helper) {
+		MachineBlockEntity reactor = place(helper, MachineKind.CHEMICAL_REACTOR, new BlockPos(2, 1, 1));
+		reactor.tanks().input(0).fill(PetroFluids.LYE.source(), 250);
+		reactor.setItem(0, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("bauxite"))));
+		MachineBlockEntity cell = place(helper, MachineKind.ELECTROLYTIC_CELL, new BlockPos(5, 1, 4));
+		cell.setItem(0, new ItemStack(PetroItems.ALUMINA, 2));
+		cell.setItem(1, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("coke"))));
+		helper.succeedWhen(() -> {
+			helper.assertTrue(reactor.getItem(reactor.kind().outputSlot()).is(PetroItems.ALUMINA)
+					&& reactor.getItem(reactor.kind().outputSlot()).getCount() == 2, "Alumina: " + reactor.getItem(reactor.kind().outputSlot()));
+			ItemStack ingots = cell.getItem(cell.kind().outputSlot());
+			helper.assertTrue(ingots.is(BuiltInRegistries.ITEM.getValue(Jugcraft.id("aluminum_ingot"))) && ingots.getCount() == 2,
+					"Aluminum: " + ingots);
+		});
+	}
 }

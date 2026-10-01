@@ -69,6 +69,8 @@ ITEMS = {
     # Polymerized refinery gas; the metal press flattens each into a plastic sheet.
     "plastic_pellets": "Plastic Pellets",
     "plastic_sheet": "Plastic Sheet",
+    # Bayer-process alumina (batch 5): the electrolytic cell smelts it into aluminum.
+    "alumina": "Alumina",
 }
 
 
@@ -212,12 +214,18 @@ FLUID_RECIPES = {
         {"name": "brine", "fluids": [("jugcraft:brine", 1000)],
          "fluid_results": [("jugcraft:chlorine", 250), ("jugcraft:hydrogen", 250), ("jugcraft:lye", 500)],
          "ticks": 200, "features": ["salt"]},
+        # The Hall-Heroult process: alumina dissolved in molten salt and split with a coke anode, which burns away.
+        {"name": "aluminum", "items": [("jugcraft:alumina", 2), ("jugcraft:coke", 1)],
+         "results": [("jugcraft:aluminum_ingot", 2)], "ticks": 160, "features": ["aluminum"]},
     ],
     # Sulfur burnt to sulfur trioxide and absorbed in water (the contact process, simplified): two sulfur dust and a
     # bucket of water make a bucket of sulfuric acid.
     "chemical_reactor": [
         {"name": "sulfuric_acid", "items": [("jugcraft:sulfur_dust", 2)], "fluids": [("minecraft:water", 1000)],
          "fluid_results": [("jugcraft:sulfuric_acid", 1000)], "source": 0, "ticks": 100, "features": ["sulfur"]},
+        # The Bayer process: bauxite digested in hot lye leaves alumina (each bauxite holds two ingots' worth).
+        {"name": "alumina", "items": [("jugcraft:bauxite", 1)], "fluids": [("jugcraft:lye", 250)],
+         "results": [("jugcraft:alumina", 2)], "ticks": 120, "features": ["aluminum", "salt"]},
     ],
     # Flowback water settles and is filtered: most of it comes back as clean water; the brine leaves salt. A quarter
     # is lost (sludge), so fracking water is never free.
