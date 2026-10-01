@@ -439,4 +439,25 @@ public class PetroGameTests {
 			helper.succeed();
 		});
 	}
+
+	/** The chemical mixer dissolves two salt in a bucket of water to make a bucket of brine. */
+	@GameTest(maxTicks = 200)
+	public void mixerMakesBrine(GameTestHelper helper) {
+		MachineBlockEntity mixer = place(helper, MachineKind.CHEMICAL_MIXER, new BlockPos(4, 1, 2));
+		mixer.tanks().input(0).fill(Fluids.WATER, 1000);
+		mixer.setItem(0, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("salt")), 2));
+		helper.succeedWhen(() -> helper.assertTrue(mixer.tanks().output(0).has(PetroFluids.BRINE.source(), 1000), "No brine"));
+	}
+
+	/** The electrolytic cell splits a bucket of brine into 250 mB of chlorine, 250 mB of hydrogen and 500 mB of lye. */
+	@GameTest(maxTicks = 400)
+	public void cellSplitsBrine(GameTestHelper helper) {
+		MachineBlockEntity cell = place(helper, MachineKind.ELECTROLYTIC_CELL, new BlockPos(4, 1, 2));
+		cell.tanks().input(0).fill(PetroFluids.BRINE.source(), 1000);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(cell.tanks().output(0).has(PetroFluids.CHLORINE.fluid(), 250), "Chlorine: " + cell.tanks().output(0).millibuckets());
+			helper.assertTrue(cell.tanks().output(1).has(PetroFluids.HYDROGEN.fluid(), 250), "Hydrogen: " + cell.tanks().output(1).millibuckets());
+			helper.assertTrue(cell.tanks().output(2).has(PetroFluids.LYE.source(), 500), "Lye: " + cell.tanks().output(2).millibuckets());
+		});
+	}
 }

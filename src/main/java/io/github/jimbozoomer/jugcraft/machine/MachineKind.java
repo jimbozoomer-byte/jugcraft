@@ -74,7 +74,9 @@ public enum MachineKind implements StringRepresentable {
 	// A 2x2x3 jacketed reactor: refinery gas in, plastic pellets out.
 	POLYMERIZATION_REACTOR("polymerization_reactor", 30_000, 512, 0, 96, 1),
 	// A 2x2x3 V8 diesel engine: burns diesel or heavy fuel oil and turns a shaft out of its back.
-	DIESEL_ENGINE("diesel_engine", 0, 0, 0, 0, 0);
+	DIESEL_ENGINE("diesel_engine", 0, 0, 0, 0, 0),
+	// A 3x3x2 electrolysis house: brine in; chlorine, hydrogen and lye out (and alumina + coke into aluminum).
+	ELECTROLYTIC_CELL("electrolytic_cell", 60_000, 1_024, 0, 256, 3);
 
 	/** JE produced per tick while the coal generator burns. */
 	public static final int GENERATION_PER_TICK = 32;
@@ -178,6 +180,9 @@ public enum MachineKind implements StringRepresentable {
 	public static final int DIESEL_ENGINE_OUTPUT = 512;
 	public static final int DIESEL_ENGINE_TANK = 8_000;
 	public static final int DIESEL_ENGINE_OUTPUT_PART = 11;
+	/** Electrolytic cell: each tank, and the layers its outputs leave from (chlorine top, hydrogen middle, lye base). */
+	public static final int CELL_TANK = 8_000;
+	private static final int[] CELL_DRAW_OFFS = {2, 1, 0};
 	/** Polymerization reactor: its refinery gas tank. */
 	public static final int REACTOR_TANK = 8_000;
 	/** Ticks the electric furnace needs per item (the vanilla furnace needs 200). */
@@ -250,6 +255,7 @@ public enum MachineKind implements StringRepresentable {
 			case CHEMICAL_MIXER -> "chemical_mixing";
 			case FLOWBACK_TREATMENT_UNIT -> "water_treatment";
 			case POLYMERIZATION_REACTOR -> "polymerization";
+			case ELECTROLYTIC_CELL -> "electrolysis";
 			default -> null;
 		};
 	}
@@ -286,6 +292,7 @@ public enum MachineKind implements StringRepresentable {
 			case GAS_TURBINE -> new FluidMachineSpec(List.of(TURBINE_TANK, TURBINE_LUBRICANT_TANK), List.of(), 0, 0);
 			case POLYMERIZATION_REACTOR -> new FluidMachineSpec(List.of(REACTOR_TANK), List.of(), 0, 1);
 			case DIESEL_ENGINE -> new FluidMachineSpec(List.of(DIESEL_ENGINE_TANK), List.of(), 0, 0);
+			case ELECTROLYTIC_CELL -> new FluidMachineSpec(List.of(CELL_TANK), List.of(CELL_TANK, CELL_TANK, CELL_TANK), 2, 1);
 			default -> null;
 		};
 	}
@@ -300,6 +307,7 @@ public enum MachineKind implements StringRepresentable {
 			case CATALYTIC_CRACKER -> CRACKER_DRAW_OFFS[tank];
 			case CATALYTIC_REFORMER -> REFORMER_DRAW_OFFS[tank];
 			case FRACKING_RIG -> FRACK_DRAW_OFFS[tank];
+			case ELECTROLYTIC_CELL -> CELL_DRAW_OFFS[tank];
 			default -> -1;
 		};
 	}
@@ -379,6 +387,7 @@ public enum MachineKind implements StringRepresentable {
 			case GAS_TURBINE -> Footprint.cuboid(4, 2, 2);
 			case POLYMERIZATION_REACTOR -> Footprint.cuboid(2, 3, 2);
 			case DIESEL_ENGINE -> Footprint.cuboid(2, 2, 3);
+			case ELECTROLYTIC_CELL -> Footprint.cuboid(3, 3, 2);
 			default -> Footprint.SINGLE;
 		};
 	}

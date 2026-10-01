@@ -389,6 +389,16 @@ The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches
 | Asphalt, Asphalt Slab, Asphalt Road Line | Road blocks; walking on them is 1.3× as fast | 8 gravel + asphalt binder → 8; 3 asphalt → 6 slabs; 4 asphalt + yellow dye → 4 road line (faces the placer) | – |
 | Plastic Pellets, Plastic Sheet | Pellets from the reactor; the metal press makes a sheet from each (60 ticks) | for later machines (first: the diesel engine) | – |
 
+### Industrial chemistry
+
+Salt, sulfur, phosphate and bauxite get their real reactions ([feature record](features/industrial-chemistry.md)).
+
+| Thing | What it does | Details | Built from |
+| --- | --- | --- | --- |
+| Brine, Lye | Fluids with buckets: salt water, and sodium hydroxide solution | `c:brine`, `c:lye` | chemical mixer (2 salt + 1,000 mB water → 1,000 mB brine), electrolytic cell |
+| Chlorine, Hydrogen | Gases: tanks and pipes only | `c:chlorine`, `c:hydrogen` | electrolytic cell |
+| Electrolytic Cell | 3 wide, 3 tall, 2 deep; splits brine | 1,000 mB brine → 250 chlorine (top row), 250 hydrogen (middle row), 500 lye (bottom row); 200 ticks at 256 JE/t | 4 steel plates, 2 aluminum cables, 2 steel tanks, advanced circuit, casing |
+
 **Fluid processing machines** (the pumpjack and extractor are the first): input tanks take only fluids the machine's recipes use; output tanks push into neighbouring tanks and pipes; the screen shows a gauge per tank. Recipes are data in `data/jugcraft/recipe/<type>/` (see [petrochemistry.md](features/petrochemistry.md)).
 
 ## Ore processing

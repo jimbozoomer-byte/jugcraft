@@ -35,6 +35,13 @@ FLUIDS = {
     "flowback_water": {"display": "Flowback Water", "feature": "crude_oil",
                        "colors": [(70, 64, 50), (100, 92, 72), (130, 120, 96), (172, 162, 132)],
                        "tick_delay": 5, "slope": 4, "drop_off": 1},
+    # Industrial chemistry (batch 5): salt brine for the electrolytic cell, and the lye it makes.
+    "brine": {"display": "Brine", "feature": "salt",
+              "colors": [(110, 140, 160), (150, 178, 194), (190, 210, 220), (232, 240, 244)],
+              "tick_delay": 5, "slope": 4, "drop_off": 1},
+    "lye": {"display": "Lye", "feature": "salt",
+            "colors": [(170, 170, 140), (200, 200, 170), (224, 224, 198), (246, 246, 228)],
+            "tick_delay": 6, "slope": 4, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -42,6 +49,11 @@ GASES = {
     # colors: the swirl drawn for recipe viewers and tank gauges (gases are never placed in the world).
     "refinery_gas": {"display": "Refinery Gas", "feature": "crude_oil",
                      "colors": [(150, 160, 172), (176, 188, 200), (200, 210, 220), (226, 232, 238)]},
+    # From brine electrolysis (batch 5).
+    "chlorine": {"display": "Chlorine", "feature": "salt",
+                 "colors": [(130, 160, 60), (160, 190, 80), (186, 214, 104), (214, 236, 150)]},
+    "hydrogen": {"display": "Hydrogen", "feature": "salt",
+                 "colors": [(190, 200, 214), (210, 220, 232), (228, 236, 244), (246, 250, 254)]},
 }
 
 
@@ -126,6 +138,9 @@ FLUID_MACHINES = {
     "gas_turbine": {"inputs": [16_000, 4_000], "outputs": [], "item_inputs": 0, "item_outputs": 0, "recipe_type": None},
     # Burns diesel or heavy fuel oil (FLUID_FUELS, KE per mB) to turn a shaft at up to 512 KE/t.
     "diesel_engine": {"inputs": [8_000], "outputs": [], "item_inputs": 0, "item_outputs": 0, "recipe_type": None},
+    # Brine -> chlorine (top), hydrogen (middle) and lye (base); alumina + coke -> aluminum (batch 5). 256 JE/t.
+    "electrolytic_cell": {"inputs": [8_000], "outputs": [8_000, 8_000, 8_000], "item_inputs": 2, "item_outputs": 1,
+                          "recipe_type": "electrolysis"},
     # Refinery gas -> plastic pellets. 96 JE/t.
     "polymerization_reactor": {"inputs": [8_000], "outputs": [], "item_inputs": 0, "item_outputs": 1,
                                "recipe_type": "polymerization"},
@@ -181,6 +196,16 @@ FLUID_RECIPES = {
         {"name": "fracking_fluid", "items": [("minecraft:sand", 2), ("minecraft:dried_kelp", 1)],
          "fluids": [("minecraft:water", 1000)], "fluid_results": [("jugcraft:fracking_fluid", 1000)], "source": 0,
          "ticks": 80, "features": ["crude_oil"]},
+        # Brine for the electrolytic cell: two salt dissolved in a bucket of water.
+        {"name": "brine", "items": [("jugcraft:salt", 2)], "fluids": [("minecraft:water", 1000)],
+         "fluid_results": [("jugcraft:brine", 1000)], "source": 0, "ticks": 60, "features": ["salt"]},
+    ],
+    # The chlor-alkali process: a bucket of brine splits into chlorine at the anode, hydrogen at the cathode and lye
+    # left in the cell. Electricity-hungry: 256 JE/t for 200 ticks.
+    "electrolytic_cell": [
+        {"name": "brine", "fluids": [("jugcraft:brine", 1000)],
+         "fluid_results": [("jugcraft:chlorine", 250), ("jugcraft:hydrogen", 250), ("jugcraft:lye", 500)],
+         "ticks": 200, "features": ["salt"]},
     ],
     # Flowback water settles and is filtered: most of it comes back as clean water; the brine leaves salt. A quarter
     # is lost (sludge), so fracking water is never free.

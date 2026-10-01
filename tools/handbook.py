@@ -130,6 +130,10 @@ ABOUT = {
     "diesel_generator": "Three wide, two tall and two deep. Burns diesel or heavy fuel oil piped into its 8-bucket tank: "
                         "256 JE/t, a bucket of diesel every 1,000 ticks (256,000 JE) or heavy fuel oil twice as fast "
                         "(128,000 JE a bucket). It refuses crude oil and other fluids.",
+    "electrolytic_cell": "Three wide, three tall and two deep. Splits brine with electricity: a bucket gives 250 mB of "
+                         "chlorine (out of the top row), 250 mB of hydrogen (the middle row) and 500 mB of lye (the "
+                         "bottom row), every 10 seconds at 256 JE/t. Make brine in the chemical mixer from two salt "
+                         "and a bucket of water.",
     "diesel_engine": "Two wide, two tall and three long. Burns diesel (256 KE a mB) or heavy fuel oil (128) piped into "
                      "its 8-bucket tank and turns a shaft out of the back of its upper right back block: up to "
                      "512 KE/t, twice the large steam engine. It burns only for the rotation the line takes.",
@@ -365,6 +369,13 @@ def build():
             {"title": "Cracking Catalyst", "icon": f"{MOD}:cracking_catalyst", "text": [
                 "Bauxite (alumina) and sand (silica) with a nickel ingot make four. The catalytic cracker uses one for "
                 "each bucket of heavy fuel oil it cracks."], "craft": craft("cracking_catalyst")},
+        ]},
+        {"title": "Chemistry", "icon": f"{MOD}:brine_bucket", "pages": [
+            {"title": "Industrial Chemistry", "icon": f"{MOD}:salt", "text": [
+                "Salt, sulfur, phosphate and bauxite get their real uses here.",
+                "Dissolve salt in water to make brine (chemical mixer), then split it in the electrolytic cell into "
+                "chlorine, hydrogen and lye. Gases live only in tanks and pipes."]},
+            machine_page("electrolytic_cell"),
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [
