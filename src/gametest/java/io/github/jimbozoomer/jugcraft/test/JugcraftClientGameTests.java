@@ -71,13 +71,11 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			server.runCommand("gamerule minecraft:send_command_feedback false");
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
-			// A floor under the showroom and the scenes; air above it in slices (a fill is limited to 32,768 blocks).
+			// A floor under the showroom and the scenes, with the air above it cleared. Set block by block on the
+			// server: a fill command cannot reach chunks that are not loaded yet, and the multi-block row runs far
+			// beyond the player.
 			int end = x + 20 + largeRowLength() + 8;
-			for (int from = x - 26; from <= end; from += 60) {
-				int to = Math.min(end, from + 59);
-				server.runCommand("fill %d %d %d %d %d %d minecraft:smooth_stone".formatted(from, y - 1, z - 10, to, y - 1, z + 12));
-				server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(from, y, z - 10, to, y + 14, z + 12));
-			}
+			server.runOnServer(minecraft -> clearFloor(minecraft.overworld(), new BlockPos(x - 26, y, z - 10), new BlockPos(end, y + 14, z + 12)));
 			server.runOnServer(minecraft -> buildShowroom(minecraft.overworld(), new BlockPos(x, y, z - 5)));
 
 			// Hide the HUD, hand and chat so the screenshots show only the machines. In 26.3 this is the "toggle GUI"
@@ -151,7 +149,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			// Power gear in the electric look: a line of glowing cables from a solar panel through a battery box, a
 			// capacitor bank and a charging station to an electric motor turning a dynamo, and an electric pump.
 			server.runOnServer(minecraft -> buildPowerGear(minecraft.overworld(), new BlockPos(x - 24, y, z + 2)));
-			server.runCommand("tp @p %d %d %d 180 30".formatted(x - 17, y + 4, z + 10));
+			server.runCommand("tp @p %d %d %d 180 18".formatted(x - 17, y + 2, z + 9));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_power_gear");
@@ -341,6 +339,23 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			}
 		}
 		throw new IllegalArgumentException(target.id);
+	}
+
+	/** Smooth stone one below {@code from}'s level across the area, and air from there up to {@code to}. */
+	private static void clearFloor(ServerLevel level, BlockPos from, BlockPos to) {
+		BlockState floor = Blocks.SMOOTH_STONE.defaultBlockState();
+		BlockState air = Blocks.AIR.defaultBlockState();
+		for (int bx = from.getX(); bx <= to.getX(); bx++) {
+			for (int bz = from.getZ(); bz <= to.getZ(); bz++) {
+				level.setBlock(new BlockPos(bx, from.getY() - 1, bz), floor, 2);
+				for (int by = from.getY(); by <= to.getY(); by++) {
+					BlockPos pos = new BlockPos(bx, by, bz);
+					if (!level.getBlockState(pos).isAir()) {
+						level.setBlock(pos, air, 2);
+					}
+				}
+			}
+		}
 	}
 
 	/** Blocks a multi-block machine takes across its front (it extends to its right, +x when facing south). */
