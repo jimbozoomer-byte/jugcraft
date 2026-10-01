@@ -71,6 +71,9 @@ MACHINES = {
     "electrolytic_cell": {"display": "Electrolytic Cell", "lit": True},
     # A 2x2x2 acid-proof reactor: sulfur + water -> sulfuric acid, and later digestion and fertilizer.
     "chemical_reactor": {"display": "Chemical Reactor", "lit": True},
+    # Nitrogen chemistry (batch 12): a cold box splitting air, and the high-pressure synthesis converter.
+    "air_separation_unit": {"display": "Air Separation Unit", "lit": True},
+    "synthesis_converter": {"display": "Synthesis Converter", "lit": True},
     # A one-block hydrogen fuel cell in the electric look: hydrogen -> JE.
     "fuel_cell": {"display": "Fuel Cell", "lit": True},
     # Storage (batch 6): a 3x2 lithium battery bank in the electric look.
@@ -246,7 +249,7 @@ STATS = {
     "large_steam_engine": {"capacity": 0, "use_per_tick": 0, "output_ke": 256, "water_per_tick": 40, "tank": 16_000},
     # Unpowered: heat comes from the charge itself. No battery, no cable connection.
     "coke_oven": {"capacity": 0, "use_per_tick": 0},
-    "steel_foundry": {"capacity": 0, "use_per_tick": 0},
+    "steel_foundry": {"capacity": 0, "use_per_tick": 0, "boost": "oxygen", "boost_per_tick": 2, "boost_tank": 8_000},
     # Two blocks wide. Burns 1 mB of lava per tick for 64 JE: a bucket lasts 1,000 ticks.
     "geothermal_generator": {"capacity": 30_000, "output_per_tick": 128, "generation_per_tick": 64,
                              "lava_per_tick": 1, "tank": 4_000},
@@ -282,12 +285,18 @@ STATS = {
     "electrolytic_cell": {"capacity": 60_000, "input_per_tick": 1_024, "use_per_tick": 256, "tank": 8_000},
     # 2x2x2. 96 JE/t; a bucket of sulfuric acid per 100 ticks.
     "chemical_reactor": {"capacity": 30_000, "input_per_tick": 512, "use_per_tick": 96, "tank": 8_000},
+    # 2x2x6. From the air alone: 8 mB/t nitrogen (top) and 2 mB/t oxygen (base) at 64 JE/t.
+    "air_separation_unit": {"capacity": 40_000, "input_per_tick": 512, "use_per_tick": 64, "tank": 16_000,
+                            "nitrogen_per_tick": 8, "oxygen_per_tick": 2, "argon_interval": 2},
+    # 3x4x2. Three input tanks and one output: ammonia (Haber-Bosch) and nitric acid (Ostwald). 128 JE/t.
+    "synthesis_converter": {"capacity": 60_000, "input_per_tick": 1_024, "use_per_tick": 128, "tank": 8_000},
     # One block. 128 JE/t from 1 mB of hydrogen a tick (128 JE/mB).
     "fuel_cell": {"capacity": 40_000, "output_per_tick": 512, "generation_per_tick": 128, "tank": 8_000},
     # 3x2, one deep. Outputs from its front (all six blocks), charges from any other face.
     "lithium_battery_bank": {"capacity": 32_000_000, "io_per_tick": 16_384},
     # 2 tall. 4 silicon + 1 phosphate (the dopant) -> a silicon boule.
-    "crystal_grower": {"capacity": 60_000, "input_per_tick": 512, "use_per_tick": 128},
+    "crystal_grower": {"capacity": 60_000, "input_per_tick": 512, "use_per_tick": 128, "boost": "argon",
+                       "boost_per_tick": 1, "boost_tank": 8_000},
     # 3x2x2. Wafer + 2 copper wire + 100 mB sulfuric acid -> 4 microchips.
     "lithography_station": {"capacity": 60_000, "input_per_tick": 1_024, "use_per_tick": 192, "tank": 4_000},
     # 2x2x3. Up to 512 KE/t: 2 mB of diesel a tick (256 KE/mB) or 4 mB of heavy fuel oil, only for what it delivers.
@@ -323,6 +332,13 @@ WOODS = {"oak": "oak_logs", "spruce": "spruce_logs", "birch": "birch_logs", "jun
 FEATURE = "machines"
 
 # Shaped crafting recipes: id -> (pattern, key, result count). Result id equals the recipe id.
+# Second recipes for items that already have one in CRAFTING: file name -> (result, pattern, key, count).
+ALT_CRAFTING = {
+    # Rubber (batch 14): belts from rubber instead of leather, and steel pipes sealed with gaskets.
+    "belt_from_rubber": ("belt", ["RSR"], {"R": "jugcraft:rubber", "S": "minecraft:string"}, 2),
+    "steel_fluid_pipe_from_gaskets": ("steel_fluid_pipe", ["PKP"], {"P": "#c:plates/steel", "K": "jugcraft:gasket"}, 4),
+}
+
 CRAFTING = {
     "machine_casing": (["BZB", "Z Z", "BZB"], {"B": "#c:ingots/bronze", "Z": "#c:ingots/zinc"}, 1),
     "copper_cable": (["CTC"], {"C": "#c:ingots/copper", "T": "#c:ingots/tin"}, 6),
@@ -509,6 +525,12 @@ CRAFTING = {
     "electrolytic_cell": (["PWP", "TCT", "PMP"], {"P": "#c:plates/steel", "W": "jugcraft:aluminum_cable",
                                                   "T": "jugcraft:steel_tank", "C": "jugcraft:advanced_circuit",
                                                   "M": "jugcraft:machine_casing"}, 1),
+    "air_separation_unit": (["SPS", "TMT", "ECE"], {"S": "#c:plates/steel", "P": "jugcraft:steel_fluid_pipe",
+                                                    "T": "jugcraft:fluid_tank", "M": "jugcraft:machine_casing",
+                                                    "E": "jugcraft:electric_motor", "C": "jugcraft:advanced_circuit"}, 1),
+    "synthesis_converter": (["STS", "PMP", "SCS"], {"S": "#c:plates/steel", "T": "#c:ingots/titanium",
+                                                    "P": "jugcraft:steel_fluid_pipe", "M": "jugcraft:machine_casing",
+                                                    "C": "jugcraft:advanced_circuit"}, 1),
     "chemical_reactor": (["PGP", "TCT", "PLP"], {"P": "#c:plates/steel", "G": "minecraft:glass",
                                                  "T": "jugcraft:fluid_tank", "C": "jugcraft:machine_casing",
                                                  "L": "#c:ingots/lead"}, 1),
@@ -533,6 +555,8 @@ CRAFTING = {
     "polymerization_reactor": (["PCP", "TGT", "PMP"], {"P": "#c:plates/steel", "C": "jugcraft:cracking_catalyst",
                                                        "T": "jugcraft:steel_tank", "G": "minecraft:glass",
                                                        "M": "jugcraft:machine_casing"}, 1),
+    # A steel plate faced with rubber, cut into four gaskets (batch 14).
+    "gasket": (["RPR"], {"R": "jugcraft:rubber", "P": "#c:plates/steel"}, 4),
     "cracking_catalyst": (["BSB", "SNS", "BSB"], {"B": "jugcraft:bauxite", "S": "minecraft:sand",
                                                   "N": "#c:ingots/nickel"}, 4),
     "charging_station": (["SLS", "WAW", "SBS"], {"S": "#c:plates/steel", "L": "minecraft:redstone_lamp",
