@@ -262,6 +262,12 @@ ITEMS = {
     "popcorn_ball": {"display": "Popcorn Ball", "food": [5, 0.6], "compost": "medium_high", "tags": ["c:foods/candy"]},
     # Trick-or-treating's rare prize: only villagers hand it out (an optional seasonal treat, nothing needs it).
     "king_size_candy_bar": {"display": "King-Size Candy Bar", "food": [8, 0.4], "compost": "medium_high", "tags": ["c:foods/candy"]},
+    # Spooky sweets (Cooking Pot): eaten even on a full stomach for a moment of magic, `sweet`: the effect (vanilla
+    # MobEffects field) and its seconds, level I. Not compostable, like cooked meals.
+    "glow_gum": {"display": "Glow Gum", "food": [1, 0.1], "sweet": ["GLOWING", 30], "tags": ["c:foods/candy"]},
+    "ghost_taffy": {"display": "Ghost Taffy", "food": [1, 0.1], "sweet": ["INVISIBILITY", 3], "tags": ["c:foods/candy"]},
+    "fizz_rocks": {"display": "Fizz Rocks", "food": [1, 0.1], "sweet": ["JUMP_BOOST", 20], "tags": ["c:foods/candy"]},
+    "witchs_licorice": {"display": "Witch's Licorice", "food": [1, 0.1], "sweet": ["NIGHT_VISION", 45], "tags": ["c:foods/candy"]},
 }
 
 # ---------------------------------------------------------------- Festival crops (slice 3)
@@ -489,6 +495,76 @@ HALLOWEEN_ADVANCEMENTS = {
 }
 
 
+# ---------------------------------------------------------------- Halloween festivities
+
+# The carving contest (agriculture/CarvingContest.java): a hand-carved pumpkin on a Judging Stand is entered by
+# its carver (or by anyone, once the pumpkin was moved and forgot its carver); using the stand votes for its
+# entrant while the Halloween event runs: one vote per player per Halloween, never for oneself (voting again
+# moves it). Sneak-use shows the standings. When the event ends, the `places` entrants with the most votes get
+# the Harvest Scale's ribbons (offline winners on their next visit). The server checks every check_ticks; a
+# contest counts at most max_voters voters and the world keeps the latest max_contests contests.
+CONTEST = {"stand": "judging_stand", "stand_display": "Judging Stand", "places": 3, "check_ticks": 200, "max_voters": 4096,
+           "max_contests": 8}
+
+# Costumed mobs (agriculture/CostumedMobs.java): while the event runs, each mob of `mobs` rolls once when it
+# first enters the world, and `chance` of them dress up in one of `costumes` (equal odds) if their head is bare.
+# Killed by a player with mob loot on, a costumed mob (entity tag `tag`) also drops one roll of `candy` (gift
+# loot table `table`, rolled for the killer). The costume drops like any mob equipment (vanilla's 8.5%).
+COSTUMED_MOBS = {"mobs": ["zombie", "husk", "skeleton", "stray", "zombie_villager"], "chance": 0.15,
+                 "costumes": ["jugcraft:witch_hat", "jugcraft:ghost_sheet", "jugcraft:scarecrow_hat", "minecraft:carved_pumpkin"],
+                 "tag": "jugcraft.costumed", "table": "entities/costumed_mob_candy",
+                 # (item, weight, count)
+                 "candy": [("jugcraft:candy_corn", 40, [1, 2]), ("jugcraft:caramel", 20, [1, 1]), ("jugcraft:glow_gum", 10, [1, 1]),
+                           ("jugcraft:ghost_taffy", 10, [1, 1]), ("jugcraft:fizz_rocks", 10, [1, 1]),
+                           ("jugcraft:witchs_licorice", 10, [1, 1])]}
+
+# The Halloween Peddler (agriculture/HalloweenPeddler.java): while the event runs, a wandering trader arrives
+# in a Witch Hat and adds `amount` of these offers, without repeats, to its usual wares (data:
+# villager_trade/halloween_peddler/<name>, the villager_trade tag and trade_set halloween_peddler). Each wants
+# emeralds and gives (item, count) up to max_uses times; it buys nothing, so no trade can be run backwards. It
+# is a second route to the heirloom and giant pumpkin seeds, the costumes and the sweets, never the only one.
+PEDDLER = {"display": "Halloween Peddler", "trade_set": "halloween_peddler", "amount": 4, "trades": {
+    "emerald_giant_pumpkin_seeds": {"wants": 4, "gives": ("jugcraft:giant_pumpkin_seeds", 1), "max_uses": 3},
+    "emerald_white_pumpkin_seeds": {"wants": 1, "gives": ("jugcraft:white_pumpkin_seeds", 2), "max_uses": 8},
+    "emerald_jarrahdale_pumpkin_seeds": {"wants": 1, "gives": ("jugcraft:jarrahdale_pumpkin_seeds", 2), "max_uses": 8},
+    "emerald_cinderella_pumpkin_seeds": {"wants": 1, "gives": ("jugcraft:cinderella_pumpkin_seeds", 2), "max_uses": 8},
+    "emerald_witch_hat": {"wants": 3, "gives": ("jugcraft:witch_hat", 1), "max_uses": 2},
+    "emerald_ghost_sheet": {"wants": 3, "gives": ("jugcraft:ghost_sheet", 1), "max_uses": 2},
+    "emerald_scarecrow_hat": {"wants": 3, "gives": ("jugcraft:scarecrow_hat", 1), "max_uses": 2},
+    "emerald_candle_skull": {"wants": 2, "gives": ("jugcraft:candle_skull", 1), "max_uses": 4},
+    "emerald_hanging_ghost": {"wants": 1, "gives": ("jugcraft:hanging_ghost", 2), "max_uses": 6},
+    "emerald_glow_gum": {"wants": 1, "gives": ("jugcraft:glow_gum", 2), "max_uses": 8},
+    "emerald_ghost_taffy": {"wants": 1, "gives": ("jugcraft:ghost_taffy", 2), "max_uses": 8},
+    "emerald_fizz_rocks": {"wants": 1, "gives": ("jugcraft:fizz_rocks", 2), "max_uses": 8},
+    "emerald_witchs_licorice": {"wants": 1, "gives": ("jugcraft:witchs_licorice", 2), "max_uses": 8},
+}}
+
+# Gravestones (agriculture/GravestoneBlock.java), cut from stone in a stonecutter. `boxes`: the model and shape
+# facing north, pixels (x0, y0, z0, x1, y1, z1); `engraving`: how far in front of the centre the engraved face
+# is, the height of the text's middle, its width (pixels), at most how many lines, and blocks per font pixel.
+# A named Name Tag engraves its name (at most max_length characters); so does renaming the item in an anvil.
+GRAVESTONES = {
+    "rounded_gravestone": {"display": "Rounded Gravestone", "style": "ROUNDED",
+                           "boxes": [(1, 0, 4, 15, 2, 12), (2, 2, 6, 14, 12, 10), (3, 12, 6, 13, 14, 10), (5, 14, 6, 11, 15, 10)],
+                           "engraving": [2.0, 7.5, 10.0, 6, "1.0F / 128"]},
+    "cross_gravestone": {"display": "Cross Gravestone", "style": "CROSS",
+                         "boxes": [(2, 0, 4, 14, 4, 12), (6.5, 4, 6.5, 9.5, 16, 9.5), (2.5, 10, 6.5, 13.5, 13, 9.5)],
+                         "engraving": [4.0, 2.0, 11.0, 3, "1.0F / 144"]},
+    "obelisk_gravestone": {"display": "Obelisk Gravestone", "style": "OBELISK",
+                           "boxes": [(2, 0, 2, 14, 3, 14), (4, 3, 4, 12, 13, 12), (5, 13, 5, 11, 15, 11), (6.5, 15, 6.5, 9.5, 16, 9.5)],
+                           "engraving": [4.0, 8.0, 7.0, 7, "1.0F / 128"]},
+}
+ENGRAVING = {"max_length": 50, "stone": "minecraft:stone"}
+# Decorations for any time of year: cobwebs that never slow anyone, a ghost hanging under a block, and a
+# skull with a candle that is lit and snuffed like one (light `light` when lit).
+FEST_DECOR = {"spun_cobweb": "Spun Cobweb", "hanging_ghost": "Hanging Ghost", "candle_skull": "Candle Skull"}
+CANDLE_SKULL = {"light": 12}
+
+
+def festivity_blocks():
+    return [CONTEST["stand"]] + list(GRAVESTONES) + list(FEST_DECOR)
+
+
 def regatta_blocks():
     return [REGATTA["flag"], REGATTA["buoy"]]
 
@@ -584,6 +660,11 @@ POT_RECIPES = {
     "cranberry_sauce": {"inputs": {"minecraft:bowl": 1, "jugcraft:cranberries": 2, "minecraft:sugar": 1}, "time": 200},
     # Halloween harvest: the guts scooped from carved pumpkins make soup.
     "pumpkin_soup": {"inputs": {"minecraft:bowl": 1, "jugcraft:pumpkin_guts": 2, "jugcraft:onion": 1}, "time": 200},
+    # Spooky sweets: sugar boiled with a pinch of something odd, four pieces a batch.
+    "glow_gum": {"inputs": {"minecraft:sugar": 2, "minecraft:glow_berries": 1, "minecraft:slime_ball": 1}, "count": 4, "time": 200},
+    "ghost_taffy": {"inputs": {"minecraft:sugar": 2, "minecraft:phantom_membrane": 1}, "count": 4, "time": 200},
+    "fizz_rocks": {"inputs": {"minecraft:sugar": 2, "minecraft:gunpowder": 1}, "count": 4, "time": 200},
+    "witchs_licorice": {"inputs": {"minecraft:sugar": 2, "minecraft:wheat": 1, "minecraft:ink_sac": 1}, "count": 4, "time": 200},
 }
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
@@ -632,6 +713,11 @@ SHAPELESS = [
     {"id": "red_dye_from_red_mum", "inputs": ["jugcraft:red_mum"], "result": "minecraft:red_dye", "count": 1, "group": "red_dye"},
     {"id": "purple_dye_from_purple_mum", "inputs": ["jugcraft:purple_mum"], "result": "minecraft:purple_dye", "count": 1,
      "group": "purple_dye"},
+    # Halloween festivities: a sheet ghost on a string, and a candle melted onto a bone skull.
+    {"id": "hanging_ghost", "inputs": ["minecraft:white_wool", "minecraft:string", "minecraft:black_dye"], "result": "hanging_ghost",
+     "count": 2, "category": "building"},
+    {"id": "candle_skull", "inputs": ["minecraft:bone_block", "minecraft:candle"], "result": "candle_skull", "count": 1,
+     "category": "building"},
 ]
 SHAPED = [
     {"id": "barley_bread", "pattern": ["BBB"], "key": {"B": "jugcraft:barley"}, "result": "barley_bread", "count": 1,
@@ -679,6 +765,11 @@ SHAPED = [
      "result": "ghost_sheet", "count": 1, "category": "equipment"},
     {"id": "scarecrow_hat", "pattern": [" W ", "WWW"], "key": {"W": "minecraft:wheat"},
      "result": "scarecrow_hat", "count": 1, "category": "equipment"},
+    # Halloween festivities: a pedestal draped in purple for the carving contest, and cobwebs spun from string.
+    {"id": "judging_stand", "pattern": ["WWW", " P ", "PPP"], "key": {"W": "minecraft:purple_wool", "P": "#minecraft:planks"},
+     "result": "judging_stand", "count": 1, "category": "misc"},
+    {"id": "spun_cobweb", "pattern": ["S S", " S ", "S S"], "key": {"S": "minecraft:string"}, "result": "spun_cobweb", "count": 2,
+     "category": "building"},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -722,14 +813,14 @@ def all_blocks():
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"]] + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS)
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
-            + regatta_blocks())
+            + regatta_blocks() + festivity_blocks())
 
 
 def all_items():
     return (list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
             + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
-            + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items())
+            + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks())
 
 
 def owns(entry_id):

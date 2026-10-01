@@ -151,7 +151,7 @@ public final class CarvingContest {
 				ItemStack stack = new ItemStack(JugcraftAgriculture.item(ribbon));
 				player.sendSystemMessage(Component.translatable("message.jugcraft.carving_contest.prize", stack.getHoverName()));
 				if (!player.getInventory().add(stack)) {
-					player.drop(stack, false);
+					player.spawnAtLocation(player.level(), stack); // Full inventory: drop it at their feet.
 				}
 			}
 			it.remove();

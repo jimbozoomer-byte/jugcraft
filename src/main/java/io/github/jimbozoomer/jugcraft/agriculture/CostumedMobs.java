@@ -3,28 +3,31 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
-import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 /**
  * Costumed mobs: while the Halloween event runs ({@link HalloweenSeason}), each zombie, husk, skeleton, stray
  * and zombie villager rolls once, the first time it enters the world, and {@link #CHANCE} of them dress up in a
  * costume hat or a carved pumpkin (never over a helmet they already wear). The hat drops like any mob
- * equipment, now and then; killed by a player, a costumed mob also drops candy (loot table
- * {@code jugcraft:entities/costumed_mob_candy}, added to these mobs' own tables). When the event ends no new
+ * equipment, now and then; killed by a player (and with mob loot on), a costumed mob also drops one roll of
+ * candy (loot table {@code jugcraft:entities/costumed_mob_candy}, rolled as a gift to the player). When the event ends no new
  * mob dresses up; those already dressed keep their costume. With agriculture switched off, no mob dresses up
  * and none drops candy.
  */
@@ -47,13 +50,14 @@ public final class CostumedMobs {
 				dress(mob, level.getRandom());
 			}
 		});
-		Set<ResourceKey<LootTable>> tables = MOBS.stream()
-				.map(mob -> ResourceKey.create(Registries.LOOT_TABLE, Identifier.withDefaultNamespace("entities/" + mob)))
-				.collect(Collectors.toSet());
-		LootTableEvents.MODIFY.register((key, table, source, registries) -> {
-			if (source.isBuiltin() && tables.contains(key) && JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE)) {
-				table.withPool(LootPool.lootPool().add(NestedLootTable.lootTableReference(CANDY)));
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity.entityTags().contains(COSTUMED) && source.getEntity() instanceof ServerPlayer killer
+					&& entity.level() instanceof ServerLevel level && level.getGameRules().get(GameRules.MOB_DROPS)
+					&& JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE)) {
+				dropCandy(level, entity, killer);
 			}
+		});
+	}
 		});
 	}
 
@@ -79,6 +83,16 @@ public final class CostumedMobs {
 		mob.setItemSlot(EquipmentSlot.HEAD, new ItemStack(BuiltInRegistries.ITEM.getValue(costume)));
 		mob.addTag(COSTUMED);
 		return true;
+	}
+
+	/** Rolls the candy table once for a costumed mob a player killed and drops it where the mob fell. */
+	public static List<ItemStack> dropCandy(ServerLevel level, LivingEntity mob, ServerPlayer killer) {
+		LootTable table = level.getServer().reloadableRegistries().getLootTable(CANDY);
+		LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, mob.position())
+				.withParameter(LootContextParams.THIS_ENTITY, killer).create(LootContextParamSets.GIFT);
+		List<ItemStack> candy = List.copyOf(table.getRandomItems(params));
+		candy.forEach(stack -> mob.spawnAtLocation(level, stack.copy()));
+		return candy;
 	}
 
 	/** Puts a costume on a mob whatever the season or the dice (tests). */

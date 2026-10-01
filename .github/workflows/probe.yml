@@ -26,9 +26,5 @@ jobs:
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
           CP="$CLIENT:$COMMON"
           l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
-          for f in data/minecraft/loot_table/entities/zombie.json data/minecraft/loot_table/entities/wither_skeleton.json data/minecraft/trade_set/wandering_trader/common.json data/minecraft/recipe/stone_slab_from_stonecutting.json; do echo "--- $f"; unzip -p "$COMMON" "$f"; echo; done
-          mkdir -p vd && cd vd && unzip -q -o "$COMMON" 'data/minecraft/*' && grep -rl '"nbt"' data | head -10; grep -rh -B2 -A2 '"nbt"' data | head -40; cd ..
-          unzip -l "$COMMON" | grep -iE "EntityPredicate|criterion/NbtPredicate" | awk '{print $4}' | head
-          l net.minecraft.advancements.criterion.EntityPredicate 'nbt|record|public net' 20
-          l net.minecraft.world.level.storage.loot.LootContext 'getRandom' 5
-          l net.minecraft.client.renderer.SubmitNodeCollector 'submitText' 5
+          l net.minecraft.world.level.gamerules.GameRules 'DROP|LOOT' 10
+          for f in $(unzip -l "$COMMON" | grep -iE "data/minecraft/recipe/.*stonecutting.json" | awk '{print $4}' | head -2); do echo "--- $f"; unzip -p "$COMMON" "$f"; echo; done
