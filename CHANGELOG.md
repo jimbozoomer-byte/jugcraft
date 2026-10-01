@@ -14,7 +14,7 @@ No numbered release yet. Everything below is on `main`.
 - **Light:** a torch inside lights it, from 4 up to 15 the more is carved out; an empty hand takes the torch back. Broken, it drops with its design and its torch.
 - **Roasted Pumpkin Seeds** from the furnace, smoker or campfire.
 - **Server checks:** the server checks every carving (the session from using the knife, the knife in hand, reach, build permission, a valid face that only goes deeper). Carvings record their last carver for operators, and `carving.free_draw=false` in `config/jugcraft.properties` allows only the starter faces.
-- The checker also verifies the carving numbers against Java, the starter faces and every refusal message, and understands select item models. Ten new game tests and a client test that carves through the real screen.
+- The checker also verifies the carving numbers against Java, the starter faces and every refusal message, and understands select item models. Ten new game tests, and a client test that carves through the real screen with the mouse and keyboard (after the owner's first play found that clicks on the grid did nothing: 26.3 numbers mouse buttons from 1, and the screen used the old numbers).
 
 ### Agriculture: Festival Crops (pull request pending, stacked on the Kitchen Garden)
 - **Gourds on stems:** butternut squash, acorn squash and warty gourds grow from stems on farmland and place their gourd beside them, like pumpkins. Stems follow Jugcraft's growth rules, so squash next to beans grows 1.5× as fast. Gourds are blocks for fall displays; 1 gourd → 4 seeds.
