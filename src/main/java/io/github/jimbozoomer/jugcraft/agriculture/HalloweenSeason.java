@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.time.Clock;
 import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -75,6 +76,17 @@ public final class HalloweenSeason {
 			case OFF -> false;
 			case AUTO -> inWindow(MonthDay.now(clock.withZone(zone)), start, end);
 		};
+	}
+
+	/**
+	 * Which Halloween it is (or was last): the year the current window started, on the server's clock. A window
+	 * running over New Year belongs to the year it started in; with {@code on} outside the dates, this year.
+	 */
+	public static int year() {
+		LocalDate today = LocalDate.now(clock.withZone(zone));
+		boolean wraps = start.isAfter(end);
+		MonthDay day = MonthDay.from(today);
+		return wraps && !day.isBefore(MonthDay.of(1, 1)) && !day.isAfter(end) ? today.getYear() - 1 : today.getYear();
 	}
 
 	/** Whether {@code day} is in the window from {@code from} to {@code to}, both included; it may wrap past New Year. */

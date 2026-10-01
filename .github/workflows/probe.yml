@@ -26,19 +26,9 @@ jobs:
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
           CP="$CLIENT:$COMMON"
           l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
-          for f in data/minecraft/villager_trade/wandering_trader/emerald_oak_sapling.json data/minecraft/villager_trade/farmer/2/emerald_apple.json data/minecraft/tags/villager_trade/librarian/level_3.json; do echo "--- $f"; unzip -p "$COMMON" "$f"; echo; done
-          unzip -l "$COMMON" | grep -iE "data/minecraft/(trade_set|villager_trade)/[a-z_]+\.json|trade_set" | awk '{print $4}' | head -20
-          for f in $(unzip -l "$COMMON" | grep -iE "data/minecraft/trade_set/.*json" | awk '{print $4}' | head -3); do echo "--- $f"; unzip -p "$COMMON" "$f"; echo; done
-          unzip -l "$COMMON" | grep -iE "tags/villager_trade/wandering|villager_trade/wandering_trader" | awk '{print $4}' | head -40
-          for f in $(unzip -l "$COMMON" | grep -iE "tags/villager_trade/wandering.*json" | awk '{print $4}' | head -3); do echo "--- $f"; unzip -p "$COMMON" "$f"; echo; done
-          l net.minecraft.world.item.trading.VillagerTrade '' 40
-          l net.minecraft.world.item.trading.TradeSet '' 30
-          l net.minecraft.world.item.trading.TradeSets 'public static' 30
-          javap -cp "$CP" -c -p net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader | grep -A40 "void updateTrades" | head -50
-          javap -cp "$CP" -c -p net.minecraft.world.entity.npc.villager.AbstractVillager | grep -A45 "void addOffersFromTradeSet" | head -50
-          l net.minecraft.world.entity.Entity 'getTags|addTag|removeTag|entityTags' 10
-          l net.minecraft.world.entity.DropChances 'public' 20
-          l net.minecraft.client.gui.Font 'public .* split|public int width|lineHeight|public .* plainSubstrByWidth' 10
-          unzip -l "$CLIENT" | grep -iE "renderer/blockentity/.*Sign" | awk '{print $4}'
-          javap -cp "$CP" -c -p net.minecraft.client.renderer.blockentity.AbstractSignRenderer | grep -B12 "submitText" | head -60
-          l net.minecraft.core.registries.Registries 'TRADE|VILLAGER_TRADE' 5
+          for f in data/minecraft/loot_table/entities/zombie.json data/minecraft/loot_table/entities/wither_skeleton.json data/minecraft/trade_set/wandering_trader/common.json data/minecraft/recipe/stone_slab_from_stonecutting.json; do echo "--- $f"; unzip -p "$COMMON" "$f"; echo; done
+          mkdir -p vd && cd vd && unzip -q -o "$COMMON" 'data/minecraft/*' && grep -rl '"nbt"' data | head -10; grep -rh -B2 -A2 '"nbt"' data | head -40; cd ..
+          unzip -l "$COMMON" | grep -iE "EntityPredicate|criterion/NbtPredicate" | awk '{print $4}' | head
+          l net.minecraft.advancements.criterion.EntityPredicate 'nbt|record|public net' 20
+          l net.minecraft.world.level.storage.loot.LootContext 'getRandom' 5
+          l net.minecraft.client.renderer.SubmitNodeCollector 'submitText' 5

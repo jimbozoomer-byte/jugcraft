@@ -34,6 +34,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -45,6 +46,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.equipment.Equippable;
@@ -133,6 +137,8 @@ public final class JugcraftAgriculture {
 	public static EntityType<PumpkinBoat> PUMPKIN_RACER;
 	public static BlockEntityType<RegattaFlagBlockEntity> REGATTA_FLAG_ENTITY;
 	public static BlockEntityType<RegattaBuoyBlockEntity> REGATTA_BUOY_ENTITY;
+	public static BlockEntityType<JudgingStandBlockEntity> JUDGING_STAND_ENTITY;
+	public static BlockEntityType<GravestoneBlockEntity> GRAVESTONE_ENTITY;
 	/** What each kind of pumpkin becomes when first carved by hand, and the loot table its seeds come from. */
 	private static final Map<Block, Block> CARVED_FROM = new HashMap<>();
 	private static final Map<Block, ResourceKey<LootTable>> CARVE_LOOT = new HashMap<>();
@@ -261,6 +267,11 @@ public final class JugcraftAgriculture {
 		food("popcorn_ball", 5, 0.6F, COMPOST_MEDIUM_HIGH);
 		// Trick-or-treating's rare prize (only villagers hand it out).
 		food("king_size_candy_bar", 8, 0.4F, COMPOST_MEDIUM_HIGH);
+		// Spooky sweets from the Cooking Pot: a moment of magic each.
+		sweet("glow_gum", 1, 0.1F, MobEffects.GLOWING, 30);
+		sweet("ghost_taffy", 1, 0.1F, MobEffects.INVISIBILITY, 3);
+		sweet("fizz_rocks", 1, 0.1F, MobEffects.JUMP_BOOST, 20);
+		sweet("witchs_licorice", 1, 0.1F, MobEffects.NIGHT_VISION, 45);
 
 		// Farm tools.
 		sickle("flint_sickle", 1, 131);
@@ -287,6 +298,7 @@ public final class JugcraftAgriculture {
 		registerHalloween();
 		registerRegatta();
 		registerTrickOrTreat();
+		registerFestivities();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> FOOD_TAB.forEach(output::accept));
@@ -513,6 +525,47 @@ public final class JugcraftAgriculture {
 		TrickOrTreat.register();
 	}
 
+	/**
+	 * Halloween festivities: the Judging Stand of the carving contest, costumed mobs and the Halloween Peddler
+	 * (both only while the event runs), and decorations for any time of year: three gravestones to engrave,
+	 * the Spun Cobweb (no sticking), the Hanging Ghost and the Candle Skull.
+	 */
+	private static void registerFestivities() {
+		Block stand = registerBlock("judging_stand", JudgingStandBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		registerItem("judging_stand", props -> new BlockItem(stand, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		JUDGING_STAND_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("judging_stand"),
+				FabricBlockEntityTypeBuilder.create(JudgingStandBlockEntity::new, stand).build());
+		CarvingContest.register();
+		CostumedMobs.register();
+		HalloweenPeddler.register();
+
+		List<Block> gravestones = new ArrayList<>();
+		for (GravestoneBlock.Style style : GravestoneBlock.Style.values()) {
+			Block stone = registerBlock(style.id, props -> new GravestoneBlock(props, style), BlockBehaviour.Properties.of()
+					.mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F).sound(SoundType.STONE).noOcclusion());
+			registerItem(style.id, props -> new BlockItem(stone, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+			gravestones.add(stone);
+		}
+		GRAVESTONE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("gravestone"),
+				FabricBlockEntityTypeBuilder.create(GravestoneBlockEntity::new, gravestones.toArray(Block[]::new)).build());
+
+		Block cobweb = registerBlock("spun_cobweb", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).noCollision()
+				.strength(0.2F).sound(SoundType.COBWEB).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block ghost = registerBlock("hanging_ghost", HangingGhostBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SNOW)
+				.noCollision().strength(0.3F).sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block skull = registerBlock("candle_skull", CandleSkullBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
+				.strength(1.0F).sound(SoundType.BONE_BLOCK).noOcclusion().lightLevel(CandleSkullBlock::light).pushReaction(PushReaction.POPPED));
+		for (Block block : List.of(cobweb, ghost, skull)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		}
+		// String and cloth burn like wool.
+		FlammableBlockRegistry fire = FlammableBlockRegistry.getDefaultInstance();
+		fire.add(cobweb, 30, 60);
+		fire.add(ghost, 30, 60);
+	}
+
 	/** The costume hats, in the order of their tag. */
 	public static final List<String> COSTUMES = List.of("witch_hat", "ghost_sheet", "scarecrow_hat");
 
@@ -694,6 +747,14 @@ public final class JugcraftAgriculture {
 	/** A treat on a stick, like a caramel apple: eating it leaves the stick. */
 	private static void treat(String id, int nutrition, float saturation) {
 		registerItem(id, Item::new, new Item.Properties().food(nourishment(nutrition, saturation)).usingConvertsTo(Items.STICK), FOOD_TAB);
+	}
+
+	/** A spooky sweet: a bite of sugar with a short effect, eaten even on a full stomach. */
+	private static void sweet(String id, int nutrition, float saturation, Holder<MobEffect> effect, int seconds) {
+		FoodProperties food = new FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation).alwaysEdible().build();
+		Consumable eaten = Consumables.defaultFood().onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(effect, seconds * 20)))
+				.build();
+		registerItem(id, Item::new, new Item.Properties().food(food, eaten), FOOD_TAB);
 	}
 
 	private static void stew(String id, int nutrition, float saturation) {

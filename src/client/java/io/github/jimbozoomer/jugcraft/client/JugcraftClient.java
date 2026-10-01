@@ -20,7 +20,7 @@ import net.minecraft.client.gui.screens.MenuScreens;
 /**
  * Client entrypoint: machine and Cooking Pot menus to their screens, the wind turbine and belt renderers,
  * the handbook to its book, ore surveys to the prospector screen, carved and giant pumpkins to their renderers and carving screen,
- * and pumpkin boats to theirs.
+ * pumpkin boats to theirs, and gravestones to the renderer of their engravings.
  */
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
@@ -45,6 +45,7 @@ public final class JugcraftClient implements ClientModInitializer {
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.GIANT_PUMPKIN_ENTITY, GiantPumpkinRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.GRAVESTONE_ENTITY, GravestoneRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_BARGE, PumpkinBoatRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_RACER, PumpkinBoatRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(OpenCarvingPayload.TYPE,
