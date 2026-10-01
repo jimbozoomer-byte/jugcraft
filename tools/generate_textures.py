@@ -1383,6 +1383,8 @@ def main():
     electric_textures.draw_all()
     import petro_textures
     petro_textures.draw_all(save, save_animation)
+    import crop_textures
+    crop_textures.draw_all(save)
 
 
 if __name__ == "__main__":

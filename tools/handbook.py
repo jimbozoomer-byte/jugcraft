@@ -474,6 +474,11 @@ def build():
         {"title": "Farming", "icon": f"{MOD}:crop_harvester", "pages": [
             machine_page("crop_harvester"),
             block_page("sprinkler", FARMING_BLOCKS["sprinkler"]["display"]),
+            {"title": "Cotton", "icon": f"{MOD}:cotton", "text": [
+                "Sift coarse dirt in the sieve: now and then it turns up cotton seeds (and wheat seeds).",
+                "Plant them on farmland like wheat. A ripe plant gives one to three cotton and more seeds; the harvester, "
+                "sprinkler and fertilizer all work on it.",
+                "One cotton spins into one string."]},
         ]},
         {"title": "Upgrades", "icon": f"{MOD}:speed_upgrade", "pages":
             [block_page(u, UPGRADES[u]) for u in UPGRADES] + [

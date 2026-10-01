@@ -10,7 +10,7 @@ from pathlib import Path
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, EXTRA_NAMES, MINERAL_TAGS, PROCESSING, COMPONENTS, CIRCUITS,
                        metal_blocks, metal_items, mineral_blocks, all_blocks, all_items, feature_of, ingot_id)
 
-from machines import ELECTRONICS_BLOCKS, FARMING_BLOCKS, MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
+from machines import CROPS, ELECTRONICS_BLOCKS, FARMING_BLOCKS, MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
 import model_writer
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -266,6 +266,20 @@ def machine_assets(lang):
         write(ASSETS / "blockstates" / f"{block}.json", {"variants": {
             f"{info['states']}={value}": {"model": rid(f"block/{block}")} for value in ("false", "true")}})
         write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+    # Crops: a cross model per growth stage, the ages mapped onto the stages, and flat seed and product items.
+    for crop, info in CROPS.items():
+        lang[f"block.{MOD}.{crop}"] = info["display"]
+        lang[f"item.{MOD}.{info['seeds']}"] = info["seeds_display"]
+        lang[f"item.{MOD}.{info['product']}"] = info["product_display"]
+        for stage in sorted(set(info["stages"])):
+            write(ASSETS / "models" / "block" / f"{crop}_stage{stage}.json", {
+                "parent": "minecraft:block/crop", "textures": {"crop": rid(f"block/{crop}_stage{stage}")}})
+        write(ASSETS / "blockstates" / f"{crop}.json", {"variants": {
+            f"age={age}": {"model": rid(f"block/{crop}_stage{stage}")} for age, stage in enumerate(info["stages"])}})
+        for item in (info["seeds"], info["product"]):
+            write(ASSETS / "models" / "item" / f"{item}.json",
+                  {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
+            write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
     # Kinetic blocks: one model each, a turning or lit variant where they have one, and rotations.
     import kinetic_models
     import kinetic_rotors
@@ -588,6 +602,23 @@ def petro_assets(lang):
         lang[f"block.{MOD}.{gas}"] = info["display"]
 
 
+def crop_drop(block, info):
+    """Like vanilla wheat: a ripe crop drops its product (1-3) and seeds (more with Fortune); an unripe one, a seed."""
+    ripe = [{"condition": "minecraft:block_state_property", "block": rid(block), "properties": {"age": "7"}}]
+    return {"type": "minecraft:block", "pools": [
+        {"rolls": 1.0, "bonus_rolls": 0.0, "entries": [{"type": "minecraft:alternatives", "children": [
+            {"type": "minecraft:item", "name": rid(info["product"]), "conditions": ripe, "functions": [
+                {"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1.0, "max": 3.0},
+                 "add": False}]},
+            {"type": "minecraft:item", "name": rid(info["seeds"])}]}]},
+        {"rolls": 1.0, "bonus_rolls": 0.0, "conditions": ripe, "entries": [
+            {"type": "minecraft:item", "name": rid(info["seeds"]), "functions": [
+                {"function": "minecraft:apply_bonus", "enchantment": "minecraft:fortune",
+                 "formula": "minecraft:binomial_with_bonus_count", "parameters": {"extra": 3, "probability": 0.5714286}}]}]}],
+        "functions": [{"function": "minecraft:explosion_decay"}],
+        "random_sequence": rid(f"blocks/{block}")}
+
+
 def loot_tables():
     out = DATA / MOD / "loot_table" / "blocks"
     for metal, info in METALS.items():
@@ -600,7 +631,7 @@ def loot_tables():
             table = ore_drop(block, mineral, low, high) if block.endswith("_ore") else self_drop(block)
             write(out / f"{block}.json", table)
     for block in machine_blocks():
-        write(out / f"{block}.json", self_drop(block))
+        write(out / f"{block}.json", crop_drop(block, CROPS[block]) if block in CROPS else self_drop(block))
     # The 2-tall charging station drops once, from its lower half.
     for block in TOOL_BLOCKS:
         table = self_drop(block)
@@ -707,6 +738,10 @@ def recipes():
     paper = shaped(MACHINE_FEATURE, ["SS", "SS"], {"S": rid("sawdust")}, "sawdust")
     paper["result"] = {"id": "minecraft:paper", "count": 1}
     write(out / "paper_from_sawdust.json", paper)
+    # Farming (batch 9): cotton spins into string, one each.
+    string = shaped(MACHINE_FEATURE, ["C"], {"C": rid("cotton")}, "cotton")
+    string["result"] = {"id": "minecraft:string", "count": 1}
+    write(out / "string_from_cotton.json", string)
 
     # Gears: four plates of one metal (36 nugget units in, 36 out).
     for metal in COMPONENTS["gear"]:
@@ -791,7 +826,13 @@ def tags():
         tags.add("block", f"minecraft:mineable/{info['tool']}", rid(rock))
 
     for block in machine_blocks():
-        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+        if block not in CROPS:
+            tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    # Crops grow on farmland, take bone meal and fertilizer, and keep the farmland under them.
+    for crop, info in CROPS.items():
+        tags.add("block", "minecraft:crops", rid(crop))
+        tags.add("block", "minecraft:maintains_farmland", rid(crop))
+        tags.add("item", "c:seeds", rid(info["seeds"]))
 
     # What the powered tools mine fast (tools/JugcraftTools): the drill is a pickaxe and shovel, the chainsaw an axe
     # that also cuts leaves.

@@ -112,6 +112,10 @@ LOGISTICS_BLOCKS = {
 ELECTRONICS_BLOCKS = {"network_terminal": {"display": "Network Terminal"}}
 # Farming (batch 9): a pipe-fed sprinkler with a fertilizer hopper (farming/SprinklerBlock); "wet" shows spray.
 FARMING_BLOCKS = {"sprinkler": {"display": "Sprinkler", "states": "wet"}}
+# Crops (farming/CottonCropBlock): the crop block (planted by its seeds item, no item of its own), its seeds and its
+# product. Growth ages 0-7 show the block's four stage textures.
+CROPS = {"cotton_crop": {"display": "Cotton", "seeds": "cotton_seeds", "seeds_display": "Cotton Seeds",
+                         "product": "cotton", "product_display": "Cotton", "stages": [0, 0, 1, 1, 2, 2, 2, 3]}}
 TOOLS = {"brass_wrench": "Brass Wrench", "engineers_handbook": "Engineer's Handbook",
          # Mining & prospecting: a vague 3x3-chunk ore survey (prospecting/OreSurvey).
          "prospector": "Geo-Resonance Prospector",
@@ -666,6 +670,9 @@ def _ore_washer():
 
 # Sieve: gravel and soul sand, with small renewable finds.
 SIEVE = [
+    # Farming (batch 9): sifting coarse dirt turns up cotton seeds now and then.
+    {"input": "minecraft:coarse_dirt", "output": "minecraft:dirt", "count": 1, "ticks": 100, "features": [FEATURE],
+     "renewable": True, "byproducts": [["jugcraft:cotton_seeds", 1, 0.15, None], ["minecraft:wheat_seeds", 1, 0.1, None]]},
     {"input": "minecraft:gravel", "output": "minecraft:flint", "count": 1, "ticks": 100, "features": [FEATURE],
      "renewable": True, "byproducts": [["minecraft:iron_nugget", 1, 0.12, None], ["jugcraft:tin_nugget", 1, 0.08, "tin"]]},
     {"input": "minecraft:soul_sand", "output": "minecraft:soul_soil", "count": 1, "ticks": 100, "features": [FEATURE],
@@ -743,9 +750,10 @@ def _arc_dusts():
 def machine_blocks():
     return (list(MACHINES) + list(PARTS) + list(CABLES) + list(PIPES) + list(FLUID_BLOCKS)
             + list(ITEM_PIPES) + list(LOGISTICS_BLOCKS) + list(STORAGE_BLOCKS) + list(KINETIC_BLOCKS) + list(TOOL_BLOCKS)
-            + list(SLOPE_BLOCKS) + list(ELECTRONICS_BLOCKS) + list(FARMING_BLOCKS))
+            + list(SLOPE_BLOCKS) + list(ELECTRONICS_BLOCKS) + list(FARMING_BLOCKS) + list(CROPS))
 
 
 def machine_items():
     """Items of the machine feature that are not blocks (tools and upgrades)."""
-    return list(TOOLS) + list(UPGRADES) + list(POWERED_TOOLS) + list(UPGRADE_MODULES)
+    return (list(TOOLS) + list(UPGRADES) + list(POWERED_TOOLS) + list(UPGRADE_MODULES)
+            + [info[key] for info in CROPS.values() for key in ("seeds", "product")])

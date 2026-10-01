@@ -18,10 +18,15 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 /**
- * Farming (batch 9, docs/features/farming.md): the sprinkler. (The crop harvester is a machine; see MachineKind.)
+ * Farming (batch 9, docs/features/farming.md): the sprinkler and the cotton crop. (The crop harvester is a machine;
+ * see MachineKind.)
  */
 public final class JugcraftFarming {
 	public static Block SPRINKLER;
+	/** The cotton crop block; it has no item of its own: cotton seeds plant it. */
+	public static Block COTTON_CROP;
+	public static Item COTTON_SEEDS;
+	public static Item COTTON;
 	public static BlockEntityType<SprinklerBlockEntity> SPRINKLER_ENTITY;
 
 	private JugcraftFarming() {
@@ -39,5 +44,16 @@ public final class JugcraftFarming {
 		FluidStorage.SIDED.registerForBlockEntity((sprinkler, side) -> sprinkler.water, SPRINKLER_ENTITY);
 		ItemStorage.SIDED.registerForBlockEntity((sprinkler, side) -> sprinkler.hopper, SPRINKLER_ENTITY);
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(SPRINKLER));
+
+		ResourceKey<Block> cropKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("cotton_crop"));
+		COTTON_CROP = Registry.register(BuiltInRegistries.BLOCK, cropKey,
+				new CottonCropBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT).setId(cropKey)));
+		ResourceKey<Item> seedsKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("cotton_seeds"));
+		COTTON_SEEDS = Registry.register(BuiltInRegistries.ITEM, seedsKey,
+				new BlockItem(COTTON_CROP, new Item.Properties().setId(seedsKey)));
+		ResourceKey<Item> cottonKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("cotton"));
+		COTTON = Registry.register(BuiltInRegistries.ITEM, cottonKey, new Item(new Item.Properties().setId(cottonKey)));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.accept(COTTON_SEEDS));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.accept(COTTON));
 	}
 }

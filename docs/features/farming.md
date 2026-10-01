@@ -35,9 +35,16 @@ Greenhouses and rubber trees are left for later: rubber trees need worldgen, and
 - Code: `farming/SprinklerBlock`, `SprinklerBlockEntity`, `JugcraftFarming`.
 - Recipe: a bronze fluid pipe, steel plates, a tinplate tank and a hopper.
 
+### Cotton (commit 48)
+- **A new crop:** plant cotton seeds on farmland; it grows through eight ages, shown in four original stages (sprouts, leafy plants, green bolls, open white bolls).
+- **Seeds:** the sieve sometimes finds them in coarse dirt (15%, with wheat seeds 10%); the coarse dirt becomes dirt.
+- **A ripe plant** drops one to three cotton and more seeds (Fortune adds seeds), like wheat. The harvester, sprinkler and fertilizer all work on it (`minecraft:crops`, `minecraft:maintains_farmland`).
+- **One cotton spins into one string** (crafting).
+- Code: `farming/CottonCropBlock`; `JugcraftFarming` registers the crop, its seeds (which place it) and cotton. Textures: `tools/crop_textures.py`. `check_mod_data` now knows crops have no item of their own and that item tags may hold machine and chemistry items.
+
 ## Connections
 - Existing input producer: vanilla crops on farmland; fertilizer (batch 5) ripens them faster.
-- Existing output consumer: food and seeds for players, the auto-crafter, and anything that takes wheat.
+- Existing output consumer: food and seeds for players, the auto-crafter, and anything that takes wheat; cotton makes string (and so wool, bows, leads and the leather belt's string).
 - Technology connection: power, item logistics.
 - Magic connection: none.
 - Reachable entry path: steel tier; no circular unlock.
@@ -45,16 +52,18 @@ Greenhouses and rubber trees are left for later: rubber trees need worldgen, and
 
 ## Balance and automation
 - The harvester only gathers what vanilla crops grow on their own; it makes nothing from power. 480 JE a crop.
+- Cotton is like wheat: it grows only as vanilla crops do, and one cotton makes one string. Coarse dirt is renewable (gravel and dirt), so the seed source never runs out.
 - A sprinkler's extra growth tick every 5 seconds is about thirteen times the vanilla average for a crop (a random tick roughly every 68 seconds), for 600 mB of water a minute. Water is renewable but has to be pumped and piped there.
 
 ## Multiplayer and persistence
 Server-side. The harvester's scan position saves with its block entity like the ore drill's, and it only touches crop blocks in its loaded field. The sprinkler's water, fertilizer and pulse count save with its block entity; its spray is a client-side effect of its `wet` block state.
 
 ## Dependencies and assets
-No new dependencies. Textures and models are original (`tools/dieselpunk_models.py`, `tools/farming_models.py`).
+No new dependencies. Textures and models are original (`tools/dieselpunk_models.py`, `tools/farming_models.py`, `tools/crop_textures.py`).
 
 ## Verification
 - Game test `cropHarvesterHarvestsAndReplants` (JugcraftGameTests): a ripe wheat crop in its field is harvested, replanted at age 0, and the wheat kept.
+- Game test `cottonGrowsFromSeedsAndDropsCotton` (JugcraftGameTests): the seeds plant the crop, it is in `minecraft:crops`, a ripe one drops cotton and seeds, and the sieve's coarse dirt recipe can give seeds.
 - Game test `sprinklerWatersAndFertilizes` (PetroGameTests): with water and three fertilizer, it uses at least six pulses of water and one fertilizer, and the wheat beside it grows.
 
 ## World and event applicability

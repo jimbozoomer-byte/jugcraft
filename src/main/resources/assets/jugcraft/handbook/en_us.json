@@ -1384,6 +1384,28 @@
             {
               "in": [
                 [
+                  "minecraft:coarse_dirt",
+                  1
+                ]
+              ],
+              "out": [
+                "minecraft:dirt",
+                1
+              ],
+              "extra": [
+                [
+                  "jugcraft:cotton_seeds",
+                  0.15
+                ],
+                [
+                  "minecraft:wheat_seeds",
+                  0.1
+                ]
+              ]
+            },
+            {
+              "in": [
+                [
                   "minecraft:gravel",
                   1
                 ]
@@ -3069,6 +3091,15 @@
             "result": "jugcraft:sprinkler",
             "count": 1
           }
+        },
+        {
+          "title": "Cotton",
+          "icon": "jugcraft:cotton",
+          "text": [
+            "Sift coarse dirt in the sieve: now and then it turns up cotton seeds (and wheat seeds).",
+            "Plant them on farmland like wheat. A ripe plant gives one to three cotton and more seeds; the harvester, sprinkler and fertilizer all work on it.",
+            "One cotton spins into one string."
+          ]
         }
       ]
     },
