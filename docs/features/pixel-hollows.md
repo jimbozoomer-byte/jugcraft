@@ -1,6 +1,6 @@
 # Pixel Hollows
 
-Status: implemented in source; **not yet played**. Compiles in CI; game tests cover it, and the client test screenshots its blocks and a cave lined by its worldgen feature.
+Status: implemented in source; **not yet played**. Builds and passes its game tests in CI (see Verification); the client test screenshots its blocks and a cave lined by its worldgen feature.
 Proposal issue: none. The owner supplied the proposal ("Pixel Hollows: a retro-electronics cave biome (first slice)") and asked for it to be implemented on 1 October 2026.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery → Workshops. Iron tools and a light source are enough.
@@ -65,16 +65,23 @@ The theme is original: no real consoles, games, brands or characters.
 - Original assets: textures drawn by `tools/pixel_hollows_textures.py` and models built in `tools/retro_models.py`; the ambient loop synthesised by `tools/pixel_hollows_sound.py` (written to an Ogg file with ffmpeg). The bleeps reuse the game's own note-block "bit" sound by name in `sounds.json`; no Mojang file is copied. MIT.
 
 ## Verification
-Results are recorded in the PR. The checks:
-- `python3 tools/check_mod_data.py`: IDs, assets, loot, tags, the biome's feature references, and that no recipe makes shards.
-- Game tests (`PixelHollowsGameTests`, run by `./gradlew build` on a headless server):
-  - `pixelCrystalClusterDrops`: 1–2 shards, Silk Touch takes the cluster, Fortune III at most 5.
-  - `pixelHollowsBlocksDropThemselves`: circuitstone needs a pickaxe and drops itself; lamp light 15; cluster light 3 and no random ticks.
+Build workflow run 36811250794 on commit e034b19 (1 October 2026): Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub-hosted Ubuntu; game tests on the headless test server, client tests with Mesa software rendering.
+
+**Passed:**
+- `python3 scripts/check_repository.py`, `python3 tools/check_mod_data.py` (IDs, assets, loot, tags, the biome's feature references, no recipe makes shards, no pre-26 loot keys) and the generated-JSON check.
+- `./gradlew build`: all 74 game tests, including `PixelHollowsGameTests`:
+  - `pixelCrystalClusterDrops`: 1–2 shards (both seen in 64 breaks), Silk Touch takes the cluster, Fortune III at most 5.
+  - `pixelHollowsBlocksDropThemselves`: circuitstone needs a pickaxe and drops itself; lamp light 15; cluster light 3 and no random ticks; the cabinet drops once, from its lower half.
+  - `pixelCrystalFeaturesFaceTheCave`: the floor and ceiling features place clusters facing up and down.
   - `pixelHollowsRecipes`: lamp (4 shards + glass → 1), cabinet, stonecutting.
   - `pixelHollowsJoinsTheOverworld`: the biome is registered and in the Overworld's climate table.
-  - `overworldFeatureOrderHasNoCycle`: every Overworld biome's features sort into one order (a mistake here would crash world generation).
-- Client test screenshots: `jugcraft_pixel_hollows_blocks` and `jugcraft_pixel_hollows_cave` (a carved cavity whose biome is set to the Pixel Hollows, lined by placing the real `pixel_hollows_lining` feature around its walls, with clusters on its floor and ceiling).
-- **Not run:** how often and where the biome appears on real seeds (26.3's climate sampler is not public API in the form the plan assumed, and the test worlds are superflat); a survival playthrough; finding the biome in naturally generated terrain in a client; the old-chunk upgrade test; hostile-spawn checks in dark pockets; a dedicated server with two clients; chunk-generation timing with and without the feature.
+  - `overworldFeatureOrderHasNoCycle`: every Overworld biome's features sort into one order.
+  - `oresNeedSilkTouchToDropThemselves` (with the shared loot fix): tin ore gives raw tin, 1–4 with Fortune III, and itself only with Silk Touch.
+- Client screenshots, looked at: `jugcraft_pixel_hollows_blocks` (the four blocks, a cluster and the cabinet) and `jugcraft_pixel_hollows_cave` (a carved cavity set to the biome, lined by the real `pixel_hollows_lining` feature, clusters on its floor and ceiling).
+
+**Failed, then fixed on this branch:** 26.3 changed two data formats without load errors. Loot tables written the pre-26 way lost their conditions and functions (clusters and every Jugcraft ore dropped themselves to any tool; the loot validator logged "Unreachable entry"), so the generator now writes 26.3's form. The crystal features' first block-state and placement format did not load in 26.3 and were rewritten.
+
+**Not run:** how often and where the biome appears on real seeds (26.3's climate sampler is not public API in the form the plan assumed, and the test worlds are superflat); a survival playthrough; finding the biome in naturally generated terrain in a client; the old-chunk upgrade test; hostile-spawn checks in dark pockets; a dedicated server with two clients; chunk-generation timing with and without the feature.
 
 ## World and event applicability
 - Biome fit: a deep cave under dry land; the surface above is desert, savanna, badlands or dry plains, so the cave has no surface tell. It is not under oceans.

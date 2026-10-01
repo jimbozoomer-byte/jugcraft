@@ -1,6 +1,6 @@
 # Retro Game Shop and Retro Trader
 
-Status: implemented in source; **not yet played**. Compiles in CI; game tests cover it, and the client test screenshots the trader, his cabinet and the shop.
+Status: implemented in source; **not yet played**. Builds and passes its game tests in CI (see Verification); the client test screenshots the trader, his cabinet and the shop.
 Proposal issue: none. The owner supplied the proposal ("Retro Game Shop & Retro Trader (Pixel Hollows companion)") with a reference picture of the trader and asked for it to be implemented on 1 October 2026.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery. Emeralds and a compass are all a player needs.
@@ -38,7 +38,7 @@ Everything is original: no real shop names, logos, colours, uniforms, games or f
 - How this specialty stays useful without mastering every other branch: a map seller and a small decor shop; nothing requires him.
 
 ## Balance and automation
-- **Shop rarity:** the shop joins `minecraft:village/plains/houses` with weight 1 (vanilla houses weigh 1 to 3 each). Each house slot of a new plains village has about a 1-in-N chance of being the shop, where N is the pool's total weight; the game test `retroGameShopTemplate` logs the actual share. Plains villages only in this slice.
+- **Shop rarity:** the shop joins `minecraft:village/plains/houses` with weight 1 (vanilla houses weigh 1 to 3 each). Each house slot of a new plains village has a 1-in-88 chance of being the shop (the pool's total weight in 26.3, logged by `retroGameShopTemplate`), so a village of about 15 houses has a shop roughly 1 time in 6. Plains villages only in this slice.
 - **Trades** are data (26.1+): `data/jugcraft/villager_trade/retro_trader/*.json`, one tag per level (`#jugcraft:retro_trader/level_1` …) and a trade set per level (`data/jugcraft/trade_set/retro_trader/level_<n>.json`) that the profession names. All are generated from `TRADES` in `tools/pixel_hollows.py`. The last column is each trade's `reputation_discount` (the old price multiplier):
 
 | Level | Trade | Uses per restock | XP | Price multiplier |
@@ -74,19 +74,26 @@ Everything is original: no real shop names, logos, colours, uniforms, games or f
 - The shop template is written in 26.3's format with 26.3's DataVersion (5023), so the data fixer leaves it alone. A DataVersion above the game's made the whole template load as air; the game test `retroGameShopTemplateLoads` compares the two numbers, so after a platform bump `DATA_VERSION` in `tools/retro_game_shop.py` must follow.
 
 ## Verification
-Results are recorded in the PR. The checks:
+Build workflow run 36811250794 on commit e034b19 (1 October 2026): Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub-hosted Ubuntu; game tests on the headless test server, client tests with Mesa software rendering.
+
+**Passed:**
 - `python3 tools/check_mod_data.py`: the Java trade table against `tools/pixel_hollows.py`, the search bounds, and the buyback against the cheapest sale.
-- Game tests (`PixelHollowsGameTests`):
+- `./gradlew build`: all 74 game tests, including:
   - `retroTraderTrades`: novice, apprentice and journeyman traders get exactly their trades; the map costs 12 emeralds and a compass, once per restock.
-  - `retroTraderHasNoProfitLoop`: the buyback's multiplier is 0; the best buyback per shard is below the cheapest sale.
+  - `retroTraderHasNoProfitLoop`: the buyback's multiplier is 0; logged "cheapest shard 0.5 emeralds, best buyback 0.333 emeralds per shard".
   - `pixelHollowsMapNeedsACaveInReach`: in the superflat test world, using the map leaves it unmarked.
   - `pixelHollowsMapIsMarked`: a marked map carries the marker and the depth in its name.
   - `arcadeCabinetIsAJobSite`: the lower half is an acquirable job site for the profession; the upper half is not.
   - `villagerClaimsTheArcadeCabinet`: an unemployed villager walks to a cabinet and becomes a Retro Trader.
-  - `retroGameShopTemplateLoads`: the template loads with its blocks and carries the game's DataVersion.
-  - `retroGameShopTemplate`: the shop placed as the test structure has the cabinet, the "Retro Games" sign, the street jigsaw and a villager, and the shop is in the plains houses pool.
-- Client screenshots: `jugcraft_retro_trader`, `jugcraft_retro_game_shop`, and the cabinet in `jugcraft_pixel_hollows_blocks`.
-- **Not run:** shop frequency across generated villages on ten seeds (only the per-house weight is known); a shop joined to a real village street; buying a map in a client and following it to a cave; the map search's time in a real world; a dedicated server with two clients trading with one trader; restock and restart with a saved map; old-world upgrade; disable-switch behaviour in a running world.
+  - `retroGameShopTemplateLoads`: the template's DataVersion is 5023, the same as the game's, and its palette reads as its own blocks.
+  - `retroGameShopTemplate`: placed as the test structure, the shop has the cabinet, door, sign, street jigsaw and a villager, and it is in the plains houses pool: logged "weight 1 of 88 in plains houses (1.14% per house)".
+- Client screenshots, looked at: `jugcraft_retro_trader` (the trader beside his cabinet, matching the reference picture), `jugcraft_retro_game_shop` (the storefront with its door, windows, shelves, lamps and sign) and the cabinet in `jugcraft_pixel_hollows_blocks`.
+
+**Failed, then fixed on this branch:** the shop first placed as air: 26.3 templates name palette entries `id`/`properties`, and the template had used the older `Name`/`Properties` with a DataVersion the data fixer would not upgrade. It now matches vanilla 26.3's own village templates.
+
+**Shop frequency, estimated, not measured:** the shop is 1 of 88 weighted entries in the plains houses pool (1.14% per house slot). A plains village with about 15 house slots would then have a shop about 1 time in 6 (1 − (87/88)^15 ≈ 16%), which matches the proposal; villages vary in size, and this was not counted on real seeds.
+
+**Not run:** shop frequency across generated villages on real seeds; a shop joined to a real village street (whether its floor sits level with the path); buying a map in a client and following it to a cave; the map search's time in a real world; a dedicated server with two clients trading with one trader; restock and restart with a saved map; old-world upgrade; disable-switch behaviour in a running world.
 
 ## World and event applicability
 - Village fit: plains villages only; the shop uses their oak and cobblestone with a few Jugcraft blocks inside.
