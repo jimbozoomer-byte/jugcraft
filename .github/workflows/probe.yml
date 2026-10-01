@@ -1,0 +1,57 @@
+name: Probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - run: ./gradlew compileJava --no-daemon -q
+      - run: |
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
+          CP="$CLIENT:$COMMON"
+          FAPI=$(find ~/.gradle/caches -name 'fabric-*.jar' -path '*net.fabricmc.fabric-api*' | grep -v sources | tr '\n' ':')
+          p() { echo "=== $1"; javap -cp "$CP:$FAPI" -p "$1" 2>&1 | grep -v 'lambda\$' | head -${2:-80}; }
+          p net.minecraft.client.renderer.texture.DynamicTexture
+          p net.minecraft.client.renderer.texture.AbstractTexture 40
+          p com.mojang.blaze3d.platform.NativeImage 120
+          p net.minecraft.client.renderer.texture.TextureManager 60
+          echo "=== RenderTypes entity*"; javap -cp "$CP" net.minecraft.client.renderer.rendertype.RenderTypes | grep -iE 'entity|eyes|emissive' | head -40
+          p net.minecraft.client.renderer.LightTexture 40
+          find /tmp -maxdepth 0; mkdir -p /tmp/x && cd /tmp/x && unzip -q -o "$CLIENT" 'net/*' && unzip -q -o "$COMMON" 'net/*' 'data/*' 'assets/*' 2>/dev/null || true
+          echo "=== light classes"; find net -iname '*LightCoords*' -o -iname '*LightTexture*' | head
+          p net.minecraft.client.gui.screens.Screen 200 | grep -E 'mouse|key|char|public|protected' | head -80
+          p net.minecraft.client.gui.components.events.GuiEventListener 60
+          echo "=== input event classes"; find net/minecraft/client/input -name '*.class' | head -30
+          p net.minecraft.client.input.MouseButtonEvent 40
+          p net.minecraft.client.input.KeyEvent 40
+          p net.minecraft.client.input.MouseButtonInfo 40
+          p net.minecraft.client.gui.GuiGraphicsExtractor 200 | grep -E 'public' | head -80
+          p net.minecraft.world.level.block.entity.BlockEntity 200 | grep -iE 'component|implicit|update|save|load|Custom' | head -40
+          p net.minecraft.core.component.DataComponentGetter 30
+          p net.minecraft.world.level.storage.ValueInput 60
+          p net.minecraft.world.level.storage.ValueOutput 60
+          p net.minecraft.network.codec.ByteBufCodecs 200 | grep -iE 'byte|array' | head -20
+          echo "=== PumpkinBlock"; javap -cp "$CP" -p -c net.minecraft.world.level.block.PumpkinBlock | grep -E 'invoke|getstatic|bipush|iconst|ldc|Method|protected|public' | head -90
+          p net.minecraft.world.entity.player.Player 400 | grep -iE 'interact|range|mayBuild|canInteract' | head -20
+          p net.minecraft.world.level.Level 400 | grep -iE 'mayInteract' | head
+          p net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents 30
+          p net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext 60
+          p net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState 30
+          p net.minecraft.world.item.BlockItem 80 | grep -iE 'public|protected' | head -30
+          p net.minecraft.world.level.block.CarvedPumpkinBlock 40
+          echo "=== Sounds"; javap -cp "$CP" net.minecraft.sounds.SoundEvents | grep -iE 'pumpkin|carve' | head
+          for f in data/minecraft/loot_table/blocks/white_banner.json data/minecraft/loot_table/blocks/bee_nest.json data/minecraft/loot_table/blocks/decorated_pot.json assets/minecraft/items/light.json assets/minecraft/items/bee_nest.json data/minecraft/recipe/jack_o_lantern.json data/minecraft/recipe/shulker_box_coloring.json data/minecraft/recipe/black_shulker_box.json data/minecraft/loot_table/blocks/pumpkin.json data/minecraft/loot_table/blocks/carved_pumpkin.json data/minecraft/recipe/pumpkin_seeds.json data/minecraft/recipe/dried_kelp_from_smoking.json; do echo "=== $f"; cat "$f" 2>&1 | head -60; done
+          echo "=== recipe types mentioning transmute"; ls data/minecraft/recipe | grep -iE 'dye|color' | head
+          ls assets/minecraft/models/block | grep -iE 'pumpkin|lantern' | head
+          for f in assets/minecraft/models/block/carved_pumpkin.json assets/minecraft/models/block/pumpkin.json assets/minecraft/blockstates/carved_pumpkin.json assets/minecraft/items/carved_pumpkin.json; do echo "=== $f"; cat $f; echo; done
