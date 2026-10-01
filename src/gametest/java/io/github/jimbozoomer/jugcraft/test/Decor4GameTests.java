@@ -223,7 +223,7 @@ public class Decor4GameTests {
 		place(helper, player, stand, Direction.UP);
 		helper.assertTrue(helper.getBlockState(stand.above()).is(block("witchs_broom"))
 				&& helper.getBlockState(stand.above()).getValue(WitchsBroomBlock.FACING) == Direction.SOUTH, "It stands facing its owner");
-		BlockPos post = new BlockPos(6, 2, 6);
+		BlockPos post = new BlockPos(6, 3, 6);
 		helper.setBlock(post, Blocks.OAK_PLANKS);
 		place(helper, player, post, Direction.EAST);
 		helper.assertBlockNotPresent(block("witchs_broom"), post.east());
