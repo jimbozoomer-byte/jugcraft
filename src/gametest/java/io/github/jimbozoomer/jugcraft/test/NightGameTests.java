@@ -581,8 +581,9 @@ public class NightGameTests {
 			HeadlessHorseman horseman = riders.get(0);
 			double away = Math.hypot(horseman.getX() - scarecrow.getX() - 0.5, horseman.getZ() - scarecrow.getZ() - 0.5);
 			helper.assertTrue(away <= HorsemanSummoning.MAX_DISTANCE + 1.0, "within " + HorsemanSummoning.MAX_DISTANCE + " blocks: " + away);
-			helper.assertTrue(horseman.home().equals(scarecrow) && horseman.getTarget() == caller && horseman.isPersistenceRequired(),
-					"His arena is the scarecrow, he hunts the summoner, and he stays");
+			helper.assertTrue(horseman.home().equals(scarecrow), "His arena is the scarecrow: " + horseman.home() + " vs " + scarecrow);
+			helper.assertTrue(horseman.getTarget() == caller, "He hunts the summoner: " + horseman.getTarget());
+			helper.assertTrue(horseman.isPersistenceRequired(), "and he stays");
 			helper.setBlock(lower.above(2), Blocks.JACK_O_LANTERN);
 			helper.assertTrue(HorsemanSummoning.summon(caller, scarecrow, MIDNIGHT) == HorsemanSummoning.Result.ALREADY_RIDING, "Only one rides at a time");
 			helper.assertTrue(helper.getBlockState(lower.above(2)).is(Blocks.JACK_O_LANTERN), "and the second head is kept");

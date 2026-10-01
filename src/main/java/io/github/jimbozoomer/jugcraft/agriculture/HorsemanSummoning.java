@@ -96,8 +96,8 @@ public final class HorsemanSummoning {
 		horseman.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.FEET, Vec3.atBottomCenterOf(scarecrow));
 		horseman.setHome(scarecrow);
 		horseman.setPersistenceRequired();
-		horseman.setTarget(player);
 		level.addFreshEntity(horseman);
+		horseman.setTarget(player);
 		for (ServerPlayer near : level.getPlayers(p -> p.distanceToSqr(Vec3.atCenterOf(scarecrow)) < 64.0 * 64.0)) {
 			near.sendSystemMessage(Component.translatable("message.jugcraft.horseman.summoned"));
 		}
