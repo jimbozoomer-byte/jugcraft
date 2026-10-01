@@ -4,8 +4,8 @@ package io.github.jimbozoomer.jugcraft.season;
  * The seasonal colour maths, kept free of client classes so server game tests can check it; the client applies it
  * to grass and foliage tints ({@code client/SeasonColors}). Keyframes through the year say how far each tint moves
  * from its vanilla colour towards a seasonal one; between keyframes the result blends smoothly. Summer (day 196) is
- * vanilla. Autumn foliage mixes gold, orange and red in patches about 24 blocks across, with smaller speckles, so
- * a forest turns in patches rather than one flat colour.
+ * vanilla. Autumn foliage mixes gold, orange and red in patches about 12 blocks across, with smaller speckles, so
+ * neighbouring trees turn different colours rather than one flat one.
  */
 public final class SeasonPalette {
 	/**
@@ -17,21 +17,21 @@ public final class SeasonPalette {
 
 	/** In day order; the year wraps from the last back to the first. */
 	public static final Keyframe[] YEAR = {
-			new Keyframe(15, 0x7d6f4a, 0.55F, 0.0F, 0x94946a, 0.50F), // midwinter: dormant, olive-brown
-			new Keyframe(75, 0x6f8a3c, 0.25F, 0.0F, 0x8aa05a, 0.25F), // mid-March: first green
-			new Keyframe(120, 0x6fd23a, 0.30F, 0.0F, 0x7cd44e, 0.30F), // spring: fresh, bright green
+			new Keyframe(15, 0x86704c, 0.70F, 0.0F, 0x9c9472, 0.60F), // midwinter: dormant, grey-brown
+			new Keyframe(75, 0x7c8a40, 0.40F, 0.0F, 0x94a462, 0.35F), // mid-March: first green
+			new Keyframe(120, 0x80e23c, 0.45F, 0.0F, 0x86de52, 0.40F), // spring: fresh, bright green
 			new Keyframe(196, 0x000000, 0.0F, 0.0F, 0x000000, 0.0F), // midsummer: vanilla
-			new Keyframe(244, 0xb8b23a, 0.35F, 0.3F, 0xa7b04a, 0.20F), // September: first yellowing
-			new Keyframe(293, 0xd47a2a, 0.80F, 1.0F, 0xb3a24e, 0.40F), // 20 October: peak autumn
-			new Keyframe(330, 0x8e5a2c, 0.70F, 0.4F, 0xa08e58, 0.45F), // late November: russet and bare
+			new Keyframe(244, 0xc8b43a, 0.45F, 0.3F, 0xb0b04a, 0.25F), // September: first yellowing
+			new Keyframe(293, 0xe07020, 0.95F, 1.0F, 0xc0a24c, 0.50F), // 20 October: peak autumn
+			new Keyframe(330, 0x96542a, 0.85F, 0.4F, 0xa88e56, 0.55F), // late November: russet and bare
 	};
 
-	public static final int GOLD = 0xd8b032;
-	public static final int ORANGE = 0xd9792a;
-	public static final int RED = 0xb8402a;
+	public static final int GOLD = 0xe8b028;
+	public static final int ORANGE = 0xe86a1c;
+	public static final int RED = 0xc8301e;
 	/** Blocks across an autumn colour patch, and across the smaller speckles inside it. */
-	public static final double PATCH = 24.0;
-	public static final double SPECKLE = 7.0;
+	public static final double PATCH = 12.0;
+	public static final double SPECKLE = 5.0;
 
 	private SeasonPalette() {
 	}
@@ -73,7 +73,7 @@ public final class SeasonPalette {
 		double n = 0.7 * valueNoise(x / PATCH, z / PATCH, 0) + 0.3 * valueNoise(x / SPECKLE, z / SPECKLE, 1);
 		// Averaged noise bunches around one half; stretch it so all three colours show.
 		n = Math.clamp((n - 0.5) * 1.8 + 0.5, 0.0, 1.0);
-		return n < 0.5 ? mix(GOLD, ORANGE, (float) (n * 2.0)) : mix(ORANGE, RED, (float) ((n - 0.5) * 2.0));
+		return n < 0.45 ? mix(GOLD, ORANGE, (float) (n / 0.45)) : mix(ORANGE, RED, (float) ((n - 0.45) / 0.55));
 	}
 
 	/** {@code a} moved {@code t} (0 to 1) of the way towards {@code b}, per colour channel; {@code a}'s alpha is kept. */

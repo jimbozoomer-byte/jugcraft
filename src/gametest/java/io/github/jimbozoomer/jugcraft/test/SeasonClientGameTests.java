@@ -51,7 +51,9 @@ public class SeasonClientGameTests implements FabricClientGameTest {
 			if (joined != expected) {
 				throw new AssertionError("The client has season day " + joined + " after joining; the server has " + expected);
 			}
-			context.getInput().pressKey(options -> options.keyToggleGui);
+			// Hide the HUD and hand for the screenshots. Set, not toggled: earlier tests may leave it either way.
+			boolean hudHidden = context.computeOnClient(client -> client.options.hideGui);
+			context.runOnClient(client -> client.options.hideGui = true);
 			server.runCommand("tp @p %d %d %d 180 -4".formatted(x, y, z + 1));
 
 			BlockPos leaf = origin.offset(TREES[2][0], 4, TREES[2][1]);
@@ -77,7 +79,7 @@ public class SeasonClientGameTests implements FabricClientGameTest {
 				context.takeScreenshot("jugcraft_season_" + mode.name().toLowerCase(Locale.ROOT));
 			}
 			server.runOnServer(minecraft -> JugcraftSeasons.setMode(minecraft, configured));
-			context.getInput().pressKey(options -> options.keyToggleGui);
+			context.runOnClient(client -> client.options.hideGui = hudHidden);
 
 			int[] summer = tints.get(SeasonCalendar.Mode.SUMMER);
 			int[] off = tints.get(SeasonCalendar.Mode.OFF);

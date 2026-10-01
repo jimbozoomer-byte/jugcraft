@@ -11,7 +11,7 @@ Primary specialty and supported player role: exploration and building (looks onl
   - **Winter** (around January): dull, olive-brown and dormant.
   - **Spring** (March to May): first green, then a fresh, bright green.
   - **Summer** (July): the vanilla colours.
-  - **Autumn** (September to November): leaves yellow from September. In late October they turn gold, orange and red in patches about 24 blocks across, with smaller speckles, so a forest turns unevenly. By late November they are russet. Grass goes straw-coloured.
+  - **Autumn** (September to November): leaves yellow from September. In late October they turn gold, orange and red in patches about 12 blocks across, with smaller speckles, so neighbouring trees turn different colours. By late November they are russet. Grass goes straw-coloured.
 - Colours change a little each day (no sudden jumps) and blend smoothly into neighbouring biomes that have no seasons.
 - Biomes with seasons (`#jugcraft:has_seasons`, listed in `tools/seasons.py`):
   - plains, sunflower plains and meadow;
