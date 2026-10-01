@@ -49,6 +49,9 @@ ITEMS = {
     "cracking_catalyst": "Cracking Catalyst",
     # The residue of vacuum distillation; asphalt roads come in batch 4.
     "asphalt_binder": "Asphalt Binder",
+    # Polymerized refinery gas; the metal press flattens each into a plastic sheet.
+    "plastic_pellets": "Plastic Pellets",
+    "plastic_sheet": "Plastic Sheet",
 }
 
 
@@ -105,6 +108,9 @@ FLUID_MACHINES = {
     # Burns gasoline (384 JE/mB) or refinery gas (192 JE/mB) at 512 JE/t; the second tank takes lubricant,
     # 1 mB every 20 ticks of running (FluidFuels.LUBRICANT_TICKS), and it will not run without it.
     "gas_turbine": {"inputs": [16_000, 4_000], "outputs": [], "item_inputs": 0, "item_outputs": 0, "recipe_type": None},
+    # Refinery gas -> plastic pellets. 96 JE/t.
+    "polymerization_reactor": {"inputs": [8_000], "outputs": [], "item_inputs": 0, "item_outputs": 1,
+                               "recipe_type": "polymerization"},
 }
 
 # JE per mB each fluid-burning generator gets from each fuel (Java: chemistry/FluidFuels).
@@ -145,7 +151,11 @@ FLUID_RECIPES = {
          "fluid_results": [("jugcraft:lubricant", 400)], "results": [("jugcraft:asphalt_binder", 2)], "ticks": 120,
          "features": ["crude_oil"]},
     ],
-    # Reforming rearranges naphtha into high-octane gasoline, giving off a little gas.
+    # Refinery gas polymerizes into plastic: a bucket of gas gives four pellets.
+    "polymerization_reactor": [
+        {"name": "refinery_gas", "fluids": [("jugcraft:refinery_gas", 1000)], "fluid_results": [],
+         "results": [("jugcraft:plastic_pellets", 4)], "source": 0, "ticks": 100, "features": ["crude_oil"]},
+    ],
     # Fracking fluid: water carrying sand (to prop the cracks open) and a gelling agent (dried kelp, standing in for
     # guar gum) to carry the sand.
     "chemical_mixer": [
@@ -160,6 +170,7 @@ FLUID_RECIPES = {
          "fluid_results": [("minecraft:water", 750)], "results": [("jugcraft:salt", 1)], "ticks": 80,
          "features": ["crude_oil"]},
     ],
+    # Reforming rearranges naphtha into high-octane gasoline, giving off a little gas.
     "catalytic_reformer": [
         {"name": "naphtha", "fluids": [("jugcraft:naphtha", 1000)],
          "fluid_results": [("jugcraft:gasoline", 900), ("jugcraft:refinery_gas", 100)], "ticks": 120,

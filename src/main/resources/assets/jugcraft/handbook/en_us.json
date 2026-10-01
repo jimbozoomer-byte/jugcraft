@@ -2071,6 +2071,29 @@
           }
         },
         {
+          "title": "Polymerization Reactor",
+          "icon": "jugcraft:polymerization_reactor",
+          "text": [
+            "Two by two and three blocks tall. Polymerizes refinery gas into plastic: a bucket of gas gives four plastic pellets, every 5 seconds. The metal press flattens each pellet into a plastic sheet.",
+            "Uses 96 JE/t while working. Holds 30,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:cracking_catalyst",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "minecraft:glass",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:polymerization_reactor",
+            "count": 1
+          }
+        },
+        {
           "title": "Cracking Catalyst",
           "icon": "jugcraft:cracking_catalyst",
           "text": [

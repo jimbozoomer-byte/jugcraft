@@ -130,6 +130,9 @@ ABOUT = {
     "diesel_generator": "Three wide, two tall and two deep. Burns diesel or heavy fuel oil piped into its 8-bucket tank: "
                         "256 JE/t, a bucket of diesel every 1,000 ticks (256,000 JE) or heavy fuel oil twice as fast "
                         "(128,000 JE a bucket). It refuses crude oil and other fluids.",
+    "polymerization_reactor": "Two by two and three blocks tall. Polymerizes refinery gas into plastic: a bucket of gas "
+                              "gives four plastic pellets, every 5 seconds. The metal press flattens each pellet "
+                              "into a plastic sheet.",
     "gas_turbine": "Four wide, two tall and two deep. Burns gasoline or refinery gas from its 16-bucket tank: 512 JE/t, "
                    "384,000 JE a bucket of gasoline or 192,000 JE a bucket of gas. Its second tank takes lubricant "
                    "from the vacuum distillation unit: 1 mB every second of running, and it stops when it runs dry.",
@@ -341,6 +344,7 @@ def build():
             machine_page("flowback_treatment_unit"),
             machine_page("diesel_generator"),
             machine_page("gas_turbine"),
+            machine_page("polymerization_reactor"),
             {"title": "Cracking Catalyst", "icon": f"{MOD}:cracking_catalyst", "text": [
                 "Bauxite (alumina) and sand (silica) with a nickel ingot make four. The catalytic cracker uses one for "
                 "each bucket of heavy fuel oil it cracks."], "craft": craft("cracking_catalyst")},

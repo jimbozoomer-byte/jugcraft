@@ -383,4 +383,16 @@ public class PetroGameTests {
 			});
 		});
 	}
+
+	/** The polymerization reactor turns a bucket of refinery gas into four plastic pellets. */
+	@GameTest(maxTicks = 300)
+	public void reactorMakesPlasticPellets(GameTestHelper helper) {
+		MachineBlockEntity reactor = place(helper, MachineKind.POLYMERIZATION_REACTOR, new BlockPos(4, 1, 2));
+		reactor.tanks().input(0).fill(PetroFluids.REFINERY_GAS.fluid(), 1000);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(reactor.getItem(0).is(PetroItems.PLASTIC_PELLETS) && reactor.getItem(0).getCount() == 4,
+					"Pellets: " + reactor.getItem(0));
+			helper.assertTrue(reactor.tanks().input(0).isResourceBlank(), "Gas left: " + reactor.tanks().input(0).millibuckets());
+		});
+	}
 }

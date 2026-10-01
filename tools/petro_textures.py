@@ -132,7 +132,38 @@ def asphalt_binder():
     return img
 
 
+def plastic_pellets():
+    """Plastic pellets: a little pile of glossy off-white nurdles, each with a bright highlight."""
+    rng = random.Random(962)
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    centres = [(rng.uniform(3, 13), rng.uniform(6 + abs(8 - x) * 0.35, 14)) for x in range(18)]
+    for cx, cy in sorted(centres, key=lambda c: c[1]):
+        for y in range(16):
+            for x in range(16):
+                d = (x - cx) ** 2 + (y - cy) ** 2
+                if d <= 2.4:
+                    c = (232, 230, 220) if d < 0.8 and x <= cx else (204, 202, 190) if y <= cy else (168, 166, 156)
+                    img.putpixel((x, y), c + (255,))
+    return img
+
+
+def plastic_sheet():
+    """Plastic sheet: a thin, slightly translucent-looking cream panel seen at an angle, with a moulded edge."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(3, 14):
+        shift = (13 - y) // 3
+        for x in range(2 + shift, 13 + shift):
+            edge = y in (3, 13) or x in (2 + shift, 12 + shift)
+            c = (150, 146, 132) if edge else (226, 222, 204) if (x + 2 * y) % 9 else (240, 238, 224)
+            if not edge and x - shift < 6 and y < 7:
+                c = (246, 244, 234)
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
 def draw_all(save, save_animation):
+    save(plastic_pellets(), "item", "plastic_pellets")
+    save(plastic_sheet(), "item", "plastic_sheet")
     save(catalyst(), "item", "cracking_catalyst")
     save(asphalt_binder(), "item", "asphalt_binder")
     for index, (fluid, info) in enumerate(FLUIDS.items()):

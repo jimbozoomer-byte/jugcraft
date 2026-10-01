@@ -383,6 +383,8 @@ The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches
 | Flowback Treatment Unit | 3 wide, 1 tall, 2 deep: settling basins and a filter press | 1,000 mB flowback water → 750 mB water + 1 salt; 80 ticks at 48 JE/t | steel plates, iron bars, 2 tinplate tanks, sieve, casing |
 | Diesel Generator | 3 wide, 2 tall, 2 deep; an inline six burning liquid fuel | 256 JE/t: diesel 256 JE/mB (1 mB/t), heavy fuel oil 128 JE/mB (2 mB/t); 8-bucket tank, 60,000 JE buffer | 4 steel plates, electric motor, 2 tinplate tanks, casing, steel gear |
 | Gas Turbine | 4 wide, 2 tall, 2 deep; burns light fuels, needs lubricant | 512 JE/t: gasoline 384 JE/mB, refinery gas 192 JE/mB; 1 mB lubricant per 20 ticks of running; 16-bucket fuel tank, 4-bucket lubricant tank, 120,000 JE buffer | 4 steel plates, 2 iron bars, 2 diesel generators, advanced circuit, steel gear |
+| Polymerization Reactor | 2×2, three tall; polymerizes refinery gas | 1,000 mB refinery gas → 4 plastic pellets; 100 ticks at 96 JE/t | 4 steel plates, cracking catalyst, 2 steel tanks, glass, casing |
+| Plastic Pellets, Plastic Sheet | Pellets from the reactor; the metal press makes a sheet from each (60 ticks) | for later machines (first: the diesel engine) | – |
 
 **Fluid processing machines** (the pumpjack and extractor are the first): input tanks take only fluids the machine's recipes use; output tanks push into neighbouring tanks and pipes; the screen shows a gauge per tank. Recipes are data in `data/jugcraft/recipe/<type>/` (see [petrochemistry.md](features/petrochemistry.md)).
 

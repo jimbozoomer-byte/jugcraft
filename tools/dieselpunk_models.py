@@ -618,6 +618,36 @@ def gas_turbine():
     return m
 
 
+def polymerization_reactor():
+    """Two by two and three tall: a jacketed olive reactor vessel with gunmetal heating bands, a domed head carrying
+    the agitator drive, a gas feed line with a red valve, a chrome sight glass showing the hot gas, and a pellet
+    extruder at the base dropping cream pellets into a hopper beside the control panel (the master block)."""
+    m = [box((-16, 0, 0), (16, 2, 32), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    # Control panel at the front left (the master block).
+    m.append(box((1, 2, 0.5), (15, 12, 6), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(dial("north", (5, 8.5, 0.25), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 8.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    # Skirt and the reactor vessel with its heating jacket bands.
+    m += cyl("y", -1, 18, 9, 2, 8, GUNMETAL)
+    m += cyl("y", -1, 18, 11, 8, 38, OLIVE, GUNMETAL)
+    for y in (12, 20, 28, 35):
+        m += cyl("y", -1, 18, 11.4, y, y + 1.5, GUNMETAL)
+    m.append(box((-3, 22, 6.5), (1, 32, 7), {"*": CHROME, "north": "lubricant_still"}))
+    # Domed head and agitator drive.
+    m += cyl("y", -1, 18, 8, 38, 41, GUNMETAL, CHROME)
+    m += cyl("y", -1, 18, 4, 41, 44, OLIVE)
+    m.append(box((-4, 44, 15), (2, 48, 21), {"*": OLIVE, "east": GRILLE, "west": GRILLE}))
+    # Gas feed line down the right side with its valve.
+    m.append(box((-15, 2, 16), (-12, 34, 19), CHROME))
+    m.append(box((-13, 32, 16), (-11, 34, 19), CHROME))
+    m += wheel("x", 24, 17.5, 1.5, -15.75, -15, "sp_red_iron", CHROME, spokes=False)
+    # Pellet extruder and catch hopper at the front.
+    m.append(box((3, 12, 8), (9, 16, 14), GUNMETAL))
+    m.append(box((4, 12.5, 6.5), (8, 15.5, 8), CHROME))
+    m.append(box((3.5, 14, 14), (8.5, 18, 17), RUBBER))
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
           "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump(),
@@ -625,4 +655,5 @@ MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), 
           "vacuum_distillation_unit": vacuum_distillation_unit(), "catalytic_reformer": catalytic_reformer(),
           "chemical_mixer": chemical_mixer(), "fracking_rig": fracking_rig(),
           "flowback_treatment_unit": flowback_treatment_unit(), "diesel_generator": diesel_generator(),
-          "gas_turbine": gas_turbine()}
+          "gas_turbine": gas_turbine(),
+          "polymerization_reactor": polymerization_reactor()}

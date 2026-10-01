@@ -117,6 +117,13 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - 120,000 JE buffer, up to 2,048 JE/t out of every part. Recipe: steel plates, iron bars, two diesel generators, an advanced circuit and a steel gear.
 - Balance: the gasoline and gas from one bucket of crude oil (293 mB and 183 mB) give about 147,700 JE here, on top of the diesel's 134,400 JE. Audited in BALANCE.md in commit 19.
 
+### Plastics (batch 4, commit 16)
+- The **polymerization reactor** is two by two and three tall: a jacketed olive vessel with heating bands, a domed head with the agitator drive, a valved gas feed line, a sight glass and a pellet extruder by the control panel.
+- **1,000 mB of refinery gas → 4 plastic pellets**, every 100 ticks at 96 JE/t. The **metal press** flattens a pellet into a **plastic sheet** (60 ticks).
+- Plastic sheets go into later machines and parts; the first is the diesel engine (commit 18).
+- Refinery gas now has two uses: burning it in the gas turbine (192,000 JE a bucket) or making four plastic sheets.
+- Recipe: steel plates, a cracking catalyst, two steel tanks, glass and a machine casing.
+
 ### What refining gives (batch 2 summary)
 From one bucket of crude oil, with every byproduct refined:
 
@@ -161,6 +168,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 - Game test `mixerMakesFrackingFluid`.
 - Game test `frackingRigFreesShaleOil` (it takes fracking fluid through Fabric's fluid API, brings up crude oil, gas and flowback, and draws on the shale).
 - Game test `treatmentCleansFlowback`.
+- Game test `reactorMakesPlasticPellets`.
 - Game test `gasTurbineNeedsLubricant` (no energy and no gasoline burnt without lubricant; with it, 384 JE per mB of gasoline and a little lubricant used).
 - Game test `dieselGeneratorBurnsDiesel` (its tank refuses crude oil through Fabric's fluid API, and each mB of diesel burnt adds exactly 256 JE).
 - Game test `pumpjackPumpsOil`: a powered pumpjack over pumpable oil fills its tank with crude oil and the reservoir goes down by as much.

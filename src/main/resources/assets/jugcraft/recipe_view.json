@@ -807,6 +807,20 @@
           ],
           "extra": [],
           "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:plastic_pellets",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:plastic_sheet",
+            1
+          ],
+          "extra": [],
+          "ticks": 60
         }
       ]
     },
