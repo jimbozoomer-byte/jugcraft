@@ -294,7 +294,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Bronze is never turned back into its ingredients.
 - Every recipe has a feature-switch condition that includes its result's feature.
 - Python lists must match Java: `MachineKind` numbers and recipe types, `JugcraftComponents` lists, materials, features, worldgen.
-- Every ID has a model, a texture, a name, and a loot table (for blocks). Both machine styles cover every block state. Model elements stay within −16..32.
+- Every ID has a model, a texture, a name, and a loot table (for blocks). Both machine styles cover every block state. Model elements stay within −16..32. Loot tables are written in 26.3's form (`condition`, `modifier`, `type`); the checker rejects the pre-26 `conditions`/`functions`/`function` keys, which 26.3 ignores without an error.
 - No recipe makes pixel shards. The Retro Trader's Java trades and map-search bounds match `tools/pixel_hollows.py`, and his shard buyback never pays more per shard than his cheapest possible shard sale.
 
 ## File map

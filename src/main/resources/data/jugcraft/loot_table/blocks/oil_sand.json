@@ -2,8 +2,7 @@
   "type": "minecraft:block",
   "pools": [
     {
-      "rolls": 1.0,
-      "bonus_rolls": 0.0,
+      "rolls": 1,
       "entries": [
         {
           "type": "minecraft:alternatives",
@@ -11,19 +10,14 @@
             {
               "type": "minecraft:item",
               "name": "jugcraft:oil_sand",
-              "conditions": [
-                {
-                  "condition": "minecraft:reference",
-                  "name": "minecraft:tool/can_silk_touch"
-                }
-              ]
+              "condition": "minecraft:tool/can_silk_touch"
             },
             {
               "type": "minecraft:item",
               "name": "jugcraft:bitumen",
-              "functions": [
+              "modifier": [
                 {
-                  "function": "minecraft:set_count",
+                  "type": "minecraft:set_count",
                   "count": {
                     "type": "minecraft:uniform",
                     "min": 1.0,
@@ -31,12 +25,12 @@
                   }
                 },
                 {
-                  "function": "minecraft:apply_bonus",
+                  "type": "minecraft:apply_bonus",
                   "enchantment": "minecraft:fortune",
                   "formula": "minecraft:ore_drops"
                 },
                 {
-                  "function": "minecraft:explosion_decay"
+                  "type": "minecraft:explosion_decay"
                 }
               ]
             }

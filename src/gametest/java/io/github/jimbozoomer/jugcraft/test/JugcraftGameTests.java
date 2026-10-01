@@ -94,7 +94,7 @@ public class JugcraftGameTests {
 		return JugcraftMachines.MACHINES.get(kind).defaultBlockState();
 	}
 
-	/** Ores drop their raw material to a plain pickaxe; only Silk Touch takes the ore block itself. */
+	/** Ores drop their raw material to a plain pickaxe, more with Fortune; only Silk Touch takes the ore block itself. */
 	@GameTest
 	public void oresNeedSilkTouchToDropThemselves(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -106,6 +106,17 @@ public class JugcraftGameTests {
 		silk.enchant(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH), 1);
 		List<ItemStack> silkDrops = Block.getDrops(ore, level, pos, null, null, silk);
 		helper.assertTrue(silkDrops.size() == 1 && silkDrops.get(0).is(item("tin_ore")), "Tin ore gave Silk Touch " + silkDrops);
+		// Fortune III multiplies raw ore by 1-4 (vanilla's ore formula); 64 breaks all giving one has odds of 0.4^64.
+		ItemStack fortune = new ItemStack(Items.IRON_PICKAXE);
+		fortune.enchant(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE), 3);
+		int most = 0;
+		for (int i = 0; i < 64; i++) {
+			List<ItemStack> drops = Block.getDrops(ore, level, pos, null, null, fortune);
+			helper.assertTrue(drops.size() == 1 && drops.get(0).is(item("raw_tin")) && drops.get(0).getCount() <= 4,
+					"Tin ore gave Fortune III " + drops);
+			most = Math.max(most, drops.get(0).getCount());
+		}
+		helper.assertTrue(most > 1, "Fortune III never gave more than one raw tin");
 		helper.succeed();
 	}
 

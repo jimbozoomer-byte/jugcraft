@@ -110,9 +110,25 @@ def check_assets(registered):
             err(f"Missing name for item {item}")
 
 
+# Loot table keys from before 26.x. 26.3 ignores them without an error, so a table using them loses its
+# conditions (Silk Touch, explosions, the lower half of a 2-tall block) and functions (counts, Fortune).
+OLD_LOOT_KEYS = ("conditions", "functions", "function")
+
+
+def old_loot_keys(value):
+    if isinstance(value, dict):
+        return {key for key in value if key in OLD_LOOT_KEYS} | {k for v in value.values() for k in old_loot_keys(v)}
+    if isinstance(value, list):
+        return {k for v in value for k in old_loot_keys(v)}
+    return set()
+
+
 def check_loot(registered):
     for path in sorted((DATA / MOD / "loot_table").rglob("*.json")):
         text = path.read_text(encoding="utf-8")
+        old = old_loot_keys(json.loads(text))
+        if old:
+            err(f"{path.name} uses pre-26 loot keys {sorted(old)} that 26.3 ignores (use condition/modifier/type)")
         for name in re.findall(r'"name": "jugcraft:([a-z_]+)"', text):
             if name not in registered:
                 err(f"{path.name} drops unknown item {name}")

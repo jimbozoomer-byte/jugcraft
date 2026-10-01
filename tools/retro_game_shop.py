@@ -11,9 +11,10 @@ Layout (x across, z from the back wall at 0 to the front wall at 6, y up from th
 the middle of the front, and the jigsaw block just outside it (4, 1, 7) joins the shop to a village street the
 way vanilla houses do (name minecraft:building_entrance). Positions not listed are left to the terrain.
 
-DataVersion: the blocks and block entities are written in 26.3's own format, so the template carries 26.3's data
-version and the data fixer has nothing to do. (A version above the game's made the whole template load as air.) The
-game test retroGameShopTemplateLoads compares this number with the running game's; regenerate after a platform bump.
+Format: 26.3's own, as in vanilla 26.3's village templates: palette entries are {"id", "properties"} (older templates
+used "Name"/"Properties", which 26.3 reads as air unless the data fixer upgrades them), and DataVersion is 26.3's
+(5023), so the data fixer has nothing to do. The game test retroGameShopTemplateLoads checks both against the running
+game; regenerate after a platform bump.
 """
 import gzip
 import io
@@ -204,7 +205,7 @@ def build():
     return {
         "DataVersion": DATA_VERSION,
         "size": list(SIZE),
-        "palette": [{"Name": name, **({"Properties": dict(props)} if props else {})} for name, props in palette],
+        "palette": [{"id": name, **({"properties": dict(props)} if props else {})} for name, props in palette],
         "blocks": block_list,
         "entities": [{"pos": [Double(3.5), Double(1.0), Double(2.5)], "blockPos": [3, 1, 2],
                       "nbt": {"id": "minecraft:villager"}}],

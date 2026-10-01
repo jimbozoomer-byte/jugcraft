@@ -352,33 +352,42 @@ def machine_recipe_files(out):
 
 # ---------------------------------------------------------------- loot tables
 
-# Vanilla's own "tool has Silk Touch" predicate (26.x block loot tables reference it). The inline item-predicate form
-# used before 26.x no longer reads its enchantment check, so it matched every tool and ores always dropped themselves.
-SILK = {"condition": "minecraft:reference", "name": "minecraft:tool/can_silk_touch"}
+# 26.x loot tables: a pool or an entry has one "condition", an entry has a "modifier" list, and conditions and
+# modifiers name their kind with "type" (as vanilla 26.3's own block loot tables do). 26.3 silently ignores the older
+# "conditions", "functions" and "function" keys, so tables in that form drop as if they had no conditions or functions.
+SILK = "minecraft:tool/can_silk_touch"  # vanilla's own Silk Touch predicate
 
 
 def loot(block, entries, explosion_condition=False):
-    pool = {"rolls": 1.0, "bonus_rolls": 0.0, "entries": entries}
+    pool = {"rolls": 1, "entries": entries}
     if explosion_condition:
-        pool["conditions"] = [{"condition": "minecraft:survives_explosion"}]
+        pool["condition"] = {"type": "minecraft:survives_explosion"}
     return {"type": "minecraft:block", "pools": [pool], "random_sequence": rid(f"blocks/{block}")}
 
 
-def self_drop(block):
-    return loot(block, [{"type": "minecraft:item", "name": rid(block)}], explosion_condition=True)
+def self_drop(block, lower_half_only=False):
+    entry = {"type": "minecraft:item", "name": rid(block)}
+    if lower_half_only:  # a 2-tall block drops once, from its lower half (like vanilla doors)
+        entry["condition"] = {"type": "minecraft:match_block", "blocks": rid(block), "state": {"half": "lower"}}
+    return loot(block, [entry], explosion_condition=True)
+
+
+def silk_or(block, item, modifier):
+    """Silk Touch takes the block itself; anything else drops the item with the given modifiers."""
+    return loot(block, [{"type": "minecraft:alternatives", "children": [
+        {"type": "minecraft:item", "name": rid(block), "condition": SILK},
+        {"type": "minecraft:item", "name": rid(item), "modifier": modifier},
+    ]}])
 
 
 def ore_drop(block, item, low=1, high=1):
-    functions = []
+    modifier = []
     if (low, high) != (1, 1):
-        functions.append({"function": "minecraft:set_count",
-                          "count": {"type": "minecraft:uniform", "min": float(low), "max": float(high)}})
-    functions += [{"function": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"},
-                  {"function": "minecraft:explosion_decay"}]
-    return loot(block, [{"type": "minecraft:alternatives", "children": [
-        {"type": "minecraft:item", "name": rid(block), "conditions": [SILK]},
-        {"type": "minecraft:item", "name": rid(item), "functions": functions},
-    ]}])
+        modifier.append({"type": "minecraft:set_count",
+                         "count": {"type": "minecraft:uniform", "min": float(low), "max": float(high)}})
+    modifier += [{"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"},
+                 {"type": "minecraft:explosion_decay"}]
+    return silk_or(block, item, modifier)
 
 
 def powered_tools(lang):
@@ -523,10 +532,7 @@ def loot_tables():
         write(out / f"{block}.json", self_drop(block))
     # The 2-tall charging station drops once, from its lower half.
     for block in TOOL_BLOCKS:
-        table = self_drop(block)
-        table["pools"][0]["conditions"].append({"condition": "minecraft:block_state_property", "block": rid(block),
-                                                "properties": {"half": "lower"}})
-        write(out / f"{block}.json", table)
+        write(out / f"{block}.json", self_drop(block, lower_half_only=True))
     for rock, info in ROCKS.items():
         drop = info["drop"]
         table = ore_drop(rock, drop["item"], drop["min"], drop["max"]) if drop else self_drop(rock)
@@ -537,18 +543,12 @@ def loot_tables():
     for block in ph.CUBES:
         write(out / f"{block}.json", self_drop(block))
     low, high = ph.CLUSTER_DROPS
-    write(out / f"{ph.CLUSTER}.json", loot(ph.CLUSTER, [{"type": "minecraft:alternatives", "children": [
-        {"type": "minecraft:item", "name": rid(ph.CLUSTER), "conditions": [SILK]},
-        {"type": "minecraft:item", "name": rid(ph.SHARD), "functions": [
-            {"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": float(low), "max": float(high)}},
-            {"function": "minecraft:apply_bonus", "enchantment": "minecraft:fortune",
-             "formula": "minecraft:uniform_bonus_count", "parameters": {"bonusMultiplier": 1}},
-            {"function": "minecraft:explosion_decay"}]},
-    ]}]))
-    table = self_drop(ph.CABINET)
-    table["pools"][0]["conditions"].append({"condition": "minecraft:block_state_property", "block": rid(ph.CABINET),
-                                            "properties": {"half": "lower"}})
-    write(out / f"{ph.CABINET}.json", table)
+    write(out / f"{ph.CLUSTER}.json", silk_or(ph.CLUSTER, ph.SHARD, [
+        {"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": float(low), "max": float(high)}},
+        {"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune",
+         "formula": "minecraft:uniform_bonus_count", "parameters": {"bonusMultiplier": 1}},
+        {"type": "minecraft:explosion_decay"}]))
+    write(out / f"{ph.CABINET}.json", self_drop(ph.CABINET, lower_half_only=True))
 
 
 # ---------------------------------------------------------------- recipes

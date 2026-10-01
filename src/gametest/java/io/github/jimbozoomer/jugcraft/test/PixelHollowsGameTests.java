@@ -94,7 +94,7 @@ public class PixelHollowsGameTests {
 		helper.succeed();
 	}
 
-	/** Circuitstone needs a pickaxe and drops itself; the lamp drops itself to any tool. */
+	/** Circuitstone needs a pickaxe and drops itself; the lamp drops itself to any tool; the cabinet drops once. */
 	@GameTest
 	public void pixelHollowsBlocksDropThemselves(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -109,6 +109,12 @@ public class PixelHollowsGameTests {
 		helper.assertTrue(PixelHollows.PIXEL_LAMP.defaultBlockState().getLightEmission() == 15, "The lamp should give full light");
 		helper.assertTrue(PixelHollows.PIXEL_CRYSTAL_CLUSTER.defaultBlockState().getLightEmission() == 3, "Clusters should glow faintly (3)");
 		helper.assertTrue(!PixelHollows.PIXEL_CRYSTAL_CLUSTER.defaultBlockState().isRandomlyTicking(), "Clusters must not grow");
+		BlockState cabinet = RetroTrader.ARCADE_CABINET.defaultBlockState();
+		List<ItemStack> lower = Block.getDrops(cabinet, level, pos, null, null, ItemStack.EMPTY);
+		List<ItemStack> upper = Block.getDrops(cabinet.setValue(ArcadeCabinetBlock.HALF, DoubleBlockHalf.UPPER), level, pos, null, null,
+				ItemStack.EMPTY);
+		helper.assertTrue(count(lower, RetroTrader.ARCADE_CABINET.asItem()) == 1 && upper.isEmpty(),
+				"The cabinet should drop once, from its lower half: lower " + lower + ", upper " + upper);
 		helper.succeed();
 	}
 
@@ -313,7 +319,8 @@ public class PixelHollowsGameTests {
 
 	/**
 	 * The shop template file carries this game's data version, so the data fixer leaves it alone, and its palette reads
-	 * as its own blocks (an unreadable palette loads as air). Both versions and the loaded palette are logged.
+	 * as its own blocks (26.3 names palette entries "id"; an entry it cannot read loads as air). Both versions and the
+	 * loaded palette are logged.
 	 */
 	@GameTest
 	public void retroGameShopTemplateLoads(GameTestHelper helper) {
@@ -333,7 +340,7 @@ public class PixelHollowsGameTests {
 		ListTag palette = saved.getListOrEmpty("palette");
 		List<String> names = new ArrayList<>();
 		for (int i = 0; i < palette.size(); i++) {
-			names.add(palette.getCompoundOrEmpty(i).getStringOr("Name", "?"));
+			names.add(palette.getCompoundOrEmpty(i).getStringOr("id", "?"));
 		}
 		Jugcraft.LOGGER.info("[pixel-hollows] Retro Game Shop template: DataVersion {} (game {}), size {}, palette {}", file, game,
 				template.getSize(), names);

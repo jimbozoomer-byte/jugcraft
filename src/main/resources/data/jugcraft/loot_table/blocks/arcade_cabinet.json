@@ -2,26 +2,23 @@
   "type": "minecraft:block",
   "pools": [
     {
-      "rolls": 1.0,
-      "bonus_rolls": 0.0,
+      "rolls": 1,
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "jugcraft:arcade_cabinet"
-        }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        },
-        {
-          "condition": "minecraft:block_state_property",
-          "block": "jugcraft:arcade_cabinet",
-          "properties": {
-            "half": "lower"
+          "name": "jugcraft:arcade_cabinet",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:arcade_cabinet",
+            "state": {
+              "half": "lower"
+            }
           }
         }
-      ]
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
   ],
   "random_sequence": "jugcraft:blocks/arcade_cabinet"
