@@ -492,6 +492,12 @@ HALLOWEEN_ADVANCEMENTS = {
                  "frame": "goal"},
     "pumpkin_regatta": {"icon": "jugcraft:pumpkin_racer", "title": "Pumpkin Regatta",
                         "description": "Finish a regatta course in a hollowed-out giant pumpkin", "frame": "task"},
+    "wisp_in_a_jar": {"icon": "jugcraft:wisp_in_a_jar", "title": "Bottled Light", "description": "Catch a will-o'-wisp in a glass bottle",
+                      "frame": "task"},
+    "pumpkin_chunkin": {"icon": "jugcraft:trebuchet", "title": "Pumpkin Chunkin'",
+                        "description": "Throw a pumpkin 50 blocks or more with a trebuchet", "frame": "goal"},
+    "headless_horseman": {"icon": "jugcraft:horseman_lantern", "title": "Lost His Head",
+                          "description": "Send the Headless Horseman back into the night", "frame": "challenge"},
 }
 
 
@@ -559,6 +565,50 @@ ENGRAVING = {"max_length": 50, "stone": "minecraft:stone"}
 # skull with a candle that is lit and snuffed like one (light `light` when lit).
 FEST_DECOR = {"spun_cobweb": "Spun Cobweb", "hanging_ghost": "Hanging Ghost", "candle_skull": "Candle Skull"}
 CANDLE_SKULL = {"light": 12}
+
+
+# ---------------------------------------------------------------- Halloween nights
+
+# Will-o'-wisps (agriculture/WillOWisp.java, Wisps.java): on Halloween nights (the event running, overworld time
+# dusk to dawn), every spawn_ticks the server tries, spawn_chance of the time per player, one spot min..max
+# blocks away, open to the sky, over a swamp or within corn_radius of corn; at most near_cap within near_range of a
+# player and level_cap in the world. A wisp flees within flee (sneak_flee when sneaking); a glass bottle catches it.
+WISPS = {"spawn_ticks": 100, "spawn_chance": 0.5, "min": 10, "max": 32, "corn_radius": 2, "near_cap": 4, "near_range": 48,
+         "level_cap": 64, "flee": 6.0, "sneak_flee": 2.5, "jar": "wisp_in_a_jar", "jar_display": "Wisp in a Jar", "jar_light": 13}
+# The Harvest Moon (agriculture/HarvestMoon.java): the nights (dusk to dawn) of `day` (halloween.harvest_moon) while
+# the event runs; Jugcraft crops grow growth_bonus times as fast and giant pumpkins swell twice as fast.
+HARVEST_MOON = {"day": "10-31", "growth_bonus": 2.0, "dusk": 13000, "dawn": 23000, "check_ticks": 100}
+# The Pumpkin Chunkin' Trebuchet (agriculture/TrebuchetBlock.java, TrebuchetBlockEntity.java, FlyingPumpkin.java):
+# throws one pumpkin (item tag ammo_tag) at base_speed blocks a tick times the pumpkin's factor, plus or minus a
+# gust of up to `gust`, at an angle from min_angle to max_angle (default default_angle, steps of angle_step). The
+# board keeps the `board` longest throws, ribbons once per player per trebuchet (remembered: the last 64).
+TREBUCHET = {"block": "trebuchet", "display": "Pumpkin Chunkin' Trebuchet", "ammo_tag": "jugcraft:trebuchet_ammo", "base_speed": 1.5,
+             "gust": 0.04, "min_angle": 30, "max_angle": 60, "angle_step": 5, "default_angle": 45, "board": 3, "remembered": 64,
+             "reset_ticks": 30, "max_flight": 200, "advancement_distance": 50.0, "marker_ticks": 600,
+             "factors": {"minecraft:pumpkin": 1.0, "minecraft:carved_pumpkin": 1.06, "minecraft:jack_o_lantern": 1.03,
+                         "jugcraft:white_pumpkin": 1.02, "jugcraft:jarrahdale_pumpkin": 0.97, "jugcraft:cinderella_pumpkin": 0.95,
+                         "jugcraft:hand_carved_pumpkin": 1.06, "jugcraft:hand_carved_white_pumpkin": 1.08,
+                         "jugcraft:hand_carved_jarrahdale_pumpkin": 1.03, "jugcraft:hand_carved_cinderella_pumpkin": 1.01}}
+# The Candy Bag holds treats (item tag treat_tag) like a bundle.
+CANDY_BAG = {"treat_tag": "jugcraft:candy_bag_treats", "treats": ["#c:foods/candy", "minecraft:cookie"]}
+# The Headless Horseman (agriculture/HeadlessHorseman.java, HorsemanSummoning.java, FlamingPumpkin.java): summoned
+# within hour_window ticks of midnight in the event with a lit pumpkin on a scarecrow; fights within arena_radius,
+# rides off with nobody within leave_range for lonely_ticks, at dawn, or when the event ends.
+HORSEMAN = {"health": 160, "arena_radius": 32, "leave_range": 48, "lonely_ticks": 600, "throw_cooldown": 60, "enraged_throw_cooldown": 30,
+            "throw_range": 28.0, "midnight": 18000, "hour_window": 1000, "one_at_a_time": 128, "pumpkin_damage": 6.0, "splash": 2.0,
+            "fire_seconds": 3.0, "lantern": "horseman_lantern", "lantern_display": "Horseman's Lantern", "cloak": "horseman_cloak",
+            "cloak_display": "Horseman's Cloak", "table": "entities/headless_horseman",
+            # (item, count range) dropped when a player defeats him
+            "loot": [("jugcraft:horseman_lantern", [1, 1]), ("jugcraft:horseman_cloak", [1, 1]), ("jugcraft:king_size_candy_bar", [1, 2]),
+                     ("jugcraft:candy_corn", [3, 6])]}
+
+
+def night_blocks():
+    return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
+
+
+def night_items():
+    return night_blocks() + [HORSEMAN["cloak"]]
 
 
 def festivity_blocks():
@@ -770,6 +820,10 @@ SHAPED = [
      "result": "judging_stand", "count": 1, "category": "misc"},
     {"id": "spun_cobweb", "pattern": ["S S", " S ", "S S"], "key": {"S": "minecraft:string"}, "result": "spun_cobweb", "count": 2,
      "category": "building"},
+    # Halloween nights: a log arm with a string sling and an iron counterweight on a plank frame.
+    {"id": "trebuchet", "pattern": ["  S", "LLI", "PPP"], "key": {"S": "minecraft:string", "L": "#minecraft:logs", "I": "#c:ingots/iron",
+                                                                 "P": "#minecraft:planks"},
+     "result": "trebuchet", "count": 1, "category": "misc"},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -813,14 +867,14 @@ def all_blocks():
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"]] + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS)
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
-            + regatta_blocks() + festivity_blocks())
+            + regatta_blocks() + festivity_blocks() + night_blocks())
 
 
 def all_items():
     return (list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
             + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
-            + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks())
+            + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items())
 
 
 def owns(entry_id):

@@ -34,7 +34,7 @@ STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
 EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_replaceables",
                   "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires", "minecraft:mineable/axe",
                   "minecraft:mineable/shovel", "minecraft:leaves", "minecraft:eggs", "minecraft:dirt", "minecraft:mud",
-                  "minecraft:grass_blocks", "minecraft:sand", "minecraft:wool"}
+                  "minecraft:grass_blocks", "minecraft:sand", "minecraft:wool", "minecraft:logs"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -718,6 +718,7 @@ def check_agriculture():
     check_halloween(java, main)
     check_regatta(java, main)
     check_festivities(java, main)
+    check_night(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1078,6 +1079,99 @@ def check_festivities(java, main):
         if [tuple(e["from"] + e["to"]) for e in model.get("elements", [])] != [tuple(b) for b in info["boxes"]]:
             err(f"{stone}: model boxes differ from its shape")
 
+
+def check_night(java, main):
+    """Halloween nights: Java matches tools/agriculture.py, every trebuchet state has a model, and the Horseman's loot
+    is tools/agriculture.py's (dropped only when a player defeats him)."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    wisps, moon, treb, horseman = ag.WISPS, ag.HARVEST_MOON, ag.TREBUCHET, ag.HORSEMAN
+    expected = {("Wisps", "SPAWN_TICKS"): wisps["spawn_ticks"], ("Wisps", "SPAWN_CHANCE"): wisps["spawn_chance"],
+                ("Wisps", "MIN_DISTANCE"): wisps["min"], ("Wisps", "MAX_DISTANCE"): wisps["max"],
+                ("Wisps", "CORN_RADIUS"): wisps["corn_radius"], ("Wisps", "NEAR_CAP"): wisps["near_cap"],
+                ("Wisps", "NEAR_RANGE"): wisps["near_range"], ("Wisps", "LEVEL_CAP"): wisps["level_cap"],
+                ("WillOWisp", "FLEE_RADIUS"): wisps["flee"], ("WillOWisp", "SNEAK_FLEE_RADIUS"): wisps["sneak_flee"],
+                ("JugcraftAgriculture", "WISP_JAR_LIGHT"): wisps["jar_light"],
+                ("HarvestMoon", "GROWTH_BONUS"): moon["growth_bonus"], ("HarvestMoon", "DUSK"): moon["dusk"],
+                ("HarvestMoon", "DAWN"): moon["dawn"], ("HarvestMoon", "CHECK_TICKS"): moon["check_ticks"],
+                ("TrebuchetBlockEntity", "REMEMBERED"): treb["remembered"], ("TrebuchetBlockEntity", "BASE_SPEED"): treb["base_speed"],
+                ("TrebuchetBlockEntity", "GUST"): treb["gust"], ("TrebuchetBlockEntity", "MIN_ANGLE"): treb["min_angle"],
+                ("TrebuchetBlockEntity", "MAX_ANGLE"): treb["max_angle"], ("TrebuchetBlockEntity", "ANGLE_STEP"): treb["angle_step"],
+                ("TrebuchetBlockEntity", "DEFAULT_ANGLE"): treb["default_angle"],
+                ("TrebuchetBlockEntity", "ADVANCEMENT_DISTANCE"): treb["advancement_distance"],
+                ("TrebuchetBlock", "RESET_TICKS"): treb["reset_ticks"], ("FlyingPumpkin", "MAX_FLIGHT"): treb["max_flight"],
+                ("ThrowMarker", "LIFETIME"): treb["marker_ticks"],
+                ("HeadlessHorseman", "MAX_HEALTH"): horseman["health"], ("HeadlessHorseman", "ARENA_RADIUS"): horseman["arena_radius"],
+                ("HeadlessHorseman", "LEAVE_RANGE"): horseman["leave_range"], ("HeadlessHorseman", "LONELY_TICKS"): horseman["lonely_ticks"],
+                ("HeadlessHorseman", "THROW_COOLDOWN"): horseman["throw_cooldown"],
+                ("HeadlessHorseman", "ENRAGED_THROW_COOLDOWN"): horseman["enraged_throw_cooldown"],
+                ("HeadlessHorseman", "THROW_RANGE"): horseman["throw_range"], ("HorsemanSummoning", "MIDNIGHT"): horseman["midnight"],
+                ("HorsemanSummoning", "HOUR_WINDOW"): horseman["hour_window"], ("HorsemanSummoning", "ONE_AT_A_TIME"): horseman["one_at_a_time"],
+                ("FlamingPumpkin", "DAMAGE"): horseman["pumpkin_damage"], ("FlamingPumpkin", "SPLASH_RADIUS"): horseman["splash"],
+                ("FlamingPumpkin", "FIRE_SECONDS"): horseman["fire_seconds"]}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    if treb["board"] != ag.HARVEST_SCALE["board"] or "BOARD = HarvestScaleBlockEntity.BOARD;" not in java.get("TrebuchetBlockEntity", ""):
+        err("The trebuchet's board must hand out the Harvest Scale's ribbons, one per place")
+    if not treb["min_angle"] <= treb["default_angle"] <= treb["max_angle"] or (treb["default_angle"] - treb["min_angle"]) % treb["angle_step"]:
+        err("The trebuchet's default angle must be one of its angles")
+
+    # Throwing factors: Java's are the table's, each is a pumpkin that exists, and the ammunition tag lists exactly them.
+    source = java.get("TrebuchetBlockEntity", "")
+    factors = {item: float(factor) for item, factor in re.findall(r'Map\.entry\("([a-z_:]+)", ([\d.]+)\)', source)}
+    if factors != treb["factors"]:
+        err(f"TrebuchetBlockEntity.FACTORS {factors} differs from tools/agriculture.py {treb['factors']}")
+    for item, factor in treb["factors"].items():
+        if split(item)[0] == MOD and split(item)[1] not in ag.all_items():
+            err(f"trebuchet: {item} is not a Jugcraft item")
+        if not 0.8 <= factor <= 1.2:
+            err(f"trebuchet: {item}'s factor {factor} is outside 0.8 to 1.2")
+    ammo = load(DATA / MOD / "tags" / "item" / f"{split(treb['ammo_tag'])[1]}.json") or {}
+    if sorted(ammo.get("values", [])) != sorted(treb["factors"]):
+        err("The trebuchet's ammunition tag must list exactly the pumpkins that have a throwing factor")
+    treats = load(DATA / MOD / "tags" / "item" / f"{split(ag.CANDY_BAG['treat_tag'])[1]}.json") or {}
+    if treats.get("values") != ag.CANDY_BAG["treats"]:
+        err("The candy bag's treat tag differs from tools/agriculture.py")
+
+    # The trebuchet's blockstate covers every facing and arm position, with a model for each arm.
+    states = (load(ASSETS / "blockstates" / f"{treb['block']}.json") or {}).get("variants", {})
+    want = {f"arm={arm},facing={facing}" for arm in ("ready", "loaded", "released") for facing in ("north", "east", "south", "west")}
+    if set(states) != want:
+        err(f"{treb['block']}: blockstate variants {sorted(states)} differ from every arm position and facing")
+    arms = re.search(r"enum Arm[^{]*\{\s*([^;]+);", java.get("TrebuchetBlock", ""))
+    if not arms or re.findall(r'[A-Z_]+\("([a-z_]+)"\)', arms.group(1)) != ["ready", "loaded", "released"]:
+        err("TrebuchetBlock.Arm differs from the arm positions the models draw")
+    for arm in ("ready", "loaded", "released"):
+        if load(ASSETS / "models" / "block" / f"{treb['block']}_{arm}.json") is None:
+            err(f"{treb['block']}: no model for arm position {arm}")
+
+    # The Harvest Moon's day is configured, defaulting to tools/agriculture.py's.
+    config = (JAVA_ROOT / "config" / "JugcraftConfig.java").read_text(encoding="utf-8")
+    if f'"halloween.harvest_moon", "{moon["day"]}"' not in config:
+        err(f"JugcraftConfig's halloween.harvest_moon default differs from tools/agriculture.py ({moon['day']})")
+    month, day = (int(v) for v in moon["day"].split("-"))
+    if f"DEFAULT_HARVEST_MOON = MonthDay.of({month}, {day})" not in java.get("HalloweenSeason", ""):
+        err("HalloweenSeason.DEFAULT_HARVEST_MOON differs from tools/agriculture.py")
+
+    # The Horseman drops tools/agriculture.py's loot, and only to a player's kill.
+    table = load(DATA / MOD / "loot_table" / f"{horseman['table']}.json") or {}
+    drops = []
+    for pool in table.get("pools", []):
+        if pool.get("condition", {}).get("type") != "minecraft:killed_by_player":
+            err(f"{horseman['table']}: every pool needs a player's kill")
+        for entry in pool.get("entries", []):
+            modifier = entry.get("modifier", {})
+            count = modifier.get("count", 1) if modifier.get("type") == "minecraft:set_count" else 1
+            low, high = (count["min"], count["max"]) if isinstance(count, dict) else (count, count)
+            drops.append((entry.get("name"), [low, high]))
+    if drops != [(item, list(counts)) for item, counts in horseman["loot"]]:
+        err(f"{horseman['table']}: drops {drops} differ from tools/agriculture.py {horseman['loot']}")
+    registration = re.search(r'HEADLESS_HORSEMAN = entity\("([a-z_]+)"[^;]*;', main)
+    if not registration or f"entities/{registration.group(1)}" != horseman["table"] or "noLootTable" in registration.group(0):
+        err(f"The Headless Horseman must be registered with his loot table {horseman['table']}")
 
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())

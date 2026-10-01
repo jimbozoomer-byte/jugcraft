@@ -838,4 +838,6 @@ def crop_textures():
     out.update(regatta_textures())
     from festivity_textures import festivity_textures  # and the Halloween festivities
     out.update(festivity_textures())
+    from night_textures import night_textures  # and Halloween nights
+    out.update(night_textures())
     return out
