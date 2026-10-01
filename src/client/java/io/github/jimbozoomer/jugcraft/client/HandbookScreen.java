@@ -36,15 +36,19 @@ public class HandbookScreen extends Screen {
 	private static final int MAX_WIDTH = 440;
 	private static final int MIN_HEIGHT = 170;
 	private static final int MAX_HEIGHT = 260;
-	private static final int SIDE_WIDTH = 120;
+	private static final int SIDE_WIDTH = 112;
 	/** Heights of a chapter row and a page row in the contents list. */
 	private static final int CHAPTER_ROW = 13;
 	private static final int PAGE_ROW = 11;
 	/** Space at the bottom of the page for the page buttons and counter. */
 	private static final int FOOTER = 20;
 	private static final int SCROLL_STEP = 12;
-	/** Progression steps: the size of one step's card and the gap (with an arrow) between cards. */
-	private static final int STEP_WIDTH = 62;
+	/**
+	 * Progression steps: a card's narrowest and widest width (cards share out the page width between them), its height
+	 * and the gap (with an arrow) between cards.
+	 */
+	private static final int STEP_MIN_WIDTH = 56;
+	private static final int STEP_MAX_WIDTH = 72;
 	private static final int STEP_HEIGHT = 50;
 	private static final int STEP_GAP = 8;
 
@@ -468,25 +472,26 @@ public class HandbookScreen extends Screen {
 	 * as many to a row as fit.
 	 */
 	private int extractSteps(GuiGraphicsExtractor graphics, JsonArray steps, int x, int y, int mouseX, int mouseY, boolean tooltips) {
-		int columns = Math.max(1, (textWidth() + STEP_GAP) / (STEP_WIDTH + STEP_GAP));
+		int columns = Math.max(1, (textWidth() + STEP_GAP) / (STEP_MIN_WIDTH + STEP_GAP));
+		int cardWidth = Math.min(STEP_MAX_WIDTH, (textWidth() - (columns - 1) * STEP_GAP) / columns);
 		for (int i = 0; i < steps.size(); i++) {
 			JsonObject step = steps.get(i).getAsJsonObject();
-			int cx = x + (i % columns) * (STEP_WIDTH + STEP_GAP);
+			int cx = x + (i % columns) * (cardWidth + STEP_GAP);
 			int cy = y + (i / columns) * (STEP_HEIGHT + 6);
-			graphics.fill(cx, cy, cx + STEP_WIDTH, cy + STEP_HEIGHT, PAPER_SHADE);
-			graphics.outline(cx, cy, STEP_WIDTH, STEP_HEIGHT, SLOT);
+			graphics.fill(cx, cy, cx + cardWidth, cy + STEP_HEIGHT, PAPER_SHADE);
+			graphics.outline(cx, cy, cardWidth, STEP_HEIGHT, SLOT);
 			graphics.text(font, String.valueOf(i + 1), cx + 3, cy + 3, INK_LIGHT, false);
-			item(graphics, step.get("item").getAsString(), cx + (STEP_WIDTH - 16) / 2, cy + 3, mouseX, mouseY, tooltips);
+			item(graphics, step.get("item").getAsString(), cx + (cardWidth - 16) / 2, cy + 3, mouseX, mouseY, tooltips);
 			int ly = cy + 21;
-			for (FormattedCharSequence line : font.split(Component.literal(step.get("label").getAsString()), STEP_WIDTH - 4)) {
+			for (FormattedCharSequence line : font.split(Component.literal(step.get("label").getAsString()), cardWidth - 2)) {
 				if (ly + font.lineHeight > cy + STEP_HEIGHT) {
 					break;
 				}
-				graphics.text(font, line, cx + (STEP_WIDTH - font.width(line)) / 2, ly, INK, false);
+				graphics.text(font, line, cx + (cardWidth - font.width(line)) / 2, ly, INK, false);
 				ly += font.lineHeight;
 			}
 			if (i + 1 < steps.size() && i % columns != columns - 1) {
-				graphics.text(font, "→", cx + STEP_WIDTH + 1, cy + STEP_HEIGHT / 2 - 4, INK_LIGHT, false);
+				graphics.text(font, "→", cx + cardWidth + 1, cy + STEP_HEIGHT / 2 - 4, INK_LIGHT, false);
 			}
 		}
 		int rows = (steps.size() + columns - 1) / columns;
