@@ -26,17 +26,11 @@ jobs:
           # Prints the bytecode of the methods of a class whose header line matches a regex.
           m() { echo "=== $1 /$2/"; javap -cp "$CP" -c -p "$1" 2>&1 | awk -v re="$2" '/^  [a-z].*\(/{p=($0 ~ re)} p' | head -${3:-200}; }
           l() { echo "=== $1 (listing)"; javap -cp "$CP" -p "$1" 2>&1 | grep -iE "${2:-.}" | head -${3:-80}; }
-          l net.minecraft.client.gui.screens.Screen 'mouse|click|drag|release|event|input'
-          m net.minecraft.client.gui.screens.Screen 'mouseClicked|mouseDragged|mouseReleased'
-          l net.minecraft.client.gui.components.events.ContainerEventHandler
-          m net.minecraft.client.gui.components.events.ContainerEventHandler 'mouseClicked|mouseDragged|mouseReleased'
-          l net.minecraft.client.gui.components.events.AbstractContainerEventHandler
-          l net.minecraft.client.input.MouseButtonEvent
-          l net.minecraft.client.input.MouseButtonInfo
-          l net.minecraft.client.MouseHandler
-          m net.minecraft.client.MouseHandler 'onButton|onMove|handleAccumulatedMovement' 400
-          l net.minecraft.client.gui.Gui 'screen|mouse|click'
-          for c in $(unzip -l "$GAMETEST" | awk '{print $4}' | grep -E '\.class$' | grep -iE 'TestInput|ClientGameTestContextImpl' | sed 's/\.class$//;s#/#.#g'); do
-            l "$c"
-            m "$c" 'clickScreenButton|setCursorPos|pressMouse|holdMouse|releaseMouse|moveCursor|cursor' 300
-          done
+          m net.minecraft.client.MouseHandler 'handleAccumulatedMovement' 700 | grep -E 'invoke|if|iconst|getfield.*activeButton|getfield.*Pressed'
+          echo "=== InputConstants constants"; javap -cp "$CP" -p -constants com.mojang.blaze3d.platform.InputConstants | grep -E 'MOUSE_BUTTON|KEY_Z|KEY_LCONTROL|KEY_LEFT_CONTROL| KEY_[A-Z]+ =' | head -60
+          l net.minecraft.client.input.KeyEvent
+          l net.minecraft.client.input.InputWithModifiers
+          m net.minecraft.client.input.InputWithModifiers 'hasControlDown|isLeft|isRight|isUndo|isSelectAll' 120
+          l com.mojang.blaze3d.platform.Window 'scale|width|height'
+          m net.minecraft.client.gui.components.AbstractWidget 'isValidClickButton|mouseClicked' 80
+          m net.minecraft.client.gui.components.MultiLineEditBox 'keyPressed' 120 | grep -E 'invoke|iconst|bipush|sipush|if'
