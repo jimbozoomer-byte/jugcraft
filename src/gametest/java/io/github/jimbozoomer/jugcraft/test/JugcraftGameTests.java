@@ -194,6 +194,19 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/** The circuit assembler bonds four microchips to an advanced circuit with gold: a processor. */
+	@GameTest(maxTicks = 600)
+	public void circuitAssemblerMakesAProcessor(GameTestHelper helper) {
+		MachineBlockEntity assembler = processing(helper, new BlockPos(2, 1, 2), MachineKind.CIRCUIT_ASSEMBLER,
+				new ItemStack(item("microchip"), 4));
+		assembler.setItem(1, new ItemStack(item("advanced_circuit")));
+		assembler.setItem(2, new ItemStack(Items.GOLD_INGOT));
+		helper.succeedWhen(() -> {
+			ItemStack output = assembler.getItem(MachineKind.CIRCUIT_ASSEMBLER.outputSlot());
+			helper.assertTrue(output.is(item("processor")), "Circuit assembler output is " + output);
+		});
+	}
+
 	/** Breaking any block of a multi-block machine removes the whole machine (here the nine-block wind turbine). */
 	@GameTest(maxTicks = 40)
 	public void breakingOnePartRemovesTheMachine(GameTestHelper helper) {

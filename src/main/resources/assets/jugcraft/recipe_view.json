@@ -993,6 +993,28 @@
           ],
           "extra": [],
           "ticks": 300
+        },
+        {
+          "in": [
+            [
+              "jugcraft:microchip",
+              4
+            ],
+            [
+              "jugcraft:advanced_circuit",
+              1
+            ],
+            [
+              "minecraft:gold_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:processor",
+            1
+          ],
+          "extra": [],
+          "ticks": 400
         }
       ]
     },

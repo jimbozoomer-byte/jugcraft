@@ -590,6 +590,9 @@ CIRCUIT_ASSEMBLER = [
      "output": "jugcraft:basic_circuit", "count": 1, "ticks": 200, "features": [FEATURE, "silicon", "lead"]},
     {"inputs": [["jugcraft:basic_circuit", 2], ["jugcraft:silver_wire", 3], ["jugcraft:invar_plate", 1]],
      "output": "jugcraft:advanced_circuit", "count": 1, "ticks": 300, "features": [FEATURE, "silver", "nickel"]},
+    # Electronics (batch 7): four microchips bonded to an advanced circuit with gold.
+    {"inputs": [["jugcraft:microchip", 4], ["jugcraft:advanced_circuit", 1], ["minecraft:gold_ingot", 1]],
+     "output": "jugcraft:processor", "count": 1, "ticks": 400, "features": [FEATURE, "silicon", "sulfur", "silver", "nickel"]},
 ]
 
 

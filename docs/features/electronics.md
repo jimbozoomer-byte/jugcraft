@@ -33,9 +33,13 @@ The owner's references for the tier after oil: dark sci-fi casings with cyan gla
 - A fluid processor like the chemical reactor (`FluidMachineSpec([4000], [], 2, 1)`, recipe type `jugcraft:lithography`), so pipes, side config, the recipe viewer and the metal audit all work as they do there.
 - Recipe: glass, a redstone lamp, titanium ingots, an advanced circuit, aluminum plates and a machine casing.
 
+### Processors (commit 33)
+- **4 microchips + 1 advanced circuit + 1 gold ingot → 1 processor** in the circuit assembler (400 ticks at 32 JE/t). The third circuit tier, after basic and advanced; tagged with the other circuits in `JugcraftComponents.CIRCUITS`.
+- Used by the network terminal (commit 34) and kept for the tiers above this one.
+
 ## Connections
 - Existing input producer: silicon (arc furnace from quartz), phosphate (mined), titanium (batch 6), the sawmill.
-- Existing output consumer: wafers go to lithography, microchips to processors (commit 33).
+- Existing output consumer: wafers go to lithography, microchips to processors, processors to the network terminal (commit 34).
 - Technology connection: power network, processing machines, recipe viewer.
 - Magic connection: none.
 - Reachable entry path: silicon, phosphate and titanium are all reachable before this tier; no circular unlock.
@@ -45,6 +49,7 @@ The owner's references for the tier after oil: dark sci-fi casings with cyan gla
 - A boule costs 4 silicon and 51,200 JE and gives 8 wafers: each wafer costs half a silicon and 6,400 JE before the sawmill.
 - A microchip costs a quarter wafer, half a copper wire, 25 mB of sulfuric acid and 9,600 JE of etching: about 11,200 JE a chip in all, plus the acid's own cost.
 - The metal audit allows the lithography recipe: copper wire goes in and no metal comes out.
+- A processor holds four chips (about 45,000 JE), an advanced circuit and a gold ingot. The gold is used up.
 - No item turns back into silicon, and no machine here makes power, so there is no loop.
 
 ## Multiplayer and persistence
@@ -55,7 +60,7 @@ No new dependencies. Textures and models are original (`tools/electric_textures.
 
 ## Verification
 - `tools/check_mod_data.py` checks the new IDs, recipes and models.
-- Game tests `crystalGrowerPullsABoule` (JugcraftGameTests), which also checks the sawmill's boule recipe, and `lithographyMakesMicrochips` (PetroGameTests).
+- Game tests `crystalGrowerPullsABoule` (JugcraftGameTests), which also checks the sawmill's boule recipe, and `lithographyMakesMicrochips` (PetroGameTests) and `circuitAssemblerMakesAProcessor` (JugcraftGameTests).
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.
