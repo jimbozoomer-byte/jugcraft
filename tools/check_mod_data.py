@@ -755,6 +755,7 @@ def check_agriculture():
     check_decor(java)
     check_decor2(java)
     check_decor3(java)
+    check_decor4(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1405,6 +1406,56 @@ def check_decor3(java):
             values = (load(RES / "data" / "minecraft" / "tags" / registry / f"{tag}.json") or {}).get("values", [])
             if f"{MOD}:{entry}" not in values:
                 err(f"{entry} is missing from the {registry} tag minecraft:{tag}")
+
+
+def check_decor4(java):
+    """The witch's cottage: Java matches tools/agriculture.py (lights, timings, the brews, arrangements, fortunes and
+    spreads), every block state has a model, every fortune and spell has its text, and every brew its item tag."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    cauldron, shelf, ball, grimoire, broom = ag.CAULDRON, ag.APOTHECARY_SHELF, ag.CRYSTAL_BALL, ag.GRIMOIRE, ag.BROOM
+    expected = {("BubblingCauldronBlock", "BREW_LIGHT"): cauldron["light"], ("ApothecaryShelfBlock", "ARRANGEMENTS"): shelf["arrangements"],
+                ("CrystalBallBlock", "LIGHT"): ball["light"], ("CrystalBallBlock", "GAZING_LIGHT"): ball["gazing_light"],
+                ("CrystalBallBlock", "FORTUNES"): len(ball["fortunes"]), ("CrystalBallBlock", "GAZE_TICKS"): ball["gaze_ticks"],
+                ("GrimoireStandBlock", "LIGHT"): grimoire["light"]}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+
+    def enum(source, name):
+        match = re.search(rf"enum {name} implements StringRepresentable \{{\s*([A-Z_, ]+);", java.get(source, ""))
+        return [v.strip().lower() for v in match.group(1).split(",")] if match else None
+    if enum("BubblingCauldronBlock", "Brew") != ["empty", "water"] + list(cauldron["brews"]):
+        err(f"BubblingCauldronBlock.Brew {enum('BubblingCauldronBlock', 'Brew')} differs from CAULDRON's brews")
+    if enum("GrimoireStandBlock", "Spread") != list(grimoire["spreads"]):
+        err(f"GrimoireStandBlock.Spread {enum('GrimoireStandBlock', 'Spread')} differs from GRIMOIRE's spreads")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    wanted = {
+        cauldron["block"]: {f"contents={c}" for c in ["empty", "water"] + list(cauldron["brews"])},
+        shelf["block"]: {f"arrangement={n},facing={f}" for f in horizontal for n in range(shelf["arrangements"])},
+        ball["block"]: {"gazing=false", "gazing=true"},
+        grimoire["block"]: {f"facing={f},page={p}" for f in horizontal for p in grimoire["spreads"]},
+        broom["block"]: {f"facing={f}" for f in horizontal},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for n in range(len(ball["fortunes"])):
+        if f"message.{MOD}.crystal_ball.fortune.{n}" not in lang:
+            err(f"Crystal ball fortune {n} has no text")
+    for spread in grimoire["spreads"]:
+        if f"message.{MOD}.grimoire.{spread}" not in lang:
+            err(f"The {spread} spread has no name")
+    for colour, items in cauldron["brews"].items():
+        values = (load(DATA / MOD / "tags" / "item" / "brew" / f"{colour}.json") or {}).get("values", [])
+        if sorted(values) != sorted(items):
+            err(f"The item tag {MOD}:brew/{colour} differs from CAULDRON's brews")
 
 
 def check_model_uvs():

@@ -697,6 +697,44 @@ def decor3_blocks():
 def decor3_items():
     return decor3_blocks()
 
+
+# ---------------------------------------------------------------- Halloween decorations, batch 4: the witch's cottage
+# The Bubbling Cauldron (BubblingCauldronBlock): water from a bucket, then a brew ingredient (item tags
+# jugcraft:brew/<colour>) makes a brew that glows (`light`); over one of the Cooking Pot's heat sources it bubbles.
+CAULDRON = {"block": "bubbling_cauldron", "display": "Bubbling Cauldron", "light": 7,
+            "brews": {"green": ["minecraft:spider_eye", "minecraft:fermented_spider_eye", "minecraft:slime_ball"],
+                      "purple": ["minecraft:nether_wart", "minecraft:chorus_fruit", "minecraft:amethyst_shard"],
+                      "orange": ["minecraft:glowstone_dust", "minecraft:blaze_powder", "minecraft:magma_cream"]}}
+# The Apothecary Shelf (ApothecaryShelfBlock): wall shelves of jars; sneak-use cycles `arrangements` ways to set them.
+APOTHECARY_SHELF = {"block": "apothecary_shelf", "display": "Apothecary Shelf", "arrangements": 4}
+# The Crystal Ball (CrystalBallBlock): glows `light`; gazing flares it to `gazing_light` for `gaze_ticks` and tells a
+# fortune (one of these, in order: message.jugcraft.crystal_ball.fortune.<n>).
+CRYSTAL_BALL = {"block": "crystal_ball", "display": "Crystal Ball", "light": 6, "gazing_light": 12, "gaze_ticks": 40,
+                "fortunes": ["A pumpkin is in your future. Possibly several.",
+                             "Beware of creepers bearing gifts.",
+                             "Something will follow you home tonight. It is probably a cat.",
+                             "The mists say: water your crops.",
+                             "A great treasure lies beneath your feet. Dig carefully.",
+                             "You will meet a tall, dark stranger. It will be an Enderman.",
+                             "Your next knock on a door will bring a treat.",
+                             "The Horseman rides closer than you think.",
+                             "Bones will rattle where you least expect them.",
+                             "The mists are cloudy. Ask again after supper."]}
+# The Grimoire Stand (GrimoireStandBlock): an open spellbook (light `light`); using it turns to the next spread.
+GRIMOIRE = {"block": "grimoire_stand", "display": "Grimoire Stand", "light": 3,
+            "spreads": {"moons": "Almanac of Moons", "bats": "A Treatise on Bats", "brew": "Brew of the Seven Shadows",
+                        "pumpkin": "Charm for a Lantern Pumpkin"}}
+# The Witch's Broom (WitchsBroomBlock): a besom leaning on its bristles.
+BROOM = {"block": "witchs_broom", "display": "Witch's Broom"}
+
+
+def decor4_blocks():
+    return [CAULDRON["block"], APOTHECARY_SHELF["block"], CRYSTAL_BALL["block"], GRIMOIRE["block"], BROOM["block"]]
+
+
+def decor4_items():
+    return decor4_blocks()
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -966,6 +1004,20 @@ SHAPED = [
     {"id": "pop_up_skeleton", "pattern": ["PBP", "BSB", "PPP"], "key": {"P": "#minecraft:planks", "B": "minecraft:bone",
                                                                      "S": "minecraft:slime_ball"},
      "result": "pop_up_skeleton", "count": 1, "category": "redstone"},
+    # Decorations batch 4: a cauldron on iron legs; glass bottles on slab shelves; an amethyst-hearted glass orb on a
+    # gold stand; a feathered book on a slab stand; a wheat besom on a stick.
+    {"id": "bubbling_cauldron", "pattern": [" C ", "I I"], "key": {"C": "minecraft:cauldron", "I": "#c:ingots/iron"},
+     "result": "bubbling_cauldron", "count": 1, "category": "misc"},
+    {"id": "apothecary_shelf", "pattern": ["BBB", "SSS"], "key": {"B": "minecraft:glass_bottle", "S": "#minecraft:wooden_slabs"},
+     "result": "apothecary_shelf", "count": 1, "category": "building"},
+    {"id": "crystal_ball", "pattern": [" G ", "GAG", " N "], "key": {"G": "minecraft:glass", "A": "minecraft:amethyst_shard",
+                                                                  "N": "minecraft:gold_ingot"},
+     "result": "crystal_ball", "count": 1, "category": "misc"},
+    {"id": "grimoire_stand", "pattern": ["FBF", " S ", "SSS"], "key": {"F": "minecraft:feather", "B": "minecraft:book",
+                                                                    "S": "#minecraft:wooden_slabs"},
+     "result": "grimoire_stand", "count": 1, "category": "misc"},
+    {"id": "witchs_broom", "pattern": ["  S", " S ", "W  "], "key": {"S": "minecraft:stick", "W": "minecraft:wheat"}, "result": "witchs_broom",
+     "count": 1, "category": "misc"},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -1009,7 +1061,8 @@ def all_blocks():
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"]] + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS)
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
-            + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks())
+            + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
+            + decor4_blocks())
 
 
 def all_items():
@@ -1017,7 +1070,7 @@ def all_items():
             + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
-            + decor2_items() + decor3_items())
+            + decor2_items() + decor3_items() + decor4_items())
 
 
 def owns(entry_id):

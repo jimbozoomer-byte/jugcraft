@@ -12,6 +12,7 @@ import night_data
 import decor_data
 import decor2_data
 import decor3_data
+import decor4_data
 import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -148,6 +149,7 @@ def assets(root, write, lang):
     decor_data.assets(root, write, lang)
     decor2_data.assets(root, write, lang)
     decor3_data.assets(root, write, lang)
+    decor4_data.assets(root, write, lang)
 
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
@@ -252,6 +254,7 @@ def loot(data, write):
     decor_data.loot(out, write)
     decor2_data.loot(out, write)
     decor3_data.loot(out, write)
+    decor4_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -327,6 +330,7 @@ def tags(tags):
     decor_data.tags(tags)
     decor2_data.tags(tags)
     decor3_data.tags(tags)
+    decor4_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

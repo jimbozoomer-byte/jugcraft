@@ -720,6 +720,23 @@ public final class JugcraftAgriculture {
 		}
 		SCARE_PROP_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("scare_prop"),
 				FabricBlockEntityTypeBuilder.create(ScarePropBlockEntity::new, mound, skeleton).build());
+
+		// Batch 4, the witch's cottage: the Bubbling Cauldron, the Apothecary Shelf, the Crystal Ball, the Grimoire Stand
+		// and the Witch's Broom.
+		Block cauldron = registerBlock("bubbling_cauldron", BubblingCauldronBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY)
+				.strength(2.0F).requiresCorrectToolForDrops().sound(SoundType.METAL).noOcclusion().lightLevel(BubblingCauldronBlock::light));
+		Block shelf = registerBlock("apothecary_shelf", ApothecaryShelfBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block ball = registerBlock("crystal_ball", CrystalBallBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(0.6F).sound(SoundType.AMETHYST).noOcclusion().lightLevel(CrystalBallBlock::light).pushReaction(PushReaction.POPPED));
+		Block grimoire = registerBlock("grimoire_stand", GrimoireStandBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(state -> GrimoireStandBlock.LIGHT));
+		Block broom = registerBlock("witchs_broom", WitchsBroomBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(0.2F).sound(SoundType.WOOD).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		for (Block block : List.of(cauldron, shelf, ball, grimoire, broom)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
 	}
 
 	/** How brightly a Wisp in a Jar glows. */
