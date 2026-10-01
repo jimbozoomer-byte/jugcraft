@@ -40,6 +40,27 @@ TREE = {
     "diesel_engine": ("diesel_generator", "diesel_engine", "Eight Cylinders", "Build a diesel engine", "goal"),
     "plastic": ("distillation_tower", "plastic_sheet", "Fantastic Plastic", "Press a plastic sheet", "task"),
     "asphalt": ("distillation_tower", "asphalt", "Hit the Road", "Lay asphalt, and walk faster on it", "task"),
+    # Industrial chemistry (batch 5).
+    "electrolytic_cell": ("steel", "electrolytic_cell", "Split Decision", "Build an electrolytic cell", "goal"),
+    "sulfuric_acid": ("electrolytic_cell", "sulfuric_acid_bucket", "Oil of Vitriol", "Make sulfuric acid", "task"),
+    "fertilizer": ("sulfuric_acid", "fertilizer", "Green Revolution", "Make fertilizer", "task"),
+    "alumina": ("electrolytic_cell", "alumina", "The Bayer Way", "Digest bauxite into alumina", "task"),
+    "fuel_cell": ("electrolytic_cell", "fuel_cell", "Clean Burn", "Build a hydrogen fuel cell", "goal"),
+    # Advanced materials (batch 6).
+    "titanium": ("electrolytic_cell", "titanium_ingot", "Kroll Call", "Chlorinate titanium and melt the sponge", "task"),
+    "lithium_battery_bank": ("titanium", "lithium_battery_bank", "Power Wall", "Build a lithium battery bank", "goal"),
+    "neodymium_magnet": ("sulfuric_acid", "neodymium_magnet", "Strong Attraction", "Make a neodymium magnet", "task"),
+    "magnet_dynamo": ("neodymium_magnet", ["magnet_dynamo", "magnet_motor"], "Lossless (Almost)",
+                      "Build a magnet dynamo or magnet motor", "goal"),
+    # Electronics (batch 7).
+    "silicon_boule": ("titanium", "silicon_boule", "Pulling Strings", "Grow a silicon boule in the crystal grower", "goal"),
+    "microchip": ("silicon_boule", "microchip", "Etched in Light", "Etch microchips in the lithography station", "task"),
+    "processor": ("microchip", "processor", "Central Processing", "Assemble a processor", "task"),
+    "network_terminal": ("processor", "network_terminal", "Hello, World", "Build a network terminal", "goal"),
+    # Fluid logistics (batch 8).
+    "gas_holder": ("electrolytic_cell", "gas_holder", "Under Pressure", "Build a gas holder", "goal"),
+    "fluid_valve": ("crude_oil", "fluid_valve", "Shut-Off Valve", "Make a fluid valve", "task"),
+    "fluid_filter": ("fluid_valve", "fluid_filter", "Strained Relations", "Make a fluid filter", "task"),
 }
 # Background of the tab (a block texture), shown behind the tree.
 BACKGROUND = "jugcraft:block/dp_gunmetal"

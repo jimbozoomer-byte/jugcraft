@@ -56,6 +56,15 @@ FOOTPRINTS = {
     "gas_turbine": cuboid(4, 2, 2),
     "polymerization_reactor": cuboid(2, 3, 2),
     "diesel_engine": cuboid(2, 2, 3),
+    "electrolytic_cell": cuboid(3, 3, 2),
+    "chemical_reactor": cuboid(2, 2, 2),
+    # Storage: a lithium battery bank three wide, two tall and one deep.
+    "lithium_battery_bank": cuboid(3, 2, 1),
+    # Electronics: a two-block crystal grower.
+    "crystal_grower": [(0, 0, 0), (0, 1, 0)],
+    "lithography_station": cuboid(3, 2, 2),
+    # Fluid logistics: a 3x3x3 gas holder.
+    "gas_holder": cuboid(3, 3, 3),
 }
 
 # Machines that take power at one marked socket only: (part, face) for a north-facing machine.
@@ -285,6 +294,45 @@ MODELS["diesel_engine"] = [
     ((-9.5, 22.5, 42), (-6.5, 25.5, 48), PIPE),
 ]
 
+MODELS["electrolytic_cell"] = [
+    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-30, 2, 4), (-2, 24, 28), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+    ((-31, 36, 20), (15, 40, 24), PIPE),
+    ((-31, 22, 24), (15, 26, 28), PIPE),
+]
+
+MODELS["chemical_reactor"] = [
+    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-14, 2, 8), (12, 26, 30), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+]
+
+MODELS["lithium_battery_bank"] = [
+    ((-32, 0, 0), (16, 2, 16), "heavy_plinth"),
+    ((-31, 2, 1), (15, 30, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-32, 30, 0), (16, 32, 16), "heavy_plinth"),
+    ((-30, 8, 0.5), (14, 9, 1), "power_port_frame"),
+]
+
+MODELS["crystal_grower"] = [
+    ((0, 0, 0), (16, 2, 16), "heavy_plinth"),
+    ((1, 2, 1), (15, 14, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((3, 14, 3), (13, 28, 13), "fluid_tank_side"),
+    ((6, 28, 6), (10, 32, 10), "geothermal_stack"),
+]
+
+MODELS["lithography_station"] = [
+    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-30, 2, 4), (-2, 28, 30), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+]
+
+MODELS["gas_holder"] = [
+    ((-32, 0, 0), (16, 2, 48), "heavy_plinth"),
+    ((-30, 2, 2), (14, 46, 46), {"*": "fluid_tank_side", "north": "#front", "up": "fluid_tank_top"}),
+]
+
 # Textures the front face uses: "#front" in MODELS. Lit machines also get <front>_on.
 FRONTS = {
     "geothermal_generator": "geothermal_generator_front",
@@ -310,4 +358,10 @@ FRONTS = {
     "gas_turbine": "gas_turbine_front",
     "polymerization_reactor": "polymerization_reactor_front",
     "diesel_engine": "diesel_engine_front",
+    "electrolytic_cell": "electrolytic_cell_front",
+    "chemical_reactor": "chemical_reactor_front",
+    "lithium_battery_bank": "lithium_battery_bank_front",
+    "crystal_grower": "crystal_grower_front",
+    "lithography_station": "lithography_station_front",
+    "gas_holder": "gas_holder_front",
 }
