@@ -13,6 +13,7 @@ from PIL import Image
 
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS, PART_UNITS, CIRCUITS, WASHED_ORES,
                        all_blocks, all_items, feature_of)
+import petro
 from machines import (MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 
@@ -106,6 +107,30 @@ def check_assets(registered):
             model(definition["model"]["model"])
         if item not in all_blocks() + machine_blocks() and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
+
+
+def check_petro():
+    """Petroleum fluids: Java registers exactly tools/petro.py's fluids, each with its block, textures and names."""
+    java = (JAVA_ROOT / "chemistry" / "PetroFluids.java").read_text(encoding="utf-8")
+    declared = re.findall(r'= fluid\("([a-z_]+)", (\d+), (\d+), (\d+)', java)
+    expected = [(f, str(i["tick_delay"]), str(i["slope"]), str(i["drop_off"])) for f, i in petro.FLUIDS.items()]
+    if declared != expected:
+        err(f"PetroFluids.java fluids {declared} != tools/petro.py {expected}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for fluid in petro.FLUIDS:
+        if f"block.{MOD}.{fluid}" not in lang:
+            err(f"Missing name for fluid {fluid}")
+        for form in ("still", "flow"):
+            texture(rid_of(f"block/{fluid}_{form}"))
+            if not (ASSETS / "textures" / "block" / f"{fluid}_{form}.png.mcmeta").is_file():
+                err(f"Fluid texture {fluid}_{form} is not animated")
+        state = load(ASSETS / "blockstates" / f"{fluid}.json")
+        if state:
+            model(state["variants"][""]["model"])
+
+
+def rid_of(path):
+    return f"{MOD}:{path}"
 
 
 def check_loot(registered):
@@ -250,6 +275,9 @@ def check_tags():
             if value.startswith("#"):
                 if not tag_exists(registry, value[1:]):
                     err(f"{path.relative_to(ROOT)}: unknown tag {value}")
+            elif registry == "fluid":
+                if split(value)[1] not in [f for fluid in petro.FLUIDS for f in (fluid, f"flowing_{fluid}")]:
+                    err(f"{path.relative_to(ROOT)}: unknown fluid {value}")
             elif split(value)[0] == MOD and split(value)[1] not in all_blocks() + all_items() + machine_blocks():
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
@@ -481,8 +509,10 @@ def check_style_pack():
 
 
 def main():
-    registered = set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
+    registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
+                  | set(petro.petro_items()))
     check_assets(sorted(registered))
+    check_petro()
     check_loot(registered)
     check_recipes(registered)
     check_machine_recipe_files(registered)

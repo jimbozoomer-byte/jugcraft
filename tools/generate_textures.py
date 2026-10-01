@@ -1330,6 +1330,8 @@ def main():
     steampunk_textures.draw_all()
     import dieselpunk_textures
     dieselpunk_textures.draw_all()
+    import petro_textures
+    petro_textures.draw_all(save, save_animation)
 
 
 if __name__ == "__main__":

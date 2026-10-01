@@ -256,6 +256,7 @@ def machine_assets(lang):
     lang[f"message.{MOD}.conveyor_slope.up"] = "up"
     lang[f"message.{MOD}.conveyor_slope.down"] = "down"
     powered_tools(lang)
+    petro_assets(lang)
     lang[f"message.{MOD}.hand_crank"] = "Turning for %s more seconds"
     lang[f"message.{MOD}.steam_engine"] = "Steam engine: %s fuel, %s / %s mB water"
     lang[f"message.{MOD}.dynamo"] = "Dynamo: %s / %s JE"
@@ -443,6 +444,21 @@ def powered_tools(lang):
     lang[f"tooltip.{MOD}.rocket_pack"] = "Hold jump in the air to fly"
     lang[f"message.{MOD}.charging_station"] = "Charging station: %s / %s JE"
     lang[f"message.{MOD}.charging_station.tool"] = "%s: %s / %s JE"
+
+
+def petro_assets(lang):
+    """Petroleum fluids (tools/petro.py): the liquid block (particles only; the fluid renderer draws the liquid) and
+    the bucket."""
+    import petro
+    for fluid, info in petro.FLUIDS.items():
+        lang[f"block.{MOD}.{fluid}"] = info["display"]
+        write(ASSETS / "blockstates" / f"{fluid}.json", {"variants": {"": {"model": rid(f"block/{fluid}")}}})
+        write(ASSETS / "models" / "block" / f"{fluid}.json", {"textures": {"particle": rid(f"block/{fluid}_still")}})
+        bucket = f"{fluid}_bucket"
+        lang[f"item.{MOD}.{bucket}"] = f"{info['display']} Bucket"
+        write(ASSETS / "models" / "item" / f"{bucket}.json",
+              {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{bucket}")}})
+        write(ASSETS / "items" / f"{bucket}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{bucket}")}})
 
 
 def loot_tables():
@@ -642,6 +658,12 @@ def tags():
             tags.add("item", f"c:{info['tag']}", rid(item))
             if info["tag"].startswith("dusts/"):
                 tags.add("item", "c:dusts", f"#c:{info['tag']}")
+
+    # Petroleum fluids, so other mods' machines can recognise them (c:crude_oil and so on).
+    import petro
+    for fluid in petro.FLUIDS:
+        tags.add("fluid", f"c:{fluid}", rid(fluid))
+        tags.add("fluid", f"c:{fluid}", rid(f"flowing_{fluid}"))
     tags.write()
 
 
