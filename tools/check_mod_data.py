@@ -119,6 +119,19 @@ def item_models(definition):
     if definition.get("type") == "minecraft:select":
         return [ref for case in definition["cases"] for ref in item_models(case["model"])] + item_models(definition["fallback"])
     return [definition["model"]]
+# Minecraft 26.x silently ignores these pre-26.x loot keys, so a table using them loads but misbehaves
+# (ores dropped themselves). The 26.x keys are "condition" and "modifier".
+OLD_LOOT_KEYS = {"conditions", "functions", "function"}
+
+
+def old_loot_keys(node):
+    if isinstance(node, dict):
+        return (OLD_LOOT_KEYS & set(node)) | {k for value in node.values() for k in old_loot_keys(value)}
+    if isinstance(node, list):
+        return {k for value in node for k in old_loot_keys(value)}
+    return set()
+
+
 def check_petro():
     """Petroleum fluids: Java registers exactly tools/petro.py's fluids, each with its block, textures and names."""
     java = (JAVA_ROOT / "chemistry" / "PetroFluids.java").read_text(encoding="utf-8")
@@ -149,6 +162,9 @@ def check_loot(registered):
         for name in re.findall(r'"name": "jugcraft:([a-z_]+)"', text):
             if name not in registered:
                 err(f"{path.name} drops unknown item {name}")
+        old = old_loot_keys(load(path))
+        if old:
+            err(f"{path.name} uses pre-26.x loot keys {sorted(old)}; use \"condition\" and \"modifier\"")
 
 
 # Metal content in nugget units. Tags stand for the same forms from any mod.

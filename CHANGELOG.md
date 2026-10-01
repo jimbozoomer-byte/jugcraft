@@ -45,6 +45,14 @@ No numbered release yet. Everything below is on `main`.
 - **Seed sources:** wild plants in fitting biomes (new chunks), and short grass (2 % per crop) anywhere.
 - Also: composting, pig, chicken and parrot feed, `c:` crop, seed and food tags, and a new `agriculture` feature switch.
 - Original textures from `tools/crop_textures.py`. Twelve game tests, plus a client game test with screenshots of a corn maze, the fields and every growth stage.
+### Fix: ore loot tables in the 26.x format (pull request pending)
+- **Ores now drop their raw material.** Before this, mining tin, zinc, lead, silver, nickel, tungsten, uranium, salt, phosphate, lepidolite or monazite ore, or oil sand, dropped the block itself, as if with Silk Touch. Fortune and multi-drops (2–4 salt, 1–2 bitumen) did nothing either.
+- **Cause:** Minecraft 26.x renamed the loot keys (`conditions` → `condition`, `functions` → `modifier`, and Silk Touch is now the `minecraft:tool/can_silk_touch` predicate). The old keys were silently ignored. The game test server had been logging "Unreachable entry!" for all 23 ore tables.
+- Every generated loot table (99 now) uses the 26.x format. Storage blocks, machines and the conveyor slope (#44, whose table also used the old keys) still drop themselves, and now respect explosions again.
+- **Charging Station (#40):** its "lower half only" condition used the old keys too, so breaking the top half dropped two stations. It now drops one (game test `chargingStationDropsOnce`).
+- `tools/check_mod_data.py` fails on any pre-26.x loot key, and a new game test mines ores and checks what drops.
+
+
 ### #47 Oil line, batch 1: oil in the world
 The first five commits of the dieselpunk Chemistry branch ([plan](docs/branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line)).
 - **Crude oil:** a real fluid with a bucket; slow, thick, never makes new sources; works in every tank and pipe.

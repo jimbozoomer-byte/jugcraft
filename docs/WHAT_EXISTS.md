@@ -335,6 +335,8 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Python lists must match Java: `MachineKind` numbers and recipe types, `JugcraftComponents` lists, materials, features, worldgen, and every agriculture number (`TallCrop`, items, foods, compost tiers, sickles, wild-plant and wild-patch biomes, grass seeds, legume bonus, gourds, cranberry and chestnut numbers, the lantern's light, and the carving numbers, starter faces and messages).
 - Every tall-crop age and section, and every crop age, has a model. Agriculture recipes (crafting, cooking and Cooking Pot) never form a loop, no two Cooking Pot recipes share their ingredients, a seed is a trellis seed exactly when it plants a climbing crop, and a bog seed exactly when it plants the cranberry bush. Every stem age, cranberry age and leaf fruit state has a model.
 - Every ID has a model, a texture, a name, and a loot table (for blocks). Both machine styles cover every block state. Model elements stay within −16..32.
+- Python lists must match Java: `MachineKind` numbers and recipe types, `JugcraftComponents` lists, materials, features, worldgen.
+- Every ID has a model, a texture, a name, and a loot table (for blocks). Loot tables use the **26.x keys** (`condition`, `modifier`, predicates such as `minecraft:tool/can_silk_touch`); the old `conditions`/`functions` keys are rejected because 26.x silently ignores them. Both machine styles cover every block state. Model elements stay within −16..32.
 
 ## File map
 
