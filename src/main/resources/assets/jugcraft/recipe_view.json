@@ -3000,6 +3000,23 @@
             ]
           ],
           "ticks": 100
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:butadiene",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:rubber",
+              4
+            ]
+          ],
+          "ticks": 100
         }
       ]
     },
@@ -3180,6 +3197,45 @@
           "ticks": 80
         },
         {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:naphtha",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:butadiene",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "jugcraft:phosphate",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:ammonia",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fertilizer",
+              6
+            ]
+          ],
+          "ticks": 80
+        },
+        {
           "items": [
             [
               "jugcraft:raw_titanium",
@@ -3280,6 +3336,84 @@
             ]
           ],
           "ticks": 200
+        },
+        {
+          "items": [
+            [
+              "jugcraft:silicon_wafer",
+              1
+            ],
+            [
+              "jugcraft:copper_wire",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:nitric_acid",
+              50
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:microchip",
+              4
+            ]
+          ],
+          "ticks": 200
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:synthesis_converter",
+      "type": "gas_synthesis",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen",
+              300
+            ],
+            [
+              "jugcraft:nitrogen",
+              100
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:ammonia",
+              200
+            ]
+          ],
+          "results": [],
+          "ticks": 40
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:ammonia",
+              100
+            ],
+            [
+              "jugcraft:oxygen",
+              200
+            ],
+            [
+              "minecraft:water",
+              100
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:nitric_acid",
+              200
+            ]
+          ],
+          "results": [],
+          "ticks": 40
         }
       ]
     },
