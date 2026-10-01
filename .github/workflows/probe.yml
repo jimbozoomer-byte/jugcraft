@@ -26,10 +26,8 @@ jobs:
           # Prints the bytecode of the methods of a class whose header line matches a regex.
           m() { echo "=== $1 /$2/"; javap -cp "$CP" -c -p "$1" 2>&1 | awk -v re="$2" '/^  [a-z].*\(/{p=($0 ~ re)} p' | head -${3:-200}; }
           l() { echo "=== $1 (listing)"; javap -cp "$CP" -p "$1" 2>&1 | grep -iE "${2:-.}" | head -${3:-80}; }
-          m net.minecraft.client.input.KeyEvent 'shortcutKey|KeyEvent\(' 80
-          l net.minecraft.client.KeyboardHandler
-          m net.minecraft.client.KeyboardHandler 'keyPress' 260 | grep -E 'invoke|new|iload|bipush|sipush|if'
-          l com.mojang.blaze3d.platform.InputConstants 'static|public' 120
-          m net.minecraft.client.input.InputWithModifiers 'isCopy|isPaste|shortcutKey' 80
-          l net.minecraft.client.input.InputQuirks
-          m net.fabricmc.fabric.impl.client.gametest.TestInputImpl 'pressOrReleaseKey|holdControl|holdKey\(com' 200
+          m net.minecraft.client.input.KeyEvent 'shortcutKey|KeyEvent[(]' 80
+          echo "=== InputConstants mouse and modifier constants"; javap -cp "$CP" -p -constants com.mojang.blaze3d.platform.InputConstants | grep -E 'MOUSE_BUTTON|MOD_|PRESS|RELEASE'
+          echo "=== InputQuirks"; javap -cp "$CP" -p -c net.minecraft.client.input.InputQuirks | grep -A30 'static {}' | grep -E 'sipush|bipush|iconst|putstatic|ldc'
+          m net.fabricmc.fabric.impl.client.gametest.TestInputImpl 'pressOrReleaseKey|holdControl|holdKey[(]com' 260
+          l com.mojang.blaze3d.platform.InputConstants 'getKey|scancode|keycode|Key[(]' 40
