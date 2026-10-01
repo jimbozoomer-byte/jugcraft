@@ -225,7 +225,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
   - The machine waits unless every possible byproduct fits in its byproduct slots.
 - **Lookup:** use `MachineRecipes.find(serverLevel, kind, stack)` and `findMulti(...)`. Types and serializers are registered per kind in `MachineRecipeTypes`.
 - **Resource condition:** `{"condition": "jugcraft:feature_enabled", "feature": "<name>"}` in `fabric:load_conditions` gates any JSON by a feature switch.
-- **Recipe viewers:** no EMI/JEI/REI plugin exists yet, because no viewer build for 26.3 has been confirmed.
+- **Recipe viewers:** an optional JEI plugin (`client/compat/JugcraftJeiPlugin`, JEI 31.8 compile-time API) shows one category per machine, read from `assets/jugcraft/recipe_view.json` (`tools/recipe_view.py`). Fluid machines get their own categories with fluid slots (amounts converted with `IPlatformFluidHelper.bucketVolume()`). Refinery gas has a still texture registered so viewers can draw it. EMI and REI have no plugin.
 
 ### Feature switches (`config/`)
 
@@ -317,7 +317,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 ## Not built yet
 
 - Chemistry branch: electrolysis. The oil line's extraction, refining, fracking and fuel generators exist (see below); oil products (plastics, asphalt) and the diesel engine are planned. Blast-furnace stand-ins mark the recipes that will move there.
-- Recipe viewer plugin (EMI/JEI/REI).
+- EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
 - Any magic, farming, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md).
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).

@@ -511,7 +511,7 @@ Every machine recipe is an ordinary Minecraft recipe file. A data pack can add, 
 - Multi-input ingredients can sit in any input slot, and every unused slot must be empty.
 - Jugcraft's own recipes are generated from `tools/machines.py`, where the metal audit runs. Edit them there, not in the JSON.
 - Code: `machine/MachineRecipe.java` and `MultiMachineRecipe.java` (formats), `MachineRecipeTypes.java` (registration), `MachineRecipes.java` (lookup).
-- **Recipe viewers:** recipe viewers (EMI, JEI, REI) show a new recipe type only through a small plugin. No viewer build for Minecraft 26.3 has been confirmed yet, so that plugin is a follow-up.
+- **Recipe viewers:** with JEI installed, every machine (fluid machines included, with their fluids in and out) has a recipe category. EMI and REI have no plugin yet.
 
 ## Engineer's Handbook
 

@@ -149,6 +149,12 @@ From one bucket of crude oil, with every byproduct refined:
 
 So a bucket of crude oil cracked all the way gives about 525 mB of diesel, 293 mB of gasoline and 183 mB of refinery gas, for about 12,800 + 6,400 + 4,680 = 23,880 JE of refining. What those fuels are worth in generators is set in batch 3 (diesel generator, gas turbine) and audited in BALANCE.md (commit 19).
 
+### Handbook, advancements, recipe viewer and balance (batch 4, commit 19)
+- **Advancements:** Black Gold (crude oil bucket), Nodding Donkey, Fractional Thinking, Tight Spot, Diesel Power, Spool Up, Eight Cylinders, Fantastic Plastic and Hit the Road, under Forged in Coke.
+- **Handbook:** a Fuel Values page in the Oil chapter, plus pages for every machine.
+- **JEI:** each fluid machine has a category showing its item and fluid inputs and outputs (`recipe_view.json` → `fluid_machines`).
+- **Balance:** the whole chain, per bucket of crude, is in [BALANCE.md](../BALANCE.md#oil).
+
 ## Connections
 - Existing input producer: oil reservoirs (commit 3) through the pumpjack; oil sand and bitumen (existing rock and item) through the extractor; water from pumps.
 - Existing output consumer: the fluid system (tanks, steel tank, pumps, pipes); refining comes in batch 2.

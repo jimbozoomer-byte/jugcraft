@@ -39,7 +39,9 @@ FLUIDS = {
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
 GASES = {
-    "refinery_gas": {"display": "Refinery Gas", "feature": "crude_oil"},
+    # colors: the swirl drawn for recipe viewers and tank gauges (gases are never placed in the world).
+    "refinery_gas": {"display": "Refinery Gas", "feature": "crude_oil",
+                     "colors": [(150, 160, 172), (176, 188, 200), (200, 210, 220), (226, 232, 238)]},
 }
 
 

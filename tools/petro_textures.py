@@ -8,7 +8,7 @@ import random
 
 from PIL import Image
 
-from petro import FLUIDS
+from petro import FLUIDS, GASES
 
 FRAMES = 16
 
@@ -200,3 +200,6 @@ def draw_all(save, save_animation):
         save_animation(still(info["colors"], 800 + index), f"{fluid}_still", frametime=3)
         save_animation(flowing(info["colors"], 850 + index), f"{fluid}_flow", frametime=2)
         save(bucket(info["colors"], 900 + index), "item", f"{fluid}_bucket")
+    # Gases: a still swirl only, for recipe viewers (they have no block, so nothing flows in the world).
+    for index, (gas, info) in enumerate(GASES.items()):
+        save_animation(still(info["colors"], 880 + index), f"{gas}_still", frametime=4)
