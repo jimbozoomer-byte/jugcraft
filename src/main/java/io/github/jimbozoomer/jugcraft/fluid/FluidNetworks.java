@@ -86,8 +86,8 @@ public final class FluidNetworks {
 
 		static Network discover(Level level, BlockPos start) {
 			Network network = new Network();
-			if (level.getBlockState(start).getBlock() instanceof FluidPipeBlock pipe) {
-				network.rate = pipe.transferRate();
+			if (level.getBlockState(start).getBlock() instanceof FluidPipeBlock first) {
+				network.rate = first.transferRate();
 			}
 			ArrayDeque<BlockPos> queue = new ArrayDeque<>();
 			queue.add(start.immutable());
