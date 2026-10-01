@@ -710,7 +710,7 @@ public final class JugcraftAgriculture {
 		Block mound = registerBlock("grave_mound", GraveMoundBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.DIRT).strength(0.6F)
 				.sound(SoundType.ROOTED_DIRT).noOcclusion());
 		Block angel = registerBlock("mourning_angel", MourningAngelBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ)
-				.strength(2.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.CALCITE).noOcclusion().pushReaction(PushReaction.BLOCK));
+				.strength(2.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.CALCITE).noOcclusion().pushReaction(PushReaction.POPPED));
 		Block skeleton = registerBlock("pop_up_skeleton", PopUpSkeletonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
 				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
 		// The door places its upper half itself (DoorBlock.setPlacedBy), like the Scarecrow.
