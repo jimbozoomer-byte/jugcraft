@@ -528,6 +528,29 @@ def stencil_item(cut):
     return c.img
 
 
+def giant_pumpkin_icon():
+    """A whole giant pumpkin: wider than it is tall, flattened under its own weight, deep ribs and a thick stem."""
+    c = Canvas()
+    for y in range(3, 16):
+        for x in range(16):
+            dx, dy = (x - 7.5) / 8.0, (y - 9.5) / 6.0
+            # Flat-bottomed: the lower half bulges out (a superellipse) and sits on its base.
+            if (abs(dx) ** 2 + abs(dy) ** 2 if y <= 9 else abs(dx) ** 3.2 + abs(dy) ** 3.2) > 1:
+                continue
+            # Ribs: darker grooves curving round the body, lighter on the side the light comes from.
+            rib = abs(((x - 7.5) / (1.0 - 0.35 * dy * dy)) % 4.0 - 2.0)
+            tone = 2 if rib > 1.4 else 3 if rib > 0.6 else 4
+            if x < 6 and y < 10 and tone > 2:
+                tone += 1
+            if y > 13:
+                tone -= 1
+            c.px(x, y, GIANT[max(0, min(5, tone))])
+    for x, y, tone in ((7, 1, 1), (8, 1, 2), (7, 2, 2), (8, 2, 3), (6, 3, 1), (7, 3, 2), (8, 3, 3), (9, 3, 1), (9, 0, 1)):
+        c.px(x, y, GIANT_STEM[tone])
+    outline(c, rgb("4a2408"))
+    return c.img
+
+
 def scarecrow_icon():
     c = Canvas()
     for y in range(4, 16):
@@ -627,6 +650,7 @@ def halloween_textures():
         ("item", "pumpkin_stencil"): stencil_item(True),
         ("item", "gourd_canteen"): bottle_gourd_item(dried=True, strap=True),
         ("item", "scarecrow"): scarecrow_icon(),
+        ("item", "giant_pumpkin"): giant_pumpkin_icon(),
         ("item", "corn_shock"): stook_icon(),
         ("item", "gourd_birdhouse"): birdhouse_icon(),
     })

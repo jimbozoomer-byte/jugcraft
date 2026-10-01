@@ -28,7 +28,7 @@ Primary specialty and supported player role: farming and play; supports groups (
    - someone lives there: a villager whose bed is within 12 blocks of the door.
 5. **Treat.** The villager opens the door and hands you a treat: candy corn, caramel, cookies, a popcorn ball, a caramel apple or, rarely, the **King-Size Candy Bar** (8 hunger), only from villagers. In a costume hat, one time in four you get a second treat. Each villager's home gives each player **one treat a night**.
 6. **Trick.** Knock at a home that has already given you a treat tonight and you get a harmless prank: a witch's cackle and a little hop, a flurry of bats and a moment of darkness, or the door slammed with a "no". Nothing is taken. Ten homes in one night earns the **Full Bag** advancement.
-7. **Costumes.** The **Witch Hat** (black wool and purple dye), the **Ghost Sheet** (white wool and black dye; you look out through its eye holes) and the **Scarecrow Hat** (wheat) go in the head slot and show on players and armor stands. Hand-carved pumpkins can now be worn too, like vanilla's carved pumpkin: you look out through the carving, and endermen take them as a disguise.
+7. **Costumes.** The **Witch Hat** (black wool and purple dye), the **Ghost Sheet** (white wool and black dye; it drapes over the whole wearer, a hood with eye holes over the head and the sheet over the body and arms to below the knees, moving with them; you look out through its eye holes) and the **Scarecrow Hat** (wheat) go in the head slot and show on players and armor stands. Hand-carved pumpkins can now be worn too, like vanilla's carved pumpkin: you look out through the carving, and endermen take them as a disguise.
 
 ## Connections
 - Existing input producer: the giant pumpkin and Carving Knife (boats), the Harvest Scale's ribbons (race prizes), Jugcraft candy corn, caramel, popcorn balls and caramel apples (treats), the turnip lantern, hand-carved pumpkins and lit giant pumpkins (porch lights); vanilla villages, wool, dye, wheat, paper, string, planks.
@@ -64,7 +64,7 @@ Primary specialty and supported player role: farming and play; supports groups (
 - New IDs only: entities `pumpkin_barge` and `pumpkin_racer`; items `pumpkin_barge`, `pumpkin_racer`, `candy_bag`, `king_size_candy_bar`, `witch_hat`, `ghost_sheet`, `scarecrow_hat`; blocks `regatta_flag` and `regatta_buoy`; the `jugcraft:pumpkin_boat` component. Hand-carved pumpkins gain the `equippable` component (head), so they can be worn; nothing about placed ones changes. The `agriculture` switch turns off the new recipes; placed blocks, boats and items stay.
 
 ## Dependencies and assets
-No new dependencies. Every texture is drawn by code (`tools/regatta_textures.py`): the boats' cut flesh, the ghost sheet's view, the flag, buoys, hats, bag, candy bar and boat icons. The boats are drawn from the giant pumpkin's own side tiles. The hats are 3D item models.
+No new dependencies. Every texture is drawn by code (`tools/regatta_textures.py`): the boats' cut flesh, the ghost sheet's view and the sheet as worn (`entity/ghost_sheet`, drawn over the wearer by the client's `GhostSheetLayer`), the flag, buoys, hats, bag, candy bar and boat icons. The boats are drawn from the giant pumpkin's own side tiles. The hats are 3D item models.
 
 ## Verification
 Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions):
@@ -98,6 +98,16 @@ The client game test (`RegattaClientGameTests`) builds a pond with a carved, lit
 Found by CI and fixed before this record:
 - 26.3 has no `PushReaction.DESTROY` (`POPPED`), its `PoseStack` turns with `rotateDegrees`, and vanilla entity types are looked up by ID in tests (compile errors).
 - Test 10 first checked the saved record by the clock time instead of the night number it is kept by; the test was wrong, not the game.
+
+**The Ghost Sheet after the owner's first look (1 October 2026).** It didn't fit over the character: as a head-slot item the game drew its small block model on the head only. A render layer now drapes the whole sheet over the wearer (every humanoid: players, costumed mobs, armor stands), fixed to the head, body, arms and thighs so it moves with them. Its equipment asset has no layers, which keeps the armor layer from drawing anything and the item from being drawn on the head, and is what puts it in the render state the layer reads. Results on `449f61b` (with the Halloween harvest's giant pumpkin and scarecrow fixes merged in):
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py`, `python3 tools/check_mod_data.py` | Pass (453 IDs) |
+| `./gradlew build` and the game tests on the headless server | **All 199 pass** |
+| Client game test (`RegattaClientGameTests`), with a close-up of the sheet on its armor stand and a third-person shot of the player wearing it | **Passes**; screenshots `ingame_ghost_sheet.jpg`, `ingame_ghost_sheet_worn.jpg` |
+
+Found by CI on the way: 26.3 has no `RenderTypes.entityCutoutNoCull` (its `entityCutout` already draws both sides), and the first working build drew nothing, because 26.3 only puts head equipment with an equipment asset in the render state (the screenshots showed a bare head); the empty asset fixed it.
 
 **Not run:**
 - a person playing it in a client, paddling a pumpkin boat (speed in water is only checked by its formula);
