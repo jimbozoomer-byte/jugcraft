@@ -87,7 +87,28 @@
           "icon": "jugcraft:overclock_module",
           "text": [
             "Tinkerer: Make an upgrade module for a powered tool.",
-            "Rocketeer: Make a rocket pack and take to the air."
+            "Rocketeer: Make a rocket pack and take to the air.",
+            "Black Gold: Fill a bucket with crude oil.",
+            "Nodding Donkey: Build a pumpjack over an oil reservoir.",
+            "Fractional Thinking: Build a distillation tower."
+          ]
+        },
+        {
+          "title": "Milestones (6)",
+          "icon": "jugcraft:fracking_rig",
+          "text": [
+            "Tight Spot: Build a fracking rig for shale oil.",
+            "Diesel Power: Build a diesel generator.",
+            "Spool Up: Build a gas turbine.",
+            "Eight Cylinders: Build a diesel engine.",
+            "Fantastic Plastic: Press a plastic sheet."
+          ]
+        },
+        {
+          "title": "Milestones (7)",
+          "icon": "jugcraft:asphalt",
+          "text": [
+            "Hit the Road: Lay asphalt, and walk faster on it."
           ]
         }
       ]
@@ -2023,6 +2044,15 @@
             "result": "jugcraft:flowback_treatment_unit",
             "count": 1
           }
+        },
+        {
+          "title": "Fuel Values",
+          "icon": "jugcraft:diesel_bucket",
+          "text": [
+            "What a bucket is worth: diesel 256,000 JE (diesel generator) or KE (diesel engine); heavy fuel oil 128,000; gasoline 384,000 and refinery gas 192,000 (gas turbine).",
+            "Refined all the way, a bucket of crude oil gives about 525 mB of diesel, 293 mB of gasoline and 183 mB of gas: about 282,000 JE, for about 40,000 JE of pumping and refining.",
+            "Oil never comes back: every reservoir runs dry."
+          ]
         },
         {
           "title": "Diesel Generator",

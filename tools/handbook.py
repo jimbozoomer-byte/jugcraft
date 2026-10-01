@@ -345,6 +345,12 @@ def build():
             machine_page("chemical_mixer"),
             machine_page("fracking_rig"),
             machine_page("flowback_treatment_unit"),
+            {"title": "Fuel Values", "icon": f"{MOD}:diesel_bucket", "text": [
+                "What a bucket is worth: diesel 256,000 JE (diesel generator) or KE (diesel engine); heavy fuel oil "
+                "128,000; gasoline 384,000 and refinery gas 192,000 (gas turbine).",
+                "Refined all the way, a bucket of crude oil gives about 525 mB of diesel, 293 mB of gasoline and 183 mB "
+                "of gas: about 282,000 JE, for about 40,000 JE of pumping and refining.",
+                "Oil never comes back: every reservoir runs dry."]},
             machine_page("diesel_generator"),
             machine_page("gas_turbine"),
             machine_page("polymerization_reactor"),
