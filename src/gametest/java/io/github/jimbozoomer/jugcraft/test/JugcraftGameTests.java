@@ -39,6 +39,7 @@ import io.github.jimbozoomer.jugcraft.tools.ChargingStationBlockEntity;
 import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import io.github.jimbozoomer.jugcraft.tools.MiningDrillItem;
 import io.github.jimbozoomer.jugcraft.tools.RocketPackItem;
+import io.github.jimbozoomer.jugcraft.tools.ToolUpgrades;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
@@ -897,7 +898,7 @@ public class JugcraftGameTests {
 
 	private static ItemStack charged(Item item) {
 		ItemStack stack = new ItemStack(item);
-		Chargeable.setEnergy(stack, ((Chargeable) item).capacity());
+		Chargeable.setEnergy(stack, Chargeable.capacity(stack));
 		return stack;
 	}
 
@@ -989,6 +990,94 @@ public class JugcraftGameTests {
 		long left = Chargeable.energy(player.getItemBySlot(EquipmentSlot.CHEST));
 		helper.assertTrue(left == RocketPackItem.CAPACITY - RocketPackItem.ENERGY_PER_TICK, "The pack holds " + left + " JE");
 		helper.assertTrue(player.fallDistance == 0, "The fall was not cancelled");
+		helper.succeed();
+	}
+
+	/** A capacity module doubles what a drill holds; a second triples it; a third does not fit. */
+	@GameTest
+	public void capacityModulesAddCharge(GameTestHelper helper) {
+		ItemStack drill = new ItemStack(JugcraftTools.MINING_DRILL);
+		for (int i = 1; i <= 2; i++) {
+			helper.assertTrue(ToolUpgrades.fit(helper.getLevel(), drill, ToolUpgrades.Kind.CAPACITY) == ToolUpgrades.Result.FITTED,
+					"Capacity module " + i + " did not fit");
+		}
+		helper.assertTrue(ToolUpgrades.fit(helper.getLevel(), drill, ToolUpgrades.Kind.CAPACITY) == ToolUpgrades.Result.FULL,
+				"A third capacity module fitted");
+		Chargeable.setEnergy(drill, Long.MAX_VALUE);
+		helper.assertTrue(Chargeable.energy(drill) == 3 * JugcraftTools.DRILL_CAPACITY, "The drill holds " + Chargeable.energy(drill));
+		helper.succeed();
+	}
+
+	/** Modules fit only the tools they are for, and silk touch and fortune exclude each other. */
+	@GameTest
+	public void modulesFitTheRightTools(GameTestHelper helper) {
+		ItemStack chainsaw = new ItemStack(JugcraftTools.CHAINSAW);
+		helper.assertTrue(ToolUpgrades.fit(helper.getLevel(), chainsaw, ToolUpgrades.Kind.RANGE) == ToolUpgrades.Result.WRONG_TOOL,
+				"A range module fitted the chainsaw");
+		ItemStack drill = new ItemStack(JugcraftTools.MINING_DRILL);
+		helper.assertTrue(ToolUpgrades.fit(helper.getLevel(), drill, ToolUpgrades.Kind.SILK_TOUCH) == ToolUpgrades.Result.FITTED,
+				"Silk touch did not fit the drill");
+		helper.assertTrue(ToolUpgrades.fit(helper.getLevel(), drill, ToolUpgrades.Kind.FORTUNE) == ToolUpgrades.Result.CONFLICT,
+				"Fortune fitted alongside silk touch");
+		helper.assertTrue(!drill.getEnchantments().isEmpty(), "The drill has no enchantment after a silk touch module");
+		helper.assertTrue(ToolUpgrades.fit(helper.getLevel(), new ItemStack(JugcraftTools.ROCKET_PACK), ToolUpgrades.Kind.OVERCLOCK)
+				== ToolUpgrades.Result.WRONG_TOOL, "An overclock module fitted the rocket pack");
+		helper.succeed();
+	}
+
+	/** With a range module, the drill's area mode breaks a 5x5 square for the energy of 25 blocks. */
+	@GameTest
+	public void rangeModuleMinesFiveByFive(GameTestHelper helper) {
+		for (int x = 0; x <= 4; x++) {
+			for (int y = 1; y <= 5; y++) {
+				helper.setBlock(new BlockPos(x, y, 3), Blocks.STONE);
+			}
+		}
+		ItemStack drill = charged(JugcraftTools.MINING_DRILL);
+		drill.set(JugcraftTools.DRILL_MODE, MiningDrillItem.AREA);
+		ToolUpgrades.fit(helper.getLevel(), drill, ToolUpgrades.Kind.RANGE);
+		ServerPlayer player = miner(helper, drill);
+		player.gameMode.destroyBlock(helper.absolutePos(new BlockPos(2, 3, 3)));
+		for (int x = 0; x <= 4; x++) {
+			for (int y = 1; y <= 5; y++) {
+				helper.assertBlockPresent(Blocks.AIR, new BlockPos(x, y, 3));
+			}
+		}
+		long used = JugcraftTools.DRILL_CAPACITY - Chargeable.energy(player.getMainHandItem());
+		helper.assertTrue(used == 25 * JugcraftTools.DRILL_ENERGY_PER_BLOCK, "The drill used " + used + " JE for 25 blocks");
+		helper.succeed();
+	}
+
+	/** An overclock module speeds the drill up by half and doubles its JE per block. */
+	@GameTest
+	public void overclockModuleSpeedsUp(GameTestHelper helper) {
+		ItemStack plain = charged(JugcraftTools.MINING_DRILL);
+		ItemStack fast = charged(JugcraftTools.MINING_DRILL);
+		ToolUpgrades.fit(helper.getLevel(), fast, ToolUpgrades.Kind.OVERCLOCK);
+		BlockState stone = Blocks.STONE.defaultBlockState();
+		float ratio = fast.getDestroySpeed(stone) / plain.getDestroySpeed(stone);
+		helper.assertTrue(Math.abs(ratio - 1.5F) < 0.01F, "Overclocked speed ratio " + ratio);
+		helper.assertTrue(((MiningDrillItem) fast.getItem()).energyPerBlock(fast) == 2 * JugcraftTools.DRILL_ENERGY_PER_BLOCK,
+				"Overclocked JE per block " + ((MiningDrillItem) fast.getItem()).energyPerBlock(fast));
+		helper.succeed();
+	}
+
+	// ------------------------------------------------------------------ advancements
+
+	/** The quest line loads: its first and last steps exist, and the rocket pack step leads back to the root. */
+	@GameTest
+	public void advancementTreeLoads(GameTestHelper helper) {
+		var advancements = helper.getLevel().getServer().getAdvancements();
+		for (String id : List.of("root", "bronze", "steel", "charging_station", "upgrade", "rocket_pack")) {
+			helper.assertTrue(advancements.get(Jugcraft.id(id)) != null, "Advancement jugcraft:" + id + " did not load");
+		}
+		var step = advancements.get(Jugcraft.id("rocket_pack"));
+		int depth = 0;
+		while (step != null && step.value().parent().isPresent() && depth < 20) {
+			step = advancements.get(step.value().parent().get());
+			depth++;
+		}
+		helper.assertTrue(step != null && step.id().equals(Jugcraft.id("root")), "The rocket pack step does not lead back to the root");
 		helper.succeed();
 	}
 
