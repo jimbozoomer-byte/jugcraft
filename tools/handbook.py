@@ -8,7 +8,7 @@ Format: {"chapters": [{"title", "icon", "pages": [{"title", "icon", "text": [par
 "craft": {"grid": [9 item ids or null], "result", "count"}, "recipes": [{"in": [[id, count]], "out": [id, count]}]}]}]}
 """
 from materials import COMPONENTS, METALS, MINERALS, ingot_id, ore_ids
-from machines import (CRAFTING, MACHINES, STATS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, POWERED_TOOLS, TOOL_BLOCKS,
+from machines import (CRAFTING, MACHINES, STATS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES,
                       UPGRADES, BYPRODUCTS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, machine_recipes)
 
 MOD = "jugcraft"
@@ -74,6 +74,8 @@ ABOUT = {
                    "it fires. On a dedicated server, set allow-flight=true or long hovers get you kicked.",
     "charging_station": "Two blocks tall. Hang a drill, chainsaw or rocket pack on its cradle and it fills it from "
                         "cables, 512 JE a tick; take it back with an empty hand. Its lamp lights while it charges.",
+    **{module: f"{about}. Fit it by using it on a charging station holding the tool; it is used up and stays in "
+                 "the tool." for module, (_, _, about) in UPGRADE_MODULES.items()},
     "conveyor": "Carries items the way you faced when placing it, 2.5 blocks a second, while rotation drives it. A shaft, "
                 "gearbox or motor on any side drives every conveyor joined to it, for 1 KE per conveyor per tick. Pipes, "
                 "hoppers and machines load it, and so do items dropped on it; at the end items go into the conveyor or "
@@ -181,6 +183,21 @@ def power_line(block):
     return f"Holds {stats['capacity']:,} JE; {stats['io_per_tick']} JE/t in and out."
 
 
+def milestone_pages():
+    """The advancement quest line (tools/advancements.py), in order, a few steps to a page."""
+    from advancements import TREE
+    steps = [(title, description, items if isinstance(items, str) else items[0])
+             for _, (_, items, title, description, _) in TREE.items()]
+    pages = []
+    for start in range(0, len(steps), 5):
+        chunk = steps[start:start + 5]
+        pages.append({"title": "Milestones" if start == 0 else f"Milestones ({start // 5 + 1})",
+                      "icon": f"{MOD}:{chunk[0][2]}",
+                      "text": (["Your advancements (key L) track these steps."] if start == 0 else [])
+                      + [f"{title}: {description}." for title, description, _ in chunk]})
+    return pages
+
+
 def block_page(block, display):
     page = {"title": display, "icon": f"{MOD}:{block}", "text": [ABOUT[block]]}
     if block in MACHINES:
@@ -222,7 +239,7 @@ def build():
                 "Furnace. Run cable from the generator to the furnace, or place them side by side.",
                 "Every machine holds its own charge, so it keeps working for a while after the power stops."],
              "craft": craft("machine_casing")},
-        ]},
+        ] + milestone_pages()},
         {"title": "Materials", "icon": f"{MOD}:bronze_ingot", "pages": [
             ores_page(),
             block_page("prospector", TOOLS["prospector"]),
@@ -257,7 +274,8 @@ def build():
         {"title": "Steel", "icon": f"{MOD}:steel_ingot", "pages":
             [machine_page(m) for m in ("coke_oven", "steel_foundry")]
             + [block_page(b, TOOL_BLOCKS[b]["display"]) for b in TOOL_BLOCKS]
-            + [block_page(t, POWERED_TOOLS[t]) for t in POWERED_TOOLS]},
+            + [block_page(t, POWERED_TOOLS[t]) for t in POWERED_TOOLS]
+            + [block_page(m, UPGRADE_MODULES[m][0]) for m in UPGRADE_MODULES]},
         {"title": "Fluids", "icon": f"{MOD}:fluid_tank", "pages":
             [block_page("bronze_fluid_pipe", PIPES["bronze_fluid_pipe"]["display"])]
             + [block_page(b, FLUID_BLOCKS[b]["display"]) for b in ("fluid_tank", "electric_pump")]},

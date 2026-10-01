@@ -19,6 +19,20 @@ No numbered release yet. Everything below is on `main`.
 - Also: composting, pig, chicken and parrot feed, `c:` crop, seed and food tags, and a new `agriculture` feature switch.
 - Original textures from `tools/crop_textures.py`. Twelve game tests, plus a client game test with screenshots of a corn maze, the fields and every growth stage.
 
+### #43 Advancements
+- A **Jugcraft** advancement tab: 22 steps from the first tin to the rocket pack, earned by having each item. Goals for steel, the steel foundry and the large steam engine; a challenge for the rocket pack.
+- The handbook's Getting Started chapter lists the steps on its Milestones pages.
+- A game test checks the tree loads; the data checker checks every step's items, title and parent.
+
+### #42 Tool upgrades and a 3D rocket pack
+- **Upgrade modules** for the powered tools, fitted at the charging station: Overclock, Range (5×5 drilling), Capacity, Silk Touch and Fortune.
+- The worn rocket pack is now a 3D model on the wearer's back.
+- The mining drill sits higher in first person.
+- Four game tests.
+
+### #41 Dieselpunk steel machines
+- The steel foundry, capacitor bank, steel tank, ore drill and high-pressure extractor now look dieselpunk: gunmetal and olive paint, hazard stripes, chrome, phosphor gauges and caged lamps, an exhaust stack on the foundry and a diesel motor on the drill. Same footprints and ports; looks only.
+
 ### #40 Powered tools (the first dieselpunk gear)
 - **Mining Drill:** a JE pickaxe and shovel, faster than netherite; modes for one block, 3×3 or a whole ore vein.
 - **Chainsaw:** a JE axe that also cuts leaves and fells whole trees.
