@@ -23,6 +23,8 @@ public final class PetroItems {
 	public static Item TITANIUM_SPONGE;
 	/** A lithium cell in an aluminum can: crafted from lithium carbonate, built into the lithium battery bank. */
 	public static Item LITHIUM_CELL;
+	/** Rare earths alloyed with iron in the alloy smelter: for the magnet dynamo and magnet motor. */
+	public static Item NEODYMIUM_MAGNET;
 
 	private PetroItems() {
 	}
@@ -36,6 +38,7 @@ public final class PetroItems {
 		FERTILIZER = JugcraftRegistry.item("fertilizer", FertilizerItem::new);
 		TITANIUM_SPONGE = JugcraftRegistry.item("titanium_sponge");
 		LITHIUM_CELL = JugcraftRegistry.item("lithium_cell");
+		NEODYMIUM_MAGNET = JugcraftRegistry.item("neodymium_magnet");
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(CRACKING_CATALYST);
@@ -46,6 +49,7 @@ public final class PetroItems {
 			output.accept(FERTILIZER);
 			output.accept(TITANIUM_SPONGE);
 			output.accept(LITHIUM_CELL);
+			output.accept(NEODYMIUM_MAGNET);
 		});
 	}
 }

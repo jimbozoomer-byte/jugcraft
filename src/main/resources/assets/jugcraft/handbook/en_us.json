@@ -119,7 +119,11 @@
           "title": "Milestones (8)",
           "icon": "jugcraft:fuel_cell",
           "text": [
-            "Clean Burn: Build a hydrogen fuel cell."
+            "Clean Burn: Build a hydrogen fuel cell.",
+            "Kroll Call: Chlorinate titanium and melt the sponge.",
+            "Power Wall: Build a lithium battery bank.",
+            "Strong Attraction: Make a neodymium magnet.",
+            "Lossless (Almost): Build a magnet dynamo or magnet motor."
           ]
         }
       ]
@@ -618,6 +622,50 @@
               "jugcraft:iron_plate"
             ],
             "result": "jugcraft:electric_motor",
+            "count": 1
+          }
+        },
+        {
+          "title": "Magnet Dynamo",
+          "icon": "jugcraft:magnet_dynamo",
+          "text": [
+            "A dynamo wound round rare-earth magnets: 512 KE/t into JE at 95%, against the copper dynamo's 128 at 75%. It pushes the JE into cables on every side."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:aluminum_plate",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:aluminum_plate",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:dynamo",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:aluminum_plate",
+              "jugcraft:aluminum_cable",
+              "jugcraft:aluminum_plate"
+            ],
+            "result": "jugcraft:magnet_dynamo",
+            "count": 1
+          }
+        },
+        {
+          "title": "Magnet Motor",
+          "icon": "jugcraft:magnet_motor",
+          "text": [
+            "An electric motor with rare-earth magnets: takes 1,024 JE/t and turns it into up to 384 KE/t at 95%. Paired with a magnet dynamo it still loses a tenth every round."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:aluminum_plate",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:aluminum_plate",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:electric_motor",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:aluminum_plate",
+              "jugcraft:aluminum_cable",
+              "jugcraft:aluminum_plate"
+            ],
+            "result": "jugcraft:magnet_motor",
             "count": 1
           }
         }
@@ -2310,7 +2358,8 @@
           "text": [
             "Dissolve ores in sulfuric acid in the chemical reactor: a lepidolite and 250 mB of acid give two lithium carbonate, a monazite two rare earth oxide.",
             "That is twice what the blast furnace gets.",
-            "Two lithium carbonate, four aluminum plates and a copper wire make two lithium cells."
+            "Two lithium carbonate, four aluminum plates and a copper wire make two lithium cells.",
+            "The alloy smelter melts a rare earth oxide with an iron ingot into a neodymium magnet, for the magnet dynamo and magnet motor."
           ]
         },
         {

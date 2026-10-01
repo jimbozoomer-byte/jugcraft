@@ -276,6 +276,8 @@ A second, mechanical power system measured in **KE** (kinetic energy) per tick. 
 | Belt Pulley | A shaft that can hold a belt | Carries rotation along its axis like a shaft, and to the pulley it is belted to. | planks, iron shaft |
 | Leather Belt | Links two pulleys | Use on one pulley, then another: same axis, level along it, up to 16 blocks apart. Breaking a pulley drops the belt. | leather, string |
 | Electric Motor | JE → KE at 75%, up to 96 KE/t | Takes JE from cables and drives the block it faces. | iron plates, copper wire, iron shaft, copper cable |
+| Magnet Dynamo | KE → JE at 95%, 512/t | The dynamo with rare-earth magnets; pushes JE into cables on every side. Cyan-banded. | aluminum plates, 4 neodymium magnets, dynamo, aluminum cable |
+| Magnet Motor | JE → KE at 95%, up to 384 KE/t | Takes up to 1,024 JE/t and drives the block it faces. With a magnet dynamo it still loses a tenth each round. | aluminum plates, 4 neodymium magnets, electric motor, aluminum cable |
 | Diesel Engine (2×2×3) | Up to 512 KE/t out of the back of its upper right back block | Burns diesel or heavy fuel oil ([Oil](#oil)), only for what the line takes. | steel plates, plastic sheets, steel gears, casing |
 
 ![Kinetic blocks](images/kinetic.png)
@@ -405,6 +407,7 @@ Salt, sulfur, phosphate and bauxite get their real reactions ([feature record](f
 | Lithium Cell, Lithium Battery Bank | Cells of lithium carbonate in aluminum cans; a 3×2×1 electric-look battery | 2 lithium carbonate + 4 aluminum plates + copper wire → 2 cells; the bank holds 32,000,000 JE, 16,384 JE/t out of its front (see Storage) | cells: as left; bank: 4 titanium ingots, 4 cells, capacitor bank |
 | Alumina | Bauxite digested in lye | 1 bauxite + 250 mB lye → 2 alumina (chemical reactor); 2 alumina + 1 coal coke → 2 aluminum ingots (electrolytic cell): two ingots per bauxite, twice the arc furnace | – |
 | Fuel Cell | One block, electric look; hydrogen → JE | 128 JE/t, 1 mB hydrogen a tick (128 JE/mB); 8-bucket tank | 4 aluminum plates, 2 aluminum cables, 2 steel plates, advanced circuit, tinplate tank |
+| Neodymium Magnet | Rare earths alloyed with iron | 1 rare earth oxide + 1 iron ingot → 1 (alloy smelter, 200 ticks) | – |
 | Fertilizer | Superphosphate: two doses of bone meal on every crop in a 5×5 area | 2 phosphate + 250 mB sulfuric acid → 4 (chemical reactor) | – |
 | Chemical Reactor | 2×2×2 acid plant | 2 sulfur dust + 1,000 mB water → 1,000 mB sulfuric acid; 100 ticks at 96 JE/t | 4 steel plates, glass, 2 tinplate tanks, casing, lead ingot |
 

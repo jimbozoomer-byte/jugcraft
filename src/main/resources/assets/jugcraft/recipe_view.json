@@ -689,6 +689,24 @@
           ],
           "extra": [],
           "ticks": 120
+        },
+        {
+          "in": [
+            [
+              "jugcraft:rare_earth_oxide",
+              1
+            ],
+            [
+              "minecraft:iron_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:neodymium_magnet",
+            1
+          ],
+          "extra": [],
+          "ticks": 200
         }
       ]
     },

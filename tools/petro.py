@@ -77,6 +77,8 @@ ITEMS = {
     "titanium_sponge": "Titanium Sponge",
     # Lithium cells (batch 6): crafted from lithium carbonate, built into the lithium battery bank.
     "lithium_cell": "Lithium Cell",
+    # Neodymium magnets (batch 6): the alloy smelter makes them; the magnet dynamo and motor use them.
+    "neodymium_magnet": "Neodymium Magnet",
 }
 
 

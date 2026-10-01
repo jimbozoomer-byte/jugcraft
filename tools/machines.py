@@ -118,6 +118,9 @@ KINETIC_BLOCKS = {
     "belt_pulley": {"display": "Belt Pulley", "states": "axis"},
     # JE -> KE at 75%; its shaft points the way the player looked when placing it.
     "electric_motor": {"display": "Electric Motor", "states": "facing"},
+    # Rare-earth magnet versions (batch 6): faster and far less lossy.
+    "magnet_dynamo": {"display": "Magnet Dynamo", "states": "horizontal"},
+    "magnet_motor": {"display": "Magnet Motor", "states": "facing"},
     # Item conveyors (logistics/ConveyorBlock): driven by rotation, facing the way items travel.
     "conveyor": {"display": "Conveyor", "states": "horizontal"},
     "conveyor_splitter": {"display": "Conveyor Splitter", "states": "horizontal"},
@@ -386,6 +389,10 @@ CRAFTING = {
     "belt": (["LSL"], {"L": "minecraft:leather", "S": "minecraft:string"}, 1),
     "electric_motor": (["PWP", "WSW", "PCP"], {"P": "#c:plates/iron", "W": "#c:wires/copper", "S": "jugcraft:iron_shaft",
                                              "C": "jugcraft:copper_cable"}, 1),
+    "magnet_dynamo": (["PMP", "MDM", "PWP"], {"P": "#c:plates/aluminum", "M": "jugcraft:neodymium_magnet",
+                                              "D": "jugcraft:dynamo", "W": "jugcraft:aluminum_cable"}, 1),
+    "magnet_motor": (["PMP", "MEM", "PWP"], {"P": "#c:plates/aluminum", "M": "jugcraft:neodymium_magnet",
+                                             "E": "jugcraft:electric_motor", "W": "jugcraft:aluminum_cable"}, 1),
     # Conveyors: leather belts over iron plates and a shaft; the splitter adds bronze gears and a brass plate.
     "conveyor": (["BBB", "PSP"], {"B": "jugcraft:belt", "P": "#c:plates/iron", "S": "jugcraft:iron_shaft"}, 6),
     "conveyor_slope": ([" C", "CP"], {"C": "jugcraft:conveyor", "P": "#c:plates/iron"}, 2),
@@ -543,6 +550,9 @@ ALLOY_SMELTER = [
      "count": 3, "ticks": 240, "features": [FEATURE, "nickel"]},
     {"inputs": [["jugcraft:tin_ingot", 1], ["jugcraft:lead_ingot", 1]], "output": "jugcraft:solder_ingot",
      "count": 2, "ticks": 120, "features": [FEATURE, "tin", "lead"]},
+    # Batch 6: rare earths alloyed with iron (and boron, left out) make neodymium magnets.
+    {"inputs": [["jugcraft:rare_earth_oxide", 1], ["minecraft:iron_ingot", 1]], "output": "jugcraft:neodymium_magnet",
+     "count": 1, "ticks": 200, "features": [FEATURE, "rare_earths"]},
 ]
 
 

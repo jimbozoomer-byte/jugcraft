@@ -272,7 +272,28 @@ def lithium_cell():
     return img
 
 
+def neodymium_magnet():
+    """A neodymium magnet: a nickel-plated horseshoe with a red north pole and a blue-grey south pole."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    plate = [(120, 126, 136), (176, 182, 190), (230, 234, 240)]
+    for y in range(2, 15):
+        for x in range(2, 14):
+            d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+            arch = y <= 8 and 2.5 <= d <= 5.6
+            leg = y > 8 and (3 <= x <= 5 or 10 <= x <= 12)
+            if not (arch or leg):
+                continue
+            c = plate[2] if x in (3, 10) or d < 3.3 else plate[0] if x in (5, 12) or d > 5 else plate[1]
+            if y >= 12:
+                c = (200, 52, 48) if x <= 5 else (70, 92, 150)
+                if y == 12:
+                    c = (230, 96, 88) if x <= 5 else (110, 132, 190)
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
 def draw_all(save, save_animation):
+    save(neodymium_magnet(), "item", "neodymium_magnet")
     save(lithium_cell(), "item", "lithium_cell")
     save(titanium_sponge(), "item", "titanium_sponge")
     save(fertilizer(), "item", "fertilizer")

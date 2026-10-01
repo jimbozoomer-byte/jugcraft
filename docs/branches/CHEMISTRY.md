@@ -97,12 +97,12 @@ After the oil line (owner request, 1 October 2026: "start the next batch immedia
 
 ### Batch 6: advanced materials
 
-Owner request, 1 October 2026: "start the next batch with 1 and 2" (chlorine and titanium; batteries and rare earths).
+Owner request, 1 October 2026: "start the next batch with 1 and 2" (chlorine and titanium; batteries and rare earths). Status: implemented in #54; see [industrial-chemistry.md](../features/industrial-chemistry.md).
 
 | # | Commit | What it adds |
 | --- | --- | --- |
 | 26 | Titanium ore | Titanium: a new metal, mined as rutile-bearing ore deep underground. No furnace smelts it. |
-| 27 | The Kroll process | Raw titanium + coke + chlorine → titanium sponge (chemical reactor) → ingots in the arc furnace: chlorine's first real job. Titanium plates in high-tech recipes. |
+| 27 | The Kroll process | Raw titanium + coke + chlorine → titanium sponge (chemical reactor) → ingots in the arc furnace: chlorine's first real job. Titanium goes into the lithium battery bank. |
 | 28 | Lithium and rare earths | Lepidolite and monazite leached in sulfuric acid: twice what the blast-furnace stand-ins give. |
 | 29 | Lithium battery bank | Lithium cells and a big electric-look battery bank, far above the capacitor bank. |
 | 30 | Rare-earth magnets | Neodymium magnets; a magnet dynamo and a magnet motor that lose far less than the copper-wound ones; docs and advancements. |

@@ -1,6 +1,6 @@
 # Industrial chemistry: electrochemistry and acids
 
-Status: implemented (batch 5 of the Chemistry branch, #52)
+Status: implemented (batch 5 of the Chemistry branch, #52; batch 6, advanced materials, #54)
 Proposal issue: owner request, 1 October 2026 ("merge it and start the next batch immediately"); plan in [CHEMISTRY.md](../branches/CHEMISTRY.md#industrial-chemistry-electrochemistry-and-acids)
 Owner: jimbozoomer-byte
 Target milestone and tier: steel tier, after the oil line
@@ -66,12 +66,20 @@ Salt, sulfur, phosphate and bauxite have been in the world since the first ores,
 - One deep so every block's front is a socket: power never pushes from one of its blocks into another.
 - It only stores power; it makes none.
 
+### Rare-earth magnets (batch 6, commit 30)
+- **Neodymium magnet** (an item): **1 rare earth oxide + 1 iron ingot → 1**, in the alloy smelter (200 ticks).
+- **Magnet dynamo**: KE → JE at **95%**, up to **512 KE/t** (the copper dynamo: 75%, 128). 32,000 JE buffer. Pushes JE into cables on every side.
+- **Magnet motor**: JE → KE at **95%**, up to **384 KE/t** out of its shaft (the electric motor: 75%, 96), taking up to 1,024 JE/t. 32,000 JE buffer.
+- Both are the copper-wound blocks with magnet stats (`DynamoBlockEntity.MAGNET`, `ElectricMotorBlockEntity.MAGNET`), in the electric look with a ring of nickel-plated magnet segments between **cyan** bands: cyan is the colour kept for the higher-tech tiers.
+- Recipes: aluminum plates, 4 neodymium magnets, the copper-wound dynamo or motor, and an aluminum cable.
+- A magnet motor driving a magnet dynamo returns 90.25% of the JE: still a loss every round. Through a magnet dynamo, the diesel engine gives 243 JE per mB of diesel, still under the diesel generator's 256.
+
 ### Advancements
-Split Decision (electrolytic cell), Oil of Vitriol (sulfuric acid), Green Revolution (fertilizer), The Bayer Way (alumina) and Clean Burn (fuel cell), under Forged in Coke.
+Split Decision (electrolytic cell), Oil of Vitriol (sulfuric acid), Green Revolution (fertilizer), The Bayer Way (alumina) and Clean Burn (fuel cell), under Forged in Coke. Batch 6 adds Kroll Call (titanium), Power Wall (lithium battery bank), Strong Attraction (neodymium magnet) and Lossless (Almost) (a magnet dynamo or motor).
 
 ## Connections
 - Existing input producer: rock salt ore and the flowback treatment unit (salt); crushed sulfur (sulfur dust); water pumps.
-- Existing output consumer: lye goes to bauxite digestion, sulfuric acid to fertilizer, fertilizer to vanilla crops, hydrogen to the fuel cell (commit 25), chlorine to later chemistry.
+- Existing output consumer: lye goes to bauxite digestion, sulfuric acid to fertilizer and leaching, fertilizer to vanilla crops, hydrogen to the fuel cell, chlorine to the Kroll process (titanium), lithium carbonate to lithium cells, rare earth oxide to neodymium magnets.
 - Technology connection: the oil line's fluid machines and the chemical mixer.
 - Magic connection: none.
 - Reachable entry path: salt is mined from the start; the mixer and cell need only steel-tier parts. No circular unlock.
@@ -81,6 +89,8 @@ Split Decision (electrolytic cell), Oil of Vitriol (sulfuric acid), Green Revolu
 ## Balance and automation
 - Volume is conserved: a bucket of brine gives 1,000 mB of products in all.
 - Salt comes only from mining and fracking flowback; the cell costs 51,200 JE a bucket of brine. Its 250 mB of hydrogen give 32,000 JE in the fuel cell, so electrolysis is never a power loop.
+- Magnets: the magnet motor and dynamo are 95% each way, so a pair loses 9.75% a round (game test).
+- Storage: the lithium battery bank only stores power.
 - Metal: the fluid recipe audit (`check_mod_data`) holds every recipe to the metal its items carry.
 
 ## Multiplayer and persistence
@@ -91,10 +101,10 @@ No new dependencies. Textures and models are original (`tools/petro_textures.py`
 
 ## Verification
 - `tools/check_mod_data.py` audits the new fluids, gases and recipes like the oil line's.
-- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` `bayerRouteMakesAluminum`, `reactorMakesFertilizer`, `fertilizerGrowsTheCropsAround` `fuelCellBurnsHydrogen` `reactorMakesTitaniumSponge` and `reactorLeachesLithium` (PetroGameTests); `lithiumBatteryBankOutputsFromItsFront` (JugcraftGameTests).
+- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` `bayerRouteMakesAluminum`, `reactorMakesFertilizer`, `fertilizerGrowsTheCropsAround` `fuelCellBurnsHydrogen` `reactorMakesTitaniumSponge` and `reactorLeachesLithium` (PetroGameTests); `lithiumBatteryBankOutputsFromItsFront` and `magnetMotorAndDynamoLoopLosesPower` (JugcraftGameTests).
 
 ## World and event applicability
-Not applicable: no worldgen, mobs or dimensions.
+Titanium ore generates in the Overworld (Y −64 to −8), behind the `titanium.enabled` switch. No mobs or dimensions.
 
 ## Rollout and open questions
 - Chlorine's consumer is the Kroll process (titanium); PVC and bleach remain candidates.

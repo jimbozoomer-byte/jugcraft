@@ -764,6 +764,30 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/**
+	 * A magnet motor driving a magnet dynamo, which feeds the motor back: both run at the magnet rates, but at 95%
+	 * each way the pair loses power every round and never gains any.
+	 */
+	@GameTest(maxTicks = 200)
+	public void magnetMotorAndDynamoLoopLosesPower(GameTestHelper helper) {
+		BlockPos motorPos = new BlockPos(1, 1, 2);
+		helper.setBlock(motorPos, JugcraftKinetics.MAGNET_MOTOR.defaultBlockState().setValue(ElectricMotorBlock.FACING, Direction.EAST));
+		helper.setBlock(motorPos.east(), JugcraftKinetics.MAGNET_DYNAMO);
+		ElectricMotorBlockEntity motor = helper.getBlockEntity(motorPos, ElectricMotorBlockEntity.class);
+		DynamoBlockEntity dynamo = helper.getBlockEntity(motorPos.east(), DynamoBlockEntity.class);
+		helper.assertTrue(motor.stats() == ElectricMotorBlockEntity.MAGNET, "The magnet motor has copper stats");
+		helper.assertTrue(dynamo.stats() == DynamoBlockEntity.MAGNET, "The magnet dynamo has copper stats");
+		long start = ElectricMotorBlockEntity.MAGNET.capacity();
+		motor.energy().setAmount(start);
+		helper.runAfterDelay(100, () -> {
+			long total = motor.energy().getAmount() + dynamo.energy().getAmount();
+			helper.assertTrue(total < start, "The pair holds " + total + " JE of " + start);
+			// At least 100 ticks of the motor's full 384 KE/t went round, losing about a tenth of each pass.
+			helper.assertTrue(start - total >= 100L * 384 * 5 / 100, "Only " + (start - total) + " JE was lost");
+			helper.succeed();
+		});
+	}
+
 	/** A belt between two pulleys carries a hand crank's rotation to a dynamo under the other pulley. */
 	@GameTest(maxTicks = 200)
 	public void beltCarriesRotation(GameTestHelper helper) {

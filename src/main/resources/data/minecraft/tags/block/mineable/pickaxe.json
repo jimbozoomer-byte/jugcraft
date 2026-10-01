@@ -118,6 +118,8 @@
     "jugcraft:dynamo",
     "jugcraft:belt_pulley",
     "jugcraft:electric_motor",
+    "jugcraft:magnet_dynamo",
+    "jugcraft:magnet_motor",
     "jugcraft:conveyor",
     "jugcraft:conveyor_splitter",
     "jugcraft:charging_station",
