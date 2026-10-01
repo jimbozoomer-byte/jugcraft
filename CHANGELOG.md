@@ -13,7 +13,7 @@ No numbered release yet. Everything below is on `main`.
 - **Soap** from lye and rotten flesh; a bar washes off every status effect.
 - Two advancements, a handbook page and game tests.
 
-### Unmerged: Rubber and polymers, batch 14
+### #69 Rubber and polymers, batch 14
 - **Butadiene** from naphtha (chemical reactor) and **synthetic rubber** from butadiene (polymerization reactor).
 - **Gaskets** (rubber + steel plate); rubber belts; gasketed steel pipe, four for two plates.
 - An advancement, a handbook page and a game test.
