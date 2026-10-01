@@ -1,6 +1,6 @@
 # Agriculture branch
 
-Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md) and [../features/pumpkin-carving.md](../features/pumpkin-carving.md) for the implemented slices and their test evidence.
+Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife) and the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md) and [../features/halloween-harvest.md](../features/halloween-harvest.md) for the implemented slices and their test evidence.
 
 Agriculture is Jugcraft's third starting branch, alongside technology and magic ([DESIGN.md](../DESIGN.md)). A farmer can begin on day one with a hoe and whatever grows nearby, and never needs a machine or a spell. Industrial farming (powered harvesters, planters, sprinklers, crop processors) comes later and belongs to the engineering branch; see [Boundaries](#boundaries).
 
@@ -56,7 +56,7 @@ Every crop has two independent entry points, so none is locked behind a biome, a
 | Wild Sweet Potato | savanna, jungle | A warm, tropical vine |
 | Wild Flax | plains, flower-rich biomes | A meadow flower |
 
-2. **Short grass.** Breaking short grass has a 12.5 % chance to drop one Jugcraft seed, as often as vanilla wheat seeds, chosen evenly from every Jugcraft crop (eighteen so far). Adding crops never makes grass drop more seeds overall. This works in any biome and in worlds created before this feature.
+2. **Short grass.** Breaking short grass has a 12.5 % chance to drop one Jugcraft seed, as often as vanilla wheat seeds, chosen evenly from every Jugcraft crop (twenty-four so far). Adding crops never makes grass drop more seeds overall. This works in any biome and in worlds created before this feature.
 
 ### Systems
 
@@ -281,6 +281,39 @@ Use a **torch** on a hand-carved pumpkin to put it inside. It glows more the mor
 
 The server checks every carving before anything changes (the knife in hand, reach, permission to build there, and that the carving only goes deeper). A carved pumpkin records who carved it last, for server operators. A server that wants no free drawing can set `carving.free_draw=false` in `config/jugcraft.properties`; then only the starter faces can be carved.
 
+## What exists now: the Halloween harvest
+
+Ten additions for a fall pumpkin patch, all permanent. Details, numbers and test evidence: [../features/halloween-harvest.md](../features/halloween-harvest.md).
+
+<!-- halloween screenshots -->
+
+### Giant pumpkins
+
+Plant **Giant Pumpkin Seeds** on farmland. The vine grows like a pumpkin stem (1.5× slower), then sets **one** small fruit beside it. While the vine holds it, the fruit grows: faster on moist farmland, faster still when watered from a **Gourd Canteen**, and bone meal feeds it too. It swells to **2×2×2**, then **3×3×3**, away from its vine, if there is room on ground fruit can lie on. Full grown, it weighs 100–120 kg and keeps putting on weight, up to 1000 kg, until it is carved.
+
+Break any block of it to harvest the whole pumpkin: 9 pumpkins and 1–3 giant seeds when full grown. Pistons can't move it.
+
+Every side of a full-grown giant carves with the Carving Knife as **one 48×48 face**, three times as fine as a pumpkin's; the screen shrinks its cells and offers bigger brushes, and the starter faces come blown up. A torch inside lights every block of it.
+
+Where the seeds come from: the first cut into any pumpkin **scoops** it, and sometimes a giant seed comes out with the **Pumpkin Guts** (they cook into Pumpkin Soup). Short grass drops them too.
+
+### The weigh-off
+
+Put a **Harvest Scale** beside a full-grown giant pumpkin and use it. It weighs the pumpkin and keeps the three heaviest it has weighed on its board. The first time a pumpkin places, whoever weighed it wins a **First, Second or Third Prize Ribbon**. A comparator reads the last weight.
+
+### Fall decorations and treats
+
+| Addition | How to get it | What it does |
+| --- | --- | --- |
+| **Pumpkin Stencil** | Use a Blank Stencil (two paper) on a carved side | Traces the design; hold it in your other hand while carving to press it in, on any pumpkin or a giant |
+| **White, Jarrahdale and Cinderella pumpkins** | Wild in birch forests and snowy places, savannas and windswept hills, plains and flower forests; grass drops their seeds | Grow from stems; carve like pumpkins into their own hand-carved blocks; bake into pumpkin pie |
+| **Scarecrow** | Wool over hay between sticks | Two blocks tall; dye its flannel shirt any colour; put any pumpkin on top for a head |
+| **Ornamental corn** | Wild Corn sometimes drops its kernels; grass drops them | Grows like corn; its multicoloured ears tie into an **Ornamental Corn Bundle** for walls and door frames |
+| **Corn Shock** | Six Corn Stalks (from breaking any corn 3 blocks tall) and string | A two-block stook for porches |
+| **Caramel, Caramel Apple, Popcorn Ball** | Smelt sugar; add an apple and a stick, or two popcorn | Treats (2, 6 and 5 hunger); the apple's stick comes back |
+| **Bottle Gourd** | Wild in jungles and savannas; grass drops its seeds | Dry it in a furnace; with string it makes a **Gourd Birdhouse** (stands or hangs), with leather a **Gourd Canteen** (3 sips of water for giant pumpkins, farmland, fire or a cauldron) |
+| **Mums** | Wild patches in flower forests, meadows and forests | Yellow, orange, red and purple flowers for pots, dye and suspicious stew |
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
@@ -308,8 +341,10 @@ Hand tools and farmstead blocks, made from wood, stone and early metals. None ne
 | Seed Pouch | Holds several seed types; right-click plants a 3×3 patch of farmland from it | Discovery |
 | **Trellis (wood)** ✅ | Supports climbing crops (tomatoes now; grapes, hops and pole beans later); also a garden decoration | Discovery |
 | **Carving Knife** ✅ | Carves any face into the sides of a pumpkin, a pixel at a time; see [Pumpkin Carving](#what-exists-now-pumpkin-carving) | Discovery |
-| Scarecrow | Decoration for fields and Halloween, with a carved pumpkin for a head; later keeps crop-eating birds away once those creatures exist | Discovery |
-| Corn Shock and Bushel Basket | Decoration and small produce storage for fall porches and markets | Discovery |
+| **Scarecrow** ✅ | Decoration for fields and Halloween, in a flannel shirt you dye, with any pumpkin for a head; see [the Halloween harvest](#what-exists-now-the-halloween-harvest). Later keeps crop-eating birds away once those creatures exist | Discovery |
+| **Corn Shock** ✅ | A stook of corn stalks for fall porches and markets (decoration) | Discovery |
+| **Harvest Scale** ✅ | Weighs giant pumpkins, keeps a board of the three heaviest and gives prize ribbons | Discovery |
+| Bushel Basket | Small produce storage for markets | Discovery |
 | Compost Bin | Turns scraps into Compost, an organic fertilizer that makes farmland *fertile* for a while (faster growth); the no-chemistry route | Discovery |
 | Quern (hand mill) | Grinds corn into cornmeal and grain into flour (cornbread, pancakes) | Discovery |
 | Drying Rack | Retts flax into linen fibre, dries herbs and fruit, makes jerky | Workshops |
@@ -335,7 +370,7 @@ The farmer's goods are useful elsewhere; nothing here *requires* another branch.
 - **Reachable from day one.** Every crop has a wild source and a grass-drop source. No crop needs another branch, a rare biome or a seasonal event to start.
 - **No free loops.** Crops multiply through time and light, as in vanilla; recipes only convert downhill (corn → kernels, flax → string). `tools/check_mod_data.py` fails if agriculture recipes ever form a loop.
 - **No chores.** Farmland under crops does not decay; crops do not die of neglect; fertilizer and irrigation speed things up but are never required.
-- **Bounded server work.** Growth runs on vanilla random ticks. A tall crop ticks only in its bottom block and reads at most 17 block states per tick. A sickle touches at most 75 blocks per use (5×5×3). A Cooking Pot reads one block (its heat source) per tick and looks up its recipe only when its slots change. A gourd stem reads the same 17 block states plus 2 when it places a gourd; a cranberry bush reads the block above it; chestnut leaves read the block below them, and only leaves a tree grew tick at all (they tick all the time to grow burs, where vanilla leaves tick only while decaying). Carved pumpkins never tick; a carving checks its 256 pixels once. Nothing scans the world.
+- **Bounded server work.** Growth runs on vanilla random ticks. A tall crop ticks only in its bottom block and reads at most 17 block states per tick. A sickle touches at most 75 blocks per use (5×5×3). A Cooking Pot reads one block (its heat source) per tick and looks up its recipe only when its slots change. A gourd stem reads the same 17 block states plus 2 when it places a gourd; a cranberry bush reads the block above it; chestnut leaves read the block below them, and only leaves a tree grew tick at all (they tick all the time to grow burs, where vanilla leaves tick only while decaying). Carved pumpkins never tick; a carving checks its 256 pixels once (2,304 on a giant). Only a giant pumpkin's corner block ticks, reading at most 3 blocks, or 54 when it grows a size; breaking one removes at most 27 blocks. The Harvest Scale reads 5 neighbours when used. Nothing scans the world.
 - **One source of truth.** IDs, heights, yields, foods and biomes live in [`tools/agriculture.py`](../../tools/agriculture.py); the Java must match it, and the checker compares them.
 - **Stable IDs.** Crop blocks keep their IDs after release. The `agriculture` switch in `config/jugcraft.properties` turns off recipes, wild plants in new chunks and grass drops, but never removes registered blocks or items, so planted fields survive.
 

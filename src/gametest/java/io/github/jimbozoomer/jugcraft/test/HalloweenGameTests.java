@@ -29,8 +29,10 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -389,7 +391,9 @@ public class HalloweenGameTests {
 				&& upper.is(block("scarecrow")) && upper.getValue(TallDecorationBlock.HALF) == DoubleBlockHalf.UPPER
 				&& upper.getValue(ScarecrowBlock.SHIRT) == ScarecrowBlock.DEFAULT_SHIRT, "Expected a two-block scarecrow: " + lower + " / " + upper);
 
-		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BLUE_DYE, 2));
+		Item blueDye = BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("minecraft", "blue_dye"));
+		helper.assertTrue(ScarecrowBlock.dyeColor(new ItemStack(blueDye)) == DyeColor.BLUE, "Blue dye should be known as blue");
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(blueDye, 2));
 		helper.useBlock(ground.above(2), player, hit(helper, ground.above(2), Direction.NORTH));
 		helper.assertTrue(helper.getBlockState(ground.above()).getValue(ScarecrowBlock.SHIRT) == DyeColor.BLUE
 				&& helper.getBlockState(ground.above(2)).getValue(ScarecrowBlock.SHIRT) == DyeColor.BLUE, "Both halves wear the blue shirt");

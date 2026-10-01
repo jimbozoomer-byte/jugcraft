@@ -8,7 +8,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 
 > **Status.** Everything here compiles and loads in CI. Where a feature has an automated game test, that test passes on a headless server. Nothing has been play-tested in a client or on a dedicated server with two players yet.
 >
-> This document describes `main` after PRs #4–#36 (the conveyors and powered tools of #38 and #40 are not described here yet), plus the Agriculture branch's Fall Harvest, Kitchen Garden, Festival Crops and pumpkin carving. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
+> This document describes `main` after PRs #4–#36 (the conveyors and powered tools of #38 and #40 are not described here yet), plus the Agriculture branch's Fall Harvest, Kitchen Garden, Festival Crops, pumpkin carving and Halloween harvest. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
 
 ## Quick facts
 
@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 331 items/blocks under `jugcraft:` (the checker counts them) |
+| Registered IDs | 383 items/blocks under `jugcraft:` (the checker counts them) |
 
 ## Build, generate, check
 
@@ -139,7 +139,10 @@ The Agriculture branch ([branches/AGRICULTURE.md](branches/AGRICULTURE.md)). Eve
 | Bog crop | `cranberry_bush` | `CranberryBushBlock` | `age` 0–3; stands in a water source one deep over `jugcraft:bog_soil`; holds its water like seagrass; picked when ripe |
 | Chestnut tree | `chestnut_sapling`, `chestnut_leaves`; wood: `chestnut_log`, `chestnut_wood`, `stripped_chestnut_log`, `stripped_chestnut_wood`, `chestnut_planks`, `chestnut_stairs`, `chestnut_slab`, `chestnut_fence`, `chestnut_fence_gate` | vanilla `SaplingBlock` with `JugcraftAgriculture.CHESTNUT_GROWER`; `ChestnutLeavesBlock` (`fruit` 0–2); `StrippableLogBlock` | tree: `worldgen/feature/chestnut.json`; wood in vanilla wood tags and `jugcraft:chestnut_logs`; fuel and flammability like oak |
 | Decorations | `turnip_lantern` | `TurnipLanternBlock` | light 13, faces the player |
-| Carving | `hand_carved_pumpkin` (block with item); `carving_knife` | `CarvedPumpkinBlock` + `CarvedPumpkinBlockEntity`; `CarvingKnifeItem` | four carved sides (`PumpkinCarving`); `facing`, `lit`, `glow` 0–15; light only with a torch inside; data component `jugcraft:carving` |
+| Carving | `hand_carved_pumpkin`, `hand_carved_white_pumpkin`, `hand_carved_jarrahdale_pumpkin`, `hand_carved_cinderella_pumpkin` (blocks with items); `carving_knife`; `blank_stencil`, `pumpkin_stencil`; `pumpkin_guts` | `CarvedPumpkinBlock` + `CarvedPumpkinBlockEntity` (one block entity type for all four); `CarvingKnifeItem`; `BlankStencilItem`, `PumpkinStencilItem` | four carved sides (`PumpkinCarving`); `facing`, `lit`, `glow` 0–15; light only with a torch inside; data components `jugcraft:carving`, `jugcraft:stencil`; loot `carve/<pumpkin>` and `gameplay/scoop_pumpkin` |
+| Giant pumpkin | `giant_pumpkin` (no item), `giant_pumpkin_vine`, `attached_giant_pumpkin_vine`; `giant_pumpkin_seeds` | `GiantPumpkinBlock` (`size` 1–3, `part` 0–26, `light` 0–15) + `GiantPumpkinBlockEntity` on part 0 only; `GiantPumpkinVineBlock`, `AttachedGiantPumpkinVineBlock` | growth points, weight, watering, four 48×48 faces (`CarvingFace`), lit; pushes `IMMOVEABLE` |
+| Harvest Scale | `harvest_scale` (block with item); `first_prize_ribbon`, `second_prize_ribbon`, `third_prize_ribbon` | `HarvestScaleBlock` + `HarvestScaleBlockEntity` | board of 3, ribbons once per pumpkin, comparator output |
+| Fall decorations | `scarecrow`, `corn_shock`, `ornamental_corn_bundle`, `gourd_birdhouse` (blocks with items); `gourd_canteen`; `yellow_mum`, `orange_mum`, `red_mum`, `purple_mum` and their `potted_` forms | `ScarecrowBlock` (`shirt`: 16 dye colours) and corn shock: `TallDecorationBlock` (2 tall); `WallDecorationBlock`; vanilla `LanternBlock`, `FlowerBlock`, `FlowerPotBlock`; `GourdCanteenItem` | data component `jugcraft:canteen_water` (0–3) |
 | Wild plants | `wild_corn`, `wild_sunflower`, `wild_beans`, `wild_sweet_potato`, `wild_flax`, `wild_tomato`, `wild_pepper`, `wild_onion`, `wild_garlic`, `wild_cabbage`, `wild_oats`, `wild_barley`, `wild_turnip` | `WildCropBlock` | patches on grass (`worldgen/placed_feature/patch_wild_*`); shears take the plant. Gourds, ripe cranberry bushes and chestnut trees also generate as themselves (`patch_<gourd>`, `patch_cranberry_bush`, `patch_chestnut_tree`) |
 | Seeds (place the crop) | `corn_kernels`, `sunflower_seeds`, `beans`, `sweet_potato`, `flax_seeds`, `pepper_seeds`, `onion`, `garlic`, `cabbage_seeds`, `oat_seeds`, `barley_seeds`, `butternut_squash_seeds`, `acorn_squash_seeds`, `warty_gourd_seeds`, `turnip`, `cranberries` (into shallow water), `chestnut` (plants the sapling); `tomato_seeds` | `BlockItem`; `TrellisSeedItem` (plants on a trellis) | `c:seeds/*`, and animal food tags |
 | Produce and food | `corn`, `roasted_corn`, `popcorn`, `roasted_sunflower_seeds`, `baked_sweet_potato`, `flax`, `three_sisters_stew`, `tomato`, `pepper`, `cabbage`, `oats`, `barley`, `barley_bread`, `sauerkraut`, `garden_salad`, `tomato_soup`, `onion_soup`, `vegetable_soup`, `mushroom_barley_soup`, `oat_porridge`, `chili`, `cabbage_rolls`, `roasted_chestnuts`, `baked_acorn_squash`, `squash_pie`, `candy_corn`, `butternut_squash_soup`, `harvest_stew`, `cranberry_sauce`, `roasted_pumpkin_seeds` | plain items with food components | `c:crops/*`, `c:foods/*` |
@@ -262,6 +265,8 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - **Design:** `PumpkinCarving` is an immutable design of four 16×16 faces (front, then clockwise seen from above: `faceIndex(facing, side)` and `side(facing, face)`), each pixel `SKIN`, `SHAVED` or `CUT`, a face row being one int of 2-bit pixels. `glow()` gives the light with a torch inside. `CODEC` saves it as an int array; equal designs are equal, so clients share their textures.
 - **Carving:** `PumpkinCarvings.open(player, pos, side)` starts a session and sends `OpenCarvingPayload`; the client's `CarvingScreen` sends back a `CarvePayload` (exactly 16 rows), and `PumpkinCarvings.carve(player, pos, side, face)` checks it and returns a `Result` (`CARVED`, or why not). `startSession(...)` alone is for tests. The server option `carving.free_draw` (`JugcraftConfig.option`) allows only `CarvingTemplates.ALL` when false.
 - **Client:** `CarvedPumpkinRenderer` draws each carved side as one quad textured by `CarvingTextures` (one 64×16 dynamic texture per design and lit state, at most 256).
+- **Sizes:** `CarvingFace` handles faces of any size in `CarvingFace.SIZES` (16, and 48 for a full-grown giant pumpkin); a 16×16 face is the same ints as a `PumpkinCarving` face. The payloads carry a `CarvingFace.Sized` (the size, then exactly that many ints; other sizes are refused before reading). For a giant, `PumpkinCarvings.open` targets its master block and the session records size 48; `GiantPumpkinRenderer` draws its sides from one 192×48 texture per design. `CarvingFace.scale` blows a 16×16 face up for giants (starter faces, stencils).
+- **Varieties:** `JugcraftAgriculture.carvedFrom(block)` maps each carvable pumpkin to its hand-carved block, and `carveLoot(block)` to the seeds of its first cut; the first cut also rolls `PumpkinCarvings.SCOOP`.
 
 ### Cooking Pot (`agriculture/CookingPot*`)
 
