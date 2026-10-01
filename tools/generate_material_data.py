@@ -611,18 +611,16 @@ def petro_assets(lang):
 
 def crop_drop(block, info):
     """Like vanilla wheat: a ripe crop drops its product (1-3) and seeds (more with Fortune); an unripe one, a seed."""
-    ripe = [{"condition": "minecraft:block_state_property", "block": rid(block), "properties": {"age": "7"}}]
-    return {"type": "minecraft:block", "pools": [
-        {"rolls": 1.0, "bonus_rolls": 0.0, "entries": [{"type": "minecraft:alternatives", "children": [
-            {"type": "minecraft:item", "name": rid(info["product"]), "conditions": ripe, "functions": [
-                {"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1.0, "max": 3.0},
-                 "add": False}]},
+    ripe = block_state(block, {"age": "7"})
+    return {"type": "minecraft:block", "modifier": {"type": "minecraft:explosion_decay"}, "pools": [
+        {"rolls": 1, "entries": [{"type": "minecraft:alternatives", "children": [
+            {"type": "minecraft:item", "condition": ripe, "name": rid(info["product"]), "modifier": {
+                "type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 3}}},
             {"type": "minecraft:item", "name": rid(info["seeds"])}]}]},
-        {"rolls": 1.0, "bonus_rolls": 0.0, "conditions": ripe, "entries": [
-            {"type": "minecraft:item", "name": rid(info["seeds"]), "functions": [
-                {"function": "minecraft:apply_bonus", "enchantment": "minecraft:fortune",
-                 "formula": "minecraft:binomial_with_bonus_count", "parameters": {"extra": 3, "probability": 0.5714286}}]}]}],
-        "functions": [{"function": "minecraft:explosion_decay"}],
+        {"rolls": 1, "condition": ripe, "entries": [
+            {"type": "minecraft:item", "name": rid(info["seeds"]), "modifier": {
+                "type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune",
+                "formula": "minecraft:binomial_with_bonus_count", "parameters": {"extra": 3, "probability": 0.5714286}}}]}],
         "random_sequence": rid(f"blocks/{block}")}
 
 
