@@ -1,10 +1,13 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.CarvedPumpkinBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.CarvingTemplates;
 import io.github.jimbozoomer.jugcraft.agriculture.HalloweenSeason;
 import io.github.jimbozoomer.jugcraft.agriculture.HarvestMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.HeadlessHorseman;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.PumpkinCarving;
+import io.github.jimbozoomer.jugcraft.agriculture.ScarecrowBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.TallCrop;
 import io.github.jimbozoomer.jugcraft.agriculture.TallCropBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.TallDecorationBlock;
@@ -23,6 +26,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -33,6 +37,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LanternBlock;
@@ -130,8 +135,13 @@ public class NightClientGameTests implements FabricClientGameTest {
 		BlockState standing = state("scarecrow").setValue(TallDecorationBlock.FACING, Direction.SOUTH);
 		set(level, scarecrow, standing);
 		set(level, scarecrow.above(), standing.setValue(TallDecorationBlock.HALF, DoubleBlockHalf.UPPER));
-		set(level, scarecrow.above(2), state("hand_carved_pumpkin").setValue(CarvedPumpkinBlock.FACING, Direction.SOUTH)
-				.setValue(CarvedPumpkinBlock.LIT, true));
+		// It wears a lit hand-carved pumpkin with the Classic face.
+		ItemStack head = new ItemStack(JugcraftAgriculture.item("hand_carved_pumpkin"));
+		head.set(JugcraftAgriculture.CARVING, PumpkinCarving.BLANK.withFace(0, CarvingTemplates.ALL.get(0).face()));
+		head.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(CarvedPumpkinBlock.LIT, true));
+		if (level.getBlockEntity(scarecrow.above()) instanceof ScarecrowBlockEntity worn) {
+			worn.setHead(head);
+		}
 		for (int dx : new int[] {6, 10}) {
 			set(level, new BlockPos(x + dx, y, z - 9), state("hand_carved_pumpkin").setValue(CarvedPumpkinBlock.FACING, Direction.SOUTH)
 					.setValue(CarvedPumpkinBlock.LIT, true));
