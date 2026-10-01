@@ -54,6 +54,9 @@ ABOUT = {
     "high_pressure_extractor": "A steel extractor: 32 items every 4 ticks, four times the brass one.",
     "capacitor_bank": "A 2x2 bank of Leyden jars: 4,000,000 JE. It charges from any side and gives power out of the "
                       "sockets on its front, 4,096 JE/t.",
+    "crop_harvester": "Two blocks tall. Harvests the ripe crops in the 9x9 field in front of it, starting the block in "
+                      "front: one crop a second at 24 JE/t. It keeps the drops and plants one of the seeds again, and "
+                      "waits when its three result slots are full. Crops on farmland sit at its own height.",
     "gas_holder": "A 3x3x3 sphere on legs: 1,024 buckets of one gas, and nothing but gases (liquids go in the steel "
                   "tank). Pumps and pipes fill and empty it from any face; right-click with an empty hand to read it. "
                   "Comparators read how full it is.",

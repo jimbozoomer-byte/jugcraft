@@ -69,6 +69,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -216,6 +217,31 @@ public class JugcraftGameTests {
 		helper.succeedWhen(() -> {
 			helper.assertTrue(set.get(), "The filter is not set to water yet");
 			helper.assertTrue(filteredTank.storage.amount > 0, "A water filter let no water out");
+		});
+	}
+
+	/** The crop harvester harvests a ripe wheat crop in its field, keeps the wheat, and plants one of the seeds again. */
+	@GameTest(maxTicks = 200)
+	public void cropHarvesterHarvestsAndReplants(GameTestHelper helper) {
+		BlockPos master = new BlockPos(4, 1, 0);
+		LargeMachineBlock block = (LargeMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.CROP_HARVESTER);
+		helper.setBlock(master, block.defaultBlockState().setValue(MachineBlock.FACING, Direction.SOUTH));
+		block.setPlacedBy(helper.getLevel(), helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
+		charge(helper, master.above(), Direction.UP);
+		MachineBlockEntity harvester = helper.getBlockEntity(master, MachineBlockEntity.class);
+		// The field starts the block in front (south); a ripe crop two blocks out and one to the side.
+		BlockPos crop = new BlockPos(3, 1, 2);
+		helper.setBlock(crop.below(), Blocks.FARMLAND);
+		helper.setBlock(crop, ((CropBlock) Blocks.WHEAT).getStateForAge(7));
+		helper.succeedWhen(() -> {
+			BlockState replanted = helper.getBlockState(crop);
+			helper.assertTrue(replanted.is(Blocks.WHEAT) && ((CropBlock) Blocks.WHEAT).getAge(replanted) == 0,
+					"The crop is now " + replanted);
+			boolean wheat = false;
+			for (int slot = 0; slot < MachineKind.CROP_HARVESTER.slots; slot++) {
+				wheat |= harvester.getItem(slot).is(Items.WHEAT);
+			}
+			helper.assertTrue(wheat, "The harvester kept no wheat");
 		});
 	}
 
