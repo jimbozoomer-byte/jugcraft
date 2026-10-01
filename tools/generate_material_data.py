@@ -10,7 +10,7 @@ from pathlib import Path
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, EXTRA_NAMES, MINERAL_TAGS, PROCESSING, COMPONENTS, CIRCUITS,
                        metal_blocks, metal_items, mineral_blocks, all_blocks, all_items, feature_of, ingot_id)
 
-from machines import MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
+from machines import MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
 import model_writer
 import agriculture_data
 
@@ -21,7 +21,7 @@ DATA = RES / "data"
 PACKS = RES / "resourcepacks"
 
 GENERATED_DIRS = [
-    ASSETS / "blockstates", ASSETS / "items", ASSETS / "models", ASSETS / "lang", ASSETS / "handbook",
+    DATA / MOD / "advancement", ASSETS / "blockstates", ASSETS / "items", ASSETS / "models", ASSETS / "lang", ASSETS / "handbook",
     DATA / MOD / "loot_table", DATA / MOD / "recipe", DATA / MOD / "worldgen",
     DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD, PACKS,
 ]
@@ -92,6 +92,8 @@ def assets():
         lang[f"item.{MOD}.{item}"] = item_name(item)
     machine_assets(lang)
     agriculture_data.assets(ASSETS, write, lang)
+    import advancements
+    lang.update(advancements.generate(MOD)[1])
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
 
 
@@ -389,8 +391,24 @@ def powered_tools(lang):
             "parent": "minecraft:block/block", "textures": textures,
             "elements": model_writer.scaled_elements(elements)})
         write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
-    # How the rocket pack looks when worn (textures/entity/equipment/humanoid/rocket_pack.png).
+    # How the rocket pack looks when worn: harness straps as an armor layer (textures/entity/equipment/humanoid/
+    # rocket_pack.png), and the pack itself in 3D on the back (client/RocketPackLayer draws these quads).
     write(ASSETS / "equipment" / "rocket_pack.json", {"layers": {"humanoid": [{"texture": rid("rocket_pack")}]}})
+    import kinetic_rotors
+    write(ASSETS / "worn_models.json", {"rocket_pack": kinetic_rotors.quads(tool_models.ITEMS["rocket_pack"])})
+    for module, (display, short, about) in UPGRADE_MODULES.items():
+        lang[f"item.{MOD}.{module}"] = display
+        lang[f"item.{MOD}.{module}.short"] = short
+        lang[f"tooltip.{MOD}.{module}"] = about
+        write(ASSETS / "models" / "item" / f"{module}.json",
+              {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{module}")}})
+        write(ASSETS / "items" / f"{module}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{module}")}})
+    lang[f"tooltip.{MOD}.module_fitting"] = "Use it on a charging station holding the tool"
+    lang[f"tooltip.{MOD}.upgrades"] = "Upgrades:"
+    lang[f"message.{MOD}.module.fitted"] = "%s fitted to the %s"
+    lang[f"message.{MOD}.module.wrong_tool"] = "The %s does not fit the %s"
+    lang[f"message.{MOD}.module.full"] = "The %2$s has no room for another %1$s"
+    lang[f"message.{MOD}.module.conflict"] = "The %2$s cannot take a %1$s alongside its other enchantment"
     lang[f"message.{MOD}.drill_mode"] = "Drill mode: %s"
     lang[f"message.{MOD}.drill_mode.single"] = "one block"
     lang[f"message.{MOD}.drill_mode.area"] = "3×3"
@@ -668,6 +686,9 @@ def main():
     recipes()
     tags()
     worldgen()
+    import advancements
+    for key, advancement in advancements.generate(MOD)[0].items():
+        write(DATA / MOD / "advancement" / f"{key}.json", advancement)
 
 
 if __name__ == "__main__":
