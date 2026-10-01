@@ -15,6 +15,14 @@ No numbered release yet. Everything below is on `main`.
 - **Fix (all Jugcraft block loot):** 26.3 changed the loot table format (an entry's `condition` and `modifier`, and `type` in place of `function`/`condition`) and silently ignores the old keys. So far every ore dropped itself to any tool, Fortune did nothing, the charging station's lower-half-only drop rule was ignored, and a double asphalt slab dropped one slab. The tables are now written in 26.3's form, with vanilla's `minecraft:tool/can_silk_touch` predicate, and the data checker rejects the old keys; game tests cover Silk Touch, Fortune, the 2-tall drops and double slabs.
 - Fourteen game tests, four client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
 
+### #52 Chemistry, batch 5: electrochemistry and acids
+- **Brine** (chemical mixer: salt + water) and the **electrolytic cell** (3×3×2): brine → **chlorine**, **hydrogen** (gases) and **lye**, each out of its own row.
+- **Chemical reactor** (2×2×2): sulfur dust + water → **sulfuric acid**.
+- **Alumina and real aluminum:** bauxite + lye → 2 alumina; 2 alumina + coke → 2 aluminum ingots in the cell. Two ingots per bauxite, twice the arc furnace.
+- **Fertilizer:** phosphate + sulfuric acid; ripens every crop in a 5×5 area.
+- **Fuel cell** (one block, electric look): hydrogen → 128 JE/t.
+- Five advancements, a Chemistry chapter in the handbook, and a metal audit for fluid recipes.
+
 ### #51 Oil line, batch 4: industry, and the electric look
 - **Polymerization reactor** (2×2×3): refinery gas → plastic pellets; the metal press makes **plastic sheets**.
 - **Asphalt**, **asphalt slab** and **asphalt road line**: walking on them is 1.3× as fast.
