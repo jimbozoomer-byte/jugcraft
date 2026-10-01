@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -67,7 +68,8 @@ public final class HarvestMoon {
 	/** Whether the Harvest Moon is up at {@code dayTime} on the overworld clock, on today's date (server clock). */
 	public static boolean rising(long dayTime) {
 		long hour = Math.floorMod(dayTime, TrickOrTreat.DAY);
-		return HalloweenSeason.active() && HalloweenSeason.today().equals(HalloweenSeason.harvestMoon()) && hour >= DUSK && hour < DAWN;
+		return HalloweenSeason.active() && JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE)
+				&& HalloweenSeason.today().equals(HalloweenSeason.harvestMoon()) && hour >= DUSK && hour < DAWN;
 	}
 
 	/** Works the state out again; if it changed, tells every player. Returns the new state. */

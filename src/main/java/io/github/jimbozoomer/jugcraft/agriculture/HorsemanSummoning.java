@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -23,7 +24,8 @@ import net.minecraft.world.phys.Vec3;
  * pumpkin, under the open sky, in the overworld, not in peaceful. The Horseman claims the head (it is used up, with
  * a flash of harmless lightning) and rides in {@value #MIN_DISTANCE} to {@value #MAX_DISTANCE} blocks away, hunting
  * whoever called him; the scarecrow becomes the centre of his arena. Only one Horseman rides within
- * {@value #ONE_AT_A_TIME} blocks at a time. Everything is checked on the server.
+ * {@value #ONE_AT_A_TIME} blocks at a time, and none while the {@code agriculture} feature is switched off. Everything is
+ * checked on the server.
  */
 public final class HorsemanSummoning {
 	public static final long MIDNIGHT = 18000;
@@ -33,7 +35,7 @@ public final class HorsemanSummoning {
 	public static final int ONE_AT_A_TIME = 128;
 
 	public enum Result {
-		SUMMONED, OUT_OF_SEASON, WRONG_HOUR, WRONG_PLACE, PEACEFUL, NO_HEAD, ROOFED, ALREADY_RIDING
+		SUMMONED, DISABLED, OUT_OF_SEASON, WRONG_HOUR, WRONG_PLACE, PEACEFUL, NO_HEAD, ROOFED, ALREADY_RIDING
 	}
 
 	private HorsemanSummoning() {
@@ -52,6 +54,9 @@ public final class HorsemanSummoning {
 	/** Tries to summon the Horseman as if the overworld clock read {@code dayTime}. */
 	public static Result summon(ServerPlayer player, BlockPos scarecrow, long dayTime) {
 		ServerLevel level = player.level();
+		if (!JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE)) {
+			return Result.DISABLED;
+		}
 		if (!HalloweenSeason.active()) {
 			return Result.OUT_OF_SEASON;
 		}

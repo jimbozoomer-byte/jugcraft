@@ -152,6 +152,7 @@ TEXT = {
     "message.jugcraft.horseman.summoned": "The Headless Horseman rides for his head!",
     "message.jugcraft.horseman.rides_off": "The Headless Horseman rides off into the night...",
     "message.jugcraft.horseman.defeated": "The Headless Horseman is gone, back into the dark",
+    "message.jugcraft.horseman.disabled": "The Headless Horseman does not ride on this server",
     "message.jugcraft.horseman.out_of_season": "He only rides on Halloween nights",
     "message.jugcraft.horseman.wrong_hour": "He only rides at midnight",
     "message.jugcraft.horseman.wrong_place": "He only rides in the Overworld",

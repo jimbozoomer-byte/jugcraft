@@ -173,12 +173,12 @@ public class NightGameTests {
 
 	private static int bagged(ItemStack bag) {
 		BundleContents contents = bag.get(DataComponents.BUNDLE_CONTENTS);
-		return contents == null ? 0 : contents.itemCopyStream().mapToInt(ItemStack::getCount).sum();
+		return contents == null ? 0 : contents.itemCopies().mapToInt(ItemStack::getCount).sum();
 	}
 
 	private static boolean onlyTreats(ItemStack bag) {
 		BundleContents contents = bag.get(DataComponents.BUNDLE_CONTENTS);
-		return contents != null && contents.itemCopyStream().allMatch(stack -> stack.is(CandyBagItem.TREATS));
+		return contents != null && contents.itemCopies().allMatch(stack -> stack.is(CandyBagItem.TREATS));
 	}
 
 	// ---------------------------------------------------------------- the Harvest Moon
@@ -295,7 +295,7 @@ public class NightGameTests {
 		player.setShiftKeyDown(false);
 
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.GLASS_BOTTLE, 2));
-		InteractionResult caught = player.interactOn(wisp, InteractionHand.MAIN_HAND);
+		InteractionResult caught = player.interactOn(wisp, InteractionHand.MAIN_HAND, wisp.position());
 		helper.assertTrue(caught.consumesAction() && wisp.isRemoved(), "A glass bottle catches it: " + caught);
 		helper.assertTrue(player.getMainHandItem().is(Items.GLASS_BOTTLE) && player.getMainHandItem().getCount() == 1
 				&& count(player, item("wisp_in_a_jar")) == 1, "One bottle became a Wisp in a Jar");
@@ -649,7 +649,7 @@ public class NightGameTests {
 	public void flamingPumpkinsBurnButBreakNothing(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		floor(helper);
-		helper.setBlock(new BlockPos(4, 2, 2), Blocks.WHITE_WOOL);
+		helper.setBlock(new BlockPos(4, 2, 2), Blocks.OAK_PLANKS);
 		helper.setBlock(new BlockPos(2, 2, 4), Blocks.HAY_BLOCK);
 		Mob cow = helper.spawnWithNoFreeWill(vanilla("cow"), new BlockPos(3, 2, 3));
 		HeadlessHorseman horseman = helper.spawnWithNoFreeWill(JugcraftAgriculture.HEADLESS_HORSEMAN, new BlockPos(4, 2, 4));
@@ -658,7 +658,7 @@ public class NightGameTests {
 		pumpkin.burst(level, cow.position());
 		helper.assertTrue(cow.getHealth() == health - FlamingPumpkin.DAMAGE && cow.isOnFire(), "The cow is hurt and alight: " + cow.getHealth());
 		helper.assertTrue(horseman.getHealth() == horseman.getMaxHealth() && !horseman.isOnFire(), "The Horseman is not");
-		helper.assertTrue(helper.getBlockState(new BlockPos(4, 2, 2)).is(Blocks.WHITE_WOOL) && helper.getBlockState(new BlockPos(2, 2, 4)).is(Blocks.HAY_BLOCK),
+		helper.assertTrue(helper.getBlockState(new BlockPos(4, 2, 2)).is(Blocks.OAK_PLANKS) && helper.getBlockState(new BlockPos(2, 2, 4)).is(Blocks.HAY_BLOCK),
 				"No block breaks");
 		for (BlockPos pos : BlockPos.betweenClosed(helper.absolutePos(new BlockPos(0, 1, 0)), helper.absolutePos(new BlockPos(7, 4, 7)))) {
 			helper.assertFalse(level.getBlockState(pos).is(Blocks.FIRE), "and nothing is set alight: fire at " + pos);

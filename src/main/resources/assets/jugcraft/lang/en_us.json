@@ -712,6 +712,7 @@
   "message.jugcraft.hollow.too_small": "Only a giant pumpkin 2 or 3 blocks wide makes a boat",
   "message.jugcraft.horseman.already_riding": "The Headless Horseman is already riding nearby",
   "message.jugcraft.horseman.defeated": "The Headless Horseman is gone, back into the dark",
+  "message.jugcraft.horseman.disabled": "The Headless Horseman does not ride on this server",
   "message.jugcraft.horseman.no_head": "The scarecrow needs a lit pumpkin for a head",
   "message.jugcraft.horseman.out_of_season": "He only rides on Halloween nights",
   "message.jugcraft.horseman.peaceful": "He won't ride on Peaceful",

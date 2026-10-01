@@ -1169,6 +1169,14 @@ def check_night(java, main):
             drops.append((entry.get("name"), [low, high]))
     if drops != [(item, list(counts)) for item, counts in horseman["loot"]]:
         err(f"{horseman['table']}: drops {drops} differ from tools/agriculture.py {horseman['loot']}")
+    # Every way a summoning can fail has a message for the player.
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    results = re.search(r"enum Result \{([A-Z_,\s]+)\}", java.get("HorsemanSummoning", ""))
+    for result in (re.findall(r"[A-Z_]+", results.group(1)) if results else []):
+        if result != "SUMMONED" and f"message.jugcraft.horseman.{result.lower()}" not in lang:
+            err(f"HorsemanSummoning.Result.{result} has no message.jugcraft.horseman.{result.lower()} text")
+    if not results:
+        err("HorsemanSummoning.Result not found")
     registration = re.search(r'HEADLESS_HORSEMAN = entity\("([a-z_]+)"[^;]*;', main)
     if not registration or f"entities/{registration.group(1)}" != horseman["table"] or "noLootTable" in registration.group(0):
         err(f"The Headless Horseman must be registered with his loot table {horseman['table']}")
