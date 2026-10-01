@@ -79,8 +79,11 @@ def giant_part_model(size, dx, dy, dz):
                 "w": tex(giant_tile("side", size, dz, row)), "e": tex(giant_tile("side", size, last - dz, row)),
                 "up": tex(giant_tile("top", size, dx, dz)), "down": tex("giant_pumpkin_bottom")}
     used = {key for key in textures if key == "particle" or any(f["texture"] == f"#{key}" for f in faces.values())}
-    return {"parent": "minecraft:block/block", "textures": {k: v for k, v in textures.items() if k in used},
-            "elements": [box((0, 0, 0), (16, 16, 16), faces)]}
+    model = {"parent": "minecraft:block/block", "textures": {k: v for k, v in textures.items() if k in used}}
+    if faces:
+        # The middle block of a 3x3x3 pumpkin shows nothing; Minecraft refuses an element without faces.
+        model["elements"] = [box((0, 0, 0), (16, 16, 16), faces)]
+    return model
 
 
 def giant_assets(root, write, lang):

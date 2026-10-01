@@ -285,7 +285,17 @@ The server checks every carving before anything changes (the knife in hand, reac
 
 Ten additions for a fall pumpkin patch, all permanent. Details, numbers and test evidence: [../features/halloween-harvest.md](../features/halloween-harvest.md).
 
-<!-- halloween screenshots -->
+| **The pumpkin patch** from above: giant pumpkins, scarecrows, heirlooms, ornamental corn and the shed | **Giant pumpkins:** one carved with a jack o'lantern face, one by its Harvest Scale, a 2×2×2 and a seedling, with heirloom pumpkins on the right |
+| --- | --- |
+| ![The Halloween pumpkin patch from above](../images/ingame_halloween_harvest.jpg) | ![Giant pumpkins and the Harvest Scale](../images/ingame_giant_pumpkins.jpg) |
+| **Scarecrows** in four shirts, with a hand-carved pumpkin, a carved white pumpkin, a jack o'lantern and a carved Cinderella pumpkin for heads | **Heirloom pumpkins** and bottle gourds, hand-carved heirlooms on hay bales, corn shocks and ripe ornamental corn |
+| ![Scarecrows](../images/ingame_scarecrows.jpg) | ![Heirloom pumpkins, corn shocks and ornamental corn](../images/ingame_heirloom_pumpkins.jpg) |
+| **The shed:** ornamental corn bundles, gourd birdhouses under the eaves, potted mums and wild mums | **Carving a giant pumpkin:** the 48×48 screen with a stencil from the other hand pressed in |
+| ![Corn bundles, birdhouses and mums](../images/ingame_harvest_decorations.jpg) | ![The giant carving screen](../images/ingame_carving_giant_screen.jpg) |
+| **At midnight:** the carved giant with a torch inside, and the one carved from the stencil | **The scarecrows at midnight** |
+| ![Giant pumpkins at night](../images/ingame_giant_pumpkin_night.jpg) | ![Scarecrows at night](../images/ingame_scarecrows_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`HalloweenClientGameTests`, software rendering, small previews, hotbar cropped). The giant was carved from the stencil through the screen; the server then held the face.*
 
 ### Giant pumpkins
 

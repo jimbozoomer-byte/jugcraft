@@ -76,7 +76,7 @@ Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API
 | `python3 tools/check_mod_data.py` (now also compares the giant pumpkin, scale, canteen, mum, heirloom and scarecrow numbers with Java, checks every giant pumpkin and scarecrow state has a model, and fails on a recipe category its recipe type doesn't have) | Pass, 383 IDs |
 | `./gradlew build`, compile, on `5472054` (with Pumpkin Carving, the Festival Crops, Kitchen Garden, Fall Harvest and `main` after #51 merged in) | Pass |
 | Game tests on the headless server, same commit: 142 in total, 14 of them new here (`HalloweenGameTests`) | **All 142 pass** |
-| Client game test (real client, Mesa software rendering, CI job `client`) | <!-- client result --> |
+| Client game test (real client, Mesa software rendering, CI job `client`), including carving a giant from a stencil through the screen | **Passes** on `5472054`; see below for the one model error it found |
 
 The 14 new game tests (`HalloweenGameTests`):
 1. Giant Pumpkin Seeds plant a vine on farmland, not on grass;
@@ -94,10 +94,16 @@ The 14 new game tests (`HalloweenGameTests`):
 13. caramel, caramel apples, popcorn balls and pumpkin soup restore 2, 6, 5 and 8; eating a caramel apple leaves its stick; all 18 new recipes load; pumpkin guts cook into soup in the Cooking Pot; the five new wild patches load;
 14. the Gourd Canteen fills at a water source, moistens farmland, fills a cauldron a level and puts out fire, one sip each, does nothing when empty, and waters a giant pumpkin.
 
+The client game test (`HalloweenClientGameTests`):
+- builds a pumpkin patch: two full-grown giant pumpkins (one carved with the Classic face blown up, one beside a Harvest Scale), a 2×2×2 giant, a seedling and the vine's growth stages; four scarecrows in red, blue, green and purple shirts with carved heads; heirloom pumpkins and bottle gourds, hand-carved heirlooms on hay bales; ripe ornamental corn and corn shocks; a shed hung with corn bundles and gourd birdhouses, potted and wild mums. The log reads `[halloween test] giant pumpkin blocks: 63` (27 + 27 + 8 + 1);
+- photographs it by day and, with the carved giant and the carved heads lit, at midnight;
+- then opens the giant carving screen as the knife does, with a Pumpkin Stencil (the Spooky face) in the player's other hand, presses Apply (the stencil is offered and selected), turns the candle preview on, photographs the screen and presses Done. The server must then hold the stencil blown up to 48×48 on the giant's south side. The log reads `[halloween test] giant carved from a stencil over the network: true`.
+
 Found by CI and fixed before this record:
 - `PushReaction.BLOCK` and `DESTROY` are `IMMOVEABLE` and `POPPED` in 26.3 (found by compiling, `fc3d9fd`).
 - 26.3 has no `Items.BLUE_DYE` field; the dye is looked up by its ID, as the scarecrow does (`76afe24`).
 - The game test server refused to load the datapack: three crafting recipes used the category `food`, which only cooking recipes have (`8855eb4`). The checker now fails on any such category.
+- The client log showed one model error: the hidden middle block of a 3×3×3 giant had a cube with no faces, which 26.3 refuses (`Expected between 1 and 6 unique faces, got 0`). It now has no element at all, and the checker fails on any model element without faces. Nothing showed, as that block is inside the pumpkin.
 
 **Not run:**
 - a person playing it in a client (the client test drives the real carving screen with simulated input);

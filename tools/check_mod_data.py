@@ -911,6 +911,12 @@ def check_halloween(java, main):
         if wild not in ag.WILD_CROPS:
             err(f"WILD_BONUS: {wild} is not a wild plant")
 
+    # Minecraft 26.3 refuses a model element with no faces (the hidden middle of a giant pumpkin must have no element).
+    for path in sorted((ASSETS / "models").rglob("*.json")):
+        for element in (load(path) or {}).get("elements", []):
+            if not element.get("faces"):
+                err(f"{path.relative_to(ROOT)}: a model element needs at least one face")
+
     max_size = giant["max_size"]
     states = set((load(ASSETS / "blockstates" / f"{giant['block']}.json") or {}).get("variants", {}))
     if states != {f"part={p},size={size}" for size in range(1, max_size + 1) for p in range(max_size ** 3)}:
