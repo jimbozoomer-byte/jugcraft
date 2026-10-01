@@ -1,0 +1,64 @@
+name: Probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - run: |
+          set +e
+          ./gradlew compileClientJava compileGametestJava --no-daemon > compile.txt 2>&1
+          echo "exit $?"
+          grep -E "error:" -A3 compile.txt | head -300
+      - run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*deobf-26.3.jar' | head -1)
+          FAPI=$(find ~/.gradle/caches -name 'fabric-*.jar' -path '*net.fabricmc.fabric-api*' | tr '\n' ':')
+          CP="$CLIENT:$COMMON:$FAPI"
+          l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
+          unzip -l "$COMMON" | grep -iE "trading/|villager_trade|TradeSet|npc/.*Trade|WanderingTrader" | awk '{print $4}' | head -40
+          unzip -l "$COMMON" | grep -iE "data/minecraft/(villager_trade|trade)" | awk '{print $4}' | head -10
+          l net.minecraft.world.item.trading.MerchantOffer 'public' 30
+          l net.minecraft.world.item.trading.ItemCost 'public' 20
+          l net.minecraft.world.item.trading.MerchantOffers 'public' 10
+          l net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader 'public|protected' 40
+          l net.minecraft.world.entity.npc.WanderingTrader 'public|protected' 40
+          l net.minecraft.world.entity.npc.villager.AbstractVillager 'getOffers|updateTrades|offers' 10
+          l net.minecraft.world.entity.Mob 'DropChance|dropChance|setGuaranteed|equip' 20
+          l net.minecraft.world.entity.EquipmentSlot 'HEAD' 5
+          l net.minecraft.world.item.component.Consumable 'public' 20
+          l 'net.minecraft.world.item.component.Consumable$Builder' 'public' 20
+          l net.minecraft.world.item.component.Consumables 'public static' 20
+          l net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect 'public' 10
+          l 'net.minecraft.world.item.Item$Properties' 'food' 5
+          l net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents '' 10
+          l net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents '' 20
+          l 'net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents$AfterDeath' '' 5
+          unzip -l $(find ~/.gradle/caches -name 'fabric-resource-loader*.jar' | head -1) | grep -i "api/" | awk '{print $4}' | head -20
+          l net.fabricmc.fabric.api.resource.v1.ResourceLoader '' 20
+          l net.fabricmc.fabric.api.resource.ResourceManagerHelper '' 20
+          l net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener '' 10
+          l net.minecraft.server.packs.resources.ResourceManagerReloadListener '' 10
+          l net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener 'public|protected' 20
+          l net.minecraft.client.renderer.blockentity.SignRenderer 'submit|Text|text' 20
+          l net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider\$Context 'public' 20
+          l net.minecraft.world.entity.Entity 'Tag|tag' 20
+          l net.minecraft.world.entity.monster.zombie.Zombie 'public' 5
+          l net.minecraft.world.entity.monster.Zombie 'public' 5
+          l net.minecraft.world.level.block.WebBlock '' 10
+          l net.minecraft.world.level.block.LanternBlock 'HANGING|public' 10
+          l net.minecraft.world.level.storage.loot.parameters.LootContextParamSets 'ENTITY' 3
+          l net.minecraft.world.entity.LivingEntity 'getLootTable|dropFromLootTable|lastHurtByPlayer' 10
+          l net.minecraft.server.players.PlayerList 'getPlayer' 5
+          l net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents '' 10
