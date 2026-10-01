@@ -1274,6 +1274,8 @@ def machines():
     save(jaws(969, True), "block", "fracking_rig_front_on")
     save(window(970, [(60, 56, 44), (76, 70, 56)]), "block", "flowback_treatment_unit_front")
     save(window(970, [(60, 56, 44)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "flowback_treatment_unit_front_on")
+    save(window(971, [(36, 40, 30), (48, 54, 40)]), "block", "diesel_generator_front")
+    save(window(971, [(36, 40, 30)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "diesel_generator_front_on")
     save(jaws(956, False), "block", "ore_drill_front")
     save(jaws(956, True), "block", "ore_drill_front_on")
     save(window(953, [(30, 26, 26)], glow=[(255, 200, 80), (255, 236, 150), (250, 150, 40)]), "block", "steel_foundry_front_on")

@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.chemistry.FluidFuels;
 import io.github.jimbozoomer.jugcraft.chemistry.OilReservoirs;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroItems;
@@ -331,6 +332,30 @@ public class PetroGameTests {
 		helper.succeedWhen(() -> {
 			helper.assertTrue(unit.tanks().output(0).has(Fluids.WATER, 750), "Water: " + unit.tanks().output(0).millibuckets());
 			helper.assertTrue(unit.getItem(0).is(BuiltInRegistries.ITEM.getValue(Jugcraft.id("salt"))), "No salt: " + unit.getItem(0));
+		});
+	}
+
+	/** The diesel generator burns 1 mB of diesel a tick for 256 JE, and refuses crude oil. */
+	@GameTest(maxTicks = 200)
+	public void dieselGeneratorBurnsDiesel(GameTestHelper helper) {
+		BlockPos master = new BlockPos(4, 1, 2);
+		MachineBlockEntity generator = place(helper, MachineKind.DIESEL_GENERATOR, master);
+		SimpleEnergyStorage energy = (SimpleEnergyStorage) EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.UP);
+		energy.setAmount(0);
+		Storage<FluidVariant> tanks = FluidStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.NORTH);
+		helper.assertTrue(tanks != null, "The generator has no fluid storage");
+		try (Transaction transaction = Transaction.openOuter()) {
+			long oil = tanks.insert(FluidVariant.of(PetroFluids.CRUDE_OIL.source()), FluidConstants.BUCKET, transaction);
+			long diesel = tanks.insert(FluidVariant.of(PetroFluids.DIESEL.source()), FluidConstants.BUCKET, transaction);
+			helper.assertTrue(oil == 0, "The generator took " + oil + " droplets of crude oil");
+			helper.assertTrue(diesel == FluidConstants.BUCKET, "The generator took " + diesel + " droplets of diesel");
+			transaction.commit();
+		}
+		helper.runAfterDelay(40, () -> {
+			int left = generator.tanks().input(0).millibuckets();
+			helper.assertTrue(left < 1000 && left >= 950, "Diesel left: " + left);
+			helper.assertTrue(energy.getAmount() == (1000L - left) * FluidFuels.DIESEL, "Energy " + energy.getAmount() + " for " + (1000 - left) + " mB");
+			helper.succeed();
 		});
 	}
 }

@@ -361,7 +361,7 @@ Empty tools mine like a bare hand and get no drops.
 
 ## Oil
 
-The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line), [feature record](features/petrochemistry.md)). Fracking and diesel power are still to come.
+The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line), [feature record](features/petrochemistry.md)). The gas turbine is still to come.
 
 | Thing | What it does | Details | Built from |
 | --- | --- | --- | --- |
@@ -381,6 +381,7 @@ The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches
 | Chemical Mixer | 2×2×2 stirred vessel | 1,000 mB water + 2 sand + 1 dried kelp → 1,000 mB fracking fluid; 80 ticks at 64 JE/t | steel plates, electric motor, 2 tinplate tanks, casing, hopper |
 | Fracking Rig | 3×3, five tall; frees shale oil under its front left block | per tick: 4 mB fracking fluid down; 6 mB crude oil (base), 2 mB refinery gas (top), 3 mB flowback water (one up); 256 JE/t | steel plates, ore drill, 2 heavy pumps, advanced circuit, casing |
 | Flowback Treatment Unit | 3 wide, 1 tall, 2 deep: settling basins and a filter press | 1,000 mB flowback water → 750 mB water + 1 salt; 80 ticks at 48 JE/t | steel plates, iron bars, 2 tinplate tanks, sieve, casing |
+| Diesel Generator | 3 wide, 2 tall, 2 deep; an inline six burning liquid fuel | 256 JE/t: diesel 256 JE/mB (1 mB/t), heavy fuel oil 128 JE/mB (2 mB/t); 8-bucket tank, 60,000 JE buffer | 4 steel plates, electric motor, 2 tinplate tanks, casing, steel gear |
 
 **Fluid processing machines** (the pumpjack and extractor are the first): input tanks take only fluids the machine's recipes use; output tanks push into neighbouring tanks and pipes; the screen shows a gauge per tank. Recipes are data in `data/jugcraft/recipe/<type>/` (see [petrochemistry.md](features/petrochemistry.md)).
 

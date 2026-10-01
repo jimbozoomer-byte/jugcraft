@@ -550,10 +550,43 @@ def flowback_treatment_unit():
     return m
 
 
+def diesel_generator():
+    """Three wide, two tall and two deep: an inline six diesel engine on a hazard-striped skid. Olive engine block
+    with six chrome rocker covers, an exhaust manifold along its front feeding two sooty stacks, a grilled radiator
+    at the right end, a gunmetal alternator drum at the left behind the control panel (the master block, gauge and
+    caged lamp), and a red-valved fuel line from the day tank at the back."""
+    m = [box((-32, 0, 0), (16, 2, 32), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    # Control panel at the front left (the master block).
+    m.append(box((1, 2, 0.5), (15, 12, 6), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(dial("north", (5, 8.5, 0.25), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 8.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    # Alternator drum behind the panel, coupled to the crankshaft.
+    m += cyl("x", 11, 18, 7, 2, 15, GUNMETAL, CHROME)
+    m.append(box((0, 8, 15), (2, 14, 21), CHROME))
+    # Engine block and its six rocker covers.
+    m.append(box((-24, 2, 11), (0, 18, 25), {"*": OLIVE, "up": GUNMETAL}))
+    for x in range(-23, -1, 4):
+        m.append(box((x, 18, 12.5), (x + 3, 21, 23.5), CHROME))
+    # Exhaust manifold on the front of the block and two stacks.
+    m.append(box((-23, 12, 9), (-1, 15, 11), EXHAUST))
+    for x in (-19, -7):
+        m.append(box((x - 1, 15, 8.5), (x + 1, 17, 10.5), EXHAUST))
+        m += cyl("y", x, 9.5, 1.5, 17, 31, EXHAUST)
+    # Radiator at the right end.
+    m.append(box((-31, 2, 4), (-26, 26, 28), {"*": GUNMETAL, "east": GRILLE, "west": GRILLE}))
+    m.append(box((-31.5, 26, 3.5), (-25.5, 27, 28.5), HAZARD))
+    m.append(box((-26, 8, 15), (-24, 12, 19), RUBBER))
+    # Day tank and fuel line at the back.
+    m.append(box((-22, 2, 27), (-2, 10, 31), {"*": OLIVE, "up": STENCIL}))
+    m.append(box((-12, 10, 26), (-10, 14, 28), CHROME))
+    m += wheel("z", -11, 15.5, 1.5, 26, 26.75, "sp_red_iron", CHROME, spokes=False)
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
           "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump(),
           "distillation_tower": distillation_tower(), "catalytic_cracker": catalytic_cracker(),
           "vacuum_distillation_unit": vacuum_distillation_unit(), "catalytic_reformer": catalytic_reformer(),
           "chemical_mixer": chemical_mixer(), "fracking_rig": fracking_rig(),
-          "flowback_treatment_unit": flowback_treatment_unit()}
+          "flowback_treatment_unit": flowback_treatment_unit(), "diesel_generator": diesel_generator()}

@@ -59,6 +59,8 @@ MACHINES = {
     "fracking_rig": {"display": "Fracking Rig", "lit": True},
     # 3x1x2 settling basins and a filter press: flowback water -> water + salt.
     "flowback_treatment_unit": {"display": "Flowback Treatment Unit", "lit": True},
+    # A 3x2x2 inline six on a skid: burns diesel or heavy fuel oil from its tank.
+    "diesel_generator": {"display": "Diesel Generator", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
 }
 
@@ -213,6 +215,8 @@ STATS = {
     "fracking_rig": {"capacity": 80_000, "input_per_tick": 1_024, "use_per_tick": 256, "tank": 16_000},
     # 3x1x2. 48 JE/t; a bucket of flowback water per 80 ticks.
     "flowback_treatment_unit": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 48, "tank": 8_000},
+    # 3x2x2. 256 JE/t: 1 mB of diesel a tick (256 JE/mB) or 2 mB of heavy fuel oil (128 JE/mB).
+    "diesel_generator": {"capacity": 60_000, "output_per_tick": 1_024, "generation_per_tick": 256, "tank": 8_000},
 }
 
 # Fuel for the coal generator: burn ticks per item (coal matches the vanilla furnace's 1600).
@@ -400,6 +404,9 @@ CRAFTING = {
     "flowback_treatment_unit": (["PFP", "TST", "PMP"], {"P": "#c:plates/steel", "F": "minecraft:iron_bars",
                                                         "T": "jugcraft:fluid_tank", "S": "jugcraft:sieve",
                                                         "M": "jugcraft:machine_casing"}, 1),
+    "diesel_generator": (["PEP", "TMT", "PGP"], {"P": "#c:plates/steel", "E": "jugcraft:electric_motor",
+                                                 "T": "jugcraft:fluid_tank", "M": "jugcraft:machine_casing",
+                                                 "G": "#c:gears/steel"}, 1),
     "cracking_catalyst": (["BSB", "SNS", "BSB"], {"B": "jugcraft:bauxite", "S": "minecraft:sand",
                                                   "N": "#c:ingots/nickel"}, 4),
     "charging_station": (["SLS", "WAW", "SBS"], {"S": "#c:plates/steel", "L": "minecraft:redstone_lamp",

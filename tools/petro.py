@@ -100,6 +100,13 @@ FLUID_MACHINES = {
     # Water + two powders/solids -> a mixture. 64 JE/t.
     "chemical_mixer": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 0,
                        "recipe_type": "chemical_mixing"},
+    # Burns diesel (256 JE/mB) or heavy fuel oil (128 JE/mB) from its tank at 256 JE/t (FLUID_FUELS).
+    "diesel_generator": {"inputs": [8_000], "outputs": [], "item_inputs": 0, "item_outputs": 0, "recipe_type": None},
+}
+
+# JE per mB each fluid-burning generator gets from each fuel (Java: chemistry/FluidFuels).
+FLUID_FUELS = {
+    "diesel_generator": {"diesel": 256, "heavy_fuel_oil": 128},
 }
 
 # Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],

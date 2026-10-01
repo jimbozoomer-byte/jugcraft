@@ -52,6 +52,7 @@ FOOTPRINTS = {
     "chemical_mixer": cuboid(2, 2, 2),
     "fracking_rig": cuboid(3, 5, 3),
     "flowback_treatment_unit": cuboid(3, 1, 2),
+    "diesel_generator": cuboid(3, 2, 2),
 }
 
 # Machines that take power at one marked socket only: (part, face) for a north-facing machine.
@@ -250,6 +251,14 @@ MODELS["flowback_treatment_unit"] = [
     ((1, 2, 12), (15, 14, 30), "fluid_tank_side"),
 ]
 
+MODELS["diesel_generator"] = [
+    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-24, 2, 10), (0, 20, 26), STEEL),
+    ((-31, 2, 4), (-26, 26, 28), "fluid_tank_side"),
+    ((-20, 20, 14), (-16, 30, 18), "geothermal_stack"),
+]
+
 # Textures the front face uses: "#front" in MODELS. Lit machines also get <front>_on.
 FRONTS = {
     "geothermal_generator": "geothermal_generator_front",
@@ -271,4 +280,5 @@ FRONTS = {
     "chemical_mixer": "chemical_mixer_front",
     "fracking_rig": "fracking_rig_front",
     "flowback_treatment_unit": "flowback_treatment_unit_front",
+    "diesel_generator": "diesel_generator_front",
 }

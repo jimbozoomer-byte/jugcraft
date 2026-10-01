@@ -127,6 +127,9 @@ ABOUT = {
     "flowback_treatment_unit": "Three wide, one tall and two deep. Settles and filters the flowback water from a "
                                "fracking rig: each bucket gives 750 mB of clean water and a salt, every 4 seconds. "
                                "Pipe the water back to the chemical mixer; a quarter is lost each time round.",
+    "diesel_generator": "Three wide, two tall and two deep. Burns diesel or heavy fuel oil piped into its 8-bucket tank: "
+                        "256 JE/t, a bucket of diesel every 1,000 ticks (256,000 JE) or heavy fuel oil twice as fast "
+                        "(128,000 JE a bucket). It refuses crude oil and other fluids.",
     "ore_drill": "Two blocks tall. Mines the ore blocks in a 9x9 column below it, one layer at a time down to the bottom "
                  "of the world, one ore every 2 seconds. Each hole is refilled with stone or deepslate. The ores come "
                  "out whole, ready for ore processing.",
@@ -333,6 +336,7 @@ def build():
             machine_page("chemical_mixer"),
             machine_page("fracking_rig"),
             machine_page("flowback_treatment_unit"),
+            machine_page("diesel_generator"),
             {"title": "Cracking Catalyst", "icon": f"{MOD}:cracking_catalyst", "text": [
                 "Bauxite (alumina) and sand (silica) with a nickel ingot make four. The catalytic cracker uses one for "
                 "each bucket of heavy fuel oil it cracks."], "craft": craft("cracking_catalyst")},

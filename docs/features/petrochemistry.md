@@ -102,6 +102,14 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - The salt is the same salt as rock salt ore, ready for the planned brine electrolysis.
 - Recipe: steel plates, iron bars, two tinplate tanks, a sieve and a machine casing.
 
+### Diesel generator (batch 3, commit 14)
+- The **diesel generator** is three wide, two tall and two deep: an inline six on a hazard-striped skid, with chrome rocker covers, an exhaust manifold feeding two sooty stacks, a grilled radiator, an alternator drum behind the control panel and a day tank at the back.
+- It burns fuel piped into its 8-bucket tank and makes **256 JE/t**: **diesel gives 256 JE/mB** (1 mB a tick, 256,000 JE a bucket) and **heavy fuel oil 128 JE/mB** (2 mB a tick). Its tank refuses crude oil and every other fluid.
+- Fuel values live in `chemistry/FluidFuels` and `tools/petro.py` (`FLUID_FUELS`); `check_mod_data` checks they match.
+- It stops when its 60,000 JE buffer is full, follows its redstone mode, and pushes up to 1,024 JE/t into cables from every part, like the other generators.
+- Balance: a bucket of crude oil refined to diesel and gasoline costs about 16,000 JE to pump and 23,880 JE to refine, and its 525 mB of diesel alone give 134,400 JE here, so oil is a strong net gain; that is the point of the tier. Burning heavy fuel oil straight is worth 128,000 JE a bucket but skips the diesel and naphtha cracking would give. The whole chain is audited in BALANCE.md in commit 19.
+- Recipe: steel plates, an electric motor, two tinplate tanks, a machine casing and a steel gear.
+
 ### What refining gives (batch 2 summary)
 From one bucket of crude oil, with every byproduct refined:
 
@@ -146,6 +154,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 - Game test `mixerMakesFrackingFluid`.
 - Game test `frackingRigFreesShaleOil` (it takes fracking fluid through Fabric's fluid API, brings up crude oil, gas and flowback, and draws on the shale).
 - Game test `treatmentCleansFlowback`.
+- Game test `dieselGeneratorBurnsDiesel` (its tank refuses crude oil through Fabric's fluid API, and each mB of diesel burnt adds exactly 256 JE).
 - Game test `pumpjackPumpsOil`: a powered pumpjack over pumpable oil fills its tank with crude oil and the reservoir goes down by as much.
 - Game tests `extractorTanksOnlyTakeWhatTheyUse` (its tanks take water but not lava or crude oil, through Fabric's fluid API) and `extractorWashesOilFromOilSand` (a block of oil sand and water become 500 mB of crude oil and sand, using 250 mB of water).
 - Not run: client play-testing of how the fluid looks and flows.

@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.machine;
 
+import io.github.jimbozoomer.jugcraft.chemistry.FluidFuels;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidMachineSpec;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidRecipe;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidRecipes;
@@ -198,6 +199,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	private boolean acceptsFluid(ServerLevel server, int tank, FluidVariant variant) {
 		return switch (kind) {
 			case FRACKING_RIG -> variant.isOf(PetroFluids.FRACKING_FLUID.source());
+			case DIESEL_GENERATOR -> tank == 0 && FluidFuels.jePerMb(kind, variant.getFluid()) > 0;
 			default -> FluidRecipes.usesFluid(server.getServer(), kind, tank, variant);
 		};
 	}
@@ -346,6 +348,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case AUTO_CRAFTER -> tickCrafter(level, pos, state);
 			case PUMPJACK -> tickPumpjack(level, pos, state);
 			case FRACKING_RIG -> tickFrackingRig(level, pos, state);
+			case DIESEL_GENERATOR -> tickFluidGenerator(level, pos, state, MachineKind.DIESEL_OUTPUT);
 			default -> kind.isFluidProcessor() ? tickFluidProcessor(level, pos, state) : tickProcessor(level, pos, state);
 		};
 		if (state.getValue(MachineBlock.LIT) != active) {
@@ -784,6 +787,38 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		progress = (progress + 1) % PUMPJACK_STROKE;
 		setChanged();
 		return true;
+	}
+
+	/**
+	 * A fluid-burning generator: makes {@code output} JE every tick it has room, burning fuel from tank 0 a millibucket
+	 * at a time as the JE it holds in hand ({@link #burn}) runs low; each mB is worth {@link FluidFuels#jePerMb}. Pushes
+	 * power out of every block. The progress bar shows the JE in hand.
+	 */
+	private boolean tickFluidGenerator(ServerLevel level, BlockPos pos, BlockState state, int output) {
+		boolean running = false;
+		boolean room = energy.getAmount() + output <= energy.getCapacity();
+		if (room && sides.redstone().allows(poweredByRedstone(level, pos, state))) {
+			FluidTank fuel = tanks.input(0);
+			while (burn < output && fuel.millibuckets() > 0) {
+				int value = FluidFuels.jePerMb(kind, fuel.variant.getFluid());
+				if (value <= 0) {
+					break;
+				}
+				fuel.drain(1);
+				burn += value;
+			}
+			if (burn >= output) {
+				burn -= output;
+				energy.setAmount(energy.getAmount() + output);
+				running = true;
+			}
+			maxBurn = output;
+			maxProgress = output;
+			progress = Math.min(burn, output);
+			setChanged();
+		}
+		pushFromAllParts(level, pos, state);
+		return running;
 	}
 
 	/** Ticks per stroke of the pumpjack, for its screen's progress arrow. */
