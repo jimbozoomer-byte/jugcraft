@@ -7,7 +7,7 @@ Target milestone and tier: Discovery. Emeralds and a compass are all a player ne
 Primary specialty and supported player role: exploration and trade, supporting the [Pixel Hollows](pixel-hollows.md).
 
 ## Player experience
-In some new plains villages there is a small **Retro Game Shop**: an oak storefront with a false front and a lit "Retro Games" sign, display windows, a chequered floor, shelves of chunky cartridges, a counter, pixel lamps and a glowing **arcade cabinet**. The villager who takes that cabinet becomes the **Retro Trader**: a bearded villager with brown hair, black glasses and green eyes, in a red-and-black flannel shirt over a white tee with a silver cross, backpack straps, navy plaid trousers and black-and-white sneakers (drawn from the owner's reference picture).
+Every new village has one small **Retro Game Shop**: an oak storefront with a false front and a lit "Retro Games" sign, display windows, a chequered floor, shelves of chunky cartridges, a counter, pixel lamps and a glowing **arcade cabinet**. The villager who takes that cabinet becomes the **Retro Trader**: a bearded villager with brown hair, black glasses and green eyes, in a red-and-black flannel shirt over a white tee with a silver cross, backpack straps, navy plaid trousers and black-and-white sneakers (drawn from the owner's reference picture).
 
 He:
 - **always offers a Pixel Hollows map**, which is how most players will first find the rare cave;
@@ -38,7 +38,7 @@ Everything is original: no real shop names, logos, colours, uniforms, games or f
 - How this specialty stays useful without mastering every other branch: a map seller and a small decor shop; nothing requires him.
 
 ## Balance and automation
-- **Shop rarity:** the shop joins `minecraft:village/plains/houses` with weight 1 (vanilla houses weigh 1 to 3 each). Each house slot of a new plains village has a 1-in-88 chance of being the shop (the pool's total weight in 26.3, logged by `retroGameShopTemplate`), so a village of about 15 houses has a shop roughly 1 time in 6. Plains villages only in this slice.
+- **One shop in every new village** (owner request, replacing the proposal's about 1 in 6): the shop joins the houses pool of all five village types (plains, desert, savanna, snowy, taiga) with weight 1, and `world/RetroShopPlacement` makes it the first choice for each of a new village's house slots until it is placed, then removes it, so there is exactly one. A village only lacks it if no house slot has room for it. Zombie villages (about 2% of villages, abandoned, with zombie villagers) get none. The storefront is the same oak shop in every village type.
 - **Trades** are data (26.1+): `data/jugcraft/villager_trade/retro_trader/*.json`, one tag per level (`#jugcraft:retro_trader/level_1` …) and a trade set per level (`data/jugcraft/trade_set/retro_trader/level_<n>.json`) that the profession names. All are generated from `TRADES` in `tools/pixel_hollows.py`. The last column is each trade's `reputation_discount` (the old price multiplier):
 
 | Level | Trade | Uses per restock | XP | Price multiplier |
@@ -69,7 +69,7 @@ Everything is original: no real shop names, logos, colours, uniforms, games or f
 - **Disable switch:** `retro_trader.enabled=false` stops new shops, the map trade (for trades made from then on) and the cabinet recipe. The profession, the cabinet, the map item, existing traders and their saved offers stay. Trades that sell cave goods follow the `pixel_hollows` switch.
 
 ## Dependencies and assets
-- Fabric API's `PoiHelper` registers the cabinet as a job site; trades are vanilla data. Fabric API has no village pool API, so a mixin accessor (`mixin/StructureTemplatePoolAccessor`) adds the shop to the plains houses pool when the server starts.
+- Fabric API's `PoiHelper` registers the cabinet as a job site; trades are vanilla data. Fabric API has no village pool API, so a mixin accessor (`mixin/StructureTemplatePoolAccessor`) adds the shop to the five houses pools when the server starts, and three small mixins make it one per village: `StructureTemplatePoolMixin` reorders a houses pool's shuffled candidates, `JigsawPlacerMixin` marks the start of each jigsaw structure and `PoolElementStructurePieceMixin` notes when the shop is placed.
 - Original assets: the trader's 64×64 villager overlay (also used for his zombie form) and the cabinet's textures are drawn by `tools/pixel_hollows_textures.py`; the cabinet model is in `tools/retro_models.py`; the shop is written by `tools/retro_game_shop.py` from vanilla blocks and Jugcraft's own; the work sound reuses the note block's "bit" sound by name. MIT.
 - The shop template is written in 26.3's format with 26.3's DataVersion (5023), so the data fixer leaves it alone. A DataVersion above the game's made the whole template load as air; the game test `retroGameShopTemplateLoads` compares the two numbers, so after a platform bump `DATA_VERSION` in `tools/retro_game_shop.py` must follow.
 
@@ -97,10 +97,9 @@ Build workflow run 36815372169 on commit 568409c (1 October 2026, merged with `m
 **Not run:** shop frequency across generated villages on real seeds; a shop joined to a real village street (whether its floor sits level with the path); buying a map in a client and following it to a cave; the map search's time in a real world; two clients trading with one trader on a dedicated server (the checklist is in docs/TESTING.md); restock; a marked map across a restart; old-world upgrade; disable-switch behaviour in a running world.
 
 ## World and event applicability
-- Village fit: plains villages only; the shop uses their oak and cobblestone with a few Jugcraft blocks inside.
+- Village fit: every village type except zombie villages. The shop is built from oak and cobblestone (plains style) with a few Jugcraft blocks inside, in every village type; styled variants for desert, savanna, snowy and taiga villages are a later change.
 - Not seasonal; no pets, bosses, dimensions or rare loot.
 
 ## Rollout and open questions
-- Two shops can appear in one large village; the pool has no per-village limit.
 - The villager in the shop usually takes its cabinet, but any unemployed villager may claim it first.
-- Other village styles, wandering-trader stock and cosmetic outfits are later proposals.
+- Village-styled shops, wandering-trader stock and cosmetic outfits are later proposals.

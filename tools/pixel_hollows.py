@@ -213,6 +213,9 @@ TRADES = {
 TRADE_LEVELS = sorted({trade["level"] for trade in TRADES.values()})
 # Bounded search behind the map (Java: world/PixelHollowsMaps): radius, column spacing, height spacing, start height.
 MAP_SEARCH = {"radius": 2048, "step": 64, "vertical_step": 32, "start_y": -16}
-# Village shop: weight in minecraft:village/plains/houses (vanilla houses weigh 1-3 each).
+# Village shop: one in every new village of these types (not zombie villages). It joins each type's
+# minecraft:village/<type>/houses pool with this weight, and world/RetroShopPlacement makes it the first choice for a
+# village's house slots until one is placed, then removes it (Java: RetroTrader.VILLAGE_HOUSES and SHOP_WEIGHT).
+SHOP_VILLAGES = ["plains", "desert", "savanna", "snowy", "taiga"]
 SHOP_WEIGHT = 1
 SHOP = "village/plains/retro_game_shop"

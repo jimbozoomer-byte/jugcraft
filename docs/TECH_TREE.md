@@ -270,7 +270,7 @@ A cave to explore and a villager who points the way; neither needs any machine. 
 | Arcade cabinet (2 tall) | the Retro Trader's job site; any unemployed villager can take it | planks, glass pane, redstone, 2 pixel shards; or found in a Retro Game Shop |
 | Retro Trader | novice: Pixel Hollows Map (12 emeralds + compass), 8 circuitstone (1 emerald); apprentice: buys 6 shards for 1 emerald, sells a lamp (3); journeyman: 2 shards (4) | a villager at an arcade cabinet |
 | Pixel Hollows Map | use it: marks the nearest Pixel Hollows within 2,048 blocks on an explorer map named with its depth, or tells you none is in reach and stays unused | the Retro Trader |
-| Retro Game Shop | a storefront in some new plains villages | find one |
+| Retro Game Shop | a storefront in every new village (one each; not zombie villages) | find one |
 
 **Code:** `world/` (`PixelHollows`, `RetroTrader`, `ArcadeCabinetBlock`, `PixelHollowsMaps`, `PixelHollowsMapItem`), `mixin/`, and the data generated from `tools/pixel_hollows.py`.
 

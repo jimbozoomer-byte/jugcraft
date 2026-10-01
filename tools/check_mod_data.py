@@ -655,6 +655,9 @@ def check_pixel_hollows():
     trader = (WORLD_JAVA / "RetroTrader.java").read_text(encoding="utf-8")
     if f"SHOP_WEIGHT = {ph.SHOP_WEIGHT};" not in trader:
         err("RetroTrader.SHOP_WEIGHT differs from tools/pixel_hollows.py")
+    villages = re.findall(r'houses\("([a-z]+)"\)', trader)
+    if villages != ph.SHOP_VILLAGES:
+        err(f"RetroTrader.VILLAGE_HOUSES {villages} differs from SHOP_VILLAGES {ph.SHOP_VILLAGES} in tools/pixel_hollows.py")
     for level in ph.TRADE_LEVELS:
         if f'"retro_trader/level_{level}"' not in trader:
             err(f"RetroTrader's profession does not name the level {level} trade set")

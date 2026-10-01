@@ -48,6 +48,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 /**
@@ -353,7 +356,7 @@ public class PixelHollowsGameTests {
 
 	/**
 	 * The Retro Game Shop template, placed as this test's structure: the cabinet, the sign, the street jigsaw and a
-	 * villager inside. The shop is also in this server's plains village houses; the per-house chance is logged.
+	 * villager inside. The shop is also in the houses pool of all five village types.
 	 */
 	@GameTest(structure = "jugcraft:village/plains/retro_game_shop", maxTicks = 40)
 	public void retroGameShopTemplate(GameTestHelper helper) {
@@ -365,12 +368,94 @@ public class PixelHollowsGameTests {
 		helper.getBlockEntity(new BlockPos(4, 6, 7), SignBlockEntity.class);
 		helper.assertEntityPresent(villagerType());
 
-		var pool = helper.getLevel().registryAccess().lookupOrThrow(Registries.TEMPLATE_POOL).getValue(RetroTrader.PLAINS_HOUSES);
-		helper.assertTrue(pool != null && RetroTrader.shopElement(helper.getLevel().registryAccess()).isPresent(),
-				"The shop is not in the plains village houses");
-		int slots = ((io.github.jimbozoomer.jugcraft.mixin.StructureTemplatePoolAccessor) pool).jugcraft$templates().size();
-		Jugcraft.LOGGER.info("[pixel-hollows] Retro Game Shop: weight {} of {} in plains houses ({}% per house)", RetroTrader.SHOP_WEIGHT,
-				slots, String.format("%.2f", 100.0 * RetroTrader.SHOP_WEIGHT / slots));
+		for (var houses : RetroTrader.VILLAGE_HOUSES) {
+			helper.assertTrue(RetroTrader.shopElement(helper.getLevel().registryAccess(), houses).isPresent(),
+					"The shop is not in " + houses);
+		}
+		helper.assertTrue(RetroTrader.shop() != null, "No shop element is recorded for this server's villages");
 		helper.succeed();
+	}
+
+	/** How far from a village's start the shop search and the loaded area reach (villages stay within 80 blocks). */
+	private static final int VILLAGE_REACH = 112;
+	private static final String[] VILLAGE_TYPES = {"plains", "desert", "savanna", "snowy", "taiga"};
+
+	/**
+	 * Every new village has exactly one Retro Game Shop. One village of each type is generated as /place structure does,
+	 * far from the other tests, after its area is force-loaded; then its arcade cabinets (one per shop), villagers and
+	 * zombie villagers are counted. A zombie village (about 2% of villages; no villagers) gets no shop.
+	 */
+	@GameTest(maxTicks = 1200)
+	public void everyVillageHasOneShop(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		var server = level.getServer();
+		BlockPos base = helper.absolutePos(BlockPos.ZERO);
+		List<BlockPos> centres = new ArrayList<>();
+		for (int i = 0; i < VILLAGE_TYPES.length; i++) {
+			BlockPos centre = new BlockPos(base.getX() + 1024 + i * 320, base.getY(), base.getZ() + 1024);
+			centres.add(centre);
+			command(server, "forceload add %d %d %d %d".formatted(centre.getX() - VILLAGE_REACH, centre.getZ() - VILLAGE_REACH,
+					centre.getX() + VILLAGE_REACH, centre.getZ() + VILLAGE_REACH));
+		}
+		List<String> results = new ArrayList<>();
+		List<String> problems = new ArrayList<>();
+		helper.succeedWhen(() -> {
+			if (results.isEmpty()) {
+				for (BlockPos centre : centres) {
+					for (int x = centre.getX() - VILLAGE_REACH; x <= centre.getX() + VILLAGE_REACH; x += 16) {
+						for (int z = centre.getZ() - VILLAGE_REACH; z <= centre.getZ() + VILLAGE_REACH; z += 16) {
+							helper.assertTrue(level.getChunkSource().hasChunk(x >> 4, z >> 4), "Village area still loading");
+						}
+					}
+				}
+				for (int i = 0; i < VILLAGE_TYPES.length; i++) {
+					String type = VILLAGE_TYPES[i];
+					BlockPos centre = centres.get(i);
+					command(server, "place structure minecraft:village_%s %d %d %d".formatted(type, centre.getX(), centre.getY(), centre.getZ()));
+					int[] counts = countVillage(level, centre);
+					results.add("%s: %d shop(s), %d villagers, %d zombie villagers".formatted(type, counts[0], counts[1], counts[2]));
+					if (counts[1] == 0 && counts[2] == 0) {
+						problems.add(type + " village did not generate");
+					} else if (counts[1] == 0) {
+						if (counts[0] != 0) {
+							problems.add("the zombie " + type + " village has " + counts[0] + " shops");
+						}
+					} else if (counts[0] != 1) {
+						problems.add("the " + type + " village has " + counts[0] + " shops");
+					}
+					command(server, "forceload remove %d %d %d %d".formatted(centre.getX() - VILLAGE_REACH, centre.getZ() - VILLAGE_REACH,
+							centre.getX() + VILLAGE_REACH, centre.getZ() + VILLAGE_REACH));
+				}
+				Jugcraft.LOGGER.info("[pixel-hollows] generated villages: {}", results);
+			}
+			helper.assertTrue(problems.isEmpty(), "Villages without exactly one shop: " + problems + " (" + results + ")");
+		});
+	}
+
+	private static void command(net.minecraft.server.MinecraftServer server, String command) {
+		server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), command);
+	}
+
+	/** Lower halves of arcade cabinets (one per shop), villagers and zombie villagers around a village's start. */
+	private static int[] countVillage(ServerLevel level, BlockPos centre) {
+		int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, centre.getX(), centre.getZ());
+		int shops = 0;
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (int x = centre.getX() - VILLAGE_REACH + 8; x <= centre.getX() + VILLAGE_REACH - 8; x++) {
+			for (int z = centre.getZ() - VILLAGE_REACH + 8; z <= centre.getZ() + VILLAGE_REACH - 8; z++) {
+				for (int y = surface - 12; y <= surface + 24; y++) {
+					BlockState state = level.getBlockState(pos.set(x, y, z));
+					if (state.is(RetroTrader.ARCADE_CABINET) && state.getValue(ArcadeCabinetBlock.HALF) == DoubleBlockHalf.LOWER) {
+						shops++;
+					}
+				}
+			}
+		}
+		AABB area = new AABB(centre.getX() - VILLAGE_REACH, surface - 16, centre.getZ() - VILLAGE_REACH,
+				centre.getX() + VILLAGE_REACH, surface + 32, centre.getZ() + VILLAGE_REACH);
+		var zombieVillager = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("zombie_villager"));
+		int villagers = level.getEntities(EntityTypeTest.forClass(Villager.class), area, villager -> true).size();
+		int zombies = level.getEntities((net.minecraft.world.entity.Entity) null, area, entity -> entity.getType() == zombieVillager).size();
+		return new int[] {shops, villagers, zombies};
 	}
 }

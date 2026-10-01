@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.HandbookScreen;
 import io.github.jimbozoomer.jugcraft.client.MachineScreen;
 import io.github.jimbozoomer.jugcraft.client.ProspectorScreen;
@@ -30,6 +31,7 @@ import io.github.jimbozoomer.jugcraft.world.ArcadeCabinetBlock;
 import io.github.jimbozoomer.jugcraft.world.PixelHollows;
 import io.github.jimbozoomer.jugcraft.world.RetroTrader;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -54,6 +56,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
@@ -249,6 +252,20 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_retro_game_shop");
 
+			// The shop in a real village: a plains village generated far from the scenes (as /place structure does, once its
+			// area is loaded), seen from the street in front of the shop's door.
+			int vx = x + 640;
+			int vz = z + 640;
+			String villageArea = "%d %d %d %d".formatted(vx - 112, vz - 112, vx + 112, vz + 112);
+			server.runCommand("forceload add " + villageArea);
+			server.waitFor(minecraft -> areaLoaded(minecraft.overworld(), vx, vz, 112), 1200);
+			server.runCommand("place structure minecraft:village_plains %d %d %d".formatted(vx, y, vz));
+			server.runCommand(server.computeOnServer(minecraft -> shopCamera(minecraft.overworld(), new BlockPos(vx, y, vz), 112)));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_retro_game_shop_village");
+			server.runCommand("forceload remove " + villageArea);
+
 			// Inside a Pixel Hollows cave: a carved cavity in one chunk, its biome set to the Pixel Hollows, lined by the
 			// biome's own circuitstone feature placed around the walls, with crystals on its floor and ceiling; seen in
 			// spectator mode with night vision.
@@ -295,6 +312,51 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 		level.setBlock(row.offset(6, 1, 0), cabinet.setValue(ArcadeCabinetBlock.HALF, DoubleBlockHalf.UPPER), 3);
 		level.setBlock(row.offset(11, 0, 0), cabinet, 3);
 		level.setBlock(row.offset(11, 1, 0), cabinet.setValue(ArcadeCabinetBlock.HALF, DoubleBlockHalf.UPPER), 3);
+	}
+
+	private static boolean areaLoaded(ServerLevel level, int x, int z, int reach) {
+		for (int cx = (x - reach) >> 4; cx <= (x + reach) >> 4; cx++) {
+			for (int cz = (z - reach) >> 4; cz <= (z + reach) >> 4; cz++) {
+				if (!level.getChunkSource().hasChunk(cx, cz)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * A teleport command that puts the camera on the street in front of the village's Retro Game Shop, looking at its
+	 * door: the shop is found by its arcade cabinet, and its door is the nearest oak door to the cabinet.
+	 */
+	private static String shopCamera(ServerLevel level, BlockPos centre, int reach) {
+		BlockPos cabinet = null;
+		for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-reach, -12, -reach), centre.offset(reach, 24, reach))) {
+			BlockState state = level.getBlockState(pos);
+			if (state.is(RetroTrader.ARCADE_CABINET) && state.getValue(ArcadeCabinetBlock.HALF) == DoubleBlockHalf.LOWER) {
+				cabinet = pos.immutable();
+				break;
+			}
+		}
+		if (cabinet == null) {
+			throw new AssertionError("The generated plains village has no Retro Game Shop");
+		}
+		BlockPos door = null;
+		for (BlockPos pos : BlockPos.betweenClosed(cabinet.offset(-10, -2, -10), cabinet.offset(10, 2, 10))) {
+			BlockState state = level.getBlockState(pos);
+			if (state.is(Blocks.OAK_DOOR) && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER
+					&& (door == null || pos.distSqr(cabinet) < door.distSqr(cabinet))) {
+				door = pos.immutable();
+			}
+		}
+		if (door == null) {
+			throw new AssertionError("The Retro Game Shop at " + cabinet + " has no door");
+		}
+		Direction outside = level.getBlockState(door).getValue(DoorBlock.FACING).getOpposite();
+		BlockPos eye = door.relative(outside, 8).above(2);
+		Jugcraft.LOGGER.info("[pixel-hollows] Retro Game Shop in a generated plains village: cabinet {}, door {}", cabinet, door);
+		return String.format(Locale.ROOT, "tp @p %.1f %d %.1f facing %.1f %.1f %.1f", eye.getX() + 0.5, eye.getY(), eye.getZ() + 0.5,
+				door.getX() + 0.5, door.getY() + 1.5, door.getZ() + 0.5);
 	}
 
 	/** Gives every motionless (NoAI) villager the Retro Trader profession, at apprentice level. */

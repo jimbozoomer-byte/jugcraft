@@ -39,9 +39,9 @@ import net.minecraft.world.level.saveddata.maps.MapDecorationType;
 
 /**
  * The Retro Trader: a villager profession whose job site is the arcade cabinet, and the Retro Game Shop that
- * brings one to some new plains villages. He always offers a Pixel Hollows map, sells a little of the cave's
- * palette and buys pixel shards back. His trades are data (villager_trade and trade_set files generated from
- * TRADES in tools/pixel_hollows.py).
+ * brings one to every new village (one shop per village; see {@link RetroShopPlacement}). He always offers a Pixel
+ * Hollows map, sells a little of the cave's palette and buys pixel shards back. His trades are data (villager_trade
+ * and trade_set files generated from TRADES in tools/pixel_hollows.py).
  *
  * <p>The {@code retro_trader} switch stops new shops, the map trade and the cabinet recipe. The profession, the
  * cabinet, the map item and existing traders and their offers stay.
@@ -51,11 +51,16 @@ public final class RetroTrader {
 	public static final ResourceKey<VillagerProfession> PROFESSION =
 			ResourceKey.create(Registries.VILLAGER_PROFESSION, Jugcraft.id("retro_trader"));
 	public static final ResourceKey<PoiType> JOB_SITE = ResourceKey.create(Registries.POINT_OF_INTEREST_TYPE, Jugcraft.id("arcade_cabinet"));
-	public static final ResourceKey<StructureTemplatePool> PLAINS_HOUSES =
-			ResourceKey.create(Registries.TEMPLATE_POOL, Identifier.withDefaultNamespace("village/plains/houses"));
+	public static final ResourceKey<StructureTemplatePool> PLAINS_HOUSES = houses("plains");
+	/** The houses pools of the five village types; each new village of any of them gets one shop. Zombie villages do not. */
+	public static final List<ResourceKey<StructureTemplatePool>> VILLAGE_HOUSES =
+			List.of(PLAINS_HOUSES, houses("desert"), houses("savanna"), houses("snowy"), houses("taiga"));
 	/** The shop's template (data/jugcraft/structure/village/plains/retro_game_shop.nbt, from tools/retro_game_shop.py). */
 	public static final Identifier SHOP = Jugcraft.id("village/plains/retro_game_shop");
-	/** Weight among the plains houses (vanilla houses weigh 1 to 3 each); keep in sync with tools/pixel_hollows.py. */
+	/**
+	 * The shop's weight in each houses pool; keep in sync with tools/pixel_hollows.py. It only puts the shop among the
+	 * candidates: {@link RetroShopPlacement} makes it the first choice until one is placed, then removes it.
+	 */
 	public static final int SHOP_WEIGHT = 1;
 
 	public static Block ARCADE_CABINET;
@@ -63,6 +68,8 @@ public final class RetroTrader {
 	public static SoundEvent WORK_SOUND;
 	public static Holder<MapDecorationType> MAP_MARKER;
 	private static final Set<StructureTemplatePool> EXTENDED = Collections.newSetFromMap(new WeakHashMap<>());
+	/** The pool element added to this server's villages, or null while the switch is off (read by worldgen threads). */
+	private static volatile StructurePoolElement shop;
 
 	private RetroTrader() {
 	}
@@ -104,29 +111,51 @@ public final class RetroTrader {
 		return ResourceKey.create(registry, Jugcraft.id(path));
 	}
 
-	/** Adds the shop to the plains village houses once per server (village pools are fixed while a world runs). */
-	public static void addShopToVillages(RegistryAccess registries) {
-		if (!JugcraftConfig.isFeatureEnabled(FEATURE)) {
-			return;
-		}
-		StructureTemplatePool pool = registries.lookupOrThrow(Registries.TEMPLATE_POOL).getValue(PLAINS_HOUSES);
-		if (pool == null || !EXTENDED.add(pool)) {
-			return;
-		}
-		StructurePoolElement shop = StructurePoolElement.single(SHOP.toString()).apply(StructureTemplatePool.Projection.RIGID);
-		for (int i = 0; i < SHOP_WEIGHT; i++) {
-			((StructureTemplatePoolAccessor) pool).jugcraft$templates().add(shop);
-		}
-		Jugcraft.LOGGER.info("Retro Game Shop added to the plains village houses (weight {})", SHOP_WEIGHT);
+	private static ResourceKey<StructureTemplatePool> houses(String village) {
+		return ResourceKey.create(Registries.TEMPLATE_POOL, Identifier.withDefaultNamespace("village/" + village + "/houses"));
 	}
 
-	/** The shop's pool element, if this server's plains villages have one (for tests). */
-	public static Optional<StructurePoolElement> shopElement(RegistryAccess registries) {
-		StructureTemplatePool pool = registries.lookupOrThrow(Registries.TEMPLATE_POOL).getValue(PLAINS_HOUSES);
+	/** Adds the shop to every village type's houses once per server (village pools are fixed while a world runs). */
+	public static void addShopToVillages(RegistryAccess registries) {
+		if (!JugcraftConfig.isFeatureEnabled(FEATURE)) {
+			shop = null;
+			return;
+		}
+		StructurePoolElement element = StructurePoolElement.single(SHOP.toString()).apply(StructureTemplatePool.Projection.RIGID);
+		int added = 0;
+		for (ResourceKey<StructureTemplatePool> key : VILLAGE_HOUSES) {
+			StructureTemplatePool pool = registries.lookupOrThrow(Registries.TEMPLATE_POOL).getValue(key);
+			if (pool == null || !EXTENDED.add(pool)) {
+				continue;
+			}
+			for (int i = 0; i < SHOP_WEIGHT; i++) {
+				((StructureTemplatePoolAccessor) pool).jugcraft$templates().add(element);
+			}
+			added++;
+		}
+		if (added > 0) {
+			shop = element;
+			Jugcraft.LOGGER.info("Retro Game Shop added to {} village houses pools: one shop per new village", added);
+		}
+	}
+
+	/** The shop's pool element in this server's villages, or null when there is none. */
+	public static StructurePoolElement shop() {
+		return shop;
+	}
+
+	/** The shop's pool element in one houses pool, if it is there (for tests). */
+	public static Optional<StructurePoolElement> shopElement(RegistryAccess registries, ResourceKey<StructureTemplatePool> key) {
+		StructureTemplatePool pool = registries.lookupOrThrow(Registries.TEMPLATE_POOL).getValue(key);
 		if (pool == null) {
 			return Optional.empty();
 		}
 		return ((StructureTemplatePoolAccessor) pool).jugcraft$templates().stream()
 				.filter(element -> element.toString().contains(SHOP.toString())).findFirst();
+	}
+
+	/** The shop's pool element in the plains houses, if it is there (for tests). */
+	public static Optional<StructurePoolElement> shopElement(RegistryAccess registries) {
+		return shopElement(registries, PLAINS_HOUSES);
 	}
 }
