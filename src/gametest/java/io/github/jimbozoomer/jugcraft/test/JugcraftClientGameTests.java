@@ -44,7 +44,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -282,7 +283,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 	/** Gives every motionless (NoAI) villager the Retro Trader profession, at apprentice level. */
 	private static void makeRetroTraders(ServerLevel level) {
 		var trader = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(RetroTrader.PROFESSION);
-		for (var villager : level.getEntities(EntityType.VILLAGER, villager -> villager.isNoAi())) {
+		for (Villager villager : level.getEntities(EntityTypeTest.forClass(Villager.class), villager -> villager.isNoAi())) {
 			villager.setVillagerData(villager.getVillagerData().withProfession(trader).withLevel(2));
 		}
 	}

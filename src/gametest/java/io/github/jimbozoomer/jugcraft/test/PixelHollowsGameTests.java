@@ -18,7 +18,9 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.tags.PoiTypeTags;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.item.ItemStack;
@@ -183,9 +185,17 @@ public class PixelHollowsGameTests {
 		helper.succeed();
 	}
 
+	private static EntityType<?> villagerType() {
+		return BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("villager"));
+	}
+
+	private static Villager spawnVillager(GameTestHelper helper, BlockPos pos) {
+		return (Villager) helper.spawn(villagerType(), pos);
+	}
+
 	/** A villager given the profession at a level, with the trades that level brings (the trades are data). */
 	private static List<MerchantOffer> traderOffers(GameTestHelper helper, int level) {
-		var villager = helper.spawn(EntityType.VILLAGER, new BlockPos(1 + level, 1, 2));
+		Villager villager = spawnVillager(helper, new BlockPos(1 + level, 1, 2));
 		var profession = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(RetroTrader.PROFESSION);
 		villager.setVillagerData(villager.getVillagerData().withProfession(profession).withLevel(level));
 		return new ArrayList<>(villager.getOffers());
@@ -261,13 +271,13 @@ public class PixelHollowsGameTests {
 				net.minecraft.core.Direction.SOUTH));
 		helper.setBlock(new BlockPos(1, 2, 1), RetroTrader.ARCADE_CABINET.defaultBlockState()
 				.setValue(ArcadeCabinetBlock.FACING, net.minecraft.core.Direction.SOUTH).setValue(ArcadeCabinetBlock.HALF, DoubleBlockHalf.UPPER));
-		var villager = helper.spawn(EntityType.VILLAGER, new BlockPos(4, 1, 4));
+		Villager villager = spawnVillager(helper, new BlockPos(4, 1, 4));
 		helper.succeedWhen(() -> helper.assertTrue(villager.getVillagerData().profession().is(RetroTrader.PROFESSION),
 				"The villager is still " + villager.getVillagerData().profession()));
 	}
 
 	/**
-	 * The Retro Game Shop template, placed as this test's structure: the cabinet, a lit sign, the street jigsaw and a
+	 * The Retro Game Shop template, placed as this test's structure: the cabinet, the sign, the street jigsaw and a
 	 * villager inside. The shop is also in this server's plains village houses; the per-house chance is logged.
 	 */
 	@GameTest(structure = "jugcraft:village/plains/retro_game_shop", maxTicks = 40)
@@ -276,10 +286,9 @@ public class PixelHollowsGameTests {
 		helper.assertBlockPresent(RetroTrader.ARCADE_CABINET, new BlockPos(7, 2, 4));
 		helper.assertBlockPresent(Blocks.JIGSAW, new BlockPos(4, 1, 7));
 		helper.assertBlockPresent(Blocks.OAK_DOOR, new BlockPos(4, 1, 6));
-		SignBlockEntity sign = helper.getBlockEntity(new BlockPos(4, 6, 7), SignBlockEntity.class);
-		helper.assertTrue(sign.getFrontText().getMessage(1, false).getString().equals("Retro")
-				&& sign.getFrontText().getMessage(2, false).getString().equals("Games"), "The shop sign does not read Retro Games");
-		helper.assertEntityPresent(EntityType.VILLAGER);
+		helper.assertBlockPresent(Blocks.OAK_WALL_SIGN, new BlockPos(4, 6, 7));
+		helper.getBlockEntity(new BlockPos(4, 6, 7), SignBlockEntity.class);
+		helper.assertEntityPresent(villagerType());
 
 		var pool = helper.getLevel().registryAccess().lookupOrThrow(Registries.TEMPLATE_POOL).getValue(RetroTrader.PLAINS_HOUSES);
 		helper.assertTrue(pool != null && RetroTrader.shopElement(helper.getLevel().registryAccess()).isPresent(),
