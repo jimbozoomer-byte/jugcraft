@@ -61,6 +61,8 @@ MACHINES = {
     "flowback_treatment_unit": {"display": "Flowback Treatment Unit", "lit": True},
     # A 3x2x2 inline six on a skid: burns diesel or heavy fuel oil from its tank.
     "diesel_generator": {"display": "Diesel Generator", "lit": True},
+    # A 4x2x2 gas turbine: burns gasoline or refinery gas, with a lubricant tank.
+    "gas_turbine": {"display": "Gas Turbine", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
 }
 
@@ -217,6 +219,9 @@ STATS = {
     "flowback_treatment_unit": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 48, "tank": 8_000},
     # 3x2x2. 256 JE/t: 1 mB of diesel a tick (256 JE/mB) or 2 mB of heavy fuel oil (128 JE/mB).
     "diesel_generator": {"capacity": 60_000, "output_per_tick": 1_024, "generation_per_tick": 256, "tank": 8_000},
+    # 4x2x2. 512 JE/t: 1.33 mB of gasoline a tick (384 JE/mB) or 2.67 mB of refinery gas (192 JE/mB);
+    # 1 mB of lubricant every 20 ticks.
+    "gas_turbine": {"capacity": 120_000, "output_per_tick": 2_048, "generation_per_tick": 512, "tank": 16_000},
 }
 
 # Fuel for the coal generator: burn ticks per item (coal matches the vanilla furnace's 1600).
@@ -407,6 +412,9 @@ CRAFTING = {
     "diesel_generator": (["PEP", "TMT", "PGP"], {"P": "#c:plates/steel", "E": "jugcraft:electric_motor",
                                                  "T": "jugcraft:fluid_tank", "M": "jugcraft:machine_casing",
                                                  "G": "#c:gears/steel"}, 1),
+    "gas_turbine": (["PBP", "DCD", "PGP"], {"P": "#c:plates/steel", "B": "minecraft:iron_bars",
+                                            "D": "jugcraft:diesel_generator", "C": "jugcraft:advanced_circuit",
+                                            "G": "#c:gears/steel"}, 1),
     "cracking_catalyst": (["BSB", "SNS", "BSB"], {"B": "jugcraft:bauxite", "S": "minecraft:sand",
                                                   "N": "#c:ingots/nickel"}, 4),
     "charging_station": (["SLS", "WAW", "SBS"], {"S": "#c:plates/steel", "L": "minecraft:redstone_lamp",

@@ -358,4 +358,29 @@ public class PetroGameTests {
 			helper.succeed();
 		});
 	}
+
+	/** The gas turbine will not run without lubricant; with it, it burns gasoline at 384 JE/mB. */
+	@GameTest(maxTicks = 200)
+	public void gasTurbineNeedsLubricant(GameTestHelper helper) {
+		BlockPos master = new BlockPos(5, 1, 2);
+		MachineBlockEntity turbine = place(helper, MachineKind.GAS_TURBINE, master);
+		SimpleEnergyStorage energy = (SimpleEnergyStorage) EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.UP);
+		energy.setAmount(0);
+		turbine.tanks().input(0).fill(PetroFluids.GASOLINE.source(), 1000);
+		helper.runAfterDelay(20, () -> {
+			helper.assertTrue(energy.getAmount() == 0, "Ran dry of lubricant: " + energy.getAmount() + " JE");
+			helper.assertTrue(turbine.tanks().input(0).millibuckets() == 1000, "Burnt gasoline without lubricant");
+			turbine.tanks().input(1).fill(PetroFluids.LUBRICANT.source(), 100);
+			helper.runAfterDelay(60, () -> {
+				int burnt = 1000 - turbine.tanks().input(0).millibuckets();
+				helper.assertTrue(burnt > 0, "Burnt no gasoline");
+				long expected = (long) burnt * FluidFuels.GASOLINE;
+				helper.assertTrue(energy.getAmount() <= expected && energy.getAmount() > expected - MachineKind.TURBINE_OUTPUT,
+						"Energy " + energy.getAmount() + " for " + burnt + " mB of gasoline");
+				int lubricant = turbine.tanks().input(1).millibuckets();
+				helper.assertTrue(lubricant < 100 && lubricant >= 95, "Lubricant left: " + lubricant);
+				helper.succeed();
+			});
+		});
+	}
 }

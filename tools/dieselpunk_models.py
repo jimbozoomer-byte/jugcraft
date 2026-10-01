@@ -583,10 +583,46 @@ def diesel_generator():
     return m
 
 
+def gas_turbine():
+    """Four wide, two tall and two deep: a gas turbine on a hazard-striped skid. A grilled air-intake filter house at
+    the right end feeds a long gunmetal turbine casing with chrome bands; the hot section rises into a sooty exhaust
+    stack, and the shaft drives an alternator drum behind the control panel (the master block, gauge and caged lamp).
+    A small olive lubricant tank with a golden sight glass and red valve sits at the back."""
+    m = [box((-48, 0, 0), (16, 2, 32), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    # Control panel at the front left (the master block).
+    m.append(box((1, 2, 0.5), (15, 12, 6), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(dial("north", (5, 8.5, 0.25), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 8.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    # Alternator drum behind the panel and the coupling to the turbine shaft.
+    m += cyl("x", 13, 18, 8, 2, 15, OLIVE, GUNMETAL)
+    m += cyl("x", 13, 18, 3, -2, 2, CHROME)
+    # Turbine casing: compressor (right, wider), combustor and hot section (left), with chrome bands.
+    m += cyl("x", 13, 17, 9, -36, -20, GUNMETAL, CHROME)
+    m += cyl("x", 13, 17, 7, -20, -2, GUNMETAL, CHROME)
+    for x in (-34, -27, -14, -8):
+        m += cyl("x", 13, 17, 9.4 if x < -20 else 7.4, x, x + 1, CHROME)
+    # Burner cans around the combustor.
+    for z in (8, 26):
+        m.append(box((-20, 9, z - 1.5), (-16, 13, z + 1.5), CHROME))
+    # Air intake filter house at the right end.
+    m.append(box((-47, 2, 2), (-37, 30, 30), {"*": GUNMETAL, "north": GRILLE, "south": GRILLE, "west": GRILLE}))
+    m.append(box((-47.5, 30, 1.5), (-36.5, 31, 30.5), HAZARD))
+    # Exhaust duct and stack over the hot section.
+    m.append(box((-10, 20, 12), (-4, 24, 22), EXHAUST))
+    m += cyl("y", -7, 17, 3, 24, 32, EXHAUST)
+    # Lubricant tank, sight glass and valve at the back.
+    m.append(box((-32, 2, 26.5), (-22, 9, 31), {"*": OLIVE, "up": STENCIL}))
+    m.append(box((-28, 3, 31), (-26, 8, 31.25), {"*": CHROME, "south": "lubricant_still"}))
+    m.append(box((-23, 9, 27.5), (-21, 11, 29.5), RUBBER))
+    m += wheel("y", -22, 28.5, 1.5, 11, 11.75, "sp_red_iron", CHROME, spokes=False)
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
           "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump(),
           "distillation_tower": distillation_tower(), "catalytic_cracker": catalytic_cracker(),
           "vacuum_distillation_unit": vacuum_distillation_unit(), "catalytic_reformer": catalytic_reformer(),
           "chemical_mixer": chemical_mixer(), "fracking_rig": fracking_rig(),
-          "flowback_treatment_unit": flowback_treatment_unit(), "diesel_generator": diesel_generator()}
+          "flowback_treatment_unit": flowback_treatment_unit(), "diesel_generator": diesel_generator(),
+          "gas_turbine": gas_turbine()}

@@ -200,6 +200,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		return switch (kind) {
 			case FRACKING_RIG -> variant.isOf(PetroFluids.FRACKING_FLUID.source());
 			case DIESEL_GENERATOR -> tank == 0 && FluidFuels.jePerMb(kind, variant.getFluid()) > 0;
+			case GAS_TURBINE -> tank == 0 ? FluidFuels.jePerMb(kind, variant.getFluid()) > 0
+					: variant.isOf(PetroFluids.LUBRICANT.source());
 			default -> FluidRecipes.usesFluid(server.getServer(), kind, tank, variant);
 		};
 	}
@@ -349,6 +351,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case PUMPJACK -> tickPumpjack(level, pos, state);
 			case FRACKING_RIG -> tickFrackingRig(level, pos, state);
 			case DIESEL_GENERATOR -> tickFluidGenerator(level, pos, state, MachineKind.DIESEL_OUTPUT);
+			case GAS_TURBINE -> tickFluidGenerator(level, pos, state, MachineKind.TURBINE_OUTPUT);
 			default -> kind.isFluidProcessor() ? tickFluidProcessor(level, pos, state) : tickProcessor(level, pos, state);
 		};
 		if (state.getValue(MachineBlock.LIT) != active) {
@@ -792,12 +795,15 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	/**
 	 * A fluid-burning generator: makes {@code output} JE every tick it has room, burning fuel from tank 0 a millibucket
 	 * at a time as the JE it holds in hand ({@link #burn}) runs low; each mB is worth {@link FluidFuels#jePerMb}. Pushes
-	 * power out of every block. The progress bar shows the JE in hand.
+	 * power out of every block. The progress bar shows the JE in hand. A second input tank (the gas turbine) holds
+	 * lubricant: it will not run dry, and running uses 1 mB every {@link FluidFuels#LUBRICANT_TICKS} game ticks.
 	 */
 	private boolean tickFluidGenerator(ServerLevel level, BlockPos pos, BlockState state, int output) {
 		boolean running = false;
 		boolean room = energy.getAmount() + output <= energy.getCapacity();
-		if (room && sides.redstone().allows(poweredByRedstone(level, pos, state))) {
+		FluidTank lubricant = tanks.spec().inputTanks().size() > 1 ? tanks.input(1) : null;
+		boolean oiled = lubricant == null || lubricant.millibuckets() > 0;
+		if (room && oiled && sides.redstone().allows(poweredByRedstone(level, pos, state))) {
 			FluidTank fuel = tanks.input(0);
 			while (burn < output && fuel.millibuckets() > 0) {
 				int value = FluidFuels.jePerMb(kind, fuel.variant.getFluid());
@@ -811,6 +817,9 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				burn -= output;
 				energy.setAmount(energy.getAmount() + output);
 				running = true;
+				if (lubricant != null && level.getGameTime() % FluidFuels.LUBRICANT_TICKS == 0) {
+					lubricant.drain(1);
+				}
 			}
 			maxBurn = output;
 			maxProgress = output;

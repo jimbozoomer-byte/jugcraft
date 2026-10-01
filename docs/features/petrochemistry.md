@@ -110,6 +110,13 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - Balance: a bucket of crude oil refined to diesel and gasoline costs about 16,000 JE to pump and 23,880 JE to refine, and its 525 mB of diesel alone give 134,400 JE here, so oil is a strong net gain; that is the point of the tier. Burning heavy fuel oil straight is worth 128,000 JE a bucket but skips the diesel and naphtha cracking would give. The whole chain is audited in BALANCE.md in commit 19.
 - Recipe: steel plates, an electric motor, two tinplate tanks, a machine casing and a steel gear.
 
+### Gas turbine (batch 3, commit 15)
+- The **gas turbine** is four wide, two tall and two deep: a grilled air-intake filter house, a long gunmetal turbine casing with chrome bands and burner cans, an exhaust stack over the hot section, an alternator drum behind the control panel and a lubricant tank with a golden sight glass at the back.
+- It makes **512 JE/t** from its 16-bucket fuel tank: **gasoline gives 384 JE/mB** (384,000 JE a bucket) and **refinery gas 192 JE/mB**. Refinery gas, which every refining step gives off, is now worth burning.
+- Its second tank takes **lubricant** from the vacuum distillation unit: it will not run without any, and running uses 1 mB every 20 game ticks (a bucket lasts about 17 minutes). This is upkeep, not fuel: a bucket of lubricant keeps it running for 10,240,000 JE.
+- 120,000 JE buffer, up to 2,048 JE/t out of every part. Recipe: steel plates, iron bars, two diesel generators, an advanced circuit and a steel gear.
+- Balance: the gasoline and gas from one bucket of crude oil (293 mB and 183 mB) give about 147,700 JE here, on top of the diesel's 134,400 JE. Audited in BALANCE.md in commit 19.
+
 ### What refining gives (batch 2 summary)
 From one bucket of crude oil, with every byproduct refined:
 
@@ -154,6 +161,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 - Game test `mixerMakesFrackingFluid`.
 - Game test `frackingRigFreesShaleOil` (it takes fracking fluid through Fabric's fluid API, brings up crude oil, gas and flowback, and draws on the shale).
 - Game test `treatmentCleansFlowback`.
+- Game test `gasTurbineNeedsLubricant` (no energy and no gasoline burnt without lubricant; with it, 384 JE per mB of gasoline and a little lubricant used).
 - Game test `dieselGeneratorBurnsDiesel` (its tank refuses crude oil through Fabric's fluid API, and each mB of diesel burnt adds exactly 256 JE).
 - Game test `pumpjackPumpsOil`: a powered pumpjack over pumpable oil fills its tank with crude oil and the reservoir goes down by as much.
 - Game tests `extractorTanksOnlyTakeWhatTheyUse` (its tanks take water but not lava or crude oil, through Fabric's fluid API) and `extractorWashesOilFromOilSand` (a block of oil sand and water become 500 mB of crude oil and sand, using 250 mB of water).

@@ -13,6 +13,12 @@ public final class FluidFuels {
 	public static final int DIESEL = 256;
 	/** Heavy fuel oil in the diesel generator burns at half diesel's value. */
 	public static final int HEAVY_FUEL_OIL = 128;
+	/** Gasoline in the gas turbine: the richest fuel, 384,000 JE a bucket. */
+	public static final int GASOLINE = 384;
+	/** Refinery gas in the gas turbine: half gasoline's value, so the distillation tower's gas is worth burning. */
+	public static final int REFINERY_GAS = 192;
+	/** The gas turbine's lubricant upkeep: 1 mB for every this many ticks it runs (a bucket lasts 20,000 ticks). */
+	public static final int LUBRICANT_TICKS = 20;
 
 	private FluidFuels() {
 	}
@@ -22,6 +28,8 @@ public final class FluidFuels {
 		return switch (kind) {
 			case DIESEL_GENERATOR -> fluid == PetroFluids.DIESEL.source() ? DIESEL
 					: fluid == PetroFluids.HEAVY_FUEL_OIL.source() ? HEAVY_FUEL_OIL : 0;
+			case GAS_TURBINE -> fluid == PetroFluids.GASOLINE.source() ? GASOLINE
+					: fluid == PetroFluids.REFINERY_GAS.fluid() ? REFINERY_GAS : 0;
 			default -> 0;
 		};
 	}
