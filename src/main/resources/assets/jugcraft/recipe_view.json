@@ -203,6 +203,34 @@
         {
           "in": [
             [
+              "jugcraft:titanium_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:raw_titanium",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_titanium_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:raw_titanium",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
               "minecraft:iron_ore",
               1
             ]
@@ -503,6 +531,20 @@
         {
           "in": [
             [
+              "jugcraft:titanium_sponge",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:titanium_ingot",
+            1
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
               "jugcraft:lepidolite",
               1
             ]
@@ -647,6 +689,24 @@
           ],
           "extra": [],
           "ticks": 120
+        },
+        {
+          "in": [
+            [
+              "jugcraft:rare_earth_oxide",
+              1
+            ],
+            [
+              "minecraft:iron_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:neodymium_magnet",
+            1
+          ],
+          "extra": [],
+          "ticks": 200
         }
       ]
     },
@@ -811,6 +871,20 @@
         {
           "in": [
             [
+              "jugcraft:titanium_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:titanium_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
               "jugcraft:plastic_pellets",
               1
             ]
@@ -919,6 +993,28 @@
           ],
           "extra": [],
           "ticks": 300
+        },
+        {
+          "in": [
+            [
+              "jugcraft:microchip",
+              4
+            ],
+            [
+              "jugcraft:advanced_circuit",
+              1
+            ],
+            [
+              "minecraft:gold_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:processor",
+            1
+          ],
+          "extra": [],
+          "ticks": 400
         }
       ]
     },
@@ -2427,6 +2523,20 @@
           ],
           "extra": [],
           "ticks": 60
+        },
+        {
+          "in": [
+            [
+              "jugcraft:silicon_boule",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:silicon_wafer",
+            8
+          ],
+          "extra": [],
+          "ticks": 200
         }
       ]
     },
@@ -2917,6 +3027,254 @@
           ],
           "results": [],
           "ticks": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:salt",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:brine",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 60
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:electrolytic_cell",
+      "type": "electrolysis",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:brine",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:chlorine",
+              250
+            ],
+            [
+              "jugcraft:hydrogen",
+              250
+            ],
+            [
+              "jugcraft:lye",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 200
+        },
+        {
+          "items": [
+            [
+              "jugcraft:alumina",
+              2
+            ],
+            [
+              "jugcraft:coke",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:aluminum_ingot",
+              2
+            ]
+          ],
+          "ticks": 160
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:chemical_reactor",
+      "type": "chemical_reaction",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:sulfur_dust",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:sulfuric_acid",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "jugcraft:bauxite",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:lye",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:alumina",
+              2
+            ]
+          ],
+          "ticks": 120
+        },
+        {
+          "items": [
+            [
+              "jugcraft:phosphate",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fertilizer",
+              4
+            ]
+          ],
+          "ticks": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:raw_titanium",
+              1
+            ],
+            [
+              "jugcraft:coke",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:chlorine",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:titanium_sponge",
+              1
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:lepidolite",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:lithium_carbonate",
+              2
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "jugcraft:monazite",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:rare_earth_oxide",
+              2
+            ]
+          ],
+          "ticks": 140
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:lithography_station",
+      "type": "lithography",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:silicon_wafer",
+              1
+            ],
+            [
+              "jugcraft:copper_wire",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              100
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:microchip",
+              4
+            ]
+          ],
+          "ticks": 200
         }
       ]
     },

@@ -18,6 +18,7 @@ Energy is in **JE** (Jugcraft Energy) and rotation in **KE**, both per tick (20 
 | Diesel Generator | 256 JE/t | diesel 256,000 · heavy fuel oil 128,000 per bucket | stops burning when full |
 | Gas Turbine | 512 JE/t | gasoline 384,000 · refinery gas 192,000 per bucket | plus 1 mB lubricant per 20 ticks running (a bucket per 10,240,000 JE) |
 | Diesel Engine | up to 512 KE/t | diesel 256,000 KE · heavy fuel oil 128,000 KE per bucket | burns only for what the line takes |
+| Fuel Cell | 128 JE/t | hydrogen 128,000 per bucket | a bucket of hydrogen costs 204,800 JE of electrolysis |
 | Steam Generator, bitumen | 64 JE/t | 51,200 per bitumen | unchanged by the oil line |
 
 Charcoal burns three quarters as long as coal in Jugcraft's generators and engines. Vanilla furnaces are unchanged.
@@ -28,9 +29,11 @@ Charcoal burns three quarters as long as coal in Jugcraft's generators and engin
 | --- | --- | --- |
 | KE → JE (Dynamo) | 128 JE/t max | 25% |
 | JE → KE (Electric Motor) | 96 KE/t max (needs 128 JE/t; takes up to 256) | 25% |
+| KE → JE (Magnet Dynamo) | 512 JE/t max | 5% |
+| JE → KE (Magnet Motor) | 384 KE/t max (needs 405 JE/t; takes up to 1,024) | 5% |
 | Machine on a shaft | 1 KE = 1 JE | none |
 
-A motor driving a dynamo returns 56% of the JE: no loop.
+A motor driving a dynamo returns 56% of the JE: no loop. The magnet pair returns 90.25%: still no loop.
 
 ## Storage and transfer
 
@@ -38,6 +41,9 @@ A motor driving a dynamo returns 56% of the JE: no loop.
 | --- | --- | --- |
 | Battery Box | 400,000 JE | 256 |
 | Capacitor Bank | 4,000,000 JE | 4,096 |
+| Lithium Battery Bank | 32,000,000 JE | 16,384 |
+| Steel Tank | 128 buckets of one fluid | by pump |
+| Gas Holder | 1,024 buckets of one gas | by pump |
 | Copper / Silver / Aluminum Cable | — | 256 / 1,024 / 4,096 |
 | Charging Station | 50,000 JE | 1,024 in, 512 into the tool |
 
@@ -73,11 +79,24 @@ Burnt in the best generator for each (diesel generator, gas turbine), that is 13
 
 - Instead of cracking, the vacuum unit turns 250 mB of heavy fuel oil into 100 mB lubricant and ½ asphalt binder (the turbine's upkeep and 4 asphalt).
 - Refinery gas has two uses: 192,000 JE a bucket in the turbine, or 4 plastic pellets (4 sheets).
-- KE: the diesel engine gives the same per mB as the generator; through a dynamo that is 192 JE/mB, so the generator stays the better JE source.
+- KE: the diesel engine gives the same per mB as the generator; through a dynamo that is 192 JE/mB, so the generator stays the better JE source. Even through a magnet dynamo it is 243 JE/mB, under the generator's 256.
+
+## Electronics
+
+| Step | Cost |
+| --- | --- |
+| Silicon boule (crystal grower) | 4 silicon, 1 phosphate, 51,200 JE |
+| 8 wafers (sawmill) | 1 boule, 200 ticks |
+| 4 microchips (lithography station) | 1 wafer, 2 copper wire, 100 mB sulfuric acid, 38,400 JE |
+| Processor (circuit assembler) | 4 microchips, 1 advanced circuit, 1 gold ingot, 12,800 JE |
+
+A processor costs about 64,000 JE of crystal growing and etching (two wafers' worth of chips), plus 2 silicon, 4 copper wire and 100 mB of acid. Nothing in this tier makes power or turns back into its inputs.
 
 ## Loops and renewables checked
 
-- **Motor ↔ dynamo:** loses 44% per round trip.
+- **Motor ↔ dynamo:** loses 44% per round trip; magnet motor ↔ magnet dynamo loses 9.75% (game test `magnetMotorAndDynamoLoopLosesPower`).
+- **Electrolysis and the fuel cell:** a bucket of brine costs 51,200 JE and gives 250 mB of hydrogen, worth 32,000 JE in the fuel cell: a 37.5% return, never a loop.
+- **Aluminum:** the Bayer route gets two ingots per bauxite for about 35,000 JE an ingot; the arc furnace gets one for 12,800 JE. More metal for more power, not more of both.
 - **Oil:** no loop. Fracking water returns at 75% (flowback treatment), so a fracking rig needs a water supply; the water is not counted as gain. Diesel engine → dynamo → electric motor loses at every step.
 - **Coke:** a coke oven turns 1 coal into 1 coke, which burns twice as long. That doubles the power from coal, but uses the coal up: an upgrade path, not a loop.
 - **Sieve:** cobblestone → gravel → sieve gives a small trickle of iron and tin nuggets (12% and 8%). This is a deliberate renewable, marked `renewable` in the recipe data and exempt from the metal-conservation audit.
