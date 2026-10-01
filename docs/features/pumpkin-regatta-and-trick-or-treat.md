@@ -67,7 +67,43 @@ Primary specialty and supported player role: farming and play; supports groups (
 No new dependencies. Every texture is drawn by code (`tools/regatta_textures.py`): the boats' cut flesh, the ghost sheet's view, the flag, buoys, hats, bag, candy bar and boat icons. The boats are drawn from the giant pumpkin's own side tiles. The hats are 3D item models.
 
 ## Verification
-Pending: the Build workflow's results are recorded here when they are in.
+Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions):
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares every boat, regatta and trick-or-treat number, tag and table with Java, checks every buoy number has a model, and allows a vanilla tab's root as an advancement's parent) | Pass, 424 IDs |
+| `./gradlew build` on `21a98ac` (with the Halloween harvest and everything under it, and `main` after #57, merged in) | Pass |
+| Game tests on the headless server, same commit: 174 in total, 14 of them new here (`RegattaGameTests`) | **All 174 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `21a98ac`; no model or texture errors in the log; `[regatta test] pumpkin boats afloat: 2` |
+
+The 14 new game tests (`RegattaGameTests`):
+1. hollowing a full-grown, carved, lit giant from the top gives a barge keeping its weight, carving and torch; all 27 blocks go, 4–8 guts and giant seeds come out but no pumpkins, and the knife wears by one;
+2. the knife on top of a 2×2×2 giant only hints until the player sneaks, then makes a racer weighing 30 kg plus 2 kg a growth point, with guts and no giant seeds;
+3. each kind's speed ratio runs from its lightest to its heaviest weight, and the tick factor reaches exactly that top speed;
+4. a barge seats four (a fifth is refused), a racer one; a broken barge drops its item with the same data;
+5. a buoy floats on water, not on land; using it counts up, sneaking counts down past 1 to 16; it goes when its water does;
+6. a run: the flag finds buoys 1 and 2 in order; only the driver can start; no mark counts during the countdown; sitting within reach of both buoys and the flag, the run passes them on three ticks and the board records 2 ticks; the winner gets one first-prize ribbon, a better time replaces the old one without a second ribbon, and leaving the boat voids a new run;
+7. the Halloween window: both ends included, wrapping past New Year, the operator's time zone (still on in New York at 02:00 UTC on 4 November, over in UTC), and `on`/`off` overriding the dates;
+8. **activation and duplicates:** in season at dusk, in a carved pumpkin under a porch light, a home gives a treat; knocking again the same night gives a trick and no treat; the next night it gives again;
+9. **conditions:** nothing out of season (`off`), at noon or after midnight, without a costume or without a porch light, or with nobody's bed near; a lit hand-carved pumpkin counts as a porch light;
+10. **restart, deactivation and earned content:** the night's record survives a save and load and refuses the same home again; with the event off nobody answers but treats and the costume stay; on again the same night, no second treat;
+11. ten villagers' homes behind one door give ten treats, then a trick, and Full Bag is earned;
+12. a Candy Bag used on a door through the game's own block-use path knocks without opening it; one knock waits per player; only wooden doors take one; after the answer the player may knock again;
+13. the three hats and all four hand-carved pumpkins are worn on the head (the pumpkins not swapped on by a right click, with the carved-pumpkin view), count as costumes, and the pumpkins disguise a gaze; the ghost sheet has its view;
+14. the six recipes, the treat and hollowing tables and both advancements load, and 50 rolls of the treat table give only its sweets.
+
+The client game test (`RegattaClientGameTests`) builds a pond with a carved, lit barge with two villagers aboard, a racer, four numbered buoys and the flag, and a door with a jack o'lantern porch light beside armor stands in a carved pumpkin, the three hats and a hand-carved pumpkin. It photographs them by day and at midnight. Screenshots are taken with the HUD hidden, so the ghost sheet's view (a camera overlay) is not photographed; test 13 checks the sheet has it.
+
+Found by CI and fixed before this record:
+- 26.3 has no `PushReaction.DESTROY` (`POPPED`), its `PoseStack` turns with `rotateDegrees`, and vanilla entity types are looked up by ID in tests (compile errors).
+- Test 10 first checked the saved record by the clock time instead of the night number it is kept by; the test was wrong, not the game.
+
+**Not run:**
+- a person playing it in a client, paddling a pumpkin boat (speed in water is only checked by its formula);
+- a dedicated server with two players: racing each other, two players at the same door;
+- trick-or-treating in a real village at night (the tests use villagers with homes set, not grown villages), and a restart of a real world across the event's end;
+- performance with many boats or racers.
 
 ## World and event applicability
 - **Seasonal rules** (docs/CONTENT_BRANCHES.md): the operator sets `halloween.start`, `halloween.end`, `halloween.timezone` and `halloween.mode` (`auto`, `on`, `off`) in `config/jugcraft.properties`; clients' clocks never count; timing and the record of who got what are on the server; ending the event only stops answers; nothing in progression needs it, and every treat but the optional King-Size Candy Bar has an all-year recipe.
