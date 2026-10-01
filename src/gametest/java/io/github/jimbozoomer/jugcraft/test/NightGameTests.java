@@ -582,7 +582,7 @@ public class NightGameTests {
 			double away = Math.hypot(horseman.getX() - scarecrow.getX() - 0.5, horseman.getZ() - scarecrow.getZ() - 0.5);
 			helper.assertTrue(away <= HorsemanSummoning.MAX_DISTANCE + 1.0, "within " + HorsemanSummoning.MAX_DISTANCE + " blocks: " + away);
 			helper.assertTrue(horseman.home().equals(scarecrow), "His arena is the scarecrow: " + horseman.home() + " vs " + scarecrow);
-			helper.assertTrue(horseman.getTarget() == caller, "He hunts the summoner: " + horseman.getTarget());
+			helper.assertTrue(horseman.quarry().map(caller.getUUID()::equals).orElse(false), "He hunts the summoner: " + horseman.quarry());
 			helper.assertTrue(horseman.isPersistenceRequired(), "and he stays");
 			helper.setBlock(lower.above(2), Blocks.JACK_O_LANTERN);
 			helper.assertTrue(HorsemanSummoning.summon(caller, scarecrow, MIDNIGHT) == HorsemanSummoning.Result.ALREADY_RIDING, "Only one rides at a time");
@@ -697,7 +697,7 @@ public class NightGameTests {
 	}
 
 	/**
-	 * He is saved with the world: his arena, rage, loneliness and health. Loaded after the event has ended (a restart
+	 * He is saved with the world: his arena, whom he hunts, his rage, loneliness and health. Loaded after the event has ended (a restart
 	 * across the boundary) he leaves at once.
 	 */
 	@GameTest
@@ -706,8 +706,10 @@ public class NightGameTests {
 		floor(helper);
 		HeadlessHorseman horseman = helper.spawnWithNoFreeWill(JugcraftAgriculture.HEADLESS_HORSEMAN, new BlockPos(3, 2, 3));
 		BlockPos home = helper.absolutePos(new BlockPos(1, 2, 1));
+		ServerPlayer summoner = player(helper, new BlockPos(6, 2, 6), ItemStack.EMPTY);
 		try {
 			horseman.setHome(home);
+			horseman.hunt(summoner);
 			horseman.setHealth(horseman.getMaxHealth() / 2.0F);
 			horseman.updateRage(level);
 			horseman.setLonely(200);
@@ -715,8 +717,8 @@ public class NightGameTests {
 			horseman.saveWithoutId(out);
 			HeadlessHorseman copy = JugcraftAgriculture.HEADLESS_HORSEMAN.create(level, EntitySpawnReason.LOAD);
 			copy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), out.buildResult()));
-			helper.assertTrue(copy.home().equals(home) && copy.enraged() && copy.lonely() == 200 && copy.getHealth() == horseman.getMaxHealth() / 2.0F,
-					"Arena, rage, loneliness and health are kept");
+			helper.assertTrue(copy.home().equals(home) && copy.enraged() && copy.lonely() == 200 && copy.getHealth() == horseman.getMaxHealth() / 2.0F
+					&& copy.quarry().map(summoner.getUUID()::equals).orElse(false), "Arena, quarry, rage, loneliness and health are kept");
 			try {
 				HalloweenSeason.setMode(HalloweenSeason.Mode.ON);
 				helper.assertFalse(copy.shouldLeave(MIDNIGHT), "Loaded during the event, at midnight, he rides on");

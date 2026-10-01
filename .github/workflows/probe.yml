@@ -30,8 +30,7 @@ jobs:
           l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
           GT=$(find ~/.gradle/caches -name 'fabric-gametest-api-v1*.jar' | grep -v sources | head -2 | tr '\n' ':')
           CP="$CP:$GT"
-          javap -cp "$CP" -p -c net.minecraft.world.entity.Mob | sed -n '/public void setTarget(/,/^$/p' | head -60
-          javap -cp "$CP" -p -c net.minecraft.world.entity.LivingEntity | sed -n '/public boolean canAttack(net.minecraft.world.entity.LivingEntity);/,/^$/p' | head -40
-          javap -cp "$CP" -p -c net.minecraft.world.entity.LivingEntity | sed -n '/public boolean canBeSeenAsEnemy()/,/^$/p' | head -30
-          javap -cp "$CP" -p -c net.minecraft.world.entity.player.Player | sed -n '/public boolean canBeSeenAsEnemy()/,/^$/p' | head -30
-          javap -cp "$CP" -p -c net.minecraft.world.entity.Mob | sed -n '/protected final void serverAiStep()/,/^$/p' | head -40
+          javap -cp "$CP" -p -c net.minecraft.world.entity.Mob | sed -n '/asValidTarget(net.minecraft.world.entity.LivingEntity);/,/^$/p' | head -60
+          javap -cp "$CP" -p -c net.minecraft.world.entity.LivingEntity | sed -n '/public boolean canBeSeenByAnyone()/,/^$/p' | head -30
+          javap -cp "$CP" -p -c net.minecraft.world.entity.Avatar | sed -n '/canBeSeenAsEnemy()/,/^$/p' | head -30
+          javap -cp "$CP" -p net.minecraft.server.level.ServerPlayer | grep -iE 'invulnerable|canBeSeen|isSpectator' | head -20

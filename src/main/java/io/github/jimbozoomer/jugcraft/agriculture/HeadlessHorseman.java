@@ -1,7 +1,10 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
@@ -31,13 +34,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The Headless Horseman: a headless rider on a black horse, summoned at midnight during the Halloween event
  * ({@link HorsemanSummoning}). He charges and strikes, and throws {@link FlamingPumpkin}s at whoever he hunts
  * ({@value #THROW_RANGE} blocks at most). At half health he is enraged: faster, throwing three at a time, twice as
  * often. He keeps to his arena, {@value #ARENA_RADIUS} blocks around where he was summoned (he rides back, and
- * lets go of a target that runs far beyond it), and shows a boss bar.
+ * lets go of a target that runs far beyond it), and shows a boss bar. He remembers who summoned him and goes back for
+ * them whenever they are in his arena.
  *
  * <p>He rides off, leaving nothing, at dawn, when the event ends, or when nobody has been within
  * {@value #LEAVE_RANGE} blocks of his arena for {@value #LONELY_TICKS} ticks. Killed by a player he drops his
@@ -56,9 +61,11 @@ public class HeadlessHorseman extends Monster implements RangedAttackMob {
 	public static final double ENRAGED_SPEED_BONUS = 0.25;
 	public static final int MAX_HEALTH = 160;
 
-	private final ServerBossEvent bossBar = new ServerBossEvent(java.util.UUID.randomUUID(),
+	private final ServerBossEvent bossBar = new ServerBossEvent(UUID.randomUUID(),
 			Component.translatable("entity.jugcraft.headless_horseman"), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
 	private BlockPos home;
+	/** Whoever summoned him: he goes for them whenever they are in his arena and can be attacked. */
+	private @Nullable UUID quarry;
 	private boolean enraged;
 	private int lonely;
 	private int throwCooldown = THROW_COOLDOWN;
@@ -98,6 +105,16 @@ public class HeadlessHorseman extends Monster implements RangedAttackMob {
 		return enraged;
 	}
 
+	public Optional<UUID> quarry() {
+		return Optional.ofNullable(quarry);
+	}
+
+	/** Sets who he hunts, and goes for them now if he can (a player who has only just appeared cannot be attacked yet). */
+	public void hunt(Player player) {
+		quarry = player.getUUID();
+		setTarget(player);
+	}
+
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
@@ -113,6 +130,12 @@ public class HeadlessHorseman extends Monster implements RangedAttackMob {
 			}
 		}
 		keepToArena();
+		if (getTarget() == null && quarry != null && tickCount % 20 == 0) {
+			Player summoner = level.getPlayerByUUID(quarry);
+			if (summoner != null && summoner.distanceToSqr(Vec3.atBottomCenterOf(home())) <= (ARENA_RADIUS + 8) * (ARENA_RADIUS + 8)) {
+				setTarget(summoner);
+			}
+		}
 		updateRage(level);
 		LivingEntity target = getTarget();
 		if (--throwCooldown <= 0 && target != null && target.isAlive()) {
@@ -257,6 +280,9 @@ public class HeadlessHorseman extends Monster implements RangedAttackMob {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		super.addAdditionalSaveData(output);
 		output.store("home", BlockPos.CODEC, home());
+		if (quarry != null) {
+			output.store("quarry", UUIDUtil.CODEC, quarry);
+		}
 		output.putBoolean("enraged", enraged);
 		output.putInt("lonely", lonely);
 	}
@@ -265,6 +291,7 @@ public class HeadlessHorseman extends Monster implements RangedAttackMob {
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		home = input.read("home", BlockPos.CODEC).orElse(null);
+		quarry = input.read("quarry", UUIDUtil.CODEC).orElse(null);
 		enraged = input.getBooleanOr("enraged", false);
 		lonely = input.getIntOr("lonely", 0);
 		if (enraged) {

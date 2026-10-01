@@ -97,7 +97,7 @@ public final class HorsemanSummoning {
 		horseman.setHome(scarecrow);
 		horseman.setPersistenceRequired();
 		level.addFreshEntity(horseman);
-		horseman.setTarget(player);
+		horseman.hunt(player);
 		for (ServerPlayer near : level.getPlayers(p -> p.distanceToSqr(Vec3.atCenterOf(scarecrow)) < 64.0 * 64.0)) {
 			near.sendSystemMessage(Component.translatable("message.jugcraft.horseman.summoned"));
 		}
