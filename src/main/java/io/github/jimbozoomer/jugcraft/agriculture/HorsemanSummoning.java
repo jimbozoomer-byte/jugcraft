@@ -104,14 +104,17 @@ public final class HorsemanSummoning {
 		return Result.SUMMONED;
 	}
 
-	/** A spot on the ground {@value #MIN_DISTANCE} to {@value #MAX_DISTANCE} blocks from the scarecrow, in a loaded chunk; beside it if none is found. */
+	/**
+	 * A spot on the ground {@value #MIN_DISTANCE} to {@value #MAX_DISTANCE} blocks from the scarecrow where entities tick (a chunk can be
+	 * loaded before its entities are, and a Horseman put there would stand frozen and unseen); beside it if none is found.
+	 */
 	static Vec3 rideInSpot(ServerLevel level, BlockPos scarecrow) {
 		for (int attempt = 0; attempt < 8; attempt++) {
 			double angle = level.getRandom().nextDouble() * Math.PI * 2.0;
 			int distance = MIN_DISTANCE + level.getRandom().nextInt(MAX_DISTANCE - MIN_DISTANCE + 1);
 			int x = scarecrow.getX() + (int) Math.round(Math.cos(angle) * distance);
 			int z = scarecrow.getZ() + (int) Math.round(Math.sin(angle) * distance);
-			if (level.isLoaded(new BlockPos(x, scarecrow.getY(), z))) {
+			if (level.isPositionEntityTicking(new BlockPos(x, scarecrow.getY(), z))) {
 				int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
 				if (Math.abs(y - scarecrow.getY()) <= 8) {
 					return new Vec3(x + 0.5, y, z + 0.5);
