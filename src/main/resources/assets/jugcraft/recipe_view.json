@@ -3021,6 +3021,28 @@
             ]
           ],
           "ticks": 120
+        },
+        {
+          "items": [
+            [
+              "jugcraft:phosphate",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fertilizer",
+              4
+            ]
+          ],
+          "ticks": 80
         }
       ]
     },

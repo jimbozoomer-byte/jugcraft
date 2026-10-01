@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidFuels;
 import io.github.jimbozoomer.jugcraft.chemistry.OilReservoirs;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroBlocks;
@@ -38,6 +39,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.material.Fluids;
 
 /**
@@ -490,5 +492,38 @@ public class PetroGameTests {
 			helper.assertTrue(ingots.is(BuiltInRegistries.ITEM.getValue(Jugcraft.id("aluminum_ingot"))) && ingots.getCount() == 2,
 					"Aluminum: " + ingots);
 		});
+	}
+
+	/** The chemical reactor treats two phosphate with 250 mB of sulfuric acid to make four fertilizer. */
+	@GameTest(maxTicks = 300)
+	public void reactorMakesFertilizer(GameTestHelper helper) {
+		MachineBlockEntity reactor = place(helper, MachineKind.CHEMICAL_REACTOR, new BlockPos(4, 1, 2));
+		reactor.tanks().input(0).fill(PetroFluids.SULFURIC_ACID.source(), 250);
+		reactor.setItem(0, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("phosphate")), 2));
+		helper.succeedWhen(() -> {
+			ItemStack out = reactor.getItem(reactor.kind().outputSlot());
+			helper.assertTrue(out.is(PetroItems.FERTILIZER) && out.getCount() == 4, "Fertilizer: " + out);
+		});
+	}
+
+	/** Fertilizer grows every crop in the 5x5 area around where it is used. */
+	@GameTest
+	public void fertilizerGrowsTheCropsAround(GameTestHelper helper) {
+		List<BlockPos> crops = new java.util.ArrayList<>();
+		for (int x = 0; x < 3; x++) {
+			for (int z = 0; z < 3; z++) {
+				BlockPos soil = new BlockPos(1 + x * 2, 1, 1 + z * 2);
+				helper.setBlock(soil, Blocks.FARMLAND);
+				helper.setBlock(soil.above(), Blocks.WHEAT);
+				crops.add(soil.above());
+			}
+		}
+		// The centre crop is at (3, 2, 3); the corners are two blocks out, inside the 5x5 area.
+		int grown = FertilizerItem.fertilize(helper.getLevel(), helper.absolutePos(new BlockPos(3, 2, 3)));
+		helper.assertTrue(grown == crops.size(), "Grew " + grown + " of " + crops.size());
+		for (BlockPos crop : crops) {
+			helper.assertTrue(((CropBlock) Blocks.WHEAT).getAge(helper.getBlockState(crop)) > 0, "Did not grow at " + crop);
+		}
+		helper.succeed();
 	}
 }

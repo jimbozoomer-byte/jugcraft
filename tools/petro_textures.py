@@ -206,7 +206,29 @@ def alumina():
     return img
 
 
+def fertilizer():
+    """Fertilizer: a tied burlap sack with a green leaf stencilled on it and a few grey-white granules spilt."""
+    rng = random.Random(966)
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(3, 15):
+        half = 4 + (1 if 6 <= y <= 12 else 0) - (1 if y < 5 else 0)
+        for x in range(16):
+            if abs(x - 7.5) <= half:
+                c = (176, 146, 96) if rng.random() < 0.7 else (150, 122, 78)
+                if x > 7.5 + half - 1 or y == 14:
+                    c = (120, 96, 60)
+                img.putpixel((x, y), c + (255,))
+    for x in range(6, 10):
+        img.putpixel((x, 4), (96, 76, 44, 255))
+    for x, y in ((7, 8), (8, 8), (6, 9), (7, 9), (8, 9), (9, 9), (7, 10), (8, 10), (7, 11)):
+        img.putpixel((x, y), (60, 140, 50, 255))
+    for x, y in ((2, 14), (3, 15), (13, 15), (12, 14)):
+        img.putpixel((x, y), (214, 218, 210, 255))
+    return img
+
+
 def draw_all(save, save_animation):
+    save(fertilizer(), "item", "fertilizer")
     save(alumina(), "item", "alumina")
     save(asphalt(), "block", "asphalt")
     save(asphalt_road_line(), "block", "asphalt_road_line")

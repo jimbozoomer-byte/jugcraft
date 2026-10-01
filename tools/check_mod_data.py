@@ -116,7 +116,7 @@ def check_petro():
     expected = [(f, str(i["tick_delay"]), str(i["slope"]), str(i["drop_off"])) for f, i in petro.FLUIDS.items()]
     if declared != expected:
         err(f"PetroFluids.java fluids {declared} != tools/petro.py {expected}")
-    items_java = re.findall(r'JugcraftRegistry\.item\("([a-z_]+)"\)',
+    items_java = re.findall(r'JugcraftRegistry\.item\("([a-z_]+)"[,)]',
                             (JAVA_ROOT / "chemistry" / "PetroItems.java").read_text(encoding="utf-8"))
     if items_java != list(petro.ITEMS):
         err(f"PetroItems.java items {items_java} != tools/petro.py {list(petro.ITEMS)}")

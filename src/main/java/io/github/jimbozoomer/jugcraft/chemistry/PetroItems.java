@@ -17,6 +17,8 @@ public final class PetroItems {
 	public static Item PLASTIC_SHEET;
 	/** Bauxite digested in hot lye (the Bayer process): smelted into aluminum in the electrolytic cell. */
 	public static Item ALUMINA;
+	/** Superphosphate: ripens the crops in a 5x5 area ({@link FertilizerItem}). */
+	public static Item FERTILIZER;
 
 	private PetroItems() {
 	}
@@ -27,6 +29,7 @@ public final class PetroItems {
 		PLASTIC_PELLETS = JugcraftRegistry.item("plastic_pellets");
 		PLASTIC_SHEET = JugcraftRegistry.item("plastic_sheet");
 		ALUMINA = JugcraftRegistry.item("alumina");
+		FERTILIZER = JugcraftRegistry.item("fertilizer", FertilizerItem::new);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(CRACKING_CATALYST);
@@ -34,6 +37,7 @@ public final class PetroItems {
 			output.accept(PLASTIC_PELLETS);
 			output.accept(PLASTIC_SHEET);
 			output.accept(ALUMINA);
+			output.accept(FERTILIZER);
 		});
 	}
 }

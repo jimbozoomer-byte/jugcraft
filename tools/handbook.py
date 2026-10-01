@@ -385,6 +385,10 @@ def build():
                 "seconds.",
                 "That is two ingots from each bauxite, twice what the arc furnace gets and far more than the blast "
                 "furnace's nugget."]},
+            {"title": "Fertilizer", "icon": f"{MOD}:fertilizer", "text": [
+                "Two phosphate and 250 mB of sulfuric acid in the chemical reactor make four fertilizer.",
+                "Use one on the ground or a crop: every crop in the 5x5 area around it (a block up or down too) gets "
+                "two doses of bone meal. Grass and saplings are left alone."]},
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

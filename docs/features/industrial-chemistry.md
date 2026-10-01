@@ -31,9 +31,15 @@ Salt, sulfur, phosphate and bauxite have been in the world since the first ores,
 - Cost per pair of ingots: 40,960 JE in the cell, 3,840 in the reactor and half a bucket of brine's electrolysis for the lye (25,600 JE and a salt). That is about 35,000 JE an ingot, against 12,800 in the arc furnace: more power, twice the metal.
 - `check_mod_data` now audits metal in fluid recipes too: no fluid machine gives out more metal than its items hold.
 
+### Fertilizer (commit 24)
+- **2 phosphate + 250 mB of sulfuric acid → 4 fertilizer** (superphosphate), in the chemical reactor, 80 ticks.
+- Used on the ground or a crop, one fertilizer gives **every crop in a 5×5 area** (and one block up or down) **two doses of bone meal**, through vanilla's own growth (`BoneMealItem.growCrop`), so every crop grows by its own rules. Only `minecraft:crops`; grass, flowers and saplings are left alone. It is used only if something grew.
+- Up to 25 crops for one item, against one crop per bone meal: the reason to build the acid chain for a farm.
+- Code: `chemistry/FertilizerItem`.
+
 ## Connections
 - Existing input producer: rock salt ore and the flowback treatment unit (salt); crushed sulfur (sulfur dust); water pumps.
-- Existing output consumer: tanks and pipes now; lye goes to bauxite digestion (commit 23), hydrogen to the fuel cell (commit 25), chlorine to later chemistry.
+- Existing output consumer: lye goes to bauxite digestion, sulfuric acid to fertilizer, fertilizer to vanilla crops, hydrogen to the fuel cell (commit 25), chlorine to later chemistry.
 - Technology connection: the oil line's fluid machines and the chemical mixer.
 - Magic connection: none.
 - Reachable entry path: salt is mined from the start; the mixer and cell need only steel-tier parts. No circular unlock.
@@ -52,7 +58,7 @@ No new dependencies. Textures and models are original (`tools/petro_textures.py`
 
 ## Verification
 - `tools/check_mod_data.py` audits the new fluids, gases and recipes like the oil line's.
-- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` and `bayerRouteMakesAluminum` (PetroGameTests).
+- Game tests `mixerMakesBrine`, `cellSplitsBrine`, `reactorMakesSulfuricAcid` `bayerRouteMakesAluminum`, `reactorMakesFertilizer` and `fertilizerGrowsTheCropsAround` (PetroGameTests).
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.

@@ -71,6 +71,8 @@ ITEMS = {
     "plastic_sheet": "Plastic Sheet",
     # Bayer-process alumina (batch 5): the electrolytic cell smelts it into aluminum.
     "alumina": "Alumina",
+    # Superphosphate fertilizer (batch 5): ripens crops in a 5x5 area (chemistry/FertilizerItem).
+    "fertilizer": "Fertilizer",
 }
 
 
@@ -226,6 +228,9 @@ FLUID_RECIPES = {
         # The Bayer process: bauxite digested in hot lye leaves alumina (each bauxite holds two ingots' worth).
         {"name": "alumina", "items": [("jugcraft:bauxite", 1)], "fluids": [("jugcraft:lye", 250)],
          "results": [("jugcraft:alumina", 2)], "ticks": 120, "features": ["aluminum", "salt"]},
+        # Superphosphate: phosphate rock treated with sulfuric acid becomes a soluble fertilizer.
+        {"name": "fertilizer", "items": [("jugcraft:phosphate", 2)], "fluids": [("jugcraft:sulfuric_acid", 250)],
+         "results": [("jugcraft:fertilizer", 4)], "ticks": 80, "features": ["phosphate", "sulfur"]},
     ],
     # Flowback water settles and is filtered: most of it comes back as clean water; the brine leaves salt. A quarter
     # is lost (sludge), so fracking water is never free.
