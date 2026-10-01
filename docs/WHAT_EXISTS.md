@@ -99,7 +99,7 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | WATER_WHEEL | water_wheel | **2 tall** generator: 8–12 JE/t per flowing-water block on its right | 8k / 0 / 64 / – | – | – |
 | AUTO_CRAFTER | auto_crafter | crafts the vanilla recipe in its 3×3 grid; each slot keeps one item as the pattern | 10k / 128 / 0 / 8 | 9 grid, out, 1 remainder | vanilla `crafting` |
 | LARGE_STEAM_ENGINE | large_steam_engine | **2×2×2**: fuel + water → 256 KE/t out of the back of part 7 | none | fuel, water bucket, empty bucket | – |
-| DEPOSIT_DRILL | deposit_drill | **3×3×2**: takes `DEPOSIT_UNITS` (4) per `DEPOSIT_TICKS` (80) from a `DepositBlock` under it or `DEPOSIT_REACH` (1) round it, `DEPOSIT_DEPTH` (3) deep; all faces output, eject on (`SideConfig.allOutputs`) | 20k / 256 / 0 / 32 | 3 result slots (no inputs) | – |
+| DEPOSIT_DRILL | deposit_drill | **3×3×2**: takes `DEPOSIT_UNITS` (1) per `DEPOSIT_TICKS` (300) from one `DepositBlock` of each kind under it or `DEPOSIT_REACH` (1) round it, `DEPOSIT_DEPTH` (3) deep; all faces output, eject on (`SideConfig.allOutputs`) | 20k / 256 / 0 / 16 | 3 result slots (no inputs) | – |
 | ORE_DRILL | ore_drill | **2 tall**: mines `c:ores` in a 9×9 column below, 40 ticks each (`OreDrilling`) | 20k / 256 / 0 / 32 | 3 result slots (no inputs) | – |
 
 Other blocks:

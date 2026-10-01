@@ -40,8 +40,8 @@ public enum MachineKind implements StringRepresentable {
 	STEEL_TANK("steel_tank", 0, 0, 0, 0, 0),
 	// Mining: a 2-tall derrick that mines the ores in a 9x9 column below it. No inputs; three result slots.
 	ORE_DRILL("ore_drill", 20_000, 256, 0, 32, 3),
-	// A 3x3x2 rig over a surface deposit: takes 4 units at a time from the deposit blocks under and around it.
-	DEPOSIT_DRILL("deposit_drill", 20_000, 256, 0, 32, 3),
+	// A 3x3x2 rig over a surface deposit: every 15 s, one unit from each kind of deposit under and around it.
+	DEPOSIT_DRILL("deposit_drill", 20_000, 256, 0, 16, 3),
 	// Renewables: a cobblestone generator (no inputs, one result slot), a tree farm (sapling in; logs out, with the
 	// sapling and extras in two byproduct slots) and a 2-tall water wheel that generates from flowing water.
 	COBBLESTONE_GENERATOR("cobblestone_generator", 4_000, 64, 0, 4, 1),
@@ -134,9 +134,12 @@ public enum MachineKind implements StringRepresentable {
 	public static final int DRILL_TICKS = 40;
 	/** Ore drill: blocks the drill head checks per tick while looking for the next ore (one layer). */
 	public static final int DRILL_SCAN_PER_TICK = (2 * DRILL_RADIUS + 1) * (2 * DRILL_RADIUS + 1);
-	/** Deposit drill: ticks per cycle (before speed upgrades), and the units (items) each cycle takes. */
-	public static final int DEPOSIT_TICKS = 80;
-	public static final int DEPOSIT_UNITS = 4;
+	/**
+	 * Deposit drill: ticks per cycle (15 seconds, before speed upgrades), and the units (items) each cycle takes from
+	 * each kind of deposit in reach.
+	 */
+	public static final int DEPOSIT_TICKS = 300;
+	public static final int DEPOSIT_UNITS = 1;
 	/** Deposit drill: how far past its own 3x3 it reaches on each side, and how many layers down. */
 	public static final int DEPOSIT_REACH = 1;
 	public static final int DEPOSIT_DEPTH = 3;

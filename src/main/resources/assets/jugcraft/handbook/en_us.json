@@ -197,8 +197,8 @@
           "title": "Deposit Drill",
           "icon": "jugcraft:deposit_drill",
           "text": [
-            "Three blocks square and two tall. Build it on a surface deposit (coal, iron, copper or tin, on stony hills): every 4 seconds it takes 4 coal or raw ore from a deposit block under it or one block round it, down to 3 blocks deep, using 32 JE/t. It pushes what it mines out of every side into a chest, item pipe, conveyor or machine beside it. Each deposit block holds 1,000 and then turns to stone; right-click one to see how much is left. Picks only break deposits, for nothing.",
-            "Uses 32 JE/t while working. Holds 20,000 JE."
+            "Three blocks square and two tall. Build it on a surface deposit (coal, iron, copper or tin, on stony hills): every 15 seconds it takes one coal or raw ore from each kind of deposit under it or one block round it, down to 3 blocks deep, using 16 JE/t. It pushes what it mines out of every side into a chest, item pipe, conveyor or machine beside it. Each deposit block holds 1,000 and then turns to stone; right-click one to see how much is left. Picks only break deposits, for nothing.",
+            "Uses 16 JE/t while working. Holds 20,000 JE."
           ],
           "craft": {
             "grid": [

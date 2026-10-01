@@ -768,11 +768,12 @@ public class JugcraftGameTests {
 	}
 
 	/**
-	 * A deposit drill standing on surface deposits empties the ones under it and one block round it into a chest
-	 * beside it, 4 at a time, and leaves stone where each ran out; a deposit outside its reach stays full. Picks get
-	 * nothing from a deposit block.
+	 * A deposit drill standing on surface deposits takes one of each kind per cycle from those under it and one block
+	 * round it, into a chest beside it, and leaves stone where each ran out; a deposit outside its reach stays full.
+	 * Two cycles empty an iron and a coal deposit with 2 left each; mining them one after the other would take four,
+	 * longer than the test allows. Picks get nothing from a deposit block.
 	 */
-	@GameTest(maxTicks = 800)
+	@GameTest(maxTicks = 1000)
 	public void depositDrillEmptiesDepositsIntoAChest(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		BlockPos master = new BlockPos(4, 2, 4);
@@ -785,11 +786,11 @@ public class JugcraftGameTests {
 		helper.setBlock(outside, JugcraftDeposits.BLOCKS.get("iron_deposit"));
 		helper.assertTrue(Block.getDrops(helper.getBlockState(iron), level, helper.absolutePos(iron), null).isEmpty(),
 				"A deposit block drops something when broken");
-		// Run the two deposits nearly dry so the test finishes quickly: 6 iron and 3 coal left.
-		helper.assertTrue(Deposits.extract(level, helper.absolutePos(iron), Deposits.CAPACITY - 6) == Deposits.CAPACITY - 6,
+		// Run the two deposits nearly dry so the test finishes quickly: 2 iron and 2 coal left.
+		helper.assertTrue(Deposits.extract(level, helper.absolutePos(iron), Deposits.CAPACITY - 2) == Deposits.CAPACITY - 2,
 				"Could not draw down the iron deposit");
-		Deposits.extract(level, helper.absolutePos(coal), Deposits.CAPACITY - 3);
-		helper.assertTrue(Deposits.remaining(level, helper.absolutePos(coal)) == 3, "The coal deposit does not hold 3");
+		Deposits.extract(level, helper.absolutePos(coal), Deposits.CAPACITY - 2);
+		helper.assertTrue(Deposits.remaining(level, helper.absolutePos(coal)) == 2, "The coal deposit does not hold 2");
 		helper.setBlock(new BlockPos(4, 2, 3), Blocks.CHEST);
 		large(helper, master, MachineKind.DEPOSIT_DRILL);
 		charge(helper, master, Direction.EAST);
@@ -802,7 +803,7 @@ public class JugcraftGameTests {
 			ChestBlockEntity chest = helper.getBlockEntity(new BlockPos(4, 2, 3), ChestBlockEntity.class);
 			int rawIron = count(chest, Items.RAW_IRON);
 			int coalItems = count(chest, Items.COAL);
-			helper.assertTrue(rawIron == 6 && coalItems == 3, "The chest holds " + rawIron + " raw iron and " + coalItems + " coal");
+			helper.assertTrue(rawIron == 2 && coalItems == 2, "The chest holds " + rawIron + " raw iron and " + coalItems + " coal");
 		});
 	}
 

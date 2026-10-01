@@ -67,6 +67,9 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import net.minecraft.world.level.block.Block;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -1006,9 +1009,9 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 
 	/**
 	 * The deposit drill: every {@link MachineKind#DEPOSIT_TICKS} powered ticks it takes {@link MachineKind#DEPOSIT_UNITS}
-	 * units from a deposit block under or around it (see {@link #depositTarget}) and puts the coal or raw ore in its
-	 * result slots, which it pushes out of every face into chests, pipes and machines beside it. A full drill waits;
-	 * a drill with no deposit left in reach stops.
+	 * from one block of each kind of deposit under or around it (see {@link #findDeposits}), so a drill over coal and
+	 * iron gives one coal and one raw iron. What it mines goes in its result slots, which it pushes out of every face
+	 * into chests, pipes and machines beside it. A full drill waits; a drill with no deposit left in reach stops.
 	 */
 	private boolean tickDepositDrill(ServerLevel level, BlockPos pos, BlockState state) {
 		if (sides.eject() && level.getGameTime() % EJECT_INTERVAL == 0) {
@@ -1019,15 +1022,15 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			if (level.getGameTime() % MachineKind.SOURCE_CHECK_INTERVAL != 0) {
 				return false;
 			}
-			depositTarget = findDeposit(level, pos, state);
+			List<BlockPos> found = findDeposits(level, pos, state);
+			depositTarget = found.isEmpty() ? null : found.get(0);
 			progress = 0;
 			if (depositTarget == null) {
 				return false;
 			}
 		}
-		DepositBlock deposit = (DepositBlock) level.getBlockState(depositTarget).getBlock();
-		ItemStack batch = new ItemStack(deposit.yield(), Math.min(MachineKind.DEPOSIT_UNITS, Deposits.remaining(level, depositTarget)));
-		if (batch.isEmpty() || resultSlotFor(batch) < 0 || !sides.redstone().allows(poweredByRedstone(level, pos, state))) {
+		ItemStack first = new ItemStack(((DepositBlock) level.getBlockState(depositTarget).getBlock()).yield());
+		if (resultSlotFor(first) < 0 || !sides.redstone().allows(poweredByRedstone(level, pos, state))) {
 			return false;
 		}
 		MachineUpgrades.Effect upgrades = upgrades();
@@ -1039,13 +1042,20 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		energy.setAmount(energy.getAmount() - use);
 		if (++progress >= maxProgress) {
 			progress = 0;
-			int got = Deposits.extract(level, depositTarget, batch.getCount());
-			if (got > 0) {
-				int slot = resultSlotFor(batch);
-				if (items.get(slot).isEmpty()) {
-					items.set(slot, batch.copyWithCount(got));
-				} else {
-					items.get(slot).grow(got);
+			for (BlockPos source : findDeposits(level, pos, state)) {
+				ItemStack mined = new ItemStack(((DepositBlock) level.getBlockState(source).getBlock()).yield(),
+						MachineKind.DEPOSIT_UNITS);
+				int slot = resultSlotFor(mined);
+				if (slot < 0) {
+					continue; // No room for this kind; the others still come out.
+				}
+				int got = Deposits.extract(level, source, mined.getCount());
+				if (got > 0) {
+					if (items.get(slot).isEmpty()) {
+						items.set(slot, mined.copyWithCount(got));
+					} else {
+						items.get(slot).grow(got);
+					}
 				}
 			}
 		}
@@ -1054,11 +1064,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	}
 
 	/**
-	 * The deposit block the drill works next: the highest in the area under its 3x3 base and
-	 * {@link MachineKind#DEPOSIT_REACH} blocks round it, down to {@link MachineKind#DEPOSIT_DEPTH} layers. Null when
-	 * none is left.
+	 * The deposit blocks the drill works next, one of each kind (coal, iron, ...): for each, the highest in the area
+	 * under its 3x3 base and {@link MachineKind#DEPOSIT_REACH} blocks round it, down to {@link MachineKind#DEPOSIT_DEPTH}
+	 * layers. Empty when none is left.
 	 */
-	public @Nullable BlockPos findDeposit(ServerLevel level, BlockPos pos, BlockState state) {
+	public List<BlockPos> findDeposits(ServerLevel level, BlockPos pos, BlockState state) {
 		Direction facing = state.getValue(MachineBlock.FACING);
 		Footprint footprint = kind.footprint();
 		int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, minZ = Integer.MAX_VALUE, maxZ = Integer.MIN_VALUE;
@@ -1070,17 +1080,19 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			maxZ = Math.max(maxZ, partPos.getZ());
 		}
 		int reach = MachineKind.DEPOSIT_REACH;
+		Map<Block, BlockPos> byKind = new LinkedHashMap<>();
 		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
 		for (int y = pos.getY() - 1; y >= pos.getY() - MachineKind.DEPOSIT_DEPTH; y--) {
 			for (int x = minX - reach; x <= maxX + reach; x++) {
 				for (int z = minZ - reach; z <= maxZ + reach; z++) {
-					if (level.getBlockState(at.set(x, y, z)).getBlock() instanceof DepositBlock) {
-						return at.immutable();
+					Block block = level.getBlockState(at.set(x, y, z)).getBlock();
+					if (block instanceof DepositBlock && !byKind.containsKey(block)) {
+						byKind.put(block, at.immutable());
 					}
 				}
 			}
 		}
-		return null;
+		return new ArrayList<>(byKind.values());
 	}
 
 	/**

@@ -10,7 +10,7 @@ No numbered release yet. Everything below is on `main`.
 
 ### Unmerged: Surface deposits, batch 11
 - **Coal, Iron, Copper and Tin Deposits:** flat patches in the top layer of stony hills (windswept hills, stony peaks, stony shores). Picks only break them, for nothing; each block holds 1,000 units.
-- **Deposit drill** (3×3, two tall): takes 4 coal or raw ore every 4 seconds from the deposits under it and one block round it, and pushes them into a chest, pipe, conveyor or machine beside it. Empty deposit blocks turn to stone.
+- **Deposit drill** (3×3, two tall): takes one coal or raw ore of each kind every 15 seconds from the deposits under it and one block round it, and pushes them into a chest, pipe, conveyor or machine beside it. Empty deposit blocks turn to stone.
 - `deposits.enabled` switch, an advancement, a handbook page and game tests.
 
 ### #57 Fluid logistics, batch 8: gas holders, valves and filters

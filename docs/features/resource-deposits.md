@@ -1,7 +1,7 @@
 # Surface resource deposits and the deposit drill
 
 Status: implemented on `feature/deposits-11` (batch 11), awaiting review. Compiles and tests in CI only; **not yet played**.
-Proposal issue: owner request, 1 October 2026: "add some surface deposits of resources like coal and iron which have different blocks that aren't mineable directly but that the players must put big drills on and they keep putting out resources until like 1000 are depleted per block the mining drills would mine like 4 at a time and output them into a chest which the player could then send on a conveyer belt or item pipes to furnaces and industrial machines to process, lets start with these showing up on the surface in like stoney hill biomes and maybe make new resource rich biome? We can eventually put them underground."
+Proposal issue: owner request, 1 October 2026: "add some surface deposits of resources like coal and iron which have different blocks that aren't mineable directly but that the players must put big drills on and they keep putting out resources until like 1000 are depleted per block the mining drills would mine like 4 at a time and output them into a chest which the player could then send on a conveyer belt or item pipes to furnaces and industrial machines to process, lets start with these showing up on the surface in like stoney hill biomes and maybe make new resource rich biome? We can eventually put them underground." Rate changed the same day at the owner's request: "Should produce like 1 of each resource every 15 seconds".
 Owner: jimbozoomer-byte
 Target milestone and tier: workshop tier (right after the first coal generator and a basic circuit)
 Primary specialty and supported player role: mining and logistics
@@ -12,14 +12,14 @@ Primary specialty and supported player role: mining and logistics
   - A pickaxe only breaks one, slowly (as slow as obsidian), and gets nothing for it.
   - Right-click one to read how much is left, e.g. "Iron Deposit: 734 of 1,000 left".
 - **Deposit drill.** A 3×3 dieselpunk rig, two blocks tall, built on top of a patch.
-  - Every 4 seconds it takes **4 coal or raw ore** from a deposit block under it, or one block round it, down to 3 blocks deep.
-  - A powered drill covers up to 25 deposit blocks of a patch, so 25,000 items.
+  - Every 15 seconds it takes **one coal or raw ore from each kind of deposit** under it, or one block round it, down to 3 blocks deep. A drill over coal and iron gives one coal and one raw iron every 15 seconds.
+  - A drill covers up to 25 deposit blocks of a patch, 25,000 items; at one item of a kind every 15 seconds, a single-kind patch keeps one drill busy for a long time (about 100 hours of play), so it is a steady trickle rather than a flood.
   - It pushes what it mines out of every side into whatever is beside it: a chest, item pipe, conveyor, or a furnace or machine directly. Item pipes and conveyors then carry it to furnaces and the ore-processing machines.
   - Every face and the eject toggle can be changed on its screen, like any machine.
 - **Depletion.** Each deposit block holds 1,000 units. When one is empty it turns to stone and the drill moves on to the next block. When none is left in reach the drill stops, and you move it to the next patch.
 
 ## Connections
-- Input producer: power from any generator (32 JE/t); the coal generator is enough.
+- Input producer: power from any generator (16 JE/t); a coal generator runs two.
 - Output consumer:
   - Coal goes to generators, the coke oven and furnaces.
   - Raw iron, copper and tin go to furnaces, the electric furnace, crusher, pulverizer and ore washer.
@@ -33,7 +33,7 @@ Primary specialty and supported player role: mining and logistics
 - Trade and solo: solo-reachable. A patch can also be a shared resource on a server.
 
 ## Balance and automation
-- **Rate.** 4 items per 80 ticks (1 item a second) at 32 JE/t: 640 JE an item. Speed and efficiency upgrades apply as on other machines.
+- **Rate.** One item of each kind of deposit in reach per 300 ticks (15 s) at 16 JE/t: 4,800 JE a cycle. Speed and efficiency upgrades apply as on other machines.
 - **Amount.** 1,000 units per block, patches of about 13–50 blocks: roughly 13,000–50,000 items per patch, all finite.
 - **No loop.** Deposits are finite and never regrow. Turning coal from a coal deposit into power (51,200 JE a coal in the coal generator) gains energy the way any mined fuel does, but each block ends.
 - **Yield parity.** A deposit gives raw ore (or coal), the same as pick-mining an ore block without silk touch, so ore processing (crusher ×2, washing ×3) keeps its value. There is no doubling at the drill.
@@ -59,7 +59,7 @@ No new dependencies. Uses Fabric API biome modifications and the `c:is_windswept
   - that every deposit has its assets, loot table and placed feature.
 - The worldgen JSON follows vanilla 26.3's own `disk_gravel` and placed-feature files, read from the game jar with an API probe.
 - Game tests (CI):
-  - `depositDrillEmptiesDepositsIntoAChest`: two nearly-empty deposits in reach are emptied into a chest beside the drill and turn to stone; a deposit out of reach stays full; a deposit block drops nothing.
+  - `depositDrillEmptiesDepositsIntoAChest`: an iron and a coal deposit in reach, each with 2 left, are worked together (one of each per cycle) into a chest beside the drill and turn to stone; a deposit out of reach stays full; a deposit block drops nothing.
   - `brokenDepositIsForgotten`: a deposit placed where one was broken starts full.
 - Not run: client play, worldgen in a real world (finding patches on actual hills), two players, performance with many drills.
 

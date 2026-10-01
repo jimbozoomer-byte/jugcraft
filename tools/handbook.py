@@ -169,8 +169,8 @@ ABOUT = {
                    "384,000 JE a bucket of gasoline or 192,000 JE a bucket of gas. Its second tank takes lubricant "
                    "from the vacuum distillation unit: 1 mB every second of running, and it stops when it runs dry.",
     "deposit_drill": "Three blocks square and two tall. Build it on a surface deposit (coal, iron, copper or tin, on "
-                     "stony hills): every 4 seconds it takes 4 coal or raw ore from a deposit block under it or one "
-                     "block round it, down to 3 blocks deep, using 32 JE/t. It pushes what it mines out of every side "
+                     "stony hills): every 15 seconds it takes one coal or raw ore from each kind of deposit under it "
+                     "or one block round it, down to 3 blocks deep, using 16 JE/t. It pushes what it mines out of every side "
                      "into a chest, item pipe, conveyor or machine beside it. Each deposit block holds 1,000 and then "
                      "turns to stone; right-click one to see how much is left. Picks only break deposits, for nothing.",
     "ore_drill": "Two blocks tall. Mines the ore blocks in a 9x9 column below it, one layer at a time down to the bottom "

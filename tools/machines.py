@@ -212,8 +212,9 @@ STATS = {
     "gas_holder": {"capacity": 0, "tank": 1_024_000},
     # 2 tall. Mines one c:ores block per 40 ticks from a 9x9 column below it, down to the bottom of the world.
     "ore_drill": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "ticks": 40, "radius": 4},
-    # 3x3x2. Takes 4 units (items) from a deposit block per 80 ticks: under its base and 1 block round it, 3 deep.
-    "deposit_drill": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "ticks": 80, "units": 4,
+    # 3x3x2. Every 300 ticks (15 s) takes 1 unit (item) from each kind of deposit under its base and 1 block round
+    # it, 3 deep: a drill over coal and iron gives 1 coal and 1 raw iron.
+    "deposit_drill": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 16, "ticks": 300, "units": 1,
                       "reach": 1, "depth": 3},
     # Needs water and lava touching it (neither is used): 1 cobblestone per 20 ticks.
     "cobblestone_generator": {"capacity": 4_000, "input_per_tick": 64, "use_per_tick": 4, "ticks": 20},
