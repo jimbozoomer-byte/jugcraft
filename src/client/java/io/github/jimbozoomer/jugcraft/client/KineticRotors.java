@@ -56,7 +56,7 @@ public final class KineticRotors {
 		float[] turn = rotor.variantProperty() == null ? null : rotor.variants().get(value(state, rotor.variantProperty()));
 		float angle;
 		if (rotor.sun()) {
-			long day = entity.getLevel().getDayTime() % 24_000L;
+			long day = entity.getLevel().getOverworldClockTime() % 24_000L;
 			angle = day < 12_000L ? (day - 6_000L) / 6_000F * rotor.speed() : 0;
 		} else {
 			long time = entity.getLevel().getGameTime();
