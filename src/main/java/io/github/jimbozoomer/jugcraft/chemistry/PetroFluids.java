@@ -17,7 +17,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The petroleum fluids of the Chemistry branch's oil line (docs/branches/CHEMISTRY.md). Each is a real fluid with a
@@ -31,13 +33,15 @@ public final class PetroFluids {
 		private final int tickDelay;
 		private final int slope;
 		private final int dropOff;
+		private final int color;
 		private FlowingFluid source;
 		private FlowingFluid flowing;
 		private LiquidBlock block;
 		private Item bucket;
 
-		Entry(String id, int tickDelay, int slope, int dropOff) {
+		Entry(String id, int tickDelay, int slope, int dropOff, int color) {
 			this.id = id;
+			this.color = color;
 			this.tickDelay = tickDelay;
 			this.slope = slope;
 			this.dropOff = dropOff;
@@ -45,6 +49,11 @@ public final class PetroFluids {
 
 		public String id() {
 			return id;
+		}
+
+		/** ARGB colour for tank gauges (the middle shade of its texture). */
+		public int color() {
+			return color;
 		}
 
 		public FlowingFluid source() {
@@ -83,8 +92,18 @@ public final class PetroFluids {
 	private PetroFluids() {
 	}
 
+	/** The entry for a petroleum fluid (source or flowing), or null for any other fluid. */
+	public static @Nullable Entry of(Fluid fluid) {
+		for (Entry entry : FLUIDS.values()) {
+			if (fluid == entry.source || fluid == entry.flowing) {
+				return entry;
+			}
+		}
+		return null;
+	}
+
 	public static void register() {
-		CRUDE_OIL = fluid("crude_oil", 20, 2, 2, MapColor.COLOR_BLACK);
+		CRUDE_OIL = fluid("crude_oil", 20, 2, 2, 0xFF1E1711, MapColor.COLOR_BLACK);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {
@@ -93,8 +112,8 @@ public final class PetroFluids {
 		});
 	}
 
-	private static Entry fluid(String id, int tickDelay, int slope, int dropOff, MapColor color) {
-		Entry entry = new Entry(id, tickDelay, slope, dropOff);
+	private static Entry fluid(String id, int tickDelay, int slope, int dropOff, int gauge, MapColor color) {
+		Entry entry = new Entry(id, tickDelay, slope, dropOff, gauge);
 		entry.source = Registry.register(BuiltInRegistries.FLUID, Jugcraft.id(id), new OilFluid.Source(entry));
 		entry.flowing = Registry.register(BuiltInRegistries.FLUID, Jugcraft.id("flowing_" + id), new OilFluid.Flowing(entry));
 		ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id(id));

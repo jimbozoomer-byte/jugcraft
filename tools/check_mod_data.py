@@ -246,7 +246,7 @@ def check_machine_recipe_files(registered):
         if f'"{kind}"' not in kinds:
             err(f"MachineKind.recipeType() has no \"{kind}\" (tools say {machine} uses it)")
     expected = sum(len(recipes) for recipes in machine_recipes().values())
-    files = sorted((DATA / MOD / "recipe").glob("*/*.json"))
+    files = sorted(path for path in (DATA / MOD / "recipe").glob("*/*.json") if path.parent.name in RECIPE_TYPES.values())
     if len(files) != expected:
         err(f"{len(files)} machine recipe files, but tools/machines.py defines {expected}")
     for path in files:
@@ -266,6 +266,55 @@ def check_machine_recipe_files(registered):
                     err(f"{label}: unknown tag {ref}")
             elif split(ref)[0] == MOD and split(ref)[1] not in registered:
                 err(f"{label}: unknown item {ref}")
+
+
+def check_fluid_recipes(registered):
+    """Fluid recipes (tools/petro.py): every item and fluid resolves, slots and tanks exist, and none makes fluid from
+    nothing. Recipes with no item input must not give out more fluid than they take in; recipes with item input must
+    say how much fluid they release from it ("source")."""
+    from generate_material_data import RECIPE_TYPES
+    java = MACHINE_JAVA.read_text(encoding="utf-8")
+    fluids = {f"{MOD}:{f}" for f in petro.FLUIDS} | {"minecraft:water", "minecraft:lava"}
+    for machine, spec in petro.FLUID_MACHINES.items():
+        if f'"{spec["recipe_type"]}"' not in java:
+            err(f"MachineKind.recipeType() has no \"{spec['recipe_type']}\" for {machine}")
+        if spec["recipe_type"] in RECIPE_TYPES.values():
+            err(f"Fluid recipe type {spec['recipe_type']} is also an item machine's")
+    expected = sum(len(r) for r in petro.FLUID_RECIPES.values())
+    types = {spec["recipe_type"] for spec in petro.FLUID_MACHINES.values()}
+    files = [p for p in (DATA / MOD / "recipe").glob("*/*.json") if p.parent.name in types]
+    if len(files) != expected:
+        err(f"{len(files)} fluid recipe files, but tools/petro.py defines {expected}")
+    for machine, recipes in petro.FLUID_RECIPES.items():
+        spec = petro.FLUID_MACHINES[machine]
+        for recipe in recipes:
+            label = f"{machine} recipe {recipe['name']}"
+            if len(recipe.get("items", [])) > spec["item_inputs"] or len(recipe.get("results", [])) > spec["item_outputs"]:
+                err(f"{label}: more items than the machine has slots")
+            if len(recipe.get("fluids", [])) > len(spec["inputs"]) or len(recipe.get("fluid_results", [])) > len(spec["outputs"]):
+                err(f"{label}: more fluids than the machine has tanks")
+            for i, (fluid, mb) in enumerate(recipe.get("fluids", [])):
+                if fluid not in fluids:
+                    err(f"{label}: unknown fluid {fluid}")
+                if mb > spec["inputs"][i]:
+                    err(f"{label}: needs {mb} mB of {fluid} but its tank holds {spec['inputs'][i]}")
+            for i, (fluid, mb) in enumerate(recipe.get("fluid_results", [])):
+                if fluid not in fluids:
+                    err(f"{label}: unknown fluid {fluid}")
+                if mb > spec["outputs"][i]:
+                    err(f"{label}: makes {mb} mB of {fluid} but its tank holds {spec['outputs'][i]}")
+            for ref, _ in recipe.get("items", []) + recipe.get("results", []):
+                if ref.startswith("#"):
+                    if not tag_exists("item", ref[1:]):
+                        err(f"{label}: unknown tag {ref}")
+                elif split(ref)[0] == MOD and split(ref)[1] not in registered:
+                    err(f"{label}: unknown item {ref}")
+            fluid_in = sum(mb for _, mb in recipe.get("fluids", [])) + recipe.get("source", 0)
+            fluid_out = sum(mb for _, mb in recipe.get("fluid_results", []))
+            if recipe.get("items") and "source" not in recipe and fluid_out > sum(mb for _, mb in recipe.get("fluids", [])):
+                err(f"{label}: makes fluid from items without saying how much (\"source\")")
+            if fluid_out > fluid_in:
+                err(f"{label}: {fluid_out} mB out from {fluid_in} mB in")
 
 
 def check_tags():
@@ -516,6 +565,7 @@ def main():
     check_loot(registered)
     check_recipes(registered)
     check_machine_recipe_files(registered)
+    check_fluid_recipes(registered)
     check_tags()
     check_worldgen()
     check_java()

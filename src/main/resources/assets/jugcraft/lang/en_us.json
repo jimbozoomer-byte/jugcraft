@@ -188,6 +188,7 @@
   "container.jugcraft.steam_generator": "Steam Generator",
   "container.jugcraft.steel_foundry": "Steel Foundry",
   "container.jugcraft.steel_tank": "Steel Tank",
+  "container.jugcraft.tank.empty": "Empty",
   "container.jugcraft.tree_farm": "Tree Farm",
   "container.jugcraft.upgrades": "Upgrades: %s\u00d7 speed, %s energy per tick",
   "container.jugcraft.water_wheel": "Water Wheel",

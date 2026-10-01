@@ -14,6 +14,15 @@ Primary specialty and supported player role: industry and power engineering.
 - It is tagged `c:crude_oil` for other mods.
 - Where it comes from and what uses it arrive in the next commits (reservoirs, the pumpjack, the oil sand extractor and refining).
 
+### Fluid processing machines (batch 1, commit 2)
+The base every oil machine is built on; on its own it adds nothing a player can build yet.
+- A fluid processing machine has **input tanks, output tanks and item slots**. Its screen shows a gauge per tank (input tanks on the left, output tanks on the right) with the fluid's name and amount on hover, the item slots, a progress arrow and the energy readout.
+- **Input tanks** take fluid from pumps, pipes and buckets, but only fluids the machine's recipes use in that tank. **Output tanks** give fluid to buckets and pumps, and the machine pushes them out of every outer face of every block it fills, into neighbouring tanks or pipe networks: up to 1,000 mB from each output tank every 4 ticks (pipes still carry at their own rate).
+- Recipes are data-driven: `data/<namespace>/recipe/<machine type>/<name>.json` with `items`, `fluids`, `fluid_results`, `results` and `time` (see `chemistry/FluidRecipe`). The n-th fluid goes in the n-th input tank, results go to the output tanks and slots in order.
+- A machine runs a recipe at its JE per tick when every input is present and every result has room; it waits with its progress kept when power is short.
+- Comparators read how full its tanks are. Breaking the machine loses the fluid inside, as with the tinplate tank.
+- These machines have no side configuration or upgrade slots: items go in and out of any face.
+
 ## Connections
 - Existing input producer: none yet (crude oil comes from reservoirs and oil sand in commits 3–5).
 - Existing output consumer: the fluid system (tanks, steel tank, pumps, pipes); refining comes in batch 2.
@@ -35,6 +44,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 
 ## Verification
 - `tools/check_mod_data.py` checks that the Java fluids match `tools/petro.py` and that every fluid has its name, block model and animated textures.
+- `tools/check_mod_data.py` audits fluid recipes (`tools/petro.py`): every item and fluid resolves, recipes fit the machine's slots and tank sizes, and no recipe gives out more fluid than it takes in (a recipe that releases fluid from an item, such as oil sand, must state how much as its `source`).
 - Game tests (`PetroGameTests`): `crudeOilFillsTanks` (a tinplate tank stores a bucket of crude oil) and `crudeOilMakesNoNewSources` (two sources with a gap leave flowing oil, not a new source).
 - Not run: client play-testing of how the fluid looks and flows.
 

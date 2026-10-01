@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.machine;
 
+import io.github.jimbozoomer.jugcraft.chemistry.FluidMachineSpec;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.StringRepresentable;
@@ -180,8 +181,26 @@ public enum MachineKind implements StringRepresentable {
 		return slots + upgradeSlots();
 	}
 
-	/** The output slot of a processor: after the inputs, before any byproduct slots. */
+	/**
+	 * The tanks and item slots of a fluid processing machine (the Chemistry branch's oil line: docs/branches/CHEMISTRY.md),
+	 * or null for every other machine. Such machines run {@link io.github.jimbozoomer.jugcraft.chemistry.FluidRecipe}s.
+	 */
+	public @Nullable FluidMachineSpec fluidSpec() {
+		return switch (this) {
+			default -> null;
+		};
+	}
+
+	public boolean isFluidProcessor() {
+		return fluidSpec() != null;
+	}
+
+	/** The output slot of a processor: after the inputs, before any byproduct slots. Fluid processors: the first output slot. */
 	public int outputSlot() {
+		FluidMachineSpec spec = fluidSpec();
+		if (spec != null) {
+			return spec.itemInputs();
+		}
 		return slots - 1 - byproductSlots();
 	}
 

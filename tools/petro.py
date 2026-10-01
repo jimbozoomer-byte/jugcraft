@@ -26,3 +26,31 @@ def buckets():
 def petro_items():
     """Items of the petrochemistry line that are not blocks."""
     return buckets()
+
+
+# Fluid processing machines (MachineKind.fluidSpec() in Java mirrors this): input and output tank capacities in mB,
+# item input and output slots, and their recipe type (data/jugcraft/recipe/<type>/).
+FLUID_MACHINES = {}
+
+# Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],
+# fluids out [(fluid, mB)], item results [(item, count)], ticks, feature switches.
+FLUID_RECIPES = {}
+
+
+def fluid_recipe_files(condition):
+    """(recipe type, file name, JSON) for every fluid recipe."""
+    for machine, recipes in FLUID_RECIPES.items():
+        kind = FLUID_MACHINES[machine]["recipe_type"]
+        for recipe in recipes:
+            data = {"fabric:load_conditions": [c for f in recipe["features"] for c in condition(f)],
+                    "type": f"jugcraft:{kind}"}
+            if recipe.get("items"):
+                data["items"] = [{"ingredient": item, "count": count} for item, count in recipe["items"]]
+            if recipe.get("fluids"):
+                data["fluids"] = [{"fluid": fluid, "amount": mb} for fluid, mb in recipe["fluids"]]
+            if recipe.get("fluid_results"):
+                data["fluid_results"] = [{"fluid": fluid, "amount": mb} for fluid, mb in recipe["fluid_results"]]
+            if recipe.get("results"):
+                data["results"] = [{"id": item, "count": count} for item, count in recipe["results"]]
+            data["time"] = recipe["ticks"]
+            yield kind, recipe["name"], data

@@ -283,6 +283,7 @@ def machine_assets(lang):
         write(ASSETS / "items" / f"{upgrade}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{upgrade}")}})
     lang[f"tooltip.{MOD}.speed_upgrade"] = "Each: faster, uses more energy per item (up to 4 count)"
     lang[f"tooltip.{MOD}.efficiency_upgrade"] = "Each: 20% less energy (up to 4 count)"
+    lang[f"container.{MOD}.tank.empty"] = "Empty"
     lang[f"container.{MOD}.redstone"] = "Redstone: %s"
     lang[f"container.{MOD}.redstone.ignored"] = "ignored (always runs)"
     lang[f"container.{MOD}.redstone.high"] = "runs only with a signal"
@@ -541,6 +542,9 @@ def recipes():
         recipe["fabric:load_conditions"] = [c for f in features for c in condition(f)]
         write(out / f"{result}.json", recipe)
     machine_recipe_files(out)
+    import petro
+    for kind, name, data in petro.fluid_recipe_files(condition):
+        write(out / kind / f"{name}.json", data)
 
     # Dusts smelt back into ingots wherever the metal's ore could be smelted; the others use the arc furnace.
     for metal in COMPONENTS["dust"]:
