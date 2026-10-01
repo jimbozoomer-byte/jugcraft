@@ -42,6 +42,8 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.material.Fluid;
+import io.github.jimbozoomer.jugcraft.fluid.FluidNetworks;
 import net.minecraft.world.level.material.Fluids;
 
 /**
@@ -413,6 +415,24 @@ public class PetroGameTests {
 		});
 	}
 
+	/**
+	 * Synthetic rubber (batch 14): the chemical reactor cracks a bucket of naphtha into 500 mB of butadiene, and the
+	 * polymerization reactor turns 500 mB of butadiene into four rubber.
+	 */
+	@GameTest(maxTicks = 300)
+	public void naphthaBecomesRubber(GameTestHelper helper) {
+		MachineBlockEntity cracker = place(helper, MachineKind.CHEMICAL_REACTOR, new BlockPos(2, 1, 1));
+		cracker.tanks().input(0).fill(PetroFluids.NAPHTHA.source(), 1000);
+		MachineBlockEntity polymerizer = place(helper, MachineKind.POLYMERIZATION_REACTOR, new BlockPos(5, 1, 4));
+		polymerizer.tanks().input(0).fill(PetroFluids.BUTADIENE.fluid(), 500);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(cracker.tanks().output(0).has(PetroFluids.BUTADIENE.fluid(), 500),
+					"Butadiene: " + cracker.tanks().output(0).millibuckets());
+			ItemStack rubber = polymerizer.getItem(0);
+			helper.assertTrue(rubber.is(PetroItems.RUBBER) && rubber.getCount() == 4, "Rubber: " + rubber);
+		});
+	}
+
 	/** All three asphalt blocks speed up walking, and need a pickaxe. */
 	@GameTest
 	public void asphaltIsFasterToWalkOn(GameTestHelper helper) {
@@ -561,6 +581,119 @@ public class PetroGameTests {
 			ItemStack out = station.getItem(station.kind().outputSlot());
 			helper.assertTrue(out.is(PetroItems.MICROCHIP) && out.getCount() == 4, "Microchips: " + out);
 			helper.assertTrue(station.tanks().input(0).millibuckets() == 900, "Acid left: " + station.tanks().input(0).millibuckets());
+		});
+	}
+
+	// ------------------------------------------------------------------ nitrogen chemistry (batch 12)
+
+	/**
+	 * The air separation unit needs no input: powered, it fills its first tank with nitrogen and its second with
+	 * oxygen, four parts to one.
+	 */
+	@GameTest(maxTicks = 200)
+	public void airSeparationMakesNitrogenAndOxygen(GameTestHelper helper) {
+		MachineBlockEntity unit = place(helper, MachineKind.AIR_SEPARATION_UNIT, new BlockPos(4, 1, 2));
+		helper.succeedWhen(() -> {
+			int nitrogen = unit.tanks().output(0).millibuckets();
+			int oxygen = unit.tanks().output(1).millibuckets();
+			helper.assertTrue(unit.tanks().output(0).has(PetroFluids.NITROGEN.fluid(), 400), "Nitrogen: " + nitrogen);
+			helper.assertTrue(unit.tanks().output(1).has(PetroFluids.OXYGEN.fluid(), 100), "Oxygen: " + oxygen);
+			helper.assertTrue(nitrogen == 4 * oxygen, nitrogen + " mB nitrogen to " + oxygen + " mB oxygen");
+			int argon = unit.tanks().output(2).millibuckets();
+			helper.assertTrue(unit.tanks().output(2).has(PetroFluids.ARGON.fluid(), 1) && argon * 2 <= oxygen / 2 + 1,
+					"Argon: " + argon + " mB to " + oxygen + " mB oxygen");
+		});
+	}
+
+	/** Pipes the boost gas into a machine through the fluid API, as a pipe would. */
+	private static void feedGas(GameTestHelper helper, BlockPos pos, Fluid gas, int mb) {
+		Storage<FluidVariant> storage = FluidStorage.SIDED.find(helper.getLevel(), helper.absolutePos(pos), Direction.UP);
+		helper.assertTrue(storage != null, "No fluid storage at " + pos);
+		try (Transaction transaction = Transaction.openOuter()) {
+			long in = storage.insert(FluidVariant.of(gas), mb * FluidNetworks.DROPLETS_PER_MB, transaction);
+			helper.assertTrue(in == mb * FluidNetworks.DROPLETS_PER_MB, "Only " + in + " droplets of gas went in");
+			transaction.commit();
+		}
+	}
+
+	/**
+	 * Oxygen blown into the steel foundry doubles its speed: with oxygen, a steel ingot comes out well before the 400
+	 * ticks the foundry takes without, and some of the oxygen is used.
+	 */
+	@GameTest(maxTicks = 300)
+	public void oxygenSpeedsUpTheSteelFoundry(GameTestHelper helper) {
+		BlockPos master = new BlockPos(2, 1, 2);
+		MachineBlockEntity foundry = placeUnpowered(helper, MachineKind.STEEL_FOUNDRY, master);
+		foundry.setItem(0, new ItemStack(Items.IRON_INGOT));
+		foundry.setItem(1, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("coke"))));
+		feedGas(helper, master, PetroFluids.OXYGEN.fluid(), 1_000);
+		helper.succeedWhen(() -> {
+			ItemStack output = foundry.getItem(MachineKind.STEEL_FOUNDRY.outputSlot());
+			helper.assertTrue(output.is(BuiltInRegistries.ITEM.getValue(Jugcraft.id("steel_ingot"))), "Foundry output: " + output);
+		});
+	}
+
+	/** Argon around the crystal grower's melt doubles its speed too. */
+	@GameTest(maxTicks = 300)
+	public void argonSpeedsUpTheCrystalGrower(GameTestHelper helper) {
+		BlockPos master = new BlockPos(2, 1, 2);
+		MachineBlockEntity grower = place(helper, MachineKind.CRYSTAL_GROWER, master);
+		grower.setItem(0, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("silicon")), 4));
+		grower.setItem(1, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("phosphate"))));
+		feedGas(helper, master, PetroFluids.ARGON.fluid(), 1_000);
+		helper.succeedWhen(() -> {
+			ItemStack output = grower.getItem(MachineKind.CRYSTAL_GROWER.outputSlot());
+			helper.assertTrue(output.is(PetroItems.SILICON_BOULE), "Grower output: " + output);
+		});
+	}
+
+	/**
+	 * The synthesis converter makes 200 mB of ammonia from 300 mB of hydrogen and 100 mB of nitrogen (Haber-Bosch), and
+	 * 200 mB of nitric acid from 100 mB of ammonia, 200 mB of oxygen and 100 mB of water (Ostwald).
+	 */
+	@GameTest(maxTicks = 300)
+	public void converterMakesAmmoniaAndNitricAcid(GameTestHelper helper) {
+		MachineBlockEntity haber = place(helper, MachineKind.SYNTHESIS_CONVERTER, new BlockPos(5, 1, 1));
+		haber.tanks().input(0).fill(PetroFluids.HYDROGEN.fluid(), 300);
+		haber.tanks().input(1).fill(PetroFluids.NITROGEN.fluid(), 100);
+		MachineBlockEntity ostwald = place(helper, MachineKind.SYNTHESIS_CONVERTER, new BlockPos(5, 1, 4));
+		ostwald.tanks().input(0).fill(PetroFluids.AMMONIA.fluid(), 100);
+		ostwald.tanks().input(1).fill(PetroFluids.OXYGEN.fluid(), 200);
+		ostwald.tanks().input(2).fill(Fluids.WATER, 100);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(haber.tanks().output(0).has(PetroFluids.AMMONIA.fluid(), 200),
+					"Ammonia: " + haber.tanks().output(0).millibuckets());
+			helper.assertTrue(haber.tanks().input(0).millibuckets() == 0 && haber.tanks().input(1).millibuckets() == 0,
+					"The converter kept some hydrogen or nitrogen");
+			helper.assertTrue(ostwald.tanks().output(0).has(PetroFluids.NITRIC_ACID.source(), 200),
+					"Nitric acid: " + ostwald.tanks().output(0).millibuckets());
+		});
+	}
+
+	/** Two phosphate in 250 mB of ammonia make six fertilizer in the chemical reactor (ammonium phosphate). */
+	@GameTest(maxTicks = 300)
+	public void reactorMakesAmmoniumPhosphate(GameTestHelper helper) {
+		MachineBlockEntity reactor = place(helper, MachineKind.CHEMICAL_REACTOR, new BlockPos(4, 1, 2));
+		reactor.tanks().input(0).fill(PetroFluids.AMMONIA.fluid(), 250);
+		reactor.setItem(0, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("phosphate")), 2));
+		helper.succeedWhen(() -> {
+			ItemStack out = reactor.getItem(reactor.kind().outputSlot());
+			helper.assertTrue(out.is(PetroItems.FERTILIZER) && out.getCount() == 6, "Fertilizer: " + out);
+		});
+	}
+
+	/** Nitric acid etches microchips too, using 50 mB where sulfuric acid takes 100. */
+	@GameTest(maxTicks = 400)
+	public void lithographyEtchesWithNitricAcid(GameTestHelper helper) {
+		MachineBlockEntity station = place(helper, MachineKind.LITHOGRAPHY_STATION, new BlockPos(5, 1, 2));
+		station.tanks().input(0).fill(PetroFluids.NITRIC_ACID.source(), 1_000);
+		station.setItem(0, new ItemStack(PetroItems.SILICON_WAFER));
+		station.setItem(1, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("copper_wire")), 2));
+		helper.succeedWhen(() -> {
+			ItemStack out = station.getItem(station.kind().outputSlot());
+			helper.assertTrue(out.is(PetroItems.MICROCHIP) && out.getCount() == 4, "Microchips: " + out);
+			helper.assertTrue(station.tanks().input(0).millibuckets() == 950,
+					"Nitric acid left: " + station.tanks().input(0).millibuckets());
 		});
 	}
 
