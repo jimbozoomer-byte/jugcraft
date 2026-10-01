@@ -138,6 +138,11 @@ public final class JugcraftAgriculture {
 	/** Sips of water in a Gourd Canteen. */
 	public static DataComponentType<Integer> CANTEEN_WATER;
 	public static BlockEntityType<GiantPumpkinBlockEntity> GIANT_PUMPKIN_ENTITY;
+	public static BlockEntityType<ScarecrowBlockEntity> SCARECROW_ENTITY;
+	/** What a scarecrow wears for a head. */
+	public static final TagKey<Item> SCARECROW_HEADS = TagKey.create(Registries.ITEM, Jugcraft.id("scarecrow_heads"));
+	/** A giant pumpkin carried as an item: see {@link GiantPumpkinData}. */
+	public static DataComponentType<GiantPumpkinData> GIANT_PUMPKIN;
 	public static BlockEntityType<HarvestScaleBlockEntity> HARVEST_SCALE_ENTITY;
 	/** A pumpkin boat's weight, torch and carving, on its item and its entity. */
 	public static DataComponentType<PumpkinBoatData> PUMPKIN_BOAT;
@@ -422,6 +427,16 @@ public final class JugcraftAgriculture {
 		return carved;
 	}
 
+	/** The plain pumpkin a hand-carved pumpkin of this kind was carved from, or null if it is not a hand-carved pumpkin. */
+	public static @Nullable Block plainPumpkin(Block carved) {
+		for (Map.Entry<Block, Block> entry : CARVED_FROM.entrySet()) {
+			if (entry.getValue() == carved) {
+				return entry.getKey();
+			}
+		}
+		return null;
+	}
+
 	/** The hand-carved pumpkin a plain pumpkin of this kind becomes when first carved, or null if it is not a carvable pumpkin. */
 	public static @Nullable Block carvedFrom(Block pumpkin) {
 		return CARVED_FROM.get(pumpkin);
@@ -437,11 +452,17 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * The giant pumpkin: its vine (planted from Giant Pumpkin Seeds), the vine holding a fruit, and the fruit,
-	 * a block of up to 3x3x3 whose master block keeps its growth, weight and carvings. Pistons cannot move it.
+	 * a block of up to 3x3x3 whose master block keeps its growth, weight and carvings. Pistons cannot move it;
+	 * breaking it picks it up whole as a Giant Pumpkin item, which places it again.
 	 */
 	private static void registerGiantPumpkin() {
+		GIANT_PUMPKIN = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("giant_pumpkin"),
+				DataComponentType.<GiantPumpkinData>builder().persistent(GiantPumpkinData.CODEC)
+						.networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(GiantPumpkinData.CODEC)).build());
 		Block giant = registerBlock("giant_pumpkin", GiantPumpkinBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.PUMPKIN)
 				.strength(3.0F).lightLevel(GiantPumpkinBlock::light).pushReaction(PushReaction.IMMOVEABLE));
+		registerItem("giant_pumpkin", props -> new GiantPumpkinItem(giant, props), new Item.Properties().stacksTo(1).useBlockDescriptionPrefix()
+				.component(GIANT_PUMPKIN, GiantPumpkinData.FULL_GROWN), EQUIPMENT_TAB);
 		registerBlock("giant_pumpkin_vine", GiantPumpkinVineBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.PUMPKIN_STEM));
 		registerBlock("attached_giant_pumpkin_vine", AttachedGiantPumpkinVineBlock::new,
 				BlockBehaviour.Properties.ofFullCopy(Blocks.ATTACHED_PUMPKIN_STEM));
@@ -474,7 +495,10 @@ public final class JugcraftAgriculture {
 		registerItem("gourd_canteen", GourdCanteenItem::new, new Item.Properties().stacksTo(1).component(CANTEEN_WATER, 0), TOOL_TAB);
 
 		Block scarecrow = registerBlock("scarecrow", ScarecrowBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
-				.strength(0.8F).sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+				.strength(0.8F).sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED)
+				.lightLevel(ScarecrowBlock::light));
+		SCARECROW_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("scarecrow"),
+				FabricBlockEntityTypeBuilder.create(ScarecrowBlockEntity::new, scarecrow).build());
 		Block shock = registerBlock("corn_shock", props -> new TallDecorationBlock(props, Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0),
 				Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0)), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
 				.strength(0.5F).sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
@@ -543,7 +567,9 @@ public final class JugcraftAgriculture {
 		for (String costume : COSTUMES) {
 			Equippable.Builder worn = Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER);
 			if (costume.equals("ghost_sheet")) {
-				worn.setCameraOverlay(Jugcraft.id("misc/ghost_sheet"));
+				// Its equipment asset has no layers: nothing is drawn by the armor layer or as a block on the head, and the
+				// client's GhostSheetLayer drapes the whole sheet over the wearer (it reads equipment that has an asset).
+				worn.setCameraOverlay(Jugcraft.id("misc/ghost_sheet")).setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id("ghost_sheet")));
 			}
 			registerItem(costume, Item::new, new Item.Properties().stacksTo(1).component(DataComponents.EQUIPPABLE, worn.build()), TOOL_TAB);
 		}

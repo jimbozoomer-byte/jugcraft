@@ -3,7 +3,8 @@
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code from fixed seeds; no Mojang
 texture is read, traced or recoloured. Block and item textures are 16x16; the pumpkin boats' cut flesh
 (entity/pumpkin_boat_flesh, stretched over the inside of a boat) is 64x64, and the view from under a
-ghost sheet (misc/ghost_sheet, stretched over the screen) is 256x128.
+ghost sheet (misc/ghost_sheet, stretched over the screen) is 256x128, and the sheet as worn (entity/ghost_sheet,
+drawn by GhostSheetLayer) is 128x64.
 """
 import math
 import random
@@ -65,6 +66,45 @@ def ghost_face():
     for y in range(16):
         for x in range(16):
             if (x - 7.5) ** 2 + (y - 11) ** 2 <= 1.6:
+                img.putpixel((x, y), (30, 30, 36, 255))
+    return img
+
+
+# The worn sheet's boxes, as in GhostSheetLayer.java: (u, v, width, height, depth) on a 128x64 texture, laid out like a
+# vanilla model box (top and bottom in a row, then the sides west, north, east, south).
+SHEET_BOXES = {"hood": (0, 0, 10, 10, 10), "crown": (40, 0, 8, 1, 8), "drape": (0, 20, 10, 13, 6), "skirt": (40, 20, 11, 9, 8),
+               "right_sleeve": (80, 0, 5, 13, 5), "left_sleeve": (100, 0, 5, 13, 5),
+               "right_thigh": (80, 20, 5, 9, 5), "left_thigh": (100, 20, 5, 9, 5)}
+
+
+def worn_sheet():
+    """The ghost sheet as worn (entity/ghost_sheet, 128x64): plain cloth with soft folds running down the sides, two
+    eye holes and a round mouth on the front of the hood."""
+    rng = random.Random(7111)
+    img = Image.new("RGBA", (128, 64), (0, 0, 0, 0))
+    for name, (u, v, w, h, d) in SHEET_BOXES.items():
+        for y in range(v, v + d + h):
+            for x in range(u, u + 2 * (d + w)):
+                top_row = y < v + d
+                if top_row and not (u + d <= x < u + d + 2 * w):
+                    continue
+                shade_index = rng.choice([1, 2, 2, 3, 2])
+                if not top_row and (x - u) % 4 == 3:
+                    shade_index -= 1  # a fold down the cloth
+                if not top_row and y >= v + d + h - 1 and name in ("skirt", "drape"):
+                    shade_index -= 1  # the hem
+                img.putpixel((x, y), SHEET[max(0, min(3, shade_index))] + (255,))
+    # The hood's front (north) face runs from (u + d, v + d), w by h; the eyes sit level with the wearer's eyes.
+    u, v, w, h, d = SHEET_BOXES["hood"]
+    fx, fy = u + d, v + d
+    for y in range(fy, fy + h):
+        for x in range(fx, fx + w):
+            px, py = x - fx + 0.5, y - fy + 0.5
+            eye = min((px - cx) ** 2 / 2.0 + (py - 4.6) ** 2 / 3.6 for cx in (2.9, 7.1))
+            mouth = (px - 5.0) ** 2 / 1.1 + (py - 8.3) ** 2 / 0.9
+            if eye <= 1.0:
+                img.putpixel((x, y), (16, 16, 20, 255))
+            elif mouth <= 1.0:
                 img.putpixel((x, y), (30, 30, 36, 255))
     return img
 
@@ -211,6 +251,7 @@ def regatta_textures():
         ("block", "regatta_buoy_white"): buoy_paint(WHITE, 7110),
         ("entity", "pumpkin_boat_flesh"): boat_flesh(),
         ("misc", "ghost_sheet"): ghost_overlay(),
+        ("entity", "ghost_sheet"): worn_sheet(),
     }
 
 
