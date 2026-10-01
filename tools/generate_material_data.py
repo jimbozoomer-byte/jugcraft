@@ -30,6 +30,8 @@ CABLE_ROTATION = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {
 
 
 def write(path, obj):
+    if isinstance(obj, dict) and obj.get("elements"):
+        model_writer.separate_coplanar(obj["elements"])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
 
