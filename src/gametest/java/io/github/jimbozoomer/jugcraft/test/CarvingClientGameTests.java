@@ -16,6 +16,8 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.client.MouseHandler;
+import net.minecraft.client.input.InputQuirks;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -125,23 +127,21 @@ public class CarvingClientGameTests implements FabricClientGameTest {
 		context.waitTicks(2);
 
 		TestInput input = context.getInput();
-		clickCell(context, 3, 3, CarvingScreen.MOUSE_LEFT); // Cut is the starting tool
+		clickCell(context, 3, 3, InputConstants.MOUSE_BUTTON_LEFT); // Cut is the starting tool
 		moveToCell(context, 4, 10); // drag a line along row 10
-		input.holdMouse(CarvingScreen.MOUSE_LEFT);
+		input.holdMouse(InputConstants.MOUSE_BUTTON_LEFT);
 		context.waitTicks(1);
 		for (int x = 5; x <= 9; x++) {
 			moveToCell(context, x, 10);
 		}
-		input.releaseMouse(CarvingScreen.MOUSE_LEFT);
+		input.releaseMouse(InputConstants.MOUSE_BUTTON_LEFT);
 		context.waitTicks(1);
-		clickCell(context, 6, 10, CarvingScreen.MOUSE_RIGHT); // right-click erases this session's cut...
-		input.holdControl();
-		input.pressKey(InputConstants.KEY_Z); // ...and Ctrl+Z brings it back
-		input.releaseControl();
+		clickCell(context, 6, 10, InputConstants.MOUSE_BUTTON_RIGHT); // right-click erases this session's cut...
+		pressUndo(context); // ...and Ctrl+Z brings it back
 		context.waitTicks(1);
-		clickCell(context, 9, 10, CarvingScreen.MOUSE_RIGHT); // this erase stays
+		clickCell(context, 9, 10, InputConstants.MOUSE_BUTTON_RIGHT); // this erase stays
 		context.clickScreenButton("Shave");
-		clickCell(context, 12, 3, CarvingScreen.MOUSE_LEFT);
+		clickCell(context, 12, 3, InputConstants.MOUSE_BUTTON_LEFT);
 		context.takeScreenshot("jugcraft_carving_by_hand");
 		context.clickScreenButton("Done");
 		context.waitForScreen(null);
@@ -178,6 +178,19 @@ public class CarvingClientGameTests implements FabricClientGameTest {
 		});
 		context.getInput().setCursorPos(window[0], window[1]);
 		context.waitTicks(1);
+	}
+
+	/**
+	 * Presses Ctrl+Z (Cmd+Z on macOS) through the game's keyboard handler, as the event a real keyboard sends: the Z
+	 * key, its key code and the platform's shortcut modifier. Fabric's {@code TestInput.pressKey} can't express it,
+	 * because it sends every key with no modifiers, even while {@code holdControl} holds Ctrl.
+	 */
+	private static void pressUndo(ClientGameTestContext context) {
+		context.runOnClient(client -> {
+			KeyEvent undo = new KeyEvent(InputConstants.KEY_Z, InputConstants.KEYCODE_Z, InputQuirks.EDIT_SHORTCUT_KEY_MODIFIER);
+			client.keyboardHandler.keyPress(client.getWindow().handle(), InputConstants.PRESS, undo);
+			client.keyboardHandler.keyPress(client.getWindow().handle(), InputConstants.RELEASE, undo);
+		});
 	}
 
 	private static void clickCell(ClientGameTestContext context, int x, int y, int button) {

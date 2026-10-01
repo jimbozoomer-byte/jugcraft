@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.agriculture.CarvePayload;
 import io.github.jimbozoomer.jugcraft.agriculture.CarvingTemplates;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
@@ -32,12 +33,6 @@ public class CarvingScreen extends Screen {
 	private static final int HEIGHT = 222;
 	private static final int PREVIEW_SCALE = 3;
 	private static final int UNDO_LIMIT = 64;
-	/**
-	 * Minecraft 26.3 numbers mouse buttons from 1: 1 is left, 2 middle, 3 right ({@code MouseHandler.onButton};
-	 * vanilla widgets take only button 1). Older versions counted from 0, so these are spelled out here.
-	 */
-	public static final int MOUSE_LEFT = 1;
-	public static final int MOUSE_RIGHT = 3;
 
 	private static final int RIND = 0xFF6B3A10;
 	private static final int PANEL = 0xFF2B1A0E;
@@ -243,10 +238,12 @@ public class CarvingScreen extends Screen {
 		if (super.mouseClicked(event, doubleClick)) {
 			return true;
 		}
-		if (freeDraw && inGrid(event.x(), event.y()) && (event.button() == MOUSE_LEFT || event.button() == MOUSE_RIGHT)) {
+		// Minecraft 26.3 numbers mouse buttons from 1 (left 1, middle 2, right 3); older versions counted from 0.
+		if (freeDraw && inGrid(event.x(), event.y())
+				&& (event.button() == InputConstants.MOUSE_BUTTON_LEFT || event.button() == InputConstants.MOUSE_BUTTON_RIGHT)) {
 			pushUndo();
 			painting = true;
-			erasing = event.button() == MOUSE_RIGHT;
+			erasing = event.button() == InputConstants.MOUSE_BUTTON_RIGHT;
 			paint(event.x(), event.y());
 			return true;
 		}
@@ -278,7 +275,7 @@ public class CarvingScreen extends Screen {
 	@Override
 	public boolean keyPressed(KeyEvent event) {
 		// Ctrl+Z (Cmd+Z on macOS), matched like vanilla's edit shortcuts: by the letter on the keyboard layout.
-		if (event.shortcutKey() == 'z' && event.hasControlDownWithQuirk() && !event.hasShiftDown() && !event.hasAltDown()) {
+		if (event.shortcutKey() == InputConstants.KEYCODE_Z && event.hasControlDownWithQuirk() && !event.hasShiftDown() && !event.hasAltDown()) {
 			undo();
 			return true;
 		}
