@@ -132,7 +132,37 @@ Found by CI and fixed before this record:
 
 ### Batch 2 verification
 
-Pending: the CI results for batch 2 are added here when its build has run.
+Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on this branch after `main` (#58, #60, #62, #63) was merged down the stack:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the luminaria's, floating candles' (light, bob, each candle's place and height), sconce's and soul flame's numbers and the strand kinds with Java, every new block state with a model, the bag's cut face and whole inside, and the soul-lit icon's colours with the client's) | Pass, 461 IDs |
+| `./gradlew build` on `52e0f77` (later commits only change docs and screenshots) | Pass |
+| Game tests on the headless server, same commit: 226 in total, 7 of them new here (`Decor2GameTests`) | **All 226 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `52e0f77`; no model, texture or particle errors in the log |
+
+The 7 new game tests (`Decor2GameTests`):
+1. a luminaria placed on the floor is white and dark; flint and steel lights it (light 10, one durability); an empty hand snuffs it; orange dye colours it (one dye) and the same dye again does nothing; it falls when its floor is broken, dropping once, and the dropped bag keeps its colour and places orange again;
+2. a floating candle stays in the air beside a post, and after the post is gone; four more uses put four candles in the block and the fifth goes above; a fire charge lights them (12 light, using the charge); an empty hand snuffs them; every candle's bob stays within a pixel; breaking them drops four candles;
+3. the sconce won't stand on an open floor; on a wall it reaches out burning at light 14; an empty hand snuffs it, flint and steel relights it; it falls (dropping) when its wall goes;
+4. a soul torch lights a carved pumpkin (lit, soul, light 10 where its carving would give 15), using one; an empty hand gives back the soul torch, not a torch; a torch gives the whole glow and no soul flame; broken soul-lit, the item keeps `soul`, and placed again it is soul-lit at light 10;
+5. a soul torch lights a carved, full-grown giant pumpkin: every one of its 27 blocks gives light 10; the soul flame survives a save and load; an empty hand gives the soul torch back and it goes dark;
+6. bat bunting is strung between two hooks (one used) and saved as bunting; a hook with bunting running to it can hold string lights on to a third; taken down it drops bunting, not lights; a hook with lights running to it holds bunting of its own, and breaking it drops that bunting;
+7. the four recipes, three loot tables and the sconce's tool tag load.
+
+The client game test (`Decor2ClientGameTests`) builds a row of lit luminarias in eight colours, one to four lit floating candles before a dark wall, three sconces on a stone wall (two burning), carved pumpkins lit by a soul torch, a torch and nothing, a soul-lit giant pumpkin, and bat bunting beside string lights on fence posts, and photographs them by day and at midnight: the bags glow with candlelight through their faces, the candles hang with flames, the sconces burn and light their wall, the soul-lit faces are ice-blue beside a candle-yellow one, and the bunting's pennants and bats hang from the cord.
+
+Found by CI and fixed before this record:
+- 26.3 has no `Items.ORANGE_DYE` field (a test compile error); the test looks the dye up by its ID.
+- The giant pumpkin test first aimed its soul torch through `GameTestHelper.relativePos` and hit the wrong block; it now works from the master block's position.
+- The first luminaria screenshot showed dark faces: each hole looked straight through the matching hole in the far wall. The bag's inside is now whole, lit paper, so the face shows candlelight.
+
+**Not run (batch 2):**
+- a person playing it in a client;
+- a dedicated server with two players (one lighting a luminaria or stringing bunting while the other watches);
+- burning arrows or water on floating candles (they aren't handled, see below);
+- hollowing a soul-lit giant pumpkin into a barge (it keeps the torch as ordinary candlelight, see below).
 
 ## World and event applicability
 - Decorations work all year, anywhere. The candy bowl uses the trick-or-treat night count but is not limited to the Halloween event.

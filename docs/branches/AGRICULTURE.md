@@ -428,6 +428,18 @@ The first ten of thirty Halloween decorations; the rest follow five at a time. A
 
 The second five:
 
+| **Batch 2** by day: luminarias, floating candles, sconces and soul-lit pumpkins | **Bat Bunting** beside string lights |
+| --- | --- |
+| ![Halloween decorations, batch 2](../images/ingame_halloween_decorations_2.jpg) | ![Bat Bunting](../images/ingame_bat_bunting.jpg) |
+| **Luminarias** at midnight, in eight colours | **Floating Candles** at midnight |
+| ![Luminarias at night](../images/ingame_luminarias_night.jpg) | ![Floating Candles at night](../images/ingame_floating_candles_night.jpg) |
+| **Skeleton Hand Sconces:** two burning, one snuffed | **At night** |
+| ![Skeleton Hand Sconces](../images/ingame_skeleton_hand_sconces.jpg) | ![Skeleton Hand Sconces at night](../images/ingame_skeleton_hand_sconces_night.jpg) |
+| **Soul-flame carvings:** a soul torch, a torch and none | **A giant pumpkin** lit by a soul torch |
+| ![Soul-flame carvings](../images/ingame_soul_carvings_night.jpg) | ![Soul-lit giant pumpkin](../images/ingame_soul_giant_pumpkin_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor2ClientGameTests`, software rendering, small previews).*
+
 - **Luminaria:** a paper bag with a candle in sand and a face cut in its sides. Light it like a candle, and dye it any of 16 colours.
 - **Floating Candles:** up to four candles that hang in the air and bob gently.
 - **Skeleton Hand Sconce:** a torch held out from a wall by a bony hand.
