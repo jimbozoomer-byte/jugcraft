@@ -11,9 +11,19 @@ No numbered release yet. Everything below is on `main`.
 ### Fix: ore loot tables in the 26.x format (pull request pending)
 - **Ores now drop their raw material.** Before this, mining tin, zinc, lead, silver, nickel, tungsten, uranium, salt, phosphate, lepidolite or monazite ore, or oil sand, dropped the block itself, as if with Silk Touch. Fortune and multi-drops (2–4 salt, 1–2 bitumen) did nothing either.
 - **Cause:** Minecraft 26.x renamed the loot keys (`conditions` → `condition`, `functions` → `modifier`, and Silk Touch is now the `minecraft:tool/can_silk_touch` predicate). The old keys were silently ignored. The game test server had been logging "Unreachable entry!" for all 23 ore tables.
-- Every generated loot table (112 now) uses the 26.x format. Storage blocks, machines, the conveyor slope (#44) and the oil line's machines and pipes (#47, #49, #50), whose tables also used the old keys, still drop themselves, and now respect explosions again.
+- Every generated loot table (117 now) uses the 26.x format. Storage blocks, machines, the conveyor slope (#44) and the oil line's machines and pipes (#47, #49, #50), whose tables also used the old keys, still drop themselves, and now respect explosions again.
+- **Asphalt slab (#51):** a double slab now drops two slabs; its table used the old keys, so it dropped one.
 - **Charging Station (#40):** its "lower half only" condition used the old keys too, so breaking the top half dropped two stations. It now drops one (game test `chargingStationDropsOnce`).
 - `tools/check_mod_data.py` fails on any pre-26.x loot key, and a new game test mines ores and checks what drops.
+
+### #51 Oil line, batch 4: industry, and the electric look
+- **Polymerization reactor** (2×2×3): refinery gas → plastic pellets; the metal press makes **plastic sheets**.
+- **Asphalt**, **asphalt slab** and **asphalt road line**: walking on them is 1.3× as fast.
+- **Diesel engine** (2×2×3): up to 512 KE/t into a shaft line from diesel or heavy fuel oil, burning only for what is used.
+- Nine oil **advancements**, a **Fuel Values** handbook page, JEI categories for every **fluid machine**, and the oil audit in [docs/BALANCE.md](docs/BALANCE.md#oil).
+- **Electric look** (owner request): cables are 6 px graphite with a glowing green core (emissive), with copper, silver or aluminum collars; the battery box, capacitor bank, charging station, solar panel, electric pump, electric motor and dynamo are restyled in graphite and green light.
+- Fix: a dynamo took up to twice its 128 KE/t on a strong shaft line; it is now capped per tick.
+- Screenshots: a power-gear scene, and the multi-block showroom spaced to fit the oil machines.
 
 ### #50 Oil line, batch 3: fracking and diesel power
 - New fluids: **fracking fluid** and **flowback water** (with buckets).
