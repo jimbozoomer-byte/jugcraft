@@ -352,11 +352,14 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 		if (door == null) {
 			throw new AssertionError("The Retro Game Shop at " + cabinet + " has no door");
 		}
+		// From above the street, looking down at the doorstep: the storefront and how it meets the village path.
 		Direction outside = level.getBlockState(door).getValue(DoorBlock.FACING).getOpposite();
-		BlockPos eye = door.relative(outside, 8).above(2);
-		Jugcraft.LOGGER.info("[pixel-hollows] Retro Game Shop in a generated plains village: cabinet {}, door {}", cabinet, door);
+		BlockPos eye = door.relative(outside, 7).above(6);
+		BlockPos doorstep = door.relative(outside);
+		Jugcraft.LOGGER.info("[pixel-hollows] Retro Game Shop in a generated plains village: cabinet {}, door {}, doorstep {} ({}), beyond {}",
+				cabinet, door, doorstep, level.getBlockState(doorstep.below()), level.getBlockState(doorstep.relative(outside).below()));
 		return String.format(Locale.ROOT, "tp @p %.1f %d %.1f facing %.1f %.1f %.1f", eye.getX() + 0.5, eye.getY(), eye.getZ() + 0.5,
-				door.getX() + 0.5, door.getY() + 1.5, door.getZ() + 0.5);
+				doorstep.getX() + 0.5, doorstep.getY() + 1.0, doorstep.getZ() + 0.5);
 	}
 
 	/** Gives every motionless (NoAI) villager the Retro Trader profession, at apprentice level. */
