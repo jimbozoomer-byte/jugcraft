@@ -203,6 +203,34 @@
         {
           "in": [
             [
+              "jugcraft:titanium_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:raw_titanium",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_titanium_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:raw_titanium",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
               "minecraft:iron_ore",
               1
             ]
@@ -803,6 +831,20 @@
           ],
           "out": [
             "jugcraft:steel_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:titanium_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:titanium_plate",
             1
           ],
           "extra": [],

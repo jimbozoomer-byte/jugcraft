@@ -653,11 +653,13 @@ def machine_recipes():
 
 
 def _arc_dusts():
-    """Dusts of metals a plain furnace cannot smelt (nickel, tungsten, uranium) melt in the arc furnace."""
-    from materials import METALS
+    """Dusts of metals a plain furnace cannot smelt (nickel, tungsten, uranium) melt in the arc furnace. (Titanium has
+    no dust: only the Kroll process frees it.)"""
+    from materials import COMPONENTS, METALS
     return [{"input": f"jugcraft:{metal}_dust", "output": f"jugcraft:{metal}_ingot", "count": 1, "ticks": 80,
              "features": [FEATURE, info["feature"]]}
-            for metal, info in METALS.items() if info["mined"] and "smelting" not in info["cook"]]
+            for metal, info in METALS.items()
+            if info["mined"] and "smelting" not in info["cook"] and metal in COMPONENTS["dust"]]
 
 
 def machine_blocks():

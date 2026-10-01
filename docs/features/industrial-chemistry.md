@@ -43,6 +43,11 @@ Salt, sulfur, phosphate and bauxite have been in the world since the first ores,
 - Making a bucket of hydrogen takes four buckets of brine in the electrolytic cell (204,800 JE), so the fuel cell pays back part of the cell's power and is never a loop.
 - Recipe: aluminum plates, two aluminum cables, steel plates, an advanced circuit and a tinplate tank.
 
+### Titanium ore (batch 6, commit 26)
+- **Titanium** is a new mined metal: rutile-bearing titanium ore (and deepslate ore), rare, Y −64 to −8, iron pickaxe. Raw titanium, ingots, nuggets, blocks and plates, all tagged `c:`.
+- **No furnace smelts it**, not even the arc furnace: titanium is made with chlorine (commit 27). The crusher still doubles the ore. The prospector reports it.
+- A new feature switch, `titanium.enabled`.
+
 ### Advancements
 Split Decision (electrolytic cell), Oil of Vitriol (sulfuric acid), Green Revolution (fertilizer), The Bayer Way (alumina) and Clean Burn (fuel cell), under Forged in Coke.
 

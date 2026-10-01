@@ -140,6 +140,7 @@
             "Nickel: Y -64 to 16, needs a iron pickaxe.",
             "Tungsten: Y -64 to 0, needs a iron pickaxe.",
             "Uranium: Y -64 to -16, needs a iron pickaxe.",
+            "Titanium: Y -64 to -8, needs a iron pickaxe.",
             "Rock Salt: Y 0 to 64.",
             "Phosphorite: Y -16 to 48.",
             "Lepidolite: Y -48 to 32.",
@@ -205,7 +206,7 @@
           "title": "Parts",
           "icon": "jugcraft:bronze_gear",
           "text": [
-            "Plates (Metal Press): copper, iron, tin, bronze, brass, invar, aluminum, nickel, lead, tungsten, steel.",
+            "Plates (Metal Press): copper, iron, tin, bronze, brass, invar, aluminum, nickel, lead, tungsten, steel, titanium.",
             "Gears (four plates): iron, bronze, brass, invar, steel.",
             "Wires (Wire Drawer): copper, silver, aluminum.",
             "Every part works with other mods' parts through c: tags."
