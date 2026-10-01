@@ -296,4 +296,30 @@ public class PetroGameTests {
 			helper.assertTrue(mixer.getItem(0).isEmpty() && mixer.getItem(1).isEmpty(), "The mixer kept its sand or kelp");
 		});
 	}
+
+	/**
+	 * A powered fracking rig over shale pumps fracking fluid down and brings up crude oil, refinery gas and flowback
+	 * water, taking the oil from the shale reservoir. (Tests share chunks, so this only checks that it flows.)
+	 */
+	@GameTest(maxTicks = 200)
+	public void frackingRigFreesShaleOil(GameTestHelper helper) {
+		BlockPos master = new BlockPos(4, 1, 1);
+		ChunkPos chunk = ChunkPos.containing(helper.absolutePos(master));
+		OilReservoirs.overrideForTest(chunk, OilReservoirs.Kind.SHALE, 400_000);
+		MachineBlockEntity rig = place(helper, MachineKind.FRACKING_RIG, master);
+		Storage<FluidVariant> tanks = FluidStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.NORTH);
+		try (Transaction transaction = Transaction.openOuter()) {
+			long accepted = tanks.insert(FluidVariant.of(PetroFluids.FRACKING_FLUID.source()), 2 * FluidConstants.BUCKET, transaction);
+			helper.assertTrue(accepted == 2 * FluidConstants.BUCKET, "The rig took " + accepted / 81 + " mB of fracking fluid");
+			transaction.commit();
+		}
+		long before = OilReservoirs.get(helper.getLevel(), chunk).remaining();
+		helper.succeedWhen(() -> {
+			int oil = rig.tanks().output(0).millibuckets();
+			helper.assertTrue(oil >= 30 && rig.tanks().output(0).variant.isOf(PetroFluids.CRUDE_OIL.source()), "Crude oil: " + oil);
+			helper.assertTrue(rig.tanks().output(1).variant.isOf(PetroFluids.REFINERY_GAS.fluid()), "No refinery gas");
+			helper.assertTrue(rig.tanks().output(2).millibuckets() >= 15, "Flowback: " + rig.tanks().output(2).millibuckets());
+			helper.assertTrue(OilReservoirs.get(helper.getLevel(), chunk).remaining() <= before - 40, "The shale gave nothing");
+		});
+	}
 }

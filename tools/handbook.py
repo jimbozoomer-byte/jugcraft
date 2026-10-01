@@ -120,6 +120,10 @@ ABOUT = {
                           "the top row), every 6 seconds.",
     "chemical_mixer": "Two by two by two. Stirs powders into water: two sand (first slot) and a dried kelp (second "
                       "slot) with a bucket of water make a bucket of fracking fluid, every 4 seconds.",
+    "fracking_rig": "Three by three and five blocks tall. Place it with its front left block over shale oil (the "
+                    "prospector's Shale oil reading). Each powered tick it pumps 4 mB of fracking fluid down the well "
+                    "and brings up 6 mB of crude oil (out at the base), 2 mB of refinery gas (out at the top) and 3 mB "
+                    "of flowback water (out one block up), until the shale is spent.",
     "ore_drill": "Two blocks tall. Mines the ore blocks in a 9x9 column below it, one layer at a time down to the bottom "
                  "of the world, one ore every 2 seconds. Each hole is refilled with stone or deepslate. The ores come "
                  "out whole, ready for ore processing.",
@@ -324,6 +328,7 @@ def build():
             machine_page("vacuum_distillation_unit"),
             machine_page("catalytic_reformer"),
             machine_page("chemical_mixer"),
+            machine_page("fracking_rig"),
             {"title": "Cracking Catalyst", "icon": f"{MOD}:cracking_catalyst", "text": [
                 "Bauxite (alumina) and sand (silica) with a nickel ingot make four. The catalytic cracker uses one for "
                 "each bucket of heavy fuel oil it cracks."], "craft": craft("cracking_catalyst")},

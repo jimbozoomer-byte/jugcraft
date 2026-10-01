@@ -458,9 +458,72 @@ def chemical_mixer():
     return m
 
 
+def fracking_rig():
+    """A three by three fracking derrick five blocks tall. A hazard-striped skid carries the frac pump and its diesel
+    engine (under the drill floor, with twin exhaust stacks), the wellhead with its frac tree of red valves, and a
+    control panel by the front left corner. Above, a grated drill floor on gunmetal legs holds the doghouse (crew cabin
+    with a lit window) and a lattice derrick narrowing in three stages to a hazard-striped crown block with its sheave,
+    the travelling block and kelly hanging down the middle. Chrome draw-offs with red valves give crude oil (base),
+    flowback water (one block up) and gas (top)."""
+    m = [box((-32, 0, 0), (16, 2, 48), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    # Control panel at the front left (the master block): gauge and the running lamp.
+    m.append(box((2, 2, 0.5), (14, 12, 6), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(dial("north", (5.5, 8.5, 0.25), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (10.5, 8.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    # Wellhead and frac tree under the middle of the floor.
+    m += cyl("y", -8, 24, 3.5, 2, 4, GUNMETAL, CHROME)
+    m += cyl("y", -8, 24, 2, 4, 14, CHROME)
+    for y in (6, 10):
+        m.append(box((-13, y, 23), (-3, y + 2, 25), GUNMETAL))
+        m += wheel("x", y + 1, 24, 1.75, -14.5, -13.5, "sp_red_iron", CHROME, spokes=False)
+    # Frac pump and its diesel engine under the back of the floor, with twin exhaust stacks past the floor's edge.
+    m.append(box((-27, 2, 31), (-11, 12, 45), {"*": OLIVE, "up": STENCIL, "east": GRILLE, "west": GRILLE}))
+    m.append(box((-10, 2, 33), (-2, 9, 43), {"*": GUNMETAL, "up": GRILLE}))
+    m.append(box((-14, 5, 26), (-10, 8, 33), RUBBER))
+    for x in (-30, -26.5):
+        m += cyl("y", x, 46, 1, 2, 30, EXHAUST, "sp_hopper_inside")
+    # Drill floor on legs.
+    for x in (-28, 10):
+        for z in (4, 42):
+            m.append(box((x, 2, z), (x + 2, 14, z + 2), GUNMETAL))
+    m.append(box((-28, 14, 4), (12, 16, 44), {"*": GUNMETAL, "up": GRILLE, "down": GRILLE}))
+    m.append(box((-28, 16, 4), (12, 17, 5), HAZARD))
+    m.append(box((-28, 16, 43), (12, 17, 44), HAZARD))
+    # Doghouse on the floor's front right corner, with a lit window.
+    m.append(box((-27, 17, 6), (-17, 28, 16), {"*": OLIVE, "up": STENCIL}))
+    m.append(box((-25, 21, 5.75), (-19, 26, 6), {"*": GUNMETAL, "north": "sp_window!"}))
+    # Lattice derrick in three stages, narrowing towards the crown.
+    stages = ((17, 40, 0), (40, 62, 4), (62, 74, 8))
+    for lo, hi, a in stages:
+        x0, x1, z0, z1 = -22 + a, 4 - a, 10 + a, 36 - a
+        for x in (x0, x1):
+            for z in (z0, z1):
+                m.append(box((x, lo, z), (x + 2, hi, z + 2), GUNMETAL))
+        m.append(box((x0, hi - 1, z0), (x1 + 2, hi, z0 + 2), HAZARD))
+        m.append(box((x0, hi - 1, z1), (x1 + 2, hi, z1 + 2), HAZARD))
+        m.append(box((x0, hi - 1, z0 + 2), (x0 + 2, hi, z1), HAZARD))
+        m.append(box((x1, hi - 1, z0 + 2), (x1 + 2, hi, z1), HAZARD))
+        mid = (lo + hi) // 2
+        m.append(box((x0 + 2, mid, z0 + 0.5), (x1, mid + 1, z0 + 1.5), CHROME))
+        m.append(box((x0 + 2, mid, z1 + 0.5), (x1, mid + 1, z1 + 1.5), CHROME))
+    # Crown block with the sheave, and the travelling block and kelly down the middle.
+    m.append(box((-14, 74, 18), (-2, 76, 30), HAZARD))
+    m += wheel("x", 78, 24, 2.5, -9, -7, GUNMETAL, CHROME)
+    m.append(box((-9, 52, 23), (-7, 74, 25), RUBBER))
+    m.append(box((-10.5, 46, 21.5), (-5.5, 52, 26.5), {"*": OLIVE, "north": HAZARD}))
+    m.append(box((-8.5, 17, 23.5), (-7.5, 46, 24.5), CHROME))
+    # Draw-offs out of the front right: crude oil (base), flowback water (one block up), gas (top).
+    for y in (9, 24, 70):
+        m.append(box((-28, y - 2, 0.5), (-24, y + 2, 6.5), CHROME))
+        m.append(box((-29, y - 3, 0), (-23, y + 3, 0.5), GUNMETAL))
+        m += wheel("z", -26, y + 4.5, 1.5, 2.5, 3.25, "sp_red_iron", CHROME, spokes=False)
+    m.append(box((-28, 26, 6.5), (-24, 70, 8), RUBBER))
+    return m
+
+
 MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), "steel_tank": steel_tank(),
           "ore_drill": ore_drill(), "pumpjack": pumpjack(),
           "oil_sand_extractor": oil_sand_extractor(), "heavy_pump": heavy_pump(),
           "distillation_tower": distillation_tower(), "catalytic_cracker": catalytic_cracker(),
           "vacuum_distillation_unit": vacuum_distillation_unit(), "catalytic_reformer": catalytic_reformer(),
-          "chemical_mixer": chemical_mixer()}
+          "chemical_mixer": chemical_mixer(), "fracking_rig": fracking_rig()}

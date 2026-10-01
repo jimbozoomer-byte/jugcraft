@@ -55,6 +55,8 @@ MACHINES = {
     "catalytic_reformer": {"display": "Catalytic Reformer", "lit": True},
     # A 2x2x2 stirred mixing vessel: water + sand + dried kelp -> fracking fluid.
     "chemical_mixer": {"display": "Chemical Mixer", "lit": True},
+    # A 3x3x5 derrick over shale oil: fracking fluid down; crude oil, refinery gas and flowback water up.
+    "fracking_rig": {"display": "Fracking Rig", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
 }
 
@@ -205,6 +207,8 @@ STATS = {
     "catalytic_reformer": {"capacity": 30_000, "input_per_tick": 512, "use_per_tick": 120, "tank": 8_000},
     # 2x2x2. 64 JE/t; a bucket of mixture per 80 ticks.
     "chemical_mixer": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 64, "tank": 8_000},
+    # 3x3x5. 256 JE/t; 4 mB/t fracking fluid down, 8 mB/t oil freed, 3 mB/t flowback.
+    "fracking_rig": {"capacity": 80_000, "input_per_tick": 1_024, "use_per_tick": 256, "tank": 16_000},
 }
 
 # Fuel for the coal generator: burn ticks per item (coal matches the vanilla furnace's 1600).
@@ -386,6 +390,9 @@ CRAFTING = {
     "chemical_mixer": (["PMP", "TCT", "PHP"], {"P": "#c:plates/steel", "M": "jugcraft:electric_motor",
                                                "T": "jugcraft:fluid_tank", "C": "jugcraft:machine_casing",
                                                "H": "minecraft:hopper"}, 1),
+    "fracking_rig": (["SDS", "UCU", "SMS"], {"S": "#c:plates/steel", "D": "jugcraft:ore_drill",
+                                             "U": "jugcraft:heavy_pump", "C": "jugcraft:advanced_circuit",
+                                             "M": "jugcraft:machine_casing"}, 1),
     "cracking_catalyst": (["BSB", "SNS", "BSB"], {"B": "jugcraft:bauxite", "S": "minecraft:sand",
                                                   "N": "#c:ingots/nickel"}, 4),
     "charging_station": (["SLS", "WAW", "SBS"], {"S": "#c:plates/steel", "L": "minecraft:redstone_lamp",

@@ -188,7 +188,18 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		FluidMachineSpec spec = kind.fluidSpec();
 		// Input tanks only take fluids this machine's recipes use in that tank (only the server knows the recipes).
 		this.tanks = spec == null ? null : new FluidTanks(spec, (tank, variant) -> level instanceof ServerLevel server
-				&& FluidRecipes.usesFluid(server.getServer(), kind, tank, variant), this::setChanged);
+				&& acceptsFluid(server, tank, variant), this::setChanged);
+	}
+
+	/**
+	 * Which fluids input tank {@code tank} takes from outside: what this machine burns or pumps down, or else what its
+	 * recipes use in that tank.
+	 */
+	private boolean acceptsFluid(ServerLevel server, int tank, FluidVariant variant) {
+		return switch (kind) {
+			case FRACKING_RIG -> variant.isOf(PetroFluids.FRACKING_FLUID.source());
+			default -> FluidRecipes.usesFluid(server.getServer(), kind, tank, variant);
+		};
 	}
 
 	public MachineKind kind() {
@@ -334,6 +345,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case WATER_WHEEL -> tickWaterWheel(level, pos, state);
 			case AUTO_CRAFTER -> tickCrafter(level, pos, state);
 			case PUMPJACK -> tickPumpjack(level, pos, state);
+			case FRACKING_RIG -> tickFrackingRig(level, pos, state);
 			default -> kind.isFluidProcessor() ? tickFluidProcessor(level, pos, state) : tickProcessor(level, pos, state);
 		};
 		if (state.getValue(MachineBlock.LIT) != active) {
@@ -719,6 +731,55 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 		energy.setAmount(energy.getAmount() - kind.usePerTick);
 		tank.fill(PetroFluids.CRUDE_OIL.source(), pumped);
+		maxProgress = PUMPJACK_STROKE;
+		progress = (progress + 1) % PUMPJACK_STROKE;
+		setChanged();
+		return true;
+	}
+
+	/**
+	 * The fracking rig: while the chunk under its master block holds shale oil, each powered tick it pumps
+	 * {@link MachineKind#FRACK_FLUID_PER_TICK} mB of fracking fluid down, frees {@link MachineKind#FRACK_OIL_PER_TICK} mB
+	 * from the reservoir (three quarters crude oil, a quarter refinery gas) and returns
+	 * {@link MachineKind#FRACK_FLOWBACK_PER_TICK} mB of flowback water. {@link #formed} says whether there is shale
+	 * under it (checked once a second).
+	 */
+	private boolean tickFrackingRig(ServerLevel level, BlockPos pos, BlockState state) {
+		pushFluids(level, pos, state);
+		ChunkPos chunk = ChunkPos.containing(pos);
+		if (!checked || level.getGameTime() % MachineKind.SOURCE_CHECK_INTERVAL == 0) {
+			checked = true;
+			OilReservoirs.Reservoir reservoir = OilReservoirs.get(level, chunk);
+			boolean shale = reservoir.kind() == OilReservoirs.Kind.SHALE && !reservoir.isDry();
+			if (shale != formed) {
+				formed = shale;
+				setChanged();
+			}
+		}
+		int oilShare = MachineKind.FRACK_OIL_PER_TICK * 3 / 4;
+		int gasShare = MachineKind.FRACK_OIL_PER_TICK - oilShare;
+		FluidTank fluid = tanks.input(0);
+		if (!formed || !fluid.has(PetroFluids.FRACKING_FLUID.source(), MachineKind.FRACK_FLUID_PER_TICK)
+				|| !tanks.output(0).fits(PetroFluids.CRUDE_OIL.source(), oilShare)
+				|| !tanks.output(1).fits(PetroFluids.REFINERY_GAS.fluid(), gasShare)
+				|| !tanks.output(2).fits(PetroFluids.FLOWBACK_WATER.source(), MachineKind.FRACK_FLOWBACK_PER_TICK)
+				|| !sides.redstone().allows(poweredByRedstone(level, pos, state)) || energy.getAmount() < kind.usePerTick) {
+			return false;
+		}
+		int freed = OilReservoirs.extract(level, chunk, OilReservoirs.Kind.SHALE, MachineKind.FRACK_OIL_PER_TICK);
+		if (freed <= 0) {
+			formed = false;
+			setChanged();
+			return false;
+		}
+		energy.setAmount(energy.getAmount() - kind.usePerTick);
+		fluid.drain(MachineKind.FRACK_FLUID_PER_TICK);
+		int oil = freed * 3 / 4;
+		tanks.output(0).fill(PetroFluids.CRUDE_OIL.source(), oil);
+		if (freed > oil) {
+			tanks.output(1).fill(PetroFluids.REFINERY_GAS.fluid(), freed - oil);
+		}
+		tanks.output(2).fill(PetroFluids.FLOWBACK_WATER.source(), MachineKind.FRACK_FLOWBACK_PER_TICK);
 		maxProgress = PUMPJACK_STROKE;
 		progress = (progress + 1) % PUMPJACK_STROKE;
 		setChanged();

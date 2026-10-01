@@ -81,6 +81,20 @@ The base every oil machine is built on; on its own it adds nothing a player can 
 - **1,000 mB water + 2 sand (first slot) + 1 dried kelp (second slot) → 1,000 mB fracking fluid**, every 80 ticks at 64 JE/t.
 - Recipe: steel plates, an electric motor, two tinplate tanks, a machine casing and a hopper.
 
+### Fracking rig (batch 3, commit 12)
+- **Flowback water**: a murky brown fluid with a bucket. It comes back up a fracked well and needs treating (commit 13).
+- The **fracking rig** is a 3×3 derrick five blocks tall:
+  - on the ground, a frac pump and diesel engine with twin exhaust stacks, the wellhead with its frac tree, and a control panel;
+  - above, a grated drill floor with a crew doghouse;
+  - a lattice derrick narrowing in three stages to a hazard-striped crown block, with the travelling block and kelly down the middle.
+- **Place it with its front left block over shale oil** (the prospector's "Shale oil" reading). Each powered tick, at 256 JE/t, it:
+  - pumps **4 mB of fracking fluid** down;
+  - frees **8 mB of oil** from the shale (6 mB crude oil and 2 mB refinery gas);
+  - brings up **3 mB of flowback water**. The other quarter of the fluid stays in the rock.
+- At that rate a shale reservoir (200–800 buckets) lasts about 21 minutes to 1 hour 25 minutes, four times the pumpjack's rate. Its screen says "Fracking shale" or "No shale oil here".
+- Draw-offs: crude oil at the base, flowback water one block up and refinery gas at the top. Its tank takes only fracking fluid.
+- Recipe: steel plates, an ore drill, two heavy pumps, an advanced circuit and a machine casing.
+
 ### What refining gives (batch 2 summary)
 From one bucket of crude oil, with every byproduct refined:
 
@@ -123,6 +137,7 @@ Fabric API's fluid rendering registry draws the fluid. Textures are original, dr
 - Game test `vacuumUnitMakesLubricantAndAsphalt` (a bucket of heavy fuel oil becomes 400 mB of lubricant and two asphalt binder).
 - Game test `reformerMakesGasoline` (a bucket of naphtha becomes 900 mB of gasoline and 100 mB of refinery gas).
 - Game test `mixerMakesFrackingFluid`.
+- Game test `frackingRigFreesShaleOil` (it takes fracking fluid through Fabric's fluid API, brings up crude oil, gas and flowback, and draws on the shale).
 - Game test `pumpjackPumpsOil`: a powered pumpjack over pumpable oil fills its tank with crude oil and the reservoir goes down by as much.
 - Game tests `extractorTanksOnlyTakeWhatTheyUse` (its tanks take water but not lava or crude oil, through Fabric's fluid API) and `extractorWashesOilFromOilSand` (a block of oil sand and water become 500 mB of crude oil and sand, using 250 mB of water).
 - Not run: client play-testing of how the fluid looks and flows.

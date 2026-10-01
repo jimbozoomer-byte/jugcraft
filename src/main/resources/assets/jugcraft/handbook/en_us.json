@@ -1979,6 +1979,29 @@
           }
         },
         {
+          "title": "Fracking Rig",
+          "icon": "jugcraft:fracking_rig",
+          "text": [
+            "Three by three and five blocks tall. Place it with its front left block over shale oil (the prospector's Shale oil reading). Each powered tick it pumps 4 mB of fracking fluid down the well and brings up 6 mB of crude oil (out at the base), 2 mB of refinery gas (out at the top) and 3 mB of flowback water (out one block up), until the shale is spent.",
+            "Uses 256 JE/t while working. Holds 80,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:ore_drill",
+              "jugcraft:steel_plate",
+              "jugcraft:heavy_pump",
+              "jugcraft:advanced_circuit",
+              "jugcraft:heavy_pump",
+              "jugcraft:steel_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:fracking_rig",
+            "count": 1
+          }
+        },
+        {
           "title": "Cracking Catalyst",
           "icon": "jugcraft:cracking_catalyst",
           "text": [

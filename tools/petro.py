@@ -32,6 +32,9 @@ FLUIDS = {
     "fracking_fluid": {"display": "Fracking Fluid", "feature": "crude_oil",
                        "colors": [(90, 110, 120), (130, 150, 160), (170, 185, 190), (212, 222, 226)],
                        "tick_delay": 6, "slope": 3, "drop_off": 1},
+    "flowback_water": {"display": "Flowback Water", "feature": "crude_oil",
+                       "colors": [(70, 64, 50), (100, 92, 72), (130, 120, 96), (172, 162, 132)],
+                       "tick_delay": 5, "slope": 4, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -87,6 +90,10 @@ FLUID_MACHINES = {
     # Naphtha -> gasoline (base) + refinery gas (top). 120 JE/t.
     "catalytic_reformer": {"inputs": [8_000], "outputs": [8_000, 8_000], "item_inputs": 0, "item_outputs": 0,
                            "recipe_type": "reforming"},
+    # Over shale (no recipes): 4 mB/t fracking fluid down; 8 mB/t freed (6 crude, 2 gas) and 3 mB/t flowback up.
+    # 256 JE/t. Draw-offs: crude at the base, flowback one block up, gas at the top (MachineKind.outputLayer).
+    "fracking_rig": {"inputs": [16_000], "outputs": [16_000, 8_000, 16_000], "item_inputs": 0, "item_outputs": 0,
+                     "recipe_type": None},
     # Water + two powders/solids -> a mixture. 64 JE/t.
     "chemical_mixer": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 0,
                        "recipe_type": "chemical_mixing"},

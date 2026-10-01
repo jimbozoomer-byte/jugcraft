@@ -63,7 +63,9 @@ public enum MachineKind implements StringRepresentable {
 	// A 3x2x2 catalytic reformer: naphtha in; gasoline (base) and refinery gas (top) out.
 	CATALYTIC_REFORMER("catalytic_reformer", 30_000, 512, 0, 120, 0),
 	// A 2x2x2 stirred mixing vessel: water and powders in, mixtures (fracking fluid) out.
-	CHEMICAL_MIXER("chemical_mixer", 20_000, 256, 0, 64, 2);
+	CHEMICAL_MIXER("chemical_mixer", 20_000, 256, 0, 64, 2),
+	// A 3x3x5 fracking derrick over a shale reservoir: fracking fluid down; crude oil, gas and flowback water up.
+	FRACKING_RIG("fracking_rig", 80_000, 1_024, 0, 256, 0);
 
 	/** JE produced per tick while the coal generator burns. */
 	public static final int GENERATION_PER_TICK = 32;
@@ -141,6 +143,19 @@ public enum MachineKind implements StringRepresentable {
 	private static final int[] REFORMER_DRAW_OFFS = {0, 1};
 	/** Chemical mixer: its water tank and its product tank. */
 	public static final int MIXER_TANK = 8_000;
+	/**
+	 * Fracking rig, per powered tick over shale: fracking fluid pumped down, oil freed from the reservoir (three
+	 * quarters crude oil, a quarter refinery gas) and flowback water returned. A quarter of the fluid stays in the rock.
+	 */
+	public static final int FRACK_FLUID_PER_TICK = 4;
+	public static final int FRACK_OIL_PER_TICK = 8;
+	public static final int FRACK_FLOWBACK_PER_TICK = 3;
+	public static final int FRACK_INPUT_TANK = 16_000;
+	public static final int FRACK_OIL_TANK = 16_000;
+	public static final int FRACK_GAS_TANK = 8_000;
+	public static final int FRACK_FLOWBACK_TANK = 16_000;
+	/** Fracking rig draw-offs: crude oil at the base, flowback water one block up, gas at the top. */
+	private static final int[] FRACK_DRAW_OFFS = {0, 4, 1};
 	/** Ticks the electric furnace needs per item (the vanilla furnace needs 200). */
 	public static final int ELECTRIC_FURNACE_TICKS = 100;
 
@@ -238,6 +253,8 @@ public enum MachineKind implements StringRepresentable {
 			case VACUUM_DISTILLATION_UNIT -> new FluidMachineSpec(List.of(VACUUM_TANK), List.of(VACUUM_TANK), 0, 1);
 			case CATALYTIC_REFORMER -> new FluidMachineSpec(List.of(REFORMER_TANK), List.of(REFORMER_TANK, REFORMER_TANK), 0, 0);
 			case CHEMICAL_MIXER -> new FluidMachineSpec(List.of(MIXER_TANK), List.of(MIXER_TANK), 2, 0);
+			case FRACKING_RIG -> new FluidMachineSpec(List.of(FRACK_INPUT_TANK),
+					List.of(FRACK_OIL_TANK, FRACK_GAS_TANK, FRACK_FLOWBACK_TANK), 0, 0);
 			default -> null;
 		};
 	}
@@ -251,6 +268,7 @@ public enum MachineKind implements StringRepresentable {
 			case DISTILLATION_TOWER -> TOWER_DRAW_OFFS[tank];
 			case CATALYTIC_CRACKER -> CRACKER_DRAW_OFFS[tank];
 			case CATALYTIC_REFORMER -> REFORMER_DRAW_OFFS[tank];
+			case FRACKING_RIG -> FRACK_DRAW_OFFS[tank];
 			default -> -1;
 		};
 	}
@@ -323,6 +341,7 @@ public enum MachineKind implements StringRepresentable {
 			case VACUUM_DISTILLATION_UNIT -> Footprint.cuboid(2, 3, 2);
 			case CATALYTIC_REFORMER -> Footprint.cuboid(3, 2, 2);
 			case CHEMICAL_MIXER -> Footprint.cuboid(2, 2, 2);
+			case FRACKING_RIG -> Footprint.cuboid(3, 5, 3);
 			default -> Footprint.SINGLE;
 		};
 	}

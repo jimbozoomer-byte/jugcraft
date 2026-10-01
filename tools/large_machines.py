@@ -50,6 +50,7 @@ FOOTPRINTS = {
     "vacuum_distillation_unit": cuboid(2, 3, 2),
     "catalytic_reformer": cuboid(3, 2, 2),
     "chemical_mixer": cuboid(2, 2, 2),
+    "fracking_rig": cuboid(3, 5, 3),
 }
 
 # Machines that take power at one marked socket only: (part, face) for a north-facing machine.
@@ -231,6 +232,16 @@ MODELS["chemical_mixer"] = [
     ((-5, 26, 13), (3, 31, 21), {"*": STEEL, "up": TOP}),
 ]
 
+MODELS["fracking_rig"] = [
+    ((-32, 0, 0), (16, 2, 48), "heavy_plinth"),
+    ((2, 2, 1), (14, 12, 6), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-28, 14, 4), (12, 16, 44), "heavy_plinth"),
+    ((-24, 16, 8), (8, 40, 40), "wind_turbine_mast"),
+    ((-18, 40, 14), (2, 70, 34), "wind_turbine_mast"),
+    ((-12, 70, 20), (-4, 78, 28), "geothermal_stack"),
+    ((-11, 2, 22), (-5, 14, 26), PIPE),
+]
+
 # Textures the front face uses: "#front" in MODELS. Lit machines also get <front>_on.
 FRONTS = {
     "geothermal_generator": "geothermal_generator_front",
@@ -250,4 +261,5 @@ FRONTS = {
     "vacuum_distillation_unit": "vacuum_distillation_unit_front",
     "catalytic_reformer": "catalytic_reformer_front",
     "chemical_mixer": "chemical_mixer_front",
+    "fracking_rig": "fracking_rig_front",
 }
