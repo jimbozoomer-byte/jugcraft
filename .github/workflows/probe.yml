@@ -30,15 +30,5 @@ jobs:
           l() { echo "=== $1"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-80}; }
           GT=$(find ~/.gradle/caches -name 'fabric-gametest-api-v1*.jar' | grep -v sources | head -2 | tr '\n' ':')
           CP="$CP:$GT"
-          javap -cp "$CP" -p net.minecraft.world.level.block.AbstractBedBlock 2>&1 | head -60
-          javap -cp "$CP" -p 'net.minecraft.client.particle.SingleQuadParticle$Layer' 2>&1 | head -20
-          javap -cp "$CP" -p -c net.minecraft.world.item.Items | grep -A14 'String red_bed' | head -30
-          javap -cp "$CP" -p net.minecraft.world.attribute.BedRule 2>&1 | head -30
-          javap -cp "$CP" -p net.minecraft.world.attribute.EnvironmentAttributes 2>&1 | grep -i bed
-          javap -cp "$CP" -p net.minecraft.world.entity.ContainerUser 2>&1 | head -20
-          javap -cp "$CP" -p net.minecraft.world.level.block.entity.ContainerOpenersCounter 2>&1 | head -30
-          javap -cp "$CP" -p net.minecraft.world.level.block.BedBlock 2>&1 | head -40
-          javap -cp "$CP" -p -c net.minecraft.world.level.block.Blocks | grep -B3 -A20 'String red_bed' | head -40
-          javap -cp "$CP" -p 'net.minecraft.world.entity.player.Player$BedSleepingProblem' 2>&1 | head -20
-          javap -cp "$CP" -p net.minecraft.world.level.block.ButtonBlock 2>&1 | grep -E 'codec|MapCodec|ButtonBlock\(' | head
-          javap -cp "$CP" -p net.fabricmc.fabric.api.client.particle.v1.FabricSpriteSet 2>&1 | head
+          javap -cp "$CP" -p net.minecraft.world.level.block.HorizontalDirectionalBlock 2>&1 | grep -i codec
+          javap -cp "$CP" -p net.minecraft.world.level.block.BaseEntityBlock 2>&1 | grep -i 'codec\|RenderShape'

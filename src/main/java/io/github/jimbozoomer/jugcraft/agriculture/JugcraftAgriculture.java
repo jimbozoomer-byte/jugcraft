@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 import com.mojang.serialization.Codec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags;
@@ -26,6 +28,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -149,6 +152,13 @@ public final class JugcraftAgriculture {
 	public static EntityType<HeadlessHorseman> HEADLESS_HORSEMAN;
 	public static EntityType<FlamingPumpkin> FLAMING_PUMPKIN;
 	public static BlockEntityType<TrebuchetBlockEntity> TREBUCHET_ENTITY;
+	public static BlockEntityType<StringLightHookBlockEntity> STRING_LIGHT_HOOK_ENTITY;
+	public static BlockEntityType<CandyBowlBlockEntity> CANDY_BOWL_ENTITY;
+	public static BlockEntityType<CoffinBlockEntity> COFFIN_ENTITY;
+	public static BlockEntityType<HauntedPortraitBlockEntity> HAUNTED_PORTRAIT_ENTITY;
+	public static BlockEntityType<FogMachineBlockEntity> FOG_MACHINE_ENTITY;
+	/** Low ground fog from the Fog Machine (drawn by the client: client/FogParticle.java). */
+	public static final SimpleParticleType FOG = FabricParticleTypes.simple();
 	/** What each kind of pumpkin becomes when first carved by hand, and the loot table its seeds come from. */
 	private static final Map<Block, Block> CARVED_FROM = new HashMap<>();
 	private static final Map<Block, ResourceKey<LootTable>> CARVE_LOOT = new HashMap<>();
@@ -310,6 +320,7 @@ public final class JugcraftAgriculture {
 		registerTrickOrTreat();
 		registerFestivities();
 		registerNight();
+		registerDecorations();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> FOOD_TAB.forEach(output::accept));
@@ -619,6 +630,47 @@ public final class JugcraftAgriculture {
 		registerItem("horseman_cloak", Item::new, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).component(DataComponents.EQUIPPABLE, cloak),
 				TOOL_TAB);
 		HarvestMoon.register();
+	}
+
+	/**
+	 * Halloween decorations, the first five: String Light Hooks and the Jack-o'-Lantern String Lights strung between
+	 * them, the Candy Bowl, the Coffin, the Haunted Portrait and the Fog Machine. The hooks and the fog machine take
+	 * electricity through the shared energy interface.
+	 */
+	private static void registerDecorations() {
+		Block hook = registerBlock("string_light_hook", StringLightHookBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+				.strength(0.5F).sound(SoundType.LANTERN).noCollision().lightLevel(StringLightHookBlock::light).pushReaction(PushReaction.DESTROY));
+		registerItem("string_light_hook", props -> new BlockItem(hook, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		STRING_LIGHT_HOOK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("string_light_hook"),
+				FabricBlockEntityTypeBuilder.create(StringLightHookBlockEntity::new, hook).build());
+		EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> entity.energy(), STRING_LIGHT_HOOK_ENTITY);
+		registerItem("jack_o_lantern_string_lights", StringLightsItem::new, new Item.Properties(), BUILDING_TAB);
+
+		Block bowl = registerBlock("candy_bowl", CandyBowlBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(0.8F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.DESTROY));
+		registerItem("candy_bowl", props -> new BlockItem(bowl, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		CANDY_BOWL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("candy_bowl"),
+				FabricBlockEntityTypeBuilder.create(CandyBowlBlockEntity::new, bowl).build());
+
+		Block coffin = registerBlock("coffin", CoffinBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(2.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
+		registerItem("coffin", props -> new BlockItem(coffin, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), EQUIPMENT_TAB);
+		COFFIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("coffin"),
+				FabricBlockEntityTypeBuilder.create(CoffinBlockEntity::new, coffin).build());
+
+		Block portrait = registerBlock("haunted_portrait", HauntedPortraitBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).noCollision().ignitedByLava().pushReaction(PushReaction.DESTROY));
+		registerItem("haunted_portrait", props -> new BlockItem(portrait, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		HAUNTED_PORTRAIT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("haunted_portrait"),
+				FabricBlockEntityTypeBuilder.create(HauntedPortraitBlockEntity::new, portrait).build());
+
+		Block fog = registerBlock("fog_machine", FogMachineBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+				.strength(3.5F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().lightLevel(FogMachineBlock::light));
+		registerItem("fog_machine", props -> new BlockItem(fog, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		FOG_MACHINE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("fog_machine"),
+				FabricBlockEntityTypeBuilder.create(FogMachineBlockEntity::new, fog).build());
+		EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> entity.energy(), FOG_MACHINE_ENTITY);
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id("fog"), FOG);
 	}
 
 	/** How brightly a Wisp in a Jar glows. */
