@@ -19,7 +19,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -37,7 +36,8 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
  * Client game test for the pumpkin regatta and trick-or-treating: a pond with a carved, lit Pumpkin Barge
  * (two villagers aboard) and a Pumpkin Racer among numbered buoys, the Regatta Flag on the shore, and armor
  * stands wearing the three costumes and a hand-carved pumpkin by a door with its porch light; photographed by
- * day and at midnight, then from under a ghost sheet (CI job {@code client}).
+ * day and at midnight (CI job {@code client}). Screenshots hide the HUD, so the ghost sheet's view (a camera
+ * overlay) is not photographed; a server test checks the sheet has it.
  */
 public class RegattaClientGameTests implements FabricClientGameTest {
 	@Override
@@ -71,13 +71,6 @@ public class RegattaClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 7, y + 3, z - 3, 180, 18, "jugcraft_pumpkin_barge_night");
 			shoot(context, singleplayer, x + 26, y + 1, z + 2, 180, 6, "jugcraft_trick_or_treat_night");
 
-			// The view from under a ghost sheet.
-			server.runCommand("time set noon");
-			server.runOnServer(minecraft -> {
-				ServerPlayer player = minecraft.getPlayerList().getPlayers().get(0);
-				player.setItemSlot(EquipmentSlot.HEAD, new ItemStack(JugcraftAgriculture.item("ghost_sheet")));
-			});
-			shoot(context, singleplayer, x + 10, y + 3, z, 180, 15, "jugcraft_ghost_sheet_view");
 		}
 	}
 

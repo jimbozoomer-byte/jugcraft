@@ -328,6 +328,14 @@ Put a **Harvest Scale** beside a full-grown giant pumpkin and use it. It weighs 
 
 Two things to do with the Halloween harvest. The regatta works all year; trick-or-treating only while the Halloween event runs. Details, numbers and test evidence: [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md).
 
+| **The regatta pond:** a carved Pumpkin Barge with two villagers aboard, a Pumpkin Racer, numbered buoys and the Regatta Flag on the shore | **The barge** close up: a 3×3×3 giant hollowed out, its carved face kept |
+| --- | --- |
+| ![The regatta pond](../images/ingame_pumpkin_regatta.jpg) | ![A Pumpkin Barge and a Pumpkin Racer](../images/ingame_pumpkin_barge.jpg) |
+| **At midnight:** the barge's torch lights its carving | **Costumes:** a carved pumpkin, Witch Hat, Ghost Sheet, Scarecrow Hat and a hand-carved pumpkin, by a door with its jack o'lantern porch light |
+| ![The barge at night](../images/ingame_pumpkin_barge_night.jpg) | ![Costumes on armor stands](../images/ingame_costumes.jpg) |
+
+*Real screenshots from the client game test that CI runs (`RegattaClientGameTests`, software rendering, small previews).*
+
 ### Pumpkin boats and the regatta
 
 Sneak and use the Carving Knife on top of a giant pumpkin to **hollow it out into a boat**. A full-grown 3×3×3 giant makes a **Pumpkin Barge**: four seats, and it keeps its weight, carving and torch, so a carved barge glows on the water at night. A 2×2×2 giant (stop it there by cutting its vine or giving it no room) makes a **Pumpkin Racer** for one. Lighter boats are faster: a racer 1.15–1.30× a boat, a barge 0.70–0.95×. Hollowing gives the pumpkin's guts and, full grown, its giant seeds, but not its pumpkins.
