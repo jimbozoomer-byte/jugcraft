@@ -14,7 +14,7 @@ No numbered release yet. Everything below is on `main`.
 - **Skeleton Hand Sconce:** a torch held out from a wall by a bony hand (light 14); snuff it by hand, relight it with flint and steel.
 - **Soul-Flame Carvings:** a soul torch lights hand-carved and giant pumpkins with an ice-blue glow (at most light 10) and comes back out as a soul torch. Hand-carved pumpkins gain a `soul` block state (old worlds load with a plain candle).
 - **Bat Bunting:** orange and black pennants and paper bats strung between String Light Hooks like the string lights; hooks remember which strand they hold.
-- The checker compares the new blocks' numbers and the floating candles' places with Java, checks every state has a model, that the bag's cut-out face lines up inside and out, and that the soul-lit icon uses the client's soul colours. New server game tests and a client test with screenshots.
+- The checker compares the new blocks' numbers and the floating candles' places with Java, checks every state has a model, that the bag has a face cut through its walls and a whole inside (so the face shines with the candlelit far wall), and that the soul-lit icon uses the client's soul colours. New server game tests and a client test with screenshots.
 
 ### Agriculture: Halloween decorations, the first five (pull request pending, stacked on Halloween nights)
 - **Jack-o'-Lantern String Lights** strung between **String Light Hooks** (up to 16 blocks; hooks chain); a hook lights from redstone or 1 JE a tick from the electric network, and a strand glows while either end is lit.

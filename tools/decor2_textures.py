@@ -27,8 +27,8 @@ TWINE = [rgb("9a7a48"), rgb("b09060"), rgb("c8a870")]
 ORANGE = [rgb("b85a0e"), rgb("e07a18"), rgb("f2922a")]
 BLACK = [rgb("141416"), rgb("1e1e22"), rgb("2c2c32")]
 
-# The face cut through each wall of the bag, in the wall's own pixels (x 0-7 across, y 0-9 down from the rim). It is
-# the same mirrored, so the holes line up seen from inside the bag.
+# The face cut through each wall of the bag, in the wall's own pixels (x 0-7 across, y 0-9 down from the rim). Inside,
+# the walls are plain paper (luminaria_inside), so through the holes one sees the far wall lit by the candle.
 BAG_X, BAG_Y = 4, 6
 BAG_HOLES = [(1, 4), (2, 4), (2, 3), (6, 4), (5, 4), (5, 3), (3, 5), (4, 5), (1, 6), (6, 6), (2, 7), (3, 7), (4, 7), (5, 7)]
 
@@ -60,6 +60,21 @@ def luminaria(color, lit):
             img.putpixel((x, y), shade(paper, tone) + (255,))
     for hx, hy in BAG_HOLES:
         img.putpixel((BAG_X + hx, BAG_Y + hy), (0, 0, 0, 0))
+    return img
+
+
+def luminaria_inside(lit):
+    """The inside of the bag: plain paper in shadow, or lit warm by the candle, brightest low down in the middle."""
+    rng = random.Random(9221 + lit)
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            if lit:
+                near = 1.0 - min(1.0, (abs(x - 7.5) / 8 + abs(y - 12) / 10) / 1.4)
+                color = mix(rgb("f6c25a"), rgb("fff4c8"), near)
+            else:
+                color = shade(rgb(DYES["white"]), 0.62)
+            img.putpixel((x, y), shade(color, 1.0 + rng.uniform(-0.03, 0.03)) + (255,))
     return img
 
 
@@ -246,6 +261,8 @@ def bunting_item():
 def decor2_textures():
     """(kind, name) -> image for every texture of the second decorations batch."""
     out = {
+        ("block", "luminaria_inside"): luminaria_inside(False),
+        ("block", "luminaria_inside_lit"): luminaria_inside(True),
         ("block", "luminaria_sand"): luminaria_sand(),
         ("block", "luminaria_candle"): luminaria_candle(),
         ("block", "luminaria_flame"): flame(),

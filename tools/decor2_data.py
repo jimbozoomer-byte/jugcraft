@@ -10,7 +10,8 @@ a positive angle turns +y toward +z, so it lifts the north end of an element.
 from agriculture import LUMINARIA, FLOATING_CANDLE, SCONCE, BAT_BUNTING, DYE_COLORS
 from decor_data import MOD, HORIZONTAL, SIDES, rid, turned, box, block_model, flat_item, self_drop
 
-# The bag's four paper walls, each a plane seen from outside and from inside (zero thickness).
+# The bag's four paper walls, each a plane seen from outside (the cut face) and from inside (plain paper lit by the
+# candle, so the face shines when seen through its holes); zero thickness.
 BAG_WALLS = [((4, 0, 4), (12, 10, 4), ("north", "south")), ((4, 0, 12), (12, 10, 12), ("south", "north")),
              ((4, 0, 4), (4, 10, 12), ("west", "east")), ((12, 0, 4), (12, 10, 12), ("east", "west"))]
 
@@ -19,14 +20,15 @@ def luminaria_model(color, lit):
     """A paper bag 8 pixels square and 10 tall, open at the top, its walls cut with a jack-o'-lantern face; sand in
     the bottom and a candle standing in it. Lit, the paper glows and a flame burns on the wick."""
     paper = f"luminaria_{color}_lit" if lit else f"luminaria_{color}"
-    elements = [box(lo, hi, "#paper", faces=faces, light=12 if lit else None) for lo, hi, faces in BAG_WALLS]
+    elements = [box(lo, hi, "#paper", faces=faces, textures={faces[1]: "#inside"}, light=12 if lit else None) for lo, hi, faces in BAG_WALLS]
     elements += [
         box((4, 0, 4), (12, 1.5, 12), "#sand", faces=("up",)),
         box((7, 1.5, 7), (9, 6, 9), "#candle", faces=SIDES + ("up",)),
     ]
     if lit:
         elements.append(box((7.5, 6, 7.5), (8.5, 7.5, 8.5), "#flame", faces=SIDES + ("up",), light=15))
-    return block_model({"paper": paper, "sand": "luminaria_sand", "candle": "luminaria_candle", "flame": "luminaria_flame"},
+    return block_model({"paper": paper, "inside": "luminaria_inside_lit" if lit else "luminaria_inside", "sand": "luminaria_sand",
+                        "candle": "luminaria_candle", "flame": "luminaria_flame"},
                        elements, paper)
 
 

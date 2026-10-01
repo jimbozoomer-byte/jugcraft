@@ -3,6 +3,7 @@
   "textures": {
     "particle": "jugcraft:block/luminaria_gray_lit",
     "paper": "jugcraft:block/luminaria_gray_lit",
+    "inside": "jugcraft:block/luminaria_inside_lit",
     "sand": "jugcraft:block/luminaria_sand",
     "candle": "jugcraft:block/luminaria_candle",
     "flame": "jugcraft:block/luminaria_flame"
@@ -24,7 +25,7 @@
           "texture": "#paper"
         },
         "south": {
-          "texture": "#paper"
+          "texture": "#inside"
         }
       },
       "light_emission": 12
@@ -45,7 +46,7 @@
           "texture": "#paper"
         },
         "north": {
-          "texture": "#paper"
+          "texture": "#inside"
         }
       },
       "light_emission": 12
@@ -66,7 +67,7 @@
           "texture": "#paper"
         },
         "east": {
-          "texture": "#paper"
+          "texture": "#inside"
         }
       },
       "light_emission": 12
@@ -87,7 +88,7 @@
           "texture": "#paper"
         },
         "west": {
-          "texture": "#paper"
+          "texture": "#inside"
         }
       },
       "light_emission": 12

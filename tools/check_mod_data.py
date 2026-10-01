@@ -1279,8 +1279,8 @@ def check_decor(java):
 
 def check_decor2(java):
     """The second decorations batch: Java matches tools/agriculture.py (lights, the floating candles' places, the strand
-    kinds), every block state has a model, the bag's cut-out face is the same mirrored (so its holes line up seen from
-    inside), and the soul-lit carving icon uses the client's soul colours."""
+    kinds), every block state has a model, the bag's walls have a face cut through them and its inside none (so the
+    face shines with the candlelit far wall), and the soul-lit carving icon uses the client's soul colours."""
     def number(source, name):
         match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
         return float(match.group(1)) if match else None
@@ -1323,7 +1323,7 @@ def check_decor2(java):
         if variants(block) != keys:
             err(f"{block}: blockstate variants differ from its properties")
 
-    # The bag's face is cut the same seen from inside: each hole's mirror image is a hole too.
+    # The bag's walls are cut with a face where the model shows them (x 4-11, y 6-15); the inside is whole.
     for color in ag.DYE_COLORS:
         for suffix in ("", "_lit"):
             image = ASSETS / "textures" / "block" / f"luminaria_{color}{suffix}.png"
@@ -1331,9 +1331,12 @@ def check_decor2(java):
                 err(f"Missing texture {image.name}")
                 continue
             pixels = Image.open(image).convert("RGBA")
-            holes = {(x, y) for x in range(4, 12) for y in range(6, 16) if pixels.getpixel((x, y))[3] == 0}
-            if not holes or holes != {(15 - x, y) for x, y in holes}:
-                err(f"{image.name}: the cut-out face is missing or not the same mirrored")
+            if not any(pixels.getpixel((x, y))[3] == 0 for x in range(4, 12) for y in range(6, 16)):
+                err(f"{image.name}: no face cut through the bag")
+    for name in ("luminaria_inside", "luminaria_inside_lit"):
+        image = ASSETS / "textures" / "block" / f"{name}.png"
+        if not image.exists() or Image.open(image).convert("RGBA").getextrema()[3][0] < 255:
+            err(f"{name}.png: missing, or see-through (the inside of the bag must be whole)")
 
     # The soul-lit icon and the client's soul colours agree.
     client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "CarvingTextures.java")
