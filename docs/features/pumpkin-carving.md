@@ -1,6 +1,6 @@
 # Pumpkin carving: the Carving Knife and hand-carved pumpkins
 
-Status: implemented in source; **not yet played**. The Build workflow compiles it, and CI's game tests pass (details below).
+Status: implemented in source. **First played by the owner on 1 October 2026:** the screen worked, but clicking the grid did nothing. That is fixed (see Verification); the fixed version has not been played yet. The Build workflow compiles it, and CI's game tests pass (details below).
 Proposal issue: none; requested directly by the owner on 1 October 2026 ("start with the carving knife, 16 per block is fine"), the first of the Halloween and harvest additions discussed with them.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Milestone 3 (first homestead); Discovery tier (an iron ingot and a stick).
@@ -61,10 +61,10 @@ Actual results (1 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API
 | Check | Result |
 | --- | --- |
 | `python3 scripts/check_repository.py` | Pass |
-| `python3 tools/check_mod_data.py` (now also checks the carving numbers against Java (face size, glow formula, session length, knife durability), that every starter face is 16 rows of 16 pixels and named, that every refusal has a message, and the models of select item definitions) | Pass, 301 IDs |
-| `./gradlew build`, compile, with the Festival Crops, Kitchen Garden, Fall Harvest and `main` after #46 merged in (`734bc6e`) | Pass |
-| Game tests on the headless server, same commit: 107 in total, 10 of them new here | **All 107 pass** |
-| Client game test (real client, Mesa software rendering, CI job `client`, same commit and `dce9952`) | **Passes**; the screenshots in the branch document are from the `734bc6e` run |
+| `python3 tools/check_mod_data.py` (now also checks the carving numbers against Java (face size, glow formula, session length, knife durability), that every starter face is 16 rows of 16 pixels and named, that every refusal has a message, and the models of select item definitions) | Pass, 304 IDs |
+| `./gradlew build`, compile, with the input fix, the Festival Crops, Kitchen Garden, Fall Harvest and `main` after #47 merged in (`1864fc9`) | Pass |
+| Game tests on the headless server, same commit: 114 in total, 10 of them new here (all 107 passed at `734bc6e`, before #47's tests) | **All 114 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`), including carving with the mouse and keyboard | **Passes** on `1864fc9`. Before the input fix it passed on `734bc6e` and `dce9952`, which only pressed buttons; the screenshots in the branch document are from the `734bc6e` run |
 
 The 10 new game tests (`CarvingGameTests`):
 1. the first carve turns a plain pumpkin into a hand-carved one facing the carved side, keeps the face, records the carver, sets the glow from the design, gives no light without a torch, costs the knife one use and lets out 4 seeds;
@@ -78,10 +78,12 @@ The 10 new game tests (`CarvingGameTests`):
 9. glow values (blank 0, one hole 4, 48 holes 15, 96 shaved 12), a design saves and loads unchanged, a wrong-sized design doesn't load, and the starter faces are valid and distinct;
 10. roasted pumpkin seeds restore 2, and their furnace, smoker and campfire recipes load.
 
-The client game test goes through the real path a player uses:
+The client game test goes through the screen twice. First with its buttons:
 - the server opens the carving screen for a plain pumpkin, as using the knife does (`PumpkinCarvings.open`);
 - the test presses Apply (the Classic face), Mirror and Candle, then Done;
 - it then checks on the server that the pumpkin holds the Classic face. The log reads `[carving test] face carved over the network: true`.
+
+Then by hand, as a player carves (added after the owner's first play, below): the use key with the knife opens the screen, and mouse clicks and drags, a right-click, Ctrl+Z and the Shave tool carve a face the server must then hold exactly. The log reads `[carving test] face carved by mouse and keyboard: true`.
 
 The test also builds a row of carved pumpkins on hay bales and photographs it by day and lit at midnight.
 
@@ -89,8 +91,19 @@ The first CI run did not compile: the client test used a field that 26.3's `Mine
 
 The client log shows no model or texture errors.
 
+**Found in play, and fixed.** The owner played the first version: the screen looked right, but clicking the grid did nothing.
+- Cause: Minecraft 26.3 numbers mouse buttons from 1 (left 1, middle 2, right 3), as its `MouseHandler` and vanilla's widgets read them. The screen used the older numbering (left 0, right 1), so a left click was taken as a right-click erase, which leaves uncarved skin as it is, and right clicks were ignored. Ctrl+Z checked the old key code for Z (90; 26.3 numbers keys differently, and Z is 29), so undo by keyboard did nothing either.
+- Fix: the screen uses 26.3's button numbers, and matches Ctrl+Z as vanilla's edit shortcuts do: by the letter on the keyboard layout, with Cmd on macOS.
+- Why the tests missed it: the client test only pressed the screen's buttons through the test harness and never clicked the grid.
+- New test: the client test now also carves a pumpkin as a player does, through the game's own input handlers:
+  - it uses the knife on a pumpkin with the use key, which opens the screen;
+  - with the mouse (Fabric's test input, through Minecraft's `MouseHandler`) it left-clicks a cell, left-drags along a row, right-clicks a cut to erase it, presses Ctrl+Z, right-clicks another, picks Shave and clicks a cell, then presses Done;
+  - Ctrl+Z goes through Minecraft's `KeyboardHandler` as the event a keyboard sends (the Z key, its key code and the platform's shortcut modifier). Fabric's `TestInput.pressKey` can't send it: it sends every key without modifiers, even while `holdControl` holds Ctrl;
+  - the server must then hold exactly that face, pixel by pixel. The log reads `[carving test] face carved by mouse and keyboard: true`.
+- Without the fix, this test fails as the owner saw it (`d2663ad`): the screen opened, but the pumpkin was left uncarved. With the fix (`26eccb7`), only the test's Ctrl+Z step still failed, because of the Fabric limitation above; the test now sends Ctrl+Z through the keyboard handler and passes (`1864fc9`).
+
 **Not run:**
-- a person playing in a client: drawing by dragging the mouse wasn't exercised, since the test pressed the screen's buttons;
+- a person playing the fixed version in a client (the test drives the real input path, but with simulated input);
 - a dedicated server with two players, including two players carving the same side at once;
 - save and restart with carved pumpkins in the world (the design's save format and the item round trip are tested);
 - resource packs that retexture pumpkins;

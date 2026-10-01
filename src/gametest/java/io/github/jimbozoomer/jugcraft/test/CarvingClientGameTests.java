@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.agriculture.CarvedPumpkinBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.CarvedPumpkinBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.CarvingTemplates;
@@ -10,9 +11,13 @@ import io.github.jimbozoomer.jugcraft.client.CarvingScreen;
 import java.util.Arrays;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
+import net.fabricmc.fabric.api.client.gametest.v1.TestInput;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.MouseHandler;
+import net.minecraft.client.input.InputQuirks;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,7 +33,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * Client game test for pumpkin carving: a row of hand-carved pumpkins on hay bales (the starter faces and two
  * free designs, one pumpkin carved on two sides), photographed by day and lit at midnight; and the carving
  * screen, opened by the server as the knife does, used (a starter face pressed in, the candle preview on),
- * photographed and finished, after which the server must hold the carved face (CI job {@code client}).
+ * photographed and finished, after which the server must hold the carved face; and a pumpkin carved by real
+ * mouse and keyboard input, as a player does (CI job {@code client}).
  */
 public class CarvingClientGameTests implements FabricClientGameTest {
 	private static final String[] BAT = {
@@ -92,11 +98,116 @@ public class CarvingClientGameTests implements FabricClientGameTest {
 				throw new AssertionError("The carving screen's face did not reach the pumpkin");
 			}
 
+			carveByHand(context, server, origin.offset(15, 0, -3), y);
+
 			server.runOnServer(minecraft -> lightAll(minecraft.overworld(), origin));
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 6, y + 2, z + 4, 180, 12, "jugcraft_carved_pumpkins_night");
 			shoot(context, singleplayer, x + 17, y, z - 1, 180, 28, "jugcraft_carved_pumpkin_close");
 		}
+	}
+
+	/**
+	 * Carves a pumpkin the way a player does, through real input: the use key with the knife opens the screen,
+	 * then mouse clicks and a drag on the grid, a right-click erase, Ctrl+Z, the Shave tool and Done. The server
+	 * must then hold exactly that face.
+	 */
+	private static void carveByHand(ClientGameTestContext context, TestServerContext server, BlockPos target, int y) {
+		server.runOnServer(minecraft -> {
+			minecraft.overworld().setBlock(target, Blocks.PUMPKIN.defaultBlockState(), Block.UPDATE_ALL);
+			minecraft.getPlayerList().getPlayers().get(0).setItemInHand(InteractionHand.MAIN_HAND,
+					new ItemStack(JugcraftAgriculture.item("carving_knife")));
+		});
+		server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 20", target.getX() + 0.5, y, target.getZ() + 2.5));
+		context.waitTicks(20);
+		context.getInput().lookAt(target);
+		context.waitTicks(2);
+		context.getInput().pressKey(options -> options.keyUse);
+		context.waitForScreen(CarvingScreen.class);
+		context.waitTicks(2);
+
+		TestInput input = context.getInput();
+		clickCell(context, 3, 3, InputConstants.MOUSE_BUTTON_LEFT); // Cut is the starting tool
+		moveToCell(context, 4, 10); // drag a line along row 10
+		input.holdMouse(InputConstants.MOUSE_BUTTON_LEFT);
+		context.waitTicks(1);
+		for (int x = 5; x <= 9; x++) {
+			moveToCell(context, x, 10);
+		}
+		input.releaseMouse(InputConstants.MOUSE_BUTTON_LEFT);
+		context.waitTicks(1);
+		clickCell(context, 6, 10, InputConstants.MOUSE_BUTTON_RIGHT); // right-click erases this session's cut...
+		pressUndo(context); // ...and Ctrl+Z brings it back
+		context.waitTicks(1);
+		clickCell(context, 9, 10, InputConstants.MOUSE_BUTTON_RIGHT); // this erase stays
+		context.clickScreenButton("Shave");
+		clickCell(context, 12, 3, InputConstants.MOUSE_BUTTON_LEFT);
+		context.takeScreenshot("jugcraft_carving_by_hand");
+		context.clickScreenButton("Done");
+		context.waitForScreen(null);
+		context.waitTicks(20);
+
+		int[] expected = face(
+				"................", "................", "................", "...#........s...",
+				"................", "................", "................", "................",
+				"................", "................", "....#####.......", "................",
+				"................", "................", "................", "................");
+		int[] actual = server.computeOnServer(minecraft -> {
+			BlockState state = minecraft.overworld().getBlockState(target);
+			if (state.getBlock() instanceof CarvedPumpkinBlock
+					&& minecraft.overworld().getBlockEntity(target) instanceof CarvedPumpkinBlockEntity pumpkin) {
+				return pumpkin.carving().face(PumpkinCarving.faceIndex(state.getValue(CarvedPumpkinBlock.FACING), Direction.SOUTH));
+			}
+			return new int[PumpkinCarving.SIZE];
+		});
+		boolean match = Arrays.equals(expected, actual);
+		System.out.println("[carving test] face carved by mouse and keyboard: " + match);
+		if (!match) {
+			throw new AssertionError("The face carved with the mouse is wrong. Expected:\n" + rows(expected) + "Got:\n" + rows(actual));
+		}
+	}
+
+	/** Moves the real cursor to the middle of a cell of the open carving screen's grid. */
+	private static void moveToCell(ClientGameTestContext context, int x, int y) {
+		double[] window = context.computeOnClient(client -> {
+			CarvingScreen screen = (CarvingScreen) client.gui.screen();
+			// The cursor is set in window pixels; the screen works in GUI units.
+			double guiPerPixelX = MouseHandler.getScaledXPos(client.getWindow(), 1.0);
+			double guiPerPixelY = MouseHandler.getScaledYPos(client.getWindow(), 1.0);
+			return new double[] {screen.cellCentreX(x) / guiPerPixelX, screen.cellCentreY(y) / guiPerPixelY};
+		});
+		context.getInput().setCursorPos(window[0], window[1]);
+		context.waitTicks(1);
+	}
+
+	/**
+	 * Presses Ctrl+Z (Cmd+Z on macOS) through the game's keyboard handler, as the event a real keyboard sends: the Z
+	 * key, its key code and the platform's shortcut modifier. Fabric's {@code TestInput.pressKey} can't express it,
+	 * because it sends every key with no modifiers, even while {@code holdControl} holds Ctrl.
+	 */
+	private static void pressUndo(ClientGameTestContext context) {
+		context.runOnClient(client -> {
+			KeyEvent undo = new KeyEvent(InputConstants.KEY_Z, InputConstants.KEYCODE_Z, InputQuirks.EDIT_SHORTCUT_KEY_MODIFIER);
+			client.keyboardHandler.keyPress(client.getWindow().handle(), InputConstants.PRESS, undo);
+			client.keyboardHandler.keyPress(client.getWindow().handle(), InputConstants.RELEASE, undo);
+		});
+	}
+
+	private static void clickCell(ClientGameTestContext context, int x, int y, int button) {
+		moveToCell(context, x, y);
+		context.getInput().pressMouse(button);
+		context.waitTicks(1);
+	}
+
+	private static String rows(int[] face) {
+		StringBuilder text = new StringBuilder();
+		for (int y = 0; y < PumpkinCarving.SIZE; y++) {
+			for (int x = 0; x < PumpkinCarving.SIZE; x++) {
+				text.append(".s#?".charAt(PumpkinCarving.pixel(face[y], x)));
+			}
+			text.append('\n');
+		}
+		return text.toString();
 	}
 
 	/** Stands the player at a spot (on an invisible barrier) and takes a screenshot. */

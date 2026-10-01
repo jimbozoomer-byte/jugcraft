@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.agriculture.CarvePayload;
 import io.github.jimbozoomer.jugcraft.agriculture.CarvingTemplates;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
@@ -32,8 +33,6 @@ public class CarvingScreen extends Screen {
 	private static final int HEIGHT = 222;
 	private static final int PREVIEW_SCALE = 3;
 	private static final int UNDO_LIMIT = 64;
-	/** GLFW's key code for Z (Ctrl+Z undoes). */
-	private static final int KEY_Z = 90;
 
 	private static final int RIND = 0xFF6B3A10;
 	private static final int PANEL = 0xFF2B1A0E;
@@ -185,6 +184,15 @@ public class CarvingScreen extends Screen {
 		}
 	}
 
+	/** The middle of a grid cell in GUI coordinates (the client game test clicks the grid through it). */
+	public double cellCentreX(int x) {
+		return gridX + x * CELL + CELL / 2.0;
+	}
+
+	public double cellCentreY(int y) {
+		return gridY + y * CELL + CELL / 2.0;
+	}
+
 	private boolean inGrid(double mouseX, double mouseY) {
 		return mouseX >= gridX && mouseX < gridX + GRID && mouseY >= gridY && mouseY < gridY + GRID;
 	}
@@ -230,10 +238,12 @@ public class CarvingScreen extends Screen {
 		if (super.mouseClicked(event, doubleClick)) {
 			return true;
 		}
-		if (freeDraw && inGrid(event.x(), event.y()) && (event.button() == 0 || event.button() == 1)) {
+		// Minecraft 26.3 numbers mouse buttons from 1 (left 1, middle 2, right 3); older versions counted from 0.
+		if (freeDraw && inGrid(event.x(), event.y())
+				&& (event.button() == InputConstants.MOUSE_BUTTON_LEFT || event.button() == InputConstants.MOUSE_BUTTON_RIGHT)) {
 			pushUndo();
 			painting = true;
-			erasing = event.button() == 1;
+			erasing = event.button() == InputConstants.MOUSE_BUTTON_RIGHT;
 			paint(event.x(), event.y());
 			return true;
 		}
@@ -264,7 +274,8 @@ public class CarvingScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(KeyEvent event) {
-		if (event.hasControlDown() && event.key() == KEY_Z) {
+		// Ctrl+Z (Cmd+Z on macOS), matched like vanilla's edit shortcuts: by the letter on the keyboard layout.
+		if (event.shortcutKey() == InputConstants.KEYCODE_Z && event.hasControlDownWithQuirk() && !event.hasShiftDown() && !event.hasAltDown()) {
 			undo();
 			return true;
 		}

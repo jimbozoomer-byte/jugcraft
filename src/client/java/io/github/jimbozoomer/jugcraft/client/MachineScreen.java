@@ -251,6 +251,10 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 			String key = menu.data(MachineBlockEntity.DATA_FORMED) == 1
 					? "container.jugcraft.wind_turbine.clear" : "container.jugcraft.wind_turbine.blocked";
 			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT, false);
+		} else if (menu.kind() == MachineKind.FRACKING_RIG) {
+			String key = menu.data(MachineBlockEntity.DATA_FORMED) == 1
+					? "container.jugcraft.fracking_rig.shale" : "container.jugcraft.fracking_rig.none";
+			graphics.text(font, Component.translatable(key).getString(), 28, 18, TEXT, false);
 		} else if (menu.kind() == MachineKind.PUMPJACK) {
 			String key = menu.data(MachineBlockEntity.DATA_FORMED) == 1
 					? "container.jugcraft.pumpjack.oil" : "container.jugcraft.pumpjack.dry";
@@ -291,8 +295,8 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		if (fluid == Fluids.LAVA || fluid == Fluids.FLOWING_LAVA) {
 			return LAVA;
 		}
-		PetroFluids.Entry entry = PetroFluids.of(fluid);
-		return entry != null ? entry.color() : 0xFF8090A8;
+		int color = PetroFluids.gaugeColor(fluid);
+		return color != 0 ? color : 0xFF8090A8;
 	}
 
 	private static void slotFrame(GuiGraphicsExtractor graphics, int slotX, int slotY) {

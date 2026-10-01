@@ -14,7 +14,7 @@ No numbered release yet. Everything below is on `main`.
 - **Light:** a torch inside lights it, from 4 up to 15 the more is carved out; an empty hand takes the torch back. Broken, it drops with its design and its torch.
 - **Roasted Pumpkin Seeds** from the furnace, smoker or campfire.
 - **Server checks:** the server checks every carving (the session from using the knife, the knife in hand, reach, build permission, a valid face that only goes deeper). Carvings record their last carver for operators, and `carving.free_draw=false` in `config/jugcraft.properties` allows only the starter faces.
-- The checker also verifies the carving numbers against Java, the starter faces and every refusal message, and understands select item models. Ten new game tests and a client test that carves through the real screen.
+- The checker also verifies the carving numbers against Java, the starter faces and every refusal message, and understands select item models. Ten new game tests, and a client test that carves through the real screen with the mouse and keyboard (after the owner's first play found that clicks on the grid did nothing: 26.3 numbers mouse buttons from 1, and the screen used the old numbers).
 
 ### Agriculture: Festival Crops (pull request pending, stacked on the Kitchen Garden)
 - **Gourds on stems:** butternut squash, acorn squash and warty gourds grow from stems on farmland and place their gourd beside them, like pumpkins. Stems follow Jugcraft's growth rules, so squash next to beans grows 1.5× as fast. Gourds are blocks for fall displays; 1 gourd → 4 seeds.
@@ -52,6 +52,24 @@ No numbered release yet. Everything below is on `main`.
 - **Charging Station (#40):** its "lower half only" condition used the old keys too, so breaking the top half dropped two stations. It now drops one (game test `chargingStationDropsOnce`).
 - `tools/check_mod_data.py` fails on any pre-26.x loot key, and a new game test mines ores and checks what drops.
 
+
+### #50 Oil line, batch 3: fracking and diesel power
+- New fluids: **fracking fluid** and **flowback water** (with buckets).
+- **Chemical mixer** (2×2×2): water + sand + dried kelp → fracking fluid.
+- **Fracking rig** (3×3×5): over shale oil, pumps fracking fluid down and brings up crude oil, refinery gas and flowback water.
+- **Flowback treatment unit** (3×1×2): flowback water → clean water (a quarter lost) + salt.
+- **Diesel generator** (3×2×2): 256 JE/t from diesel (256 JE/mB) or heavy fuel oil (128 JE/mB).
+- **Gas turbine** (4×2×2): 512 JE/t from gasoline (384 JE/mB) or refinery gas (192 JE/mB), with lubricant upkeep.
+- Game tests for each.
+
+### #49 Oil line, batch 2: refining
+- **Steel fluid pipes** (1,000 mB/t) and the **heavy pump** (1,000 mB/t); a pipe line now carries as much as its slowest pipe.
+- New fluids: **naphtha, diesel, heavy fuel oil, lubricant, gasoline** (with buckets) and **refinery gas** (a gas: tanks and pipes only).
+- **Distillation tower** (2×2×7): crude oil → gas, naphtha, diesel and heavy fuel oil, each drawn off at its own height.
+- **Catalytic cracker** (2×2×4): heavy fuel oil + steam + catalyst → diesel, naphtha and gas. **Cracking catalyst** from bauxite, sand and nickel.
+- **Vacuum distillation unit** (2×2×3): heavy fuel oil → lubricant + asphalt binder.
+- **Catalytic reformer** (3×2×2): naphtha → gasoline + gas.
+- Game tests for each.
 
 ### #47 Oil line, batch 1: oil in the world
 The first five commits of the dieselpunk Chemistry branch ([plan](docs/branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line)).
