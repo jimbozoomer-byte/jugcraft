@@ -109,14 +109,17 @@ public class Decor3GameTests {
 		helper.setBlock(a, block("cemetery_fence"));
 		helper.setBlock(a.east(), block("cemetery_fence"));
 		helper.setBlock(a.east(2), block("cemetery_gate").defaultBlockState().setValue(FenceGateBlock.FACING, Direction.NORTH));
-		helper.setBlock(a.east(3), block("cemetery_fence"));
+		// Set from its neighbours, as placing it by hand would (setBlock alone keeps the state it is given).
+		helper.setBlock(a.east(3), Block.updateFromNeighbourShapes(block("cemetery_fence").defaultBlockState(), helper.getLevel(),
+				helper.absolutePos(a.east(3))));
 		helper.setBlock(a.north(), Blocks.NETHER_BRICK_FENCE);
 		helper.setBlock(a.south(), Blocks.OAK_FENCE);
 		BlockState fence = helper.getBlockState(a);
 		helper.assertTrue(fence.getValue(FenceBlock.EAST) && fence.getValue(FenceBlock.NORTH) && !fence.getValue(FenceBlock.SOUTH),
 				"A cemetery fence joins its neighbour and a nether brick fence, not an oak fence: " + fence);
 		helper.assertTrue(helper.getBlockState(a.east()).getValue(FenceBlock.EAST) && helper.getBlockState(a.east(3)).getValue(FenceBlock.WEST),
-				"Fences on both sides join the gate");
+				"Fences on both sides join the gate: " + helper.getBlockState(a.east()) + " | " + helper.getBlockState(a.east(2)) + " | "
+						+ helper.getBlockState(a.east(3)));
 		helper.assertTrue(fence.is(BlockTags.FENCES) && !fence.is(BlockTags.WOODEN_FENCES)
 				&& helper.getBlockState(a.east(2)).is(BlockTags.FENCE_GATES), "The fence and gate are in vanilla's tags");
 

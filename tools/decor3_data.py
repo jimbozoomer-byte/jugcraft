@@ -31,7 +31,7 @@ def fitted(model):
             if min(u0, v0, u1, v1) < 0 or max(u0, v0, u1, v1) > 16:
                 du = min(max(u0, 0), 16 - (u1 - u0)) - u0
                 dv = min(max(v0, 0), 16 - (v1 - v0)) - v0
-                face["uv"] = [u0 + du, v0 + dv, u1 + du, v1 + dv]
+                face["uv"] = [round(u0 + du, 3), round(v0 + dv, 3), round(u1 + du, 3), round(v1 + dv, 3)]
     return model
 
 
@@ -102,20 +102,22 @@ def mound_model(raised):
     elements = [box((1, 0, 1), (15, 3, 15), "#side", textures={"up": "#top"}),
                 box((3, 3, 2), (13, 5, 14), "#side", textures={"up": "#top"}, faces=UP_SIDES)]
     if raised:
-        curl = {"origin": [8, 12.5, 7.5], "axis": "x", "angle": -22.5}
-        elements += [box((6.5, 5, 6.5), (9.5, 7, 9.5), "#sleeve", faces=UP_SIDES),
-                     box((7, 7, 7), (9, 10.5, 9), "#hand", faces=SIDES),
-                     box((6.5, 10.5, 7), (9.5, 12.5, 9), "#hand")]
-        for x in (6.5, 7.25, 8.0, 8.75):
-            elements.append(box((x, 12.5, 7.25), (x + 0.6, 15, 8.25), "#hand", rotation=curl))
-        elements.append(box((9.5, 10.5, 7.5), (10.25, 12.5, 8.5), "#hand"))
+        # A big hand, so it reads from across a graveyard: a torn sleeve, the forearm, a palm and four fingers clawing
+        # forward over the top of the block, and a thumb.
+        curl = {"origin": [8, 15.5, 8], "axis": "x", "angle": -22.5}
+        elements += [box((6, 5, 6), (10, 8, 10), "#sleeve", faces=UP_SIDES),
+                     box((6.5, 8, 6.5), (9.5, 13, 9.5), "#hand", faces=SIDES),
+                     box((6, 13, 6.5), (10, 15.5, 9.5), "#hand")]
+        for x in (6, 7, 8, 9):
+            elements.append(box((x, 15.5, 7), (x + 0.9, 19, 8.2), "#hand", rotation=curl))
+        elements.append(box((10, 13, 7.5), (11, 15.5, 8.5), "#hand"))
     return fitted(block_model({"top": "grave_mound_top", "side": "grave_mound_side", "hand": "grave_mound_hand",
                                "sleeve": "grave_mound_sleeve"}, elements, "grave_mound_side"))
 
 
 def angel_model(half):
-    """The Mourning Angel facing north: a plinth and robe below; above, its torso, folded wings rising behind and its
-    head bowed into its hands."""
+    """The Mourning Angel facing north: a plinth and robe below; above, its torso, wings folded behind it (their tips no
+    higher than its bowed head) and its head bowed into its hands."""
     if half == "lower":
         elements = [box((2, 0, 2), (14, 3, 14), "#plinth"), box((2.5, 3, 2.5), (13.5, 4, 13.5), "#plinth", faces=UP_SIDES),
                     box((3.5, 4, 4.5), (12.5, 6, 11.5), "#marble", faces=UP_SIDES), box((4, 6, 5), (12, 12, 11), "#marble", faces=SIDES),
@@ -127,8 +129,8 @@ def angel_model(half):
                     box((6, 6, 5), (10, 10, 9), "#marble", rotation=bow), box((5.5, 4, 8.5), (10.5, 10, 9.5), "#marble"),
                     box((5, 4, 4), (7, 8, 6), "#marble"), box((9, 4, 4), (11, 8, 6), "#marble"),
                     box((6, 7, 3.5), (10, 9.5, 5), "#marble"),
-                    box((1, 0, 9), (4, 13, 12), "#wing", faces=UP_SIDES), box((1.5, 13, 9.5), (3.5, 15, 11.5), "#wing", faces=UP_SIDES),
-                    box((12, 0, 9), (15, 13, 12), "#wing", faces=UP_SIDES), box((12.5, 13, 9.5), (14.5, 15, 11.5), "#wing", faces=UP_SIDES)]
+                    box((2, 0, 8.5), (4.5, 8, 12), "#wing", faces=UP_SIDES), box((2.5, 8, 9), (4, 10, 11.5), "#wing", faces=UP_SIDES),
+                    box((11.5, 0, 8.5), (14, 8, 12), "#wing", faces=UP_SIDES), box((12, 8, 9), (13.5, 10, 11.5), "#wing", faces=UP_SIDES)]
     return fitted(block_model({"marble": "mourning_angel_marble", "wing": "mourning_angel_wing", "plinth": "mourning_angel_plinth"},
                               elements, "mourning_angel_marble"))
 

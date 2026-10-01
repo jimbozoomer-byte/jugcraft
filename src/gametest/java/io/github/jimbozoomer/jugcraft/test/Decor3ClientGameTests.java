@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MourningAngelBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PopUpSkeletonBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.ScareProp;
+import io.github.jimbozoomer.jugcraft.agriculture.ScarePropBlockEntity;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -13,17 +14,19 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.storage.TagValueInput;
 
 /**
  * Client game test for the graveyard decorations: a wrought-iron fence with a shut and an open gate, a row of Grave
- * Mounds (three with a hand up, held by redstone underneath), a Mourning Angel, a crypt front of crypt stone with
+ * Mounds (three with a hand up, held there by their timers), a Mourning Angel, a crypt front of crypt stone with
  * pillars, a chiseled frieze and a Crypt Door, and two Pop-Up Skeletons (one sprung); photographed by day and at night
  * (CI job {@code client}). The camera keeps out of the props' reach, so the lowered ones stay down.
  */
@@ -78,6 +81,16 @@ public class Decor3ClientGameTests implements FabricClientGameTest {
 		return JugcraftAgriculture.block(id).defaultBlockState();
 	}
 
+	/** Keeps a raised scare prop up through the shots: its saved timer says it comes down (and may go again) far off. */
+	private static void holdUp(ServerLevel level, BlockPos pos) {
+		if (level.getBlockEntity(pos) instanceof ScarePropBlockEntity prop) {
+			CompoundTag timers = new CompoundTag();
+			timers.putLong("down_at", Long.MAX_VALUE / 2);
+			timers.putLong("ready_at", Long.MAX_VALUE / 2);
+			prop.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), timers));
+		}
+	}
+
 	private static void build(ServerLevel level, BlockPos origin) {
 		int x = origin.getX();
 		int y = origin.getY();
@@ -91,15 +104,20 @@ public class Decor3ClientGameTests implements FabricClientGameTest {
 				set(level, pos, state("cemetery_fence"));
 			}
 		}
+		// Join each post to its neighbours, as placing them by hand would.
+		for (int dx = -2; dx <= 12; dx++) {
+			BlockPos pos = new BlockPos(x + dx, y, z - 6);
+			set(level, pos, Block.updateFromNeighbourShapes(level.getBlockState(pos), level, pos));
+		}
 
-		// Grave mounds facing the fence; every other one has its hand up, held there by a redstone block underneath.
+		// Grave mounds facing the fence; every other one has its hand up, held there for the shots by its timer.
 		for (int i = 0; i < 5; i++) {
 			BlockPos pos = new BlockPos(x + 1 + i * 2, y, z - 9);
 			boolean up = i % 2 == 0;
-			if (up) {
-				set(level, pos.below(), Blocks.REDSTONE_BLOCK.defaultBlockState());
-			}
 			set(level, pos, state("grave_mound").setValue(GraveMoundBlock.FACING, Direction.SOUTH).setValue(ScareProp.RAISED, up));
+			if (up) {
+				holdUp(level, pos);
+			}
 		}
 
 		// The mourning angel at the end of the row.
@@ -120,10 +138,10 @@ public class Decor3ClientGameTests implements FabricClientGameTest {
 		set(level, door, doorState);
 		set(level, door.above(), doorState.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER));
 
-		// Two pop-up skeletons on the lawn: one sprung (redstone underneath), one in its crate.
+		// Two pop-up skeletons on the lawn: one sprung (held by its timer), one in its crate.
 		BlockPos sprung = new BlockPos(x + 14, y, z - 3);
-		set(level, sprung.below(), Blocks.REDSTONE_BLOCK.defaultBlockState());
 		set(level, sprung, state("pop_up_skeleton").setValue(PopUpSkeletonBlock.FACING, Direction.SOUTH).setValue(ScareProp.RAISED, true));
+		holdUp(level, sprung);
 		set(level, new BlockPos(x + 16, y, z - 3), state("pop_up_skeleton").setValue(PopUpSkeletonBlock.FACING, Direction.SOUTH));
 	}
 }

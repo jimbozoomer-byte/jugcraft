@@ -38,7 +38,7 @@ public class GraveMoundBlock extends BaseEntityBlock implements ScareProp {
 	public static final int UP_TICKS = 60;
 	public static final int COOLDOWN_TICKS = 100;
 	private static final VoxelShape MOUND = Shapes.or(Block.box(1.0, 0.0, 1.0, 15.0, 3.0, 15.0), Block.box(3.0, 3.0, 2.0, 13.0, 5.0, 14.0));
-	private static final VoxelShape WITH_HAND = Shapes.or(MOUND, Block.box(5.5, 5.0, 5.5, 10.5, 15.0, 10.5));
+	private static final VoxelShape WITH_HAND = Shapes.or(MOUND, Block.box(6.0, 5.0, 6.0, 11.0, 16.0, 10.0));
 
 	public GraveMoundBlock(Properties properties) {
 		super(properties);
