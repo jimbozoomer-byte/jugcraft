@@ -13,6 +13,7 @@ import decor_data
 import decor2_data
 import decor3_data
 import decor4_data
+import decor5_data
 import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -150,6 +151,7 @@ def assets(root, write, lang):
     decor2_data.assets(root, write, lang)
     decor3_data.assets(root, write, lang)
     decor4_data.assets(root, write, lang)
+    decor5_data.assets(root, write, lang)
 
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
@@ -255,6 +257,7 @@ def loot(data, write):
     decor2_data.loot(out, write)
     decor3_data.loot(out, write)
     decor4_data.loot(out, write)
+    decor5_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -278,8 +281,10 @@ def recipes(out, write):
         data = {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped", "category": recipe["category"]}
         if "group" in recipe:
             data["group"] = recipe["group"]
-        data.update({"pattern": recipe["pattern"], "key": recipe["key"],
-                     "result": {"id": rid(recipe["result"]), "count": recipe["count"]}})
+        result = {"id": rid(recipe["result"]), "count": recipe["count"]}
+        if "components" in recipe:
+            result["components"] = recipe["components"]
+        data.update({"pattern": recipe["pattern"], "key": recipe["key"], "result": result})
         write(out / f"{recipe['id']}.json", data)
     for result, info in POT_RECIPES.items():
         out_item = {"id": rid(result)}
@@ -331,6 +336,7 @@ def tags(tags):
     decor2_data.tags(tags)
     decor3_data.tags(tags)
     decor4_data.tags(tags)
+    decor5_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

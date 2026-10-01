@@ -160,6 +160,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<HauntedPortraitBlockEntity> HAUNTED_PORTRAIT_ENTITY;
 	public static BlockEntityType<FogMachineBlockEntity> FOG_MACHINE_ENTITY;
 	public static BlockEntityType<FloatingCandleBlockEntity> FLOATING_CANDLE_ENTITY;
+	public static BlockEntityType<PumpkinCrateBlockEntity> PUMPKIN_CRATE_ENTITY;
+	public static EntityType<Seat> SEAT;
 	public static BlockEntityType<ScarePropBlockEntity> SCARE_PROP_ENTITY;
 	/** Low ground fog from the Fog Machine (drawn by the client: client/FogParticle.java). */
 	public static final SimpleParticleType FOG = FabricParticleTypes.simple();
@@ -737,7 +739,43 @@ public final class JugcraftAgriculture {
 			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
 			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
+
+		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
+		// entity players sit on), the Autumn Wreath and the Leaf Piles.
+		Block tub = registerBlock("bobbing_tub", BobbingTubBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		Block crate = registerBlock("pumpkin_crate", PumpkinCrateBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		PUMPKIN_CRATE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("pumpkin_crate"),
+				FabricBlockEntityTypeBuilder.create(PumpkinCrateBlockEntity::new, crate).build());
+		Block bale = registerBlock("hay_bale_seat", HayBaleSeatBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
+				.strength(0.5F).sound(SoundType.GRASS).noOcclusion().ignitedByLava());
+		SEAT = entity("seat", EntityType.Builder.<Seat>of(Seat::new, MobCategory.MISC).noLootTable().noSave().noSummon()
+				.sized(0.5F, 0.1F).passengerAttachments(0.0F).clientTrackingRange(10).updateInterval(20));
+		Block wreath = registerBlock("autumn_wreath", AutumnWreathBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(0.2F).sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		List<Block> piles = new ArrayList<>();
+		for (String colour : LEAF_PILE_COLOURS) {
+			piles.add(registerBlock(colour + "_leaf_pile", LeafPileBlock::new, BlockBehaviour.Properties.of().mapColor(
+					colour.equals("red") ? MapColor.COLOR_RED : colour.equals("orange") ? MapColor.COLOR_ORANGE : MapColor.COLOR_YELLOW)
+					.strength(0.1F).sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED)));
+		}
+		for (Block block : List.of(tub, crate, bale, wreath)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		FlammableBlockRegistry fire = FlammableBlockRegistry.getDefaultInstance();
+		fire.add(bale, 60, 20);
+		fire.add(wreath, 30, 60);
+		for (Block pile : piles) {
+			String id = BuiltInRegistries.BLOCK.getKey(pile).getPath();
+			registerItem(id, props -> new BlockItem(pile, props), new Item.Properties().useBlockDescriptionPrefix().compostable(COMPOST_LOW), BUILDING_TAB);
+			fire.add(pile, 30, 60);
+		}
 	}
+
+	/** The Leaf Piles' colours, one block each ({@code <colour>_leaf_pile}). */
+	public static final List<String> LEAF_PILE_COLOURS = List.of("red", "orange", "yellow");
 
 	/** How brightly a Wisp in a Jar glows. */
 	public static final int WISP_JAR_LIGHT = 13;

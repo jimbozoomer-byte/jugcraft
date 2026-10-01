@@ -848,4 +848,6 @@ def crop_textures():
     out.update(decor3_textures())
     from decor4_textures import decor4_textures  # and the witch's cottage
     out.update(decor4_textures())
+    from decor5_textures import decor5_textures  # and the harvest party
+    out.update(decor5_textures())
     return out

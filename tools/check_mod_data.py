@@ -756,6 +756,7 @@ def check_agriculture():
     check_decor2(java)
     check_decor3(java)
     check_decor4(java)
+    check_decor5(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1457,6 +1458,58 @@ def check_decor4(java):
         if sorted(values) != sorted(items):
             err(f"The item tag {MOD}:brew/{colour} differs from CAULDRON's brews")
 
+
+def check_decor5(java):
+    """The harvest party: Java matches tools/agriculture.py (the tub's apples, odds and splash, the crate's capacity
+    and tag, the bale's seat height and softening, the wreath's flowers, the piles' layers, softening and colours), every
+    block state has a model, and the tub's messages have their text."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    tub, crate, bale, wreath, piles = ag.BOBBING_TUB, ag.PUMPKIN_CRATE, ag.HAY_BALE_SEAT, ag.AUTUMN_WREATH, ag.LEAF_PILES
+    expected = {("BobbingTubBlock", "MAX_APPLES"): tub["max_apples"], ("BobbingTubBlock", "CHANCE"): tub["chance"],
+                ("BobbingTubBlock", "SPLASH_TICKS"): tub["splash_ticks"], ("PumpkinCrateBlockEntity", "CAPACITY"): crate["capacity"],
+                ("HayBaleSeatBlock", "FALL_SOFTENING"): bale["fall_softening"], ("LeafPileBlock", "MAX_LAYERS"): piles["max_layers"],
+                ("LeafPileBlock", "LAYER_PIXELS"): piles["layer_pixels"], ("LeafPileBlock", "SOFTENING_PER_LAYER"): piles["softening_per_layer"],
+                ("LeafPileBlock", "SCATTER_CHANCE"): piles["scatter_chance"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    height = re.search(r"HEIGHT = ([\d.]+) / ([\d.]+);", java.get("HayBaleSeatBlock", ""))
+    if not height or abs(float(height.group(1)) / float(height.group(2)) - bale["height"]) > 1e-9:
+        err(f"HayBaleSeatBlock.HEIGHT differs from HAY_BALE_SEAT's height ({bale['height']})")
+    if f'Jugcraft.id("{crate["produce_tag"].split(":")[1]}")' not in java.get("PumpkinCrateBlock", ""):
+        err(f"PumpkinCrateBlock.PRODUCE is not {crate['produce_tag']}")
+    mums = re.search(r"enum Mums implements StringRepresentable \{\s*([A-Z_, ]+);", java.get("AutumnWreathBlock", ""))
+    if not mums or [v.strip().lower() for v in mums.group(1).split(",")] != wreath["flowers"]:
+        err("AutumnWreathBlock.Mums differs from AUTUMN_WREATH's flowers")
+    if f"Mums.{wreath['default'].upper()}" not in java.get("AutumnWreathBlock", ""):
+        err("AutumnWreathBlock's default flowers differ from AUTUMN_WREATH's default")
+    colours = re.search(r"LEAF_PILE_COLOURS = List\.of\(([^)]*)\)", java.get("JugcraftAgriculture", ""))
+    if not colours or re.findall(r'"(\w+)"', colours.group(1)) != list(piles["colours"]):
+        err("JugcraftAgriculture.LEAF_PILE_COLOURS differs from LEAF_PILES' colours")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    wanted = {
+        tub["block"]: {f"apples={n},splashing={s}" for n in range(tub["max_apples"] + 1) for s in ("false", "true")},
+        crate["block"]: {f"facing={f}" for f in horizontal},
+        bale["block"]: {f"facing={f}" for f in horizontal},
+        wreath["block"]: {f"facing={f},flowers={c}" for f in horizontal for c in wreath["flowers"]},
+        **{pile: {f"layers={n}" for n in range(1, piles["max_layers"] + 1)} for pile in ag.leaf_piles()},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in tub["messages"]:
+        if f"message.{MOD}.{tub['block']}.{key}" not in lang:
+            err(f"The tub's {key} message has no text")
+    values = (load(DATA / MOD / "tags" / "item" / f"{crate['produce_tag'].split(':')[1]}.json") or {}).get("values", [])
+    if sorted(values) != sorted(crate["produce"]):
+        err(f"The item tag {crate['produce_tag']} differs from PUMPKIN_CRATE's produce")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

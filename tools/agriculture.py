@@ -735,6 +735,39 @@ def decor4_blocks():
 def decor4_items():
     return decor4_blocks()
 
+
+# ---------------------------------------------------------------- Halloween decorations, batch 5: the harvest party
+# The Bobbing for Apples Tub (BobbingTubBlock): holds up to `max_apples` apples; one try in `chance` catches one, then
+# the water splashes `splash_ticks` before the next try.
+BOBBING_TUB = {"block": "bobbing_tub", "display": "Bobbing for Apples Tub", "max_apples": 4, "chance": 3, "splash_ticks": 20,
+               "messages": {"empty": "There are no apples in the tub.", "caught": "Got one! You caught an apple in your teeth.",
+                            "missed": "Splash! The apple bobs away."}}
+# The Pumpkin Crate (PumpkinCrateBlock + PumpkinCrateBlockEntity): shows up to `capacity` pieces of produce (item tag
+# jugcraft:crate_produce).
+PUMPKIN_CRATE = {"block": "pumpkin_crate", "display": "Pumpkin Crate", "capacity": 4, "produce_tag": "jugcraft:crate_produce",
+                 "produce": ["minecraft:pumpkin", "minecraft:melon", "#c:crops/pumpkin", "#c:crops/squash", "#c:crops/gourd"]}
+# The Hay Bale Seat (HayBaleSeatBlock): sat on at `height` blocks; softens falls like a hay block.
+HAY_BALE_SEAT = {"block": "hay_bale_seat", "display": "Hay Bale Seat", "height": 0.625, "fall_softening": 0.8, "entity": "seat"}
+# The Autumn Wreath (AutumnWreathBlock): chestnut leaves, ornamental corn and mums; a mum swaps its flowers.
+AUTUMN_WREATH = {"block": "autumn_wreath", "display": "Autumn Wreath", "flowers": ["yellow", "orange", "red", "purple"],
+                 "default": "orange"}
+# Leaf Piles (LeafPileBlock): one block a colour, heaped `max_layers` layers of `layer_pixels`; each layer softens a
+# fall by `softening_per_layer`.
+LEAF_PILES = {"colours": {"red": "Red Leaf Pile", "orange": "Orange Leaf Pile", "yellow": "Yellow Leaf Pile"}, "max_layers": 4,
+              "layer_pixels": 4, "softening_per_layer": 0.2, "scatter_chance": 4}
+
+
+def leaf_piles():
+    return [f"{colour}_leaf_pile" for colour in LEAF_PILES["colours"]]
+
+
+def decor5_blocks():
+    return [BOBBING_TUB["block"], PUMPKIN_CRATE["block"], HAY_BALE_SEAT["block"], AUTUMN_WREATH["block"]] + leaf_piles()
+
+
+def decor5_items():
+    return decor5_blocks()
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -920,6 +953,16 @@ SHAPELESS = [
                                      "minecraft:bone_meal"], "result": "crypt_stone", "count": 4, "category": "building"},
     {"id": "grave_mound", "inputs": ["minecraft:dirt", "minecraft:dirt", "minecraft:rotten_flesh"], "result": "grave_mound", "count": 1,
      "category": "building"},
+    # Decorations batch 5: four leaves (any) and a dye heap into four leaf piles of that colour.
+    {"id": "red_leaf_pile", "inputs": ["#minecraft:leaves", "#minecraft:leaves", "#minecraft:leaves", "#minecraft:leaves", "minecraft:red_dye"],
+     "result": "red_leaf_pile", "count": 4, "category": "building"},
+    {"id": "orange_leaf_pile", "inputs": ["#minecraft:leaves", "#minecraft:leaves", "#minecraft:leaves", "#minecraft:leaves", "minecraft:orange_dye"],
+     "result": "orange_leaf_pile", "count": 4, "category": "building"},
+    {"id": "yellow_leaf_pile", "inputs": ["#minecraft:leaves", "#minecraft:leaves", "#minecraft:leaves", "#minecraft:leaves", "minecraft:yellow_dye"],
+     "result": "yellow_leaf_pile", "count": 4, "category": "building"},
+    # A hay block and string tie two bale seats.
+    {"id": "hay_bale_seat", "inputs": ["minecraft:hay_block", "minecraft:string"], "result": "hay_bale_seat", "count": 2,
+     "category": "building"},
 ]
 SHAPED = [
     {"id": "barley_bread", "pattern": ["BBB"], "key": {"B": "jugcraft:barley"}, "result": "barley_bread", "count": 1,
@@ -1018,6 +1061,28 @@ SHAPED = [
      "result": "grimoire_stand", "count": 1, "category": "misc"},
     {"id": "witchs_broom", "pattern": ["  S", " S ", "W  "], "key": {"S": "minecraft:stick", "W": "minecraft:wheat"}, "result": "witchs_broom",
      "count": 1, "category": "misc"},
+    # Decorations batch 5: a plank tub of water (the bucket comes back); a crate of slabs; a wreath of chestnut leaves
+    # round an ear of ornamental corn, with a mum that sets its flowers.
+    {"id": "bobbing_tub", "pattern": ["PWP", "PPP"], "key": {"P": "#minecraft:planks", "W": "minecraft:water_bucket"},
+     "result": "bobbing_tub", "count": 1, "category": "misc"},
+    {"id": "pumpkin_crate", "pattern": ["S S", "SSS"], "key": {"S": "#minecraft:wooden_slabs"}, "result": "pumpkin_crate", "count": 1,
+     "category": "building"},
+    {"id": "autumn_wreath_yellow", "pattern": ["LCL", "L L", "LML"], "key": {"L": "jugcraft:chestnut_leaves", "C": "jugcraft:ornamental_corn",
+                                                                          "M": "jugcraft:yellow_mum"},
+     "result": "autumn_wreath", "count": 1, "category": "building", "group": "autumn_wreath",
+     "components": {"minecraft:block_state": {"flowers": "yellow"}}},
+    {"id": "autumn_wreath_orange", "pattern": ["LCL", "L L", "LML"], "key": {"L": "jugcraft:chestnut_leaves", "C": "jugcraft:ornamental_corn",
+                                                                          "M": "jugcraft:orange_mum"},
+     "result": "autumn_wreath", "count": 1, "category": "building", "group": "autumn_wreath",
+     "components": {"minecraft:block_state": {"flowers": "orange"}}},
+    {"id": "autumn_wreath_red", "pattern": ["LCL", "L L", "LML"], "key": {"L": "jugcraft:chestnut_leaves", "C": "jugcraft:ornamental_corn",
+                                                                          "M": "jugcraft:red_mum"},
+     "result": "autumn_wreath", "count": 1, "category": "building", "group": "autumn_wreath",
+     "components": {"minecraft:block_state": {"flowers": "red"}}},
+    {"id": "autumn_wreath_purple", "pattern": ["LCL", "L L", "LML"], "key": {"L": "jugcraft:chestnut_leaves", "C": "jugcraft:ornamental_corn",
+                                                                          "M": "jugcraft:purple_mum"},
+     "result": "autumn_wreath", "count": 1, "category": "building", "group": "autumn_wreath",
+     "components": {"minecraft:block_state": {"flowers": "purple"}}},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -1062,7 +1127,7 @@ def all_blocks():
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
-            + decor4_blocks())
+            + decor4_blocks() + decor5_blocks())
 
 
 def all_items():
@@ -1070,7 +1135,7 @@ def all_items():
             + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
-            + decor2_items() + decor3_items() + decor4_items())
+            + decor2_items() + decor3_items() + decor4_items() + decor5_items())
 
 
 def owns(entry_id):
