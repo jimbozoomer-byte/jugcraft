@@ -1,6 +1,6 @@
 # Agriculture branch
 
-Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife) and the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md) and [../features/halloween-harvest.md](../features/halloween-harvest.md) for the implemented slices and their test evidence.
+Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife), the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations), and the pumpkin regatta and trick-or-treating.** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md), [../features/halloween-harvest.md](../features/halloween-harvest.md) and [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md) for the implemented slices and their test evidence.
 
 Agriculture is Jugcraft's third starting branch, alongside technology and magic ([DESIGN.md](../DESIGN.md)). A farmer can begin on day one with a hoe and whatever grows nearby, and never needs a machine or a spell. Industrial farming (powered harvesters, planters, sprinklers, crop processors) comes later and belongs to the engineering branch; see [Boundaries](#boundaries).
 
@@ -323,6 +323,20 @@ Put a **Harvest Scale** beside a full-grown giant pumpkin and use it. It weighs 
 | **Caramel, Caramel Apple, Popcorn Ball** | Smelt sugar; add an apple and a stick, or two popcorn | Treats (2, 6 and 5 hunger); the apple's stick comes back |
 | **Bottle Gourd** | Wild in jungles and savannas; grass drops its seeds | Dry it in a furnace; with string it makes a **Gourd Birdhouse** (stands or hangs), with leather a **Gourd Canteen** (3 sips of water for giant pumpkins, farmland, fire or a cauldron) |
 | **Mums** | Wild patches in flower forests, meadows and forests | Yellow, orange, red and purple flowers for pots, dye and suspicious stew |
+
+## What exists now: the pumpkin regatta and trick-or-treating
+
+Two things to do with the Halloween harvest. The regatta works all year; trick-or-treating only while the Halloween event runs. Details, numbers and test evidence: [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md).
+
+### Pumpkin boats and the regatta
+
+Sneak and use the Carving Knife on top of a giant pumpkin to **hollow it out into a boat**. A full-grown 3×3×3 giant makes a **Pumpkin Barge**: four seats, and it keeps its weight, carving and torch, so a carved barge glows on the water at night. A 2×2×2 giant (stop it there by cutting its vine or giving it no room) makes a **Pumpkin Racer** for one. Lighter boats are faster: a racer 1.15–1.30× a boat, a barge 0.70–0.95×. Hollowing gives the pumpkin's guts and, full grown, its giant seeds, but not its pumpkins.
+
+For a race, put a **Regatta Flag** on the shore and **Regatta Buoys** on still water, and number them by using them (1–16; sneak to count down). Used on foot, the flag finds its course and shows the board. Used from a pumpkin boat's driver's seat, it starts a run: after a three-second countdown, pass within 5 blocks of each buoy in order and come back to the flag. The server times it. The flag keeps the three best times, one per racer, and the first time you place you get the Harvest Scale's ribbon for that place.
+
+### Trick-or-treating
+
+While the Halloween event runs (by default 20 October to 3 November; the server operator sets the dates), use a **Candy Bag** on a villager's wooden door between dusk and midnight. Wear a costume on your head (a carved pumpkin, any hand-carved one, or a **Witch Hat**, **Ghost Sheet** or **Scarecrow Hat**), and make sure a porch light burns by the door (a jack o'lantern, a turnip lantern, or a lit hand-carved or giant pumpkin). The villager whose bed is inside opens up and hands you a treat: candy, caramel, cookies, a popcorn ball, a caramel apple or, rarely, a **King-Size Candy Bar**. Each home gives each player one treat a night; knock again and you get a harmless prank. Ten homes in one night earn **Full Bag**. When the event ends, nobody answers, but every treat and costume stays.
 
 ## Crop roster: what comes next (planned)
 

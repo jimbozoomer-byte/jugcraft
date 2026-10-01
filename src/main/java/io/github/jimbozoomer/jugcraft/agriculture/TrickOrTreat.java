@@ -223,7 +223,7 @@ public final class TrickOrTreat {
 		if (!porchLight(level, door)) {
 			return Result.NO_PORCH_LIGHT;
 		}
-		long night = Math.floorDiv(dayTime, DAY);
+		long night = night(dayTime);
 		Data data = data(level);
 		List<Villager> residents = residents(level, door);
 		if (residents.isEmpty()) {
@@ -248,6 +248,11 @@ public final class TrickOrTreat {
 			award(player, "full_bag");
 		}
 		return Result.TREAT;
+	}
+
+	/** The number of the night a time on the overworld clock belongs to (a day runs from one sunrise to the next). */
+	public static long night(long dayTime) {
+		return Math.floorDiv(dayTime, DAY);
 	}
 
 	/** Whether a porch light burns near the door: a block in {@link #PORCH_LIGHTS}, or a lit hand-carved or giant pumpkin. Reads at most 486 blocks. */

@@ -497,9 +497,10 @@ public class RegattaGameTests {
 			int earned = treats(player);
 			Tag saved = TrickOrTreat.Data.CODEC.encodeStart(NbtOps.INSTANCE, TrickOrTreat.data(helper.getLevel())).getOrThrow();
 			TrickOrTreat.Data loaded = TrickOrTreat.Data.CODEC.parse(NbtOps.INSTANCE, saved).getOrThrow();
-			helper.assertTrue(loaded.visited(NIGHT, player.getUUID(), helper.absolutePos(BED)) && loaded.count(NIGHT, player.getUUID()) == 1,
+			long tonight = TrickOrTreat.night(NIGHT);
+			helper.assertTrue(loaded.visited(tonight, player.getUUID(), helper.absolutePos(BED)) && loaded.count(tonight, player.getUUID()) == 1,
 					"The saved record keeps tonight's treat");
-			helper.assertFalse(loaded.record(NIGHT, player.getUUID(), helper.absolutePos(BED)), "and refuses the same home again after loading");
+			helper.assertFalse(loaded.record(tonight, player.getUUID(), helper.absolutePos(BED)), "and refuses the same home again after loading");
 
 			HalloweenSeason.setMode(HalloweenSeason.Mode.OFF);
 			helper.assertTrue(TrickOrTreat.answer(player, door, NIGHT) == Result.OUT_OF_SEASON, "The event has ended");

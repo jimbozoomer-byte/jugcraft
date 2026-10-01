@@ -8,7 +8,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 
 > **Status.** Everything here compiles and loads in CI. Where a feature has an automated game test, that test passes on a headless server. Nothing has been play-tested in a client or on a dedicated server with two players yet.
 >
-> This document describes `main` after PRs #4–#36 (the conveyors and powered tools of #38 and #40 are not described here yet), plus the Agriculture branch's Fall Harvest, Kitchen Garden, Festival Crops, pumpkin carving and Halloween harvest. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
+> This document describes `main` after PRs #4–#36 (the conveyors and powered tools of #38 and #40 are not described here yet), plus the Agriculture branch's Fall Harvest, Kitchen Garden, Festival Crops, pumpkin carving, Halloween harvest, and the pumpkin regatta and trick-or-treating. Update it whenever you add, rename or remove a system, so it stays the map other contributors rely on.
 
 ## Quick facts
 
@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 383 items/blocks under `jugcraft:` (the checker counts them) |
+| Registered IDs | 392 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge` and `pumpkin_racer` |
 
 ## Build, generate, check
 
@@ -142,6 +142,9 @@ The Agriculture branch ([branches/AGRICULTURE.md](branches/AGRICULTURE.md)). Eve
 | Carving | `hand_carved_pumpkin`, `hand_carved_white_pumpkin`, `hand_carved_jarrahdale_pumpkin`, `hand_carved_cinderella_pumpkin` (blocks with items); `carving_knife`; `blank_stencil`, `pumpkin_stencil`; `pumpkin_guts` | `CarvedPumpkinBlock` + `CarvedPumpkinBlockEntity` (one block entity type for all four); `CarvingKnifeItem`; `BlankStencilItem`, `PumpkinStencilItem` | four carved sides (`PumpkinCarving`); `facing`, `lit`, `glow` 0–15; light only with a torch inside; data components `jugcraft:carving`, `jugcraft:stencil`; loot `carve/<pumpkin>` and `gameplay/scoop_pumpkin` |
 | Giant pumpkin | `giant_pumpkin` (no item), `giant_pumpkin_vine`, `attached_giant_pumpkin_vine`; `giant_pumpkin_seeds` | `GiantPumpkinBlock` (`size` 1–3, `part` 0–26, `light` 0–15) + `GiantPumpkinBlockEntity` on part 0 only; `GiantPumpkinVineBlock`, `AttachedGiantPumpkinVineBlock` | growth points, weight, watering, four 48×48 faces (`CarvingFace`), lit; pushes `IMMOVEABLE` |
 | Harvest Scale | `harvest_scale` (block with item); `first_prize_ribbon`, `second_prize_ribbon`, `third_prize_ribbon` | `HarvestScaleBlock` + `HarvestScaleBlockEntity` | board of 3, ribbons once per pumpkin, comparator output |
+| Pumpkin boats | entities and items `pumpkin_barge` (4 seats), `pumpkin_racer` (1 seat) | `PumpkinBoat` (an `AbstractBoat`, `Kind` holds each kind's numbers), `PumpkinBoatItem`, `PumpkinBoatData`; client `PumpkinBoatRenderer` | hollowed from a giant pumpkin with the knife (`PumpkinCarvings.hollow`, loot `gameplay/hollow_giant_pumpkin`); data component `jugcraft:pumpkin_boat` (weight, torch, four 48×48 faces) on the item and synced by the entity; speed in water by weight |
+| Regatta | `regatta_flag`, `regatta_buoy` (blocks with items) | `RegattaFlagBlock` + `RegattaFlagBlockEntity` (course, board of 3, ribbons once per racer); `RegattaBuoyBlock` (`number` 1–16, floats like a lily pad) + `RegattaBuoyBlockEntity` (a marker) | runs are timed by the boat on the server (`PumpkinBoat.startRace`); advancement `jugcraft:pumpkin_regatta` |
+| Trick-or-treating | `candy_bag`; costumes `witch_hat`, `ghost_sheet`, `scarecrow_hat`; `king_size_candy_bar` | `TrickOrTreat` (knock, answer, tricks, the per-night `Data`), `HalloweenSeason` (the event window) | only while `HalloweenSeason.active()`; loot `gameplay/trick_or_treat` (type `gift`); tags `jugcraft:trick_or_treat_costumes`, `jugcraft:costume_hats`, `jugcraft:porch_lights`; hand-carved pumpkins are `equippable` on the head and in `minecraft:gaze_disguise_equipment`; advancement `jugcraft:full_bag` |
 | Fall decorations | `scarecrow`, `corn_shock`, `ornamental_corn_bundle`, `gourd_birdhouse` (blocks with items); `gourd_canteen`; `yellow_mum`, `orange_mum`, `red_mum`, `purple_mum` and their `potted_` forms | `ScarecrowBlock` (`shirt`: 16 dye colours) and corn shock: `TallDecorationBlock` (2 tall); `WallDecorationBlock`; vanilla `LanternBlock`, `FlowerBlock`, `FlowerPotBlock`; `GourdCanteenItem` | data component `jugcraft:canteen_water` (0–3) |
 | Wild plants | `wild_corn`, `wild_sunflower`, `wild_beans`, `wild_sweet_potato`, `wild_flax`, `wild_tomato`, `wild_pepper`, `wild_onion`, `wild_garlic`, `wild_cabbage`, `wild_oats`, `wild_barley`, `wild_turnip` | `WildCropBlock` | patches on grass (`worldgen/placed_feature/patch_wild_*`); shears take the plant. Gourds, ripe cranberry bushes and chestnut trees also generate as themselves (`patch_<gourd>`, `patch_cranberry_bush`, `patch_chestnut_tree`) |
 | Seeds (place the crop) | `corn_kernels`, `sunflower_seeds`, `beans`, `sweet_potato`, `flax_seeds`, `pepper_seeds`, `onion`, `garlic`, `cabbage_seeds`, `oat_seeds`, `barley_seeds`, `butternut_squash_seeds`, `acorn_squash_seeds`, `warty_gourd_seeds`, `turnip`, `cranberries` (into shallow water), `chestnut` (plants the sapling); `tomato_seeds` | `BlockItem`; `TrellisSeedItem` (plants on a trellis) | `c:seeds/*`, and animal food tags |
@@ -278,6 +281,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 - `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 15 materials plus `machines` and `agriculture`.
 - It also holds other server options, `JugcraftConfig.OPTIONS` (read with `JugcraftConfig.option(key)`): `carving.free_draw` (default `true`).
+- Text options, `JugcraftConfig.TEXT_OPTIONS` (read with `JugcraftConfig.textOption(key)`): the Halloween event's `halloween.start` and `halloween.end` (`MM-DD`, defaults `10-20` and `11-03`), `halloween.timezone` (default `UTC`) and `halloween.mode` (`auto`, `on` or `off`). `HalloweenSeason` reads them; a bad value is logged and its default kept.
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
 
