@@ -89,9 +89,9 @@ public class PumpkinBoatRenderer extends EntityRenderer<PumpkinBoat, PumpkinBoat
 		int size = kind == PumpkinBoat.Kind.BARGE ? GiantPumpkinBlock.MAX_SIZE : 2;
 		int light = state.lightCoords;
 		pose.pushPose();
-		pose.mulPose(Axis.YP.rotationDegrees(180.0F - state.yRot));
+		pose.rotateDegrees(Axis.YP, 180.0F - state.yRot);
 		if (state.hurtTime > 0.0F) {
-			pose.mulPose(Axis.XP.rotationDegrees(Mth.sin(state.hurtTime) * state.hurtTime * state.damageTime / 10.0F * state.hurtDir));
+			pose.rotateDegrees(Axis.XP, Mth.sin(state.hurtTime) * state.hurtTime * state.damageTime / 10.0F * state.hurtDir);
 		}
 		float half = kind.width / 2;
 		float top = kind.height;

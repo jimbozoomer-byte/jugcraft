@@ -333,7 +333,7 @@ public final class TrickOrTreat {
 		}
 	}
 
-	static Data data(ServerLevel level) {
+	public static Data data(ServerLevel level) {
 		return level.getDataStorage().computeIfAbsent(Data.TYPE);
 	}
 
