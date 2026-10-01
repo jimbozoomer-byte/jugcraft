@@ -42,6 +42,8 @@ Useful starter prompt:
 
 ## 4. Open a pull request
 
+Test on your PC first when possible: build, run relevant automated checks, and launch Minecraft to try the feature and inspect models/textures. Fix issues within your scope and report actual results. If your environment cannot build or launch the game, you may still submit a draft PR explaining what was not tested; local testing is encouraged, not a prerequisite for starting or submitting work. Never invent test evidence.
+
 On GitHub choose Compare & pull request; target the upstream repository's `main`. Keep one feature per PR, fill every applicable template section, link an issue if one exists (otherwise describe the proposal in the PR), and include reproducible evidence. Add a feature record under `docs/features/` using the template there. For gameplay features, name both the upstream input and downstream use; for infrastructure explain the systems it supports instead. Screenshots are helpful but do not replace tests.
 
 Mark unfinished work Draft. Fix review feedback in the same branch. Rebase or merge updated main as needed and rerun tests. Only maintainers merge. Prefer squash merge for one clear feature commit and easy source rollback.
