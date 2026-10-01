@@ -381,6 +381,63 @@ def retro_keys(seed):
     return img
 
 
+WHITE = [(150, 156, 164), (186, 192, 198), (214, 218, 222), (232, 235, 238), (246, 248, 250)]
+
+
+def white(seed, border=True):
+    """White enamel panels, as on the owner's reference advanced solar panel: a faint brushed grain, a soft bevel and a
+    recessed groove two pixels in. Without border it tiles."""
+    rng = random.Random(seed)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            put(img, x, y, _noise(rng, WHITE[3], WHITE[2], 0.15))
+    if border:
+        for i in range(16):
+            put(img, i, 0, WHITE[4])
+            put(img, 0, i, WHITE[4])
+            put(img, i, 15, WHITE[1])
+            put(img, 15, i, WHITE[1])
+        for i in range(2, 14):
+            put(img, i, 2, WHITE[1])
+            put(img, 2, i, WHITE[1])
+            put(img, i, 13, WHITE[4])
+            put(img, 13, i, WHITE[4])
+    return img
+
+
+def ribbed(seed):
+    """Light brushed steel with vertical ribs, as on the owner's reference engine's cylinder bank."""
+    rng = random.Random(seed)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            c = WHITE[1] if rng.random() < 0.7 else WHITE[2]
+            if x % 4 == 0:
+                c = WHITE[0]
+            elif x % 4 == 1:
+                c = WHITE[3]
+            if y in (0, 15):
+                c = GRAPHITE[3]
+            put(img, x, y, c)
+    return img
+
+
+def solar_large(seed):
+    """Large-format solar cells: deep blue cells in a fine silver grid with a few sky glints."""
+    rng = random.Random(seed)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            c = (22, 48, 104) if rng.random() < 0.75 else (30, 62, 128)
+            if x % 4 == 3 or y % 4 == 3:
+                c = (78, 104, 150)
+            if (x + 2 * y) % 13 == 0 and x % 4 != 3 and y % 4 != 3:
+                c = (64, 110, 178)
+            put(img, x, y, c)
+    return img
+
+
 def hazard(seed):
     """Yellow-and-black warning stripes for high-voltage edges."""
     img = new()
@@ -441,6 +498,9 @@ def draw_all():
     save(hazard(740), "el_hazard")
     save(magnet(741), "el_magnet")
     # The electronics tier (cyan look) and the retro computer.
+    save(white(748), "el_white")
+    save(solar_large(749), "el_solar_large")
+    save(ribbed(750), "el_ribbed")
     save(dark(742), "el_dark")
     save(glass(False), "el_glass")
     save(glass(True), "el_glass_on")
