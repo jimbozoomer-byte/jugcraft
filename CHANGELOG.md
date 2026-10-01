@@ -19,6 +19,36 @@ No numbered release yet. Everything below is on `main`.
 - Also: composting, pig, chicken and parrot feed, `c:` crop, seed and food tags, and a new `agriculture` feature switch.
 - Original textures from `tools/crop_textures.py`. Twelve game tests, plus a client game test with screenshots of a corn maze, the fields and every growth stage.
 
+### #57 Fluid logistics, batch 8: gas holders, valves and filters
+- **Gas holder** (3×3×3 Horton sphere): 1,024 buckets of one gas, and only gases.
+- **Fluid valve:** a steel pipe segment that a redstone signal closes, splitting the line in two.
+- **Fluid filter:** a steel pipe segment whose neighbouring tanks and machines only receive its chosen fluid; set it with a bucket or from a tank beside it (for gases).
+- Three advancements, handbook pages and a game test for each.
+
+### #56 Electronics, batch 7: silicon, chips and the cyan look
+- **The cyan look** for the electronics tier, following the owner's references: near-black casings with cyan seams, cyan glass that glows while working, cyan screens, violet conduits, and a beige retro computer.
+- **Crystal grower** (1×2): 4 silicon + a phosphate dopant → a silicon boule; the sawmill cuts it into 8 **silicon wafers**.
+- **Lithography station** (3×2×2, a cleanroom with a monitor bank): wafer + copper wire + sulfuric acid → 4 **microchips**.
+- **Processors:** the third circuit tier (circuit assembler).
+- **Network terminal:** a beige retro computer that reads out the power network it is cabled to.
+- Four advancements, an Electronics handbook chapter and game tests for each.
+
+### #54 Chemistry, batch 6: advanced materials
+- **Titanium:** a new mined metal (deep ore, iron pickaxe, `titanium.enabled`). No furnace smelts it.
+- **The Kroll process:** raw titanium + coke + 250 mB chlorine → titanium sponge (chemical reactor); the arc furnace melts it into ingots. Chlorine's first use.
+- **Leaching:** lepidolite or monazite + sulfuric acid → 2 lithium carbonate or 2 rare earth oxide.
+- **Lithium battery bank** (3×2×1, electric look): 32,000,000 JE, 16,384 JE/t out of its front; built from lithium cells and titanium.
+- **Neodymium magnets** (alloy smelter), and the **magnet dynamo** and **magnet motor**: 95% each way, four times the copper-wound rates, cyan-banded.
+- Four advancements, handbook pages and game tests for each.
+
+### #52 Chemistry, batch 5: electrochemistry and acids
+- **Brine** (chemical mixer: salt + water) and the **electrolytic cell** (3×3×2): brine → **chlorine**, **hydrogen** (gases) and **lye**, each out of its own row.
+- **Chemical reactor** (2×2×2): sulfur dust + water → **sulfuric acid**.
+- **Alumina and real aluminum:** bauxite + lye → 2 alumina; 2 alumina + coke → 2 aluminum ingots in the cell. Two ingots per bauxite, twice the arc furnace.
+- **Fertilizer:** phosphate + sulfuric acid; ripens every crop in a 5×5 area.
+- **Fuel cell** (one block, electric look): hydrogen → 128 JE/t.
+- Five advancements, a Chemistry chapter in the handbook, and a metal audit for fluid recipes.
+
 ### #51 Oil line, batch 4: industry, and the electric look
 - **Polymerization reactor** (2×2×3): refinery gas → plastic pellets; the metal press makes **plastic sheets**.
 - **Asphalt**, **asphalt slab** and **asphalt road line**: walking on them is 1.3× as fast.
