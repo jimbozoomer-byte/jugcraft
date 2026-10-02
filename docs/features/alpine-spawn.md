@@ -4,7 +4,7 @@ Status: in progress on branch `claude/alpine-spawn`, which is stacked on the agr
 - Part 1 (the biome, its placement, villages and the world start) passed CI.
 - The start search was then changed to prefer alpine villages (see Results).
 - Part 2 (larch trees, and the start beside an alpine village) passed CI.
-- On 2 October the owner asked for a larger biome: every meadow and the cool plateau's forest and taiga now become Alpine Spawn. This awaits CI.
+- On 2 October the owner asked for a larger biome: every meadow and the cool plateau's forest and taiga now become Alpine Spawn. That passed CI too.
 - Later parts are planned (see Rollout). **Not yet played.**
 
 Proposal issue: none. On 2 October 2026 the owner asked for an "Alpine Spawn" biome:
@@ -140,7 +140,13 @@ Results are recorded under "Results" below after CI runs.
   - Alpine Spawn covered 2.2% of the 2 km square around the start and 0.8% of a 16 km square around the origin.
   - The larch scene: spring 58 needles, all green; autumn 34 gold (and 6 green from the spring tree's crown, which reached into its counting box; the trees are now further apart); winter 34, all bare.
   - The overview screenshot shows autumn-coloured woods with a gold larch. The start screenshot faced a terrace wall; it is now taken from a little higher.
-- **Larger biome:** awaiting CI.
+- **Larger biome, run [36956117976](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/36956117976) (commit 134190fb): green.**
+  - All 301 required server game tests passed.
+  - The plateau hook applied: the climate table's 7,595 entries now have 220 Alpine Spawn (part 1 had 100) and no meadow. 568 forest and 332 taiga entries remain elsewhere.
+  - **Alpine Spawn now covers 1.9% of a 16 km square around the origin, about 2.4 times its 0.8% before.** It covers 2.8% of the 2 km square around the start.
+  - The world (seed `jugcraft`) now started much nearer the origin: at an alpine village at 320, 106, 512, in Alpine Spawn.
+  - The start screenshot shows an alpine meadow with spruces and poppies, and **gold larches**: the catch-up turned them on a freshly made world in October. The overview shows grassy alpine slopes with gold larches below snowy spruce peaks.
+  - The larch scene: spring 30 needles, all green; autumn 17, all gold; winter 53, all bare. A village house and a villager stand behind them.
 
 ## World and event applicability
 - **Biome fit.** A cool, wet mountain meadow takes vanilla's meadow climate and the cool plateau beside it, so it borders the mountain slopes, the cool plateau's old-growth taiga and lowland forest and taiga.
@@ -162,5 +168,5 @@ Results are recorded under "Results" below after CI runs.
 - **Open questions:**
   - Should other mods' world presets or data packs that change the Overworld also get the spawn move? Today only the vanilla multi-noise Overworld does.
   - Would a pillager outpost near the start be too harsh? Vanilla's meadows allow outposts, and Alpine Spawn joins `#minecraft:is_mountain`. Villages exclude outposts nearby.
-  - Is the biome large enough now? Before it grew, it covered about 0.8% of the land (seed `jugcraft`), in patches a few hundred blocks across. The client test logs its share after the change.
+  - Is the biome large enough now? It covers about 1.9% of the land (seed `jugcraft`), up from 0.8%. It could grow further by taking more of the cool plateau (its old-growth taiga) or the windswept hills, at the cost of more vanilla terrain.
   - Should larches also grow outside Alpine Spawn (for example in taiga)? Today they are unique to it.
