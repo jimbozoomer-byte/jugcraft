@@ -817,6 +817,15 @@ Ten more fall and Halloween additions, one per pull request ([features/fall-addi
 - **Face Paint Kit:** paints one of six designs on a friend at once, or on your own face after a held use; good for 16 faces.
 - **A painted face is a costume** for trick-or-treating and the costume contest, and washes off under water. Details: [fall additions](../features/fall-additions.md#face-paint).
 
+## More fall additions
+
+Ten more fall and Halloween additions, numbered on from the first ten, one per pull request ([features/more-fall-additions.md](../features/more-fall-additions.md)).
+
+### The candy kitchen
+
+- **Candy Kettle:** a copper sugar pot with a candy thermometer. A base (water for syrup, milk for cream), up to four sugar, two flavours and dyes go in before it boils; over a fire it climbs through the candy stages, a bell at each, and the hottest it reaches decides the candy.
+- **Candy Tray:** rock candy grown for a day, candy corn in three coloured layers, taffy pulled while warm, hard candy and lollipops, caramel, fudge, cream caramels and toffee. Flavoured candy gives short effects. Details: [more fall additions](../features/more-fall-additions.md#the-candy-kettle).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

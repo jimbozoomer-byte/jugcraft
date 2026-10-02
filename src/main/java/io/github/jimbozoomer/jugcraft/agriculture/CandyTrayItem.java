@@ -21,6 +21,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -87,7 +88,7 @@ public class CandyTrayItem extends Item {
 		player.setItemInHand(hand, player.hasInfiniteMaterials() ? tray : new ItemStack(this));
 		for (ItemStack candy : pieces) {
 			if (!player.getInventory().add(candy)) {
-				player.drop(candy, false);
+				Block.popResource(level, player.blockPosition(), candy);
 			}
 		}
 		CandyKind kind = batch.sets(now);
