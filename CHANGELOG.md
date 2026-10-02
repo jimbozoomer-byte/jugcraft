@@ -8,6 +8,24 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: more Halloween, batch 10, lighting and glow (pull request pending, stacked on batch 9)
+- **Black Light** and **Glow Paint:** paint skulls, bats, spiders, webs, handprints and eyes on any face; they blaze green-white under a black light nearby.
+- **Witch Fire Brazier:** a brazier whose flame turns orange, green, purple or blue with a dye; it burns nothing.
+- **Shadow Puppet Lamp:** its turning paper shade throws a bat, a cat and a witch round the walls of the room.
+- **Mini Pumpkin Stack** and **Floating Witch Hat:** candle-lit, lit and snuffed like candles; the hats bob and turn in the air.
+- The glow, flames, shade, shadows and hats are drawn by each client. The checker compares the numbers with Java. New server game tests and a client test with screenshots.
+
+### Agriculture: more Halloween, batch 9, the yard and porch (pull request pending, stacked on batch 8)
+- **Yard Inflatables:** a ghost, a black cat, a pumpkin stack and a spider, two blocks tall, that fill up on a click or redstone, wobble and glow, and sag flat when switched off.
+- **Animatronic Porch Witch:** stirs her bubbling pot and follows you with her eyes; walk up and she throws her head back and cackles.
+- **Grasping Hands:** rotting hands in a mound of dirt that snatch at the ankles of anything that steps on them (a short, harmless Slowness II); sneak past.
+- **Poseable Skeleton:** use it to pose it sitting, waving, lounging or hanging.
+- **Bone Wind Chimes:** bones and a little skull under a porch roof that swing and clack, more and louder in rain and storms.
+- **Bat and Witch Weathervanes:** turn to point into one wind shared by the whole world, swinging about in storms.
+- **Spooky Sign:** painted warnings (BEWARE, KEEP OUT, TURN BACK...) or your own words from a Name Tag or an anvil.
+- **Haunted Archway** and **Dead Hollow Tree:** lantern-lit props of several blocks, placed and broken as one.
+- The figures, the witch's arm and head, the chimes, the vanes and the sign's words are drawn by each client. The checker compares the numbers with Java. New server game tests and a client test with screenshots.
+
 ### Agriculture: more Halloween, batch 8, the mad scientist and monsters (pull request pending, stacked on batch 7)
 - **Tesla Coil:** a two-block coil on the electric network (20 JE a tick) that hums, glows and throws harmless violet arcs to other running coils nearby.
 - **Lab Table:** a two-block operating table whose sheeted patient sits bolt upright on a redstone signal, and twitches at night.

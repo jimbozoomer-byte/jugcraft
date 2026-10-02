@@ -1,6 +1,6 @@
 # Agriculture branch
 
-Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife), the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations), the pumpkin regatta and trick-or-treating, the Halloween festivities (the carving contest, costumed mobs, the Halloween Peddler, spooky decorations and sweets), Halloween nights (will-o'-wisps, the Pumpkin Chunkin' Trebuchet, a bigger Candy Bag, the Harvest Moon and the Headless Horseman), and the thirty Halloween decorations (string lights, the Candy Bowl, the Coffin, the Haunted Portrait, the Fog Machine, luminarias, floating candles, the Skeleton Hand Sconce, soul-flame carvings, bat bunting, the graveyard: the cemetery fence and gate, the crypt set, the Grave Mound, the Mourning Angel and the Pop-Up Skeleton, the witch's cottage: the Bubbling Cauldron, the Apothecary Shelf, the Crystal Ball, the Grimoire Stand and the Witch's Broom, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat, the Autumn Wreath and the Leaf Piles, and the haunted house and yard: the Rocking Chair, the Lurking Eyes, the Silhouette Window, the Spooky Music Box and the Giant Fake Spider), and the first two batches of more Halloween, the haunted house inside (the Haunted Chandelier, the Phantom Pipe Organ, the Suit of Armor, the Dust Sheet, the Spirit Mirror, Tattered Curtains and the Creepy Doll) and the mad scientist and monsters (the Tesla Coil, the Lab Table, the Specimen Jar, the Mummy Sarcophagus, the Raven on a Perch and the Black Cat Figure).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md), [../features/halloween-harvest.md](../features/halloween-harvest.md) , [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md) [../features/halloween-festivities.md](../features/halloween-festivities.md) [../features/halloween-nights.md](../features/halloween-nights.md), [../features/halloween-decorations.md](../features/halloween-decorations.md) and [../features/more-halloween.md](../features/more-halloween.md) for the implemented slices and their test evidence.
+Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife), the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations), the pumpkin regatta and trick-or-treating, the Halloween festivities (the carving contest, costumed mobs, the Halloween Peddler, spooky decorations and sweets), Halloween nights (will-o'-wisps, the Pumpkin Chunkin' Trebuchet, a bigger Candy Bag, the Harvest Moon and the Headless Horseman), and the thirty Halloween decorations (string lights, the Candy Bowl, the Coffin, the Haunted Portrait, the Fog Machine, luminarias, floating candles, the Skeleton Hand Sconce, soul-flame carvings, bat bunting, the graveyard: the cemetery fence and gate, the crypt set, the Grave Mound, the Mourning Angel and the Pop-Up Skeleton, the witch's cottage: the Bubbling Cauldron, the Apothecary Shelf, the Crystal Ball, the Grimoire Stand and the Witch's Broom, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat, the Autumn Wreath and the Leaf Piles, and the haunted house and yard: the Rocking Chair, the Lurking Eyes, the Silhouette Window, the Spooky Music Box and the Giant Fake Spider), and the first four batches of more Halloween, the haunted house inside (the Haunted Chandelier, the Phantom Pipe Organ, the Suit of Armor, the Dust Sheet, the Spirit Mirror, Tattered Curtains and the Creepy Doll) the mad scientist and monsters (the Tesla Coil, the Lab Table, the Specimen Jar, the Mummy Sarcophagus, the Raven on a Perch and the Black Cat Figure) the yard and porch (the Yard Inflatables, the Animatronic Porch Witch, Grasping Hands, the Poseable Skeleton, Bone Wind Chimes, the Weathervanes, the Spooky Sign, the Haunted Archway and the Dead Hollow Tree) and lighting and glow (the Black Light and Glow Paint, the Witch Fire Brazier, the Shadow Puppet Lamp, the Mini Pumpkin Stack and the Floating Witch Hat).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md), [../features/halloween-harvest.md](../features/halloween-harvest.md) , [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md) [../features/halloween-festivities.md](../features/halloween-festivities.md) [../features/halloween-nights.md](../features/halloween-nights.md), [../features/halloween-decorations.md](../features/halloween-decorations.md) and [../features/more-halloween.md](../features/more-halloween.md) for the implemented slices and their test evidence.
 
 Agriculture is Jugcraft's third starting branch, alongside technology and magic ([DESIGN.md](../DESIGN.md)). A farmer can begin on day one with a hoe and whatever grows nearby, and never needs a machine or a spell. Industrial farming (powered harvesters, planters, sprinklers, crop processors) comes later and belongs to the engineering branch; see [Boundaries](#boundaries).
 
@@ -524,7 +524,7 @@ The haunted house and yard:
 
 ## What exists now: more Halloween
 
-Forty-five more Halloween ideas, one category a batch: so far the haunted house inside and the mad scientist and monsters. All of it works all year. Details, numbers and test evidence: [../features/more-halloween.md](../features/more-halloween.md).
+Forty-five more Halloween ideas, one category a batch: so far the haunted house inside, the mad scientist and monsters, the yard and porch, and lighting and glow. All of it works all year. Details, numbers and test evidence: [../features/more-halloween.md](../features/more-halloween.md).
 
 | **The haunted room** by day: the organ, the suit of armor, sheeted furniture and the doll | **At midnight**, lit by the chandelier |
 | --- | --- |
@@ -566,6 +566,54 @@ Forty-five more Halloween ideas, one category a batch: so far the haunted house 
 - **Mummy Sarcophagus:** use it or power it and the lid grinds open, the mummy lurches out, and four seconds later it all shuts again.
 - **Raven on a Perch:** watches the nearest player, ruffles and croaks, caws when used.
 - **Black Cat Figure:** its tail swishes, its eyes glow at night, and it hisses at anyone who runs past.
+
+### The yard and porch
+
+| **The yard** by day: the porch and its witch, the inflatables, signs, hands, skeletons, the archway and the dead tree | **At midnight** |
+| --- | --- |
+| ![The yard](../images/ingame_yard.jpg) | ![The yard at night](../images/ingame_yard_night.jpg) |
+| **Yard Inflatables**: a ghost, a black cat, a pumpkin stack and a spider | **The inflatables at night**, glowing from inside |
+| ![Yard inflatables](../images/ingame_inflatables.jpg) | ![Yard inflatables at night](../images/ingame_inflatables_night.jpg) |
+| **The Animatronic Porch Witch**, cackling over her pot | **Bone Wind Chimes** under the porch roof |
+| ![The porch witch](../images/ingame_porch_witch.jpg) | ![Bone wind chimes](../images/ingame_wind_chimes.jpg) |
+| **The Poseable Skeleton** waving, lounging, hanging from a gallows and sitting on the porch | **Spooky Signs** and **Grasping Hands** |
+| ![Poseable skeletons](../images/ingame_skeletons.jpg) | ![Spooky signs and grasping hands](../images/ingame_spooky_signs_and_hands.jpg) |
+| **The Haunted Archway** and **the Dead Hollow Tree** | **At night**, their lanterns lit and the tree's eyes glowing |
+| ![The archway and the dead tree](../images/ingame_archway_and_tree.jpg) | ![The archway and the dead tree at night](../images/ingame_archway_and_tree_night.jpg) |
+| **Weathervanes** on the porch roof, a bat and a witch | |
+| ![Weathervanes](../images/ingame_weathervanes.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`Decor9ClientGameTests`, software rendering, small previews).*
+
+- **Yard Inflatables:** two blocks tall; a click or redstone and the blower fills them, they wobble and glow from inside; switched off, they sag flat.
+- **Animatronic Porch Witch:** stirs her pot and watches you; walk up and she throws her head back and cackles.
+- **Grasping Hands:** snatch at the ankles of anything that steps on them (a short, harmless Slowness II); sneak past.
+- **Poseable Skeleton:** use it to pose it: sitting, waving, lounging, hanging.
+- **Bone Wind Chimes:** swing and clack under a porch roof, more and louder in rain and storms.
+- **Weathervanes:** a bat or a witch, turning to point into one wind shared by the whole world.
+- **Spooky Sign:** painted warnings, or your own words from a named Name Tag or an anvil.
+- **Haunted Archway:** a lantern-lit gateway three blocks wide and tall, placed and broken as one.
+- **Dead Hollow Tree:** four blocks tall, a face in its bark with glowing eyes, lanterns hanging from its branches.
+
+### Lighting and glow
+
+| **Witch Fire Braziers**, Floating Witch Hats and Mini Pumpkin Stacks by day | **At midnight** |
+| --- | --- |
+| ![Lighting by day](../images/ingame_lighting.jpg) | ![Lighting at night](../images/ingame_lighting_night.jpg) |
+| **Witch fire**: orange, green, purple and blue | **The braziers at night** |
+| ![Witch fire braziers](../images/ingame_witch_fire_braziers.jpg) | ![Witch fire braziers at night](../images/ingame_witch_fire_braziers_night.jpg) |
+| **Glow Paint under Black Lights**, and the Shadow Puppet Lamp | **The same at night** |
+| ![Glow paint](../images/ingame_glow_paint.jpg) | ![Glow paint at night](../images/ingame_glow_paint_night.jpg) |
+| **The Shadow Puppet Lamp's** cat on the wall | **The black lights off**: the paint is only a faint smear |
+| ![The shadow puppet lamp](../images/ingame_shadow_puppet_lamp_night.jpg) | ![Glow paint with the lights off](../images/ingame_glow_paint_unlit_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor10ClientGameTests`, software rendering, small previews).*
+
+- **Black Light** and **Glow Paint:** paint a skull, bat, spider, web, handprint or eye on any face; it blazes green-white under a black light within six blocks.
+- **Witch Fire Brazier:** a dye turns its flame orange, green, purple or blue; a shovel puts it out; it burns nothing.
+- **Shadow Puppet Lamp:** its turning paper shade throws a bat, a cat and a witch round the walls.
+- **Mini Pumpkin Stack:** three little jack o'lanterns with candles in them.
+- **Floating Witch Hat:** a candle-lit hat floating in the air, bobbing and turning.
 
 ## Crop roster: what comes next (planned)
 
