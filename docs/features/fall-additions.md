@@ -825,6 +825,31 @@ Found by CI and fixed before this record: nothing; ghost hunting's tests and cli
 - graves stirring by their own random ticks over a real night (the tests raise spirits directly);
 - the sounds.
 
+### Face paint verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-24` stacked on ghost hunting:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares face paint with Java: the designs in order, the kit's uses, the time to paint your own face and how often paint washes off; checks the kit is registered and worn by use, its design component and the paint attachment are registered and the attachment is sent to clients, every design has its name and texture, the kit has its texture, words, recipe and advancement, and trick-or-treating and the costume contest take a painted face as a costume) | Pass, 621 IDs |
+| `./gradlew build` on `5cb4d12` (Build workflow run 37045137269) | Pass |
+| Game tests on the headless server, same run: 389 in total, 3 of them new here (`FacePaintGameTests`) | **All 389 pass**, the existing trick-or-treat and costume contest tests among them |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `5cb4d12` (run 37045137269): the player, painted on the server with each design in turn, seen from the front, with the paint drawn on their face. The screenshots are in [AGRICULTURE.md](../branches/AGRICULTURE.md#face-paint) |
+
+The 3 new game tests (`FacePaintGameTests`):
+1. a bare face is no costume; used on a friend, the kit paints a skull at once, wears by one use and earns Face Painter; used sneaking it turns its dial to a jack o'lantern and paints nothing; that then paints over the skull; painting your own face takes 32 ticks, brushing, and at the end paints it; the kit paints no zombie; after its last face it is used up; its recipe loads;
+2. paint stays on a dry face; standing in water two deep, the head is under and the paint washes off; the paint attachment is saved, and a design saved reads back the same;
+3. bare-headed and unpainted, a player knocking at a door on a Halloween night gets "no costume"; painted, the costume rule passes and only the missing porch light turns them away.
+
+Found by CI and fixed before this record: the player renderers are found by 26.3's `EntityTypes.PLAYER` (`EntityType.PLAYER` is gone there) (`5cb4d12`). The common code, the attachment included, compiled first time.
+
+**Not run (face paint):**
+- a person playing it in a client: painting a friend, painting your own face, washing it off in a lake;
+- a dedicated server with two players, each seeing the other's paint (the client test paints its own player, on its own server);
+- the paint after a restart or on rejoining (the tests check that the attachment is saved and its design reads back, not a real restart);
+- trick-or-treating and the costume contest in play with a painted face.
+
 ## World and event applicability
 - Candles and pots work anywhere, in every dimension, all year. Nothing is seasonal. The aura doesn't depend on biome, time or weather; harvest helps only plants that would grow there anyway.
 - Revealing shows creatures through walls (Glowing), which can help find hostile mobs in caves; it gives no other information.
