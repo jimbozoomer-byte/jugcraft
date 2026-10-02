@@ -126,7 +126,7 @@ public class SpookySignBlock extends BaseEntityBlock {
 		if (player.isSecondaryUseActive()) {
 			if (!sign.text().isEmpty()) {
 				sign.paint("");
-				level.playSound(null, pos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 0.6F, 1.4F);
+				level.playSound(null, pos, SoundEvents.AXE_STRIP.value(), SoundSource.BLOCKS, 0.6F, 1.4F);
 				level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
 			}
 			return InteractionResult.SUCCESS;
