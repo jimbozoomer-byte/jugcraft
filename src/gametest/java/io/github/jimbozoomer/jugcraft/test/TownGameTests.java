@@ -170,7 +170,7 @@ public class TownGameTests {
 	 * townsfolk come out, a survival player can neither break nor place there, an explosion and a fire leave it as it
 	 * was, townsfolk shrug off a player's blows, and a lamp changes with the theme.
 	 */
-	@GameTest(maxTicks = 300)
+	@GameTest(maxTicks = 4000)
 	public void testTownIsBuiltAndKept(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		TownState state = TownState.get(level);
@@ -275,32 +275,48 @@ public class TownGameTests {
 		level.setBlock(fire, Blocks.FIRE.defaultBlockState(), 3);
 		helper.runAfterDelay(80, () -> {
 			boolean out = !level.getBlockState(fire).is(Blocks.FIRE);
-			// Townsfolk shrug off a player's blows.
-			List<Townsfolk> early = recordedTownsfolk(level, state, places);
-			logTownsfolk(level, state, origin, places, "80");
-			boolean unhurt = false;
-			if (!early.isEmpty()) {
-				Townsfolk someone = early.get(0);
-				boolean hurt = someone.hurtServer(level, level.damageSources().playerAttack(player), 100.0F);
-				unhurt = !hurt && someone.getHealth() == someone.getMaxHealth() && someone.isAlive();
-			}
-			boolean wasUnhurt = unhurt;
-			// The townsfolk are in the world, each the one the town recorded for its place (looked at again later in case a
-			// chunk's entities show late).
-			helper.runAfterDelay(120, () -> {
+			// The townsfolk are in the world, each the one the town recorded for its place. A chunk ticks (and shows) its
+			// entities only once the chunks round it are generated, which happens off the server thread while the test
+			// server races through ticks, so wait for that rather than for a number of ticks.
+			whenEntitiesTick(helper, level, chunks, 0, () -> {
 				List<Townsfolk> people = recordedTownsfolk(level, state, places);
-				logTownsfolk(level, state, origin, places, "200");
+				if (people.size() != places.size()) {
+					logTownsfolk(level, state, origin, places);
+				}
+				LOGGER.info("Test town: {} townsfolk by the square for {} places: {}", people.size(), places.size(),
+						people.stream().map(p -> p.getName().getString() + " (" + p.role() + (p.shop().isEmpty() ? "" : ", " + p.shop()) + ")").toList());
+				// Townsfolk shrug off a player's blows.
+				boolean unhurt = false;
+				if (!people.isEmpty()) {
+					Townsfolk someone = people.get(0);
+					boolean hurt = someone.hurtServer(level, level.damageSources().playerAttack(player), 100.0F);
+					unhurt = !hurt && someone.getHealth() == someone.getMaxHealth() && someone.isAlive();
+				}
 				state.forget();
 				for (ChunkPos pos : chunks) {
 					level.setChunkForced(pos.x(), pos.z(), false);
 				}
 				helper.assertTrue(people.size() == places.size(), "One townsperson in the world for each place by the square: "
 						+ people.size() + " of " + places.size());
-				helper.assertTrue(wasUnhurt, "A townsperson can't be hurt by a player");
+				helper.assertTrue(unhurt, "A townsperson can't be hurt by a player");
 				helper.assertTrue(out, "Fire in the town goes out");
 				helper.succeed();
 			});
 		});
+	}
+
+	/**
+	 * Runs {@code then} once every one of {@code chunks} ticks its entities (checked every 20 ticks), or, failing that,
+	 * after waiting 3,600 ticks (the test allows 4,000).
+	 */
+	private static void whenEntitiesTick(GameTestHelper helper, ServerLevel level, List<ChunkPos> chunks, int waited, Runnable then) {
+		boolean ticking = chunks.stream().allMatch(c -> level.isPositionEntityTicking(new BlockPos(c.x() << 4, level.getMinY() + 4, c.z() << 4)));
+		if (ticking || waited >= 3600) {
+			LOGGER.info("Test town: the square's chunks tick their entities after waiting {} ticks: {}", waited, ticking);
+			then.run();
+		} else {
+			helper.runAfterDelay(20, () -> whenEntitiesTick(helper, level, chunks, waited + 20, then));
+		}
 	}
 
 	/** The townsfolk the town recorded for these places that are in the world now. */
@@ -310,11 +326,11 @@ public class TownGameTests {
 	}
 
 	/** Logs each place (its chunk, whether that ticks entities, its recorded townsperson) and every townsperson in the level. */
-	private static void logTownsfolk(ServerLevel level, TownState state, BlockPos origin, List<TownData.Spot> places, String when) {
+	private static void logTownsfolk(ServerLevel level, TownState state, BlockPos origin, List<TownData.Spot> places) {
 		for (TownData.Spot s : places) {
 			BlockPos at = origin.offset(s.pos());
 			UUID id = state.townsperson(s.index());
-			LOGGER.info("Test town, tick {}: place {} {} ({}) at {} chunk {} entity-ticking {}: recorded {} found {}", when, s.index(), s.name(),
+			LOGGER.info("Test town: place {} {} ({}) at {} chunk {} entity-ticking {}: recorded {} found {}", s.index(), s.name(),
 					s.role(), s.pos().toShortString(), ChunkPos.containing(at), level.isPositionEntityTicking(at), id,
 					id != null && level.getEntity(id) != null);
 		}
@@ -322,6 +338,6 @@ public class TownGameTests {
 				.map(t -> t.getName().getString() + " spot " + t.spot() + " at " + t.blockPosition().subtract(origin).toShortString()
 						+ (t.isAlive() ? "" : " (dead: " + t.getRemovalReason() + ")"))
 				.toList();
-		LOGGER.info("Test town, tick {}: {} townsfolk in the level: {}", when, all.size(), all);
+		LOGGER.info("Test town: {} townsfolk in the level: {}", all.size(), all);
 	}
 }
