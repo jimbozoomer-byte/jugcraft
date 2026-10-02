@@ -195,7 +195,7 @@ public class KnittingGameTests {
 		ServerLevel level = helper.getLevel();
 		RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
 		Optional<RecipeHolder<CraftingRecipe>> leather = crafting.getRecipeFor(
-				CraftingInput.of(2, 1, List.of(new ItemStack(Items.LEATHER_HELMET), new ItemStack(Items.RED_DYE))), level);
+				CraftingInput.of(2, 1, List.of(new ItemStack(Items.LEATHER_HELMET), new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("red_dye"))))), level);
 		helper.assertTrue(leather.isPresent(), "A leather helmet and red dye make a recipe");
 		CraftingRecipe dyeing = leather.get().value();
 		Object json = ((MapCodec) dyeing.getSerializer().codec()).codec()
@@ -206,7 +206,7 @@ public class KnittingGameTests {
 			knits.add(Knitting.garment(knit, Knitting.UNDYED));
 		}
 		for (ItemStack knit : knits) {
-			CraftingInput input = CraftingInput.of(2, 1, List.of(knit, new ItemStack(Items.RED_DYE)));
+			CraftingInput input = CraftingInput.of(2, 1, List.of(knit, new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("red_dye")))));
 			Optional<RecipeHolder<CraftingRecipe>> recipe = crafting.getRecipeFor(input, level);
 			helper.assertTrue(recipe.isPresent() && recipe.get().id().equals(leather.get().id()), knit + " takes dye as leather does: " + how);
 			ItemStack dyed = recipe.get().value().assemble(input);
