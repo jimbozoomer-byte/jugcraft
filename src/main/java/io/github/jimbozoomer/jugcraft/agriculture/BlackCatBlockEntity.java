@@ -41,20 +41,26 @@ public class BlackCatBlockEntity extends BlockEntity {
 		}
 		long time = level.getGameTime();
 		boolean hissing = state.getValue(BlackCatBlock.HISSING);
-		boolean next = hissing;
 		if (!hissing && time >= readyAt && runnerNear(level)) {
-			calmAt = time + BlackCatBlock.HISS_TICKS;
-			readyAt = calmAt + BlackCatBlock.COOLDOWN_TICKS;
-			next = true;
-			level.playSound(null, worldPosition, SoundEvents.CAT_HISS, SoundSource.BLOCKS, 1.0F, 1.0F);
-		} else if (hissing && time >= calmAt) {
-			next = false;
+			hiss(level);
+			return true;
 		}
-		if (next != hissing) {
-			level.setBlock(worldPosition, state.setValue(BlackCatBlock.HISSING, next), Block.UPDATE_ALL);
+		if (hissing && time >= calmAt) {
+			level.setBlock(worldPosition, state.setValue(BlackCatBlock.HISSING, false), Block.UPDATE_ALL);
 			setChanged();
+			return false;
 		}
-		return next;
+		return hissing;
+	}
+
+	/** Arches its back and hisses now, for {@link BlackCatBlock#HISS_TICKS} ticks, then rests. */
+	public void hiss(ServerLevel level) {
+		long time = level.getGameTime();
+		calmAt = time + BlackCatBlock.HISS_TICKS;
+		readyAt = calmAt + BlackCatBlock.COOLDOWN_TICKS;
+		level.setBlock(worldPosition, getBlockState().setValue(BlackCatBlock.HISSING, true), Block.UPDATE_ALL);
+		level.playSound(null, worldPosition, SoundEvents.CREEPER_PRIMED, SoundSource.BLOCKS, 1.0F, 1.6F);
+		setChanged();
 	}
 
 	private boolean runnerNear(ServerLevel level) {

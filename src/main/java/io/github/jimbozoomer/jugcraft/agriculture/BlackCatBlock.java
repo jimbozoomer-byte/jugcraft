@@ -86,7 +86,7 @@ public class BlackCatBlock extends BaseEntityBlock {
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
 		if (!level.isClientSide() && !state.getValue(HISSING)) {
-			level.playSound(null, pos, SoundEvents.CAT_PURR, SoundSource.BLOCKS, 1.0F, 1.0F);
+			level.playSound(null, pos, SoundEvents.FOX_SNIFF, SoundSource.BLOCKS, 0.8F, 0.5F);
 		}
 		return InteractionResult.SUCCESS;
 	}
