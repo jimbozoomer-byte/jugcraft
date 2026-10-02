@@ -210,6 +210,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<GhostBellBlockEntity> GHOST_BELL_ENTITY;
 	public static BlockEntityType<FortuneTellerTableBlockEntity> FORTUNE_TABLE_ENTITY;
 	public static BlockEntityType<HalloweenBonfireBlockEntity> BONFIRE_ENTITY;
+	public static BlockEntityType<BarmbrackBlockEntity> BARMBRACK_ENTITY;
 	/** The Dust Sheet: its item, and the block it becomes over what it covers. */
 	public static final String DUST_SHEET = "dust_sheet";
 	/** What a Dust Sheet may cover (block tag). */
@@ -349,6 +350,13 @@ public final class JugcraftAgriculture {
 		treat("burnt_marshmallow", 2, 0.1F);
 		// Trick-or-treating's rare prize (only villagers hand it out).
 		food("king_size_candy_bar", 8, 0.4F, COMPOST_MEDIUM_HIGH);
+		// Halloween treats: soul cakes, pumpkin bread, spiderweb cupcakes and bat-wing cookies; two drinks in a bottle.
+		food("soul_cake", 4, 0.4F, COMPOST_MEDIUM_HIGH);
+		food("pumpkin_bread", 6, 0.8F, COMPOST_MEDIUM_HIGH);
+		food("spiderweb_cupcake", 3, 0.4F, COMPOST_MEDIUM_HIGH);
+		food("bat_wing_cookie", 2, 0.1F, COMPOST_MEDIUM_HIGH);
+		drink("pumpkin_spice_latte", 3, 0.3F, MobEffects.SPEED, 30);
+		drink("witchs_brew_punch", 2, 0.2F, MobEffects.GLOWING, 10);
 		// Spooky sweets from the Cooking Pot: a moment of magic each.
 		sweet("glow_gum", 1, 0.1F, MobEffects.GLOWING, 30);
 		sweet("ghost_taffy", 1, 0.1F, MobEffects.INVISIBILITY, 3);
@@ -1100,6 +1108,23 @@ public final class JugcraftAgriculture {
 		BONFIRE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("halloween_bonfire"),
 				FabricBlockEntityTypeBuilder.create(HalloweenBonfireBlockEntity::new, bonfire).build());
 		registerItem("marshmallow_on_a_stick", MarshmallowStickItem::new, new Item.Properties().stacksTo(16), FOOD_TAB);
+
+		// Batch 13, treats: the Witch's Brew Punch Bowl, the Barmbrack with its hidden ring, and Giant Candy props (the
+		// treats themselves are foods, registered with the others).
+		Block punch = registerBlock("witchs_brew_punch_bowl", PunchBowlBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GREEN)
+				.strength(0.5F).sound(SoundType.GLASS).noOcclusion().lightLevel(PunchBowlBlock::light).pushReaction(PushReaction.POPPED));
+		Block brack = registerBlock("barmbrack", BarmbrackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+		BARMBRACK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("barmbrack"),
+				FabricBlockEntityTypeBuilder.create(BarmbrackBlockEntity::new, brack).build());
+		Block candy = registerBlock("giant_candy", GiantCandyBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(0.8F).sound(SoundType.STONE).noOcclusion());
+		for (Block block : List.of(punch, candy)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		registerItem("barmbrack", props -> new BlockItem(brack, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);
+		registerItem("barmbrack_ring", Item::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON), TOOL_TAB);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
@@ -1308,6 +1333,14 @@ public final class JugcraftAgriculture {
 		Consumable eaten = Consumables.defaultFood().onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(effect, seconds * 20)))
 				.build();
 		registerItem(id, Item::new, new Item.Properties().food(food, eaten), FOOD_TAB);
+	}
+
+	/** A drink in a glass bottle, like a potion: drunk even on a full stomach for a short effect, leaving the bottle. */
+	private static void drink(String id, int nutrition, float saturation, Holder<MobEffect> effect, int seconds) {
+		FoodProperties food = new FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation).alwaysEdible().build();
+		Consumable drunk = Consumables.defaultDrink().onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(effect, seconds * 20)))
+				.build();
+		registerItem(id, Item::new, new Item.Properties().food(food, drunk).usingConvertsTo(Items.GLASS_BOTTLE).stacksTo(16), FOOD_TAB);
 	}
 
 	private static void stew(String id, int nutrition, float saturation) {

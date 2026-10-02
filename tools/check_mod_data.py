@@ -716,10 +716,15 @@ def check_agriculture():
         items[name] = ("sweet", int(n), float(sat), None, None)
         if ag.ITEMS.get(name, {}).get("sweet") != [effect, int(seconds)]:
             err(f"JugcraftAgriculture.java sweet {name} gives {effect} for {seconds} s, not as tools/agriculture.py says")
+    for name, n, sat, effect, seconds in re.findall(r'\bdrink\("([a-z_]+)", (\d+), ([\d.]+)F, MobEffects\.(\w+), (\d+)\)', main):
+        items[name] = ("drink", int(n), float(sat), None, None)
+        if ag.ITEMS.get(name, {}).get("drink") != [effect, int(seconds)]:
+            err(f"JugcraftAgriculture.java drink {name} gives {effect} for {seconds} s, not as tools/agriculture.py says")
     expected = {}
     for name, info in ag.ITEMS.items():
         food = info.get("food") or [None, None]
-        kind = ("stew" if info.get("stew") else "treat" if info.get("treat") else "sweet" if info.get("sweet") else "seeds" if "plants" in info
+        kind = ("stew" if info.get("stew") else "treat" if info.get("treat") else "sweet" if info.get("sweet") else "drink" if info.get("drink")
+                else "seeds" if "plants" in info
                 else "food" if "food" in info else "plain")
         expected[name] = (kind, food[0], food[1], info.get("compost"), info.get("plants"))
     if items != expected:
@@ -767,6 +772,7 @@ def check_agriculture():
     check_decor10(java)
     check_decor11(java)
     check_decor12(java)
+    check_decor13(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1991,6 +1997,49 @@ def check_decor12(java):
     for name in ("hayride_wagon", "hayride_lantern"):
         if not quads.get(name):
             err(f"decor12_quads.json has no quads for {name}")
+
+
+def check_decor13(java):
+    """Treats: Java matches tools/agriculture.py (the punch bowl's servings, brewing and light, the barmbrack's slices,
+    food and fortunes, the giant candy's designs), every block state has a model, every fortune has its words, and
+    the punch's ingredients are tagged."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    bowl, brack, candy = ag.PUNCH_BOWL, ag.BARMBRACK, ag.GIANT_CANDY
+    expected = {("PunchBowlBlock", "SERVINGS"): bowl["servings"], ("PunchBowlBlock", "PER_BERRY"): bowl["per_berry"],
+                ("PunchBowlBlock", "LIGHT"): bowl["light"], ("BarmbrackBlock", "SLICES"): brack["slices"],
+                ("BarmbrackBlock", "NUTRITION"): brack["slice_food"][0], ("BarmbrackBlock", "SATURATION"): brack["slice_food"][1]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    fortunes = re.search(r"FORTUNES = List\.of\(([^)]*)\)", java.get("BarmbrackBlock", ""))
+    if not fortunes or re.findall(r'"([a-z_]+)"', fortunes.group(1)) != brack["fortunes"]:
+        err("BarmbrackBlock.FORTUNES differs from BARMBRACK's fortunes")
+    designs = re.search(r"enum Design implements StringRepresentable \{\s*([A-Z_, ]+?);", java.get("GiantCandyBlock", ""))
+    if not designs or [d.strip().lower() for d in designs.group(1).split(",")] != candy["designs"]:
+        err("GiantCandyBlock.Design differs from GIANT_CANDY's designs")
+    if f'item("{bowl["punch"]}")' not in java.get("PunchBowlBlock", "") or f'item("{brack["ring"]}")' not in java.get("BarmbrackBlock", ""):
+        err("The punch bowl or the barmbrack hands out an item other than tools/agriculture.py's")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    wanted = {bowl["block"]: {f"servings={n}" for n in range(bowl["servings"] + 1)},
+              brack["block"]: {f"bites={b},facing={f}" for b in range(brack["slices"]) for f in horizontal},
+              candy["block"]: {f"design={d},facing={f}" for d in candy["designs"] for f in horizontal}}
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in ["ring"] + brack["fortunes"]:
+        if f"message.jugcraft.{brack['block']}.{key}" not in lang:
+            err(f"Missing words for the barmbrack's {key}")
+    tag = load(DATA / "jugcraft" / "tags" / "item" / "witchs_brew_ingredients.json") or {}
+    if tag.get("values") != bowl["ingredients"]:
+        err("Item tag jugcraft:witchs_brew_ingredients differs from PUNCH_BOWL's ingredients")
 
 
 def check_model_uvs():

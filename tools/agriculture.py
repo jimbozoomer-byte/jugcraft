@@ -267,6 +267,15 @@ ITEMS = {
     "burnt_marshmallow": {"display": "Burnt Marshmallow", "food": [2, 0.1], "treat": True, "tags": []},
     # Trick-or-treating's rare prize: only villagers hand it out (an optional seasonal treat, nothing needs it).
     "king_size_candy_bar": {"display": "King-Size Candy Bar", "food": [8, 0.4], "compost": "medium_high", "tags": ["c:foods/candy"]},
+    # Halloween treats (batch 13). Soul cakes (given out to soulers on All Hallows' Eve) and pumpkin bread; spiderweb
+    # cupcakes and bat-wing cookies count as candy; the pumpkin spice latte and the witch's brew punch are drinks
+    # (`drink`: an effect, vanilla MobEffects field, and its seconds), leaving their glass bottle.
+    "soul_cake": {"display": "Soul Cake", "food": [4, 0.4], "compost": "medium_high", "tags": ["c:foods"]},
+    "pumpkin_bread": {"display": "Pumpkin Bread", "food": [6, 0.8], "compost": "medium_high", "tags": ["c:foods/bread"]},
+    "spiderweb_cupcake": {"display": "Spiderweb Cupcake", "food": [3, 0.4], "compost": "medium_high", "tags": ["c:foods/candy"]},
+    "bat_wing_cookie": {"display": "Bat-Wing Cookie", "food": [2, 0.1], "compost": "medium_high", "tags": ["c:foods/candy"]},
+    "pumpkin_spice_latte": {"display": "Pumpkin Spice Latte", "food": [3, 0.3], "drink": ["SPEED", 30], "tags": []},
+    "witchs_brew_punch": {"display": "Witch's Brew Punch", "food": [2, 0.2], "drink": ["GLOWING", 10], "tags": []},
     # Spooky sweets (Cooking Pot): eaten even on a full stomach for a moment of magic, `sweet`: the effect (vanilla
     # MobEffects field) and its seconds, level I. Not compostable, like cooked meals.
     "glow_gum": {"display": "Glow Gum", "food": [1, 0.1], "sweet": ["GLOWING", 30], "tags": ["c:foods/candy"]},
@@ -597,7 +606,7 @@ TREBUCHET = {"block": "trebuchet", "display": "Pumpkin Chunkin' Trebuchet", "amm
                          "jugcraft:hand_carved_pumpkin": 1.06, "jugcraft:hand_carved_white_pumpkin": 1.08,
                          "jugcraft:hand_carved_jarrahdale_pumpkin": 1.03, "jugcraft:hand_carved_cinderella_pumpkin": 1.01}}
 # The Candy Bag holds treats (item tag treat_tag) like a bundle.
-CANDY_BAG = {"treat_tag": "jugcraft:candy_bag_treats", "treats": ["#c:foods/candy", "minecraft:cookie"]}
+CANDY_BAG = {"treat_tag": "jugcraft:candy_bag_treats", "treats": ["#c:foods/candy", "minecraft:cookie", "jugcraft:soul_cake"]}
 # The Headless Horseman (agriculture/HeadlessHorseman.java, HorsemanSummoning.java, FlamingPumpkin.java): summoned
 # within hour_window ticks of midnight in the event with a lit pumpkin on a scarecrow; fights within arena_radius,
 # rides off with nobody within leave_range for lonely_ticks, at dawn, or when the event ends.
@@ -1047,6 +1056,29 @@ def decor12_items():
     return decor12_blocks() + [TOILET_PAPER["item"], HAYRIDE["item"], BONFIRE["stick"]]
 
 
+# ---------------------------------------------------------------- Halloween decorations, batch 13: treats
+# The Witch's Brew Punch Bowl (PunchBowlBlock): a glass bowl of glowing green punch (light `light`) with dry-ice fog
+# rolling over its rim; a berry (`ingredients`) brews `per_berry` servings, up to `servings`; a glass bottle ladles one
+# Witch's Brew Punch.
+PUNCH_BOWL = {"block": "witchs_brew_punch_bowl", "display": "Witch's Brew Punch Bowl", "servings": 12, "per_berry": 2, "light": 6,
+              "punch": "witchs_brew_punch", "ingredients": ["minecraft:glow_berries", "minecraft:sweet_berries"]}
+# The Barmbrack (BarmbrackBlock + entity): an Irish fruit loaf of `slices` slices, eaten like a cake (each `slice_food`);
+# one slice, picked when it is placed, hides the `ring` (the gold nugget baked into it): whoever eats that slice finds
+# it. Every other slice tells a smaller fortune (`fortunes`).
+BARMBRACK = {"block": "barmbrack", "display": "Barmbrack", "slices": 6, "slice_food": [2, 0.4], "ring": "barmbrack_ring",
+             "ring_display": "Barmbrack Ring", "fortunes": ["coin", "pea", "stick", "cloth", "crumbs"]}
+# Giant Candy (GiantCandyBlock): a prop of a giant sweet, one of `designs` (an empty hand changes it).
+GIANT_CANDY = {"block": "giant_candy", "display": "Giant Candy", "designs": ["candy_corn", "lollipop", "wrapped_candy", "gumdrop"]}
+
+
+def decor13_blocks():
+    return [PUNCH_BOWL["block"], BARMBRACK["block"], GIANT_CANDY["block"]]
+
+
+def decor13_items():
+    return decor13_blocks() + [BARMBRACK["ring"]]
+
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -1163,6 +1195,19 @@ POT_RECIPES = {
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    # Decorations batch 13: soul cakes with currants; pumpkin bread; chocolate cupcakes iced with a web; chocolate
+    # bat-wing cookies; a pumpkin spice latte (the milk bucket is given back).
+    {"id": "soul_cake", "inputs": ["minecraft:wheat", "minecraft:sugar", "#minecraft:eggs", "minecraft:sweet_berries"], "result": "soul_cake",
+     "count": 4, "category": "misc"},
+    {"id": "pumpkin_bread", "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:pumpkin", "minecraft:sugar", "#minecraft:eggs"],
+     "result": "pumpkin_bread", "count": 2, "category": "misc"},
+    {"id": "spiderweb_cupcake", "inputs": ["minecraft:wheat", "minecraft:sugar", "#minecraft:eggs", "minecraft:cocoa_beans"],
+     "result": "spiderweb_cupcake", "count": 4, "category": "misc"},
+    {"id": "bat_wing_cookie", "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:cocoa_beans", "minecraft:sugar"],
+     "result": "bat_wing_cookie", "count": 8, "category": "misc"},
+    {"id": "pumpkin_spice_latte", "inputs": ["minecraft:milk_bucket", "minecraft:pumpkin", "minecraft:sugar", "minecraft:cocoa_beans",
+                                              "minecraft:glass_bottle"],
+     "result": "pumpkin_spice_latte", "count": 1, "category": "misc"},
     # Decorations batch 12: three paper round a stick make toilet paper; sugar whipped with an egg makes marshmallows,
     # one goes on a stick to toast.
     {"id": "toilet_paper_roll", "inputs": ["minecraft:paper", "minecraft:paper", "minecraft:paper", "minecraft:stick"],
@@ -1467,6 +1512,15 @@ SHAPED = [
     {"id": "dead_hollow_tree", "pattern": ["LSL", "TJT", " T "], "key": {"L": "minecraft:lantern", "S": "minecraft:stick",
                                                                       "T": "#minecraft:logs", "J": "minecraft:jack_o_lantern"},
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
+    # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
+    # (the ring) baked in; sugar round a red dye.
+    {"id": "witchs_brew_punch_bowl", "pattern": ["G G", "GBG"], "key": {"G": "minecraft:glass", "B": "minecraft:glow_berries"},
+     "result": "witchs_brew_punch_bowl", "count": 1, "category": "building"},
+    {"id": "barmbrack", "pattern": ["WSW", "BGB"], "key": {"W": "minecraft:wheat", "S": "minecraft:sugar", "B": "minecraft:sweet_berries",
+                                                        "G": "minecraft:gold_nugget"},
+     "result": "barmbrack", "count": 1, "category": "misc"},
+    {"id": "giant_candy", "pattern": ["SSS", "SDS", "SSS"], "key": {"S": "minecraft:sugar", "D": "minecraft:red_dye"},
+     "result": "giant_candy", "count": 2, "category": "building"},
     # Decorations batch 12: a minecart under two hay bales with a jack o'lantern on a post; logs over coal in a ring of
     # cobblestone.
     {"id": "haunted_hayride", "pattern": [" J ", "HMH"], "key": {"J": "minecraft:jack_o_lantern", "H": "minecraft:hay_block",
@@ -1558,7 +1612,7 @@ def all_blocks():
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
-            + decor11_blocks() + decor12_blocks())
+            + decor11_blocks() + decor12_blocks() + decor13_blocks())
 
 
 def all_items():
@@ -1567,7 +1621,7 @@ def all_items():
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
-            + decor9_items() + decor10_items() + decor11_items() + decor12_items())
+            + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items())
 
 
 def owns(entry_id):
