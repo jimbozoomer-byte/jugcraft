@@ -137,6 +137,13 @@ No numbered release yet. Everything below is on `main`.
 - **Dedicated-server check (CI):** a real client joins the game's own dedicated server, opens a machine and trades with the Retro Trader over the network, leaves and rejoins; and a world is saved and reopened with its trader, machine contents and cabinet intact. The two-client checklist is in [docs/TESTING.md](docs/TESTING.md#dedicated-server-and-two-clients).
 - Fourteen game tests, seven client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
 
+### Unmerged: Alpine Spawn, part 1 (stacked on the agriculture pull requests, #53 and #80)
+- **New worlds start in Alpine Spawn**, a large, cool alpine meadow on mountain plateaus. Vanilla's cool meadows become this biome, and the server moves a new world's spawn there, onto a village when one is nearby.
+- **Alpine villages are common:** vanilla's taiga villages on a 16-chunk grid (vanilla's is 34), only in this biome.
+- It has seasonal colours and winter snow from the start. Larches, seasonal flowers, bilberries and an alpine winter come in the next parts.
+- New settings: `alpine_spawn.enabled` (generation) and `alpine_spawn.start` (`on` or `off`: start there).
+- Server game tests for its climate entries, tags and villages, and a client test in a real world that it is where the world starts.
+
 ### Unmerged: Surface deposits, batch 11
 ### Unmerged: Seasons (colours, events and winter snow)
 - **Grass and leaves change colour with the server's date** in every biome that has four seasons: plains, meadows, forests (dark, dappled and cherry groves included), taigas, windswept hills, swamps and rivers.

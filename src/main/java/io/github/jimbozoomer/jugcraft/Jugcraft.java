@@ -22,6 +22,7 @@ import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.storage.JugcraftStorage;
 import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import io.github.jimbozoomer.jugcraft.weapons.JugcraftWeapons;
+import io.github.jimbozoomer.jugcraft.world.AlpineSpawn;
 import io.github.jimbozoomer.jugcraft.world.PixelHollows;
 import io.github.jimbozoomer.jugcraft.world.RetroTrader;
 import net.fabricmc.api.ModInitializer;
@@ -66,6 +67,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftAgriculture.register();
 		PixelHollows.register();
 		RetroTrader.register();
+		AlpineSpawn.register();
 		JugcraftSeasons.register();
 		FeatureEnabledCondition.register();
 		JugcraftWorldgen.register();

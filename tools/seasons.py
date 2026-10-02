@@ -18,6 +18,7 @@ BIOMES = [
     "minecraft:taiga", "minecraft:old_growth_pine_taiga", "minecraft:old_growth_spruce_taiga",
     "minecraft:windswept_forest", "minecraft:windswept_hills", "minecraft:windswept_gravelly_hills",
     "minecraft:swamp", "minecraft:river",
+    "jugcraft:alpine_spawn",
 ]
 
 TAG = "jugcraft:has_seasons"

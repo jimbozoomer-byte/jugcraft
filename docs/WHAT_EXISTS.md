@@ -375,6 +375,13 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
   - `SeasonalSnow` lays `jugcraft:seasonal_snow` (`SeasonalSnowBlock`, vanilla snow models, in `#minecraft:snow`) round players while it rains. Once it is no longer snowing, the block melts on random ticks.
 - **For later seasonal content.** Read `JugcraftSeasons.today()`, `isActive(event)` or `SeasonState.snowing()` on the server. Never trust a client's date.
 
+### Alpine Spawn (`world/AlpineSpawn`, `tools/alpine.py`)
+
+- **Placement.** `AlpineSpawn.wrap` turns the Overworld biome builder's cool meadows (temperature band at most `COOL_MAX`, -0.15) into `jugcraft:alpine_spawn`. It runs through `mixin/OverworldBiomeBuilderMixin` (`@ModifyVariable` on `addBiomes`).
+- **The start.** On a new world's first start (game time 0, multi-noise Overworld only), `findStart` finds the nearest Alpine Spawn within `SEARCH_RADIUS` (6,400), moves inward by `MARGIN` (48), and prefers a village within `VILLAGE_CHUNKS` (24). The spawn is then set with `/setworldspawn`.
+- **Villages.** `jugcraft:village_alpine` (taiga pieces, `#jugcraft:has_structure/village_alpine`) on the structure set `jugcraft:alpine_villages` (spacing 16, separation 5). It is in `#minecraft:village`.
+- **Settings.** `alpine_spawn.enabled` and `alpine_spawn.start`.
+
 ### Registration (`materials/`)
 
 - `JugcraftRegistry.item(path)` and `block(path, copyFrom)` register simple items and blocks.

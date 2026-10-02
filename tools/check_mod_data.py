@@ -20,6 +20,7 @@ import seasons
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 import pixel_hollows as ph
+import alpine as al
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -335,7 +336,7 @@ def check_machine_recipe_files(registered):
 
 
 # Jugcraft entries of registries other than blocks and items that tags may name.
-OTHER_ENTRIES = {"worldgen": {"pixel_hollows"}, "point_of_interest_type": {"arcade_cabinet"},
+OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE}, "point_of_interest_type": {"arcade_cabinet"},
                  "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES}}
 
 
@@ -492,6 +493,40 @@ def check_seasons():
                    "harvest_feast", "harvest_feast.days", "december"):
         if f'"{option}"' not in options:
             err(f"JugcraftConfig.TEXT_OPTIONS has no {option}")
+
+
+def check_alpine():
+    """Alpine Spawn: Java's placement and spawn numbers match tools/alpine.py, and its data is all there."""
+    java = (WORLD_JAVA / "AlpineSpawn.java").read_text(encoding="utf-8")
+    for expected in (f'FEATURE = "{al.FEATURE}"', f'Jugcraft.id("{al.BIOME}")', f"COOL_MAX = {al.COOL_MAX}F",
+                     f"SEARCH_RADIUS = {al.SPAWN['radius']};", f"SEARCH_STEP = {al.SPAWN['step']};",
+                     f"VILLAGE_CHUNKS = {al.SPAWN['village_chunks']};"):
+        if expected not in java:
+            err(f"AlpineSpawn.java has no {expected} (tools/alpine.py)")
+    if al.FEATURE not in FEATURES:
+        err(f"{al.FEATURE} is not a feature switch")
+    if '"alpine_spawn.start"' not in CONFIG.read_text(encoding="utf-8"):
+        err("JugcraftConfig has no alpine_spawn.start")
+    folder = DATA / MOD / "worldgen"
+    biome = load(folder / "biome" / f"{al.BIOME}.json") or {}
+    if biome.get("temperature") != al.TEMPERATURE or biome.get("downfall") != al.DOWNFALL:
+        err(f"{al.BIOME}.json climate differs from tools/alpine.py")
+    for step in biome.get("features", []):
+        for feature in step:
+            ns, path = split(feature)
+            if ns == MOD and not (folder / "placed_feature" / f"{path}.json").is_file():
+                err(f"{al.BIOME}.json: unknown placed feature {feature}")
+    structure = load(folder / "structure" / f"{al.VILLAGE}.json") or {}
+    if structure.get("biomes") != f"#{al.VILLAGE_TAG}":
+        err(f"{al.VILLAGE}.json should generate in #{al.VILLAGE_TAG}")
+    placement = (load(folder / "structure_set" / f"{al.VILLAGE_SET}.json") or {}).get("placement", {})
+    if [placement.get(k) for k in ("spacing", "separation", "salt")] != [al.VILLAGES[k] for k in ("spacing", "separation", "salt")]:
+        err(f"{al.VILLAGE_SET}.json differs from VILLAGES in tools/alpine.py")
+    if f"{MOD}:{al.BIOME}" not in seasons.BIOMES:
+        err("Alpine Spawn has no seasons")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"biome.{MOD}.{al.BIOME}") != al.DISPLAY:
+        err(f"No name for the {al.BIOME} biome")
 
 
 def check_java():
@@ -1748,6 +1783,7 @@ def main():
     check_java()
     check_deposits()
     check_seasons()
+    check_alpine()
     check_machines(registered)
     check_large_machines()
     check_style_pack()
