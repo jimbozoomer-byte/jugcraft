@@ -747,6 +747,19 @@ Ten more fall and Halloween additions, one per pull request ([features/fall-addi
 - **Scarecrows keep them off:** crows leave the crops within 4 blocks of a bare scarecrow alone, 8 of one wearing a pumpkin head, 12 of one wearing a lit head.
 - Crows fly off from a player who comes close, from a blow, and at nightfall; they drop feathers. Details: [fall additions](../features/fall-additions.md#crows).
 
+### Spooky fireworks
+
+| **Spooky fireworks** at midnight: a bat, a jack o'lantern, a ghost and a skull, each drawn in sparks facing the camera | **A finale** fired from a Show Launcher: nine rockets fanned out, their pictures bursting together |
+| --- | --- |
+| ![Spooky fireworks](../images/ingame_spooky_fireworks.jpg) | ![A fireworks finale](../images/ingame_fireworks_finale.jpg) |
+| **The Show Launcher**, loaded: a rocket's nose in each tube, the dial on its front set to "finale" | |
+| ![The Show Launcher](../images/ingame_show_launcher.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`FireworkClientGameTests`, software rendering, small previews). The four pictures in the first are burst straight on the client; the finale is fired from the launcher for real.*
+
+- **Spooky fireworks** burst into a bat, a jack o'lantern, a ghost or a skull in coloured sparks, the right way round for every player. Paper, gunpowder (the flight) and the picture's ingredients; glowstone dust to twinkle. They hurt and break nothing.
+- **Show Launcher:** nine tubes of sixteen rockets each (spooky or vanilla), fired in sequence, in volleys or as a finale, by hand or redstone. Details: [fall additions](../features/fall-additions.md#spooky-fireworks).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

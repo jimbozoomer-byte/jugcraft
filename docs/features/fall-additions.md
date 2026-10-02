@@ -1,12 +1,12 @@
 # Fall Additions
 
-Status: the chandlery (addition 1), the cider mill (addition 2), the preserves pantry (addition 3) and crows and working scarecrows (addition 4) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
+Status: the chandlery (addition 1), the cider mill (addition 2), the preserves pantry (addition 3), crows and working scarecrows (addition 4) and spooky fireworks (addition 5) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok lets build another 10 more thorough and well thought out festive halloween and fall additions, maybe for one we do candle making with an interesting process to make them allowing you to make a bunch of different combinations and then light them to give different cool effects to an aoe area like beacons do"). The ten additions ship one per pull request, each stacked on the one before:
 1. the chandlery: the Wax Melting Pot and Aura Candles;
 2. the cider mill: apple trees, the Cider Press, the Cider Barrel and four ciders;
 3. the preserves pantry: Mason Jars, eight preserves, the Canning Kettle and the Pantry Shelf;
 4. crows and working scarecrows: crows that raid ripe crops, and scarecrows that keep them off;
-5. spooky fireworks (planned);
+5. spooky fireworks: rockets that burst into a bat, a jack o'lantern, a ghost or a skull drawn in sparks, and the Show Launcher;
 6. a sky lantern festival (planned);
 7. a harvest feast table (planned);
 8. a corn maze (planned);
@@ -14,10 +14,10 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok let
 10. face paint (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace). Crows need nothing to come but a ripe crop; the scarecrow that keeps them off is the existing one (a hay bale, wool and sticks), and its pumpkin heads come from any pumpkin patch.
-Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast. Crows are for farmers: a little pressure on open fields, answered by building and dressing scarecrows, and a source of feathers for fletchers and chandlers.
+Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace). Spooky fireworks are Discovery tier too: paper, gunpowder and the picture's ingredients (a feather and black dye, a carved pumpkin, a phantom membrane or a bone), and glowstone dust to twinkle; the Show Launcher is a dispenser, iron ingots, planks and redstone. Crows need nothing to come but a ripe crop; the scarecrow that keeps them off is the existing one (a hay bale, wool and sticks), and its pumpkin heads come from any pumpkin patch.
+Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast. Crows are for farmers: a little pressure on open fields, answered by building and dressing scarecrows, and a source of feathers for fletchers and chandlers. Spooky fireworks are for anyone throwing a party: one rocket for a moment, or a Show Launcher's nine tubes for a planned show.
 
-Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, and preserves put up, all year; crows come to fields all year too.
+Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, and preserves put up, all year; crows come to fields all year too, and fireworks go up whenever someone lights them.
 
 ## Player experience
 ### The Wax Melting Pot
@@ -144,6 +144,21 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 43. **A Scarecrow now guards the crops round it:** within 4 blocks bare, 8 wearing a pumpkin head, and 12 wearing a lit one (a jack o'lantern, or a hand-carved pumpkin with a torch in it), measured across the ground from its head, and up to 6 blocks above or below it. Crows won't go for a guarded crop, and a crow after a crop takes flight within half a second of a scarecrow going up beside it.
 44. Nothing else about the scarecrow changes: it is placed, dressed, dyed and broken as before. It stands on any block with a solid top, so in a field it goes on a dirt, grass or path block rather than on farmland.
 
+### Spooky fireworks
+45. **Four spooky fireworks**, each bursting into a picture drawn in coloured sparks: a **bat** (violet wings, red eyes), a **jack o'lantern** (orange, with a green stem and a glowing yellow face), a **ghost** (white, with a pale blue hem) and a **skull** (bone white). Dark details (eyes, sockets, a mouth) are left as holes in the picture, since dark sparks would vanish against the night.
+46. **Every player sees the picture the right way round:** each client draws it facing its own player, so a crowd round a launcher all see the bat's wings spread, not edge on.
+47. **Crafting:** paper, one to three gunpowder (the flight, as vanilla's rockets) and the picture's ingredients (a feather and black dye, a carved pumpkin, a phantom membrane, a bone) make three. Add glowstone dust and the sparks **twinkle** as they fade.
+48. **Setting one off:** use it on a block and it climbs, trailing sparks, for a second or two by its flight, and bursts with a bang. Spooky fireworks hurt nothing and break nothing, and can't boost elytra flight. A dispenser facing up sets one off as by hand; facing any other way, it fires it straight out.
+
+### The Show Launcher
+49. A painted crate of **nine mortar tubes**, three rows of three, in orange and black, with a brass dial on its front. Each tube holds **up to sixteen rockets** of one kind, spooky or vanilla; the nose of the next rocket peeks out of each loaded tube.
+50. Use it holding rockets to load them (matching tubes first, then empty ones). Hoppers can load it from any side and unload it from below.
+51. **Starting a show:** use it with an empty hand, or give it a rising redstone signal; do it again to stop. Sneak and use it with an empty hand to turn the dial between three ways of firing:
+    - **in sequence:** one rocket every half second, round the loaded tubes in turn;
+    - **in volleys:** a row of three every second, front row first;
+    - **as a finale:** one from every tube at once.
+52. Rockets leave the tubes **fanned out from the middle**, so a volley or a finale spreads across the sky. A show runs until the tubes are empty (a finale fires once). Comparators read how many tubes are loaded; broken, it spills its rockets.
+
 ## Connections
 - Existing input producer: vanilla copper (the pot), bees (honeycomb), zombies (rotten flesh), spiders (string), dyes, and the scent items above; Jugcraft's `jugcraft:heat_sources` (the Cooking Pot's heat).
 - Existing output consumer:
@@ -171,6 +186,10 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - Crows, output consumer: feathers, for vanilla arrows and the chandlery's Featherfall scent (`jugcraft:candle_scents/featherfall`); a use for scarecrows beyond decoration.
 - Crows, entry path: none needed to meet them; a scarecrow is a hay bale, wool and three sticks, all early-game.
 - Crows, required vs optional: crows are a nuisance, never a gate. A pecked crop is set back, never destroyed, and grows again; nothing in storage is touched. The game rules turn spawning and pecking off.
+- Fireworks, input producer: paper (sugar cane), gunpowder (creepers), feathers (chickens, and now crows), black dye, carved pumpkins, phantom membranes, bones, glowstone dust; vanilla firework rockets in the launcher.
+- Fireworks, output consumer: celebrations: the Halloween events, the Carving Contest and the regatta, and the harvest feast to come. Not a progression item.
+- Fireworks, entry path: everything is early-game; the phantom membrane needs a few sleepless nights, and the other three pictures don't.
+- Fireworks, required vs optional: purely celebratory, all year, reachable solo.
 - Crows and the plans: [AGRICULTURE.md](../branches/AGRICULTURE.md) promised that the scarecrow would one day keep crop-eating birds away; it now does.
 - Cider mill and the plans:
   - [AGRICULTURE.md](../branches/AGRICULTURE.md) plans orchards (slice 4) and a Fruit and Seed Press (apples into cider, grapes into juice, seed oil for engineers).
@@ -264,6 +283,13 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
   - **No positive-gain loop:** crows don't breed and aren't bred; a crow gives 0 to 2 feathers once and nothing else; feathers make no crows.
   - Automation: a scarecrow works on its own, all day, and needs nothing.
 
+- **Fireworks:**
+  - Costs: three rockets from a paper, 1 to 3 gunpowder and the picture's ingredients (as vanilla's three rockets from a paper and gunpowder), and a glowstone dust to twinkle. The launcher: a dispenser, three iron ingots, four planks and a redstone.
+  - Units: flight in ticks: 10 for each flight level plus one, and up to 12 more (flight 1: 20 to 32 ticks).
+  - A burst is one picture of 87 to 117 sparks and sixteen loose ones, each lasting two to three seconds.
+  - Nothing is made back from a rocket: it is gone when it bursts. No damage, so no use as a weapon.
+  - Automation: dispensers and the launcher both fire them, by redstone; hoppers load the launcher.
+
 ## Multiplayer and persistence
 - **Server authority:**
   - Putting things in the pot, dipping, pouring, lighting and snuffing all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server.
@@ -335,6 +361,12 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - **Crows, IDs:** the entity `jugcraft:crow`, its loot table `jugcraft:entities/crow` and texture `jugcraft:textures/entity/crow.png`. All new; the scarecrow keeps its ID and states.
 - **Crows, disable behaviour:** with the agriculture feature off, no crows come, and crows already about fly off as at nightfall; the entity stays registered, so a saved crow loads.
 
+- **Fireworks, server authority:** the server spawns, moves and bursts every rocket, and runs every show (loading, starting and stopping go through vanilla's block use path or redstone). A burst is one small message to the players who can see the rocket (`jugcraft:spooky_burst`: where, which picture, whether it twinkles); each client draws it. Clients decide nothing.
+- **Fireworks, persistence:** a rocket saves its flight and how long it has flown; the launcher saves its tubes, whether a show is running and where it is in it.
+- **Fireworks, bounded work:** a launcher ticks only while a show runs; a rocket ticks as any projectile; a burst is drawn on the client from one message.
+- **Fireworks, IDs:** items `bat_firework`, `pumpkin_firework`, `ghost_firework` and `skull_firework`; block with item `show_launcher` and its block entity; entity `spooky_rocket`; particle `jugcraft:spooky_spark`; data component `jugcraft:twinkle`; the network message `jugcraft:spooky_burst`; 24 rocket recipes and the launcher's. All new.
+- **Fireworks, disable behaviour:** with the agriculture feature off, the recipes don't load; everything stays registered.
+
 ## Dependencies and assets
 No new dependencies. Every texture is drawn by code (`tools/chandlery_textures.py`): the pot's hammered copper and dark inside, the brass dish, the wax (pale, tinted by its colour as it is drawn), the wax's surface in the pot, the flame (white at its heart, tinted by its scent) and the candle's item in two layers (its body, tinted by its dyed colour; its wick and dish, not). The models, blockstates, item model, names, tooltip, messages, loot and tags come from `tools/chandlery_data.py`; the numbers from `CHANDLERY` in `tools/agriculture.py`. The client's `WaxPotRenderer` draws the wax in the pot at its level and colour; `AuraCandleRenderer` draws the candle at its height, layers and colour and its flame; both share `TintedBoxes`. The item's colour is the vanilla `dyed_color` component, read by the item model's dye tint. Sounds are vanilla's (honeycomb waxing, dye use, brewing, a bottle filling, a honey slide, a bucket emptying, a candle going out).
 
@@ -355,6 +387,12 @@ Crows:
 - Its name and loot come from `tools/crow_data.py`; the numbers from `CROWS` in `tools/agriculture.py`.
 - The client's `CrowModel` (head and beak, body, two wings that spread and beat in flight and fold while it pecks, a fanned tail, legs) and `CrowRenderer` draw it.
 - Sounds are vanilla's: a parrot's call, pitched down, for its caw; crops breaking when it has pecked.
+
+Fireworks:
+- Textures are drawn by code in `tools/firework_textures.py`: each rocket's item, the launcher's stained crate with iron corners, its painted tubes and their mouths, the brass dial at each mode, a rocket's paper, and the soft star of a spark.
+- The pictures are pixel pictures in `FireworkShape.java`, which the client reads to draw a burst (`SpookyBursts`, `SpookySparkParticle`). The launcher's loaded rockets are drawn by `ShowLauncherRenderer`; a rocket in flight by vanilla's thrown-item renderer.
+- Models, blockstates, recipes, loot, tags and words come from `tools/firework_data.py`; the numbers from `FIREWORKS` in `tools/agriculture.py`.
+- Sounds are vanilla's fireworks' (launch, blast near and far, twinkle).
 
 ## Verification
 ### Chandlery verification
@@ -491,6 +529,40 @@ Found by CI and fixed before this record:
 - how often crows come to a real farm over a day (the tests call the spawner directly), or how much they set a farm back;
 - the sounds.
 
+### Fireworks verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-19` stacked on the crows:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the fireworks with Java: the rocket's flight base, spread and climb, the launcher's tubes, tube size, sequence and volley steps and both leans; checks every picture has its firework item, named and drawn, with a recipe for each flight, plain and twinkling, making three of that flight; the launcher's models for every facing and mode, its words, loot and recipe; the spark particle, the burst payload and the dispensing are registered) | Pass, 610 IDs |
+| `./gradlew build` on `d035ac4` (Build workflow run 37038322733) | Pass |
+| Game tests on the headless server, same run | **All pass**. On `f869aa1` (run 37037699738), the last commit to change the game tests, the count was 369, 8 of them new here (`FireworkGameTests`); `d035ac4` changes only the client test |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `d035ac4` (run 37038322733), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#spooky-fireworks): four pictures bursting at night, a finale, and a loaded launcher with its rockets' tips showing. No model, texture or particle errors in the log |
+
+The 8 new game tests (`FireworkGameTests`):
+1. every picture is well formed, at least 40 sparks, and has a firework that bursts into it with flight 1 when crafted plain; the jack o'lantern has its green stem and holes round it;
+2. used on the ground, a ghost firework is used up and goes up alone, flies for its flight's time, is still climbing after half a second and bursts, breaking and hurting nothing;
+3. flight 3 flies longer, a twinkling firework twinkles; all 24 firework recipes load, and paper, two gunpowder, a carved pumpkin and glowstone dust make three twinkling flight-2 jack o'lanterns; the launcher's recipe and loot table load;
+4. the Show Launcher loads sixteen rockets to a tube, matching tubes first and vanilla rockets in their own; sticks don't load; hoppers load rockets from any side and unload only from below; comparators read the loaded tubes; a full launcher takes no more; broken, it spills every rocket;
+5. in sequence a show fires one rocket every half second round the loaded tubes in turn and stops when they are empty;
+6. in volleys it fires a row of three every second, front row first, a vanilla rocket in a row going up with it; a finale fires one from every tube at once, each leaning out from the middle, and stops;
+7. a rising redstone signal starts a show and the next stops it, and so does an empty hand; sneaking turns the dial; a stick does nothing and an empty launcher won't start;
+8. a dispenser facing up sets off a spooky firework.
+
+Found by CI and fixed before this record:
+- The spark particle overrode a light method 26.3 doesn't have; it now lights itself at full brightness through `getLightCoords` (`f2e6c83`).
+- The recipe test assembled with the older two-argument `assemble`; 26.3's takes only the input (`6af3169`).
+- Two mistakes in the tests themselves: the jack o'lantern's stem pixel was looked for in the wrong column, and the "not a rocket" check used dirt, which the use test placed as a block; it now uses a stick (`f869aa1`).
+- The first screenshots were too far off to make out the pictures; the camera now stands closer to the launcher and the bursts (`d035ac4`).
+
+**Not run (fireworks):**
+- a person playing it in a client: crafting the fireworks, setting them off by hand, loading and running a show;
+- a dedicated server with two players, each seeing the pictures face them;
+- how a long show looks and runs with many launchers going at once;
+- the sounds.
+
 ## World and event applicability
 - Candles and pots work anywhere, in every dimension, all year. Nothing is seasonal. The aura doesn't depend on biome, time or weather; harvest helps only plants that would grow there anyway.
 - Revealing shows creatures through walls (Glowing), which can help find hostile mobs in caves; it gives no other information.
@@ -516,6 +588,9 @@ Found by CI and fixed before this record:
 - Preserves only spoil when unsealed; nothing else in Jugcraft spoils. A jar's three days count game time (sleeping doesn't hasten them).
 - The kettle and shelf can't be filled or emptied by hoppers yet.
 - A jar can be sealed only full and fresh: an opened jar can't be put up again.
+- A spooky firework can't be used in a crossbow (crossbows only take vanilla rockets) or to boost elytra flight.
+- A burst is drawn facing each player when it bursts; a player who moves round it while it fades sees it turn edge-on.
+- Rockets climb about 15 blocks at flight 1 and 30 to 40 at flight 3, much as vanilla's do.
 - Crows peck only crops of the vanilla crop kind (`CropBlock`); tall crops, gourds, bushes and fruit trees are safe.
 - A scarecrow's guard is a circle measured across the ground from its head; walls don't block it.
 - Crows don't eat crops from storage, trample farmland, or attack. A crop set back keeps its farmland.
