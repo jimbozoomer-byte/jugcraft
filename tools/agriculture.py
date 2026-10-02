@@ -1495,6 +1495,9 @@ KNITTING = {"wheel": "spinning_wheel", "wheel_display": "Spinning Wheel", "yarn"
             "needles": "knitting_needles", "needles_display": "Knitting Needles", "needles_durability": 128, "row_ticks": 40,
             "turns": 4, "spin_ticks": 20, "yarn_per_wool": 4, "unravel_loss": 1, "undyed": 0xF0E6D2,
             "cozy": {"ticks": 40, "pieces": 2, "range": 4, "effect_ticks": 60}, "knitwear_tag": "jugcraft:knitwear",
+            # Dyeing, as Minecraft 26.3 dyes leather armour: a recipe of this type for each dyeable item (yarn and the
+            # garments), taking any dye; a water cauldron washes the dye out of anything in vanilla's tag.
+            "dye_recipe": "minecraft:crafting_dye", "dye_group": "dyed_knitwear", "wash_tag": "minecraft:cauldron_can_remove_dye",
             # In the order of the Knitwear enum (the needles' cycle).
             "garments": {
                 "knit_beanie": {"display": "Knit Beanie", "slot": "HEAD", "rows": 2, "asset": "knit"},

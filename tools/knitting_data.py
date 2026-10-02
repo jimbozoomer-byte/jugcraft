@@ -2,10 +2,11 @@
 treadle, the wheel's posts and axle, the distaff and the spindle's maidens; the wheel, the wool and the yarn are drawn by
 the client's SpinningWheelRenderer) and blockstate, the yarn's, needles' and garments' item models (each tinted by the
 vanilla dyed_color component, a sweater's motif over it), the garments' equipment assets (the knit, dyeable, and a
-sweater's motif), names, messages, tooltips, loot and tags (knitwear; vanilla's freeze-immune wearables and dyeable
-items). The recipes are in SHAPED; the advancements in HALLOWEEN_ADVANCEMENTS.
+sweater's motif), names, messages, tooltips, loot, tags (knitwear; vanilla's freeze-immune wearables, and the items a
+cauldron washes the dye out of) and the dyeing recipes (one for the yarn and each garment, as 26.3 dyes leather armour).
+The other recipes are in SHAPED; the advancements in HALLOWEEN_ADVANCEMENTS.
 
-Called from agriculture_data.py (assets, loot, tags). Formats follow vanilla Minecraft 26.3's own files.
+Called from agriculture_data.py (assets, loot, tags, recipes). Formats follow vanilla Minecraft 26.3's own files.
 """
 from agriculture import KNITTING
 from candy_data import argb
@@ -83,8 +84,21 @@ def loot(out, write):
 
 def tags(tags):
     tags.add("block", "minecraft:mineable/axe", rid(KNITTING["wheel"]))
-    tags.add("item", "minecraft:dyeable", rid(KNITTING["yarn"]))
+    tags.add("item", KNITTING["wash_tag"], rid(KNITTING["yarn"]))
     for garment in KNITTING["garments"]:
         tags.add("item", KNITTING["knitwear_tag"], rid(garment))
         tags.add("item", "minecraft:freeze_immune_wearables", rid(garment))
-        tags.add("item", "minecraft:dyeable", rid(garment))
+        tags.add("item", KNITTING["wash_tag"], rid(garment))
+
+
+def dyeable():
+    """The items that take dye: the yarn and every garment."""
+    return [KNITTING["yarn"]] + list(KNITTING["garments"])
+
+
+def recipes(out, write, conditions):
+    """A dyeing recipe for each, in the form of vanilla's leather_helmet_dyed: the item and any dye make it that colour."""
+    for item in dyeable():
+        write(out / f"{item}_dyed.json", {"fabric:load_conditions": conditions(), "type": KNITTING["dye_recipe"],
+                                          "group": KNITTING["dye_group"], "target": rid(item), "dye": "#minecraft:dyes",
+                                          "result": {"id": rid(item)}})

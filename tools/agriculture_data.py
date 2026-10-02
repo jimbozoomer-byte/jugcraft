@@ -378,6 +378,7 @@ def recipes(out, write):
     lantern_data.recipes(out, write, conditions)
     feast_data.recipes(out, write, conditions)
     maze_data.recipes(out, write, conditions)
+    knitting_data.recipes(out, write, conditions)
     ghost_data.recipes(out, write, conditions)
     face_paint_data.recipes(out, write, conditions)
     decor3_data.recipes(out, write, conditions)
