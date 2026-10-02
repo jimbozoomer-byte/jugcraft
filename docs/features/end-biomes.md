@@ -45,7 +45,8 @@ Five new biomes of the outer End islands. Four share the highlands with vanilla'
 Results are recorded under "Results" below after CI runs.
 - `python3 tools/check_mod_data.py`: biomes and their features, the generated placements current, no End biome with region rules, an Overworld surface or seasons.
 - Server game test (`BiomeGameTests.dimensionBiomesArePlaced`): every End biome is in the End's biome source, and at least half are found within 3,200 blocks of the origin (distances logged).
-- Not run: play, screenshots of the End, a dedicated server, two clients.
+- Client game test (`BiomeClientGameTests`): each End biome's nearest place to the origin, a standing spot on its ground, and a screenshot.
+- Not run: play, a dedicated server, two clients.
 
 ### Results
 Not yet run in CI.

@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.datafixers.util.Pair;
 import io.github.jimbozoomer.jugcraft.agriculture.SeasonalLeavesBlock;
+import io.github.jimbozoomer.jugcraft.biome.JugcraftDimensions;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.state.BlockState;
@@ -174,6 +176,26 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 				singleplayer.getConnection().waitForChunksRender();
 				context.takeScreenshot("jugcraft_biome_" + shot);
 			}
+			// The Nether and End biomes (batches 8 and 9): each where it is nearest the origin, from a standing spot on its
+			// floor, looking out. Logged and photographed only.
+			for (ResourceKey<Level> dimension : List.of(Level.NETHER, Level.END)) {
+				List<ResourceKey<Biome>> biomes = dimension == Level.NETHER ? JugcraftDimensions.nether() : JugcraftDimensions.end();
+				for (ResourceKey<Biome> biome : biomes) {
+					BlockPos spot = server.computeOnServer(minecraft -> standingSpot(minecraft.getLevel(dimension), biome));
+					String name = biome.identifier().getPath();
+					LOGGER.info("Biomes, seed {}: {} in {} {}", SEED, name, dimension.identifier().getPath(), spot == null
+							? "not found standing room within " + SEARCH + " blocks of the origin"
+							: "standing at " + spot.getX() + " " + spot.getY() + " " + spot.getZ());
+					if (spot == null) {
+						continue;
+					}
+					server.runCommand(String.format(Locale.ROOT, "execute in %s run tp @p %d.5 %d %d.5 135 15", dimension.identifier(),
+							spot.getX(), spot.getY(), spot.getZ()));
+					context.waitTicks(80);
+					singleplayer.getConnection().waitForChunksRender();
+					context.takeScreenshot("jugcraft_biome_" + name);
+				}
+			}
 			if (!vanillaMissing.isEmpty()) {
 				throw new AssertionError("Vanilla " + vanillaMissing + " not within " + SEARCH + " blocks of the start (seed " + SEED + ")");
 			}
@@ -224,6 +246,40 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 			}
 		}
 		return inside != null ? inside : edge;
+	}
+
+	/**
+	 * In a Nether or End level: the biome's nearest place to the origin, and there, within 32 blocks, the highest open
+	 * floor in the biome with three blocks of air to stand in (below the Nether's roof). Null if none.
+	 */
+	private static BlockPos standingSpot(ServerLevel level, ResourceKey<Biome> biome) {
+		Pair<BlockPos, Holder<Biome>> nearest = level.findClosestBiome3d(holder -> holder.is(biome), BlockPos.ZERO.atY(64), SEARCH, 32, 32);
+		if (nearest == null) {
+			return null;
+		}
+		BlockPos place = nearest.getFirst();
+		int top = Math.min(level.getMaxY() - 1, level.getMinY() + 120);
+		for (int reach = 0; reach <= 32; reach += 8) {
+			for (int dx = -reach; dx <= reach; dx += 8) {
+				for (int dz = -reach; dz <= reach; dz += 8) {
+					if (Math.max(Math.abs(dx), Math.abs(dz)) != reach) {
+						continue;
+					}
+					int x = place.getX() + dx;
+					int z = place.getZ() + dz;
+					level.getChunk(x >> 4, z >> 4);
+					for (int y = top; y > level.getMinY() + 4; y--) {
+						BlockPos feet = new BlockPos(x, y, z);
+						if (level.getBlockState(feet).isAir() && level.getBlockState(feet.above()).isAir()
+								&& level.getBlockState(feet.above(2)).isAir() && level.getBlockState(feet.below()).isSolid()
+								&& level.getBiome(feet).is(biome)) {
+							return feet;
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	/** The biome on the surface where the camera looks from {@code spot}. */
