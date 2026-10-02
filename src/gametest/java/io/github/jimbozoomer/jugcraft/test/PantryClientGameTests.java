@@ -50,8 +50,8 @@ public class PantryClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 
 			shoot(context, singleplayer, x + 3, y + 1, z - 2, 180, 15, "jugcraft_preserves_pantry");
-			shoot(context, singleplayer, x + 1, y + 2, z - 4, 180, 50, "jugcraft_canning_kettle");
-			shoot(context, singleplayer, x + 4, y + 1, z - 4, 180, 10, "jugcraft_pantry_shelves");
+			shoot(context, singleplayer, x + 1, y + 2, z - 4, 180, 45, "jugcraft_canning_kettle");
+			shoot(context, singleplayer, x + 4, y, z - 4, 180, 20, "jugcraft_pantry_shelves");
 		}
 	}
 

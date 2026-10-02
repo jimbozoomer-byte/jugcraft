@@ -153,8 +153,8 @@ public class CanningKettleBlock extends BaseEntityBlock {
 		double x = pos.getX() + 0.25 + random.nextDouble() * 0.5;
 		double z = pos.getZ() + 0.25 + random.nextDouble() * 0.5;
 		level.addParticle(ParticleTypes.BUBBLE_POP, x, pos.getY() + 0.62, z, 0.0, 0.02, 0.0);
-		if (random.nextInt(3) == 0) {
-			level.addParticle(ParticleTypes.CLOUD, x, pos.getY() + 0.75, z, 0.0, 0.03, 0.0);
+		if (random.nextInt(4) == 0) {
+			level.addParticle(ParticleTypes.WHITE_SMOKE, x, pos.getY() + 0.75, z, 0.0, 0.02, 0.0);
 		}
 	}
 
