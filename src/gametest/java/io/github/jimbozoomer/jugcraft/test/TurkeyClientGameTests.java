@@ -90,14 +90,14 @@ public class TurkeyClientGameTests implements FabricClientGameTest {
 		int x = origin.getX();
 		int y = origin.getY();
 		int z = origin.getZ();
-		// The flock, facing the camera (south): the strutting tom in the middle.
-		turkey(level, x + 3.5, y, z - 6.0, 180.0F, true, false, true);
-		turkey(level, x + 6.0, y, z - 7.0, 150.0F, true, false, false);
-		turkey(level, x + 1.0, y, z - 5.5, 210.0F, false, false, false);
-		turkey(level, x + 5.5, y, z - 4.5, 200.0F, false, false, false);
-		turkey(level, x + 6.5, y, z - 4.0, 170.0F, false, true, false);
-		turkey(level, x + 7.2, y, z - 3.6, 190.0F, false, true, false);
-		turkey(level, x + 6.0, y, z - 3.2, 160.0F, false, true, false);
+		// The flock, facing the camera (south, yaw 0): the strutting tom in the middle.
+		turkey(level, x + 3.5, y, z - 6.0, 0.0F, true, false, true);
+		turkey(level, x + 6.0, y, z - 7.0, 30.0F, true, false, false);
+		turkey(level, x + 1.0, y, z - 5.5, -30.0F, false, false, false);
+		turkey(level, x + 5.5, y, z - 4.5, -20.0F, false, false, false);
+		turkey(level, x + 6.5, y, z - 4.0, 10.0F, false, true, false);
+		turkey(level, x + 7.2, y, z - 3.6, -10.0F, false, true, false);
+		turkey(level, x + 6.0, y, z - 3.2, 20.0F, false, true, false);
 		// The table: four roast turkeys, as eaten as each can be.
 		int[] bites = {0, 1, 3, 5};
 		for (int i = 0; i < bites.length; i++) {
