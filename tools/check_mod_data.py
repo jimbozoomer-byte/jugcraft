@@ -2909,7 +2909,8 @@ def check_pies(java, main):
         match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
         return float(match.group(1)) if match else None
 
-    expected = {("HearthOvenBlockEntity", "MAX_BURN"): pies["max_burn"], ("HearthOvenBlockEntity", "MAX_HEAT"): pies["max_heat"],
+    expected = {("HearthOvenBlockEntity", "MAX_BURN"): pies["max_burn"], ("HearthOvenBlockEntity", "WOOD_BURN"): pies["wood_burn"],
+                ("HearthOvenBlockEntity", "MAX_HEAT"): pies["max_heat"],
                 ("HearthOvenBlockEntity", "HEAT_TICKS"): pies["heat_ticks"], ("HearthOvenBlockEntity", "COOL_TICKS"): pies["cool_ticks"],
                 ("HearthOvenBlockEntity", "BAKE_HEAT"): pies["bake_heat"], ("HearthOvenBlockEntity", "BAKED"): pies["baked"],
                 ("HearthOvenBlockEntity", "BURNT"): pies["burnt_points"], ("HearthOvenBlock", "LIGHT"): pies["light"],
@@ -2948,7 +2949,10 @@ def check_pies(java, main):
                 err(f"Pie baking needs the words and texture of {item}")
         if not (DATA / "jugcraft" / "recipe" / f"raw_{filling}_pie.json").exists():
             err(f"raw_{filling}_pie needs its recipe")
+    if f'"{pies["wood_tag"].split(":")[1]}"' not in java.get("HearthOvenBlockEntity", ""):
+        err("HearthOvenBlockEntity.WOOD must be the tag PIES['wood_tag'] in tools/agriculture.py")
     for path in (DATA / "jugcraft" / "recipe" / "hearth_oven.json", DATA / "jugcraft" / "recipe" / "pastry_dough.json",
+                 DATA / "jugcraft" / "tags" / "item" / "hearth_oven_wood.json",
                  DATA / "jugcraft" / "loot_table" / "blocks" / "hearth_oven.json", ASSETS / "models" / "block" / "hearth_oven_lit.json",
                  DATA / "jugcraft" / "advancement" / "as_easy_as_pie.json"):
         if not path.exists():

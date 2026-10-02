@@ -92,6 +92,8 @@ def loot(out, write):
 
 def tags(tags):
     tags.add("block", "minecraft:mineable/pickaxe", rid(PIES["oven"]))
+    for wood in PIES["wood"]:
+        tags.add("item", PIES["wood_tag"], wood)
     for filling in PIES["fillings"]:
         tags.add("item", "c:foods", rid(f"{filling}_pie_slice"))
         tags.add("item", "c:foods/pie", rid(f"{filling}_pie_slice"))

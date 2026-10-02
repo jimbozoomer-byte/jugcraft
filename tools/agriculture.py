@@ -1508,13 +1508,15 @@ KNITTING = {"wheel": "spinning_wheel", "wheel_display": "Spinning Wheel", "yarn"
                 "leaf_sweater": {"display": "Autumn Leaf Sweater", "slot": "CHEST", "rows": 5, "asset": "knit_leaf", "motif": "leaf"}}}
 
 
-# Pie baking (fall additions 16): the Hearth Oven (HearthOvenBlock + entity) banks up to `max_burn` ticks of fuel (as a
-# furnace burns it); burning, it heats a degree every `heat_ticks` to `max_heat`, cooling a degree every `cool_ticks` when
-# out. A pie bakes at `bake_heat` or hotter, a point a tick (two at full heat): baked at `baked` points, burnt at `burnt`.
-# Its light when lit is `light`. Pies (PieBlock) have `slices` slices; each filling's slice gives its nutrition and
+# Pie baking (fall additions 16): the Hearth Oven (HearthOvenBlock + entity) banks up to `max_burn` ticks of fuel (coal,
+# charcoal and coke as long as generators burn them, GeneratorFuels; logs, item tag `wood_tag`, `wood_burn` ticks each);
+# burning, it heats a degree every `heat_ticks` to `max_heat`, cooling a degree every `cool_ticks` when out. A pie bakes
+# at `bake_heat` or hotter, a point a tick (two at full heat): baked at `baked` points, burnt at `burnt`. Its light when
+# lit is `light`. Pies (PieBlock) have `slices` slices; each filling's slice gives its nutrition and
 # saturation; a burnt pie's slice gives `burnt_nutrition` and Hunger one time in `burnt_sick_chance`.
 PIES = {"oven": "hearth_oven", "oven_display": "Hearth Oven", "dough": "pastry_dough", "dough_display": "Pastry Dough",
-        "burnt": "burnt_pie", "burnt_display": "Burnt Pie", "max_burn": 3200, "max_heat": 100, "heat_ticks": 2, "cool_ticks": 4,
+        "burnt": "burnt_pie", "burnt_display": "Burnt Pie", "max_burn": 3200, "wood_burn": 300,
+        "wood_tag": "jugcraft:hearth_oven_wood", "wood": ["#minecraft:logs_that_burn"], "max_heat": 100, "heat_ticks": 2, "cool_ticks": 4,
         "bake_heat": 50, "baked": 600, "burnt_points": 1200, "light": 13, "slices": 4, "burnt_nutrition": 1, "burnt_sick_chance": 3,
         # In the order of the PieFilling enum: display name, slice food, filling colour, and the raw pie's ingredients
         # (with the pastry and sugar).

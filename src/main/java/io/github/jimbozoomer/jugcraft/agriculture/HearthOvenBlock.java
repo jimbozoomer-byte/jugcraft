@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The Hearth Oven: a domed brick bread oven on a stone hearth, its arched mouth to the front and a chimney out of the
- * top ({@link HearthOvenBlockEntity}). Use it with fuel to feed the fire (anything that burns in a furnace); with a raw pie
+ * top ({@link HearthOvenBlockEntity}). Use it with fuel to feed the fire (coal, charcoal, coke or a log); with a raw pie
  * to put it in; with an empty hand to take the pie out. Lit, it glows from the mouth and sends sparks and smoke up the
  * chimney; comparators read how far the pie is baked.
  */
@@ -78,7 +78,7 @@ public class HearthOvenBlock extends BaseEntityBlock {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		}
 		boolean pie = HearthOvenBlockEntity.rawFilling(stack) != null;
-		if (!pie && !HearthOvenBlockEntity.isFuel(level, stack)) {
+		if (!pie && !HearthOvenBlockEntity.isFuel(stack)) {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		}
 		if (level.isClientSide()) {

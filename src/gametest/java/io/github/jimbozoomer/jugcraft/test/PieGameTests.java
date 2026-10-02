@@ -30,7 +30,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * In-game tests for pie baking: the Hearth Oven taking fuel (as long as a furnace burns it, up to its bank), lighting while
+ * In-game tests for pie baking: the Hearth Oven taking fuel (coal as long as a generator burns it, logs as long as a
+ * furnace, up to its bank), lighting while
  * it burns, baking a pie only when hot enough, faster at full heat, giving back a raw pie taken out too soon, a baked pie
  * (As Easy as Pie) on time and a burnt pie too late, and reading the pie on a comparator; pies eaten a slice at a time,
  * cut with a carving knife into slices to take away, gone with the last slice, dropping themselves only while whole; a
@@ -68,7 +69,8 @@ public class PieGameTests {
 	}
 
 	/**
-	 * Coal banks a furnace's 1,600 ticks of fire, twice, but not a third time past the bank; the oven lights while it
+	 * Coal banks a generator's 1,600 ticks of fire, twice, but not a third time past the bank; a log burns 300 ticks and dirt
+	 * not at all; the oven lights while it
 	 * burns. A raw pie goes in (not a second); taken out at once it comes back raw. Too cool (below 50) a pie doesn't bake.
 	 */
 	@GameTest(maxTicks = 40)
@@ -83,6 +85,10 @@ public class PieGameTests {
 		int banked = oven.burn();
 		use(helper, baker, pos, fuel);
 		helper.assertTrue(banked == 3200 && oven.burn() == 3200 && fuel.getCount() == 1, "Two coal bank 3,200 ticks; a third doesn't fit: " + banked);
+		ItemStack log = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("oak_log")));
+		ItemStack dirt = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("dirt")));
+		helper.assertTrue(HearthOvenBlockEntity.burnTicks(log) == HearthOvenBlockEntity.WOOD_BURN && !HearthOvenBlockEntity.isFuel(dirt),
+				"A log burns 300 ticks; dirt doesn't burn");
 		ItemStack raw = new ItemStack(item(PieFilling.APPLE.rawPie()), 2);
 		use(helper, baker, pos, raw);
 		use(helper, baker, pos, raw);

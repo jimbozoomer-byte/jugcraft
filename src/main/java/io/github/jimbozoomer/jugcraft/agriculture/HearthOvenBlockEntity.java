@@ -1,8 +1,11 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.machine.GeneratorFuels;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -12,9 +15,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -24,7 +28,9 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A Hearth Oven's fire and its pie. Fuel burns as long as it would in a furnace (up to {@value #MAX_BURN} ticks banked).
+ * A Hearth Oven's fire and its pie. It burns what generators burn, as long ({@link GeneratorFuels}: coal, charcoal, coke),
+ * and logs ({@code jugcraft:hearth_oven_wood}), {@value #WOOD_BURN} ticks each, as in a furnace; up to {@value #MAX_BURN}
+ * ticks banked.
  * While it burns the oven heats a degree every {@value #HEAT_TICKS} ticks to {@value #MAX_HEAT}; out, it cools a degree
  * every {@value #COOL_TICKS}. A pie bakes only while the oven is at {@value #BAKE_HEAT} or hotter: a point a tick, two when
  * it is at {@value #MAX_HEAT}. At {@value #BAKED} points it is baked; left in until {@value #BURNT} it burns. Clients get
@@ -32,6 +38,8 @@ import org.jspecify.annotations.Nullable;
  */
 public class HearthOvenBlockEntity extends BlockEntity {
 	public static final int MAX_BURN = 3200;
+	public static final int WOOD_BURN = 300;
+	public static final TagKey<Item> WOOD = TagKey.create(Registries.ITEM, Jugcraft.id("hearth_oven_wood"));
 	public static final int MAX_HEAT = 100;
 	public static final int HEAT_TICKS = 2;
 	public static final int COOL_TICKS = 4;
@@ -78,8 +86,16 @@ public class HearthOvenBlockEntity extends BlockEntity {
 		return stack.isEmpty() ? null : PieFilling.ofRaw(BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath());
 	}
 
-	public static boolean isFuel(Level level, ItemStack stack) {
-		return !stack.isEmpty() && level.fuelValues().burnDuration(stack) > 0;
+	/** How long one of {@code stack} burns in the oven, in ticks; 0 if it isn't fuel. */
+	public static int burnTicks(ItemStack stack) {
+		if (stack.isEmpty()) {
+			return 0;
+		}
+		return stack.is(WOOD) ? WOOD_BURN : GeneratorFuels.burnTicks(stack);
+	}
+
+	public static boolean isFuel(ItemStack stack) {
+		return burnTicks(stack) > 0;
 	}
 
 	/** Puts one of {@code fuel} on the fire, if there is room for its burn; returns whether it did. */
@@ -87,21 +103,13 @@ public class HearthOvenBlockEntity extends BlockEntity {
 		if (level == null) {
 			return false;
 		}
-		int duration = level.fuelValues().burnDuration(fuel);
+		int duration = burnTicks(fuel);
 		if (duration <= 0 || burn + duration > MAX_BURN) {
 			message(player, "full");
 			return false;
 		}
 		burn += duration;
-		ItemStackTemplate remainder = fuel.getItem().getCraftingRemainder();
 		fuel.consume(1, player);
-		if (remainder != null && !player.getAbilities().instabuild) {
-			// A lava bucket leaves its bucket.
-			ItemStack left = remainder.create();
-			if (!player.getInventory().add(left)) {
-				Block.popResource(level, worldPosition, left);
-			}
-		}
 		level.playSound(null, worldPosition, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.5F, 1.2F);
 		changed(true);
 		return true;
