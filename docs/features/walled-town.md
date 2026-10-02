@@ -85,7 +85,7 @@ Primary specialty and supported player role: a shared hub. It serves traders and
   - Building a chunk levels the ground inside the wall to the town's height. It fills down to the land under it (up to 40 blocks), and clears land and trees above.
   - Outside the wall, the ground blends back to the land's own height over 12 blocks.
   - Blocks are set without neighbour updates or drops, as a structure template places them. Fences, panes, walls and stair corners are worked out by the generator.
-- **The town's place** is chosen once, on a new world's first start (game time 0), after the world spawn is settled (and after Alpine Spawn's move, when that is merged). The heights come from the generator's noise, so no chunk is generated to choose.
+- **The town's place** is chosen once, on a new world's first start (game time 0), after the world spawn is settled (after Alpine Spawn's move to the alpine village). The heights come from the generator's noise, so no chunk is generated to choose.
 - **Switches:**
   - `town.enabled=false` places no town in new worlds.
   - `town.protection=off` lifts protection.

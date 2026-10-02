@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "JigsawPlacerMixin",
+    "MultiNoiseBiomeSourceMixin",
     "OverworldBiomeBuilderMixin",
     "PoolElementStructurePieceMixin",
     "StructureTemplatePoolAccessor",
