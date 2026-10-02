@@ -27,7 +27,8 @@ public final class CropGrowth {
 
 	/**
 	 * Growth speed at {@code pos}: 1, plus 1 for farmland under the plant (3 if moist), plus a quarter
-	 * of that for each of the eight blocks around it; then times {@link #LEGUME_BONUS} next to a legume.
+	 * of that for each of the eight blocks around it; then times {@link #LEGUME_BONUS} next to a legume, and
+	 * times {@link HarvestMoon#GROWTH_BONUS} under the Harvest Moon.
 	 * Unlike vanilla, dense planting is not penalised, so fields and maze walls can be solid.
 	 * Reads at most 17 block states, and only on a random tick.
 	 */
@@ -46,6 +47,9 @@ public final class CropGrowth {
 		}
 		if (!isLegume && nextToLegume(level, pos)) {
 			speed *= LEGUME_BONUS;
+		}
+		if (HarvestMoon.active()) {
+			speed *= HarvestMoon.GROWTH_BONUS;
 		}
 		return speed;
 	}

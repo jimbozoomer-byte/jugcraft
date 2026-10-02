@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.time.Clock;
 import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -28,9 +29,12 @@ public final class HalloweenSeason {
 	private static final DateTimeFormatter MONTH_DAY = DateTimeFormatter.ofPattern("MM-dd");
 	public static final MonthDay DEFAULT_START = MonthDay.of(10, 20);
 	public static final MonthDay DEFAULT_END = MonthDay.of(11, 3);
+	/** The Harvest Moon's day: Halloween itself. */
+	public static final MonthDay DEFAULT_HARVEST_MOON = MonthDay.of(10, 31);
 
 	private static MonthDay start = DEFAULT_START;
 	private static MonthDay end = DEFAULT_END;
+	private static MonthDay harvestMoon = DEFAULT_HARVEST_MOON;
 	private static ZoneId zone = ZoneOffset.UTC;
 	private static Mode mode = Mode.AUTO;
 	private static Clock clock = Clock.systemUTC();
@@ -42,6 +46,7 @@ public final class HalloweenSeason {
 	static void load() {
 		start = monthDay("halloween.start", DEFAULT_START);
 		end = monthDay("halloween.end", DEFAULT_END);
+		harvestMoon = monthDay("halloween.harvest_moon", DEFAULT_HARVEST_MOON);
 		String zoneId = JugcraftConfig.textOption("halloween.timezone");
 		try {
 			zone = ZoneId.of(zoneId);
@@ -77,9 +82,35 @@ public final class HalloweenSeason {
 		};
 	}
 
+	/**
+	 * Which Halloween it is (or was last): the year the current window started, on the server's clock. A window
+	 * running over New Year belongs to the year it started in; with {@code on} outside the dates, this year.
+	 */
+	public static int year() {
+		LocalDate today = LocalDate.now(clock.withZone(zone));
+		boolean wraps = start.isAfter(end);
+		MonthDay day = MonthDay.from(today);
+		return wraps && !day.isBefore(MonthDay.of(1, 1)) && !day.isAfter(end) ? today.getYear() - 1 : today.getYear();
+	}
+
 	/** Whether {@code day} is in the window from {@code from} to {@code to}, both included; it may wrap past New Year. */
 	public static boolean inWindow(MonthDay day, MonthDay from, MonthDay to) {
 		return from.isAfter(to) ? !day.isBefore(from) || !day.isAfter(to) : !day.isBefore(from) && !day.isAfter(to);
+	}
+
+	/** Today's date on the server's clock, in the operator's time zone. */
+	public static MonthDay today() {
+		return MonthDay.now(clock.withZone(zone));
+	}
+
+	/** The Harvest Moon's day ({@code halloween.harvest_moon}, Halloween by default). */
+	public static MonthDay harvestMoon() {
+		return harvestMoon;
+	}
+
+	/** Sets the Harvest Moon's day until the next restart or {@link #reset} (tests). */
+	public static void setHarvestMoon(MonthDay day) {
+		harvestMoon = day;
 	}
 
 	public static Mode mode() {

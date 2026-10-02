@@ -30,6 +30,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -59,7 +60,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>it is between dusk and midnight ({@link #DUSK} to {@link #MIDNIGHT} of the overworld day);</li>
  * <li>the player wears a costume on their head (item tag {@code jugcraft:trick_or_treat_costumes}: a carved
- * pumpkin or one of the costume hats);</li>
+ * pumpkin or one of the costume hats), or has a painted face ({@link FacePaint});</li>
  * <li>a porch light burns within {@link #PORCH_RADIUS} blocks of the door (block tag {@code jugcraft:porch_lights},
  * or any lit hand-carved or giant pumpkin);</li>
  * <li>a villager whose home bed is within {@link #HOME_RADIUS} blocks of the door lives there.</li>
@@ -216,10 +217,11 @@ public final class TrickOrTreat {
 		if (!isWoodenDoor(state)) {
 			return Result.NOT_A_DOOR;
 		}
-		ItemStack head = player.getItemBySlot(EquipmentSlot.HEAD);
-		if (!head.is(COSTUMES)) {
+		// A costume on the head, or a painted face (FacePaint).
+		if (!FacePaint.inCostume(player)) {
 			return Result.NO_COSTUME;
 		}
+		ItemStack head = player.getItemBySlot(EquipmentSlot.HEAD);
 		if (!porchLight(level, door)) {
 			return Result.NO_PORCH_LIGHT;
 		}
@@ -244,6 +246,7 @@ public final class TrickOrTreat {
 			return Result.TRICK;
 		}
 		treat(player, level, door, host, head);
+		CandyBagItem.recordHomes(candyBag(player), night, data.count(night, player.getUUID()));
 		if (data.count(night, player.getUUID()) == FULL_BAG) {
 			award(player, "full_bag");
 		}
@@ -291,9 +294,11 @@ public final class TrickOrTreat {
 		if (head.is(COSTUME_HATS) && level.getRandom().nextFloat() < COSTUME_BONUS_CHANCE) {
 			treats.addAll(table.getRandomItems(params));
 		}
+		ItemStack bag = candyBag(player);
 		for (ItemStack stack : treats) {
 			player.sendSystemMessage(Component.translatable("message.jugcraft.trick_or_treat.treat", stack.getHoverName(), stack.getCount()));
-			if (!player.getInventory().add(stack)) {
+			CandyBagItem.fill(bag, stack); // Into the bag first; what does not fit goes to the inventory.
+			if (!stack.isEmpty() && !player.getInventory().add(stack)) {
 				Block.popResource(level, door, stack);
 			}
 		}
@@ -331,6 +336,22 @@ public final class TrickOrTreat {
 	}
 
 	/** Grants a Jugcraft advancement whose one criterion, {@code done}, is only ever granted from code. */
+	/** The Candy Bag the player is using: in a hand, else the first in their inventory, else none (an empty stack). */
+	public static ItemStack candyBag(ServerPlayer player) {
+		Item bag = JugcraftAgriculture.item("candy_bag");
+		for (InteractionHand hand : InteractionHand.values()) {
+			if (player.getItemInHand(hand).is(bag)) {
+				return player.getItemInHand(hand);
+			}
+		}
+		for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+			if (player.getInventory().getItem(slot).is(bag)) {
+				return player.getInventory().getItem(slot);
+			}
+		}
+		return ItemStack.EMPTY;
+	}
+
 	public static void award(ServerPlayer player, String id) {
 		AdvancementHolder advancement = player.level().getServer().getAdvancements().get(Jugcraft.id(id));
 		if (advancement != null) {

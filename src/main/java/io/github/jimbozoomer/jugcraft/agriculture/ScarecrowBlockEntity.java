@@ -56,16 +56,24 @@ public class ScarecrowBlockEntity extends BlockEntity {
 		return light(head) > 0;
 	}
 
-	/** How much light a head gives: a jack o'lantern's, a lit hand-carved pumpkin's glow, or none. */
+	/**
+	 * How much light a head gives: a jack o'lantern's, a lit hand-carved pumpkin's glow (capped at a soul torch's light
+	 * when the flame is a soul torch's), or none.
+	 */
 	public static int light(ItemStack head) {
 		if (head.is(Items.JACK_O_LANTERN)) {
 			return 15;
 		}
 		if (head.getItem() instanceof BlockItem item && item.getBlock() instanceof CarvedPumpkinBlock
 				&& Boolean.TRUE.equals(head.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY).get(CarvedPumpkinBlock.LIT))) {
-			return head.getOrDefault(JugcraftAgriculture.CARVING, PumpkinCarving.BLANK).glow();
+			return CarvedPumpkinBlock.flameLight(head.getOrDefault(JugcraftAgriculture.CARVING, PumpkinCarving.BLANK).glow(), soul(head));
 		}
 		return 0;
+	}
+
+	/** Whether a hand-carved head is lit by a soul torch. */
+	public static boolean soul(ItemStack head) {
+		return Boolean.TRUE.equals(head.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY).get(CarvedPumpkinBlock.SOUL));
 	}
 
 	/** Breaking the scarecrow drops its head. */

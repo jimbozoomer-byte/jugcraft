@@ -48,11 +48,15 @@ def assets(root, write, lang):
     # The block is a plain vanilla pumpkin (vanilla's model and textures, so resource packs apply); the
     # carving is drawn over it by the client. Every state looks the same.
     write(root / "blockstates" / f"{block}.json", {"variants": {"": {"model": "minecraft:block/pumpkin"}}})
-    for icon in (block, f"{block}_lit"):
+    for icon in (block, f"{block}_lit", f"{block}_soul"):
         write(root / "models" / "item" / f"{icon}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{icon}")}})
+    # Lit with a torch, or with a soul torch (blue).
+    lit = {"type": "minecraft:select", "property": "minecraft:block_state", "block_state_property": "soul",
+           "cases": [{"when": "true", "model": {"type": "minecraft:model", "model": rid(f"item/{block}_soul")}}],
+           "fallback": {"type": "minecraft:model", "model": rid(f"item/{block}_lit")}}
     write(root / "items" / f"{block}.json", {"model": {
         "type": "minecraft:select", "property": "minecraft:block_state", "block_state_property": "lit",
-        "cases": [{"when": "true", "model": {"type": "minecraft:model", "model": rid(f"item/{block}_lit")}}],
+        "cases": [{"when": "true", "model": lit}],
         "fallback": {"type": "minecraft:model", "model": rid(f"item/{block}")}}})
     write(root / "models" / "item" / f"{knife}.json", {"parent": "minecraft:item/handheld", "textures": {"layer0": rid(f"item/{knife}")}})
     write(root / "items" / f"{knife}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{knife}")}})
@@ -64,13 +68,14 @@ def assets(root, write, lang):
 
 
 def loot(out, write):
-    # Like vanilla's bee nest: the item keeps the design (block entity component) and whether a torch is inside.
+    # Like vanilla's bee nest: the item keeps the design (block entity component) and whether a torch (or a soul
+    # torch) is inside.
     block = CARVING["block"]
     write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{
         "condition": {"type": "minecraft:survives_explosion"},
         "entries": [{"type": "minecraft:item", "name": rid(block), "modifier": [
             {"type": "minecraft:copy_components", "include": [rid("carving")], "source": "block_entity"},
-            {"type": "minecraft:copy_state", "block": rid(block), "properties": ["lit"]}]}],
+            {"type": "minecraft:copy_state", "block": rid(block), "properties": ["lit", "soul"]}]}],
         "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
 
 

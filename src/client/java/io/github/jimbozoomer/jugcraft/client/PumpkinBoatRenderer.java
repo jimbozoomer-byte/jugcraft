@@ -79,7 +79,7 @@ public class PumpkinBoatRenderer extends EntityRenderer<PumpkinBoat, PumpkinBoat
 			for (int i = 0; i < 4; i++) {
 				state.faces[i] = data.face(i);
 			}
-			state.carving = CarvingTextures.getGiant(state.faces, state.lit);
+			state.carving = CarvingTextures.getGiant(state.faces, state.lit, false);
 		}
 	}
 
