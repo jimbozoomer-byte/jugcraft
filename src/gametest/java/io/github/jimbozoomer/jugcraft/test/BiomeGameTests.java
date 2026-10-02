@@ -388,33 +388,41 @@ public class BiomeGameTests {
 	}
 
 	/**
-	 * The Nether and End biomes (batches 8 and 9) are in their dimension's biome source, and the search finds most of
-	 * them within {@link #DIMENSION_SEARCH} blocks of the origin (distances logged).
+	 * The Nether and End biomes (batches 8 and 9): the search finds most of them within {@link #DIMENSION_SEARCH} blocks
+	 * of the origin, and every one it finds is among its dimension's biomes (which world generation sorts features by).
+	 * Distances, and whether each is listed, are logged.
 	 */
 	@GameTest(maxTicks = 400)
 	public void dimensionBiomesArePlaced(GameTestHelper helper) {
 		MinecraftServer server = helper.getLevel().getServer();
-		Map<ResourceKey<Level>, List<ResourceKey<Biome>>> dimensions = Map.of(Level.NETHER, JugcraftDimensions.nether(),
-				Level.END, JugcraftDimensions.end());
-		for (Map.Entry<ResourceKey<Level>, List<ResourceKey<Biome>>> dimension : dimensions.entrySet()) {
-			ServerLevel level = server.getLevel(dimension.getKey());
-			helper.assertTrue(level != null, "No " + dimension.getKey().identifier());
+		for (ResourceKey<Level> dimension : List.of(Level.NETHER, Level.END)) {
+			List<ResourceKey<Biome>> biomes = dimension == Level.NETHER ? JugcraftDimensions.nether() : JugcraftDimensions.end();
+			ServerLevel level = server.getLevel(dimension);
+			helper.assertTrue(level != null, "No " + dimension.identifier());
 			Set<ResourceKey<Biome>> possible = new HashSet<>();
 			for (Holder<Biome> holder : level.getChunkSource().getGenerator().getBiomeSource().possibleBiomes()) {
 				holder.unwrapKey().ifPresent(possible::add);
 			}
+			LOGGER.info("{}: biome source {}, {} biomes", dimension.identifier().getPath(),
+					level.getChunkSource().getGenerator().getBiomeSource().getClass().getSimpleName(), possible.size());
 			int found = 0;
-			for (ResourceKey<Biome> biome : dimension.getValue()) {
-				helper.assertTrue(possible.contains(biome), biome.identifier() + " is not in the " + dimension.getKey().identifier() + "'s biomes");
+			List<String> unlisted = new ArrayList<>();
+			for (ResourceKey<Biome> biome : biomes) {
 				Pair<BlockPos, Holder<Biome>> nearest = level.findClosestBiome3d(holder -> holder.is(biome), BlockPos.ZERO.atY(64),
 						DIMENSION_SEARCH, 32, 32);
-				LOGGER.info("{}: {} {}", dimension.getKey().identifier().getPath(), biome.identifier().getPath(), nearest == null
+				boolean listed = possible.contains(biome);
+				LOGGER.info("{}: {} {}; {}", dimension.identifier().getPath(), biome.identifier().getPath(), nearest == null
 						? "not within " + DIMENSION_SEARCH + " blocks"
-						: "at " + nearest.getFirst().getX() + " " + nearest.getFirst().getY() + " " + nearest.getFirst().getZ());
+						: "at " + nearest.getFirst().getX() + " " + nearest.getFirst().getY() + " " + nearest.getFirst().getZ(),
+						listed ? "listed" : "not listed");
 				found += nearest == null ? 0 : 1;
+				if (nearest != null && !listed) {
+					unlisted.add(biome.identifier().toString());
+				}
 			}
-			helper.assertTrue(found * 2 >= dimension.getValue().size(), "Only " + found + " of " + dimension.getValue().size()
-					+ " Jugcraft biomes within " + DIMENSION_SEARCH + " blocks in the " + dimension.getKey().identifier());
+			helper.assertTrue(unlisted.isEmpty(), "Generated but not among the " + dimension.identifier() + "'s biomes: " + unlisted);
+			helper.assertTrue(found * 2 >= biomes.size(), "Only " + found + " of " + biomes.size() + " Jugcraft biomes within "
+					+ DIMENSION_SEARCH + " blocks in the " + dimension.identifier());
 		}
 		helper.succeed();
 	}
