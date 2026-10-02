@@ -119,7 +119,7 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 | Pickled Peppers | 4 peppers, Cider Vinegar | 2 food | Fire Resistance, 15 s |
 | Corn Relish | 2 corn, a pepper, an onion, Cider Vinegar | 3 food | |
 
-28. **Cider Vinegar:** Aged Cider soured on Apple Pomace in the Cooking Pot (a bottle a batch). Pickling with it leaves its bottle in the pot.
+28. **Cider Vinegar:** Aged Cider soured on Apple Pomace in the Cooking Pot (a bottle a batch). Pickling with it leaves its bottle in one of the pot's result slots, where a hopper can take it.
 29. **A jar holds four servings.** Eat it like food, a serving at a time; the last serving leaves the empty Mason Jar to fill again. Its tooltip says how many servings are left and whether it is sealed.
 30. **Unsealed jars spoil.** Fresh from the pot a jar is unsealed: it keeps three days from when it was cooked. After that a serving is 1 food, with Hunger and Nausea ("Ugh! That jar had gone off"). An opened jar also keeps three days from when it was opened.
 
@@ -637,7 +637,7 @@ Found by CI and fixed before this record:
 - The first screenshots showed the kettle under a cloud of steam; the steam is now a few small wisps (`b801521`).
 
 The 8 new game tests (`PantryGameTests`):
-1. jam cooks into a jar in the Cooking Pot, full, unsealed and stamped with when it was cooked; beets pickle in cider vinegar, and the vinegar's bottle stays in the pot;
+1. jam cooks into a jar in the Cooking Pot, full, unsealed and stamped with when it was cooked; beets pickle in cider vinegar, and the vinegar's bottle goes to a result slot, not back among the ingredients;
 2. a jar is eaten a serving at a time (2 food each for the jelly), the last leaving the empty jar; the jelly gives Night Vision;
 3. an unsealed jar over three days old has spoiled (1 food, Hunger and Nausea); a sealed jar of the same age is fine, and opening it starts its days;
 4. sealed jars of a preserve stack, unsealed jars from different batches don't;

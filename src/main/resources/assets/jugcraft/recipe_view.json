@@ -611,6 +611,24 @@
           ],
           "extra": [],
           "ticks": 80
+        },
+        {
+          "in": [
+            [
+              "jugcraft:silicon",
+              4
+            ],
+            [
+              "jugcraft:phosphate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:silicon_boule",
+            1
+          ],
+          "extra": [],
+          "ticks": 400
         }
       ]
     },
@@ -2642,6 +2660,246 @@
         {
           "in": [
             [
+              "#jugcraft:larch_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:larch_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:maple_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:maple_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:aspen_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:aspen_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:fir_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:fir_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:dead_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:dead_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:jacaranda_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jacaranda_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:willow_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:willow_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:palm_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:palm_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:cypress_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cypress_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:redwood_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:redwood_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:eucalyptus_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:eucalyptus_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:mahogany_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:mahogany_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
               "#minecraft:planks",
               1
             ]
@@ -2941,66 +3199,286 @@
             ]
           ],
           "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:larch_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:larch_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:larch_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:maple_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:maple_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:maple_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:aspen_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:aspen_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:aspen_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:fir_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:fir_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:fir_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jacaranda_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jacaranda_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:jacaranda_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:willow_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:willow_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:willow_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:palm_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:palm_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:palm_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:cypress_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cypress_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:cypress_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:redwood_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:redwood_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:redwood_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:eucalyptus_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:eucalyptus_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:eucalyptus_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:mahogany_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:mahogany_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:mahogany_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
         }
       ]
     }
   ],
   "fluid_machines": [
-    {
-      "block": "jugcraft:oil_sand_extractor",
-      "type": "oil_sand_extraction",
-      "recipes": [
-        {
-          "items": [
-            [
-              "jugcraft:oil_sand",
-              1
-            ]
-          ],
-          "fluids": [
-            [
-              "minecraft:water",
-              250
-            ]
-          ],
-          "fluid_results": [
-            [
-              "jugcraft:crude_oil",
-              500
-            ]
-          ],
-          "results": [
-            [
-              "minecraft:sand",
-              1
-            ]
-          ],
-          "ticks": 160
-        },
-        {
-          "items": [
-            [
-              "jugcraft:bitumen",
-              1
-            ]
-          ],
-          "fluids": [
-            [
-              "minecraft:water",
-              100
-            ]
-          ],
-          "fluid_results": [
-            [
-              "jugcraft:crude_oil",
-              150
-            ]
-          ],
-          "results": [],
-          "ticks": 80
-        }
-      ]
-    },
     {
       "block": "jugcraft:distillation_tower",
       "type": "distillation",
@@ -3033,6 +3511,28 @@
           ],
           "results": [],
           "ticks": 100
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:heavy_fuel_oil",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:lubricant",
+              400
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:asphalt_binder",
+              2
+            ]
+          ],
+          "ticks": 120
         }
       ]
     },
@@ -3073,33 +3573,31 @@
           ],
           "results": [],
           "ticks": 160
-        }
-      ]
-    },
-    {
-      "block": "jugcraft:vacuum_distillation_unit",
-      "type": "vacuum_distillation",
-      "recipes": [
+        },
         {
-          "items": [],
+          "items": [
+            [
+              "jugcraft:cracking_catalyst",
+              1
+            ]
+          ],
           "fluids": [
             [
-              "jugcraft:heavy_fuel_oil",
+              "jugcraft:naphtha",
               1000
             ]
           ],
           "fluid_results": [
             [
-              "jugcraft:lubricant",
-              400
-            ]
-          ],
-          "results": [
+              "jugcraft:gasoline",
+              900
+            ],
             [
-              "jugcraft:asphalt_binder",
-              2
+              "jugcraft:refinery_gas",
+              100
             ]
           ],
+          "results": [],
           "ticks": 120
         }
       ]
@@ -3162,60 +3660,6 @@
       ]
     },
     {
-      "block": "jugcraft:chemical_mixer",
-      "type": "chemical_mixing",
-      "recipes": [
-        {
-          "items": [
-            [
-              "minecraft:sand",
-              2
-            ],
-            [
-              "minecraft:dried_kelp",
-              1
-            ]
-          ],
-          "fluids": [
-            [
-              "minecraft:water",
-              1000
-            ]
-          ],
-          "fluid_results": [
-            [
-              "jugcraft:fracking_fluid",
-              1000
-            ]
-          ],
-          "results": [],
-          "ticks": 80
-        },
-        {
-          "items": [
-            [
-              "jugcraft:salt",
-              2
-            ]
-          ],
-          "fluids": [
-            [
-              "minecraft:water",
-              1000
-            ]
-          ],
-          "fluid_results": [
-            [
-              "jugcraft:brine",
-              1000
-            ]
-          ],
-          "results": [],
-          "ticks": 60
-        }
-      ]
-    },
-    {
       "block": "jugcraft:electrolytic_cell",
       "type": "electrolysis",
       "recipes": [
@@ -3264,6 +3708,27 @@
             ]
           ],
           "ticks": 160
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:oxygen",
+              250
+            ],
+            [
+              "jugcraft:hydrogen",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 800
         }
       ]
     },
@@ -3511,6 +3976,516 @@
           ],
           "results": [],
           "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "#jugcraft:fermentable",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:bioethanol",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "minecraft:sand",
+              2
+            ],
+            [
+              "minecraft:dried_kelp",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:fracking_fluid",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:salt",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:brine",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 60
+        },
+        {
+          "items": [
+            [
+              "minecraft:copper_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_copper_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "minecraft:deepslate_copper_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_copper_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "minecraft:iron_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_iron_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "minecraft:deepslate_iron_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_iron_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "minecraft:gold_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_gold_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "minecraft:deepslate_gold_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_gold_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:tin_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_tin_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:deepslate_tin_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_tin_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:zinc_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_zinc_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:deepslate_zinc_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_zinc_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:lead_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_lead_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:deepslate_lead_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_lead_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:silver_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_silver_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:deepslate_silver_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_silver_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:nickel_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_nickel_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:deepslate_nickel_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_nickel_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:tungsten_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_tungsten_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:deepslate_tungsten_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_tungsten_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:uranium_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_uranium_ore",
+              4
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:deepslate_uranium_ore",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_uranium_ore",
+              4
+            ]
+          ],
+          "ticks": 160
         }
       ]
     },
@@ -3670,33 +4645,77 @@
             ]
           ],
           "ticks": 80
-        }
-      ]
-    },
-    {
-      "block": "jugcraft:catalytic_reformer",
-      "type": "reforming",
-      "recipes": [
+        },
         {
-          "items": [],
+          "items": [
+            [
+              "jugcraft:oil_sand",
+              1
+            ]
+          ],
           "fluids": [
             [
-              "jugcraft:naphtha",
-              1000
+              "minecraft:water",
+              250
             ]
           ],
           "fluid_results": [
             [
-              "jugcraft:gasoline",
-              900
-            ],
+              "jugcraft:crude_oil",
+              500
+            ]
+          ],
+          "results": [
             [
-              "jugcraft:refinery_gas",
+              "minecraft:sand",
+              1
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:bitumen",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
               100
             ]
           ],
+          "fluid_results": [
+            [
+              "jugcraft:crude_oil",
+              150
+            ]
+          ],
           "results": [],
-          "ticks": 120
+          "ticks": 80
+        },
+        {
+          "items": [
+            [
+              "minecraft:mud",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "results": [
+            [
+              "minecraft:clay_ball",
+              4
+            ]
+          ],
+          "ticks": 60
         }
       ]
     }

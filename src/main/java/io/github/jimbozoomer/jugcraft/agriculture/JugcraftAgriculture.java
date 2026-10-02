@@ -1,10 +1,18 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -52,6 +60,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -73,14 +82,17 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.TallFlowerBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.TintedParticleLeavesBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -126,6 +138,29 @@ public final class JugcraftAgriculture {
 	public static final ResourceKey<Feature> APPLE_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("apple_tree"));
 	public static final TreeGrower APPLE_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_apple", WeightedList.of(APPLE_TREE),
 			WeightedList.of(), WeightedList.of(), APPLE_TREE);
+	/** Trees grown from their saplings (data/jugcraft/worldgen/feature/<tree>.json, tools/trees.py). */
+	public static final TreeGrower LARCH_GROWER = grower("larch");
+	public static final TreeGrower MAPLE_GROWER = grower("maple");
+	public static final TreeGrower ASPEN_GROWER = grower("aspen");
+	public static final TreeGrower FIR_GROWER = grower("fir");
+	public static final TreeGrower JACARANDA_GROWER = grower("jacaranda");
+	public static final TreeGrower WILLOW_GROWER = grower("willow");
+	public static final TreeGrower PALM_GROWER = grower("palm");
+	public static final TreeGrower CYPRESS_GROWER = grower("cypress");
+	public static final TreeGrower REDWOOD_GROWER = grower("redwood");
+	public static final TreeGrower EUCALYPTUS_GROWER = grower("eucalyptus");
+	public static final TreeGrower MAHOGANY_GROWER = grower("mahogany");
+	/** Giant trees, which four saplings in a square grow ({@link GiantSaplingBlock}; agriculture.TREES "giant"). */
+	public static final TreeGrower GIANT_REDWOOD_GROWER = grower("giant_redwood");
+	public static final TreeGrower GIANT_MAHOGANY_GROWER = grower("giant_mahogany");
+	private static final Map<String, TreeGrower> GIANT_GROWERS = Map.of("redwood", GIANT_REDWOOD_GROWER, "mahogany", GIANT_MAHOGANY_GROWER);
+	/** The dead tree, which no sapling grows; it stands in the Dead Forest (and game tests grow it). */
+	public static final TreeGrower DEAD_TREE_GROWER = grower("dead_tree");
+	/** Seasonal trees' leaf schedules, in season days. Keep in sync with TREES in tools/agriculture.py. */
+	public static final SeasonalLeavesBlock.Schedule LARCH_LEAVES = new SeasonalLeavesBlock.Schedule(91, 268, 318);
+	public static final SeasonalLeavesBlock.Schedule MAPLE_LEAVES = new SeasonalLeavesBlock.Schedule(95, 265, 310);
+	public static final SeasonalLeavesBlock.Schedule ASPEN_LEAVES = new SeasonalLeavesBlock.Schedule(96, 258, 302);
+	public static final SeasonalLeavesBlock.Schedule WILLOW_LEAVES = new SeasonalLeavesBlock.Schedule(88, 283, 328);
 
 	private static final ResourceKey<ContextIntProvider> COMPOST_LOW = ContextIntProviders.COMPOSTABLE_LOW;
 	private static final ResourceKey<ContextIntProvider> COMPOST_MEDIUM = ContextIntProviders.COMPOSTABLE_MEDIUM;
@@ -337,6 +372,32 @@ public final class JugcraftAgriculture {
 				.sound(SoundType.WET_GRASS));
 		registerChestnutTree();
 		registerAppleTree();
+		// Generated trees' seasonal leaves start in today's look (tools/trees.py DECORATOR).
+		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("seasonal_leaves"), SeasonalLeavesDecorator.TYPE);
+		registerTree("larch", "larch_needles", LARCH_GROWER, LARCH_LEAVES, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
+				MapColor.TERRACOTTA_RED, MapColor.TERRACOTTA_ORANGE);
+		registerTree("maple", "maple_leaves", MAPLE_GROWER, MAPLE_LEAVES, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				MapColor.COLOR_GRAY, MapColor.TERRACOTTA_PINK);
+		registerTree("aspen", "aspen_leaves", ASPEN_GROWER, ASPEN_LEAVES, Blocks.BIRCH_SAPLING, Blocks.BIRCH_LEAVES,
+				MapColor.QUARTZ, MapColor.SAND);
+		registerTree("fir", "fir_needles", FIR_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
+				MapColor.PODZOL, MapColor.WOOD);
+		registerTree("jacaranda", "jacaranda_leaves", JACARANDA_GROWER, null, Blocks.CHERRY_SAPLING, Blocks.CHERRY_LEAVES,
+				MapColor.TERRACOTTA_GRAY, MapColor.TERRACOTTA_PINK);
+		registerTree("willow", "willow_leaves", WILLOW_GROWER, WILLOW_LEAVES, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				MapColor.TERRACOTTA_BROWN, MapColor.TERRACOTTA_YELLOW);
+		registerTree("palm", "palm_fronds", PALM_GROWER, null, Blocks.JUNGLE_SAPLING, Blocks.JUNGLE_LEAVES,
+				MapColor.TERRACOTTA_LIGHT_GRAY, MapColor.SAND);
+		registerTree("cypress", "cypress_leaves", CYPRESS_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
+				MapColor.TERRACOTTA_RED, MapColor.TERRACOTTA_ORANGE);
+		registerTree("redwood", "redwood_needles", REDWOOD_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
+				MapColor.TERRACOTTA_BROWN, MapColor.TERRACOTTA_RED);
+		registerTree("eucalyptus", "eucalyptus_leaves", EUCALYPTUS_GROWER, null, Blocks.JUNGLE_SAPLING, Blocks.JUNGLE_LEAVES,
+				MapColor.TERRACOTTA_GREEN, MapColor.TERRACOTTA_WHITE);
+		registerTree("mahogany", "mahogany_leaves", MAHOGANY_GROWER, null, Blocks.JUNGLE_SAPLING, Blocks.JUNGLE_LEAVES,
+				MapColor.TERRACOTTA_GRAY, MapColor.CRIMSON_STEM);
+		registerWoodSet("dead", MapColor.COLOR_LIGHT_GRAY, MapColor.TERRACOTTA_LIGHT_GRAY);
+		registerWildPlants();
 
 		// Seeds, produce and food.
 		food("corn", 3, 0.6F, COMPOST_MEDIUM);
@@ -909,7 +970,7 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(PumpkinCrateBlockEntity::new, crate).build());
 		Block bale = registerBlock("hay_bale_seat", HayBaleSeatBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
 				.strength(0.5F).sound(SoundType.GRASS).noOcclusion().ignitedByLava());
-		SEAT = entity("seat", EntityType.Builder.<Seat>of(Seat::new, MobCategory.MISC).noLootTable().noSummon()
+		SEAT = entity("chair_seat", EntityType.Builder.<Seat>of(Seat::new, MobCategory.MISC).noLootTable().noSummon()
 				.sized(0.5F, 0.1F).passengerAttachments(0.0F).clientTrackingRange(10).updateInterval(20));
 		Block wreath = registerBlock("autumn_wreath", AutumnWreathBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
 				.strength(0.2F).sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
@@ -1406,48 +1467,165 @@ public final class JugcraftAgriculture {
 	}
 
 	/**
-	 * The chestnut tree: its sapling (planted from a chestnut), fruiting leaves and a small wood set.
-	 * Logs and wood strip with any axe; everything wooden burns like oak.
+	 * The biomes branch's wild plants (tools/plants.py), from the generated {@code /jugcraft/plants.json}: small flowers
+	 * (with their potted forms), tall flowers and tall plants, flowerbeds (ground cover, {@link GroundCoverBlock}), water
+	 * plants ({@link WaterPlantBlock}) and plants floating on water ({@link FloatingPlantBlock}), copying a vanilla plant's
+	 * properties. They compost and burn like vanilla's flowers.
 	 */
+	private static void registerWildPlants() {
+		JsonArray plants;
+		try (InputStream stream = JugcraftAgriculture.class.getResourceAsStream("/jugcraft/plants.json")) {
+			if (stream == null) {
+				throw new IOException("missing");
+			}
+			plants = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).getAsJsonArray();
+		} catch (IOException | RuntimeException e) {
+			throw new IllegalStateException("Could not read /jugcraft/plants.json", e);
+		}
+		FlammableBlockRegistry fire = FlammableBlockRegistry.getDefaultInstance();
+		for (JsonElement element : plants) {
+			JsonObject plant = element.getAsJsonObject();
+			String id = plant.get("id").getAsString();
+			Block block = switch (plant.get("kind").getAsString()) {
+				case "flower" -> {
+					Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.getOrThrow(ResourceKey.create(Registries.MOB_EFFECT,
+							Identifier.parse(plant.get("effect").getAsString())));
+					float seconds = plant.get("seconds").getAsFloat();
+					int light = plant.has("light") ? plant.get("light").getAsInt() : 0;
+					Block flower = registerBlock(id, props -> new FlowerBlock(effect, seconds, props), BlockBehaviour.Properties.ofFullCopy(Blocks.DANDELION)
+							.lightLevel(state -> light));
+					registerItem(id, props -> new BlockItem(flower, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					registerBlock("potted_" + id, props -> new FlowerPotBlock(flower, props), BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_DANDELION));
+					yield flower;
+				}
+				case "tall_flower" -> {
+					Block tall = registerBlock(id, TallFlowerBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LILAC));
+					registerItem(id, props -> new DoubleHighBlockItem(tall, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					yield tall;
+				}
+				case "flowerbed" -> {
+					Block bed = registerBlock(id, GroundCoverBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.PINK_PETALS));
+					registerItem(id, props -> new BlockItem(bed, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_LOW), SEEDS_TAB);
+					yield bed;
+				}
+				case "tall_plant" -> {
+					Block tall = registerBlock(id, DoublePlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LILAC));
+					registerItem(id, props -> new DoubleHighBlockItem(tall, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					yield tall;
+				}
+				case "floor_plant" -> {
+					int light = plant.has("light") ? plant.get("light").getAsInt() : 0;
+					Block glow = registerBlock(id, FloorPlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM)
+							.lightLevel(state -> light));
+					registerItem(id, props -> new BlockItem(glow, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					yield glow;
+				}
+				case "dune_plant" -> {
+					Block tall = registerBlock(id, DunePlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS));
+					registerItem(id, props -> new DoubleHighBlockItem(tall, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					yield tall;
+				}
+				case "water_plant" -> {
+					Block water = registerBlock(id, WaterPlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SEAGRASS));
+					registerItem(id, props -> new BlockItem(water, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_LOW), SEEDS_TAB);
+					yield water;
+				}
+				case "surface" -> {
+					Block floating = registerBlock(id, FloatingPlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LILY_PAD));
+					registerItem(id, props -> new PlaceOnWaterBlockItem(floating, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					yield floating;
+				}
+				default -> throw new IllegalStateException("Unknown wild plant kind in /jugcraft/plants.json: " + plant);
+			};
+			if (!(block instanceof WaterPlantBlock) && !(block instanceof FloatingPlantBlock)) {
+				fire.add(block, 60, 100);
+			}
+		}
+	}
+
+	/** The chestnut tree: its sapling (planted from a chestnut), fruiting leaves and a wood set. */
 	private static void registerChestnutTree() {
 		registerBlock("chestnut_sapling", props -> new SaplingBlock(CHESTNUT_GROWER, props) {
 		}, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING));
 		Block leaves = registerBlock("chestnut_leaves", ChestnutLeavesBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)
 				.mapColor(MapColor.PLANT));
 		registerItem("chestnut_leaves", props -> new BlockItem(leaves, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
+		registerWoodSet("chestnut", MapColor.TERRACOTTA_BROWN, MapColor.COLOR_BROWN);
+		FlammableBlockRegistry.getDefaultInstance().add(leaves, 30, 60);
+	}
 
-		BlockBehaviour.Properties log = BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG).mapColor(MapColor.TERRACOTTA_BROWN);
-		Block chestnutLog = registerBlock("chestnut_log", props -> new StrippableLogBlock(props, "stripped_chestnut_log"), log);
-		Block wood = registerBlock("chestnut_wood", props -> new StrippableLogBlock(props, "stripped_chestnut_wood"),
-				BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WOOD).mapColor(MapColor.TERRACOTTA_BROWN));
-		Block strippedLog = registerBlock("stripped_chestnut_log", RotatedPillarBlock::new,
-				BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_LOG).mapColor(MapColor.COLOR_BROWN));
-		Block strippedWood = registerBlock("stripped_chestnut_wood", RotatedPillarBlock::new,
-				BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_WOOD).mapColor(MapColor.COLOR_BROWN));
-		Block planks = registerBlock("chestnut_planks", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).mapColor(MapColor.COLOR_BROWN));
-		Block stairs = registerBlock("chestnut_stairs", props -> new StairBlock(planks.defaultBlockState(), props) {
-		}, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_STAIRS).mapColor(MapColor.COLOR_BROWN));
-		Block slab = registerBlock("chestnut_slab", SlabBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SLAB).mapColor(MapColor.COLOR_BROWN));
-		Block fence = registerBlock("chestnut_fence", FenceBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE).mapColor(MapColor.COLOR_BROWN));
-		Block gate = registerBlock("chestnut_fence_gate", props -> new FenceGateBlock(WoodType.OAK, props),
-				BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE).mapColor(MapColor.COLOR_BROWN));
+	private static TreeGrower grower(String shape) {
+		ResourceKey<Feature> tree = ResourceKey.create(Registries.FEATURE, Jugcraft.id(shape));
+		return new TreeGrower(Jugcraft.MOD_ID + "_" + shape, WeightedList.of(tree), WeightedList.of(), WeightedList.of(), tree);
+	}
+
+	/**
+	 * A tree with its own sapling and leaves, and its wood set (agriculture.TREES and WOOD_SETS in tools). Leaves with a
+	 * {@code schedule} follow the seasons ({@link SeasonalLeavesBlock}); null: evergreen. The sapling and leaves copy
+	 * {@code saplingLike} and {@code leavesLike} (sound, strength); leaves burn like vanilla leaves. A tree in
+	 * GIANT_GROWERS has a {@link GiantSaplingBlock}: four in a square grow its giant.
+	 */
+	private static void registerTree(String tree, String leavesId, TreeGrower grower, SeasonalLeavesBlock.Schedule schedule,
+			Block saplingLike, Block leavesLike, MapColor bark, MapColor inner) {
+		TreeGrower giant = GIANT_GROWERS.get(tree);
+		Block sapling = registerBlock(tree + "_sapling", giant == null ? props -> new SaplingBlock(grower, props) {
+		} : props -> new GiantSaplingBlock(grower, giant, props), BlockBehaviour.Properties.ofFullCopy(saplingLike));
+		registerItem(tree + "_sapling", props -> new BlockItem(sapling, props), new Item.Properties().useBlockDescriptionPrefix()
+				.compostable(COMPOST_LOW), SEEDS_TAB);
+		Function<BlockBehaviour.Properties, Block> leavesFactory = schedule == null
+				? props -> new TintedParticleLeavesBlock(0.01F, props)
+				: props -> new SeasonalLeavesBlock(schedule, props);
+		Block leaves = registerBlock(leavesId, leavesFactory, BlockBehaviour.Properties.ofFullCopy(leavesLike).mapColor(MapColor.PLANT));
+		registerItem(leavesId, props -> new BlockItem(leaves, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
+		registerWoodSet(tree, bark, inner);
+		FlammableBlockRegistry.getDefaultInstance().add(leaves, 30, 60);
+	}
+
+	/**
+	 * A wood set like oak's: log, wood and their stripped forms, planks, stairs, slab, fence and fence gate, with block
+	 * items in the building tab. Logs and wood strip with any axe; everything wooden burns like oak. {@code bark} is the
+	 * map colour of the log and wood, {@code inner} of the stripped forms and everything made from planks.
+	 */
+	private static void registerWoodSet(String wood, MapColor bark, MapColor inner) {
+		Block log = registerBlock(wood + "_log", props -> new StrippableLogBlock(props, "stripped_" + wood + "_log"),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG).mapColor(bark));
+		Block woodBlock = registerBlock(wood + "_wood", props -> new StrippableLogBlock(props, "stripped_" + wood + "_wood"),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WOOD).mapColor(bark));
+		Block strippedLog = registerBlock("stripped_" + wood + "_log", RotatedPillarBlock::new,
+				BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_LOG).mapColor(inner));
+		Block strippedWood = registerBlock("stripped_" + wood + "_wood", RotatedPillarBlock::new,
+				BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_WOOD).mapColor(inner));
+		Block planks = registerBlock(wood + "_planks", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).mapColor(inner));
+		Block stairs = registerBlock(wood + "_stairs", props -> new StairBlock(planks.defaultBlockState(), props) {
+		}, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_STAIRS).mapColor(inner));
+		Block slab = registerBlock(wood + "_slab", SlabBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SLAB).mapColor(inner));
+		Block fence = registerBlock(wood + "_fence", FenceBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE).mapColor(inner));
+		Block gate = registerBlock(wood + "_fence_gate", props -> new FenceGateBlock(WoodType.OAK, props),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE).mapColor(inner));
 		// Furnace fuel like oak: a slab burns half as long as a block.
-		for (Block block : List.of(chestnutLog, wood, strippedLog, strippedWood, planks, stairs, slab, fence, gate)) {
+		for (Block block : List.of(log, woodBlock, strippedLog, strippedWood, planks, stairs, slab, fence, gate)) {
 			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
 			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix()
 					.cookingFuel(block == slab ? ContextIntProviders.COOKING_TIME_WOOD_SLABS : ContextIntProviders.COOKING_TIME_WOOD_BLOCKS),
 					BUILDING_TAB);
 		}
 
-		// Vanilla oak's fire behaviour: logs catch slowly, planks and their shapes faster, leaves fastest.
+		// Vanilla oak's fire behaviour: logs catch slowly, planks and their shapes faster.
 		FlammableBlockRegistry fire = FlammableBlockRegistry.getDefaultInstance();
-		for (Block block : List.of(chestnutLog, wood, strippedLog, strippedWood)) {
+		for (Block block : List.of(log, woodBlock, strippedLog, strippedWood)) {
 			fire.add(block, 5, 5);
 		}
 		for (Block block : List.of(planks, stairs, slab, fence, gate)) {
 			fire.add(block, 5, 20);
 		}
-		fire.add(leaves, 30, 60);
 	}
 
 	/**
