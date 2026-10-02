@@ -989,6 +989,9 @@ def gui():
     for col in range(9):
         slot(7 + col * 18, 141)
     img.save(TEX / "gui" / "machine.png", optimize=True)
+    # The themed machine screens (batch 22).
+    import gui_textures
+    gui_textures.draw_all(lambda image, name: image.save(TEX / "gui" / f"{name}.png", optimize=True))
 
 
 def solar_top():
@@ -1427,6 +1430,8 @@ def main():
     cotton_textures.draw_all(save)
     import deposits
     deposits.draw_all(save)
+    import tank_display
+    tank_display.draw_all(save)
 
 
 if __name__ == "__main__":
