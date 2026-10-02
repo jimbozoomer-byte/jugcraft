@@ -282,6 +282,19 @@ ITEMS = {
     "ghost_taffy": {"display": "Ghost Taffy", "food": [1, 0.1], "sweet": ["INVISIBILITY", 3], "tags": ["c:foods/candy"]},
     "fizz_rocks": {"display": "Fizz Rocks", "food": [1, 0.1], "sweet": ["JUMP_BOOST", 20], "tags": ["c:foods/candy"]},
     "witchs_licorice": {"display": "Witch's Licorice", "food": [1, 0.1], "sweet": ["NIGHT_VISION", 45], "tags": ["c:foods/candy"]},
+    # Fall additions 2, the cider mill. Apple seeds plant an apple sapling (from the pomace the Cider Press knocks out, or
+    # broken apple leaves); pomace feeds pigs and composts. Cider is drawn from the press (sweet) or the Cider Barrel as it
+    # ages (sparkling, then aged); mulled cider is sparkling cider simmered with mulling spices in the Cooking Pot. Every
+    # cider leaves its glass bottle when drunk; `bottle_back`: crafting with it gives the bottle back too (sweet cider, in the
+    # donuts). Sparkling cider doesn't: the Cooking Pot hands remainders back, and mulled cider keeps that bottle.
+    "apple_seeds": {"display": "Apple Seeds", "plants": "apple_sapling", "compost": "low", "tags": ["c:seeds/apple"]},
+    "apple_pomace": {"display": "Apple Pomace", "compost": "medium", "tags": ["minecraft:pig_food"]},
+    "sweet_cider": {"display": "Sweet Cider", "food": [3, 0.3], "drink": ["HASTE", 30], "bottle_back": True, "tags": []},
+    "sparkling_cider": {"display": "Sparkling Cider", "food": [3, 0.4], "drink": ["JUMP_BOOST", 60], "tags": []},
+    "aged_cider": {"display": "Aged Cider", "food": [4, 0.6], "drink": ["ABSORPTION", 120], "tags": []},
+    "mulled_cider": {"display": "Mulled Cider", "food": [6, 0.8], "drink": ["REGENERATION", 15], "tags": []},
+    "mulling_spices": {"display": "Mulling Spices", "compost": "medium", "tags": []},
+    "apple_cider_donut": {"display": "Apple Cider Donut", "food": [3, 0.4], "compost": "medium_high", "tags": ["c:foods/candy"]},
 }
 
 # ---------------------------------------------------------------- Festival crops (slice 3)
@@ -514,6 +527,16 @@ HALLOWEEN_ADVANCEMENTS = {
                         "description": "Throw a pumpkin 50 blocks or more with a trebuchet", "frame": "goal"},
     "headless_horseman": {"icon": "jugcraft:horseman_lantern", "title": "Lost His Head",
                           "description": "Send the Headless Horseman back into the night", "frame": "challenge"},
+    "lantern_festival": {"icon": "jugcraft:sky_lantern", "title": "A Sky Full of Wishes",
+                         "description": "Be there when eight sky lanterns are let go together", "frame": "goal"},
+    "harvest_home": {"icon": "jugcraft:feast_table", "title": "Harvest Home",
+                     "description": "Share a grand feast at a Harvest Feast Table", "frame": "challenge"},
+    "amazing": {"icon": "jugcraft:corn_maze_gate", "title": "A-maze-ing", "description": "Find your way through a corn maze",
+                "frame": "task"},
+    "ghost_hunter": {"icon": "jugcraft:spirit_lantern", "title": "Ghost Hunter", "description": "Catch a restless spirit in a glass bottle",
+                     "frame": "goal"},
+    "face_painter": {"icon": "jugcraft:face_paint_kit", "title": "Face Painter", "description": "Paint another player's face",
+                     "frame": "task"},
 }
 
 
@@ -1103,6 +1126,259 @@ def decor14_items():
     return decor14_blocks() + list(OUTFITS)
 
 
+# ---------------------------------------------------------------- Fall additions 1: the chandlery
+# The Wax Melting Pot (WaxPotBlock + entity) holds up to `capacity` measures of one wax (`waxes`: what puts it in, as an
+# item tag, how many measures an item gives, how long a candle burns for each layer of it, and its natural colour). Over
+# a heat source (HEAT_TAG, as the Cooking Pot) it melts a measure every `melt_ticks`; without heat its molten wax sets
+# again, a measure every `set_ticks`. Molten wax takes dyes (mixed as leather dye mixes), up to `max_scents` scents
+# (`scents`: item tag, the aura, its colour), a brightener (stronger aura, burns `bright_burn` as long) and an extender
+# (burns `long_burn` as long). String dipped in molten wax starts a candle; each later dip adds a layer (a measure of wax)
+# once the last has cooled (`cool_ticks`; dipped too soon the layer slides off and is lost), up to `max_dips` layers.
+# The Aura Candle burns for the sum of its layers. Lit, it pulses every `pulse_ticks` (as a beacon does) over `radius`
+# blocks (by layers), giving players within it its scents' effects for `effect_ticks`. A candle layered with more than
+# `max_scents` scents is muddled: it burns for light but has no aura. Harvest gives radius^2 / `harvest_divisor` random
+# ticks to plants in the radius a pulse (twice as many when bright).
+CHANDLERY = {"pot": "wax_melting_pot", "pot_display": "Wax Melting Pot", "candle": "aura_candle", "candle_display": "Aura Candle",
+             "capacity": 8, "melt_ticks": 100, "set_ticks": 300, "cool_ticks": 40, "max_dips": 4, "max_scents": 2,
+             "pulse_ticks": 80, "effect_ticks": 180, "radius": [5, 8, 12, 16], "light": [8, 10, 12, 14],
+             "bright_burn": 0.5, "long_burn": 1.5, "harvest_divisor": 4,
+             "brightener": {"tag": "jugcraft:candle_brighteners", "items": ["minecraft:glowstone_dust"]},
+             "extender": {"tag": "jugcraft:candle_extenders", "items": ["minecraft:redstone"]},
+             "waxes": {"beeswax": {"display": "Beeswax", "items": ["minecraft:honeycomb"], "measures": 2, "burn_per_dip": 4800,
+                                   "color": 0xE8B84A},
+                       "tallow": {"display": "Tallow", "items": ["minecraft:rotten_flesh"], "measures": 1, "burn_per_dip": 2400,
+                                  "color": 0xEEE6D2}},
+             # Scents: the vanilla MobEffects field given to players, or a special aura (warding: hostile mobs in the radius
+             # are slowed and weakened; harvest: plants grow; revealing: other creatures glow).
+             "scents": {"swiftness": {"display": "Swiftness", "items": ["minecraft:sugar"], "effect": "SPEED", "color": 0x7CC8F0},
+                        "leaping": {"display": "Leaping", "items": ["minecraft:rabbit_foot"], "effect": "JUMP_BOOST", "color": 0x9CF26E},
+                        "moonlight": {"display": "Moonlight", "items": ["minecraft:golden_carrot"], "effect": "NIGHT_VISION",
+                                      "color": 0x5A78FF},
+                        "featherfall": {"display": "Featherfall", "items": ["minecraft:feather"], "effect": "SLOW_FALLING",
+                                        "color": 0xF2F2E8},
+                        "tide": {"display": "Tide", "items": ["minecraft:pufferfish"], "effect": "WATER_BREATHING", "color": 0x3FA9C8},
+                        "ember": {"display": "Ember", "items": ["minecraft:magma_cream"], "effect": "FIRE_RESISTANCE", "color": 0xFF6A1A},
+                        "diligence": {"display": "Diligence", "items": ["minecraft:amethyst_shard"], "effect": "HASTE", "color": 0xE8C84A},
+                        "mending": {"display": "Mending", "items": ["minecraft:ghast_tear"], "effect": "REGENERATION", "color": 0xF27ACB},
+                        "warding": {"display": "Warding", "items": ["minecraft:fermented_spider_eye"], "effect": None, "color": 0x7A3FCF},
+                        "harvest": {"display": "Harvest", "items": ["minecraft:bone_meal"], "effect": None, "color": 0x5FBF3A},
+                        "revealing": {"display": "Revealing", "items": ["minecraft:glow_ink_sac"], "effect": None, "color": 0x9FFFE8},
+                        # Ectoplasm, caught from restless spirits (fall additions 9): everyone near turns invisible.
+                        "ghostly": {"display": "Ghostly", "items": ["jugcraft:ectoplasm"], "effect": "INVISIBILITY", "color": 0xB8FFD8}}}
+
+
+def chandlery_blocks():
+    return [CHANDLERY["pot"], CHANDLERY["candle"]]
+
+
+def chandlery_items():
+    return chandlery_blocks()
+
+
+# ---------------------------------------------------------------- Fall additions 2: the cider mill
+# The apple tree (AppleLeavesBlock, like the chestnut tree): apple seeds plant a sapling that grows an oak-trunked tree
+# (worldgen/feature/apple_tree.json) whose leaves blossom and then hang with ripe apples, one stage in `fruit_chance`
+# random ticks; a right-click picks 1-3 vanilla apples. Wild apple trees grow in plains and flower-rich places.
+# The Cider Press (CiderPressBlock + entity) takes `capacity` apples (tag `apples`) in its hopper and basket together; an
+# empty hand turns its crank, grinding one apple into pulp, then its screw, pressing the pulp in `turns` turns, each letting
+# its share of the juice (a serving an apple) into a trough of `trough` servings; the last turn knocks out a pomace for
+# every `apples_per_pomace` apples (rounded up). Crank and screw each move once every `work_ticks`. A glass bottle draws
+# a serving: Sweet Cider. The Cider Barrel (CiderBarrelBlock + entity) holds `capacity` servings of one batch: fresh juice
+# ferments into Sparkling Cider after `sparkling_ticks` and matures into Aged Cider after `aged_ticks`, counted from the
+# last fresh serving poured in (a fermenting batch takes no more). A glass bottle draws whatever it has become.
+CIDER = {"tree": {"sapling": "apple_sapling", "leaves": "apple_leaves", "seed": "apple_seeds", "fruit_chance": 10,
+                  "pick": {"item": "minecraft:apple", "min": 1, "max": 3},
+                  # worldgen/feature/apple_tree.json: a rounded crown on a short oak trunk.
+                  "trunk": {"base_height": 4, "height_rand_a": 1}, "foliage": {"radius": 2, "height": 3},
+                  "biomes": ["IS_PLAINS", "IS_FLORAL"], "rarity": 12, "display": {"apple_sapling": "Apple Sapling",
+                                                                                    "apple_leaves": "Apple Leaves"}},
+         "press": {"block": "cider_press", "display": "Cider Press", "apples": "jugcraft:cider_apples",
+                   "apple_items": ["minecraft:apple"], "capacity": 8, "trough": 8, "turns": 4, "work_ticks": 8,
+                   "apples_per_pomace": 2},
+         "barrel": {"block": "cider_barrel", "display": "Cider Barrel", "capacity": 16, "sparkling_ticks": 24000,
+                    "aged_ticks": 72000, "stages": ["sweet_cider", "sparkling_cider", "aged_cider"]}}
+
+
+def cider_blocks():
+    return [CIDER["tree"]["sapling"], CIDER["tree"]["leaves"], CIDER["press"]["block"], CIDER["barrel"]["block"]]
+
+
+def cider_items():
+    return [CIDER["tree"]["leaves"], CIDER["press"]["block"], CIDER["barrel"]["block"]]
+
+
+# ---------------------------------------------------------------- Fall additions 3: the preserves pantry
+# Preserves (PreserveJarItem) are cooked into a Mason Jar in the Cooking Pot (POT_RECIPES). A jar holds `servings`
+# servings, eaten one at a time (`food` each, and `effect` [vanilla MobEffects field, seconds] if any); the last leaves the
+# jar. Fresh from the pot a jar is unsealed and spoils `spoil_ticks` after it was cooked (a spoiled serving: 1 food,
+# Hunger and Nausea). The Canning Kettle (CanningKettleBlock + entity) holds water and up to `kettle_jars` full jars; over
+# heat its water boils after `boil_ticks`, and a jar in boiling water for `process_ticks` is sealed (component
+# jugcraft:sealed): it keeps until opened, when its days start. The Pantry Shelf (PantryShelfBlock + entity) shows up to
+# `shelf_slots` jars. `color`: what is in the jar, for the item textures and the renderers.
+PANTRY = {"jar": "mason_jar", "jar_display": "Mason Jar", "vinegar": "cider_vinegar", "vinegar_display": "Cider Vinegar",
+          "kettle": "canning_kettle", "kettle_display": "Canning Kettle", "shelf": "pantry_shelf", "shelf_display": "Pantry Shelf",
+          "servings": 4, "spoil_ticks": 72000, "kettle_jars": 4, "boil_ticks": 200, "process_ticks": 400, "shelf_slots": 6,
+          "preserves": {
+              "sweet_berry_jam": {"display": "Sweet Berry Jam", "food": [3, 0.4], "effect": None, "color": 0x9A1E3A, "kind": "sweet"},
+              "apple_butter": {"display": "Apple Butter", "food": [4, 0.5], "effect": None, "color": 0x7A3A14, "kind": "sweet"},
+              "pumpkin_butter": {"display": "Pumpkin Butter", "food": [4, 0.5], "effect": None, "color": 0xC8701E, "kind": "sweet"},
+              "cranberry_preserves": {"display": "Cranberry Preserves", "food": [3, 0.4], "effect": None, "color": 0xB0122E, "kind": "sweet"},
+              "glow_berry_jelly": {"display": "Glow Berry Jelly", "food": [2, 0.3], "effect": ["NIGHT_VISION", 30], "color": 0xF0B030,
+                                   "kind": "sweet"},
+              "pickled_beets": {"display": "Pickled Beets", "food": [2, 0.4], "effect": None, "color": 0x7A1040, "kind": "pickle"},
+              "pickled_peppers": {"display": "Pickled Peppers", "food": [2, 0.4], "effect": ["FIRE_RESISTANCE", 15], "color": 0x4A8A2A,
+                                  "kind": "pickle"},
+              "corn_relish": {"display": "Corn Relish", "food": [3, 0.5], "effect": None, "color": 0xE0B828, "kind": "pickle"}}}
+
+
+# ---------------------------------------------------------------- Fall additions 4: crows and working scarecrows
+# Crows (agriculture/Crow.java, Crows.java) come to fields by day: every `spawn_ticks`, for each overworld player,
+# `spawn_chance` of the time a spot `min_distance` to `max_distance` blocks away is tried; if a ripe crop is within
+# `field_radius` of it (`field_tries` spots sampled) a flock of `flock` crows arrives, while the spawn_mobs rule is on.
+# At most `near_cap` near a player (within `near_range`), `level_cap` in the world; they leave at `day_end` on the
+# overworld clock, climbing until `leave_height` over the ground or for `leave_ticks`. A crow searches
+# `search_tries` spots within `raid_radius` for a ripe single-block crop, flies to it and pecks for `peck_ticks`,
+# setting it back `setback` stages, then rests `raid_cooldown` ticks and up to `raid_cooldown_spread` more; only while
+# the mob_griefing rule is on. It flies off from a player within `flee_radius` (sneaking: `sneak_flee_radius`), or from a
+# scarecrow come to guard its crop (looking every `look_ticks`).
+# Scarecrows (Scarecrows.java) guard crops within `guard` blocks across (bare, wearing a head, wearing a lit head) and
+# `guard_height` up or down. A crow drops 0 to `feathers` feathers.
+CROWS = {"entity": "crow", "display": "Crow", "health": 4.0, "flee_radius": 6.0, "sneak_flee_radius": 2.5, "raid_radius": 12,
+         "search_tries": 24, "peck_ticks": 40, "setback": 3, "raid_cooldown": 600, "raid_cooldown_spread": 600,
+         "spawn_ticks": 200, "spawn_chance": 0.3, "min_distance": 16, "max_distance": 40, "field_radius": 6, "field_tries": 16,
+         "flock": [2, 3], "near_cap": 6, "near_range": 48, "level_cap": 32, "day_end": 12000,
+         "leave_height": 24, "leave_ticks": 200, "look_ticks": 10,
+         "guard": {"bare": 4, "headed": 8, "lit": 12}, "guard_height": 6, "feathers": 2, "table": "entities/crow"}
+
+# ---------------------------------------------------------------- Fall additions 5: spooky fireworks
+# Spooky fireworks (SpookyFireworkItem, SpookyRocket): rockets that burst into a picture made of sparks (FireworkShape:
+# a bat, a jack o'lantern, a ghost or a skull), drawn by each client facing the player who watches. Crafted from paper,
+# 1 to 3 gunpowder (the flight, as vanilla's) and the shape's ingredients, `per_craft` a craft; glowstone dust makes the
+# sparks twinkle. A rocket flies `lifetime_base` x (flight + 1) ticks plus up to `lifetime_spread` more, climbing
+# `climb` blocks/tick faster each tick, and bursts at the end or where it hits something. It hurts nothing and breaks
+# nothing. The Show Launcher (ShowLauncherBlock) holds `tube_capacity` rockets (spooky or vanilla) in each of its
+# `tubes` tubes; a rising redstone signal (or an empty hand) starts a show in its mode and a second stops it:
+# sequence (one rocket every `sequence_ticks`), volley (a row of three every `volley_ticks`) or finale (one from every
+# tube at once). Rockets leave its tubes fanned out by `lean` blocks/tick (vanilla rockets `vanilla_lean`).
+FIREWORKS = {"shapes": {"bat": {"item": "bat_firework", "display": "Bat Burst Firework",
+                                "ingredients": ["minecraft:feather", "minecraft:black_dye"], "colour": 0x9B59D0},
+                        "pumpkin": {"item": "pumpkin_firework", "display": "Jack o'Lantern Burst Firework",
+                                    "ingredients": ["minecraft:carved_pumpkin"], "colour": 0xFF8A1C},
+                        "ghost": {"item": "ghost_firework", "display": "Ghost Burst Firework",
+                                  "ingredients": ["minecraft:phantom_membrane"], "colour": 0xF2F4FF},
+                        "skull": {"item": "skull_firework", "display": "Skull Burst Firework",
+                                  "ingredients": ["minecraft:bone"], "colour": 0xEDE3C4}},
+             "per_craft": 3, "flights": [1, 2, 3], "twinkle": "minecraft:glowstone_dust", "component": "twinkle",
+             "lifetime_base": 10, "lifetime_spread": 12, "climb": 0.04, "entity": "spooky_rocket", "particle": "spooky_spark",
+             "launcher": "show_launcher", "launcher_display": "Show Launcher", "tubes": 9, "tube_capacity": 16,
+             "sequence_ticks": 10, "volley_ticks": 20, "lean": 0.1, "vanilla_lean": 0.003}
+
+# ---------------------------------------------------------------- Fall additions 6: the sky lantern festival
+# Sky lanterns (SkyLanternItem, SkyLantern): used, a lantern is let go in front of its holder; it rises `rise` blocks a
+# tick and drifts with the wind (`wind` blocks a tick, its direction turning full circle every `wind_period` ticks, the
+# same for every lantern), burns `lifetime` ticks plus up to `lifetime_spread` more, dimming over the last `fade_ticks`.
+# Dyed in the crafting grid (minecraft:dyeable), named in an anvil (its wish). `per_craft` a craft. When
+# `festival_lanterns` are let go within `festival_radius` blocks of each other in `festival_window` ticks (SkyLanterns),
+# players within the radius get Luck for `luck_ticks` and A Sky Full of Wishes; no second festival there for
+# `festival_cooldown` ticks; the server remembers at most `memory` releases. Mooncakes (MooncakeItem), `mooncake_count`
+# a batch in the Cooking Pot, give `mooncake_food`, and Luck for `mooncake_luck_ticks` when eaten outdoors on a
+# full-moon night (`night` on the overworld clock, the first night of eight).
+LANTERNS = {"item": "sky_lantern", "display": "Sky Lantern", "entity": "sky_lantern", "default_colour": 0xE8642A,
+            "rise": 0.035, "wind": 0.015, "wind_period": 72000, "lifetime": 2400, "lifetime_spread": 600, "fade_ticks": 100,
+            "per_craft": 2, "festival_lanterns": 8, "festival_radius": 32, "festival_window": 2400, "festival_cooldown": 24000,
+            "luck_ticks": 6000, "memory": 256,
+            "mooncakes": {"red_bean_mooncake": {"display": "Red Bean Mooncake", "filling": {"jugcraft:beans": 2}},
+                          "chestnut_mooncake": {"display": "Chestnut Mooncake", "filling": {"jugcraft:roasted_chestnuts": 2}},
+                          "pumpkin_mooncake": {"display": "Pumpkin Mooncake", "filling": {"minecraft:pumpkin": 1}}},
+            "mooncake_base": {"minecraft:wheat": 2, "minecraft:sugar": 1, "minecraft:egg": 1}, "mooncake_count": 4,
+            "mooncake_time": 300, "mooncake_food": [3, 0.6], "mooncake_luck_ticks": 6000, "night": [13000, 23000]}
+
+# ---------------------------------------------------------------- Fall additions 7: the harvest feast
+# The Harvest Feast Table (FeastTableBlock, FeastTableBlockEntity, Feasts): lengths placed end to end along one axis join
+# into a table of up to `max_length`; each length holds `dishes` dishes of up to `servings` servings of one food. Eating
+# a serving there works out the feast: score = different foods on the table + players who ate there in the last
+# `window` ticks; every recent diner within `reach` blocks gets the tier: `tiers` (good meal, feast, harvest feast, grand
+# feast) at those scores, with Regeneration for `regeneration_ticks`, Absorption for `absorption_ticks`, Haste and Luck
+# and (grand) Health Boost for `long_ticks`, and Harvest Home. `per_craft` a craft.
+FEAST = {"block": "feast_table", "display": "Harvest Feast Table", "dishes": 2, "servings": 8, "window": 2400, "max_length": 8,
+         "tiers": [3, 5, 8, 11], "regeneration_ticks": 200, "absorption_ticks": 2400, "long_ticks": 6000, "reach": 16,
+         "per_craft": 2}
+
+# ---------------------------------------------------------------- Fall additions 8: the corn maze
+# The Corn Maze Gate (CornMazeGateBlock, CornMazeGateBlockEntity, CornMaze): sneak-use cycles the size (`cells` cells
+# across, `sizes`); used holding corn kernels it carves a perfect maze from a new seed and plants maze corn (MazeCornBlock,
+# three tall, solid, needing only solid ground) along its walls, `plant_per_tick` stalks a tick, one kernel a stalk, only
+# where three blocks are clear; the finish post goes at the exit. A run starts through the gate and ends at the finish
+# post; it is void if the runner flies, climbs on the corn, leaves the maze, takes more than `max_run` ticks, or walked
+# less than `shortcut` of the shortest way through. The best of each runner, top `board`, go on the board; ribbons the
+# first time a runner places; A-maze-ing for finishing. At most `max_runners` at once.
+MAZE = {"gate": "corn_maze_gate", "gate_display": "Corn Maze Gate", "finish": "corn_maze_finish", "finish_display": "Corn Maze Finish Post",
+        "corn": "maze_corn", "corn_display": "Maze Corn", "cells": [3, 5, 7, 9], "sizes": ["tiny", "small", "medium", "large"],
+        "plant_per_tick": 32, "max_run": 12000, "shortcut": 0.8, "board": 3, "max_runners": 16, "kernel": "corn_kernels"}
+
+# ---------------------------------------------------------------- Fall additions 9: ghost hunting
+# Restless spirits (RestlessSpirit, Spirits) rise from graves at night: each random tick of a grave (the gravestones and
+# the grave mound) raises one `stir_chance` of the time, at night on the overworld clock, while fewer than `near_cap`
+# are within `near_range` blocks. A spirit drifts about its grave, `haunt_radius` blocks across and up to `haunt_height`
+# above, at `drift_speed` blocks/tick. Hidden until revealed: by a player holding the Spirit Lantern within
+# `reveal_radius` blocks (it looks every `look_ticks`, and a look lasts `reveal_ticks`), or by glowing (a Revealing
+# candle). Revealed, it fades in over `fade_ticks`, shows to everyone, and shies away (`shy_speed`) from anyone within
+# `shy_radius` (a sneaking player gets to `sneak_shy_radius`), never out of its haunt. A glass bottle catches a revealed
+# spirit as Ectoplasm (giving the bottle back when stirred into wax), the Ghostly candle scent.
+GHOSTS = {"lantern": "spirit_lantern", "lantern_display": "Spirit Lantern", "ectoplasm": "ectoplasm", "ectoplasm_display": "Ectoplasm",
+          "entity": "restless_spirit", "display": "Restless Spirit",
+          "graves": ["rounded_gravestone", "cross_gravestone", "obelisk_gravestone", "grave_mound"],
+          "stir_chance": 0.25, "near_cap": 3, "near_range": 16, "reveal_radius": 12,
+          "haunt_radius": 6, "haunt_height": 3.0, "shy_radius": 3.0, "sneak_shy_radius": 1.5, "drift_speed": 0.04, "shy_speed": 0.12,
+          "reveal_ticks": 40, "look_ticks": 10, "fade_ticks": 10}
+
+# ---------------------------------------------------------------- Fall additions 10: face paint
+# A Face Paint Kit (FacePaintKitItem) paints one of `designs` on a player's face (FacePaint: a Fabric data attachment,
+# saved and sent to every client that sees the player, drawn by the client's FacePaintLayer). Its dial (data component
+# `component`) picks the design; it lasts `uses` faces; painting your own face takes `use_ticks`. The paint washes off
+# when the player's head is under water (checked every `wash_ticks`) or at death. A painted face counts as a costume.
+FACE_PAINT = {"kit": "face_paint_kit", "kit_display": "Face Paint Kit", "component": "face_paint_design", "attachment": "face_paint",
+              "uses": 16, "use_ticks": 32, "wash_ticks": 20,
+              "designs": {"skull": "Skull", "pumpkin": "Jack o'Lantern", "black_cat": "Black Cat", "vampire": "Vampire",
+                          "witch": "Witch", "scarecrow": "Scarecrow"}}
+
+
+def pantry_blocks():
+    return [PANTRY["kettle"], PANTRY["shelf"]]
+
+
+def pantry_items():
+    return pantry_blocks() + [PANTRY["jar"], PANTRY["vinegar"]] + list(PANTRY["preserves"])
+
+
+def firework_blocks():
+    return [FIREWORKS["launcher"]]
+
+
+def firework_items():
+    return firework_blocks() + [info["item"] for info in FIREWORKS["shapes"].values()]
+
+
+def ghost_items():
+    return [GHOSTS["lantern"], GHOSTS["ectoplasm"]]
+
+
+def face_paint_items():
+    return [FACE_PAINT["kit"]]
+
+
+def lantern_items():
+    return [LANTERNS["item"]] + list(LANTERNS["mooncakes"])
+
+
+def feast_blocks():
+    return [FEAST["block"]]
+
+
+def maze_blocks():
+    return [MAZE["gate"], MAZE["finish"], MAZE["corn"]]
+
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -1215,10 +1491,39 @@ POT_RECIPES = {
     "ghost_taffy": {"inputs": {"minecraft:sugar": 2, "minecraft:phantom_membrane": 1}, "count": 4, "time": 200},
     "fizz_rocks": {"inputs": {"minecraft:sugar": 2, "minecraft:gunpowder": 1}, "count": 4, "time": 200},
     "witchs_licorice": {"inputs": {"minecraft:sugar": 2, "minecraft:wheat": 1, "minecraft:ink_sac": 1}, "count": 4, "time": 200},
+    # Fall additions 2: sparkling cider simmered with mulling spices, a bottle a batch.
+    "mulled_cider": {"inputs": {"jugcraft:sparkling_cider": 1, "jugcraft:mulling_spices": 1}, "time": 200},
+    # Fall additions 3: cider vinegar (aged cider soured on pomace); preserves, each cooked down into a Mason Jar: jams and
+    # fruit butters with sugar (apple butter cooked in sweet cider, pumpkin butter with mulling spices), and pickles and
+    # relish in cider vinegar.
+    "cider_vinegar": {"inputs": {"jugcraft:aged_cider": 1, "jugcraft:apple_pomace": 1}, "time": 200},
+    "sweet_berry_jam": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:sweet_berries": 6, "minecraft:sugar": 2}, "time": 300},
+    "apple_butter": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:apple": 3, "minecraft:sugar": 1, "jugcraft:sweet_cider": 1}, "time": 300},
+    "pumpkin_butter": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:pumpkin": 1, "minecraft:sugar": 2, "jugcraft:mulling_spices": 1},
+                       "time": 300},
+    "cranberry_preserves": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:cranberries": 6, "minecraft:sugar": 2}, "time": 300},
+    "glow_berry_jelly": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:glow_berries": 6, "minecraft:sugar": 2}, "time": 300},
+    "pickled_beets": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:beetroot": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
+    "pickled_peppers": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:pepper": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
+    "corn_relish": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:corn": 2, "jugcraft:pepper": 1, "jugcraft:onion": 1,
+                               "jugcraft:cider_vinegar": 1}, "time": 300},
 }
+# The mooncakes (the sky lantern festival, above) bake in the pot too.
+for _cake, _info in LANTERNS["mooncakes"].items():
+    POT_RECIPES[_cake] = {"inputs": {**LANTERNS["mooncake_base"], **_info["filling"]}, "time": LANTERNS["mooncake_time"],
+                          "count": LANTERNS["mooncake_count"]}
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    # Fall additions 3: a canning kettle is a cauldron enamelled blue, with an iron-bar jar rack.
+    {"id": "canning_kettle", "inputs": ["minecraft:cauldron", "minecraft:blue_dye", "minecraft:iron_bars"], "result": "canning_kettle",
+     "count": 1, "category": "misc"},
+    # Fall additions 2: mulling spices; apple seeds picked out of pomace; apple cider donuts (the cider's bottle comes back).
+    {"id": "mulling_spices", "inputs": ["minecraft:sugar", "minecraft:sweet_berries", "minecraft:cocoa_beans"], "result": "mulling_spices",
+     "count": 2, "category": "misc"},
+    {"id": "apple_seeds", "inputs": ["jugcraft:apple_pomace"], "result": "apple_seeds", "count": 1, "category": "misc"},
+    {"id": "apple_cider_donut", "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:sugar", "#minecraft:eggs", "jugcraft:sweet_cider"],
+     "result": "apple_cider_donut", "count": 4, "category": "misc"},
     # Decorations batch 14: cat ears on a headband with a tail of black wool.
     {"id": "cat_ears_and_tail", "inputs": ["minecraft:black_wool", "minecraft:black_wool", "minecraft:string", "minecraft:pink_dye"],
      "result": "cat_ears_and_tail", "count": 1, "category": "misc"},
@@ -1541,6 +1846,22 @@ SHAPED = [
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
     # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
     # (the ring) baked in; sugar round a red dye.
+    # Fall additions 1: a copper pot for melting wax.
+    {"id": "wax_melting_pot", "pattern": ["C C", "C C", "CCC"], "key": {"C": "minecraft:copper_ingot"},
+     "result": "wax_melting_pot", "count": 1, "category": "misc"},
+    # Fall additions 2: a press of planks round an iron screw over a grindstone (the grinder) and a trough of slabs; a
+    # barrel in a cradle of sticks with iron hoops and a gold tap.
+    {"id": "cider_press", "pattern": ["PIP", "PGP", "SSS"], "key": {"P": "#minecraft:planks", "I": "minecraft:iron_ingot",
+                                                                   "G": "minecraft:grindstone", "S": "#minecraft:wooden_slabs"},
+     "result": "cider_press", "count": 1, "category": "misc"},
+    # Fall additions 3: Mason Jars of glass with an iron lid; a pantry shelf of planks and slabs.
+    {"id": "mason_jar", "pattern": [" N ", "G G", "GGG"], "key": {"N": "minecraft:iron_nugget", "G": "minecraft:glass"},
+     "result": "mason_jar", "count": 3, "category": "misc"},
+    {"id": "pantry_shelf", "pattern": ["SSS", "P P", "SSS"], "key": {"S": "#minecraft:wooden_slabs", "P": "#minecraft:planks"},
+     "result": "pantry_shelf", "count": 1, "category": "misc"},
+    {"id": "cider_barrel", "pattern": [" G ", "NBN", "S S"], "key": {"G": "minecraft:gold_nugget", "N": "minecraft:iron_nugget",
+                                                                    "B": "minecraft:barrel", "S": "minecraft:stick"},
+     "result": "cider_barrel", "count": 1, "category": "misc"},
     # Decorations batch 14: a black cape lined with red; linen strips and string; a black suit with bones and glowstone
     # for their glow; brown fur with leather and bone fangs; leather wings on sticks; a trunk of planks round a chest.
     {"id": "vampire_cape", "pattern": ["BRB", "BBB", "B B"], "key": {"B": "minecraft:black_wool", "R": "minecraft:red_wool"},
@@ -1640,13 +1961,15 @@ def giant_blocks():
 
 
 def planted_blocks():
-    """Blocks that a seed item places: crops, gourd stems and vines, the cranberry bush and the chestnut sapling."""
-    return crop_blocks() + [stem(gourd) for gourd in GOURDS] + [CRANBERRY["block"], CHESTNUT["sapling"], GIANT_PUMPKIN["vine"]]
+    """Blocks that a seed item places: crops, gourd stems and vines, the cranberry bush and the fruit trees' saplings."""
+    return (crop_blocks() + [stem(gourd) for gourd in GOURDS]
+            + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"], GIANT_PUMPKIN["vine"]])
 
 
 def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
-    return crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"]] + giant_blocks() + [potted(m) for m in MUMS]
+    return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"]] + giant_blocks()
+            + [potted(m) for m in MUMS] + [MAZE["finish"], MAZE["corn"]])
 
 
 def all_blocks():
@@ -1656,7 +1979,8 @@ def all_blocks():
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
-            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks())
+            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
+            + firework_blocks() + feast_blocks() + maze_blocks())
 
 
 def all_items():
@@ -1665,7 +1989,9 @@ def all_items():
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
-            + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items())
+            + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
+            + chandlery_items() + cider_items() + pantry_items() + firework_items()
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items())
 
 
 def owns(entry_id):

@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:chestnut_sapling"
+    "jugcraft:chestnut_sapling",
+    "jugcraft:apple_sapling"
   ]
 }
