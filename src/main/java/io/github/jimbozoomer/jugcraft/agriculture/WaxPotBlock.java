@@ -14,6 +14,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -167,8 +168,16 @@ public class WaxPotBlock extends BaseEntityBlock {
 		}
 	}
 
+	/** Stirs one of {@code stack} in, handing back what it leaves (a bottle of ectoplasm leaves its bottle). */
 	private static void stir(Level level, BlockPos pos, Player player, ItemStack stack, net.minecraft.sounds.SoundEvent sound) {
+		ItemStackTemplate remainder = stack.getItem().getCraftingRemainder();
 		stack.consume(1, player);
+		if (remainder != null && !player.getAbilities().instabuild) {
+			ItemStack left = remainder.create();
+			if (!player.getInventory().add(left)) {
+				Block.popResource(level, pos.above(), left);
+			}
+		}
 		level.playSound(null, pos, sound, SoundSource.BLOCKS, 1.0F, 1.0F);
 		level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
 	}

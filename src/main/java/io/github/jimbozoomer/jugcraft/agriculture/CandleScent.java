@@ -19,7 +19,8 @@ import org.jspecify.annotations.Nullable;
  * The scents stirred into molten wax (item tag {@code jugcraft:candle_scents/<scent>}), and the aura a lit candle
  * carrying each gives. Most give players in the radius a vanilla effect; three are auras of their own, worked out by
  * {@link AuraCandleBlockEntity#pulse}: warding slows and weakens hostile mobs, harvest gives plants random ticks, and
- * revealing makes other creatures glow. The colour tints the flame and the drifting scent.
+ * revealing makes other creatures glow (restless spirits included, which shows them). Ghostly, from ectoplasm, turns
+ * players invisible. The colour tints the flame and the drifting scent.
  */
 public enum CandleScent implements StringRepresentable {
 	SWIFTNESS(MobEffects.SPEED, 0x7CC8F0),
@@ -32,7 +33,8 @@ public enum CandleScent implements StringRepresentable {
 	MENDING(MobEffects.REGENERATION, 0xF27ACB),
 	WARDING(null, 0x7A3FCF),
 	HARVEST(null, 0x5FBF3A),
-	REVEALING(null, 0x9FFFE8);
+	REVEALING(null, 0x9FFFE8),
+	GHOSTLY(MobEffects.INVISIBILITY, 0xB8FFD8);
 
 	public static final Codec<CandleScent> CODEC = StringRepresentable.fromEnum(CandleScent::values);
 

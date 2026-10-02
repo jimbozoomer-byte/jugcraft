@@ -527,6 +527,16 @@ HALLOWEEN_ADVANCEMENTS = {
                         "description": "Throw a pumpkin 50 blocks or more with a trebuchet", "frame": "goal"},
     "headless_horseman": {"icon": "jugcraft:horseman_lantern", "title": "Lost His Head",
                           "description": "Send the Headless Horseman back into the night", "frame": "challenge"},
+    "lantern_festival": {"icon": "jugcraft:sky_lantern", "title": "A Sky Full of Wishes",
+                         "description": "Be there when eight sky lanterns are let go together", "frame": "goal"},
+    "harvest_home": {"icon": "jugcraft:feast_table", "title": "Harvest Home",
+                     "description": "Share a grand feast at a Harvest Feast Table", "frame": "challenge"},
+    "amazing": {"icon": "jugcraft:corn_maze_gate", "title": "A-maze-ing", "description": "Find your way through a corn maze",
+                "frame": "task"},
+    "ghost_hunter": {"icon": "jugcraft:spirit_lantern", "title": "Ghost Hunter", "description": "Catch a restless spirit in a glass bottle",
+                     "frame": "goal"},
+    "face_painter": {"icon": "jugcraft:face_paint_kit", "title": "Face Painter", "description": "Paint another player's face",
+                     "frame": "task"},
 }
 
 
@@ -1152,7 +1162,9 @@ CHANDLERY = {"pot": "wax_melting_pot", "pot_display": "Wax Melting Pot", "candle
                         "mending": {"display": "Mending", "items": ["minecraft:ghast_tear"], "effect": "REGENERATION", "color": 0xF27ACB},
                         "warding": {"display": "Warding", "items": ["minecraft:fermented_spider_eye"], "effect": None, "color": 0x7A3FCF},
                         "harvest": {"display": "Harvest", "items": ["minecraft:bone_meal"], "effect": None, "color": 0x5FBF3A},
-                        "revealing": {"display": "Revealing", "items": ["minecraft:glow_ink_sac"], "effect": None, "color": 0x9FFFE8}}}
+                        "revealing": {"display": "Revealing", "items": ["minecraft:glow_ink_sac"], "effect": None, "color": 0x9FFFE8},
+                        # Ectoplasm, caught from restless spirits (fall additions 9): everyone near turns invisible.
+                        "ghostly": {"display": "Ghostly", "items": ["jugcraft:ectoplasm"], "effect": "INVISIBILITY", "color": 0xB8FFD8}}}
 
 
 def chandlery_blocks():
@@ -1238,6 +1250,98 @@ CROWS = {"entity": "crow", "display": "Crow", "health": 4.0, "flee_radius": 6.0,
          "leave_height": 24, "leave_ticks": 200, "look_ticks": 10,
          "guard": {"bare": 4, "headed": 8, "lit": 12}, "guard_height": 6, "feathers": 2, "table": "entities/crow"}
 
+# ---------------------------------------------------------------- Fall additions 5: spooky fireworks
+# Spooky fireworks (SpookyFireworkItem, SpookyRocket): rockets that burst into a picture made of sparks (FireworkShape:
+# a bat, a jack o'lantern, a ghost or a skull), drawn by each client facing the player who watches. Crafted from paper,
+# 1 to 3 gunpowder (the flight, as vanilla's) and the shape's ingredients, `per_craft` a craft; glowstone dust makes the
+# sparks twinkle. A rocket flies `lifetime_base` x (flight + 1) ticks plus up to `lifetime_spread` more, climbing
+# `climb` blocks/tick faster each tick, and bursts at the end or where it hits something. It hurts nothing and breaks
+# nothing. The Show Launcher (ShowLauncherBlock) holds `tube_capacity` rockets (spooky or vanilla) in each of its
+# `tubes` tubes; a rising redstone signal (or an empty hand) starts a show in its mode and a second stops it:
+# sequence (one rocket every `sequence_ticks`), volley (a row of three every `volley_ticks`) or finale (one from every
+# tube at once). Rockets leave its tubes fanned out by `lean` blocks/tick (vanilla rockets `vanilla_lean`).
+FIREWORKS = {"shapes": {"bat": {"item": "bat_firework", "display": "Bat Burst Firework",
+                                "ingredients": ["minecraft:feather", "minecraft:black_dye"], "colour": 0x9B59D0},
+                        "pumpkin": {"item": "pumpkin_firework", "display": "Jack o'Lantern Burst Firework",
+                                    "ingredients": ["minecraft:carved_pumpkin"], "colour": 0xFF8A1C},
+                        "ghost": {"item": "ghost_firework", "display": "Ghost Burst Firework",
+                                  "ingredients": ["minecraft:phantom_membrane"], "colour": 0xF2F4FF},
+                        "skull": {"item": "skull_firework", "display": "Skull Burst Firework",
+                                  "ingredients": ["minecraft:bone"], "colour": 0xEDE3C4}},
+             "per_craft": 3, "flights": [1, 2, 3], "twinkle": "minecraft:glowstone_dust", "component": "twinkle",
+             "lifetime_base": 10, "lifetime_spread": 12, "climb": 0.04, "entity": "spooky_rocket", "particle": "spooky_spark",
+             "launcher": "show_launcher", "launcher_display": "Show Launcher", "tubes": 9, "tube_capacity": 16,
+             "sequence_ticks": 10, "volley_ticks": 20, "lean": 0.1, "vanilla_lean": 0.003}
+
+# ---------------------------------------------------------------- Fall additions 6: the sky lantern festival
+# Sky lanterns (SkyLanternItem, SkyLantern): used, a lantern is let go in front of its holder; it rises `rise` blocks a
+# tick and drifts with the wind (`wind` blocks a tick, its direction turning full circle every `wind_period` ticks, the
+# same for every lantern), burns `lifetime` ticks plus up to `lifetime_spread` more, dimming over the last `fade_ticks`.
+# Dyed in the crafting grid (minecraft:dyeable), named in an anvil (its wish). `per_craft` a craft. When
+# `festival_lanterns` are let go within `festival_radius` blocks of each other in `festival_window` ticks (SkyLanterns),
+# players within the radius get Luck for `luck_ticks` and A Sky Full of Wishes; no second festival there for
+# `festival_cooldown` ticks; the server remembers at most `memory` releases. Mooncakes (MooncakeItem), `mooncake_count`
+# a batch in the Cooking Pot, give `mooncake_food`, and Luck for `mooncake_luck_ticks` when eaten outdoors on a
+# full-moon night (`night` on the overworld clock, the first night of eight).
+LANTERNS = {"item": "sky_lantern", "display": "Sky Lantern", "entity": "sky_lantern", "default_colour": 0xE8642A,
+            "rise": 0.035, "wind": 0.015, "wind_period": 72000, "lifetime": 2400, "lifetime_spread": 600, "fade_ticks": 100,
+            "per_craft": 2, "festival_lanterns": 8, "festival_radius": 32, "festival_window": 2400, "festival_cooldown": 24000,
+            "luck_ticks": 6000, "memory": 256,
+            "mooncakes": {"red_bean_mooncake": {"display": "Red Bean Mooncake", "filling": {"jugcraft:beans": 2}},
+                          "chestnut_mooncake": {"display": "Chestnut Mooncake", "filling": {"jugcraft:roasted_chestnuts": 2}},
+                          "pumpkin_mooncake": {"display": "Pumpkin Mooncake", "filling": {"minecraft:pumpkin": 1}}},
+            "mooncake_base": {"minecraft:wheat": 2, "minecraft:sugar": 1, "minecraft:egg": 1}, "mooncake_count": 4,
+            "mooncake_time": 300, "mooncake_food": [3, 0.6], "mooncake_luck_ticks": 6000, "night": [13000, 23000]}
+
+# ---------------------------------------------------------------- Fall additions 7: the harvest feast
+# The Harvest Feast Table (FeastTableBlock, FeastTableBlockEntity, Feasts): lengths placed end to end along one axis join
+# into a table of up to `max_length`; each length holds `dishes` dishes of up to `servings` servings of one food. Eating
+# a serving there works out the feast: score = different foods on the table + players who ate there in the last
+# `window` ticks; every recent diner within `reach` blocks gets the tier: `tiers` (good meal, feast, harvest feast, grand
+# feast) at those scores, with Regeneration for `regeneration_ticks`, Absorption for `absorption_ticks`, Haste and Luck
+# and (grand) Health Boost for `long_ticks`, and Harvest Home. `per_craft` a craft.
+FEAST = {"block": "feast_table", "display": "Harvest Feast Table", "dishes": 2, "servings": 8, "window": 2400, "max_length": 8,
+         "tiers": [3, 5, 8, 11], "regeneration_ticks": 200, "absorption_ticks": 2400, "long_ticks": 6000, "reach": 16,
+         "per_craft": 2}
+
+# ---------------------------------------------------------------- Fall additions 8: the corn maze
+# The Corn Maze Gate (CornMazeGateBlock, CornMazeGateBlockEntity, CornMaze): sneak-use cycles the size (`cells` cells
+# across, `sizes`); used holding corn kernels it carves a perfect maze from a new seed and plants maze corn (MazeCornBlock,
+# three tall, solid, needing only solid ground) along its walls, `plant_per_tick` stalks a tick, one kernel a stalk, only
+# where three blocks are clear; the finish post goes at the exit. A run starts through the gate and ends at the finish
+# post; it is void if the runner flies, climbs on the corn, leaves the maze, takes more than `max_run` ticks, or walked
+# less than `shortcut` of the shortest way through. The best of each runner, top `board`, go on the board; ribbons the
+# first time a runner places; A-maze-ing for finishing. At most `max_runners` at once.
+MAZE = {"gate": "corn_maze_gate", "gate_display": "Corn Maze Gate", "finish": "corn_maze_finish", "finish_display": "Corn Maze Finish Post",
+        "corn": "maze_corn", "corn_display": "Maze Corn", "cells": [3, 5, 7, 9], "sizes": ["tiny", "small", "medium", "large"],
+        "plant_per_tick": 32, "max_run": 12000, "shortcut": 0.8, "board": 3, "max_runners": 16, "kernel": "corn_kernels"}
+
+# ---------------------------------------------------------------- Fall additions 9: ghost hunting
+# Restless spirits (RestlessSpirit, Spirits) rise from graves at night: each random tick of a grave (the gravestones and
+# the grave mound) raises one `stir_chance` of the time, at night on the overworld clock, while fewer than `near_cap`
+# are within `near_range` blocks. A spirit drifts about its grave, `haunt_radius` blocks across and up to `haunt_height`
+# above, at `drift_speed` blocks/tick. Hidden until revealed: by a player holding the Spirit Lantern within
+# `reveal_radius` blocks (it looks every `look_ticks`, and a look lasts `reveal_ticks`), or by glowing (a Revealing
+# candle). Revealed, it fades in over `fade_ticks`, shows to everyone, and shies away (`shy_speed`) from anyone within
+# `shy_radius` (a sneaking player gets to `sneak_shy_radius`), never out of its haunt. A glass bottle catches a revealed
+# spirit as Ectoplasm (giving the bottle back when stirred into wax), the Ghostly candle scent.
+GHOSTS = {"lantern": "spirit_lantern", "lantern_display": "Spirit Lantern", "ectoplasm": "ectoplasm", "ectoplasm_display": "Ectoplasm",
+          "entity": "restless_spirit", "display": "Restless Spirit",
+          "graves": ["rounded_gravestone", "cross_gravestone", "obelisk_gravestone", "grave_mound"],
+          "stir_chance": 0.25, "near_cap": 3, "near_range": 16, "reveal_radius": 12,
+          "haunt_radius": 6, "haunt_height": 3.0, "shy_radius": 3.0, "sneak_shy_radius": 1.5, "drift_speed": 0.04, "shy_speed": 0.12,
+          "reveal_ticks": 40, "look_ticks": 10, "fade_ticks": 10}
+
+# ---------------------------------------------------------------- Fall additions 10: face paint
+# A Face Paint Kit (FacePaintKitItem) paints one of `designs` on a player's face (FacePaint: a Fabric data attachment,
+# saved and sent to every client that sees the player, drawn by the client's FacePaintLayer). Its dial (data component
+# `component`) picks the design; it lasts `uses` faces; painting your own face takes `use_ticks`. The paint washes off
+# when the player's head is under water (checked every `wash_ticks`) or at death. A painted face counts as a costume.
+FACE_PAINT = {"kit": "face_paint_kit", "kit_display": "Face Paint Kit", "component": "face_paint_design", "attachment": "face_paint",
+              "uses": 16, "use_ticks": 32, "wash_ticks": 20,
+              "designs": {"skull": "Skull", "pumpkin": "Jack o'Lantern", "black_cat": "Black Cat", "vampire": "Vampire",
+                          "witch": "Witch", "scarecrow": "Scarecrow"}}
+
 
 def pantry_blocks():
     return [PANTRY["kettle"], PANTRY["shelf"]]
@@ -1245,6 +1349,34 @@ def pantry_blocks():
 
 def pantry_items():
     return pantry_blocks() + [PANTRY["jar"], PANTRY["vinegar"]] + list(PANTRY["preserves"])
+
+
+def firework_blocks():
+    return [FIREWORKS["launcher"]]
+
+
+def firework_items():
+    return firework_blocks() + [info["item"] for info in FIREWORKS["shapes"].values()]
+
+
+def ghost_items():
+    return [GHOSTS["lantern"], GHOSTS["ectoplasm"]]
+
+
+def face_paint_items():
+    return [FACE_PAINT["kit"]]
+
+
+def lantern_items():
+    return [LANTERNS["item"]] + list(LANTERNS["mooncakes"])
+
+
+def feast_blocks():
+    return [FEAST["block"]]
+
+
+def maze_blocks():
+    return [MAZE["gate"], MAZE["finish"], MAZE["corn"]]
 
 
 def night_blocks():
@@ -1376,6 +1508,10 @@ POT_RECIPES = {
     "corn_relish": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:corn": 2, "jugcraft:pepper": 1, "jugcraft:onion": 1,
                                "jugcraft:cider_vinegar": 1}, "time": 300},
 }
+# The mooncakes (the sky lantern festival, above) bake in the pot too.
+for _cake, _info in LANTERNS["mooncakes"].items():
+    POT_RECIPES[_cake] = {"inputs": {**LANTERNS["mooncake_base"], **_info["filling"]}, "time": LANTERNS["mooncake_time"],
+                          "count": LANTERNS["mooncake_count"]}
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
@@ -1833,7 +1969,7 @@ def planted_blocks():
 def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"]] + giant_blocks()
-            + [potted(m) for m in MUMS])
+            + [potted(m) for m in MUMS] + [MAZE["finish"], MAZE["corn"]])
 
 
 def all_blocks():
@@ -1843,7 +1979,8 @@ def all_blocks():
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
-            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks())
+            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
+            + firework_blocks() + feast_blocks() + maze_blocks())
 
 
 def all_items():
@@ -1853,7 +1990,8 @@ def all_items():
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
-            + chandlery_items() + cider_items() + pantry_items())
+            + chandlery_items() + cider_items() + pantry_items() + firework_items()
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items())
 
 
 def owns(entry_id):
