@@ -32,6 +32,33 @@
         }
       ],
       "rolls": 1
+    },
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:ornamental_corn_kernels",
+          "modifier": [
+            {
+              "type": "minecraft:explosion_decay"
+            }
+          ]
+        }
+      ],
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:inverted",
+            "term": "minecraft:tool/can_shear"
+          },
+          {
+            "type": "minecraft:random_chance",
+            "chance": 0.1
+          }
+        ]
+      }
     }
   ],
   "random_sequence": "jugcraft:blocks/wild_corn"

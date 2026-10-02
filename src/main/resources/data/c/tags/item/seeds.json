@@ -13,6 +13,13 @@
     "#c:seeds/barley",
     "#c:seeds/butternut_squash",
     "#c:seeds/acorn_squash",
-    "#c:seeds/warty_gourd"
+    "#c:seeds/warty_gourd",
+    "#c:seeds/giant_pumpkin",
+    "#c:seeds/white_pumpkin",
+    "#c:seeds/jarrahdale_pumpkin",
+    "#c:seeds/cinderella_pumpkin",
+    "#c:seeds/bottle_gourd",
+    "#c:seeds/ornamental_corn",
+    "#c:seeds/apple"
   ]
 }

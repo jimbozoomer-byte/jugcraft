@@ -4,10 +4,39 @@ Called by generate_material_data.py. Loot tables and worldgen use the Minecraft 
 (singular "condition", "modifier", minecraft:match_block, inline block states), copied from
 vanilla 26.3's own crop and berry-bush files.
 """
+import carving_data
 import festival_data
+import festivity_data
+import halloween_data
+import night_data
+import decor_data
+import decor2_data
+import decor3_data
+import decor4_data
+import decor5_data
+import decor6_data
+import decor7_data
+import decor8_data
+import decor9_data
+import decor10_data
+import decor11_data
+import decor12_data
+import decor13_data
+import decor14_data
+import chandlery_data
+import cider_data
+import pantry_data
+import crow_data
+import firework_data
+import lantern_data
+import feast_data
+import maze_data
+import ghost_data
+import face_paint_data
+import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
-                         HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, crop_blocks)
+                         HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, STALKS, WILD_BONUS, crop_blocks)
 
 MOD = "jugcraft"
 
@@ -132,6 +161,35 @@ def assets(root, write, lang):
     lang[f"container.{MOD}.cooking_pot.cold"] = "Needs heat below"
 
     festival_data.assets(root, write, lang)
+    carving_data.assets(root, write, lang)
+    halloween_data.assets(root, write, lang)
+    regatta_data.assets(root, write, lang)
+    festivity_data.assets(root, write, lang)
+    night_data.assets(root, write, lang)
+    decor_data.assets(root, write, lang)
+    decor2_data.assets(root, write, lang)
+    decor3_data.assets(root, write, lang)
+    decor4_data.assets(root, write, lang)
+    decor5_data.assets(root, write, lang)
+    decor6_data.assets(root, write, lang)
+    decor7_data.assets(root, write, lang)
+    decor8_data.assets(root, write, lang)
+    decor9_data.assets(root, write, lang)
+    decor10_data.assets(root, write, lang)
+    decor11_data.assets(root, write, lang)
+    decor12_data.assets(root, write, lang)
+    decor13_data.assets(root, write, lang)
+    decor14_data.assets(root, write, lang)
+    chandlery_data.assets(root, write, lang)
+    cider_data.assets(root, write, lang)
+    pantry_data.assets(root, write, lang)
+    crow_data.assets(root, write, lang)
+    firework_data.assets(root, write, lang)
+    lantern_data.assets(root, write, lang)
+    feast_data.assets(root, write, lang)
+    maze_data.assets(root, write, lang)
+    ghost_data.assets(root, write, lang)
+    face_paint_data.assets(root, write, lang)
 
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
@@ -190,6 +248,10 @@ def loot(data, write):
         pools = [pool(entry(info["seed"]), condition=match_block(block, section=0)),
                  pool(entry(pick["item"], uniform(pick["min"], pick["max"]), FORTUNE_UNIFORM),
                       condition=match_block(block, section=0, age=7))]
+        if info["seed"] in [TALL_CROPS[c]["seed"] for c in STALKS["crops"]]:
+            # A plant three blocks tall (picked or not) gives dry stalks for corn shocks.
+            pools.append(pool(entry(STALKS["item"], uniform(STALKS["min"], STALKS["max"])), condition={
+                "type": "minecraft:any_of", "terms": [match_block(block, section=0, age=age) for age in range(STALKS["from_age"], 8)]}))
         if info.get("trellis"):
             # Every block of a climbing plant stands in a trellis, which drops again.
             pools.append(pool(entry("trellis"), condition={"type": "minecraft:survives_explosion"}))
@@ -208,14 +270,48 @@ def loot(data, write):
                 pool(entry(seed, FORTUNE_BINOMIAL), condition=ripe)))
     for wild, info in WILD_CROPS.items():
         seed = TALL_CROPS[info["crop"]]["seed"] if info["crop"] in TALL_CROPS else CROPS[info["crop"]]["seed"]
-        write(out / f"{wild}.json", table(wild, pool({"type": "minecraft:alternatives", "children": [
+        pools = [pool({"type": "minecraft:alternatives", "children": [
             entry(wild, condition="minecraft:tool/can_shear"),
             entry(seed, uniform(1, 2), {"type": "minecraft:explosion_decay"}),
-        ]}), decay=False))
+        ]})]
+        if wild in WILD_BONUS:
+            # Now and then a different seed, unless shears took the plant.
+            bonus = WILD_BONUS[wild]
+            pools.append(pool(entry(bonus["item"], {"type": "minecraft:explosion_decay"}), condition={"type": "minecraft:all_of", "terms": [
+                {"type": "minecraft:inverted", "term": "minecraft:tool/can_shear"},
+                {"type": "minecraft:random_chance", "chance": bonus["chance"]}]}))
+        write(out / f"{wild}.json", table(wild, *pools, decay=False))
     for block in EQUIPMENT:
         # Like vanilla scaffolding and cauldrons: the block itself, unless an explosion destroys it.
         write(out / f"{block}.json", table(block, pool(entry(block), condition={"type": "minecraft:survives_explosion"}), decay=False))
     festival_data.loot(out, write)
+    carving_data.loot(out, write)
+    halloween_data.loot(out, write)
+    regatta_data.loot(out, write)
+    festivity_data.loot(out, write)
+    festivity_data.trades(data, write)
+    night_data.loot(out, write)
+    decor_data.loot(out, write)
+    decor2_data.loot(out, write)
+    decor3_data.loot(out, write)
+    decor4_data.loot(out, write)
+    decor5_data.loot(out, write)
+    decor6_data.loot(out, write)
+    decor7_data.loot(out, write)
+    decor8_data.loot(out, write)
+    decor9_data.loot(out, write)
+    decor10_data.loot(out, write)
+    decor11_data.loot(out, write)
+    decor12_data.loot(out, write)
+    decor13_data.loot(out, write)
+    decor14_data.loot(out, write)
+    chandlery_data.loot(out, write)
+    cider_data.loot(out, write)
+    pantry_data.loot(out, write)
+    crow_data.loot(out, write)
+    firework_data.loot(out, write)
+    feast_data.loot(out, write)
+    maze_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -224,7 +320,8 @@ def recipes(out, write):
     for result, info in COOKING.items():
         for kind, time in COOK_TIMES.items():
             name = result if kind == "smelting" else f"{result}_from_{kind}"
-            write(out / f"{name}.json", {"fabric:load_conditions": conditions(), "type": f"minecraft:{kind}", "category": "food",
+            write(out / f"{name}.json", {"fabric:load_conditions": conditions(), "type": f"minecraft:{kind}",
+                                         "category": info.get("category", "food"),
                                          "ingredient": rid(info["input"]), "result": {"id": rid(result)},
                                          "experience": info["xp"], "cookingtime": time})
     for recipe in SHAPELESS:
@@ -238,8 +335,10 @@ def recipes(out, write):
         data = {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped", "category": recipe["category"]}
         if "group" in recipe:
             data["group"] = recipe["group"]
-        data.update({"pattern": recipe["pattern"], "key": recipe["key"],
-                     "result": {"id": rid(recipe["result"]), "count": recipe["count"]}})
+        result = {"id": rid(recipe["result"]), "count": recipe["count"]}
+        if "components" in recipe:
+            result["components"] = recipe["components"]
+        data.update({"pattern": recipe["pattern"], "key": recipe["key"], "result": result})
         write(out / f"{recipe['id']}.json", data)
     for result, info in POT_RECIPES.items():
         out_item = {"id": rid(result)}
@@ -257,6 +356,15 @@ def recipes(out, write):
         write(out / f"{sickle}.json", {"fabric:load_conditions": conditions(*info["features"]), "type": "minecraft:crafting_shaped",
                                        "category": "equipment", "pattern": SICKLE_PATTERN,
                                        "key": {"M": info["material"], "S": "minecraft:stick"}, "result": {"id": rid(sickle), "count": 1}})
+    carving_data.recipes(out, write, conditions)
+    festivity_data.recipes(out, write, conditions)
+    firework_data.recipes(out, write, conditions)
+    lantern_data.recipes(out, write, conditions)
+    feast_data.recipes(out, write, conditions)
+    maze_data.recipes(out, write, conditions)
+    ghost_data.recipes(out, write, conditions)
+    face_paint_data.recipes(out, write, conditions)
+    decor3_data.recipes(out, write, conditions)
 
 
 # ---------------------------------------------------------------- tags
@@ -279,12 +387,44 @@ def tags(tags):
         if info["legume"]:
             tags.add("block", LEGUME_TAG, rid(info["block"]))
     festival_data.tags(tags)
+    carving_data.tags(tags)
+    halloween_data.tags(tags)
+    regatta_data.tags(tags)
+    festivity_data.tags(tags)
+    night_data.tags(tags)
+    decor_data.tags(tags)
+    decor2_data.tags(tags)
+    decor3_data.tags(tags)
+    decor4_data.tags(tags)
+    decor5_data.tags(tags)
+    decor6_data.tags(tags)
+    decor7_data.tags(tags)
+    decor8_data.tags(tags)
+    decor9_data.tags(tags)
+    decor10_data.tags(tags)
+    decor11_data.tags(tags)
+    decor12_data.tags(tags)
+    decor13_data.tags(tags)
+    decor14_data.tags(tags)
+    chandlery_data.tags(tags)
+    cider_data.tags(tags)
+    pantry_data.tags(tags)
+    firework_data.tags(tags)
+    lantern_data.tags(tags)
+    feast_data.tags(tags)
+    maze_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen
 
+def advancements(data, write):
+    regatta_data.advancements(data, write)
+
+
 def worldgen(data, write):
     festival_data.worldgen(data, write)
+    cider_data.worldgen(data, write)
+    halloween_data.worldgen(data, write)
     spread = WILD_PATCH["spread_xz"]
     for wild in WILD_CROPS:
         write(data / MOD / "worldgen" / "feature" / f"{wild}.json",
