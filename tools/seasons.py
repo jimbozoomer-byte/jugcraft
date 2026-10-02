@@ -19,7 +19,7 @@ BIOMES = [
     "minecraft:windswept_forest", "minecraft:windswept_hills", "minecraft:windswept_gravelly_hills",
     "minecraft:swamp", "minecraft:river",
     "jugcraft:alpine_spawn",
-]
+] + [f"jugcraft:{name}" for name, info in __import__("biomes").BIOMES.items() if info["seasons"]]
 
 TAG = "jugcraft:has_seasons"
 

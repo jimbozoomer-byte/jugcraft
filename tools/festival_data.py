@@ -5,7 +5,7 @@ berry bushes, oak wood, oak leaves and trees, read from the game jar. No model o
 stem and wood models below reuse vanilla's templates (stairs, slab, fence, fence gate) with Jugcraft
 textures, and the stem models are rebuilt here without vanilla's biome tint.
 """
-from agriculture import (GOURDS, CRANBERRY, BOG_SOIL_TAG, BOG_SOIL, CHESTNUT, LARCH, WOOD, WOOD_SETS, WOOD_TAGS, TREE_BLOCKS, DECOR,
+from agriculture import (GOURDS, CRANBERRY, BOG_SOIL_TAG, BOG_SOIL, CHESTNUT, WOOD, WOOD_SETS, WOOD_TAGS, TREE_BLOCKS, DECOR,
                          FOUND_WILD, GOURD_PATCH, CRANBERRY_PATCH, CHESTNUT_TREES, stem, attached_stem)
 
 MOD = "jugcraft"
@@ -127,11 +127,6 @@ def stairs_variants(model):
     return {"variants": out}
 
 
-def needle_texture(state):
-    """The larch needles' texture (and model) for a season state: larch_needles, larch_needles_gold, larch_needles_bare."""
-    return LARCH["needles"] if state == LARCH["states"][0] else f"{LARCH['needles']}_{state}"
-
-
 def wood_assets(root, write, lang):
     for wood in WOOD_SETS:
         wood_set_assets(wood, root, write)
@@ -233,19 +228,6 @@ def assets(root, write, lang):
     write(root / "blockstates" / f"{leaves}.json", {"variants": {
         f"fruit={fruit}": {"model": rid(f"block/{texture}")} for fruit, texture in enumerate(leaf_textures)}})
     write(root / "items" / f"{leaves}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{leaves}")}})
-    # The larch: a sapling, and needles in each season's state (untinted: green, gold, or bare twigs).
-    sapling, needles = LARCH["sapling"], LARCH["needles"]
-    write(models / f"{sapling}.json", {"parent": "minecraft:block/cross", "textures": {"cross": rid(f"block/{sapling}")}})
-    write(root / "blockstates" / f"{sapling}.json", {"variants": {"": {"model": rid(f"block/{sapling}")}}})
-    write(root / "items" / f"{sapling}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{sapling}")}})
-    write(root / "models" / "item" / f"{sapling}.json", {"parent": "minecraft:item/generated",
-                                                          "textures": {"layer0": rid(f"block/{sapling}")}})
-    for state in LARCH["states"]:
-        texture = needle_texture(state)
-        write(models / f"{texture}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{texture}")}})
-    write(root / "blockstates" / f"{needles}.json", {"variants": {
-        f"season={state}": {"model": rid(f"block/{needle_texture(state)}")} for state in LARCH["states"]}})
-    write(root / "items" / f"{needles}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{needles}")}})
     for block, display in TREE_BLOCKS.items():
         lang[f"block.{MOD}.{block}"] = display
     wood_assets(root, write, lang)
@@ -325,20 +307,6 @@ def loot(out, write):
     sapling = self_drop(CHESTNUT["sapling"])
     sapling["pools"][0]["entries"][0]["name"] = nut
     write(out / f"{CHESTNUT['sapling']}.json", sapling)
-    needles, larch_sapling = LARCH["needles"], rid(LARCH["sapling"])
-    write(out / f"{needles}.json", {"type": "minecraft:block", "pools": [
-        {"entries": [{"type": "minecraft:alternatives", "children": [
-            {"type": "minecraft:item", "condition": SHEARS_OR_SILK, "name": rid(needles)},
-            {"type": "minecraft:item", "condition": {"type": "minecraft:all_of", "terms": [
-                {"type": "minecraft:survives_explosion"},
-                {"type": "minecraft:table_bonus", "chances": LARCH["sapling_chances"], "enchantment": "minecraft:fortune"}]},
-             "name": larch_sapling}]}], "rolls": 1},
-        {"condition": not_shears, "entries": [{"type": "minecraft:item", "condition": {
-            "type": "minecraft:table_bonus", "chances": [0.02, 0.022222223, 0.025, 0.033333335, 0.1], "enchantment": "minecraft:fortune"},
-            "modifier": [{"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 2}},
-                         {"type": "minecraft:explosion_decay"}], "name": "minecraft:stick"}], "rolls": 1}],
-        "random_sequence": rid(f"blocks/{needles}")})
-    write(out / f"{LARCH['sapling']}.json", self_drop(LARCH["sapling"]))
     for block in WOOD:
         if block.endswith("_slab"):
             write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{"entries": [{"type": "minecraft:item", "modifier": [
@@ -386,8 +354,6 @@ def tags(tags):
         tags.add("block", "minecraft:overworld_natural_logs", rid(f"{wood}_log"))
     for registry in ("block", "item"):
         tags.add(registry, "minecraft:leaves", rid(CHESTNUT["leaves"]))
-        tags.add(registry, "minecraft:leaves", rid(LARCH["needles"]))
-        tags.add(registry, "minecraft:saplings", rid(LARCH["sapling"]))
     tags.add("block", "minecraft:saplings", rid(CHESTNUT["sapling"]))
 
 
@@ -449,24 +415,6 @@ def worldgen(data, write):
         "trunk_placer": {"type": "minecraft:straight_trunk_placer", "base_height": trunk["base_height"],
                          "height_rand_a": trunk["height_rand_a"], "height_rand_b": 0},
         "trunk_provider": {"id": rid("chestnut_log"), "properties": {"axis": "y"}}})
-    # The larch: a tall, narrow cone (vanilla's spruce foliage shape) on a straight trunk, needles starting green.
-    trunk, foliage = LARCH["trunk"], LARCH["foliage"]
-
-    def uniform(bounds):
-        return {"type": "minecraft:uniform", "max_inclusive": bounds[1], "min_inclusive": bounds[0]}
-
-    write(folder / "feature" / "larch.json", {
-        "type": "minecraft:tree", "below_trunk_provider": "minecraft:soil_beneath_tree", "decorators": [],
-        "foliage_placer": {"type": "minecraft:spruce_foliage_placer", "offset": uniform(foliage["offset"]),
-                           "radius": uniform(foliage["radius"]), "trunk_height": uniform(foliage["trunk_height"])},
-        "foliage_provider": {"id": rid(LARCH["needles"]), "properties": {
-            "distance": "7", "persistent": "false", "season": LARCH["states"][0], "waterlogged": "false"}},
-        "ignore_vines": True, "minimum_size": {"type": "minecraft:two_layers_feature_size", "limit": 2, "upper_size": 2},
-        "trunk_placer": {"type": "minecraft:straight_trunk_placer", "base_height": trunk["base_height"],
-                         "height_rand_a": trunk["height_rand_a"], "height_rand_b": 0},
-        "trunk_provider": {"id": rid("larch_log"), "properties": {"axis": "y"}}})
-    write(folder / "placed_feature" / "larch_checked.json", {"feature": rid("larch"), "placement": [
-        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": rid(LARCH["sapling"])}}]})
     write(folder / "placed_feature" / "patch_chestnut_tree.json", {"feature": rid("chestnut"), "placement": [
         {"type": "minecraft:rarity_filter", "chance": CHESTNUT_TREES["rarity"]},
         {"type": "minecraft:in_square"},

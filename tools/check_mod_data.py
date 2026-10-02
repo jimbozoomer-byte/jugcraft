@@ -21,6 +21,9 @@ from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WAS
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 import pixel_hollows as ph
 import alpine as al
+import biomes as bm
+import biomes_data
+import trees as tr
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -103,7 +106,8 @@ def check_assets(registered):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
-                model(variant["model"])
+                for choice in variant if isinstance(variant, list) else [variant]:  # a list: weighted, picked by position
+                    model(choice["model"])
             for part in state.get("multipart", []):
                 model(part["apply"]["model"])
         if f"block.{MOD}.{block}" not in lang:
@@ -336,7 +340,7 @@ def check_machine_recipe_files(registered):
 
 
 # Jugcraft entries of registries other than blocks and items that tags may name.
-OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE}, "point_of_interest_type": {"arcade_cabinet"},
+OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE} | set(bm.BIOMES), "point_of_interest_type": {"arcade_cabinet"},
                  "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES}}
 
 
@@ -493,6 +497,47 @@ def check_seasons():
                    "harvest_feast", "harvest_feast.days", "december"):
         if f'"{option}"' not in options:
             err(f"JugcraftConfig.TEXT_OPTIONS has no {option}")
+
+
+def check_biomes():
+    """The biomes branch: Java's region rules and options match tools/biomes.py, each biome's files are complete,
+    every feature a biome or tree selector names exists, and the four-season biomes have seasons."""
+    java = (JAVA_ROOT / "biome" / "JugcraftRegions.java").read_text(encoding="utf-8")
+    rules = [(f"minecraft:{replaces.lower()}", (int(a), int(b)), (int(c), int(d)), biome) for replaces, a, b, c, d, biome in
+             re.findall(r'rule\(Biomes\.(\w+), (\d), (\d), (\d), (\d), "(\w+)"\)', java)]
+    if rules != bm.RULES:
+        err(f"JugcraftRegions.RULES {rules} differ from RULES in tools/biomes.py")
+    for expected in (f'FEATURE = "{bm.FEATURE}"', f"SIZE = {bm.REGIONS['size']};", f"SHARE = {bm.REGIONS['share']};",
+                     "TEMPERATURE_BANDS = {" + ", ".join(f"{v}F" for v in bm.TEMPERATURE_BANDS) + "}",
+                     "HUMIDITY_BANDS = {" + ", ".join(f"{v}F" for v in bm.HUMIDITY_BANDS) + "}"):
+        if expected not in java:
+            err(f"JugcraftRegions.java has no {expected} (tools/biomes.py)")
+    config = CONFIG.read_text(encoding="utf-8")
+    if (f'"biomes.region_size", "{bm.REGIONS["size"]}"' not in config or f'"biomes.region_share", "{bm.REGIONS["share"]}"' not in config
+            or bm.FEATURE not in FEATURES):
+        err("JugcraftConfig's biomes switch or region options differ from tools/biomes.py")
+    placed = DATA / MOD / "worldgen" / "placed_feature"
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for name, info in bm.BIOMES.items():
+        if name not in {rule[3] for rule in bm.RULES}:
+            err(f"No region rule places the {name} biome")
+        if lang.get(f"biome.{MOD}.{name}") != info["display"]:
+            err(f"No name for the {name} biome")
+        for step in biomes_data.steps(name):
+            for feature in step:
+                ns, path = split(feature)
+                if ns == MOD and not (placed / f"{path}.json").is_file():
+                    err(f"{name}: unknown placed feature {feature}")
+        picks = [info["trees"]["default"]] + [feature for feature, _ in info["trees"]["picks"]]
+        for feature in picks:
+            ns, path = split(feature)
+            if ns == MOD and not (placed / f"{path}.json").is_file():
+                err(f"{name}'s trees: unknown placed feature {feature}")
+        if info["seasons"] != (f"{MOD}:{name}" in seasons.BIOMES):
+            err(f"{name}: seasons {info['seasons']} but seasons.BIOMES says otherwise")
+    for shape, info in tr.SHAPES.items():
+        if info["wood"] not in ag.WOOD_SETS or (info["foliage"] and info["wood"] not in ag.TREES):
+            err(f"Tree shape {shape} grows unknown wood or leaves ({info['wood']})")
 
 
 def check_alpine():
@@ -961,50 +1006,60 @@ def check_festival(java, main):
     chestnut = ag.CHESTNUT
     if numbers != {"FRUIT_CHANCE": chestnut["fruit_chance"], "PICK_MIN": chestnut["pick"]["min"], "PICK_MAX": chestnut["pick"]["max"]}:
         err("ChestnutLeavesBlock.java differs from CHESTNUT in tools/agriculture.py")
-    for block in list(ag.TREE_BLOCKS) + list(ag.DECOR) + [ag.CRANBERRY["block"]]:
+    tree_blocks = {block for tree in ag.TREES for block in (ag.sapling(tree), ag.TREES[tree]["leaves"])}
+    for block in [b for b in ag.TREE_BLOCKS if b not in tree_blocks] + list(ag.DECOR) + [ag.CRANBERRY["block"]]:
         if f'registerBlock("{block}"' not in main:
             err(f"JugcraftAgriculture.java does not register {block}")
+    for tree, info in ag.TREES.items():  # registerTree registers the sapling, the leaves and the wood set
+        base = info["base"].upper()
+        if not re.search(rf'registerTree\("{tree}", "{info["leaves"]}", {tree.upper()}_GROWER, '
+                         rf'{tree.upper() + "_LEAVES" if info["season"] else "null"}, Blocks\.{base}_SAPLING, Blocks\.{base}_LEAVES,', main):
+            err(f"JugcraftAgriculture.java does not register the {tree} tree as TREES in tools/agriculture.py says")
     for wood in ag.WOOD_SETS:  # registerWoodSet registers every block in agriculture.wood_blocks
-        if f'registerWoodSet("{wood}",' not in main:
+        if f'registerWoodSet("{wood}",' not in main and wood not in ag.TREES:
             err(f"JugcraftAgriculture.java does not register the {wood} wood set")
-    check_larch(java.get("LarchNeedlesBlock", ""))
+    check_seasonal_trees(main, java.get("SeasonalLeavesBlock", ""))
     for block, info in ag.DECOR.items():
         if f"lightLevel(state -> {info['light']})" not in main:
             err(f"{block}: light level differs from DECOR in tools/agriculture.py")
     expected_states = {ag.stem(g): {f"age={a}" for a in range(8)} for g in ag.GOURDS}
     expected_states[ag.CRANBERRY["block"]] = {f"age={a}" for a in range(len(ag.CRANBERRY["stages"]))}
     expected_states[ag.CHESTNUT["leaves"]] = {f"fruit={f}" for f in range(3)}
-    expected_states[ag.LARCH["needles"]] = {f"season={state}" for state in ag.LARCH["states"]}
+    for tree, info in ag.TREES.items():
+        expected_states[info["leaves"]] = {f"season={state}" for state in ag.SEASON_STATES} if info["season"] else {""}
     for block, variants in expected_states.items():
         if set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})) != variants:
             err(f"{block}: blockstate does not cover every stage")
 
 
-def check_larch(needles):
-    """LarchNeedlesBlock's season days match LARCH, and every fixed season mode shows its own needles on every block."""
-    larch = ag.LARCH
-    numbers = {name: int(value) for name, value in re.findall(r"int (GREEN_FROM|GOLD_FROM|BARE_FROM|JITTER) = (\d+);", needles)}
-    if numbers != {"GREEN_FROM": larch["green_from"], "GOLD_FROM": larch["gold_from"], "BARE_FROM": larch["bare_from"],
-                   "JITTER": larch["jitter"]}:
-        err(f"LarchNeedlesBlock.java {numbers} differs from LARCH in tools/agriculture.py")
-    states = re.findall(r"^\t\t([A-Z, ]+);", needles.partition("enum Needles")[2], re.M)
-    if not states or [state.strip().lower() for state in states[0].split(",")] != larch["states"]:
-        err(f"LarchNeedlesBlock.Needles differs from LARCH['states'] {larch['states']}")
+def check_seasonal_trees(main, leaves):
+    """Each seasonal tree's leaf schedule in Java matches TREES, SeasonalLeavesBlock matches JITTER, SPREAD and the
+    states, and every fixed season mode shows its own look on every block, whatever its jitter."""
+    numbers = {name: int(value) for name, value in re.findall(r"int (JITTER|SPREAD) = (\d+);", leaves)}
+    if numbers != {"JITTER": ag.JITTER, "SPREAD": ag.SPREAD}:
+        err(f"SeasonalLeavesBlock.java {numbers} differs from JITTER and SPREAD in tools/agriculture.py")
+    states = re.findall(r"^\t\t([A-Z, ]+);", leaves.partition("enum Foliage")[2], re.M)
+    if not states or [state.strip().lower() for state in states[0].split(",")] != ag.SEASON_STATES:
+        err(f"SeasonalLeavesBlock.Foliage differs from SEASON_STATES {ag.SEASON_STATES}")
+    schedules = {name.lower(): [int(a), int(b), int(c)] for name, a, b, c in
+                 re.findall(r"(\w+)_LEAVES = new SeasonalLeavesBlock\.Schedule\((\d+), (\d+), (\d+)\);", main)}
+    expected = {tree: info["season"] for tree, info in ag.TREES.items() if info["season"]}
+    if schedules != expected:
+        err(f"JugcraftAgriculture.java leaf schedules {schedules} differ from TREES in tools/agriculture.py {expected}")
     calendar = (ROOT / "src/main/java/io/github/jimbozoomer/jugcraft/season/SeasonCalendar.java").read_text(encoding="utf-8")
     modes = {name.lower(): int(day) for name, day in re.findall(r"\b(SPRING|SUMMER|AUTUMN|WINTER)\((\d+)\)", calendar)}
-
-    def needles_on(day):
-        if larch["bare_from"] <= day or day < larch["green_from"]:
-            return "bare"
-        return "gold" if day >= larch["gold_from"] else "green"
-
-    wanted = {"spring": "green", "summer": "green", "autumn": "gold", "winter": "bare"}
-    for mode, day in modes.items():
-        seen = {needles_on((day - 1 + shift) % 365 + 1) for shift in range(-larch["jitter"], larch["jitter"] + 1)}
-        if seen != {wanted[mode]}:
-            err(f"/jugcraft season set {mode} (day {day}) shows larch needles {sorted(seen)}, not only {wanted[mode]}")
     if len(modes) != 4:
         err(f"SeasonCalendar.Mode days not found ({modes})")
+    wanted = {"spring": "green", "summer": "green", "autumn": "gold", "winter": "bare"}
+    for tree, (green_from, gold_from, bare_from) in expected.items():
+        def look(day):
+            if bare_from <= day or day < green_from:
+                return "bare"
+            return "gold" if day >= gold_from else "green"
+        for mode, day in modes.items():
+            seen = {look((day - 1 + shift) % 365 + 1) for shift in range(-ag.JITTER, ag.JITTER + 1)}
+            if seen != {wanted[mode]}:
+                err(f"/jugcraft season set {mode} (day {day}) shows {tree} leaves {sorted(seen)}, not only {wanted[mode]}")
 
 
 def check_carving(java, main):
@@ -1832,6 +1887,7 @@ def main():
     check_deposits()
     check_seasons()
     check_alpine()
+    check_biomes()
     check_machines(registered)
     check_large_machines()
     check_style_pack()

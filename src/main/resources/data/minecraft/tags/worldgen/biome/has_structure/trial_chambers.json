@@ -1,6 +1,15 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:alpine_spawn"
+    "jugcraft:alpine_spawn",
+    "jugcraft:coniferous_forest",
+    "jugcraft:snowy_coniferous_forest",
+    "jugcraft:maple_woods",
+    "jugcraft:seasonal_forest",
+    "jugcraft:aspen_glade",
+    "jugcraft:dead_forest",
+    "jugcraft:tundra",
+    "jugcraft:snowy_forest",
+    "jugcraft:muskeg"
   ]
 }

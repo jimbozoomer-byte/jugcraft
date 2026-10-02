@@ -72,6 +72,7 @@ import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.TintedParticleLeavesBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -112,10 +113,17 @@ public final class JugcraftAgriculture {
 	public static final ResourceKey<Feature> CHESTNUT_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("chestnut"));
 	public static final TreeGrower CHESTNUT_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_chestnut", WeightedList.of(CHESTNUT_TREE),
 			WeightedList.of(), WeightedList.of(), CHESTNUT_TREE);
-	/** The larch's feature (data/jugcraft/worldgen/feature/larch.json), grown by its sapling. */
-	public static final ResourceKey<Feature> LARCH_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("larch"));
-	public static final TreeGrower LARCH_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_larch", WeightedList.of(LARCH_TREE),
-			WeightedList.of(), WeightedList.of(), LARCH_TREE);
+	/** Trees grown from their saplings (data/jugcraft/worldgen/feature/<tree>.json, tools/trees.py). */
+	public static final TreeGrower LARCH_GROWER = grower("larch");
+	public static final TreeGrower MAPLE_GROWER = grower("maple");
+	public static final TreeGrower ASPEN_GROWER = grower("aspen");
+	public static final TreeGrower FIR_GROWER = grower("fir");
+	/** The dead tree, which no sapling grows; it stands in the Dead Forest (and game tests grow it). */
+	public static final TreeGrower DEAD_TREE_GROWER = grower("dead_tree");
+	/** Seasonal trees' leaf schedules, in season days. Keep in sync with TREES in tools/agriculture.py. */
+	public static final SeasonalLeavesBlock.Schedule LARCH_LEAVES = new SeasonalLeavesBlock.Schedule(91, 268, 318);
+	public static final SeasonalLeavesBlock.Schedule MAPLE_LEAVES = new SeasonalLeavesBlock.Schedule(95, 265, 310);
+	public static final SeasonalLeavesBlock.Schedule ASPEN_LEAVES = new SeasonalLeavesBlock.Schedule(96, 258, 302);
 
 	private static final ResourceKey<ContextIntProvider> COMPOST_LOW = ContextIntProviders.COMPOSTABLE_LOW;
 	private static final ResourceKey<ContextIntProvider> COMPOST_MEDIUM = ContextIntProviders.COMPOSTABLE_MEDIUM;
@@ -238,7 +246,15 @@ public final class JugcraftAgriculture {
 		registerBlock("cranberry_bush", CranberryBushBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SWEET_BERRY_BUSH)
 				.sound(SoundType.WET_GRASS));
 		registerChestnutTree();
-		registerLarchTree();
+		registerTree("larch", "larch_needles", LARCH_GROWER, LARCH_LEAVES, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
+				MapColor.TERRACOTTA_RED, MapColor.TERRACOTTA_ORANGE);
+		registerTree("maple", "maple_leaves", MAPLE_GROWER, MAPLE_LEAVES, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				MapColor.COLOR_GRAY, MapColor.TERRACOTTA_PINK);
+		registerTree("aspen", "aspen_leaves", ASPEN_GROWER, ASPEN_LEAVES, Blocks.BIRCH_SAPLING, Blocks.BIRCH_LEAVES,
+				MapColor.QUARTZ, MapColor.SAND);
+		registerTree("fir", "fir_needles", FIR_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
+				MapColor.PODZOL, MapColor.WOOD);
+		registerWoodSet("dead", MapColor.COLOR_LIGHT_GRAY, MapColor.TERRACOTTA_LIGHT_GRAY);
 
 		// Seeds, produce and food.
 		food("corn", 3, 0.6F, COMPOST_MEDIUM);
@@ -870,17 +886,29 @@ public final class JugcraftAgriculture {
 		FlammableBlockRegistry.getDefaultInstance().add(leaves, 30, 60);
 	}
 
-	/** The larch (Alpine Spawn's seasonal conifer): its sapling, needles that follow the season and a wood set. */
-	private static void registerLarchTree() {
-		Block sapling = registerBlock("larch_sapling", props -> new SaplingBlock(LARCH_GROWER, props) {
-		}, BlockBehaviour.Properties.ofFullCopy(Blocks.SPRUCE_SAPLING));
-		registerItem("larch_sapling", props -> new BlockItem(sapling, props), new Item.Properties().useBlockDescriptionPrefix()
+	private static TreeGrower grower(String shape) {
+		ResourceKey<Feature> tree = ResourceKey.create(Registries.FEATURE, Jugcraft.id(shape));
+		return new TreeGrower(Jugcraft.MOD_ID + "_" + shape, WeightedList.of(tree), WeightedList.of(), WeightedList.of(), tree);
+	}
+
+	/**
+	 * A tree with its own sapling and leaves, and its wood set (agriculture.TREES and WOOD_SETS in tools). Leaves with a
+	 * {@code schedule} follow the seasons ({@link SeasonalLeavesBlock}); null: evergreen. The sapling and leaves copy
+	 * {@code saplingLike} and {@code leavesLike} (sound, strength); leaves burn like vanilla leaves.
+	 */
+	private static void registerTree(String tree, String leavesId, TreeGrower grower, SeasonalLeavesBlock.Schedule schedule,
+			Block saplingLike, Block leavesLike, MapColor bark, MapColor inner) {
+		Block sapling = registerBlock(tree + "_sapling", props -> new SaplingBlock(grower, props) {
+		}, BlockBehaviour.Properties.ofFullCopy(saplingLike));
+		registerItem(tree + "_sapling", props -> new BlockItem(sapling, props), new Item.Properties().useBlockDescriptionPrefix()
 				.compostable(COMPOST_LOW), SEEDS_TAB);
-		Block needles = registerBlock("larch_needles", LarchNeedlesBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SPRUCE_LEAVES)
-				.mapColor(MapColor.PLANT));
-		registerItem("larch_needles", props -> new BlockItem(needles, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
-		registerWoodSet("larch", MapColor.TERRACOTTA_RED, MapColor.TERRACOTTA_ORANGE);
-		FlammableBlockRegistry.getDefaultInstance().add(needles, 30, 60);
+		Function<BlockBehaviour.Properties, Block> leavesFactory = schedule == null
+				? props -> new TintedParticleLeavesBlock(0.01F, props)
+				: props -> new SeasonalLeavesBlock(schedule, props);
+		Block leaves = registerBlock(leavesId, leavesFactory, BlockBehaviour.Properties.ofFullCopy(leavesLike).mapColor(MapColor.PLANT));
+		registerItem(leavesId, props -> new BlockItem(leaves, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
+		registerWoodSet(tree, bark, inner);
+		FlammableBlockRegistry.getDefaultInstance().add(leaves, 30, 60);
 	}
 
 	/**

@@ -1,7 +1,10 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:chestnut_sapling",
     "jugcraft:larch_sapling",
-    "jugcraft:chestnut_sapling"
+    "jugcraft:maple_sapling",
+    "jugcraft:aspen_sapling",
+    "jugcraft:fir_sapling"
   ]
 }

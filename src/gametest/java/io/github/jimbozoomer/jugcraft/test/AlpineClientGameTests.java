@@ -1,7 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
-import io.github.jimbozoomer.jugcraft.agriculture.LarchNeedlesBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.SeasonalLeavesBlock;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
 import io.github.jimbozoomer.jugcraft.world.AlpineSpawn;
@@ -123,11 +123,11 @@ public class AlpineClientGameTests implements FabricClientGameTest {
 			level.setBlock(trunk, JugcraftAgriculture.block("larch_sapling").defaultBlockState(), Block.UPDATE_ALL);
 			boolean grew = JugcraftAgriculture.LARCH_GROWER.growTree(level, level.getChunkSource().getGenerator(), trunk,
 					level.getBlockState(trunk), level.getRandom());
-			int[] counts = new int[LarchNeedlesBlock.Needles.values().length];
+			int[] counts = new int[SeasonalLeavesBlock.Foliage.values().length];
 			for (BlockPos pos : BlockPos.betweenClosed(trunk.offset(-3, 0, -3), trunk.offset(3, 16, 3))) {
 				BlockState state = level.getBlockState(pos);
 				if (state.is(JugcraftAgriculture.block("larch_needles"))) {
-					counts[state.getValue(LarchNeedlesBlock.SEASON).ordinal()]++;
+					counts[state.getValue(SeasonalLeavesBlock.SEASON).ordinal()]++;
 				}
 			}
 			out.append(i == 0 ? "" : "; ").append(modes[i]).append(grew ? "" : " (did not grow)").append(' ')

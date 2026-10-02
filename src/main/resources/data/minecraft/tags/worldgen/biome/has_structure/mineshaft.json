@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:pixel_hollows"
+    "jugcraft:pixel_hollows",
+    "jugcraft:dead_forest",
+    "jugcraft:tundra",
+    "jugcraft:snowy_forest",
+    "jugcraft:muskeg"
   ]
 }

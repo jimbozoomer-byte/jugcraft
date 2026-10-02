@@ -3,6 +3,10 @@
   "values": [
     "jugcraft:chestnut_fence_gate",
     "jugcraft:larch_fence_gate",
+    "jugcraft:maple_fence_gate",
+    "jugcraft:aspen_fence_gate",
+    "jugcraft:fir_fence_gate",
+    "jugcraft:dead_fence_gate",
     "jugcraft:cemetery_gate"
   ]
 }

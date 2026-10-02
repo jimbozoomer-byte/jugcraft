@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:dead_forest",
+    "jugcraft:tundra",
+    "jugcraft:snowy_forest",
+    "jugcraft:muskeg"
+  ]
+}

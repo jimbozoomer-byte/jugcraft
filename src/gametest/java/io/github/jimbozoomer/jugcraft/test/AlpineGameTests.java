@@ -3,7 +3,7 @@ package io.github.jimbozoomer.jugcraft.test;
 import com.mojang.datafixers.util.Pair;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
-import io.github.jimbozoomer.jugcraft.agriculture.LarchNeedlesBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.SeasonalLeavesBlock;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
 import io.github.jimbozoomer.jugcraft.world.AlpineSpawn;
@@ -124,8 +124,8 @@ public class AlpineGameTests {
 		return JugcraftAgriculture.block(id);
 	}
 
-	private static LarchNeedlesBlock.Needles needles(GameTestHelper helper, BlockPos pos) {
-		return helper.getBlockState(pos).getValue(LarchNeedlesBlock.SEASON);
+	private static SeasonalLeavesBlock.Foliage needles(GameTestHelper helper, BlockPos pos) {
+		return helper.getBlockState(pos).getValue(SeasonalLeavesBlock.SEASON);
 	}
 
 	/**
@@ -146,8 +146,8 @@ public class AlpineGameTests {
 		helper.setBlock(placed, state.setValue(LeavesBlock.PERSISTENT, true));
 		SeasonCalendar.Mode[] modes = {SeasonCalendar.Mode.AUTUMN, SeasonCalendar.Mode.WINTER, SeasonCalendar.Mode.SPRING,
 				SeasonCalendar.Mode.AUTUMN, SeasonCalendar.Mode.SUMMER, SeasonCalendar.Mode.OFF};
-		LarchNeedlesBlock.Needles[] looks = {LarchNeedlesBlock.Needles.GOLD, LarchNeedlesBlock.Needles.BARE, LarchNeedlesBlock.Needles.GREEN,
-				LarchNeedlesBlock.Needles.GOLD, LarchNeedlesBlock.Needles.GREEN, LarchNeedlesBlock.Needles.GREEN};
+		SeasonalLeavesBlock.Foliage[] looks = {SeasonalLeavesBlock.Foliage.GOLD, SeasonalLeavesBlock.Foliage.BARE, SeasonalLeavesBlock.Foliage.GREEN,
+				SeasonalLeavesBlock.Foliage.GOLD, SeasonalLeavesBlock.Foliage.GREEN, SeasonalLeavesBlock.Foliage.GREEN};
 		try {
 			for (int i = 0; i < modes.length; i++) {
 				JugcraftSeasons.setMode(server, modes[i]);
@@ -160,7 +160,7 @@ public class AlpineGameTests {
 			JugcraftSeasons.setMode(server, SeasonCalendar.Mode.WINTER);
 			BlockPos fresh = log.north();
 			helper.setBlock(fresh, state.setValue(LeavesBlock.PERSISTENT, true));
-			helper.assertTrue(needles(helper, fresh) == LarchNeedlesBlock.Needles.BARE, "Needles placed in winter are " + needles(helper, fresh));
+			helper.assertTrue(needles(helper, fresh) == SeasonalLeavesBlock.Foliage.BARE, "Needles placed in winter are " + needles(helper, fresh));
 		} finally {
 			JugcraftSeasons.setMode(server, before.mode());
 		}
@@ -186,14 +186,14 @@ public class AlpineGameTests {
 				}
 			}
 			JugcraftSeasons.setMode(server, SeasonCalendar.Mode.WINTER);
-			helper.assertTrue(crown.stream().allMatch(pos -> needles(helper, pos) == LarchNeedlesBlock.Needles.GREEN),
+			helper.assertTrue(crown.stream().allMatch(pos -> needles(helper, pos) == SeasonalLeavesBlock.Foliage.GREEN),
 					"Needles changed before any tick");
 			BlockPos first = crown.get(0);
 			helper.getBlockState(first).randomTick(level, helper.absolutePos(first), level.getRandom());
 		} finally {
 			JugcraftSeasons.setMode(server, before.mode());
 		}
-		long bare = crown.stream().filter(pos -> needles(helper, pos) == LarchNeedlesBlock.Needles.BARE).count();
+		long bare = crown.stream().filter(pos -> needles(helper, pos) == SeasonalLeavesBlock.Foliage.BARE).count();
 		helper.assertTrue(bare == crown.size(), "One tick turned " + bare + " of " + crown.size() + " touching needles bare");
 		helper.succeed();
 	}
@@ -208,8 +208,8 @@ public class AlpineGameTests {
 			for (int z = 0; z < 16; z++) {
 				BlockPos pos = a.offset(x, 0, z);
 				int first = -1;
-				for (int day = LarchNeedlesBlock.GOLD_FROM - LarchNeedlesBlock.JITTER; day <= LarchNeedlesBlock.GOLD_FROM + LarchNeedlesBlock.JITTER; day++) {
-					if (LarchNeedlesBlock.forDay(day, pos) == LarchNeedlesBlock.Needles.GOLD) {
+				for (int day = JugcraftAgriculture.LARCH_LEAVES.goldFrom() - SeasonalLeavesBlock.JITTER; day <= JugcraftAgriculture.LARCH_LEAVES.goldFrom() + SeasonalLeavesBlock.JITTER; day++) {
+					if (JugcraftAgriculture.LARCH_LEAVES.on(day, pos) == SeasonalLeavesBlock.Foliage.GOLD) {
 						first = day;
 						break;
 					}
@@ -220,8 +220,8 @@ public class AlpineGameTests {
 			}
 		}
 		LOGGER.info("Larch needles in a 16x16 patch turn gold between season days {} and {}", earliest, latest);
-		helper.assertTrue(latest - earliest >= LarchNeedlesBlock.JITTER, "A crown turns all at once (" + earliest + " to " + latest + ")");
-		helper.assertTrue(LarchNeedlesBlock.forDay(0, a) == LarchNeedlesBlock.Needles.GREEN, "Needles with seasons off are not green");
+		helper.assertTrue(latest - earliest >= SeasonalLeavesBlock.JITTER, "A crown turns all at once (" + earliest + " to " + latest + ")");
+		helper.assertTrue(JugcraftAgriculture.LARCH_LEAVES.on(0, a) == SeasonalLeavesBlock.Foliage.GREEN, "Needles with seasons off are not green");
 		helper.succeed();
 	}
 
@@ -258,7 +258,7 @@ public class AlpineGameTests {
 			BlockState state = level.getBlockState(pos);
 			if (state.is(block("larch_needles"))) {
 				needles++;
-				bare += state.getValue(LarchNeedlesBlock.SEASON) == LarchNeedlesBlock.Needles.BARE ? 1 : 0;
+				bare += state.getValue(SeasonalLeavesBlock.SEASON) == SeasonalLeavesBlock.Foliage.BARE ? 1 : 0;
 			} else if (state.is(block("larch_log"))) {
 				height = Math.max(height, pos.getY() - absolute.getY() + 1);
 			}

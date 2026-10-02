@@ -326,11 +326,13 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
             # worldgen/feature/chestnut.json: a broad crown on a straight trunk.
             "trunk": {"base_height": 5, "height_rand_a": 2}, "foliage": {"radius": 3, "height": 3}}
 # Wood sets: each tree's log, wood, stripped log and wood, planks, stairs, slab, fence and fence gate, generated
-# alike (festival_data.wood_assets). Logs and wood strip with an axe; logs saw into planks (sawmill). The
-# chestnut is the Festival Crops' fruit tree; the larch is Alpine Spawn's seasonal conifer.
-WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch"}
+# alike (festival_data.wood_assets) and registered alike (JugcraftAgriculture.registerWoodSet). Logs and wood strip
+# with an axe; logs saw into planks (sawmill). The chestnut is the Festival Crops' fruit tree; the larch is Alpine
+# Spawn's seasonal conifer; maple, aspen, fir and dead wood come from the biomes branch's seasonal forests.
+WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead"}
 # The feature switch each wood's hand recipes follow: the switch of whatever grows the tree.
-WOOD_SWITCHES = {"chestnut": FEATURE, "larch": "alpine_spawn"}
+WOOD_SWITCHES = {"chestnut": FEATURE, "larch": "alpine_spawn", "maple": "biomes", "aspen": "biomes", "fir": "biomes",
+                 "dead": "biomes"}
 
 
 def wood_blocks(wood, display):
@@ -345,25 +347,53 @@ WOOD = {block: name for wood, display in WOOD_SETS.items() for block, name in wo
 WOOD_TAGS = {wood: f"jugcraft:{wood}_logs" for wood in WOOD_SETS}
 WOOD_TAG = WOOD_TAGS["chestnut"]
 STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS for part in ("log", "wood")}
-# The larch (Alpine Spawn): a conifer that changes with the seasons. Its needles (state "season": green, gold,
-# bare) follow the server's season day (season/JugcraftSeasons): green from green_from, gold from gold_from, bare
-# from bare_from until green_from comes round again (northern calendar days; seasons.hemisphere shifts the south).
-# Each block turns up to jitter days early or late, fixed by its position, so a crown turns gradually and trees
-# differ; blocks catch up on random ticks, and needles placed or grown from a sapling start in today's state.
-# With seasons off they stay green. The needles drop saplings and sticks like spruce leaves.
-LARCH = {"sapling": "larch_sapling", "needles": "larch_needles", "states": ["green", "gold", "bare"],
-         "green_from": 91, "gold_from": 268, "bare_from": 318, "jitter": 7,
-         "sapling_chances": [0.05, 0.0625, 0.083333336, 0.1],
-         # worldgen/feature/larch.json: a tall, narrow cone (vanilla's spruce foliage shape) on a straight trunk,
-         # its lowest trunk_height blocks bare. Ranges are [min, max].
-         "trunk": {"base_height": 7, "height_rand_a": 3},
-         "foliage": {"radius": [1, 2], "offset": [0, 1], "trunk_height": [2, 3]}}
+# Trees with their own leaves and sapling (besides the chestnut, whose sapling is planted from a chestnut). Their
+# wood is in WOOD_SETS under the same name; their shapes are in tools/trees.py. Leaves drop saplings and sticks like
+# spruce leaves (SAPLING_CHANCES with Fortune); leaves and saplings follow the wood's switch.
+# "season": deciduous leaves (agriculture/SeasonalLeavesBlock, state "season": green, gold, bare) follow the server's
+# season day (season/JugcraftSeasons): green from the first day, their autumn colour ("gold") from the second, bare
+# from the third until the first comes round again (northern calendar days; seasons.hemisphere shifts the south).
+# Each block turns up to JITTER days early or late, fixed by its position, so a crown turns gradually and trees
+# differ; blocks catch up on random ticks (a changed block brings up to SPREAD touching leaves along), and leaves
+# placed or grown from a sapling start in today's state. With seasons off they stay green. "autumn": the gold
+# state's looks, weighted (random by position, as vanilla picks grass models). None: evergreen.
+TREES = {
+    "larch": {"leaves": "larch_needles", "leaves_display": "Larch Needles", "season": [91, 268, 318], "autumn": {"gold": 1},
+              "base": "spruce"},
+    "maple": {"leaves": "maple_leaves", "leaves_display": "Maple Leaves", "season": [95, 265, 310],
+              "autumn": {"red": 3, "orange": 2, "gold": 1}, "base": "oak"},
+    "aspen": {"leaves": "aspen_leaves", "leaves_display": "Aspen Leaves", "season": [96, 258, 302], "autumn": {"gold": 1},
+              "base": "birch"},
+    "fir": {"leaves": "fir_needles", "leaves_display": "Fir Needles", "season": None, "base": "spruce"},
+}
+SEASON_STATES = ["green", "gold", "bare"]
+JITTER = 7
+SPREAD = 128
+SAPLING_CHANCES = [0.05, 0.0625, 0.083333336, 0.1]
+
+
+def sapling(tree):
+    return f"{tree}_sapling"
+
+
+def leaf_looks(tree):
+    """Texture (and model) names for each state of a tree's leaves: {state: {texture: weight}}."""
+    leaves = TREES[tree]["leaves"]
+    if TREES[tree]["season"] is None:
+        return {None: {leaves: 1}}
+    return {"green": {leaves: 1}, "gold": {f"{leaves}_{look}": weight for look, weight in TREES[tree]["autumn"].items()},
+            "bare": {f"{leaves}_bare": 1}}
+
+
 TREE_BLOCKS = {"chestnut_sapling": "Chestnut Sapling", "chestnut_leaves": "Chestnut Leaves",
-               "larch_sapling": "Larch Sapling", "larch_needles": "Larch Needles"}
-TREE_TEXTURES = ["chestnut_log", "chestnut_log_top", "stripped_chestnut_log", "stripped_chestnut_log_top", "chestnut_planks",
-                 "chestnut_leaves", "chestnut_leaves_burs", "chestnut_leaves_ripe", "chestnut_sapling",
-                 "larch_log", "larch_log_top", "stripped_larch_log", "stripped_larch_log_top", "larch_planks",
-                 "larch_needles", "larch_needles_gold", "larch_needles_bare", "larch_sapling"]
+               **{block: name for tree in TREES for block, name in
+                  ((sapling(tree), f"{WOOD_SETS[tree]} Sapling"), (TREES[tree]["leaves"], TREES[tree]["leaves_display"]))}}
+TREE_TEXTURES = (["chestnut_log", "chestnut_log_top", "stripped_chestnut_log", "stripped_chestnut_log_top", "chestnut_planks",
+                  "chestnut_leaves", "chestnut_leaves_burs", "chestnut_leaves_ripe", "chestnut_sapling"]
+                 + [name for wood in WOOD_SETS if wood != "chestnut" for name in (
+                     f"{wood}_log", f"{wood}_log_top", f"stripped_{wood}_log", f"stripped_{wood}_log_top", f"{wood}_planks")]
+                 + [texture for tree in TREES for looks in leaf_looks(tree).values() for texture in looks]
+                 + [sapling(tree) for tree in TREES])
 
 # Decorations. The Turnip Lantern is the original jack-o'-lantern: a carved turnip with a candle inside.
 DECOR = {"turnip_lantern": {"display": "Turnip Lantern", "light": 13}}
@@ -1202,7 +1232,7 @@ def all_blocks():
 
 def all_items():
     return (list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
-            + [LARCH["sapling"], LARCH["needles"]] + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
+            + [block for tree in TREES for block in (sapling(tree), TREES[tree]["leaves"])] + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items())
@@ -1213,13 +1243,14 @@ def owns(entry_id):
 
 
 def switch_of(entry_id):
-    """The feature switch that owns one of this branch's IDs: its tree's switch for a wood set (and the larch's sapling
-    and needles), otherwise FEATURE."""
+    """The feature switch that owns one of this branch's IDs: its tree's switch for a wood set and for a tree's sapling
+    and leaves, otherwise FEATURE."""
     for wood, switch in WOOD_SWITCHES.items():
         if entry_id in wood_blocks(wood, WOOD_SETS[wood]):
             return switch
-    if entry_id in (LARCH["sapling"], LARCH["needles"]):
-        return WOOD_SWITCHES["larch"]
+    for tree in TREES:
+        if entry_id in (sapling(tree), TREES[tree]["leaves"]):
+            return WOOD_SWITCHES[tree]
     return FEATURE
 
 

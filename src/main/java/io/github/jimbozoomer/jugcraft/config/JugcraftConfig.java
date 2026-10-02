@@ -23,7 +23,7 @@ public final class JugcraftConfig {
 			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
 			"salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines",
 			"deposits", "explosives", "agriculture",
-			"pixel_hollows", "retro_trader", "alpine_spawn");
+			"pixel_hollows", "retro_trader", "alpine_spawn", "biomes");
 
 	/**
 	 * Other server options, with their defaults. {@code carving.free_draw}: players may carve any face into a
@@ -47,6 +47,8 @@ public final class JugcraftConfig {
 	 * ({@code harvest_feast}: {@code us}, {@code canada} or {@code off}, lasting {@code harvest_feast.days}) and
 	 * December ({@code december}: {@code MM-DD..MM-DD} or {@code off}).</li>
 	 * <li>{@code alpine_spawn.start} ({@code on} or {@code off}): new worlds start in the Alpine Spawn biome.</li>
+	 * <li>Jugcraft regions (see {@code biome/JugcraftRegions}): {@code biomes.region_size} (blocks across, 256 to 8192)
+	 * and {@code biomes.region_share} (the fraction of regions with the biomes branch's biomes, 0 to 1).</li>
 	 * </ul>
 	 */
 	public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
@@ -56,7 +58,8 @@ public final class JugcraftConfig {
 			Map.entry("seasons.snow", "off"), Map.entry("seasons.snow_depth", "2"),
 			Map.entry("harvest_feast", "us"), Map.entry("harvest_feast.days", "4"),
 			Map.entry("december", "12-01..01-06"),
-			Map.entry("alpine_spawn.start", "on"));
+			Map.entry("alpine_spawn.start", "on"),
+			Map.entry("biomes.region_size", "1024"), Map.entry("biomes.region_share", "0.5"));
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
@@ -125,7 +128,8 @@ public final class JugcraftConfig {
 					+ " the Halloween event runs: start and end as MM-DD, a timezone, mode auto, on or off, and the Harvest Moon's day;"
 					+ " seasons.*: seasonal colours follow the server's date; mode auto, spring, summer, autumn, winter or off,"
 					+ " hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"
-					+ " december MM-DD..MM-DD or off; alpine_spawn.start on or off: new worlds start in the Alpine Spawn biome).");
+					+ " december MM-DD..MM-DD or off; alpine_spawn.start on or off: new worlds start in the Alpine Spawn biome;"
+					+ " biomes.region_size in blocks and biomes.region_share from 0 to 1: Jugcraft regions with the new biomes).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}

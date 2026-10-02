@@ -2,6 +2,10 @@
   "replace": false,
   "values": [
     "jugcraft:chestnut_slab",
-    "jugcraft:larch_slab"
+    "jugcraft:larch_slab",
+    "jugcraft:maple_slab",
+    "jugcraft:aspen_slab",
+    "jugcraft:fir_slab",
+    "jugcraft:dead_slab"
   ]
 }

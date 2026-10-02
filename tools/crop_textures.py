@@ -832,6 +832,8 @@ def crop_textures():
     out.update(festival_textures())
     from larch_textures import larch_textures  # and Alpine Spawn's larch
     out.update(larch_textures())
+    from forest_textures import forest_textures  # and the biomes branch's seasonal-forest trees
+    out.update(forest_textures())
     from carving_textures import carving_textures  # and pumpkin carving
     out.update(carving_textures())
     from halloween_textures import halloween_textures  # and the Halloween harvest

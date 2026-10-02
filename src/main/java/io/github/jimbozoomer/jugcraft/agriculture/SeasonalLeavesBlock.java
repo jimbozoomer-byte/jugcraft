@@ -19,27 +19,25 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 
 /**
- * Larch needles: the foliage of a conifer that changes with the seasons. They follow the server's season day
- * ({@link JugcraftSeasons#today()}): green from {@link #GREEN_FROM}, gold from {@link #GOLD_FROM} and bare twigs from
- * {@link #BARE_FROM} until spring. Each block turns up to {@link #JITTER} days early or late, fixed by its position,
- * so a crown turns gradually and neighbouring trees differ. Needles catch up on their random ticks; one that changes
- * also brings the needles it touches up to date (up to {@link #SPREAD} of them, in loaded chunks), so a tree generated
- * green in autumn turns together within moments of its first tick. Needles placed by a player or grown from a sapling
- * start in today's state; with seasons off they stay green. Only the look changes: otherwise these are vanilla leaves
- * (natural ones decay away from logs; they drop saplings and sticks).
+ * Leaves of a deciduous tree (the larch, maple and aspen) that follow the seasons. They follow the server's season
+ * day ({@link JugcraftSeasons#today()}) on their tree's {@link Schedule}: green, then their autumn colour
+ * ({@link Foliage#GOLD}; the maple's models show reds, oranges and golds), then bare twigs until spring. Each block
+ * turns up to {@link #JITTER} days early or late, fixed by its position, so a crown turns gradually and neighbouring
+ * trees differ. Leaves catch up on their random ticks; one that changes also brings the leaves it touches up to date
+ * (up to {@link #SPREAD} of them, in loaded chunks), so a tree generated green in autumn turns together within moments
+ * of its first tick. Leaves placed by a player or grown from a sapling start in today's state; with seasons off they
+ * stay green. Only the look changes: otherwise these are vanilla leaves (natural ones decay away from logs; they drop
+ * saplings and sticks).
  */
-public class LarchNeedlesBlock extends TintedParticleLeavesBlock {
-	public static final EnumProperty<Needles> SEASON = EnumProperty.create("season", Needles.class);
-	/** Season days (northern calendar). Keep in sync with LARCH in tools/agriculture.py. */
-	public static final int GREEN_FROM = 91;
-	public static final int GOLD_FROM = 268;
-	public static final int BARE_FROM = 318;
+public class SeasonalLeavesBlock extends TintedParticleLeavesBlock {
+	public static final EnumProperty<Foliage> SEASON = EnumProperty.create("season", Foliage.class);
+	/** Keep in sync with JITTER and SPREAD in tools/agriculture.py. */
 	public static final int JITTER = 7;
-	/** At most this many touching needles catch up with one that changed on its random tick. */
+	/** At most this many touching leaves catch up with one that changed on its random tick. */
 	public static final int SPREAD = 128;
 
-	/** The needles' look in each season. */
-	public enum Needles implements StringRepresentable {
+	/** The leaves' look in each season. */
+	public enum Foliage implements StringRepresentable {
 		GREEN, GOLD, BARE;
 
 		@Override
@@ -48,21 +46,34 @@ public class LarchNeedlesBlock extends TintedParticleLeavesBlock {
 		}
 	}
 
-	public LarchNeedlesBlock(Properties properties) {
-		super(0.01F, properties);
-		registerDefaultState(defaultBlockState().setValue(SEASON, Needles.GREEN));
+	/**
+	 * When a tree's leaves change, in season days (northern calendar): green from {@code greenFrom}, autumn colour
+	 * from {@code goldFrom}, bare from {@code bareFrom} until {@code greenFrom} comes round again.
+	 */
+	public record Schedule(int greenFrom, int goldFrom, int bareFrom) {
+		/** The leaves at {@code pos} on season day {@code day} (0: seasons off, always green). */
+		public Foliage on(int day, BlockPos pos) {
+			if (day <= 0) {
+				return Foliage.GREEN;
+			}
+			int shifted = Math.floorMod(day - 1 + jitter(pos), SeasonCalendar.DAYS) + 1;
+			if (shifted >= bareFrom || shifted < greenFrom) {
+				return Foliage.BARE;
+			}
+			return shifted >= goldFrom ? Foliage.GOLD : Foliage.GREEN;
+		}
 	}
 
-	/** The needles at {@code pos} on season day {@code day} (0: seasons off, always green). */
-	public static Needles forDay(int day, BlockPos pos) {
-		if (day <= 0) {
-			return Needles.GREEN;
-		}
-		int shifted = Math.floorMod(day - 1 + jitter(pos), SeasonCalendar.DAYS) + 1;
-		if (shifted >= BARE_FROM || shifted < GREEN_FROM) {
-			return Needles.BARE;
-		}
-		return shifted >= GOLD_FROM ? Needles.GOLD : Needles.GREEN;
+	private final Schedule schedule;
+
+	public SeasonalLeavesBlock(Schedule schedule, Properties properties) {
+		super(0.01F, properties);
+		this.schedule = schedule;
+		registerDefaultState(defaultBlockState().setValue(SEASON, Foliage.GREEN));
+	}
+
+	public Schedule schedule() {
+		return schedule;
 	}
 
 	/** How many days early (negative) or late this position turns: -JITTER to JITTER, always the same. */
@@ -72,7 +83,7 @@ public class LarchNeedlesBlock extends TintedParticleLeavesBlock {
 		return Math.floorMod(hash, 2 * JITTER + 1) - JITTER;
 	}
 
-	/** Every larch needle ticks, placed ones too, so all of them follow the season. */
+	/** Every seasonal leaf ticks, placed ones too, so all of them follow the season. */
 	@Override
 	protected boolean isRandomlyTicking(BlockState state) {
 		return true;
@@ -88,7 +99,7 @@ public class LarchNeedlesBlock extends TintedParticleLeavesBlock {
 		}
 	}
 
-	/** Needles placed or grown from a sapling start in today's state rather than waiting for a random tick. */
+	/** Leaves placed or grown from a sapling start in today's state rather than waiting for a random tick. */
 	@Override
 	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
 		super.onPlace(state, level, pos, oldState, movedByPiston);
@@ -97,7 +108,7 @@ public class LarchNeedlesBlock extends TintedParticleLeavesBlock {
 		}
 	}
 
-	/** Brings the loaded needles connected to {@code start} up to date for {@code day}, at most {@link #SPREAD} of them. */
+	/** Brings the loaded leaves connected to {@code start} up to date for {@code day}, at most {@link #SPREAD} of them. */
 	private void catchUp(ServerLevel level, BlockPos start, int day) {
 		Set<BlockPos> seen = new HashSet<>();
 		ArrayDeque<BlockPos> queue = new ArrayDeque<>();
@@ -122,13 +133,13 @@ public class LarchNeedlesBlock extends TintedParticleLeavesBlock {
 		}
 	}
 
-	/** Sets the needles at {@code pos} to their look on {@code day}; true if that changed them. */
+	/** Sets the leaves at {@code pos} to their look on {@code day}; true if that changed them. */
 	private boolean follow(BlockState state, Level level, BlockPos pos, int day) {
-		Needles needles = forDay(day, pos);
-		if (state.getValue(SEASON) == needles) {
+		Foliage foliage = schedule.on(day, pos);
+		if (state.getValue(SEASON) == foliage) {
 			return false;
 		}
-		level.setBlock(pos, state.setValue(SEASON, needles), Block.UPDATE_CLIENTS);
+		level.setBlock(pos, state.setValue(SEASON, foliage), Block.UPDATE_CLIENTS);
 		return true;
 	}
 

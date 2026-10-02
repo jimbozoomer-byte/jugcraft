@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:coniferous_forest",
+    "jugcraft:maple_woods",
+    "jugcraft:tundra"
+  ]
+}

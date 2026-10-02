@@ -2,6 +2,10 @@
   "replace": false,
   "values": [
     "jugcraft:chestnut_log",
-    "jugcraft:larch_log"
+    "jugcraft:larch_log",
+    "jugcraft:maple_log",
+    "jugcraft:aspen_log",
+    "jugcraft:fir_log",
+    "jugcraft:dead_log"
   ]
 }
