@@ -847,20 +847,20 @@ public final class JugcraftAgriculture {
 		// Batch 7, the haunted house inside: the Haunted Chandelier, the Phantom Pipe Organ, the Suit of Armor, the Dust
 		// Sheet, the Spirit Mirror, Tattered Curtains and the Creepy Doll.
 		Block chandelier = registerBlock("haunted_chandelier", HauntedChandelierBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
-				.strength(1.0F).sound(SoundType.CHAIN).noOcclusion().lightLevel(HauntedChandelierBlock::light).pushReaction(PushReaction.DESTROY));
+				.strength(1.0F).sound(SoundType.CHAIN).noOcclusion().lightLevel(HauntedChandelierBlock::light).pushReaction(PushReaction.POPPED));
 		HAUNTED_CHANDELIER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("haunted_chandelier"),
 				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(HAUNTED_CHANDELIER_ENTITY, pos, state), chandelier).build());
 		Block organ = registerBlock("phantom_pipe_organ", PipeOrganBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
-				.strength(2.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.BLOCK));
+				.strength(2.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
 		PIPE_ORGAN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("phantom_pipe_organ"),
 				FabricBlockEntityTypeBuilder.create(PipeOrganBlockEntity::new, organ).build());
 		Block armor = registerBlock("suit_of_armor", SuitOfArmorBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
-				.strength(2.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.DESTROY));
+				.strength(2.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
 		SUIT_OF_ARMOR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("suit_of_armor"),
 				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(SUIT_OF_ARMOR_ENTITY, pos, state), armor).build());
 		// The sheet's shape is whatever it covers (block entity data), so it must not be cached per block state.
 		Block sheet = registerBlock(DUST_SHEET, DustSheetBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SNOW)
-				.strength(0.2F).sound(SoundType.WOOL).noOcclusion().dynamicShape().ignitedByLava().pushReaction(PushReaction.BLOCK));
+				.strength(0.2F).sound(SoundType.WOOL).noOcclusion().dynamicShape().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
 		DUST_SHEET_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(DUST_SHEET),
 				FabricBlockEntityTypeBuilder.create(DustSheetBlockEntity::new, sheet).build());
 		registerItem(DUST_SHEET, DustSheetItem::new, new Item.Properties(), BUILDING_TAB);
@@ -868,15 +868,15 @@ public final class JugcraftAgriculture {
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> player.getItemInHand(hand).is(item(DUST_SHEET))
 				? DustSheetItem.tryCover(player, level, hand, hit.getBlockPos(), hit.getDirection()) : InteractionResult.PASS);
 		Block mirror = registerBlock("spirit_mirror", SpiritMirrorBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.GOLD)
-				.strength(0.6F).sound(SoundType.GLASS).noOcclusion().noCollision().pushReaction(PushReaction.DESTROY));
+				.strength(0.6F).sound(SoundType.GLASS).noOcclusion().noCollision().pushReaction(PushReaction.POPPED));
 		SPIRIT_MIRROR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("spirit_mirror"),
 				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(SPIRIT_MIRROR_ENTITY, pos, state), mirror).build());
 		Block curtains = registerBlock("tattered_curtains", TatteredCurtainsBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL)
-				.strength(0.2F).sound(SoundType.WOOL).noOcclusion().noCollision().ignitedByLava().pushReaction(PushReaction.DESTROY));
+				.strength(0.2F).sound(SoundType.WOOL).noOcclusion().noCollision().ignitedByLava().pushReaction(PushReaction.POPPED));
 		TATTERED_CURTAINS_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("tattered_curtains"),
 				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(TATTERED_CURTAINS_ENTITY, pos, state), curtains).build());
 		Block doll = registerBlock("creepy_doll", CreepyDollBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
-				.strength(0.3F).sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
+				.strength(0.3F).sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
 		CREEPY_DOLL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("creepy_doll"),
 				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(CREEPY_DOLL_ENTITY, pos, state), doll).build());
 		for (Block block : List.of(chandelier, organ, armor, mirror, curtains, doll)) {
