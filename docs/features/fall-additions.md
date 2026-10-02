@@ -1,6 +1,6 @@
 # Fall Additions
 
-Status: the chandlery (addition 1), the cider mill (addition 2), the preserves pantry (addition 3), crows and working scarecrows (addition 4), spooky fireworks (addition 5), the sky lantern festival (addition 6) and the Harvest Feast Table (addition 7) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
+Status: the chandlery (addition 1), the cider mill (addition 2), the preserves pantry (addition 3), crows and working scarecrows (addition 4), spooky fireworks (addition 5), the sky lantern festival (addition 6), the Harvest Feast Table (addition 7) and the corn maze (addition 8) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok lets build another 10 more thorough and well thought out festive halloween and fall additions, maybe for one we do candle making with an interesting process to make them allowing you to make a bunch of different combinations and then light them to give different cool effects to an aoe area like beacons do"). The ten additions ship one per pull request, each stacked on the one before:
 1. the chandlery: the Wax Melting Pot and Aura Candles;
 2. the cider mill: apple trees, the Cider Press, the Cider Barrel and four ciders;
@@ -9,15 +9,15 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok let
 5. spooky fireworks: rockets that burst into a bat, a jack o'lantern, a ghost or a skull drawn in sparks, and the Show Launcher;
 6. the sky lantern festival: Sky Lanterns that drift up together, the festival eight of them make, and mooncakes for a full moon;
 7. the Harvest Feast Table: a long table to set with the harvest, and a feast that grows with its variety and its company;
-8. a corn maze (planned);
+8. the corn maze: a gate that plants a maze of corn from its own seed, and times runners through it;
 9. ghost hunting (planned; its ectoplasm is to become a candle scent);
 10. face paint (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace). Spooky fireworks are Discovery tier too: paper, gunpowder and the picture's ingredients (a feather and black dye, a carved pumpkin, a phantom membrane or a bone), and glowstone dust to twinkle; the Show Launcher is a dispenser, iron ingots, planks and redstone. Crows need nothing to come but a ripe crop; the scarecrow that keeps them off is the existing one (a hay bale, wool and sticks), and its pumpkin heads come from any pumpkin patch. The sky lantern festival is Discovery tier too: paper, string and a candle (lanterns), any dye for a colour and an anvil for a wish; mooncakes are baked in the Kitchen Garden's Cooking Pot from wheat, sugar, an egg and beans, roasted chestnuts or a pumpkin. The Harvest Feast Table is Discovery tier too: wooden slabs and logs; what it rewards is a varied harvest, so its best feasts come as a farm grows.
-Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast. Crows are for farmers: a little pressure on open fields, answered by building and dressing scarecrows, and a source of feathers for fletchers and chandlers. Spooky fireworks are for anyone throwing a party: one rocket for a moment, or a Show Launcher's nine tubes for a planned show. Sky lanterns are for gatherings: one player can let eight go and hold a festival alone, but a crowd fills the sky faster, and everyone there shares the Luck; mooncakes are for cooks, and for anyone out under a full moon. The feast table is for farmers and cooks to share their harvest: a host sets a long table, and everyone who eats there shares the blessing, so a group fills up before a dig, a raid or a boss.
+Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace). Spooky fireworks are Discovery tier too: paper, gunpowder and the picture's ingredients (a feather and black dye, a carved pumpkin, a phantom membrane or a bone), and glowstone dust to twinkle; the Show Launcher is a dispenser, iron ingots, planks and redstone. Crows need nothing to come but a ripe crop; the scarecrow that keeps them off is the existing one (a hay bale, wool and sticks), and its pumpkin heads come from any pumpkin patch. The sky lantern festival is Discovery tier too: paper, string and a candle (lanterns), any dye for a colour and an anvil for a wish; mooncakes are baked in the Kitchen Garden's Cooking Pot from wheat, sugar, an egg and beans, roasted chestnuts or a pumpkin. The Harvest Feast Table is Discovery tier too: wooden slabs and logs; what it rewards is a varied harvest, so its best feasts come as a farm grows. The corn maze is Discovery tier too: a hay bale and sticks (the gate) and corn kernels, a kernel a stalk of wall.
+Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast. Crows are for farmers: a little pressure on open fields, answered by building and dressing scarecrows, and a source of feathers for fletchers and chandlers. Spooky fireworks are for anyone throwing a party: one rocket for a moment, or a Show Launcher's nine tubes for a planned show. Sky lanterns are for gatherings: one player can let eight go and hold a festival alone, but a crowd fills the sky faster, and everyone there shares the Luck; mooncakes are for cooks, and for anyone out under a full moon. The feast table is for farmers and cooks to share their harvest: a host sets a long table, and everyone who eats there shares the blessing, so a group fills up before a dig, a raid or a boss. The corn maze is for farmers who grow corn and for anyone at a harvest party: one player plants it, and anyone can run it against the clock.
 
-Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, and preserves put up, all year; crows come to fields all year too, and fireworks and sky lanterns go up whenever someone lets them go. A mooncake's Luck comes with every full moon, one night in eight, and a feast can be held any day.
+Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, and preserves put up, all year; crows come to fields all year too, and fireworks and sky lanterns go up whenever someone lets them go. A mooncake's Luck comes with every full moon, one night in eight, and a feast can be held, or a maze run, any day.
 
 ## Player experience
 ### The Wax Melting Pot
@@ -184,6 +184,17 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
     - 11 or more, **a grand feast**: Health Boost for five minutes as well, and the advancement **Harvest Home**.
 63. The eater is told how the meal went ("A harvest feast! (7 dishes, 1 at the table)"). Alone at a table of seven foods you reach a harvest feast; a grand feast needs friends (six foods and five diners) or a very varied table (ten foods alone).
 
+### The corn maze
+64. **The Corn Maze Gate:** two hay-wrapped posts and a crossbar with a green pennant; a hay bale and four sticks make one. It faces away from whoever placed it, into the maze it will plant ahead of it.
+65. **Choosing a size:** sneak and use it with an empty hand to step through **tiny** (7 by 7 blocks), **small** (11 by 11), **medium** (15 by 15) and **large** (19 by 19).
+66. **Planting:** use it holding corn kernels. The gate carves a new maze from a fresh seed: a perfect maze, with one way through and every part reachable, the entrance at the gate and the exit straight across on the far side. It plants **maze corn** along the walls, **a kernel a stalk**: 30 kernels for a tiny maze on clear, flat ground, 70 for small, 126 for medium and 198 for large. It plants only where the ground is solid and the three blocks above are clear, and never replaces a block, so plant on open, level ground: a tree or a wall in the way stays where it is. The **finish post**, the gate's twin with a chequered flag, goes at the exit. If that square isn't clear the gate says so and plants nothing; if you carry too few kernels it says how many it needs. A planted maze isn't planted again.
+67. **Maze corn:** three blocks of tall, ripe corn planted close as a wall. It can't be walked through, doesn't grow, and stands on any solid ground. Breaking a stalk anywhere brings down what is above; its bottom gives back the kernel it was planted from.
+
+### Running the maze
+68. **Walk out through the gate** to start the clock ("Go! Find the way through"), and reach the finish post to stop it. Standing in the gate restarts your clock.
+69. **Fair runs:** the server follows each runner every tick. A run is void if the runner flies or glides, climbs up over the corn, leaves the maze, takes more than ten minutes, or reaches the finish having walked less than four fifths of the shortest way through (a shortcut, say through a broken wall). Sixteen can run at once.
+70. **The board:** the runner is told their time, and each runner's best goes on the gate's board of the top three. The first time a runner places on a gate's board they get a prize ribbon, first, second or third (the Harvest Scale's ribbons); finishing at all earns **A-maze-ing**. Use the gate with an empty hand to see the maze's size and its board.
+
 ## Connections
 - Existing input producer: vanilla copper (the pot), bees (honeycomb), zombies (rotten flesh), spiders (string), dyes, and the scent items above; Jugcraft's `jugcraft:heat_sources` (the Cooking Pot's heat).
 - Existing output consumer:
@@ -223,6 +234,10 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - Feast, output consumer: groups before a dig, a raid or a boss (Regeneration, Absorption, Haste, Luck and Health Boost), and the advancement Harvest Home. It gives every food a second use and rewards growing many crops rather than one.
 - Feast, entry path: the table is wood, and any food at all makes a meal; its higher feasts come with a varied farm and with friends.
 - Feast, required vs optional: optional and all year; reachable solo up to a harvest feast.
+- Maze, input producer: corn kernels (from corn, the Fall Harvest's first crop), a hay bale and sticks.
+- Maze, output consumer: harvest parties and friendly races; the Harvest Scale's prize ribbons and the advancement A-maze-ing. Clearing a maze gives its kernels back for the next.
+- Maze, entry path: corn is an early crop, and a tiny maze needs only 30 kernels.
+- Maze, required vs optional: optional and all year; one player can plant and run a maze alone, and a board of best times gives friends something to beat.
 - Crows and the plans: [AGRICULTURE.md](../branches/AGRICULTURE.md) promised that the scarecrow would one day keep crop-eating birds away; it now does.
 - Cider mill and the plans:
   - [AGRICULTURE.md](../branches/AGRICULTURE.md) plans orchards (slice 4) and a Fruit and Seed Press (apples into cider, grapes into juice, seed oil for engineers).
@@ -336,6 +351,10 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
   - Units: a dish holds 8 servings; a table counts at most 8 lengths (16 dishes) from where you eat; diners count for 2,400 ticks after they last ate; the blessing reaches 16 blocks.
   - Tiers by score: 3, 5, 8 and 11. Regeneration I for 200 ticks; Absorption I for 2,400; Haste I, Luck and Health Boost I for 6,000. A higher tier gives the lower tiers' effects too, and another serving refreshes them; they don't stack in strength.
   - Unlike a beacon, the feast uses food for every blessing, and its effects end. Nothing is made: a serving is eaten, and its container (a bowl, a bottle) comes back as it would. No loop.
+- **The corn maze:**
+  - Costs: the gate from a hay bale and four sticks; a kernel a stalk of wall (30, 70, 126 or 198 on clear ground). The finish post drops nothing.
+  - Units: mazes of 3, 5, 7 and 9 cells across (7, 11, 15 and 19 blocks); planting 32 stalks a tick; a run at most 12,000 ticks; a shortcut is a run that walked less than 0.8 of the shortest way through, in blocks across the ground.
+  - Return: each stalk gives back its one kernel from its bottom, and nothing else. A ribbon comes once for each runner on each gate (the gate remembers the last 64), so running a maze again only betters a time. No loop.
 
 ## Multiplayer and persistence
 - **Server authority:**
@@ -424,6 +443,12 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - **Feast, bounded work:** a table never ticks. A meal walks at most 8 lengths of table and looks through their recent diners once.
 - **Feast, IDs:** block with item `feast_table` and its block entity; advancement `harvest_home`; the table's recipe. All new.
 - **Feast, disable behaviour:** with the agriculture feature off, the recipe doesn't load; tables already placed still serve and feast, and everything stays registered.
+- **Maze, server authority:** choosing the size and planting go through vanilla's block use path and are decided on the server, which takes the kernels, carves the maze and plants it. The server starts, follows and finishes every run from the positions it already has for its players; clients claim nothing. A run is void for flying, gliding, spectating, climbing over the corn, leaving the maze, taking too long or a shortcut. Times are counted in the server's game ticks.
+- **Maze, concurrent use:** up to sixteen runners at once, each timed alone; each runner's best counts once on the board.
+- **Maze, persistence:** the gate saves its size, seed, whether it is planted, its maze's shortest way, any stalks still to plant, its board and who has had a ribbon (the last 64). The maze itself is blocks in the world. Runs in progress are kept in memory only, so a restart ends them.
+- **Maze, bounded work:** a gate plants at most 32 stalks a tick. A planted gate looks for players in its own square each tick and, while anyone runs, in the finish post's square and at its runners (at most sixteen). The maze's plan is carved once and kept. Nothing loads a chunk.
+- **Maze, IDs:** blocks `corn_maze_gate` (with its item and block entity), `corn_maze_finish` and `maze_corn` (no items); advancement `amazing`; the gate's recipe. All new.
+- **Maze, disable behaviour:** with the agriculture feature off, the recipe doesn't load; mazes already planted still run, and everything stays registered.
 
 ## Dependencies and assets
 No new dependencies. Every texture is drawn by code (`tools/chandlery_textures.py`): the pot's hammered copper and dark inside, the brass dish, the wax (pale, tinted by its colour as it is drawn), the wax's surface in the pot, the flame (white at its heart, tinted by its scent) and the candle's item in two layers (its body, tinted by its dyed colour; its wick and dish, not). The models, blockstates, item model, names, tooltip, messages, loot and tags come from `tools/chandlery_data.py`; the numbers from `CHANDLERY` in `tools/agriculture.py`. The client's `WaxPotRenderer` draws the wax in the pot at its level and colour; `AuraCandleRenderer` draws the candle at its height, layers and colour and its flame; both share `TintedBoxes`. The item's colour is the vanilla `dyed_color` component, read by the item model's dye tint. Sounds are vanilla's (honeycomb waxing, dye use, brewing, a bottle filling, a honey slide, a bucket emptying, a candle going out).
@@ -463,6 +488,11 @@ The feast table:
 - The dishes are drawn by `FeastTableRenderer`: each on its plate on the runner, the food lying on it, one, two or three pieces high as the servings run down.
 - Models (a length on its own, at the start, in the middle and at the end, along either axis), blockstates, loot, the recipe, the advancement and words come from `tools/feast_data.py`; the numbers from `FEAST` in `tools/agriculture.py`.
 - Sounds are vanilla's (a decorated pot's when a dish is served).
+
+The corn maze:
+- Textures are drawn by code in `tools/maze_textures.py`: the gate's weathered posts, its green pennant with a white arrow, and the finish post's chequered flag. The posts' hay wraps use vanilla's hay bale texture by reference (not copied), and maze corn uses ripe corn's own models.
+- Models, blockstates, the gate's item, loot (maze corn gives back its kernel from the bottom; the finish post gives nothing), the recipe, tags and words come from `tools/maze_data.py`; the numbers from `MAZE` in `tools/agriculture.py`.
+- Sounds are vanilla's (crops planted, a level-up chime at the finish).
 
 ## Verification
 ### Chandlery verification
@@ -685,6 +715,34 @@ Found by CI and fixed before this record: nothing; the feast's tests passed on t
 - a restart with diners counted;
 - how it balances in play against a beacon or a potion.
 
+### Maze verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-22` stacked on the Harvest Feast Table:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the maze with Java: the sizes in cells and their names, the planting rate, the longest run, the shortcut fraction and the most runners; checks the gate, finish post and maze corn are registered, with a model for every facing or section, words for every message and size, maze corn's loot giving back its kernel from the bottom only, and the gate's recipe and advancement) | Pass, 618 IDs |
+| `./gradlew build` on `b0035e6` (Build workflow run 37041890514) | Pass |
+| Game tests on the headless server, same run: 381 in total, 4 of them new here (`MazeGameTests`) | **All 381 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `b0035e6` (run 37041890514) and `62445da` (run 37040197910), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-corn-maze) from the latter: a medium maze planted by its gate, seen from above, and the gate between its walls |
+
+The 4 new game tests (`MazeGameTests`), each planting a tiny maze in its own test area:
+1. every size of maze has one way through and every open square reachable, and the same seed carves the same maze;
+2. too few kernels plant nothing; enough plant the maze, a kernel a stalk: three-tall maze corn on every wall square, the way through left open, and the finish post at the exit; a planted maze isn't planted again;
+3. a runner walked along the way through is timed (in about the time it took) and boarded in first place, with a first prize ribbon and A-maze-ing; one sent straight from the gate to the finish took a shortcut and isn't boarded; flying or leaving the maze voids a run;
+4. maze corn stands three tall on solid ground and blocks the way; breaking the bottom brings the stalk down and gives back a kernel.
+
+Found by CI and fixed before this record:
+- Two calls 26.3 doesn't have: taking the kernels now goes through the inventory by hand (`Inventory.clearOrCountMatchingItems` takes other arguments in 26.3), and maze corn pops when pushed with `PushReaction.POPPED`, as 26.3 calls what was `DESTROY` (`62445da`).
+- The run test looked for a "blue ribbon"; a winner gets the Harvest Scale's first prize ribbon (`b0035e6`).
+
+**Not run (maze):**
+- a person playing it in a client: planting a maze, finding the way through, racing friends;
+- a dedicated server with two or more players running at once;
+- a large maze planted over uneven or cluttered ground;
+- a restart during a run (runs are in memory, so a restart ends them).
+
 ## World and event applicability
 - Candles and pots work anywhere, in every dimension, all year. Nothing is seasonal. The aura doesn't depend on biome, time or weather; harvest helps only plants that would grow there anyway.
 - Revealing shows creatures through walls (Glowing), which can help find hostile mobs in caves; it gives no other information.
@@ -696,6 +754,7 @@ Found by CI and fixed before this record: nothing; the feast's tests passed on t
 
 - Sky lanterns go up in any dimension, all year. A festival counts lanterns in one dimension at a time.
 - A feast table works anywhere, in every dimension, all year.
+- A corn maze can be planted on any solid ground, in any dimension, all year. It needs no farmland or light.
 
 ## Rollout and open questions
 - The aura's area is a box reaching the radius in every direction, up and down too (a beacon's reaches the whole height of the world).
@@ -729,5 +788,10 @@ Found by CI and fixed before this record: nothing; the feast's tests passed on t
 - Variety counts kinds of food: two dishes of bread count once. A table longer than eight lengths is counted eight lengths at a time, from where you eat.
 - Only players are diners; pets and villagers at the table don't count.
 - Dishes can't be filled or emptied by hoppers.
+- A gate plants one maze. For a new maze, clear the old corn first (each stalk gives back its kernel), then place a gate again: a new gate plants round whatever still stands.
+- The finish post drops nothing. The clock stops at its square whether or not the post still stands.
+- The gate doesn't check that the paths are clear: on uneven or cluttered ground a wall may have gaps, or a path may be blocked by whatever was already there.
+- Runs count blocks walked across the ground, so a runner who wanders the dead ends is never mistaken for a shortcut; one who breaks through a wall usually is.
+- A maze's walls are corn, which anyone can break: the board's times are only as fair as the players keeping the maze.
 - Jars of preserves can't be served: a jar has no food component (it is eaten a serving at a time from the hand, with its own sealing and spoiling), and the table serves only items that do. Serving preserves at the table would be a follow-up.
 - A mooncake's Luck goes by the Overworld clock's moon wherever it is eaten, and needs only the sky open above the eater; it isn't limited to the Overworld.
