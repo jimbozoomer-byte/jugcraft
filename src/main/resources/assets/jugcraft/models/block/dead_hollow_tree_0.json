@@ -1,0 +1,213 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jugcraft:block/dead_tree_bark",
+    "bark": "jugcraft:block/dead_tree_bark",
+    "end": "jugcraft:block/dead_tree_end",
+    "hollow": "jugcraft:block/dead_tree_hollow",
+    "face": "jugcraft:block/dead_tree_face",
+    "eye": "jugcraft:block/dead_tree_eye",
+    "lantern_iron": "jugcraft:block/yard_lantern_iron",
+    "lantern_glass": "jugcraft:block/yard_lantern_glass"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        5,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bark"
+        },
+        "south": {
+          "texture": "#bark"
+        },
+        "east": {
+          "texture": "#bark"
+        },
+        "west": {
+          "texture": "#bark"
+        },
+        "up": {
+          "texture": "#bark"
+        },
+        "down": {
+          "texture": "#bark"
+        }
+      }
+    },
+    {
+      "from": [
+        -3,
+        0,
+        6
+      ],
+      "to": [
+        1,
+        2.5,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bark"
+        },
+        "south": {
+          "texture": "#bark"
+        },
+        "east": {
+          "texture": "#bark"
+        },
+        "west": {
+          "texture": "#bark"
+        },
+        "up": {
+          "texture": "#bark"
+        },
+        "down": {
+          "texture": "#bark"
+        }
+      }
+    },
+    {
+      "from": [
+        15,
+        0,
+        5
+      ],
+      "to": [
+        19,
+        2,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bark"
+        },
+        "south": {
+          "texture": "#bark"
+        },
+        "east": {
+          "texture": "#bark"
+        },
+        "west": {
+          "texture": "#bark"
+        },
+        "up": {
+          "texture": "#bark"
+        },
+        "down": {
+          "texture": "#bark"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        0,
+        15
+      ],
+      "to": [
+        10,
+        2.5,
+        19
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bark"
+        },
+        "south": {
+          "texture": "#bark"
+        },
+        "east": {
+          "texture": "#bark"
+        },
+        "west": {
+          "texture": "#bark"
+        },
+        "up": {
+          "texture": "#bark"
+        },
+        "down": {
+          "texture": "#bark"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        0,
+        -3
+      ],
+      "to": [
+        10.5,
+        2,
+        1
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bark"
+        },
+        "south": {
+          "texture": "#bark"
+        },
+        "east": {
+          "texture": "#bark"
+        },
+        "west": {
+          "texture": "#bark"
+        },
+        "up": {
+          "texture": "#bark"
+        },
+        "down": {
+          "texture": "#bark"
+        }
+      }
+    },
+    {
+      "from": [
+        2.5,
+        5,
+        2.5
+      ],
+      "to": [
+        13.5,
+        14,
+        13.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hollow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#bark"
+        },
+        "east": {
+          "texture": "#bark"
+        },
+        "west": {
+          "texture": "#bark"
+        },
+        "up": {
+          "texture": "#bark"
+        },
+        "down": {
+          "texture": "#bark"
+        }
+      }
+    }
+  ]
+}

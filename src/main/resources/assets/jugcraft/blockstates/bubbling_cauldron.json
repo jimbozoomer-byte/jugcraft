@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "contents=empty": {
+      "model": "jugcraft:block/bubbling_cauldron_empty"
+    },
+    "contents=water": {
+      "model": "jugcraft:block/bubbling_cauldron_water"
+    },
+    "contents=green": {
+      "model": "jugcraft:block/bubbling_cauldron_green"
+    },
+    "contents=purple": {
+      "model": "jugcraft:block/bubbling_cauldron_purple"
+    },
+    "contents=orange": {
+      "model": "jugcraft:block/bubbling_cauldron_orange"
+    }
+  }
+}

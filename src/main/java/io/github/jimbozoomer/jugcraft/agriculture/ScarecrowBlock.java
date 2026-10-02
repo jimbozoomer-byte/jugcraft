@@ -36,8 +36,8 @@ import org.jspecify.annotations.Nullable;
  * it wears it for a head, on its shoulders the way an armor stand wears a pumpkin, carving and all
  * ({@link ScarecrowBlockEntity}, on the upper half); an empty hand takes the head back, and a torch or soul torch
  * lights a hand-carved one. A lit head lights the scarecrow ({@link #LIGHT}). Wearing a lit head, sneak-used at midnight during the
- * Halloween event, it summons the Headless Horseman ({@link HorsemanSummoning}). Once crop-eating birds exist, it will
- * keep them off nearby fields (docs/branches/AGRICULTURE.md).
+ * Halloween event, it summons the Headless Horseman ({@link HorsemanSummoning}). It keeps crows ({@link Crow}) off the
+ * crops round it, the farther the better it is dressed ({@link Scarecrows}).
  */
 public class ScarecrowBlock extends TallDecorationBlock implements EntityBlock {
 	public static final EnumProperty<DyeColor> SHIRT = EnumProperty.create("shirt", DyeColor.class);
