@@ -347,11 +347,59 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ### Feature switches (`config/`)
 
-- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives` and `agriculture`.
+- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives`, `parties`, `drones` and `agriculture`.
 - It also holds other server options, `JugcraftConfig.OPTIONS` (read with `JugcraftConfig.option(key)`): `carving.free_draw` (default `true`).
-- Text options, `JugcraftConfig.TEXT_OPTIONS` (read with `JugcraftConfig.textOption(key)`): the Halloween event's `halloween.start` and `halloween.end` (`MM-DD`, defaults `10-20` and `11-03`), `halloween.timezone` (default `UTC`) and `halloween.mode` (`auto`, `on` or `off`). `HalloweenSeason` reads them; a bad value is logged and its default kept.
+- Text options, `JugcraftConfig.TEXT_OPTIONS` (read with `JugcraftConfig.textOption(key)`): the `seasons.*`, `harvest_feast*` and `december` settings (season/SeasonCalendar), and the Halloween event's `halloween.start` and `halloween.end` (`MM-DD`, defaults `10-20` and `11-03`), `halloween.timezone` (default `UTC`) and `halloween.mode` (`auto`, `on` or `off`). `HalloweenSeason` reads the Halloween ones; a bad value is logged and its default kept.
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
+
+### Seasons (`season/`, `client/SeasonColors`, `tools/seasons.py`)
+
+- **The clock.** `JugcraftSeasons` is the one season clock.
+  - `today()` gives the season day:
+    - 1–365 on the northern calendar, where 29 February shares the 28th's day and the south is `SOUTH_OFFSET` (182) days on;
+    - a fixed mode's day (`SeasonCalendar.Mode`: spring 105, summer 196, autumn 293, winter 15);
+    - 0 when off.
+  - `isActive(SeasonCalendar.Event)` tells whether an event is running: `HARVEST_FEAST` or `DECEMBER`. Events are calendar windows in the same zone.
+- **Settings.** `SeasonCalendar.Settings` reads `seasons.mode`, `seasons.hemisphere`, `seasons.timezone`, `seasons.snow`, `seasons.snow_depth`, `harvest_feast`, `harvest_feast.days` and `december` (`JugcraftConfig.TEXT_OPTIONS`; read them with `JugcraftConfig.textOption`).
+- **Overrides until the server stops.** `setMode`, `setFixedDate` (a preview date) and `setSnow` change the settings in memory only. The command `/jugcraft season [set|date|snow]` (`SeasonCommand`, permission level 2 to change) calls them.
+- **Sync.** The server sends `SeasonPayload` (day and snowing) on join and whenever anything changes; it checks once a minute. Events are announced in chat.
+- **Colours.**
+  - `season/SeasonPalette.colour(day, vanilla, foliage, x, z)` holds the colour maths: keyframes `YEAR` and patchy autumn hues.
+  - The client applies it to grass and foliage tints in `#jugcraft:has_seasons`, through the client mixin `mixin/client/ClientLevelSeasonMixin` on `ClientLevel.calculateBlockTint`.
+- **Biome flags.** `mixin/BiomeSeasonMixin` gives every biome `SeasonalBiome` flags, `jugcraft$hasSeasons()` and `jugcraft$hasWinterSnow()`. They are set from the two biome tags whenever tags load, so hot paths need no tag lookups.
+- **Winter snow.**
+  - `SeasonState.snowing()` is true when `seasons.snow` is on and the season day is in 1 December to 28 February.
+  - While it is true, `BiomeSeasonMixin` makes rain fall as snow in `#jugcraft:has_winter_snow`.
+  - `SeasonalSnow` lays `jugcraft:seasonal_snow` (`SeasonalSnowBlock`, vanilla snow models, in `#minecraft:snow`) round players while it rains. Once it is no longer snowing, the block melts on random ticks.
+- **For later seasonal content.** Read `JugcraftSeasons.today()`, `isActive(event)` or `SeasonState.snowing()` on the server. Never trust a client's date.
+
+### Parties (`party/`)
+
+- **Shared team rule.** Call the static methods on `JugcraftParties`: `sameParty`, `isLeader`, `partyMembers`, `partyId`, `addListener`.
+- **`mayServe(systemOwner, systemMode, jobOwner, jobMode)`** with `UseMode.PERSONAL`/`PARTY` is the one rule for whether an automated system may work on another player's job. Use it; don't write your own.
+- **Logic and storage:**
+  - `PartyManager` holds the rules and has no Minecraft types.
+  - `PartyStore` saves `<world>/jugcraft/parties.txt`.
+  - `PartyCommands` provides `/party`.
+- Details: [features/parties.md](features/parties.md).
+
+### Drones (`drone/`)
+
+- **`BuildJobs`** is the build-job interface. A `Source` offers open positions; depots reserve them, fly the materials there and call `fill`. Blueprints (#23) will be a source. `SimpleBuildJobs` is a minimal one, used by tests and the development-only `/dronetest` command.
+- **Pure logic (no Minecraft types), testable on its own:**
+  - `PlatformLayout` scans the platform the Drone Tower places: separated 5x5 pads and 3x3 supply pickups. A terminal without a tower flies no drones (`allowTiersWithoutTower` is for tests and `/dronetest` only).
+  - `DroneFleet` holds the roster and the cached pooled power; `DockLayout` places docked drones round the pads.
+  - `FlightScheduler` runs the timed flights; `FlightPath` is each flight's shape and timing (shared by server and client).
+- **World side:**
+  - `DroneTerminalBlockEntity` does power, dispatch and delivery, forms pads and pickups, and sends clients a `DepotView`.
+  - `DroneRoutes` picks each leg's cruise height over the terrain.
+  - `DroneDepots` is the registry of loaded terminals.
+  - `LandingPadBlock`, `SupplyPickupBlock`, `ControlScreenBlock` and `HoloTableBlock` are the combining plates, panels and table sections; `DepotDisplayBlockEntity` links a formed screen or table to the nearest terminal.
+- **Client side:** `DroneDepotRenderer` and `DroneModel` draw the drones (all nine tiers) and the pickup lift; `ControlScreenRenderer` draws the wall display; `HoloMapRenderer` draws the hologram map; `DroneTerminalScreen` is the terminal screen.
+- Tier numbers live in `DroneTier` and `tools/drones.py`; the checker keeps them in sync.
+- Details: [features/drone-depot.md](features/drone-depot.md).
+- **Drone Tower (`tower/`):** `JugcraftTower` registers the building blocks, furniture (`FurnitureBlock`), the Tower Core (`TowerCoreBlock`, `TowerCoreBlockEntity`) and modules. `TowerData` loads `data/jugcraft/drone_tower/tower.json.gz` (made by `tools/drone_tower.py`). `TowerBuildJobs` is the `BuildJobs.Source` for tiers 2–9. `TowerUpgradePayload` is the screen's upgrade request, and `TowerScreen` is the client screen. The terminal links to the core, and the tower gives it hangars, pickups, capacity and the drone tier cap. Details: [features/drone-tower.md](features/drone-tower.md).
 
 ### Registration (`materials/`)
 
@@ -359,7 +407,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - `MetalFamily.builder(name).mined().extraItem(...).build()` registers a whole metal set. `MineralFamily.register(name)` does the same for minerals.
 - `JugcraftWorldgen` adds placed features to biomes. In 26.x, configured features live in `data/jugcraft/worldgen/feature/` (there is no `configured_feature` folder), with no `config` wrapper and with block states written as plain IDs.
 - Surface deposits (`deposit/`): `JugcraftDeposits` registers the `DepositBlock`s (mirrors `tools/deposits.py`); `Deposits` keeps how much each touched deposit block has given (`SavedData`, `jugcraft_deposits.dat`) and turns an empty one to stone. `JugcraftWorldgen.addDeposit` adds their disk features to the stony hill biomes at `LOCAL_MODIFICATIONS`.
-- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → deposits → machines → fluids → petroleum → logistics → storage → electronics → farming → prospecting → kinetics → tools → guide → agriculture → conditions → worldgen → style pack.
+- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → deposits → machines → fluids → petroleum → logistics → storage → electronics → farming → prospecting → kinetics → tools → guide → agriculture → drones, the tower and blueprints → seasons → conditions → worldgen → parties → style pack.
 
 ### Looks (`tools/model_writer.py`, `tools/steampunk_*.py`)
 
@@ -431,6 +479,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `…/logistics/` | item pipe, extractor, sorter, wrench, item networks |
 | `…/machine/` | machine kinds, blocks, block entity, menu, recipes, footprints, power ports, side config, arc furnace structure |
 | `src/client/java/.../client/` | `JugcraftClient` (screen registration), `MachineScreen` |
+| `…/season/`, `…/mixin/BiomeSeasonMixin.java`, `src/client/.../SeasonColors.java`, `src/client/.../mixin/client/` | seasons: calendar and events, palette, sync, command, winter snow, the client tint hook |
 | `src/gametest/java/.../test/JugcraftGameTests.java` | game tests (run by `./gradlew build`) |
 | `src/gametest/java/.../test/JugcraftClientGameTests.java` | client game tests with screenshots (CI job `client`) |
 | `…/guide/`, `src/client/.../HandbookScreen.java`, `tools/handbook.py` | Engineer's Handbook |
@@ -453,7 +502,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Electronics beyond processors: a monitor-bank multi-block, computers that control machines, and uses for processors in the tiers above.
 - EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
-- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md). Farming has a harvester, sprinkler and cotton (`farming/`), and the agriculture branch its first three slices; greenhouses, rubber trees and the rest of the crop roster are not built (planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md)).
+- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md), apart from the seasons (colours, the Harvest Feast and December windows, and winter snow) and the agriculture branch's Halloween. Farming has a harvester, sprinkler and cotton (`farming/`), and the agriculture branch its slices so far; greenhouses, rubber trees and the rest of the crop roster are not built (planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md)).
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).
 - Handbook translations (English only).
 

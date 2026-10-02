@@ -11,11 +11,14 @@ from pathlib import Path
 
 from PIL import Image
 
+from party import PARTY_LANG
+import drones
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS, PART_UNITS, CIRCUITS, WASHED_ORES,
                        all_blocks, all_items, feature_of)
 import agriculture as ag
 import petro
 import deposits
+import seasons
 import tank_display
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
@@ -27,6 +30,7 @@ DATA = RES / "data"
 JAVA_ROOT = ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft"
 JAVA = JAVA_ROOT / "materials" / "JugcraftMaterials.java"
 CONFIG = JAVA_ROOT / "config" / "JugcraftConfig.java"
+SEASON_JAVA = JAVA_ROOT / "season"
 WORLDGEN = JAVA_ROOT / "materials" / "JugcraftWorldgen.java"
 MACHINE_JAVA = JAVA_ROOT / "machine" / "MachineKind.java"
 AGRICULTURE_JAVA = JAVA_ROOT / "agriculture"
@@ -79,8 +83,8 @@ def texture(ref):
         width, height = img.size
         if animated and not (width == 16 and height % 16 == 0 and height > 16):
             err(f"Animated texture {ref} is {img.size}, expected a 16-wide strip of 16x16 frames")
-        elif not animated and img.size != (16, 16):
-            err(f"Texture {ref} is {img.size}, expected 16x16")
+        elif not animated and img.size != (16, 16) and not (img.size == (64, 64) and _hi_res(png.stem)):
+            err(f"Texture {ref} is {img.size}, expected 16x16 (64x64 only for tower_art textures)")
 
 
 def model(ref):
@@ -91,12 +95,20 @@ def model(ref):
     if data is None:
         return
     for tex in data.get("textures", {}).values():
-        texture(tex)
+        # A texture is a reference, or {"sprite": reference, "force_translucent": ...}.
+        texture(tex["sprite"] if isinstance(tex, dict) else tex)
+
+
+def _hi_res(name):
+    """The drone tower's realistic block textures (tools/tower_art.py) are 64x64."""
+    import tower_art
+    return name in tower_art.TEXTURES or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_"))
 
 
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
-    for block in all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS):
+    for block in (all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS) + ag.all_blocks()
+                  + seasons.BLOCKS):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -209,7 +221,8 @@ UNITS = {"ingots": 9, "nuggets": 1, "raw_materials": 9, "ores": 9, "storage_bloc
          **{f"{form}s": units for form, units in PART_UNITS.items()}}
 
 
-NON_METAL = {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS)
+import guide_books
+NON_METAL = set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ag.all_blocks()) | set(ag.all_items())
 
 
 def item_units(ref):
@@ -363,11 +376,11 @@ def check_fluid_recipes(registered):
             err(f"MachineKind.recipeType() has no \"{spec['recipe_type']}\" for {machine}")
         if spec["recipe_type"] in RECIPE_TYPES.values():
             err(f"Fluid recipe type {spec['recipe_type']} is also an item machine's")
-    expected = sum(len(r) for r in petro.FLUID_RECIPES.values())
+    expected = sum(len(r) for r in petro.FLUID_RECIPES.values()) + sum(len(r) for r in drones.DRONE_FLUID_RECIPES.values())
     types = {spec["recipe_type"] for spec in petro.FLUID_MACHINES.values() if spec["recipe_type"]}
     files = [p for p in (DATA / MOD / "recipe").glob("*/*.json") if p.parent.name in types]
     if len(files) != expected:
-        err(f"{len(files)} fluid recipe files, but tools/petro.py defines {expected}")
+        err(f"{len(files)} fluid recipe files, but tools/petro.py and tools/drones.py define {expected}")
     for machine, recipes in petro.FLUID_RECIPES.items():
         spec = petro.FLUID_MACHINES[machine]
         for recipe in recipes:
@@ -418,6 +431,10 @@ def check_tags():
             if value.startswith("#"):
                 if not tag_exists(registry, value[1:]):
                     err(f"{path.relative_to(ROOT)}: unknown tag {value}")
+            elif registry == "damage_type":
+                ns, name = split(value)
+                if not (DATA / ns / "damage_type" / f"{name}.json").is_file():
+                    err(f"{path.relative_to(ROOT)}: unknown damage type {value}")
             elif registry == "fluid":
                 if split(value)[1] not in petro.fluid_ids():
                     err(f"{path.relative_to(ROOT)}: unknown fluid {value}")
@@ -428,7 +445,7 @@ def check_tags():
             elif split(value)[0] == MOD and split(value)[1] not in (all_blocks() + all_items() + machine_blocks()
                                                                     + machine_items() + petro.petro_blocks()
                                                                     + petro.petro_items() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
-                                                                    + ag.all_blocks() + ag.all_items()):
+                                                                    + seasons.BLOCKS + ag.all_blocks() + ag.all_items()):
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
 
@@ -447,6 +464,40 @@ def check_worldgen():
         feature = split((load(path) or {})["feature"])[1]
         if not (DATA / MOD / "worldgen" / "feature" / f"{feature}.json").is_file():
             err(f"{path.name}: unknown configured feature {feature}")
+
+
+def check_seasons():
+    """The seasons biome tags match tools/seasons.py, seasonal snow is registered as data says, and the palette and
+    calendar days are in the year."""
+    java = (SEASON_JAVA / "JugcraftSeasons.java").read_text(encoding="utf-8")
+    for tag_id, biomes in ((seasons.TAG, seasons.BIOMES), (seasons.WINTER_SNOW_TAG, seasons.WINTER_SNOW)):
+        ns, path = split(tag_id)
+        tag = load(DATA / ns / "tags" / "worldgen" / "biome" / f"{path}.json") or {}
+        if tag.get("values") != biomes:
+            err(f"#{tag_id} {tag.get('values')} != tools/seasons.py {biomes}")
+        if f'Jugcraft.id("{path}")' not in java:
+            err(f"JugcraftSeasons does not read #{tag_id}")
+    if not set(seasons.WINTER_SNOW) - {"minecraft:pale_garden"} <= set(seasons.BIOMES):
+        err("Every winter-snow biome but the pale garden must have seasons")
+    snow = (SEASON_JAVA / "SeasonalSnow.java").read_text(encoding="utf-8")
+    if f'ID = "{seasons.SNOW_BLOCK}"' not in snow:
+        err(f"SeasonalSnow.ID is not {seasons.SNOW_BLOCK}")
+    for registry, tag in (("block", "minecraft:snow"), ("block", "minecraft:mineable/shovel")):
+        ns, path = split(tag)
+        if f"{MOD}:{seasons.SNOW_BLOCK}" not in (load(DATA / ns / "tags" / registry / f"{path}.json") or {}).get("values", []):
+            err(f"{seasons.SNOW_BLOCK} is not in #{tag}")
+    days = [int(day) for day in re.findall(r"new Keyframe\((\d+),", (SEASON_JAVA / "SeasonPalette.java").read_text(encoding="utf-8"))]
+    if not days or days != sorted(set(days)) or days[0] < 1 or days[-1] > 365:
+        err(f"SeasonPalette keyframe days {days} must rise strictly within 1..365")
+    modes = re.findall(r"([A-Z]+)\((-?\d+)\)", (SEASON_JAVA / "SeasonCalendar.java").read_text(encoding="utf-8"))
+    for mode, day in modes:
+        if not (int(day) == -1 if mode == "AUTO" else 0 <= int(day) <= 365):
+            err(f"SeasonCalendar.Mode.{mode} day {day} is outside the year")
+    options = CONFIG.read_text(encoding="utf-8")
+    for option in ("seasons.mode", "seasons.hemisphere", "seasons.timezone", "seasons.snow", "seasons.snow_depth",
+                   "harvest_feast", "harvest_feast.days", "december"):
+        if f'"{option}"' not in options:
+            err(f"JugcraftConfig.TEXT_OPTIONS has no {option}")
 
 
 def check_java():
@@ -479,6 +530,13 @@ def check_java():
     features = re.findall(r'"([a-z_]+)"', CONFIG.read_text(encoding="utf-8").split("List.of(")[1].split(");")[0])
     if features != FEATURES:
         err(f"JugcraftConfig.FEATURES {features} != {FEATURES}")
+
+    # Every party action result needs a chat message (party/PartyCommands.java shows them).
+    party_source = (JAVA_ROOT / "party" / "PartyManager.java").read_text(encoding="utf-8")
+    results = re.findall(r"\b([A-Z_]+)\b", re.search(r"enum Result \{([^}]*)\}", party_source).group(1))
+    for result in results:
+        if f"error.{result.lower()}" not in PARTY_LANG:
+            err(f"PartyManager.Result.{result} has no message in tools/party.py")
 
     worldgen = WORLDGEN.read_text(encoding="utf-8")
     placed = sorted(p.stem[4:] for p in (DATA / MOD / "worldgen" / "placed_feature").glob("ore_*.json"))
@@ -630,6 +688,95 @@ def check_advancements(registered):
         # A vanilla tab's root may be the parent (the Halloween advancements live in Husbandry).
         if parent and parent not in VANILLA_ADVANCEMENT_ROOTS and split(parent)[1] not in names:
             err(f"advancement {path.stem}: missing parent {parent}")
+def check_guide_books():
+    """drone/GuideBooks.java's page counts match tools/guide_books.py; every page's screenshot exists at 512x288."""
+    import guide_books
+    java = (JAVA_ROOT / "drone" / "GuideBooks.java").read_text(encoding="utf-8")
+    for item, const in (("drone_tower_manual", "MANUAL_PAGES"), ("creative_tower_guide", "CREATIVE_PAGES")):
+        m = re.search(const + r" = (\d+);", java)
+        if not m or int(m.group(1)) != guide_books.PAGE_COUNTS[item]:
+            err(f"GuideBooks.{const} must be {guide_books.PAGE_COUNTS[item]} (pages in tools/guide_books.py)")
+        for i, (heading, body, _) in enumerate(guide_books.BOOKS[item][1]):
+            if len(body) > 300:
+                err(f"{item} page {i + 1} is {len(body)} characters; keep it under 300 so it fits under its picture")
+    for shot in guide_books.SCREENSHOTS:
+        png = guide_books.SHOTS / f"{shot}.png"
+        if not png.is_file():
+            err(f"guide screenshot {png.relative_to(ROOT)} is missing")
+        else:
+            with Image.open(png) as img:
+                if img.size != (512, 288):
+                    err(f"guide screenshot {shot}.png is {img.size}, expected 512x288")
+
+
+def check_tower():
+    """tower/JugcraftTower.java registers what tools/tower.py describes, and the tower data is generated."""
+    import tower
+    import tower_costs
+    tower_costs.check(err)
+    java = (JAVA_ROOT / "tower" / "JugcraftTower.java").read_text(encoding="utf-8")
+    building = re.findall(r'\{"([a-z_]+)", "([a-z:0-9]+)"\}', re.search(r"BUILDING = \{(.*?)\};", java, re.S).group(1))
+    expected = [(b, i["kind"] if i["kind"] != "light" else f"light:{i['light']}") for b, i in tower.BUILDING.items()]
+    if building != expected:
+        err(f"JugcraftTower.BUILDING {building} != tools/tower.py {expected}")
+    variants = re.findall(r'"([a-z_]+)"', re.search(r"VARIANTS = \{(.*?)\};", java, re.S).group(1))
+    if variants != [b for b, i in tower.BUILDING.items() if i.get("variants")]:
+        err("JugcraftTower.VARIANTS differs from tools/tower.py")
+    modules = re.findall(r'"([a-z_]+)"', re.search(r"MODULES = \{(.*?)\};", java, re.S).group(1))
+    if modules != list(tower.MODULES):
+        err("JugcraftTower.MODULES differs from tools/tower.py")
+    for block in tower.FURNITURE:
+        if f'furniture("{block}"' not in java:
+            err(f"JugcraftTower does not register furniture {block}")
+    if not (ROOT / "src" / "main" / "resources" / "data" / "jugcraft" / "drone_tower" / "tower.json.gz").exists():
+        err("missing tower data: run tools/drone_tower.py")
+
+
+def check_drones():
+    """drone/DroneTier.java, JugcraftDrones.PARTS and PlatformLayout match tools/drones.py."""
+    java = JAVA_ROOT / "drone"
+    tiers = re.findall(r"^\s+[A-Z_]+\((\d+), (\d+), (\d+), DroneSize\.([A-Z]+), (true|false)\)",
+                       (java / "DroneTier.java").read_text(encoding="utf-8"), re.M)
+    if len(tiers) != len(drones.DRONE_TIERS):
+        err(f"DroneTier.java has {len(tiers)} tiers, tools/drones.py {len(drones.DRONE_TIERS)}")
+    for number, (capacity, speed, upkeep, size, available) in enumerate(tiers, start=1):
+        info = drones.DRONE_TIERS.get(number, {})
+        found = {"capacity": int(capacity), "speed": int(speed), "upkeep": int(upkeep), "size": size.lower(),
+                 "available": available == "true"}
+        for key, value in found.items():
+            if info.get(key) != value:
+                err(f"drone tier {number}: {key} is {value} in Java, {info.get(key)} in tools/drones.py")
+    parts = re.findall(r'"([a-z_]+)"', re.search(r"PARTS = \{([^}]*)\}", (java / "JugcraftDrones.java").read_text(encoding="utf-8")).group(1))
+    if parts != list(drones.DRONE_PARTS):
+        err(f"JugcraftDrones.PARTS {parts} != tools/drones.py {list(drones.DRONE_PARTS)}")
+    layout = (java / "PlatformLayout.java").read_text(encoding="utf-8")
+    if f"MAX_DRONES = {drones.MAX_DRONES};" not in layout:
+        err("PlatformLayout.MAX_DRONES differs from tools/drones.py")
+    if f"PAD_SIZE = {drones.PAD_SIZE};" not in layout:
+        err("PlatformLayout.PAD_SIZE differs from tools/drones.py")
+    if f"HEIGHT = {drones.PAD_PLATE_HEIGHT};" not in (java / "LandingPadBlock.java").read_text(encoding="utf-8"):
+        err("LandingPadBlock.HEIGHT differs from tools/drones.py PAD_PLATE_HEIGHT")
+    if f"PICKUP_SIZE = {drones.PICKUP_SIZE};" not in layout:
+        err("PlatformLayout.PICKUP_SIZE differs from tools/drones.py")
+    # The drone models' 32x32 fleet regions sit where tools/drone_textures.py draws them.
+    import drone_textures
+    model = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+             / "DroneModel.java").read_text(encoding="utf-8")
+    for index, name in enumerate(drone_textures.FLEET_ORDER):
+        x, y = drone_textures.fleet_slot(index)
+        if f"static final float[] {name.upper()} = fleet({x}, {y});" not in model:
+            err(f"DroneModel.java: fleet region {name.upper()} is not fleet({x}, {y})")
+    holo = (java / "HoloTableBlock.java").read_text(encoding="utf-8")
+    if f"SIZE = {drones.HOLO_SIZE};" not in holo or f"HEIGHT = {drones.HOLO_HEIGHT};" not in holo:
+        err("HoloTableBlock SIZE/HEIGHT differ from tools/drones.py")
+    screen = (java / "ControlScreenBlock.java").read_text(encoding="utf-8")
+    for name, value in (("WIDTH", drones.SCREEN_WIDTH), ("HEIGHT", drones.SCREEN_HEIGHT), ("THICKNESS", drones.SCREEN_THICKNESS)):
+        if f"{name} = {value};" not in screen:
+            err(f"ControlScreenBlock.{name} differs from tools/drones.py")
+    for result, (pattern, key, count) in drones.DRONE_CRAFTING.items():
+        used = set("".join(pattern)) - {" "}
+        if used != set(key):
+            err(f"drone recipe {result}: pattern letters {sorted(used)} != key {sorted(key)}")
 
 
 def check_style_pack():
@@ -2662,8 +2809,8 @@ def check_deposits():
 
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
-                  | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
-                  | set(deposits.DEPOSITS) | set(tank_display.BLOCKS))
+                  | set(petro.petro_items()) | set(petro.petro_blocks()) | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
+                  | set(ag.all_blocks()) | set(ag.all_items()))
     check_assets(sorted(registered))
     check_petro()
     check_loot(registered)
@@ -2674,9 +2821,13 @@ def main():
     check_worldgen()
     check_java()
     check_deposits()
+    check_seasons()
     check_machines(registered)
     check_large_machines()
     check_style_pack()
+    check_drones()
+    check_tower()
+    check_guide_books()
     check_handbook(registered)
     check_agriculture()
     check_recipe_categories()
