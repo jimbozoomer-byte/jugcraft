@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.Knitting;
@@ -9,6 +11,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.Knitwear;
 import io.github.jimbozoomer.jugcraft.agriculture.SpinningWheelBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.SpinningWheelBlockEntity;
 import java.util.List;
+import java.util.Optional;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
@@ -22,7 +25,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -30,6 +32,13 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
@@ -41,7 +50,7 @@ import net.minecraft.world.phys.Vec3;
  * In-game tests for knitting: the Spinning Wheel taking a skein of wool and spinning it in four turns (by hand or by a
  * redstone pulse) into four balls of yarn in its colour set out in front, refusing a second skein, and unravelling knitwear
  * into its yarn less one; Knitting Needles changing project, knitting a row a ball of yarn, unpicking, and finishing a
- * garment in the blend of its yarns; knitwear being worn, freeze-proof and dyeable; and keeping cosy by a lit campfire in
+ * garment in the blend of its yarns; knitwear being worn and freeze-proof, and taking dye as leather does; and keeping cosy by a lit campfire in
  * two pieces of knitwear (not one, not by an unlit fire), and Snug as a Bug in all three.
  */
 public class KnittingGameTests {
@@ -177,21 +186,47 @@ public class KnittingGameTests {
 	}
 
 	/**
-	 * Knitwear is worn in its slot, keeps out powder snow's cold and takes dye. Two pieces by a lit campfire make a player
+	 * Knitwear and yarn take dye at a crafting table by the same recipe that dyes leather armour: a garment and red dye make
+	 * the garment redder.
+	 */
+	@GameTest
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public void knitwearTakesDye(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
+		Optional<RecipeHolder<CraftingRecipe>> leather = crafting.getRecipeFor(
+				CraftingInput.of(2, 1, List.of(new ItemStack(Items.LEATHER_HELMET), new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("red_dye"))))), level);
+		helper.assertTrue(leather.isPresent(), "A leather helmet and red dye make a recipe");
+		CraftingRecipe dyeing = leather.get().value();
+		Object json = ((MapCodec) dyeing.getSerializer().codec()).codec()
+				.encodeStart(level.registryAccess().createSerializationContext(JsonOps.INSTANCE), dyeing);
+		String how = leather.get().id() + " " + dyeing.getClass().getName() + " " + json;
+		List<ItemStack> knits = new java.util.ArrayList<>(List.of(Knitting.yarn(Knitting.UNDYED, 1)));
+		for (Knitwear knit : Knitwear.values()) {
+			knits.add(Knitting.garment(knit, Knitting.UNDYED));
+		}
+		for (ItemStack knit : knits) {
+			CraftingInput input = CraftingInput.of(2, 1, List.of(knit, new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("red_dye")))));
+			Optional<RecipeHolder<CraftingRecipe>> recipe = crafting.getRecipeFor(input, level);
+			helper.assertTrue(recipe.isPresent() && recipe.get().id().equals(leather.get().id()), knit + " takes dye as leather does: " + how);
+			ItemStack dyed = recipe.get().value().assemble(input);
+			DyedItemColor color = dyed.get(DataComponents.DYED_COLOR);
+			helper.assertTrue(dyed.is(knit.getItem()) && color != null && color.rgb() != Knitting.UNDYED, knit + " comes out dyed: " + dyed);
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * Knitwear is worn in its slot and keeps out powder snow's cold. Two pieces by a lit campfire make a player
 	 * cosy (Regeneration); one piece, or an unlit fire, doesn't; all three earn Snug as a Bug.
 	 */
 	@GameTest(maxTicks = 20)
 	public void knitwearKeepsYouCosy(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		// Vanilla's dyeable items (leather armour is one), which its dyeing recipe takes.
-		TagKey<Item> dyeable = TagKey.create(Registries.ITEM, Identifier.withDefaultNamespace("dyeable"));
-		helper.assertTrue(new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("leather_helmet"))).is(dyeable),
-				"minecraft:dyeable is vanilla's dyeable tag (leather is in it)");
-		helper.assertTrue(Knitting.yarn(Knitting.UNDYED, 1).is(dyeable), "Yarn takes dye");
 		for (Knitwear knit : Knitwear.values()) {
 			ItemStack garment = Knitting.garment(knit, 0x228822);
 			helper.assertTrue(garment.get(DataComponents.EQUIPPABLE).slot() == knit.slot && garment.is(ItemTags.FREEZE_IMMUNE_WEARABLES)
-					&& garment.is(dyeable) && garment.is(Knitting.KNITWEAR), knit + " is worn, warm and dyeable");
+					&& garment.is(Knitting.KNITWEAR), knit + " is worn and warm");
 		}
 		helper.setBlock(new BlockPos(3, 2, 3), Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, false));
 		ServerPlayer player = player(helper, new BlockPos(3, 2, 5));
