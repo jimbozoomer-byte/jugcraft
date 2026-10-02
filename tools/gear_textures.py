@@ -200,6 +200,100 @@ BOOTS = [
     "................",
 ]
 
+# Batch 27 gear. Letters: R rubber (black), G glass (pale blue), Y yellow (hazard paint), and the digits are steel.
+SCUBA_MASK = [
+    "................",
+    "................",
+    "...RRRRRRRRRR...",
+    "..R4444444444R..",
+    "..R4GGGGGGGG4R..",
+    "..R4GGGGGGGG4R..",
+    "..R4GGGGGGGG4R..",
+    "..R4444444444R..",
+    "...RR22RR22RR...",
+    ".....RR..RR.....",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+SCUBA_TANK = [
+    "................",
+    "......2332......",
+    ".....R2442R.....",
+    "....YYYYYYYY....",
+    "....Y444443Y....",
+    "....Y444443Y....",
+    "....Y444443Y....",
+    "....RRRRRRRR....",
+    "....Y444443Y....",
+    "....Y444443Y....",
+    "....Y444443Y....",
+    "....YYYYYYYY....",
+    ".....233332.....",
+    "................",
+    "................",
+    "................",
+]
+FREE_RUNNERS = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "...RRR....RRR...",
+    "...R4R....R4R...",
+    "...R4R....R4R...",
+    "...R3R....R3R...",
+    "..RR3R....R3RR..",
+    ".R4443R..R3444R.",
+    ".RRRRRR..RRRRRR.",
+    "..Y..Y....Y..Y..",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+# A curved single-edged blade with a glowing edge (G) and a wrapped rubber grip.
+POWER_KATANA = [
+    "..............34",
+    ".............34G",
+    "............34G.",
+    "...........34G..",
+    "..........34G...",
+    ".........34G....",
+    "........34G.....",
+    ".......34G......",
+    "......34G.......",
+    ".....3YG........",
+    "...YYYY.........",
+    "....RR..........",
+    "...RR...........",
+    "..RR............",
+    ".RR.............",
+    "R2..............",
+]
+BOW_BASE = [
+    "........RR......",
+    ".......R4.W.....",
+    "......R4..W.....",
+    ".....43...W.....",
+    "....43....W.....",
+    "...43.....W.....",
+    "..43......W.....",
+    "..2YG.....W.....",
+    "..2YG.....W.....",
+    "..43......W.....",
+    "...43.....W.....",
+    "....43....W.....",
+    ".....43...W.....",
+    "......R4..W.....",
+    ".......R4.W.....",
+    "........RR......",
+]
+EXTRA_COLORS = {"R": (32, 32, 36), "G": (120, 220, 255), "Y": (232, 186, 40), "W": (226, 226, 220)}
+
 TOOLS = {"sword": SWORD, "pickaxe": PICKAXE, "axe": AXE, "shovel": SHOVEL, "hoe": HOE}
 ARMOR = {"helmet": HELMET, "chestplate": CHESTPLATE, "leggings": LEGGINGS, "boots": BOOTS}
 
@@ -222,6 +316,61 @@ def icon(mask, palette):
                 img.putpixel((x, y), tuple(palette[int(ch)]) + (255,))
             elif ch in "hH":
                 img.putpixel((x, y), HANDLE[ch == "H"] + (255,))
+            elif ch in EXTRA_COLORS:
+                img.putpixel((x, y), EXTRA_COLORS[ch] + (255,))
+    return img
+
+
+def bow_drawn(step):
+    """The power bow drawn back: the string pulled further left each step, with an energy bolt nocked."""
+    rows = [list(r) for r in BOW_BASE]
+    for row in rows:
+        for x, ch in enumerate(row):
+            if ch == "W":
+                row[x] = "."
+    pull = 10 - 2 * (step + 1)
+    for y in range(1, 15):
+        bend = pull - min(abs(y - 7.5), 6) * 0.5
+        rows[y][max(5, int(round(bend)))] = "W"
+    for x in range(max(3, int(pull) - 4), 15):
+        rows[8][x] = "G" if x > int(pull) else rows[8][x]
+    return ["".join(r) for r in rows]
+
+
+def scuba_layer(palette):
+    """Worn scuba gear on the humanoid sheet: a glass-fronted mask over the face and a yellow tank on the back."""
+    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+    rubber, glass, yellow = EXTRA_COLORS["R"], EXTRA_COLORS["G"], EXTRA_COLORS["Y"]
+    # Mask: a rubber strap round the head (the head's side faces) and the glass window on the front (x 8..15).
+    for x in range(0, 32):
+        for y in (11, 12):
+            img.putpixel((x, y), rubber + (255,))
+    for x in range(9, 15):
+        for y in range(10, 14):
+            img.putpixel((x, y), glass + (255,))
+    for x in (8, 15):
+        for y in range(9, 15):
+            img.putpixel((x, y), tuple(palette[4]) + (255,))
+    # Tank on the back of the body (back face x 32..39, y 20..31) and harness straps on the front (x 20..27).
+    for x in range(33, 39):
+        for y in range(20, 31):
+            img.putpixel((x, y), (yellow if y not in (20, 30) else tuple(palette[2])) + (255,))
+    for y in range(20, 32):
+        for x in (21, 26):
+            img.putpixel((x, y), rubber + (255,))
+    return img
+
+
+def runners_layer(palette):
+    """Free runners on the humanoid sheet: black rubber boots with steel springs, on the bottom of the legs."""
+    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+    rubber, yellow = EXTRA_COLORS["R"], EXTRA_COLORS["Y"]
+    for left, top, width, height in _faces(RIGHT_LEG)[2:]:
+        for y in range(top + height - 4, top + height):
+            for x in range(left, left + width):
+                c = tuple(palette[3]) if y == top + height - 3 else rubber
+                img.putpixel((x, y), c + (255,))
+        img.putpixel((left + width // 2, top + height - 4), yellow + (255,))
     return img
 
 
@@ -293,6 +442,14 @@ def draw_all(save, save_armor, part_palette):
             save(icon(mask, palette), "item", f"{metal}_{piece}")
         save_armor(armor_layer(palette, False), "humanoid", metal)
         save_armor(armor_layer(palette, True), "humanoid_leggings", metal)
+    steel = part_palette("steel")
+    for name, mask in (("scuba_mask", SCUBA_MASK), ("scuba_tank", SCUBA_TANK), ("free_runners", FREE_RUNNERS),
+                       ("power_katana", POWER_KATANA), ("power_bow", BOW_BASE)):
+        save(icon(mask, steel), "item", name)
+    for step in range(3):
+        save(icon(bow_drawn(step), steel), "item", f"power_bow_pulling_{step}")
+    save_armor(scuba_layer(steel), "humanoid", "scuba")
+    save_armor(runners_layer(steel), "humanoid", "free_runners")
     for tier, palette in list(VANILLA_TIERS.items()) + [("bronze", part_palette("bronze")),
                                                          ("steel", part_palette("steel"))]:
         save(icon(PAXEL, palette), "item", f"{tier}_paxel")

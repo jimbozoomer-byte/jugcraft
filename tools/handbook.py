@@ -363,6 +363,21 @@ def gear_pages():
             "A paxel is a pickaxe, an axe and a shovel in one tool: it mines stone, wood and dirt at full speed.",
             "Craft one from a pickaxe, an axe and a shovel of the same tier, from wood to netherite, bronze or steel. "
             "It lasts as long as all three together."]},
+        {"title": "Scuba Gear", "icon": f"{MOD}:scuba_tank", "text": [
+            "Wear the scuba mask and the scuba tank together to breathe under water.",
+            f"The tank holds {gear.SCUBA_OXYGEN:,} mB of oxygen. Use it on anything holding oxygen to fill it: a gas "
+            "holder, or the oxygen tank of an electrolytic cell or air separation unit.",
+            f"Under water it keeps your air full for {gear.SCUBA_OXYGEN_PER_TICK} mB a tick: a full tank lasts "
+            f"{gear.SCUBA_OXYGEN // gear.SCUBA_OXYGEN_PER_TICK // 20} seconds of breathing."]},
+        {"title": "Free Runners", "icon": f"{MOD}:free_runners", "text": [
+            "Rubber-soled boots that take away all fall damage and step up a full block without jumping.",
+            "They protect like iron boots and are mended with rubber."]},
+        {"title": "Power Katana and Power Bow", "icon": f"{MOD}:power_katana", "text": [
+            "Two weapons that run on JE instead of wearing out. Charge them at a charging station; capacity modules fit "
+            "both.",
+            "The power katana hits harder and faster than a netherite sword, for 1,000 JE a hit. Empty, it hits for 1.",
+            "The power bow fires arrows of energy for 500 JE a shot: no arrows needed, and they fly faster and hit "
+            "harder. Empty, it is an ordinary bow that shoots your arrows."]},
     ]
 
 
@@ -586,6 +601,10 @@ def build():
                 "each into four optical fibre, which can carry a processor's signals instead of gold.",
                 "Iron and borax make ferroboron; a rare earth oxide with ferroboron gives two neodymium magnets, "
                 "twice the old recipe."]},
+            {"title": "Plastic Blocks", "icon": f"{MOD}:light_blue_plastic", "text": [
+                "Eight plastic sheets around a dye make eight plastic blocks of that colour, in all sixteen dye "
+                "colours.",
+                "They are smooth, bright building blocks, as hard as concrete; mine them with a pickaxe."]},
             {"title": "Chlorine and Lye", "icon": f"{MOD}:pvc_resin", "text": [
                 "PVC: the synthesis converter joins 250 mB of refinery gas and 250 mB of chlorine into 250 mB of vinyl "
                 "chloride; the polymerization reactor turns 500 mB of it into four PVC resin, and the metal press "

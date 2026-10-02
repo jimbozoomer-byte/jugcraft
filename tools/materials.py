@@ -213,6 +213,9 @@ def feature_of(entry_id):
     import tank_display
     if entry_id in tank_display.BLOCKS:
         return FEATURE
+    import plastic
+    if entry_id in plastic.blocks():
+        return "crude_oil"
     import gear
     if entry_id in gear.items():
         tier = entry_id.rsplit("_", 1)[0]

@@ -393,6 +393,19 @@ Empty tools mine like a bare hand and get no drops.
 
 **Code:** `gear/JugcraftGear`; data and art from `tools/gear.py` and `tools/gear_textures.py` ([feature record](features/tools-and-armor.md)).
 
+### Scuba gear, free runners and power weapons (batch 27)
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Scuba Mask | With the scuba tank, breathe under water | steel plates, rubber, glass pane |
+| Scuba Tank | Holds 8,000 mB of oxygen (use on a gas holder to fill); 1 mB a tick under water with the mask | rubber, steel plates, fluid tank |
+| Free Runners | No fall damage; step up a full block | leather, steel plates, rubber |
+| Power Katana | 11 damage, 1.8 attacks/s; 1,000 JE a hit, 200,000 JE full | tungsten plates, lithium cell, advanced circuit, steel ingot |
+| Power Bow | Energy arrows, no ammo, 500 JE a shot, 100,000 JE full; an ordinary bow when empty | steel plates, string, lithium cell, advanced circuit |
+| Plastic blocks (16 colours) | Building blocks | 8 plastic sheets around a dye make 8 |
+
+**Code:** `gear/` (`JugcraftGear`, `ScubaTankItem`, `PowerKatanaItem`, `PowerBowItem`); plastic blocks in `chemistry/PetroBlocks`; data from `tools/gear.py` and `tools/plastic.py` ([feature record](features/gear-and-plastic.md)).
+
 ## Oil
 
 The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line), [feature record](features/petrochemistry.md)).

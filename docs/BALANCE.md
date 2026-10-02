@@ -63,6 +63,9 @@ A charging station on copper cable fills at 256 JE/t; silver cable or better let
 | Mining Drill | 60 JE a block (×2 / ×3 with overclock modules); 100,000 JE full |
 | Chainsaw | 40 JE a block; 100,000 JE full |
 | Rocket Pack | 50 JE a tick of thrust; 200,000 JE full (about 200 s) |
+| Power Katana | 1,000 JE a hit; 200,000 JE full |
+| Power Bow | 500 JE a shot; 100,000 JE full; arrows cannot be picked up |
+| Scuba Tank | 1 mB oxygen a tick under water while air is short; 8,000 mB full (400 s; 256,000 JE of air separation) |
 
 ## Oil
 
