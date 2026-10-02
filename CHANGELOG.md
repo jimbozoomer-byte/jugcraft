@@ -8,6 +8,25 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: fall additions 15, knitting (pull request pending, stacked on the Hay Golem)
+- **Spinning Wheel:** put a skein of wool on the distaff and work the treadle (or pulse it with redstone): four turns spin it into four balls of yarn in its colour, set out where a hopper can take them. It unravels knitwear back into yarn, less a ball.
+- **Knitting Needles:** with yarn in the other hand, knit a row at a time into a Knit Beanie, Wool Socks, or one of five sweaters (plain, striped, pumpkin, bat, autumn leaf), coloured the blend of its rows (Knit One, Purl Two). Sneak to change project or unpick.
+- **Knitwear** is worn and shows in its colour, keeps out powder snow, and takes dye (and washes clean in a cauldron) as leather does in 26.3. Two pieces by a lit campfire make you cosy (Regeneration I); a beanie, sweater and socks earn Snug as a Bug.
+- The checker's recipe audit knows 26.3's dyeing recipes. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 14, the Hay Golem (pull request pending, stacked on the Bat House)
+- **Hay Golem:** build a T of four hay bales and put a carved pumpkin (or jack o'lantern, or a hand-carved pumpkin with a face) on top, and it comes to life (Man of Straw).
+- A walking scarecrow: crows keep off crops within eight blocks of it, twelve with a lit head.
+- It tends the ripe crops round its post, replanting them from their drops, and carries the harvest to the chest, barrel or hopper under its post. Lead it with wheat to move its post.
+- Wheat heals it; shears take it apart again; fire hurts it double.
+- All decided on the server; the client draws its head and carving. The checker compares its numbers with Java. New server game tests (one walks it to a crop with its own AI) and a client test with screenshots.
+
+### Agriculture: fall additions 13, the Bat House (pull request pending, stacked on autumn foraging)
+- **Bat House:** a slatted roost to hang on a wall. Bats roost in it by day and pour out at dusk (Night Shift); at dawn the nearest bats come back in, up to four, each leaving a guano on its tray. A house with room gains a bat at dusk now and then. Scoop the guano with an empty hand; comparators read the bats.
+- **Bat Guano:** fertilizes the crops in a 3x3 patch (a dose of bone meal each), and four make a phosphate.
+- `FertilizerItem` takes its area and doses, so superphosphate and guano share one rule.
+- All decided on the server. The checker compares the house's numbers with Java. New server game tests and a client test with screenshots.
+
 ### Agriculture: fall additions 12, autumn foraging (pull request pending, stacked on the candy kitchen)
 - **Wild mushrooms:** chanterelles, porcini, puffballs, fly agarics and the glowing jack o'lantern mushroom grow in patches on forest floors (each in its own biomes), on soil. They spread in the shade, up to five of a kind together; bone meal spreads them in any light.
 - **Fairy rings:** on a full-moon night a mushroom may sprout a ring of its kind round it. Stand in a ring's centre on a full-moon night for Luck II (once a night) and Away with the Fairies.

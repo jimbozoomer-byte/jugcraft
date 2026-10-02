@@ -1,12 +1,12 @@
 # More Fall Additions
 
-Status: the candy kitchen (addition 11) and autumn foraging (addition 12) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
+Status: the candy kitchen (addition 11), autumn foraging (addition 12), the Bat House (addition 13), the Hay Golem (addition 14) and knitting (addition 15) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets do another 10 detailed halloween and fall themed additions", then "start them now stacked on #33"). They follow the ten [fall additions](fall-additions.md), numbered on from them, one per pull request, each stacked on the one before:
 11. the candy kitchen: the Candy Kettle, its thermometer and the candy stages, the Candy Tray, and ten candies;
 12. autumn foraging: five wild mushrooms that spread in the shade and sprout fairy rings under the full moon, the Foraging Basket, and four mushroom dishes;
-13. the Bat House and guano (planned);
-14. the Hay Golem (planned);
-15. knitting and sweaters (planned);
+13. the Bat House: a roost for bats that fly out at dusk and back at dawn, leaving guano, a fertilizer and a source of phosphate;
+14. the Hay Golem: a straw man with a carved pumpkin head that guards crops from crows and tends them, carrying the harvest home;
+15. knitting: the Spinning Wheel spins wool into yarn, Knitting Needles knit it into beanies, socks and five sweaters, and knitwear keeps you cosy by a campfire;
 16. pie baking (planned);
 17. the Spirit Board (planned);
 18. wild turkeys (planned);
@@ -14,10 +14,10 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets d
 20. the Día de Muertos ofrenda (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot.
-Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot.
+Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick. The Hay Golem is Discovery tier: four hay bales (36 wheat) and a carved pumpkin. Knitting is Discovery tier: planks, sticks and string (the wheel), two iron nuggets and two sticks (the needles), and wool.
+Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near. The Hay Golem is a farmhand: it keeps crows off a field and brings in the ripe crops, so a small farm runs while its farmer is away mining. Knitting is for crafters and shepherds: wool becomes clothes in any colour, warm against powder snow, and a set of knitwear by a campfire heals a party back up between trips.
 
-Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon.
+Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night, a Hay Golem works all year, and knitwear is worn in any season.
 
 ## Player experience
 ### The Candy Kettle
@@ -104,6 +104,50 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - **Forager's Stew** (10 food): a chanterelle, a porcini, a puffball, a potato and a bowl in the Cooking Pot.
 - All four are tagged `c:foods`, so the Harvest Feast Table counts each as a different food.
 
+### The Bat House
+1. A slatted wooden roost with a little roof and a landing tray below it (seven planks and a stick). Hang it on the side of a block (it faces out from it) or stand it on top of one (it faces you).
+2. **Bats roost in it by day.** At **dusk** every roosting bat pours out of it, a puff and the sound of wings, and anyone within 16 blocks earns **Night Shift**. Bats let out are ordinary bats, tagged as the house's.
+3. **At dawn** the bats nearest it, within 32 blocks (its own and wild ones), come in to roost, up to four. Each leaves a **Bat Guano** on the tray, up to 16 waiting. The tray shows none, a little, more or a pile.
+4. **A new house fills by itself:** at dusk, while mobs spawn (the `spawn_mobs` game rule), a house with room has an even chance of a bat moving in first, so a house with no bats near still has residents in a few days.
+5. **Use it with an empty hand** to scoop up the guano ("Bat House: 3 of 4 bats roosting. You scoop up 7 guano"), or just to see how many bats roost.
+6. **Comparators** read the roosting bats: 0 for none, 15 for a full house.
+7. Broken, it lets its bats out (none are lost) and drops its guano and itself.
+
+### Bat Guano
+- **A fertilizer:** use it on a crop or the ground, and every crop in the 3x3 patch round it (a block up or down too) gets a dose of bone meal, by its own rules. One guano is used if anything grew. Only crops (`minecraft:crops`), never grass or saplings. It is the superphosphate fertilizer's rule over a smaller area and one dose.
+- **Phosphate:** four guano make a phosphate (crafting), the same phosphate that is mined from phosphorite ore.
+- It goes in a composter.
+
+### The Hay Golem
+1. **Build it like an iron golem, from hay:** two hay bales stacked, a hay bale either side of the upper one for arms (nothing under the arms), then use a carved head on the top of the upper bale: a carved pumpkin, a jack o'lantern, or a hand-carved pumpkin with a face cut (any of the `jugcraft:hay_golem_heads`). The hay comes to life as a straw man two and a half blocks tall, wearing the head and facing its builder, and the builder earns **Man of Straw**. A plain pumpkin, an uncut one, a missing arm or a block under an arm leaves it as hay, so pumpkins can still decorate hay bales.
+2. **Its post:** it keeps to where it was built, wandering within eight blocks. Hold wheat near it and it follows you; where you leave it is its new post.
+3. **A walking scarecrow:** crows won't raid crops within eight blocks of it, or twelve if its head is lit (a jack o'lantern, or a hand-carved pumpkin with a torch), as a scarecrow wearing that head would guard.
+4. **It tends the crops round its post:** every five seconds it looks for a ripe crop within eight blocks of its post (two up or down). It walks to it, bends over it a moment and harvests it, replanting it from its own drops when they include its seed (wheat seeds, a carrot, a potato, a beetroot seed, Jugcraft's seeds). The rest goes in its pouch of nine stacks.
+5. **It carries the harvest home:** with 32 items or more, or once nothing has been ripe for ten seconds, it walks back to its post and puts its pouch into the chest, barrel or hopper under it, or sets it down there if there is none. If it can't get home in fifteen seconds it sets its load down where it is.
+6. It harvests only while the `mob_griefing` game rule is on, as crows only peck while it is.
+7. **Looking after it:** wheat heals it 4 health. Shears take it apart again: its four hay bales, its head and its pouch. Fire hurts it twice as much. It never despawns. Killed, it drops two to five wheat, its head and its pouch.
+
+### The Spinning Wheel
+1. A big spoked wheel on a slanted plank bench, a treadle underneath, the distaff at the front and the spindle between its maidens (three planks, three sticks and a string). It faces you when you place it.
+2. **Put a skein on the distaff:** use it with any wool. One skein at a time ("there is wool on the distaff already").
+3. **Work the treadle:** use it with an empty hand, or give it a redstone pulse. The wheel spins for a second after each turn. After four turns the skein is spun: four balls of yarn in the wool's colour, set out in front of the wheel, where a hopper can take them.
+4. **Unravel knitwear:** use a garment on it and you get its yarn back, a ball a row, less one ball too worn to use: a sweater gives four, a beanie or socks one.
+5. Comparators read it: 0 empty, then 1 plus the turns so far.
+
+### Knitting Needles and yarn
+1. **Knitting Needles** (two iron nuggets and two sticks): hold them with a ball of yarn in your other hand and hold use to knit a row, two seconds a row, using the ball. The needles say which row you are on.
+2. **Projects:** sneak and use with no rows on the needles to change project: a Knit Beanie (two rows), Wool Socks (two rows), or a sweater (five rows): the Knit Sweater, the Striped Sweater, the Pumpkin Sweater, the Bat Sweater or the Autumn Leaf Sweater, each a pattern knitted into it.
+3. **Colour:** each row is the colour of its yarn, and the garment comes out the blend of its rows: knit three orange rows and two black for a dark orange sweater. Undyed yarn is cream.
+4. **Unpicking:** with rows on the needles, sneak and use to unpick them: the yarn comes back, in the rows' blend.
+5. When the last row is done the garment is yours (**Knit One, Purl Two**) and the needles take a point of wear (128 garments).
+6. The work belongs to the needles, so it keeps when they are put away or handed to a friend to finish.
+7. **Dyeing:** yarn and knitwear take dye at a crafting table as leather armour does in Minecraft 26.3: the item and any dye, through a dyeing recipe of the same kind as vanilla's. A water cauldron washes the dye out again.
+
+### Knitwear
+1. Beanies go on the head, socks on the feet, sweaters on the chest. They show on the player in their colour, a sweater's pattern over it. They have no armour value.
+2. **Warm:** knitwear keeps out powder snow's cold, as leather does.
+3. **Cosy:** wearing two or more pieces within four blocks of a lit campfire (two up or down), you are cosy: Regeneration I, renewed every two seconds while you stay. A beanie, a sweater and socks by the fire earn **Snug as a Bug**.
+
 ## Connections
 - Candy kitchen, input producer: sugar cane (sugar); bottles of water and cows (milk); cocoa, sweet berries, glow berries and bees; the Festival Crops (cranberries, roasted chestnuts) and the cider mill (mulling spices); dyes; sticks; vanilla copper and iron; Jugcraft's `jugcraft:heat_sources`.
 - Candy kitchen, output consumer:
@@ -124,6 +168,24 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - Autumn foraging, entry path: found from the first day; nothing needs another Jugcraft item.
 - Autumn foraging, required vs optional: optional; nothing else needs a mushroom. A player who finds none can grow a patch from one by bone meal and shade, or trade for them.
 - Autumn foraging, trade and solo routes: mushrooms and dishes stack and trade; a forager can plant fairy rings for others.
+- Bat House, input producer: planks and a stick; vanilla bats (from caves, or moving in by themselves).
+- Bat House, output consumer: farms (guano grows crops); phosphate for the existing recipes that use it (superphosphate fertilizer in the chemical reactor, silicon boules); composters.
+- Bat House, technology connection: comparators read the bats; guano is a second source of phosphate, so a player with no phosphorite near can still make superphosphate.
+- Bat House, entry path: two early items; no other Jugcraft block needed.
+- Bat House, required vs optional: optional. Phosphate is still mined from phosphorite as before.
+- Bat House, trade and solo routes: guano stacks and trades; anyone can hang houses alone.
+- Hay Golem, input producer: wheat (hay bales); the carved pumpkins of the Halloween harvest and pumpkin carving.
+- Hay Golem, output consumer: the crops it harvests (into a chest, barrel or hopper, and on into any storage or machine line); crows' working scarecrows (it guards as one does).
+- Hay Golem, technology connection: a hopper under its post feeds the harvest into storage or machines.
+- Hay Golem, entry path: early-game wheat and a carved pumpkin; no other Jugcraft block needed.
+- Hay Golem, required vs optional: optional; farming by hand is unchanged.
+- Hay Golem, trade and solo routes: anyone can build one alone; it harvests for whoever's farm it stands in.
+- Knitting, input producer: wool (sheep, in any of the sixteen colours); string; iron nuggets; dyes.
+- Knitting, output consumer: players (warmth in powder snow, Regeneration by a campfire); the Spinning Wheel takes knitwear back; dyed yarn and garments trade.
+- Knitting, technology connection: the wheel is worked by a redstone pulse and emptied by a hopper, so a sheep farm can feed an automatic yarn line; comparators read its progress.
+- Knitting, entry path: early items only; no other Jugcraft block needed.
+- Knitting, required vs optional: optional; leather still keeps out the cold.
+- Knitting, trade and solo routes: one player can shear, spin and knit alone; a knitter can sell sweaters in any colour, and needles part-way through a garment can be handed on.
 
 ## Balance and automation
 - **Candy kitchen:**
@@ -141,6 +203,26 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
   - Fairy rings: one random tick in 40 on a full-moon night (one night in eight). The blessing is once a night a player, Luck II for five minutes.
   - The food values sit with vanilla's cooked foods (a baked potato is 5, the stew is a mushroom stew and more).
   - Mushrooms only multiply in place, a few at a time, and nothing converts them into more of anything. No loop.
+- **Bat House:**
+  - Costs: seven planks and a stick. Guano costs nothing but time.
+  - Units: bats (four a house at most), guano (one a bat a dawn, 16 waiting at most), blocks, ticks.
+  - Yield: at most four guano a house a day. Four guano make one phosphate, so a full house gives at most one phosphate a day; a phosphorite ore drops one to three.
+  - Fertilizer: one guano grows each crop in a 3x3 patch by one bone-meal dose, against superphosphate's 5x5 and two doses: a guano is about a fifth of a superphosphate.
+  - New bats: an even chance a dusk for a house with room, only while mobs spawn.
+  - No loop: guano and phosphate make nothing that makes bats or houses.
+- **Hay Golem:**
+  - Costs: four hay bales (36 wheat) and a carved pumpkin; shears give back all of it.
+  - Units: blocks, ticks, items.
+  - Work: at most one crop every few seconds (it walks to each and works at it half a second); villager farmers do the same kind of work.
+  - It only replants from the crop's own drops: no seed is made from nothing, and a crop whose drops hold no seed isn't replanted.
+  - No loop: a golem makes nothing that makes golems; its wheat harvest could build another, as wheat grown by hand could.
+- **Knitting:**
+  - Costs: the wheel three planks, three sticks and a string; the needles two iron nuggets and two sticks.
+  - Units: balls of yarn, rows, ticks.
+  - Yarn: a wool block spins into four balls in four turns. A beanie or socks take two balls (half a wool), a sweater five (a wool and a quarter).
+  - Unravelling gives back a ball a row less one, so knitting and unravelling always loses yarn: no loop.
+  - Cosiness: Regeneration I only, only near a lit campfire, and only while wearing two pieces; it doesn't stack with anything new.
+  - Knitwear gives no armour, so it isn't a cheap alternative to leather in a fight.
 
 ## Multiplayer and persistence
 - **Candy kitchen, server authority:** filling, reading, tipping out and pouring all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server, which checks the base, the sugar and flavour limits, and the temperature. Pulling and breaking up a tray go through vanilla's item use; the server checks the tray's own record of when it was poured and how often it has been pulled, by its own game time.
@@ -156,6 +238,24 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - **Autumn foraging, bounded work:** a random tick looks at the 243 blocks within four blocks and up to four spots. The server looks at each Overworld player every 20 ticks, only on full-moon nights, reading the blocks of the ring round them (the columns between 2.5 and 3.6 blocks off, three blocks high).
 - **Autumn foraging, IDs:** blocks/items `chanterelle`, `porcini`, `puffball`, `fly_agaric`, `jack_o_lantern_mushroom`; items `foraging_basket`, `sauteed_chanterelles`, `roasted_porcini`, `fried_puffball`, `foragers_stew`; placed features `patch_<mushroom>`; block tags `jugcraft:mushroom_soil` and `jugcraft:wild_mushrooms`; item tags `jugcraft:forage` and `jugcraft:wild_mushrooms`; advancements `forager` and `fairy_ring`; their recipes. All new.
 - **Autumn foraging, disable behaviour:** with the agriculture feature off, the recipes don't load; the mushrooms still generate and grow, the basket still works, and everything stays registered.
+- **Bat House, server authority:** dusk, dawn and moving in are the server's, by the Overworld clock. Scooping goes through vanilla's block use path (reach, spawn protection, adventure mode) and is decided on the server.
+- **Bat House, what clients get:** the block state (facing, how much guano shows), and the house's bats and guano for the status message; vanilla bats as ever.
+- **Bat House, persistence:** the house saves its roosting bats, its guano and whether it last saw night, so a restart at dusk or dawn neither loses nor doubles the change. Bats out at night are ordinary bats, saved as vanilla saves them; a house doesn't keep track of which bats are its own.
+- **Bat House, bounded work:** a house looks at the clock every 20 ticks. At dawn it looks for bats within 32 blocks once, through the entity lookup (it never loads a chunk), and takes at most four.
+- **Bat House, IDs:** block and item `bat_house`, item `bat_guano`, block entity `bat_house`, entity tag `jugcraft.bat_house`, advancement `night_shift`, recipes `bat_house` and `phosphate_from_bat_guano`. All new. `FertilizerItem` now takes its area and doses (superphosphate's are as before).
+- **Bat House, disable behaviour:** with the agriculture feature off, the recipes don't load and no bat moves in; bats still roost and leave guano, and everything stays registered. With the phosphate feature off, the phosphate recipe doesn't load.
+- **Hay Golem, server authority:** building is checked on the server: the T of hay, a head with a face, the builder able to build there (adventure mode can't), through vanilla's block use path (reach, spawn protection). Its tending, guarding, healing and shearing are the server's.
+- **Hay Golem, what clients get:** the golem, its head (an item stack, to draw), and whether it is bent over a crop.
+- **Hay Golem, persistence:** the golem saves its head, its post and its pouch; it never despawns.
+- **Hay Golem, bounded work:** it looks for a ripe crop at most every 100 ticks (and right after a harvest), over the circle of eight blocks round its post, five blocks high, in loaded chunks only. A crow looking for a guard asks for golems within twelve blocks through the entity lookup.
+- **Hay Golem, IDs:** entity `hay_golem`, item tag `jugcraft:hay_golem_heads`, loot table `jugcraft:entities/hay_golem`, advancement `man_of_straw`. All new.
+- **Hay Golem, disable behaviour:** with the agriculture feature off, no new golem can be built and golems don't harvest; they still stand and guard, and everything stays registered.
+- **Knitting, server authority:** spinning, unravelling, knitting a row, unpicking and changing project happen on the server, through vanilla's block and item use paths (reach, spawn protection, adventure mode). The needles check for yarn in the other hand on the server.
+- **Knitting, what clients get:** the wheel's skein colour and when it last turned (to draw it spinning); the needles' project and rows as a data component (for the tooltip).
+- **Knitting, persistence:** the wheel saves its skein and turns; the needles' work is a data component on the item (`jugcraft:knitting`); garments and yarn carry their colour in vanilla's `dyed_color`.
+- **Knitting, bounded work:** cosiness looks at each player every 40 ticks, and looks for a campfire (9 by 5 by 9 blocks) only round a player wearing two pieces or more.
+- **Knitting, IDs:** block and item `spinning_wheel`, block entity `spinning_wheel`, items `yarn`, `knitting_needles`, `knit_beanie`, `wool_socks`, `knit_sweater`, `striped_sweater`, `pumpkin_sweater`, `bat_sweater`, `leaf_sweater`; data component `jugcraft:knitting`; equipment assets `knit`, `knit_striped`, `knit_pumpkin`, `knit_bat`, `knit_leaf`; item tag `jugcraft:knitwear`; recipes `spinning_wheel`, `knitting_needles` and a `<item>_dyed` recipe for the yarn and each garment; advancements `knit_one_purl_two`, `snug_as_a_bug`. All new. The garments and yarn join vanilla's `minecraft:freeze_immune_wearables` (garments) and `minecraft:cauldron_can_remove_dye`.
+- **Knitting, disable behaviour:** with the agriculture feature off, the recipes don't load and no one is made cosy; the wheel and needles still work, and everything stays registered.
 
 ## Dependencies and assets
 Candy kitchen:
@@ -168,6 +268,23 @@ Autumn foraging:
 - No new dependencies. Textures are drawn by code in `tools/foraging_textures.py`: each mushroom's cross-shaped plant (gills and spots, a cluster for the jack o'lantern mushroom), the basket (a red cloth and a chanterelle peeking out), and the dishes.
 - Models, item models, names, loot, recipes, tags, worldgen and advancements come from `tools/foraging_data.py`; the numbers and biomes from `FORAGING` in `tools/agriculture.py`. Each mushroom's patch is added to its biomes by Fabric's biome modification API.
 - Sounds and particles are vanilla's (wool breaking and white ash for a bursting puffball, an amethyst chime and end-rod sparkles at a fairy ring).
+
+Bat House:
+- No new dependencies. Textures are drawn by code in `tools/bat_textures.py`: weathered planks, the slatted front, the guano on the tray, and the guano item.
+- Models (the house and its tray with one, two or three piles), blockstates, names, messages, loot and tags come from `tools/bat_data.py`; the numbers from `BATS` in `tools/agriculture.py`. The recipes are in its shaped and shapeless tables.
+- Sounds and particles are vanilla's (a bat taking off and smoke at dusk).
+
+Hay Golem:
+- No new dependencies. Its texture is drawn by code in `tools/hay_golem_textures.py`: golden straw running along each bundle, twine bands round the body, wrists and ankles, a sackcloth patch on the chest, and loose straw at the collar, wrists and ankles.
+- The client's `HayGolemModel` is a hay-bale body with a straw collar, straw-bundle arms and legs with tufts at the ends; it walks with a stiff swing, sways standing, and bends with its arms down to harvest. `HayGolemRenderer` draws the head it wears on the collar: the pumpkin's own item model, and a hand-carved pumpkin's carving over it (lit at full brightness), as the scarecrow draws its head.
+- Its name, loot, head tag and advancement come from `tools/hay_golem_data.py`; the numbers from `HAY_GOLEM` in `tools/agriculture.py`.
+- Sounds are vanilla's (grass for its steps, hurt and death; shearing; hay placed when it is built).
+
+Knitting:
+- No new dependencies. Textures are drawn by code in `tools/knitting_textures.py`: the wheel's wood, its felloes and spokes, the wool on the distaff and the yarn on the bobbin; the yarn, needles and garments as items (drawn pale, to take their colour, a sweater's pattern in a layer of its own); and the knit worn on the player, with each sweater's pattern.
+- Models, blockstates, item models (tinted by vanilla's `dyed_color`), equipment assets (the dyeable knit, a pattern over it), names, messages, tooltips, loot, tags and the dyeing recipes come from `tools/knitting_data.py`; the numbers from `KNITTING` in `tools/agriculture.py`. The recipe audit in `tools/check_mod_data.py` knows 26.3's dyeing recipe type.
+- The client's `SpinningWheelRenderer` draws the wheel turning while it spins, the skein on the distaff and the yarn growing on the bobbin.
+- Sounds are vanilla's (wool as it spins, is knitted and unravels, a bundle as the yarn is set out, leather armour as a garment is finished).
 
 ## Verification
 ### Candy kitchen verification
@@ -201,11 +318,109 @@ Not run: a two-client dedicated-server playtest, and any play by hand.
 
 ### Autumn foraging verification
 
-Pending CI (recorded when it runs).
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-26` stacked on the candy kitchen:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares autumn foraging with Java: spreading, the fairy ring's size, chance, check interval and blessing; checks the mushrooms (the jack o'lantern mushroom's light), the basket and the foods are registered, every mushroom has its texture, words, loot and worldgen, the tags hold the mushrooms and the forage, the cooked foods have their recipes, and the two advancements exist) | Pass, 641 IDs |
+| `./gradlew build` on `2e14ff6` (Build workflow run 37069783476) | Pass |
+| Game tests on the headless server, same run: 400 in total, 4 of them new here (`ForagingGameTests`) | **All 400 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `c42f88d` (run 37067986302) and `2e14ff6` (run 37069783476), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#autumn-foraging) from the first |
+
+The 4 new game tests (`ForagingGameTests`):
+1. a porcini stands on grass but not on stone; spreading (as bone meal makes it) it puts out another of its kind, one at a time, until five are near, and no more; the jack o'lantern mushroom glows (light 9) and the others don't;
+2. seven fly agarics round a circle are no ring and eight are; a player at the centre is blessed with Luck II for five minutes and earns Away with the Fairies, once a night; rings bless on full-moon nights only; one chanterelle sprouts a ring of its kind round it;
+3. the basket refuses stone and takes berries; each of the five mushrooms picked with the basket in the other hand goes straight into it; all five earn Forager;
+4. the dishes', basket's and stew's recipes and every mushroom's patch load.
+
+Found by CI and fixed before this record:
+- 26.3's `playerDestroy` takes a `ServerLevel` and a `ServerPlayer` (`d9d3786`, `a3efb90`).
+- 26.3's `minecraft:dirt` block tag doesn't include grass, so a mushroom couldn't stand on a grass block: wild mushrooms now grow on a tag of their own, `jugcraft:mushroom_soil`, which their patches use too (`c42f88d`).
+- `main`'s `PetroGameTests.heliostatsHeatASolarReceiver` failed twice on this branch's `c42f88d` (run 37067986302 and its re-run: "The receiver made 48 JE/t, expected 36 on tick 25"). The solar receiver counts its heliostats on its first tick, before the test's stone roof has cut off the sky light, and again only when the game time is a multiple of 100, so the test passes or fails by the game time it starts at. `main` has already fixed the test (it gives the receiver water only after its next count); this branch carries the same change (`f23f040`), and the test passes since.
+
+Not run: a two-client dedicated-server playtest, and any play by hand.
+
+
+### Bat House verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-27` stacked on autumn foraging:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the Bat House with Java: its room, guano cap, return range, moving-in chance, check interval, the bats' tag, and guano's area and doses; checks the house and guano are registered (guano as a fertilizer), the house has a model for each guano level, its words, loot, recipe and advancement, and phosphate takes four guano) | Pass, 643 IDs |
+| `./gradlew build` on `b1a7915` (Build workflow run 37071059060) | Pass |
+| Game tests on the headless server, same run: 402 in total, 2 of them new here (`BatHouseGameTests`) | **All 402 pass**. They also all passed on `2217bd2` (run 37068610115) |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `b1a7915` (run 37071059060), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-bat-house), and on `2217bd2` (run 37068610115) |
+
+The 2 new game tests (`BatHouseGameTests`):
+1. at dusk a house's three roosting bats fly out, tagged as its bats, and a player near earns Night Shift; at dawn the four nearest bats come in, wild ones too, two are left outside, each leaves a guano and the tray shows it; a full house reads 15 on a comparator; an empty house gains bats at dusk while mobs spawn;
+2. an empty hand scoops up the house's seven guano; one guano grows the nine crops of a 3x3 patch and none beyond it; the house's and phosphate's recipes load.
+
+Found by CI and fixed before this record:
+- 26.3's `BlockPos` has no `getCenter`: the house finds the nearest bats with `Vec3.atCenterOf` (`2217bd2`).
+- The first screenshots showed dark houses on a dark wall with the guano hard to see; the wall is now pale birch and a second shot looks down into the trays (`b1a7915`). The guano piles are still small at this size.
+
+Not run: a two-client dedicated-server playtest, and any play by hand.
+
+### Hay Golem verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-28` stacked on the Bat House:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the Hay Golem with Java: health, speed, post radius, search height, tending, work, give-up and idle times, pouch, carry, wheat's healing, fire, hay bales, reach and leading range; checks it is registered with its size, attributes and building callback, scarecrows count golems, it is named, drops wheat, has its head tag, texture and advancement, and its model's boxes sit where its texture paints them) | Pass, 643 IDs (the golem is an entity, not an item or block) |
+| `./gradlew build` on `709a0c2` (Build workflow run 37071260396) | Pass |
+| Game tests on the headless server, same run: 408 in total, 6 of them new here (`HayGolemGameTests`) | **All 408 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `709a0c2` (run 37071260396), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-hay-golem) |
+
+The 6 new game tests (`HayGolemGameTests`):
+1. carved pumpkins and jack o'lanterns are heads, a plain pumpkin and an uncut hand-carved one are not; one arm short, or with stone under an arm, the hay stays hay; a carved head on a full T makes one golem where the legs stood, facing its builder, the hay gone and the head used, and the builder earns Man of Straw;
+2. a golem in a carved pumpkin guards seven blocks off (eight at most), twelve in a jack o'lantern, four headless (and not six); a crow won't raid ripe wheat a golem guards;
+3. four ripe carrots harvested are each replanted from a carrot, the rest in its pouch; unripe carrots are left; unloading puts the carrots in the chest under its post, or with no chest sets them on the ground; the pouch holds nine stacks and no more;
+4. with its own AI a golem walks five blocks to ripe carrots and harvests and replants them;
+5. fire hurts it double; a wheat heals it four; shears take it apart into four hay bales, its jack o'lantern and its carrots;
+6. killed by a player it drops two to five wheat and its head; its loot table, head tag and advancement load.
+
+Found by CI and fixed before this record:
+- 26.3's `Entity.invulnerableTime` is private, so the damage test couldn't reset it between hits; the test now burns the golem first and heals it after (`709a0c2`). The golem's own code compiled first time.
+
+Not run: a two-client dedicated-server playtest, and any play by hand. The golem's walking and harvesting were seen only in the game test, on a flat stone floor.
+
+### Knitting verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-29` stacked on the Hay Golem:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares knitting with Java: the needles' wear and row time, the wheel's turns and spin, yarn per wool, the unravelling loss, the undyed colour and cosiness; checks the registrations, each garment's slot, rows, item model, equipment asset and tags, the yarn's and every garment's dyeing recipe and cauldron tag, the recipes and advancements; and the recipe audit reads 26.3's `minecraft:crafting_dye` recipes) | Pass, 653 IDs |
+| `./gradlew build` on `26b570e` (Build workflow run 37077362634) | Pass |
+| Game tests on the headless server, same run: 413 in total, 5 of them new here (`KnittingGameTests`) | **All 413 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `26b570e` (run 37077362634), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#knitting) |
+
+The 5 new game tests (`KnittingGameTests`):
+1. with no wool the wheel doesn't turn; red wool goes on the distaff (a second skein doesn't); four turns spin it into four balls of red yarn set out in front of the wheel; a redstone pulse works the treadle as a hand does;
+2. a pumpkin sweater used on the wheel unravels into four balls of its yarn (five rows, less one);
+3. sneaking changes the needles' project (beanie, then socks); each row uses a ball of yarn; a beanie of one red row and one white comes out their blend, earning Knit One, Purl Two, and the needles take a point of wear; unpicking a row gives its yarn back;
+4. a leather helmet and red dye make vanilla's dyeing recipe; the yarn and every garment take red dye by a recipe of the same kind and come out dyed; a water cauldron washes a red sweater back to undyed;
+5. each garment is worn in its slot and is freeze-immune; one piece, or an unlit campfire, doesn't make a player cosy; two pieces by a lit campfire give Regeneration; a beanie, sweater and socks earn Snug as a Bug; the recipes load.
+
+Found by CI and fixed before this record:
+- Minecraft 26.3 doesn't dye leather by the `minecraft:dyeable` tag: leather isn't in it. A test that reported leather's tags and components, then the recipe that dyes it, showed a data-driven recipe per item instead (`minecraft:leather_helmet_dyed`: a `target`, any `#minecraft:dyes`, the item back). The yarn and each garment now have one of the same kind, and join `minecraft:cauldron_can_remove_dye` (`75ca09d`).
+- 26.3's `Items` has no dye fields, so the tests look `red_dye` up by ID (`ff5669e`).
+- The first screenshots had campfire smoke in front of the armour stands and the stands turned away; the scene was rearranged (`93a3a3b`, `26b570e`).
+
+Not run: a two-client dedicated-server playtest, and any play by hand.
 
 ## World and event applicability
 - A Candy Kettle works anywhere there is heat under it, in every dimension, all year. Nothing is seasonal.
 - Wild mushrooms generate only in newly generated Overworld chunks of their biomes; existing chunks don't get them, but one mushroom brought in spreads. They can be planted and spread in any dimension with soil and shade. Fairy rings bless only in the Overworld, on full-moon nights (by the Overworld's moon).
+- A Bat House keeps the Overworld's dusk and dawn wherever it is hung.
+- A Hay Golem works in any dimension.
+- Knitting works anywhere; cosiness needs a lit campfire, in any dimension.
 
 ## Rollout and open questions
 - Candy can't be poured by hoppers or dispensers; trays are filled and broken up by hand.
@@ -215,3 +430,11 @@ Pending CI (recorded when it runs).
 - The fairy-ring blessing isn't saved: a restart during a full-moon night lets a player be blessed again that night.
 - Mushrooms aren't food raw. The fly agaric and the jack o'lantern mushroom aren't cooked into anything yet; a later addition could use them (dyes, a potion).
 - How often patches generate is a first guess, open to review once worlds are explored.
+- Bats out at night may despawn as vanilla bats do far from players; the house fills again by moving in at dusk.
+- Hoppers don't take guano from a Bat House; it is scooped by hand.
+- A Hay Golem harvests only single-block crops (`CropBlock`s); tall crops, gourds, berries and the giant pumpkin are left to the farmer, as crows leave them.
+- Following wheat moves its post: a farmer walking past with wheat in hand will lead it off. Holding something else keeps it where it is.
+- A golem doesn't open doors or cross fences; build its field where it can walk.
+- Knitwear has no armour value and no enchantments of its own.
+- A garment's pattern is fixed by its kind; only its colour changes.
+- Cosiness looks for a campfire only, not other fires or heat.
