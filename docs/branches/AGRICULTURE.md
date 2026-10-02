@@ -823,6 +823,12 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 
 ### The candy kitchen
 
+| **Candy Kettles** on iron trivets over campfires, each at its own stage on the thermometer, the last one burning | **Candy** in frames: rock candy, lollipops, taffy, hard candy, fudge and the rest, flavoured and dyed |
+| --- | --- |
+| ![Candy Kettles](../images/ingame_candy_kettles.jpg) | ![Candies](../images/ingame_candies.jpg) |
+
+*Real screenshots from the client game test that CI runs (`CandyClientGameTests`, software rendering, small previews). Each kettle was filled and set to its temperature on the server.*
+
 - **Candy Kettle:** a copper sugar pot with a candy thermometer. A base (water for syrup, milk for cream), up to four sugar, two flavours and dyes go in before it boils; over a fire it climbs through the candy stages, a bell at each, and the hottest it reaches decides the candy.
 - **Candy Tray:** rock candy grown for a day, candy corn in three coloured layers, taffy pulled while warm, hard candy and lollipops, caramel, fudge, cream caramels and toffee. Flavoured candy gives short effects. Details: [more fall additions](../features/more-fall-additions.md#the-candy-kettle).
 

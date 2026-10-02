@@ -1,6 +1,6 @@
 # More Fall Additions
 
-Status: the candy kitchen (addition 11) is implemented in source, not yet played. The Build workflow compiles it, and CI's game tests are recorded below.
+Status: the candy kitchen (addition 11) is implemented in source, not yet played by hand. The Build workflow compiles it, and CI's game tests and client screenshots are recorded below.
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets do another 10 detailed halloween and fall themed additions", then "start them now stacked on #33"). They follow the ten [fall additions](fall-additions.md), numbered on from them, one per pull request, each stacked on the one before:
 11. the candy kitchen: the Candy Kettle, its thermometer and the candy stages, the Candy Tray, and ten candies;
 12. autumn foraging (planned);
@@ -113,7 +113,32 @@ Candy kitchen:
 ## Verification
 ### Candy kitchen verification
 
-Pending CI (recorded when it runs).
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-25` stacked on #33:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the candy kitchen with Java: the batch limits, temperatures and heating rates; the tray's setting, pulling, crystal and layer times; the eating time and candy corn's bands; each stage and where it starts; which candy each base sets into at each stage; each kind's colour; each flavour's effect, time and colour; the candies' food; and checks every candy, stage, base and flavour has its words, textures and tags, and the recipes and advancements exist) | Pass, 631 IDs |
+| `./gradlew build` on `fdbbbae` (Build workflow run 37067878969) | Pass |
+| Game tests on the headless server, same run: 396 in total, 7 of them new here (`CandyGameTests`) | **All 396 pass**. They also all passed on `f4235ef` (run 37066473716) |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `fdbbbae` (run 37067878969), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-candy-kitchen) |
+
+The 7 new game tests (`CandyGameTests`):
+1. a water bottle sets the base and leaves its bottle, and milk is then refused; sugar goes in up to four, two flavours at most and each once, and dyes mix; near the boil nothing more goes in; sneaking with an empty hand tips it all out;
+2. over a fire a batch heats a degree every four ticks below the boil, and a kettle with sugar but no base doesn't; off the heat it cools but keeps the stage it reached, which comparators read;
+3. syrup at soft ball pours candy corn and cream fudge; cream at thread is too runny to pour; syrup past 175°C is burnt; pouring fills one tray (two pieces a sugar, with the batch's flavours and colour), empties the kettle and earns Sweet Science;
+4. a tray breaks up into its named, flavoured pieces once set, and not while still setting; hard candy with sticks in the other hand makes a lollipop a stick; rock candy takes a day to grow;
+5. warm taffy pulled four times earns Pulling Power and cuts into taffy; left to go cold unpulled, it sets hard, as hard candy;
+6. candy corn takes up to three layers, each its own colour; three undyed layers make plain candy corn, which stacks with any other, and a dyed one keeps its bands;
+7. flavoured candy is named for its flavours and gives their effects when eaten, even on a full stomach; burnt sugar keeps no flavour; the candies count as candy, the flavours' items are tagged, and the recipes load.
+
+Found by CI and fixed before this record:
+- 26.3's `LivingEntity.drop` takes different arguments: a tray's spare pieces now go to the ground with `Block.popResource` (`d1f4304`).
+- 26.3 has no `Items` field for each dye: the tests look the dyes up by ID (`1ac7690`).
+- In 26.3 every item has a name and lore component by default, so two assertions that a piece had its own name were always true; they now compare with a plain stack (`f4235ef`).
+- The first screenshots showed the kettles floating over their campfires with no syrup in them: the needle's turn leaked into the syrup's pose. The needle is now drawn in its own pose, and the kettle stands on four iron trivet legs (`fdbbbae`).
+
+Not run: a two-client dedicated-server playtest, and any play by hand.
 
 ## World and event applicability
 - A Candy Kettle works anywhere there is heat under it, in every dimension, all year. Nothing is seasonal.
