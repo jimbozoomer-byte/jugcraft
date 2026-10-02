@@ -535,9 +535,19 @@ def check_biomes():
                 err(f"{name}'s trees: unknown placed feature {feature}")
         if info["seasons"] != (f"{MOD}:{name}" in seasons.BIOMES):
             err(f"{name}: seasons {info['seasons']} but seasons.BIOMES says otherwise")
+    features = DATA / MOD / "worldgen" / "feature"
     for shape, info in tr.SHAPES.items():
         if info["wood"] not in ag.WOOD_SETS or (info["foliage"] and info["wood"] not in ag.TREES):
             err(f"Tree shape {shape} grows unknown wood or leaves ({info['wood']})")
+            continue
+        # Generated seasonal leaves need the decorator to start in today's look (world generation skips onPlace).
+        seasonal = bool(info["foliage"]) and ag.TREES[info["wood"]]["season"] is not None
+        decorators = [decorator.get("type") for decorator in (load(features / f"{shape}.json") or {}).get("decorators", [])]
+        if seasonal != (f"{MOD}:{tr.DECORATOR}" in decorators):
+            err(f"Tree shape {shape}: the {MOD}:{tr.DECORATOR} decorator belongs on exactly the trees with seasonal leaves")
+    agriculture = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8")
+    if f'TREE_DECORATOR_TYPE, Jugcraft.id("{tr.DECORATOR}")' not in agriculture:
+        err(f"JugcraftAgriculture.java does not register the {tr.DECORATOR} tree decorator")
 
 
 def check_alpine():

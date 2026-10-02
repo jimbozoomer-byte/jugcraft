@@ -56,7 +56,7 @@ Use the cases relevant to the feature; do not claim a scenario was run just beca
     - Not covered: other seeds, a dedicated server's first start, needles changing over real days.
   - Biomes branch ([features/biome-regions.md](features/biome-regions.md), [features/seasonal-forests.md](features/seasonal-forests.md)):
     - `BiomeGameTests` covers the recorded Jugcraft layout and its unreachable listings, the regions' share and seed behaviour, maple, aspen, fir and dead trees growing, every seasonal tree's leaves in every season mode, and the new woods.
-    - `BiomeClientGameTests` finds each batch 1 biome, and vanilla taiga, forest and birch forest, from the start of a real world (seed `jugcraft`), logs the distances and takes screenshots.
+    - `BiomeClientGameTests` finds each batch 1 biome, and vanilla taiga, forest and birch forest, from the start of a real world (seed `jugcraft`), logs the distances, checks that the seasonal leaves generated around each biome are in today's look, and takes screenshots.
     - Not covered: other seeds, a dedicated server, region borders in play, seasons over real days.
   - Seasons ([features/seasons.md](features/seasons.md)): `SeasonGameTests` covers the calendar, zones, overrides, palette, biome tags, events (US and Canadian Thanksgiving, December across New Year), the `/jugcraft season` command, and winter snow (lies, never on farmland, water or vanilla snow, melts in spring). `SeasonClientGameTests` switches each mode in a real client, checks the synced day and tints, then winter snow (falling on the client, snowy grass), and saves `jugcraft_season_<mode>` screenshots. Not covered: a dedicated server with two clients, a restart across midnight, a real winter and thaw.
 

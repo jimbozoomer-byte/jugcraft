@@ -23,10 +23,10 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
  * day ({@link JugcraftSeasons#today()}) on their tree's {@link Schedule}: green, then their autumn colour
  * ({@link Foliage#GOLD}; the maple's models show reds, oranges and golds), then bare twigs until spring. Each block
  * turns up to {@link #JITTER} days early or late, fixed by its position, so a crown turns gradually and neighbouring
- * trees differ. Leaves catch up on their random ticks; one that changes also brings the leaves it touches up to date
- * (up to {@link #SPREAD} of them, in loaded chunks), so a tree generated green in autumn turns together within moments
- * of its first tick. Leaves placed by a player or grown from a sapling start in today's state; with seasons off they
- * stay green. Only the look changes: otherwise these are vanilla leaves (natural ones decay away from logs; they drop
+ * trees differ. Leaves start in today's look: generated trees through {@link SeasonalLeavesDecorator}, leaves placed by
+ * a player or grown from a sapling through {@link #onPlace}. After that they catch up on their random ticks; one that
+ * changes also brings the leaves it touches up to date (up to {@link #SPREAD} of them, in loaded chunks), so a crown
+ * turns together. With seasons off they stay green. Only the look changes: otherwise these are vanilla leaves (natural ones decay away from logs; they drop
  * saplings and sticks).
  */
 public class SeasonalLeavesBlock extends TintedParticleLeavesBlock {

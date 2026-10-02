@@ -1,6 +1,6 @@
 # Jugcraft regions
 
-Status: in progress on branch `claude/biomes`, stacked on Alpine Spawn (`claude/alpine-spawn`). Awaiting CI. **Not yet played.**
+Status: in progress on branch `claude/biomes`, stacked on Alpine Spawn (`claude/alpine-spawn`). Green in CI (server and client game tests). **Not yet played.**
 Proposal issue: none. On 2 October 2026 the owner asked to remake the Biomes O' Plenty catalog's biomes in Jugcraft ([branches/BIOMES.md](../branches/BIOMES.md)), and chose this placement: a region layer, so that the new biomes do not shrink vanilla's away.
 Owner: @jimbozoomer-byte
 Target milestone and tier: world generation (Discovery); every biomes-branch batch builds on it.
@@ -52,7 +52,26 @@ Results are recorded under "Results" below after CI runs.
 - Not run: a dedicated server, other seeds, the look of region borders in play, performance measurements.
 
 ### Results
-Not yet run in CI.
+- **Run [36966158381](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/36966158381) (commit 88f47fcc): green.** (An earlier run failed to compile: 26.3's `WorldData` has no `worldGenOptions()`. The seed is now read as the Overworld loads, through Fabric's `ServerLevelEvents.LOAD`.)
+  - Server game tests: all 307 required tests passed.
+    - The Jugcraft layout has 7,595 entries. Every rule placed its biome: Aspen Glade 176 entries, Coniferous Forest 172, Dead Forest 80, Maple Woods 172, Muskeg 192, Seasonal Forest 176, Snowy Coniferous Forest 310, Snowy Forest 106, Tundra 172. Vanilla's table has 7,604: the same 7,595 plus the nine Jugcraft biomes at the unreachable climate.
+    - Regions: 8,822 of 16,384 samples (54%) of a 128 km square are Jugcraft regions (setting: half). With the next seed, 8,193 samples (50%) change.
+  - Client game test, a real world with seed `jugcraft`. The start is unchanged: 320 106 512, at an alpine village in Alpine Spawn. All nine biomes are within 6,400 blocks of it:
+
+    | Biome | Distance from the start (blocks) |
+    |---|---|
+    | Muskeg | 543 |
+    | Tundra | 550 |
+    | Aspen Glade | 603 |
+    | Maple Woods | 607 |
+    | Snowy Forest | 668 |
+    | Seasonal Forest | 689 |
+    | Snowy Coniferous Forest | 715 |
+    | Coniferous Forest | 853 |
+    | Dead Forest | 2,489 |
+
+    Vanilla taiga (at 368 528), forest (240 656) and birch forest (560 912) are still near the start. This is the first evidence that the lookup mixin applies in a real world: its resolver targets and their place arguments work, and `/locate`-style searches see the regions.
+  - The screenshots and two problems they showed are in [seasonal-forests.md](seasonal-forests.md). Region borders were not looked at.
 
 ## World and event applicability
 - Only the Overworld's multi-noise source (vanilla's Overworld preset, or another preset built by vanilla's Overworld builder). Superflat, single-biome and other mods' biome sources are untouched.

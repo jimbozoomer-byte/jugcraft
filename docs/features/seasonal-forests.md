@@ -46,24 +46,30 @@ Nine biomes grow in Jugcraft regions, each in place of the vanilla biome with th
 
 ## Multiplayer and persistence
 - Server authority: world generation and the season clock are the server's; clients only see block states.
-- Seasonal leaves update on random ticks, a changed leaf bringing up to 128 touching leaves in loaded chunks with it; placed or grown leaves start in today's look (as for the larch, [alpine-spawn.md](alpine-spawn.md)).
+- Seasonal leaves start in today's look. Generated trees get it from the `jugcraft:seasonal_leaves` tree decorator, listed in every tree feature with seasonal leaves (world generation does not run the block's own placement hook); leaves placed by a player or grown from a sapling get it as they are placed. After that they follow the season on random ticks, a changed leaf bringing up to 128 touching leaves in loaded chunks with it (as for the larch, [alpine-spawn.md](alpine-spawn.md)). The decorator visits each generated tree's leaves once.
 - `biomes.enabled=false` stops the biomes in new chunks (no Jugcraft regions) and the new woods' hand recipes. Every block, item and biome stays registered, so old chunks and inventories keep them.
 - Existing worlds: new chunks only; see [biome-regions.md](biome-regions.md).
 
 ## Dependencies and assets
 - Textures drawn by code in `tools/forest_textures.py` (wood, leaves in every look, saplings); nothing read, traced or recoloured.
 - Biomes start from the vanilla biome they replace, by reference (`tools/biome_bases.py`: its ore, cave, lake and spring features, mobs, music and sky), with their own trees and plants (`tools/biomes.py`, `tools/trees.py`). No Mojang file is copied.
-- The larch's one-off seasonal leaves became a general `SeasonalLeavesBlock`, shared by larch, maple and aspen; the larch's blocks, states and generated files are unchanged.
+- The larch's one-off seasonal leaves became a general `SeasonalLeavesBlock`, shared by larch, maple and aspen; the larch's blocks and states are unchanged, and its tree feature now lists the `jugcraft:seasonal_leaves` decorator.
 
 ## Verification
 Results are recorded under "Results" below after CI runs.
-- `python3 tools/check_mod_data.py`: every tree, wood set and leaf schedule is registered as the data says; every fixed season mode shows only its own look for every tree, whatever the jitter; every biome's features, tree picks, name, tags and seasons exist; the region rules match.
+- `python3 tools/check_mod_data.py`: every tree, wood set and leaf schedule is registered as the data says; every fixed season mode shows only its own look for every tree, whatever the jitter; every biome's features, tree picks, name, tags and seasons exist; the region rules match; exactly the trees with seasonal leaves list the `jugcraft:seasonal_leaves` decorator, and Java registers it.
 - Server game tests (`BiomeGameTests`): maple, aspen and fir saplings grow (sizes logged), grown in autumn all their leaves in autumn colours (the fir's evergreen); the dead tree grows with no leaves; every seasonal tree's leaves follow every season mode; the new logs strip with an axe and the woods are in vanilla's tags. The larch's tests (`AlpineGameTests`) now run on the shared leaves.
-- Client game test (`BiomeClientGameTests`): distances from the start of a real world (seed `jugcraft`) to each biome (logged); screenshots of Maple Woods, Seasonal Forest, Aspen Glade, Coniferous Forest, Dead Forest and Tundra from above.
+- Client game test (`BiomeClientGameTests`): distances from the start of a real world (seed `jugcraft`) to each biome (logged); the seasonal leaves within 24 blocks of each biome found, in chunks generated during the test far from the player (so no random tick has touched them), are all in today's look (counts logged); screenshots of Maple Woods, Seasonal Forest, Aspen Glade, Coniferous Forest, Dead Forest and Tundra from above.
 - Not run: play, a dedicated server, two clients, the look of each season in play (only fixed modes are tested).
 
 ### Results
-Not yet run in CI.
+- **Run [36966158381](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/36966158381) (commit 88f47fcc): green, but the screenshots showed two problems.**
+  - Server game tests: all 307 required tests passed. Saplings grown in autumn: a maple with 6 logs and 131 leaves, all in autumn colours; an aspen with 8 logs and 148 leaves, all in autumn colours; a fir with 9 logs and 101 needles, none changed (evergreen). A dead tree grew 9 dead logs and no leaves. The season-mode and wood tests passed. The larch tests on the shared leaves passed: a larch grown in winter had a 9-block trunk and 34 needles, all bare.
+  - Client game tests: larches grown in spring, autumn and winter had green/gold/bare needles 53/0/0, 0/82/0 and 0/0/33.
+  - Screenshots, 2 October (season day 275, autumn): Maple Woods is red, orange and gold maples; Seasonal Forest is maples among autumn-tinted oaks; Coniferous Forest is dark firs along a river, with maple woods beyond; Dead Forest is grey dead trunks in dry grass.
+  - **Problem 1: Aspen Glade was mostly green, with one gold aspen.** World generation placed every seasonal leaf green, and leaves only turned on a random tick. Maple crowns touch, so one tick turned a whole stand; aspens stand apart, so each waited for its own. Fix: the `jugcraft:seasonal_leaves` tree decorator gives generated leaves today's look, and the client test now checks generated leaves.
+  - **Problem 2: the Tundra's hills were under snow in October.** Its temperature (0.2) let vanilla snow lie from about y 120. Fix: 0.25, as warm as vanilla taiga, so vanilla snow lies only above about y 160 and the Tundra's lowland snow is Jugcraft's winter.
+- **Fix run: pending.**
 
 ## World and event applicability
 - Biome fit: each biome takes the climate of the vanilla biome it replaces, so it borders what that biome bordered.

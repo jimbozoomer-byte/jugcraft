@@ -2,10 +2,13 @@
 "<shape>_checked" placed features (only where the tree's sapling would survive), which biomes pick from.
 
 Each shape grows one tree's wood (agriculture.WOOD_SETS) and leaves (agriculture.TREES; the dead tree has none),
-using vanilla 26.3's trunk and foliage placers. "sapling": the tree a sapling of that wood grows. Leaves start green;
-seasonal ones take today's look as they are placed (agriculture/SeasonalLeavesBlock).
+using vanilla 26.3's trunk and foliage placers. "sapling": the tree a sapling of that wood grows. Seasonal leaves take
+today's look as the tree is placed: every shape with seasonal leaves lists the DECORATOR tree decorator
+(agriculture/SeasonalLeavesDecorator), since world generation does not run the block's own placement hook.
 Ranges are [min, max] (inclusive); a single number is fixed.
 """
+
+DECORATOR = "seasonal_leaves"
 
 SHAPES = {
     # Alpine Spawn's larch: a tall, narrow cone (vanilla's spruce foliage shape), its lowest trunk_height blocks bare.

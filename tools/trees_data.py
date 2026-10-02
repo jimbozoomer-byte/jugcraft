@@ -3,7 +3,7 @@ blockstates, items, loot and tags) and the tree features biomes and saplings gro
 other woods (festival_data.wood_assets); textures are drawn by larch_textures.py and forest_textures.py.
 """
 from agriculture import TREES, SEASON_STATES, SAPLING_CHANCES, sapling, leaf_looks
-from trees import SHAPES, FALLEN
+from trees import SHAPES, FALLEN, DECORATOR
 
 MOD = "jugcraft"
 SHEARS_OR_SILK = {"type": "minecraft:any_of", "terms": ["minecraft:tool/can_shear", "minecraft:tool/can_silk_touch"]}
@@ -107,6 +107,7 @@ def worldgen(data, write):
     folder = data / MOD / "worldgen"
     for shape, info in SHAPES.items():
         wood = info["wood"]
+        decorators = []
         if info["foliage"] is None:
             # No leaves: a single air "leaf" at each branch end, which places nothing.
             foliage = {"type": "minecraft:blob_foliage_placer", "height": 1, "offset": 0, "radius": 0}
@@ -116,9 +117,10 @@ def worldgen(data, write):
             properties = {"distance": "7", "persistent": "false", "waterlogged": "false"}
             if TREES[wood]["season"] is not None:
                 properties["season"] = SEASON_STATES[0]
+                decorators.append({"type": rid(DECORATOR)})
             provider = {"id": rid(TREES[wood]["leaves"]), "properties": dict(sorted(properties.items()))}
         write(folder / "feature" / f"{shape}.json", {
-            "type": "minecraft:tree", "below_trunk_provider": "minecraft:soil_beneath_tree", "decorators": [],
+            "type": "minecraft:tree", "below_trunk_provider": "minecraft:soil_beneath_tree", "decorators": decorators,
             "foliage_placer": foliage, "foliage_provider": provider, "ignore_vines": True,
             "minimum_size": minimum_size(info),
             "trunk_placer": trunk_placer(info["trunk"]),

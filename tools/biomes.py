@@ -90,8 +90,10 @@ BIOMES = {
         "untags": ["minecraft:has_structure/village_plains"],
         "tags": ["c:is_dead"],
     },
+    # Tundra is as warm as vanilla taiga (0.25), so vanilla snow only lies above about y 160: lower down its snow is
+    # Jugcraft's winter (0.2 left the hills snowed over in October).
     "tundra": {
-        "display": "Tundra", "base": "plains", "temperature": 0.2, "downfall": 0.5, "seasons": True,
+        "display": "Tundra", "base": "plains", "temperature": 0.25, "downfall": 0.5, "seasons": True,
         "effects": {"grass_color": "#9a9a5e", "foliage_color": "#a07a3c"},
         "trees": {"count": [3, 4], "default": "jugcraft:maple_bush_checked", "picks": []},
         "drop": ["minecraft:flower_plains", "minecraft:patch_tall_grass_2"],

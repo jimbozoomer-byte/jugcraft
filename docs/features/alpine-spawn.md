@@ -54,8 +54,8 @@ Primary specialty and supported player role: exploration and settling; every pla
   - If there is no Alpine Spawn in reach, the spawn stays vanilla's (logged).
 - **Larch needles.**
   - The server decides the look from its own season day (`JugcraftSeasons.today()`, #80), never a client's clock. Clients see block states, as for any block.
-  - Needles placed by a player or grown from a sapling take today's look at once. Others catch up on random ticks. A needle that changes on its tick also brings the needles it touches up to date (at most 128, in loaded chunks only), so a whole tree turns within moments of its first tick near a player. Chunks nobody is near keep their old look until someone comes.
-  - World generation places green needles, and they catch up as above: a new world made in autumn shows its larches turn gold within seconds of loading near the player.
+  - Needles placed by a player or grown from a sapling take today's look at once; since the biomes branch, so do the needles of generated larches (the `jugcraft:seasonal_leaves` tree decorator, [seasonal-forests.md](seasonal-forests.md)). After that they catch up on random ticks. A needle that changes on its tick also brings the needles it touches up to date (at most 128, in loaded chunks only), so a whole tree turns within moments of its first tick near a player. Chunks nobody is near keep their old look until someone comes.
+  - Before the biomes branch, world generation placed green needles and they caught up as above: a new world made in autumn showed its larches turn gold within seconds of loading near the player.
   - The look is saved as a block state (`season`) and survives restarts.
   - The cost is one date lookup per random tick of a needle block, which is bounded by vanilla's random tick rate. The catch-up runs only when a needle changes and visits at most 128 needles.
   - With seasons off (`seasons.mode=off`) every needle turns green.

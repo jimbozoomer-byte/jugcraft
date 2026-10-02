@@ -246,6 +246,8 @@ public final class JugcraftAgriculture {
 		registerBlock("cranberry_bush", CranberryBushBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SWEET_BERRY_BUSH)
 				.sound(SoundType.WET_GRASS));
 		registerChestnutTree();
+		// Generated trees' seasonal leaves start in today's look (tools/trees.py DECORATOR).
+		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("seasonal_leaves"), SeasonalLeavesDecorator.TYPE);
 		registerTree("larch", "larch_needles", LARCH_GROWER, LARCH_LEAVES, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.TERRACOTTA_RED, MapColor.TERRACOTTA_ORANGE);
 		registerTree("maple", "maple_leaves", MAPLE_GROWER, MAPLE_LEAVES, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
