@@ -57,6 +57,11 @@ public class CandyBowlBlock extends BaseEntityBlock {
 		return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
 	}
 
+	/** The start of the keys of the messages it shows. */
+	protected String messages() {
+		return "message.jugcraft.candy_bowl.";
+	}
+
 	@Override
 	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
 		super.setPlacedBy(level, pos, state, placer, stack);
@@ -73,8 +78,8 @@ public class CandyBowlBlock extends BaseEntityBlock {
 		}
 		if (!level.isClientSide() && level.getBlockEntity(pos) instanceof CandyBowlBlockEntity bowl) {
 			int added = bowl.add(stack);
-			player.sendOverlayMessage(added > 0 ? Component.translatable("message.jugcraft.candy_bowl.filled", bowl.count(), CandyBowlBlockEntity.CAPACITY)
-					: Component.translatable("message.jugcraft.candy_bowl.full"));
+			player.sendOverlayMessage(added > 0 ? Component.translatable(messages() + "filled", bowl.count(), CandyBowlBlockEntity.CAPACITY)
+					: Component.translatable(messages() + "full"));
 			if (added > 0) {
 				level.playSound(null, pos, SoundEvents.BUNDLE_INSERT, SoundSource.BLOCKS, 1.0F, 1.0F);
 				level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
@@ -89,11 +94,11 @@ public class CandyBowlBlock extends BaseEntityBlock {
 			return InteractionResult.SUCCESS;
 		}
 		if (player.isSecondaryUseActive()) {
-			player.sendOverlayMessage(Component.translatable("message.jugcraft.candy_bowl.count", bowl.count(), CandyBowlBlockEntity.CAPACITY));
+			player.sendOverlayMessage(Component.translatable(messages() + "count", bowl.count(), CandyBowlBlockEntity.CAPACITY));
 			return InteractionResult.SUCCESS;
 		}
 		CandyBowlBlockEntity.Taken taken = bowl.take(player, TrickOrTreat.night(server.getOverworldClockTime()));
-		player.sendOverlayMessage(Component.translatable("message.jugcraft.candy_bowl." + taken.name().toLowerCase(Locale.ROOT)));
+		player.sendOverlayMessage(Component.translatable(messages() + taken.name().toLowerCase(Locale.ROOT)));
 		if (taken == CandyBowlBlockEntity.Taken.TAKEN) {
 			level.playSound(null, pos, SoundEvents.BUNDLE_REMOVE_ONE, SoundSource.BLOCKS, 1.0F, 1.0F);
 		}

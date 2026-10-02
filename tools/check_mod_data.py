@@ -765,6 +765,7 @@ def check_agriculture():
     check_decor8(java)
     check_decor9(java)
     check_decor10(java)
+    check_decor11(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1857,6 +1858,80 @@ def check_decor10(java):
     for name in ("floating_witch_hat", "floating_witch_hat_flame"):
         if not quads.get(name):
             err(f"decor10_quads.json has no quads for {name}")
+
+
+def check_decor11(java):
+    """Party games: Java matches tools/agriculture.py (the trap's reach and timing, the contest's round, range and
+    entries, the bowling pumpkin's roll and the lane's reach, the dance floor's reach and light, ghost tag's round,
+    range, players and tag-backs, the fortune table's fortunes, cards and cooldown), every block state has a model, every
+    message the games show has its words (each fortune, each vote, each candy cache answer), and the textures and quads
+    the client draws exist."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    scare, contest, bowling, dance, tag, fortune = ag.JUMP_SCARE, ag.COSTUME_CONTEST, ag.BOWLING, ag.DANCE_FLOOR, ag.GHOST_TAG, ag.FORTUNE_TABLE
+    expected = {("JumpScareTrapBlock", "REACH"): scare["reach"], ("JumpScareTrapBlock", "POP_TICKS"): scare["pop_ticks"],
+                ("JumpScareTrapBlock", "RESET_TICKS"): scare["reset_ticks"], ("JudgesTableBlockEntity", "ROUND_TICKS"): contest["round_ticks"],
+                ("JudgesTableBlockEntity", "RANGE"): contest["range"], ("JudgesTableBlockEntity", "MAX_CONTESTANTS"): contest["max_contestants"],
+                ("BowlingPumpkin", "SPEED"): bowling["speed"], ("BowlingPumpkin", "FRICTION"): bowling["friction"],
+                ("BowlingPumpkin", "DOMINO_CHANCE"): bowling["domino_chance"], ("BowlingScoreboardBlock", "LANE_REACH"): bowling["lane_reach"],
+                ("BowlingScore", "FRAMES"): bowling["frames"], ("DanceFloorBlock", "REACH"): dance["reach"], ("DanceFloorBlock", "LIGHT"): dance["light"],
+                ("GhostBellBlockEntity", "ROUND_TICKS"): tag["round_ticks"], ("GhostBellBlockEntity", "RANGE"): tag["range"],
+                ("GhostBellBlockEntity", "TAG_BACK_TICKS"): tag["tag_back_ticks"], ("GhostBellBlockEntity", "MAX_PLAYERS"): tag["max_players"],
+                ("FortuneTellerTableBlock", "FORTUNES"): fortune["fortunes"], ("FortuneTellerTableBlock", "CARDS"): fortune["cards"],
+                ("FortuneTellerTableBlock", "COOLDOWN_TICKS"): fortune["cooldown_ticks"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    if "extends CandyBowlBlock" not in java.get("CandyCacheBlock", "") or "cache).build()" not in java.get("JugcraftAgriculture", ""):
+        err("The Candy Cache must be a Candy Bowl with the same block entity (no second candy store)")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    wanted = {scare["block"]: {f"facing={f},phase={p},powered={w}" for f in horizontal for p in ("ready", "popped", "resetting") for w in booleans},
+              contest["runway"]: {"axis=x", "axis=z"},
+              contest["table"]: {f"facing={f},open={o}" for f in horizontal for o in booleans},
+              bowling["pin"]: {f"down={d},facing={f}" for d in booleans for f in horizontal},
+              bowling["scoreboard"]: {f"facing={f}" for f in horizontal},
+              ag.CANDY_CACHE["block"]: {f"facing={f},fill={n}" for f in horizontal for n in range(4)},
+              dance["block"]: {f"distance={d}" for d in range(dance["reach"] + 1)},
+              tag["block"]: {f"facing={f},ringing={r}" for f in horizontal for r in booleans},
+              fortune["block"]: {f"facing={f}" for f in horizontal}}
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    votes = re.search(r"enum Vote \{\s*([A-Z_, ]+?)\s*\}", java.get("JudgesTableBlockEntity", ""))
+    taken = re.search(r"enum Taken \{\s*([A-Z_, ]+?)\s*\}", java.get("CandyBowlBlockEntity", ""))
+    keys = [f"message.jugcraft.fortune.{n}" for n in range(1, fortune["fortunes"] + 1)]
+    keys += [f"message.jugcraft.judges_table.{v.strip().lower()}" for v in (votes.group(1).split(",") if votes else [])]
+    keys += [f"message.jugcraft.candy_cache.{t.strip().lower()}" for t in (taken.group(1).split(",") if taken else [])]
+    keys += [f"message.jugcraft.candy_cache.{k}" for k in ("filled", "full", "count")]
+    for source in ("JudgesTableBlockEntity", "GhostBellBlockEntity", "BowlingScoreboardBlock"):
+        keys += re.findall(r'"(message\.jugcraft\.[a-z_.]+[a-z_])"', java.get(source, ""))
+    if not votes or not taken:
+        err("JudgesTableBlockEntity.Vote or CandyBowlBlockEntity.Taken not found")
+    for key in keys:
+        if key not in lang:
+            err(f"Missing words for {key}")
+    for key in ("frame", "score", "game_over", "ready"):
+        if f"message.jugcraft.bowling_scoreboard.{key}" not in lang:
+            err(f"Missing words for the scoreboard's {key}")
+
+    if not (ASSETS / "textures" / "entity" / "dance_floor_glow.png").exists():
+        err("Missing entity texture dance_floor_glow")
+    for card in range(fortune["cards"]):
+        if not (ASSETS / "textures" / "block" / f"fortune_card_{card}.png").exists():
+            err(f"Missing tarot card {card}")
+    quads = load(ASSETS / "decor11_quads.json") or {}
+    for name in ("jump_scare_lid", "jump_scare_ghost", "jump_scare_spring", "bowling_pumpkin", "ghost_bell", "ghost_bell_clapper",
+                 "fortune_planchette"):
+        if not quads.get(name):
+            err(f"decor11_quads.json has no quads for {name}")
 
 
 def check_model_uvs():

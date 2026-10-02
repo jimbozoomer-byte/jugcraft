@@ -21,11 +21,13 @@ import org.jspecify.annotations.Nullable;
  * decor8_quads.json (tools/decor8_data.py: the lab table's patient, the specimens, the sarcophagus's lid and mummy, the
  * raven and the black cat's tail) and decor9_quads.json (tools/decor9_data.py: the yard inflatables, the porch witch's
  * arm and head, the wind chimes' bones and skull, and the weathervanes' vanes) and decor10_quads.json (tools/decor10_data.py:
- * the floating witch hat and its flame).
+ * the floating witch hat and its flame) and decor11_quads.json (tools/decor11_data.py: the jump-scare trap's lid, ghost
+ * and spring, the bowling pumpkin, the ghost bell and its clapper, and the fortune teller's planchette).
  */
 public final class DecorQuads {
 	private static final List<Identifier> FILES = List.of(Jugcraft.id("decor_quads.json"), Jugcraft.id("decor7_quads.json"),
-			Jugcraft.id("decor8_quads.json"), Jugcraft.id("decor9_quads.json"), Jugcraft.id("decor10_quads.json"));
+			Jugcraft.id("decor8_quads.json"), Jugcraft.id("decor9_quads.json"), Jugcraft.id("decor10_quads.json"),
+			Jugcraft.id("decor11_quads.json"));
 	private static @Nullable Map<String, QuadModel> models;
 
 	private DecorQuads() {

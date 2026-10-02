@@ -16,7 +16,9 @@ import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -158,6 +160,7 @@ public final class JugcraftAgriculture {
 	public static DataComponentType<CandyBagItem.Night> CANDY_BAG_NIGHT;
 	public static EntityType<WillOWisp> WILL_O_WISP;
 	public static EntityType<FlyingPumpkin> FLYING_PUMPKIN;
+	public static EntityType<BowlingPumpkin> BOWLING_PUMPKIN;
 	public static EntityType<ThrowMarker> THROW_MARKER;
 	public static EntityType<HeadlessHorseman> HEADLESS_HORSEMAN;
 	public static EntityType<FlamingPumpkin> FLAMING_PUMPKIN;
@@ -197,6 +200,12 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> BRAZIER_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> SHADOW_LAMP_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> FLOATING_HAT_ENTITY;
+	public static BlockEntityType<JumpScareTrapBlockEntity> JUMP_SCARE_ENTITY;
+	public static BlockEntityType<JudgesTableBlockEntity> JUDGES_TABLE_ENTITY;
+	public static BlockEntityType<BowlingScoreboardBlockEntity> BOWLING_SCOREBOARD_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> DANCE_FLOOR_ENTITY;
+	public static BlockEntityType<GhostBellBlockEntity> GHOST_BELL_ENTITY;
+	public static BlockEntityType<FortuneTellerTableBlockEntity> FORTUNE_TABLE_ENTITY;
 	/** The Dust Sheet: its item, and the block it becomes over what it covers. */
 	public static final String DUST_SHEET = "dust_sheet";
 	/** What a Dust Sheet may cover (block tag). */
@@ -717,8 +726,12 @@ public final class JugcraftAgriculture {
 		Block bowl = registerBlock("candy_bowl", CandyBowlBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
 				.strength(0.8F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.POPPED));
 		registerItem("candy_bowl", props -> new BlockItem(bowl, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		// The Candy Cache (Halloween batch 11) is a hidden candy bowl: the same block entity, under its own block.
+		Block cache = registerBlock("candy_cache", CandyCacheBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		registerItem("candy_cache", props -> new BlockItem(cache, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
 		CANDY_BOWL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("candy_bowl"),
-				FabricBlockEntityTypeBuilder.create(CandyBowlBlockEntity::new, bowl).build());
+				FabricBlockEntityTypeBuilder.create(CandyBowlBlockEntity::new, bowl, cache).build());
 
 		Block coffin = registerBlock("coffin", CoffinBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
 				.strength(2.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
@@ -1018,6 +1031,48 @@ public final class JugcraftAgriculture {
 		}
 		fire.add(lamp, 5, 20);
 		fire.add(hat, 30, 60);
+
+		// Batch 11, party games: the Jump-Scare Trap, the Costume Runway and Judges' Table, Pumpkin Bowling, the Monster
+		// Mash Dance Floor, the Ghost Bell and the Fortune Teller's Table (the Candy Cache is with the Candy Bowl).
+		Block scare = registerBlock("jump_scare_trap", JumpScareTrapBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		JUMP_SCARE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("jump_scare_trap"),
+				FabricBlockEntityTypeBuilder.create(JumpScareTrapBlockEntity::new, scare).build());
+		Block runway = registerBlock("costume_runway", CostumeRunwayBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.strength(0.1F).sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block judges = registerBlock("judges_table", JudgesTableBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		JUDGES_TABLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("judges_table"),
+				FabricBlockEntityTypeBuilder.create(JudgesTableBlockEntity::new, judges).build());
+		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> JudgesTableBlockEntity.onUseEntity(player, level, hand, entity));
+		Block pin = registerBlock("skeleton_pin", SkeletonPinBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
+				.strength(0.3F).sound(SoundType.BONE_BLOCK).noOcclusion().noCollision().pushReaction(PushReaction.POPPED));
+		Block scoreboard = registerBlock("bowling_scoreboard", BowlingScoreboardBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		BOWLING_SCOREBOARD_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("bowling_scoreboard"),
+				FabricBlockEntityTypeBuilder.create(BowlingScoreboardBlockEntity::new, scoreboard).build());
+		BOWLING_PUMPKIN = entity("bowling_pumpkin", EntityType.Builder.<BowlingPumpkin>of(BowlingPumpkin::new, MobCategory.MISC).noLootTable()
+				.sized(0.5F, 0.5F).clientTrackingRange(8).updateInterval(2));
+		Block dance = registerBlock("dance_floor", DanceFloorBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(0.6F).sound(SoundType.GLASS).lightLevel(DanceFloorBlock::light));
+		DANCE_FLOOR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("dance_floor"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(DANCE_FLOOR_ENTITY, pos, state), dance).build());
+		Block ghostBell = registerBlock("ghost_bell", GhostBellBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+				.strength(2.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
+		GHOST_BELL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ghost_bell"),
+				FabricBlockEntityTypeBuilder.create(GhostBellBlockEntity::new, ghostBell).build());
+		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> GhostBellBlockEntity.onAttack(player, level, hand, entity));
+		Block fortune = registerBlock("fortune_teller_table", FortuneTellerTableBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		FORTUNE_TABLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("fortune_teller_table"),
+				FabricBlockEntityTypeBuilder.create(FortuneTellerTableBlockEntity::new, fortune).build());
+		for (Block block : List.of(scare, runway, judges, pin, scoreboard, dance, ghostBell, fortune)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		registerItem("best_costume_ribbon", Item::new, new Item.Properties().rarity(Rarity.UNCOMMON), TOOL_TAB);
+		registerItem("bowling_pumpkin", BowlingPumpkinItem::new, new Item.Properties().stacksTo(16), TOOL_TAB);
+		fire.add(runway, 30, 60);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

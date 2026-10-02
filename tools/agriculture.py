@@ -958,6 +958,51 @@ def decor10_blocks():
 def decor10_items():
     return decor10_blocks()
 
+
+# ---------------------------------------------------------------- Halloween decorations, batch 11: party games
+# The Jump-Scare Trap (JumpScareTrapBlock + JumpScareTrapBlockEntity): a crate that springs open with a shriek and a
+# ghost on a spring when someone walks up to its front (within `reach` blocks, not sneaking) or on a rising redstone
+# signal (a tripwire); the ghost stays out `pop_ticks`, then it rests `reset_ticks`.
+JUMP_SCARE = {"block": "jump_scare_trap", "display": "Jump-Scare Trap", "reach": 2.5, "pop_ticks": 40, "reset_ticks": 60}
+# The Costume Contest: Runway carpet (CostumeRunwayBlock) and the Judges' Table (JudgesTableBlock +
+# JudgesTableBlockEntity). Ringing the table's bell opens a round of `round_ticks`; players in costume (TrickOrTreat's
+# costume tag on their head) who walk the runway within `range` blocks are contestants (at most `max_contestants`);
+# anyone else votes by using the contestant they like (one vote each, never for themselves). The most votes win the
+# `ribbon`.
+COSTUME_CONTEST = {"runway": "costume_runway", "runway_display": "Costume Runway", "table": "judges_table", "table_display": "Judges' Table",
+                   "ribbon": "best_costume_ribbon", "ribbon_display": "Best Costume Ribbon", "round_ticks": 1200, "range": 16,
+                   "max_contestants": 16}
+# Pumpkin Bowling: Skeleton Pins (SkeletonPinBlock) and the Bowling Pumpkin (BowlingPumpkinItem, rolled as a
+# BowlingPumpkin entity at `speed` blocks a tick, slowing by `friction` a tick, knocking pins down as it rolls and the
+# pins behind them one time in `domino_chance`), scored by the Bowling Scoreboard (BowlingScoreboardBlock + entity)
+# for the pins within `lane_reach` blocks of it: `frames` frames of two rolls, strikes and spares as in ten-pin.
+BOWLING = {"pin": "skeleton_pin", "pin_display": "Skeleton Pin", "pumpkin": "bowling_pumpkin", "pumpkin_display": "Bowling Pumpkin",
+           "scoreboard": "bowling_scoreboard", "scoreboard_display": "Bowling Scoreboard", "speed": 0.55, "friction": 0.985,
+           "domino_chance": 2, "lane_reach": 4, "frames": 10, "pins": 10}
+# The Candy Cache (CandyCacheBlock, a hidden Candy Bowl): a hollow stump that keeps treats like a Candy Bowl does, one
+# a night for each finder; it sparkles faintly.
+CANDY_CACHE = {"block": "candy_cache", "display": "Candy Cache"}
+# The Monster Mash Dance Floor (DanceFloorBlock + DecorationBlockEntity): tiles light up and pulse in colours while a
+# jukebox with a disc in it or a redstone signal is next to one of them, passing it along up to `reach` tiles (light
+# `light`); villagers on lit tiles hop and spin.
+DANCE_FLOOR = {"block": "dance_floor", "display": "Monster Mash Dance Floor", "reach": 8, "light": 8}
+# Ghost Tag (GhostBellBlock + GhostBellBlockEntity): ring the bell to start a round of `round_ticks` with everyone
+# within `range` blocks (at least two); whoever is "it" glows; "it" tags someone by hitting them (no harm done), not
+# the one who just tagged them back within `tag_back_ticks`.
+GHOST_TAG = {"block": "ghost_bell", "display": "Ghost Bell", "round_ticks": 2400, "range": 16, "tag_back_ticks": 40, "max_players": 32}
+# The Fortune Teller's Table (FortuneTellerTableBlock + DecorationBlockEntity): use it to turn a tarot card and have the
+# planchette slide over the spirit board; one of `fortunes` silly fortunes, at most one a player every `cooldown_ticks`.
+FORTUNE_TABLE = {"block": "fortune_teller_table", "display": "Fortune Teller's Table", "fortunes": 20, "cards": 6, "cooldown_ticks": 40}
+
+
+def decor11_blocks():
+    return [JUMP_SCARE["block"], COSTUME_CONTEST["runway"], COSTUME_CONTEST["table"], BOWLING["pin"], BOWLING["scoreboard"],
+            CANDY_CACHE["block"], DANCE_FLOOR["block"], GHOST_TAG["block"], FORTUNE_TABLE["block"]]
+
+
+def decor11_items():
+    return decor11_blocks() + [COSTUME_CONTEST["ribbon"], BOWLING["pumpkin"]]
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -1074,6 +1119,9 @@ POT_RECIPES = {
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    # Decorations batch 11: a pumpkin weighted with an iron nugget.
+    {"id": "bowling_pumpkin", "inputs": ["minecraft:pumpkin", "minecraft:iron_nugget"], "result": "bowling_pumpkin", "count": 1,
+     "category": "misc"},
     # Decorations batch 10: glow ink thinned with bone meal.
     {"id": "glow_paint", "inputs": ["minecraft:glow_ink_sac", "minecraft:bone_meal"], "result": "glow_paint", "count": 4,
      "category": "building"},
@@ -1367,6 +1415,30 @@ SHAPED = [
     {"id": "dead_hollow_tree", "pattern": ["LSL", "TJT", " T "], "key": {"L": "minecraft:lantern", "S": "minecraft:stick",
                                                                       "T": "#minecraft:logs", "J": "minecraft:jack_o_lantern"},
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
+    # Decorations batch 11: a plank crate round a wool ghost on an iron spring; red carpet edged with gold; a red-draped
+    # table with a gold bell; bone pins; a chalkboard on legs; a hollow log round a chest; black glass tiles round a
+    # redstone lamp; a gold bell with a wool ghost; a purple-draped table with a book for a spirit board.
+    {"id": "jump_scare_trap", "pattern": ["PWP", "PIP", "PPP"], "key": {"P": "#minecraft:planks", "W": "minecraft:white_wool",
+                                                                     "I": "#c:ingots/iron"},
+     "result": "jump_scare_trap", "count": 1, "category": "redstone"},
+    {"id": "costume_runway", "pattern": ["CCC", "G G"], "key": {"C": "minecraft:red_carpet", "G": "minecraft:gold_nugget"},
+     "result": "costume_runway", "count": 3, "category": "building"},
+    {"id": "judges_table", "pattern": ["CGC", "P P"], "key": {"C": "minecraft:red_wool", "G": "minecraft:gold_ingot", "P": "#minecraft:planks"},
+     "result": "judges_table", "count": 1, "category": "building"},
+    {"id": "skeleton_pin", "pattern": ["B", "B"], "key": {"B": "minecraft:bone"}, "result": "skeleton_pin", "count": 2, "category": "building"},
+    {"id": "bowling_scoreboard", "pattern": ["PPP", "PKP", "S S"], "key": {"P": "#minecraft:planks", "K": "minecraft:black_dye",
+                                                                        "S": "minecraft:stick"},
+     "result": "bowling_scoreboard", "count": 1, "category": "building"},
+    {"id": "candy_cache", "pattern": ["L L", "LCL"], "key": {"L": "#minecraft:logs", "C": "minecraft:chest"},
+     "result": "candy_cache", "count": 1, "category": "building"},
+    {"id": "dance_floor", "pattern": ["GDG", "DLD", "GDG"], "key": {"G": "minecraft:black_stained_glass", "D": "minecraft:glowstone_dust",
+                                                                 "L": "minecraft:redstone_lamp"},
+     "result": "dance_floor", "count": 8, "category": "redstone"},
+    {"id": "ghost_bell", "pattern": [" S ", "GWG", " G "], "key": {"S": "minecraft:stick", "G": "minecraft:gold_ingot", "W": "minecraft:white_wool"},
+     "result": "ghost_bell", "count": 1, "category": "building"},
+    {"id": "fortune_teller_table", "pattern": ["CBC", "PPP", "P P"], "key": {"C": "minecraft:purple_carpet", "B": "minecraft:book",
+                                                                          "P": "#minecraft:planks"},
+     "result": "fortune_teller_table", "count": 1, "category": "building"},
     # Decorations batch 10: a purple-dyed glass tube in an iron fixture with glowstone; glow ink with bone meal; an iron
     # brazier on a campfire; paper round a candle on a plank base; three pumpkins and torches; a hat of wool round a candle.
     {"id": "black_light", "pattern": ["III", "PGP"], "key": {"I": "minecraft:iron_nugget", "P": "minecraft:purple_stained_glass",
@@ -1425,7 +1497,8 @@ def all_blocks():
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
-            + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks())
+            + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
+            + decor11_blocks())
 
 
 def all_items():
@@ -1434,7 +1507,7 @@ def all_items():
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
-            + decor9_items() + decor10_items())
+            + decor9_items() + decor10_items() + decor11_items())
 
 
 def owns(entry_id):
