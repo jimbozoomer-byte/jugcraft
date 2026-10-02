@@ -36,6 +36,24 @@ No numbered release yet. Everything below is on `main`.
   - the arc furnace pulls silicon boules, with argon (was the crystal grower).
 - New uses: the settling plant presses mud into clay; the electrolytic cell splits water into hydrogen and oxygen.
 
+### Unmerged: Seasons (colours, events and winter snow)
+- **Grass and leaves change colour with the server's date** in every biome that has four seasons: plains, meadows, forests (dark, dappled and cherry groves included), taigas, windswept hills and swamps.
+  - Winter is dull and dormant, spring is fresh green and summer is vanilla.
+  - Autumn turns oak leaves gold, orange and red in patches, then russet.
+  - Colours change a little each day.
+- **Winter snow (opt-in, `seasons.snow=on`):**
+  - From December to February, rain falls as snow in those biomes, and up to `seasons.snow_depth` layers settle.
+  - The snow melts in spring.
+  - It never freezes water, lies on farmland or touches snow you placed.
+- **Events on one clock:**
+  - the **Harvest Feast** (`harvest_feast`: the US Thanksgiving weekend by default, Canada's, or off);
+  - **December** (`december`: 1 December to 6 January by default).
+  - Both are announced in chat.
+- **`/jugcraft season`** shows the season, day and events. Operators can set a season, preview a date or switch snow on or off until the server stops.
+- **Server settings** in `config/jugcraft.properties`: `seasons.mode`, `seasons.hemisphere`, `seasons.timezone`, plus the snow and event settings above.
+- The server decides everything; clients never use their own clock. Colours and events save nothing; seasonal snow melts away.
+- Server and client game tests, with a screenshot per season and one of winter snow.
+
 ### Blueprints and test blocks (same draft PR)
 - **Blueprint Table:**
   - LIBRARY of the mod's structures and imported blueprints, with a front view and materials; printing is free.
