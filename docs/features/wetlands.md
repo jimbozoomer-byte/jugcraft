@@ -85,7 +85,7 @@ Results are recorded under "Results" below after CI runs.
     - Lush River: oak bushes on its banks. Marsh: shallow water with cattails and watergrass on a green plain.
     - Wetland: mud patches in olive grass with firs and willows. Bog: mud and cattails.
     - Dead Swamp and Sludge Mire: the camera stood over their murky ponds and shows mostly water.
-    - Quagmire: the shot looked across its region's edge into a neighbouring Dead Forest. The client test now prefers a spot where the camera's view has the biome too.
+    - Quagmire: the shot shows dead trees, small firs and maple scrub, which the Quagmire does not grow. It most likely looks across its region's edge into a neighbouring Dead Forest (the same climate in another layout). The client test then preferred a spot where the camera's view has the biome too, but run [37041750692](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37041750692) took the same spot and the same view. It now logs the biome at the picture's centre, to tell a region edge from a placement fault. Open until that run reports.
 
 ## World and event applicability
 - Biome fit: each biome takes the climate of the vanilla biome it replaces.

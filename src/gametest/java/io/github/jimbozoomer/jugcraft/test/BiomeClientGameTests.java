@@ -138,8 +138,10 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 				BlockPos place = places.get(i);
 				ResourceKey<Biome> biome = keys.get(i);
 				BlockPos spot = server.computeOnServer(minecraft -> surfaceSpot(minecraft.overworld(), place, biome));
+				String view = spot == null ? "" : server.computeOnServer(minecraft -> viewBiome(minecraft.overworld(), spot));
 				LOGGER.info("Biomes, seed {}: {} on the surface {}", SEED, found.get(i), spot == null ? "not within " + SURFACE_REACH
-						+ " blocks of where it was found; using that place" : "at " + spot.getX() + " " + spot.getY() + " " + spot.getZ());
+						+ " blocks of where it was found; using that place" : "at " + spot.getX() + " " + spot.getY() + " " + spot.getZ()
+						+ " (the camera looks at " + view + ")");
 				spots.add(spot == null ? place : spot);
 			}
 			// The chunks around each biome found are generated now, far from the player, so no random tick has turned
@@ -187,7 +189,8 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 
 	/**
 	 * The column nearest {@code place} (within {@link #SURFACE_REACH} blocks, every {@link #SURFACE_STEP}) whose surface
-	 * has {@code biome}, preferring one with the biome {@link #SURFACE_MARGIN} blocks to each side too; null if none.
+	 * has {@code biome}. Preferred, in order: one inside the biome (the biome {@link #SURFACE_MARGIN} blocks to each side
+	 * and where the camera looks) on dry ground; one inside the biome; any. Null if none.
 	 */
 	private static BlockPos surfaceSpot(ServerLevel level, BlockPos place, ResourceKey<Biome> biome) {
 		List<int[]> offsets = new ArrayList<>();
@@ -197,6 +200,7 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 			}
 		}
 		offsets.sort(Comparator.comparingInt(offset -> offset[0] * offset[0] + offset[1] * offset[1]));
+		BlockPos inside = null;
 		BlockPos edge = null;
 		for (int[] offset : offsets) {
 			int x = place.getX() + offset[0];
@@ -204,16 +208,28 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 			if (!surfaceIs(level, x, z, biome)) {
 				continue;
 			}
+			BlockPos spot = surface(level, x, z);
 			if (surfaceIs(level, x + SURFACE_MARGIN, z, biome) && surfaceIs(level, x - SURFACE_MARGIN, z, biome)
 					&& surfaceIs(level, x, z + SURFACE_MARGIN, biome) && surfaceIs(level, x, z - SURFACE_MARGIN, biome)
 					&& surfaceIs(level, x - SURFACE_VIEW, z - SURFACE_VIEW, biome)) {
-				return surface(level, x, z);
+				if (level.getFluidState(spot.below()).isEmpty()) {
+					return spot;
+				}
+				if (inside == null) {
+					inside = spot;
+				}
 			}
 			if (edge == null) {
-				edge = surface(level, x, z);
+				edge = spot;
 			}
 		}
-		return edge;
+		return inside != null ? inside : edge;
+	}
+
+	/** The biome on the surface where the camera looks from {@code spot}. */
+	private static String viewBiome(ServerLevel level, BlockPos spot) {
+		return level.getBiome(surface(level, spot.getX() - SURFACE_VIEW, spot.getZ() - SURFACE_VIEW)).unwrapKey()
+				.map(key -> key.identifier().toString()).orElse("?");
 	}
 
 	private static BlockPos surface(ServerLevel level, int x, int z) {

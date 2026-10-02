@@ -82,7 +82,10 @@ Results are recorded under "Results" below after CI runs.
     - Burnt Forest: charred trunks on coarse dirt under grey, ashy air.
     - Mediterranean Forest: dark cypress columns among oaks in autumn colours. Orchard: chestnut trees and azaleas.
     - Jugcraft's own surfaces generate: coarse dirt in the Burnt Forest and Lush Savanna.
-    - The Cold Desert was buried in snow: vanilla lays snow on any freezing biome as the land is made. It now drops that step and has no precipitation, so its gravel should show; awaiting CI.
+    - The Cold Desert was buried in snow: vanilla lays snow on any freezing biome as the land is made. It now drops that step and has no precipitation.
+- **Run [37041750692](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37041750692) (commit 44f70069): green.**
+  - The Cold Desert now shows bare gravel and coarse dirt.
+  - The climate check found no vanilla desert or badlands within 6,400 blocks of this seed's start, so the seven biomes that replace them could not be near either. It found a savanna plateau 5,772 blocks away; no Xeric Shrubland was found, as layout and share make the replaced climate rarer still.
 
 ## World and event applicability
 - Biome fit: each biome takes the climate of the vanilla biome it replaces.

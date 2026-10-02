@@ -1,6 +1,6 @@
 # Big trees and rainforests (biomes batch 5)
 
-Status: in progress on branch `claude/biomes`, with the region engine ([biome-regions.md](biome-regions.md)). Awaiting CI. **Not yet played.**
+Status: in progress on branch `claude/biomes`, with the region engine ([biome-regions.md](biome-regions.md)). Green in CI (server and client game tests). **Not yet played.**
 Proposal issue: none. The owner asked on 2 October 2026 to remake the Biomes O' Plenty catalog's biomes ([branches/BIOMES.md](../branches/BIOMES.md)) and to carry on through every batch. Everything here is original: the catalog guided the concepts only.
 Owner: @jimbozoomer-byte
 Target milestone and tier: world generation and building (Discovery).
@@ -62,7 +62,24 @@ Results are recorded under "Results" below after CI runs.
 - Not run: play, a dedicated server, two clients.
 
 ### Results
-Not yet run in CI.
+- **Run [37040036527](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37040036527) (commit 5cc96597): server green, client failed.**
+  - Server game tests: all 313 passed. A redwood of 13 logs and only 25 needles (its crown was then widened), a eucalyptus of 11 logs and 38 leaves, a mahogany of 10 and 57. Four saplings grew a giant redwood of 117 logs and a giant mahogany of 92, both two blocks wide.
+  - Client game test: failed in the seasons test, not here: grass under seasonal snow had turned to dirt ([seasons.md](seasons.md); fixed in commit 44f70069).
+- **Run [37041750692](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37041750692) (commit 44f70069): green.**
+  - Server game tests: all 314 passed.
+    - `bigTreesGrow`: a redwood of 14 logs and 165 needles, a eucalyptus of 12 and 42, a mahogany of 9 and 85; a giant redwood of 125 logs and a giant mahogany of 49, both two blocks wide.
+    - `tropicalPlantsWork`: a broken hydrangea dropped 1.
+    - The woodland layout placed every batch 5 biome: Subtropics 448 entries, Eucalyptus Forest 220, Dense Forest 174, Woodland 158, Rainforest 156, Redwood Forest 114, Temperate Rainforest 100, Tropics 88. The wild layout also placed the Redwood Forest (114) and Temperate Rainforest (100).
+  - Client game test, a real world with seed `jugcraft`: all eight were within 6,400 blocks of the start.
+    - Temperate Rainforest 1,104 blocks away, Subtropics 1,319, Dense Forest 1,345, Tropics 1,384.
+    - Rainforest 1,431, Eucalyptus Forest 1,438, Redwood Forest 1,498, Woodland 2,307.
+  - Screenshots (2 October, autumn):
+    - Rainforest: a dark green canopy of mahoganies and jungle trees hung with vines.
+    - Eucalyptus Forest: tall, streaked trunks under blue-green crowns.
+    - Tropics: a turquoise lagoon below green hills with palms. Subtropics: green hills with azaleas and oaks.
+    - Dense Forest: big oaks packed close, in autumn colours. Temperate Rainforest: firs and redwoods with a yellow willow.
+    - Woodland: the camera stood inside an oak's crown.
+    - Redwood Forest: the camera looked down into a lake. The client test now prefers dry ground.
 
 ## World and event applicability
 - Biome fit: each biome takes the climate of the vanilla biome it replaces.
