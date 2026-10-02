@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "#c:foods/candy",
-    "minecraft:cookie"
+    "minecraft:cookie",
+    "jugcraft:soul_cake"
   ]
 }

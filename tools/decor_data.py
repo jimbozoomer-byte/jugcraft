@@ -140,7 +140,7 @@ def fog_model(running):
 
 TEXT = {
     "message.jugcraft.string_lights.first": "Now use the strand on another hook, up to %s blocks away",
-    "message.jugcraft.string_lights.strung": "String lights strung",
+    "message.jugcraft.string_lights.strung": "Strung between the hooks",
     "message.jugcraft.string_lights.same_hook": "Use it on a second hook",
     "message.jugcraft.string_lights.too_far": "Too far: hooks can be at most %s blocks apart",
     "message.jugcraft.string_lights.gone": "The first hook is gone; start again",
