@@ -26,7 +26,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Client game test for crows and working scarecrows: a ripe wheat field guarded by a scarecrow wearing a pumpkin head,
- * crows wheeling over a patch just out of its reach, and one of them down on the wheat, pecking (it was sent after the
+ * crows wheeling over a carrot patch just out of its reach, and one of them down on the carrots, pecking (it was sent after the
  * crop and stepped once, so it pecks for real); the others are posed in flight. Photographed by day (CI job
  * {@code client}).
  */
@@ -55,7 +55,7 @@ public class CrowClientGameTests implements FabricClientGameTest {
 					.getEntitiesOfClass(Crow.class, client.player.getBoundingBox().inflate(40.0)).stream().filter(Crow::pecking).count()));
 
 			shoot(context, singleplayer, x + 7, y + 2, z + 3, 180, 14, "jugcraft_crows_and_scarecrow");
-			shoot(context, singleplayer, x + 13, y + 1, z - 5, 180, 22, "jugcraft_crows");
+			shoot(context, singleplayer, x + 13, y + 1, z - 4, 180, 28, "jugcraft_crows");
 		}
 	}
 
@@ -79,13 +79,13 @@ public class CrowClientGameTests implements FabricClientGameTest {
 		level.setBlock(pos, state, Block.UPDATE_ALL);
 	}
 
-	/** Ripe wheat on wet farmland at (x, y, z) to (x2, y, z2). */
-	private static void wheat(ServerLevel level, int x, int y, int z, int x2, int z2) {
+	/** A ripe crop on wet farmland at (x, y, z) to (x2, y, z2). */
+	private static void field(ServerLevel level, Block crop, int x, int y, int z, int x2, int z2) {
 		for (int dx = x; dx <= x2; dx++) {
 			for (int dz = z; dz <= z2; dz++) {
 				BlockPos pos = new BlockPos(dx, y, dz);
 				set(level, pos.below(), Blocks.FARMLAND.defaultBlockState().setValue(BlockStateProperties.MOISTURE, 7));
-				set(level, pos, ((CropBlock) Blocks.WHEAT).getStateForAge(7));
+				set(level, pos, ((CropBlock) crop).getStateForAge(((CropBlock) crop).getMaxAge()));
 			}
 		}
 	}
@@ -109,17 +109,19 @@ public class CrowClientGameTests implements FabricClientGameTest {
 		int x = origin.getX();
 		int y = origin.getY();
 		int z = origin.getZ();
-		// The field, and a scarecrow in it wearing a pumpkin head: it guards eight blocks round.
-		wheat(level, x, y, z - 12, x + 8, z - 6);
+		// A wheat field, and a scarecrow in it wearing a pumpkin head (it guards eight blocks round), standing on a grass
+		// block: it needs a solid top under it, and farmland's isn't.
+		field(level, Blocks.WHEAT, x, y, z - 12, x + 8, z - 6);
 		BlockPos scarecrow = new BlockPos(x + 4, y, z - 9);
+		set(level, scarecrow.below(), Blocks.GRASS_BLOCK.defaultBlockState());
 		BlockState standing = JugcraftAgriculture.block("scarecrow").defaultBlockState().setValue(TallDecorationBlock.FACING, Direction.SOUTH);
 		set(level, scarecrow, standing);
 		set(level, scarecrow.above(), standing.setValue(TallDecorationBlock.HALF, DoubleBlockHalf.UPPER));
 		if (level.getBlockEntity(scarecrow.above()) instanceof ScarecrowBlockEntity dressed) {
 			dressed.setHead(new ItemStack(Items.CARVED_PUMPKIN));
 		}
-		// A patch just out of its reach, where the crows are.
-		wheat(level, x + 12, y, z - 10, x + 15, z - 7);
+		// A carrot patch just out of its reach, where the crows are (carrots are short, so the pecking crow shows).
+		field(level, Blocks.CARROTS, x + 12, y, z - 10, x + 15, z - 7);
 		BlockPos crop = new BlockPos(x + 13, y, z - 9);
 		Crow pecking = crow(level, crop.getX() + 0.5, crop.getY() + 0.1, crop.getZ() + 0.5, 200.0F);
 		if (pecking != null) {
@@ -127,8 +129,8 @@ public class CrowClientGameTests implements FabricClientGameTest {
 			pecking.step(level, true);
 			System.out.println("[crows test] sent after the crop: " + sent + ", pecking: " + pecking.pecking());
 		}
-		crow(level, x + 12.2, y + 1.7, z - 8.2, 60.0F);
-		crow(level, x + 14.8, y + 2.3, z - 9.8, -130.0F);
+		crow(level, x + 12.0, y + 1.5, z - 8.0, 60.0F);
+		crow(level, x + 15.0, y + 2.0, z - 9.0, -130.0F);
 		crow(level, x + 11.0, y + 3.6, z - 11.5, 100.0F);
 		crow(level, x + 15.6, y + 4.4, z - 12.5, -60.0F);
 	}
