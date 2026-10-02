@@ -1,21 +1,21 @@
 # More Halloween
 
-Status: implemented in source for batches 7 to 10, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below). Batches 11 to 14 are planned and follow one pull request at a time.
+Status: implemented in source for batches 7 to 11, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below). Batches 12 to 14 are planned and follow one pull request at a time.
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("I want to make more halloween content more decorations and fun festive content", then "Lets do those 45 by each category starting with Haunted House inside then Mad Scientist and Mosnters then Yard and Porch then Lighting and Glow then Party Games then Night Events then Treats then Costumes"). The 45 ideas ship one category per pull request, each stacked on the one before:
 - batch 7, the haunted house inside: the Haunted Chandelier, the Phantom Pipe Organ, the Suit of Armor, the Dust Sheet, the Spirit Mirror, Tattered Curtains and the Creepy Doll;
 - batch 8, the mad scientist and monsters: the Tesla Coil, the Lab Table, the Specimen Jar, the Mummy Sarcophagus, the Raven on a Perch and the Black Cat Figure;
 - batch 9, the yard and porch: the Yard Inflatables (a ghost, a black cat, a pumpkin stack and a spider), the Animatronic Porch Witch, Grasping Hands, the Poseable Skeleton, Bone Wind Chimes, the Bat and Witch Weathervanes, the Spooky Sign, the Haunted Archway and the Dead Hollow Tree;
 - batch 10, lighting and glow: the Black Light and Glow Paint, the Witch Fire Brazier, the Shadow Puppet Lamp, the Mini Pumpkin Stack and the Floating Witch Hat;
-- batch 11, party games (planned);
+- batch 11, party games: the Jump-Scare Trap, the Costume Contest (the Costume Runway, the Judges' Table and the Best Costume Ribbon), Pumpkin Bowling (Skeleton Pins, the Bowling Pumpkin and the Bowling Scoreboard), the Candy Cache, the Monster Mash Dance Floor, Ghost Tag (the Ghost Bell) and the Fortune Teller's Table;
 - batch 12, night events (planned);
 - batch 13, treats (planned);
 - batch 14, costumes (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: batch 7 is Discovery tier (iron, candles, a note block, bones, planks, an armor stand, white carpet, glass, gold nuggets, soul sand, string, clay and wool). Batch 8 is Discovery tier too (iron, glass, a slime ball, sandstone, paper, rotten flesh, feathers, sticks, black terracotta, glowstone dust), apart from the Tesla Coil, which needs copper and copper cable (the tin and bronze tier) and a generator to run. Batch 9 is Discovery tier (wool, dyes, iron, redstone, a cauldron, bones, rotten flesh, dirt, string, slabs, planks, sticks, mossy cobblestone, lanterns, logs and a jack o'lantern). Batch 10 is Discovery tier too (iron, purple stained glass, glowstone dust, a glow ink sac, bone meal, a campfire, paper, a candle, slabs, carved pumpkins, torches and black wool).
-Primary specialty and supported player role: building and play; builders (haunted houses and Halloween yards), groups (a shared haunted house to explore, a street of decorated yards), and anyone who likes a prop that does something when you are not looking.
+Target milestone and tier: batch 7 is Discovery tier (iron, candles, a note block, bones, planks, an armor stand, white carpet, glass, gold nuggets, soul sand, string, clay and wool). Batch 8 is Discovery tier too (iron, glass, a slime ball, sandstone, paper, rotten flesh, feathers, sticks, black terracotta, glowstone dust), apart from the Tesla Coil, which needs copper and copper cable (the tin and bronze tier) and a generator to run. Batch 9 is Discovery tier (wool, dyes, iron, redstone, a cauldron, bones, rotten flesh, dirt, string, slabs, planks, sticks, mossy cobblestone, lanterns, logs and a jack o'lantern). Batch 10 is Discovery tier too (iron, purple stained glass, glowstone dust, a glow ink sac, bone meal, a campfire, paper, a candle, slabs, carved pumpkins, torches and black wool). So is batch 11 (planks, wool, iron, red and purple carpet, gold, bones, a pumpkin, black dye, sticks, logs, a chest, black stained glass, glowstone dust, a redstone lamp and a book).
+Primary specialty and supported player role: building and play; builders (haunted houses and Halloween yards), groups (a shared haunted house to explore, a street of decorated yards, a Halloween party with games to play together), and anyone who likes a prop that does something when you are not looking.
 
-Event-only activities in later batches follow the rule the earlier Halloween work set: they run only in the Halloween window, and anything crafted or placed stays all year. Nothing in batches 7 to 10 depends on the event.
+Event-only activities in later batches follow the rule the earlier Halloween work set: they run only in the Halloween window, and anything crafted or placed stays all year. Nothing in batches 7 to 11 depends on the event: the party games can be played at any party, all year.
 
 ## Player experience
 ### Batch 7: the Haunted Chandelier
@@ -119,12 +119,41 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
 ### Batch 10: the Floating Witch Hat
 47. A pointed black hat with an orange band and a candle hanging inside it, floating where it is placed, bobbing and turning slowly, each hat out of step with its neighbours. Lit like a candle (light 10); nothing walks into it.
 
+### Batch 11: the Jump-Scare Trap
+48. A battered plank crate with iron corners and a red question mark on its front. **Walk up to its front** (within two and a half blocks, not sneaking) or trip a redstone signal into it (hook it to a tripwire) and the lid bursts open with a shriek: a sheet ghost on a spring shoots up out of it, overshooting and wobbling. Two seconds later the ghost sinks back and the lid drops shut; three seconds after that it is ready again. It frightens; it does no harm. Sneak up on it to get past.
+
+### Batch 11: the Costume Contest
+49. **The Costume Runway** is red carpet with gold braid along its edges and little footlights, laid like carpet along the way you face (three from three red carpets and two gold nuggets). **The Judges' Table** is draped in red to the floor, with a brass bell, a ballot box and three score cards.
+50. **Ring the bell** (use the table) to open a round of one minute. Anyone wearing a costume on their head (a carved pumpkin, a witch hat, a ghost sheet or a scarecrow hat, the trick-or-treat costumes) who walks the runway within 16 blocks is entered (at most 16 contestants); the score cards go up.
+51. **Everyone else votes** by using the contestant they like best with an empty hand: one vote each, which they can move; nobody votes for themselves. Use the table during a round to hear the standings.
+52. When the minute is up, the contestants with the most votes (at least one) each win a **Best Costume Ribbon**, and the table closes.
+
+### Batch 11: Pumpkin Bowling
+53. **Skeleton Pins:** little skeletons standing to attention, round as bowling pins, red ribbons at their necks (two from two bones). Nothing walks into them. Set them up in a triangle, or however you like.
+54. **The Bowling Pumpkin:** a small, heavy pumpkin drilled with three finger holes (a pumpkin and an iron nugget). **Use it to roll it** along the ground the way you face; it rolls on, slowing, falling where the ground falls, and knocks down every pin it rolls through, the pins behind them sometimes going down too. When it stops or hits a wall it comes to rest as an item to pick up.
+55. **The Bowling Scoreboard:** a slate in a wooden frame on legs. A pumpkin rolled within six blocks of it scores each roll on it for the pins within four blocks of it: **ten frames of two balls, strikes and spares as in ten-pin**, for a lane of any number of pins. The slate shows the frame, the last three frames' marks (X, /, -) and the score. It stands the pins up again two seconds after a strike, a spare or the end of a frame; use it to start a new game. A fallen pin also stands up when used.
+
+### Batch 11: the Candy Cache
+56. A hollow, mossy stump with roots and a knot-hole, for a candy hunt. It is a Candy Bowl in disguise: fill it with treats, and each finder takes one a night (whoever hid it, any time). Nothing shows from outside how full it is, apart from a faint sparkle at the knot-hole now and then while there are treats in it.
+
+### Batch 11: the Monster Mash Dance Floor
+57. Black glass tiles over a grid of coloured lamps (eight from glowstone dust, black stained glass and a redstone lamp). A tile beside **a jukebox playing a disc**, or with a redstone signal, lights up and passes it on to the tiles beside it, up to eight tiles away (light 8). Lit tiles pulse in orange, purple, green and magenta, the colours stepping along the floor in waves on the beat; tiles further from the music glow a little less. **Villagers on lit tiles hop and spin.**
+
+### Batch 11: Ghost Tag
+58. **The Ghost Bell:** a tarnished bronze bell with a little ghost for a clapper, hung from a crooked post. **Ring it** to start a two-minute round of Ghost Tag with everyone within 16 blocks (at least two players, at most 32). One of them, at random, is the ghost: "it", glowing so everyone can see.
+59. The ghost tags someone by hitting them: **no harm is done** (hits between players in the round are cancelled), and now they are the ghost. They can't tag straight back whoever tagged them for two seconds. Players who leave, or wander more than 48 blocks away, drop out. When time is up, whoever is the ghost loses. The bell swings the whole round; use it to hear who is the ghost.
+
+### Batch 11: the Fortune Teller's Table
+60. A round table under a purple, star-sprinkled cloth with a gold fringe, a spirit board (YES, NO and GOODBYE) and three tarot cards on it. **Use it:** the middle card flips over (the Moon, the Bat, the Pumpkin, the Ghost, the Cat or Death), the planchette slides across the board to YES, NO or GOODBYE and circles there, and you are told one of twenty silly fortunes, for you alone. Everyone near sees the card and the planchette. A table reads at most once every two seconds.
+
 ## Connections
+- Batch 11 inputs: planks, white wool and iron (the trap), and redstone or a tripwire to spring it; red carpet and gold nuggets (the runway); red wool, a gold ingot and planks (the judges' table), and a costume on the head (the trick-or-treat costumes) to enter; bones (the pins); a pumpkin and an iron nugget (the bowling pumpkin); planks, black dye and sticks (the scoreboard); logs and a chest (the cache), and treats to fill it; black stained glass, glowstone dust and a redstone lamp (the dance floor), and a jukebox playing a disc or redstone to light it; sticks, gold ingots and white wool (the bell); purple carpet, a book and planks (the fortune table).
+- Batch 11 outputs: the Best Costume Ribbon (a trophy; nothing consumes it), and treats moved from one player to another through the Candy Cache.
 - Batch 10 inputs: iron nuggets, purple stained glass, glowstone dust, and redstone (the black light); a glow ink sac and bone meal (the paint); iron and a campfire, and dyes (the brazier); paper, a candle and a wooden slab (the lamp); carved pumpkins and a torch (the pumpkins); black wool and a candle (the hat); flint and steel or a fire charge to light them.
 - Batch 9 inputs: wool, a dye or a spider eye, iron nuggets and redstone (the inflatables), and redstone to run them; purple and black wool, redstone and a cauldron (the witch); bones, rotten flesh and dirt (the hands); bones (the skeleton); an iron nugget, string, a wooden slab and bones (the chimes); iron and black or purple dye (the vanes); planks, red dye and a stick (the sign), and a Name Tag to write on it; lanterns, iron and mossy cobblestone (the archway); lanterns, a stick, logs and a jack o'lantern (the tree).
 - Batch 8 inputs: a lightning rod, copper, copper cable and iron, and the electric network's power (the coil); iron, white wool and rotten flesh, and redstone (the table); glass, an iron nugget and a slime ball (the jar); sandstone, gold nuggets, paper and rotten flesh, and redstone (the sarcophagus); feathers, black dye and sticks (the raven); black terracotta and glowstone dust (the cat).
 - Existing input producer: iron, candles, flint and steel or fire charges (the chandelier); iron, bone, a note block and planks, and redstone (the organ); iron and an armor stand (the suit); white carpet (the sheet); a glass pane, gold nuggets and soul sand (the mirror); iron nuggets and string (the curtains); clay, wool and string (the doll). The sheet covers the earlier batches' Rocking Chair, Hay Bale Seat, Crystal Ball and Grimoire Stand, this batch's doll and mirror, and vanilla furniture.
-- Existing output consumer: decoration, light (the chandelier), music (the organ), storage kept under a sheet.
+- Existing output consumer: decoration, light (the chandelier), music (the organ), storage kept under a sheet. Batch 11's Candy Cache is the Candy Bowl's own block entity under another block, so treats go in and out of it exactly as a bowl's do (no second candy store), and the costume contest uses the trick-or-treat costume tag.
 - Technology connection: none needed for batches 7 and 9; the organ and the inflatables answer redstone. Batch 8's Tesla Coil runs on the electric network through the shared energy interface (`EnergyStorage.SIDED`), so any Jugcraft generator powers it, and its recipe needs copper cable; the lab table and sarcophagus answer redstone.
 - Magic connection: none yet.
 - Reachable entry path: everything is crafted from vanilla materials an early player has.
@@ -138,6 +167,8 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
 - Batch 9 uses no energy. Inflatables cost five wool, a dye (a spider eye for the spider), two iron nuggets and a redstone; the witch a purple wool, two black wool, a redstone and a cauldron; the hands two bones, a rotten flesh and a dirt; the skeleton six bones; the chimes an iron nugget, two string, a wooden slab and three bones; a vane two iron nuggets, a dye and two iron ingots; two signs five planks, a red dye and a stick; the archway two lanterns, two iron ingots and four mossy cobblestone; the tree two lanterns, a stick, three logs and a jack o'lantern. Light: a blown-up inflatable 7, the witch's brew 6, the archway's lanterns 14, the tree's 13.
 - The hands' Slowness is harmless (no damage) and can't be farmed into anything.
 - Batch 10 uses no energy. A black light costs three iron nuggets, two purple stained glass and a glowstone dust; four glow paints a glow ink sac and a bone meal; a brazier five iron ingots and a campfire, and a dye each time its flame changes colour; a lamp five paper, a candle and a wooden slab; two pumpkin stacks three carved pumpkins and a torch; two hats six black wool and a candle. Light: a black light 6, glow paint 1, a brazier 15, a lamp 12, a pumpkin stack 12, a hat 10.
+- Batch 11 uses no energy. A trap costs seven planks, a white wool and an iron ingot; three runways three red carpets and two gold nuggets; a judges' table two red wool, a gold ingot and two planks; two pins two bones; a bowling pumpkin a pumpkin and an iron nugget; a scoreboard five planks, a black dye and two sticks; a cache four logs and a chest; eight dance floor tiles four black stained glass, four glowstone dust and a redstone lamp; a ghost bell a stick, three gold ingots and a white wool; a fortune table two purple carpets, a book and five planks. Light: a lit dance floor tile 8.
+- **Batch 11 makes nothing from nothing.** The Best Costume Ribbon is the only item it gives, one to each winner of a round that had at least one vote, and a vote needs another player. The bowling pumpkin comes back as itself; the cache only hands out treats someone put in. Ghost Tag and the trap do no harm and drop nothing.
 - **The Dust Sheet makes nothing.** It only moves a block (and that block's saved data) under itself and back. Breaking a sheeted block gives the covered block's own drops, with the tool the player is using: a sheet over stone stairs broken by hand gives only the sheet, as breaking stone stairs by hand gives nothing. A sheeted chest's contents spill once, from the sheet, never also from the chest.
 - No conversion loops; nothing here makes items or energy.
 
@@ -149,9 +180,17 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
 - **Batch 8, server authority.** Switching a coil, sitting the patient up, changing a specimen, opening the sarcophagus and using the raven and cat go through vanilla's block use path (reach, spawn protection) or redstone, and are decided on the server. A coil's power, running and arcs (and which coil it arcs to) are worked out on the server and sent as block events; the cat watches for runners on the server, from where players really are, every 5 ticks, at the level's player list. The raven's flap is a block event.
 - **Batch 9, server authority.** Switching an inflatable, posing the skeleton, changing or writing on a sign, and lighting the archway and tree go through vanilla's block use path (reach, spawn protection; writing and wiping the sign also need build permission) or redstone, and are decided on the server. The witch watches the level's player list on the server every 5 ticks; the hands grab on the server when something steps on them, and their phases run on scheduled ticks. A sign's own words are cleaned (control characters dropped, at most 50 characters) before they are kept or sent.
 - **Batch 10, server authority.** Switching a black light, painting, dyeing, lighting and putting out go through vanilla's block use path (reach, spawn protection; painting over glow paint needs build permission) or redstone, and are decided on the server; a dye or fire charge is used up and flint and steel worn there.
+- **Batch 11, server authority.** Everything the games decide happens on the server.
+  - **The trap** watches the level's player list every 5 ticks while it is ready, and springs only for a player near its front who isn't sneaking or spectating. Its phases run on scheduled ticks.
+  - **The contest:** the table enters contestants from where players really are and what they really wear. A vote is a use of another player (Fabric's `UseEntityCallback`), checked on the server: an empty hand, within 16 blocks of an open table, for a contestant, not yourself, one vote a player. Ribbons go only to winners still on the server, into their inventory or at their feet.
+  - **Bowling:** the pumpkin rolls, knocks pins and finishes on the server; the scoreboard counts the pins within four blocks itself, once a roll, and never takes a score from a client.
+  - **Ghost Tag:** a tag is a hit between two players in the same round (Fabric's `AttackEntityCallback`), checked on the server and cancelled, so no damage or knockback reaches the player hit. Players who leave or go more than 48 blocks away drop out every second. Glowing is a server effect, so every client sees who is the ghost.
+  - **The fortune table** picks the fortune, card and answer on the server. The fortune goes to the reader alone; the card and answer reach everyone near as a block event. A table reads at most once every two seconds.
+  - All of them are used through vanilla's block use path (reach, spawn protection).
 - **Client only.** The chandelier's sway and flames, the organ's keys, the suit's helmet and visor glow, the sheet's drape and breathing, the mirror's face, the curtains' sway and the doll's head are drawn by each client from what it already has (the time, the block states, where players are, its own camera), so nothing about them is sent or trusted. Every client works out the same nearest player for the suit. The doll turns for each player alone, by when that player last saw it.
 - **Batch 8, client only.** The arcs (from the block event), the patient sitting up (from the block state), the specimens bobbing, the lid and mummy, the raven's head and wings, and the cat's tail and eyes are drawn by each client from what it already has. The coil keeps a set of running coils per level, so finding a partner searches no blocks.
 - **Batch 9, client only.** The inflatables filling, flopping and wobbling, the witch's arm and head, the chimes swinging and clacking, the vanes turning and the sign's lettering are drawn by each client from what it already has (the block states, the time, the weather, where players are). The wind is the same function of the time on every client, so every vane points the same way; the chimes' clacking is each client's own sound.
+- **Batch 11, client only.** The trap's lid, ghost and spring, the dance floor's colours, the scoreboard's chalk, the bell's swing and the fortune table's card and planchette are drawn by each client from what it already has (the block states, the scoreboard's synced rolls, the reading's block event, the time). The rolling pumpkin's turning is worked out by each client from how far it has moved. The trap keeps when each trap last changed phase, as that client saw it, in a weak map.
 - **Batch 10, client only.** The paint's glow, the brazier's flames, the lamp's shade and shadows and the hats' bobbing are drawn by each client from what it already has. Each client knows which black lights shine from the block states it has: a shining light notes where it is in a small map each tick, and paint looks through that map, never searching blocks. The lamp looks along at most six blocks for each of its three shadows' walls each frame.
 - **Saved state.**
   - Block states: the chandelier's `lit` and `burning`; the organ's `part`, `facing`, `playing` and `powered`; the suit's `facing` and `half`; the mirror's `facing`; the curtains' `facing`, `open` and `part`; the doll's `facing`.
@@ -163,6 +202,8 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
   - Only a playing organ ticks, on its master block, for its 200 ticks. A lit chandelier and the organ's master take random ticks; a relighting chandelier schedules one tick per candle.
   - The renderers do a little arithmetic a frame. The suit looks through the level's player list; the curtains look up at most eight blocks above them; the suit and doll keep one small entry per block entity in a weak map.
   - Batch 8: a running coil ticks (its energy, and an arc every 15 to 40 ticks); a cat looks every 5 ticks; nothing else ticks. Arcs, the patient, the specimens, the mummy, the raven and the cat's tail are a little arithmetic a frame on each client; the raven looks through the level's player list.
+- Batch 11 saved state: block states (the trap's `facing`, `phase`: ready, popped, resetting, and `powered`; the runway's `axis`; the judges' table's `facing` and `open`; the pins' `facing` and `down`; the scoreboard's `facing`; the cache's `facing` and `fill`; the dance floor's `distance` 0–8; the bell's `facing` and `ringing`; the fortune table's `facing`). The judges' table saves its round (`ends_at`, `contestants` in the order they walked the runway, `votes`); the scoreboard its game (`rolls`, `pins`, `standing`); the bell its round (`ends_at`, `players`, `it`, `tagged_by`, `tagged_at`); the cache its treats, owner and visits exactly as a Candy Bowl; a rolling pumpkin its scoreboard (`scoreboard`). A round in progress goes on after a restart.
+- Batch 11 bounded work: a ready trap looks every 5 ticks; a judges' table with a round open every 10, a ringing bell every 20 (both through the level's player list), and they stop ticking when the round ends; a scoreboard counts a 9 by 3 by 9 box of blocks once a roll; a bowling pumpkin looks at two blocks a tick, rolls at most 300 ticks, and its domino run goes at most two pins deep; a pumpkin's use looks for a scoreboard in a 13 by 5 by 13 box once; the dance floor works out its distance in scheduled ticks only as its neighbours change, and lit tiles take random ticks for villagers in the block above them. The contest is limited to 16 contestants and Ghost Tag to 32 players.
 - Batch 10 saved state: block states only (the black light's `facing`, `lit`, `powered`; the paint's `facing` and `design`; the brazier's `lit` and `flame`; the lamp's `lit`; the pumpkins' `facing` and `lit`; the hat's `lit`).
 - Batch 10 bounded work: nothing ticks on the server; a shining black light ticks on each client to note where it is.
 - Batch 9 bounded work: the witch looks every 5 ticks; the hands only act when stepped on, and then schedule two ticks; nothing else ticks. The renderers do a little arithmetic a frame; the witch's head reads the level's player list.
@@ -174,6 +215,7 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
 - Batch 8 new IDs: blocks with items `tesla_coil`, `lab_table`, `specimen_jar`, `mummy_sarcophagus`, `raven_perch`, `black_cat_figure`; block entities of the same names (`tesla_coil` its energy, `black_cat_figure` its timers, the rest empty, for drawing).
 - Batch 9 new IDs: blocks with items `inflatable_ghost`, `inflatable_cat`, `inflatable_pumpkin`, `inflatable_spider`, `porch_witch`, `grasping_hands`, `poseable_skeleton`, `bone_wind_chimes`, `bat_weathervane`, `witch_weathervane`, `spooky_sign`, `haunted_archway`, `dead_hollow_tree`; block entities `inflatable` (all four inflatables), `porch_witch` (her timers), `bone_wind_chimes`, `weathervane` (both vanes) and `spooky_sign` (its words); the inflatables, chimes and vanes' are empty, for drawing.
 - Batch 10 new IDs: blocks with items `black_light`, `glow_paint`, `witch_fire_brazier`, `shadow_puppet_lamp`, `mini_pumpkin_stack`, `floating_witch_hat`; block entities `black_light`, `glow_paint`, `witch_fire_brazier`, `shadow_puppet_lamp` and `floating_witch_hat` (all empty, for drawing).
+- Batch 11 new IDs: blocks with items `jump_scare_trap`, `costume_runway`, `judges_table`, `skeleton_pin`, `bowling_scoreboard`, `candy_cache`, `dance_floor`, `ghost_bell`, `fortune_teller_table`; items `best_costume_ribbon` and `bowling_pumpkin`; the entity `bowling_pumpkin`; block entities `jump_scare_trap`, `judges_table`, `bowling_scoreboard`, `dance_floor` (empty, for drawing), `ghost_bell` and `fortune_teller_table` (the cache uses `candy_bowl`'s).
 - **The `agriculture` switch** turns off their recipes; placed blocks stay and work, and sheets can still be pulled off.
 
 ## Dependencies and assets
@@ -184,6 +226,8 @@ Batch 8's textures are drawn by code in `tools/decor8_textures.py` and its model
 Batch 9's textures are drawn by code in `tools/decor9_textures.py` and its models, loot, tags and quads come from `tools/decor9_data.py` (the quads in `assets/jugcraft/decor9_quads.json`; the weathervanes' silhouettes are drawn cut out, a new `cutout` flag on a quad). The archway is cut into one model per block; the tree's boxes go whole to the block their middle is in, so its branches reach out over the air beside it. The renderers are `InflatableRenderer`, `PorchWitchRenderer`, `BoneWindChimesRenderer`, `WeathervaneRenderer` and `SpookySignRenderer`. The witch cackles with the vanilla witch's celebration sound; the chimes clack on the xylophone note-block sound.
 
 Batch 10's textures are drawn by code in `tools/decor10_textures.py` (the paint's designs share the bat and witch grids with batch 9) and its models, loot and tags come from `tools/decor10_data.py` (the hat's quads in `assets/jugcraft/decor10_quads.json`). The renderers are `GlowPaintRenderer`, `WitchFireBrazierRenderer`, `ShadowPuppetLampRenderer` and `FloatingWitchHatRenderer`; lighting and snuffing the candle-lit ones share `CandleLighting`. 26.3 has no item constant for each dye, so the brazier knows dyes by their colour, as the scarecrow does.
+
+Batch 11's textures are drawn by code in `tools/decor11_textures.py` (the pins wear the Poseable Skeleton's bones; the spirit board is drawn at 32 by 16 and cut into two block textures) and its models, loot, tags and quads come from `tools/decor11_data.py` (the quads in `assets/jugcraft/decor11_quads.json`). The renderers are `JumpScareTrapRenderer`, `BowlingScoreboardRenderer`, `DanceFloorRenderer`, `GhostBellRenderer`, `FortuneTellerTableRenderer` and, for the rolling pumpkin, `BowlingPumpkinRenderer`. The trap shrieks with the ghast's scream; the pins rattle with the skeleton's hurt sound, pitched up.
 
 The organ's tune is the opening of J. S. Bach's Toccata and Fugue in D minor, BWV 565, which is in the public domain; the arrangement for note-block sounds is written here.
 
@@ -324,8 +368,57 @@ Found by CI and fixed before this record:
 - the brazier's flames, the lamp's turning and the hats' bobbing in motion (their rules are tested; the screenshots are still);
 - the sounds (the CI client has no sound device).
 
+### Batch 11 verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-11` stacked on batch 10:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the trap's reach and timing, the contest's round, range and entries, the bowling pumpkin's speed, friction and dominoes, the lane's reach and frames, the dance floor's reach and light, Ghost Tag's round, range, players and tag-backs and the fortune table's fortunes, cards and cooldown with Java; checks the Candy Cache is a Candy Bowl with the bowl's block entity, every block state has a blockstate entry, every message the games show has its words (each fortune, each vote, each cache answer), and the textures and quads the client draws exist) | Pass, 554 IDs |
+| `./gradlew build` on `0df3dfe` (later commits only change docs and screenshots) | Pass |
+| Game tests on the headless server, same commit: 312 in total, 9 of them new here (`Decor11GameTests`) | **All 312 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `0df3dfe`; no model, texture or quad errors in the log |
+
+The 9 new game tests (`Decor11GameTests`):
+1. a player sneaking up to a jump-scare trap's front doesn't spring it; walking up does (popped); it shuts and rests (resetting) after its time, then is ready again; a redstone block (a tripwire's signal) springs it;
+2. ringing the judges' table opens a round; a player in a witch hat on the runway is entered and one without a costume isn't, until they put on a ghost sheet; using a contestant with an empty hand votes for them, with a stick in hand doesn't; nobody votes for themselves; voting again moves the one vote; only contestants take votes; the round, its contestants (in order) and votes survive a save and load; at the end the most votes win the Best Costume Ribbon and the table closes;
+3. ten-pin scoring: twelve strikes are 300 and the game is over, eleven leave a roll; all spares of five 150; a gutter game 0 in twenty rolls; nine and a miss every frame 90; strike and spare bonuses; a three-pin lane's perfect game; the next ball after a strike and a three; marks for a strike, a spare after a gutter and an open frame; when the pins go back up;
+4. a bowling pumpkin used by a player rolls down a lane through three skeleton pins, knocks each down the way it rolled, stops at the wall and comes to rest as an item; the scoreboard scores a strike on the three-pin lane and stands the pins up again; a knocked pin stands up when used;
+5. treats used on a candy cache go in and show how full it is; a finder takes one a night and has it;
+6. a line of dance floor tiles from a jukebox playing a disc lights one step further each tile and is dark past eight; lit tiles shine (light 8); a villager on a lit tile spins on its random tick; without the music the floor goes dark; a redstone block under a tile lights it and those beside it;
+7. ringing the ghost bell starts a round with both players near, one of them the ghost, glowing; the ghost hitting the other tags them harmlessly and they glow instead; they can't tag straight back; a player outside the round is left alone; the round and the ghost survive a save and load; ending it stops the bell and the glowing;
+8. using a fortune table reads a fortune (a card and an answer); using it again five ticks later doesn't, after its cooldown it does;
+9. the nine recipes and the bowling pumpkin's, and the nine loot tables, load; a turned runway turns its edging.
+
+The client game test (`Decor11ClientGameTests`) builds a party on a lawn:
+- a Costume Runway up to a Judges' Table with its round open and a witch-hatted armor stand on the runway;
+- a bowling lane of ten Skeleton Pins, seven knocked down, and its Scoreboard;
+- a five-by-five Monster Mash Dance Floor lit by a jukebox, with two villagers on it;
+- two Jump-Scare Traps, one gone off;
+- the Ghost Bell ringing, the Fortune Teller's Table and a Candy Cache.
+
+It photographs them by day and at midnight, having the fortune table read before photographing it. In the screenshots:
+- the ghost stands out of its crate on its spring;
+- the pins stand and lie as placed, and the slate chalks FRAME 1 and SCORE 7;
+- the dance floor's tiles glow in four colours;
+- the turned card and the planchette at YES show on the spirit board.
+
+Found by CI and fixed before this record:
+- 26.3's `BlockPos` has no `getCenter()`, a compile error; the bell and table measure from `Vec3.atCenterOf` instead.
+- The contest saved its contestants as a map, which came back in another order after a save and load; they are saved as a list in the order they walked the runway.
+- The fortune table's own block event set its reading time again on the server, a tick late; only clients note readings from it now.
+
+**Not run (batch 11):**
+- a person playing it in a client;
+- a dedicated server with two or more players: a real costume contest (walking the runway, voting by clicking), a real game of Ghost Tag (hits from a real client), two players bowling on one lane, both seeing the same fortune;
+- a real tripwire on the trap (the test uses a redstone block, the same signal);
+- the bowling pumpkin bouncing over uneven ground, or many pumpkins rolling at once;
+- a jukebox with a real disc in it (the test sets its "has a disc" state, which is what the floor reads);
+- the sounds (the CI client has no sound device).
+
 ## World and event applicability
-- Batches 7 to 10 work anywhere, all year. The chandelier's gusts, the organ's night playing, the suit's visor glow, the sheets' breathing, the mirror's face and the curtains' night draft follow the Overworld's clock (as the earlier decorations' night effects do); so do batch 8's twitching patient and glowing cat eyes and batch 9's witch's eyes. Batch 9's chimes and vanes follow the weather where the player is; batch 10's lamp's shadows are darker at night.
+- Batches 7 to 11 work anywhere, all year. The chandelier's gusts, the organ's night playing, the suit's visor glow, the sheets' breathing, the mirror's face and the curtains' night draft follow the Overworld's clock (as the earlier decorations' night effects do); so do batch 8's twitching patient and glowing cat eyes and batch 9's witch's eyes. Batch 9's chimes and vanes follow the weather where the player is; batch 10's lamp's shadows are darker at night. Batch 11's games don't depend on the time, the weather or the event; the Candy Cache's "night" is the Candy Bowl's.
 
 ## Rollout and open questions
 - Tesla Coils only arc to coils that are running; a coil in an unloaded chunk drops out of the set until it runs again.
@@ -339,3 +432,7 @@ Found by CI and fixed before this record:
 - An inflatable glows from inside at full brightness while it is blown up, day or night.
 - Glow Paint only glows under a Jugcraft Black Light, not under other light; it has a faint light of its own (1).
 - The lamp's shadows fall on full blocks only, along each panel's direction; they don't bend round corners or fall on furniture.
+- A bowling pumpkin knocks down pins it rolls through and, by chance, those behind; it doesn't bounce off them. Lanes can be any size and shape: the scoreboard counts whatever pins are within four blocks of it, as the lane's pins at the first roll of a game.
+- A Ghost Tag round, or a costume contest, needs players near when it starts; whoever arrives later isn't in it (latecomers can still walk the runway while a contest is open).
+- The costume contest gives a ribbon to every contestant tied for the most votes.
+- Villagers dance on lit tiles only on random ticks, so some dance more often than others.
