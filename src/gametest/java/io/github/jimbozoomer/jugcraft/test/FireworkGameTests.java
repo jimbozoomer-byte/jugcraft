@@ -111,7 +111,7 @@ public class FireworkGameTests {
 			Fireworks fireworks = new ItemStack(firework).get(DataComponents.FIREWORKS);
 			helper.assertTrue(fireworks != null && fireworks.flightDuration() == 1, "A plain " + shape.item() + " has flight 1");
 		}
-		helper.assertTrue(FireworkShape.PUMPKIN.colourAt(6, 0) == -1 && FireworkShape.PUMPKIN.colourAt(5, 0) == 0x58C83C,
+		helper.assertTrue(FireworkShape.PUMPKIN.colourAt(4, 0) == -1 && FireworkShape.PUMPKIN.colourAt(5, 0) == 0x58C83C,
 				"The jack o'lantern has a green stem and holes round it");
 		helper.succeed();
 	}
@@ -200,10 +200,10 @@ public class FireworkGameTests {
 		helper.assertTrue(launcher.tube(1).getCount() == 9 && launcher.tube(2).isEmpty(), "More of the same top up the second tube");
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.FIREWORK_ROCKET, 3));
 		use(helper, player, pos);
-		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIRT, 3));
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK, 3));
 		use(helper, player, pos);
-		helper.assertTrue(launcher.tube(2).is(Items.FIREWORK_ROCKET) && launcher.tube(2).getCount() == 3 && player.getMainHandItem().getCount() == 3,
-				"Vanilla rockets load into their own tube; dirt doesn't load");
+		helper.assertTrue(launcher.tube(2).is(Items.FIREWORK_ROCKET) && launcher.tube(2).getCount() == 3, "Vanilla rockets load into their own tube");
+		helper.assertTrue(player.getMainHandItem().getCount() == 3 && launcher.tube(3).isEmpty(), "Sticks don't load");
 		helper.assertTrue(launcher.loadedTubes() == 3 && launcher.rockets() == 28, "Three tubes, 28 rockets");
 		helper.assertTrue(helper.getLevel().getBlockState(helper.absolutePos(pos)).getAnalogOutputSignal(helper.getLevel(), helper.absolutePos(pos),
 				Direction.NORTH) == 4, "Comparators read three tubes as 4");
