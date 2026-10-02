@@ -176,7 +176,7 @@ public class MazeGameTests {
 	}
 
 	/**
-	 * A runner who walks the way through is timed and boarded (first place, a blue ribbon, A-maze-ing); one who cuts
+	 * A runner who walks the way through is timed and boarded (first place, a first prize ribbon, A-maze-ing); one who cuts
 	 * straight to the finish took a shortcut and isn't; one who flies, or leaves the maze, has the run voided.
 	 */
 	@GameTest(maxTicks = 200)
@@ -204,7 +204,7 @@ public class MazeGameTests {
 					"Walking the way through puts the runner on the board");
 			int ticks = gate.board().get(0).ticks();
 			helper.assertTrue(ticks >= way.size() - 3 && ticks <= way.size() + 2, "in about the time it took: " + ticks + " for " + way.size() + " steps");
-			helper.assertTrue(runner.getInventory().countItem(JugcraftAgriculture.item("blue_ribbon")) == 1, "with a blue ribbon");
+			helper.assertTrue(runner.getInventory().countItem(JugcraftAgriculture.item("first_prize_ribbon")) == 1, "with a first prize ribbon");
 			AdvancementHolder amazing = level.getServer().getAdvancements().get(Jugcraft.id("amazing"));
 			helper.assertTrue(amazing != null && runner.getAdvancements().getOrStartProgress(amazing).isDone(), "and A-maze-ing");
 
