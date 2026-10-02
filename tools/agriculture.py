@@ -533,6 +533,10 @@ HALLOWEEN_ADVANCEMENTS = {
                      "description": "Share a grand feast at a Harvest Feast Table", "frame": "challenge"},
     "amazing": {"icon": "jugcraft:corn_maze_gate", "title": "A-maze-ing", "description": "Find your way through a corn maze",
                 "frame": "task"},
+    "ghost_hunter": {"icon": "jugcraft:spirit_lantern", "title": "Ghost Hunter", "description": "Catch a restless spirit in a glass bottle",
+                     "frame": "goal"},
+    "face_painter": {"icon": "jugcraft:face_paint_kit", "title": "Face Painter", "description": "Paint another player's face",
+                     "frame": "task"},
 }
 
 
@@ -1158,7 +1162,9 @@ CHANDLERY = {"pot": "wax_melting_pot", "pot_display": "Wax Melting Pot", "candle
                         "mending": {"display": "Mending", "items": ["minecraft:ghast_tear"], "effect": "REGENERATION", "color": 0xF27ACB},
                         "warding": {"display": "Warding", "items": ["minecraft:fermented_spider_eye"], "effect": None, "color": 0x7A3FCF},
                         "harvest": {"display": "Harvest", "items": ["minecraft:bone_meal"], "effect": None, "color": 0x5FBF3A},
-                        "revealing": {"display": "Revealing", "items": ["minecraft:glow_ink_sac"], "effect": None, "color": 0x9FFFE8}}}
+                        "revealing": {"display": "Revealing", "items": ["minecraft:glow_ink_sac"], "effect": None, "color": 0x9FFFE8},
+                        # Ectoplasm, caught from restless spirits (fall additions 9): everyone near turns invisible.
+                        "ghostly": {"display": "Ghostly", "items": ["jugcraft:ectoplasm"], "effect": "INVISIBILITY", "color": 0xB8FFD8}}}
 
 
 def chandlery_blocks():
@@ -1310,6 +1316,32 @@ MAZE = {"gate": "corn_maze_gate", "gate_display": "Corn Maze Gate", "finish": "c
         "corn": "maze_corn", "corn_display": "Maze Corn", "cells": [3, 5, 7, 9], "sizes": ["tiny", "small", "medium", "large"],
         "plant_per_tick": 32, "max_run": 12000, "shortcut": 0.8, "board": 3, "max_runners": 16, "kernel": "corn_kernels"}
 
+# ---------------------------------------------------------------- Fall additions 9: ghost hunting
+# Restless spirits (RestlessSpirit, Spirits) rise from graves at night: each random tick of a grave (the gravestones and
+# the grave mound) raises one `stir_chance` of the time, at night on the overworld clock, while fewer than `near_cap`
+# are within `near_range` blocks. A spirit drifts about its grave, `haunt_radius` blocks across and up to `haunt_height`
+# above, at `drift_speed` blocks/tick. Hidden until revealed: by a player holding the Spirit Lantern within
+# `reveal_radius` blocks (it looks every `look_ticks`, and a look lasts `reveal_ticks`), or by glowing (a Revealing
+# candle). Revealed, it fades in over `fade_ticks`, shows to everyone, and shies away (`shy_speed`) from anyone within
+# `shy_radius` (a sneaking player gets to `sneak_shy_radius`), never out of its haunt. A glass bottle catches a revealed
+# spirit as Ectoplasm (giving the bottle back when stirred into wax), the Ghostly candle scent.
+GHOSTS = {"lantern": "spirit_lantern", "lantern_display": "Spirit Lantern", "ectoplasm": "ectoplasm", "ectoplasm_display": "Ectoplasm",
+          "entity": "restless_spirit", "display": "Restless Spirit",
+          "graves": ["rounded_gravestone", "cross_gravestone", "obelisk_gravestone", "grave_mound"],
+          "stir_chance": 0.25, "near_cap": 3, "near_range": 16, "reveal_radius": 12,
+          "haunt_radius": 6, "haunt_height": 3.0, "shy_radius": 3.0, "sneak_shy_radius": 1.5, "drift_speed": 0.04, "shy_speed": 0.12,
+          "reveal_ticks": 40, "look_ticks": 10, "fade_ticks": 10}
+
+# ---------------------------------------------------------------- Fall additions 10: face paint
+# A Face Paint Kit (FacePaintKitItem) paints one of `designs` on a player's face (FacePaint: a Fabric data attachment,
+# saved and sent to every client that sees the player, drawn by the client's FacePaintLayer). Its dial (data component
+# `component`) picks the design; it lasts `uses` faces; painting your own face takes `use_ticks`. The paint washes off
+# when the player's head is under water (checked every `wash_ticks`) or at death. A painted face counts as a costume.
+FACE_PAINT = {"kit": "face_paint_kit", "kit_display": "Face Paint Kit", "component": "face_paint_design", "attachment": "face_paint",
+              "uses": 16, "use_ticks": 32, "wash_ticks": 20,
+              "designs": {"skull": "Skull", "pumpkin": "Jack o'Lantern", "black_cat": "Black Cat", "vampire": "Vampire",
+                          "witch": "Witch", "scarecrow": "Scarecrow"}}
+
 
 def pantry_blocks():
     return [PANTRY["kettle"], PANTRY["shelf"]]
@@ -1325,6 +1357,14 @@ def firework_blocks():
 
 def firework_items():
     return firework_blocks() + [info["item"] for info in FIREWORKS["shapes"].values()]
+
+
+def ghost_items():
+    return [GHOSTS["lantern"], GHOSTS["ectoplasm"]]
+
+
+def face_paint_items():
+    return [FACE_PAINT["kit"]]
 
 
 def lantern_items():
@@ -1951,7 +1991,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]])
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items())
 
 
 def owns(entry_id):

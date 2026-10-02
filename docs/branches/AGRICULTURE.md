@@ -795,6 +795,28 @@ Ten more fall and Halloween additions, one per pull request ([features/fall-addi
 - **Corn Maze Gate:** choose a size, then use it holding corn kernels to plant a maze of three-tall corn from a fresh seed, one way through, with a finish post at the exit.
 - **Runs** are timed on the server from the gate to the finish post and voided for flying, climbing out, leaving or a shortcut; the best times go on the gate's board, with prize ribbons and A-maze-ing. Details: [fall additions](../features/fall-additions.md#the-corn-maze).
 
+### Ghost hunting
+
+| **Restless spirits** revealed at night over a row of gravestones and grave mounds, lit by soul lanterns | **The hunter's kit:** a Spirit Lantern and a bottle of Ectoplasm in frames, and a lit Ghostly candle |
+| --- | --- |
+| ![Restless spirits in a graveyard](../images/ingame_restless_spirits.jpg) | ![The ghost hunter's kit](../images/ingame_ghost_hunting_kit.jpg) |
+
+*Real screenshots from the client game test that CI runs (`GhostClientGameTests`, software rendering, small previews). The spirits are revealed on the server and drawn by the client.*
+
+- **Restless spirits** rise from gravestones and grave mounds at night and drift about their graves, unseen until revealed.
+- **The Spirit Lantern** reveals every spirit within 12 blocks to everyone near; a revealed spirit shies away but can be cornered, and a glass bottle catches it as **Ectoplasm**, the Ghostly candle scent (invisibility). Details: [fall additions](../features/fall-additions.md#ghost-hunting).
+
+### Face paint
+
+| **Face paint**, all six designs on the player's face: a skull, a jack o'lantern, a black cat, a vampire, a witch and a scarecrow (cropped and enlarged from the test's screenshots) | **A vampire**, the whole frame: the player in third person, seen from the front |
+| --- | --- |
+| ![The six face paint designs](../images/ingame_face_paint.jpg) | ![A painted vampire face](../images/ingame_face_paint_vampire.jpg) |
+
+*Real screenshots from the client game test that CI runs (`FacePaintClientGameTests`, software rendering, small previews). Each design is painted on the server and drawn on the face by the client.*
+
+- **Face Paint Kit:** paints one of six designs on a friend at once, or on your own face after a held use; good for 16 faces.
+- **A painted face is a costume** for trick-or-treating and the costume contest, and washes off under water. Details: [fall additions](../features/fall-additions.md#face-paint).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

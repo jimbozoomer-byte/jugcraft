@@ -8,6 +8,17 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: fall additions 10, face paint (pull request pending, stacked on ghost hunting)
+- **Face Paint Kit:** a tin palette and brush, good for 16 faces, that paints one of six designs: a skull, a jack o'lantern, a black cat, a vampire, a witch or a scarecrow. Use it on a friend to paint them at once, hold use to paint yourself, sneak to turn the dial.
+- The paint shows on the face for everyone who can see you and lasts until your head goes under water, or you die. A painted face counts as a costume for trick-or-treating and the costume contest.
+- The paint is a Fabric data attachment on the player, set on the server and sent to the clients that see them. The checker compares the kit and designs with Java. New server game tests and a client test with a screenshot of each design.
+
+### Agriculture: fall additions 9, ghost hunting (pull request pending, stacked on the corn maze)
+- **Restless spirits** rise from gravestones and grave mounds at night (graves now take random ticks), a few at most near, and drift about their graves, unseen.
+- **Spirit Lantern:** held in either hand, it reveals every spirit within 12 blocks to everyone near; so does a Revealing candle's glow. A revealed spirit fades into view, moans, and shies away from anyone close, though never out of its haunt, so it can be cornered. Blows pass through it; it fades at dawn.
+- **Ectoplasm:** a glass bottle catches a revealed spirit (earning Ghost Hunter). Ectoplasm is the chandlery's new **Ghostly** scent: a Ghostly candle turns the players in its aura invisible, and the wax pot now hands back a scent's bottle.
+- All decided on the server; clients are told only when a spirit shows, and draw it. The checker compares the spirits and the lantern with Java. New server game tests and a client test with screenshots.
+
 ### Agriculture: fall additions 8, the corn maze (pull request pending, stacked on the Harvest Feast Table)
 - **Corn Maze Gate:** choose a size (tiny 7 by 7 to large 19 by 19) and use it holding corn kernels: it carves a new maze, one way through, and plants three-tall **maze corn** along its walls, a kernel a stalk, with a **finish post** at the exit. It never replaces a block.
 - **Running it:** walk out through the gate to start the clock and reach the finish post to stop it. The server follows every runner and voids a run for flying, climbing over the corn, leaving the maze, taking too long or a shortcut. The best times go on the gate's board, with a prize ribbon the first time a runner places and the advancement A-maze-ing.

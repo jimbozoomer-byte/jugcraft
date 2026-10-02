@@ -31,6 +31,8 @@ import firework_data
 import lantern_data
 import feast_data
 import maze_data
+import ghost_data
+import face_paint_data
 import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -186,6 +188,8 @@ def assets(root, write, lang):
     lantern_data.assets(root, write, lang)
     feast_data.assets(root, write, lang)
     maze_data.assets(root, write, lang)
+    ghost_data.assets(root, write, lang)
+    face_paint_data.assets(root, write, lang)
 
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
@@ -358,6 +362,8 @@ def recipes(out, write):
     lantern_data.recipes(out, write, conditions)
     feast_data.recipes(out, write, conditions)
     maze_data.recipes(out, write, conditions)
+    ghost_data.recipes(out, write, conditions)
+    face_paint_data.recipes(out, write, conditions)
     decor3_data.recipes(out, write, conditions)
 
 

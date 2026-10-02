@@ -51,6 +51,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		RocketPackLayer.register();
 		GhostSheetLayer.register();
 		CostumeLayer.register();
+		FacePaintLayer.register();
 		BlockEntityRendererRegistry.register(JugcraftKinetics.HAND_CRANK_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.ELECTRIC_MOTOR_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.FLYWHEEL_ENTITY, KineticRotorRenderer::new);
@@ -117,6 +118,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOW_LAUNCHER_ENTITY, ShowLauncherRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.SPOOKY_ROCKET, context -> new ThrownItemRenderer<>(context, 1.0F, true));
 		EntityRendererRegistry.register(JugcraftAgriculture.SKY_LANTERN, SkyLanternRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.RESTLESS_SPIRIT, RestlessSpiritRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FEAST_TABLE_ENTITY, FeastTableRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(SpookyBurstPayload.TYPE, (payload, context) -> SpookyBursts.receive(payload));
 		ModelLayerRegistry.registerModelLayer(WispModel.LAYER, WispModel::createLayer);
