@@ -760,6 +760,18 @@ Ten more fall and Halloween additions, one per pull request ([features/fall-addi
 - **Spooky fireworks** burst into a bat, a jack o'lantern, a ghost or a skull in coloured sparks, the right way round for every player. Paper, gunpowder (the flight) and the picture's ingredients; glowstone dust to twinkle. They hurt and break nothing.
 - **Show Launcher:** nine tubes of sixteen rockets each (spooky or vanilla), fired in sequence, in volleys or as a finale, by hand or redstone. Details: [fall additions](../features/fall-additions.md#spooky-fireworks).
 
+### The sky lantern festival
+
+| **Sky Lanterns** let go together at night in seven colours, rising together; one carries a wish, "A good harvest" | **Mooncakes:** red bean, chestnut and pumpkin, and a Sky Lantern, in item frames |
+| --- | --- |
+| ![Sky lanterns](../images/ingame_sky_lanterns.jpg) | ![Mooncakes](../images/ingame_mooncakes.jpg) |
+
+*Real screenshots from the client game test that CI runs (`LanternClientGameTests`, software rendering, small previews). The lanterns are let go for real and photographed as they rise.*
+
+- **Sky Lanterns**, dyed any colour and named for a wish, rise glowing on a wind they all share and burn out after two minutes or so.
+- **The lantern festival:** eight let go within 32 blocks in two minutes fill the sky, with Luck and A Sky Full of Wishes for everyone near.
+- **Mooncakes** baked in the Cooking Pot, with Luck when eaten outdoors under a full moon. Details: [fall additions](../features/fall-additions.md#sky-lanterns).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
