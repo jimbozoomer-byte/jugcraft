@@ -6,19 +6,27 @@
     },
     {
       "condition": "jugcraft:feature_enabled",
-      "feature": "titanium"
+      "feature": "silicon"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "phosphate"
     }
   ],
   "type": "jugcraft:arc_smelting",
   "ingredients": [
     {
-      "ingredient": "jugcraft:titanium_sponge",
+      "ingredient": "jugcraft:silicon",
+      "count": 4
+    },
+    {
+      "ingredient": "jugcraft:phosphate",
       "count": 1
     }
   ],
   "result": {
-    "id": "jugcraft:titanium_ingot",
+    "id": "jugcraft:silicon_boule",
     "count": 1
   },
-  "time": 160
+  "time": 400
 }

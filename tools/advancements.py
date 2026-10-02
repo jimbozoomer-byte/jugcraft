@@ -69,7 +69,7 @@ TREE = {
     "magnet_dynamo": ("neodymium_magnet", ["magnet_dynamo", "magnet_motor"], "Lossless (Almost)",
                       "Build a magnet dynamo or magnet motor", "goal"),
     # Electronics (batch 7).
-    "silicon_boule": ("titanium", "silicon_boule", "Pulling Strings", "Grow a silicon boule in the crystal grower", "goal"),
+    "silicon_boule": ("titanium", "silicon_boule", "Pulling Strings", "Pull a silicon boule in the arc furnace", "goal"),
     "microchip": ("silicon_boule", "microchip", "Etched in Light", "Etch microchips in the lithography station", "task"),
     "processor": ("microchip", "processor", "Central Processing", "Assemble a processor", "task"),
     "network_terminal": ("processor", "network_terminal", "Hello, World", "Build a network terminal", "goal"),

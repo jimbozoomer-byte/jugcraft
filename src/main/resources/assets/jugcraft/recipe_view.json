@@ -611,6 +611,24 @@
           ],
           "extra": [],
           "ticks": 80
+        },
+        {
+          "in": [
+            [
+              "jugcraft:silicon",
+              4
+            ],
+            [
+              "jugcraft:phosphate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:silicon_boule",
+            1
+          ],
+          "extra": [],
+          "ticks": 400
         }
       ]
     },
@@ -2927,61 +2945,6 @@
   ],
   "fluid_machines": [
     {
-      "block": "jugcraft:oil_sand_extractor",
-      "type": "oil_sand_extraction",
-      "recipes": [
-        {
-          "items": [
-            [
-              "jugcraft:oil_sand",
-              1
-            ]
-          ],
-          "fluids": [
-            [
-              "minecraft:water",
-              250
-            ]
-          ],
-          "fluid_results": [
-            [
-              "jugcraft:crude_oil",
-              500
-            ]
-          ],
-          "results": [
-            [
-              "minecraft:sand",
-              1
-            ]
-          ],
-          "ticks": 160
-        },
-        {
-          "items": [
-            [
-              "jugcraft:bitumen",
-              1
-            ]
-          ],
-          "fluids": [
-            [
-              "minecraft:water",
-              100
-            ]
-          ],
-          "fluid_results": [
-            [
-              "jugcraft:crude_oil",
-              150
-            ]
-          ],
-          "results": [],
-          "ticks": 80
-        }
-      ]
-    },
-    {
       "block": "jugcraft:distillation_tower",
       "type": "distillation",
       "recipes": [
@@ -3013,6 +2976,28 @@
           ],
           "results": [],
           "ticks": 100
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:heavy_fuel_oil",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:lubricant",
+              400
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:asphalt_binder",
+              2
+            ]
+          ],
+          "ticks": 120
         }
       ]
     },
@@ -3053,33 +3038,31 @@
           ],
           "results": [],
           "ticks": 160
-        }
-      ]
-    },
-    {
-      "block": "jugcraft:vacuum_distillation_unit",
-      "type": "vacuum_distillation",
-      "recipes": [
+        },
         {
-          "items": [],
+          "items": [
+            [
+              "jugcraft:cracking_catalyst",
+              1
+            ]
+          ],
           "fluids": [
             [
-              "jugcraft:heavy_fuel_oil",
+              "jugcraft:naphtha",
               1000
             ]
           ],
           "fluid_results": [
             [
-              "jugcraft:lubricant",
-              400
-            ]
-          ],
-          "results": [
+              "jugcraft:gasoline",
+              900
+            ],
             [
-              "jugcraft:asphalt_binder",
-              2
+              "jugcraft:refinery_gas",
+              100
             ]
           ],
+          "results": [],
           "ticks": 120
         }
       ]
@@ -3142,60 +3125,6 @@
       ]
     },
     {
-      "block": "jugcraft:chemical_mixer",
-      "type": "chemical_mixing",
-      "recipes": [
-        {
-          "items": [
-            [
-              "minecraft:sand",
-              2
-            ],
-            [
-              "minecraft:dried_kelp",
-              1
-            ]
-          ],
-          "fluids": [
-            [
-              "minecraft:water",
-              1000
-            ]
-          ],
-          "fluid_results": [
-            [
-              "jugcraft:fracking_fluid",
-              1000
-            ]
-          ],
-          "results": [],
-          "ticks": 80
-        },
-        {
-          "items": [
-            [
-              "jugcraft:salt",
-              2
-            ]
-          ],
-          "fluids": [
-            [
-              "minecraft:water",
-              1000
-            ]
-          ],
-          "fluid_results": [
-            [
-              "jugcraft:brine",
-              1000
-            ]
-          ],
-          "results": [],
-          "ticks": 60
-        }
-      ]
-    },
-    {
       "block": "jugcraft:electrolytic_cell",
       "type": "electrolysis",
       "recipes": [
@@ -3244,6 +3173,27 @@
             ]
           ],
           "ticks": 160
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:oxygen",
+              250
+            ],
+            [
+              "jugcraft:hydrogen",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 800
         }
       ]
     },
@@ -3491,6 +3441,54 @@
           ],
           "results": [],
           "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "minecraft:sand",
+              2
+            ],
+            [
+              "minecraft:dried_kelp",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:fracking_fluid",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:salt",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:brine",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 60
         }
       ]
     },
@@ -3650,33 +3648,77 @@
             ]
           ],
           "ticks": 80
-        }
-      ]
-    },
-    {
-      "block": "jugcraft:catalytic_reformer",
-      "type": "reforming",
-      "recipes": [
+        },
         {
-          "items": [],
+          "items": [
+            [
+              "jugcraft:oil_sand",
+              1
+            ]
+          ],
           "fluids": [
             [
-              "jugcraft:naphtha",
-              1000
+              "minecraft:water",
+              250
             ]
           ],
           "fluid_results": [
             [
-              "jugcraft:gasoline",
-              900
-            ],
+              "jugcraft:crude_oil",
+              500
+            ]
+          ],
+          "results": [
             [
-              "jugcraft:refinery_gas",
+              "minecraft:sand",
+              1
+            ]
+          ],
+          "ticks": 160
+        },
+        {
+          "items": [
+            [
+              "jugcraft:bitumen",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
               100
             ]
           ],
+          "fluid_results": [
+            [
+              "jugcraft:crude_oil",
+              150
+            ]
+          ],
           "results": [],
-          "ticks": 120
+          "ticks": 80
+        },
+        {
+          "items": [
+            [
+              "minecraft:mud",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "results": [
+            [
+              "minecraft:clay_ball",
+              4
+            ]
+          ],
+          "ticks": 60
         }
       ]
     }

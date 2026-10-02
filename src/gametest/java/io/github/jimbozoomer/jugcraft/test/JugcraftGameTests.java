@@ -345,22 +345,34 @@ public class JugcraftGameTests {
 		helper.assertTrue(out.is(result) && out.getCount() == count, kind.id + " makes " + out + " from " + inputs);
 	}
 
-	/** The two-block crystal grower pulls a silicon boule from 4 silicon and a phosphate; the sawmill cuts it into 8 wafers. */
+	/**
+	 * The arc furnace pulls a silicon boule from 4 silicon and a phosphate (batch 24, from the old crystal grower); the
+	 * sawmill cuts it into 8 wafers. Its one-ingredient recipes still work alongside.
+	 */
 	@GameTest(maxTicks = 600)
-	public void crystalGrowerPullsABoule(GameTestHelper helper) {
-		BlockPos master = new BlockPos(2, 1, 2);
-		MachineBlockEntity grower = large(helper, master, MachineKind.CRYSTAL_GROWER);
-		charge(helper, master.above(), Direction.WEST);
-		grower.setItem(0, new ItemStack(item("silicon"), 4));
-		grower.setItem(1, new ItemStack(item("phosphate")));
+	public void arcFurnacePullsABoule(GameTestHelper helper) {
+		for (int x = 2; x <= 4; x++) {
+			for (int y = 1; y <= 3; y++) {
+				for (int z = 1; z <= 3; z++) {
+					helper.setBlock(new BlockPos(x, y, z), JugcraftMachines.ARC_FURNACE_CASING);
+				}
+			}
+		}
+		BlockPos controller = new BlockPos(3, 2, 1);
+		helper.setBlock(controller, machine(MachineKind.ARC_FURNACE).setValue(MachineBlock.FACING, Direction.NORTH));
+		charge(helper, controller, Direction.NORTH);
+		MachineBlockEntity furnace = helper.getBlockEntity(controller, MachineBlockEntity.class);
+		furnace.setItem(0, new ItemStack(item("phosphate")));
+		furnace.setItem(1, new ItemStack(item("silicon"), 4));
+		assertMulti(helper, MachineKind.ARC_FURNACE, List.of(new ItemStack(Items.QUARTZ)), item("silicon"), 2);
 		MachineRecipe wafers = MachineRecipes.find(helper.getLevel(), MachineKind.SAWMILL, new ItemStack(item("silicon_boule")))
 				.orElseThrow(() -> helper.assertionException("No sawing recipe for a silicon boule"));
 		ItemStack sawn = wafers.output().create();
 		helper.assertTrue(sawn.is(item("silicon_wafer")) && sawn.getCount() == 8, "A boule saws into " + sawn);
 		helper.succeedWhen(() -> {
-			ItemStack output = grower.getItem(MachineKind.CRYSTAL_GROWER.outputSlot());
-			helper.assertTrue(output.is(item("silicon_boule")), "Crystal grower output is " + output);
-			helper.assertTrue(grower.getItem(0).isEmpty() && grower.getItem(1).isEmpty(), "The inputs were not used up");
+			ItemStack output = furnace.getItem(MachineKind.ARC_FURNACE.outputSlot());
+			helper.assertTrue(output.is(item("silicon_boule")), "Arc furnace output is " + output);
+			helper.assertTrue(furnace.getItem(0).isEmpty() && furnace.getItem(1).isEmpty(), "The inputs were not used up");
 		});
 	}
 

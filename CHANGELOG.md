@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Fewer chemistry machines, batch 24
+- Five single-job machines folded into ones that already exist (65 machines down to 60):
+  - the distillation tower vacuum-distils heavy fuel oil (was the vacuum distillation unit);
+  - the catalytic cracker reforms naphtha, using a catalyst (was the catalytic reformer);
+  - the chemical reactor mixes brine and fracking fluid (was the chemical mixer);
+  - the **Settling Plant** (the flowback treatment unit, renamed) separates oil sand and bitumen (was the oil sand extractor);
+  - the arc furnace pulls silicon boules, with argon (was the crystal grower).
+- New uses: the settling plant presses mud into clay; the electrolytic cell splits water into hydrogen and oxygen.
+
 ### Unmerged: Seasons (colours, events and winter snow)
 - **Grass and leaves change colour with the server's date** in every biome that has four seasons: plains, meadows, forests (dark, dappled and cherry groves included), taigas, windswept hills and swamps.
   - Winter is dull and dormant, spring is fresh green and summer is vanilla.
@@ -57,9 +66,7 @@ No numbered release yet. Everything below is on `main`.
 - **Feature switch:** `parties.enabled`.
 - **Tests:** seven new game tests, plus a checker rule that every party result has a chat message.
 
-### Unmerged: Explosive weapons, batch 18
-
-### Unmerged: Engineer's Handbook reorganised, batch 23
+### #81 Engineer's Handbook reorganised, batch 23
 - The book fits the window; the chapter list is a scrollable contents list where the open chapter shows its pages, and long pages scroll (mouse wheel or arrow keys).
 - New **Progression** chapter: the road through the mod in nine stages, each a plan and a numbered chain of the items to make in order.
 
