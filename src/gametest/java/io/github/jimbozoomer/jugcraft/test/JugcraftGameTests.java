@@ -1571,7 +1571,8 @@ public class JugcraftGameTests {
 		ItemStack base = new ItemStack(JugcraftExosuit.piece(ExosuitItem.Style.VANGUARD, ArmorType.HELMET));
 		Chargeable.setEnergy(base, 123_456);
 		SmithingRecipeInput input = new SmithingRecipeInput(new ItemStack(JugcraftExosuit.RONIN_LIVERY), base,
-				new ItemStack(Items.RED_DYE));
+				// Looked up by ID: the dye has no Items constant in 26.3.
+				new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("red_dye"))));
 		Optional<RecipeHolder<SmithingRecipe>> recipe = level.recipeAccess().getRecipeFor(RecipeType.SMITHING, input, level);
 		helper.assertTrue(recipe.isPresent(), "No livery recipe for the helmet");
 		ItemStack out = recipe.get().value().assemble(input);
