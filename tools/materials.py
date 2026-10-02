@@ -14,7 +14,7 @@ MOD = "jugcraft"
 FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
             "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines", "deposits",
             "explosives", "parties", "drones",
-            "pixel_hollows", "retro_trader"]
+            "pixel_hollows", "retro_trader", "town"]
 
 # Metals use the vanilla form set. "mined" adds ore, deepslate ore, raw item and raw block.
 # cook: which vanilla cookers can smelt the ore/raw form. tool: minimum pickaxe tier.

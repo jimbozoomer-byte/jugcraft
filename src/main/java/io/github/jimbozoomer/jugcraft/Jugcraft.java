@@ -79,6 +79,7 @@ public final class Jugcraft implements ModInitializer {
 		PixelHollows.register();
 		RetroTrader.register();
 		JugcraftSeasons.register();
+		io.github.jimbozoomer.jugcraft.town.JugcraftTown.register();
 		FeatureEnabledCondition.register();
 		JugcraftWorldgen.register();
 		JugcraftParties.register();

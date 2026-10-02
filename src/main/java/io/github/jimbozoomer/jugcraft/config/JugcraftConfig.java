@@ -23,7 +23,7 @@ public final class JugcraftConfig {
 			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
 			"salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines",
 			"deposits", "explosives", "parties", "drones",
-			"pixel_hollows", "retro_trader");
+			"pixel_hollows", "retro_trader", "town");
 
 	/**
 	 * Text options, with their defaults (see {@code season/SeasonCalendar.Settings}). The season follows the
@@ -33,12 +33,14 @@ public final class JugcraftConfig {
 	 * {@code on}) lets winter lay snow, up to {@code seasons.snow_depth} layers, that melts in spring. Events on
 	 * the same clock: the Harvest Feast ({@code harvest_feast}: {@code us}, {@code canada} or {@code off}, lasting
 	 * {@code harvest_feast.days}) and December ({@code december}: {@code MM-DD..MM-DD} or {@code off}).
+	 * {@code town.protection} ({@code on} or {@code off}) keeps the walled town as it was built (town/TownProtection).
 	 */
 	public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
 			Map.entry("seasons.mode", "auto"), Map.entry("seasons.hemisphere", "north"), Map.entry("seasons.timezone", "UTC"),
 			Map.entry("seasons.snow", "off"), Map.entry("seasons.snow_depth", "2"),
 			Map.entry("harvest_feast", "us"), Map.entry("harvest_feast.days", "4"),
-			Map.entry("december", "12-01..01-06"));
+			Map.entry("december", "12-01..01-06"),
+			Map.entry("town.protection", "on"));
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
@@ -89,7 +91,7 @@ public final class JugcraftConfig {
 			properties.store(writer, "Jugcraft feature switches (false stops new worldgen and recipes; existing items and blocks stay)"
 					+ " and server options (seasons.*: seasonal colours follow the server's date; mode auto, spring, summer, autumn,"
 					+ " winter or off, hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"
-					+ " december MM-DD..MM-DD or off).");
+					+ " december MM-DD..MM-DD or off; town.protection on or off).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}

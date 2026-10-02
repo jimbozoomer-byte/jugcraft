@@ -25,6 +25,7 @@ import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 import pixel_hollows as ph
+import town_assets
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -42,7 +43,9 @@ STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
 # Tags that Jugcraft reads but that vanilla/Fabric API define.
 EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_replaceables",
                   "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:mineable/axe",
-                  "minecraft:mineable/shovel", "minecraft:leaves"}
+                  "minecraft:mineable/shovel", "minecraft:leaves",
+                  # The town's usable blocks (tools/town_assets.py USABLE): vanilla 26.3's own block tags.
+                  "minecraft:wooden_doors", "minecraft:fence_gates", "minecraft:buttons", "minecraft:beds"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -121,7 +124,7 @@ def item_models(definition):
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
-                  + plastic.blocks() + ph.blocks() + seasons.BLOCKS):
+                  + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -139,7 +142,7 @@ def check_assets(registered):
         if definition:
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
-                        + plastic.blocks() + ph.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + plastic.blocks() + ph.blocks() + town_assets.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -221,7 +224,7 @@ UNITS = {"ingots": 9, "nuggets": 1, "raw_materials": 9, "ores": 9, "storage_bloc
 
 
 import guide_books
-NON_METAL = set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items())
+NON_METAL = set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks())
 
 
 def item_units(ref):
@@ -458,6 +461,7 @@ def check_tags():
         known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + machine_items()
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
+                                                    + town_assets.blocks()
                                                     + gear.items() + plastic.blocks() + exosuit.items())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -938,6 +942,58 @@ def check_style_pack():
             err(f"{block}: the two styles cover different block states")
 
 
+def check_town():
+    """The walled town: its data is written, its shops have no profit loop, every townsperson's skin and every line they
+    can say exists, and the Java side names the same feature, shops screen ids and decor kinds."""
+    import gzip
+    import town_shops
+    import town_lang
+    import town_decor
+    town_dir = DATA / MOD / "town"
+    if not (town_dir / "town.json.gz").exists() or not (town_dir / "shops.json").exists():
+        err("missing town data: run tools/generate_material_data.py (tools/town.py)")
+        return
+    for problem in town_shops.loop_errors():
+        err(f"town shops: {problem}")
+    shops = load(town_dir / "shops.json") or {}
+    if shops.get("shops") != town_shops.data():
+        err("data/jugcraft/town/shops.json differs from tools/town_shops.py: regenerate")
+    data = json.loads(gzip.decompress((town_dir / "town.json.gz").read_bytes()))
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    skins = ASSETS / "textures" / "entity" / "townsfolk"
+    for spot in data["spots"]:
+        if not (skins / f"{spot['skin']}.png").exists():
+            err(f"town: no skin texture {spot['skin']}")
+        if spot["role"] == "shopkeeper" and spot.get("shop") not in town_shops.SHOPS:
+            err(f"town: shopkeeper {spot['name']} keeps no known shop {spot.get('shop')}")
+    for role in town_lang.LINES:
+        for theme in town_decor.THEMES:
+            for i in range(3):
+                if f"message.jugcraft.townsfolk.{role}.{theme}.{i}" not in lang:
+                    err(f"lang: missing townsfolk line {role}.{theme}.{i}")
+    for theme in town_decor.THEMES:
+        if f"theme.jugcraft.{theme}" not in lang:
+            err(f"lang: missing theme name {theme}")
+        for kind, themes in town_decor.KINDS.items():
+            if theme not in themes:
+                err(f"town decor: {kind} has nothing for {theme}")
+    for shop in town_shops.SHOPS:
+        if f"shop.jugcraft.{shop}" not in lang:
+            err(f"lang: missing shop name {shop}")
+    kinds = {site["kind"] for site in data["sites"]}
+    unknown = kinds - set(town_decor.KINDS) - {"centerpiece"}
+    if unknown:
+        err(f"town: decor sites of unknown kinds {sorted(unknown)}")
+    java = (JAVA_ROOT / "town" / "JugcraftTown.java").read_text(encoding="utf-8")
+    if 'FEATURE = "town";' not in java or "town" not in FEATURES:
+        err("JugcraftTown.FEATURE must be the town feature switch")
+    menu = (JAVA_ROOT / "town" / "ShopMenu.java").read_text(encoding="utf-8")
+    most = max(len(info["sells"]) for info in town_shops.SHOPS.values())
+    base = int(re.search(r"SELL_BASE = (\d+);", menu).group(1))
+    if most > base or max(len(info["buys"]) for info in town_shops.SHOPS.values()) + base > 127:
+        err(f"ShopMenu.SELL_BASE {base} cannot number every offer as a menu button")
+
+
 def check_pixel_hollows():
     """The cave's shards stay finite, and the Retro Trader's Java numbers match tools/pixel_hollows.py without a
     profit loop between his shard sale and buyback."""
@@ -1022,7 +1078,7 @@ def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(petro.petro_items()) | set(petro.petro_blocks()) | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items())
-                  | set(ph.blocks()) | set(ph.items()))
+                  | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_petro()
     check_loot(registered)
@@ -1046,6 +1102,7 @@ def main():
     check_handbook(registered)
     check_advancements(registered)
     check_pixel_hollows()
+    check_town()
     for path in RES.rglob("*.json"):
         load(path)
     if errors:
