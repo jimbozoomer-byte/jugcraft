@@ -216,4 +216,8 @@ def feature_of(entry_id):
     import tank_display
     if entry_id in tank_display.BLOCKS:
         return FEATURE
+    import gear
+    if entry_id in gear.items():
+        tier = entry_id.rsplit("_", 1)[0]
+        return gear.GEAR_TIERS[tier]["feature"] if tier in gear.GEAR_TIERS else FEATURE
     raise KeyError(entry_id)

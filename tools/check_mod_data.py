@@ -19,6 +19,7 @@ import petro
 import deposits
 import seasons
 import tank_display
+import gear
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 
@@ -255,6 +256,14 @@ def item_units(ref):
         return {"aluminum": 9}
     if path in NON_METAL:
         return {}
+    if path in gear.items():
+        # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
+        # hold nothing the audit tracks, like the vanilla tools they are made from.
+        tier, piece = path.rsplit("_", 1)
+        if tier not in gear.GEAR_TIERS:
+            return {}
+        pieces = ("pickaxe", "axe", "shovel") if piece == "paxel" else (piece,)
+        return {tier: 9 * sum("".join(gear.PATTERNS[p]).count("#") for p in pieces)}
     err(f"No metal content known for {ref}")
     return {}
 
@@ -428,7 +437,7 @@ def check_tags():
             elif split(value)[0] == MOD and split(value)[1] not in (all_blocks() + all_items() + machine_blocks()
                                                                     + machine_items() + petro.petro_blocks()
                                                                     + petro.petro_items() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
-                                                                    + seasons.BLOCKS):
+                                                                    + gear.items() + seasons.BLOCKS):
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
 
@@ -447,6 +456,31 @@ def check_worldgen():
         feature = split((load(path) or {})["feature"])[1]
         if not (DATA / MOD / "worldgen" / "feature" / f"{feature}.json").is_file():
             err(f"{path.name}: unknown configured feature {feature}")
+
+
+def check_gear():
+    """gear/JugcraftGear.java against tools/gear.py: the tiers, pieces, paxel tiers and each tier's stats, and that
+    every item and worn-armor layer has its texture."""
+    java = (JAVA_ROOT / "gear" / "JugcraftGear.java").read_text(encoding="utf-8")
+    for name, expected in (("TIERS", list(gear.GEAR_TIERS)), ("PIECES", gear.PIECES), ("PAXEL_TIERS", list(gear.PAXEL_TIERS))):
+        found = re.findall(r'"([a-z_]+)"', re.search(name + r" = List\.of\(([^)]*)\)", java).group(1))
+        if found != expected:
+            err(f"JugcraftGear.{name} {found} != tools/gear.py {expected}")
+    if f"PAXEL_DURABILITY = {gear.PAXEL_DURABILITY};" not in java:
+        err("JugcraftGear.PAXEL_DURABILITY differs from tools/gear.py")
+    for tier, info in gear.GEAR_TIERS.items():
+        durability, speed, damage, enchant = info["tool"]
+        drops = "INCORRECT_FOR_" + info["drops"].upper() + "_TOOL"
+        tool = f"{tier.upper()} = new ToolMaterial(BlockTags.{drops}, {durability}, {speed}F, {damage}F, {enchant},"
+        if tool not in java:
+            err(f"JugcraftGear: {tier} tool material is not {tool}")
+        mult, (boots, legs, chest, helmet), enchant, tough, knock = info["armor"]
+        armor = (f"{tier.upper()}_ARMOR = new ArmorMaterial({mult}, defense({boots}, {legs}, {chest}, {helmet}), {enchant},")
+        if armor not in java or f"{tough}F, {knock}F, repairs(\"{tier}\")" not in java:
+            err(f"JugcraftGear: {tier} armor material differs from tools/gear.py")
+        for layer in ("humanoid", "humanoid_leggings"):
+            if not (ASSETS / "textures" / "entity" / "equipment" / layer / f"{tier}.png").exists():
+                err(f"Missing worn armor texture {layer}/{tier}.png")
 
 
 def check_seasons():
@@ -832,7 +866,8 @@ def check_deposits():
 
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
-                  | set(petro.petro_items()) | set(petro.petro_blocks()) | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS))
+                  | set(petro.petro_items()) | set(petro.petro_blocks()) | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
+                  | set(gear.items()))
     check_assets(sorted(registered))
     check_petro()
     check_loot(registered)
@@ -843,6 +878,7 @@ def main():
     check_worldgen()
     check_java()
     check_deposits()
+    check_gear()
     check_seasons()
     check_machines(registered)
     check_large_machines()

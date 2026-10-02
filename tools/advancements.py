@@ -31,6 +31,11 @@ TREE = {
     "upgrade": ("mining_drill", ["overclock_module", "range_module", "capacity_module", "silk_touch_module",
                                  "fortune_module"], "Tinkerer", "Make an upgrade module for a powered tool", "task"),
     "rocket_pack": ("charging_station", "rocket_pack", "Rocketeer", "Make a rocket pack and take to the air", "challenge"),
+    # Batch 25: gear.
+    "steel_armor": ("steel", ["steel_helmet", "steel_chestplate", "steel_leggings", "steel_boots"], "Suited Up",
+                    "Make a piece of steel armor", "task"),
+    "paxel": ("steel", [f"{tier}_paxel" for tier in ("wood", "stone", "iron", "gold", "diamond", "netherite", "bronze",
+                                                      "steel")], "Jack of All Trades", "Make a paxel", "task"),
     # The oil line (Chemistry branch).
     "crude_oil": ("steel", "crude_oil_bucket", "Black Gold", "Fill a bucket with crude oil", "task"),
     "pumpjack": ("crude_oil", "pumpjack", "Nodding Donkey", "Build a pumpjack over an oil reservoir", "task"),

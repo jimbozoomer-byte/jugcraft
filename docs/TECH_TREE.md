@@ -381,6 +381,18 @@ Empty tools mine like a bare hand and get no drops.
 
 **Code:** `tools/` (`JugcraftTools`, `Chargeable`, `PoweredToolItem`, `MiningDrillItem`, `ChainsawItem`, `RocketPackItem`, `RocketThrustPayload`, `ChargingStationBlock(Entity)`); client `ChargingStationRenderer`, `RocketPackClient`.
 
+### Tools, armor and paxels (batch 25)
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Bronze sword, pickaxe, axe, shovel, hoe | Iron-tier drops; 320 uses, speed 6.5 | bronze ingots and sticks, shaped like iron tools |
+| Steel sword, pickaxe, axe, shovel, hoe | Diamond-tier drops (obsidian); 900 uses, speed 7 | steel ingots and sticks |
+| Bronze helmet, chestplate, leggings, boots | Iron's defense, 0.5 toughness | bronze ingots, shaped like iron armor |
+| Steel helmet, chestplate, leggings, boots | 3/6/7/3 defense, 1.5 toughness | steel ingots |
+| Paxel (wood, stone, iron, gold, diamond, netherite, bronze, steel) | Mines like a pickaxe, axe and shovel; three times the tier's durability | that tier's pickaxe, axe and shovel (shapeless) |
+
+**Code:** `gear/JugcraftGear`; data and art from `tools/gear.py` and `tools/gear_textures.py` ([feature record](features/tools-and-armor.md)).
+
 ## Oil
 
 The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line), [feature record](features/petrochemistry.md)).
