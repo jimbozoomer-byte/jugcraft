@@ -804,9 +804,14 @@ public class PetroGameTests {
 	 */
 	@GameTest(maxTicks = 1000)
 	public void cellSplitsWater(GameTestHelper helper) {
-		MachineBlockEntity cell = place(helper, MachineKind.ELECTROLYTIC_CELL, new BlockPos(4, 1, 2));
+		BlockPos master = new BlockPos(4, 1, 2);
+		MachineBlockEntity cell = place(helper, MachineKind.ELECTROLYTIC_CELL, master);
 		cell.tanks().input(0).fill(Fluids.WATER, 1000);
+		// A bucket takes 204,800 JE, more than the cell's 60,000 JE battery holds: keep it charged, as a cable would.
+		// (succeedWhen runs this check every tick until it passes.)
+		SimpleEnergyStorage energy = (SimpleEnergyStorage) EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.UP);
 		helper.succeedWhen(() -> {
+			energy.setAmount(energy.getCapacity());
 			helper.assertTrue(cell.tanks().output(1).has(PetroFluids.HYDROGEN.fluid(), 500), "Hydrogen: " + cell.tanks().output(1).millibuckets());
 			helper.assertTrue(cell.tanks().output(0).has(PetroFluids.OXYGEN.fluid(), 250), "Oxygen: " + cell.tanks().output(0).millibuckets());
 			helper.assertTrue(cell.tanks().output(2).isResourceBlank(), "Something went into the lye tank");
