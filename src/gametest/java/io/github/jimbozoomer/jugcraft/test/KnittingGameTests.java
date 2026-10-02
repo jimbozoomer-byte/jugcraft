@@ -185,8 +185,12 @@ public class KnittingGameTests {
 		ServerLevel level = helper.getLevel();
 		// Vanilla's dyeable items (leather armour is one), which its dyeing recipe takes.
 		TagKey<Item> dyeable = TagKey.create(Registries.ITEM, Identifier.withDefaultNamespace("dyeable"));
-		helper.assertTrue(new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("leather_helmet"))).is(dyeable),
-				"minecraft:dyeable is vanilla's dyeable tag (leather is in it)");
+		Item leather = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("leather_helmet"));
+		String leatherTags = String.join(", ", BuiltInRegistries.ITEM.wrapAsHolder(leather).tags().map(tag -> tag.location().toString()).sorted().toList());
+		String leatherComponents = new ItemStack(leather).getComponents().keySet().stream().map(String::valueOf).sorted()
+				.collect(java.util.stream.Collectors.joining(", "));
+		helper.assertTrue(new ItemStack(leather).is(dyeable),
+				"minecraft:dyeable is vanilla's dyeable tag (leather is in it). Leather's tags: " + leatherTags + "; components: " + leatherComponents);
 		helper.assertTrue(Knitting.yarn(Knitting.UNDYED, 1).is(dyeable), "Yarn takes dye");
 		for (Knitwear knit : Knitwear.values()) {
 			ItemStack garment = Knitting.garment(knit, 0x228822);
