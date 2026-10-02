@@ -901,6 +901,46 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Ores drop their raw material, not themselves, and storage blocks drop themselves. Before the
+	 * loot tables used the 26.x keys, Minecraft ignored their conditions and every ore dropped itself.
+	 */
+	@GameTest
+	public void oresDropRawMaterial(GameTestHelper helper) {
+		assertDrops(helper, new BlockPos(1, 1, 1), "tin_ore", "raw_tin", 1, 1);
+		assertDrops(helper, new BlockPos(3, 1, 1), "deepslate_zinc_ore", "raw_zinc", 1, 1);
+		assertDrops(helper, new BlockPos(5, 1, 1), "salt_ore", "salt", 2, 4);
+		assertDrops(helper, new BlockPos(1, 1, 3), "oil_sand", "bitumen", 1, 2);
+		assertDrops(helper, new BlockPos(3, 1, 3), "tin_block", "tin_block", 1, 1);
+		helper.succeed();
+	}
+
+	/**
+	 * The Charging Station drops once, from its lower half. Its top half's "lower half only" condition used
+	 * the pre-26.x loot keys, which Minecraft ignored, so breaking the top half dropped two stations.
+	 */
+	@GameTest
+	public void chargingStationDropsOnce(GameTestHelper helper) {
+		BlockPos lower = new BlockPos(2, 1, 2);
+		BlockState state = JugcraftTools.CHARGING_STATION.defaultBlockState();
+		helper.setBlock(lower, state);
+		helper.setBlock(lower.above(), state.setValue(ChargingStationBlock.HALF, DoubleBlockHalf.UPPER));
+		List<ItemStack> top = Block.getDrops(helper.getBlockState(lower.above()), helper.getLevel(), helper.absolutePos(lower.above()), null);
+		List<ItemStack> bottom = Block.getDrops(helper.getBlockState(lower), helper.getLevel(), helper.absolutePos(lower), null);
+		helper.assertTrue(top.isEmpty(), "The top half should drop nothing, dropped " + top);
+		helper.assertTrue(bottom.size() == 1 && bottom.get(0).is(JugcraftTools.CHARGING_STATION.asItem()) && bottom.get(0).getCount() == 1,
+				"The lower half should drop one station, dropped " + bottom);
+		helper.succeed();
+	}
+
+	/** Breaking {@code block} with no tool drops only {@code drop}, between {@code min} and {@code max} of it. */
+	private static void assertDrops(GameTestHelper helper, BlockPos pos, String block, String drop, int min, int max) {
+		helper.setBlock(pos, BuiltInRegistries.BLOCK.getValue(Jugcraft.id(block)));
+		List<ItemStack> drops = Block.getDrops(helper.getBlockState(pos), helper.getLevel(), helper.absolutePos(pos), null);
+		helper.assertTrue(drops.size() == 1 && drops.get(0).is(item(drop)) && drops.get(0).getCount() >= min
+				&& drops.get(0).getCount() <= max, block + " should drop " + min + "-" + max + " " + drop + ", dropped " + drops);
+	}
+
 	// ------------------------------------------------------------------ mining & prospecting
 
 	/** The prospector's survey reports ore placed nearby, with a signal of 1-5 and a depth band, and no positions. */
