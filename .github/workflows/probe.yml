@@ -18,43 +18,24 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
-      - name: Gear APIs
-        run: |
-          set +e
-          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
-          echo "=== AbstractArrow"; javap -cp "$COMMON" net.minecraft.world.entity.projectile.arrow.AbstractArrow | grep -iE "BaseDamage|shoot|pickup|Pickup|setCritArrow|setPierce" | head -20
-          javap -p -cp "$COMMON" 'net.minecraft.world.entity.projectile.arrow.AbstractArrow$Pickup' | head
-          echo "=== Projectile"; javap -cp "$COMMON" net.minecraft.world.entity.projectile.Projectile | grep -iE "shoot" | head
-          echo "=== Attributes"; javap -cp "$COMMON" net.minecraft.world.entity.ai.attributes.Attributes | grep -iE "FALL|STEP|SAFE|OXYGEN|WATER|MOVEMENT_SPEED|ATTACK_DAMAGE|ARMOR\b" | head -20
-          echo "=== AttributeModifier"; javap -cp "$COMMON" net.minecraft.world.entity.ai.attributes.AttributeModifier | head -12
-          javap -cp "$COMMON" 'net.minecraft.world.entity.ai.attributes.AttributeModifier$Operation' | head -8
-          echo "=== ItemAttributeModifiers"; javap -cp "$COMMON" net.minecraft.world.item.component.ItemAttributeModifiers | head -30
-          javap -cp "$COMMON" 'net.minecraft.world.item.component.ItemAttributeModifiers$Builder' | head
-          echo "=== EquipmentSlotGroup"; javap -cp "$COMMON" net.minecraft.world.entity.EquipmentSlotGroup | grep static | head -12
-          echo "=== Item.Properties attributes"; javap -cp "$COMMON" 'net.minecraft.world.item.Item$Properties' | grep -iE "attributes|component|stacksTo|durability|rarity" | head
-          echo "=== Item.inventoryTick usage example"; javap -c -cp "$COMMON" net.minecraft.world.item.Item | grep -A3 "inventoryTick" | head
-          echo "=== Player"; javap -cp "$COMMON" net.minecraft.world.entity.player.Player | grep -iE "getProjectile|hasInfiniteMaterials|isCreative|getAbilities" | head
-          echo "=== SoundEvents"; javap -cp "$COMMON" net.minecraft.sounds.SoundEvents | grep -iE " ARROW_SHOOT| ARMOR_EQUIP_(LEATHER|IRON)| BUCKET_FILL;| PLAYER_ATTACK_SWEEP" | head
-          echo "=== Blocks DyeColor"; javap -cp "$COMMON" net.minecraft.world.item.DyeColor | grep -iE "getName|getSerializedName|getTextureDiffuseColor|getMapColor" | head
-      - name: Tool and armor APIs
+      - name: Exosuit APIs
         run: |
           set +e
           COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-clientonly-deobf-26.3.jar' | head -1)
-          echo "=== Item.Properties"; javap -cp "$COMMON" 'net.minecraft.world.item.Item$Properties' | grep -iE "sword|pickaxe|axe|shovel|hoe|tool|armor|Armor|spear|durability|repairable|enchantable|equippable"
-          for c in net.minecraft.world.item.ToolMaterial net.minecraft.world.item.equipment.ArmorMaterial net.minecraft.world.item.equipment.ArmorType net.minecraft.world.item.equipment.ArmorMaterials net.minecraft.world.item.equipment.EquipmentAssets net.minecraft.world.item.AxeItem net.minecraft.world.item.ShovelItem net.minecraft.world.item.HoeItem net.minecraft.world.item.BowItem net.minecraft.world.item.ProjectileWeaponItem net.minecraft.world.item.ShieldItem; do echo "=== $c"; javap -cp "$COMMON" $c | head -40; done
-          echo "=== ItemTags"; javap -cp "$COMMON" net.minecraft.tags.ItemTags | grep -iE "SWORD|PICKAXE|AXES|SHOVEL|HOE|ARMOR|ENCHANTABLE|REPAIR|BRONZE|HEAD|CHEST|LEG|FOOT|FEET" | head -50
-          echo "=== BlockTags"; javap -cp "$COMMON" net.minecraft.tags.BlockTags | grep -iE "MINEABLE|INCORRECT" | head
-          echo "=== equipment assets"; unzip -l "$CLIENT" "$COMMON" | grep -E "equipment/(iron|diamond)\.json|entity/equipment/humanoid(_leggings)?/iron" | head
-          for f in $(unzip -l "$CLIENT" | grep -oE "assets/minecraft/equipment/iron\.json" | head -1); do unzip -p "$CLIENT" $f; done
-          for f in $(unzip -l "$COMMON" | grep -oE "assets/minecraft/equipment/iron\.json" | head -1); do unzip -p "$COMMON" $f; done
-          echo "=== iron_pickaxe item model"; for J in "$CLIENT" "$COMMON"; do unzip -p "$J" assets/minecraft/items/iron_pickaxe.json 2>/dev/null; unzip -p "$J" assets/minecraft/items/bow.json 2>/dev/null; unzip -p "$J" assets/minecraft/items/shield.json 2>/dev/null; done
-          echo "=== recipe iron_pickaxe"; unzip -p "$COMMON" data/minecraft/recipe/iron_pickaxe.json; unzip -p "$COMMON" data/minecraft/recipe/netherite_pickaxe_smithing.json
-          echo "=== tags"; unzip -p "$COMMON" data/minecraft/tags/item/pickaxes.json; unzip -p "$COMMON" data/minecraft/tags/item/enchantable/armor.json; unzip -p "$COMMON" data/minecraft/tags/item/head_armor.json; unzip -l "$COMMON" | grep -E "tags/item/(enchantable|.*armor|swords|axes|shovels|hoes)" | head -30
-          echo "=== Fabric damage events"; for J in $(find ~/.gradle/caches -name 'fabric-entity-events*.jar' | grep -v sources | head -1); do javap -cp "$J:$COMMON" net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents | head -30; done
-          echo "=== MobEffects"; javap -cp "$COMMON" net.minecraft.world.effect.MobEffects | grep -iE "WATER_BREATHING|BREATH" 
-          echo "=== LivingEntity air"; javap -cp "$COMMON" net.minecraft.world.entity.LivingEntity | grep -iE "AirSupply|isEyeInFluid|getArmorValue|getItemBySlot" | head
-          echo "=== Entity air"; javap -cp "$COMMON" net.minecraft.world.entity.Entity | grep -iE "AirSupply|isUnderWater|isEyeInFluid" | head
-          echo "=== Item hooks"; javap -cp "$COMMON" net.minecraft.world.item.Item | grep -iE "inventoryTick|releaseUsing|getUseDuration|use\(|hurtEnemy|postHurtEnemy|getAttackDamageBonus|onUseTick" | head -20
-          echo "=== DamageTypes"; javap -cp "$COMMON" net.minecraft.world.damagesource.DamageTypes | grep -iE "FALL|ARROW|PLAYER_ATTACK" | head
-          echo "=== Arrow"; javap -cp "$COMMON" net.minecraft.world.entity.projectile.arrow.Arrow 2>/dev/null | head -20; unzip -l "$COMMON" | grep -E "projectile/.*Arrow\.class" | head
+          echo "=== Attributes"; javap -cp "$COMMON" net.minecraft.world.entity.ai.attributes.Attributes | grep -iE "ABSORPTION|MOVEMENT_SPEED|STEP|FALL_DAMAGE" 
+          echo "=== AttributeInstance"; javap -cp "$COMMON" net.minecraft.world.entity.ai.attributes.AttributeInstance | grep -iE "Modifier|getValue"
+          echo "=== LivingEntity"; javap -cp "$COMMON" net.minecraft.world.entity.LivingEntity | grep -iE "getAttribute\(|Absorption|addEffect|removeEffect|getEffect\(|hasEffect|getItemBySlot"
+          echo "=== MobEffectInstance"; javap -cp "$COMMON" net.minecraft.world.effect.MobEffectInstance | grep -iE "public net.minecraft.world.effect.MobEffectInstance\(|isAmbient|isVisible|getDuration|showIcon"
+          echo "=== MobEffects"; javap -cp "$COMMON" net.minecraft.world.effect.MobEffects | grep -iE "NIGHT_VISION"
+          echo "=== Level brightness"; javap -cp "$COMMON" net.minecraft.world.level.Level | grep -iE "getMaxLocalRawBrightness|getRawBrightness|getLightEmission"; javap -cp "$COMMON" net.minecraft.world.level.LevelReader | grep -iE "Brightness"; javap -cp "$COMMON" net.minecraft.world.level.BlockAndTintGetter | grep -iE "Brightness"
+          echo "=== Recipe smithing"; javap -cp "$COMMON" net.minecraft.world.item.crafting.SmithingRecipeInput | head; javap -cp "$COMMON" net.minecraft.world.item.crafting.SmithingTransformRecipe | head -20
+          javap -cp "$COMMON" net.minecraft.world.item.crafting.RecipeManager | grep -iE "getRecipeFor|byKey"
+          javap -cp "$COMMON" net.minecraft.server.level.ServerLevel | grep -iE "recipeAccess"
+          javap -cp "$COMMON" net.minecraft.world.item.crafting.RecipeType | grep -iE "SMITHING"
+          echo "=== smithing json"; unzip -p "$COMMON" data/minecraft/recipe/netherite_helmet_smithing.json
+          echo "=== HumanoidModel"; javap -cp "$CLIENT:$COMMON" net.minecraft.client.model.HumanoidModel | grep -iE "ModelPart"
+          echo "=== HumanoidRenderState"; javap -cp "$CLIENT:$COMMON" net.minecraft.client.renderer.entity.state.HumanoidRenderState | grep -iE "Equipment|ItemStack"
+          echo "=== ModelPart"; javap -cp "$CLIENT:$COMMON" net.minecraft.client.model.geom.ModelPart | grep -iE "translateAndRotate|visible"
+          echo "=== ServerTickEvents"; for J in $(find ~/.gradle/caches -name 'fabric-lifecycle-events*.jar' | grep -v sources | head -1); do javap -cp "$J:$COMMON" net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents | head; javap -cp "$J:$COMMON" 'net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents$EndTick' | head; done
+          echo "=== PlayerList"; javap -cp "$COMMON" net.minecraft.server.players.PlayerList | grep -iE "getPlayers"
