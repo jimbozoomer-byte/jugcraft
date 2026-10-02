@@ -463,8 +463,7 @@ def check_tags():
                                                                     + machine_items() + petro.petro_blocks()
                                                                     + petro.petro_items() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
                                                                     + gear.items() + plastic.blocks()
-                                                                    + exosuit.items()):
-                                                                    + gear.items() + plastic.blocks() + gear.items() + seasons.BLOCKS):
+                                                                    + exosuit.items() + seasons.BLOCKS):
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
 
