@@ -66,6 +66,7 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 	private int points;
 	private int weight;
 	private boolean lit;
+	private boolean soul;
 	private long wateredUntil;
 	private UUID id = UUID.randomUUID();
 	private final int[][] faces = new int[4][];
@@ -114,6 +115,11 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 		return lit;
 	}
 
+	/** Whether the torch inside is a soul torch. */
+	public boolean soul() {
+		return lit && soul;
+	}
+
 	public boolean carved() {
 		for (int[] face : faces) {
 			if (face != null && !CarvingFace.isBlank(face)) {
@@ -156,6 +162,9 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 		}
 		if (watered(level)) {
 			gain++;
+		}
+		if (HarvestMoon.active()) {
+			gain *= 2; // The Harvest Moon swells it twice as fast.
 		}
 		feed(level, gain, random);
 	}
@@ -270,6 +279,7 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 		points = other.points;
 		weight = other.weight;
 		lit = other.lit;
+		soul = other.soul;
 		wateredUntil = other.wateredUntil;
 		id = other.id;
 		for (int i = 0; i < faces.length; i++) {
@@ -317,14 +327,23 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 		return cut + shaved == 0 ? 0 : Math.min(15, 4 + cut / 27 + shaved / 108);
 	}
 
-	/** Puts a torch in (or takes it out): every block of the pumpkin gives the carving's glow, or none. */
+	/** Puts a torch in (or takes it out), keeping the kind of torch already inside. */
 	public void setLit(boolean lit) {
+		setLit(lit, soul);
+	}
+
+	/**
+	 * Puts a torch or a soul torch in (or takes it out): every block of the pumpkin gives the carving's glow (a soul
+	 * torch's light at most), or none.
+	 */
+	public void setLit(boolean lit, boolean soul) {
 		this.lit = lit;
+		this.soul = lit && soul;
 		setChanged();
 		if (level == null) {
 			return;
 		}
-		int light = lit ? glow() : 0;
+		int light = lit ? CarvedPumpkinBlock.flameLight(glow(), this.soul) : 0;
 		BlockState master = getBlockState();
 		int size = master.getValue(GiantPumpkinBlock.SIZE);
 		for (int part = 0; part < size * size * size; part++) {
@@ -346,6 +365,7 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 		points = input.getIntOr("points", 0);
 		weight = input.getIntOr("weight", 0);
 		lit = input.getBooleanOr("lit", false);
+		soul = input.getBooleanOr("soul", false);
 		wateredUntil = input.getLongOr("watered_until", 0L);
 		id = input.read("id", UUIDUtil.CODEC).orElse(id);
 		for (Direction side : Direction.Plane.HORIZONTAL) {
@@ -364,6 +384,9 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 		output.putInt("points", points);
 		output.putInt("weight", weight);
 		output.putBoolean("lit", lit);
+		if (soul) {
+			output.putBoolean("soul", true);
+		}
 		output.putLong("watered_until", wateredUntil);
 		output.store("id", UUIDUtil.CODEC, id);
 		for (Direction side : Direction.Plane.HORIZONTAL) {
@@ -387,7 +410,7 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 				carving.put(side, face);
 			}
 		}
-		return new GiantPumpkinData(size(), points, weight, Optional.of(id), lit, carving, Optional.ofNullable(carverId), carverName);
+		return new GiantPumpkinData(size(), points, weight, Optional.of(id), lit, carving, Optional.ofNullable(carverId), carverName, soul());
 	}
 
 	@Override
@@ -410,6 +433,7 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 		points = data.points();
 		weight = data.weight();
 		lit = data.lit();
+		soul = data.lit() && data.soul();
 		data.id().ifPresent(value -> id = value);
 		for (Direction side : Direction.Plane.HORIZONTAL) {
 			int[] face = data.faces().get(side);
@@ -422,7 +446,7 @@ public class GiantPumpkinBlockEntity extends BlockEntity {
 	@Override
 	public void removeComponentsFromTag(ValueOutput output) {
 		super.removeComponentsFromTag(output);
-		for (String key : List.of("points", "weight", "lit", "id", "carved_by", "carved_by_name")) {
+		for (String key : List.of("points", "weight", "lit", "soul", "id", "carved_by", "carved_by_name")) {
 			output.discard(key);
 		}
 		for (Direction side : Direction.Plane.HORIZONTAL) {

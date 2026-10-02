@@ -36,7 +36,8 @@ STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
 EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_replaceables",
                   "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires", "minecraft:mineable/axe",
                   "minecraft:mineable/shovel", "minecraft:leaves", "minecraft:eggs", "minecraft:dirt", "minecraft:mud",
-                  "minecraft:grass_blocks", "minecraft:sand", "minecraft:wool"}
+                  "minecraft:grass_blocks", "minecraft:sand", "minecraft:wool", "minecraft:logs", "minecraft:candles",
+                  "minecraft:stairs", "minecraft:slabs", "minecraft:walls", "minecraft:coals"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -120,10 +121,15 @@ def check_assets(registered):
 
 
 def item_models(definition):
-    """Every model an item definition can show: a plain model, or each case and the fallback of a select."""
+    """Every model an item definition can show: a plain model, each case and the fallback of a select, or both sides of a
+    condition."""
     if definition.get("type") == "minecraft:select":
         return [ref for case in definition["cases"] for ref in item_models(case["model"])] + item_models(definition["fallback"])
+    if definition.get("type") == "minecraft:condition":
+        return item_models(definition["on_true"]) + item_models(definition["on_false"])
     return [definition["model"]]
+
+
 def check_petro():
     """Petroleum fluids: Java registers exactly tools/petro.py's fluids, each with its block, textures and names."""
     java = (JAVA_ROOT / "chemistry" / "PetroFluids.java").read_text(encoding="utf-8")
@@ -191,6 +197,8 @@ def check_loot(registered):
         stale = old_loot_keys(load(path))
         if stale:
             err(f"{path.name}: uses the pre-26.x loot keys {sorted(stale)}; use \"condition\" and \"modifier\"")
+        if '"minecraft:block_state_property"' in text:
+            err(f"{path.name}: 26.3 has no block_state_property loot condition (the server fails to load); use match_block")
         for name in re.findall(r'"name": "jugcraft:([a-z_]+)"', text):
             if name not in registered:
                 err(f"{path.name} drops unknown item {name}")
@@ -715,10 +723,22 @@ def check_agriculture():
         items[name] = ("sweet", int(n), float(sat), None, None)
         if ag.ITEMS.get(name, {}).get("sweet") != [effect, int(seconds)]:
             err(f"JugcraftAgriculture.java sweet {name} gives {effect} for {seconds} s, not as tools/agriculture.py says")
+    for name, n, sat, effect, seconds, back in re.findall(
+            r'\bdrink\("([a-z_]+)", (\d+), ([\d.]+)F, MobEffects\.(\w+), (\d+)(, true)?\)', main):
+        items[name] = ("drink", int(n), float(sat), None, None)
+        if ag.ITEMS.get(name, {}).get("drink") != [effect, int(seconds)]:
+            err(f"JugcraftAgriculture.java drink {name} gives {effect} for {seconds} s, not as tools/agriculture.py says")
+        if bool(back) != bool(ag.ITEMS.get(name, {}).get("bottle_back")):
+            err(f"JugcraftAgriculture.java drink {name}: whether crafting gives its bottle back differs from tools/agriculture.py")
+        # The Cooking Pot hands remainders back, so a drink that gives its bottle back must not cook into another drink.
+        if back and any(f"jugcraft:{name}" in recipe["inputs"] and "drink" in ag.ITEMS.get(result, {})
+                        for result, recipe in ag.POT_RECIPES.items()):
+            err(f"{name} gives its bottle back, but a Cooking Pot recipe cooks it into another bottled drink (a bottle from nothing)")
     expected = {}
     for name, info in ag.ITEMS.items():
         food = info.get("food") or [None, None]
-        kind = ("stew" if info.get("stew") else "treat" if info.get("treat") else "sweet" if info.get("sweet") else "seeds" if "plants" in info
+        kind = ("stew" if info.get("stew") else "treat" if info.get("treat") else "sweet" if info.get("sweet") else "drink" if info.get("drink")
+                else "seeds" if "plants" in info
                 else "food" if "food" in info else "plain")
         expected[name] = (kind, food[0], food[1], info.get("compost"), info.get("plants"))
     if items != expected:
@@ -735,6 +755,7 @@ def check_agriculture():
     expected = {name: info["biomes"] for name, info in ag.WILD_CROPS.items()}
     expected.update({name: info["biomes"] for name, info in ag.FOUND_WILD.items()})
     expected["chestnut_tree"] = ag.CHESTNUT_TREES["biomes"]
+    expected["apple_tree"] = ag.CIDER["tree"]["biomes"]
     expected["mums"] = ag.MUM_PATCH["biomes"]
     if patches != expected:
         err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
@@ -753,6 +774,31 @@ def check_agriculture():
     check_halloween(java, main)
     check_regatta(java, main)
     check_festivities(java, main)
+    check_night(java, main)
+    check_decor(java)
+    check_decor2(java)
+    check_decor3(java)
+    check_decor4(java)
+    check_decor5(java)
+    check_decor6(java)
+    check_decor7(java)
+    check_decor8(java)
+    check_decor9(java)
+    check_decor10(java)
+    check_decor11(java)
+    check_decor12(java)
+    check_decor13(java)
+    check_decor14(java)
+    check_chandlery(java)
+    check_cider(java)
+    check_pantry(java, main)
+    check_crows(java, main)
+    check_fireworks(java, main)
+    check_lanterns(java, main)
+    check_feast(java, main)
+    check_maze(java, main)
+    check_ghosts(java, main)
+    check_face_paint(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1085,7 +1131,7 @@ def check_festivities(java, main):
         if weight <= 0 or not 1 <= low <= high or (split(item)[0] == MOD and split(item)[1] not in ag.ITEMS):
             err(f"costumed mob candy: {item} needs to be a known food with a positive weight and count")
     for costume in mobs["costumes"]:
-        if split(costume)[0] == MOD and costume.split(":")[1] not in ag.COSTUMES:
+        if split(costume)[0] == MOD and costume.split(":")[1] not in {**ag.COSTUMES, **ag.OUTFITS}:
             err(f"costumed mobs: {costume} is not a costume")
 
     # The Peddler wants emeralds and gives Jugcraft goods that have another route; it never gives emeralds back.
@@ -1112,6 +1158,1476 @@ def check_festivities(java, main):
         model = load(ASSETS / "models" / "block" / f"{stone}.json") or {}
         if [tuple(e["from"] + e["to"]) for e in model.get("elements", [])] != [tuple(b) for b in info["boxes"]]:
             err(f"{stone}: model boxes differ from its shape")
+
+
+def check_night(java, main):
+    """Halloween nights: Java matches tools/agriculture.py, every trebuchet state has a model, and the Horseman's loot
+    is tools/agriculture.py's (dropped only when a player defeats him)."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    wisps, moon, treb, horseman = ag.WISPS, ag.HARVEST_MOON, ag.TREBUCHET, ag.HORSEMAN
+    expected = {("Wisps", "SPAWN_TICKS"): wisps["spawn_ticks"], ("Wisps", "SPAWN_CHANCE"): wisps["spawn_chance"],
+                ("Wisps", "MIN_DISTANCE"): wisps["min"], ("Wisps", "MAX_DISTANCE"): wisps["max"],
+                ("Wisps", "CORN_RADIUS"): wisps["corn_radius"], ("Wisps", "NEAR_CAP"): wisps["near_cap"],
+                ("Wisps", "NEAR_RANGE"): wisps["near_range"], ("Wisps", "LEVEL_CAP"): wisps["level_cap"],
+                ("WillOWisp", "FLEE_RADIUS"): wisps["flee"], ("WillOWisp", "SNEAK_FLEE_RADIUS"): wisps["sneak_flee"],
+                ("JugcraftAgriculture", "WISP_JAR_LIGHT"): wisps["jar_light"],
+                ("HarvestMoon", "GROWTH_BONUS"): moon["growth_bonus"], ("HarvestMoon", "DUSK"): moon["dusk"],
+                ("HarvestMoon", "DAWN"): moon["dawn"], ("HarvestMoon", "CHECK_TICKS"): moon["check_ticks"],
+                ("TrebuchetBlockEntity", "REMEMBERED"): treb["remembered"], ("TrebuchetBlockEntity", "BASE_SPEED"): treb["base_speed"],
+                ("TrebuchetBlockEntity", "GUST"): treb["gust"], ("TrebuchetBlockEntity", "MIN_ANGLE"): treb["min_angle"],
+                ("TrebuchetBlockEntity", "MAX_ANGLE"): treb["max_angle"], ("TrebuchetBlockEntity", "ANGLE_STEP"): treb["angle_step"],
+                ("TrebuchetBlockEntity", "DEFAULT_ANGLE"): treb["default_angle"],
+                ("TrebuchetBlockEntity", "ADVANCEMENT_DISTANCE"): treb["advancement_distance"],
+                ("TrebuchetBlock", "RESET_TICKS"): treb["reset_ticks"], ("FlyingPumpkin", "MAX_FLIGHT"): treb["max_flight"],
+                ("ThrowMarker", "LIFETIME"): treb["marker_ticks"],
+                ("HeadlessHorseman", "MAX_HEALTH"): horseman["health"], ("HeadlessHorseman", "ARENA_RADIUS"): horseman["arena_radius"],
+                ("HeadlessHorseman", "LEAVE_RANGE"): horseman["leave_range"], ("HeadlessHorseman", "LONELY_TICKS"): horseman["lonely_ticks"],
+                ("HeadlessHorseman", "THROW_COOLDOWN"): horseman["throw_cooldown"],
+                ("HeadlessHorseman", "ENRAGED_THROW_COOLDOWN"): horseman["enraged_throw_cooldown"],
+                ("HeadlessHorseman", "THROW_RANGE"): horseman["throw_range"], ("HorsemanSummoning", "MIDNIGHT"): horseman["midnight"],
+                ("HorsemanSummoning", "HOUR_WINDOW"): horseman["hour_window"], ("HorsemanSummoning", "ONE_AT_A_TIME"): horseman["one_at_a_time"],
+                ("FlamingPumpkin", "DAMAGE"): horseman["pumpkin_damage"], ("FlamingPumpkin", "SPLASH_RADIUS"): horseman["splash"],
+                ("FlamingPumpkin", "FIRE_SECONDS"): horseman["fire_seconds"]}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    if treb["board"] != ag.HARVEST_SCALE["board"] or "BOARD = HarvestScaleBlockEntity.BOARD;" not in java.get("TrebuchetBlockEntity", ""):
+        err("The trebuchet's board must hand out the Harvest Scale's ribbons, one per place")
+    if not treb["min_angle"] <= treb["default_angle"] <= treb["max_angle"] or (treb["default_angle"] - treb["min_angle"]) % treb["angle_step"]:
+        err("The trebuchet's default angle must be one of its angles")
+
+    # Throwing factors: Java's are the table's, each is a pumpkin that exists, and the ammunition tag lists exactly them.
+    source = java.get("TrebuchetBlockEntity", "")
+    factors = {item: float(factor) for item, factor in re.findall(r'Map\.entry\("([a-z_:]+)", ([\d.]+)\)', source)}
+    if factors != treb["factors"]:
+        err(f"TrebuchetBlockEntity.FACTORS {factors} differs from tools/agriculture.py {treb['factors']}")
+    for item, factor in treb["factors"].items():
+        if split(item)[0] == MOD and split(item)[1] not in ag.all_items():
+            err(f"trebuchet: {item} is not a Jugcraft item")
+        if not 0.8 <= factor <= 1.2:
+            err(f"trebuchet: {item}'s factor {factor} is outside 0.8 to 1.2")
+    ammo = load(DATA / MOD / "tags" / "item" / f"{split(treb['ammo_tag'])[1]}.json") or {}
+    if sorted(ammo.get("values", [])) != sorted(treb["factors"]):
+        err("The trebuchet's ammunition tag must list exactly the pumpkins that have a throwing factor")
+    treats = load(DATA / MOD / "tags" / "item" / f"{split(ag.CANDY_BAG['treat_tag'])[1]}.json") or {}
+    if treats.get("values") != ag.CANDY_BAG["treats"]:
+        err("The candy bag's treat tag differs from tools/agriculture.py")
+
+    # The trebuchet's blockstate covers every facing and arm position, with a model for each arm.
+    states = (load(ASSETS / "blockstates" / f"{treb['block']}.json") or {}).get("variants", {})
+    want = {f"arm={arm},facing={facing}" for arm in ("ready", "loaded", "released") for facing in ("north", "east", "south", "west")}
+    if set(states) != want:
+        err(f"{treb['block']}: blockstate variants {sorted(states)} differ from every arm position and facing")
+    arms = re.search(r"enum Arm[^{]*\{\s*([^;]+);", java.get("TrebuchetBlock", ""))
+    if not arms or re.findall(r'[A-Z_]+\("([a-z_]+)"\)', arms.group(1)) != ["ready", "loaded", "released"]:
+        err("TrebuchetBlock.Arm differs from the arm positions the models draw")
+    for arm in ("ready", "loaded", "released"):
+        if load(ASSETS / "models" / "block" / f"{treb['block']}_{arm}.json") is None:
+            err(f"{treb['block']}: no model for arm position {arm}")
+
+    # The Harvest Moon's day is configured, defaulting to tools/agriculture.py's.
+    config = (JAVA_ROOT / "config" / "JugcraftConfig.java").read_text(encoding="utf-8")
+    if f'"halloween.harvest_moon", "{moon["day"]}"' not in config:
+        err(f"JugcraftConfig's halloween.harvest_moon default differs from tools/agriculture.py ({moon['day']})")
+    month, day = (int(v) for v in moon["day"].split("-"))
+    if f"DEFAULT_HARVEST_MOON = MonthDay.of({month}, {day})" not in java.get("HalloweenSeason", ""):
+        err("HalloweenSeason.DEFAULT_HARVEST_MOON differs from tools/agriculture.py")
+
+    # The Horseman drops tools/agriculture.py's loot, and only to a player's kill.
+    table = load(DATA / MOD / "loot_table" / f"{horseman['table']}.json") or {}
+    drops = []
+    for pool in table.get("pools", []):
+        if pool.get("condition", {}).get("type") != "minecraft:killed_by_player":
+            err(f"{horseman['table']}: every pool needs a player's kill")
+        for entry in pool.get("entries", []):
+            modifier = entry.get("modifier", {})
+            count = modifier.get("count", 1) if modifier.get("type") == "minecraft:set_count" else 1
+            low, high = (count["min"], count["max"]) if isinstance(count, dict) else (count, count)
+            drops.append((entry.get("name"), [low, high]))
+    if drops != [(item, list(counts)) for item, counts in horseman["loot"]]:
+        err(f"{horseman['table']}: drops {drops} differ from tools/agriculture.py {horseman['loot']}")
+    # Every way a summoning can fail has a message for the player.
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    results = re.search(r"enum Result \{([A-Z_,\s]+)\}", java.get("HorsemanSummoning", ""))
+    for result in (re.findall(r"[A-Z_]+", results.group(1)) if results else []):
+        if result != "SUMMONED" and f"message.jugcraft.horseman.{result.lower()}" not in lang:
+            err(f"HorsemanSummoning.Result.{result} has no message.jugcraft.horseman.{result.lower()} text")
+    if not results:
+        err("HorsemanSummoning.Result not found")
+    registration = re.search(r'HEADLESS_HORSEMAN = entity\("([a-z_]+)"[^;]*;', main)
+    if not registration or f"entities/{registration.group(1)}" != horseman["table"] or "noLootTable" in registration.group(0):
+        err(f"The Headless Horseman must be registered with his loot table {horseman['table']}")
+
+def check_decor(java):
+    """The first decorations batch: Java matches tools/agriculture.py, every block state has a model, every result has
+    its message, and the portraits' eyes sit inside their frames where the textures paint them."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    def numbers(source, name):
+        match = re.search(rf"\b{name} = \{{([\d, ]+)\}};", java.get(source, ""))
+        return [int(v) for v in match.group(1).split(",")] if match else None
+
+    lights, bowl, coffin, portrait, fog = ag.STRING_LIGHTS, ag.CANDY_BOWL, ag.COFFIN, ag.HAUNTED_PORTRAIT, ag.FOG_MACHINE
+    expected = {("StringLightHookBlockEntity", "MAX_LENGTH"): lights["max_length"], ("StringLightHookBlockEntity", "USE"): lights["use"],
+                ("StringLightHookBlockEntity", "CAPACITY"): lights["capacity"], ("StringLightHookBlockEntity", "INPUT"): lights["input"],
+                ("StringLightHookBlockEntity", "CHECK_TICKS"): lights["check_ticks"], ("StringLightHookBlock", "LIGHT"): lights["light"],
+                ("CandyBowlBlockEntity", "CAPACITY"): bowl["capacity"], ("CandyBowlBlockEntity", "VISITORS"): bowl["visitors"],
+                ("CoffinBlockEntity", "SLOTS"): coffin["slots"], ("FogMachineBlockEntity", "USE"): fog["use"],
+                ("FogMachineBlockEntity", "CAPACITY"): fog["capacity"], ("FogMachineBlockEntity", "INPUT"): fog["input"],
+                ("FogMachineBlockEntity", "PARTICLES_PER_TICK"): fog["particles_per_tick"], ("FogMachineBlockEntity", "BUDGET"): fog["budget"],
+                ("FogMachineBlockEntity", "VIEW"): fog["view"]}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    if numbers("CandyBowlBlockEntity", "FILL") != bowl["fill"] or numbers("FogMachineBlockEntity", "RADII") != fog["radii"]:
+        err("CandyBowlBlockEntity.FILL or FogMachineBlockEntity.RADII differs from tools/agriculture.py")
+    if fog["particles_per_tick"] > fog["budget"] or 2 + len(fog["radii"]) - 1 > fog["particles_per_tick"]:
+        err("The fog machine's per-machine puffs must fit its per-tick budget")
+
+    # The portraits: Java's eyes are the table's, inside the frame, and the textures paint a white where each eye is.
+    found = {name: [tuple(int(v) for v in eye.split(",")) for eye in re.findall(r"new int\[\] \{([\d, ]+)\}", eyes)]
+             for name, eyes in re.findall(r'[A-Z]+\("([a-z]+)", List\.of\(([^;]*?)\)\)', java.get("HauntedPortraitBlock", ""))}
+    if found != {name: [tuple(e) for e in eyes] for name, eyes in portrait["portraits"].items()}:
+        err(f"HauntedPortraitBlock.Portrait eyes {found} differ from tools/agriculture.py")
+    for name, eyes in portrait["portraits"].items():
+        image = ASSETS / "textures" / "block" / f"{portrait['block']}_{name}.png"
+        pixels = Image.open(image).convert("RGBA") if image.exists() else None
+        for x, y, w, h in eyes:
+            if x < 1 or y < 1 or x + w > 15 or y + h > 15:
+                err(f"{name}: an eye at {(x, y, w, h)} runs into the frame")
+            elif pixels is not None and len({pixels.getpixel((x + i, y + j)) for i in range(w) for j in range(h)}) != 1:
+                err(f"{name}: the eye at {(x, y, w, h)} is not one painted white")
+
+    # Every combination of each block's state properties has a model.
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    wanted = {
+        lights["hook"]: {f"face={a},facing={f},lit={l}" for a in ("floor", "wall", "ceiling") for f in horizontal for l in ("false", "true")},
+        bowl["block"]: {f"facing={f},fill={n}" for f in horizontal for n in range(4)},
+        coffin["block"]: {f"facing={f},open={o},part={p}" for f in horizontal for o in ("false", "true") for p in ("head", "foot")},
+        portrait["block"]: {f"facing={f},portrait={n}" for f in horizontal for n in portrait["portraits"]},
+        fog["block"]: {f"facing={f},running={r}" for f in horizontal for r in ("false", "true")},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+
+    # Every outcome a player can be told about has its text.
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for source, enum, prefix in (("StringLightsItem", "Result", "message.jugcraft.string_lights."), ("CandyBowlBlockEntity", "Taken", "message.jugcraft.candy_bowl.")):
+        values = re.search(rf"enum {enum} \{{([A-Z_,\s]+)\}}", java.get(source, ""))
+        for value in re.findall(r"[A-Z_]+", values.group(1)) if values else []:
+            if prefix + value.lower() not in lang:
+                err(f"{source}.{enum}.{value} has no {prefix}{value.lower()} text")
+        if not values:
+            err(f"{source}.{enum} not found")
+    for name in portrait["portraits"]:
+        if f"message.jugcraft.haunted_portrait.{name}" not in lang:
+            err(f"The {name} portrait has no name")
+
+def check_decor2(java):
+    """The second decorations batch: Java matches tools/agriculture.py (lights, the floating candles' places, the strand
+    kinds), every block state has a model, the bag's walls have a face cut through them and its inside none (so the
+    face shines with the candlelit far wall), and the soul-lit carving icon uses the client's soul colours."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    bag, candle, sconce, soul, bunting = ag.LUMINARIA, ag.FLOATING_CANDLE, ag.SCONCE, ag.SOUL_CARVING, ag.BAT_BUNTING
+    expected = {("LuminariaBlock", "LIGHT"): bag["light"], ("FloatingCandleBlock", "MAX"): candle["max"],
+                ("FloatingCandleBlock", "LIGHT_PER_CANDLE"): candle["light_per_candle"], ("FloatingCandleBlock", "BOB"): candle["bob"],
+                ("FloatingCandleBlock", "BOB_TICKS"): candle["bob_ticks"], ("SkeletonHandSconceBlock", "LIGHT"): sconce["light"],
+                ("CarvedPumpkinBlock", "SOUL_LIGHT"): soul["light"]}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    source = java.get("FloatingCandleBlock", "")
+    table = re.search(r"CANDLE = \{(.*?)\};", source, re.S)
+    places = [[tuple(float(v.rstrip("F")) for v in spot.split(",")) for spot in re.findall(r"\{([\d., F]+)\}", group)]
+              for group in re.findall(r"\{(\{[^{}]*\}(?:, \{[^{}]*\})*)\}", table.group(1))] if table else []
+    if places != [[tuple(float(v) for v in spot) for spot in group] for group in candle["candles"]]:
+        err(f"FloatingCandleBlock.CANDLE {places} differs from tools/agriculture.py")
+    heights = re.search(r"HEIGHT = \{([\d., F]+)\};", source)
+    if not heights or [float(v.strip().rstrip("F")) for v in heights.group(1).split(",")] != [float(h) for h in candle["heights"]]:
+        err("FloatingCandleBlock.HEIGHT differs from tools/agriculture.py")
+    if any(len(group) != n + 1 for n, group in enumerate(candle["candles"])) or len(candle["heights"]) != candle["max"]:
+        err("FLOATING_CANDLE needs one place per candle and a height for each place")
+    if candle["max"] * candle["light_per_candle"] > 15:
+        err("Floating candles would give more than light 15")
+    strands = re.findall(r'[A-Z]+\("([a-z]+)", "([a-z_]+)"\)', java.get("StringLightHookBlockEntity", ""))
+    if dict(strands) != {"lights": ag.STRING_LIGHTS["strand"], "bunting": bunting["item"]}:
+        err(f"StringLightHookBlockEntity.Strand {strands} differs from the strand items in tools/agriculture.py")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    wanted = {
+        bag["block"]: {f"color={c},lit={l}" for c in ag.DYE_COLORS for l in booleans},
+        candle["block"]: {f"candles={n},lit={l}" for n in range(1, candle["max"] + 1) for l in booleans},
+        sconce["block"]: {f"facing={f},lit={l}" for f in horizontal for l in booleans},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+
+    # The bag's walls are cut with a face where the model shows them (x 4-11, y 6-15); the inside is whole.
+    for color in ag.DYE_COLORS:
+        for suffix in ("", "_lit"):
+            image = ASSETS / "textures" / "block" / f"luminaria_{color}{suffix}.png"
+            if not image.exists():
+                err(f"Missing texture {image.name}")
+                continue
+            pixels = Image.open(image).convert("RGBA")
+            if not any(pixels.getpixel((x, y))[3] == 0 for x in range(4, 12) for y in range(6, 16)):
+                err(f"{image.name}: no face cut through the bag")
+    for name in ("luminaria_inside", "luminaria_inside_lit"):
+        image = ASSETS / "textures" / "block" / f"{name}.png"
+        if not image.exists() or Image.open(image).convert("RGBA").getextrema()[3][0] < 255:
+            err(f"{name}.png: missing, or see-through (the inside of the bag must be whole)")
+
+    # The soul-lit icon and the client's soul colours agree.
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "CarvingTextures.java")
+    colors = dict(re.findall(r"int (HOLE_SOUL|HOLE_WALL_SOUL) = 0xFF([0-9A-Fa-f]{6});", client.read_text(encoding="utf-8")))
+    icon = ASSETS / "textures" / "item" / "hand_carved_pumpkin_soul.png"
+    if icon.exists():
+        pixels = Image.open(icon).convert("RGBA")
+        used = {"%02X%02X%02X" % pixels.getpixel((x, y))[:3] for x in range(16) for y in range(16) if pixels.getpixel((x, y))[3]}
+        if not {c.upper() for c in colors.values()} <= used or len(colors) != 2:
+            err("The soul-lit carved pumpkin icon should use CarvingTextures' HOLE_SOUL and HOLE_WALL_SOUL")
+    else:
+        err("Missing texture hand_carved_pumpkin_soul.png")
+
+
+def check_decor3(java):
+    """The graveyard batch: the scare props' timings match tools/agriculture.py, every block state of the fence, gate,
+    pillar, door, mound, angel and pop-up skeleton has a model, and the fence, gate and door are in vanilla's tags."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("ScarePropBlockEntity", "PERIOD"): ag.SCARE_PERIOD}
+    for source, info in (("GraveMoundBlock", ag.GRAVE_MOUND), ("PopUpSkeletonBlock", ag.POP_UP_SKELETON)):
+        expected.update({(source, "REACH"): info["reach"], (source, "UP_TICKS"): info["up_ticks"],
+                         (source, "COOLDOWN_TICKS"): info["cooldown_ticks"]})
+        if f"implements ScareProp" not in java.get(source, ""):
+            err(f"{source} is not a ScareProp")
+        if info["up_ticks"] < ag.SCARE_PERIOD:
+            err(f"{source}: it must stay up at least one look ({ag.SCARE_PERIOD} ticks)")
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    fence, gate, crypt = ag.CEMETERY_FENCE["fence"], ag.CEMETERY_FENCE["gate"], ag.CRYPT
+    wanted = {
+        gate: {f"facing={f},in_wall={w},open={o}" for f in horizontal for w in booleans for o in booleans},
+        crypt["pillar"]: {"axis=x", "axis=y", "axis=z"},
+        crypt["door"]: {f"facing={f},half={h},hinge={g},open={o}" for f in horizontal for h in ("lower", "upper") for g in ("left", "right")
+                        for o in booleans},
+        ag.GRAVE_MOUND["block"]: {f"facing={f},raised={r}" for f in horizontal for r in booleans},
+        ag.POP_UP_SKELETON["block"]: {f"facing={f},raised={r}" for f in horizontal for r in booleans},
+        ag.MOURNING_ANGEL["block"]: {f"facing={f},half={h}" for f in horizontal for h in ("lower", "upper")},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    parts = (load(ASSETS / "blockstates" / f"{fence}.json") or {}).get("multipart", [])
+    if sorted(next(iter(p.get("when", {"post": 1}))) for p in parts) != sorted(["post", "north", "east", "south", "west"]):
+        err(f"{fence}: the multipart needs the post and a side for each direction")
+    for tag, entry in (("fences", fence), ("fence_gates", gate), ("doors", crypt["door"])):
+        for registry in ("block", "item"):
+            values = (load(RES / "data" / "minecraft" / "tags" / registry / f"{tag}.json") or {}).get("values", [])
+            if f"{MOD}:{entry}" not in values:
+                err(f"{entry} is missing from the {registry} tag minecraft:{tag}")
+
+
+def check_decor4(java):
+    """The witch's cottage: Java matches tools/agriculture.py (lights, timings, the brews, arrangements, fortunes and
+    spreads), every block state has a model, every fortune and spell has its text, and every brew its item tag."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    cauldron, shelf, ball, grimoire, broom = ag.CAULDRON, ag.APOTHECARY_SHELF, ag.CRYSTAL_BALL, ag.GRIMOIRE, ag.BROOM
+    expected = {("BubblingCauldronBlock", "BREW_LIGHT"): cauldron["light"], ("ApothecaryShelfBlock", "ARRANGEMENTS"): shelf["arrangements"],
+                ("CrystalBallBlock", "LIGHT"): ball["light"], ("CrystalBallBlock", "GAZING_LIGHT"): ball["gazing_light"],
+                ("CrystalBallBlock", "FORTUNES"): len(ball["fortunes"]), ("CrystalBallBlock", "GAZE_TICKS"): ball["gaze_ticks"],
+                ("GrimoireStandBlock", "LIGHT"): grimoire["light"]}
+    for (source, name), value in expected.items():
+        if number(source, name) != value:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+
+    def enum(source, name):
+        match = re.search(rf"enum {name} implements StringRepresentable \{{\s*([A-Z_, ]+);", java.get(source, ""))
+        return [v.strip().lower() for v in match.group(1).split(",")] if match else None
+    if enum("BubblingCauldronBlock", "Brew") != ["empty", "water"] + list(cauldron["brews"]):
+        err(f"BubblingCauldronBlock.Brew {enum('BubblingCauldronBlock', 'Brew')} differs from CAULDRON's brews")
+    if enum("GrimoireStandBlock", "Spread") != list(grimoire["spreads"]):
+        err(f"GrimoireStandBlock.Spread {enum('GrimoireStandBlock', 'Spread')} differs from GRIMOIRE's spreads")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    wanted = {
+        cauldron["block"]: {f"contents={c}" for c in ["empty", "water"] + list(cauldron["brews"])},
+        shelf["block"]: {f"arrangement={n},facing={f}" for f in horizontal for n in range(shelf["arrangements"])},
+        ball["block"]: {"gazing=false", "gazing=true"},
+        grimoire["block"]: {f"facing={f},page={p}" for f in horizontal for p in grimoire["spreads"]},
+        broom["block"]: {f"facing={f}" for f in horizontal},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for n in range(len(ball["fortunes"])):
+        if f"message.{MOD}.crystal_ball.fortune.{n}" not in lang:
+            err(f"Crystal ball fortune {n} has no text")
+    for spread in grimoire["spreads"]:
+        if f"message.{MOD}.grimoire.{spread}" not in lang:
+            err(f"The {spread} spread has no name")
+    for colour, items in cauldron["brews"].items():
+        values = (load(DATA / MOD / "tags" / "item" / "brew" / f"{colour}.json") or {}).get("values", [])
+        if sorted(values) != sorted(items):
+            err(f"The item tag {MOD}:brew/{colour} differs from CAULDRON's brews")
+
+
+def check_decor5(java):
+    """The harvest party: Java matches tools/agriculture.py (the tub's apples, odds and splash, the crate's capacity
+    and tag, the bale's seat height and softening, the wreath's flowers, the piles' layers, softening and colours), every
+    block state has a model, and the tub's messages have their text."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    tub, crate, bale, wreath, piles = ag.BOBBING_TUB, ag.PUMPKIN_CRATE, ag.HAY_BALE_SEAT, ag.AUTUMN_WREATH, ag.LEAF_PILES
+    expected = {("BobbingTubBlock", "MAX_APPLES"): tub["max_apples"], ("BobbingTubBlock", "CHANCE"): tub["chance"],
+                ("BobbingTubBlock", "SPLASH_TICKS"): tub["splash_ticks"], ("PumpkinCrateBlockEntity", "CAPACITY"): crate["capacity"],
+                ("HayBaleSeatBlock", "FALL_SOFTENING"): bale["fall_softening"], ("LeafPileBlock", "MAX_LAYERS"): piles["max_layers"],
+                ("LeafPileBlock", "LAYER_PIXELS"): piles["layer_pixels"], ("LeafPileBlock", "SOFTENING_PER_LAYER"): piles["softening_per_layer"],
+                ("LeafPileBlock", "SCATTER_CHANCE"): piles["scatter_chance"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    height = re.search(r"HEIGHT = ([\d.]+) / ([\d.]+);", java.get("HayBaleSeatBlock", ""))
+    if not height or abs(float(height.group(1)) / float(height.group(2)) - bale["height"]) > 1e-9:
+        err(f"HayBaleSeatBlock.HEIGHT differs from HAY_BALE_SEAT's height ({bale['height']})")
+    if f'Jugcraft.id("{crate["produce_tag"].split(":")[1]}")' not in java.get("PumpkinCrateBlock", ""):
+        err(f"PumpkinCrateBlock.PRODUCE is not {crate['produce_tag']}")
+    mums = re.search(r"enum Mums implements StringRepresentable \{\s*([A-Z_, ]+);", java.get("AutumnWreathBlock", ""))
+    if not mums or [v.strip().lower() for v in mums.group(1).split(",")] != wreath["flowers"]:
+        err("AutumnWreathBlock.Mums differs from AUTUMN_WREATH's flowers")
+    if f"Mums.{wreath['default'].upper()}" not in java.get("AutumnWreathBlock", ""):
+        err("AutumnWreathBlock's default flowers differ from AUTUMN_WREATH's default")
+    colours = re.search(r"LEAF_PILE_COLOURS = List\.of\(([^)]*)\)", java.get("JugcraftAgriculture", ""))
+    if not colours or re.findall(r'"(\w+)"', colours.group(1)) != list(piles["colours"]):
+        err("JugcraftAgriculture.LEAF_PILE_COLOURS differs from LEAF_PILES' colours")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    wanted = {
+        tub["block"]: {f"apples={n},splashing={s}" for n in range(tub["max_apples"] + 1) for s in ("false", "true")},
+        crate["block"]: {f"facing={f}" for f in horizontal},
+        bale["block"]: {f"facing={f}" for f in horizontal},
+        wreath["block"]: {f"facing={f},flowers={c}" for f in horizontal for c in wreath["flowers"]},
+        **{pile: {f"layers={n}" for n in range(1, piles["max_layers"] + 1)} for pile in ag.leaf_piles()},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in tub["messages"]:
+        if f"message.{MOD}.{tub['block']}.{key}" not in lang:
+            err(f"The tub's {key} message has no text")
+    values = (load(DATA / MOD / "tags" / "item" / f"{crate['produce_tag'].split(':')[1]}.json") or {}).get("values", [])
+    if sorted(values) != sorted(crate["produce"]):
+        err(f"The item tag {crate['produce_tag']} differs from PUMPKIN_CRATE's produce")
+
+def check_decor6(java):
+    """The haunted house and yard: Java matches tools/agriculture.py (the chair's seat and rocking, the eyes' distance
+    and blinking, the window's designs and light, the music box's tune length and every note in range, the spider's
+    drop and sway), every block state has a model, and the quads, glowing papers and eye sprite the client draws exist."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    chair, eyes, window, box_, spider = ag.ROCKING_CHAIR, ag.LURKING_EYES, ag.SILHOUETTE_WINDOW, ag.MUSIC_BOX, ag.GIANT_FAKE_SPIDER
+    expected = {("RockingChairBlock", "HAUNTED_ROCK"): chair["haunted_rock"], ("RockingChairBlock", "SITTER_ROCK"): chair["sitter_rock"],
+                ("RockingChairBlock", "ROCK_PERIOD"): chair["rock_period"], ("LurkingEyesBlock", "HIDE_DISTANCE"): eyes["hide_distance"],
+                ("LurkingEyesBlock", "BLINK_PERIOD"): eyes["blink_period"], ("LurkingEyesBlock", "BLINK_TICKS"): eyes["blink_ticks"],
+                ("SilhouetteWindowBlock", "GLOW_LIGHT"): window["glow_light"], ("MusicBoxBlockEntity", "TICKS_PER_BEAT"): box_["ticks_per_beat"],
+                ("MusicBoxBlockEntity", "BEATS"): box_["beats"], ("GiantFakeSpiderBlock", "MAX_DROP"): spider["max_drop"],
+                ("GiantFakeSpiderBlock", "SWAY_PERIOD"): spider["sway_period"], ("GiantFakeSpiderBlock", "SWAY_DEGREES"): spider["sway_degrees"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    seat = re.search(r"SEAT_HEIGHT = ([\d.]+) / ([\d.]+);", java.get("RockingChairBlock", ""))
+    if not seat or abs(float(seat.group(1)) / float(seat.group(2)) - chair["seat_height"]) > 1e-9:
+        err(f"RockingChairBlock.SEAT_HEIGHT differs from ROCKING_CHAIR's seat_height ({chair['seat_height']})")
+    designs = re.search(r"enum Design implements StringRepresentable \{\s*([A-Z_, ]+);", java.get("SilhouetteWindowBlock", ""))
+    if not designs or [v.strip().lower() for v in designs.group(1).split(",")] != window["designs"]:
+        err("SilhouetteWindowBlock.Design differs from SILHOUETTE_WINDOW's designs")
+    tune = re.search(r"TUNE = \{(.*?)\};", java.get("MusicBoxBlockEntity", ""), re.S)
+    notes = re.findall(r"\{(\d+), (\d+), (BELL|HARP)\}", tune.group(1)) if tune else []
+    if not notes:
+        err("MusicBoxBlockEntity.TUNE has no notes")
+    for beat, note, _ in notes:
+        if not 0 <= int(beat) < box_["beats"] or not 0 <= int(note) <= 24:
+            err(f"Music box note {{{beat}, {note}}} is outside the tune or a note block's range")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    wanted = {
+        chair["block"]: {f"facing={f}" for f in horizontal},
+        eyes["block"]: {f"facing={f}" for f in horizontal + ("up", "down")},
+        window["block"]: {f"design={d},facing={f}" for f in horizontal for d in window["designs"]},
+        box_["block"]: {f"facing={f},open={o},powered={p}" for f in horizontal for o in ("false", "true") for p in ("false", "true")},
+        spider["block"]: {f"drop={n}" for n in range(1, spider["max_drop"] + 1)},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    quads = load(ASSETS / "decor_quads.json") or {}
+    for name in ("rocking_chair", "giant_fake_spider"):
+        if not quads.get(name):
+            err(f"decor_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"decor_quads.json: {name} uses a missing texture {quad['texture']}")
+                break
+    for texture in [f"silhouette_window_{d}_lit" for d in window["designs"]] + ["lurking_eyes"]:
+        if not (ASSETS / "textures" / "entity" / f"{texture}.png").exists():
+            err(f"Missing entity texture {texture}")
+
+def check_decor7(java):
+    """The haunted house inside: Java matches tools/agriculture.py (the chandelier's candles, gusts and sway, the
+    organ's size, tune length and phantom chance, the suit's watching, the sheet's tag and breathing, the mirror's face,
+    the curtains' drape and sway, the doll's glances), every note of the organ's tune is in range, every block state
+    has a model, and the quads and textures the client draws exist."""
+    import decor7_data
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    chandelier, organ, armor, sheet = ag.HAUNTED_CHANDELIER, ag.PIPE_ORGAN, ag.SUIT_OF_ARMOR, ag.DUST_SHEET
+    mirror, curtains, doll = ag.SPIRIT_MIRROR, ag.TATTERED_CURTAINS, ag.CREEPY_DOLL
+    expected = {("HauntedChandelierBlock", "CANDLES"): chandelier["candles"], ("HauntedChandelierBlock", "GUST_CHANCE"): chandelier["gust_chance"],
+                ("HauntedChandelierBlock", "RELIGHT_TICKS"): chandelier["relight_ticks"],
+                ("HauntedChandelierBlock", "SWAY_DEGREES"): chandelier["sway_degrees"], ("HauntedChandelierBlock", "SWAY_PERIOD"): chandelier["sway_period"],
+                ("HauntedChandelierBlock", "RING_RADIUS"): decor7_data.RING,
+                ("PipeOrganBlock", "WIDTH"): organ["width"], ("PipeOrganBlock", "HEIGHT"): organ["height"],
+                ("PipeOrganBlock", "PHANTOM_CHANCE"): organ["phantom_chance"], ("PipeOrganBlockEntity", "TUNE_TICKS"): organ["tune_ticks"],
+                ("SuitOfArmorBlock", "WATCH_RANGE"): armor["watch_range"], ("SuitOfArmorBlock", "TURN_SPEED"): armor["turn_speed"],
+                ("SuitOfArmorBlock", "MAX_TURN"): armor["max_turn"], ("DustSheetBlock", "BREATHE_CHANCE"): sheet["breathe_chance"],
+                ("SpiritMirrorBlock", "PERIOD"): mirror["period"], ("SpiritMirrorBlock", "VISIBLE"): mirror["visible"],
+                ("SpiritMirrorBlock", "FADE"): mirror["fade"], ("SpiritMirrorBlock", "RANGE"): mirror["range"],
+                ("TatteredCurtainsBlock", "MAX_DROP"): curtains["max_drop"], ("TatteredCurtainsBlock", "SWAY"): curtains["sway"],
+                ("TatteredCurtainsBlock", "NIGHT_SWAY"): curtains["night_sway"], ("TatteredCurtainsBlock", "SWAY_PERIOD"): curtains["sway_period"],
+                ("CreepyDollBlock", "UNSEEN_TICKS"): doll["unseen_ticks"], ("CreepyDollBlock", "ELSEWHERE_CHANCE"): doll["elsewhere_chance"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    tune = re.search(r"TUNE = \{(.*?)\};", java.get("PipeOrganBlockEntity", ""), re.S)
+    notes = re.findall(r"\{(\d+), (\d+), (FLUTE|HARP|BASS)\}", tune.group(1)) if tune else []
+    if not notes:
+        err("PipeOrganBlockEntity.TUNE has no notes")
+    for tick, note, _ in notes:
+        if not 0 <= int(tick) < organ["tune_ticks"] or not 0 <= int(note) <= 24:
+            err(f"Organ note {{{tick}, {note}}} is outside the tune or a note block's range")
+    if f'Jugcraft.id("{sheet["tag"].split(":")[1]}")' not in java.get("JugcraftAgriculture", ""):
+        err(f"JugcraftAgriculture.DUST_SHEET_COVERABLE is not {sheet['tag']}")
+    values = (load(DATA / MOD / "tags" / "block" / f"{sheet['tag'].split(':')[1]}.json") or {}).get("values", [])
+    if sorted(values) != sorted(sheet["coverable"]):
+        err(f"The block tag {sheet['tag']} differs from DUST_SHEET's coverable blocks")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    wanted = {
+        chandelier["block"]: {f"burning={n},lit={b}" for n in range(chandelier["candles"] + 1) for b in booleans},
+        organ["block"]: {f"facing={f},part={p},playing={a},powered={b}" for f in horizontal for p in range(organ["width"] * organ["height"])
+                         for a in booleans for b in booleans},
+        armor["block"]: {f"facing={f},half={h}" for f in horizontal for h in ("lower", "upper")},
+        sheet["block"]: {""},
+        mirror["block"]: {f"facing={f}" for f in horizontal},
+        curtains["block"]: {f"facing={f},open={o},part={p}" for f in horizontal for o in booleans for p in ("single", "top", "middle", "bottom")},
+        doll["block"]: {f"facing={f}" for f in horizontal},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    quads = load(ASSETS / "decor7_quads.json") or {}
+    for name in ("haunted_chandelier", "suit_of_armor_helmet", "creepy_doll_head"):
+        if not quads.get(name):
+            err(f"decor7_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"decor7_quads.json: {name} uses a missing texture {quad['texture']}")
+                break
+    for kind, texture in (("entity", "haunted_chandelier_flame"), ("entity", "suit_of_armor_glow"), ("entity", "dust_sheet_side"),
+                          ("entity", "spirit_mirror_face"), ("entity", "tattered_curtains"), ("entity", "tattered_curtains_hem"),
+                          ("block", "phantom_pipe_organ_ivory"), ("block", "phantom_pipe_organ_ebony"), ("block", "tattered_curtains_rod"),
+                          ("block", "dust_sheet")):
+        if not (ASSETS / "textures" / kind / f"{texture}.png").exists():
+            err(f"Missing {kind} texture {texture}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in ("day", "night"):
+        if f"message.{MOD}.{mirror['block']}.{key}" not in lang:
+            err(f"The spirit mirror's {key} message has no text")
+
+
+def check_decor8(java):
+    """The mad scientist and monsters: Java matches tools/agriculture.py (the coil's power, range and arcs, the table's
+    sitting and twitching, the jar's specimens, light and bob, the sarcophagus's timing and swing, the raven's watching
+    and ruffling, the cat's reach, hiss and swish), every block state has a model, and the quads and textures the client
+    draws exist."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    coil, table, jar, sarcophagus, raven, cat = ag.TESLA_COIL, ag.LAB_TABLE, ag.SPECIMEN_JAR, ag.SARCOPHAGUS, ag.RAVEN, ag.BLACK_CAT
+    expected = {("TeslaCoilBlockEntity", "USE"): coil["use"], ("TeslaCoilBlockEntity", "CAPACITY"): coil["capacity"],
+                ("TeslaCoilBlockEntity", "INPUT"): coil["input"], ("TeslaCoilBlockEntity", "RANGE"): coil["range"],
+                ("TeslaCoilBlockEntity", "ARC_MIN"): coil["arc_min"], ("TeslaCoilBlockEntity", "ARC_SPREAD"): coil["arc_spread"],
+                ("TeslaCoilBlockEntity", "ARC_TICKS"): coil["arc_ticks"], ("TeslaCoilBlock", "LIGHT"): coil["light"],
+                ("LabTableBlock", "SIT_DEGREES"): table["sit_degrees"], ("LabTableBlock", "SIT_SPEED"): table["sit_speed"],
+                ("LabTableBlock", "TWITCH_PERIOD"): table["twitch_period"], ("LabTableBlock", "TWITCH_TICKS"): table["twitch_ticks"],
+                ("SpecimenJarBlock", "LIGHT"): jar["light"], ("SpecimenJarBlock", "BOB"): jar["bob"], ("SpecimenJarBlock", "BOB_TICKS"): jar["bob_ticks"],
+                ("MummySarcophagusBlock", "OPEN_TICKS"): sarcophagus["open_ticks"], ("MummySarcophagusBlock", "LID_DEGREES"): sarcophagus["lid_degrees"],
+                ("MummySarcophagusBlock", "LURCH"): sarcophagus["lurch"], ("RavenPerchBlock", "WATCH_RANGE"): raven["watch_range"],
+                ("RavenPerchBlock", "MAX_TURN"): raven["max_turn"], ("RavenPerchBlock", "RUFFLE_PERIOD"): raven["ruffle_period"],
+                ("RavenPerchBlock", "RUFFLE_TICKS"): raven["ruffle_ticks"], ("BlackCatBlock", "REACH"): cat["reach"],
+                ("BlackCatBlock", "HISS_TICKS"): cat["hiss_ticks"], ("BlackCatBlock", "COOLDOWN_TICKS"): cat["cooldown_ticks"],
+                ("BlackCatBlock", "SWISH_PERIOD"): cat["swish_period"], ("BlackCatBlock", "SWISH_DEGREES"): cat["swish_degrees"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    specimens = re.search(r"enum Specimen implements StringRepresentable \{\s*([A-Z_, ]+);", java.get("SpecimenJarBlock", ""))
+    if not specimens or [v.strip().lower() for v in specimens.group(1).split(",")] != jar["specimens"]:
+        err("SpecimenJarBlock.Specimen differs from SPECIMEN_JAR's specimens")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    wanted = {
+        coil["block"]: {f"active={a},enabled={e},facing={f},half={h}" for a in booleans for e in booleans for f in horizontal
+                        for h in ("lower", "upper")},
+        table["block"]: {f"facing={f},part={p},powered={b}" for f in horizontal for p in ("foot", "head") for b in booleans},
+        jar["block"]: {f"specimen={s}" for s in jar["specimens"]},
+        sarcophagus["block"]: {f"facing={f},half={h},open={o},powered={p}" for f in horizontal for h in ("lower", "upper") for o in booleans
+                               for p in booleans},
+        raven["block"]: {f"facing={f}" for f in horizontal},
+        cat["block"]: {f"facing={f},hissing={h}" for f in horizontal for h in booleans},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    quads = load(ASSETS / "decor8_quads.json") or {}
+    names = (["lab_table_legs", "lab_table_torso", "mummy_sarcophagus_lid", "mummy_sarcophagus_mummy", "mummy_sarcophagus_arms", "raven_body",
+              "raven_head", "raven_left_wing", "raven_right_wing", "black_cat_tail", "black_cat_tail_up"]
+             + [f"specimen_{s}" for s in jar["specimens"]])
+    for name in names:
+        if not quads.get(name):
+            err(f"decor8_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"decor8_quads.json: {name} uses a missing texture {quad['texture']}")
+                break
+    for texture in ("tesla_coil_arc", "specimen_jar_bubble", "black_cat_eyes"):
+        if not (ASSETS / "textures" / "entity" / f"{texture}.png").exists():
+            err(f"Missing entity texture {texture}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in [f"tesla_coil.{k}" for k in ("on", "off")] + [f"specimen_jar.{s}" for s in jar["specimens"]]:
+        if f"message.{MOD}.{key}" not in lang:
+            err(f"Message {key} has no text")
+
+
+def check_decor9(java):
+    """The yard and porch: Java matches tools/agriculture.py (the inflatables' filling, light and wobble, the witch's
+    reach, cackle, rest and stirring, the hands' grab and rest, the chimes' swing and clacking, the vanes' turning, the
+    archway's and tree's sizes and light), the designs, poses and words agree, every block state has a model, the
+    block models turn only by 22.5 or 45 degrees, and the quads and textures the client draws exist."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    inf, witch, hands, chimes, vanes = ag.INFLATABLES, ag.PORCH_WITCH, ag.GRASPING_HANDS, ag.WIND_CHIMES, ag.WEATHERVANES
+    arch, tree = ag.HAUNTED_ARCHWAY, ag.DEAD_TREE
+    expected = {("InflatableBlock", "INFLATE_TICKS"): inf["inflate_ticks"], ("InflatableBlock", "DEFLATE_TICKS"): inf["deflate_ticks"],
+                ("InflatableBlock", "LIGHT"): inf["light"], ("InflatableBlock", "WOBBLE_DEGREES"): inf["wobble_degrees"],
+                ("InflatableBlock", "WOBBLE_PERIOD"): inf["wobble_period"],
+                ("PorchWitchBlock", "REACH"): witch["reach"], ("PorchWitchBlock", "CACKLE_TICKS"): witch["cackle_ticks"],
+                ("PorchWitchBlock", "COOLDOWN_TICKS"): witch["cooldown_ticks"], ("PorchWitchBlock", "STIR_PERIOD"): witch["stir_period"],
+                ("PorchWitchBlock", "FAST_STIR_PERIOD"): witch["fast_stir_period"], ("PorchWitchBlock", "WATCH_RANGE"): witch["watch_range"],
+                ("GraspingHandsBlock", "SLOW_TICKS"): hands["slow_ticks"], ("GraspingHandsBlock", "SLOWNESS_LEVEL"): hands["slowness_level"],
+                ("GraspingHandsBlock", "GRAB_TICKS"): hands["grab_ticks"], ("GraspingHandsBlock", "REST_TICKS"): hands["rest_ticks"],
+                ("BoneWindChimesBlock", "BONES"): chimes["bones"], ("BoneWindChimesBlock", "CALM_SWING"): chimes["calm_swing"],
+                ("BoneWindChimesBlock", "RAIN_SWING"): chimes["rain_swing"], ("BoneWindChimesBlock", "STORM_SWING"): chimes["storm_swing"],
+                ("BoneWindChimesBlock", "CALM_CHANCE"): chimes["calm_chance"], ("BoneWindChimesBlock", "RAIN_CHANCE"): chimes["rain_chance"],
+                ("BoneWindChimesBlock", "STORM_CHANCE"): chimes["storm_chance"], ("WeathervaneBlock", "TURN_SPEED"): vanes["turn_speed"],
+                ("HauntedArchwayBlock", "WIDTH"): arch["width"], ("HauntedArchwayBlock", "HEIGHT"): arch["height"],
+                ("HauntedArchwayBlock", "LIGHT"): arch["light"], ("DeadHollowTreeBlock", "HEIGHT"): tree["height"],
+                ("DeadHollowTreeBlock", "LIGHT"): tree["light"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    main = java.get("JugcraftAgriculture", "")
+    for name, designs in (("INFLATABLE_DESIGNS", inf["designs"]), ("WEATHERVANE_DESIGNS", vanes["designs"])):
+        match = re.search(rf"{name} = List\.of\(([^)]*)\);", main)
+        if not match or re.findall(r'"([a-z_]+)"', match.group(1)) != designs:
+            err(f"JugcraftAgriculture.{name} differs from tools/agriculture.py")
+    for source, enum, values in (("PoseableSkeletonBlock", "Pose", ag.POSEABLE_SKELETON["poses"]), ("SpookySignBlock", "Words", ag.SPOOKY_SIGN["words"]),
+                                 ("GraspingHandsBlock", "Phase", ["rest", "grab", "recover"])):
+        match = re.search(rf"enum {enum} implements StringRepresentable \{{\s*([A-Z_, ]+);", java.get(source, ""))
+        if not match or [v.strip().lower() for v in match.group(1).split(",")] != values:
+            err(f"{source}.{enum} differs from tools/agriculture.py")
+    if number("GravestoneBlockEntity", "MAX_LENGTH") != ag.SPOOKY_SIGN["max_length"]:
+        err("SPOOKY_SIGN's max_length differs from GravestoneBlockEntity.MAX_LENGTH")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    halves = ("lower", "upper")
+    wanted = {ag.PORCH_WITCH["block"]: {f"cackling={c},facing={f},half={h}" for c in booleans for f in horizontal for h in halves},
+              ag.GRASPING_HANDS["block"]: {f"facing={f},phase={p}" for f in horizontal for p in ("rest", "grab", "recover")},
+              ag.POSEABLE_SKELETON["block"]: {f"facing={f},half={h},pose={p}" for f in horizontal for h in halves for p in ag.POSEABLE_SKELETON["poses"]},
+              ag.WIND_CHIMES["block"]: {""},
+              ag.SPOOKY_SIGN["block"]: {f"facing={f},words={w}" for f in horizontal for w in ag.SPOOKY_SIGN["words"]},
+              arch["block"]: {f"facing={f},lit={l},part={p}" for f in horizontal for l in booleans for p in range(7)},
+              tree["block"]: {f"facing={f},lit={l},part={p}" for f in horizontal for l in booleans for p in range(tree["height"])}}
+    for design in inf["designs"]:
+        wanted[ag.inflatable(design)] = {f"facing={f},half={h},on={o},powered={p}" for f in horizontal for h in halves for o in booleans for p in booleans}
+    for design in vanes["designs"]:
+        wanted[ag.weathervane(design)] = {""}
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+        for variant in ((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})).values():
+            model = load(ASSETS / "models" / f"{variant['model'].split(':')[1]}.json") or {}
+            for element in model.get("elements", []):
+                angle = element.get("rotation", {}).get("angle", 0)
+                if angle not in (-45, -22.5, 0, 22.5, 45):
+                    err(f"{variant['model']}: a box turns by {angle} degrees; block models only turn by 22.5 or 45")
+    quads = load(ASSETS / "decor9_quads.json") or {}
+    names = ([f"inflatable_{d}" for d in inf["designs"]] + ["porch_witch_arm", "porch_witch_head", "wind_chime_bone", "wind_chime_skull"]
+             + [f"weathervane_{d}" for d in vanes["designs"]])
+    for name in names:
+        if not quads.get(name):
+            err(f"decor9_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"decor9_quads.json: {name} uses a missing texture {quad['texture']}")
+                break
+    if not (ASSETS / "textures" / "entity" / "porch_witch_eyes.png").exists():
+        err("Missing entity texture porch_witch_eyes")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in [f"spooky_sign.{w}" for w in ag.SPOOKY_SIGN["words"]] + ["spooky_sign.painted", "spooky_sign.unnamed_tag"]:
+        if f"message.{MOD}.{key}" not in lang:
+            err(f"Message {key} has no text")
+
+
+def check_decor10(java):
+    """Lighting and glow: Java matches tools/agriculture.py (the black light's light and range, the brazier's light and
+    flames, the lamp's light, turning and reach, the pumpkins' and hat's light, the hat's bob and turning), the glow
+    paint's designs agree, every block state has a model, and the textures and quads the client draws exist."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    light, paint, brazier, lamp, pumpkins, hat = ag.BLACK_LIGHT, ag.GLOW_PAINT, ag.BRAZIER, ag.SHADOW_LAMP, ag.MINI_PUMPKINS, ag.FLOATING_HAT
+    expected = {("BlackLightBlock", "LIGHT"): light["light"], ("BlackLightBlock", "RANGE"): light["range"],
+                ("WitchFireBrazierBlock", "LIGHT"): brazier["light"], ("ShadowPuppetLampBlock", "LIGHT"): lamp["light"],
+                ("ShadowPuppetLampBlock", "TURN_TICKS"): lamp["turn_ticks"], ("ShadowPuppetLampBlock", "RANGE"): lamp["range"],
+                ("MiniPumpkinStackBlock", "LIGHT"): pumpkins["light"], ("FloatingWitchHatBlock", "LIGHT"): hat["light"],
+                ("FloatingWitchHatBlock", "BOB"): hat["bob"], ("FloatingWitchHatBlock", "BOB_TICKS"): hat["bob_ticks"],
+                ("FloatingWitchHatBlock", "TURN_TICKS"): hat["turn_ticks"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    designs = re.search(r"enum Design implements StringRepresentable \{\s*([A-Z_, ]+);", java.get("GlowPaintBlock", ""))
+    if not designs or [v.strip().lower() for v in designs.group(1).split(",")] != paint["designs"]:
+        err("GlowPaintBlock.Design differs from GLOW_PAINT's designs")
+    flames = re.findall(r"\b([A-Z]+)\(0x[0-9A-F]+, DyeColor\.([A-Z_]+)\)", java.get("WitchFireBrazierBlock", ""))
+    if [(f.lower(), f"{d.lower()}_dye") for f, d in flames] != list(brazier["flames"].items()):
+        err("WitchFireBrazierBlock.Flame differs from BRAZIER's flames and dyes")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    wanted = {light["block"]: {f"facing={f},lit={l},powered={p}" for f in horizontal for l in booleans for p in booleans},
+              paint["block"]: {f"design={d},facing={f}" for d in paint["designs"] for f in horizontal + ("up", "down")},
+              brazier["block"]: {f"flame={c},lit={l}" for c in brazier["flames"] for l in booleans},
+              lamp["block"]: {f"lit={l}" for l in booleans},
+              pumpkins["block"]: {f"facing={f},lit={l}" for f in horizontal for l in booleans},
+              hat["block"]: {f"lit={l}" for l in booleans}}
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    entity = ASSETS / "textures" / "entity"
+    for texture in ([f"glow_paint_{d}_glow" for d in paint["designs"]] + ["witch_fire_flame"]
+                    + [f"shadow_puppet_lamp_{d}_shadow" for d in ("bat", "cat", "witch")]):
+        if not (entity / f"{texture}.png").exists():
+            err(f"Missing entity texture {texture}")
+    for design in ("bat", "cat", "witch"):
+        if not (ASSETS / "textures" / "block" / f"shadow_puppet_lamp_paper_{design}.png").exists():
+            err(f"Missing lamp paper {design}")
+    quads = load(ASSETS / "decor10_quads.json") or {}
+    for name in ("floating_witch_hat", "floating_witch_hat_flame"):
+        if not quads.get(name):
+            err(f"decor10_quads.json has no quads for {name}")
+
+
+def check_decor11(java):
+    """Party games: Java matches tools/agriculture.py (the trap's reach and timing, the contest's round, range and
+    entries, the bowling pumpkin's roll and the lane's reach, the dance floor's reach and light, ghost tag's round,
+    range, players and tag-backs, the fortune table's fortunes, cards and cooldown), every block state has a model, every
+    message the games show has its words (each fortune, each vote, each candy cache answer), and the textures and quads
+    the client draws exist."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    scare, contest, bowling, dance, tag, fortune = ag.JUMP_SCARE, ag.COSTUME_CONTEST, ag.BOWLING, ag.DANCE_FLOOR, ag.GHOST_TAG, ag.FORTUNE_TABLE
+    expected = {("JumpScareTrapBlock", "REACH"): scare["reach"], ("JumpScareTrapBlock", "POP_TICKS"): scare["pop_ticks"],
+                ("JumpScareTrapBlock", "RESET_TICKS"): scare["reset_ticks"], ("JudgesTableBlockEntity", "ROUND_TICKS"): contest["round_ticks"],
+                ("JudgesTableBlockEntity", "RANGE"): contest["range"], ("JudgesTableBlockEntity", "MAX_CONTESTANTS"): contest["max_contestants"],
+                ("BowlingPumpkin", "SPEED"): bowling["speed"], ("BowlingPumpkin", "FRICTION"): bowling["friction"],
+                ("BowlingPumpkin", "DOMINO_CHANCE"): bowling["domino_chance"], ("BowlingScoreboardBlock", "LANE_REACH"): bowling["lane_reach"],
+                ("BowlingScore", "FRAMES"): bowling["frames"], ("DanceFloorBlock", "REACH"): dance["reach"], ("DanceFloorBlock", "LIGHT"): dance["light"],
+                ("GhostBellBlockEntity", "ROUND_TICKS"): tag["round_ticks"], ("GhostBellBlockEntity", "RANGE"): tag["range"],
+                ("GhostBellBlockEntity", "TAG_BACK_TICKS"): tag["tag_back_ticks"], ("GhostBellBlockEntity", "MAX_PLAYERS"): tag["max_players"],
+                ("FortuneTellerTableBlock", "FORTUNES"): fortune["fortunes"], ("FortuneTellerTableBlock", "CARDS"): fortune["cards"],
+                ("FortuneTellerTableBlock", "COOLDOWN_TICKS"): fortune["cooldown_ticks"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    if "extends CandyBowlBlock" not in java.get("CandyCacheBlock", "") or "cache).build()" not in java.get("JugcraftAgriculture", ""):
+        err("The Candy Cache must be a Candy Bowl with the same block entity (no second candy store)")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    wanted = {scare["block"]: {f"facing={f},phase={p},powered={w}" for f in horizontal for p in ("ready", "popped", "resetting") for w in booleans},
+              contest["runway"]: {"axis=x", "axis=z"},
+              contest["table"]: {f"facing={f},open={o}" for f in horizontal for o in booleans},
+              bowling["pin"]: {f"down={d},facing={f}" for d in booleans for f in horizontal},
+              bowling["scoreboard"]: {f"facing={f}" for f in horizontal},
+              ag.CANDY_CACHE["block"]: {f"facing={f},fill={n}" for f in horizontal for n in range(4)},
+              dance["block"]: {f"distance={d}" for d in range(dance["reach"] + 1)},
+              tag["block"]: {f"facing={f},ringing={r}" for f in horizontal for r in booleans},
+              fortune["block"]: {f"facing={f}" for f in horizontal}}
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    votes = re.search(r"enum Vote \{\s*([A-Z_, ]+?)\s*\}", java.get("JudgesTableBlockEntity", ""))
+    taken = re.search(r"enum Taken \{\s*([A-Z_, ]+?)\s*\}", java.get("CandyBowlBlockEntity", ""))
+    keys = [f"message.jugcraft.fortune.{n}" for n in range(1, fortune["fortunes"] + 1)]
+    keys += [f"message.jugcraft.judges_table.{v.strip().lower()}" for v in (votes.group(1).split(",") if votes else [])]
+    keys += [f"message.jugcraft.candy_cache.{t.strip().lower()}" for t in (taken.group(1).split(",") if taken else [])]
+    keys += [f"message.jugcraft.candy_cache.{k}" for k in ("filled", "full", "count")]
+    for source in ("JudgesTableBlockEntity", "GhostBellBlockEntity", "BowlingScoreboardBlock"):
+        keys += re.findall(r'"(message\.jugcraft\.[a-z_.]+[a-z_])"', java.get(source, ""))
+    if not votes or not taken:
+        err("JudgesTableBlockEntity.Vote or CandyBowlBlockEntity.Taken not found")
+    for key in keys:
+        if key not in lang:
+            err(f"Missing words for {key}")
+    for key in ("frame", "score", "game_over", "ready"):
+        if f"message.jugcraft.bowling_scoreboard.{key}" not in lang:
+            err(f"Missing words for the scoreboard's {key}")
+
+    if not (ASSETS / "textures" / "entity" / "dance_floor_glow.png").exists():
+        err("Missing entity texture dance_floor_glow")
+    for card in range(fortune["cards"]):
+        if not (ASSETS / "textures" / "block" / f"fortune_card_{card}.png").exists():
+            err(f"Missing tarot card {card}")
+    quads = load(ASSETS / "decor11_quads.json") or {}
+    for name in ("jump_scare_lid", "jump_scare_ghost", "jump_scare_spring", "bowling_pumpkin", "ghost_bell", "ghost_bell_clapper",
+                 "fortune_planchette"):
+        if not quads.get(name):
+            err(f"decor11_quads.json has no quads for {name}")
+
+
+def check_decor12(java):
+    """Night events: Java matches tools/agriculture.py (the trick-or-treaters' timing, chances, group sizes, distances,
+    prank and costumes and their gift table, the toilet paper's reach and strands, the hayride's seats and spooks, the
+    bonfire's light, skewers and speed, and toasting's reach and times), every block state has a model, the gift table
+    holds the gifts, every message has its words, and the textures and quads the client draws exist."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    kids, paper, ride, fire = ag.TRICK_OR_TREATERS, ag.TOILET_PAPER, ag.HAYRIDE, ag.BONFIRE
+    expected = {("TrickOrTreaters", "CHECK_TICKS"): kids["check_ticks"], ("TrickOrTreaters", "CHANCE"): kids["chance"],
+                ("TrickOrTreaters", "MAX_GROUPS"): kids["max_groups"], ("TrickOrTreaters", "MIN_KIDS"): kids["kids"][0],
+                ("TrickOrTreaters", "MAX_KIDS"): kids["kids"][1], ("TrickOrTreaters", "MIN_DISTANCE"): kids["spawn_distance"][0],
+                ("TrickOrTreaters", "MAX_DISTANCE"): kids["spawn_distance"][1], ("TrickOrTreaters", "PLAYER_RANGE"): kids["player_range"],
+                ("TrickOrTreaters", "GIVE_UP_TICKS"): kids["give_up_ticks"], ("TrickOrTreaters", "WAIT_TICKS"): kids["wait_ticks"],
+                ("TrickOrTreaters", "LEAVE_TICKS"): kids["leave_ticks"], ("TrickOrTreaters", "PRANK_REACH"): kids["prank_reach"],
+                ("TrickOrTreaters", "STREAMERS"): kids["streamers"], ("ToiletPaperRoll", "STREAMERS"): paper["streamers"],
+                ("ToiletPaperRoll", "REACH"): paper["reach"], ("ToiletPaperStreamerBlock", "MAX_LENGTH"): paper["max_length"],
+                ("HauntedHayride", "SEATS"): ride["seats"], ("HauntedHayride", "SPOOK_MIN"): ride["spook_ticks"][0],
+                ("HauntedHayride", "SPOOK_MAX"): ride["spook_ticks"][1], ("HalloweenBonfireBlock", "LIGHT"): fire["light"],
+                ("HalloweenBonfireBlockEntity", "SLOTS"): fire["slots"], ("HalloweenBonfireBlockEntity", "SPEED"): fire["speed"],
+                ("MarshmallowStickItem", "BONFIRE_REACH"): fire["reach"], ("MarshmallowStickItem", "CAMPFIRE_REACH"): fire["campfire_reach"],
+                ("MarshmallowStickItem", "TOAST_TICKS"): fire["toast_ticks"], ("MarshmallowStickItem", "BURN_TICKS"): fire["burn_ticks"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    source = java.get("TrickOrTreaters", "")
+    if f'GIFT_TABLE = "{kids["gift_table"]}"' not in source:
+        err("TrickOrTreaters.GIFT_TABLE differs from TRICK_OR_TREATERS' gift table")
+    costumes = re.search(r"COSTUMES = List\.of\(([^)]*)\)", source)
+    if not costumes or re.findall(r'"([a-z_:]+)"', costumes.group(1)) != kids["costumes"]:
+        err("TrickOrTreaters.COSTUMES differs from TRICK_OR_TREATERS' costumes")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    if variants(paper["block"]) != {"draped=false", "draped=true"}:
+        err(f"{paper['block']}: blockstate variants differ from its properties")
+    if variants(fire["block"]) != {"lit=false", "lit=true"}:
+        err(f"{fire['block']}: blockstate variants differ from its properties")
+
+    table = load(DATA / "jugcraft" / "loot_table" / f"{kids['gift_table']}.json") or {}
+    gifts = [(entry.get("name"), entry.get("weight")) for pool in table.get("pools", []) for entry in pool.get("entries", [])]
+    if gifts != [tuple(gift) for gift in kids["gifts"]]:
+        err(f"The trick-or-treaters' gift table differs from TRICK_OR_TREATERS' gifts: {gifts}")
+
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for source in ("TrickOrTreaters", "MarshmallowStickItem"):
+        for key in re.findall(r'"(message\.jugcraft\.[a-z_.]+[a-z_])"', java.get(source, "")):
+            if key not in lang:
+                err(f"Missing words for {key}")
+    if not (ASSETS / "textures" / "entity" / "bonfire_flame.png").exists():
+        err("Missing entity texture bonfire_flame")
+    quads = load(ASSETS / "decor12_quads.json") or {}
+    for name in ("hayride_wagon", "hayride_lantern"):
+        if not quads.get(name):
+            err(f"decor12_quads.json has no quads for {name}")
+
+
+def check_decor13(java):
+    """Treats: Java matches tools/agriculture.py (the punch bowl's servings, brewing and light, the barmbrack's slices,
+    food and fortunes, the giant candy's designs), every block state has a model, every fortune has its words, and
+    the punch's ingredients are tagged."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    bowl, brack, candy = ag.PUNCH_BOWL, ag.BARMBRACK, ag.GIANT_CANDY
+    expected = {("PunchBowlBlock", "SERVINGS"): bowl["servings"], ("PunchBowlBlock", "PER_BERRY"): bowl["per_berry"],
+                ("PunchBowlBlock", "LIGHT"): bowl["light"], ("BarmbrackBlock", "SLICES"): brack["slices"],
+                ("BarmbrackBlock", "NUTRITION"): brack["slice_food"][0], ("BarmbrackBlock", "SATURATION"): brack["slice_food"][1]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    fortunes = re.search(r"FORTUNES = List\.of\(([^)]*)\)", java.get("BarmbrackBlock", ""))
+    if not fortunes or re.findall(r'"([a-z_]+)"', fortunes.group(1)) != brack["fortunes"]:
+        err("BarmbrackBlock.FORTUNES differs from BARMBRACK's fortunes")
+    designs = re.search(r"enum Design implements StringRepresentable \{\s*([A-Z_, ]+?);", java.get("GiantCandyBlock", ""))
+    if not designs or [d.strip().lower() for d in designs.group(1).split(",")] != candy["designs"]:
+        err("GiantCandyBlock.Design differs from GIANT_CANDY's designs")
+    if f'item("{bowl["punch"]}")' not in java.get("PunchBowlBlock", "") or f'item("{brack["ring"]}")' not in java.get("BarmbrackBlock", ""):
+        err("The punch bowl or the barmbrack hands out an item other than tools/agriculture.py's")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    wanted = {bowl["block"]: {f"servings={n}" for n in range(bowl["servings"] + 1)},
+              brack["block"]: {f"bites={b},facing={f}" for b in range(brack["slices"]) for f in horizontal},
+              candy["block"]: {f"design={d},facing={f}" for d in candy["designs"] for f in horizontal}}
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in ["ring"] + brack["fortunes"]:
+        if f"message.jugcraft.{brack['block']}.{key}" not in lang:
+            err(f"Missing words for the barmbrack's {key}")
+    tag = load(DATA / "jugcraft" / "tags" / "item" / "witchs_brew_ingredients.json") or {}
+    if tag.get("values") != bowl["ingredients"]:
+        err("Item tag jugcraft:witchs_brew_ingredients differs from PUNCH_BOWL's ingredients")
+
+
+def check_decor14(java):
+    """Costumes: Java matches tools/agriculture.py (the outfits, the trunk's slots and how long its lid stays open), every
+    outfit has an equipment asset without layers, boxes in costumes.json on body parts and motions the client knows,
+    inside textures that exist, and is a trick-or-treat costume and a costume hat; the trunk's block states have models
+    and its messages their words."""
+    import decor14_data
+    main = java.get("JugcraftAgriculture", "")
+    outfits = re.search(r"OUTFITS = List\.of\(([^)]*)\)", main)
+    if not outfits or re.findall(r'"([a-z_]+)"', outfits.group(1)) != list(ag.OUTFITS):
+        err("JugcraftAgriculture.OUTFITS differs from tools/agriculture.py")
+    trunk = ag.COSTUME_TRUNK
+    for source, name, value in (("CostumeTrunkBlockEntity", "SLOTS", trunk["slots"]), ("CostumeTrunkBlock", "OPEN_TICKS", trunk["open_ticks"])):
+        match = re.search(rf"\b{name} = (\d+);", java.get(source, ""))
+        if not match or int(match.group(1)) != value:
+            err(f"{source}.{name} differs from tools/agriculture.py ({value})")
+
+    layer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "CostumeLayer.java")
+    motions = set(re.findall(r'case "([a-z_]+)" -> ', layer.read_text(encoding="utf-8") if layer.exists() else ""))
+    if not set(decor14_data.MOTIONS) <= motions:
+        err(f"CostumeLayer doesn't know the motions {sorted(set(decor14_data.MOTIONS) - motions)}")
+    costumes = load(ASSETS / "costumes.json") or {}
+    if set(costumes) != set(ag.OUTFITS):
+        err("costumes.json doesn't hold exactly the outfits")
+    tags = {tag: set((load(DATA / "jugcraft" / "tags" / "item" / f"{tag.split(':')[1]}.json") or {}).get("values", []))
+            for tag in (ag.COSTUME_TAG, ag.COSTUME_HAT_TAG)}
+    for name, info in ag.OUTFITS.items():
+        entry = costumes.get(name, {})
+        width, height = entry.get("size", [0, 0])
+        for key in ("texture", "glow") if info.get("glow") else ("texture",):
+            namespace, path = split(entry.get(key, ":"))
+            if not (ASSETS.parent / namespace / path).exists():
+                err(f"{name}: missing {key} texture {entry.get(key)}")
+        for piece in entry.get("pieces", []):
+            if piece["part"] not in decor14_data.PARTS or any(j[4] not in decor14_data.MOTIONS or j[3] not in "xyz" for j in piece["joints"]):
+                err(f"{name}: a piece on an unknown part, axis or motion")
+            for b in piece["boxes"]:
+                u, v, w, h, d = b[6:11]
+                if u + 2 * (d + w) > width or v + d + h > height:
+                    err(f"{name}: a box's faces run off its texture")
+        if (load(ASSETS / "equipment" / f"{name}.json") or {}).get("layers") != {}:
+            err(f"{name}: its equipment asset must have no layers (CostumeLayer draws it)")
+        for tag, values in tags.items():
+            if rid_of(name) not in values:
+                err(f"{name} is not in {tag}")
+
+    states = set((load(ASSETS / "blockstates" / f"{trunk['block']}.json") or {}).get("variants", {}))
+    if states != {f"facing={f},open={o}" for f in ("north", "east", "south", "west") for o in ("false", "true")}:
+        err(f"{trunk['block']}: blockstate variants differ from its properties")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in re.findall(r'MESSAGES \+ "([a-z_]+)"', java.get("CostumeTrunkBlock", "")):
+        if f"message.jugcraft.{trunk['block']}.{key}" not in lang:
+            err(f"Missing words for the trunk's {key}")
+
+
+def check_chandlery(java):
+    """The chandlery: Java matches tools/agriculture.py (the pot's capacity, melting, setting and cooling times, scents
+    and burn factors; the candle's layers, pulse, effect time, radii, light and harvest; each wax's measures, burn and
+    colour; each scent's effect and colour), the tags hold the items that melt, scent, brighten and extend, every block
+    state has its blockstate entry, and every message and tooltip has its words."""
+    ch = ag.CHANDLERY
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("WaxPotBlockEntity", "CAPACITY"): ch["capacity"], ("WaxPotBlockEntity", "MELT_TICKS"): ch["melt_ticks"],
+                ("WaxPotBlockEntity", "SET_TICKS"): ch["set_ticks"], ("WaxPotBlockEntity", "COOL_TICKS"): ch["cool_ticks"],
+                ("WaxPotBlockEntity", "MAX_SCENTS"): ch["max_scents"], ("WaxPotBlockEntity", "BRIGHT_BURN"): ch["bright_burn"],
+                ("WaxPotBlockEntity", "LONG_BURN"): ch["long_burn"], ("AuraCandleBlock", "MAX_DIPS"): ch["max_dips"],
+                ("AuraCandleBlock", "PULSE_TICKS"): ch["pulse_ticks"], ("AuraCandleBlock", "EFFECT_TICKS"): ch["effect_ticks"],
+                ("AuraCandleBlock", "HARVEST_DIVISOR"): ch["harvest_divisor"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    candle = java.get("AuraCandleBlock", "")
+    for name, key in (("RADIUS", "radius"), ("LIGHT", "light")):
+        match = re.search(rf"\b{name} = \{{([\d, ]+)\}};", candle)
+        if not match or [int(v) for v in match.group(1).split(",")] != ch[key]:
+            err(f"AuraCandleBlock.{name} differs from tools/agriculture.py {ch[key]}")
+    waxes = {name.lower(): (int(m), int(b), int(c, 16)) for name, m, b, c in
+             re.findall(r"\b([A-Z]+)\((\d+), (\d+), 0x([0-9A-F]{6})\)", java.get("CandleWax", ""))}
+    if waxes != {name: (info["measures"], info["burn_per_dip"], info["color"]) for name, info in ch["waxes"].items()}:
+        err(f"CandleWax {waxes} differs from tools/agriculture.py")
+    scents = {name.lower(): (None if effect == "null" else effect.split(".")[1], int(c, 16)) for name, effect, c in
+              re.findall(r"\b([A-Z]+)\((null|MobEffects\.[A-Z_]+), 0x([0-9A-F]{6})\)", java.get("CandleScent", ""))}
+    if scents != {name: (info["effect"], info["color"]) for name, info in ch["scents"].items()}:
+        err(f"CandleScent {scents} differs from tools/agriculture.py")
+
+    def tag(path):
+        return (load(DATA / "jugcraft" / "tags" / "item" / f"{path}.json") or {}).get("values")
+    for name, info in ch["waxes"].items():
+        if tag(f"candle_wax/{name}") != info["items"]:
+            err(f"Item tag jugcraft:candle_wax/{name} differs from tools/agriculture.py")
+    for name, info in ch["scents"].items():
+        if tag(f"candle_scents/{name}") != info["items"]:
+            err(f"Item tag jugcraft:candle_scents/{name} differs from tools/agriculture.py")
+    for kind in ("brightener", "extender"):
+        if tag(ch[kind]["tag"].split(":")[1]) != ch[kind]["items"]:
+            err(f"Item tag {ch[kind]['tag']} differs from tools/agriculture.py")
+
+    states = set((load(ASSETS / "blockstates" / f"{ch['candle']}.json") or {}).get("variants", {}))
+    if states != {f"dips={d},lit={lit}" for d in range(1, ch["max_dips"] + 1) for lit in ("false", "true")}:
+        err(f"{ch['candle']}: blockstate variants differ from its properties")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"message.jugcraft.{ch['pot']}.{k}" for k in re.findall(r'MESSAGES \+ "([a-z_]+)"', java.get("WaxPotBlock", ""))]
+    keys += [f"tooltip.jugcraft.{ch['candle']}.{k}" for k in re.findall(r'TOOLTIP \+ "([a-z_]+)"', java.get("AuraCandleItem", ""))]
+    keys += [f"item.jugcraft.{ch['candle']}.{k}" for k in ("plain", "one", "two", "muddled")]
+    keys += [f"candle_wax.jugcraft.{w}" for w in ch["waxes"]] + [f"candle_scent.jugcraft.{s}" for s in ch["scents"]]
+    for key in keys:
+        if key not in lang:
+            err(f"Missing words for {key}")
+
+
+
+def check_cider(java):
+    """The cider mill: Java matches CIDER in tools/agriculture.py (the apple leaves' fruiting and picking, the press's
+    capacity, trough, turns, pacing and pomace, the barrel's capacity, ageing times and stages), the apple tag holds its
+    items, every block state has its blockstate entry, every message has its words, and the press and barrel loot keep
+    what they should."""
+    tree, press, barrel = ag.CIDER["tree"], ag.CIDER["press"], ag.CIDER["barrel"]
+
+    def numbers(source, names):
+        return {name: int(value) for name, value in re.findall(rf"int ({names}) = (\d+);", java.get(source, ""))}
+
+    if numbers("AppleLeavesBlock", "FRUIT_CHANCE|PICK_MIN|PICK_MAX") != {"FRUIT_CHANCE": tree["fruit_chance"],
+                                                                         "PICK_MIN": tree["pick"]["min"], "PICK_MAX": tree["pick"]["max"]}:
+        err("AppleLeavesBlock.java differs from CIDER['tree'] in tools/agriculture.py")
+    if "Items.APPLE" not in java.get("AppleLeavesBlock", "") or tree["pick"]["item"] != "minecraft:apple":
+        err("AppleLeavesBlock.java must pick the apple CIDER['tree'] names")
+    expected = {"CAPACITY": press["capacity"], "TROUGH": press["trough"], "TURNS": press["turns"], "WORK_TICKS": press["work_ticks"],
+                "APPLES_PER_POMACE": press["apples_per_pomace"]}
+    if numbers("CiderPressBlockEntity", "|".join(expected)) != expected:
+        err("CiderPressBlockEntity.java differs from CIDER['press'] in tools/agriculture.py")
+    if f'Jugcraft.id("{press["apples"].split(":")[1]}")' not in java.get("CiderPressBlock", ""):
+        err("CiderPressBlock.java does not read the apple tag CIDER['press'] names")
+    expected = {"CAPACITY": barrel["capacity"], "SPARKLING_TICKS": barrel["sparkling_ticks"], "AGED_TICKS": barrel["aged_ticks"]}
+    entity = java.get("CiderBarrelBlockEntity", "")
+    if numbers("CiderBarrelBlockEntity", "|".join(expected)) != expected:
+        err("CiderBarrelBlockEntity.java differs from CIDER['barrel'] in tools/agriculture.py")
+    stages = re.search(r"STAGES = List\.of\(([^)]*)\)", entity)
+    if not stages or re.findall(r'"([a-z_]+)"', stages.group(1)) != barrel["stages"]:
+        err("CiderBarrelBlockEntity.STAGES differs from CIDER['barrel'] in tools/agriculture.py")
+    for stage in barrel["stages"] + ["mulled_cider"]:
+        if "drink" not in ag.ITEMS.get(stage, {}):
+            err(f"{stage}: every cider is a drink in ITEMS")
+    if (load(DATA / "jugcraft" / "tags" / "item" / f"{press['apples'].split(':')[1]}.json") or {}).get("values") != press["apple_items"]:
+        err(f"Item tag {press['apples']} differs from tools/agriculture.py")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    facings = ("north", "south", "east", "west")
+    if variants(press["block"]) != {f"facing={f}" for f in facings}:
+        err(f"{press['block']}: blockstate does not cover every facing")
+    if variants(barrel["block"]) != {f"cider={c},facing={f}" for c in range(len(barrel["stages"]) + 1) for f in facings}:
+        err(f"{barrel['block']}: blockstate does not cover every stage and facing")
+    if variants(tree["leaves"]) != {f"fruit={f}" for f in range(3)}:
+        err(f"{tree['leaves']}: blockstate does not cover every fruit stage")
+    cider = re.search(r'IntegerProperty\.create\("cider", 0, (\d+)\)', java.get("CiderBarrelBlock", ""))
+    if not cider or int(cider.group(1)) != len(barrel["stages"]):
+        err("CiderBarrelBlock.CIDER must run from 0 (empty) to the number of stages")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"message.jugcraft.{press['block']}.{k}" for k in re.findall(r'MESSAGES \+ (?:\([^"]*)?"([a-z_]+)"', java.get("CiderPressBlock", ""))]
+    keys += [f"message.jugcraft.{press['block']}.{k}" for k in ("full", "pressing")]
+    keys += [f"message.jugcraft.{barrel['block']}.{k}" for k in re.findall(r'MESSAGES \+ (?:\([^"]*)?"([a-z_]+)"', java.get("CiderBarrelBlock", ""))]
+    keys += [f"message.jugcraft.{barrel['block']}.{k}" for k in ("full", "fermenting")]
+    keys += ["tooltip.jugcraft.cider_barrel.servings"]
+    for key in keys:
+        if key not in lang:
+            err(f"Missing words for {key}")
+    table = load(DATA / "jugcraft" / "loot_table" / "blocks" / f"{barrel['block']}.json") or {}
+    if "jugcraft:barrel_cider" not in json.dumps(table):
+        err(f"{barrel['block']}: its loot must keep its cider (copy jugcraft:barrel_cider)")
+
+
+def check_pantry(java, main):
+    """The preserves pantry: Java matches PANTRY in tools/agriculture.py (servings, spoiling time, the kettle's jars and
+    timings, the shelf's slots, and every preserve's food, effect and colour), every preserve is cooked into a Mason Jar in
+    the Cooking Pot, its item model shows the cloth cap once sealed, and every message and tooltip has its words."""
+    pantry = ag.PANTRY
+
+    def numbers(source, names):
+        return {name: int(value) for name, value in re.findall(rf"int ({names}) = (\d+);", java.get(source, ""))}
+
+    for source, expected in (("PreserveJarItem", {"SERVINGS": pantry["servings"], "SPOIL_TICKS": pantry["spoil_ticks"]}),
+                             ("CanningKettleBlockEntity", {"JARS": pantry["kettle_jars"], "BOIL_TICKS": pantry["boil_ticks"],
+                                                           "PROCESS_TICKS": pantry["process_ticks"]}),
+                             ("PantryShelfBlockEntity", {"SLOTS": pantry["shelf_slots"]})):
+        if numbers(source, "|".join(expected)) != expected:
+            err(f"{source}.java differs from PANTRY in tools/agriculture.py")
+    registered = {name: (int(n), float(sat), None if effect == "null" else [effect.split(".")[1], int(seconds)], int(color, 16))
+                  for name, n, sat, effect, seconds, color in re.findall(
+                      r'\bpreserve\("([a-z_]+)", (\d+), ([\d.]+)F, (null|MobEffects\.\w+), (\d+), 0x([0-9A-F]{6})\)', main)}
+    expected = {name: (info["food"][0], info["food"][1], info["effect"], info["color"]) for name, info in pantry["preserves"].items()}
+    if registered != expected:
+        err(f"JugcraftAgriculture.java preserves {registered} differ from PANTRY in tools/agriculture.py")
+    jar = f"jugcraft:{pantry['jar']}"
+    for preserve in pantry["preserves"]:
+        recipe = ag.POT_RECIPES.get(preserve)
+        if not recipe or recipe["inputs"].get(jar) != 1 or recipe.get("count", 1) != 1:
+            err(f"{preserve}: must be cooked into one Mason Jar in the Cooking Pot")
+        model = (load(ASSETS / "items" / f"{preserve}.json") or {}).get("model", {})
+        if model.get("type") != "minecraft:condition" or model.get("component") != "jugcraft:sealed":
+            err(f"{preserve}: its item model must show the sealed jar (a condition on jugcraft:sealed)")
+    if pantry["vinegar"] not in ag.POT_RECIPES:
+        err("Cider vinegar must be cooked in the Cooking Pot")
+    if f'registerItem("{pantry["vinegar"]}", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE)' not in main:
+        err("Cider vinegar must give its bottle back when cooked into preserves")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"message.jugcraft.{pantry['kettle']}.{k}" for k in re.findall(r'MESSAGES \+ (?:\([^"]*)?"([a-z_]+)"', java.get("CanningKettleBlock", ""))]
+    keys += [f"message.jugcraft.{pantry['kettle']}.{k}" for k in ("no_water", "already_sealed", "opened", "full")]
+    keys += [f"message.jugcraft.{pantry['shelf']}.{k}" for k in re.findall(r'MESSAGES \+ "([a-z_]+)"', java.get("PantryShelfBlock", ""))]
+    keys += [f"tooltip.jugcraft.preserves.{k}" for k in re.findall(r'TOOLTIP \+ "([a-z_]+)"', java.get("PreserveJarItem", ""))]
+    for key in keys:
+        if key not in lang:
+            err(f"Missing words for {key}")
+
+
+def check_crows(java, main):
+    """Crows and working scarecrows: Crow.java, Crows.java and Scarecrows.java match CROWS in tools/agriculture.py; the
+    crow is registered with its attributes, named, and drops feathers."""
+    crows = ag.CROWS
+
+    def numbers(source):
+        return {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;",
+                                                                    java.get(source, ""))}
+
+    expected = {"Crow": {"FLEE_RADIUS": crows["flee_radius"], "SNEAK_FLEE_RADIUS": crows["sneak_flee_radius"], "RAID_RADIUS": crows["raid_radius"],
+                         "SEARCH_TRIES": crows["search_tries"], "PECK_TICKS": crows["peck_ticks"], "SETBACK": crows["setback"],
+                         "RAID_COOLDOWN": crows["raid_cooldown"], "RAID_COOLDOWN_SPREAD": crows["raid_cooldown_spread"],
+                         "LEAVE_HEIGHT": crows["leave_height"], "LEAVE_TICKS": crows["leave_ticks"],
+                         "LOOK_TICKS": crows["look_ticks"]},
+                "Crows": {"SPAWN_TICKS": crows["spawn_ticks"], "SPAWN_CHANCE": crows["spawn_chance"], "MIN_DISTANCE": crows["min_distance"],
+                          "MAX_DISTANCE": crows["max_distance"], "FIELD_RADIUS": crows["field_radius"], "FIELD_TRIES": crows["field_tries"],
+                          "FLOCK_MIN": crows["flock"][0], "FLOCK_MAX": crows["flock"][1], "NEAR_CAP": crows["near_cap"],
+                          "NEAR_RANGE": crows["near_range"], "LEVEL_CAP": crows["level_cap"], "DAY_END": crows["day_end"]},
+                "Scarecrows": {"BARE": crows["guard"]["bare"], "HEADED": crows["guard"]["headed"], "LIT": crows["guard"]["lit"],
+                               "HEIGHT": crows["guard_height"]}}
+    for source, values in expected.items():
+        found = numbers(source)
+        for name, value in values.items():
+            if name not in found or abs(found[name] - value) > 1e-6:
+                err(f"{source}.{name} = {found.get(name)} differs from CROWS in tools/agriculture.py ({value})")
+    if f"Attributes.MAX_HEALTH, {crows['health']})" not in java.get("Crow", ""):
+        err("Crow.java health differs from CROWS in tools/agriculture.py")
+    if f'entity("{crows["entity"]}"' not in main or "FabricDefaultAttributeRegistry.register(CROW, Crow.createAttributes())" not in main:
+        err("JugcraftAgriculture.java must register the crow and its attributes")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"entity.jugcraft.{crows['entity']}") != crows["display"]:
+        err("The crow has no name")
+    table = load(DATA / "jugcraft" / "loot_table" / f"{crows['table']}.json") or {}
+    if "minecraft:feather" not in json.dumps(table):
+        err("A crow must drop feathers")
+
+def check_fireworks(java, main):
+    """Spooky fireworks: SpookyRocket.java, ShowLauncherBlockEntity.java and FireworkShape.java match FIREWORKS in
+    tools/agriculture.py; every picture has a firework item, named and drawn, with a recipe for each flight, plain and
+    twinkling, giving `per_craft` rockets of that flight; the launcher has a model for every facing and mode, its words,
+    loot and recipe; the spark particle, the burst payload and the dispensing are registered."""
+    fw = ag.FIREWORKS
+
+    def numbers(source):
+        return {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;",
+                                                                    java.get(source, ""))}
+
+    expected = {"SpookyRocket": {"LIFETIME_BASE": fw["lifetime_base"], "LIFETIME_SPREAD": fw["lifetime_spread"], "CLIMB": fw["climb"]},
+                "ShowLauncherBlockEntity": {"TUBES": fw["tubes"], "TUBE_CAPACITY": fw["tube_capacity"], "SEQUENCE_TICKS": fw["sequence_ticks"],
+                                            "VOLLEY_TICKS": fw["volley_ticks"], "LEAN": fw["lean"], "VANILLA_LEAN": fw["vanilla_lean"]}}
+    for source, values in expected.items():
+        found = numbers(source)
+        for name, value in values.items():
+            if name not in found or abs(found[name] - value) > 1e-9:
+                err(f"{source}.{name} = {found.get(name)} differs from FIREWORKS in tools/agriculture.py ({value})")
+    shapes_java = re.findall(r'\n\t([A-Z]+)\("([a-z]+)", 0x([0-9A-Fa-f]{6})', java.get("FireworkShape", ""))
+    colours = {sid: int(colour, 16) for constant, sid, colour in shapes_java if constant.lower() == sid}
+    if set(colours) != set(fw["shapes"]) or len(shapes_java) != len(colours):
+        err(f"FireworkShape's pictures {sorted(colours)} differ from FIREWORKS in tools/agriculture.py {sorted(fw['shapes'])}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for shape, info in fw["shapes"].items():
+        if colours.get(shape) != info["colour"]:
+            err(f"FireworkShape {shape}'s colour differs from FIREWORKS in tools/agriculture.py")
+        if info["item"] != f"{shape}_firework":
+            err(f"The {shape} firework must be {shape}_firework (FireworkShape.item())")
+        if lang.get(f"item.jugcraft.{info['item']}") != info["display"] or f"tooltip.jugcraft.spooky_firework.{shape}" not in lang:
+            err(f"The {shape} firework has no name or tooltip")
+        if not (ASSETS / "textures" / "item" / f"{info['item']}.png").exists():
+            err(f"The {shape} firework has no texture")
+        for flight in fw["flights"]:
+            for twinkle in (False, True):
+                name = f"{info['item']}_{flight}" + ("_twinkle" if twinkle else "")
+                recipe = load(DATA / "jugcraft" / "recipe" / f"{name}.json") or {}
+                result = recipe.get("result", {})
+                components = result.get("components", {})
+                inputs = recipe.get("ingredients", [])
+                if (result.get("id") != f"jugcraft:{info['item']}" or result.get("count") != fw["per_craft"]
+                        or components.get("minecraft:fireworks", {}).get("flight_duration") != flight
+                        or inputs.count("minecraft:gunpowder") != flight or (fw["twinkle"] in inputs) != twinkle
+                        or bool(components.get(f"jugcraft:{fw['component']}")) != twinkle
+                        or any(ingredient not in inputs for ingredient in info["ingredients"])):
+                    err(f"Recipe {name} must make {fw['per_craft']} {info['item']} of flight {flight}" + (", twinkling" if twinkle else ""))
+    launcher = fw["launcher"]
+    states = (load(ASSETS / "blockstates" / f"{launcher}.json") or {}).get("variants", {})
+    for facing in ("north", "south", "east", "west"):
+        for mode in ("sequence", "volley", "finale"):
+            if f"facing={facing},mode={mode}" not in states:
+                err(f"The Show Launcher's blockstate has no variant for facing={facing},mode={mode}")
+    for key in ("full", "started", "stopped", "empty", "mode.sequence", "mode.volley", "mode.finale"):
+        if f"message.jugcraft.show_launcher.{key}" not in lang:
+            err(f"The Show Launcher has no words for {key}")
+    if lang.get(f"block.jugcraft.{launcher}") != fw["launcher_display"] or f"entity.jugcraft.{fw['entity']}" not in lang:
+        err("The Show Launcher or the spooky rocket has no name")
+    if not (DATA / "jugcraft" / "loot_table" / "blocks" / f"{launcher}.json").exists() or not (DATA / "jugcraft" / "recipe" / f"{launcher}.json").exists():
+        err("The Show Launcher needs its loot table and recipe")
+    if not (ASSETS / "particles" / f"{fw['particle']}.json").exists() or not (ASSETS / "textures" / "particle" / f"{fw['particle']}.png").exists():
+        err("The spooky spark particle needs its definition and texture")
+    for needed in (f'Jugcraft.id("{fw["particle"]}"), SPOOKY_SPARK', "SpookyBurstPayload.TYPE, SpookyBurstPayload.CODEC",
+                   f'entity("{fw["entity"]}"', "SpookyFireworkItem.registerDispensing()", f'Jugcraft.id("{fw["component"]}")'):
+        if needed not in main:
+            err(f"JugcraftAgriculture.java must register {needed}")
+
+def check_lanterns(java, main):
+    """The sky lantern festival: SkyLantern.java, SkyLanterns.java and MooncakeItem.java match LANTERNS in
+    tools/agriculture.py; the lantern is registered, dyeable, named and crafted; every mooncake is registered with its
+    food, named, drawn and baked in the Cooking Pot; the festival has its message and advancement."""
+    lt = ag.LANTERNS
+
+    def numbers(source):
+        return {name: float(int(value, 16)) if value.startswith("0x") else float(value) for name, value in
+                re.findall(r"static final (?:int|double|float) ([A-Z_]+) = (0x[0-9A-Fa-f]+|[\d.]+)[FD]?;", java.get(source, ""))}
+
+    expected = {"SkyLantern": {"RISE": lt["rise"], "WIND": lt["wind"], "WIND_PERIOD": lt["wind_period"], "LIFETIME": lt["lifetime"],
+                               "LIFETIME_SPREAD": lt["lifetime_spread"], "FADE_TICKS": lt["fade_ticks"], "DEFAULT_COLOUR": lt["default_colour"]},
+                "SkyLanterns": {"FESTIVAL_LANTERNS": lt["festival_lanterns"], "FESTIVAL_RADIUS": lt["festival_radius"],
+                                "FESTIVAL_WINDOW": lt["festival_window"], "FESTIVAL_COOLDOWN": lt["festival_cooldown"],
+                                "LUCK_TICKS": lt["luck_ticks"], "MEMORY": lt["memory"]},
+                "MooncakeItem": {"LUCK_TICKS": lt["mooncake_luck_ticks"], "NIGHT_START": lt["night"][0], "NIGHT_END": lt["night"][1]}}
+    for source, values in expected.items():
+        found = numbers(source)
+        for name, value in values.items():
+            if name not in found or abs(found[name] - value) > 1e-9:
+                err(f"{source}.{name} = {found.get(name)} differs from LANTERNS in tools/agriculture.py ({value})")
+    listed = re.search(r'MOONCAKES = List\.of\(([^)]*)\)', main)
+    if not listed or re.findall(r'"([a-z_]+)"', listed.group(1)) != list(lt["mooncakes"]):
+        err("JugcraftAgriculture.MOONCAKES differs from LANTERNS in tools/agriculture.py")
+    food = lt["mooncake_food"]
+    if f"MooncakeItem::new, new Item.Properties().food(nourishment({food[0]}, {food[1]}F))" not in main:
+        err("The mooncakes' food differs from LANTERNS in tools/agriculture.py")
+    for needed in (f'registerItem("{lt["item"]}", SkyLanternItem::new', f'entity("{lt["entity"]}"', "SkyLanterns.register()"):
+        if needed not in main:
+            err(f"JugcraftAgriculture.java must register {needed}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"item.jugcraft.{lt['item']}") != lt["display"] or "message.jugcraft.sky_lantern.festival" not in lang:
+        err("The sky lantern has no name, or the festival no message")
+    dyeable = (load(DATA / "minecraft" / "tags" / "item" / "dyeable.json") or {}).get("values", [])
+    if f"jugcraft:{lt['item']}" not in dyeable:
+        err("The sky lantern must be in minecraft:dyeable, so it can be dyed")
+    recipe = load(DATA / "jugcraft" / "recipe" / f"{lt['item']}.json") or {}
+    if recipe.get("result", {}).get("count") != lt["per_craft"]:
+        err(f"The sky lantern's recipe must make {lt['per_craft']}")
+    for cake, info in lt["mooncakes"].items():
+        if lang.get(f"item.jugcraft.{cake}") != info["display"] or not (ASSETS / "textures" / "item" / f"{cake}.png").exists():
+            err(f"{cake} has no name or texture")
+        baked = load(DATA / "jugcraft" / "recipe" / "pot_cooking" / f"{cake}.json") or {}
+        if baked.get("result", {}).get("count") != lt["mooncake_count"]:
+            err(f"{cake} must bake {lt['mooncake_count']} at a time in the Cooking Pot")
+    if not (DATA / "jugcraft" / "advancement" / "lantern_festival.json").exists():
+        err("The lantern festival needs its advancement")
+
+def check_feast(java, main):
+    """The harvest feast: FeastTableBlockEntity.java and Feasts.java match FEAST in tools/agriculture.py; the table is
+    registered, has a model for every axis and part, its words for every tier, loot, recipe and advancement."""
+    fe = ag.FEAST
+
+    def numbers(source):
+        return {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;",
+                                                                    java.get(source, ""))}
+
+    expected = {"FeastTableBlockEntity": {"DISHES": fe["dishes"], "SERVINGS": fe["servings"], "WINDOW": fe["window"], "MAX_LENGTH": fe["max_length"]},
+                "Feasts": {"GOOD_MEAL": fe["tiers"][0], "FEAST": fe["tiers"][1], "HARVEST_FEAST": fe["tiers"][2], "GRAND_FEAST": fe["tiers"][3],
+                           "REGENERATION_TICKS": fe["regeneration_ticks"], "ABSORPTION_TICKS": fe["absorption_ticks"],
+                           "LONG_TICKS": fe["long_ticks"], "REACH": fe["reach"]}}
+    for source, values in expected.items():
+        found = numbers(source)
+        for name, value in values.items():
+            if name not in found or abs(found[name] - value) > 1e-9:
+                err(f"{source}.{name} = {found.get(name)} differs from FEAST in tools/agriculture.py ({value})")
+    if f'registerBlock("{fe["block"]}", FeastTableBlock::new' not in main:
+        err("JugcraftAgriculture.java must register the feast table")
+    states = (load(ASSETS / "blockstates" / f"{fe['block']}.json") or {}).get("variants", {})
+    for axis in ("x", "z"):
+        for part in ("single", "start", "middle", "end"):
+            if f"axis={axis},part={part}" not in states:
+                err(f"The feast table's blockstate has no variant for axis={axis},part={part}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in ["dish_taken", "empty"] + [f"tier.{tier}" for tier in range(5)]:
+        if f"message.jugcraft.feast_table.{key}" not in lang:
+            err(f"The feast table has no words for {key}")
+    if lang.get(f"block.jugcraft.{fe['block']}") != fe["display"]:
+        err("The feast table has no name")
+    recipe = load(DATA / "jugcraft" / "recipe" / f"{fe['block']}.json") or {}
+    if recipe.get("result", {}).get("count") != fe["per_craft"] or not (DATA / "jugcraft" / "loot_table" / "blocks" / f"{fe['block']}.json").exists():
+        err(f"The feast table needs its loot table and a recipe making {fe['per_craft']}")
+    if not (DATA / "jugcraft" / "advancement" / "harvest_home.json").exists():
+        err("A grand feast needs its advancement")
+
+def check_maze(java, main):
+    """The corn maze: CornMaze.java and CornMazeGateBlockEntity.java match MAZE in tools/agriculture.py; the gate, finish
+    post and maze corn are registered with models for every state, the words for every message and size, loot (maze corn
+    giving back its kernel from the bottom only), the gate's recipe and the advancement."""
+    mz = ag.MAZE
+    maze = java.get("CornMaze", "")
+    cells = re.search(r"CELLS = \{([^}]*)\}", maze)
+    sizes = re.search(r"SIZES = \{([^}]*)\}", maze)
+    if not cells or [int(v) for v in cells.group(1).split(",")] != mz["cells"] or not sizes or re.findall(r'"([a-z]+)"', sizes.group(1)) != mz["sizes"]:
+        err("CornMaze's sizes differ from MAZE in tools/agriculture.py")
+    found = {name: float(value) for name, value in re.findall(r"static final (?:int|double) ([A-Z_]+) = ([\d.]+);", java.get("CornMazeGateBlockEntity", ""))}
+    for name, value in {"PLANT_PER_TICK": mz["plant_per_tick"], "MAX_RUN": mz["max_run"], "SHORTCUT": mz["shortcut"],
+                        "MAX_RUNNERS": mz["max_runners"]}.items():
+        if name not in found or abs(found[name] - value) > 1e-9:
+            err(f"CornMazeGateBlockEntity.{name} = {found.get(name)} differs from MAZE in tools/agriculture.py ({value})")
+    for needed in (f'registerBlock("{mz["corn"]}", MazeCornBlock::new', f'registerBlock("{mz["gate"]}", CornMazeGateBlock::new',
+                   f'registerBlock("{mz["finish"]}", CornMazeFinishBlock::new'):
+        if needed not in main:
+            err(f"JugcraftAgriculture.java must register {needed}")
+    corn_states = (load(ASSETS / "blockstates" / f"{mz['corn']}.json") or {}).get("variants", {})
+    if sorted(corn_states) != [f"section={s}" for s in range(3)]:
+        err("Maze corn needs a model for each of its three sections")
+    for block in (mz["gate"], mz["finish"]):
+        states = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+        if sorted(states) != sorted(f"facing={f}" for f in ("north", "south", "east", "west")):
+            err(f"{block} needs a model for every facing")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = ["go", "shortcut", "finished", "planted", "plan", "size_set", "needs", "blocked", "already", "planting"]
+    keys += [f"void.{why}" for why in ("flew", "climbed", "left", "slow")] + [f"size.{size}" for size in mz["sizes"]]
+    for key in keys:
+        if f"message.jugcraft.corn_maze.{key}" not in lang:
+            err(f"The corn maze has no words for {key}")
+    corn_loot = json.dumps(load(DATA / "jugcraft" / "loot_table" / "blocks" / f"{mz['corn']}.json") or {})
+    if f"jugcraft:{mz['kernel']}" not in corn_loot or '"section": "0"' not in corn_loot:
+        err("Maze corn must give back its kernel, from its bottom section only")
+    if not (DATA / "jugcraft" / "recipe" / f"{mz['gate']}.json").exists() or not (DATA / "jugcraft" / "advancement" / "amazing.json").exists():
+        err("The corn maze gate needs its recipe, and finishing a maze its advancement")
+
+def check_ghosts(java, main):
+    """Ghost hunting: Spirits.java and RestlessSpirit.java match GHOSTS in tools/agriculture.py; the spirit is registered
+    with its attributes and no loot, named; the Spirit Lantern and Ectoplasm are registered, named and drawn, Ectoplasm
+    giving its bottle back and scenting wax (the Ghostly scent); the lantern has its recipe and tooltip; every grave takes
+    random ticks and stirs; catching a spirit has its advancement."""
+    gh = ag.GHOSTS
+
+    def numbers(source):
+        return {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;",
+                                                                    java.get(source, ""))}
+
+    expected = {"Spirits": {"STIR_CHANCE": gh["stir_chance"], "NEAR_CAP": gh["near_cap"], "NEAR_RANGE": gh["near_range"],
+                            "REVEAL_RADIUS": gh["reveal_radius"]},
+                "RestlessSpirit": {"HAUNT_RADIUS": gh["haunt_radius"], "HAUNT_HEIGHT": gh["haunt_height"], "SHY_RADIUS": gh["shy_radius"],
+                                   "SNEAK_SHY_RADIUS": gh["sneak_shy_radius"], "DRIFT_SPEED": gh["drift_speed"], "SHY_SPEED": gh["shy_speed"],
+                                   "REVEAL_TICKS": gh["reveal_ticks"], "LOOK_TICKS": gh["look_ticks"], "FADE_TICKS": gh["fade_ticks"]}}
+    for source, values in expected.items():
+        found = numbers(source)
+        for name, value in values.items():
+            if name not in found or abs(found[name] - value) > 1e-9:
+                err(f"{source}.{name} = {found.get(name)} differs from GHOSTS in tools/agriculture.py ({value})")
+    if f'entity("{gh["entity"]}", EntityType.Builder.<RestlessSpirit>of(RestlessSpirit::new' not in main \
+            or "FabricDefaultAttributeRegistry.register(RESTLESS_SPIRIT" not in main:
+        err("JugcraftAgriculture.java must register the restless spirit and its attributes")
+    if f'registerItem("{gh["lantern"]}", SpiritLanternItem::new' not in main \
+            or f'registerItem("{gh["ectoplasm"]}", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE)' not in main:
+        err("JugcraftAgriculture.java must register the Spirit Lantern, and Ectoplasm giving back its glass bottle")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key, display in ((f"entity.jugcraft.{gh['entity']}", gh["display"]), (f"item.jugcraft.{gh['lantern']}", gh["lantern_display"]),
+                         (f"item.jugcraft.{gh['ectoplasm']}", gh["ectoplasm_display"])):
+        if lang.get(key) != display:
+            err(f"{key} must be named {display!r}")
+    if "item.jugcraft.spirit_lantern.tooltip" not in lang:
+        err("The Spirit Lantern has no tooltip")
+    for item in (gh["lantern"], gh["ectoplasm"]):
+        if not (ASSETS / "textures" / "item" / f"{item}.png").exists() or not (ASSETS / "items" / f"{item}.json").exists():
+            err(f"{item} needs its texture and item model")
+    if not (ASSETS / "textures" / "entity" / f"{gh['entity']}.png").exists():
+        err("The restless spirit needs its texture")
+    if f"jugcraft:{gh['ectoplasm']}" not in ag.CHANDLERY["scents"].get("ghostly", {}).get("items", []):
+        err("Ectoplasm must be the Ghostly candle scent")
+    if not (DATA / "jugcraft" / "recipe" / f"{gh['lantern']}.json").exists() or not (DATA / "jugcraft" / "advancement" / "ghost_hunter.json").exists():
+        err("The Spirit Lantern needs its recipe, and catching a spirit its advancement")
+    if main.count(".noOcclusion().randomTicks());") < 2:
+        err("The gravestones and the grave mound must take random ticks, so graves stir")
+    for source in ("GravestoneBlock", "GraveMoundBlock"):
+        if "Spirits.stir(level, pos, random)" not in java.get(source, ""):
+            err(f"{source} must stir at night (Spirits.stir in randomTick)")
+
+def check_face_paint(java, main):
+    """Face paint: FacePaint.java and FacePaintKitItem.java match FACE_PAINT in tools/agriculture.py (the designs in order,
+    the uses, the time to paint your own face, how often paint washes off); the kit, its design component and the paint
+    attachment are registered; every design has its name and its texture; the kit has its texture, words, recipe and
+    advancement; and a painted face counts as a costume for trick-or-treating and the costume contest."""
+    fp = ag.FACE_PAINT
+    paint = java.get("FacePaint", "")
+    designs = re.search(r"enum Design implements StringRepresentable \{\s*([A-Z_,\s]+);", paint)
+    if not designs or [d.strip().lower() for d in designs.group(1).split(",")] != list(fp["designs"]):
+        err("FacePaint.Design differs from FACE_PAINT['designs'] in tools/agriculture.py")
+    found = {name: float(value) for source in ("FacePaint", "FacePaintKitItem")
+             for name, value in re.findall(r"static final int ([A-Z_]+) = (\d+);", java.get(source, ""))}
+    for name, value in {"WASH_TICKS": fp["wash_ticks"], "USES": fp["uses"], "USE_TICKS": fp["use_ticks"]}.items():
+        if found.get(name) != value:
+            err(f"{name} = {found.get(name)} differs from FACE_PAINT in tools/agriculture.py ({value})")
+    if f'registerItem("{fp["kit"]}", FacePaintKitItem::new, new Item.Properties().durability(FacePaintKitItem.USES)' not in main \
+            or f'Jugcraft.id("{fp["component"]}")' not in main:
+        err("JugcraftAgriculture.java must register the Face Paint Kit (worn by use) and its design component")
+    if f'buildAndRegister(Jugcraft.id("{fp["attachment"]}"))' not in paint or "syncWith(" not in paint:
+        err("FacePaint must register the face paint attachment, sent to the clients that see the player")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"item.jugcraft.{fp['kit']}", "item.jugcraft.face_paint_kit.design", "item.jugcraft.face_paint_kit.hint",
+            "message.jugcraft.face_paint.design", "message.jugcraft.face_paint.painted", "message.jugcraft.face_paint.washed"]
+    for key in keys + [f"face_paint.jugcraft.{design}" for design in fp["designs"]]:
+        if key not in lang:
+            err(f"Face paint has no words for {key}")
+    for design in fp["designs"]:
+        if not (ASSETS / "textures" / "entity" / "face_paint" / f"{design}.png").exists():
+            err(f"The {design} face paint needs its texture")
+    if not (ASSETS / "textures" / "item" / f"{fp['kit']}.png").exists() or not (DATA / "jugcraft" / "recipe" / f"{fp['kit']}.json").exists() \
+            or not (DATA / "jugcraft" / "advancement" / "face_painter.json").exists():
+        err("The Face Paint Kit needs its texture, recipe and advancement")
+    for source in ("TrickOrTreat", "JudgesTableBlockEntity"):
+        if "FacePaint.inCostume(player)" not in java.get(source, ""):
+            err(f"{source} must count a painted face as a costume (FacePaint.inCostume)")
+
+def check_model_uvs():
+    """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has
+    see-through pixels ("Cannot compute translucency out of bounds"). Faces without a "uv" take theirs from the
+    element's position, so a box reaching outside the block must pin its UVs."""
+    def default_uv(side, lo, hi):
+        fx, fy, fz = lo
+        tx, ty, tz = hi
+        return {"down": (fx, 16 - tz, tx, 16 - fz), "up": (fx, fz, tx, tz), "north": (16 - tx, 16 - ty, 16 - fx, 16 - fy),
+                "south": (fx, 16 - ty, tx, 16 - fy), "west": (fz, 16 - ty, tz, 16 - fy), "east": (16 - tz, 16 - ty, 16 - fz, 16 - fy)}[side]
+
+    see_through = {}
+
+    def translucent(texture):
+        if texture not in see_through:
+            namespace, path = split(texture) if ":" in texture else (MOD, texture)
+            image = ASSETS.parent / namespace / "textures" / f"{path}.png"
+            see_through[texture] = image.exists() and Image.open(image).convert("RGBA").getextrema()[3][0] < 255
+        return see_through[texture]
+
+    for path in sorted((ASSETS / "models" / "block").glob("*.json")):
+        model = load(path) or {}
+        textures = model.get("textures", {})
+        for element in model.get("elements", []):
+            for side, face in element.get("faces", {}).items():
+                texture = face.get("texture", "")
+                for _ in range(4):
+                    if texture.startswith("#"):
+                        texture = textures.get(texture[1:], "")
+                if not texture or not translucent(texture):
+                    continue
+                uv = face.get("uv") or default_uv(side, element["from"], element["to"])
+                if min(uv) < 0 or max(uv) > 16:
+                    err(f"{path.relative_to(ROOT)}: the {side} face reads {list(uv)} outside its see-through texture {texture}; pin its uv")
 
 
 def check_deposits():
@@ -1165,6 +2681,7 @@ def main():
     check_agriculture()
     check_recipe_categories()
     check_advancements(registered)
+    check_model_uvs()
     for path in RES.rglob("*.json"):
         load(path)
     if errors:

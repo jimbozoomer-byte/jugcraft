@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -50,7 +51,7 @@ import org.jspecify.annotations.Nullable;
  * {@link GiantPumpkinVineBlock}. Every block of it is this block; {@link #PART} says where in the cube it
  * is, counted from the lowest north-west corner (the master, part 0, which alone has the
  * {@link GiantPumpkinBlockEntity} and ticks). Full grown, each side can be carved as one 48x48 face, and a torch
- * inside lights every block of it ({@link #LIGHT}).
+ * inside lights every block of it ({@link #LIGHT}); a soul torch lights it blue, at most a soul torch's light.
  *
  * <p>It is one prop, like a large machine: breaking any block breaks the whole pumpkin and drops it as one Giant
  * Pumpkin item that keeps its size, weight, carving and torch ({@link GiantPumpkinData}); placing the item puts the
@@ -211,7 +212,7 @@ public class GiantPumpkinBlock extends BaseEntityBlock implements BonemealableBl
 	}
 
 	/**
-	 * A torch lights a full-grown, carved giant pumpkin (every block of it then glows); an axe chops the pumpkin up;
+	 * A torch or soul torch lights a full-grown, carved giant pumpkin (every block of it then glows); an axe chops it up;
 	 * bone meal says so when the pumpkin has no room left to grow.
 	 */
 	@Override
@@ -234,11 +235,11 @@ public class GiantPumpkinBlock extends BaseEntityBlock implements BonemealableBl
 			}
 			return InteractionResult.SUCCESS;
 		}
-		if (!stack.is(Items.TORCH) || master == null || master.lit() || master.glow() == 0) {
+		if (!CarvedPumpkinBlock.isTorch(stack) || master == null || master.lit() || master.glow() == 0) {
 			return stack.isEmpty() ? InteractionResult.TRY_WITH_EMPTY_HAND : InteractionResult.PASS;
 		}
 		if (!level.isClientSide()) {
-			master.setLit(true);
+			master.setLit(true, stack.is(Items.SOUL_TORCH));
 			stack.consume(1, player);
 			level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 0.9F);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
@@ -262,7 +263,7 @@ public class GiantPumpkinBlock extends BaseEntityBlock implements BonemealableBl
 				.withParameter(LootContextParams.THIS_ENTITY, player).create(LootContextParamSets.BLOCK);
 		List<ItemStack> drops = new ArrayList<>(level.getServer().reloadableRegistries().getLootTable(CHOP_LOOT).getRandomItems(params));
 		if (pumpkin.lit()) {
-			drops.add(new ItemStack(Items.TORCH));
+			drops.add(CarvedPumpkinBlock.torch(pumpkin.soul()));
 		}
 		level.removeBlock(master, false);
 		for (ItemStack drop : drops) {
@@ -272,7 +273,7 @@ public class GiantPumpkinBlock extends BaseEntityBlock implements BonemealableBl
 		level.gameEvent(player, GameEvent.BLOCK_DESTROY, master);
 	}
 
-	/** An empty hand takes the torch back out. */
+	/** An empty hand takes the torch (or soul torch) back out. */
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
 		GiantPumpkinBlockEntity master = master(level, pos, state);
@@ -280,8 +281,8 @@ public class GiantPumpkinBlock extends BaseEntityBlock implements BonemealableBl
 			return InteractionResult.PASS;
 		}
 		if (!level.isClientSide()) {
-			master.setLit(false);
-			ItemStack torch = new ItemStack(Items.TORCH);
+			ItemStack torch = CarvedPumpkinBlock.torch(master.soul());
+			master.setLit(false, false);
 			if (!player.getInventory().add(torch)) {
 				Block.popResourceFromFace(level, pos, hit.getDirection(), torch);
 			}
@@ -320,7 +321,7 @@ public class GiantPumpkinBlock extends BaseEntityBlock implements BonemealableBl
 		if (level.getBlockEntity(masterPos(pos, state)) instanceof GiantPumpkinBlockEntity master) {
 			GiantPumpkinData data = master.data();
 			stack.set(JugcraftAgriculture.GIANT_PUMPKIN, includeData ? data : new GiantPumpkinData(data.size(), 0,
-					GiantPumpkinBlockEntity.START_WEIGHT, Optional.empty(), false, Map.of(), Optional.empty(), ""));
+					GiantPumpkinBlockEntity.START_WEIGHT, Optional.empty(), false, Map.of(), Optional.empty(), "", false));
 		}
 		return stack;
 	}
@@ -339,5 +340,14 @@ public class GiantPumpkinBlock extends BaseEntityBlock implements BonemealableBl
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(SIZE, PART, LIGHT);
+	}
+
+	/** Under the Harvest Moon a lit giant pumpkin throws off sparks from its top. */
+	@Override
+	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+		if (HarvestMoon.clientActive && state.getValue(LIGHT) > 0 && random.nextInt(6) == 0) {
+			level.addParticle(random.nextBoolean() ? ParticleTypes.SMALL_FLAME : ParticleTypes.WAX_ON, pos.getX() + random.nextDouble(),
+					pos.getY() + 1.0, pos.getZ() + random.nextDouble(), 0.0, 0.04, 0.0);
+		}
 	}
 }

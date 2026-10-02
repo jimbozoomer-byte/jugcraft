@@ -34,10 +34,12 @@ public final class JugcraftConfig {
 	 * Text options, with their defaults. The Halloween event (trick-or-treating) runs from
 	 * {@code halloween.start} to {@code halloween.end} (month-day, both included) in {@code halloween.timezone}
 	 * on the server's clock; {@code halloween.mode} is {@code auto} (follow the dates), {@code on} or {@code off}
-	 * (for testing and off-season worlds). Treats already given are kept whatever the setting.
+	 * (for testing and off-season worlds); {@code halloween.harvest_moon} is the day (month-day) of the Harvest
+	 * Moon, whose nights make crops grow faster. Treats already given are kept whatever the setting.
 	 */
 	public static final Map<String, String> TEXT_OPTIONS = Map.of(
-			"halloween.start", "10-20", "halloween.end", "11-03", "halloween.timezone", "UTC", "halloween.mode", "auto");
+			"halloween.start", "10-20", "halloween.end", "11-03", "halloween.timezone", "UTC", "halloween.mode", "auto",
+			"halloween.harvest_moon", "10-31");
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
@@ -103,7 +105,7 @@ public final class JugcraftConfig {
 		try (Writer writer = Files.newBufferedWriter(path)) {
 			properties.store(writer, "Jugcraft feature switches (false stops new worldgen and recipes; existing items and blocks stay)"
 					+ " and server options (carving.free_draw=false allows only the starter pumpkin faces; halloween.* sets when"
-					+ " trick-or-treating runs: start and end as MM-DD, a timezone, and mode auto, on or off).");
+					+ " the Halloween event runs: start and end as MM-DD, a timezone, mode auto, on or off, and the Harvest Moon's day).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}
