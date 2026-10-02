@@ -547,101 +547,103 @@
             "Light on Your Feet: Make free runners and never take fall damage.",
             "Charged Up: Make a power katana or power bow.",
             "Lego My Ego: Mould coloured plastic blocks.",
-            "Black Gold: Fill a bucket with crude oil."
+            "Steel Samurai: Build a piece of the powered exosuit."
           ]
         },
         {
           "title": "Milestones (7)",
-          "icon": "jugcraft:pumpjack",
+          "icon": "jugcraft:ronin_exosuit_helmet",
           "text": [
+            "Masterless: Repaint your exosuit or katana in the Ronin livery.",
+            "Black Gold: Fill a bucket with crude oil.",
             "Nodding Donkey: Build a pumpjack over an oil reservoir.",
             "Fractional Thinking: Build a distillation tower.",
-            "Tight Spot: Build a fracking rig for shale oil.",
-            "Diesel Power: Build a diesel generator.",
-            "Spool Up: Build a gas turbine."
+            "Tight Spot: Build a fracking rig for shale oil."
           ]
         },
         {
           "title": "Milestones (8)",
-          "icon": "jugcraft:diesel_engine",
+          "icon": "jugcraft:diesel_generator",
           "text": [
+            "Diesel Power: Build a diesel generator.",
+            "Spool Up: Build a gas turbine.",
             "Eight Cylinders: Build a diesel engine.",
             "Fantastic Plastic: Press a plastic sheet.",
-            "Bouncing Back: Make synthetic rubber.",
-            "Vinyl Revival: Make PVC resin from chlorine.",
-            "Squeaky Clean: Boil soap from lye."
+            "Bouncing Back: Make synthetic rubber."
           ]
         },
         {
           "title": "Milestones (9)",
-          "icon": "jugcraft:optical_fibre",
+          "icon": "jugcraft:pvc_resin",
           "text": [
+            "Vinyl Revival: Make PVC resin from chlorine.",
+            "Squeaky Clean: Boil soap from lye.",
             "Light Speed: Draw borosilicate glass into optical fibre.",
             "Pin Pulled: Make a grenade.",
-            "Going with the Flow: Build a flow battery.",
-            "Hit the Road: Lay asphalt, and walk faster on it.",
-            "Split Decision: Build an electrolytic cell."
+            "Going with the Flow: Build a flow battery."
           ]
         },
         {
           "title": "Milestones (10)",
-          "icon": "jugcraft:sulfuric_acid_bucket",
+          "icon": "jugcraft:asphalt",
           "text": [
+            "Hit the Road: Lay asphalt, and walk faster on it.",
+            "Split Decision: Build an electrolytic cell.",
             "Oil of Vitriol: Make sulfuric acid.",
             "Green Revolution: Make fertilizer.",
-            "Moonshine: Ferment crops into bioethanol.",
-            "The Bayer Way: Digest bauxite into alumina.",
-            "Clean Burn: Build a hydrogen fuel cell."
+            "Moonshine: Ferment crops into bioethanol."
           ]
         },
         {
           "title": "Milestones (11)",
-          "icon": "jugcraft:air_separation_unit",
+          "icon": "jugcraft:alumina",
           "text": [
+            "The Bayer Way: Digest bauxite into alumina.",
+            "Clean Burn: Build a hydrogen fuel cell.",
             "Thin Air: Build an air separation unit.",
             "Bread from Air: Build a synthesis converter, to make ammonia from air.",
-            "Aqua Fortis: Make nitric acid.",
-            "Kroll Call: Chlorinate titanium and melt the sponge.",
-            "Power Wall: Build a lithium battery bank."
+            "Aqua Fortis: Make nitric acid."
           ]
         },
         {
           "title": "Milestones (12)",
-          "icon": "jugcraft:neodymium_magnet",
+          "icon": "jugcraft:titanium_ingot",
           "text": [
+            "Kroll Call: Chlorinate titanium and melt the sponge.",
+            "Power Wall: Build a lithium battery bank.",
             "Strong Attraction: Make a neodymium magnet.",
             "Lossless (Almost): Build a magnet dynamo or magnet motor.",
-            "Pulling Strings: Pull a silicon boule in the arc furnace.",
-            "Etched in Light: Etch microchips in the lithography station.",
-            "Central Processing: Assemble a processor."
+            "Pulling Strings: Pull a silicon boule in the arc furnace."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:network_terminal",
+          "icon": "jugcraft:microchip",
           "text": [
+            "Etched in Light: Etch microchips in the lithography station.",
+            "Central Processing: Assemble a processor.",
             "Hello, World: Build a network terminal.",
             "Under Pressure: Build a gas holder.",
-            "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter.",
-            "Here Comes the Sun: Build an advanced solar panel."
+            "Shut-Off Valve: Make a fluid valve."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:tank_gauge",
+          "icon": "jugcraft:fluid_filter",
           "text": [
+            "Strained Relations: Make a fluid filter.",
+            "Here Comes the Sun: Build an advanced solar panel.",
             "Full of It: Make a tank gauge.",
             "Concentrate: Build a solar receiver for a heliostat field.",
-            "Spool Up: Make a turbocharger for the advanced engine.",
-            "Keep It Spinning: Build a flywheel.",
-            "Four on the Floor: Build an advanced combustion engine."
+            "Spool Up: Make a turbocharger for the advanced engine."
           ]
         },
         {
           "title": "Milestones (15)",
-          "icon": "jugcraft:cotton",
+          "icon": "jugcraft:flywheel",
           "text": [
+            "Keep It Spinning: Build a flywheel.",
+            "Four on the Floor: Build an advanced combustion engine.",
             "King Cotton: Grow cotton.",
             "Make It Rain: Build a sprinkler.",
             "Reaping What You Sow: Build a crop harvester."
@@ -2553,6 +2555,23 @@
             "Two weapons that run on JE instead of wearing out. Charge them at a charging station; capacity modules fit both.",
             "The power katana hits harder and faster than a netherite sword, for 1,000 JE a hit. Empty, it hits for 1.",
             "The power bow fires arrows of energy for 500 JE a shot: no arrows needed, and they fly faster and hit harder. Empty, it is an ordinary bow that shoots your arrows."
+          ]
+        },
+        {
+          "title": "Powered Exosuit",
+          "icon": "jugcraft:exosuit_helmet",
+          "text": [
+            "Four pieces of armor as strong as netherite that run on JE. Each piece holds 400,000 JE and charges at a charging station; capacity modules fit.",
+            "Helmet: night vision whenever it is dark. Chestplate: an energy shield that regrows up to four hearts of absorption, and a jetpack (hold jump in the air). Leggings: 30% more speed. Boots: no fall damage and a full-block step.",
+            "Each piece works only while it is charged; a flat piece is plain armor."
+          ]
+        },
+        {
+          "title": "Liveries",
+          "icon": "jugcraft:ronin_livery",
+          "text": [
+            "The exosuit comes in Vanguard gunmetal. A Ronin livery at a smithing table, with a piece and red dye, repaints it crimson and silver, with the Ronin's hat and skirt; the power katana becomes the crimson Ronin katana.",
+            "A Vanguard livery with cyan dye paints it back. Repainting keeps the charge, modules and enchantments."
           ]
         }
       ]

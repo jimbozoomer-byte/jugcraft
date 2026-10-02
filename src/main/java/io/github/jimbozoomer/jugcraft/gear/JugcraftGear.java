@@ -113,16 +113,16 @@ public final class JugcraftGear {
 		extras();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(
 				(id, item) -> {
-					if (!id.endsWith("_sword") && !isArmor(id)) {
+					if (!id.endsWith("_sword") && !isArmor(id) && !isCombatExtra(id)) {
 						output.accept(item);
 					}
 				}));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> ITEMS.forEach((id, item) -> {
-			if (id.endsWith("_sword") || isArmor(id)) {
-				output.accept(item);
-			} else if (isCombatExtra(id)) {
+			if (isCombatExtra(id)) {
 				output.accept(item);
 				output.accept(full(item));
+			} else if (id.endsWith("_sword") || isArmor(id)) {
+				output.accept(item);
 			}
 		}));
 	}
@@ -145,13 +145,13 @@ public final class JugcraftGear {
 	}
 
 	/** One of a kind, unbreakable (they run on JE, not durability), starting empty, like the powered tools. */
-	private static Item.Properties powered(Item.Properties properties) {
+	static Item.Properties powered(Item.Properties properties) {
 		return properties.stacksTo(1).rarity(Rarity.UNCOMMON).component(JugcraftTools.ENERGY, 0L)
 				.component(DataComponents.UNBREAKABLE, Unit.INSTANCE)
 				.component(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.UNBREAKABLE, true));
 	}
 
-	/** A charged katana or bow, or a full scuba tank, for the creative tab. */
+	/** A charged katana, bow or exosuit piece, or a full scuba tank, for the creative tab. */
 	private static ItemStack full(Item item) {
 		ItemStack stack = new ItemStack(item);
 		if (item instanceof Chargeable) {
@@ -163,7 +163,8 @@ public final class JugcraftGear {
 	}
 
 	private static boolean isCombatExtra(String id) {
-		return id.startsWith("scuba_") || id.equals("free_runners") || id.startsWith("power_");
+		return id.startsWith("scuba_") || id.equals("free_runners") || id.startsWith("power_") || id.contains("exosuit_")
+				|| id.equals("ronin_katana");
 	}
 
 	/** One metal's sword, pickaxe, axe, shovel and hoe, then its helmet, chestplate, leggings and boots. */
@@ -212,7 +213,8 @@ public final class JugcraftGear {
 		return ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id(metal));
 	}
 
-	private static Item item(String name, Function<Item.Properties, Item> factory) {
+	/** Registers an item and lists it in ITEMS (and so in the creative tabs above); also used by JugcraftExosuit. */
+	static Item item(String name, Function<Item.Properties, Item> factory) {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Jugcraft.id(name));
 		Item item = Registry.register(BuiltInRegistries.ITEM, key, factory.apply(new Item.Properties().setId(key)));
 		ITEMS.put(name, item);

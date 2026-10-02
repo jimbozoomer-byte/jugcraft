@@ -140,6 +140,8 @@ def assets():
     tank_display.write_all(write, ASSETS, DATA / MOD, lang, model_writer)
     import gear
     gear.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import exosuit
+    exosuit.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
@@ -786,7 +788,10 @@ def powered_tools(lang):
     # rocket_pack.png), and the pack itself in 3D on the back (client/RocketPackLayer draws these quads).
     write(ASSETS / "equipment" / "rocket_pack.json", {"layers": {"humanoid": [{"texture": rid("rocket_pack")}]}})
     import kinetic_rotors
-    write(ASSETS / "worn_models.json", {"rocket_pack": kinetic_rotors.quads(tool_models.ITEMS["rocket_pack"])})
+    # The exosuit's 3D parts (shoulder plates, skirt plates, the Ronin's hat) too: client/ExosuitLayer.
+    import exosuit
+    write(ASSETS / "worn_models.json", {"rocket_pack": kinetic_rotors.quads(tool_models.ITEMS["rocket_pack"]),
+                                        **exosuit.worn_models(kinetic_rotors.quads)})
     for module, (display, short, about) in UPGRADE_MODULES.items():
         lang[f"item.{MOD}.{module}"] = display
         lang[f"item.{MOD}.{module}.short"] = short

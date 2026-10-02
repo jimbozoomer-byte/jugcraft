@@ -255,6 +255,11 @@ No numbered release yet. Everything below is on `main`.
 - Original textures from `tools/crop_textures.py`. Twelve game tests, plus a client game test with screenshots of a corn maze, the fields and every growth stage.
 
 ### Unmerged: Engineer's Handbook reorganised, batch 23
+### Unmerged: Powered exosuit, batch 28
+- Four JE-powered armor pieces (netherite protection, unbreakable): night vision, an energy shield and jetpack, speed, and fall immunity with step assist.
+- Two liveries: Vanguard (gunmetal with teal lights) and Ronin (crimson and silver, conical hat, red eyes), with 3D shoulder plates, skirts and hat. Smithing liveries switch between them and keep the charge.
+- The crimson Ronin katana. Inspired by Mekanism's MekaSuit (MIT); looks follow the owner's reference images; all art original.
+
 ### Unmerged: Gear, weapons and plastic blocks, batch 27
 - **Scuba mask and tank:** breathe under water on oxygen (8,000 mB, 400 s); fill the tank from a gas holder or machine.
 - **Free runners:** boots with no fall damage and a one-block step.

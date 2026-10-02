@@ -1325,6 +1325,8 @@ def machines():
         img.save(folder / f"{name}.png", optimize=True)
     import gear_textures
     gear_textures.draw_all(save, save_armor, part_palette)
+    import exosuit_art
+    exosuit_art.draw_all(save, save_armor)
     import plastic
     plastic.draw_all(save)
     save(conveyor_frame(0), "block", "conveyor_belt")

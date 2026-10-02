@@ -407,6 +407,19 @@ Empty tools mine like a bare hand and get no drops.
 
 **Code:** `gear/` (`JugcraftGear`, `ScubaTankItem`, `PowerKatanaItem`, `PowerBowItem`); plastic blocks in `chemistry/PetroBlocks`; data from `tools/gear.py` and `tools/plastic.py` ([feature record](features/gear-and-plastic.md)).
 
+### Powered exosuit (batch 28)
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Exosuit Helmet | Netherite armor; night vision in the dark (2 JE/t) | titanium plates, processor, tinted glass |
+| Exosuit Chestplate | Netherite armor; regrowing 4-heart shield (4,000 JE a half heart); jetpack | titanium plates, lithium cells, rocket pack, advanced circuit |
+| Exosuit Leggings | Netherite armor; +30% speed (1 JE/t) | titanium plates, advanced circuit, neodymium magnets |
+| Exosuit Boots | Netherite armor; no fall damage, full-block step (1 JE/t) | titanium plates, free runners, neodymium magnets |
+| Ronin Exosuit pieces, Ronin Katana | The same, in the crimson Ronin livery | smithing: Ronin Livery + piece (or power katana) + red dye |
+| Ronin / Vanguard Livery | Smithing templates that repaint the suit and katana, keeping charge | dyes around a steel plate (2) |
+
+**Code:** `gear/` (`JugcraftExosuit`, `ExosuitItem`, `Exosuit`), `tools/Jetpack`, client `ExosuitLayer`; data and art from `tools/exosuit.py` and `tools/exosuit_art.py` ([feature record](features/exosuit.md)).
+
 ## Oil
 
 The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line), [feature record](features/petrochemistry.md)).

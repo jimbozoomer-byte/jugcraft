@@ -347,7 +347,8 @@ def machine_page(block):
 
 
 def gear_pages():
-    """Batch 25: bronze and steel tools and armor, and paxels."""
+    """Batch 25: bronze and steel tools and armor, and paxels; batch 27 gear; batch 28 exosuit."""
+    import exosuit
     import gear
     grid = [item_for(gear.GEAR_TIERS["steel"]["ingot"]) if ch == "#" else ("minecraft:stick" if ch == "S" else None)
             for row in gear.PATTERNS["pickaxe"] for ch in row.ljust(3)]
@@ -378,6 +379,18 @@ def gear_pages():
             "The power katana hits harder and faster than a netherite sword, for 1,000 JE a hit. Empty, it hits for 1.",
             "The power bow fires arrows of energy for 500 JE a shot: no arrows needed, and they fly faster and hit "
             "harder. Empty, it is an ordinary bow that shoots your arrows."]},
+        {"title": "Powered Exosuit", "icon": f"{MOD}:exosuit_helmet", "text": [
+            "Four pieces of armor as strong as netherite that run on JE. Each piece holds "
+            f"{exosuit.CAPACITY:,} JE and charges at a charging station; capacity modules fit.",
+            "Helmet: night vision whenever it is dark. Chestplate: an energy shield that regrows up to four hearts of "
+            "absorption, and a jetpack (hold jump in the air). Leggings: 30% more speed. Boots: no fall damage and a "
+            "full-block step.",
+            "Each piece works only while it is charged; a flat piece is plain armor."]},
+        {"title": "Liveries", "icon": f"{MOD}:ronin_livery", "text": [
+            "The exosuit comes in Vanguard gunmetal. A Ronin livery at a smithing table, with a piece and red dye, "
+            "repaints it crimson and silver, with the Ronin's hat and skirt; the power katana becomes the crimson Ronin "
+            "katana.",
+            "A Vanguard livery with cyan dye paints it back. Repainting keeps the charge, modules and enchantments."]},
     ]
 
 
