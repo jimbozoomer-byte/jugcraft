@@ -1,11 +1,11 @@
 # Fall Additions
 
-Status: the chandlery (addition 1), the cider mill (addition 2) and the preserves pantry (addition 3) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
+Status: the chandlery (addition 1), the cider mill (addition 2), the preserves pantry (addition 3) and crows and working scarecrows (addition 4) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok lets build another 10 more thorough and well thought out festive halloween and fall additions, maybe for one we do candle making with an interesting process to make them allowing you to make a bunch of different combinations and then light them to give different cool effects to an aoe area like beacons do"). The ten additions ship one per pull request, each stacked on the one before:
 1. the chandlery: the Wax Melting Pot and Aura Candles;
 2. the cider mill: apple trees, the Cider Press, the Cider Barrel and four ciders;
 3. the preserves pantry: Mason Jars, eight preserves, the Canning Kettle and the Pantry Shelf;
-4. crows and working scarecrows (planned);
+4. crows and working scarecrows: crows that raid ripe crops, and scarecrows that keep them off;
 5. spooky fireworks (planned);
 6. a sky lantern festival (planned);
 7. a harvest feast table (planned);
@@ -14,10 +14,10 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok let
 10. face paint (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace).
-Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast.
+Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace). Crows need nothing to come but a ripe crop; the scarecrow that keeps them off is the existing one (a hay bale, wool and sticks), and its pumpkin heads come from any pumpkin patch.
+Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast. Crows are for farmers: a little pressure on open fields, answered by building and dressing scarecrows, and a source of feathers for fletchers and chandlers.
 
-Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, and preserves put up, all year.
+Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, and preserves put up, all year; crows come to fields all year too.
 
 ## Player experience
 ### The Wax Melting Pot
@@ -132,6 +132,18 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 ### The Pantry Shelf
 36. An open oak cupboard with a beadboard back and two shelves. Use it holding a jar (full, opened, sealed or empty) to put it up, three to a shelf; use it with an empty hand to take the last one down. Comparators read how full it is; broken, it spills its jars.
 
+### Crows
+37. **Crows come to fields by day.** Every ten seconds, for each player in the Overworld, there is a three-in-ten chance the game looks at one spot 16 to 40 blocks away. If a ripe crop open to the sky is within six blocks of it, a flock of two or three crows arrives in the sky above. There are at most six crows near a player and 32 in the world. They come only while mobs spawn (the `spawn_mobs` game rule).
+38. **A crow wheels a few blocks over the ground, cawing.** Now and then it spots a ripe crop open to the sky within 12 blocks, drops onto it and pecks at it for two seconds, its head bobbing; then the crop is **three growth stages back** (for wheat, from ripe to age 4). It rests 30 to 60 seconds before it raids again. Crows go for any fully grown crop of the vanilla crop kind: wheat, carrots, potatoes, beetroot, and Jugcraft's beans, sweet potatoes, flax, onions, garlic, cabbage, oats, barley and turnips. Tall crops, gourds and pumpkins on stems, bushes and trees are safe, and so is anything under a roof.
+39. **Pecking follows the `mob_griefing` game rule.** With it off, crows still come and wheel about but leave crops alone.
+40. **Scaring them off:** a crow takes flight from a player within six blocks (sneaking, you can get within two and a half), from a blow, and from a scarecrow; the crop it was after is spared. Crows don't attack.
+41. **At nightfall** crows give up their crops and climb away out of sight.
+42. **Crows drop up to two feathers** (for arrows, and for the chandlery's Featherfall scent). They have two hearts.
+
+### Working scarecrows
+43. **A Scarecrow now guards the crops round it:** within 4 blocks bare, 8 wearing a pumpkin head, and 12 wearing a lit one (a jack o'lantern, or a hand-carved pumpkin with a torch in it), measured across the ground from its head, and up to 6 blocks above or below it. Crows won't go for a guarded crop, and a crow after a crop takes flight within half a second of a scarecrow going up beside it.
+44. Nothing else about the scarecrow changes: it is placed, dressed, dyed and broken as before. It stands on any block with a solid top, so in a field it goes on a dirt, grass or path block rather than on farmland.
+
 ## Connections
 - Existing input producer: vanilla copper (the pot), bees (honeycomb), zombies (rotten flesh), spiders (string), dyes, and the scent items above; Jugcraft's `jugcraft:heat_sources` (the Cooking Pot's heat).
 - Existing output consumer:
@@ -155,6 +167,11 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - Pantry, output consumer: food that keeps (sealed jars), for expeditions and for the planned harvest feast (addition 7), which is to count dishes; preserves join `c:foods`.
 - Pantry, entry path: glass, an iron nugget, a cauldron, dye and iron bars are early-game; every preserve has a crop that grows wild or is vanilla. Only pickles need the cider mill (for vinegar).
 - Cider mill, entry path: apples drop from vanilla oak leaves, and a pressed apple's pomace gives apple seeds, so the first orchard needs no wild apple tree. The press and barrel are crafted from vanilla materials.
+- Crows, input producer: any ripe crop open to the sky; the existing Scarecrow, and pumpkins, jack o'lanterns and hand-carved pumpkins for its head.
+- Crows, output consumer: feathers, for vanilla arrows and the chandlery's Featherfall scent (`jugcraft:candle_scents/featherfall`); a use for scarecrows beyond decoration.
+- Crows, entry path: none needed to meet them; a scarecrow is a hay bale, wool and three sticks, all early-game.
+- Crows, required vs optional: crows are a nuisance, never a gate. A pecked crop is set back, never destroyed, and grows again; nothing in storage is touched. The game rules turn spawning and pecking off.
+- Crows and the plans: [AGRICULTURE.md](../branches/AGRICULTURE.md) promised that the scarecrow would one day keep crop-eating birds away; it now does.
 - Cider mill and the plans:
   - [AGRICULTURE.md](../branches/AGRICULTURE.md) plans orchards (slice 4) and a Fruit and Seed Press (apples into cider, grapes into juice, seed oil for engineers).
   - The apple tree is the first orchard tree, on the chestnut tree's pattern (now a shared `FruitingLeavesBlock`).
@@ -239,6 +256,14 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
     - The Cooking Pot already takes hoppers, so preserves can be cooked automatically.
     - The kettle and shelf are filled and emptied by hand.
 
+- **Crows:**
+  - Costs: a scarecrow is a hay bale, a wool and three sticks; a head is a pumpkin (carved, jack o'lantern, or hand-carved and lit).
+  - Units: blocks across and growth stages.
+  - A raid sets a ripe crop back three growth stages (wheat from 7 back to 4: three sevenths of its growing). A crow pecks for 40 ticks, then rests 600 to 1,200 ticks, so it raids once or twice a minute; a flock of three, three to six crops a minute, if no one is near and no scarecrow guards them.
+  - Guarded area: 4 blocks across (about 50 blocks of field), 8 (about 200) and 12 (about 450).
+  - **No positive-gain loop:** crows don't breed and aren't bred; a crow gives 0 to 2 feathers once and nothing else; feathers make no crows.
+  - Automation: a scarecrow works on its own, all day, and needs nothing.
+
 ## Multiplayer and persistence
 - **Server authority:**
   - Putting things in the pot, dipping, pouring, lighting and snuffing all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server.
@@ -297,6 +322,19 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
   - All are new.
 - **Pantry, disable behaviour:** with the agriculture feature off, the recipes don't load; blocks, items and components stay registered.
 
+- **Crows, server authority:** crows are server-side mobs; where they fly, which crop they pick, their pecking, fleeing and leaving, and the scarecrow checks are all decided on the server. Clients are sent the crow's position and whether it is pecking, to draw it; they decide nothing.
+- **Crows, persistence:**
+  - Crows are ambient mobs, as bats are: they despawn when no player is within 128 blocks, and in time when none is within 32. A crow's crop, rest and fleeing aren't saved; a crow loaded again just looks again.
+  - A crop changes only when a crow standing on it has pecked for two seconds, in a loaded chunk.
+  - Scarecrows save nothing new; a scarecrow's guard comes from its head, which it already saved.
+- **Crows, bounded work:**
+  - The spawner runs every 200 ticks: for each player, one entity count and at most 16 heightmap lookups.
+  - A crow looks for a crop every 20 ticks while not resting: 24 heightmap lookups within 12 blocks.
+  - Each crop it considers, and the crop it is after every 10 ticks, is checked against scarecrows: the block entities of the loaded chunks within 12 blocks (at most nine chunks).
+  - Nothing loads a chunk (`isLoaded`, `getChunkNow`).
+- **Crows, IDs:** the entity `jugcraft:crow`, its loot table `jugcraft:entities/crow` and texture `jugcraft:textures/entity/crow.png`. All new; the scarecrow keeps its ID and states.
+- **Crows, disable behaviour:** with the agriculture feature off, no crows come, and crows already about fly off as at nightfall; the entity stays registered, so a saved crow loads.
+
 ## Dependencies and assets
 No new dependencies. Every texture is drawn by code (`tools/chandlery_textures.py`): the pot's hammered copper and dark inside, the brass dish, the wax (pale, tinted by its colour as it is drawn), the wax's surface in the pot, the flame (white at its heart, tinted by its scent) and the candle's item in two layers (its body, tinted by its dyed colour; its wick and dish, not). The models, blockstates, item model, names, tooltip, messages, loot and tags come from `tools/chandlery_data.py`; the numbers from `CHANDLERY` in `tools/agriculture.py`. The client's `WaxPotRenderer` draws the wax in the pot at its level and colour; `AuraCandleRenderer` draws the candle at its height, layers and colour and its flame; both share `TintedBoxes`. The item's colour is the vanilla `dyed_color` component, read by the item model's dye tint. Sounds are vanilla's (honeycomb waxing, dye use, brewing, a bottle filling, a honey slide, a bucket emptying, a candle going out).
 
@@ -311,6 +349,12 @@ The pantry:
 - Models, the items' sealed-or-not models (a `minecraft:condition` on `jugcraft:sealed`), loot, tags and words come from `tools/pantry_data.py`; the numbers from `PANTRY` in `tools/agriculture.py`.
 - The client's `CanningKettleRenderer` and `PantryShelfRenderer` draw the water and jars (with `PreserveJars` and `TintedBoxes`).
 - Sounds are vanilla's (buckets, bottles, a chiseled bookshelf's slot, eating).
+
+Crows:
+- The texture is drawn by code in `tools/crow_textures.py`: glossy blue-black feathers with a lighter sheen along the wings' edges, a dark grey beak and feet, and pale yellow eyes.
+- Its name and loot come from `tools/crow_data.py`; the numbers from `CROWS` in `tools/agriculture.py`.
+- The client's `CrowModel` (head and beak, body, two wings that spread and beat in flight and fold while it pecks, a fanned tail, legs) and `CrowRenderer` draw it.
+- Sounds are vanilla's: a parrot's call, pitched down, for its caw; crops breaking when it has pecked.
 
 ## Verification
 ### Chandlery verification
@@ -415,12 +459,46 @@ The 8 new game tests (`PantryGameTests`):
 - a real three days of spoiling (the tests set the time back);
 - the sounds.
 
+### Crows verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-18` stacked on the preserves pantry:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the crows and scarecrows with Java: the crow's flight, fleeing, raiding, pecking, setback, rest, nightfall and look intervals, the spawner's timing, distances, flock and caps, the scarecrows' guard radii and height, the crow's health; checks the crow is registered with its attributes, named, and drops feathers) | Pass, 605 IDs (crows add an entity, not an item or block) |
+| `./gradlew build` on `71d42ef` (Build workflow run 37037813700) | Pass |
+| Game tests on the headless server, same run: 361 in total, 8 of them new here (`CrowGameTests`) | **All 361 pass**. They also all passed on `c2d093b` (run 37033625474) and `85e6c36` (run 37036340295). Run 37034790416, on a commit that changed only the client test, failed once on `main`'s `PetroGameTests.heliostatsHeatASolarReceiver` ("The receiver made 48 JE/t, expected 36 on tick 25"), which this branch doesn't touch; its re-run passed |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `71d42ef` (run 37037813700), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#crows-and-working-scarecrows): five crows on the client, one of them pecking for real. No model or texture errors for the crow in the log |
+
+The 8 new game tests (`CrowGameTests`):
+1. a bare scarecrow guards 4 blocks across and not 5, and 6 blocks up or down but not 7; wearing a carved pumpkin, 8 and not 9; wearing a jack o'lantern, 12;
+2. sent after ripe wheat, a crow lands and pecks; halfway through, the wheat is still ripe; after two seconds it is three stages back and the crow is done, and won't go for the unripe wheat;
+3. with its own AI (by day), a crow three blocks above flies down to the wheat it was sent after and pecks it back;
+4. a scarecrow going up beside the wheat a crow is pecking sends it off within half a second, the wheat spared; no other crow goes after a guarded crop;
+5. a sneaking player four blocks off doesn't scare a pecking crow; standing up, the player does, and it flies away from them; with no one near another crow pecks, and a blow sends it off;
+6. at nightfall a crow leaves its crop and climbs, and is gone once high over the ground;
+7. the spawner finds ripe wheat open to the sky, not under a glass roof, and brings a flock of two or three crows in the sky above it;
+8. a crow killed by a player drops at most two feathers; its loot table loads.
+
+Found by CI and fixed before this record:
+- The spawner test's field was under the game test's barrier ceiling, which crows rightly took for a roof; the test now lifts it, and checks that a glass roof keeps crows off (`c2d093b`). The other tests passed first time.
+- In the client test the scarecrow broke itself on farmland, which has no solid top, and the pecking crow was hidden in tall wheat; the scarecrow now stands on grass and the crow pecks carrots at the front of the patch (`0c18542`, `85e6c36`, `71d42ef`).
+
+**Not run (crows):**
+- a person playing it in a client: crows coming to a real farm, scaring them off, building scarecrows round a field;
+- a dedicated server with two players;
+- how often crows come to a real farm over a day (the tests call the spawner directly), or how much they set a farm back;
+- the sounds.
+
 ## World and event applicability
 - Candles and pots work anywhere, in every dimension, all year. Nothing is seasonal. The aura doesn't depend on biome, time or weather; harvest helps only plants that would grow there anyway.
 - Revealing shows creatures through walls (Glowing), which can help find hostile mobs in caves; it gives no other information.
 
 - Wild apple trees grow in plains and flower-rich biomes (`c:is_plains`, `c:is_floral`), in new chunks only, about one patch in twelve chunks there.
 - A barrel ages by game time, so sleeping through the night doesn't age it (sleeping skips the time of day, not game time).
+
+- Crows come to the Overworld only, by day (on the Overworld clock), wherever there are ripe crops open to the sky; they don't depend on the biome or the season.
 
 ## Rollout and open questions
 - The aura's area is a box reaching the radius in every direction, up and down too (a beacon's reaches the whole height of the world).
@@ -438,3 +516,8 @@ The 8 new game tests (`PantryGameTests`):
 - Preserves only spoil when unsealed; nothing else in Jugcraft spoils. A jar's three days count game time (sleeping doesn't hasten them).
 - The kettle and shelf can't be filled or emptied by hoppers yet.
 - A jar can be sealed only full and fresh: an opened jar can't be put up again.
+- Crows peck only crops of the vanilla crop kind (`CropBlock`); tall crops, gourds, bushes and fruit trees are safe.
+- A scarecrow's guard is a circle measured across the ground from its head; walls don't block it.
+- Crows don't eat crops from storage, trample farmland, or attack. A crop set back keeps its farmland.
+- The spawn chances, flock size and caps are first guesses, open to balance review in play.
+- Crows use vanilla sounds (a parrot's call pitched down); a crow's own caw would need a new sound file.
