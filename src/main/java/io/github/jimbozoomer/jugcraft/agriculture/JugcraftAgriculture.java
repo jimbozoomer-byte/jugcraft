@@ -250,6 +250,7 @@ public final class JugcraftAgriculture {
 	public static DataComponentType<CandyBatch> CANDY_BATCH;
 	public static BlockEntityType<CandyKettleBlockEntity> CANDY_KETTLE_ENTITY;
 	public static BlockEntityType<BatHouseBlockEntity> BAT_HOUSE_ENTITY;
+	public static EntityType<HayGolem> HAY_GOLEM;
 	/** Bat guano fertilizes the crops this far round where it is used (a 3x3 patch), with this many doses of bone meal each. */
 	public static final int GUANO_RADIUS = 1;
 	public static final int GUANO_DOSES = 1;
@@ -1375,6 +1376,13 @@ public final class JugcraftAgriculture {
 		registerItem("bat_house", props -> new BlockItem(batHouse, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		registerItem("bat_guano", props -> new FertilizerItem(props, GUANO_RADIUS, GUANO_DOSES), new Item.Properties()
 				.compostable(COMPOST_MEDIUM_HIGH), INGREDIENT_TAB);
+
+		// Fall additions 14, the Hay Golem: built from four hay bales and a carved head; a walking scarecrow that tends the
+		// crops round its post and carries the harvest home.
+		HAY_GOLEM = entity("hay_golem", EntityType.Builder.<HayGolem>of(HayGolem::new, MobCategory.MISC).sized(0.9F, 2.5F).eyeHeight(2.2F)
+				.clientTrackingRange(10));
+		FabricDefaultAttributeRegistry.register(HAY_GOLEM, HayGolem.createAttributes());
+		UseBlockCallback.EVENT.register(HayGolem::onUseBlock);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

@@ -803,6 +803,7 @@ def check_agriculture():
     check_candy(java, main)
     check_foraging(java, main)
     check_bats(java, main)
+    check_hay_golem(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2788,6 +2789,51 @@ def check_bats(java, main):
     guano = load(DATA / "jugcraft" / "recipe" / "phosphate_from_bat_guano.json") or {}
     if guano.get("ingredients") != [f"jugcraft:{bt['guano']}"] * bt["guano_per_phosphate"]:
         err(f"Phosphate takes {bt['guano_per_phosphate']} guano (tools/agriculture.py)")
+
+
+def check_hay_golem(java, main):
+    """The Hay Golem: HayGolem.java matches HAY_GOLEM in tools/agriculture.py (health, speed, post radius, search height,
+    tending, work, give-up and idle times, pouch, carry, wheat's healing, fire, hay bales, reach, leading range); it is
+    registered with its size and attributes and its building callback; it guards as a scarecrow (Scarecrows looks for
+    golems); it is named, drops wheat, has its head tag, texture and advancement; and its model lays its boxes where the
+    texture paints them."""
+    hg = ag.HAY_GOLEM
+    source = java.get("HayGolem", "")
+    found = {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;", source)}
+    expected = {"MAX_HEALTH": hg["health"], "SPEED": hg["speed"], "POST_RADIUS": hg["post_radius"], "SEARCH_HEIGHT": hg["search_height"],
+                "TEND_TICKS": hg["tend_ticks"], "WORK_TICKS": hg["work_ticks"], "GIVE_UP_TICKS": hg["give_up_ticks"],
+                "POUCH_SLOTS": hg["pouch_slots"], "CARRY": hg["carry"], "IDLE_TICKS": hg["idle_ticks"], "WHEAT_HEAL": hg["wheat_heal"],
+                "FIRE_FACTOR": hg["fire_factor"], "HAY_BALES": hg["hay_bales"], "REACH": hg["reach"], "LEAD_RANGE": hg["lead_range"]}
+    for name, value in expected.items():
+        if name not in found or abs(found[name] - value) > 1e-6:
+            err(f"HayGolem.{name} = {found.get(name)} differs from HAY_GOLEM in tools/agriculture.py ({value})")
+    if f'Jugcraft.id("{hg["heads_tag"].split(":", 1)[1]}")' not in source:
+        err(f"HayGolem.HEADS must be {hg['heads_tag']}")
+    width, height = hg["size"]
+    if (f'entity("{hg["entity"]}", EntityType.Builder.<HayGolem>of(HayGolem::new, MobCategory.MISC).sized({width}F, {height}F)' not in main
+            or "FabricDefaultAttributeRegistry.register(HAY_GOLEM, HayGolem.createAttributes())" not in main
+            or "UseBlockCallback.EVENT.register(HayGolem::onUseBlock)" not in main):
+        err("JugcraftAgriculture.java must register the Hay Golem with its size, attributes and building callback")
+    if "HayGolem.class" not in java.get("Scarecrows", ""):
+        err("Scarecrows.guarded must count Hay Golems")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"entity.jugcraft.{hg['entity']}") != hg["display"]:
+        err("The Hay Golem has no name")
+    table = load(DATA / "jugcraft" / "loot_table" / f"{hg['table']}.json") or {}
+    if "minecraft:wheat" not in json.dumps(table):
+        err("A Hay Golem must drop wheat")
+    heads = load(DATA / "jugcraft" / "tags" / "item" / f"{hg['heads_tag'].split(':', 1)[1]}.json") or {}
+    if sorted(heads.get("values", [])) != sorted(hg["heads"]):
+        err(f"The tag {hg['heads_tag']} must hold the heads in HAY_GOLEM")
+    for path in (ASSETS / "textures" / "entity" / f"{hg['entity']}.png", DATA / "jugcraft" / "advancement" / "man_of_straw.json"):
+        if not path.exists():
+            err(f"The Hay Golem needs {path.relative_to(ROOT)}")
+    import hay_golem_textures
+    model_path = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "HayGolemModel.java"
+    model = model_path.read_text(encoding="utf-8") if model_path.exists() else ""
+    for name, (u, v, *_size) in hay_golem_textures.BOXES.items():
+        if f"texOffs({u}, {v})" not in model:
+            err(f"HayGolemModel has no box at ({u}, {v}) for the texture's {name}")
 
 
 def check_model_uvs():

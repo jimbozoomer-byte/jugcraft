@@ -894,4 +894,6 @@ def crop_textures():
     out.update(foraging_textures())
     from bat_textures import bat_textures  # and the Bat House
     out.update(bat_textures())
+    from hay_golem_textures import hay_golem_textures  # and the Hay Golem
+    out.update(hay_golem_textures())
     return out

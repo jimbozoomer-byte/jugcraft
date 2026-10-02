@@ -546,6 +546,8 @@ HALLOWEEN_ADVANCEMENTS = {
                     "frame": "task"},
     "night_shift": {"icon": "jugcraft:bat_house", "title": "Night Shift", "description": "Watch bats pour out of a Bat House at dusk",
                     "frame": "task"},
+    "man_of_straw": {"icon": "minecraft:hay_block", "title": "Man of Straw", "description": "Build a Hay Golem from hay bales and a carved pumpkin",
+                     "frame": "task"},
     "fairy_ring": {"icon": "jugcraft:fly_agaric", "title": "Away with the Fairies",
                    "description": "Stand in a fairy ring under a full moon", "frame": "goal"},
     "forager": {"icon": "jugcraft:foraging_basket", "title": "Forager", "description": "Carry all five wild mushrooms in a Foraging Basket",
@@ -1460,6 +1462,23 @@ def foraging_items():
 BATS = {"house": "bat_house", "house_display": "Bat House", "guano": "bat_guano", "guano_display": "Bat Guano", "tag": "jugcraft.bat_house",
         "capacity": 4, "guano_cap": 16, "return_range": 32, "move_in_chance": 0.5, "check_ticks": 20,
         "guano_radius": 1, "guano_doses": 1, "guano_per_phosphate": 4}
+
+
+# The Hay Golem (HayGolem, an entity): built from `hay_bales` hay bales (two stacked, an arm either side of the upper one)
+# and a carved head from `heads_tag`. It keeps a post (where it was built or was last led with wheat, `lead_range`) and
+# guards crops from crows as a scarecrow wearing its head would (CROWS["guard"]). Every `tend_ticks` it harvests the
+# nearest ripe crop within `post_radius` (and `search_height` up or down) of its post, working `work_ticks` at it,
+# replanting from the drops, pouching the rest (`pouch_slots` stacks); it carries `carry` items or more home, or what it has
+# after `idle_ticks` without a harvest, giving up on a crop or the trip after `give_up_ticks`. Wheat heals `wheat_heal`;
+# fire hurts `fire_factor` times; killed it drops `wheat` wheat (min, max), its head and pouch.
+HAY_GOLEM = {"entity": "hay_golem", "display": "Hay Golem", "health": 20, "speed": 0.25, "size": [0.9, 2.5],
+             "post_radius": 8, "search_height": 2, "tend_ticks": 100, "work_ticks": 10, "give_up_ticks": 300,
+             "pouch_slots": 9, "carry": 32, "idle_ticks": 200, "wheat_heal": 4.0, "fire_factor": 2.0, "hay_bales": 4,
+             "reach": 1.8, "lead_range": 8.0, "heads_tag": "jugcraft:hay_golem_heads",
+             "heads": ["minecraft:carved_pumpkin", "minecraft:jack_o_lantern", "jugcraft:hand_carved_pumpkin",
+                       "jugcraft:hand_carved_white_pumpkin", "jugcraft:hand_carved_jarrahdale_pumpkin",
+                       "jugcraft:hand_carved_cinderella_pumpkin"],
+             "wheat": [2, 5], "table": "entities/hay_golem"}
 
 
 def bat_blocks():
