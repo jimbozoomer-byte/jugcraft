@@ -104,13 +104,18 @@ def model(ref):
 def _hi_res(name):
     """The drone tower's realistic block textures (tools/tower_art.py) are 64x64."""
     import tower_art
-    return name in tower_art.TEXTURES or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_"))
+    import blueprints
+    return (name in tower_art.TEXTURES or name in blueprints.TABLE_TEXTURES
+            or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_")))
 
 
 def item_models(definition):
-    """Every model an item definition can show, through condition and range_dispatch (the power bow's draw)."""
+    """Every model an item definition can show, through select (the blueprint's kinds), condition and range_dispatch
+    (the power bow's draw)."""
     if "model" in definition:
         model(definition["model"])
+    for case in definition.get("cases", []):
+        item_models(case["model"])
     for key in ("on_true", "on_false", "fallback"):
         if key in definition:
             item_models(definition[key])
