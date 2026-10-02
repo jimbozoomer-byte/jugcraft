@@ -1,23 +1,23 @@
 # Fall Additions
 
-Status: the chandlery (addition 1), the cider mill (addition 2), the preserves pantry (addition 3), crows and working scarecrows (addition 4) and spooky fireworks (addition 5) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
+Status: the chandlery (addition 1), the cider mill (addition 2), the preserves pantry (addition 3), crows and working scarecrows (addition 4), spooky fireworks (addition 5), the sky lantern festival (addition 6), the Harvest Feast Table (addition 7), the corn maze (addition 8), ghost hunting (addition 9) and face paint (addition 10) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok lets build another 10 more thorough and well thought out festive halloween and fall additions, maybe for one we do candle making with an interesting process to make them allowing you to make a bunch of different combinations and then light them to give different cool effects to an aoe area like beacons do"). The ten additions ship one per pull request, each stacked on the one before:
 1. the chandlery: the Wax Melting Pot and Aura Candles;
 2. the cider mill: apple trees, the Cider Press, the Cider Barrel and four ciders;
 3. the preserves pantry: Mason Jars, eight preserves, the Canning Kettle and the Pantry Shelf;
 4. crows and working scarecrows: crows that raid ripe crops, and scarecrows that keep them off;
 5. spooky fireworks: rockets that burst into a bat, a jack o'lantern, a ghost or a skull drawn in sparks, and the Show Launcher;
-6. a sky lantern festival (planned);
-7. a harvest feast table (planned);
-8. a corn maze (planned);
-9. ghost hunting (planned; its ectoplasm is to become a candle scent);
-10. face paint (planned).
+6. the sky lantern festival: Sky Lanterns that drift up together, the festival eight of them make, and mooncakes for a full moon;
+7. the Harvest Feast Table: a long table to set with the harvest, and a feast that grows with its variety and its company;
+8. the corn maze: a gate that plants a maze of corn from its own seed, and times runners through it;
+9. ghost hunting: restless spirits that rise from graves at night, the Spirit Lantern that reveals them, and Ectoplasm, the Ghostly candle scent;
+10. face paint: a kit that paints six designs on players' faces, which count as costumes.
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace). Spooky fireworks are Discovery tier too: paper, gunpowder and the picture's ingredients (a feather and black dye, a carved pumpkin, a phantom membrane or a bone), and glowstone dust to twinkle; the Show Launcher is a dispenser, iron ingots, planks and redstone. Crows need nothing to come but a ripe crop; the scarecrow that keeps them off is the existing one (a hay bale, wool and sticks), and its pumpkin heads come from any pumpkin patch.
-Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast. Crows are for farmers: a little pressure on open fields, answered by building and dressing scarecrows, and a source of feathers for fletchers and chandlers. Spooky fireworks are for anyone throwing a party: one rocket for a moment, or a Show Launcher's nine tubes for a planned show.
+Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace). Spooky fireworks are Discovery tier too: paper, gunpowder and the picture's ingredients (a feather and black dye, a carved pumpkin, a phantom membrane or a bone), and glowstone dust to twinkle; the Show Launcher is a dispenser, iron ingots, planks and redstone. Crows need nothing to come but a ripe crop; the scarecrow that keeps them off is the existing one (a hay bale, wool and sticks), and its pumpkin heads come from any pumpkin patch. The sky lantern festival is Discovery tier too: paper, string and a candle (lanterns), any dye for a colour and an anvil for a wish; mooncakes are baked in the Kitchen Garden's Cooking Pot from wheat, sugar, an egg and beans, roasted chestnuts or a pumpkin. The Harvest Feast Table is Discovery tier too: wooden slabs and logs; what it rewards is a varied harvest, so its best feasts come as a farm grows. The corn maze is Discovery tier too: a hay bale and sticks (the gate) and corn kernels, a kernel a stalk of wall. Ghost hunting is Discovery tier too: gold nuggets, glass panes, an amethyst shard and a candle (the Spirit Lantern), glass bottles, and the graveyard decorations' gravestones and grave mounds. Face paint is Discovery tier too: a bowl and white, black, orange and green dye.
+Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast. Crows are for farmers: a little pressure on open fields, answered by building and dressing scarecrows, and a source of feathers for fletchers and chandlers. Spooky fireworks are for anyone throwing a party: one rocket for a moment, or a Show Launcher's nine tubes for a planned show. Sky lanterns are for gatherings: one player can let eight go and hold a festival alone, but a crowd fills the sky faster, and everyone there shares the Luck; mooncakes are for cooks, and for anyone out under a full moon. The feast table is for farmers and cooks to share their harvest: a host sets a long table, and everyone who eats there shares the blessing, so a group fills up before a dig, a raid or a boss. The corn maze is for farmers who grow corn and for anyone at a harvest party: one player plants it, and anyone can run it against the clock. Ghost hunting is for explorers and chandlers: a hunter with a lantern reveals the spirits haunting a graveyard to everyone near, friends corner them, and the Ectoplasm they catch scents candles. Face paint is for anyone dressing up: a painter does a friend's face in a moment, and a painted face is a costume that leaves the head free for a hat, or for a helmet once the party's over.
 
-Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, and preserves put up, all year; crows come to fields all year too, and fireworks go up whenever someone lights them.
+Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, and preserves put up, all year; crows come to fields all year too, and fireworks and sky lanterns go up whenever someone lets them go. A mooncake's Luck comes with every full moon, one night in eight, and a feast can be held, or a maze run, any day.
 
 ## Player experience
 ### The Wax Melting Pot
@@ -54,7 +54,8 @@ Nothing here depends on the Halloween event: candles are made and burned, and ci
 | Mending | a ghast tear | players get Regeneration |
 | Warding | a fermented spider eye | hostile mobs are slowed and weakened |
 | Harvest | bone meal | growing plants get extra growth ticks |
-| Revealing | a glow ink sac | other creatures glow, so they show through walls |
+| Revealing | a glow ink sac | other creatures glow, so they show through walls (and restless spirits are revealed) |
+| Ghostly | Ectoplasm (caught from restless spirits) | players turn invisible |
 
 Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add items to it.
 
@@ -159,6 +160,57 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
     - **as a finale:** one from every tube at once.
 52. Rockets leave the tubes **fanned out from the middle**, so a volley or a finale spreads across the sky. A show runs until the tubes are empty (a finale fires once). Comparators read how many tubes are loaded; broken, it spills its rockets.
 
+### Sky lanterns
+53. **Sky Lanterns:** five paper, two string and a candle make two. Dye one in the crafting grid, as leather armour is dyed (warm red undyed), and name it in an anvil: the name is its **wish**, shown over it as it rises.
+54. **Letting one go:** use it and it is lit and let go just in front of you. It rises 0.7 blocks a second, bobbing a little and turning slowly, and drifts on **a wind every lantern shares**: 0.3 blocks a second, its direction turning full circle every three days. Lanterns let go together drift together, so a festival's lanterns rise as one cloud.
+55. **Glowing and burning out:** the paper glows in its colour, lighter where the flame shines through, and flickers. A lantern burns for two minutes to two and a half, dims over its last five seconds and is gone; one that rises above the world is gone too. A blow tears it and puts it out with a hiss. It lights no blocks and sets nothing alight.
+
+### The lantern festival
+56. **Eight lanterns let go within 32 blocks of each other in two minutes**, by one player or many, make a festival. Everyone within 32 blocks is told "The sky fills with lanterns! Make a wish", gets **Luck for five minutes** and earns **A Sky Full of Wishes**. The same place holds no second festival for a day.
+
+### Mooncakes
+57. **Three mooncakes**, baked four at a time in the Cooking Pot (15 seconds) from two wheat, a sugar, an egg and a filling: **red bean** (two beans), **chestnut** (two roasted chestnuts) or **pumpkin** (a pumpkin).
+58. Each is 3 food. Eaten **outdoors on a full-moon night** (the sky open above you), a mooncake also gives **Luck for five minutes**.
+
+### The Harvest Feast Table
+59. **A long trestle table** of honey oak with an orange runner: three wooden slabs over two logs make two lengths. Lengths placed end to end along the same line **join into one table**, with legs only at its ends; a length placed against a table's end carries on along it, and one placed across stands alone.
+60. **Serving:** each length holds **two dishes**, one at each half. Use it holding any food or drink to serve it on the dish you point at: **up to eight servings**, one food to a dish. Each dish sits on a cream plate, heaped higher the more servings are left. Sneak and use it with an empty hand to take a dish back; broken, a length spills its dishes.
+61. **Eating:** use it with an empty hand to eat a serving from the dish you point at. It feeds you just as eating it would, and a stew leaves its bowl. You can eat a serving whether or not you are hungry.
+
+### The feast
+62. **A feast's score** is how many different foods are on the whole table plus how many players have eaten at it in the last two minutes. Every serving eaten works it out and blesses every recent diner within 16 blocks, the eater included:
+    - 3 or more, **a good meal**: Regeneration for 10 seconds;
+    - 5 or more, **a feast**: Absorption for two minutes as well;
+    - 8 or more, **a harvest feast**: Haste and Luck for five minutes as well;
+    - 11 or more, **a grand feast**: Health Boost for five minutes as well, and the advancement **Harvest Home**.
+63. The eater is told how the meal went ("A harvest feast! (7 dishes, 1 at the table)"). Alone at a table of seven foods you reach a harvest feast; a grand feast needs friends (six foods and five diners) or a very varied table (ten foods alone).
+
+### The corn maze
+64. **The Corn Maze Gate:** two hay-wrapped posts and a crossbar with a green pennant; a hay bale and four sticks make one. It faces away from whoever placed it, into the maze it will plant ahead of it.
+65. **Choosing a size:** sneak and use it with an empty hand to step through **tiny** (7 by 7 blocks), **small** (11 by 11), **medium** (15 by 15) and **large** (19 by 19).
+66. **Planting:** use it holding corn kernels. The gate carves a new maze from a fresh seed: a perfect maze, with one way through and every part reachable, the entrance at the gate and the exit straight across on the far side. It plants **maze corn** along the walls, **a kernel a stalk**: 30 kernels for a tiny maze on clear, flat ground, 70 for small, 126 for medium and 198 for large. It plants only where the ground is solid and the three blocks above are clear, and never replaces a block, so plant on open, level ground: a tree or a wall in the way stays where it is. The **finish post**, the gate's twin with a chequered flag, goes at the exit. If that square isn't clear the gate says so and plants nothing; if you carry too few kernels it says how many it needs. A planted maze isn't planted again.
+67. **Maze corn:** three blocks of tall, ripe corn planted close as a wall. It can't be walked through, doesn't grow, and stands on any solid ground. Breaking a stalk anywhere brings down what is above; its bottom gives back the kernel it was planted from.
+
+### Running the maze
+68. **Walk out through the gate** to start the clock ("Go! Find the way through"), and reach the finish post to stop it. Standing in the gate restarts your clock.
+69. **Fair runs:** the server follows each runner every tick. A run is void if the runner flies or glides, climbs up over the corn, leaves the maze, takes more than ten minutes, or reaches the finish having walked less than four fifths of the shortest way through (a shortcut, say through a broken wall). Sixteen can run at once.
+70. **The board:** the runner is told their time, and each runner's best goes on the gate's board of the top three. The first time a runner places on a gate's board they get a prize ribbon, first, second or third (the Harvest Scale's ribbons); finishing at all earns **A-maze-ing**. Use the gate with an empty hand to see the maze's size and its board.
+
+### Ghost hunting
+71. **Graves stir at night.** Gravestones (rounded, cross and obelisk) and grave mounds now take random ticks, about one a minute each at the default rate; at night on the Overworld clock, one in four raises a **restless spirit** above the grave, until three are within 16 blocks. Spirits need the `spawn_mobs` game rule and the agriculture feature.
+72. **Restless spirits** are pale, hooded shapes of see-through wisps, arms reaching, tails trailing away to nothing, with hollow eyes and a moaning mouth. Each haunts its grave, drifting about it up to 6 blocks across the ground and from half a block to 3 blocks above it. **No one sees a spirit until it is revealed**; hidden, it can't be aimed at, and it heeds no one.
+73. **The Spirit Lantern:** a brass lantern with a pale green flame behind amethyst glass (three gold nuggets, two glass panes, an amethyst shard and a candle). **Held in either hand, it reveals every spirit within 12 blocks, to everyone near**, not only its bearer. A revealed spirit fades into view with a shimmer, glows faintly, moans now and then and stares at whoever is nearest. A **Revealing** aura candle reveals the spirits in its glow too.
+74. **The hunt:** a revealed spirit **shies away** from anyone within 3 blocks (a sneaking player gets to a block and a half), but it never leaves its haunt, so it can be cornered at the edge, or by friends coming at it from both sides. Blows pass straight through it. At dawn spirits fade.
+75. **Catching one:** use a glass bottle on a revealed spirit and the bottle fills with **Ectoplasm**, glowing green ooze. The first catch earns **Ghost Hunter**. A spirit drops nothing else.
+76. **Ectoplasm** is the **Ghostly** candle scent: stirred into molten wax it gives its bottle back, and a lit Ghostly candle turns the players in its aura **invisible**.
+
+### Face paint
+77. **The Face Paint Kit:** a tin palette of greasepaints and a brush (a bowl and white, black, orange and green dye), good for **16 faces**. Its dial is set to one of six designs: a **skull**, a **jack o'lantern**, a **black cat**, a **vampire**, a **witch** or a **scarecrow**. Sneak and use it to turn the dial; the kit's tooltip shows the design.
+78. **Painting:** use the kit on another player to paint their face at once, or hold use for a second and a half to paint your own. Painting over a painted face replaces the design. Each face wears the kit by one use. Painting a friend's face earns **Face Painter**.
+79. **On the face:** the design is drawn over the face of the painted player's skin, for everyone who can see them, turning and nodding with the head. Designs leave the skin showing where they don't paint (the cat's whiskers, the scarecrow's rosy cheeks), and some leave the eyes clear (the vampire, the witch). A helmet or a pumpkin on the head covers the face as it would.
+80. **Washing off:** paint lasts until the player's head goes under water, or they die.
+81. **A costume:** a painted face counts as a costume for trick-or-treating (with nothing on the head) and for the costume contest's runway. A costume hat's extra treat still needs the hat.
+
 ## Connections
 - Existing input producer: vanilla copper (the pot), bees (honeycomb), zombies (rotten flesh), spiders (string), dyes, and the scent items above; Jugcraft's `jugcraft:heat_sources` (the Cooking Pot's heat).
 - Existing output consumer:
@@ -190,6 +242,26 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - Fireworks, output consumer: celebrations: the Halloween events, the Carving Contest and the regatta, and the harvest feast to come. Not a progression item.
 - Fireworks, entry path: everything is early-game; the phantom membrane needs a few sleepless nights, and the other three pictures don't.
 - Fireworks, required vs optional: purely celebratory, all year, reachable solo.
+- Lanterns, input producer: paper (sugar cane), string (spiders), candles, dyes, an anvil; for mooncakes, wheat, sugar, eggs, the Kitchen Garden's beans, the festival crops' roasted chestnuts, pumpkins and the Cooking Pot.
+- Lanterns, output consumer: gatherings: the Halloween events, the harvest feast to come, and any celebration. Luck (vanilla's: better loot rolls and fishing) for everyone at a festival or under a full moon. Not a progression item.
+- Lanterns, entry path: everything is early-game; the Cooking Pot is the Kitchen Garden's first station.
+- Lanterns, required vs optional: purely celebratory, all year, reachable solo (one player can let eight go).
+- Feast, input producer: every food and drink in the game: the Kitchen Garden's Cooking Pot dishes, the festival crops, the cider mill's ciders, mooncakes and vanilla food; wooden slabs and logs for the table.
+- Feast, output consumer: groups before a dig, a raid or a boss (Regeneration, Absorption, Haste, Luck and Health Boost), and the advancement Harvest Home. It gives every food a second use and rewards growing many crops rather than one.
+- Feast, entry path: the table is wood, and any food at all makes a meal; its higher feasts come with a varied farm and with friends.
+- Feast, required vs optional: optional and all year; reachable solo up to a harvest feast.
+- Maze, input producer: corn kernels (from corn, the Fall Harvest's first crop), a hay bale and sticks.
+- Maze, output consumer: harvest parties and friendly races; the Harvest Scale's prize ribbons and the advancement A-maze-ing. Clearing a maze gives its kernels back for the next.
+- Maze, entry path: corn is an early crop, and a tiny maze needs only 30 kernels.
+- Maze, required vs optional: optional and all year; one player can plant and run a maze alone, and a board of best times gives friends something to beat.
+- Ghosts, input producer: the graveyard decorations' gravestones and grave mounds (now where spirits rise), gold nuggets, glass panes, an amethyst shard and a candle (the lantern), glass bottles; the chandlery's Revealing candles reveal spirits too.
+- Ghosts, output consumer: the chandlery: Ectoplasm is its twelfth scent, Ghostly (Invisibility), for hide-and-seek, haunted houses and sneaking past mobs. The advancement Ghost Hunter.
+- Ghosts, entry path: the lantern is early-game (an amethyst shard from a geode); a gravestone is cut from stone on a stonecutter, and a grave mound is two dirt and a rotten flesh; spirits need only a grave and a night.
+- Ghosts, required vs optional: optional and all year; one hunter can corner a spirit alone, and a group, with one lantern among them, all see the spirits.
+- Face paint, input producer: dyes (white, black, orange, green) and a bowl.
+- Face paint, output consumer: trick-or-treating and the costume contest, which now take a painted face as a costume; parties and screenshots.
+- Face paint, entry path: everything is early-game.
+- Face paint, required vs optional: cosmetic, all year; one player can paint their own face.
 - Crows and the plans: [AGRICULTURE.md](../branches/AGRICULTURE.md) promised that the scarecrow would one day keep crop-eating birds away; it now does.
 - Cider mill and the plans:
   - [AGRICULTURE.md](../branches/AGRICULTURE.md) plans orchards (slice 4) and a Fruit and Seed Press (apples into cider, grapes into juice, seed oil for engineers).
@@ -290,6 +362,33 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
   - Nothing is made back from a rocket: it is gone when it bursts. No damage, so no use as a weapon.
   - Automation: dispensers and the launcher both fire them, by redstone; hoppers load the launcher.
 
+- **Sky lanterns:**
+  - Costs: two lanterns from five paper, two string and a candle; a dye to colour one. A festival's eight lanterns are four crafts: 20 paper, 8 string and 4 candles.
+  - Units: a lantern rises 0.035 blocks a tick and drifts 0.015, the wind's direction turning full circle every 72,000 ticks; it burns 2,400 to 3,000 ticks and dims over the last 100.
+  - The festival: 8 lanterns within 32 blocks in 2,400 ticks; Luck for 6,000 ticks; one festival a place a day (24,000 ticks).
+  - Nothing is made back: a lantern is gone when it burns out, torn or not. The reward is an effect and an advancement, never an item, so there is no loop.
+- **Mooncakes:**
+  - Costs: four cakes from two wheat, a sugar, an egg and the filling, in 300 ticks in the Cooking Pot.
+  - 3 food each, saturation modifier 0.6. Luck for 6,000 ticks, only outdoors on a full-moon night: one night in eight.
+- **The feast table:**
+  - Costs: two lengths from three wooden slabs and two logs. Every blessing costs a serving: one food item eaten.
+  - Units: a dish holds 8 servings; a table counts at most 8 lengths (16 dishes) from where you eat; diners count for 2,400 ticks after they last ate; the blessing reaches 16 blocks.
+  - Tiers by score: 3, 5, 8 and 11. Regeneration I for 200 ticks; Absorption I for 2,400; Haste I, Luck and Health Boost I for 6,000. A higher tier gives the lower tiers' effects too, and another serving refreshes them; they don't stack in strength.
+  - Unlike a beacon, the feast uses food for every blessing, and its effects end. Nothing is made: a serving is eaten, and its container (a bowl, a bottle) comes back as it would. No loop.
+- **The corn maze:**
+  - Costs: the gate from a hay bale and four sticks; a kernel a stalk of wall (30, 70, 126 or 198 on clear ground). The finish post drops nothing.
+  - Units: mazes of 3, 5, 7 and 9 cells across (7, 11, 15 and 19 blocks); planting 32 stalks a tick; a run at most 12,000 ticks; a shortcut is a run that walked less than 0.8 of the shortest way through, in blocks across the ground.
+  - Return: each stalk gives back its one kernel from its bottom, and nothing else. A ribbon comes once for each runner on each gate (the gate remembers the last 64), so running a maze again only betters a time. No loop.
+- **Ghost hunting:**
+  - Costs: the lantern from three gold nuggets, two glass panes, an amethyst shard and a candle; a glass bottle a catch (it comes back when the Ectoplasm is stirred into wax).
+  - Units: a grave stirs on 1 random tick in 4, at night only; at most 3 spirits within 16 blocks; a spirit's haunt is 6 blocks across and 3 up; it drifts at 0.04 blocks a tick and shies at 0.12 (a walking player covers about 0.22); a lantern reveals within 12 blocks, looking every 10 ticks, each look lasting 40.
+  - Yield: one Ectoplasm a spirit; one Ectoplasm scents a pot of wax, as any scent item does. A graveyard of a dozen graves gives about two or three spirits a minute at night while it has room for them; a single grave about two a night.
+  - Nothing is made from nothing: a spirit needs a grave and a night, a catch needs a bottle, and Ectoplasm only scents wax. No loop.
+- **Face paint:**
+  - Costs: a kit from a bowl and four dyes, good for 16 faces.
+  - Units: painting your own face takes 32 ticks; the server looks for painted faces under water every 20 ticks.
+  - Face paint makes nothing and gives no effect: it is a costume, and the costume rules' rewards (one treat a home a night, a contest ribbon by vote) are unchanged. No loop.
+
 ## Multiplayer and persistence
 - **Server authority:**
   - Putting things in the pot, dipping, pouring, lighting and snuffing all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server.
@@ -366,6 +465,33 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - **Fireworks, bounded work:** a launcher ticks only while a show runs; a rocket ticks as any projectile; a burst is drawn on the client from one message.
 - **Fireworks, IDs:** items `bat_firework`, `pumpkin_firework`, `ghost_firework` and `skull_firework`; block with item `show_launcher` and its block entity; entity `spooky_rocket`; particle `jugcraft:spooky_spark`; data component `jugcraft:twinkle`; the network message `jugcraft:spooky_burst`; 24 rocket recipes and the launcher's. All new.
 - **Fireworks, disable behaviour:** with the agriculture feature off, the recipes don't load; everything stays registered.
+- **Lanterns, server authority:** the server lets every lantern go (through vanilla's item use path, using one up), moves it and burns it out. The festival is counted on the server from its own record of releases, and the Luck, message and advancement are given there. A mooncake's Luck is decided on the server from the Overworld clock and whether the sky is open above the eater. Clients are sent a lantern's position, colour and when it burns out, to draw it; they decide nothing.
+- **Lanterns, persistence:** a lantern saves its colour and when it burns out; its wish is its name. The festival's count is kept in memory only (at most 256 recent releases, and the last day's festivals): a restart forgets it, so a festival under way starts its count again, and a place could hold a second festival the same day after a restart.
+- **Lanterns, bounded work:** a lantern ticks like any entity, one fixed step a tick, and is tracked by clients within 10 chunks. Each release looks once through at most 256 remembered releases. Nothing loads a chunk.
+- **Lanterns, IDs:** item `sky_lantern` and entity `sky_lantern`; items `red_bean_mooncake`, `chestnut_mooncake` and `pumpkin_mooncake`; advancement `lantern_festival`; the lantern's recipe and the three Cooking Pot recipes. All new.
+- **Lanterns, disable behaviour:** with the agriculture feature off, the recipes don't load; lanterns already made can still be let go, and everything stays registered.
+- **Feast, server authority:** serving, eating and taking a dish back go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server. The server checks that the item is food, that the dish is empty or holds the same food and has room, and that a dish eaten from isn't empty. The score, the diners and the blessing are worked out on the server; a diner is blessed only if alive and within 16 blocks of the table. Clients are sent the dishes, to draw them; they decide nothing.
+- **Feast, concurrent use:** two players eating from one dish each take their own serving, one after the other on the server; the last serving goes to whoever's use arrives first.
+- **Feast, persistence:** each length saves its two dishes. Who has eaten there is kept in memory only: a restart forgets the diners, never the dishes.
+- **Feast, bounded work:** a table never ticks. A meal walks at most 8 lengths of table and looks through their recent diners once.
+- **Feast, IDs:** block with item `feast_table` and its block entity; advancement `harvest_home`; the table's recipe. All new.
+- **Feast, disable behaviour:** with the agriculture feature off, the recipe doesn't load; tables already placed still serve and feast, and everything stays registered.
+- **Maze, server authority:** choosing the size and planting go through vanilla's block use path and are decided on the server, which takes the kernels, carves the maze and plants it. The server starts, follows and finishes every run from the positions it already has for its players; clients claim nothing. A run is void for flying, gliding, spectating, climbing over the corn, leaving the maze, taking too long or a shortcut. Times are counted in the server's game ticks.
+- **Maze, concurrent use:** up to sixteen runners at once, each timed alone; each runner's best counts once on the board.
+- **Maze, persistence:** the gate saves its size, seed, whether it is planted, its maze's shortest way, any stalks still to plant, its board and who has had a ribbon (the last 64). The maze itself is blocks in the world. Runs in progress are kept in memory only, so a restart ends them.
+- **Maze, bounded work:** a gate plants at most 32 stalks a tick. A planted gate looks for players in its own square each tick and, while anyone runs, in the finish post's square and at its runners (at most sixteen). The maze's plan is carved once and kept. Nothing loads a chunk.
+- **Maze, IDs:** blocks `corn_maze_gate` (with its item and block entity), `corn_maze_finish` and `maze_corn` (no items); advancement `amazing`; the gate's recipe. All new.
+- **Maze, disable behaviour:** with the agriculture feature off, the recipe doesn't load; mazes already planted still run, and everything stays registered.
+- **Ghosts, server authority:** spirits rise, drift, shy, fade and are caught on the server. Whether a spirit is revealed is the server's own reckoning (a player it can see holding a lantern within 12 blocks, or the Glowing effect); clients are sent when it was revealed and until when, and draw it accordingly. A catch goes through vanilla's entity interaction (reach checked by the server) and needs the spirit revealed on the server; a client can't catch, or see, a spirit the server hasn't revealed by claiming to.
+- **Ghosts, persistence:** a spirit saves its grave; its being revealed is not saved and is looked for again. Spirits are ambient creatures: they despawn when no player is near, like bats.
+- **Ghosts, bounded work:** graves stir only on vanilla's random ticks, which reach only chunks near players; each stir counts the spirits within 16 blocks once. A spirit looks for a lantern every 10 ticks (one search among the level's players). Nothing loads a chunk.
+- **Ghosts, IDs:** entity `restless_spirit`; items `spirit_lantern` and `ectoplasm`; the item tag `jugcraft:candle_scents/ghostly`; advancement `ghost_hunter`; the lantern's recipe. All new. The gravestones and the grave mound keep their IDs; they only gain random ticks.
+- **Ghosts, disable behaviour:** with the agriculture feature off, graves raise no spirits, spirits about fade, and the lantern's recipe doesn't load; everything stays registered.
+- **Face paint, server authority:** painting goes through vanilla's item use and entity interaction (reach checked by the server); turning the dial changes the kit on the server. The paint is a Fabric data attachment the server sets and clears; the server sends it to every client that can see the player, and clients only draw it. Whether a player is in costume is the server's own check.
+- **Face paint, persistence:** the paint is saved with the player and kept across a restart; it washes off under water, and is not kept at death. The kit saves its design as a data component.
+- **Face paint, bounded work:** every 20 ticks the server looks at each online player once (a water check for the painted ones). Each client finds a painted player among the level's players when drawing them.
+- **Face paint, IDs:** item `face_paint_kit`; data component `jugcraft:face_paint_design`; attachment `jugcraft:face_paint`; advancement `face_painter`; the kit's recipe. All new.
+- **Face paint, disable behaviour:** with the agriculture feature off, the kit's recipe doesn't load; kits already made still paint, paint already on stays, and everything stays registered.
 
 ## Dependencies and assets
 No new dependencies. Every texture is drawn by code (`tools/chandlery_textures.py`): the pot's hammered copper and dark inside, the brass dish, the wax (pale, tinted by its colour as it is drawn), the wax's surface in the pot, the flame (white at its heart, tinted by its scent) and the candle's item in two layers (its body, tinted by its dyed colour; its wick and dish, not). The models, blockstates, item model, names, tooltip, messages, loot and tags come from `tools/chandlery_data.py`; the numbers from `CHANDLERY` in `tools/agriculture.py`. The client's `WaxPotRenderer` draws the wax in the pot at its level and colour; `AuraCandleRenderer` draws the candle at its height, layers and colour and its flame; both share `TintedBoxes`. The item's colour is the vanilla `dyed_color` component, read by the item model's dye tint. Sounds are vanilla's (honeycomb waxing, dye use, brewing, a bottle filling, a honey slide, a bucket emptying, a candle going out).
@@ -393,6 +519,35 @@ Fireworks:
 - The pictures are pixel pictures in `FireworkShape.java`, which the client reads to draw a burst (`SpookyBursts`, `SpookySparkParticle`). The launcher's loaded rockets are drawn by `ShowLauncherRenderer`; a rocket in flight by vanilla's thrown-item renderer.
 - Models, blockstates, recipes, loot, tags and words come from `tools/firework_data.py`; the numbers from `FIREWORKS` in `tools/agriculture.py`.
 - Sounds are vanilla's fireworks' (launch, blast near and far, twinkle).
+
+Sky lanterns:
+- Textures are drawn by code in `tools/lantern_textures.py`: the lantern's item in two layers (its paper, pale so the dye tints it, and, untinted, its bamboo ring and flame), the rice paper the client wraps a lantern in, and each mooncake (a scalloped golden cake pressed with a flower, a wedge cut away to show its filling).
+- A lantern in flight is drawn by `SkyLanternRenderer`: its paper body on its ring, glowing at full brightness and flickering, dimming as it burns out.
+- Models, the recipe, the `minecraft:dyeable` tag and words come from `tools/lantern_data.py`; the mooncakes' Cooking Pot recipes from `POT_RECIPES`; the numbers from `LANTERNS` in `tools/agriculture.py`.
+- Sounds are vanilla's (flint and steel to light one, a fire going out when one is torn).
+
+The feast table:
+- Textures are drawn by code in `tools/feast_textures.py`: the table's honey-oak top, its darker trestle wood, its orange runner with a border of little leaves, and the cream plate each dish sits on.
+- The dishes are drawn by `FeastTableRenderer`: each on its plate on the runner, the food lying on it, one, two or three pieces high as the servings run down.
+- Models (a length on its own, at the start, in the middle and at the end, along either axis), blockstates, loot, the recipe, the advancement and words come from `tools/feast_data.py`; the numbers from `FEAST` in `tools/agriculture.py`.
+- Sounds are vanilla's (a decorated pot's when a dish is served).
+
+The corn maze:
+- Textures are drawn by code in `tools/maze_textures.py`: the gate's weathered posts, its green pennant with a white arrow, and the finish post's chequered flag. The posts' hay wraps use vanilla's hay bale texture by reference (not copied), and maze corn uses ripe corn's own models.
+- Models, blockstates, the gate's item, loot (maze corn gives back its kernel from the bottom; the finish post gives nothing), the recipe, tags and words come from `tools/maze_data.py`; the numbers from `MAZE` in `tools/agriculture.py`.
+- Sounds are vanilla's (crops planted, a level-up chime at the finish).
+
+Ghost hunting:
+- Textures are drawn by code in `tools/ghost_textures.py`: the Spirit Lantern, Ectoplasm, and the pale stuff a spirit is shaped from.
+- A spirit is drawn by `RestlessSpiritRenderer`: see-through boxes for its hood, robe, reaching arms and swaying tail, with hollow eyes and mouth, glowing faintly, bobbing, and fading in and out as it is revealed and hidden.
+- Item models, the lantern's recipe and words come from `tools/ghost_data.py`; the Ghostly scent's tag from `CHANDLERY`; the numbers from `GHOSTS` in `tools/agriculture.py`.
+- Sounds are vanilla's (an amethyst chime when one is revealed, a ghast's moan pitched up, a bottle filling).
+
+Face paint:
+- Textures are drawn by code in `tools/face_paint_textures.py`: the kit, and each design as a 16x16 laid over the face's 8x8, see-through where the skin shows.
+- The paint is drawn by `FacePaintLayer`, added to the player renderers: one quad a hair in front of the head's front, posed with the head.
+- The kit's item model, recipe and words come from `tools/face_paint_data.py`; the numbers from `FACE_PAINT` in `tools/agriculture.py`.
+- Sounds are vanilla's (dye being used, a bucket emptying when paint washes off).
 
 ## Verification
 ### Chandlery verification
@@ -563,6 +718,138 @@ Found by CI and fixed before this record:
 - how a long show looks and runs with many launchers going at once;
 - the sounds.
 
+### Lanterns verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-20` stacked on spooky fireworks:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the lanterns with Java: the lantern's rise, wind, wind period, lifetime, spread and fade; the festival's count, radius, window, cooldown, Luck and memory; the mooncake's Luck and the night's start and end; checks the lantern is registered, named, dyeable and crafted two at a time, every mooncake is registered with its food and bakes four at a time in the Cooking Pot, and the festival has its message and advancement) | Pass, 614 IDs |
+| `./gradlew build` on `53cbeef` (Build workflow run 37038755618) | Pass |
+| Game tests on the headless server, same run: 373 in total, 4 of them new here (`LanternGameTests`) | **All 4 lantern tests pass.** One test failed, twice (the run and its one re-run): `main`'s `PetroGameTests.heliostatsHeatASolarReceiver` ("The receiver made 48 JE/t, expected 36 on tick 25"), which this branch doesn't touch and which fails the same way now and then on other branches. On `c3edfea` (run 37037176622) the lantern tests passed too; the only failures there were the two firework test mistakes since fixed on the fireworks branch (`f869aa1`) and merged here |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `53cbeef` (run 37038755618) and `c3edfea` (run 37037176622), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-sky-lantern-festival): eighteen lanterns in seven colours let go together at night, one carrying a wish, and the three mooncakes and a lantern in item frames |
+
+The 4 new game tests (`LanternGameTests`):
+1. used, a dyed, named lantern is used up and one lantern goes up, blue and carrying its wish, to burn for two minutes or so; a second later it has risen and drifted with the wind;
+2. an undyed lantern is warm red with no wish; it burns bright and dims over its last five seconds; two let go apart drift exactly the same way, rising; one above the world is gone; a blow tears one and puts it out;
+3. seven lanterns make no festival, nor an eighth let go too far off; the eighth near makes one, with Luck and A Sky Full of Wishes for the player near; the same place holds no second festival that day;
+4. the first and ninth nights are full-moon nights, and noon, the second night and dawn aren't; the three mooncake recipes load; wheat, sugar, an egg and roasted chestnuts bake four chestnut mooncakes; a mooncake is three food.
+
+Found by CI and fixed before this record: nothing in the lanterns; their tests passed on their first run.
+
+**Not run (lanterns):**
+- a person playing it in a client: letting lanterns go, watching a festival, eating a mooncake under a real full moon (the test checks the full-moon reckoning and the food, not the Luck from eating one at night);
+- a dedicated server with two or more players letting lanterns go together;
+- a server restart in the middle of a festival's count;
+- the sounds.
+
+### Feast verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-21` stacked on the sky lantern festival:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the feast with Java: the dishes, servings, diners' window and longest table; the four tiers, the effects' lengths and the reach; checks the table is registered and named, has a model for every axis and part, words for every tier, loot, a recipe making two, and its advancement) | Pass, 615 IDs |
+| `./gradlew build` on `c892a9d` (Build workflow run 37038153230) | Pass |
+| Game tests on the headless server, same run: 377 in total, 4 of them new here (`FeastGameTests`) | **All 377 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `c892a9d` (run 37038153230), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-harvest-feast-table): a four-length table set with eight foods between hay bale seats |
+
+The 4 new game tests (`FeastGameTests`):
+1. lengths end to end along one line join into a table with legs at its ends; a length across them stands alone;
+2. food is served eight to a dish, one food to a dish, and a stick isn't served; a serving of bread feeds a hungry diner by five, and two dishes and one diner make a good meal (Regeneration, not yet Absorption); sneaking takes a dish back; a stew leaves its bowl; broken, the table spills its dishes;
+3. at a table of six foods, the first diner has a feast (Absorption), a second makes it a harvest feast for both (Haste and Luck), and the fifth a grand feast for all five (Health Boost and Harvest Home);
+4. the table's recipe and loot table load.
+
+Found by CI and fixed before this record: nothing; the feast's tests passed on their first run.
+
+**Not run (feast):**
+- a person playing it in a client: setting a table, eating at it, a feast with friends;
+- a dedicated server with two or more players eating together (the grand feast test uses five mock players on the headless server);
+- a restart with diners counted;
+- how it balances in play against a beacon or a potion.
+
+### Maze verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-22` stacked on the Harvest Feast Table:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the maze with Java: the sizes in cells and their names, the planting rate, the longest run, the shortcut fraction and the most runners; checks the gate, finish post and maze corn are registered, with a model for every facing or section, words for every message and size, maze corn's loot giving back its kernel from the bottom only, and the gate's recipe and advancement) | Pass, 618 IDs |
+| `./gradlew build` on `b0035e6` (Build workflow run 37041890514) | Pass |
+| Game tests on the headless server, same run: 381 in total, 4 of them new here (`MazeGameTests`) | **All 381 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `b0035e6` (run 37041890514) and `62445da` (run 37040197910), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-corn-maze) from the latter: a medium maze planted by its gate, seen from above, and the gate between its walls |
+
+The 4 new game tests (`MazeGameTests`), each planting a tiny maze in its own test area:
+1. every size of maze has one way through and every open square reachable, and the same seed carves the same maze;
+2. too few kernels plant nothing; enough plant the maze, a kernel a stalk: three-tall maze corn on every wall square, the way through left open, and the finish post at the exit; a planted maze isn't planted again;
+3. a runner walked along the way through is timed (in about the time it took) and boarded in first place, with a first prize ribbon and A-maze-ing; one sent straight from the gate to the finish took a shortcut and isn't boarded; flying or leaving the maze voids a run;
+4. maze corn stands three tall on solid ground and blocks the way; breaking the bottom brings the stalk down and gives back a kernel.
+
+Found by CI and fixed before this record:
+- Two calls 26.3 doesn't have: taking the kernels now goes through the inventory by hand (`Inventory.clearOrCountMatchingItems` takes other arguments in 26.3), and maze corn pops when pushed with `PushReaction.POPPED`, as 26.3 calls what was `DESTROY` (`62445da`).
+- The run test looked for a "blue ribbon"; a winner gets the Harvest Scale's first prize ribbon (`b0035e6`).
+
+**Not run (maze):**
+- a person playing it in a client: planting a maze, finding the way through, racing friends;
+- a dedicated server with two or more players running at once;
+- a large maze planted over uneven or cluttered ground;
+- a restart during a run (runs are in memory, so a restart ends them).
+
+### Ghost hunting verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-23` stacked on the corn maze:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares ghost hunting with Java: the stir chance, the cap and its range, the lantern's reach, the haunt's size, the shy radii, both speeds and the reveal, look and fade times; checks the spirit is registered with its attributes and named, the lantern and Ectoplasm are registered, named and drawn, Ectoplasm gives its bottle back and is the Ghostly scent, the lantern has its recipe and tooltip, every grave takes random ticks and stirs, and Ghost Hunter exists; the chandlery check now includes the Ghostly scent) | Pass, 620 IDs |
+| `./gradlew build` on `7a52c69` (Build workflow run 37043843402) | Pass |
+| Game tests on the headless server, same run: 386 in total, 5 of them new here (`GhostGameTests`) | **All 386 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `7a52c69` (run 37043843402), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#ghost-hunting): four spirits revealed over a row of graves at night, and the hunter's kit with a lit Ghostly candle by day |
+
+The 5 new game tests (`GhostGameTests`):
+1. every grave takes random ticks; by day no spirit rises; at night spirits rise over a gravestone, each haunting it, unseen and out of any aim, until three are near; a grave mound stirs too;
+2. hidden, a spirit can't be caught by a bottle; a Spirit Lantern held in the off hand fifteen blocks above doesn't reveal it, but held near it does, so it fades in (and fades out when no longer revealed) and can be aimed at; a glass bottle then catches it as Ectoplasm, one bottle of two, earning Ghost Hunter;
+3. revealed, a spirit shies away from a player two blocks off but not from a sneaking one; hidden, it heeds no one; its haunt holds it within 6 blocks across and 3 up and never down into the ground; herded with its own AI, it shies a good way along, but no farther than its haunt's edge;
+4. a blow passes through a spirit; at dawn it fades, leaving nothing; a Revealing candle's aura makes one glow, which reveals it;
+5. Ectoplasm is the Ghostly scent, of invisibility; stirred into molten wax it scents it and gives its bottle back; a lit Ghostly candle turns the players near invisible; the Spirit Lantern's recipe loads.
+
+Found by CI and fixed before this record: nothing; ghost hunting's tests and client test passed on their first run.
+
+**Not run (ghost hunting):**
+- a person playing it in a client: a night in a graveyard with a lantern, chasing and catching spirits, a Ghostly candle at a party;
+- a dedicated server with two or more players, one holding the lantern;
+- graves stirring by their own random ticks over a real night (the tests raise spirits directly);
+- the sounds.
+
+### Face paint verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-24` stacked on ghost hunting:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares face paint with Java: the designs in order, the kit's uses, the time to paint your own face and how often paint washes off; checks the kit is registered and worn by use, its design component and the paint attachment are registered and the attachment is sent to clients, every design has its name and texture, the kit has its texture, words, recipe and advancement, and trick-or-treating and the costume contest take a painted face as a costume) | Pass, 621 IDs |
+| `./gradlew build` on `5cb4d12` (Build workflow run 37045137269) | Pass |
+| Game tests on the headless server, same run: 389 in total, 3 of them new here (`FacePaintGameTests`) | **All 389 pass**, the existing trick-or-treat and costume contest tests among them |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `5cb4d12` (run 37045137269): the player, painted on the server with each design in turn, seen from the front, with the paint drawn on their face. The screenshots are in [AGRICULTURE.md](../branches/AGRICULTURE.md#face-paint) |
+
+The 3 new game tests (`FacePaintGameTests`):
+1. a bare face is no costume; used on a friend, the kit paints a skull at once, wears by one use and earns Face Painter; used sneaking it turns its dial to a jack o'lantern and paints nothing; that then paints over the skull; painting your own face takes 32 ticks, brushing, and at the end paints it; the kit paints no zombie; after its last face it is used up; its recipe loads;
+2. paint stays on a dry face; standing in water two deep, the head is under and the paint washes off; the paint attachment is saved, and a design saved reads back the same;
+3. bare-headed and unpainted, a player knocking at a door on a Halloween night gets "no costume"; painted, the costume rule passes and only the missing porch light turns them away.
+
+Found by CI and fixed before this record: the player renderers are found by 26.3's `EntityTypes.PLAYER` (`EntityType.PLAYER` is gone there) (`5cb4d12`). The common code, the attachment included, compiled first time.
+
+**Not run (face paint):**
+- a person playing it in a client: painting a friend, painting your own face, washing it off in a lake;
+- a dedicated server with two players, each seeing the other's paint (the client test paints its own player, on its own server);
+- the paint after a restart or on rejoining (the tests check that the attachment is saved and its design reads back, not a real restart);
+- trick-or-treating and the costume contest in play with a painted face.
+
 ## World and event applicability
 - Candles and pots work anywhere, in every dimension, all year. Nothing is seasonal. The aura doesn't depend on biome, time or weather; harvest helps only plants that would grow there anyway.
 - Revealing shows creatures through walls (Glowing), which can help find hostile mobs in caves; it gives no other information.
@@ -571,6 +858,12 @@ Found by CI and fixed before this record:
 - A barrel ages by game time, so sleeping through the night doesn't age it (sleeping skips the time of day, not game time).
 
 - Crows come to the Overworld only, by day (on the Overworld clock), wherever there are ripe crops open to the sky; they don't depend on the biome or the season.
+
+- Sky lanterns go up in any dimension, all year. A festival counts lanterns in one dimension at a time.
+- A feast table works anywhere, in every dimension, all year.
+- A corn maze can be planted on any solid ground, in any dimension, all year. It needs no farmland or light.
+- Spirits rise at night on the Overworld clock, from graves in any dimension, all year; they aren't tied to the Halloween event.
+- Face paint works anywhere, all year.
 
 ## Rollout and open questions
 - The aura's area is a box reaching the radius in every direction, up and down too (a beacon's reaches the whole height of the world).
@@ -596,3 +889,25 @@ Found by CI and fixed before this record:
 - Crows don't eat crops from storage, trample farmland, or attack. A crop set back keeps its farmland.
 - The spawn chances, flock size and caps are first guesses, open to balance review in play.
 - Crows use vanilla sounds (a parrot's call pitched down); a crow's own caw would need a new sound file.
+- A lantern lights nothing below it: entities can't give off block light, so its glow is drawn, not cast.
+- The wind is the same everywhere in a world and turns with game time; weather doesn't change it.
+- The festival's memory is the server's alone and is lost on a restart (see Multiplayer and persistence).
+- Lanterns can't be let go from a dispenser.
+- A serving can be eaten at the table whether or not the diner is hungry, so a blessing's only cost is the food. That is open to balance review in play.
+- Variety counts kinds of food: two dishes of bread count once. A table longer than eight lengths is counted eight lengths at a time, from where you eat.
+- Only players are diners; pets and villagers at the table don't count.
+- Dishes can't be filled or emptied by hoppers.
+- A gate plants one maze. For a new maze, clear the old corn first (each stalk gives back its kernel), then place a gate again: a new gate plants round whatever still stands.
+- The finish post drops nothing. The clock stops at its square whether or not the post still stands.
+- The gate doesn't check that the paths are clear: on uneven or cluttered ground a wall may have gaps, or a path may be blocked by whatever was already there.
+- Runs count blocks walked across the ground, so a runner who wanders the dead ends is never mistaken for a shortcut; one who breaks through a wall usually is.
+- A maze's walls are corn, which anyone can break: the board's times are only as fair as the players keeping the maze.
+- Spirits rise only from the graveyard decorations' graves (gravestones and grave mounds), not from crypts or mourning angels, nor from vanilla blocks.
+- A revealed spirit is revealed to everyone who can see it, by design: one lantern serves a whole party.
+- Spirits pass no walls: they float, but bump into blocks like other creatures.
+- A Ghostly candle turns every player in its aura invisible, friend or foe, as a potion of Invisibility would; armour and held items still show.
+- Anyone holding a kit can paint another player's face without asking; the paint is harmless and washes off in water.
+- Face paint shows on players only; armor stands, mannequins and mobs can't be painted.
+- Rain doesn't wash paint off; only putting your head under water does.
+- Jars of preserves can't be served: a jar has no food component (it is eaten a serving at a time from the hand, with its own sealing and spoiling), and the table serves only items that do. Serving preserves at the table would be a follow-up.
+- A mooncake's Luck goes by the Overworld clock's moon wherever it is eaten, and needs only the sky open above the eater; it isn't limited to the Overworld.

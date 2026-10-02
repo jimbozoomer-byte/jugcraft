@@ -39,6 +39,7 @@ Corn is built for fields you want to look at and walk through.
 - **Walls you cannot walk through.** Once corn is two blocks tall it blocks movement like a hedge, and mobs path around it. Knee-high corn can still be walked through, like wheat. That is what makes a maze work: plant the walls, leave the paths as grass or dirt path, and wait.
 - **No irrigation needed.** Corn keeps its farmland from drying back to dirt (the same rule as vanilla crops). Water nearby only makes it grow faster.
 - **Easy to shape.** Corn only grows into air. A block above a plant stops it at that height, and breaking any block of a plant removes the whole plant and drops its kernel.
+- **Or let a gate plant it.** The [Corn Maze Gate](#the-corn-maze) carves a maze from its own seed and plants it in close-set maze corn, ready to run at once and timed on the server.
 
 The maze in the screenshots above is 13 × 11 blocks with one-block paths, planted by the client game test in `AgricultureClientGameTests`.
 
@@ -759,6 +760,62 @@ Ten more fall and Halloween additions, one per pull request ([features/fall-addi
 
 - **Spooky fireworks** burst into a bat, a jack o'lantern, a ghost or a skull in coloured sparks, the right way round for every player. Paper, gunpowder (the flight) and the picture's ingredients; glowstone dust to twinkle. They hurt and break nothing.
 - **Show Launcher:** nine tubes of sixteen rockets each (spooky or vanilla), fired in sequence, in volleys or as a finale, by hand or redstone. Details: [fall additions](../features/fall-additions.md#spooky-fireworks).
+
+### The sky lantern festival
+
+| **Sky Lanterns** let go together at night in seven colours, rising together; one carries a wish, "A good harvest" | **Mooncakes:** red bean, chestnut and pumpkin, and a Sky Lantern, in item frames |
+| --- | --- |
+| ![Sky lanterns](../images/ingame_sky_lanterns.jpg) | ![Mooncakes](../images/ingame_mooncakes.jpg) |
+
+*Real screenshots from the client game test that CI runs (`LanternClientGameTests`, software rendering, small previews). The lanterns are let go for real and photographed as they rise.*
+
+- **Sky Lanterns**, dyed any colour and named for a wish, rise glowing on a wind they all share and burn out after two minutes or so.
+- **The lantern festival:** eight let go within 32 blocks in two minutes fill the sky, with Luck and A Sky Full of Wishes for everyone near.
+- **Mooncakes** baked in the Cooking Pot, with Luck when eaten outdoors under a full moon. Details: [fall additions](../features/fall-additions.md#sky-lanterns).
+
+### The Harvest Feast Table
+
+| **A Harvest Feast Table** of four lengths, set with eight foods between hay bale seats | **The dishes** up close: bread, roasted corn, pumpkin pie, chicken, apples, mooncakes, baked potatoes and cookies, each heaped by its servings |
+| --- | --- |
+| ![A Harvest Feast Table](../images/ingame_harvest_feast.jpg) | ![The dishes on a feast table](../images/ingame_feast_dishes.jpg) |
+
+*Real screenshots from the client game test that CI runs (`FeastClientGameTests`, software rendering, small previews). The dishes are served on the server and drawn by the client.*
+
+- **Harvest Feast Table:** lengths end to end join into one long table; each holds two dishes of up to eight servings of any food or drink.
+- **The feast** grows with the variety on the table and the company at it: Regeneration, then Absorption, then Haste and Luck, then Health Boost and Harvest Home, shared with everyone who ate there lately. Details: [fall additions](../features/fall-additions.md#the-harvest-feast-table).
+
+### The corn maze
+
+| **A medium corn maze** (15 by 15) planted by its gate: the entrance on the near side, the exit with its finish post straight across | **The Corn Maze Gate**, its green pennant pointing into the maze between walls of maze corn |
+| --- | --- |
+| ![A corn maze from above](../images/ingame_corn_maze_planted.jpg) | ![The Corn Maze Gate](../images/ingame_corn_maze_gate.jpg) |
+
+*Real screenshots from the client game test that CI runs (`MazeClientGameTests`, software rendering, small previews). The gate plants the maze for real, a few stalks a tick.*
+
+- **Corn Maze Gate:** choose a size, then use it holding corn kernels to plant a maze of three-tall corn from a fresh seed, one way through, with a finish post at the exit.
+- **Runs** are timed on the server from the gate to the finish post and voided for flying, climbing out, leaving or a shortcut; the best times go on the gate's board, with prize ribbons and A-maze-ing. Details: [fall additions](../features/fall-additions.md#the-corn-maze).
+
+### Ghost hunting
+
+| **Restless spirits** revealed at night over a row of gravestones and grave mounds, lit by soul lanterns | **The hunter's kit:** a Spirit Lantern and a bottle of Ectoplasm in frames, and a lit Ghostly candle |
+| --- | --- |
+| ![Restless spirits in a graveyard](../images/ingame_restless_spirits.jpg) | ![The ghost hunter's kit](../images/ingame_ghost_hunting_kit.jpg) |
+
+*Real screenshots from the client game test that CI runs (`GhostClientGameTests`, software rendering, small previews). The spirits are revealed on the server and drawn by the client.*
+
+- **Restless spirits** rise from gravestones and grave mounds at night and drift about their graves, unseen until revealed.
+- **The Spirit Lantern** reveals every spirit within 12 blocks to everyone near; a revealed spirit shies away but can be cornered, and a glass bottle catches it as **Ectoplasm**, the Ghostly candle scent (invisibility). Details: [fall additions](../features/fall-additions.md#ghost-hunting).
+
+### Face paint
+
+| **Face paint**, all six designs on the player's face: a skull, a jack o'lantern, a black cat, a vampire, a witch and a scarecrow (cropped and enlarged from the test's screenshots) | **A vampire**, the whole frame: the player in third person, seen from the front |
+| --- | --- |
+| ![The six face paint designs](../images/ingame_face_paint.jpg) | ![A painted vampire face](../images/ingame_face_paint_vampire.jpg) |
+
+*Real screenshots from the client game test that CI runs (`FacePaintClientGameTests`, software rendering, small previews). Each design is painted on the server and drawn on the face by the client.*
+
+- **Face Paint Kit:** paints one of six designs on a friend at once, or on your own face after a held use; good for 16 faces.
+- **A painted face is a costume** for trick-or-treating and the costume contest, and washes off under water. Details: [fall additions](../features/fall-additions.md#face-paint).
 
 ## Crop roster: what comes next (planned)
 

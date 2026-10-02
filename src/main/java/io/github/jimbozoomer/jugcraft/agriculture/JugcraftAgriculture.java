@@ -230,11 +230,21 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<CanningKettleBlockEntity> CANNING_KETTLE_ENTITY;
 	/** Crows: they come to fields by day and peck ripe crops, unless a scarecrow guards them. */
 	public static EntityType<Crow> CROW;
+	/** Restless spirits: risen from graves at night, seen only by a Spirit Lantern's light (or a Revealing candle's). */
+	public static EntityType<RestlessSpirit> RESTLESS_SPIRIT;
 	/** Spooky fireworks in flight: they burst into a picture ({@link FireworkShape}). */
 	public static EntityType<SpookyRocket> SPOOKY_ROCKET;
+	/** Sky lanterns let go: they rise, drift with the wind and burn out. */
+	public static EntityType<SkyLantern> SKY_LANTERN;
+	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
+	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
+	/** The mooncakes, baked in the Cooking Pot. */
+	public static final List<String> MOONCAKES = List.of("red_bean_mooncake", "chestnut_mooncake", "pumpkin_mooncake");
 	public static BlockEntityType<ShowLauncherBlockEntity> SHOW_LAUNCHER_ENTITY;
 	/** A spooky firework made with glowstone dust: its sparks twinkle. */
 	public static DataComponentType<Boolean> TWINKLE;
+	/** The design a Face Paint Kit's dial is set to. */
+	public static DataComponentType<FacePaint.Design> FACE_PAINT_DESIGN;
 	/** A spooky firework's coloured spark, drawn by the client's SpookySparkParticle. */
 	public static final ParticleType<SpookySparkOptions> SPOOKY_SPARK = FabricParticleTypes.complex(true, SpookySparkOptions.CODEC,
 			SpookySparkOptions.STREAM_CODEC);
@@ -705,8 +715,9 @@ public final class JugcraftAgriculture {
 
 		List<Block> gravestones = new ArrayList<>();
 		for (GravestoneBlock.Style style : GravestoneBlock.Style.values()) {
+			// Random ticks: graves stir at night (fall additions 9, ghost hunting).
 			Block stone = registerBlock(style.id, props -> new GravestoneBlock(props, style), BlockBehaviour.Properties.of()
-					.mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F).sound(SoundType.STONE).noOcclusion());
+					.mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F).sound(SoundType.STONE).noOcclusion().randomTicks());
 			registerItem(style.id, props -> new BlockItem(stone, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
 			gravestones.add(stone);
 		}
@@ -845,7 +856,7 @@ public final class JugcraftAgriculture {
 				.mapColor(MapColor.DEEPSLATE).strength(3.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.STONE).noOcclusion()
 				.pushReaction(PushReaction.POPPED));
 		Block mound = registerBlock("grave_mound", GraveMoundBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.DIRT).strength(0.6F)
-				.sound(SoundType.ROOTED_DIRT).noOcclusion());
+				.sound(SoundType.ROOTED_DIRT).noOcclusion().randomTicks());
 		Block angel = registerBlock("mourning_angel", MourningAngelBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ)
 				.strength(2.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.CALCITE).noOcclusion().pushReaction(PushReaction.POPPED));
 		Block skeleton = registerBlock("pop_up_skeleton", PopUpSkeletonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
@@ -1264,6 +1275,48 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(ShowLauncherBlockEntity::new, launcher).build());
 		registerItem("show_launcher", props -> new BlockItem(launcher, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
 		SpookyFireworkItem.registerDispensing();
+
+		// Fall additions 6, the sky lantern festival: sky lanterns to let go together, and mooncakes for a full moon.
+		registerItem("sky_lantern", SkyLanternItem::new, new Item.Properties().stacksTo(16), EQUIPMENT_TAB);
+		SKY_LANTERN = entity("sky_lantern", EntityType.Builder.<SkyLantern>of(SkyLantern::new, MobCategory.MISC).noLootTable()
+				.sized(0.5F, 0.75F).clientTrackingRange(10).updateInterval(10));
+		SkyLanterns.register();
+		for (String mooncake : MOONCAKES) {
+			registerItem(mooncake, MooncakeItem::new, new Item.Properties().food(nourishment(3, 0.6F)).stacksTo(16), FOOD_TAB);
+		}
+
+		// Fall additions 7, the harvest feast: a long table to serve dishes on, blessing those who eat at it together.
+		Block feastTable = registerBlock("feast_table", FeastTableBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		FEAST_TABLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("feast_table"),
+				FabricBlockEntityTypeBuilder.create(FeastTableBlockEntity::new, feastTable).build());
+		registerItem("feast_table", props -> new BlockItem(feastTable, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 8, the corn maze: a gate that plants a maze of corn, times runners and keeps a board.
+		registerBlock("maze_corn", MazeCornBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(0.3F)
+				.sound(SoundType.CROP).noOcclusion().pushReaction(PushReaction.POPPED).ignitedByLava());
+		Block mazeGate = registerBlock("corn_maze_gate", CornMazeGateBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		CORN_MAZE_GATE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("corn_maze_gate"),
+				FabricBlockEntityTypeBuilder.create(CornMazeGateBlockEntity::new, mazeGate).build());
+		registerItem("corn_maze_gate", props -> new BlockItem(mazeGate, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		registerBlock("corn_maze_finish", CornMazeFinishBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+
+		// Fall additions 9, ghost hunting: restless spirits rise from graves at night; a Spirit Lantern reveals them, and a
+		// glass bottle catches one as Ectoplasm, the Ghostly candle scent.
+		registerItem("spirit_lantern", SpiritLanternItem::new, new Item.Properties().stacksTo(1), EQUIPMENT_TAB);
+		registerItem("ectoplasm", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE).stacksTo(16), INGREDIENT_TAB);
+		RESTLESS_SPIRIT = entity("restless_spirit", EntityType.Builder.<RestlessSpirit>of(RestlessSpirit::new, MobCategory.AMBIENT).noLootTable()
+				.sized(0.6F, 1.4F).eyeHeight(1.15F).fireImmune().clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(RESTLESS_SPIRIT, RestlessSpirit.createAttributes());
+
+		// Fall additions 10, face paint: a kit that paints a design on a player's face, which counts as a costume.
+		FACE_PAINT_DESIGN = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("face_paint_design"),
+				DataComponentType.<FacePaint.Design>builder().persistent(FacePaint.Design.CODEC).networkSynchronized(FacePaint.Design.STREAM_CODEC).build());
+		registerItem("face_paint_kit", FacePaintKitItem::new, new Item.Properties().durability(FacePaintKitItem.USES)
+				.component(FACE_PAINT_DESIGN, FacePaint.Design.SKULL), EQUIPMENT_TAB);
+		FacePaint.register();
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
