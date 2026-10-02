@@ -143,7 +143,7 @@ def loot(out, write):
     for block in (PUNCH_BOWL["block"], GIANT_CANDY["block"]):
         write(out / f"{block}.json", self_drop(block))
     brack = BARMBRACK["block"]
-    write(out / f"{brack}.json", self_drop(brack, {"type": "minecraft:block_state_property", "block": rid(brack), "properties": {"bites": "0"}}))
+    write(out / f"{brack}.json", self_drop(brack, {"type": "minecraft:match_block", "blocks": rid(brack), "state": {"bites": "0"}}))
 
 
 def tags(tags):

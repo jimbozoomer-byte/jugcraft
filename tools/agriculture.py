@@ -1198,7 +1198,7 @@ SHAPELESS = [
     # Decorations batch 13: soul cakes with currants; pumpkin bread; chocolate cupcakes iced with a web; chocolate
     # bat-wing cookies; a pumpkin spice latte (the milk bucket is given back).
     {"id": "soul_cake", "inputs": ["minecraft:wheat", "minecraft:sugar", "#minecraft:eggs", "minecraft:sweet_berries"], "result": "soul_cake",
-     "count": 4, "category": "misc"},
+     "count": 3, "category": "misc"},
     {"id": "pumpkin_bread", "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:pumpkin", "minecraft:sugar", "#minecraft:eggs"],
      "result": "pumpkin_bread", "count": 2, "category": "misc"},
     {"id": "spiderweb_cupcake", "inputs": ["minecraft:wheat", "minecraft:sugar", "#minecraft:eggs", "minecraft:cocoa_beans"],

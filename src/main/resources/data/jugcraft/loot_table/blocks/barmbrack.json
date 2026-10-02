@@ -9,9 +9,9 @@
             "type": "minecraft:survives_explosion"
           },
           {
-            "type": "minecraft:block_state_property",
-            "block": "jugcraft:barmbrack",
-            "properties": {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:barmbrack",
+            "state": {
               "bites": "0"
             }
           }

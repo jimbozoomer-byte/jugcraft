@@ -192,6 +192,8 @@ def check_loot(registered):
         stale = old_loot_keys(load(path))
         if stale:
             err(f"{path.name}: uses the pre-26.x loot keys {sorted(stale)}; use \"condition\" and \"modifier\"")
+        if '"minecraft:block_state_property"' in text:
+            err(f"{path.name}: 26.3 has no block_state_property loot condition (the server fails to load); use match_block")
         for name in re.findall(r'"name": "jugcraft:([a-z_]+)"', text):
             if name not in registered:
                 err(f"{path.name} drops unknown item {name}")
