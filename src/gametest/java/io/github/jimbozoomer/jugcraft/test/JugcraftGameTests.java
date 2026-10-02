@@ -1,12 +1,20 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.deposit.Deposits;
+import io.github.jimbozoomer.jugcraft.deposit.JugcraftDeposits;
+import io.github.jimbozoomer.jugcraft.electronics.JugcraftElectronics;
+import io.github.jimbozoomer.jugcraft.electronics.NetworkTerminalBlock;
 import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
+import io.github.jimbozoomer.jugcraft.farming.JugcraftFarming;
 import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
+import io.github.jimbozoomer.jugcraft.fluid.FluidFilterBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidTankBlockEntity;
+import io.github.jimbozoomer.jugcraft.fluid.FluidValveBlock;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
+import io.github.jimbozoomer.jugcraft.fluid.StoredFluid;
 import io.github.jimbozoomer.jugcraft.kinetic.BeltPulleyBlockEntity;
 import io.github.jimbozoomer.jugcraft.kinetic.DynamoBlockEntity;
 import io.github.jimbozoomer.jugcraft.kinetic.ElectricMotorBlock;
@@ -57,18 +65,26 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.material.Fluids;
 
 /**
@@ -149,6 +165,124 @@ public class JugcraftGameTests {
 		helper.succeedWhen(() -> helper.assertTrue(tankEntity.storage.amount > 0, "Tank is still empty"));
 	}
 
+	/** A powered fluid valve stops a pump's water short of the tank; once the signal goes, the water gets through. */
+	@GameTest(maxTicks = 300)
+	public void fluidValveClosesOnRedstone(GameTestHelper helper) {
+		helper.setBlock(new BlockPos(1, 1, 3), Blocks.WATER);
+		BlockPos pump = new BlockPos(1, 2, 3);
+		helper.setBlock(pump, JugcraftFluids.ELECTRIC_PUMP);
+		helper.getBlockEntity(pump, ElectricPumpBlockEntity.class).energy().setAmount(ElectricPumpBlockEntity.ENERGY_CAPACITY);
+		helper.setBlock(new BlockPos(2, 2, 3), JugcraftFluids.STEEL_FLUID_PIPE);
+		BlockPos valve = new BlockPos(3, 2, 3);
+		helper.setBlock(valve, JugcraftFluids.FLUID_VALVE);
+		BlockPos signal = valve.above();
+		helper.setBlock(signal, Blocks.REDSTONE_BLOCK);
+		helper.setBlock(new BlockPos(4, 2, 3), JugcraftFluids.STEEL_FLUID_PIPE);
+		BlockPos tank = new BlockPos(5, 2, 3);
+		helper.setBlock(tank, JugcraftFluids.FLUID_TANK);
+		FluidTankBlockEntity tankEntity = helper.getBlockEntity(tank, FluidTankBlockEntity.class);
+		java.util.concurrent.atomic.AtomicBoolean opened = new java.util.concurrent.atomic.AtomicBoolean();
+		helper.runAfterDelay(60, () -> {
+			helper.assertTrue(helper.getBlockState(valve).getValue(FluidValveBlock.POWERED), "The valve is not closed");
+			helper.assertTrue(tankEntity.storage.amount == 0, "Water got past the closed valve");
+			helper.setBlock(signal, Blocks.AIR);
+			opened.set(true);
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(opened.get(), "The valve has not been opened yet");
+			helper.assertTrue(tankEntity.storage.amount > 0, "The tank is still empty with the valve open");
+		});
+	}
+
+	/**
+	 * A fluid filter lets nothing into the tank it touches until it is set, and then only its fluid; a tank on an
+	 * ordinary pipe of the same line fills all along.
+	 */
+	@GameTest(maxTicks = 300)
+	public void fluidFilterLetsOnlyItsFluidOut(GameTestHelper helper) {
+		helper.setBlock(new BlockPos(1, 1, 3), Blocks.WATER);
+		BlockPos pump = new BlockPos(1, 2, 3);
+		helper.setBlock(pump, JugcraftFluids.ELECTRIC_PUMP);
+		helper.getBlockEntity(pump, ElectricPumpBlockEntity.class).energy().setAmount(ElectricPumpBlockEntity.ENERGY_CAPACITY);
+		helper.setBlock(new BlockPos(2, 2, 3), JugcraftFluids.STEEL_FLUID_PIPE);
+		BlockPos filter = new BlockPos(3, 2, 3);
+		helper.setBlock(filter, JugcraftFluids.FLUID_FILTER);
+		BlockPos open = new BlockPos(2, 2, 2);
+		BlockPos filtered = new BlockPos(4, 2, 3);
+		helper.setBlock(open, JugcraftFluids.FLUID_TANK);
+		helper.setBlock(filtered, JugcraftFluids.FLUID_TANK);
+		FluidTankBlockEntity openTank = helper.getBlockEntity(open, FluidTankBlockEntity.class);
+		FluidTankBlockEntity filteredTank = helper.getBlockEntity(filtered, FluidTankBlockEntity.class);
+		FluidFilterBlockEntity filterEntity = helper.getBlockEntity(filter, FluidFilterBlockEntity.class);
+		java.util.concurrent.atomic.AtomicBoolean set = new java.util.concurrent.atomic.AtomicBoolean();
+		helper.runAfterDelay(40, () -> {
+			helper.assertTrue(openTank.storage.amount > 0, "The tank on the ordinary pipe is empty");
+			helper.assertTrue(filteredTank.storage.amount == 0, "An unset filter let water out");
+			filterEntity.setFilter(FluidVariant.of(Fluids.LAVA));
+		});
+		helper.runAfterDelay(80, () -> {
+			helper.assertTrue(filteredTank.storage.amount == 0, "A lava filter let water out");
+			filterEntity.setFilter(FluidVariant.of(Fluids.WATER));
+			set.set(true);
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(set.get(), "The filter is not set to water yet");
+			helper.assertTrue(filteredTank.storage.amount > 0, "A water filter let no water out");
+		});
+	}
+
+	/** The crop harvester harvests a ripe wheat crop in its field, keeps the wheat, and plants one of the seeds again. */
+	@GameTest(maxTicks = 200)
+	public void cropHarvesterHarvestsAndReplants(GameTestHelper helper) {
+		BlockPos master = new BlockPos(4, 1, 0);
+		LargeMachineBlock block = (LargeMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.CROP_HARVESTER);
+		helper.setBlock(master, block.defaultBlockState().setValue(MachineBlock.FACING, Direction.SOUTH));
+		block.setPlacedBy(helper.getLevel(), helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
+		charge(helper, master.above(), Direction.UP);
+		MachineBlockEntity harvester = helper.getBlockEntity(master, MachineBlockEntity.class);
+		// The field starts the block in front (south); a ripe crop two blocks out and one to the side.
+		BlockPos crop = new BlockPos(3, 1, 2);
+		helper.setBlock(crop.below(), Blocks.FARMLAND);
+		helper.setBlock(crop, ((CropBlock) Blocks.WHEAT).getStateForAge(7));
+		helper.succeedWhen(() -> {
+			BlockState replanted = helper.getBlockState(crop);
+			helper.assertTrue(replanted.is(Blocks.WHEAT) && ((CropBlock) Blocks.WHEAT).getAge(replanted) == 0,
+					"The crop is now " + replanted);
+			boolean wheat = false;
+			for (int slot = 0; slot < MachineKind.CROP_HARVESTER.slots; slot++) {
+				wheat |= harvester.getItem(slot).is(Items.WHEAT);
+			}
+			helper.assertTrue(wheat, "The harvester kept no wheat");
+		});
+	}
+
+	/**
+	 * Cotton: the seeds plant the crop on farmland, a ripe crop drops cotton and seeds (an unripe one only a seed), cotton counts as a crop for
+	 * fertilizer, and sifting coarse dirt can turn up the seeds.
+	 */
+	@GameTest
+	public void cottonGrowsFromSeedsAndDropsCotton(GameTestHelper helper) {
+		BlockPos crop = new BlockPos(2, 2, 2);
+		helper.setBlock(crop.below(), Blocks.FARMLAND);
+		helper.setBlock(crop, JugcraftFarming.COTTON_CROP);
+		helper.assertTrue(helper.getBlockState(crop).is(BlockTags.CROPS), "Cotton is not in minecraft:crops");
+		CropBlock cotton = (CropBlock) JugcraftFarming.COTTON_CROP;
+		helper.assertTrue(cotton.asItem() == JugcraftFarming.COTTON_SEEDS, "Cotton seeds do not plant cotton");
+		BlockState ripe = cotton.getStateForAge(cotton.getMaxAge());
+		helper.setBlock(crop, ripe);
+		List<ItemStack> drops = Block.getDrops(ripe, helper.getLevel(), helper.absolutePos(crop), null);
+		helper.assertTrue(drops.stream().anyMatch(stack -> stack.is(JugcraftFarming.COTTON)), "A ripe crop dropped " + drops);
+		helper.assertTrue(drops.stream().anyMatch(stack -> stack.is(JugcraftFarming.COTTON_SEEDS)), "A ripe crop dropped " + drops);
+		List<ItemStack> unripe = Block.getDrops(cotton.getStateForAge(3), helper.getLevel(), helper.absolutePos(crop), null);
+		helper.assertTrue(unripe.stream().noneMatch(stack -> stack.is(JugcraftFarming.COTTON))
+				&& unripe.stream().anyMatch(stack -> stack.is(JugcraftFarming.COTTON_SEEDS)), "An unripe crop dropped " + unripe);
+		MachineRecipe sifting = MachineRecipes.find(helper.getLevel(), MachineKind.SIEVE, new ItemStack(Items.COARSE_DIRT))
+				.orElseThrow(() -> helper.assertionException("No sifting recipe for coarse dirt"));
+		helper.assertTrue(sifting.byproducts().stream().anyMatch(b -> b.result().create().is(JugcraftFarming.COTTON_SEEDS)),
+				"Sifting coarse dirt never gives cotton seeds");
+		helper.succeed();
+	}
+
 	/** The 3x2x6 alloy smelter: places all 36 blocks, takes power only at its socket, makes bronze. */
 	@GameTest(maxTicks = 400)
 	public void alloySmelterMakesBronze(GameTestHelper helper) {
@@ -172,6 +306,179 @@ public class JugcraftGameTests {
 		helper.succeedWhen(() -> {
 			ItemStack output = smelter.getItem(MachineKind.ALLOY_SMELTER.outputSlot());
 			helper.assertTrue(output.is(item("bronze_ingot")) && output.getCount() == 4, "Alloy smelter output is " + output);
+		});
+	}
+
+	/**
+	 * Glass chemistry (batch 16): tincal drops 1-3 borax; sand and borax melt into borosilicate glass, drawn into
+	 * optical fibre; iron and borax make ferroboron, which doubles the magnets a rare earth oxide gives; fibre can stand
+	 * in for gold in a processor.
+	 */
+	@GameTest
+	public void glassChemistryRecipes(GameTestHelper helper) {
+		BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
+		BlockState tincal = BuiltInRegistries.BLOCK.getValue(Jugcraft.id("tincal")).defaultBlockState();
+		for (int i = 0; i < 8; i++) {
+			int borax = Block.getDrops(tincal, helper.getLevel(), pos, null).stream().filter(s -> s.is(item("borax")))
+					.mapToInt(ItemStack::getCount).sum();
+			helper.assertTrue(borax >= 1 && borax <= 3, "Tincal dropped " + borax + " borax");
+		}
+		assertMulti(helper, MachineKind.ALLOY_SMELTER, List.of(new ItemStack(Items.SAND, 2), new ItemStack(item("borax"))),
+				item("borosilicate_glass"), 2);
+		assertMulti(helper, MachineKind.ALLOY_SMELTER, List.of(new ItemStack(Items.IRON_INGOT), new ItemStack(item("borax"))),
+				item("ferroboron"), 1);
+		assertMulti(helper, MachineKind.ALLOY_SMELTER, List.of(new ItemStack(item("rare_earth_oxide")),
+				new ItemStack(item("ferroboron"))), item("neodymium_magnet"), 2);
+		MachineRecipe fibre = MachineRecipes.find(helper.getLevel(), MachineKind.WIRE_DRAWER, new ItemStack(item("borosilicate_glass")))
+				.orElseThrow(() -> helper.assertionException("No drawing recipe for borosilicate glass"));
+		ItemStack drawn = fibre.output().create();
+		helper.assertTrue(drawn.is(item("optical_fibre")) && drawn.getCount() == 4, "Glass draws into " + drawn);
+		assertMulti(helper, MachineKind.CIRCUIT_ASSEMBLER, List.of(new ItemStack(item("microchip"), 4),
+				new ItemStack(item("advanced_circuit")), new ItemStack(item("optical_fibre"), 2)), item("processor"), 1);
+		helper.succeed();
+	}
+
+	private static void assertMulti(GameTestHelper helper, MachineKind kind, List<ItemStack> inputs, Item result, int count) {
+		ItemStack out = MachineRecipes.findMulti(helper.getLevel(), kind, inputs)
+				.orElseThrow(() -> helper.assertionException("No " + kind.id + " recipe for " + inputs))
+				.recipe().output().create();
+		helper.assertTrue(out.is(result) && out.getCount() == count, kind.id + " makes " + out + " from " + inputs);
+	}
+
+	/** The two-block crystal grower pulls a silicon boule from 4 silicon and a phosphate; the sawmill cuts it into 8 wafers. */
+	@GameTest(maxTicks = 600)
+	public void crystalGrowerPullsABoule(GameTestHelper helper) {
+		BlockPos master = new BlockPos(2, 1, 2);
+		MachineBlockEntity grower = large(helper, master, MachineKind.CRYSTAL_GROWER);
+		charge(helper, master.above(), Direction.WEST);
+		grower.setItem(0, new ItemStack(item("silicon"), 4));
+		grower.setItem(1, new ItemStack(item("phosphate")));
+		MachineRecipe wafers = MachineRecipes.find(helper.getLevel(), MachineKind.SAWMILL, new ItemStack(item("silicon_boule")))
+				.orElseThrow(() -> helper.assertionException("No sawing recipe for a silicon boule"));
+		ItemStack sawn = wafers.output().create();
+		helper.assertTrue(sawn.is(item("silicon_wafer")) && sawn.getCount() == 8, "A boule saws into " + sawn);
+		helper.succeedWhen(() -> {
+			ItemStack output = grower.getItem(MachineKind.CRYSTAL_GROWER.outputSlot());
+			helper.assertTrue(output.is(item("silicon_boule")), "Crystal grower output is " + output);
+			helper.assertTrue(grower.getItem(0).isEmpty() && grower.getItem(1).isEmpty(), "The inputs were not used up");
+		});
+	}
+
+	/** The circuit assembler bonds four microchips to an advanced circuit with gold: a processor. */
+	@GameTest(maxTicks = 600)
+	public void circuitAssemblerMakesAProcessor(GameTestHelper helper) {
+		MachineBlockEntity assembler = processing(helper, new BlockPos(2, 1, 2), MachineKind.CIRCUIT_ASSEMBLER,
+				new ItemStack(item("microchip"), 4));
+		assembler.setItem(1, new ItemStack(item("advanced_circuit")));
+		assembler.setItem(2, new ItemStack(Items.GOLD_INGOT));
+		helper.succeedWhen(() -> {
+			ItemStack output = assembler.getItem(MachineKind.CIRCUIT_ASSEMBLER.outputSlot());
+			helper.assertTrue(output.is(item("processor")), "Circuit assembler output is " + output);
+		});
+	}
+
+	/**
+	 * The network terminal reads the network it is cabled to: four cables, a battery box and a capacitor bank whose two
+	 * lower blocks both touch the cables. The bank counts once.
+	 */
+	@GameTest
+	public void networkTerminalReadsItsNetwork(GameTestHelper helper) {
+		BlockPos terminal = new BlockPos(1, 1, 2);
+		helper.setBlock(terminal, JugcraftElectronics.NETWORK_TERMINAL);
+		helper.assertTrue(NetworkTerminalBlock.read(helper.getLevel(), helper.absolutePos(terminal)) == null,
+				"A terminal with no cable read a network");
+		for (BlockPos cable : List.of(new BlockPos(2, 1, 2), new BlockPos(2, 1, 3), new BlockPos(3, 1, 3), new BlockPos(4, 1, 3))) {
+			helper.setBlock(cable, JugcraftMachines.COPPER_CABLE);
+		}
+		helper.setBlock(new BlockPos(2, 1, 1), machine(MachineKind.BATTERY_BOX));
+		((SimpleEnergyStorage) helper.getBlockEntity(new BlockPos(2, 1, 1), MachineBlockEntity.class).energyFor(null)).setAmount(100_000);
+		MachineBlockEntity bank = large(helper, new BlockPos(4, 1, 4), MachineKind.CAPACITOR_BANK);
+		((SimpleEnergyStorage) bank.energyFor(null)).setAmount(1_000_000);
+		NetworkTerminalBlock.Reading reading = NetworkTerminalBlock.read(helper.getLevel(), helper.absolutePos(terminal));
+		helper.assertTrue(reading != null, "The terminal found no network");
+		helper.assertTrue(reading.cables() == 4, "Cables: " + reading.cables());
+		helper.assertTrue(reading.devices() == 2, "Devices: " + reading.devices());
+		helper.assertTrue(reading.stored() == 1_100_000, "Stored: " + reading.stored());
+		helper.assertTrue(reading.capacity() == 4_400_000, "Capacity: " + reading.capacity());
+		helper.succeed();
+	}
+
+	/**
+	 * Loot tables load in Minecraft 26.x's format: the charging station drops once (from its lower half only) and salt
+	 * ore drops two to four salt. With the older keys, which 26.x ignores, both halves dropped and the ore dropped one.
+	 */
+	@GameTest
+	public void lootTablesKeepTheirConditionsAndCounts(GameTestHelper helper) {
+		BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
+		BlockState lower = JugcraftTools.CHARGING_STATION.defaultBlockState();
+		BlockState upper = lower.setValue(ChargingStationBlock.HALF, DoubleBlockHalf.UPPER);
+		helper.assertTrue(Block.getDrops(lower, helper.getLevel(), pos, null).size() == 1, "The lower half did not drop the station");
+		helper.assertTrue(Block.getDrops(upper, helper.getLevel(), pos, null).isEmpty(), "The upper half dropped a second station");
+		BlockState saltOre = BuiltInRegistries.BLOCK.getValue(Jugcraft.id("salt_ore")).defaultBlockState();
+		for (int i = 0; i < 8; i++) {
+			int salt = Block.getDrops(saltOre, helper.getLevel(), pos, null).stream().mapToInt(ItemStack::getCount).sum();
+			helper.assertTrue(salt >= 2 && salt <= 4, "Salt ore dropped " + salt + " salt");
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * A broken tank drops with its fluid and a placed one takes it back: a tinplate tank with five buckets of water
+	 * and a steel tank broken from any of its blocks both keep what they held, and an empty tank's item carries nothing.
+	 */
+	@GameTest(maxTicks = 40)
+	public void tanksKeepTheirFluidWhenBroken(GameTestHelper helper) {
+		BlockPos tank = new BlockPos(1, 1, 1);
+		helper.setBlock(tank, JugcraftFluids.FLUID_TANK);
+		FluidTankBlockEntity tankEntity = helper.getBlockEntity(tank, FluidTankBlockEntity.class);
+		List<ItemStack> empty = Block.getDrops(helper.getBlockState(tank), helper.getLevel(), helper.absolutePos(tank), tankEntity);
+		helper.assertTrue(empty.size() == 1 && !empty.get(0).has(JugcraftFluids.STORED_FLUID), "An empty tank dropped with fluid");
+		try (Transaction transaction = Transaction.openOuter()) {
+			tankEntity.storage.insert(FluidVariant.of(Fluids.WATER), 5 * FluidConstants.BUCKET, transaction);
+			transaction.commit();
+		}
+		List<ItemStack> drops = Block.getDrops(helper.getBlockState(tank), helper.getLevel(), helper.absolutePos(tank), tankEntity);
+		helper.assertTrue(drops.size() == 1, "The tank dropped " + drops.size() + " stacks");
+		StoredFluid stored = drops.get(0).get(JugcraftFluids.STORED_FLUID);
+		helper.assertTrue(stored != null && stored.variant().isOf(Fluids.WATER) && stored.amount() == 5 * FluidConstants.BUCKET,
+				"The tank's item does not carry its water: " + stored);
+		BlockPos placed = new BlockPos(3, 1, 1);
+		helper.setBlock(placed, JugcraftFluids.FLUID_TANK);
+		FluidTankBlockEntity placedEntity = helper.getBlockEntity(placed, FluidTankBlockEntity.class);
+		placedEntity.applyComponentsFromItemStack(drops.get(0));
+		helper.assertTrue(placedEntity.storage.variant.isOf(Fluids.WATER) && placedEntity.storage.amount == 5 * FluidConstants.BUCKET,
+				"The placed tank did not take back its water");
+
+		BlockPos base = new BlockPos(5, 1, 1);
+		LargeMachineBlock steel = (LargeMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.STEEL_TANK);
+		helper.setBlock(base, steel.defaultBlockState());
+		steel.setPlacedBy(helper.getLevel(), helper.absolutePos(base), helper.getBlockState(base), null, ItemStack.EMPTY);
+		MachineBlockEntity steelEntity = helper.getBlockEntity(base, MachineBlockEntity.class);
+		try (Transaction transaction = Transaction.openOuter()) {
+			steelEntity.reservoir().insert(FluidVariant.of(Fluids.LAVA), 20 * FluidConstants.BUCKET, transaction);
+			transaction.commit();
+		}
+		List<ItemStack> steelDrops = Block.getDrops(helper.getBlockState(base), helper.getLevel(), helper.absolutePos(base), steelEntity);
+		StoredFluid lava = steelDrops.isEmpty() ? null : steelDrops.get(0).get(JugcraftFluids.STORED_FLUID);
+		helper.assertTrue(steelDrops.size() == 1 && lava != null && lava.variant().isOf(Fluids.LAVA) && lava.amount() == 20 * FluidConstants.BUCKET,
+				"The steel tank's item does not carry its lava: " + steelDrops);
+		// Break another block of the 2x2 tank (not the master, which holds the fluid): the whole tank drops once.
+		BlockPos other = null;
+		for (BlockPos near : BlockPos.betweenClosed(base.offset(-1, 0, -1), base.offset(1, 0, 1))) {
+			if (!near.equals(base) && helper.getBlockState(near).is(steel)) {
+				other = near.immutable();
+			}
+		}
+		helper.assertTrue(other != null, "The steel tank did not form");
+		BlockPos broken = other;
+		helper.destroyBlock(broken);
+		helper.succeedWhen(() -> {
+			helper.assertBlockNotPresent(steel, base);
+			helper.assertBlockNotPresent(steel, broken);
+			int tanks = helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+					new net.minecraft.world.phys.AABB(helper.absolutePos(base)).inflate(3),
+					item -> item.getItem().has(JugcraftFluids.STORED_FLUID) && item.getItem().get(JugcraftFluids.STORED_FLUID).amount() == 20 * FluidConstants.BUCKET).size();
+			helper.assertTrue(tanks == 1, "Breaking the steel tank's top dropped " + tanks + " full tanks");
 		});
 	}
 
@@ -532,6 +839,21 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/** The 3x2 lithium battery bank holds 32,000,000 JE and gives up to 16,384 JE/t out of all six front sockets. */
+	@GameTest
+	public void lithiumBatteryBankOutputsFromItsFront(GameTestHelper helper) {
+		BlockPos master = new BlockPos(5, 1, 3);
+		large(helper, master, MachineKind.LITHIUM_BATTERY_BANK);
+		EnergyStorage front = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master.west().above()), Direction.NORTH);
+		EnergyStorage side = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master.west(2)), Direction.WEST);
+		EnergyStorage back = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master.above()), Direction.SOUTH);
+		helper.assertTrue(front != null && front.supportsExtraction() && !front.supportsInsertion(), "Front must only give power");
+		helper.assertTrue(side != null && side.supportsInsertion() && !side.supportsExtraction(), "Sides must only take power");
+		helper.assertTrue(back != null && back.supportsInsertion(), "The back must take power");
+		helper.assertTrue(front.getCapacity() == 32_000_000, "Capacity is " + front.getCapacity());
+		helper.succeed();
+	}
+
 	/** The steel tank holds exactly 128 buckets of one fluid. */
 	@GameTest
 	public void steelTankHolds128Buckets(GameTestHelper helper) {
@@ -614,6 +936,93 @@ public class JugcraftGameTests {
 			}
 			helper.assertTrue(ore == 1 && deep == 1, "Drill holds " + ore + " iron ore and " + deep + " deepslate iron ore");
 		});
+	}
+
+	/**
+	 * A deposit drill standing on surface deposits takes one of each kind per cycle from those under it and one block
+	 * round it, into a chest beside it, and leaves stone where each ran out; a deposit outside its reach stays full.
+	 * Two cycles empty an iron and a coal deposit with 2 left each; mining them one after the other would take four,
+	 * longer than the test allows. Picks get nothing from a deposit block.
+	 */
+	@GameTest(maxTicks = 1000)
+	public void depositDrillEmptiesDepositsIntoAChest(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos master = new BlockPos(4, 2, 4);
+		// The drill covers x 2..4, z 4..6 (it faces north); it reaches x 1..5, z 3..7, at y 1 and below.
+		BlockPos iron = new BlockPos(3, 1, 5);
+		BlockPos coal = new BlockPos(5, 1, 7);
+		BlockPos outside = new BlockPos(0, 1, 5);
+		helper.setBlock(iron, JugcraftDeposits.BLOCKS.get("iron_deposit"));
+		helper.setBlock(coal, JugcraftDeposits.BLOCKS.get("coal_deposit"));
+		helper.setBlock(outside, JugcraftDeposits.BLOCKS.get("iron_deposit"));
+		helper.assertTrue(Block.getDrops(helper.getBlockState(iron), level, helper.absolutePos(iron), null).isEmpty(),
+				"A deposit block drops something when broken");
+		// Run the two deposits nearly dry so the test finishes quickly: 2 iron and 2 coal left.
+		helper.assertTrue(Deposits.extract(level, helper.absolutePos(iron), Deposits.CAPACITY - 2) == Deposits.CAPACITY - 2,
+				"Could not draw down the iron deposit");
+		Deposits.extract(level, helper.absolutePos(coal), Deposits.CAPACITY - 2);
+		helper.assertTrue(Deposits.remaining(level, helper.absolutePos(coal)) == 2, "The coal deposit does not hold 2");
+		helper.setBlock(new BlockPos(4, 2, 3), Blocks.CHEST);
+		large(helper, master, MachineKind.DEPOSIT_DRILL);
+		charge(helper, master, Direction.EAST);
+		helper.succeedWhen(() -> {
+			helper.assertBlockPresent(Blocks.STONE, iron);
+			helper.assertBlockPresent(Blocks.STONE, coal);
+			helper.assertBlockPresent(JugcraftDeposits.BLOCKS.get("iron_deposit"), outside);
+			helper.assertTrue(Deposits.remaining(level, helper.absolutePos(outside)) == Deposits.CAPACITY,
+					"The deposit out of reach was drawn on");
+			ChestBlockEntity chest = helper.getBlockEntity(new BlockPos(4, 2, 3), ChestBlockEntity.class);
+			int rawIron = count(chest, Items.RAW_IRON);
+			int coalItems = count(chest, Items.COAL);
+			helper.assertTrue(rawIron == 2 && coalItems == 2, "The chest holds " + rawIron + " raw iron and " + coalItems + " coal");
+		});
+	}
+
+	/**
+	 * The iron deposit's worldgen feature, placed on a two-layer stone floor as the surface heightmap would place it
+	 * (on the first air block), turns a disk of the top layer into iron deposit and leaves the layer below as stone.
+	 */
+	@GameTest
+	public void depositFeatureReplacesTheTopLayer(GameTestHelper helper) {
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				helper.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
+				helper.setBlock(new BlockPos(x, 2, z), Blocks.STONE);
+			}
+		}
+		ServerLevel level = helper.getLevel();
+		PlacedFeature placed = level.registryAccess().lookupOrThrow(Registries.PLACED_FEATURE)
+				.getOrThrow(ResourceKey.create(Registries.PLACED_FEATURE, Jugcraft.id("iron_deposit"))).value();
+		// Without its placement rules (rarity, heightmap, biome), the feature goes exactly where it is put.
+		new PlacedFeature(placed.feature(), List.of()).place(level, level.getChunkSource().getGenerator(),
+				RandomSource.create(42), helper.absolutePos(new BlockPos(4, 3, 4)));
+		Block deposit = JugcraftDeposits.BLOCKS.get("iron_deposit");
+		helper.assertBlockPresent(deposit, new BlockPos(4, 2, 4));
+		helper.assertBlockPresent(Blocks.STONE, new BlockPos(4, 1, 4));
+		int top = 0;
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				top += helper.getBlockState(new BlockPos(x, 2, z)).is(deposit) ? 1 : 0;
+				helper.assertBlockNotPresent(deposit, new BlockPos(x, 1, z));
+			}
+		}
+		helper.assertTrue(top >= 9, "Only " + top + " deposit blocks were placed");
+		helper.succeed();
+	}
+
+	/** Breaking a deposit forgets what was taken from it, so a deposit placed there again is full. */
+	@GameTest
+	public void brokenDepositIsForgotten(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, JugcraftDeposits.BLOCKS.get("tin_deposit"));
+		Deposits.extract(level, helper.absolutePos(pos), 400);
+		helper.assertTrue(Deposits.remaining(level, helper.absolutePos(pos)) == Deposits.CAPACITY - 400, "Nothing was taken");
+		helper.setBlock(pos, Blocks.AIR);
+		helper.setBlock(pos, JugcraftDeposits.BLOCKS.get("tin_deposit"));
+		helper.assertTrue(Deposits.remaining(level, helper.absolutePos(pos)) == Deposits.CAPACITY,
+				"A new deposit block starts with " + Deposits.remaining(level, helper.absolutePos(pos)));
+		helper.succeed();
 	}
 
 	// ------------------------------------------------------------------ renewables
@@ -746,6 +1155,30 @@ public class JugcraftGameTests {
 			helper.assertTrue(crusher.getItem(MachineKind.CRUSHER.outputSlot()).is(item("raw_tin")),
 					"Crusher output is " + crusher.getItem(MachineKind.CRUSHER.outputSlot()));
 			helper.assertTrue(motor.energy().getAmount() < ElectricMotorBlockEntity.CAPACITY, "The motor used no JE");
+		});
+	}
+
+	/**
+	 * A magnet motor driving a magnet dynamo, which feeds the motor back: both run at the magnet rates, but at 95%
+	 * each way the pair loses power every round and never gains any.
+	 */
+	@GameTest(maxTicks = 200)
+	public void magnetMotorAndDynamoLoopLosesPower(GameTestHelper helper) {
+		BlockPos motorPos = new BlockPos(1, 1, 2);
+		helper.setBlock(motorPos, JugcraftKinetics.MAGNET_MOTOR.defaultBlockState().setValue(ElectricMotorBlock.FACING, Direction.EAST));
+		helper.setBlock(motorPos.east(), JugcraftKinetics.MAGNET_DYNAMO);
+		ElectricMotorBlockEntity motor = helper.getBlockEntity(motorPos, ElectricMotorBlockEntity.class);
+		DynamoBlockEntity dynamo = helper.getBlockEntity(motorPos.east(), DynamoBlockEntity.class);
+		helper.assertTrue(motor.stats() == ElectricMotorBlockEntity.MAGNET, "The magnet motor has copper stats");
+		helper.assertTrue(dynamo.stats() == DynamoBlockEntity.MAGNET, "The magnet dynamo has copper stats");
+		long start = ElectricMotorBlockEntity.MAGNET.capacity();
+		motor.energy().setAmount(start);
+		helper.runAfterDelay(100, () -> {
+			long total = motor.energy().getAmount() + dynamo.energy().getAmount();
+			helper.assertTrue(total < start, "The pair holds " + total + " JE of " + start);
+			// At least 100 ticks of the motor's full 384 KE/t went round, losing about a tenth of each pass.
+			helper.assertTrue(start - total >= 100L * 384 * 5 / 100, "Only " + (start - total) + " JE was lost");
+			helper.succeed();
 		});
 	}
 

@@ -11,8 +11,9 @@ blast furnace as a clearly marked stand-in, and liquid crude oil is not added.
 MOD = "jugcraft"
 
 # Feature switches (config/jugcraft.properties). Order is the config file order.
-FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "aluminum",
-            "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines"]
+FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
+            "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines", "deposits",
+            "explosives", "parties", "drones"]
 
 # Metals use the vanilla form set. "mined" adds ore, deepslate ore, raw item and raw block.
 # cook: which vanilla cookers can smelt the ore/raw form. tool: minimum pickaxe tier.
@@ -31,6 +32,9 @@ METALS = {
                  "tool": "iron", "gen": {"size": 5, "count": 2, "min_y": -64, "max_y": 0}},
     "uranium": {"mined": True, "display": "Uranium", "feature": "uranium", "cook": ["blasting"], "xp": 1.0,
                 "tool": "iron", "gen": {"size": 4, "count": 1, "min_y": -64, "max_y": -16}},
+    # Rutile-bearing titanium ore: no furnace smelts it; only the Kroll process (chlorine, chemistry batch 6) does.
+    "titanium": {"mined": True, "display": "Titanium", "feature": "titanium", "cook": [], "xp": 1.0,
+                 "tool": "iron", "gen": {"size": 5, "count": 2, "min_y": -64, "max_y": -8}},
     "bronze": {"mined": False, "display": "Bronze", "feature": "tin", "extras": ["bronze_blend"]},
     "aluminum": {"mined": False, "display": "Aluminum", "feature": "aluminum"},
     # Alloys made only in the alloy smelter (tools/machines.py ALLOY_SMELTER).
@@ -62,6 +66,11 @@ ROCKS = {
                  "drop": {"item": "bitumen", "min": 1, "max": 2},
                  "gen": {"size": 24, "count": 3, "min_y": 50, "max_y": 90, "target": "minecraft:sand",
                          "biomes": ["IS_DESERT", "IS_BADLANDS"]}},
+    # Glass chemistry (batch 16): tincal, natural borax, crusts the sand of dry deserts.
+    "tincal": {"display": "Tincal", "feature": "silicon", "copy": "SANDSTONE", "tool": "pickaxe",
+               "drop": {"item": "borax", "min": 1, "max": 3},
+               "gen": {"size": 14, "count": 2, "min_y": 55, "max_y": 100, "target": "minecraft:sand",
+                       "biomes": ["IS_DESERT", "IS_BADLANDS"]}},
 }
 
 # Plain items: display name, feature, optional c: tag path.
@@ -73,6 +82,11 @@ ITEMS = {
     "rare_earth_oxide": {"display": "Rare Earth Oxide", "feature": "rare_earths", "tag": "dusts/rare_earth_oxide"},
     # Coal baked in the coke oven: a hotter fuel and the carbon for steel.
     "coke": {"display": "Coal Coke", "feature": "machines", "tag": "coal_coke"},
+    # Glass chemistry (batch 16): borax, glass made with it, and fibre drawn from that glass.
+    "borax": {"display": "Borax", "feature": "silicon", "tag": "dusts/borax"},
+    "borosilicate_glass": {"display": "Borosilicate Glass", "feature": "silicon", "tag": None},
+    "optical_fibre": {"display": "Optical Fibre", "feature": "silicon", "tag": None},
+    "ferroboron": {"display": "Ferroboron", "feature": "silicon", "tag": None},
 }
 
 EXTRA_NAMES = {"bronze_blend": "Bronze Blend"}
@@ -82,7 +96,8 @@ EXTRA_NAMES = {"bronze_blend": "Bronze Blend"}
 # Metal content per item in nugget units; the checker uses these to audit recipes.
 PART_UNITS = {"plate": 9, "gear": 36, "wire": 3, "dust": 9}
 COMPONENTS = {
-    "plate": ["copper", "iron", "tin", "bronze", "brass", "invar", "aluminum", "nickel", "lead", "tungsten", "steel"],
+    "plate": ["copper", "iron", "tin", "bronze", "brass", "invar", "aluminum", "nickel", "lead", "tungsten", "steel",
+              "titanium"],
     "gear": ["iron", "bronze", "brass", "invar", "steel"],
     "wire": ["copper", "silver", "aluminum"],
     # Pulverizer output (see tools/machines.py); one dust smelts back into one ingot.
@@ -93,7 +108,7 @@ WASHED_ORES = list(COMPONENTS["dust"])
 # Sawmill byproduct.
 SAWDUST = "sawdust"
 # Assembled electronics (non-metal outputs; their metal is consumed).
-CIRCUITS = {"basic_circuit": "Basic Circuit", "advanced_circuit": "Advanced Circuit"}
+CIRCUITS = {"basic_circuit": "Basic Circuit", "advanced_circuit": "Advanced Circuit", "processor": "Processor"}
 # Vanilla metals that get Jugcraft parts: nugget units per vanilla ingot.
 VANILLA_METALS = {"copper", "iron", "gold"}
 
@@ -191,5 +206,14 @@ def feature_of(entry_id):
         return "machines"
     from machines import machine_blocks, machine_items, FEATURE
     if entry_id in machine_blocks() or entry_id in machine_items():
+        return FEATURE
+    import petro
+    if entry_id in petro.petro_items() or entry_id in petro.petro_blocks():
+        return FEATURE
+    import guide_books  # the Drone Tower guide books go with the drones, part of the machines
+    if entry_id in guide_books.BOOKS:
+        return FEATURE
+    import tank_display
+    if entry_id in tank_display.BLOCKS:
         return FEATURE
     raise KeyError(entry_id)

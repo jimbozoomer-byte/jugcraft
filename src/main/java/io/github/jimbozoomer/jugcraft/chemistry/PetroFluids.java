@@ -85,9 +85,51 @@ public final class PetroFluids {
 		}
 	}
 
+	/** A gas: a fluid with no block or bucket (see {@link GasFluid}), and its gauge colour. */
+	public record Gas(String id, Fluid fluid, int color) {
+	}
+
 	public static final Map<String, Entry> FLUIDS = new LinkedHashMap<>();
+	public static final Map<String, Gas> GASES = new LinkedHashMap<>();
 	/** Liquid crude oil: from reservoirs and oil sand; refined into fuels. */
 	public static Entry CRUDE_OIL;
+	/** Distillation fractions: light naphtha (for gasoline), diesel, and heavy fuel oil (for cracking). */
+	public static Entry NAPHTHA;
+	public static Entry DIESEL;
+	public static Entry HEAVY_FUEL_OIL;
+	/** Reformed naphtha: high-octane gasoline. */
+	public static Entry GASOLINE;
+	/** Water thickened with sand and a gelling agent: what the fracking rig pumps down the well. */
+	public static Entry FRACKING_FLUID;
+	/** What comes back up a fracked well with the oil: dirty water, to be treated. */
+	public static Entry FLOWBACK_WATER;
+	/** Vacuum distillation of heavy fuel oil: lubricant (machine upkeep). */
+	public static Entry LUBRICANT;
+	/** The lightest fraction: refinery gas (fuel gas, and later plastics). */
+	public static Gas REFINERY_GAS;
+	/** Salt dissolved in water, for the electrolytic cell. */
+	public static Entry BRINE;
+	/** Sodium hydroxide solution from brine electrolysis: the base for digesting bauxite. */
+	public static Entry LYE;
+	/** Gases from brine electrolysis: chlorine (at the anode) and hydrogen (at the cathode). */
+	public static Gas CHLORINE;
+	public static Gas HYDROGEN;
+	/** Sulfur burnt and absorbed in water: the acid for fertilizer and leaching. */
+	public static Entry SULFURIC_ACID;
+	/** Nitrogen chemistry (batch 12): air separated into nitrogen and oxygen; ammonia from them and hydrogen. */
+	public static Gas NITROGEN;
+	public static Gas OXYGEN;
+	public static Gas AMMONIA;
+	/** The scarce third part of air (batch 13): a shielding gas. */
+	public static Gas ARGON;
+	/** Cracked out of naphtha and polymerized into synthetic rubber (batch 14). */
+	public static Gas BUTADIENE;
+	/** Chlorine joined to refinery gas, polymerized into PVC (batch 15). */
+	public static Gas VINYL_CHLORIDE;
+	/** Ammonia burnt in oxygen and absorbed in water (the Ostwald process). */
+	public static Entry NITRIC_ACID;
+	/** Vanadium leached into sulfuric acid (batch 17): the flow battery's electrolyte. */
+	public static Entry VANADIUM_ELECTROLYTE;
 
 	private PetroFluids() {
 	}
@@ -102,14 +144,55 @@ public final class PetroFluids {
 		return null;
 	}
 
+	/** ARGB gauge colour for a petroleum fluid or gas, or 0 if it is neither. */
+	public static int gaugeColor(Fluid fluid) {
+		Entry entry = of(fluid);
+		if (entry != null) {
+			return entry.color();
+		}
+		for (Gas gas : GASES.values()) {
+			if (gas.fluid() == fluid) {
+				return gas.color();
+			}
+		}
+		return 0;
+	}
+
 	public static void register() {
 		CRUDE_OIL = fluid("crude_oil", 20, 2, 2, 0xFF1E1711, MapColor.COLOR_BLACK);
+		NAPHTHA = fluid("naphtha", 5, 4, 1, 0xFFBEAA64, MapColor.COLOR_YELLOW);
+		DIESEL = fluid("diesel", 8, 3, 1, 0xFFAA6E19, MapColor.COLOR_ORANGE);
+		HEAVY_FUEL_OIL = fluid("heavy_fuel_oil", 30, 2, 2, 0xFF261E12, MapColor.COLOR_BLACK);
+		LUBRICANT = fluid("lubricant", 25, 2, 2, 0xFF8C7D28, MapColor.COLOR_YELLOW);
+		GASOLINE = fluid("gasoline", 4, 4, 1, 0xFFC86446, MapColor.COLOR_RED);
+		FRACKING_FLUID = fluid("fracking_fluid", 6, 3, 1, 0xFF8296A0, MapColor.COLOR_LIGHT_GRAY);
+		FLOWBACK_WATER = fluid("flowback_water", 5, 4, 1, 0xFF645C48, MapColor.COLOR_BROWN);
+		REFINERY_GAS = gas("refinery_gas", 0xFFB8C4D0);
+		BRINE = fluid("brine", 5, 4, 1, 0xFFB4C8D2, MapColor.COLOR_LIGHT_BLUE);
+		LYE = fluid("lye", 6, 4, 1, 0xFFDCDCC0, MapColor.SNOW);
+		CHLORINE = gas("chlorine", 0xFFB4D25A);
+		HYDROGEN = gas("hydrogen", 0xFFDCE6F0);
+		SULFURIC_ACID = fluid("sulfuric_acid", 6, 4, 1, 0xFFD2C850, MapColor.COLOR_YELLOW);
+		NITROGEN = gas("nitrogen", 0xFF96A8D6);
+		OXYGEN = gas("oxygen", 0xFF78B4E0);
+		AMMONIA = gas("ammonia", 0xFFB096D4);
+		ARGON = gas("argon", 0xFFC8A0E6);
+		BUTADIENE = gas("butadiene", 0xFFC8D0AA);
+		VINYL_CHLORIDE = gas("vinyl_chloride", 0xFFD6DEB6);
+		NITRIC_ACID = fluid("nitric_acid", 5, 4, 1, 0xFFE2D48C, MapColor.COLOR_YELLOW);
+		VANADIUM_ELECTROLYTE = fluid("vanadium_electrolyte", 6, 4, 1, 0xFF2C3E96, MapColor.COLOR_BLUE);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {
 				output.accept(entry.bucket());
 			}
 		});
+	}
+
+	private static Gas gas(String id, int color) {
+		Gas gas = new Gas(id, Registry.register(BuiltInRegistries.FLUID, Jugcraft.id(id), new GasFluid()), color);
+		GASES.put(id, gas);
+		return gas;
 	}
 
 	private static Entry fluid(String id, int tickDelay, int slope, int dropOff, int gauge, MapColor color) {

@@ -32,6 +32,11 @@ public final class JugcraftKinetics {
 	public static Block DYNAMO;
 	public static Block BELT_PULLEY;
 	public static Block ELECTRIC_MOTOR;
+	/** Rare-earth magnet versions of the dynamo and motor (batch 6): faster and far less lossy. */
+	public static Block MAGNET_DYNAMO;
+	public static Block MAGNET_MOTOR;
+	/** Stores rotation (batch 19). */
+	public static Block FLYWHEEL;
 	public static Item BELT;
 	public static BlockEntityType<ShaftBlockEntity> SHAFT_ENTITY;
 	public static BlockEntityType<HandCrankBlockEntity> HAND_CRANK_ENTITY;
@@ -39,6 +44,7 @@ public final class JugcraftKinetics {
 	public static BlockEntityType<DynamoBlockEntity> DYNAMO_ENTITY;
 	public static BlockEntityType<BeltPulleyBlockEntity> BELT_PULLEY_ENTITY;
 	public static BlockEntityType<ElectricMotorBlockEntity> ELECTRIC_MOTOR_ENTITY;
+	public static BlockEntityType<FlywheelBlockEntity> FLYWHEEL_ENTITY;
 
 	private JugcraftKinetics() {
 	}
@@ -60,6 +66,10 @@ public final class JugcraftKinetics {
 		DYNAMO = block("dynamo", Blocks.IRON_BLOCK, DynamoBlock::new);
 		BELT_PULLEY = block("belt_pulley", Blocks.OAK_PLANKS, BeltPulleyBlock::new);
 		ELECTRIC_MOTOR = block("electric_motor", Blocks.IRON_BLOCK, ElectricMotorBlock::new);
+		MAGNET_DYNAMO = block("magnet_dynamo", Blocks.IRON_BLOCK, properties -> new DynamoBlock(properties, DynamoBlockEntity.MAGNET));
+		MAGNET_MOTOR = block("magnet_motor", Blocks.IRON_BLOCK,
+				properties -> new ElectricMotorBlock(properties, ElectricMotorBlockEntity.MAGNET));
+		FLYWHEEL = block("flywheel", Blocks.IRON_BLOCK, FlywheelBlock::new);
 		ResourceKey<Item> beltKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("belt"));
 		BELT = Registry.register(BuiltInRegistries.ITEM, beltKey, new BeltItem(new Item.Properties().setId(beltKey)));
 		SHAFT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("iron_shaft"),
@@ -69,11 +79,13 @@ public final class JugcraftKinetics {
 		STEAM_ENGINE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("steam_engine"),
 				FabricBlockEntityTypeBuilder.create(SteamEngineBlockEntity::new, STEAM_ENGINE).build());
 		DYNAMO_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("dynamo"),
-				FabricBlockEntityTypeBuilder.create(DynamoBlockEntity::new, DYNAMO).build());
+				FabricBlockEntityTypeBuilder.create(DynamoBlockEntity::new, DYNAMO, MAGNET_DYNAMO).build());
 		BELT_PULLEY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("belt_pulley"),
 				FabricBlockEntityTypeBuilder.create(BeltPulleyBlockEntity::new, BELT_PULLEY).build());
 		ELECTRIC_MOTOR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("electric_motor"),
-				FabricBlockEntityTypeBuilder.create(ElectricMotorBlockEntity::new, ELECTRIC_MOTOR).build());
+				FabricBlockEntityTypeBuilder.create(ElectricMotorBlockEntity::new, ELECTRIC_MOTOR, MAGNET_MOTOR).build());
+		FLYWHEEL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("flywheel"),
+				FabricBlockEntityTypeBuilder.create(FlywheelBlockEntity::new, FLYWHEEL).build());
 		EnergyStorage.SIDED.registerForBlockEntity((motor, side) -> motor.energy, ELECTRIC_MOTOR_ENTITY);
 		ItemStorage.SIDED.registerForBlockEntity((engine, side) -> engine.fuel, STEAM_ENGINE_ENTITY);
 		FluidStorage.SIDED.registerForBlockEntity((engine, side) -> engine.waterInlet, STEAM_ENGINE_ENTITY);
@@ -87,6 +99,9 @@ public final class JugcraftKinetics {
 			output.accept(BELT_PULLEY);
 			output.accept(BELT);
 			output.accept(ELECTRIC_MOTOR);
+			output.accept(MAGNET_DYNAMO);
+			output.accept(MAGNET_MOTOR);
+			output.accept(FLYWHEEL);
 		});
 	}
 }

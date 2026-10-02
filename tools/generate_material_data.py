@@ -10,8 +10,10 @@ from pathlib import Path
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, EXTRA_NAMES, MINERAL_TAGS, PROCESSING, COMPONENTS, CIRCUITS,
                        metal_blocks, metal_items, mineral_blocks, all_blocks, all_items, feature_of, ingot_id)
 
-from machines import MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS, CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
+from machines import CROPS, ELECTRONICS_BLOCKS, FARMING_BLOCKS, MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS, CRAFTING, ALT_CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
 import model_writer
+from party import party_lang
+import drones
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -29,7 +31,47 @@ CABLE_ROTATION = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {
                   "up": {"x": 270}, "down": {"x": 90}}
 
 
+# Glowing strips on cables (electric look): this far proud of the sheath, in pixels, and at full light emission.
+GLOW_LIFT = 0.1
+GLOW_EMISSION = 15
+
+
+def glow_strip(frm, to, face):
+    """A thin lit strip lying on one face of a cable box: drawn on its outer face and its two long edges."""
+    return {"from": frm, "to": to, "light_emission": GLOW_EMISSION,
+            "faces": {f: {"uv": [0, 0, 16, 16], "texture": "#glow"}
+                      for f in ("north", "south", "east", "west", "up", "down") if f != face}}
+
+
+def cable_glow(lo, hi, z0, z1):
+    """Strips along a cable piece running north-south from z0 to z1: one centred on each of its four long faces."""
+    a, b, t = 7, 9, GLOW_LIFT
+    return [glow_strip([a, hi, z0], [b, hi + t, z1], "down"), glow_strip([a, lo - t, z0], [b, lo, z1], "up"),
+            glow_strip([hi, a, z0], [hi + t, b, z1], "west"), glow_strip([lo - t, a, z0], [lo, b, z1], "east")]
+
+
+def core_glow(lo, hi):
+    """The glowing cross on each face of a cable's core: a full-width bar one way, two short bars the other (no
+    overlap, so no two lit faces share a plane)."""
+    a, b, t = 7, 9, GLOW_LIFT
+    out = []
+    for axis in range(3):
+        for side, outer in ((lo, lo - t), (hi, hi + t)):
+            u, v = [i for i in range(3) if i != axis]
+            for (u0, u1), (v0, v1) in (((lo, hi), (a, b)), ((a, b), (lo, a)), ((a, b), (b, hi))):
+                frm, to = [0.0] * 3, [0.0] * 3
+                frm[axis], to[axis] = min(side, outer), max(side, outer)
+                frm[u], to[u] = u0, u1
+                frm[v], to[v] = v0, v1
+                facing = {0: ("west", "east"), 1: ("down", "up"), 2: ("north", "south")}[axis]
+                inner = facing[1] if side == lo else facing[0]
+                out.append(glow_strip(frm, to, inner))
+    return out
+
+
 def write(path, obj):
+    if isinstance(obj, dict) and obj.get("elements"):
+        model_writer.separate_coplanar(obj["elements"])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
 
@@ -90,9 +132,220 @@ def assets():
         write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
         lang[f"item.{MOD}.{item}"] = item_name(item)
     machine_assets(lang)
+    import deposits
+    deposits.write_all(write, ASSETS, DATA / MOD, lang)
+    import tank_display
+    tank_display.write_all(write, ASSETS, DATA / MOD, lang, model_writer)
+    import gui_textures
+    gui_textures.write_all(write, ASSETS, lang, MACHINES)
     import advancements
     lang.update(advancements.generate(MOD)[1])
+    party_lang(lang)
+    drone_assets(lang)
+    import tower
+    tower.write_assets(write, rid, ASSETS, lang)
+    import blueprints
+    blueprints.write_assets(write, rid, ASSETS, lang)
+    blueprints.write_all()
+    import drone_sounds
+    lang.update(drone_sounds.LANG)
+    import guide_books
+    guide_books.write_assets(write, rid, ASSETS, DATA, lang)
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
+
+
+def drone_assets(lang):
+    """Drone Depot blocks, drones and parts (tools/drones.py): simple cube models in the sci-fi palette."""
+    for block, info in drones.DRONE_BLOCKS.items():
+        lang[f"block.{MOD}.{block}"] = info["display"]
+        if info["faces"] in ("pad", "pickup"):
+            write_pad_models(block, drones.PAD_SIZE if info["faces"] == "pad" else drones.PICKUP_SIZE)
+            continue
+        if info["faces"] == "screen":
+            write_screen_models(block)
+            continue
+        if info["faces"] == "holo":
+            write_holo_models(block)
+            continue
+        if info["faces"] == "furniture":
+            continue
+        if info["faces"] == "glass":
+            # See-through: the texture has translucent glass in a solid frame.
+            model = {"parent": "minecraft:block/cube_all", "textures": {
+                "all": {"force_translucent": True, "sprite": rid(f"block/{block}")}}}
+            write(ASSETS / "models" / "block" / f"{block}.json", model)
+            write(ASSETS / "blockstates" / f"{block}.json", {"variants": {"": {"model": rid(f"block/{block}")}}})
+            write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+            continue
+        if info["faces"] == "all":
+            model = {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{block}")}}
+        else:
+            model = {"parent": "minecraft:block/cube_bottom_top", "textures": {
+                "side": rid(f"block/{block}_side"), "top": rid(f"block/{block}_top"), "bottom": rid(f"block/{block}_bottom")}}
+        write(ASSETS / "models" / "block" / f"{block}.json", model)
+        write(ASSETS / "blockstates" / f"{block}.json", {"variants": {"": {"model": rid(f"block/{block}")}}})
+        write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+    items = dict(drones.DRONE_PARTS)
+    items.update({tier["id"]: tier["display"] for tier in drones.DRONE_TIERS.values()})
+    for item, display in items.items():
+        lang[f"item.{MOD}.{item}"] = display
+        write(ASSETS / "models" / "item" / f"{item}.json",
+              {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
+        write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
+    lang.update(drones.DRONE_LANG)
+
+
+def write_pad_models(block, size):
+    """Landing pad and supply pickup plates: a thin plate model; loose plates (part=0) use their own
+    top, and the plates of a formed pad (5x5) or pickup (3x3) each show one tile of the combined
+    picture (the pad with its charger port, the pickup with its lift hatch)."""
+    height = drones.PAD_PLATE_HEIGHT
+    side_uv = [0, 16 - height, 16, 16]
+    write(ASSETS / "models" / "block" / "pad_plate.json", {
+        "parent": "minecraft:block/block",
+        "textures": {"particle": "#side"},
+        "elements": [{"from": [0, 0, 0], "to": [16, height, 16], "faces": {
+            "up": {"uv": [0, 0, 16, 16], "texture": "#top"},
+            "down": {"uv": [0, 0, 16, 16], "texture": "#side", "cullface": "down"},
+            "north": {"uv": side_uv, "texture": "#side", "cullface": "north"},
+            "south": {"uv": side_uv, "texture": "#side", "cullface": "south"},
+            "west": {"uv": side_uv, "texture": "#side", "cullface": "west"},
+            "east": {"uv": side_uv, "texture": "#side", "cullface": "east"}}}]})
+    side = rid(f"block/{block}_side")
+    write(ASSETS / "models" / "block" / f"{block}.json",
+          {"parent": rid("block/pad_plate"), "textures": {"top": rid(f"block/{block}"), "side": side}})
+    variants = {"part=0": {"model": rid(f"block/{block}")}}
+    for part in range(1, size * size + 1):
+        name = f"{block}_formed_{part}"
+        write(ASSETS / "models" / "block" / f"{name}.json",
+              {"parent": rid("block/pad_plate"), "textures": {"top": rid(f"block/{name}"), "side": side}})
+        variants[f"part={part}"] = {"model": rid(f"block/{name}")}
+    write(ASSETS / "blockstates" / f"{block}.json", {"variants": variants})
+    write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+
+
+def write_holo_models(block):
+    """Hologram table sections: a 13-pixel table (dark glass top, panelled sides). Loose sections show
+    their own top; the nine of a formed 3x3 table each show one tile of the combined top with the
+    projector in the middle."""
+    h = drones.HOLO_HEIGHT
+    side_uv = [0, 16 - h, 16, 16]
+    write(ASSETS / "models" / "block" / "holo_table_base.json", {
+        "parent": "minecraft:block/block",
+        "textures": {"particle": "#side"},
+        "elements": [{"from": [0, 0, 0], "to": [16, h, 16], "faces": {
+            "up": {"uv": [0, 0, 16, 16], "texture": "#top"},
+            "down": {"uv": [0, 0, 16, 16], "texture": "#side", "cullface": "down"},
+            "north": {"uv": side_uv, "texture": "#side", "cullface": "north"},
+            "south": {"uv": side_uv, "texture": "#side", "cullface": "south"},
+            "west": {"uv": side_uv, "texture": "#side", "cullface": "west"},
+            "east": {"uv": side_uv, "texture": "#side", "cullface": "east"}}}]})
+    side = rid(f"block/{block}_side")
+    variants = {}
+    for part in range(0, drones.HOLO_SIZE * drones.HOLO_SIZE + 1):
+        name = block if part == 0 else f"{block}_formed_{part}"
+        write(ASSETS / "models" / "block" / f"{name}.json",
+              {"parent": rid("block/holo_table_base"), "textures": {"top": rid(f"block/{name}"), "side": side}})
+        variants[f"part={part}"] = {"model": rid(f"block/{name}")}
+    write(ASSETS / "blockstates" / f"{block}.json", {"variants": variants})
+    write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+
+
+def write_screen_models(block):
+    """Control screen panels: a thin panel against the wall behind it (modelled facing north and
+    rotated for the other facings). Loose panels show a standby pattern; the six panels of a formed
+    3x2 screen each show one tile of the combined, animated display."""
+    t = drones.SCREEN_THICKNESS
+    write(ASSETS / "models" / "block" / "screen_panel.json", {
+        "parent": "minecraft:block/block",
+        "textures": {"particle": "#side"},
+        "elements": [{"from": [0, 0, 16 - t], "to": [16, 16, 16], "faces": {
+            "north": {"uv": [0, 0, 16, 16], "texture": "#front"},
+            "south": {"uv": [0, 0, 16, 16], "texture": "#side", "cullface": "south"},
+            "up": {"uv": [0, 16 - t, 16, 16], "texture": "#side", "cullface": "up"},
+            "down": {"uv": [0, 16 - t, 16, 16], "texture": "#side", "cullface": "down"},
+            "west": {"uv": [16 - t, 0, 16, 16], "texture": "#side", "cullface": "west"},
+            "east": {"uv": [0, 0, t, 16], "texture": "#side", "cullface": "east"}}}]})
+    side = rid(f"block/{block}_side")
+    names = {0: block}
+    for part in range(1, drones.SCREEN_WIDTH * drones.SCREEN_HEIGHT + 1):
+        names[part] = f"{block}_formed_{part}"
+    for part, name in names.items():
+        write(ASSETS / "models" / "block" / f"{name}.json",
+              {"parent": rid("block/screen_panel"), "textures": {"front": rid(f"block/{name}"), "side": side}})
+    variants = {}
+    for facing, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+        for part, name in names.items():
+            variant = {"model": rid(f"block/{name}")}
+            if y:
+                variant["y"] = y
+            variants[f"facing={facing},part={part}"] = variant
+    write(ASSETS / "blockstates" / f"{block}.json", {"variants": variants})
+    write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+
+
+def drone_recipes(out):
+    """Shaped recipes (automatable with the vanilla Crafter), gated by the machines and drones switches,
+    the switch of every Jugcraft metal they use, and the switches behind the items they're made from
+    (drones.ITEM_FEATURES; drone parts pass theirs on). Plus the drone fluid recipes (hydrogen lift cell)."""
+    memo = {}
+
+    def features_of(result):
+        if result in memo:
+            return memo[result]
+        memo[result] = set()
+        pattern, key, count = drones.DRONE_CRAFTING[result]
+        found = set()
+        for ref in key.values():
+            if ref.startswith(("#c:plates/", "#c:ingots/", "#c:gears/", "#c:wires/", "#c:dusts/")):
+                metal = ref.split("/")[-1]
+                if metal not in ("copper", "iron", "gold"):
+                    found.add(feature_of(f"{metal}_ingot"))
+            elif ref.startswith(f"{MOD}:"):
+                name = ref.split(":")[1]
+                found.update(drones.ITEM_FEATURES.get(name, []))
+                if name in drones.DRONE_CRAFTING:
+                    found |= features_of(name)
+        memo[result] = found - {MACHINE_FEATURE, drones.FEATURE}
+        return memo[result]
+
+    import tower
+    import blueprints
+    for result, (pattern, key, count) in blueprints.CRAFTING.items():
+        recipe = shaped(MACHINE_FEATURE, pattern, key, result, count, "misc")
+        write(out / f"{result}.json", recipe)
+    for result, (pattern, key, count) in {**tower.CRAFTING, **tower.variant_recipes()}.items():
+        found = set()
+        for ref in key.values():
+            if ref.startswith(("#c:plates/", "#c:ingots/", "#c:gears/", "#c:wires/", "#c:dusts/")):
+                metal = ref.split("/")[-1]
+                if metal not in ("copper", "iron", "gold"):
+                    found.add(feature_of(f"{metal}_ingot"))
+            elif ref.startswith(f"{MOD}:"):
+                name = ref.split(":")[1]
+                found.update(tower.ITEM_FEATURES.get(name, []) + drones.ITEM_FEATURES.get(name, []))
+                if name in drones.DRONE_CRAFTING:
+                    found |= features_of(name)
+        features = [MACHINE_FEATURE, drones.FEATURE] + sorted(found - {MACHINE_FEATURE, drones.FEATURE})
+        recipe = shaped(MACHINE_FEATURE, pattern, key, result, count, "building")
+        recipe["fabric:load_conditions"] = [c for f in features for c in condition(f)]
+        write(out / f"{result}.json", recipe)
+    for result, (pattern, key, count) in drones.DRONE_CRAFTING.items():
+        features = [MACHINE_FEATURE, drones.FEATURE] + sorted(features_of(result))
+        recipe = shaped(MACHINE_FEATURE, pattern, key, result, count)
+        recipe["fabric:load_conditions"] = [c for f in features for c in condition(f)]
+        write(out / f"{result}.json", recipe)
+    import petro
+    for machine, recipes in drones.DRONE_FLUID_RECIPES.items():
+        kind = petro.FLUID_MACHINES[machine]["recipe_type"]
+        for r in recipes:
+            data = {"fabric:load_conditions": [c for f in [MACHINE_FEATURE] + r["features"] for c in condition(f)],
+                    "type": f"jugcraft:{kind}",
+                    "items": [{"ingredient": i, "count": n} for i, n in r["items"]],
+                    "fluids": [{"fluid": f, "amount": mb} for f, mb in r["fluids"]],
+                    "results": [{"id": i, "count": n} for i, n in r["results"]],
+                    "time": r["ticks"]}
+            write(out / kind / f"{r['name']}.json", data)
 
 
 def write_alternate_pack(lang):
@@ -116,44 +369,61 @@ def machine_assets(lang):
     model_writer.WRITERS[model_writer.DEFAULT_STYLE](ASSETS, MACHINES, PARTS, FLUID_BLOCKS)
     write_alternate_pack(lang)
 
+    import pipe_models
     for cable, info in {**CABLES, **PIPES, **ITEM_PIPES}.items():
         lang[f"block.{MOD}.{cable}"] = info["display"]
-        texture = rid(f"block/{cable}")
+        # A valve or filter uses the pipe texture of the pipe it is built from.
+        texture = rid(f"block/{info.get('texture', cable)}")
         # Transmitters are `size` pixels thick (4 for cables and fluid pipes, 6 for item pipes).
         lo = 8 - info.get("size", 4) // 2
         hi = 16 - lo
+        textures = {"cable": texture, "particle": texture}
+        glowing = cable in CABLES
+        if glowing:
+            textures["glow"] = rid("block/el_glow")
         write(ASSETS / "models" / "block" / f"{cable}_core.json", {
-            "textures": {"cable": texture, "particle": texture},
+            "textures": textures,
             "elements": [{"from": [lo, lo, lo], "to": [hi, hi, hi], "faces": {
                 face: {"uv": [lo, lo, hi, hi], "texture": "#cable"}
-                for face in ("north", "east", "south", "west", "up", "down")}}],
+                for face in ("north", "east", "south", "west", "up", "down")}}] + (core_glow(lo, hi) if glowing else []),
         })
         write(ASSETS / "models" / "block" / f"{cable}_arm.json", {
-            "textures": {"cable": texture, "particle": texture},
+            "textures": textures,
             "elements": [{"from": [lo, lo, 0], "to": [hi, hi, lo], "faces": {
                 "north": {"uv": [lo, lo, hi, hi], "texture": "#cable"},
                 "east": {"uv": [0, lo, lo, hi], "texture": "#cable"},
                 "west": {"uv": [0, lo, lo, hi], "texture": "#cable"},
                 "up": {"uv": [lo, 0, hi, lo], "texture": "#cable"},
                 "down": {"uv": [lo, 0, hi, lo], "texture": "#cable"},
-            }}],
+            }}] + (cable_glow(lo, hi, 1, lo) if glowing else []),
         })
         parts = [{"apply": {"model": rid(f"block/{cable}_core")}}]
         for direction, rotation in CABLE_ROTATION.items():
             parts.append({"when": {direction: "true"}, "apply": {"model": rid(f"block/{cable}_arm"), **rotation}})
+        # Valve and filter bodies over the core (tools/pipe_models.py).
+        body_elements = {}
+        for body, when in pipe_models.BODIES.get(cable, []):
+            elements = pipe_models.MODELS[body]
+            body_textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
+            body_textures["particle"] = texture
+            body_elements[body] = (model_writer.slice_model(body, elements, [(0, 0, 0)])[0], body_textures)
+            write(ASSETS / "models" / "block" / f"{body}.json", {
+                "parent": "minecraft:block/block", "textures": body_textures, "elements": body_elements[body][0]})
+            parts.append({**({"when": when} if when else {}), "apply": {"model": rid(f"block/{body}")}})
         write(ASSETS / "blockstates" / f"{cable}.json", {"multipart": parts})
         # A 3D straight segment in hand and inventory, like other tech mods' transmitters.
+        item_body, item_textures = body_elements.get(pipe_models.ITEM_BODY.get(cable), ([], {}))
         write(ASSETS / "models" / "item" / f"{cable}.json", {
             "parent": "minecraft:block/block",
-            "textures": {"cable": texture, "particle": texture},
-            "elements": [{"from": [lo, lo, 0], "to": [hi, hi, 16], "faces": {
+            "textures": {**item_textures, **textures},
+            "elements": item_body + [{"from": [lo, lo, 0], "to": [hi, hi, 16], "faces": {
                 "north": {"uv": [lo, lo, hi, hi], "texture": "#cable"},
                 "south": {"uv": [lo, lo, hi, hi], "texture": "#cable"},
                 "east": {"uv": [0, lo, 16, hi], "texture": "#cable"},
                 "west": {"uv": [0, lo, 16, hi], "texture": "#cable"},
                 "up": {"uv": [lo, 0, hi, 16], "texture": "#cable"},
                 "down": {"uv": [lo, 0, hi, 16], "texture": "#cable"},
-            }}],
+            }}] + (cable_glow(lo, hi, 1, 15) if glowing else []),
         })
         write(ASSETS / "items" / f"{cable}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{cable}")}})
 
@@ -182,6 +452,47 @@ def machine_assets(lang):
             "elements": model_writer.slice_model(block, elements, [(0, 0, 0)])[0]})
         write(ASSETS / "blockstates" / f"{block}.json", {"variants": {"": {"model": rid(f"block/{block}")}}})
         write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+    # Electronics blocks (cyan look): one model each, turned to the four horizontal directions.
+    import hightech_models
+    for block, info in ELECTRONICS_BLOCKS.items():
+        lang[f"block.{MOD}.{block}"] = info["display"]
+        elements = hightech_models.BLOCKS[block]
+        textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
+        textures["particle"] = rid("block/rt_beige")
+        write(ASSETS / "models" / "block" / f"{block}.json", {
+            "parent": "minecraft:block/block", "textures": textures,
+            "elements": model_writer.slice_model(block, elements, [(0, 0, 0)])[0]})
+        write(ASSETS / "blockstates" / f"{block}.json", {"variants": {
+            f"facing={facing}": {"model": rid(f"block/{block}"), **rotation}
+            for facing, rotation in FACING_ROTATION.items() if facing not in ("up", "down")}})
+        write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+    # Farming blocks: one model each, the same for every value of their one boolean state.
+    import farming_models
+    for block, info in FARMING_BLOCKS.items():
+        lang[f"block.{MOD}.{block}"] = info["display"]
+        elements = farming_models.MODELS[block]
+        textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
+        textures["particle"] = rid("block/dp_gunmetal")
+        write(ASSETS / "models" / "block" / f"{block}.json", {
+            "parent": "minecraft:block/block", "textures": textures,
+            "elements": model_writer.slice_model(block, elements, [(0, 0, 0)])[0]})
+        write(ASSETS / "blockstates" / f"{block}.json", {"variants": {
+            f"{info['states']}={value}": {"model": rid(f"block/{block}")} for value in ("false", "true")}})
+        write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+    # Crops: a cross model per growth stage, the ages mapped onto the stages, and flat seed and product items.
+    for crop, info in CROPS.items():
+        lang[f"block.{MOD}.{crop}"] = info["display"]
+        lang[f"item.{MOD}.{info['seeds']}"] = info["seeds_display"]
+        lang[f"item.{MOD}.{info['product']}"] = info["product_display"]
+        for stage in sorted(set(info["stages"])):
+            write(ASSETS / "models" / "block" / f"{crop}_stage{stage}.json", {
+                "parent": "minecraft:block/crop", "textures": {"crop": rid(f"block/{crop}_stage{stage}")}})
+        write(ASSETS / "blockstates" / f"{crop}.json", {"variants": {
+            f"age={age}": {"model": rid(f"block/{crop}_stage{stage}")} for age, stage in enumerate(info["stages"])}})
+        for item in (info["seeds"], info["product"]):
+            write(ASSETS / "models" / "item" / f"{item}.json",
+                  {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
+            write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
     # Kinetic blocks: one model each, a turning or lit variant where they have one, and rotations.
     import kinetic_models
     import kinetic_rotors
@@ -261,6 +572,15 @@ def machine_assets(lang):
     lang[f"message.{MOD}.steam_engine"] = "Steam engine: %s fuel, %s / %s mB water"
     lang[f"message.{MOD}.dynamo"] = "Dynamo: %s / %s JE"
     lang[f"message.{MOD}.electric_motor"] = "Electric motor: %s / %s JE"
+    lang[f"message.{MOD}.flywheel"] = "Flywheel: %s / %s KE"
+    lang[f"message.{MOD}.solar_receiver"] = "Solar receiver: %s heliostats in the field, %s JE/t, %s mB of water"
+    lang[f"message.{MOD}.network_terminal"] = "Network: %s cables at %s JE/t, %s devices holding %s / %s JE (%s%%)"
+    lang[f"message.{MOD}.network_terminal.none"] = "No cable connected"
+    lang[f"tooltip.{MOD}.stored_fluid"] = "%s: %s mB"
+    lang[f"message.{MOD}.fluid_filter"] = "Filter: only %s"
+    lang[f"message.{MOD}.sprinkler"] = "Sprinkler: %s mB of water, %s fertilizer"
+    lang[f"message.{MOD}.fluid_filter.none"] = ("Filter: not set, lets nothing out. Use a filled bucket on it, or "
+                                                "right-click it beside a tank of the fluid")
     lang[f"message.{MOD}.belt.first"] = "Now use the belt on the second pulley"
     lang[f"message.{MOD}.belt.linked"] = "Belt fitted"
     lang[f"message.{MOD}.belt.same"] = "Pick a different pulley"
@@ -287,6 +607,8 @@ def machine_assets(lang):
     lang[f"prospector.{MOD}.oil"] = "Oil"
     lang[f"container.{MOD}.pumpjack.oil"] = "Pumping oil"
     lang[f"container.{MOD}.pumpjack.dry"] = "No pumpable oil here"
+    lang[f"container.{MOD}.fracking_rig.shale"] = "Fracking shale"
+    lang[f"container.{MOD}.fracking_rig.none"] = "No shale oil here"
     lang[f"prospector.{MOD}.shale_oil"] = "Shale oil"
     lang[f"container.{MOD}.redstone"] = "Redstone: %s"
     lang[f"container.{MOD}.redstone.ignored"] = "ignored (always runs)"
@@ -323,7 +645,7 @@ RECIPE_TYPES = {"crusher": "crushing", "arc_furnace": "arc_smelting", "alloy_sme
                 "metal_press": "pressing", "wire_drawer": "wire_drawing", "circuit_assembler": "circuit_assembly",
                 "pulverizer": "pulverizing", "ore_washer": "ore_washing", "sieve": "sifting", "sawmill": "sawing",
                 "coke_oven": "coking", "steel_foundry": "steelmaking",
-                "tree_farm": "tree_growing"}
+                "tree_farm": "tree_growing", "crystal_grower": "crystal_growing"}
 
 
 def machine_recipe_files(out):
@@ -333,7 +655,13 @@ def machine_recipe_files(out):
         for recipe in recipes:
             data = {"fabric:load_conditions": [c for f in recipe["features"] for c in condition(f)],
                     "type": rid(kind)}
-            if "inputs" in recipe:
+            if "name" in recipe:
+                name = recipe["name"]
+                if "inputs" in recipe:
+                    data["ingredients"] = [{"ingredient": item, "count": count} for item, count in recipe["inputs"]]
+                else:
+                    data["ingredient"] = recipe["input"]
+            elif "inputs" in recipe:
                 name = recipe["output"].split(":")[1]
                 data["ingredients"] = [{"ingredient": item, "count": count} for item, count in recipe["inputs"]]
             else:
@@ -356,14 +684,22 @@ def machine_recipe_files(out):
 
 # ---------------------------------------------------------------- loot tables
 
-SILK = {"condition": "minecraft:match_tool", "predicate": {"predicates": {
-    "minecraft:enchantments": [{"enchantments": "minecraft:silk_touch", "levels": {"min": 1}}]}}}
+# Loot tables in the Minecraft 26.x format (as vanilla's own): each pool or entry has at most one "condition" and a
+# "modifier" (one function or a list), and conditions and functions are typed with "type". The older "conditions" and
+# "functions" keys are silently ignored by 26.x, so check_mod_data rejects them.
+SILK = "minecraft:tool/can_silk_touch"
+SURVIVES_EXPLOSION = {"type": "minecraft:survives_explosion"}
+
+
+def block_state(block, state):
+    """A condition that the broken block was in this state, such as {"half": "lower"}."""
+    return {"type": "minecraft:match_block", "blocks": rid(block), "state": state}
 
 
 def loot(block, entries, explosion_condition=False):
-    pool = {"rolls": 1.0, "bonus_rolls": 0.0, "entries": entries}
+    pool = {"rolls": 1, "entries": entries}
     if explosion_condition:
-        pool["conditions"] = [{"condition": "minecraft:survives_explosion"}]
+        pool["condition"] = SURVIVES_EXPLOSION
     return {"type": "minecraft:block", "pools": [pool], "random_sequence": rid(f"blocks/{block}")}
 
 
@@ -374,13 +710,12 @@ def self_drop(block):
 def ore_drop(block, item, low=1, high=1):
     functions = []
     if (low, high) != (1, 1):
-        functions.append({"function": "minecraft:set_count",
-                          "count": {"type": "minecraft:uniform", "min": float(low), "max": float(high)}})
-    functions += [{"function": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"},
-                  {"function": "minecraft:explosion_decay"}]
+        functions.append({"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}})
+    functions += [{"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"},
+                  {"type": "minecraft:explosion_decay"}]
     return loot(block, [{"type": "minecraft:alternatives", "children": [
-        {"type": "minecraft:item", "name": rid(block), "conditions": [SILK]},
-        {"type": "minecraft:item", "name": rid(item), "functions": functions},
+        {"type": "minecraft:item", "condition": SILK, "name": rid(block)},
+        {"type": "minecraft:item", "modifier": functions, "name": rid(item)},
     ]}])
 
 
@@ -464,6 +799,70 @@ def petro_assets(lang):
         write(ASSETS / "models" / "item" / f"{bucket}.json",
               {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{bucket}")}})
         write(ASSETS / "items" / f"{bucket}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{bucket}")}})
+    for item, display in petro.ITEMS.items():
+        lang[f"item.{MOD}.{item}"] = display
+        parent = "minecraft:item/handheld" if item == "grenade_launcher" else "minecraft:item/generated"
+        write(ASSETS / "models" / "item" / f"{item}.json",
+              {"parent": parent, "textures": {"layer0": rid(f"item/{item}")}})
+        write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
+    lang["message.jugcraft.grenade_launcher.empty"] = "No grenades to fire"
+    lang["entity.jugcraft.grenade"] = "Grenade"
+    for block, info in petro.BLOCKS.items():
+        lang[f"block.{MOD}.{block}"] = info["display"]
+        models = ASSETS / "models" / "block"
+        if info["shape"] == "cube":
+            write(models / f"{block}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{block}")}})
+            state = {"variants": {"": {"model": rid(f"block/{block}")}}}
+        elif info["shape"] == "slab":
+            full = block.removesuffix("_slab")
+            textures = {"bottom": rid(f"block/{full}"), "top": rid(f"block/{full}"), "side": rid(f"block/{full}")}
+            write(models / f"{block}.json", {"parent": "minecraft:block/slab", "textures": textures})
+            write(models / f"{block}_top.json", {"parent": "minecraft:block/slab_top", "textures": textures})
+            state = {"variants": {"type=bottom": {"model": rid(f"block/{block}")},
+                                  "type=top": {"model": rid(f"block/{block}_top")},
+                                  "type=double": {"model": rid(f"block/{full}")}}}
+        else:
+            write(models / f"{block}.json", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+                "top": rid(f"block/{block}"), "bottom": rid("block/asphalt"), "side": rid("block/asphalt")}})
+            state = {"variants": {f"facing={face}": {"model": rid(f"block/{block}"), **({"y": y} if y else {})}
+                                  for face, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270))}}
+        write(ASSETS / "blockstates" / f"{block}.json", state)
+        write(ASSETS / "models" / "item" / f"{block}.json", {"parent": rid(f"block/{block}")})
+        write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
+    # Gases have no block, so Fabric names them from this key.
+    for gas, info in petro.GASES.items():
+        lang[f"block.{MOD}.{gas}"] = info["display"]
+
+
+# Tanks that keep their fluid when broken (batch 10): the drop copies the block entity's jugcraft:stored_fluid. The
+# multi-block ones drop only from their master block (part 0), which holds the block entity; breaking any other part
+# breaks the master too (machine/LargeMachineBlock).
+TANKS = {"fluid_tank": False, "steel_tank": True, "gas_holder": True, "flow_battery": True}
+
+
+def tank_drop(block):
+    table = self_drop(block)
+    table["pools"][0]["entries"][0]["modifier"] = {
+        "type": "minecraft:copy_components", "source": "block_entity", "include": [rid("stored_fluid")]}
+    if TANKS[block]:
+        table["pools"][0]["condition"] = {"type": "minecraft:all_of",
+                                          "terms": [SURVIVES_EXPLOSION, block_state(block, {"part": "0"})]}
+    return table
+
+
+def crop_drop(block, info):
+    """Like vanilla wheat: a ripe crop drops its product (1-3) and seeds (more with Fortune); an unripe one, a seed."""
+    ripe = block_state(block, {"age": "7"})
+    return {"type": "minecraft:block", "modifier": {"type": "minecraft:explosion_decay"}, "pools": [
+        {"rolls": 1, "entries": [{"type": "minecraft:alternatives", "children": [
+            {"type": "minecraft:item", "condition": ripe, "name": rid(info["product"]), "modifier": {
+                "type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 3}}},
+            {"type": "minecraft:item", "name": rid(info["seeds"])}]}]},
+        {"rolls": 1, "condition": ripe, "entries": [
+            {"type": "minecraft:item", "name": rid(info["seeds"]), "modifier": {
+                "type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune",
+                "formula": "minecraft:binomial_with_bonus_count", "parameters": {"extra": 3, "probability": 0.5714286}}}]}],
+        "random_sequence": rid(f"blocks/{block}")}
 
 
 def loot_tables():
@@ -478,12 +877,31 @@ def loot_tables():
             table = ore_drop(block, mineral, low, high) if block.endswith("_ore") else self_drop(block)
             write(out / f"{block}.json", table)
     for block in machine_blocks():
-        write(out / f"{block}.json", self_drop(block))
+        if block in TANKS:
+            table = tank_drop(block)
+        elif block in CROPS:
+            table = crop_drop(block, CROPS[block])
+        else:
+            table = self_drop(block)
+        write(out / f"{block}.json", table)
+    import tower
+    tower.write_loot(write, rid, out, self_drop)
+    import blueprints
+    blueprints.write_loot(write, rid, out, self_drop)
     # The 2-tall charging station drops once, from its lower half.
     for block in TOOL_BLOCKS:
         table = self_drop(block)
-        table["pools"][0]["conditions"].append({"condition": "minecraft:block_state_property", "block": rid(block),
-                                                "properties": {"half": "lower"}})
+        table["pools"][0]["condition"] = {"type": "minecraft:all_of",
+                                          "terms": [SURVIVES_EXPLOSION, block_state(block, {"half": "lower"})]}
+        write(out / f"{block}.json", table)
+    import petro
+    for block, info in petro.BLOCKS.items():
+        table = self_drop(block)
+        if info["shape"] == "slab":
+            table["pools"][0]["entries"][0]["modifier"] = [
+                {"type": "minecraft:set_count", "count": 2, "add": False,
+                 "condition": block_state(block, {"type": "double"})},
+                {"type": "minecraft:explosion_decay"}]
         write(out / f"{block}.json", table)
     for rock, info in ROCKS.items():
         drop = info["drop"]
@@ -540,15 +958,46 @@ def recipes():
 
     for result, (pattern, key, count) in CRAFTING.items():
         features = [MACHINE_FEATURE] + sorted({
-            feature_of(f"{ref.split('/')[-1]}_ingot") for ref in key.values() if ref.startswith("#c:ingots/")
-            and ref.split("/")[-1] not in ("copper", "iron", "gold")} | ({"silicon"} if "#c:silicon" in key.values() else set()))
+            feature_of(f"{ref.split('/')[-1]}_ingot") for ref in key.values()
+            if ref.startswith("#c:ingots/") and ref.split("/")[-1] not in ("copper", "iron", "gold")}
+            | {ITEMS[ref.split(":")[1]]["feature"] for ref in key.values() if ref.startswith(f"{MOD}:")
+               and ref.split(":")[1] in ITEMS}
+            | ({"silicon"} if "#c:silicon" in key.values() else set()))
         recipe = shaped(MACHINE_FEATURE, pattern, key, result, count)
         recipe["fabric:load_conditions"] = [c for f in features for c in condition(f)]
         write(out / f"{result}.json", recipe)
+    for name, (result, pattern, key, count) in ALT_CRAFTING.items():
+        recipe = shaped(MACHINE_FEATURE, pattern, key, result, count)
+        recipe["fabric:load_conditions"] = condition(MACHINE_FEATURE) + condition("crude_oil")
+        write(out / f"{name}.json", recipe)
     machine_recipe_files(out)
     import petro
     for kind, name, data in petro.fluid_recipe_files(condition):
         write(out / kind / f"{name}.json", data)
+    # Asphalt: gravel bound with asphalt binder; a slab is half a block; yellow dye paints the centre line.
+    oil = [c for f in (MACHINE_FEATURE, "crude_oil") for c in condition(f)]
+    for name, recipe in (
+            ("asphalt", shaped(MACHINE_FEATURE, ["GGG", "GBG", "GGG"],
+                               {"G": "minecraft:gravel", "B": rid("asphalt_binder")}, "asphalt", 8, "building")),
+            ("asphalt_slab", shaped(MACHINE_FEATURE, ["AAA"], {"A": rid("asphalt")}, "asphalt_slab", 6, "building")),
+            ("asphalt_road_line", shapeless(MACHINE_FEATURE, [rid("asphalt")] * 4 + ["minecraft:yellow_dye"],
+                                            "asphalt_road_line", 4, "building"))):
+        recipe["fabric:load_conditions"] = oil
+        write(out / f"{name}.json", recipe)
+    drone_recipes(out)
+
+    # Explosive weapons (batch 18): grenades and the launcher, behind the explosives switch.
+    boom = [c for f in (MACHINE_FEATURE, "explosives") for c in condition(f)]
+    for name, recipe in (
+            ("grenade", shaped(MACHINE_FEATURE, [" N ", "PGP", " P "],
+                               {"N": "minecraft:iron_nugget", "P": "#c:plates/steel", "G": rid("guncotton")},
+                               "grenade", 4, "equipment")),
+            ("grenade_launcher", shaped(MACHINE_FEATURE, ["PPG", "RCS"],
+                                        {"P": "#c:plates/steel", "G": "#c:gears/steel", "R": rid("rubber"),
+                                         "C": rid("basic_circuit"), "S": "#c:ingots/steel"},
+                                        "grenade_launcher", 1, "equipment"))):
+        recipe["fabric:load_conditions"] = boom
+        write(out / f"{name}.json", recipe)
 
     # Dusts smelt back into ingots wherever the metal's ore could be smelted; the others use the arc furnace.
     for metal in COMPONENTS["dust"]:
@@ -563,6 +1012,10 @@ def recipes():
     paper = shaped(MACHINE_FEATURE, ["SS", "SS"], {"S": rid("sawdust")}, "sawdust")
     paper["result"] = {"id": "minecraft:paper", "count": 1}
     write(out / "paper_from_sawdust.json", paper)
+    # Farming (batch 9): cotton spins into string, one each.
+    string = shaped(MACHINE_FEATURE, ["C"], {"C": rid("cotton")}, "cotton")
+    string["result"] = {"id": "minecraft:string", "count": 1}
+    write(out / "string_from_cotton.json", string)
 
     # Gears: four plates of one metal (36 nugget units in, 36 out).
     for metal in COMPONENTS["gear"]:
@@ -647,7 +1100,13 @@ def tags():
         tags.add("block", f"minecraft:mineable/{info['tool']}", rid(rock))
 
     for block in machine_blocks():
-        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+        if block not in CROPS:
+            tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    # Crops grow on farmland, take bone meal and fertilizer, and keep the farmland under them.
+    for crop, info in CROPS.items():
+        tags.add("block", "minecraft:crops", rid(crop))
+        tags.add("block", "minecraft:maintains_farmland", rid(crop))
+        tags.add("item", "c:seeds", rid(info["seeds"]))
 
     # What the powered tools mine fast (tools/JugcraftTools): the drill is a pickaxe and shovel, the chainsaw an axe
     # that also cuts leaves.
@@ -672,6 +1131,17 @@ def tags():
     for fluid in petro.FLUIDS:
         tags.add("fluid", f"c:{fluid}", rid(fluid))
         tags.add("fluid", f"c:{fluid}", rid(f"flowing_{fluid}"))
+    for gas in petro.GASES:
+        tags.add("fluid", f"c:{gas}", rid(gas))
+    for block in petro.BLOCKS:
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    # Deposits break (slowly, for nothing) with a pickaxe; only a deposit drill gets their ore.
+    import deposits
+    for block in deposits.DEPOSITS:
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import tank_display
+    for block in tank_display.BLOCKS:
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     tags.write()
 
 

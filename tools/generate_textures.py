@@ -10,6 +10,8 @@ from pathlib import Path
 
 from PIL import Image
 
+import electric_textures
+
 ROOT = Path(__file__).resolve().parents[1]
 TEX = ROOT / "src" / "main" / "resources" / "assets" / "jugcraft" / "textures"
 
@@ -223,6 +225,9 @@ METAL_COLORS = {
                  [(38, 40, 44), (64, 68, 74), (92, 96, 104), (120, 124, 132), (156, 160, 168)]),
     "uranium": ([(24, 24, 20), (40, 40, 30), (186, 208, 58)], (232, 242, 122),
                 [(66, 70, 60), (106, 112, 96), (146, 152, 132), (184, 190, 168), (214, 220, 196)]),
+    # Rutile: reddish-brown to black needles in the stone; the metal a cool blue-grey.
+    "titanium": ([(70, 30, 20), (120, 54, 30), (168, 86, 44)], (226, 150, 92),
+                 [(58, 62, 72), (96, 102, 116), (138, 144, 158), (178, 184, 196), (214, 218, 228)]),
     "aluminum": (None, None,
                  [(118, 124, 130), (166, 172, 178), (198, 202, 208), (220, 224, 228), (238, 240, 244)]),
 }
@@ -456,36 +461,6 @@ def _transmitter(palette, node, ring):
 
 
 RUBBER = [(22, 20, 20), (36, 34, 33), (52, 50, 48), (74, 72, 70)]
-
-
-def cable_texture():
-    """Black rubber insulation with a copper junction node."""
-    def node(x, y):
-        edge = x in (6, 9) or y in (6, 9)
-        return COPPER[0] if edge else COPPER[2 if (x + y) % 2 else 1]
-    return _transmitter(RUBBER, node, [COPPER[0], COPPER[1], COPPER[1], COPPER[0]])
-
-
-def silver_cable_texture():
-    """Dark blue-gray insulation with a bright silver junction node."""
-    insulation = [(28, 32, 44), (42, 48, 64), (58, 66, 86), (80, 90, 112)]
-    silver = [(150, 154, 164), (200, 204, 212), (236, 238, 244)]
-    def node(x, y):
-        edge = x in (6, 9) or y in (6, 9)
-        return silver[0] if edge else silver[2 if (x + y) % 2 else 1]
-    return _transmitter(insulation, node, [silver[0], silver[1], silver[1], silver[0]])
-
-
-def aluminum_cable_texture():
-    """Armored power line: steel-gray sheath with a red high-power stripe and an aluminum node."""
-    sheath = [(52, 56, 62), (78, 84, 92), (104, 110, 118), (130, 136, 144)]
-    aluminum = [(170, 176, 182), (208, 212, 218), (236, 238, 242)]
-    def node(x, y):
-        edge = x in (6, 9) or y in (6, 9)
-        if edge:
-            return (170, 40, 30)
-        return aluminum[2 if (x + y) % 2 else 1]
-    return _transmitter(sheath, node, [(170, 40, 30), aluminum[1], aluminum[1], (170, 40, 30)])
 
 
 def item_tube_texture():
@@ -751,6 +726,17 @@ def pipe_texture():
                         [BRONZE[0], BRONZE[0], BRONZE[0], BRONZE[0]])
 
 
+def steel_pipe_texture():
+    """Gunmetal pipe with a hazard-striped junction collar and chrome flanges at connections (dieselpunk)."""
+    from dieselpunk_textures import CHROME, GUNMETAL, HAZARD
+    def node(x, y):
+        if x in (6, 9) and y in (6, 9):
+            return CHROME[3]
+        return HAZARD[0] if x in (6, 9) or y in (6, 9) else GUNMETAL[2]
+    return _transmitter([GUNMETAL[1], GUNMETAL[2], GUNMETAL[3], GUNMETAL[4]], node,
+                        [HAZARD[0], HAZARD[2], HAZARD[0], HAZARD[2]])
+
+
 def tank_side(seed):
     """Tinplate walls around a vertical glass gauge."""
     img = panel(seed, palette=TIN, trim=TIN)
@@ -1003,6 +989,9 @@ def gui():
     for col in range(9):
         slot(7 + col * 18, 141)
     img.save(TEX / "gui" / "machine.png", optimize=True)
+    # The themed machine screens (batch 22).
+    import gui_textures
+    gui_textures.draw_all(lambda image, name: image.save(TEX / "gui" / f"{name}.png", optimize=True))
 
 
 def solar_top():
@@ -1156,6 +1145,25 @@ def circuit(advanced):
     return img
 
 
+def processor():
+    """A processor: a square black package with a cyan die window, on a dark green board with gold pins all round."""
+    img = new()
+    gold = (226, 188, 72)
+    for y in range(1, 15):
+        for x in range(1, 15):
+            img.putpixel((x, y), ((22, 60, 46) if (x + y) % 2 else (26, 70, 52)) + (255,))
+    for i in range(3, 13, 2):
+        for x, y in ((i, 2), (i, 13), (2, i), (13, i)):
+            img.putpixel((x, y), gold + (255,))
+    for y in range(4, 12):
+        for x in range(4, 12):
+            c = (34, 36, 42) if x in (4, 11) or y in (4, 11) else (24, 26, 30)
+            if 6 <= x <= 9 and 6 <= y <= 9:
+                c = (56, 200, 218) if (x, y) in ((6, 6), (7, 6), (6, 7)) else (28, 128, 148)
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
 def press_front(seed, lit):
     img = window(seed, [(40, 40, 44), (50, 50, 56)])
     head = STEEL[4] if lit else STEEL[3]
@@ -1230,12 +1238,25 @@ def machines():
     save(pile(950, [(196, 160, 108), (214, 180, 126), (176, 140, 92), (230, 200, 150)]), "item", "sawdust")
     # Coke: porous gray-black lumps with a dull silver sheen.
     save(raw_chunk(951, [(28, 28, 30), (48, 48, 52), (74, 74, 80)], (150, 150, 158)), "item", "coke")
+    glass_textures()
     ember = [(250, 140, 30), (255, 190, 60), (220, 80, 20)]
     save(grate(952), "block", "coke_oven_front")
     save(grate(952, glow=ember), "block", "coke_oven_front_on")
     save(window(953, [(30, 26, 26), (44, 36, 34)]), "block", "steel_foundry_front")
     save(battery_front(954), "block", "capacitor_bank_front")
+    save(battery_front(978), "block", "lithium_battery_bank_front")
+    save(battery_front(985), "block", "flow_battery_front")
+    save(window(979, [(40, 46, 50), (52, 60, 64)]), "block", "crystal_grower_front")
+    save(window(979, [(40, 46, 50)], glow=[(80, 210, 230), (150, 240, 250), (60, 170, 200)]), "block", "crystal_grower_front_on")
+    save(window(980, [(40, 46, 50), (52, 60, 64)]), "block", "lithography_station_front")
+    save(window(980, [(40, 46, 50)], glow=[(80, 210, 230), (150, 240, 250), (60, 170, 200)]), "block", "lithography_station_front_on")
     save(tank_side(955), "block", "steel_tank_front")
+    save(tank_side(981), "block", "gas_holder_front")
+    save(battery_front(983), "block", "advanced_solar_panel_front")
+    save(grate(984), "block", "advanced_engine_front")
+    save(grate(984, glow=[(250, 140, 30), (255, 190, 60), (220, 80, 20)]), "block", "advanced_engine_front_on")
+    save(grate(982), "block", "crop_harvester_front")
+    save(grate(982, glow=[(150, 220, 80), (200, 250, 130), (110, 180, 60)]), "block", "crop_harvester_front_on")
     save(grate(957), "block", "cobblestone_generator_front")
     save(grate(957, glow=[(250, 140, 30), (255, 190, 60), (220, 80, 20)]), "block", "cobblestone_generator_front_on")
     save(window(958, [(28, 44, 30), (36, 56, 38)]), "block", "tree_farm_front")
@@ -1249,15 +1270,51 @@ def machines():
     save(window(962, [(20, 16, 12)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "pumpjack_front_on")
     save(window(963, [(40, 34, 26), (52, 44, 32)]), "block", "oil_sand_extractor_front")
     save(window(963, [(40, 34, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "oil_sand_extractor_front_on")
+    save(window(964, [(30, 26, 26), (44, 36, 34)]), "block", "distillation_tower_front")
+    save(window(964, [(30, 26, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "distillation_tower_front_on")
+    save(window(965, [(30, 26, 26), (44, 36, 34)]), "block", "catalytic_cracker_front")
+    save(window(965, [(30, 26, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "catalytic_cracker_front_on")
+    save(window(966, [(30, 26, 26), (44, 36, 34)]), "block", "vacuum_distillation_unit_front")
+    save(window(966, [(30, 26, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "vacuum_distillation_unit_front_on")
+    save(window(967, [(30, 26, 26), (44, 36, 34)]), "block", "catalytic_reformer_front")
+    save(window(967, [(30, 26, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "catalytic_reformer_front_on")
+    save(window(968, [(40, 46, 50), (52, 60, 64)]), "block", "chemical_mixer_front")
+    save(window(968, [(40, 46, 50)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "chemical_mixer_front_on")
+    save(jaws(969, False), "block", "fracking_rig_front")
+    save(jaws(969, True), "block", "fracking_rig_front_on")
+    save(window(970, [(60, 56, 44), (76, 70, 56)]), "block", "flowback_treatment_unit_front")
+    save(window(970, [(60, 56, 44)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "flowback_treatment_unit_front_on")
+    save(window(971, [(36, 40, 30), (48, 54, 40)]), "block", "diesel_generator_front")
+    save(window(971, [(36, 40, 30)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "diesel_generator_front_on")
+    save(window(972, [(34, 38, 44), (46, 52, 60)]), "block", "gas_turbine_front")
+    save(window(972, [(34, 38, 44)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "gas_turbine_front_on")
+    save(window(973, [(44, 46, 40), (58, 60, 52)]), "block", "polymerization_reactor_front")
+    save(window(973, [(44, 46, 40)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "polymerization_reactor_front_on")
+    save(window(974, [(36, 40, 30), (48, 54, 40)]), "block", "diesel_engine_front")
+    save(window(974, [(36, 40, 30)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "diesel_engine_front_on")
+    save(window(975, [(40, 46, 50), (52, 60, 64)]), "block", "electrolytic_cell_front")
+    save(window(975, [(40, 46, 50)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "electrolytic_cell_front_on")
+    save(window(985, [(36, 44, 56), (48, 58, 72)]), "block", "air_separation_unit_front")
+    save(window(985, [(36, 44, 56)], glow=[(120, 200, 255), (180, 230, 255), (90, 160, 230)]), "block", "air_separation_unit_front_on")
+    save(window(986, [(52, 46, 40), (66, 58, 50)]), "block", "synthesis_converter_front")
+    save(window(986, [(52, 46, 40)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "synthesis_converter_front_on")
+    save(window(976, [(52, 50, 30), (66, 62, 40)]), "block", "chemical_reactor_front")
+    save(window(976, [(52, 50, 30)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "chemical_reactor_front_on")
+    save(window(977, [(40, 46, 50), (52, 60, 64)]), "block", "fuel_cell_front")
+    save(window(977, [(40, 46, 50)], glow=[(90, 230, 140), (160, 255, 190), (60, 200, 120)]), "block", "fuel_cell_front_on")
+    save(jaws(978, False), "block", "deposit_drill_front")
+    save(jaws(978, True), "block", "deposit_drill_front_on")
     save(jaws(956, False), "block", "ore_drill_front")
     save(jaws(956, True), "block", "ore_drill_front_on")
     save(window(953, [(30, 26, 26)], glow=[(255, 200, 80), (255, 236, 150), (250, 150, 40)]), "block", "steel_foundry_front_on")
     save(circuit(False), "item", "basic_circuit")
     save(circuit(True), "item", "advanced_circuit")
-    save(cable_texture(), "block", "copper_cable")
-    save(silver_cable_texture(), "block", "silver_cable")
-    save(aluminum_cable_texture(), "block", "aluminum_cable")
+    save(processor(), "item", "processor")
+    save(electric_textures.cable(electric_textures.COPPER), "block", "copper_cable")
+    save(electric_textures.cable(electric_textures.SILVER), "block", "silver_cable")
+    save(electric_textures.cable(electric_textures.ALUMINUM), "block", "aluminum_cable")
     save(pipe_texture(), "block", "bronze_fluid_pipe")
+    save(steel_pipe_texture(), "block", "steel_fluid_pipe")
     save(item_tube_texture(), "block", "brass_item_pipe")
     save(wrench_item(), "item", "brass_wrench")
     save(handbook_item(), "item", "engineers_handbook")
@@ -1310,7 +1367,36 @@ def machines():
     save(pump_side(523), "block", "electric_pump_side")
     save(pump_port(524, False), "block", "electric_pump_top")
     save(pump_port(525, True), "block", "electric_pump_bottom")
+    save(panel(526, palette=STEEL, trim=STEEL), "block", "heavy_pump_side")
+    save(pump_port(527, False), "block", "heavy_pump_top")
+    save(pump_port(528, True), "block", "heavy_pump_bottom")
     gui()
+
+
+def glass_textures():
+    """Glass chemistry (batch 16): tincal crust, borax crystals, borosilicate glass and a coil of optical fibre."""
+    save(speckled([(214, 206, 186), (224, 216, 196), (204, 196, 176), (232, 226, 210), (196, 188, 168)], 1601,
+                  [(246, 246, 240), (236, 240, 244), (180, 176, 164)], count=36), "block", "tincal")
+    save(raw_chunk(1602, [(196, 200, 204), (226, 230, 234), (246, 248, 250)], (255, 255, 255)), "item", "borax")
+    glass = new()
+    for y in range(2, 14):
+        shift = (13 - y) // 4
+        for x in range(3 + shift, 13 + shift):
+            edge = y in (2, 13) or x in (3 + shift, 12 + shift)
+            c = (120, 170, 176, 255) if edge else (200, 232, 236, 150) if (x + y) % 7 else (240, 252, 252, 200)
+            glass.putpixel((x, y), c)
+    save(glass, "item", "borosilicate_glass")
+    fibre = new()
+    import math
+    for t in range(0, 360, 6):
+        for r, c in ((5.5, (120, 220, 240)), (3.5, (90, 190, 220))):
+            x = 8 + r * math.cos(math.radians(t))
+            y = 8 + r * 0.6 * math.sin(math.radians(t))
+            fibre.putpixel((int(round(x)), int(round(y))), c + (255,))
+    for x, y in ((13, 7), (14, 6), (15, 5)):
+        fibre.putpixel((x, y), (200, 250, 255, 255))
+    save(fibre, "item", "optical_fibre")
+    save(raw_chunk(1603, [(70, 72, 78), (104, 106, 114), (140, 142, 150)], (210, 214, 222)), "item", "ferroboron")
 
 
 def main():
@@ -1334,8 +1420,34 @@ def main():
     steampunk_textures.draw_all()
     import dieselpunk_textures
     dieselpunk_textures.draw_all()
+    electric_textures.draw_all()
     import petro_textures
     petro_textures.draw_all(save, save_animation)
+    import crop_textures
+    crop_textures.draw_all(save)
+    import deposits
+    deposits.draw_all(save)
+    import drone_textures
+    drone_textures.draw_all()
+    import blueprints
+    for name, img in blueprints.draw_textures().items():
+        save(img, "block", name)
+    for name, img in blueprints.draw_item_textures().items():
+        save(img, "item", name)
+    ghost_dir = ROOT / "src" / "main" / "resources" / "assets" / "jugcraft" / "textures" / "misc"
+    ghost_dir.mkdir(parents=True, exist_ok=True)
+    blueprints.ghost_texture().save(ghost_dir / "blueprint_ghost.png")
+    import tower
+    for name, img in tower.draw_textures().items():
+        save(img, "block", name)
+    for name, img in tower.draw_item_textures().items():
+        save(img, "item", name)
+    # The tower's building blocks, pads and pickups at 64 px (tools/tower_art.py), over the 16 px versions above.
+    import tower_art
+    tower_art.write_all(str(ROOT / "src" / "main" / "resources" / "assets" / "jugcraft"))
+
+    import tank_display
+    tank_display.draw_all(save)
 
 
 if __name__ == "__main__":

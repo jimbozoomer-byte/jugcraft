@@ -38,6 +38,8 @@ FOOTPRINTS = {
     "steel_tank": [(0, 0, 0), (-1, 0, 0), (0, 0, 1), (-1, 0, 1)],
     # Mining: a two-block derrick over the drilled column.
     "ore_drill": [(0, 0, 0), (0, 1, 0)],
+    # A 3x3 rig two blocks tall, standing on the deposit it works.
+    "deposit_drill": cuboid(3, 2, 3),
     # Renewables: a two-block water wheel house (the wheel turns in the water column on its right).
     "water_wheel": [(0, 0, 0), (0, 1, 0)],
     # Kinetic: a 2x2x2 steam engine; its shaft comes out of the back of part 7 (upper right back).
@@ -45,6 +47,37 @@ FOOTPRINTS = {
     # Petrochemistry: a pumpjack one wide, three tall, three long (wellhead at the front).
     "pumpjack": cuboid(1, 3, 3),
     "oil_sand_extractor": cuboid(2, 2, 2),
+    "distillation_tower": cuboid(2, 7, 2),
+    "catalytic_cracker": cuboid(2, 4, 2),
+    "vacuum_distillation_unit": cuboid(2, 3, 2),
+    "catalytic_reformer": cuboid(3, 2, 2),
+    "chemical_mixer": cuboid(2, 2, 2),
+    "fracking_rig": cuboid(3, 5, 3),
+    "flowback_treatment_unit": cuboid(3, 1, 2),
+    "diesel_generator": cuboid(3, 2, 2),
+    "gas_turbine": cuboid(4, 2, 2),
+    "polymerization_reactor": cuboid(2, 3, 2),
+    "diesel_engine": cuboid(2, 2, 3),
+    "electrolytic_cell": cuboid(3, 3, 2),
+    "chemical_reactor": cuboid(2, 2, 2),
+    # Nitrogen chemistry: a 2x2 cold box six tall, and a 3x4x2 converter train.
+    "air_separation_unit": cuboid(2, 6, 2),
+    "synthesis_converter": cuboid(3, 4, 2),
+    # Storage: a lithium battery bank three wide, two tall and one deep.
+    "lithium_battery_bank": cuboid(3, 2, 1),
+    # Chemistry: the flow battery, three wide, three tall and two deep.
+    "flow_battery": cuboid(3, 3, 2),
+    # Electronics: a two-block crystal grower.
+    "crystal_grower": [(0, 0, 0), (0, 1, 0)],
+    "lithography_station": cuboid(3, 2, 2),
+    # Fluid logistics: a 3x3x3 gas holder.
+    "gas_holder": cuboid(3, 3, 3),
+    "advanced_engine": cuboid(2, 1, 1),
+    # Power: the advanced solar panel's pedestal and the 3x3 layer of cells above it.
+    "advanced_solar_panel": [(0, 0, 0), (0, 1, 0), (-1, 1, 0), (1, 1, 0), (0, 1, -1), (0, 1, 1), (-1, 1, -1),
+                             (1, 1, -1), (-1, 1, 1), (1, 1, 1)],
+    # Farming: a two-block crop harvester.
+    "crop_harvester": [(0, 0, 0), (0, 1, 0)],
 }
 
 # Machines that take power at one marked socket only: (part, face) for a north-facing machine.
@@ -143,6 +176,13 @@ MODELS["ore_drill"] = [
     ((6, 26, 6), (10, 32, 10), "geothermal_stack"),
 ]
 
+MODELS["deposit_drill"] = [
+    ((-32, 0, 0), (16, 2, 48), "heavy_plinth"),
+    ((-15, 2, 1), (15, 14, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-12, 2, 18), (12, 28, 42), STEEL),
+    ((-4, 28, 26), (4, 32, 34), "geothermal_stack"),
+]
+
 MODELS["water_wheel"] = [
     ((0, 0, 0), (16, 2, 16), "heavy_plinth"),
     ((1, 2, 1), (15, 20, 15), {"*": STEEL, "north": "#front", "up": TOP}),
@@ -177,6 +217,179 @@ MODELS["oil_sand_extractor"] = [
     ((-9.5, 14, 27), (-6.5, 30, 30), "geothermal_stack"),
 ]
 
+MODELS["distillation_tower"] = [
+    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 14, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-11, 2, 5), (11, 106, 27), "fluid_tank_side"),
+    ((-11, 106, 5), (11, 108, 27), "fluid_tank_top"),
+    ((-13, 7, 0), (-7, 11, 5), PIPE),
+    ((-13, 38, 0), (-7, 42, 5), PIPE),
+    ((-13, 70, 0), (-7, 74, 5), PIPE),
+    ((-13, 102, 0), (-7, 106, 5), PIPE),
+]
+
+MODELS["catalytic_cracker"] = [
+    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 14, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((2, 14, 10), (14, 60, 26), "fluid_tank_side"),
+    ((-14, 2, 6), (-2, 48, 28), "fluid_tank_side"),
+    ((-12, 48, 10), (8, 52, 14), PIPE),
+    ((-13, 7, 0), (-7, 11, 5), PIPE),
+    ((-13, 39, 0), (-7, 43, 5), PIPE),
+    ((-13, 55, 0), (-7, 59, 5), PIPE),
+]
+
+MODELS["vacuum_distillation_unit"] = [
+    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 14, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-14, 2, 6), (10, 40, 30), "fluid_tank_side"),
+    ((-10, 40, 10), (6, 46, 26), "fluid_tank_top"),
+    ((-13, 7, 0), (-7, 11, 5), PIPE),
+]
+
+MODELS["catalytic_reformer"] = [
+    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 14, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-14, 2, 10), (-2, 26, 22), "fluid_tank_side"),
+    ((-30, 2, 10), (-18, 26, 22), "fluid_tank_side"),
+    ((2, 14, 12), (14, 26, 22), "fluid_tank_side"),
+    ((-28, 26, 14), (12, 29, 18), PIPE),
+    ((-29, 7, 0), (-23, 11, 5), PIPE),
+    ((-29, 21, 0), (-23, 25, 5), PIPE),
+]
+
+MODELS["chemical_mixer"] = [
+    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 14, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-12, 2, 6), (10, 24, 28), "fluid_tank_side"),
+    ((-12, 24, 6), (10, 26, 28), "fluid_tank_top"),
+    ((-5, 26, 13), (3, 31, 21), {"*": STEEL, "up": TOP}),
+]
+
+MODELS["fracking_rig"] = [
+    ((-32, 0, 0), (16, 2, 48), "heavy_plinth"),
+    ((2, 2, 1), (14, 12, 6), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-28, 14, 4), (12, 16, 44), "heavy_plinth"),
+    ((-24, 16, 8), (8, 40, 40), "wind_turbine_mast"),
+    ((-18, 40, 14), (2, 70, 34), "wind_turbine_mast"),
+    ((-12, 70, 20), (-4, 78, 28), "geothermal_stack"),
+    ((-11, 2, 22), (-5, 14, 26), PIPE),
+]
+
+MODELS["flowback_treatment_unit"] = [
+    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-31, 2, 2), (-1, 10, 30), {"*": STEEL, "up": "fluid_tank_top"}),
+    ((1, 2, 12), (15, 14, 30), "fluid_tank_side"),
+]
+
+MODELS["diesel_generator"] = [
+    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-24, 2, 10), (0, 20, 26), STEEL),
+    ((-31, 2, 4), (-26, 26, 28), "fluid_tank_side"),
+    ((-20, 20, 14), (-16, 30, 18), "geothermal_stack"),
+]
+
+MODELS["gas_turbine"] = [
+    ((-48, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-36, 4, 8), (0, 22, 26), STEEL),
+    ((-47, 2, 2), (-37, 30, 30), "fluid_tank_side"),
+    ((-10, 22, 14), (-4, 32, 20), "geothermal_stack"),
+]
+
+MODELS["polymerization_reactor"] = [
+    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-12, 2, 6), (12, 40, 28), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+    ((-4, 40, 14), (4, 46, 22), STEEL),
+]
+
+MODELS["diesel_engine"] = [
+    ((-16, 0, 0), (16, 2, 48), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-12, 2, 9), (12, 22, 42), STEEL),
+    ((-15, 2, 1), (-1, 24, 7), "fluid_tank_side"),
+    ((-9.5, 22.5, 42), (-6.5, 25.5, 48), PIPE),
+]
+
+MODELS["electrolytic_cell"] = [
+    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-30, 2, 4), (-2, 24, 28), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+    ((-31, 36, 20), (15, 40, 24), PIPE),
+    ((-31, 22, 24), (15, 26, 28), PIPE),
+]
+
+MODELS["air_separation_unit"] = [
+    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((-15, 2, 1), (15, 14, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-14, 2, 16), (14, 96, 30), "fluid_tank_side"),
+]
+
+MODELS["synthesis_converter"] = [
+    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 14, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-24, 2, 8), (-8, 62, 24), "fluid_tank_side"),
+    ((-31, 2, 18), (-26, 40, 30), "fluid_tank_side"),
+]
+
+MODELS["chemical_reactor"] = [
+    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-14, 2, 8), (12, 26, 30), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+]
+
+MODELS["lithium_battery_bank"] = [
+    ((-32, 0, 0), (16, 2, 16), "heavy_plinth"),
+    ((-31, 2, 1), (15, 30, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-32, 30, 0), (16, 32, 16), "heavy_plinth"),
+    ((-30, 8, 0.5), (14, 9, 1), "power_port_frame"),
+]
+
+MODELS["flow_battery"] = [
+    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((-31, 2, 1), (15, 46, 31), {"*": STEEL, "north": "#front", "up": TOP}),
+]
+
+MODELS["crystal_grower"] = [
+    ((0, 0, 0), (16, 2, 16), "heavy_plinth"),
+    ((1, 2, 1), (15, 14, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((3, 14, 3), (13, 28, 13), "fluid_tank_side"),
+    ((6, 28, 6), (10, 32, 10), "geothermal_stack"),
+]
+
+MODELS["lithography_station"] = [
+    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-30, 2, 4), (-2, 28, 30), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+]
+
+MODELS["gas_holder"] = [
+    ((-32, 0, 0), (16, 2, 48), "heavy_plinth"),
+    ((-30, 2, 2), (14, 46, 46), {"*": "fluid_tank_side", "north": "#front", "up": "fluid_tank_top"}),
+]
+
+MODELS["advanced_solar_panel"] = [
+    ((2, 0, 2), (14, 2, 14), "heavy_plinth"),
+    ((5, 2, 5), (11, 20, 11), {"*": STEEL, "north": "#front"}),
+    ((-14, 20, -14), (30, 22, 30), {"*": "heavy_plinth", "up": "solar_panel_top"}),
+]
+
+MODELS["advanced_engine"] = [
+    ((-16, 0, 0), (16, 2, 16), "heavy_plinth"),
+    ((-15, 2, 1), (15, 12, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((6, 6, 15), (10, 10, 16), "iron_shaft"),
+]
+
+MODELS["crop_harvester"] = [
+    ((0, 0, 0), (16, 2, 16), "heavy_plinth"),
+    ((1, 2, 1), (15, 14, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((3, 14, 3), (13, 28, 13), "wind_turbine_mast"),
+    ((0, 22, 1), (16, 26, 5), "sp_red_iron"),
+]
+
 # Textures the front face uses: "#front" in MODELS. Lit machines also get <front>_on.
 FRONTS = {
     "geothermal_generator": "geothermal_generator_front",
@@ -191,4 +404,28 @@ FRONTS = {
     "large_steam_engine": "large_steam_engine_front",
     "pumpjack": "pumpjack_front",
     "oil_sand_extractor": "oil_sand_extractor_front",
+    "distillation_tower": "distillation_tower_front",
+    "catalytic_cracker": "catalytic_cracker_front",
+    "vacuum_distillation_unit": "vacuum_distillation_unit_front",
+    "catalytic_reformer": "catalytic_reformer_front",
+    "chemical_mixer": "chemical_mixer_front",
+    "fracking_rig": "fracking_rig_front",
+    "flowback_treatment_unit": "flowback_treatment_unit_front",
+    "diesel_generator": "diesel_generator_front",
+    "deposit_drill": "deposit_drill_front",
+    "gas_turbine": "gas_turbine_front",
+    "polymerization_reactor": "polymerization_reactor_front",
+    "diesel_engine": "diesel_engine_front",
+    "electrolytic_cell": "electrolytic_cell_front",
+    "chemical_reactor": "chemical_reactor_front",
+    "air_separation_unit": "air_separation_unit_front",
+    "synthesis_converter": "synthesis_converter_front",
+    "lithium_battery_bank": "lithium_battery_bank_front",
+    "flow_battery": "flow_battery_front",
+    "crystal_grower": "crystal_grower_front",
+    "lithography_station": "lithography_station_front",
+    "gas_holder": "gas_holder_front",
+    "advanced_solar_panel": "advanced_solar_panel_front",
+    "advanced_engine": "advanced_engine_front",
+    "crop_harvester": "crop_harvester_front",
 }

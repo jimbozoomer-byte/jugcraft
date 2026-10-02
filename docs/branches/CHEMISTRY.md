@@ -18,12 +18,12 @@ These materials already exist and are obtainable. Chemistry will give them their
 
 | Item | Current source | Current stand-in use | Chemistry plan |
 | --- | --- | --- | --- |
-| Salt | Rock salt ore | None | Brine electrolysis → lye (sodium hydroxide) and chlorine |
-| Bauxite | Surface rock | Blast furnace → 1 aluminum nugget; arc furnace → 1 aluminum ingot | Lye digestion → alumina, then electrolysis → aluminum (the real route) |
-| Sulfur dust | Crushed vanilla sulfur | None | Sulfuric acid |
-| Phosphate | Phosphorite ore | None | Phosphate + sulfuric acid → fertilizer (for the farming pillar) |
-| Lepidolite / lithium carbonate | Lepidolite ore | Blast or arc furnace → lithium carbonate | Leaching and precipitation; battery compounds |
-| Monazite / rare earth oxide | Monazite ore | Blast or arc furnace → rare earth oxide | Acid digestion and solvent extraction → separated rare earths (magnets) |
+| Salt | Rock salt ore | None | **Done (batch 5):** brine electrolysis → lye, chlorine and hydrogen |
+| Bauxite | Surface rock | Blast furnace → 1 aluminum nugget; arc furnace → 1 aluminum ingot | **Done (batch 5):** lye digestion → 2 alumina, electrolysis with a coke anode → 2 aluminum ingots |
+| Sulfur dust | Crushed vanilla sulfur | None | **Done (batch 5):** sulfuric acid |
+| Phosphate | Phosphorite ore | None | **Done (batch 5):** phosphate + sulfuric acid → fertilizer |
+| Lepidolite / lithium carbonate | Lepidolite ore | Blast or arc furnace → lithium carbonate | **Done (batch 6):** sulfuric acid leaching → 2 lithium carbonate |
+| Monazite / rare earth oxide | Monazite ore | Blast or arc furnace → rare earth oxide | **Done (batch 6):** sulfuric acid leaching → 2 rare earth oxide |
 | Bitumen | Oil sand | Steam generator fuel | Upgrading and refining alongside liquid crude oil |
 
 ## Planned machines (proposals)
@@ -41,7 +41,7 @@ The owner asked on 1 October 2026 for "the Diesel Punk Chemistry branch of the s
 
 Every machine here is steel tier or later and follows [ART_DIRECTION.md](../ART_DIRECTION.md): dieselpunk, detailed, and as big as the real thing (pumpjacks, towers and rigs are multi-block). Fluids move in the existing pipes and tanks. Amounts are millibuckets (mB).
 
-### Batch 1: oil in the world
+### Batch 1: oil in the world (done, #47)
 
 | # | Commit | What it adds |
 | --- | --- | --- |
@@ -51,7 +51,7 @@ Every machine here is steel tier or later and follows [ART_DIRECTION.md](../ART_
 | 4 | Pumpjack | A 3-block-long, 3-tall dieselpunk pumpjack (nodding donkey) that pumps a chunk's conventional reservoir dry, slowly, on JE. |
 | 5 | Oil sand extractor | Hot-water extraction: oil sand + water → crude oil + sand. A route to crude anywhere oil sand is found, for players with no reservoir nearby. |
 
-### Batch 2: refining
+### Batch 2: refining (done, #49)
 
 | # | Commit | What it adds |
 | --- | --- | --- |
@@ -61,17 +61,17 @@ Every machine here is steel tier or later and follows [ART_DIRECTION.md](../ART_
 | 9 | Vacuum distillation | Heavy fuel oil → lubricant and asphalt binder. |
 | 10 | Reformer | Naphtha → high-octane gasoline. |
 
-### Batch 3: fracking and diesel power
+### Batch 3: fracking and diesel power (done, #50)
 
 | # | Commit | What it adds |
 | --- | --- | --- |
 | 11 | Chemical mixer and fracking fluid | Water + sand + a gelling agent → fracking fluid. |
-| 12 | Fracking rig | A big derrick that pumps fracking fluid into a shale reservoir and brings up crude oil, natural gas and flowback water. |
+| 12 | Fracking rig | A big derrick that pumps fracking fluid into a shale reservoir and brings up crude oil, refinery gas and flowback water. |
 | 13 | Flowback treatment | Flowback water → clean water (with losses) and salt, so fracking water is not free. |
 | 14 | Diesel generator | A big engine that burns diesel (or heavy fuel oil, less well) for high JE output. |
 | 15 | Gas turbine | Burns refinery gas or gasoline for the highest output, with lubricant upkeep. |
 
-### Batch 4: industry
+### Batch 4: industry (done, #51)
 
 | # | Commit | What it adds |
 | --- | --- | --- |
@@ -79,7 +79,67 @@ Every machine here is steel tier or later and follows [ART_DIRECTION.md](../ART_
 | 17 | Asphalt | Asphalt binder + gravel → asphalt road blocks that are quicker to walk on. |
 | 18 | Diesel engine | A kinetic engine that turns shafts on diesel. |
 | 19 | Handbook, advancements and JEI | The oil chapter, advancements, recipe viewer categories and the oil energy audit in [BALANCE.md](../BALANCE.md). |
-| 20 | Visual polish | Animated pumpjack and rig, flare stacks, and screenshots. |
+| 20 | Visual polish | In-game screenshots of the oil machines and a power-gear scene. The owner's restyle of the cables and power gear (the electric look, [ART_DIRECTION.md](../ART_DIRECTION.md#electric-power-gear-and-the-high-tech-tiers)) rode along in this batch. The animated pumpjack and rig and flare stacks were not done: they need a block-entity renderer like the kinetic rotors, and are left for a later polish pass. |
+
+## Industrial chemistry: electrochemistry and acids
+
+After the oil line (owner request, 1 October 2026: "start the next batch immediately"), the branch turns to the items that have been waiting for chemistry since the start: salt, sulfur, phosphate and bauxite. These machines are steel tier and dieselpunk like the oil line, and they use the same fluid machine system, tanks and pipes.
+
+### Batch 5: electrochemistry and acids (done, #52)
+
+| # | Commit | What it adds |
+| --- | --- | --- |
+| 21 | Brine and the electrolytic cell | Salt + water → brine (chemical mixer). A big electrolytic cell splits brine into chlorine gas, hydrogen gas and lye (sodium hydroxide solution). |
+| 22 | Sulfuric acid | A chemical reactor: sulfur dust + water → sulfuric acid, the base of the acid chemistry. |
+| 23 | Alumina and real aluminum | Bauxite digested in hot lye → alumina (the Bayer process); the electrolytic cell smelts alumina with a coke anode into aluminum, far better than the blast-furnace stand-in. |
+| 24 | Fertilizer | Phosphate + sulfuric acid → fertilizer: a stronger bone meal that ripens crops around it, for the farming pillar. |
+| 25 | Hydrogen fuel cell | Hydrogen → JE in a fuel cell (the first electric-look generator), so the cell's byproducts pay for some of its power; handbook, advancements and docs. |
+
+### Batch 6: advanced materials
+
+Owner request, 1 October 2026: "start the next batch with 1 and 2" (chlorine and titanium; batteries and rare earths). Status: implemented in #54; see [industrial-chemistry.md](../features/industrial-chemistry.md).
+
+| # | Commit | What it adds |
+| --- | --- | --- |
+| 26 | Titanium ore | Titanium: a new metal, mined as rutile-bearing ore deep underground. No furnace smelts it. |
+| 27 | The Kroll process | Raw titanium + coke + chlorine → titanium sponge (chemical reactor) → ingots in the arc furnace: chlorine's first real job. Titanium goes into the lithium battery bank. |
+| 28 | Lithium and rare earths | Lepidolite and monazite leached in sulfuric acid: twice what the blast-furnace stand-ins give. |
+| 29 | Lithium battery bank | Lithium cells and a big electric-look battery bank, far above the capacitor bank. |
+| 30 | Rare-earth magnets | Neodymium magnets; a magnet dynamo and a magnet motor that lose far less than the copper-wound ones; docs and advancements. |
+
+### Batch 12: nitrogen chemistry
+
+The first batch from the owner's saved idea backlog ([MACHINE_ROADMAP.md](../MACHINE_ROADMAP.md#idea-backlog-saved-by-the-owner-1-october-2026)). Feature record: [nitrogen-chemistry.md](../features/nitrogen-chemistry.md).
+
+| # | What it adds |
+| --- | --- |
+| 31 | Air separation unit: a 2×2×6 cold box that splits air into nitrogen (top) and oxygen (base), four parts to one, needing only power. Nitrogen, oxygen and ammonia gases. |
+| 32 | Synthesis converter: a 3×4×2 high-pressure loop. Haber–Bosch (hydrogen + nitrogen → ammonia) and Ostwald (ammonia + oxygen + water → nitric acid). Nitric acid fluid. |
+| 33 | Uses: ammonia + phosphate → ammonium phosphate fertilizer (6 for 2 phosphate); nitric acid etches microchips with half the acid. Handbook, advancements and docs. |
+
+### Batch 13: oxygen-blown steel and argon
+
+| # | What it adds |
+| --- | --- |
+| 34 | The air separation unit also gives argon (1 mB every 2 ticks, from the middle of the column). Item machines can take a **boost gas**: oxygen blown into the steel foundry and argon round the crystal grower's melt double their speed, burning the gas each tick they are boosted. |
+
+### Batch 14: rubber and polymers
+
+| # | What it adds |
+| --- | --- |
+| 35 | Butadiene gas from naphtha (chemical reactor), synthetic rubber from butadiene (polymerization reactor), gaskets. Rubber belts and gasketed steel pipe. Feature record: [rubber.md](../features/rubber.md). |
+
+### Batch 15: chlorine and lye
+
+| # | What it adds |
+| --- | --- |
+| 36 | Vinyl chloride (refinery gas + chlorine, synthesis converter) → PVC resin (polymerization reactor) → two plastic sheets each (metal press). Soap from lye and rotten flesh (chemical reactor), which washes off status effects. Feature record: [chlor-alkali.md](../features/chlor-alkali.md). |
+
+### Batch 16: glass chemistry
+
+| # | What it adds |
+| --- | --- |
+| 37 | Tincal (desert borax crust), borax, borosilicate glass, optical fibre and ferroboron. Fibre stands in for gold in processors; ferroboron doubles neodymium magnets. Multi-input recipes now try the one with the most ingredients first. Feature record: [glass-chemistry.md](../features/glass-chemistry.md). |
 
 ### Rules for the oil line
 

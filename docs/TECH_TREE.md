@@ -65,6 +65,7 @@ All machines hold their own internal battery and accept power from cables or dir
 | Coal Generator | Power | Burns coal, charcoal (¾ as long), coal blocks or coke → 32 JE/t | produces | bronze, cable, furnace, casing |
 | Steam Generator | Power | Boils water with coal or bitumen → 64 JE/t | produces | coal generator, bronze, bucket, cable, casing |
 | Solar Panel | Power | Daylight under open sky → 8 JE/t (4 in rain) | produces | glass, silicon, bronze, cable |
+| Advanced Solar Panel (pedestal + 3×3 array) | Power | A white pedestal carrying nine blocks of cells: 64 JE/t in full sun (half in rain), 400,000 JE buffer, 512 JE/t out of the pedestal | produces | 3 solar panels, aluminum plates, processor, aluminum cable, titanium |
 | Battery Box | Power | Stores 400,000 JE; outputs from its front | stores | lead, cable, redstone block, casing |
 | Electric Furnace | Mechanical | Any vanilla smelting recipe, 100 ticks | 10 JE/t | bronze, redstone, cable, furnace, casing |
 | Crusher | Mechanical | Ore → 2 raw; minerals, sulfur, oil sand, cobble → gravel → sand | 16 JE/t | flint, cable, casing, bronze, redstone |
@@ -80,13 +81,13 @@ All machines hold their own internal battery and accept power from cables or dir
 | Steel Foundry (2×2, 5 tall) | Steel | Iron ingot + coke → steel ingot, 400 ticks | none | bricks, hopper, iron plates, blast furnace |
 | Geothermal Generator (2×2×2) | Power | Lava → 64 JE/t (1 mB/t; a bucket lasts 1,000 ticks) | produces | invar plates, tinplate tank, bronze gears, casing, basic circuit |
 | Wind Turbine (9 tall, 7-block rotor) | Power | 12–72 JE/t by height above sea level; ×1.5 in rain, ×2 in thunder; the rotor turns (drawn by the client) and needs a clear 7×7 square in front of the top | produces | aluminum plates, bronze gears, casing, bronze plates, cable |
-| Arc Furnace (3×3×3 multiblock) | Mechanical (with chemistry stand-ins) | Quartz → 2 silicon; raw nickel, tungsten or uranium → ingot; bauxite, lepidolite and monazite stand-ins | 64 JE/t | 26 arc furnace casings (bricks + nickel) + controller |
+| Arc Furnace (3×3×3 multiblock) | Mechanical (with chemistry stand-ins) | Quartz → 2 silicon; raw nickel, tungsten or uranium → ingot; titanium sponge → titanium ingot; bauxite, lepidolite and monazite stand-ins | 64 JE/t | 26 arc furnace casings (bricks + nickel) + controller |
 
 ## Machine looks: steampunk and classic
 
 Machines are drawn in a **steampunk** style by default: brass, copper and riveted iron, with gauges, gears, valve wheels, glowing fireboxes and portholes. The look is purely visual. Blocks, recipes, footprints, screens and power connections are the same in both styles.
 
-From the steel tier up, machines are **dieselpunk** instead: gunmetal and olive paint, hazard stripes, chrome, phosphor gauges and caged lamps (see [ART_DIRECTION.md](ART_DIRECTION.md)). The steel foundry, capacitor bank, steel tank, ore drill and high-pressure extractor already use it; the renders below predate that.
+Power gear (cables, battery box, capacitor bank, charging station, solar panel, electric pump, electric motor and dynamo) has an **electric** look: graphite with glowing green strips, screens and ports. From the steel tier up, other machines are **dieselpunk** instead: gunmetal and olive paint, hazard stripes, chrome, phosphor gauges and caged lamps (see [ART_DIRECTION.md](ART_DIRECTION.md)). The steel foundry, capacitor bank, steel tank, ore drill and high-pressure extractor already use it; the renders below predate that.
 
 ![Steampunk machines, each shown from the front-left and front-right](images/steampunk_machines.png)
 
@@ -186,7 +187,7 @@ There is no faster fluid pipe yet. A pump moves 100 mB/t, less than the bronze p
 
 **Transmitter design:**
 
-- **Thin, not full blocks.** Each is a 4-pixel (¼-block) core. An arm reaches out toward each connected neighbor, and the hitbox follows the same shape. For comparison, Mekanism's cables and pipes are 6 pixels.
+- **Thin, not full blocks.** Cables are 6 pixels thick, fluid pipes 4 and item pipes 6. An arm reaches out toward each connected neighbor, and the hitbox follows the same shape (Mekanism's are 6 pixels).
 - **Connect automatically.**
   - A cable joins other cables and any block that stores or uses energy on the touching face.
   - A pipe joins other pipes and any block with a fluid storage on that face, including tanks, pumps, the steam generator, vanilla cauldrons and other mods' fluid blocks.
@@ -197,7 +198,7 @@ There is no faster fluid pipe yet. A pump moves 100 mB/t, less than the bronze p
 *Approximate isometric render made from the mod's own textures and model boxes, not a game screenshot.*
 
 - **Look:**
-  - The cable is black rubber insulation with copper connectors. The pipe is bronze, darker at its flanged ends.
+  - Cables have the electric look: a graphite sheath with a glowing green core strip along every side, a glowing cross on the junction, and collars of the tier's metal (copper, silver, aluminum) where they meet a neighbour. The strips are emissive, so they glow in the dark. The pipe is bronze, darker at its flanged ends.
   - In the inventory both show as a short 3D segment.
 
 ## Fluids
@@ -209,6 +210,10 @@ The fluid branch moves liquids around. It never changes what a liquid *is*: that
 | Bronze Fluid Pipe | Carries fluid pushed into it by a pump to every fluid storage it touches | 250 mB/t per push, up to 1,024 pipes per network | 2 bronze plates + glass → 4 |
 | Tinplate Tank | Stores one fluid; fill or empty with buckets, right-click with an empty hand to read it, comparators show how full it is | 16,000 mB (16 buckets); contents are lost if broken | 8 tin plates + glass |
 | Electric Pump | Pulls from below, pushes out of its top and four sides | 100 mB/t, 8 JE per tick it moves fluid, 4,000 JE battery, 4,000 mB buffer | bronze plates, bucket, 2 iron gears, casing, cable |
+| Steel Fluid Pipe | Like the bronze pipe, for refinery flows | 1,000 mB/t per push; a network carries as much as its slowest pipe | 2 steel plates + bronze pipe → 3 |
+| Fluid Valve | A steel pipe segment that redstone closes | Open: a steel pipe. Powered: closed, and the pipes on either side become separate lines. Lamp green open, amber closed. | lever, 2 steel plates, steel pipe, redstone → 2 |
+| Fluid Filter | A steel pipe segment that sorts fluids | Carries anything, but the tanks and machines it touches only get its chosen fluid (nothing until set). Set with a filled bucket, or by right-clicking beside a tank of the fluid (for gases); sneak to clear. | 2 steel plates, 2 iron bars, steel pipe |
+| Heavy Pump | The steel-tier pump | 1,000 mB/t, 40 JE per tick it moves fluid, 32,000 JE battery, 16,000 mB buffer | steel plates, silver cable, 2 steel gears, electric pump, casing |
 
 **How the pieces work together**
 
@@ -232,7 +237,11 @@ The fluid branch moves liquids around. It never changes what a liquid *is*: that
 | --- | --- | --- | --- |
 | Item Crate | 32 stacks of one item | Right-click with an item to put it in; with an empty hand to take a stack (sneak to just look). Pipes, extractors and hoppers use it; comparators read how full it is. Breaking it drops everything. | iron plates, planks |
 | Capacitor Bank (2 wide, 2 tall) | 4,000,000 JE | Charges from any side; gives power out of the copper sockets on its front, 4,096 JE/t (a job for aluminum cable). Comparators read its charge. | steel plates, 4 battery boxes, advanced circuit |
+| Lithium Battery Bank (3 wide, 2 tall, 1 deep) | 32,000,000 JE | Charges from any side; gives power out of the six sockets on its front, 16,384 JE/t (four aluminum cables' worth). Comparators read its charge. Electric look. | titanium ingots, 4 lithium cells, a capacitor bank |
+| Gas Holder (3×3×3) | 1,024 buckets of one gas, only gases | A Horton sphere on legs. Pumps and pipes fill and empty it from any face; right-click to read it; comparators read how full it is. | steel plates, 4 steel tanks, steel pipe |
 | Steel Tank (2 wide, 2 deep) | 128 buckets of one fluid | Buckets, pumps and pipes fill and empty it from any face; right-click with an empty hand to read it. Comparators read how full it is. | 8 steel plates, tinplate tank |
+
+**Tanks keep their fluid.** Break a tinplate tank, steel tank or gas holder and it drops as one item carrying its fluid (the tooltip shows which and how much); place it again and the fluid is back. Empty tanks still stack.
 
 ![Capacitor Bank, Steel Tank and Item Crate](images/storage.png)
 
@@ -243,6 +252,7 @@ The fluid branch moves liquids around. It never changes what a liquid *is*: that
 | Block or tool | What it does | Details | Built from |
 | --- | --- | --- | --- |
 | Geo-Resonance Prospector (hand tool) | Surveys the 3×3 chunks around you | Shows each ore family found as 1–5 bars with a rough depth (shallow Y ≥ 40, middle 0–39, deep below 0). Readings are deliberately vague: every second column is sampled, a quarter of readings are one bar off, and no positions are given. 3-second cooldown. | brass plates, copper wire, glass pane, basic circuit |
+| Deposit Drill (3×3, 2 tall) | Works a surface deposit under it | Built on a patch of Coal, Iron, Copper or Tin Deposit (stony hills). Every 15 seconds at 16 JE/t it takes one coal or raw ore from each kind of deposit under it or one block round it, down to 3 deep. It pushes them out of every side into chests, pipes, conveyors or machines beside it. Each deposit block holds 1,000 and then turns to stone; right-click one to read what is left. Picks break deposits for nothing. Upgrades, side configuration, redstone modes and comparator output as on other machines. | iron plates, bronze gears, 2 iron pickaxes, machine casing, basic circuit |
 | Ore Drill (2 tall) | Mines the ores in a 9×9 column below it | One `c:ores` block every 40 ticks at 32 JE/t, from the layer under it down to the bottom of the world. Ores come out whole (like silk touch) into three result slots, and each hole is refilled with stone, deepslate or netherrack. It has upgrades, side configuration, eject, redstone modes and comparator output. It stops when full. | steel plates, steel gear, 2 basic circuits, machine casing, diamond pickaxe |
 
 ![Ore Drill](images/mining.png)
@@ -273,6 +283,10 @@ A second, mechanical power system measured in **KE** (kinetic energy) per tick. 
 | Belt Pulley | A shaft that can hold a belt | Carries rotation along its axis like a shaft, and to the pulley it is belted to. | planks, iron shaft |
 | Leather Belt | Links two pulleys | Use on one pulley, then another: same axis, level along it, up to 16 blocks apart. Breaking a pulley drops the belt. | leather, string |
 | Electric Motor | JE → KE at 75%, up to 96 KE/t | Takes JE from cables and drives the block it faces. | iron plates, copper wire, iron shaft, copper cable |
+| Magnet Dynamo | KE → JE at 95%, 512/t | The dynamo with rare-earth magnets; pushes JE into cables on every side. Cyan-banded. | aluminum plates, 4 neodymium magnets, dynamo, aluminum cable |
+| Magnet Motor | JE → KE at 95%, up to 384 KE/t | Takes up to 1,024 JE/t and drives the block it faces. With a magnet dynamo it still loses a tenth each round. | aluminum plates, 4 neodymium magnets, electric motor, aluminum cable |
+| Diesel Engine (2×2×3) | Up to 512 KE/t out of the back of its upper right back block | Burns diesel or heavy fuel oil ([Oil](#oil)), only for what the line takes. | steel plates, plastic sheets, steel gears, casing |
+| Advanced Combustion Engine (2 long) | Up to 1,024 KE/t out of the back of its right-hand block | Four cylinders; burns gasoline (448 KE/mB) or diesel (320), only for what the line takes. 8-bucket tank. | titanium, processor, 2 neodymium magnets, diesel engine, casing |
 
 ![Kinetic blocks](images/kinetic.png)
 
@@ -287,6 +301,16 @@ A second, mechanical power system measured in **KE** (kinetic energy) per tick. 
 | Water Wheel (2 tall) | Power from flowing water | The wheel on its right side (seen from the front) turns in the column of blocks beside it: 8 JE/t per block of flowing water there, 12 if falling, up to 24 JE/t. Source water does not count. Cables connect to its house. | planks, sticks, bronze gear, copper cable |
 | Cobblestone Generator | 1 cobblestone per 20 ticks, 4 JE/t | Needs water and lava touching any sides; neither is used up. | bronze, water bucket, lava bucket, cable, casing |
 | Tree Farm | Sapling → 6 logs in 400 ticks, 16 JE/t | The sapling comes back (byproduct slot) with a 10% chance of the tree's extra (apple, cocoa beans, pink petals, pale moss carpet or a stick). Recipes are data (`jugcraft:tree_growing`) for all nine vanilla trees. | glass, glowstone, dirt, bronze, casing, basic circuit |
+
+### Farming
+
+See [farming.md](features/farming.md).
+
+| Block or item | What it does | Details | Built from |
+| --- | --- | --- | --- |
+| Crop Harvester (2 tall) | Harvests and replants ripe crops in the 9×9 field in front of it | One crop per 20 ticks at 24 JE/t; keeps the drops less one seed, which it replants; waits when its three result slots are full | steel gears, shears, 2 hoppers, casing, steel plates, basic circuit |
+| Sprinkler | Waters the crops within 4 blocks | Every 5 s uses 50 mB of water and gives each growing crop an extra growth tick; with fertilizer loaded, spreads one every 30 s over the 5×5 around it. 4-bucket tank, 16 fertilizer. | bronze pipe, steel plates, tinplate tank, hopper |
+| Cotton | A crop like wheat | Seeds from sifting coarse dirt (15%); a ripe plant gives 1–3 cotton and seeds; 1 cotton → 1 string | – |
 
 ![Cobblestone Generator, Tree Farm and Water Wheel](images/renewables.png)
 
@@ -332,7 +356,7 @@ Steel is the second material tier. It needs **no power** and no new ore, only ir
 | Block | Does | Numbers | Built from |
 | --- | --- | --- | --- |
 | Coke Oven (2×2, 2 tall + chimney) | Bakes coal into **Coal Coke** | 600 ticks per coal; no power, no fuel | bricks, iron, furnace |
-| Steel Foundry (2×2, 5 tall) | 1 iron ingot + 1 coke → 1 **steel ingot** (either slot) | 400 ticks; no power | bricks, hopper, iron plates, blast furnace |
+| Steel Foundry (2×2, 5 tall) | 1 iron ingot + 1 coke → 1 **steel ingot** (either slot) | 400 ticks; no power. Oxygen piped in (2 mB/t) doubles its speed (batch 13) | bricks, hopper, iron plates, blast furnace |
 
 - **Coal Coke** (`c:coal_coke`) burns twice as long as coal in the Coal and Steam Generators (3,200 ticks). It is the carbon for steel.
 - **Steel** has the usual ingot, nugget and block, plus a **steel plate** (Metal Press) and a **steel gear**. The first things built from steel are the [machine upgrades](#machine-control).
@@ -359,16 +383,70 @@ Empty tools mine like a bare hand and get no drops.
 
 ## Oil
 
-The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line), [feature record](features/petrochemistry.md)). Refining, fracking and diesel power are still to come.
+The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line), [feature record](features/petrochemistry.md)).
 
 | Thing | What it does | Details | Built from |
 | --- | --- | --- | --- |
 | Crude Oil | A thick black fluid with a bucket; flows slowly and never makes new sources | `c:crude_oil` | reservoirs, oil sand |
+| Naphtha, Diesel, Heavy Fuel Oil, Lubricant, Gasoline | Refined liquids with buckets, tagged `c:<name>` | runny / amber / thick / golden / thin red-orange | distillation tower, cracker, vacuum unit, reformer |
+| Fracking Fluid | Water thickened with sand and a gelling agent, with a bucket | `c:fracking_fluid` | chemical mixer |
+| Flowback Water | Dirty water from a fracked well, with a bucket | `c:flowback_water` | fracking rig |
+| Refinery Gas | A gas: tanks and pipes only, no block or bucket | `c:refinery_gas` | distillation tower |
 | Oil reservoirs | Hidden under Overworld chunks, fixed by the seed: conventional (about 1 chunk in 12, 50–250 buckets) or shale (about 1 in 4 of the rest, 200–800 buckets, fracking only) | finite; the prospector reports Oil and Shale oil | – |
 | Pumpjack | 1 wide, 3 tall, 3 long; pumps the conventional reservoir under its wellhead | 2 mB/t at 32 JE/t, 16-bucket tank, pushes into pipes | 4 steel plates, 2 steel gears, electric pump, casing |
 | Oil Sand Extractor | 2×2×2 hot-water extraction | oil sand + 250 mB water → 500 mB crude oil + sand (160 ticks); bitumen + 100 mB water → 150 mB (80 ticks); 32 JE/t | 4 steel plates, hopper, 2 tinplate tanks, casing, steel gear |
+| Distillation Tower | 2×2, seven tall; splits crude oil into fractions, each drawn off at its own height | 1,000 mB crude → 100 refinery gas (top), 250 naphtha (layer 4), 400 diesel (layer 2), 250 heavy fuel oil (base); 100 ticks at 128 JE/t | 6 steel plates, steel tank, advanced circuit, blast furnace |
+| Catalytic Cracker | 2×2, four tall; cracks heavy fuel oil into lighter fuels | 1,000 mB heavy fuel oil + 250 mB water + 1 catalyst → 500 diesel (base), 300 naphtha (layer 2), 200 refinery gas (top); 160 ticks at 160 JE/t | steel plates, advanced circuit, 2 steel tanks, arc furnace casing, casing |
+| Cracking Catalyst | Used up by the cracker, one per bucket | – | 4 bauxite, 4 sand, nickel ingot → 4 |
+| Vacuum Distillation Unit | 2×2, three tall; boils heavy fuel oil under vacuum | 1,000 mB heavy fuel oil → 400 mB lubricant + 2 asphalt binder; 120 ticks at 96 JE/t | steel plates, heavy pump, 2 tinplate tanks, advanced circuit, casing |
+| Catalytic Reformer | 3 wide, 2 tall, 2 deep; reforms naphtha | 1,000 mB naphtha → 900 gasoline (bottom row) + 100 refinery gas (top row); 120 ticks at 120 JE/t | steel plates, advanced circuit, 2 tinplate tanks, blast furnace, casing |
+| Chemical Mixer | 2×2×2 stirred vessel | 1,000 mB water + 2 sand + 1 dried kelp → 1,000 mB fracking fluid; 80 ticks at 64 JE/t | steel plates, electric motor, 2 tinplate tanks, casing, hopper |
+| Fracking Rig | 3×3, five tall; frees shale oil under its front left block | per tick: 4 mB fracking fluid down; 6 mB crude oil (base), 2 mB refinery gas (top), 3 mB flowback water (one up); 256 JE/t | steel plates, ore drill, 2 heavy pumps, advanced circuit, casing |
+| Flowback Treatment Unit | 3 wide, 1 tall, 2 deep: settling basins and a filter press | 1,000 mB flowback water → 750 mB water + 1 salt; 80 ticks at 48 JE/t | steel plates, iron bars, 2 tinplate tanks, sieve, casing |
+| Diesel Generator | 3 wide, 2 tall, 2 deep; an inline six burning liquid fuel | 256 JE/t: diesel 256 JE/mB (1 mB/t), heavy fuel oil 128 JE/mB (2 mB/t); 8-bucket tank, 60,000 JE buffer | 4 steel plates, electric motor, 2 tinplate tanks, casing, steel gear |
+| Gas Turbine | 4 wide, 2 tall, 2 deep; burns light fuels, needs lubricant | 512 JE/t: gasoline 384 JE/mB, refinery gas 192 JE/mB; 1 mB lubricant per 20 ticks of running; 16-bucket fuel tank, 4-bucket lubricant tank, 120,000 JE buffer | 4 steel plates, 2 iron bars, 2 diesel generators, advanced circuit, steel gear |
+| Polymerization Reactor | 2×2, three tall; polymerizes refinery gas | 1,000 mB refinery gas → 4 plastic pellets; 100 ticks at 96 JE/t | 4 steel plates, cracking catalyst, 2 steel tanks, glass, casing |
+| Diesel Engine | 2 wide, 2 tall, 3 long; a V8 that turns a shaft | up to 512 KE/t out of the back of its upper right back block; diesel 256 KE/mB, heavy fuel oil 128; burns only for what the line takes; 8-bucket tank | 4 steel plates, 2 plastic sheets, 2 steel gears, casing |
+| Asphalt, Asphalt Slab, Asphalt Road Line | Road blocks; walking on them is 1.3× as fast | 8 gravel + asphalt binder → 8; 3 asphalt → 6 slabs; 4 asphalt + yellow dye → 4 road line (faces the placer) | – |
+| Plastic Pellets, Plastic Sheet | Pellets from the reactor; the metal press makes a sheet from each (60 ticks) | for later machines (first: the diesel engine) | – |
+| Synthetic Rubber, Gasket (batch 14) | Naphtha cracked to butadiene (chemical reactor, 1,000 mB → 500 mB), polymerized to rubber (polymerization reactor, 500 mB → 4 rubber); rubber + steel plate → 4 gaskets | rubber + string → 2 belts; 2 steel plates + gasket → 4 steel fluid pipes | – |
+| PVC Resin, Soap (batch 15) | Refinery gas + chlorine → vinyl chloride (synthesis converter, 250 + 250 mB → 250 mB) → 4 PVC resin per 500 mB (polymerization reactor); 2 rotten flesh + 250 mB lye → 4 soap (chemical reactor) | PVC resin → 2 plastic sheets (metal press); soap washes off every status effect | – |
+| Tincal, Borax, Borosilicate Glass, Optical Fibre, Ferroboron (batch 16) | Tincal crusts desert and badlands sand, drops 1-3 borax; 2 sand + borax → 2 borosilicate glass (alloy smelter); glass → 4 optical fibre (wire drawer); iron + borax → ferroboron (alloy smelter) | rare earth oxide + ferroboron → 2 neodymium magnets; 4 microchips + advanced circuit + 2 optical fibre → processor (no gold) | – |
+
+### Industrial chemistry
+
+Salt, sulfur, phosphate and bauxite get their real reactions ([feature record](features/industrial-chemistry.md)).
+
+| Thing | What it does | Details | Built from |
+| --- | --- | --- | --- |
+| Brine, Lye | Fluids with buckets: salt water, and sodium hydroxide solution | `c:brine`, `c:lye` | chemical mixer (2 salt + 1,000 mB water → 1,000 mB brine), electrolytic cell |
+| Chlorine, Hydrogen | Gases: tanks and pipes only | `c:chlorine`, `c:hydrogen` | electrolytic cell |
+| Electrolytic Cell | 3 wide, 3 tall, 2 deep; splits brine | 1,000 mB brine → 250 chlorine (top row), 250 hydrogen (middle row), 500 lye (bottom row); 200 ticks at 256 JE/t | 4 steel plates, 2 aluminum cables, 2 steel tanks, advanced circuit, casing |
+| Sulfuric Acid | A fluid with a bucket | `c:sulfuric_acid` | chemical reactor |
+| Titanium | A metal mined as rutile-bearing ore (Y −64 to −8, iron pickaxe); no furnace smelts it | raw titanium + coke + 250 mB chlorine → titanium sponge (chemical reactor); sponge → ingot (arc furnace) | – |
+| Leaching | Lepidolite or monazite dissolved in sulfuric acid | 1 lepidolite + 250 mB acid → 2 lithium carbonate; 1 monazite + 250 mB acid → 2 rare earth oxide (chemical reactor) | – |
+| Lithium Cell, Lithium Battery Bank | Cells of lithium carbonate in aluminum cans; a 3×2×1 electric-look battery | 2 lithium carbonate + 4 aluminum plates + copper wire → 2 cells; the bank holds 32,000,000 JE, 16,384 JE/t out of its front (see Storage) | cells: as left; bank: 4 titanium ingots, 4 cells, capacitor bank |
+| Alumina | Bauxite digested in lye | 1 bauxite + 250 mB lye → 2 alumina (chemical reactor); 2 alumina + 1 coal coke → 2 aluminum ingots (electrolytic cell): two ingots per bauxite, twice the arc furnace | – |
+| Fuel Cell | One block, electric look; hydrogen → JE | 128 JE/t, 1 mB hydrogen a tick (128 JE/mB); 8-bucket tank | 4 aluminum plates, 2 aluminum cables, 2 steel plates, advanced circuit, tinplate tank |
+| Neodymium Magnet | Rare earths alloyed with iron | 1 rare earth oxide + 1 iron ingot → 1 (alloy smelter, 200 ticks) | – |
+| Fertilizer | Superphosphate: two doses of bone meal on every crop in a 5×5 area | 2 phosphate + 250 mB sulfuric acid → 4, or 2 phosphate + 250 mB ammonia → 6 (ammonium phosphate; chemical reactor) | – |
+| Chemical Reactor | 2×2×2 acid plant | 2 sulfur dust + 1,000 mB water → 1,000 mB sulfuric acid; 100 ticks at 96 JE/t | 4 steel plates, glass, 2 tinplate tanks, casing, lead ingot |
+| Air Separation Unit | 2×2×6 cold box and column (batch 12) | From the air, needing only power: 8 mB/t nitrogen out of the top row, 2 mB/t oxygen out of the bottom row and 1 mB of argon every 2 ticks out of the middle at 64 JE/t; 16-bucket tanks | 4 steel plates, 2 steel pipes, 2 tinplate tanks, casing, 2 electric motors, advanced circuit |
+| Synthesis Converter | 3×4×2 high-pressure loop (batch 12) | Haber–Bosch: 300 mB hydrogen + 100 mB nitrogen → 200 mB ammonia. Ostwald: 100 mB ammonia + 200 mB oxygen + 100 mB water → 200 mB nitric acid. 40 ticks at 128 JE/t | 4 steel plates, 2 titanium ingots, 2 steel pipes, casing, advanced circuit |
 
 **Fluid processing machines** (the pumpjack and extractor are the first): input tanks take only fluids the machine's recipes use; output tanks push into neighbouring tanks and pipes; the screen shows a gauge per tank. Recipes are data in `data/jugcraft/recipe/<type>/` (see [petrochemistry.md](features/petrochemistry.md)).
+
+### Electronics
+
+The tier after oil and chemistry, in the **cyan look**: near-black casings with lit cyan seams, cyan glass that glows while a machine works, cyan screens, violet conduits, and a beige retro computer (the owner's references). See [electronics.md](features/electronics.md).
+
+| Thing | What it is | Recipe or use | Built from |
+| --- | --- | --- | --- |
+| Crystal Grower | 2 tall; pulls doped silicon crystals | 4 silicon + 1 phosphate → 1 silicon boule; 400 ticks at 128 JE/t; argon piped in (1 mB/t) doubles its speed (batch 13) | glass, titanium ingot, arc furnace casing, aluminum plates, advanced circuit |
+| Silicon Wafer | Thin slices of a boule | 1 silicon boule → 8 wafers (sawmill, 200 ticks) | – |
+| Lithography Station | 3×2×2 cleanroom with a monitor bank | 1 wafer + 2 copper wire + 100 mB sulfuric acid (or 50 mB nitric acid) → 4 microchips; 200 ticks at 192 JE/t; 4-bucket acid tank | glass, redstone lamp, titanium ingots, advanced circuit, aluminum plates, casing |
+| Processor | The third circuit tier | 4 microchips + 1 advanced circuit + 1 gold ingot (circuit assembler, 400 ticks) | – |
+| Network Terminal | A beige retro computer | Right-click: the cabled network's cables, rate, devices and stored energy. Uses no power. | glass panes, processor, plastic sheets, redstone, copper cables, button |
 
 ## Ore processing
 
@@ -490,7 +568,7 @@ Every machine recipe is an ordinary Minecraft recipe file. A data pack can add, 
 - Multi-input ingredients can sit in any input slot, and every unused slot must be empty.
 - Jugcraft's own recipes are generated from `tools/machines.py`, where the metal audit runs. Edit them there, not in the JSON.
 - Code: `machine/MachineRecipe.java` and `MultiMachineRecipe.java` (formats), `MachineRecipeTypes.java` (registration), `MachineRecipes.java` (lookup).
-- **Recipe viewers:** recipe viewers (EMI, JEI, REI) show a new recipe type only through a small plugin. No viewer build for Minecraft 26.3 has been confirmed yet, so that plugin is a follow-up.
+- **Recipe viewers:** with JEI installed, every machine (fluid machines included, with their fluids in and out) has a recipe category. EMI and REI have no plugin yet.
 
 ## Engineer's Handbook
 

@@ -75,6 +75,8 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | CRUSHER | crusher | ore ×2, minerals, gravel/sand | 10k / 128 / 0 / 16 | in, out | `jugcraft:crushing` |
 | ARC_FURNACE | arc_furnace_controller | 3×3×3 casing structure | 50k / 512 / 0 / 64 | in, out | `jugcraft:arc_smelting` |
 | SOLAR_PANEL | solar_panel | 8 JE/t in sun | 4k / 0 / 32 / – | – | – |
+| ADVANCED_SOLAR_PANEL | advanced_solar_panel | **pedestal + 3×3 layer (10 parts)**, 64 JE/t in sun (sky checked above the array) | 400k / 0 / 512 / – | – | – |
+| ADVANCED_ENGINE | advanced_engine | **2×1×1** KE generator: gasoline/diesel → up to 1,024 KE/t out of the master's back | none (KE) | – (8,000 mB fuel tank) | – |
 | STEAM_GENERATOR | steam_generator | coal/bitumen + water → 64 JE/t | 40k / 0 / 128 / – | fuel, water bucket, empty bucket | – |
 | ALLOY_SMELTER | alloy_smelter | **3×2×6 multi-block (36 parts)**, power socket only | 10k / 128 / 0 / 20 | 2 in, out | `jugcraft:alloying` (multi) |
 | METAL_PRESS | metal_press | ingot → plate | 10k / 128 / 0 / 16 | in, out | `jugcraft:pressing` |
@@ -87,14 +89,20 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | SIEVE | sieve | gravel → flint + finds | 10k / 128 / 0 / 8 | in, out, 2 byproduct | `jugcraft:sifting` |
 | SAWMILL | sawmill | log → 6 planks + sawdust | 10k / 128 / 0 / 12 | in, out, 2 byproduct | `jugcraft:sawing` |
 | CAPACITOR_BANK | capacitor_bank | **2×2** battery: charges any side, outputs from its front | 4M / 4,096 / 4,096 / – | – | – |
-| STEEL_TANK | steel_tank | **2×2** tank, 128 buckets, no power, no screen | none | – (fluid) | – |
+| LITHIUM_BATTERY_BANK | lithium_battery_bank | **3×2×1** battery (electric look): charges any side, outputs from all six front faces | 32M / 16,384 / 16,384 / – | – | – |
+| CRYSTAL_GROWER | crystal_grower | **1×2** (cyan look): 4 silicon + phosphate → silicon boule | 60k / 512 / 0 / 128 | 2 in, out | `jugcraft:crystal_growing` (multi) |
+| LITHOGRAPHY_STATION | lithography_station | **3×2×2** fluid processor (cyan look): wafer + 2 copper wire + 100 mB acid → 4 microchips | 60k / 1,024 / 0 / 192 | 2 in, out, 4,000 mB tank | `jugcraft:lithography` |
+| GAS_HOLDER | gas_holder | **3×3×3** tank, 1,024 buckets of one gas (`GasFluid` only), no power, no screen | none | – (gas) | – |
+| STEEL_TANK | steel_tank | **2×2** tank, 128 buckets, no power, no screen; drops with its fluid (`MachineKind.keepsContents`) | none | – (fluid) | – |
 | COKE_OVEN | coke_oven | **2×2, 2 tall + chimney block (9 parts)**, unpowered: coal → coke | none | in, out | `jugcraft:coking` |
 | STEEL_FOUNDRY | steel_foundry | **2×2×5**, unpowered: iron + coke → steel | none | 2 in, out | `jugcraft:steelmaking` (multi) |
 | COBBLESTONE_GENERATOR | cobblestone_generator | water + lava beside it → cobblestone, 20 ticks | 4k / 64 / 0 / 4 | 1 result slot (no inputs) | – |
+| CROP_HARVESTER | crop_harvester | **1×2**: harvests and replants ripe `CropBlock`s in the 9×9 field in front (`MachineBlockEntity.tickHarvester`, `harvestTarget`) | 20k / 256 / 0 / 24 | 3 result slots | – |
 | TREE_FARM | tree_farm | sapling → 6 logs, sapling back + extra | 10k / 128 / 0 / 16 | in, out, 2 byproduct | `jugcraft:tree_growing` |
 | WATER_WHEEL | water_wheel | **2 tall** generator: 8–12 JE/t per flowing-water block on its right | 8k / 0 / 64 / – | – | – |
 | AUTO_CRAFTER | auto_crafter | crafts the vanilla recipe in its 3×3 grid; each slot keeps one item as the pattern | 10k / 128 / 0 / 8 | 9 grid, out, 1 remainder | vanilla `crafting` |
 | LARGE_STEAM_ENGINE | large_steam_engine | **2×2×2**: fuel + water → 256 KE/t out of the back of part 7 | none | fuel, water bucket, empty bucket | – |
+| DEPOSIT_DRILL | deposit_drill | **3×3×2**: takes `DEPOSIT_UNITS` (1) per `DEPOSIT_TICKS` (300) from one `DepositBlock` of each kind under it or `DEPOSIT_REACH` (1) round it, `DEPOSIT_DEPTH` (3) deep; all faces output, eject on (`SideConfig.allOutputs`) | 20k / 256 / 0 / 16 | 3 result slots (no inputs) | – |
 | ORE_DRILL | ore_drill | **2 tall**: mines `c:ores` in a 9×9 column below, 40 ticks each (`OreDrilling`) | 20k / 256 / 0 / 32 | 3 result slots (no inputs) | – |
 
 Other blocks:
@@ -102,9 +110,13 @@ Other blocks:
 | ID | Class | What |
 | --- | --- | --- |
 | `machine_casing`, `arc_furnace_casing` | plain blocks | crafting part; arc furnace structure |
-| `copper_cable`, `silver_cable`, `aluminum_cable` | `energy/CableBlock` | 4 px energy transmitters: 256 / 1,024 / 4,096 JE/t; a network runs at its slowest cable |
+| `copper_cable`, `silver_cable`, `aluminum_cable` | `energy/CableBlock` | 6 px energy transmitters (glowing green core, emissive strips): 256 / 1,024 / 4,096 JE/t; a network runs at its slowest cable |
 | `bronze_fluid_pipe` | `fluid/FluidPipeBlock` | 4 px fluid transmitter, 250 mB per push |
 | `fluid_tank` | `fluid/FluidTankBlock(Entity)` | 16,000 mB, one fluid, comparator output |
+| `sprinkler` | `farming/SprinklerBlock(Entity)`, `JugcraftFarming` | water tank (pipes) and fertilizer hopper; pulses random ticks on nearby crops; `wet` state shows spray |
+| `cotton_crop`, `cotton_seeds`, `cotton` | `farming/CottonCropBlock`, `JugcraftFarming` | a `CropBlock` with no item of its own (the seeds place it); `CROPS` in `tools/machines.py` drives its models, loot and tags |
+| `fluid_valve` | `fluid/FluidValveBlock` | a steel pipe; `carries(state)` is false while `powered`, so `FluidNetworks` stops there |
+| `fluid_filter` | `fluid/FluidFilterBlock(Entity)` | a steel pipe whose touching storages only take its saved `FluidVariant`; `FluidNetworks` endpoints remember their pipe |
 | `electric_pump` | `fluid/ElectricPumpBlock(Entity)` | pulls from below, 100 mB/t, 8 JE/t |
 | `brass_item_pipe` | `logistics/ItemPipeBlock` | 6 px item transmitter |
 | `pneumatic_extractor`, `high_pressure_extractor` | `logistics/PneumaticExtractorBlock` | pull 16 items / 8 ticks (brass) or 32 / 4 (steel) from what they face |
@@ -123,6 +135,8 @@ Other blocks:
 | `dynamo` | `kinetic/DynamoBlock(Entity)` | KE → JE at 75%; any `MachineBlockEntity` also takes KE directly (`KineticConsumer`) |
 | `belt_pulley`, `belt` (item) | `kinetic/BeltPulleyBlock(Entity)`, `BeltItem` | a shaft whose BE saves `link`; `BeltPulleyBlockEntity.cannotLink`/`connect`; drawn by client `BeltRenderer` |
 | `electric_motor` | `kinetic/ElectricMotorBlock(Entity)` | JE → KE at 75%, 96 KE/t out of `FACING`; 8,000 JE buffer, 256 JE/t in |
+| `magnet_dynamo`, `magnet_motor` | the same `DynamoBlock`/`ElectricMotorBlock` classes and block entity types, built with `DynamoBlockEntity.MAGNET` / `ElectricMotorBlockEntity.MAGNET` `Stats` | KE → JE at 95%, 512/t, 32,000 JE buffer; JE → KE at 95%, 384 KE/t out, 1,024 JE/t in |
+| `network_terminal` | `electronics/NetworkTerminalBlock`, `JugcraftElectronics` | beige retro computer; `read(level, pos)` sums the cabled network (`EnergyNetworks.view`), counting each device (multi-block machines by master) once; overlay message on use |
 | `speed_upgrade`, `efficiency_upgrade` (items) | `machine/MachineUpgrades` | upgrade slots of powered processors |
 | `prospector` (item) | `prospecting/ProspectorItem`, `OreSurvey`, `SurveyPayload`, `client/ProspectorScreen` | vague 3×3-chunk ore survey; server → client payload `jugcraft:ore_survey` |
 | `engineers_handbook` (item) | `guide/EngineersHandbookItem`, `client/HandbookScreen` | in-game guide generated by `tools/handbook.py` |
@@ -166,7 +180,24 @@ Other blocks:
 - **Fluid processing machines:** a `MachineKind` with a `fluidSpec()` (`FluidMachineSpec`: input and output tank capacities, item inputs and outputs). `MachineBlockEntity.tanks()` is a `FluidTanks`; `fluidFor(side)` exposes all tanks as one storage (inputs insert-only and filtered by recipes, outputs extract-only). Output tanks push out of every outer face every 4 ticks.
 - **Fluid recipes** (`FluidRecipe`, `FluidRecipes`): one recipe type per machine (`MachineKind.recipeType()`), JSON keys `items`, `fluids`, `fluid_results`, `results`, `time`. Written from `tools/petro.py`; `check_mod_data.py` audits them and forbids fluid from nothing (`source` declares fluid released from items).
 - **Oil reservoirs** (`OilReservoirs`): seeded per chunk, `get(level, chunk)` and `extract(level, chunk, kind, mb)`; depletion is `SavedData` (`jugcraft:oil_reservoirs`). `overrideForTest` is for game tests only.
-- **Machines:** `PUMPJACK` (custom tick), `OIL_SAND_EXTRACTOR` (`jugcraft:oil_sand_extraction`).
+- **Gases** (`PetroFluids.Gas`, `GasFluid`): fluids with no block or bucket (refinery gas); Fabric names them from `block.<ns>.<id>`.
+- **Draw-offs:** `MachineKind.outputLayer(tank)` makes an output tank push only from the faces of one block layer (distillation tower, cracker, reformer).
+- **Items** (`PetroItems`): cracking catalyst, asphalt binder.
+- **Machines:** `PUMPJACK` (custom tick), `OIL_SAND_EXTRACTOR` (`jugcraft:oil_sand_extraction`), `DISTILLATION_TOWER` (`distillation`), `CATALYTIC_CRACKER` (`catalytic_cracking`), `VACUUM_DISTILLATION_UNIT` (`vacuum_distillation`), `CATALYTIC_REFORMER` (`reforming`), `CHEMICAL_MIXER` (`chemical_mixing`), `FRACKING_RIG` (custom tick; works over shale), `FLOWBACK_TREATMENT_UNIT` (`water_treatment`).
+- **Industrial chemistry:** `ELECTROLYTIC_CELL` (`electrolysis`: brine → chlorine/hydrogen/lye by layer; alumina + coke → aluminum), `CHEMICAL_REACTOR` (`chemical_reaction`: sulfuric acid, alumina, fertilizer), `FUEL_CELL` (hydrogen → JE). Items `alumina`, `fertilizer`, `titanium_sponge`, `lithium_cell`, `neodymium_magnet`, and the electronics items `silicon_boule`, `silicon_wafer`, `microchip` (`chemistry/FertilizerItem`, area bone meal on crops). Fluids `brine`, `lye`, `sulfuric_acid`; gases `chlorine`, `hydrogen`. `check_mod_data` audits metal in fluid recipes.
+- **Nitrogen chemistry (batch 12):** `AIR_SEPARATION_UNIT` (no recipes, like the pumpjack: `tickAirSeparation` fills nitrogen `ASU_NITROGEN_PER_TICK` into tank 0, drawn off layer 5, and oxygen `ASU_OXYGEN_PER_TICK` into tank 1, layer 0) and `SYNTHESIS_CONVERTER` (`gas_synthesis`: Haber–Bosch ammonia, Ostwald nitric acid; three input tanks, one output). Gases `nitrogen`, `oxygen`, `ammonia`; fluid `nitric_acid`. Chemical reactor `ammonium_phosphate` and lithography `microchip_nitric` recipes.
+- **Glass chemistry (batch 16):** rock `tincal` (`ROCKS`, desert/badlands, drops `borax`); items `borax`, `borosilicate_glass`, `optical_fibre`, `ferroboron` (`materials.ITEMS`). Machine recipes may set `"name"` for a second recipe with the same output. `MachineRecipes.multiRecipes` sorts by ingredient count, most first.
+- **Machine screens (batch 22):** `client/MachineScreen` is 268 wide: the 176-wide bay and inventory (slot positions unchanged) and a terminal (tagline, status, progress, power, rate, condition, side controls). Themes and colours come from `assets/jugcraft/gui/machine_themes.json` (`client/MachineScreenThemes`), written with the backgrounds and taglines by `tools/gui_textures.py`.
+- **Solar thermal (batch 21):** package `solar`: `SOLAR_TRACKER` (`SolarTrackerBlockEntity`, generator), `HELIOSTAT` (`HeliostatBlockEntity`, empty, for the renderer), `SOLAR_RECEIVER` (`SolarReceiverBlockEntity`: `countHeliostats`, water tank, `JE_PER_HELIOSTAT`, `MAX_HELIOSTATS`, `JE_PER_MB`). `SunTrackingBlock` keeps `turning` true so the client draws the top part; rotors in `kinetic_models.ROTORS` with `"mode": "sun"` tilt with the day time (`client/KineticRotors`). Their models are built with the kinetic blocks (`KINETIC_BLOCKS`).
+- **Joined tanks and gauges (batch 20):** `fluid/TankGroup` (a `CombinedStorage` over face-joined `FluidTankBlockEntity`s, lowest first, one fluid, drains from the top) is what `FluidStorage.SIDED`, buckets and comparators get for a tank. `GLASS_TANK` shares the tank block entity and syncs its fluid to clients (`client/GlassTankRenderer`). `TANK_GAUGE` (`fluid/TankGaugeBlock`): `FACING`, `LEVEL` 0-8, reads `FluidStorage.SIDED` behind it every 10 ticks. Assets in `tools/tank_display.py`.
+- **Turbocharger and flywheel (batch 19):** item `turbocharger` (`PetroItems`); the advanced engine has one item slot (turbocharger only, `canPlaceItem`) and a coolant tank (input 1, water); `tickDieselEngine` uses `TURBO_OUTPUT`, `TURBO_EFFICIENCY_PERCENT` and `TURBO_WATER_PER_TICK`. Block `flywheel` (`kinetic/FlywheelBlock`, `FlywheelBlockEntity`: a `KineticConsumer` on every face but its front, pushes from its front; `CAPACITY`, `RATE`, `FRICTION_DIVISOR`).
+- **Explosive weapons (batch 18):** package `weapons`: `JugcraftWeapons.GRENADE` (entity type), `GrenadeEntity` (a `ThrowableItemProjectile` that calls `Blast.detonate` on hit), `GrenadeItem`, `GrenadeLauncherItem`, and `Blast` (damage to `LivingEntity` only, falloff and `ServerExplosion.getSeenPercent` shielding, never touches blocks). Items `guncotton`, `grenade`, `grenade_launcher` (`PetroItems`). Feature switch `explosives`.
+- **Flow batteries (batch 17):** fluid `vanadium_electrolyte` (chemical reactor); `FLOW_BATTERY` is a battery (`isBattery`, `keepsContents`) whose reservoir takes only electrolyte and cannot be extracted from. `SimpleEnergyStorage` takes an optional ceiling (`LongSupplier`); the flow battery's is electrolyte mB × `FLOW_BATTERY_JE_PER_MB`. `loadAdditional` reads the reservoir before the energy.
+- **Chlor-alkali (batch 15):** gas `vinyl_chloride`; items `pvc_resin`, `soap` (`chemistry/SoapItem`: use to clear status effects).
+- **Rubber (batch 14):** gas `butadiene`; items `rubber`, `gasket` (`PetroItems`); `ALT_CRAFTING` in `tools/machines.py` holds second recipes (`belt_from_rubber`, `steel_fluid_pipe_from_gaskets`).
+- **Boost gases (batch 13):** `MachineKind.boostGas()` / `boostPerTick()`: the steel foundry (oxygen) and crystal grower (argon) get a `TankInlet` for the gas; `tickProcessor` takes a second step each tick it can burn `boostPerTick` mB. The air separation unit's third tank is argon (`ASU_ARGON_INTERVAL`). Gas `argon`.
+- **Fluid generators:** `DIESEL_GENERATOR`, `GAS_TURBINE` and `FUEL_CELL` burn fuel from input tank 0 (`MachineBlockEntity.tickFluidGenerator`); JE per mB is `FluidFuels.jePerMb(kind, fluid)` (mirrored in `tools/petro.py` `FLUID_FUELS`). The turbine's tank 1 holds lubricant, used 1 mB per `FluidFuels.LUBRICANT_TICKS`.
+- **Pumps and pipes:** `ElectricPumpBlockEntity.Tier` (ELECTRIC, HEAVY); `FluidPipeBlock` takes a rate (bronze 250, steel 1,000 mB/t) and a network carries its slowest pipe's rate.
 
 ### Items (`logistics/`)
 
@@ -220,20 +251,48 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
   - The machine waits unless every possible byproduct fits in its byproduct slots.
 - **Lookup:** use `MachineRecipes.find(serverLevel, kind, stack)` and `findMulti(...)`. Types and serializers are registered per kind in `MachineRecipeTypes`.
 - **Resource condition:** `{"condition": "jugcraft:feature_enabled", "feature": "<name>"}` in `fabric:load_conditions` gates any JSON by a feature switch.
-- **Recipe viewers:** no EMI/JEI/REI plugin exists yet, because no viewer build for 26.3 has been confirmed.
+- **Recipe viewers:** an optional JEI plugin (`client/compat/JugcraftJeiPlugin`, JEI 31.8 compile-time API) shows one category per machine, read from `assets/jugcraft/recipe_view.json` (`tools/recipe_view.py`). Fluid machines get their own categories with fluid slots (amounts converted with `IPlatformFluidHelper.bucketVolume()`). Refinery gas has a still texture registered so viewers can draw it. EMI and REI have no plugin.
 
 ### Feature switches (`config/`)
 
-- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 15 materials plus `machines`.
+- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives`, `parties` and `drones`.
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
+
+### Parties (`party/`)
+
+- **Shared team rule.** Call the static methods on `JugcraftParties`: `sameParty`, `isLeader`, `partyMembers`, `partyId`, `addListener`.
+- **`mayServe(systemOwner, systemMode, jobOwner, jobMode)`** with `UseMode.PERSONAL`/`PARTY` is the one rule for whether an automated system may work on another player's job. Use it; don't write your own.
+- **Logic and storage:**
+  - `PartyManager` holds the rules and has no Minecraft types.
+  - `PartyStore` saves `<world>/jugcraft/parties.txt`.
+  - `PartyCommands` provides `/party`.
+- Details: [features/parties.md](features/parties.md).
+
+### Drones (`drone/`)
+
+- **`BuildJobs`** is the build-job interface. A `Source` offers open positions; depots reserve them, fly the materials there and call `fill`. Blueprints (#23) will be a source. `SimpleBuildJobs` is a minimal one, used by tests and the development-only `/dronetest` command.
+- **Pure logic (no Minecraft types), testable on its own:**
+  - `PlatformLayout` scans the platform the Drone Tower places: separated 5x5 pads and 3x3 supply pickups. A terminal without a tower flies no drones (`allowTiersWithoutTower` is for tests and `/dronetest` only).
+  - `DroneFleet` holds the roster and the cached pooled power; `DockLayout` places docked drones round the pads.
+  - `FlightScheduler` runs the timed flights; `FlightPath` is each flight's shape and timing (shared by server and client).
+- **World side:**
+  - `DroneTerminalBlockEntity` does power, dispatch and delivery, forms pads and pickups, and sends clients a `DepotView`.
+  - `DroneRoutes` picks each leg's cruise height over the terrain.
+  - `DroneDepots` is the registry of loaded terminals.
+  - `LandingPadBlock`, `SupplyPickupBlock`, `ControlScreenBlock` and `HoloTableBlock` are the combining plates, panels and table sections; `DepotDisplayBlockEntity` links a formed screen or table to the nearest terminal.
+- **Client side:** `DroneDepotRenderer` and `DroneModel` draw the drones (all nine tiers) and the pickup lift; `ControlScreenRenderer` draws the wall display; `HoloMapRenderer` draws the hologram map; `DroneTerminalScreen` is the terminal screen.
+- Tier numbers live in `DroneTier` and `tools/drones.py`; the checker keeps them in sync.
+- Details: [features/drone-depot.md](features/drone-depot.md).
+- **Drone Tower (`tower/`):** `JugcraftTower` registers the building blocks, furniture (`FurnitureBlock`), the Tower Core (`TowerCoreBlock`, `TowerCoreBlockEntity`) and modules. `TowerData` loads `data/jugcraft/drone_tower/tower.json.gz` (made by `tools/drone_tower.py`). `TowerBuildJobs` is the `BuildJobs.Source` for tiers 2–9. `TowerUpgradePayload` is the screen's upgrade request, and `TowerScreen` is the client screen. The terminal links to the core, and the tower gives it hangars, pickups, capacity and the drone tier cap. Details: [features/drone-tower.md](features/drone-tower.md).
 
 ### Registration (`materials/`)
 
 - `JugcraftRegistry.item(path)` and `block(path, copyFrom)` register simple items and blocks.
 - `MetalFamily.builder(name).mined().extraItem(...).build()` registers a whole metal set. `MineralFamily.register(name)` does the same for minerals.
 - `JugcraftWorldgen` adds placed features to biomes. In 26.x, configured features live in `data/jugcraft/worldgen/feature/` (there is no `configured_feature` folder), with no `config` wrapper and with block states written as plain IDs.
-- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → machines → fluids → logistics → conditions → worldgen → style pack.
+- Surface deposits (`deposit/`): `JugcraftDeposits` registers the `DepositBlock`s (mirrors `tools/deposits.py`); `Deposits` keeps how much each touched deposit block has given (`SavedData`, `jugcraft_deposits.dat`) and turns an empty one to stone. `JugcraftWorldgen.addDeposit` adds their disk features to the stony hill biomes at `LOCAL_MODIFICATIONS`.
+- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → machines → fluids → logistics → guide → conditions → worldgen → parties → style pack (drones, the tower and blueprints register right after the guide).
 
 ### Looks (`tools/model_writer.py`, `tools/steampunk_*.py`)
 
@@ -311,9 +370,15 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ## Not built yet
 
-- Chemistry branch: electrolysis and refining. Crude oil, reservoirs, the pumpjack and the oil sand extractor exist (see below); refining, fracking and diesel power are planned. Blast-furnace stand-ins mark the recipes that will move there.
-- Recipe viewer plugin (EMI/JEI/REI).
+- Chemistry branch: PVC, bleach and enrichment (the oil line, electrochemistry, advanced materials and gas storage exist). Blast-furnace stand-ins remain as the simple routes.
+- Electronics beyond processors: a monitor-bank multi-block, computers that control machines, and uses for processors in the tiers above.
+- EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
-- Any magic, farming, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md).
+- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md). Farming has a harvester, sprinkler and cotton; greenhouses and rubber trees are not built.
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).
 - Handbook translations (English only).
+
+### Stored fluid on items
+- `fluid/StoredFluid` (record: `FluidVariant`, droplets) is the `jugcraft:stored_fluid` data component (`JugcraftFluids.STORED_FLUID`, persistent and synced).
+- `FluidTankBlockEntity` and `MachineBlockEntity` (steel tank, gas holder reservoirs) write it in `collectImplicitComponents` and read it in `applyImplicitComponents`; loot tables copy it with `copy_components` (multi-block tanks only from part 0, and `LargeMachineBlock` breaks the master when another part goes).
+- `client/JugcraftClient` adds its tooltip line through `ItemTooltipCallback`.

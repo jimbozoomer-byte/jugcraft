@@ -63,6 +63,39 @@ These unlock whole groups of machines, so they should be designed first.
 | **Fission Reactor** (multiblock) | Uranium → very high power | Uranium, lead shielding, tungsten, circuits. **Needs its own hazard design first** | Late-game factories, space launch |
 | **Launch Pad** (multiblock) | Rocket launches | Fuel, fabricated parts | Moons and planets |
 
+## Idea backlog saved by the owner (1 October 2026)
+
+Ideas Claude suggested after batch 10 (advanced power and tanks). The owner asked to save them and to pursue the **chemistry ideas next**. They are proposals, not designs: each still needs a feature record, balance numbers and the owner's choices before it is built.
+
+### Chemistry (next)
+| Idea | What it adds | Builds on | Notes |
+| --- | --- | --- | --- |
+| **Haber–Bosch ammonia** ✅ batch 12 (synthesis converter) | Hydrogen + nitrogen → ammonia | Electrolytic cell (hydrogen), air separation (nitrogen) | Leads to better fertilizer and nitric acid |
+| **Air separation unit** ✅ batch 12 (nitrogen and oxygen), argon and the oxygen/argon boosts ✅ batch 13 | A tall cryogenic column: air → oxygen, nitrogen, argon | Gas holders, pipes | Oxygen speeds up the steel foundry; argon is a shielding gas for titanium work |
+| **Chlor-alkali uses** ✅ batch 15 (PVC and soap; scrubbing left for later) | Real uses for sodium hydroxide (soap, aluminum digestion, scrubbing); chlorine + ethylene → PVC, a second plastic | Electrolytic cell, cracker | Gives chlorine and lye steady consumers |
+| **Explosives line** ✅ batch 18 as weapons only (guncotton, grenades, grenade launcher; no block damage, owner's choice) | Nitric acid → nitroglycerin → dynamite and mining charges for the ore drill | Ammonia, nitric acid | Can grief: needs a server config switch and a hazard design first |
+| **Polymer tiers** ✅ batch 14 (butadiene, synthetic rubber, gaskets; hoses with the turbocharger) | Synthetic rubber from butadiene (off the cracker) → hoses, gaskets, tires | Catalytic cracker | Rubber could gate high-pressure pipes and an engine turbocharger |
+| **Glass chemistry** ✅ batch 16 (tincal, borax, borosilicate glass, optical fibre, ferroboron; glass tanks with the tank gauges) | Borosilicate glass from borax → lab glassware and glass tanks; optical fibre for a data network | New mineral (borax) | Fits the owner's earlier glass stasis-tank reference |
+| **Pharmaceuticals** | A chemistry bench making status potions industrially (antidote, haste, night-vision tonic) | Chemistry outputs, magic bridge | Needs hazard and balance limits |
+| **Waste and pollution loop** | Acid waste and slag must be neutralized (lime, flowback treatment) | Flowback treatment unit | Gives a chemical plant a clean-up cost rather than free disposal |
+| **Flow batteries** ✅ batch 17 (vanadium electrolyte from asphalt binder; 64,000,000 JE) | Two big tanks of vanadium electrolyte as grid storage | Tanks that keep their fluid (batch 10), vanadium | Ties fluid storage directly into the power grid |
+
+### Power, tanks and engines
+| Idea | What it adds | Notes |
+| --- | --- | --- |
+| **Fluid gauge and tank walls** ✅ batch 20 (tank gauge, joined tanks, glass tank) | A panel showing a tank's level; tinplate tanks side by side join into one bigger tank | |
+| **Turbocharger / intercooler** ✅ batch 19 (fitted in the advanced engine, water coolant) | An add-on for the advanced engine: more output for more fuel, needs coolant water | Tuning instead of just more engines |
+| **Solar tracker and concentrator** ✅ batch 21 (solar tracker, heliostats and a solar receiver) | The array follows the sun; a heliostat mirror field boils water for steam | A solar-thermal route |
+| **Flywheel** ✅ batch 19 (2,000,000 KE, friction) | Stores kinetic energy for engines, smoothing bursty kinetic lines | |
+| **Pressure tiers for pipes** | Heavy gas pipes and compressor stations | The gas holder becomes a real buffer for hydrogen and natural gas grids |
+| **Grid control room** | A cyan monitor bank wired to battery banks, showing generation and use per source over time | |
+| **Portable tanks / fluid canisters** | Handheld containers to refuel engines, rocket packs and tools in the field | |
+| **Locomotive generator** | A long multi-block in the advanced engine's style burning heavy fuel oil | A late use for the bottom of the barrel |
+
+### Resource deposits (after batch 11)
+- A resource-rich biome: needs the owner's choice between a biome library dependency (such as TerraBlender), replacing the Overworld biome layout, or a rare "rich" variant of the stony hills with denser patches.
+- Underground deposits (thicker veins in caves, a deeper drill tier) and more deposit kinds (gold, zinc, lead, nickel, salt).
+
 ## Connections to magic and other specialties
 Each connection below works both ways, but no machine requires magic to work.
 - **Magic → technology:**

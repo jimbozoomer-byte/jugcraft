@@ -14,7 +14,7 @@ TURNING = {"brass_gearbox": ("brass_gearbox", "brass_gearbox_turning"),
            "conveyor_splitter": ("conveyor_belt", "conveyor_belt_moving")}
 LIT = {"steam_engine": ("sp_firebox", "sp_firebox_on")}
 # Blocks with a "turning" block state.
-STATES_TURNING = {"iron_shaft", "brass_gearbox", "hand_crank", "belt_pulley", "electric_motor", "conveyor",
+STATES_TURNING = {"iron_shaft", "brass_gearbox", "hand_crank", "belt_pulley", "electric_motor", "magnet_motor", "flywheel", "solar_tracker", "heliostat", "conveyor",
                   "conveyor_splitter"}
 
 
@@ -68,18 +68,38 @@ def steam_engine():
 
 
 def dynamo():
-    """A copper-wound coil on an iron frame, with an axle through it for shafts at the front and back, and brass
-    terminals where cables meet it."""
-    m = [box((1, 0, 1), (15, 1.5, 15), IRON_PLATE)]
-    m += cyl("z", 8, 8.5, 5.25, 2, 14, "sp_coil", BRASS)
+    """In the electric look of the power gear: a graphite generator housing with glowing bands on a trim base, an axle
+    through it for shafts at the front and back, a vented top and power ports where cables meet it."""
+    m = [box((1, 0, 1), (15, 1.5, 15), "el_frame")]
+    m += cyl("z", 8, 8.5, 5.25, 2, 14, "el_casing", "el_frame")
+    for z in (4.5, 11):
+        m += cyl("z", 8, 8.5, 5.5, z, z + 0.5, "el_glow")
     for z in (2, 13.25):
-        m.append(box((2, 1.5, z), (14, 14.5, z + 0.75), IRON))
+        m.append(box((2, 1.5, z), (14, 14.5, z + 0.75), "el_frame"))
     m += cyl("z", 8, 8.5, 1.25, 0, 16, IRON)
-    # Terminals in the middle of the other faces so cables meet the dynamo.
-    m.append(box((0.25, 6, 6.5), (2, 10, 9.5), {"*": BRASS, "west": BRASS_PLATE}))
-    m.append(box((14, 6, 6.5), (15.75, 10, 9.5), {"*": BRASS, "east": BRASS_PLATE}))
-    m.append(box((6.5, 13.75, 6.5), (9.5, 15.75, 9.5), {"*": BRASS, "up": BRASS_PLATE}))
-    m.append(box((5, 1.5, 5), (11, 3, 11), COPPER))
+    # Ports in the middle of the other faces so cables meet the dynamo.
+    m.append(box((0.25, 6, 6.5), (2, 10, 9.5), {"*": "el_frame", "west": "el_port!"}))
+    m.append(box((14, 6, 6.5), (15.75, 10, 9.5), {"*": "el_frame", "east": "el_port!"}))
+    m.append(box((6.5, 13.75, 6.5), (9.5, 15.75, 9.5), {"*": "el_frame", "up": "el_vent!"}))
+    m.append(box((5, 1.5, 5), (11, 3, 11), "el_casing"))
+    return m
+
+
+def magnet_dynamo():
+    """The dynamo's housing and axle with rare-earth magnets: a ring of nickel-plated magnet segments round the middle
+    between cyan bands (the higher-tech colour), on the same base with the same ports."""
+    m = [box((1, 0, 1), (15, 1.5, 15), "el_frame")]
+    m += cyl("z", 8, 8.5, 5.25, 2, 14, "el_casing", "el_frame")
+    for z in (4, 11.5):
+        m += cyl("z", 8, 8.5, 5.5, z, z + 0.5, "el_glow_cyan")
+    m += cyl("z", 8, 8.5, 5.75, 6, 10, "el_magnet")
+    for z in (2, 13.25):
+        m.append(box((2, 1.5, z), (14, 14.5, z + 0.75), "el_frame"))
+    m += cyl("z", 8, 8.5, 1.25, 0, 16, IRON)
+    m.append(box((0.25, 6, 6.5), (2, 10, 9.5), {"*": "el_frame", "west": "el_port!"}))
+    m.append(box((14, 6, 6.5), (15.75, 10, 9.5), {"*": "el_frame", "east": "el_port!"}))
+    m.append(box((6.5, 14.25, 6.5), (9.5, 15.75, 9.5), {"*": "el_frame", "up": "el_vent!"}))
+    m.append(box((5, 1.5, 5), (11, 3, 11), "el_casing"))
     return m
 
 
@@ -98,19 +118,87 @@ def belt_pulley():
 
 
 def electric_motor():
-    """A copper-wound motor on iron feet; its shaft comes out of the front (north), with brass terminals where cables
-    meet it."""
-    m = [box((2, 0, 3), (14, 1.5, 15), IRON_PLATE)]
-    m += cyl("z", 8, 8.5, 5.5, 3.5, 14.5, "sp_coil", BRASS_PLATE)
+    """In the electric look of the power gear: a graphite motor housing with glowing bands and end rings on trim feet;
+    its shaft comes out of the front (north), with power ports where cables meet it."""
+    m = [box((2, 0, 3), (14, 1.5, 15), "el_frame")]
+    m += cyl("z", 8, 8.5, 5.5, 3.5, 14.5, "el_casing", "el_frame")
     for z in (3, 14):
-        m += cyl("z", 8, 8.5, 5.9, z, z + 1, IRON)
-    m.append(box((0.25, 6, 7), (2.5, 11, 11), {"*": BRASS, "west": BRASS_PLATE}))
-    m.append(box((13.5, 6, 7), (15.75, 11, 11), {"*": BRASS, "east": BRASS_PLATE}))
-    m.append(box((6, 14, 7), (10, 15.75, 11), {"*": BRASS, "up": BRASS_PLATE}))
-    m.append(box((6, 6.5, 14.5), (10, 10.5, 15.75), {"*": BRASS, "south": BRASS_PLATE}))
+        m += cyl("z", 8, 8.5, 5.9, z, z + 1, "el_frame")
+    for z in (6.5, 10.5):
+        m += cyl("z", 8, 8.5, 5.75, z, z + 0.5, "el_glow")
+    m.append(box((0.25, 6, 7), (2.5, 11, 11), {"*": "el_frame", "west": "el_port!"}))
+    m.append(box((13.5, 6, 7), (15.75, 11, 11), {"*": "el_frame", "east": "el_port!"}))
+    m.append(box((6, 14, 7), (10, 15.75, 11), {"*": "el_frame", "up": "el_vent!"}))
+    m.append(box((6, 6.5, 14.5), (10, 10.5, 15.75), {"*": "el_frame", "south": "el_port!"}))
     # The output shaft spins, with a coupling on it.
-    rotor = [box((6, 6.5, 0), (10, 10.5, 3.5), "iron_shaft"), box((5.5, 6, 1), (10.5, 11, 2.5), BRASS)]
+    rotor = [box((6, 6.5, 0), (10, 10.5, 3.5), "iron_shaft"), box((5.5, 6, 1), (10.5, 11, 2.5), "el_frame")]
     return m, rotor
+
+
+def magnet_motor():
+    """The electric motor with rare-earth magnets: a ring of nickel-plated magnet segments round its middle between
+    cyan bands, on the same feet with the same ports and output shaft."""
+    m = [box((2, 0, 3), (14, 1.5, 15), "el_frame")]
+    m += cyl("z", 8, 8.5, 5.5, 3.5, 14.5, "el_casing", "el_frame")
+    for z in (3, 14):
+        m += cyl("z", 8, 8.5, 5.9, z, z + 1, "el_frame")
+    for z in (5.5, 11.5):
+        m += cyl("z", 8, 8.5, 5.75, z, z + 0.5, "el_glow_cyan")
+    m += cyl("z", 8, 8.5, 6, 7, 10.5, "el_magnet")
+    m.append(box((0.25, 6, 7), (2.5, 11, 11), {"*": "el_frame", "west": "el_port!"}))
+    m.append(box((13.5, 6, 7), (15.75, 11, 11), {"*": "el_frame", "east": "el_port!"}))
+    m.append(box((6, 14.5, 4), (10, 15.75, 6.5), {"*": "el_frame", "up": "el_vent!"}))
+    m.append(box((6, 6.5, 14.5), (10, 10.5, 15.75), {"*": "el_frame", "south": "el_port!"}))
+    rotor = [box((6, 6.5, 0), (10, 10.5, 3.5), "iron_shaft"), box((5.5, 6, 1), (10.5, 11, 2.5), "el_frame")]
+    return m, rotor
+
+
+def flywheel():
+    """A heavy steel flywheel between two bearing pedestals on a riveted base: a thick rim with spokes and a hub on a
+    shaft along z, coming out of the front (north) to drive what it faces and out of the back where the drive comes
+    in. The wheel and shaft spin."""
+    m = [box((0.5, 0, 1), (15.5, 1.5, 15), "dp_gunmetal")]
+    for z0 in (1.5, 12.5):
+        m.append(box((5.5, 1.5, z0), (10.5, 5, z0 + 2), "dp_gunmetal"))
+        m.append(box((6.5, 5, z0), (9.5, 10, z0 + 2), BRASS_PLATE))
+    rotor = [box((6.5, 6.5, 0), (9.5, 9.5, 16), "iron_shaft")]
+    rotor += cyl("z", 8, 8, 7.25, 5.5, 10.5, IRON_PLATE, IRON)
+    rotor += cyl("z", 8, 8, 2, 4.5, 11.5, BRASS, BRASS_PLATE)
+    for z0, z1 in ((5.25, 5.5), (10.5, 10.75)):
+        rotor.append(box((7.25, 1.5, z0), (8.75, 14.5, z1), BRASS))
+        rotor.append(box((1.5, 7.25, z0), (14.5, 8.75, z1), BRASS))
+    return m, rotor
+
+
+def solar_tracker():
+    """A solar panel on a motorised mount (the electric look): a graphite post with glowing trim and a cable port on
+    a trim plinth, carrying a 14-pixel panel of cells on a pivot running north to south. The panel (with its pivot
+    and frame) tilts with the sun ("sun" rotor)."""
+    m = [box((3, 0, 3), (13, 1.5, 13), "el_frame")]
+    m.append(box((6, 1.5, 6), (10, 7, 10), {"*": "el_casing", "north": "el_port!"}))
+    m.append(box((5.5, 4, 5.5), (10.5, 4.5, 10.5), "el_glow"))
+    m.append(box((7, 7, 2), (9, 7.5, 14), "el_frame"))
+    rotor = [box((1, 8.5, 1), (15, 9.5, 15), {"*": "el_frame", "up": "el_solar"}),
+             box((7, 7.5, 1.5), (9, 8.5, 14.5), "iron_shaft")]
+    return m, rotor
+
+
+def heliostat():
+    """A heliostat: a slim post on a small footing with a square mirror on a pivot that tilts after the sun ("sun"
+    rotor, half as far as a tracker, as a mirror aiming at a fixed receiver turns half the sun's angle)."""
+    m = [box((5, 0, 5), (11, 1, 11), "el_frame"), box((7, 1, 7), (9, 9, 9), "el_casing")]
+    rotor = [box((2, 9, 2), (14, 10, 14), {"*": "el_frame", "up": "el_mirror"}),
+             box((7, 8, 2.5), (9, 9, 13.5), "iron_shaft")]
+    return m, rotor
+
+
+def solar_receiver():
+    """The solar receiver: a block-sized absorber, its four sides walls of orange-hot tubes, under a graphite cap with
+    a vent and on a graphite base with power and water ports."""
+    m = [box((0.5, 0, 0.5), (15.5, 2, 15.5), {"*": "el_frame", "north": "el_port!"})]
+    m.append(box((1.5, 2, 1.5), (14.5, 13, 14.5), {"*": "el_receiver!", "up": "el_casing", "down": "el_casing"}))
+    m.append(box((0.5, 13, 0.5), (15.5, 16, 15.5), {"*": "el_frame", "up": "el_vent!"}))
+    return m
 
 
 def conveyor():
@@ -141,19 +229,27 @@ def conveyor_splitter():
     return m
 
 
+# How far the slope's tilted belt and rails sit above the block's centre line (pixels): without it the belt's top
+# met the block's low edge at 1 pixel, below the flat conveyor's 5, and the two did not join.
+SLOPE_LIFT = 4
+
+
 def conveyor_slope(ascending):
     """A conveyor ramp, one block up (ascending: rising towards the front, north) or down: the belt and its side rails
     tilted 45 degrees across the block's diagonal, on iron legs. Items ride it the same way as a flat conveyor."""
     angle = 45 if ascending else -45
-    tilt = ("x", angle, (8, 8, 8), True)
-    m = [box((2, 6.5, 0.25), (14, 8.5, 15.75), {"*": "belt", "up": "conveyor_belt"}, rotation=tilt)]
+    # Raised by SLOPE_LIFT so the belt's top meets the flat conveyors' (5 pixels up) at both ends: 5 at the low edge,
+    # 21 (one block plus 5) at the high edge. Items ride at the same heights (ConveyorBlockEntity.riseAt).
+    lift = SLOPE_LIFT
+    tilt = ("x", angle, (8, 8 + lift, 8), True)
+    m = [box((2, 6.5 + lift, 0.25), (14, 8.5 + lift, 15.75), {"*": "belt", "up": "conveyor_belt"}, rotation=tilt)]
     for x0, x1 in ((0.5, 2), (14, 15.5)):
-        m.append(box((x0, 6.25, 0), (x1, 9.5, 16), {"*": IRON_PLATE, "up": IRON}, rotation=tilt))
-    # Legs: tall at the high end, short in the middle.
+        m.append(box((x0, 6.25 + lift, 0), (x1, 9.5 + lift, 16), {"*": IRON_PLATE, "up": IRON}, rotation=tilt))
+    # Legs up to the underside of the rails: tall at the high end, short in the middle.
     high, mid = (1, 3) if ascending else (13, 15), (7, 9)
     for x0, x1 in ((0.5, 2), (14, 15.5)):
-        m.append(box((x0, 0, high[0]), (x1, 12, high[1]), IRON))
-        m.append(box((x0, 0, mid[0]), (x1, 5, mid[1]), IRON))
+        m.append(box((x0, 0, high[0]), (x1, 15, high[1]), IRON))
+        m.append(box((x0, 0, mid[0]), (x1, 8.5, mid[1]), IRON))
     m.append(box((2, 0, high[0]), (14, 1.5, high[1]), IRON_PLATE))
     return m
 
@@ -168,7 +264,10 @@ def dynamo_parts():
 
 PARTS = {"iron_shaft": iron_shaft(), "brass_gearbox": brass_gearbox_parts(), "hand_crank": hand_crank(),
          "steam_engine": steam_engine(), "dynamo": dynamo_parts(), "belt_pulley": belt_pulley(),
-         "electric_motor": electric_motor(), "conveyor": (conveyor(), []),
+         "electric_motor": electric_motor(), "magnet_dynamo": (magnet_dynamo(), []), "magnet_motor": magnet_motor(),
+         "flywheel": flywheel(),
+         "solar_tracker": solar_tracker(), "heliostat": heliostat(), "solar_receiver": (solar_receiver(), []),
+         "conveyor": (conveyor(), []),
          "conveyor_splitter": (conveyor_splitter(), [])}
 # Conveyor slopes: one block (conveyor_slope, logistics/ConveyorSlopeBlock) with an ascending and a descending model.
 SLOPES = {"conveyor_slope": conveyor_slope(True), "conveyor_slope_down": conveyor_slope(False)}
@@ -181,6 +280,11 @@ ROTORS = {
     "iron_shaft": {"axis": "z", "center": (8, 8), "property": "turning", "speed": 9},
     "belt_pulley": {"axis": "z", "center": (8, 8), "property": "turning", "speed": 9},
     "electric_motor": {"axis": "z", "center": (8, 8.5), "property": "turning", "speed": 12},
+    "magnet_motor": {"axis": "z", "center": (8, 8.5), "property": "turning", "speed": 18},
+    "flywheel": {"axis": "z", "center": (8, 8), "property": "turning", "speed": 4},
+    # Sun rotors tilt with the time of day, "speed" degrees each way (client/KineticRotors).
+    "solar_tracker": {"axis": "z", "center": (8, 9), "property": "turning", "speed": 60, "mode": "sun"},
+    "heliostat": {"axis": "z", "center": (8, 9.5), "property": "turning", "speed": 30, "mode": "sun"},
     "hand_crank": {"axis": "z", "center": (8, 8), "property": "turning", "speed": 6},
     "steam_engine": {"axis": "z", "center": (8, 8), "property": "lit", "speed": 9},
 }
