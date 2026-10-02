@@ -48,8 +48,9 @@ import net.minecraft.world.phys.Vec3;
  * In-game tests for knitting: the Spinning Wheel taking a skein of wool and spinning it in four turns (by hand or by a
  * redstone pulse) into four balls of yarn in its colour set out in front, refusing a second skein, and unravelling knitwear
  * into its yarn less one; Knitting Needles changing project, knitting a row a ball of yarn, unpicking, and finishing a
- * garment in the blend of its yarns; knitwear being worn and freeze-proof, taking dye as leather does and washing clean in a cauldron; and keeping cosy by a lit campfire in
- * two pieces of knitwear (not one, not by an unlit fire), and Snug as a Bug in all three.
+ * garment in the blend of its yarns; knitwear being worn and freeze-proof, taking dye as leather does and washing clean in
+ * a cauldron; and keeping cosy by a lit campfire in two pieces of knitwear (not one, not by an unlit fire), and Snug as a
+ * Bug in all three.
  */
 public class KnittingGameTests {
 	private static Item item(String id) {
