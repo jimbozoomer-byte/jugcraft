@@ -69,7 +69,19 @@ Results are recorded under "Results" below after CI runs.
 - Not run: play, a dedicated server, two clients.
 
 ### Results
-Not yet run in CI.
+- **Run [37042688480](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37042688480) (commit 81609a4c): server green; client job cancelled at the 30-minute limit.**
+  - Server game tests: all 315 passed.
+    - `glowingPlantsWork`: glowcaps gave light 10 on bare stone, the glimmerbloom 7; a patch of four snowpetals dropped 4.
+    - Every batch 7 rule placed its biome:
+      - Meadow layout: Cinder Barrens 432 entries, Starlit Wood 174, Hallowed Bog 160, Webwood 160, Elder Vale 100.
+      - Wetland layout: Highsun Meadow 448, Wild Greens 220, Gilded Shrubland 128, the Glowcap Grotto cave 50.
+      - Woodland layout: Toadstool Field 100, Frostlight Garden 90.
+      - Wild layout: Mycelial Jungle 248, Gloomweald 174, Shrine Springs 106, Snowpetal Grove 90, Glimmer Grove 80, the Spider Nest cave 50.
+  - Client game test, a real world with seed `jugcraft`. The search finished: thirteen of the seventeen were within 6,400 blocks of the start.
+    - Hallowed Bog 1,089 blocks away, Glimmer Grove 1,286, Starlit Wood 1,494, the Spider Nest 1,537, Highsun Meadow 1,802, Wild Greens 1,832.
+    - Frostlight Garden 2,235, Shrine Springs 2,931, Mycelial Jungle 3,008, Gloomweald 3,228, Snowpetal Grove 3,781, the Glowcap Grotto 4,917, Gilded Shrubland 6,337.
+    - Not within 6,400 blocks: the Cinder Barrens (badlands, none near this start), the Elder Vale and Toadstool Field (mushroom islands) and the Webwood (mangrove swamps, the nearest vanilla one 4,457 blocks away).
+  - The test then hung while finding a surface spot for the Gloomweald, after the Glimmer Grove's, and the job was cancelled at its 30-minute limit, so there are no screenshots. A seasons-branch run hung at the same time in an unrelated step; whether the hang repeats is being checked.
 
 ## World and event applicability
 - Biome fit: each biome takes the climate and land shape of the vanilla biome it replaces.
