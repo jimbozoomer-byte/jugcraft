@@ -8,13 +8,113 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### Fix: ore loot tables in the 26.x format (pull request pending)
-- **Ores now drop their raw material.** Before this, mining tin, zinc, lead, silver, nickel, tungsten, uranium, salt, phosphate, lepidolite, monazite or titanium ore (#54), or oil sand, dropped the block itself, as if with Silk Touch. Fortune and multi-drops (2–4 salt, 1–2 bitumen) did nothing either.
-- **Cause:** Minecraft 26.x renamed the loot keys (`conditions` → `condition`, `functions` → `modifier`, and Silk Touch is now the `minecraft:tool/can_silk_touch` predicate). The old keys were silently ignored. The game test server had been logging "Unreachable entry!" for all 23 ore tables.
-- Every generated loot table (133 now) uses the 26.x format. Storage blocks, machines, the conveyor slope (#44), the oil line's machines and pipes (#47, #49, #50) and the chemistry, electronics and fluid logistics blocks (#52, #54, #56, #57), whose tables also used the old keys, still drop themselves, and now respect explosions again.
-- **Asphalt slab (#51):** a double slab now drops two slabs; its table used the old keys, so it dropped one.
-- **Charging Station (#40):** its "lower half only" condition used the old keys too, so breaking the top half dropped two stations. It now drops one (game test `chargingStationDropsOnce`).
-- `tools/check_mod_data.py` fails on any pre-26.x loot key, and a new game test mines ores and checks what drops.
+### Blueprints and test blocks (same draft PR)
+- **Blueprint Table:**
+  - LIBRARY of the mod's structures and imported blueprints, with a front view and materials; printing is free.
+  - IMPORT takes pasted `.jugbp.json` text, checks it, saves it with the world and shares it with everyone.
+- **Placing blueprints:** a hologram preview up to 32 blocks away, a Survey Stake screen (progress, materials, Personal/Party, rotate, remove), and drone building layer by layer.
+- **Drone Tower tier 1** now also builds the Energy Exchange and Storage Exchange, adding seven new building blocks and two ports that feed the depot.
+- **Seating:** Operator Chairs can be sat on.
+- **Creative-only test blocks:** the Creative Energy Cell and the Creative Supply Crate.
+
+### Drone Depot (draft PR, stacked on Parties)
+- **New blocks:** Drone Depot Terminal, Control Screen Panel, Hologram Table, Cargo Packager, and the tower-placed Landing Platform, Landing Pad and Supply Pickup Plate (no recipes: the Drone Tower builds the depot).
+- **Depot:** part of the Drone Tower. Tier 1 places the base floor, eight pads (5x5 plates forming a pad with a charger port), the supply pickup (3x3 plates with a lift hatch) and the terminal building. A terminal without a tower flies no drones.
+- **Drones:** nine tiers, all craftable, each with its own 3D look in the tower's graphite-and-dull-red theme (tier 9 is the Superconducting Ring Lifter). Tiers 5–9 use new parts from real materials: neodymium motors, tilt-rotor nacelles, composite rotors, hydrogen lift cells (chemical reactor), ion emitters, superconducting tape, Stirling cryocoolers and superconducting lift fans.
+- **Drone Tower ([docs](docs/features/drone-tower.md)):** a Tower Core on a 15×15 chiseled stone plinth builds the Command Post (tier 1, with a furnished command room). Tiers 2–9 are flown in tile by tile by the depot's own drones, using four kinds of tower module. Tower tier N unlocks drone tier N; the full tower holds 100 drones, each in its own hangar, with seven pickups. Adds 19 building materials (nine with stairs and slabs), five furniture blocks and a tower status screen. Drones dock round the pads, fly their routes, and winch crates up from the pickup (the hatch opens and a lift raises the crate).
+- **Command room screens:** a hologram table (nine sections form one table projecting a live depot map) and a screen wall (six panels form one live display), both in the tower's command room. The terminal opens a sci-fi screen (OVERVIEW, FLEET, JOBS, POWER, and a PERSONAL/PARTY button) whose text is fitted to the panel.
+- **Pooled power:** standby and working draw, cached. Low power slows flights and never drops cargo.
+- **Flights:** timed flight records (not mobs) with terrain-following routes, at most 5 launches per tick, and reservations. Clients get a small snapshot when something changes and move the drones themselves.
+- **`BuildJobs`:** the build-job interface for blueprints and later builders, plus a development-only `/dronetest` command.
+- **Tests:** tower server and client game tests; server game tests (layout rules, docks, flight paths, and in-world depots that build blocks, re-form pads, respect Party mode and link screens) and a client game test with screenshots, plus checker rules keeping drone numbers in sync.
+
+### Parties (draft PR; proposal #21)
+- **`/party` commands:** create, invite, accept, decline, leave, kick, leader and disband.
+  - Invites expire after 5 minutes, and each player can send 10 a minute.
+  - Parties hold up to 8 members.
+- **Shared API (`JugcraftParties`):**
+  - `sameParty`, `isLeader`, `partyMembers`, change listeners.
+  - `mayServe` with `UseMode` (Personal/Party), which every automated system will use.
+- **Saving:** parties are saved in the world folder (`jugcraft/parties.txt`).
+- **Feature switch:** `parties.enabled`.
+- **Tests:** seven new game tests, plus a checker rule that every party result has a chat message.
+
+### Unmerged: Explosive weapons, batch 18
+
+### Unmerged: Engineer's Handbook reorganised, batch 23
+- The book fits the window; the chapter list is a scrollable contents list where the open chapter shows its pages, and long pages scroll (mouse wheel or arrow keys).
+- New **Progression** chapter: the road through the mod in nine stages, each a plan and a numbered chain of the items to make in order.
+
+### #78 Machine screens redesigned, batch 22
+- Every machine screen has a themed look: dieselpunk amber, electric green or lab teal, after the machine's model.
+- A control terminal says what the machine is for, what it is doing, its progress, power and power rate, and holds the side controls.
+
+### #77 Solar tracker and heliostats, batch 21
+- **Solar tracker:** a panel that tilts after the sun, 20 JE/t in one block.
+- **Heliostats** and a **solar receiver**: 12 JE/t per heliostat under open sky in the field below the receiver (up to 48), boiling water.
+
+### #76 Joined tanks, glass tanks and gauges, batch 20
+- Tinplate and glass tanks touching each other join into one tank (up to 64), filling from the bottom.
+- **Glass tank** shows its fluid; **tank gauge** shows any tank's or machine's level in eighths.
+
+### #75 Turbocharger and flywheel, batch 19
+- **Turbocharger** in the advanced engine's new slot, with coolant water in its new second tank: up to 1,536 KE/t and 10% more KE from each mB of fuel.
+- **Flywheel:** stores up to 2,000,000 KE of rotation and drives its front shaft from it; friction runs it down slowly.
+
+### #74 Explosive weapons, batch 18
+- **Guncotton** (2 cotton + 250 mB nitric acid, chemical reactor).
+- **Grenades**, thrown by hand, and the **grenade launcher**, which fires them further. The blast hurts living things only: up to 16 damage, walls shield, and no block, armor stand, frame or dropped item is ever touched.
+- New switch `explosives.enabled`. An advancement, a handbook page and a game test.
+
+### #73 Flow batteries, batch 17
+- **Vanadium electrolyte:** two asphalt binder and a bucket of sulfuric acid in the chemical reactor.
+- **Flow battery** (3×3×2): 1,000 JE per mB of electrolyte in it, up to 64,000,000 JE with 64 buckets; 8,192 JE/t in and out. Keeps its electrolyte when broken.
+- An advancement, a handbook page and a game test.
+
+### #72 Glass chemistry, batch 16
+- **Tincal**, natural borax, in desert and badlands sand; **borax**.
+- **Borosilicate glass** (2 sand + borax, alloy smelter) drawn into **optical fibre**, which can replace gold in processors.
+- **Ferroboron** (iron + borax): with a rare earth oxide it makes **two** neodymium magnets.
+- Multi-input recipes now try the one with the most ingredients first.
+
+### #70 Chlorine and lye, batch 15
+- **PVC:** refinery gas + chlorine → vinyl chloride (synthesis converter) → PVC resin (polymerization reactor) → two plastic sheets each (metal press).
+- **Soap** from lye and rotten flesh; a bar washes off every status effect.
+- Two advancements, a handbook page and game tests.
+
+### #69 Rubber and polymers, batch 14
+- **Butadiene** from naphtha (chemical reactor) and **synthetic rubber** from butadiene (polymerization reactor).
+- **Gaskets** (rubber + steel plate); rubber belts; gasketed steel pipe, four for two plates.
+- An advancement, a handbook page and a game test.
+
+### #68 Oxygen-blown steel and argon, batch 13
+- The air separation unit also makes **argon**.
+- **Boost gases:** oxygen piped into the steel foundry, or argon into the crystal grower, doubles its speed.
+
+### #65 Nitrogen chemistry, batch 12: air separation, ammonia and nitric acid
+- **Air separation unit** (2×2, six tall): splits air into nitrogen and oxygen, four to one, needing only power.
+- **Synthesis converter** (3×4×2): Haber–Bosch ammonia (hydrogen + nitrogen) and Ostwald nitric acid (ammonia + oxygen + water).
+- New gases nitrogen, oxygen and ammonia; nitric acid with a bucket.
+- Ammonia + phosphate → 6 fertilizer; nitric acid etches microchips with half the acid.
+- Three advancements, a handbook section and game tests.
+
+### #62 Surface deposits, batch 11
+- **Coal, Iron, Copper and Tin Deposits:** flat patches in the top layer of stony hills (windswept hills, stony peaks, stony shores). Picks only break them, for nothing; each block holds 1,000 units.
+- **Deposit drill** (3×3, two tall): takes one coal or raw ore of each kind every 15 seconds from the deposits under it and one block round it, and pushes them into a chest, pipe, conveyor or machine beside it. Empty deposit blocks turn to stone.
+- `deposits.enabled` switch, an advancement, a handbook page and game tests.
+
+### #60 Advanced power, batch 10: big solar, a four-cylinder engine and tanks that keep their fluid
+- **Advanced solar panel:** a white pedestal carrying a 3×3 array of cells, 64 JE/t in full sun (eight solar panels).
+- **Advanced combustion engine** (2 long): gasoline or diesel → up to 1,024 KE/t on a shaft; through a magnet dynamo, the best JE per mB of either fuel.
+- **Tanks** have a new look (white with checker bands) and **keep their fluid when broken**: the item carries the fluid and amount, shown in its tooltip.
+- **Fix:** loot tables now use the Minecraft 26.x format; the old keys were silently ignored, so ore drop counts, the charging station's upper half and slab doubles were wrong. A data check and a game test guard it.
+- Two advancements, handbook pages and game tests.
+
+### #58 Farming, batch 9: harvesters, sprinklers and cotton
+- **Crop harvester** (1×2): harvests and replants the ripe crops in the 9×9 field in front of it.
+- **Sprinkler:** pipe-fed water gives nearby crops extra growth ticks; it also spreads fertilizer from its hopper.
+- **Cotton:** a new crop; seeds from sifting coarse dirt; cotton spins into string.
+- Three advancements, a Farming handbook chapter and a game test for each.
 
 ### #57 Fluid logistics, batch 8: gas holders, valves and filters
 - **Gas holder** (3×3×3 Horton sphere): 1,024 buckets of one gas, and only gases.

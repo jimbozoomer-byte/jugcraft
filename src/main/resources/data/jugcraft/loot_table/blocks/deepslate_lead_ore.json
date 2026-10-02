@@ -2,18 +2,18 @@
   "type": "minecraft:block",
   "pools": [
     {
+      "rolls": 1,
       "entries": [
         {
           "type": "minecraft:alternatives",
           "children": [
             {
               "type": "minecraft:item",
-              "name": "jugcraft:deepslate_lead_ore",
-              "condition": "minecraft:tool/can_silk_touch"
+              "condition": "minecraft:tool/can_silk_touch",
+              "name": "jugcraft:deepslate_lead_ore"
             },
             {
               "type": "minecraft:item",
-              "name": "jugcraft:raw_lead",
               "modifier": [
                 {
                   "type": "minecraft:apply_bonus",
@@ -23,12 +23,12 @@
                 {
                   "type": "minecraft:explosion_decay"
                 }
-              ]
+              ],
+              "name": "jugcraft:raw_lead"
             }
           ]
         }
-      ],
-      "rolls": 1
+      ]
     }
   ],
   "random_sequence": "jugcraft:blocks/deepslate_lead_ore"

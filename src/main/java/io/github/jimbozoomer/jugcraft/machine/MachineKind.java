@@ -40,6 +40,8 @@ public enum MachineKind implements StringRepresentable {
 	STEEL_TANK("steel_tank", 0, 0, 0, 0, 0),
 	// Mining: a 2-tall derrick that mines the ores in a 9x9 column below it. No inputs; three result slots.
 	ORE_DRILL("ore_drill", 20_000, 256, 0, 32, 3),
+	// A 3x3x2 rig over a surface deposit: every 15 s, one unit from each kind of deposit under and around it.
+	DEPOSIT_DRILL("deposit_drill", 20_000, 256, 0, 16, 3),
 	// Renewables: a cobblestone generator (no inputs, one result slot), a tree farm (sapling in; logs out, with the
 	// sapling and extras in two byproduct slots) and a 2-tall water wheel that generates from flowing water.
 	COBBLESTONE_GENERATOR("cobblestone_generator", 4_000, 64, 0, 4, 1),
@@ -79,6 +81,10 @@ public enum MachineKind implements StringRepresentable {
 	ELECTROLYTIC_CELL("electrolytic_cell", 60_000, 1_024, 0, 256, 3),
 	// A 2x2x2 acid-proof reactor: sulfur + water -> sulfuric acid; later bauxite digestion and fertilizer.
 	CHEMICAL_REACTOR("chemical_reactor", 30_000, 512, 0, 96, 3),
+	// Nitrogen chemistry (batch 12): a 2x2x6 cold box drawing nitrogen and oxygen out of the air (no recipes), and a
+	// 3x4x2 high-pressure converter making ammonia (Haber-Bosch) and nitric acid (Ostwald).
+	AIR_SEPARATION_UNIT("air_separation_unit", 40_000, 512, 0, 64, 0),
+	SYNTHESIS_CONVERTER("synthesis_converter", 60_000, 1_024, 0, 128, 0),
 	// A one-block hydrogen fuel cell (electric look): hydrogen in, JE out.
 	FUEL_CELL("fuel_cell", 40_000, 0, 512, 0, 0),
 	// Storage (batch 6): a 3x2 lithium battery bank, one deep, giving power out of its front like the capacitor bank.
@@ -88,12 +94,25 @@ public enum MachineKind implements StringRepresentable {
 	// A 3x2x2 cleanroom with a monitor bank: wafers etched with sulfuric acid into microchips.
 	LITHOGRAPHY_STATION("lithography_station", 60_000, 1_024, 0, 192, 3),
 	// Fluid logistics (batch 8): a 3x3x3 Horton sphere holding 1,024 buckets of one gas. No power.
-	GAS_HOLDER("gas_holder", 0, 0, 0, 0, 0);
+	GAS_HOLDER("gas_holder", 0, 0, 0, 0, 0),
+	// Power (batch 10, the electric look): a pedestal carrying a 3x3 array of solar cells on the layer above.
+	ADVANCED_SOLAR_PANEL("advanced_solar_panel", 400_000, 0, 512, 0, 0),
+	// A 2x1x1 four-cylinder engine (electric look): burns gasoline or diesel and turns a shaft out of its back. Its one
+	// slot takes a turbocharger (batch 19), which needs coolant water in its second tank.
+	ADVANCED_ENGINE("advanced_engine", 0, 0, 0, 0, 1),
+	// Farming (batch 9): a two-block gantry that harvests and replants ripe crops in the 9x9 field in front of it.
+	// No inputs; three result slots.
+	CROP_HARVESTER("crop_harvester", 20_000, 256, 0, 24, 3),
+	// Chemistry (batch 17, the electric look): a 3x3x2 vanadium redox flow battery. Its charge is capped by the
+	// electrolyte in its tanks (FLOW_BATTERY_JE_PER_MB a millibucket); it gives power out of its front.
+	FLOW_BATTERY("flow_battery", 64_000_000, 8_192, 8_192, 0, 0);
 
 	/** JE produced per tick while the coal generator burns. */
 	public static final int GENERATION_PER_TICK = 32;
 	/** JE per tick from a solar panel in full sun; halved in rain. */
 	public static final int SOLAR_PER_TICK = 8;
+	/** JE per tick from an advanced solar panel in full sun (eight solar panels' worth); halved in rain. */
+	public static final int ADVANCED_SOLAR_PER_TICK = 64;
 	/** JE per tick while the steam generator boils water. */
 	public static final int STEAM_PER_TICK = 64;
 	/** Water (mB) the steam generator boils per tick of generation. */
@@ -120,6 +139,10 @@ public enum MachineKind implements StringRepresentable {
 	public static final int STEEL_TANK_CAPACITY = 128_000;
 	/** Gas holder: 1,024 buckets (mB) of one gas, and only gases. */
 	public static final int GAS_HOLDER_CAPACITY = 1_024_000;
+	/** Flow battery electrolyte tanks (mB): 64 buckets, filling them gives the full 64,000,000 JE. */
+	public static final int FLOW_BATTERY_TANK = 64_000;
+	/** JE the flow battery can hold for each millibucket of vanadium electrolyte in it. */
+	public static final long FLOW_BATTERY_JE_PER_MB = 1_000;
 	/** Ore washer water tank (mB). */
 	public static final int WASHER_TANK = 8_000;
 	/** Water (mB) the ore washer uses per operation, taken when the operation finishes. */
@@ -130,8 +153,23 @@ public enum MachineKind implements StringRepresentable {
 	public static final int DRILL_RADIUS = 4;
 	/** Ore drill: ticks to mine one ore block (before speed upgrades). */
 	public static final int DRILL_TICKS = 40;
+	/** Crop harvester: powered ticks per crop harvested. */
+	public static final int HARVEST_TICKS = 20;
+	/** Crop harvester: blocks either side of the middle of its field; the field is 9x9, starting the block in front. */
+	public static final int HARVEST_RADIUS = 4;
+	/** Crop harvester: field blocks checked per tick while looking for a ripe crop. */
+	public static final int HARVEST_SCAN_PER_TICK = 9;
 	/** Ore drill: blocks the drill head checks per tick while looking for the next ore (one layer). */
 	public static final int DRILL_SCAN_PER_TICK = (2 * DRILL_RADIUS + 1) * (2 * DRILL_RADIUS + 1);
+	/**
+	 * Deposit drill: ticks per cycle (15 seconds, before speed upgrades), and the units (items) each cycle takes from
+	 * each kind of deposit in reach.
+	 */
+	public static final int DEPOSIT_TICKS = 300;
+	public static final int DEPOSIT_UNITS = 1;
+	/** Deposit drill: how far past its own 3x3 it reaches on each side, and how many layers down. */
+	public static final int DEPOSIT_REACH = 1;
+	public static final int DEPOSIT_DEPTH = 3;
 	/** Cobblestone generator: ticks per cobblestone (before speed upgrades), with water and lava beside it. */
 	public static final int COBBLE_TICKS = 20;
 	/** Water wheel: JE per tick for each block of flowing water at the wheel; falling water gives more. */
@@ -194,9 +232,34 @@ public enum MachineKind implements StringRepresentable {
 	public static final int DIESEL_ENGINE_OUTPUT = 512;
 	public static final int DIESEL_ENGINE_TANK = 8_000;
 	public static final int DIESEL_ENGINE_OUTPUT_PART = 11;
+	/** Advanced combustion engine: KE per tick at most, out of the back of its master block. */
+	public static final int ADVANCED_ENGINE_OUTPUT = 1_024;
+	public static final int ADVANCED_ENGINE_TANK = 8_000;
+	/** Turbocharger (batch 19): KE per tick at most with a turbocharger fitted and coolant in. */
+	public static final int TURBO_OUTPUT = 1_536;
+	/** Percent of the fuel's usual KE per mB a turbocharged engine gets out of it. */
+	public static final int TURBO_EFFICIENCY_PERCENT = 110;
+	/** Coolant water (mB) the intercooler uses each tick the turbocharged engine runs. */
+	public static final int TURBO_WATER_PER_TICK = 2;
+	/** The advanced engine's coolant tank (mB). */
+	public static final int TURBO_WATER_TANK = 4_000;
 	/** Electrolytic cell: each tank, and the layers its outputs leave from (chlorine top, hydrogen middle, lye base). */
 	public static final int CELL_TANK = 8_000;
 	private static final int[] CELL_DRAW_OFFS = {2, 1, 0};
+	/** Air separation unit: nitrogen and oxygen per powered tick, its tanks, and where each is drawn off (nitrogen
+	 * boils off the top of the column, liquid oxygen collects at the base). */
+	public static final int ASU_NITROGEN_PER_TICK = 8;
+	public static final int ASU_OXYGEN_PER_TICK = 2;
+	/** Argon is scarce: one mB every this many ticks, drawn off the middle of the column (batch 13). */
+	public static final int ASU_ARGON_INTERVAL = 2;
+	public static final int ASU_TANK = 16_000;
+	private static final int[] ASU_DRAW_OFFS = {5, 0, 2};
+	/** Boost gases (batch 13): oxygen blown into the steel foundry, argon around the crystal grower's melt. */
+	public static final int BOOST_TANK = 8_000;
+	public static final int FOUNDRY_OXYGEN_PER_TICK = 2;
+	public static final int GROWER_ARGON_PER_TICK = 1;
+	/** Synthesis converter: each input tank and the output tank. */
+	public static final int CONVERTER_TANK = 8_000;
 	/** Fuel cell: JE per tick while running, and its hydrogen tank. Fuel value: chemistry/FluidFuels. */
 	public static final int FUEL_CELL_OUTPUT = 128;
 	public static final int FUEL_CELL_TANK = 8_000;
@@ -230,13 +293,14 @@ public enum MachineKind implements StringRepresentable {
 		return this == ELECTRIC_FURNACE || this == CRUSHER || this == ARC_FURNACE || this == ALLOY_SMELTER
 				|| this == METAL_PRESS || this == WIRE_DRAWER || this == CIRCUIT_ASSEMBLER
 				|| this == PULVERIZER || this == ORE_WASHER || this == SIEVE || this == SAWMILL
-				|| this == COKE_OVEN || this == STEEL_FOUNDRY || this == ORE_DRILL
-				|| this == COBBLESTONE_GENERATOR || this == TREE_FARM || this == AUTO_CRAFTER || this == CRYSTAL_GROWER;
+				|| this == COKE_OVEN || this == STEEL_FOUNDRY || this == ORE_DRILL || this == DEPOSIT_DRILL
+				|| this == COBBLESTONE_GENERATOR || this == TREE_FARM || this == AUTO_CRAFTER || this == CRYSTAL_GROWER
+				|| this == CROP_HARVESTER;
 	}
 
 	/** Stores energy and gives it out of its front face only. */
 	public boolean isBattery() {
-		return this == BATTERY_BOX || this == CAPACITOR_BANK || this == LITHIUM_BATTERY_BANK;
+		return this == BATTERY_BOX || this == CAPACITOR_BANK || this == LITHIUM_BATTERY_BANK || this == FLOW_BATTERY;
 	}
 
 	/** Whether the machine runs on JE at all. Unpowered machines have no battery and cables never connect to them. */
@@ -277,6 +341,7 @@ public enum MachineKind implements StringRepresentable {
 			case FLOWBACK_TREATMENT_UNIT -> "water_treatment";
 			case POLYMERIZATION_REACTOR -> "polymerization";
 			case ELECTROLYTIC_CELL -> "electrolysis";
+			case SYNTHESIS_CONVERTER -> "gas_synthesis";
 			case CHEMICAL_REACTOR -> "chemical_reaction";
 			case CRYSTAL_GROWER -> "crystal_growing";
 			case LITHOGRAPHY_STATION -> "lithography";
@@ -316,7 +381,11 @@ public enum MachineKind implements StringRepresentable {
 			case GAS_TURBINE -> new FluidMachineSpec(List.of(TURBINE_TANK, TURBINE_LUBRICANT_TANK), List.of(), 0, 0);
 			case POLYMERIZATION_REACTOR -> new FluidMachineSpec(List.of(REACTOR_TANK), List.of(), 0, 1);
 			case DIESEL_ENGINE -> new FluidMachineSpec(List.of(DIESEL_ENGINE_TANK), List.of(), 0, 0);
+			case ADVANCED_ENGINE -> new FluidMachineSpec(List.of(ADVANCED_ENGINE_TANK, TURBO_WATER_TANK), List.of(), 1, 0);
 			case ELECTROLYTIC_CELL -> new FluidMachineSpec(List.of(CELL_TANK), List.of(CELL_TANK, CELL_TANK, CELL_TANK), 2, 1);
+			case AIR_SEPARATION_UNIT -> new FluidMachineSpec(List.of(), List.of(ASU_TANK, ASU_TANK, ASU_TANK), 0, 0);
+			case SYNTHESIS_CONVERTER -> new FluidMachineSpec(List.of(CONVERTER_TANK, CONVERTER_TANK, CONVERTER_TANK),
+					List.of(CONVERTER_TANK), 0, 0);
 			case CHEMICAL_REACTOR -> new FluidMachineSpec(List.of(CHEM_REACTOR_TANK), List.of(CHEM_REACTOR_TANK), 2, 1);
 			case LITHOGRAPHY_STATION -> new FluidMachineSpec(List.of(LITHOGRAPHY_TANK), List.of(), 2, 1);
 			case FUEL_CELL -> new FluidMachineSpec(List.of(FUEL_CELL_TANK), List.of(), 0, 0);
@@ -335,6 +404,7 @@ public enum MachineKind implements StringRepresentable {
 			case CATALYTIC_REFORMER -> REFORMER_DRAW_OFFS[tank];
 			case FRACKING_RIG -> FRACK_DRAW_OFFS[tank];
 			case ELECTROLYTIC_CELL -> CELL_DRAW_OFFS[tank];
+			case AIR_SEPARATION_UNIT -> ASU_DRAW_OFFS[tank];
 			default -> -1;
 		};
 	}
@@ -358,7 +428,29 @@ public enum MachineKind implements StringRepresentable {
 		if (this == AUTO_CRAFTER) {
 			return 1; // Container remainders, such as the empty bucket from a cake.
 		}
-		return this == PULVERIZER || this == SIEVE || this == SAWMILL || this == ORE_DRILL || this == TREE_FARM ? 2 : 0;
+		return this == PULVERIZER || this == SIEVE || this == SAWMILL || this == ORE_DRILL || this == DEPOSIT_DRILL
+				|| this == TREE_FARM || this == CROP_HARVESTER ? 2 : 0;
+	}
+
+	/**
+	 * The gas this item machine can be boosted with (batch 13), as a {@code jugcraft} fluid id, or null: each tick it
+	 * holds {@link #boostPerTick()} mB of it, it burns that much and works twice as fast.
+	 */
+	public @Nullable String boostGas() {
+		return switch (this) {
+			case STEEL_FOUNDRY -> "oxygen";
+			case CRYSTAL_GROWER -> "argon";
+			default -> null;
+		};
+	}
+
+	/** mB of boost gas a boosted tick uses (0 for machines without a boost). */
+	public int boostPerTick() {
+		return switch (this) {
+			case STEEL_FOUNDRY -> FOUNDRY_OXYGEN_PER_TICK;
+			case CRYSTAL_GROWER -> GROWER_ARGON_PER_TICK;
+			default -> 0;
+		};
 	}
 
 	/** mB the machine's fluid tank holds, or 0 without one. */
@@ -376,7 +468,7 @@ public enum MachineKind implements StringRepresentable {
 	public boolean isGenerator() {
 		return this == COAL_GENERATOR || this == SOLAR_PANEL || this == STEAM_GENERATOR
 				|| this == GEOTHERMAL_GENERATOR || this == WIND_TURBINE || this == WATER_WHEEL || this == DIESEL_GENERATOR
-				|| this == GAS_TURBINE || this == FUEL_CELL;
+				|| this == GAS_TURBINE || this == FUEL_CELL || this == ADVANCED_SOLAR_PANEL;
 	}
 
 	/**
@@ -391,6 +483,9 @@ public enum MachineKind implements StringRepresentable {
 			case COKE_OVEN -> Footprint.of(Vec3i.ZERO, new Vec3i(-1, 0, 0), new Vec3i(0, 0, 1), new Vec3i(-1, 0, 1),
 					new Vec3i(0, 1, 0), new Vec3i(-1, 1, 0), new Vec3i(0, 1, 1), new Vec3i(-1, 1, 1), new Vec3i(0, 2, 0));
 			case ORE_DRILL -> Footprint.tall(2);
+			// Three wide, two tall, three deep, standing on the deposit.
+			case DEPOSIT_DRILL -> Footprint.cuboid(3, 2, 3);
+			case CROP_HARVESTER -> Footprint.tall(2);
 			case LARGE_STEAM_ENGINE -> Footprint.cuboid(2, 2, 2);
 			case WATER_WHEEL -> Footprint.tall(2);
 			case STEEL_FOUNDRY -> Footprint.cuboid(2, 5, 2);
@@ -414,7 +509,11 @@ public enum MachineKind implements StringRepresentable {
 			case GAS_TURBINE -> Footprint.cuboid(4, 2, 2);
 			case POLYMERIZATION_REACTOR -> Footprint.cuboid(2, 3, 2);
 			case DIESEL_ENGINE -> Footprint.cuboid(2, 2, 3);
+			case ADVANCED_ENGINE -> Footprint.cuboid(2, 1, 1);
 			case ELECTROLYTIC_CELL -> Footprint.cuboid(3, 3, 2);
+			// A two by two cold box six blocks tall, and a three-wide, four-tall converter train.
+			case AIR_SEPARATION_UNIT -> Footprint.cuboid(2, 6, 2);
+			case SYNTHESIS_CONVERTER -> Footprint.cuboid(3, 4, 2);
 			case CHEMICAL_REACTOR -> Footprint.cuboid(2, 2, 2);
 			// Three wide, two tall, one deep, so every block's front is a power socket.
 			case LITHIUM_BATTERY_BANK -> Footprint.cuboid(3, 2, 1);
@@ -424,6 +523,12 @@ public enum MachineKind implements StringRepresentable {
 			case LITHOGRAPHY_STATION -> Footprint.cuboid(3, 2, 2);
 			// A sphere on legs, three blocks every way.
 			case GAS_HOLDER -> Footprint.cuboid(3, 3, 3);
+			// Two electrolyte tanks either side of the cell stack, three wide, three tall and two deep.
+			case FLOW_BATTERY -> Footprint.cuboid(3, 3, 2);
+			// The pedestal (the master) and the 3x3 array of cells on the layer above it, centred over it.
+			case ADVANCED_SOLAR_PANEL -> Footprint.of(Vec3i.ZERO, new Vec3i(0, 1, 0), new Vec3i(-1, 1, 0), new Vec3i(1, 1, 0),
+					new Vec3i(0, 1, -1), new Vec3i(0, 1, 1), new Vec3i(-1, 1, -1), new Vec3i(1, 1, -1), new Vec3i(-1, 1, 1),
+					new Vec3i(1, 1, 1));
 			default -> Footprint.SINGLE;
 		};
 	}
@@ -436,6 +541,14 @@ public enum MachineKind implements StringRepresentable {
 		return this == ALLOY_SMELTER ? new PowerPort(2, Direction.WEST) : null;
 	}
 
+	/**
+	 * Tanks that keep their fluid when broken. Only their master block has the block entity, so only it drops the item
+	 * (with the fluid on it): breaking any other block of one breaks the master too (see LargeMachineBlock).
+	 */
+	public boolean keepsContents() {
+		return this == STEEL_TANK || this == GAS_HOLDER || this == FLOW_BATTERY;
+	}
+
 	/** Boilers: a fuel slot, a water-bucket slot and an empty-bucket slot, and a water tank. */
 	public boolean isBoiler() {
 		return this == STEAM_GENERATOR || this == LARGE_STEAM_ENGINE;
@@ -445,7 +558,7 @@ public enum MachineKind implements StringRepresentable {
 	public boolean burnsFuel() {
 		return this == COAL_GENERATOR || this == STEAM_GENERATOR || this == GEOTHERMAL_GENERATOR
 				|| this == LARGE_STEAM_ENGINE || this == COKE_OVEN || this == STEEL_FOUNDRY || this == ARC_FURNACE
-				|| this == DIESEL_GENERATOR || this == GAS_TURBINE || this == DIESEL_ENGINE;
+				|| this == DIESEL_GENERATOR || this == GAS_TURBINE || this == DIESEL_ENGINE || this == ADVANCED_ENGINE;
 	}
 
 	/** Height of the machine in blocks (the tallest part plus one). */

@@ -1,6 +1,451 @@
 {
   "chapters": [
     {
+      "title": "Progression",
+      "icon": "jugcraft:engineers_handbook",
+      "pages": [
+        {
+          "title": "The Road Ahead",
+          "icon": "jugcraft:engineers_handbook",
+          "text": [
+            "Jugcraft builds in stages, each needing parts from the ones before. Pick a stage on the left to see its steps."
+          ],
+          "steps": [
+            {
+              "item": "jugcraft:bronze_ingot",
+              "label": "Bronze Age"
+            },
+            {
+              "item": "jugcraft:basic_circuit",
+              "label": "Workshop"
+            },
+            {
+              "item": "jugcraft:iron_shaft",
+              "label": "Rotation and Logistics"
+            },
+            {
+              "item": "jugcraft:steel_ingot",
+              "label": "Steel"
+            },
+            {
+              "item": "jugcraft:crude_oil_bucket",
+              "label": "Oil"
+            },
+            {
+              "item": "jugcraft:electrolytic_cell",
+              "label": "Chemistry"
+            },
+            {
+              "item": "jugcraft:processor",
+              "label": "Electronics"
+            },
+            {
+              "item": "jugcraft:flow_battery",
+              "label": "Late Game"
+            },
+            {
+              "item": "jugcraft:borosilicate_glass",
+              "label": "Special Materials"
+            }
+          ]
+        },
+        {
+          "title": "1. Bronze Age",
+          "icon": "jugcraft:bronze_ingot",
+          "text": [
+            "Get power running and double every ore.",
+            "Mine copper and tin and smelt bronze. Build a machine casing, a coal generator and copper cable.",
+            "Put the crusher first: every ore through it gives two raw ores, twice the ingots."
+          ],
+          "steps": [
+            {
+              "item": "jugcraft:tin_ingot",
+              "label": "Mine tin, copper"
+            },
+            {
+              "item": "jugcraft:bronze_ingot",
+              "label": "Smelt bronze"
+            },
+            {
+              "item": "jugcraft:machine_casing",
+              "label": "Machine casing"
+            },
+            {
+              "item": "jugcraft:coal_generator",
+              "label": "Coal generator"
+            },
+            {
+              "item": "jugcraft:copper_cable",
+              "label": "Copper cable"
+            },
+            {
+              "item": "jugcraft:electric_furnace",
+              "label": "Electric furnace"
+            },
+            {
+              "item": "jugcraft:crusher",
+              "label": "Crusher: 2x ore"
+            }
+          ]
+        },
+        {
+          "title": "2. Workshop",
+          "icon": "jugcraft:basic_circuit",
+          "text": [
+            "Plates, wires and circuits: the parts every later machine needs.",
+            "Make plates in the metal press and wire in the wire drawer, then basic circuits.",
+            "Store power in a battery box. The pulverizer and ore washer take ore to three ingots each.",
+            "Find surface deposits with the prospector and put a deposit drill on them."
+          ],
+          "steps": [
+            {
+              "item": "jugcraft:metal_press",
+              "label": "Metal press"
+            },
+            {
+              "item": "jugcraft:wire_drawer",
+              "label": "Wire drawer"
+            },
+            {
+              "item": "jugcraft:basic_circuit",
+              "label": "Basic circuit"
+            },
+            {
+              "item": "jugcraft:battery_box",
+              "label": "Battery box"
+            },
+            {
+              "item": "jugcraft:alloy_smelter",
+              "label": "Alloy smelter"
+            },
+            {
+              "item": "jugcraft:pulverizer",
+              "label": "Pulverizer"
+            },
+            {
+              "item": "jugcraft:ore_washer",
+              "label": "Ore washer: 3x ore"
+            },
+            {
+              "item": "jugcraft:prospector",
+              "label": "Prospector"
+            },
+            {
+              "item": "jugcraft:deposit_drill",
+              "label": "Deposit drill"
+            }
+          ]
+        },
+        {
+          "title": "3. Rotation and Logistics",
+          "icon": "jugcraft:iron_shaft",
+          "text": [
+            "Move power by shaft and items by pipe and belt.",
+            "A steam engine or water wheel turns shafts; machines run on rotation directly, or a dynamo makes power.",
+            "Item pipes, extractors and conveyors carry ore from drills to furnaces without you."
+          ],
+          "steps": [
+            {
+              "item": "jugcraft:hand_crank",
+              "label": "Hand crank"
+            },
+            {
+              "item": "jugcraft:steam_engine",
+              "label": "Steam engine"
+            },
+            {
+              "item": "jugcraft:iron_shaft",
+              "label": "Shafts"
+            },
+            {
+              "item": "jugcraft:dynamo",
+              "label": "Dynamo"
+            },
+            {
+              "item": "jugcraft:water_wheel",
+              "label": "Water wheel"
+            },
+            {
+              "item": "jugcraft:brass_item_pipe",
+              "label": "Item pipes"
+            },
+            {
+              "item": "jugcraft:pneumatic_extractor",
+              "label": "Extractor"
+            },
+            {
+              "item": "jugcraft:conveyor",
+              "label": "Conveyors"
+            },
+            {
+              "item": "jugcraft:auto_crafter",
+              "label": "Auto-crafter"
+            }
+          ]
+        },
+        {
+          "title": "4. Steel",
+          "icon": "jugcraft:steel_ingot",
+          "text": [
+            "Steel opens every heavy machine and the powered tools.",
+            "Bake coal into coke, then refine iron with coke into steel in the steel foundry.",
+            "The arc furnace melts what furnaces cannot. Advanced circuits need steel.",
+            "Charge a mining drill at the charging station."
+          ],
+          "steps": [
+            {
+              "item": "jugcraft:coke_oven",
+              "label": "Coke oven"
+            },
+            {
+              "item": "jugcraft:coke",
+              "label": "Coke"
+            },
+            {
+              "item": "jugcraft:steel_foundry",
+              "label": "Steel foundry"
+            },
+            {
+              "item": "jugcraft:steel_ingot",
+              "label": "Steel"
+            },
+            {
+              "item": "jugcraft:arc_furnace_controller",
+              "label": "Arc furnace"
+            },
+            {
+              "item": "jugcraft:advanced_circuit",
+              "label": "Advanced circuit"
+            },
+            {
+              "item": "jugcraft:charging_station",
+              "label": "Charging station"
+            },
+            {
+              "item": "jugcraft:mining_drill",
+              "label": "Mining drill"
+            }
+          ]
+        },
+        {
+          "title": "5. Oil",
+          "icon": "jugcraft:crude_oil_bucket",
+          "text": [
+            "Crude oil becomes fuel, plastic and asphalt.",
+            "Prospect for a reservoir and pump it with a pumpjack. Steel pipes and tanks carry the oil.",
+            "Distil it; burn diesel in a diesel generator. Crack heavy oil, make plastic, and run a gas turbine."
+          ],
+          "steps": [
+            {
+              "item": "jugcraft:prospector",
+              "label": "Find oil"
+            },
+            {
+              "item": "jugcraft:pumpjack",
+              "label": "Pumpjack"
+            },
+            {
+              "item": "jugcraft:steel_fluid_pipe",
+              "label": "Steel pipes"
+            },
+            {
+              "item": "jugcraft:distillation_tower",
+              "label": "Distillation tower"
+            },
+            {
+              "item": "jugcraft:diesel_generator",
+              "label": "Diesel generator"
+            },
+            {
+              "item": "jugcraft:catalytic_cracker",
+              "label": "Cracker"
+            },
+            {
+              "item": "jugcraft:plastic_sheet",
+              "label": "Plastic"
+            },
+            {
+              "item": "jugcraft:gas_turbine",
+              "label": "Gas turbine"
+            },
+            {
+              "item": "jugcraft:diesel_engine",
+              "label": "Diesel engine"
+            }
+          ]
+        },
+        {
+          "title": "6. Chemistry",
+          "icon": "jugcraft:electrolytic_cell",
+          "text": [
+            "Salt, sulfur and air become acids, metals and gases.",
+            "Make brine and split it in the electrolytic cell into chlorine, hydrogen and lye.",
+            "The chemical reactor makes sulfuric acid, titanium sponge, lithium and rare earths.",
+            "Store a lot of power in a lithium battery bank. Split air for nitrogen and make ammonia and nitric acid."
+          ],
+          "steps": [
+            {
+              "item": "jugcraft:brine_bucket",
+              "label": "Brine"
+            },
+            {
+              "item": "jugcraft:electrolytic_cell",
+              "label": "Electrolytic cell"
+            },
+            {
+              "item": "jugcraft:chemical_reactor",
+              "label": "Chemical reactor"
+            },
+            {
+              "item": "jugcraft:sulfuric_acid_bucket",
+              "label": "Sulfuric acid"
+            },
+            {
+              "item": "jugcraft:titanium_ingot",
+              "label": "Titanium"
+            },
+            {
+              "item": "jugcraft:neodymium_magnet",
+              "label": "Magnets"
+            },
+            {
+              "item": "jugcraft:lithium_battery_bank",
+              "label": "Lithium bank"
+            },
+            {
+              "item": "jugcraft:air_separation_unit",
+              "label": "Air separation"
+            },
+            {
+              "item": "jugcraft:synthesis_converter",
+              "label": "Ammonia, nitric acid"
+            }
+          ]
+        },
+        {
+          "title": "7. Electronics",
+          "icon": "jugcraft:processor",
+          "text": [
+            "Silicon becomes chips and processors.",
+            "Grow silicon boules, saw them into wafers and etch microchips in the lithography station.",
+            "Four microchips and an advanced circuit make a processor, for the top machines."
+          ],
+          "steps": [
+            {
+              "item": "jugcraft:crystal_grower",
+              "label": "Crystal grower"
+            },
+            {
+              "item": "jugcraft:silicon_wafer",
+              "label": "Wafers"
+            },
+            {
+              "item": "jugcraft:lithography_station",
+              "label": "Lithography"
+            },
+            {
+              "item": "jugcraft:microchip",
+              "label": "Microchips"
+            },
+            {
+              "item": "jugcraft:processor",
+              "label": "Processor"
+            },
+            {
+              "item": "jugcraft:network_terminal",
+              "label": "Network terminal"
+            }
+          ]
+        },
+        {
+          "title": "8. Late Game",
+          "icon": "jugcraft:flow_battery",
+          "text": [
+            "Big, efficient power.",
+            "Magnet dynamos and motors lose almost nothing. Fit a turbocharger to the advanced engine and give it coolant water; a flywheel smooths out a bursty shaft line.",
+            "Solar trackers follow the sun; a field of heliostats around a tower boils water at a solar receiver. A flow battery stores 64 million JE."
+          ],
+          "steps": [
+            {
+              "item": "jugcraft:magnet_dynamo",
+              "label": "Magnet dynamo"
+            },
+            {
+              "item": "jugcraft:advanced_engine",
+              "label": "Advanced engine"
+            },
+            {
+              "item": "jugcraft:turbocharger",
+              "label": "Turbocharger"
+            },
+            {
+              "item": "jugcraft:flywheel",
+              "label": "Flywheel"
+            },
+            {
+              "item": "jugcraft:advanced_solar_panel",
+              "label": "Advanced solar"
+            },
+            {
+              "item": "jugcraft:solar_tracker",
+              "label": "Solar tracker"
+            },
+            {
+              "item": "jugcraft:heliostat",
+              "label": "Heliostats"
+            },
+            {
+              "item": "jugcraft:solar_receiver",
+              "label": "Solar receiver"
+            },
+            {
+              "item": "jugcraft:flow_battery",
+              "label": "Flow battery"
+            }
+          ]
+        },
+        {
+          "title": "9. Special Materials",
+          "icon": "jugcraft:borosilicate_glass",
+          "text": [
+            "Rubber, glass and weapons from the chemistry you already run.",
+            "Butadiene from the cracker becomes rubber and gaskets, for sealed pipes and the turbocharger.",
+            "Borax turns sand into borosilicate glass: glass tanks that join into big see-through stores, tank gauges and optical fibre for processors. Guncotton fills grenades."
+          ],
+          "steps": [
+            {
+              "item": "jugcraft:rubber",
+              "label": "Rubber"
+            },
+            {
+              "item": "jugcraft:gasket",
+              "label": "Gaskets"
+            },
+            {
+              "item": "jugcraft:borosilicate_glass",
+              "label": "Borosilicate glass"
+            },
+            {
+              "item": "jugcraft:glass_tank",
+              "label": "Glass tanks"
+            },
+            {
+              "item": "jugcraft:tank_gauge",
+              "label": "Tank gauge"
+            },
+            {
+              "item": "jugcraft:optical_fibre",
+              "label": "Optical fibre"
+            },
+            {
+              "item": "jugcraft:grenade_launcher",
+              "label": "Grenade launcher"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "title": "Getting Started",
       "icon": "jugcraft:engineers_handbook",
       "pages": [
@@ -9,7 +454,8 @@
           "icon": "jugcraft:engineers_handbook",
           "text": [
             "This handbook covers every Jugcraft machine: what it does, what it needs and how to build it.",
-            "Pick a chapter on the left. Page through a chapter with the arrows.",
+            "Pick a chapter on the left; it opens to show its pages. Scroll with the mouse wheel, or turn pages with the arrows or the arrow keys.",
+            "New here? The Progression chapter shows the order to build things in.",
             "Power is measured in JE (Jugcraft Energy) per tick, fluids in mB (1,000 mB is a bucket)."
           ]
         },
@@ -56,70 +502,92 @@
             "Down to Dust: Build a pulverizer for byproducts.",
             "Stored Lightning: Build a battery box.",
             "Hands Off: Build an auto-crafter.",
-            "Elbow Grease: Make a hand crank: power by hand.",
-            "Full Steam Ahead: Build a steam engine to turn your shafts."
+            "Strike It Rich: Build a deposit drill on a surface deposit.",
+            "Elbow Grease: Make a hand crank: power by hand."
           ]
         },
         {
           "title": "Milestones (3)",
-          "icon": "jugcraft:large_steam_engine",
+          "icon": "jugcraft:steam_engine",
           "text": [
+            "Full Steam Ahead: Build a steam engine to turn your shafts.",
             "Iron Horse: Build the large steam engine.",
             "Belt Drive: Carry rotation across a gap with belt pulleys.",
             "Assembly Line: Build a conveyor.",
-            "Sorting It Out: Split a conveyor line three ways.",
-            "Forged in Coke: Make steel."
+            "Sorting It Out: Split a conveyor line three ways."
           ]
         },
         {
           "title": "Milestones (4)",
-          "icon": "jugcraft:steel_foundry",
+          "icon": "jugcraft:steel_ingot",
           "text": [
+            "Forged in Coke: Make steel.",
             "Blast Furnace: Build the steel foundry.",
             "Capacitance: Build a capacitor bank.",
             "Plugged In: Build a charging station.",
-            "Power Drill: Make a mining drill.",
-            "Timber!: Make a chainsaw."
+            "Power Drill: Make a mining drill."
           ]
         },
         {
           "title": "Milestones (5)",
-          "icon": "jugcraft:overclock_module",
+          "icon": "jugcraft:chainsaw",
           "text": [
+            "Timber!: Make a chainsaw.",
             "Tinkerer: Make an upgrade module for a powered tool.",
             "Rocketeer: Make a rocket pack and take to the air.",
             "Black Gold: Fill a bucket with crude oil.",
-            "Nodding Donkey: Build a pumpjack over an oil reservoir.",
-            "Fractional Thinking: Build a distillation tower."
+            "Nodding Donkey: Build a pumpjack over an oil reservoir."
           ]
         },
         {
           "title": "Milestones (6)",
-          "icon": "jugcraft:fracking_rig",
+          "icon": "jugcraft:distillation_tower",
           "text": [
+            "Fractional Thinking: Build a distillation tower.",
             "Tight Spot: Build a fracking rig for shale oil.",
             "Diesel Power: Build a diesel generator.",
             "Spool Up: Build a gas turbine.",
-            "Eight Cylinders: Build a diesel engine.",
-            "Fantastic Plastic: Press a plastic sheet."
+            "Eight Cylinders: Build a diesel engine."
           ]
         },
         {
           "title": "Milestones (7)",
-          "icon": "jugcraft:asphalt",
+          "icon": "jugcraft:plastic_sheet",
           "text": [
-            "Hit the Road: Lay asphalt, and walk faster on it.",
-            "Split Decision: Build an electrolytic cell.",
-            "Oil of Vitriol: Make sulfuric acid.",
-            "Green Revolution: Make fertilizer.",
-            "The Bayer Way: Digest bauxite into alumina."
+            "Fantastic Plastic: Press a plastic sheet.",
+            "Bouncing Back: Make synthetic rubber.",
+            "Vinyl Revival: Make PVC resin from chlorine.",
+            "Squeaky Clean: Boil soap from lye.",
+            "Light Speed: Draw borosilicate glass into optical fibre."
           ]
         },
         {
           "title": "Milestones (8)",
-          "icon": "jugcraft:fuel_cell",
+          "icon": "jugcraft:grenade",
           "text": [
+            "Pin Pulled: Make a grenade.",
+            "Going with the Flow: Build a flow battery.",
+            "Hit the Road: Lay asphalt, and walk faster on it.",
+            "Split Decision: Build an electrolytic cell.",
+            "Oil of Vitriol: Make sulfuric acid."
+          ]
+        },
+        {
+          "title": "Milestones (9)",
+          "icon": "jugcraft:fertilizer",
+          "text": [
+            "Green Revolution: Make fertilizer.",
+            "The Bayer Way: Digest bauxite into alumina.",
             "Clean Burn: Build a hydrogen fuel cell.",
+            "Thin Air: Build an air separation unit.",
+            "Bread from Air: Build a synthesis converter, to make ammonia from air."
+          ]
+        },
+        {
+          "title": "Milestones (10)",
+          "icon": "jugcraft:nitric_acid_bucket",
+          "text": [
+            "Aqua Fortis: Make nitric acid.",
             "Kroll Call: Chlorinate titanium and melt the sponge.",
             "Power Wall: Build a lithium battery bank.",
             "Strong Attraction: Make a neodymium magnet.",
@@ -127,7 +595,7 @@
           ]
         },
         {
-          "title": "Milestones (9)",
+          "title": "Milestones (11)",
           "icon": "jugcraft:silicon_boule",
           "text": [
             "Pulling Strings: Grow a silicon boule in the crystal grower.",
@@ -138,11 +606,32 @@
           ]
         },
         {
-          "title": "Milestones (10)",
+          "title": "Milestones (12)",
           "icon": "jugcraft:fluid_valve",
           "text": [
             "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter."
+            "Strained Relations: Make a fluid filter.",
+            "Here Comes the Sun: Build an advanced solar panel.",
+            "Full of It: Make a tank gauge.",
+            "Concentrate: Build a solar receiver for a heliostat field."
+          ]
+        },
+        {
+          "title": "Milestones (13)",
+          "icon": "jugcraft:turbocharger",
+          "text": [
+            "Spool Up: Make a turbocharger for the advanced engine.",
+            "Keep It Spinning: Build a flywheel.",
+            "Four on the Floor: Build an advanced combustion engine.",
+            "King Cotton: Grow cotton.",
+            "Make It Rain: Build a sprinkler."
+          ]
+        },
+        {
+          "title": "Milestones (14)",
+          "icon": "jugcraft:crop_harvester",
+          "text": [
+            "Reaping What You Sow: Build a crop harvester."
           ]
         }
       ]
@@ -189,6 +678,29 @@
               "jugcraft:brass_plate"
             ],
             "result": "jugcraft:prospector",
+            "count": 1
+          }
+        },
+        {
+          "title": "Deposit Drill",
+          "icon": "jugcraft:deposit_drill",
+          "text": [
+            "Three blocks square and two tall. Build it on a surface deposit (coal, iron, copper or tin, on stony hills): every 15 seconds it takes one coal or raw ore from each kind of deposit under it or one block round it, down to 3 blocks deep, using 16 JE/t. It pushes what it mines out of every side into a chest, item pipe, conveyor or machine beside it. Each deposit block holds 1,000 and then turns to stone; right-click one to see how much is left. Picks only break deposits, for nothing.",
+            "Uses 16 JE/t while working. Holds 20,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:iron_plate",
+              "jugcraft:bronze_gear",
+              "jugcraft:iron_plate",
+              "minecraft:iron_pickaxe",
+              "jugcraft:machine_casing",
+              "minecraft:iron_pickaxe",
+              "jugcraft:iron_plate",
+              "jugcraft:basic_circuit",
+              "jugcraft:iron_plate"
+            ],
+            "result": "jugcraft:deposit_drill",
             "count": 1
           }
         },
@@ -376,6 +888,29 @@
               "jugcraft:lead_ingot"
             ],
             "result": "jugcraft:battery_box",
+            "count": 1
+          }
+        },
+        {
+          "title": "Advanced Solar Panel",
+          "icon": "jugcraft:advanced_solar_panel",
+          "text": [
+            "A white pedestal carrying a 3x3 array of solar cells on the layer above it: 64 JE/t in full sun (eight solar panels), half in rain, none at night. The cells need open sky. Cables meet the pedestal's foot.",
+            "Makes up to 64 JE/t. Holds 400,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:solar_panel",
+              "jugcraft:solar_panel",
+              "jugcraft:solar_panel",
+              "jugcraft:aluminum_plate",
+              "jugcraft:processor",
+              "jugcraft:aluminum_plate",
+              "jugcraft:aluminum_cable",
+              "jugcraft:titanium_ingot",
+              "jugcraft:aluminum_cable"
+            ],
+            "result": "jugcraft:advanced_solar_panel",
             "count": 1
           }
         },
@@ -685,6 +1220,94 @@
               "jugcraft:aluminum_plate"
             ],
             "result": "jugcraft:magnet_motor",
+            "count": 1
+          }
+        },
+        {
+          "title": "Flywheel",
+          "icon": "jugcraft:flywheel",
+          "text": [
+            "Stores rotation: a steel wheel that holds up to 2,000,000 KE. Shafts into any face but its front spin it up, 2,048 KE/t at most; its front shaft drives what it faces from the store at up to 2,048 KE/t. Friction takes a ten-thousandth of what it holds each tick, so it runs down when left alone. Right-click it to read how much it holds."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_gear",
+              "jugcraft:steel_plate",
+              "jugcraft:iron_shaft",
+              "jugcraft:steel_ingot",
+              "jugcraft:iron_shaft",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_gear",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:flywheel",
+            "count": 1
+          }
+        },
+        {
+          "title": "Solar Tracker",
+          "icon": "jugcraft:solar_tracker",
+          "text": [
+            "A solar panel on a motorised mount that follows the sun from east to west: 20 JE/t all day in full sun (two and a half solar panels), half in rain, none at night. Cables take power from any side."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:solar_panel",
+              "jugcraft:solar_panel",
+              "jugcraft:solar_panel",
+              "jugcraft:copper_cable",
+              "jugcraft:electric_motor",
+              "jugcraft:copper_cable",
+              "jugcraft:steel_plate",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:solar_tracker",
+            "count": 1
+          }
+        },
+        {
+          "title": "Heliostat",
+          "icon": "jugcraft:heliostat",
+          "text": [
+            "A mirror on a post that follows the sun to keep its light on a solar receiver above it. It does nothing on its own."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:glass_pane",
+              "minecraft:glass_pane",
+              "minecraft:glass_pane",
+              null,
+              "jugcraft:electric_motor",
+              null,
+              null,
+              "jugcraft:steel_plate",
+              null
+            ],
+            "result": "jugcraft:heliostat",
+            "count": 2
+          }
+        },
+        {
+          "title": "Solar Receiver",
+          "icon": "jugcraft:solar_receiver",
+          "text": [
+            "Put it on a tower over a field of heliostats: it counts those under open sky within 8 blocks across and 16 below, and makes 12 JE/t for each (up to 48, 576 JE/t) in daylight, boiling a mB of water for every 32 JE. Pipe water into it; cables take power from any side. Right-click it to read its field."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_fluid_pipe",
+              "minecraft:blast_furnace",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:solar_receiver",
             "count": 1
           }
         }
@@ -1010,6 +1633,18 @@
                 "jugcraft:aluminum_wire",
                 3
               ]
+            },
+            {
+              "in": [
+                [
+                  "jugcraft:borosilicate_glass",
+                  1
+                ]
+              ],
+              "out": [
+                "jugcraft:optical_fibre",
+                4
+              ]
             }
           ]
         },
@@ -1089,6 +1724,26 @@
                 [
                   "minecraft:gold_ingot",
                   1
+                ]
+              ],
+              "out": [
+                "jugcraft:processor",
+                1
+              ]
+            },
+            {
+              "in": [
+                [
+                  "jugcraft:microchip",
+                  4
+                ],
+                [
+                  "jugcraft:advanced_circuit",
+                  1
+                ],
+                [
+                  "jugcraft:optical_fibre",
+                  2
                 ]
               ],
               "out": [
@@ -1384,6 +2039,28 @@
             {
               "in": [
                 [
+                  "minecraft:coarse_dirt",
+                  1
+                ]
+              ],
+              "out": [
+                "minecraft:dirt",
+                1
+              ],
+              "extra": [
+                [
+                  "jugcraft:cotton_seeds",
+                  0.15
+                ],
+                [
+                  "minecraft:wheat_seeds",
+                  0.1
+                ]
+              ]
+            },
+            {
+              "in": [
+                [
                   "minecraft:gravel",
                   1
                 ]
@@ -1571,7 +2248,7 @@
           "title": "Steel Foundry",
           "icon": "jugcraft:steel_foundry",
           "text": [
-            "Three blocks tall, needs no power. Refines one iron ingot with one coke into one steel ingot.",
+            "Two by two and five tall, needs no power. Refines one iron ingot with one coke into one steel ingot. Pipe oxygen into it (from the air separation unit) and it blows the charge: twice as fast, for 2 mB of oxygen a tick.",
             "Needs no power."
           ],
           "craft": {
@@ -1965,6 +2642,15 @@
             "result": "jugcraft:heavy_pump",
             "count": 1
           }
+        },
+        {
+          "title": "Joined Tanks and Gauges",
+          "icon": "jugcraft:tank_gauge",
+          "text": [
+            "Tinplate and glass tanks touching face to face join into one tank of one fluid, up to 64 of them. They fill from the bottom and drain from the top; pipes, buckets and comparators see the whole group.",
+            "A glass tank (four borosilicate glass in a steel frame) shows the fluid inside it.",
+            "Hang a tank gauge on the side of any tank or machine: its sight glass shows how full it is in eighths. Right-click it to read the fluid and amount; a comparator reads it too."
+          ]
         }
       ]
     },
@@ -2290,6 +2976,29 @@
           }
         },
         {
+          "title": "Advanced Combustion Engine",
+          "icon": "jugcraft:advanced_engine",
+          "text": [
+            "Two blocks long, four cylinders. Burns gasoline (448 KE a mB) or diesel (320) piped into its 8-bucket tank and turns a shaft out of the back of its right-hand block at up to 1,024 KE/t, burning only for what the line takes. Through a magnet dynamo it is the best use of either fuel. Put a turbocharger in its slot and pipe water into its second tank: up to 1,536 KE/t, 10% more from each mB of fuel, using 2 mB of water a tick.",
+            "Needs no power."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:titanium_ingot",
+              "jugcraft:processor",
+              "jugcraft:titanium_ingot",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:diesel_engine",
+              "jugcraft:neodymium_magnet",
+              "jugcraft:titanium_ingot",
+              "jugcraft:machine_casing",
+              "jugcraft:titanium_ingot"
+            ],
+            "result": "jugcraft:advanced_engine",
+            "count": 1
+          }
+        },
+        {
           "title": "Asphalt",
           "icon": "jugcraft:asphalt",
           "text": [
@@ -2419,6 +3128,111 @@
           }
         },
         {
+          "title": "Rubber",
+          "icon": "jugcraft:rubber",
+          "text": [
+            "Crack a bucket of naphtha in the chemical reactor: 500 mB of butadiene. The polymerization reactor turns 500 mB of butadiene into four synthetic rubber.",
+            "Rubber and string make two belts. A steel plate faced with rubber cuts into four gaskets, and gasketed steel pipe comes four to a steel plate pair, without a bronze pipe."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:rubber",
+              "jugcraft:steel_plate",
+              "jugcraft:rubber",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "result": "jugcraft:gasket",
+            "count": 4
+          }
+        },
+        {
+          "title": "Glass Chemistry",
+          "icon": "jugcraft:borosilicate_glass",
+          "text": [
+            "Tincal, natural borax, crusts the sand of deserts and badlands; mine it for 1-3 borax.",
+            "Two sand and a borax melt into two borosilicate glass in the alloy smelter; the wire drawer pulls each into four optical fibre, which can carry a processor's signals instead of gold.",
+            "Iron and borax make ferroboron; a rare earth oxide with ferroboron gives two neodymium magnets, twice the old recipe."
+          ]
+        },
+        {
+          "title": "Chlorine and Lye",
+          "icon": "jugcraft:pvc_resin",
+          "text": [
+            "PVC: the synthesis converter joins 250 mB of refinery gas and 250 mB of chlorine into 250 mB of vinyl chloride; the polymerization reactor turns 500 mB of it into four PVC resin, and the metal press makes two plastic sheets from each.",
+            "Soap: boil two rotten flesh in 250 mB of lye in the chemical reactor for four bars. Use a bar to wash every status effect off, as milk does."
+          ]
+        },
+        {
+          "title": "Nitrogen Chemistry",
+          "icon": "jugcraft:nitric_acid_bucket",
+          "text": [
+            "Air is four parts nitrogen to one of oxygen. The air separation unit splits it; hydrogen comes from the electrolytic cell.",
+            "The synthesis converter joins hydrogen and nitrogen into ammonia, and burns ammonia in oxygen over water into nitric acid.",
+            "Ammonia and phosphate make fertilizer (six for two phosphate, against four with sulfuric acid). Nitric acid etches microchips with half as much acid as sulfuric."
+          ]
+        },
+        {
+          "title": "Air Separation Unit",
+          "icon": "jugcraft:air_separation_unit",
+          "text": [
+            "Two by two and six tall: a cold box and its distillation column. It needs no input: it liquefies air and splits it, 8 mB of nitrogen a tick out of the top row, 2 mB of oxygen out of the bottom row and a little argon (1 mB every 2 ticks) out of the middle, at 64 JE/t. Pipe the gases to the synthesis converter, the steel foundry, the crystal grower or a gas holder; it stops while any tank is full.",
+            "Uses 64 JE/t while working. Holds 40,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate",
+              "jugcraft:fluid_tank",
+              "jugcraft:machine_casing",
+              "jugcraft:fluid_tank",
+              "jugcraft:electric_motor",
+              "jugcraft:advanced_circuit",
+              "jugcraft:electric_motor"
+            ],
+            "result": "jugcraft:air_separation_unit",
+            "count": 1
+          }
+        },
+        {
+          "title": "Synthesis Converter",
+          "icon": "jugcraft:synthesis_converter",
+          "text": [
+            "Three wide, four tall and two deep: a high-pressure catalytic converter. Haber-Bosch: 300 mB of hydrogen and 100 mB of nitrogen make 200 mB of ammonia. Ostwald: 100 mB of ammonia, 200 mB of oxygen and 100 mB of water make 200 mB of nitric acid. Each takes 2 seconds at 128 JE/t.",
+            "Uses 128 JE/t while working. Holds 60,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:titanium_ingot",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:synthesis_converter",
+            "count": 1
+          }
+        },
+        {
+          "title": "Grenades",
+          "icon": "jugcraft:grenade",
+          "text": [
+            "Two cotton in 250 mB of nitric acid in the chemical reactor make two guncotton.",
+            "Two steel plates, a guncotton and an iron nugget make four grenades. Throw one with right-click; it goes off where it hits.",
+            "The blast hurts living things within 4 blocks, up to eight hearts at the centre, and walls shield from it. It never breaks a block.",
+            "The grenade launcher fires grenades from your inventory much further."
+          ]
+        },
+        {
           "title": "Aluminum, the Real Way",
           "icon": "jugcraft:alumina",
           "text": [
@@ -2469,6 +3283,29 @@
           }
         },
         {
+          "title": "Flow Battery",
+          "icon": "jugcraft:flow_battery",
+          "text": [
+            "Three wide, three tall, two deep: a vanadium redox flow battery. It holds 1,000 JE for every mB of vanadium electrolyte in its tank, so 64,000,000 JE with all 64 buckets in. Fill it by pipe or bucket; the electrolyte stays in it (also when broken). It charges from any side and gives power out of its front, 8,192 JE/t. Make the electrolyte in the chemical reactor from two asphalt binder and a bucket of sulfuric acid.",
+            "Holds 64,000,000 JE; 8192 JE/t in and out."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:borosilicate_glass",
+              "jugcraft:processor",
+              "jugcraft:borosilicate_glass",
+              "jugcraft:steel_tank",
+              "jugcraft:capacitor_bank",
+              "jugcraft:steel_tank",
+              "jugcraft:borosilicate_glass",
+              "jugcraft:steel_plate",
+              "jugcraft:borosilicate_glass"
+            ],
+            "result": "jugcraft:flow_battery",
+            "count": 1
+          }
+        },
+        {
           "title": "Fertilizer",
           "icon": "jugcraft:fertilizer",
           "text": [
@@ -2494,7 +3331,7 @@
           "title": "Crystal Grower",
           "icon": "jugcraft:crystal_grower",
           "text": [
-            "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 wafers in the sawmill.",
+            "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 wafers in the sawmill. Pipe argon in to shield the melt and it grows twice as fast, for 1 mB of argon a tick.",
             "Uses 128 JE/t while working. Holds 60,000 JE."
           ],
           "craft": {
@@ -3017,6 +3854,66 @@
                 ]
               ]
             }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Farming",
+      "icon": "jugcraft:crop_harvester",
+      "pages": [
+        {
+          "title": "Crop Harvester",
+          "icon": "jugcraft:crop_harvester",
+          "text": [
+            "Two blocks tall. Harvests the ripe crops in the 9x9 field in front of it, starting the block in front: one crop a second at 24 JE/t. It keeps the drops and plants one of the seeds again, and waits when its three result slots are full. Crops on farmland sit at its own height.",
+            "Uses 24 JE/t while working. Holds 20,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_gear",
+              "minecraft:shears",
+              "jugcraft:steel_gear",
+              "minecraft:hopper",
+              "jugcraft:machine_casing",
+              "minecraft:hopper",
+              "jugcraft:steel_plate",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:crop_harvester",
+            "count": 1
+          }
+        },
+        {
+          "title": "Sprinkler",
+          "icon": "jugcraft:sprinkler",
+          "text": [
+            "Pipe water in (or use a water bucket) and it sprays the crops within 4 blocks, at its height and one below: every 5 seconds it uses 50 mB and gives each growing crop an extra growth tick. Load up to 16 fertilizer (by hand or hopper) and every 30 seconds it spreads one over the 5x5 crops around it."
+          ],
+          "craft": {
+            "grid": [
+              null,
+              "jugcraft:bronze_fluid_pipe",
+              null,
+              "jugcraft:steel_plate",
+              "jugcraft:fluid_tank",
+              "jugcraft:steel_plate",
+              null,
+              "minecraft:hopper",
+              null
+            ],
+            "result": "jugcraft:sprinkler",
+            "count": 1
+          }
+        },
+        {
+          "title": "Cotton",
+          "icon": "jugcraft:cotton",
+          "text": [
+            "Sift coarse dirt in the sieve: now and then it turns up cotton seeds (and wheat seeds).",
+            "Plant them on farmland like wheat. A ripe plant gives one to three cotton and more seeds; the harvester, sprinkler and fertilizer all work on it.",
+            "One cotton spins into one string."
           ]
         }
       ]

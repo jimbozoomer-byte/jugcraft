@@ -5,10 +5,11 @@ generate_material_data.py writes it to assets/jugcraft/handbook/en_us.json; the 
 tools/materials.py, so the book stays in step with the game. Only the prose is written here.
 
 Format: {"chapters": [{"title", "icon", "pages": [{"title", "icon", "text": [paragraphs],
-"craft": {"grid": [9 item ids or null], "result", "count"}, "recipes": [{"in": [[id, count]], "out": [id, count]}]}]}]}
+"craft": {"grid": [9 item ids or null], "result", "count"}, "recipes": [{"in": [[id, count]], "out": [id, count]}],
+"steps": [{"item", "label"}]}]}]}. Steps are drawn as a numbered chain (the Progression chapter).
 """
 from materials import COMPONENTS, METALS, MINERALS, ingot_id, ore_ids
-from machines import (ELECTRONICS_BLOCKS, CRAFTING, MACHINES, STATS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS,
+from machines import (ELECTRONICS_BLOCKS, FARMING_BLOCKS, CRAFTING, MACHINES, STATS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS,
                       UPGRADES, BYPRODUCTS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, machine_recipes)
 
 MOD = "jugcraft"
@@ -45,7 +46,9 @@ ABOUT = {
     "sieve": "Sifts gravel into flint and soul sand into soul soil, with a small chance of nuggets or quartz.",
     "sawmill": "Cuts logs into six planks (four by hand) with sawdust, and planks into three sticks.",
     "coke_oven": "Two blocks tall, needs no power. Bakes coal into coal coke, a hotter fuel and the carbon for steel.",
-    "steel_foundry": "Three blocks tall, needs no power. Refines one iron ingot with one coke into one steel ingot.",
+    "steel_foundry": "Two by two and five tall, needs no power. Refines one iron ingot with one coke into one steel "
+                     "ingot. Pipe oxygen into it (from the air separation unit) and it blows the charge: twice as "
+                     "fast, for 2 mB of oxygen a tick.",
     "copper_cable": "Carries power between generators, batteries and machines. It connects by itself to anything that stores "
                     "or uses power on the touching face.",
     "silver_cable": "A faster cable: 1,024 JE/t, four times copper. Cable tiers join into one network, which carries "
@@ -54,6 +57,12 @@ ABOUT = {
     "high_pressure_extractor": "A steel extractor: 32 items every 4 ticks, four times the brass one.",
     "capacitor_bank": "A 2x2 bank of Leyden jars: 4,000,000 JE. It charges from any side and gives power out of the "
                       "sockets on its front, 4,096 JE/t.",
+    "sprinkler": "Pipe water in (or use a water bucket) and it sprays the crops within 4 blocks, at its height and one "
+                 "below: every 5 seconds it uses 50 mB and gives each growing crop an extra growth tick. Load up to 16 "
+                 "fertilizer (by hand or hopper) and every 30 seconds it spreads one over the 5x5 crops around it.",
+    "crop_harvester": "Two blocks tall. Harvests the ripe crops in the 9x9 field in front of it, starting the block in "
+                      "front: one crop a second at 24 JE/t. It keeps the drops and plants one of the seeds again, and "
+                      "waits when its three result slots are full. Crops on farmland sit at its own height.",
     "gas_holder": "A 3x3x3 sphere on legs: 1,024 buckets of one gas, and nothing but gases (liquids go in the steel "
                   "tank). Pumps and pipes fill and empty it from any face; right-click with an empty hand to read it. "
                   "Comparators read how full it is.",
@@ -145,9 +154,19 @@ ABOUT = {
                          "and a bucket of water.",
     "chemical_reactor": "Two by two by two, lined with lead against the acid. Burns sulfur and absorbs it in water: two "
                         "sulfur dust and a bucket of water make a bucket of sulfuric acid, every 5 seconds.",
+    "air_separation_unit": "Two by two and six tall: a cold box and its distillation column. It needs no input: it "
+                           "liquefies air and splits it, 8 mB of nitrogen a tick out of the top row, 2 mB of oxygen "
+                           "out of the bottom row and a little argon (1 mB every 2 ticks) out of the middle, at 64 "
+                           "JE/t. Pipe the gases to the synthesis converter, the steel foundry, the crystal grower or "
+                           "a gas holder; it stops while any tank is full.",
+    "synthesis_converter": "Three wide, four tall and two deep: a high-pressure catalytic converter. Haber-Bosch: 300 mB "
+                           "of hydrogen and 100 mB of nitrogen make 200 mB of ammonia. Ostwald: 100 mB of ammonia, 200 "
+                           "mB of oxygen and 100 mB of water make 200 mB of nitric acid. Each takes 2 seconds at 128 "
+                           "JE/t.",
     "crystal_grower": "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single "
                       "crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 "
-                      "wafers in the sawmill.",
+                      "wafers in the sawmill. Pipe argon in to shield the melt and it grows twice as fast, for 1 mB "
+                      "of argon a tick.",
     "network_terminal": "A beige retro computer. Cable it into a power network and right-click it: it shows the "
                         "network's cables, the rate its slowest cable sets, how many devices it reaches and the "
                         "energy they hold. It uses no power.",
@@ -157,6 +176,19 @@ ABOUT = {
     "lithium_battery_bank": "Three wide, two tall, one deep: six lithium battery modules holding 32,000,000 JE, eight "
                             "capacitor banks. It charges from any side and gives power out of the sockets on its "
                             "front, 16,384 JE/t.",
+    "flow_battery": "Three wide, three tall, two deep: a vanadium redox flow battery. It holds 1,000 JE for every mB "
+                    "of vanadium electrolyte in its tank, so 64,000,000 JE with all 64 buckets in. Fill it by pipe or "
+                    "bucket; the electrolyte stays in it (also when broken). It charges from any side and gives power "
+                    "out of its front, 8,192 JE/t. Make the electrolyte in the chemical reactor from two asphalt "
+                    "binder and a bucket of sulfuric acid.",
+    "advanced_solar_panel": "A white pedestal carrying a 3x3 array of solar cells on the layer above it: 64 JE/t in full "
+                            "sun (eight solar panels), half in rain, none at night. The cells need open sky. Cables meet "
+                            "the pedestal's foot.",
+    "advanced_engine": "Two blocks long, four cylinders. Burns gasoline (448 KE a mB) or diesel (320) piped into its "
+                       "8-bucket tank and turns a shaft out of the back of its right-hand block at up to 1,024 KE/t, "
+                       "burning only for what the line takes. Through a magnet dynamo it is the best use of either fuel. "
+                       "Put a turbocharger in its slot and pipe water into its second tank: up to 1,536 KE/t, 10% more "
+                       "from each mB of fuel, using 2 mB of water a tick.",
     "fuel_cell": "One block. Combines hydrogen with the air: 128 JE/t, burning a millibucket of hydrogen a tick (128,000 "
                  "JE a bucket). Pipe hydrogen from the electrolytic cell into it. Its screen lights while it runs.",
     "diesel_engine": "Two wide, two tall and three long. Burns diesel (256 KE a mB) or heavy fuel oil (128) piped into "
@@ -168,6 +200,11 @@ ABOUT = {
     "gas_turbine": "Four wide, two tall and two deep. Burns gasoline or refinery gas from its 16-bucket tank: 512 JE/t, "
                    "384,000 JE a bucket of gasoline or 192,000 JE a bucket of gas. Its second tank takes lubricant "
                    "from the vacuum distillation unit: 1 mB every second of running, and it stops when it runs dry.",
+    "deposit_drill": "Three blocks square and two tall. Build it on a surface deposit (coal, iron, copper or tin, on "
+                     "stony hills): every 15 seconds it takes one coal or raw ore from each kind of deposit under it "
+                     "or one block round it, down to 3 blocks deep, using 16 JE/t. It pushes what it mines out of every side "
+                     "into a chest, item pipe, conveyor or machine beside it. Each deposit block holds 1,000 and then "
+                     "turns to stone; right-click one to see how much is left. Picks only break deposits, for nothing.",
     "ore_drill": "Two blocks tall. Mines the ore blocks in a 9x9 column below it, one layer at a time down to the bottom "
                  "of the world, one ore every 2 seconds. Each hole is refilled with stone or deepslate. The ores come "
                  "out whole, ready for ore processing.",
@@ -197,6 +234,19 @@ ABOUT = {
                       "the way you looked when placing it. Motor and dynamo together always lose power.",
     "magnet_dynamo": "A dynamo wound round rare-earth magnets: 512 KE/t into JE at 95%, against the copper "
                      "dynamo's 128 at 75%. It pushes the JE into cables on every side.",
+    "solar_tracker": "A solar panel on a motorised mount that follows the sun from east to west: 20 JE/t all day in "
+                     "full sun (two and a half solar panels), half in rain, none at night. Cables take power from "
+                     "any side.",
+    "heliostat": "A mirror on a post that follows the sun to keep its light on a solar receiver above it. It does "
+                 "nothing on its own.",
+    "solar_receiver": "Put it on a tower over a field of heliostats: it counts those under open sky within 8 blocks "
+                      "across and 16 below, and makes 12 JE/t for each (up to 48, 576 JE/t) in daylight, boiling a "
+                      "mB of water for every 32 JE. Pipe water into it; cables take power from any side. Right-click "
+                      "it to read its field.",
+    "flywheel": "Stores rotation: a steel wheel that holds up to 2,000,000 KE. Shafts into any face but its front spin it "
+                "up, 2,048 KE/t at most; its front shaft drives what it faces from the store at up to 2,048 KE/t. "
+                "Friction takes a ten-thousandth of what it holds each tick, so it runs down when left alone. "
+                "Right-click it to read how much it holds.",
     "magnet_motor": "An electric motor with rare-earth magnets: takes 1,024 JE/t and turns it into up to 384 KE/t at "
                     "95%. Paired with a magnet dynamo it still loses a tenth every round.",
     "dynamo": "Turns rotation reaching any face into JE at 75% and pushes it into cables on every side: the bridge "
@@ -310,12 +360,96 @@ def ores_page():
             "text": ["Jugcraft ores appear in the stone and deepslate of every Overworld biome:"] + lines}
 
 
+# The path through the mod, stage by stage (the "Progression" chapter). Each stage: title, icon, what it is for, a
+# plan in a few lines, and the steps in order, each an item and a short label. Shown as a chain of numbered steps.
+PROGRESSION = [
+    ("Bronze Age", "bronze_ingot", "Get power running and double every ore.", [
+        "Mine copper and tin and smelt bronze. Build a machine casing, a coal generator and copper cable.",
+        "Put the crusher first: every ore through it gives two raw ores, twice the ingots."], [
+        ("tin_ingot", "Mine tin, copper"), ("bronze_ingot", "Smelt bronze"), ("machine_casing", "Machine casing"),
+        ("coal_generator", "Coal generator"), ("copper_cable", "Copper cable"), ("electric_furnace", "Electric furnace"),
+        ("crusher", "Crusher: 2x ore")]),
+    ("Workshop", "basic_circuit", "Plates, wires and circuits: the parts every later machine needs.", [
+        "Make plates in the metal press and wire in the wire drawer, then basic circuits.",
+        "Store power in a battery box. The pulverizer and ore washer take ore to three ingots each.",
+        "Find surface deposits with the prospector and put a deposit drill on them."], [
+        ("metal_press", "Metal press"), ("wire_drawer", "Wire drawer"), ("basic_circuit", "Basic circuit"),
+        ("battery_box", "Battery box"), ("alloy_smelter", "Alloy smelter"), ("pulverizer", "Pulverizer"),
+        ("ore_washer", "Ore washer: 3x ore"), ("prospector", "Prospector"), ("deposit_drill", "Deposit drill")]),
+    ("Rotation and Logistics", "iron_shaft", "Move power by shaft and items by pipe and belt.", [
+        "A steam engine or water wheel turns shafts; machines run on rotation directly, or a dynamo makes power.",
+        "Item pipes, extractors and conveyors carry ore from drills to furnaces without you."], [
+        ("hand_crank", "Hand crank"), ("steam_engine", "Steam engine"), ("iron_shaft", "Shafts"),
+        ("dynamo", "Dynamo"), ("water_wheel", "Water wheel"), ("brass_item_pipe", "Item pipes"),
+        ("pneumatic_extractor", "Extractor"), ("conveyor", "Conveyors"), ("auto_crafter", "Auto-crafter")]),
+    ("Steel", "steel_ingot", "Steel opens every heavy machine and the powered tools.", [
+        "Bake coal into coke, then refine iron with coke into steel in the steel foundry.",
+        "The arc furnace melts what furnaces cannot. Advanced circuits need steel.",
+        "Charge a mining drill at the charging station."], [
+        ("coke_oven", "Coke oven"), ("coke", "Coke"), ("steel_foundry", "Steel foundry"), ("steel_ingot", "Steel"),
+        ("arc_furnace_controller", "Arc furnace"), ("advanced_circuit", "Advanced circuit"),
+        ("charging_station", "Charging station"), ("mining_drill", "Mining drill")]),
+    ("Oil", "crude_oil_bucket", "Crude oil becomes fuel, plastic and asphalt.", [
+        "Prospect for a reservoir and pump it with a pumpjack. Steel pipes and tanks carry the oil.",
+        "Distil it; burn diesel in a diesel generator. Crack heavy oil, make plastic, and run a gas turbine."], [
+        ("prospector", "Find oil"), ("pumpjack", "Pumpjack"), ("steel_fluid_pipe", "Steel pipes"),
+        ("distillation_tower", "Distillation tower"), ("diesel_generator", "Diesel generator"),
+        ("catalytic_cracker", "Cracker"), ("plastic_sheet", "Plastic"), ("gas_turbine", "Gas turbine"),
+        ("diesel_engine", "Diesel engine")]),
+    ("Chemistry", "electrolytic_cell", "Salt, sulfur and air become acids, metals and gases.", [
+        "Make brine and split it in the electrolytic cell into chlorine, hydrogen and lye.",
+        "The chemical reactor makes sulfuric acid, titanium sponge, lithium and rare earths.",
+        "Store a lot of power in a lithium battery bank. Split air for nitrogen and make ammonia and nitric acid."], [
+        ("brine_bucket", "Brine"), ("electrolytic_cell", "Electrolytic cell"), ("chemical_reactor", "Chemical reactor"),
+        ("sulfuric_acid_bucket", "Sulfuric acid"), ("titanium_ingot", "Titanium"), ("neodymium_magnet", "Magnets"),
+        ("lithium_battery_bank", "Lithium bank"), ("air_separation_unit", "Air separation"),
+        ("synthesis_converter", "Ammonia, nitric acid")]),
+    ("Electronics", "processor", "Silicon becomes chips and processors.", [
+        "Grow silicon boules, saw them into wafers and etch microchips in the lithography station.",
+        "Four microchips and an advanced circuit make a processor, for the top machines."], [
+        ("crystal_grower", "Crystal grower"), ("silicon_wafer", "Wafers"), ("lithography_station", "Lithography"),
+        ("microchip", "Microchips"), ("processor", "Processor"), ("network_terminal", "Network terminal")]),
+    ("Late Game", "flow_battery", "Big, efficient power.", [
+        "Magnet dynamos and motors lose almost nothing. Fit a turbocharger to the advanced engine and give it "
+        "coolant water; a flywheel smooths out a bursty shaft line.",
+        "Solar trackers follow the sun; a field of heliostats around a tower boils water at a solar receiver. A flow "
+        "battery stores 64 million JE."], [
+        ("magnet_dynamo", "Magnet dynamo"), ("advanced_engine", "Advanced engine"), ("turbocharger", "Turbocharger"),
+        ("flywheel", "Flywheel"), ("advanced_solar_panel", "Advanced solar"), ("solar_tracker", "Solar tracker"),
+        ("heliostat", "Heliostats"), ("solar_receiver", "Solar receiver"), ("flow_battery", "Flow battery")]),
+    ("Special Materials", "borosilicate_glass", "Rubber, glass and weapons from the chemistry you already run.", [
+        "Butadiene from the cracker becomes rubber and gaskets, for sealed pipes and the turbocharger.",
+        "Borax turns sand into borosilicate glass: glass tanks that join into big see-through stores, tank gauges "
+        "and optical fibre for processors. Guncotton fills grenades."], [
+        ("rubber", "Rubber"), ("gasket", "Gaskets"), ("borosilicate_glass", "Borosilicate glass"),
+        ("glass_tank", "Glass tanks"), ("tank_gauge", "Tank gauge"), ("optical_fibre", "Optical fibre"),
+        ("grenade_launcher", "Grenade launcher")]),
+]
+
+
+def progression_pages():
+    """An overview of the stages, then one page per stage with its plan and the steps in order."""
+    overview = {"title": "The Road Ahead", "icon": f"{MOD}:engineers_handbook", "text": [
+        "Jugcraft builds in stages, each needing parts from the ones before. Pick a stage on the left to see its "
+        "steps."],
+        "steps": [{"item": f"{MOD}:{icon}", "label": title}
+                  for title, icon, _, _, _ in PROGRESSION]}
+    pages = [overview]
+    for n, (title, icon, summary, plan, steps) in enumerate(PROGRESSION):
+        pages.append({"title": f"{n + 1}. {title}", "icon": f"{MOD}:{icon}", "text": [summary] + plan,
+                      "steps": [{"item": f"{MOD}:{item}", "label": label} for item, label in steps]})
+    return pages
+
+
 def build():
     chapters = [
+        {"title": "Progression", "icon": f"{MOD}:engineers_handbook", "pages": progression_pages()},
         {"title": "Getting Started", "icon": f"{MOD}:engineers_handbook", "pages": [
             {"title": "Welcome, Engineer", "icon": f"{MOD}:engineers_handbook", "text": [
                 "This handbook covers every Jugcraft machine: what it does, what it needs and how to build it.",
-                "Pick a chapter on the left. Page through a chapter with the arrows.",
+                "Pick a chapter on the left; it opens to show its pages. Scroll with the mouse wheel, or turn pages "
+                "with the arrows or the arrow keys.",
+                "New here? The Progression chapter shows the order to build things in.",
                 "Power is measured in JE (Jugcraft Energy) per tick, fluids in mB (1,000 mB is a bucket)."]},
             {"title": "Your First Power", "icon": f"{MOD}:coal_generator", "text": [
                 "Mine tin and zinc, then make bronze (3 copper + 1 tin) by hand and smelt it.",
@@ -327,6 +461,7 @@ def build():
         {"title": "Materials", "icon": f"{MOD}:bronze_ingot", "pages": [
             ores_page(),
             block_page("prospector", TOOLS["prospector"]),
+            machine_page("deposit_drill"),
             machine_page("ore_drill"),
             {"title": "Ore Processing", "icon": f"{MOD}:tin_dust", "text": [
                 "Smelting an ore gives one ingot.",
@@ -342,7 +477,7 @@ def build():
         ]},
         {"title": "Power", "icon": f"{MOD}:coal_generator", "pages":
             [machine_page(m) for m in ("coal_generator", "solar_panel", "steam_generator", "geothermal_generator",
-                                       "wind_turbine", "battery_box")]
+                                       "wind_turbine", "battery_box", "advanced_solar_panel")]
             + [block_page(c, CABLES[c]["display"]) for c in CABLES]
             + [block_page(b, KINETIC_BLOCKS[b]["display"]) for b in ("steam_engine",)]
             + [machine_page("large_steam_engine")]
@@ -350,7 +485,8 @@ def build():
                                                                      "belt_pulley")]
             + [block_page("belt", TOOLS["belt"])]
             + [block_page(b, KINETIC_BLOCKS[b]["display"]) for b in ("dynamo", "electric_motor", "magnet_dynamo",
-                                                                     "magnet_motor")]},
+                                                                     "magnet_motor", "flywheel")]
+            + [block_page(b, KINETIC_BLOCKS[b]["display"]) for b in ("solar_tracker", "heliostat", "solar_receiver")]},
         {"title": "Processing", "icon": f"{MOD}:crusher", "pages":
             [machine_page(m) for m in ("electric_furnace", "crusher", "alloy_smelter", "metal_press", "wire_drawer",
                                        "circuit_assembler", "arc_furnace_controller", "auto_crafter")]},
@@ -364,7 +500,13 @@ def build():
         {"title": "Fluids", "icon": f"{MOD}:fluid_tank", "pages":
             [block_page(p, PIPES[p]["display"]) for p in ("bronze_fluid_pipe", "steel_fluid_pipe", "fluid_valve",
                                                           "fluid_filter")]
-            + [block_page(b, FLUID_BLOCKS[b]["display"]) for b in ("fluid_tank", "electric_pump", "heavy_pump")]},
+            + [block_page(b, FLUID_BLOCKS[b]["display"]) for b in ("fluid_tank", "electric_pump", "heavy_pump")]
+            + [{"title": "Joined Tanks and Gauges", "icon": f"{MOD}:tank_gauge", "text": [
+                "Tinplate and glass tanks touching face to face join into one tank of one fluid, up to 64 of them. "
+                "They fill from the bottom and drain from the top; pipes, buckets and comparators see the whole group.",
+                "A glass tank (four borosilicate glass in a steel frame) shows the fluid inside it.",
+                "Hang a tank gauge on the side of any tank or machine: its sight glass shows how full it is in "
+                "eighths. Right-click it to read the fluid and amount; a comparator reads it too."]}]},
         {"title": "Oil", "icon": f"{MOD}:crude_oil_bucket", "pages": [
             {"title": "Crude Oil", "icon": f"{MOD}:crude_oil_bucket", "text": [
                 "Crude oil lies in hidden reservoirs under some Overworld chunks. The prospector reports Oil (pumpable) "
@@ -390,6 +532,7 @@ def build():
             machine_page("gas_turbine"),
             machine_page("polymerization_reactor"),
             machine_page("diesel_engine"),
+            machine_page("advanced_engine"),
             {"title": "Asphalt", "icon": f"{MOD}:asphalt", "text": [
                 "Eight gravel around an asphalt binder (from the vacuum distillation unit) make eight asphalt.",
                 "Walking on asphalt, its slabs or road line is 1.3 times as fast. Three asphalt make six slabs.",
@@ -409,6 +552,40 @@ def build():
             machine_page("electrolytic_cell"),
             machine_page("chemical_reactor"),
             machine_page("fuel_cell"),
+            {"title": "Rubber", "icon": f"{MOD}:rubber", "text": [
+                "Crack a bucket of naphtha in the chemical reactor: 500 mB of butadiene. The polymerization reactor "
+                "turns 500 mB of butadiene into four synthetic rubber.",
+                "Rubber and string make two belts. A steel plate faced with rubber cuts into four gaskets, and "
+                "gasketed steel pipe comes four to a steel plate pair, without a bronze pipe."],
+             "craft": craft("gasket")},
+            {"title": "Glass Chemistry", "icon": f"{MOD}:borosilicate_glass", "text": [
+                "Tincal, natural borax, crusts the sand of deserts and badlands; mine it for 1-3 borax.",
+                "Two sand and a borax melt into two borosilicate glass in the alloy smelter; the wire drawer pulls "
+                "each into four optical fibre, which can carry a processor's signals instead of gold.",
+                "Iron and borax make ferroboron; a rare earth oxide with ferroboron gives two neodymium magnets, "
+                "twice the old recipe."]},
+            {"title": "Chlorine and Lye", "icon": f"{MOD}:pvc_resin", "text": [
+                "PVC: the synthesis converter joins 250 mB of refinery gas and 250 mB of chlorine into 250 mB of vinyl "
+                "chloride; the polymerization reactor turns 500 mB of it into four PVC resin, and the metal press "
+                "makes two plastic sheets from each.",
+                "Soap: boil two rotten flesh in 250 mB of lye in the chemical reactor for four bars. Use a bar to "
+                "wash every status effect off, as milk does."]},
+            {"title": "Nitrogen Chemistry", "icon": f"{MOD}:nitric_acid_bucket", "text": [
+                "Air is four parts nitrogen to one of oxygen. The air separation unit splits it; hydrogen comes from "
+                "the electrolytic cell.",
+                "The synthesis converter joins hydrogen and nitrogen into ammonia, and burns ammonia in oxygen over "
+                "water into nitric acid.",
+                "Ammonia and phosphate make fertilizer (six for two phosphate, against four with sulfuric acid). "
+                "Nitric acid etches microchips with half as much acid as sulfuric."]},
+            machine_page("air_separation_unit"),
+            machine_page("synthesis_converter"),
+            {"title": "Grenades", "icon": f"{MOD}:grenade", "text": [
+                "Two cotton in 250 mB of nitric acid in the chemical reactor make two guncotton.",
+                "Two steel plates, a guncotton and an iron nugget make four grenades. Throw one with right-click; it "
+                "goes off where it hits.",
+                "The blast hurts living things within 4 blocks, up to eight hearts at the centre, and walls shield "
+                "from it. It never breaks a block.",
+                "The grenade launcher fires grenades from your inventory much further."]},
             {"title": "Aluminum, the Real Way", "icon": f"{MOD}:alumina", "text": [
                 "Digest a bauxite in 250 mB of lye in the chemical reactor: two alumina.",
                 "Smelt two alumina with a coal coke anode in the electrolytic cell: two aluminum ingots, every 8 "
@@ -427,6 +604,7 @@ def build():
                 "The alloy smelter melts a rare earth oxide with an iron ingot into a neodymium magnet, for the "
                 "magnet dynamo and magnet motor."]},
             machine_page("lithium_battery_bank"),
+            machine_page("flow_battery"),
             {"title": "Fertilizer", "icon": f"{MOD}:fertilizer", "text": [
                 "Two phosphate and 250 mB of sulfuric acid in the chemical reactor make four fertilizer.",
                 "Use one on the ground or a crop: every crop in the 5x5 area around it (a block up or down too) gets "
@@ -465,6 +643,15 @@ def build():
             + [machine_page(m) for m in ("capacitor_bank", "steel_tank", "gas_holder")]},
         {"title": "Renewables", "icon": f"{MOD}:tree_farm", "pages":
             [machine_page(m) for m in ("water_wheel", "cobblestone_generator", "tree_farm")]},
+        {"title": "Farming", "icon": f"{MOD}:crop_harvester", "pages": [
+            machine_page("crop_harvester"),
+            block_page("sprinkler", FARMING_BLOCKS["sprinkler"]["display"]),
+            {"title": "Cotton", "icon": f"{MOD}:cotton", "text": [
+                "Sift coarse dirt in the sieve: now and then it turns up cotton seeds (and wheat seeds).",
+                "Plant them on farmland like wheat. A ripe plant gives one to three cotton and more seeds; the harvester, "
+                "sprinkler and fertilizer all work on it.",
+                "One cotton spins into one string."]},
+        ]},
         {"title": "Upgrades", "icon": f"{MOD}:speed_upgrade", "pages":
             [block_page(u, UPGRADES[u]) for u in UPGRADES] + [
             {"title": "Comparators", "icon": "minecraft:comparator", "text": [

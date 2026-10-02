@@ -2,13 +2,13 @@
   "type": "minecraft:block",
   "pools": [
     {
+      "rolls": 1,
       "entries": [
         {
           "type": "minecraft:item",
           "name": "jugcraft:coke_oven"
         }
       ],
-      "rolls": 1,
       "condition": {
         "type": "minecraft:survives_explosion"
       }

@@ -2,6 +2,7 @@
   "type": "minecraft:block",
   "pools": [
     {
+      "rolls": 1,
       "entries": [
         {
           "type": "minecraft:item",
@@ -9,14 +10,15 @@
           "modifier": [
             {
               "type": "minecraft:set_count",
+              "count": 2,
+              "add": false,
               "condition": {
                 "type": "minecraft:match_block",
                 "blocks": "jugcraft:asphalt_slab",
                 "state": {
                   "type": "double"
                 }
-              },
-              "count": 2
+              }
             },
             {
               "type": "minecraft:explosion_decay"
@@ -24,7 +26,6 @@
           ]
         }
       ],
-      "rolls": 1,
       "condition": {
         "type": "minecraft:survives_explosion"
       }

@@ -2,18 +2,18 @@
   "type": "minecraft:block",
   "pools": [
     {
+      "rolls": 1,
       "entries": [
         {
           "type": "minecraft:alternatives",
           "children": [
             {
               "type": "minecraft:item",
-              "name": "jugcraft:lepidolite_ore",
-              "condition": "minecraft:tool/can_silk_touch"
+              "condition": "minecraft:tool/can_silk_touch",
+              "name": "jugcraft:lepidolite_ore"
             },
             {
               "type": "minecraft:item",
-              "name": "jugcraft:lepidolite",
               "modifier": [
                 {
                   "type": "minecraft:set_count",
@@ -31,12 +31,12 @@
                 {
                   "type": "minecraft:explosion_decay"
                 }
-              ]
+              ],
+              "name": "jugcraft:lepidolite"
             }
           ]
         }
-      ],
-      "rolls": 1
+      ]
     }
   ],
   "random_sequence": "jugcraft:blocks/lepidolite_ore"
