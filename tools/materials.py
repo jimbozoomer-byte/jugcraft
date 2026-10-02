@@ -13,7 +13,7 @@ MOD = "jugcraft"
 # Feature switches (config/jugcraft.properties). Order is the config file order.
 FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
             "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines", "deposits",
-            "explosives", "parties", "drones",
+            "explosives", "agriculture", "parties", "drones",
             "pixel_hollows", "retro_trader"]
 
 # Metals use the vanilla form set. "mined" adds ore, deepslate ore, raw item and raw block.
@@ -217,6 +217,9 @@ def feature_of(entry_id):
     import tank_display
     if entry_id in tank_display.BLOCKS:
         return FEATURE
+    import agriculture
+    if agriculture.owns(entry_id):
+        return agriculture.FEATURE
     import plastic
     if entry_id in plastic.blocks():
         return "crude_oil"
