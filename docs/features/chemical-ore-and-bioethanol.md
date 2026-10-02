@@ -22,7 +22,7 @@ Design inspiration: Mekanism (aidancbrady and team, MIT): its chemical ore proce
 - Input producers: sulfuric acid (chemical reactor), ores; crops (crop harvester, any farm), water.
 - Output consumers:
   - washed ores go to the pulverizer;
-  - bioethanol goes to the gas turbine and advanced engine, through pipes, tanks and gas-free fluid logistics.
+  - bioethanol goes to the gas turbine and advanced engine, through pipes and tanks.
 - Technology connection: industrial chemistry, farming, fluid fuels. Magic connection: none.
 - Required vs optional: optional; both are better routes, not required ones.
 
