@@ -1289,7 +1289,7 @@ public final class JugcraftAgriculture {
 
 		// Fall additions 8, the corn maze: a gate that plants a maze of corn, times runners and keeps a board.
 		registerBlock("maze_corn", MazeCornBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(0.3F)
-				.sound(SoundType.CROP).noOcclusion().pushReaction(PushReaction.DESTROY).ignitedByLava());
+				.sound(SoundType.CROP).noOcclusion().pushReaction(PushReaction.POPPED).ignitedByLava());
 		Block mazeGate = registerBlock("corn_maze_gate", CornMazeGateBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
 				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
 		CORN_MAZE_GATE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("corn_maze_gate"),

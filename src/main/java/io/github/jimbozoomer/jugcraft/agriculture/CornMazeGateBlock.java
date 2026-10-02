@@ -122,7 +122,16 @@ public class CornMazeGateBlock extends BaseEntityBlock {
 				player.sendOverlayMessage(Component.translatable(MESSAGES + "needs", needed));
 				return InteractionResult.SUCCESS;
 			}
-			player.getInventory().clearOrCountMatchingItems(candidate -> candidate.is(kernels), needed, player.inventoryMenu.getCraftSlots());
+			int left = needed;
+			for (int slot = 0; slot < player.getInventory().getContainerSize() && left > 0; slot++) {
+				ItemStack carried = player.getInventory().getItem(slot);
+				if (carried.is(kernels)) {
+					int taken = Math.min(left, carried.getCount());
+					carried.shrink(taken);
+					left -= taken;
+				}
+			}
+			player.getInventory().setChanged();
 		}
 		gate.plant(server, seed, columns);
 		player.sendOverlayMessage(Component.translatable(MESSAGES + "planting", Component.translatable(MESSAGES + "size." + CornMaze.SIZES[gate.size()]),
