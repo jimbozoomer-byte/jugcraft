@@ -24,7 +24,7 @@ Nothing to obtain from the engine itself. Its rules decide where each batch's bi
 
 ## Multiplayer and persistence
 - **Server authority.** Biomes are chosen by the server's world generation only.
-- **Seeds.** Which cells are Jugcraft regions comes from the world seed, read as the server starts (before any world generates): the same seed always makes the same world, and different seeds differ.
+- **Seeds.** Which cells are Jugcraft regions comes from the world seed, read as the Overworld loads (before the server places the start or generates any chunk): the same seed always makes the same world, and different seeds differ.
 - **Settings** (config/jugcraft.properties):
   - `biomes.enabled=false` turns Jugcraft regions off for new chunks: the whole world is vanilla again there. The biomes, blocks and items stay registered, so old chunks and inventories keep them.
   - `biomes.region_size` (blocks across, 256 to 8192; default 1024) and `biomes.region_share` (0 to 1; default 0.5). Changing them on an existing world moves the borders for new chunks only, which can leave seams.

@@ -10,10 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
@@ -81,9 +82,16 @@ public final class JugcraftRegions {
 		return new Rule(replaces, minT, maxT, minH, maxH, ResourceKey.create(Registries.BIOME, Jugcraft.id(biome)));
 	}
 
-	/** Reads the region options (after the config has loaded), and each server's world seed as it starts. */
+	/**
+	 * Reads the region options (after the config has loaded), and the world seed as each Overworld loads (before the
+	 * server places the start or generates any chunk).
+	 */
 	public static void register() {
-		ServerLifecycleEvents.SERVER_STARTING.register(server -> seedPrint = fingerprint(server.getWorldData().worldGenOptions().seed()));
+		ServerLevelEvents.LOAD.register((server, level) -> {
+			if (level.dimension() == Level.OVERWORLD) {
+				seedPrint = fingerprint(level.getSeed());
+			}
+		});
 		int size = SIZE;
 		double fraction = SHARE;
 		try {
