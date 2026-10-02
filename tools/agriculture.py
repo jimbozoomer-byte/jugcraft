@@ -529,6 +529,8 @@ HALLOWEEN_ADVANCEMENTS = {
                           "description": "Send the Headless Horseman back into the night", "frame": "challenge"},
     "lantern_festival": {"icon": "jugcraft:sky_lantern", "title": "A Sky Full of Wishes",
                          "description": "Be there when eight sky lanterns are let go together", "frame": "goal"},
+    "harvest_home": {"icon": "jugcraft:feast_table", "title": "Harvest Home",
+                     "description": "Share a grand feast at a Harvest Feast Table", "frame": "challenge"},
 }
 
 
@@ -1283,6 +1285,17 @@ LANTERNS = {"item": "sky_lantern", "display": "Sky Lantern", "entity": "sky_lant
             "mooncake_base": {"minecraft:wheat": 2, "minecraft:sugar": 1, "minecraft:egg": 1}, "mooncake_count": 4,
             "mooncake_time": 300, "mooncake_food": [3, 0.6], "mooncake_luck_ticks": 6000, "night": [13000, 23000]}
 
+# ---------------------------------------------------------------- Fall additions 7: the harvest feast
+# The Harvest Feast Table (FeastTableBlock, FeastTableBlockEntity, Feasts): lengths placed end to end along one axis join
+# into a table of up to `max_length`; each length holds `dishes` dishes of up to `servings` servings of one food. Eating
+# a serving there works out the feast: score = different foods on the table + players who ate there in the last
+# `window` ticks; every recent diner within `reach` blocks gets the tier: `tiers` (good meal, feast, harvest feast, grand
+# feast) at those scores, with Regeneration for `regeneration_ticks`, Absorption for `absorption_ticks`, Haste and Luck
+# and (grand) Health Boost for `long_ticks`, and Harvest Home. `per_craft` a craft.
+FEAST = {"block": "feast_table", "display": "Harvest Feast Table", "dishes": 2, "servings": 8, "window": 2400, "max_length": 8,
+         "tiers": [3, 5, 8, 11], "regeneration_ticks": 200, "absorption_ticks": 2400, "long_ticks": 6000, "reach": 16,
+         "per_craft": 2}
+
 
 def pantry_blocks():
     return [PANTRY["kettle"], PANTRY["shelf"]]
@@ -1302,6 +1315,10 @@ def firework_items():
 
 def lantern_items():
     return [LANTERNS["item"]] + list(LANTERNS["mooncakes"])
+
+
+def feast_blocks():
+    return [FEAST["block"]]
 
 
 def night_blocks():
@@ -1905,7 +1922,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks())
+            + firework_blocks() + feast_blocks())
 
 
 def all_items():
@@ -1916,7 +1933,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items())
+            + lantern_items() + feast_blocks())
 
 
 def owns(entry_id):

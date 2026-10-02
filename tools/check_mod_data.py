@@ -795,6 +795,7 @@ def check_agriculture():
     check_crows(java, main)
     check_fireworks(java, main)
     check_lanterns(java, main)
+    check_feast(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2430,6 +2431,43 @@ def check_lanterns(java, main):
             err(f"{cake} must bake {lt['mooncake_count']} at a time in the Cooking Pot")
     if not (DATA / "jugcraft" / "advancement" / "lantern_festival.json").exists():
         err("The lantern festival needs its advancement")
+
+def check_feast(java, main):
+    """The harvest feast: FeastTableBlockEntity.java and Feasts.java match FEAST in tools/agriculture.py; the table is
+    registered, has a model for every axis and part, its words for every tier, loot, recipe and advancement."""
+    fe = ag.FEAST
+
+    def numbers(source):
+        return {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;",
+                                                                    java.get(source, ""))}
+
+    expected = {"FeastTableBlockEntity": {"DISHES": fe["dishes"], "SERVINGS": fe["servings"], "WINDOW": fe["window"], "MAX_LENGTH": fe["max_length"]},
+                "Feasts": {"GOOD_MEAL": fe["tiers"][0], "FEAST": fe["tiers"][1], "HARVEST_FEAST": fe["tiers"][2], "GRAND_FEAST": fe["tiers"][3],
+                           "REGENERATION_TICKS": fe["regeneration_ticks"], "ABSORPTION_TICKS": fe["absorption_ticks"],
+                           "LONG_TICKS": fe["long_ticks"], "REACH": fe["reach"]}}
+    for source, values in expected.items():
+        found = numbers(source)
+        for name, value in values.items():
+            if name not in found or abs(found[name] - value) > 1e-9:
+                err(f"{source}.{name} = {found.get(name)} differs from FEAST in tools/agriculture.py ({value})")
+    if f'registerBlock("{fe["block"]}", FeastTableBlock::new' not in main:
+        err("JugcraftAgriculture.java must register the feast table")
+    states = (load(ASSETS / "blockstates" / f"{fe['block']}.json") or {}).get("variants", {})
+    for axis in ("x", "z"):
+        for part in ("single", "start", "middle", "end"):
+            if f"axis={axis},part={part}" not in states:
+                err(f"The feast table's blockstate has no variant for axis={axis},part={part}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in ["dish_taken", "empty"] + [f"tier.{tier}" for tier in range(5)]:
+        if f"message.jugcraft.feast_table.{key}" not in lang:
+            err(f"The feast table has no words for {key}")
+    if lang.get(f"block.jugcraft.{fe['block']}") != fe["display"]:
+        err("The feast table has no name")
+    recipe = load(DATA / "jugcraft" / "recipe" / f"{fe['block']}.json") or {}
+    if recipe.get("result", {}).get("count") != fe["per_craft"] or not (DATA / "jugcraft" / "loot_table" / "blocks" / f"{fe['block']}.json").exists():
+        err(f"The feast table needs its loot table and a recipe making {fe['per_craft']}")
+    if not (DATA / "jugcraft" / "advancement" / "harvest_home.json").exists():
+        err("A grand feast needs its advancement")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

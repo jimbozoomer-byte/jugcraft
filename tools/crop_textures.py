@@ -880,4 +880,6 @@ def crop_textures():
     out.update(firework_textures())
     from lantern_textures import lantern_textures  # and the sky lantern festival
     out.update(lantern_textures())
+    from feast_textures import feast_textures  # and the harvest feast
+    out.update(feast_textures())
     return out

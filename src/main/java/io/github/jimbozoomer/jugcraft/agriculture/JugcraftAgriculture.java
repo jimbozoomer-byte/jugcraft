@@ -234,6 +234,7 @@ public final class JugcraftAgriculture {
 	public static EntityType<SpookyRocket> SPOOKY_ROCKET;
 	/** Sky lanterns let go: they rise, drift with the wind and burn out. */
 	public static EntityType<SkyLantern> SKY_LANTERN;
+	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
 	/** The mooncakes, baked in the Cooking Pot. */
 	public static final List<String> MOONCAKES = List.of("red_bean_mooncake", "chestnut_mooncake", "pumpkin_mooncake");
 	public static BlockEntityType<ShowLauncherBlockEntity> SHOW_LAUNCHER_ENTITY;
@@ -1277,6 +1278,13 @@ public final class JugcraftAgriculture {
 		for (String mooncake : MOONCAKES) {
 			registerItem(mooncake, MooncakeItem::new, new Item.Properties().food(nourishment(3, 0.6F)).stacksTo(16), FOOD_TAB);
 		}
+
+		// Fall additions 7, the harvest feast: a long table to serve dishes on, blessing those who eat at it together.
+		Block feastTable = registerBlock("feast_table", FeastTableBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		FEAST_TABLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("feast_table"),
+				FabricBlockEntityTypeBuilder.create(FeastTableBlockEntity::new, feastTable).build());
+		registerItem("feast_table", props -> new BlockItem(feastTable, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
