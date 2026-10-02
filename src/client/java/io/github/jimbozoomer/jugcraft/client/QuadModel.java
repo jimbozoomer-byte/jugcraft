@@ -34,7 +34,9 @@ public final class QuadModel {
 		QuadModel model = new QuadModel();
 		for (JsonElement element : list) {
 			JsonObject quad = element.getAsJsonObject();
-			Identifier texture = Jugcraft.id("textures/block/" + quad.get("texture").getAsString() + ".png");
+			String name = quad.get("texture").getAsString();
+			// Plain names are block textures; "item/..." and other paths are taken from textures/ directly.
+			Identifier texture = Jugcraft.id(name.contains("/") ? "textures/" + name + ".png" : "textures/block/" + name + ".png");
 			// A quad marked "cutout" (a silhouette) leaves out its texture's see-through pixels.
 			boolean cutout = quad.has("cutout") && quad.get("cutout").getAsBoolean();
 			RenderType type = cutout ? RenderTypes.entityCutout(texture) : RenderTypes.entitySolid(texture);

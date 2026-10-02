@@ -792,7 +792,7 @@ BOBBING_TUB = {"block": "bobbing_tub", "display": "Bobbing for Apples Tub", "max
 PUMPKIN_CRATE = {"block": "pumpkin_crate", "display": "Pumpkin Crate", "capacity": 4, "produce_tag": "jugcraft:crate_produce",
                  "produce": ["minecraft:pumpkin", "minecraft:melon", "#c:crops/pumpkin", "#c:crops/squash", "#c:crops/gourd"]}
 # The Hay Bale Seat (HayBaleSeatBlock): sat on at `height` blocks; softens falls like a hay block.
-HAY_BALE_SEAT = {"block": "hay_bale_seat", "display": "Hay Bale Seat", "height": 0.625, "fall_softening": 0.8, "entity": "seat"}
+HAY_BALE_SEAT = {"block": "hay_bale_seat", "display": "Hay Bale Seat", "height": 0.625, "fall_softening": 0.8, "entity": "chair_seat"}
 # The Autumn Wreath (AutumnWreathBlock): chestnut leaves, ornamental corn and mums; a mum swaps its flowers.
 AUTUMN_WREATH = {"block": "autumn_wreath", "display": "Autumn Wreath", "flowers": ["yellow", "orange", "red", "purple"],
                  "default": "orange"}

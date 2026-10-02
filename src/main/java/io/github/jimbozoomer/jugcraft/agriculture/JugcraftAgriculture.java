@@ -902,7 +902,7 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(PumpkinCrateBlockEntity::new, crate).build());
 		Block bale = registerBlock("hay_bale_seat", HayBaleSeatBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
 				.strength(0.5F).sound(SoundType.GRASS).noOcclusion().ignitedByLava());
-		SEAT = entity("seat", EntityType.Builder.<Seat>of(Seat::new, MobCategory.MISC).noLootTable().noSummon()
+		SEAT = entity("chair_seat", EntityType.Builder.<Seat>of(Seat::new, MobCategory.MISC).noLootTable().noSummon()
 				.sized(0.5F, 0.1F).passengerAttachments(0.0F).clientTrackingRange(10).updateInterval(20));
 		Block wreath = registerBlock("autumn_wreath", AutumnWreathBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
 				.strength(0.2F).sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));

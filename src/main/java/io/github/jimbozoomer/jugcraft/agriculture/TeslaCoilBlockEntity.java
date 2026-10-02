@@ -136,7 +136,8 @@ public class TeslaCoilBlockEntity extends BlockEntity {
 	@Override
 	public void setRemoved() {
 		super.setRemoved();
-		if (level != null && RUNNING.containsKey(level)) {
+		// Server levels only: the map is the server's, and client block entities are removed on the render thread.
+		if (level != null && !level.isClientSide() && RUNNING.containsKey(level)) {
 			RUNNING.get(level).remove(worldPosition);
 		}
 	}

@@ -1,6 +1,6 @@
 # Specialties and contribution briefs
 
-This is a contribution map for the owner's vision, not a claim of shipped content or blanket approval of every implementation. Open one focused proposal, establish shared interfaces first, and build one usable slice per PR. Example specialties may be refined during review.
+This is a contribution map for the owner's vision, not a claim of shipped content or guaranteed acceptance. You may start one focused prototype in your fork and submit a draft PR without an approved issue. Reuse shared interfaces and build one usable slice per PR. Coordinate major shared-API changes first. Example specialties may be refined during review.
 
 ## Factory engineering
 
