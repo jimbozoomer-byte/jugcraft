@@ -22,7 +22,7 @@ public final class JugcraftConfig {
 	public static final List<String> FEATURES = List.of(
 			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
 			"salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines",
-			"deposits", "explosives", "parties", "drones", "agriculture");
+			"deposits", "explosives", "agriculture", "parties", "drones");
 
 	/**
 	 * Other server options, with their defaults. {@code carving.free_draw}: players may carve any face into a
@@ -45,12 +45,12 @@ public final class JugcraftConfig {
 	 * whatever the setting.
 	 */
 	public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
+			Map.entry("halloween.start", "10-20"), Map.entry("halloween.end", "11-03"), Map.entry("halloween.timezone", "UTC"),
+			Map.entry("halloween.mode", "auto"), Map.entry("halloween.harvest_moon", "10-31"),
 			Map.entry("seasons.mode", "auto"), Map.entry("seasons.hemisphere", "north"), Map.entry("seasons.timezone", "UTC"),
 			Map.entry("seasons.snow", "off"), Map.entry("seasons.snow_depth", "2"),
 			Map.entry("harvest_feast", "us"), Map.entry("harvest_feast.days", "4"),
-			Map.entry("december", "12-01..01-06"),
-			Map.entry("halloween.start", "10-20"), Map.entry("halloween.end", "11-03"), Map.entry("halloween.timezone", "UTC"),
-			Map.entry("halloween.mode", "auto"), Map.entry("halloween.harvest_moon", "10-31"));
+			Map.entry("december", "12-01..01-06"));
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
@@ -117,8 +117,8 @@ public final class JugcraftConfig {
 			properties.store(writer, "Jugcraft feature switches (false stops new worldgen and recipes; existing items and blocks stay)"
 					+ " and server options (carving.free_draw=false allows only the starter pumpkin faces; halloween.* sets when"
 					+ " the Halloween event runs: start and end as MM-DD, a timezone, mode auto, on or off, and the Harvest Moon's day;"
-					+ " seasons.*: seasonal colours follow the server's date; mode auto, spring, summer, autumn, winter or off,"
-					+ " hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"
+					+ " seasons.*: seasonal colours follow the server's date; mode auto, spring, summer, autumn,"
+					+ " winter or off, hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"
 					+ " december MM-DD..MM-DD or off).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);

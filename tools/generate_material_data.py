@@ -138,6 +138,12 @@ def assets():
     deposits.write_all(write, ASSETS, DATA / MOD, lang)
     import tank_display
     tank_display.write_all(write, ASSETS, DATA / MOD, lang, model_writer)
+    import gear
+    gear.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import exosuit
+    exosuit.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import plastic
+    plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
     gui_textures.write_all(write, ASSETS, lang, MACHINES)
     import advancements
@@ -667,7 +673,7 @@ RECIPE_TYPES = {"crusher": "crushing", "arc_furnace": "arc_smelting", "alloy_sme
                 "metal_press": "pressing", "wire_drawer": "wire_drawing", "circuit_assembler": "circuit_assembly",
                 "pulverizer": "pulverizing", "ore_washer": "ore_washing", "sieve": "sifting", "sawmill": "sawing",
                 "coke_oven": "coking", "steel_foundry": "steelmaking",
-                "tree_farm": "tree_growing", "crystal_grower": "crystal_growing"}
+                "tree_farm": "tree_growing"}
 
 
 def machine_recipe_files(out):
@@ -782,7 +788,10 @@ def powered_tools(lang):
     # rocket_pack.png), and the pack itself in 3D on the back (client/RocketPackLayer draws these quads).
     write(ASSETS / "equipment" / "rocket_pack.json", {"layers": {"humanoid": [{"texture": rid("rocket_pack")}]}})
     import kinetic_rotors
-    write(ASSETS / "worn_models.json", {"rocket_pack": kinetic_rotors.quads(tool_models.ITEMS["rocket_pack"])})
+    # The exosuit's 3D parts (shoulder plates, skirt plates, the Ronin's hat) too: client/ExosuitLayer.
+    import exosuit
+    write(ASSETS / "worn_models.json", {"rocket_pack": kinetic_rotors.quads(tool_models.ITEMS["rocket_pack"]),
+                                        **exosuit.worn_models(kinetic_rotors.quads)})
     for module, (display, short, about) in UPGRADE_MODULES.items():
         lang[f"item.{MOD}.{module}"] = display
         lang[f"item.{MOD}.{module}.short"] = short
@@ -1099,6 +1108,12 @@ def storage_tags(tags, path, block_id, tool):
 
 def tags():
     tags = Tags()
+    import petro
+    for crop in petro.FERMENTABLE:
+        tags.add("item", f"{MOD}:fermentable", crop)
+    import plastic
+    for block in plastic.blocks():
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     for metal, info in METALS.items():
         tool = info.get("tool", "stone")
         tags.add("item", f"c:ingots/{metal}", rid(f"{metal}_ingot"))

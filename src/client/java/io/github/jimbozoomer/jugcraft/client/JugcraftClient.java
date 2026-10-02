@@ -34,9 +34,9 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
  * Client entrypoint: machine and Cooking Pot menus to their screens, the wind turbine and belt renderers,
  * the handbook to its book, ore surveys to the prospector screen, carved and giant pumpkins to their renderers and carving screen,
  * pumpkin boats to theirs, gravestones to the renderer of their engravings, and Halloween's night creatures,
- * thrown pumpkins and landing markers to theirs; the Harvest Moon's state to the pumpkins' sparks; the drone depot's
- * renderers (drones, pickup lift, control room screen) and terminal screen; and the server's season to grass and
- * foliage colours.
+ * thrown pumpkins and landing markers to theirs; the Harvest Moon's state to the pumpkins' sparks; the drone
+ * depot's renderers (drones, pickup lift, control room screen) and terminal screen, and the server's season to
+ * grass and foliage colours.
  */
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
@@ -57,6 +57,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		GhostSheetLayer.register();
 		CostumeLayer.register();
 		FacePaintLayer.register();
+		ExosuitLayer.register();
 		BlockEntityRendererRegistry.register(JugcraftKinetics.HAND_CRANK_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.ELECTRIC_MOTOR_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.FLYWHEEL_ENTITY, KineticRotorRenderer::new);
