@@ -825,6 +825,45 @@ public class PetroGameTests {
 		});
 	}
 
+	/**
+	 * Batch 26, the best ore route: an iron ore dissolved in 250 mB of sulfuric acid gives four washed iron ore (the
+	 * ore washer gives three).
+	 */
+	@GameTest(maxTicks = 300)
+	public void reactorLeachesOreFourTimes(GameTestHelper helper) {
+		MachineBlockEntity reactor = place(helper, MachineKind.CHEMICAL_REACTOR, new BlockPos(4, 1, 2));
+		reactor.tanks().input(0).fill(PetroFluids.SULFURIC_ACID.source(), 250);
+		reactor.setItem(0, new ItemStack(Items.IRON_ORE));
+		helper.succeedWhen(() -> {
+			ItemStack out = reactor.getItem(reactor.kind().outputSlot());
+			helper.assertTrue(out.is(BuiltInRegistries.ITEM.getValue(Jugcraft.id("washed_iron_ore"))) && out.getCount() == 4,
+					"The reactor made " + out);
+			helper.assertTrue(reactor.tanks().input(0).isResourceBlank(), "Acid left over");
+		});
+	}
+
+	/**
+	 * Batch 26: eight crops ferment in a bucket of water into 250 mB of bioethanol, which the gas turbine and the advanced
+	 * engine burn.
+	 */
+	@GameTest(maxTicks = 300)
+	public void reactorFermentsBioethanol(GameTestHelper helper) {
+		MachineBlockEntity reactor = place(helper, MachineKind.CHEMICAL_REACTOR, new BlockPos(4, 1, 2));
+		reactor.tanks().input(0).fill(Fluids.WATER, 1000);
+		reactor.setItem(0, new ItemStack(Items.SUGAR_CANE, 8));
+		helper.assertTrue(FluidFuels.jePerMb(MachineKind.GAS_TURBINE, PetroFluids.BIOETHANOL.source()) == 192,
+				"The gas turbine does not burn bioethanol at 192 JE/mB");
+		helper.assertTrue(FluidFuels.jePerMb(MachineKind.ADVANCED_ENGINE, PetroFluids.BIOETHANOL.source()) == 256,
+				"The advanced engine does not burn bioethanol at 256 KE/mB");
+		helper.assertTrue(FluidFuels.jePerMb(MachineKind.DIESEL_GENERATOR, PetroFluids.BIOETHANOL.source()) == 0,
+				"The diesel generator burns bioethanol");
+		helper.succeedWhen(() -> {
+			helper.assertTrue(reactor.tanks().output(0).has(PetroFluids.BIOETHANOL.source(), 250),
+					"Bioethanol: " + reactor.tanks().output(0).millibuckets());
+			helper.assertTrue(reactor.getItem(0).isEmpty(), "The reactor kept its sugar cane");
+		});
+	}
+
 	/** The chemical reactor turns two sulfur dust and a bucket of water into a bucket of sulfuric acid. */
 	@GameTest(maxTicks = 300)
 	public void reactorMakesSulfuricAcid(GameTestHelper helper) {

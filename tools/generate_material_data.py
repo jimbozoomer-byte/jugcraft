@@ -1097,6 +1097,9 @@ def storage_tags(tags, path, block_id, tool):
 
 def tags():
     tags = Tags()
+    import petro
+    for crop in petro.FERMENTABLE:
+        tags.add("item", f"{MOD}:fermentable", crop)
     for metal, info in METALS.items():
         tool = info.get("tool", "stone")
         tags.add("item", f"c:ingots/{metal}", rid(f"{metal}_ingot"))

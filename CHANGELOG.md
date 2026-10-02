@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Four-ingot ore and bioethanol, batch 26
+- **Acid leaching:** an ore and 250 mB of sulfuric acid in the chemical reactor give 4 washed ores (the best ore route).
+- **Bioethanol:** 8 crops and a bucket of water ferment into 250 mB in the chemical reactor; it burns in the gas turbine and the advanced engine.
+- Inspired by Mekanism (MIT); no new machines.
+
 ### Unmerged: Tools, armor and paxels, batch 25
 - Bronze and steel swords, pickaxes, axes, shovels, hoes and armor (bronze iron-tier, steel between iron and diamond).
 - Paxels (pickaxe, axe and shovel in one) for every tier from wood to netherite, bronze and steel.

@@ -59,6 +59,8 @@ TREE = {
     "electrolytic_cell": ("steel", "electrolytic_cell", "Split Decision", "Build an electrolytic cell", "goal"),
     "sulfuric_acid": ("electrolytic_cell", "sulfuric_acid_bucket", "Oil of Vitriol", "Make sulfuric acid", "task"),
     "fertilizer": ("sulfuric_acid", "fertilizer", "Green Revolution", "Make fertilizer", "task"),
+    # Batch 26: fuel from crops.
+    "bioethanol": ("crop_harvester", "bioethanol_bucket", "Moonshine", "Ferment crops into bioethanol", "task"),
     "alumina": ("electrolytic_cell", "alumina", "The Bayer Way", "Digest bauxite into alumina", "task"),
     "fuel_cell": ("electrolytic_cell", "fuel_cell", "Clean Burn", "Build a hydrogen fuel cell", "goal"),
     # Nitrogen chemistry (batch 12).

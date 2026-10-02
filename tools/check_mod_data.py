@@ -20,7 +20,7 @@ import deposits
 import seasons
 import tank_display
 import gear
-from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
+from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -214,7 +214,7 @@ def item_units(ref):
         return {}  # vanilla tags used here (logs, planks) hold no metal
     if ref.startswith("#"):
         form, _, metal = path.partition("/")
-        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()}:
+        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path == "fermentable":
             return {}
         if form not in UNITS or not metal:
             err(f"Recipe uses unsupported tag {ref}")
@@ -403,8 +403,14 @@ def check_fluid_recipes(registered):
             for ref, count in recipe.get("results", []):
                 for metal, units in item_units(ref).items():
                     metal_out[metal] = metal_out.get(metal, 0) + units * count
+            # Ore routes (batch 26: acid leaching) may multiply an ore's metal, up to ORE_LEACHING_MULTIPLIER.
+            bonus = recipe.get("ore_bonus", 1)
+            if bonus > ORE_LEACHING_MULTIPLIER:
+                err(f"{label}: ore bonus {bonus} exceeds the leaching route's {ORE_LEACHING_MULTIPLIER}")
+            if bonus > 1 and not all(ref.split(":")[1].endswith("_ore") for ref, _ in recipe.get("items", [])):
+                err(f"{label}: only ores may take an ore bonus")
             for metal, units in metal_out.items():
-                if units > metal_in.get(metal, 0):
+                if units > metal_in.get(metal, 0) * bonus:
                     err(f"{label}: gives {units} {metal} units from {metal_in.get(metal, 0)}")
             for ref, _ in recipe.get("items", []) + recipe.get("results", []):
                 if ref.startswith("#"):

@@ -309,6 +309,9 @@ STEAM_FUELS = {**GENERATOR_FUELS, "jugcraft:bitumen": 800}
 ORE_PROCESSING_MULTIPLIER = 2
 # The ore washer's better route: one ore -> three washed ores -> three dusts -> three ingots.
 ORE_WASHING_MULTIPLIER = 3
+# The best route (batch 26, after Mekanism's chemical ore processing): one ore dissolved in sulfuric acid in the
+# chemical reactor -> four washed ores -> four ingots.
+ORE_LEACHING_MULTIPLIER = 4
 # Pulverizer byproducts: grinding ore (or washed ore) of the first metal sometimes yields dust of the
 # second, as the real ores occur together. Chance per operation.
 BYPRODUCTS = {"copper": ("gold", 0.1), "iron": ("nickel", 0.1), "gold": ("silver", 0.1), "tin": ("tungsten", 0.05),
