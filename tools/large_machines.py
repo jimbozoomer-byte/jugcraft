@@ -46,12 +46,8 @@ FOOTPRINTS = {
     "large_steam_engine": cuboid(2, 2, 2),
     # Petrochemistry: a pumpjack one wide, three tall, three long (wellhead at the front).
     "pumpjack": cuboid(1, 3, 3),
-    "oil_sand_extractor": cuboid(2, 2, 2),
     "distillation_tower": cuboid(2, 7, 2),
     "catalytic_cracker": cuboid(2, 4, 2),
-    "vacuum_distillation_unit": cuboid(2, 3, 2),
-    "catalytic_reformer": cuboid(3, 2, 2),
-    "chemical_mixer": cuboid(2, 2, 2),
     "fracking_rig": cuboid(3, 5, 3),
     "flowback_treatment_unit": cuboid(3, 1, 2),
     "diesel_generator": cuboid(3, 2, 2),
@@ -67,8 +63,6 @@ FOOTPRINTS = {
     "lithium_battery_bank": cuboid(3, 2, 1),
     # Chemistry: the flow battery, three wide, three tall and two deep.
     "flow_battery": cuboid(3, 3, 2),
-    # Electronics: a two-block crystal grower.
-    "crystal_grower": [(0, 0, 0), (0, 1, 0)],
     "lithography_station": cuboid(3, 2, 2),
     # Fluid logistics: a 3x3x3 gas holder.
     "gas_holder": cuboid(3, 3, 3),
@@ -208,15 +202,6 @@ MODELS["pumpjack"] = [
     ((7, 12, 6), (9, 34, 8), PIPE),
 ]
 
-MODELS["oil_sand_extractor"] = [
-    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
-    ((-12, 2, 4), (12, 26, 28), "fluid_tank_side"),
-    ((-12, 26, 4), (12, 28, 28), "fluid_tank_top"),
-    ((-13, 2, 1), (-3, 12, 3), {"*": STEEL, "north": "#front", "up": TOP}),
-    ((-15, 2, 25), (-5, 14, 31), {"*": STEEL, "up": TOP}),
-    ((-9.5, 14, 27), (-6.5, 30, 30), "geothermal_stack"),
-]
-
 MODELS["distillation_tower"] = [
     ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
     ((1, 2, 1), (15, 14, 9), {"*": STEEL, "north": "#front", "up": TOP}),
@@ -237,33 +222,6 @@ MODELS["catalytic_cracker"] = [
     ((-13, 7, 0), (-7, 11, 5), PIPE),
     ((-13, 39, 0), (-7, 43, 5), PIPE),
     ((-13, 55, 0), (-7, 59, 5), PIPE),
-]
-
-MODELS["vacuum_distillation_unit"] = [
-    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
-    ((1, 2, 1), (15, 14, 9), {"*": STEEL, "north": "#front", "up": TOP}),
-    ((-14, 2, 6), (10, 40, 30), "fluid_tank_side"),
-    ((-10, 40, 10), (6, 46, 26), "fluid_tank_top"),
-    ((-13, 7, 0), (-7, 11, 5), PIPE),
-]
-
-MODELS["catalytic_reformer"] = [
-    ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
-    ((1, 2, 1), (15, 14, 9), {"*": STEEL, "north": "#front", "up": TOP}),
-    ((-14, 2, 10), (-2, 26, 22), "fluid_tank_side"),
-    ((-30, 2, 10), (-18, 26, 22), "fluid_tank_side"),
-    ((2, 14, 12), (14, 26, 22), "fluid_tank_side"),
-    ((-28, 26, 14), (12, 29, 18), PIPE),
-    ((-29, 7, 0), (-23, 11, 5), PIPE),
-    ((-29, 21, 0), (-23, 25, 5), PIPE),
-]
-
-MODELS["chemical_mixer"] = [
-    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
-    ((1, 2, 1), (15, 14, 9), {"*": STEEL, "north": "#front", "up": TOP}),
-    ((-12, 2, 6), (10, 24, 28), "fluid_tank_side"),
-    ((-12, 24, 6), (10, 26, 28), "fluid_tank_top"),
-    ((-5, 26, 13), (3, 31, 21), {"*": STEEL, "up": TOP}),
 ]
 
 MODELS["fracking_rig"] = [
@@ -353,13 +311,6 @@ MODELS["flow_battery"] = [
     ((-31, 2, 1), (15, 46, 31), {"*": STEEL, "north": "#front", "up": TOP}),
 ]
 
-MODELS["crystal_grower"] = [
-    ((0, 0, 0), (16, 2, 16), "heavy_plinth"),
-    ((1, 2, 1), (15, 14, 15), {"*": STEEL, "north": "#front", "up": TOP}),
-    ((3, 14, 3), (13, 28, 13), "fluid_tank_side"),
-    ((6, 28, 6), (10, 32, 10), "geothermal_stack"),
-]
-
 MODELS["lithography_station"] = [
     ((-32, 0, 0), (16, 2, 32), "heavy_plinth"),
     ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
@@ -403,12 +354,8 @@ FRONTS = {
     "water_wheel": "water_wheel_front",
     "large_steam_engine": "large_steam_engine_front",
     "pumpjack": "pumpjack_front",
-    "oil_sand_extractor": "oil_sand_extractor_front",
     "distillation_tower": "distillation_tower_front",
     "catalytic_cracker": "catalytic_cracker_front",
-    "vacuum_distillation_unit": "vacuum_distillation_unit_front",
-    "catalytic_reformer": "catalytic_reformer_front",
-    "chemical_mixer": "chemical_mixer_front",
     "fracking_rig": "fracking_rig_front",
     "flowback_treatment_unit": "flowback_treatment_unit_front",
     "diesel_generator": "diesel_generator_front",
@@ -422,7 +369,6 @@ FRONTS = {
     "synthesis_converter": "synthesis_converter_front",
     "lithium_battery_bank": "lithium_battery_bank_front",
     "flow_battery": "flow_battery_front",
-    "crystal_grower": "crystal_grower_front",
     "lithography_station": "lithography_station_front",
     "gas_holder": "gas_holder_front",
     "advanced_solar_panel": "advanced_solar_panel_front",

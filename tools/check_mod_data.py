@@ -375,11 +375,17 @@ def check_fluid_recipes(registered):
                     err(f"{label}: unknown fluid {fluid}")
                 if mb > spec["inputs"][i]:
                     err(f"{label}: needs {mb} mB of {fluid} but its tank holds {spec['inputs'][i]}")
-            for i, (fluid, mb) in enumerate(recipe.get("fluid_results", [])):
+            targets = [petro.result_tank(i, r) for i, r in enumerate(recipe.get("fluid_results", []))]
+            if len(set(targets)) != len(targets):
+                err(f"{label}: two fluid results share an output tank")
+            for i, result in enumerate(recipe.get("fluid_results", [])):
+                fluid, mb, tank = result[0], result[1], targets[i]
                 if fluid not in fluids:
                     err(f"{label}: unknown fluid {fluid}")
-                if mb > spec["outputs"][i]:
-                    err(f"{label}: makes {mb} mB of {fluid} but its tank holds {spec['outputs'][i]}")
+                if tank >= len(spec["outputs"]):
+                    err(f"{label}: sends {fluid} to output tank {tank}, which the machine does not have")
+                elif mb > spec["outputs"][tank]:
+                    err(f"{label}: makes {mb} mB of {fluid} but its tank holds {spec['outputs'][tank]}")
             # Metal is conserved like in the item machines: no recipe gives out more than its items hold.
             metal_in, metal_out = {}, {}
             for ref, count in recipe.get("items", []):
@@ -398,7 +404,7 @@ def check_fluid_recipes(registered):
                 elif split(ref)[0] == MOD and split(ref)[1] not in registered:
                     err(f"{label}: unknown item {ref}")
             fluid_in = sum(mb for _, mb in recipe.get("fluids", [])) + recipe.get("source", 0)
-            fluid_out = sum(mb for _, mb in recipe.get("fluid_results", []))
+            fluid_out = sum(r[1] for r in recipe.get("fluid_results", []))
             if recipe.get("items") and "source" not in recipe and fluid_out > sum(mb for _, mb in recipe.get("fluids", [])):
                 err(f"{label}: makes fluid from items without saying how much (\"source\")")
             if fluid_out > fluid_in:
@@ -568,22 +574,24 @@ def check_machines(registered):
 
     kinds = MACHINE_JAVA.read_text(encoding="utf-8")
     for machine, stats in STATS.items():
-        match = re.search(r'\("' + machine + r'", ([\d_]+), ([\d_]+), ([\d_]+), ([\d_]+),', kinds)
+        match = re.search(r'(\w+)\("' + machine + r'", ([\d_]+), ([\d_]+), ([\d_]+), ([\d_]+),', kinds)
         if not match:
             err(f"MachineKind.java has no entry for {machine}")
             continue
-        capacity, max_in, max_out, use = (int(v.replace("_", "")) for v in match.groups())
+        # The enum constant can differ from the block id (ARC_FURNACE is "arc_furnace_controller").
+        constant = match.group(1)
+        capacity, max_in, max_out, use = (int(v.replace("_", "")) for v in match.groups()[1:])
         if capacity != stats["capacity"]:
             err(f"{machine}: capacity {capacity} in Java, {stats['capacity']} in machines.py")
         expected_use = stats.get("use_per_tick", 0)
         if use != expected_use:
             err(f"{machine}: use {use} in Java, {expected_use} in machines.py")
         if "boost" in stats:
-            if f'case {machine.upper()} -> "{stats["boost"]}";' not in kinds:
+            if f'case {constant} -> "{stats["boost"]}";' not in kinds:
                 err(f"{machine}: MachineKind.boostGas() is not {stats['boost']}")
             if stats["boost"] not in petro.GASES:
                 err(f"{machine}: boost gas {stats['boost']} is not a gas in tools/petro.py")
-            per_tick = re.search(r"case " + machine.upper() + r" -> (\w+);\s*(?:case|default)", kinds.split("public int boostPerTick()")[1])
+            per_tick = re.search(r"case " + constant + r" -> (\w+);\s*(?:case|default)", kinds.split("public int boostPerTick()")[1])
             constants = dict(re.findall(r"public static final int (\w+) = ([\d_]+);", kinds))
             if not per_tick or int(constants.get(per_tick.group(1), "-1").replace("_", "")) != stats["boost_per_tick"]:
                 err(f"{machine}: MachineKind.boostPerTick() does not give {stats['boost_per_tick']}")

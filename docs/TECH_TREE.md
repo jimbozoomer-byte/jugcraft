@@ -81,7 +81,7 @@ All machines hold their own internal battery and accept power from cables or dir
 | Steel Foundry (2×2, 5 tall) | Steel | Iron ingot + coke → steel ingot, 400 ticks | none | bricks, hopper, iron plates, blast furnace |
 | Geothermal Generator (2×2×2) | Power | Lava → 64 JE/t (1 mB/t; a bucket lasts 1,000 ticks) | produces | invar plates, tinplate tank, bronze gears, casing, basic circuit |
 | Wind Turbine (9 tall, 7-block rotor) | Power | 12–72 JE/t by height above sea level; ×1.5 in rain, ×2 in thunder; the rotor turns (drawn by the client) and needs a clear 7×7 square in front of the top | produces | aluminum plates, bronze gears, casing, bronze plates, cable |
-| Arc Furnace (3×3×3 multiblock) | Mechanical (with chemistry stand-ins) | Quartz → 2 silicon; raw nickel, tungsten or uranium → ingot; titanium sponge → titanium ingot; bauxite, lepidolite and monazite stand-ins | 64 JE/t | 26 arc furnace casings (bricks + nickel) + controller |
+| Arc Furnace (3×3×3 multiblock) | Mechanical (with chemistry stand-ins) | Quartz → 2 silicon; 4 silicon + 1 phosphate → 1 silicon boule (400 ticks; argon piped into the controller, 1 mB/t, doubles its speed; batch 24, from the old crystal grower); raw nickel, tungsten or uranium → ingot; titanium sponge → titanium ingot; bauxite, lepidolite and monazite stand-ins | 64 JE/t | 26 arc furnace casings (bricks + nickel) + controller |
 
 ## Machine looks: steampunk and classic
 
@@ -388,21 +388,17 @@ The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches
 | Thing | What it does | Details | Built from |
 | --- | --- | --- | --- |
 | Crude Oil | A thick black fluid with a bucket; flows slowly and never makes new sources | `c:crude_oil` | reservoirs, oil sand |
-| Naphtha, Diesel, Heavy Fuel Oil, Lubricant, Gasoline | Refined liquids with buckets, tagged `c:<name>` | runny / amber / thick / golden / thin red-orange | distillation tower, cracker, vacuum unit, reformer |
-| Fracking Fluid | Water thickened with sand and a gelling agent, with a bucket | `c:fracking_fluid` | chemical mixer |
+| Naphtha, Diesel, Heavy Fuel Oil, Lubricant, Gasoline | Refined liquids with buckets, tagged `c:<name>` | runny / amber / thick / golden / thin red-orange | distillation tower, cracker, reformer |
+| Fracking Fluid | Water thickened with sand and a gelling agent, with a bucket | `c:fracking_fluid` | chemical reactor |
 | Flowback Water | Dirty water from a fracked well, with a bucket | `c:flowback_water` | fracking rig |
 | Refinery Gas | A gas: tanks and pipes only, no block or bucket | `c:refinery_gas` | distillation tower |
 | Oil reservoirs | Hidden under Overworld chunks, fixed by the seed: conventional (about 1 chunk in 12, 50–250 buckets) or shale (about 1 in 4 of the rest, 200–800 buckets, fracking only) | finite; the prospector reports Oil and Shale oil | – |
 | Pumpjack | 1 wide, 3 tall, 3 long; pumps the conventional reservoir under its wellhead | 2 mB/t at 32 JE/t, 16-bucket tank, pushes into pipes | 4 steel plates, 2 steel gears, electric pump, casing |
-| Oil Sand Extractor | 2×2×2 hot-water extraction | oil sand + 250 mB water → 500 mB crude oil + sand (160 ticks); bitumen + 100 mB water → 150 mB (80 ticks); 32 JE/t | 4 steel plates, hopper, 2 tinplate tanks, casing, steel gear |
-| Distillation Tower | 2×2, seven tall; splits crude oil into fractions, each drawn off at its own height | 1,000 mB crude → 100 refinery gas (top), 250 naphtha (layer 4), 400 diesel (layer 2), 250 heavy fuel oil (base); 100 ticks at 128 JE/t | 6 steel plates, steel tank, advanced circuit, blast furnace |
-| Catalytic Cracker | 2×2, four tall; cracks heavy fuel oil into lighter fuels | 1,000 mB heavy fuel oil + 250 mB water + 1 catalyst → 500 diesel (base), 300 naphtha (layer 2), 200 refinery gas (top); 160 ticks at 160 JE/t | steel plates, advanced circuit, 2 steel tanks, arc furnace casing, casing |
+| Distillation Tower | 2×2, seven tall; splits crude oil into fractions, each drawn off at its own height | 1,000 mB crude → 100 refinery gas (top), 250 naphtha (layer 4), 400 diesel (layer 2), 250 heavy fuel oil (base); 100 ticks at 128 JE/t; batch 24: heavy fuel oil piped in instead → 400 mB lubricant (layer 1) + 2 asphalt binder (its slot), 120 ticks | 6 steel plates, steel tank, advanced circuit, blast furnace |
+| Catalytic Cracker | 2×2, four tall; cracks heavy fuel oil into lighter fuels | 1,000 mB heavy fuel oil + 250 mB water + 1 catalyst → 500 diesel (base), 300 naphtha (layer 2), 200 refinery gas (top); 160 ticks at 160 JE/t; batch 24: 1,000 mB naphtha + 1 catalyst → 900 gasoline (layer 1) + 100 refinery gas (top), 120 ticks | steel plates, advanced circuit, 2 steel tanks, arc furnace casing, casing |
 | Cracking Catalyst | Used up by the cracker, one per bucket | – | 4 bauxite, 4 sand, nickel ingot → 4 |
-| Vacuum Distillation Unit | 2×2, three tall; boils heavy fuel oil under vacuum | 1,000 mB heavy fuel oil → 400 mB lubricant + 2 asphalt binder; 120 ticks at 96 JE/t | steel plates, heavy pump, 2 tinplate tanks, advanced circuit, casing |
-| Catalytic Reformer | 3 wide, 2 tall, 2 deep; reforms naphtha | 1,000 mB naphtha → 900 gasoline (bottom row) + 100 refinery gas (top row); 120 ticks at 120 JE/t | steel plates, advanced circuit, 2 tinplate tanks, blast furnace, casing |
-| Chemical Mixer | 2×2×2 stirred vessel | 1,000 mB water + 2 sand + 1 dried kelp → 1,000 mB fracking fluid; 80 ticks at 64 JE/t | steel plates, electric motor, 2 tinplate tanks, casing, hopper |
 | Fracking Rig | 3×3, five tall; frees shale oil under its front left block | per tick: 4 mB fracking fluid down; 6 mB crude oil (base), 2 mB refinery gas (top), 3 mB flowback water (one up); 256 JE/t | steel plates, ore drill, 2 heavy pumps, advanced circuit, casing |
-| Flowback Treatment Unit | 3 wide, 1 tall, 2 deep: settling basins and a filter press | 1,000 mB flowback water → 750 mB water + 1 salt; 80 ticks at 48 JE/t | steel plates, iron bars, 2 tinplate tanks, sieve, casing |
+| Settling Plant (was Flowback Treatment Unit) | 3 wide, 1 tall, 2 deep: settling basins and a filter press | 1,000 mB flowback water → 750 mB water + 1 salt (80 ticks); batch 24: oil sand + 250 mB water → 500 mB crude oil + sand (160 ticks), bitumen + 100 mB water → 150 mB (80 ticks), mud → 4 clay balls + 250 mB water (60 ticks); 48 JE/t | steel plates, iron bars, 2 tinplate tanks, sieve, casing |
 | Diesel Generator | 3 wide, 2 tall, 2 deep; an inline six burning liquid fuel | 256 JE/t: diesel 256 JE/mB (1 mB/t), heavy fuel oil 128 JE/mB (2 mB/t); 8-bucket tank, 60,000 JE buffer | 4 steel plates, electric motor, 2 tinplate tanks, casing, steel gear |
 | Gas Turbine | 4 wide, 2 tall, 2 deep; burns light fuels, needs lubricant | 512 JE/t: gasoline 384 JE/mB, refinery gas 192 JE/mB; 1 mB lubricant per 20 ticks of running; 16-bucket fuel tank, 4-bucket lubricant tank, 120,000 JE buffer | 4 steel plates, 2 iron bars, 2 diesel generators, advanced circuit, steel gear |
 | Polymerization Reactor | 2×2, three tall; polymerizes refinery gas | 1,000 mB refinery gas → 4 plastic pellets; 100 ticks at 96 JE/t | 4 steel plates, cracking catalyst, 2 steel tanks, glass, casing |
@@ -419,9 +415,9 @@ Salt, sulfur, phosphate and bauxite get their real reactions ([feature record](f
 
 | Thing | What it does | Details | Built from |
 | --- | --- | --- | --- |
-| Brine, Lye | Fluids with buckets: salt water, and sodium hydroxide solution | `c:brine`, `c:lye` | chemical mixer (2 salt + 1,000 mB water → 1,000 mB brine), electrolytic cell |
+| Brine, Lye | Fluids with buckets: salt water, and sodium hydroxide solution | `c:brine`, `c:lye` | chemical reactor (2 salt + 1,000 mB water → 1,000 mB brine), electrolytic cell |
 | Chlorine, Hydrogen | Gases: tanks and pipes only | `c:chlorine`, `c:hydrogen` | electrolytic cell |
-| Electrolytic Cell | 3 wide, 3 tall, 2 deep; splits brine | 1,000 mB brine → 250 chlorine (top row), 250 hydrogen (middle row), 500 lye (bottom row); 200 ticks at 256 JE/t | 4 steel plates, 2 aluminum cables, 2 steel tanks, advanced circuit, casing |
+| Electrolytic Cell | 3 wide, 3 tall, 2 deep; splits brine | 1,000 mB brine → 250 chlorine (top row), 250 hydrogen (middle row), 500 lye (bottom row); 200 ticks at 256 JE/t; batch 24: 1,000 mB water → 500 hydrogen (middle row) + 250 oxygen (top row), 800 ticks | 4 steel plates, 2 aluminum cables, 2 steel tanks, advanced circuit, casing |
 | Sulfuric Acid | A fluid with a bucket | `c:sulfuric_acid` | chemical reactor |
 | Titanium | A metal mined as rutile-bearing ore (Y −64 to −8, iron pickaxe); no furnace smelts it | raw titanium + coke + 250 mB chlorine → titanium sponge (chemical reactor); sponge → ingot (arc furnace) | – |
 | Leaching | Lepidolite or monazite dissolved in sulfuric acid | 1 lepidolite + 250 mB acid → 2 lithium carbonate; 1 monazite + 250 mB acid → 2 rare earth oxide (chemical reactor) | – |
@@ -430,7 +426,7 @@ Salt, sulfur, phosphate and bauxite get their real reactions ([feature record](f
 | Fuel Cell | One block, electric look; hydrogen → JE | 128 JE/t, 1 mB hydrogen a tick (128 JE/mB); 8-bucket tank | 4 aluminum plates, 2 aluminum cables, 2 steel plates, advanced circuit, tinplate tank |
 | Neodymium Magnet | Rare earths alloyed with iron | 1 rare earth oxide + 1 iron ingot → 1 (alloy smelter, 200 ticks) | – |
 | Fertilizer | Superphosphate: two doses of bone meal on every crop in a 5×5 area | 2 phosphate + 250 mB sulfuric acid → 4, or 2 phosphate + 250 mB ammonia → 6 (ammonium phosphate; chemical reactor) | – |
-| Chemical Reactor | 2×2×2 acid plant | 2 sulfur dust + 1,000 mB water → 1,000 mB sulfuric acid; 100 ticks at 96 JE/t | 4 steel plates, glass, 2 tinplate tanks, casing, lead ingot |
+| Chemical Reactor | 2×2×2 acid plant | 2 sulfur dust + 1,000 mB water → 1,000 mB sulfuric acid; 100 ticks at 96 JE/t; batch 24 (from the old chemical mixer): 2 salt + 1,000 mB water → 1,000 mB brine (60 ticks); 2 sand + 1 dried kelp + 1,000 mB water → 1,000 mB fracking fluid (80 ticks) | 4 steel plates, glass, 2 tinplate tanks, casing, lead ingot |
 | Air Separation Unit | 2×2×6 cold box and column (batch 12) | From the air, needing only power: 8 mB/t nitrogen out of the top row, 2 mB/t oxygen out of the bottom row and 1 mB of argon every 2 ticks out of the middle at 64 JE/t; 16-bucket tanks | 4 steel plates, 2 steel pipes, 2 tinplate tanks, casing, 2 electric motors, advanced circuit |
 | Synthesis Converter | 3×4×2 high-pressure loop (batch 12) | Haber–Bosch: 300 mB hydrogen + 100 mB nitrogen → 200 mB ammonia. Ostwald: 100 mB ammonia + 200 mB oxygen + 100 mB water → 200 mB nitric acid. 40 ticks at 128 JE/t | 4 steel plates, 2 titanium ingots, 2 steel pipes, casing, advanced circuit |
 
@@ -442,7 +438,6 @@ The tier after oil and chemistry, in the **cyan look**: near-black casings with 
 
 | Thing | What it is | Recipe or use | Built from |
 | --- | --- | --- | --- |
-| Crystal Grower | 2 tall; pulls doped silicon crystals | 4 silicon + 1 phosphate → 1 silicon boule; 400 ticks at 128 JE/t; argon piped in (1 mB/t) doubles its speed (batch 13) | glass, titanium ingot, arc furnace casing, aluminum plates, advanced circuit |
 | Silicon Wafer | Thin slices of a boule | 1 silicon boule → 8 wafers (sawmill, 200 ticks) | – |
 | Lithography Station | 3×2×2 cleanroom with a monitor bank | 1 wafer + 2 copper wire + 100 mB sulfuric acid (or 50 mB nitric acid) → 4 microchips; 200 ticks at 192 JE/t; 4-bucket acid tank | glass, redstone lamp, titanium ingots, advanced circuit, aluminum plates, casing |
 | Processor | The third circuit tier | 4 microchips + 1 advanced circuit + 1 gold ingot (circuit assembler, 400 ticks) | – |
