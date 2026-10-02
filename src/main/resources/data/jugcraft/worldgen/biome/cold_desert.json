@@ -158,10 +158,8 @@
       "jugcraft:patch_dead_bush",
       "jugcraft:dry_grass"
     ],
-    [
-      "minecraft:freeze_top_layer"
-    ]
+    []
   ],
-  "has_precipitation": true,
+  "has_precipitation": false,
   "temperature": -0.3
 }

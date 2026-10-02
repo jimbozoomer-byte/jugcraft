@@ -1,6 +1,6 @@
 # Wetlands (biomes batch 3)
 
-Status: in progress on branch `claude/biomes`, with the region engine ([biome-regions.md](biome-regions.md)). Awaiting CI. **Not yet played.**
+Status: in progress on branch `claude/biomes`, with the region engine ([biome-regions.md](biome-regions.md)). Green in CI (server and client game tests). **Not yet played.**
 Proposal issue: none. The owner asked on 2 October 2026 to remake the Biomes O' Plenty catalog's biomes ([branches/BIOMES.md](../branches/BIOMES.md)) and to carry on through every batch. Everything here is original: the catalog guided the concepts only.
 Owner: @jimbozoomer-byte
 Target milestone and tier: world generation, farming and building (Discovery).
@@ -67,7 +67,25 @@ Results are recorded under "Results" below after CI runs.
 - Not run: play, a dedicated server, two clients.
 
 ### Results
-Not yet run in CI.
+- **Run [37037252461](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37037252461) (commit 2809360f): failed to compile.** 26.3 has no `WaterlilyBlock`, so duckweed got its own `FloatingPlantBlock`.
+- **Run [37038021655](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37038021655) (commit e62dd3a7): green.**
+  - Server game tests: all 310 required tests passed.
+    - `wetlandPlantsWork`: watergrass and duckweed stood only where they should, and a cattail dropped 1.
+    - `seasonalForestSaplingsGrow`: a willow of 7 logs and 84 leaves, all 84 in autumn colours.
+    - The wetland layout placed every batch 3 biome: Lake District 178 entries, Marsh 174, Lush River 160, Wetland 158, Fen 100, Sludge Mire 92, Ghost Forest 82, Bayou 80, Floodplain 80, Quagmire 80, Bog 40, Dead Swamp 40, Lush Swamp 40 and Swamp Woods 40. The cut vanilla table has 9,045 entries per layout.
+  - Client game test, a real world with seed `jugcraft`. Twelve of the fourteen wetlands were within 6,400 blocks of the start:
+    - Bog 1,740 blocks away, Dead Swamp 1,757, Lush River 1,847, Marsh 2,437, Lake District 2,691, Quagmire 4,249.
+    - Wetland 4,786, Sludge Mire 4,790, Fen 5,013, Swamp Woods 6,004, Lush Swamp 6,052, Ghost Forest 6,291.
+    - The Bayou and Floodplain (warm and hot mangrove swamps, which are rare) were not within 6,400 blocks.
+    - Generated seasonal leaves near them were all in today's look. Willows were still green on day 275, as their schedule says (they turn on day 283).
+  - Screenshots (2 October, autumn):
+    - Swamp Woods: willows hung with leaves and vines over grassy terraces.
+    - Lush Swamp: tall oaks in autumn colours. Fen: firs and dark oaks over muddy pools.
+    - Lake District: lakes ringed with autumn-coloured trees. Ghost Forest: a lake with lily pads and grey dead trees beyond.
+    - Lush River: oak bushes on its banks. Marsh: shallow water with cattails and watergrass on a green plain.
+    - Wetland: mud patches in olive grass with firs and willows. Bog: mud and cattails.
+    - Dead Swamp and Sludge Mire: the camera stood over their murky ponds and shows mostly water.
+    - Quagmire: the shot looked across its region's edge into a neighbouring Dead Forest. The client test now prefers a spot where the camera's view has the biome too.
 
 ## World and event applicability
 - Biome fit: each biome takes the climate of the vanilla biome it replaces.

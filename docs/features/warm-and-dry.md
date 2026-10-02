@@ -1,6 +1,6 @@
 # Warm and dry lands (biomes batch 4)
 
-Status: in progress on branch `claude/biomes`, with the region engine ([biome-regions.md](biome-regions.md)). Awaiting CI. **Not yet played.**
+Status: in progress on branch `claude/biomes`, with the region engine ([biome-regions.md](biome-regions.md)). Green in CI (server and client game tests). **Not yet played.**
 Proposal issue: none. The owner asked on 2 October 2026 to remake the Biomes O' Plenty catalog's biomes ([branches/BIOMES.md](../branches/BIOMES.md)) and to carry on through every batch. Everything here is original: the catalog guided the concepts only.
 Owner: @jimbozoomer-byte
 Target milestone and tier: world generation and building (Discovery).
@@ -17,7 +17,7 @@ Fifteen warm or dry biomes. The meadow layout takes the dry grasslands and sandy
 | **Lush Desert** | meadow: desert (one half) | orange dunes of red sand that see rain: dune grass, acacia brush, bushes, wildflowers; villages |
 | **Bone Flats** | meadow: desert (other half) | dry, coarse flats with pillars of bone, dead bushes and dry grass |
 | **Dry River** | meadow: hot rivers | a river between sandy banks with dead bushes |
-| **Cold Desert** | meadow: dry snowy plains | gravel and coarse dirt, dry grass, hidden powder snow; no animals; snowy villages |
+| **Cold Desert** | meadow: dry snowy plains | gravel and coarse dirt, dry grass, hidden powder snow; too dry for snow; no animals; snowy villages |
 | **Scrubland** | wild: dry savanna | flat scrub of dry grass and wildflowers, scattered oak bushes |
 | **Lush Savanna** | wild: savanna | a field of poppies and rose bushes on grass blotched with coarse dirt; no trees, no animals |
 | **Outback** | wild: desert (one half) | red sand patched with grass, tiny acacias and cacti, pools of water and lava; villages |
@@ -63,7 +63,26 @@ Results are recorded under "Results" below after CI runs.
 - Not run: play, a dedicated server, two clients.
 
 ### Results
-Not yet run in CI.
+- **Run [37038318322](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37038318322) (commit 9654ad30): green.**
+  - Server game tests: all 311 required tests passed.
+    - `warmTreesGrow`: a palm of 8 logs and 55 leaves, and a cypress of 10 logs and 38 leaves. `jacarandaSaplingsGrow`: 12 logs and 78 leaves.
+    - Every batch 4 rule placed its biome:
+      - Meadow layout: Lush Desert 400 entries, Bone Flats 308, Jacaranda Glade 220, Dryland 180, Xeric Shrubland 128, Cold Desert 90, Dry River 80.
+      - Wild layout: Wasteland 432, Outback 400, Oasis 308, Burnt Forest 220, Lush Savanna 180, Scrubland 180.
+      - Woodland layout: Mediterranean Forest 220, Orchard 158.
+    - The data packs loaded with Jugcraft's material rule override in place.
+  - Client game test, a real world with seed `jugcraft`. Eight of the fifteen were within 6,400 blocks of the start:
+    - Orchard 999 blocks away, Cold Desert 1,033, Lush Savanna 1,176, Scrubland 1,242, Burnt Forest 1,260, Mediterranean Forest 1,865, Jacaranda Glade 2,673.
+    - Dryland was found 8,016 blocks away (the search covers a square).
+    - Not within 6,400 blocks: the seven that replace deserts, badlands, savanna plateaus and hot rivers (Lush Desert, Bone Flats, Outback, Oasis, Wasteland, Xeric Shrubland and Dry River). The client test now also logs how near the vanilla deserts, badlands and savanna plateaus are, to tell a climate missing near the start from a placement fault.
+  - Screenshots (2 October, autumn):
+    - Dryland: lilac sky, pines and oaks, bone pillars, sand by the water.
+    - Jacaranda Glade: violet jacarandas among cherries and oaks.
+    - Scrubland: dry grass and bushes on a coastal slope. Lush Savanna: poppies and rose bushes on grass and coarse dirt.
+    - Burnt Forest: charred trunks on coarse dirt under grey, ashy air.
+    - Mediterranean Forest: dark cypress columns among oaks in autumn colours. Orchard: chestnut trees and azaleas.
+    - Jugcraft's own surfaces generate: coarse dirt in the Burnt Forest and Lush Savanna.
+    - The Cold Desert was buried in snow: vanilla lays snow on any freezing biome as the land is made. It now drops that step and has no precipitation, so its gravel should show; awaiting CI.
 
 ## World and event applicability
 - Biome fit: each biome takes the climate of the vanilla biome it replaces.

@@ -61,6 +61,11 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 	private static final int SURFACE_STEP = 8;
 	/** A spot is preferred where the surface 16 blocks to each side has the biome too. */
 	private static final int SURFACE_MARGIN = 16;
+	/**
+	 * And where the camera looks: the screenshot faces north-west (yaw 135) and down, so the middle of the picture is
+	 * about this many blocks west and north of the spot.
+	 */
+	private static final int SURFACE_VIEW = 20;
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -109,6 +114,19 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 				if (place == null) {
 					vanillaMissing.add(biome.identifier().getPath());
 				}
+			}
+			// Logged only: how near the climates are that the rarer Jugcraft biomes replace (hot lands, mangroves, jungles,
+			// old-growth taigas), to tell a biome missing near the start from one the regions never place.
+			for (ResourceKey<Biome> biome : List.of(Biomes.DESERT, Biomes.BADLANDS, Biomes.SAVANNA_PLATEAU, Biomes.MANGROVE_SWAMP,
+					Biomes.JUNGLE, Biomes.OLD_GROWTH_PINE_TAIGA)) {
+				BlockPos place = server.computeOnServer(minecraft -> {
+					Pair<BlockPos, Holder<Biome>> nearest = minecraft.overworld().findClosestBiome3d(holder -> holder.is(biome), start,
+							SEARCH, 64, 64);
+					return nearest == null ? null : nearest.getFirst();
+				});
+				LOGGER.info("Biomes, seed {}: climate check, vanilla {} {}", SEED, biome.identifier().getPath(), place == null
+						? "not within " + SEARCH + " blocks" : String.format(Locale.ROOT, "at %d %d (%d blocks from the start)", place.getX(),
+								place.getZ(), (int) Math.sqrt(place.distSqr(start.atY(place.getY())))));
 			}
 			List<BlockPos> spots = new ArrayList<>();
 			for (int i = 0; i < found.size(); i++) {
@@ -182,7 +200,8 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 				continue;
 			}
 			if (surfaceIs(level, x + SURFACE_MARGIN, z, biome) && surfaceIs(level, x - SURFACE_MARGIN, z, biome)
-					&& surfaceIs(level, x, z + SURFACE_MARGIN, biome) && surfaceIs(level, x, z - SURFACE_MARGIN, biome)) {
+					&& surfaceIs(level, x, z + SURFACE_MARGIN, biome) && surfaceIs(level, x, z - SURFACE_MARGIN, biome)
+					&& surfaceIs(level, x - SURFACE_VIEW, z - SURFACE_VIEW, biome)) {
 				return surface(level, x, z);
 			}
 			if (edge == null) {

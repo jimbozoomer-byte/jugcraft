@@ -495,12 +495,15 @@ BIOMES = {
         "extras": ["patch_dead_bush"],
         "tags": ["c:is_dry", "c:is_hot"],
     },
-    # A cold, gravelly waste with coarse dirt, dry grass and treacherous powder snow; no animals; snowy villages.
+    # A cold, gravelly waste with coarse dirt, dry grass and treacherous powder snow; no animals; snowy villages. Too
+    # dry for snow: no snowfall, and none laid when the land is made (vanilla lays it on any freezing biome).
     "cold_desert": {
         "display": "Cold Desert", "base": "snowy_plains", "temperature": -0.3, "downfall": 0.05, "seasons": False,
+        "precipitation": False,
         "surface": {"floor": "minecraft:gravel", "under": "minecraft:dirt",
                     "patches": [[-0.3, 0.0, "minecraft:coarse_dirt"], [0.45, 0.6, "minecraft:powder_snow"]]},
         "trees": None,
+        "drop": ["minecraft:freeze_top_layer"],
         "extras": ["dry_grass", "patch_dead_bush"],
         "creatures": [],
         "tags": ["c:is_dry", "c:is_cold", "c:is_desert"],
