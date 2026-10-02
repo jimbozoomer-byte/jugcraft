@@ -1,8 +1,16 @@
 package io.github.jimbozoomer.jugcraft.biome;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Pair;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -13,64 +21,63 @@ import java.util.function.Consumer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
 
 /**
  * Jugcraft regions (docs/features/biome-regions.md, tools/biomes.py): the Overworld is divided into irregular cells
- * about {@code biomes.region_size} blocks across, and {@code biomes.region_share} of them use the Jugcraft layout:
- * vanilla's climate table with {@link #RULES} applied (a vanilla biome, in the given climate bands, becomes a Jugcraft
- * biome). The rest stay vanilla. Terrain does not depend on biomes, so a region's border is a change of biome only.
+ * about {@code biomes.region_size} blocks across, and {@code biomes.region_share} of them are Jugcraft regions. Each
+ * Jugcraft region uses one of {@link #LAYOUTS} layouts: vanilla's climate table with that layout's {@link #rules()}
+ * applied (a vanilla biome, in the given climate bands and weirdness half, becomes a Jugcraft biome). The rest stay
+ * vanilla. Terrain does not depend on biomes, so a region's border is a change of biome only.
  *
- * <p>How: {@code mixin/OverworldBiomeBuilderMixin} records the Jugcraft layout as the builder fills vanilla's table
+ * <p>How: {@code mixin/OverworldBiomeBuilderMixin} records the layouts as the builder fills vanilla's table
  * ({@link #recorder}), and lists every Jugcraft biome in vanilla's table at {@link #UNREACHABLE}, a climate no place
  * has, so world generation knows its features and structures. {@code mixin/MultiNoiseBiomeSourceMixin} then answers
- * biome lookups in Jugcraft regions from the Jugcraft layout ({@link Source}). Which cells are Jugcraft regions comes
- * from the world seed (read as the server starts, before any world generates), so a seed always makes the same world.
- * {@code biomes.enabled=false} turns regions off for new chunks; the biomes stay registered.
+ * biome lookups in Jugcraft regions from their layout ({@link Source}). Which cells are Jugcraft regions, and which
+ * layout each uses, comes from the world seed (read as the Overworld loads, before any chunk generates), so a seed
+ * always makes the same world. The rules are data ({@code /jugcraft/region_rules.json}, generated from
+ * tools/biomes.py). {@code biomes.enabled=false} turns regions off for new chunks; the biomes stay registered.
  */
 public final class JugcraftRegions {
 	public static final String FEATURE = "biomes";
 	/** Defaults of the region options. Keep in sync with REGIONS in tools/biomes.py. */
 	public static final int SIZE = 1024;
 	public static final double SHARE = 0.5;
+	/** How many layouts Jugcraft regions come in, equally often. Keep in sync with LAYOUTS in tools/biomes.py. */
+	public static final int LAYOUTS = 4;
 	/** Vanilla's climate band edges (OverworldBiomeBuilder). Keep in sync with tools/biomes.py. */
 	private static final float[] TEMPERATURE_BANDS = {-0.45F, -0.15F, 0.2F, 0.55F};
 	private static final float[] HUMIDITY_BANDS = {-0.35F, -0.1F, 0.1F, 0.3F};
 	/** Where the Jugcraft biomes sit in vanilla's table: further from any place's climate than vanilla's own biomes. */
 	public static final Climate.ParameterPoint UNREACHABLE = Climate.parameters(1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F);
+	private static final String RULES_FILE = "/jugcraft/region_rules.json";
 
-	/** In the Jugcraft layout, entries of {@code replaces} in these temperature and humidity bands become {@code biome}. */
-	public record Rule(ResourceKey<Biome> replaces, int minTemperature, int maxTemperature, int minHumidity, int maxHumidity,
-			ResourceKey<Biome> biome) {
-		boolean matches(Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry) {
-			if (!entry.getSecond().equals(replaces)) {
+	/**
+	 * In the layouts of the {@code layouts} bit set, entries of {@code replaces} in these temperature and humidity bands,
+	 * and in this weirdness half (-1: negative, 1: positive, 0: either), become {@code biome}.
+	 */
+	public record Rule(int layouts, ResourceKey<Biome> replaces, int minTemperature, int maxTemperature, int minHumidity,
+			int maxHumidity, int weirdness, ResourceKey<Biome> biome) {
+		public boolean matches(int layout, Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry) {
+			if ((layouts & 1 << layout) == 0 || !entry.getSecond().equals(replaces)) {
 				return false;
 			}
-			int temperature = band(entry.getFirst().temperature(), TEMPERATURE_BANDS);
-			int humidity = band(entry.getFirst().humidity(), HUMIDITY_BANDS);
-			return temperature >= minTemperature && temperature <= maxTemperature && humidity >= minHumidity && humidity <= maxHumidity;
+			Climate.ParameterPoint point = entry.getFirst();
+			int temperature = temperatureBand(point);
+			int humidity = humidityBand(point);
+			return temperature >= minTemperature && temperature <= maxTemperature && humidity >= minHumidity && humidity <= maxHumidity
+					&& (weirdness == 0 || weirdness == half(point.weirdness()));
 		}
 	}
 
-	/** Batch 1, the seasonal forests. Keep in sync with RULES in tools/biomes.py. */
-	public static final List<Rule> RULES = List.of(
-			rule(Biomes.TAIGA, 1, 1, 0, 4, "coniferous_forest"),
-			rule(Biomes.SNOWY_TAIGA, 0, 0, 0, 4, "snowy_coniferous_forest"),
-			rule(Biomes.FOREST, 1, 1, 0, 4, "maple_woods"),
-			rule(Biomes.FOREST, 2, 2, 0, 4, "seasonal_forest"),
-			rule(Biomes.BIRCH_FOREST, 0, 4, 0, 4, "aspen_glade"),
-			rule(Biomes.OLD_GROWTH_BIRCH_FOREST, 0, 4, 0, 4, "aspen_glade"),
-			rule(Biomes.PLAINS, 1, 1, 0, 0, "dead_forest"),
-			rule(Biomes.PLAINS, 1, 1, 1, 1, "tundra"),
-			rule(Biomes.SNOWY_PLAINS, 0, 0, 2, 2, "snowy_forest"),
-			rule(Biomes.SNOWY_PLAINS, 0, 0, 1, 1, "muskeg"));
+	private static final List<Rule> RULES = loadRules();
 
-	private static volatile List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> layout;
+	private static volatile List<List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>>> layouts;
 	private static volatile long seedPrint = mix(0L);
 	private static volatile int cellQuarts = SIZE / 4;
 	private static volatile int share = (int) (SHARE * 65536);
@@ -78,8 +85,40 @@ public final class JugcraftRegions {
 	private JugcraftRegions() {
 	}
 
-	private static Rule rule(ResourceKey<Biome> replaces, int minT, int maxT, int minH, int maxH, String biome) {
-		return new Rule(replaces, minT, maxT, minH, maxH, ResourceKey.create(Registries.BIOME, Jugcraft.id(biome)));
+	/** The rules, from the generated {@value #RULES_FILE}; none (and an error logged) if it cannot be read. */
+	private static List<Rule> loadRules() {
+		List<Rule> rules = new ArrayList<>();
+		try (InputStream stream = JugcraftRegions.class.getResourceAsStream(RULES_FILE)) {
+			if (stream == null) {
+				throw new IOException("missing");
+			}
+			JsonArray array = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).getAsJsonArray();
+			for (JsonElement element : array) {
+				JsonObject rule = element.getAsJsonObject();
+				int mask = 0;
+				for (JsonElement layout : rule.getAsJsonArray("layouts")) {
+					mask |= 1 << layout.getAsInt();
+				}
+				JsonArray temperature = rule.getAsJsonArray("temperature");
+				JsonArray humidity = rule.getAsJsonArray("humidity");
+				rules.add(new Rule(mask, biomeKey(rule.get("replaces").getAsString()), temperature.get(0).getAsInt(),
+						temperature.get(1).getAsInt(), humidity.get(0).getAsInt(), humidity.get(1).getAsInt(),
+						rule.get("weirdness").getAsInt(), biomeKey(rule.get("biome").getAsString())));
+			}
+		} catch (IOException | RuntimeException e) {
+			Jugcraft.LOGGER.error("Could not read the Jugcraft region rules {}; Jugcraft regions stay vanilla", RULES_FILE, e);
+			return List.of();
+		}
+		return List.copyOf(rules);
+	}
+
+	private static ResourceKey<Biome> biomeKey(String id) {
+		return ResourceKey.create(Registries.BIOME, Identifier.parse(id));
+	}
+
+	/** The rules, in order (the first that matches an entry decides it). */
+	public static List<Rule> rules() {
+		return RULES;
 	}
 
 	/**
@@ -122,7 +161,7 @@ public final class JugcraftRegions {
 	}
 
 	/** The band (0 to 4) where the middle of a climate parameter's range falls. */
-	static int band(Climate.Parameter parameter, float[] edges) {
+	private static int band(Climate.Parameter parameter, float[] edges) {
 		long middle = (parameter.min() + parameter.max()) / 2;
 		int band = 0;
 		for (float edge : edges) {
@@ -133,19 +172,34 @@ public final class JugcraftRegions {
 		return band;
 	}
 
-	/** The biome a vanilla table entry has in the Jugcraft layout. */
-	public static ResourceKey<Biome> regional(Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry) {
+	/** The temperature band (0, coldest, to 4) of a climate entry. */
+	public static int temperatureBand(Climate.ParameterPoint point) {
+		return band(point.temperature(), TEMPERATURE_BANDS);
+	}
+
+	/** The humidity band (0, driest, to 4) of a climate entry. */
+	public static int humidityBand(Climate.ParameterPoint point) {
+		return band(point.humidity(), HUMIDITY_BANDS);
+	}
+
+	/** The weirdness half where the middle of the range falls: -1 below zero, 1 from zero up. */
+	public static int half(Climate.Parameter parameter) {
+		return (parameter.min() + parameter.max()) / 2 < 0 ? -1 : 1;
+	}
+
+	/** The biome a vanilla table entry has in a layout. */
+	public static ResourceKey<Biome> regional(int layout, Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry) {
 		for (Rule rule : RULES) {
-			if (rule.matches(entry)) {
+			if (rule.matches(layout, entry)) {
 				return rule.biome();
 			}
 		}
 		return entry.getSecond();
 	}
 
-	/** The Jugcraft layout last recorded from the Overworld biome builder (null: none yet, or regions are off). */
-	public static List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> layout() {
-		return layout;
+	/** The layouts last recorded from the Overworld biome builder, by index (null: none yet, or regions are off). */
+	public static List<List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>>> layouts() {
+		return layouts;
 	}
 
 	/** A consumer for the Overworld biome builder that passes entries on and records the Jugcraft layout; null if off. */
@@ -153,34 +207,42 @@ public final class JugcraftRegions {
 		return enabled() ? new Recorder(vanilla) : null;
 	}
 
-	/** Records the Jugcraft layout while vanilla's table is built. */
+	/** Records the layouts while vanilla's table is built. */
 	public static final class Recorder implements Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> {
 		private final Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> vanilla;
-		private final List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> recorded = new ArrayList<>();
+		private final List<List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>>> recorded = new ArrayList<>();
 
 		private Recorder(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> vanilla) {
 			this.vanilla = vanilla;
+			for (int layout = 0; layout < LAYOUTS; layout++) {
+				recorded.add(new ArrayList<>());
+			}
 		}
 
 		@Override
 		public void accept(Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry) {
 			vanilla.accept(entry);
-			recorded.add(Pair.of(entry.getFirst(), regional(entry)));
+			for (int layout = 0; layout < LAYOUTS; layout++) {
+				recorded.get(layout).add(Pair.of(entry.getFirst(), regional(layout, entry)));
+			}
 		}
 
-		/** Lists the Jugcraft biomes in vanilla's table where no climate reaches them, and publishes the layout. */
+		/** Lists the Jugcraft biomes in vanilla's table where no climate reaches them, and publishes the layouts. */
 		public void finish() {
 			for (ResourceKey<Biome> biome : biomes()) {
 				vanilla.accept(Pair.of(UNREACHABLE, biome));
 			}
-			layout = List.copyOf(recorded);
+			layouts = recorded.stream().map(List::copyOf).toList();
 		}
 	}
 
-	/** The Jugcraft layout with this biome source's own holders; null if it is not an Overworld with the Jugcraft biomes. */
-	public static Climate.ParameterList<Holder<Biome>> layoutFor(Set<Holder<Biome>> possible) {
-		List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> table = layout;
-		if (table == null) {
+	/**
+	 * The layouts with this biome source's own holders; null if it is not an Overworld with the Jugcraft biomes (every
+	 * biome the rules place).
+	 */
+	public static List<Climate.ParameterList<Holder<Biome>>> layoutsFor(Set<Holder<Biome>> possible) {
+		List<List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>>> tables = layouts;
+		if (tables == null) {
 			return null;
 		}
 		Map<ResourceKey<Biome>, Holder<Biome>> byKey = new HashMap<>();
@@ -190,15 +252,19 @@ public final class JugcraftRegions {
 		if (!byKey.keySet().containsAll(biomes())) {
 			return null;
 		}
-		List<Pair<Climate.ParameterPoint, Holder<Biome>>> values = new ArrayList<>(table.size());
-		for (Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry : table) {
-			Holder<Biome> holder = byKey.get(entry.getSecond());
-			if (holder == null) {
-				return null;
+		List<Climate.ParameterList<Holder<Biome>>> out = new ArrayList<>();
+		for (List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> table : tables) {
+			List<Pair<Climate.ParameterPoint, Holder<Biome>>> values = new ArrayList<>(table.size());
+			for (Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry : table) {
+				Holder<Biome> holder = byKey.get(entry.getSecond());
+				if (holder == null) {
+					return null;
+				}
+				values.add(Pair.of(entry.getFirst(), holder));
 			}
-			values.add(Pair.of(entry.getFirst(), holder));
+			out.add(new Climate.ParameterList<>(values));
 		}
-		return new Climate.ParameterList<>(values);
+		return List.copyOf(out);
 	}
 
 	/** The number regions are drawn from for a world seed. */
@@ -206,8 +272,11 @@ public final class JugcraftRegions {
 		return mix(seed ^ 0x5DEECE66DL);
 	}
 
-	/** Whether the place at quart coordinates (block / 4) is in a Jugcraft region, for a seed's {@link #fingerprint}. */
-	public static boolean isJugcraft(long fingerprint, int quartX, int quartZ) {
+	/**
+	 * The layout of the Jugcraft region at quart coordinates (block / 4), for a seed's {@link #fingerprint}; -1 where
+	 * the place is in a vanilla region.
+	 */
+	public static int regionOf(long fingerprint, int quartX, int quartZ) {
 		int cell = cellQuarts;
 		int cx = Math.floorDiv(quartX, cell);
 		int cz = Math.floorDiv(quartZ, cell);
@@ -226,7 +295,15 @@ public final class JugcraftRegions {
 				}
 			}
 		}
-		return ((chosen >>> 32) & 0xFFFF) < share;
+		if (((chosen >>> 32) & 0xFFFF) >= share) {
+			return -1;
+		}
+		return (int) (((chosen >>> 48) & 0xFFFF) * LAYOUTS >>> 16);
+	}
+
+	/** Whether the place at quart coordinates is in a Jugcraft region (of any layout). */
+	public static boolean isJugcraft(long fingerprint, int quartX, int quartZ) {
+		return regionOf(fingerprint, quartX, quartZ) >= 0;
 	}
 
 	private static long mix(long value) {
@@ -237,9 +314,9 @@ public final class JugcraftRegions {
 		return value ^ value >>> 33;
 	}
 
-	/** One biome source's region state: its Jugcraft layout, built once (held by the mixin). */
+	/** One biome source's region state: its layouts, built once (held by the mixin). */
 	public static final class Source {
-		private volatile Climate.ParameterList<Holder<Biome>> regional;
+		private volatile List<Climate.ParameterList<Holder<Biome>>> regional;
 		private volatile boolean checked;
 
 		/**
@@ -247,15 +324,19 @@ public final class JugcraftRegions {
 		 * of this source; null to let vanilla answer.
 		 */
 		public Holder<Biome> biome(BiomeSource source, int x, int z, Climate.TargetPoint target) {
-			if (!enabled() || !isJugcraft(seedPrint, x, z)) {
+			if (!enabled()) {
+				return null;
+			}
+			int layout = regionOf(seedPrint, x, z);
+			if (layout < 0) {
 				return null;
 			}
 			if (!checked) {
-				regional = layoutFor(source.possibleBiomes());
+				regional = layoutsFor(source.possibleBiomes());
 				checked = true;
 			}
-			Climate.ParameterList<Holder<Biome>> list = regional;
-			return list == null ? null : list.findValue(target);
+			List<Climate.ParameterList<Holder<Biome>>> lists = regional;
+			return lists == null ? null : lists.get(layout).findValue(target);
 		}
 	}
 }

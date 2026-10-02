@@ -499,15 +499,43 @@ def check_seasons():
             err(f"JugcraftConfig.TEXT_OPTIONS has no {option}")
 
 
+def check_region_rules():
+    """Region rules: valid layouts, bands and biomes; no two rules can match the same entry in the same layout; and the
+    generated /jugcraft/region_rules.json is current."""
+    from biome_bases import BASES
+    for rule in bm.RULES:
+        where = f"rule {rule['replaces']} -> {rule['biome']}"
+        if not rule["layouts"] or any(not 0 <= layout < bm.LAYOUTS for layout in rule["layouts"]):
+            err(f"{where}: layouts {rule['layouts']} outside 0..{bm.LAYOUTS - 1}")
+        for name in ("temperature", "humidity"):
+            low, high = rule[name]
+            if not 0 <= low <= high <= 4:
+                err(f"{where}: {name} bands {rule[name]}")
+        if rule["weirdness"] not in (-1, 0, 1):
+            err(f"{where}: weirdness {rule['weirdness']}")
+        if rule["replaces"].split(":")[1] not in BASES:
+            err(f"{where}: {rule['replaces']} is not a vanilla biome")
+        if rule["biome"].split(":")[1] not in bm.BIOMES:
+            err(f"{where}: {rule['biome']} is not a biome in tools/biomes.py")
+    for i, a in enumerate(bm.RULES):
+        for b in bm.RULES[i + 1:]:
+            if (a["replaces"] == b["replaces"] and set(a["layouts"]) & set(b["layouts"])
+                    and a["temperature"][0] <= b["temperature"][1] and b["temperature"][0] <= a["temperature"][1]
+                    and a["humidity"][0] <= b["humidity"][1] and b["humidity"][0] <= a["humidity"][1]
+                    and (a["weirdness"] == 0 or b["weirdness"] == 0 or a["weirdness"] == b["weirdness"])):
+                err(f"Region rules overlap: {a['replaces']} -> {a['biome']} and -> {b['biome']} in layouts "
+                    f"{sorted(set(a['layouts']) & set(b['layouts']))}")
+    if load(RES / MOD / "region_rules.json") != bm.rules_file():
+        err("src/main/resources/jugcraft/region_rules.json is out of date (run tools/generate_material_data.py)")
+
+
 def check_biomes():
     """The biomes branch: Java's region rules and options match tools/biomes.py, each biome's files are complete,
     every feature a biome or tree selector names exists, and the four-season biomes have seasons."""
     java = (JAVA_ROOT / "biome" / "JugcraftRegions.java").read_text(encoding="utf-8")
-    rules = [(f"minecraft:{replaces.lower()}", (int(a), int(b)), (int(c), int(d)), biome) for replaces, a, b, c, d, biome in
-             re.findall(r'rule\(Biomes\.(\w+), (\d), (\d), (\d), (\d), "(\w+)"\)', java)]
-    if rules != bm.RULES:
-        err(f"JugcraftRegions.RULES {rules} differ from RULES in tools/biomes.py")
+    check_region_rules()
     for expected in (f'FEATURE = "{bm.FEATURE}"', f"SIZE = {bm.REGIONS['size']};", f"SHARE = {bm.REGIONS['share']};",
+                     f"LAYOUTS = {bm.LAYOUTS};",
                      "TEMPERATURE_BANDS = {" + ", ".join(f"{v}F" for v in bm.TEMPERATURE_BANDS) + "}",
                      "HUMIDITY_BANDS = {" + ", ".join(f"{v}F" for v in bm.HUMIDITY_BANDS) + "}"):
         if expected not in java:
@@ -519,7 +547,7 @@ def check_biomes():
     placed = DATA / MOD / "worldgen" / "placed_feature"
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for name, info in bm.BIOMES.items():
-        if name not in {rule[3] for rule in bm.RULES}:
+        if f"{MOD}:{name}" not in {rule["biome"] for rule in bm.RULES}:
             err(f"No region rule places the {name} biome")
         if lang.get(f"biome.{MOD}.{name}") != info["display"]:
             err(f"No name for the {name} biome")
@@ -528,7 +556,7 @@ def check_biomes():
                 ns, path = split(feature)
                 if ns == MOD and not (placed / f"{path}.json").is_file():
                     err(f"{name}: unknown placed feature {feature}")
-        picks = [info["trees"]["default"]] + [feature for feature, _ in info["trees"]["picks"]]
+        picks = [] if info["trees"] is None else [info["trees"]["default"]] + [feature for feature, _ in info["trees"]["picks"]]
         for feature in picks:
             ns, path = split(feature)
             if ns == MOD and not (placed / f"{path}.json").is_file():
@@ -537,11 +565,13 @@ def check_biomes():
             err(f"{name}: seasons {info['seasons']} but seasons.BIOMES says otherwise")
     features = DATA / MOD / "worldgen" / "feature"
     for shape, info in tr.SHAPES.items():
-        if info["wood"] not in ag.WOOD_SETS or (info["foliage"] and info["wood"] not in ag.TREES):
+        vanilla = info["wood"] in ("minecraft:oak", "minecraft:birch", "minecraft:spruce", "minecraft:jungle", "minecraft:acacia",
+                                   "minecraft:dark_oak", "minecraft:cherry", "minecraft:mangrove", "minecraft:pale_oak")
+        if not vanilla and (info["wood"] not in ag.WOOD_SETS or (info["foliage"] and info["wood"] not in ag.TREES)):
             err(f"Tree shape {shape} grows unknown wood or leaves ({info['wood']})")
             continue
         # Generated seasonal leaves need the decorator to start in today's look (world generation skips onPlace).
-        seasonal = bool(info["foliage"]) and ag.TREES[info["wood"]]["season"] is not None
+        seasonal = bool(info["foliage"]) and not vanilla and ag.TREES[info["wood"]]["season"] is not None
         decorators = [decorator.get("type") for decorator in (load(features / f"{shape}.json") or {}).get("decorators", [])]
         if seasonal != (f"{MOD}:{tr.DECORATOR}" in decorators):
             err(f"Tree shape {shape}: the {MOD}:{tr.DECORATOR} decorator belongs on exactly the trees with seasonal leaves")

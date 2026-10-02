@@ -8,9 +8,9 @@
   ],
   "foliage_placer": {
     "type": "minecraft:blob_foliage_placer",
-    "height": 5,
     "offset": 0,
-    "radius": 2
+    "radius": 2,
+    "height": 5
   },
   "foliage_provider": {
     "id": "jugcraft:aspen_leaves",

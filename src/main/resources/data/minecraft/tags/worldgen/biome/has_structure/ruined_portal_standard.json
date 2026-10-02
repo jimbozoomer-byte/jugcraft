@@ -4,6 +4,12 @@
     "jugcraft:dead_forest",
     "jugcraft:tundra",
     "jugcraft:snowy_forest",
-    "jugcraft:muskeg"
+    "jugcraft:muskeg",
+    "jugcraft:grassland",
+    "jugcraft:heathland",
+    "jugcraft:lavender_field",
+    "jugcraft:prairie",
+    "jugcraft:shrubland",
+    "jugcraft:steppe"
   ]
 }

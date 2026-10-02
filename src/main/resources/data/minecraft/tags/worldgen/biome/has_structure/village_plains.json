@@ -2,6 +2,12 @@
   "replace": false,
   "values": [
     "jugcraft:seasonal_forest",
-    "jugcraft:aspen_glade"
+    "jugcraft:aspen_glade",
+    "jugcraft:grassland",
+    "jugcraft:heathland",
+    "jugcraft:lush_grassland",
+    "jugcraft:prairie",
+    "jugcraft:shrubland",
+    "jugcraft:steppe"
   ]
 }

@@ -7,9 +7,6 @@ import biomes as bm
 from biome_bases import BASES
 
 MOD = bm.MOD
-BASE_TREES = {"taiga": "minecraft:trees_taiga", "snowy_taiga": "minecraft:trees_taiga",
-              "forest": "minecraft:trees_birch_and_oak_leaf_litter", "birch_forest": "minecraft:trees_birch",
-              "plains": "minecraft:trees_plains", "snowy_plains": "minecraft:trees_snowy"}
 PATCH_SPREAD = {"x": {"type": "minecraft:trapezoid", "max": 7, "min": -7, "plateau": 0},
                 "y": {"type": "minecraft:trapezoid", "max": 3, "min": -3, "plateau": 0},
                 "z": {"type": "minecraft:trapezoid", "max": 7, "min": -7, "plateau": 0}}
@@ -25,19 +22,30 @@ def spawn(entry):
     return {"type": kind, "count": count, "weight": weight}
 
 
+def base_trees(base):
+    """The base's tree feature (vanilla's trees_* placed feature in its vegetation step), if it has one."""
+    for feature in BASES[base]["steps"][9]:
+        if feature.startswith("minecraft:trees_"):
+            return feature
+    return None
+
+
 def steps(name):
-    """The biome's features per step: its base's, with the trees swapped for its own, drops and swaps applied, and
-    its extras appended in EXTRAS order."""
+    """The biome's features per step: its base's, with the trees swapped for its own (or dropped, for a treeless
+    biome), drops and swaps applied, and its extras appended in EXTRAS order."""
     info = bm.BIOMES[name]
     out = copy.deepcopy(BASES[info["base"]]["steps"])
-    tree = BASE_TREES[info["base"]]
+    tree = base_trees(info["base"])
+    drop = list(info.get("drop", []))
+    if info["trees"] is None:
+        drop.append(tree)
     for step in out:
         for i, feature in enumerate(step):
-            if feature == tree:
+            if feature == tree and info["trees"] is not None:
                 step[i] = rid(f"trees_{name}")
             elif feature in info.get("swap", {}):
                 step[i] = info["swap"][feature]
-        step[:] = [f for f in step if f not in info.get("drop", [])]
+        step[:] = [f for f in step if f not in drop]
     for extra in bm.EXTRAS:
         if extra in info.get("extras", []):
             out[bm.EXTRAS[extra]["step"]].append(rid(extra))
@@ -50,16 +58,22 @@ def biome(name):
     spawns = copy.deepcopy(base["spawns"])
     if "creatures" in info:
         spawns["creature"] = [spawn(entry) for entry in info["creatures"]]
-    attributes = {"minecraft:gameplay/natural_mob_spawns": {"argument": {"spawn_costs": {}, "spawns_by_category": spawns},
-                                                            "modifier": "overlay"},
-                  "minecraft:visual/sky_color": base["sky_color"]}
+    attributes = {"minecraft:gameplay/natural_mob_spawns": {"argument": {
+        "spawn_costs": copy.deepcopy(base.get("spawn_costs", {})), "spawns_by_category": spawns}, "modifier": "overlay"}}
+    if "sky_color" in base:
+        attributes["minecraft:visual/sky_color"] = base["sky_color"]
     if "music" in base:
         attributes["minecraft:audio/background_music"] = {"default": {"max_delay": 24000, "min_delay": 12000, "sound": base["music"]}}
     attributes.update(copy.deepcopy(base.get("attributes", {})))
-    effects = {"water_color": "#3f76e4" if info["temperature"] > -0.2 else "#3d57d6"}
+    attributes.update(copy.deepcopy(info.get("attributes", {})))
+    effects = copy.deepcopy(base.get("effects", {}))
+    if effects.get("water_color", "#3f76e4") in ("#3f76e4", "#3d57d6"):
+        # Plain water: vanilla's cold blue below -0.2, its usual blue above.
+        effects["water_color"] = "#3f76e4" if info["temperature"] > -0.2 else "#3d57d6"
     effects.update(info.get("effects", {}))
     return {"attributes": dict(sorted(attributes.items())), "carvers": base["carvers"], "downfall": info["downfall"],
-            "effects": effects, "features": steps(name), "has_precipitation": True, "temperature": info["temperature"]}
+            "effects": dict(sorted(effects.items())), "features": steps(name),
+            "has_precipitation": info.get("precipitation", base.get("precipitation", True)), "temperature": info["temperature"]}
 
 
 def extra_placement(extra):
@@ -67,6 +81,8 @@ def extra_placement(extra):
     if "placement" in info:
         return info["placement"]
     placement = []
+    if "patches" in info:
+        placement.append({"type": "minecraft:count", "count": info["patches"]})
     if "rarity" in info:
         placement.append({"type": "minecraft:rarity_filter", "chance": info["rarity"]})
     placement += [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"},
@@ -83,10 +99,13 @@ def extra_placement(extra):
 
 
 def worldgen(data, write):
+    write(data.parent / MOD / "region_rules.json", bm.rules_file())
     folder = data / MOD / "worldgen"
     for name, info in bm.BIOMES.items():
         write(folder / "biome" / f"{name}.json", biome(name))
         trees = info["trees"]
+        if trees is None:
+            continue
         write(folder / "feature" / f"trees_{name}.json", {
             "type": "minecraft:random_selector", "default": trees["default"],
             "features": [{"chance": chance, "feature": feature} for feature, chance in trees["picks"]]})
@@ -99,7 +118,12 @@ def worldgen(data, write):
             {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"},
             {"type": "minecraft:biome"}]})
     for extra, info in bm.EXTRAS.items():
-        write(folder / "placed_feature" / f"{extra}.json", {"feature": info["feature"], "placement": extra_placement(extra)})
+        feature = info.get("feature")
+        if "block" in info:
+            # A block placed alone: a feature of its own, named after the extra.
+            feature = rid(extra)
+            write(folder / "feature" / f"{extra}.json", {"type": "minecraft:simple_block", "to_place": {"id": info["block"]}})
+        write(folder / "placed_feature" / f"{extra}.json", {"feature": feature, "placement": extra_placement(extra)})
 
 
 def tags(tags):

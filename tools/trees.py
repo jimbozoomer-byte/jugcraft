@@ -1,7 +1,8 @@
 """Tree shapes: the configured tree features of Jugcraft's own trees (worldgen/feature/<shape>.json), and their
 "<shape>_checked" placed features (only where the tree's sapling would survive), which biomes pick from.
 
-Each shape grows one tree's wood (agriculture.WOOD_SETS) and leaves (agriculture.TREES; the dead tree has none),
+Each shape grows one tree's wood (agriculture.WOOD_SETS, or a vanilla wood such as "minecraft:oak") and leaves
+(agriculture.TREES, or the vanilla wood's leaves; the dead tree has none),
 using vanilla 26.3's trunk and foliage placers. "sapling": the tree a sapling of that wood grows. Seasonal leaves take
 today's look as the tree is placed: every shape with seasonal leaves lists the DECORATOR tree decorator
 (agriculture/SeasonalLeavesDecorator), since world generation does not run the block's own placement hook.
@@ -37,6 +38,14 @@ SHAPES = {
     "tall_fir": {"wood": "fir",
                  "trunk": {"type": "straight", "base_height": 14, "height_rand_a": 5},
                  "foliage": {"type": "spruce", "radius": [2, 3], "offset": [0, 1], "trunk_height": [3, 5]}},
+    # Jacaranda: a short trunk that forks into a wide, flat-topped umbrella of violet blossom (vanilla's acacia shapes).
+    "jacaranda": {"wood": "jacaranda", "sapling": True,
+                  "trunk": {"type": "forking", "base_height": 5, "height_rand_a": 2, "height_rand_b": 2},
+                  "foliage": {"type": "acacia", "radius": 2, "offset": 0}},
+    # An oak bush: one oak log in a ball of oak leaves, the fields' scrub (vanilla oak wood; no sapling of its own).
+    "oak_bush": {"wood": "minecraft:oak",
+                 "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},
+                 "foliage": {"type": "bush", "radius": 2, "offset": 1, "height": 2}},
     # A dead tree: a bare, branching trunk of grey dead wood (vanilla's fancy trunk with no leaves).
     "dead_tree": {"wood": "dead", "survives_as": "minecraft:oak_sapling",
                   "trunk": {"type": "fancy", "base_height": 5, "height_rand_a": 4},

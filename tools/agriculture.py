@@ -6,6 +6,8 @@ agriculture/JugcraftAgriculture.java; the checker compares the two.
 See docs/branches/AGRICULTURE.md for the design.
 """
 
+import plants
+
 FEATURE = "agriculture"
 
 # Tall crops grow through ages 0-7. heights[age] is how many blocks tall the plant is at
@@ -328,11 +330,13 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 # Wood sets: each tree's log, wood, stripped log and wood, planks, stairs, slab, fence and fence gate, generated
 # alike (festival_data.wood_assets) and registered alike (JugcraftAgriculture.registerWoodSet). Logs and wood strip
 # with an axe; logs saw into planks (sawmill). The chestnut is the Festival Crops' fruit tree; the larch is Alpine
-# Spawn's seasonal conifer; maple, aspen, fir and dead wood come from the biomes branch's seasonal forests.
-WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead"}
+# Spawn's seasonal conifer; maple, aspen, fir and dead wood come from the biomes branch's seasonal forests, and the
+# jacaranda from its fields and meadows.
+WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
+             "jacaranda": "Jacaranda"}
 # The feature switch each wood's hand recipes follow: the switch of whatever grows the tree.
 WOOD_SWITCHES = {"chestnut": FEATURE, "larch": "alpine_spawn", "maple": "biomes", "aspen": "biomes", "fir": "biomes",
-                 "dead": "biomes"}
+                 "dead": "biomes", "jacaranda": "biomes"}
 
 
 def wood_blocks(wood, display):
@@ -365,6 +369,8 @@ TREES = {
     "aspen": {"leaves": "aspen_leaves", "leaves_display": "Aspen Leaves", "season": [96, 258, 302], "autumn": {"gold": 1},
               "base": "birch"},
     "fir": {"leaves": "fir_needles", "leaves_display": "Fir Needles", "season": None, "base": "spruce"},
+    # The biomes branch's later batches. The jacaranda flowers all year, a crown of violet blossom.
+    "jacaranda": {"leaves": "jacaranda_leaves", "leaves_display": "Jacaranda Leaves", "season": None, "base": "cherry"},
 }
 SEASON_STATES = ["green", "gold", "bare"]
 JITTER = 7
@@ -1053,6 +1059,8 @@ SHAPELESS = [
      "count": 2, "category": "building"},
     {"id": "silhouette_window", "inputs": ["minecraft:glass_pane", "minecraft:paper", "minecraft:orange_dye", "minecraft:black_dye"],
      "result": "silhouette_window", "count": 1, "category": "building"},
+    # The biomes branch's wild flowers make dye (tools/plants.py).
+    *plants.dye_recipes(),
 ]
 SHAPED = [
     {"id": "barley_bread", "pattern": ["BBB"], "key": {"B": "jugcraft:barley"}, "result": "barley_bread", "count": 1,
@@ -1218,7 +1226,8 @@ def planted_blocks():
 
 def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
-    return crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"]] + giant_blocks() + [potted(m) for m in MUMS]
+    return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"]] + giant_blocks() + [potted(m) for m in MUMS]
+            + plants.itemless())
 
 
 def all_blocks():
@@ -1227,7 +1236,7 @@ def all_blocks():
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
-            + decor4_blocks() + decor5_blocks() + decor6_blocks())
+            + decor4_blocks() + decor5_blocks() + decor6_blocks() + plants.blocks())
 
 
 def all_items():
@@ -1235,7 +1244,7 @@ def all_items():
             + [block for tree in TREES for block in (sapling(tree), TREES[tree]["leaves"])] + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
-            + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items())
+            + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + plants.items())
 
 
 def owns(entry_id):
@@ -1251,6 +1260,8 @@ def switch_of(entry_id):
     for tree in TREES:
         if entry_id in (sapling(tree), TREES[tree]["leaves"]):
             return WOOD_SWITCHES[tree]
+    if entry_id in plants.blocks():
+        return plants.FEATURE
     return FEATURE
 
 
@@ -1264,7 +1275,7 @@ def textures():
         out += [f"{info['block'].removesuffix('_crop')}_stage{n}" for n in sorted(set(info["stages"]))]
     out += [w["texture"] for w in WILD_CROPS.values() if w["texture"] not in out]
     out += [f"{gourd}_{part}" for gourd in GOURDS for part in ("side", "top")] + STEM_TEXTURES + CRANBERRY["stages"]
-    return out + EQUIPMENT_TEXTURES + TREE_TEXTURES + DECOR_TEXTURES + halloween_textures()
+    return out + EQUIPMENT_TEXTURES + TREE_TEXTURES + DECOR_TEXTURES + halloween_textures() + plants.textures()
 
 
 EQUIPMENT_TEXTURES = ["trellis", "trellis_post", "cooking_pot_side", "cooking_pot_rim", "cooking_pot_empty", "cooking_pot_soup"]

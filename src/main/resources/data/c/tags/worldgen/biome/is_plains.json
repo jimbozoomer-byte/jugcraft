@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:field",
+    "jugcraft:flower_meadow",
+    "jugcraft:grassland",
+    "jugcraft:heathland",
+    "jugcraft:lavender_field",
+    "jugcraft:lush_grassland",
+    "jugcraft:prairie",
+    "jugcraft:shrubland",
+    "jugcraft:steppe"
+  ]
+}

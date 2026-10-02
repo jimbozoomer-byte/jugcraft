@@ -8,9 +8,9 @@
   ],
   "foliage_placer": {
     "type": "minecraft:bush_foliage_placer",
-    "height": 2,
     "offset": 1,
-    "radius": 2
+    "radius": 2,
+    "height": 2
   },
   "foliage_provider": {
     "id": "jugcraft:maple_leaves",

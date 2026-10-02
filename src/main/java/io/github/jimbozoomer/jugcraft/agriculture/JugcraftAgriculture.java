@@ -1,9 +1,17 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -45,6 +53,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -64,12 +73,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FlowerBedBlock;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.TallFlowerBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.TintedParticleLeavesBlock;
@@ -118,6 +129,7 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower MAPLE_GROWER = grower("maple");
 	public static final TreeGrower ASPEN_GROWER = grower("aspen");
 	public static final TreeGrower FIR_GROWER = grower("fir");
+	public static final TreeGrower JACARANDA_GROWER = grower("jacaranda");
 	/** The dead tree, which no sapling grows; it stands in the Dead Forest (and game tests grow it). */
 	public static final TreeGrower DEAD_TREE_GROWER = grower("dead_tree");
 	/** Seasonal trees' leaf schedules, in season days. Keep in sync with TREES in tools/agriculture.py. */
@@ -256,7 +268,10 @@ public final class JugcraftAgriculture {
 				MapColor.QUARTZ, MapColor.SAND);
 		registerTree("fir", "fir_needles", FIR_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.PODZOL, MapColor.WOOD);
+		registerTree("jacaranda", "jacaranda_leaves", JACARANDA_GROWER, null, Blocks.CHERRY_SAPLING, Blocks.CHERRY_LEAVES,
+				MapColor.TERRACOTTA_GRAY, MapColor.TERRACOTTA_PINK);
 		registerWoodSet("dead", MapColor.COLOR_LIGHT_GRAY, MapColor.TERRACOTTA_LIGHT_GRAY);
+		registerWildPlants();
 
 		// Seeds, produce and food.
 		food("corn", 3, 0.6F, COMPOST_MEDIUM);
@@ -875,6 +890,54 @@ public final class JugcraftAgriculture {
 		registerItem(id, props -> new BlockItem(flower, props), new Item.Properties().useBlockDescriptionPrefix().compostable(COMPOST_MEDIUM),
 				SEEDS_TAB);
 		registerBlock("potted_" + id, props -> new FlowerPotBlock(flower, props), BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_DANDELION));
+	}
+
+	/**
+	 * The biomes branch's wild plants (tools/plants.py), from the generated {@code /jugcraft/plants.json}: small flowers
+	 * (with their potted forms), tall flowers and flowerbeds, each a vanilla block class copying a vanilla plant's
+	 * properties. They compost and burn like vanilla's flowers.
+	 */
+	private static void registerWildPlants() {
+		JsonArray plants;
+		try (InputStream stream = JugcraftAgriculture.class.getResourceAsStream("/jugcraft/plants.json")) {
+			if (stream == null) {
+				throw new IOException("missing");
+			}
+			plants = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).getAsJsonArray();
+		} catch (IOException | RuntimeException e) {
+			throw new IllegalStateException("Could not read /jugcraft/plants.json", e);
+		}
+		FlammableBlockRegistry fire = FlammableBlockRegistry.getDefaultInstance();
+		for (JsonElement element : plants) {
+			JsonObject plant = element.getAsJsonObject();
+			String id = plant.get("id").getAsString();
+			Block block = switch (plant.get("kind").getAsString()) {
+				case "flower" -> {
+					Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.getOrThrow(ResourceKey.create(Registries.MOB_EFFECT,
+							Identifier.parse(plant.get("effect").getAsString())));
+					float seconds = plant.get("seconds").getAsFloat();
+					Block flower = registerBlock(id, props -> new FlowerBlock(effect, seconds, props), BlockBehaviour.Properties.ofFullCopy(Blocks.DANDELION));
+					registerItem(id, props -> new BlockItem(flower, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					registerBlock("potted_" + id, props -> new FlowerPotBlock(flower, props), BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_DANDELION));
+					yield flower;
+				}
+				case "tall_flower" -> {
+					Block tall = registerBlock(id, TallFlowerBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LILAC));
+					registerItem(id, props -> new DoubleHighBlockItem(tall, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					yield tall;
+				}
+				case "flowerbed" -> {
+					Block bed = registerBlock(id, FlowerBedBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.PINK_PETALS));
+					registerItem(id, props -> new BlockItem(bed, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_LOW), SEEDS_TAB);
+					yield bed;
+				}
+				default -> throw new IllegalStateException("Unknown wild plant kind in /jugcraft/plants.json: " + plant);
+			};
+			fire.add(block, 60, 100);
+		}
 	}
 
 	/** The chestnut tree: its sapling (planted from a chestnut), fruiting leaves and a wood set. */

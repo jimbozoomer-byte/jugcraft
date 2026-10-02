@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.SeasonalLeavesBlock;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -21,6 +22,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -30,14 +32,19 @@ import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.FlowerBlock;
+import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** The biomes branch: Jugcraft regions, and the seasonal-forest trees (batch 1). */
+/** The biomes branch: Jugcraft regions, the seasonal-forest trees (batch 1), and the fields' plants and jacaranda (batch 2). */
 public class BiomeGameTests {
 	private static final Logger LOGGER = LoggerFactory.getLogger("jugcraft-test");
 
@@ -53,24 +60,58 @@ public class BiomeGameTests {
 	// ---------------------------------------------------------------- regions
 
 	/**
-	 * The Jugcraft layout was recorded from the Overworld biome builder, every rule placed its biome, and vanilla's own
-	 * table lists every Jugcraft biome once, at the unreachable climate.
+	 * The layouts were recorded from the Overworld biome builder, every rule placed its biome in each of its layouts (it
+	 * matches some entry no earlier rule takes), and vanilla's own table lists every Jugcraft biome once, at the
+	 * unreachable climate. Logs each layout's Jugcraft biomes, and vanilla's table by biome, climate bands and weirdness
+	 * half (what the rules can match).
 	 */
 	@GameTest
 	public void regionLayoutFollowsItsRules(GameTestHelper helper) {
-		List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> layout = JugcraftRegions.layout();
-		helper.assertTrue(layout != null, "No Jugcraft layout was recorded");
-		Map<String, Integer> counts = new TreeMap<>();
-		for (Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry : layout) {
-			if (JugcraftRegions.biomes().contains(entry.getSecond())) {
-				counts.merge(entry.getSecond().identifier().getPath(), 1, Integer::sum);
+		List<List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>>> layouts = JugcraftRegions.layouts();
+		helper.assertTrue(layouts != null && layouts.size() == JugcraftRegions.LAYOUTS, "The layouts were not recorded");
+		helper.assertTrue(!JugcraftRegions.rules().isEmpty(), "No region rules were read");
+		Map<String, Integer> placed = new TreeMap<>();
+		for (int layout = 0; layout < layouts.size(); layout++) {
+			Map<String, Integer> counts = new TreeMap<>();
+			for (Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry : layouts.get(layout)) {
+				if (JugcraftRegions.biomes().contains(entry.getSecond())) {
+					counts.merge(entry.getSecond().identifier().getPath(), 1, Integer::sum);
+					placed.merge(entry.getSecond().identifier().getPath(), 1, Integer::sum);
+				}
 			}
+			LOGGER.info("Jugcraft layout {}: {} entries; Jugcraft biomes {}", layout, layouts.get(layout).size(), counts);
 		}
-		LOGGER.info("Jugcraft layout: {} entries; Jugcraft biomes {}", layout.size(), counts);
 		for (ResourceKey<Biome> biome : JugcraftRegions.biomes()) {
-			helper.assertTrue(counts.getOrDefault(biome.identifier().getPath(), 0) > 0, "No climate entry became " + biome.identifier());
+			helper.assertTrue(placed.getOrDefault(biome.identifier().getPath(), 0) > 0, "No climate entry became " + biome.identifier());
 		}
 		List<Pair<Climate.ParameterPoint, Holder<Biome>>> vanilla = overworldPreset(helper.getLevel()).value().parameters().values();
+		Map<String, Integer> table = new TreeMap<>();
+		List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> entries = new ArrayList<>();
+		for (Pair<Climate.ParameterPoint, Holder<Biome>> entry : vanilla) {
+			ResourceKey<Biome> key = entry.getSecond().unwrapKey().orElseThrow();
+			if (JugcraftRegions.biomes().contains(key)) {
+				continue;
+			}
+			entries.add(Pair.of(entry.getFirst(), key));
+			table.merge(key.identifier().getPath() + " t" + JugcraftRegions.temperatureBand(entry.getFirst()) + " h"
+					+ JugcraftRegions.humidityBand(entry.getFirst()) + " w" + JugcraftRegions.half(entry.getFirst().weirdness()), 1, Integer::sum);
+		}
+		LOGGER.info("Vanilla Overworld table by biome, temperature and humidity band, weirdness half: {}", table);
+		List<String> idle = new ArrayList<>();
+		for (JugcraftRegions.Rule rule : JugcraftRegions.rules()) {
+			for (int layout = 0; layout < JugcraftRegions.LAYOUTS; layout++) {
+				if ((rule.layouts() & 1 << layout) == 0) {
+					continue;
+				}
+				int finalLayout = layout;
+				long hits = entries.stream().filter(entry -> rule.matches(finalLayout, entry)
+						&& JugcraftRegions.regional(finalLayout, entry).equals(rule.biome())).count();
+				if (hits == 0) {
+					idle.add(rule.biome().identifier().getPath() + " from " + rule.replaces().identifier().getPath() + " in layout " + layout);
+				}
+			}
+		}
+		helper.assertTrue(idle.isEmpty(), "Rules that place nothing: " + idle);
 		for (ResourceKey<Biome> biome : JugcraftRegions.biomes()) {
 			List<Pair<Climate.ParameterPoint, Holder<Biome>>> listed = vanilla.stream().filter(entry -> entry.getSecond().is(biome)).toList();
 			helper.assertTrue(listed.size() == 1 && listed.get(0).getFirst().equals(JugcraftRegions.UNREACHABLE),
@@ -87,18 +128,26 @@ public class BiomeGameTests {
 		int inside = 0;
 		int total = 0;
 		int differ = 0;
+		int[] byLayout = new int[JugcraftRegions.LAYOUTS];
 		for (int x = -4096; x < 4096; x += 64) {
 			for (int z = -4096; z < 4096; z += 64) {
-				boolean jugcraft = JugcraftRegions.isJugcraft(seed, x, z);
-				helper.assertTrue(jugcraft == JugcraftRegions.isJugcraft(seed, x, z), "Regions changed between lookups");
-				inside += jugcraft ? 1 : 0;
-				differ += jugcraft != JugcraftRegions.isJugcraft(next, x, z) ? 1 : 0;
+				int layout = JugcraftRegions.regionOf(seed, x, z);
+				helper.assertTrue(layout == JugcraftRegions.regionOf(seed, x, z), "Regions changed between lookups");
+				helper.assertTrue(layout >= -1 && layout < JugcraftRegions.LAYOUTS, "No such layout: " + layout);
+				if (layout >= 0) {
+					inside++;
+					byLayout[layout]++;
+				}
+				differ += layout != JugcraftRegions.regionOf(next, x, z) ? 1 : 0;
 				total++;
 			}
 		}
 		double share = (double) inside / total;
-		LOGGER.info("Jugcraft regions: {} of {} samples ({}%) in a 128 km square; {} differ for the next seed", inside, total,
-				Math.round(share * 100), differ);
+		LOGGER.info("Jugcraft regions: {} of {} samples ({}%) in a 128 km square, by layout {}; {} differ for the next seed",
+				inside, total, Math.round(share * 100), java.util.Arrays.toString(byLayout), differ);
+		for (int count : byLayout) {
+			helper.assertTrue(count > inside / JugcraftRegions.LAYOUTS / 2, "A layout is rare: " + java.util.Arrays.toString(byLayout));
+		}
 		helper.assertTrue(share > JugcraftRegions.SHARE - 0.2 && share < JugcraftRegions.SHARE + 0.2,
 				"Jugcraft regions cover " + share + " of the land, far from " + JugcraftRegions.SHARE);
 		helper.assertTrue(differ > total / 5, "Another seed gives almost the same regions");
@@ -168,6 +217,61 @@ public class BiomeGameTests {
 			JugcraftSeasons.setMode(server, before.mode());
 		}
 		helper.succeed();
+	}
+
+	/** A jacaranda sapling grows a forked trunk under a crown of blossom (fields and meadows). */
+	@GameTest(maxTicks = 100)
+	public void jacarandaSaplingsGrow(GameTestHelper helper) {
+		BlockPos at = open(helper, new BlockPos(3, 2, 3));
+		int[] counts = grow(helper, JugcraftAgriculture.JACARANDA_GROWER, at, block("jacaranda_sapling"), "jacaranda_log", "jacaranda_leaves");
+		LOGGER.info("A jacaranda: {} logs, {} leaves", counts[0], counts[1]);
+		helper.assertTrue(counts[0] >= 4 && counts[1] >= 10, "A small jacaranda: " + counts[0] + " logs, " + counts[1] + " leaves");
+		helper.succeed();
+	}
+
+	private static int dropped(GameTestHelper helper, Block block) {
+		AABB area = new AABB(helper.absolutePos(BlockPos.ZERO)).inflate(16);
+		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, area, entity -> entity.getItem().is(block.asItem()))
+				.stream().mapToInt(entity -> entity.getItem().getCount()).sum();
+	}
+
+	/**
+	 * The wild plants (tools/plants.py) work like vanilla's: small flowers stand on grass and have a potted form and an
+	 * item; tall lavender takes two blocks and drops itself once; a clover patch of four clumps drops four.
+	 */
+	@GameTest
+	public void wildPlantsWork(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		String[] flowers = {"lavender", "goldenrod", "heather", "orange_cosmos"};
+		for (int i = 0; i < flowers.length; i++) {
+			BlockPos pos = new BlockPos(1 + i * 2, 2, 1);
+			helper.setBlock(pos.below(), Blocks.GRASS_BLOCK);
+			Block flower = block(flowers[i]);
+			helper.assertTrue(flower instanceof FlowerBlock, flowers[i] + " is not a flower");
+			helper.setBlock(pos, flower);
+			helper.assertTrue(helper.getBlockState(pos).canSurvive(level, helper.absolutePos(pos)), flowers[i] + " cannot stand on grass");
+			helper.assertTrue(block("potted_" + flowers[i]) instanceof FlowerPotBlock pot && pot.getPotted() == flower, "No potted " + flowers[i]);
+			helper.assertTrue(flower.asItem() != Items.AIR, flowers[i] + " has no item");
+		}
+		BlockPos tall = new BlockPos(1, 2, 4);
+		helper.setBlock(tall.below(), Blocks.GRASS_BLOCK);
+		Block tallLavender = block("tall_lavender");
+		DoublePlantBlock.placeAt(level, tallLavender.defaultBlockState(), helper.absolutePos(tall), Block.UPDATE_ALL);
+		helper.assertBlockPresent(tallLavender, tall.above());
+		level.destroyBlock(helper.absolutePos(tall), true);
+		BlockPos bed = new BlockPos(4, 2, 4);
+		helper.setBlock(bed.below(), Blocks.GRASS_BLOCK);
+		Block clover = block("clover");
+		helper.setBlock(bed, clover.defaultBlockState().setValue(BlockStateProperties.FLOWER_AMOUNT, 4));
+		level.destroyBlock(helper.absolutePos(bed), true);
+		helper.runAfterDelay(2, () -> {
+			int lavender = dropped(helper, tallLavender);
+			int clovers = dropped(helper, clover);
+			LOGGER.info("Wild plants: tall lavender dropped {}, a clover patch of 4 dropped {}", lavender, clovers);
+			helper.assertTrue(lavender == 1, "Tall lavender dropped " + lavender);
+			helper.assertTrue(clovers == 4, "A clover patch of four dropped " + clovers);
+			helper.succeed();
+		});
 	}
 
 	/** The dead tree (no sapling grows it) is a bare trunk of dead wood with no leaves at all. */

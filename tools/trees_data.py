@@ -80,15 +80,25 @@ def uniform(value):
 
 def trunk_placer(trunk):
     return {"type": f"minecraft:{trunk['type']}_trunk_placer", "base_height": trunk["base_height"],
-            "height_rand_a": trunk["height_rand_a"], "height_rand_b": 0}
+            "height_rand_a": trunk["height_rand_a"], "height_rand_b": trunk.get("height_rand_b", 0)}
 
 
 def foliage_placer(foliage):
     if foliage["type"] == "spruce":
         return {"type": "minecraft:spruce_foliage_placer", "offset": uniform(foliage["offset"]),
                 "radius": uniform(foliage["radius"]), "trunk_height": uniform(foliage["trunk_height"])}
-    return {"type": f"minecraft:{foliage['type']}_foliage_placer", "height": foliage["height"],
-            "offset": foliage["offset"], "radius": foliage["radius"]}
+    out = {"type": f"minecraft:{foliage['type']}_foliage_placer", "offset": foliage["offset"], "radius": foliage["radius"]}
+    if "height" in foliage:
+        out["height"] = foliage["height"]
+    return out
+
+
+def tree_blocks(wood):
+    """A shape's log and leaves: its own (agriculture.TREES) or a vanilla wood's ("minecraft:oak")."""
+    if wood.startswith("minecraft:"):
+        return f"{wood}_log", f"{wood}_leaves", None
+    leaves = TREES[wood]["leaves"] if wood in TREES else None
+    return rid(f"{wood}_log"), rid(leaves) if leaves else None, TREES[wood]["season"] if wood in TREES else None
 
 
 def minimum_size(info):
@@ -115,17 +125,18 @@ def worldgen(data, write):
         else:
             foliage = foliage_placer(info["foliage"])
             properties = {"distance": "7", "persistent": "false", "waterlogged": "false"}
-            if TREES[wood]["season"] is not None:
+            log, leaves, season = tree_blocks(wood)
+            if season is not None:
                 properties["season"] = SEASON_STATES[0]
                 decorators.append({"type": rid(DECORATOR)})
-            provider = {"id": rid(TREES[wood]["leaves"]), "properties": dict(sorted(properties.items()))}
+            provider = {"id": leaves, "properties": dict(sorted(properties.items()))}
         write(folder / "feature" / f"{shape}.json", {
             "type": "minecraft:tree", "below_trunk_provider": "minecraft:soil_beneath_tree", "decorators": decorators,
             "foliage_placer": foliage, "foliage_provider": provider, "ignore_vines": True,
             "minimum_size": minimum_size(info),
             "trunk_placer": trunk_placer(info["trunk"]),
-            "trunk_provider": {"id": rid(f"{wood}_log"), "properties": {"axis": "y"}}})
-        survives = info.get("survives_as") or rid(sapling(wood))
+            "trunk_provider": {"id": tree_blocks(wood)[0], "properties": {"axis": "y"}}})
+        survives = info.get("survives_as") or (f"{wood}_sapling" if wood.startswith("minecraft:") else rid(sapling(wood)))
         write(folder / "placed_feature" / f"{shape}_checked.json", {"feature": rid(shape), "placement": [
             {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": survives}}]})
     for wood, length in FALLEN.items():

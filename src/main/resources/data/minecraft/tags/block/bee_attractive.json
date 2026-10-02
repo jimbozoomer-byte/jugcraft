@@ -1,6 +1,12 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:lavender",
+    "jugcraft:tall_lavender",
+    "jugcraft:goldenrod",
+    "jugcraft:heather",
+    "jugcraft:orange_cosmos",
+    "jugcraft:clover",
     "jugcraft:yellow_mum",
     "jugcraft:orange_mum",
     "jugcraft:red_mum",

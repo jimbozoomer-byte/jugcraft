@@ -25,6 +25,13 @@
     "jugcraft:aspen_glade",
     "jugcraft:dead_forest",
     "jugcraft:tundra",
+    "jugcraft:field",
+    "jugcraft:flower_meadow",
+    "jugcraft:grassland",
+    "jugcraft:lavender_field",
+    "jugcraft:prairie",
+    "jugcraft:shrubland",
+    "jugcraft:steppe",
     "minecraft:pale_garden"
   ]
 }

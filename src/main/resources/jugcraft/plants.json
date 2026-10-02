@@ -1,0 +1,34 @@
+[
+  {
+    "id": "lavender",
+    "kind": "flower",
+    "effect": "minecraft:regeneration",
+    "seconds": 5.0
+  },
+  {
+    "id": "tall_lavender",
+    "kind": "tall_flower"
+  },
+  {
+    "id": "goldenrod",
+    "kind": "flower",
+    "effect": "minecraft:saturation",
+    "seconds": 0.35
+  },
+  {
+    "id": "heather",
+    "kind": "flower",
+    "effect": "minecraft:speed",
+    "seconds": 6.0
+  },
+  {
+    "id": "orange_cosmos",
+    "kind": "flower",
+    "effect": "minecraft:fire_resistance",
+    "seconds": 4.0
+  },
+  {
+    "id": "clover",
+    "kind": "flowerbed"
+  }
+]

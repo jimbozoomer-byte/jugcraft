@@ -27,8 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The biomes branch in a real, normally generated world (seed "jugcraft"): how far from the start each seasonal-forest
- * biome is (logged), that their trees' seasonal leaves are generated in today's look, and screenshots of those found,
+ * The biomes branch in a real, normally generated world (seed "jugcraft"): how far from the start each Jugcraft biome is
+ * (logged), that their trees' seasonal leaves are generated in today's look, and screenshots of those found,
  * seen from above the treetops where the biome is on the surface.
  */
 public class BiomeClientGameTests implements FabricClientGameTest {
@@ -36,10 +36,11 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 	private static final String SEED = "jugcraft";
 	/** How far to look for each biome, in blocks. */
 	private static final int SEARCH = 6400;
-	/** At least this many of the nine biomes must be within SEARCH blocks of the start. */
-	private static final int FOUND_AT_LEAST = 6;
+	/** At least this share of the Jugcraft biomes must be within SEARCH blocks of the start. */
+	private static final double FOUND_SHARE = 2.0 / 3.0;
 	/** Biomes to photograph, if found. */
-	private static final String[] SHOTS = {"maple_woods", "seasonal_forest", "aspen_glade", "coniferous_forest", "dead_forest", "tundra"};
+	private static final String[] SHOTS = {"maple_woods", "seasonal_forest", "aspen_glade", "coniferous_forest", "dead_forest", "tundra",
+			"field", "flower_meadow", "grassland", "heathland", "lavender_field", "lush_grassland", "prairie", "shrubland", "steppe"};
 	/** Seasonal leaves are counted within this many blocks (east-west and north-south) of each biome found. */
 	private static final int LEAF_REACH = 24;
 	/** How far below the top block of a column to look for leaves. */
@@ -146,8 +147,8 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 			if (leaves == 0 || stale > 0) {
 				throw new AssertionError(stale + " of " + leaves + " generated seasonal leaves near the biomes found are not in today's look");
 			}
-			if (found.size() < FOUND_AT_LEAST) {
-				throw new AssertionError("Only " + found.size() + " of " + JugcraftRegions.biomes().size() + " batch 1 biomes within "
+			if (found.size() < JugcraftRegions.biomes().size() * FOUND_SHARE) {
+				throw new AssertionError("Only " + found.size() + " of " + JugcraftRegions.biomes().size() + " Jugcraft biomes within "
 						+ SEARCH + " blocks of the start (seed " + SEED + "): " + found);
 			}
 		}

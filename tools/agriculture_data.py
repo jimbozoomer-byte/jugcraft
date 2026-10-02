@@ -16,6 +16,7 @@ import decor4_data
 import decor5_data
 import decor6_data
 import regatta_data
+import plants_data
 import trees_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -146,6 +147,7 @@ def assets(root, write, lang):
 
     festival_data.assets(root, write, lang)
     trees_data.assets(root, write)
+    plants_data.assets(root, write, lang)
     carving_data.assets(root, write, lang)
     halloween_data.assets(root, write, lang)
     regatta_data.assets(root, write, lang)
@@ -253,6 +255,7 @@ def loot(data, write):
         write(out / f"{block}.json", table(block, pool(entry(block), condition={"type": "minecraft:survives_explosion"}), decay=False))
     festival_data.loot(out, write)
     trees_data.loot(out, write)
+    plants_data.loot(out, write)
     carving_data.loot(out, write)
     halloween_data.loot(out, write)
     regatta_data.loot(out, write)
@@ -337,6 +340,7 @@ def tags(tags):
             tags.add("block", LEGUME_TAG, rid(info["block"]))
     festival_data.tags(tags)
     trees_data.tags(tags)
+    plants_data.tags(tags)
     carving_data.tags(tags)
     halloween_data.tags(tags)
     regatta_data.tags(tags)
@@ -359,6 +363,7 @@ def advancements(data, write):
 def worldgen(data, write):
     festival_data.worldgen(data, write)
     trees_data.worldgen(data, write)
+    plants_data.worldgen(data, write)
     halloween_data.worldgen(data, write)
     spread = WILD_PATCH["spread_xz"]
     for wild in WILD_CROPS:
