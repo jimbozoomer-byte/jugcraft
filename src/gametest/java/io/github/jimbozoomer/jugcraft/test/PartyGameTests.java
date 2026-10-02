@@ -164,10 +164,12 @@ public class PartyGameTests {
 		parties.accept(c, NOW);
 		helper.assertTrue(parties.findAnyMemberByName("blake").equals(java.util.Optional.of(b)), "names match ignoring case");
 		helper.assertTrue(parties.findAnyMemberByName("Nobody").isEmpty(), "unknown names find nobody");
+		// Operator actions work while parties are off; the lookups below answer "solo" until they are back on.
 		parties.setEnabled(false);
 		expect(helper, parties.adminSetLeader(c), Result.OK, "make Casey leader");
-		helper.assertTrue(parties.isLeader(c), "Casey leads");
 		expect(helper, parties.adminRemove(a), Result.OK, "remove Alex");
+		parties.setEnabled(true);
+		helper.assertTrue(parties.isLeader(c), "Casey leads");
 		helper.assertTrue(!parties.sameParty(a, b) && parties.sameParty(b, c), "Alex is out, Blake and Casey stay");
 		expect(helper, parties.adminRemove(a), Result.NOT_IN_PARTY, "Alex is no longer in a party");
 		expect(helper, parties.adminDisband(b), Result.OK, "disband through any member");
