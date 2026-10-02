@@ -904,4 +904,6 @@ def crop_textures():
     out.update(spirit_board_textures())
     from turkey_textures import turkey_textures  # and wild turkeys
     out.update(turkey_textures())
+    from theremin_textures import theremin_textures  # and the theremin
+    out.update(theremin_textures())
     return out

@@ -560,6 +560,8 @@ HALLOWEEN_ADVANCEMENTS = {
     "gobble_gobble": {"icon": "jugcraft:raw_turkey", "title": "Gobble Gobble", "description": "Breed two wild turkeys", "frame": "task"},
     "carving_the_bird": {"icon": "jugcraft:roast_turkey", "title": "Carving the Bird",
                          "description": "Carve a slice from a roast turkey with a Carving Knife", "frame": "task"},
+    "good_vibrations": {"icon": "jugcraft:theremin", "title": "Good Vibrations", "description": "Play a theremin without touching it",
+                        "frame": "task"},
     "as_easy_as_pie": {"icon": "jugcraft:apple_pie", "title": "As Easy as Pie", "description": "Take a perfectly baked pie out of a Hearth Oven",
                        "frame": "task"},
     "man_of_straw": {"icon": "minecraft:hay_block", "title": "Man of Straw", "description": "Build a Hay Golem from hay bales and a carved pumpkin",
@@ -1593,6 +1595,15 @@ TURKEYS = {"entity": "turkey", "display": "Wild Turkey", "health": 8, "speed": 0
            "roast_display": "Roast Turkey", "slice": "turkey_slice", "servings": 6, "serving": [3, 0.6]}
 
 
+# The Theremin (fall additions 19; ThereminBlock + entity): every `sense_ticks` it finds the nearest player or mob within
+# `range` blocks of its pitch antenna; comparators read 15 at the antenna down to 0 at `range`. Playing (switched on with
+# an empty hand, or powered), it sounds a flute note each look, from `low` pitch at `range` to `high` at the antenna (two
+# octaves), with a vibrato of `vibrato` at `vibrato_speed` radians a tick; a player within `player_range` earns Good
+# Vibrations. Its magic eye glows (`light`) while it plays. Made with copper wire, so it needs the machines feature.
+THEREMIN = {"block": "theremin", "display": "Theremin", "sense_ticks": 4, "range": 8.0, "player_range": 3.0, "low": 0.5, "high": 2.0,
+            "vibrato": 0.03, "vibrato_speed": 0.7, "light": 7}
+
+
 def pie_blocks():
     return [PIES["oven"], PIES["burnt"]] + [f"{f}_pie" for f in PIES["fillings"]]
 
@@ -2128,6 +2139,10 @@ SHAPED = [
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
     # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
     # (the ring) baked in; sugar round a red dye.
+    # Fall additions 19: two copper-wire antennas over a note block in a wooden cabinet on legs (copper wire needs machines).
+    {"id": "theremin", "pattern": ["W W", "PNP", "S S"], "key": {"W": "jugcraft:copper_wire", "P": "#minecraft:planks",
+                                                               "N": "minecraft:note_block", "S": "minecraft:stick"},
+     "result": "theremin", "count": 1, "category": "redstone", "features": ["machines"]},
     # Fall additions 17: a birch board lettered in ink under a glass-lensed planchette.
     {"id": "spirit_board", "pattern": [" G ", "SIS"], "key": {"G": "minecraft:glass_pane", "S": "minecraft:birch_slab", "I": "minecraft:ink_sac"},
      "result": "spirit_board", "count": 1, "category": "building"},
@@ -2285,7 +2300,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"]])
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"]])
 
 
 def all_items():
@@ -2296,7 +2311,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"]])
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"]])
 
 
 def owns(entry_id):

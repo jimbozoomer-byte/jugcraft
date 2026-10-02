@@ -41,6 +41,7 @@ import knitting_data
 import pie_data
 import spirit_board_data
 import turkey_data
+import theremin_data
 import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -213,6 +214,7 @@ def assets(root, write, lang):
     pie_data.assets(root, write, lang)
     spirit_board_data.assets(root, write, lang)
     turkey_data.assets(root, write, lang)
+    theremin_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -333,6 +335,7 @@ def loot(data, write):
     pie_data.loot(out, write)
     spirit_board_data.loot(out, write)
     turkey_data.loot(out, write)
+    theremin_data.loot(out, write)
     crow_data.loot(out, write)
     firework_data.loot(out, write)
     feast_data.loot(out, write)
@@ -357,7 +360,8 @@ def recipes(out, write):
         data.update({"ingredients": recipe["inputs"], "result": {"id": rid(recipe["result"]), "count": recipe["count"]}})
         write(out / f"{recipe['id']}.json", data)
     for recipe in SHAPED:
-        data = {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped", "category": recipe["category"]}
+        data = {"fabric:load_conditions": conditions(*recipe.get("features", [])), "type": "minecraft:crafting_shaped",
+                "category": recipe["category"]}
         if "group" in recipe:
             data["group"] = recipe["group"]
         result = {"id": rid(recipe["result"]), "count": recipe["count"]}
@@ -447,6 +451,7 @@ def tags(tags):
     pie_data.tags(tags)
     spirit_board_data.tags(tags)
     turkey_data.tags(tags)
+    theremin_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

@@ -257,6 +257,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<SpinningWheelBlockEntity> SPINNING_WHEEL_ENTITY;
 	public static BlockEntityType<HearthOvenBlockEntity> HEARTH_OVEN_ENTITY;
 	public static BlockEntityType<SpiritBoardBlockEntity> SPIRIT_BOARD_ENTITY;
+	public static BlockEntityType<ThereminBlockEntity> THEREMIN_ENTITY;
 	/** How many uses Knitting Needles have. */
 	public static final int NEEDLES_DURABILITY = 128;
 	/** Bat guano fertilizes the crops this far round where it is used (a 3x3 patch), with this many doses of bone meal each. */
@@ -1453,6 +1454,14 @@ public final class JugcraftAgriculture {
 		registerItem("roast_turkey", props -> new BlockItem(roastTurkey, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1),
 				FOOD_TAB);
 		meal("turkey_slice", 3, 0.6F);
+
+		// Fall additions 19, the Theremin: an eerie electronic instrument played without touching, singing higher the nearer
+		// someone stands; comparators read how near, so it doubles as a proximity sensor.
+		Block theremin = registerBlock("theremin", ThereminBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(state -> ThereminBlock.playing(state) ? ThereminBlock.LIGHT : 0));
+		THEREMIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("theremin"),
+				FabricBlockEntityTypeBuilder.create(ThereminBlockEntity::new, theremin).build());
+		registerItem("theremin", props -> new BlockItem(theremin, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

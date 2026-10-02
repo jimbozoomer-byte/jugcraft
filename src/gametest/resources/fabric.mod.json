@@ -49,6 +49,7 @@
       "io.github.jimbozoomer.jugcraft.test.PieGameTests",
       "io.github.jimbozoomer.jugcraft.test.SpiritBoardGameTests",
       "io.github.jimbozoomer.jugcraft.test.TurkeyGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ThereminGameTests",
       "io.github.jimbozoomer.jugcraft.test.PetroGameTests"
     ],
     "fabric-client-gametest": [
@@ -92,7 +93,8 @@
       "io.github.jimbozoomer.jugcraft.test.KnittingClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.PieClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.SpiritBoardClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.TurkeyClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.TurkeyClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ThereminClientGameTests"
     ]
   },
   "depends": {

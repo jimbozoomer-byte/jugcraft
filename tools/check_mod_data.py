@@ -814,6 +814,7 @@ def check_agriculture():
     check_pies(java, main)
     check_spirit_board(java, main)
     check_turkeys(java, main)
+    check_theremin(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -3090,6 +3091,33 @@ def check_turkeys(java, main):
     for name, (u, v, *_size) in turkey_textures.BOXES.items():
         if f"texOffs({u}, {v})" not in model:
             err(f"TurkeyModel has no box at ({u}, {v}) for the texture's {name}")
+
+
+def check_theremin(java, main):
+    """The Theremin: ThereminBlockEntity and ThereminBlock match THEREMIN in tools/agriculture.py (how often it looks, its
+    range, the range that earns Good Vibrations, its pitch, vibrato and light); it is registered; its models (silent and
+    playing), words, recipe (gated on machines, for its copper wire), loot and advancement exist."""
+    th = ag.THEREMIN
+    source = java.get("ThereminBlockEntity", "") + java.get("ThereminBlock", "")
+    found = {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;", source)}
+    expected = {"SENSE_TICKS": th["sense_ticks"], "RANGE": th["range"], "PLAYER_RANGE": th["player_range"], "LOW": th["low"],
+                "HIGH": th["high"], "VIBRATO": th["vibrato"], "VIBRATO_SPEED": th["vibrato_speed"], "LIGHT": th["light"]}
+    for name, value in expected.items():
+        if name not in found or abs(found[name] - value) > 1e-6:
+            err(f"Theremin {name} = {found.get(name)} differs from THEREMIN in tools/agriculture.py ({value})")
+    if 'registerBlock("theremin", ThereminBlock::new' not in main:
+        err('JugcraftAgriculture.java must call registerBlock("theremin", ThereminBlock::new')
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in (f"block.jugcraft.{th['block']}", "message.jugcraft.theremin.on", "message.jugcraft.theremin.off"):
+        if key not in lang:
+            err(f"The theremin has no words for {key}")
+    recipe = load(DATA / "jugcraft" / "recipe" / f"{th['block']}.json") or {}
+    if "machines" not in json.dumps(recipe.get("fabric:load_conditions", [])):
+        err("The theremin's recipe must load only with the machines feature (it takes copper wire)")
+    for path in (ASSETS / "models" / "block" / f"{th['block']}.json", ASSETS / "models" / "block" / f"{th['block']}_on.json",
+                 DATA / "jugcraft" / "loot_table" / "blocks" / f"{th['block']}.json", DATA / "jugcraft" / "advancement" / "good_vibrations.json"):
+        if not path.exists():
+            err(f"The theremin needs {path.relative_to(ROOT)}")
 
 
 def check_model_uvs():
