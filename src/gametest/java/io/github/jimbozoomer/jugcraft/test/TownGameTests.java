@@ -318,6 +318,9 @@ public class TownGameTests {
 	private static String drift(ServerLevel level, TownData data, BlockPos origin, List<ChunkPos> chunks, Set<Long> sites) {
 		int drifted = 0;
 		String first = null;
+		int[] min = {Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE};
+		int[] max = {Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE};
+		List<String> nearSource = new ArrayList<>();
 		for (ChunkPos pos : chunks) {
 			for (int wx = pos.x() << 4; wx < (pos.x() << 4) + 16; wx++) {
 				for (int wz = pos.z() << 4; wz < (pos.z() << 4) + 16; wz++) {
@@ -335,10 +338,38 @@ public class TownGameTests {
 							if (first == null) {
 								first = x + " " + y + " " + z + ": " + found + " instead of " + want;
 							}
+							int[] at = {x, y, z};
+							for (int i = 0; i < 3; i++) {
+								min[i] = Math.min(min[i], at[i]);
+								max[i] = Math.max(max[i], at[i]);
+							}
+							// Flowing water one block from its source (amount 7) shows where it came out.
+							if (found.getFluidState().getAmount() >= 7 && !found.getFluidState().isSource() && nearSource.size() < 12) {
+								nearSource.add(x + " " + y + " " + z + " " + found.getFluidState().getAmount() + " (was " + want + ")");
+							}
 						}
 					}
 				}
 			}
+		}
+		if (drifted > 0) {
+			LOGGER.info("Test town: drift spans {} {} {} to {} {} {}; water one block from its source at: {}", min[0], min[1], min[2],
+					max[0], max[1], max[2], nearSource);
+			BlockPos centre = origin.offset(88, 0, 104);
+			List<String> rim = new ArrayList<>();
+			for (int dx = -5; dx <= 5; dx++) {
+				for (int dz = -5; dz <= 5; dz++) {
+					for (int dy = -1; dy <= 2; dy++) {
+						BlockState state = level.getBlockState(centre.offset(dx, dy, dz));
+						int index = data.index(88 + dx, dy, 104 + dz);
+						BlockState want = index == TownData.KEEP ? null : data.state(index);
+						if (want != null && state != want) {
+							rim.add((88 + dx) + " " + dy + " " + (104 + dz) + " " + state + " (was " + want + ")");
+						}
+					}
+				}
+			}
+			LOGGER.info("Test town: round the fountain, {} blocks differ: {}", rim.size(), rim.size() > 40 ? rim.subList(0, 40) : rim);
 		}
 		LOGGER.info("Test town: {} blocks drifted after ticking{}", drifted, first == null ? "" : " (first: " + first + ")");
 		return drifted == 0 ? null : drifted + " blocks, first " + first;
