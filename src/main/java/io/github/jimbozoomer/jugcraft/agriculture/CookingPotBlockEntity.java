@@ -115,7 +115,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 			loaded = false;
 			time = recipe == null ? 0 : recipe.time();
 		}
-		boolean cooking = heated && recipe != null && hasRoomFor(recipe.output());
+		boolean cooking = heated && recipe != null && resultSlotFor(served(recipe.output(), level.getGameTime())) >= 0;
 		if (cooking) {
 			progress++;
 			if (progress >= time) {
@@ -132,8 +132,13 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 		}
 	}
 
-	private boolean hasRoomFor(ItemStackTemplate output) {
-		return resultSlotFor(output.create()) >= 0;
+	/** The meal a recipe serves at {@code now}: a jar of preserves is stamped with the time it was cooked (it spoils from then). */
+	private static ItemStack served(ItemStackTemplate output, long now) {
+		ItemStack meal = output.create();
+		if (meal.getItem() instanceof PreserveJarItem) {
+			PreserveJarItem.cooked(meal, now);
+		}
+		return meal;
 	}
 
 	/** A result slot that can take the whole meal: one already holding it with room, else an empty one, else -1. */
@@ -157,24 +162,28 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 			recheck = true;
 			return;
 		}
+		ItemStack meal = served(cooked.output(), level.getGameTime());
+		int slot = resultSlotFor(meal);
+		if (slot < 0) {
+			recheck = true;
+			return;
+		}
 		int[] take = match.get().take();
-		for (int slot = 0; slot < INPUTS; slot++) {
-			if (take[slot] == 0) {
+		for (int input = 0; input < INPUTS; input++) {
+			if (take[input] == 0) {
 				continue;
 			}
-			ItemStack stack = items.get(slot);
+			ItemStack stack = items.get(input);
 			ItemStackTemplate remainder = stack.getItem().getCraftingRemainder();
-			stack.shrink(take[slot]);
-			for (int n = 0; remainder != null && n < take[slot]; n++) {
-				if (items.get(slot).isEmpty()) {
-					items.set(slot, remainder.create());
+			stack.shrink(take[input]);
+			for (int n = 0; remainder != null && n < take[input]; n++) {
+				if (items.get(input).isEmpty()) {
+					items.set(input, remainder.create());
 				} else {
 					Block.popResource(level, pos.above(), remainder.create());
 				}
 			}
 		}
-		ItemStack meal = cooked.output().create();
-		int slot = resultSlotFor(meal);
 		if (items.get(slot).isEmpty()) {
 			items.set(slot, meal);
 		} else {
