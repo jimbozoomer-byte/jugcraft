@@ -51,8 +51,8 @@ public class Decor8ClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 
-			BlockPos coilA = new BlockPos(x + 3, y, z - 9);
-			BlockPos coilB = new BlockPos(x + 7, y, z - 9);
+			BlockPos coilA = new BlockPos(x + 4, y, z - 8);
+			BlockPos coilB = new BlockPos(x + 8, y, z - 8);
 			power(server, coilA, coilB);
 			shoot(context, singleplayer, x + 7, y + 2, z + 5, 180, 10, "jugcraft_mad_lab");
 			// The coils as they arc: wait for one to strike, then photograph it.
@@ -68,7 +68,7 @@ public class Decor8ClientGameTests implements FabricClientGameTest {
 				ServerLevel level = minecraft.overworld();
 				MummySarcophagusBlock.open(level, sarcophagus, level.getBlockState(sarcophagus));
 			});
-			shoot(context, singleplayer, x + 10, y + 1, z - 9, 270, 0, "jugcraft_mummy_sarcophagus");
+			shoot(context, singleplayer, x + 9, y, z - 9, 270, 10, "jugcraft_mummy_sarcophagus");
 			BlockPos hissing = new BlockPos(x + 7, y, z - 4);
 			place(context, singleplayer, x + 8, y + 2, z - 1, 180, 30);
 			server.runOnServer(minecraft -> {
@@ -141,13 +141,13 @@ public class Decor8ClientGameTests implements FabricClientGameTest {
 				set(level, new BlockPos(x + 14, y + dy, z + dz), bricks);
 			}
 		}
-		// Two Tesla Coils, switched on.
-		for (int dx : new int[] {3, 7}) {
+		// Two Tesla Coils, switched on, out of the way of the jar counter.
+		for (int dx : new int[] {4, 8}) {
 			BlockState coil = state("tesla_coil").setValue(TeslaCoilBlock.ENABLED, true);
-			set(level, new BlockPos(x + dx, y, z - 9), coil.setValue(TeslaCoilBlock.HALF, DoubleBlockHalf.LOWER));
-			set(level, new BlockPos(x + dx, y + 1, z - 9), coil.setValue(TeslaCoilBlock.HALF, DoubleBlockHalf.UPPER));
+			set(level, new BlockPos(x + dx, y, z - 8), coil.setValue(TeslaCoilBlock.HALF, DoubleBlockHalf.LOWER));
+			set(level, new BlockPos(x + dx, y + 1, z - 8), coil.setValue(TeslaCoilBlock.HALF, DoubleBlockHalf.UPPER));
 		}
-		// The lab table, its head to the north, on a hidden block of redstone so the patient sits up.
+		// The lab table, its head to the north, over a block of redstone set in the floor so the patient sits up.
 		BlockPos foot = new BlockPos(x + 10, y, z - 5);
 		BlockState table = state("lab_table").setValue(LabTableBlock.FACING, Direction.NORTH);
 		set(level, foot, table.setValue(LabTableBlock.PART, BedPart.FOOT));
