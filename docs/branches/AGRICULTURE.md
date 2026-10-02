@@ -319,7 +319,7 @@ Put a **Harvest Scale** beside a full-grown giant pumpkin (or carry the pumpkin 
 | --- | --- | --- |
 | **Pumpkin Stencil** | Use a Blank Stencil (two paper) on a carved side | Traces the design; hold it in your other hand while carving to press it in, on any pumpkin or a giant |
 | **White, Jarrahdale and Cinderella pumpkins** | Wild in birch forests and snowy places, savannas and windswept hills, plains and flower forests; grass drops their seeds | Grow from stems; carve like pumpkins into their own hand-carved blocks; bake into pumpkin pie |
-| **Scarecrow** | Wool over hay between sticks | Two blocks tall; dye its flannel shirt any colour; give it any pumpkin and it wears it for a head (a lit one lights it) |
+| **Scarecrow** | Wool over hay between sticks | Two blocks tall; dye its flannel shirt any colour; give it any pumpkin and it wears it for a head (a lit one lights it); it keeps [crows](#crows-and-working-scarecrows) off the crops round it |
 | **Ornamental corn** | Wild Corn sometimes drops its kernels; grass drops them | Grows like corn; its multicoloured ears tie into an **Ornamental Corn Bundle** for walls and door frames |
 | **Corn Shock** | Six Corn Stalks (from breaking any corn 3 blocks tall) and string | A two-block stook for porches |
 | **Caramel, Caramel Apple, Popcorn Ball** | Smelt sugar; add an apple and a stick, or two popcorn | Treats (2, 6 and 5 hunger); the apple's stick comes back |
@@ -735,6 +735,18 @@ Ten more fall and Halloween additions, one per pull request ([features/fall-addi
 - **Unsealed jars spoil** three days after cooking. The **Canning Kettle** seals them in a boiling water bath: sealed jars keep until opened, stack, and wear a gingham cap.
 - **Pantry Shelf:** shows off six jars.
 
+### Crows and working scarecrows
+
+| **Crows** over a carrot patch just out of a scarecrow's reach, and one of them down on it, pecking | **The working scarecrow**: wearing a pumpkin head, it guards the field eight blocks round |
+| --- | --- |
+| ![Crows](../images/ingame_crows.jpg) | ![Crows and a scarecrow](../images/ingame_crows_and_scarecrow.jpg) |
+
+*Real screenshots from the client game test that CI runs (`CrowClientGameTests`, software rendering, small previews). The pecking crow was sent after its crop and pecks for real; the others are posed in flight.*
+
+- **Crows** come to fields by day in small flocks, wheel over them, and drop onto ripe crops to peck them three growth stages back (only while `mob_griefing` is on). Crops under a roof, tall crops, gourds and bushes are safe.
+- **Scarecrows keep them off:** crows leave the crops within 4 blocks of a bare scarecrow alone, 8 of one wearing a pumpkin head, 12 of one wearing a lit head.
+- Crows fly off from a player who comes close, from a blow, and at nightfall; they drop feathers. Details: [fall additions](../features/fall-additions.md#crows).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
@@ -762,7 +774,7 @@ Hand tools and farmstead blocks, made from wood, stone and early metals. None ne
 | Seed Pouch | Holds several seed types; right-click plants a 3×3 patch of farmland from it | Discovery |
 | **Trellis (wood)** ✅ | Supports climbing crops (tomatoes now; grapes, hops and pole beans later); also a garden decoration | Discovery |
 | **Carving Knife** ✅ | Carves any face into the sides of a pumpkin, a pixel at a time; see [Pumpkin Carving](#what-exists-now-pumpkin-carving) | Discovery |
-| **Scarecrow** ✅ | Decoration for fields and Halloween, in a flannel shirt you dye, with any pumpkin for a head; see [the Halloween harvest](#what-exists-now-the-halloween-harvest). Later keeps crop-eating birds away once those creatures exist | Discovery |
+| **Scarecrow** ✅ | Decoration for fields and Halloween, in a flannel shirt you dye, with any pumpkin for a head; see [the Halloween harvest](#what-exists-now-the-halloween-harvest). Keeps [crows](#crows-and-working-scarecrows) off the crops round it (4 blocks, 8 with a head, 12 with a lit one) | Discovery |
 | **Corn Shock** ✅ | A stook of corn stalks for fall porches and markets (decoration) | Discovery |
 | **Harvest Scale** ✅ | Weighs giant pumpkins, keeps a board of the three heaviest and gives prize ribbons | Discovery |
 | Bushel Basket | Small produce storage for markets | Discovery |
