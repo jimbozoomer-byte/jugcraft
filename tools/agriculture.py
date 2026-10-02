@@ -550,6 +550,10 @@ HALLOWEEN_ADVANCEMENTS = {
                           "frame": "task"},
     "snug_as_a_bug": {"icon": "jugcraft:knit_sweater", "title": "Snug as a Bug",
                       "description": "Warm yourself by a campfire in a knit beanie, sweater and wool socks", "frame": "goal"},
+    "is_anybody_there": {"icon": "jugcraft:spirit_board", "title": "Is Anybody There?",
+                         "description": "Hold a séance at a Spirit Board and have a restless spirit answer", "frame": "task"},
+    "unfinished_business": {"icon": "jugcraft:ectoplasm", "title": "Unfinished Business",
+                            "description": "Give a restless spirit the thing it wishes for, and lay it to rest", "frame": "goal"},
     "as_easy_as_pie": {"icon": "jugcraft:apple_pie", "title": "As Easy as Pie", "description": "Take a perfectly baked pie out of a Hearth Oven",
                        "frame": "task"},
     "man_of_straw": {"icon": "minecraft:hay_block", "title": "Man of Straw", "description": "Build a Hay Golem from hay bales and a carved pumpkin",
@@ -1531,6 +1535,35 @@ PIES = {"oven": "hearth_oven", "oven_display": "Hearth Oven", "dough": "pastry_d
                          "with": ["jugcraft:roasted_chestnuts", "jugcraft:roasted_chestnuts"]}}}
 
 
+# The Spirit Board (fall additions 17): a séance (SpiritBoard, SpiritBoardBlock + entity) needs a lit candle (block tag
+# `candles_tag`, anything in it with the vanilla `lit` property set) within `candle_range` blocks, and players' fingers on
+# the planchette (up to `max_hands`, each within `hand_range` blocks; a hand lifts beyond `hand_range` + 1). The restless
+# spirit nearest the board within `spirit_range` blocks answers: YES, its name and its wish, then GOODBYE, a stop every
+# `letter_ticks` with one hand on the planchette or every `fast_letter_ticks` with two or more; no spirit, NO and GOODBYE.
+# The board rests `cooldown_ticks` after; players within `watch_range` see the letters. Given what it wishes for (an item
+# in `jugcraft:spirit_wishes/<wish>`), a revealed spirit is laid to rest: `rest_xp` experience and Luck for
+# `rest_luck_ticks` ticks to the giver. Names and wishes are drawn at random the first time a séance asks a spirit.
+SPIRIT_BOARD = {"block": "spirit_board", "display": "Spirit Board", "candle_range": 4, "spirit_range": 16, "hand_range": 3,
+                "max_hands": 4, "letter_ticks": 20, "fast_letter_ticks": 12, "cooldown_ticks": 40, "watch_range": 8, "rest_xp": 20,
+                "rest_luck_ticks": 6000, "candles_tag": "jugcraft:seance_candles",
+                "candles": ["#minecraft:candles", "jugcraft:aura_candle", "jugcraft:floating_candle", "jugcraft:candle_skull"],
+                "names": ["MABEL", "OTIS", "EZRA", "HATTIE", "JASPER", "AGNES", "SILAS", "WINNIE", "AMOS", "PRUDENCE", "ELIJAH", "OPAL",
+                          "CORNELIUS", "BEATRIX", "HORACE", "LUELLA"],
+                # In the order of SpiritBoard.Wish: what the message calls it, and the items that grant it.
+                "wishes": {
+                    "pie": {"display": "a pie, or a slice of one",
+                            "items": [f"jugcraft:{f}_pie" for f in PIES["fillings"]] + [f"jugcraft:{f}_pie_slice" for f in PIES["fillings"]]},
+                    "candle": {"display": "a candle", "items": ["#minecraft:candles", "jugcraft:aura_candle"]},
+                    "cider": {"display": "a bottle of cider",
+                              "items": ["jugcraft:sweet_cider", "jugcraft:sparkling_cider", "jugcraft:aged_cider", "jugcraft:mulled_cider"]},
+                    "sweater": {"display": "a knitted sweater",
+                                "items": [f"jugcraft:{g}" for g, i in KNITTING["garments"].items() if i["slot"] == "CHEST"]},
+                    "candy": {"display": "a piece of candy", "items": [f"jugcraft:{c}" for c in CANDY["candies"]]},
+                    "apple": {"display": "an apple", "items": ["minecraft:apple", "minecraft:golden_apple", "jugcraft:caramel_apple"]},
+                    "rose": {"display": "a rose (a poppy, or a rose bush)", "items": ["minecraft:poppy", "minecraft:rose_bush"]},
+                    "pumpkin": {"display": "a pumpkin", "items": ["minecraft:pumpkin", "minecraft:carved_pumpkin", "minecraft:jack_o_lantern"]}}}
+
+
 def pie_blocks():
     return [PIES["oven"], PIES["burnt"]] + [f"{f}_pie" for f in PIES["fillings"]]
 
@@ -2065,6 +2098,9 @@ SHAPED = [
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
     # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
     # (the ring) baked in; sugar round a red dye.
+    # Fall additions 17: a birch board lettered in ink under a glass-lensed planchette.
+    {"id": "spirit_board", "pattern": [" G ", "SIS"], "key": {"G": "minecraft:glass_pane", "S": "minecraft:birch_slab", "I": "minecraft:ink_sac"},
+     "result": "spirit_board", "count": 1, "category": "building"},
     # Fall additions 16: a brick oven over a furnace's fire.
     {"id": "hearth_oven", "pattern": ["BBB", "B B", "BFB"], "key": {"B": "minecraft:brick", "F": "minecraft:furnace"},
      "result": "hearth_oven", "count": 1, "category": "building"},
@@ -2219,7 +2255,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"]])
 
 
 def all_items():
@@ -2230,7 +2266,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"]])
 
 
 def owns(entry_id):

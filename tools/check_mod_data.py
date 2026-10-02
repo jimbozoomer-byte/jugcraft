@@ -806,6 +806,7 @@ def check_agriculture():
     check_hay_golem(java, main)
     check_knitting(java, main)
     check_pies(java, main)
+    check_spirit_board(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2957,6 +2958,70 @@ def check_pies(java, main):
                  DATA / "jugcraft" / "advancement" / "as_easy_as_pie.json"):
         if not path.exists():
             err(f"Pie baking needs {path.relative_to(ROOT)}")
+
+
+def check_spirit_board(java, main):
+    """The Spirit Board: the Java matches SPIRIT_BOARD in tools/agriculture.py (the séance's ranges, hands, letter times,
+    rest, watch range and a spirit's reward; the names; the wishes, in order); its words, YES, NO and GOODBYE sit on the
+    face where tools/spirit_board_textures.py draws them; the block is registered; its model, textures (the face at its
+    size), words, tags, recipe, loot and advancements exist."""
+    import spirit_board_textures as sbt
+    board = ag.SPIRIT_BOARD
+    source = java.get("SpiritBoard", "")
+
+    def number(name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", source)
+        return float(match.group(1)) if match else None
+
+    expected = {"CANDLE_RANGE": board["candle_range"], "SPIRIT_RANGE": board["spirit_range"], "HAND_RANGE": board["hand_range"],
+                "MAX_HANDS": board["max_hands"], "LETTER_TICKS": board["letter_ticks"], "FAST_LETTER_TICKS": board["fast_letter_ticks"],
+                "COOLDOWN_TICKS": board["cooldown_ticks"], "WATCH_RANGE": board["watch_range"], "REST_XP": board["rest_xp"],
+                "REST_LUCK_TICKS": board["rest_luck_ticks"], "FACE_WIDTH": sbt.FACE[0], "FACE_HEIGHT": sbt.FACE[1]}
+    for name, value in expected.items():
+        found = number(name)
+        if found is None or abs(found - value) > 1e-9:
+            err(f"SpiritBoard.{name} = {found} differs from SPIRIT_BOARD in tools/agriculture.py ({value})")
+    names = re.search(r"NAMES = \{([^}]*)\}", source)
+    if not names or re.findall(r'"([A-Z]+)"', names.group(1)) != board["names"]:
+        err("SpiritBoard.NAMES differs from SPIRIT_BOARD['names'] in tools/agriculture.py")
+    wishes = re.search(r"enum Wish \{\s*([A-Z_, ]+);", source)
+    if not wishes or [w.strip().lower() for w in wishes.group(1).split(",")] != list(board["wishes"]):
+        err("SpiritBoard.Wish differs from SPIRIT_BOARD['wishes'] in tools/agriculture.py (in order)")
+    if f'"{board["candles_tag"].split(":")[1]}"' not in source:
+        err("SpiritBoard.CANDLES must be the tag SPIRIT_BOARD['candles_tag']")
+    # Each word's middle on the face, as SpiritBoard.place() has it, is where the texture draws it.
+    stops = {"YES": "YES", "NO": "NO", "GOODBYE": "GOODBYE"}
+    for word, stop in stops.items():
+        x, y = sbt.WORDS[word]
+        middle = (x + (4 * len(word) - 1) / 2, y + 2.5)
+        found = re.search(rf"case {stop} -> new float\[\] \{{([\d.]+)F, ([\d.]+)F\}}", source)
+        if not found or (float(found.group(1)), float(found.group(2))) != middle:
+            err(f"SpiritBoard.place({word}) must be {middle}, the middle of the word on the face")
+    for formula in ("7.5F + 4 * i, 15.5F - arc(i)", "7.5F + 4 * i, 24.5F - arc(i)", "13.5F + 4 * i, 33.5F"):
+        if formula not in source:
+            err(f"SpiritBoard.place() must put the letters where spirit_board_textures.letter_places() draws them ({formula})")
+    if 'registerBlock("spirit_board", SpiritBoardBlock::new' not in main:
+        err('JugcraftAgriculture.java must call registerBlock("spirit_board", SpiritBoardBlock::new')
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"block.jugcraft.{board['block']}"] + [f"spirit_wish.jugcraft.{w}" for w in board["wishes"]]
+    for key in keys:
+        if key not in lang:
+            err(f"The Spirit Board has no words for {key}")
+    for texture, size in (("entity/spirit_board", sbt.FACE), ("entity/planchette", (32, 32)), ("entity/planchette_wood", (16, 16))):
+        png = ASSETS / "textures" / f"{texture}.png"
+        if not png.is_file():
+            err(f"The Spirit Board needs its texture {texture}")
+            continue
+        with Image.open(png) as img:
+            if img.size != size:
+                err(f"{texture} is {img.size}, expected {size}")
+    tags = DATA / "jugcraft" / "tags"
+    paths = [tags / "block" / f"{board['candles_tag'].split(':')[1]}.json", DATA / "jugcraft" / "recipe" / "spirit_board.json",
+             DATA / "jugcraft" / "loot_table" / "blocks" / "spirit_board.json", DATA / "jugcraft" / "advancement" / "is_anybody_there.json",
+             DATA / "jugcraft" / "advancement" / "unfinished_business.json"] + [tags / "item" / "spirit_wishes" / f"{w}.json" for w in board["wishes"]]
+    for path in paths:
+        if not path.exists():
+            err(f"The Spirit Board needs {path.relative_to(ROOT)}")
 
 
 def check_model_uvs():

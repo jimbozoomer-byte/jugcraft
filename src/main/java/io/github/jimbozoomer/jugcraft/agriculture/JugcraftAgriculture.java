@@ -255,6 +255,7 @@ public final class JugcraftAgriculture {
 	public static DataComponentType<KnittingWork> KNITTING;
 	public static BlockEntityType<SpinningWheelBlockEntity> SPINNING_WHEEL_ENTITY;
 	public static BlockEntityType<HearthOvenBlockEntity> HEARTH_OVEN_ENTITY;
+	public static BlockEntityType<SpiritBoardBlockEntity> SPIRIT_BOARD_ENTITY;
 	/** How many uses Knitting Needles have. */
 	public static final int NEEDLES_DURABILITY = 128;
 	/** Bat guano fertilizes the crops this far round where it is used (a 3x3 patch), with this many doses of bone meal each. */
@@ -1430,6 +1431,14 @@ public final class JugcraftAgriculture {
 		Block burnt = registerBlock("burnt_pie", props -> new PieBlock(null, props), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
 				.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
 		registerItem("burnt_pie", props -> new BlockItem(burnt, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);
+
+		// Fall additions 17, the Spirit Board: a candlelit séance spells out a restless spirit's name and the one thing it
+		// wishes for; given it, the spirit is laid to rest.
+		Block spiritBoard = registerBlock("spirit_board", SpiritBoardBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
+				.strength(0.8F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
+		SPIRIT_BOARD_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("spirit_board"),
+				FabricBlockEntityTypeBuilder.create(SpiritBoardBlockEntity::new, spiritBoard).build());
+		registerItem("spirit_board", props -> new BlockItem(spiritBoard, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

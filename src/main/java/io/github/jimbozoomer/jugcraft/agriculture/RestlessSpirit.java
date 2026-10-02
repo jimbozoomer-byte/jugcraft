@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -12,9 +13,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -41,8 +44,9 @@ import org.jspecify.annotations.Nullable;
  * Glowing effect). Revealed, it shows to everyone near for {@value #REVEAL_TICKS} ticks at a time, moans now and then,
  * and shies away from anyone within {@value #SHY_RADIUS} blocks (a sneaking player gets to {@value #SNEAK_SHY_RADIUS}),
  * though never out of its haunt, so it can be cornered. A glass bottle used on a revealed spirit catches it: the bottle
- * fills with Ectoplasm. Blows pass through it; it fades at dawn or when the agriculture feature is off. It harms nothing
- * and drops nothing.
+ * fills with Ectoplasm. A Spirit Board's séance ({@link SpiritBoard}) learns its name and the one thing it wishes for;
+ * given that, revealed, it is laid to rest. Blows pass through it; it fades at dawn or when the agriculture feature is off.
+ * It harms nothing and drops nothing.
  */
 public class RestlessSpirit extends AmbientCreature {
 	public static final int HAUNT_RADIUS = 6;
@@ -63,6 +67,9 @@ public class RestlessSpirit extends AmbientCreature {
 
 	private @Nullable BlockPos home;
 	private @Nullable Vec3 target;
+	/** Its name ({@link SpiritBoard#NAMES}) and wish, once a séance has asked it; -1 until then. */
+	private int spiritName = -1;
+	private int wish = -1;
 
 	public RestlessSpirit(EntityType<? extends RestlessSpirit> type, Level level) {
 		super(type, level);
@@ -90,6 +97,30 @@ public class RestlessSpirit extends AmbientCreature {
 
 	public void setHome(BlockPos grave) {
 		home = grave.immutable();
+	}
+
+	/** Its name, as an index into {@link SpiritBoard#NAMES}, or -1 if no séance has asked it yet. */
+	public int spiritName() {
+		return spiritName;
+	}
+
+	/** What it wishes for, or null if no séance has asked it yet. */
+	public SpiritBoard.@Nullable Wish wish() {
+		return wish >= 0 ? SpiritBoard.Wish.values()[wish] : null;
+	}
+
+	/** Gives it a name and a wish, if it has none yet (when a séance first asks it). */
+	public void promise(RandomSource random) {
+		if (spiritName < 0 || wish < 0) {
+			spiritName = random.nextInt(SpiritBoard.NAMES.length);
+			wish = random.nextInt(SpiritBoard.Wish.values().length);
+		}
+	}
+
+	/** Sets its name and wish (tests). */
+	public void promise(int name, SpiritBoard.Wish wished) {
+		spiritName = Math.clamp(name, 0, SpiritBoard.NAMES.length - 1);
+		wish = wished.ordinal();
 	}
 
 	/** Whether it shows now. */
@@ -205,24 +236,53 @@ public class RestlessSpirit extends AmbientCreature {
 		discard();
 	}
 
-	/** A glass bottle catches it once revealed: the bottle fills with Ectoplasm. */
+	/**
+	 * Once revealed: a glass bottle catches it (the bottle fills with Ectoplasm); what it wishes for, once a séance has
+	 * learnt that, lays it to rest; anything else it turns from.
+	 */
 	@Override
 	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
 		ItemStack held = player.getItemInHand(hand);
-		if (!held.is(Items.GLASS_BOTTLE) || !revealed()) {
+		SpiritBoard.Wish wished = wish();
+		if (!revealed() || held.isEmpty() || !held.is(Items.GLASS_BOTTLE) && wished == null) {
 			return super.mobInteract(player, hand);
 		}
-		if (level() instanceof ServerLevel level && player instanceof ServerPlayer catcher) {
-			ItemStack ectoplasm = new ItemStack(JugcraftAgriculture.item("ectoplasm"));
-			player.setItemInHand(hand, ItemUtils.createFilledResult(held, player, ectoplasm));
-			level.playSound(null, getX(), getY(), getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0F, 0.7F);
-			level.playSound(null, getX(), getY(), getZ(), SoundEvents.GHAST_AMBIENT, SoundSource.NEUTRAL, 0.4F, 1.9F);
-			level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, getX(), getY() + 0.6, getZ(), 12, 0.2, 0.4, 0.2, 0.02);
-			level.gameEvent(player, GameEvent.ENTITY_INTERACT, position());
-			TrickOrTreat.award(catcher, "ghost_hunter");
-			discard();
+		if (level() instanceof ServerLevel level && player instanceof ServerPlayer server) {
+			if (held.is(Items.GLASS_BOTTLE)) {
+				ItemStack ectoplasm = new ItemStack(JugcraftAgriculture.item("ectoplasm"));
+				player.setItemInHand(hand, ItemUtils.createFilledResult(held, player, ectoplasm));
+				level.playSound(null, getX(), getY(), getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0F, 0.7F);
+				level.playSound(null, getX(), getY(), getZ(), SoundEvents.GHAST_AMBIENT, SoundSource.NEUTRAL, 0.4F, 1.9F);
+				level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, getX(), getY() + 0.6, getZ(), 12, 0.2, 0.4, 0.2, 0.02);
+				level.gameEvent(player, GameEvent.ENTITY_INTERACT, position());
+				TrickOrTreat.award(server, "ghost_hunter");
+				discard();
+			} else if (held.is(wished.items)) {
+				layToRest(level, server, held);
+			} else {
+				server.sendOverlayMessage(Component.translatable("message.jugcraft.restless_spirit.not_that"));
+				level.playSound(null, getX(), getY(), getZ(), SoundEvents.GHAST_AMBIENT, SoundSource.NEUTRAL, 0.3F, 0.7F);
+			}
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * {@code giver} gives it {@code gift}, what it wished for: it takes it and rises away in a column of light, at rest. The
+	 * giver gets {@value SpiritBoard#REST_XP} experience and Luck for {@value SpiritBoard#REST_LUCK_TICKS} ticks.
+	 */
+	public void layToRest(ServerLevel level, ServerPlayer giver, ItemStack gift) {
+		gift.consume(1, giver);
+		giver.giveExperiencePoints(SpiritBoard.REST_XP);
+		giver.addEffect(new MobEffectInstance(MobEffects.LUCK, SpiritBoard.REST_LUCK_TICKS));
+		level.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 0.8, getZ(), 24, 0.2, 0.8, 0.2, 0.04);
+		level.sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.4, getZ(), 8, 0.25, 0.3, 0.25, 0.02);
+		level.playSound(null, getX(), getY(), getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 1.0F, 0.6F);
+		giver.sendOverlayMessage(Component.translatable("message.jugcraft.restless_spirit.at_rest",
+				SpiritBoardBlockEntity.spiritName(Math.max(0, spiritName))));
+		level.gameEvent(giver, GameEvent.ENTITY_INTERACT, position());
+		TrickOrTreat.award(giver, "unfinished_business");
+		discard();
 	}
 
 	/** Only a revealed spirit can be aimed at. */
@@ -280,11 +340,19 @@ public class RestlessSpirit extends AmbientCreature {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		super.addAdditionalSaveData(output);
 		output.store("home", BlockPos.CODEC, home());
+		output.putInt("spirit_name", spiritName);
+		output.putInt("wish", wish);
 	}
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		home = input.read("home", BlockPos.CODEC).orElse(null);
+		spiritName = input.getIntOr("spirit_name", -1);
+		wish = input.getIntOr("wish", -1);
+		if (spiritName < 0 || spiritName >= SpiritBoard.NAMES.length || wish < 0 || wish >= SpiritBoard.Wish.values().length) {
+			spiritName = -1;
+			wish = -1;
+		}
 	}
 }

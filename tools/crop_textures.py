@@ -900,4 +900,6 @@ def crop_textures():
     out.update(knitting_textures())
     from pie_textures import pie_textures  # and pie baking
     out.update(pie_textures())
+    from spirit_board_textures import spirit_board_textures  # and the Spirit Board
+    out.update(spirit_board_textures())
     return out
