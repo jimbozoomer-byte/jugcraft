@@ -79,7 +79,7 @@ public final class RetroTrader {
 		ResourceKey<Block> cabinetKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("arcade_cabinet"));
 		ARCADE_CABINET = Registry.register(BuiltInRegistries.BLOCK, cabinetKey, new ArcadeCabinetBlock(
 				// Immovable: a piston moving one half of a two-block cabinet would break the other and drop a cabinet.
-				BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(2.5F).noOcclusion().pushReaction(PushReaction.BLOCK)
+				BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(2.5F).noOcclusion().pushReaction(PushReaction.IMMOVEABLE)
 						.lightLevel(state -> state.getValue(ArcadeCabinetBlock.HALF) == DoubleBlockHalf.UPPER ? 6 : 0)
 						.setId(cabinetKey)));
 		ResourceKey<Item> cabinetItem = ResourceKey.create(Registries.ITEM, Jugcraft.id("arcade_cabinet"));
