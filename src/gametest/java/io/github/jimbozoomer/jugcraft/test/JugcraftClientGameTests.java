@@ -142,21 +142,25 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_rocket_pack_worn");
-			// Batch 25: a full set of steel armor and a steel paxel in hand, from behind; then bronze, from the front.
+			// Batch 25: kaiserpunk steel armor with a steel paxel in hand, from the front; then steampunk bronze, from the
+			// front and from behind (its boiler).
 			server.runCommand("item replace entity @p armor.head with jugcraft:steel_helmet");
 			server.runCommand("item replace entity @p armor.chest with jugcraft:steel_chestplate");
 			server.runCommand("item replace entity @p armor.legs with jugcraft:steel_leggings");
 			server.runCommand("item replace entity @p armor.feet with jugcraft:steel_boots");
 			server.runCommand("item replace entity @p hotbar.0 with jugcraft:steel_paxel");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_steel_armor_worn");
 			server.runCommand("item replace entity @p armor.head with jugcraft:bronze_helmet");
 			server.runCommand("item replace entity @p armor.chest with jugcraft:bronze_chestplate");
 			server.runCommand("item replace entity @p armor.legs with jugcraft:bronze_leggings");
 			server.runCommand("item replace entity @p armor.feet with jugcraft:bronze_boots");
-			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_bronze_armor_worn");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_bronze_armor_back");
 			// Batch 27: scuba mask and tank, free runners and the power katana, from the front; then the sixteen plastic
 			// blocks in a wall, two high.
 			server.runCommand("item replace entity @p armor.head with jugcraft:scuba_mask");
@@ -164,6 +168,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			server.runCommand("item replace entity @p armor.legs with minecraft:air");
 			server.runCommand("item replace entity @p armor.feet with jugcraft:free_runners");
 			server.runCommand("item replace entity @p hotbar.0 with jugcraft:power_katana");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_scuba_gear_worn");
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));

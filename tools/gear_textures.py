@@ -1,10 +1,12 @@
 """Tool and armor textures (batch 25, docs/features/tools-and-armor.md): bronze and steel swords, pickaxes, axes,
-shovels and hoes, paxels for every tier, and bronze and steel armor (inventory icons and the worn 64x32 layers).
+shovels and hoes, and paxels for every tier. The bronze and steel armor (icons and worn layers) is in armor_styles.py.
 
 All original: each icon is a hand-drawn mask below, coloured from a five-shade palette (0 darkest .. 4 lightest);
-handles are oak brown. The worn armor is drawn plate by plate onto the humanoid UV layout.
+handles are oak brown.
 """
 from PIL import Image
+
+import armor_styles
 
 # Mask characters: digits are the head's palette shade; h/H the handle (dark/light); . is empty.
 HANDLE = [(58, 40, 22), (98, 70, 40)]
@@ -124,81 +126,6 @@ PAXEL = [
     "................",
 ]
 
-HELMET = [
-    "................",
-    "................",
-    "....23333332....",
-    "...2444444443...",
-    "..244433334442..",
-    "..243......342..",
-    "..242......242..",
-    "..231......132..",
-    "..11........11..",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-]
-
-CHESTPLATE = [
-    "................",
-    "..2333....3332..",
-    ".2444431134444..",
-    ".2444444444442..",
-    ".1344444444431..",
-    "..1.2444442.1...",
-    "....2444442.....",
-    "....2433342.....",
-    "....2444442.....",
-    "....2444442.....",
-    "....1333331.....",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-]
-
-LEGGINGS = [
-    "................",
-    "................",
-    "....23333332....",
-    "....24444442....",
-    "....24433442....",
-    "....2442.442....",
-    "....2442.442....",
-    "....2441.442....",
-    "....2441.442....",
-    "....2431.342....",
-    "....1331.331....",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-]
-
-BOOTS = [
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "...233....332...",
-    "...244....442...",
-    "...244....442...",
-    "...243....342...",
-    "..2443....3442..",
-    ".24442....24442.",
-    ".13331....13331.",
-    "................",
-    "................",
-    "................",
-    "................",
-]
 
 # Batch 27 gear. Letters: R rubber (black), G glass (pale blue), Y yellow (hazard paint), and the digits are steel.
 SCUBA_MASK = [
@@ -295,7 +222,6 @@ BOW_BASE = [
 EXTRA_COLORS = {"R": (32, 32, 36), "G": (120, 220, 255), "Y": (232, 186, 40), "W": (226, 226, 220)}
 
 TOOLS = {"sword": SWORD, "pickaxe": PICKAXE, "axe": AXE, "shovel": SHOVEL, "hoe": HOE}
-ARMOR = {"helmet": HELMET, "chestplate": CHESTPLATE, "leggings": LEGGINGS, "boots": BOOTS}
 
 # Head palettes for the paxel tiers that are not Jugcraft metals (darkest .. lightest), our own picks.
 VANILLA_TIERS = {
@@ -385,63 +311,18 @@ def _faces(box):
             (u, v + d, d, h), (u + d, v + d, w, h), (u + d + w, v + d, d, h), (u + 2 * d + w, v + d, w, h)]
 
 
-def _plate(img, rect, palette, seam_every=4, rows=None):
-    """Fills one face with plate: a light top edge, a dark bottom edge, a seam every few rows and rivets."""
-    left, top, width, height = rect
-    for y in range(top, top + height):
-        if rows is not None and not rows(y - top, height):
-            continue
-        for x in range(left, left + width):
-            row = y - top
-            if row == 0:
-                c = palette[4]
-            elif row == height - 1:
-                c = palette[0]
-            elif row % seam_every == 0:
-                c = palette[1]
-            else:
-                c = palette[3 if (x + y) % 7 else 2]
-            img.putpixel((x, y), tuple(c) + (255,))
-    # Rivets at the top corners of wide faces, where that part of the face is plated.
-    if width >= 6 and height >= 6 and (rows is None or rows(1, height)):
-        for x, y in ((left + 1, top + 1), (left + width - 2, top + 1)):
-            img.putpixel((x, y), tuple(palette[4]) + (255,))
-
-
-def armor_layer(palette, leggings):
-    """The worn armor on the 64x32 humanoid sheet. Layer 1 (helmet, chestplate, boots): head, body, arms and the
-    boot part of the legs. Layer 2 (leggings): the waist of the body and the upper legs."""
-    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
-    if leggings:
-        for rect in _faces(BODY)[2:]:
-            _plate(img, rect, palette, rows=lambda r, h: r >= h - 4)
-        for rect in _faces(RIGHT_LEG):
-            _plate(img, rect, palette, rows=lambda r, h: r < 9)
-        return img
-    for rect in _faces(HEAD):
-        _plate(img, rect, palette, seam_every=3)
-    # The visor: a dark slot across the helmet's front face.
-    for x in range(9, 15):
-        img.putpixel((x, 12), tuple(palette[0]) + (255,))
-    for rect in _faces(BODY):
-        _plate(img, rect, palette)
-    for rect in _faces(RIGHT_ARM):
-        _plate(img, rect, palette, rows=lambda r, h: r < 6)
-    for rect in _faces(RIGHT_LEG):
-        _plate(img, rect, palette, rows=lambda r, h: r >= h - 4)
-    return img
-
-
 def draw_all(save, save_armor, part_palette):
     """save(img, kind, name) as in generate_textures; save_armor(img, layer, name) for the worn layers."""
     for metal in ("bronze", "steel"):
         palette = part_palette(metal)
         for tool, mask in TOOLS.items():
             save(icon(mask, palette), "item", f"{metal}_{tool}")
-        for piece, mask in ARMOR.items():
-            save(icon(mask, palette), "item", f"{metal}_{piece}")
-        save_armor(armor_layer(palette, False), "humanoid", metal)
-        save_armor(armor_layer(palette, True), "humanoid_leggings", metal)
+        # Armor: steampunk bronze and kaiserpunk steel, drawn in tools/armor_styles.py.
+        armor = armor_styles.palette(metal, palette)
+        for piece in ("helmet", "chestplate", "leggings", "boots"):
+            save(armor_styles.icon(metal, piece, armor), "item", f"{metal}_{piece}")
+        save_armor(armor_styles.layer(metal, armor, False), "humanoid", metal)
+        save_armor(armor_styles.layer(metal, armor, True), "humanoid_leggings", metal)
     steel = part_palette("steel")
     for name, mask in (("scuba_mask", SCUBA_MASK), ("scuba_tank", SCUBA_TANK), ("free_runners", FREE_RUNNERS),
                        ("power_katana", POWER_KATANA), ("power_bow", BOW_BASE)):
