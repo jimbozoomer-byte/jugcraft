@@ -28,6 +28,7 @@ import cider_data
 import pantry_data
 import crow_data
 import firework_data
+import lantern_data
 import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -180,6 +181,7 @@ def assets(root, write, lang):
     pantry_data.assets(root, write, lang)
     crow_data.assets(root, write, lang)
     firework_data.assets(root, write, lang)
+    lantern_data.assets(root, write, lang)
 
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
@@ -347,6 +349,7 @@ def recipes(out, write):
     carving_data.recipes(out, write, conditions)
     festivity_data.recipes(out, write, conditions)
     firework_data.recipes(out, write, conditions)
+    lantern_data.recipes(out, write, conditions)
     decor3_data.recipes(out, write, conditions)
 
 
@@ -393,6 +396,7 @@ def tags(tags):
     cider_data.tags(tags)
     pantry_data.tags(tags)
     firework_data.tags(tags)
+    lantern_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

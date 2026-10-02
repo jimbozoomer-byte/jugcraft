@@ -794,6 +794,7 @@ def check_agriculture():
     check_pantry(java, main)
     check_crows(java, main)
     check_fireworks(java, main)
+    check_lanterns(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2381,6 +2382,54 @@ def check_fireworks(java, main):
                    f'entity("{fw["entity"]}"', "SpookyFireworkItem.registerDispensing()", f'Jugcraft.id("{fw["component"]}")'):
         if needed not in main:
             err(f"JugcraftAgriculture.java must register {needed}")
+
+def check_lanterns(java, main):
+    """The sky lantern festival: SkyLantern.java, SkyLanterns.java and MooncakeItem.java match LANTERNS in
+    tools/agriculture.py; the lantern is registered, dyeable, named and crafted; every mooncake is registered with its
+    food, named, drawn and baked in the Cooking Pot; the festival has its message and advancement."""
+    lt = ag.LANTERNS
+
+    def numbers(source):
+        return {name: float(int(value, 16)) if value.startswith("0x") else float(value) for name, value in
+                re.findall(r"static final (?:int|double|float) ([A-Z_]+) = (0x[0-9A-Fa-f]+|[\d.]+)[FD]?;", java.get(source, ""))}
+
+    expected = {"SkyLantern": {"RISE": lt["rise"], "WIND": lt["wind"], "WIND_PERIOD": lt["wind_period"], "LIFETIME": lt["lifetime"],
+                               "LIFETIME_SPREAD": lt["lifetime_spread"], "FADE_TICKS": lt["fade_ticks"], "DEFAULT_COLOUR": lt["default_colour"]},
+                "SkyLanterns": {"FESTIVAL_LANTERNS": lt["festival_lanterns"], "FESTIVAL_RADIUS": lt["festival_radius"],
+                                "FESTIVAL_WINDOW": lt["festival_window"], "FESTIVAL_COOLDOWN": lt["festival_cooldown"],
+                                "LUCK_TICKS": lt["luck_ticks"], "MEMORY": lt["memory"]},
+                "MooncakeItem": {"LUCK_TICKS": lt["mooncake_luck_ticks"], "NIGHT_START": lt["night"][0], "NIGHT_END": lt["night"][1]}}
+    for source, values in expected.items():
+        found = numbers(source)
+        for name, value in values.items():
+            if name not in found or abs(found[name] - value) > 1e-9:
+                err(f"{source}.{name} = {found.get(name)} differs from LANTERNS in tools/agriculture.py ({value})")
+    listed = re.search(r'MOONCAKES = List\.of\(([^)]*)\)', main)
+    if not listed or re.findall(r'"([a-z_]+)"', listed.group(1)) != list(lt["mooncakes"]):
+        err("JugcraftAgriculture.MOONCAKES differs from LANTERNS in tools/agriculture.py")
+    food = lt["mooncake_food"]
+    if f"MooncakeItem::new, new Item.Properties().food(nourishment({food[0]}, {food[1]}F))" not in main:
+        err("The mooncakes' food differs from LANTERNS in tools/agriculture.py")
+    for needed in (f'registerItem("{lt["item"]}", SkyLanternItem::new', f'entity("{lt["entity"]}"', "SkyLanterns.register()"):
+        if needed not in main:
+            err(f"JugcraftAgriculture.java must register {needed}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"item.jugcraft.{lt['item']}") != lt["display"] or "message.jugcraft.sky_lantern.festival" not in lang:
+        err("The sky lantern has no name, or the festival no message")
+    dyeable = (load(DATA / "minecraft" / "tags" / "item" / "dyeable.json") or {}).get("values", [])
+    if f"jugcraft:{lt['item']}" not in dyeable:
+        err("The sky lantern must be in minecraft:dyeable, so it can be dyed")
+    recipe = load(DATA / "jugcraft" / "recipe" / f"{lt['item']}.json") or {}
+    if recipe.get("result", {}).get("count") != lt["per_craft"]:
+        err(f"The sky lantern's recipe must make {lt['per_craft']}")
+    for cake, info in lt["mooncakes"].items():
+        if lang.get(f"item.jugcraft.{cake}") != info["display"] or not (ASSETS / "textures" / "item" / f"{cake}.png").exists():
+            err(f"{cake} has no name or texture")
+        baked = load(DATA / "jugcraft" / "recipe" / "pot_cooking" / f"{cake}.json") or {}
+        if baked.get("result", {}).get("count") != lt["mooncake_count"]:
+            err(f"{cake} must bake {lt['mooncake_count']} at a time in the Cooking Pot")
+    if not (DATA / "jugcraft" / "advancement" / "lantern_festival.json").exists():
+        err("The lantern festival needs its advancement")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

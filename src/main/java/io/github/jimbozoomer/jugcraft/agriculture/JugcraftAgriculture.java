@@ -232,6 +232,10 @@ public final class JugcraftAgriculture {
 	public static EntityType<Crow> CROW;
 	/** Spooky fireworks in flight: they burst into a picture ({@link FireworkShape}). */
 	public static EntityType<SpookyRocket> SPOOKY_ROCKET;
+	/** Sky lanterns let go: they rise, drift with the wind and burn out. */
+	public static EntityType<SkyLantern> SKY_LANTERN;
+	/** The mooncakes, baked in the Cooking Pot. */
+	public static final List<String> MOONCAKES = List.of("red_bean_mooncake", "chestnut_mooncake", "pumpkin_mooncake");
 	public static BlockEntityType<ShowLauncherBlockEntity> SHOW_LAUNCHER_ENTITY;
 	/** A spooky firework made with glowstone dust: its sparks twinkle. */
 	public static DataComponentType<Boolean> TWINKLE;
@@ -1264,6 +1268,15 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(ShowLauncherBlockEntity::new, launcher).build());
 		registerItem("show_launcher", props -> new BlockItem(launcher, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
 		SpookyFireworkItem.registerDispensing();
+
+		// Fall additions 6, the sky lantern festival: sky lanterns to let go together, and mooncakes for a full moon.
+		registerItem("sky_lantern", SkyLanternItem::new, new Item.Properties().stacksTo(16), EQUIPMENT_TAB);
+		SKY_LANTERN = entity("sky_lantern", EntityType.Builder.<SkyLantern>of(SkyLantern::new, MobCategory.MISC).noLootTable()
+				.sized(0.5F, 0.75F).clientTrackingRange(10).updateInterval(10));
+		SkyLanterns.register();
+		for (String mooncake : MOONCAKES) {
+			registerItem(mooncake, MooncakeItem::new, new Item.Properties().food(nourishment(3, 0.6F)).stacksTo(16), FOOD_TAB);
+		}
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

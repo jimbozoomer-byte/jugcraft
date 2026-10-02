@@ -527,6 +527,8 @@ HALLOWEEN_ADVANCEMENTS = {
                         "description": "Throw a pumpkin 50 blocks or more with a trebuchet", "frame": "goal"},
     "headless_horseman": {"icon": "jugcraft:horseman_lantern", "title": "Lost His Head",
                           "description": "Send the Headless Horseman back into the night", "frame": "challenge"},
+    "lantern_festival": {"icon": "jugcraft:sky_lantern", "title": "A Sky Full of Wishes",
+                         "description": "Be there when eight sky lanterns are let go together", "frame": "goal"},
 }
 
 
@@ -1261,6 +1263,26 @@ FIREWORKS = {"shapes": {"bat": {"item": "bat_firework", "display": "Bat Burst Fi
              "launcher": "show_launcher", "launcher_display": "Show Launcher", "tubes": 9, "tube_capacity": 16,
              "sequence_ticks": 10, "volley_ticks": 20, "lean": 0.1, "vanilla_lean": 0.003}
 
+# ---------------------------------------------------------------- Fall additions 6: the sky lantern festival
+# Sky lanterns (SkyLanternItem, SkyLantern): used, a lantern is let go in front of its holder; it rises `rise` blocks a
+# tick and drifts with the wind (`wind` blocks a tick, its direction turning full circle every `wind_period` ticks, the
+# same for every lantern), burns `lifetime` ticks plus up to `lifetime_spread` more, dimming over the last `fade_ticks`.
+# Dyed in the crafting grid (minecraft:dyeable), named in an anvil (its wish). `per_craft` a craft. When
+# `festival_lanterns` are let go within `festival_radius` blocks of each other in `festival_window` ticks (SkyLanterns),
+# players within the radius get Luck for `luck_ticks` and A Sky Full of Wishes; no second festival there for
+# `festival_cooldown` ticks; the server remembers at most `memory` releases. Mooncakes (MooncakeItem), `mooncake_count`
+# a batch in the Cooking Pot, give `mooncake_food`, and Luck for `mooncake_luck_ticks` when eaten outdoors on a
+# full-moon night (`night` on the overworld clock, the first night of eight).
+LANTERNS = {"item": "sky_lantern", "display": "Sky Lantern", "entity": "sky_lantern", "default_colour": 0xE8642A,
+            "rise": 0.035, "wind": 0.015, "wind_period": 72000, "lifetime": 2400, "lifetime_spread": 600, "fade_ticks": 100,
+            "per_craft": 2, "festival_lanterns": 8, "festival_radius": 32, "festival_window": 2400, "festival_cooldown": 24000,
+            "luck_ticks": 6000, "memory": 256,
+            "mooncakes": {"red_bean_mooncake": {"display": "Red Bean Mooncake", "filling": {"jugcraft:beans": 2}},
+                          "chestnut_mooncake": {"display": "Chestnut Mooncake", "filling": {"jugcraft:roasted_chestnuts": 2}},
+                          "pumpkin_mooncake": {"display": "Pumpkin Mooncake", "filling": {"minecraft:pumpkin": 1}}},
+            "mooncake_base": {"minecraft:wheat": 2, "minecraft:sugar": 1, "minecraft:egg": 1}, "mooncake_count": 4,
+            "mooncake_time": 300, "mooncake_food": [3, 0.6], "mooncake_luck_ticks": 6000, "night": [13000, 23000]}
+
 
 def pantry_blocks():
     return [PANTRY["kettle"], PANTRY["shelf"]]
@@ -1276,6 +1298,10 @@ def firework_blocks():
 
 def firework_items():
     return firework_blocks() + [info["item"] for info in FIREWORKS["shapes"].values()]
+
+
+def lantern_items():
+    return [LANTERNS["item"]] + list(LANTERNS["mooncakes"])
 
 
 def night_blocks():
@@ -1407,6 +1433,10 @@ POT_RECIPES = {
     "corn_relish": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:corn": 2, "jugcraft:pepper": 1, "jugcraft:onion": 1,
                                "jugcraft:cider_vinegar": 1}, "time": 300},
 }
+# The mooncakes (the sky lantern festival, above) bake in the pot too.
+for _cake, _info in LANTERNS["mooncakes"].items():
+    POT_RECIPES[_cake] = {"inputs": {**LANTERNS["mooncake_base"], **_info["filling"]}, "time": LANTERNS["mooncake_time"],
+                          "count": LANTERNS["mooncake_count"]}
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
@@ -1885,7 +1915,8 @@ def all_items():
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
-            + chandlery_items() + cider_items() + pantry_items() + firework_items())
+            + chandlery_items() + cider_items() + pantry_items() + firework_items()
+            + lantern_items())
 
 
 def owns(entry_id):
