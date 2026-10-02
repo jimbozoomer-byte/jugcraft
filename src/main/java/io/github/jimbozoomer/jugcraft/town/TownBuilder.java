@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 /**
  * Builds the town into the world a chunk at a time, as its chunks load: nothing is loaded to build it, and a chunk is
  * built once (TownState remembers which). Building a chunk levels the ground inside the wall to the town's height
- * (filling hollows a few blocks deep, clearing the land and trees above), blends the ground outside the wall back to the
+ * (filling down to the land under it, clearing the land and trees above), blends the ground outside the wall back to the
  * land's own height over the town's blend ring (paths lead out of the gates), places the town's blocks, sets its decor
  * sites to the current theme and brings out the townsfolk who stand in it.
  *
@@ -30,8 +30,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
  */
 public final class TownBuilder {
 	public static final int CHUNKS_PER_TICK = 1;
-	/** How deep under the town's ground hollows are filled. */
-	public static final int FILL_DEPTH = 8;
+	/** How deep under the town's ground a valley or hollow is filled at most. */
+	public static final int FILL_DEPTH = 40;
 	private static final int FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
 	private static final Deque<ChunkPos> QUEUE = new ArrayDeque<>();
 	private static final Set<Long> QUEUED = new HashSet<>();
@@ -156,12 +156,13 @@ public final class TownBuilder {
 		for (int y = top; y > dataTop; y--) {
 			set(level, at.set(wx, y, wz), Blocks.AIR.defaultBlockState());
 		}
-		// Fill hollows under the ground.
-		for (int y = floor - 1; y >= floor - FILL_DEPTH; y--) {
+		// Fill under the ground down to the land (a valley or a cave mouth), at most FILL_DEPTH deep.
+		for (int y = floor - 1; y >= Math.max(level.getMinY(), floor - FILL_DEPTH); y--) {
 			BlockState state = level.getBlockState(at.set(wx, y, wz));
-			if (state.isAir() || !state.getFluidState().isEmpty() || state.canBeReplaced()) {
-				set(level, at, y >= floor - 3 ? Blocks.DIRT.defaultBlockState() : Blocks.STONE.defaultBlockState());
+			if (!state.isAir() && state.getFluidState().isEmpty() && !state.canBeReplaced()) {
+				break;
 			}
+			set(level, at, y >= floor - 3 ? Blocks.DIRT.defaultBlockState() : Blocks.STONE.defaultBlockState());
 		}
 		// The town's own blocks, ground included.
 		for (int y = data.yMin; y < data.yMin + data.height; y++) {

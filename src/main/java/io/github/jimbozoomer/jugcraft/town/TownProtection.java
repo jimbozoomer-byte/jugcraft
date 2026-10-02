@@ -22,9 +22,9 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -34,11 +34,11 @@ import net.minecraft.world.phys.BlockHitResult;
 /**
  * Keeps the town as it was built. In its protected area (inside the wall and {@code protect} blocks round it, from
  * {@link Town#PROTECT_BELOW} under the ground up) players cannot break or place blocks, use items on blocks, empty or
- * fill buckets, or harm its decorations; they can still open doors and gates, press buttons, ring nothing, and use the
- * town's ATMs and shops (the blocks in {@code #jugcraft:town_usable}). Townsfolk cannot be harmed by anyone. Hostile
- * mobs do not spawn naturally inside the wall. Explosions, fire and pistons cannot change protected blocks (the
- * mixins {@code ExplosionDamageCalculatorMixin}, {@code EntityExplosionMixin}, {@code FireBlockMixin} and
- * {@code PistonBaseBlockMixin} ask {@link #shieldsBlock}).
+ * fill buckets, or harm its decorations; they can still open doors and gates, press buttons, and use the town's ATMs,
+ * crafting tables and beds (the blocks in {@code #jugcraft:town_usable}) and its shops. Townsfolk cannot be harmed by
+ * anyone. Hostile mobs do not spawn naturally inside the wall. Explosions, fire and pistons cannot change protected
+ * blocks (the mixins {@code TownExplosionCalculatorMixin}, {@code TownEntityExplosionMixin}, {@code TownFireBlockMixin}
+ * and {@code TownPistonMixin} ask {@link #shieldsBlock}).
  *
  * <p>Operators in creative mode are exempt, so a server's staff can repair or change the town; {@code town.protection=off}
  * switches all of it off. Everything is decided on the server.
@@ -103,7 +103,9 @@ public final class TownProtection {
 		if (state.is(USABLE) && !(player.isSecondaryUseActive() && holding)) {
 			return InteractionResult.PASS;
 		}
-		tell(player);
+		if (holding) {
+			tell(player);
+		}
 		return InteractionResult.FAIL;
 	}
 
@@ -112,8 +114,10 @@ public final class TownProtection {
 			return InteractionResult.PASS;
 		}
 		ItemStack stack = player.getItemInHand(hand);
-		boolean changesBlocks = stack.getItem() instanceof BlockItem || stack.getItem() instanceof BucketItem
-				|| stack.getItem() instanceof SpawnEggItem;
+		// Items whose plain use (not on a block) changes the world: buckets, spawn eggs, and lily pads and frogspawn on
+		// water. Block items used on blocks are refused in useBlock; berries and seeds can still be eaten.
+		boolean changesBlocks = stack.getItem() instanceof BucketItem || stack.getItem() instanceof SpawnEggItem
+				|| stack.is(Items.LILY_PAD) || stack.is(Items.FROGSPAWN);
 		if (changesBlocks && denies(player, level, player.blockPosition())) {
 			tell(player);
 			return InteractionResult.FAIL;
