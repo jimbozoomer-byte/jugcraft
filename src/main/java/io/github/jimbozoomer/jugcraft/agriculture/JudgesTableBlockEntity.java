@@ -22,7 +22,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -37,10 +36,11 @@ import net.minecraft.world.phys.Vec3;
  * A round of the costume contest, run on the server by a {@link JudgesTableBlock}. Ringing the bell opens a round of
  * {@value #ROUND_TICKS} ticks. Every {@value #PERIOD} ticks the table looks at the level's players within
  * {@value #RANGE} blocks: one standing on a {@link CostumeRunwayBlock} with a costume on their head (the
- * trick-or-treat costume tag, {@link TrickOrTreat#COSTUMES}) is entered (at most {@value #MAX_CONTESTANTS}). Anyone
- * else within range votes by using the contestant they like best with an empty hand ({@link #onUseEntity}): one vote
- * each, which they may move, never for themselves. When the round ends, the contestants with the most votes (at least
- * one) get a Best Costume Ribbon, if they are still on the server. The round, its contestants and its votes are saved.
+ * trick-or-treat costume tag, {@link TrickOrTreat#COSTUMES}) or a painted face ({@link FacePaint}) is entered (at most
+ * {@value #MAX_CONTESTANTS}). Anyone else within range votes by using the contestant they like best with an empty hand
+ * ({@link #onUseEntity}): one vote each, which they may move, never for themselves. When the round ends, the contestants
+ * with the most votes (at least one) get a Best Costume Ribbon, if they are still on the server. The round, its
+ * contestants and its votes are saved.
  */
 public class JudgesTableBlockEntity extends BlockEntity {
 	public static final int ROUND_TICKS = 1200;
@@ -109,7 +109,7 @@ public class JudgesTableBlockEntity extends BlockEntity {
 				continue;
 			}
 			boolean onRunway = level.getBlockState(player.blockPosition()).is(runway) || level.getBlockState(player.getOnPos()).is(runway);
-			if (onRunway && player.getItemBySlot(EquipmentSlot.HEAD).is(TrickOrTreat.COSTUMES)) {
+			if (onRunway && FacePaint.inCostume(player)) {
 				contestants.put(player.getUUID(), player.getName().getString());
 				setChanged();
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.judges_table.entered"));

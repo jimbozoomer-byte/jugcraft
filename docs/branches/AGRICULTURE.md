@@ -39,6 +39,7 @@ Corn is built for fields you want to look at and walk through.
 - **Walls you cannot walk through.** Once corn is two blocks tall it blocks movement like a hedge, and mobs path around it. Knee-high corn can still be walked through, like wheat. That is what makes a maze work: plant the walls, leave the paths as grass or dirt path, and wait.
 - **No irrigation needed.** Corn keeps its farmland from drying back to dirt (the same rule as vanilla crops). Water nearby only makes it grow faster.
 - **Easy to shape.** Corn only grows into air. A block above a plant stops it at that height, and breaking any block of a plant removes the whole plant and drops its kernel.
+- **Or let a gate plant it.** The [Corn Maze Gate](#the-corn-maze) carves a maze from its own seed and plants it in close-set maze corn, ready to run at once and timed on the server.
 
 The maze in the screenshots above is 13 × 11 blocks with one-block paths, planted by the client game test in `AgricultureClientGameTests`.
 
@@ -319,7 +320,7 @@ Put a **Harvest Scale** beside a full-grown giant pumpkin (or carry the pumpkin 
 | --- | --- | --- |
 | **Pumpkin Stencil** | Use a Blank Stencil (two paper) on a carved side | Traces the design; hold it in your other hand while carving to press it in, on any pumpkin or a giant |
 | **White, Jarrahdale and Cinderella pumpkins** | Wild in birch forests and snowy places, savannas and windswept hills, plains and flower forests; grass drops their seeds | Grow from stems; carve like pumpkins into their own hand-carved blocks; bake into pumpkin pie |
-| **Scarecrow** | Wool over hay between sticks | Two blocks tall; dye its flannel shirt any colour; give it any pumpkin and it wears it for a head (a lit one lights it) |
+| **Scarecrow** | Wool over hay between sticks | Two blocks tall; dye its flannel shirt any colour; give it any pumpkin and it wears it for a head (a lit one lights it); it keeps [crows](#crows-and-working-scarecrows) off the crops round it |
 | **Ornamental corn** | Wild Corn sometimes drops its kernels; grass drops them | Grows like corn; its multicoloured ears tie into an **Ornamental Corn Bundle** for walls and door frames |
 | **Corn Shock** | Six Corn Stalks (from breaking any corn 3 blocks tall) and string | A two-block stook for porches |
 | **Caramel, Caramel Apple, Popcorn Ball** | Smelt sugar; add an apple and a stick, or two popcorn | Treats (2, 6 and 5 hunger); the apple's stick comes back |
@@ -721,6 +722,101 @@ Ten more fall and Halloween additions, one per pull request ([features/fall-addi
 - **Cider Barrel:** sweet cider ferments into Sparkling Cider in a day and matures into Aged Cider in three; broken, a barrel keeps its cider.
 - **Mulled Cider** (Cooking Pot), **Apple Cider Donuts**, and **Apple Pomace** for pigs, compost and seeds.
 
+### The preserves pantry
+
+| **The pantry**: a Canning Kettle at the boil over a campfire, and two Pantry Shelves of preserves | **The Canning Kettle** from above: four jars in the boiling water |
+| --- | --- |
+| ![The preserves pantry](../images/ingame_preserves_pantry.jpg) | ![The canning kettle](../images/ingame_canning_kettle.jpg) |
+| **Pantry Shelves**: jars sealed with gingham caps, and not | |
+| ![Pantry shelves](../images/ingame_pantry_shelves.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`PantryClientGameTests`, software rendering, small previews).*
+
+- **Preserves** cooked into **Mason Jars** in the Cooking Pot: jams, fruit butters, jelly, and pickles and relish in **Cider Vinegar**. A jar holds four servings; the last leaves the jar.
+- **Unsealed jars spoil** three days after cooking. The **Canning Kettle** seals them in a boiling water bath: sealed jars keep until opened, stack, and wear a gingham cap.
+- **Pantry Shelf:** shows off six jars.
+
+### Crows and working scarecrows
+
+| **Crows** over a carrot patch just out of a scarecrow's reach, and one of them down on it, pecking | **The working scarecrow**: wearing a pumpkin head, it guards the field eight blocks round |
+| --- | --- |
+| ![Crows](../images/ingame_crows.jpg) | ![Crows and a scarecrow](../images/ingame_crows_and_scarecrow.jpg) |
+
+*Real screenshots from the client game test that CI runs (`CrowClientGameTests`, software rendering, small previews). The pecking crow was sent after its crop and pecks for real; the others are posed in flight.*
+
+- **Crows** come to fields by day in small flocks, wheel over them, and drop onto ripe crops to peck them three growth stages back (only while `mob_griefing` is on). Crops under a roof, tall crops, gourds and bushes are safe.
+- **Scarecrows keep them off:** crows leave the crops within 4 blocks of a bare scarecrow alone, 8 of one wearing a pumpkin head, 12 of one wearing a lit head.
+- Crows fly off from a player who comes close, from a blow, and at nightfall; they drop feathers. Details: [fall additions](../features/fall-additions.md#crows).
+
+### Spooky fireworks
+
+| **Spooky fireworks** at midnight: a bat, a jack o'lantern, a ghost and a skull, each drawn in sparks facing the camera | **A finale** fired from a Show Launcher: nine rockets fanned out, their pictures bursting together |
+| --- | --- |
+| ![Spooky fireworks](../images/ingame_spooky_fireworks.jpg) | ![A fireworks finale](../images/ingame_fireworks_finale.jpg) |
+| **The Show Launcher**, loaded: a rocket's nose in each tube, the dial on its front set to "finale" | |
+| ![The Show Launcher](../images/ingame_show_launcher.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`FireworkClientGameTests`, software rendering, small previews). The four pictures in the first are burst straight on the client; the finale is fired from the launcher for real.*
+
+- **Spooky fireworks** burst into a bat, a jack o'lantern, a ghost or a skull in coloured sparks, the right way round for every player. Paper, gunpowder (the flight) and the picture's ingredients; glowstone dust to twinkle. They hurt and break nothing.
+- **Show Launcher:** nine tubes of sixteen rockets each (spooky or vanilla), fired in sequence, in volleys or as a finale, by hand or redstone. Details: [fall additions](../features/fall-additions.md#spooky-fireworks).
+
+### The sky lantern festival
+
+| **Sky Lanterns** let go together at night in seven colours, rising together; one carries a wish, "A good harvest" | **Mooncakes:** red bean, chestnut and pumpkin, and a Sky Lantern, in item frames |
+| --- | --- |
+| ![Sky lanterns](../images/ingame_sky_lanterns.jpg) | ![Mooncakes](../images/ingame_mooncakes.jpg) |
+
+*Real screenshots from the client game test that CI runs (`LanternClientGameTests`, software rendering, small previews). The lanterns are let go for real and photographed as they rise.*
+
+- **Sky Lanterns**, dyed any colour and named for a wish, rise glowing on a wind they all share and burn out after two minutes or so.
+- **The lantern festival:** eight let go within 32 blocks in two minutes fill the sky, with Luck and A Sky Full of Wishes for everyone near.
+- **Mooncakes** baked in the Cooking Pot, with Luck when eaten outdoors under a full moon. Details: [fall additions](../features/fall-additions.md#sky-lanterns).
+
+### The Harvest Feast Table
+
+| **A Harvest Feast Table** of four lengths, set with eight foods between hay bale seats | **The dishes** up close: bread, roasted corn, pumpkin pie, chicken, apples, mooncakes, baked potatoes and cookies, each heaped by its servings |
+| --- | --- |
+| ![A Harvest Feast Table](../images/ingame_harvest_feast.jpg) | ![The dishes on a feast table](../images/ingame_feast_dishes.jpg) |
+
+*Real screenshots from the client game test that CI runs (`FeastClientGameTests`, software rendering, small previews). The dishes are served on the server and drawn by the client.*
+
+- **Harvest Feast Table:** lengths end to end join into one long table; each holds two dishes of up to eight servings of any food or drink.
+- **The feast** grows with the variety on the table and the company at it: Regeneration, then Absorption, then Haste and Luck, then Health Boost and Harvest Home, shared with everyone who ate there lately. Details: [fall additions](../features/fall-additions.md#the-harvest-feast-table).
+
+### The corn maze
+
+| **A medium corn maze** (15 by 15) planted by its gate: the entrance on the near side, the exit with its finish post straight across | **The Corn Maze Gate**, its green pennant pointing into the maze between walls of maze corn |
+| --- | --- |
+| ![A corn maze from above](../images/ingame_corn_maze_planted.jpg) | ![The Corn Maze Gate](../images/ingame_corn_maze_gate.jpg) |
+
+*Real screenshots from the client game test that CI runs (`MazeClientGameTests`, software rendering, small previews). The gate plants the maze for real, a few stalks a tick.*
+
+- **Corn Maze Gate:** choose a size, then use it holding corn kernels to plant a maze of three-tall corn from a fresh seed, one way through, with a finish post at the exit.
+- **Runs** are timed on the server from the gate to the finish post and voided for flying, climbing out, leaving or a shortcut; the best times go on the gate's board, with prize ribbons and A-maze-ing. Details: [fall additions](../features/fall-additions.md#the-corn-maze).
+
+### Ghost hunting
+
+| **Restless spirits** revealed at night over a row of gravestones and grave mounds, lit by soul lanterns | **The hunter's kit:** a Spirit Lantern and a bottle of Ectoplasm in frames, and a lit Ghostly candle |
+| --- | --- |
+| ![Restless spirits in a graveyard](../images/ingame_restless_spirits.jpg) | ![The ghost hunter's kit](../images/ingame_ghost_hunting_kit.jpg) |
+
+*Real screenshots from the client game test that CI runs (`GhostClientGameTests`, software rendering, small previews). The spirits are revealed on the server and drawn by the client.*
+
+- **Restless spirits** rise from gravestones and grave mounds at night and drift about their graves, unseen until revealed.
+- **The Spirit Lantern** reveals every spirit within 12 blocks to everyone near; a revealed spirit shies away but can be cornered, and a glass bottle catches it as **Ectoplasm**, the Ghostly candle scent (invisibility). Details: [fall additions](../features/fall-additions.md#ghost-hunting).
+
+### Face paint
+
+| **Face paint**, all six designs on the player's face: a skull, a jack o'lantern, a black cat, a vampire, a witch and a scarecrow (cropped and enlarged from the test's screenshots) | **A vampire**, the whole frame: the player in third person, seen from the front |
+| --- | --- |
+| ![The six face paint designs](../images/ingame_face_paint.jpg) | ![A painted vampire face](../images/ingame_face_paint_vampire.jpg) |
+
+*Real screenshots from the client game test that CI runs (`FacePaintClientGameTests`, software rendering, small previews). Each design is painted on the server and drawn on the face by the client.*
+
+- **Face Paint Kit:** paints one of six designs on a friend at once, or on your own face after a held use; good for 16 faces.
+- **A painted face is a costume** for trick-or-treating and the costume contest, and washes off under water. Details: [fall additions](../features/fall-additions.md#face-paint).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
@@ -748,7 +844,7 @@ Hand tools and farmstead blocks, made from wood, stone and early metals. None ne
 | Seed Pouch | Holds several seed types; right-click plants a 3×3 patch of farmland from it | Discovery |
 | **Trellis (wood)** ✅ | Supports climbing crops (tomatoes now; grapes, hops and pole beans later); also a garden decoration | Discovery |
 | **Carving Knife** ✅ | Carves any face into the sides of a pumpkin, a pixel at a time; see [Pumpkin Carving](#what-exists-now-pumpkin-carving) | Discovery |
-| **Scarecrow** ✅ | Decoration for fields and Halloween, in a flannel shirt you dye, with any pumpkin for a head; see [the Halloween harvest](#what-exists-now-the-halloween-harvest). Later keeps crop-eating birds away once those creatures exist | Discovery |
+| **Scarecrow** ✅ | Decoration for fields and Halloween, in a flannel shirt you dye, with any pumpkin for a head; see [the Halloween harvest](#what-exists-now-the-halloween-harvest). Keeps [crows](#crows-and-working-scarecrows) off the crops round it (4 blocks, 8 with a head, 12 with a lit one) | Discovery |
 | **Corn Shock** ✅ | A stook of corn stalks for fall porches and markets (decoration) | Discovery |
 | **Harvest Scale** ✅ | Weighs giant pumpkins, keeps a board of the three heaviest and gives prize ribbons | Discovery |
 | Bushel Basket | Small produce storage for markets | Discovery |
