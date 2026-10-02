@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -28,12 +29,13 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A crow: a black bird that comes to fields by day in small flocks ({@link Crows}). It wheels a few blocks above the
- * ground, cawing, and now and then spots a ripe crop within {@value #RAID_RADIUS} blocks, drops onto it and pecks at it for
- * {@value #PECK_TICKS} ticks, setting it back {@value #SETBACK} growth stages, then rests ({@value #RAID_COOLDOWN} ticks or
- * more) before it raids again. It won't raid a crop a scarecrow guards ({@link Scarecrows}), and takes flight from one; it flies off
- * from a player who comes within {@value #FLEE_RADIUS} blocks (a sneaking one gets to {@value #SNEAK_FLEE_RADIUS}), or
- * who hits it, and the crop is spared. Crows only peck crops while the {@code mob_griefing} game rule is on. They fly
- * off at nightfall. They drop feathers.
+ * ground, cawing, and now and then spots a ripe crop open to the sky within {@value #RAID_RADIUS} blocks, drops onto it
+ * and pecks at it for {@value #PECK_TICKS} ticks, setting it back {@value #SETBACK} growth stages, then rests
+ * ({@value #RAID_COOLDOWN} ticks or more) before it raids again. It won't raid a crop a scarecrow guards ({@link Scarecrows}), and takes flight if
+ * one comes to guard the crop it is after (it looks every {@value #LOOK_TICKS} ticks). It flies off from a player who
+ * comes within {@value #FLEE_RADIUS} blocks (a sneaking one gets to {@value #SNEAK_FLEE_RADIUS}), or who hits it, and the
+ * crop is spared. Crows only peck crops while the {@code mob_griefing} game rule is on. They fly off at nightfall, and
+ * when the agriculture feature is switched off. They drop feathers.
  */
 public class Crow extends AmbientCreature {
 	public static final double FLEE_RADIUS = 6.0;
@@ -46,6 +48,8 @@ public class Crow extends AmbientCreature {
 	public static final int RAID_COOLDOWN = 600;
 	public static final int RAID_COOLDOWN_SPREAD = 600;
 	public static final int FLEE_TICKS = 80;
+	/** How often (ticks) a crow after a crop looks round for a scarecrow that has come to guard it. */
+	public static final int LOOK_TICKS = 10;
 	/** At nightfall a crow climbs away and is gone once {@value #LEAVE_HEIGHT} blocks over the ground, or after {@value #LEAVE_TICKS} ticks. */
 	public static final int LEAVE_HEIGHT = 24;
 	public static final int LEAVE_TICKS = 200;
@@ -59,6 +63,7 @@ public class Crow extends AmbientCreature {
 	private int cooldown;
 	private int fleeing;
 	private int leaving;
+	private int look;
 
 	public Crow(EntityType<? extends Crow> type, Level level) {
 		super(type, level);
@@ -110,7 +115,8 @@ public class Crow extends AmbientCreature {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
-		step(level, Crows.day(level));
+		// With the feature switched off, crows leave as they do at nightfall.
+		step(level, Crows.day(level) && JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE));
 	}
 
 	/** One tick of the crow's life on the server, by day or (it leaves) by night. */
@@ -128,8 +134,11 @@ public class Crow extends AmbientCreature {
 		Player near = level.getNearestPlayer(this, FLEE_RADIUS);
 		if (near != null && !near.isSpectator() && near.distanceTo(this) < (near.isShiftKeyDown() ? SNEAK_FLEE_RADIUS : FLEE_RADIUS)) {
 			flee(level, near.position());
-		} else if (crop != null && Scarecrows.guarded(level, crop)) {
-			flee(level, Vec3.atCenterOf(crop));
+		} else if (crop != null && ++look >= LOOK_TICKS) {
+			look = 0;
+			if (Scarecrows.guarded(level, crop)) {
+				flee(level, Vec3.atCenterOf(crop));
+			}
 		}
 		if (fleeing > 0) {
 			fleeing--;

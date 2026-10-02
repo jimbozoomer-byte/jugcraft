@@ -185,8 +185,10 @@ public class CrowGameTests {
 		crow.step(level, true);
 		helper.assertTrue(crow.pecking(), "and pecks");
 		scarecrow(helper, new BlockPos(4, 1, 6));
-		crow.step(level, true);
-		helper.assertTrue(crow.fleeing() && !crow.pecking() && crow.crop() == null, "A scarecrow goes up: it takes flight");
+		for (int i = 0; i < Crow.LOOK_TICKS && !crow.fleeing(); i++) {
+			crow.step(level, true);
+		}
+		helper.assertTrue(crow.fleeing() && !crow.pecking() && crow.crop() == null, "A scarecrow goes up: within half a second it takes flight");
 		for (int i = 0; i < Crow.PECK_TICKS; i++) {
 			crow.step(level, true);
 		}
@@ -254,21 +256,48 @@ public class CrowGameTests {
 
 	// ---------------------------------------------------------------- spawning and drops
 
-	/** The spawner finds the ripe field and brings a flock of two or three crows, in the sky above it. */
+	/**
+	 * The spawner finds a ripe field open to the sky, and not one under a roof (crows look down from the sky); it brings a
+	 * flock of two or three crows, in the sky above the field.
+	 */
 	@GameTest(maxTicks = 20)
 	public void aFlockComesToARipeField(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		for (int x = 0; x <= 7; x++) {
 			for (int z = 0; z <= 7; z++) {
 				ripeWheat(helper, new BlockPos(x, 2, z));
+				// The test's own barrier ceiling would be a roof over the field: lift it.
+				for (int y = 3; y <= 24; y++) {
+					if (helper.getBlockState(new BlockPos(x, y, z)).is(Blocks.BARRIER)) {
+						helper.setBlock(new BlockPos(x, y, z), Blocks.AIR);
+					}
+				}
 			}
 		}
+		BlockPos centre = helper.absolutePos(new BlockPos(4, 2, 4));
+		helper.assertTrue(level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centre.getX(), centre.getZ()) == centre.getY(),
+				"The field is open to the sky: the heightmap stands at " + level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centre.getX(),
+						centre.getZ()) + ", the wheat at " + centre.getY());
 		RandomSource random = RandomSource.create(1031L);
+		for (int x = 0; x <= 7; x++) {
+			for (int z = 0; z <= 7; z++) {
+				helper.setBlock(new BlockPos(x, 5, z), Blocks.GLASS);
+			}
+		}
+		for (int i = 0; i < 4; i++) {
+			BlockPos roofed = Crows.findField(level, centre, random);
+			helper.assertTrue(roofed == null, "Under a glass roof crows find no field: " + roofed);
+		}
+		for (int x = 0; x <= 7; x++) {
+			for (int z = 0; z <= 7; z++) {
+				helper.setBlock(new BlockPos(x, 5, z), Blocks.AIR);
+			}
+		}
 		BlockPos field = null;
 		for (int i = 0; i < 4 && field == null; i++) {
-			field = Crows.findField(level, helper.absolutePos(new BlockPos(4, 2, 4)), random);
+			field = Crows.findField(level, centre, random);
 		}
-		helper.assertTrue(field != null && Crow.tempting(level.getBlockState(field)), "It finds ripe wheat: " + field);
+		helper.assertTrue(field != null && Crow.tempting(level.getBlockState(field)), "Open to the sky, it finds ripe wheat: " + field);
 		AABB sky = new AABB(field).inflate(4.0, 12.0, 4.0);
 		List<Crow> before = level.getEntitiesOfClass(Crow.class, sky);
 		int spawned = Crows.spawnFlock(level, field, random);

@@ -16,11 +16,11 @@ import org.jspecify.annotations.Nullable;
 /**
  * Where crows ({@link Crow}) come from: fields by day. Every {@value #SPAWN_TICKS} ticks, for each player in the overworld,
  * {@link #SPAWN_CHANCE} of the time the server looks at one spot {@value #MIN_DISTANCE} to {@value #MAX_DISTANCE} blocks
- * away, in a loaded chunk; if a ripe crop is within {@value #FIELD_RADIUS} blocks of it (a few spots sampled), a flock of
- * {@value #FLOCK_MIN} to {@value #FLOCK_MAX} crows arrives in the sky above. Fewer than {@value #NEAR_CAP} crows may be
- * near a player, and at most {@value #LEVEL_CAP} in the world. Each try reads a few dozen blocks and never loads a chunk.
- * Crows come only while mobs spawn (the {@code spawn_mobs} game rule), and whether or not they may peck (the
- * {@code mob_griefing} rule decides only that).
+ * away, in a loaded chunk; if a ripe crop open to the sky (crops under a roof are safe) is within {@value #FIELD_RADIUS}
+ * blocks of it (a few spots sampled), a flock of {@value #FLOCK_MIN} to {@value #FLOCK_MAX} crows arrives in the sky
+ * above. Fewer than {@value #NEAR_CAP} crows may be near a player, and at most {@value #LEVEL_CAP} in the world. Each try
+ * reads a few dozen blocks and never loads a chunk. Crows come only while mobs spawn (the {@code spawn_mobs} game rule),
+ * and whether or not they may peck (the {@code mob_griefing} rule decides only that).
  */
 public final class Crows {
 	public static final int SPAWN_TICKS = 200;

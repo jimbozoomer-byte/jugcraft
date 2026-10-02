@@ -1227,14 +1227,15 @@ PANTRY = {"jar": "mason_jar", "jar_display": "Mason Jar", "vinegar": "cider_vine
 # overworld clock, climbing until `leave_height` over the ground or for `leave_ticks`. A crow searches
 # `search_tries` spots within `raid_radius` for a ripe single-block crop, flies to it and pecks for `peck_ticks`,
 # setting it back `setback` stages, then rests `raid_cooldown` ticks and up to `raid_cooldown_spread` more; only while
-# the mob_griefing rule is on. It flies off from a player within `flee_radius` (sneaking: `sneak_flee_radius`) or a scarecrow.
+# the mob_griefing rule is on. It flies off from a player within `flee_radius` (sneaking: `sneak_flee_radius`), or from a
+# scarecrow come to guard its crop (looking every `look_ticks`).
 # Scarecrows (Scarecrows.java) guard crops within `guard` blocks across (bare, wearing a head, wearing a lit head) and
 # `guard_height` up or down. A crow drops 0 to `feathers` feathers.
 CROWS = {"entity": "crow", "display": "Crow", "health": 4.0, "flee_radius": 6.0, "sneak_flee_radius": 2.5, "raid_radius": 12,
          "search_tries": 24, "peck_ticks": 40, "setback": 3, "raid_cooldown": 600, "raid_cooldown_spread": 600,
          "spawn_ticks": 200, "spawn_chance": 0.3, "min_distance": 16, "max_distance": 40, "field_radius": 6, "field_tries": 16,
          "flock": [2, 3], "near_cap": 6, "near_range": 48, "level_cap": 32, "day_end": 12000,
-         "leave_height": 24, "leave_ticks": 200,
+         "leave_height": 24, "leave_ticks": 200, "look_ticks": 10,
          "guard": {"bare": 4, "headed": 8, "lit": 12}, "guard_height": 6, "feathers": 2, "table": "entities/crow"}
 
 
