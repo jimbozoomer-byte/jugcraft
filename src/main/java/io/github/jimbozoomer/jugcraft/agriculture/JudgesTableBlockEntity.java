@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,13 +49,20 @@ public class JudgesTableBlockEntity extends BlockEntity {
 	public static final int PERIOD = 10;
 	/** How far away players hear the contest open and close. */
 	public static final int ANNOUNCE_RANGE = 32;
-	private static final Codec<Map<UUID, String>> CONTESTANTS = Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.STRING);
+	/** The contestants in the order they walked the runway (a map's order isn't kept). */
+	private static final Codec<List<Entrant>> CONTESTANTS = Entrant.CODEC.listOf();
 	private static final Codec<Map<UUID, UUID>> VOTES = Codec.unboundedMap(UUIDUtil.STRING_CODEC, UUIDUtil.CODEC);
 	/** The tables with a round open, per level, for votes to find. */
 	private static final Map<Level, Set<BlockPos>> OPEN = new WeakHashMap<>();
 
 	public enum Vote {
 		VOTED, MOVED, SAME, OWN, NOT_IN_ROUND
+	}
+
+	private record Entrant(UUID id, String name) {
+		static final Codec<Entrant> CODEC = RecordCodecBuilder.create(i -> i.group(
+				UUIDUtil.CODEC.fieldOf("id").forGetter(Entrant::id),
+				Codec.STRING.fieldOf("name").forGetter(Entrant::name)).apply(i, Entrant::new));
 	}
 
 	private long endsAt;
@@ -229,7 +237,7 @@ public class JudgesTableBlockEntity extends BlockEntity {
 		super.loadAdditional(input);
 		endsAt = input.getLongOr("ends_at", 0L);
 		contestants.clear();
-		contestants.putAll(input.read("contestants", CONTESTANTS).orElse(Map.of()));
+		input.read("contestants", CONTESTANTS).orElse(List.of()).forEach(entrant -> contestants.put(entrant.id(), entrant.name()));
 		votes.clear();
 		votes.putAll(input.read("votes", VOTES).orElse(Map.of()));
 	}
@@ -238,7 +246,9 @@ public class JudgesTableBlockEntity extends BlockEntity {
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
 		output.putLong("ends_at", endsAt);
-		output.store("contestants", CONTESTANTS, contestants);
+		List<Entrant> entrants = new ArrayList<>();
+		contestants.forEach((id, name) -> entrants.add(new Entrant(id, name)));
+		output.store("contestants", CONTESTANTS, entrants);
 		output.store("votes", VOTES, votes);
 	}
 }

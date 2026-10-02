@@ -6,8 +6,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * The Fortune Teller's Table's last reading: when, which card turned and where the planchette went (packed by
- * {@link FortuneTellerTableBlock#reading}), set on the server and on each client by the reading's block event, for
- * the client to animate from. It is not saved.
+ * {@link FortuneTellerTableBlock#reading}), set on the server when it is asked for (for its cooldown) and on each client
+ * by the reading's block event (to animate from). It is not saved.
  */
 public class FortuneTellerTableBlockEntity extends BlockEntity {
 	private long marked = Long.MIN_VALUE / 2;
@@ -39,7 +39,10 @@ public class FortuneTellerTableBlockEntity extends BlockEntity {
 	@Override
 	public boolean triggerEvent(int id, int param) {
 		if (id == FortuneTellerTableBlock.READ && level != null) {
-			read(level.getGameTime(), param);
+			// The server noted the reading when it was asked for; clients note it when they hear of it.
+			if (level.isClientSide()) {
+				read(level.getGameTime(), param);
+			}
 			return true;
 		}
 		return super.triggerEvent(id, param);

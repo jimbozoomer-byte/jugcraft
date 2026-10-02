@@ -62,7 +62,7 @@ public class Decor11ClientGameTests implements FabricClientGameTest {
 			context.waitTicks(60);
 			singleplayer.getConnection().waitForChunksRender();
 
-			shoot(context, singleplayer, x + 13, y + 6, z + 8, 180, 22, "jugcraft_party_games");
+			shoot(context, singleplayer, x + 13, y + 4, z + 2, 180, 18, "jugcraft_party_games");
 			shoot(context, singleplayer, x + 4, y + 2, z - 5, 165, 15, "jugcraft_costume_contest");
 			shoot(context, singleplayer, x + 9, y + 2, z - 4, 180, 15, "jugcraft_pumpkin_bowling");
 			shoot(context, singleplayer, x + 9, y + 1, z - 8, 180, 8, "jugcraft_bowling_scoreboard");
@@ -70,10 +70,10 @@ public class Decor11ClientGameTests implements FabricClientGameTest {
 			read(server, x, y, z);
 			shoot(context, singleplayer, x + 23, y + 1, z - 3, 180, 20, "jugcraft_ghost_bell_and_fortune_table");
 			read(server, x, y, z);
-			shoot(context, singleplayer, x + 23, y + 2, z - 4, 180, 50, "jugcraft_fortune_reading");
+			shoot(context, singleplayer, x + 23, y + 1, z - 5, 180, 60, "jugcraft_fortune_reading");
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 17, y + 3, z - 5, 180, 30, "jugcraft_dance_floor_night");
-			shoot(context, singleplayer, x + 13, y + 6, z + 8, 180, 22, "jugcraft_party_games_night");
+			shoot(context, singleplayer, x + 13, y + 4, z + 2, 180, 18, "jugcraft_party_games_night");
 		}
 	}
 
