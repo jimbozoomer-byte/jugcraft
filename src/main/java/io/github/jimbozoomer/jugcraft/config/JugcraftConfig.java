@@ -32,12 +32,16 @@ public final class JugcraftConfig {
 	 * {@code on}) lets winter lay snow, up to {@code seasons.snow_depth} layers, that melts in spring. Events on
 	 * the same clock: the Harvest Feast ({@code harvest_feast}: {@code us}, {@code canada} or {@code off}, lasting
 	 * {@code harvest_feast.days}) and December ({@code december}: {@code MM-DD..MM-DD} or {@code off}).
+	 * Party limits (see {@code party/JugcraftParties}): {@code parties.max_size} members (2 to 64),
+	 * {@code parties.invite_minutes} before an invite expires (1 to 60) and {@code parties.invites_per_minute}
+	 * each player may send (1 to 60).
 	 */
 	public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
 			Map.entry("seasons.mode", "auto"), Map.entry("seasons.hemisphere", "north"), Map.entry("seasons.timezone", "UTC"),
 			Map.entry("seasons.snow", "off"), Map.entry("seasons.snow_depth", "2"),
 			Map.entry("harvest_feast", "us"), Map.entry("harvest_feast.days", "4"),
-			Map.entry("december", "12-01..01-06"));
+			Map.entry("december", "12-01..01-06"),
+			Map.entry("parties.max_size", "8"), Map.entry("parties.invite_minutes", "5"), Map.entry("parties.invites_per_minute", "10"));
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
@@ -88,7 +92,7 @@ public final class JugcraftConfig {
 			properties.store(writer, "Jugcraft feature switches (false stops new worldgen and recipes; existing items and blocks stay)"
 					+ " and server options (seasons.*: seasonal colours follow the server's date; mode auto, spring, summer, autumn,"
 					+ " winter or off, hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"
-					+ " december MM-DD..MM-DD or off).");
+					+ " december MM-DD..MM-DD or off; parties.max_size 2-64, parties.invite_minutes 1-60, parties.invites_per_minute 1-60).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}
