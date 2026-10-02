@@ -169,7 +169,7 @@ public class FireworkGameTests {
 		CraftingInput input = CraftingInput.of(3, 2, List.of(new ItemStack(Items.PAPER), new ItemStack(Items.GUNPOWDER), new ItemStack(Items.GUNPOWDER),
 				new ItemStack(Items.CARVED_PUMPKIN), new ItemStack(Items.GLOWSTONE_DUST), ItemStack.EMPTY));
 		helper.assertTrue(crafting.matches(input, level), "Paper, two gunpowder, a carved pumpkin and glowstone dust match it");
-		ItemStack made = crafting.assemble(input, level.registryAccess());
+		ItemStack made = crafting.assemble(input);
 		Fireworks fireworks = made.get(DataComponents.FIREWORKS);
 		helper.assertTrue(made.is(item("pumpkin_firework")) && made.getCount() == 3 && fireworks != null && fireworks.flightDuration() == 2
 				&& Boolean.TRUE.equals(made.get(JugcraftAgriculture.TWINKLE)), "It makes three twinkling flight-2 jack o'lantern fireworks: " + made);
