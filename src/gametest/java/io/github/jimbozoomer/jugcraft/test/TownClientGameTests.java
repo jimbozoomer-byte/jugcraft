@@ -99,7 +99,7 @@ public class TownClientGameTests implements FabricClientGameTest {
 			boolean shop = server.computeOnServer(minecraft -> {
 				ServerLevel level = minecraft.overworld();
 				ServerPlayer player = minecraft.getPlayerList().getPlayers().get(0);
-				List<Townsfolk> keepers = level.getEntitiesOfClass(Townsfolk.class, new AABB(origin.getCenter(), origin.offset(size, 60, size).getCenter()),
+				List<Townsfolk> keepers = level.getEntitiesOfClass(Townsfolk.class, townBox(origin, size),
 						t -> t.shop().equals("seasonal"));
 				if (keepers.isEmpty()) {
 					return false;
@@ -164,9 +164,14 @@ public class TownClientGameTests implements FabricClientGameTest {
 		}
 	}
 
+	/** The town's whole volume, from its corner to {@code size} across and 60 up. */
+	private static AABB townBox(BlockPos origin, int size) {
+		return new AABB(origin.getX(), origin.getY(), origin.getZ(), origin.getX() + size, origin.getY() + 60, origin.getZ() + size);
+	}
+
 	private static String townsfolk(ServerLevel level, BlockPos origin) {
 		int size = TownData.get().size;
-		List<Townsfolk> people = level.getEntitiesOfClass(Townsfolk.class, new AABB(origin.getCenter(), origin.offset(size, 60, size).getCenter()));
+		List<Townsfolk> people = level.getEntitiesOfClass(Townsfolk.class, townBox(origin, size));
 		return people.size() + " " + people.stream().map(p -> p.role() + (p.shop().isEmpty() ? "" : "/" + p.shop())).sorted().toList();
 	}
 }
