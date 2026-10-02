@@ -211,6 +211,10 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<FortuneTellerTableBlockEntity> FORTUNE_TABLE_ENTITY;
 	public static BlockEntityType<HalloweenBonfireBlockEntity> BONFIRE_ENTITY;
 	public static BlockEntityType<BarmbrackBlockEntity> BARMBRACK_ENTITY;
+	public static BlockEntityType<CostumeTrunkBlockEntity> COSTUME_TRUNK_ENTITY;
+	/** The outfits of decorations batch 14, worn on the head and drawn over the whole body (the client's CostumeLayer). */
+	public static final List<String> OUTFITS = List.of("vampire_cape", "mummy_wraps", "skeleton_suit", "werewolf_mask", "cat_ears_and_tail",
+			"bat_wings");
 	/** The Dust Sheet: its item, and the block it becomes over what it covers. */
 	public static final String DUST_SHEET = "dust_sheet";
 	/** What a Dust Sheet may cover (block tag). */
@@ -1125,6 +1129,20 @@ public final class JugcraftAgriculture {
 		}
 		registerItem("barmbrack", props -> new BlockItem(brack, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);
 		registerItem("barmbrack_ring", Item::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON), TOOL_TAB);
+
+		// Batch 14, costumes: outfits worn on the head like the Ghost Sheet (their equipment assets have no layers, so
+		// nothing is drawn by the armor layer or on the head; the client's CostumeLayer dresses the whole wearer), and the
+		// Costume Trunk to keep them in.
+		for (String outfit : OUTFITS) {
+			Equippable worn = Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER)
+					.setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id(outfit))).build();
+			registerItem(outfit, Item::new, new Item.Properties().stacksTo(1).component(DataComponents.EQUIPPABLE, worn), TOOL_TAB);
+		}
+		Block trunk = registerBlock("costume_trunk", CostumeTrunkBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(2.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		COSTUME_TRUNK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("costume_trunk"),
+				FabricBlockEntityTypeBuilder.create(CostumeTrunkBlockEntity::new, trunk).build());
+		registerItem("costume_trunk", props -> new BlockItem(trunk, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

@@ -775,6 +775,7 @@ def check_agriculture():
     check_decor11(java)
     check_decor12(java)
     check_decor13(java)
+    check_decor14(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1107,7 +1108,7 @@ def check_festivities(java, main):
         if weight <= 0 or not 1 <= low <= high or (split(item)[0] == MOD and split(item)[1] not in ag.ITEMS):
             err(f"costumed mob candy: {item} needs to be a known food with a positive weight and count")
     for costume in mobs["costumes"]:
-        if split(costume)[0] == MOD and costume.split(":")[1] not in ag.COSTUMES:
+        if split(costume)[0] == MOD and costume.split(":")[1] not in {**ag.COSTUMES, **ag.OUTFITS}:
             err(f"costumed mobs: {costume} is not a costume")
 
     # The Peddler wants emeralds and gives Jugcraft goods that have another route; it never gives emeralds back.
@@ -2042,6 +2043,60 @@ def check_decor13(java):
     tag = load(DATA / "jugcraft" / "tags" / "item" / "witchs_brew_ingredients.json") or {}
     if tag.get("values") != bowl["ingredients"]:
         err("Item tag jugcraft:witchs_brew_ingredients differs from PUNCH_BOWL's ingredients")
+
+
+def check_decor14(java):
+    """Costumes: Java matches tools/agriculture.py (the outfits, the trunk's slots and how long its lid stays open), every
+    outfit has an equipment asset without layers, boxes in costumes.json on body parts and motions the client knows,
+    inside textures that exist, and is a trick-or-treat costume and a costume hat; the trunk's block states have models
+    and its messages their words."""
+    import decor14_data
+    main = java.get("JugcraftAgriculture", "")
+    outfits = re.search(r"OUTFITS = List\.of\(([^)]*)\)", main)
+    if not outfits or re.findall(r'"([a-z_]+)"', outfits.group(1)) != list(ag.OUTFITS):
+        err("JugcraftAgriculture.OUTFITS differs from tools/agriculture.py")
+    trunk = ag.COSTUME_TRUNK
+    for source, name, value in (("CostumeTrunkBlockEntity", "SLOTS", trunk["slots"]), ("CostumeTrunkBlock", "OPEN_TICKS", trunk["open_ticks"])):
+        match = re.search(rf"\b{name} = (\d+);", java.get(source, ""))
+        if not match or int(match.group(1)) != value:
+            err(f"{source}.{name} differs from tools/agriculture.py ({value})")
+
+    layer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "CostumeLayer.java")
+    motions = set(re.findall(r'case "([a-z_]+)" -> ', layer.read_text(encoding="utf-8") if layer.exists() else ""))
+    if not set(decor14_data.MOTIONS) <= motions:
+        err(f"CostumeLayer doesn't know the motions {sorted(set(decor14_data.MOTIONS) - motions)}")
+    costumes = load(ASSETS / "costumes.json") or {}
+    if set(costumes) != set(ag.OUTFITS):
+        err("costumes.json doesn't hold exactly the outfits")
+    tags = {tag: set((load(DATA / "jugcraft" / "tags" / "item" / f"{tag.split(':')[1]}.json") or {}).get("values", []))
+            for tag in (ag.COSTUME_TAG, ag.COSTUME_HAT_TAG)}
+    for name, info in ag.OUTFITS.items():
+        entry = costumes.get(name, {})
+        width, height = entry.get("size", [0, 0])
+        for key in ("texture", "glow") if info.get("glow") else ("texture",):
+            namespace, path = split(entry.get(key, ":"))
+            if not (ASSETS.parent / namespace / path).exists():
+                err(f"{name}: missing {key} texture {entry.get(key)}")
+        for piece in entry.get("pieces", []):
+            if piece["part"] not in decor14_data.PARTS or any(j[4] not in decor14_data.MOTIONS or j[3] not in "xyz" for j in piece["joints"]):
+                err(f"{name}: a piece on an unknown part, axis or motion")
+            for b in piece["boxes"]:
+                u, v, w, h, d = b[6:11]
+                if u + 2 * (d + w) > width or v + d + h > height:
+                    err(f"{name}: a box's faces run off its texture")
+        if (load(ASSETS / "equipment" / f"{name}.json") or {}).get("layers") != {}:
+            err(f"{name}: its equipment asset must have no layers (CostumeLayer draws it)")
+        for tag, values in tags.items():
+            if rid_of(name) not in values:
+                err(f"{name} is not in {tag}")
+
+    states = set((load(ASSETS / "blockstates" / f"{trunk['block']}.json") or {}).get("variants", {}))
+    if states != {f"facing={f},open={o}" for f in ("north", "east", "south", "west") for o in ("false", "true")}:
+        err(f"{trunk['block']}: blockstate variants differ from its properties")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in re.findall(r'MESSAGES \+ "([a-z_]+)"', java.get("CostumeTrunkBlock", "")):
+        if f"message.jugcraft.{trunk['block']}.{key}" not in lang:
+            err(f"Missing words for the trunk's {key}")
 
 
 def check_model_uvs():

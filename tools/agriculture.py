@@ -533,7 +533,9 @@ CONTEST = {"stand": "judging_stand", "stand_display": "Judging Stand", "places":
 # Killed by a player with mob loot on, a costumed mob (entity tag `tag`) also drops one roll of `candy` (gift
 # loot table `table`, rolled for the killer). The costume drops like any mob equipment (vanilla's 8.5%).
 COSTUMED_MOBS = {"mobs": ["zombie", "husk", "skeleton", "stray", "zombie_villager"], "chance": 0.15,
-                 "costumes": ["jugcraft:witch_hat", "jugcraft:ghost_sheet", "jugcraft:scarecrow_hat", "minecraft:carved_pumpkin"],
+                 "costumes": ["jugcraft:witch_hat", "jugcraft:ghost_sheet", "jugcraft:scarecrow_hat", "minecraft:carved_pumpkin",
+                              "jugcraft:vampire_cape", "jugcraft:mummy_wraps", "jugcraft:skeleton_suit", "jugcraft:werewolf_mask",
+                              "jugcraft:cat_ears_and_tail", "jugcraft:bat_wings"],
                  "tag": "jugcraft.costumed", "table": "entities/costumed_mob_candy",
                  # (item, weight, count)
                  "candy": [("jugcraft:candy_corn", 40, [1, 2]), ("jugcraft:caramel", 20, [1, 1]), ("jugcraft:glow_gum", 10, [1, 1]),
@@ -1079,6 +1081,28 @@ def decor13_items():
     return decor13_blocks() + [BARMBRACK["ring"]]
 
 
+# ---------------------------------------------------------------- Halloween decorations, batch 14: costumes
+# Outfits (JugcraftAgriculture.OUTFITS): worn on the head like the Ghost Sheet, one at a time, and drawn over the whole
+# body by the client's CostumeLayer from assets/jugcraft/costumes.json. Each is a trick-or-treat costume and a costume
+# hat (COSTUME_TAG, COSTUME_HAT_TAG). The Skeleton Suit's bones glow in the dark (`glow`); the cape wraps round its
+# wearer while they sneak, the tails sway, and the bat wings spread and flap while their wearer is off the ground.
+OUTFITS = {"vampire_cape": {"display": "Vampire Cape"}, "mummy_wraps": {"display": "Mummy Wraps"},
+           "skeleton_suit": {"display": "Skeleton Suit", "glow": True}, "werewolf_mask": {"display": "Werewolf Mask"},
+           "cat_ears_and_tail": {"display": "Cat Ears and Tail"}, "bat_wings": {"display": "Bat Wings"}}
+# The Costume Trunk (CostumeTrunkBlock + entity): holds up to `slots` costumes (item tag COSTUME_TAG). A costume in hand
+# goes in; an empty hand changes into the next one (what you wore goes in at the back); sneaking with an empty hand takes
+# the last one out. Its lid opens for `open_ticks` when used.
+COSTUME_TRUNK = {"block": "costume_trunk", "display": "Costume Trunk", "slots": 9, "open_ticks": 20}
+
+
+def decor14_blocks():
+    return [COSTUME_TRUNK["block"]]
+
+
+def decor14_items():
+    return decor14_blocks() + list(OUTFITS)
+
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -1195,6 +1219,9 @@ POT_RECIPES = {
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    # Decorations batch 14: cat ears on a headband with a tail of black wool.
+    {"id": "cat_ears_and_tail", "inputs": ["minecraft:black_wool", "minecraft:black_wool", "minecraft:string", "minecraft:pink_dye"],
+     "result": "cat_ears_and_tail", "count": 1, "category": "misc"},
     # Decorations batch 13: soul cakes with currants; pumpkin bread; chocolate cupcakes iced with a web; chocolate
     # bat-wing cookies; a pumpkin spice latte (the milk bucket is given back).
     {"id": "soul_cake", "inputs": ["minecraft:wheat", "minecraft:sugar", "#minecraft:eggs", "minecraft:sweet_berries"], "result": "soul_cake",
@@ -1514,6 +1541,23 @@ SHAPED = [
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
     # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
     # (the ring) baked in; sugar round a red dye.
+    # Decorations batch 14: a black cape lined with red; linen strips and string; a black suit with bones and glowstone
+    # for their glow; brown fur with leather and bone fangs; leather wings on sticks; a trunk of planks round a chest.
+    {"id": "vampire_cape", "pattern": ["BRB", "BBB", "B B"], "key": {"B": "minecraft:black_wool", "R": "minecraft:red_wool"},
+     "result": "vampire_cape", "count": 1, "category": "misc"},
+    {"id": "mummy_wraps", "pattern": ["PSP", "SWS", "PSP"], "key": {"P": "minecraft:paper", "S": "minecraft:string", "W": "minecraft:white_wool"},
+     "result": "mummy_wraps", "count": 1, "category": "misc"},
+    {"id": "skeleton_suit", "pattern": ["BWB", "WGW", "BWB"], "key": {"B": "minecraft:bone", "W": "minecraft:black_wool",
+                                                                   "G": "minecraft:glowstone_dust"},
+     "result": "skeleton_suit", "count": 1, "category": "misc"},
+    {"id": "werewolf_mask", "pattern": ["WLW", "WBW", "W W"], "key": {"W": "minecraft:brown_wool", "L": "minecraft:leather",
+                                                                   "B": "minecraft:bone"},
+     "result": "werewolf_mask", "count": 1, "category": "misc"},
+    {"id": "bat_wings", "pattern": ["S S", "LDL", "L L"], "key": {"S": "minecraft:stick", "L": "minecraft:leather", "D": "minecraft:black_dye"},
+     "result": "bat_wings", "count": 1, "category": "misc"},
+    {"id": "costume_trunk", "pattern": ["PWP", "PCP", "PPP"], "key": {"P": "#minecraft:planks", "W": "minecraft:purple_wool",
+                                                                   "C": "minecraft:chest"},
+     "result": "costume_trunk", "count": 1, "category": "building"},
     {"id": "witchs_brew_punch_bowl", "pattern": ["G G", "GBG"], "key": {"G": "minecraft:glass", "B": "minecraft:glow_berries"},
      "result": "witchs_brew_punch_bowl", "count": 1, "category": "building"},
     {"id": "barmbrack", "pattern": ["WSW", "BGB"], "key": {"W": "minecraft:wheat", "S": "minecraft:sugar", "B": "minecraft:sweet_berries",
@@ -1612,7 +1656,7 @@ def all_blocks():
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
-            + decor11_blocks() + decor12_blocks() + decor13_blocks())
+            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks())
 
 
 def all_items():
@@ -1621,7 +1665,7 @@ def all_items():
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
-            + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items())
+            + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items())
 
 
 def owns(entry_id):
