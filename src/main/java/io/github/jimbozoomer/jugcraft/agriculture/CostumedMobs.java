@@ -25,8 +25,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 /**
  * Costumed mobs: while the Halloween event runs ({@link HalloweenSeason}), each zombie, husk, skeleton, stray
  * and zombie villager rolls once, the first time it enters the world, and {@link #CHANCE} of them dress up in a
- * costume hat or a carved pumpkin (never over a helmet they already wear). The hat drops like any mob
- * equipment, now and then; killed by a player (and with mob loot on), a costumed mob also drops one roll of
+ * costume hat, an outfit (a vampire cape, mummy wraps, a skeleton suit, a werewolf mask, cat ears and tail or bat wings)
+ * or a carved pumpkin (never over a helmet they already wear). The costume drops like any mob equipment, now and then; killed by a player (and with mob loot on), a costumed mob also drops one roll of
  * candy (loot table {@code jugcraft:entities/costumed_mob_candy}, rolled as a gift to the player). When the event ends no new
  * mob dresses up; those already dressed keep their costume. With agriculture switched off, no mob dresses up
  * and none drops candy.
@@ -38,7 +38,8 @@ public final class CostumedMobs {
 	public static final String COSTUMED = "jugcraft.costumed";
 	public static final List<String> MOBS = List.of("zombie", "husk", "skeleton", "stray", "zombie_villager");
 	public static final List<String> COSTUMES = List.of("jugcraft:witch_hat", "jugcraft:ghost_sheet", "jugcraft:scarecrow_hat",
-			"minecraft:carved_pumpkin");
+			"minecraft:carved_pumpkin", "jugcraft:vampire_cape", "jugcraft:mummy_wraps", "jugcraft:skeleton_suit", "jugcraft:werewolf_mask",
+			"jugcraft:cat_ears_and_tail", "jugcraft:bat_wings");
 	public static final ResourceKey<LootTable> CANDY = ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id("entities/costumed_mob_candy"));
 
 	private CostumedMobs() {
