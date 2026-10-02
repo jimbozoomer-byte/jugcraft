@@ -260,6 +260,11 @@ ITEMS = {
     "caramel": {"display": "Caramel", "food": [2, 0.1], "compost": "medium_high", "tags": ["c:foods/candy"]},
     "caramel_apple": {"display": "Caramel Apple", "food": [6, 0.6], "treat": True, "tags": ["c:foods/candy"]},
     "popcorn_ball": {"display": "Popcorn Ball", "food": [5, 0.6], "compost": "medium_high", "tags": ["c:foods/candy"]},
+    # Marshmallows (Halloween batch 12): toasted on a stick over a bonfire or campfire (MarshmallowStickItem); eating a
+    # toasted or burnt one leaves the stick.
+    "marshmallow": {"display": "Marshmallow", "food": [1, 0.1], "compost": "medium_high", "tags": ["c:foods/candy"]},
+    "toasted_marshmallow": {"display": "Toasted Marshmallow", "food": [4, 0.5], "treat": True, "tags": ["c:foods/candy"]},
+    "burnt_marshmallow": {"display": "Burnt Marshmallow", "food": [2, 0.1], "treat": True, "tags": []},
     # Trick-or-treating's rare prize: only villagers hand it out (an optional seasonal treat, nothing needs it).
     "king_size_candy_bar": {"display": "King-Size Candy Bar", "food": [8, 0.4], "compost": "medium_high", "tags": ["c:foods/candy"]},
     # Spooky sweets (Cooking Pot): eaten even on a full stomach for a moment of magic, `sweet`: the effect (vanilla
@@ -1003,6 +1008,45 @@ def decor11_blocks():
 def decor11_items():
     return decor11_blocks() + [COSTUME_CONTEST["ribbon"], BOWLING["pumpkin"]]
 
+# ---------------------------------------------------------------- Halloween decorations, batch 12: night events
+# Trick-or-treaters at your door (TrickOrTreaters, during the Halloween event, dusk to midnight): every `check_ticks`
+# a Candy Bowl by a wooden door with a porch light, with a player within `player_range` blocks, has one chance in
+# `chance` of a visit, at most `max_groups` a night. A group of `kids` village children in costume (`costumes`) comes
+# from `spawn_distance` blocks away, walks to the bowl, knocks and waits `wait_ticks`; each takes a treat from the bowl
+# and leaves a thank-you gift (loot table `gift_table`); if the bowl is empty they toilet-paper up to `streamers` spots
+# within `prank_reach` blocks of the door instead. They give up after `give_up_ticks`, and go home `leave_ticks`.
+TRICK_OR_TREATERS = {"check_ticks": 200, "chance": 4, "max_groups": 6, "kids": [1, 3], "spawn_distance": [12, 20], "player_range": 48,
+                     "give_up_ticks": 1200, "wait_ticks": 60, "leave_ticks": 300, "prank_reach": 8, "streamers": 6,
+                     "gift_table": "gameplay/trick_or_treater_thanks",
+                     "costumes": ["minecraft:carved_pumpkin", "jugcraft:witch_hat", "jugcraft:scarecrow_hat", "jugcraft:ghost_sheet"],
+                     "gifts": [("minecraft:poppy", 20), ("minecraft:dandelion", 20), ("minecraft:oxeye_daisy", 10),
+                               ("minecraft:pumpkin_seeds", 15), ("minecraft:paper", 15), ("minecraft:feather", 10),
+                               ("minecraft:candle", 5)]}
+# Toilet Paper Rolls (ToiletPaperRollItem, thrown as a ToiletPaperRoll entity): where one lands it drapes up to
+# `streamers` Toilet Paper Streamers (ToiletPaperStreamerBlock) within `reach` blocks, hanging from leaves and logs
+# (up to `max_length` long) or draped over fences and walls. They drop nothing; rain washes off the ones it reaches.
+TOILET_PAPER = {"item": "toilet_paper_roll", "display": "Toilet Paper Roll", "block": "toilet_paper_streamer",
+                "block_display": "Toilet Paper Streamer", "streamers": 4, "reach": 2, "max_length": 3}
+# The Haunted Hayride (HauntedHayride, a minecart): a hay wagon on rails with `seats` seats; at night, while it rolls
+# with riders, something spooky is heard every `spook_ticks` ticks (between the two).
+HAYRIDE = {"item": "haunted_hayride", "display": "Haunted Hayride", "seats": 4, "spook_ticks": [100, 240]}
+# The Halloween Bonfire (HalloweenBonfireBlock + entity): a great log fire (light `light`) that cooks what a campfire
+# cooks, `slots` at a time, `speed` times as fast, and burns what stands in it. A Marshmallow on a Stick
+# (MarshmallowStickItem) held over a lit bonfire within `reach` blocks, or a campfire within `campfire_reach`, toasts in
+# `toast_ticks` and burns at `burn_ticks`.
+BONFIRE = {"block": "halloween_bonfire", "display": "Halloween Bonfire", "light": 15, "slots": 4, "speed": 2, "reach": 3.5,
+           "campfire_reach": 2.0, "stick": "marshmallow_on_a_stick", "stick_display": "Marshmallow on a Stick", "toast_ticks": 60,
+           "burn_ticks": 140}
+
+
+def decor12_blocks():
+    return [TOILET_PAPER["block"], BONFIRE["block"]]
+
+
+def decor12_items():
+    return decor12_blocks() + [TOILET_PAPER["item"], HAYRIDE["item"], BONFIRE["stick"]]
+
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -1119,6 +1163,14 @@ POT_RECIPES = {
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    # Decorations batch 12: three paper round a stick make toilet paper; sugar whipped with an egg makes marshmallows,
+    # one goes on a stick to toast.
+    {"id": "toilet_paper_roll", "inputs": ["minecraft:paper", "minecraft:paper", "minecraft:paper", "minecraft:stick"],
+     "result": "toilet_paper_roll", "count": 4, "category": "misc"},
+    {"id": "marshmallow", "inputs": ["minecraft:sugar", "minecraft:sugar", "#minecraft:eggs"], "result": "marshmallow", "count": 4,
+     "category": "misc"},
+    {"id": "marshmallow_on_a_stick", "inputs": ["jugcraft:marshmallow", "minecraft:stick"], "result": "marshmallow_on_a_stick", "count": 1,
+     "category": "misc"},
     # Decorations batch 11: a pumpkin weighted with an iron nugget.
     {"id": "bowling_pumpkin", "inputs": ["minecraft:pumpkin", "minecraft:iron_nugget"], "result": "bowling_pumpkin", "count": 1,
      "category": "misc"},
@@ -1415,6 +1467,14 @@ SHAPED = [
     {"id": "dead_hollow_tree", "pattern": ["LSL", "TJT", " T "], "key": {"L": "minecraft:lantern", "S": "minecraft:stick",
                                                                       "T": "#minecraft:logs", "J": "minecraft:jack_o_lantern"},
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
+    # Decorations batch 12: a minecart under two hay bales with a jack o'lantern on a post; logs over coal in a ring of
+    # cobblestone.
+    {"id": "haunted_hayride", "pattern": [" J ", "HMH"], "key": {"J": "minecraft:jack_o_lantern", "H": "minecraft:hay_block",
+                                                              "M": "minecraft:minecart"},
+     "result": "haunted_hayride", "count": 1, "category": "misc"},
+    {"id": "halloween_bonfire", "pattern": [" L ", "LCL", "SSS"], "key": {"L": "#minecraft:logs", "C": "#minecraft:coals",
+                                                                       "S": "minecraft:cobblestone"},
+     "result": "halloween_bonfire", "count": 1, "category": "building"},
     # Decorations batch 11: a plank crate round a wool ghost on an iron spring; red carpet edged with gold; a red-draped
     # table with a gold bell; bone pins; a chalkboard on legs; a hollow log round a chest; black glass tiles round a
     # redstone lamp; a gold bell with a wool ghost; a purple-draped table with a book for a spirit board.
@@ -1498,7 +1558,7 @@ def all_blocks():
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
-            + decor11_blocks())
+            + decor11_blocks() + decor12_blocks())
 
 
 def all_items():
@@ -1507,7 +1567,7 @@ def all_items():
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
-            + decor9_items() + decor10_items() + decor11_items())
+            + decor9_items() + decor10_items() + decor11_items() + decor12_items())
 
 
 def owns(entry_id):

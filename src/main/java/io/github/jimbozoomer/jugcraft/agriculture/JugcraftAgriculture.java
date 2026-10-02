@@ -52,6 +52,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MinecartItem;
 import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.Consumable;
@@ -161,6 +162,8 @@ public final class JugcraftAgriculture {
 	public static EntityType<WillOWisp> WILL_O_WISP;
 	public static EntityType<FlyingPumpkin> FLYING_PUMPKIN;
 	public static EntityType<BowlingPumpkin> BOWLING_PUMPKIN;
+	public static EntityType<ToiletPaperRoll> TOILET_PAPER_ROLL;
+	public static EntityType<HauntedHayride> HAUNTED_HAYRIDE;
 	public static EntityType<ThrowMarker> THROW_MARKER;
 	public static EntityType<HeadlessHorseman> HEADLESS_HORSEMAN;
 	public static EntityType<FlamingPumpkin> FLAMING_PUMPKIN;
@@ -206,6 +209,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> DANCE_FLOOR_ENTITY;
 	public static BlockEntityType<GhostBellBlockEntity> GHOST_BELL_ENTITY;
 	public static BlockEntityType<FortuneTellerTableBlockEntity> FORTUNE_TABLE_ENTITY;
+	public static BlockEntityType<HalloweenBonfireBlockEntity> BONFIRE_ENTITY;
 	/** The Dust Sheet: its item, and the block it becomes over what it covers. */
 	public static final String DUST_SHEET = "dust_sheet";
 	/** What a Dust Sheet may cover (block tag). */
@@ -340,6 +344,9 @@ public final class JugcraftAgriculture {
 		food("caramel", 2, 0.1F, COMPOST_MEDIUM_HIGH);
 		treat("caramel_apple", 6, 0.6F);
 		food("popcorn_ball", 5, 0.6F, COMPOST_MEDIUM_HIGH);
+		food("marshmallow", 1, 0.1F, COMPOST_MEDIUM_HIGH);
+		treat("toasted_marshmallow", 4, 0.5F);
+		treat("burnt_marshmallow", 2, 0.1F);
 		// Trick-or-treating's rare prize (only villagers hand it out).
 		food("king_size_candy_bar", 8, 0.4F, COMPOST_MEDIUM_HIGH);
 		// Spooky sweets from the Cooking Pot: a moment of magic each.
@@ -625,6 +632,7 @@ public final class JugcraftAgriculture {
 		registerItem("candy_bag", CandyBagItem::new, new Item.Properties().stacksTo(1)
 				.component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY), TOOL_TAB);
 		TrickOrTreat.register();
+		TrickOrTreaters.register();
 	}
 
 	/**
@@ -1073,6 +1081,25 @@ public final class JugcraftAgriculture {
 		registerItem("best_costume_ribbon", Item::new, new Item.Properties().rarity(Rarity.UNCOMMON), TOOL_TAB);
 		registerItem("bowling_pumpkin", BowlingPumpkinItem::new, new Item.Properties().stacksTo(16), TOOL_TAB);
 		fire.add(runway, 30, 60);
+
+		// Batch 12, night events: Toilet Paper Rolls and their streamers, the Haunted Hayride and the Halloween Bonfire
+		// with marshmallows to toast (the trick-or-treaters come to Candy Bowls, TrickOrTreaters).
+		Block streamer = registerBlock("toilet_paper_streamer", ToiletPaperStreamerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SNOW)
+				.instabreak().noCollision().noOcclusion().replaceable().sound(SoundType.WOOL).pushReaction(PushReaction.POPPED));
+		registerItem("toilet_paper_streamer", props -> new BlockItem(streamer, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem("toilet_paper_roll", ToiletPaperRollItem::new, new Item.Properties().stacksTo(16), TOOL_TAB);
+		TOILET_PAPER_ROLL = entity("toilet_paper_roll", EntityType.Builder.<ToiletPaperRoll>of(ToiletPaperRoll::new, MobCategory.MISC).noLootTable()
+				.sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10));
+		HAUNTED_HAYRIDE = entity("haunted_hayride", EntityType.Builder.<HauntedHayride>of(HauntedHayride::new, MobCategory.MISC).noLootTable()
+				.sized(0.98F, 0.7F).passengerAttachments(0.1875F).clientTrackingRange(8));
+		registerItem("haunted_hayride", props -> new MinecartItem(HAUNTED_HAYRIDE, props), new Item.Properties().stacksTo(1), TOOL_TAB);
+		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> HauntedHayride.board(player, level, hand, entity));
+		Block bonfire = registerBlock("halloween_bonfire", HalloweenBonfireBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PODZOL)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().lightLevel(HalloweenBonfireBlock::light).pushReaction(PushReaction.IMMOVEABLE));
+		registerItem("halloween_bonfire", props -> new BlockItem(bonfire, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		BONFIRE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("halloween_bonfire"),
+				FabricBlockEntityTypeBuilder.create(HalloweenBonfireBlockEntity::new, bonfire).build());
+		registerItem("marshmallow_on_a_stick", MarshmallowStickItem::new, new Item.Properties().stacksTo(16), FOOD_TAB);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

@@ -28,6 +28,12 @@ public class CandyCacheBlock extends CandyBowlBlock {
 		return SHAPE;
 	}
 
+	/** Hidden treats are for finders, not for knocking trick-or-treaters. */
+	@Override
+	protected boolean invitesTrickOrTreaters() {
+		return false;
+	}
+
 	@Override
 	protected String messages() {
 		return "message.jugcraft.candy_cache.";

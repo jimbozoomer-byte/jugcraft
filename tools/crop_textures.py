@@ -862,4 +862,6 @@ def crop_textures():
     out.update(decor10_textures())
     from decor11_textures import decor11_textures  # and party games
     out.update(decor11_textures())
+    from decor12_textures import decor12_textures  # and night events
+    out.update(decor12_textures())
     return out

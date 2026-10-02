@@ -37,7 +37,7 @@ EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_repla
                   "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires", "minecraft:mineable/axe",
                   "minecraft:mineable/shovel", "minecraft:leaves", "minecraft:eggs", "minecraft:dirt", "minecraft:mud",
                   "minecraft:grass_blocks", "minecraft:sand", "minecraft:wool", "minecraft:logs", "minecraft:candles",
-                  "minecraft:stairs", "minecraft:slabs"}
+                  "minecraft:stairs", "minecraft:slabs", "minecraft:walls", "minecraft:coals"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -766,6 +766,7 @@ def check_agriculture():
     check_decor9(java)
     check_decor10(java)
     check_decor11(java)
+    check_decor12(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1932,6 +1933,64 @@ def check_decor11(java):
                  "fortune_planchette"):
         if not quads.get(name):
             err(f"decor11_quads.json has no quads for {name}")
+
+
+def check_decor12(java):
+    """Night events: Java matches tools/agriculture.py (the trick-or-treaters' timing, chances, group sizes, distances,
+    prank and costumes and their gift table, the toilet paper's reach and strands, the hayride's seats and spooks, the
+    bonfire's light, skewers and speed, and toasting's reach and times), every block state has a model, the gift table
+    holds the gifts, every message has its words, and the textures and quads the client draws exist."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    kids, paper, ride, fire = ag.TRICK_OR_TREATERS, ag.TOILET_PAPER, ag.HAYRIDE, ag.BONFIRE
+    expected = {("TrickOrTreaters", "CHECK_TICKS"): kids["check_ticks"], ("TrickOrTreaters", "CHANCE"): kids["chance"],
+                ("TrickOrTreaters", "MAX_GROUPS"): kids["max_groups"], ("TrickOrTreaters", "MIN_KIDS"): kids["kids"][0],
+                ("TrickOrTreaters", "MAX_KIDS"): kids["kids"][1], ("TrickOrTreaters", "MIN_DISTANCE"): kids["spawn_distance"][0],
+                ("TrickOrTreaters", "MAX_DISTANCE"): kids["spawn_distance"][1], ("TrickOrTreaters", "PLAYER_RANGE"): kids["player_range"],
+                ("TrickOrTreaters", "GIVE_UP_TICKS"): kids["give_up_ticks"], ("TrickOrTreaters", "WAIT_TICKS"): kids["wait_ticks"],
+                ("TrickOrTreaters", "LEAVE_TICKS"): kids["leave_ticks"], ("TrickOrTreaters", "PRANK_REACH"): kids["prank_reach"],
+                ("TrickOrTreaters", "STREAMERS"): kids["streamers"], ("ToiletPaperRoll", "STREAMERS"): paper["streamers"],
+                ("ToiletPaperRoll", "REACH"): paper["reach"], ("ToiletPaperStreamerBlock", "MAX_LENGTH"): paper["max_length"],
+                ("HauntedHayride", "SEATS"): ride["seats"], ("HauntedHayride", "SPOOK_MIN"): ride["spook_ticks"][0],
+                ("HauntedHayride", "SPOOK_MAX"): ride["spook_ticks"][1], ("HalloweenBonfireBlock", "LIGHT"): fire["light"],
+                ("HalloweenBonfireBlockEntity", "SLOTS"): fire["slots"], ("HalloweenBonfireBlockEntity", "SPEED"): fire["speed"],
+                ("MarshmallowStickItem", "BONFIRE_REACH"): fire["reach"], ("MarshmallowStickItem", "CAMPFIRE_REACH"): fire["campfire_reach"],
+                ("MarshmallowStickItem", "TOAST_TICKS"): fire["toast_ticks"], ("MarshmallowStickItem", "BURN_TICKS"): fire["burn_ticks"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    source = java.get("TrickOrTreaters", "")
+    if f'GIFT_TABLE = "{kids["gift_table"]}"' not in source:
+        err("TrickOrTreaters.GIFT_TABLE differs from TRICK_OR_TREATERS' gift table")
+    costumes = re.search(r"COSTUMES = List\.of\(([^)]*)\)", source)
+    if not costumes or re.findall(r'"([a-z_:]+)"', costumes.group(1)) != kids["costumes"]:
+        err("TrickOrTreaters.COSTUMES differs from TRICK_OR_TREATERS' costumes")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    if variants(paper["block"]) != {"draped=false", "draped=true"}:
+        err(f"{paper['block']}: blockstate variants differ from its properties")
+    if variants(fire["block"]) != {"lit=false", "lit=true"}:
+        err(f"{fire['block']}: blockstate variants differ from its properties")
+
+    table = load(DATA / "jugcraft" / "loot_table" / f"{kids['gift_table']}.json") or {}
+    gifts = [(entry.get("name"), entry.get("weight")) for pool in table.get("pools", []) for entry in pool.get("entries", [])]
+    if gifts != [tuple(gift) for gift in kids["gifts"]]:
+        err(f"The trick-or-treaters' gift table differs from TRICK_OR_TREATERS' gifts: {gifts}")
+
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for source in ("TrickOrTreaters", "MarshmallowStickItem"):
+        for key in re.findall(r'"(message\.jugcraft\.[a-z_.]+[a-z_])"', java.get(source, "")):
+            if key not in lang:
+                err(f"Missing words for {key}")
+    if not (ASSETS / "textures" / "entity" / "bonfire_flame.png").exists():
+        err("Missing entity texture bonfire_flame")
+    quads = load(ASSETS / "decor12_quads.json") or {}
+    for name in ("hayride_wagon", "hayride_lantern"):
+        if not quads.get(name):
+            err(f"decor12_quads.json has no quads for {name}")
 
 
 def check_model_uvs():
