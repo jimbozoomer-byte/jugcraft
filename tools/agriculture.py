@@ -1238,6 +1238,29 @@ CROWS = {"entity": "crow", "display": "Crow", "health": 4.0, "flee_radius": 6.0,
          "leave_height": 24, "leave_ticks": 200, "look_ticks": 10,
          "guard": {"bare": 4, "headed": 8, "lit": 12}, "guard_height": 6, "feathers": 2, "table": "entities/crow"}
 
+# ---------------------------------------------------------------- Fall additions 5: spooky fireworks
+# Spooky fireworks (SpookyFireworkItem, SpookyRocket): rockets that burst into a picture made of sparks (FireworkShape:
+# a bat, a jack o'lantern, a ghost or a skull), drawn by each client facing the player who watches. Crafted from paper,
+# 1 to 3 gunpowder (the flight, as vanilla's) and the shape's ingredients, `per_craft` a craft; glowstone dust makes the
+# sparks twinkle. A rocket flies `lifetime_base` x (flight + 1) ticks plus up to `lifetime_spread` more, climbing
+# `climb` blocks/tick faster each tick, and bursts at the end or where it hits something. It hurts nothing and breaks
+# nothing. The Show Launcher (ShowLauncherBlock) holds `tube_capacity` rockets (spooky or vanilla) in each of its
+# `tubes` tubes; a rising redstone signal (or an empty hand) starts a show in its mode and a second stops it:
+# sequence (one rocket every `sequence_ticks`), volley (a row of three every `volley_ticks`) or finale (one from every
+# tube at once). Rockets leave its tubes fanned out by `lean` blocks/tick (vanilla rockets `vanilla_lean`).
+FIREWORKS = {"shapes": {"bat": {"item": "bat_firework", "display": "Bat Burst Firework",
+                                "ingredients": ["minecraft:feather", "minecraft:black_dye"], "colour": 0x9B59D0},
+                        "pumpkin": {"item": "pumpkin_firework", "display": "Jack o'Lantern Burst Firework",
+                                    "ingredients": ["minecraft:carved_pumpkin"], "colour": 0xFF8A1C},
+                        "ghost": {"item": "ghost_firework", "display": "Ghost Burst Firework",
+                                  "ingredients": ["minecraft:phantom_membrane"], "colour": 0xF2F4FF},
+                        "skull": {"item": "skull_firework", "display": "Skull Burst Firework",
+                                  "ingredients": ["minecraft:bone"], "colour": 0xEDE3C4}},
+             "per_craft": 3, "flights": [1, 2, 3], "twinkle": "minecraft:glowstone_dust", "component": "twinkle",
+             "lifetime_base": 10, "lifetime_spread": 12, "climb": 0.04, "entity": "spooky_rocket", "particle": "spooky_spark",
+             "launcher": "show_launcher", "launcher_display": "Show Launcher", "tubes": 9, "tube_capacity": 16,
+             "sequence_ticks": 10, "volley_ticks": 20, "lean": 0.1, "vanilla_lean": 0.003}
+
 
 def pantry_blocks():
     return [PANTRY["kettle"], PANTRY["shelf"]]
@@ -1245,6 +1268,14 @@ def pantry_blocks():
 
 def pantry_items():
     return pantry_blocks() + [PANTRY["jar"], PANTRY["vinegar"]] + list(PANTRY["preserves"])
+
+
+def firework_blocks():
+    return [FIREWORKS["launcher"]]
+
+
+def firework_items():
+    return firework_blocks() + [info["item"] for info in FIREWORKS["shapes"].values()]
 
 
 def night_blocks():
@@ -1843,7 +1874,8 @@ def all_blocks():
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
-            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks())
+            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
+            + firework_blocks())
 
 
 def all_items():
@@ -1853,7 +1885,7 @@ def all_items():
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
-            + chandlery_items() + cider_items() + pantry_items())
+            + chandlery_items() + cider_items() + pantry_items() + firework_items())
 
 
 def owns(entry_id):

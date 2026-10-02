@@ -22,6 +22,7 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
@@ -31,6 +32,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -58,6 +60,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -227,6 +230,14 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<CanningKettleBlockEntity> CANNING_KETTLE_ENTITY;
 	/** Crows: they come to fields by day and peck ripe crops, unless a scarecrow guards them. */
 	public static EntityType<Crow> CROW;
+	/** Spooky fireworks in flight: they burst into a picture ({@link FireworkShape}). */
+	public static EntityType<SpookyRocket> SPOOKY_ROCKET;
+	public static BlockEntityType<ShowLauncherBlockEntity> SHOW_LAUNCHER_ENTITY;
+	/** A spooky firework made with glowstone dust: its sparks twinkle. */
+	public static DataComponentType<Boolean> TWINKLE;
+	/** A spooky firework's coloured spark, drawn by the client's SpookySparkParticle. */
+	public static final ParticleType<SpookySparkOptions> SPOOKY_SPARK = FabricParticleTypes.complex(true, SpookySparkOptions.CODEC,
+			SpookySparkOptions.STREAM_CODEC);
 	public static BlockEntityType<PantryShelfBlockEntity> PANTRY_SHELF_ENTITY;
 	/** A jar of preserves sealed in a Canning Kettle: it keeps for ever (its item model shows a cloth cap). */
 	public static DataComponentType<Boolean> SEALED;
@@ -1235,6 +1246,24 @@ public final class JugcraftAgriculture {
 				.clientTrackingRange(8));
 		FabricDefaultAttributeRegistry.register(CROW, Crow.createAttributes());
 		Crows.register();
+
+		// Fall additions 5, spooky fireworks: rockets that burst into pictures in sparks, and the Show Launcher.
+		TWINKLE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("twinkle"),
+				DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+		for (FireworkShape shape : FireworkShape.values()) {
+			registerItem(shape.item(), props -> new SpookyFireworkItem(shape, props),
+					new Item.Properties().component(DataComponents.FIREWORKS, new Fireworks(1, List.of())), EQUIPMENT_TAB);
+		}
+		SPOOKY_ROCKET = entity("spooky_rocket", EntityType.Builder.<SpookyRocket>of(SpookyRocket::new, MobCategory.MISC).noLootTable()
+				.sized(0.25F, 0.25F).clientTrackingRange(8).updateInterval(10));
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id("spooky_spark"), SPOOKY_SPARK);
+		PayloadTypeRegistry.clientboundPlay().register(SpookyBurstPayload.TYPE, SpookyBurstPayload.CODEC);
+		Block launcher = registerBlock("show_launcher", ShowLauncherBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		SHOW_LAUNCHER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("show_launcher"),
+				FabricBlockEntityTypeBuilder.create(ShowLauncherBlockEntity::new, launcher).build());
+		registerItem("show_launcher", props -> new BlockItem(launcher, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		SpookyFireworkItem.registerDispensing();
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

@@ -793,6 +793,7 @@ def check_agriculture():
     check_cider(java)
     check_pantry(java, main)
     check_crows(java, main)
+    check_fireworks(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2314,6 +2315,72 @@ def check_crows(java, main):
     table = load(DATA / "jugcraft" / "loot_table" / f"{crows['table']}.json") or {}
     if "minecraft:feather" not in json.dumps(table):
         err("A crow must drop feathers")
+
+def check_fireworks(java, main):
+    """Spooky fireworks: SpookyRocket.java, ShowLauncherBlockEntity.java and FireworkShape.java match FIREWORKS in
+    tools/agriculture.py; every picture has a firework item, named and drawn, with a recipe for each flight, plain and
+    twinkling, giving `per_craft` rockets of that flight; the launcher has a model for every facing and mode, its words,
+    loot and recipe; the spark particle, the burst payload and the dispensing are registered."""
+    fw = ag.FIREWORKS
+
+    def numbers(source):
+        return {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;",
+                                                                    java.get(source, ""))}
+
+    expected = {"SpookyRocket": {"LIFETIME_BASE": fw["lifetime_base"], "LIFETIME_SPREAD": fw["lifetime_spread"], "CLIMB": fw["climb"]},
+                "ShowLauncherBlockEntity": {"TUBES": fw["tubes"], "TUBE_CAPACITY": fw["tube_capacity"], "SEQUENCE_TICKS": fw["sequence_ticks"],
+                                            "VOLLEY_TICKS": fw["volley_ticks"], "LEAN": fw["lean"], "VANILLA_LEAN": fw["vanilla_lean"]}}
+    for source, values in expected.items():
+        found = numbers(source)
+        for name, value in values.items():
+            if name not in found or abs(found[name] - value) > 1e-9:
+                err(f"{source}.{name} = {found.get(name)} differs from FIREWORKS in tools/agriculture.py ({value})")
+    shapes_java = re.findall(r'\n\t([A-Z]+)\("([a-z]+)", 0x([0-9A-Fa-f]{6})', java.get("FireworkShape", ""))
+    colours = {sid: int(colour, 16) for constant, sid, colour in shapes_java if constant.lower() == sid}
+    if set(colours) != set(fw["shapes"]) or len(shapes_java) != len(colours):
+        err(f"FireworkShape's pictures {sorted(colours)} differ from FIREWORKS in tools/agriculture.py {sorted(fw['shapes'])}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for shape, info in fw["shapes"].items():
+        if colours.get(shape) != info["colour"]:
+            err(f"FireworkShape {shape}'s colour differs from FIREWORKS in tools/agriculture.py")
+        if info["item"] != f"{shape}_firework":
+            err(f"The {shape} firework must be {shape}_firework (FireworkShape.item())")
+        if lang.get(f"item.jugcraft.{info['item']}") != info["display"] or f"tooltip.jugcraft.spooky_firework.{shape}" not in lang:
+            err(f"The {shape} firework has no name or tooltip")
+        if not (ASSETS / "textures" / "item" / f"{info['item']}.png").exists():
+            err(f"The {shape} firework has no texture")
+        for flight in fw["flights"]:
+            for twinkle in (False, True):
+                name = f"{info['item']}_{flight}" + ("_twinkle" if twinkle else "")
+                recipe = load(DATA / "jugcraft" / "recipe" / f"{name}.json") or {}
+                result = recipe.get("result", {})
+                components = result.get("components", {})
+                inputs = recipe.get("ingredients", [])
+                if (result.get("id") != f"jugcraft:{info['item']}" or result.get("count") != fw["per_craft"]
+                        or components.get("minecraft:fireworks", {}).get("flight_duration") != flight
+                        or inputs.count("minecraft:gunpowder") != flight or (fw["twinkle"] in inputs) != twinkle
+                        or bool(components.get(f"jugcraft:{fw['component']}")) != twinkle
+                        or any(ingredient not in inputs for ingredient in info["ingredients"])):
+                    err(f"Recipe {name} must make {fw['per_craft']} {info['item']} of flight {flight}" + (", twinkling" if twinkle else ""))
+    launcher = fw["launcher"]
+    states = (load(ASSETS / "blockstates" / f"{launcher}.json") or {}).get("variants", {})
+    for facing in ("north", "south", "east", "west"):
+        for mode in ("sequence", "volley", "finale"):
+            if f"facing={facing},mode={mode}" not in states:
+                err(f"The Show Launcher's blockstate has no variant for facing={facing},mode={mode}")
+    for key in ("full", "started", "stopped", "empty", "mode.sequence", "mode.volley", "mode.finale"):
+        if f"message.jugcraft.show_launcher.{key}" not in lang:
+            err(f"The Show Launcher has no words for {key}")
+    if lang.get(f"block.jugcraft.{launcher}") != fw["launcher_display"] or f"entity.jugcraft.{fw['entity']}" not in lang:
+        err("The Show Launcher or the spooky rocket has no name")
+    if not (DATA / "jugcraft" / "loot_table" / "blocks" / f"{launcher}.json").exists() or not (DATA / "jugcraft" / "recipe" / f"{launcher}.json").exists():
+        err("The Show Launcher needs its loot table and recipe")
+    if not (ASSETS / "particles" / f"{fw['particle']}.json").exists() or not (ASSETS / "textures" / "particle" / f"{fw['particle']}.png").exists():
+        err("The spooky spark particle needs its definition and texture")
+    for needed in (f'Jugcraft.id("{fw["particle"]}"), SPOOKY_SPARK', "SpookyBurstPayload.TYPE, SpookyBurstPayload.CODEC",
+                   f'entity("{fw["entity"]}"', "SpookyFireworkItem.registerDispensing()", f'Jugcraft.id("{fw["component"]}")'):
+        if needed not in main:
+            err(f"JugcraftAgriculture.java must register {needed}")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

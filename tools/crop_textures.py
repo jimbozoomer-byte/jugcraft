@@ -876,4 +876,6 @@ def crop_textures():
     out.update(pantry_textures())
     from crow_textures import crow_textures  # and the crow
     out.update(crow_textures())
+    from firework_textures import firework_textures  # and spooky fireworks
+    out.update(firework_textures())
     return out
