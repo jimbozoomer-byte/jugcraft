@@ -31,6 +31,21 @@ TREE = {
     "upgrade": ("mining_drill", ["overclock_module", "range_module", "capacity_module", "silk_touch_module",
                                  "fortune_module"], "Tinkerer", "Make an upgrade module for a powered tool", "task"),
     "rocket_pack": ("charging_station", "rocket_pack", "Rocketeer", "Make a rocket pack and take to the air", "challenge"),
+    # Batch 25: gear.
+    "steel_armor": ("steel", ["steel_helmet", "steel_chestplate", "steel_leggings", "steel_boots"], "Suited Up",
+                    "Make a piece of steel armor", "task"),
+    "paxel": ("steel", [f"{tier}_paxel" for tier in ("wood", "stone", "iron", "gold", "diamond", "netherite", "bronze",
+                                                      "steel")], "Jack of All Trades", "Make a paxel", "task"),
+    # Batch 27: gear and plastic blocks.
+    "scuba": ("rubber", ["scuba_mask", "scuba_tank"], "Deep Breath", "Make scuba gear and breathe under water on oxygen",
+              "task"),
+    "free_runners": ("rubber", "free_runners", "Light on Your Feet", "Make free runners and never take fall damage",
+                     "task"),
+    "power_weapon": ("charging_station", ["power_katana", "power_bow"], "Charged Up", "Make a power katana or power bow",
+                     "goal"),
+    "plastic_blocks": ("plastic", [f"{color}_plastic" for color in (
+        "white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple",
+        "blue", "brown", "green", "red", "black")], "Lego My Ego", "Mould coloured plastic blocks", "task"),
     # The oil line (Chemistry branch).
     "crude_oil": ("steel", "crude_oil_bucket", "Black Gold", "Fill a bucket with crude oil", "task"),
     "pumpjack": ("crude_oil", "pumpjack", "Nodding Donkey", "Build a pumpjack over an oil reservoir", "task"),
@@ -54,6 +69,8 @@ TREE = {
     "electrolytic_cell": ("steel", "electrolytic_cell", "Split Decision", "Build an electrolytic cell", "goal"),
     "sulfuric_acid": ("electrolytic_cell", "sulfuric_acid_bucket", "Oil of Vitriol", "Make sulfuric acid", "task"),
     "fertilizer": ("sulfuric_acid", "fertilizer", "Green Revolution", "Make fertilizer", "task"),
+    # Batch 26: fuel from crops.
+    "bioethanol": ("crop_harvester", "bioethanol_bucket", "Moonshine", "Ferment crops into bioethanol", "task"),
     "alumina": ("electrolytic_cell", "alumina", "The Bayer Way", "Digest bauxite into alumina", "task"),
     "fuel_cell": ("electrolytic_cell", "fuel_cell", "Clean Burn", "Build a hydrogen fuel cell", "goal"),
     # Nitrogen chemistry (batch 12).
@@ -69,7 +86,7 @@ TREE = {
     "magnet_dynamo": ("neodymium_magnet", ["magnet_dynamo", "magnet_motor"], "Lossless (Almost)",
                       "Build a magnet dynamo or magnet motor", "goal"),
     # Electronics (batch 7).
-    "silicon_boule": ("titanium", "silicon_boule", "Pulling Strings", "Grow a silicon boule in the crystal grower", "goal"),
+    "silicon_boule": ("titanium", "silicon_boule", "Pulling Strings", "Pull a silicon boule in the arc furnace", "goal"),
     "microchip": ("silicon_boule", "microchip", "Etched in Light", "Etch microchips in the lithography station", "task"),
     "processor": ("microchip", "processor", "Central Processing", "Assemble a processor", "task"),
     "network_terminal": ("processor", "network_terminal", "Hello, World", "Build a network terminal", "goal"),

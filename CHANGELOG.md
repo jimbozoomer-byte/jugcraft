@@ -255,6 +255,84 @@ No numbered release yet. Everything below is on `main`.
 - Original textures from `tools/crop_textures.py`. Twelve game tests, plus a client game test with screenshots of a corn maze, the fields and every growth stage.
 
 ### Unmerged: Engineer's Handbook reorganised, batch 23
+### Unmerged: Gear, weapons and plastic blocks, batch 27
+- **Scuba mask and tank:** breathe under water on oxygen (8,000 mB, 400 s); fill the tank from a gas holder or machine.
+- **Free runners:** boots with no fall damage and a one-block step.
+- **Power katana and power bow:** JE-powered weapons charged at the charging station; the bow fires energy arrows without ammo.
+- **Plastic blocks** in all sixteen dye colours, from plastic sheets.
+- High-detail art: an animated 32x32 energy katana, and double-resolution scuba gear and free runners.
+- Four advancements and handbook pages. Inspired by Mekanism and Mekanism: Additions (MIT); all code and art original.
+
+### Unmerged: Four-ingot ore and bioethanol, batch 26
+- **Acid leaching:** an ore and 250 mB of sulfuric acid in the chemical reactor give 4 washed ores (the best ore route).
+- **Bioethanol:** 8 crops and a bucket of water ferment into 250 mB in the chemical reactor; it burns in the gas turbine and the advanced engine.
+- Inspired by Mekanism (MIT); no new machines.
+
+### Unmerged: Tools, armor and paxels, batch 25
+- Bronze and steel swords, pickaxes, axes, shovels, hoes and armor (bronze iron-tier, steel between iron and diamond).
+- Paxels (pickaxe, axe and shovel in one) for every tier from wood to netherite, bronze and steel.
+- Bronze armor is steampunk (goggles, pressure gauge, boiler); steel armor is kaiserpunk (Pickelhaube, field-grey tunic, jackboots).
+- Two advancements and handbook pages. Inspired by Mekanism: Tools (MIT); all code and art original.
+
+### Unmerged: Fewer chemistry machines, batch 24
+- Five single-job machines folded into ones that already exist (65 machines down to 60):
+  - the distillation tower vacuum-distils heavy fuel oil (was the vacuum distillation unit);
+  - the catalytic cracker reforms naphtha, using a catalyst (was the catalytic reformer);
+  - the chemical reactor mixes brine and fracking fluid (was the chemical mixer);
+  - the **Settling Plant** (the flowback treatment unit, renamed) separates oil sand and bitumen (was the oil sand extractor);
+  - the arc furnace pulls silicon boules, with argon (was the crystal grower).
+- New uses: the settling plant presses mud into clay; the electrolytic cell splits water into hydrogen and oxygen.
+
+### Unmerged: Seasons (colours, events and winter snow)
+- **Grass and leaves change colour with the server's date** in every biome that has four seasons: plains, meadows, forests (dark, dappled and cherry groves included), taigas, windswept hills and swamps.
+  - Winter is dull and dormant, spring is fresh green and summer is vanilla.
+  - Autumn turns oak leaves gold, orange and red in patches, then russet.
+  - Colours change a little each day.
+- **Winter snow (opt-in, `seasons.snow=on`):**
+  - From December to February, rain falls as snow in those biomes, and up to `seasons.snow_depth` layers settle.
+  - The snow melts in spring.
+  - It never freezes water, lies on farmland or touches snow you placed.
+- **Events on one clock:**
+  - the **Harvest Feast** (`harvest_feast`: the US Thanksgiving weekend by default, Canada's, or off);
+  - **December** (`december`: 1 December to 6 January by default).
+  - Both are announced in chat.
+- **`/jugcraft season`** shows the season, day and events. Operators can set a season, preview a date or switch snow on or off until the server stops.
+- **Server settings** in `config/jugcraft.properties`: `seasons.mode`, `seasons.hemisphere`, `seasons.timezone`, plus the snow and event settings above.
+- The server decides everything; clients never use their own clock. Colours and events save nothing; seasonal snow melts away.
+- Server and client game tests, with a screenshot per season and one of winter snow.
+
+### Blueprints and test blocks (same draft PR)
+- **Blueprint Table:**
+  - LIBRARY of the mod's structures and imported blueprints, with a front view and materials; printing is free.
+  - IMPORT takes pasted `.jugbp.json` text, checks it, saves it with the world and shares it with everyone.
+- **Placing blueprints:** a hologram preview up to 32 blocks away, a Survey Stake screen (progress, materials, Personal/Party, rotate, remove), and drone building layer by layer.
+- **Drone Tower tier 1** now also builds the Energy Exchange and Storage Exchange, adding seven new building blocks and two ports that feed the depot.
+- **Seating:** Operator Chairs can be sat on.
+- **Creative-only test blocks:** the Creative Energy Cell and the Creative Supply Crate.
+
+### Drone Depot (draft PR, stacked on Parties)
+- **New blocks:** Drone Depot Terminal, Control Screen Panel, Hologram Table, Cargo Packager, and the tower-placed Landing Platform, Landing Pad and Supply Pickup Plate (no recipes: the Drone Tower builds the depot).
+- **Depot:** part of the Drone Tower. Tier 1 places the base floor, eight pads (5x5 plates forming a pad with a charger port), the supply pickup (3x3 plates with a lift hatch) and the terminal building. A terminal without a tower flies no drones.
+- **Drones:** nine tiers, all craftable, each with its own 3D look in the tower's graphite-and-dull-red theme (tier 9 is the Superconducting Ring Lifter). Tiers 5–9 use new parts from real materials: neodymium motors, tilt-rotor nacelles, composite rotors, hydrogen lift cells (chemical reactor), ion emitters, superconducting tape, Stirling cryocoolers and superconducting lift fans.
+- **Drone Tower ([docs](docs/features/drone-tower.md)):** a Tower Core on a 15×15 chiseled stone plinth builds the Command Post (tier 1, with a furnished command room). Tiers 2–9 are flown in tile by tile by the depot's own drones, using four kinds of tower module. Tower tier N unlocks drone tier N; the full tower holds 100 drones, each in its own hangar, with seven pickups. Adds 19 building materials (nine with stairs and slabs), five furniture blocks and a tower status screen. Drones dock round the pads, fly their routes, and winch crates up from the pickup (the hatch opens and a lift raises the crate).
+- **Command room screens:** a hologram table (nine sections form one table projecting a live depot map) and a screen wall (six panels form one live display), both in the tower's command room. The terminal opens a sci-fi screen (OVERVIEW, FLEET, JOBS, POWER, and a PERSONAL/PARTY button) whose text is fitted to the panel.
+- **Pooled power:** standby and working draw, cached. Low power slows flights and never drops cargo.
+- **Flights:** timed flight records (not mobs) with terrain-following routes, at most 5 launches per tick, and reservations. Clients get a small snapshot when something changes and move the drones themselves.
+- **`BuildJobs`:** the build-job interface for blueprints and later builders, plus a development-only `/dronetest` command.
+- **Tests:** tower server and client game tests; server game tests (layout rules, docks, flight paths, and in-world depots that build blocks, re-form pads, respect Party mode and link screens) and a client game test with screenshots, plus checker rules keeping drone numbers in sync.
+
+### Parties (draft PR; proposal #21)
+- **`/party` commands:** create, invite, accept, decline, leave, kick, leader and disband.
+  - Invites expire after 5 minutes, and each player can send 10 a minute.
+  - Parties hold up to 8 members.
+- **Shared API (`JugcraftParties`):**
+  - `sameParty`, `isLeader`, `partyMembers`, change listeners.
+  - `mayServe` with `UseMode` (Personal/Party), which every automated system will use.
+- **Saving:** parties are saved in the world folder (`jugcraft/parties.txt`).
+- **Feature switch:** `parties.enabled`.
+- **Tests:** seven new game tests, plus a checker rule that every party result has a chat message.
+
+### #81 Engineer's Handbook reorganised, batch 23
 - The book fits the window; the chapter list is a scrollable contents list where the open chapter shows its pages, and long pages scroll (mouse wheel or arrow keys).
 - New **Progression** chapter: the road through the mod in nine stages, each a plan and a numbered chain of the items to make in order.
 

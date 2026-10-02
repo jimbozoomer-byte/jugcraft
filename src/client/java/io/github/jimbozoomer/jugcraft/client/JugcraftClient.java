@@ -4,6 +4,8 @@ import io.github.jimbozoomer.jugcraft.agriculture.HarvestMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
 import io.github.jimbozoomer.jugcraft.agriculture.SpookyBurstPayload;
+import io.github.jimbozoomer.jugcraft.drone.DroneTerminalBlock;
+import io.github.jimbozoomer.jugcraft.drone.JugcraftDrones;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
 import io.github.jimbozoomer.jugcraft.fluid.StoredFluid;
 import io.github.jimbozoomer.jugcraft.guide.EngineersHandbookItem;
@@ -25,13 +27,16 @@ import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 
 /**
  * Client entrypoint: machine and Cooking Pot menus to their screens, the wind turbine and belt renderers,
  * the handbook to its book, ore surveys to the prospector screen, carved and giant pumpkins to their renderers and carving screen,
  * pumpkin boats to theirs, gravestones to the renderer of their engravings, and Halloween's night creatures,
- * thrown pumpkins and landing markers to theirs; the Harvest Moon's state to the pumpkins' sparks.
+ * thrown pumpkins and landing markers to theirs; the Harvest Moon's state to the pumpkins' sparks; the drone
+ * depot's renderers (drones, pickup lift, control room screen) and terminal screen, and the server's season to
+ * grass and foliage colours.
  */
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
@@ -66,6 +71,7 @@ public final class JugcraftClient implements ClientModInitializer {
 			}
 		});
 		EngineersHandbookItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
+		SeasonColors.register();
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);
@@ -143,5 +149,15 @@ public final class JugcraftClient implements ClientModInitializer {
 			HarvestMoon.clientActive = false;
 			client.execute(CarvingTextures::clear);
 		});
+		BlockEntityRenderers.register(JugcraftDrones.TERMINAL_ENTITY, context -> new DroneDepotRenderer());
+		DroneSounds.register();
+		BlockEntityRenderers.register(JugcraftDrones.SCREEN_ENTITY, ControlScreenRenderer::new);
+		BlockEntityRenderers.register(JugcraftDrones.HOLO_ENTITY, context -> new HoloMapRenderer());
+		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.blueprint.JugcraftBlueprints.STAKE_ENTITY, context -> new SurveyStakeRenderer());
+		io.github.jimbozoomer.jugcraft.client.blueprint.ClientBlueprints.register();
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.tower.JugcraftTower.SEAT, net.minecraft.client.renderer.entity.NoopRenderer::new);
+		io.github.jimbozoomer.jugcraft.drone.GuideBooks.openScreen = book -> Minecraft.getInstance().gui.setScreen(new GuideBookScreen(book));
+		DroneTerminalBlock.openScreen = pos -> Minecraft.getInstance().gui.setScreen(new DroneTerminalScreen(pos));
+		io.github.jimbozoomer.jugcraft.tower.TowerCoreBlock.openScreen = pos -> Minecraft.getInstance().gui.setScreen(new TowerScreen(pos));
 	}
 }

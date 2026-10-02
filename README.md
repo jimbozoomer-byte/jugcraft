@@ -12,6 +12,7 @@ Jugcraft's original gameplay ships as one mod, organized into internal feature p
 
 ## Start here
 
+- [Start contributing now: fork, connect your AI, and open a PR](docs/COMMUNITY_QUICKSTART.md).
 - [Propose a feature](../../issues/new?template=feature.yml): no coding experience needed.
 - [Propose an existing mod integration](../../issues/new?template=integration.yml).
 - [Contribute code, art, or documentation](CONTRIBUTING.md).
@@ -26,7 +27,7 @@ Jugcraft's original gameplay ships as one mod, organized into internal feature p
 
 ## How additions become part of Jugcraft
 
-Proposal → maintainer approval → fork and feature branch → commits → pull request → checks and review → multiplayer playtest → merge → numbered release.
+Idea → fork and feature branch → focused prototype and commits → draft pull request → checks and maintainer review → multiplayer playtest → acceptance and merge → numbered release. You may start a prototype without an approved issue.
 
 One feature per PR. Include the proposal, integration contract, and actual test evidence. An approved idea is permission to develop it, not a promise to merge it. Maintainers decide fit, quality, and release timing.
 
@@ -59,7 +60,7 @@ Install Python 3.11 or newer, then run:
 python scripts/check_repository.py
 ```
 
-This checks the contribution foundation only. It does **not** compile Minecraft code or certify multiplayer compatibility. The platform bootstrap must introduce a pinned Gradle wrapper, mod build, and required game tests before implementation PRs can merge.
+This checks the contribution foundation only. It does **not** compile Minecraft code or certify multiplayer compatibility. The pinned Gradle build already exists; use the Build workflow and documented build commands for compilation. Multiplayer playtesting remains separate.
 
 ## Rights and conduct
 
