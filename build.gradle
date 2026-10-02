@@ -61,8 +61,38 @@ fabricApi {
 		createSourceSet = true
 		modId = "jugcraft-test"
 		enableGameTests = true
-		enableClientGameTests = true // Real client with rendering; CI job "client" runs it and keeps the screenshots.
+		enableClientGameTests = true // Real client with rendering; CI's client jobs run it and keep the screenshots.
 		eula = true // Accepts the Minecraft EULA for the test server only.
+	}
+}
+
+// CI shares the client game tests out between parallel jobs: -PclientTestShard=<n> -PclientTestShards=<count> keeps
+// the test mod's client test classes at positions n, n + count, n + 2 * count ... of its list, so every class runs in
+// exactly one job. Without the two properties every class runs. Server game tests are never split.
+def clientTestShard = providers.gradleProperty("clientTestShard").getOrElse("")
+def clientTestShards = providers.gradleProperty("clientTestShards").getOrElse("")
+tasks.named("processGametestResources", ProcessResources) {
+	inputs.property("clientTestShard", clientTestShard)
+	inputs.property("clientTestShards", clientTestShards)
+	doLast { task ->
+		if (clientTestShard.isEmpty() && clientTestShards.isEmpty()) {
+			return
+		}
+		if (clientTestShard.isEmpty() || clientTestShards.isEmpty()) {
+			throw new GradleException("Give both clientTestShard and clientTestShards, or neither")
+		}
+		int shard = clientTestShard as int
+		int shards = clientTestShards as int
+		if (shards < 1 || shard < 0 || shard >= shards) {
+			throw new GradleException("clientTestShard must be from 0 to clientTestShards - 1, got ${shard} of ${shards}")
+		}
+		File manifest = new File(task.destinationDir, "fabric.mod.json")
+		def json = new groovy.json.JsonSlurper().parse(manifest)
+		List<String> all = json.entrypoints["fabric-client-gametest"]
+		List<String> mine = (0..<all.size()).findAll { it % shards == shard }.collect { all[it] }
+		json.entrypoints["fabric-client-gametest"] = mine
+		manifest.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json))
+		task.logger.lifecycle("Client game tests, shard ${shard} of ${shards} (0-based): ${mine.size()} of ${all.size()} classes: ${mine}")
 	}
 }
 
