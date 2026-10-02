@@ -739,23 +739,27 @@ public class PetroGameTests {
 		helper.setBlock(new BlockPos(6, 2, 1), Blocks.STONE);
 		BlockPos absolute = helper.absolutePos(receiverPos);
 		SolarReceiverBlockEntity receiver = helper.getBlockEntity(receiverPos, SolarReceiverBlockEntity.class);
-		// Sky light (what "open sky" reads) catches up with the new roof a few ticks after it is placed.
-		helper.runAfterDelay(20, () -> {
+		// Sky light (what "open sky" reads) catches up with the new roof some ticks after it is placed, later when the
+		// server is busy, so wait for the count to settle rather than a fixed delay. Then add water and check the
+		// output five ticks later. succeedWhen repeats this every tick until it passes.
+		long[] watered = {-1};
+		helper.succeedWhen(() -> {
 			int count = SolarReceiverBlockEntity.countHeliostats(helper.getLevel(), absolute);
 			helper.assertTrue(count == 3, "The receiver counted " + count + " heliostats under open sky");
-			helper.assertTrue(receiver.lastOutput() == 0 && receiver.energy().getAmount() == 0, "It made power without water");
-			receiver.water().variant = FluidVariant.of(Fluids.WATER);
-			receiver.water().amount = 4 * FluidConstants.BUCKET;
-			helper.runAfterDelay(5, () -> {
-				ServerLevel level = helper.getLevel();
-				boolean sun = level.isBrightOutside() && level.canSeeSky(absolute.above());
-				int expected = sun ? (level.isRaining() ? 18 : 36) : 0;
-				helper.assertTrue(receiver.lastOutput() == expected,
-						"The receiver made " + receiver.lastOutput() + " JE/t, expected " + expected);
-				helper.assertTrue((expected > 0) == (receiver.water().amount < 4 * FluidConstants.BUCKET),
-						"Water boiled " + (4 * FluidConstants.BUCKET - receiver.water().amount) / 81 + " mB at " + expected + " JE/t");
-				helper.succeed();
-			});
+			ServerLevel level = helper.getLevel();
+			if (watered[0] < 0) {
+				helper.assertTrue(receiver.lastOutput() == 0 && receiver.energy().getAmount() == 0, "It made power without water");
+				receiver.water().variant = FluidVariant.of(Fluids.WATER);
+				receiver.water().amount = 4 * FluidConstants.BUCKET;
+				watered[0] = level.getGameTime();
+			}
+			helper.assertTrue(level.getGameTime() - watered[0] >= 5, "Waiting for the receiver to rescan");
+			boolean sun = level.isBrightOutside() && level.canSeeSky(absolute.above());
+			int expected = sun ? (level.isRaining() ? 18 : 36) : 0;
+			helper.assertTrue(receiver.lastOutput() == expected,
+					"The receiver made " + receiver.lastOutput() + " JE/t, expected " + expected);
+			helper.assertTrue((expected > 0) == (receiver.water().amount < 4 * FluidConstants.BUCKET),
+					"Water boiled " + (4 * FluidConstants.BUCKET - receiver.water().amount) / 81 + " mB at " + expected + " JE/t");
 		});
 	}
 
