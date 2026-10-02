@@ -1,6 +1,6 @@
 # Seasons: colours, events and winter snow
 
-Status: implemented on branch `claude/seasons` (PR #80). The first part, seasonal colours, compiles and passes its server and client game tests in CI (see Results); the upgrade (events, command, more biomes, winter snow) is awaiting CI. **Not yet played.**
+Status: implemented on branch `claude/seasons` (PR #80). Compiles and passes its server and client game tests in CI (see Results). **Not yet played.**
 Proposal issue: none.
 - On 1 October 2026 the owner asked for seasonal biomes that change colour with the real date, and chose "Seasonal colours first" on a new branch.
 - On 2 October they chose:
@@ -184,7 +184,16 @@ Seasonal colours, from Build run [36915807158](https://github.com/jimbozoomer-by
   - today's date (1 October) shows the oaks partly turned.
 - An earlier screenshot round (run 36914731990) showed autumn as a flat olive-gold, because leaf textures darken the tint. The palette was strengthened, and the autumn patches made smaller, before these results.
 
-Upgrade (events, command, more biomes, winter snow): not yet run in CI.
+Upgrade (events, command, more biomes, winter snow), from Build run [36950495928](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/36950495928) on e9a0f11, run on 2 October 2026:
+- `./gradlew build`: all 128 game tests pass. That includes the eight `SeasonGameTests`:
+  - events;
+  - the command;
+  - winter snow lying, then melting in spring;
+  - the new biome tags.
+- `./gradlew runClientGameTest`: pass.
+  - The tints are as above. Auto on 2 October is day 275: foliage #ceab2a, grass #a4b354.
+  - Winter snow was logged as "client sees snow falling true, grass under the season's snow is snowy true".
+  - I looked at the screenshot `jugcraft_season_winter_snow`: snow is falling, two layers lie on the ground and on the oak crowns, the grass is white under it, and the dormant winter leaves show beneath.
 
 ## World and event applicability
 - **Seasonal rules** ([CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md)):
