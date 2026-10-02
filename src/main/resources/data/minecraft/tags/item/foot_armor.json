@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:bronze_boots",
+    "jugcraft:steel_boots",
+    "jugcraft:free_runners",
+    "jugcraft:exosuit_boots",
+    "jugcraft:ronin_exosuit_boots"
+  ]
+}

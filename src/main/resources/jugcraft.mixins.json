@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.jimbozoomer.jugcraft.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "JigsawPlacerMixin",
+    "MultiNoiseBiomeSourceMixin",
+    "OverworldBiomeBuilderMixin",
+    "PoolElementStructurePieceMixin",
+    "StructureTemplatePoolAccessor",
+    "StructureTemplatePoolMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
