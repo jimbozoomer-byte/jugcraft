@@ -8,6 +8,7 @@ Each entry: id -> (parent or None, item that earns it, title, description, frame
 TREE = {
     "root": (None, "raw_tin", "Jugcraft", "Dig up tin, the first metal of the workshop", "task"),
     "bronze": ("root", "bronze_ingot", "Bronze Age", "Alloy tin and copper into bronze", "task"),
+    "pixel_shard": ("root", "pixel_shard", "Dead Pixels", "Find the Pixel Hollows and mine a pixel crystal", "task"),
     "prospector": ("bronze", "prospector", "Geo-Resonance", "Build a prospector and listen for ore underground", "task"),
     "coal_generator": ("bronze", "coal_generator", "Spark of Industry", "Build a coal generator", "task"),
     "crusher": ("coal_generator", "crusher", "Twice the Ore", "Build a crusher and double your ingots", "task"),

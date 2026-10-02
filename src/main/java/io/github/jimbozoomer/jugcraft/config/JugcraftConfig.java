@@ -22,7 +22,8 @@ public final class JugcraftConfig {
 	public static final List<String> FEATURES = List.of(
 			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
 			"salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines",
-			"deposits", "explosives", "agriculture", "parties", "drones");
+			"deposits", "explosives", "agriculture", "parties", "drones",
+			"pixel_hollows", "retro_trader");
 
 	/**
 	 * Other server options, with their defaults. {@code carving.free_draw}: players may carve any face into a
