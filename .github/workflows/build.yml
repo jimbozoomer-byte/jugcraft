@@ -30,10 +30,18 @@ jobs:
         run: ./gradlew build --no-daemon
 
   # A real game client with software rendering (Mesa): runs the client game tests in
-  # src/gametest (JugcraftClientGameTests), which build a showroom and take screenshots.
-  client:
+  # src/gametest (JugcraftClientGameTests and the rest), which build showrooms and worlds and
+  # take screenshots. Three jobs share the test classes out (every third class each, see
+  # clientTestShard in build.gradle), so every class runs once; the "client" job below passes
+  # only when all three do.
+  client-shard:
+    name: client (shard ${{ matrix.shard }} of 3)
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -48,8 +56,8 @@ jobs:
         run: |
           mkdir -p run && echo "eula=true" > run/eula.txt
           echo 'preferredGraphicsBackend:"opengl"' > run/options.txt
-      - name: Run client game tests
-        run: ./gradlew runClientGameTest --no-daemon
+      - name: Run client game tests (shard ${{ matrix.shard }} of 3)
+        run: ./gradlew runClientGameTest --no-daemon -PclientTestShard=${{ matrix.shard }} -PclientTestShards=3
       - name: Print small previews of the screenshots
         if: always()
         run: |
@@ -69,5 +77,19 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: client-screenshots
+          name: client-screenshots-${{ matrix.shard }}
           path: '**/screenshots/*.png'
+
+  # The client game tests' result: green only when every shard ran and passed.
+  client:
+    needs: client-shard
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every client test shard passed
+        env:
+          RESULT: ${{ needs.client-shard.result }}
+        run: |
+          echo "Client test shards: $RESULT"
+          test "$RESULT" = success
