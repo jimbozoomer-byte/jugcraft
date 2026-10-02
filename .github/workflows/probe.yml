@@ -1,0 +1,42 @@
+name: API probe
+on:
+  push:
+    branches: ['probe/**']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Resolve Minecraft
+        run: ./gradlew compileJava --no-daemon -q
+      - name: Tool and armor APIs
+        run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-clientonly-deobf-26.3.jar' | head -1)
+          echo "=== Item.Properties"; javap -cp "$COMMON" 'net.minecraft.world.item.Item$Properties' | grep -iE "sword|pickaxe|axe|shovel|hoe|tool|armor|Armor|spear|durability|repairable|enchantable|equippable"
+          for c in net.minecraft.world.item.ToolMaterial net.minecraft.world.item.equipment.ArmorMaterial net.minecraft.world.item.equipment.ArmorType net.minecraft.world.item.equipment.ArmorMaterials net.minecraft.world.item.equipment.EquipmentAssets net.minecraft.world.item.AxeItem net.minecraft.world.item.ShovelItem net.minecraft.world.item.HoeItem net.minecraft.world.item.BowItem net.minecraft.world.item.ProjectileWeaponItem net.minecraft.world.item.ShieldItem; do echo "=== $c"; javap -cp "$COMMON" $c | head -40; done
+          echo "=== ItemTags"; javap -cp "$COMMON" net.minecraft.tags.ItemTags | grep -iE "SWORD|PICKAXE|AXES|SHOVEL|HOE|ARMOR|ENCHANTABLE|REPAIR|BRONZE|HEAD|CHEST|LEG|FOOT|FEET" | head -50
+          echo "=== BlockTags"; javap -cp "$COMMON" net.minecraft.tags.BlockTags | grep -iE "MINEABLE|INCORRECT" | head
+          echo "=== equipment assets"; unzip -l "$CLIENT" "$COMMON" | grep -E "equipment/(iron|diamond)\.json|entity/equipment/humanoid(_leggings)?/iron" | head
+          for f in $(unzip -l "$CLIENT" | grep -oE "assets/minecraft/equipment/iron\.json" | head -1); do unzip -p "$CLIENT" $f; done
+          for f in $(unzip -l "$COMMON" | grep -oE "assets/minecraft/equipment/iron\.json" | head -1); do unzip -p "$COMMON" $f; done
+          echo "=== iron_pickaxe item model"; for J in "$CLIENT" "$COMMON"; do unzip -p "$J" assets/minecraft/items/iron_pickaxe.json 2>/dev/null; unzip -p "$J" assets/minecraft/items/bow.json 2>/dev/null; unzip -p "$J" assets/minecraft/items/shield.json 2>/dev/null; done
+          echo "=== recipe iron_pickaxe"; unzip -p "$COMMON" data/minecraft/recipe/iron_pickaxe.json; unzip -p "$COMMON" data/minecraft/recipe/netherite_pickaxe_smithing.json
+          echo "=== tags"; unzip -p "$COMMON" data/minecraft/tags/item/pickaxes.json; unzip -p "$COMMON" data/minecraft/tags/item/enchantable/armor.json; unzip -p "$COMMON" data/minecraft/tags/item/head_armor.json; unzip -l "$COMMON" | grep -E "tags/item/(enchantable|.*armor|swords|axes|shovels|hoes)" | head -30
+          echo "=== Fabric damage events"; for J in $(find ~/.gradle/caches -name 'fabric-entity-events*.jar' | grep -v sources | head -1); do javap -cp "$J:$COMMON" net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents | head -30; done
+          echo "=== MobEffects"; javap -cp "$COMMON" net.minecraft.world.effect.MobEffects | grep -iE "WATER_BREATHING|BREATH" 
+          echo "=== LivingEntity air"; javap -cp "$COMMON" net.minecraft.world.entity.LivingEntity | grep -iE "AirSupply|isEyeInFluid|getArmorValue|getItemBySlot" | head
+          echo "=== Entity air"; javap -cp "$COMMON" net.minecraft.world.entity.Entity | grep -iE "AirSupply|isUnderWater|isEyeInFluid" | head
+          echo "=== Item hooks"; javap -cp "$COMMON" net.minecraft.world.item.Item | grep -iE "inventoryTick|releaseUsing|getUseDuration|use\(|hurtEnemy|postHurtEnemy|getAttackDamageBonus|onUseTick" | head -20
+          echo "=== DamageTypes"; javap -cp "$COMMON" net.minecraft.world.damagesource.DamageTypes | grep -iE "FALL|ARROW|PLAYER_ATTACK" | head
+          echo "=== Arrow"; javap -cp "$COMMON" net.minecraft.world.entity.projectile.arrow.Arrow 2>/dev/null | head -20; unzip -l "$COMMON" | grep -E "projectile/.*Arrow\.class" | head
