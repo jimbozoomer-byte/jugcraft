@@ -71,6 +71,7 @@ import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CarpetBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
@@ -258,6 +259,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<HearthOvenBlockEntity> HEARTH_OVEN_ENTITY;
 	public static BlockEntityType<SpiritBoardBlockEntity> SPIRIT_BOARD_ENTITY;
 	public static BlockEntityType<ThereminBlockEntity> THEREMIN_ENTITY;
+	public static BlockEntityType<OfrendaBlockEntity> OFRENDA_ENTITY;
 	/** How many uses Knitting Needles have. */
 	public static final int NEEDLES_DURABILITY = 128;
 	/** Bat guano fertilizes the crops this far round where it is used (a 3x3 patch), with this many doses of bone meal each. */
@@ -660,6 +662,8 @@ public final class JugcraftAgriculture {
 		mum("orange_mum", MobEffects.FIRE_RESISTANCE, 4.0F);
 		mum("red_mum", MobEffects.REGENERATION, 8.0F);
 		mum("purple_mum", MobEffects.NIGHT_VISION, 5.0F);
+		// Fall additions 20: the cempasúchil marigold, the flower of Día de Muertos.
+		mum("marigold", MobEffects.LUCK, 6.0F);
 	}
 
 	/**
@@ -1462,6 +1466,26 @@ public final class JugcraftAgriculture {
 		THEREMIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("theremin"),
 				FabricBlockEntityTypeBuilder.create(ThereminBlockEntity::new, theremin).build());
 		registerItem("theremin", props -> new BlockItem(theremin, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 20, the Día de Muertos ofrenda: an altar of three tiers for offerings to those remembered, with
+		// marigold petals, papel picado, sugar skulls and pan de muerto; complete, it welcomes the restless spirits near.
+		Block ofrenda = registerBlock("ofrenda", OfrendaBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).strength(1.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(state -> state.getValue(OfrendaBlock.COMPLETE) ? OfrendaBlock.LIGHT : 0));
+		OFRENDA_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ofrenda"),
+				FabricBlockEntityTypeBuilder.create(OfrendaBlockEntity::new, ofrenda).build());
+		registerItem("ofrenda", props -> new BlockItem(ofrenda, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block petals = registerBlock("marigold_petals", CarpetBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.PINK_PETALS)
+				.mapColor(MapColor.COLOR_ORANGE));
+		registerItem("marigold_petals", props -> new BlockItem(petals, props), new Item.Properties().useBlockDescriptionPrefix()
+				.compostable(COMPOST_LOW), BUILDING_TAB);
+		Block papel = registerBlock("papel_picado", props -> new WallDecorationBlock(props, 1.0, 1.0, 15.0), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_PINK).instabreak().noCollision().sound(SoundType.WOOL).ignitedByLava().pushReaction(PushReaction.POPPED));
+		registerItem("papel_picado", props -> new BlockItem(papel, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block skull = registerBlock("sugar_skull", SugarSkullBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(0.3F)
+				.sound(SoundType.STONE).noOcclusion().pushReaction(PushReaction.POPPED));
+		registerItem("sugar_skull", props -> new BlockItem(skull, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		plain("pan_de_muerto_dough", COMPOST_MEDIUM);
+		food("pan_de_muerto", 6, 0.7F, COMPOST_MEDIUM_HIGH);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

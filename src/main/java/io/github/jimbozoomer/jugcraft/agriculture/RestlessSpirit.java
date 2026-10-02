@@ -45,7 +45,8 @@ import org.jspecify.annotations.Nullable;
  * and shies away from anyone within {@value #SHY_RADIUS} blocks (a sneaking player gets to {@value #SNEAK_SHY_RADIUS}),
  * though never out of its haunt, so it can be cornered. A glass bottle used on a revealed spirit catches it: the bottle
  * fills with Ectoplasm. A Spirit Board's séance ({@link SpiritBoard}) learns its name and the one thing it wishes for;
- * given that, revealed, it is laid to rest. Blows pass through it; it fades at dawn or when the agriculture feature is off.
+ * given that, revealed, it is laid to rest. A complete ofrenda welcomes it ({@link #welcome}): it comes to the ofrenda and
+ * stays there, shown and calm, until dawn. Blows pass through it; it fades at dawn or when the agriculture feature is off.
  * It harms nothing and drops nothing.
  */
 public class RestlessSpirit extends AmbientCreature {
@@ -70,6 +71,8 @@ public class RestlessSpirit extends AmbientCreature {
 	/** Its name ({@link SpiritBoard#NAMES}) and wish, once a séance has asked it; -1 until then. */
 	private int spiritName = -1;
 	private int wish = -1;
+	/** Whether an ofrenda has welcomed it (its home is then the ofrenda). */
+	private boolean welcomed;
 
 	public RestlessSpirit(EntityType<? extends RestlessSpirit> type, Level level) {
 		super(type, level);
@@ -123,6 +126,24 @@ public class RestlessSpirit extends AmbientCreature {
 		wish = wished.ordinal();
 	}
 
+	/** Whether an ofrenda has welcomed it. */
+	public boolean welcomed() {
+		return welcomed;
+	}
+
+	/**
+	 * An ofrenda at {@code ofrenda} welcomes it: it makes the ofrenda its home (so it drifts there and stays near it),
+	 * shows itself, and no longer shies from anyone.
+	 */
+	public void welcome(ServerLevel level, BlockPos ofrenda) {
+		if (!welcomed || !ofrenda.equals(home)) {
+			welcomed = true;
+			setHome(ofrenda);
+			target = null;
+		}
+		reveal(level.getGameTime() + REVEAL_TICKS * 2L);
+	}
+
 	/** Whether it shows now. */
 	public boolean revealed() {
 		return entityData.get(REVEALED_UNTIL) > level().getGameTime();
@@ -167,12 +188,15 @@ public class RestlessSpirit extends AmbientCreature {
 		}
 		if (tickCount % LOOK_TICKS == 0) {
 			look(level);
+			if (welcomed) {
+				reveal(level.getGameTime() + REVEAL_TICKS);
+			}
 		}
 		Vec3 here = position();
 		Vec3 haunt = Vec3.atBottomCenterOf(home());
 		boolean shying = false;
 		double speed = DRIFT_SPEED;
-		Player near = revealed() ? level.getNearestPlayer(this, SHY_RADIUS) : null;
+		Player near = revealed() && !welcomed ? level.getNearestPlayer(this, SHY_RADIUS) : null;
 		if (near != null && !near.isSpectator() && near.distanceTo(this) < (near.isShiftKeyDown() ? SNEAK_SHY_RADIUS : SHY_RADIUS)) {
 			Vec3 away = here.subtract(near.position()).multiply(1.0, 0.0, 1.0);
 			away = away.lengthSqr() < 1.0E-4 ? new Vec3(random.nextDouble() - 0.5, 0.0, random.nextDouble() - 0.5) : away;
@@ -342,6 +366,7 @@ public class RestlessSpirit extends AmbientCreature {
 		output.store("home", BlockPos.CODEC, home());
 		output.putInt("spirit_name", spiritName);
 		output.putInt("wish", wish);
+		output.putBoolean("welcomed", welcomed);
 	}
 
 	@Override
@@ -350,6 +375,7 @@ public class RestlessSpirit extends AmbientCreature {
 		home = input.read("home", BlockPos.CODEC).orElse(null);
 		spiritName = input.getIntOr("spirit_name", -1);
 		wish = input.getIntOr("wish", -1);
+		welcomed = input.getBooleanOr("welcomed", false);
 		if (spiritName < 0 || spiritName >= SpiritBoard.NAMES.length || wish < 0 || wish >= SpiritBoard.Wish.values().length) {
 			spiritName = -1;
 			wish = -1;

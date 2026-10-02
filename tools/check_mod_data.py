@@ -815,6 +815,7 @@ def check_agriculture():
     check_spirit_board(java, main)
     check_turkeys(java, main)
     check_theremin(java, main)
+    check_ofrenda(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -3118,6 +3119,40 @@ def check_theremin(java, main):
                  DATA / "jugcraft" / "loot_table" / "blocks" / f"{th['block']}.json", DATA / "jugcraft" / "advancement" / "good_vibrations.json"):
         if not path.exists():
             err(f"The theremin needs {path.relative_to(ROOT)}")
+
+
+def check_ofrenda(java, main):
+    """The ofrenda: OfrendaBlockEntity and OfrendaBlock match OFRENDA in tools/agriculture.py (slots, how often it looks,
+    its ranges and light; the kinds of offering, in order); the ofrenda, petals, papel picado and sugar skull are
+    registered and the marigold is one of MUMS; their models, words, loot, the offering tags, pan de muerto's cooking and
+    the advancement exist."""
+    of = ag.OFRENDA
+    source = java.get("OfrendaBlockEntity", "") + java.get("OfrendaBlock", "")
+    found = {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;", source)}
+    expected = {"SLOTS": of["slots"], "CHECK_TICKS": of["check_ticks"], "WELCOME_RANGE": of["welcome_range"], "ARRIVED": of["arrived"],
+                "WITNESS_RANGE": of["witness_range"], "LIGHT": of["light"]}
+    for name, value in expected.items():
+        if name not in found or abs(found[name] - value) > 1e-6:
+            err(f"Ofrenda {name} = {found.get(name)} differs from OFRENDA in tools/agriculture.py ({value})")
+    kinds = re.search(r"enum Kind \{\s*([A-Z_, ]+);", source)
+    if not kinds or [k.strip().lower() for k in kinds.group(1).split(",")] != list(of["kinds"]):
+        err("OfrendaBlockEntity.Kind differs from OFRENDA['kinds'] in tools/agriculture.py (in order)")
+    for call in ('registerBlock("ofrenda", OfrendaBlock::new', 'registerBlock("marigold_petals", CarpetBlock::new', 'registerBlock("papel_picado"',
+                 'registerBlock("sugar_skull", SugarSkullBlock::new'):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    if "marigold" not in ag.MUMS or ag.COOKING.get("pan_de_muerto", {}).get("input") != "pan_de_muerto_dough":
+        err("The marigold must be one of MUMS, and pan de muerto must bake from its dough")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for block in [of["block"]] + list(of["decor"]):
+        if f"block.jugcraft.{block}" not in lang or not (ASSETS / "models" / "block" / f"{block}.json").exists():
+            err(f"The ofrenda set needs the words and model of {block}")
+        if not (DATA / "jugcraft" / "loot_table" / "blocks" / f"{block}.json").exists():
+            err(f"{block} needs its loot table")
+    tags = DATA / "jugcraft" / "tags" / "item" / "ofrenda"
+    for path in [tags / f"{kind}.json" for kind in of["kinds"]] + [tags / "offerings.json", DATA / "jugcraft" / "advancement" / "remembered.json"]:
+        if not path.exists():
+            err(f"The ofrenda needs {path.relative_to(ROOT)}")
 
 
 def check_model_uvs():

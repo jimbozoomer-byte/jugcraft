@@ -218,6 +218,9 @@ ITEMS = {
     "oat_porridge": {"display": "Oat Porridge", "food": [6, 0.6], "stew": True, "tags": ["c:foods/soup"]},
     "chili": {"display": "Chili", "food": [10, 0.8], "stew": True, "tags": ["c:foods/soup"]},
     "cabbage_rolls": {"display": "Cabbage Rolls", "food": [6, 0.8], "tags": ["c:foods"]},
+    # Fall additions 20: pan de muerto, the sweet bread of Día de Muertos, its top crossed with dough "bones".
+    "pan_de_muerto_dough": {"display": "Pan de Muerto Dough", "compost": "medium", "tags": []},
+    "pan_de_muerto": {"display": "Pan de Muerto", "food": [6, 0.7], "compost": "medium_high", "tags": ["c:foods", "c:foods/bread"]},
     # Fall additions 18: a wild turkey's meat, raw (it cooks into a whole roast turkey) and carved from the roast.
     "raw_turkey": {"display": "Raw Turkey", "food": [3, 0.3], "tags": ["c:foods", "c:foods/raw_meat"]},
     "turkey_slice": {"display": "Slice of Roast Turkey", "food": [3, 0.6], "tags": ["c:foods", "c:foods/cooked_meat"]},
@@ -470,6 +473,8 @@ MUMS = {
     "orange_mum": {"display": "Orange Mum", "dye": "orange", "effect": "FIRE_RESISTANCE", "seconds": 4.0},
     "red_mum": {"display": "Red Mum", "dye": "red", "effect": "REGENERATION", "seconds": 8.0},
     "purple_mum": {"display": "Purple Mum", "dye": "purple", "effect": "NIGHT_VISION", "seconds": 5.0},
+    # Fall additions 20: the cempasúchil marigold, grown and found wild with the mums.
+    "marigold": {"display": "Cempasúchil Marigold", "dye": "orange", "effect": "LUCK", "seconds": 6.0},
 }
 MUM_PATCH = {"biomes": ["IS_FLORAL", "IS_FOREST"], "rarity": 16, "tries": 32, "spread_xz": 5, "spread_y": 2}
 
@@ -562,6 +567,8 @@ HALLOWEEN_ADVANCEMENTS = {
                          "description": "Carve a slice from a roast turkey with a Carving Knife", "frame": "task"},
     "good_vibrations": {"icon": "jugcraft:theremin", "title": "Good Vibrations", "description": "Play a theremin without touching it",
                         "frame": "task"},
+    "remembered": {"icon": "jugcraft:marigold", "title": "Remembered", "description": "Welcome a spirit to a complete ofrenda on a quiet night",
+                   "frame": "goal"},
     "as_easy_as_pie": {"icon": "jugcraft:apple_pie", "title": "As Easy as Pie", "description": "Take a perfectly baked pie out of a Hearth Oven",
                        "frame": "task"},
     "man_of_straw": {"icon": "minecraft:hay_block", "title": "Man of Straw", "description": "Build a Hay Golem from hay bales and a carved pumpkin",
@@ -1604,6 +1611,25 @@ THEREMIN = {"block": "theremin", "display": "Theremin", "sense_ticks": 4, "range
             "vibrato": 0.03, "vibrato_speed": 0.7, "light": 7}
 
 
+# The Día de Muertos ofrenda (fall additions 20; OfrendaBlock + entity): `slots` offerings, two to each of three tiers.
+# Anything in `offerings_tag` may be offered; complete holds one of each `kinds` (item tags jugcraft:ofrenda/<kind>).
+# Every `check_ticks` a complete ofrenda glows (`light`) and, at night, welcomes the restless spirits within
+# `welcome_range` blocks: each makes the ofrenda its home and shows itself there, calm, until dawn; when one is within
+# `arrived` blocks every player within `witness_range` earns Remembered. Marigold petals, papel picado and sugar skulls
+# are decorations and offerings; pan de muerto is in ITEMS.
+OFRENDA = {"block": "ofrenda", "display": "Ofrenda", "slots": 6, "check_ticks": 40, "welcome_range": 16, "arrived": 3.0, "witness_range": 8,
+           "light": 8, "offerings_tag": "jugcraft:ofrenda/offerings",
+           "kinds": {"flowers": ["jugcraft:marigold", "jugcraft:marigold_petals"],
+                     "light": ["#minecraft:candles", "jugcraft:aura_candle"],
+                     "bread": ["jugcraft:pan_de_muerto", "minecraft:bread"],
+                     "sugar": ["jugcraft:sugar_skull"],
+                     "drink": ["minecraft:potion", "minecraft:honey_bottle", "minecraft:milk_bucket", "jugcraft:sweet_cider", "jugcraft:mulled_cider"]},
+           # Keepsakes: a picture, a likeness, a favourite food, the papel picado, any flower of the season.
+           "keepsakes": ["minecraft:painting", "minecraft:player_head", "#c:foods", "jugcraft:papel_picado", "minecraft:poppy",
+                         "jugcraft:orange_mum", "jugcraft:yellow_mum"],
+           "decor": {"marigold_petals": "Marigold Petals", "papel_picado": "Papel Picado", "sugar_skull": "Sugar Skull"}}
+
+
 def pie_blocks():
     return [PIES["oven"], PIES["burnt"]] + [f"{f}_pie" for f in PIES["fillings"]]
 
@@ -1732,6 +1758,7 @@ SICKLE_PATTERN = [" M ", "  M", "SM "]
 
 # Cooking: every cooked food works in the furnace, smoker and on a campfire (vanilla timings).
 COOKING = {
+    "pan_de_muerto": {"input": "pan_de_muerto_dough", "xp": 0.35},
     "roast_turkey": {"input": "raw_turkey", "xp": 0.35},
     "roasted_corn": {"input": "corn", "xp": 0.35},
     "popcorn": {"input": "corn_kernels", "xp": 0.1},
@@ -1889,6 +1916,7 @@ SHAPELESS = [
     {"id": "yellow_dye_from_yellow_mum", "inputs": ["jugcraft:yellow_mum"], "result": "minecraft:yellow_dye", "count": 1, "group": "yellow_dye"},
     {"id": "orange_dye_from_orange_mum", "inputs": ["jugcraft:orange_mum"], "result": "minecraft:orange_dye", "count": 1, "group": "orange_dye"},
     {"id": "red_dye_from_red_mum", "inputs": ["jugcraft:red_mum"], "result": "minecraft:red_dye", "count": 1, "group": "red_dye"},
+    {"id": "orange_dye_from_marigold", "inputs": ["jugcraft:marigold"], "result": "minecraft:orange_dye", "count": 1, "group": "orange_dye"},
     {"id": "purple_dye_from_purple_mum", "inputs": ["jugcraft:purple_mum"], "result": "minecraft:purple_dye", "count": 1,
      "group": "purple_dye"},
     # Halloween festivities: a sheet ghost on a string, and a candle melted onto a bone skull.
@@ -2139,6 +2167,9 @@ SHAPED = [
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
     # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
     # (the ring) baked in; sugar round a red dye.
+    # Fall additions 20: an altar of three tiers, planks under a white cloth.
+    {"id": "ofrenda", "pattern": ["WWW", "PPP", "PPP"], "key": {"W": "minecraft:white_carpet", "P": "#minecraft:planks"},
+     "result": "ofrenda", "count": 1, "category": "building"},
     # Fall additions 19: two copper-wire antennas over a note block in a wooden cabinet on legs (copper wire needs machines).
     {"id": "theremin", "pattern": ["W W", "PNP", "S S"], "key": {"W": "jugcraft:copper_wire", "P": "#minecraft:planks",
                                                                "N": "minecraft:note_block", "S": "minecraft:stick"},
@@ -2300,7 +2331,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"]])
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]))
 
 
 def all_items():
@@ -2311,7 +2342,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"]])
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]))
 
 
 def owns(entry_id):
@@ -2339,3 +2370,14 @@ SHAPELESS += [{"id": PIES["dough"], "inputs": ["minecraft:wheat", "minecraft:whe
                "category": "misc"}]
 SHAPELESS += [{"id": f"raw_{filling}_pie", "inputs": [f"jugcraft:{PIES['dough']}"] + info["with"] + ["minecraft:sugar"],
                "result": f"raw_{filling}_pie", "count": 1, "category": "misc"} for filling, info in PIES["fillings"].items()]
+
+# Fall additions 20: marigold petals strewn from a flower; papel picado cut from paper on a string; sugar skulls moulded
+# from sugar and an egg white, iced; pan de muerto dough (baked in COOKING).
+SHAPELESS += [{"id": "marigold_petals", "inputs": ["jugcraft:marigold"], "result": "marigold_petals", "count": 4, "category": "building"},
+              {"id": "papel_picado", "inputs": ["minecraft:paper", "minecraft:paper", "minecraft:paper", "minecraft:string",
+                                                "minecraft:pink_dye", "minecraft:orange_dye"], "result": "papel_picado", "count": 6,
+               "category": "building"},
+              {"id": "sugar_skull", "inputs": ["minecraft:sugar", "minecraft:sugar", "minecraft:sugar", "minecraft:egg",
+                                               "minecraft:light_blue_dye"], "result": "sugar_skull", "count": 2, "category": "building"},
+              {"id": "pan_de_muerto_dough", "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:wheat", "minecraft:egg",
+                                                       "minecraft:sugar"], "result": "pan_de_muerto_dough", "count": 2, "category": "misc"}]
