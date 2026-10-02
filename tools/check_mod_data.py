@@ -762,6 +762,7 @@ def check_agriculture():
     check_decor5(java)
     check_decor6(java)
     check_decor7(java)
+    check_decor8(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1650,6 +1651,73 @@ def check_decor7(java):
     for key in ("day", "night"):
         if f"message.{MOD}.{mirror['block']}.{key}" not in lang:
             err(f"The spirit mirror's {key} message has no text")
+
+
+def check_decor8(java):
+    """The mad scientist and monsters: Java matches tools/agriculture.py (the coil's power, range and arcs, the table's
+    sitting and twitching, the jar's specimens, light and bob, the sarcophagus's timing and swing, the raven's watching
+    and ruffling, the cat's reach, hiss and swish), every block state has a model, and the quads and textures the client
+    draws exist."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    coil, table, jar, sarcophagus, raven, cat = ag.TESLA_COIL, ag.LAB_TABLE, ag.SPECIMEN_JAR, ag.SARCOPHAGUS, ag.RAVEN, ag.BLACK_CAT
+    expected = {("TeslaCoilBlockEntity", "USE"): coil["use"], ("TeslaCoilBlockEntity", "CAPACITY"): coil["capacity"],
+                ("TeslaCoilBlockEntity", "INPUT"): coil["input"], ("TeslaCoilBlockEntity", "RANGE"): coil["range"],
+                ("TeslaCoilBlockEntity", "ARC_MIN"): coil["arc_min"], ("TeslaCoilBlockEntity", "ARC_SPREAD"): coil["arc_spread"],
+                ("TeslaCoilBlockEntity", "ARC_TICKS"): coil["arc_ticks"], ("TeslaCoilBlock", "LIGHT"): coil["light"],
+                ("LabTableBlock", "SIT_DEGREES"): table["sit_degrees"], ("LabTableBlock", "SIT_SPEED"): table["sit_speed"],
+                ("LabTableBlock", "TWITCH_PERIOD"): table["twitch_period"], ("LabTableBlock", "TWITCH_TICKS"): table["twitch_ticks"],
+                ("SpecimenJarBlock", "LIGHT"): jar["light"], ("SpecimenJarBlock", "BOB"): jar["bob"], ("SpecimenJarBlock", "BOB_TICKS"): jar["bob_ticks"],
+                ("MummySarcophagusBlock", "OPEN_TICKS"): sarcophagus["open_ticks"], ("MummySarcophagusBlock", "LID_DEGREES"): sarcophagus["lid_degrees"],
+                ("MummySarcophagusBlock", "LURCH"): sarcophagus["lurch"], ("RavenPerchBlock", "WATCH_RANGE"): raven["watch_range"],
+                ("RavenPerchBlock", "MAX_TURN"): raven["max_turn"], ("RavenPerchBlock", "RUFFLE_PERIOD"): raven["ruffle_period"],
+                ("RavenPerchBlock", "RUFFLE_TICKS"): raven["ruffle_ticks"], ("BlackCatBlock", "REACH"): cat["reach"],
+                ("BlackCatBlock", "HISS_TICKS"): cat["hiss_ticks"], ("BlackCatBlock", "COOLDOWN_TICKS"): cat["cooldown_ticks"],
+                ("BlackCatBlock", "SWISH_PERIOD"): cat["swish_period"], ("BlackCatBlock", "SWISH_DEGREES"): cat["swish_degrees"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    specimens = re.search(r"enum Specimen implements StringRepresentable \{\s*([A-Z_, ]+);", java.get("SpecimenJarBlock", ""))
+    if not specimens or [v.strip().lower() for v in specimens.group(1).split(",")] != jar["specimens"]:
+        err("SpecimenJarBlock.Specimen differs from SPECIMEN_JAR's specimens")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    wanted = {
+        coil["block"]: {f"active={a},enabled={e},facing={f},half={h}" for a in booleans for e in booleans for f in horizontal
+                        for h in ("lower", "upper")},
+        table["block"]: {f"facing={f},part={p},powered={b}" for f in horizontal for p in ("foot", "head") for b in booleans},
+        jar["block"]: {f"specimen={s}" for s in jar["specimens"]},
+        sarcophagus["block"]: {f"facing={f},half={h},open={o},powered={p}" for f in horizontal for h in ("lower", "upper") for o in booleans
+                               for p in booleans},
+        raven["block"]: {f"facing={f}" for f in horizontal},
+        cat["block"]: {f"facing={f},hissing={h}" for f in horizontal for h in booleans},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    quads = load(ASSETS / "decor8_quads.json") or {}
+    names = (["lab_table_legs", "lab_table_torso", "mummy_sarcophagus_lid", "mummy_sarcophagus_mummy", "mummy_sarcophagus_arms", "raven_body",
+              "raven_head", "raven_left_wing", "raven_right_wing", "black_cat_tail", "black_cat_tail_up"]
+             + [f"specimen_{s}" for s in jar["specimens"]])
+    for name in names:
+        if not quads.get(name):
+            err(f"decor8_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"decor8_quads.json: {name} uses a missing texture {quad['texture']}")
+                break
+    for texture in ("tesla_coil_arc", "specimen_jar_bubble", "black_cat_eyes"):
+        if not (ASSETS / "textures" / "entity" / f"{texture}.png").exists():
+            err(f"Missing entity texture {texture}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in [f"tesla_coil.{k}" for k in ("on", "off")] + [f"specimen_jar.{s}" for s in jar["specimens"]]:
+        if f"message.{MOD}.{key}" not in lang:
+            err(f"Message {key} has no text")
 
 
 def check_model_uvs():

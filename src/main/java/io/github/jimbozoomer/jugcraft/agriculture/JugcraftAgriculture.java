@@ -180,6 +180,12 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> SPIRIT_MIRROR_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> TATTERED_CURTAINS_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> CREEPY_DOLL_ENTITY;
+	public static BlockEntityType<TeslaCoilBlockEntity> TESLA_COIL_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> LAB_TABLE_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> SPECIMEN_JAR_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> SARCOPHAGUS_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> RAVEN_PERCH_ENTITY;
+	public static BlockEntityType<BlackCatBlockEntity> BLACK_CAT_ENTITY;
 	/** The Dust Sheet: its item, and the block it becomes over what it covers. */
 	public static final String DUST_SHEET = "dust_sheet";
 	/** What a Dust Sheet may cover (block tag). */
@@ -885,6 +891,38 @@ public final class JugcraftAgriculture {
 		}
 		fire.add(curtains, 60, 100);
 		fire.add(sheet, 30, 60);
+
+		// Batch 8, the mad scientist and monsters: the Tesla Coil, the Lab Table, Specimen Jars, the Mummy Sarcophagus, the
+		// Raven on a Perch and the Black Cat Figure.
+		Block coil = registerBlock("tesla_coil", TeslaCoilBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(2.0F).sound(SoundType.COPPER).noOcclusion().lightLevel(TeslaCoilBlock::light).pushReaction(PushReaction.IMMOVEABLE));
+		TESLA_COIL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("tesla_coil"),
+				FabricBlockEntityTypeBuilder.create(TeslaCoilBlockEntity::new, coil).build());
+		EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> entity.energy(), TESLA_COIL_ENTITY);
+		Block table = registerBlock("lab_table", LabTableBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+				.strength(2.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		LAB_TABLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("lab_table"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(LAB_TABLE_ENTITY, pos, state), table).build());
+		Block jar = registerBlock("specimen_jar", SpecimenJarBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GREEN)
+				.strength(0.4F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> SpecimenJarBlock.LIGHT).pushReaction(PushReaction.POPPED));
+		SPECIMEN_JAR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("specimen_jar"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(SPECIMEN_JAR_ENTITY, pos, state), jar).build());
+		Block sarcophagus = registerBlock("mummy_sarcophagus", MummySarcophagusBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
+				.strength(2.0F).sound(SoundType.STONE).noOcclusion().pushReaction(PushReaction.POPPED));
+		SARCOPHAGUS_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("mummy_sarcophagus"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(SARCOPHAGUS_ENTITY, pos, state), sarcophagus).build());
+		Block raven = registerBlock("raven_perch", RavenPerchBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(0.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		RAVEN_PERCH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("raven_perch"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(RAVEN_PERCH_ENTITY, pos, state), raven).build());
+		Block cat = registerBlock("black_cat_figure", BlackCatBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(0.8F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.POPPED));
+		BLACK_CAT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("black_cat_figure"),
+				FabricBlockEntityTypeBuilder.create(BlackCatBlockEntity::new, cat).build());
+		for (Block block : List.of(coil, table, jar, sarcophagus, raven, cat)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
 	}
 
 	/** The Leaf Piles' colours, one block each ({@code <colour>_leaf_pile}). */

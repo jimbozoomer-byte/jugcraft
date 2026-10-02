@@ -17,10 +17,13 @@ import org.jspecify.annotations.Nullable;
 /**
  * The moving decorations' shapes, from assets/jugcraft/decor_quads.json (written by tools/decor6_data.py from the
  * same boxes as their block and item models: the rocking chair and the giant fake spider) and decor7_quads.json
- * (tools/decor7_data.py: the haunted chandelier, the suit of armor's helmet and the creepy doll's head).
+ * (tools/decor7_data.py: the haunted chandelier, the suit of armor's helmet and the creepy doll's head) and
+ * decor8_quads.json (tools/decor8_data.py: the lab table's patient, the specimens, the sarcophagus's lid and mummy, the
+ * raven and the black cat's tail).
  */
 public final class DecorQuads {
-	private static final List<Identifier> FILES = List.of(Jugcraft.id("decor_quads.json"), Jugcraft.id("decor7_quads.json"));
+	private static final List<Identifier> FILES = List.of(Jugcraft.id("decor_quads.json"), Jugcraft.id("decor7_quads.json"),
+			Jugcraft.id("decor8_quads.json"));
 	private static @Nullable Map<String, QuadModel> models;
 
 	private DecorQuads() {

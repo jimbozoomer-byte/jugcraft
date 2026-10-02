@@ -854,4 +854,6 @@ def crop_textures():
     out.update(decor6_textures())
     from decor7_textures import decor7_textures  # and the haunted house inside
     out.update(decor7_textures())
+    from decor8_textures import decor8_textures  # and the mad scientist and monsters
+    out.update(decor8_textures())
     return out

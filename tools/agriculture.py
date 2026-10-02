@@ -839,6 +839,40 @@ def decor7_blocks():
 def decor7_items():
     return decor7_blocks()
 
+
+# ---------------------------------------------------------------- Halloween decorations, batch 8: the mad scientist and monsters
+# The Tesla Coil (TeslaCoilBlock + TeslaCoilBlockEntity, two blocks tall): switched on and holding `use` JE (buffer
+# `capacity`, `input` a tick in) it hums, lit `light`, using `use` JE a tick; every `arc_min` to `arc_min` + `arc_spread`
+# ticks it throws a harmless arc to another running coil within `range` blocks (or into the air), drawn for `arc_ticks`.
+TESLA_COIL = {"block": "tesla_coil", "display": "Tesla Coil", "use": 20, "capacity": 4000, "input": 64, "range": 8, "arc_min": 15,
+              "arc_spread": 25, "arc_ticks": 6, "light": 8}
+# The Lab Table (LabTableBlock, two blocks long): its sheeted patient sits up `sit_degrees` (at `sit_speed` a tick) while
+# the table has a redstone signal, and twitches at night for `twitch_ticks` of every `twitch_period` (drawn by the client).
+LAB_TABLE = {"block": "lab_table", "display": "Lab Table", "sit_degrees": 70.0, "sit_speed": 6.0, "twitch_period": 97, "twitch_ticks": 4}
+# The Specimen Jar (SpecimenJarBlock): glowing green fluid (light `light`) with one of `specimens` floating in it,
+# bobbing `bob` pixels every `bob_ticks`; sneak-use changes the specimen.
+SPECIMEN_JAR = {"block": "specimen_jar", "display": "Specimen Jar", "specimens": ["eye", "tentacle", "pumpkin", "brain"], "light": 7,
+                "bob": 0.75, "bob_ticks": 90}
+# The Mummy Sarcophagus (MummySarcophagusBlock, two blocks tall): a click or a rising redstone signal opens it for
+# `open_ticks`: the lid swings `lid_degrees` and the mummy lurches `lurch` pixels out (drawn by the client).
+SARCOPHAGUS = {"block": "mummy_sarcophagus", "display": "Mummy Sarcophagus", "open_ticks": 80, "lid_degrees": 100.0, "lurch": 5.0}
+# The Raven on a Perch (RavenPerchBlock): turns its head up to `max_turn` toward the nearest player within
+# `watch_range`; ruffles its feathers for `ruffle_ticks` of every `ruffle_period`; caws and flaps when used.
+RAVEN = {"block": "raven_perch", "display": "Raven on a Perch", "watch_range": 8.0, "max_turn": 90.0, "ruffle_period": 140, "ruffle_ticks": 12}
+# The Black Cat Figure (BlackCatBlock + BlackCatBlockEntity): swishes its tail `swish_degrees` every `swish_period`;
+# its eyes glow at night; a sprinting player within `reach` blocks makes it hiss, back arched, for `hiss_ticks`, then
+# it rests `cooldown_ticks`.
+BLACK_CAT = {"block": "black_cat_figure", "display": "Black Cat Figure", "reach": 3.0, "hiss_ticks": 30, "cooldown_ticks": 60,
+             "swish_period": 50, "swish_degrees": 25.0}
+
+
+def decor8_blocks():
+    return [TESLA_COIL["block"], LAB_TABLE["block"], SPECIMEN_JAR["block"], SARCOPHAGUS["block"], RAVEN["block"], BLACK_CAT["block"]]
+
+
+def decor8_items():
+    return decor8_blocks()
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -1187,6 +1221,24 @@ SHAPED = [
      "result": "tattered_curtains", "count": 3, "category": "building"},
     {"id": "creepy_doll", "pattern": [" C ", "WSW"], "key": {"C": "minecraft:clay_ball", "W": "#minecraft:wool", "S": "minecraft:string"},
      "result": "creepy_doll", "count": 1, "category": "building"},
+    # Decorations batch 8: a lightning rod over copper coils and cable on an iron base; a wool-sheeted patient on an
+    # iron table; slime in a glass jar under an iron lid; a sandstone case round a paper-wrapped mummy; a feathered raven
+    # on a stick perch; a black terracotta cat with glowing eyes.
+    {"id": "tesla_coil", "pattern": [" R ", "CWC", "III"], "key": {"R": "minecraft:lightning_rod", "C": "#c:ingots/copper",
+                                                                "W": "jugcraft:copper_cable", "I": "#c:ingots/iron"},
+     "result": "tesla_coil", "count": 1, "category": "redstone"},
+    {"id": "lab_table", "pattern": ["WRW", "III", "I I"], "key": {"W": "minecraft:white_wool", "R": "minecraft:rotten_flesh", "I": "#c:ingots/iron"},
+     "result": "lab_table", "count": 1, "category": "redstone"},
+    {"id": "specimen_jar", "pattern": [" N ", "GSG", " G "], "key": {"N": "minecraft:iron_nugget", "G": "minecraft:glass",
+                                                                  "S": "minecraft:slime_ball"},
+     "result": "specimen_jar", "count": 1, "category": "building"},
+    {"id": "mummy_sarcophagus", "pattern": ["GSG", "SPS", "SRS"], "key": {"G": "minecraft:gold_nugget", "S": "minecraft:sandstone",
+                                                                       "P": "minecraft:paper", "R": "minecraft:rotten_flesh"},
+     "result": "mummy_sarcophagus", "count": 1, "category": "redstone"},
+    {"id": "raven_perch", "pattern": ["FBF", " S ", "SSS"], "key": {"F": "minecraft:feather", "B": "minecraft:black_dye", "S": "minecraft:stick"},
+     "result": "raven_perch", "count": 1, "category": "building"},
+    {"id": "black_cat_figure", "pattern": ["BGB", "BBB"], "key": {"B": "minecraft:black_terracotta", "G": "minecraft:glowstone_dust"},
+     "result": "black_cat_figure", "count": 1, "category": "building"},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -1231,7 +1283,7 @@ def all_blocks():
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
-            + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks())
+            + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks())
 
 
 def all_items():
@@ -1239,7 +1291,7 @@ def all_items():
             + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
-            + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items())
+            + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items())
 
 
 def owns(entry_id):
