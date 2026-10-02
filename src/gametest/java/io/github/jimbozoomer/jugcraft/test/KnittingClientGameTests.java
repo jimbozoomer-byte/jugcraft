@@ -24,9 +24,9 @@ import net.minecraft.world.level.block.Blocks;
 
 /**
  * Client game test for knitting: three Spinning Wheels, one bare, one with a skein of orange wool, one half spun with
- * purple, their wheels turning; and in front of a campfire three armour stands in knitwear: a cream beanie, pumpkin
- * sweater and socks; a red striped sweater and green beanie; a black bat sweater. By day, up close on the wheels, and the
- * yarn, needles and garments in frames. CI job {@code client}.
+ * purple, their wheels turning; and beside them, before a campfire, three armour stands in knitwear: a cream beanie,
+ * pumpkin sweater and socks; a red striped sweater and green beanie; an orange bat sweater and black socks. By day, up
+ * close on the wheels and on the knitwear, and the yarn, needles and garments in frames. CI job {@code client}.
  */
 public class KnittingClientGameTests implements FabricClientGameTest {
 	private static final String[] FRAMED = {"yarn", "knitting_needles", "knit_beanie", "wool_socks", "knit_sweater", "striped_sweater",
@@ -60,7 +60,8 @@ public class KnittingClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 
-			shoot(context, singleplayer, x + 5, y + 1, z + 2, 180, 15, "jugcraft_knitting");
+			shoot(context, singleplayer, x + 7, y + 1, z + 3, 180, 15, "jugcraft_knitting");
+			shoot(context, singleplayer, x + 11, y + 1, z + 1, 180, 10, "jugcraft_knitwear");
 			// Turn the wheels while the shot is taken, so they are caught mid-spin.
 			server.runOnServer(minecraft -> {
 				ServerLevel level = minecraft.overworld();
@@ -128,11 +129,11 @@ public class KnittingClientGameTests implements FabricClientGameTest {
 				}
 			}
 		}
-		// By a campfire, three stands in knitwear.
-		level.setBlock(new BlockPos(x + 5, y, z - 2), Blocks.CAMPFIRE.defaultBlockState(), Block.UPDATE_ALL);
-		stand(level, x + 2.5, y, z - 3.5, 200.0F, Knitwear.BEANIE, Knitting.UNDYED, Knitwear.PUMPKIN_SWEATER, Knitting.UNDYED, Knitwear.SOCKS,
+		// Beside the wheels, three stands in knitwear before a campfire (behind them, so its smoke rises clear of them).
+		level.setBlock(new BlockPos(x + 11, y, z - 5), Blocks.CAMPFIRE.defaultBlockState(), Block.UPDATE_ALL);
+		stand(level, x + 9.5, y, z - 3.5, 200.0F, Knitwear.BEANIE, Knitting.UNDYED, Knitwear.PUMPKIN_SWEATER, Knitting.UNDYED, Knitwear.SOCKS,
 				Knitting.UNDYED);
-		stand(level, x + 5.5, y, z - 4.0, 180.0F, Knitwear.BEANIE, 0x3C8A2E, Knitwear.STRIPED_SWEATER, 0xB02E26);
-		stand(level, x + 8.5, y, z - 3.5, 160.0F, Knitwear.BAT_SWEATER, 0xE8761C, Knitwear.SOCKS, 0x1D1D21);
+		stand(level, x + 11.5, y, z - 3.0, 180.0F, Knitwear.BEANIE, 0x3C8A2E, Knitwear.STRIPED_SWEATER, 0xB02E26);
+		stand(level, x + 13.5, y, z - 3.5, 160.0F, Knitwear.BAT_SWEATER, 0xE8761C, Knitwear.SOCKS, 0x1D1D21);
 	}
 }
