@@ -103,19 +103,19 @@ public class WildMushroomBlock extends VegetationBlock implements BonemealableBl
 
 	/** Picked by hand: into a Foraging Basket in either hand if there is one (what doesn't fit drops); a puffball bursts. */
 	@Override
-	public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
-		if (state.is(JugcraftAgriculture.block("puffball")) && level instanceof ServerLevel server) {
-			server.sendParticles(ParticleTypes.WHITE_ASH, pos.getX() + 0.5, pos.getY() + 0.3, pos.getZ() + 0.5, 24, 0.3, 0.2, 0.3, 0.02);
+	public void playerDestroy(ServerLevel level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
+		if (state.is(JugcraftAgriculture.block("puffball"))) {
+			level.sendParticles(ParticleTypes.WHITE_ASH, pos.getX() + 0.5, pos.getY() + 0.3, pos.getZ() + 0.5, 24, 0.3, 0.2, 0.3, 0.02);
 			level.playSound(null, pos, SoundEvents.WOOL_BREAK, SoundSource.BLOCKS, 0.6F, 1.6F);
 		}
 		ItemStack basket = ForagingBasketItem.held(player);
-		if (basket.isEmpty() || !(level instanceof ServerLevel server)) {
+		if (basket.isEmpty()) {
 			super.playerDestroy(level, player, pos, state, blockEntity, tool);
 			return;
 		}
 		player.awardStat(Stats.BLOCK_MINED.get(this));
 		player.causeFoodExhaustion(0.005F);
-		List<ItemStack> drops = Block.getDrops(state, server, pos, blockEntity, player, tool);
+		List<ItemStack> drops = Block.getDrops(state, level, pos, blockEntity, player, tool);
 		for (ItemStack drop : drops) {
 			ForagingBasketItem.fill(basket, drop, player);
 			if (!drop.isEmpty()) {
