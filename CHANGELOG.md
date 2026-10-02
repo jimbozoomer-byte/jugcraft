@@ -21,6 +21,20 @@ No numbered release yet. Everything below is on `main`.
 - Flavoured candy is named for its flavours and gives their short effects when eaten. All candy counts as candy for Candy Bowls and Bags.
 - All decided on the server; the client draws the syrup and the thermometer's needle. The checker compares the stages, rates and flavours with Java. New server game tests and a client test with screenshots.
 
+### Unmerged: Parties finished (from #31)
+- **Party screen** on the P key: members with online lights, the leader and you marked; LEAD, KICK, DISBAND or LEAVE; invite by name; accept or decline the latest invite. Every button runs the ordinary `/party` command.
+- **Clickable [Accept] and [Decline]** on invites in chat.
+- **`/party admin list | kick | leader | disband`** for operators (level 2), on any party.
+- **Limits in the server config:** `parties.max_size`, `parties.invite_minutes`, `parties.invites_per_minute` (defaults 8, 5 and 10, as before).
+- Commands and the shared party API are @Narvisius's from #31, already on main through #84.
+### #53 Pixel Hollows and the Retro Trader
+- **Pixel Hollows:** a rare cave biome deep under the driest land, lined with **circuitstone** and lit only by scattered, faintly glowing **pixel crystal clusters**, with an original chiptune hum. It holds 1.5× the usual copper and redstone (and tin). New building blocks: circuitstone, polished circuitstone, circuitstone bricks and the **pixel lamp**; clusters drop **pixel shards**. One mixin adds the biome to the Overworld (Fabric API has no Overworld biome API).
+- **Retro Trader:** a villager profession at the new two-block-tall **arcade cabinet**. He sells a **Pixel Hollows Map** (use it to mark the nearest cave), circuitstone, lamps and shards, and buys shards back without any profit loop. Trades are 26.1+ data files.
+- **Retro Game Shop:** a small storefront in every new village (one per village, all five village types; not zombie villages), with the cabinet and a villager inside.
+- **Loot:** the cluster and cabinet use the 26.x loot format (#34 fixed the other tables on main), and new game tests check ore Silk Touch and Fortune and double slabs.
+- **Dedicated-server check (CI):** a real client joins the game's own dedicated server, opens a machine and trades with the Retro Trader over the network, leaves and rejoins; and a world is saved and reopened with its trader, machine contents and cabinet intact. The two-client checklist is in [docs/TESTING.md](docs/TESTING.md#dedicated-server-and-two-clients).
+- Seventeen game tests, eight client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
+
 ### Agriculture: fall additions 10, face paint (pull request pending, stacked on ghost hunting)
 - **Face Paint Kit:** a tin palette and brush, good for 16 faces, that paints one of six designs: a skull, a jack o'lantern, a black cat, a vampire, a witch or a scarecrow. Use it on a friend to paint them at once, hold use to paint yourself, sneak to turn the dial.
 - The paint shows on the face for everyone who can see you and lasts until your head goes under water, or you die. A painted face counts as a costume for trick-or-treating and the costume contest.
@@ -267,7 +281,116 @@ No numbered release yet. Everything below is on `main`.
 - Also: composting, pig, chicken and parrot feed, `c:` crop, seed and food tags, and a new `agriculture` feature switch.
 - Original textures from `tools/crop_textures.py`. Twelve game tests, plus a client game test with screenshots of a corn maze, the fields and every growth stage.
 
-### Unmerged: Engineer's Handbook reorganised, batch 23
+### Unmerged: biomes branch, Jugcraft regions and nine batches of biomes (stacked on Alpine Spawn)
+- **Remaking the Biomes O' Plenty catalog in Jugcraft**, with original art and names: the roster in [docs/branches/BIOMES.md](docs/branches/BIOMES.md) plans 98 biomes in nine batches.
+- **Jugcraft regions:** about half the Overworld, in regions about 1 km across, grows the new biomes in place of some vanilla ones; the rest stays vanilla. New settings: `biomes.enabled`, `biomes.region_size`, `biomes.region_share`.
+- **Batch 1, the seasonal forests:** Coniferous Forest, Snowy Coniferous Forest, Maple Woods, Seasonal Forest, Aspen Glade, Dead Forest, Tundra, Snowy Forest and Muskeg.
+- **New trees and wood:** maples turn red, orange and gold in autumn and stand bare in winter; aspens turn gold; firs stay green; dead wood stands grey. Each has a full wood set (dead wood without a sapling), sawmill and tree farm recipes.
+- **Region layouts:** Jugcraft regions come in four layouts (woodland, meadow, wetland, wild), so one vanilla climate can grow different Jugcraft biomes in different regions.
+- **Batch 2, fields and meadows** (meadow layout): Field, Flower Meadow, Grassland, Heathland, Lavender Field, Lush Grassland, Prairie, Shrubland and Steppe.
+- **New plants:** lavender and tall lavender, goldenrod, heather, orange cosmos (all make dye, the small ones go in flower pots) and clover. **New tree:** the jacaranda, in violet bloom all year, with a full wood set.
+- **Batch 3, wetlands** (wetland layout; swamps also elsewhere): Bog (with wild cranberries), Dead Swamp, Lush Swamp, Swamp Woods, Bayou, Floodplain, Ghost Forest, Sludge Mire, Lush River, Fen, Lake District, Quagmire, Marsh and Wetland, with muddy ponds and mud.
+- **More plants:** cattails, watergrass (under water) and duckweed (on water). **New tree:** the willow, with hanging leaves and vines, yellow in autumn and bare in winter.
+- **Batch 4, warm and dry:** Dryland, Xeric Shrubland, Jacaranda Glade, Lush Desert, Bone Flats, Dry River, Cold Desert, Scrubland, Lush Savanna, Outback, Oasis, Wasteland, Burnt Forest, Mediterranean Forest and Orchard, with their own ground (red sand, coarse dirt, gravel, salt flats). **New trees:** palm and cypress.
+- **Batch 5, big trees and rainforests** (mostly the woodland layout): Rainforest, Eucalyptus Forest, Tropics, Subtropics, Dense Forest, Redwood Forest, Temperate Rainforest and Woodland.
+- **New trees:** redwood and mahogany (four saplings in a square grow a giant, two blocks wide) and eucalyptus (rainbow-streaked bark), each with a full wood set. **New flowers:** hibiscus and hydrangea.
+- **Batch 6, mountains, coasts and volcanoes:** Volcano, Canyon, Highland, Basin, Shield, Karst Pinnacles and Hot Springs (wild layout), Gravel Beach, Dune Beach, Overgrown Beach and Flower Isle (wetland layout), Ice Sheet and Ocean Trench (both). **New plant:** sea oats, which grow on sand.
+- **Fixed:** the Cold Desert is no longer buried in snow.
+- **Batch 7, wonders and caves:** Cinder Barrens, Elder Vale, Frostlight Garden, Gilded Shrubland, Glimmer Grove, Gloomweald, Hallowed Bog, Highsun Meadow, Mycelial Jungle, Shrine Springs, Snowpetal Grove, Starlit Wood, Toadstool Field, Webwood and Wild Greens, and two cave biomes, the Glowcap Grotto and the Spider Nest. **New plants:** glowcaps and glimmerblooms (both glow), frost irises and snowpetals.
+- **Batch 8, the Nether:** Ashfall Wastes, Blighted Sands, Frost Rift, Fungal Thicket, Magma Fields, Marrow Heap, Netherbrush, Quartz Rift and Withered Hollow, rarer than vanilla's five. **New plant:** brambles.
+- **Batch 9, the End:** Chorus Reef, Ender Wilds, Outer Flats, Phantom Garden and Rotted Expanse on the outer islands. With it, every biome on the roster is built.
+
+### Unmerged: Alpine Spawn, parts 1 and 2 (stacked on the agriculture pull requests, #53 and #80)
+- **New worlds start in Alpine Spawn, at an alpine village.** Alpine Spawn is a large, cool alpine meadow on mountain plateaus; it takes the place of every vanilla meadow and of the cool plateau's forest and taiga. The server moves a new world's spawn to the alpine village nearest the origin, or into the biome when there is no alpine village within 6,400 blocks.
+- **Alpine villages are common:** vanilla's taiga villages on a 16-chunk grid (vanilla's is 34), only in this biome.
+- **Larches** (part 2): a conifer that changes with the seasons. Its needles are green in spring and summer, turn gold in autumn and fall in winter, leaving bare twigs, then bud green again; each block turns within a week either side, so crowns change gradually. Larches grow among spruces in Alpine Spawn. The tree drops larch saplings, and comes with a full larch wood set (logs, wood, stripped forms, planks, stairs, slab, fence and gate). Larch logs saw into planks in the sawmill, and saplings grow in the tree farm.
+- It has seasonal colours and winter snow from the start. Seasonal flowers, bilberries and an alpine winter come in the next parts.
+- New settings: `alpine_spawn.enabled` (generation, and the larch's hand recipes) and `alpine_spawn.start` (`on` or `off`: start there).
+- Server game tests for its climate entries, tags and villages, and a client test in a real world that it is where the world starts.
+
+### Unmerged: Powered exosuit, batch 28
+- Four JE-powered armor pieces (netherite protection, unbreakable): night vision, an energy shield and jetpack, speed, and fall immunity with step assist.
+- Two liveries: Vanguard (gunmetal with teal lights) and Ronin (crimson and silver, conical hat, red eyes), with 3D shoulder plates, skirts and hat. Smithing liveries switch between them and keep the charge.
+- The crimson Ronin katana. Inspired by Mekanism's MekaSuit (MIT); looks follow the owner's reference images; all art original.
+
+### Unmerged: Gear, weapons and plastic blocks, batch 27
+- **Scuba mask and tank:** breathe under water on oxygen (8,000 mB, 400 s); fill the tank from a gas holder or machine.
+- **Free runners:** boots with no fall damage and a one-block step.
+- **Power katana and power bow:** JE-powered weapons charged at the charging station; the bow fires energy arrows without ammo.
+- **Plastic blocks** in all sixteen dye colours, from plastic sheets.
+- High-detail art: an animated 32x32 energy katana, and double-resolution scuba gear and free runners.
+- Four advancements and handbook pages. Inspired by Mekanism and Mekanism: Additions (MIT); all code and art original.
+
+### Unmerged: Four-ingot ore and bioethanol, batch 26
+- **Acid leaching:** an ore and 250 mB of sulfuric acid in the chemical reactor give 4 washed ores (the best ore route).
+- **Bioethanol:** 8 crops and a bucket of water ferment into 250 mB in the chemical reactor; it burns in the gas turbine and the advanced engine.
+- Inspired by Mekanism (MIT); no new machines.
+
+### Unmerged: Tools, armor and paxels, batch 25
+- Bronze and steel swords, pickaxes, axes, shovels, hoes and armor (bronze iron-tier, steel between iron and diamond).
+- Paxels (pickaxe, axe and shovel in one) for every tier from wood to netherite, bronze and steel.
+- Bronze armor is steampunk (goggles, pressure gauge, boiler); steel armor is kaiserpunk (Pickelhaube, field-grey tunic, jackboots).
+- Two advancements and handbook pages. Inspired by Mekanism: Tools (MIT); all code and art original.
+
+### Unmerged: Fewer chemistry machines, batch 24
+- Five single-job machines folded into ones that already exist (65 machines down to 60):
+  - the distillation tower vacuum-distils heavy fuel oil (was the vacuum distillation unit);
+  - the catalytic cracker reforms naphtha, using a catalyst (was the catalytic reformer);
+  - the chemical reactor mixes brine and fracking fluid (was the chemical mixer);
+  - the **Settling Plant** (the flowback treatment unit, renamed) separates oil sand and bitumen (was the oil sand extractor);
+  - the arc furnace pulls silicon boules, with argon (was the crystal grower).
+- New uses: the settling plant presses mud into clay; the electrolytic cell splits water into hydrogen and oxygen.
+
+### #80 Seasons (colours, events and winter snow)
+- **Grass and leaves change colour with the server's date** in every biome that has four seasons: plains, meadows, forests (dark, dappled and cherry groves included), taigas, windswept hills and swamps.
+  - Winter is dull and dormant, spring is fresh green and summer is vanilla.
+  - Autumn turns oak leaves gold, orange and red in patches, then russet.
+  - Colours change a little each day.
+- **Winter snow (opt-in, `seasons.snow=on`):**
+  - From December to February, rain falls as snow in those biomes, and up to `seasons.snow_depth` layers settle.
+  - The snow melts in spring.
+  - It never freezes water, lies on farmland or touches snow you placed.
+- **Events on one clock:**
+  - the **Harvest Feast** (`harvest_feast`: the US Thanksgiving weekend by default, Canada's, or off);
+  - **December** (`december`: 1 December to 6 January by default).
+  - Both are announced in chat.
+- **`/jugcraft season`** shows the season, day and events. Operators can set a season, preview a date or switch snow on or off until the server stops.
+- **Server settings** in `config/jugcraft.properties`: `seasons.mode`, `seasons.hemisphere`, `seasons.timezone`, plus the snow and event settings above.
+- The server decides everything; clients never use their own clock. Colours and events save nothing; seasonal snow melts away.
+- Server and client game tests, with a screenshot per season and one of winter snow.
+
+### Blueprints and test blocks (same draft PR)
+- **Blueprint Table:**
+  - LIBRARY of the mod's structures and imported blueprints, with a front view and materials; printing is free.
+  - IMPORT takes pasted `.jugbp.json` text, checks it, saves it with the world and shares it with everyone.
+- **Placing blueprints:** a hologram preview up to 32 blocks away, a Survey Stake screen (progress, materials, Personal/Party, rotate, remove), and drone building layer by layer.
+- **Drone Tower tier 1** now also builds the Energy Exchange and Storage Exchange, adding seven new building blocks and two ports that feed the depot.
+- **Seating:** Operator Chairs can be sat on.
+- **Creative-only test blocks:** the Creative Energy Cell and the Creative Supply Crate.
+
+### Drone Depot (draft PR, stacked on Parties)
+- **New blocks:** Drone Depot Terminal, Control Screen Panel, Hologram Table, Cargo Packager, and the tower-placed Landing Platform, Landing Pad and Supply Pickup Plate (no recipes: the Drone Tower builds the depot).
+- **Depot:** part of the Drone Tower. Tier 1 places the base floor, eight pads (5x5 plates forming a pad with a charger port), the supply pickup (3x3 plates with a lift hatch) and the terminal building. A terminal without a tower flies no drones.
+- **Drones:** nine tiers, all craftable, each with its own 3D look in the tower's graphite-and-dull-red theme (tier 9 is the Superconducting Ring Lifter). Tiers 5–9 use new parts from real materials: neodymium motors, tilt-rotor nacelles, composite rotors, hydrogen lift cells (chemical reactor), ion emitters, superconducting tape, Stirling cryocoolers and superconducting lift fans.
+- **Drone Tower ([docs](docs/features/drone-tower.md)):** a Tower Core on a 15×15 chiseled stone plinth builds the Command Post (tier 1, with a furnished command room). Tiers 2–9 are flown in tile by tile by the depot's own drones, using four kinds of tower module. Tower tier N unlocks drone tier N; the full tower holds 100 drones, each in its own hangar, with seven pickups. Adds 19 building materials (nine with stairs and slabs), five furniture blocks and a tower status screen. Drones dock round the pads, fly their routes, and winch crates up from the pickup (the hatch opens and a lift raises the crate).
+- **Command room screens:** a hologram table (nine sections form one table projecting a live depot map) and a screen wall (six panels form one live display), both in the tower's command room. The terminal opens a sci-fi screen (OVERVIEW, FLEET, JOBS, POWER, and a PERSONAL/PARTY button) whose text is fitted to the panel.
+- **Pooled power:** standby and working draw, cached. Low power slows flights and never drops cargo.
+- **Flights:** timed flight records (not mobs) with terrain-following routes, at most 5 launches per tick, and reservations. Clients get a small snapshot when something changes and move the drones themselves.
+- **`BuildJobs`:** the build-job interface for blueprints and later builders, plus a development-only `/dronetest` command.
+- **Tests:** tower server and client game tests; server game tests (layout rules, docks, flight paths, and in-world depots that build blocks, re-form pads, respect Party mode and link screens) and a client game test with screenshots, plus checker rules keeping drone numbers in sync.
+
+### Parties (draft PR; proposal #21)
+- **`/party` commands:** create, invite, accept, decline, leave, kick, leader and disband.
+  - Invites expire after 5 minutes, and each player can send 10 a minute.
+  - Parties hold up to 8 members.
+- **Shared API (`JugcraftParties`):**
+  - `sameParty`, `isLeader`, `partyMembers`, change listeners.
+  - `mayServe` with `UseMode` (Personal/Party), which every automated system will use.
+- **Saving:** parties are saved in the world folder (`jugcraft/parties.txt`).
+- **Feature switch:** `parties.enabled`.
+- **Tests:** seven new game tests, plus a checker rule that every party result has a chat message.
+
+### #81 Engineer's Handbook reorganised, batch 23
 - The book fits the window; the chapter list is a scrollable contents list where the open chapter shows its pages, and long pages scroll (mouse wheel or arrow keys).
 - New **Progression** chapter: the road through the mod in nine stages, each a plan and a numbered chain of the items to make in order.
 
