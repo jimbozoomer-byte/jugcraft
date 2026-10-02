@@ -4,6 +4,8 @@
 
 Run `python scripts/check_repository.py` with Python 3.11+. The Foundation / repository job checks required files, relative Markdown links, and the phase declaration. It is not a Java compiler, mod test, security audit, or gameplay approval. In the `bootstrap` phase, Java/Gradle sources are allowed. The Build workflow compiles the mod (`./gradlew build`), checks generated JSON is current and runs `tools/check_mod_data.py`, which validates material data and audits recipes offline. None of these is a game test.
 
+Game tests run in the Build workflow too: the `mod` job's `./gradlew build` runs the server game tests, and three client jobs run the client game tests (`./gradlew runClientGameTest -PclientTestShard=<n> -PclientTestShards=3`, every third test class each, so each class runs once). The `client` job passes only when all three shards pass. Locally, `./gradlew runClientGameTest` without the two properties runs every class.
+
 ## Gameplay PR evidence after bootstrap
 
 Record commit SHA, exact client/server/dependency versions, test world origin, commands, observed results, and test date. Do not commit worlds or logs with player information; attach redacted evidence when needed.
