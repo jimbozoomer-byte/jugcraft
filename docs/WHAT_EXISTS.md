@@ -73,7 +73,7 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | BATTERY_BOX | battery_box | storage; outputs from the front only | 400k / 256 / 256 / – | – | – |
 | ELECTRIC_FURNACE | electric_furnace | vanilla smelting, 100 ticks | 10k / 128 / 0 / 10 | in, out | vanilla `smelting` |
 | CRUSHER | crusher | ore ×2, minerals, gravel/sand | 10k / 128 / 0 / 16 | in, out | `jugcraft:crushing` |
-| ARC_FURNACE | arc_furnace_controller | 3×3×3 casing structure | 50k / 512 / 0 / 64 | in, out | `jugcraft:arc_smelting` |
+| ARC_FURNACE | arc_furnace_controller | 3×3×3 casing structure; pulls silicon boules and takes argon as a boost gas since batch 24 (the crystal grower's jobs) | 50k / 512 / 0 / 64 | 2 in, out | `jugcraft:arc_smelting` (multi-ingredient since batch 24) |
 | SOLAR_PANEL | solar_panel | 8 JE/t in sun | 4k / 0 / 32 / – | – | – |
 | ADVANCED_SOLAR_PANEL | advanced_solar_panel | **pedestal + 3×3 layer (10 parts)**, 64 JE/t in sun (sky checked above the array) | 400k / 0 / 512 / – | – | – |
 | ADVANCED_ENGINE | advanced_engine | **2×1×1** KE generator: gasoline/diesel → up to 1,024 KE/t out of the master's back | none (KE) | – (8,000 mB fuel tank) | – |
@@ -90,7 +90,6 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | SAWMILL | sawmill | log → 6 planks + sawdust | 10k / 128 / 0 / 12 | in, out, 2 byproduct | `jugcraft:sawing` |
 | CAPACITOR_BANK | capacitor_bank | **2×2** battery: charges any side, outputs from its front | 4M / 4,096 / 4,096 / – | – | – |
 | LITHIUM_BATTERY_BANK | lithium_battery_bank | **3×2×1** battery (electric look): charges any side, outputs from all six front faces | 32M / 16,384 / 16,384 / – | – | – |
-| CRYSTAL_GROWER | crystal_grower | **1×2** (cyan look): 4 silicon + phosphate → silicon boule | 60k / 512 / 0 / 128 | 2 in, out | `jugcraft:crystal_growing` (multi) |
 | LITHOGRAPHY_STATION | lithography_station | **3×2×2** fluid processor (cyan look): wafer + 2 copper wire + 100 mB acid → 4 microchips | 60k / 1,024 / 0 / 192 | 2 in, out, 4,000 mB tank | `jugcraft:lithography` |
 | GAS_HOLDER | gas_holder | **3×3×3** tank, 1,024 buckets of one gas (`GasFluid` only), no power, no screen | none | – (gas) | – |
 | STEEL_TANK | steel_tank | **2×2** tank, 128 buckets, no power, no screen; drops with its fluid (`MachineKind.keepsContents`) | none | – (fluid) | – |
@@ -204,7 +203,8 @@ Records: [pixel-hollows.md](features/pixel-hollows.md), [retro-trader.md](featur
 - **Gases** (`PetroFluids.Gas`, `GasFluid`): fluids with no block or bucket (refinery gas); Fabric names them from `block.<ns>.<id>`.
 - **Draw-offs:** `MachineKind.outputLayer(tank)` makes an output tank push only from the faces of one block layer (distillation tower, cracker, reformer).
 - **Items** (`PetroItems`): cracking catalyst, asphalt binder.
-- **Machines:** `PUMPJACK` (custom tick), `OIL_SAND_EXTRACTOR` (`jugcraft:oil_sand_extraction`), `DISTILLATION_TOWER` (`distillation`), `CATALYTIC_CRACKER` (`catalytic_cracking`), `VACUUM_DISTILLATION_UNIT` (`vacuum_distillation`), `CATALYTIC_REFORMER` (`reforming`), `CHEMICAL_MIXER` (`chemical_mixing`), `FRACKING_RIG` (custom tick; works over shale), `FLOWBACK_TREATMENT_UNIT` (`water_treatment`).
+- **Machines:** `PUMPJACK` (custom tick), `DISTILLATION_TOWER` (`distillation`: crude oil, and heavy fuel oil vacuum-distilled since batch 24), `CATALYTIC_CRACKER` (`catalytic_cracking`: cracking, and naphtha reforming since batch 24), `FRACKING_RIG` (custom tick; works over shale), `FLOWBACK_TREATMENT_UNIT` (`water_treatment`; the Settling Plant: flowback water, oil sand, bitumen, mud). The oil sand extractor, vacuum distillation unit, catalytic reformer and chemical mixer were removed in batch 24 (docs/features/machine-consolidation.md).
+- **Fluid results** may name their output tank (`"tank": n`, `FluidRecipe.resultTank`); without it they go by position.
 - **Industrial chemistry:** `ELECTROLYTIC_CELL` (`electrolysis`: brine → chlorine/hydrogen/lye by layer; alumina + coke → aluminum), `CHEMICAL_REACTOR` (`chemical_reaction`: sulfuric acid, alumina, fertilizer), `FUEL_CELL` (hydrogen → JE). Items `alumina`, `fertilizer`, `titanium_sponge`, `lithium_cell`, `neodymium_magnet`, and the electronics items `silicon_boule`, `silicon_wafer`, `microchip` (`chemistry/FertilizerItem`, area bone meal on crops). Fluids `brine`, `lye`, `sulfuric_acid`; gases `chlorine`, `hydrogen`. `check_mod_data` audits metal in fluid recipes.
 - **Nitrogen chemistry (batch 12):** `AIR_SEPARATION_UNIT` (no recipes, like the pumpjack: `tickAirSeparation` fills nitrogen `ASU_NITROGEN_PER_TICK` into tank 0, drawn off layer 5, and oxygen `ASU_OXYGEN_PER_TICK` into tank 1, layer 0) and `SYNTHESIS_CONVERTER` (`gas_synthesis`: Haber–Bosch ammonia, Ostwald nitric acid; three input tanks, one output). Gases `nitrogen`, `oxygen`, `ammonia`; fluid `nitric_acid`. Chemical reactor `ammonium_phosphate` and lithography `microchip_nitric` recipes.
 - **Glass chemistry (batch 16):** rock `tincal` (`ROCKS`, desert/badlands, drops `borax`); items `borax`, `borosilicate_glass`, `optical_fibre`, `ferroboron` (`materials.ITEMS`). Machine recipes may set `"name"` for a second recipe with the same output. `MachineRecipes.multiRecipes` sorts by ingredient count, most first.

@@ -32,4 +32,4 @@ These are suggested issue-sized briefs, not assigned or implementation-approved 
 - One school brief chosen from Fire, Ice, Storm, Earth, Necromancy, Blood, Vampirism or Cursing.
 - One realm brief and one moon/rocket brief, including safe return travel and material uses.
 
-Use the feature proposal form. Maintainers approve scope, sequence dependencies and assign one lead before substantial implementation. Do not accept a single PR implementing the entire roadmap.
+Use the feature proposal form for discussion, or start one focused prototype in your fork and open a draft PR. Prior issue approval is not required for that prototype. Coordinate major shared-API or platform changes first; maintainers decide acceptance during review. Do not submit a single PR implementing the entire roadmap.

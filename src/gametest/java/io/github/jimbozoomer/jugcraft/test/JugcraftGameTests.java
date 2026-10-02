@@ -50,7 +50,25 @@ import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import io.github.jimbozoomer.jugcraft.tools.MiningDrillItem;
 import io.github.jimbozoomer.jugcraft.tools.RocketPackItem;
 import io.github.jimbozoomer.jugcraft.tools.ToolUpgrades;
+import io.github.jimbozoomer.jugcraft.gear.Exosuit;
+import io.github.jimbozoomer.jugcraft.gear.ExosuitItem;
+import io.github.jimbozoomer.jugcraft.gear.JugcraftExosuit;
+import io.github.jimbozoomer.jugcraft.gear.JugcraftGear;
+import java.util.Optional;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmithingRecipe;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
+import net.minecraft.world.item.equipment.ArmorType;
+import io.github.jimbozoomer.jugcraft.gear.PowerBowItem;
+import io.github.jimbozoomer.jugcraft.gear.PowerKatanaItem;
+import io.github.jimbozoomer.jugcraft.gear.ScubaTankItem;
 import java.util.List;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -62,6 +80,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -389,22 +408,34 @@ public class JugcraftGameTests {
 		helper.assertTrue(out.is(result) && out.getCount() == count, kind.id + " makes " + out + " from " + inputs);
 	}
 
-	/** The two-block crystal grower pulls a silicon boule from 4 silicon and a phosphate; the sawmill cuts it into 8 wafers. */
+	/**
+	 * The arc furnace pulls a silicon boule from 4 silicon and a phosphate (batch 24, from the old crystal grower); the
+	 * sawmill cuts it into 8 wafers. Its one-ingredient recipes still work alongside.
+	 */
 	@GameTest(maxTicks = 600)
-	public void crystalGrowerPullsABoule(GameTestHelper helper) {
-		BlockPos master = new BlockPos(2, 1, 2);
-		MachineBlockEntity grower = large(helper, master, MachineKind.CRYSTAL_GROWER);
-		charge(helper, master.above(), Direction.WEST);
-		grower.setItem(0, new ItemStack(item("silicon"), 4));
-		grower.setItem(1, new ItemStack(item("phosphate")));
+	public void arcFurnacePullsABoule(GameTestHelper helper) {
+		for (int x = 2; x <= 4; x++) {
+			for (int y = 1; y <= 3; y++) {
+				for (int z = 1; z <= 3; z++) {
+					helper.setBlock(new BlockPos(x, y, z), JugcraftMachines.ARC_FURNACE_CASING);
+				}
+			}
+		}
+		BlockPos controller = new BlockPos(3, 2, 1);
+		helper.setBlock(controller, machine(MachineKind.ARC_FURNACE).setValue(MachineBlock.FACING, Direction.NORTH));
+		charge(helper, controller, Direction.NORTH);
+		MachineBlockEntity furnace = helper.getBlockEntity(controller, MachineBlockEntity.class);
+		furnace.setItem(0, new ItemStack(item("phosphate")));
+		furnace.setItem(1, new ItemStack(item("silicon"), 4));
+		assertMulti(helper, MachineKind.ARC_FURNACE, List.of(new ItemStack(Items.QUARTZ)), item("silicon"), 2);
 		MachineRecipe wafers = MachineRecipes.find(helper.getLevel(), MachineKind.SAWMILL, new ItemStack(item("silicon_boule")))
 				.orElseThrow(() -> helper.assertionException("No sawing recipe for a silicon boule"));
 		ItemStack sawn = wafers.output().create();
 		helper.assertTrue(sawn.is(item("silicon_wafer")) && sawn.getCount() == 8, "A boule saws into " + sawn);
 		helper.succeedWhen(() -> {
-			ItemStack output = grower.getItem(MachineKind.CRYSTAL_GROWER.outputSlot());
-			helper.assertTrue(output.is(item("silicon_boule")), "Crystal grower output is " + output);
-			helper.assertTrue(grower.getItem(0).isEmpty() && grower.getItem(1).isEmpty(), "The inputs were not used up");
+			ItemStack output = furnace.getItem(MachineKind.ARC_FURNACE.outputSlot());
+			helper.assertTrue(output.is(item("silicon_boule")), "Arc furnace output is " + output);
+			helper.assertTrue(furnace.getItem(0).isEmpty() && furnace.getItem(1).isEmpty(), "The inputs were not used up");
 		});
 	}
 
@@ -932,6 +963,46 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Ores drop their raw material, not themselves, and storage blocks drop themselves. Before the
+	 * loot tables used the 26.x keys, Minecraft ignored their conditions and every ore dropped itself.
+	 */
+	@GameTest
+	public void oresDropRawMaterial(GameTestHelper helper) {
+		assertDrops(helper, new BlockPos(1, 1, 1), "tin_ore", "raw_tin", 1, 1);
+		assertDrops(helper, new BlockPos(3, 1, 1), "deepslate_zinc_ore", "raw_zinc", 1, 1);
+		assertDrops(helper, new BlockPos(5, 1, 1), "salt_ore", "salt", 2, 4);
+		assertDrops(helper, new BlockPos(1, 1, 3), "oil_sand", "bitumen", 1, 2);
+		assertDrops(helper, new BlockPos(3, 1, 3), "tin_block", "tin_block", 1, 1);
+		helper.succeed();
+	}
+
+	/**
+	 * The Charging Station drops once, from its lower half. Its top half's "lower half only" condition used
+	 * the pre-26.x loot keys, which Minecraft ignored, so breaking the top half dropped two stations.
+	 */
+	@GameTest
+	public void chargingStationDropsOnce(GameTestHelper helper) {
+		BlockPos lower = new BlockPos(2, 1, 2);
+		BlockState state = JugcraftTools.CHARGING_STATION.defaultBlockState();
+		helper.setBlock(lower, state);
+		helper.setBlock(lower.above(), state.setValue(ChargingStationBlock.HALF, DoubleBlockHalf.UPPER));
+		List<ItemStack> top = Block.getDrops(helper.getBlockState(lower.above()), helper.getLevel(), helper.absolutePos(lower.above()), null);
+		List<ItemStack> bottom = Block.getDrops(helper.getBlockState(lower), helper.getLevel(), helper.absolutePos(lower), null);
+		helper.assertTrue(top.isEmpty(), "The top half should drop nothing, dropped " + top);
+		helper.assertTrue(bottom.size() == 1 && bottom.get(0).is(JugcraftTools.CHARGING_STATION.asItem()) && bottom.get(0).getCount() == 1,
+				"The lower half should drop one station, dropped " + bottom);
+		helper.succeed();
+	}
+
+	/** Breaking {@code block} with no tool drops only {@code drop}, between {@code min} and {@code max} of it. */
+	private static void assertDrops(GameTestHelper helper, BlockPos pos, String block, String drop, int min, int max) {
+		helper.setBlock(pos, BuiltInRegistries.BLOCK.getValue(Jugcraft.id(block)));
+		List<ItemStack> drops = Block.getDrops(helper.getBlockState(pos), helper.getLevel(), helper.absolutePos(pos), null);
+		helper.assertTrue(drops.size() == 1 && drops.get(0).is(item(drop)) && drops.get(0).getCount() >= min
+				&& drops.get(0).getCount() <= max, block + " should drop " + min + "-" + max + " " + drop + ", dropped " + drops);
+	}
+
 	// ------------------------------------------------------------------ mining & prospecting
 
 	/** The prospector's survey reports ore placed nearby, with a signal of 1-5 and a depth band, and no positions. */
@@ -1381,6 +1452,217 @@ public class JugcraftGameTests {
 			helper.assertTrue(energy >= ChargingStationBlockEntity.CHARGE_RATE * 10, "The drill holds only " + energy + " JE");
 			helper.assertTrue(helper.getBlockState(lower).getValue(ChargingStationBlock.LIT), "The station is not lit while charging");
 		});
+	}
+
+	/**
+	 * Batch 25 gear. A paxel mines stone, logs and dirt fast. Bronze (iron tier) reaches diamond ore but not obsidian;
+	 * steel (diamond tier) reaches both. Paxels last three times as long as the tier's tools. The armor goes in the right slots.
+	 */
+	@GameTest
+	public void paxelsAndBronzeAndSteelGear(GameTestHelper helper) {
+		ItemStack bronze = new ItemStack(item("bronze_paxel"));
+		ItemStack steel = new ItemStack(item("steel_paxel"));
+		for (BlockState state : List.of(Blocks.STONE.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(),
+				Blocks.DIRT.defaultBlockState())) {
+			helper.assertTrue(bronze.getDestroySpeed(state) > 1.0F, "A bronze paxel mines " + state + " like a hand");
+		}
+		// Iron tier (bronze) reaches diamond ore but not obsidian; diamond tier (steel) reaches both.
+		helper.assertTrue(bronze.isCorrectToolForDrops(Blocks.DIAMOND_ORE.defaultBlockState()), "Bronze cannot get diamond ore");
+		helper.assertTrue(!bronze.isCorrectToolForDrops(Blocks.OBSIDIAN.defaultBlockState()), "Bronze gets obsidian");
+		helper.assertTrue(steel.isCorrectToolForDrops(Blocks.OBSIDIAN.defaultBlockState()), "A steel paxel cannot get obsidian");
+		helper.assertTrue(new ItemStack(item("steel_pickaxe")).isCorrectToolForDrops(Blocks.OBSIDIAN.defaultBlockState()),
+				"A steel pickaxe cannot get obsidian");
+		helper.assertTrue(bronze.getMaxDamage() == 3 * new ItemStack(item("bronze_pickaxe")).getMaxDamage(),
+				"A bronze paxel lasts " + bronze.getMaxDamage());
+		helper.assertTrue(new ItemStack(item("diamond_paxel")).getMaxDamage() == 3 * new ItemStack(Items.DIAMOND_PICKAXE).getMaxDamage(),
+				"A diamond paxel is not three diamond pickaxes' worth");
+		helper.assertTrue(new ItemStack(item("netherite_paxel")).has(DataComponents.DAMAGE_RESISTANT), "The netherite paxel burns");
+		for (String[] piece : new String[][] {{"helmet", "HEAD"}, {"chestplate", "CHEST"}, {"leggings", "LEGS"}, {"boots", "FEET"}}) {
+			for (String metal : List.of("bronze", "steel")) {
+				ItemStack stack = new ItemStack(item(metal + "_" + piece[0]));
+				var equippable = stack.get(DataComponents.EQUIPPABLE);
+				helper.assertTrue(equippable != null && equippable.slot() == EquipmentSlot.valueOf(piece[1]),
+						metal + " " + piece[0] + " does not go in " + piece[1]);
+			}
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 27: under water, a scuba tank worn with the mask tops the wearer's air up for 1 mB of oxygen; without the
+	 * mask it does nothing.
+	 */
+	@GameTest
+	public void scubaTankKeepsAirUnderWater(GameTestHelper helper) {
+		for (int y = 1; y <= 3; y++) {
+			helper.setBlock(new BlockPos(2, y, 2), Blocks.WATER);
+		}
+		ServerPlayer diver = helper.makeMockServerPlayerInLevel();
+		Vec3 at = helper.absoluteVec(new Vec3(2.5, 1.0, 2.5));
+		diver.setPos(at.x, at.y, at.z);
+		ItemStack tank = new ItemStack(JugcraftGear.SCUBA_TANK);
+		ScubaTankItem.setOxygen(tank, ScubaTankItem.CAPACITY);
+		diver.setItemSlot(EquipmentSlot.CHEST, tank);
+		diver.setItemSlot(EquipmentSlot.HEAD, new ItemStack(JugcraftGear.SCUBA_MASK));
+		diver.baseTick();
+		helper.assertTrue(diver.isEyeInFluid(FluidTags.WATER), "The diver's eyes are not under water");
+		diver.setAirSupply(10);
+		tank.getItem().inventoryTick(tank, helper.getLevel(), diver, EquipmentSlot.CHEST);
+		helper.assertTrue(diver.getAirSupply() == diver.getMaxAirSupply(), "Air is " + diver.getAirSupply());
+		helper.assertTrue(ScubaTankItem.oxygen(tank) == ScubaTankItem.CAPACITY - ScubaTankItem.OXYGEN_PER_TICK,
+				"The tank holds " + ScubaTankItem.oxygen(tank) + " mB");
+		diver.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+		diver.setAirSupply(10);
+		tank.getItem().inventoryTick(tank, helper.getLevel(), diver, EquipmentSlot.CHEST);
+		helper.assertTrue(diver.getAirSupply() == 10, "The tank gave air without the mask");
+		helper.succeed();
+	}
+
+	/** Batch 27: free runners take away all fall damage and step up half a block more, on top of their armor. */
+	@GameTest
+	public void freeRunnersCancelFallDamage(GameTestHelper helper) {
+		ItemAttributeModifiers modifiers = new ItemStack(JugcraftGear.FREE_RUNNERS).get(DataComponents.ATTRIBUTE_MODIFIERS);
+		helper.assertTrue(modifiers != null, "Free runners have no attribute modifiers");
+		helper.assertTrue(modifiers.modifiers().stream().anyMatch(entry -> entry.attribute().equals(Attributes.FALL_DAMAGE_MULTIPLIER)
+				&& entry.modifier().amount() == JugcraftGear.RUNNERS_FALL_DAMAGE), "No fall damage modifier");
+		helper.assertTrue(modifiers.modifiers().stream().anyMatch(entry -> entry.attribute().equals(Attributes.STEP_HEIGHT)
+				&& entry.modifier().amount() == JugcraftGear.RUNNERS_STEP_HEIGHT), "No step height modifier");
+		helper.assertTrue(modifiers.modifiers().stream().anyMatch(entry -> entry.attribute().equals(Attributes.ARMOR)),
+				"Free runners lost their armor");
+		helper.succeed();
+	}
+
+	/** Batch 27: a charged power katana hits at full strength and pays 1,000 JE a hit; an empty one hits for 1. */
+	@GameTest
+	public void powerKatanaRunsOnCharge(GameTestHelper helper) {
+		ServerPlayer player = miner(helper, new ItemStack(JugcraftGear.POWER_KATANA));
+		float bonus = JugcraftGear.POWER_KATANA.getAttackDamageBonus(player, 11.0F,
+				helper.getLevel().damageSources().playerAttack(player));
+		helper.assertTrue(bonus == -10.0F, "An empty katana's bonus is " + bonus);
+		player.setItemInHand(InteractionHand.MAIN_HAND, charged(JugcraftGear.POWER_KATANA));
+		bonus = JugcraftGear.POWER_KATANA.getAttackDamageBonus(player, 11.0F, helper.getLevel().damageSources().playerAttack(player));
+		helper.assertTrue(bonus == 0.0F, "A charged katana's bonus is " + bonus);
+		ItemStack katana = player.getMainHandItem();
+		katana.getItem().postHurtEnemy(katana, player, player);
+		helper.assertTrue(Chargeable.energy(katana) == PowerKatanaItem.CAPACITY - PowerKatanaItem.ENERGY_PER_HIT,
+				"The katana holds " + Chargeable.energy(katana) + " JE");
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 27: a charged power bow fires an energy arrow with no arrows in the inventory, for 500 JE, and the arrow
+	 * cannot be picked up; an empty one with no arrows fires nothing.
+	 */
+	@GameTest
+	public void powerBowFiresOnCharge(GameTestHelper helper) {
+		ServerPlayer player = miner(helper, charged(JugcraftGear.POWER_BOW));
+		// Stand inside the test area, where the chunk is loaded, so the arrow is added to the world.
+		Vec3 at = helper.absoluteVec(new Vec3(2.5, 1.0, 2.5));
+		player.setPos(at.x, at.y, at.z);
+		ItemStack bow = player.getMainHandItem();
+		int drawn = bow.getUseDuration(player) - 20;
+		helper.assertTrue(JugcraftGear.POWER_BOW.releaseUsing(bow, helper.getLevel(), player, drawn), "The charged bow did not fire");
+		List<Arrow> arrows = helper.getLevel().getEntitiesOfClass(Arrow.class, player.getBoundingBox().inflate(8));
+		helper.assertTrue(arrows.size() == 1, arrows.size() + " arrows");
+		helper.assertTrue(arrows.get(0).pickup == Arrow.Pickup.CREATIVE_ONLY, "The energy arrow can be picked up");
+		helper.assertTrue(Chargeable.energy(bow) == PowerBowItem.CAPACITY - PowerBowItem.ENERGY_PER_SHOT,
+				"The bow holds " + Chargeable.energy(bow) + " JE");
+		ItemStack empty = new ItemStack(JugcraftGear.POWER_BOW);
+		player.setItemInHand(InteractionHand.MAIN_HAND, empty);
+		helper.assertTrue(!JugcraftGear.POWER_BOW.releaseUsing(empty, helper.getLevel(), player, drawn), "The empty bow fired");
+		helper.assertTrue(helper.getLevel().getEntitiesOfClass(Arrow.class, player.getBoundingBox().inflate(8)).size() == 1,
+				"The empty bow made an arrow");
+		helper.succeed();
+	}
+
+	private static EquipmentSlot slot(ArmorType type) {
+		return switch (type) {
+			case HELMET -> EquipmentSlot.HEAD;
+			case CHESTPLATE -> EquipmentSlot.CHEST;
+			case LEGGINGS -> EquipmentSlot.LEGS;
+			default -> EquipmentSlot.FEET;
+		};
+	}
+
+	/**
+	 * Batch 28: a charged exosuit gives more speed, a full-block step, no fall damage and a shield, and its leggings
+	 * and boots pay a JE a tick; flat pieces give none of it, and nothing is left behind.
+	 */
+	@GameTest
+	public void exosuitPowersRunOnCharge(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		for (ArmorType type : JugcraftExosuit.PIECES) {
+			player.setItemSlot(slot(type), charged(JugcraftExosuit.piece(ExosuitItem.Style.VANGUARD, type)));
+		}
+		Exosuit.tick(player);
+		helper.assertTrue(player.getAttribute(Attributes.MOVEMENT_SPEED).hasModifier(Exosuit.SPEED), "No speed bonus");
+		helper.assertTrue(player.getAttribute(Attributes.STEP_HEIGHT).getValue() >= 1.0,
+				"Step height " + player.getAttribute(Attributes.STEP_HEIGHT).getValue());
+		helper.assertTrue(player.getAttribute(Attributes.FALL_DAMAGE_MULTIPLIER).getValue() == 0.0, "Fall damage still counts");
+		helper.assertTrue(player.getMaxAbsorption() >= Exosuit.SHIELD_POINTS, "Shield holds " + player.getMaxAbsorption());
+		for (EquipmentSlot paid : new EquipmentSlot[] {EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+			ItemStack piece = player.getItemBySlot(paid);
+			helper.assertTrue(Chargeable.energy(piece) == Chargeable.capacity(piece) - 1,
+					"The " + paid + " piece holds " + Chargeable.energy(piece) + " JE");
+		}
+		for (ArmorType type : JugcraftExosuit.PIECES) {
+			player.setItemSlot(slot(type), new ItemStack(JugcraftExosuit.piece(ExosuitItem.Style.VANGUARD, type)));
+		}
+		Exosuit.tick(player);
+		helper.assertTrue(!player.getAttribute(Attributes.MOVEMENT_SPEED).hasModifier(Exosuit.SPEED), "Flat leggings still speed");
+		helper.assertTrue(!player.getAttribute(Attributes.STEP_HEIGHT).hasModifier(Exosuit.STEP), "Flat boots still step");
+		helper.assertTrue(!player.getAttribute(Attributes.FALL_DAMAGE_MULTIPLIER).hasModifier(Exosuit.FALL), "Flat boots still cushion");
+		helper.assertTrue(player.getMaxAbsorption() == 0.0F, "A flat chestplate still shields");
+		helper.succeed();
+	}
+
+	/** Batch 28: the chestplate's shield regrows absorption for 4,000 JE a point. */
+	@GameTest(maxTicks = 100)
+	public void exosuitShieldRegrows(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setItemSlot(EquipmentSlot.CHEST, charged(JugcraftExosuit.piece(ExosuitItem.Style.RONIN, ArmorType.CHESTPLATE)));
+		player.setAbsorptionAmount(0.0F);
+		helper.succeedWhen(() -> {
+			Exosuit.tick(player);
+			ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
+			helper.assertTrue(player.getAbsorptionAmount() >= 1.0F, "No shield yet");
+			helper.assertTrue(Chargeable.energy(chest) <= Chargeable.capacity(chest) - Exosuit.SHIELD_PER_POINT,
+					"The shield cost " + (Chargeable.capacity(chest) - Chargeable.energy(chest)) + " JE");
+		});
+	}
+
+	/** Batch 28: the exosuit chestplate flies like the rocket pack, on its own charge. */
+	@GameTest
+	public void exosuitChestplateIsAJetpack(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setItemSlot(EquipmentSlot.CHEST, charged(JugcraftExosuit.piece(ExosuitItem.Style.VANGUARD, ArmorType.CHESTPLATE)));
+		helper.assertTrue(RocketPackItem.canThrust(player), "The chestplate cannot thrust");
+		player.fallDistance = 10;
+		RocketPackItem.thrust(player);
+		ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
+		helper.assertTrue(Chargeable.energy(chest) == Chargeable.capacity(chest) - RocketPackItem.ENERGY_PER_TICK,
+				"The chestplate holds " + Chargeable.energy(chest) + " JE");
+		helper.assertTrue(player.fallDistance == 0, "The fall was not cancelled");
+		player.setItemSlot(EquipmentSlot.CHEST, charged(JugcraftExosuit.piece(ExosuitItem.Style.VANGUARD, ArmorType.LEGGINGS)));
+		helper.assertTrue(!RocketPackItem.canThrust(player), "Leggings worn on the chest fly");
+		helper.succeed();
+	}
+
+	/** Batch 28: the Ronin livery repaints an exosuit piece at the smithing table and keeps its charge. */
+	@GameTest
+	public void liveryRepaintsAndKeepsCharge(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ItemStack base = new ItemStack(JugcraftExosuit.piece(ExosuitItem.Style.VANGUARD, ArmorType.HELMET));
+		Chargeable.setEnergy(base, 123_456);
+		SmithingRecipeInput input = new SmithingRecipeInput(new ItemStack(JugcraftExosuit.RONIN_LIVERY), base,
+				// Looked up by ID: the dye has no Items constant in 26.3.
+				new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse("minecraft:red_dye"))));
+		Optional<RecipeHolder<SmithingRecipe>> recipe = level.recipeAccess().getRecipeFor(RecipeType.SMITHING, input, level);
+		helper.assertTrue(recipe.isPresent(), "No livery recipe for the helmet");
+		ItemStack out = recipe.get().value().assemble(input);
+		helper.assertTrue(out.is(JugcraftExosuit.piece(ExosuitItem.Style.RONIN, ArmorType.HELMET)), "Repainted into " + out);
+		helper.assertTrue(Chargeable.energy(out) == 123_456, "The repainted helmet holds " + Chargeable.energy(out) + " JE");
+		helper.succeed();
 	}
 
 	/** An empty drill mines like a bare hand and gets no ore drops; a charged one is fast and correct. */

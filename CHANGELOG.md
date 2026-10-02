@@ -12,9 +12,42 @@ No numbered release yet. Everything below is on `main`.
 - **Pixel Hollows:** a rare cave biome deep under the driest land, lined with **circuitstone** and lit only by scattered, faintly glowing **pixel crystal clusters**, with an original chiptune hum. It holds 1.5× the usual copper and redstone (and tin). New building blocks: circuitstone, polished circuitstone, circuitstone bricks and the **pixel lamp**; clusters drop **pixel shards**. One mixin adds the biome to the Overworld (Fabric API has no Overworld biome API).
 - **Retro Trader:** a villager profession at the new two-block-tall **arcade cabinet**. He sells a **Pixel Hollows Map** (use it to mark the nearest cave), circuitstone, lamps and shards, and buys shards back without any profit loop. Trades are 26.1+ data files.
 - **Retro Game Shop:** a small storefront in every new village (one per village, all five village types; not zombie villages), with the cabinet and a villager inside.
-- **Loot:** the cluster and cabinet use the 26.x loot format (main fixed the other tables in #60), and new game tests check ore Silk Touch and Fortune and double slabs.
+- **Loot:** the cluster and cabinet use the 26.x loot format (#34 fixed the other tables on main), and new game tests check ore Silk Touch and Fortune and double slabs.
 - **Dedicated-server check (CI):** a real client joins the game's own dedicated server, opens a machine and trades with the Retro Trader over the network, leaves and rejoins; and a world is saved and reopened with its trader, machine contents and cabinet intact. The two-client checklist is in [docs/TESTING.md](docs/TESTING.md#dedicated-server-and-two-clients).
 - Seventeen game tests, eight client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
+
+### Unmerged: Powered exosuit, batch 28
+- Four JE-powered armor pieces (netherite protection, unbreakable): night vision, an energy shield and jetpack, speed, and fall immunity with step assist.
+- Two liveries: Vanguard (gunmetal with teal lights) and Ronin (crimson and silver, conical hat, red eyes), with 3D shoulder plates, skirts and hat. Smithing liveries switch between them and keep the charge.
+- The crimson Ronin katana. Inspired by Mekanism's MekaSuit (MIT); looks follow the owner's reference images; all art original.
+
+### Unmerged: Gear, weapons and plastic blocks, batch 27
+- **Scuba mask and tank:** breathe under water on oxygen (8,000 mB, 400 s); fill the tank from a gas holder or machine.
+- **Free runners:** boots with no fall damage and a one-block step.
+- **Power katana and power bow:** JE-powered weapons charged at the charging station; the bow fires energy arrows without ammo.
+- **Plastic blocks** in all sixteen dye colours, from plastic sheets.
+- High-detail art: an animated 32x32 energy katana, and double-resolution scuba gear and free runners.
+- Four advancements and handbook pages. Inspired by Mekanism and Mekanism: Additions (MIT); all code and art original.
+
+### Unmerged: Four-ingot ore and bioethanol, batch 26
+- **Acid leaching:** an ore and 250 mB of sulfuric acid in the chemical reactor give 4 washed ores (the best ore route).
+- **Bioethanol:** 8 crops and a bucket of water ferment into 250 mB in the chemical reactor; it burns in the gas turbine and the advanced engine.
+- Inspired by Mekanism (MIT); no new machines.
+
+### Unmerged: Tools, armor and paxels, batch 25
+- Bronze and steel swords, pickaxes, axes, shovels, hoes and armor (bronze iron-tier, steel between iron and diamond).
+- Paxels (pickaxe, axe and shovel in one) for every tier from wood to netherite, bronze and steel.
+- Bronze armor is steampunk (goggles, pressure gauge, boiler); steel armor is kaiserpunk (Pickelhaube, field-grey tunic, jackboots).
+- Two advancements and handbook pages. Inspired by Mekanism: Tools (MIT); all code and art original.
+
+### Unmerged: Fewer chemistry machines, batch 24
+- Five single-job machines folded into ones that already exist (65 machines down to 60):
+  - the distillation tower vacuum-distils heavy fuel oil (was the vacuum distillation unit);
+  - the catalytic cracker reforms naphtha, using a catalyst (was the catalytic reformer);
+  - the chemical reactor mixes brine and fracking fluid (was the chemical mixer);
+  - the **Settling Plant** (the flowback treatment unit, renamed) separates oil sand and bitumen (was the oil sand extractor);
+  - the arc furnace pulls silicon boules, with argon (was the crystal grower).
+- New uses: the settling plant presses mud into clay; the electrolytic cell splits water into hydrogen and oxygen.
 
 ### #80 Seasons (colours, events and winter snow)
 - **Grass and leaves change colour with the server's date** in every biome that has four seasons: plains, meadows, forests (dark, dappled and cherry groves included), taigas, windswept hills and swamps.
@@ -65,9 +98,7 @@ No numbered release yet. Everything below is on `main`.
 - **Feature switch:** `parties.enabled`.
 - **Tests:** seven new game tests, plus a checker rule that every party result has a chat message.
 
-### Unmerged: Explosive weapons, batch 18
-
-### Unmerged: Engineer's Handbook reorganised, batch 23
+### #81 Engineer's Handbook reorganised, batch 23
 - The book fits the window; the chapter list is a scrollable contents list where the open chapter shows its pages, and long pages scroll (mouse wheel or arrow keys).
 - New **Progression** chapter: the road through the mod in nine stages, each a plan and a numbered chain of the items to make in order.
 

@@ -19,7 +19,10 @@ import petro
 import deposits
 import seasons
 import tank_display
-from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
+import exosuit
+import gear
+import plastic
+from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 import pixel_hollows as ph
 
@@ -77,12 +80,13 @@ def texture(ref):
         return
     animated = png.with_name(png.name + ".mcmeta").is_file()
     with Image.open(png) as img:
-        # Animated textures are a vertical strip of 16x16 frames with an .mcmeta beside them.
+        # 16x16, 32x32 for the high-detail gear (tools/hitech.py), or 64x64 for the tower's art. Animated textures
+        # are a vertical strip of square frames with an .mcmeta beside them.
         width, height = img.size
-        if animated and not (width == 16 and height % 16 == 0 and height > 16):
-            err(f"Animated texture {ref} is {img.size}, expected a 16-wide strip of 16x16 frames")
-        elif not animated and img.size != (16, 16) and not (img.size == (64, 64) and _hi_res(png.stem)):
-            err(f"Texture {ref} is {img.size}, expected 16x16 (64x64 only for tower_art textures)")
+        if animated and not (width in (16, 32) and height % width == 0 and height > width):
+            err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16 or 32x32 frames")
+        elif not animated and img.size not in ((16, 16), (32, 32)) and not (img.size == (64, 64) and _hi_res(png.stem)):
+            err(f"Texture {ref} is {img.size}, expected 16x16 or 32x32 (64x64 only for tower_art textures)")
 
 
 def model(ref):
@@ -103,10 +107,21 @@ def _hi_res(name):
     return name in tower_art.TEXTURES or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_"))
 
 
+def item_models(definition):
+    """Every model an item definition can show, through condition and range_dispatch (the power bow's draw)."""
+    if "model" in definition:
+        model(definition["model"])
+    for key in ("on_true", "on_false", "fallback"):
+        if key in definition:
+            item_models(definition[key])
+    for entry in definition.get("entries", []):
+        item_models(entry["model"])
+
+
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
-    for block in (all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS) + ph.blocks()
-                  + seasons.BLOCKS):
+    for block in (all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
+                  + plastic.blocks() + ph.blocks() + seasons.BLOCKS):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -122,8 +137,9 @@ def check_assets(registered):
             continue  # A crop block has no item of its own: its seeds plant it.
         definition = load(ASSETS / "items" / f"{item}.json")
         if definition:
-            model(definition["model"]["model"])
-        if item not in all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS) + ph.blocks() and f"item.{MOD}.{item}" not in lang:
+            item_models(definition["model"])
+        if item not in (all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
+                        + plastic.blocks() + ph.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -215,7 +231,7 @@ def item_units(ref):
         return {}  # vanilla tags used here (logs, planks) hold no metal
     if ref.startswith("#"):
         form, _, metal = path.partition("/")
-        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()}:
+        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path == "fermentable":
             return {}
         if form not in UNITS or not metal:
             err(f"Recipe uses unsupported tag {ref}")
@@ -257,6 +273,16 @@ def item_units(ref):
         return {"aluminum": 9}
     if path in NON_METAL:
         return {}
+    if path in plastic.blocks() or path in exosuit.items():
+        return {}
+    if path in gear.items():
+        # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
+        # hold nothing the audit tracks, like the vanilla tools they are made from.
+        tier, piece = path.rsplit("_", 1)
+        if tier not in gear.GEAR_TIERS:
+            return {}
+        pieces = ("pickaxe", "axe", "shovel") if piece == "paxel" else (piece,)
+        return {tier: 9 * sum("".join(gear.PATTERNS[p]).count("#") for p in pieces)}
     err(f"No metal content known for {ref}")
     return {}
 
@@ -280,6 +306,8 @@ def check_recipes(registered):
             inputs = [recipe["key"][ch] for ch in symbols if ch != " "]
         elif kind == "minecraft:crafting_shapeless":
             inputs = recipe["ingredients"]
+        elif kind == "minecraft:smithing_transform":
+            inputs = [recipe["template"], recipe["base"], recipe["addition"]]
         else:
             inputs = [recipe["ingredient"]]
 
@@ -382,11 +410,17 @@ def check_fluid_recipes(registered):
                     err(f"{label}: unknown fluid {fluid}")
                 if mb > spec["inputs"][i]:
                     err(f"{label}: needs {mb} mB of {fluid} but its tank holds {spec['inputs'][i]}")
-            for i, (fluid, mb) in enumerate(recipe.get("fluid_results", [])):
+            targets = [petro.result_tank(i, r) for i, r in enumerate(recipe.get("fluid_results", []))]
+            if len(set(targets)) != len(targets):
+                err(f"{label}: two fluid results share an output tank")
+            for i, result in enumerate(recipe.get("fluid_results", [])):
+                fluid, mb, tank = result[0], result[1], targets[i]
                 if fluid not in fluids:
                     err(f"{label}: unknown fluid {fluid}")
-                if mb > spec["outputs"][i]:
-                    err(f"{label}: makes {mb} mB of {fluid} but its tank holds {spec['outputs'][i]}")
+                if tank >= len(spec["outputs"]):
+                    err(f"{label}: sends {fluid} to output tank {tank}, which the machine does not have")
+                elif mb > spec["outputs"][tank]:
+                    err(f"{label}: makes {mb} mB of {fluid} but its tank holds {spec['outputs'][tank]}")
             # Metal is conserved like in the item machines: no recipe gives out more than its items hold.
             metal_in, metal_out = {}, {}
             for ref, count in recipe.get("items", []):
@@ -395,8 +429,14 @@ def check_fluid_recipes(registered):
             for ref, count in recipe.get("results", []):
                 for metal, units in item_units(ref).items():
                     metal_out[metal] = metal_out.get(metal, 0) + units * count
+            # Ore routes (batch 26: acid leaching) may multiply an ore's metal, up to ORE_LEACHING_MULTIPLIER.
+            bonus = recipe.get("ore_bonus", 1)
+            if bonus > ORE_LEACHING_MULTIPLIER:
+                err(f"{label}: ore bonus {bonus} exceeds the leaching route's {ORE_LEACHING_MULTIPLIER}")
+            if bonus > 1 and not all(ref.split(":")[1].endswith("_ore") for ref, _ in recipe.get("items", [])):
+                err(f"{label}: only ores may take an ore bonus")
             for metal, units in metal_out.items():
-                if units > metal_in.get(metal, 0):
+                if units > metal_in.get(metal, 0) * bonus:
                     err(f"{label}: gives {units} {metal} units from {metal_in.get(metal, 0)}")
             for ref, _ in recipe.get("items", []) + recipe.get("results", []):
                 if ref.startswith("#"):
@@ -405,7 +445,7 @@ def check_fluid_recipes(registered):
                 elif split(ref)[0] == MOD and split(ref)[1] not in registered:
                     err(f"{label}: unknown item {ref}")
             fluid_in = sum(mb for _, mb in recipe.get("fluids", [])) + recipe.get("source", 0)
-            fluid_out = sum(mb for _, mb in recipe.get("fluid_results", []))
+            fluid_out = sum(r[1] for r in recipe.get("fluid_results", []))
             if recipe.get("items") and "source" not in recipe and fluid_out > sum(mb for _, mb in recipe.get("fluids", [])):
                 err(f"{label}: makes fluid from items without saying how much (\"source\")")
             if fluid_out > fluid_in:
@@ -417,7 +457,8 @@ def check_tags():
         registry = path.relative_to(DATA).parts[2]
         known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + machine_items()
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
-                                                    + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items())
+                                                    + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
+                                                    + gear.items() + plastic.blocks() + exosuit.items())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
             if value.startswith("#"):
@@ -457,6 +498,93 @@ def check_worldgen():
         for ref in step:
             if split(ref)[0] == MOD and not (DATA / MOD / "worldgen" / "placed_feature" / f"{split(ref)[1]}.json").is_file():
                 err(f"pixel_hollows.json: unknown placed feature {ref}")
+
+
+def check_exosuit():
+    """gear/JugcraftExosuit.java and gear/Exosuit.java against tools/exosuit.py: the liveries, pieces and numbers; and
+    that every icon, worn layer and 3D part texture exists."""
+    java = (JAVA_ROOT / "gear" / "JugcraftExosuit.java").read_text(encoding="utf-8")
+    prefixes = dict(re.findall(r'ExosuitItem\.Style\.([A-Z]+), "([a-z_]+)"', java))
+    expected = {style.upper(): info[0] for style, info in exosuit.STYLES.items()}
+    if prefixes != expected:
+        err(f"JugcraftExosuit.PREFIXES {prefixes} != tools/exosuit.py {expected}")
+    pieces = [p.lower() for p in re.findall(r'ArmorType\.([A-Z]+)', re.search(r"PIECES = List\.of\(([^)]*)\)", java).group(1))]
+    if pieces != exosuit.PIECES:
+        err(f"JugcraftExosuit.PIECES {pieces} != tools/exosuit.py {exosuit.PIECES}")
+    for name in ("ronin_katana", "ronin_livery", "vanguard_livery"):
+        if f'item("{name}"' not in java:
+            err(f"JugcraftExosuit does not register {name}")
+    powers = (JAVA_ROOT / "gear" / "Exosuit.java").read_text(encoding="utf-8")
+    for const in ("CAPACITY", "NIGHT_VISION_PER_TICK", "SHIELD_POINTS", "SHIELD_INTERVAL", "SHIELD_PER_POINT",
+                  "SPEED_PER_TICK", "SPEED_BONUS", "BOOTS_PER_TICK", "STEP_BONUS"):
+        value = getattr(exosuit, const)
+        text = f"{value:_}" if isinstance(value, int) else str(value)
+        if not re.search(rf"\b{const} = {re.escape(text)};", powers):
+            err(f"Exosuit.{const} differs from tools/exosuit.py ({text})")
+    textures = ASSETS / "textures"
+    for style, (prefix, _, asset) in exosuit.STYLES.items():
+        for layer in ("humanoid", "humanoid_leggings"):
+            if not (textures / "entity" / "equipment" / layer / f"{asset}.png").exists():
+                err(f"Missing worn exosuit texture {layer}/{asset}.png")
+    for item in exosuit.items():
+        if not (textures / "item" / f"{item}.png").exists():
+            err(f"Missing item texture {item}.png")
+    worn = load(ASSETS / "worn_models.json") or {}
+    for style, parts in exosuit.PARTS.items():
+        for name, boxes in parts.items():
+            if f"{style}_{name}" not in worn:
+                err(f"worn_models.json has no {style}_{name}")
+            for _, _, tex in boxes:
+                if not (textures / "block" / f"{tex}.png").exists():
+                    err(f"Missing exosuit part texture block/{tex}.png")
+
+
+def check_plastic():
+    """chemistry/PetroBlocks.PLASTIC_COLORS against tools/plastic.py COLORS."""
+    java = (JAVA_ROOT / "chemistry" / "PetroBlocks.java").read_text(encoding="utf-8")
+    found = re.findall(r'"([a-z_]+)"', re.search(r"PLASTIC_COLORS = List\.of\(([^)]*)\)", java).group(1))
+    if found != list(plastic.COLORS):
+        err(f"PetroBlocks.PLASTIC_COLORS {found} != tools/plastic.py {list(plastic.COLORS)}")
+
+
+def check_gear():
+    """gear/JugcraftGear.java against tools/gear.py: the tiers, pieces, paxel tiers and each tier's stats, and that
+    every item and worn-armor layer has its texture."""
+    java = (JAVA_ROOT / "gear" / "JugcraftGear.java").read_text(encoding="utf-8")
+    for name, expected in (("TIERS", list(gear.GEAR_TIERS)), ("PIECES", gear.PIECES), ("PAXEL_TIERS", list(gear.PAXEL_TIERS))):
+        found = re.findall(r'"([a-z_]+)"', re.search(name + r" = List\.of\(([^)]*)\)", java).group(1))
+        if found != expected:
+            err(f"JugcraftGear.{name} {found} != tools/gear.py {expected}")
+    if f"PAXEL_DURABILITY = {gear.PAXEL_DURABILITY};" not in java:
+        err("JugcraftGear.PAXEL_DURABILITY differs from tools/gear.py")
+    for tier, info in gear.GEAR_TIERS.items():
+        durability, speed, damage, enchant = info["tool"]
+        drops = "INCORRECT_FOR_" + info["drops"].upper() + "_TOOL"
+        tool = f"{tier.upper()} = new ToolMaterial(BlockTags.{drops}, {durability}, {speed}F, {damage}F, {enchant},"
+        if tool not in java:
+            err(f"JugcraftGear: {tier} tool material is not {tool}")
+        mult, (boots, legs, chest, helmet), enchant, tough, knock = info["armor"]
+        armor = (f"{tier.upper()}_ARMOR = new ArmorMaterial({mult}, defense({boots}, {legs}, {chest}, {helmet}), {enchant},")
+        if armor not in java or f"{tough}F, {knock}F, repairs(\"{tier}\")" not in java:
+            err(f"JugcraftGear: {tier} armor material differs from tools/gear.py")
+        for layer in ("humanoid", "humanoid_leggings"):
+            if not (ASSETS / "textures" / "entity" / "equipment" / layer / f"{tier}.png").exists():
+                err(f"Missing worn armor texture {layer}/{tier}.png")
+    extras = re.findall(r'^\t\t[A-Z_]+ = item\("([a-z_]+)"', java, re.M)
+    if extras != list(gear.EXTRAS):
+        err(f"JugcraftGear extras {extras} != tools/gear.py {list(gear.EXTRAS)}")
+    scuba = (JAVA_ROOT / "gear" / "ScubaTankItem.java").read_text(encoding="utf-8")
+    if (f"CAPACITY = {gear.SCUBA_OXYGEN:_};" not in scuba
+            or f"OXYGEN_PER_TICK = {gear.SCUBA_OXYGEN_PER_TICK};" not in scuba):
+        err("ScubaTankItem capacity or use differs from tools/gear.py")
+    for asset in ("scuba", "free_runners"):
+        if not (ASSETS / "textures" / "entity" / "equipment" / "humanoid" / f"{asset}.png").exists():
+            err(f"Missing worn texture humanoid/{asset}.png")
+    for item, info in gear.EXTRAS.items():
+        frames = [item] + ([f"{item}_pulling_{step}" for step in range(3)] if info["model"] == "bow" else [])
+        for frame in frames:
+            if not (ASSETS / "textures" / "item" / f"{frame}.png").exists():
+                err(f"Missing item texture {frame}.png")
 
 
 def check_seasons():
@@ -584,22 +712,24 @@ def check_machines(registered):
 
     kinds = MACHINE_JAVA.read_text(encoding="utf-8")
     for machine, stats in STATS.items():
-        match = re.search(r'\("' + machine + r'", ([\d_]+), ([\d_]+), ([\d_]+), ([\d_]+),', kinds)
+        match = re.search(r'(\w+)\("' + machine + r'", ([\d_]+), ([\d_]+), ([\d_]+), ([\d_]+),', kinds)
         if not match:
             err(f"MachineKind.java has no entry for {machine}")
             continue
-        capacity, max_in, max_out, use = (int(v.replace("_", "")) for v in match.groups())
+        # The enum constant can differ from the block id (ARC_FURNACE is "arc_furnace_controller").
+        constant = match.group(1)
+        capacity, max_in, max_out, use = (int(v.replace("_", "")) for v in match.groups()[1:])
         if capacity != stats["capacity"]:
             err(f"{machine}: capacity {capacity} in Java, {stats['capacity']} in machines.py")
         expected_use = stats.get("use_per_tick", 0)
         if use != expected_use:
             err(f"{machine}: use {use} in Java, {expected_use} in machines.py")
         if "boost" in stats:
-            if f'case {machine.upper()} -> "{stats["boost"]}";' not in kinds:
+            if f'case {constant} -> "{stats["boost"]}";' not in kinds:
                 err(f"{machine}: MachineKind.boostGas() is not {stats['boost']}")
             if stats["boost"] not in petro.GASES:
                 err(f"{machine}: boost gas {stats['boost']} is not a gas in tools/petro.py")
-            per_tick = re.search(r"case " + machine.upper() + r" -> (\w+);\s*(?:case|default)", kinds.split("public int boostPerTick()")[1])
+            per_tick = re.search(r"case " + constant + r" -> (\w+);\s*(?:case|default)", kinds.split("public int boostPerTick()")[1])
             constants = dict(re.findall(r"public static final int (\w+) = ([\d_]+);", kinds))
             if not per_tick or int(constants.get(per_tick.group(1), "-1").replace("_", "")) != stats["boost_per_tick"]:
                 err(f"{machine}: MachineKind.boostPerTick() does not give {stats['boost_per_tick']}")
@@ -891,6 +1021,7 @@ def check_deposits():
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(petro.petro_items()) | set(petro.petro_blocks()) | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
+                  | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items())
                   | set(ph.blocks()) | set(ph.items()))
     check_assets(sorted(registered))
     check_petro()
@@ -902,6 +1033,9 @@ def main():
     check_worldgen()
     check_java()
     check_deposits()
+    check_gear()
+    check_exosuit()
+    check_plastic()
     check_seasons()
     check_machines(registered)
     check_large_machines()

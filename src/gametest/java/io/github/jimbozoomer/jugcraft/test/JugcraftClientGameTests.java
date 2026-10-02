@@ -156,6 +156,65 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_rocket_pack_worn");
+			// Batch 25: kaiserpunk steel armor with a steel paxel in hand, from the front; then steampunk bronze, from the
+			// front and from behind (its boiler).
+			server.runCommand("item replace entity @p armor.head with jugcraft:steel_helmet");
+			server.runCommand("item replace entity @p armor.chest with jugcraft:steel_chestplate");
+			server.runCommand("item replace entity @p armor.legs with jugcraft:steel_leggings");
+			server.runCommand("item replace entity @p armor.feet with jugcraft:steel_boots");
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:steel_paxel");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_steel_armor_worn");
+			server.runCommand("item replace entity @p armor.head with jugcraft:bronze_helmet");
+			server.runCommand("item replace entity @p armor.chest with jugcraft:bronze_chestplate");
+			server.runCommand("item replace entity @p armor.legs with jugcraft:bronze_leggings");
+			server.runCommand("item replace entity @p armor.feet with jugcraft:bronze_boots");
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_bronze_armor_worn");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_bronze_armor_back");
+			// Batch 27: scuba mask and tank, free runners and the power katana, from the front; then the sixteen plastic
+			// blocks in a wall, two high.
+			server.runCommand("item replace entity @p armor.head with jugcraft:scuba_mask");
+			server.runCommand("item replace entity @p armor.chest with jugcraft:scuba_tank");
+			server.runCommand("item replace entity @p armor.legs with minecraft:air");
+			server.runCommand("item replace entity @p armor.feet with jugcraft:free_runners");
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:power_katana");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_scuba_gear_worn");
+			// Batch 28: the powered exosuit, Vanguard from the front and behind, then Ronin with its katana.
+			for (String[] slot : new String[][] {{"head", "helmet"}, {"chest", "chestplate"}, {"legs", "leggings"},
+					{"feet", "boots"}}) {
+				server.runCommand("item replace entity @p armor.%s with jugcraft:exosuit_%s".formatted(slot[0], slot[1]));
+			}
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:power_katana");
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_exosuit_vanguard");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_exosuit_vanguard_back");
+			for (String[] slot : new String[][] {{"head", "helmet"}, {"chest", "chestplate"}, {"legs", "leggings"},
+					{"feet", "boots"}}) {
+				server.runCommand("item replace entity @p armor.%s with jugcraft:ronin_exosuit_%s".formatted(slot[0], slot[1]));
+			}
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:ronin_katana");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_exosuit_ronin");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
+			String[] plastics = {"white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray",
+					"cyan", "purple", "blue", "brown", "green", "red", "black"};
+			for (int i = 0; i < plastics.length; i++) {
+				server.runCommand("fill %d %d %d %d %d %d jugcraft:%s_plastic".formatted(x - 14 + i, y, z + 12, x - 14 + i, y + 1,
+						z + 12, plastics[i]));
+			}
+			server.runCommand("tp @p %d %d %d 180 10".formatted(x - 6, y, z + 18));
+			context.waitTicks(20);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_plastic_blocks");
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			context.getInput().pressKey(options -> options.keyToggleGui);
 			server.runCommand("clear @p");
@@ -190,9 +249,11 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.setScreen(() -> null);
 
 			// One screen in each of the other two themes (batch 22): the electric battery box and the lab's circuit
-			// assembler.
-			for (MachineKind kind : List.of(MachineKind.BATTERY_BOX, MachineKind.CIRCUIT_ASSEMBLER)) {
-				BlockPos machine = new BlockPos(x - 7 + singleIndex(kind), y, z - 5);
+			// assembler; and the distillation tower, whose screen holds the most outputs (five tanks and a slot, batch
+			// 24).
+			for (MachineKind kind : List.of(MachineKind.BATTERY_BOX, MachineKind.CIRCUIT_ASSEMBLER, MachineKind.DISTILLATION_TOWER)) {
+				BlockPos machine = kind.isLarge() ? new BlockPos(x + largeOffset(kind), y, z - 5)
+						: new BlockPos(x - 7 + singleIndex(kind), y, z - 5);
 				server.runCommand("tp @p %d %d %d 180 30".formatted(machine.getX(), y, z - 3));
 				context.waitTicks(10);
 				context.getInput().lookAt(machine);
@@ -576,6 +637,20 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 	/** Blocks a multi-block machine takes across its front (it extends to its right, +x when facing south). */
 	private static int width(MachineKind kind) {
 		return 1 + kind.footprint().offsets().stream().mapToInt(offset -> Math.abs(offset.getX())).max().orElse(0);
+	}
+
+	/** How far east of the showroom's origin a multi-block machine's master stands (see buildShowroom). */
+	private static int largeOffset(MachineKind target) {
+		int offset = 20;
+		for (MachineKind kind : MachineKind.values()) {
+			if (kind == target) {
+				return offset;
+			}
+			if (kind.isLarge()) {
+				offset += width(kind) + 2;
+			}
+		}
+		throw new IllegalArgumentException(target.id);
 	}
 
 	/** Length of the multi-block row: each machine's width plus a two-block gap. */

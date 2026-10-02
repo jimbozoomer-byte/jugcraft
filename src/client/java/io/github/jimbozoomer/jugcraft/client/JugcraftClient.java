@@ -43,6 +43,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);
 		PetroFluidsClient.register();
 		RocketPackLayer.register();
+		ExosuitLayer.register();
 		BlockEntityRendererRegistry.register(JugcraftKinetics.HAND_CRANK_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.ELECTRIC_MOTOR_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.FLYWHEEL_ENTITY, KineticRotorRenderer::new);

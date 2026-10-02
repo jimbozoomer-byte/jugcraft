@@ -63,6 +63,10 @@ A charging station on copper cable fills at 256 JE/t; silver cable or better let
 | Mining Drill | 60 JE a block (×2 / ×3 with overclock modules); 100,000 JE full |
 | Chainsaw | 40 JE a block; 100,000 JE full |
 | Rocket Pack | 50 JE a tick of thrust; 200,000 JE full (about 200 s) |
+| Power Katana | 1,000 JE a hit; 200,000 JE full |
+| Power Bow | 500 JE a shot; 100,000 JE full; arrows cannot be picked up |
+| Exosuit (each piece) | 400,000 JE full. Helmet 2 JE/t while dark; chestplate 4,000 JE per absorption point regrown and 50 JE/t of jetpack thrust; leggings and boots 1 JE/t |
+| Scuba Tank | 1 mB oxygen a tick under water while air is short; 8,000 mB full (400 s; 256,000 JE of air separation) |
 
 ## Oil
 
@@ -88,7 +92,7 @@ Burnt in the best generator for each (diesel generator, gas turbine), that is 13
 
 | Step | Cost |
 | --- | --- |
-| Silicon boule (crystal grower) | 4 silicon, 1 phosphate, 51,200 JE |
+| Silicon boule (arc furnace, batch 24) | 4 silicon, 1 phosphate, 25,600 JE |
 | 8 wafers (sawmill) | 1 boule, 200 ticks |
 | 4 microchips (lithography station) | 1 wafer, 2 copper wire, 100 mB sulfuric acid, 38,400 JE |
 | Processor (circuit assembler) | 4 microchips, 1 advanced circuit, 1 gold ingot, 12,800 JE |
@@ -99,6 +103,9 @@ A processor costs about 64,000 JE of crystal growing and etching (two wafers' wo
 
 - **Motor ↔ dynamo:** loses 44% per round trip; magnet motor ↔ magnet dynamo loses 9.75% (game test `magnetMotorAndDynamoLoopLosesPower`).
 - **Electrolysis and the fuel cell:** a bucket of brine costs 51,200 JE and gives 250 mB of hydrogen, worth 32,000 JE in the fuel cell: a 37.5% return, never a loop.
+- **Bioethanol (batch 26):** 8 crops and 9,600 JE of fermenting (100 ticks at 96 JE/t) give 250 mB, worth 48,000 JE in the gas turbine: 4,800 JE a crop after fermenting. One harvester field (81 crops, each regrowing in roughly 20–40 minutes) feeds about 10–20 JE/t on average: a renewable trickle, a few solar panels' worth, never a rival to oil. Crops are renewable, so this is a renewable power source like the sun, not a loop.
+- **Acid leaching (batch 26):** an ore + 250 mB of sulfuric acid gives 4 washed ores, the 4× route (washer 3×, crusher 2×). The acid costs half a sulfur dust per ore, so the extra ingot is paid for in sulfur.
+- **Water electrolysis (batch 24):** a bucket of water costs 204,800 JE (800 ticks at 256 JE/t) and gives 500 mB of hydrogen, worth 64,000 JE in the fuel cell: a 31% return. Fluid processors take no upgrade cards, so nothing makes it cheaper. Its 250 mB of oxygen is a by-product for the steel foundry or nitric acid.
 - **Aluminum:** the Bayer route gets two ingots per bauxite for about 35,000 JE an ingot; the arc furnace gets one for 12,800 JE. More metal for more power, not more of both.
 - **Oil:** no loop. Fracking water returns at 75% (flowback treatment), so a fracking rig needs a water supply; the water is not counted as gain. Diesel engine → dynamo → electric motor loses at every step.
 - **Coke:** a coke oven turns 1 coal into 1 coke, which burns twice as long. That doubles the power from coal, but uses the coal up: an upgrade path, not a loop.
@@ -116,7 +123,7 @@ A processor costs about 64,000 JE of crystal growing and etching (two wafers' wo
 | --- | --- | --- |
 | Air separation | 64 JE/t for 8 mB nitrogen + 2 mB oxygen + 0.5 mB argon | from the air; no input, like a pumpjack's reservoir |
 | Oxygen-blown steel (batch 13) | 2 mB oxygen a tick | the steel foundry runs twice as fast; one air separation unit keeps one foundry blown |
-| Argon-shielded crystals (batch 13) | 1 mB argon a tick | the crystal grower runs twice as fast; one unit's argon keeps half a grower shielded |
+| Argon-shielded crystals (batch 13) | 1 mB argon a tick | the arc furnace runs twice as fast on any recipe (batch 24; the crystal grower before it); one unit's argon keeps half a furnace shielded |
 | Ammonia (Haber–Bosch) | 300 mB hydrogen + 100 mB nitrogen → 200 mB, 5,120 JE | the hydrogen is 1.2 buckets of brine of electrolysis |
 | Nitric acid (Ostwald) | 100 mB ammonia + 200 mB oxygen + 100 mB water → 200 mB, 5,120 JE | |
 | Ammonium phosphate | 2 phosphate + 250 mB ammonia → 6 fertilizer | against 4 with sulfuric acid; phosphate stays the limit |
