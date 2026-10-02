@@ -467,6 +467,26 @@ def check_worldgen():
                 err(f"pixel_hollows.json: unknown placed feature {ref}")
 
 
+def check_end_shares():
+    """End biomes give shares, which tools/end_noise.py turns into Fabric weights: highlands shares leave vanilla's End
+    Highlands some, and one barrens biome at most, keyed by vanilla's End Highlands (the only case the weight maths
+    covers). The noise quantiles rise from 0 to 1."""
+    import end_noise
+    quantiles = end_noise.QUANTILES
+    if quantiles[0] != 0 or quantiles[-1] != 1 or any(b <= a for a, b in zip(quantiles, quantiles[1:])):
+        err("tools/end_noise.py QUANTILES must rise from 0 to 1")
+    ends = {name: info["end"] for name, info in bm.BIOMES.items() if info.get("dimension") == "end"}
+    highlands = [end["share"] for end in ends.values() if end.get("zone") == "highlands"]
+    barrens = [name for name, end in ends.items() if end.get("zone") == "barrens"]
+    for name, end in ends.items():
+        if end.get("zone") not in ("highlands", "barrens") or not 0 < end.get("share", 0) < 1 or "weight" in end:
+            err(f"{name}: an End biome needs a zone (highlands or barrens) and a share between 0 and 1, not a weight")
+    if not 0 < 1 - sum(highlands) < 1:
+        err(f"End highlands shares {highlands} must leave vanilla's End Highlands a share")
+    if len(barrens) > 1 or any(ends[name].get("highlands") != "minecraft:end_highlands" for name in barrens):
+        err(f"End barrens {barrens}: at most one, keyed by minecraft:end_highlands")
+
+
 NESTED_PLACED = ("default", "feature_true", "feature_false", "vegetation_feature")
 
 
@@ -595,6 +615,7 @@ def check_biomes():
     if (f'"biomes.region_size", "{bm.REGIONS["size"]}"' not in config or f'"biomes.region_share", "{bm.REGIONS["share"]}"' not in config
             or bm.FEATURE not in FEATURES):
         err("JugcraftConfig's biomes switch or region options differ from tools/biomes.py")
+    check_end_shares()
     placed = DATA / MOD / "worldgen" / "placed_feature"
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for name, info in bm.BIOMES.items():

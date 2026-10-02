@@ -59,28 +59,33 @@
     {
       "biome": "jugcraft:chorus_reef",
       "zone": "highlands",
-      "weight": 0.25
+      "share": 0.125,
+      "weight": 0.2996
     },
     {
       "biome": "jugcraft:ender_wilds",
       "zone": "highlands",
-      "weight": 0.25
+      "share": 0.125,
+      "weight": 0.3492
+    },
+    {
+      "biome": "jugcraft:phantom_garden",
+      "zone": "highlands",
+      "share": 0.125,
+      "weight": 0.5043
+    },
+    {
+      "biome": "jugcraft:rotted_expanse",
+      "zone": "highlands",
+      "share": 0.125,
+      "weight": 2.9515
     },
     {
       "biome": "jugcraft:outer_flats",
       "zone": "barrens",
       "highlands": "minecraft:end_highlands",
-      "weight": 0.5
-    },
-    {
-      "biome": "jugcraft:phantom_garden",
-      "zone": "highlands",
-      "weight": 0.25
-    },
-    {
-      "biome": "jugcraft:rotted_expanse",
-      "zone": "highlands",
-      "weight": 0.25
+      "share": 0.3333,
+      "weight": 7.0128
     }
   ]
 }

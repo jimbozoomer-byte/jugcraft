@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
@@ -81,6 +83,9 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 	private static final int STAND_TRIES = 32;
 	/** Blocks of air the camera must have ahead of it, diagonally to the north-west at eye level. */
 	private static final int STAND_VIEW = 4;
+	/** Nether and End shares: every Jugcraft biome must turn up in this square round the origin, sampled this finely. */
+	private static final int SAMPLE_REACH = 4096;
+	private static final int SAMPLE_STEP = 64;
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -184,10 +189,19 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 				singleplayer.getConnection().waitForChunksRender();
 				context.takeScreenshot("jugcraft_biome_" + shot);
 			}
-			// The Nether and End biomes (batches 8 and 9): each where it is nearest the origin, from a standing spot on its
-			// floor, looking out. Logged and photographed only.
+			// The Nether and End biomes (batches 8 and 9): how often each turns up over a square round the origin (every
+			// Jugcraft one must), and each where it is nearest the origin, from a standing spot on its floor, looking out.
+			List<String> dimensionMissing = new ArrayList<>();
 			for (ResourceKey<Level> dimension : List.of(Level.NETHER, Level.END)) {
 				List<ResourceKey<Biome>> biomes = dimension == Level.NETHER ? JugcraftDimensions.nether() : JugcraftDimensions.end();
+				Map<String, Integer> sampled = server.computeOnServer(minecraft -> sampleBiomes(minecraft.getLevel(dimension)));
+				LOGGER.info("Biomes, seed {}: {} biomes every {} blocks over {} blocks round the origin: {}", SEED,
+						dimension.identifier().getPath(), SAMPLE_STEP, SAMPLE_REACH, sampled);
+				for (ResourceKey<Biome> biome : biomes) {
+					if (!sampled.containsKey(biome.identifier().toString())) {
+						dimensionMissing.add(biome.identifier().toString());
+					}
+				}
 				for (ResourceKey<Biome> biome : biomes) {
 					BlockPos spot = server.computeOnServer(minecraft -> standingSpot(minecraft.getLevel(dimension), biome));
 					String name = biome.identifier().getPath();
@@ -202,6 +216,9 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 					singleplayer.getConnection().waitForChunksRender();
 					context.takeScreenshot("jugcraft_biome_" + name);
 				}
+			}
+			if (!dimensionMissing.isEmpty()) {
+				throw new AssertionError("Not sampled within " + SAMPLE_REACH + " blocks of the origin: " + dimensionMissing);
 			}
 			if (!vanillaMissing.isEmpty()) {
 				throw new AssertionError("Vanilla " + vanillaMissing + " not within " + SEARCH + " blocks of the start (seed " + SEED + ")");
@@ -320,6 +337,17 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 			}
 		}
 		return true;
+	}
+
+	/** How often each biome is found at y 64 every {@link #SAMPLE_STEP} blocks over a square round the origin (biome lookups only). */
+	private static Map<String, Integer> sampleBiomes(ServerLevel level) {
+		Map<String, Integer> counts = new TreeMap<>();
+		for (int x = -SAMPLE_REACH; x <= SAMPLE_REACH; x += SAMPLE_STEP) {
+			for (int z = -SAMPLE_REACH; z <= SAMPLE_REACH; z += SAMPLE_STEP) {
+				level.getBiome(new BlockPos(x, 64, z)).unwrapKey().ifPresent(key -> counts.merge(key.identifier().toString(), 1, Integer::sum));
+			}
+		}
+		return counts;
 	}
 
 	/** The biome on the surface where the camera looks from {@code spot}. */

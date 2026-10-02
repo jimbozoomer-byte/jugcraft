@@ -51,7 +51,7 @@ Nine new Nether biomes join vanilla's five. They are rarer than vanilla's: each 
 Results are recorded under "Results" below after CI runs.
 - `python3 tools/check_mod_data.py`: biomes and their features, the generated placements current, Java placing them, no Nether biome with region rules, an Overworld surface or seasons.
 - Server game test (`BiomeGameTests.dimensionBiomesArePlaced`): the game test server's Nether has one fixed biome, so the test builds the Nether's biome source as a real world does; every Jugcraft Nether biome must be among its biomes, and their features must sort into one order (no feature order cycle).
-- Client game test (`BiomeClientGameTests`): each Nether biome's nearest place to the origin, a standing spot on its floor, and a screenshot.
+- Client game test (`BiomeClientGameTests`): how often each Nether biome turns up every 64 blocks over 4,096 blocks round the origin (every Jugcraft one must), each one's nearest place to the origin, a standing spot on its floor, and a screenshot.
 - Not run: play, a dedicated server, two clients.
 
 ### Results
@@ -68,6 +68,9 @@ Results are recorded under "Results" below after CI runs.
     - Fungal Thicket: crimson nylium and crimson fungi beside a lava sea.
     - Netherbrush: warped nylium and roots in the dark. Blighted Sands: a dim floor of soul sand.
     - The Ashfall Wastes' shot looked into lava, and the Quartz Rift's and Withered Hollow's at a wall. The client test now needs air ahead of the camera and no fluid beside the spot (commit 079af8b8).
+- **Run [37052172948](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37052172948) (commit 079af8b8): green.** Standing spots now need air ahead of the camera and no fluid beside them.
+  - The same biomes had spots, three moved: Ashfall Wastes -400 67 -512, Magma Fields 648 52 544, Quartz Rift -232 112 -96.
+  - Screenshots: the Ashfall Wastes now show an ash-grey haze over a lava sea; the Magma Fields sulfur spikes, sulfur, magma and blackstone; the Marrow Heap bone spires on its floor; the Quartz Rift a quartz pillar close by. The Withered Hollow's still faces obsidian close up.
 
 ## World and event applicability
 - Biome fit: each takes a climate point in the Nether, next to vanilla's.

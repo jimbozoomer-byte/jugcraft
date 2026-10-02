@@ -10,6 +10,7 @@ Biomes are built from the vanilla biome they replace (biome_bases.BASES): its or
 their own trees and plants (trees.SHAPES). Batch 1 is the seasonal forests.
 """
 
+import end_noise
 from biome_bases import BASE_TAGS
 
 MOD = "jugcraft"
@@ -160,14 +161,26 @@ def rules_file():
 
 def dimension_file():
     """The generated Nether and End placements Java reads (/jugcraft/dimension_biomes.json; biome/JugcraftDimensions):
-    a Nether biome's [temperature, humidity, offset], an End biome's zone and weight."""
+    a Nether biome's [temperature, humidity, offset], an End biome's zone and Fabric weight, in the order Java adds them.
+
+    An End biome gives its share instead of a weight: of the highlands ("highlands"), or of the barrens beside
+    vanilla's End Highlands ("barrens", keyed by minecraft:end_highlands). Fabric's weights do not give shares in
+    proportion (tools/end_noise.py), so the weights are worked out from the shares."""
     out = {"nether": [], "end": []}
+    highlands, barrens = [], []
     for name, info in BIOMES.items():
         if info.get("dimension") == "nether":
             temperature, humidity, offset = info["nether"]
             out["nether"].append({"biome": f"{MOD}:{name}", "temperature": temperature, "humidity": humidity, "offset": offset})
         elif info.get("dimension") == "end":
-            out["end"].append({"biome": f"{MOD}:{name}", **info["end"]})
+            (highlands if info["end"]["zone"] == "highlands" else barrens).append((name, info["end"]))
+    weights, vanilla = end_noise.highlands_weights([end["share"] for _, end in highlands])
+    for (name, end), weight in zip(highlands, weights):
+        out["end"].append({"biome": f"{MOD}:{name}", "zone": "highlands", "share": round(end["share"], 4),
+                           "weight": round(weight, 4)})
+    for name, end in barrens:
+        out["end"].append({"biome": f"{MOD}:{name}", "zone": "barrens", "highlands": end["highlands"],
+                           "share": round(end["share"], 4), "weight": round(end_noise.barrens_weight(end["share"], vanilla), 4)})
     return out
 
 
@@ -1316,7 +1329,7 @@ BIOMES = {
     # sandstone pillars.
     "chorus_reef": {
         "display": "Chorus Reef", "base": "end_highlands", "temperature": 0.5, "downfall": 0.5, "seasons": False,
-        "dimension": "end", "end": {"zone": "highlands", "weight": 0.25},
+        "dimension": "end", "end": {"zone": "highlands", "share": 0.125},
         "ground": {"blocks": {"minecraft:end_stone": 3, "minecraft:sand": 2, "minecraft:sandstone": 1, "minecraft:dead_brain_coral_block": 1,
                               "minecraft:dead_tube_coral_block": 1, "minecraft:dead_horn_coral_block": 1},
                    "replaceable": "#jugcraft:end_ground_replaceable"},
@@ -1328,7 +1341,7 @@ BIOMES = {
     # glinting motes.
     "ender_wilds": {
         "display": "Ender Wilds", "base": "end_highlands", "temperature": 0.5, "downfall": 0.5, "seasons": False,
-        "dimension": "end", "end": {"zone": "highlands", "weight": 0.25},
+        "dimension": "end", "end": {"zone": "highlands", "share": 0.125},
         "attributes": {"minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:glow"}, "probability": 0.003}],
                                                                "modifier": "append"}},
         "ground": {"blocks": {"minecraft:moss_block": 3, "minecraft:end_stone": 2}, "replaceable": "#jugcraft:end_ground_replaceable"},
@@ -1339,7 +1352,7 @@ BIOMES = {
     # The outer flats: low, wide barrens of end stone, sand and gravel at the islands' edges, with dead bushes.
     "outer_flats": {
         "display": "Outer Flats", "base": "end_barrens", "temperature": 0.5, "downfall": 0.5, "seasons": False,
-        "dimension": "end", "end": {"zone": "barrens", "highlands": "minecraft:end_highlands", "weight": 0.5},
+        "dimension": "end", "end": {"zone": "barrens", "highlands": "minecraft:end_highlands", "share": 1 / 3},
         "ground": {"blocks": {"minecraft:end_stone": 4, "minecraft:sand": 2, "minecraft:gravel": 1},
                    "replaceable": "#jugcraft:end_ground_replaceable"},
         "trees": None,
@@ -1349,7 +1362,7 @@ BIOMES = {
     # A phantom garden: pale moss and its carpets, pale oaks and eyeblossoms, in the End's dark.
     "phantom_garden": {
         "display": "Phantom Garden", "base": "end_highlands", "temperature": 0.5, "downfall": 0.5, "seasons": False,
-        "dimension": "end", "end": {"zone": "highlands", "weight": 0.25},
+        "dimension": "end", "end": {"zone": "highlands", "share": 0.125},
         "ground": {"blocks": {"minecraft:pale_moss_block": 3, "minecraft:end_stone": 1}, "plant": "jugcraft:pale_moss_carpets",
                    "plant_chance": 0.3, "replaceable": "#jugcraft:end_ground_replaceable"},
         "trees": {"count": [2, 3], "default": "minecraft:pale_oak_checked", "picks": []},
@@ -1360,7 +1373,7 @@ BIOMES = {
     # murky pools; no endermen.
     "rotted_expanse": {
         "display": "Rotted Expanse", "base": "end_highlands", "temperature": 0.5, "downfall": 0.5, "seasons": False,
-        "dimension": "end", "end": {"zone": "highlands", "weight": 0.25},
+        "dimension": "end", "end": {"zone": "highlands", "share": 0.125},
         "effects": {"water_color": "#4a4a3a"},
         "ground": {"blocks": {"minecraft:end_stone": 3, "minecraft:coarse_dirt": 2, "minecraft:soul_soil": 1},
                    "replaceable": "#jugcraft:end_ground_replaceable"},
