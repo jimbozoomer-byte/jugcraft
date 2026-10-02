@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -182,10 +183,15 @@ public class KnittingGameTests {
 	@GameTest(maxTicks = 20)
 	public void knitwearKeepsYouCosy(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
+		// Vanilla's dyeable items (leather armour is one), which its dyeing recipe takes.
+		TagKey<Item> dyeable = TagKey.create(Registries.ITEM, Identifier.withDefaultNamespace("dyeable"));
+		helper.assertTrue(new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("leather_helmet"))).is(dyeable),
+				"minecraft:dyeable is vanilla's dyeable tag (leather is in it)");
+		helper.assertTrue(Knitting.yarn(Knitting.UNDYED, 1).is(dyeable), "Yarn takes dye");
 		for (Knitwear knit : Knitwear.values()) {
 			ItemStack garment = Knitting.garment(knit, 0x228822);
 			helper.assertTrue(garment.get(DataComponents.EQUIPPABLE).slot() == knit.slot && garment.is(ItemTags.FREEZE_IMMUNE_WEARABLES)
-					&& garment.is(ItemTags.DYEABLE) && garment.is(Knitting.KNITWEAR), knit + " is worn, warm and dyeable");
+					&& garment.is(dyeable) && garment.is(Knitting.KNITWEAR), knit + " is worn, warm and dyeable");
 		}
 		helper.setBlock(new BlockPos(3, 2, 3), Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, false));
 		ServerPlayer player = player(helper, new BlockPos(3, 2, 5));
