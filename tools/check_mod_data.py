@@ -797,6 +797,7 @@ def check_agriculture():
     check_lanterns(java, main)
     check_feast(java, main)
     check_maze(java, main)
+    check_ghosts(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2507,6 +2508,55 @@ def check_maze(java, main):
         err("Maze corn must give back its kernel, from its bottom section only")
     if not (DATA / "jugcraft" / "recipe" / f"{mz['gate']}.json").exists() or not (DATA / "jugcraft" / "advancement" / "amazing.json").exists():
         err("The corn maze gate needs its recipe, and finishing a maze its advancement")
+
+def check_ghosts(java, main):
+    """Ghost hunting: Spirits.java and RestlessSpirit.java match GHOSTS in tools/agriculture.py; the spirit is registered
+    with its attributes and no loot, named; the Spirit Lantern and Ectoplasm are registered, named and drawn, Ectoplasm
+    giving its bottle back and scenting wax (the Ghostly scent); the lantern has its recipe and tooltip; every grave takes
+    random ticks and stirs; catching a spirit has its advancement."""
+    gh = ag.GHOSTS
+
+    def numbers(source):
+        return {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;",
+                                                                    java.get(source, ""))}
+
+    expected = {"Spirits": {"STIR_CHANCE": gh["stir_chance"], "NEAR_CAP": gh["near_cap"], "NEAR_RANGE": gh["near_range"],
+                            "REVEAL_RADIUS": gh["reveal_radius"]},
+                "RestlessSpirit": {"HAUNT_RADIUS": gh["haunt_radius"], "HAUNT_HEIGHT": gh["haunt_height"], "SHY_RADIUS": gh["shy_radius"],
+                                   "SNEAK_SHY_RADIUS": gh["sneak_shy_radius"], "DRIFT_SPEED": gh["drift_speed"], "SHY_SPEED": gh["shy_speed"],
+                                   "REVEAL_TICKS": gh["reveal_ticks"], "LOOK_TICKS": gh["look_ticks"], "FADE_TICKS": gh["fade_ticks"]}}
+    for source, values in expected.items():
+        found = numbers(source)
+        for name, value in values.items():
+            if name not in found or abs(found[name] - value) > 1e-9:
+                err(f"{source}.{name} = {found.get(name)} differs from GHOSTS in tools/agriculture.py ({value})")
+    if f'entity("{gh["entity"]}", EntityType.Builder.<RestlessSpirit>of(RestlessSpirit::new' not in main \
+            or "FabricDefaultAttributeRegistry.register(RESTLESS_SPIRIT" not in main:
+        err("JugcraftAgriculture.java must register the restless spirit and its attributes")
+    if f'registerItem("{gh["lantern"]}", SpiritLanternItem::new' not in main \
+            or f'registerItem("{gh["ectoplasm"]}", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE)' not in main:
+        err("JugcraftAgriculture.java must register the Spirit Lantern, and Ectoplasm giving back its glass bottle")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key, display in ((f"entity.jugcraft.{gh['entity']}", gh["display"]), (f"item.jugcraft.{gh['lantern']}", gh["lantern_display"]),
+                         (f"item.jugcraft.{gh['ectoplasm']}", gh["ectoplasm_display"])):
+        if lang.get(key) != display:
+            err(f"{key} must be named {display!r}")
+    if "item.jugcraft.spirit_lantern.tooltip" not in lang:
+        err("The Spirit Lantern has no tooltip")
+    for item in (gh["lantern"], gh["ectoplasm"]):
+        if not (ASSETS / "textures" / "item" / f"{item}.png").exists() or not (ASSETS / "items" / f"{item}.json").exists():
+            err(f"{item} needs its texture and item model")
+    if not (ASSETS / "textures" / "entity" / f"{gh['entity']}.png").exists():
+        err("The restless spirit needs its texture")
+    if f"jugcraft:{gh['ectoplasm']}" not in ag.CHANDLERY["scents"].get("ghostly", {}).get("items", []):
+        err("Ectoplasm must be the Ghostly candle scent")
+    if not (DATA / "jugcraft" / "recipe" / f"{gh['lantern']}.json").exists() or not (DATA / "jugcraft" / "advancement" / "ghost_hunter.json").exists():
+        err("The Spirit Lantern needs its recipe, and catching a spirit its advancement")
+    if main.count(".noOcclusion().randomTicks());") < 2:
+        err("The gravestones and the grave mound must take random ticks, so graves stir")
+    for source in ("GravestoneBlock", "GraveMoundBlock"):
+        if "Spirits.stir(level, pos, random)" not in java.get(source, ""):
+            err(f"{source} must stir at night (Spirits.stir in randomTick)")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

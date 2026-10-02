@@ -230,6 +230,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<CanningKettleBlockEntity> CANNING_KETTLE_ENTITY;
 	/** Crows: they come to fields by day and peck ripe crops, unless a scarecrow guards them. */
 	public static EntityType<Crow> CROW;
+	/** Restless spirits: risen from graves at night, seen only by a Spirit Lantern's light (or a Revealing candle's). */
+	public static EntityType<RestlessSpirit> RESTLESS_SPIRIT;
 	/** Spooky fireworks in flight: they burst into a picture ({@link FireworkShape}). */
 	public static EntityType<SpookyRocket> SPOOKY_ROCKET;
 	/** Sky lanterns let go: they rise, drift with the wind and burn out. */
@@ -711,8 +713,9 @@ public final class JugcraftAgriculture {
 
 		List<Block> gravestones = new ArrayList<>();
 		for (GravestoneBlock.Style style : GravestoneBlock.Style.values()) {
+			// Random ticks: graves stir at night (fall additions 9, ghost hunting).
 			Block stone = registerBlock(style.id, props -> new GravestoneBlock(props, style), BlockBehaviour.Properties.of()
-					.mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F).sound(SoundType.STONE).noOcclusion());
+					.mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F).sound(SoundType.STONE).noOcclusion().randomTicks());
 			registerItem(style.id, props -> new BlockItem(stone, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
 			gravestones.add(stone);
 		}
@@ -851,7 +854,7 @@ public final class JugcraftAgriculture {
 				.mapColor(MapColor.DEEPSLATE).strength(3.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.STONE).noOcclusion()
 				.pushReaction(PushReaction.POPPED));
 		Block mound = registerBlock("grave_mound", GraveMoundBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.DIRT).strength(0.6F)
-				.sound(SoundType.ROOTED_DIRT).noOcclusion());
+				.sound(SoundType.ROOTED_DIRT).noOcclusion().randomTicks());
 		Block angel = registerBlock("mourning_angel", MourningAngelBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ)
 				.strength(2.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.CALCITE).noOcclusion().pushReaction(PushReaction.POPPED));
 		Block skeleton = registerBlock("pop_up_skeleton", PopUpSkeletonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
@@ -1297,6 +1300,14 @@ public final class JugcraftAgriculture {
 		registerItem("corn_maze_gate", props -> new BlockItem(mazeGate, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
 		registerBlock("corn_maze_finish", CornMazeFinishBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F)
 				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+
+		// Fall additions 9, ghost hunting: restless spirits rise from graves at night; a Spirit Lantern reveals them, and a
+		// glass bottle catches one as Ectoplasm, the Ghostly candle scent.
+		registerItem("spirit_lantern", SpiritLanternItem::new, new Item.Properties().stacksTo(1), EQUIPMENT_TAB);
+		registerItem("ectoplasm", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE).stacksTo(16), INGREDIENT_TAB);
+		RESTLESS_SPIRIT = entity("restless_spirit", EntityType.Builder.<RestlessSpirit>of(RestlessSpirit::new, MobCategory.AMBIENT).noLootTable()
+				.sized(0.6F, 1.4F).eyeHeight(1.15F).fireImmune().clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(RESTLESS_SPIRIT, RestlessSpirit.createAttributes());
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
