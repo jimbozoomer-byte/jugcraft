@@ -328,7 +328,7 @@ SIGN_TEXTURES = {"wood": "spooky_sign_wood", "stake": "spooky_sign_stake"}
 
 def sign_elements():
     """A weathered board on a stake, facing north."""
-    return [box((7, 0, 8), (9, 9, 9.5), "#stake"), box((1, 7, 7.5), (15, 15, 9), "#wood"), box((10.5, 14.5, 7.25), (15.5, 16, 8.75), "#wood")]
+    return [box((7, 0, 8), (9, 7, 9.5), "#stake"), box((0.5, 6, 7.5), (15.5, 15.5, 9), "#wood")]
 
 
 # ---------------------------------------------------------------- the haunted archway
@@ -347,10 +347,12 @@ def archway_elements(lit):
                      box((x0 + 3, 41, 5), (x0 + 13, 44, 11), s), box((x0 + 5, 44, 7), (x0 + 11, 46, 9), s),
                      box((x0 + 7, 26, 1), (x0 + 9, 27, 4), i), box((x0 + 7.75, 23, 1.75), (x0 + 8.25, 26, 2.25), i)]
         elements += lantern(x0 + 6, 17, 0, lit)
-    for x0, x1, y0, y1 in ((14, 17, 36.5, 39), (17, 20, 38.5, 41), (20, 24, 40.5, 42.5), (24, 28, 40.5, 42.5), (28, 31, 38.5, 41),
-                           (31, 34, 36.5, 39)):
-        elements.append(box((x0, y0, 7.25), (x1, y1, 8.75), i))
-    elements += [box((14, 35, 7), (34, 36.5, 9), i),
+    for x0, x1, y0, y1 in ((14, 17, 36.5, 39.5), (17, 20, 38.5, 41.5), (20, 24, 40.5, 43), (24, 28, 40.5, 43), (28, 31, 38.5, 41.5),
+                           (31, 34, 36.5, 39.5)):
+        elements.append(box((x0, y0, 6.75), (x1, y1, 9.25), i))
+    for x, top in ((18, 38.5), (30, 38.5)):
+        elements += [box((x - 0.4, 36.5, 7.6), (x + 0.4, top, 8.4), i), box((x - 0.4, top + 3, 7.6), (x + 0.4, top + 5, 8.4), i)]
+    elements += [box((14, 34.5, 6.75), (34, 36.5, 9.25), i),
                  box((21, 36.5, 6.5), (27, 41, 9.5), i, textures={"north": "#skull", "south": "#skull"},
                      uvs={"north": FULL, "south": FULL}),
                  box((23.5, 42.5, 7.5), (24.5, 45, 8.5), i),

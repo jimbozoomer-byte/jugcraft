@@ -26,14 +26,14 @@ import org.jspecify.annotations.Nullable;
  * font pixel; lines past the last that fits are left off.
  */
 public class SpookySignRenderer implements BlockEntityRenderer<SpookySignBlockEntity, SpookySignRenderer.State> {
-	private static final int PAINT = 0xFF9A1414;
+	private static final int PAINT = 0xFFD41C1C;
 	/** The board's face: its middle's height, its width and height (pixels) and how far in front of the block's middle. */
-	private static final float MIDDLE_Y = 11.0F;
-	private static final float WIDTH = 12.5F;
-	private static final float HEIGHT = 7.0F;
+	private static final float MIDDLE_Y = 10.75F;
+	private static final float WIDTH = 13.5F;
+	private static final float HEIGHT = 8.0F;
 	private static final float FRONT = 0.5F;
 	private static final float OUT = 0.005F;
-	private static final float MAX_SCALE = 1.0F / 64;
+	private static final float MAX_SCALE = 1.0F / 32;
 	/** The smallest the letters get: the width to wrap at, in font pixels, is the board's width at this size. */
 	private static final float MIN_SCALE = 1.0F / 150;
 	private static final int MAX_LINES = 4;

@@ -43,8 +43,8 @@ import org.jspecify.annotations.Nullable;
 public class SpookySignBlock extends BaseEntityBlock {
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 	public static final EnumProperty<Words> WORDS = EnumProperty.create("words", Words.class);
-	private static final VoxelShape[] SHAPES = {Block.box(1.0, 0.0, 7.0, 15.0, 16.0, 9.5), Block.box(6.5, 0.0, 1.0, 9.0, 16.0, 15.0),
-			Block.box(1.0, 0.0, 6.5, 15.0, 16.0, 9.0), Block.box(7.0, 0.0, 1.0, 9.5, 16.0, 15.0)};
+	private static final VoxelShape[] SHAPES = {Block.box(0.5, 0.0, 7.0, 15.5, 15.5, 9.5), Block.box(6.5, 0.0, 0.5, 9.0, 15.5, 15.5),
+			Block.box(0.5, 0.0, 6.5, 15.5, 15.5, 9.0), Block.box(7.0, 0.0, 0.5, 9.5, 15.5, 15.5)};
 
 	public enum Words implements StringRepresentable {
 		BEWARE, KEEP_OUT, TURN_BACK, GO_AWAY, NO_TRESPASSING, ABANDON_HOPE;
