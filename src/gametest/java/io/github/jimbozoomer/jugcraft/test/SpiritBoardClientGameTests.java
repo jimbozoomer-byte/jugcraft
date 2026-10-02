@@ -46,8 +46,8 @@ public class SpiritBoardClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 
-			shoot(context, singleplayer, x + 4, y + 2, z - 1, 180, 50, "jugcraft_spirit_boards");
-			shoot(context, singleplayer, x + 1, y + 2, z - 4, 180, 72, "jugcraft_spirit_board");
+			shoot(context, singleplayer, x + 4, y + 1, z - 2, 180, 42, "jugcraft_spirit_boards");
+			shoot(context, singleplayer, x + 1, y + 1, z - 4, 180, 68, "jugcraft_spirit_board");
 			server.runCommand("time set midnight");
 			context.waitTicks(10);
 			shoot(context, singleplayer, x + 11, y + 1, z - 2, 180, 25, "jugcraft_seance");
