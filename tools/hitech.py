@@ -57,27 +57,37 @@ GRIP_END = 29.5
 POMMEL_END = 31.0
 
 
-def _katana_pixel(t, k, pulse):
+# The blade's energy colours: the power katana's cyan, and the Ronin katana's crimson (batch 28).
+KATANA_COLOURS = {
+    "cyan": {"WHITE": WHITE, "CYAN_CORE": CYAN_CORE, "CYAN": CYAN, "CYAN_DEEP": CYAN_DEEP, "INDIGO": INDIGO,
+             "INDIGO_HI": INDIGO_HI, "VIOLET": VIOLET, "GLOW": GLOW},
+    "crimson": {"WHITE": (255, 242, 238), "CYAN_CORE": (255, 176, 164), "CYAN": (244, 56, 52), "CYAN_DEEP": (160, 18, 26),
+                "INDIGO": (34, 14, 18), "INDIGO_HI": (74, 24, 30), "VIOLET": (226, 230, 236),
+                "GLOW": (244, 56, 52, 110)},
+}
+
+
+def _katana_pixel(t, k, pulse, c):
     if t < 0.5 or t > POMMEL_END:
         return None
     if t <= BLADE_END:
         # Kissaki: the tip narrows to the edge row.
         lowest = -1 if t > 3.5 else (0 if t > 2.5 else (1 if t > 1.5 else 2))
         if k == 3 and t > 1.5:
-            return GLOW
+            return c["GLOW"]
         if not lowest <= k <= 2:
             return None
         glow = max(0.0, 1.0 - abs(t - pulse) / 2.5)
         # Across the blade, dark spine to white-hot edge, so the rows blend instead of striping.
         if k == -1:
-            return INDIGO  # the dark spine
+            return c["INDIGO"]  # the dark spine
         if k == 0:
             if t > BLADE_END - 8 and int(t) % 3 == 1:
-                return _mix(CYAN, WHITE, glow)  # circuit nodes running out from the collar
-            return _mix(INDIGO_HI, CYAN_DEEP, glow)
+                return _mix(c["CYAN"], c["WHITE"], glow)  # circuit nodes running out from the collar
+            return _mix(c["INDIGO_HI"], c["CYAN_DEEP"], glow)
         if k == 1:
-            return _mix(CYAN, CYAN_CORE, glow)
-        return _mix(CYAN_CORE, WHITE, 0.4 + 0.6 * glow)  # the cutting edge
+            return _mix(c["CYAN"], c["CYAN_CORE"], glow)
+        return _mix(c["CYAN_CORE"], c["WHITE"], 0.4 + 0.6 * glow)  # the cutting edge
     if t <= COLLAR_END:
         return (GOLD if k <= 0 else GOLD_DARK) if -1 <= k <= 2 else None  # habaki
     if t <= GUARD_END:
@@ -85,37 +95,37 @@ def _katana_pixel(t, k, pulse):
             return None
         if k in (-3, 4):
             return STEEL_DARK
-        return CYAN if k in (-2, 3) else STEEL_MID  # tsuba with a cyan power ring
+        return c["CYAN"] if k in (-2, 3) else STEEL_MID  # tsuba with a cyan power ring
     if t <= GRIP_END:
         if not -1 <= k <= 2:
             return None
         i = int(t - GUARD_END)
         if (i + k) % 3 == 0:
-            return CYAN_CORE if k in (0, 1) else CYAN  # cell windows between the wraps
+            return c["CYAN_CORE"] if k in (0, 1) else c["CYAN"]  # cell windows between the wraps
         return WRAP_HI if (i - k) % 3 == 0 else WRAP
     if not -1 <= k <= 2:
         return None
     if k in (0, 1) and t < POMMEL_END - 0.5:
-        return VIOLET  # status light in the pommel cap
+        return c["VIOLET"]  # status light in the pommel cap
     return STEEL_HI if k <= 0 else STEEL
 
 
-def katana_frame(pulse):
+def katana_frame(pulse, colours=None):
     img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
     for y in range(32):
         for x in range(32):
-            colour = _katana_pixel((x - y + 31) / 2, x + y - 31, pulse)
+            colour = _katana_pixel((x - y + 31) / 2, x + y - 31, pulse, colours or KATANA_COLOURS["cyan"])
             if colour is not None:
                 img.putpixel((x, y), colour if len(colour) == 4 else _rgba(colour))
     return _outline(img, BLACK, alpha=170)
 
 
-def katana():
+def katana(colours=None):
     """The animated icon: KATANA_FRAMES frames of 32x32 in a vertical strip, a light running down to the tip."""
     strip = Image.new("RGBA", (32, 32 * KATANA_FRAMES), (0, 0, 0, 0))
     for i in range(KATANA_FRAMES):
         pulse = BLADE_END + 2 - (BLADE_END + 5) * i / KATANA_FRAMES
-        strip.paste(katana_frame(pulse), (0, 32 * i))
+        strip.paste(katana_frame(pulse, colours), (0, 32 * i))
     return strip
 
 

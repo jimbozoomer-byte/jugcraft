@@ -50,7 +50,16 @@ import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import io.github.jimbozoomer.jugcraft.tools.MiningDrillItem;
 import io.github.jimbozoomer.jugcraft.tools.RocketPackItem;
 import io.github.jimbozoomer.jugcraft.tools.ToolUpgrades;
+import io.github.jimbozoomer.jugcraft.gear.Exosuit;
+import io.github.jimbozoomer.jugcraft.gear.ExosuitItem;
+import io.github.jimbozoomer.jugcraft.gear.JugcraftExosuit;
 import io.github.jimbozoomer.jugcraft.gear.JugcraftGear;
+import java.util.Optional;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmithingRecipe;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
+import net.minecraft.world.item.equipment.ArmorType;
 import io.github.jimbozoomer.jugcraft.gear.PowerBowItem;
 import io.github.jimbozoomer.jugcraft.gear.PowerKatanaItem;
 import io.github.jimbozoomer.jugcraft.gear.ScubaTankItem;
@@ -1519,6 +1528,96 @@ public class JugcraftGameTests {
 		helper.assertTrue(!JugcraftGear.POWER_BOW.releaseUsing(empty, helper.getLevel(), player, drawn), "The empty bow fired");
 		helper.assertTrue(helper.getLevel().getEntitiesOfClass(Arrow.class, player.getBoundingBox().inflate(8)).size() == 1,
 				"The empty bow made an arrow");
+		helper.succeed();
+	}
+
+	private static EquipmentSlot slot(ArmorType type) {
+		return switch (type) {
+			case HELMET -> EquipmentSlot.HEAD;
+			case CHESTPLATE -> EquipmentSlot.CHEST;
+			case LEGGINGS -> EquipmentSlot.LEGS;
+			default -> EquipmentSlot.FEET;
+		};
+	}
+
+	/**
+	 * Batch 28: a charged exosuit gives more speed, a full-block step, no fall damage and a shield, and its leggings
+	 * and boots pay a JE a tick; flat pieces give none of it, and nothing is left behind.
+	 */
+	@GameTest
+	public void exosuitPowersRunOnCharge(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		for (ArmorType type : JugcraftExosuit.PIECES) {
+			player.setItemSlot(slot(type), charged(JugcraftExosuit.piece(ExosuitItem.Style.VANGUARD, type)));
+		}
+		Exosuit.tick(player);
+		helper.assertTrue(player.getAttribute(Attributes.MOVEMENT_SPEED).hasModifier(Exosuit.SPEED), "No speed bonus");
+		helper.assertTrue(player.getAttribute(Attributes.STEP_HEIGHT).getValue() >= 1.0,
+				"Step height " + player.getAttribute(Attributes.STEP_HEIGHT).getValue());
+		helper.assertTrue(player.getAttribute(Attributes.FALL_DAMAGE_MULTIPLIER).getValue() == 0.0, "Fall damage still counts");
+		helper.assertTrue(player.getMaxAbsorption() >= Exosuit.SHIELD_POINTS, "Shield holds " + player.getMaxAbsorption());
+		for (EquipmentSlot paid : new EquipmentSlot[] {EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+			ItemStack piece = player.getItemBySlot(paid);
+			helper.assertTrue(Chargeable.energy(piece) == Chargeable.capacity(piece) - 1,
+					"The " + paid + " piece holds " + Chargeable.energy(piece) + " JE");
+		}
+		for (ArmorType type : JugcraftExosuit.PIECES) {
+			player.setItemSlot(slot(type), new ItemStack(JugcraftExosuit.piece(ExosuitItem.Style.VANGUARD, type)));
+		}
+		Exosuit.tick(player);
+		helper.assertTrue(!player.getAttribute(Attributes.MOVEMENT_SPEED).hasModifier(Exosuit.SPEED), "Flat leggings still speed");
+		helper.assertTrue(!player.getAttribute(Attributes.STEP_HEIGHT).hasModifier(Exosuit.STEP), "Flat boots still step");
+		helper.assertTrue(!player.getAttribute(Attributes.FALL_DAMAGE_MULTIPLIER).hasModifier(Exosuit.FALL), "Flat boots still cushion");
+		helper.assertTrue(player.getMaxAbsorption() == 0.0F, "A flat chestplate still shields");
+		helper.succeed();
+	}
+
+	/** Batch 28: the chestplate's shield regrows absorption for 4,000 JE a point. */
+	@GameTest(maxTicks = 100)
+	public void exosuitShieldRegrows(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setItemSlot(EquipmentSlot.CHEST, charged(JugcraftExosuit.piece(ExosuitItem.Style.RONIN, ArmorType.CHESTPLATE)));
+		player.setAbsorptionAmount(0.0F);
+		helper.succeedWhen(() -> {
+			Exosuit.tick(player);
+			ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
+			helper.assertTrue(player.getAbsorptionAmount() >= 1.0F, "No shield yet");
+			helper.assertTrue(Chargeable.energy(chest) <= Chargeable.capacity(chest) - Exosuit.SHIELD_PER_POINT,
+					"The shield cost " + (Chargeable.capacity(chest) - Chargeable.energy(chest)) + " JE");
+		});
+	}
+
+	/** Batch 28: the exosuit chestplate flies like the rocket pack, on its own charge. */
+	@GameTest
+	public void exosuitChestplateIsAJetpack(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setItemSlot(EquipmentSlot.CHEST, charged(JugcraftExosuit.piece(ExosuitItem.Style.VANGUARD, ArmorType.CHESTPLATE)));
+		helper.assertTrue(RocketPackItem.canThrust(player), "The chestplate cannot thrust");
+		player.fallDistance = 10;
+		RocketPackItem.thrust(player);
+		ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
+		helper.assertTrue(Chargeable.energy(chest) == Chargeable.capacity(chest) - RocketPackItem.ENERGY_PER_TICK,
+				"The chestplate holds " + Chargeable.energy(chest) + " JE");
+		helper.assertTrue(player.fallDistance == 0, "The fall was not cancelled");
+		player.setItemSlot(EquipmentSlot.CHEST, charged(JugcraftExosuit.piece(ExosuitItem.Style.VANGUARD, ArmorType.LEGGINGS)));
+		helper.assertTrue(!RocketPackItem.canThrust(player), "Leggings worn on the chest fly");
+		helper.succeed();
+	}
+
+	/** Batch 28: the Ronin livery repaints an exosuit piece at the smithing table and keeps its charge. */
+	@GameTest
+	public void liveryRepaintsAndKeepsCharge(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ItemStack base = new ItemStack(JugcraftExosuit.piece(ExosuitItem.Style.VANGUARD, ArmorType.HELMET));
+		Chargeable.setEnergy(base, 123_456);
+		SmithingRecipeInput input = new SmithingRecipeInput(new ItemStack(JugcraftExosuit.RONIN_LIVERY), base,
+				// Looked up by ID: the dye has no Items constant in 26.3.
+				new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse("minecraft:red_dye"))));
+		Optional<RecipeHolder<SmithingRecipe>> recipe = level.recipeAccess().getRecipeFor(RecipeType.SMITHING, input, level);
+		helper.assertTrue(recipe.isPresent(), "No livery recipe for the helmet");
+		ItemStack out = recipe.get().value().assemble(input);
+		helper.assertTrue(out.is(JugcraftExosuit.piece(ExosuitItem.Style.RONIN, ArmorType.HELMET)), "Repainted into " + out);
+		helper.assertTrue(Chargeable.energy(out) == 123_456, "The repainted helmet holds " + Chargeable.energy(out) + " JE");
 		helper.succeed();
 	}
 

@@ -19,6 +19,7 @@ import petro
 import deposits
 import seasons
 import tank_display
+import exosuit
 import gear
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
@@ -270,7 +271,7 @@ def item_units(ref):
         return {"aluminum": 9}
     if path in NON_METAL:
         return {}
-    if path in plastic.blocks():
+    if path in plastic.blocks() or path in exosuit.items():
         return {}
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
@@ -303,6 +304,8 @@ def check_recipes(registered):
             inputs = [recipe["key"][ch] for ch in symbols if ch != " "]
         elif kind == "minecraft:crafting_shapeless":
             inputs = recipe["ingredients"]
+        elif kind == "minecraft:smithing_transform":
+            inputs = [recipe["template"], recipe["base"], recipe["addition"]]
         else:
             inputs = [recipe["ingredient"]]
 
@@ -459,7 +462,8 @@ def check_tags():
             elif split(value)[0] == MOD and split(value)[1] not in (all_blocks() + all_items() + machine_blocks()
                                                                     + machine_items() + petro.petro_blocks()
                                                                     + petro.petro_items() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
-                                                                    + gear.items() + plastic.blocks() + seasons.BLOCKS):
+                                                                    + gear.items() + plastic.blocks()
+                                                                    + exosuit.items() + seasons.BLOCKS):
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
 
@@ -478,6 +482,45 @@ def check_worldgen():
         feature = split((load(path) or {})["feature"])[1]
         if not (DATA / MOD / "worldgen" / "feature" / f"{feature}.json").is_file():
             err(f"{path.name}: unknown configured feature {feature}")
+
+
+def check_exosuit():
+    """gear/JugcraftExosuit.java and gear/Exosuit.java against tools/exosuit.py: the liveries, pieces and numbers; and
+    that every icon, worn layer and 3D part texture exists."""
+    java = (JAVA_ROOT / "gear" / "JugcraftExosuit.java").read_text(encoding="utf-8")
+    prefixes = dict(re.findall(r'ExosuitItem\.Style\.([A-Z]+), "([a-z_]+)"', java))
+    expected = {style.upper(): info[0] for style, info in exosuit.STYLES.items()}
+    if prefixes != expected:
+        err(f"JugcraftExosuit.PREFIXES {prefixes} != tools/exosuit.py {expected}")
+    pieces = [p.lower() for p in re.findall(r'ArmorType\.([A-Z]+)', re.search(r"PIECES = List\.of\(([^)]*)\)", java).group(1))]
+    if pieces != exosuit.PIECES:
+        err(f"JugcraftExosuit.PIECES {pieces} != tools/exosuit.py {exosuit.PIECES}")
+    for name in ("ronin_katana", "ronin_livery", "vanguard_livery"):
+        if f'item("{name}"' not in java:
+            err(f"JugcraftExosuit does not register {name}")
+    powers = (JAVA_ROOT / "gear" / "Exosuit.java").read_text(encoding="utf-8")
+    for const in ("CAPACITY", "NIGHT_VISION_PER_TICK", "SHIELD_POINTS", "SHIELD_INTERVAL", "SHIELD_PER_POINT",
+                  "SPEED_PER_TICK", "SPEED_BONUS", "BOOTS_PER_TICK", "STEP_BONUS"):
+        value = getattr(exosuit, const)
+        text = f"{value:_}" if isinstance(value, int) else str(value)
+        if not re.search(rf"\b{const} = {re.escape(text)};", powers):
+            err(f"Exosuit.{const} differs from tools/exosuit.py ({text})")
+    textures = ASSETS / "textures"
+    for style, (prefix, _, asset) in exosuit.STYLES.items():
+        for layer in ("humanoid", "humanoid_leggings"):
+            if not (textures / "entity" / "equipment" / layer / f"{asset}.png").exists():
+                err(f"Missing worn exosuit texture {layer}/{asset}.png")
+    for item in exosuit.items():
+        if not (textures / "item" / f"{item}.png").exists():
+            err(f"Missing item texture {item}.png")
+    worn = load(ASSETS / "worn_models.json") or {}
+    for style, parts in exosuit.PARTS.items():
+        for name, boxes in parts.items():
+            if f"{style}_{name}" not in worn:
+                err(f"worn_models.json has no {style}_{name}")
+            for _, _, tex in boxes:
+                if not (textures / "block" / f"{tex}.png").exists():
+                    err(f"Missing exosuit part texture block/{tex}.png")
 
 
 def check_plastic():
@@ -912,7 +955,7 @@ def check_deposits():
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(petro.petro_items()) | set(petro.petro_blocks()) | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
-                  | set(gear.items()) | set(plastic.blocks()))
+                  | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()))
     check_assets(sorted(registered))
     check_petro()
     check_loot(registered)
@@ -924,6 +967,7 @@ def main():
     check_java()
     check_deposits()
     check_gear()
+    check_exosuit()
     check_plastic()
     check_seasons()
     check_machines(registered)

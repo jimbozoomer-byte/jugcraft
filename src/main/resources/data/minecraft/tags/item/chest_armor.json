@@ -3,6 +3,8 @@
   "values": [
     "jugcraft:bronze_chestplate",
     "jugcraft:steel_chestplate",
-    "jugcraft:scuba_tank"
+    "jugcraft:scuba_tank",
+    "jugcraft:exosuit_chestplate",
+    "jugcraft:ronin_exosuit_chestplate"
   ]
 }
