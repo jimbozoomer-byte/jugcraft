@@ -11,7 +11,7 @@ drawn by the client's CandyKettleRenderer.
 from agriculture import CANDY
 from decor_data import MOD, rid, box, block_model, self_drop, turned
 
-KETTLE_TEXTURES = {"copper": "candy_kettle", "inside": "candy_kettle_inside", "dial": "candy_dial"}
+KETTLE_TEXTURES = {"copper": "candy_kettle", "inside": "candy_kettle_inside", "dial": "candy_dial", "trivet": "candy_trivet"}
 # Candies drawn in two layers: the candy (tinted by its colour) and an untinted part (a stick, a wrapper, a shine).
 DETAIL = {"rock_candy": "rock_candy_stick", "salt_water_taffy": "salt_water_taffy_wrapper", "hard_candy": "hard_candy_shine",
           "lollipop": "lollipop_stick", "cream_caramel": "cream_caramel_wrapper"}
@@ -23,8 +23,8 @@ def argb(color):
 
 
 def kettle():
-    """A copper sugar pot facing north: walls a pixel thick, a rolled rim, two side handles, and on its front a round
-    candy thermometer dial on a clip hooked over the rim."""
+    """A copper sugar pot facing north on an iron trivet: walls a pixel thick, a rolled rim, two side handles, and on its
+    front a round candy thermometer dial on a clip hooked over the rim."""
     c, i, d = "#copper", "#inside", "#dial"
     elements = [box((2, 0, 2), (14, 1, 14), c, textures={"up": i}),
                 box((2, 1, 2), (14, 10, 3), c, textures={"south": i}), box((2, 1, 13), (14, 10, 14), c, textures={"north": i}),
@@ -36,6 +36,10 @@ def kettle():
                 # The dial (its face to the north), its clip, and the hook over the rim.
                 box((5.5, 4, 1), (10.5, 9, 1.5), c, textures={"north": d}, uvs={"north": (0, 0, 16, 16)}),
                 box((7.5, 9, 1.25), (8.5, 11, 1.75), c), box((7.5, 10.5, 1.75), (8.5, 11, 3), c)]
+    # An iron trivet under it, its legs reaching down to the fire it stands over (a campfire is 7 pixels tall).
+    for x, z in ((3, 3), (12, 3), (3, 12), (12, 12)):
+        elements.append(box((x, -9, z), (x + 1, 0, z + 1), "#trivet", uvs={side: (x, 7, x + 1, 16) for side in ("north", "south", "east", "west")}))
+    elements.append(box((3, -0.5, 3), (13, 0, 13), "#trivet", faces=("down",)))
     return block_model(KETTLE_TEXTURES, elements, KETTLE_TEXTURES["copper"])
 
 
