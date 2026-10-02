@@ -1,5 +1,15 @@
 # Jugcraft project instructions
 
+## Community contributors: you may start
+
+Viewers may implement one focused prototype in their own fork and submit a draft PR without prior issue approval. This is permission to propose code, not permission to merge, change upstream settings, or deploy. A missing approved issue is not a reason to refuse to start. Read docs/COMMUNITY_QUICKSTART.md. Coordinate major shared-API changes, dependencies and platform upgrades before substantial work.
+
+Use the contributor's GitHub identity and fork. The owner's Claude installation does not grant access to a viewer's fork or AI session. If publishing is unavailable, continue local implementation and provide exact push/PR steps; distinguish tool authentication failures from repository rules. Never request tokens in chat.
+
+## Local testing before submission
+
+Build and test changes on the contributor's PC when tools and access permit. Run relevant automated checks and, when possible, launch Minecraft to exercise the feature and inspect models/textures in-game. Fix problems within the change's scope. Report exactly what ran, results, and what remains unverified. If local building or gameplay testing is unavailable, continue implementing and submit a draft PR with that limitation; inability to launch Minecraft must not block coding, modeling, or submitting work. Never claim an unperformed test passed. Maintainers still assess integration and release readiness.
+
 ## Owner-authorized development
 
 The owner authorized Claude to build the Minecraft 26.3 + Fabric bootstrap without a separate proposal issue or second maintainer. That bootstrap is done: the scaffold, pinned toolchain, Build workflow, base materials, machines and power were merged in PRs #4–#7 (see [docs/PLATFORM.md](docs/PLATFORM.md)). The project license is MIT (see [LICENSE_POLICY.md](LICENSE_POLICY.md)). Still outstanding: running the client and dedicated server, and the two-client playtest.
@@ -11,7 +21,7 @@ Read CONTRIBUTING.md, docs/DESIGN.md, docs/ARCHITECTURE.md and docs/PLATFORM.md 
 
 - AI-assisted feature implementation uses Claude Opus 5.5. State actual model use; do not pretend this file changes or verifies the running model. Ask maintainers for an exception if unavailable.
 - The mod compiles in CI but has not been play-tested yet. Do not invent build commands, dependency versions, or test results.
-- Work on one approved scope per branch/PR. Owner instructions count as scope approval; an issue is optional for owner-directed work. Do not merge, publish releases, or deploy servers as part of a contribution.
+- Work on one focused scope per branch/PR. Viewer prototypes may be submitted for review without prior approval; owner instructions also count as scope approval. An issue is optional when the PR describes the proposal. Do not merge, publish releases, or deploy servers as part of a contribution.
 - Target Minecraft Java Edition 26.3 + Fabric with the pins in docs/PLATFORM.md; do not change them without a reviewed platform PR. Original content is the priority, not external-mod availability.
 - Read docs/CONTENT_BRANCHES.md for factories, farming, biomes, caves, creatures, space, realms, loot, schools and seasons. Preserve independently useful specialties with selected collaboration milestones; do not force every player through every branch.
 - Higher tiers look more dieselpunk and less steampunk, with detailed models and real-life-sized stations: follow docs/ART_DIRECTION.md.
