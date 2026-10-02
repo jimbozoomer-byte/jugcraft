@@ -1,10 +1,10 @@
 # Fall Additions
 
-Status: the chandlery (addition 1) and the cider mill (addition 2) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
+Status: the chandlery (addition 1), the cider mill (addition 2) and the preserves pantry (addition 3) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok lets build another 10 more thorough and well thought out festive halloween and fall additions, maybe for one we do candle making with an interesting process to make them allowing you to make a bunch of different combinations and then light them to give different cool effects to an aoe area like beacons do"). The ten additions ship one per pull request, each stacked on the one before:
 1. the chandlery: the Wax Melting Pot and Aura Candles;
 2. the cider mill: apple trees, the Cider Press, the Cider Barrel and four ciders;
-3. a preserves pantry (planned);
+3. the preserves pantry: Mason Jars, eight preserves, the Canning Kettle and the Pantry Shelf;
 4. crows and working scarecrows (planned);
 5. spooky fireworks (planned);
 6. a sky lantern festival (planned);
@@ -14,10 +14,10 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok let
 10. face paint (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg.
-Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party.
+Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace).
+Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast.
 
-Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, all year.
+Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, and preserves put up, all year.
 
 ## Player experience
 ### The Wax Melting Pot
@@ -104,6 +104,34 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 25. **Apple Cider Donuts:** two wheat, sugar, an egg and a Sweet Cider make four cinnamon-sugar donuts (3 food each); the cider's bottle comes back. They count as candy, for Candy Bowls and Candy Bags.
 26. **Apple Pomace** feeds pigs and goes in the composter; crafted, it gives apple seeds.
 
+### Preserves
+27. **Mason Jars** (glass round an iron nugget lid, three a craft) are cooked full of preserves in the **Cooking Pot**:
+
+| Preserve | In the pot with a Mason Jar | A serving | Effect |
+| --- | --- | --- | --- |
+| Sweet Berry Jam | 6 sweet berries, 2 sugar | 3 food | |
+| Apple Butter | 3 apples, sugar, a Sweet Cider (apple butter is cooked down in cider) | 4 food | |
+| Pumpkin Butter | a pumpkin, 2 sugar, Mulling Spices | 4 food | |
+| Cranberry Preserves | 6 cranberries, 2 sugar | 3 food | |
+| Glow Berry Jelly | 6 glow berries, 2 sugar | 2 food | Night Vision, 30 s |
+| Pickled Beets | 4 beetroot, Cider Vinegar | 2 food | |
+| Pickled Peppers | 4 peppers, Cider Vinegar | 2 food | Fire Resistance, 15 s |
+| Corn Relish | 2 corn, a pepper, an onion, Cider Vinegar | 3 food | |
+
+28. **Cider Vinegar:** Aged Cider soured on Apple Pomace in the Cooking Pot (a bottle a batch). Pickling with it leaves its bottle in the pot.
+29. **A jar holds four servings.** Eat it like food, a serving at a time; the last serving leaves the empty Mason Jar to fill again. Its tooltip says how many servings are left and whether it is sealed.
+30. **Unsealed jars spoil.** Fresh from the pot a jar is unsealed: it keeps three days from when it was cooked. After that a serving is 1 food, with Hunger and Nausea ("Ugh! That jar had gone off"). An opened jar also keeps three days from when it was opened.
+
+### The Canning Kettle
+31. A big speckled-blue enamel kettle with a jar rack (a cauldron, blue dye and iron bars). Fill it with a **water bucket** and set it over a fire (anything in `jugcraft:heat_sources`).
+32. Stand up to **four full, fresh jars** in the water. An opened jar, or one already sealed, is refused, and so is any jar while there's no water.
+33. The water comes to a **rolling boil** after ten seconds over the fire (bubbles and steam). Each jar that has been **twenty seconds in boiling water seals**. Off the fire the water cools again and nothing seals.
+34. Use the kettle with an empty hand to **lift out the sealed jars**, with a pop. Sneak to lift out every jar, sealed or not (or, with none ready, to see how it's doing). An empty bucket takes the water back while no jars are in it. Comparators read how many jars have sealed.
+35. **A sealed jar keeps until it is opened**, stacks with other sealed jars of the same preserve, and wears a red gingham cap tied with string.
+
+### The Pantry Shelf
+36. An open oak cupboard with a beadboard back and two shelves. Use it holding a jar (full, opened, sealed or empty) to put it up, three to a shelf; use it with an empty hand to take the last one down. Comparators read how full it is; broken, it spills its jars.
+
 ## Connections
 - Existing input producer: vanilla copper (the pot), bees (honeycomb), zombies (rotten flesh), spiders (string), dyes, and the scent items above; Jugcraft's `jugcraft:heat_sources` (the Cooking Pot's heat).
 - Existing output consumer:
@@ -123,6 +151,9 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
   - donuts for Candy Bowls and Candy Bags (the existing `c:foods/candy` tag);
   - pomace for pigs (the vanilla `minecraft:pig_food` tag) and composters;
   - seeds for orchards.
+- Pantry, input producer: the Cooking Pot and its heat sources; Agriculture's crops (cranberries, peppers, corn, onions) and vanilla ones (sweet berries, glow berries, beetroot, apples, pumpkins); the cider mill's sweet cider, mulling spices, aged cider and pomace.
+- Pantry, output consumer: food that keeps (sealed jars), for expeditions and for the planned harvest feast (addition 7), which is to count dishes; preserves join `c:foods`.
+- Pantry, entry path: glass, an iron nugget, a cauldron, dye and iron bars are early-game; every preserve has a crop that grows wild or is vanilla. Only pickles need the cider mill (for vinegar).
 - Cider mill, entry path: apples drop from vanilla oak leaves, and a pressed apple's pomace gives apple seeds, so the first orchard needs no wild apple tree. The press and barrel are crafted from vanilla materials.
 - Cider mill and the plans:
   - [AGRICULTURE.md](../branches/AGRICULTURE.md) plans orchards (slice 4) and a Fruit and Seed Press (apples into cider, grapes into juice, seed oil for engineers).
@@ -181,6 +212,33 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
   - **No positive-gain loop.** Nothing turns back into apples. Pomace makes one seed; seeds make trees, which need land and time as any orchard does.
   - Automation: grinding, pressing and bottling are by hand (a player's use); a barrel ages by itself. Comparators read both.
 
+- **Pantry:**
+  - Costs:
+    - three Mason Jars: five glass and an iron nugget;
+    - a kettle: a cauldron, a blue dye and iron bars;
+    - a shelf: six wooden slabs and two planks.
+  - Units: a jar is **four servings**.
+  - Food (a jar's four servings, against what goes in):
+    - jam: 12, from six sweet berries (12);
+    - apple butter: 16, from three apples and a sweet cider (15);
+    - cranberry preserves: 12, from six cranberries (12);
+    - jelly: 8, from six glow berries (12), with Night Vision;
+    - pumpkin butter: 16, from a pumpkin, which isn't food raw (vanilla's pumpkin pie gives 8);
+    - pickles: 8, from four beetroot (4) or four peppers;
+    - corn relish: 12, from two corn, a pepper and an onion.
+    - Cooking adds a little, as vanilla's cooking does; the real gain is that sealed food keeps and stacks.
+  - Time:
+    - 300 ticks in the pot for preserves, 200 for vinegar;
+    - the kettle boils after 200 ticks over heat and seals a jar after 400 at the boil;
+    - an unsealed or opened jar keeps 72,000 ticks (three days).
+  - **No container from nothing.**
+    - A jar goes into every preserve and comes back after the last serving.
+    - Vinegar's bottle comes back when it pickles; aged cider's bottle carries into the vinegar.
+    - Sealing changes no item count.
+  - Automation:
+    - The Cooking Pot already takes hoppers, so preserves can be cooked automatically.
+    - The kettle and shelf are filled and emptied by hand.
+
 ## Multiplayer and persistence
 - **Server authority:**
   - Putting things in the pot, dipping, pouring, lighting and snuffing all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server.
@@ -223,6 +281,22 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
   - All are new. The chestnut leaves' fruiting moved into the shared `FruitingLeavesBlock` with no change of ID, state or behaviour (the festival tests still check it).
 - **Cider mill, disable behaviour:** with the agriculture feature off, the recipes don't load and wild apple trees don't generate; the blocks, items, component and block entities stay registered.
 
+- **Pantry, server authority:**
+  - Filling, adding jars, lifting them out, draining, and using the shelf go through vanilla's block use path and are decided on the server.
+  - The kettle checks for water, room, and that a jar is full and unsealed.
+  - Spoiling is checked on the server when a serving is eaten, from the jar's stored time and the world's game time; a client can't freshen a jar.
+- **Pantry, persistence:**
+  - The kettle saves its water, heat, jars and how long each has been processed. The shelf saves its jars. Both send them to clients to draw, and both spill their jars when broken.
+  - A jar's state is two components: `jugcraft:sealed` (a sealed jar) and `jugcraft:jar_contents` (servings left and when it was cooked or opened).
+  - The Cooking Pot stamps a cooked jar with the game time. That is the only change to the pot: it builds the meal before using the ingredients, so a stamped jar that can't stack in the result slots waits rather than being lost.
+- **Pantry, IDs:**
+  - blocks with items `canning_kettle` and `pantry_shelf`, with block entities of the same names;
+  - items `mason_jar`, `cider_vinegar`, `sweet_berry_jam`, `apple_butter`, `pumpkin_butter`, `cranberry_preserves`, `glow_berry_jelly`, `pickled_beets`, `pickled_peppers` and `corn_relish`;
+  - data components `jugcraft:sealed` and `jugcraft:jar_contents`;
+  - Cooking Pot recipes `pot_cooking/<preserve>` and `pot_cooking/cider_vinegar`.
+  - All are new.
+- **Pantry, disable behaviour:** with the agriculture feature off, the recipes don't load; blocks, items and components stay registered.
+
 ## Dependencies and assets
 No new dependencies. Every texture is drawn by code (`tools/chandlery_textures.py`): the pot's hammered copper and dark inside, the brass dish, the wax (pale, tinted by its colour as it is drawn), the wax's surface in the pot, the flame (white at its heart, tinted by its scent) and the candle's item in two layers (its body, tinted by its dyed colour; its wick and dish, not). The models, blockstates, item model, names, tooltip, messages, loot and tags come from `tools/chandlery_data.py`; the numbers from `CHANDLERY` in `tools/agriculture.py`. The client's `WaxPotRenderer` draws the wax in the pot at its level and colour; `AuraCandleRenderer` draws the candle at its height, layers and colour and its flame; both share `TintedBoxes`. The item's colour is the vanilla `dyed_color` component, read by the item model's dye tint. Sounds are vanilla's (honeycomb waxing, dye use, brewing, a bottle filling, a honey slide, a bucket emptying, a candle going out).
 
@@ -231,6 +305,12 @@ The cider mill:
 - The models, blockstates, loot, tags, worldgen and words come from `tools/cider_data.py`; the numbers from `CIDER` in `tools/agriculture.py`.
 - The client's `CiderPressRenderer` draws the press's apples, pulp, plate, screw, capstan bar and juice (with `TintedBoxes`). The barrel is a block model with a variant for each chalk mark.
 - Sounds are vanilla's (an item frame's click, a grindstone, a trapdoor's creak, a bucket, bottles).
+
+The pantry:
+- Textures are drawn by code in `tools/pantry_textures.py`: the kettle's speckled enamel, inside and rack, the shelf's oak and beadboard, the water, a jar's glass, lid and gingham, and each preserve's jar, plain and sealed.
+- Models, the items' sealed-or-not models (a `minecraft:condition` on `jugcraft:sealed`), loot, tags and words come from `tools/pantry_data.py`; the numbers from `PANTRY` in `tools/agriculture.py`.
+- The client's `CanningKettleRenderer` and `PantryShelfRenderer` draw the water and jars (with `PreserveJars` and `TintedBoxes`).
+- Sounds are vanilla's (buckets, bottles, a chiseled bookshelf's slot, eating).
 
 ## Verification
 ### Chandlery verification
@@ -302,6 +382,39 @@ Found by CI and fixed before this record:
 - wild apple trees in a new world (the test grows one from a sapling, and checks the placed feature loads);
 - the sounds.
 
+### Pantry verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-17` stacked on the cider mill:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the pantry with Java: servings, spoiling time, the kettle's jars and timings, the shelf's slots, every preserve's food, effect and colour; checks that every preserve is cooked into one Mason Jar in the Cooking Pot and that its item model switches on `jugcraft:sealed`, that cider vinegar is cooked and gives its bottle back, and every message and tooltip; and reads condition item models) | Pass, 605 IDs |
+| `./gradlew build` on `b801521` (Build workflow run 37030026432) | Pass |
+| Game tests on the headless server, same run: 353 in total, 8 of them new here (`PantryGameTests`) | **All 353 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `b801521`, with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-preserves-pantry). No model or texture errors for the pantry in the log; its Cooking Pot recipes are logged as ones the vanilla recipe book can't place, like every Cooking Pot recipe |
+
+Found by CI and fixed before this record:
+- Two blocks in one registration method shared a variable name (a compile error) (`6bcec72`).
+- Holding anything but a jar, using the shelf fell through to the empty-hand action, so a stick took a jar down; the shelf and kettle now answer only an empty hand. `pantryShelfHoldsSixJars` caught it (352 of 353 passed) (`55ff342`).
+- The first screenshots showed the kettle under a cloud of steam; the steam is now a few small wisps (`b801521`).
+
+The 8 new game tests (`PantryGameTests`):
+1. jam cooks into a jar in the Cooking Pot, full, unsealed and stamped with when it was cooked; beets pickle in cider vinegar, and the vinegar's bottle stays in the pot;
+2. a jar is eaten a serving at a time (2 food each for the jelly), the last leaving the empty jar; the jelly gives Night Vision;
+3. an unsealed jar over three days old has spoiled (1 food, Hunger and Nausea); a sealed jar of the same age is fine, and opening it starts its days;
+4. sealed jars of a preserve stack, unsealed jars from different batches don't;
+5. the kettle takes no jar without water, fills from a water bucket, refuses an opened jar, takes fresh ones; at the boil both seal after twenty seconds; comparators read them; an empty hand lifts them out sealed;
+6. off the heat the kettle stops boiling and nothing seals; sneaking lifts the jar out unsealed;
+7. a shelf holds six jars and refuses a seventh and a stick; a full shelf reads 15; an empty hand takes one down; broken, it spills the rest;
+8. the recipes (every preserve and the vinegar in the Cooking Pot) and loot tables load.
+
+**Not run (pantry):**
+- a person playing it in a client: cooking, canning and eating;
+- a dedicated server with two players at one kettle;
+- a real three days of spoiling (the tests set the time back);
+- the sounds.
+
 ## World and event applicability
 - Candles and pots work anywhere, in every dimension, all year. Nothing is seasonal. The aura doesn't depend on biome, time or weather; harvest helps only plants that would grow there anyway.
 - Revealing shows creatures through walls (Glowing), which can help find hostile mobs in caves; it gives no other information.
@@ -322,3 +435,6 @@ Found by CI and fixed before this record:
 - The press's pacing is per press: a second player at the same press waits as the first does.
 - A barrel holds one batch; a fermenting batch takes no fresh juice, so a cider maker uses several barrels.
 - Grapes, juices and the seed oil of the planned Fruit and Seed Press are not built.
+- Preserves only spoil when unsealed; nothing else in Jugcraft spoils. A jar's three days count game time (sleeping doesn't hasten them).
+- The kettle and shelf can't be filled or emptied by hoppers yet.
+- A jar can be sealed only full and fresh: an opened jar can't be put up again.

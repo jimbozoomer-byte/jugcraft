@@ -721,6 +721,20 @@ Ten more fall and Halloween additions, one per pull request ([features/fall-addi
 - **Cider Barrel:** sweet cider ferments into Sparkling Cider in a day and matures into Aged Cider in three; broken, a barrel keeps its cider.
 - **Mulled Cider** (Cooking Pot), **Apple Cider Donuts**, and **Apple Pomace** for pigs, compost and seeds.
 
+### The preserves pantry
+
+| **The pantry**: a Canning Kettle at the boil over a campfire, and two Pantry Shelves of preserves | **The Canning Kettle** from above: four jars in the boiling water |
+| --- | --- |
+| ![The preserves pantry](../images/ingame_preserves_pantry.jpg) | ![The canning kettle](../images/ingame_canning_kettle.jpg) |
+| **Pantry Shelves**: jars sealed with gingham caps, and not | |
+| ![Pantry shelves](../images/ingame_pantry_shelves.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`PantryClientGameTests`, software rendering, small previews).*
+
+- **Preserves** cooked into **Mason Jars** in the Cooking Pot: jams, fruit butters, jelly, and pickles and relish in **Cider Vinegar**. A jar holds four servings; the last leaves the jar.
+- **Unsealed jars spoil** three days after cooking. The **Canning Kettle** seals them in a boiling water bath: sealed jars keep until opened, stack, and wear a gingham cap.
+- **Pantry Shelf:** shows off six jars.
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
