@@ -1,5 +1,5 @@
 """JSON resources for the Theremin (fall additions 19), from tools/agriculture.py: its models (a walnut cabinet on four
-slender legs with a brass top; the tall copper pitch antenna on a bakelite insulator at the player's right, the copper
+slender legs, its walnut lid edged in brass; the tall copper pitch antenna on a bakelite insulator at the player's right, the copper
 volume loop held out at the left; a speaker grille, two bakelite knobs and the magic-eye tube in front, dark when silent
 and glowing green while it plays) and blockstate; the item; names and messages; loot; and tags. The recipe is in SHAPED;
 the advancement in HALLOWEEN_ADVANCEMENTS.
@@ -26,7 +26,8 @@ def theremin(on):
     w, f, b, c, k = "#walnut", "#front", "#brass", "#copper", "#bakelite"
     elements = [box((3, 0, 4), (4, 8, 5), w), box((12, 0, 4), (13, 8, 5), w), box((3, 0, 11), (4, 8, 12), w), box((12, 0, 11), (13, 8, 12), w),
                 box((2.5, 8, 3.5), (13.5, 14, 12.5), w, textures={"north": f}),
-                box((2, 14, 3), (14, 15, 13), b),
+                # The lid: walnut, edged in brass.
+                box((2, 14, 3), (14, 15, 13), w, textures={side: b for side in ("north", "south", "east", "west")}),
                 # The pitch antenna: an insulator, and the copper rod rising from it.
                 box((3, 15, 7), (4.5, 16, 8.5), k),
                 pinned((3.5, 16, 7.5), (4, 30, 8), c, (7, 1, 8, 15)),
@@ -37,7 +38,7 @@ def theremin(on):
                 pinned((17, 11.75, 6), (17.5, 12.25, 10), c, (0, 7, 4, 7.5)),
                 # Two knobs and the magic eye.
                 box((4.5, 9, 3), (5.5, 10, 3.5), k), box((10.5, 9, 3), (11.5, 10, 3.5), k),
-                box((7, 11.5, 3), (9, 13.5, 3.5), "#eye", light=15 if on else None)]
+                box((6.5, 10.5, 3), (9.5, 13.5, 3.5), "#eye", light=15 if on else None)]
     textures = {"walnut": "theremin_walnut", "front": "theremin_front", "brass": "theremin_brass", "copper": "theremin_copper",
                 "bakelite": "theremin_bakelite", "eye": "theremin_eye_on" if on else "theremin_eye"}
     return block_model(textures, elements, "theremin_walnut")

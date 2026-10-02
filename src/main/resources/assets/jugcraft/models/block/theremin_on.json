@@ -195,10 +195,10 @@
           "texture": "#brass"
         },
         "up": {
-          "texture": "#brass"
+          "texture": "#walnut"
         },
         "down": {
-          "texture": "#brass"
+          "texture": "#walnut"
         }
       }
     },
@@ -604,12 +604,12 @@
     },
     {
       "from": [
-        7,
-        11.5,
+        6.5,
+        10.5,
         3
       ],
       "to": [
-        9,
+        9.5,
         13.5,
         3.5
       ],
