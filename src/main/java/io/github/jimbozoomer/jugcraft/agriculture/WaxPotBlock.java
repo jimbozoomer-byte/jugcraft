@@ -163,7 +163,7 @@ public class WaxPotBlock extends BaseEntityBlock {
 		if (player.getItemInHand(hand).isEmpty()) {
 			player.setItemInHand(hand, candle);
 		} else if (!player.getInventory().add(candle)) {
-			player.drop(candle, false);
+			Block.popResource(level, pos.above(), candle);
 		}
 	}
 
