@@ -1435,7 +1435,7 @@ public final class JugcraftAgriculture {
 		// Fall additions 17, the Spirit Board: a candlelit séance spells out a restless spirit's name and the one thing it
 		// wishes for; given it, the spirit is laid to rest.
 		Block spiritBoard = registerBlock("spirit_board", SpiritBoardBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
-				.strength(0.8F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
+				.strength(0.8F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
 		SPIRIT_BOARD_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("spirit_board"),
 				FabricBlockEntityTypeBuilder.create(SpiritBoardBlockEntity::new, spiritBoard).build());
 		registerItem("spirit_board", props -> new BlockItem(spiritBoard, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
