@@ -1427,6 +1427,8 @@ def main():
     cotton_textures.draw_all(save)
     import deposits
     deposits.draw_all(save)
+    import pixel_hollows_textures
+    pixel_hollows_textures.draw_all()
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:arcade_cabinet",
     "jugcraft:trellis",
     "jugcraft:butternut_squash",
     "jugcraft:acorn_squash",

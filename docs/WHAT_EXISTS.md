@@ -23,6 +23,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
 | Registered IDs | 504 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman` and `flaming_pumpkin` |
+| Registered IDs | 206 items/blocks under `jugcraft:` (the checker counts them), plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
 
 ## Build, generate, check
 
@@ -189,6 +190,26 @@ The Agriculture branch ([branches/AGRICULTURE.md](branches/AGRICULTURE.md)). Eve
 | Produce and food | `corn`, `roasted_corn`, `popcorn`, `roasted_sunflower_seeds`, `baked_sweet_potato`, `flax`, `three_sisters_stew`, `tomato`, `pepper`, `cabbage`, `oats`, `barley`, `barley_bread`, `sauerkraut`, `garden_salad`, `tomato_soup`, `onion_soup`, `vegetable_soup`, `mushroom_barley_soup`, `oat_porridge`, `chili`, `cabbage_rolls`, `roasted_chestnuts`, `baked_acorn_squash`, `squash_pie`, `candy_corn`, `butternut_squash_soup`, `harvest_stew`, `cranberry_sauce`, `roasted_pumpkin_seeds` | plain items with food components | `c:crops/*`, `c:foods/*` |
 | Tools | `flint_sickle` (3×3), `bronze_sickle` (5×5) | `SickleItem` | harvests and replants ripe crops, vanilla crops included |
 | Equipment | `trellis`, `cooking_pot` | `TrellisBlock`; `CookingPotBlock`, `CookingPotBlockEntity`, `CookingPotMenu`, `client/CookingPotScreen` | the pot cooks `jugcraft:pot_cooking` recipes over a block in `jugcraft:heat_sources` |
+### World: Pixel Hollows and the Retro Trader (`world/`, `tools/pixel_hollows.py`)
+
+Records: [pixel-hollows.md](features/pixel-hollows.md), [retro-trader.md](features/retro-trader.md).
+
+| ID | Class / data | What |
+| --- | --- | --- |
+| `pixel_hollows` (biome) | `data/jugcraft/worldgen/biome/pixel_hollows.json`; `world/PixelHollows.PARAMETERS`; `mixin/OverworldBiomeBuilderMixin` | rare cave biome under the driest land, depth 0.3–0.9; added to the Overworld climate table by the mixin (Fabric API has no Overworld biome API) |
+| `pixel_hollows_lining`, `pixel_crystals_floor`, `pixel_crystals_ceiling` (features) | data only | a circuitstone ore feature (96 × size 64, after the ores, biome-filtered); `simple_block` clusters found by `environment_scan` on floors and ceilings |
+| `pixel_hollows_copper`, `…_redstone`, `…_redstone_lower`, `…_tin` (placed features) | vanilla ore features (and `jugcraft:ore_tin`) | half the vanilla attempts again, biome-filtered: 1.5× ore inside the biome; tin added from Java only while `tin` is on |
+| `circuitstone`, `polished_circuitstone`, `circuitstone_bricks`, `pixel_lamp` | `JugcraftRegistry.block` (copies deepslate, polished deepslate, deepslate bricks, sea lantern) | building palette; stonecutter and 2×2 recipes; lamp = 4 shards + glass |
+| `pixel_crystal_cluster`, `pixel_shard` | vanilla `AmethystClusterBlock(13, 2)`, light 3 | static clusters (no ticks) drop 1–2 shards, Fortune bonus, Silk Touch takes the cluster |
+| `arcade_cabinet` | `world/ArcadeCabinetBlock` (2-tall, `facing`, `half`) | the Retro Trader's job site (POI `jugcraft:arcade_cabinet`, lower half only, in `#minecraft:acquirable_job_site`) |
+| `retro_trader` (profession) | `world/RetroTrader` (Fabric `PoiHelper`; `VillagerProfession` constructor naming its trade sets) | trades are data (26.1+): `villager_trade/retro_trader/*`, tags `#jugcraft:retro_trader/level_<n>`, `trade_set/retro_trader/level_<n>`, all from `TRADES` in `tools/pixel_hollows.py`; the buyback's `reputation_discount` is 0 so there is no profit loop |
+| `pixel_hollows` (map decoration) | `RetroTrader.MAP_MARKER`; `textures/map/decorations/pixel_hollows.png` | the map's marker |
+| `pixel_hollows_map` (item) | `world/PixelHollowsMapItem`, `PixelHollowsMaps` | used: `ServerLevel.findClosestBiome3d` from the player (radius 2,048, 64-block columns, every 32 blocks of height) → a marked explorer map; none in reach → a message, item kept; 5 s cooldown |
+| `village/plains/retro_game_shop` (template) | `data/jugcraft/structure/…/retro_game_shop.nbt` from `tools/retro_game_shop.py`; `mixin/StructureTemplatePoolAccessor`, `world/RetroShopPlacement` with `mixin/StructureTemplatePoolMixin`, `JigsawPlacerMixin`, `PoolElementStructurePieceMixin` | added to the five `minecraft:village/<type>/houses` pools at server start; exactly one per new village (not zombie villages) |
+| sounds | `assets/jugcraft/sounds.json`; `sounds/ambient/pixel_hollows_loop.ogg` from `tools/pixel_hollows_sound.py` | biome loop and bleeps; the trader's work sound |
+| textures | `tools/pixel_hollows_textures.py` (`ph_*`, `rt_*`, the villager overlay `entity/villager/profession/retro_trader.png` and its zombie twin) | original |
+
+**Mixins:** `jugcraft.mixins.json` holds the two above and nothing else. Add one only when no API can do the job, and say why in its Javadoc.
 
 ## Shared systems and how to plug in
 
@@ -328,6 +349,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives` and `agriculture`.
 - It also holds other server options, `JugcraftConfig.OPTIONS` (read with `JugcraftConfig.option(key)`): `carving.free_draw` (default `true`).
 - Text options, `JugcraftConfig.TEXT_OPTIONS` (read with `JugcraftConfig.textOption(key)`): the Halloween event's `halloween.start` and `halloween.end` (`MM-DD`, defaults `10-20` and `11-03`), `halloween.timezone` (default `UTC`) and `halloween.mode` (`auto`, `on` or `off`). `HalloweenSeason` reads them; a bad value is logged and its default kept.
+- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials, `machines`, `deposits` (surface deposit worldgen), `pixel_hollows` and `retro_trader`.
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
 
@@ -338,6 +360,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - `JugcraftWorldgen` adds placed features to biomes. In 26.x, configured features live in `data/jugcraft/worldgen/feature/` (there is no `configured_feature` folder), with no `config` wrapper and with block states written as plain IDs.
 - Surface deposits (`deposit/`): `JugcraftDeposits` registers the `DepositBlock`s (mirrors `tools/deposits.py`); `Deposits` keeps how much each touched deposit block has given (`SavedData`, `jugcraft_deposits.dat`) and turns an empty one to stone. `JugcraftWorldgen.addDeposit` adds their disk features to the stony hill biomes at `LOCAL_MODIFICATIONS`.
 - Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → deposits → machines → fluids → petroleum → logistics → storage → electronics → farming → prospecting → kinetics → tools → guide → agriculture → conditions → worldgen → style pack.
+- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → deposits → machines → fluids → logistics → storage → electronics → farming → prospecting → kinetics → tools → guide → Pixel Hollows → Retro Trader → conditions → worldgen → style pack.
 
 ### Looks (`tools/model_writer.py`, `tools/steampunk_*.py`)
 
@@ -396,6 +419,9 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Python lists must match Java: `MachineKind` numbers and recipe types, `JugcraftComponents` lists, materials, features, worldgen, and every agriculture number (`TallCrop`, items, foods, compost tiers, sickles, wild-plant and wild-patch biomes, grass seeds, legume bonus, gourds, cranberry and chestnut numbers, the lantern's light, and the carving numbers, starter faces and messages).
 - Every tall-crop age and section, and every crop age, has a model. Agriculture recipes (crafting, cooking and Cooking Pot) never form a loop, no two Cooking Pot recipes share their ingredients, a seed is a trellis seed exactly when it plants a climbing crop, and a bog seed exactly when it plants the cranberry bush. Every stem age, cranberry age and leaf fruit state has a model.
 - Every ID has a model, a texture, a name, and a loot table (for blocks). Both machine styles cover every block state. Model elements stay within −16..32.
+- Python lists must match Java: `MachineKind` numbers and recipe types, `JugcraftComponents` lists, materials, features, worldgen.
+- Every ID has a model, a texture, a name, and a loot table (for blocks). Both machine styles cover every block state. Model elements stay within −16..32. Loot tables are written in 26.3's form (`condition`, `modifier`, `type`); the checker rejects the pre-26 `conditions`/`functions`/`function` keys, which 26.3 ignores without an error.
+- No recipe makes pixel shards. The Retro Trader's Java trades and map-search bounds match `tools/pixel_hollows.py`, and his shard buyback never pays more per shard than his cheapest possible shard sale.
 
 ## File map
 
@@ -408,8 +434,11 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `…/fluid/` | pipe, tank, pump, fluid networks |
 | `…/logistics/` | item pipe, extractor, sorter, wrench, item networks |
 | `…/machine/` | machine kinds, blocks, block entity, menu, recipes, footprints, power ports, side config, arc furnace structure |
+| `…/world/` | Pixel Hollows (blocks, lining feature, map search) and the Retro Trader (cabinet, profession, trades, village shop) |
+| `…/mixin/` | the two mixins (Overworld biome table, village pool accessor) |
 | `src/client/java/.../client/` | `JugcraftClient` (screen registration), `MachineScreen` |
 | `src/gametest/java/.../test/JugcraftGameTests.java` | game tests (run by `./gradlew build`) |
+| `src/gametest/java/.../test/PixelHollowsGameTests.java` | Pixel Hollows and Retro Trader game tests (drops, recipes, worldgen order, map, trades, job site, shop template) |
 | `src/gametest/java/.../test/JugcraftClientGameTests.java` | client game tests with screenshots (CI job `client`) |
 | `…/guide/`, `src/client/.../HandbookScreen.java`, `tools/handbook.py` | Engineer's Handbook |
 | `…/agriculture/`, `tools/agriculture.py`, `tools/agriculture_data.py`, `tools/festival_data.py`, `tools/carving_data.py`, `tools/crop_textures.py`, `tools/kitchen_textures.py`, `tools/festival_textures.py`, `tools/carving_textures.py`, `tools/render_agriculture.py` | Agriculture branch: crops, wild plants, sickles, trellis, Cooking Pot, gourds, cranberries, the chestnut tree, pumpkin carving, their data, textures and doc previews |
@@ -417,7 +446,8 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `src/main/resources/assets/jugcraft/` | generated models, blockstates, lang, textures |
 | `src/main/resources/data/jugcraft/` | generated recipes (`recipe/<type>/` for machines), loot, tags, worldgen |
 | `src/main/resources/resourcepacks/alternate_machines/` | classic look pack |
-| `tools/materials.py`, `tools/machines.py` | **source of truth** for content and numbers |
+| `tools/materials.py`, `tools/machines.py`, `tools/pixel_hollows.py` | **source of truth** for content and numbers |
+| `tools/pixel_hollows_textures.py`, `tools/retro_models.py`, `tools/retro_game_shop.py`, `tools/pixel_hollows_sound.py` | Pixel Hollows and Retro Trader textures, models, shop template and ambient loop |
 | `tools/generate_*.py`, `tools/model_writer.py`, `tools/steampunk_*.py`, `tools/large_machines.py`, `tools/logistics_models.py` | generators |
 | `tools/check_mod_data.py` | offline audit |
 | `docs/TECH_TREE.md` | player-facing guide |
@@ -432,6 +462,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
 - Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md). Farming has a harvester, sprinkler and cotton (`farming/`), and the agriculture branch its first three slices; greenhouses, rubber trees and the rest of the crop roster are not built (planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md)).
+- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md). Farming has a harvester, sprinkler and cotton; greenhouses and rubber trees are not built. (The Pixel Hollows is the first cave biome; it has no creatures, structures or bosses yet.)
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).
 - Handbook translations (English only).
 

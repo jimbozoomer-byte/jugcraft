@@ -63,6 +63,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
@@ -73,15 +74,17 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.PipeBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
@@ -104,6 +107,47 @@ public class JugcraftGameTests {
 
 	private static BlockState machine(MachineKind kind) {
 		return JugcraftMachines.MACHINES.get(kind).defaultBlockState();
+	}
+
+	/** Ores drop their raw material to a plain pickaxe, more with Fortune; only Silk Touch takes the ore block itself. */
+	@GameTest
+	public void oresNeedSilkTouchToDropThemselves(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
+		BlockState ore = BuiltInRegistries.BLOCK.getValue(Jugcraft.id("tin_ore")).defaultBlockState();
+		List<ItemStack> plain = Block.getDrops(ore, level, pos, null, null, new ItemStack(Items.IRON_PICKAXE));
+		helper.assertTrue(plain.size() == 1 && plain.get(0).is(item("raw_tin")), "Tin ore gave a plain pickaxe " + plain);
+		ItemStack silk = new ItemStack(Items.IRON_PICKAXE);
+		silk.enchant(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH), 1);
+		List<ItemStack> silkDrops = Block.getDrops(ore, level, pos, null, null, silk);
+		helper.assertTrue(silkDrops.size() == 1 && silkDrops.get(0).is(item("tin_ore")), "Tin ore gave Silk Touch " + silkDrops);
+		// Fortune III multiplies raw ore by 1-4 (vanilla's ore formula); 64 breaks all giving one has odds of 0.4^64.
+		ItemStack fortune = new ItemStack(Items.IRON_PICKAXE);
+		fortune.enchant(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE), 3);
+		int most = 0;
+		for (int i = 0; i < 64; i++) {
+			List<ItemStack> drops = Block.getDrops(ore, level, pos, null, null, fortune);
+			helper.assertTrue(drops.size() == 1 && drops.get(0).is(item("raw_tin")) && drops.get(0).getCount() <= 4,
+					"Tin ore gave Fortune III " + drops);
+			most = Math.max(most, drops.get(0).getCount());
+		}
+		helper.assertTrue(most > 1, "Fortune III never gave more than one raw tin");
+		helper.succeed();
+	}
+
+	/** A double asphalt slab drops two slabs, a single one drops one (26.3's slab loot form). */
+	@GameTest
+	public void doubleSlabsDropTwo(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
+		BlockState slab = BuiltInRegistries.BLOCK.getValue(Jugcraft.id("asphalt_slab")).defaultBlockState();
+		List<ItemStack> single = Block.getDrops(slab.setValue(SlabBlock.TYPE, SlabType.BOTTOM), level, pos, null, null,
+				new ItemStack(Items.IRON_PICKAXE));
+		List<ItemStack> twin = Block.getDrops(slab.setValue(SlabBlock.TYPE, SlabType.DOUBLE), level, pos, null, null,
+				new ItemStack(Items.IRON_PICKAXE));
+		helper.assertTrue(single.size() == 1 && single.get(0).getCount() == 1, "A single slab dropped " + single);
+		helper.assertTrue(twin.size() == 1 && twin.get(0).getCount() == 2, "A double slab dropped " + twin);
+		helper.succeed();
 	}
 
 	/** Recipes are data-driven: the crushing recipe for tin ore loads from data/jugcraft/recipe/crushing. */
