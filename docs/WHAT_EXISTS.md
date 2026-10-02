@@ -350,8 +350,30 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - It also holds other server options, `JugcraftConfig.OPTIONS` (read with `JugcraftConfig.option(key)`): `carving.free_draw` (default `true`).
 - Text options, `JugcraftConfig.TEXT_OPTIONS` (read with `JugcraftConfig.textOption(key)`): the Halloween event's `halloween.start` and `halloween.end` (`MM-DD`, defaults `10-20` and `11-03`), `halloween.timezone` (default `UTC`) and `halloween.mode` (`auto`, `on` or `off`). `HalloweenSeason` reads them; a bad value is logged and its default kept.
 - `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials, `machines`, `deposits` (surface deposit worldgen), `pixel_hollows` and `retro_trader`.
+- `config/jugcraft.properties` holds `<feature>.enabled` and the text options in `JugcraftConfig.TEXT_OPTIONS` (the `seasons.*` settings). The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines` and `deposits` (surface deposit worldgen).
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
+
+### Seasons (`season/`, `client/SeasonColors`, `tools/seasons.py`)
+
+- **The clock.** `JugcraftSeasons` is the one season clock.
+  - `today()` gives the season day:
+    - 1–365 on the northern calendar, where 29 February shares the 28th's day and the south is `SOUTH_OFFSET` (182) days on;
+    - a fixed mode's day (`SeasonCalendar.Mode`: spring 105, summer 196, autumn 293, winter 15);
+    - 0 when off.
+  - `isActive(SeasonCalendar.Event)` tells whether an event is running: `HARVEST_FEAST` or `DECEMBER`. Events are calendar windows in the same zone.
+- **Settings.** `SeasonCalendar.Settings` reads `seasons.mode`, `seasons.hemisphere`, `seasons.timezone`, `seasons.snow`, `seasons.snow_depth`, `harvest_feast`, `harvest_feast.days` and `december` (`JugcraftConfig.TEXT_OPTIONS`; read them with `JugcraftConfig.textOption`).
+- **Overrides until the server stops.** `setMode`, `setFixedDate` (a preview date) and `setSnow` change the settings in memory only. The command `/jugcraft season [set|date|snow]` (`SeasonCommand`, permission level 2 to change) calls them.
+- **Sync.** The server sends `SeasonPayload` (day and snowing) on join and whenever anything changes; it checks once a minute. Events are announced in chat.
+- **Colours.**
+  - `season/SeasonPalette.colour(day, vanilla, foliage, x, z)` holds the colour maths: keyframes `YEAR` and patchy autumn hues.
+  - The client applies it to grass and foliage tints in `#jugcraft:has_seasons`, through the client mixin `mixin/client/ClientLevelSeasonMixin` on `ClientLevel.calculateBlockTint`.
+- **Biome flags.** `mixin/BiomeSeasonMixin` gives every biome `SeasonalBiome` flags, `jugcraft$hasSeasons()` and `jugcraft$hasWinterSnow()`. They are set from the two biome tags whenever tags load, so hot paths need no tag lookups.
+- **Winter snow.**
+  - `SeasonState.snowing()` is true when `seasons.snow` is on and the season day is in 1 December to 28 February.
+  - While it is true, `BiomeSeasonMixin` makes rain fall as snow in `#jugcraft:has_winter_snow`.
+  - `SeasonalSnow` lays `jugcraft:seasonal_snow` (`SeasonalSnowBlock`, vanilla snow models, in `#minecraft:snow`) round players while it rains. Once it is no longer snowing, the block melts on random ticks.
+- **For later seasonal content.** Read `JugcraftSeasons.today()`, `isActive(event)` or `SeasonState.snowing()` on the server. Never trust a client's date.
 
 ### Registration (`materials/`)
 
@@ -437,6 +459,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `…/world/` | Pixel Hollows (blocks, lining feature, map search) and the Retro Trader (cabinet, profession, trades, village shop) |
 | `…/mixin/` | the two mixins (Overworld biome table, village pool accessor) |
 | `src/client/java/.../client/` | `JugcraftClient` (screen registration), `MachineScreen` |
+| `…/season/`, `…/mixin/BiomeSeasonMixin.java`, `src/client/.../SeasonColors.java`, `src/client/.../mixin/client/` | seasons: calendar and events, palette, sync, command, winter snow, the client tint hook |
 | `src/gametest/java/.../test/JugcraftGameTests.java` | game tests (run by `./gradlew build`) |
 | `src/gametest/java/.../test/PixelHollowsGameTests.java` | Pixel Hollows and Retro Trader game tests (drops, recipes, worldgen order, map, trades, job site, shop template) |
 | `src/gametest/java/.../test/JugcraftClientGameTests.java` | client game tests with screenshots (CI job `client`) |
@@ -463,6 +486,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - A faster fluid pipe (pointless until pumps are faster).
 - Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md). Farming has a harvester, sprinkler and cotton (`farming/`), and the agriculture branch its first three slices; greenhouses, rubber trees and the rest of the crop roster are not built (planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md)).
 - Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md). Farming has a harvester, sprinkler and cotton; greenhouses and rubber trees are not built. (The Pixel Hollows is the first cave biome; it has no creatures, structures or bosses yet.)
+- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md), apart from the seasons (colours, the Harvest Feast and December windows, and winter snow). Farming has a harvester, sprinkler and cotton; greenhouses and rubber trees are not built.
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).
 - Handbook translations (English only).
 

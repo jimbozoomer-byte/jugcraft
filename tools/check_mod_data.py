@@ -16,6 +16,7 @@ from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS
 import agriculture as ag
 import petro
 import deposits
+import seasons
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 import pixel_hollows as ph
@@ -27,6 +28,7 @@ DATA = RES / "data"
 JAVA_ROOT = ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft"
 JAVA = JAVA_ROOT / "materials" / "JugcraftMaterials.java"
 CONFIG = JAVA_ROOT / "config" / "JugcraftConfig.java"
+SEASON_JAVA = JAVA_ROOT / "season"
 WORLDGEN = JAVA_ROOT / "materials" / "JugcraftWorldgen.java"
 MACHINE_JAVA = JAVA_ROOT / "machine" / "MachineKind.java"
 AGRICULTURE_JAVA = JAVA_ROOT / "agriculture"
@@ -96,7 +98,7 @@ def model(ref):
 
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
-    for block in all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + ph.blocks():
+    for block in all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + ph.blocks() + seasons.BLOCKS:
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -416,7 +418,7 @@ def check_tags():
         registry = path.relative_to(DATA).parts[2]
         known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + machine_items()
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
-                                                    + ph.blocks() + ph.items() + ag.all_blocks() + ag.all_items())
+                                                    + ph.blocks() + ph.items() + ag.all_blocks() + ag.all_items() + seasons.BLOCKS)
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
             if value.startswith("#"):
@@ -456,6 +458,40 @@ def check_worldgen():
         for ref in step:
             if split(ref)[0] == MOD and not (DATA / MOD / "worldgen" / "placed_feature" / f"{split(ref)[1]}.json").is_file():
                 err(f"pixel_hollows.json: unknown placed feature {ref}")
+
+
+def check_seasons():
+    """The seasons biome tags match tools/seasons.py, seasonal snow is registered as data says, and the palette and
+    calendar days are in the year."""
+    java = (SEASON_JAVA / "JugcraftSeasons.java").read_text(encoding="utf-8")
+    for tag_id, biomes in ((seasons.TAG, seasons.BIOMES), (seasons.WINTER_SNOW_TAG, seasons.WINTER_SNOW)):
+        ns, path = split(tag_id)
+        tag = load(DATA / ns / "tags" / "worldgen" / "biome" / f"{path}.json") or {}
+        if tag.get("values") != biomes:
+            err(f"#{tag_id} {tag.get('values')} != tools/seasons.py {biomes}")
+        if f'Jugcraft.id("{path}")' not in java:
+            err(f"JugcraftSeasons does not read #{tag_id}")
+    if not set(seasons.WINTER_SNOW) - {"minecraft:pale_garden"} <= set(seasons.BIOMES):
+        err("Every winter-snow biome but the pale garden must have seasons")
+    snow = (SEASON_JAVA / "SeasonalSnow.java").read_text(encoding="utf-8")
+    if f'ID = "{seasons.SNOW_BLOCK}"' not in snow:
+        err(f"SeasonalSnow.ID is not {seasons.SNOW_BLOCK}")
+    for registry, tag in (("block", "minecraft:snow"), ("block", "minecraft:mineable/shovel")):
+        ns, path = split(tag)
+        if f"{MOD}:{seasons.SNOW_BLOCK}" not in (load(DATA / ns / "tags" / registry / f"{path}.json") or {}).get("values", []):
+            err(f"{seasons.SNOW_BLOCK} is not in #{tag}")
+    days = [int(day) for day in re.findall(r"new Keyframe\((\d+),", (SEASON_JAVA / "SeasonPalette.java").read_text(encoding="utf-8"))]
+    if not days or days != sorted(set(days)) or days[0] < 1 or days[-1] > 365:
+        err(f"SeasonPalette keyframe days {days} must rise strictly within 1..365")
+    modes = re.findall(r"([A-Z]+)\((-?\d+)\)", (SEASON_JAVA / "SeasonCalendar.java").read_text(encoding="utf-8"))
+    for mode, day in modes:
+        if not (int(day) == -1 if mode == "AUTO" else 0 <= int(day) <= 365):
+            err(f"SeasonCalendar.Mode.{mode} day {day} is outside the year")
+    options = CONFIG.read_text(encoding="utf-8")
+    for option in ("seasons.mode", "seasons.hemisphere", "seasons.timezone", "seasons.snow", "seasons.snow_depth",
+                   "harvest_feast", "harvest_feast.days", "december"):
+        if f'"{option}"' not in options:
+            err(f"JugcraftConfig.TEXT_OPTIONS has no {option}")
 
 
 def check_java():
@@ -1711,6 +1747,7 @@ def main():
     check_worldgen()
     check_java()
     check_deposits()
+    check_seasons()
     check_machines(registered)
     check_large_machines()
     check_style_pack()

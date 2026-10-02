@@ -29,7 +29,7 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
  * Client entrypoint: machine and Cooking Pot menus to their screens, the wind turbine and belt renderers,
  * the handbook to its book, ore surveys to the prospector screen, carved and giant pumpkins to their renderers and carving screen,
  * pumpkin boats to theirs, gravestones to the renderer of their engravings, and Halloween's night creatures,
- * thrown pumpkins and landing markers to theirs; the Harvest Moon's state to the pumpkins' sparks.
+ * thrown pumpkins and landing markers to theirs; the Harvest Moon's state to the pumpkins' sparks; the server's season to grass and foliage colours.
  */
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
@@ -58,6 +58,7 @@ public final class JugcraftClient implements ClientModInitializer {
 			}
 		});
 		EngineersHandbookItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
+		SeasonColors.register();
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);

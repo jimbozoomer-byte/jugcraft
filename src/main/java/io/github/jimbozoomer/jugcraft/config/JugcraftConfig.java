@@ -13,8 +13,8 @@ import java.util.Properties;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * Server-side feature switches, read once at startup from config/jugcraft.properties
- * as {@code <feature>.enabled}. A switch disables acquisition (worldgen and recipes);
+ * Server-side feature switches and options, read once at startup from config/jugcraft.properties
+ * as {@code <feature>.enabled} and {@link #TEXT_OPTIONS}. A switch disables acquisition (worldgen and recipes);
  * it never unregisters content, so saved blocks and items survive.
  */
 public final class JugcraftConfig {
@@ -32,15 +32,29 @@ public final class JugcraftConfig {
 	public static final Map<String, Boolean> OPTIONS = Map.of("carving.free_draw", true);
 
 	/**
-	 * Text options, with their defaults. The Halloween event (trick-or-treating) runs from
-	 * {@code halloween.start} to {@code halloween.end} (month-day, both included) in {@code halloween.timezone}
-	 * on the server's clock; {@code halloween.mode} is {@code auto} (follow the dates), {@code on} or {@code off}
-	 * (for testing and off-season worlds); {@code halloween.harvest_moon} is the day (month-day) of the Harvest
-	 * Moon, whose nights make crops grow faster. Treats already given are kept whatever the setting.
+	 * Text options, with their defaults.
+	 * <ul>
+	 * <li>The Halloween event (trick-or-treating) runs from {@code halloween.start} to {@code halloween.end} (month-day,
+	 * both included) in {@code halloween.timezone} on the server's clock; {@code halloween.mode} is {@code auto} (follow
+	 * the dates), {@code on} or {@code off} (for testing and off-season worlds); {@code halloween.harvest_moon} is the
+	 * day (month-day) of the Harvest Moon, whose nights make crops grow faster. Treats already given are kept whatever
+	 * the setting.</li>
+	 * <li>Seasons (see {@code season/SeasonCalendar.Settings}): the season follows the server's date in
+	 * {@code seasons.timezone} for {@code seasons.hemisphere} ({@code north} or {@code south}); {@code seasons.mode} is
+	 * {@code auto} (follow the date), {@code spring}, {@code summer}, {@code autumn}, {@code winter} (always that
+	 * season) or {@code off} (vanilla colours). {@code seasons.snow} ({@code off} or {@code on}) lets winter lay snow,
+	 * up to {@code seasons.snow_depth} layers, that melts in spring. Events on the same clock: the Harvest Feast
+	 * ({@code harvest_feast}: {@code us}, {@code canada} or {@code off}, lasting {@code harvest_feast.days}) and
+	 * December ({@code december}: {@code MM-DD..MM-DD} or {@code off}).</li>
+	 * </ul>
 	 */
-	public static final Map<String, String> TEXT_OPTIONS = Map.of(
-			"halloween.start", "10-20", "halloween.end", "11-03", "halloween.timezone", "UTC", "halloween.mode", "auto",
-			"halloween.harvest_moon", "10-31");
+	public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
+			Map.entry("halloween.start", "10-20"), Map.entry("halloween.end", "11-03"), Map.entry("halloween.timezone", "UTC"),
+			Map.entry("halloween.mode", "auto"), Map.entry("halloween.harvest_moon", "10-31"),
+			Map.entry("seasons.mode", "auto"), Map.entry("seasons.hemisphere", "north"), Map.entry("seasons.timezone", "UTC"),
+			Map.entry("seasons.snow", "off"), Map.entry("seasons.snow_depth", "2"),
+			Map.entry("harvest_feast", "us"), Map.entry("harvest_feast.days", "4"),
+			Map.entry("december", "12-01..01-06"));
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
@@ -106,7 +120,10 @@ public final class JugcraftConfig {
 		try (Writer writer = Files.newBufferedWriter(path)) {
 			properties.store(writer, "Jugcraft feature switches (false stops new worldgen and recipes; existing items and blocks stay)"
 					+ " and server options (carving.free_draw=false allows only the starter pumpkin faces; halloween.* sets when"
-					+ " the Halloween event runs: start and end as MM-DD, a timezone, mode auto, on or off, and the Harvest Moon's day).");
+					+ " the Halloween event runs: start and end as MM-DD, a timezone, mode auto, on or off, and the Harvest Moon's day;"
+					+ " seasons.*: seasonal colours follow the server's date; mode auto, spring, summer, autumn, winter or off,"
+					+ " hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"
+					+ " december MM-DD..MM-DD or off).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}
