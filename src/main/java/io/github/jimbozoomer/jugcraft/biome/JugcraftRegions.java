@@ -32,8 +32,8 @@ import net.minecraft.world.level.biome.Climate;
  * Jugcraft regions (docs/features/biome-regions.md, tools/biomes.py): the Overworld is divided into irregular cells
  * about {@code biomes.region_size} blocks across, and {@code biomes.region_share} of them are Jugcraft regions. Each
  * Jugcraft region uses one of {@link #LAYOUTS} layouts: vanilla's climate table with that layout's {@link #rules()}
- * applied (a vanilla biome, in the given climate bands and weirdness half, becomes a Jugcraft biome). The rest stay
- * vanilla. Terrain does not depend on biomes, so a region's border is a change of biome only.
+ * applied (a vanilla biome, in the given climate bands and weirdness half, becomes a Jugcraft biome; entries are cut at
+ * the band edges first, {@link #split}). The rest stay vanilla. Terrain does not depend on biomes, so a region's border is a change of biome only.
  *
  * <p>How: {@code mixin/OverworldBiomeBuilderMixin} records the layouts as the builder fills vanilla's table
  * ({@link #recorder}), and lists every Jugcraft biome in vanilla's table at {@link #UNREACHABLE}, a climate no place
@@ -187,7 +187,42 @@ public final class JugcraftRegions {
 		return (parameter.min() + parameter.max()) / 2 < 0 ? -1 : 1;
 	}
 
-	/** The biome a vanilla table entry has in a layout. */
+	/**
+	 * A vanilla table entry cut along the temperature and humidity band edges and at zero weirdness, so that each piece
+	 * lies in one band of each and one weirdness half, and rules match exact climates (vanilla's entries often span
+	 * several bands: a swamp entry covers cool and temperate). The pieces cover what the entry covered.
+	 */
+	public static List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> split(Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry) {
+		Climate.ParameterPoint point = entry.getFirst();
+		List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> out = new ArrayList<>();
+		for (Climate.Parameter temperature : cut(point.temperature(), TEMPERATURE_BANDS)) {
+			for (Climate.Parameter humidity : cut(point.humidity(), HUMIDITY_BANDS)) {
+				for (Climate.Parameter weirdness : cut(point.weirdness(), WEIRDNESS_HALVES)) {
+					out.add(Pair.of(new Climate.ParameterPoint(temperature, humidity, point.continentalness(), point.erosion(), point.depth(),
+							weirdness, point.offset()), entry.getSecond()));
+				}
+			}
+		}
+		return out;
+	}
+
+	private static final float[] WEIRDNESS_HALVES = {0.0F};
+
+	private static List<Climate.Parameter> cut(Climate.Parameter parameter, float[] edges) {
+		List<Climate.Parameter> out = new ArrayList<>();
+		long start = parameter.min();
+		for (float edge : edges) {
+			long at = Climate.quantizeCoord(edge);
+			if (at > start && at < parameter.max()) {
+				out.add(new Climate.Parameter(start, at));
+				start = at;
+			}
+		}
+		out.add(new Climate.Parameter(start, parameter.max()));
+		return out;
+	}
+
+	/** The biome a vanilla table entry (or a piece of one, {@link #split}) has in a layout. */
 	public static ResourceKey<Biome> regional(int layout, Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry) {
 		for (Rule rule : RULES) {
 			if (rule.matches(layout, entry)) {
@@ -222,8 +257,10 @@ public final class JugcraftRegions {
 		@Override
 		public void accept(Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry) {
 			vanilla.accept(entry);
-			for (int layout = 0; layout < LAYOUTS; layout++) {
-				recorded.get(layout).add(Pair.of(entry.getFirst(), regional(layout, entry)));
+			for (Pair<Climate.ParameterPoint, ResourceKey<Biome>> piece : split(entry)) {
+				for (int layout = 0; layout < LAYOUTS; layout++) {
+					recorded.get(layout).add(Pair.of(piece.getFirst(), regional(layout, piece)));
+				}
 			}
 		}
 

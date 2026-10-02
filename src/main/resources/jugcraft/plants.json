@@ -30,5 +30,17 @@
   {
     "id": "clover",
     "kind": "flowerbed"
+  },
+  {
+    "id": "cattail",
+    "kind": "tall_plant"
+  },
+  {
+    "id": "watergrass",
+    "kind": "water_plant"
+  },
+  {
+    "id": "duckweed",
+    "kind": "surface"
   }
 ]

@@ -73,6 +73,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.LanternBlock;
@@ -80,6 +81,7 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.TallFlowerBlock;
+import net.minecraft.world.level.block.WaterlilyBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.TintedParticleLeavesBlock;
@@ -129,12 +131,14 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower ASPEN_GROWER = grower("aspen");
 	public static final TreeGrower FIR_GROWER = grower("fir");
 	public static final TreeGrower JACARANDA_GROWER = grower("jacaranda");
+	public static final TreeGrower WILLOW_GROWER = grower("willow");
 	/** The dead tree, which no sapling grows; it stands in the Dead Forest (and game tests grow it). */
 	public static final TreeGrower DEAD_TREE_GROWER = grower("dead_tree");
 	/** Seasonal trees' leaf schedules, in season days. Keep in sync with TREES in tools/agriculture.py. */
 	public static final SeasonalLeavesBlock.Schedule LARCH_LEAVES = new SeasonalLeavesBlock.Schedule(91, 268, 318);
 	public static final SeasonalLeavesBlock.Schedule MAPLE_LEAVES = new SeasonalLeavesBlock.Schedule(95, 265, 310);
 	public static final SeasonalLeavesBlock.Schedule ASPEN_LEAVES = new SeasonalLeavesBlock.Schedule(96, 258, 302);
+	public static final SeasonalLeavesBlock.Schedule WILLOW_LEAVES = new SeasonalLeavesBlock.Schedule(88, 283, 328);
 
 	private static final ResourceKey<ContextIntProvider> COMPOST_LOW = ContextIntProviders.COMPOSTABLE_LOW;
 	private static final ResourceKey<ContextIntProvider> COMPOST_MEDIUM = ContextIntProviders.COMPOSTABLE_MEDIUM;
@@ -269,6 +273,8 @@ public final class JugcraftAgriculture {
 				MapColor.PODZOL, MapColor.WOOD);
 		registerTree("jacaranda", "jacaranda_leaves", JACARANDA_GROWER, null, Blocks.CHERRY_SAPLING, Blocks.CHERRY_LEAVES,
 				MapColor.TERRACOTTA_GRAY, MapColor.TERRACOTTA_PINK);
+		registerTree("willow", "willow_leaves", WILLOW_GROWER, WILLOW_LEAVES, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				MapColor.TERRACOTTA_BROWN, MapColor.TERRACOTTA_YELLOW);
 		registerWoodSet("dead", MapColor.COLOR_LIGHT_GRAY, MapColor.TERRACOTTA_LIGHT_GRAY);
 		registerWildPlants();
 
@@ -893,8 +899,8 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * The biomes branch's wild plants (tools/plants.py), from the generated {@code /jugcraft/plants.json}: small flowers
-	 * (with their potted forms), tall flowers and flowerbeds (ground cover, {@link GroundCoverBlock}), copying a vanilla
-	 * plant's properties. They compost and burn like vanilla's flowers.
+	 * (with their potted forms), tall flowers and tall plants, flowerbeds (ground cover, {@link GroundCoverBlock}), water
+	 * plants ({@link WaterPlantBlock}) and plants floating on water, copying a vanilla plant's properties. They compost and burn like vanilla's flowers.
 	 */
 	private static void registerWildPlants() {
 		JsonArray plants;
@@ -933,9 +939,29 @@ public final class JugcraftAgriculture {
 							.compostable(COMPOST_LOW), SEEDS_TAB);
 					yield bed;
 				}
+				case "tall_plant" -> {
+					Block tall = registerBlock(id, DoublePlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LILAC));
+					registerItem(id, props -> new DoubleHighBlockItem(tall, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					yield tall;
+				}
+				case "water_plant" -> {
+					Block water = registerBlock(id, WaterPlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SEAGRASS));
+					registerItem(id, props -> new BlockItem(water, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_LOW), SEEDS_TAB);
+					yield water;
+				}
+				case "surface" -> {
+					Block floating = registerBlock(id, WaterlilyBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LILY_PAD));
+					registerItem(id, props -> new PlaceOnWaterBlockItem(floating, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					yield floating;
+				}
 				default -> throw new IllegalStateException("Unknown wild plant kind in /jugcraft/plants.json: " + plant);
 			};
-			fire.add(block, 60, 100);
+			if (!(block instanceof WaterPlantBlock) && !(block instanceof WaterlilyBlock)) {
+				fire.add(block, 60, 100);
+			}
 		}
 	}
 

@@ -37,15 +37,15 @@ def rule(layouts, replaces, temperature, humidity, biome, weirdness=0):
 
 
 RULES = [
-    # Batch 1, the seasonal forests: everywhere but the meadow layout, where batch 2 takes cool forests and plains.
+    # Batch 1, the seasonal forests: in every layout, except where the meadows and wetlands take a climate.
     rule([0, 1, 2, 3], "taiga", (1, 1), (0, 4), "coniferous_forest"),
     rule([0, 1, 2, 3], "snowy_taiga", (0, 0), (0, 4), "snowy_coniferous_forest"),
     rule([0, 2, 3], "forest", (1, 1), (0, 4), "maple_woods"),
-    rule([0, 1, 2, 3], "forest", (2, 2), (0, 4), "seasonal_forest"),
+    rule([0, 1, 3], "forest", (2, 2), (0, 4), "seasonal_forest"),
     rule([0, 1, 2, 3], "birch_forest", (0, 4), (0, 4), "aspen_glade"),
     rule([0, 1, 2, 3], "old_growth_birch_forest", (0, 4), (0, 4), "aspen_glade"),
-    rule([0, 2, 3], "plains", (1, 1), (0, 0), "dead_forest"),
-    rule([0, 2, 3], "plains", (1, 1), (1, 1), "tundra"),
+    rule([0, 3], "plains", (1, 1), (0, 0), "dead_forest"),
+    rule([0, 3], "plains", (1, 1), (1, 1), "tundra"),
     rule([0, 1, 2, 3], "snowy_plains", (0, 0), (2, 2), "snowy_forest"),
     rule([0, 1, 2, 3], "snowy_plains", (0, 0), (1, 1), "muskeg"),
     # Batch 2, fields and meadows: the meadow layout.
@@ -59,6 +59,21 @@ RULES = [
     rule([1], "savanna", (3, 3), (1, 1), "heathland"),
     rule([1], "sparse_jungle", (3, 3), (0, 4), "lush_grassland"),
     rule([1], "plains", (3, 3), (0, 4), "lush_grassland"),
+    # Batch 3, wetlands: the wetland layout; its swamps and bayous also grow in the woodland and wild layouts.
+    rule([0, 2, 3], "swamp", (0, 1), (0, 4), "bog", weirdness=-1),
+    rule([0, 2, 3], "swamp", (0, 1), (0, 4), "dead_swamp", weirdness=1),
+    rule([0, 2, 3], "swamp", (2, 4), (0, 4), "lush_swamp", weirdness=-1),
+    rule([0, 2, 3], "swamp", (2, 4), (0, 4), "swamp_woods", weirdness=1),
+    rule([0, 2, 3], "mangrove_swamp", (0, 3), (0, 4), "bayou"),
+    rule([0, 2, 3], "mangrove_swamp", (4, 4), (0, 4), "floodplain"),
+    rule([2], "dark_forest", (0, 4), (0, 4), "ghost_forest", weirdness=-1),
+    rule([2], "dark_forest", (0, 4), (0, 4), "sludge_mire", weirdness=1),
+    rule([2], "river", (2, 3), (0, 4), "lush_river"),
+    rule([2], "old_growth_spruce_taiga", (0, 4), (0, 4), "fen"),
+    rule([2], "forest", (2, 2), (0, 4), "lake_district"),
+    rule([2], "plains", (1, 1), (0, 0), "quagmire"),
+    rule([2], "plains", (1, 1), (1, 1), "marsh"),
+    rule([2], "plains", (2, 2), (0, 4), "wetland"),
 ]
 
 
@@ -90,6 +105,64 @@ EXTRAS = {
     "tall_grass_dense": {"feature": "minecraft:tall_grass", "step": 9, "count": 48},
     "dry_grass": {"feature": "minecraft:dry_grass", "step": 9, "patches": 2, "count": 32},
     "bushes_dense": {"feature": "minecraft:bush", "step": 9, "patches": 2, "count": 24},
+    # Batch 3. "configured": the extra's own feature, as written. Placements follow vanilla's for the same kind of feature
+    # (lakes, disks, sugar cane, seagrass, lily pads).
+    "ponds": {"configured": {"type": "minecraft:lake", "barrier": {"id": "minecraft:mud"}, "can_place_feature": {"type": "minecraft:true"},
+                             "can_replace_with_air_or_fluid": {"type": "minecraft:not", "predicate": {
+                                 "type": "minecraft:matching_block_tag", "tag": "minecraft:features_cannot_replace"}},
+                             "can_replace_with_barrier": {"type": "minecraft:not", "predicate": {
+                                 "type": "minecraft:matching_block_tag", "tag": "minecraft:lava_pool_stone_cannot_replace"}},
+                             "fluid": {"id": "minecraft:water", "properties": {"level": "0"}}},
+              "step": 1, "placement": [{"type": "minecraft:rarity_filter", "chance": 4}, {"type": "minecraft:in_square"},
+                                       {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"}, {"type": "minecraft:biome"}]},
+    "mud": {"configured": {"type": "minecraft:disk", "half_height": 1, "radius": {"type": "minecraft:uniform", "max_inclusive": 5, "min_inclusive": 2},
+                           "state_provider": {"id": "minecraft:mud"}, "target": {"type": "minecraft:matching_blocks", "blocks": [
+                               "minecraft:dirt", "minecraft:grass_block", "minecraft:clay", "minecraft:coarse_dirt"]}},
+            "step": 6, "placement": [{"type": "minecraft:count", "count": 3}, {"type": "minecraft:in_square"},
+                                     {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR_WG"}, {"type": "minecraft:biome"}]},
+    "cattails": {"feature": "jugcraft:cattail", "step": 9, "placement": [
+        {"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"},
+        {"type": "minecraft:count", "count": 32},
+        {"type": "minecraft:offset", "x": {"type": "minecraft:trapezoid", "max": 5, "min": -5, "plateau": 0}, "y": 0,
+         "z": {"type": "minecraft:trapezoid", "max": 5, "min": -5, "plateau": 0}},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
+            {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+            {"type": "minecraft:would_survive", "state": {"id": "jugcraft:cattail", "properties": {"half": "lower"}}},
+            {"type": "minecraft:any_of", "predicates": [
+                {"type": "minecraft:matching_fluids", "fluids": ["minecraft:water", "minecraft:flowing_water"], "offset": offset}
+                for offset in ([1, -1, 0], [-1, -1, 0], [0, -1, 1], [0, -1, -1])]}]}}]},
+    "watergrass": {"feature": "jugcraft:watergrass", "step": 9, "placement": [
+        {"type": "minecraft:in_square"}, {"type": "minecraft:count", "count": 48},
+        {"type": "minecraft:offset", "x": {"type": "minecraft:trapezoid", "max": 7, "min": -7, "plateau": 0}, "y": 0,
+         "z": {"type": "minecraft:trapezoid", "max": 7, "min": -7, "plateau": 0}},
+        {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:matching_blocks", "blocks": "minecraft:water"}},
+        {"type": "minecraft:biome"}]},
+    "duckweed": {"feature": "jugcraft:duckweed", "step": 9, "placement": [
+        {"type": "minecraft:count", "count": 6}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"}, {"type": "minecraft:biome"}, {"type": "minecraft:count", "count": 16},
+        {"type": "minecraft:offset", "x": {"type": "minecraft:trapezoid", "max": 7, "min": -7, "plateau": 0},
+         "y": {"type": "minecraft:trapezoid", "max": 3, "min": -3, "plateau": 0},
+         "z": {"type": "minecraft:trapezoid", "max": 7, "min": -7, "plateau": 0}},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"}}]},
+    "lily_pads": {"feature": "minecraft:waterlily", "step": 9, "placement": [
+        {"type": "minecraft:count", "count": 4}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"}, {"type": "minecraft:biome"}, {"type": "minecraft:count", "count": 12},
+        {"type": "minecraft:offset", "x": {"type": "minecraft:trapezoid", "max": 7, "min": -7, "plateau": 0},
+         "y": {"type": "minecraft:trapezoid", "max": 3, "min": -3, "plateau": 0},
+         "z": {"type": "minecraft:trapezoid", "max": 7, "min": -7, "plateau": 0}},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"}}]},
+    "cranberries": {"block": "jugcraft:cranberry_bush", "properties": {"age": "3"}, "step": 9, "placement": [
+        {"type": "minecraft:rarity_filter", "chance": 2}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, {"type": "minecraft:biome"}, {"type": "minecraft:count", "count": 24},
+        {"type": "minecraft:offset", "x": {"type": "minecraft:trapezoid", "max": 5, "min": -5, "plateau": 0}, "y": 0,
+         "z": {"type": "minecraft:trapezoid", "max": 5, "min": -5, "plateau": 0}},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
+            {"type": "minecraft:matching_blocks", "blocks": "minecraft:water"},
+            {"type": "minecraft:matching_block_tag", "tag": "minecraft:air", "offset": [0, 1, 0]}]}}]},
+    "ferns": {"block": "minecraft:fern", "step": 9, "patches": 2, "count": 24},
+    "large_ferns": {"feature": "minecraft:large_fern", "step": 9, "rarity": 2, "count": 16},
+    "berry_bushes": {"feature": "minecraft:berry_bush", "step": 9, "rarity": 3, "count": 12},
 }
 
 # Each biome: its base, climate values, trees (count: [usual, sometimes]; default and weighted picks of placed
@@ -171,6 +244,141 @@ BIOMES = {
         "creatures": [["minecraft:rabbit", 6, 2, 3]],
         "untags": ["minecraft:has_structure/village_snowy"],
         "tags": ["c:is_snowy", "c:is_dead"],
+    },
+    # ---------------------------------------------------------------- batch 3: wetlands (bases' swamp colours unless set)
+    # A cool cranberry bog: reddish-orange grass, maple scrub and bushes, cranberries in its shallow, muddy pools.
+    "bog": {
+        "display": "Bog", "base": "swamp", "temperature": 0.4, "downfall": 0.8, "seasons": True,
+        "effects": {"grass_color": "#ad6c3c", "foliage_color": "#9c5a30", "grass_color_modifier": "none", "water_color": "#4f6a54"},
+        "trees": {"count": [2, 3], "default": "jugcraft:maple_bush_checked", "picks": [["jugcraft:dead_tree_checked", 0.1]]},
+        "drop": ["minecraft:flower_swamp"],
+        "extras": ["mud", "cranberries", "cattails", "watergrass", "bushes_dense", "berry_bushes"],
+        "tags": ["c:is_swamp", "c:is_wet"],
+    },
+    # Dark, muddy ponds and sparse dead trees; no animals; villages.
+    "dead_swamp": {
+        "display": "Dead Swamp", "base": "swamp", "temperature": 0.35, "downfall": 0.9, "seasons": True,
+        "effects": {"grass_color": "#6f6a45", "foliage_color": "#6a6440", "grass_color_modifier": "none", "water_color": "#3e4528"},
+        "trees": {"count": [1, 2], "default": "jugcraft:dead_tree_checked", "picks": [], "water_depth": 2},
+        "drop": ["minecraft:flower_swamp", "minecraft:patch_pumpkin"],
+        "extras": ["mud", "ponds", "cattails", "patch_dead_bush"],
+        "creatures": [],
+        "tags": ["c:is_swamp", "c:is_dead", "minecraft:has_structure/village_taiga"],
+    },
+    # A verdant swamp: vibrant grass and blue water, tall oaks hung with vines, cattails, ferns and berries.
+    "lush_swamp": {
+        "display": "Lush Swamp", "base": "swamp", "temperature": 0.7, "downfall": 0.9, "seasons": True,
+        "effects": {"grass_color": "#56b13a", "foliage_color": "#4aa22e", "grass_color_modifier": "none", "water_color": "#2e86a8"},
+        "trees": {"count": [3, 4], "default": "jugcraft:tall_vine_oak_checked", "picks": [["jugcraft:willow_checked", 0.3]],
+                  "water_depth": 2},
+        "extras": ["cattails", "watergrass", "duckweed", "lily_pads", "ferns", "berry_bushes"],
+        "tags": ["c:is_swamp", "c:is_wet"],
+    },
+    # More forest than swamp: willows and vine-hung oaks over moss, duckweed and lily pads; animals.
+    "swamp_woods": {
+        "display": "Swamp Woods", "base": "swamp", "temperature": 0.65, "downfall": 0.9, "seasons": True,
+        "trees": {"count": [7, 9], "default": "jugcraft:willow_checked", "picks": [["jugcraft:tall_vine_oak_checked", 0.3]],
+                  "water_depth": 2},
+        "extras": ["duckweed", "lily_pads", "cattails", "ferns"],
+        "creatures": [["minecraft:frog", 10, 2, 5], ["minecraft:sheep", 8, 4, 4], ["minecraft:pig", 8, 4, 4], ["minecraft:cow", 6, 4, 4],
+                      ["minecraft:chicken", 8, 4, 4]],
+        "tags": ["c:is_swamp", "c:is_wet"],
+    },
+    # A warm, overcast bayou: willows standing in the water, trailing moss (vines), cattails and ferns on mud.
+    "bayou": {
+        "display": "Bayou", "base": "mangrove_swamp", "temperature": 0.85, "downfall": 0.95, "seasons": True, "winter_snow": False,
+        "effects": {"water_color": "#4d6a4c"},
+        "attributes": {"minecraft:visual/fog_color": "#a9b8a6"},
+        "trees": {"count": [5, 6], "default": "jugcraft:willow_checked", "picks": [["jugcraft:tall_vine_oak_checked", 0.15]],
+                  "water_depth": 3},
+        "extras": ["mud", "cattails", "ferns", "large_ferns", "duckweed"],
+        "untags": ["minecraft:has_structure/trail_ruins"],
+        "tags": ["c:is_swamp", "c:is_wet"],
+    },
+    # A warm, flooded plain: brushy oaks and tall grass, orange cosmos, and lily pads and watergrass in the floods.
+    "floodplain": {
+        "display": "Floodplain", "base": "mangrove_swamp", "temperature": 0.9, "downfall": 0.9, "seasons": True, "winter_snow": False,
+        "effects": {"grass_color": "#6cb041", "foliage_color": "#5ea034", "grass_color_modifier": "none", "water_color": "#3d7f9a"},
+        "trees": {"count": [3, 4], "default": "jugcraft:oak_bush_checked", "picks": [["minecraft:oak_checked", 0.2]], "water_depth": 1},
+        "extras": ["tall_grass_dense", "orange_cosmos", "watergrass", "lily_pads"],
+        "tags": ["c:is_wet"],
+    },
+    # A dead forest of grey trunks and dark oak scrub around many lakes, with clay.
+    "ghost_forest": {
+        "display": "Ghost Forest", "base": "dark_forest", "base_trees": "minecraft:dark_forest_vegetation",
+        "temperature": 0.5, "downfall": 0.8, "seasons": True,
+        "effects": {"grass_color": "#8b9478", "foliage_color": "#7d8670", "grass_color_modifier": "none"},
+        "trees": {"count": [3, 4], "default": "jugcraft:dead_tree_checked", "picks": [["minecraft:dark_oak_checked", 0.15]]},
+        "drop": ["minecraft:forest_flowers"],
+        "extras": ["ponds", "patch_dead_bush"],
+        "untags": ["minecraft:is_forest"],
+        "tags": ["c:is_dead", "c:is_wet"],
+    },
+    # A dusky mire under a dense canopy of big oaks and dark oaks, with mud, sludgy pools and algae; no animals; villages.
+    "sludge_mire": {
+        "display": "Sludge Mire", "base": "dark_forest", "base_trees": "minecraft:dark_forest_vegetation",
+        "temperature": 0.6, "downfall": 0.95, "seasons": True,
+        "effects": {"grass_color": "#5d6b34", "foliage_color": "#55632e", "grass_color_modifier": "none", "water_color": "#3d4a24"},
+        "trees": {"count": [10, 12], "default": "minecraft:dark_oak_checked", "picks": [
+            ["minecraft:fancy_oak_checked", 0.3], ["jugcraft:tall_vine_oak_checked", 0.2]]},
+        "drop": ["minecraft:forest_flowers", "minecraft:flower_default"],
+        "extras": ["mud", "ponds", "duckweed"],
+        "creatures": [],
+        "untags": ["minecraft:is_forest"],
+        "tags": ["c:is_swamp", "c:is_wet", "minecraft:has_structure/village_taiga"],
+    },
+    # A river lush with duckweed, lily pads and watergrass, oak bushes along its banks.
+    "lush_river": {
+        "display": "Lush River", "base": "river", "temperature": 0.7, "downfall": 0.8, "seasons": True, "winter_snow": False,
+        "effects": {"grass_color": "#5eb33f", "foliage_color": "#52a434", "water_color": "#2f9a96"},
+        "trees": {"count": [1, 2], "default": "jugcraft:oak_bush_checked", "picks": []},
+        "extras": ["duckweed", "lily_pads", "watergrass", "cattails"],
+        "tags": ["c:is_wet"],
+    },
+    # A cool fen: short firs and dark oaks over muddy pools, cattails and lily pads; cows, sheep and slimes.
+    "fen": {
+        "display": "Fen", "base": "old_growth_spruce_taiga", "temperature": 0.3, "downfall": 0.9, "seasons": True,
+        "effects": {"grass_color": "#6c8f4c", "foliage_color": "#5d8040"},
+        "trees": {"count": [4, 5], "default": "jugcraft:fir_checked", "picks": [["minecraft:dark_oak_checked", 0.3]]},
+        "extras": ["mud", "ponds", "cattails", "lily_pads"],
+        "untags": ["minecraft:is_taiga"],
+        "tags": ["c:is_swamp", "c:is_wet"],
+    },
+    # Forest of oaks and spruces broken by many lakes with muddy shores, cattails and lily pads.
+    "lake_district": {
+        "display": "Lake District", "base": "forest", "temperature": 0.5, "downfall": 0.8, "seasons": True,
+        "trees": {"count": [6, 7], "default": "minecraft:oak_checked", "picks": [
+            ["minecraft:spruce_checked", 0.4], ["minecraft:fancy_oak_checked", 0.1]]},
+        "extras": ["ponds", "mud", "cattails", "lily_pads"],
+        "tags": ["c:is_wet"],
+    },
+    # Muddy flats with brown ponds, cattails and lily pads, no trees, no animals.
+    "quagmire": {
+        "display": "Quagmire", "base": "swamp", "temperature": 0.4, "downfall": 0.9, "seasons": True,
+        "effects": {"grass_color": "#7d7a4a", "foliage_color": "#6f6c40", "grass_color_modifier": "none", "water_color": "#6b5a3c"},
+        "trees": None,
+        "drop": ["minecraft:flower_swamp", "minecraft:patch_pumpkin"],
+        "extras": ["mud", "ponds", "cattails"],
+        "creatures": [],
+        "tags": ["c:is_swamp", "c:is_wet"],
+    },
+    # A wide, green plain of shallow lakes full of watergrass, ringed by cattails; tall grass, no trees, no flowers.
+    "marsh": {
+        "display": "Marsh", "base": "swamp", "temperature": 0.5, "downfall": 0.9, "seasons": True,
+        "effects": {"grass_color": "#5f9f46", "foliage_color": "#559340", "grass_color_modifier": "none"},
+        "trees": None,
+        "drop": ["minecraft:flower_swamp"],
+        "extras": ["ponds", "watergrass", "cattails", "tall_grass_dense"],
+        "creatures": [],
+        "tags": ["c:is_swamp", "c:is_wet"],
+    },
+    # Murky grass and mud with ferns, spruces and willows, cattails and sugar cane, and purple water; villages.
+    "wetland": {
+        "display": "Wetland", "base": "swamp", "temperature": 0.55, "downfall": 0.9, "seasons": True,
+        "effects": {"water_color": "#6b5c9c"},
+        "trees": {"count": [2, 3], "default": "minecraft:spruce_checked", "picks": [["jugcraft:willow_checked", 0.4]], "water_depth": 1},
+        "extras": ["mud", "ferns", "cattails", "watergrass"],
+        "tags": ["c:is_swamp", "c:is_wet", "minecraft:has_structure/village_taiga"],
     },
     # ---------------------------------------------------------------- batch 2: fields and meadows
     # Cool, flat land with teal grass, scattered small spruces and clumps of oak bush, and many flowers.

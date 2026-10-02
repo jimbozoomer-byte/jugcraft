@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "jugcraft:dead_forest",
-    "jugcraft:muskeg"
+    "jugcraft:muskeg",
+    "jugcraft:dead_swamp",
+    "jugcraft:ghost_forest"
   ]
 }

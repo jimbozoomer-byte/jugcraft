@@ -5,6 +5,9 @@ Each plant is registered alike from the generated /jugcraft/plants.json (agricul
 - "flower": a small flower (vanilla's FlowerBlock, like the dandelion), with its potted form; dye and suspicious stew.
 - "tall_flower": a two-block flower (TallFlowerBlock, like the lilac); bone meal drops a copy; dye x2.
 - "flowerbed": ground cover of up to four clumps (agriculture/GroundCoverBlock, like pink petals).
+- "tall_plant": a two-block plant that is not a flower (DoublePlantBlock), dropping itself from its lower half.
+- "water_plant": a plant under water (agriculture/WaterPlantBlock, like seagrass); only shears take it.
+- "surface": a plant floating on still water (vanilla's lily pad block); placed on water like a lily pad.
 Every plant composts, burns like vanilla flowers and follows the "biomes" feature switch for its recipes. Textures are
 drawn by tools/wild_textures.py. Biomes place them through tools/biomes.py EXTRAS.
 """
@@ -21,8 +24,13 @@ PLANTS = {
     "orange_cosmos": {"kind": "flower", "display": "Orange Cosmos", "dye": "orange", "effect": "minecraft:fire_resistance",
                       "seconds": 4.0},
     "clover": {"kind": "flowerbed", "display": "Clover"},
+    # Batch 3: wetlands.
+    "cattail": {"kind": "tall_plant", "display": "Cattail"},
+    "watergrass": {"kind": "water_plant", "display": "Watergrass"},
+    "duckweed": {"kind": "surface", "display": "Duckweed"},
 }
-KINDS = ("flower", "tall_flower", "flowerbed")
+KINDS = ("flower", "tall_flower", "flowerbed", "tall_plant", "water_plant", "surface")
+TALL = ("tall_flower", "tall_plant")
 
 
 def potted(plant):
@@ -71,7 +79,7 @@ def textures():
     """Block textures the plants' models use."""
     out = []
     for plant, info in PLANTS.items():
-        if info["kind"] == "tall_flower":
+        if info["kind"] in TALL:
             out += [f"{plant}_bottom", f"{plant}_top"]
         elif info["kind"] == "flowerbed":
             out += [plant, f"{plant}_stem"]

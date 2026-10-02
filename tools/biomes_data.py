@@ -35,7 +35,7 @@ def steps(name):
     biome), drops and swaps applied, and its extras appended in EXTRAS order."""
     info = bm.BIOMES[name]
     out = copy.deepcopy(BASES[info["base"]]["steps"])
-    tree = base_trees(info["base"])
+    tree = info.get("base_trees") or base_trees(info["base"])
     drop = list(info.get("drop", []))
     if info["trees"] is None:
         drop.append(tree)
@@ -114,7 +114,7 @@ def worldgen(data, write):
             {"type": "minecraft:count", "count": {"type": "minecraft:weighted_list", "distribution": [
                 {"data": usual, "weight": 9}, {"data": sometimes, "weight": 1}]}},
             {"type": "minecraft:in_square"},
-            {"type": "minecraft:surface_water_depth_filter", "max_water_depth": 0},
+            {"type": "minecraft:surface_water_depth_filter", "max_water_depth": trees.get("water_depth", 0)},
             {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"},
             {"type": "minecraft:biome"}]})
     for extra, info in bm.EXTRAS.items():
@@ -122,7 +122,13 @@ def worldgen(data, write):
         if "block" in info:
             # A block placed alone: a feature of its own, named after the extra.
             feature = rid(extra)
-            write(folder / "feature" / f"{extra}.json", {"type": "minecraft:simple_block", "to_place": {"id": info["block"]}})
+            state = {"id": info["block"]}
+            if "properties" in info:
+                state["properties"] = info["properties"]
+            write(folder / "feature" / f"{extra}.json", {"type": "minecraft:simple_block", "to_place": state})
+        elif "configured" in info:
+            feature = rid(extra)
+            write(folder / "feature" / f"{extra}.json", info["configured"])
         write(folder / "placed_feature" / f"{extra}.json", {"feature": feature, "placement": extra_placement(extra)})
 
 

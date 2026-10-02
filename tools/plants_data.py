@@ -29,12 +29,21 @@ def assets(root, write, lang):
             write(root / "blockstates" / f"{pl.potted(plant)}.json", {"variants": {"": {"model": rid(f"block/{pl.potted(plant)}")}}})
             icon = tex(plant)
             lang[f"block.{MOD}.{pl.potted(plant)}"] = f"Potted {info['display']}"
-        elif kind == "tall_flower":
+        elif kind in pl.TALL:
             for half in ("bottom", "top"):
                 write(models / f"{plant}_{half}.json", {"parent": "minecraft:block/cross", "textures": {"cross": tex(f"{plant}_{half}")}})
             write(root / "blockstates" / f"{plant}.json", {"variants": {
                 "half=lower": {"model": rid(f"block/{plant}_bottom")}, "half=upper": {"model": rid(f"block/{plant}_top")}}})
             icon = tex(f"{plant}_top")
+        elif kind == "water_plant":
+            write(models / f"{plant}.json", {"parent": "minecraft:block/cross", "textures": {"cross": tex(plant)}})
+            write(root / "blockstates" / f"{plant}.json", {"variants": {"": {"model": rid(f"block/{plant}")}}})
+            icon = tex(plant)
+        elif kind == "surface":
+            # Vanilla's lily pad shape (its tint is unused: our texture carries its colours).
+            write(models / f"{plant}.json", {"parent": "minecraft:block/lily_pad", "textures": {"particle": tex(plant), "texture": tex(plant)}})
+            write(root / "blockstates" / f"{plant}.json", {"variants": {"": {"model": rid(f"block/{plant}")}}})
+            icon = tex(plant)
         else:
             # Vanilla's flowerbed shapes (one to four clumps), turned by facing, like pink petals.
             for n in range(1, 5):
@@ -72,11 +81,20 @@ def loot(out, write):
                 {"condition": explosion, "entries": [{"type": "minecraft:item", "name": "minecraft:flower_pot"}], "rolls": 1},
                 {"condition": explosion, "entries": [{"type": "minecraft:item", "name": rid(plant)}], "rolls": 1}],
                 "random_sequence": rid(f"blocks/{pl.potted(plant)}")})
-        elif kind == "tall_flower":
+        elif kind in pl.TALL:
             # From the lower half only, like the lilac.
             write(out / f"{plant}.json", {"type": "minecraft:block", "pools": [
                 {"condition": explosion, "entries": [{"type": "minecraft:item", "condition": match_block(plant, half="lower"),
                                                       "name": rid(plant)}], "rolls": 1}], "random_sequence": rid(f"blocks/{plant}")})
+        elif kind == "water_plant":
+            # Only shears take it, like seagrass.
+            write(out / f"{plant}.json", {"type": "minecraft:block", "pools": [
+                {"condition": "minecraft:tool/can_shear", "entries": [{"type": "minecraft:item", "name": rid(plant)}], "rolls": 1}],
+                "random_sequence": rid(f"blocks/{plant}")})
+        elif kind == "surface":
+            write(out / f"{plant}.json", {"type": "minecraft:block", "pools": [
+                {"condition": explosion, "entries": [{"type": "minecraft:item", "name": rid(plant)}], "rolls": 1}],
+                "random_sequence": rid(f"blocks/{plant}")})
         else:
             # One per clump, like pink petals.
             write(out / f"{plant}.json", {"type": "minecraft:block", "pools": [{"entries": [{"type": "minecraft:item", "modifier": [
@@ -87,6 +105,11 @@ def loot(out, write):
 def tags(tags):
     for plant, info in pl.PLANTS.items():
         kind = info["kind"]
+        if kind in ("tall_plant", "water_plant", "surface"):
+            if kind == "tall_plant":
+                tags.add("block", "minecraft:replaceable_by_trees", rid(plant))
+                tags.add("block", "minecraft:sword_efficient", rid(plant))
+            continue
         if kind == "flower":
             for registry in ("block", "item"):
                 tags.add(registry, "minecraft:small_flowers", rid(plant))
@@ -108,8 +131,10 @@ def placement_state(plant):
     kind = pl.PLANTS[plant]["kind"]
     if kind == "flower":
         return {"id": rid(plant)}
-    if kind == "tall_flower":
+    if kind in pl.TALL:
         return {"id": rid(plant), "properties": {"half": "lower"}}
+    if kind in ("water_plant", "surface"):
+        return {"id": rid(plant)}
     return {"type": "minecraft:weighted", "entries": [
         {"data": {"id": rid(plant), "properties": {"facing": facing, "flower_amount": str(n)}}, "weight": 1}
         for n in range(1, 5) for facing in FACINGS]}

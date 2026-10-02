@@ -330,13 +330,13 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 # Wood sets: each tree's log, wood, stripped log and wood, planks, stairs, slab, fence and fence gate, generated
 # alike (festival_data.wood_assets) and registered alike (JugcraftAgriculture.registerWoodSet). Logs and wood strip
 # with an axe; logs saw into planks (sawmill). The chestnut is the Festival Crops' fruit tree; the larch is Alpine
-# Spawn's seasonal conifer; maple, aspen, fir and dead wood come from the biomes branch's seasonal forests, and the
-# jacaranda from its fields and meadows.
+# Spawn's seasonal conifer; maple, aspen, fir and dead wood come from the biomes branch's seasonal forests, the
+# jacaranda from its fields and meadows, and the willow from its wetlands.
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
-             "jacaranda": "Jacaranda"}
+             "jacaranda": "Jacaranda", "willow": "Willow"}
 # The feature switch each wood's hand recipes follow: the switch of whatever grows the tree.
 WOOD_SWITCHES = {"chestnut": FEATURE, "larch": "alpine_spawn", "maple": "biomes", "aspen": "biomes", "fir": "biomes",
-                 "dead": "biomes", "jacaranda": "biomes"}
+                 "dead": "biomes", "jacaranda": "biomes", "willow": "biomes"}
 
 
 def wood_blocks(wood, display):
@@ -371,6 +371,9 @@ TREES = {
     "fir": {"leaves": "fir_needles", "leaves_display": "Fir Needles", "season": None, "base": "spruce"},
     # The biomes branch's later batches. The jacaranda flowers all year, a crown of violet blossom.
     "jacaranda": {"leaves": "jacaranda_leaves", "leaves_display": "Jacaranda Leaves", "season": None, "base": "cherry"},
+    # The willow of the wetlands: leaves out early and holds them late, turning yellow before they fall.
+    "willow": {"leaves": "willow_leaves", "leaves_display": "Willow Leaves", "season": [88, 283, 328], "autumn": {"gold": 1},
+               "base": "oak"},
 }
 SEASON_STATES = ["green", "gold", "bare"]
 JITTER = 7

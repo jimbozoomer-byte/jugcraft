@@ -42,6 +42,18 @@ SHAPES = {
     "jacaranda": {"wood": "jacaranda", "sapling": True,
                   "trunk": {"type": "forking", "base_height": 5, "height_rand_a": 2, "height_rand_b": 2},
                   "foliage": {"type": "acacia", "radius": 2, "offset": 0}},
+    # Willow: a short trunk under a broad crown whose leaves hang in long curtains (vanilla's cherry foliage shape,
+    # mostly hanging), with vines trailing like moss.
+    "willow": {"wood": "willow", "sapling": True,
+               "trunk": {"type": "straight", "base_height": 5, "height_rand_a": 2},
+               "foliage": {"type": "cherry", "radius": 3, "offset": 0, "height": 5, "wide_bottom_layer_hole_chance": 0.2,
+                           "corner_hole_chance": 0.3, "hanging_leaves_chance": 0.75, "hanging_leaves_extension_chance": 0.6},
+               "decorators": [{"type": "minecraft:leave_vine", "probability": 0.2}]},
+    # A tall swamp oak with vines (vanilla oak wood): the lush swamps' big trees.
+    "tall_vine_oak": {"wood": "minecraft:oak",
+                      "trunk": {"type": "straight", "base_height": 6, "height_rand_a": 3},
+                      "foliage": {"type": "blob", "radius": 3, "offset": 0, "height": 3},
+                      "decorators": [{"type": "minecraft:leave_vine", "probability": 0.25}]},
     # An oak bush: one oak log in a ball of oak leaves, the fields' scrub (vanilla oak wood; no sapling of its own).
     "oak_bush": {"wood": "minecraft:oak",
                  "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},

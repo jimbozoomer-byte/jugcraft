@@ -90,6 +90,8 @@ def foliage_placer(foliage):
     out = {"type": f"minecraft:{foliage['type']}_foliage_placer", "offset": foliage["offset"], "radius": foliage["radius"]}
     if "height" in foliage:
         out["height"] = foliage["height"]
+    # Any other field of vanilla's placer (the cherry placer's hanging leaves, for example) as given.
+    out.update({key: value for key, value in foliage.items() if key not in ("type", "offset", "radius", "height")})
     return out
 
 
@@ -117,7 +119,7 @@ def worldgen(data, write):
     folder = data / MOD / "worldgen"
     for shape, info in SHAPES.items():
         wood = info["wood"]
-        decorators = []
+        decorators = list(info.get("decorators", []))
         if info["foliage"] is None:
             # No leaves: a single air "leaf" at each branch end, which places nothing.
             foliage = {"type": "minecraft:blob_foliage_placer", "height": 1, "offset": 0, "radius": 0}

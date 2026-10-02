@@ -92,11 +92,13 @@ public class BiomeGameTests {
 			if (JugcraftRegions.biomes().contains(key)) {
 				continue;
 			}
-			entries.add(Pair.of(entry.getFirst(), key));
-			table.merge(key.identifier().getPath() + " t" + JugcraftRegions.temperatureBand(entry.getFirst()) + " h"
-					+ JugcraftRegions.humidityBand(entry.getFirst()) + " w" + JugcraftRegions.half(entry.getFirst().weirdness()), 1, Integer::sum);
+			for (Pair<Climate.ParameterPoint, ResourceKey<Biome>> piece : JugcraftRegions.split(Pair.of(entry.getFirst(), key))) {
+				entries.add(piece);
+				table.merge(key.identifier().getPath() + " t" + JugcraftRegions.temperatureBand(piece.getFirst()) + " h"
+						+ JugcraftRegions.humidityBand(piece.getFirst()) + " w" + JugcraftRegions.half(piece.getFirst().weirdness()), 1, Integer::sum);
+			}
 		}
-		LOGGER.info("Vanilla Overworld table by biome, temperature and humidity band, weirdness half: {}", table);
+		LOGGER.info("Vanilla Overworld table, cut at the band edges, by biome, temperature and humidity band, weirdness half: {}", table);
 		List<String> idle = new ArrayList<>();
 		for (JugcraftRegions.Rule rule : JugcraftRegions.rules()) {
 			for (int layout = 0; layout < JugcraftRegions.LAYOUTS; layout++) {
@@ -184,14 +186,15 @@ public class BiomeGameTests {
 		return start;
 	}
 
-	/** Maple, aspen and fir saplings grow their trees; in autumn the maple and aspen come out in autumn colours. */
+	/** Maple, aspen, fir and willow saplings grow their trees; in autumn all but the fir come out in autumn colours. */
 	@GameTest(maxTicks = 100)
 	public void seasonalForestSaplingsGrow(GameTestHelper helper) {
 		MinecraftServer server = helper.getLevel().getServer();
 		SeasonCalendar.Settings before = JugcraftSeasons.settings();
 		BlockPos at = open(helper, new BlockPos(3, 2, 3));
-		String[][] trees = {{"maple", "maple_leaves"}, {"aspen", "aspen_leaves"}, {"fir", "fir_needles"}};
-		TreeGrower[] growers = {JugcraftAgriculture.MAPLE_GROWER, JugcraftAgriculture.ASPEN_GROWER, JugcraftAgriculture.FIR_GROWER};
+		String[][] trees = {{"maple", "maple_leaves"}, {"aspen", "aspen_leaves"}, {"fir", "fir_needles"}, {"willow", "willow_leaves"}};
+		TreeGrower[] growers = {JugcraftAgriculture.MAPLE_GROWER, JugcraftAgriculture.ASPEN_GROWER, JugcraftAgriculture.FIR_GROWER,
+				JugcraftAgriculture.WILLOW_GROWER};
 		try {
 			JugcraftSeasons.setMode(server, SeasonCalendar.Mode.AUTUMN);
 			for (int i = 0; i < trees.length; i++) {
@@ -270,6 +273,42 @@ public class BiomeGameTests {
 			LOGGER.info("Wild plants: tall lavender dropped {}, a clover patch of 4 dropped {}", lavender, clovers);
 			helper.assertTrue(lavender == 1, "Tall lavender dropped " + lavender);
 			helper.assertTrue(clovers == 4, "A clover patch of four dropped " + clovers);
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * The wetland plants (batch 3) work like their vanilla models: watergrass stands only in water, on a solid floor; duckweed
+	 * floats only on water; a cattail takes two blocks and drops itself once.
+	 */
+	@GameTest
+	public void wetlandPlantsWork(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Block watergrass = block("watergrass");
+		BlockPos wet = new BlockPos(1, 2, 1);
+		helper.setBlock(wet.below(), Blocks.SAND);
+		helper.setBlock(wet, Blocks.WATER);
+		helper.assertTrue(watergrass.defaultBlockState().canSurvive(level, helper.absolutePos(wet)), "Watergrass cannot stand in water on sand");
+		BlockPos dry = new BlockPos(3, 2, 1);
+		helper.setBlock(dry.below(), Blocks.SAND);
+		helper.assertTrue(!watergrass.defaultBlockState().canSurvive(level, helper.absolutePos(dry)), "Watergrass stands in air");
+		helper.setBlock(wet, watergrass);
+		helper.assertTrue(level.getFluidState(helper.absolutePos(wet)).isSource(), "Watergrass does not hold its water");
+		Block duckweed = block("duckweed");
+		BlockPos pond = new BlockPos(5, 2, 1);
+		helper.setBlock(pond, Blocks.WATER);
+		helper.assertTrue(duckweed.defaultBlockState().canSurvive(level, helper.absolutePos(pond.above())), "Duckweed cannot float on water");
+		helper.assertTrue(!duckweed.defaultBlockState().canSurvive(level, helper.absolutePos(dry.above())), "Duckweed floats on sand");
+		BlockPos tall = new BlockPos(1, 2, 4);
+		helper.setBlock(tall.below(), Blocks.GRASS_BLOCK);
+		Block cattail = block("cattail");
+		DoublePlantBlock.placeAt(level, cattail.defaultBlockState(), helper.absolutePos(tall), Block.UPDATE_ALL);
+		helper.assertBlockPresent(cattail, tall.above());
+		level.destroyBlock(helper.absolutePos(tall), true);
+		helper.runAfterDelay(2, () -> {
+			int cattails = dropped(helper, cattail);
+			LOGGER.info("Wetland plants: watergrass and duckweed stand where they should; a cattail dropped {}", cattails);
+			helper.assertTrue(cattails == 1, "A cattail dropped " + cattails);
 			helper.succeed();
 		});
 	}

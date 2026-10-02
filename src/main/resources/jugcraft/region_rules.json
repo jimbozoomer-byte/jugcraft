@@ -59,7 +59,6 @@
     "layouts": [
       0,
       1,
-      2,
       3
     ],
     "replaces": "minecraft:forest",
@@ -115,7 +114,6 @@
   {
     "layouts": [
       0,
-      2,
       3
     ],
     "replaces": "minecraft:plains",
@@ -133,7 +131,6 @@
   {
     "layouts": [
       0,
-      2,
       3
     ],
     "replaces": "minecraft:plains",
@@ -345,5 +342,241 @@
     ],
     "weirdness": 0,
     "biome": "jugcraft:lush_grassland"
+  },
+  {
+    "layouts": [
+      0,
+      2,
+      3
+    ],
+    "replaces": "minecraft:swamp",
+    "temperature": [
+      0,
+      1
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": -1,
+    "biome": "jugcraft:bog"
+  },
+  {
+    "layouts": [
+      0,
+      2,
+      3
+    ],
+    "replaces": "minecraft:swamp",
+    "temperature": [
+      0,
+      1
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 1,
+    "biome": "jugcraft:dead_swamp"
+  },
+  {
+    "layouts": [
+      0,
+      2,
+      3
+    ],
+    "replaces": "minecraft:swamp",
+    "temperature": [
+      2,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": -1,
+    "biome": "jugcraft:lush_swamp"
+  },
+  {
+    "layouts": [
+      0,
+      2,
+      3
+    ],
+    "replaces": "minecraft:swamp",
+    "temperature": [
+      2,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 1,
+    "biome": "jugcraft:swamp_woods"
+  },
+  {
+    "layouts": [
+      0,
+      2,
+      3
+    ],
+    "replaces": "minecraft:mangrove_swamp",
+    "temperature": [
+      0,
+      3
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:bayou"
+  },
+  {
+    "layouts": [
+      0,
+      2,
+      3
+    ],
+    "replaces": "minecraft:mangrove_swamp",
+    "temperature": [
+      4,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:floodplain"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:dark_forest",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": -1,
+    "biome": "jugcraft:ghost_forest"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:dark_forest",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 1,
+    "biome": "jugcraft:sludge_mire"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:river",
+    "temperature": [
+      2,
+      3
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:lush_river"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:old_growth_spruce_taiga",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:fen"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:forest",
+    "temperature": [
+      2,
+      2
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:lake_district"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:plains",
+    "temperature": [
+      1,
+      1
+    ],
+    "humidity": [
+      0,
+      0
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:quagmire"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:plains",
+    "temperature": [
+      1,
+      1
+    ],
+    "humidity": [
+      1,
+      1
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:marsh"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:plains",
+    "temperature": [
+      2,
+      2
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:wetland"
   }
 ]

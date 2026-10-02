@@ -22,7 +22,16 @@ WOODS = {
                   "heart": pal("8a4f4d", "9e605c", "b2736d", "c5877f"),
                   "sap": pal("d1aaa0", "dbb8ae", "e4c5bc", "ecd2ca"),
                   "style": "fissured"},
+    # Willow: dark, deeply furrowed bark; pale, golden-green wood.
+    "willow": {"bark": pal("2f2a22", "443b30", "5a4e3f", "71634f", "887960"),
+               "plank": pal("9c8b5a", "b19f6b", "c4b27c", "d4c38f", "e2d3a3"),
+               "heart": pal("8f7c48", "a08d56", "b19e66", "c1af78"),
+               "sap": pal("d6caa0", "dfd4ae", "e7ddbb", "eee6c8"),
+               "style": "furrowed"},
 }
+WILLOW = {"green": pal("223f18", "2f5620", "3f6e29", "548834", "6fa244", "93bd62"),
+          "gold": pal("6a5a0e", "8f7a12", "b39a1c", "cdb52e", "e2cd4a", "f0e27c")}
+TWIG = pal("2a221c", "3e3228", "564637", "6e5a48")
 BLOSSOM = {"jacaranda": pal("3b2a6b", "523b8e", "6b52b0", "8670cc", "a492e0", "c4b8f0")}
 LEAF_GREEN = pal("1f3b16", "2b501d", "3a6826", "4c8231", "659c40", "86b85a")
 
@@ -38,6 +47,10 @@ def bark(wood, seed):
                 # Smooth plates split by shallow, wandering vertical fissures.
                 lane = (x + (y // 5) % 2) % 5
                 shade = 1 if lane == 0 else 3 if lane == 2 else 2
+            elif w["style"] == "furrowed":
+                # Deep, interlacing furrows between narrow ridges.
+                lane = (x + (1 if (y // 3) % 2 else 0)) % 3
+                shade = 0 if lane == 0 else 3 if lane == 1 else 2
             else:
                 shade = 2
             if rng.random() < 0.08:
@@ -137,6 +150,52 @@ def blossom_sapling(tree):
     for x0, y0 in ((4, 9), (12, 8)):
         c.px(x0, y0, LEAF_GREEN[3])
         c.px(x0 + 1, y0, LEAF_GREEN[4])
+    return c.img
+
+
+def willow_leaves(look, seed):
+    """Long, narrow willow leaves hanging in strands; "bare" draws the winter twigs. Gaps keep a dark colour, so fast
+    graphics (drawn opaque) still look dense."""
+    rng = random.Random(seed)
+    c = Canvas()
+    if look == "bare":
+        for y in range(16):
+            for x in range(16):
+                c.img.putpixel((x, y), TWIG[0] + (0,))
+        for x in (1, 5, 9, 13):
+            for y in range(16):
+                if rng.random() < 0.8:
+                    c.px(x + (y // 6) % 2, y, TWIG[1 + (y % 2)])
+        return c.img
+    palette = WILLOW[look]
+    for y in range(16):
+        for x in range(16):
+            c.img.putpixel((x, y), palette[0] + (0,))
+    for strand in range(7):
+        x = strand * 2 + rng.randrange(0, 2)
+        top = rng.randrange(-4, 4)
+        for k in range(rng.randrange(8, 14)):
+            y = (top + k) % 16
+            shade = 4 if k % 3 == 0 else 3 if k % 3 == 1 else 2
+            c.px(x, y, palette[shade])
+            if k % 4 == 2:
+                c.px((x + 1) % 16, y, palette[shade - 1])
+    for y in range(16):
+        for x in range(16):
+            if c.empty(x, y) and rng.random() < 0.3:
+                c.px(x, y, palette[1])
+    return c.img
+
+
+def willow_sapling():
+    c = Canvas()
+    stem = WOODS["willow"]["bark"][3]
+    c.line(8, 15, 8, 5, stem)
+    green = WILLOW["green"]
+    for x0 in (5, 7, 9, 11):
+        for k in range(5):
+            c.px(x0 + (1 if k > 2 and x0 > 8 else 0) - (1 if k > 2 and x0 < 8 else 0), 4 + k, green[4 if k % 2 else 3])
+    c.line(5, 4, 11, 4, green[2])
     return c.img
 
 
@@ -285,6 +344,56 @@ def clover_stem():
     return c.img
 
 
+CATTAIL_LEAF = pal("2f4a20", "3e6229", "507a33", "679541")
+CATTAIL_HEAD = pal("3a2214", "53311c", "6b4226", "855533")
+WATERGRASS = pal("1c4a2a", "245e35", "2f7543", "3d8c52", "52a566")
+DUCKWEED = pal("2f5c1a", "3f7a22", "52962d", "6db03c", "8cc955")
+
+
+def cattail(part):
+    """Cattails: long, flat leaves and, at the top, brown, velvety heads on stiff stalks."""
+    rng = random.Random({"bottom": 441, "top": 443}[part])
+    c = Canvas()
+    if part == "bottom":
+        for x in (3, 5, 7, 9, 11, 13):
+            lean = rng.choice((-1, 0, 1))
+            c.line(x, 15, x + lean, 0, CATTAIL_LEAF[1 + x % 3])
+        return c.img
+    for x, top in ((4, 5), (8, 2), (11, 4)):
+        c.line(x, 15, x, top, CATTAIL_LEAF[2])
+        for k in range(5):
+            c.px(x, top + 1 + k, CATTAIL_HEAD[2 if k % 2 else 3])
+            c.px(x + 1, top + 1 + k, CATTAIL_HEAD[1])
+        c.px(x, top - 1, CATTAIL_LEAF[3])
+    for x in (2, 6, 13):
+        c.line(x, 15, x + rng.choice((-1, 1)), 7 + rng.randrange(0, 4), CATTAIL_LEAF[1])
+    return c.img
+
+
+def watergrass():
+    """Watergrass: soft, ribbon-like blades that sway under water."""
+    rng = random.Random(451)
+    c = Canvas()
+    for i, x in enumerate((2, 4, 7, 9, 12, 14)):
+        top = 2 + rng.randrange(0, 6)
+        for y in range(15, top - 1, -1):
+            sway = round(math.sin((y + i * 3) / 3.0))
+            c.px(x + sway, y, WATERGRASS[1 + (y + i) % 4])
+    return c.img
+
+
+def duckweed():
+    """Duckweed from above: a scatter of tiny round fronds, open water between them."""
+    rng = random.Random(461)
+    c = Canvas()
+    for _ in range(46):
+        x, y = rng.randrange(16), rng.randrange(16)
+        c.px(x, y, DUCKWEED[rng.choice((2, 3, 3, 4))])
+        if rng.random() < 0.5:
+            c.px((x + 1) % 16, y, DUCKWEED[1])
+    return c.img
+
+
 def wild_textures():
     """(kind, name) -> image for every texture of the later batches' trees and plants."""
     out = {}
@@ -296,6 +405,14 @@ def wild_textures():
         out[("block", f"{wood}_planks")] = planks(wood, 521 + index)
     out[("block", "jacaranda_leaves")] = blossom_leaves("jacaranda", 531)
     out[("block", "jacaranda_sapling")] = blossom_sapling("jacaranda")
+    out[("block", "willow_leaves")] = willow_leaves("green", 541)
+    out[("block", "willow_leaves_gold")] = willow_leaves("gold", 541)
+    out[("block", "willow_leaves_bare")] = willow_leaves("bare", 543)
+    out[("block", "willow_sapling")] = willow_sapling()
+    out[("block", "cattail_bottom")] = cattail("bottom")
+    out[("block", "cattail_top")] = cattail("top")
+    out[("block", "watergrass")] = watergrass()
+    out[("block", "duckweed")] = duckweed()
     out[("block", "lavender")] = lavender()
     out[("block", "tall_lavender_bottom")] = lavender("bottom")
     out[("block", "tall_lavender_top")] = lavender("top")
