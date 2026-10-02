@@ -11,6 +11,8 @@ PUMPKIN = [rgb("7a3a08"), rgb("a8520e"), rgb("cf6e14"), rgb("e88a22"), rgb("f6a8
 STEM = [rgb("3e3a14"), rgb("5c5420"), rgb("7d7430")]
 HOLE = rgb("2a1406")
 GLOW = [rgb("f59a2c"), rgb("ffe07a"), rgb("fff2b8")]
+# A soul torch's cold flame (the carving's soul colours in client/CarvingTextures.java).
+SOUL_GLOW = [rgb("37a9c9"), rgb("c8faff"), rgb("f0feff")]
 STEEL = [rgb("4a5058"), rgb("7c848e"), rgb("aeb6c0"), rgb("dfe5ec")]
 HANDLE = [rgb("3b2414"), rgb("5e3a1e"), rgb("84562c")]
 BRASS = rgb("c89a3a")
@@ -40,8 +42,10 @@ def carving_knife():
     return c.img
 
 
-def pumpkin_icon(lit):
-    """A round, ribbed pumpkin with a stalk and a carved face: a dark hollow, or candlelight when lit."""
+def pumpkin_icon(lit, soul=False):
+    """A round, ribbed pumpkin with a stalk and a carved face: a dark hollow, or candlelight when lit (blue from a
+    soul torch)."""
+    glow = SOUL_GLOW if soul else GLOW
     c = Canvas()
     for y in range(3, 15):
         for x in range(1, 15):
@@ -60,10 +64,10 @@ def pumpkin_icon(lit):
             (4, 11), (5, 11), (7, 11), (8, 11), (10, 11), (11, 11), (5, 12), (6, 12), (7, 12), (8, 12), (9, 12), (10, 12)]
     for x, y in face:
         above = (x, y - 1) in face
-        c.px(x, y, (GLOW[1] if above else GLOW[0]) if lit else HOLE)
+        c.px(x, y, (glow[1] if above else glow[0]) if lit else HOLE)
     if lit:
         for x, y in ((5, 8), (10, 8), (7, 12), (8, 12)):
-            c.px(x, y, GLOW[2])
+            c.px(x, y, glow[2])
     outline(c, PUMPKIN[0])
     return c.img
 
@@ -74,6 +78,7 @@ def carving_textures():
         ("item", "carving_knife"): carving_knife(),
         ("item", "hand_carved_pumpkin"): pumpkin_icon(False),
         ("item", "hand_carved_pumpkin_lit"): pumpkin_icon(True),
+        ("item", "hand_carved_pumpkin_soul"): pumpkin_icon(True, soul=True),
         ("item", "roasted_pumpkin_seeds"): seeds_item([rgb("8a6a34"), rgb("b08c4a"), rgb("d2b06a")],
                                                       [(3, 4), (8, 3), (12, 6), (5, 8), (10, 10), (3, 12), (8, 13)], size=(2, 1)),
     }
