@@ -195,6 +195,8 @@ Upgrade (events, command, more biomes, winter snow), from Build run [36950495928
   - Winter snow was logged as "client sees snow falling true, grass under the season's snow is snowy true".
   - I looked at the screenshot `jugcraft_season_winter_snow`: snow is falling, two layers lie on the ground and on the oak crowns, the grass is white under it, and the dormant winter leaves show beneath.
 
+Later, on a branch built on this one (run [36968803297](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/36968803297)), `winterSnowLiesAndMeltsInSpring` failed once ("Winter rain does not fall as snow"). Its plains covered only its own blocks, and a biome lookup blends the biome cells up to 5 blocks around, so near its edge it could read the natural biome of wherever the test happened to be placed (placement changes from run to run). The test now fills plains 5 blocks past every block it reads and checks that the fill took.
+
 ## World and event applicability
 - **Seasonal rules** ([CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md)):
   - **Activation** and **deactivation**: tested by switching modes (including `off`), previewing dates, and switching snow on and off.

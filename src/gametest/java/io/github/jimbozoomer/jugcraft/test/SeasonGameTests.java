@@ -214,10 +214,20 @@ public class SeasonGameTests {
 		ServerLevel level = helper.getLevel();
 		MinecraftServer server = level.getServer();
 		SeasonCalendar.Settings before = JugcraftSeasons.settings();
-		BlockPos low = helper.absolutePos(new BlockPos(0, 0, 0));
-		BlockPos high = helper.absolutePos(new BlockPos(8, 3, 2));
+		// A biome lookup blends the 4x4x4 biome cells around the block (vanilla's BiomeManager), reaching up to 5 blocks
+		// away, so the plains reach 5 blocks past every block this test reads (x 1 to 7, y 1 to 2, z 1). With only the
+		// test's own blocks filled, lookups near its edge could see the natural biome of wherever the test was placed.
+		BlockPos low = helper.absolutePos(new BlockPos(-4, -4, -4));
+		BlockPos high = helper.absolutePos(new BlockPos(12, 7, 6));
 		server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), String.format(Locale.ROOT,
 				"fillbiome %d %d %d %d %d %d minecraft:plains", low.getX(), low.getY(), low.getZ(), high.getX(), high.getY(), high.getZ()));
+		for (int x = 1; x <= 7; x++) {
+			for (int y = 1; y <= 2; y++) {
+				BlockPos read = helper.absolutePos(new BlockPos(x, y, 1));
+				helper.assertTrue(level.getBiome(read).is(Biomes.PLAINS), "fillbiome did not make " + read + " plains: "
+						+ level.getBiome(read).getRegisteredName());
+			}
+		}
 		for (int x = 0; x <= 8; x++) {
 			helper.setBlock(new BlockPos(x, 1, 1), Blocks.STONE);
 		}
