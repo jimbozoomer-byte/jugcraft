@@ -26,7 +26,7 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 /**
  * Client entrypoint: machine menus to their screens, the handbook to its book, ore surveys to the prospector
  * screen, the drone depot's renderers (drones, pickup lift, control room screen) and terminal screen, and the server's
- * season to grass and foliage colours.
+ * season to grass and foliage colours, and the Party key to the Party screen.
  */
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
@@ -59,6 +59,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		});
 		EngineersHandbookItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
 		SeasonColors.register();
+		PartyClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
 		BlockEntityRenderers.register(JugcraftDrones.TERMINAL_ENTITY, context -> new DroneDepotRenderer());

@@ -276,7 +276,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ### Feature switches (`config/`)
 
-- `config/jugcraft.properties` holds `<feature>.enabled` and the text options in `JugcraftConfig.TEXT_OPTIONS` (the `seasons.*` settings). The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives`, `parties`, `drones`, `pixel_hollows` and `retro_trader`.
+- `config/jugcraft.properties` holds `<feature>.enabled` and the text options in `JugcraftConfig.TEXT_OPTIONS` (the `seasons.*` settings and the `parties.*` limits). The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives`, `parties`, `drones`, `pixel_hollows` and `retro_trader`.
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
 
