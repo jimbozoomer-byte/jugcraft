@@ -13,8 +13,10 @@ import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -46,6 +48,10 @@ public class Decor10GameTests {
 
 	private static Block block(String id) {
 		return JugcraftAgriculture.block(id);
+	}
+
+	private static Item vanilla(String id) {
+		return BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("minecraft", id));
 	}
 
 	private static void floor(GameTestHelper helper) {
@@ -184,13 +190,13 @@ public class Decor10GameTests {
 		helper.assertTrue(helper.getBlockState(pos).getValue(WitchFireBrazierBlock.FLAME) == WitchFireBrazierBlock.Flame.ORANGE
 				&& light(helper, pos) == WitchFireBrazierBlock.LIGHT, "Placed, it burns orange");
 		helper.assertTrue(helper.getBlockEntity(pos, DecorationBlockEntity.class) != null, "Its flames are drawn from its block entity");
-		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.GREEN_DYE, 2));
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(vanilla("green_dye"), 2));
 		use(helper, player, pos, Direction.SOUTH);
 		helper.assertTrue(helper.getBlockState(pos).getValue(WitchFireBrazierBlock.FLAME) == WitchFireBrazierBlock.Flame.GREEN
 				&& player.getMainHandItem().getCount() == 1, "A green dye turns it green and is used up");
 		use(helper, player, pos, Direction.SOUTH);
 		helper.assertTrue(player.getMainHandItem().getCount() == 1, "The same dye again does nothing");
-		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SHOVEL));
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(vanilla("iron_shovel")));
 		use(helper, player, pos, Direction.SOUTH);
 		helper.assertTrue(!helper.getBlockState(pos).getValue(WitchFireBrazierBlock.LIT) && light(helper, pos) == 0, "A shovel puts it out");
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.FLINT_AND_STEEL));

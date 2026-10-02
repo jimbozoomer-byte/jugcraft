@@ -1828,8 +1828,8 @@ def check_decor10(java):
     designs = re.search(r"enum Design implements StringRepresentable \{\s*([A-Z_, ]+);", java.get("GlowPaintBlock", ""))
     if not designs or [v.strip().lower() for v in designs.group(1).split(",")] != paint["designs"]:
         err("GlowPaintBlock.Design differs from GLOW_PAINT's designs")
-    flames = re.findall(r"\b([A-Z]+)\(0x[0-9A-F]+, Items\.([A-Z_]+)\)", java.get("WitchFireBrazierBlock", ""))
-    if [(f.lower(), d.lower()) for f, d in flames] != list(brazier["flames"].items()):
+    flames = re.findall(r"\b([A-Z]+)\(0x[0-9A-F]+, DyeColor\.([A-Z_]+)\)", java.get("WitchFireBrazierBlock", ""))
+    if [(f.lower(), f"{d.lower()}_dye") for f, d in flames] != list(brazier["flames"].items()):
         err("WitchFireBrazierBlock.Flame differs from BRAZIER's flames and dyes")
 
     def variants(block):
