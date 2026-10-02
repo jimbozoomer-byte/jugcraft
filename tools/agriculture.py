@@ -531,6 +531,8 @@ HALLOWEEN_ADVANCEMENTS = {
                          "description": "Be there when eight sky lanterns are let go together", "frame": "goal"},
     "harvest_home": {"icon": "jugcraft:feast_table", "title": "Harvest Home",
                      "description": "Share a grand feast at a Harvest Feast Table", "frame": "challenge"},
+    "amazing": {"icon": "jugcraft:corn_maze_gate", "title": "A-maze-ing", "description": "Find your way through a corn maze",
+                "frame": "task"},
 }
 
 
@@ -1296,6 +1298,18 @@ FEAST = {"block": "feast_table", "display": "Harvest Feast Table", "dishes": 2, 
          "tiers": [3, 5, 8, 11], "regeneration_ticks": 200, "absorption_ticks": 2400, "long_ticks": 6000, "reach": 16,
          "per_craft": 2}
 
+# ---------------------------------------------------------------- Fall additions 8: the corn maze
+# The Corn Maze Gate (CornMazeGateBlock, CornMazeGateBlockEntity, CornMaze): sneak-use cycles the size (`cells` cells
+# across, `sizes`); used holding corn kernels it carves a perfect maze from a new seed and plants maze corn (MazeCornBlock,
+# three tall, solid, needing only solid ground) along its walls, `plant_per_tick` stalks a tick, one kernel a stalk, only
+# where three blocks are clear; the finish post goes at the exit. A run starts through the gate and ends at the finish
+# post; it is void if the runner flies, climbs on the corn, leaves the maze, takes more than `max_run` ticks, or walked
+# less than `shortcut` of the shortest way through. The best of each runner, top `board`, go on the board; ribbons the
+# first time a runner places; A-maze-ing for finishing. At most `max_runners` at once.
+MAZE = {"gate": "corn_maze_gate", "gate_display": "Corn Maze Gate", "finish": "corn_maze_finish", "finish_display": "Corn Maze Finish Post",
+        "corn": "maze_corn", "corn_display": "Maze Corn", "cells": [3, 5, 7, 9], "sizes": ["tiny", "small", "medium", "large"],
+        "plant_per_tick": 32, "max_run": 12000, "shortcut": 0.8, "board": 3, "max_runners": 16, "kernel": "corn_kernels"}
+
 
 def pantry_blocks():
     return [PANTRY["kettle"], PANTRY["shelf"]]
@@ -1319,6 +1333,10 @@ def lantern_items():
 
 def feast_blocks():
     return [FEAST["block"]]
+
+
+def maze_blocks():
+    return [MAZE["gate"], MAZE["finish"], MAZE["corn"]]
 
 
 def night_blocks():
@@ -1911,7 +1929,7 @@ def planted_blocks():
 def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"]] + giant_blocks()
-            + [potted(m) for m in MUMS])
+            + [potted(m) for m in MUMS] + [MAZE["finish"], MAZE["corn"]])
 
 
 def all_blocks():
@@ -1922,7 +1940,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks())
 
 
 def all_items():
@@ -1933,7 +1951,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]])
 
 
 def owns(entry_id):

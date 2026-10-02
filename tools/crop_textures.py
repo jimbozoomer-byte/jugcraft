@@ -882,4 +882,6 @@ def crop_textures():
     out.update(lantern_textures())
     from feast_textures import feast_textures  # and the harvest feast
     out.update(feast_textures())
+    from maze_textures import maze_textures  # and the corn maze
+    out.update(maze_textures())
     return out

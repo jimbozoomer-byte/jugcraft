@@ -796,6 +796,7 @@ def check_agriculture():
     check_fireworks(java, main)
     check_lanterns(java, main)
     check_feast(java, main)
+    check_maze(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2468,6 +2469,44 @@ def check_feast(java, main):
         err(f"The feast table needs its loot table and a recipe making {fe['per_craft']}")
     if not (DATA / "jugcraft" / "advancement" / "harvest_home.json").exists():
         err("A grand feast needs its advancement")
+
+def check_maze(java, main):
+    """The corn maze: CornMaze.java and CornMazeGateBlockEntity.java match MAZE in tools/agriculture.py; the gate, finish
+    post and maze corn are registered with models for every state, the words for every message and size, loot (maze corn
+    giving back its kernel from the bottom only), the gate's recipe and the advancement."""
+    mz = ag.MAZE
+    maze = java.get("CornMaze", "")
+    cells = re.search(r"CELLS = \{([^}]*)\}", maze)
+    sizes = re.search(r"SIZES = \{([^}]*)\}", maze)
+    if not cells or [int(v) for v in cells.group(1).split(",")] != mz["cells"] or not sizes or re.findall(r'"([a-z]+)"', sizes.group(1)) != mz["sizes"]:
+        err("CornMaze's sizes differ from MAZE in tools/agriculture.py")
+    found = {name: float(value) for name, value in re.findall(r"static final (?:int|double) ([A-Z_]+) = ([\d.]+);", java.get("CornMazeGateBlockEntity", ""))}
+    for name, value in {"PLANT_PER_TICK": mz["plant_per_tick"], "MAX_RUN": mz["max_run"], "SHORTCUT": mz["shortcut"],
+                        "MAX_RUNNERS": mz["max_runners"]}.items():
+        if name not in found or abs(found[name] - value) > 1e-9:
+            err(f"CornMazeGateBlockEntity.{name} = {found.get(name)} differs from MAZE in tools/agriculture.py ({value})")
+    for needed in (f'registerBlock("{mz["corn"]}", MazeCornBlock::new', f'registerBlock("{mz["gate"]}", CornMazeGateBlock::new',
+                   f'registerBlock("{mz["finish"]}", CornMazeFinishBlock::new'):
+        if needed not in main:
+            err(f"JugcraftAgriculture.java must register {needed}")
+    corn_states = (load(ASSETS / "blockstates" / f"{mz['corn']}.json") or {}).get("variants", {})
+    if sorted(corn_states) != [f"section={s}" for s in range(3)]:
+        err("Maze corn needs a model for each of its three sections")
+    for block in (mz["gate"], mz["finish"]):
+        states = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+        if sorted(states) != sorted(f"facing={f}" for f in ("north", "south", "east", "west")):
+            err(f"{block} needs a model for every facing")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = ["go", "shortcut", "finished", "planted", "plan", "size_set", "needs", "blocked", "already", "planting"]
+    keys += [f"void.{why}" for why in ("flew", "climbed", "left", "slow")] + [f"size.{size}" for size in mz["sizes"]]
+    for key in keys:
+        if f"message.jugcraft.corn_maze.{key}" not in lang:
+            err(f"The corn maze has no words for {key}")
+    corn_loot = json.dumps(load(DATA / "jugcraft" / "loot_table" / "blocks" / f"{mz['corn']}.json") or {})
+    if f"jugcraft:{mz['kernel']}" not in corn_loot or '"section": "0"' not in corn_loot:
+        err("Maze corn must give back its kernel, from its bottom section only")
+    if not (DATA / "jugcraft" / "recipe" / f"{mz['gate']}.json").exists() or not (DATA / "jugcraft" / "advancement" / "amazing.json").exists():
+        err("The corn maze gate needs its recipe, and finishing a maze its advancement")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

@@ -52,6 +52,8 @@
     "jugcraft:cider_barrel",
     "jugcraft:pantry_shelf",
     "jugcraft:show_launcher",
-    "jugcraft:feast_table"
+    "jugcraft:feast_table",
+    "jugcraft:corn_maze_gate",
+    "jugcraft:corn_maze_finish"
   ]
 }

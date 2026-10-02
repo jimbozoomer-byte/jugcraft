@@ -235,6 +235,7 @@ public final class JugcraftAgriculture {
 	/** Sky lanterns let go: they rise, drift with the wind and burn out. */
 	public static EntityType<SkyLantern> SKY_LANTERN;
 	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
+	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
 	/** The mooncakes, baked in the Cooking Pot. */
 	public static final List<String> MOONCAKES = List.of("red_bean_mooncake", "chestnut_mooncake", "pumpkin_mooncake");
 	public static BlockEntityType<ShowLauncherBlockEntity> SHOW_LAUNCHER_ENTITY;
@@ -1285,6 +1286,17 @@ public final class JugcraftAgriculture {
 		FEAST_TABLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("feast_table"),
 				FabricBlockEntityTypeBuilder.create(FeastTableBlockEntity::new, feastTable).build());
 		registerItem("feast_table", props -> new BlockItem(feastTable, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 8, the corn maze: a gate that plants a maze of corn, times runners and keeps a board.
+		registerBlock("maze_corn", MazeCornBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(0.3F)
+				.sound(SoundType.CROP).noOcclusion().pushReaction(PushReaction.DESTROY).ignitedByLava());
+		Block mazeGate = registerBlock("corn_maze_gate", CornMazeGateBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		CORN_MAZE_GATE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("corn_maze_gate"),
+				FabricBlockEntityTypeBuilder.create(CornMazeGateBlockEntity::new, mazeGate).build());
+		registerItem("corn_maze_gate", props -> new BlockItem(mazeGate, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		registerBlock("corn_maze_finish", CornMazeFinishBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
