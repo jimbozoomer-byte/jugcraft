@@ -1,9 +1,9 @@
 # More Fall Additions
 
-Status: the candy kitchen (addition 11) is implemented in source, not yet played by hand. The Build workflow compiles it, and CI's game tests and client screenshots are recorded below.
+Status: the candy kitchen (addition 11) and autumn foraging (addition 12) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets do another 10 detailed halloween and fall themed additions", then "start them now stacked on #33"). They follow the ten [fall additions](fall-additions.md), numbered on from them, one per pull request, each stacked on the one before:
 11. the candy kitchen: the Candy Kettle, its thermometer and the candy stages, the Candy Tray, and ten candies;
-12. autumn foraging (planned);
+12. autumn foraging: five wild mushrooms that spread in the shade and sprout fairy rings under the full moon, the Foraging Basket, and four mushroom dishes;
 13. the Bat House and guano (planned);
 14. the Hay Golem (planned);
 15. knitting and sweaters (planned);
@@ -14,10 +14,10 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets d
 20. the Día de Muertos ofrenda (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts.
-Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name.
+Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot.
+Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot.
 
-Nothing here depends on the Halloween event: the kettle boils candy all year.
+Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon.
 
 ## Player experience
 ### The Candy Kettle
@@ -73,6 +73,37 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 
 - Burnt sugar keeps no flavour: it tastes of nothing but burning. Caramel keeps its flavours but not its dye.
 
+### Wild mushrooms
+1. Five wild autumn mushrooms grow in patches on the forest floor, each in its own biomes:
+
+| Mushroom | Found in | Use |
+| --- | --- | --- |
+| **Chanterelle** (golden, frilled) | forests, birch forests | Sautéed Chanterelles, Forager's Stew |
+| **Porcini** (a fat brown cap on a pale stem) | taiga, forests | Roasted Porcini, Forager's Stew |
+| **Puffball** (a white ball) | plains, forests | Fried Puffball, Forager's Stew; bursts in a cloud of spores when picked |
+| **Fly Agaric** (red with white spots) | birch forests, taiga | not food; fairy rings and decoration |
+| **Jack o'Lantern Mushroom** (an orange cluster) | spooky biomes, forests | not food; it glows (light 9) |
+
+2. They grow on soil: grass, dirt, coarse or rooted dirt, podzol, mycelium and moss (the block tag `jugcraft:mushroom_soil`), not on stone or sand.
+3. **They spread in the shade.** One random tick in 25, a mushroom with fewer than five of its kind within four blocks puts out another nearby (two blocks across, a block up or down), where the light is below 13. Under trees a patch fills in; in the open it doesn't.
+4. **Bone meal** makes it spread at once, in any light, still up to five.
+5. Picked, each drops itself; they go in a composter.
+
+### Fairy rings
+1. **A fairy ring** is eight or more wild mushrooms in a circle between 2.5 and 3.6 blocks from a centre (a block up or down counts), of any kinds.
+2. **Mushrooms sprout rings under a full moon.** On a full-moon night, one random tick in 40 a wild mushroom plants a ring of its own kind: a circle of radius three that it stands on. A mushroom goes wherever the ground takes one, and nothing sprouts where a ring already stands. Anyone can plant a ring by hand too.
+3. **Stand in its centre on a full-moon night** (in the Overworld) and you are blessed, once a night: Luck II for five minutes, a chime, a shimmer round the ring, "You dance in the fairy ring under the full moon. You feel lucky", and the advancement **Away with the Fairies**. Luck improves fishing and loot from chests.
+
+### The Foraging Basket
+1. A wicker basket (five sugar cane and a stick). It holds forage, like a bundle: wild mushrooms, vanilla mushrooms, sweet berries, glow berries, apples, cocoa beans, chestnuts and cranberries (the item tag `jugcraft:forage`), and nothing else.
+2. **Pick mushrooms with it in either hand** and they go straight into it (what doesn't fit drops as usual).
+3. A basket holding all five wild mushrooms earns **Forager**.
+
+### Mushroom dishes
+- **Sautéed Chanterelles** (5 food), **Roasted Porcini** (6) and **Fried Puffball** (4): the mushroom cooked in a furnace, smoker or campfire.
+- **Forager's Stew** (10 food): a chanterelle, a porcini, a puffball, a potato and a bowl in the Cooking Pot.
+- All four are tagged `c:foods`, so the Harvest Feast Table counts each as a different food.
+
 ## Connections
 - Candy kitchen, input producer: sugar cane (sugar); bottles of water and cows (milk); cocoa, sweet berries, glow berries and bees; the Festival Crops (cranberries, roasted chestnuts) and the cider mill (mulling spices); dyes; sticks; vanilla copper and iron; Jugcraft's `jugcraft:heat_sources`.
 - Candy kitchen, output consumer:
@@ -84,6 +115,15 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - Candy kitchen, entry path: everything is early-game; no candy needs another candy, and the kettle needs no other Jugcraft block.
 - Candy kitchen, required vs optional: optional and all year. One cook can make every candy alone.
 - Candy kitchen, trade and solo routes: candy stacks (identical pieces) and says what it is, so a candy maker can sell to others.
+- Autumn foraging, input producer: the world (forest, taiga, plains and spooky biomes), bone meal, and sugar cane and sticks for the basket.
+- Autumn foraging, output consumer:
+  - the four dishes, and through them the Harvest Feast Table (`c:foods`);
+  - Luck for fishing and loot;
+  - the Foraging Basket carries the Festival Crops' chestnuts and cranberries and the cider mill's apples too;
+  - the jack o'lantern mushroom is a soft light for spooky builds.
+- Autumn foraging, entry path: found from the first day; nothing needs another Jugcraft item.
+- Autumn foraging, required vs optional: optional; nothing else needs a mushroom. A player who finds none can grow a patch from one by bone meal and shade, or trade for them.
+- Autumn foraging, trade and solo routes: mushrooms and dishes stack and trade; a forager can plant fairy rings for others.
 
 ## Balance and automation
 - **Candy kitchen:**
@@ -93,6 +133,14 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
   - Setting: 100 ticks; rock candy 24,000 ticks; taffy pulled 4 times, 20 ticks each, within 600 ticks.
   - Effects are short (4 to 30 seconds a piece) and the same as vanilla potions'; candy gives no effect stronger than level I.
   - Nothing is made from nothing: candy comes only from sugar, and candy makes nothing else (caramel goes into caramel apples, as before). No loop.
+- **Autumn foraging:**
+  - Costs: the basket is five sugar cane and a stick. A dish is one mushroom (Forager's Stew three and a potato). Bone meal, once a try.
+  - Units: random ticks (vanilla's random tick speed); blocks; ticks for Luck (6,000, five minutes).
+  - Spreading: one random tick in 25, at most five of a kind within four blocks, only below light 13 (bone meal in any light). A shady patch fills in over a few in-game days; it never covers a forest.
+  - Worldgen: each mushroom's patch is placed once in 16 chunks of its biomes, 12 tries over a 9 by 9 area, on soil only.
+  - Fairy rings: one random tick in 40 on a full-moon night (one night in eight). The blessing is once a night a player, Luck II for five minutes.
+  - The food values sit with vanilla's cooked foods (a baked potato is 5, the stew is a mushroom stew and more).
+  - Mushrooms only multiply in place, a few at a time, and nothing converts them into more of anything. No loop.
 
 ## Multiplayer and persistence
 - **Candy kitchen, server authority:** filling, reading, tipping out and pouring all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server, which checks the base, the sugar and flavour limits, and the temperature. Pulling and breaking up a tray go through vanilla's item use; the server checks the tray's own record of when it was poured and how often it has been pulled, by its own game time.
@@ -102,6 +150,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - **Candy kitchen, bounded work:** a kettle does nothing unless it is warmer than the room or heating a batch; a degree changes at most every 4 ticks, and only then is it sent to clients.
 - **Candy kitchen, IDs:** blocks/items `candy_kettle`, `candy_tray`, `rock_candy`, `salt_water_taffy`, `hard_candy`, `lollipop`, `fudge`, `cream_caramel`, `toffee`, `burnt_sugar`; block entity `candy_kettle`; data component `jugcraft:candy_batch`; item tags `jugcraft:candy_flavours/*`; advancements `candy_maker` and `taffy_puller`; the kettle's and tray's recipes. All new. Candy corn's item model now takes its band colours from the vanilla `custom_model_data` component (plain candy corn keeps its white, orange and yellow).
 - **Candy kitchen, disable behaviour:** with the agriculture feature off, the kettle's and tray's recipes don't load; kettles, trays and candy already made still work, and everything stays registered.
+- **Autumn foraging, server authority:** spreading, sprouting rings and blessing are the server's (random ticks and a server tick). Picking goes through vanilla's block breaking; the basket fill happens on the server, from the block's own drops. The blessing checks the player's own position on the server; nothing is asked of the client.
+- **Autumn foraging, what clients get:** the blocks and the basket's contents (vanilla's bundle component); particles and sounds.
+- **Autumn foraging, persistence:** mushrooms are blocks. Who was blessed tonight is kept in the server's memory only: a restart in the middle of a full-moon night lets players be blessed once more that night.
+- **Autumn foraging, bounded work:** a random tick looks at the 243 blocks within four blocks and up to four spots. The server looks at each Overworld player every 20 ticks, only on full-moon nights, reading the blocks of the ring round them (the columns between 2.5 and 3.6 blocks off, three blocks high).
+- **Autumn foraging, IDs:** blocks/items `chanterelle`, `porcini`, `puffball`, `fly_agaric`, `jack_o_lantern_mushroom`; items `foraging_basket`, `sauteed_chanterelles`, `roasted_porcini`, `fried_puffball`, `foragers_stew`; placed features `patch_<mushroom>`; block tags `jugcraft:mushroom_soil` and `jugcraft:wild_mushrooms`; item tags `jugcraft:forage` and `jugcraft:wild_mushrooms`; advancements `forager` and `fairy_ring`; their recipes. All new.
+- **Autumn foraging, disable behaviour:** with the agriculture feature off, the recipes don't load; the mushrooms still generate and grow, the basket still works, and everything stays registered.
 
 ## Dependencies and assets
 Candy kitchen:
@@ -109,6 +163,11 @@ Candy kitchen:
 - The models, blockstates, item models (each candy tinted by the vanilla `dyed_color` component; candy corn's bands by `custom_model_data`), names, tooltips, messages, loot and tags come from `tools/candy_data.py`; the numbers from `CANDY` in `tools/agriculture.py`.
 - The client's `CandyKettleRenderer` draws the batch at the height of its sugar, browning past hard crack and black once burnt, and the needle on the dial.
 - Sounds are vanilla's (a note block's bell at each stage, fire going out when it burns, sand, a bottle, a bucket, dye, honey, amethyst breaking for hard candy).
+
+Autumn foraging:
+- No new dependencies. Textures are drawn by code in `tools/foraging_textures.py`: each mushroom's cross-shaped plant (gills and spots, a cluster for the jack o'lantern mushroom), the basket (a red cloth and a chanterelle peeking out), and the dishes.
+- Models, item models, names, loot, recipes, tags, worldgen and advancements come from `tools/foraging_data.py`; the numbers and biomes from `FORAGING` in `tools/agriculture.py`. Each mushroom's patch is added to its biomes by Fabric's biome modification API.
+- Sounds and particles are vanilla's (wool breaking and white ash for a bursting puffball, an amethyst chime and end-rod sparkles at a fairy ring).
 
 ## Verification
 ### Candy kitchen verification
@@ -140,11 +199,19 @@ Found by CI and fixed before this record:
 
 Not run: a two-client dedicated-server playtest, and any play by hand.
 
+### Autumn foraging verification
+
+Pending CI (recorded when it runs).
+
 ## World and event applicability
 - A Candy Kettle works anywhere there is heat under it, in every dimension, all year. Nothing is seasonal.
+- Wild mushrooms generate only in newly generated Overworld chunks of their biomes; existing chunks don't get them, but one mushroom brought in spreads. They can be planted and spread in any dimension with soil and shade. Fairy rings bless only in the Overworld, on full-moon nights (by the Overworld's moon).
 
 ## Rollout and open questions
 - Candy can't be poured by hoppers or dispensers; trays are filled and broken up by hand.
 - A tray of candy doesn't stack, so a candy maker carries one tray a batch.
 - The stages' temperatures are real candy makers' (roughly); the heating rates are compressed so a batch takes under a minute.
 - Every effect is open to balance review in play, Absorption and Resistance in particular.
+- The fairy-ring blessing isn't saved: a restart during a full-moon night lets a player be blessed again that night.
+- Mushrooms aren't food raw. The fly agaric and the jack o'lantern mushroom aren't cooked into anything yet; a later addition could use them (dyes, a potion).
+- How often patches generate is a first guess, open to review once worlds are explored.

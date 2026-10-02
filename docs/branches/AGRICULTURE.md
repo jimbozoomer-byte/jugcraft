@@ -832,6 +832,20 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Candy Kettle:** a copper sugar pot with a candy thermometer. A base (water for syrup, milk for cream), up to four sugar, two flavours and dyes go in before it boils; over a fire it climbs through the candy stages, a bell at each, and the hottest it reaches decides the candy.
 - **Candy Tray:** rock candy grown for a day, candy corn in three coloured layers, taffy pulled while warm, hard candy and lollipops, caramel, fudge, cream caramels and toffee. Flavoured candy gives short effects. Details: [more fall additions](../features/more-fall-additions.md#the-candy-kettle).
 
+### Autumn foraging
+
+| **The forest floor**: chanterelles, porcini, puffballs, fly agarics and jack o'lantern mushrooms under the trees | **Wild mushrooms** up close |
+| --- | --- |
+| ![The forest floor](../images/ingame_forest_floor.jpg) | ![Wild mushrooms](../images/ingame_wild_mushrooms.jpg) |
+| **A fairy ring at night**, the jack o'lantern mushrooms glowing | **The Foraging Basket and the dishes** in frames |
+| ![A fairy ring at night](../images/ingame_fairy_ring_night.jpg) | ![The basket and dishes](../images/ingame_foraging_basket.jpg) |
+
+*Real screenshots from the client game test that CI runs (`ForagingClientGameTests`, software rendering, small previews).*
+
+- **Wild mushrooms** grow in patches on forest floors, each in its own biomes, and spread in the shade up to five of a kind; bone meal spreads them in any light. The jack o'lantern mushroom glows.
+- **Fairy rings:** on a full-moon night a mushroom may sprout a ring of its kind. Stand in the centre of a ring on a full-moon night for Luck II, once a night.
+- **Foraging Basket:** holds forage; mushrooms picked with it in hand go straight in. Cook chanterelles, porcini and puffballs, or make Forager's Stew in the Cooking Pot. Details: [more fall additions](../features/more-fall-additions.md#wild-mushrooms).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
