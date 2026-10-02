@@ -142,6 +142,21 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_rocket_pack_worn");
+			// Batch 25: a full set of steel armor and a steel paxel in hand, from behind; then bronze, from the front.
+			server.runCommand("item replace entity @p armor.head with jugcraft:steel_helmet");
+			server.runCommand("item replace entity @p armor.chest with jugcraft:steel_chestplate");
+			server.runCommand("item replace entity @p armor.legs with jugcraft:steel_leggings");
+			server.runCommand("item replace entity @p armor.feet with jugcraft:steel_boots");
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:steel_paxel");
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_steel_armor_worn");
+			server.runCommand("item replace entity @p armor.head with jugcraft:bronze_helmet");
+			server.runCommand("item replace entity @p armor.chest with jugcraft:bronze_chestplate");
+			server.runCommand("item replace entity @p armor.legs with jugcraft:bronze_leggings");
+			server.runCommand("item replace entity @p armor.feet with jugcraft:bronze_boots");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_bronze_armor_worn");
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			context.getInput().pressKey(options -> options.keyToggleGui);
 			server.runCommand("clear @p");

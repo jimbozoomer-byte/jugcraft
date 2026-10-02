@@ -62,6 +62,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -1349,6 +1350,39 @@ public class JugcraftGameTests {
 			helper.assertTrue(energy >= ChargingStationBlockEntity.CHARGE_RATE * 10, "The drill holds only " + energy + " JE");
 			helper.assertTrue(helper.getBlockState(lower).getValue(ChargingStationBlock.LIT), "The station is not lit while charging");
 		});
+	}
+
+	/**
+	 * Batch 25 gear. A paxel mines stone, logs and dirt fast. Bronze reaches iron ore but not diamond ore; steel reaches
+	 * both. Paxels last three times as long as the tier's tools. The armor goes in the right slots.
+	 */
+	@GameTest
+	public void paxelsAndBronzeAndSteelGear(GameTestHelper helper) {
+		ItemStack bronze = new ItemStack(item("bronze_paxel"));
+		ItemStack steel = new ItemStack(item("steel_paxel"));
+		for (BlockState state : List.of(Blocks.STONE.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(),
+				Blocks.DIRT.defaultBlockState())) {
+			helper.assertTrue(bronze.getDestroySpeed(state) > 1.0F, "A bronze paxel mines " + state + " like a hand");
+		}
+		helper.assertTrue(bronze.isCorrectToolForDrops(Blocks.IRON_ORE.defaultBlockState()), "Bronze cannot get iron ore");
+		helper.assertTrue(!bronze.isCorrectToolForDrops(Blocks.DIAMOND_ORE.defaultBlockState()), "Bronze gets diamond ore");
+		helper.assertTrue(steel.isCorrectToolForDrops(Blocks.DIAMOND_ORE.defaultBlockState()), "Steel cannot get diamond ore");
+		helper.assertTrue(new ItemStack(item("steel_pickaxe")).isCorrectToolForDrops(Blocks.OBSIDIAN.defaultBlockState()),
+				"A steel pickaxe cannot get obsidian");
+		helper.assertTrue(bronze.getMaxDamage() == 3 * new ItemStack(item("bronze_pickaxe")).getMaxDamage(),
+				"A bronze paxel lasts " + bronze.getMaxDamage());
+		helper.assertTrue(new ItemStack(item("diamond_paxel")).getMaxDamage() == 3 * new ItemStack(Items.DIAMOND_PICKAXE).getMaxDamage(),
+				"A diamond paxel is not three diamond pickaxes' worth");
+		helper.assertTrue(new ItemStack(item("netherite_paxel")).has(DataComponents.DAMAGE_RESISTANT), "The netherite paxel burns");
+		for (String[] piece : new String[][] {{"helmet", "HEAD"}, {"chestplate", "CHEST"}, {"leggings", "LEGS"}, {"boots", "FEET"}}) {
+			for (String metal : List.of("bronze", "steel")) {
+				ItemStack stack = new ItemStack(item(metal + "_" + piece[0]));
+				var equippable = stack.get(DataComponents.EQUIPPABLE);
+				helper.assertTrue(equippable != null && equippable.slot() == EquipmentSlot.valueOf(piece[1]),
+						metal + " " + piece[0] + " does not go in " + piece[1]);
+			}
+		}
+		helper.succeed();
 	}
 
 	/** An empty drill mines like a bare hand and gets no ore drops; a charged one is fast and correct. */

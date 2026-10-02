@@ -1314,6 +1314,13 @@ def machines():
     armor = TEX / "entity" / "equipment" / "humanoid"
     armor.mkdir(parents=True, exist_ok=True)
     rocket_pack_armor().save(armor / "rocket_pack.png", optimize=True)
+
+    def save_armor(img, layer, name):
+        folder = TEX / "entity" / "equipment" / layer
+        folder.mkdir(parents=True, exist_ok=True)
+        img.save(folder / f"{name}.png", optimize=True)
+    import gear_textures
+    gear_textures.draw_all(save, save_armor, part_palette)
     save(conveyor_frame(0), "block", "conveyor_belt")
     save_animation([conveyor_frame(2 * i) for i in range(4)], "conveyor_belt_moving", frametime=1)
     save(shaft_frame(0), "block", "iron_shaft")

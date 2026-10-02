@@ -535,102 +535,104 @@
             "Timber!: Make a chainsaw.",
             "Tinkerer: Make an upgrade module for a powered tool.",
             "Rocketeer: Make a rocket pack and take to the air.",
-            "Black Gold: Fill a bucket with crude oil.",
-            "Nodding Donkey: Build a pumpjack over an oil reservoir."
+            "Suited Up: Make a piece of steel armor.",
+            "Jack of All Trades: Make a paxel."
           ]
         },
         {
           "title": "Milestones (6)",
-          "icon": "jugcraft:distillation_tower",
+          "icon": "jugcraft:crude_oil_bucket",
           "text": [
+            "Black Gold: Fill a bucket with crude oil.",
+            "Nodding Donkey: Build a pumpjack over an oil reservoir.",
             "Fractional Thinking: Build a distillation tower.",
             "Tight Spot: Build a fracking rig for shale oil.",
-            "Diesel Power: Build a diesel generator.",
-            "Spool Up: Build a gas turbine.",
-            "Eight Cylinders: Build a diesel engine."
+            "Diesel Power: Build a diesel generator."
           ]
         },
         {
           "title": "Milestones (7)",
-          "icon": "jugcraft:plastic_sheet",
+          "icon": "jugcraft:gas_turbine",
           "text": [
+            "Spool Up: Build a gas turbine.",
+            "Eight Cylinders: Build a diesel engine.",
             "Fantastic Plastic: Press a plastic sheet.",
             "Bouncing Back: Make synthetic rubber.",
-            "Vinyl Revival: Make PVC resin from chlorine.",
-            "Squeaky Clean: Boil soap from lye.",
-            "Light Speed: Draw borosilicate glass into optical fibre."
+            "Vinyl Revival: Make PVC resin from chlorine."
           ]
         },
         {
           "title": "Milestones (8)",
-          "icon": "jugcraft:grenade",
+          "icon": "jugcraft:soap",
           "text": [
+            "Squeaky Clean: Boil soap from lye.",
+            "Light Speed: Draw borosilicate glass into optical fibre.",
             "Pin Pulled: Make a grenade.",
             "Going with the Flow: Build a flow battery.",
-            "Hit the Road: Lay asphalt, and walk faster on it.",
-            "Split Decision: Build an electrolytic cell.",
-            "Oil of Vitriol: Make sulfuric acid."
+            "Hit the Road: Lay asphalt, and walk faster on it."
           ]
         },
         {
           "title": "Milestones (9)",
-          "icon": "jugcraft:fertilizer",
+          "icon": "jugcraft:electrolytic_cell",
           "text": [
+            "Split Decision: Build an electrolytic cell.",
+            "Oil of Vitriol: Make sulfuric acid.",
             "Green Revolution: Make fertilizer.",
             "The Bayer Way: Digest bauxite into alumina.",
-            "Clean Burn: Build a hydrogen fuel cell.",
-            "Thin Air: Build an air separation unit.",
-            "Bread from Air: Build a synthesis converter, to make ammonia from air."
+            "Clean Burn: Build a hydrogen fuel cell."
           ]
         },
         {
           "title": "Milestones (10)",
-          "icon": "jugcraft:nitric_acid_bucket",
+          "icon": "jugcraft:air_separation_unit",
           "text": [
+            "Thin Air: Build an air separation unit.",
+            "Bread from Air: Build a synthesis converter, to make ammonia from air.",
             "Aqua Fortis: Make nitric acid.",
             "Kroll Call: Chlorinate titanium and melt the sponge.",
-            "Power Wall: Build a lithium battery bank.",
-            "Strong Attraction: Make a neodymium magnet.",
-            "Lossless (Almost): Build a magnet dynamo or magnet motor."
+            "Power Wall: Build a lithium battery bank."
           ]
         },
         {
           "title": "Milestones (11)",
-          "icon": "jugcraft:silicon_boule",
+          "icon": "jugcraft:neodymium_magnet",
           "text": [
+            "Strong Attraction: Make a neodymium magnet.",
+            "Lossless (Almost): Build a magnet dynamo or magnet motor.",
             "Pulling Strings: Pull a silicon boule in the arc furnace.",
             "Etched in Light: Etch microchips in the lithography station.",
-            "Central Processing: Assemble a processor.",
-            "Hello, World: Build a network terminal.",
-            "Under Pressure: Build a gas holder."
+            "Central Processing: Assemble a processor."
           ]
         },
         {
           "title": "Milestones (12)",
-          "icon": "jugcraft:fluid_valve",
+          "icon": "jugcraft:network_terminal",
           "text": [
+            "Hello, World: Build a network terminal.",
+            "Under Pressure: Build a gas holder.",
             "Shut-Off Valve: Make a fluid valve.",
             "Strained Relations: Make a fluid filter.",
-            "Here Comes the Sun: Build an advanced solar panel.",
-            "Full of It: Make a tank gauge.",
-            "Concentrate: Build a solar receiver for a heliostat field."
+            "Here Comes the Sun: Build an advanced solar panel."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:turbocharger",
+          "icon": "jugcraft:tank_gauge",
           "text": [
+            "Full of It: Make a tank gauge.",
+            "Concentrate: Build a solar receiver for a heliostat field.",
             "Spool Up: Make a turbocharger for the advanced engine.",
             "Keep It Spinning: Build a flywheel.",
-            "Four on the Floor: Build an advanced combustion engine.",
-            "King Cotton: Grow cotton.",
-            "Make It Rain: Build a sprinkler."
+            "Four on the Floor: Build an advanced combustion engine."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:crop_harvester",
+          "icon": "jugcraft:cotton",
           "text": [
+            "King Cotton: Grow cotton.",
+            "Make It Rain: Build a sprinkler.",
             "Reaping What You Sow: Build a crop harvester."
           ]
         }
@@ -2482,6 +2484,38 @@
             "result": "jugcraft:fortune_module",
             "count": 1
           }
+        },
+        {
+          "title": "Bronze and Steel Gear",
+          "icon": "jugcraft:steel_pickaxe",
+          "text": [
+            "Bronze and steel make swords, pickaxes, axes, shovels, hoes and armor, shaped like iron ones.",
+            "Bronze tools get the same drops as iron and last a little longer. Bronze armor matches iron's and is slightly tougher.",
+            "Steel tools mine obsidian and diamond, and last nearly four times as long as iron. Steel armor sits between iron and diamond."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              null,
+              "minecraft:stick",
+              null,
+              null,
+              "minecraft:stick",
+              null
+            ],
+            "result": "jugcraft:steel_pickaxe",
+            "count": 1
+          }
+        },
+        {
+          "title": "Paxels",
+          "icon": "jugcraft:steel_paxel",
+          "text": [
+            "A paxel is a pickaxe, an axe and a shovel in one tool: it mines stone, wood and dirt at full speed.",
+            "Craft one from a pickaxe, an axe and a shovel of the same tier, from wood to netherite, bronze or steel. It lasts as long as all three together."
+          ]
         }
       ]
     },

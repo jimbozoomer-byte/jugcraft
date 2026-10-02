@@ -342,6 +342,26 @@ def machine_page(block):
     return block_page(block, MACHINES[block]["display"])
 
 
+def gear_pages():
+    """Batch 25: bronze and steel tools and armor, and paxels."""
+    import gear
+    grid = [item_for(gear.GEAR_TIERS["steel"]["ingot"]) if ch == "#" else ("minecraft:stick" if ch == "S" else None)
+            for row in gear.PATTERNS["pickaxe"] for ch in row.ljust(3)]
+    return [
+        {"title": "Bronze and Steel Gear", "icon": f"{MOD}:steel_pickaxe", "text": [
+            "Bronze and steel make swords, pickaxes, axes, shovels, hoes and armor, shaped like iron ones.",
+            "Bronze tools get the same drops as iron and last a little longer. Bronze armor matches iron's and is "
+            "slightly tougher.",
+            "Steel tools mine obsidian and diamond, and last nearly four times as long as iron. Steel armor sits "
+            "between iron and diamond."],
+         "craft": {"grid": grid, "result": f"{MOD}:steel_pickaxe", "count": 1}},
+        {"title": "Paxels", "icon": f"{MOD}:steel_paxel", "text": [
+            "A paxel is a pickaxe, an axe and a shovel in one tool: it mines stone, wood and dirt at full speed.",
+            "Craft one from a pickaxe, an axe and a shovel of the same tier, from wood to netherite, bronze or steel. "
+            "It lasts as long as all three together."]},
+    ]
+
+
 def ores_page():
     lines = []
     for metal, info in METALS.items():
@@ -493,7 +513,8 @@ def build():
             [machine_page(m) for m in ("coke_oven", "steel_foundry")]
             + [block_page(b, TOOL_BLOCKS[b]["display"]) for b in TOOL_BLOCKS]
             + [block_page(t, POWERED_TOOLS[t]) for t in POWERED_TOOLS]
-            + [block_page(m, UPGRADE_MODULES[m][0]) for m in UPGRADE_MODULES]},
+            + [block_page(m, UPGRADE_MODULES[m][0]) for m in UPGRADE_MODULES]
+            + gear_pages()},
         {"title": "Fluids", "icon": f"{MOD}:fluid_tank", "pages":
             [block_page(p, PIPES[p]["display"]) for p in ("bronze_fluid_pipe", "steel_fluid_pipe", "fluid_valve",
                                                           "fluid_filter")]
