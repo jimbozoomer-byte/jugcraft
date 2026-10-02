@@ -33,7 +33,8 @@ public class CiderPressBlockEntity extends BlockEntity {
 	private int pressing;
 	private int turns;
 	private int juice;
-	private long lastWork = Long.MIN_VALUE;
+	/** When the crank or screw last moved (game time); never, at first. */
+	private long lastWork = -WORK_TICKS;
 
 	public CiderPressBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.CIDER_PRESS_ENTITY, pos, state);
@@ -133,7 +134,7 @@ public class CiderPressBlockEntity extends BlockEntity {
 		turns = Math.clamp(input.getIntOr("turns", 0), 0, TURNS - 1);
 		pressing = turns == 0 ? 0 : Math.clamp(input.getIntOr("pressing", 0), 0, CAPACITY);
 		juice = Math.clamp(input.getIntOr("juice", 0), 0, TROUGH);
-		lastWork = Long.MIN_VALUE;
+		lastWork = -WORK_TICKS;
 	}
 
 	@Override
