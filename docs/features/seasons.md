@@ -99,7 +99,7 @@ Primary specialty and supported player role: exploration and building (looks), s
 - **Snow.**
   - A common mixin (`mixin/BiomeSeasonMixin`) turns rain into snow in winter-snow biomes while it is snowing. Rendering and weather rules then match vanilla's snowy biomes: for example, rain does not water farmland, and lightning does not strike in snow.
   - Biome temperature is untouched, so world generation, ice and vanilla snow are unchanged.
-  - The season lays its own block, `jugcraft:seasonal_snow`. It looks like vanilla snow and is in `#minecraft:snow`, so grass under it turns snowy. It is placed by `SeasonalSnow`: 2 spots per player per tick, within 48 blocks, only in loaded chunks and only while it rains.
+  - The season lays its own block, `jugcraft:seasonal_snow`. It looks like vanilla snow and is in `#minecraft:snow`, so grass under it turns snowy. It does not occlude: vanilla kills grass under anything that shuts out its light except one layer of vanilla snow, so grass under seasonal snow would otherwise turn to dirt over winter and have no grass to spread back from in spring. It is placed by `SeasonalSnow`: 2 spots per player per tick, within 48 blocks, only in loaded chunks and only while it rains.
   - Once it is no longer snowing, the block's random ticks melt it.
 - A client without the mod, or a server without Jugcraft, shows vanilla colours and rain. Leaving a server resets both.
 - **Saved data.** Nothing is saved for colours or events. Seasonal snow is ordinary block data in loaded chunks:
@@ -144,6 +144,7 @@ Results are recorded under "Results" below after CI runs.
     - rain becomes snow in winter;
     - two layers lie, and no third past the depth;
     - no snow on farmland, on water (which stays water) or over vanilla snow;
+    - grass under two layers stays grass (snowy) through random ticks;
     - in spring rain falls as rain again;
     - each random tick melts a layer, while vanilla snow stays.
 - Client game test (`SeasonClientGameTests`):

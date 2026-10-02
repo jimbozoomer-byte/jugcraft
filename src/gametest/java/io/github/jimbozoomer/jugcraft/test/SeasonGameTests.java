@@ -28,6 +28,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 /** Seasons: the server's calendar and events, the operator's settings and command, the palette, the biome tags and winter snow. */
 public class SeasonGameTests {
@@ -250,6 +251,16 @@ public class SeasonGameTests {
 		helper.assertBlockPresent(Blocks.SNOW, new BlockPos(5, 2, 1));
 		helper.assertTrue(!SeasonalSnow.snowAt(level, helper.absolutePos(new BlockPos(7, 2, 1)), 2), "Snow on water");
 		helper.assertBlockPresent(Blocks.WATER, new BlockPos(7, 1, 1));
+		// Grass under the season's snow lives through winter (vanilla kills grass under anything that shuts out its
+		// light but one layer of vanilla snow): it stays grass, snowy, through random ticks.
+		BlockPos lawn = helper.absolutePos(new BlockPos(6, 1, 1));
+		level.setBlockAndUpdate(lawn, Blocks.GRASS_BLOCK.defaultBlockState());
+		helper.assertTrue(SeasonalSnow.snowAt(level, lawn.above(), 2) && SeasonalSnow.snowAt(level, lawn.above(), 2), "No snow on the grass");
+		for (int tick = 0; tick < 4; tick++) {
+			level.getBlockState(lawn).randomTick(level, lawn, level.getRandom());
+		}
+		helper.assertTrue(level.getBlockState(lawn).is(Blocks.GRASS_BLOCK) && level.getBlockState(lawn).getValue(BlockStateProperties.SNOWY),
+				"Grass under two layers of seasonal snow became " + level.getBlockState(lawn));
 
 		// Spring: the season's snow melts a layer per random tick; vanilla snow stays.
 		JugcraftSeasons.setMode(server, SeasonCalendar.Mode.SPRING);

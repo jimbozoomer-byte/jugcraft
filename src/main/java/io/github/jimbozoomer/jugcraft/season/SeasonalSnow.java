@@ -41,8 +41,11 @@ public final class SeasonalSnow {
 
 	static void register() {
 		ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, Jugcraft.id(ID));
+		// Not occluding: grass dies under anything that shuts out its light except one layer of vanilla snow, so under
+		// occluding seasonal snow every lawn and meadow would turn to dirt over winter, with no grass left to spread back
+		// in spring. Seasonal snow lets the grass under it live (snowy), as one vanilla layer does.
 		BLOCK = Registry.register(BuiltInRegistries.BLOCK, key,
-				new SeasonalSnowBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SNOW).setId(key)));
+				new SeasonalSnowBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SNOW).noOcclusion().setId(key)));
 	}
 
 	/** Lays winter snow round every player in levels where it is raining (bounded per tick). */
