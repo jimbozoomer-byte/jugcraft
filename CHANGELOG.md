@@ -10,7 +10,7 @@ No numbered release yet. Everything below is on `main`.
 
 ### Unmerged: Engineer's Handbook reorganised, batch 23
 - The book fits the window; the chapter list is a scrollable contents list where the open chapter shows its pages, and long pages scroll (mouse wheel or arrow keys).
-- New **Progression** chapter: the road through the mod in eight stages, each a plan and a numbered chain of the items to make in order.
+- New **Progression** chapter: the road through the mod in nine stages, each a plan and a numbered chain of the items to make in order.
 
 ### #78 Machine screens redesigned, batch 22
 - Every machine screen has a themed look: dieselpunk amber, electric green or lab teal, after the machine's model.

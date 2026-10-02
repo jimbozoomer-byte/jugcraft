@@ -8,8 +8,7 @@
           "title": "The Road Ahead",
           "icon": "jugcraft:engineers_handbook",
           "text": [
-            "Jugcraft builds in stages; each needs the one before. Pick a stage on the left to see its steps.",
-            "You do not have to finish a stage before starting the next, but its parts are needed later."
+            "Jugcraft builds in stages, each needing parts from the ones before. Pick a stage on the left to see its steps."
           ],
           "steps": [
             {
@@ -43,6 +42,10 @@
             {
               "item": "jugcraft:flow_battery",
               "label": "Late Game"
+            },
+            {
+              "item": "jugcraft:borosilicate_glass",
+              "label": "Special Materials"
             }
           ]
         },
@@ -358,9 +361,9 @@
           "title": "8. Late Game",
           "icon": "jugcraft:flow_battery",
           "text": [
-            "Big, efficient power and the best tools.",
-            "Magnet dynamos and motors lose almost nothing. The advanced engine and advanced solar panel are the best generators; a flow battery stores 64 million JE.",
-            "Rubber, borosilicate glass and grenades come from the chemistry you already run."
+            "Big, efficient power.",
+            "Magnet dynamos and motors lose almost nothing. Fit a turbocharger to the advanced engine and give it coolant water; a flywheel smooths out a bursty shaft line.",
+            "Solar trackers follow the sun; a field of heliostats around a tower boils water at a solar receiver. A flow battery stores 64 million JE."
           ],
           "steps": [
             {
@@ -372,20 +375,67 @@
               "label": "Advanced engine"
             },
             {
+              "item": "jugcraft:turbocharger",
+              "label": "Turbocharger"
+            },
+            {
+              "item": "jugcraft:flywheel",
+              "label": "Flywheel"
+            },
+            {
               "item": "jugcraft:advanced_solar_panel",
               "label": "Advanced solar"
             },
             {
+              "item": "jugcraft:solar_tracker",
+              "label": "Solar tracker"
+            },
+            {
+              "item": "jugcraft:heliostat",
+              "label": "Heliostats"
+            },
+            {
+              "item": "jugcraft:solar_receiver",
+              "label": "Solar receiver"
+            },
+            {
               "item": "jugcraft:flow_battery",
               "label": "Flow battery"
-            },
+            }
+          ]
+        },
+        {
+          "title": "9. Special Materials",
+          "icon": "jugcraft:borosilicate_glass",
+          "text": [
+            "Rubber, glass and weapons from the chemistry you already run.",
+            "Butadiene from the cracker becomes rubber and gaskets, for sealed pipes and the turbocharger.",
+            "Borax turns sand into borosilicate glass: glass tanks that join into big see-through stores, tank gauges and optical fibre for processors. Guncotton fills grenades."
+          ],
+          "steps": [
             {
               "item": "jugcraft:rubber",
               "label": "Rubber"
             },
             {
+              "item": "jugcraft:gasket",
+              "label": "Gaskets"
+            },
+            {
               "item": "jugcraft:borosilicate_glass",
               "label": "Borosilicate glass"
+            },
+            {
+              "item": "jugcraft:glass_tank",
+              "label": "Glass tanks"
+            },
+            {
+              "item": "jugcraft:tank_gauge",
+              "label": "Tank gauge"
+            },
+            {
+              "item": "jugcraft:optical_fibre",
+              "label": "Optical fibre"
             },
             {
               "item": "jugcraft:grenade_launcher",

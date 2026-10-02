@@ -409,21 +409,29 @@ PROGRESSION = [
         "Four microchips and an advanced circuit make a processor, for the top machines."], [
         ("crystal_grower", "Crystal grower"), ("silicon_wafer", "Wafers"), ("lithography_station", "Lithography"),
         ("microchip", "Microchips"), ("processor", "Processor"), ("network_terminal", "Network terminal")]),
-    ("Late Game", "flow_battery", "Big, efficient power and the best tools.", [
-        "Magnet dynamos and motors lose almost nothing. The advanced engine and advanced solar panel are the best "
-        "generators; a flow battery stores 64 million JE.",
-        "Rubber, borosilicate glass and grenades come from the chemistry you already run."], [
-        ("magnet_dynamo", "Magnet dynamo"), ("advanced_engine", "Advanced engine"),
-        ("advanced_solar_panel", "Advanced solar"), ("flow_battery", "Flow battery"), ("rubber", "Rubber"),
-        ("borosilicate_glass", "Borosilicate glass"), ("grenade_launcher", "Grenade launcher")]),
+    ("Late Game", "flow_battery", "Big, efficient power.", [
+        "Magnet dynamos and motors lose almost nothing. Fit a turbocharger to the advanced engine and give it "
+        "coolant water; a flywheel smooths out a bursty shaft line.",
+        "Solar trackers follow the sun; a field of heliostats around a tower boils water at a solar receiver. A flow "
+        "battery stores 64 million JE."], [
+        ("magnet_dynamo", "Magnet dynamo"), ("advanced_engine", "Advanced engine"), ("turbocharger", "Turbocharger"),
+        ("flywheel", "Flywheel"), ("advanced_solar_panel", "Advanced solar"), ("solar_tracker", "Solar tracker"),
+        ("heliostat", "Heliostats"), ("solar_receiver", "Solar receiver"), ("flow_battery", "Flow battery")]),
+    ("Special Materials", "borosilicate_glass", "Rubber, glass and weapons from the chemistry you already run.", [
+        "Butadiene from the cracker becomes rubber and gaskets, for sealed pipes and the turbocharger.",
+        "Borax turns sand into borosilicate glass: glass tanks that join into big see-through stores, tank gauges "
+        "and optical fibre for processors. Guncotton fills grenades."], [
+        ("rubber", "Rubber"), ("gasket", "Gaskets"), ("borosilicate_glass", "Borosilicate glass"),
+        ("glass_tank", "Glass tanks"), ("tank_gauge", "Tank gauge"), ("optical_fibre", "Optical fibre"),
+        ("grenade_launcher", "Grenade launcher")]),
 ]
 
 
 def progression_pages():
     """An overview of the stages, then one page per stage with its plan and the steps in order."""
     overview = {"title": "The Road Ahead", "icon": f"{MOD}:engineers_handbook", "text": [
-        "Jugcraft builds in stages; each needs the one before. Pick a stage on the left to see its steps.",
-        "You do not have to finish a stage before starting the next, but its parts are needed later."],
+        "Jugcraft builds in stages, each needing parts from the ones before. Pick a stage on the left to see its "
+        "steps."],
         "steps": [{"item": f"{MOD}:{icon}", "label": title}
                   for title, icon, _, _, _ in PROGRESSION]}
     pages = [overview]
