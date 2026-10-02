@@ -370,7 +370,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 - `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives`, `agriculture`, `parties`, `drones`, `pixel_hollows` and `retro_trader`.
 - It also holds other server options, `JugcraftConfig.OPTIONS` (read with `JugcraftConfig.option(key)`): `carving.free_draw` (default `true`).
-- Text options, `JugcraftConfig.TEXT_OPTIONS` (read with `JugcraftConfig.textOption(key)`): the `seasons.*`, `harvest_feast*` and `december` settings (season/SeasonCalendar), and the Halloween event's `halloween.start` and `halloween.end` (`MM-DD`, defaults `10-20` and `11-03`), `halloween.timezone` (default `UTC`) and `halloween.mode` (`auto`, `on` or `off`). `HalloweenSeason` reads the Halloween ones; a bad value is logged and its default kept.
+- Text options, `JugcraftConfig.TEXT_OPTIONS` (read with `JugcraftConfig.textOption(key)`): the `seasons.*`, `harvest_feast*` and `december` settings (season/SeasonCalendar), the `parties.*` limits (party/JugcraftParties), and the Halloween event's `halloween.start` and `halloween.end` (`MM-DD`, defaults `10-20` and `11-03`), `halloween.timezone` (default `UTC`) and `halloween.mode` (`auto`, `on` or `off`). `HalloweenSeason` reads the Halloween ones; a bad value is logged and its default kept.
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
 

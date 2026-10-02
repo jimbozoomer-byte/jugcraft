@@ -44,6 +44,9 @@ public final class JugcraftConfig {
 	 * (follow the dates), {@code on} or {@code off} (for testing and off-season worlds); {@code halloween.harvest_moon}
 	 * is the day (month-day) of the Harvest Moon, whose nights make crops grow faster. Treats already given are kept
 	 * whatever the setting.
+	 * Party limits (see {@code party/JugcraftParties}): {@code parties.max_size} members (2 to 64),
+	 * {@code parties.invite_minutes} before an invite expires (1 to 60) and {@code parties.invites_per_minute}
+	 * each player may send (1 to 60).
 	 */
 	public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
 			Map.entry("halloween.start", "10-20"), Map.entry("halloween.end", "11-03"), Map.entry("halloween.timezone", "UTC"),
@@ -51,7 +54,8 @@ public final class JugcraftConfig {
 			Map.entry("seasons.mode", "auto"), Map.entry("seasons.hemisphere", "north"), Map.entry("seasons.timezone", "UTC"),
 			Map.entry("seasons.snow", "off"), Map.entry("seasons.snow_depth", "2"),
 			Map.entry("harvest_feast", "us"), Map.entry("harvest_feast.days", "4"),
-			Map.entry("december", "12-01..01-06"));
+			Map.entry("december", "12-01..01-06"),
+			Map.entry("parties.max_size", "8"), Map.entry("parties.invite_minutes", "5"), Map.entry("parties.invites_per_minute", "10"));
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
@@ -120,7 +124,7 @@ public final class JugcraftConfig {
 					+ " the Halloween event runs: start and end as MM-DD, a timezone, mode auto, on or off, and the Harvest Moon's day;"
 					+ " seasons.*: seasonal colours follow the server's date; mode auto, spring, summer, autumn,"
 					+ " winter or off, hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"
-					+ " december MM-DD..MM-DD or off).");
+					+ " december MM-DD..MM-DD or off; parties.max_size 2-64, parties.invite_minutes 1-60, parties.invites_per_minute 1-60).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}
