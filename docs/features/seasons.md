@@ -56,7 +56,7 @@ Primary specialty and supported player role: exploration and building (looks), s
 
 ## Connections
 - Input producer: the server's clock. Nothing in the game feeds it.
-- Output consumer: none yet. No item, block, recipe, drop, spawn or progression step depends on seasons.
+- Output consumer: looks only. Alpine Spawn's larch needles (`docs/features/alpine-spawn.md`) turn gold and bare with `today()`. No item, recipe, drop, spawn or progression step depends on seasons.
   - The seasonal snow block drops snowballs, as vanilla snow does, so snow adds nothing new.
   - `JugcraftSeasons.isActive(event)` and `today()` are the shared clock that seasonal content reads, such as the Halloween and Harvest Feast content in the agriculture branch.
 - Technology connection: none.
