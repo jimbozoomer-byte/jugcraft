@@ -1,21 +1,21 @@
 # More Halloween
 
-Status: implemented in source for batches 7 to 9, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below). Batches 10 to 14 are planned and follow one pull request at a time.
+Status: implemented in source for batches 7 to 10, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below). Batches 11 to 14 are planned and follow one pull request at a time.
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("I want to make more halloween content more decorations and fun festive content", then "Lets do those 45 by each category starting with Haunted House inside then Mad Scientist and Mosnters then Yard and Porch then Lighting and Glow then Party Games then Night Events then Treats then Costumes"). The 45 ideas ship one category per pull request, each stacked on the one before:
 - batch 7, the haunted house inside: the Haunted Chandelier, the Phantom Pipe Organ, the Suit of Armor, the Dust Sheet, the Spirit Mirror, Tattered Curtains and the Creepy Doll;
 - batch 8, the mad scientist and monsters: the Tesla Coil, the Lab Table, the Specimen Jar, the Mummy Sarcophagus, the Raven on a Perch and the Black Cat Figure;
 - batch 9, the yard and porch: the Yard Inflatables (a ghost, a black cat, a pumpkin stack and a spider), the Animatronic Porch Witch, Grasping Hands, the Poseable Skeleton, Bone Wind Chimes, the Bat and Witch Weathervanes, the Spooky Sign, the Haunted Archway and the Dead Hollow Tree;
-- batch 10, lighting and glow (planned);
+- batch 10, lighting and glow: the Black Light and Glow Paint, the Witch Fire Brazier, the Shadow Puppet Lamp, the Mini Pumpkin Stack and the Floating Witch Hat;
 - batch 11, party games (planned);
 - batch 12, night events (planned);
 - batch 13, treats (planned);
 - batch 14, costumes (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: batch 7 is Discovery tier (iron, candles, a note block, bones, planks, an armor stand, white carpet, glass, gold nuggets, soul sand, string, clay and wool). Batch 8 is Discovery tier too (iron, glass, a slime ball, sandstone, paper, rotten flesh, feathers, sticks, black terracotta, glowstone dust), apart from the Tesla Coil, which needs copper and copper cable (the tin and bronze tier) and a generator to run. Batch 9 is Discovery tier (wool, dyes, iron, redstone, a cauldron, bones, rotten flesh, dirt, string, slabs, planks, sticks, mossy cobblestone, lanterns, logs and a jack o'lantern).
+Target milestone and tier: batch 7 is Discovery tier (iron, candles, a note block, bones, planks, an armor stand, white carpet, glass, gold nuggets, soul sand, string, clay and wool). Batch 8 is Discovery tier too (iron, glass, a slime ball, sandstone, paper, rotten flesh, feathers, sticks, black terracotta, glowstone dust), apart from the Tesla Coil, which needs copper and copper cable (the tin and bronze tier) and a generator to run. Batch 9 is Discovery tier (wool, dyes, iron, redstone, a cauldron, bones, rotten flesh, dirt, string, slabs, planks, sticks, mossy cobblestone, lanterns, logs and a jack o'lantern). Batch 10 is Discovery tier too (iron, purple stained glass, glowstone dust, a glow ink sac, bone meal, a campfire, paper, a candle, slabs, carved pumpkins, torches and black wool).
 Primary specialty and supported player role: building and play; builders (haunted houses and Halloween yards), groups (a shared haunted house to explore, a street of decorated yards), and anyone who likes a prop that does something when you are not looking.
 
-Event-only activities in later batches follow the rule the earlier Halloween work set: they run only in the Halloween window, and anything crafted or placed stays all year. Nothing in batches 7 to 9 depends on the event.
+Event-only activities in later batches follow the rule the earlier Halloween work set: they run only in the Halloween window, and anything crafted or placed stays all year. Nothing in batches 7 to 10 depends on the event.
 
 ## Player experience
 ### Batch 7: the Haunted Chandelier
@@ -103,7 +103,24 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
 ### Batch 9: the Dead Hollow Tree
 41. A dead, gnarled tree four blocks tall: a dark hollow at its foot, a face in its bark with glowing yellow eyes, and bare branches reaching out over the blocks round it, two of them hung with lanterns (light 13). Only the trunk is solid. Placed and broken as one; use it to put the lanterns out or light them.
 
+### Batch 10: the Black Light and Glow Paint
+42. **The Black Light:** a violet fluorescent tube in a black fixture, hung on a wall. Use it to switch it on and off, or give it a redstone signal; it glows violet (light 6).
+43. **Glow Paint:** a jar of glowing paint (a glow ink sac and bone meal make four). Paint it on any face of a block, a wall, the floor or a ceiling: a skull, a bat, a spider, a web, a handprint or an eye; use it to paint the next design over it. In ordinary light it is a faint pale smear; **under a black light** within six blocks it blazes out green-white, fully within three blocks and fading by six.
+
+### Batch 10: the Witch Fire Brazier
+44. A black iron bowl of glowing coals on four legs, burning with a tall flame (light 15). **Use a dye on it** to turn the flame orange, green, purple or blue (the dye is used up), with sparks to match. A shovel puts it out; flint and steel or a fire charge lights it again. It is witch fire: it burns nothing and nobody.
+
+### Batch 10: the Shadow Puppet Lamp
+45. A candle on a turned wooden base under a three-sided paper shade with a bat, a cat and a witch cut out of it. Lit like a candle (light 12), the warm shade turns slowly, once every twelve seconds, and the three shapes **slide round the walls of the room**, bigger the further away the wall, darker at night.
+
+### Batch 10: the Mini Pumpkin Stack
+46. Three little jack o'lanterns, two side by side and one on top, grinning out at whoever placed them, a candle in each (light 12). Placed lit; an empty hand snuffs them and flint and steel or a fire charge lights them again.
+
+### Batch 10: the Floating Witch Hat
+47. A pointed black hat with an orange band and a candle hanging inside it, floating where it is placed, bobbing and turning slowly, each hat out of step with its neighbours. Lit like a candle (light 10); nothing walks into it.
+
 ## Connections
+- Batch 10 inputs: iron nuggets, purple stained glass, glowstone dust, and redstone (the black light); a glow ink sac and bone meal (the paint); iron and a campfire, and dyes (the brazier); paper, a candle and a wooden slab (the lamp); carved pumpkins and a torch (the pumpkins); black wool and a candle (the hat); flint and steel or a fire charge to light them.
 - Batch 9 inputs: wool, a dye or a spider eye, iron nuggets and redstone (the inflatables), and redstone to run them; purple and black wool, redstone and a cauldron (the witch); bones, rotten flesh and dirt (the hands); bones (the skeleton); an iron nugget, string, a wooden slab and bones (the chimes); iron and black or purple dye (the vanes); planks, red dye and a stick (the sign), and a Name Tag to write on it; lanterns, iron and mossy cobblestone (the archway); lanterns, a stick, logs and a jack o'lantern (the tree).
 - Batch 8 inputs: a lightning rod, copper, copper cable and iron, and the electric network's power (the coil); iron, white wool and rotten flesh, and redstone (the table); glass, an iron nugget and a slime ball (the jar); sandstone, gold nuggets, paper and rotten flesh, and redstone (the sarcophagus); feathers, black dye and sticks (the raven); black terracotta and glowstone dust (the cat).
 - Existing input producer: iron, candles, flint and steel or fire charges (the chandelier); iron, bone, a note block and planks, and redstone (the organ); iron and an armor stand (the suit); white carpet (the sheet); a glass pane, gold nuggets and soul sand (the mirror); iron nuggets and string (the curtains); clay, wool and string (the doll). The sheet covers the earlier batches' Rocking Chair, Hay Bale Seat, Crystal Ball and Grimoire Stand, this batch's doll and mirror, and vanilla furniture.
@@ -120,6 +137,7 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
 - Batch 8: the Tesla Coil uses 20 JE a tick while it runs (buffer 4,000 JE, up to 64 JE a tick in): a coal generator runs it easily, a solar panel (8 JE a tick) can't alone. Nothing else in batch 8 uses energy. A coil costs a lightning rod, two copper ingots, a copper cable and three iron ingots; a table two white wool, a rotten flesh and five iron ingots; a jar an iron nugget, three glass and a slime ball; a sarcophagus five sandstone, two gold nuggets, a paper and a rotten flesh; a raven two feathers, a black dye and four sticks; a cat five black terracotta and a glowstone dust. Light: a running coil 8, a jar 7.
 - Batch 9 uses no energy. Inflatables cost five wool, a dye (a spider eye for the spider), two iron nuggets and a redstone; the witch a purple wool, two black wool, a redstone and a cauldron; the hands two bones, a rotten flesh and a dirt; the skeleton six bones; the chimes an iron nugget, two string, a wooden slab and three bones; a vane two iron nuggets, a dye and two iron ingots; two signs five planks, a red dye and a stick; the archway two lanterns, two iron ingots and four mossy cobblestone; the tree two lanterns, a stick, three logs and a jack o'lantern. Light: a blown-up inflatable 7, the witch's brew 6, the archway's lanterns 14, the tree's 13.
 - The hands' Slowness is harmless (no damage) and can't be farmed into anything.
+- Batch 10 uses no energy. A black light costs three iron nuggets, two purple stained glass and a glowstone dust; four glow paints a glow ink sac and a bone meal; a brazier five iron ingots and a campfire, and a dye each time its flame changes colour; a lamp five paper, a candle and a wooden slab; two pumpkin stacks three carved pumpkins and a torch; two hats six black wool and a candle. Light: a black light 6, glow paint 1, a brazier 15, a lamp 12, a pumpkin stack 12, a hat 10.
 - **The Dust Sheet makes nothing.** It only moves a block (and that block's saved data) under itself and back. Breaking a sheeted block gives the covered block's own drops, with the tool the player is using: a sheet over stone stairs broken by hand gives only the sheet, as breaking stone stairs by hand gives nothing. A sheeted chest's contents spill once, from the sheet, never also from the chest.
 - No conversion loops; nothing here makes items or energy.
 
@@ -130,9 +148,11 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
   - **Covering a container closes it first** for anyone looking into it, and its contents move under the sheet before the chest is replaced, so nothing can be taken out of a covered chest or spilled twice. Clients are only told which block is under a sheet, never a chest's contents.
 - **Batch 8, server authority.** Switching a coil, sitting the patient up, changing a specimen, opening the sarcophagus and using the raven and cat go through vanilla's block use path (reach, spawn protection) or redstone, and are decided on the server. A coil's power, running and arcs (and which coil it arcs to) are worked out on the server and sent as block events; the cat watches for runners on the server, from where players really are, every 5 ticks, at the level's player list. The raven's flap is a block event.
 - **Batch 9, server authority.** Switching an inflatable, posing the skeleton, changing or writing on a sign, and lighting the archway and tree go through vanilla's block use path (reach, spawn protection; writing and wiping the sign also need build permission) or redstone, and are decided on the server. The witch watches the level's player list on the server every 5 ticks; the hands grab on the server when something steps on them, and their phases run on scheduled ticks. A sign's own words are cleaned (control characters dropped, at most 50 characters) before they are kept or sent.
+- **Batch 10, server authority.** Switching a black light, painting, dyeing, lighting and putting out go through vanilla's block use path (reach, spawn protection; painting over glow paint needs build permission) or redstone, and are decided on the server; a dye or fire charge is used up and flint and steel worn there.
 - **Client only.** The chandelier's sway and flames, the organ's keys, the suit's helmet and visor glow, the sheet's drape and breathing, the mirror's face, the curtains' sway and the doll's head are drawn by each client from what it already has (the time, the block states, where players are, its own camera), so nothing about them is sent or trusted. Every client works out the same nearest player for the suit. The doll turns for each player alone, by when that player last saw it.
 - **Batch 8, client only.** The arcs (from the block event), the patient sitting up (from the block state), the specimens bobbing, the lid and mummy, the raven's head and wings, and the cat's tail and eyes are drawn by each client from what it already has. The coil keeps a set of running coils per level, so finding a partner searches no blocks.
 - **Batch 9, client only.** The inflatables filling, flopping and wobbling, the witch's arm and head, the chimes swinging and clacking, the vanes turning and the sign's lettering are drawn by each client from what it already has (the block states, the time, the weather, where players are). The wind is the same function of the time on every client, so every vane points the same way; the chimes' clacking is each client's own sound.
+- **Batch 10, client only.** The paint's glow, the brazier's flames, the lamp's shade and shadows and the hats' bobbing are drawn by each client from what it already has. Each client knows which black lights shine from the block states it has: a shining light notes where it is in a small map each tick, and paint looks through that map, never searching blocks. The lamp looks along at most six blocks for each of its three shadows' walls each frame.
 - **Saved state.**
   - Block states: the chandelier's `lit` and `burning`; the organ's `part`, `facing`, `playing` and `powered`; the suit's `facing` and `half`; the mirror's `facing`; the curtains' `facing`, `open` and `part`; the doll's `facing`.
   - The organ's master block entity saves where it is in its tune (`tick`) and when it started (`start_time`, for the keys).
@@ -143,6 +163,8 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
   - Only a playing organ ticks, on its master block, for its 200 ticks. A lit chandelier and the organ's master take random ticks; a relighting chandelier schedules one tick per candle.
   - The renderers do a little arithmetic a frame. The suit looks through the level's player list; the curtains look up at most eight blocks above them; the suit and doll keep one small entry per block entity in a weak map.
   - Batch 8: a running coil ticks (its energy, and an arc every 15 to 40 ticks); a cat looks every 5 ticks; nothing else ticks. Arcs, the patient, the specimens, the mummy, the raven and the cat's tail are a little arithmetic a frame on each client; the raven looks through the level's player list.
+- Batch 10 saved state: block states only (the black light's `facing`, `lit`, `powered`; the paint's `facing` and `design`; the brazier's `lit` and `flame`; the lamp's `lit`; the pumpkins' `facing` and `lit`; the hat's `lit`).
+- Batch 10 bounded work: nothing ticks on the server; a shining black light ticks on each client to note where it is.
 - Batch 9 bounded work: the witch looks every 5 ticks; the hands only act when stepped on, and then schedule two ticks; nothing else ticks. The renderers do a little arithmetic a frame; the witch's head reads the level's player list.
 - New IDs only:
   - blocks with items: `haunted_chandelier`, `phantom_pipe_organ`, `suit_of_armor`, `spirit_mirror`, `tattered_curtains`, `creepy_doll`;
@@ -151,6 +173,7 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
   - block tag `jugcraft:dust_sheet_coverable`, so packs can let sheets cover more or fewer blocks.
 - Batch 8 new IDs: blocks with items `tesla_coil`, `lab_table`, `specimen_jar`, `mummy_sarcophagus`, `raven_perch`, `black_cat_figure`; block entities of the same names (`tesla_coil` its energy, `black_cat_figure` its timers, the rest empty, for drawing).
 - Batch 9 new IDs: blocks with items `inflatable_ghost`, `inflatable_cat`, `inflatable_pumpkin`, `inflatable_spider`, `porch_witch`, `grasping_hands`, `poseable_skeleton`, `bone_wind_chimes`, `bat_weathervane`, `witch_weathervane`, `spooky_sign`, `haunted_archway`, `dead_hollow_tree`; block entities `inflatable` (all four inflatables), `porch_witch` (her timers), `bone_wind_chimes`, `weathervane` (both vanes) and `spooky_sign` (its words); the inflatables, chimes and vanes' are empty, for drawing.
+- Batch 10 new IDs: blocks with items `black_light`, `glow_paint`, `witch_fire_brazier`, `shadow_puppet_lamp`, `mini_pumpkin_stack`, `floating_witch_hat`; block entities `black_light`, `glow_paint`, `witch_fire_brazier`, `shadow_puppet_lamp` and `floating_witch_hat` (all empty, for drawing).
 - **The `agriculture` switch** turns off their recipes; placed blocks stay and work, and sheets can still be pulled off.
 
 ## Dependencies and assets
@@ -159,6 +182,8 @@ No new dependencies. Every texture is drawn by code (`tools/decor7_textures.py`)
 Batch 8's textures are drawn by code in `tools/decor8_textures.py` and its models, loot, tags and quads come from `tools/decor8_data.py` (the quads in `assets/jugcraft/decor8_quads.json`); the renderers are `TeslaCoilRenderer`, `LabTableRenderer`, `SpecimenJarRenderer`, `MummySarcophagusRenderer`, `RavenRenderer` and `BlackCatRenderer`. 26.3 has no plain cat sounds (cats use sound variants), so the cat hisses with a creeper's fuse, pitched up, and purrs with a low fox sniff; the raven croaks and caws with a parrot's call pitched far down.
 
 Batch 9's textures are drawn by code in `tools/decor9_textures.py` and its models, loot, tags and quads come from `tools/decor9_data.py` (the quads in `assets/jugcraft/decor9_quads.json`; the weathervanes' silhouettes are drawn cut out, a new `cutout` flag on a quad). The archway is cut into one model per block; the tree's boxes go whole to the block their middle is in, so its branches reach out over the air beside it. The renderers are `InflatableRenderer`, `PorchWitchRenderer`, `BoneWindChimesRenderer`, `WeathervaneRenderer` and `SpookySignRenderer`. The witch cackles with the vanilla witch's celebration sound; the chimes clack on the xylophone note-block sound.
+
+Batch 10's textures are drawn by code in `tools/decor10_textures.py` (the paint's designs share the bat and witch grids with batch 9) and its models, loot and tags come from `tools/decor10_data.py` (the hat's quads in `assets/jugcraft/decor10_quads.json`). The renderers are `GlowPaintRenderer`, `WitchFireBrazierRenderer`, `ShadowPuppetLampRenderer` and `FloatingWitchHatRenderer`; lighting and snuffing the candle-lit ones share `CandleLighting`. 26.3 has no item constant for each dye, so the brazier knows dyes by their colour, as the scarecrow does.
 
 The organ's tune is the opening of J. S. Bach's Toccata and Fugue in D minor, BWV 565, which is in the public domain; the arrangement for note-block sounds is written here.
 
@@ -269,8 +294,38 @@ Found by CI and fixed before this record:
 - the chimes and vanes in real rain and thunder (their rules are tested; the screenshots are in clear weather);
 - the sounds (the CI client has no sound device).
 
+### Batch 10 verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-10` stacked on batch 9:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the black light's light and range, the brazier's light, flames and dyes, the lamp's light, turning and reach, the pumpkins' and hat's light and the hat's bob and turning with Java; checks the paint's designs agree, every block state has a blockstate entry, and the textures and quads the client draws exist) | Pass, 543 IDs |
+| `./gradlew build` on `34fa3b4` (later commits only merge batch 9's docs and change docs and screenshots) | Pass |
+| Game tests on the headless server, same commit: 303 in total, 5 of them new here (`Decor10GameTests`) | **All 303 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `34fa3b4`; no model, texture or quad errors in the log |
+
+The 5 new game tests (`Decor10GameTests`):
+1. a black light hangs on the wall it was placed against, facing out, off; used, it shines (light 6), used again it goes off; a redstone block turns it on and taking it away off; its glow is full within half its range, half at three quarters and gone at its edge; without its wall it drops once;
+2. glow paint goes on a wall, the floor and a ceiling, facing out from each, a skull first, with a faint light of its own (1); used, it is painted over with a bat, a spider, a web, a hand, an eye and a skull again; it needs a face behind it; without its wall it drops once;
+3. a brazier is placed burning orange (light 15); a green dye turns it green and is used up, the same dye again does nothing; an iron shovel puts it out; flint and steel lights it again, still green, and is worn by one; broken, it drops once;
+4. the lamp and the hat are placed out and the pumpkin stack lit, facing the player; flint and steel lights the lamp (12) and a fire charge the hat (10), and is used up; an empty hand snuffs all three; the lamp's shade goes round once in its time, and the hat bobs no more than its bob;
+5. the six recipes and loot tables load.
+
+The client game test (`Decor10ClientGameTests`) builds a dark stone room with two Black Lights over a back wall of Glow Paint (and paint on the floor, the ceiling and a side wall) and a lit Shadow Puppet Lamp on a table in the middle; outside, four Witch Fire Braziers (orange, green, purple, blue) with Floating Witch Hats over them and Mini Pumpkin Stacks in front. It photographs them by day and at midnight, then turns the black lights off and photographs the paint again: the paint blazes green-white under the lights and is a faint smear without them, the braziers burn in their four colours, and the lamp's bat and cat fall on the walls.
+
+Found by CI and fixed before this record:
+- 26.3 has no item constant for each dye (`Items.ORANGE_DYE` and the rest), a compile error; the brazier knows dyes by their colour, as the scarecrow does.
+
+**Not run (batch 10):**
+- a person playing it in a client;
+- a dedicated server with two players (one switching a black light on while the other watches the paint; both seeing the lamp's shadows);
+- the brazier's flames, the lamp's turning and the hats' bobbing in motion (their rules are tested; the screenshots are still);
+- the sounds (the CI client has no sound device).
+
 ## World and event applicability
-- Batches 7 to 9 work anywhere, all year. The chandelier's gusts, the organ's night playing, the suit's visor glow, the sheets' breathing, the mirror's face and the curtains' night draft follow the Overworld's clock (as the earlier decorations' night effects do); so do batch 8's twitching patient and glowing cat eyes and batch 9's witch's eyes. Batch 9's chimes and vanes follow the weather where the player is.
+- Batches 7 to 10 work anywhere, all year. The chandelier's gusts, the organ's night playing, the suit's visor glow, the sheets' breathing, the mirror's face and the curtains' night draft follow the Overworld's clock (as the earlier decorations' night effects do); so do batch 8's twitching patient and glowing cat eyes and batch 9's witch's eyes. Batch 9's chimes and vanes follow the weather where the player is; batch 10's lamp's shadows are darker at night.
 
 ## Rollout and open questions
 - Tesla Coils only arc to coils that are running; a coil in an unloaded chunk drops out of the set until it runs again.
@@ -282,3 +337,5 @@ Found by CI and fixed before this record:
 - The archway and tree, like the organ, are mirrored as a turn, and stop being placed where any block they need isn't free.
 - The wind is one for the whole world (all dimensions); it doesn't depend on biome or height.
 - An inflatable glows from inside at full brightness while it is blown up, day or night.
+- Glow Paint only glows under a Jugcraft Black Light, not under other light; it has a faint light of its own (1).
+- The lamp's shadows fall on full blocks only, along each panel's direction; they don't bend round corners or fall on furniture.
