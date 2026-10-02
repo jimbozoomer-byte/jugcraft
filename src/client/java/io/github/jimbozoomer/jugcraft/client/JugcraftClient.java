@@ -36,7 +36,7 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
  * pumpkin boats to theirs, gravestones to the renderer of their engravings, and Halloween's night creatures,
  * thrown pumpkins and landing markers to theirs; the Harvest Moon's state to the pumpkins' sparks; the drone
  * depot's renderers (drones, pickup lift, control room screen) and terminal screen, and the server's season to
- * grass and foliage colours.
+ * grass and foliage colours, and the Party key to the Party screen.
  */
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
@@ -73,6 +73,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		});
 		EngineersHandbookItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
 		SeasonColors.register();
+		PartyClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);
