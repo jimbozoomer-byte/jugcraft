@@ -18,24 +18,14 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
-      - name: Exosuit APIs
+      - name: Dye APIs
         run: |
           set +e
           COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
-          CLIENT=$(find ~/.gradle/caches -name 'minecraft-clientonly-deobf-26.3.jar' | head -1)
-          echo "=== Attributes"; javap -cp "$COMMON" net.minecraft.world.entity.ai.attributes.Attributes | grep -iE "ABSORPTION|MOVEMENT_SPEED|STEP|FALL_DAMAGE" 
-          echo "=== AttributeInstance"; javap -cp "$COMMON" net.minecraft.world.entity.ai.attributes.AttributeInstance | grep -iE "Modifier|getValue"
-          echo "=== LivingEntity"; javap -cp "$COMMON" net.minecraft.world.entity.LivingEntity | grep -iE "getAttribute\(|Absorption|addEffect|removeEffect|getEffect\(|hasEffect|getItemBySlot"
-          echo "=== MobEffectInstance"; javap -cp "$COMMON" net.minecraft.world.effect.MobEffectInstance | grep -iE "public net.minecraft.world.effect.MobEffectInstance\(|isAmbient|isVisible|getDuration|showIcon"
-          echo "=== MobEffects"; javap -cp "$COMMON" net.minecraft.world.effect.MobEffects | grep -iE "NIGHT_VISION"
-          echo "=== Level brightness"; javap -cp "$COMMON" net.minecraft.world.level.Level | grep -iE "getMaxLocalRawBrightness|getRawBrightness|getLightEmission"; javap -cp "$COMMON" net.minecraft.world.level.LevelReader | grep -iE "Brightness"; javap -cp "$COMMON" net.minecraft.world.level.BlockAndTintGetter | grep -iE "Brightness"
-          echo "=== Recipe smithing"; javap -cp "$COMMON" net.minecraft.world.item.crafting.SmithingRecipeInput | head; javap -cp "$COMMON" net.minecraft.world.item.crafting.SmithingTransformRecipe | head -20
-          javap -cp "$COMMON" net.minecraft.world.item.crafting.RecipeManager | grep -iE "getRecipeFor|byKey"
-          javap -cp "$COMMON" net.minecraft.server.level.ServerLevel | grep -iE "recipeAccess"
-          javap -cp "$COMMON" net.minecraft.world.item.crafting.RecipeType | grep -iE "SMITHING"
-          echo "=== smithing json"; unzip -p "$COMMON" data/minecraft/recipe/netherite_helmet_smithing.json
-          echo "=== HumanoidModel"; javap -cp "$CLIENT:$COMMON" net.minecraft.client.model.HumanoidModel | grep -iE "ModelPart"
-          echo "=== HumanoidRenderState"; javap -cp "$CLIENT:$COMMON" net.minecraft.client.renderer.entity.state.HumanoidRenderState | grep -iE "Equipment|ItemStack"
-          echo "=== ModelPart"; javap -cp "$CLIENT:$COMMON" net.minecraft.client.model.geom.ModelPart | grep -iE "translateAndRotate|visible"
-          echo "=== ServerTickEvents"; for J in $(find ~/.gradle/caches -name 'fabric-lifecycle-events*.jar' | grep -v sources | head -1); do javap -cp "$J:$COMMON" net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents | head; javap -cp "$J:$COMMON" 'net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents$EndTick' | head; done
-          echo "=== PlayerList"; javap -cp "$COMMON" net.minecraft.server.players.PlayerList | grep -iE "getPlayers"
+          echo "=== Items DYE"; javap -cp "$COMMON" net.minecraft.world.item.Items | grep -iE "DYE" | head -40
+          echo "=== dye item models"; unzip -l "$COMMON" | grep -iE "(items|recipe)/[a-z_]*dye[a-z_]*\.json" | head -40
+          echo "=== a vanilla recipe using red dye"; for f in red_bed red_wool red_banner red_terracotta red_candle; do echo "-- $f"; unzip -p "$COMMON" data/minecraft/recipe/$f.json 2>/dev/null; unzip -p "$COMMON" data/minecraft/recipe/dye_$f.json 2>/dev/null; done
+          echo "=== tags dye"; unzip -l "$COMMON" | grep -iE "tags/item/.*dye" | head
+          for t in $(unzip -l "$COMMON" | grep -oE "data/minecraft/tags/item/[a-z_/]*dye[a-z_/]*\.json" | head -3); do echo "-- $t"; unzip -p "$COMMON" $t; done
+          echo "=== DyeItem"; javap -cp "$COMMON" net.minecraft.world.item.DyeItem | head -20
+          echo "=== DataComponents dye"; javap -cp "$COMMON" net.minecraft.core.component.DataComponents | grep -iE "DYE|COLOR" | head
