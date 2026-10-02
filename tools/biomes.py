@@ -1166,7 +1166,7 @@ BIOMES = {
         "attributes": {"minecraft:visual/sky_color": "#5a6ab8", "minecraft:visual/fog_color": "#8a92c8",
                        "minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:end_rod"}, "probability": 0.002}],
                                                              "modifier": "append"}},
-        "trees": {"count": [8, 9], "default": "minecraft:birch_tall", "picks": [["jugcraft:tall_fir_checked", 0.25]]},
+        "trees": {"count": [8, 9], "default": "minecraft:super_birch_bees", "picks": [["jugcraft:tall_fir_checked", 0.25]]},
         "extras": ["glimmerblooms", "lilies_of_the_valley"],
         "tags": [],
     },

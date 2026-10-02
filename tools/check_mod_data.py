@@ -452,6 +452,7 @@ def check_worldgen():
             block = split(target["state"])[1]
             if block not in all_blocks() + ph.blocks():
                 err(f"{path.name}: places unknown block {block}")
+    check_nested_features()
     for path in sorted((DATA / MOD / "worldgen" / "placed_feature").glob("*.json")):
         namespace, feature = split((load(path) or {})["feature"])
         # Vanilla configured features (the Pixel Hollows' bonus ores) are checked by the game tests, which load them.
@@ -464,6 +465,51 @@ def check_worldgen():
         for ref in step:
             if split(ref)[0] == MOD and not (DATA / MOD / "worldgen" / "placed_feature" / f"{split(ref)[1]}.json").is_file():
                 err(f"pixel_hollows.json: unknown placed feature {ref}")
+
+
+NESTED_PLACED = ("default", "feature_true", "feature_false", "vegetation_feature")
+
+
+def check_nested_features():
+    """A placed feature inside another feature (a random selector's picks, a vegetation patch's plant) must not have a
+    biome filter: only a biome's own top-level features know their biome, and a nested one with the filter throws while
+    the chunk generates, which stops that chunk for good. Vanilla's top-level features (those its biomes list) have the
+    filter, so they cannot be nested either; their checked forms (birch_bees_0002, super_birch_bees ...) can."""
+    from biome_bases import BASES
+    vanilla_top = {feature for base in BASES.values() for step in base["steps"] for feature in step}
+    placed = DATA / MOD / "worldgen" / "placed_feature"
+
+    def check(holder, where):
+        if isinstance(holder, dict):
+            if any(m.get("type") == "minecraft:biome" for m in holder.get("placement", [])):
+                err(f"{where}: a nested placed feature has a biome filter")
+            if isinstance(holder.get("feature"), dict):
+                walk(holder["feature"], where)
+            return
+        ns, path = split(str(holder))
+        if ns == MOD:
+            nested = load(placed / f"{path}.json") or {}
+            if any(m.get("type") == "minecraft:biome" for m in nested.get("placement", [])):
+                err(f"{where}: nests {holder}, which has a biome filter")
+        elif holder in vanilla_top:
+            err(f"{where}: nests vanilla's top-level {holder}, which has a biome filter")
+
+    def walk(feature, where):
+        for key in NESTED_PLACED:
+            if key in feature:
+                check(feature[key], where)
+        kind = feature.get("type")
+        if kind == "minecraft:random_selector":
+            for entry in feature.get("features", []):
+                check(entry["feature"], where)
+        elif kind == "minecraft:simple_random_selector" and isinstance(feature.get("features"), list):
+            for entry in feature["features"]:
+                check(entry, where)
+        elif kind in ("minecraft:random_patch", "minecraft:root_system") and "feature" in feature:
+            check(feature["feature"], where)
+
+    for path in sorted((DATA / MOD / "worldgen" / "feature").glob("*.json")):
+        walk(load(path) or {}, path.name)
 
 
 def check_seasons():

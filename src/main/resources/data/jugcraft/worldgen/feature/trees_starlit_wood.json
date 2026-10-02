@@ -1,6 +1,6 @@
 {
   "type": "minecraft:random_selector",
-  "default": "minecraft:birch_tall",
+  "default": "minecraft:super_birch_bees",
   "features": [
     {
       "chance": 0.25,
