@@ -133,6 +133,10 @@
     "jugcraft:electric_motor",
     "jugcraft:magnet_dynamo",
     "jugcraft:magnet_motor",
+    "jugcraft:flywheel",
+    "jugcraft:solar_tracker",
+    "jugcraft:heliostat",
+    "jugcraft:solar_receiver",
     "jugcraft:conveyor",
     "jugcraft:conveyor_splitter",
     "jugcraft:charging_station",
@@ -167,6 +171,8 @@
     "jugcraft:coal_deposit",
     "jugcraft:iron_deposit",
     "jugcraft:copper_deposit",
-    "jugcraft:tin_deposit"
+    "jugcraft:tin_deposit",
+    "jugcraft:glass_tank",
+    "jugcraft:tank_gauge"
   ]
 }
