@@ -50,29 +50,27 @@ def press_model():
 
 def barrel_model(head):
     """An oak cask on its side along the north-south axis, in a cradle: its head (with the chalk mark) to the north with a
-    brass tap, three iron hoops, a bung on top."""
+    brass tap, three iron hoops, a bung on top. Three boxes, each a step narrower and taller than the last, round its
+    profile; their ends together show the whole round head."""
     st, sd, hd, ir, br, wd = "#staves", "#side", "#head", "#iron", "#brass", "#wood"
+    ends = {"north": hd, "south": hd, "east": sd, "west": sd}
+    # (x0, y0, x1, y1, z0, z1) of each body box: tall and narrow, square, wide and low.
+    body = [(4, 2, 12, 14, 0.5, 15.5), (3, 3, 13, 13, 0.75, 15.25), (2, 4, 14, 12, 1, 15)]
     elements = [
         # The cradle: two saddles across the barrel.
         box((1, 0, 2.5), (15, 2.5, 4.5), wd), box((1, 0, 11.5), (15, 2.5, 13.5), wd),
         box((1, 2.5, 2.5), (2.5, 5, 4.5), wd), box((13.5, 2.5, 2.5), (15, 5, 4.5), wd),
         box((1, 2.5, 11.5), (2.5, 5, 13.5), wd), box((13.5, 2.5, 11.5), (15, 5, 13.5), wd),
-        # The cask: a tall and a wide box make a rounded body; the tall one's ends are its heads.
-        box((3, 2, 0.5), (13, 14, 15.5), st, textures={"north": hd, "south": hd, "east": sd, "west": sd}),
-        box((2, 3, 1), (14, 13, 15), st, textures={"east": sd, "west": sd}),
-        # Iron hoops near each end and round the belly.
-        box((1.75, 2.75, 2), (14.25, 13.25, 3), ir, faces=["east", "west"]),
-        box((2.75, 1.75, 2), (13.25, 14.25, 3), ir, faces=["up", "down"]),
-        box((1.75, 2.75, 13), (14.25, 13.25, 14), ir, faces=["east", "west"]),
-        box((2.75, 1.75, 13), (13.25, 14.25, 14), ir, faces=["up", "down"]),
-        box((1.75, 2.75, 7.5), (14.25, 13.25, 8.5), ir, faces=["east", "west"]),
-        box((2.75, 1.75, 7.5), (13.25, 14.25, 8.5), ir, faces=["up", "down"]),
-        # The brass tap low on the head, and the bung.
-        box((7.5, 4, -1), (8.5, 5, 0.5), br), box((7, 5, -0.75), (9, 6, 0), br),
-        box((7, 14, 7), (9, 14.5, 9), wd),
     ]
-    return block_model({"staves": "cider_barrel_staves", "side": "cider_barrel_staves_side", "head": head, "iron": "cider_press_iron", "brass": "cider_barrel_brass",
-                        "wood": "cider_press_wood"}, elements, "cider_barrel_staves")
+    elements += [box((x0, y0, z0), (x1, y1, z1), st, textures=ends) for x0, y0, x1, y1, z0, z1 in body]
+    # Iron hoops near each end and round the belly, a quarter pixel proud of each body box.
+    for z in (2, 7.5, 13):
+        elements += [box((x0 - 0.25, y0 - 0.25, z), (x1 + 0.25, y1 + 0.25, z + 1), ir, faces=["up", "down", "east", "west"])
+                     for x0, y0, x1, y1, _, _ in body]
+    # The brass tap low on the head, and the bung.
+    elements += [box((7.5, 4, -1), (8.5, 5, 0.5), br), box((7, 5, -0.75), (9, 6, 0), br), box((7, 14, 7), (9, 14.5, 9), wd)]
+    return block_model({"staves": "cider_barrel_staves", "side": "cider_barrel_staves_side", "head": head, "iron": "cider_press_iron",
+                        "brass": "cider_barrel_brass", "wood": "cider_press_wood"}, elements, "cider_barrel_staves")
 
 
 TEXT = {

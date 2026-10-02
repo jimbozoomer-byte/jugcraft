@@ -47,7 +47,7 @@ public class CiderClientGameTests implements FabricClientGameTest {
 
 			shoot(context, singleplayer, x + 3, y + 1, z + 2, 180, 10, "jugcraft_cider_mill");
 			shoot(context, singleplayer, x - 3, y + 2, z - 3, 180, 15, "jugcraft_apple_tree");
-			shoot(context, singleplayer, x + 3, y + 2, z - 5, 180, 55, "jugcraft_cider_presses");
+			shoot(context, singleplayer, x + 3, y + 2, z - 6, 180, 50, "jugcraft_cider_presses");
 			shoot(context, singleplayer, x + 9, y + 1, z - 5, 180, 20, "jugcraft_cider_barrels");
 		}
 	}
