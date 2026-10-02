@@ -1221,6 +1221,9 @@ def tags():
     for tag in ph.BIOME_TAGS:
         tags.add("worldgen/biome", tag, rid("pixel_hollows"))
     tags.add("point_of_interest_type", "minecraft:acquirable_job_site", rid("arcade_cabinet"))
+    # Ores may replace the lining (a deepslate-like stone), so lining that spills into a chunk decorated later does
+    # not take that chunk's ores away; ore there becomes the deepslate kind.
+    tags.add("block", "minecraft:deepslate_ore_replaceables", rid(ph.LINING_BLOCK))
 
     for item, info in ITEMS.items():
         if info["tag"]:
@@ -1320,7 +1323,7 @@ def pixel_hollows_worldgen():
     write(folder / "feature" / f"{ph.LINING}.json", {
         "type": "minecraft:ore", "size": gen["size"], "discard_chance_on_air_exposure": 0.0,
         "targets": [{"target": {"predicate_type": "minecraft:tag_match", "tag": "minecraft:base_stone_overworld"},
-                     "state": rid("circuitstone")}]})
+                     "state": rid(ph.LINING_BLOCK)}]})
     write(folder / "placed_feature" / f"{ph.LINING}.json", {"feature": rid(ph.LINING), "placement": [
         {"type": "minecraft:count", "count": gen["count"]},
         {"type": "minecraft:in_square"},

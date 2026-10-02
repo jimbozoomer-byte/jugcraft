@@ -258,9 +258,10 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_pixel_hollows_blocks");
 
-			server.runCommand("summon minecraft:villager %d.5 %d %d.5 {NoAI:1b,Silent:1b,Rotation:[0f,0f]}".formatted(x + 10, y, pz));
+			// Block centres as numbers ("%d.5" would put a negative coordinate half a block the wrong way).
+			server.runCommand("summon minecraft:villager %s %d %s {NoAI:1b,Silent:1b,Rotation:[0f,0f]}".formatted(x + 10.5, y, pz + 0.5));
 			server.runOnServer(minecraft -> makeRetroTraders(minecraft.overworld()));
-			server.runCommand("tp @p %d.5 %d %d.2 180 5".formatted(x + 10, y, pz + 3));
+			server.runCommand("tp @p %s %d %s 180 5".formatted(x + 10.5, y, pz + 3.2));
 			context.waitTicks(20);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_retro_trader");

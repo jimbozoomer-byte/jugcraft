@@ -160,7 +160,7 @@ Records: [pixel-hollows.md](features/pixel-hollows.md), [retro-trader.md](featur
 | sounds | `assets/jugcraft/sounds.json`; `sounds/ambient/pixel_hollows_loop.ogg` from `tools/pixel_hollows_sound.py` | biome loop and bleeps; the trader's work sound |
 | textures | `tools/pixel_hollows_textures.py` (`ph_*`, `rt_*`, the villager overlay `entity/villager/profession/retro_trader.png` and its zombie twin) | original |
 
-**Mixins:** `jugcraft.mixins.json` holds the two above and nothing else. Add one only when no API can do the job, and say why in its Javadoc.
+**Mixins:** `jugcraft.mixins.json` holds five: the Overworld biome table (`OverworldBiomeBuilderMixin`), the village pool accessor (`StructureTemplatePoolAccessor`), and the one-shop-per-village trio (`JigsawPlacerMixin`, `PoolElementStructurePieceMixin`, `StructureTemplatePoolMixin`, which only reorders the houses pools that hold the shop). Add one only when no API can do the job, and say why in its Javadoc.
 
 ## Shared systems and how to plug in
 
@@ -376,7 +376,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `…/logistics/` | item pipe, extractor, sorter, wrench, item networks |
 | `…/machine/` | machine kinds, blocks, block entity, menu, recipes, footprints, power ports, side config, arc furnace structure |
 | `…/world/` | Pixel Hollows (blocks, lining feature, map search) and the Retro Trader (cabinet, profession, trades, village shop) |
-| `…/mixin/` | the two mixins (Overworld biome table, village pool accessor) |
+| `…/mixin/` | the five mixins (Overworld biome table, village pool accessor, one shop per village) |
 | `src/client/java/.../client/` | `JugcraftClient` (screen registration), `MachineScreen` |
 | `src/gametest/java/.../test/JugcraftGameTests.java` | game tests (run by `./gradlew build`) |
 | `src/gametest/java/.../test/PixelHollowsGameTests.java` | Pixel Hollows and Retro Trader game tests (drops, recipes, worldgen order, map, trades, job site, shop template) |

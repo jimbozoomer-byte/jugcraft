@@ -781,7 +781,11 @@ def check_pixel_hollows():
     trader = (WORLD_JAVA / "RetroTrader.java").read_text(encoding="utf-8")
     if f"SHOP_WEIGHT = {ph.SHOP_WEIGHT};" not in trader:
         err("RetroTrader.SHOP_WEIGHT differs from tools/pixel_hollows.py")
-    villages = re.findall(r'houses\("([a-z]+)"\)', trader)
+    listed = re.search(r'VILLAGE_HOUSES =\s*List\.of\(([^;]*)\);', trader)
+    names = {const: village for const, village in re.findall(r'([A-Z_]+) = houses\("([a-z]+)"\)', trader)}
+    villages = [names.get(item.strip(), item.strip()) if not item.strip().startswith("houses(") else
+                re.match(r'houses\("([a-z]+)"\)', item.strip()).group(1)
+                for item in (listed.group(1).split(",") if listed else [])]
     if villages != ph.SHOP_VILLAGES:
         err(f"RetroTrader.VILLAGE_HOUSES {villages} differs from SHOP_VILLAGES {ph.SHOP_VILLAGES} in tools/pixel_hollows.py")
     for level in ph.TRADE_LEVELS:
@@ -812,8 +816,9 @@ def check_pixel_hollows():
 
 
 def json_result(path):
+    """A recipe's outputs as text: its "result", or the "results" of machine recipes."""
     data = load(path) or {}
-    return json.dumps(data.get("result", {}))
+    return json.dumps([data.get("result", {}), data.get("results", [])])
 
 
 def check_deposits():

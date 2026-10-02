@@ -40,13 +40,15 @@ public final class PixelHollows {
 
 	/**
 	 * Where the biome sits in the climate table. Deep (the depth band of the vanilla cave biomes, minus its top
-	 * quarter) under the driest land that is not ocean. The search for the trader's map relies on the same band.
-	 * Measured share and spacing: JugcraftGameTests.pixelHollowsDistribution.
+	 * quarter) under the driest land that is not ocean, and short of the far inland (continentalness 0.8 and up),
+	 * where vanilla's dripstone caves sit over the same depths: two biomes at the same climate distance would leave
+	 * the winner to the climate search's cache. The search for the trader's map relies on the same band. Its share and
+	 * spacing in a world have not been measured.
 	 */
 	public static final Climate.ParameterPoint PARAMETERS = Climate.parameters(
 			Climate.Parameter.span(-1.0F, 1.0F), // temperature
 			Climate.Parameter.span(-1.0F, -0.6F), // humidity: the driest land
-			Climate.Parameter.span(-0.11F, 1.0F), // continentalness: coast and inland, not under the sea
+			Climate.Parameter.span(-0.11F, 0.8F), // continentalness: coast and inland, not under the sea or the far inland
 			Climate.Parameter.span(-1.0F, 1.0F), // erosion
 			Climate.Parameter.span(0.3F, 0.9F), // depth: about 40 to 115 blocks below the surface
 			Climate.Parameter.span(-1.0F, 1.0F), // weirdness
