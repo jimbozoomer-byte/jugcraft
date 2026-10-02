@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * An Aura Candle on its dish (the block model): the candle in its outermost layer's colour, as wide as its layers make
  * it and burning down to a quarter of its height, with a drip of wax down two sides, its wick, and while lit a
- * flickering flame in its first scent's colour (warm yellow when it has none), at full brightness.
+ * flickering flame in its first scent's colour (warm yellow when it has none) round a warm white heart, at full brightness.
  */
 public class AuraCandleRenderer implements BlockEntityRenderer<AuraCandleBlockEntity, AuraCandleRenderer.State> {
 	private static final RenderType WAX = RenderTypes.entityCutout(Jugcraft.id("textures/entity/candle_wax.png"));
@@ -29,6 +29,10 @@ public class AuraCandleRenderer implements BlockEntityRenderer<AuraCandleBlockEn
 	private static final int FULL_BRIGHT = 0xF000F0;
 	private static final int WICK = 0xFF2A2018;
 	private static final int WARM_FLAME = 0xFFFFC870;
+	/** The flame's untinted heart, drawn in front of its coloured edge so every flame reads as fire. */
+	private static final int CORE = 0xFFFFF4C8;
+	/** The flame is two crossed planes. */
+	private static final double[] TURNS = {Math.PI / 4, -Math.PI / 4};
 	/** Half the candle's width, in pixels, by layers. */
 	private static final float[] HALF_WIDTH = {1.0F, 1.5F, 2.0F, 3.0F};
 
@@ -74,11 +78,14 @@ public class AuraCandleRenderer implements BlockEntityRenderer<AuraCandleBlockEn
 		}
 		int flame = mix.scents().isEmpty() || mix.muddled() ? WARM_FLAME : 0xFF000000 | mix.scents().get(0).color;
 		float flicker = 1.0F + 0.12F * Mth.sin(state.time * 0.9F) + 0.06F * Mth.sin(state.time * 2.3F);
-		float height = (2.5F + mix.dips() * 0.5F) * flicker;
-		float width = 1.6F + mix.dips() * 0.3F;
+		float height = (4.5F + mix.dips() * 0.75F) * flicker;
+		float width = 3.0F + mix.dips() * 0.5F;
+		float base = top + 0.4F;
 		collector.submitCustomGeometry(pose, FLAME, (matrix, buffer) -> {
-			TintedBoxes.plane(buffer, matrix, Math.PI / 4, width, top + 0.6F, top + 0.6F + height, flame, FULL_BRIGHT);
-			TintedBoxes.plane(buffer, matrix, -Math.PI / 4, width, top + 0.6F, top + 0.6F + height, flame, FULL_BRIGHT);
+			for (double turn : TURNS) {
+				TintedBoxes.plane(buffer, matrix, turn, width, base, base + height, flame, FULL_BRIGHT);
+				TintedBoxes.plane(buffer, matrix, turn, width * 0.5F, base, base + height * 0.6F, CORE, FULL_BRIGHT, 0.05F);
+			}
 		});
 	}
 }

@@ -40,14 +40,26 @@ final class TintedBoxes {
 	 * from {@code y0} to {@code y1}, showing the whole texture from both sides (for flames).
 	 */
 	static void plane(VertexConsumer buffer, PoseStack.Pose matrix, double turn, float width, float y0, float y1, int argb, int light) {
+		plane(buffer, matrix, turn, width, y0, y1, argb, light, 0.0F);
+	}
+
+	/**
+	 * As {@link #plane}, with each side drawn {@code lift} pixels out from the middle on its own side, so a smaller plane
+	 * drawn this way shows in front of a bigger one through the same middle, from either side (a flame's bright core).
+	 */
+	static void plane(VertexConsumer buffer, PoseStack.Pose matrix, double turn, float width, float y0, float y1, int argb, int light,
+			float lift) {
 		float dx = (float) Math.cos(turn) * width / 2;
 		float dz = (float) Math.sin(turn) * width / 2;
-		float[][] corners = {{8 - dx, y1, 8 - dz}, {8 + dx, y1, 8 + dz}, {8 + dx, y0, 8 + dz}, {8 - dx, y0, 8 - dz}};
-		float[][] uv = {{0, 0}, {16, 0}, {16, 16}, {0, 16}};
 		float nx = (float) -Math.sin(turn);
 		float nz = (float) Math.cos(turn);
-		face(buffer, matrix, argb, light, nx, 0, nz, corners, uv);
-		face(buffer, matrix, argb, light, -nx, 0, -nz, corners, uv);
+		float[][] uv = {{0, 0}, {16, 0}, {16, 16}, {0, 16}};
+		for (int side = 1; side >= -1; side -= 2) {
+			float ox = 8 + side * nx * lift;
+			float oz = 8 + side * nz * lift;
+			float[][] corners = {{ox - dx, y1, oz - dz}, {ox + dx, y1, oz + dz}, {ox + dx, y0, oz + dz}, {ox - dx, y0, oz - dz}};
+			face(buffer, matrix, argb, light, side * nx, 0, side * nz, corners, uv);
+		}
 	}
 
 	/** Draws a quad facing along (nx, ny, nz): counter-clockwise seen from that side, reversing its corners if need be. */

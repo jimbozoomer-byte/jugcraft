@@ -688,6 +688,24 @@ Forty-five more Halloween ideas, one category a batch: the haunted house inside,
 - **Six outfits**, worn on the head and drawn over the whole body: the **Vampire Cape** flares as you walk and wraps round you when you sneak; **Mummy Wraps**; a **Skeleton Suit** whose bones glow; a **Werewolf Mask** with fur, claws and a tail; **Cat Ears and Tail**; **Bat Wings** that spread and flap when you jump. All count as costumes for trick-or-treating.
 - **Costume Trunk:** keeps nine costumes; an empty hand changes you into the next one.
 
+## Fall additions
+
+Ten more fall and Halloween additions, one per pull request ([features/fall-additions.md](../features/fall-additions.md)).
+
+### The chandlery
+
+| **The chandlery**: a pot of molten purple beeswax over a campfire, a cold pot of set tallow, and a table of Aura Candles | **Aura Candles** of one to four layers, in several colours and scents; the flame takes the colour of the first scent |
+| --- | --- |
+| ![The chandlery](../images/ingame_chandlery.jpg) | ![Aura candles](../images/ingame_aura_candles.jpg) |
+| **The Wax Melting Pot** from above: the wax in its colour, at its level | **At night**: the candles' light and flames |
+| ![The wax melting pot](../images/ingame_wax_melting_pot.jpg) | ![Aura candles at night](../images/ingame_aura_candles_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`ChandleryClientGameTests`, software rendering, small previews).*
+
+- **Wax Melting Pot:** set it over a fire and melt honeycomb (beeswax) or rotten flesh (tallow) in it; stir in dyes, up to two scents, glowstone dust (a stronger aura, a faster burn) and redstone (a longer burn).
+- **Aura Candles:** dip string to start one, then dip it again once each layer has cooled, up to four layers. Each layer makes it bigger, brighter and wider-reaching, and adds its wax's colour, scents and burn time. A third scent muddles it.
+- **Lit, a candle is a small beacon:** every four seconds it gives everyone in its radius its scents' effects, wards off monsters, makes creatures glow or speeds up crops, until it burns down. Broken, it keeps what is left.
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
