@@ -1,9 +1,9 @@
 # Fall Additions
 
-Status: the chandlery (addition 1) is implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
+Status: the chandlery (addition 1) and the cider mill (addition 2) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok lets build another 10 more thorough and well thought out festive halloween and fall additions, maybe for one we do candle making with an interesting process to make them allowing you to make a bunch of different combinations and then light them to give different cool effects to an aoe area like beacons do"). The ten additions ship one per pull request, each stacked on the one before:
-1. the chandlery: the Wax Melting Pot and Aura Candles (this record, so far);
-2. a cider mill (planned);
+1. the chandlery: the Wax Melting Pot and Aura Candles;
+2. the cider mill: apple trees, the Cider Press, the Cider Barrel and four ciders;
 3. a preserves pantry (planned);
 4. crows and working scarecrows (planned);
 5. spooky fireworks (planned);
@@ -14,10 +14,10 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok let
 10. face paint (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld.
-Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time.
+Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg.
+Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party.
 
-Nothing here depends on the Halloween event: candles are made and burned all year.
+Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, all year.
 
 ## Player experience
 ### The Wax Melting Pot
@@ -67,6 +67,43 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 10. **It burns down as it burns:** it shrinks to a quarter of its height, then goes out for good in a puff of smoke. A layer of beeswax burns four minutes; a layer of tallow two. Brightening halves that; redstone makes it half as long again. A long-burning beeswax candle of four layers burns 24 minutes.
 11. Broken, a candle drops itself as it is, part-burned, with its name, colour and scents, to be placed and lit again later. Burned out, it is gone.
 
+### The apple tree
+12. **Apple trees** grow wild in plains and flower-rich places (meadows, flower forests, sunflower plains): a short oak trunk under a rounded crown of apple leaves.
+13. Their leaves (the ones the tree grew, with air below them) **blossom** white and pink and then **hang with ripe red apples**, about a Minecraft day from bare leaves to ripe. Use ripe leaves with an empty hand to pick them: 1 to 3 apples fall, and the leaves start again. Leaves a player placed never fruit.
+14. **Apple seeds** plant an apple sapling on dirt or grass, which grows like any sapling (bone meal works). Broken apple leaves drop seeds now and then (as oak leaves drop saplings), sticks, and now and then an apple. The pomace from the press gives seeds too, so vanilla apples alone are enough to start an orchard.
+
+### The Cider Press
+15. A slatted oak basket bound with iron, on a trough, under a beam with an iron screw. Behind it is the grinder (the scratter): a drum under a hopper, with a crank. It faces you when placed.
+16. **Grind:** put apples in the hopper, one at a time, up to eight. Use the press with an empty hand to **turn the crank**: an apple is ground into pulp in the basket, with a crunch and a splash. The crank turns once every 8 ticks, however fast anyone clicks.
+17. **Press:** once the hopper is empty, an empty hand **turns the screw** instead.
+    - The plate comes down on the pulp (the "cheese"), and each of four turns squeezes out a quarter of its juice into the trough, a serving for every apple.
+    - The capstan bar on the beam turns a quarter turn each time, and the pulp squashes lower.
+    - Nothing more goes in until the cheese is pressed out.
+    - The last turn frees the screw and **knocks out the pomace** (one for every two apples).
+18. **Bottle it:** a glass bottle draws a serving of juice from the trough: **Sweet Cider**. The trough holds eight servings; the screw won't turn while a turn's juice wouldn't fit. Sneak with an empty hand to see what is in the press. Comparators read the juice.
+
+### The Cider Barrel
+19. An oak cask on its side in a cradle, with iron hoops, a brass tap and a bung. Pour **Sweet Cider** in by the bottle (the bottles come back), up to sixteen servings.
+20. **It ages by itself:**
+    - A day after the last fresh serving went in, the batch is **Sparkling Cider** (it fizzes at the bung); three days after, **Aged Cider**.
+    - A chalk mark on its head shows the stage (one stroke, two, three).
+    - A batch that has begun to ferment takes no more fresh juice, so new juice can't be slipped into an old batch; topping up a sweet batch starts its day again.
+21. A glass bottle draws off a serving of whatever it has become. Use it with an empty hand to see how much is in it and how long to the next stage. Comparators read how full it is.
+22. Broken, a barrel keeps its cider, and the cider keeps ageing while it is carried.
+
+### Ciders and what they make
+| Drink | How it's made | Food | Effect |
+| --- | --- | --- | --- |
+| Sweet Cider | bottled from the press | 3 | Haste, 30 s |
+| Sparkling Cider | a day in the barrel | 3 | Jump Boost, 60 s |
+| Aged Cider | three days in the barrel | 4 | Absorption, 120 s |
+| Mulled Cider | sparkling cider and mulling spices in the Cooking Pot | 6 | Regeneration, 15 s |
+
+23. Every cider is drunk even on a full stomach and leaves its bottle.
+24. **Mulling Spices:** sugar, sweet berries and cocoa beans make two.
+25. **Apple Cider Donuts:** two wheat, sugar, an egg and a Sweet Cider make four cinnamon-sugar donuts (3 food each); the cider's bottle comes back. They count as candy, for Candy Bowls and Candy Bags.
+26. **Apple Pomace** feeds pigs and goes in the composter; crafted, it gives apple seeds.
+
 ## Connections
 - Existing input producer: vanilla copper (the pot), bees (honeycomb), zombies (rotten flesh), spiders (string), dyes, and the scent items above; Jugcraft's `jugcraft:heat_sources` (the Cooking Pot's heat).
 - Existing output consumer:
@@ -80,6 +117,17 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - Required vs optional: all optional; nothing in progression needs a candle. Nothing here is gated by the Halloween event.
 - Trade and solo routes: a solo player can make every candle; candles also stack (16) and carry everything they are, so a chandler can make them for others.
 - How this stays useful without other branches: every scent's effect is useful on its own, and the harvest aura helps any farm.
+- Cider mill, input producer: vanilla apples (oak leaves, villagers, chests) and then apple trees; the Cooking Pot (mulled cider) with its heat sources; wheat, sugar, eggs, sweet berries and cocoa beans; glass bottles.
+- Cider mill, output consumer:
+  - drinks for everyone;
+  - donuts for Candy Bowls and Candy Bags (the existing `c:foods/candy` tag);
+  - pomace for pigs (the vanilla `minecraft:pig_food` tag) and composters;
+  - seeds for orchards.
+- Cider mill, entry path: apples drop from vanilla oak leaves, and a pressed apple's pomace gives apple seeds, so the first orchard needs no wild apple tree. The press and barrel are crafted from vanilla materials.
+- Cider mill and the plans:
+  - [AGRICULTURE.md](../branches/AGRICULTURE.md) plans orchards (slice 4) and a Fruit and Seed Press (apples into cider, grapes into juice, seed oil for engineers).
+  - The apple tree is the first orchard tree, on the chestnut tree's pattern (now a shared `FruitingLeavesBlock`).
+  - The Cider Press is the apple half of that press. Grapes and seed oil are not built.
 
 ## Balance and automation
 - No energy. A pot costs seven copper ingots. A candle costs one string and one measure of wax a layer: half a honeycomb of beeswax, or one rotten flesh of tallow. A dye, a scent, a glowstone dust or a redstone is used once per pot of wax, however many layers that wax makes (up to eight).
@@ -111,6 +159,28 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
   - The harvest aura only speeds growth that bone meal could give anyway: vanilla already lets crops be composted into bone meal. A candle spends wax and string to spread that over time, and gives no item of its own.
 - Automation: candles are dipped by hand (a player's use and cooldown), so the pot can't be automated. Lit candles need no attention until they burn out.
 
+- **Cider mill:**
+  - Costs:
+    - the press: four planks, an iron ingot, a grindstone and three wooden slabs;
+    - the barrel: a barrel, two iron nuggets, a gold nugget and two sticks.
+  - Units: juice and cider in **servings** (a bottle each). An apple gives one serving of juice, and the press a pomace for every two apples (rounded up). The trough holds 8 servings, the barrel 16.
+  - Time:
+    - a crank or screw turn every 8 ticks at most; a cheese takes 4 turns;
+    - fruit: a stage every 10 random ticks on average, two stages (about a Minecraft day), 1 to 3 apples a pick;
+    - the barrel: sparkling at 24,000 ticks (a day, 20 minutes) after the last fresh serving, aged at 72,000 (three days, an hour).
+  - Food:
+    - a raw apple is 4 food; its serving of Sweet Cider is 3 (with 30 s of Haste) and half a pomace;
+    - ageing adds food (aged cider 4) and a better effect for time, not material.
+  - Effects are level I. Aged Cider's two minutes of Absorption match a golden apple's Absorption (without its Regeneration). A barrel makes sixteen, but only after three days and only from apples. This is open to balance review in play.
+  - **Bottles are never made from nothing:**
+    - the press turns a bottle into a cider;
+    - the barrel gives a bottle back for each serving poured in and takes one for each drawn off;
+    - every cider leaves its bottle when drunk.
+    - Only Sweet Cider gives its bottle back in a recipe (the donuts). Sparkling Cider doesn't, because the Cooking Pot hands back crafting remainders and the mulled cider keeps that bottle.
+    - The checker refuses a drink that gives its bottle back and cooks into another bottled drink.
+  - **No positive-gain loop.** Nothing turns back into apples. Pomace makes one seed; seeds make trees, which need land and time as any orchard does.
+  - Automation: grinding, pressing and bottling are by hand (a player's use); a barrel ages by itself. Comparators read both.
+
 ## Multiplayer and persistence
 - **Server authority:**
   - Putting things in the pot, dipping, pouring, lighting and snuffing all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server.
@@ -135,8 +205,32 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
   - All are new; nothing earlier is renamed.
 - **Disable behaviour:** with the agriculture feature disabled the pot's recipe doesn't load; the blocks, items, component and block entities stay registered, so placed pots and candles stay in the world.
 
+- **Cider mill, server authority:**
+  - Putting apples in, cranking, turning the screw, bottling, filling and drawing the barrel go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server.
+  - The press checks room, that it isn't mid-pressing, that the trough has room for the turn, and its own pacing. The pacing is per press, not per player: two players can't grind faster than one.
+  - Picking apples goes through the same path, as the chestnut's does.
+- **Cider mill, persistence:**
+  - The press saves its apples, pulp, turns, cheese and juice, and sends them to clients for the renderer (they decide nothing).
+  - The barrel saves its servings and the game time its batch started; a broken barrel keeps both as the item component `jugcraft:barrel_cider`.
+  - Ageing is worked out from the world's game time, which every dimension shares. So a barrel ages while unloaded or carried, and needs no ticking; it only looks every 20 ticks to change its chalk mark (one comparison).
+- **Cider mill, IDs:**
+  - blocks with items `apple_leaves`, `cider_press` and `cider_barrel`; the block `apple_sapling` (planted from `apple_seeds`);
+  - items `apple_seeds`, `apple_pomace`, `sweet_cider`, `sparkling_cider`, `aged_cider`, `mulled_cider`, `mulling_spices` and `apple_cider_donut`;
+  - block entities `cider_press` and `cider_barrel`; the data component `jugcraft:barrel_cider`;
+  - item tags `jugcraft:cider_apples` and `c:seeds/apple`;
+  - worldgen feature `jugcraft:apple_tree` and placed feature `jugcraft:patch_apple_tree`;
+  - the Cooking Pot recipe `jugcraft:pot_cooking/mulled_cider`.
+  - All are new. The chestnut leaves' fruiting moved into the shared `FruitingLeavesBlock` with no change of ID, state or behaviour (the festival tests still check it).
+- **Cider mill, disable behaviour:** with the agriculture feature off, the recipes don't load and wild apple trees don't generate; the blocks, items, component and block entities stay registered.
+
 ## Dependencies and assets
 No new dependencies. Every texture is drawn by code (`tools/chandlery_textures.py`): the pot's hammered copper and dark inside, the brass dish, the wax (pale, tinted by its colour as it is drawn), the wax's surface in the pot, the flame (white at its heart, tinted by its scent) and the candle's item in two layers (its body, tinted by its dyed colour; its wick and dish, not). The models, blockstates, item model, names, tooltip, messages, loot and tags come from `tools/chandlery_data.py`; the numbers from `CHANDLERY` in `tools/agriculture.py`. The client's `WaxPotRenderer` draws the wax in the pot at its level and colour; `AuraCandleRenderer` draws the candle at its height, layers and colour and its flame; both share `TintedBoxes`. The item's colour is the vanilla `dyed_color` component, read by the item model's dye tint. Sounds are vanilla's (honeycomb waxing, dye use, brewing, a bottle filling, a honey slide, a bucket emptying, a candle going out).
+
+The cider mill:
+- Textures are drawn by code in `tools/cider_textures.py`: the leaves at each stage, the sapling, the press's oak, slats and iron, the barrel's staves along and across, its head with each chalk mark, its brass, the pulp, juice and apple skin for the renderer, and the items. The bottles share the treats' bottle shape.
+- The models, blockstates, loot, tags, worldgen and words come from `tools/cider_data.py`; the numbers from `CIDER` in `tools/agriculture.py`.
+- The client's `CiderPressRenderer` draws the press's apples, pulp, plate, screw, capstan bar and juice (with `TintedBoxes`). The barrel is a block model with a variant for each chalk mark.
+- Sounds are vanilla's (an item frame's click, a grindstone, a trapdoor's creak, a bucket, bottles).
 
 ## Verification
 ### Chandlery verification
@@ -174,9 +268,46 @@ Found by CI and fixed before this record:
 - how long a harvest candle takes to grow a real farm (the test drives 400 pulses at once);
 - the sounds (the CI client has no sound device).
 
+### Cider mill verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-16` stacked on the chandlery:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the cider mill with Java: the apple leaves' fruiting and picking, the press's capacity, trough, turns, pacing and pomace, the barrel's capacity, ageing times and stages; checks the apple tag, the press's, barrel's and leaves' block states, the barrel's chalk-mark states, every message, the barrel's loot keeping its cider, the apple tree's biomes and that apple seeds plant a known sapling; and refuses a drink that gives its bottle back but cooks into another bottled drink) | Pass, 593 IDs |
+| `./gradlew build` on `c01a4a2` (Build workflow run 37025266440) | Pass |
+| Game tests on the headless server, same run: 345 in total, 9 of them new here (`CiderGameTests`) | **All 345 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `c01a4a2`, with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-cider-mill). No model or texture errors for the cider mill in the log. Like every Jugcraft machine and Cooking Pot recipe, the mulled cider recipe is logged as one the vanilla recipe book can't place (the recipe book only knows vanilla recipe types) |
+
+The 9 new game tests (`CiderGameTests`):
+1. an apple sapling grows a tree: an oak trunk and a crown of apple leaves;
+2. tree-grown leaves blossom and ripen; placed leaves don't; picking drops apples and leaves bare leaves;
+3. eight apples go in and not a ninth; a crank turn grinds one, a second at once does nothing, and once free the crank grinds another;
+4. four screw turns press a full cheese: a quarter of the juice each, no apples in while pressing, four pomace knocked out, the screw free again; a bottle draws sweet cider; comparators read the juice;
+5. a cheese of three apples gives exactly three servings and two pomace;
+6. sweet cider goes into a barrel and the bottles come back; after a day it is sparkling (the chalk mark follows) and takes no fresh juice; a bottle draws sparkling cider; after three days it is aged; broken, it keeps its servings and start time;
+7. topping up a sweet batch starts its day again;
+8. every cider is drunk on a full stomach, leaves its bottle and gives its effect; sweet cider gives its bottle back in a recipe and sparkling cider doesn't;
+9. the recipes (mulled cider in the Cooking Pot among them), loot tables and the apple tree's placed feature load, and sparkling cider with spices finds the mulled cider recipe.
+
+Found by CI and fixed before this record:
+- The press started with its last work at `Long.MIN_VALUE`, so "now minus then" overflowed and a new press never turned its crank. The first run's `pressGrindsApplesIntoPulp` caught it (344 of 345 passed); it now starts a work interval in the past (`3d1751a`).
+- The first screenshots showed the barrels as square crates; three stepped boxes now round their profile (`c01a4a2`).
+
+**Not run (cider mill):**
+- a person playing it in a client: grinding and pressing by hand, drinking;
+- a dedicated server with two players at one press;
+- a real day of ageing (the tests set the barrel's start time back);
+- wild apple trees in a new world (the test grows one from a sapling, and checks the placed feature loads);
+- the sounds.
+
 ## World and event applicability
 - Candles and pots work anywhere, in every dimension, all year. Nothing is seasonal. The aura doesn't depend on biome, time or weather; harvest helps only plants that would grow there anyway.
 - Revealing shows creatures through walls (Glowing), which can help find hostile mobs in caves; it gives no other information.
+
+- Wild apple trees grow in plains and flower-rich biomes (`c:is_plains`, `c:is_floral`), in new chunks only, about one patch in twelve chunks there.
+- A barrel ages by game time, so sleeping through the night doesn't age it (sleeping skips the time of day, not game time).
 
 ## Rollout and open questions
 - The aura's area is a box reaching the radius in every direction, up and down too (a beacon's reaches the whole height of the world).
@@ -186,3 +317,8 @@ Found by CI and fixed before this record:
 - The "still warm" cooldown is the item cooldown, so it shows on every Aura Candle in the hotbar, not only the one just dipped.
 - A dipped candle goes to the hand that held it if that hand is empty, else into the inventory, else it pops out of the top of the pot.
 - A pot's wax is lost when the pot is broken; the pot drops itself.
+- Apple leaves take random ticks but not bone meal, so a harvest candle's aura doesn't speed their fruiting.
+- The press can't be fed or emptied by hoppers or pipes yet; grinding, pressing and bottling are by hand.
+- The press's pacing is per press: a second player at the same press waits as the first does.
+- A barrel holds one batch; a fermenting batch takes no fresh juice, so a cider maker uses several barrels.
+- Grapes, juices and the seed oil of the planned Fruit and Seed Press are not built.

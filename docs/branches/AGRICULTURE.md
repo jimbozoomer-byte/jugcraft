@@ -706,6 +706,21 @@ Ten more fall and Halloween additions, one per pull request ([features/fall-addi
 - **Aura Candles:** dip string to start one, then dip it again once each layer has cooled, up to four layers. Each layer makes it bigger, brighter and wider-reaching, and adds its wax's colour, scents and burn time. A third scent muddles it.
 - **Lit, a candle is a small beacon:** every four seconds it gives everyone in its radius its scents' effects, wards off monsters, makes creatures glow or speeds up crops, until it burns down. Broken, it keeps what is left.
 
+### The cider mill
+
+| **The cider mill**: an apple tree, two Cider Presses and three Cider Barrels | **An apple tree** in blossom and hung with ripe apples |
+| --- | --- |
+| ![The cider mill](../images/ingame_cider_mill.jpg) | ![An apple tree](../images/ingame_apple_tree.jpg) |
+| **Cider Presses** from above: apples in the hopper and pulp in the basket; a cheese halfway pressed, with juice in the trough | **Cider Barrels**: sweet, sparkling and aged, by their chalk marks |
+| ![Cider presses](../images/ingame_cider_presses.jpg) | ![Cider barrels](../images/ingame_cider_barrels.jpg) |
+
+*Real screenshots from the client game test that CI runs (`CiderClientGameTests`, software rendering, small previews).*
+
+- **Apple trees:** wild in plains and flower-rich places, or grown from apple seeds; the leaves blossom and then hang with apples to pick, without cutting the tree down.
+- **Cider Press:** turn the crank to grind apples into pulp, one at a time; then four turns of the screw press out the juice (a serving an apple) and knock out the pomace. Bottle the juice as Sweet Cider.
+- **Cider Barrel:** sweet cider ferments into Sparkling Cider in a day and matures into Aged Cider in three; broken, a barrel keeps its cider.
+- **Mulled Cider** (Cooking Pot), **Apple Cider Donuts**, and **Apple Pomace** for pigs, compost and seeds.
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
@@ -715,7 +730,7 @@ The branch grows in small slices that each stand on their own. Each crop needs a
 | **1. Fall Harvest** ✅ | Corn, sunflower, beans, sweet potato, flax | Tall crops, picking, legumes, wild plants, sickles | Starter farming; mazes and fields; string, feed and stew |
 | **2. Kitchen garden** ✅ | Tomato, onion, garlic, cabbage, pepper, oats, barley | Trellises for climbing crops; the **Cooking Pot** for multi-ingredient meals | A real kitchen: soups, salads, porridge. Cabbage + salt → sauerkraut uses Jugcraft's salt. Garlic can later double as a ward against the planned Vampirism school (not built yet) |
 | **3. Festival Crops** ✅ | Butternut and acorn squash, warty gourds, turnip, cranberry, chestnut tree | Gourds grow from stems like pumpkins; bog crops in shallow water; a fruit tree | Halloween: Turnip Lanterns (the original jack-o'-lantern), gourd displays, candy corn. December: cranberry sauce, roasted chestnuts. All permanent, so nothing is lost after a season |
-| **4. Orchards and vines** | Apple, pear, peach, lemon and orange trees; grapes and hops on trellises; blueberries and raspberries | Fruit trees that grow from saplings and fruit every year without being cut down | Juices, pies, preserves; the cider press; long-term homestead beauty |
+| **4. Orchards and vines** (apple ✅) | Apple (built: [the cider mill](#the-cider-mill)), pear, peach, lemon and orange trees; grapes and hops on trellises; blueberries and raspberries | Fruit trees that grow from saplings and fruit every year without being cut down | Juices, pies, preserves; the cider press; long-term homestead beauty |
 | **5. Fibre, oil and industrial crops** | Cotton, canola, sugar beet, rubber tree, indigo and madder | Tapping (rubber) and retting (flax to linen) | What engineers need from farmers: rubber for insulated cables and belts, plant oil for lubricant and biodiesel, sugar and corn for ethanol, fibres for canvas, dyes |
 | **6. Magical botany** | One herb per magic school (proposal names: Emberroot, Frostcap, Stormreed, Stonebloom, Gravemoss, Bloodthorn, Nightshade, Moonpetal) | Attunement: an herb grows only near its school's influence or with a ritual catalyst | Reagents for the magic branch; see [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md#magical-workshops-and-schools) |
 | **7. Rice and wet farming** | Rice, taro, water chestnut | Paddy crops that grow in one block of still water | A distinct regional farm; rice dishes |
@@ -740,7 +755,7 @@ Hand tools and farmstead blocks, made from wood, stone and early metals. None ne
 | Compost Bin | Turns scraps into Compost, an organic fertilizer that makes farmland *fertile* for a while (faster growth); the no-chemistry route | Discovery |
 | Quern (hand mill) | Grinds corn into cornmeal and grain into flour (cornbread, pancakes) | Discovery |
 | Drying Rack | Retts flax into linen fibre, dries herbs and fruit, makes jerky | Workshops |
-| Fruit and Seed Press | Apples into cider, grapes into juice, and **sunflower or flax seeds into plant oil at a low hand-press yield**, so engineers can buy early lubricant from farmers | Workshops |
+| Fruit and Seed Press (apples ✅) | Apples into cider (built: the **Cider Press**, a Discovery-tier hand press; see [the cider mill](#the-cider-mill)); grapes into juice, and **sunflower or flax seeds into plant oil at a low hand-press yield**, so engineers can buy early lubricant from farmers (planned) | Workshops |
 | Butter Churn and Cheese Press | Dairy from the husbandry slice | Workshops |
 | **Cooking Pot** ✅ | Multi-ingredient meals over a campfire (expedition rations later) | Discovery (iron and a campfire; planned for Workshops, moved earlier because it needs no workshop) |
 

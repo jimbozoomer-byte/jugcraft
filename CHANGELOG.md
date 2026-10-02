@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: fall additions 2, the cider mill (pull request pending, stacked on the chandlery)
+- **Apple trees:** wild in plains and flower-rich places, or grown from **apple seeds**. Their leaves blossom and then hang with ripe apples to pick, about a Minecraft day apart, without the tree being cut down.
+- **Cider Press:** load up to eight apples and turn the crank to grind them, one at a time, into pulp. Then turn the screw: four turns press the juice into the trough (a serving an apple) and knock out the pomace. Bottle the juice as **Sweet Cider**.
+- **Cider Barrel:** pour sweet cider in; in a day it ferments into **Sparkling Cider**, in three it matures into **Aged Cider**, and a chalk mark on the barrel shows which. Broken, it keeps its cider, still ageing.
+- **Mulled Cider** (sparkling cider and mulling spices in the Cooking Pot), **Apple Cider Donuts**, and **Apple Pomace** for pigs, compost and seeds. Each cider gives a short effect: Haste, Jump Boost, Absorption, Regeneration.
+- All decided on the server; the press's apples, pulp, screw and juice are drawn by each client. The chestnut tree's fruiting now shares its code with the apple tree. The checker compares the press, barrel and tree with Java, and makes sure no bottle is made from nothing. New server game tests and a client test with screenshots.
+
 ### Agriculture: fall additions 1, the chandlery (pull request pending, stacked on batch 14)
 - **Wax Melting Pot:** a copper pot set over a fire. Melt honeycomb (beeswax) or rotten flesh (tallow) in it, then stir in dyes (mixed as on leather), up to two scents, glowstone dust (a stronger aura, a faster burn) and redstone (a longer burn).
 - **Aura Candles:** dip string in the wax to start a candle, and dip it again once each layer has cooled (dipped while warm, the layer slides off), up to four layers. Each layer makes it taller and brighter, widens its aura (5, 8, 12, 16 blocks) and adds its wax's colour, scents and burn time. Layers of different pots combine their scents; a third scent muddles the candle.
