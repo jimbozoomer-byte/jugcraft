@@ -145,7 +145,7 @@ public class Turkey extends Animal {
 		}
 		entityData.set(STRUT, Math.max(1, ticks));
 		getNavigation().stop();
-		playSound(SoundEvents.CHICKEN_AMBIENT, 1.4F, 0.45F);
+		playSound(SoundEvents.PARROT_AMBIENT, 1.4F, 0.45F);
 		gameEvent(GameEvent.ENTITY_ACTION);
 		return true;
 	}
@@ -157,7 +157,7 @@ public class Turkey extends Animal {
 		}
 		Item egg = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("egg"));
 		spawnAtLocation(level, egg);
-		playSound(SoundEvents.CHICKEN_EGG, 1.0F, 0.8F + (random.nextFloat() - random.nextFloat()) * 0.2F);
+		playSound(SoundEvents.WOOL_PLACE, 0.8F, 1.2F + (random.nextFloat() - random.nextFloat()) * 0.2F);
 		gameEvent(GameEvent.ENTITY_PLACE);
 		eggTime = nextEgg();
 		return true;
@@ -216,28 +216,28 @@ public class Turkey extends Animal {
 
 	@Override
 	public void playAmbientSound() {
-		// A low cluck from a hen; a tom's is deeper still.
-		playSound(SoundEvents.CHICKEN_AMBIENT, getSoundVolume(), (isTom() ? 0.55F : 0.75F) + random.nextFloat() * 0.1F);
+		// A low warble from a hen; a tom's is deeper still.
+		playSound(SoundEvents.PARROT_AMBIENT, getSoundVolume(), (isTom() ? 0.55F : 0.75F) + random.nextFloat() * 0.1F);
 	}
 
 	@Override
 	protected @Nullable SoundEvent getAmbientSound() {
-		return SoundEvents.CHICKEN_AMBIENT;
+		return SoundEvents.PARROT_AMBIENT;
 	}
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource source) {
-		return SoundEvents.CHICKEN_HURT;
+		return SoundEvents.PARROT_AMBIENT;
 	}
 
 	@Override
 	protected SoundEvent getDeathSound() {
-		return SoundEvents.CHICKEN_DEATH;
+		return SoundEvents.PARROT_AMBIENT;
 	}
 
 	@Override
 	protected void playStepSound(BlockPos pos, BlockState state) {
-		playSound(SoundEvents.CHICKEN_STEP, 0.2F, 0.8F);
+		playSound(SoundEvents.GRASS_STEP, 0.15F, 1.2F);
 	}
 
 	@Override
