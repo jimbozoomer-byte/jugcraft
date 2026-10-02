@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
@@ -45,7 +45,7 @@ public class FacePaintLayer<S extends HumanoidRenderState, M extends HumanoidMod
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static void register() {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
-			if (type == EntityType.PLAYER && renderer.getModel() instanceof HumanoidModel<?>) {
+			if (type == EntityTypes.PLAYER && renderer.getModel() instanceof HumanoidModel<?>) {
 				helper.register(new FacePaintLayer((RenderLayerParent) renderer));
 			}
 		});
