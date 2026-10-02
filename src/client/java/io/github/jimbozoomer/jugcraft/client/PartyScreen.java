@@ -39,7 +39,7 @@ public class PartyScreen extends Screen {
 	/** Called on the client thread when the server sends the state; refreshes the screen if it is open. */
 	static void receive(PartyStatePayload payload) {
 		state = payload;
-		if (Minecraft.getInstance().screen instanceof PartyScreen screen) {
+		if (Minecraft.getInstance().gui.screen() instanceof PartyScreen screen) {
 			String typed = screen.name == null ? "" : screen.name.getValue();
 			screen.rebuildWidgets();
 			screen.name.setValue(typed);

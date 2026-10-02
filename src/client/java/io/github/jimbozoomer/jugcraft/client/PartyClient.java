@@ -22,7 +22,7 @@ final class PartyClient {
 		openParty = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.party", InputConstants.KEY_P, CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (openParty.consumeClick()) {
-				if (client.screen == null && client.player != null) {
+				if (client.gui.screen() == null && client.player != null) {
 					client.gui.setScreen(new PartyScreen());
 				}
 			}
