@@ -859,6 +859,19 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Bat House:** bats roost in it by day and pour out at dusk; at dawn the nearest bats come back in, up to four, each leaving a guano on the tray. A house with room gains a bat at dusk now and then. Scoop the guano with an empty hand; comparators read the bats.
 - **Bat Guano** fertilizes the crops in a 3x3 patch, and four make a phosphate. Details: [more fall additions](../features/more-fall-additions.md#the-bat-house).
 
+### The Hay Golem
+
+| **Hay Golems** in a carrot and wheat field: one in a carved pumpkin, one bent over the carrots harvesting, one in a lit hand-carved white pumpkin with a cat's face; a chest at a post, and a T of hay waiting for its head | **Up close** |
+| --- | --- |
+| ![Hay Golems](../images/ingame_hay_golems.jpg) | ![A Hay Golem up close](../images/ingame_hay_golem_close.jpg) |
+| **At night**, the lit head glowing | |
+| ![Hay Golems at night](../images/ingame_hay_golems_night.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`HayGolemClientGameTests`, software rendering, small previews). The golems are posed (no AI) for the picture.*
+
+- **Build one** from a T of four hay bales with a carved pumpkin on top. It keeps crows off crops within eight blocks (twelve with a lit head), harvests and replants the ripe crops round its post, and carries the harvest to the chest under its post.
+- Lead it with wheat; wheat heals it; shears take it apart. Details: [more fall additions](../features/more-fall-additions.md#the-hay-golem).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

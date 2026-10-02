@@ -1,11 +1,11 @@
 # More Fall Additions
 
-Status: the candy kitchen (addition 11), autumn foraging (addition 12) and the Bat House (addition 13) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
+Status: the candy kitchen (addition 11), autumn foraging (addition 12), the Bat House (addition 13) and the Hay Golem (addition 14) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets do another 10 detailed halloween and fall themed additions", then "start them now stacked on #33"). They follow the ten [fall additions](fall-additions.md), numbered on from them, one per pull request, each stacked on the one before:
 11. the candy kitchen: the Candy Kettle, its thermometer and the candy stages, the Candy Tray, and ten candies;
 12. autumn foraging: five wild mushrooms that spread in the shade and sprout fairy rings under the full moon, the Foraging Basket, and four mushroom dishes;
 13. the Bat House: a roost for bats that fly out at dusk and back at dawn, leaving guano, a fertilizer and a source of phosphate;
-14. the Hay Golem (planned);
+14. the Hay Golem: a straw man with a carved pumpkin head that guards crops from crows and tends them, carrying the harvest home;
 15. knitting and sweaters (planned);
 16. pie baking (planned);
 17. the Spirit Board (planned);
@@ -14,10 +14,10 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets d
 20. the Día de Muertos ofrenda (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick.
-Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near.
+Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick. The Hay Golem is Discovery tier: four hay bales (36 wheat) and a carved pumpkin.
+Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near. The Hay Golem is a farmhand: it keeps crows off a field and brings in the ripe crops, so a small farm runs while its farmer is away mining.
 
-Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night.
+Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night, and a Hay Golem works all year.
 
 ## Player experience
 ### The Candy Kettle
@@ -118,6 +118,15 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - **Phosphate:** four guano make a phosphate (crafting), the same phosphate that is mined from phosphorite ore.
 - It goes in a composter.
 
+### The Hay Golem
+1. **Build it like an iron golem, from hay:** two hay bales stacked, a hay bale either side of the upper one for arms (nothing under the arms), then use a carved head on the top of the upper bale: a carved pumpkin, a jack o'lantern, or a hand-carved pumpkin with a face cut (any of the `jugcraft:hay_golem_heads`). The hay comes to life as a straw man two and a half blocks tall, wearing the head and facing its builder, and the builder earns **Man of Straw**. A plain pumpkin, an uncut one, a missing arm or a block under an arm leaves it as hay, so pumpkins can still decorate hay bales.
+2. **Its post:** it keeps to where it was built, wandering within eight blocks. Hold wheat near it and it follows you; where you leave it is its new post.
+3. **A walking scarecrow:** crows won't raid crops within eight blocks of it, or twelve if its head is lit (a jack o'lantern, or a hand-carved pumpkin with a torch), as a scarecrow wearing that head would guard.
+4. **It tends the crops round its post:** every five seconds it looks for a ripe crop within eight blocks of its post (two up or down). It walks to it, bends over it a moment and harvests it, replanting it from its own drops when they include its seed (wheat seeds, a carrot, a potato, a beetroot seed, Jugcraft's seeds). The rest goes in its pouch of nine stacks.
+5. **It carries the harvest home:** with 32 items or more, or once nothing has been ripe for ten seconds, it walks back to its post and puts its pouch into the chest, barrel or hopper under it, or sets it down there if there is none. If it can't get home in fifteen seconds it sets its load down where it is.
+6. It harvests only while the `mob_griefing` game rule is on, as crows only peck while it is.
+7. **Looking after it:** wheat heals it 4 health. Shears take it apart again: its four hay bales, its head and its pouch. Fire hurts it twice as much. It never despawns. Killed, it drops two to five wheat, its head and its pouch.
+
 ## Connections
 - Candy kitchen, input producer: sugar cane (sugar); bottles of water and cows (milk); cocoa, sweet berries, glow berries and bees; the Festival Crops (cranberries, roasted chestnuts) and the cider mill (mulling spices); dyes; sticks; vanilla copper and iron; Jugcraft's `jugcraft:heat_sources`.
 - Candy kitchen, output consumer:
@@ -144,6 +153,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - Bat House, entry path: two early items; no other Jugcraft block needed.
 - Bat House, required vs optional: optional. Phosphate is still mined from phosphorite as before.
 - Bat House, trade and solo routes: guano stacks and trades; anyone can hang houses alone.
+- Hay Golem, input producer: wheat (hay bales); the carved pumpkins of the Halloween harvest and pumpkin carving.
+- Hay Golem, output consumer: the crops it harvests (into a chest, barrel or hopper, and on into any storage or machine line); crows' working scarecrows (it guards as one does).
+- Hay Golem, technology connection: a hopper under its post feeds the harvest into storage or machines.
+- Hay Golem, entry path: early-game wheat and a carved pumpkin; no other Jugcraft block needed.
+- Hay Golem, required vs optional: optional; farming by hand is unchanged.
+- Hay Golem, trade and solo routes: anyone can build one alone; it harvests for whoever's farm it stands in.
 
 ## Balance and automation
 - **Candy kitchen:**
@@ -168,6 +183,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
   - Fertilizer: one guano grows each crop in a 3x3 patch by one bone-meal dose, against superphosphate's 5x5 and two doses: a guano is about a fifth of a superphosphate.
   - New bats: an even chance a dusk for a house with room, only while mobs spawn.
   - No loop: guano and phosphate make nothing that makes bats or houses.
+- **Hay Golem:**
+  - Costs: four hay bales (36 wheat) and a carved pumpkin; shears give back all of it.
+  - Units: blocks, ticks, items.
+  - Work: at most one crop every few seconds (it walks to each and works at it half a second); villager farmers do the same kind of work.
+  - It only replants from the crop's own drops: no seed is made from nothing, and a crop whose drops hold no seed isn't replanted.
+  - No loop: a golem makes nothing that makes golems; its wheat harvest could build another, as wheat grown by hand could.
 
 ## Multiplayer and persistence
 - **Candy kitchen, server authority:** filling, reading, tipping out and pouring all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server, which checks the base, the sugar and flavour limits, and the temperature. Pulling and breaking up a tray go through vanilla's item use; the server checks the tray's own record of when it was poured and how often it has been pulled, by its own game time.
@@ -189,6 +210,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - **Bat House, bounded work:** a house looks at the clock every 20 ticks. At dawn it looks for bats within 32 blocks once, through the entity lookup (it never loads a chunk), and takes at most four.
 - **Bat House, IDs:** block and item `bat_house`, item `bat_guano`, block entity `bat_house`, entity tag `jugcraft.bat_house`, advancement `night_shift`, recipes `bat_house` and `phosphate_from_bat_guano`. All new. `FertilizerItem` now takes its area and doses (superphosphate's are as before).
 - **Bat House, disable behaviour:** with the agriculture feature off, the recipes don't load and no bat moves in; bats still roost and leave guano, and everything stays registered. With the phosphate feature off, the phosphate recipe doesn't load.
+- **Hay Golem, server authority:** building is checked on the server: the T of hay, a head with a face, the builder able to build there (adventure mode can't), through vanilla's block use path (reach, spawn protection). Its tending, guarding, healing and shearing are the server's.
+- **Hay Golem, what clients get:** the golem, its head (an item stack, to draw), and whether it is bent over a crop.
+- **Hay Golem, persistence:** the golem saves its head, its post and its pouch; it never despawns.
+- **Hay Golem, bounded work:** it looks for a ripe crop at most every 100 ticks (and right after a harvest), over the circle of eight blocks round its post, five blocks high, in loaded chunks only. A crow looking for a guard asks for golems within twelve blocks through the entity lookup.
+- **Hay Golem, IDs:** entity `hay_golem`, item tag `jugcraft:hay_golem_heads`, loot table `jugcraft:entities/hay_golem`, advancement `man_of_straw`. All new.
+- **Hay Golem, disable behaviour:** with the agriculture feature off, no new golem can be built and golems don't harvest; they still stand and guard, and everything stays registered.
 
 ## Dependencies and assets
 Candy kitchen:
@@ -206,6 +233,12 @@ Bat House:
 - No new dependencies. Textures are drawn by code in `tools/bat_textures.py`: weathered planks, the slatted front, the guano on the tray, and the guano item.
 - Models (the house and its tray with one, two or three piles), blockstates, names, messages, loot and tags come from `tools/bat_data.py`; the numbers from `BATS` in `tools/agriculture.py`. The recipes are in its shaped and shapeless tables.
 - Sounds and particles are vanilla's (a bat taking off and smoke at dusk).
+
+Hay Golem:
+- No new dependencies. Its texture is drawn by code in `tools/hay_golem_textures.py`: golden straw running along each bundle, twine bands round the body, wrists and ankles, a sackcloth patch on the chest, and loose straw at the collar, wrists and ankles.
+- The client's `HayGolemModel` is a hay-bale body with a straw collar, straw-bundle arms and legs with tufts at the ends; it walks with a stiff swing, sways standing, and bends with its arms down to harvest. `HayGolemRenderer` draws the head it wears on the collar: the pumpkin's own item model, and a hand-carved pumpkin's carving over it (lit at full brightness), as the scarecrow draws its head.
+- Its name, loot, head tag and advancement come from `tools/hay_golem_data.py`; the numbers from `HAY_GOLEM` in `tools/agriculture.py`.
+- Sounds are vanilla's (grass for its steps, hurt and death; shearing; hay placed when it is built).
 
 ## Verification
 ### Candy kitchen verification
@@ -285,10 +318,36 @@ Found by CI and fixed before this record:
 
 Not run: a two-client dedicated-server playtest, and any play by hand.
 
+### Hay Golem verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-28` stacked on the Bat House:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the Hay Golem with Java: health, speed, post radius, search height, tending, work, give-up and idle times, pouch, carry, wheat's healing, fire, hay bales, reach and leading range; checks it is registered with its size, attributes and building callback, scarecrows count golems, it is named, drops wheat, has its head tag, texture and advancement, and its model's boxes sit where its texture paints them) | Pass, 643 IDs (the golem is an entity, not an item or block) |
+| `./gradlew build` on `709a0c2` (Build workflow run 37071260396) | Pass |
+| Game tests on the headless server, same run: 408 in total, 6 of them new here (`HayGolemGameTests`) | **All 408 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `709a0c2` (run 37071260396), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-hay-golem) |
+
+The 6 new game tests (`HayGolemGameTests`):
+1. carved pumpkins and jack o'lanterns are heads, a plain pumpkin and an uncut hand-carved one are not; one arm short, or with stone under an arm, the hay stays hay; a carved head on a full T makes one golem where the legs stood, facing its builder, the hay gone and the head used, and the builder earns Man of Straw;
+2. a golem in a carved pumpkin guards seven blocks off (eight at most), twelve in a jack o'lantern, four headless (and not six); a crow won't raid ripe wheat a golem guards;
+3. four ripe carrots harvested are each replanted from a carrot, the rest in its pouch; unripe carrots are left; unloading puts the carrots in the chest under its post, or with no chest sets them on the ground; the pouch holds nine stacks and no more;
+4. with its own AI a golem walks five blocks to ripe carrots and harvests and replants them;
+5. fire hurts it double; a wheat heals it four; shears take it apart into four hay bales, its jack o'lantern and its carrots;
+6. killed by a player it drops two to five wheat and its head; its loot table, head tag and advancement load.
+
+Found by CI and fixed before this record:
+- 26.3's `Entity.invulnerableTime` is private, so the damage test couldn't reset it between hits; the test now burns the golem first and heals it after (`709a0c2`). The golem's own code compiled first time.
+
+Not run: a two-client dedicated-server playtest, and any play by hand. The golem's walking and harvesting were seen only in the game test, on a flat stone floor.
+
 ## World and event applicability
 - A Candy Kettle works anywhere there is heat under it, in every dimension, all year. Nothing is seasonal.
 - Wild mushrooms generate only in newly generated Overworld chunks of their biomes; existing chunks don't get them, but one mushroom brought in spreads. They can be planted and spread in any dimension with soil and shade. Fairy rings bless only in the Overworld, on full-moon nights (by the Overworld's moon).
 - A Bat House keeps the Overworld's dusk and dawn wherever it is hung.
+- A Hay Golem works in any dimension.
 
 ## Rollout and open questions
 - Candy can't be poured by hoppers or dispensers; trays are filled and broken up by hand.
@@ -300,3 +359,6 @@ Not run: a two-client dedicated-server playtest, and any play by hand.
 - How often patches generate is a first guess, open to review once worlds are explored.
 - Bats out at night may despawn as vanilla bats do far from players; the house fills again by moving in at dusk.
 - Hoppers don't take guano from a Bat House; it is scooped by hand.
+- A Hay Golem harvests only single-block crops (`CropBlock`s); tall crops, gourds, berries and the giant pumpkin are left to the farmer, as crows leave them.
+- Following wheat moves its post: a farmer walking past with wheat in hand will lead it off. Holding something else keeps it where it is.
+- A golem doesn't open doors or cross fences; build its field where it can walk.
