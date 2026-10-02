@@ -2,8 +2,8 @@
   "replace": false,
   "values": [
     "jugcraft:oil_sand",
-    "jugcraft:seasonal_snow",
     "jugcraft:grave_mound",
-    "jugcraft:grasping_hands"
+    "jugcraft:grasping_hands",
+    "jugcraft:seasonal_snow"
   ]
 }
