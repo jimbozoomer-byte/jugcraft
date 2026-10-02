@@ -55,7 +55,7 @@ public class CrowClientGameTests implements FabricClientGameTest {
 					.getEntitiesOfClass(Crow.class, client.player.getBoundingBox().inflate(40.0)).stream().filter(Crow::pecking).count()));
 
 			shoot(context, singleplayer, x + 7, y + 2, z + 3, 180, 14, "jugcraft_crows_and_scarecrow");
-			shoot(context, singleplayer, x + 13, y + 1, z - 4, 180, 28, "jugcraft_crows");
+			shoot(context, singleplayer, x + 13, y + 1, z - 3, 180, 30, "jugcraft_crows");
 		}
 	}
 
@@ -122,15 +122,16 @@ public class CrowClientGameTests implements FabricClientGameTest {
 		}
 		// A carrot patch just out of its reach, where the crows are (carrots are short, so the pecking crow shows).
 		field(level, Blocks.CARROTS, x + 12, y, z - 10, x + 15, z - 7);
-		BlockPos crop = new BlockPos(x + 13, y, z - 9);
+		// The pecking crow is on the front row, nearest the camera, so the leaves behind it don't hide it.
+		BlockPos crop = new BlockPos(x + 13, y, z - 7);
 		Crow pecking = crow(level, crop.getX() + 0.5, crop.getY() + 0.1, crop.getZ() + 0.5, 200.0F);
 		if (pecking != null) {
 			boolean sent = pecking.raid(level, crop);
 			pecking.step(level, true);
 			System.out.println("[crows test] sent after the crop: " + sent + ", pecking: " + pecking.pecking());
 		}
-		crow(level, x + 12.0, y + 1.5, z - 8.0, 60.0F);
-		crow(level, x + 15.0, y + 2.0, z - 9.0, -130.0F);
+		crow(level, x + 11.8, y + 1.5, z - 6.8, 60.0F);
+		crow(level, x + 15.0, y + 2.0, z - 7.8, -130.0F);
 		crow(level, x + 11.0, y + 3.6, z - 11.5, 100.0F);
 		crow(level, x + 15.6, y + 4.4, z - 12.5, -60.0F);
 	}
