@@ -805,6 +805,7 @@ def check_agriculture():
     check_bats(java, main)
     check_hay_golem(java, main)
     check_knitting(java, main)
+    check_pies(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2895,6 +2896,63 @@ def check_knitting(java, main):
     for garment in kn["garments"]:
         if f"jugcraft:{garment}" not in knitwear or f"jugcraft:{garment}" not in frozen or f"jugcraft:{garment}" not in dyeable:
             err(f"{garment} must be knitwear, freeze-immune and dyeable")
+
+
+def check_pies(java, main):
+    """Pie baking: the Java matches PIES in tools/agriculture.py (the oven's fuel bank, heat, heating and cooling, baking
+    heat, baked and burnt points and light; the pie's slices and a burnt slice's food and chance of Hunger; each filling's
+    slice food and colour, in order); the oven, pies, raw pies, slices and dough are registered; every pie has a model for
+    each slice gone and its words, textures and loot (only while whole); the raw pies have recipes; the advancement exists."""
+    pies = ag.PIES
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("HearthOvenBlockEntity", "MAX_BURN"): pies["max_burn"], ("HearthOvenBlockEntity", "MAX_HEAT"): pies["max_heat"],
+                ("HearthOvenBlockEntity", "HEAT_TICKS"): pies["heat_ticks"], ("HearthOvenBlockEntity", "COOL_TICKS"): pies["cool_ticks"],
+                ("HearthOvenBlockEntity", "BAKE_HEAT"): pies["bake_heat"], ("HearthOvenBlockEntity", "BAKED"): pies["baked"],
+                ("HearthOvenBlockEntity", "BURNT"): pies["burnt_points"], ("HearthOvenBlock", "LIGHT"): pies["light"],
+                ("PieBlock", "SLICES"): pies["slices"], ("PieBlock", "BURNT_NUTRITION"): pies["burnt_nutrition"],
+                ("PieBlock", "BURNT_SICK_CHANCE"): pies["burnt_sick_chance"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(found - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from PIES in tools/agriculture.py ({value})")
+    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", (\d+), ([\d.]+)F, 0x([0-9A-Fa-f]{6})\)', java.get("PieFilling", ""), re.M)
+    wanted = [(f, str(i["food"][0]), str(i["food"][1]), f"{i['color']:06X}") for f, i in pies["fillings"].items()]
+    if [(name, food, sat, color.upper()) for _, name, food, sat, color in declared] != wanted:
+        err("PieFilling.java's fillings (slice food, colour, in order) differ from PIES in tools/agriculture.py")
+    for call in ('registerBlock("hearth_oven", HearthOvenBlock::new', 'registerItem("pastry_dough"', "for (PieFilling filling : PieFilling.values())",
+                 'registerBlock("burnt_pie", props -> new PieBlock(null, props)'):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    pies_blocks = [f"{f}_pie" for f in pies["fillings"]] + [pies["burnt"]]
+    for block in pies_blocks:
+        if f"block.jugcraft.{block}" not in lang:
+            err(f"Pie baking has no words for {block}")
+        for bites in range(pies["slices"]):
+            name = f"{block}.json" if bites == 0 else f"{block}_slice{bites}.json"
+            if not (ASSETS / "models" / "block" / name).exists():
+                err(f"{block} needs its model {name}")
+        loot = json.dumps(load(DATA / "jugcraft" / "loot_table" / "blocks" / f"{block}.json") or {})
+        if '"bites": "0"' not in loot:
+            err(f"{block} must drop only while whole")
+        for texture in (f"{block}_top", f"{block}_inside"):
+            if not (ASSETS / "textures" / "block" / f"{texture}.png").exists():
+                err(f"{block} needs its texture {texture}")
+    for filling in pies["fillings"]:
+        for item in (f"raw_{filling}_pie", f"{filling}_pie_slice"):
+            if f"item.jugcraft.{item}" not in lang or not (ASSETS / "textures" / "item" / f"{item}.png").exists():
+                err(f"Pie baking needs the words and texture of {item}")
+        if not (DATA / "jugcraft" / "recipe" / f"raw_{filling}_pie.json").exists():
+            err(f"raw_{filling}_pie needs its recipe")
+    for path in (DATA / "jugcraft" / "recipe" / "hearth_oven.json", DATA / "jugcraft" / "recipe" / "pastry_dough.json",
+                 DATA / "jugcraft" / "loot_table" / "blocks" / "hearth_oven.json", ASSETS / "models" / "block" / "hearth_oven_lit.json",
+                 DATA / "jugcraft" / "advancement" / "as_easy_as_pie.json"):
+        if not path.exists():
+            err(f"Pie baking needs {path.relative_to(ROOT)}")
 
 
 def check_model_uvs():

@@ -898,4 +898,6 @@ def crop_textures():
     out.update(hay_golem_textures())
     from knitting_textures import knitting_textures  # and knitting
     out.update(knitting_textures())
+    from pie_textures import pie_textures  # and pie baking
+    out.update(pie_textures())
     return out

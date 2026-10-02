@@ -254,6 +254,7 @@ public final class JugcraftAgriculture {
 	public static EntityType<HayGolem> HAY_GOLEM;
 	public static DataComponentType<KnittingWork> KNITTING;
 	public static BlockEntityType<SpinningWheelBlockEntity> SPINNING_WHEEL_ENTITY;
+	public static BlockEntityType<HearthOvenBlockEntity> HEARTH_OVEN_ENTITY;
 	/** How many uses Knitting Needles have. */
 	public static final int NEEDLES_DURABILITY = 128;
 	/** Bat guano fertilizes the crops this far round where it is used (a 3x3 patch), with this many doses of bone meal each. */
@@ -1409,6 +1410,26 @@ public final class JugcraftAgriculture {
 					.component(DataComponents.DYED_COLOR, new DyedItemColor(Knitting.UNDYED)), EQUIPMENT_TAB);
 		}
 		Knitting.register();
+
+		// Fall additions 16, pie baking: a brick Hearth Oven fed with fuel bakes raw pies (pastry, a filling and sugar) into
+		// pies placed like cakes, eaten or cut a slice at a time; left in too long they burn.
+		Block oven = registerBlock("hearth_oven", HearthOvenBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.strength(2.0F, 6.0F).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()
+				.lightLevel(state -> state.getValue(HearthOvenBlock.LIT) ? HearthOvenBlock.LIGHT : 0));
+		HEARTH_OVEN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("hearth_oven"),
+				FabricBlockEntityTypeBuilder.create(HearthOvenBlockEntity::new, oven).build());
+		registerItem("hearth_oven", props -> new BlockItem(oven, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem("pastry_dough", Item::new, new Item.Properties().compostable(COMPOST_MEDIUM), INGREDIENT_TAB);
+		for (PieFilling filling : PieFilling.values()) {
+			registerItem(filling.rawPie(), Item::new, new Item.Properties().stacksTo(16).compostable(COMPOST_MEDIUM_HIGH), FOOD_TAB);
+			Block pie = registerBlock(filling.pie(), props -> new PieBlock(filling, props), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+					.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+			registerItem(filling.pie(), props -> new BlockItem(pie, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);
+			food(filling.slice(), filling.nutrition, filling.saturation, COMPOST_MEDIUM_HIGH);
+		}
+		Block burnt = registerBlock("burnt_pie", props -> new PieBlock(null, props), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+		registerItem("burnt_pie", props -> new BlockItem(burnt, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

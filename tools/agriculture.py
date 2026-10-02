@@ -550,6 +550,8 @@ HALLOWEEN_ADVANCEMENTS = {
                           "frame": "task"},
     "snug_as_a_bug": {"icon": "jugcraft:knit_sweater", "title": "Snug as a Bug",
                       "description": "Warm yourself by a campfire in a knit beanie, sweater and wool socks", "frame": "goal"},
+    "as_easy_as_pie": {"icon": "jugcraft:apple_pie", "title": "As Easy as Pie", "description": "Take a perfectly baked pie out of a Hearth Oven",
+                       "frame": "task"},
     "man_of_straw": {"icon": "minecraft:hay_block", "title": "Man of Straw", "description": "Build a Hay Golem from hay bales and a carved pumpkin",
                      "frame": "task"},
     "fairy_ring": {"icon": "jugcraft:fly_agaric", "title": "Away with the Fairies",
@@ -1506,6 +1508,36 @@ KNITTING = {"wheel": "spinning_wheel", "wheel_display": "Spinning Wheel", "yarn"
                 "leaf_sweater": {"display": "Autumn Leaf Sweater", "slot": "CHEST", "rows": 5, "asset": "knit_leaf", "motif": "leaf"}}}
 
 
+# Pie baking (fall additions 16): the Hearth Oven (HearthOvenBlock + entity) banks up to `max_burn` ticks of fuel (as a
+# furnace burns it); burning, it heats a degree every `heat_ticks` to `max_heat`, cooling a degree every `cool_ticks` when
+# out. A pie bakes at `bake_heat` or hotter, a point a tick (two at full heat): baked at `baked` points, burnt at `burnt`.
+# Its light when lit is `light`. Pies (PieBlock) have `slices` slices; each filling's slice gives its nutrition and
+# saturation; a burnt pie's slice gives `burnt_nutrition` and Hunger one time in `burnt_sick_chance`.
+PIES = {"oven": "hearth_oven", "oven_display": "Hearth Oven", "dough": "pastry_dough", "dough_display": "Pastry Dough",
+        "burnt": "burnt_pie", "burnt_display": "Burnt Pie", "max_burn": 3200, "max_heat": 100, "heat_ticks": 2, "cool_ticks": 4,
+        "bake_heat": 50, "baked": 600, "burnt_points": 1200, "light": 13, "slices": 4, "burnt_nutrition": 1, "burnt_sick_chance": 3,
+        # In the order of the PieFilling enum: display name, slice food, filling colour, and the raw pie's ingredients
+        # (with the pastry and sugar).
+        "fillings": {
+            "apple": {"display": "Apple", "food": [4, 0.6], "color": 0xC89A48, "with": ["minecraft:apple", "minecraft:apple"]},
+            "pumpkin_cream": {"display": "Pumpkin Cream", "food": [4, 0.6], "color": 0xE0822A,
+                              "with": ["minecraft:pumpkin", "minecraft:milk_bucket"]},
+            "cranberry": {"display": "Cranberry", "food": [3, 0.6], "color": 0xA01C34, "with": ["jugcraft:cranberries", "jugcraft:cranberries"]},
+            "sweet_potato": {"display": "Sweet Potato", "food": [4, 0.7], "color": 0xD8682A,
+                             "with": ["jugcraft:sweet_potato", "jugcraft:sweet_potato"]},
+            "chestnut": {"display": "Chestnut", "food": [5, 0.7], "color": 0x6A3E1E,
+                         "with": ["jugcraft:roasted_chestnuts", "jugcraft:roasted_chestnuts"]}}}
+
+
+def pie_blocks():
+    return [PIES["oven"], PIES["burnt"]] + [f"{f}_pie" for f in PIES["fillings"]]
+
+
+def pie_items():
+    return (pie_blocks() + [PIES["dough"]] + [f"raw_{f}_pie" for f in PIES["fillings"]]
+            + [f"{f}_pie_slice" for f in PIES["fillings"]])
+
+
 def knitting_items():
     return [KNITTING["wheel"], KNITTING["yarn"], KNITTING["needles"]] + list(KNITTING["garments"])
 
@@ -2031,6 +2063,9 @@ SHAPED = [
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
     # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
     # (the ring) baked in; sugar round a red dye.
+    # Fall additions 16: a brick oven over a furnace's fire.
+    {"id": "hearth_oven", "pattern": ["BBB", "B B", "BFB"], "key": {"B": "minecraft:brick", "F": "minecraft:furnace"},
+     "result": "hearth_oven", "count": 1, "category": "building"},
     # Fall additions 15: a spoked wheel of planks and sticks with a string drive band; two sticks tipped with iron.
     {"id": "spinning_wheel", "pattern": [" P ", "PSP", "STS"], "key": {"P": "#minecraft:planks", "S": "minecraft:stick",
                                                                      "T": "minecraft:string"},
@@ -2182,7 +2217,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]])
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks())
 
 
 def all_items():
@@ -2193,7 +2228,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items())
 
 
 def owns(entry_id):
@@ -2214,3 +2249,10 @@ def textures():
 
 
 EQUIPMENT_TEXTURES = ["trellis", "trellis_post", "cooking_pot_side", "cooking_pot_rim", "cooking_pot_empty", "cooking_pot_soup"]
+
+# Fall additions 16: pastry from wheat and an egg; a raw pie of pastry, its filling and sugar (a milk bucket leaves its
+# bucket, as crafting with one does).
+SHAPELESS += [{"id": PIES["dough"], "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:egg"], "result": PIES["dough"], "count": 2,
+               "category": "misc"}]
+SHAPELESS += [{"id": f"raw_{filling}_pie", "inputs": [f"jugcraft:{PIES['dough']}"] + info["with"] + ["minecraft:sugar"],
+               "result": f"raw_{filling}_pie", "count": 1, "category": "misc"} for filling, info in PIES["fillings"].items()]
