@@ -13,6 +13,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -110,7 +111,7 @@ public class ShopMenu extends AbstractContainerMenu {
 		return (data.get(0) & 0xFFFFL) | ((data.get(1) & 0xFFFFL) << 16);
 	}
 
-	public @Nullable TownShops.Shop shop() {
+	public TownShops.@Nullable Shop shop() {
 		return TownShops.get().shop(opening.shop());
 	}
 
@@ -179,9 +180,8 @@ public class ShopMenu extends AbstractContainerMenu {
 		while (left > 0) {
 			ItemStack stack = new ItemStack(item, Math.min(left, max));
 			left -= stack.getCount();
-			if (!player.getInventory().add(stack) && !stack.isEmpty()) {
-				player.drop(stack, false);
-			}
+			// Into the inventory, or dropped at the player's feet if it is full.
+			player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
 		}
 		player.level().playSound(null, player.blockPosition(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.6F, 1.0F);
 		player.sendOverlayMessage(Component.translatable("message.jugcraft.shop.bought", offer.count(), new ItemStack(item).getHoverName(),

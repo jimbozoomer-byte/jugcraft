@@ -94,15 +94,15 @@ public class AtmScreen extends AbstractContainerScreen<AtmMenu> {
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		graphics.text(font, title.getString(), titleLabelX, titleLabelY, ShopScreen.INK);
-		graphics.text(font, Component.translatable("screen.jugcraft.atm.to").getString(), 10, 38, ShopScreen.INK);
+		graphics.text(font, title.getString(), titleLabelX, titleLabelY, ShopScreen.INK, false);
+		graphics.text(font, Component.translatable("screen.jugcraft.atm.to").getString(), 10, 38, ShopScreen.INK, false);
 		if (menu.opening.names().isEmpty()) {
-			graphics.text(font, Component.translatable("screen.jugcraft.atm.nobody").getString(), 10, 54, ShopScreen.INK);
+			graphics.text(font, Component.translatable("screen.jugcraft.atm.nobody").getString(), 10, 54, ShopScreen.INK, false);
 		}
-		graphics.text(font, Component.translatable("screen.jugcraft.jugs", String.format("%,d", menu.balance())).getString(), 128, 30, SCREEN_TEXT);
+		graphics.text(font, Component.translatable("screen.jugcraft.jugs", String.format("%,d", menu.balance())).getString(), 128, 30, SCREEN_TEXT, false);
 		int chosen = menu.chosen();
 		String to = chosen >= 0 && chosen < menu.opening.names().size() ? menu.opening.names().get(chosen) : "-";
-		graphics.text(font, Component.translatable("screen.jugcraft.atm.recipient", to).getString(), 128, 46, SCREEN_TEXT);
-		graphics.text(font, Component.translatable("screen.jugcraft.atm.amount", String.format("%,d", menu.amount())).getString(), 128, 62, SCREEN_TEXT);
+		graphics.text(font, Component.translatable("screen.jugcraft.atm.recipient", to).getString(), 128, 46, SCREEN_TEXT, false);
+		graphics.text(font, Component.translatable("screen.jugcraft.atm.amount", String.format("%,d", menu.amount())).getString(), 128, 62, SCREEN_TEXT, false);
 	}
 }

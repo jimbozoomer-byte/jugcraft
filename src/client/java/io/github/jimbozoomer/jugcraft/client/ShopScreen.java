@@ -135,12 +135,12 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
 
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		graphics.text(font, title.getString(), titleLabelX, titleLabelY, INK);
+		graphics.text(font, title.getString(), titleLabelX, titleLabelY, INK, false);
 		String jugs = Component.translatable("screen.jugcraft.jugs", String.format("%,d", menu.balance())).getString();
-		graphics.text(font, jugs, imageWidth - 10 - font.width(jugs), titleLabelY, INK);
+		graphics.text(font, jugs, imageWidth - 10 - font.width(jugs), titleLabelY, INK, false);
 		List<TownShops.Offer> offers = offers();
 		if (offers.isEmpty()) {
-			graphics.text(font, Component.translatable("screen.jugcraft.shop.empty").getString(), LIST_X + 4, LIST_Y + 6, INK);
+			graphics.text(font, Component.translatable("screen.jugcraft.shop.empty").getString(), LIST_X + 4, LIST_Y + 6, INK, false);
 		}
 		for (int row = 0; row < ROWS; row++) {
 			int index = page * ROWS + row;
@@ -154,9 +154,9 @@ public class ShopScreen extends AbstractContainerScreen<ShopMenu> {
 			if (font.width(name) > 120) {
 				name = font.plainSubstrByWidth(name, 116) + "...";
 			}
-			graphics.text(font, name, LIST_X + 24, y, INK);
+			graphics.text(font, name, LIST_X + 24, y, INK, false);
 			String price = Component.translatable("screen.jugcraft.price", offer.price()).getString();
-			graphics.text(font, price, imageWidth - 64 - font.width(price), y, INK);
+			graphics.text(font, price, imageWidth - 64 - font.width(price), y, INK, false);
 		}
 	}
 }

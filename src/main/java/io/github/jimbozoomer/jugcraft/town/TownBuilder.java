@@ -142,7 +142,7 @@ public final class TownBuilder {
 	static int ground(ServerLevel level, BlockPos.MutableBlockPos at, int x, int top, int z) {
 		for (int y = top; y > level.getMinY(); y--) {
 			BlockState state = level.getBlockState(at.set(x, y, z));
-			if (state.blocksMotion() && !state.is(BlockTags.LOGS) && !state.is(BlockTags.LEAVES)) {
+			if (!state.getCollisionShape(level, at).isEmpty() && !state.is(BlockTags.LOGS) && !state.is(BlockTags.LEAVES)) {
 				return y;
 			}
 		}

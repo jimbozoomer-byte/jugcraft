@@ -344,7 +344,6 @@ public class Townsfolk extends PathfinderMob {
 			double dx = to.getX() + 0.5 - getX();
 			double dz = to.getZ() + 0.5 - getZ();
 			if (dx * dx + dz * dz < 12.0 || ticks > DECORATE_TIMEOUT) {
-				swing(InteractionHand.MAIN_HAND);
 				TownDecor.apply(level, site);
 				level.playSound(null, to, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.NEUTRAL, 0.8F, 1.0F);
 				site = -1;
