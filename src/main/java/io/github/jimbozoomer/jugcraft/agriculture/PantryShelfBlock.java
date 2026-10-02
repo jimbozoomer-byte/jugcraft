@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * The Pantry Shelf: an open oak cupboard with two shelves, for showing off jars of preserves
  * ({@link PantryShelfBlockEntity}). Use it holding a jar (or an empty Mason Jar) to put it up, three to a shelf; use it
- * with an empty hand to take down the last. Comparators read how full it is.
+ * with an empty hand to take down the last (holding anything else, nothing happens). Comparators read how full it is.
  */
 public class PantryShelfBlock extends BaseEntityBlock {
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
@@ -68,6 +68,9 @@ public class PantryShelfBlock extends BaseEntityBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		if (!player.getMainHandItem().isEmpty()) {
+			return InteractionResult.PASS;
+		}
 		if (!level.isClientSide() && level.getBlockEntity(pos) instanceof PantryShelfBlockEntity shelf) {
 			ItemStack jar = shelf.takeLast();
 			if (jar.isEmpty()) {

@@ -111,6 +111,9 @@ public class CanningKettleBlock extends BaseEntityBlock {
 	/** An empty hand lifts out the sealed jars; sneaking, every jar (or, with none in, says how the kettle is doing). */
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		if (!player.getMainHandItem().isEmpty()) {
+			return InteractionResult.PASS;
+		}
 		if (level.isClientSide() || !(level.getBlockEntity(pos) instanceof CanningKettleBlockEntity kettle)) {
 			return InteractionResult.SUCCESS;
 		}
