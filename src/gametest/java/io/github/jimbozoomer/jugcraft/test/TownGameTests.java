@@ -32,7 +32,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -228,17 +227,12 @@ public class TownGameTests {
 				firstWrong == null ? "" : " (first: " + firstWrong + ")");
 		helper.assertTrue(checked > 10_000 && wrong == 0, "The square is built as designed: " + wrong + " of " + checked + " blocks differ"
 				+ (firstWrong == null ? "" : ", first " + firstWrong));
-		// The townsfolk of these chunks are out, one for each place.
-		int minX = chunks.stream().mapToInt(ChunkPos::x).min().orElseThrow() << 4;
-		int minZ = chunks.stream().mapToInt(ChunkPos::z).min().orElseThrow() << 4;
-		int maxX = (chunks.stream().mapToInt(ChunkPos::x).max().orElseThrow() << 4) + 16;
-		int maxZ = (chunks.stream().mapToInt(ChunkPos::z).max().orElseThrow() << 4) + 16;
-		AABB square = new AABB(minX, origin.getY() - 4, minZ, maxX, origin.getY() + 40, maxZ);
-		List<Townsfolk> people = level.getEntitiesOfClass(Townsfolk.class, square);
-		long places = data.spots.stream().filter(s -> chunks.contains(ChunkPos.containing(origin.offset(s.pos())))).count();
-		LOGGER.info("Test town: {} townsfolk by the square for {} places: {}", people.size(), places,
-				people.stream().map(p -> p.getName().getString() + " (" + p.role() + (p.shop().isEmpty() ? "" : ", " + p.shop()) + ")").toList());
-		helper.assertTrue(places > 0 && people.size() == places, "One townsperson for each place by the square: " + people.size() + " of " + places);
+		// The town has brought out one townsperson for each place in these chunks (they are looked up once the chunks'
+		// entities are loaded, below: a chunk forced this tick shows its entities only from a later tick).
+		List<TownData.Spot> places = data.spots.stream().filter(s -> chunks.contains(ChunkPos.containing(origin.offset(s.pos())))).toList();
+		long recorded = places.stream().filter(s -> state.townsperson(s.index()) != null).count();
+		helper.assertTrue(!places.isEmpty() && recorded == places.size(),
+				"A townsperson brought out for each place by the square: " + recorded + " of " + places.size());
 		// A survival player can't break or place, or pour water.
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		player.setGameMode(GameType.SURVIVAL);
@@ -261,10 +255,6 @@ public class TownGameTests {
 		level.explode(null, fountain.getX() + 3.5, fountain.getY() + 1.0, fountain.getZ() + 0.5, 4.0F, Level.ExplosionInteraction.TNT);
 		helper.assertTrue(level.getBlockState(fountain) == fountainState && level.getBlockState(paving) == pavingState,
 				"An explosion leaves the town's blocks");
-		// Townsfolk shrug off a player's blows.
-		Townsfolk someone = people.get(0);
-		boolean hurt = someone.hurtServer(level, level.damageSources().playerAttack(player), 100.0F);
-		helper.assertTrue(!hurt && someone.getHealth() == someone.getMaxHealth() && someone.isAlive(), "A townsperson can't be hurt by a player");
 		// A lamp shows a soul lantern at Halloween and a lantern in summer.
 		TownData.Site lamp = data.sites.stream().filter(s -> s.kind().equals("lamp")
 				&& chunks.contains(ChunkPos.containing(origin.offset(s.anchor())))).findFirst().orElseThrow();
@@ -284,10 +274,25 @@ public class TownGameTests {
 		level.setBlock(fire, Blocks.FIRE.defaultBlockState(), 3);
 		helper.runAfterDelay(80, () -> {
 			boolean out = !level.getBlockState(fire).is(Blocks.FIRE);
+			// The townsfolk are in the world, each the one the town recorded for its place.
+			List<Townsfolk> people = places.stream().map(s -> state.townsperson(s.index())).filter(id -> id != null).map(level::getEntity)
+					.filter(e -> e instanceof Townsfolk).map(e -> (Townsfolk) e).toList();
+			LOGGER.info("Test town: {} townsfolk by the square for {} places: {}", people.size(), places.size(),
+					people.stream().map(p -> p.getName().getString() + " (" + p.role() + (p.shop().isEmpty() ? "" : ", " + p.shop()) + ")").toList());
+			// Townsfolk shrug off a player's blows.
+			boolean unhurt = false;
+			if (!people.isEmpty()) {
+				Townsfolk someone = people.get(0);
+				boolean hurt = someone.hurtServer(level, level.damageSources().playerAttack(player), 100.0F);
+				unhurt = !hurt && someone.getHealth() == someone.getMaxHealth() && someone.isAlive();
+			}
 			state.forget();
 			for (ChunkPos pos : chunks) {
 				level.setChunkForced(pos.x(), pos.z(), false);
 			}
+			helper.assertTrue(people.size() == places.size(), "One townsperson in the world for each place by the square: "
+					+ people.size() + " of " + places.size());
+			helper.assertTrue(unhurt, "A townsperson can't be hurt by a player");
 			helper.assertTrue(out, "Fire in the town goes out");
 			helper.succeed();
 		});
