@@ -34,10 +34,10 @@ import org.jspecify.annotations.Nullable;
  * The Scarecrow: a straw figure on a post, two blocks tall, in a flannel shirt. Use any dye on it to change the
  * shirt's colour ({@link #SHIRT}). Give it a pumpkin of any kind (the {@code jugcraft:scarecrow_heads} item tag) and
  * it wears it for a head, on its shoulders the way an armor stand wears a pumpkin, carving and all
- * ({@link ScarecrowBlockEntity}, on the upper half); an empty hand takes the head back, and a torch lights a
- * hand-carved one. A lit head lights the scarecrow ({@link #LIGHT}). Wearing a lit head, sneak-used at midnight during the
- * Halloween event, it summons the Headless Horseman ({@link HorsemanSummoning}). Once crop-eating birds exist, it will
- * keep them off nearby fields (docs/branches/AGRICULTURE.md).
+ * ({@link ScarecrowBlockEntity}, on the upper half); an empty hand takes the head back, and a torch or soul torch
+ * lights a hand-carved one. A lit head lights the scarecrow ({@link #LIGHT}). Wearing a lit head, sneak-used at midnight during the
+ * Halloween event, it summons the Headless Horseman ({@link HorsemanSummoning}). It keeps crows ({@link Crow}) off the
+ * crops round it, the farther the better it is dressed ({@link Scarecrows}).
  */
 public class ScarecrowBlock extends TallDecorationBlock implements EntityBlock {
 	public static final EnumProperty<DyeColor> SHIRT = EnumProperty.create("shirt", DyeColor.class);
@@ -94,7 +94,7 @@ public class ScarecrowBlock extends TallDecorationBlock implements EntityBlock {
 			InteractionHand hand, BlockHitResult hit) {
 		DyeColor color = dyeColor(stack);
 		boolean head = stack.is(JugcraftAgriculture.SCARECROW_HEADS);
-		boolean torch = stack.is(Items.TORCH) && canLight(head(level, pos, state));
+		boolean torch = CarvedPumpkinBlock.isTorch(stack) && canLight(head(level, pos, state));
 		if ((color == null || state.getValue(SHIRT) == color) && !head && !torch) {
 			return stack.isEmpty() ? InteractionResult.TRY_WITH_EMPTY_HAND : InteractionResult.PASS;
 		}
@@ -115,7 +115,7 @@ public class ScarecrowBlock extends TallDecorationBlock implements EntityBlock {
 		} else if (torch) {
 			ItemStack lit = scarecrow.head().copy();
 			lit.set(DataComponents.BLOCK_STATE, lit.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY)
-					.with(CarvedPumpkinBlock.LIT, true));
+					.with(CarvedPumpkinBlock.LIT, true).with(CarvedPumpkinBlock.SOUL, stack.is(Items.SOUL_TORCH)));
 			scarecrow.setHead(lit);
 			stack.consume(1, player);
 			level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 0.9F);

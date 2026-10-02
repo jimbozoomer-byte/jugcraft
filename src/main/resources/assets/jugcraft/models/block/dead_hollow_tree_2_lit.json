@@ -1,0 +1,419 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jugcraft:block/dead_tree_bark",
+    "bark": "jugcraft:block/dead_tree_bark",
+    "end": "jugcraft:block/dead_tree_end",
+    "hollow": "jugcraft:block/dead_tree_hollow",
+    "face": "jugcraft:block/dead_tree_face",
+    "eye": "jugcraft:block/dead_tree_eye",
+    "lantern_iron": "jugcraft:block/yard_lantern_iron",
+    "lantern_glass": "jugcraft:block/yard_lantern_glass"
+  },
+  "elements": [
+    {
+      "from": [
+        3.5,
+        2,
+        3.5
+      ],
+      "to": [
+        12.5,
+        16,
+        12.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bark"
+        },
+        "south": {
+          "texture": "#bark"
+        },
+        "east": {
+          "texture": "#bark"
+        },
+        "west": {
+          "texture": "#bark"
+        },
+        "up": {
+          "texture": "#bark"
+        },
+        "down": {
+          "texture": "#bark"
+        }
+      }
+    },
+    {
+      "from": [
+        -13,
+        4,
+        6.5
+      ],
+      "to": [
+        3.5,
+        7,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bark"
+        },
+        "south": {
+          "texture": "#bark"
+        },
+        "east": {
+          "texture": "#bark"
+        },
+        "west": {
+          "texture": "#bark"
+        },
+        "up": {
+          "texture": "#bark"
+        },
+        "down": {
+          "texture": "#bark"
+        }
+      },
+      "rotation": {
+        "origin": [
+          3.5,
+          5.5,
+          8
+        ],
+        "axis": "z",
+        "angle": -22.5
+      }
+    },
+    {
+      "from": [
+        12.5,
+        12,
+        6.5
+      ],
+      "to": [
+        29,
+        15,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bark"
+        },
+        "south": {
+          "texture": "#bark"
+        },
+        "east": {
+          "texture": "#bark"
+        },
+        "west": {
+          "texture": "#bark"
+        },
+        "up": {
+          "texture": "#bark"
+        },
+        "down": {
+          "texture": "#bark"
+        }
+      },
+      "rotation": {
+        "origin": [
+          12.5,
+          13.5,
+          8
+        ],
+        "axis": "z",
+        "angle": 22.5
+      }
+    },
+    {
+      "from": [
+        -9.5,
+        10,
+        7.5
+      ],
+      "to": [
+        -8.5,
+        16,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bark"
+        },
+        "south": {
+          "texture": "#bark"
+        },
+        "east": {
+          "texture": "#bark"
+        },
+        "west": {
+          "texture": "#bark"
+        },
+        "up": {
+          "texture": "#bark"
+        },
+        "down": {
+          "texture": "#bark"
+        }
+      }
+    },
+    {
+      "from": [
+        7.5,
+        3.5,
+        21.5
+      ],
+      "to": [
+        8.5,
+        8,
+        22.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bark"
+        },
+        "south": {
+          "texture": "#bark"
+        },
+        "east": {
+          "texture": "#bark"
+        },
+        "west": {
+          "texture": "#bark"
+        },
+        "up": {
+          "texture": "#bark"
+        },
+        "down": {
+          "texture": "#bark"
+        }
+      }
+    },
+    {
+      "from": [
+        -6.25,
+        5.5,
+        7.75
+      ],
+      "to": [
+        -5.75,
+        9,
+        8.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#lantern_iron"
+        },
+        "south": {
+          "texture": "#lantern_iron"
+        },
+        "east": {
+          "texture": "#lantern_iron"
+        },
+        "west": {
+          "texture": "#lantern_iron"
+        },
+        "up": {
+          "texture": "#lantern_iron"
+        },
+        "down": {
+          "texture": "#lantern_iron"
+        }
+      }
+    },
+    {
+      "from": [
+        21.75,
+        13,
+        7.75
+      ],
+      "to": [
+        22.25,
+        17,
+        8.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#lantern_iron"
+        },
+        "south": {
+          "texture": "#lantern_iron"
+        },
+        "east": {
+          "texture": "#lantern_iron"
+        },
+        "west": {
+          "texture": "#lantern_iron"
+        },
+        "up": {
+          "texture": "#lantern_iron"
+        },
+        "down": {
+          "texture": "#lantern_iron"
+        }
+      }
+    },
+    {
+      "from": [
+        -8,
+        0.0,
+        6
+      ],
+      "to": [
+        -4,
+        4.5,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#lantern_glass"
+        },
+        "south": {
+          "texture": "#lantern_glass"
+        },
+        "east": {
+          "texture": "#lantern_glass"
+        },
+        "west": {
+          "texture": "#lantern_glass"
+        },
+        "up": {
+          "texture": "#lantern_glass"
+        },
+        "down": {
+          "texture": "#lantern_glass"
+        }
+      },
+      "light_emission": 15
+    },
+    {
+      "from": [
+        -7.5,
+        4.5,
+        6.5
+      ],
+      "to": [
+        -4.5,
+        5.5,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#lantern_iron"
+        },
+        "south": {
+          "texture": "#lantern_iron"
+        },
+        "east": {
+          "texture": "#lantern_iron"
+        },
+        "west": {
+          "texture": "#lantern_iron"
+        },
+        "up": {
+          "texture": "#lantern_iron"
+        },
+        "down": {
+          "texture": "#lantern_iron"
+        }
+      }
+    },
+    {
+      "from": [
+        20.5,
+        7,
+        6.5
+      ],
+      "to": [
+        23.5,
+        7.5,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#lantern_iron"
+        },
+        "south": {
+          "texture": "#lantern_iron"
+        },
+        "east": {
+          "texture": "#lantern_iron"
+        },
+        "west": {
+          "texture": "#lantern_iron"
+        },
+        "up": {
+          "texture": "#lantern_iron"
+        },
+        "down": {
+          "texture": "#lantern_iron"
+        }
+      }
+    },
+    {
+      "from": [
+        20,
+        7.5,
+        6
+      ],
+      "to": [
+        24,
+        12,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#lantern_glass"
+        },
+        "south": {
+          "texture": "#lantern_glass"
+        },
+        "east": {
+          "texture": "#lantern_glass"
+        },
+        "west": {
+          "texture": "#lantern_glass"
+        },
+        "up": {
+          "texture": "#lantern_glass"
+        },
+        "down": {
+          "texture": "#lantern_glass"
+        }
+      },
+      "light_emission": 15
+    },
+    {
+      "from": [
+        20.5,
+        12,
+        6.5
+      ],
+      "to": [
+        23.5,
+        13,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#lantern_iron"
+        },
+        "south": {
+          "texture": "#lantern_iron"
+        },
+        "east": {
+          "texture": "#lantern_iron"
+        },
+        "west": {
+          "texture": "#lantern_iron"
+        },
+        "up": {
+          "texture": "#lantern_iron"
+        },
+        "down": {
+          "texture": "#lantern_iron"
+        }
+      }
+    }
+  ]
+}

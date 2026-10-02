@@ -840,4 +840,52 @@ def crop_textures():
     out.update(festivity_textures())
     from night_textures import night_textures  # and Halloween nights
     out.update(night_textures())
+    from decor_textures import decor_textures  # and the Halloween decorations
+    out.update(decor_textures())
+    from decor2_textures import decor2_textures  # and their second batch
+    out.update(decor2_textures())
+    from decor3_textures import decor3_textures  # and the graveyard
+    out.update(decor3_textures())
+    from decor4_textures import decor4_textures  # and the witch's cottage
+    out.update(decor4_textures())
+    from decor5_textures import decor5_textures  # and the harvest party
+    out.update(decor5_textures())
+    from decor6_textures import decor6_textures  # and the haunted house and yard
+    out.update(decor6_textures())
+    from decor7_textures import decor7_textures  # and the haunted house inside
+    out.update(decor7_textures())
+    from decor8_textures import decor8_textures  # and the mad scientist and monsters
+    out.update(decor8_textures())
+    from decor9_textures import decor9_textures  # and the yard and porch
+    out.update(decor9_textures())
+    from decor10_textures import decor10_textures  # and lighting and glow
+    out.update(decor10_textures())
+    from decor11_textures import decor11_textures  # and party games
+    out.update(decor11_textures())
+    from decor12_textures import decor12_textures  # and night events
+    out.update(decor12_textures())
+    from decor13_textures import decor13_textures  # and treats
+    out.update(decor13_textures())
+    from decor14_textures import decor14_textures  # and costumes
+    out.update(decor14_textures())
+    from chandlery_textures import chandlery_textures  # and the chandlery
+    out.update(chandlery_textures())
+    from cider_textures import cider_textures  # and the cider mill
+    out.update(cider_textures())
+    from pantry_textures import pantry_textures  # and the preserves pantry
+    out.update(pantry_textures())
+    from crow_textures import crow_textures  # and the crow
+    out.update(crow_textures())
+    from firework_textures import firework_textures  # and spooky fireworks
+    out.update(firework_textures())
+    from lantern_textures import lantern_textures  # and the sky lantern festival
+    out.update(lantern_textures())
+    from feast_textures import feast_textures  # and the harvest feast
+    out.update(feast_textures())
+    from maze_textures import maze_textures  # and the corn maze
+    out.update(maze_textures())
+    from ghost_textures import ghost_textures  # and ghost hunting
+    out.update(ghost_textures())
+    from face_paint_textures import face_paint_textures  # and face paint
+    out.update(face_paint_textures())
     return out

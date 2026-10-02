@@ -63,7 +63,7 @@ public class GiantPumpkinRenderer implements BlockEntityRenderer<GiantPumpkinBlo
 			state.light[index] = lit ? LightCoordsUtil.FULL_BRIGHT
 					: level != null ? LightCoordsUtil.getLightCoords(level, middle.relative(side, SIZE / 2 + 1)) : state.lightCoords;
 		}
-		state.type = CarvingTextures.getGiant(state.faces, lit);
+		state.type = CarvingTextures.getGiant(state.faces, lit, pumpkin.soul());
 	}
 
 	@Override

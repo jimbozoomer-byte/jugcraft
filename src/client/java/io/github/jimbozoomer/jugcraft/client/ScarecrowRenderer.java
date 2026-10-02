@@ -76,7 +76,7 @@ public class ScarecrowRenderer implements BlockEntityRenderer<ScarecrowBlockEnti
 			state.carving = head.getOrDefault(JugcraftAgriculture.CARVING, PumpkinCarving.BLANK);
 			boolean lit = ScarecrowBlockEntity.lit(head);
 			if (!state.carving.isBlank()) {
-				state.carvingType = CarvingTextures.get(state.carving, lit);
+				state.carvingType = CarvingTextures.get(state.carving, lit, ScarecrowBlockEntity.soul(head));
 				state.carvingLight = lit ? LightCoordsUtil.FULL_BRIGHT : state.lightCoords;
 			}
 		}

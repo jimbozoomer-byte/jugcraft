@@ -23,7 +23,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * Draws a hand-carved pumpkin's design over the vanilla pumpkin it is modelled as: one quad per carved
  * side, a hair outside the face, textured by {@link CarvingTextures}. Skin pixels are transparent. Each
- * side takes the light of the block in front of it; with a torch inside, the carving glows at full brightness.
+ * side takes the light of the block in front of it; with a torch inside, the carving glows at full brightness
+ * (candle-yellow, or blue from a soul torch).
  */
 public class CarvedPumpkinRenderer implements BlockEntityRenderer<CarvedPumpkinBlockEntity, CarvedPumpkinRenderer.State> {
 	/** How far outside the block the carving sits, to stay in front of the pumpkin's own face. */
@@ -56,7 +57,7 @@ public class CarvedPumpkinRenderer implements BlockEntityRenderer<CarvedPumpkinB
 		}
 		boolean lit = block.getValue(CarvedPumpkinBlock.LIT);
 		state.facing = block.getValue(CarvedPumpkinBlock.FACING);
-		state.type = CarvingTextures.get(state.carving, lit);
+		state.type = CarvingTextures.get(state.carving, lit, block.getValue(CarvedPumpkinBlock.SOUL));
 		Level level = pumpkin.getLevel();
 		for (int face = 0; face < PumpkinCarving.FACES; face++) {
 			Direction side = PumpkinCarving.side(state.facing, face);
