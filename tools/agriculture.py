@@ -1103,6 +1103,53 @@ def decor14_items():
     return decor14_blocks() + list(OUTFITS)
 
 
+# ---------------------------------------------------------------- Fall additions 1: the chandlery
+# The Wax Melting Pot (WaxPotBlock + entity) holds up to `capacity` measures of one wax (`waxes`: what puts it in, as an
+# item tag, how many measures an item gives, how long a candle burns for each layer of it, and its natural colour). Over
+# a heat source (HEAT_TAG, as the Cooking Pot) it melts a measure every `melt_ticks`; without heat its molten wax sets
+# again, a measure every `set_ticks`. Molten wax takes dyes (mixed as leather dye mixes), up to `max_scents` scents
+# (`scents`: item tag, the aura, its colour), a brightener (stronger aura, burns `bright_burn` as long) and an extender
+# (burns `long_burn` as long). String dipped in molten wax starts a candle; each later dip adds a layer (a measure of wax)
+# once the last has cooled (`cool_ticks`; dipped too soon the layer slides off and is lost), up to `max_dips` layers.
+# The Aura Candle burns for the sum of its layers. Lit, it pulses every `pulse_ticks` (as a beacon does) over `radius`
+# blocks (by layers), giving players within it its scents' effects for `effect_ticks`. A candle layered with more than
+# `max_scents` scents is muddled: it burns for light but has no aura. Harvest gives radius^2 / `harvest_divisor` random
+# ticks to plants in the radius a pulse (twice as many when bright).
+CHANDLERY = {"pot": "wax_melting_pot", "pot_display": "Wax Melting Pot", "candle": "aura_candle", "candle_display": "Aura Candle",
+             "capacity": 8, "melt_ticks": 100, "set_ticks": 300, "cool_ticks": 40, "max_dips": 4, "max_scents": 2,
+             "pulse_ticks": 80, "effect_ticks": 180, "radius": [5, 8, 12, 16], "light": [8, 10, 12, 14],
+             "bright_burn": 0.5, "long_burn": 1.5, "harvest_divisor": 4,
+             "brightener": {"tag": "jugcraft:candle_brighteners", "items": ["minecraft:glowstone_dust"]},
+             "extender": {"tag": "jugcraft:candle_extenders", "items": ["minecraft:redstone"]},
+             "waxes": {"beeswax": {"display": "Beeswax", "items": ["minecraft:honeycomb"], "measures": 2, "burn_per_dip": 4800,
+                                   "color": 0xE8B84A},
+                       "tallow": {"display": "Tallow", "items": ["minecraft:rotten_flesh"], "measures": 1, "burn_per_dip": 2400,
+                                  "color": 0xEEE6D2}},
+             # Scents: the vanilla MobEffects field given to players, or a special aura (warding: hostile mobs in the radius
+             # are slowed and weakened; harvest: plants grow; revealing: other creatures glow).
+             "scents": {"swiftness": {"display": "Swiftness", "items": ["minecraft:sugar"], "effect": "SPEED", "color": 0x7CC8F0},
+                        "leaping": {"display": "Leaping", "items": ["minecraft:rabbit_foot"], "effect": "JUMP_BOOST", "color": 0x9CF26E},
+                        "moonlight": {"display": "Moonlight", "items": ["minecraft:golden_carrot"], "effect": "NIGHT_VISION",
+                                      "color": 0x5A78FF},
+                        "featherfall": {"display": "Featherfall", "items": ["minecraft:feather"], "effect": "SLOW_FALLING",
+                                        "color": 0xF2F2E8},
+                        "tide": {"display": "Tide", "items": ["minecraft:pufferfish"], "effect": "WATER_BREATHING", "color": 0x3FA9C8},
+                        "ember": {"display": "Ember", "items": ["minecraft:magma_cream"], "effect": "FIRE_RESISTANCE", "color": 0xFF6A1A},
+                        "diligence": {"display": "Diligence", "items": ["minecraft:amethyst_shard"], "effect": "HASTE", "color": 0xE8C84A},
+                        "mending": {"display": "Mending", "items": ["minecraft:ghast_tear"], "effect": "REGENERATION", "color": 0xF27ACB},
+                        "warding": {"display": "Warding", "items": ["minecraft:fermented_spider_eye"], "effect": None, "color": 0x7A3FCF},
+                        "harvest": {"display": "Harvest", "items": ["minecraft:bone_meal"], "effect": None, "color": 0x5FBF3A},
+                        "revealing": {"display": "Revealing", "items": ["minecraft:glow_ink_sac"], "effect": None, "color": 0x9FFFE8}}}
+
+
+def chandlery_blocks():
+    return [CHANDLERY["pot"], CHANDLERY["candle"]]
+
+
+def chandlery_items():
+    return chandlery_blocks()
+
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -1541,6 +1588,9 @@ SHAPED = [
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
     # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
     # (the ring) baked in; sugar round a red dye.
+    # Fall additions 1: a copper pot for melting wax.
+    {"id": "wax_melting_pot", "pattern": ["C C", "C C", "CCC"], "key": {"C": "minecraft:copper_ingot"},
+     "result": "wax_melting_pot", "count": 1, "category": "misc"},
     # Decorations batch 14: a black cape lined with red; linen strips and string; a black suit with bones and glowstone
     # for their glow; brown fur with leather and bone fangs; leather wings on sticks; a trunk of planks round a chest.
     {"id": "vampire_cape", "pattern": ["BRB", "BBB", "B B"], "key": {"B": "minecraft:black_wool", "R": "minecraft:red_wool"},
@@ -1656,7 +1706,7 @@ def all_blocks():
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
-            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks())
+            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks())
 
 
 def all_items():
@@ -1665,7 +1715,8 @@ def all_items():
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
-            + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items())
+            + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
+            + chandlery_items())
 
 
 def owns(entry_id):

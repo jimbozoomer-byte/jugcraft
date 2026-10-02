@@ -212,6 +212,10 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<HalloweenBonfireBlockEntity> BONFIRE_ENTITY;
 	public static BlockEntityType<BarmbrackBlockEntity> BARMBRACK_ENTITY;
 	public static BlockEntityType<CostumeTrunkBlockEntity> COSTUME_TRUNK_ENTITY;
+	public static BlockEntityType<WaxPotBlockEntity> WAX_POT_ENTITY;
+	public static BlockEntityType<AuraCandleBlockEntity> AURA_CANDLE_ENTITY;
+	/** What an Aura Candle is made of (its wax, layers, colour, scents, strength and burn). */
+	public static DataComponentType<CandleMix> CANDLE_MIX;
 	/** The outfits of decorations batch 14, worn on the head and drawn over the whole body (the client's CostumeLayer). */
 	public static final List<String> OUTFITS = List.of("vampire_cape", "mummy_wraps", "skeleton_suit", "werewolf_mask", "cat_ears_and_tail",
 			"bat_wings");
@@ -1143,6 +1147,21 @@ public final class JugcraftAgriculture {
 		COSTUME_TRUNK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("costume_trunk"),
 				FabricBlockEntityTypeBuilder.create(CostumeTrunkBlockEntity::new, trunk).build());
 		registerItem("costume_trunk", props -> new BlockItem(trunk, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 1, the chandlery: the Wax Melting Pot and the Aura Candles dipped from it.
+		CANDLE_MIX = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("candle"),
+				DataComponentType.<CandleMix>builder().persistent(CandleMix.CODEC).networkSynchronized(CandleMix.STREAM_CODEC).build());
+		Block waxPot = registerBlock("wax_melting_pot", WaxPotBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(2.5F).sound(SoundType.COPPER).noOcclusion());
+		WAX_POT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("wax_melting_pot"),
+				FabricBlockEntityTypeBuilder.create(WaxPotBlockEntity::new, waxPot).build());
+		registerItem("wax_melting_pot", props -> new BlockItem(waxPot, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block candle = registerBlock("aura_candle", AuraCandleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(0.1F)
+				.sound(SoundType.CANDLE).noOcclusion().lightLevel(AuraCandleBlock::light).pushReaction(PushReaction.POPPED));
+		AURA_CANDLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("aura_candle"),
+				FabricBlockEntityTypeBuilder.create(AuraCandleBlockEntity::new, candle).build());
+		registerItem("aura_candle", props -> new AuraCandleItem(candle, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(16),
+				TOOL_TAB);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

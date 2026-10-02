@@ -868,4 +868,6 @@ def crop_textures():
     out.update(decor13_textures())
     from decor14_textures import decor14_textures  # and costumes
     out.update(decor14_textures())
+    from chandlery_textures import chandlery_textures  # and the chandlery
+    out.update(chandlery_textures())
     return out

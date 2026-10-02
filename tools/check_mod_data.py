@@ -776,6 +776,7 @@ def check_agriculture():
     check_decor12(java)
     check_decor13(java)
     check_decor14(java)
+    check_chandlery(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2097,6 +2098,65 @@ def check_decor14(java):
     for key in re.findall(r'MESSAGES \+ "([a-z_]+)"', java.get("CostumeTrunkBlock", "")):
         if f"message.jugcraft.{trunk['block']}.{key}" not in lang:
             err(f"Missing words for the trunk's {key}")
+
+
+def check_chandlery(java):
+    """The chandlery: Java matches tools/agriculture.py (the pot's capacity, melting, setting and cooling times, scents
+    and burn factors; the candle's layers, pulse, effect time, radii, light and harvest; each wax's measures, burn and
+    colour; each scent's effect and colour), the tags hold the items that melt, scent, brighten and extend, every block
+    state has its blockstate entry, and every message and tooltip has its words."""
+    ch = ag.CHANDLERY
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("WaxPotBlockEntity", "CAPACITY"): ch["capacity"], ("WaxPotBlockEntity", "MELT_TICKS"): ch["melt_ticks"],
+                ("WaxPotBlockEntity", "SET_TICKS"): ch["set_ticks"], ("WaxPotBlockEntity", "COOL_TICKS"): ch["cool_ticks"],
+                ("WaxPotBlockEntity", "MAX_SCENTS"): ch["max_scents"], ("WaxPotBlockEntity", "BRIGHT_BURN"): ch["bright_burn"],
+                ("WaxPotBlockEntity", "LONG_BURN"): ch["long_burn"], ("AuraCandleBlock", "MAX_DIPS"): ch["max_dips"],
+                ("AuraCandleBlock", "PULSE_TICKS"): ch["pulse_ticks"], ("AuraCandleBlock", "EFFECT_TICKS"): ch["effect_ticks"],
+                ("AuraCandleBlock", "HARVEST_DIVISOR"): ch["harvest_divisor"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    candle = java.get("AuraCandleBlock", "")
+    for name, key in (("RADIUS", "radius"), ("LIGHT", "light")):
+        match = re.search(rf"\b{name} = \{{([\d, ]+)\}};", candle)
+        if not match or [int(v) for v in match.group(1).split(",")] != ch[key]:
+            err(f"AuraCandleBlock.{name} differs from tools/agriculture.py {ch[key]}")
+    waxes = {name.lower(): (int(m), int(b), int(c, 16)) for name, m, b, c in
+             re.findall(r"\b([A-Z]+)\((\d+), (\d+), 0x([0-9A-F]{6})\)", java.get("CandleWax", ""))}
+    if waxes != {name: (info["measures"], info["burn_per_dip"], info["color"]) for name, info in ch["waxes"].items()}:
+        err(f"CandleWax {waxes} differs from tools/agriculture.py")
+    scents = {name.lower(): (None if effect == "null" else effect.split(".")[1], int(c, 16)) for name, effect, c in
+              re.findall(r"\b([A-Z]+)\((null|MobEffects\.[A-Z_]+), 0x([0-9A-F]{6})\)", java.get("CandleScent", ""))}
+    if scents != {name: (info["effect"], info["color"]) for name, info in ch["scents"].items()}:
+        err(f"CandleScent {scents} differs from tools/agriculture.py")
+
+    def tag(path):
+        return (load(DATA / "jugcraft" / "tags" / "item" / f"{path}.json") or {}).get("values")
+    for name, info in ch["waxes"].items():
+        if tag(f"candle_wax/{name}") != info["items"]:
+            err(f"Item tag jugcraft:candle_wax/{name} differs from tools/agriculture.py")
+    for name, info in ch["scents"].items():
+        if tag(f"candle_scents/{name}") != info["items"]:
+            err(f"Item tag jugcraft:candle_scents/{name} differs from tools/agriculture.py")
+    for kind in ("brightener", "extender"):
+        if tag(ch[kind]["tag"].split(":")[1]) != ch[kind]["items"]:
+            err(f"Item tag {ch[kind]['tag']} differs from tools/agriculture.py")
+
+    states = set((load(ASSETS / "blockstates" / f"{ch['candle']}.json") or {}).get("variants", {}))
+    if states != {f"dips={d},lit={lit}" for d in range(1, ch["max_dips"] + 1) for lit in ("false", "true")}:
+        err(f"{ch['candle']}: blockstate variants differ from its properties")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"message.jugcraft.{ch['pot']}.{k}" for k in re.findall(r'MESSAGES \+ "([a-z_]+)"', java.get("WaxPotBlock", ""))]
+    keys += [f"tooltip.jugcraft.{ch['candle']}.{k}" for k in re.findall(r'TOOLTIP \+ "([a-z_]+)"', java.get("AuraCandleItem", ""))]
+    keys += [f"item.jugcraft.{ch['candle']}.{k}" for k in ("plain", "one", "two", "muddled")]
+    keys += [f"candle_wax.jugcraft.{w}" for w in ch["waxes"]] + [f"candle_scent.jugcraft.{s}" for s in ch["scents"]]
+    for key in keys:
+        if key not in lang:
+            err(f"Missing words for {key}")
 
 
 def check_model_uvs():
