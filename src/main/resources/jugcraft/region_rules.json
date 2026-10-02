@@ -1272,5 +1272,309 @@
     ],
     "weirdness": 0,
     "biome": "jugcraft:flower_isle"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:badlands",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:cinder_barrens"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:eroded_badlands",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:cinder_barrens"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:mushroom_fields",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:elder_vale"
+  },
+  {
+    "layouts": [
+      0
+    ],
+    "replaces": "minecraft:snowy_plains",
+    "temperature": [
+      0,
+      0
+    ],
+    "humidity": [
+      0,
+      0
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:frostlight_garden"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:savanna_plateau",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:gilded_shrubland"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:flower_forest",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:glimmer_grove"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:dark_forest",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:gloomweald"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:dripstone_caves",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:glowcap_grotto"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:swamp",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:hallowed_bog"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:plains",
+    "temperature": [
+      3,
+      3
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:highsun_meadow"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:savanna",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:highsun_meadow"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:jungle",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:mycelial_jungle"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:bamboo_jungle",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:shrine_springs"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:snowy_plains",
+    "temperature": [
+      0,
+      0
+    ],
+    "humidity": [
+      0,
+      0
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:snowpetal_grove"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:dripstone_caves",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:spider_nest"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:dark_forest",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:starlit_wood"
+  },
+  {
+    "layouts": [
+      0
+    ],
+    "replaces": "minecraft:mushroom_fields",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:toadstool_field"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:mangrove_swamp",
+    "temperature": [
+      0,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:webwood"
+  },
+  {
+    "layouts": [
+      2
+    ],
+    "replaces": "minecraft:forest",
+    "temperature": [
+      3,
+      3
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:wild_greens"
   }
 ]

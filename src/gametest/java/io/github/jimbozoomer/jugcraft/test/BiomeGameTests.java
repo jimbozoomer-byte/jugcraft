@@ -345,6 +345,44 @@ public class BiomeGameTests {
 		});
 	}
 
+	/**
+	 * The wonders' plants (batch 7): glowcaps glow and stand on bare stone; the glimmerbloom glows and the frost iris
+	 * does not, both small flowers with potted forms; a patch of four snowpetals drops four.
+	 */
+	@GameTest
+	public void glowingPlantsWork(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Block glowcap = block("glowcap");
+		BlockPos stone = new BlockPos(1, 2, 1);
+		helper.setBlock(stone.below(), Blocks.STONE);
+		helper.assertTrue(glowcap.defaultBlockState().canSurvive(level, helper.absolutePos(stone)), "Glowcaps cannot stand on stone");
+		helper.setBlock(stone, glowcap);
+		helper.assertTrue(helper.getBlockState(stone).getLightEmission() == 10, "Glowcaps give light " + helper.getBlockState(stone).getLightEmission());
+		String[] flowers = {"glimmerbloom", "frost_iris"};
+		int[] light = {7, 0};
+		for (int i = 0; i < flowers.length; i++) {
+			BlockPos pos = new BlockPos(3 + i * 2, 2, 1);
+			helper.setBlock(pos.below(), Blocks.GRASS_BLOCK);
+			Block flower = block(flowers[i]);
+			helper.assertTrue(flower instanceof FlowerBlock, flowers[i] + " is not a flower");
+			helper.setBlock(pos, flower);
+			helper.assertTrue(helper.getBlockState(pos).getLightEmission() == light[i], flowers[i] + " gives light "
+					+ helper.getBlockState(pos).getLightEmission());
+			helper.assertTrue(block("potted_" + flowers[i]) instanceof FlowerPotBlock pot && pot.getPotted() == flower, "No potted " + flowers[i]);
+		}
+		BlockPos bed = new BlockPos(4, 2, 4);
+		helper.setBlock(bed.below(), Blocks.GRASS_BLOCK);
+		Block snowpetals = block("snowpetals");
+		helper.setBlock(bed, snowpetals.defaultBlockState().setValue(BlockStateProperties.FLOWER_AMOUNT, 4));
+		level.destroyBlock(helper.absolutePos(bed), true);
+		helper.runAfterDelay(2, () -> {
+			int petals = dropped(helper, snowpetals);
+			LOGGER.info("Glowing plants: glowcap light 10 on stone, glimmerbloom light 7; snowpetals of 4 dropped {}", petals);
+			helper.assertTrue(petals == 4, "A snowpetal patch of four dropped " + petals);
+			helper.succeed();
+		});
+	}
+
 	private static int dropped(GameTestHelper helper, Block block) {
 		AABB area = new AABB(helper.absolutePos(BlockPos.ZERO)).inflate(16);
 		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, area, entity -> entity.getItem().is(block.asItem()))

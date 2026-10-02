@@ -122,11 +122,35 @@ RULES = [
     rule([2], "beach", (2, 2), (0, 4), "dune_beach"),
     rule([2], "beach", (3, 3), (0, 4), "overgrown_beach"),
     rule([2], "mushroom_fields", (0, 4), (0, 4), "flower_isle"),
+    # Batch 7: wonders and caves. Rare or unused climates in each layout, and the dripstone caves below: damp grottoes in
+    # the wetland layout, spiders' nests in the wild one.
+    rule([1], "badlands", (0, 4), (0, 4), "cinder_barrens"),
+    rule([1], "eroded_badlands", (0, 4), (0, 4), "cinder_barrens"),
+    rule([1], "mushroom_fields", (0, 4), (0, 4), "elder_vale"),
+    rule([0], "snowy_plains", (0, 0), (0, 0), "frostlight_garden"),
+    rule([2], "savanna_plateau", (0, 4), (0, 4), "gilded_shrubland"),
+    rule([3], "flower_forest", (0, 4), (0, 4), "glimmer_grove"),
+    rule([3], "dark_forest", (0, 4), (0, 4), "gloomweald"),
+    rule([2], "dripstone_caves", (0, 4), (0, 4), "glowcap_grotto"),
+    rule([1], "swamp", (0, 4), (0, 4), "hallowed_bog"),
+    rule([2], "plains", (3, 3), (0, 4), "highsun_meadow"),
+    rule([2], "savanna", (0, 4), (0, 4), "highsun_meadow"),
+    rule([3], "jungle", (0, 4), (0, 4), "mycelial_jungle"),
+    rule([3], "bamboo_jungle", (0, 4), (0, 4), "shrine_springs"),
+    rule([3], "snowy_plains", (0, 0), (0, 0), "snowpetal_grove"),
+    rule([3], "dripstone_caves", (0, 4), (0, 4), "spider_nest"),
+    rule([1], "dark_forest", (0, 4), (0, 4), "starlit_wood"),
+    rule([0], "mushroom_fields", (0, 4), (0, 4), "toadstool_field"),
+    rule([1], "mangrove_swamp", (0, 4), (0, 4), "webwood"),
+    rule([2], "forest", (3, 3), (0, 4), "wild_greens"),
 ]
 
 # Trees from other features, given a placed feature ("<name>") that checks the given sapling-like block would survive.
 PLACED_TREES = {"chestnut_checked": ("jugcraft:chestnut", "jugcraft:chestnut_sapling"),
-                "azalea_tree_checked": ("minecraft:azalea_tree", "minecraft:azalea")}
+                "azalea_tree_checked": ("minecraft:azalea_tree", "minecraft:azalea"),
+                # Huge mushrooms as trees, on soil (where an oak sapling could stand).
+                "huge_red_mushroom_on_soil": ("minecraft:huge_red_mushroom", "minecraft:oak_sapling"),
+                "huge_brown_mushroom_on_soil": ("minecraft:huge_brown_mushroom", "minecraft:oak_sapling")}
 
 
 def rules_file():
@@ -280,10 +304,66 @@ EXTRAS = {
         "step": 10, "placement": [{"type": "minecraft:count", "count": 3}, {"type": "minecraft:in_square"},
                                   {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}]},
     "sea_oats": {"feature": "jugcraft:sea_oats", "step": 9, "patches": 2, "count": 24},
+    # Batch 7. Cave extras are placed like vanilla's lush caves': on cave floors (or under ceilings) found by scanning
+    # from random heights.
+    "dandelions": {"block": "minecraft:dandelion", "step": 9, "rarity": 2, "count": 24},
+    "lilacs": {"block": "minecraft:lilac", "properties": {"half": "lower"}, "step": 9, "rarity": 2, "count": 16},
+    "glimmerblooms": {"feature": "jugcraft:glimmerbloom", "step": 9, "rarity": 2, "count": 24},
+    "frost_irises": {"feature": "jugcraft:frost_iris", "step": 9, "patches": 2, "count": 24},
+    "snowpetals": {"feature": "jugcraft:snowpetals", "step": 9, "patches": 2, "count": 32},
+    "toadstools": {"feature": "minecraft:red_mushroom", "step": 9, "patches": 2, "count": 32},
+    "brown_toadstools": {"feature": "minecraft:brown_mushroom", "step": 9, "patches": 1, "count": 32},
+    "surface_glowcaps": {"feature": "jugcraft:glowcap", "step": 9, "rarity": 2, "count": 16},
+    "grotto_mud": {"configured": {"type": "minecraft:vegetation_patch", "depth": 1, "extra_bottom_block_chance": 0.0,
+                                  "extra_edge_column_chance": 0.3, "ground_state": {"id": "minecraft:mud"},
+                                  "replaceable": "#minecraft:moss_replaceable", "surface": "floor", "vegetation_chance": 0.25,
+                                  "vegetation_feature": {"feature": "jugcraft:glowcap", "placement": []}, "vertical_range": 5,
+                                  "xz_radius": {"type": "minecraft:uniform", "max_inclusive": 7, "min_inclusive": 4}},
+                   "step": 9, "placement": [{"type": "minecraft:count", "count": 60}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 256},
+                                                     "min_inclusive": {"above_bottom": 0}}},
+        {"type": "minecraft:environment_scan", "allowed_search_condition": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+         "direction_of_search": "down", "max_steps": 12, "target_condition": {"type": "minecraft:solid"}},
+        {"type": "minecraft:offset", "x": 0, "y": 1, "z": 0}, {"type": "minecraft:biome"}]},
+    "grotto_moss": {"feature": "minecraft:moss_patch", "step": 9, "placement": [{"type": "minecraft:count", "count": 30}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 256},
+                                                     "min_inclusive": {"above_bottom": 0}}},
+        {"type": "minecraft:environment_scan", "allowed_search_condition": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+         "direction_of_search": "down", "max_steps": 12, "target_condition": {"type": "minecraft:solid"}},
+        {"type": "minecraft:offset", "x": 0, "y": 1, "z": 0}, {"type": "minecraft:biome"}]},
+    "grotto_glowcaps": {"feature": "jugcraft:glowcap", "step": 9, "placement": [{"type": "minecraft:count", "count": 120}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 256},
+                                                     "min_inclusive": {"above_bottom": 0}}},
+        {"type": "minecraft:environment_scan", "allowed_search_condition": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+         "direction_of_search": "down", "max_steps": 12, "target_condition": {"type": "minecraft:solid"}},
+        {"type": "minecraft:offset", "x": 0, "y": 1, "z": 0}, {"type": "minecraft:biome"}]},
+    "cave_cobwebs": {"configured": {"type": "minecraft:simple_block", "to_place": {"id": "minecraft:cobweb"}},
+                     "step": 9, "placement": [{"type": "minecraft:count", "count": 100}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 256},
+                                                     "min_inclusive": {"above_bottom": 0}}},
+        {"type": "minecraft:environment_scan", "allowed_search_condition": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+         "direction_of_search": "up", "max_steps": 12, "target_condition": {"type": "minecraft:solid"}},
+        {"type": "minecraft:offset", "x": 0, "y": -1, "z": 0}, {"type": "minecraft:biome"}]},
+    "floor_cobwebs": {"feature": "jugcraft:cave_cobwebs", "step": 9, "placement": [{"type": "minecraft:count", "count": 40}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "max_inclusive": {"absolute": 256},
+                                                     "min_inclusive": {"above_bottom": 0}}},
+        {"type": "minecraft:environment_scan", "allowed_search_condition": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+         "direction_of_search": "down", "max_steps": 12, "target_condition": {"type": "minecraft:solid"}},
+        {"type": "minecraft:offset", "x": 0, "y": 1, "z": 0}, {"type": "minecraft:biome"}]},
+    # Cobwebs hung in the trees: inside crowns, just under leaves.
+    "tree_cobwebs": {"feature": "jugcraft:cave_cobwebs", "step": 9, "placement": [
+        {"type": "minecraft:count", "count": 24}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"},
+        {"type": "minecraft:offset", "x": 0, "y": {"type": "minecraft:uniform", "max_inclusive": -2, "min_inclusive": -6}, "z": 0},
+        {"type": "minecraft:biome"},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
+            {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+            {"type": "minecraft:matching_block_tag", "tag": "minecraft:leaves", "offset": [0, 1, 0]}]}}]},
 }
 
 # Each biome: its base, climate values, trees (count: [usual, sometimes]; default and weighted picks of placed
-# features; None: no trees), base features it drops or swaps, extras it adds, mob changes, tags, and seasons.
+# features; None: no trees), base features it drops or swaps, extras it adds, mob changes ("creatures" and "monsters":
+# [entity, weight, min, max] lists replacing the base's; [] for none), tags, and seasons.
 # "seasons": in #jugcraft:has_seasons and #jugcraft:has_winter_snow (four-season biomes; not the frozen ones);
 # "winter_snow": False keeps a seasonal biome out of #jugcraft:has_winter_snow (mild winters).
 BIOMES = {
@@ -871,6 +951,195 @@ BIOMES = {
         "extras": ["field_sunflowers", "meadow_flowers", "hydrangeas", "poppies", "tall_grass_dense"],
         "creatures": [["minecraft:chicken", 10, 2, 4], ["minecraft:rabbit", 6, 2, 3], ["minecraft:sheep", 8, 2, 4]],
         "tags": ["c:is_floral"],
+    },
+    # ---------------------------------------------------------------- batch 7: wonders and caves
+    # A burnt-out waste of ash-grey tuff and gravel, smouldering with magma, its water blood-red; lava pools, ash in
+    # the air; no animals.
+    "cinder_barrens": {
+        "display": "Cinder Barrens", "base": "badlands", "temperature": 2.0, "downfall": 0.0, "seasons": False, "precipitation": False,
+        "effects": {"grass_color": "#6a5e4e", "foliage_color": "#5e5446", "water_color": "#8a1a1a"},
+        "attributes": {"minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:white_ash"}, "probability": 0.015}],
+                                                               "modifier": "append"},
+                       "minecraft:visual/fog_color": "#7a6e66", "minecraft:visual/water_fog_color": "#4a0a0a"},
+        "surface": {"floor": "minecraft:tuff", "under": "minecraft:tuff",
+                    "patches": [[-0.05, 0.05, "minecraft:magma_block"], [0.25, 0.45, "minecraft:gravel"], [-0.45, -0.3, "minecraft:coarse_dirt"]]},
+        "trees": None,
+        "extras": ["lava_pools", "patch_dead_bush"],
+        "creatures": [],
+        "tags": ["c:is_hot", "c:is_dry", "c:is_dead"],
+    },
+    # A vale of the old world: bright, simple green grass, plain oaks, poppies and dandelions, under a clear blue sky;
+    # an island where no monsters spawn.
+    "elder_vale": {
+        "display": "Elder Vale", "base": "mushroom_fields", "temperature": 0.7, "downfall": 0.8, "seasons": False,
+        "effects": {"grass_color": "#5ec43a", "foliage_color": "#4cb42e", "water_color": "#2c46d8"},
+        "attributes": {"minecraft:visual/sky_color": "#9cbcff"},
+        "trees": {"count": [3, 4], "default": "minecraft:oak_checked", "picks": [["minecraft:fancy_oak_checked", 0.1]]},
+        "drop": ["minecraft:mushroom_island_vegetation", "minecraft:brown_mushroom_taiga", "minecraft:red_mushroom_taiga"],
+        "extras": ["poppies", "dandelions"],
+        "creatures": [["minecraft:pig", 10, 4, 4], ["minecraft:sheep", 12, 4, 4], ["minecraft:cow", 8, 4, 4], ["minecraft:chicken", 10, 4, 4]],
+        "tags": [],
+    },
+    # A frozen garden under a cold, shimmering sky: firs and birches, frost irises and glimmerblooms in the snow;
+    # no monsters spawn.
+    "frostlight_garden": {
+        "display": "Frostlight Garden", "base": "snowy_plains", "temperature": -0.3, "downfall": 0.5, "seasons": False,
+        "effects": {"grass_color": "#8fc8b0", "foliage_color": "#7ab8a0"},
+        "attributes": {"minecraft:visual/sky_color": "#86d6cc", "minecraft:visual/fog_color": "#c4ecf0"},
+        "trees": {"count": [3, 4], "default": "jugcraft:fir_checked", "picks": [["minecraft:birch_checked", 0.4]]},
+        "extras": ["frost_irises", "glimmerblooms"],
+        "creatures": [["minecraft:rabbit", 10, 2, 3], ["minecraft:fox", 6, 2, 4]],
+        "monsters": [],
+        "tags": ["c:is_snowy", "c:is_cold"],
+    },
+    # A shrubland gilded gold: golden grass and golden-leaved oak scrub, goldenrod and dry grass, little lakes.
+    "gilded_shrubland": {
+        "display": "Gilded Shrubland", "base": "savanna_plateau", "temperature": 1.0, "downfall": 0.4, "seasons": False,
+        "effects": {"grass_color": "#d4b84a", "foliage_color": "#d8b030"},
+        "trees": {"count": [3, 4], "default": "jugcraft:oak_bush_checked", "picks": []},
+        "extras": ["ponds", "goldenrod", "dry_grass"],
+        "tags": [],
+    },
+    # A grove of twilight magic: jacarandas, giant red mushrooms, glimmerblooms, alliums, lilacs and hydrangeas under
+    # pink air, with pink water; only witches spawn.
+    "glimmer_grove": {
+        "display": "Glimmer Grove", "base": "flower_forest", "temperature": 0.6, "downfall": 0.8, "seasons": False,
+        "effects": {"grass_color": "#8ad6a0", "foliage_color": "#7cc890", "water_color": "#e070c8"},
+        "attributes": {"minecraft:visual/sky_color": "#d4a4e0", "minecraft:visual/fog_color": "#e8b8e8",
+                       "minecraft:visual/water_fog_color": "#a0408c"},
+        "trees": {"count": [6, 7], "default": "jugcraft:jacaranda_checked", "picks": [
+            ["jugcraft:huge_red_mushroom_on_soil", 0.1], ["minecraft:oak_checked", 0.2]]},
+        "extras": ["glimmerblooms", "alliums", "lilacs", "hydrangeas"],
+        "monsters": [["minecraft:witch", 10, 1, 1]],
+        "tags": ["c:is_floral"],
+    },
+    # A gloomy weald of dark oaks, dead trees and giant mushrooms over leaf litter and toadstools, with dark purple
+    # pools.
+    "gloomweald": {
+        "display": "Gloomweald", "base": "dark_forest", "temperature": 0.5, "downfall": 0.8, "seasons": False,
+        "effects": {"grass_color": "#4a5a3a", "foliage_color": "#3e4c32", "water_color": "#3a2850"},
+        "attributes": {"minecraft:visual/sky_color": "#6a6478", "minecraft:visual/fog_color": "#4a4058",
+                       "minecraft:visual/water_fog_color": "#1e1428"},
+        "trees": {"count": [2, 3], "default": "jugcraft:dead_tree_checked", "picks": [["minecraft:spruce_checked", 0.3]]},
+        "extras": ["ponds", "leaf_litter", "toadstools", "brown_toadstools"],
+        "tags": [],
+    },
+    # A cave grotto: mud floors grown with glowcaps that light the dark, moss, glow lichen; no dripstone.
+    "glowcap_grotto": {
+        "display": "Glowcap Grotto", "base": "dripstone_caves", "temperature": 0.8, "downfall": 0.6, "seasons": False,
+        "trees": None,
+        "drop": ["minecraft:large_dripstone", "minecraft:dripstone_cluster", "minecraft:pointed_dripstone"],
+        "extras": ["grotto_mud", "grotto_moss", "grotto_glowcaps"],
+        "tags": [],
+    },
+    # A hallowed bog, pale and bright: willows and vine-hung oaks over pale grass, lilies of the valley and daisies,
+    # clear blue water; no monsters spawn.
+    "hallowed_bog": {
+        "display": "Hallowed Bog", "base": "swamp", "temperature": 0.7, "downfall": 0.9, "seasons": True,
+        "effects": {"grass_color": "#a8d890", "foliage_color": "#98c880", "grass_color_modifier": "none", "water_color": "#7fd0e8"},
+        "attributes": {"minecraft:visual/sky_color": "#a8c8ff", "minecraft:visual/water_fog_color": "#4aa0c0"},
+        "trees": {"count": [2, 3], "default": "jugcraft:willow_checked", "picks": [["jugcraft:tall_vine_oak_checked", 0.3]], "water_depth": 2},
+        "extras": ["lilies_of_the_valley", "oxeye_daisies", "lily_pads", "cattails"],
+        "monsters": [],
+        "tags": ["c:is_swamp", "c:is_wet"],
+    },
+    # A sunny meadow on rolling hills: golden-green grass, sunflowers, goldenrod and wildflowers, a few small oaks.
+    "highsun_meadow": {
+        "display": "Highsun Meadow", "base": "plains", "temperature": 0.95, "downfall": 0.5, "seasons": False,
+        "effects": {"grass_color": "#a8c84a", "foliage_color": "#98b840"},
+        "attributes": {"minecraft:visual/sky_color": "#8ec8ff", "minecraft:visual/fog_color": "#fff2c8"},
+        "trees": {"count": [0, 1], "default": "jugcraft:oak_bush_checked", "picks": []},
+        "extras": ["field_sunflowers", "goldenrod", "meadow_wildflowers", "tall_grass_dense"],
+        "tags": [],
+    },
+    # A jungle of giant mushrooms: huge red and brown mushrooms, jungle bushes and oaks over grass and mycelium,
+    # toadstools everywhere, spore-green air; mooshrooms.
+    "mycelial_jungle": {
+        "display": "Mycelial Jungle", "base": "jungle", "temperature": 0.9, "downfall": 0.9, "seasons": False,
+        "effects": {"grass_color": "#6aa048", "foliage_color": "#5a9440"},
+        "attributes": {"minecraft:visual/fog_color": "#a8c890", "minecraft:visual/sky_color": "#a4c8a0"},
+        "surface": {"floor": "minecraft:grass_block", "patches": [[-0.15, 0.15, "minecraft:mycelium"]]},
+        "trees": {"count": [10, 12], "default": "minecraft:jungle_bush", "picks": [
+            ["jugcraft:huge_red_mushroom_on_soil", 0.3], ["jugcraft:huge_brown_mushroom_on_soil", 0.15], ["minecraft:oak_checked", 0.15]]},
+        "extras": ["toadstools", "brown_toadstools"],
+        "creatures": [["minecraft:mooshroom", 8, 4, 8], ["minecraft:parrot", 20, 1, 2], ["minecraft:chicken", 10, 4, 4]],
+        "tags": ["c:is_tropical"],
+    },
+    # Shrine springs: great oaks two blocks wide among jungle bushes, warm pools banked with calcite, dark green grass.
+    "shrine_springs": {
+        "display": "Shrine Springs", "base": "jungle", "temperature": 0.95, "downfall": 0.9, "seasons": False,
+        "effects": {"grass_color": "#3a8a2a", "foliage_color": "#2f7a22", "water_color": "#3fbfc8"},
+        "trees": {"count": [2, 3], "default": "jugcraft:great_oak_checked", "picks": [
+            ["minecraft:jungle_bush", 0.3], ["minecraft:oak_checked", 0.2]]},
+        "extras": ["hot_pools", "ferns", "large_ferns"],
+        "tags": ["c:is_tropical"],
+    },
+    # A snowy grove of blossoming cherries and birches, snowpetals and clover, mossy boulders, snowflakes on the air.
+    "snowpetal_grove": {
+        "display": "Snowpetal Grove", "base": "snowy_plains", "temperature": -0.2, "downfall": 0.5, "seasons": False,
+        "effects": {"grass_color": "#9ac8a0", "foliage_color": "#8ab890"},
+        "attributes": {"minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:snowflake"}, "probability": 0.005}],
+                                                               "modifier": "append"}},
+        "trees": {"count": [3, 4], "default": "minecraft:cherry_checked", "picks": [["minecraft:birch_checked", 0.25]]},
+        "extras": ["tundra_rocks", "snowpetals", "clover"],
+        "creatures": [["minecraft:rabbit", 10, 2, 3], ["minecraft:fox", 6, 2, 4]],
+        "tags": ["c:is_snowy", "c:is_cold"],
+    },
+    # A cave of spiders: cobwebs strung from the ceilings and across the floors; spiders and cave spiders.
+    "spider_nest": {
+        "display": "Spider Nest", "base": "dripstone_caves", "temperature": 0.8, "downfall": 0.4, "seasons": False,
+        "trees": None,
+        "drop": ["minecraft:large_dripstone", "minecraft:dripstone_cluster", "minecraft:pointed_dripstone"],
+        "extras": ["cave_cobwebs", "floor_cobwebs"],
+        "monsters": [["minecraft:spider", 100, 2, 4], ["minecraft:cave_spider", 60, 1, 3], ["minecraft:skeleton", 40, 2, 4],
+                     ["minecraft:zombie", 40, 2, 4]],
+        "tags": [],
+    },
+    # A starlit wood of soaring birches and tall firs, glimmerblooms and lilies of the valley below, motes of light
+    # drifting under a twilight-blue sky.
+    "starlit_wood": {
+        "display": "Starlit Wood", "base": "birch_forest", "temperature": 0.6, "downfall": 0.7, "seasons": False,
+        "effects": {"grass_color": "#6ab89a", "foliage_color": "#5aa88a"},
+        "attributes": {"minecraft:visual/sky_color": "#5a6ab8", "minecraft:visual/fog_color": "#8a92c8",
+                       "minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:end_rod"}, "probability": 0.002}],
+                                                             "modifier": "append"}},
+        "trees": {"count": [8, 9], "default": "minecraft:birch_tall", "picks": [["jugcraft:tall_fir_checked", 0.25]]},
+        "extras": ["glimmerblooms", "lilies_of_the_valley"],
+        "tags": [],
+    },
+    # A field of toadstools: mycelium patched with grass, giant mushrooms, red and brown toadstools and glowcaps;
+    # mooshrooms, and no monsters, as on vanilla's mushroom islands.
+    "toadstool_field": {
+        "display": "Toadstool Field", "base": "mushroom_fields", "temperature": 0.9, "downfall": 1.0, "seasons": False,
+        "surface": {"floor": "minecraft:mycelium", "patches": [[-0.2, 0.2, "minecraft:grass_block"]]},
+        "trees": None,
+        "extras": ["toadstools", "brown_toadstools", "surface_glowcaps"],
+        "tags": ["c:is_mushroom"],
+    },
+    # A webwood: willows, dead trees and vine-hung oaks strung with cobwebs over a swampy floor, toadstools and
+    # cattails, grey air; spiders everywhere.
+    "webwood": {
+        "display": "Webwood", "base": "mangrove_swamp", "temperature": 0.8, "downfall": 0.9, "seasons": False,
+        "effects": {"grass_color": "#5a6a48", "foliage_color": "#4e5e40", "water_color": "#5a6a5a"},
+        "attributes": {"minecraft:visual/fog_color": "#9aa0a0"},
+        "trees": {"count": [6, 7], "default": "jugcraft:willow_checked", "picks": [
+            ["jugcraft:dead_tree_checked", 0.2], ["jugcraft:tall_vine_oak_checked", 0.2], ["minecraft:birch_checked", 0.1]]},
+        "extras": ["tree_cobwebs", "toadstools", "cattails"],
+        "monsters": [["minecraft:spider", 200, 2, 4], ["minecraft:zombie", 60, 2, 4], ["minecraft:skeleton", 60, 2, 4],
+                     ["minecraft:creeper", 60, 2, 4], ["minecraft:enderman", 10, 1, 4], ["minecraft:witch", 5, 1, 1]],
+        "tags": ["c:is_swamp", "c:is_wet"],
+    },
+    # Wild greens: a riot of tall grass, clover, ferns and wildflowers over swathes of coarse dirt; no trees; cattle,
+    # sheep and chickens.
+    "wild_greens": {
+        "display": "Wild Greens", "base": "forest", "temperature": 0.8, "downfall": 0.8, "seasons": True,
+        "effects": {"grass_color": "#6cbc44", "foliage_color": "#5cac38"},
+        "surface": {"floor": "minecraft:grass_block", "patches": [[-0.3, -0.05, "minecraft:coarse_dirt"]]},
+        "trees": None,
+        "extras": ["tall_grass_dense", "clover", "large_ferns", "field_flowers", "meadow_wildflowers"],
+        "creatures": [["minecraft:cow", 10, 4, 4], ["minecraft:sheep", 12, 4, 4], ["minecraft:chicken", 10, 4, 4]],
+        "untags": ["minecraft:is_forest"],
+        "tags": [],
     },
     # ---------------------------------------------------------------- batch 2: fields and meadows
     # Cool, flat land with teal grass, scattered small spruces and clumps of oak bush, and many flowers.

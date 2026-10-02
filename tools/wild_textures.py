@@ -632,6 +632,77 @@ def sea_oats(part):
     return c.img
 
 
+GLOWCAP = pal("1d5a6e", "2a8aa0", "3fbfd0", "79e6ee", "c4fbff")
+GLOWCAP_STEM = pal("8a9a8c", "b2c0b0", "d6e2d2")
+GLIMMER = pal("6a2a8a", "9a44c0", "c86ee6", "e6a4f6", "fbe0ff")
+IRIS = pal("2a4a8a", "3f6cbc", "6896e0", "a4c6f4", "e6f0ff")
+SNOWPETAL = pal("c6d0dc", "dfe6ee", "f2f6fa", "ffffff")
+
+
+def glowcap():
+    """Glowcaps: a cluster of slender, pale stalks under round caps that glow a cold blue-green."""
+    c = Canvas()
+    for x, top, r in ((5, 6, 2), (10, 4, 3), (8, 10, 1)):
+        c.line(x, 15, x, top + 1, GLOWCAP_STEM[1])
+        c.px(x + 1, 14, GLOWCAP_STEM[0])
+        for dx in range(-r, r + 1):
+            c.px(x + dx, top, GLOWCAP[2 if abs(dx) == r else 3])
+        for dx in range(-r + 1, r):
+            c.px(x + dx, top - 1, GLOWCAP[4 if dx == 0 else 3])
+        c.px(x, top + 1, GLOWCAP[1])
+    return c.img
+
+
+def glimmerbloom():
+    """Glimmerbloom: a fine stem bearing star-shaped violet flowers with bright, glinting hearts."""
+    c = Canvas()
+    c.line(8, 15, 8, 6, STEM[2])
+    c.line(8, 11, 4, 8, STEM[1])
+    c.line(8, 10, 12, 7, STEM[1])
+    for cx, cy in ((8, 4), (4, 7), (12, 6)):
+        for dx, dy in ((0, -2), (0, 2), (-2, 0), (2, 0)):
+            c.px(cx + dx, cy + dy, GLIMMER[2])
+        for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+            c.px(cx + dx, cy + dy, GLIMMER[3])
+        c.px(cx, cy, GLIMMER[4])
+    return c.img
+
+
+def frost_iris():
+    """Frost iris: sword-like grey-green leaves and an iris of pale icy blue, its falls veined darker."""
+    c = Canvas()
+    for x, lean in ((5, -1), (7, 0), (10, 1)):
+        c.line(x, 15, x + lean, 8, STEM[1])
+    c.line(8, 15, 8, 5, STEM[2])
+    for dx, dy, shade in ((0, -3, 4), (-1, -2, 3), (1, -2, 3), (0, -2, 4), (-2, 0, 2), (2, 0, 2), (-1, 0, 3), (1, 0, 3),
+                          (-2, 1, 1), (2, 1, 1), (0, -1, 3), (0, 0, 2)):
+        c.px(8 + dx, 5 + dy, IRIS[shade])
+    c.px(8, 4, GOLD[3])
+    return c.img
+
+
+def snowpetals():
+    """Snowpetals as a flowerbed sheet: four quarters, one clump each (vanilla's flowerbed layout), of small white
+    five-petalled flowers seen from above."""
+    rng = random.Random(491)
+    c = Canvas()
+    for qx, qy in ((0, 0), (0, 8), (8, 8), (8, 0)):
+        for cx, cy in ((qx + 2, qy + 2), (qx + 5, qy + 4), (qx + 3, qy + 6)):
+            for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):
+                c.px(cx + dx, cy + dy, SNOWPETAL[rng.choice((2, 3))])
+            c.px(cx, cy, GOLD[3])
+        c.px(qx + 6, qy + 1, STEM[3])
+        c.px(qx + 1, qy + 5, STEM[3])
+    return c.img
+
+
+def snowpetals_stem():
+    c = Canvas()
+    for y in range(4, 8):
+        c.px(0, y, STEM[2 if y % 2 else 1])
+    return c.img
+
+
 CATTAIL_LEAF = pal("2f4a20", "3e6229", "507a33", "679541")
 CATTAIL_HEAD = pal("3a2214", "53311c", "6b4226", "855533")
 WATERGRASS = pal("1c4a2a", "245e35", "2f7543", "3d8c52", "52a566")
@@ -703,6 +774,11 @@ def wild_textures():
     out[("block", "eucalyptus_sapling")] = eucalyptus_sapling()
     out[("block", "mahogany_leaves")] = mahogany_leaves(591)
     out[("block", "mahogany_sapling")] = mahogany_sapling()
+    out[("block", "glowcap")] = glowcap()
+    out[("block", "glimmerbloom")] = glimmerbloom()
+    out[("block", "frost_iris")] = frost_iris()
+    out[("block", "snowpetals")] = snowpetals()
+    out[("block", "snowpetals_stem")] = snowpetals_stem()
     out[("block", "sea_oats_bottom")] = sea_oats("bottom")
     out[("block", "sea_oats_top")] = sea_oats("top")
     out[("block", "hibiscus")] = hibiscus()

@@ -62,6 +62,8 @@ def biome(name):
     spawns = copy.deepcopy(base["spawns"])
     if "creatures" in info:
         spawns["creature"] = [spawn(entry) for entry in info["creatures"]]
+    if "monsters" in info:
+        spawns["monster"] = [spawn(entry) for entry in info["monsters"]]
     attributes = {"minecraft:gameplay/natural_mob_spawns": {"argument": {
         "spawn_costs": copy.deepcopy(base.get("spawn_costs", {})), "spawns_by_category": spawns}, "modifier": "overlay"}}
     if "sky_color" in base:

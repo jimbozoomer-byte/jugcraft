@@ -50,7 +50,10 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 			"lush_savanna", "outback", "oasis", "wasteland", "burnt_forest", "mediterranean_forest", "orchard",
 			"rainforest", "eucalyptus_forest", "tropics", "subtropics", "dense_forest", "redwood_forest", "temperate_rainforest", "woodland",
 			"volcano", "canyon", "highland", "basin", "shield", "karst_pinnacles", "hot_springs", "ice_sheet", "ocean_trench", "gravel_beach",
-			"dune_beach", "overgrown_beach", "flower_isle"};
+			"dune_beach", "overgrown_beach", "flower_isle",
+			"cinder_barrens", "elder_vale", "frostlight_garden", "gilded_shrubland", "glimmer_grove", "gloomweald", "hallowed_bog",
+			"highsun_meadow", "mycelial_jungle", "shrine_springs", "snowpetal_grove", "starlit_wood", "toadstool_field", "webwood",
+			"wild_greens"};
 	/** Seasonal leaves are counted within this many blocks (east-west and north-south) of each biome found. */
 	private static final int LEAF_REACH = 24;
 	/** How far below the top block of a column to look for leaves. */

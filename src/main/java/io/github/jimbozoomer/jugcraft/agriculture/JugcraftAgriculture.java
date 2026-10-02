@@ -940,7 +940,9 @@ public final class JugcraftAgriculture {
 					Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.getOrThrow(ResourceKey.create(Registries.MOB_EFFECT,
 							Identifier.parse(plant.get("effect").getAsString())));
 					float seconds = plant.get("seconds").getAsFloat();
-					Block flower = registerBlock(id, props -> new FlowerBlock(effect, seconds, props), BlockBehaviour.Properties.ofFullCopy(Blocks.DANDELION));
+					int light = plant.has("light") ? plant.get("light").getAsInt() : 0;
+					Block flower = registerBlock(id, props -> new FlowerBlock(effect, seconds, props), BlockBehaviour.Properties.ofFullCopy(Blocks.DANDELION)
+							.lightLevel(state -> light));
 					registerItem(id, props -> new BlockItem(flower, props), new Item.Properties().useBlockDescriptionPrefix()
 							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
 					registerBlock("potted_" + id, props -> new FlowerPotBlock(flower, props), BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_DANDELION));
@@ -963,6 +965,14 @@ public final class JugcraftAgriculture {
 					registerItem(id, props -> new DoubleHighBlockItem(tall, props), new Item.Properties().useBlockDescriptionPrefix()
 							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
 					yield tall;
+				}
+				case "glow_plant" -> {
+					int light = plant.get("light").getAsInt();
+					Block glow = registerBlock(id, GlowPlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM)
+							.lightLevel(state -> light));
+					registerItem(id, props -> new BlockItem(glow, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					yield glow;
 				}
 				case "dune_plant" -> {
 					Block tall = registerBlock(id, DunePlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS));

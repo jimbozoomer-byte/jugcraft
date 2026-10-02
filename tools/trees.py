@@ -107,6 +107,12 @@ SHAPES = {
                    "trunk": {"type": "bending", "base_height": 3, "height_rand_a": 1, "min_height_for_leaves": 2,
                              "bend_length": [1, 1]},
                    "foliage": {"type": "acacia", "radius": 1, "offset": 0}},
+    # A great oak: a trunk two blocks wide under a huge, round crown (vanilla oak wood, which no sapling grows this
+    # way), the Shrine Springs' sacred trees.
+    "great_oak": {"wood": "minecraft:oak",
+                  "trunk": {"type": "giant", "base_height": 10, "height_rand_a": 3, "height_rand_b": 3},
+                  "foliage": {"type": "blob", "radius": 4, "offset": 0, "height": 5},
+                  "decorators": [{"type": "minecraft:leave_vine", "probability": 0.15}]},
     # A spruce bush: one spruce log in a ball of needles, the scrub of rocky mountainsides (vanilla spruce wood).
     "spruce_bush": {"wood": "minecraft:spruce",
                     "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},

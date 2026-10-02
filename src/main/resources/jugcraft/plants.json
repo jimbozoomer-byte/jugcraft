@@ -56,5 +56,27 @@
   {
     "id": "sea_oats",
     "kind": "dune_plant"
+  },
+  {
+    "id": "glowcap",
+    "kind": "glow_plant",
+    "light": 10
+  },
+  {
+    "id": "glimmerbloom",
+    "kind": "flower",
+    "effect": "minecraft:glowing",
+    "seconds": 8.0,
+    "light": 7
+  },
+  {
+    "id": "frost_iris",
+    "kind": "flower",
+    "effect": "minecraft:slow_falling",
+    "seconds": 4.0
+  },
+  {
+    "id": "snowpetals",
+    "kind": "flowerbed"
   }
 ]
