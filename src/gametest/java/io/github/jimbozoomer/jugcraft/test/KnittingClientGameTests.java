@@ -131,9 +131,9 @@ public class KnittingClientGameTests implements FabricClientGameTest {
 		}
 		// Beside the wheels, three stands in knitwear before a campfire (behind them, so its smoke rises clear of them).
 		level.setBlock(new BlockPos(x + 11, y, z - 5), Blocks.CAMPFIRE.defaultBlockState(), Block.UPDATE_ALL);
-		stand(level, x + 9.5, y, z - 3.5, 200.0F, Knitwear.BEANIE, Knitting.UNDYED, Knitwear.PUMPKIN_SWEATER, Knitting.UNDYED, Knitwear.SOCKS,
+		stand(level, x + 9.5, y, z - 3.5, 20.0F, Knitwear.BEANIE, Knitting.UNDYED, Knitwear.PUMPKIN_SWEATER, Knitting.UNDYED, Knitwear.SOCKS,
 				Knitting.UNDYED);
-		stand(level, x + 11.5, y, z - 3.0, 180.0F, Knitwear.BEANIE, 0x3C8A2E, Knitwear.STRIPED_SWEATER, 0xB02E26);
-		stand(level, x + 13.5, y, z - 3.5, 160.0F, Knitwear.BAT_SWEATER, 0xE8761C, Knitwear.SOCKS, 0x1D1D21);
+		stand(level, x + 11.5, y, z - 3.0, 0.0F, Knitwear.BEANIE, 0x3C8A2E, Knitwear.STRIPED_SWEATER, 0xB02E26);
+		stand(level, x + 13.5, y, z - 3.5, -20.0F, Knitwear.BAT_SWEATER, 0xE8761C, Knitwear.SOCKS, 0x1D1D21);
 	}
 }
