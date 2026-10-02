@@ -1463,6 +1463,9 @@ public class JugcraftGameTests {
 	@GameTest
 	public void powerBowFiresOnCharge(GameTestHelper helper) {
 		ServerPlayer player = miner(helper, charged(JugcraftGear.POWER_BOW));
+		// Stand inside the test area, where the chunk is loaded, so the arrow is added to the world.
+		Vec3 at = helper.absoluteVec(new Vec3(2.5, 1.0, 2.5));
+		player.setPos(at.x, at.y, at.z);
 		ItemStack bow = player.getMainHandItem();
 		int drawn = bow.getUseDuration(player) - 20;
 		helper.assertTrue(JugcraftGear.POWER_BOW.releaseUsing(bow, helper.getLevel(), player, drawn), "The charged bow did not fire");
