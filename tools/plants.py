@@ -6,6 +6,7 @@ Each plant is registered alike from the generated /jugcraft/plants.json (agricul
 - "tall_flower": a two-block flower (TallFlowerBlock, like the lilac); bone meal drops a copy; dye x2.
 - "flowerbed": ground cover of up to four clumps (agriculture/GroundCoverBlock, like pink petals).
 - "tall_plant": a two-block plant that is not a flower (DoublePlantBlock), dropping itself from its lower half.
+- "dune_plant": a tall plant that also stands on sand (agriculture/DunePlantBlock: wherever vanilla's dry grass can).
 - "water_plant": a plant under water (agriculture/WaterPlantBlock, like seagrass); only shears take it.
 - "surface": a plant floating on still water (agriculture/FloatingPlantBlock, like a lily pad); placed on water.
 Every plant composts, burns like vanilla flowers and follows the "biomes" feature switch for its recipes. Textures are
@@ -31,9 +32,11 @@ PLANTS = {
     # Batch 5: big trees and rainforests (the tropics and subtropics).
     "hibiscus": {"kind": "flower", "display": "Hibiscus", "dye": "pink", "effect": "minecraft:water_breathing", "seconds": 5.0},
     "hydrangea": {"kind": "tall_flower", "display": "Hydrangea", "dye": "light_blue"},
+    # Batch 6: mountains, coasts and volcanoes.
+    "sea_oats": {"kind": "dune_plant", "display": "Sea Oats"},
 }
-KINDS = ("flower", "tall_flower", "flowerbed", "tall_plant", "water_plant", "surface")
-TALL = ("tall_flower", "tall_plant")
+KINDS = ("flower", "tall_flower", "flowerbed", "tall_plant", "dune_plant", "water_plant", "surface")
+TALL = ("tall_flower", "tall_plant", "dune_plant")
 
 
 def potted(plant):

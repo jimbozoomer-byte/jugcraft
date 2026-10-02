@@ -964,6 +964,12 @@ public final class JugcraftAgriculture {
 							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
 					yield tall;
 				}
+				case "dune_plant" -> {
+					Block tall = registerBlock(id, DunePlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS));
+					registerItem(id, props -> new DoubleHighBlockItem(tall, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					yield tall;
+				}
 				case "water_plant" -> {
 					Block water = registerBlock(id, WaterPlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SEAGRASS));
 					registerItem(id, props -> new BlockItem(water, props), new Item.Properties().useBlockDescriptionPrefix()

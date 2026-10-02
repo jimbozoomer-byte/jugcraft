@@ -52,5 +52,9 @@
   {
     "id": "hydrangea",
     "kind": "tall_flower"
+  },
+  {
+    "id": "sea_oats",
+    "kind": "dune_plant"
   }
 ]

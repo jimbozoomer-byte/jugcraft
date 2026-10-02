@@ -323,6 +323,28 @@ public class BiomeGameTests {
 		});
 	}
 
+	/** Sea oats (batch 6) stand on sand as well as soil, but not on stone; they take two blocks and drop one. */
+	@GameTest
+	public void seaOatsGrowOnSand(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Block oats = block("sea_oats");
+		BlockPos sand = new BlockPos(1, 2, 1);
+		helper.setBlock(sand.below(), Blocks.SAND);
+		helper.assertTrue(oats.defaultBlockState().canSurvive(level, helper.absolutePos(sand)), "Sea oats cannot stand on sand");
+		BlockPos stone = new BlockPos(3, 2, 1);
+		helper.setBlock(stone.below(), Blocks.STONE);
+		helper.assertFalse(oats.defaultBlockState().canSurvive(level, helper.absolutePos(stone)), "Sea oats stand on stone");
+		DoublePlantBlock.placeAt(level, oats.defaultBlockState(), helper.absolutePos(sand), Block.UPDATE_ALL);
+		helper.assertBlockPresent(oats, sand.above());
+		level.destroyBlock(helper.absolutePos(sand), true);
+		helper.runAfterDelay(2, () -> {
+			int drops = dropped(helper, oats);
+			LOGGER.info("Sea oats: on sand, not on stone; broken, dropped {}", drops);
+			helper.assertTrue(drops == 1, "Sea oats dropped " + drops);
+			helper.succeed();
+		});
+	}
+
 	private static int dropped(GameTestHelper helper, Block block) {
 		AABB area = new AABB(helper.absolutePos(BlockPos.ZERO)).inflate(16);
 		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, area, entity -> entity.getItem().is(block.asItem()))

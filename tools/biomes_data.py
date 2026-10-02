@@ -154,7 +154,10 @@ OVERWORLD_MATERIAL_RULE = {"type": "minecraft:sequence", "sequence": [
 
 
 def material(block):
-    """A block result, or a named vanilla rule ("rule:minecraft:overworld/sand_or_sandstone_if_ceiling")."""
+    """A block result, a named vanilla rule ("rule:minecraft:overworld/sand_or_sandstone_if_ceiling"), or a rule written
+    out ({"type": "minecraft:bandlands"}, vanilla's badlands bands)."""
+    if isinstance(block, dict):
+        return block
     if block.startswith("rule:"):
         return block.removeprefix("rule:")
     return {"type": "minecraft:block", "result_state": block}

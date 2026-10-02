@@ -105,8 +105,8 @@ def loot(out, write):
 def tags(tags):
     for plant, info in pl.PLANTS.items():
         kind = info["kind"]
-        if kind in ("tall_plant", "water_plant", "surface"):
-            if kind == "tall_plant":
+        if kind in ("tall_plant", "dune_plant", "water_plant", "surface"):
+            if kind in ("tall_plant", "dune_plant"):
                 tags.add("block", "minecraft:replaceable_by_trees", rid(plant))
                 tags.add("block", "minecraft:sword_efficient", rid(plant))
             continue

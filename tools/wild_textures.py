@@ -607,6 +607,31 @@ def hydrangea(part):
     return c.img
 
 
+SEA_OATS = pal("6f7a3c", "8a9548", "a5ad5a", "c2c070")
+OAT_HEADS = pal("8a6a2a", "a8843a", "c6a04e", "dcbc6a")
+
+
+def sea_oats(part):
+    """Sea oats: tall, pale green-gold grass blades (bottom), topped by stalks hung with flat, golden seed heads (top)."""
+    rng = random.Random({"bottom": 481, "top": 483}[part])
+    c = Canvas()
+    if part == "bottom":
+        for x in (2, 4, 6, 8, 10, 12, 14):
+            lean = rng.choice((-1, 0, 1))
+            c.line(x, 15, x + lean, rng.randrange(0, 4), SEA_OATS[x % 3])
+        return c.img
+    for x, top in ((4, 2), (8, 1), (12, 3)):
+        c.line(x, 15, x, top, SEA_OATS[1])
+        for k in range(5):
+            y = top + 1 + k * 2
+            side = -1 if k % 2 else 1
+            c.px(x + side, y, OAT_HEADS[2 + k % 2])
+            c.px(x + side * 2, y + 1, OAT_HEADS[1])
+    for x in (2, 6, 10, 14):
+        c.line(x, 15, x + rng.choice((-1, 1)), 9 + rng.randrange(0, 4), SEA_OATS[2])
+    return c.img
+
+
 CATTAIL_LEAF = pal("2f4a20", "3e6229", "507a33", "679541")
 CATTAIL_HEAD = pal("3a2214", "53311c", "6b4226", "855533")
 WATERGRASS = pal("1c4a2a", "245e35", "2f7543", "3d8c52", "52a566")
@@ -678,6 +703,8 @@ def wild_textures():
     out[("block", "eucalyptus_sapling")] = eucalyptus_sapling()
     out[("block", "mahogany_leaves")] = mahogany_leaves(591)
     out[("block", "mahogany_sapling")] = mahogany_sapling()
+    out[("block", "sea_oats_bottom")] = sea_oats("bottom")
+    out[("block", "sea_oats_top")] = sea_oats("top")
     out[("block", "hibiscus")] = hibiscus()
     out[("block", "hydrangea_bottom")] = hydrangea("bottom")
     out[("block", "hydrangea_top")] = hydrangea("top")

@@ -78,7 +78,7 @@ SHAPES = {
     # (vanilla's giant trunk and mega pine crown, as for the giant spruce).
     "redwood": {"wood": "redwood", "sapling": True,
                 "trunk": {"type": "straight", "base_height": 12, "height_rand_a": 5},
-                "foliage": {"type": "spruce", "radius": [1, 2], "offset": [0, 1], "trunk_height": [5, 7]}},
+                "foliage": {"type": "spruce", "radius": [2, 3], "offset": [0, 1], "trunk_height": [4, 6]}},
     "giant_redwood": {"wood": "redwood", "giant": True,
                       "trunk": {"type": "giant", "base_height": 22, "height_rand_a": 6, "height_rand_b": 10},
                       "foliage": {"type": "mega_pine", "radius": 0, "offset": 0, "crown_height": [11, 15]},
@@ -107,6 +107,10 @@ SHAPES = {
                    "trunk": {"type": "bending", "base_height": 3, "height_rand_a": 1, "min_height_for_leaves": 2,
                              "bend_length": [1, 1]},
                    "foliage": {"type": "acacia", "radius": 1, "offset": 0}},
+    # A spruce bush: one spruce log in a ball of needles, the scrub of rocky mountainsides (vanilla spruce wood).
+    "spruce_bush": {"wood": "minecraft:spruce",
+                    "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},
+                    "foliage": {"type": "bush", "radius": 2, "offset": 1, "height": 2}},
     # A dead tree: a bare, branching trunk of grey dead wood (vanilla's fancy trunk with no leaves).
     "dead_tree": {"wood": "dead", "survives_as": "minecraft:oak_sapling",
                   "trunk": {"type": "fancy", "base_height": 5, "height_rand_a": 4},

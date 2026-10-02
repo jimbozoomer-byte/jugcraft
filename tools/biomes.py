@@ -104,6 +104,24 @@ RULES = [
     rule([0, 3], "old_growth_spruce_taiga", (0, 4), (0, 4), "temperate_rainforest"),
     rule([0], "flower_forest", (0, 4), (0, 4), "woodland"),
     rule([0], "sunflower_plains", (0, 4), (0, 4), "woodland"),
+    # Batch 6: mountains, coasts and volcanoes. The wild layout's mountains and windswept hills; the wetland layout's
+    # beaches and mushroom islands; the frozen and deep seas in both.
+    rule([3], "stony_peaks", (0, 4), (0, 4), "volcano"),
+    rule([3], "windswept_savanna", (0, 4), (0, 4), "volcano"),
+    rule([3], "wooded_badlands", (0, 4), (0, 4), "canyon"),
+    rule([3], "windswept_hills", (0, 4), (0, 4), "highland"),
+    rule([3], "windswept_gravelly_hills", (0, 4), (0, 4), "basin"),
+    rule([3], "windswept_forest", (0, 4), (0, 4), "shield"),
+    rule([3], "jagged_peaks", (0, 4), (0, 4), "karst_pinnacles"),
+    rule([3], "grove", (0, 4), (0, 4), "hot_springs"),
+    rule([2, 3], "frozen_ocean", (0, 4), (0, 4), "ice_sheet"),
+    rule([2, 3], "deep_frozen_ocean", (0, 4), (0, 4), "ice_sheet"),
+    rule([2, 3], "deep_ocean", (0, 4), (0, 4), "ocean_trench"),
+    rule([2, 3], "deep_cold_ocean", (0, 4), (0, 4), "ocean_trench"),
+    rule([2], "beach", (1, 1), (0, 4), "gravel_beach"),
+    rule([2], "beach", (2, 2), (0, 4), "dune_beach"),
+    rule([2], "beach", (3, 3), (0, 4), "overgrown_beach"),
+    rule([2], "mushroom_fields", (0, 4), (0, 4), "flower_isle"),
 ]
 
 # Trees from other features, given a placed feature ("<name>") that checks the given sapling-like block would survive.
@@ -223,6 +241,45 @@ EXTRAS = {
         {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}]},
     "hibiscus": {"feature": "jugcraft:hibiscus", "step": 9, "patches": 2, "count": 32},
     "hydrangeas": {"feature": "jugcraft:hydrangea", "step": 9, "rarity": 2, "count": 24},
+    # Batch 6.
+    "lava_pools": {"configured": {"type": "minecraft:lake", "barrier": {"id": "minecraft:blackstone"},
+                                  "can_place_feature": {"type": "minecraft:true"},
+                                  "can_replace_with_air_or_fluid": {"type": "minecraft:not", "predicate": {
+                                      "type": "minecraft:matching_block_tag", "tag": "minecraft:features_cannot_replace"}},
+                                  "can_replace_with_barrier": {"type": "minecraft:not", "predicate": {
+                                      "type": "minecraft:matching_block_tag", "tag": "minecraft:lava_pool_stone_cannot_replace"}},
+                                  "fluid": {"id": "minecraft:lava", "properties": {"level": "0"}}},
+                   "step": 1, "placement": [{"type": "minecraft:rarity_filter", "chance": 3}, {"type": "minecraft:in_square"},
+                                            {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"}, {"type": "minecraft:biome"}]},
+    "canyon_lava_pools": {"feature": "minecraft:lake_lava", "step": 1, "placement": [
+        {"type": "minecraft:rarity_filter", "chance": 6}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"}, {"type": "minecraft:biome"}]},
+    "hot_pools": {"configured": {"type": "minecraft:lake", "barrier": {"id": "minecraft:calcite"},
+                                 "can_place_feature": {"type": "minecraft:true"},
+                                 "can_replace_with_air_or_fluid": {"type": "minecraft:not", "predicate": {
+                                     "type": "minecraft:matching_block_tag", "tag": "minecraft:features_cannot_replace"}},
+                                 "can_replace_with_barrier": {"type": "minecraft:not", "predicate": {
+                                     "type": "minecraft:matching_block_tag", "tag": "minecraft:lava_pool_stone_cannot_replace"}},
+                                 "fluid": {"id": "minecraft:water", "properties": {"level": "0"}}},
+                  "step": 1, "placement": [{"type": "minecraft:rarity_filter", "chance": 2}, {"type": "minecraft:in_square"},
+                                           {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"}, {"type": "minecraft:biome"}]},
+    "basalt_spires": {"configured": {"type": "minecraft:block_column", "allowed_placement": {
+        "type": "minecraft:matching_block_tag", "tag": "minecraft:air"}, "direction": "up", "layers": [
+        {"height": {"type": "minecraft:uniform", "max_inclusive": 5, "min_inclusive": 2},
+         "provider": {"id": "minecraft:basalt", "properties": {"axis": "y"}}}], "prioritize_tip": False},
+        "step": 9, "rarity": 2, "count": 4, "on": ["minecraft:blackstone", "minecraft:basalt", "minecraft:tuff"]},
+    "coal_outcrops": {"configured": {"type": "minecraft:disk", "half_height": 1, "radius": {
+        "type": "minecraft:uniform", "max_inclusive": 2, "min_inclusive": 1}, "state_provider": {"id": "minecraft:coal_ore"},
+        "target": {"type": "minecraft:matching_blocks", "blocks": ["minecraft:stone", "minecraft:andesite"]}},
+        "step": 6, "placement": [{"type": "minecraft:rarity_filter", "chance": 2}, {"type": "minecraft:in_square"},
+                                 {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR_WG"}, {"type": "minecraft:biome"}]},
+    # Floes of packed ice in the frozen sea, after vanilla freezes its top (step 10).
+    "ice_floes": {"configured": {"type": "minecraft:disk", "half_height": 1, "radius": {
+        "type": "minecraft:uniform", "max_inclusive": 7, "min_inclusive": 3}, "state_provider": {"id": "minecraft:packed_ice"},
+        "target": {"type": "minecraft:matching_blocks", "blocks": ["minecraft:ice", "minecraft:water"]}},
+        "step": 10, "placement": [{"type": "minecraft:count", "count": 3}, {"type": "minecraft:in_square"},
+                                  {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}]},
+    "sea_oats": {"feature": "jugcraft:sea_oats", "step": 9, "patches": 2, "count": 24},
 }
 
 # Each biome: its base, climate values, trees (count: [usual, sometimes]; default and weighted picks of placed
@@ -675,6 +732,145 @@ BIOMES = {
             ["minecraft:fancy_oak_leaf_litter", 0.25], ["jugcraft:oak_bush_checked", 0.1], ["minecraft:fallen_oak_tree", 0.03]]},
         "extras": ["leaf_litter", "berry_bushes", "oxeye_daisies", "poppies"],
         "tags": ["minecraft:has_structure/village_plains", "minecraft:has_structure/woodland_mansion"],
+    },
+    # ---------------------------------------------------------------- batch 6: mountains, coasts and volcanoes
+    # A volcano: blackstone and basalt slopes cracked with magma, pools of lava, basalt spires, ash in the air; no
+    # animals. Its windswept, shattered foothills are volcanic too.
+    "volcano": {
+        "display": "Volcano", "base": "stony_peaks", "temperature": 2.0, "downfall": 0.0, "seasons": False, "precipitation": False,
+        "effects": {"grass_color": "#6d5f45", "foliage_color": "#625840", "water_color": "#5a6a70"},
+        "attributes": {"minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:white_ash"}, "probability": 0.02}],
+                                                               "modifier": "append"},
+                       "minecraft:visual/fog_color": "#6e625a", "minecraft:visual/sky_color": "#8c8a96"},
+        "surface": {"floor": "minecraft:blackstone", "under": "minecraft:basalt",
+                    "patches": [[-0.06, 0.06, "minecraft:magma_block"], [0.3, 0.6, "minecraft:basalt"], [-0.6, -0.35, "minecraft:tuff"]]},
+        "trees": None,
+        "drop": ["minecraft:freeze_top_layer"],
+        "extras": ["lava_pools", "basalt_spires"],
+        "creatures": [],
+        "tags": ["c:is_hot", "c:is_dry", "c:is_mountain"],
+    },
+    # A canyon: cliffs banded in terracotta (vanilla's badlands bands) with grassy ledges, pines and lava pools.
+    "canyon": {
+        "display": "Canyon", "base": "wooded_badlands", "temperature": 1.4, "downfall": 0.3, "seasons": False,
+        "effects": {"grass_color": "#8f9a50", "foliage_color": "#7f8c48"},
+        "surface": {"floor": {"type": "minecraft:bandlands"}, "under": {"type": "minecraft:bandlands"},
+                    "patches": [[-0.25, 0.1, "minecraft:grass_block"], [0.35, 0.5, "minecraft:coarse_dirt"]]},
+        "trees": {"count": [2, 3], "default": "minecraft:pine_checked", "picks": [["jugcraft:spruce_bush_checked", 0.3]]},
+        "extras": ["canyon_lava_pools"],
+        "tags": ["c:is_hot", "c:is_dry"],
+    },
+    # A high, treeless grassland of rolling hills: tall grass, coarse dirt, gravel and stone, mossy boulders; sheep
+    # and cattle.
+    "highland": {
+        "display": "Highland", "base": "windswept_hills", "temperature": 0.4, "downfall": 0.6, "seasons": True,
+        "effects": {"grass_color": "#80a65a", "foliage_color": "#6f9a4e"},
+        "surface": {"floor": "minecraft:grass_block",
+                    "patches": [[0.35, 0.45, "minecraft:coarse_dirt"], [-0.45, -0.38, "minecraft:gravel"], [0.6, 0.75, "minecraft:stone"]]},
+        "trees": None,
+        "extras": ["tundra_rocks", "tall_grass_dense"],
+        "creatures": [["minecraft:sheep", 12, 4, 4], ["minecraft:cow", 8, 4, 4], ["minecraft:rabbit", 4, 2, 3]],
+        "tags": [],
+    },
+    # A barren basin of gravel and bare stone among the hills, with dead bushes; no animals.
+    "basin": {
+        "display": "Basin", "base": "windswept_gravelly_hills", "temperature": 0.5, "downfall": 0.3, "seasons": False,
+        "effects": {"grass_color": "#8a9070", "foliage_color": "#7a8060"},
+        "surface": {"floor": "rule:minecraft:overworld/gravel_or_stone_if_ceiling", "under": "minecraft:gravel",
+                    "patches": [[-0.2, 0.0, "minecraft:stone"], [0.5, 0.6, "minecraft:andesite"]]},
+        "trees": None,
+        "extras": ["patch_dead_bush"],
+        "creatures": [],
+        "tags": ["c:is_dry"],
+    },
+    # A shield of old rock: humps of bare stone and andesite with seams of coal at the surface, among firs, pines,
+    # spruces and lakes.
+    "shield": {
+        "display": "Shield", "base": "windswept_forest", "temperature": 0.25, "downfall": 0.7, "seasons": True,
+        "surface": {"floor": "minecraft:grass_block", "patches": [[-0.12, 0.12, "minecraft:stone"], [0.45, 0.55, "minecraft:andesite"]]},
+        "trees": {"count": [6, 7], "default": "jugcraft:fir_checked", "picks": [
+            ["minecraft:pine_checked", 0.3], ["minecraft:spruce_checked", 0.2], ["minecraft:oak_checked", 0.1]]},
+        "extras": ["ponds", "coal_outcrops", "tundra_rocks"],
+        "tags": ["c:is_coniferous_tree"],
+    },
+    # Green karst pinnacles: steep peaks clothed in grass, pines and spruce scrub, with pale limestone (calcite)
+    # showing through, under a grey-green sky; pandas.
+    "karst_pinnacles": {
+        "display": "Karst Pinnacles", "base": "jagged_peaks", "temperature": 0.7, "downfall": 0.8, "seasons": False,
+        "effects": {"grass_color": "#5f9e62", "foliage_color": "#4f8f55"},
+        "attributes": {"minecraft:visual/sky_color": "#a3c4b5", "minecraft:visual/fog_color": "#b9d0c4"},
+        "surface": {"floor": "minecraft:grass_block", "under": "minecraft:dirt",
+                    "patches": [[-0.1, 0.1, "minecraft:calcite"], [0.4, 0.55, "minecraft:stone"]]},
+        "trees": {"count": [6, 8], "default": "minecraft:pine_checked", "picks": [["jugcraft:spruce_bush_checked", 0.35]]},
+        "creatures": [["minecraft:panda", 4, 1, 2]],
+        "tags": [],
+    },
+    # Hot springs among pines: warm, turquoise pools banked with calcite, blackstone showing through; trail ruins.
+    "hot_springs": {
+        "display": "Hot Springs", "base": "grove", "temperature": 0.4, "downfall": 0.8, "seasons": True,
+        "effects": {"grass_color": "#6f9e5a", "foliage_color": "#5f8f4c", "water_color": "#3fbfc8"},
+        "surface": {"floor": "minecraft:grass_block", "patches": [[-0.06, 0.06, "minecraft:calcite"], [0.5, 0.58, "minecraft:blackstone"]]},
+        "trees": {"count": [4, 5], "default": "minecraft:pine_checked", "picks": [["minecraft:spruce_checked", 0.3]]},
+        "extras": ["hot_pools", "ferns"],
+        "tags": ["minecraft:has_structure/trail_ruins"],
+    },
+    # A frozen sea under a sheet of ice and floes of packed ice; polar bears.
+    "ice_sheet": {
+        "display": "Ice Sheet", "base": "frozen_ocean", "temperature": -0.7, "downfall": 0.4, "seasons": False,
+        "effects": {"water_color": "#2f3fa8"},
+        "trees": None,
+        "extras": ["ice_floes"],
+        "creatures": [["minecraft:polar_bear", 1, 1, 2]],
+        "tags": [],
+    },
+    # The deepest seas: a dark floor of deepslate, gravel and obsidian under dim, inky water.
+    "ocean_trench": {
+        "display": "Ocean Trench", "base": "deep_ocean", "temperature": 0.5, "downfall": 0.5, "seasons": False,
+        "effects": {"water_color": "#1e3a80"},
+        "attributes": {"minecraft:visual/water_fog_color": "#030d26",
+                       "minecraft:visual/water_fog_end_distance": {"argument": 0.6, "modifier": "multiply"}},
+        "surface": {"floor": "minecraft:deepslate", "under": "minecraft:deepslate",
+                    "patches": [[-0.05, 0.05, "minecraft:obsidian"], [0.3, 0.5, "minecraft:gravel"]]},
+        "trees": None,
+        "tags": [],
+    },
+    # A cool shore of gravel, with no grass and no animals; shipwrecks wash up as on any beach.
+    "gravel_beach": {
+        "display": "Gravel Beach", "base": "beach", "temperature": 0.3, "downfall": 0.6, "seasons": False,
+        "surface": {"floor": "rule:minecraft:overworld/gravel_or_stone_if_ceiling", "under": "minecraft:gravel"},
+        "trees": None,
+        "creatures": [],
+        "tags": [],
+    },
+    # A sandy shore of dunes grown with dune grass and sea oats; no trees.
+    "dune_beach": {
+        "display": "Dune Beach", "base": "beach", "temperature": 0.8, "downfall": 0.4, "seasons": False,
+        "surface": {"floor": "rule:minecraft:overworld/sand_or_sandstone_if_ceiling", "under": "minecraft:sand"},
+        "trees": None,
+        "extras": ["dry_grass", "sea_oats"],
+        "tags": [],
+    },
+    # A warm shore overgrown with grass, oak scrub, tall grass and sea oats, sand showing between.
+    "overgrown_beach": {
+        "display": "Overgrown Beach", "base": "beach", "temperature": 0.9, "downfall": 0.6, "seasons": False,
+        "effects": {"grass_color": "#7cc04a", "foliage_color": "#68b03c"},
+        "surface": {"floor": "rule:minecraft:overworld/sand_or_sandstone_if_ceiling", "under": "minecraft:sand",
+                    "patches": [[-0.3, 0.3, "minecraft:grass_block"]]},
+        "trees": {"count": [1, 2], "default": "jugcraft:oak_bush_checked", "picks": []},
+        "extras": ["tall_grass_dense", "sea_oats"],
+        "tags": [],
+    },
+    # A peaceful island of flowers: rolling hills of grass, poppies, sunflowers and hydrangeas, oak scrub; no
+    # monsters spawn, as on vanilla's mushroom islands.
+    "flower_isle": {
+        "display": "Flower Isle", "base": "mushroom_fields", "temperature": 0.75, "downfall": 0.8, "seasons": True,
+        "winter_snow": False,
+        "effects": {"grass_color": "#6cd15a", "foliage_color": "#5cc04c"},
+        "trees": {"count": [1, 2], "default": "jugcraft:oak_bush_checked", "picks": []},
+        "drop": ["minecraft:mushroom_island_vegetation", "minecraft:brown_mushroom_taiga", "minecraft:red_mushroom_taiga"],
+        "extras": ["field_sunflowers", "meadow_flowers", "hydrangeas", "poppies", "tall_grass_dense"],
+        "creatures": [["minecraft:chicken", 10, 2, 4], ["minecraft:rabbit", 6, 2, 3], ["minecraft:sheep", 8, 2, 4]],
+        "tags": ["c:is_floral"],
     },
     # ---------------------------------------------------------------- batch 2: fields and meadows
     # Cool, flat land with teal grass, scattered small spruces and clumps of oak bush, and many flowers.

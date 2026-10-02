@@ -24,6 +24,7 @@ import alpine as al
 import biomes as bm
 import biomes_data
 import trees as tr
+import plants
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -578,6 +579,10 @@ def check_biomes():
     agriculture = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8")
     if f'TREE_DECORATOR_TYPE, Jugcraft.id("{tr.DECORATOR}")' not in agriculture:
         err(f"JugcraftAgriculture.java does not register the {tr.DECORATOR} tree decorator")
+    # Wild plants: Java registers every kind tools/plants.py uses.
+    for plant, info in plants.PLANTS.items():
+        if info["kind"] not in plants.KINDS or f'case "{info["kind"]}" ->' not in agriculture:
+            err(f"Wild plant {plant}: JugcraftAgriculture.registerWildPlants has no case for kind {info['kind']}")
     # Giant trees: four saplings in a square grow them (GiantSaplingBlock), so Java's growers match agriculture.TREES.
     giants = {tree: info["giant"] for tree, info in ag.TREES.items() if info.get("giant")}
     for tree, shape in giants.items():
