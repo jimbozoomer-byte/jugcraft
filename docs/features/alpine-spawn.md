@@ -3,7 +3,8 @@
 Status: in progress on branch `claude/alpine-spawn`, which is stacked on the agriculture pull requests, #53 and #80.
 - Part 1 (the biome, its placement, villages and the world start) passed CI.
 - The start search was then changed to prefer alpine villages (see Results).
-- Part 2 (larch trees) passed its server tests. The client test then found a start at the biome's edge, which is now fixed; the fix awaits CI.
+- Part 2 (larch trees, and the start beside an alpine village) passed CI.
+- On 2 October the owner asked for a larger biome: every meadow and the cool plateau's forest and taiga now become Alpine Spawn. This awaits CI.
 - Later parts are planned (see Rollout). **Not yet played.**
 
 Proposal issue: none. On 2 October 2026 the owner asked for an "Alpine Spawn" biome:
@@ -18,7 +19,7 @@ Target milestone and tier: the start of every new world (Discovery).
 Primary specialty and supported player role: exploration and settling; every player starts here.
 
 ## Player experience
-- **New worlds start at an alpine village in Alpine Spawn**: a large, cool alpine meadow on mountain plateaus, with scattered larches and spruces. Only when there is no alpine village within reach does the world start elsewhere in the biome.
+- **New worlds start at an alpine village in Alpine Spawn**: a large, cool alpine meadow on mountain plateaus, with scattered larches and spruces. It takes the place of every vanilla meadow and of the cool plateau's forest and taiga, so vanilla meadows no longer generate in new chunks. Only when there is no alpine village within reach does the world start elsewhere in the biome.
 - **Villages are common.** Alpine villages use vanilla's taiga village pieces (spruce houses, and with #53 a Retro Game Shop) on their own grid of 16 chunks; vanilla's grid is 34.
 - **Larches (part 2)** are conifers that change with the seasons:
   - green in spring and summer, gold in autumn, then bare twigs in winter, budding green again in spring;
@@ -28,7 +29,7 @@ Primary specialty and supported player role: exploration and settling; every pla
 - Like vanilla's meadow it has mineshafts, strongholds nearby, trial chambers, abandoned camps and mountain ruined portals. It has donkeys, rabbits and sheep, and foxes as well.
 
 ## Connections
-- Input producer: world generation; vanilla's cool meadows become Alpine Spawn.
+- Input producer: world generation. Vanilla's meadows, and the cool plateau's forest and taiga, become Alpine Spawn.
 - Output consumer: settling. It is the world's starting area, with villages to trade with (vanilla trades, and the Retro Trader with #53). Everything vanilla's meadow gives is here too: ores, stone and wood.
 - Technology connection:
   - Larch logs saw into planks in the sawmill, 6 per log with sawdust, like every other wood.
@@ -59,10 +60,10 @@ Primary specialty and supported player role: exploration and settling; every pla
   - The cost is one date lookup per random tick of a needle block, which is bounded by vanilla's random tick rate. The catch-up runs only when a needle changes and visits at most 128 needles.
   - With seasons off (`seasons.mode=off`) every needle turns green.
 - **Settings:**
-  - `alpine_spawn.enabled=false` stops new Alpine Spawn generation and the larch's hand recipes. Cool meadows are vanilla meadows again in new chunks, and the spawn move is skipped. The biome and every larch block and item stay registered, so old chunks and inventories keep them.
+  - `alpine_spawn.enabled=false` stops new Alpine Spawn generation and the larch's hand recipes. Meadows and the cool plateau's forest and taiga are vanilla's again in new chunks, and the spawn move is skipped. The biome and every larch block and item stay registered, so old chunks and inventories keep them.
   - `alpine_spawn.start=off` keeps vanilla's spawn but still generates the biome.
 - **Existing worlds:**
-  - Old chunks are never rewritten. New chunks where cool meadows would have generated become Alpine Spawn, which may leave seams next to old meadow chunks.
+  - Old chunks are never rewritten. New chunks where meadows or cool plateau forest and taiga would have generated become Alpine Spawn, which may leave seams next to old chunks.
   - An existing world's spawn never moves (its game time is past 0).
 
 ## Dependencies and assets
@@ -91,7 +92,8 @@ Results are recorded under "Results" below after CI runs.
   - the needles' blockstate covers every look;
   - the wood set is registered.
 - Server game tests (`AlpineGameTests`):
-  - every cool meadow in the Overworld climate table became Alpine Spawn, while temperate meadows remain (the numbers are logged);
+  - no meadow is left in the Overworld climate table, Alpine Spawn has more entries than vanilla had meadows (so the cool plateau's forest and taiga were taken), and lowland forest and taiga remain (the numbers are logged);
+  - the meadow rule and the plateau rule on their own;
   - the replacement rule on its own;
   - the biome has seasonal colours, winter snow and the mountain tags, and is cooler than a meadow;
   - the alpine village is in `#minecraft:village` and `#jugcraft:alpine_villages`, generates in Alpine Spawn, and has a grid tighter than vanilla's;
@@ -132,16 +134,24 @@ Results are recorded under "Results" below after CI runs.
   - **The start found an alpine village** at 3216, 2912 (the world started there; the start screenshot shows its spruce houses on terraced ground). **But the player stood in `minecraft:forest`**: the village's locate position, a corner of its start chunk, lay just outside the biome. The test failed on that. The start now moves to the nearest Alpine Spawn ground beside the village (awaiting CI).
   - **The biome's size:** 2.5% of the 2 km square around the start (107 of 4,225 samples) and 0.8% of a 16 km square around the origin (32 of 4,225). That is smaller than "pretty large"; see the open questions.
   - The larches in the start screenshot were still green on 2 October, as world generation places them, which prompted the catch-up above.
+- **Start fix and catch-up, run [36954872048](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/36954872048) (commit 4db60823): green.**
+  - All 301 required server game tests passed, including the catch-up test. A larch grown in winter had a 7-block trunk and 18 needles, all bare.
+  - The world (seed `jugcraft`) started at 3224, 97, 2928 in Alpine Spawn, 17 blocks from the alpine village at 3216, 2912.
+  - Alpine Spawn covered 2.2% of the 2 km square around the start and 0.8% of a 16 km square around the origin.
+  - The larch scene: spring 58 needles, all green; autumn 34 gold (and 6 green from the spring tree's crown, which reached into its counting box; the trees are now further apart); winter 34, all bare.
+  - The overview screenshot shows autumn-coloured woods with a gold larch. The start screenshot faced a terrace wall; it is now taken from a little higher.
+- **Larger biome:** awaiting CI.
 
 ## World and event applicability
-- **Biome fit.** A cool, wet mountain meadow takes vanilla's cool meadow climate, so it borders taiga, forest and the mountain slopes as meadows did.
-- **Existing worlds.** Old chunks are untouched; new chunks may form seams with old meadow chunks.
+- **Biome fit.** A cool, wet mountain meadow takes vanilla's meadow climate and the cool plateau beside it, so it borders the mountain slopes, the cool plateau's old-growth taiga and lowland forest and taiga.
+- **Existing worlds.** Old chunks are untouched; new chunks may form seams with old chunks.
 - **Seasons.** The biome is in `#jugcraft:has_seasons` and `#jugcraft:has_winter_snow`, and follows #80's rules: activation, deactivation and nothing earned is lost. The larch's look follows the same clock; switching seasons off turns every needle green, and no item or block is lost or changed in kind.
 - **Hemispheres.** The needles follow the season day, so `seasons.hemisphere=south` turns them gold in the southern autumn (April).
 
 ## Rollout and open questions
 - **Part 1:** the biome, its placement, alpine villages and the world start.
-- **Part 2 (this change):** larch trees and the larch wood set; the start at an alpine village.
+- **Part 2:** larch trees and the larch wood set; the start at an alpine village.
+- **Larger biome (this change):** every meadow, and the cool plateau's forest and taiga.
 - **Planned parts, all seasonal:**
   - **Seasonal flowers:** crocuses that bloom in spring, edelweiss and gentians in summer. Each is green the rest of the year.
   - **Bilberries:** bushes that ripen in late summer. When seasons are off, they ripen on a timer instead.
@@ -152,5 +162,5 @@ Results are recorded under "Results" below after CI runs.
 - **Open questions:**
   - Should other mods' world presets or data packs that change the Overworld also get the spawn move? Today only the vanilla multi-noise Overworld does.
   - Would a pillager outpost near the start be too harsh? Vanilla's meadows allow outposts, and Alpine Spawn joins `#minecraft:is_mountain`. Villages exclude outposts nearby.
-  - Is the biome large enough? It covers about 0.8% of the land (seed `jugcraft`), in patches a few hundred blocks across. Ways to grow it: all meadows (not only cool ones) could become Alpine Spawn, about 1.8 times the area, with vanilla meadows gone from new worlds; or it could also take the cool plateau's forest and taiga, which border it in vanilla's climate table.
+  - Is the biome large enough now? Before it grew, it covered about 0.8% of the land (seed `jugcraft`), in patches a few hundred blocks across. The client test logs its share after the change.
   - Should larches also grow outside Alpine Spawn (for example in taiga)? Today they are unique to it.

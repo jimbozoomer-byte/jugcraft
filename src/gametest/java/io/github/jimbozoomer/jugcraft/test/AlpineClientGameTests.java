@@ -61,7 +61,8 @@ public class AlpineClientGameTests implements FabricClientGameTest {
 			LOGGER.info("Alpine Spawn, seed {}: {} of the 2 km square around the start, {} of a 16 km square around the origin", SEED,
 					server.computeOnServer(minecraft -> share(minecraft.overworld(), start, 1024, 32)),
 					server.computeOnServer(minecraft -> share(minecraft.overworld(), new BlockPos(0, 128, 0), 8192, 256)));
-			context.takeScreenshot("jugcraft_alpine_spawn_start");
+			// The start seen from just above head height (standing at the start may face a terrace wall), then from above.
+			shoot(context, singleplayer, start.getX(), start.getY() + 4, start.getZ(), 135, 15, "jugcraft_alpine_spawn_start");
 			shoot(context, singleplayer, start.getX(), start.getY() + 40, start.getZ(), 135, 25, "jugcraft_alpine_spawn_overview");
 
 			// Three larches grown in spring, autumn and winter, with random ticks off so each keeps its look.
@@ -70,11 +71,11 @@ public class AlpineClientGameTests implements FabricClientGameTest {
 			int z = start.getZ();
 			server.runCommand("gamerule randomTickSpeed 0");
 			server.runCommand("gamerule minecraft:random_tick_speed 0");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 4, y - 1, z - 14, x + 20, y - 1, z + 8));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 4, y, z - 14, x + 20, y + 16, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 4, y - 1, z - 14, x + 24, y - 1, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 4, y, z - 14, x + 24, y + 16, z + 8));
 			String grown = server.computeOnServer(minecraft -> growLarches(minecraft, new BlockPos(x, y, z)));
 			LOGGER.info("Larches grown in spring, autumn and winter (green/gold/bare needles each): {}", grown);
-			shoot(context, singleplayer, x + 8, y + 4, z + 6, 180, 0, "jugcraft_larch_seasons");
+			shoot(context, singleplayer, x + 10, y + 4, z + 6, 180, 0, "jugcraft_larch_seasons");
 			if (!alpine) {
 				throw new AssertionError("A new world (seed " + SEED + ") starts in " + biome + ", not Alpine Spawn");
 			}
@@ -117,13 +118,13 @@ public class AlpineClientGameTests implements FabricClientGameTest {
 		SeasonCalendar.Mode[] modes = {SeasonCalendar.Mode.SPRING, SeasonCalendar.Mode.AUTUMN, SeasonCalendar.Mode.WINTER};
 		StringBuilder out = new StringBuilder();
 		for (int i = 0; i < modes.length; i++) {
-			BlockPos trunk = origin.offset(2 + 6 * i, 0, -6);
+			BlockPos trunk = origin.offset(2 + 8 * i, 0, -6);
 			JugcraftSeasons.setMode(server, modes[i]);
 			level.setBlock(trunk, JugcraftAgriculture.block("larch_sapling").defaultBlockState(), Block.UPDATE_ALL);
 			boolean grew = JugcraftAgriculture.LARCH_GROWER.growTree(level, level.getChunkSource().getGenerator(), trunk,
 					level.getBlockState(trunk), level.getRandom());
 			int[] counts = new int[LarchNeedlesBlock.Needles.values().length];
-			for (BlockPos pos : BlockPos.betweenClosed(trunk.offset(-4, 0, -4), trunk.offset(4, 16, 4))) {
+			for (BlockPos pos : BlockPos.betweenClosed(trunk.offset(-3, 0, -3), trunk.offset(3, 16, 3))) {
 				BlockState state = level.getBlockState(pos);
 				if (state.is(JugcraftAgriculture.block("larch_needles"))) {
 					counts[state.getValue(LarchNeedlesBlock.SEASON).ordinal()]++;

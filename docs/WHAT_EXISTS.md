@@ -377,7 +377,9 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ### Alpine Spawn (`world/AlpineSpawn`, `tools/alpine.py`)
 
-- **Placement.** `AlpineSpawn.wrap` turns the Overworld biome builder's cool meadows (temperature band at most `COOL_MAX`, -0.15) into `jugcraft:alpine_spawn`. It runs through `mixin/OverworldBiomeBuilderMixin` (`@ModifyVariable` on `addBiomes`).
+- **Placement.** Through `mixin/OverworldBiomeBuilderMixin`:
+  - `AlpineSpawn.wrap` turns every meadow the Overworld biome builder outputs into `jugcraft:alpine_spawn` (`@ModifyVariable` on `addBiomes`);
+  - `AlpineSpawn.takesPlateau` gives it the plateau table's cool row (temperature index 1) at humidity indexes 2 to 3, vanilla's forest and taiga there (`@Inject` at the head of `pickPlateauBiome`). Lowland forest and taiga are untouched.
 - **The start.** On a new world's first start (game time 0, multi-noise Overworld only), `findStart` looks for the alpine village (`#jugcraft:alpine_villages`) nearest the origin, up to `VILLAGE_CELLS` (25) grid cells away, and starts on the nearest Alpine Spawn ground within `VILLAGE_REACH` (96) of it, with `VILLAGE_MARGIN` (16) around it if possible. If there is no village, it finds the nearest Alpine Spawn within `SEARCH_RADIUS` (6,400) and moves inward by `MARGIN` (48). The spawn is then set with `/setworldspawn`.
 - **Villages.** `jugcraft:village_alpine` (taiga pieces, `#jugcraft:has_structure/village_alpine`) on the structure set `jugcraft:alpine_villages` (spacing 16, separation 5). It is in `#minecraft:village` and `#jugcraft:alpine_villages`.
 - **Trees.** `worldgen/feature/alpine_spawn_trees` picks a larch (`jugcraft:larch_checked`) 60% of the time, otherwise a spruce; 0 to 2 tries per chunk.

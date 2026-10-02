@@ -50,7 +50,7 @@ Use the cases relevant to the feature; do not claim a scenario was run just beca
 - Rockets/portals: outbound and return travel, invalid destinations, disconnect during transfer, destination access, stranded-player recovery and dimension/chunk budgets.
 - Seasons: server timezone/manual override, activation/deactivation and restart at the boundary, reward replay prevention, and preservation of earned content and occupied destinations.
   - Alpine Spawn ([features/alpine-spawn.md](features/alpine-spawn.md)):
-    - `AlpineGameTests` covers the climate table (cool meadows replaced, temperate kept), tags and seasons, and the alpine village and its grid.
+    - `AlpineGameTests` covers the climate table (no meadow left, the cool plateau's forest and taiga taken, lowland forest and taiga kept), tags and seasons, and the alpine village and its grid.
     - It also covers the larch: needles following each season mode (placed and natural), out-of-date needles catching up together, the gradual turn, a sapling grown in winter coming out bare, and the wood set.
     - `AlpineClientGameTests` creates a real world (seed `jugcraft`) and checks that it starts in Alpine Spawn at an alpine village. It logs the biome's share around the start and across a 16 km square, and takes screenshots, including larches grown in spring, autumn and winter.
     - Not covered: other seeds, a dedicated server's first start, needles changing over real days.

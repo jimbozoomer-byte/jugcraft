@@ -1,8 +1,9 @@
 """Alpine Spawn: a large, cool alpine meadow on mountain plateaus, where new worlds start.
 
-The biome takes the place of vanilla's cool meadows in the Overworld climate table: every meadow entry whose
-temperature band is cool (at most -0.15, vanilla's cool band is -0.45..-0.15) becomes Alpine Spawn
-(world/AlpineSpawn, through mixin/OverworldBiomeBuilderMixin). Temperate meadows stay meadows.
+The biome takes the place of vanilla's meadows in the Overworld climate table: every meadow entry becomes Alpine
+Spawn, and so do the cool plateau's forest and taiga, which border the cool meadows in vanilla's plateau table
+(world/AlpineSpawn, through mixin/OverworldBiomeBuilderMixin). Forest and taiga elsewhere (lowlands, other bands)
+stay as they are.
 
 New worlds start in it, at a village when there is one: on a new world's first start the server looks for the
 alpine village nearest the origin, up to SPAWN["village_cells"] cells of the alpine village grid away (as far as
@@ -24,9 +25,10 @@ DOWNFALL = 0.7
 WATER_COLOR = "#3d6ee0"
 # Fallen leaves (vanilla leaf litter) take this colour: larch gold.
 DRY_FOLIAGE_COLOR = "#b8902a"
-# Which vanilla climate entries become Alpine Spawn: meadows in the cool band (temperature at most -0.15).
+# Which vanilla climate entries become Alpine Spawn: every meadow, and the plateau table's cool row (temperature
+# index 1) at humidity indexes 2 and 3, vanilla's forest and taiga there (their weird variants are meadows).
 REPLACES = "minecraft:meadow"
-COOL_MAX = -0.15
+PLATEAU = {"temperature": 1, "humidity": [2, 3]}
 
 # The start search: alpine villages up to village_cells grid cells (spacing chunks each) from the origin, else
 # the nearest Alpine Spawn within radius blocks, sampled every step blocks.

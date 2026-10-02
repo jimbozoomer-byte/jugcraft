@@ -24,8 +24,9 @@ import net.minecraft.world.level.levelgen.structure.Structure;
  * Alpine Spawn: a large, cool alpine meadow on mountain plateaus, where new worlds start. The biome is data
  * (data/jugcraft/worldgen, generated from tools/alpine.py); this class places it and moves the world spawn into it.
  *
- * <p>Placement: vanilla's cool meadows (temperature band at most {@link #COOL_MAX}) become Alpine Spawn in the
- * Overworld climate table, through {@code mixin/OverworldBiomeBuilderMixin}; temperate meadows stay meadows.
+ * <p>Placement, in the Overworld climate table through {@code mixin/OverworldBiomeBuilderMixin}: every vanilla meadow
+ * becomes Alpine Spawn, and so do the cool plateau's forest and taiga, which border the cool meadows in vanilla's
+ * plateau table ({@link #takesPlateau}). Forest and taiga elsewhere stay as they are.
  *
  * <p>The start: on a new world's first start (game time 0) the server moves the world spawn to the alpine village
  * nearest the origin, looking up to {@link #VILLAGE_CELLS} cells of the alpine village grid away. Alpine villages
@@ -36,8 +37,14 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 public final class AlpineSpawn {
 	public static final String FEATURE = "alpine_spawn";
 	public static final ResourceKey<Biome> BIOME = ResourceKey.create(Registries.BIOME, Jugcraft.id("alpine_spawn"));
-	/** Meadows whose temperature band reaches no higher than this become Alpine Spawn (vanilla's cool band). */
-	public static final float COOL_MAX = -0.15F;
+	/**
+	 * The plateau table's cells Alpine Spawn takes besides meadows: the cool row (temperature index 1) at humidity
+	 * indexes 2 to 3, vanilla's forest and taiga there (their weird variants are meadows). Keep in sync with
+	 * PLATEAU in tools/alpine.py.
+	 */
+	public static final int PLATEAU_TEMPERATURE = 1;
+	public static final int PLATEAU_HUMIDITY_MIN = 2;
+	public static final int PLATEAU_HUMIDITY_MAX = 3;
 	/** The alpine villages (structure tag), which only generate in Alpine Spawn. */
 	public static final TagKey<Structure> VILLAGES = TagKey.create(Registries.STRUCTURE, Jugcraft.id("alpine_villages"));
 	public static final int SEARCH_RADIUS = 6400;
@@ -63,7 +70,7 @@ public final class AlpineSpawn {
 		ServerLifecycleEvents.SERVER_STARTED.register(AlpineSpawn::moveWorldSpawn);
 	}
 
-	/** Wraps the Overworld biome builder's output so cool meadows come out as Alpine Spawn (unless switched off). */
+	/** Wraps the Overworld biome builder's output so meadows come out as Alpine Spawn (unless switched off). */
 	public static Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> wrap(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> biomes) {
 		if (!JugcraftConfig.isFeatureEnabled(FEATURE)) {
 			return biomes;
@@ -71,9 +78,18 @@ public final class AlpineSpawn {
 		return entry -> biomes.accept(replaces(entry) ? Pair.of(entry.getFirst(), BIOME) : entry);
 	}
 
-	/** Whether a climate entry is a cool meadow, which Alpine Spawn takes over. */
+	/** Whether a climate entry is a meadow, which Alpine Spawn takes over. */
 	public static boolean replaces(Pair<Climate.ParameterPoint, ResourceKey<Biome>> entry) {
-		return entry.getSecond().equals(Biomes.MEADOW) && entry.getFirst().temperature().max() <= Climate.quantizeCoord(COOL_MAX);
+		return entry.getSecond().equals(Biomes.MEADOW);
+	}
+
+	/**
+	 * Whether Alpine Spawn takes the plateau table's cell at these temperature and humidity indexes (0 to 4, as vanilla's
+	 * builder numbers them): the cool plateau's forest and taiga (unless switched off).
+	 */
+	public static boolean takesPlateau(int temperature, int humidity) {
+		return JugcraftConfig.isFeatureEnabled(FEATURE) && temperature == PLATEAU_TEMPERATURE
+				&& humidity >= PLATEAU_HUMIDITY_MIN && humidity <= PLATEAU_HUMIDITY_MAX;
 	}
 
 	private static void moveWorldSpawn(MinecraftServer server) {

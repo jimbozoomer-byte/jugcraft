@@ -53,20 +53,27 @@ public class AlpineGameTests {
 				.getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD);
 	}
 
-	/** Every cool meadow became Alpine Spawn; temperate meadows are still meadows. */
+	/** Vanilla's meadows: 100 cool and 80 temperate climate entries in 26.3 (part 1's CI log). */
+	private static final int VANILLA_MEADOWS = 180;
+
+	/**
+	 * Every meadow became Alpine Spawn, and so did the cool plateau's forest and taiga, so Alpine Spawn has more entries
+	 * than vanilla had meadows; forest and taiga elsewhere remain.
+	 */
 	@GameTest
-	public void alpineSpawnTakesOverCoolMeadows(GameTestHelper helper) {
+	public void alpineSpawnTakesOverMeadowsAndCoolPlateaus(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		List<Pair<Climate.ParameterPoint, Holder<Biome>>> table = overworldPreset(level).value().parameters().values();
 		long alpine = table.stream().filter(entry -> entry.getSecond().is(AlpineSpawn.BIOME)).count();
-		long coolMeadows = table.stream().filter(entry -> entry.getSecond().is(Biomes.MEADOW)
-				&& entry.getFirst().temperature().max() <= Climate.quantizeCoord(AlpineSpawn.COOL_MAX)).count();
 		long meadows = table.stream().filter(entry -> entry.getSecond().is(Biomes.MEADOW)).count();
-		LOGGER.info("Overworld climate table: {} entries, {} Alpine Spawn, {} meadows left, {} cool meadows left",
-				table.size(), alpine, meadows, coolMeadows);
-		helper.assertTrue(alpine > 0, "The Overworld climate table has no Alpine Spawn");
-		helper.assertTrue(coolMeadows == 0, coolMeadows + " cool meadows are left");
-		helper.assertTrue(meadows > 0, "Temperate meadows are gone too");
+		long forests = table.stream().filter(entry -> entry.getSecond().is(Biomes.FOREST)).count();
+		long taigas = table.stream().filter(entry -> entry.getSecond().is(Biomes.TAIGA)).count();
+		LOGGER.info("Overworld climate table: {} entries, {} Alpine Spawn, {} meadows left, {} forest and {} taiga left",
+				table.size(), alpine, meadows, forests, taigas);
+		helper.assertTrue(meadows == 0, meadows + " meadows are left");
+		helper.assertTrue(alpine > VANILLA_MEADOWS, "Alpine Spawn has " + alpine + " entries, no more than vanilla's "
+				+ VANILLA_MEADOWS + " meadows: the cool plateau's forest and taiga were not taken");
+		helper.assertTrue(forests > 0 && taigas > 0, "Lowland forest or taiga is gone too");
 		Climate.ParameterPoint cool = Climate.parameters(Climate.Parameter.span(-0.45F, -0.15F), Climate.Parameter.span(-1.0F, 1.0F),
 				Climate.Parameter.span(0.0F, 1.0F), Climate.Parameter.span(-1.0F, 1.0F), Climate.Parameter.point(0.0F),
 				Climate.Parameter.span(-1.0F, 1.0F), 0.0F);
@@ -74,8 +81,11 @@ public class AlpineGameTests {
 				Climate.Parameter.span(0.0F, 1.0F), Climate.Parameter.span(-1.0F, 1.0F), Climate.Parameter.point(0.0F),
 				Climate.Parameter.span(-1.0F, 1.0F), 0.0F);
 		helper.assertTrue(AlpineSpawn.replaces(Pair.of(cool, Biomes.MEADOW)), "A cool meadow is not replaced");
-		helper.assertTrue(!AlpineSpawn.replaces(Pair.of(temperate, Biomes.MEADOW)), "A temperate meadow is replaced");
-		helper.assertTrue(!AlpineSpawn.replaces(Pair.of(cool, Biomes.FOREST)), "A cool forest is replaced");
+		helper.assertTrue(AlpineSpawn.replaces(Pair.of(temperate, Biomes.MEADOW)), "A temperate meadow is not replaced");
+		helper.assertTrue(!AlpineSpawn.replaces(Pair.of(cool, Biomes.FOREST)), "Every cool forest is replaced, lowland ones too");
+		helper.assertTrue(AlpineSpawn.takesPlateau(1, 2) && AlpineSpawn.takesPlateau(1, 3), "The cool plateau's forest or taiga is not taken");
+		helper.assertTrue(!AlpineSpawn.takesPlateau(1, 4) && !AlpineSpawn.takesPlateau(2, 2) && !AlpineSpawn.takesPlateau(0, 3),
+				"Plateau cells beyond the cool forest and taiga are taken");
 		helper.succeed();
 	}
 

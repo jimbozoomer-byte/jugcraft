@@ -498,7 +498,8 @@ def check_seasons():
 def check_alpine():
     """Alpine Spawn: Java's placement and spawn numbers match tools/alpine.py, and its data is all there."""
     java = (WORLD_JAVA / "AlpineSpawn.java").read_text(encoding="utf-8")
-    for expected in (f'FEATURE = "{al.FEATURE}"', f'Jugcraft.id("{al.BIOME}")', f"COOL_MAX = {al.COOL_MAX}F",
+    for expected in (f'FEATURE = "{al.FEATURE}"', f'Jugcraft.id("{al.BIOME}")', f"PLATEAU_TEMPERATURE = {al.PLATEAU['temperature']};",
+                     f"PLATEAU_HUMIDITY_MIN = {al.PLATEAU['humidity'][0]};", f"PLATEAU_HUMIDITY_MAX = {al.PLATEAU['humidity'][-1]};",
                      f"SEARCH_RADIUS = {al.SPAWN['radius']};", f"SEARCH_STEP = {al.SPAWN['step']};",
                      f"VILLAGE_CELLS = {al.SPAWN['village_cells']};", f'Jugcraft.id("{al.VILLAGE_STRUCTURES.split(":")[1]}")'):
         if expected not in java:
