@@ -42,6 +42,13 @@ def kettle():
     return c.img
 
 
+def trivet():
+    """Black iron, a little rough."""
+    c = Canvas()
+    noise(c, 0, 0, 15, 15, [rgb("1e1e22"), rgb("2a2a30"), rgb("36363c")], 26105, [2, 3, 1])
+    return c.img
+
+
 def kettle_inside():
     c = Canvas()
     noise(c, 0, 0, 15, 15, DARK, 26103, [2, 3, 2])
@@ -322,6 +329,7 @@ def candy_textures():
     return {
         ("block", "candy_kettle"): kettle(),
         ("block", "candy_kettle_inside"): kettle_inside(),
+        ("block", "candy_trivet"): trivet(),
         ("block", "candy_dial"): dial(),
         ("entity", "candy_syrup"): syrup(),
         ("entity", "candy_needle"): needle(),

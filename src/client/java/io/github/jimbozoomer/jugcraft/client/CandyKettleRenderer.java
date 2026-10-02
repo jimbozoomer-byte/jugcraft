@@ -109,6 +109,8 @@ public class CandyKettleRenderer implements BlockEntityRenderer<CandyKettleBlock
 			int color = 0xFF000000 | syrupColor(state);
 			collector.submitCustomGeometry(pose, SYRUP, (matrix, buffer) -> TintedBoxes.top(buffer, matrix, 3.0F, 3.0F, 13.0F, 13.0F, y, color, light));
 		}
+		// The needle in a pose of its own, so the syrup's (already submitted) is left as it was.
+		pose.pushPose();
 		pose.translate(DIAL_X / 16, DIAL_Y / 16, (DIAL_Z - 0.06F) / 16);
 		pose.rotateDegrees(Axis.ZP, angle(state.temperature));
 		float w = 0.3F / 16;
@@ -116,6 +118,7 @@ public class CandyKettleRenderer implements BlockEntityRenderer<CandyKettleBlock
 		float tip = 2.1F / 16;
 		collector.submitCustomGeometry(pose, NEEDLE, (matrix, buffer) -> DecorDraw.quad(buffer, matrix,
 				new float[][] {{w, tail, 0, 0, 1}, {-w, tail, 0, 1, 1}, {-w, tip, 0, 1, 0}, {w, tip, 0, 0, 0}}, 0, 0, -1, 0xFFFFFFFF, light));
+		pose.popPose();
 		pose.popPose();
 	}
 }

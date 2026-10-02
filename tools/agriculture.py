@@ -1420,7 +1420,7 @@ def candy_items():
     return candy_blocks() + [CANDY["tray"]] + list(CANDY["candies"])
 
 # ---------------------------------------------------------------- Fall additions 12: autumn foraging
-# Wild mushrooms (WildMushroomBlock) grow on any soil (block tag minecraft:dirt) in patches on forest floors (`biomes`,
+# Wild mushrooms (WildMushroomBlock) grow on soil (block tag `soil_tag`, `soil`) in patches on forest floors (`biomes`,
 # `patch`). One random tick in `spread_chance`, a mushroom with fewer than `spread_cap` of its kind within 4 blocks (and
 # 1 up or down) puts out another within 2, where the light is below `spread_light`; bone meal makes it try at once, in any
 # light. On a full-moon night one random tick in `ring_chance` sprouts a fairy ring of its kind instead: eight round a
@@ -1429,6 +1429,8 @@ def candy_items():
 # players looked at every `check_ticks`). `light`: the light a mushroom gives. The Foraging Basket (ForagingBasketItem)
 # holds forage (item tag `forage_tag`) like a bundle.
 FORAGING = {"basket": "foraging_basket", "basket_display": "Foraging Basket", "forage_tag": "jugcraft:forage",
+            "soil_tag": "jugcraft:mushroom_soil", "soil": ["minecraft:grass_block", "minecraft:dirt", "minecraft:coarse_dirt", "minecraft:rooted_dirt",
+                                                            "minecraft:podzol", "minecraft:mycelium", "minecraft:moss_block"],
             "spread_chance": 25, "spread_cap": 5, "spread_light": 13, "ring_chance": 40,
             "ring_mushrooms": 8, "inner": 2.5, "outer": 3.6, "check_ticks": 20, "luck_ticks": 6000,
             "patch": {"rarity": 16, "tries": 12, "spread_xz": 4, "spread_y": 1},

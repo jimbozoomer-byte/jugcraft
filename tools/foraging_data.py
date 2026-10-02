@@ -40,6 +40,8 @@ def tags(tags):
         tags.add("block", "minecraft:enderman_holdable", rid(mushroom))
     for item in FORAGING["forage"]:
         tags.add("item", FORAGING["forage_tag"], item)
+    for block in FORAGING["soil"]:
+        tags.add("block", FORAGING["soil_tag"], block)
 
 
 def worldgen(data, write):
@@ -63,7 +65,7 @@ def worldgen(data, write):
                  "z": {"type": "minecraft:trapezoid", "max": spread, "min": -spread, "plateau": 0}},
                 {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
                     {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
-                    {"type": "minecraft:matching_block_tag", "tag": "minecraft:dirt", "offset": [0, -1, 0]},
+                    {"type": "minecraft:matching_block_tag", "tag": FORAGING["soil_tag"], "offset": [0, -1, 0]},
                 ]}},
             ],
         })
