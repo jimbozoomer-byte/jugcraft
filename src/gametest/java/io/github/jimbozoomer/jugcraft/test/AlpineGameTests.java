@@ -7,6 +7,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.LarchNeedlesBlock;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
 import io.github.jimbozoomer.jugcraft.world.AlpineSpawn;
+import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -154,6 +155,36 @@ public class AlpineGameTests {
 			JugcraftSeasons.setMode(server, before.mode());
 		}
 		helper.assertTrue(helper.getBlockState(natural).is(BlockTags.LEAVES), "Larch needles should be leaves");
+		helper.succeed();
+	}
+
+	/** Out-of-date needles (as world generation leaves them) catch up together: one random tick turns the whole crown. */
+	@GameTest
+	public void staleLarchNeedlesCatchUpTogether(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		MinecraftServer server = level.getServer();
+		SeasonCalendar.Settings before = JugcraftSeasons.settings();
+		BlockState state = block("larch_needles").defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
+		List<BlockPos> crown = new ArrayList<>();
+		try {
+			JugcraftSeasons.setMode(server, SeasonCalendar.Mode.SUMMER);
+			for (int x = 1; x <= 4; x++) {
+				for (int z = 1; z <= 4; z++) {
+					BlockPos pos = new BlockPos(x, 3, z);
+					helper.setBlock(pos, state);
+					crown.add(pos);
+				}
+			}
+			JugcraftSeasons.setMode(server, SeasonCalendar.Mode.WINTER);
+			helper.assertTrue(crown.stream().allMatch(pos -> needles(helper, pos) == LarchNeedlesBlock.Needles.GREEN),
+					"Needles changed before any tick");
+			BlockPos first = crown.get(0);
+			helper.getBlockState(first).randomTick(level, helper.absolutePos(first), level.getRandom());
+		} finally {
+			JugcraftSeasons.setMode(server, before.mode());
+		}
+		long bare = crown.stream().filter(pos -> needles(helper, pos) == LarchNeedlesBlock.Needles.BARE).count();
+		helper.assertTrue(bare == crown.size(), "One tick turned " + bare + " of " + crown.size() + " touching needles bare");
 		helper.succeed();
 	}
 

@@ -48,6 +48,13 @@ public final class AlpineSpawn {
 	public static final int MARGIN = 48;
 	/** How far from the biome's nearest edge to look for such a start. */
 	public static final int INSIDE_SEARCH = 512;
+	/**
+	 * A village's locate position is a corner of its start chunk, which may lie just outside the biome when the village
+	 * stands at its edge: the start moves to the nearest point within this many blocks that has Alpine Spawn under it
+	 * and {@link #VILLAGE_MARGIN} blocks away on all four sides (or, failing that, under it at least).
+	 */
+	public static final int VILLAGE_REACH = 96;
+	public static final int VILLAGE_MARGIN = 16;
 
 	private AlpineSpawn() {
 	}
@@ -91,15 +98,30 @@ public final class AlpineSpawn {
 	 */
 	public static BlockPos findStart(ServerLevel level) {
 		BlockPos origin = new BlockPos(0, 96, 0);
-		BlockPos target = level.findNearestMapStructure(VILLAGES, origin, VILLAGE_CELLS, false);
-		if (target != null) {
-			Jugcraft.LOGGER.info("Alpine Spawn: starting at the alpine village at {} {}", target.getX(), target.getZ());
+		BlockPos target;
+		BlockPos village = level.findNearestMapStructure(VILLAGES, origin, VILLAGE_CELLS, false);
+		if (village != null) {
+			// Biomes are three-dimensional: read them at the village's ground, not at the locate position's height.
+			level.getChunk(village.getX() >> 4, village.getZ() >> 4);
+			BlockPos ground = village.atY(level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, village.getX(), village.getZ()));
+			target = around(level, ground, VILLAGE_MARGIN, VILLAGE_REACH, 8);
+			if (target == null) {
+				target = around(level, ground, 0, VILLAGE_REACH, 8);
+			}
+			if (target == null) {
+				target = ground;
+			}
+			Jugcraft.LOGGER.info("Alpine Spawn: starting at the alpine village at {} {} ({} {})", village.getX(), village.getZ(),
+					target.getX(), target.getZ());
 		} else {
 			Pair<BlockPos, Holder<Biome>> found = level.findClosestBiome3d(biome -> biome.is(BIOME), origin, SEARCH_RADIUS, SEARCH_STEP, 64);
 			if (found == null) {
 				return null;
 			}
-			target = inside(level, found.getFirst());
+			target = around(level, found.getFirst(), MARGIN, INSIDE_SEARCH, 16);
+			if (target == null) {
+				target = found.getFirst();
+			}
 			Jugcraft.LOGGER.info("Alpine Spawn: no alpine village in reach; starting in the biome at {} {}", target.getX(), target.getZ());
 		}
 		level.getChunk(target.getX() >> 4, target.getZ() >> 4);
@@ -108,26 +130,26 @@ public final class AlpineSpawn {
 	}
 
 	/**
-	 * The nearest point to {@code edge} (within {@link #INSIDE_SEARCH} blocks, in steps of 16) that has Alpine Spawn
-	 * under it and {@link #MARGIN} blocks away on all four sides; {@code edge} itself if there is none. Biomes are read
-	 * from the generator, so no chunk is generated.
+	 * The nearest point to {@code center} (within {@code reach} blocks, in rings {@code step} apart) that has Alpine
+	 * Spawn under it and {@code margin} blocks away on all four sides; null if there is none. Biomes are read from the
+	 * generator, so no chunk is generated.
 	 */
-	private static BlockPos inside(ServerLevel level, BlockPos edge) {
-		for (int radius = 0; radius <= INSIDE_SEARCH; radius += 16) {
-			for (int dx = -radius; dx <= radius; dx += 16) {
-				for (int dz = -radius; dz <= radius; dz += 16) {
+	private static BlockPos around(ServerLevel level, BlockPos center, int margin, int reach, int step) {
+		for (int radius = 0; radius <= reach; radius += step) {
+			for (int dx = -radius; dx <= radius; dx += step) {
+				for (int dz = -radius; dz <= radius; dz += step) {
 					if (Math.max(Math.abs(dx), Math.abs(dz)) != radius) {
 						continue;
 					}
-					BlockPos pos = edge.offset(dx, 0, dz);
-					if (alpine(level, pos) && alpine(level, pos.east(MARGIN)) && alpine(level, pos.west(MARGIN))
-							&& alpine(level, pos.north(MARGIN)) && alpine(level, pos.south(MARGIN))) {
+					BlockPos pos = center.offset(dx, 0, dz);
+					if (alpine(level, pos) && (margin == 0 || alpine(level, pos.east(margin)) && alpine(level, pos.west(margin))
+							&& alpine(level, pos.north(margin)) && alpine(level, pos.south(margin)))) {
 						return pos;
 					}
 				}
 			}
 		}
-		return edge;
+		return null;
 	}
 
 	private static boolean alpine(ServerLevel level, BlockPos pos) {

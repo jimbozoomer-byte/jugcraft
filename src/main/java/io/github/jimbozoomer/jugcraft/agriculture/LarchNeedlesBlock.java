@@ -2,8 +2,12 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
+import java.util.ArrayDeque;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -18,9 +22,11 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
  * Larch needles: the foliage of a conifer that changes with the seasons. They follow the server's season day
  * ({@link JugcraftSeasons#today()}): green from {@link #GREEN_FROM}, gold from {@link #GOLD_FROM} and bare twigs from
  * {@link #BARE_FROM} until spring. Each block turns up to {@link #JITTER} days early or late, fixed by its position,
- * so a crown turns gradually and neighbouring trees differ. Needles catch up on their random ticks, and ones placed
- * by a player or grown from a sapling start in today's state; with seasons off they stay green. Only the look
- * changes: otherwise these are vanilla leaves (natural ones decay away from logs; they drop saplings and sticks).
+ * so a crown turns gradually and neighbouring trees differ. Needles catch up on their random ticks; one that changes
+ * also brings the needles it touches up to date (up to {@link #SPREAD} of them, in loaded chunks), so a tree generated
+ * green in autumn turns together within moments of its first tick. Needles placed by a player or grown from a sapling
+ * start in today's state; with seasons off they stay green. Only the look changes: otherwise these are vanilla leaves
+ * (natural ones decay away from logs; they drop saplings and sticks).
  */
 public class LarchNeedlesBlock extends TintedParticleLeavesBlock {
 	public static final EnumProperty<Needles> SEASON = EnumProperty.create("season", Needles.class);
@@ -29,6 +35,8 @@ public class LarchNeedlesBlock extends TintedParticleLeavesBlock {
 	public static final int GOLD_FROM = 268;
 	public static final int BARE_FROM = 318;
 	public static final int JITTER = 7;
+	/** At most this many touching needles catch up with one that changed on its random tick. */
+	public static final int SPREAD = 128;
 
 	/** The needles' look in each season. */
 	public enum Needles implements StringRepresentable {
@@ -74,8 +82,9 @@ public class LarchNeedlesBlock extends TintedParticleLeavesBlock {
 	protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		super.randomTick(state, level, pos, random);
 		BlockState now = level.getBlockState(pos);
-		if (now.is(this)) {
-			follow(now, level, pos);
+		int day = JugcraftSeasons.today();
+		if (now.is(this) && follow(now, level, pos, day)) {
+			catchUp(level, pos, day);
 		}
 	}
 
@@ -84,15 +93,43 @@ public class LarchNeedlesBlock extends TintedParticleLeavesBlock {
 	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
 		super.onPlace(state, level, pos, oldState, movedByPiston);
 		if (!level.isClientSide() && !oldState.is(this)) {
-			follow(state, level, pos);
+			follow(state, level, pos, JugcraftSeasons.today());
 		}
 	}
 
-	private void follow(BlockState state, Level level, BlockPos pos) {
-		Needles needles = forDay(JugcraftSeasons.today(), pos);
-		if (state.getValue(SEASON) != needles) {
-			level.setBlock(pos, state.setValue(SEASON, needles), Block.UPDATE_CLIENTS);
+	/** Brings the loaded needles connected to {@code start} up to date for {@code day}, at most {@link #SPREAD} of them. */
+	private void catchUp(ServerLevel level, BlockPos start, int day) {
+		Set<BlockPos> seen = new HashSet<>();
+		ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+		seen.add(start);
+		queue.add(start);
+		while (!queue.isEmpty()) {
+			BlockPos pos = queue.poll();
+			for (Direction direction : Direction.values()) {
+				if (seen.size() >= SPREAD) {
+					return;
+				}
+				BlockPos next = pos.relative(direction);
+				if (!seen.contains(next) && level.isLoaded(next)) {
+					BlockState state = level.getBlockState(next);
+					if (state.is(this)) {
+						seen.add(next);
+						follow(state, level, next, day);
+						queue.add(next);
+					}
+				}
+			}
 		}
+	}
+
+	/** Sets the needles at {@code pos} to their look on {@code day}; true if that changed them. */
+	private boolean follow(BlockState state, Level level, BlockPos pos, int day) {
+		Needles needles = forDay(day, pos);
+		if (state.getValue(SEASON) == needles) {
+			return false;
+		}
+		level.setBlock(pos, state.setValue(SEASON, needles), Block.UPDATE_CLIENTS);
+		return true;
 	}
 
 	@Override

@@ -2,7 +2,8 @@
 
 Status: in progress on branch `claude/alpine-spawn`, which is stacked on the agriculture pull requests, #53 and #80.
 - Part 1 (the biome, its placement, villages and the world start) passed CI.
-- The start search was then changed to prefer alpine villages (see Results). That change, and part 2 (larch trees), await CI.
+- The start search was then changed to prefer alpine villages (see Results).
+- Part 2 (larch trees) passed its server tests. The client test then found a start at the biome's edge, which is now fixed; the fix awaits CI.
 - Later parts are planned (see Rollout). **Not yet played.**
 
 Proposal issue: none. On 2 October 2026 the owner asked for an "Alpine Spawn" biome:
@@ -46,16 +47,16 @@ Primary specialty and supported player role: exploration and settling; every pla
 ## Multiplayer and persistence
 - **Server authority.** The server places the biome (world generation) and moves the world spawn, once, on a new world's first start (game time 0), before anyone joins. It uses vanilla's `/setworldspawn`, so saving and respawning are vanilla's.
 - **The start search.**
-  - It looks for the alpine village nearest the origin, up to 25 cells of the alpine village grid away (6,400 blocks). Alpine villages only generate in Alpine Spawn, so a found village is always in the biome. The start may be thousands of blocks from the origin; nothing depends on the origin.
+  - It looks for the alpine village nearest the origin, up to 25 cells of the alpine village grid away (6,400 blocks). Alpine villages only generate where their start piece stands in Alpine Spawn, but a village at the biome's edge can reach outside it. The start is the nearest point within 96 blocks of the village that has Alpine Spawn under it and 16 blocks around it (or at least under it). The start may be thousands of blocks from the origin; nothing depends on the origin.
   - With no alpine village in reach, it finds the nearest Alpine Spawn within 6,400 blocks, sampled every 64 blocks, and moves inward until the biome reaches 48 blocks on all four sides.
   - This runs once, at world creation, and only when the Overworld uses vanilla's multi-noise biomes (not superflat or single-biome worlds).
   - If there is no Alpine Spawn in reach, the spawn stays vanilla's (logged).
 - **Larch needles.**
   - The server decides the look from its own season day (`JugcraftSeasons.today()`, #80), never a client's clock. Clients see block states, as for any block.
-  - Needles placed by a player or grown from a sapling take today's look at once. Others catch up on random ticks, so a forest changes within a few minutes of a season change near players. Chunks nobody is near keep their old look until someone comes.
-  - World generation places green needles, and they catch up on random ticks.
+  - Needles placed by a player or grown from a sapling take today's look at once. Others catch up on random ticks. A needle that changes on its tick also brings the needles it touches up to date (at most 128, in loaded chunks only), so a whole tree turns within moments of its first tick near a player. Chunks nobody is near keep their old look until someone comes.
+  - World generation places green needles, and they catch up as above: a new world made in autumn shows its larches turn gold within seconds of loading near the player.
   - The look is saved as a block state (`season`) and survives restarts.
-  - The cost is one date lookup per random tick of a needle block, which is bounded by vanilla's random tick rate.
+  - The cost is one date lookup per random tick of a needle block, which is bounded by vanilla's random tick rate. The catch-up runs only when a needle changes and visits at most 128 needles.
   - With seasons off (`seasons.mode=off`) every needle turns green.
 - **Settings:**
   - `alpine_spawn.enabled=false` stops new Alpine Spawn generation and the larch's hand recipes. Cool meadows are vanilla meadows again in new chunks, and the spawn move is skipped. The biome and every larch block and item stay registered, so old chunks and inventories keep them.
@@ -95,6 +96,7 @@ Results are recorded under "Results" below after CI runs.
   - the biome has seasonal colours, winter snow and the mountain tags, and is cooler than a meadow;
   - the alpine village is in `#minecraft:village` and `#jugcraft:alpine_villages`, generates in Alpine Spawn, and has a grid tighter than vanilla's;
   - larch needles, natural and placed, follow autumn, winter, spring, summer and off on random ticks, and needles placed in winter start bare;
+  - out-of-date needles catch up together: one random tick turns a whole 4 by 4 crown;
   - the turn is gradual: a 16 by 16 patch turns gold over at least a week (logged);
   - a sapling grows a larch of at least 7 logs and 10 needles, all bare when grown in winter (logged);
   - an axe strips a larch log; the wood is in vanilla's tags and burns.
@@ -120,10 +122,16 @@ Results are recorded under "Results" below after CI runs.
   - The client test's world (seed `jugcraft`) started at 288, 120, 1200 in Alpine Spawn.
   - **But the nearest village of any kind was 781 blocks away** (-352, 768). The start search looked for the nearest village of any kind and rejected it when it was not in the biome, so the world started without one.
   - The start screenshot shows an alpine meadow with spruces, flowers and the autumn grass colours. The overview screenshot showed the ground, because the creative player fell back down before it was taken.
-- **Changes after part 1** (awaiting CI):
+- **Changes after part 1:**
   - the start search now looks for alpine villages only, from the origin outward;
   - the client test now fails if the world does not start at one;
   - the overview is taken standing on a barrier.
+- **Part 2, run [36953457067](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/36953457067) (commit e1081030): server tests green, client test failed.**
+  - All 300 required server game tests passed, including the larch tests. A 16 by 16 patch of needles turns gold between season days 261 and 275. A larch grown in winter had an 8-block trunk and 58 needles, all bare.
+  - The client test's larch scene: grown in spring, 21 needles, all green; in autumn, 30, all gold; in winter, 33, all bare. The screenshot shows the three side by side.
+  - **The start found an alpine village** at 3216, 2912 (the world started there; the start screenshot shows its spruce houses on terraced ground). **But the player stood in `minecraft:forest`**: the village's locate position, a corner of its start chunk, lay just outside the biome. The test failed on that. The start now moves to the nearest Alpine Spawn ground beside the village (awaiting CI).
+  - **The biome's size:** 2.5% of the 2 km square around the start (107 of 4,225 samples) and 0.8% of a 16 km square around the origin (32 of 4,225). That is smaller than "pretty large"; see the open questions.
+  - The larches in the start screenshot were still green on 2 October, as world generation places them, which prompted the catch-up above.
 
 ## World and event applicability
 - **Biome fit.** A cool, wet mountain meadow takes vanilla's cool meadow climate, so it borders taiga, forest and the mountain slopes as meadows did.
@@ -144,5 +152,5 @@ Results are recorded under "Results" below after CI runs.
 - **Open questions:**
   - Should other mods' world presets or data packs that change the Overworld also get the spawn move? Today only the vanilla multi-noise Overworld does.
   - Would a pillager outpost near the start be too harsh? Vanilla's meadows allow outposts, and Alpine Spawn joins `#minecraft:is_mountain`. Villages exclude outposts nearby.
-  - Is the biome large enough? The client test now logs its share of the land; if it is too small, all meadows (not only cool ones) could become Alpine Spawn.
+  - Is the biome large enough? It covers about 0.8% of the land (seed `jugcraft`), in patches a few hundred blocks across. Ways to grow it: all meadows (not only cool ones) could become Alpine Spawn, about 1.8 times the area, with vanilla meadows gone from new worlds; or it could also take the cool plateau's forest and taiga, which border it in vanilla's climate table.
   - Should larches also grow outside Alpine Spawn (for example in taiga)? Today they are unique to it.
