@@ -8,6 +8,16 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: more Halloween, batch 7, the haunted house inside (pull request pending, stacked on decorations batch 6)
+- **Haunted Chandelier:** eight candles on an iron ring that sways on its chain; at night a draft blows them all out and they relight one by one.
+- **Phantom Pipe Organ:** a three-by-two organ, one prop, that plays the opening of Bach's Toccata and Fugue in D minor on a click or redstone, its keys going down by themselves; at night it sometimes plays alone.
+- **Suit of Armor:** two blocks of plate on a stand whose helmet slowly turns to watch the nearest player; a red glow in its visor at night.
+- **Dust Sheet:** drape it over a chair, stair, slab, chest or bookshelf; it keeps what is under it (a chest's contents too) until you pull it off. At night some sheets seem to breathe.
+- **Spirit Mirror:** at night a pale face fades into the glass now and then.
+- **Tattered Curtains:** cheesecloth drapes up to eight blocks long that open and shut together and sway in a draft.
+- **Creepy Doll:** its head never moves while you watch, but it has turned every time you look back.
+- The sway, flames, keys, helmet, sheets, face, curtains and doll's head are drawn by each client. The checker compares the numbers and the organ's tune with Java. New server game tests and a client test with screenshots.
+
 ### Agriculture: Halloween decorations, batch 6, the haunted house and yard (pull request pending, stacked on batch 5)
 - **Rocking Chair:** sit in it and it rocks under you; at night, empty, it rocks on its own and creaks.
 - **Lurking Eyes:** glowing eyes that peer out of a hedge at night, blink, and vanish when you come within four blocks.
