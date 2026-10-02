@@ -873,6 +873,61 @@ def decor8_blocks():
 def decor8_items():
     return decor8_blocks()
 
+
+# ---------------------------------------------------------------- Halloween decorations, batch 9: the yard and porch
+# Yard Inflatables (InflatableBlock + DecorationBlockEntity, two blocks tall, one block per design): switched on by hand
+# or by a redstone signal, the blower fills the figure over `inflate_ticks`, it glows from inside (light `light`) and
+# wobbles `wobble_degrees`; switched off, it sags flat over `deflate_ticks` (drawn by the client).
+INFLATABLES = {"designs": ["ghost", "cat", "pumpkin", "spider"], "display": {"ghost": "Inflatable Ghost", "cat": "Inflatable Black Cat",
+                                                                               "pumpkin": "Inflatable Pumpkin Stack", "spider": "Inflatable Spider"},
+               "inflate_ticks": 40, "deflate_ticks": 60, "light": 7, "wobble_degrees": 3.0, "wobble_period": 45}
+# The Porch Witch (PorchWitchBlock + PorchWitchBlockEntity, two blocks tall): stirs her pot slowly; when someone walks up
+# within `reach` blocks after nobody was there, she cackles and stirs hard for `cackle_ticks`, then won't again for
+# `cooldown_ticks`. Her head follows the nearest player within `watch_range`.
+PORCH_WITCH = {"block": "porch_witch", "display": "Animatronic Porch Witch", "reach": 4.0, "cackle_ticks": 40, "cooldown_ticks": 200,
+               "stir_period": 60, "fast_stir_period": 16, "watch_range": 8.0}
+# Grasping Hands (GraspingHandsBlock): something stepping on them (not sneaking) is grabbed by the ankle: Slowness
+# `slowness_level` for `slow_ticks`; the hands stay up `grab_ticks`, then sink back and rest `rest_ticks`.
+GRASPING_HANDS = {"block": "grasping_hands", "display": "Grasping Hands", "slow_ticks": 30, "slowness_level": 2, "grab_ticks": 15,
+                  "rest_ticks": 40}
+# The Poseable Skeleton (PoseableSkeletonBlock, two blocks tall): use it to pose it: sitting, waving, lounging, hanging.
+POSEABLE_SKELETON = {"block": "poseable_skeleton", "display": "Poseable Skeleton", "poses": ["sitting", "waving", "lounging", "hanging"]}
+# Bone Wind Chimes (BoneWindChimesBlock + DecorationBlockEntity): hang under a block; `bones` bones swing `calm_swing`
+# degrees, up to `storm_swing` in a thunderstorm, and clack now and then (more often and louder in rain and storms).
+WIND_CHIMES = {"block": "bone_wind_chimes", "display": "Bone Wind Chimes", "bones": 5, "calm_swing": 4.0, "rain_swing": 12.0,
+               "storm_swing": 28.0, "calm_chance": 12, "rain_chance": 4, "storm_chance": 1}
+# Weathervanes (WeathervaneBlock + DecorationBlockEntity, one block per design): the vane turns to the wind, the same in
+# the whole world (Weathervane.wind), at most `turn_speed` degrees a tick; storms make it swing about.
+WEATHERVANES = {"designs": ["bat", "witch"], "display": {"bat": "Bat Weathervane", "witch": "Witch Weathervane"}, "turn_speed": 3.0}
+# The Spooky Sign (SpookySignBlock + SpookySignBlockEntity): painted `words` (use to change them) or, like a gravestone,
+# your own words from a named Name Tag or an anvil, at most `max_length` characters.
+SPOOKY_SIGN = {"block": "spooky_sign", "display": "Spooky Sign", "words": ["beware", "keep_out", "turn_back", "go_away", "no_trespassing",
+                                                                            "abandon_hope"], "max_length": 50}
+# The Haunted Archway (HauntedArchwayBlock, a multi-block MultiDecorationBlock): two stone pillars and an iron arch,
+# `width` blocks wide and `height` tall, with a lantern hanging on each side (light `light`), lit or put out by hand.
+HAUNTED_ARCHWAY = {"block": "haunted_archway", "display": "Haunted Archway", "width": 3, "height": 3, "light": 14}
+# The Dead Hollow Tree (DeadHollowTreeBlock, a multi-block MultiDecorationBlock): a dead trunk `height` blocks tall with
+# bare branches, lanterns hanging from two of them (light `light`), a hollow at its foot and a face in its bark.
+DEAD_TREE = {"block": "dead_hollow_tree", "display": "Dead Hollow Tree", "height": 4, "light": 13}
+
+
+def inflatable(design):
+    return f"inflatable_{design}"
+
+
+def weathervane(design):
+    return f"{design}_weathervane"
+
+
+def decor9_blocks():
+    return ([inflatable(d) for d in INFLATABLES["designs"]] + [PORCH_WITCH["block"], GRASPING_HANDS["block"], POSEABLE_SKELETON["block"],
+                                                              WIND_CHIMES["block"]]
+            + [weathervane(d) for d in WEATHERVANES["designs"]] + [SPOOKY_SIGN["block"], HAUNTED_ARCHWAY["block"], DEAD_TREE["block"]])
+
+
+def decor9_items():
+    return decor9_blocks()
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -1239,6 +1294,46 @@ SHAPED = [
      "result": "raven_perch", "count": 1, "category": "building"},
     {"id": "black_cat_figure", "pattern": ["BGB", "BBB"], "key": {"B": "minecraft:black_terracotta", "G": "minecraft:glowstone_dust"},
      "result": "black_cat_figure", "count": 1, "category": "building"},
+    # Decorations batch 9: wool figures over a redstone blower; a witch of wool round a cauldron with redstone inside;
+    # rotten hands of bone in dirt; a skeleton of bones; bones hung on string from an iron hook; iron vanes painted
+    # black or purple on an iron pole; a painted plank sign on a stick; mossy pillars under an iron arch with lanterns;
+    # a dead tree of logs with lanterns and a jack o'lantern's face.
+    {"id": "inflatable_ghost", "pattern": ["WDW", "WWW", "NRN"], "key": {"W": "minecraft:white_wool", "D": "minecraft:black_dye",
+                                                                      "N": "minecraft:iron_nugget", "R": "minecraft:redstone"},
+     "result": "inflatable_ghost", "count": 1, "category": "redstone"},
+    {"id": "inflatable_cat", "pattern": ["WDW", "WWW", "NRN"], "key": {"W": "minecraft:black_wool", "D": "minecraft:yellow_dye",
+                                                                    "N": "minecraft:iron_nugget", "R": "minecraft:redstone"},
+     "result": "inflatable_cat", "count": 1, "category": "redstone"},
+    {"id": "inflatable_pumpkin", "pattern": ["WDW", "WWW", "NRN"], "key": {"W": "minecraft:orange_wool", "D": "minecraft:purple_dye",
+                                                                        "N": "minecraft:iron_nugget", "R": "minecraft:redstone"},
+     "result": "inflatable_pumpkin", "count": 1, "category": "redstone"},
+    {"id": "inflatable_spider", "pattern": ["WDW", "WWW", "NRN"], "key": {"W": "minecraft:black_wool", "D": "minecraft:spider_eye",
+                                                                       "N": "minecraft:iron_nugget", "R": "minecraft:redstone"},
+     "result": "inflatable_spider", "count": 1, "category": "redstone"},
+    {"id": "porch_witch", "pattern": [" P ", "BRB", " C "], "key": {"P": "minecraft:purple_wool", "B": "minecraft:black_wool",
+                                                                 "R": "minecraft:redstone", "C": "minecraft:cauldron"},
+     "result": "porch_witch", "count": 1, "category": "redstone"},
+    {"id": "grasping_hands", "pattern": ["BFB", " D "], "key": {"B": "minecraft:bone", "F": "minecraft:rotten_flesh", "D": "minecraft:dirt"},
+     "result": "grasping_hands", "count": 1, "category": "building"},
+    {"id": "poseable_skeleton", "pattern": [" B ", "BBB", "B B"], "key": {"B": "minecraft:bone"},
+     "result": "poseable_skeleton", "count": 1, "category": "building"},
+    {"id": "bone_wind_chimes", "pattern": [" N ", "SPS", "BBB"], "key": {"N": "minecraft:iron_nugget", "S": "minecraft:string",
+                                                                      "P": "#minecraft:wooden_slabs", "B": "minecraft:bone"},
+     "result": "bone_wind_chimes", "count": 1, "category": "building"},
+    {"id": "bat_weathervane", "pattern": ["NDN", " I ", " I "], "key": {"N": "minecraft:iron_nugget", "D": "minecraft:black_dye",
+                                                                     "I": "#c:ingots/iron"},
+     "result": "bat_weathervane", "count": 1, "category": "building"},
+    {"id": "witch_weathervane", "pattern": ["NDN", " I ", " I "], "key": {"N": "minecraft:iron_nugget", "D": "minecraft:purple_dye",
+                                                                       "I": "#c:ingots/iron"},
+     "result": "witch_weathervane", "count": 1, "category": "building"},
+    {"id": "spooky_sign", "pattern": ["PPP", "PDP", " S "], "key": {"P": "#minecraft:planks", "D": "minecraft:red_dye", "S": "minecraft:stick"},
+     "result": "spooky_sign", "count": 2, "category": "building"},
+    {"id": "haunted_archway", "pattern": ["LIL", "CIC", "C C"], "key": {"L": "minecraft:lantern", "I": "#c:ingots/iron",
+                                                                     "C": "minecraft:mossy_cobblestone"},
+     "result": "haunted_archway", "count": 1, "category": "building"},
+    {"id": "dead_hollow_tree", "pattern": ["LSL", "TJT", " T "], "key": {"L": "minecraft:lantern", "S": "minecraft:stick",
+                                                                      "T": "#minecraft:logs", "J": "minecraft:jack_o_lantern"},
+     "result": "dead_hollow_tree", "count": 1, "category": "building"},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -1283,7 +1378,7 @@ def all_blocks():
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
-            + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks())
+            + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks())
 
 
 def all_items():
@@ -1291,7 +1386,8 @@ def all_items():
             + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
-            + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items())
+            + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
+            + decor9_items())
 
 
 def owns(entry_id):

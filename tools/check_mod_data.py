@@ -763,6 +763,7 @@ def check_agriculture():
     check_decor6(java)
     check_decor7(java)
     check_decor8(java)
+    check_decor9(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1716,6 +1717,91 @@ def check_decor8(java):
             err(f"Missing entity texture {texture}")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for key in [f"tesla_coil.{k}" for k in ("on", "off")] + [f"specimen_jar.{s}" for s in jar["specimens"]]:
+        if f"message.{MOD}.{key}" not in lang:
+            err(f"Message {key} has no text")
+
+
+def check_decor9(java):
+    """The yard and porch: Java matches tools/agriculture.py (the inflatables' filling, light and wobble, the witch's
+    reach, cackle, rest and stirring, the hands' grab and rest, the chimes' swing and clacking, the vanes' turning, the
+    archway's and tree's sizes and light), the designs, poses and words agree, every block state has a model, the
+    block models turn only by 22.5 or 45 degrees, and the quads and textures the client draws exist."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    inf, witch, hands, chimes, vanes = ag.INFLATABLES, ag.PORCH_WITCH, ag.GRASPING_HANDS, ag.WIND_CHIMES, ag.WEATHERVANES
+    arch, tree = ag.HAUNTED_ARCHWAY, ag.DEAD_TREE
+    expected = {("InflatableBlock", "INFLATE_TICKS"): inf["inflate_ticks"], ("InflatableBlock", "DEFLATE_TICKS"): inf["deflate_ticks"],
+                ("InflatableBlock", "LIGHT"): inf["light"], ("InflatableBlock", "WOBBLE_DEGREES"): inf["wobble_degrees"],
+                ("InflatableBlock", "WOBBLE_PERIOD"): inf["wobble_period"],
+                ("PorchWitchBlock", "REACH"): witch["reach"], ("PorchWitchBlock", "CACKLE_TICKS"): witch["cackle_ticks"],
+                ("PorchWitchBlock", "COOLDOWN_TICKS"): witch["cooldown_ticks"], ("PorchWitchBlock", "STIR_PERIOD"): witch["stir_period"],
+                ("PorchWitchBlock", "FAST_STIR_PERIOD"): witch["fast_stir_period"], ("PorchWitchBlock", "WATCH_RANGE"): witch["watch_range"],
+                ("GraspingHandsBlock", "SLOW_TICKS"): hands["slow_ticks"], ("GraspingHandsBlock", "SLOWNESS_LEVEL"): hands["slowness_level"],
+                ("GraspingHandsBlock", "GRAB_TICKS"): hands["grab_ticks"], ("GraspingHandsBlock", "REST_TICKS"): hands["rest_ticks"],
+                ("BoneWindChimesBlock", "BONES"): chimes["bones"], ("BoneWindChimesBlock", "CALM_SWING"): chimes["calm_swing"],
+                ("BoneWindChimesBlock", "RAIN_SWING"): chimes["rain_swing"], ("BoneWindChimesBlock", "STORM_SWING"): chimes["storm_swing"],
+                ("BoneWindChimesBlock", "CALM_CHANCE"): chimes["calm_chance"], ("BoneWindChimesBlock", "RAIN_CHANCE"): chimes["rain_chance"],
+                ("BoneWindChimesBlock", "STORM_CHANCE"): chimes["storm_chance"], ("WeathervaneBlock", "TURN_SPEED"): vanes["turn_speed"],
+                ("HauntedArchwayBlock", "WIDTH"): arch["width"], ("HauntedArchwayBlock", "HEIGHT"): arch["height"],
+                ("HauntedArchwayBlock", "LIGHT"): arch["light"], ("DeadHollowTreeBlock", "HEIGHT"): tree["height"],
+                ("DeadHollowTreeBlock", "LIGHT"): tree["light"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    main = java.get("JugcraftAgriculture", "")
+    for name, designs in (("INFLATABLE_DESIGNS", inf["designs"]), ("WEATHERVANE_DESIGNS", vanes["designs"])):
+        match = re.search(rf"{name} = List\.of\(([^)]*)\);", main)
+        if not match or re.findall(r'"([a-z_]+)"', match.group(1)) != designs:
+            err(f"JugcraftAgriculture.{name} differs from tools/agriculture.py")
+    for source, enum, values in (("PoseableSkeletonBlock", "Pose", ag.POSEABLE_SKELETON["poses"]), ("SpookySignBlock", "Words", ag.SPOOKY_SIGN["words"]),
+                                 ("GraspingHandsBlock", "Phase", ["rest", "grab", "recover"])):
+        match = re.search(rf"enum {enum} implements StringRepresentable \{{\s*([A-Z_, ]+);", java.get(source, ""))
+        if not match or [v.strip().lower() for v in match.group(1).split(",")] != values:
+            err(f"{source}.{enum} differs from tools/agriculture.py")
+    if number("GravestoneBlockEntity", "MAX_LENGTH") != ag.SPOOKY_SIGN["max_length"]:
+        err("SPOOKY_SIGN's max_length differs from GravestoneBlockEntity.MAX_LENGTH")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    halves = ("lower", "upper")
+    wanted = {ag.PORCH_WITCH["block"]: {f"cackling={c},facing={f},half={h}" for c in booleans for f in horizontal for h in halves},
+              ag.GRASPING_HANDS["block"]: {f"facing={f},phase={p}" for f in horizontal for p in ("rest", "grab", "recover")},
+              ag.POSEABLE_SKELETON["block"]: {f"facing={f},half={h},pose={p}" for f in horizontal for h in halves for p in ag.POSEABLE_SKELETON["poses"]},
+              ag.WIND_CHIMES["block"]: {""},
+              ag.SPOOKY_SIGN["block"]: {f"facing={f},words={w}" for f in horizontal for w in ag.SPOOKY_SIGN["words"]},
+              arch["block"]: {f"facing={f},lit={l},part={p}" for f in horizontal for l in booleans for p in range(7)},
+              tree["block"]: {f"facing={f},lit={l},part={p}" for f in horizontal for l in booleans for p in range(tree["height"])}}
+    for design in inf["designs"]:
+        wanted[ag.inflatable(design)] = {f"facing={f},half={h},on={o},powered={p}" for f in horizontal for h in halves for o in booleans for p in booleans}
+    for design in vanes["designs"]:
+        wanted[ag.weathervane(design)] = {""}
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+        for variant in ((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})).values():
+            model = load(ASSETS / "models" / f"{variant['model'].split(':')[1]}.json") or {}
+            for element in model.get("elements", []):
+                angle = element.get("rotation", {}).get("angle", 0)
+                if angle not in (-45, -22.5, 0, 22.5, 45):
+                    err(f"{variant['model']}: a box turns by {angle} degrees; block models only turn by 22.5 or 45")
+    quads = load(ASSETS / "decor9_quads.json") or {}
+    names = ([f"inflatable_{d}" for d in inf["designs"]] + ["porch_witch_arm", "porch_witch_head", "wind_chime_bone", "wind_chime_skull"]
+             + [f"weathervane_{d}" for d in vanes["designs"]])
+    for name in names:
+        if not quads.get(name):
+            err(f"decor9_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"decor9_quads.json: {name} uses a missing texture {quad['texture']}")
+                break
+    if not (ASSETS / "textures" / "entity" / "porch_witch_eyes.png").exists():
+        err("Missing entity texture porch_witch_eyes")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in [f"spooky_sign.{w}" for w in ag.SPOOKY_SIGN["words"]] + ["spooky_sign.painted", "spooky_sign.unnamed_tag"]:
         if f"message.{MOD}.{key}" not in lang:
             err(f"Message {key} has no text")
 

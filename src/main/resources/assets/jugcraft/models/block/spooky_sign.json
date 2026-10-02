@@ -1,0 +1,106 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jugcraft:block/spooky_sign_wood",
+    "wood": "jugcraft:block/spooky_sign_wood",
+    "stake": "jugcraft:block/spooky_sign_stake"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        0,
+        8
+      ],
+      "to": [
+        9,
+        9,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#stake"
+        },
+        "south": {
+          "texture": "#stake"
+        },
+        "east": {
+          "texture": "#stake"
+        },
+        "west": {
+          "texture": "#stake"
+        },
+        "up": {
+          "texture": "#stake"
+        },
+        "down": {
+          "texture": "#stake"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        7,
+        7.5
+      ],
+      "to": [
+        15,
+        15,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "down": {
+          "texture": "#wood"
+        }
+      }
+    },
+    {
+      "from": [
+        10.5,
+        14.5,
+        7.25
+      ],
+      "to": [
+        15.5,
+        16,
+        8.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "down": {
+          "texture": "#wood"
+        }
+      }
+    }
+  ]
+}

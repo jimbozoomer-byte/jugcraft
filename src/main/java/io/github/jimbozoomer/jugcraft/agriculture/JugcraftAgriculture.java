@@ -78,6 +78,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -186,6 +187,11 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> SARCOPHAGUS_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> RAVEN_PERCH_ENTITY;
 	public static BlockEntityType<BlackCatBlockEntity> BLACK_CAT_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> INFLATABLE_ENTITY;
+	public static BlockEntityType<PorchWitchBlockEntity> PORCH_WITCH_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> WIND_CHIMES_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> WEATHERVANE_ENTITY;
+	public static BlockEntityType<SpookySignBlockEntity> SPOOKY_SIGN_ENTITY;
 	/** The Dust Sheet: its item, and the block it becomes over what it covers. */
 	public static final String DUST_SHEET = "dust_sheet";
 	/** What a Dust Sheet may cover (block tag). */
@@ -923,7 +929,66 @@ public final class JugcraftAgriculture {
 			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
 			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
+
+		// Batch 9, the yard and porch: the Yard Inflatables, the Porch Witch, Grasping Hands, the Poseable Skeleton, Bone
+		// Wind Chimes, the Weathervanes, the Spooky Sign, the Haunted Archway and the Dead Hollow Tree.
+		List<Block> yard = new ArrayList<>();
+		List<Block> inflatables = new ArrayList<>();
+		for (String design : INFLATABLE_DESIGNS) {
+			inflatables.add(registerBlock("inflatable_" + design, props -> new InflatableBlock(props, design), BlockBehaviour.Properties.of()
+					.mapColor(MapColor.WOOL).strength(0.5F).sound(SoundType.WOOL).noOcclusion().lightLevel(InflatableBlock::light)
+					.pushReaction(PushReaction.POPPED)));
+		}
+		yard.addAll(inflatables);
+		INFLATABLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("inflatable"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(INFLATABLE_ENTITY, pos, state),
+						inflatables.toArray(Block[]::new)).build());
+		Block witch = registerBlock("porch_witch", PorchWitchBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().lightLevel(state -> state.getValue(PorchWitchBlock.HALF) == DoubleBlockHalf.LOWER ? 6 : 0)
+				.pushReaction(PushReaction.POPPED));
+		PORCH_WITCH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("porch_witch"),
+				FabricBlockEntityTypeBuilder.create(PorchWitchBlockEntity::new, witch).build());
+		Block hands = registerBlock("grasping_hands", GraspingHandsBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.DIRT)
+				.strength(0.5F).sound(SoundType.ROOTED_DIRT).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block poseable = registerBlock("poseable_skeleton", PoseableSkeletonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
+				.strength(1.0F).sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block chimes = registerBlock("bone_wind_chimes", BoneWindChimesBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
+				.strength(0.3F).sound(SoundType.BONE_BLOCK).noOcclusion().noCollision().pushReaction(PushReaction.POPPED));
+		WIND_CHIMES_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("bone_wind_chimes"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(WIND_CHIMES_ENTITY, pos, state), chimes).build());
+		yard.addAll(List.of(witch, hands, poseable, chimes));
+		List<Block> vanes = new ArrayList<>();
+		for (String design : WEATHERVANE_DESIGNS) {
+			vanes.add(registerBlock(design + "_weathervane", props -> new WeathervaneBlock(props, design), BlockBehaviour.Properties.of()
+					.mapColor(MapColor.COLOR_BLACK).strength(2.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED)));
+		}
+		yard.addAll(vanes);
+		WEATHERVANE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("weathervane"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(WEATHERVANE_ENTITY, pos, state),
+						vanes.toArray(Block[]::new)).build());
+		Block sign = registerBlock("spooky_sign", SpookySignBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		SPOOKY_SIGN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("spooky_sign"),
+				FabricBlockEntityTypeBuilder.create(SpookySignBlockEntity::new, sign).build());
+		Block archway = registerBlock("haunted_archway", HauntedArchwayBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+				.strength(2.0F, 6.0F).sound(SoundType.STONE).noOcclusion().lightLevel(HauntedArchwayBlock::light).pushReaction(PushReaction.IMMOVEABLE));
+		Block tree = registerBlock("dead_hollow_tree", DeadHollowTreeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(DeadHollowTreeBlock::light)
+				.pushReaction(PushReaction.IMMOVEABLE));
+		yard.addAll(List.of(sign, archway, tree));
+		for (Block block : yard) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		fire.add(sign, 5, 20);
+		fire.add(tree, 5, 5);
 	}
+
+	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
+	public static final List<String> INFLATABLE_DESIGNS = List.of("ghost", "cat", "pumpkin", "spider");
+
+	/** The Weathervanes' designs, one block each ({@code <design>_weathervane}). */
+	public static final List<String> WEATHERVANE_DESIGNS = List.of("bat", "witch");
 
 	/** The Leaf Piles' colours, one block each ({@code <colour>_leaf_pile}). */
 	public static final List<String> LEAF_PILE_COLOURS = List.of("red", "orange", "yellow");

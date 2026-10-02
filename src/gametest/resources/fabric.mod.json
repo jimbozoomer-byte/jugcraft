@@ -25,6 +25,7 @@
       "io.github.jimbozoomer.jugcraft.test.Decor6GameTests",
       "io.github.jimbozoomer.jugcraft.test.Decor7GameTests",
       "io.github.jimbozoomer.jugcraft.test.Decor8GameTests",
+      "io.github.jimbozoomer.jugcraft.test.Decor9GameTests",
       "io.github.jimbozoomer.jugcraft.test.PetroGameTests"
     ],
     "fabric-client-gametest": [
@@ -44,7 +45,8 @@
       "io.github.jimbozoomer.jugcraft.test.Decor5ClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.Decor6ClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.Decor7ClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.Decor8ClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.Decor8ClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.Decor9ClientGameTests"
     ]
   },
   "depends": {
