@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import java.io.Reader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.client.Minecraft;
@@ -15,10 +16,11 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The moving decorations' shapes, from assets/jugcraft/decor_quads.json (written by tools/decor6_data.py from the
- * same boxes as their block and item models): the rocking chair and the giant fake spider.
+ * same boxes as their block and item models: the rocking chair and the giant fake spider) and decor7_quads.json
+ * (tools/decor7_data.py: the haunted chandelier, the suit of armor's helmet and the creepy doll's head).
  */
 public final class DecorQuads {
-	private static final Identifier FILE = Jugcraft.id("decor_quads.json");
+	private static final List<Identifier> FILES = List.of(Jugcraft.id("decor_quads.json"), Jugcraft.id("decor7_quads.json"));
 	private static @Nullable Map<String, QuadModel> models;
 
 	private DecorQuads() {
@@ -34,18 +36,20 @@ public final class DecorQuads {
 
 	private static Map<String, QuadModel> load() {
 		Map<String, QuadModel> out = new HashMap<>();
-		Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(FILE);
-		if (resource.isEmpty()) {
-			Jugcraft.LOGGER.warn("Missing {}: rocking chairs and fake spiders will not be drawn", FILE);
-			return out;
-		}
-		try (Reader reader = resource.get().openAsReader()) {
-			JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
-			for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
-				out.put(entry.getKey(), QuadModel.parse(entry.getValue().getAsJsonArray()));
+		for (Identifier file : FILES) {
+			Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(file);
+			if (resource.isEmpty()) {
+				Jugcraft.LOGGER.warn("Missing {}: the decorations in it will not be drawn", file);
+				continue;
 			}
-		} catch (Exception e) {
-			Jugcraft.LOGGER.warn("Could not read {}", FILE, e);
+			try (Reader reader = resource.get().openAsReader()) {
+				JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+				for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
+					out.put(entry.getKey(), QuadModel.parse(entry.getValue().getAsJsonArray()));
+				}
+			} catch (Exception e) {
+				Jugcraft.LOGGER.warn("Could not read {}", file, e);
+			}
 		}
 		return out;
 	}

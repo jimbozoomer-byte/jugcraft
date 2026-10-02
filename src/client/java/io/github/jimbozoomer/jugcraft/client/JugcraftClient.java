@@ -72,6 +72,13 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.LURKING_EYES_ENTITY, LurkingEyesRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SILHOUETTE_WINDOW_ENTITY, SilhouetteWindowRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.GIANT_FAKE_SPIDER_ENTITY, GiantFakeSpiderRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.HAUNTED_CHANDELIER_ENTITY, HauntedChandelierRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.PIPE_ORGAN_ENTITY, PipeOrganRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SUIT_OF_ARMOR_ENTITY, SuitOfArmorRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.DUST_SHEET_ENTITY, DustSheetRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPIRIT_MIRROR_ENTITY, SpiritMirrorRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.TATTERED_CURTAINS_ENTITY, TatteredCurtainsRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CREEPY_DOLL_ENTITY, CreepyDollRenderer::new);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.FOG, FogParticle::provider);
 		ModelLayerRegistry.registerModelLayer(WispModel.LAYER, WispModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(HorsemanModel.LAYER, HorsemanModel::createLayer);

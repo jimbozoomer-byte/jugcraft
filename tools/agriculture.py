@@ -794,6 +794,51 @@ def decor6_blocks():
 def decor6_items():
     return decor6_blocks()
 
+
+# ---------------------------------------------------------------- Halloween decorations, batch 7: the haunted house inside
+# The Haunted Chandelier (HauntedChandelierBlock): hangs under a block (or a chain) with `candles` candles, lit by flint
+# and steel or a fire charge, giving 3 light for every two lit candles. At night a lit chandelier gets a random tick's
+# one-in-`gust_chance` gust that snuffs every candle; they relight themselves one every `relight_ticks`. The client
+# sways it `sway_degrees` every `sway_period` ticks.
+HAUNTED_CHANDELIER = {"block": "haunted_chandelier", "display": "Haunted Chandelier", "candles": 8, "gust_chance": 3, "relight_ticks": 15,
+                      "sway_degrees": 3.0, "sway_period": 160}
+# The Phantom Pipe Organ (PipeOrganBlock + PipeOrganBlockEntity): `width` blocks wide and `height` tall, one prop. A
+# click or a rising redstone signal plays the opening of Bach's Toccata and Fugue in D minor (public domain), arranged
+# here for note-block sounds over `tune_ticks` ticks; the keys go down by themselves. At night a random tick plays it
+# one time in `phantom_chance`.
+PIPE_ORGAN = {"block": "phantom_pipe_organ", "display": "Phantom Pipe Organ", "width": 3, "height": 2, "tune_ticks": 200, "phantom_chance": 4}
+# The Suit of Armor (SuitOfArmorBlock, a two-block TallDecorationBlock): its helmet turns, at most `turn_speed` degrees
+# a tick and `max_turn` either way, toward the nearest player within `watch_range` blocks (drawn by the client).
+SUIT_OF_ARMOR = {"block": "suit_of_armor", "display": "Suit of Armor", "watch_range": 10.0, "turn_speed": 4.0, "max_turn": 75.0}
+# The Dust Sheet (DustSheetItem, DustSheetBlock + DustSheetBlockEntity): covers a block of the block tag `tag`, keeping
+# it (and its contents) under the sheet; an empty hand pulls it off. One sheet in `breathe_chance` seems to breathe at
+# night (drawn by the client).
+DUST_SHEET = {"block": "dust_sheet", "item": "dust_sheet", "display": "Dust Sheet", "tag": "jugcraft:dust_sheet_coverable", "breathe_chance": 3,
+              "coverable": ["#minecraft:stairs", "#minecraft:slabs", "minecraft:chest", "minecraft:trapped_chest", "minecraft:barrel",
+                            "minecraft:crafting_table", "minecraft:bookshelf", "minecraft:chiseled_bookshelf", "minecraft:loom",
+                            "minecraft:cartography_table", "minecraft:fletching_table", "minecraft:smithing_table", "minecraft:note_block",
+                            "jugcraft:rocking_chair", "jugcraft:hay_bale_seat", "jugcraft:crystal_ball", "jugcraft:grimoire_stand",
+                            "jugcraft:creepy_doll", "jugcraft:spirit_mirror"]}
+# The Spirit Mirror (SpiritMirrorBlock): at night a pale face shows in the glass for `visible` ticks in every `period`
+# (fading in and out over `fade`), to viewers in front of it within `range` blocks.
+SPIRIT_MIRROR = {"block": "spirit_mirror", "display": "Spirit Mirror", "period": 600, "visible": 80, "fade": 20, "range": 8.0}
+# Tattered Curtains (TatteredCurtainsBlock): stack into a drape of up to `max_drop` blocks that opens and closes as one;
+# closed, it sways `sway` pixels at the hem (`night_sway` at night) every `sway_period` ticks.
+TATTERED_CURTAINS = {"block": "tattered_curtains", "display": "Tattered Curtains", "max_drop": 8, "sway": 1.0, "night_sway": 2.0,
+                     "sway_period": 70}
+# The Creepy Doll (CreepyDollBlock): each time a viewer looks back after `unseen_ticks` without seeing it, its head has
+# turned: toward them, or one time in `elsewhere_chance` somewhere else (drawn by the client).
+CREEPY_DOLL = {"block": "creepy_doll", "display": "Creepy Doll", "unseen_ticks": 10, "elsewhere_chance": 3}
+
+
+def decor7_blocks():
+    return [HAUNTED_CHANDELIER["block"], PIPE_ORGAN["block"], SUIT_OF_ARMOR["block"], DUST_SHEET["block"], SPIRIT_MIRROR["block"],
+            TATTERED_CURTAINS["block"], CREEPY_DOLL["block"]]
+
+
+def decor7_items():
+    return decor7_blocks()
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -1124,6 +1169,24 @@ SHAPED = [
     {"id": "giant_fake_spider", "pattern": ["S S", "WEW", "S S"], "key": {"S": "minecraft:string", "W": "minecraft:black_wool",
                                                                        "E": "minecraft:spider_eye"},
      "result": "giant_fake_spider", "count": 1, "category": "building"},
+    # Decorations batch 7: candles on an iron ring; iron pipes over a note block and bone keys in a plank case; iron
+    # plates on an armor stand; white carpet for a sheet; a gold-framed pane over soul sand; string cheesecloth on an
+    # iron-nugget rod; a clay-headed doll in a wool dress.
+    {"id": "haunted_chandelier", "pattern": ["NIN", "CCC"], "key": {"N": "minecraft:iron_nugget", "I": "#c:ingots/iron", "C": "#minecraft:candles"},
+     "result": "haunted_chandelier", "count": 1, "category": "building"},
+    {"id": "phantom_pipe_organ", "pattern": ["III", "BNB", "PPP"], "key": {"I": "#c:ingots/iron", "B": "minecraft:bone", "N": "minecraft:note_block",
+                                                                        "P": "#minecraft:planks"},
+     "result": "phantom_pipe_organ", "count": 1, "category": "redstone"},
+    {"id": "suit_of_armor", "pattern": [" I ", "IAI", " I "], "key": {"I": "#c:ingots/iron", "A": "minecraft:armor_stand"},
+     "result": "suit_of_armor", "count": 1, "category": "building"},
+    {"id": "dust_sheet", "pattern": ["CCC"], "key": {"C": "minecraft:white_carpet"}, "result": "dust_sheet", "count": 1, "category": "building"},
+    {"id": "spirit_mirror", "pattern": ["NNN", "NPN", "NSN"], "key": {"N": "minecraft:gold_nugget", "P": "minecraft:glass_pane",
+                                                                    "S": "minecraft:soul_sand"},
+     "result": "spirit_mirror", "count": 1, "category": "building"},
+    {"id": "tattered_curtains", "pattern": ["NNN", "SSS", "SSS"], "key": {"N": "minecraft:iron_nugget", "S": "minecraft:string"},
+     "result": "tattered_curtains", "count": 3, "category": "building"},
+    {"id": "creepy_doll", "pattern": [" C ", "WSW"], "key": {"C": "minecraft:clay_ball", "W": "#minecraft:wool", "S": "minecraft:string"},
+     "result": "creepy_doll", "count": 1, "category": "building"},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -1168,7 +1231,7 @@ def all_blocks():
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
-            + decor4_blocks() + decor5_blocks() + decor6_blocks())
+            + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks())
 
 
 def all_items():
@@ -1176,7 +1239,7 @@ def all_items():
             + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
-            + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items())
+            + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items())
 
 
 def owns(entry_id):

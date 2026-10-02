@@ -35,7 +35,8 @@ STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
 EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_replaceables",
                   "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires", "minecraft:mineable/axe",
                   "minecraft:mineable/shovel", "minecraft:leaves", "minecraft:eggs", "minecraft:dirt", "minecraft:mud",
-                  "minecraft:grass_blocks", "minecraft:sand", "minecraft:wool", "minecraft:logs"}
+                  "minecraft:grass_blocks", "minecraft:sand", "minecraft:wool", "minecraft:logs", "minecraft:candles",
+                  "minecraft:stairs", "minecraft:slabs"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -758,6 +759,7 @@ def check_agriculture():
     check_decor4(java)
     check_decor5(java)
     check_decor6(java)
+    check_decor7(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1568,6 +1570,85 @@ def check_decor6(java):
     for texture in [f"silhouette_window_{d}_lit" for d in window["designs"]] + ["lurking_eyes"]:
         if not (ASSETS / "textures" / "entity" / f"{texture}.png").exists():
             err(f"Missing entity texture {texture}")
+
+def check_decor7(java):
+    """The haunted house inside: Java matches tools/agriculture.py (the chandelier's candles, gusts and sway, the
+    organ's size, tune length and phantom chance, the suit's watching, the sheet's tag and breathing, the mirror's face,
+    the curtains' drape and sway, the doll's glances), every note of the organ's tune is in range, every block state
+    has a model, and the quads and textures the client draws exist."""
+    import decor7_data
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    chandelier, organ, armor, sheet = ag.HAUNTED_CHANDELIER, ag.PIPE_ORGAN, ag.SUIT_OF_ARMOR, ag.DUST_SHEET
+    mirror, curtains, doll = ag.SPIRIT_MIRROR, ag.TATTERED_CURTAINS, ag.CREEPY_DOLL
+    expected = {("HauntedChandelierBlock", "CANDLES"): chandelier["candles"], ("HauntedChandelierBlock", "GUST_CHANCE"): chandelier["gust_chance"],
+                ("HauntedChandelierBlock", "RELIGHT_TICKS"): chandelier["relight_ticks"],
+                ("HauntedChandelierBlock", "SWAY_DEGREES"): chandelier["sway_degrees"], ("HauntedChandelierBlock", "SWAY_PERIOD"): chandelier["sway_period"],
+                ("HauntedChandelierBlock", "RING_RADIUS"): decor7_data.RING,
+                ("PipeOrganBlock", "WIDTH"): organ["width"], ("PipeOrganBlock", "HEIGHT"): organ["height"],
+                ("PipeOrganBlock", "PHANTOM_CHANCE"): organ["phantom_chance"], ("PipeOrganBlockEntity", "TUNE_TICKS"): organ["tune_ticks"],
+                ("SuitOfArmorBlock", "WATCH_RANGE"): armor["watch_range"], ("SuitOfArmorBlock", "TURN_SPEED"): armor["turn_speed"],
+                ("SuitOfArmorBlock", "MAX_TURN"): armor["max_turn"], ("DustSheetBlock", "BREATHE_CHANCE"): sheet["breathe_chance"],
+                ("SpiritMirrorBlock", "PERIOD"): mirror["period"], ("SpiritMirrorBlock", "VISIBLE"): mirror["visible"],
+                ("SpiritMirrorBlock", "FADE"): mirror["fade"], ("SpiritMirrorBlock", "RANGE"): mirror["range"],
+                ("TatteredCurtainsBlock", "MAX_DROP"): curtains["max_drop"], ("TatteredCurtainsBlock", "SWAY"): curtains["sway"],
+                ("TatteredCurtainsBlock", "NIGHT_SWAY"): curtains["night_sway"], ("TatteredCurtainsBlock", "SWAY_PERIOD"): curtains["sway_period"],
+                ("CreepyDollBlock", "UNSEEN_TICKS"): doll["unseen_ticks"], ("CreepyDollBlock", "ELSEWHERE_CHANCE"): doll["elsewhere_chance"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    tune = re.search(r"TUNE = \{(.*?)\};", java.get("PipeOrganBlockEntity", ""), re.S)
+    notes = re.findall(r"\{(\d+), (\d+), (FLUTE|HARP|BASS)\}", tune.group(1)) if tune else []
+    if not notes:
+        err("PipeOrganBlockEntity.TUNE has no notes")
+    for tick, note, _ in notes:
+        if not 0 <= int(tick) < organ["tune_ticks"] or not 0 <= int(note) <= 24:
+            err(f"Organ note {{{tick}, {note}}} is outside the tune or a note block's range")
+    if f'Jugcraft.id("{sheet["tag"].split(":")[1]}")' not in java.get("JugcraftAgriculture", ""):
+        err(f"JugcraftAgriculture.DUST_SHEET_COVERABLE is not {sheet['tag']}")
+    values = (load(DATA / MOD / "tags" / "block" / f"{sheet['tag'].split(':')[1]}.json") or {}).get("values", [])
+    if sorted(values) != sorted(sheet["coverable"]):
+        err(f"The block tag {sheet['tag']} differs from DUST_SHEET's coverable blocks")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    wanted = {
+        chandelier["block"]: {f"burning={n},lit={b}" for n in range(chandelier["candles"] + 1) for b in booleans},
+        organ["block"]: {f"facing={f},part={p},playing={a},powered={b}" for f in horizontal for p in range(organ["width"] * organ["height"])
+                         for a in booleans for b in booleans},
+        armor["block"]: {f"facing={f},half={h}" for f in horizontal for h in ("lower", "upper")},
+        sheet["block"]: {""},
+        mirror["block"]: {f"facing={f}" for f in horizontal},
+        curtains["block"]: {f"facing={f},open={o},part={p}" for f in horizontal for o in booleans for p in ("single", "top", "middle", "bottom")},
+        doll["block"]: {f"facing={f}" for f in horizontal},
+    }
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    quads = load(ASSETS / "decor7_quads.json") or {}
+    for name in ("haunted_chandelier", "suit_of_armor_helmet", "creepy_doll_head"):
+        if not quads.get(name):
+            err(f"decor7_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"decor7_quads.json: {name} uses a missing texture {quad['texture']}")
+                break
+    for kind, texture in (("entity", "haunted_chandelier_flame"), ("entity", "suit_of_armor_glow"), ("entity", "dust_sheet_side"),
+                          ("entity", "spirit_mirror_face"), ("entity", "tattered_curtains"), ("entity", "tattered_curtains_hem"),
+                          ("block", "phantom_pipe_organ_ivory"), ("block", "phantom_pipe_organ_ebony"), ("block", "tattered_curtains_rod"),
+                          ("block", "dust_sheet")):
+        if not (ASSETS / "textures" / kind / f"{texture}.png").exists():
+            err(f"Missing {kind} texture {texture}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in ("day", "night"):
+        if f"message.{MOD}.{mirror['block']}.{key}" not in lang:
+            err(f"The spirit mirror's {key} message has no text")
+
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has
