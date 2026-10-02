@@ -5,6 +5,7 @@ Every pixel is generated here from fixed seeds; no Mojang texture is read, trace
 recolored. Colors follow the real minerals: cassiterite is glossy brown-black, tin is
 pale cool silver, bronze is warm golden-brown.
 """
+import json
 import random
 from pathlib import Path
 
@@ -101,12 +102,16 @@ def new():
     return Image.new("RGBA", (16, 16), (0, 0, 0, 0))
 
 
-def save(img, kind, name, scale=1):
+def save(img, kind, name, scale=1, animation=None):
+    """Saves a texture; with animation (the .mcmeta "animation" object), img is a vertical strip of frames."""
     path = TEX / kind / f"{name}.png"
     path.parent.mkdir(parents=True, exist_ok=True)
     if scale != 1:
         img = img.resize((16 * scale, 16 * scale), Image.NEAREST)
     img.save(path, optimize=True)
+    if animation is not None:
+        path.with_name(path.name + ".mcmeta").write_text(json.dumps({"animation": animation}, indent=2) + "\n",
+                                                         encoding="utf-8")
 
 
 def rock(palette, seed, streaks=False):
@@ -585,7 +590,6 @@ def gearbox_frame(angle):
 
 def save_animation(frames, name, frametime=2):
     """A vertical strip of 16x16 frames plus its .mcmeta, so the texture animates in game."""
-    import json
     strip = Image.new("RGBA", (16, 16 * len(frames)), (0, 0, 0, 0))
     for index, frame in enumerate(frames):
         strip.paste(frame, (0, 16 * index))

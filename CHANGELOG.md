@@ -13,6 +13,7 @@ No numbered release yet. Everything below is on `main`.
 - **Free runners:** boots with no fall damage and a one-block step.
 - **Power katana and power bow:** JE-powered weapons charged at the charging station; the bow fires energy arrows without ammo.
 - **Plastic blocks** in all sixteen dye colours, from plastic sheets.
+- High-detail art: an animated 32x32 energy katana, and double-resolution scuba gear and free runners.
 - Four advancements and handbook pages. Inspired by Mekanism and Mekanism: Additions (MIT); all code and art original.
 
 ### Unmerged: Four-ingot ore and bioethanol, batch 26

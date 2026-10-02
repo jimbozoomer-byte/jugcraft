@@ -7,6 +7,7 @@ handles are oak brown.
 from PIL import Image
 
 import armor_styles
+import hitech
 
 # Mask characters: digits are the head's palette shade; h/H the handle (dark/light); . is empty.
 HANDLE = [(58, 40, 22), (98, 70, 40)]
@@ -127,80 +128,7 @@ PAXEL = [
 ]
 
 
-# Batch 27 gear. Letters: R rubber (black), G glass (pale blue), Y yellow (hazard paint), and the digits are steel.
-SCUBA_MASK = [
-    "................",
-    "................",
-    "...RRRRRRRRRR...",
-    "..R4444444444R..",
-    "..R4GGGGGGGG4R..",
-    "..R4GGGGGGGG4R..",
-    "..R4GGGGGGGG4R..",
-    "..R4444444444R..",
-    "...RR22RR22RR...",
-    ".....RR..RR.....",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-]
-SCUBA_TANK = [
-    "................",
-    "......2332......",
-    ".....R2442R.....",
-    "....YYYYYYYY....",
-    "....Y444443Y....",
-    "....Y444443Y....",
-    "....Y444443Y....",
-    "....RRRRRRRR....",
-    "....Y444443Y....",
-    "....Y444443Y....",
-    "....Y444443Y....",
-    "....YYYYYYYY....",
-    ".....233332.....",
-    "................",
-    "................",
-    "................",
-]
-FREE_RUNNERS = [
-    "................",
-    "................",
-    "................",
-    "................",
-    "...RRR....RRR...",
-    "...R4R....R4R...",
-    "...R4R....R4R...",
-    "...R3R....R3R...",
-    "..RR3R....R3RR..",
-    ".R4443R..R3444R.",
-    ".RRRRRR..RRRRRR.",
-    "..Y..Y....Y..Y..",
-    "................",
-    "................",
-    "................",
-    "................",
-]
-# A curved single-edged blade with a glowing edge (G) and a wrapped rubber grip.
-POWER_KATANA = [
-    "..............34",
-    ".............34G",
-    "............34G.",
-    "...........34G..",
-    "..........34G...",
-    ".........34G....",
-    "........34G.....",
-    ".......34G......",
-    "......34G.......",
-    ".....3YG........",
-    "...YYYY.........",
-    "....RR..........",
-    "...RR...........",
-    "..RR............",
-    ".RR.............",
-    "R2..............",
-]
+# The power bow (batch 27). Letters: R rubber (black), G glass (pale blue), Y yellow (hazard paint), and the digits are steel.
 BOW_BASE = [
     "........RR......",
     ".......R4.W.....",
@@ -263,54 +191,6 @@ def bow_drawn(step):
     return ["".join(r) for r in rows]
 
 
-def scuba_layer(palette):
-    """Worn scuba gear on the humanoid sheet: a glass-fronted mask over the face and a yellow tank on the back."""
-    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
-    rubber, glass, yellow = EXTRA_COLORS["R"], EXTRA_COLORS["G"], EXTRA_COLORS["Y"]
-    # Mask: a rubber strap round the head (the head's side faces) and the glass window on the front (x 8..15).
-    for x in range(0, 32):
-        for y in (11, 12):
-            img.putpixel((x, y), rubber + (255,))
-    for x in range(9, 15):
-        for y in range(10, 14):
-            img.putpixel((x, y), glass + (255,))
-    for x in (8, 15):
-        for y in range(9, 15):
-            img.putpixel((x, y), tuple(palette[4]) + (255,))
-    # Tank on the back of the body (back face x 32..39, y 20..31) and harness straps on the front (x 20..27).
-    for x in range(33, 39):
-        for y in range(20, 31):
-            img.putpixel((x, y), (yellow if y not in (20, 30) else tuple(palette[2])) + (255,))
-    for y in range(20, 32):
-        for x in (21, 26):
-            img.putpixel((x, y), rubber + (255,))
-    return img
-
-
-def runners_layer(palette):
-    """Free runners on the humanoid sheet: black rubber boots with steel springs, on the bottom of the legs."""
-    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
-    rubber, yellow = EXTRA_COLORS["R"], EXTRA_COLORS["Y"]
-    for left, top, width, height in _faces(RIGHT_LEG)[2:]:
-        for y in range(top + height - 4, top + height):
-            for x in range(left, left + width):
-                c = tuple(palette[3]) if y == top + height - 3 else rubber
-                img.putpixel((x, y), c + (255,))
-        img.putpixel((left + width // 2, top + height - 4), yellow + (255,))
-    return img
-
-
-# Humanoid armor UV boxes (x, y, w, h, d) on the 64x32 sheet: each box's six faces sit in the usual net.
-HEAD, BODY, RIGHT_ARM, RIGHT_LEG = (0, 0, 8, 8, 8), (16, 16, 8, 12, 4), (40, 16, 4, 12, 4), (0, 16, 4, 12, 4)
-
-
-def _faces(box):
-    """The six faces of a box on the sheet as (left, top, width, height) rectangles."""
-    u, v, w, h, d = box
-    return [(u + d, v, w, d), (u + d + w, v, w, d),  # top, bottom
-            (u, v + d, d, h), (u + d, v + d, w, h), (u + d + w, v + d, d, h), (u + 2 * d + w, v + d, w, h)]
-
-
 def draw_all(save, save_armor, part_palette):
     """save(img, kind, name) as in generate_textures; save_armor(img, layer, name) for the worn layers."""
     for metal in ("bronze", "steel"):
@@ -324,13 +204,16 @@ def draw_all(save, save_armor, part_palette):
         save_armor(armor_styles.layer(metal, armor, False), "humanoid", metal)
         save_armor(armor_styles.layer(metal, armor, True), "humanoid_leggings", metal)
     steel = part_palette("steel")
-    for name, mask in (("scuba_mask", SCUBA_MASK), ("scuba_tank", SCUBA_TANK), ("free_runners", FREE_RUNNERS),
-                       ("power_katana", POWER_KATANA), ("power_bow", BOW_BASE)):
-        save(icon(mask, steel), "item", name)
+    save(icon(BOW_BASE, steel), "item", "power_bow")
     for step in range(3):
         save(icon(bow_drawn(step), steel), "item", f"power_bow_pulling_{step}")
-    save_armor(scuba_layer(steel), "humanoid", "scuba")
-    save_armor(runners_layer(steel), "humanoid", "free_runners")
+    # The rest of the high-tech gear is drawn at double resolution in tools/hitech.py.
+    save(hitech.scuba_mask_icon(), "item", "scuba_mask")
+    save(hitech.scuba_tank_icon(), "item", "scuba_tank")
+    save(hitech.free_runners_icon(), "item", "free_runners")
+    save(hitech.katana(), "item", "power_katana", animation={"frametime": 2})
+    save_armor(hitech.scuba_layer(), "humanoid", "scuba")
+    save_armor(hitech.runners_layer(), "humanoid", "free_runners")
     for tier, palette in list(VANILLA_TIERS.items()) + [("bronze", part_palette("bronze")),
                                                          ("steel", part_palette("steel"))]:
         save(icon(PAXEL, palette), "item", f"{tier}_paxel")

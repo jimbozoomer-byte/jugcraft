@@ -73,12 +73,13 @@ def texture(ref):
         return
     animated = png.with_name(png.name + ".mcmeta").is_file()
     with Image.open(png) as img:
-        # Animated textures are a vertical strip of 16x16 frames with an .mcmeta beside them.
+        # 16x16, or 32x32 for the high-detail gear (tools/hitech.py). Animated textures are a vertical strip of
+        # square frames with an .mcmeta beside them.
         width, height = img.size
-        if animated and not (width == 16 and height % 16 == 0 and height > 16):
-            err(f"Animated texture {ref} is {img.size}, expected a 16-wide strip of 16x16 frames")
-        elif not animated and img.size != (16, 16):
-            err(f"Texture {ref} is {img.size}, expected 16x16")
+        if animated and not (width in (16, 32) and height % width == 0 and height > width):
+            err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16 or 32x32 frames")
+        elif not animated and img.size not in ((16, 16), (32, 32)):
+            err(f"Texture {ref} is {img.size}, expected 16x16 or 32x32")
 
 
 def model(ref):

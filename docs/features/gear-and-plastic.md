@@ -65,7 +65,16 @@ Design inspiration: Mekanism and Mekanism: Additions by aidancbrady and team (MI
 - Recipes follow the `machines` feature switch (scuba gear, free runners, weapons) and `crude_oil` (plastic blocks).
 
 ## Dependencies and assets
-No new dependencies. Icons, bow draw frames, worn layers (scuba mask band, tank and straps; free-runner soles) and plastic textures are drawn by `tools/gear_textures.py` and `tools/plastic.py` from hand-made masks; nothing is traced or recoloured from vanilla or Mekanism.
+No new dependencies. All art is original; nothing is traced or recoloured from vanilla or Mekanism.
+- **High-detail gear** (`tools/hitech.py`; the owner asked for "higher quality"), drawn procedurally:
+  - **Power katana:** a 32x32 icon, animated, with a light running down the blade. Its shape follows an image the owner shared (wrapped grip, guard, collar, a long two-tone blade); its art is our own. It has a dark-spined energy blade with a white-hot edge, circuit nodes by the gold collar, a cyan-ringed guard, a wrapped grip with glowing cell windows, and a pommel status light.
+  - **Scuba mask, scuba tank and free runners:** 32x32 icons and 128x64 worn layers (twice the vanilla armor resolution; the game scales the UVs to the texture). The worn gear is:
+    - a dive mask with two tempered panes, a nose pocket, a strap and a head-up light;
+    - twin yellow tanks on a manifold;
+    - a webbing harness with a lit chest buckle and a pressure gauge;
+    - a dive computer on each wrist;
+    - white-shelled free runners with a cyan light strip, a sprung sole and a heel coil.
+- The power bow keeps its 16x16 icon and draw frames from `tools/gear_textures.py`, and the plastic textures come from `tools/plastic.py`.
 
 ## Verification
 - `tools/check_mod_data.py` (340 IDs):
@@ -80,7 +89,7 @@ No new dependencies. Icons, bow draw frames, worn layers (scuba mask band, tank 
   - `freeRunnersCancelFallDamage`: the attribute modifiers are present, alongside the armor.
   - `powerKatanaRunsOnCharge`: hits for 1 when empty; full damage and 1,000 JE when charged.
   - `powerBowFiresOnCharge`: one uncollectable arrow for 500 JE; an empty bow with no arrows fires nothing.
-- Client screenshots: `jugcraft_scuba_gear_worn` and `jugcraft_plastic_blocks`.
+- Client screenshots: `jugcraft_scuba_gear_worn` (with the katana in hand) and `jugcraft_plastic_blocks`.
 - Not run:
   - client play;
   - two players;
