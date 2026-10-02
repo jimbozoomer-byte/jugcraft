@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: fall additions 13, the Bat House (pull request pending, stacked on autumn foraging)
+- **Bat House:** a slatted roost to hang on a wall. Bats roost in it by day and pour out at dusk (Night Shift); at dawn the nearest bats come back in, up to four, each leaving a guano on its tray. A house with room gains a bat at dusk now and then. Scoop the guano with an empty hand; comparators read the bats.
+- **Bat Guano:** fertilizes the crops in a 3x3 patch (a dose of bone meal each), and four make a phosphate.
+- `FertilizerItem` takes its area and doses, so superphosphate and guano share one rule.
+- All decided on the server. The checker compares the house's numbers with Java. New server game tests and a client test with screenshots.
+
 ### Agriculture: fall additions 12, autumn foraging (pull request pending, stacked on the candy kitchen)
 - **Wild mushrooms:** chanterelles, porcini, puffballs, fly agarics and the glowing jack o'lantern mushroom grow in patches on forest floors (each in its own biomes), on soil. They spread in the shade, up to five of a kind together; bone meal spreads them in any light.
 - **Fairy rings:** on a full-moon night a mushroom may sprout a ring of its kind round it. Stand in a ring's centre on a full-moon night for Luck II (once a night) and Away with the Fairies.
