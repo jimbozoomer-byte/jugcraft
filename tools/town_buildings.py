@@ -462,7 +462,9 @@ def fountain():
             if r <= 4.3:
                 v.set(x, 0, z, S("polished_andesite") if r > 3.3 else S("stone_bricks"))
             if 3.3 < r <= 4.3:
-                v.set(x, 1, z, S("stone_brick_wall") if (x + z) % 2 else S("stone_bricks"))
+                # Full blocks only: a waterloggable rim block (a wall, a slab) beside two of the basin's sources would
+                # be filled by the game's infinite-water rule and spill out over the square (it did in CI).
+                v.set(x, 1, z, S("chiseled_stone_bricks") if (x + z) % 2 else S("stone_bricks"))
             elif r <= 3.3:
                 v.set(x, 1, z, S("water", level="0"))
                 v.set(x, 0, z, S("stone_bricks"))

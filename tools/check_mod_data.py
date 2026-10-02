@@ -3225,6 +3225,7 @@ def check_town():
     for shop in town_shops.SHOPS:
         if f"shop.jugcraft.{shop}" not in lang:
             err(f"lang: missing shop name {shop}")
+    check_town_water(data)
     kinds = {site["kind"] for site in data["sites"]}
     unknown = kinds - set(town_decor.KINDS) - {"centerpiece"}
     if unknown:
@@ -3237,6 +3238,46 @@ def check_town():
     base = int(re.search(r"SELL_BASE = (\d+);", menu).group(1))
     if most > base or max(len(info["buys"]) for info in town_shops.SHOPS.values()) + base > 127:
         err(f"ShopMenu.SELL_BASE {base} cannot number every offer as a menu button")
+
+
+# Blocks that can hold water (waterloggable) or let it through: beside the town's water they would spill it.
+TOWN_WATER_LEAKY = re.compile(r"(wall|slab|stairs|fence|pane|bars|lantern|chain|sign|trapdoor|door|leaves|ladder|campfire|candle|"
+                              r"coral|scaffolding|lightning|chest|rail|flower_pot|amethyst|dripleaf|sea_pickle|grate|conduit|"
+                              r"button|lever|torch|carpet|banner|plate|hopper)")
+
+
+def check_town_water(data):
+    """The town's water stays put: no water block has air beside or under it, and no block that can hold water (a
+    wall, a slab, stairs ...) touches two water blocks, or the game's infinite-water rule fills it and it spills over
+    whatever is beyond (the fountain's rim did in CI)."""
+    import base64
+    size, height, ymin = data["size"], data["height"], data["y_min"]
+    palette = data["palette"]
+    raw = base64.b64decode(data["blocks"])
+    vol = [int.from_bytes(raw[i:i + 2], "little") for i in range(0, len(raw), 2)]
+
+    def at(x, y, z):
+        if not (0 <= x < size and 0 <= z < size and ymin <= y < ymin + height):
+            return None
+        return vol[((y - ymin) * size + z) * size + x]
+
+    def water(i):
+        return i is not None and i > 1 and palette[i].startswith("minecraft:water")
+    cells = [(x, y, z) for y in range(ymin, ymin + height) for z in range(size) for x in range(size) if water(at(x, y, z))]
+    leaky = set()
+    for x, y, z in cells:
+        below = at(x, y - 1, z)
+        if below == 1:
+            err(f"town water at {x} {y} {z} has air under it")
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            n = at(x + dx, y, z + dz)
+            if n == 1:
+                err(f"town water at {x} {y} {z} has air beside it")
+            elif n is not None and n > 1 and not water(n) and TOWN_WATER_LEAKY.search(palette[n]):
+                wet = sum(water(at(x + dx + ex, y, z + dz + ez)) for ex, ez in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+                if wet >= 2 and (x + dx, y, z + dz) not in leaky:
+                    leaky.add((x + dx, y, z + dz))
+                    err(f"town: {palette[n]} at {x + dx} {y} {z + dz} touches {wet} water blocks and would fill with water")
 
 
 def check_pixel_hollows():
