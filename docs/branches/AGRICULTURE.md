@@ -885,6 +885,19 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Spin** wool into yarn on the Spinning Wheel, by hand or with redstone; **knit** it a row at a time on Knitting Needles into beanies, socks and sweaters, the colour of the blend of their rows.
 - Knitwear keeps out powder snow, takes dye like leather, and two pieces by a campfire make you cosy. Details: [more fall additions](../features/more-fall-additions.md#knitting-needles-and-yarn).
 
+### Pie baking
+
+| **Pie baking:** three Hearth Ovens (lit with an apple pie baked golden, lit with a pumpkin cream pie just gone in, and cold with a burnt cranberry pie) and a table of pies | **The ovens** up close |
+| --- | --- |
+| ![Pie baking](../images/ingame_pie_baking.jpg) | ![Hearth Ovens](../images/ingame_hearth_ovens.jpg) |
+| **Pies**: whole, with one, two and three slices gone, and burnt | **Dough, raw pies, slices** and an oven |
+| ![Pies](../images/ingame_pies.jpg) | ![Pastry, raw pies and slices](../images/ingame_pie_items.jpg) |
+
+*Real screenshots from the client game test that CI runs (`PieClientGameTests`, software rendering, small previews).*
+
+- **Bake** in a Hearth Oven fed coal, charcoal, coke or logs: a raw pie bakes golden at 600 points while the oven is hot enough, and burns at 1,200.
+- Pies are placed like cakes and eaten or cut a slice at a time. Details: [more fall additions](../features/more-fall-additions.md#the-hearth-oven).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

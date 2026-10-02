@@ -1,23 +1,23 @@
 # More Fall Additions
 
-Status: the candy kitchen (addition 11), autumn foraging (addition 12), the Bat House (addition 13), the Hay Golem (addition 14) and knitting (addition 15) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
+Status: the candy kitchen (addition 11), autumn foraging (addition 12), the Bat House (addition 13), the Hay Golem (addition 14), knitting (addition 15) and pie baking (addition 16) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets do another 10 detailed halloween and fall themed additions", then "start them now stacked on #33"). They follow the ten [fall additions](fall-additions.md), numbered on from them, one per pull request, each stacked on the one before:
 11. the candy kitchen: the Candy Kettle, its thermometer and the candy stages, the Candy Tray, and ten candies;
 12. autumn foraging: five wild mushrooms that spread in the shade and sprout fairy rings under the full moon, the Foraging Basket, and four mushroom dishes;
 13. the Bat House: a roost for bats that fly out at dusk and back at dawn, leaving guano, a fertilizer and a source of phosphate;
 14. the Hay Golem: a straw man with a carved pumpkin head that guards crops from crows and tends them, carrying the harvest home;
 15. knitting: the Spinning Wheel spins wool into yarn, Knitting Needles knit it into beanies, socks and five sweaters, and knitwear keeps you cosy by a campfire;
-16. pie baking (planned);
+16. pie baking: the Hearth Oven, a brick bread oven that bakes five pies golden (or black, left too long), placed on the table and eaten or cut a slice at a time;
 17. the Spirit Board (planned);
 18. wild turkeys (planned);
 19. the theremin (planned);
 20. the Día de Muertos ofrenda (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick. The Hay Golem is Discovery tier: four hay bales (36 wheat) and a carved pumpkin. Knitting is Discovery tier: planks, sticks and string (the wheel), two iron nuggets and two sticks (the needles), and wool.
-Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near. The Hay Golem is a farmhand: it keeps crows off a field and brings in the ripe crops, so a small farm runs while its farmer is away mining. Knitting is for crafters and shepherds: wool becomes clothes in any colour, warm against powder snow, and a set of knitwear by a campfire heals a party back up between trips.
+Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick. The Hay Golem is Discovery tier: four hay bales (36 wheat) and a carved pumpkin. Knitting is Discovery tier: planks, sticks and string (the wheel), two iron nuggets and two sticks (the needles), and wool. Pie baking is Discovery tier: seven bricks and a furnace (the oven), coal, charcoal or logs to burn, and wheat, an egg, sugar and the fillings: apples, a pumpkin and milk, the Festival Crops' cranberries, the Kitchen Garden's sweet potatoes or the cider mill's roasted chestnuts.
+Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near. The Hay Golem is a farmhand: it keeps crows off a field and brings in the ripe crops, so a small farm runs while its farmer is away mining. Knitting is for crafters and shepherds: wool becomes clothes in any colour, warm against powder snow, and a set of knitwear by a campfire heals a party back up between trips. Pie baking is for cooks: a pie is four filling slices from one bake, to set out at a feast or cut and carried on a trip, and baking it right takes watching the oven.
 
-Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night, a Hay Golem works all year, and knitwear is worn in any season.
+Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night, a Hay Golem works all year, knitwear is worn in any season, and pies bake all year.
 
 ## Player experience
 ### The Candy Kettle
@@ -148,6 +148,21 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 2. **Warm:** knitwear keeps out powder snow's cold, as leather does.
 3. **Cosy:** wearing two or more pieces within four blocks of a lit campfire (two up or down), you are cosy: Regeneration I, renewed every two seconds while you stay. A beanie, a sweater and socks by the fire earn **Snug as a Bug**.
 
+### The Hearth Oven
+1. A domed brick bread oven on a stone hearth, its arched mouth to the front and a chimney out of the back (seven bricks round a furnace). It faces you when you place it.
+2. **Fire:** use fuel on it to feed the fire: coal (80 seconds), charcoal (60) and coke (160) burn as long as they do in Jugcraft's generators; a log burns 15 seconds, as in a furnace. It banks up to 160 seconds of fire ("the fire is banked as high as it goes"). Lit, it glows (light 13), flames flicker in its mouth and smoke rises from the chimney.
+3. **Heat:** burning, it heats a degree every two ticks up to 100; out, it cools a degree every four ticks. Use it with an empty hand and no pie in to read its heat and the fire left.
+4. **Baking:** put a raw pie in (one at a time). It bakes only while the oven is 50 degrees or hotter: a point a tick, two at 100. At 600 points (30 seconds, 15 at full heat) it is baked, and a chime rings; at 1,200 it burns, with a hiss.
+5. **Taking it out:** an empty hand takes the pie out: still raw if it went too soon (put back in, it starts over), the pie if baked (**As Easy as Pie**), or a Burnt Pie if left too long. Broken, the oven drops its pie as it is.
+6. You can watch it bake: the pie sits in the oven's mouth, pale dough going golden, then black as it burns, its filling showing through the vent. Comparators read it: 0 empty, 1 to 12 baking, 15 baked, 1 burnt.
+
+### Pies
+1. **Pastry Dough:** two wheat and an egg make two.
+2. **Raw pies:** dough, two of a filling and sugar: Apple (two apples), Pumpkin Cream (a pumpkin and a milk bucket, which comes back), Cranberry (two cranberries), Sweet Potato (two sweet potatoes) and Chestnut (two roasted chestnuts). They stack to sixteen.
+3. **A baked pie is placed** on a table like a cake, in its tin, under a lattice crust. Each pie is four slices: a hungry player eats a slice with an empty hand, or cuts one off with a Carving Knife to carry away. The last slice takes the tin. Only a whole pie can be picked up again.
+4. **Slices:** Apple, Pumpkin Cream and Sweet Potato 4 hunger, Cranberry 3, Chestnut 5 (saturation 0.6, or 0.7 for sweet potato and chestnut). Comparators read the slices left.
+5. **A Burnt Pie** is eaten the same way, but a slice is only 1 hunger, and one time in three gives Hunger ("that was very burnt"). It can't be cut.
+
 ## Connections
 - Candy kitchen, input producer: sugar cane (sugar); bottles of water and cows (milk); cocoa, sweet berries, glow berries and bees; the Festival Crops (cranberries, roasted chestnuts) and the cider mill (mulling spices); dyes; sticks; vanilla copper and iron; Jugcraft's `jugcraft:heat_sources`.
 - Candy kitchen, output consumer:
@@ -186,6 +201,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - Knitting, entry path: early items only; no other Jugcraft block needed.
 - Knitting, required vs optional: optional; leather still keeps out the cold.
 - Knitting, trade and solo routes: one player can shear, spin and knit alone; a knitter can sell sweaters in any colour, and needles part-way through a garment can be handed on.
+- Pie baking, input producer: bricks (clay); a furnace; coal, charcoal, Jugcraft's coke, or logs; wheat, eggs and sugar; apples (vanilla and the cider mill's orchard), pumpkins and milk, the Festival Crops' cranberries, the Kitchen Garden's sweet potatoes, the chestnut trees' roasted chestnuts.
+- Pie baking, output consumer: players (food); the Harvest Feast Table (each kind of slice is another food on the table); trade.
+- Pie baking, technology connection: comparators read the oven (baked or burnt) and the pies (slices left), so a redstone line can call the baker; the oven burns the same coal and coke as the generators.
+- Pie baking, entry path: early items only; no other Jugcraft block needed.
+- Pie baking, required vs optional: optional; vanilla's pumpkin pie is unchanged.
+- Pie baking, trade and solo routes: one player can bake alone; a pie is a trade good, and slices carry.
 
 ## Balance and automation
 - **Candy kitchen:**
@@ -223,6 +244,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
   - Unravelling gives back a ball a row less one, so knitting and unravelling always loses yarn: no loop.
   - Cosiness: Regeneration I only, only near a lit campfire, and only while wearing two pieces; it doesn't stack with anything new.
   - Knitwear gives no armour, so it isn't a cheap alternative to leather in a fight.
+- **Pie baking:**
+  - Costs: the oven seven bricks and a furnace; a pie a pastry dough (a wheat and half an egg), two of a filling and a sugar, and its fire.
+  - Units: degrees (0 to 100), baking points, ticks, slices, hunger.
+  - Fuel: coal, charcoal and coke as long as generators burn them, a log as long as a furnace, so the oven is never a cheaper way to use fuel.
+  - Food: a pie is four slices, 12 to 20 hunger in all, against its fillings' own food (two apples or two roasted chestnuts are 8, two cranberries 4). Baking adds to them, as vanilla cooking does, for the dough, sugar, fuel and the baker's watching; a burnt pie is nearly worthless.
+  - No loop: a pie makes nothing that makes pies.
 
 ## Multiplayer and persistence
 - **Candy kitchen, server authority:** filling, reading, tipping out and pouring all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server, which checks the base, the sugar and flavour limits, and the temperature. Pulling and breaking up a tray go through vanilla's item use; the server checks the tray's own record of when it was poured and how often it has been pulled, by its own game time.
@@ -256,6 +283,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - **Knitting, bounded work:** cosiness looks at each player every 40 ticks, and looks for a campfire (9 by 5 by 9 blocks) only round a player wearing two pieces or more.
 - **Knitting, IDs:** block and item `spinning_wheel`, block entity `spinning_wheel`, items `yarn`, `knitting_needles`, `knit_beanie`, `wool_socks`, `knit_sweater`, `striped_sweater`, `pumpkin_sweater`, `bat_sweater`, `leaf_sweater`; data component `jugcraft:knitting`; equipment assets `knit`, `knit_striped`, `knit_pumpkin`, `knit_bat`, `knit_leaf`; item tag `jugcraft:knitwear`; recipes `spinning_wheel`, `knitting_needles` and a `<item>_dyed` recipe for the yarn and each garment; advancements `knit_one_purl_two`, `snug_as_a_bug`. All new. The garments and yarn join vanilla's `minecraft:freeze_immune_wearables` (garments) and `minecraft:cauldron_can_remove_dye`.
 - **Knitting, disable behaviour:** with the agriculture feature off, the recipes don't load and no one is made cosy; the wheel and needles still work, and everything stays registered.
+- **Pie baking, server authority:** feeding, putting in, taking out, eating and cutting go through vanilla's block use paths (reach, spawn protection, adventure mode) and are decided on the server; the fire, heat and baking run on the server.
+- **Pie baking, what clients get:** the oven's facing and whether it is lit (block state); its pie and how far it is baked, sent as it passes each tenth, to draw it; the pies' slices (block state).
+- **Pie baking, persistence:** the oven saves its fire, heat, pie and baking points; a pie's slices are its block state.
+- **Pie baking, bounded work:** an oven's tick is a few counters, and it sends an update only when its fire goes out or lights, a pie goes in or out, or the pie passes another tenth of its baking.
+- **Pie baking, IDs:** blocks and items `hearth_oven` (block entity too), `apple_pie`, `pumpkin_cream_pie`, `cranberry_pie`, `sweet_potato_pie`, `chestnut_pie`, `burnt_pie`; items `pastry_dough`, `raw_<filling>_pie` and `<filling>_pie_slice` for each filling; item tag `jugcraft:hearth_oven_wood`; recipes `hearth_oven`, `pastry_dough`, `raw_<filling>_pie`; advancement `as_easy_as_pie`. All new.
+- **Pie baking, disable behaviour:** with the agriculture feature off, the recipes don't load; ovens still bake and pies are still eaten, and everything stays registered.
 
 ## Dependencies and assets
 Candy kitchen:
@@ -285,6 +318,12 @@ Knitting:
 - Models, blockstates, item models (tinted by vanilla's `dyed_color`), equipment assets (the dyeable knit, a pattern over it), names, messages, tooltips, loot, tags and the dyeing recipes come from `tools/knitting_data.py`; the numbers from `KNITTING` in `tools/agriculture.py`. The recipe audit in `tools/check_mod_data.py` knows 26.3's dyeing recipe type.
 - The client's `SpinningWheelRenderer` draws the wheel turning while it spins, the skein on the distaff and the yarn growing on the bobbin.
 - Sounds are vanilla's (wool as it spins, is knitted and unravels, a bundle as the yarn is set out, leather armour as a garment is finished).
+
+Pie baking:
+- No new dependencies. Textures are drawn by code in `tools/pie_textures.py`: the oven's bricks and mortar, soot, embers and stone hearth; each pie's lattice top and its filling where cut, the fluted crust and the tin, a burnt pie; the pale crust the renderer tints; the raw pies, slices and dough as items.
+- Models (the oven lit and unlit; each pie whole and with one, two and three slices gone), blockstates, item models, names, messages, loot (a pie only while whole) and tags come from `tools/pie_data.py`; the numbers from `PIES` in `tools/agriculture.py`.
+- The client's `HearthOvenRenderer` draws the pie in the oven's mouth, its crust dough-pale, golden or black as it bakes.
+- Sounds are vanilla's (a fire charge as fuel goes in, wood for a pie in and out, a note block's chime when it is baked, fire going out when it burns, eating).
 
 ## Verification
 ### Candy kitchen verification
@@ -415,12 +454,36 @@ Found by CI and fixed before this record:
 
 Not run: a two-client dedicated-server playtest, and any play by hand.
 
+### Pie baking verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-30` stacked on knitting:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares pie baking with Java: the oven's fuel bank, a log's burn and the wood tag, heat, heating and cooling, baking heat, baked and burnt points and light; the pie's slices and a burnt slice's food and chance of Hunger; each filling's slice food and colour, in order; checks the registrations, every pie's models for each slice gone, its words, textures and loot (only while whole), the raw pies' recipes and the advancement) | Pass, 671 IDs |
+| `./gradlew build` on `e5847b6` (Build workflow run 37075993468) | Pass |
+| Game tests on the headless server, same run: 417 in total, 4 of them new here (`PieGameTests`) | **All 417 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `e5847b6` (run 37075993468), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#pie-baking) |
+
+The 4 new game tests (`PieGameTests`):
+1. coal banks a generator's 1,600 ticks of fire, twice, but not a third time past the 3,200 bank; a log burns 300 ticks and dirt doesn't burn; a raw pie goes in (not a second) and, taken out at once, comes back raw; out and below 50 degrees a pie doesn't bake; burning, the oven is lit;
+2. at full heat a pie bakes two points a tick: in time it is baked, a comparator reads 15, and it comes out as the pie, earning As Easy as Pie; left in too long it burns and comes out burnt;
+3. a hungry player eats a slice (four food for apple), a carving knife cuts one to take away, and the last slice takes the pie; comparators read the slices left; a whole pie drops itself and a cut one doesn't; a burnt pie's slice is one food;
+4. the oven's, the pastry's and the raw pies' recipes load, and the slices are foods.
+
+Found by CI and fixed before this record:
+- 26.3's `Level` has no `fuelValues()`, so the oven can't read vanilla's furnace fuel list. It burns what Jugcraft's generators burn, as long (`GeneratorFuels`: coal, charcoal, coke), and logs (`jugcraft:hearth_oven_wood`, `#minecraft:logs_that_burn`) for 300 ticks, as a furnace does (`2a91810`). A lava bucket and the other furnace fuels aren't oven fuel.
+
+Not run: a two-client dedicated-server playtest, and any play by hand.
+
 ## World and event applicability
 - A Candy Kettle works anywhere there is heat under it, in every dimension, all year. Nothing is seasonal.
 - Wild mushrooms generate only in newly generated Overworld chunks of their biomes; existing chunks don't get them, but one mushroom brought in spreads. They can be planted and spread in any dimension with soil and shade. Fairy rings bless only in the Overworld, on full-moon nights (by the Overworld's moon).
 - A Bat House keeps the Overworld's dusk and dawn wherever it is hung.
 - A Hay Golem works in any dimension.
 - Knitting works anywhere; cosiness needs a lit campfire, in any dimension.
+- The Hearth Oven bakes in any dimension.
 
 ## Rollout and open questions
 - Candy can't be poured by hoppers or dispensers; trays are filled and broken up by hand.
@@ -438,3 +501,6 @@ Not run: a two-client dedicated-server playtest, and any play by hand.
 - Knitwear has no armour value and no enchantments of its own.
 - A garment's pattern is fixed by its kind; only its colour changes.
 - Cosiness looks for a campfire only, not other fires or heat.
+- The oven holds one pie at a time, and hoppers don't feed it or take the pie out; baking is done by hand.
+- A coal block (800 seconds) is more than the oven can bank, so it is refused.
+- Vanilla's pumpkin pie is unchanged and isn't baked in the oven.
