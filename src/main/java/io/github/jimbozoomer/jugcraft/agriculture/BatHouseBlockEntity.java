@@ -26,6 +26,7 @@ import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * The bats roosting in a Bat House, and the guano under it. Bats roost by day and fly out at dusk; at dawn the bats
@@ -142,7 +143,7 @@ public class BatHouseBlockEntity extends BlockEntity {
 	/** Dawn: the nearest bats come in to roost, up to the house's room; each leaves a guano. Returns how many came in. */
 	public int dawn(ServerLevel level) {
 		List<? extends Entity> bats = level.getEntities(EntityTypes.BAT, new AABB(worldPosition).inflate(RETURN_RANGE), Entity::isAlive);
-		List<? extends Entity> nearest = bats.stream().sorted(Comparator.comparingDouble(bat -> bat.distanceToSqr(worldPosition.getCenter())))
+		List<? extends Entity> nearest = bats.stream().sorted(Comparator.comparingDouble(bat -> bat.distanceToSqr(Vec3.atCenterOf(worldPosition))))
 				.limit(CAPACITY - residents).toList();
 		for (Entity bat : nearest) {
 			bat.discard();
