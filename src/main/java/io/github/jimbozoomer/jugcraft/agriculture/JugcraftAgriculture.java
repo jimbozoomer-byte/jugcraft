@@ -225,6 +225,8 @@ public final class JugcraftAgriculture {
 	/** The cider a broken Cider Barrel keeps (its servings and when its batch started ageing). */
 	public static DataComponentType<BarrelCider> BARREL_CIDER;
 	public static BlockEntityType<CanningKettleBlockEntity> CANNING_KETTLE_ENTITY;
+	/** Crows: they come to fields by day and peck ripe crops, unless a scarecrow guards them. */
+	public static EntityType<Crow> CROW;
 	public static BlockEntityType<PantryShelfBlockEntity> PANTRY_SHELF_ENTITY;
 	/** A jar of preserves sealed in a Canning Kettle: it keeps for ever (its item model shows a cloth cap). */
 	public static DataComponentType<Boolean> SEALED;
@@ -1227,6 +1229,12 @@ public final class JugcraftAgriculture {
 		PANTRY_SHELF_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("pantry_shelf"),
 				FabricBlockEntityTypeBuilder.create(PantryShelfBlockEntity::new, pantryShelf).build());
 		registerItem("pantry_shelf", props -> new BlockItem(pantryShelf, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 4, crows and working scarecrows: crows come to fields by day; scarecrows keep them off.
+		CROW = entity("crow", EntityType.Builder.<Crow>of(Crow::new, MobCategory.AMBIENT).sized(0.5F, 0.6F).eyeHeight(0.45F)
+				.clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(CROW, Crow.createAttributes());
+		Crows.register();
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

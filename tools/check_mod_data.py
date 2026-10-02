@@ -792,6 +792,7 @@ def check_agriculture():
     check_chandlery(java)
     check_cider(java)
     check_pantry(java, main)
+    check_crows(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2276,6 +2277,42 @@ def check_pantry(java, main):
     for key in keys:
         if key not in lang:
             err(f"Missing words for {key}")
+
+
+def check_crows(java, main):
+    """Crows and working scarecrows: Crow.java, Crows.java and Scarecrows.java match CROWS in tools/agriculture.py; the
+    crow is registered with its attributes, named, and drops feathers."""
+    crows = ag.CROWS
+
+    def numbers(source):
+        return {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;",
+                                                                    java.get(source, ""))}
+
+    expected = {"Crow": {"FLEE_RADIUS": crows["flee_radius"], "SNEAK_FLEE_RADIUS": crows["sneak_flee_radius"], "RAID_RADIUS": crows["raid_radius"],
+                         "SEARCH_TRIES": crows["search_tries"], "PECK_TICKS": crows["peck_ticks"], "SETBACK": crows["setback"],
+                         "RAID_COOLDOWN": crows["raid_cooldown"], "RAID_COOLDOWN_SPREAD": crows["raid_cooldown_spread"],
+                         "LEAVE_HEIGHT": crows["leave_height"], "LEAVE_TICKS": crows["leave_ticks"]},
+                "Crows": {"SPAWN_TICKS": crows["spawn_ticks"], "SPAWN_CHANCE": crows["spawn_chance"], "MIN_DISTANCE": crows["min_distance"],
+                          "MAX_DISTANCE": crows["max_distance"], "FIELD_RADIUS": crows["field_radius"], "FIELD_TRIES": crows["field_tries"],
+                          "FLOCK_MIN": crows["flock"][0], "FLOCK_MAX": crows["flock"][1], "NEAR_CAP": crows["near_cap"],
+                          "NEAR_RANGE": crows["near_range"], "LEVEL_CAP": crows["level_cap"], "DAY_END": crows["day_end"]},
+                "Scarecrows": {"BARE": crows["guard"]["bare"], "HEADED": crows["guard"]["headed"], "LIT": crows["guard"]["lit"],
+                               "HEIGHT": crows["guard_height"]}}
+    for source, values in expected.items():
+        found = numbers(source)
+        for name, value in values.items():
+            if name not in found or abs(found[name] - value) > 1e-6:
+                err(f"{source}.{name} = {found.get(name)} differs from CROWS in tools/agriculture.py ({value})")
+    if f"Attributes.MAX_HEALTH, {crows['health']})" not in java.get("Crow", ""):
+        err("Crow.java health differs from CROWS in tools/agriculture.py")
+    if f'entity("{crows["entity"]}"' not in main or "FabricDefaultAttributeRegistry.register(CROW, Crow.createAttributes())" not in main:
+        err("JugcraftAgriculture.java must register the crow and its attributes")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"entity.jugcraft.{crows['entity']}") != crows["display"]:
+        err("The crow has no name")
+    table = load(DATA / "jugcraft" / "loot_table" / f"{crows['table']}.json") or {}
+    if "minecraft:feather" not in json.dumps(table):
+        err("A crow must drop feathers")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

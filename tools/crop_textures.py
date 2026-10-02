@@ -874,4 +874,6 @@ def crop_textures():
     out.update(cider_textures())
     from pantry_textures import pantry_textures  # and the preserves pantry
     out.update(pantry_textures())
+    from crow_textures import crow_textures  # and the crow
+    out.update(crow_textures())
     return out
