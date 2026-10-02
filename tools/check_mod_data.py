@@ -757,6 +757,7 @@ def check_agriculture():
     expected["chestnut_tree"] = ag.CHESTNUT_TREES["biomes"]
     expected["apple_tree"] = ag.CIDER["tree"]["biomes"]
     expected["mums"] = ag.MUM_PATCH["biomes"]
+    expected.update({name: info["biomes"] for name, info in ag.FORAGING["mushrooms"].items()})
     if patches != expected:
         err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
     seeds = re.search(r'GRASS_SEEDS = List\.of\(([^)]*)\)', main)
@@ -800,6 +801,7 @@ def check_agriculture():
     check_ghosts(java, main)
     check_face_paint(java, main)
     check_candy(java, main)
+    check_foraging(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2683,6 +2685,66 @@ def check_candy(java, main):
     for name, info in cd["flavours"].items():
         if (load(DATA / "jugcraft" / "tags" / "item" / "candy_flavours" / f"{name}.json") or {}).get("values") != info["items"]:
             err(f"Item tag jugcraft:candy_flavours/{name} differs from tools/agriculture.py")
+
+
+def check_foraging(java, main):
+    """Autumn foraging: WildMushroomBlock and FairyRings match FORAGING in tools/agriculture.py (spreading, the fairy ring's
+    size, chance, check interval and blessing), JugcraftAgriculture registers the mushrooms (the jack o'lantern
+    mushroom's light), the basket and the foods; every mushroom has its texture, words, loot and worldgen, the tags hold
+    the mushrooms and the forage, the cooked foods have their recipes, and the two advancements exist."""
+    fg = ag.FORAGING
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("WildMushroomBlock", "SPREAD_CHANCE"): fg["spread_chance"], ("WildMushroomBlock", "SPREAD_CAP"): fg["spread_cap"],
+                ("WildMushroomBlock", "SPREAD_LIGHT"): fg["spread_light"], ("WildMushroomBlock", "RING_CHANCE"): fg["ring_chance"],
+                ("FairyRings", "RING_MUSHROOMS"): fg["ring_mushrooms"], ("FairyRings", "INNER"): fg["inner"],
+                ("FairyRings", "OUTER"): fg["outer"], ("FairyRings", "CHECK_TICKS"): fg["check_ticks"],
+                ("FairyRings", "LUCK_TICKS"): fg["luck_ticks"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from FORAGING in tools/agriculture.py ({value})")
+    listed = re.search(r"WILD_MUSHROOMS = List\.of\(([^)]*)\);", main)
+    if not listed or [v.strip().strip('"') for v in listed.group(1).split(",")] != list(fg["mushrooms"]):
+        err("JugcraftAgriculture.WILD_MUSHROOMS differs from FORAGING['mushrooms'] in tools/agriculture.py")
+    glowing = [name for name, info in fg["mushrooms"].items() if info["light"]]
+    for name in glowing:
+        if f'id.equals("{name}") ? {fg["mushrooms"][name]["light"]} : 0' not in main:
+            err(f"The {name} must give light {fg['mushrooms'][name]['light']} (JugcraftAgriculture.java)")
+    if f'registerItem("{fg["basket"]}", ForagingBasketItem::new' not in main or "FairyRings.register();" not in main:
+        err("JugcraftAgriculture.java must register the Foraging Basket and the fairy rings")
+    for food in fg["foods"]:
+        if f'"{food}"' not in main:
+            err(f"JugcraftAgriculture.java must register {food}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"block.jugcraft.{m}" for m in fg["mushrooms"]] + [f"item.jugcraft.{fg['basket']}", "item.jugcraft.foraging_basket.hint",
+                                                             "message.jugcraft.fairy_ring.blessed"]
+    for key in keys:
+        if key not in lang:
+            err(f"Autumn foraging has no words for {key}")
+    for mushroom in fg["mushrooms"]:
+        for path in (ASSETS / "textures" / "block" / f"{mushroom}.png", DATA / "jugcraft" / "loot_table" / "blocks" / f"{mushroom}.json",
+                     DATA / "jugcraft" / "worldgen" / "placed_feature" / f"patch_{mushroom}.json"):
+            if not path.exists():
+                err(f"The {mushroom} needs {path.relative_to(ROOT)}")
+    for item in [fg["basket"]] + fg["foods"]:
+        if not (ASSETS / "textures" / "item" / f"{item}.json".replace(".json", ".png")).exists():
+            err(f"{item} needs its texture")
+    mushrooms = (load(DATA / "jugcraft" / "tags" / "item" / "wild_mushrooms.json") or {}).get("values")
+    if mushrooms != [f"jugcraft:{m}" for m in fg["mushrooms"]]:
+        err("Item tag jugcraft:wild_mushrooms differs from FORAGING['mushrooms'] in tools/agriculture.py")
+    forage = (load(DATA / "jugcraft" / "tags" / "item" / "forage.json") or {}).get("values")
+    if forage != fg["forage"]:
+        err("Item tag jugcraft:forage differs from FORAGING['forage'] in tools/agriculture.py")
+    for recipe in [fg["basket"]] + fg["foods"]:
+        if not (DATA / "jugcraft" / "recipe" / f"{recipe}.json").exists() \
+                and not (DATA / "jugcraft" / "recipe" / "pot_cooking" / f"{recipe}.json").exists():
+            err(f"{recipe} needs its recipe")
+    for advancement in ("fairy_ring", "forager"):
+        if not (DATA / "jugcraft" / "advancement" / f"{advancement}.json").exists():
+            err(f"Autumn foraging needs its advancement {advancement}")
 
 
 def check_model_uvs():

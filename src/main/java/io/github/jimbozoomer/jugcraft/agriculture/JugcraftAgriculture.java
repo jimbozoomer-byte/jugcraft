@@ -248,6 +248,8 @@ public final class JugcraftAgriculture {
 	/** The candy poured onto a Candy Tray. */
 	public static DataComponentType<CandyBatch> CANDY_BATCH;
 	public static BlockEntityType<CandyKettleBlockEntity> CANDY_KETTLE_ENTITY;
+	/** The five wild autumn mushrooms. */
+	public static final List<String> WILD_MUSHROOMS = List.of("chanterelle", "porcini", "puffball", "fly_agaric", "jack_o_lantern_mushroom");
 	/** The Candy Kettle's own candies (it also makes candy corn and caramel). */
 	public static final List<String> CANDIES = List.of("rock_candy", "salt_water_taffy", "hard_candy", "lollipop", "fudge", "cream_caramel",
 			"toffee", "burnt_sugar");
@@ -1341,6 +1343,23 @@ public final class JugcraftAgriculture {
 		candy("cream_caramel", 2, 0.2F);
 		candy("toffee", 2, 0.2F);
 		candy("burnt_sugar", 1, 0.0F);
+
+		// Fall additions 12, autumn foraging: five wild mushrooms that spread in the shade and sprout fairy rings under a
+		// full moon (the jack o'lantern mushroom glows), the Foraging Basket, and what they cook into.
+		for (String id : WILD_MUSHROOMS) {
+			int light = id.equals("jack_o_lantern_mushroom") ? 9 : 0;
+			Block mushroom = registerBlock(id, WildMushroomBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM)
+					.lightLevel(state -> light).randomTicks());
+			registerItem(id, props -> new BlockItem(mushroom, props), new Item.Properties().useBlockDescriptionPrefix().compostable(COMPOST_MEDIUM),
+					INGREDIENT_TAB);
+		}
+		registerItem("foraging_basket", ForagingBasketItem::new, new Item.Properties().stacksTo(1)
+				.component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY), TOOL_TAB);
+		food("sauteed_chanterelles", 5, 0.6F, COMPOST_MEDIUM_HIGH);
+		food("roasted_porcini", 6, 0.6F, COMPOST_MEDIUM_HIGH);
+		food("fried_puffball", 4, 0.5F, COMPOST_MEDIUM_HIGH);
+		stew("foragers_stew", 10, 0.8F);
+		FairyRings.register();
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
@@ -1461,6 +1480,12 @@ public final class JugcraftAgriculture {
 		wildPatch("cinderella_pumpkin", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FLORAL);
 		wildPatch("bottle_gourd", ConventionalBiomeTags.IS_JUNGLE, ConventionalBiomeTags.IS_SAVANNA);
 		wildPatch("mums", ConventionalBiomeTags.IS_FLORAL, ConventionalBiomeTags.IS_FOREST);
+		// Autumn foraging: wild mushrooms on forest floors.
+		wildPatch("chanterelle", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_BIRCH_FOREST);
+		wildPatch("porcini", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_FOREST);
+		wildPatch("puffball", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FOREST);
+		wildPatch("fly_agaric", ConventionalBiomeTags.IS_BIRCH_FOREST, ConventionalBiomeTags.IS_TAIGA);
+		wildPatch("jack_o_lantern_mushroom", ConventionalBiomeTags.IS_SPOOKY, ConventionalBiomeTags.IS_FOREST);
 	}
 
 	@SafeVarargs

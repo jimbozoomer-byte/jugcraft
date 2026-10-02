@@ -294,6 +294,11 @@ ITEMS = {
     "aged_cider": {"display": "Aged Cider", "food": [4, 0.6], "drink": ["ABSORPTION", 120], "tags": []},
     "mulled_cider": {"display": "Mulled Cider", "food": [6, 0.8], "drink": ["REGENERATION", 15], "tags": []},
     "mulling_spices": {"display": "Mulling Spices", "compost": "medium", "tags": []},
+    # Fall additions 12: wild mushrooms cooked on their own, and stewed together.
+    "sauteed_chanterelles": {"display": "Sautéed Chanterelles", "food": [5, 0.6], "compost": "medium_high", "tags": ["c:foods"]},
+    "roasted_porcini": {"display": "Roasted Porcini", "food": [6, 0.6], "compost": "medium_high", "tags": ["c:foods"]},
+    "fried_puffball": {"display": "Fried Puffball", "food": [4, 0.5], "compost": "medium_high", "tags": ["c:foods"]},
+    "foragers_stew": {"display": "Forager's Stew", "food": [10, 0.8], "stew": True, "tags": ["c:foods"]},
     "apple_cider_donut": {"display": "Apple Cider Donut", "food": [3, 0.4], "compost": "medium_high", "tags": ["c:foods/candy"]},
 }
 
@@ -539,6 +544,10 @@ HALLOWEEN_ADVANCEMENTS = {
                      "frame": "task"},
     "candy_maker": {"icon": "jugcraft:candy_kettle", "title": "Sweet Science", "description": "Pour a batch of candy from a Candy Kettle",
                     "frame": "task"},
+    "fairy_ring": {"icon": "jugcraft:fly_agaric", "title": "Away with the Fairies",
+                   "description": "Stand in a fairy ring under a full moon", "frame": "goal"},
+    "forager": {"icon": "jugcraft:foraging_basket", "title": "Forager", "description": "Carry all five wild mushrooms in a Foraging Basket",
+                "frame": "task"},
     "taffy_puller": {"icon": "jugcraft:salt_water_taffy", "title": "Pulling Power", "description": "Pull a tray of warm taffy until it's done",
                      "frame": "task"},
 }
@@ -1408,6 +1417,36 @@ def candy_blocks():
 def candy_items():
     return candy_blocks() + [CANDY["tray"]] + list(CANDY["candies"])
 
+# ---------------------------------------------------------------- Fall additions 12: autumn foraging
+# Wild mushrooms (WildMushroomBlock) grow on any soil (block tag minecraft:dirt) in patches on forest floors (`biomes`,
+# `patch`). One random tick in `spread_chance`, a mushroom with fewer than `spread_cap` of its kind within 4 blocks (and
+# 1 up or down) puts out another within 2, where the light is below `spread_light`; bone meal makes it try at once, in any
+# light. On a full-moon night one random tick in `ring_chance` sprouts a fairy ring of its kind instead: eight round a
+# circle of radius three. A fairy ring (FairyRings) is `ring_mushrooms` or more wild mushrooms between `inner` and `outer`
+# blocks from a centre; a player at its centre on a full-moon night is blessed once a night (Luck II for `luck_ticks`;
+# players looked at every `check_ticks`). `light`: the light a mushroom gives. The Foraging Basket (ForagingBasketItem)
+# holds forage (item tag `forage_tag`) like a bundle.
+FORAGING = {"basket": "foraging_basket", "basket_display": "Foraging Basket", "forage_tag": "jugcraft:forage",
+            "spread_chance": 25, "spread_cap": 5, "spread_light": 13, "ring_chance": 40,
+            "ring_mushrooms": 8, "inner": 2.5, "outer": 3.6, "check_ticks": 20, "luck_ticks": 6000,
+            "patch": {"rarity": 16, "tries": 12, "spread_xz": 4, "spread_y": 1},
+            "mushrooms": {"chanterelle": {"display": "Chanterelle", "biomes": ["IS_FOREST", "IS_BIRCH_FOREST"], "light": 0},
+                          "porcini": {"display": "Porcini", "biomes": ["IS_TAIGA", "IS_FOREST"], "light": 0},
+                          "puffball": {"display": "Puffball", "biomes": ["IS_PLAINS", "IS_FOREST"], "light": 0},
+                          "fly_agaric": {"display": "Fly Agaric", "biomes": ["IS_BIRCH_FOREST", "IS_TAIGA"], "light": 0},
+                          "jack_o_lantern_mushroom": {"display": "Jack o'Lantern Mushroom", "biomes": ["IS_SPOOKY", "IS_FOREST"], "light": 9}},
+            "forage": ["#jugcraft:wild_mushrooms", "minecraft:brown_mushroom", "minecraft:red_mushroom", "minecraft:sweet_berries",
+                       "minecraft:glow_berries", "minecraft:apple", "minecraft:cocoa_beans", "jugcraft:chestnut", "jugcraft:cranberries"],
+            "foods": ["sauteed_chanterelles", "roasted_porcini", "fried_puffball", "foragers_stew"]}
+
+
+def foraging_blocks():
+    return list(FORAGING["mushrooms"])
+
+
+def foraging_items():
+    return foraging_blocks() + [FORAGING["basket"]]
+
 
 def pantry_blocks():
     return [PANTRY["kettle"], PANTRY["shelf"]]
@@ -1526,6 +1565,10 @@ COOKING = {
     # Halloween harvest. Sugar melts into caramel; a bottle gourd dries hard enough to hollow out.
     "caramel": {"input": "minecraft:sugar", "xp": 0.1},
     "dried_bottle_gourd": {"input": "bottle_gourd", "xp": 0.1, "category": "misc"},
+    # Fall additions 12: wild mushrooms.
+    "sauteed_chanterelles": {"input": "chanterelle", "xp": 0.35},
+    "roasted_porcini": {"input": "porcini", "xp": 0.35},
+    "fried_puffball": {"input": "puffball", "xp": 0.35},
 }
 COOK_TIMES = {"smelting": 200, "smoking": 100, "campfire_cooking": 600}
 
@@ -1569,6 +1612,9 @@ POT_RECIPES = {
                        "time": 300},
     "cranberry_preserves": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:cranberries": 6, "minecraft:sugar": 2}, "time": 300},
     "glow_berry_jelly": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:glow_berries": 6, "minecraft:sugar": 2}, "time": 300},
+    # Fall additions 12: the three edible wild mushrooms stewed with a potato.
+    "foragers_stew": {"inputs": {"minecraft:bowl": 1, "jugcraft:chanterelle": 1, "jugcraft:porcini": 1, "jugcraft:puffball": 1,
+                                 "minecraft:potato": 1}, "time": 200},
     "pickled_beets": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:beetroot": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
     "pickled_peppers": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:pepper": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
     "corn_relish": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:corn": 2, "jugcraft:pepper": 1, "jugcraft:onion": 1,
@@ -1912,6 +1958,9 @@ SHAPED = [
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
     # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
     # (the ring) baked in; sugar round a red dye.
+    # Fall additions 12: a wicker basket of sugar cane with a stick handle.
+    {"id": "foraging_basket", "pattern": [" S ", "C C", "CCC"], "key": {"S": "minecraft:stick", "C": "minecraft:sugar_cane"},
+     "result": "foraging_basket", "count": 1, "category": "equipment"},
     # Fall additions 11: a copper sugar pot with a glass thermometer on its rim; a tin tray of iron nuggets.
     {"id": "candy_kettle", "pattern": ["CGC", "C C", "CCC"], "key": {"C": "minecraft:copper_ingot", "G": "minecraft:glass_pane"},
      "result": "candy_kettle", "count": 1, "category": "misc"},
@@ -2051,7 +2100,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks())
 
 
 def all_items():
@@ -2062,7 +2111,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items())
 
 
 def owns(entry_id):

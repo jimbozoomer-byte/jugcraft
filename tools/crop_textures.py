@@ -890,4 +890,6 @@ def crop_textures():
     out.update(face_paint_textures())
     from candy_textures import candy_textures  # and the candy kitchen
     out.update(candy_textures())
+    from foraging_textures import foraging_textures  # and autumn foraging
+    out.update(foraging_textures())
     return out
