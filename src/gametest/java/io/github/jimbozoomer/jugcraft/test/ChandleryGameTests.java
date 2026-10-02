@@ -23,7 +23,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
@@ -226,7 +226,7 @@ public class ChandleryGameTests {
 		ServerLevel level = helper.getLevel();
 		floor(helper);
 		BlockPos pos = new BlockPos(1, 2, 1);
-		LivingEntity zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(4, 2, 4));
+		LivingEntity zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(4, 2, 4));
 		ServerPlayer player = player(helper, new BlockPos(3, 2, 1), ItemStack.EMPTY);
 		AuraCandleBlockEntity.pulse(level, helper.absolutePos(pos), scented(2, false, CandleScent.WARDING, CandleScent.REVEALING));
 		helper.assertTrue(zombie.hasEffect(MobEffects.SLOWNESS) && zombie.hasEffect(MobEffects.WEAKNESS), "Warding slows and weakens the zombie");
