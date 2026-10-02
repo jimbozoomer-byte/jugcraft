@@ -870,4 +870,6 @@ def crop_textures():
     out.update(decor14_textures())
     from chandlery_textures import chandlery_textures  # and the chandlery
     out.update(chandlery_textures())
+    from cider_textures import cider_textures  # and the cider mill
+    out.update(cider_textures())
     return out

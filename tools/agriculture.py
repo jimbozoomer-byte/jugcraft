@@ -282,6 +282,19 @@ ITEMS = {
     "ghost_taffy": {"display": "Ghost Taffy", "food": [1, 0.1], "sweet": ["INVISIBILITY", 3], "tags": ["c:foods/candy"]},
     "fizz_rocks": {"display": "Fizz Rocks", "food": [1, 0.1], "sweet": ["JUMP_BOOST", 20], "tags": ["c:foods/candy"]},
     "witchs_licorice": {"display": "Witch's Licorice", "food": [1, 0.1], "sweet": ["NIGHT_VISION", 45], "tags": ["c:foods/candy"]},
+    # Fall additions 2, the cider mill. Apple seeds plant an apple sapling (from the pomace the Cider Press knocks out, or
+    # broken apple leaves); pomace feeds pigs and composts. Cider is drawn from the press (sweet) or the Cider Barrel as it
+    # ages (sparkling, then aged); mulled cider is sparkling cider simmered with mulling spices in the Cooking Pot. Every
+    # cider leaves its glass bottle when drunk; `bottle_back`: crafting with it gives the bottle back too (sweet cider, in the
+    # donuts). Sparkling cider doesn't: the Cooking Pot hands remainders back, and mulled cider keeps that bottle.
+    "apple_seeds": {"display": "Apple Seeds", "plants": "apple_sapling", "compost": "low", "tags": ["c:seeds/apple"]},
+    "apple_pomace": {"display": "Apple Pomace", "compost": "medium", "tags": ["minecraft:pig_food"]},
+    "sweet_cider": {"display": "Sweet Cider", "food": [3, 0.3], "drink": ["HASTE", 30], "bottle_back": True, "tags": []},
+    "sparkling_cider": {"display": "Sparkling Cider", "food": [3, 0.4], "drink": ["JUMP_BOOST", 60], "tags": []},
+    "aged_cider": {"display": "Aged Cider", "food": [4, 0.6], "drink": ["ABSORPTION", 120], "tags": []},
+    "mulled_cider": {"display": "Mulled Cider", "food": [6, 0.8], "drink": ["REGENERATION", 15], "tags": []},
+    "mulling_spices": {"display": "Mulling Spices", "compost": "medium", "tags": []},
+    "apple_cider_donut": {"display": "Apple Cider Donut", "food": [3, 0.4], "compost": "medium_high", "tags": ["c:foods/candy"]},
 }
 
 # ---------------------------------------------------------------- Festival crops (slice 3)
@@ -1150,6 +1163,38 @@ def chandlery_items():
     return chandlery_blocks()
 
 
+# ---------------------------------------------------------------- Fall additions 2: the cider mill
+# The apple tree (AppleLeavesBlock, like the chestnut tree): apple seeds plant a sapling that grows an oak-trunked tree
+# (worldgen/feature/apple_tree.json) whose leaves blossom and then hang with ripe apples, one stage in `fruit_chance`
+# random ticks; a right-click picks 1-3 vanilla apples. Wild apple trees grow in plains and flower-rich places.
+# The Cider Press (CiderPressBlock + entity) takes `capacity` apples (tag `apples`) in its hopper and basket together; an
+# empty hand turns its crank, grinding one apple into pulp, then its screw, pressing the pulp in `turns` turns, each letting
+# its share of the juice (a serving an apple) into a trough of `trough` servings; the last turn knocks out a pomace for
+# every `apples_per_pomace` apples (rounded up). Crank and screw each move once every `work_ticks`. A glass bottle draws
+# a serving: Sweet Cider. The Cider Barrel (CiderBarrelBlock + entity) holds `capacity` servings of one batch: fresh juice
+# ferments into Sparkling Cider after `sparkling_ticks` and matures into Aged Cider after `aged_ticks`, counted from the
+# last fresh serving poured in (a fermenting batch takes no more). A glass bottle draws whatever it has become.
+CIDER = {"tree": {"sapling": "apple_sapling", "leaves": "apple_leaves", "seed": "apple_seeds", "fruit_chance": 10,
+                  "pick": {"item": "minecraft:apple", "min": 1, "max": 3},
+                  # worldgen/feature/apple_tree.json: a rounded crown on a short oak trunk.
+                  "trunk": {"base_height": 4, "height_rand_a": 1}, "foliage": {"radius": 2, "height": 3},
+                  "biomes": ["IS_PLAINS", "IS_FLORAL"], "rarity": 12, "display": {"apple_sapling": "Apple Sapling",
+                                                                                    "apple_leaves": "Apple Leaves"}},
+         "press": {"block": "cider_press", "display": "Cider Press", "apples": "jugcraft:cider_apples",
+                   "apple_items": ["minecraft:apple"], "capacity": 8, "trough": 8, "turns": 4, "work_ticks": 8,
+                   "apples_per_pomace": 2},
+         "barrel": {"block": "cider_barrel", "display": "Cider Barrel", "capacity": 16, "sparkling_ticks": 24000,
+                    "aged_ticks": 72000, "stages": ["sweet_cider", "sparkling_cider", "aged_cider"]}}
+
+
+def cider_blocks():
+    return [CIDER["tree"]["sapling"], CIDER["tree"]["leaves"], CIDER["press"]["block"], CIDER["barrel"]["block"]]
+
+
+def cider_items():
+    return [CIDER["tree"]["leaves"], CIDER["press"]["block"], CIDER["barrel"]["block"]]
+
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -1262,10 +1307,18 @@ POT_RECIPES = {
     "ghost_taffy": {"inputs": {"minecraft:sugar": 2, "minecraft:phantom_membrane": 1}, "count": 4, "time": 200},
     "fizz_rocks": {"inputs": {"minecraft:sugar": 2, "minecraft:gunpowder": 1}, "count": 4, "time": 200},
     "witchs_licorice": {"inputs": {"minecraft:sugar": 2, "minecraft:wheat": 1, "minecraft:ink_sac": 1}, "count": 4, "time": 200},
+    # Fall additions 2: sparkling cider simmered with mulling spices, a bottle a batch.
+    "mulled_cider": {"inputs": {"jugcraft:sparkling_cider": 1, "jugcraft:mulling_spices": 1}, "time": 200},
 }
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    # Fall additions 2: mulling spices; apple seeds picked out of pomace; apple cider donuts (the cider's bottle comes back).
+    {"id": "mulling_spices", "inputs": ["minecraft:sugar", "minecraft:sweet_berries", "minecraft:cocoa_beans"], "result": "mulling_spices",
+     "count": 2, "category": "misc"},
+    {"id": "apple_seeds", "inputs": ["jugcraft:apple_pomace"], "result": "apple_seeds", "count": 1, "category": "misc"},
+    {"id": "apple_cider_donut", "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:sugar", "#minecraft:eggs", "jugcraft:sweet_cider"],
+     "result": "apple_cider_donut", "count": 4, "category": "misc"},
     # Decorations batch 14: cat ears on a headband with a tail of black wool.
     {"id": "cat_ears_and_tail", "inputs": ["minecraft:black_wool", "minecraft:black_wool", "minecraft:string", "minecraft:pink_dye"],
      "result": "cat_ears_and_tail", "count": 1, "category": "misc"},
@@ -1591,6 +1644,14 @@ SHAPED = [
     # Fall additions 1: a copper pot for melting wax.
     {"id": "wax_melting_pot", "pattern": ["C C", "C C", "CCC"], "key": {"C": "minecraft:copper_ingot"},
      "result": "wax_melting_pot", "count": 1, "category": "misc"},
+    # Fall additions 2: a press of planks round an iron screw over a grindstone (the grinder) and a trough of slabs; a
+    # barrel in a cradle of sticks with iron hoops and a gold tap.
+    {"id": "cider_press", "pattern": ["PIP", "PGP", "SSS"], "key": {"P": "#minecraft:planks", "I": "minecraft:iron_ingot",
+                                                                   "G": "minecraft:grindstone", "S": "#minecraft:wooden_slabs"},
+     "result": "cider_press", "count": 1, "category": "misc"},
+    {"id": "cider_barrel", "pattern": [" G ", "NBN", "S S"], "key": {"G": "minecraft:gold_nugget", "N": "minecraft:iron_nugget",
+                                                                    "B": "minecraft:barrel", "S": "minecraft:stick"},
+     "result": "cider_barrel", "count": 1, "category": "misc"},
     # Decorations batch 14: a black cape lined with red; linen strips and string; a black suit with bones and glowstone
     # for their glow; brown fur with leather and bone fangs; leather wings on sticks; a trunk of planks round a chest.
     {"id": "vampire_cape", "pattern": ["BRB", "BBB", "B B"], "key": {"B": "minecraft:black_wool", "R": "minecraft:red_wool"},
@@ -1690,13 +1751,15 @@ def giant_blocks():
 
 
 def planted_blocks():
-    """Blocks that a seed item places: crops, gourd stems and vines, the cranberry bush and the chestnut sapling."""
-    return crop_blocks() + [stem(gourd) for gourd in GOURDS] + [CRANBERRY["block"], CHESTNUT["sapling"], GIANT_PUMPKIN["vine"]]
+    """Blocks that a seed item places: crops, gourd stems and vines, the cranberry bush and the fruit trees' saplings."""
+    return (crop_blocks() + [stem(gourd) for gourd in GOURDS]
+            + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"], GIANT_PUMPKIN["vine"]])
 
 
 def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
-    return crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"]] + giant_blocks() + [potted(m) for m in MUMS]
+    return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"]] + giant_blocks()
+            + [potted(m) for m in MUMS])
 
 
 def all_blocks():
@@ -1706,7 +1769,7 @@ def all_blocks():
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
-            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks())
+            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks())
 
 
 def all_items():
@@ -1716,7 +1779,7 @@ def all_items():
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
-            + chandlery_items())
+            + chandlery_items() + cider_items())
 
 
 def owns(entry_id):

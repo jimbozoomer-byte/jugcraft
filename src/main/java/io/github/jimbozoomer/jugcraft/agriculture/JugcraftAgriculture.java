@@ -118,6 +118,10 @@ public final class JugcraftAgriculture {
 	public static final ResourceKey<Feature> CHESTNUT_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("chestnut"));
 	public static final TreeGrower CHESTNUT_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_chestnut", WeightedList.of(CHESTNUT_TREE),
 			WeightedList.of(), WeightedList.of(), CHESTNUT_TREE);
+	/** The apple tree's feature (data/jugcraft/worldgen/feature/apple_tree.json), grown by its sapling. */
+	public static final ResourceKey<Feature> APPLE_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("apple_tree"));
+	public static final TreeGrower APPLE_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_apple", WeightedList.of(APPLE_TREE),
+			WeightedList.of(), WeightedList.of(), APPLE_TREE);
 
 	private static final ResourceKey<ContextIntProvider> COMPOST_LOW = ContextIntProviders.COMPOSTABLE_LOW;
 	private static final ResourceKey<ContextIntProvider> COMPOST_MEDIUM = ContextIntProviders.COMPOSTABLE_MEDIUM;
@@ -216,6 +220,10 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<AuraCandleBlockEntity> AURA_CANDLE_ENTITY;
 	/** What an Aura Candle is made of (its wax, layers, colour, scents, strength and burn). */
 	public static DataComponentType<CandleMix> CANDLE_MIX;
+	public static BlockEntityType<CiderPressBlockEntity> CIDER_PRESS_ENTITY;
+	public static BlockEntityType<CiderBarrelBlockEntity> CIDER_BARREL_ENTITY;
+	/** The cider a broken Cider Barrel keeps (its servings and when its batch started ageing). */
+	public static DataComponentType<BarrelCider> BARREL_CIDER;
 	/** The outfits of decorations batch 14, worn on the head and drawn over the whole body (the client's CostumeLayer). */
 	public static final List<String> OUTFITS = List.of("vampire_cape", "mummy_wraps", "skeleton_suit", "werewolf_mask", "cat_ears_and_tail",
 			"bat_wings");
@@ -286,6 +294,7 @@ public final class JugcraftAgriculture {
 		registerBlock("cranberry_bush", CranberryBushBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SWEET_BERRY_BUSH)
 				.sound(SoundType.WET_GRASS));
 		registerChestnutTree();
+		registerAppleTree();
 
 		// Seeds, produce and food.
 		food("corn", 3, 0.6F, COMPOST_MEDIUM);
@@ -370,6 +379,15 @@ public final class JugcraftAgriculture {
 		sweet("ghost_taffy", 1, 0.1F, MobEffects.INVISIBILITY, 3);
 		sweet("fizz_rocks", 1, 0.1F, MobEffects.JUMP_BOOST, 20);
 		sweet("witchs_licorice", 1, 0.1F, MobEffects.NIGHT_VISION, 45);
+		// Fall additions 2, the cider mill: the apple tree's seeds, the press's pomace, cider at each stage and what is made with it.
+		seeds("apple_seeds", "apple_sapling", COMPOST_LOW);
+		plain("apple_pomace", COMPOST_MEDIUM);
+		drink("sweet_cider", 3, 0.3F, MobEffects.HASTE, 30, true);
+		drink("sparkling_cider", 3, 0.4F, MobEffects.JUMP_BOOST, 60);
+		drink("aged_cider", 4, 0.6F, MobEffects.ABSORPTION, 120);
+		drink("mulled_cider", 6, 0.8F, MobEffects.REGENERATION, 15);
+		plain("mulling_spices", COMPOST_MEDIUM);
+		food("apple_cider_donut", 3, 0.4F, COMPOST_MEDIUM_HIGH);
 
 		// Farm tools.
 		sickle("flint_sickle", 1, 131);
@@ -1162,6 +1180,20 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(AuraCandleBlockEntity::new, candle).build());
 		registerItem("aura_candle", props -> new AuraCandleItem(candle, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(16),
 				TOOL_TAB);
+
+		// Fall additions 2, the cider mill: the Cider Press and the Cider Barrel the cider ages in.
+		BARREL_CIDER = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("barrel_cider"),
+				DataComponentType.<BarrelCider>builder().persistent(BarrelCider.CODEC).networkSynchronized(BarrelCider.STREAM_CODEC).build());
+		Block press = registerBlock("cider_press", CiderPressBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		CIDER_PRESS_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("cider_press"),
+				FabricBlockEntityTypeBuilder.create(CiderPressBlockEntity::new, press).build());
+		registerItem("cider_press", props -> new BlockItem(press, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block barrel = registerBlock("cider_barrel", CiderBarrelBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		CIDER_BARREL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("cider_barrel"),
+				FabricBlockEntityTypeBuilder.create(CiderBarrelBlockEntity::new, barrel).build());
+		registerItem("cider_barrel", props -> new CiderBarrelItem(barrel, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
@@ -1237,6 +1269,19 @@ public final class JugcraftAgriculture {
 		fire.add(leaves, 30, 60);
 	}
 
+	/**
+	 * The apple tree: its sapling (planted from apple seeds) and leaves that blossom and fruit. Its trunk is vanilla oak, so
+	 * it needs no wood of its own.
+	 */
+	private static void registerAppleTree() {
+		registerBlock("apple_sapling", props -> new SaplingBlock(APPLE_GROWER, props) {
+		}, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING));
+		Block leaves = registerBlock("apple_leaves", AppleLeavesBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)
+				.mapColor(MapColor.PLANT));
+		registerItem("apple_leaves", props -> new BlockItem(leaves, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
+		FlammableBlockRegistry.getDefaultInstance().add(leaves, 30, 60);
+	}
+
 	/** Wild plant patches (data/jugcraft/worldgen) in the biomes each crop comes from. New chunks only. */
 	private static void registerWorldgen() {
 		if (!JugcraftConfig.isFeatureEnabled(FEATURE)) {
@@ -1262,6 +1307,7 @@ public final class JugcraftAgriculture {
 		wildPatch("warty_gourd", ConventionalBiomeTags.IS_SWAMP, ConventionalBiomeTags.IS_SPOOKY);
 		wildPatch("cranberry_bush", ConventionalBiomeTags.IS_SWAMP);
 		wildPatch("chestnut_tree", ConventionalBiomeTags.IS_FOREST);
+		wildPatch("apple_tree", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FLORAL);
 		// Halloween harvest: heirloom pumpkins and bottle gourds on grass, and mums in flower-rich places.
 		wildPatch("white_pumpkin", ConventionalBiomeTags.IS_BIRCH_FOREST, ConventionalBiomeTags.IS_SNOWY);
 		wildPatch("jarrahdale_pumpkin", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_WINDSWEPT);
@@ -1374,10 +1420,20 @@ public final class JugcraftAgriculture {
 
 	/** A drink in a glass bottle, like a potion: drunk even on a full stomach for a short effect, leaving the bottle. */
 	private static void drink(String id, int nutrition, float saturation, Holder<MobEffect> effect, int seconds) {
+		drink(id, nutrition, saturation, effect, seconds, false);
+	}
+
+	/**
+	 * As {@link #drink(String, int, float, Holder, int)}; {@code bottleBack}: crafting with it gives the bottle back (as
+	 * vanilla's honey bottle does). Only for drinks no Cooking Pot recipe cooks into another bottled drink, since the pot
+	 * hands remainders back too and the bottle would be doubled.
+	 */
+	private static void drink(String id, int nutrition, float saturation, Holder<MobEffect> effect, int seconds, boolean bottleBack) {
 		FoodProperties food = new FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation).alwaysEdible().build();
 		Consumable drunk = Consumables.defaultDrink().onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(effect, seconds * 20)))
 				.build();
-		registerItem(id, Item::new, new Item.Properties().food(food, drunk).usingConvertsTo(Items.GLASS_BOTTLE).stacksTo(16), FOOD_TAB);
+		Item.Properties properties = new Item.Properties().food(food, drunk).usingConvertsTo(Items.GLASS_BOTTLE).stacksTo(16);
+		registerItem(id, Item::new, bottleBack ? properties.craftRemainder(Items.GLASS_BOTTLE) : properties, FOOD_TAB);
 	}
 
 	private static void stew(String id, int nutrition, float saturation) {

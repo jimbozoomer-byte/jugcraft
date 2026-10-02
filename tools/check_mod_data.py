@@ -718,10 +718,17 @@ def check_agriculture():
         items[name] = ("sweet", int(n), float(sat), None, None)
         if ag.ITEMS.get(name, {}).get("sweet") != [effect, int(seconds)]:
             err(f"JugcraftAgriculture.java sweet {name} gives {effect} for {seconds} s, not as tools/agriculture.py says")
-    for name, n, sat, effect, seconds in re.findall(r'\bdrink\("([a-z_]+)", (\d+), ([\d.]+)F, MobEffects\.(\w+), (\d+)\)', main):
+    for name, n, sat, effect, seconds, back in re.findall(
+            r'\bdrink\("([a-z_]+)", (\d+), ([\d.]+)F, MobEffects\.(\w+), (\d+)(, true)?\)', main):
         items[name] = ("drink", int(n), float(sat), None, None)
         if ag.ITEMS.get(name, {}).get("drink") != [effect, int(seconds)]:
             err(f"JugcraftAgriculture.java drink {name} gives {effect} for {seconds} s, not as tools/agriculture.py says")
+        if bool(back) != bool(ag.ITEMS.get(name, {}).get("bottle_back")):
+            err(f"JugcraftAgriculture.java drink {name}: whether crafting gives its bottle back differs from tools/agriculture.py")
+        # The Cooking Pot hands remainders back, so a drink that gives its bottle back must not cook into another drink.
+        if back and any(f"jugcraft:{name}" in recipe["inputs"] and "drink" in ag.ITEMS.get(result, {})
+                        for result, recipe in ag.POT_RECIPES.items()):
+            err(f"{name} gives its bottle back, but a Cooking Pot recipe cooks it into another bottled drink (a bottle from nothing)")
     expected = {}
     for name, info in ag.ITEMS.items():
         food = info.get("food") or [None, None]
@@ -743,6 +750,7 @@ def check_agriculture():
     expected = {name: info["biomes"] for name, info in ag.WILD_CROPS.items()}
     expected.update({name: info["biomes"] for name, info in ag.FOUND_WILD.items()})
     expected["chestnut_tree"] = ag.CHESTNUT_TREES["biomes"]
+    expected["apple_tree"] = ag.CIDER["tree"]["biomes"]
     expected["mums"] = ag.MUM_PATCH["biomes"]
     if patches != expected:
         err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
@@ -777,6 +785,7 @@ def check_agriculture():
     check_decor13(java)
     check_decor14(java)
     check_chandlery(java)
+    check_cider(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2158,6 +2167,66 @@ def check_chandlery(java):
         if key not in lang:
             err(f"Missing words for {key}")
 
+
+
+def check_cider(java):
+    """The cider mill: Java matches CIDER in tools/agriculture.py (the apple leaves' fruiting and picking, the press's
+    capacity, trough, turns, pacing and pomace, the barrel's capacity, ageing times and stages), the apple tag holds its
+    items, every block state has its blockstate entry, every message has its words, and the press and barrel loot keep
+    what they should."""
+    tree, press, barrel = ag.CIDER["tree"], ag.CIDER["press"], ag.CIDER["barrel"]
+
+    def numbers(source, names):
+        return {name: int(value) for name, value in re.findall(rf"int ({names}) = (\d+);", java.get(source, ""))}
+
+    if numbers("AppleLeavesBlock", "FRUIT_CHANCE|PICK_MIN|PICK_MAX") != {"FRUIT_CHANCE": tree["fruit_chance"],
+                                                                         "PICK_MIN": tree["pick"]["min"], "PICK_MAX": tree["pick"]["max"]}:
+        err("AppleLeavesBlock.java differs from CIDER['tree'] in tools/agriculture.py")
+    if "Items.APPLE" not in java.get("AppleLeavesBlock", "") or tree["pick"]["item"] != "minecraft:apple":
+        err("AppleLeavesBlock.java must pick the apple CIDER['tree'] names")
+    expected = {"CAPACITY": press["capacity"], "TROUGH": press["trough"], "TURNS": press["turns"], "WORK_TICKS": press["work_ticks"],
+                "APPLES_PER_POMACE": press["apples_per_pomace"]}
+    if numbers("CiderPressBlockEntity", "|".join(expected)) != expected:
+        err("CiderPressBlockEntity.java differs from CIDER['press'] in tools/agriculture.py")
+    if f'Jugcraft.id("{press["apples"].split(":")[1]}")' not in java.get("CiderPressBlock", ""):
+        err("CiderPressBlock.java does not read the apple tag CIDER['press'] names")
+    expected = {"CAPACITY": barrel["capacity"], "SPARKLING_TICKS": barrel["sparkling_ticks"], "AGED_TICKS": barrel["aged_ticks"]}
+    entity = java.get("CiderBarrelBlockEntity", "")
+    if numbers("CiderBarrelBlockEntity", "|".join(expected)) != expected:
+        err("CiderBarrelBlockEntity.java differs from CIDER['barrel'] in tools/agriculture.py")
+    stages = re.search(r"STAGES = List\.of\(([^)]*)\)", entity)
+    if not stages or re.findall(r'"([a-z_]+)"', stages.group(1)) != barrel["stages"]:
+        err("CiderBarrelBlockEntity.STAGES differs from CIDER['barrel'] in tools/agriculture.py")
+    for stage in barrel["stages"] + ["mulled_cider"]:
+        if "drink" not in ag.ITEMS.get(stage, {}):
+            err(f"{stage}: every cider is a drink in ITEMS")
+    if (load(DATA / "jugcraft" / "tags" / "item" / f"{press['apples'].split(':')[1]}.json") or {}).get("values") != press["apple_items"]:
+        err(f"Item tag {press['apples']} differs from tools/agriculture.py")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    facings = ("north", "south", "east", "west")
+    if variants(press["block"]) != {f"facing={f}" for f in facings}:
+        err(f"{press['block']}: blockstate does not cover every facing")
+    if variants(barrel["block"]) != {f"cider={c},facing={f}" for c in range(len(barrel["stages"]) + 1) for f in facings}:
+        err(f"{barrel['block']}: blockstate does not cover every stage and facing")
+    if variants(tree["leaves"]) != {f"fruit={f}" for f in range(3)}:
+        err(f"{tree['leaves']}: blockstate does not cover every fruit stage")
+    cider = re.search(r'IntegerProperty\.create\("cider", 0, (\d+)\)', java.get("CiderBarrelBlock", ""))
+    if not cider or int(cider.group(1)) != len(barrel["stages"]):
+        err("CiderBarrelBlock.CIDER must run from 0 (empty) to the number of stages")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"message.jugcraft.{press['block']}.{k}" for k in re.findall(r'MESSAGES \+ (?:\([^"]*)?"([a-z_]+)"', java.get("CiderPressBlock", ""))]
+    keys += [f"message.jugcraft.{press['block']}.{k}" for k in ("full", "pressing")]
+    keys += [f"message.jugcraft.{barrel['block']}.{k}" for k in re.findall(r'MESSAGES \+ (?:\([^"]*)?"([a-z_]+)"', java.get("CiderBarrelBlock", ""))]
+    keys += [f"message.jugcraft.{barrel['block']}.{k}" for k in ("full", "fermenting")]
+    keys += ["tooltip.jugcraft.cider_barrel.servings"]
+    for key in keys:
+        if key not in lang:
+            err(f"Missing words for {key}")
+    table = load(DATA / "jugcraft" / "loot_table" / "blocks" / f"{barrel['block']}.json") or {}
+    if "jugcraft:barrel_cider" not in json.dumps(table):
+        err(f"{barrel['block']}: its loot must keep its cider (copy jugcraft:barrel_cider)")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has
