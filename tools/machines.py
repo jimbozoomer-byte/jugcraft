@@ -784,7 +784,7 @@ def _sawmill():
                         "features": [FEATURE], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
     # Jugcraft's own wood: the Agriculture branch's chestnut tree.
     recipes.append({"input": "#jugcraft:chestnut_logs", "output": "jugcraft:chestnut_planks", "count": 6, "ticks": 100,
-                    "features": [FEATURE], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
+                    "features": [FEATURE, "agriculture"], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
     recipes.append({"input": "#minecraft:planks", "output": "minecraft:stick", "count": 3, "ticks": 60,
                     "features": [FEATURE]})
     # Electronics (batch 7): a wire saw slices a silicon boule into wafers.

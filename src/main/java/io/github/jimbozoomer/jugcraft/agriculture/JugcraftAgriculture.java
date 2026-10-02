@@ -291,6 +291,7 @@ public final class JugcraftAgriculture {
 	}
 
 	public static void register() {
+		StringLightsItem.registerCleanup();
 		// Crops. None has a block item: its seed places it.
 		for (TallCrop crop : TallCrop.values()) {
 			// Wheat's properties (plant colour, crop sounds, broken by pistons, random ticks). Tall and climbing

@@ -258,7 +258,11 @@ public final class TrickOrTreaters {
 			ServerLevel level = server.getLevel(visit.dimension);
 			if (level == null || step(level, visit)) {
 				if (level != null) {
-					kids(level, visit).forEach(kid -> kid.discard());
+					// A visiting child may have claimed a bed or work place on the way: give it back before it goes.
+					kids(level, visit).forEach(kid -> {
+						kid.releaseAllPois();
+						kid.discard();
+					});
 				}
 				it.remove();
 			}
