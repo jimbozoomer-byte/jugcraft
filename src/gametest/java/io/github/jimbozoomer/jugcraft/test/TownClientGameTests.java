@@ -41,8 +41,8 @@ public class TownClientGameTests implements FabricClientGameTest {
 					.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.NORMAL)));
 			creator.setSeed(SEED);
 		}).create()) {
-			// Far enough to see (and so load and build) the whole town from outside it.
-			context.runOnClient(client -> client.options.renderDistance().set(16));
+			// The default render distance (12 chunks) loads, and so builds, the whole town (192 blocks) round the overview
+			// spot; a larger one was too slow to render here with software rendering (run 37074095387).
 			singleplayer.getConnection().waitForChunksRender();
 			TestServerContext server = singleplayer.getServer();
 			server.runCommand("gamerule minecraft:send_command_feedback false");
