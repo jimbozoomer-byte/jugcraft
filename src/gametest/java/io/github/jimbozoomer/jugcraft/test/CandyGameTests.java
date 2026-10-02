@@ -327,7 +327,8 @@ public class CandyGameTests {
 		boolean named = false;
 		for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
 			ItemStack piece = player.getInventory().getItem(slot);
-			named |= piece.is(item("salt_water_taffy")) && piece.has(DataComponents.ITEM_NAME);
+			named |= piece.is(item("salt_water_taffy"))
+					&& !piece.get(DataComponents.ITEM_NAME).equals(new ItemStack(item("salt_water_taffy")).get(DataComponents.ITEM_NAME));
 		}
 		helper.assertTrue(player.getInventory().countItem(item("salt_water_taffy")) == 4 && named, "Pulled taffy cuts into four pieces of berry taffy");
 		player.getInventory().clearContent();
@@ -385,11 +386,13 @@ public class CandyGameTests {
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = player(helper, new BlockPos(3, 2, 3), ItemStack.EMPTY);
 		ItemStack fudge = Candies.make(CandyKind.FUDGE, List.of(CandyFlavour.CHOCOLATE, CandyFlavour.HONEY), List.of(Candies.NATURAL), 2);
-		helper.assertTrue(fudge.has(DataComponents.ITEM_NAME) && fudge.has(DataComponents.LORE), "Flavoured fudge is named and says its flavours");
+		ItemStack plainFudge = new ItemStack(item("fudge"));
+		helper.assertTrue(!fudge.get(DataComponents.ITEM_NAME).equals(plainFudge.get(DataComponents.ITEM_NAME))
+				&& fudge.get(DataComponents.LORE).lines().size() == 2, "Flavoured fudge is named and says its flavours");
 		fudge.finishUsingItem(level, player);
 		helper.assertTrue(player.hasEffect(MobEffects.SPEED) && player.hasEffect(MobEffects.ABSORPTION), "Chocolate and honey: Speed and Absorption");
 		ItemStack burnt = Candies.make(CandyKind.BURNT_SUGAR, List.of(CandyFlavour.CHOCOLATE), List.of(Candies.NATURAL), 1);
-		helper.assertTrue(!burnt.has(DataComponents.ITEM_NAME) && ItemStack.isSameItemSameComponents(burnt, new ItemStack(item("burnt_sugar"))),
+		helper.assertTrue(ItemStack.isSameItemSameComponents(burnt, new ItemStack(item("burnt_sugar"))),
 				"Burnt sugar tastes of nothing but burning");
 		TagKey<Item> candy = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "foods/candy"));
 		for (String id : JugcraftAgriculture.CANDIES) {

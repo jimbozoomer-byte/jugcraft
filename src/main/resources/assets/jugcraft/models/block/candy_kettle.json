@@ -4,7 +4,8 @@
     "particle": "jugcraft:block/candy_kettle",
     "copper": "jugcraft:block/candy_kettle",
     "inside": "jugcraft:block/candy_kettle_inside",
-    "dial": "jugcraft:block/candy_dial"
+    "dial": "jugcraft:block/candy_dial",
+    "trivet": "jugcraft:block/candy_trivet"
   },
   "elements": [
     {
@@ -522,6 +523,247 @@
         },
         "down": {
           "texture": "#copper"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        -9,
+        3
+      ],
+      "to": [
+        4,
+        0,
+        4
+      ],
+      "faces": {
+        "north": {
+          "texture": "#trivet",
+          "uv": [
+            3,
+            7,
+            4,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#trivet",
+          "uv": [
+            3,
+            7,
+            4,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#trivet",
+          "uv": [
+            3,
+            7,
+            4,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#trivet",
+          "uv": [
+            3,
+            7,
+            4,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#trivet"
+        },
+        "down": {
+          "texture": "#trivet"
+        }
+      }
+    },
+    {
+      "from": [
+        12,
+        -9,
+        3
+      ],
+      "to": [
+        13,
+        0,
+        4
+      ],
+      "faces": {
+        "north": {
+          "texture": "#trivet",
+          "uv": [
+            12,
+            7,
+            13,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#trivet",
+          "uv": [
+            12,
+            7,
+            13,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#trivet",
+          "uv": [
+            12,
+            7,
+            13,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#trivet",
+          "uv": [
+            12,
+            7,
+            13,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#trivet"
+        },
+        "down": {
+          "texture": "#trivet"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        -9,
+        12
+      ],
+      "to": [
+        4,
+        0,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#trivet",
+          "uv": [
+            3,
+            7,
+            4,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#trivet",
+          "uv": [
+            3,
+            7,
+            4,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#trivet",
+          "uv": [
+            3,
+            7,
+            4,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#trivet",
+          "uv": [
+            3,
+            7,
+            4,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#trivet"
+        },
+        "down": {
+          "texture": "#trivet"
+        }
+      }
+    },
+    {
+      "from": [
+        12,
+        -9,
+        12
+      ],
+      "to": [
+        13,
+        0,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#trivet",
+          "uv": [
+            12,
+            7,
+            13,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#trivet",
+          "uv": [
+            12,
+            7,
+            13,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#trivet",
+          "uv": [
+            12,
+            7,
+            13,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#trivet",
+          "uv": [
+            12,
+            7,
+            13,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#trivet"
+        },
+        "down": {
+          "texture": "#trivet"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        -0.5,
+        3
+      ],
+      "to": [
+        13,
+        0,
+        13
+      ],
+      "faces": {
+        "down": {
+          "texture": "#trivet"
         }
       }
     }
