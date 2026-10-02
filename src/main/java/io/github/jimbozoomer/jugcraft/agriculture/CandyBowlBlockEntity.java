@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -24,7 +25,8 @@ import org.jspecify.annotations.Nullable;
  * ({@link CandyBagItem#TREATS}); anyone may add. Each visitor takes one treat a night (the trick-or-treat night,
  * {@link TrickOrTreat#night}); its owner, whoever placed it, takes one whenever they like. The bowl remembers the last
  * {@value #VISITORS} visitors and the night each last took a treat, saved with the world, so a restart gives no
- * second treat.
+ * second treat. A bowl (not a cache) also invites trick-or-treaters on Halloween nights ({@link TrickOrTreaters}),
+ * looking every {@value TrickOrTreaters#CHECK_TICKS} ticks, and counts the groups that came tonight.
  */
 public class CandyBowlBlockEntity extends BlockEntity {
 	public static final int CAPACITY = 64;
@@ -45,6 +47,8 @@ public class CandyBowlBlockEntity extends BlockEntity {
 	private final List<ItemStack> treats = new ArrayList<>();
 	private final Map<UUID, Long> visits = new LinkedHashMap<>();
 	private @Nullable UUID owner;
+	private long groupsNight = Long.MIN_VALUE;
+	private int groups;
 
 	public CandyBowlBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.CANDY_BOWL_ENTITY, pos, state);
@@ -121,6 +125,37 @@ public class CandyBowlBlockEntity extends BlockEntity {
 		return Taken.TAKEN;
 	}
 
+	/** Hands one treat out, whoever asks (a trick-or-treater), or an empty stack if the bowl is empty. */
+	public ItemStack handOut() {
+		if (treats.isEmpty()) {
+			return ItemStack.EMPTY;
+		}
+		ItemStack from = treats.get(level == null ? 0 : level.getRandom().nextInt(treats.size()));
+		ItemStack treat = from.split(1);
+		if (from.isEmpty()) {
+			treats.remove(from);
+		}
+		changed();
+		return treat;
+	}
+
+	/** How many groups of trick-or-treaters came to this bowl on {@code night}. */
+	public int groups(long night) {
+		return night == groupsNight ? groups : 0;
+	}
+
+	void recordGroup(long night) {
+		groups = groups(night) + 1;
+		groupsNight = night;
+		setChanged();
+	}
+
+	void serverTick(ServerLevel level) {
+		if (Math.floorMod(level.getGameTime() + worldPosition.asLong(), TrickOrTreaters.CHECK_TICKS) == 0) {
+			TrickOrTreaters.maybeVisit(level, worldPosition, this);
+		}
+	}
+
 	/** 0 for empty, then 1-3 as it fills ({@link #FILL}). */
 	public int fillLevel() {
 		int count = count();
@@ -171,6 +206,8 @@ public class CandyBowlBlockEntity extends BlockEntity {
 		input.read("visits", Visit.CODEC.listOf()).ifPresent(list -> list.stream().skip(Math.max(0, list.size() - VISITORS))
 				.forEach(visit -> visits.put(visit.visitor(), visit.night())));
 		owner = input.read("owner", UUIDUtil.CODEC).orElse(null);
+		groupsNight = input.getLongOr("groups_night", Long.MIN_VALUE);
+		groups = input.getIntOr("groups", 0);
 	}
 
 	@Override
@@ -181,5 +218,7 @@ public class CandyBowlBlockEntity extends BlockEntity {
 		if (owner != null) {
 			output.store("owner", UUIDUtil.CODEC, owner);
 		}
+		output.putLong("groups_night", groupsNight);
+		output.putInt("groups", groups);
 	}
 }
