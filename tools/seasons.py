@@ -1,14 +1,14 @@
 """Seasons: which biomes change with the server's date, and the seasonal snow block.
 
 #jugcraft:has_seasons: grass and foliage change colour (client/SeasonColors, season/SeasonPalette). Every
-biome with four seasons: temperate grassland, forest, taiga, hills, swamp and river. Not the tropics (jungle,
+biome with four seasons: temperate grassland, forest, taiga, hills and swamp. Not the tropics (jungle,
 mangrove swamp), the arid lands (desert, savanna, badlands), the always-frozen biomes (snowy plains, ice spikes,
-the peaks, grove), oceans, beaches or caves. The pale garden keeps its fixed grey; birch, spruce, cherry and
+the peaks, grove), oceans, beaches, caves or rivers (a river runs through jungles and deserts too, and its banks
+would turn autumn-gold there). The pale garden keeps its fixed grey; birch, spruce, cherry and
 poplar leaves keep their fixed colours, so in their biomes only grass and oak-type leaves change.
 
 #jugcraft:has_winter_snow: with seasons.snow=on, winter rain falls as snow there and lies as seasonal snow
-(season/SeasonalSnow) that melts in spring. The seasonal biomes and the pale garden, but not rivers, which
-also run through deserts.
+(season/SeasonalSnow) that melts in spring. The seasonal biomes and the pale garden.
 """
 
 BIOMES = [

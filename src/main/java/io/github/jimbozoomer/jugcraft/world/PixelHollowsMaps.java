@@ -18,7 +18,8 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
  * Finding the Pixel Hollows for the map. Server-only and bounded: the game's own biome search (the one behind
  * {@code /locate biome}) samples the biome noise only, loading or generating no chunks, in columns {@link #STEP}
  * blocks apart out to {@link #RADIUS} blocks, every {@link #VERTICAL_STEP} blocks of height, starting at the
- * biome's depth. At most (2 * 32 + 1)^2 = 4,225 columns of 12 samples. It runs only when a player uses a map.
+ * biome's depth. At most (2 * 32 + 1)^2 = 4,225 columns of 12 samples. It runs only when a player uses a map, and
+ * then off the server thread (PixelHollowsMapItem).
  */
 public final class PixelHollowsMaps {
 	/** Keep in sync with MAP_SEARCH in tools/pixel_hollows.py. */

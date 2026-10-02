@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.mixin;
 
 import io.github.jimbozoomer.jugcraft.world.RetroShopPlacement;
+import io.github.jimbozoomer.jugcraft.world.RetroTrader;
 import java.util.List;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
@@ -15,6 +16,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class StructureTemplatePoolMixin {
 	@Inject(method = "getShuffledTemplates", at = @At("RETURN"), cancellable = true)
 	private void jugcraft$oneShopPerVillage(RandomSource random, CallbackInfoReturnable<List<StructurePoolElement>> callback) {
+		// Only the village houses pools that hold the shop; every other jigsaw pool is left alone at once.
+		if (!RetroTrader.isExtended((StructureTemplatePool) (Object) this)) {
+			return;
+		}
 		List<StructurePoolElement> reordered = RetroShopPlacement.reorder(callback.getReturnValue());
 		if (reordered != null) {
 			callback.setReturnValue(reordered);

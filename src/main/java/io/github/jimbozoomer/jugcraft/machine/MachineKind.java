@@ -17,7 +17,7 @@ public enum MachineKind implements StringRepresentable {
 	BATTERY_BOX("battery_box", 400_000, 256, 256, 0, 0),
 	ELECTRIC_FURNACE("electric_furnace", 10_000, 128, 0, 10, 2),
 	CRUSHER("crusher", 10_000, 128, 0, 16, 2),
-	ARC_FURNACE("arc_furnace_controller", 50_000, 512, 0, 64, 2),
+	ARC_FURNACE("arc_furnace_controller", 50_000, 512, 0, 64, 3),
 	SOLAR_PANEL("solar_panel", 4_000, 0, 32, 0, 0),
 	STEAM_GENERATOR("steam_generator", 40_000, 0, 128, 0, 3),
 	ALLOY_SMELTER("alloy_smelter", 10_000, 128, 0, 20, 3),
@@ -54,22 +54,17 @@ public enum MachineKind implements StringRepresentable {
 	// Petrochemistry (chemistry/, docs/branches/CHEMISTRY.md): a pumpjack, 1 wide, 3 tall and 3 long, that pumps the
 	// conventional oil reservoir under its chunk into its output tank.
 	PUMPJACK("pumpjack", 20_000, 256, 0, 32, 0),
-	// A 2x2x2 hot-water extraction plant: oil sand or bitumen and water in, crude oil and sand out.
-	OIL_SAND_EXTRACTOR("oil_sand_extractor", 20_000, 256, 0, 32, 2),
-	// A 2x2 column seven blocks tall: crude oil in, four fractions out, each drawn off at its own height.
-	DISTILLATION_TOWER("distillation_tower", 40_000, 512, 0, 128, 0),
+	// A 2x2 column seven blocks tall: crude oil in, four fractions out, each drawn off at its own height. Since batch 24
+	// it also vacuum-distils heavy fuel oil into lubricant (a fifth tank) and asphalt binder (its item slot).
+	DISTILLATION_TOWER("distillation_tower", 40_000, 512, 0, 128, 1),
 	// A 2x2x4 fluid catalytic cracker: heavy fuel oil, water (steam) and catalyst in; diesel, naphtha and gas out.
+	// Since batch 24 it also reforms naphtha over the catalyst into gasoline (a fourth tank).
 	CATALYTIC_CRACKER("catalytic_cracker", 40_000, 512, 0, 160, 1),
-	// A 2x2x3 vacuum distillation unit: heavy fuel oil in; lubricant and asphalt binder out.
-	VACUUM_DISTILLATION_UNIT("vacuum_distillation_unit", 30_000, 512, 0, 96, 1),
-	// A 3x2x2 catalytic reformer: naphtha in; gasoline (base) and refinery gas (top) out.
-	CATALYTIC_REFORMER("catalytic_reformer", 30_000, 512, 0, 120, 0),
-	// A 2x2x2 stirred mixing vessel: water and powders in, mixtures (fracking fluid) out.
-	CHEMICAL_MIXER("chemical_mixer", 20_000, 256, 0, 64, 2),
 	// A 3x3x5 fracking derrick over a shale reservoir: fracking fluid down; crude oil, gas and flowback water up.
 	FRACKING_RIG("fracking_rig", 80_000, 1_024, 0, 256, 0),
-	// A 3x1x2 row of settling basins and a filter press: flowback water in; clean water and salt out.
-	FLOWBACK_TREATMENT_UNIT("flowback_treatment_unit", 20_000, 256, 0, 48, 1),
+	// A 3x1x2 row of settling basins and a filter press, the "Settling Plant" since batch 24: flowback water -> clean
+	// water and salt; oil sand or bitumen and water -> crude oil and sand; mud -> clay.
+	FLOWBACK_TREATMENT_UNIT("flowback_treatment_unit", 20_000, 256, 0, 48, 2),
 	// A 3x2x2 six-cylinder diesel engine and generator: burns diesel or heavy fuel oil for 256 JE/t.
 	DIESEL_GENERATOR("diesel_generator", 60_000, 0, 1_024, 0, 0),
 	GAS_TURBINE("gas_turbine", 120_000, 0, 2_048, 0, 0),
@@ -77,9 +72,11 @@ public enum MachineKind implements StringRepresentable {
 	POLYMERIZATION_REACTOR("polymerization_reactor", 30_000, 512, 0, 96, 1),
 	// A 2x2x3 V8 diesel engine: burns diesel or heavy fuel oil and turns a shaft out of its back.
 	DIESEL_ENGINE("diesel_engine", 0, 0, 0, 0, 0),
-	// A 3x3x2 electrolysis house: brine in; chlorine, hydrogen and lye out (and alumina + coke into aluminum).
+	// A 3x3x2 electrolysis house: brine in; chlorine, hydrogen and lye out (and alumina + coke into aluminum; water
+	// into hydrogen and oxygen, batch 24).
 	ELECTROLYTIC_CELL("electrolytic_cell", 60_000, 1_024, 0, 256, 3),
-	// A 2x2x2 acid-proof reactor: sulfur + water -> sulfuric acid; later bauxite digestion and fertilizer.
+	// A 2x2x2 acid-proof reactor: sulfur + water -> sulfuric acid; later bauxite digestion and fertilizer, and (batch
+	// 24) the mixing jobs: brine and fracking fluid.
 	CHEMICAL_REACTOR("chemical_reactor", 30_000, 512, 0, 96, 3),
 	// Nitrogen chemistry (batch 12): a 2x2x6 cold box drawing nitrogen and oxygen out of the air (no recipes), and a
 	// 3x4x2 high-pressure converter making ammonia (Haber-Bosch) and nitric acid (Ostwald).
@@ -89,16 +86,15 @@ public enum MachineKind implements StringRepresentable {
 	FUEL_CELL("fuel_cell", 40_000, 0, 512, 0, 0),
 	// Storage (batch 6): a 3x2 lithium battery bank, one deep, giving power out of its front like the capacitor bank.
 	LITHIUM_BATTERY_BANK("lithium_battery_bank", 32_000_000, 16_384, 16_384, 0, 0),
-	// Electronics (batch 7, the cyan look): a two-block crystal grower pulling doped silicon boules.
-	CRYSTAL_GROWER("crystal_grower", 60_000, 512, 0, 128, 3),
-	// A 3x2x2 cleanroom with a monitor bank: wafers etched with sulfuric acid into microchips.
+	// Electronics (batch 7, the cyan look): a 3x2x2 cleanroom with a monitor bank: wafers etched with sulfuric acid into microchips.
 	LITHOGRAPHY_STATION("lithography_station", 60_000, 1_024, 0, 192, 3),
 	// Fluid logistics (batch 8): a 3x3x3 Horton sphere holding 1,024 buckets of one gas. No power.
 	GAS_HOLDER("gas_holder", 0, 0, 0, 0, 0),
 	// Power (batch 10, the electric look): a pedestal carrying a 3x3 array of solar cells on the layer above.
 	ADVANCED_SOLAR_PANEL("advanced_solar_panel", 400_000, 0, 512, 0, 0),
-	// A 2x1x1 four-cylinder engine (electric look): burns gasoline or diesel and turns a shaft out of its back.
-	ADVANCED_ENGINE("advanced_engine", 0, 0, 0, 0, 0),
+	// A 2x1x1 four-cylinder engine (electric look): burns gasoline or diesel and turns a shaft out of its back. Its one
+	// slot takes a turbocharger (batch 19), which needs coolant water in its second tank.
+	ADVANCED_ENGINE("advanced_engine", 0, 0, 0, 0, 1),
 	// Farming (batch 9): a two-block gantry that harvests and replants ripe crops in the 9x9 field in front of it.
 	// No inputs; three result slots.
 	CROP_HARVESTER("crop_harvester", 20_000, 256, 0, 24, 3),
@@ -188,23 +184,20 @@ public enum MachineKind implements StringRepresentable {
 	/** Pumpjack: mB of crude oil pumped per powered tick (a bucket every 25 seconds), and its tank. */
 	public static final int PUMPJACK_RATE = 2;
 	public static final int PUMPJACK_TANK = 16_000;
-	/** Oil sand extractor: its water tank and its crude oil tank. */
-	public static final int EXTRACTOR_TANK = 8_000;
 	/** Distillation tower: its crude oil tank and each fraction's tank. */
 	public static final int TOWER_INPUT_TANK = 16_000;
 	public static final int TOWER_OUTPUT_TANK = 8_000;
-	/** Distillation tower: the height (block layer) each fraction is drawn off at: gas at the top, heavy oil at the base. */
-	private static final int[] TOWER_DRAW_OFFS = {6, 4, 2, 0};
-	/** Catalytic cracker: each tank's capacity, and the layer each product is drawn off at (diesel, naphtha, gas). */
+	/**
+	 * Distillation tower: the height (block layer) each fraction is drawn off at: gas at the top, heavy oil at the base,
+	 * and (batch 24) the vacuum cut's lubricant one block up.
+	 */
+	private static final int[] TOWER_DRAW_OFFS = {6, 4, 2, 0, 1};
+	/**
+	 * Catalytic cracker: each tank's capacity, and the layer each product is drawn off at (diesel, naphtha, gas, and the
+	 * reformed gasoline, batch 24).
+	 */
 	public static final int CRACKER_TANK = 8_000;
-	private static final int[] CRACKER_DRAW_OFFS = {0, 2, 3};
-	/** Vacuum distillation unit: its heavy fuel oil tank and its lubricant tank. */
-	public static final int VACUUM_TANK = 8_000;
-	/** Catalytic reformer: each tank, and the layer each product is drawn off at (gasoline, refinery gas). */
-	public static final int REFORMER_TANK = 8_000;
-	private static final int[] REFORMER_DRAW_OFFS = {0, 1};
-	/** Chemical mixer: its water tank and its product tank. */
-	public static final int MIXER_TANK = 8_000;
+	private static final int[] CRACKER_DRAW_OFFS = {0, 2, 3, 1};
 	/**
 	 * Fracking rig, per powered tick over shale: fracking fluid pumped down, oil freed from the reservoir (three
 	 * quarters crude oil, a quarter refinery gas) and flowback water returned. A quarter of the fluid stays in the rock.
@@ -218,7 +211,7 @@ public enum MachineKind implements StringRepresentable {
 	public static final int FRACK_FLOWBACK_TANK = 16_000;
 	/** Fracking rig draw-offs: crude oil at the base, flowback water one block up, gas at the top. */
 	private static final int[] FRACK_DRAW_OFFS = {0, 4, 1};
-	/** Flowback treatment unit: its flowback tank and its clean water tank. */
+	/** Settling plant (the flowback treatment unit): its input tank and its output tank. */
 	public static final int TREATMENT_TANK = 8_000;
 	/** Diesel generator: JE per tick while running, and its fuel tank. Fuel values: chemistry/FluidFuels. */
 	public static final int DIESEL_OUTPUT = 256;
@@ -234,6 +227,14 @@ public enum MachineKind implements StringRepresentable {
 	/** Advanced combustion engine: KE per tick at most, out of the back of its master block. */
 	public static final int ADVANCED_ENGINE_OUTPUT = 1_024;
 	public static final int ADVANCED_ENGINE_TANK = 8_000;
+	/** Turbocharger (batch 19): KE per tick at most with a turbocharger fitted and coolant in. */
+	public static final int TURBO_OUTPUT = 1_536;
+	/** Percent of the fuel's usual KE per mB a turbocharged engine gets out of it. */
+	public static final int TURBO_EFFICIENCY_PERCENT = 110;
+	/** Coolant water (mB) the intercooler uses each tick the turbocharged engine runs. */
+	public static final int TURBO_WATER_PER_TICK = 2;
+	/** The advanced engine's coolant tank (mB). */
+	public static final int TURBO_WATER_TANK = 4_000;
 	/** Electrolytic cell: each tank, and the layers its outputs leave from (chlorine top, hydrogen middle, lye base). */
 	public static final int CELL_TANK = 8_000;
 	private static final int[] CELL_DRAW_OFFS = {2, 1, 0};
@@ -245,10 +246,10 @@ public enum MachineKind implements StringRepresentable {
 	public static final int ASU_ARGON_INTERVAL = 2;
 	public static final int ASU_TANK = 16_000;
 	private static final int[] ASU_DRAW_OFFS = {5, 0, 2};
-	/** Boost gases (batch 13): oxygen blown into the steel foundry, argon around the crystal grower's melt. */
+	/** Boost gases (batch 13): oxygen blown into the steel foundry, argon around the arc furnace's melt (batch 24). */
 	public static final int BOOST_TANK = 8_000;
 	public static final int FOUNDRY_OXYGEN_PER_TICK = 2;
-	public static final int GROWER_ARGON_PER_TICK = 1;
+	public static final int ARC_ARGON_PER_TICK = 1;
 	/** Synthesis converter: each input tank and the output tank. */
 	public static final int CONVERTER_TANK = 8_000;
 	/** Fuel cell: JE per tick while running, and its hydrogen tank. Fuel value: chemistry/FluidFuels. */
@@ -285,7 +286,7 @@ public enum MachineKind implements StringRepresentable {
 				|| this == METAL_PRESS || this == WIRE_DRAWER || this == CIRCUIT_ASSEMBLER
 				|| this == PULVERIZER || this == ORE_WASHER || this == SIEVE || this == SAWMILL
 				|| this == COKE_OVEN || this == STEEL_FOUNDRY || this == ORE_DRILL || this == DEPOSIT_DRILL
-				|| this == COBBLESTONE_GENERATOR || this == TREE_FARM || this == AUTO_CRAFTER || this == CRYSTAL_GROWER
+				|| this == COBBLESTONE_GENERATOR || this == TREE_FARM || this == AUTO_CRAFTER
 				|| this == CROP_HARVESTER;
 	}
 
@@ -301,7 +302,7 @@ public enum MachineKind implements StringRepresentable {
 
 	/** Processors whose recipes combine several ingredient stacks placed in any input slots. */
 	public boolean isMultiInput() {
-		return this == ALLOY_SMELTER || this == CIRCUIT_ASSEMBLER || this == STEEL_FOUNDRY || this == CRYSTAL_GROWER;
+		return this == ALLOY_SMELTER || this == CIRCUIT_ASSEMBLER || this == STEEL_FOUNDRY || this == ARC_FURNACE;
 	}
 
 	/**
@@ -323,18 +324,13 @@ public enum MachineKind implements StringRepresentable {
 			case COKE_OVEN -> "coking";
 			case STEEL_FOUNDRY -> "steelmaking";
 			case TREE_FARM -> "tree_growing";
-			case OIL_SAND_EXTRACTOR -> "oil_sand_extraction";
 			case DISTILLATION_TOWER -> "distillation";
 			case CATALYTIC_CRACKER -> "catalytic_cracking";
-			case VACUUM_DISTILLATION_UNIT -> "vacuum_distillation";
-			case CATALYTIC_REFORMER -> "reforming";
-			case CHEMICAL_MIXER -> "chemical_mixing";
 			case FLOWBACK_TREATMENT_UNIT -> "water_treatment";
 			case POLYMERIZATION_REACTOR -> "polymerization";
 			case ELECTROLYTIC_CELL -> "electrolysis";
 			case SYNTHESIS_CONVERTER -> "gas_synthesis";
 			case CHEMICAL_REACTOR -> "chemical_reaction";
-			case CRYSTAL_GROWER -> "crystal_growing";
 			case LITHOGRAPHY_STATION -> "lithography";
 			default -> null;
 		};
@@ -357,22 +353,18 @@ public enum MachineKind implements StringRepresentable {
 	public @Nullable FluidMachineSpec fluidSpec() {
 		return switch (this) {
 			case PUMPJACK -> new FluidMachineSpec(List.of(), List.of(PUMPJACK_TANK), 0, 0);
-			case OIL_SAND_EXTRACTOR -> new FluidMachineSpec(List.of(EXTRACTOR_TANK), List.of(EXTRACTOR_TANK), 1, 1);
 			case DISTILLATION_TOWER -> new FluidMachineSpec(List.of(TOWER_INPUT_TANK),
-					List.of(TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK), 0, 0);
+					List.of(TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK, TOWER_OUTPUT_TANK), 0, 1);
 			case CATALYTIC_CRACKER -> new FluidMachineSpec(List.of(CRACKER_TANK, CRACKER_TANK),
-					List.of(CRACKER_TANK, CRACKER_TANK, CRACKER_TANK), 1, 0);
-			case VACUUM_DISTILLATION_UNIT -> new FluidMachineSpec(List.of(VACUUM_TANK), List.of(VACUUM_TANK), 0, 1);
-			case CATALYTIC_REFORMER -> new FluidMachineSpec(List.of(REFORMER_TANK), List.of(REFORMER_TANK, REFORMER_TANK), 0, 0);
-			case CHEMICAL_MIXER -> new FluidMachineSpec(List.of(MIXER_TANK), List.of(MIXER_TANK), 2, 0);
+					List.of(CRACKER_TANK, CRACKER_TANK, CRACKER_TANK, CRACKER_TANK), 1, 0);
 			case FRACKING_RIG -> new FluidMachineSpec(List.of(FRACK_INPUT_TANK),
 					List.of(FRACK_OIL_TANK, FRACK_GAS_TANK, FRACK_FLOWBACK_TANK), 0, 0);
-			case FLOWBACK_TREATMENT_UNIT -> new FluidMachineSpec(List.of(TREATMENT_TANK), List.of(TREATMENT_TANK), 0, 1);
+			case FLOWBACK_TREATMENT_UNIT -> new FluidMachineSpec(List.of(TREATMENT_TANK), List.of(TREATMENT_TANK), 1, 1);
 			case DIESEL_GENERATOR -> new FluidMachineSpec(List.of(DIESEL_TANK), List.of(), 0, 0);
 			case GAS_TURBINE -> new FluidMachineSpec(List.of(TURBINE_TANK, TURBINE_LUBRICANT_TANK), List.of(), 0, 0);
 			case POLYMERIZATION_REACTOR -> new FluidMachineSpec(List.of(REACTOR_TANK), List.of(), 0, 1);
 			case DIESEL_ENGINE -> new FluidMachineSpec(List.of(DIESEL_ENGINE_TANK), List.of(), 0, 0);
-			case ADVANCED_ENGINE -> new FluidMachineSpec(List.of(ADVANCED_ENGINE_TANK), List.of(), 0, 0);
+			case ADVANCED_ENGINE -> new FluidMachineSpec(List.of(ADVANCED_ENGINE_TANK, TURBO_WATER_TANK), List.of(), 1, 0);
 			case ELECTROLYTIC_CELL -> new FluidMachineSpec(List.of(CELL_TANK), List.of(CELL_TANK, CELL_TANK, CELL_TANK), 2, 1);
 			case AIR_SEPARATION_UNIT -> new FluidMachineSpec(List.of(), List.of(ASU_TANK, ASU_TANK, ASU_TANK), 0, 0);
 			case SYNTHESIS_CONVERTER -> new FluidMachineSpec(List.of(CONVERTER_TANK, CONVERTER_TANK, CONVERTER_TANK),
@@ -392,7 +384,6 @@ public enum MachineKind implements StringRepresentable {
 		return switch (this) {
 			case DISTILLATION_TOWER -> TOWER_DRAW_OFFS[tank];
 			case CATALYTIC_CRACKER -> CRACKER_DRAW_OFFS[tank];
-			case CATALYTIC_REFORMER -> REFORMER_DRAW_OFFS[tank];
 			case FRACKING_RIG -> FRACK_DRAW_OFFS[tank];
 			case ELECTROLYTIC_CELL -> CELL_DRAW_OFFS[tank];
 			case AIR_SEPARATION_UNIT -> ASU_DRAW_OFFS[tank];
@@ -430,7 +421,7 @@ public enum MachineKind implements StringRepresentable {
 	public @Nullable String boostGas() {
 		return switch (this) {
 			case STEEL_FOUNDRY -> "oxygen";
-			case CRYSTAL_GROWER -> "argon";
+			case ARC_FURNACE -> "argon";
 			default -> null;
 		};
 	}
@@ -439,7 +430,7 @@ public enum MachineKind implements StringRepresentable {
 	public int boostPerTick() {
 		return switch (this) {
 			case STEEL_FOUNDRY -> FOUNDRY_OXYGEN_PER_TICK;
-			case CRYSTAL_GROWER -> GROWER_ARGON_PER_TICK;
+			case ARC_FURNACE -> ARC_ARGON_PER_TICK;
 			default -> 0;
 		};
 	}
@@ -488,12 +479,8 @@ public enum MachineKind implements StringRepresentable {
 			case ALLOY_SMELTER -> Footprint.cuboid(3, 6, 2);
 			// One wide, three tall, three long: wellhead at the front (the master), samson post, then crank and motor.
 			case PUMPJACK -> Footprint.cuboid(1, 3, 3);
-			case OIL_SAND_EXTRACTOR -> Footprint.cuboid(2, 2, 2);
 			case DISTILLATION_TOWER -> Footprint.cuboid(2, 7, 2);
 			case CATALYTIC_CRACKER -> Footprint.cuboid(2, 4, 2);
-			case VACUUM_DISTILLATION_UNIT -> Footprint.cuboid(2, 3, 2);
-			case CATALYTIC_REFORMER -> Footprint.cuboid(3, 2, 2);
-			case CHEMICAL_MIXER -> Footprint.cuboid(2, 2, 2);
 			case FRACKING_RIG -> Footprint.cuboid(3, 5, 3);
 			case FLOWBACK_TREATMENT_UNIT -> Footprint.cuboid(3, 1, 2);
 			case DIESEL_GENERATOR -> Footprint.cuboid(3, 2, 2);
@@ -508,8 +495,6 @@ public enum MachineKind implements StringRepresentable {
 			case CHEMICAL_REACTOR -> Footprint.cuboid(2, 2, 2);
 			// Three wide, two tall, one deep, so every block's front is a power socket.
 			case LITHIUM_BATTERY_BANK -> Footprint.cuboid(3, 2, 1);
-			// A control cabinet with the growth chamber and pull head above it.
-			case CRYSTAL_GROWER -> Footprint.tall(2);
 			// The cleanroom (left) and the operator's desk with its monitor bank (right), two deep.
 			case LITHOGRAPHY_STATION -> Footprint.cuboid(3, 2, 2);
 			// A sphere on legs, three blocks every way.

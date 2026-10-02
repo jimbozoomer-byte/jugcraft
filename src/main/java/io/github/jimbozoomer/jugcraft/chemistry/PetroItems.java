@@ -11,7 +11,7 @@ import net.minecraft.world.item.Item;
 public final class PetroItems {
 	/** Used up by the catalytic cracker, one per bucket of heavy fuel oil. */
 	public static Item CRACKING_CATALYST;
-	/** The residue of vacuum distillation: binds gravel into asphalt. */
+	/** The residue of vacuum distillation (in the distillation tower): binds gravel into asphalt. */
 	public static Item ASPHALT_BINDER;
 	/** Polymerized refinery gas: the metal press flattens each into a plastic sheet. */
 	public static Item PLASTIC_PELLETS;
@@ -27,7 +27,7 @@ public final class PetroItems {
 	public static Item LITHIUM_CELL;
 	/** Rare earths alloyed with iron in the alloy smelter: for the magnet dynamo and magnet motor. */
 	public static Item NEODYMIUM_MAGNET;
-	/** Electronics (batch 7): a doped silicon crystal from the crystal grower, sawn into wafers. */
+	/** Electronics (batch 7): a doped silicon crystal pulled in the arc furnace (batch 24), sawn into wafers. */
 	public static Item SILICON_BOULE;
 	public static Item SILICON_WAFER;
 	/** Wafers etched in the lithography station: four chips each. */
@@ -40,6 +40,8 @@ public final class PetroItems {
 	public static Item GUNCOTTON;
 	public static Item GRENADE;
 	public static Item GRENADE_LAUNCHER;
+	/** Power (batch 19): fitted in the advanced engine's slot for half as much power again. */
+	public static Item TURBOCHARGER;
 
 	private PetroItems() {
 	}
@@ -64,6 +66,7 @@ public final class PetroItems {
 		GUNCOTTON = JugcraftRegistry.item("guncotton");
 		GRENADE = JugcraftRegistry.item("grenade", GrenadeItem::new);
 		GRENADE_LAUNCHER = JugcraftRegistry.item("grenade_launcher", GrenadeLauncherItem::new);
+		TURBOCHARGER = JugcraftRegistry.item("turbocharger", properties -> new Item(properties.stacksTo(1)));
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(CRACKING_CATALYST);
@@ -79,6 +82,7 @@ public final class PetroItems {
 			output.accept(SILICON_WAFER);
 			output.accept(MICROCHIP);
 			output.accept(GUNCOTTON);
+			output.accept(TURBOCHARGER);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			output.accept(GRENADE);

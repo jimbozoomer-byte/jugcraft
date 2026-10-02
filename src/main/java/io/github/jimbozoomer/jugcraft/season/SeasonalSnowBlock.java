@@ -16,9 +16,20 @@ public class SeasonalSnowBlock extends SnowLayerBlock {
 		super(properties);
 	}
 
+	/**
+	 * Grass dies under anything whose shape shuts out its light, except one layer of vanilla snow, so under seasonal
+	 * snow every lawn and meadow would turn to dirt over winter, with no grass left to spread back in spring. Seasonal
+	 * snow's light is reckoned by block, not by its shape, so grass lives (snowy) under the layers below a full block,
+	 * while the layers still hide the faces they cover from rendering.
+	 */
+	@Override
+	protected boolean useShapeForLightOcclusion(BlockState state) {
+		return false;
+	}
+
 	@Override
 	protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-		if (!SeasonState.snowing()) {
+		if (!SeasonState.serverSnowing()) {
 			melt(state, level, pos);
 			return;
 		}

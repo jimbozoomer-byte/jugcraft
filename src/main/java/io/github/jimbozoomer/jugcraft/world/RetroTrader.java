@@ -31,6 +31,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
@@ -77,7 +78,8 @@ public final class RetroTrader {
 	public static void register() {
 		ResourceKey<Block> cabinetKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("arcade_cabinet"));
 		ARCADE_CABINET = Registry.register(BuiltInRegistries.BLOCK, cabinetKey, new ArcadeCabinetBlock(
-				BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(2.5F).noOcclusion()
+				// Immovable: a piston moving one half of a two-block cabinet would break the other and drop a cabinet.
+				BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(2.5F).noOcclusion().pushReaction(PushReaction.IMMOVEABLE)
 						.lightLevel(state -> state.getValue(ArcadeCabinetBlock.HALF) == DoubleBlockHalf.UPPER ? 6 : 0)
 						.setId(cabinetKey)));
 		ResourceKey<Item> cabinetItem = ResourceKey.create(Registries.ITEM, Jugcraft.id("arcade_cabinet"));
@@ -117,7 +119,8 @@ public final class RetroTrader {
 
 	/** Adds the shop to every village type's houses once per server (village pools are fixed while a world runs). */
 	public static void addShopToVillages(RegistryAccess registries) {
-		if (!JugcraftConfig.isFeatureEnabled(FEATURE)) {
+		// The trader's trades are Pixel Hollows goods and load only with that switch on: no shop without them.
+		if (!JugcraftConfig.isFeatureEnabled(FEATURE) || !JugcraftConfig.isFeatureEnabled(PixelHollows.FEATURE)) {
 			shop = null;
 			return;
 		}
@@ -137,6 +140,11 @@ public final class RetroTrader {
 			shop = element;
 			Jugcraft.LOGGER.info("Retro Game Shop added to {} village houses pools: one shop per new village", added);
 		}
+	}
+
+	/** Whether the shop was added to this pool (only those pools are reordered; see RetroShopPlacement). */
+	public static boolean isExtended(StructureTemplatePool pool) {
+		return shop != null && EXTENDED.contains(pool);
 	}
 
 	/** The shop's pool element in this server's villages, or null when there is none. */

@@ -71,7 +71,7 @@ public final class SeasonCommand {
 		return String.format(Locale.ROOT, "Season: %s (day %d of %d, %s, %s hemisphere). Events: %s. Winter snow: %s.",
 				SeasonCalendar.seasonName(day), day, SeasonCalendar.DAYS, source, settings.southern() ? "southern" : "northern",
 				events.isEmpty() ? "none" : events.stream().map(event -> event.display).collect(Collectors.joining(", ")),
-				!settings.snow() ? "off" : SeasonState.snowing() ? "falling" : "on (not winter)");
+				!settings.snow() ? "off" : SeasonState.serverSnowing() ? "falling" : "on (not winter)");
 	}
 
 	private static int set(CommandContext<CommandSourceStack> context) {

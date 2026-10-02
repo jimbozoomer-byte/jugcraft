@@ -13,10 +13,11 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.Identifier;
 
 /**
  * Textured quads exported from the generators' model boxes (tools/kinetic_rotors.py): a JSON list of
- * {texture, normal, vertices [x, y, z (pixels), u, v]}. Drawn by block entity renderers and render
+ * {texture, normal, vertices [x, y, z (pixels), u, v]}, and "cutout": true for a quad drawn cut out. Drawn by block entity renderers and render
  * layers that show parts of a block or item model moving (spinning rotors, a rocket pack on a back).
  */
 public final class QuadModel {
@@ -33,7 +34,12 @@ public final class QuadModel {
 		QuadModel model = new QuadModel();
 		for (JsonElement element : list) {
 			JsonObject quad = element.getAsJsonObject();
-			RenderType type = RenderTypes.entitySolid(Jugcraft.id("textures/block/" + quad.get("texture").getAsString() + ".png"));
+			String name = quad.get("texture").getAsString();
+			// Plain names are block textures; "item/..." and other paths are taken from textures/ directly.
+			Identifier texture = Jugcraft.id(name.contains("/") ? "textures/" + name + ".png" : "textures/block/" + name + ".png");
+			// A quad marked "cutout" (a silhouette) leaves out its texture's see-through pixels.
+			boolean cutout = quad.has("cutout") && quad.get("cutout").getAsBoolean();
+			RenderType type = cutout ? RenderTypes.entityCutout(texture) : RenderTypes.entitySolid(texture);
 			JsonArray n = quad.getAsJsonArray("normal");
 			JsonArray corners = quad.getAsJsonArray("vertices");
 			float[][] vertices = new float[4][];

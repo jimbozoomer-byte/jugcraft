@@ -92,12 +92,16 @@ BONUS_ORES = {
                           "switch": "tin"},
 }
 # The lining: big blobs of circuitstone replacing the stone and deepslate inside the biome, after the ores, so
-# exposed ore still shows. COUNT attempts per chunk, filtered to the biome.
+# exposed ore still shows. COUNT attempts per chunk, filtered to the biome. The biome lies 40 to 115 blocks below
+# the surface, so under mountains it reaches up to about Y 160: the lining and crystals cover Y -56 to 192, with
+# counts for that span (the density per block of height is what it was over -56 to 56).
 LINING = "pixel_hollows_lining"
-LINING_GEN = {"size": 64, "count": 96, "min_y": -56, "max_y": 56}
-# Crystal clusters on floors (facing up) and ceilings (facing down): attempts per chunk, filtered to the biome.
-CRYSTALS = {"pixel_crystals_floor": {"facing": "up", "scan": "down", "offset": 1, "count": 14},
-            "pixel_crystals_ceiling": {"facing": "down", "scan": "up", "offset": -1, "count": 8}}
+LINING_BLOCK = "circuitstone"
+LINING_GEN = {"size": 64, "count": 212, "min_y": -56, "max_y": 192}
+# Crystal clusters on floors (facing up) and ceilings (facing down): attempts per chunk over the lining's span,
+# filtered to the biome.
+CRYSTALS = {"pixel_crystals_floor": {"facing": "up", "scan": "down", "offset": 1, "count": 31},
+            "pixel_crystals_ceiling": {"facing": "down", "scan": "up", "offset": -1, "count": 18}}
 
 # The biome's features, one list per generation step. Vanilla entries keep vanilla's relative order (a different
 # order in two biomes is a "feature order cycle" crash); the JugcraftGameTests.overworldFeatureOrderHasNoCycle test

@@ -5,6 +5,7 @@ Every pixel is generated here from fixed seeds; no Mojang texture is read, trace
 recolored. Colors follow the real minerals: cassiterite is glossy brown-black, tin is
 pale cool silver, bronze is warm golden-brown.
 """
+import json
 import random
 from pathlib import Path
 
@@ -101,12 +102,16 @@ def new():
     return Image.new("RGBA", (16, 16), (0, 0, 0, 0))
 
 
-def save(img, kind, name, scale=1):
+def save(img, kind, name, scale=1, animation=None):
+    """Saves a texture; with animation (the .mcmeta "animation" object), img is a vertical strip of frames."""
     path = TEX / kind / f"{name}.png"
     path.parent.mkdir(parents=True, exist_ok=True)
     if scale != 1:
         img = img.resize((16 * scale, 16 * scale), Image.NEAREST)
     img.save(path, optimize=True)
+    if animation is not None:
+        path.with_name(path.name + ".mcmeta").write_text(json.dumps({"animation": animation}, indent=2) + "\n",
+                                                         encoding="utf-8")
 
 
 def rock(palette, seed, streaks=False):
@@ -585,7 +590,6 @@ def gearbox_frame(angle):
 
 def save_animation(frames, name, frametime=2):
     """A vertical strip of 16x16 frames plus its .mcmeta, so the texture animates in game."""
-    import json
     strip = Image.new("RGBA", (16, 16 * len(frames)), (0, 0, 0, 0))
     for index, frame in enumerate(frames):
         strip.paste(frame, (0, 16 * index))
@@ -989,6 +993,9 @@ def gui():
     for col in range(9):
         slot(7 + col * 18, 141)
     img.save(TEX / "gui" / "machine.png", optimize=True)
+    # The themed machine screens (batch 22).
+    import gui_textures
+    gui_textures.draw_all(lambda image, name: image.save(TEX / "gui" / f"{name}.png", optimize=True))
 
 
 def solar_top():
@@ -1243,8 +1250,6 @@ def machines():
     save(battery_front(954), "block", "capacitor_bank_front")
     save(battery_front(978), "block", "lithium_battery_bank_front")
     save(battery_front(985), "block", "flow_battery_front")
-    save(window(979, [(40, 46, 50), (52, 60, 64)]), "block", "crystal_grower_front")
-    save(window(979, [(40, 46, 50)], glow=[(80, 210, 230), (150, 240, 250), (60, 170, 200)]), "block", "crystal_grower_front_on")
     save(window(980, [(40, 46, 50), (52, 60, 64)]), "block", "lithography_station_front")
     save(window(980, [(40, 46, 50)], glow=[(80, 210, 230), (150, 240, 250), (60, 170, 200)]), "block", "lithography_station_front_on")
     save(tank_side(955), "block", "steel_tank_front")
@@ -1265,18 +1270,10 @@ def machines():
     save(assembler_front(960, True), "block", "auto_crafter_front_on")
     save(window(962, [(20, 16, 12), (30, 24, 18)]), "block", "pumpjack_front")
     save(window(962, [(20, 16, 12)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "pumpjack_front_on")
-    save(window(963, [(40, 34, 26), (52, 44, 32)]), "block", "oil_sand_extractor_front")
-    save(window(963, [(40, 34, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "oil_sand_extractor_front_on")
     save(window(964, [(30, 26, 26), (44, 36, 34)]), "block", "distillation_tower_front")
     save(window(964, [(30, 26, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "distillation_tower_front_on")
     save(window(965, [(30, 26, 26), (44, 36, 34)]), "block", "catalytic_cracker_front")
     save(window(965, [(30, 26, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "catalytic_cracker_front_on")
-    save(window(966, [(30, 26, 26), (44, 36, 34)]), "block", "vacuum_distillation_unit_front")
-    save(window(966, [(30, 26, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "vacuum_distillation_unit_front_on")
-    save(window(967, [(30, 26, 26), (44, 36, 34)]), "block", "catalytic_reformer_front")
-    save(window(967, [(30, 26, 26)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "catalytic_reformer_front_on")
-    save(window(968, [(40, 46, 50), (52, 60, 64)]), "block", "chemical_mixer_front")
-    save(window(968, [(40, 46, 50)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "chemical_mixer_front_on")
     save(jaws(969, False), "block", "fracking_rig_front")
     save(jaws(969, True), "block", "fracking_rig_front_on")
     save(window(970, [(60, 56, 44), (76, 70, 56)]), "block", "flowback_treatment_unit_front")
@@ -1321,6 +1318,17 @@ def machines():
     armor = TEX / "entity" / "equipment" / "humanoid"
     armor.mkdir(parents=True, exist_ok=True)
     rocket_pack_armor().save(armor / "rocket_pack.png", optimize=True)
+
+    def save_armor(img, layer, name):
+        folder = TEX / "entity" / "equipment" / layer
+        folder.mkdir(parents=True, exist_ok=True)
+        img.save(folder / f"{name}.png", optimize=True)
+    import gear_textures
+    gear_textures.draw_all(save, save_armor, part_palette)
+    import exosuit_art
+    exosuit_art.draw_all(save, save_armor)
+    import plastic
+    plastic.draw_all(save)
     save(conveyor_frame(0), "block", "conveyor_belt")
     save_animation([conveyor_frame(2 * i) for i in range(4)], "conveyor_belt_moving", frametime=1)
     save(shaft_frame(0), "block", "iron_shaft")
@@ -1427,6 +1435,28 @@ def main():
     cotton_textures.draw_all(save)
     import deposits
     deposits.draw_all(save)
+    import drone_textures
+    drone_textures.draw_all()
+    import blueprints
+    for name, img in blueprints.draw_textures().items():
+        save(img, "block", name)
+    for name, img in blueprints.draw_item_textures().items():
+        save(img, "item", name)
+    ghost_dir = ROOT / "src" / "main" / "resources" / "assets" / "jugcraft" / "textures" / "misc"
+    ghost_dir.mkdir(parents=True, exist_ok=True)
+    blueprints.ghost_texture().save(ghost_dir / "blueprint_ghost.png")
+    import tower
+    for name, img in tower.draw_textures().items():
+        save(img, "block", name)
+    for name, img in tower.draw_item_textures().items():
+        save(img, "item", name)
+    # The tower's building blocks, pads and pickups at 64 px (tools/tower_art.py), over the 16 px versions above.
+    import tower_art
+    tower_art.write_all(str(ROOT / "src" / "main" / "resources" / "assets" / "jugcraft"))
+
+    import tank_display
+    tank_display.draw_all(save)
+
     import pixel_hollows_textures
     pixel_hollows_textures.draw_all()
 

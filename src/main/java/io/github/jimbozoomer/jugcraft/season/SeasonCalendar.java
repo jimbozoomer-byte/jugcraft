@@ -121,9 +121,12 @@ public final class SeasonCalendar {
 			return new Settings(newMode, southern, zone, snow, snowDepth, feast, feastDays, december, null);
 		}
 
-		/** A fixed preview date (null: back to today's date); the season then follows that date. */
+		/**
+		 * A fixed preview date (null: back to today's date). While it is set the season follows that date whatever the
+		 * mode; ending the preview goes back to the mode it had.
+		 */
 		public Settings withFixedDate(MonthDay date) {
-			return new Settings(Mode.AUTO, southern, zone, snow, snowDepth, feast, feastDays, december, date);
+			return new Settings(mode, southern, zone, snow, snowDepth, feast, feastDays, december, date);
 		}
 
 		public Settings withSnow(boolean newSnow) {
@@ -144,9 +147,18 @@ public final class SeasonCalendar {
 			return mode == Mode.AUTO || fixedDate != null ? seasonDay(effectiveDate(today), southern) : mode.day;
 		}
 
-		/** Whether winter snow falls and lies on {@code today}: the option is on and the season day is in winter. */
+		/**
+		 * Whether winter snow falls and lies on {@code today}: the option is on and it is winter, by the calendar month
+		 * when following the date (December to February in the north, June to August in the south) or the fixed mode.
+		 */
 		public boolean snowOn(LocalDate today) {
-			return snow && isSnowSeason(dayOn(today));
+			if (!snow) {
+				return false;
+			}
+			if (mode == Mode.AUTO || fixedDate != null) {
+				return isSnowMonth(effectiveDate(today).getMonth(), southern);
+			}
+			return isSnowSeason(mode.day);
 		}
 
 		/** The events running on {@code today}, in {@link Event} order. */
@@ -193,6 +205,12 @@ public final class SeasonCalendar {
 			day--;
 		}
 		return southern ? (day - 1 + SOUTH_OFFSET) % DAYS + 1 : day;
+	}
+
+	/** Winter's months: December to February in the north, June to August in the south. */
+	public static boolean isSnowMonth(Month month, boolean southern) {
+		return southern ? month == Month.JUNE || month == Month.JULY || month == Month.AUGUST
+				: month == Month.DECEMBER || month == Month.JANUARY || month == Month.FEBRUARY;
 	}
 
 	/** Whether a season day is in the snow season (1 December to 28 February in the north). */
