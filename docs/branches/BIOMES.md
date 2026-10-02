@@ -1,6 +1,6 @@
 # Biomes branch
 
-Status: **in progress** on branch `claude/biomes`. Batch 1 (seasonal forests, with the region engine) is green in CI; batch 2 (fields and meadows, with region layouts) passed its server tests; batch 3 (wetlands) is being built. The owner asked to carry on through every batch. Everything below is a design proposal, not a promise; each batch records its own feature document and test evidence under `docs/features/` when it is built. Nothing here has been played.
+Status: **in progress** on branch `claude/biomes`. Batch 1 (seasonal forests, with the region engine) is green in CI; batch 2 (fields and meadows, with region layouts) is green in CI; batches 3 (wetlands) and 4 (warm and dry, with Jugcraft surfaces) are being built. The owner asked to carry on through every batch. Everything below is a design proposal, not a promise; each batch records its own feature document and test evidence under `docs/features/` when it is built. Nothing here has been played.
 
 On 2 October 2026 the owner shared a catalog of the Biomes O' Plenty mod's biomes (compiled from its fan wiki: 143 pages) and asked to "remake all these within our mod". They chose:
 - **Placement:** Jugcraft regions (below).
