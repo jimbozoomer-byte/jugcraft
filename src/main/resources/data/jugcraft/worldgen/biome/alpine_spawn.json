@@ -114,7 +114,8 @@
             }
           ]
         }
-      }
+      },
+      "modifier": "overlay"
     },
     "minecraft:visual/sky_color": "#7ca3ff"
   },

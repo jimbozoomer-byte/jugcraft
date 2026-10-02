@@ -65,7 +65,8 @@ def biome():
         "attributes": {
             "minecraft:audio/background_music": {"default": {"max_delay": 24000, "min_delay": 12000,
                                                              "sound": "minecraft:music.overworld.meadow"}},
-            "minecraft:gameplay/natural_mob_spawns": {"argument": {"spawn_costs": {}, "spawns_by_category": MEADOW_SPAWNS}},
+            "minecraft:gameplay/natural_mob_spawns": {"argument": {"spawn_costs": {}, "spawns_by_category": MEADOW_SPAWNS},
+                                                       "modifier": "overlay"},
             "minecraft:visual/sky_color": "#7ca3ff",
         },
         "carvers": ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"],

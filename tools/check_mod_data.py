@@ -508,6 +508,11 @@ def check_alpine():
     if '"alpine_spawn.start"' not in CONFIG.read_text(encoding="utf-8"):
         err("JugcraftConfig has no alpine_spawn.start")
     folder = DATA / MOD / "worldgen"
+    for path in sorted((folder / "biome").glob("*.json")):
+        # 26.3 reads an attribute as either a plain value or {"modifier", "argument"}; an argument alone fails to load.
+        for name, value in ((load(path) or {}).get("attributes") or {}).items():
+            if isinstance(value, dict) and "argument" in value and "modifier" not in value:
+                err(f"{path.name}: attribute {name} has an argument but no modifier")
     biome = load(folder / "biome" / f"{al.BIOME}.json") or {}
     if biome.get("temperature") != al.TEMPERATURE or biome.get("downfall") != al.DOWNFALL:
         err(f"{al.BIOME}.json climate differs from tools/alpine.py")
