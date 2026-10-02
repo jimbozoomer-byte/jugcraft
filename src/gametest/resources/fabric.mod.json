@@ -43,6 +43,7 @@
       "io.github.jimbozoomer.jugcraft.test.FacePaintGameTests",
       "io.github.jimbozoomer.jugcraft.test.CandyGameTests",
       "io.github.jimbozoomer.jugcraft.test.ForagingGameTests",
+      "io.github.jimbozoomer.jugcraft.test.BatHouseGameTests",
       "io.github.jimbozoomer.jugcraft.test.PetroGameTests"
     ],
     "fabric-client-gametest": [
@@ -80,7 +81,8 @@
       "io.github.jimbozoomer.jugcraft.test.GhostClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.FacePaintClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CandyClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.ForagingClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.ForagingClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.BatHouseClientGameTests"
     ]
   },
   "depends": {

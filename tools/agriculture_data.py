@@ -35,6 +35,7 @@ import ghost_data
 import face_paint_data
 import candy_data
 import foraging_data
+import bat_data
 import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -201,6 +202,7 @@ def assets(root, write, lang):
     # After the plain food items: candy corn's tinted model replaces its plain one.
     candy_data.assets(root, write, lang)
     foraging_data.assets(root, write, lang)
+    bat_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -315,6 +317,7 @@ def loot(data, write):
     pantry_data.loot(out, write)
     candy_data.loot(out, write)
     foraging_data.loot(out, write)
+    bat_data.loot(out, write)
     crow_data.loot(out, write)
     firework_data.loot(out, write)
     feast_data.loot(out, write)
@@ -422,6 +425,7 @@ def tags(tags):
     maze_data.tags(tags)
     candy_data.tags(tags)
     foraging_data.tags(tags)
+    bat_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

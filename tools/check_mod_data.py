@@ -802,6 +802,7 @@ def check_agriculture():
     check_face_paint(java, main)
     check_candy(java, main)
     check_foraging(java, main)
+    check_bats(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2745,6 +2746,45 @@ def check_foraging(java, main):
     for advancement in ("fairy_ring", "forager"):
         if not (DATA / "jugcraft" / "advancement" / f"{advancement}.json").exists():
             err(f"Autumn foraging needs its advancement {advancement}")
+
+
+def check_bats(java, main):
+    """The Bat House: BatHouseBlockEntity and JugcraftAgriculture match BATS in tools/agriculture.py (room, guano, range,
+    move-in chance, check interval, the bats' tag, guano's area and doses); the house and guano are registered (guano as
+    a FertilizerItem); and the house has its models (one for each guano level), words, loot, recipe and advancement, and
+    guano its texture and its phosphate recipe."""
+    bt = ag.BATS
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("BatHouseBlockEntity", "CAPACITY"): bt["capacity"], ("BatHouseBlockEntity", "GUANO_CAP"): bt["guano_cap"],
+                ("BatHouseBlockEntity", "RETURN_RANGE"): bt["return_range"], ("BatHouseBlockEntity", "MOVE_IN_CHANCE"): bt["move_in_chance"],
+                ("BatHouseBlockEntity", "CHECK_TICKS"): bt["check_ticks"], ("JugcraftAgriculture", "GUANO_RADIUS"): bt["guano_radius"],
+                ("JugcraftAgriculture", "GUANO_DOSES"): bt["guano_doses"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from BATS in tools/agriculture.py ({value})")
+    if f'TAG = "{bt["tag"]}"' not in java.get("BatHouseBlockEntity", ""):
+        err(f"BatHouseBlockEntity.TAG must be {bt['tag']}")
+    if f'registerBlock("{bt["house"]}", BatHouseBlock::new' not in main or f'registerItem("{bt["guano"]}", props -> new FertilizerItem(' not in main:
+        err("JugcraftAgriculture.java must register the Bat House and guano (a FertilizerItem)")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in (f"block.jugcraft.{bt['house']}", f"item.jugcraft.{bt['guano']}", "message.jugcraft.bat_house.status",
+                "message.jugcraft.bat_house.scooped"):
+        if key not in lang:
+            err(f"The Bat House has no words for {key}")
+    paths = [ASSETS / "models" / "block" / f"{bt['house']}.json"] + [ASSETS / "models" / "block" / f"{bt['house']}_guano_{g}.json" for g in (1, 2, 3)]
+    paths += [ASSETS / "textures" / "item" / f"{bt['guano']}.png", DATA / "jugcraft" / "loot_table" / "blocks" / f"{bt['house']}.json",
+              DATA / "jugcraft" / "recipe" / f"{bt['house']}.json", DATA / "jugcraft" / "recipe" / "phosphate_from_bat_guano.json",
+              DATA / "jugcraft" / "advancement" / "night_shift.json"]
+    for path in paths:
+        if not path.exists():
+            err(f"The Bat House needs {path.relative_to(ROOT)}")
+    guano = load(DATA / "jugcraft" / "recipe" / "phosphate_from_bat_guano.json") or {}
+    if guano.get("ingredients") != [f"jugcraft:{bt['guano']}"] * bt["guano_per_phosphate"]:
+        err(f"Phosphate takes {bt['guano_per_phosphate']} guano (tools/agriculture.py)")
 
 
 def check_model_uvs():

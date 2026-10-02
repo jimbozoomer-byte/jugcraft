@@ -892,4 +892,6 @@ def crop_textures():
     out.update(candy_textures())
     from foraging_textures import foraging_textures  # and autumn foraging
     out.update(foraging_textures())
+    from bat_textures import bat_textures  # and the Bat House
+    out.update(bat_textures())
     return out

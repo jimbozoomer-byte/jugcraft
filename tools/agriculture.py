@@ -544,6 +544,8 @@ HALLOWEEN_ADVANCEMENTS = {
                      "frame": "task"},
     "candy_maker": {"icon": "jugcraft:candy_kettle", "title": "Sweet Science", "description": "Pour a batch of candy from a Candy Kettle",
                     "frame": "task"},
+    "night_shift": {"icon": "jugcraft:bat_house", "title": "Night Shift", "description": "Watch bats pour out of a Bat House at dusk",
+                    "frame": "task"},
     "fairy_ring": {"icon": "jugcraft:fly_agaric", "title": "Away with the Fairies",
                    "description": "Stand in a fairy ring under a full moon", "frame": "goal"},
     "forager": {"icon": "jugcraft:foraging_basket", "title": "Forager", "description": "Carry all five wild mushrooms in a Foraging Basket",
@@ -1447,6 +1449,24 @@ def foraging_blocks():
 def foraging_items():
     return foraging_blocks() + [FORAGING["basket"]]
 
+# ---------------------------------------------------------------- Fall additions 13: the Bat House
+# The Bat House (BatHouseBlock + entity) holds up to `capacity` roosting bats. At dusk (the Overworld clock, looked at every
+# `check_ticks`), while mobs spawn, a house with room gains a bat one time in 1/`move_in_chance`; then every roosting bat
+# flies out (vanilla bats, tagged `tag`). At dawn the nearest bats within `return_range` blocks come in, up to the room,
+# and each leaves a guano (up to `guano_cap` waiting). Bat Guano is a fertilizer (FertilizerItem): every crop within
+# `guano_radius` gets `guano_doses` doses of bone meal; `guano_per_phosphate` guano make a phosphate.
+BATS = {"house": "bat_house", "house_display": "Bat House", "guano": "bat_guano", "guano_display": "Bat Guano", "tag": "jugcraft.bat_house",
+        "capacity": 4, "guano_cap": 16, "return_range": 32, "move_in_chance": 0.5, "check_ticks": 20,
+        "guano_radius": 1, "guano_doses": 1, "guano_per_phosphate": 4}
+
+
+def bat_blocks():
+    return [BATS["house"]]
+
+
+def bat_items():
+    return bat_blocks() + [BATS["guano"]]
+
 
 def pantry_blocks():
     return [PANTRY["kettle"], PANTRY["shelf"]]
@@ -1627,6 +1647,9 @@ for _cake, _info in LANTERNS["mooncakes"].items():
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    # Fall additions 13: bat guano is rich in phosphate.
+    {"id": "phosphate_from_bat_guano", "inputs": ["jugcraft:bat_guano"] * 4, "result": "phosphate", "count": 1, "category": "misc",
+     "features": ["phosphate"]},
     # Fall additions 3: a canning kettle is a cauldron enamelled blue, with an iron-bar jar rack.
     {"id": "canning_kettle", "inputs": ["minecraft:cauldron", "minecraft:blue_dye", "minecraft:iron_bars"], "result": "canning_kettle",
      "count": 1, "category": "misc"},
@@ -1958,6 +1981,9 @@ SHAPED = [
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
     # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
     # (the ring) baked in; sugar round a red dye.
+    # Fall additions 13: a slatted roost of planks.
+    {"id": "bat_house", "pattern": ["PPP", "PSP", "P P"], "key": {"P": "#minecraft:planks", "S": "minecraft:stick"}, "result": "bat_house",
+     "count": 1, "category": "building"},
     # Fall additions 12: a wicker basket of sugar cane with a stick handle.
     {"id": "foraging_basket", "pattern": [" S ", "C C", "CCC"], "key": {"S": "minecraft:stick", "C": "minecraft:sugar_cane"},
      "result": "foraging_basket", "count": 1, "category": "equipment"},
@@ -2100,7 +2126,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks())
 
 
 def all_items():
@@ -2111,7 +2137,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items())
 
 
 def owns(entry_id):

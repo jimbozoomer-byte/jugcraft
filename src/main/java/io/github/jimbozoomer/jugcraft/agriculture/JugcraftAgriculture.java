@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 
 import com.mojang.serialization.Codec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import java.util.ArrayList;
@@ -248,6 +249,10 @@ public final class JugcraftAgriculture {
 	/** The candy poured onto a Candy Tray. */
 	public static DataComponentType<CandyBatch> CANDY_BATCH;
 	public static BlockEntityType<CandyKettleBlockEntity> CANDY_KETTLE_ENTITY;
+	public static BlockEntityType<BatHouseBlockEntity> BAT_HOUSE_ENTITY;
+	/** Bat guano fertilizes the crops this far round where it is used (a 3x3 patch), with this many doses of bone meal each. */
+	public static final int GUANO_RADIUS = 1;
+	public static final int GUANO_DOSES = 1;
 	/** The five wild autumn mushrooms. */
 	public static final List<String> WILD_MUSHROOMS = List.of("chanterelle", "porcini", "puffball", "fly_agaric", "jack_o_lantern_mushroom");
 	/** The Candy Kettle's own candies (it also makes candy corn and caramel). */
@@ -1360,6 +1365,16 @@ public final class JugcraftAgriculture {
 		food("fried_puffball", 4, 0.5F, COMPOST_MEDIUM_HIGH);
 		stew("foragers_stew", 10, 0.8F);
 		FairyRings.register();
+
+		// Fall additions 13, the Bat House: a roost that lets bats out at dusk and takes them in at dawn, and the guano they
+		// leave, a fertilizer (superphosphate's rule over a 3x3 patch, one dose) and a source of phosphate.
+		Block batHouse = registerBlock("bat_house", BatHouseBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		BAT_HOUSE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("bat_house"),
+				FabricBlockEntityTypeBuilder.create(BatHouseBlockEntity::new, batHouse).build());
+		registerItem("bat_house", props -> new BlockItem(batHouse, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem("bat_guano", props -> new FertilizerItem(props, GUANO_RADIUS, GUANO_DOSES), new Item.Properties()
+				.compostable(COMPOST_MEDIUM_HIGH), INGREDIENT_TAB);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
