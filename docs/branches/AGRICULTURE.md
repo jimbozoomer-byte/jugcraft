@@ -872,6 +872,19 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Build one** from a T of four hay bales with a carved pumpkin on top. It keeps crows off crops within eight blocks (twelve with a lit head), harvests and replants the ripe crops round its post, and carries the harvest to the chest under its post.
 - Lead it with wheat; wheat heals it; shears take it apart. Details: [more fall additions](../features/more-fall-additions.md#the-hay-golem).
 
+### Knitting
+
+| **Knitting:** Spinning Wheels (bare, with a skein of orange wool, half spun with purple) and, by a campfire, armour stands in knitwear: a cream beanie, pumpkin sweater and socks; a red striped sweater and green beanie; an orange bat sweater and black socks | **The knitwear** up close |
+| --- | --- |
+| ![Knitting](../images/ingame_knitting.jpg) | ![Knitwear on armour stands](../images/ingame_knitwear.jpg) |
+| **Spinning Wheels**, turning | **Yarn, needles and garments** |
+| ![Spinning Wheels](../images/ingame_spinning_wheels.jpg) | ![Yarn, needles and garments](../images/ingame_knitting_items.jpg) |
+
+*Real screenshots from the client game test that CI runs (`KnittingClientGameTests`, software rendering, small previews).*
+
+- **Spin** wool into yarn on the Spinning Wheel, by hand or with redstone; **knit** it a row at a time on Knitting Needles into beanies, socks and sweaters, the colour of the blend of their rows.
+- Knitwear keeps out powder snow, takes dye like leather, and two pieces by a campfire make you cosy. Details: [more fall additions](../features/more-fall-additions.md#knitting-needles-and-yarn).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
