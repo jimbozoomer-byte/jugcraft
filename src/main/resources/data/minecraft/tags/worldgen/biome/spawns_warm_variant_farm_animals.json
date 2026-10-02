@@ -2,6 +2,11 @@
   "replace": false,
   "values": [
     "jugcraft:bayou",
-    "jugcraft:floodplain"
+    "jugcraft:floodplain",
+    "jugcraft:lush_desert",
+    "jugcraft:bone_flats",
+    "jugcraft:outback",
+    "jugcraft:oasis",
+    "jugcraft:wasteland"
   ]
 }

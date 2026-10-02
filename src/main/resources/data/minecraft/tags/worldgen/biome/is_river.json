@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:lush_river"
+    "jugcraft:lush_river",
+    "jugcraft:dry_river"
   ]
 }

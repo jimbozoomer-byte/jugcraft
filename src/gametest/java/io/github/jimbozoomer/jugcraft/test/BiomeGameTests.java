@@ -232,6 +232,24 @@ public class BiomeGameTests {
 		helper.succeed();
 	}
 
+	/** Palm and cypress saplings (warm and dry lands) grow their trees. */
+	@GameTest(maxTicks = 100)
+	public void warmTreesGrow(GameTestHelper helper) {
+		BlockPos at = open(helper, new BlockPos(3, 2, 3));
+		String[][] trees = {{"palm", "palm_fronds"}, {"cypress", "cypress_leaves"}};
+		TreeGrower[] growers = {JugcraftAgriculture.PALM_GROWER, JugcraftAgriculture.CYPRESS_GROWER};
+		for (int i = 0; i < trees.length; i++) {
+			int[] counts = grow(helper, growers[i], at, block(trees[i][0] + "_sapling"), trees[i][0] + "_log", trees[i][1]);
+			LOGGER.info("A {}: {} logs, {} leaves", trees[i][0], counts[0], counts[1]);
+			helper.assertTrue(counts[0] >= 4 && counts[1] >= 6, "A small " + trees[i][0] + ": " + counts[0] + " logs, " + counts[1] + " leaves");
+			BlockPos absolute = helper.absolutePos(at);
+			for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-6, 0, -6), absolute.offset(6, 24, 6))) {
+				helper.getLevel().setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+			}
+		}
+		helper.succeed();
+	}
+
 	private static int dropped(GameTestHelper helper, Block block) {
 		AABB area = new AABB(helper.absolutePos(BlockPos.ZERO)).inflate(16);
 		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, area, entity -> entity.getItem().is(block.asItem()))

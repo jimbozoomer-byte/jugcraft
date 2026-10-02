@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:orchard",
     "jugcraft:field",
     "jugcraft:flower_meadow",
     "jugcraft:grassland",

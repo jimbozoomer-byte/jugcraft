@@ -578,5 +578,261 @@
     ],
     "weirdness": 0,
     "biome": "jugcraft:wetland"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:savanna",
+    "temperature": [
+      3,
+      3
+    ],
+    "humidity": [
+      0,
+      0
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:dryland"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:savanna_plateau",
+    "temperature": [
+      3,
+      3
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:xeric_shrubland"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:forest",
+    "temperature": [
+      3,
+      3
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:jacaranda_glade"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:desert",
+    "temperature": [
+      4,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": -1,
+    "biome": "jugcraft:lush_desert"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:desert",
+    "temperature": [
+      4,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 1,
+    "biome": "jugcraft:bone_flats"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:river",
+    "temperature": [
+      4,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:dry_river"
+  },
+  {
+    "layouts": [
+      1
+    ],
+    "replaces": "minecraft:snowy_plains",
+    "temperature": [
+      0,
+      0
+    ],
+    "humidity": [
+      0,
+      0
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:cold_desert"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:savanna",
+    "temperature": [
+      3,
+      3
+    ],
+    "humidity": [
+      0,
+      0
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:scrubland"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:savanna",
+    "temperature": [
+      3,
+      3
+    ],
+    "humidity": [
+      1,
+      1
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:lush_savanna"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:desert",
+    "temperature": [
+      4,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": -1,
+    "biome": "jugcraft:outback"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:desert",
+    "temperature": [
+      4,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 1,
+    "biome": "jugcraft:oasis"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:badlands",
+    "temperature": [
+      4,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:wasteland"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:eroded_badlands",
+    "temperature": [
+      4,
+      4
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:wasteland"
+  },
+  {
+    "layouts": [
+      3
+    ],
+    "replaces": "minecraft:forest",
+    "temperature": [
+      3,
+      3
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:burnt_forest"
+  },
+  {
+    "layouts": [
+      0
+    ],
+    "replaces": "minecraft:forest",
+    "temperature": [
+      3,
+      3
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:mediterranean_forest"
+  },
+  {
+    "layouts": [
+      0
+    ],
+    "replaces": "minecraft:plains",
+    "temperature": [
+      2,
+      2
+    ],
+    "humidity": [
+      0,
+      4
+    ],
+    "weirdness": 0,
+    "biome": "jugcraft:orchard"
   }
 ]

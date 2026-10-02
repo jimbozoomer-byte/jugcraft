@@ -74,7 +74,28 @@ RULES = [
     rule([2], "plains", (1, 1), (0, 0), "quagmire"),
     rule([2], "plains", (1, 1), (1, 1), "marsh"),
     rule([2], "plains", (2, 2), (0, 4), "wetland"),
+    # Batch 4, warm and dry: the meadow layout's dry lands, the wild layout's deserts and scrub, two woodland forests.
+    rule([1], "savanna", (3, 3), (0, 0), "dryland"),
+    rule([1], "savanna_plateau", (3, 3), (0, 4), "xeric_shrubland"),
+    rule([1], "forest", (3, 3), (0, 4), "jacaranda_glade"),
+    rule([1], "desert", (4, 4), (0, 4), "lush_desert", weirdness=-1),
+    rule([1], "desert", (4, 4), (0, 4), "bone_flats", weirdness=1),
+    rule([1], "river", (4, 4), (0, 4), "dry_river"),
+    rule([1], "snowy_plains", (0, 0), (0, 0), "cold_desert"),
+    rule([3], "savanna", (3, 3), (0, 0), "scrubland"),
+    rule([3], "savanna", (3, 3), (1, 1), "lush_savanna"),
+    rule([3], "desert", (4, 4), (0, 4), "outback", weirdness=-1),
+    rule([3], "desert", (4, 4), (0, 4), "oasis", weirdness=1),
+    rule([3], "badlands", (4, 4), (0, 4), "wasteland"),
+    rule([3], "eroded_badlands", (4, 4), (0, 4), "wasteland"),
+    rule([3], "forest", (3, 3), (0, 4), "burnt_forest"),
+    rule([0], "forest", (3, 3), (0, 4), "mediterranean_forest"),
+    rule([0], "plains", (2, 2), (0, 4), "orchard"),
 ]
+
+# Trees from other features, given a placed feature ("<name>") that checks the given sapling-like block would survive.
+PLACED_TREES = {"chestnut_checked": ("jugcraft:chestnut", "jugcraft:chestnut_sapling"),
+                "azalea_tree_checked": ("minecraft:azalea_tree", "minecraft:azalea")}
 
 
 def rules_file():
@@ -163,6 +184,23 @@ EXTRAS = {
     "ferns": {"block": "minecraft:fern", "step": 9, "patches": 2, "count": 24},
     "large_ferns": {"feature": "minecraft:large_fern", "step": 9, "rarity": 2, "count": 16},
     "berry_bushes": {"feature": "minecraft:berry_bush", "step": 9, "rarity": 3, "count": 12},
+    # Batch 4. "survive": also check that block would survive there.
+    "cacti": {"feature": "minecraft:cactus", "step": 9, "rarity": 2, "count": 6, "survive": "minecraft:cactus"},
+    "bone_spikes": {"configured": {"type": "minecraft:block_column", "allowed_placement": {
+        "type": "minecraft:matching_block_tag", "tag": "minecraft:air"}, "direction": "up", "layers": [
+        {"height": {"type": "minecraft:uniform", "max_inclusive": 3, "min_inclusive": 1},
+         "provider": {"id": "minecraft:bone_block", "properties": {"axis": "y"}}}], "prioritize_tip": False},
+        "step": 9, "rarity": 2, "count": 3},
+    "poppies_dense": {"block": "minecraft:poppy", "step": 9, "patches": 3, "count": 64},
+    "rose_bushes": {"block": "minecraft:rose_bush", "properties": {"half": "lower"}, "step": 9, "rarity": 2, "count": 24},
+    "peonies": {"block": "minecraft:peony", "properties": {"half": "lower"}, "step": 9, "rarity": 2, "count": 24},
+    "blue_orchids": {"block": "minecraft:blue_orchid", "step": 9, "patches": 2, "count": 24},
+    "lilies_of_the_valley": {"block": "minecraft:lily_of_the_valley", "step": 9, "rarity": 2, "count": 24},
+    "salt_outcrops": {"configured": {"type": "minecraft:disk", "half_height": 1, "radius": {
+        "type": "minecraft:uniform", "max_inclusive": 2, "min_inclusive": 1}, "state_provider": {"id": "jugcraft:salt_ore"},
+        "target": {"type": "minecraft:matching_blocks", "blocks": ["minecraft:calcite", "minecraft:coarse_dirt"]}},
+        "step": 6, "placement": [{"type": "minecraft:rarity_filter", "chance": 3}, {"type": "minecraft:in_square"},
+                                 {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR_WG"}, {"type": "minecraft:biome"}]},
 }
 
 # Each biome: its base, climate values, trees (count: [usual, sometimes]; default and weighted picks of placed
@@ -379,6 +417,150 @@ BIOMES = {
         "trees": {"count": [2, 3], "default": "minecraft:spruce_checked", "picks": [["jugcraft:willow_checked", 0.4]], "water_depth": 1},
         "extras": ["mud", "ferns", "cattails", "watergrass"],
         "tags": ["c:is_swamp", "c:is_wet", "minecraft:has_structure/village_taiga"],
+    },
+    # ---------------------------------------------------------------- batch 4: warm and dry ("surface": its own ground)
+    # Hot, dry grassland under a lilac sky: pines, oaks and brush oaks, bushes, cacti and bone pillars; villages.
+    "dryland": {
+        "display": "Dryland", "base": "savanna", "temperature": 1.4, "downfall": 0.15, "seasons": False, "precipitation": False,
+        "effects": {"grass_color": "#b2aa5a", "foliage_color": "#9c9a50"},
+        "attributes": {"minecraft:visual/sky_color": "#a99fd8"},
+        "trees": {"count": [2, 3], "default": "minecraft:pine_checked", "picks": [
+            ["minecraft:oak_checked", 0.25], ["jugcraft:oak_bush_checked", 0.35]]},
+        "extras": ["bushes_dense", "patch_dead_bush", "cacti", "bone_spikes"],
+        "untags": ["minecraft:has_structure/village_savanna"],
+        "tags": ["minecraft:has_structure/village_desert", "c:is_dry", "c:is_hot"],
+    },
+    # Low hills of sand and grass with small acacias, cacti, dead shrubs and little lakes.
+    "xeric_shrubland": {
+        "display": "Xeric Shrubland", "base": "savanna_plateau", "temperature": 1.6, "downfall": 0.1, "seasons": False,
+        "precipitation": False,
+        "surface": {"floor": "minecraft:grass_block", "patches": [[-0.35, 0.35, "minecraft:sand"]]},
+        "trees": {"count": [1, 2], "default": "jugcraft:desert_acacia_checked", "picks": []},
+        "extras": ["cacti", "patch_dead_bush", "dry_grass", "ponds"],
+        "tags": ["c:is_dry", "c:is_hot"],
+    },
+    # A forest of blossoming jacarandas with cherries, oaks and azaleas, blue orchids and lilies of the valley.
+    "jacaranda_glade": {
+        "display": "Jacaranda Glade", "base": "forest", "temperature": 0.75, "downfall": 0.8, "seasons": True, "winter_snow": False,
+        "trees": {"count": [6, 7], "default": "jugcraft:jacaranda_checked", "picks": [
+            ["minecraft:cherry_checked", 0.15], ["minecraft:oak_bees_002", 0.2], ["jugcraft:azalea_tree_checked", 0.1]]},
+        "extras": ["blue_orchids", "lilies_of_the_valley"],
+        "tags": ["c:is_flower_forest"],
+    },
+    # Orange dunes of red sand that see rain: dune grass, acacia brush and bushes, a few wildflowers; villages.
+    "lush_desert": {
+        "display": "Lush Desert", "base": "desert", "temperature": 1.0, "downfall": 0.3, "seasons": False, "precipitation": True,
+        "surface": {"floor": "minecraft:red_sand", "under": "minecraft:red_sandstone", "patches": [[-0.2, 0.2, "minecraft:sand"]]},
+        "trees": {"count": [1, 2], "default": "jugcraft:desert_acacia_checked", "picks": [["jugcraft:oak_bush_checked", 0.3]]},
+        "extras": ["dry_grass", "meadow_wildflowers", "bushes_dense"],
+        "tags": ["c:is_dry", "c:is_hot", "c:is_desert"],
+    },
+    # Dry, coarse flats where pillars of bone stand among dead bushes and dry grass.
+    "bone_flats": {
+        "display": "Bone Flats", "base": "desert", "temperature": 1.8, "downfall": 0.0, "seasons": False, "precipitation": False,
+        "surface": {"floor": "minecraft:coarse_dirt", "under": "minecraft:dirt", "patches": [[-0.2, 0.2, "minecraft:sand"]]},
+        "trees": None,
+        "extras": ["bone_spikes", "dry_grass", "patch_dead_bush"],
+        "tags": ["c:is_dry", "c:is_hot"],
+    },
+    # A river of the hot, dry lands, between sandy banks with dead bushes.
+    "dry_river": {
+        "display": "Dry River", "base": "river", "temperature": 2.0, "downfall": 0.0, "seasons": False, "precipitation": False,
+        "effects": {"water_color": "#4a9db0"},
+        "surface": {"floor": "rule:minecraft:overworld/sand_or_sandstone_if_ceiling", "under": "minecraft:sand"},
+        "trees": None,
+        "drop": ["minecraft:patch_bush", "minecraft:flower_default", "minecraft:patch_grass_badlands"],
+        "extras": ["patch_dead_bush"],
+        "tags": ["c:is_dry", "c:is_hot"],
+    },
+    # A cold, gravelly waste with coarse dirt, dry grass and treacherous powder snow; no animals; snowy villages.
+    "cold_desert": {
+        "display": "Cold Desert", "base": "snowy_plains", "temperature": -0.3, "downfall": 0.05, "seasons": False,
+        "surface": {"floor": "minecraft:gravel", "under": "minecraft:dirt",
+                    "patches": [[-0.3, 0.0, "minecraft:coarse_dirt"], [0.45, 0.6, "minecraft:powder_snow"]]},
+        "trees": None,
+        "extras": ["dry_grass", "patch_dead_bush"],
+        "creatures": [],
+        "tags": ["c:is_dry", "c:is_cold", "c:is_desert"],
+    },
+    # Flat scrub of dry grass and wildflowers with scattered oak bushes; animals.
+    "scrubland": {
+        "display": "Scrubland", "base": "savanna", "temperature": 1.2, "downfall": 0.2, "seasons": False, "precipitation": False,
+        "effects": {"grass_color": "#aaa65c", "foliage_color": "#949650"},
+        "trees": {"count": [1, 2], "default": "jugcraft:oak_bush_checked", "picks": []},
+        "extras": ["dry_grass", "meadow_wildflowers"],
+        "tags": ["c:is_dry", "c:is_hot"],
+    },
+    # A savanna field of poppies and rose bushes on grass blotched with coarse dirt; no trees, no animals.
+    "lush_savanna": {
+        "display": "Lush Savanna", "base": "savanna", "temperature": 1.1, "downfall": 0.5, "seasons": False, "precipitation": True,
+        "surface": {"floor": "minecraft:grass_block", "patches": [[-0.15, 0.15, "minecraft:coarse_dirt"]]},
+        "trees": None,
+        "extras": ["poppies_dense", "rose_bushes"],
+        "creatures": [],
+        "tags": ["c:is_hot"],
+    },
+    # Red sand patched with grass, tiny acacias and cacti, pools of water and lava; villages and desert temples.
+    "outback": {
+        "display": "Outback", "base": "desert", "temperature": 2.0, "downfall": 0.0, "seasons": False, "precipitation": False,
+        "effects": {"grass_color": "#b8a858", "foliage_color": "#a49a4c"},
+        "surface": {"floor": "minecraft:red_sand", "under": "minecraft:red_sandstone",
+                    "patches": [[-0.25, 0.1, "minecraft:grass_block"]]},
+        "trees": {"count": [1, 2], "default": "jugcraft:desert_acacia_checked", "picks": []},
+        "extras": ["dry_grass"],
+        "tags": ["c:is_dry", "c:is_hot"],
+    },
+    # Sand around pools of water, with palms, grass and sugar cane.
+    "oasis": {
+        "display": "Oasis", "base": "desert", "temperature": 1.6, "downfall": 0.4, "seasons": False, "precipitation": False,
+        "effects": {"grass_color": "#7fbf4a", "foliage_color": "#6aad3c"},
+        "surface": {"floor": "rule:minecraft:overworld/sand_or_sandstone_if_ceiling", "under": "minecraft:sand",
+                    "patches": [[0.0, 0.45, "minecraft:grass_block"]]},
+        "trees": {"count": [2, 3], "default": "jugcraft:palm_checked", "picks": []},
+        "extras": ["ponds", "tall_grass_dense"],
+        "tags": ["c:is_hot", "c:is_desert"],
+    },
+    # A cruel waste of dried salt (pale calcite, rock salt) with dead trees and dead grass; no animals; husks.
+    "wasteland": {
+        "display": "Wasteland", "base": "desert", "temperature": 2.0, "downfall": 0.0, "seasons": False, "precipitation": False,
+        "effects": {"grass_color": "#9a9068", "foliage_color": "#8a8060"},
+        "surface": {"floor": "minecraft:calcite", "under": "minecraft:calcite", "patches": [[-0.15, 0.15, "minecraft:coarse_dirt"]]},
+        "trees": {"count": [0, 1], "default": "jugcraft:dead_tree_checked", "picks": []},
+        "extras": ["salt_outcrops", "dry_grass", "patch_dead_bush"],
+        "creatures": [],
+        "untags": ["minecraft:has_structure/village_desert"],
+        "tags": ["c:is_dry", "c:is_hot", "c:is_dead", "c:is_wasteland"],
+    },
+    # A burnt forest: charred dead trunks on scorched grass and coarse dirt, ash drifting in the air.
+    "burnt_forest": {
+        "display": "Burnt Forest", "base": "forest", "temperature": 0.9, "downfall": 0.3, "seasons": False,
+        "effects": {"grass_color": "#5f5b48", "foliage_color": "#5a5446"},
+        "attributes": {"minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:white_ash"}, "probability": 0.01}],
+                                                               "modifier": "append"},
+                       "minecraft:visual/fog_color": "#8c867a"},
+        "surface": {"floor": "minecraft:grass_block", "patches": [[-0.3, 0.3, "minecraft:coarse_dirt"]]},
+        "trees": {"count": [3, 4], "default": "jugcraft:dead_tree_checked", "picks": [["jugcraft:oak_bush_checked", 0.1]]},
+        "drop": ["minecraft:forest_flowers", "minecraft:flower_default"],
+        "extras": ["patch_dead_bush"],
+        "untags": ["minecraft:is_forest"],
+        "tags": ["c:is_dead", "c:is_dry"],
+    },
+    # A Mediterranean forest: tall cypresses, oaks and dark oaks, shrubs, peonies; villages.
+    "mediterranean_forest": {
+        "display": "Mediterranean Forest", "base": "forest", "temperature": 0.8, "downfall": 0.5, "seasons": True, "winter_snow": False,
+        "trees": {"count": [5, 6], "default": "jugcraft:cypress_checked", "picks": [
+            ["minecraft:oak_checked", 0.3], ["minecraft:dark_oak_checked", 0.15], ["jugcraft:oak_bush_checked", 0.2]]},
+        "extras": ["peonies", "bushes_dense"],
+        "tags": ["minecraft:has_structure/village_plains"],
+    },
+    # An orchard: chestnut trees (the agriculture branch's), oaks with bees and flowering azaleas, rose bushes and daisies.
+    "orchard": {
+        "display": "Orchard", "base": "plains", "temperature": 0.8, "downfall": 0.5, "seasons": True,
+        "effects": {"grass_color": "#8fbd5a", "foliage_color": "#77ad48"},
+        "trees": {"count": [2, 3], "default": "jugcraft:chestnut_checked", "picks": [
+            ["minecraft:oak_bees_002", 0.3], ["jugcraft:azalea_tree_checked", 0.15]]},
+        "extras": ["rose_bushes", "oxeye_daisies"],
+        "tags": ["c:is_plains"],
     },
     # ---------------------------------------------------------------- batch 2: fields and meadows
     # Cool, flat land with teal grass, scattered small spruces and clumps of oak bush, and many flowers.

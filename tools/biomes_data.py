@@ -39,6 +39,10 @@ def steps(name):
     drop = list(info.get("drop", []))
     if info["trees"] is None:
         drop.append(tree)
+    elif tree is None:
+        # A base without trees (a desert, for example): the biome's own trees join its vegetation step. The feature is
+        # the biome's alone, so its place cannot clash with another biome's order.
+        out[9].append(rid(f"trees_{name}"))
     for step in out:
         for i, feature in enumerate(step):
             if feature == tree and info["trees"] is not None:
@@ -94,12 +98,19 @@ def extra_placement(extra):
             air, {"type": "minecraft:matching_blocks", "blocks": info["on"], "offset": [0, -1, 0]}]}
     else:
         predicate = air
+    if "survive" in info:
+        predicate = {"type": "minecraft:all_of", "predicates": [predicate, {"type": "minecraft:would_survive", "state": info["survive"]}]}
     placement.append({"type": "minecraft:block_predicate_filter", "predicate": predicate})
     return placement
 
 
 def worldgen(data, write):
     write(data.parent / MOD / "region_rules.json", bm.rules_file())
+    write(data / MOD / "worldgen" / "material_rule" / "overworld" / "surface.json", surface_rule())
+    write(data / "minecraft" / "worldgen" / "material_rule" / "overworld.json", OVERWORLD_MATERIAL_RULE)
+    for tree, (feature, survives) in bm.PLACED_TREES.items():
+        write(data / MOD / "worldgen" / "placed_feature" / f"{tree}.json", {"feature": feature, "placement": [
+            {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": survives}}]})
     folder = data / MOD / "worldgen"
     for name, info in bm.BIOMES.items():
         write(folder / "biome" / f"{name}.json", biome(name))
@@ -130,6 +141,46 @@ def worldgen(data, write):
             feature = rid(extra)
             write(folder / "feature" / f"{extra}.json", info["configured"])
         write(folder / "placed_feature" / f"{extra}.json", {"feature": feature, "placement": extra_placement(extra)})
+
+
+# Vanilla's top-level Overworld material rule (26.3, by reference: its named parts), with Jugcraft's surface rule run
+# first wherever the surface is decided. Jugcraft's rule only acts in Jugcraft biomes that set a "surface"; everywhere
+# else vanilla's surface follows unchanged.
+OVERWORLD_MATERIAL_RULE = {"type": "minecraft:sequence", "sequence": [
+    "minecraft:bedrock_floor", "minecraft:overworld/copper_ore_vein", "minecraft:overworld/iron_ore_vein",
+    {"type": "minecraft:condition", "if_true": {"type": "minecraft:above_preliminary_surface"},
+     "then_run": {"type": "minecraft:sequence", "sequence": [rid("overworld/surface"), "minecraft:overworld/surface"]}},
+    "minecraft:overworld/underground"]}
+
+
+def material(block):
+    """A block result, or a named vanilla rule ("rule:minecraft:overworld/sand_or_sandstone_if_ceiling")."""
+    if block.startswith("rule:"):
+        return block.removeprefix("rule:")
+    return {"type": "minecraft:block", "result_state": block}
+
+
+def floor_rule(surface):
+    rules = [{"type": "minecraft:condition", "if_true": {"type": "minecraft:noise_threshold", "noise": "minecraft:surface",
+                                                         "min_threshold": low, "max_threshold": high}, "then_run": material(block)}
+             for low, high, block in surface.get("patches", [])]
+    rules.append(material(surface["floor"]))
+    return rules[0] if len(rules) == 1 else {"type": "minecraft:sequence", "sequence": rules}
+
+
+def surface_rule():
+    """Jugcraft's surface: for each biome with a "surface", its floor (with noise patches) and what lies under it."""
+    rules = []
+    for name, info in bm.BIOMES.items():
+        surface = info.get("surface")
+        if not surface:
+            continue
+        parts = [{"type": "minecraft:condition", "if_true": "minecraft:on_floor", "then_run": floor_rule(surface)}]
+        if "under" in surface:
+            parts.append({"type": "minecraft:condition", "if_true": "minecraft:under_floor", "then_run": material(surface["under"])})
+        rules.append({"type": "minecraft:condition", "if_true": {"type": "minecraft:biome", "biome_is": rid(name)},
+                      "then_run": {"type": "minecraft:sequence", "sequence": parts}})
+    return {"type": "minecraft:sequence", "sequence": rules}
 
 
 def tags(tags):

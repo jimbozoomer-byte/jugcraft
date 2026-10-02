@@ -1,6 +1,16 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:dryland",
+    "jugcraft:xeric_shrubland",
+    "jugcraft:lush_desert",
+    "jugcraft:bone_flats",
+    "jugcraft:dry_river",
+    "jugcraft:cold_desert",
+    "jugcraft:scrubland",
+    "jugcraft:outback",
+    "jugcraft:wasteland",
+    "jugcraft:burnt_forest",
     "jugcraft:steppe"
   ]
 }
