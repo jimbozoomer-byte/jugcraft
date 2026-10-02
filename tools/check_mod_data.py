@@ -37,7 +37,7 @@ EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_repla
                   "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires", "minecraft:mineable/axe",
                   "minecraft:mineable/shovel", "minecraft:leaves", "minecraft:eggs", "minecraft:dirt", "minecraft:mud",
                   "minecraft:grass_blocks", "minecraft:sand", "minecraft:wool", "minecraft:logs", "minecraft:candles",
-                  "minecraft:stairs", "minecraft:slabs", "minecraft:walls", "minecraft:coals"}
+                  "minecraft:stairs", "minecraft:slabs", "minecraft:walls", "minecraft:coals", "minecraft:dyes"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -284,6 +284,11 @@ def check_recipes(registered):
             inputs = [recipe["key"][ch] for ch in symbols if ch != " "]
         elif kind == "minecraft:crafting_shapeless":
             inputs = recipe["ingredients"]
+        elif kind == "minecraft:crafting_dye":
+            # 26.3's dyeing (as vanilla's leather_helmet_dyed): the item and a dye give the item back, dyed.
+            inputs = [recipe["target"], recipe["dye"]]
+            if recipe["result"]["id"] != recipe["target"]:
+                err(f"{name}: a dyeing recipe must give back the item it dyes")
         else:
             inputs = [recipe["ingredient"]]
 
@@ -2892,10 +2897,14 @@ def check_knitting(java, main):
             err(f"Knitting needs {path.relative_to(ROOT)}")
     knitwear = (load(DATA / "jugcraft" / "tags" / "item" / "knitwear.json") or {}).get("values", [])
     frozen = (load(DATA / "minecraft" / "tags" / "item" / "freeze_immune_wearables.json") or {}).get("values", [])
-    dyeable = (load(DATA / "minecraft" / "tags" / "item" / "dyeable.json") or {}).get("values", [])
+    washed = (load(DATA / "minecraft" / "tags" / "item" / f"{kn['wash_tag'].split(':')[1]}.json") or {}).get("values", [])
     for garment in kn["garments"]:
-        if f"jugcraft:{garment}" not in knitwear or f"jugcraft:{garment}" not in frozen or f"jugcraft:{garment}" not in dyeable:
-            err(f"{garment} must be knitwear, freeze-immune and dyeable")
+        if f"jugcraft:{garment}" not in knitwear or f"jugcraft:{garment}" not in frozen:
+            err(f"{garment} must be knitwear and freeze-immune")
+    for item in [kn["yarn"]] + list(kn["garments"]):
+        recipe = load(DATA / "jugcraft" / "recipe" / f"{item}_dyed.json") or {}
+        if recipe.get("type") != kn["dye_recipe"] or recipe.get("target") != f"jugcraft:{item}" or f"jugcraft:{item}" not in washed:
+            err(f"{item} must have its dyeing recipe ({item}_dyed) and wash clean in a cauldron")
 
 
 def check_pies(java, main):

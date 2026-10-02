@@ -1,7 +1,5 @@
 package io.github.jimbozoomer.jugcraft.test;
 
-import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.MapCodec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.Knitting;
@@ -33,7 +31,6 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -42,6 +39,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -50,8 +48,9 @@ import net.minecraft.world.phys.Vec3;
  * In-game tests for knitting: the Spinning Wheel taking a skein of wool and spinning it in four turns (by hand or by a
  * redstone pulse) into four balls of yarn in its colour set out in front, refusing a second skein, and unravelling knitwear
  * into its yarn less one; Knitting Needles changing project, knitting a row a ball of yarn, unpicking, and finishing a
- * garment in the blend of its yarns; knitwear being worn and freeze-proof, and taking dye as leather does; and keeping cosy by a lit campfire in
- * two pieces of knitwear (not one, not by an unlit fire), and Snug as a Bug in all three.
+ * garment in the blend of its yarns; knitwear being worn and freeze-proof, taking dye as leather does and washing clean in
+ * a cauldron; and keeping cosy by a lit campfire in two pieces of knitwear (not one, not by an unlit fire), and Snug as a
+ * Bug in all three.
  */
 public class KnittingGameTests {
 	private static Item item(String id) {
@@ -186,33 +185,39 @@ public class KnittingGameTests {
 	}
 
 	/**
-	 * Knitwear and yarn take dye at a crafting table by the same recipe that dyes leather armour: a garment and red dye make
-	 * the garment redder.
+	 * Knitwear and yarn take dye at a crafting table as Minecraft 26.3 dyes leather armour (a dyeing recipe for each, of the
+	 * same kind as vanilla's leather_helmet_dyed): a garment and red dye make the garment redder. A water cauldron washes
+	 * the dye out again.
 	 */
 	@GameTest
-	@SuppressWarnings({"unchecked", "rawtypes"})
 	public void knitwearTakesDye(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
+		Item red = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("red_dye"));
 		RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
 		Optional<RecipeHolder<CraftingRecipe>> leather = crafting.getRecipeFor(
-				CraftingInput.of(2, 1, List.of(new ItemStack(Items.LEATHER_HELMET), new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("red_dye"))))), level);
+				CraftingInput.of(2, 1, List.of(new ItemStack(Items.LEATHER_HELMET), new ItemStack(red))), level);
 		helper.assertTrue(leather.isPresent(), "A leather helmet and red dye make a recipe");
 		CraftingRecipe dyeing = leather.get().value();
-		Object json = ((MapCodec) dyeing.getSerializer().codec()).codec()
-				.encodeStart(level.registryAccess().createSerializationContext(JsonOps.INSTANCE), dyeing);
-		String how = leather.get().id() + " " + dyeing.getClass().getName() + " " + json;
+		String kind = BuiltInRegistries.RECIPE_SERIALIZER.getKey(dyeing.getSerializer()) + " (" + dyeing.getClass().getSimpleName() + ")";
 		List<ItemStack> knits = new java.util.ArrayList<>(List.of(Knitting.yarn(Knitting.UNDYED, 1)));
 		for (Knitwear knit : Knitwear.values()) {
 			knits.add(Knitting.garment(knit, Knitting.UNDYED));
 		}
 		for (ItemStack knit : knits) {
-			CraftingInput input = CraftingInput.of(2, 1, List.of(knit, new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("red_dye")))));
+			CraftingInput input = CraftingInput.of(2, 1, List.of(knit, new ItemStack(red)));
 			Optional<RecipeHolder<CraftingRecipe>> recipe = crafting.getRecipeFor(input, level);
-			helper.assertTrue(recipe.isPresent() && recipe.get().id().equals(leather.get().id()), knit + " takes dye as leather does: " + how);
+			helper.assertTrue(recipe.isPresent() && recipe.get().value().getClass() == dyeing.getClass(),
+					knit + " takes dye as leather does, by " + kind);
 			ItemStack dyed = recipe.get().value().assemble(input);
-			DyedItemColor color = dyed.get(DataComponents.DYED_COLOR);
-			helper.assertTrue(dyed.is(knit.getItem()) && color != null && color.rgb() != Knitting.UNDYED, knit + " comes out dyed: " + dyed);
+			helper.assertTrue(dyed.is(knit.getItem()) && Knitting.color(dyed) != Knitting.UNDYED, knit + " comes out dyed: " + dyed);
 		}
+		BlockPos cauldron = new BlockPos(1, 2, 1);
+		helper.setBlock(cauldron, Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3));
+		ServerPlayer washer = player(helper, new BlockPos(1, 2, 3));
+		use(helper, washer, cauldron, Knitting.garment(Knitwear.SWEATER, 0xB02E26));
+		ItemStack washed = washer.getMainHandItem();
+		helper.assertTrue(washed.is(item("knit_sweater")) && Knitting.color(washed) == Knitting.UNDYED, "A water cauldron washes the dye out: "
+				+ washed);
 		helper.succeed();
 	}
 
