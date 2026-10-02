@@ -31,6 +31,15 @@ Use a small trusted maintainer team for merge authority. Community participants 
 
 The initial CODEOWNERS is @jimbozoomer-byte. During solo-maintainer development, the owner may review and merge their own PR once checks pass. No second account is needed. Independent approval can be reinstated when the owner adds trusted maintainers.
 
+## Merge priority (owner's rule)
+
+When merging, combining or porting work from contributors, forks or other sessions, the owner's (@jimbozoomer-byte's) contributions and commits come first:
+- **Order:** merge the owner's own pull requests before contributor pull requests that touch the same areas.
+- **Conflicts:** where a contributor change conflicts with the owner's code, keep the owner's version. Fold in only what the contributor's change needs to work, such as a missing case in a shared helper.
+- **Intersections:** where a contribution intersects existing features (IDs, registries, shared APIs, config, generated data, UI style), make it work with the owner's current mod. Adapt the contribution, not the owner's code, unless the owner's code is broken.
+- **Credit:** contributors keep their commits and credit. A replacement pull request on this repository (for example, when a fork can't be pushed to) keeps the contributor's commits, names them in the description, and closes the original as superseded.
+- **Records:** write each owner-first resolution in the pull request description, so the contributor can see what changed.
+
 ## Initial setup tracking
 
 Track actual state in docs/SETUP_STATUS.md. Do not mark remote creation, branch protection, Actions success, or playable bootstrap complete until verified.

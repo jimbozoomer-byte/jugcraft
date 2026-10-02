@@ -13,7 +13,8 @@ MOD = "jugcraft"
 # Feature switches (config/jugcraft.properties). Order is the config file order.
 FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
             "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines", "deposits",
-            "explosives", "parties", "drones"]
+            "explosives", "parties", "drones",
+            "pixel_hollows", "retro_trader"]
 
 # Metals use the vanilla form set. "mined" adds ore, deepslate ore, raw item and raw block.
 # cook: which vanilla cookers can smelt the ore/raw form. tool: minimum pickaxe tier.
@@ -226,4 +227,5 @@ def feature_of(entry_id):
     import exosuit
     if entry_id in exosuit.items():
         return FEATURE
-    raise KeyError(entry_id)
+    import pixel_hollows
+    return pixel_hollows.feature_of(entry_id)
