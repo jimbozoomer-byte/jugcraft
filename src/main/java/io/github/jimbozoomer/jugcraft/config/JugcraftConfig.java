@@ -119,7 +119,7 @@ public final class JugcraftConfig {
 					+ " the Halloween event runs: start and end as MM-DD, a timezone, mode auto, on or off, and the Harvest Moon's day;"
 					+ " seasons.*: seasonal colours follow the server's date; mode auto, spring, summer, autumn,"
 					+ " winter or off, hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"
-					+ " december MM-DD..MM-DD or off).
+					+ " december MM-DD..MM-DD or off).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}
