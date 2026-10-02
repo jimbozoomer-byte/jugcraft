@@ -54,6 +54,10 @@ FLUIDS = {
     "vanadium_electrolyte": {"display": "Vanadium Electrolyte", "feature": "machines",
                              "colors": [(30, 40, 110), (44, 62, 150), (70, 92, 186), (130, 150, 224)],
                              "tick_delay": 6, "slope": 4, "drop_off": 1},
+    # Batch 26: crops fermented into fuel alcohol, a pale straw colour and thin as gasoline.
+    "bioethanol": {"display": "Bioethanol", "feature": "machines",
+                   "colors": [(170, 150, 90), (204, 188, 128), (226, 214, 164), (246, 240, 212)],
+                   "tick_delay": 4, "slope": 4, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -220,10 +224,10 @@ FLUID_MACHINES = {
 # JE per mB each fluid-burning generator gets from each fuel (Java: chemistry/FluidFuels).
 FLUID_FUELS = {
     "diesel_generator": {"diesel": 256, "heavy_fuel_oil": 128},
-    "gas_turbine": {"gasoline": 384, "refinery_gas": 192},
+    "gas_turbine": {"gasoline": 384, "refinery_gas": 192, "bioethanol": 192},
     "diesel_engine": {"diesel": 256, "heavy_fuel_oil": 128},
     "fuel_cell": {"hydrogen": 128},
-    "advanced_engine": {"gasoline": 448, "diesel": 320},
+    "advanced_engine": {"gasoline": 448, "diesel": 320, "bioethanol": 256},
 }
 
 # Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],
@@ -320,6 +324,10 @@ FLUID_RECIPES = {
         {"name": "vanadium_electrolyte", "items": [("jugcraft:asphalt_binder", 2)],
          "fluids": [("jugcraft:sulfuric_acid", 1000)], "fluid_results": [("jugcraft:vanadium_electrolyte", 1000)],
          "ticks": 160, "features": ["crude_oil", "sulfur"]},
+        # Fermentation (batch 26, after Mekanism's bio-generator): eight crops (#jugcraft:fermentable) in a bucket of
+        # water make 250 mB of bioethanol for the gas turbine or the advanced engine.
+        {"name": "bioethanol", "items": [("#jugcraft:fermentable", 8)], "fluids": [("minecraft:water", 1000)],
+         "fluid_results": [("jugcraft:bioethanol", 250)], "source": 0, "ticks": 100, "features": ["machines"]},
         # Mixing jobs (batch 24, from the old chemical mixer). Fracking fluid: water carrying sand (to prop the
         # cracks open) and a gelling agent (dried kelp, standing in for guar gum) to carry the sand.
         {"name": "fracking_fluid", "items": [("minecraft:sand", 2), ("minecraft:dried_kelp", 1)],
@@ -374,6 +382,24 @@ FLUID_RECIPES = {
          "results": [("minecraft:clay_ball", 4)], "source": 250, "ticks": 60, "features": ["machines"]},
     ],
 }
+
+
+def _leaching():
+    """Batch 26: each ore dissolved in 250 mB of sulfuric acid gives four washed ores (ORE_LEACHING_MULTIPLIER), the
+    best ore route, one better than the ore washer's three."""
+    from machines import ORE_LEACHING_MULTIPLIER, _metal_features
+    from materials import WASHED_ORES, ore_ids
+    return [{"name": ore.split(":")[1], "items": [(ore, 1)], "fluids": [("jugcraft:sulfuric_acid", 250)],
+             "results": [(f"jugcraft:washed_{metal}_ore", ORE_LEACHING_MULTIPLIER)], "ticks": 160,
+             "ore_bonus": ORE_LEACHING_MULTIPLIER, "features": ["sulfur"] + _metal_features(metal)}
+            for metal in WASHED_ORES for ore in ore_ids(metal)]
+
+
+FLUID_RECIPES["chemical_reactor"] += _leaching()
+
+# Crops that ferment into bioethanol (data/jugcraft/tags/item/fermentable.json).
+FERMENTABLE = ["minecraft:wheat", "minecraft:sugar_cane", "minecraft:potato", "minecraft:carrot", "minecraft:beetroot",
+               "minecraft:sweet_berries", "minecraft:melon_slice", "minecraft:apple"]
 
 
 def result_tank(index, result):

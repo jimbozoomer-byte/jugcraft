@@ -10,7 +10,8 @@ Format: {"chapters": [{"title", "icon", "pages": [{"title", "icon", "text": [par
 """
 from materials import COMPONENTS, METALS, MINERALS, ingot_id, ore_ids
 from machines import (ELECTRONICS_BLOCKS, FARMING_BLOCKS, CRAFTING, MACHINES, STATS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS,
-                      UPGRADES, BYPRODUCTS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, machine_recipes)
+                      UPGRADES, BYPRODUCTS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER,
+                      machine_recipes)
 
 MOD = "jugcraft"
 
@@ -152,7 +153,10 @@ ABOUT = {
     "chemical_reactor": "Two by two by two, lined with lead against the acid: the general chemistry vessel, with two "
                         "item slots, a tank in and a tank out. Two sulfur dust and a bucket of water make a bucket of "
                         "sulfuric acid. It also mixes: two salt and a bucket of water make brine; two sand, a dried "
-                        "kelp and a bucket of water make fracking fluid. Its other reactions are on its recipe pages.",
+                        "kelp and a bucket of water make fracking fluid. An ore in 250 mB of sulfuric acid gives four washed "
+                        "ores, the best ore route. Eight crops (wheat, sugar cane, potatoes, carrots, beetroot, "
+                        "berries, melon or apples) in a bucket of water ferment into 250 mB of bioethanol. Its other "
+                        "reactions are on its recipe pages.",
     "air_separation_unit": "Two by two and six tall: a cold box and its distillation column. It needs no input: it "
                            "liquefies air and splits it, 8 mB of nitrogen a tick out of the top row, 2 mB of oxygen "
                            "out of the bottom row and a little argon (1 mB every 2 ticks) out of the middle, at 64 "
@@ -484,6 +488,8 @@ def build():
                 "Smelting an ore gives one ingot.",
                 f"Crushing or pulverizing it first gives {ORE_PROCESSING_MULTIPLIER}.",
                 f"Washing it, then pulverizing the washed ore, gives {ORE_WASHING_MULTIPLIER}.",
+                f"Dissolving it in sulfuric acid in the chemical reactor gives {ORE_LEACHING_MULTIPLIER} washed ores: "
+                f"{ORE_LEACHING_MULTIPLIER} ingots.",
                 "Pulverizing ore sometimes gives a second metal's dust: " + ", ".join(
                     f"{a} gives {b}" for a, (b, _) in list(BYPRODUCTS.items())[:6]) + "."]},
             {"title": "Parts", "icon": f"{MOD}:bronze_gear", "text": [
@@ -538,7 +544,8 @@ def build():
             machine_page("flowback_treatment_unit"),
             {"title": "Fuel Values", "icon": f"{MOD}:diesel_bucket", "text": [
                 "What a bucket is worth: diesel 256,000 JE (diesel generator) or KE (diesel engine); heavy fuel oil "
-                "128,000; gasoline 384,000 and refinery gas 192,000 (gas turbine).",
+                "128,000; gasoline 384,000 and refinery gas 192,000 (gas turbine). Bioethanol from crops: 192,000 in "
+                "the gas turbine, 256,000 KE in the advanced engine.",
                 "Refined all the way, a bucket of crude oil gives about 525 mB of diesel, 293 mB of gasoline and 183 mB "
                 "of gas: about 282,000 JE, for about 40,000 JE of pumping and refining.",
                 "Oil never comes back: every reservoir runs dry."]},

@@ -579,58 +579,59 @@
             "Split Decision: Build an electrolytic cell.",
             "Oil of Vitriol: Make sulfuric acid.",
             "Green Revolution: Make fertilizer.",
-            "The Bayer Way: Digest bauxite into alumina.",
-            "Clean Burn: Build a hydrogen fuel cell."
+            "Moonshine: Ferment crops into bioethanol.",
+            "The Bayer Way: Digest bauxite into alumina."
           ]
         },
         {
           "title": "Milestones (10)",
-          "icon": "jugcraft:air_separation_unit",
+          "icon": "jugcraft:fuel_cell",
           "text": [
+            "Clean Burn: Build a hydrogen fuel cell.",
             "Thin Air: Build an air separation unit.",
             "Bread from Air: Build a synthesis converter, to make ammonia from air.",
             "Aqua Fortis: Make nitric acid.",
-            "Kroll Call: Chlorinate titanium and melt the sponge.",
-            "Power Wall: Build a lithium battery bank."
+            "Kroll Call: Chlorinate titanium and melt the sponge."
           ]
         },
         {
           "title": "Milestones (11)",
-          "icon": "jugcraft:neodymium_magnet",
+          "icon": "jugcraft:lithium_battery_bank",
           "text": [
+            "Power Wall: Build a lithium battery bank.",
             "Strong Attraction: Make a neodymium magnet.",
             "Lossless (Almost): Build a magnet dynamo or magnet motor.",
             "Pulling Strings: Pull a silicon boule in the arc furnace.",
-            "Etched in Light: Etch microchips in the lithography station.",
-            "Central Processing: Assemble a processor."
+            "Etched in Light: Etch microchips in the lithography station."
           ]
         },
         {
           "title": "Milestones (12)",
-          "icon": "jugcraft:network_terminal",
+          "icon": "jugcraft:processor",
           "text": [
+            "Central Processing: Assemble a processor.",
             "Hello, World: Build a network terminal.",
             "Under Pressure: Build a gas holder.",
             "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter.",
-            "Here Comes the Sun: Build an advanced solar panel."
+            "Strained Relations: Make a fluid filter."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:tank_gauge",
+          "icon": "jugcraft:advanced_solar_panel",
           "text": [
+            "Here Comes the Sun: Build an advanced solar panel.",
             "Full of It: Make a tank gauge.",
             "Concentrate: Build a solar receiver for a heliostat field.",
             "Spool Up: Make a turbocharger for the advanced engine.",
-            "Keep It Spinning: Build a flywheel.",
-            "Four on the Floor: Build an advanced combustion engine."
+            "Keep It Spinning: Build a flywheel."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:cotton",
+          "icon": "jugcraft:advanced_engine",
           "text": [
+            "Four on the Floor: Build an advanced combustion engine.",
             "King Cotton: Grow cotton.",
             "Make It Rain: Build a sprinkler.",
             "Reaping What You Sow: Build a crop harvester."
@@ -736,6 +737,7 @@
             "Smelting an ore gives one ingot.",
             "Crushing or pulverizing it first gives 2.",
             "Washing it, then pulverizing the washed ore, gives 3.",
+            "Dissolving it in sulfuric acid in the chemical reactor gives 4 washed ores: 4 ingots.",
             "Pulverizing ore sometimes gives a second metal's dust: copper gives gold, iron gives nickel, gold gives silver, tin gives tungsten, zinc gives lead, lead gives silver."
           ]
         },
@@ -2820,7 +2822,7 @@
           "title": "Fuel Values",
           "icon": "jugcraft:diesel_bucket",
           "text": [
-            "What a bucket is worth: diesel 256,000 JE (diesel generator) or KE (diesel engine); heavy fuel oil 128,000; gasoline 384,000 and refinery gas 192,000 (gas turbine).",
+            "What a bucket is worth: diesel 256,000 JE (diesel generator) or KE (diesel engine); heavy fuel oil 128,000; gasoline 384,000 and refinery gas 192,000 (gas turbine). Bioethanol from crops: 192,000 in the gas turbine, 256,000 KE in the advanced engine.",
             "Refined all the way, a bucket of crude oil gives about 525 mB of diesel, 293 mB of gasoline and 183 mB of gas: about 282,000 JE, for about 40,000 JE of pumping and refining.",
             "Oil never comes back: every reservoir runs dry."
           ]
@@ -3027,7 +3029,7 @@
           "title": "Chemical Reactor",
           "icon": "jugcraft:chemical_reactor",
           "text": [
-            "Two by two by two, lined with lead against the acid: the general chemistry vessel, with two item slots, a tank in and a tank out. Two sulfur dust and a bucket of water make a bucket of sulfuric acid. It also mixes: two salt and a bucket of water make brine; two sand, a dried kelp and a bucket of water make fracking fluid. Its other reactions are on its recipe pages.",
+            "Two by two by two, lined with lead against the acid: the general chemistry vessel, with two item slots, a tank in and a tank out. Two sulfur dust and a bucket of water make a bucket of sulfuric acid. It also mixes: two salt and a bucket of water make brine; two sand, a dried kelp and a bucket of water make fracking fluid. An ore in 250 mB of sulfuric acid gives four washed ores, the best ore route. Eight crops (wheat, sugar cane, potatoes, carrots, beetroot, berries, melon or apples) in a bucket of water ferment into 250 mB of bioethanol. Its other reactions are on its recipe pages.",
             "Uses 96 JE/t while working. Holds 30,000 JE."
           ],
           "craft": {

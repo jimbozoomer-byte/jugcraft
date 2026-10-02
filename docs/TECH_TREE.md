@@ -401,6 +401,7 @@ The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches
 | --- | --- | --- | --- |
 | Crude Oil | A thick black fluid with a bucket; flows slowly and never makes new sources | `c:crude_oil` | reservoirs, oil sand |
 | Naphtha, Diesel, Heavy Fuel Oil, Lubricant, Gasoline | Refined liquids with buckets, tagged `c:<name>` | runny / amber / thick / golden / thin red-orange | distillation tower, cracker, reformer |
+| Bioethanol (batch 26) | Fuel alcohol fermented from crops, with a bucket | gas turbine 192 JE/mB, advanced engine 256 KE/mB | chemical reactor |
 | Fracking Fluid | Water thickened with sand and a gelling agent, with a bucket | `c:fracking_fluid` | chemical reactor |
 | Flowback Water | Dirty water from a fracked well, with a bucket | `c:flowback_water` | fracking rig |
 | Refinery Gas | A gas: tanks and pipes only, no block or bucket | `c:refinery_gas` | distillation tower |
@@ -464,6 +465,7 @@ Ore processing gives more metal per ore and turns everyday blocks into useful th
 | Smelt it | furnace | 1 | — |
 | Crush or pulverize | Crusher → furnace, or Pulverizer → furnace | 2 | the Pulverizer rolls a byproduct |
 | Wash, then pulverize | Ore Washer (water) → Pulverizer → furnace | 3 | a byproduct roll for each washed ore |
+| Dissolve in acid (batch 26) | Chemical Reactor (250 mB sulfuric acid) → Pulverizer → furnace | 4 | a byproduct roll for each washed ore |
 
 ![Pulverizer, Ore Washer, Sieve, Sawmill, and the Ore Washer from behind](images/processing_machines.png)
 
