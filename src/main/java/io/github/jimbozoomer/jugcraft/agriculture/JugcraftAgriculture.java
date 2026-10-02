@@ -22,6 +22,7 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
@@ -31,6 +32,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -58,6 +60,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -118,6 +121,10 @@ public final class JugcraftAgriculture {
 	public static final ResourceKey<Feature> CHESTNUT_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("chestnut"));
 	public static final TreeGrower CHESTNUT_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_chestnut", WeightedList.of(CHESTNUT_TREE),
 			WeightedList.of(), WeightedList.of(), CHESTNUT_TREE);
+	/** The apple tree's feature (data/jugcraft/worldgen/feature/apple_tree.json), grown by its sapling. */
+	public static final ResourceKey<Feature> APPLE_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("apple_tree"));
+	public static final TreeGrower APPLE_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_apple", WeightedList.of(APPLE_TREE),
+			WeightedList.of(), WeightedList.of(), APPLE_TREE);
 
 	private static final ResourceKey<ContextIntProvider> COMPOST_LOW = ContextIntProviders.COMPOSTABLE_LOW;
 	private static final ResourceKey<ContextIntProvider> COMPOST_MEDIUM = ContextIntProviders.COMPOSTABLE_MEDIUM;
@@ -211,6 +218,44 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<FortuneTellerTableBlockEntity> FORTUNE_TABLE_ENTITY;
 	public static BlockEntityType<HalloweenBonfireBlockEntity> BONFIRE_ENTITY;
 	public static BlockEntityType<BarmbrackBlockEntity> BARMBRACK_ENTITY;
+	public static BlockEntityType<CostumeTrunkBlockEntity> COSTUME_TRUNK_ENTITY;
+	public static BlockEntityType<WaxPotBlockEntity> WAX_POT_ENTITY;
+	public static BlockEntityType<AuraCandleBlockEntity> AURA_CANDLE_ENTITY;
+	/** What an Aura Candle is made of (its wax, layers, colour, scents, strength and burn). */
+	public static DataComponentType<CandleMix> CANDLE_MIX;
+	public static BlockEntityType<CiderPressBlockEntity> CIDER_PRESS_ENTITY;
+	public static BlockEntityType<CiderBarrelBlockEntity> CIDER_BARREL_ENTITY;
+	/** The cider a broken Cider Barrel keeps (its servings and when its batch started ageing). */
+	public static DataComponentType<BarrelCider> BARREL_CIDER;
+	public static BlockEntityType<CanningKettleBlockEntity> CANNING_KETTLE_ENTITY;
+	/** Crows: they come to fields by day and peck ripe crops, unless a scarecrow guards them. */
+	public static EntityType<Crow> CROW;
+	/** Restless spirits: risen from graves at night, seen only by a Spirit Lantern's light (or a Revealing candle's). */
+	public static EntityType<RestlessSpirit> RESTLESS_SPIRIT;
+	/** Spooky fireworks in flight: they burst into a picture ({@link FireworkShape}). */
+	public static EntityType<SpookyRocket> SPOOKY_ROCKET;
+	/** Sky lanterns let go: they rise, drift with the wind and burn out. */
+	public static EntityType<SkyLantern> SKY_LANTERN;
+	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
+	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
+	/** The mooncakes, baked in the Cooking Pot. */
+	public static final List<String> MOONCAKES = List.of("red_bean_mooncake", "chestnut_mooncake", "pumpkin_mooncake");
+	public static BlockEntityType<ShowLauncherBlockEntity> SHOW_LAUNCHER_ENTITY;
+	/** A spooky firework made with glowstone dust: its sparks twinkle. */
+	public static DataComponentType<Boolean> TWINKLE;
+	/** The design a Face Paint Kit's dial is set to. */
+	public static DataComponentType<FacePaint.Design> FACE_PAINT_DESIGN;
+	/** A spooky firework's coloured spark, drawn by the client's SpookySparkParticle. */
+	public static final ParticleType<SpookySparkOptions> SPOOKY_SPARK = FabricParticleTypes.complex(true, SpookySparkOptions.CODEC,
+			SpookySparkOptions.STREAM_CODEC);
+	public static BlockEntityType<PantryShelfBlockEntity> PANTRY_SHELF_ENTITY;
+	/** A jar of preserves sealed in a Canning Kettle: it keeps for ever (its item model shows a cloth cap). */
+	public static DataComponentType<Boolean> SEALED;
+	/** What is left in an unsealed jar of preserves, and when it was cooked or opened. */
+	public static DataComponentType<JarContents> JAR_CONTENTS;
+	/** The outfits of decorations batch 14, worn on the head and drawn over the whole body (the client's CostumeLayer). */
+	public static final List<String> OUTFITS = List.of("vampire_cape", "mummy_wraps", "skeleton_suit", "werewolf_mask", "cat_ears_and_tail",
+			"bat_wings");
 	/** The Dust Sheet: its item, and the block it becomes over what it covers. */
 	public static final String DUST_SHEET = "dust_sheet";
 	/** What a Dust Sheet may cover (block tag). */
@@ -278,6 +323,7 @@ public final class JugcraftAgriculture {
 		registerBlock("cranberry_bush", CranberryBushBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SWEET_BERRY_BUSH)
 				.sound(SoundType.WET_GRASS));
 		registerChestnutTree();
+		registerAppleTree();
 
 		// Seeds, produce and food.
 		food("corn", 3, 0.6F, COMPOST_MEDIUM);
@@ -362,6 +408,15 @@ public final class JugcraftAgriculture {
 		sweet("ghost_taffy", 1, 0.1F, MobEffects.INVISIBILITY, 3);
 		sweet("fizz_rocks", 1, 0.1F, MobEffects.JUMP_BOOST, 20);
 		sweet("witchs_licorice", 1, 0.1F, MobEffects.NIGHT_VISION, 45);
+		// Fall additions 2, the cider mill: the apple tree's seeds, the press's pomace, cider at each stage and what is made with it.
+		seeds("apple_seeds", "apple_sapling", COMPOST_LOW);
+		plain("apple_pomace", COMPOST_MEDIUM);
+		drink("sweet_cider", 3, 0.3F, MobEffects.HASTE, 30, true);
+		drink("sparkling_cider", 3, 0.4F, MobEffects.JUMP_BOOST, 60);
+		drink("aged_cider", 4, 0.6F, MobEffects.ABSORPTION, 120);
+		drink("mulled_cider", 6, 0.8F, MobEffects.REGENERATION, 15);
+		plain("mulling_spices", COMPOST_MEDIUM);
+		food("apple_cider_donut", 3, 0.4F, COMPOST_MEDIUM_HIGH);
 
 		// Farm tools.
 		sickle("flint_sickle", 1, 131);
@@ -660,8 +715,9 @@ public final class JugcraftAgriculture {
 
 		List<Block> gravestones = new ArrayList<>();
 		for (GravestoneBlock.Style style : GravestoneBlock.Style.values()) {
+			// Random ticks: graves stir at night (fall additions 9, ghost hunting).
 			Block stone = registerBlock(style.id, props -> new GravestoneBlock(props, style), BlockBehaviour.Properties.of()
-					.mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F).sound(SoundType.STONE).noOcclusion());
+					.mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F).sound(SoundType.STONE).noOcclusion().randomTicks());
 			registerItem(style.id, props -> new BlockItem(stone, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
 			gravestones.add(stone);
 		}
@@ -800,7 +856,7 @@ public final class JugcraftAgriculture {
 				.mapColor(MapColor.DEEPSLATE).strength(3.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.STONE).noOcclusion()
 				.pushReaction(PushReaction.POPPED));
 		Block mound = registerBlock("grave_mound", GraveMoundBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.DIRT).strength(0.6F)
-				.sound(SoundType.ROOTED_DIRT).noOcclusion());
+				.sound(SoundType.ROOTED_DIRT).noOcclusion().randomTicks());
 		Block angel = registerBlock("mourning_angel", MourningAngelBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ)
 				.strength(2.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.CALCITE).noOcclusion().pushReaction(PushReaction.POPPED));
 		Block skeleton = registerBlock("pop_up_skeleton", PopUpSkeletonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
@@ -1125,6 +1181,142 @@ public final class JugcraftAgriculture {
 		}
 		registerItem("barmbrack", props -> new BlockItem(brack, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);
 		registerItem("barmbrack_ring", Item::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON), TOOL_TAB);
+
+		// Batch 14, costumes: outfits worn on the head like the Ghost Sheet (their equipment assets have no layers, so
+		// nothing is drawn by the armor layer or on the head; the client's CostumeLayer dresses the whole wearer), and the
+		// Costume Trunk to keep them in.
+		for (String outfit : OUTFITS) {
+			Equippable worn = Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER)
+					.setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id(outfit))).build();
+			registerItem(outfit, Item::new, new Item.Properties().stacksTo(1).component(DataComponents.EQUIPPABLE, worn), TOOL_TAB);
+		}
+		Block trunk = registerBlock("costume_trunk", CostumeTrunkBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(2.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		COSTUME_TRUNK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("costume_trunk"),
+				FabricBlockEntityTypeBuilder.create(CostumeTrunkBlockEntity::new, trunk).build());
+		registerItem("costume_trunk", props -> new BlockItem(trunk, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 1, the chandlery: the Wax Melting Pot and the Aura Candles dipped from it.
+		CANDLE_MIX = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("candle"),
+				DataComponentType.<CandleMix>builder().persistent(CandleMix.CODEC).networkSynchronized(CandleMix.STREAM_CODEC).build());
+		Block waxPot = registerBlock("wax_melting_pot", WaxPotBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(2.5F).sound(SoundType.COPPER).noOcclusion());
+		WAX_POT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("wax_melting_pot"),
+				FabricBlockEntityTypeBuilder.create(WaxPotBlockEntity::new, waxPot).build());
+		registerItem("wax_melting_pot", props -> new BlockItem(waxPot, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block candle = registerBlock("aura_candle", AuraCandleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(0.1F)
+				.sound(SoundType.CANDLE).noOcclusion().lightLevel(AuraCandleBlock::light).pushReaction(PushReaction.POPPED));
+		AURA_CANDLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("aura_candle"),
+				FabricBlockEntityTypeBuilder.create(AuraCandleBlockEntity::new, candle).build());
+		registerItem("aura_candle", props -> new AuraCandleItem(candle, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(16),
+				TOOL_TAB);
+
+		// Fall additions 2, the cider mill: the Cider Press and the Cider Barrel the cider ages in.
+		BARREL_CIDER = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("barrel_cider"),
+				DataComponentType.<BarrelCider>builder().persistent(BarrelCider.CODEC).networkSynchronized(BarrelCider.STREAM_CODEC).build());
+		Block press = registerBlock("cider_press", CiderPressBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		CIDER_PRESS_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("cider_press"),
+				FabricBlockEntityTypeBuilder.create(CiderPressBlockEntity::new, press).build());
+		registerItem("cider_press", props -> new BlockItem(press, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block barrel = registerBlock("cider_barrel", CiderBarrelBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		CIDER_BARREL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("cider_barrel"),
+				FabricBlockEntityTypeBuilder.create(CiderBarrelBlockEntity::new, barrel).build());
+		registerItem("cider_barrel", props -> new CiderBarrelItem(barrel, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 3, the preserves pantry: Mason Jars, cider vinegar, preserves cooked into jars in the Cooking Pot, the
+		// Canning Kettle that seals them and the Pantry Shelf that shows them off.
+		SEALED = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("sealed"),
+				DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+		JAR_CONTENTS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("jar_contents"),
+				DataComponentType.<JarContents>builder().persistent(JarContents.CODEC).networkSynchronized(JarContents.STREAM_CODEC).build());
+		registerItem("mason_jar", Item::new, new Item.Properties().stacksTo(16), INGREDIENT_TAB);
+		registerItem("cider_vinegar", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE).stacksTo(16), INGREDIENT_TAB);
+		preserve("sweet_berry_jam", 3, 0.4F, null, 0, 0x9A1E3A);
+		preserve("apple_butter", 4, 0.5F, null, 0, 0x7A3A14);
+		preserve("pumpkin_butter", 4, 0.5F, null, 0, 0xC8701E);
+		preserve("cranberry_preserves", 3, 0.4F, null, 0, 0xB0122E);
+		preserve("glow_berry_jelly", 2, 0.3F, MobEffects.NIGHT_VISION, 30, 0xF0B030);
+		preserve("pickled_beets", 2, 0.4F, null, 0, 0x7A1040);
+		preserve("pickled_peppers", 2, 0.4F, MobEffects.FIRE_RESISTANCE, 15, 0x4A8A2A);
+		preserve("corn_relish", 3, 0.5F, null, 0, 0xE0B828);
+		Block kettle = registerBlock("canning_kettle", CanningKettleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE)
+				.strength(2.0F).sound(SoundType.LANTERN).noOcclusion());
+		CANNING_KETTLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("canning_kettle"),
+				FabricBlockEntityTypeBuilder.create(CanningKettleBlockEntity::new, kettle).build());
+		registerItem("canning_kettle", props -> new BlockItem(kettle, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block pantryShelf = registerBlock("pantry_shelf", PantryShelfBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		PANTRY_SHELF_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("pantry_shelf"),
+				FabricBlockEntityTypeBuilder.create(PantryShelfBlockEntity::new, pantryShelf).build());
+		registerItem("pantry_shelf", props -> new BlockItem(pantryShelf, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 4, crows and working scarecrows: crows come to fields by day; scarecrows keep them off.
+		CROW = entity("crow", EntityType.Builder.<Crow>of(Crow::new, MobCategory.AMBIENT).sized(0.5F, 0.6F).eyeHeight(0.45F)
+				.clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(CROW, Crow.createAttributes());
+		Crows.register();
+
+		// Fall additions 5, spooky fireworks: rockets that burst into pictures in sparks, and the Show Launcher.
+		TWINKLE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("twinkle"),
+				DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+		for (FireworkShape shape : FireworkShape.values()) {
+			registerItem(shape.item(), props -> new SpookyFireworkItem(shape, props),
+					new Item.Properties().component(DataComponents.FIREWORKS, new Fireworks(1, List.of())), EQUIPMENT_TAB);
+		}
+		SPOOKY_ROCKET = entity("spooky_rocket", EntityType.Builder.<SpookyRocket>of(SpookyRocket::new, MobCategory.MISC).noLootTable()
+				.sized(0.25F, 0.25F).clientTrackingRange(8).updateInterval(10));
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id("spooky_spark"), SPOOKY_SPARK);
+		PayloadTypeRegistry.clientboundPlay().register(SpookyBurstPayload.TYPE, SpookyBurstPayload.CODEC);
+		Block launcher = registerBlock("show_launcher", ShowLauncherBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		SHOW_LAUNCHER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("show_launcher"),
+				FabricBlockEntityTypeBuilder.create(ShowLauncherBlockEntity::new, launcher).build());
+		registerItem("show_launcher", props -> new BlockItem(launcher, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		SpookyFireworkItem.registerDispensing();
+
+		// Fall additions 6, the sky lantern festival: sky lanterns to let go together, and mooncakes for a full moon.
+		registerItem("sky_lantern", SkyLanternItem::new, new Item.Properties().stacksTo(16), EQUIPMENT_TAB);
+		SKY_LANTERN = entity("sky_lantern", EntityType.Builder.<SkyLantern>of(SkyLantern::new, MobCategory.MISC).noLootTable()
+				.sized(0.5F, 0.75F).clientTrackingRange(10).updateInterval(10));
+		SkyLanterns.register();
+		for (String mooncake : MOONCAKES) {
+			registerItem(mooncake, MooncakeItem::new, new Item.Properties().food(nourishment(3, 0.6F)).stacksTo(16), FOOD_TAB);
+		}
+
+		// Fall additions 7, the harvest feast: a long table to serve dishes on, blessing those who eat at it together.
+		Block feastTable = registerBlock("feast_table", FeastTableBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		FEAST_TABLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("feast_table"),
+				FabricBlockEntityTypeBuilder.create(FeastTableBlockEntity::new, feastTable).build());
+		registerItem("feast_table", props -> new BlockItem(feastTable, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 8, the corn maze: a gate that plants a maze of corn, times runners and keeps a board.
+		registerBlock("maze_corn", MazeCornBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(0.3F)
+				.sound(SoundType.CROP).noOcclusion().pushReaction(PushReaction.POPPED).ignitedByLava());
+		Block mazeGate = registerBlock("corn_maze_gate", CornMazeGateBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		CORN_MAZE_GATE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("corn_maze_gate"),
+				FabricBlockEntityTypeBuilder.create(CornMazeGateBlockEntity::new, mazeGate).build());
+		registerItem("corn_maze_gate", props -> new BlockItem(mazeGate, props), new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		registerBlock("corn_maze_finish", CornMazeFinishBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+
+		// Fall additions 9, ghost hunting: restless spirits rise from graves at night; a Spirit Lantern reveals them, and a
+		// glass bottle catches one as Ectoplasm, the Ghostly candle scent.
+		registerItem("spirit_lantern", SpiritLanternItem::new, new Item.Properties().stacksTo(1), EQUIPMENT_TAB);
+		registerItem("ectoplasm", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE).stacksTo(16), INGREDIENT_TAB);
+		RESTLESS_SPIRIT = entity("restless_spirit", EntityType.Builder.<RestlessSpirit>of(RestlessSpirit::new, MobCategory.AMBIENT).noLootTable()
+				.sized(0.6F, 1.4F).eyeHeight(1.15F).fireImmune().clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(RESTLESS_SPIRIT, RestlessSpirit.createAttributes());
+
+		// Fall additions 10, face paint: a kit that paints a design on a player's face, which counts as a costume.
+		FACE_PAINT_DESIGN = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("face_paint_design"),
+				DataComponentType.<FacePaint.Design>builder().persistent(FacePaint.Design.CODEC).networkSynchronized(FacePaint.Design.STREAM_CODEC).build());
+		registerItem("face_paint_kit", FacePaintKitItem::new, new Item.Properties().durability(FacePaintKitItem.USES)
+				.component(FACE_PAINT_DESIGN, FacePaint.Design.SKULL), EQUIPMENT_TAB);
+		FacePaint.register();
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
@@ -1200,6 +1392,19 @@ public final class JugcraftAgriculture {
 		fire.add(leaves, 30, 60);
 	}
 
+	/**
+	 * The apple tree: its sapling (planted from apple seeds) and leaves that blossom and fruit. Its trunk is vanilla oak, so
+	 * it needs no wood of its own.
+	 */
+	private static void registerAppleTree() {
+		registerBlock("apple_sapling", props -> new SaplingBlock(APPLE_GROWER, props) {
+		}, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING));
+		Block leaves = registerBlock("apple_leaves", AppleLeavesBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES)
+				.mapColor(MapColor.PLANT));
+		registerItem("apple_leaves", props -> new BlockItem(leaves, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
+		FlammableBlockRegistry.getDefaultInstance().add(leaves, 30, 60);
+	}
+
 	/** Wild plant patches (data/jugcraft/worldgen) in the biomes each crop comes from. New chunks only. */
 	private static void registerWorldgen() {
 		if (!JugcraftConfig.isFeatureEnabled(FEATURE)) {
@@ -1225,6 +1430,7 @@ public final class JugcraftAgriculture {
 		wildPatch("warty_gourd", ConventionalBiomeTags.IS_SWAMP, ConventionalBiomeTags.IS_SPOOKY);
 		wildPatch("cranberry_bush", ConventionalBiomeTags.IS_SWAMP);
 		wildPatch("chestnut_tree", ConventionalBiomeTags.IS_FOREST);
+		wildPatch("apple_tree", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FLORAL);
 		// Halloween harvest: heirloom pumpkins and bottle gourds on grass, and mums in flower-rich places.
 		wildPatch("white_pumpkin", ConventionalBiomeTags.IS_BIRCH_FOREST, ConventionalBiomeTags.IS_SNOWY);
 		wildPatch("jarrahdale_pumpkin", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_WINDSWEPT);
@@ -1335,12 +1541,28 @@ public final class JugcraftAgriculture {
 		registerItem(id, Item::new, new Item.Properties().food(food, eaten), FOOD_TAB);
 	}
 
+	/** A jar of preserves ({@link PreserveJarItem}): four servings of {@code nutrition} each, and an effect (or none). */
+	private static void preserve(String id, int nutrition, float saturation, @Nullable Holder<MobEffect> effect, int seconds, int color) {
+		registerItem(id, props -> new PreserveJarItem(props, nutrition, saturation, effect, seconds, color), new Item.Properties().stacksTo(16),
+				FOOD_TAB);
+	}
+
 	/** A drink in a glass bottle, like a potion: drunk even on a full stomach for a short effect, leaving the bottle. */
 	private static void drink(String id, int nutrition, float saturation, Holder<MobEffect> effect, int seconds) {
+		drink(id, nutrition, saturation, effect, seconds, false);
+	}
+
+	/**
+	 * As {@link #drink(String, int, float, Holder, int)}; {@code bottleBack}: crafting with it gives the bottle back (as
+	 * vanilla's honey bottle does). Only for drinks no Cooking Pot recipe cooks into another bottled drink, since the pot
+	 * hands remainders back too and the bottle would be doubled.
+	 */
+	private static void drink(String id, int nutrition, float saturation, Holder<MobEffect> effect, int seconds, boolean bottleBack) {
 		FoodProperties food = new FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation).alwaysEdible().build();
 		Consumable drunk = Consumables.defaultDrink().onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(effect, seconds * 20)))
 				.build();
-		registerItem(id, Item::new, new Item.Properties().food(food, drunk).usingConvertsTo(Items.GLASS_BOTTLE).stacksTo(16), FOOD_TAB);
+		Item.Properties properties = new Item.Properties().food(food, drunk).usingConvertsTo(Items.GLASS_BOTTLE).stacksTo(16);
+		registerItem(id, Item::new, bottleBack ? properties.craftRemainder(Items.GLASS_BOTTLE) : properties, FOOD_TAB);
 	}
 
 	private static void stew(String id, int nutrition, float saturation) {

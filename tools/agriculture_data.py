@@ -22,6 +22,17 @@ import decor10_data
 import decor11_data
 import decor12_data
 import decor13_data
+import decor14_data
+import chandlery_data
+import cider_data
+import pantry_data
+import crow_data
+import firework_data
+import lantern_data
+import feast_data
+import maze_data
+import ghost_data
+import face_paint_data
 import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -168,6 +179,17 @@ def assets(root, write, lang):
     decor11_data.assets(root, write, lang)
     decor12_data.assets(root, write, lang)
     decor13_data.assets(root, write, lang)
+    decor14_data.assets(root, write, lang)
+    chandlery_data.assets(root, write, lang)
+    cider_data.assets(root, write, lang)
+    pantry_data.assets(root, write, lang)
+    crow_data.assets(root, write, lang)
+    firework_data.assets(root, write, lang)
+    lantern_data.assets(root, write, lang)
+    feast_data.assets(root, write, lang)
+    maze_data.assets(root, write, lang)
+    ghost_data.assets(root, write, lang)
+    face_paint_data.assets(root, write, lang)
 
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
@@ -282,6 +304,14 @@ def loot(data, write):
     decor11_data.loot(out, write)
     decor12_data.loot(out, write)
     decor13_data.loot(out, write)
+    decor14_data.loot(out, write)
+    chandlery_data.loot(out, write)
+    cider_data.loot(out, write)
+    pantry_data.loot(out, write)
+    crow_data.loot(out, write)
+    firework_data.loot(out, write)
+    feast_data.loot(out, write)
+    maze_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -328,6 +358,12 @@ def recipes(out, write):
                                        "key": {"M": info["material"], "S": "minecraft:stick"}, "result": {"id": rid(sickle), "count": 1}})
     carving_data.recipes(out, write, conditions)
     festivity_data.recipes(out, write, conditions)
+    firework_data.recipes(out, write, conditions)
+    lantern_data.recipes(out, write, conditions)
+    feast_data.recipes(out, write, conditions)
+    maze_data.recipes(out, write, conditions)
+    ghost_data.recipes(out, write, conditions)
+    face_paint_data.recipes(out, write, conditions)
     decor3_data.recipes(out, write, conditions)
 
 
@@ -369,6 +405,14 @@ def tags(tags):
     decor11_data.tags(tags)
     decor12_data.tags(tags)
     decor13_data.tags(tags)
+    decor14_data.tags(tags)
+    chandlery_data.tags(tags)
+    cider_data.tags(tags)
+    pantry_data.tags(tags)
+    firework_data.tags(tags)
+    lantern_data.tags(tags)
+    feast_data.tags(tags)
+    maze_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen
@@ -379,6 +423,7 @@ def advancements(data, write):
 
 def worldgen(data, write):
     festival_data.worldgen(data, write)
+    cider_data.worldgen(data, write)
     halloween_data.worldgen(data, write)
     spread = WILD_PATCH["spread_xz"]
     for wild in WILD_CROPS:
