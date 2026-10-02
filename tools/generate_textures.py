@@ -1426,10 +1426,13 @@ def main():
     import dieselpunk_textures
     dieselpunk_textures.draw_all()
     electric_textures.draw_all()
+    import crop_textures
+    for (kind, name), image in crop_textures.crop_textures().items():
+        save(image, kind, name)
     import petro_textures
     petro_textures.draw_all(save, save_animation)
-    import crop_textures
-    crop_textures.draw_all(save)
+    import cotton_textures
+    cotton_textures.draw_all(save)
     import deposits
     deposits.draw_all(save)
     import drone_textures

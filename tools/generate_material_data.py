@@ -12,6 +12,7 @@ from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, EXTRA_NAMES, MINERAL
 
 from machines import CROPS, ELECTRONICS_BLOCKS, FARMING_BLOCKS, MACHINES, PARTS, CABLES, PIPES, FLUID_BLOCKS, ITEM_PIPES, LOGISTICS_BLOCKS, STORAGE_BLOCKS, KINETIC_BLOCKS, TOOLS, UPGRADES, POWERED_TOOLS, TOOL_BLOCKS, UPGRADE_MODULES, SLOPE_BLOCKS, CRAFTING, ALT_CRAFTING, FEATURE as MACHINE_FEATURE, machine_blocks, machine_recipes
 import model_writer
+import agriculture_data
 from party import party_lang
 import drones
 
@@ -133,6 +134,7 @@ def assets():
         write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
         lang[f"item.{MOD}.{item}"] = item_name(item)
     machine_assets(lang)
+    agriculture_data.assets(ASSETS, write, lang)
     pixel_hollows_assets(lang)
     import deposits
     deposits.write_all(write, ASSETS, DATA / MOD, lang)
@@ -999,6 +1001,7 @@ def loot_tables():
         drop = info["drop"]
         table = ore_drop(rock, drop["item"], drop["min"], drop["max"]) if drop else self_drop(rock)
         write(out / f"{rock}.json", table)
+    agriculture_data.loot(DATA, write)
     # Pixel Hollows: blocks drop themselves; a cluster drops 1-2 shards (Fortune: up to one more per level) or, with
     # Silk Touch, itself. The cabinet drops from its lower half only.
     import pixel_hollows as ph
@@ -1149,6 +1152,7 @@ def recipes():
         else:
             write(out / f"{recipe['id']}.json",
                   cooking(recipe["feature"], recipe["kind"], recipe["input"], recipe["result"], recipe["xp"]))
+    agriculture_data.recipes(out, write)
 
 
 # ---------------------------------------------------------------- tags
@@ -1265,6 +1269,7 @@ def tags():
             tags.add("item", f"c:{info['tag']}", rid(item))
             if info["tag"].startswith("dusts/"):
                 tags.add("item", "c:dusts", f"#c:{info['tag']}")
+    agriculture_data.tags(tags)
 
     # Petroleum fluids, so other mods' machines can recognise them (c:crude_oil and so on).
     import petro
@@ -1340,6 +1345,7 @@ def worldgen():
         ore_feature(rock, gen["size"], [{"target": {"predicate_type": "minecraft:tag_match", "tag": gen["target"]},
                                          "state": rid(rock)}])
         placed_feature(rock, gen)
+    agriculture_data.worldgen(DATA, write)
     pixel_hollows_worldgen()
 
 
@@ -1433,6 +1439,7 @@ def main():
     import advancements
     for key, advancement in advancements.generate(MOD)[0].items():
         write(DATA / MOD / "advancement" / f"{key}.json", advancement)
+    agriculture_data.advancements(DATA, write)
 
 
 if __name__ == "__main__":
