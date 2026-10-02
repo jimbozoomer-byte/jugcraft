@@ -7,7 +7,7 @@ Target milestone and tier: world generation and building (Discovery).
 Primary specialty and supported player role: exploration and building; every player meets them.
 
 ## Player experience
-Nine biomes grow in Jugcraft regions, each in place of the vanilla biome with the same climate:
+Nine biomes grow in Jugcraft regions, each in place of the vanilla biome with the same climate. Six grow in every layout of Jugcraft regions; Maple Woods, Dead Forest and Tundra grow in all but the meadow layout, where batch 2's Field, Steppe and Grassland take their climates ([biome-regions.md](biome-regions.md)):
 
 | Biome | Replaces (in Jugcraft regions) | What grows |
 | --- | --- | --- |

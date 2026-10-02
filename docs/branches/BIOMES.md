@@ -1,6 +1,6 @@
 # Biomes branch
 
-Status: **planned.** Batch 1 (seasonal forests, with the region engine) is in progress on branch `claude/biomes`. Everything below is a design proposal, not a promise; each batch records its own feature document and test evidence under `docs/features/` when it is built. Nothing here has been played.
+Status: **in progress** on branch `claude/biomes`. Batch 1 (seasonal forests, with the region engine) is green in CI; batch 2 (fields and meadows, with region layouts) is being built. The owner asked to carry on through every batch. Everything below is a design proposal, not a promise; each batch records its own feature document and test evidence under `docs/features/` when it is built. Nothing here has been played.
 
 On 2 October 2026 the owner shared a catalog of the Biomes O' Plenty mod's biomes (compiled from its fan wiki: 143 pages) and asked to "remake all these within our mod". They chose:
 - **Placement:** Jugcraft regions (below).
@@ -19,8 +19,8 @@ On 2 October 2026 the owner shared a catalog of the Biomes O' Plenty mod's biome
 ## Placement: Jugcraft regions
 
 Fifty-odd new Overworld biomes cannot all take slices of vanilla's climate table without shrinking vanilla's biomes away, so the Overworld is divided into large regions:
-- About 1 km across (`regions.size`), shaped as irregular cells. A share of them (`regions.share`, half by default) are **Jugcraft regions**; the rest stay pure vanilla.
-- A Jugcraft region uses the **Jugcraft layout**: vanilla's climate table with each batch's replacements (for example, taiga becomes Coniferous Forest). Vanilla biomes keep their full size in vanilla regions, and the replacements leave the rest of the layout alone.
+- About 1 km across (`biomes.region_size`), shaped as irregular cells. A share of them (`biomes.region_share`, half by default) are **Jugcraft regions**; the rest stay pure vanilla.
+- A Jugcraft region uses one of four **layouts**: vanilla's climate table with that layout's replacements (for example, taiga becomes Coniferous Forest). Their characters: woodland (seasonal forests, big trees), meadow (fields; warm and dry lands), wetland (wetlands, coasts) and wild (mountains, volcanoes, wonders). A biome may grow in several layouts. Vanilla biomes keep their full size in vanilla regions, and the replacements leave the rest of a layout alone.
 - Terrain does not depend on biomes, so a region border shows as a change of biome, not a cliff.
 - The region of a place comes from the world seed, so a seed always makes the same world.
 - Alpine Spawn (the start) and the Pixel Hollows are in every region.
