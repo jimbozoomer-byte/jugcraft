@@ -63,7 +63,7 @@ Fifteen rare, strange lands and two cave biomes, spread over all four layouts of
 
 ## Verification
 Results are recorded under "Results" below after CI runs.
-- `python3 tools/check_mod_data.py`: plants, biomes and their features, non-overlapping rules, generated rules and surfaces current.
+- `python3 tools/check_mod_data.py`: plants, biomes and their features, non-overlapping rules, generated rules and surfaces current, and no placed feature with a biome filter nested inside another feature (it would stop chunk generation).
 - Server game tests (`BiomeGameTests`): `glowingPlantsWork` (glowcaps glow at 10 on bare stone; the glimmerbloom glows at 7 and the frost iris not at all, both with potted forms; four snowpetals drop four); `regionLayoutFollowsItsRules` checks every batch 7 rule.
 - Client game test (`BiomeClientGameTests`): distances from the start of a real world (seed `jugcraft`), and screenshots of each surface biome found. The two caves are found by the 3D search but not photographed.
 - Not run: play, a dedicated server, two clients.
@@ -81,7 +81,8 @@ Results are recorded under "Results" below after CI runs.
     - Hallowed Bog 1,089 blocks away, Glimmer Grove 1,286, Starlit Wood 1,494, the Spider Nest 1,537, Highsun Meadow 1,802, Wild Greens 1,832.
     - Frostlight Garden 2,235, Shrine Springs 2,931, Mycelial Jungle 3,008, Gloomweald 3,228, Snowpetal Grove 3,781, the Glowcap Grotto 4,917, Gilded Shrubland 6,337.
     - Not within 6,400 blocks: the Cinder Barrens (badlands, none near this start), the Elder Vale and Toadstool Field (mushroom islands) and the Webwood (mangrove swamps, the nearest vanilla one 4,457 blocks away).
-  - The test then hung while finding a surface spot for the Gloomweald, after the Glimmer Grove's, and the job was cancelled at its 30-minute limit, so there are no screenshots. A seasons-branch run hung at the same time in an unrelated step; whether the hang repeats is being checked.
+  - The test then hung while finding a surface spot for the Gloomweald, after the Glimmer Grove's, and the job was cancelled at its 30-minute limit, so there are no screenshots.
+  - Cause, found in run [37044032454](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37044032454)'s log: a chunk-generation worker threw "Tried to biome check an unregistered feature, or a feature that should not restrict the biome", so that chunk never finished. The Starlit Wood's tree selector picked vanilla's `minecraft:birch_tall`, a biome's top-level placed feature with a biome filter, which cannot be placed inside another feature. It now picks `minecraft:super_birch_bees` (commit a4b96787), and `check_mod_data.py` fails on any nested placed feature with a biome filter.
 
 ## World and event applicability
 - Biome fit: each biome takes the climate and land shape of the vanilla biome it replaces.
