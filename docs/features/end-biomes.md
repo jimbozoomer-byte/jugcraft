@@ -1,6 +1,6 @@
 # End biomes (biomes batch 9)
 
-Status: in progress on branch `claude/biomes`. CI was green, but three of the five barely or never generated; fixed placement awaiting CI. **Not yet played.**
+Status: in progress on branch `claude/biomes`. Green in CI (server and client game tests), every biome at its share. **Not yet played.**
 Proposal issue: none. The owner asked on 2 October 2026 to remake the Biomes O' Plenty catalog's biomes ([branches/BIOMES.md](../branches/BIOMES.md)) and to carry on through every batch. Everything here is original: the catalog guided the concepts only, and its invented names are replaced by our own.
 Owner: @jimbozoomer-byte
 Target milestone and tier: the outer End (after the dragon).
@@ -63,6 +63,17 @@ Results are recorded under "Results" below after CI runs.
   - Outer Flats and Rotted Expanse: **not within 6,400 blocks of the origin at all.**
   - Cause: Fabric's weights are not shares (see Dependencies). With weight 0.25 each, the four highlands got about 4.8%, 1.0%, 0.1% and 0.01% of the highlands in turn. The Outer Flats could never generate: barrens beside vanilla's highlands only occur where |noise| is below 0.5, and it needed 0.67 or more.
   - Fix: each End biome now gives its share, and the generator works out Fabric weights for it (commit after 079af8b8). The client test now also samples the real End and Nether every 64 blocks over 4,096 blocks round the origin, logs how often each biome turns up, and fails if any Jugcraft one is missing.
+- **Run [37055687473](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37055687473) (commit 35a11921): green. Every End biome generates at its share.**
+  - Sampled every 64 blocks over 4,096 blocks round the origin, the real End held:
+    - Highlands (2,907 samples): vanilla's End Highlands 1,551 (53%), Ender Wilds 408 (14%), Phantom Garden 329 (11%), Chorus Reef 328 (11%), Rotted Expanse 291 (10%). The design is 50% and four eighths.
+    - Barrens (1,845 samples): the Outer Flats 349 (19% of all barrens; the design is a sixth, a third of those beside vanilla's highlands), vanilla's End Barrens 1,496.
+    - Also End Midlands 4,093, Small End Islands 6,992, the central End 804.
+  - Standing spots: Chorus Reef -792 62 736, Ender Wilds -640 64 -832, Phantom Garden 768 61 -696, Rotted Expanse 744 57 -720, Outer Flats 616 55 864.
+  - Screenshots:
+    - Chorus Reef: dead coral blocks and fans on end stone, islands floating beyond.
+    - Ender Wilds: moss and a jacaranda beside sandstone pillars and sand (a Chorus Reef border).
+    - Outer Flats: end stone cliffs patched with gravel.
+    - Phantom Garden and Rotted Expanse, which meet there: patches of coarse dirt, soul soil and pale moss over end stone.
 
 ## World and event applicability
 - Biome fit: the outer End's highlands and barrens, beside vanilla's.

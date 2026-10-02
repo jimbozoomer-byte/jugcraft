@@ -71,6 +71,9 @@ Results are recorded under "Results" below after CI runs.
 - **Run [37052172948](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37052172948) (commit 079af8b8): green.** Standing spots now need air ahead of the camera and no fluid beside them.
   - The same biomes had spots, three moved: Ashfall Wastes -400 67 -512, Magma Fields 648 52 544, Quartz Rift -232 112 -96.
   - Screenshots: the Ashfall Wastes now show an ash-grey haze over a lava sea; the Magma Fields sulfur spikes, sulfur, magma and blackstone; the Marrow Heap bone spires on its floor; the Quartz Rift a quartz pillar close by. The Withered Hollow's still faces obsidian close up.
+- **Run [37055687473](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37055687473) (commit 35a11921): green.** The client test now samples the real Nether every 64 blocks over 4,096 blocks round the origin (16,641 samples) and requires every Jugcraft biome:
+  - Fungal Thicket 610, Ashfall Wastes 562, Netherbrush 420, Blighted Sands 337, Magma Fields 201, Quartz Rift 115, Frost Rift 90, Marrow Heap 23, Withered Hollow 14: 2,372 in all (14%).
+  - Vanilla's: Nether Wastes 5,549, Crimson Forest 3,043, Basalt Deltas 2,498, Soul Sand Valley 2,281, Warped Forest 898.
 
 ## World and event applicability
 - Biome fit: each takes a climate point in the Nether, next to vanilla's.
