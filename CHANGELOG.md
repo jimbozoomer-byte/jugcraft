@@ -8,6 +8,93 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: fall additions 10, face paint (pull request pending, stacked on ghost hunting)
+- **Face Paint Kit:** a tin palette and brush, good for 16 faces, that paints one of six designs: a skull, a jack o'lantern, a black cat, a vampire, a witch or a scarecrow. Use it on a friend to paint them at once, hold use to paint yourself, sneak to turn the dial.
+- The paint shows on the face for everyone who can see you and lasts until your head goes under water, or you die. A painted face counts as a costume for trick-or-treating and the costume contest.
+- The paint is a Fabric data attachment on the player, set on the server and sent to the clients that see them. The checker compares the kit and designs with Java. New server game tests and a client test with a screenshot of each design.
+
+### Agriculture: fall additions 9, ghost hunting (pull request pending, stacked on the corn maze)
+- **Restless spirits** rise from gravestones and grave mounds at night (graves now take random ticks), a few at most near, and drift about their graves, unseen.
+- **Spirit Lantern:** held in either hand, it reveals every spirit within 12 blocks to everyone near; so does a Revealing candle's glow. A revealed spirit fades into view, moans, and shies away from anyone close, though never out of its haunt, so it can be cornered. Blows pass through it; it fades at dawn.
+- **Ectoplasm:** a glass bottle catches a revealed spirit (earning Ghost Hunter). Ectoplasm is the chandlery's new **Ghostly** scent: a Ghostly candle turns the players in its aura invisible, and the wax pot now hands back a scent's bottle.
+- All decided on the server; clients are told only when a spirit shows, and draw it. The checker compares the spirits and the lantern with Java. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 8, the corn maze (pull request pending, stacked on the Harvest Feast Table)
+- **Corn Maze Gate:** choose a size (tiny 7 by 7 to large 19 by 19) and use it holding corn kernels: it carves a new maze, one way through, and plants three-tall **maze corn** along its walls, a kernel a stalk, with a **finish post** at the exit. It never replaces a block.
+- **Running it:** walk out through the gate to start the clock and reach the finish post to stop it. The server follows every runner and voids a run for flying, climbing over the corn, leaving the maze, taking too long or a shortcut. The best times go on the gate's board, with a prize ribbon the first time a runner places and the advancement A-maze-ing.
+- Maze corn gives back its kernel. The checker compares the maze with Java. New server game tests (perfect mazes, planting, timed and voided runs, the corn) and a client test with screenshots.
+
+### Agriculture: fall additions 7, the Harvest Feast Table (pull request pending, stacked on the sky lantern festival)
+- **Harvest Feast Table:** a long trestle table built a length at a time; lengths end to end join into one table. Each length holds two dishes of up to eight servings of any food or drink, drawn heaped on their plates; eat a serving with an empty hand.
+- **The feast:** different foods on the table plus everyone who has eaten there in the last two minutes. A good meal gives Regeneration, a feast Absorption, a harvest feast Haste and Luck, and a grand feast Health Boost and the advancement Harvest Home, shared with every recent diner close by.
+- All decided on the server; clients only draw the dishes. The checker compares the table and its tiers with Java. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 6, the sky lantern festival (pull request pending, stacked on spooky fireworks)
+- **Sky Lanterns:** paper lanterns, dyed any colour and named in an anvil to carry a wish. Let one go and it rises glowing, drifting on a wind every lantern shares, so lanterns let go together drift together; it burns out after two minutes or so. A blow puts one out.
+- **The lantern festival:** eight lanterns let go within 32 blocks in two minutes, by one player or many, fill the sky: everyone near gets Luck for five minutes and the advancement A Sky Full of Wishes. Once a day in one place.
+- **Mooncakes** (red bean, chestnut, pumpkin), baked four at a time in the Cooking Pot. Eaten outdoors on a full-moon night, they give Luck too.
+- All decided on the server; clients only draw the lanterns. The checker compares the lanterns, festival and mooncakes with Java. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 5, spooky fireworks (pull request pending, stacked on crows and working scarecrows)
+- **Spooky fireworks** that burst into pictures drawn in coloured sparks: a **bat**, a **jack o'lantern**, a **ghost** and a **skull**. Every player sees the picture the right way round, since each client draws it facing them. Crafted from paper, one to three gunpowder and the picture's ingredients; glowstone dust makes them twinkle. They hurt and break nothing, and dispensers fire them.
+- **Show Launcher:** nine tubes of up to sixteen rockets each (spooky or vanilla), fired in sequence, in volleys of three or as a finale of all nine at once, fanned out across the sky. Start and stop it by hand or with redstone; hoppers can load it.
+- All decided on the server; a burst is one small message to the players who can see it, and each client draws the sparks. The checker compares the rockets, launcher and pictures with Java and checks all 24 rocket recipes. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 4, crows and working scarecrows (pull request pending, stacked on the preserves pantry)
+- **Crows** come to fields by day in flocks of two or three. They wheel over the field, cawing, then drop onto a ripe crop and peck it three growth stages back (only while the `mob_griefing` rule is on). Crops under a roof, tall crops, gourds and bushes are safe.
+- **Scarecrows now work:** crows leave the crops within 4 blocks of one alone, 8 when it wears a pumpkin head, 12 when the head is lit. A crow after a crop takes flight when a scarecrow goes up beside it.
+- Crows also fly off from a player who comes close (sneak to get closer), from a blow, and at nightfall. They drop feathers, for arrows and the Featherfall candle scent.
+- All decided on the server; spawning follows the `spawn_mobs` rule, and nothing loads a chunk. The checker compares the crows' and scarecrows' numbers with Java. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 3, the preserves pantry (pull request pending, stacked on the cider mill)
+- **Preserves in Mason Jars**, cooked in the Cooking Pot: sweet berry jam, apple butter (cooked down in cider), pumpkin butter (with mulling spices), cranberry preserves, glow berry jelly (Night Vision), and pickled beets, pickled peppers (Fire Resistance) and corn relish in new **Cider Vinegar**. A jar holds four servings, eaten one at a time; the last leaves the jar.
+- **Unsealed jars spoil** three days after they were cooked. The **Canning Kettle** seals them: fill it with water, set it over a fire, stand up to four fresh jars in it, and twenty seconds at a rolling boil seals them. Sealed jars keep until opened, stack, and wear a gingham cap.
+- **Pantry Shelf:** an open cupboard that shows off six jars.
+- All decided on the server; the kettle's water and jars and the shelf's jars are drawn by each client. The Cooking Pot now stamps a jar with when it was cooked. The checker compares the pantry with Java. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 2, the cider mill (pull request pending, stacked on the chandlery)
+- **Apple trees:** wild in plains and flower-rich places, or grown from **apple seeds**. Their leaves blossom and then hang with ripe apples to pick, about a Minecraft day apart, without the tree being cut down.
+- **Cider Press:** load up to eight apples and turn the crank to grind them, one at a time, into pulp. Then turn the screw: four turns press the juice into the trough (a serving an apple) and knock out the pomace. Bottle the juice as **Sweet Cider**.
+- **Cider Barrel:** pour sweet cider in; in a day it ferments into **Sparkling Cider**, in three it matures into **Aged Cider**, and a chalk mark on the barrel shows which. Broken, it keeps its cider, still ageing.
+- **Mulled Cider** (sparkling cider and mulling spices in the Cooking Pot), **Apple Cider Donuts**, and **Apple Pomace** for pigs, compost and seeds. Each cider gives a short effect: Haste, Jump Boost, Absorption, Regeneration.
+- All decided on the server; the press's apples, pulp, screw and juice are drawn by each client. The chestnut tree's fruiting now shares its code with the apple tree. The checker compares the press, barrel and tree with Java, and makes sure no bottle is made from nothing. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 1, the chandlery (pull request pending, stacked on batch 14)
+- **Wax Melting Pot:** a copper pot set over a fire. Melt honeycomb (beeswax) or rotten flesh (tallow) in it, then stir in dyes (mixed as on leather), up to two scents, glowstone dust (a stronger aura, a faster burn) and redstone (a longer burn).
+- **Aura Candles:** dip string in the wax to start a candle, and dip it again once each layer has cooled (dipped while warm, the layer slides off), up to four layers. Each layer makes it taller and brighter, widens its aura (5, 8, 12, 16 blocks) and adds its wax's colour, scents and burn time. Layers of different pots combine their scents; a third scent muddles the candle.
+- **Lit, a candle works like a small beacon:** every four seconds it gives everyone in range its scents' effects (Speed, Jump Boost, Night Vision, Slow Falling, Water Breathing, Fire Resistance, Haste or Regeneration), or wards off monsters, makes creatures glow, or speeds up crops. It burns down as it burns and goes out for good; broken, it keeps what is left.
+- All decided on the server; each client draws the wax, the candle's colour and height and its tinted flame. The checker compares the waxes, scents and numbers with Java. New server game tests and a client test with screenshots.
+
+### Agriculture: more Halloween, batch 14, costumes (pull request pending, stacked on batch 13)
+- **Six outfits**, worn on the head and drawn over the whole body: a **Vampire Cape** that flares as you walk and wraps round you when you sneak, **Mummy Wraps**, a **Skeleton Suit** whose bones glow in the dark, a **Werewolf Mask** with fur, claws and a tail, **Cat Ears and Tail** (the tail sways), and **Bat Wings** that spread and flap when you jump.
+- Each counts as a trick-or-treat costume (and for the costume contest); costumed mobs wear them during the event.
+- **Costume Trunk:** keeps nine costumes; use it with an empty hand to change into the next one.
+- Changing is decided on the server; how outfits move is drawn by each client from boxes generated with their textures. The checker compares the outfits, the trunk and the boxes with Java. New server game tests and a client test with screenshots.
+
+### Agriculture: more Halloween, batch 13, treats (pull request pending, stacked on batch 12)
+- **Witch's Brew Punch Bowl:** brew glowing green punch from berries, under rolling dry-ice fog, and ladle it into bottles; a drink makes you glow.
+- **Soul Cakes** and the **Barmbrack:** a fruit loaf eaten a slice at a time, one slice hiding a ring; every slice tells a fortune.
+- **Pumpkin Spice Latte** (a burst of Speed), **Pumpkin Bread**, **Spiderweb Cupcakes** and **Bat-Wing Cookies**; the cakes, cupcakes and cookies count as treats for Candy Bowls and Candy Bags.
+- **Giant Candy:** block-sized props of candy corn, a lollipop, a wrapped sweet and a gumdrop.
+- All decided on the server; nothing ticks. The checker compares the bowl's servings, the barmbrack's slices and fortunes, the candy's designs and the drinks' effects with Java. New server game tests and a client test with screenshots.
+
+### Agriculture: more Halloween, batch 12, night events (pull request pending, stacked on batch 11)
+- **Trick-or-treaters at your door:** during the Halloween event, village children in costume knock at a Candy Bowl by a lit door; a full bowl earns thank-you gifts, an empty one gets your trees toilet-papered.
+- **Toilet Paper Rolls:** throw them over trees and fences; the streamers wash off in the rain.
+- **Haunted Hayride:** a four-seat hay wagon on rails; at night its riders hear spooky things from the dark.
+- **Halloween Bonfire:** cooks what a campfire cooks, four at a time and twice as fast; toast **Marshmallows** on a stick over it (or a campfire), but not too long.
+- All decided on the server; the flames, skewered food and wagon are drawn by each client. The checker compares the numbers, costumes and gifts with Java. New server game tests and a client test with screenshots.
+
+### Agriculture: more Halloween, batch 11, party games (pull request pending, stacked on batch 10)
+- **Jump-Scare Trap:** a crate that bursts open and throws up a shrieking ghost on a spring when someone walks up, or a tripwire fires.
+- **Costume Contest:** walk the **Costume Runway** in costume while the **Judges' Table** has a round open; everyone else votes by using their favourite, and the most votes win a **Best Costume Ribbon**.
+- **Pumpkin Bowling:** roll a **Bowling Pumpkin** down a lane of **Skeleton Pins**; the **Bowling Scoreboard** keeps ten-pin score and stands the pins up again.
+- **Candy Cache:** a hollow stump that hides treats like a Candy Bowl, one a night for each finder.
+- **Monster Mash Dance Floor:** tiles light up in pulsing Halloween colours from a playing jukebox or redstone; villagers on them dance.
+- **Ghost Tag:** ring the **Ghost Bell**; whoever is the ghost glows and tags others by hitting them, harmlessly, with no tag-backs.
+- **Fortune Teller's Table:** a tarot card turns, the planchette slides to YES, NO or GOODBYE, and you get one of twenty silly fortunes.
+- All decided on the server; the moving parts are drawn by each client. The checker compares the numbers and messages with Java. New server game tests and a client test with screenshots.
+
 ### Agriculture: more Halloween, batch 10, lighting and glow (pull request pending, stacked on batch 9)
 - **Black Light** and **Glow Paint:** paint skulls, bats, spiders, webs, handprints and eyes on any face; they blaze green-white under a black light nearby.
 - **Witch Fire Brazier:** a brazier whose flame turns orange, green, purple or blue with a dye; it burns nothing.
