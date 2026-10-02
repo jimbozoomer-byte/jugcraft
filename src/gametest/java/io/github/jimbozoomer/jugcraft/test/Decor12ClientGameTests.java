@@ -35,8 +35,8 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 /**
  * Client game test for night events: a house front with a jack o'lantern porch light, a Candy Bowl and three
  * village children in costume at its door (posed, as trick-or-treaters stand there); two trees and a fence hung with
- * toilet paper; a lit Halloween Bonfire roasting chestnuts and corn; a Haunted Hayride on its rails with two villagers
- * aboard. Photographed by day and at night (CI job {@code client}).
+ * toilet paper; a lit Halloween Bonfire roasting chestnuts and corn; a Haunted Hayride on its rails with three children in
+ * costume aboard. Photographed by day and at night (CI job {@code client}).
  */
 public class Decor12ClientGameTests implements FabricClientGameTest {
 	@Override
@@ -65,7 +65,7 @@ public class Decor12ClientGameTests implements FabricClientGameTest {
 			server.runCommand("time set midnight");
 			shoot(context, singleplayer, x + 14, y + 1, z - 3, 180, 20, "jugcraft_halloween_bonfire_night");
 			shoot(context, singleplayer, x + 4, y + 1, z - 4, 180, 5, "jugcraft_trick_or_treaters_night");
-			shoot(context, singleplayer, x + 22, y + 2, z - 2, 180, 15, "jugcraft_haunted_hayride_night");
+			shoot(context, singleplayer, x + 22, y + 3, z - 2, 180, 32, "jugcraft_haunted_hayride_night");
 			shoot(context, singleplayer, x + 12, y + 4, z + 6, 180, 18, "jugcraft_night_events_night");
 		}
 	}
@@ -167,17 +167,23 @@ public class Decor12ClientGameTests implements FabricClientGameTest {
 				fire.cook(level, food, player);
 			}
 		}
-		// The hayride on a stretch of rail, two villagers aboard.
+		// The hayride on a stretch of rail, three children in costume aboard.
 		for (int dx = 18; dx <= 27; dx++) {
 			set(level, new BlockPos(x + dx, y, z - 6), Blocks.RAIL.defaultBlockState());
 		}
 		Entity ride = JugcraftAgriculture.HAUNTED_HAYRIDE.create(level, EntitySpawnReason.COMMAND);
 		if (ride != null) {
-			ride.snapTo(x + 22.5, y + 0.0625, z - 5.5, 90.0F, 0.0F);
+			// A minecart along x faces 0 degrees.
+			ride.snapTo(x + 22.5, y + 0.0625, z - 5.5, 0.0F, 0.0F);
 			level.addFreshEntity(ride);
-			for (int i = 0; i < 2; i++) {
+			String[] riders = {"jugcraft:ghost_sheet", "jugcraft:witch_hat", "minecraft:carved_pumpkin"};
+			for (String costume : riders) {
 				if (vanilla(level, "villager") instanceof Mob rider) {
-					rider.snapTo(x + 22.5, y + 1, z - 5.5, 0.0F, 0.0F);
+					if (rider instanceof AgeableMob young) {
+						young.setAge(-24000);
+					}
+					rider.setItemSlot(EquipmentSlot.HEAD, new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(costume))));
+					rider.snapTo(x + 22.5, y + 1, z - 5.5, 180.0F, 0.0F);
 					rider.setNoAi(true);
 					level.addFreshEntity(rider);
 					rider.startRiding(ride);

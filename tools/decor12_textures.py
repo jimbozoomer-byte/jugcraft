@@ -118,7 +118,7 @@ def flame():
     rng = random.Random(22127)
     for y in range(32):
         t = y / 31.0                      # 0 at the tip, 1 at the root
-        half = 1.0 + 6.8 * (t ** 0.7)
+        half = 1.5 + 6.3 * (t ** 0.45)
         for x in range(16):
             d = abs(x - 7.5) / half
             if d > 1 or rng.random() < 0.08 * (1 - t):

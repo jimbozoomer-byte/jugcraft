@@ -28,14 +28,14 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Draws the Halloween Bonfire's flames, three pairs of crossed sheets of fire round the log cone, each flickering and
- * swaying on its own, at full brightness, two blocks tall; and the food on its four skewers, at the skewers' tips over
+ * swaying on its own, at full brightness, a block and a half tall; and the food on its four skewers, at the skewers' tips over
  * the fire. Nothing but the food while it is out.
  */
 public class HalloweenBonfireRenderer implements BlockEntityRenderer<HalloweenBonfireBlockEntity, HalloweenBonfireRenderer.State> {
 	private static final RenderType FLAME = RenderTypes.entityTranslucent(Jugcraft.id("textures/entity/bonfire_flame.png"));
 	private static final int FULL_BRIGHT = 0xF000F0;
 	/** The flames' sheets: width and height in pixels, and how far round each pair is turned. */
-	private static final float[][] SHEETS = {{22.0F, 34.0F, 0.0F}, {18.0F, 28.0F, 30.0F}, {12.0F, 22.0F, 60.0F}};
+	private static final float[][] SHEETS = {{26.0F, 27.0F, 0.0F}, {22.0F, 23.0F, 30.0F}, {16.0F, 18.0F, 60.0F}};
 	private static final float BASE_Y = 3.0F;
 	/** Where the skewers' tips hold the food over the fire (pixels), one per skewer, round the cone. */
 	private static final float[][] TIPS = {{8.0F, 10.0F, 4.2F}, {11.8F, 10.0F, 8.0F}, {8.0F, 10.0F, 11.8F}, {4.2F, 10.0F, 8.0F}};
