@@ -541,97 +541,107 @@
         },
         {
           "title": "Milestones (6)",
-          "icon": "jugcraft:crude_oil_bucket",
+          "icon": "jugcraft:scuba_mask",
           "text": [
-            "Black Gold: Fill a bucket with crude oil.",
-            "Nodding Donkey: Build a pumpjack over an oil reservoir.",
-            "Fractional Thinking: Build a distillation tower.",
-            "Tight Spot: Build a fracking rig for shale oil.",
-            "Diesel Power: Build a diesel generator."
+            "Deep Breath: Make scuba gear and breathe under water on oxygen.",
+            "Light on Your Feet: Make free runners and never take fall damage.",
+            "Charged Up: Make a power katana or power bow.",
+            "Lego My Ego: Mould coloured plastic blocks.",
+            "Black Gold: Fill a bucket with crude oil."
           ]
         },
         {
           "title": "Milestones (7)",
-          "icon": "jugcraft:gas_turbine",
+          "icon": "jugcraft:pumpjack",
           "text": [
-            "Spool Up: Build a gas turbine.",
-            "Eight Cylinders: Build a diesel engine.",
-            "Fantastic Plastic: Press a plastic sheet.",
-            "Bouncing Back: Make synthetic rubber.",
-            "Vinyl Revival: Make PVC resin from chlorine."
+            "Nodding Donkey: Build a pumpjack over an oil reservoir.",
+            "Fractional Thinking: Build a distillation tower.",
+            "Tight Spot: Build a fracking rig for shale oil.",
+            "Diesel Power: Build a diesel generator.",
+            "Spool Up: Build a gas turbine."
           ]
         },
         {
           "title": "Milestones (8)",
-          "icon": "jugcraft:soap",
+          "icon": "jugcraft:diesel_engine",
           "text": [
-            "Squeaky Clean: Boil soap from lye.",
-            "Light Speed: Draw borosilicate glass into optical fibre.",
-            "Pin Pulled: Make a grenade.",
-            "Going with the Flow: Build a flow battery.",
-            "Hit the Road: Lay asphalt, and walk faster on it."
+            "Eight Cylinders: Build a diesel engine.",
+            "Fantastic Plastic: Press a plastic sheet.",
+            "Bouncing Back: Make synthetic rubber.",
+            "Vinyl Revival: Make PVC resin from chlorine.",
+            "Squeaky Clean: Boil soap from lye."
           ]
         },
         {
           "title": "Milestones (9)",
-          "icon": "jugcraft:electrolytic_cell",
+          "icon": "jugcraft:optical_fibre",
           "text": [
-            "Split Decision: Build an electrolytic cell.",
-            "Oil of Vitriol: Make sulfuric acid.",
-            "Green Revolution: Make fertilizer.",
-            "Moonshine: Ferment crops into bioethanol.",
-            "The Bayer Way: Digest bauxite into alumina."
+            "Light Speed: Draw borosilicate glass into optical fibre.",
+            "Pin Pulled: Make a grenade.",
+            "Going with the Flow: Build a flow battery.",
+            "Hit the Road: Lay asphalt, and walk faster on it.",
+            "Split Decision: Build an electrolytic cell."
           ]
         },
         {
           "title": "Milestones (10)",
-          "icon": "jugcraft:fuel_cell",
+          "icon": "jugcraft:sulfuric_acid_bucket",
           "text": [
-            "Clean Burn: Build a hydrogen fuel cell.",
-            "Thin Air: Build an air separation unit.",
-            "Bread from Air: Build a synthesis converter, to make ammonia from air.",
-            "Aqua Fortis: Make nitric acid.",
-            "Kroll Call: Chlorinate titanium and melt the sponge."
+            "Oil of Vitriol: Make sulfuric acid.",
+            "Green Revolution: Make fertilizer.",
+            "Moonshine: Ferment crops into bioethanol.",
+            "The Bayer Way: Digest bauxite into alumina.",
+            "Clean Burn: Build a hydrogen fuel cell."
           ]
         },
         {
           "title": "Milestones (11)",
-          "icon": "jugcraft:lithium_battery_bank",
+          "icon": "jugcraft:air_separation_unit",
           "text": [
-            "Power Wall: Build a lithium battery bank.",
-            "Strong Attraction: Make a neodymium magnet.",
-            "Lossless (Almost): Build a magnet dynamo or magnet motor.",
-            "Pulling Strings: Pull a silicon boule in the arc furnace.",
-            "Etched in Light: Etch microchips in the lithography station."
+            "Thin Air: Build an air separation unit.",
+            "Bread from Air: Build a synthesis converter, to make ammonia from air.",
+            "Aqua Fortis: Make nitric acid.",
+            "Kroll Call: Chlorinate titanium and melt the sponge.",
+            "Power Wall: Build a lithium battery bank."
           ]
         },
         {
           "title": "Milestones (12)",
-          "icon": "jugcraft:processor",
+          "icon": "jugcraft:neodymium_magnet",
           "text": [
-            "Central Processing: Assemble a processor.",
-            "Hello, World: Build a network terminal.",
-            "Under Pressure: Build a gas holder.",
-            "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter."
+            "Strong Attraction: Make a neodymium magnet.",
+            "Lossless (Almost): Build a magnet dynamo or magnet motor.",
+            "Pulling Strings: Pull a silicon boule in the arc furnace.",
+            "Etched in Light: Etch microchips in the lithography station.",
+            "Central Processing: Assemble a processor."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:advanced_solar_panel",
+          "icon": "jugcraft:network_terminal",
           "text": [
-            "Here Comes the Sun: Build an advanced solar panel.",
-            "Full of It: Make a tank gauge.",
-            "Concentrate: Build a solar receiver for a heliostat field.",
-            "Spool Up: Make a turbocharger for the advanced engine.",
-            "Keep It Spinning: Build a flywheel."
+            "Hello, World: Build a network terminal.",
+            "Under Pressure: Build a gas holder.",
+            "Shut-Off Valve: Make a fluid valve.",
+            "Strained Relations: Make a fluid filter.",
+            "Here Comes the Sun: Build an advanced solar panel."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:advanced_engine",
+          "icon": "jugcraft:tank_gauge",
           "text": [
-            "Four on the Floor: Build an advanced combustion engine.",
+            "Full of It: Make a tank gauge.",
+            "Concentrate: Build a solar receiver for a heliostat field.",
+            "Spool Up: Make a turbocharger for the advanced engine.",
+            "Keep It Spinning: Build a flywheel.",
+            "Four on the Floor: Build an advanced combustion engine."
+          ]
+        },
+        {
+          "title": "Milestones (15)",
+          "icon": "jugcraft:cotton",
+          "text": [
             "King Cotton: Grow cotton.",
             "Make It Rain: Build a sprinkler.",
             "Reaping What You Sow: Build a crop harvester."
@@ -2518,6 +2528,32 @@
             "A paxel is a pickaxe, an axe and a shovel in one tool: it mines stone, wood and dirt at full speed.",
             "Craft one from a pickaxe, an axe and a shovel of the same tier, from wood to netherite, bronze or steel. It lasts as long as all three together."
           ]
+        },
+        {
+          "title": "Scuba Gear",
+          "icon": "jugcraft:scuba_tank",
+          "text": [
+            "Wear the scuba mask and the scuba tank together to breathe under water.",
+            "The tank holds 8,000 mB of oxygen. Use it on anything holding oxygen to fill it: a gas holder, or the oxygen tank of an electrolytic cell or air separation unit.",
+            "Under water it keeps your air full for 1 mB a tick: a full tank lasts 400 seconds of breathing."
+          ]
+        },
+        {
+          "title": "Free Runners",
+          "icon": "jugcraft:free_runners",
+          "text": [
+            "Rubber-soled boots that take away all fall damage and step up a full block without jumping.",
+            "They protect like iron boots and are mended with rubber."
+          ]
+        },
+        {
+          "title": "Power Katana and Power Bow",
+          "icon": "jugcraft:power_katana",
+          "text": [
+            "Two weapons that run on JE instead of wearing out. Charge them at a charging station; capacity modules fit both.",
+            "The power katana hits harder and faster than a netherite sword, for 1,000 JE a hit. Empty, it hits for 1.",
+            "The power bow fires arrows of energy for 500 JE a shot: no arrows needed, and they fly faster and hit harder. Empty, it is an ordinary bow that shoots your arrows."
+          ]
         }
       ]
     },
@@ -3101,6 +3137,14 @@
             "Tincal, natural borax, crusts the sand of deserts and badlands; mine it for 1-3 borax.",
             "Two sand and a borax melt into two borosilicate glass in the alloy smelter; the wire drawer pulls each into four optical fibre, which can carry a processor's signals instead of gold.",
             "Iron and borax make ferroboron; a rare earth oxide with ferroboron gives two neodymium magnets, twice the old recipe."
+          ]
+        },
+        {
+          "title": "Plastic Blocks",
+          "icon": "jugcraft:light_blue_plastic",
+          "text": [
+            "Eight plastic sheets around a dye make eight plastic blocks of that colour, in all sixteen dye colours.",
+            "They are smooth, bright building blocks, as hard as concrete; mine them with a pickaxe."
           ]
         },
         {

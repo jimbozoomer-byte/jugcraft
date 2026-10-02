@@ -36,6 +36,16 @@ TREE = {
                     "Make a piece of steel armor", "task"),
     "paxel": ("steel", [f"{tier}_paxel" for tier in ("wood", "stone", "iron", "gold", "diamond", "netherite", "bronze",
                                                       "steel")], "Jack of All Trades", "Make a paxel", "task"),
+    # Batch 27: gear and plastic blocks.
+    "scuba": ("rubber", ["scuba_mask", "scuba_tank"], "Deep Breath", "Make scuba gear and breathe under water on oxygen",
+              "task"),
+    "free_runners": ("rubber", "free_runners", "Light on Your Feet", "Make free runners and never take fall damage",
+                     "task"),
+    "power_weapon": ("charging_station", ["power_katana", "power_bow"], "Charged Up", "Make a power katana or power bow",
+                     "goal"),
+    "plastic_blocks": ("plastic", [f"{color}_plastic" for color in (
+        "white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple",
+        "blue", "brown", "green", "red", "black")], "Lego My Ego", "Mould coloured plastic blocks", "task"),
     # The oil line (Chemistry branch).
     "crude_oil": ("steel", "crude_oil_bucket", "Black Gold", "Fill a bucket with crude oil", "task"),
     "pumpjack": ("crude_oil", "pumpjack", "Nodding Donkey", "Build a pumpjack over an oil reservoir", "task"),

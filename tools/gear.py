@@ -40,12 +40,36 @@ ITEM_TAGS = {"sword": "swords", "pickaxe": "pickaxes", "axe": "axes", "shovel": 
              "helmet": "head_armor", "chestplate": "chest_armor", "leggings": "leg_armor", "boots": "foot_armor"}
 
 
+# Batch 27 gear (docs/features/gear-and-plastic.md), after Mekanism's scuba gear, free runners, Meka-Tana and
+# Meka-Bow (MIT; no code or art taken): display name, crafting pattern and key, and the item model it uses.
+EXTRAS = {
+    "scuba_mask": {"display": "Scuba Mask", "pattern": ["SRS", "RGR"], "model": "generated",
+                   "key": {"S": "#c:plates/steel", "R": "jugcraft:rubber", "G": "minecraft:glass_pane"}},
+    "scuba_tank": {"display": "Scuba Tank", "pattern": ["R R", "PTP", "PPP"], "model": "generated",
+                   "key": {"R": "jugcraft:rubber", "P": "#c:plates/steel", "T": "jugcraft:fluid_tank"}},
+    "free_runners": {"display": "Free Runners", "pattern": ["L L", "S S", "R R"], "model": "generated",
+                     "key": {"L": "minecraft:leather", "S": "#c:plates/steel", "R": "jugcraft:rubber"}},
+    "power_katana": {"display": "Power Katana", "pattern": ["  T", "LT ", "AS "], "model": "handheld",
+                     "key": {"T": "#c:plates/tungsten", "L": "jugcraft:lithium_cell", "A": "jugcraft:advanced_circuit",
+                             "S": "#c:ingots/steel"}},
+    "power_bow": {"display": "Power Bow", "pattern": [" PW", "LAW", " PW"], "model": "bow",
+                  "key": {"P": "#c:plates/steel", "W": "minecraft:string", "L": "jugcraft:lithium_cell",
+                          "A": "jugcraft:advanced_circuit"}},
+}
+# What the scuba tank holds and uses (Java: ScubaTankItem).
+SCUBA_OXYGEN = 8_000
+SCUBA_OXYGEN_PER_TICK = 1
+
+
 def items():
     """Every item this module registers, in registration order."""
-    return [f"{tier}_{piece}" for tier in GEAR_TIERS for piece in PIECES] + [f"{tier}_paxel" for tier in PAXEL_TIERS]
+    return ([f"{tier}_{piece}" for tier in GEAR_TIERS for piece in PIECES] + [f"{tier}_paxel" for tier in PAXEL_TIERS]
+            + list(EXTRAS))
 
 
 def display(item):
+    if item in EXTRAS:
+        return EXTRAS[item]["display"]
     tier, piece = item.rsplit("_", 1)
     if piece == "paxel":
         return f"{PAXEL_TIERS[tier]} Paxel"
@@ -64,12 +88,30 @@ def write_all(write, assets, data, lang, condition):
     for item in items():
         lang[f"item.{MOD}.{item}"] = display(item)
         piece = item.rsplit("_", 1)[1]
-        parent = "minecraft:item/generated" if piece in ARMOR else "minecraft:item/handheld"
-        write(assets / "models" / "item" / f"{item}.json", {"parent": parent, "textures": {"layer0": f"{MOD}:item/{item}"}})
-        write(assets / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}})
+        kind = EXTRAS[item]["model"] if item in EXTRAS else ("generated" if piece in ARMOR else "handheld")
+        model = {"parent": f"minecraft:item/{kind}", "textures": {"layer0": f"{MOD}:item/{item}"}}
+        write(assets / "models" / "item" / f"{item}.json", model)
+        definition = {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}
+        if kind == "bow":
+            # Drawn back in three steps while held, like the vanilla bow (minecraft:use_duration).
+            for step in range(3):
+                write(assets / "models" / "item" / f"{item}_pulling_{step}.json",
+                      {"parent": "minecraft:item/bow", "textures": {"layer0": f"{MOD}:item/{item}_pulling_{step}"}})
+            definition = {"type": "minecraft:condition", "property": "minecraft:using_item", "on_false": definition,
+                          "on_true": {"type": "minecraft:range_dispatch", "property": "minecraft:use_duration",
+                                      "scale": 0.05, "fallback": {"type": "minecraft:model",
+                                                                  "model": f"{MOD}:item/{item}_pulling_0"},
+                                      "entries": [{"threshold": t, "model": {"type": "minecraft:model",
+                                                                             "model": f"{MOD}:item/{item}_pulling_{n}"}}
+                                                  for n, t in ((1, 0.65), (2, 0.9))]}}
+        write(assets / "items" / f"{item}.json", {"model": definition})
     for tier in GEAR_TIERS:
         write(assets / "equipment" / f"{tier}.json", {"layers": {
             "humanoid": [{"texture": f"{MOD}:{tier}"}], "humanoid_leggings": [{"texture": f"{MOD}:{tier}"}]}})
+    for asset in ("scuba", "free_runners"):
+        write(assets / "equipment" / f"{asset}.json", {"layers": {"humanoid": [{"texture": f"{MOD}:{asset}"}]}})
+    lang[f"tooltip.{MOD}.oxygen"] = "Oxygen: %s / %s mB"
+    lang[f"tooltip.{MOD}.scuba_tank"] = "Use on a tank or gas holder of oxygen to fill. Wear it with the scuba mask."
 
     recipes = data / "recipe"
     for tier, info in GEAR_TIERS.items():
@@ -82,6 +124,11 @@ def write_all(write, assets, data, lang, condition):
                 "fabric:load_conditions": condition(info["feature"]), "type": "minecraft:crafting_shaped",
                 "category": category, "pattern": PATTERNS[piece], "key": key,
                 "result": {"id": f"{MOD}:{tier}_{piece}", "count": 1}})
+    for item, info in EXTRAS.items():
+        write(recipes / f"{item}.json", {
+            "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped",
+            "category": "equipment", "pattern": info["pattern"], "key": info["key"],
+            "result": {"id": f"{MOD}:{item}", "count": 1}})
     for tier in PAXEL_TIERS:
         feature = GEAR_TIERS[tier]["feature"] if tier in GEAR_TIERS else "machines"
         write(recipes / f"{tier}_paxel.json", {
@@ -97,9 +144,15 @@ def write_all(write, assets, data, lang, condition):
     for tier in PAXEL_TIERS:
         for tag in ("pickaxes", "axes", "shovels"):
             by_tag.setdefault(tag, []).append(f"{MOD}:{tier}_paxel")
+    by_tag["head_armor"].append(f"{MOD}:scuba_mask")
+    by_tag["chest_armor"].append(f"{MOD}:scuba_tank")
+    by_tag["foot_armor"].append(f"{MOD}:free_runners")
+    by_tag["swords"].append(f"{MOD}:power_katana")
+    by_tag.setdefault("enchantable/bow", []).append(f"{MOD}:power_bow")
     for tag, values in by_tag.items():
         write(tags / f"{tag}.json", {"replace": False, "values": values})
     for tier, info in GEAR_TIERS.items():
         write(data / "tags" / "item" / f"repairs_{tier}_gear.json", {"values": [info["ingot"]]})
+    write(data / "tags" / "item" / "repairs_rubber_gear.json", {"values": [f"{MOD}:rubber"]})
     write(data / "tags" / "block" / "mineable" / "paxel.json", {"values": [
         "#minecraft:mineable/pickaxe", "#minecraft:mineable/axe", "#minecraft:mineable/shovel"]})

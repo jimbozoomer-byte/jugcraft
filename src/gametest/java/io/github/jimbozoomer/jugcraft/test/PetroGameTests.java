@@ -10,6 +10,11 @@ import io.github.jimbozoomer.jugcraft.chemistry.PetroItems;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
 import io.github.jimbozoomer.jugcraft.farming.JugcraftFarming;
+import io.github.jimbozoomer.jugcraft.gear.JugcraftGear;
+import io.github.jimbozoomer.jugcraft.gear.ScubaTankItem;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.phys.BlockHitResult;
 import io.github.jimbozoomer.jugcraft.farming.SprinklerBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidTankBlockEntity;
@@ -1067,6 +1072,30 @@ public class PetroGameTests {
 			helper.assertTrue(chlorine == 0, "A hydrogen holder took chlorine");
 			transaction.commit();
 		}
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 27: a scuba tank used on a gas holder of oxygen fills to its 8,000 mB and leaves the rest in the holder.
+	 */
+	@GameTest
+	public void scubaTankFillsFromAGasHolder(GameTestHelper helper) {
+		BlockPos master = new BlockPos(5, 1, 1);
+		placeUnpowered(helper, MachineKind.GAS_HOLDER, master);
+		BlockPos at = helper.absolutePos(master);
+		Storage<FluidVariant> holder = FluidStorage.SIDED.find(helper.getLevel(), at, Direction.UP);
+		try (Transaction transaction = Transaction.openOuter()) {
+			holder.insert(FluidVariant.of(PetroFluids.OXYGEN.fluid()), 10 * FluidConstants.BUCKET, transaction);
+			transaction.commit();
+		}
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftGear.SCUBA_TANK));
+		ItemStack tank = player.getItemInHand(InteractionHand.MAIN_HAND);
+		tank.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false)));
+		helper.assertTrue(ScubaTankItem.oxygen(tank) == ScubaTankItem.CAPACITY, "The tank holds " + ScubaTankItem.oxygen(tank) + " mB");
+		long left = StorageUtil.simulateExtract(holder, FluidVariant.of(PetroFluids.OXYGEN.fluid()), Long.MAX_VALUE, null);
+		helper.assertTrue(left == 2_000 * FluidNetworks.DROPLETS_PER_MB, "The holder has " + left / FluidNetworks.DROPLETS_PER_MB + " mB left");
 		helper.succeed();
 	}
 

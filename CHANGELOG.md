@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Gear, weapons and plastic blocks, batch 27
+- **Scuba mask and tank:** breathe under water on oxygen (8,000 mB, 400 s); fill the tank from a gas holder or machine.
+- **Free runners:** boots with no fall damage and a one-block step.
+- **Power katana and power bow:** JE-powered weapons charged at the charging station; the bow fires energy arrows without ammo.
+- **Plastic blocks** in all sixteen dye colours, from plastic sheets.
+- High-detail art: an animated 32x32 energy katana, and double-resolution scuba gear and free runners.
+- Four advancements and handbook pages. Inspired by Mekanism and Mekanism: Additions (MIT); all code and art original.
+
 ### Unmerged: Four-ingot ore and bioethanol, batch 26
 - **Acid leaching:** an ore and 250 mB of sulfuric acid in the chemical reactor give 4 washed ores (the best ore route).
 - **Bioethanol:** 8 crops and a bucket of water ferment into 250 mB in the chemical reactor; it burns in the gas turbine and the advanced engine.

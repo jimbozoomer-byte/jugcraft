@@ -50,7 +50,16 @@ import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import io.github.jimbozoomer.jugcraft.tools.MiningDrillItem;
 import io.github.jimbozoomer.jugcraft.tools.RocketPackItem;
 import io.github.jimbozoomer.jugcraft.tools.ToolUpgrades;
+import io.github.jimbozoomer.jugcraft.gear.JugcraftGear;
+import io.github.jimbozoomer.jugcraft.gear.PowerBowItem;
+import io.github.jimbozoomer.jugcraft.gear.PowerKatanaItem;
+import io.github.jimbozoomer.jugcraft.gear.ScubaTankItem;
 import java.util.List;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -1423,6 +1432,93 @@ public class JugcraftGameTests {
 						metal + " " + piece[0] + " does not go in " + piece[1]);
 			}
 		}
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 27: under water, a scuba tank worn with the mask tops the wearer's air up for 1 mB of oxygen; without the
+	 * mask it does nothing.
+	 */
+	@GameTest
+	public void scubaTankKeepsAirUnderWater(GameTestHelper helper) {
+		for (int y = 1; y <= 3; y++) {
+			helper.setBlock(new BlockPos(2, y, 2), Blocks.WATER);
+		}
+		ServerPlayer diver = helper.makeMockServerPlayerInLevel();
+		Vec3 at = helper.absoluteVec(new Vec3(2.5, 1.0, 2.5));
+		diver.setPos(at.x, at.y, at.z);
+		ItemStack tank = new ItemStack(JugcraftGear.SCUBA_TANK);
+		ScubaTankItem.setOxygen(tank, ScubaTankItem.CAPACITY);
+		diver.setItemSlot(EquipmentSlot.CHEST, tank);
+		diver.setItemSlot(EquipmentSlot.HEAD, new ItemStack(JugcraftGear.SCUBA_MASK));
+		diver.baseTick();
+		helper.assertTrue(diver.isEyeInFluid(FluidTags.WATER), "The diver's eyes are not under water");
+		diver.setAirSupply(10);
+		tank.getItem().inventoryTick(tank, helper.getLevel(), diver, EquipmentSlot.CHEST);
+		helper.assertTrue(diver.getAirSupply() == diver.getMaxAirSupply(), "Air is " + diver.getAirSupply());
+		helper.assertTrue(ScubaTankItem.oxygen(tank) == ScubaTankItem.CAPACITY - ScubaTankItem.OXYGEN_PER_TICK,
+				"The tank holds " + ScubaTankItem.oxygen(tank) + " mB");
+		diver.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+		diver.setAirSupply(10);
+		tank.getItem().inventoryTick(tank, helper.getLevel(), diver, EquipmentSlot.CHEST);
+		helper.assertTrue(diver.getAirSupply() == 10, "The tank gave air without the mask");
+		helper.succeed();
+	}
+
+	/** Batch 27: free runners take away all fall damage and step up half a block more, on top of their armor. */
+	@GameTest
+	public void freeRunnersCancelFallDamage(GameTestHelper helper) {
+		ItemAttributeModifiers modifiers = new ItemStack(JugcraftGear.FREE_RUNNERS).get(DataComponents.ATTRIBUTE_MODIFIERS);
+		helper.assertTrue(modifiers != null, "Free runners have no attribute modifiers");
+		helper.assertTrue(modifiers.modifiers().stream().anyMatch(entry -> entry.attribute().equals(Attributes.FALL_DAMAGE_MULTIPLIER)
+				&& entry.modifier().amount() == JugcraftGear.RUNNERS_FALL_DAMAGE), "No fall damage modifier");
+		helper.assertTrue(modifiers.modifiers().stream().anyMatch(entry -> entry.attribute().equals(Attributes.STEP_HEIGHT)
+				&& entry.modifier().amount() == JugcraftGear.RUNNERS_STEP_HEIGHT), "No step height modifier");
+		helper.assertTrue(modifiers.modifiers().stream().anyMatch(entry -> entry.attribute().equals(Attributes.ARMOR)),
+				"Free runners lost their armor");
+		helper.succeed();
+	}
+
+	/** Batch 27: a charged power katana hits at full strength and pays 1,000 JE a hit; an empty one hits for 1. */
+	@GameTest
+	public void powerKatanaRunsOnCharge(GameTestHelper helper) {
+		ServerPlayer player = miner(helper, new ItemStack(JugcraftGear.POWER_KATANA));
+		float bonus = JugcraftGear.POWER_KATANA.getAttackDamageBonus(player, 11.0F,
+				helper.getLevel().damageSources().playerAttack(player));
+		helper.assertTrue(bonus == -10.0F, "An empty katana's bonus is " + bonus);
+		player.setItemInHand(InteractionHand.MAIN_HAND, charged(JugcraftGear.POWER_KATANA));
+		bonus = JugcraftGear.POWER_KATANA.getAttackDamageBonus(player, 11.0F, helper.getLevel().damageSources().playerAttack(player));
+		helper.assertTrue(bonus == 0.0F, "A charged katana's bonus is " + bonus);
+		ItemStack katana = player.getMainHandItem();
+		katana.getItem().postHurtEnemy(katana, player, player);
+		helper.assertTrue(Chargeable.energy(katana) == PowerKatanaItem.CAPACITY - PowerKatanaItem.ENERGY_PER_HIT,
+				"The katana holds " + Chargeable.energy(katana) + " JE");
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 27: a charged power bow fires an energy arrow with no arrows in the inventory, for 500 JE, and the arrow
+	 * cannot be picked up; an empty one with no arrows fires nothing.
+	 */
+	@GameTest
+	public void powerBowFiresOnCharge(GameTestHelper helper) {
+		ServerPlayer player = miner(helper, charged(JugcraftGear.POWER_BOW));
+		// Stand inside the test area, where the chunk is loaded, so the arrow is added to the world.
+		Vec3 at = helper.absoluteVec(new Vec3(2.5, 1.0, 2.5));
+		player.setPos(at.x, at.y, at.z);
+		ItemStack bow = player.getMainHandItem();
+		int drawn = bow.getUseDuration(player) - 20;
+		helper.assertTrue(JugcraftGear.POWER_BOW.releaseUsing(bow, helper.getLevel(), player, drawn), "The charged bow did not fire");
+		List<Arrow> arrows = helper.getLevel().getEntitiesOfClass(Arrow.class, player.getBoundingBox().inflate(8));
+		helper.assertTrue(arrows.size() == 1, arrows.size() + " arrows");
+		helper.assertTrue(arrows.get(0).pickup == Arrow.Pickup.CREATIVE_ONLY, "The energy arrow can be picked up");
+		helper.assertTrue(Chargeable.energy(bow) == PowerBowItem.CAPACITY - PowerBowItem.ENERGY_PER_SHOT,
+				"The bow holds " + Chargeable.energy(bow) + " JE");
+		ItemStack empty = new ItemStack(JugcraftGear.POWER_BOW);
+		player.setItemInHand(InteractionHand.MAIN_HAND, empty);
+		helper.assertTrue(!JugcraftGear.POWER_BOW.releaseUsing(empty, helper.getLevel(), player, drawn), "The empty bow fired");
+		helper.assertTrue(helper.getLevel().getEntitiesOfClass(Arrow.class, player.getBoundingBox().inflate(8)).size() == 1,
+				"The empty bow made an arrow");
 		helper.succeed();
 	}
 

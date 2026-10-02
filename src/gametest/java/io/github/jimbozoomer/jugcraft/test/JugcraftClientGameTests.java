@@ -164,6 +164,27 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_bronze_armor_back");
+			// Batch 27: scuba mask and tank, free runners and the power katana, from the front; then the sixteen plastic
+			// blocks in a wall, two high.
+			server.runCommand("item replace entity @p armor.head with jugcraft:scuba_mask");
+			server.runCommand("item replace entity @p armor.chest with jugcraft:scuba_tank");
+			server.runCommand("item replace entity @p armor.legs with minecraft:air");
+			server.runCommand("item replace entity @p armor.feet with jugcraft:free_runners");
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:power_katana");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_scuba_gear_worn");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
+			String[] plastics = {"white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray",
+					"cyan", "purple", "blue", "brown", "green", "red", "black"};
+			for (int i = 0; i < plastics.length; i++) {
+				server.runCommand("fill %d %d %d %d %d %d jugcraft:%s_plastic".formatted(x - 14 + i, y, z + 12, x - 14 + i, y + 1,
+						z + 12, plastics[i]));
+			}
+			server.runCommand("tp @p %d %d %d 180 10".formatted(x - 6, y, z + 18));
+			context.waitTicks(20);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_plastic_blocks");
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			context.getInput().pressKey(options -> options.keyToggleGui);
 			server.runCommand("clear @p");

@@ -20,6 +20,7 @@ import deposits
 import seasons
 import tank_display
 import gear
+import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 
@@ -76,12 +77,13 @@ def texture(ref):
         return
     animated = png.with_name(png.name + ".mcmeta").is_file()
     with Image.open(png) as img:
-        # Animated textures are a vertical strip of 16x16 frames with an .mcmeta beside them.
+        # 16x16, 32x32 for the high-detail gear (tools/hitech.py), or 64x64 for the tower's art. Animated textures
+        # are a vertical strip of square frames with an .mcmeta beside them.
         width, height = img.size
-        if animated and not (width == 16 and height % 16 == 0 and height > 16):
-            err(f"Animated texture {ref} is {img.size}, expected a 16-wide strip of 16x16 frames")
-        elif not animated and img.size != (16, 16) and not (img.size == (64, 64) and _hi_res(png.stem)):
-            err(f"Texture {ref} is {img.size}, expected 16x16 (64x64 only for tower_art textures)")
+        if animated and not (width in (16, 32) and height % width == 0 and height > width):
+            err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16 or 32x32 frames")
+        elif not animated and img.size not in ((16, 16), (32, 32)) and not (img.size == (64, 64) and _hi_res(png.stem)):
+            err(f"Texture {ref} is {img.size}, expected 16x16 or 32x32 (64x64 only for tower_art textures)")
 
 
 def model(ref):
@@ -102,10 +104,21 @@ def _hi_res(name):
     return name in tower_art.TEXTURES or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_"))
 
 
+def item_models(definition):
+    """Every model an item definition can show, through condition and range_dispatch (the power bow's draw)."""
+    if "model" in definition:
+        model(definition["model"])
+    for key in ("on_true", "on_false", "fallback"):
+        if key in definition:
+            item_models(definition[key])
+    for entry in definition.get("entries", []):
+        item_models(entry["model"])
+
+
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
-                  + seasons.BLOCKS):
+                  + plastic.blocks() + seasons.BLOCKS):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -121,8 +134,9 @@ def check_assets(registered):
             continue  # A crop block has no item of its own: its seeds plant it.
         definition = load(ASSETS / "items" / f"{item}.json")
         if definition:
-            model(definition["model"]["model"])
-        if item not in all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS) and f"item.{MOD}.{item}" not in lang:
+            item_models(definition["model"])
+        if item not in (all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
+                        + plastic.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -255,6 +269,8 @@ def item_units(ref):
         # Bayer-process alumina: one ingot of aluminum each, smelted out in the electrolytic cell.
         return {"aluminum": 9}
     if path in NON_METAL:
+        return {}
+    if path in plastic.blocks():
         return {}
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
@@ -443,7 +459,7 @@ def check_tags():
             elif split(value)[0] == MOD and split(value)[1] not in (all_blocks() + all_items() + machine_blocks()
                                                                     + machine_items() + petro.petro_blocks()
                                                                     + petro.petro_items() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
-                                                                    + gear.items() + seasons.BLOCKS):
+                                                                    + gear.items() + plastic.blocks() + seasons.BLOCKS):
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
 
@@ -462,6 +478,14 @@ def check_worldgen():
         feature = split((load(path) or {})["feature"])[1]
         if not (DATA / MOD / "worldgen" / "feature" / f"{feature}.json").is_file():
             err(f"{path.name}: unknown configured feature {feature}")
+
+
+def check_plastic():
+    """chemistry/PetroBlocks.PLASTIC_COLORS against tools/plastic.py COLORS."""
+    java = (JAVA_ROOT / "chemistry" / "PetroBlocks.java").read_text(encoding="utf-8")
+    found = re.findall(r'"([a-z_]+)"', re.search(r"PLASTIC_COLORS = List\.of\(([^)]*)\)", java).group(1))
+    if found != list(plastic.COLORS):
+        err(f"PetroBlocks.PLASTIC_COLORS {found} != tools/plastic.py {list(plastic.COLORS)}")
 
 
 def check_gear():
@@ -487,6 +511,21 @@ def check_gear():
         for layer in ("humanoid", "humanoid_leggings"):
             if not (ASSETS / "textures" / "entity" / "equipment" / layer / f"{tier}.png").exists():
                 err(f"Missing worn armor texture {layer}/{tier}.png")
+    extras = re.findall(r'^\t\t[A-Z_]+ = item\("([a-z_]+)"', java, re.M)
+    if extras != list(gear.EXTRAS):
+        err(f"JugcraftGear extras {extras} != tools/gear.py {list(gear.EXTRAS)}")
+    scuba = (JAVA_ROOT / "gear" / "ScubaTankItem.java").read_text(encoding="utf-8")
+    if (f"CAPACITY = {gear.SCUBA_OXYGEN:_};" not in scuba
+            or f"OXYGEN_PER_TICK = {gear.SCUBA_OXYGEN_PER_TICK};" not in scuba):
+        err("ScubaTankItem capacity or use differs from tools/gear.py")
+    for asset in ("scuba", "free_runners"):
+        if not (ASSETS / "textures" / "entity" / "equipment" / "humanoid" / f"{asset}.png").exists():
+            err(f"Missing worn texture humanoid/{asset}.png")
+    for item, info in gear.EXTRAS.items():
+        frames = [item] + ([f"{item}_pulling_{step}" for step in range(3)] if info["model"] == "bow" else [])
+        for frame in frames:
+            if not (ASSETS / "textures" / "item" / f"{frame}.png").exists():
+                err(f"Missing item texture {frame}.png")
 
 
 def check_seasons():
@@ -873,7 +912,7 @@ def check_deposits():
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(petro.petro_items()) | set(petro.petro_blocks()) | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
-                  | set(gear.items()))
+                  | set(gear.items()) | set(plastic.blocks()))
     check_assets(sorted(registered))
     check_petro()
     check_loot(registered)
@@ -885,6 +924,7 @@ def main():
     check_java()
     check_deposits()
     check_gear()
+    check_plastic()
     check_seasons()
     check_machines(registered)
     check_large_machines()

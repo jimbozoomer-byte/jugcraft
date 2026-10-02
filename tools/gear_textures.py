@@ -7,6 +7,7 @@ handles are oak brown.
 from PIL import Image
 
 import armor_styles
+import hitech
 
 # Mask characters: digits are the head's palette shade; h/H the handle (dark/light); . is empty.
 HANDLE = [(58, 40, 22), (98, 70, 40)]
@@ -127,6 +128,27 @@ PAXEL = [
 ]
 
 
+# The power bow (batch 27). Letters: R rubber (black), G glass (pale blue), Y yellow (hazard paint), and the digits are steel.
+BOW_BASE = [
+    "........RR......",
+    ".......R4.W.....",
+    "......R4..W.....",
+    ".....43...W.....",
+    "....43....W.....",
+    "...43.....W.....",
+    "..43......W.....",
+    "..2YG.....W.....",
+    "..2YG.....W.....",
+    "..43......W.....",
+    "...43.....W.....",
+    "....43....W.....",
+    ".....43...W.....",
+    "......R4..W.....",
+    ".......R4.W.....",
+    "........RR......",
+]
+EXTRA_COLORS = {"R": (32, 32, 36), "G": (120, 220, 255), "Y": (232, 186, 40), "W": (226, 226, 220)}
+
 TOOLS = {"sword": SWORD, "pickaxe": PICKAXE, "axe": AXE, "shovel": SHOVEL, "hoe": HOE}
 
 # Head palettes for the paxel tiers that are not Jugcraft metals (darkest .. lightest), our own picks.
@@ -148,18 +170,25 @@ def icon(mask, palette):
                 img.putpixel((x, y), tuple(palette[int(ch)]) + (255,))
             elif ch in "hH":
                 img.putpixel((x, y), HANDLE[ch == "H"] + (255,))
+            elif ch in EXTRA_COLORS:
+                img.putpixel((x, y), EXTRA_COLORS[ch] + (255,))
     return img
 
 
-# Humanoid armor UV boxes (x, y, w, h, d) on the 64x32 sheet: each box's six faces sit in the usual net.
-HEAD, BODY, RIGHT_ARM, RIGHT_LEG = (0, 0, 8, 8, 8), (16, 16, 8, 12, 4), (40, 16, 4, 12, 4), (0, 16, 4, 12, 4)
-
-
-def _faces(box):
-    """The six faces of a box on the sheet as (left, top, width, height) rectangles."""
-    u, v, w, h, d = box
-    return [(u + d, v, w, d), (u + d + w, v, w, d),  # top, bottom
-            (u, v + d, d, h), (u + d, v + d, w, h), (u + d + w, v + d, d, h), (u + 2 * d + w, v + d, w, h)]
+def bow_drawn(step):
+    """The power bow drawn back: the string pulled further left each step, with an energy bolt nocked."""
+    rows = [list(r) for r in BOW_BASE]
+    for row in rows:
+        for x, ch in enumerate(row):
+            if ch == "W":
+                row[x] = "."
+    pull = 10 - 2 * (step + 1)
+    for y in range(1, 15):
+        bend = pull - min(abs(y - 7.5), 6) * 0.5
+        rows[y][max(5, int(round(bend)))] = "W"
+    for x in range(max(3, int(pull) - 4), 15):
+        rows[8][x] = "G" if x > int(pull) else rows[8][x]
+    return ["".join(r) for r in rows]
 
 
 def draw_all(save, save_armor, part_palette):
@@ -174,6 +203,17 @@ def draw_all(save, save_armor, part_palette):
             save(armor_styles.icon(metal, piece, armor), "item", f"{metal}_{piece}")
         save_armor(armor_styles.layer(metal, armor, False), "humanoid", metal)
         save_armor(armor_styles.layer(metal, armor, True), "humanoid_leggings", metal)
+    steel = part_palette("steel")
+    save(icon(BOW_BASE, steel), "item", "power_bow")
+    for step in range(3):
+        save(icon(bow_drawn(step), steel), "item", f"power_bow_pulling_{step}")
+    # The rest of the high-tech gear is drawn at double resolution in tools/hitech.py.
+    save(hitech.scuba_mask_icon(), "item", "scuba_mask")
+    save(hitech.scuba_tank_icon(), "item", "scuba_tank")
+    save(hitech.free_runners_icon(), "item", "free_runners")
+    save(hitech.katana(), "item", "power_katana", animation={"frametime": 2})
+    save_armor(hitech.scuba_layer(), "humanoid", "scuba")
+    save_armor(hitech.runners_layer(), "humanoid", "free_runners")
     for tier, palette in list(VANILLA_TIERS.items()) + [("bronze", part_palette("bronze")),
                                                          ("steel", part_palette("steel"))]:
         save(icon(PAXEL, palette), "item", f"{tier}_paxel")

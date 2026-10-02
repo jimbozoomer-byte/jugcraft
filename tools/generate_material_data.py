@@ -138,6 +138,8 @@ def assets():
     tank_display.write_all(write, ASSETS, DATA / MOD, lang, model_writer)
     import gear
     gear.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import plastic
+    plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
     gui_textures.write_all(write, ASSETS, lang, MACHINES)
     import advancements
@@ -1100,6 +1102,9 @@ def tags():
     import petro
     for crop in petro.FERMENTABLE:
         tags.add("item", f"{MOD}:fermentable", crop)
+    import plastic
+    for block in plastic.blocks():
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     for metal, info in METALS.items():
         tool = info.get("tool", "stone")
         tags.add("item", f"c:ingots/{metal}", rid(f"{metal}_ingot"))
