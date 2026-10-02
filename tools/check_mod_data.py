@@ -459,7 +459,7 @@ def check_tags():
             elif split(value)[0] == MOD and split(value)[1] not in (all_blocks() + all_items() + machine_blocks()
                                                                     + machine_items() + petro.petro_blocks()
                                                                     + petro.petro_items() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
-                                                                    + gear.items() + plastic.blocks() + gear.items() + seasons.BLOCKS):
+                                                                    + gear.items() + plastic.blocks() + seasons.BLOCKS):
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
 
