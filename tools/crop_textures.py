@@ -862,4 +862,30 @@ def crop_textures():
     out.update(decor10_textures())
     from decor11_textures import decor11_textures  # and party games
     out.update(decor11_textures())
+    from decor12_textures import decor12_textures  # and night events
+    out.update(decor12_textures())
+    from decor13_textures import decor13_textures  # and treats
+    out.update(decor13_textures())
+    from decor14_textures import decor14_textures  # and costumes
+    out.update(decor14_textures())
+    from chandlery_textures import chandlery_textures  # and the chandlery
+    out.update(chandlery_textures())
+    from cider_textures import cider_textures  # and the cider mill
+    out.update(cider_textures())
+    from pantry_textures import pantry_textures  # and the preserves pantry
+    out.update(pantry_textures())
+    from crow_textures import crow_textures  # and the crow
+    out.update(crow_textures())
+    from firework_textures import firework_textures  # and spooky fireworks
+    out.update(firework_textures())
+    from lantern_textures import lantern_textures  # and the sky lantern festival
+    out.update(lantern_textures())
+    from feast_textures import feast_textures  # and the harvest feast
+    out.update(feast_textures())
+    from maze_textures import maze_textures  # and the corn maze
+    out.update(maze_textures())
+    from ghost_textures import ghost_textures  # and ghost hunting
+    out.update(ghost_textures())
+    from face_paint_textures import face_paint_textures  # and face paint
+    out.update(face_paint_textures())
     return out
