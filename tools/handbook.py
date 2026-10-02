@@ -28,7 +28,9 @@ ABOUT = {
     "electric_furnace": "Smelts anything a vanilla furnace can, twice as fast.",
     "crusher": "Crushes one ore into two raw ores, minerals into extra minerals, cobblestone into gravel and gravel into sand.",
     "arc_furnace_controller": "The heart of the Arc Furnace: build a solid 3x3x3 cube of Arc Furnace Casing with this block in the "
-                              "middle of one face, facing out. It melts what an ordinary furnace cannot.",
+                              "middle of one face, facing out. It melts what an ordinary furnace cannot, and it pulls "
+                              "silicon boules: 4 silicon and a phosphate (the dopant) give a boule every 20 seconds. "
+                              "Pipe argon into the controller and it works twice as fast, for 1 mB a tick.",
     "solar_panel": "Makes power from daylight under open sky: 8 JE/t in sun, half in rain, nothing at night.",
     "steam_generator": "Boils water with coal or bitumen: twice the power of the coal generator per fuel. A water source "
                        "block directly below refills it for free.",
@@ -118,55 +120,48 @@ ABOUT = {
                 "the chunk under the wellhead holds pumpable oil (the prospector's Oil reading), it pumps 2 mB of crude "
                 "oil a tick into its 16-bucket tank and pushes it into pipes and tanks touching it. A reservoir runs dry "
                 "for good after 50 to 250 buckets; shale oil needs a fracking rig instead.",
-    "oil_sand_extractor": "Two by two by two. Washes crude oil out of oil sand with hot water: a block of oil sand "
-                          "(mined with silk touch) and 250 mB of water give 500 mB of crude oil and a block of sand; a "
-                          "piece of bitumen and 100 mB of water give 150 mB. Pipe water in; it pushes the oil out into "
-                          "pipes and tanks touching it.",
     "distillation_tower": "Two by two and seven blocks tall. Heats crude oil and splits each bucket into 100 mB of "
                           "refinery gas, 250 mB of naphtha, 400 mB of diesel and 250 mB of heavy fuel oil, a bucket every "
                           "5 seconds. Each fraction comes out at its own height: heavy fuel oil at the base, diesel two "
-                          "blocks up, naphtha four up, and refinery gas at the top. Give each its own pipe or tank.",
+                          "blocks up, naphtha four up, and refinery gas at the top. Give each its own pipe or tank. Pipe heavy fuel oil "
+                          "in instead and it boils it under vacuum: each bucket gives 400 mB of lubricant (one block "
+                          "up) and two asphalt binder (in its slot), every 6 seconds.",
     "catalytic_cracker": "Two by two and four blocks tall. Cracks heavy fuel oil into lighter fuels with steam and a "
                          "catalyst: 1,000 mB of heavy fuel oil, 250 mB of water and a cracking catalyst give 500 mB of "
                          "diesel (out at the base), 300 mB of naphtha (two blocks up) and 200 mB of refinery gas (at the "
-                         "top), every 8 seconds.",
-    "vacuum_distillation_unit": "Two by two and three blocks tall. Boils heavy fuel oil under vacuum: each bucket gives "
-                                "400 mB of lubricant and two asphalt binder, every 6 seconds. Lubricant keeps the gas "
-                                "turbine running; asphalt binder makes roads.",
-    "catalytic_reformer": "Three wide, two tall and two deep. Reforms naphtha into high-octane gasoline: each bucket of "
-                          "naphtha gives 900 mB of gasoline (out of the bottom row) and 100 mB of refinery gas (out of "
-                          "the top row), every 6 seconds.",
-    "chemical_mixer": "Two by two by two. Stirs powders into water: two sand (first slot) and a dried kelp (second "
-                      "slot) with a bucket of water make a bucket of fracking fluid, every 4 seconds.",
+                         "top), every 8 seconds. Pipe naphtha in instead and it reforms it over the same catalyst: "
+                         "each bucket and a catalyst give 900 mB of gasoline (one block up) and 100 mB of refinery gas "
+                         "(at the top), every 6 seconds.",
     "fracking_rig": "Three by three and five blocks tall. Place it with its front left block over shale oil (the "
                     "prospector's Shale oil reading). Each powered tick it pumps 4 mB of fracking fluid down the well "
                     "and brings up 6 mB of crude oil (out at the base), 2 mB of refinery gas (out at the top) and 3 mB "
                     "of flowback water (out one block up), until the shale is spent.",
-    "flowback_treatment_unit": "Three wide, one tall and two deep. Settles and filters the flowback water from a "
-                               "fracking rig: each bucket gives 750 mB of clean water and a salt, every 4 seconds. "
-                               "Pipe the water back to the chemical mixer; a quarter is lost each time round.",
+    "flowback_treatment_unit": "Three wide, one tall and two deep: settling basins and a filter press. It separates "
+                               "what settles. Flowback water from a fracking rig: each bucket gives 750 mB of clean "
+                               "water and a salt (a quarter is lost each time round). Oil sand (mined with silk touch) "
+                               "and 250 mB of water give 500 mB of crude oil and a block of sand; a bitumen and 100 mB "
+                               "of water give 150 mB. A block of mud gives four clay balls and 250 mB of water.",
     "diesel_generator": "Three wide, two tall and two deep. Burns diesel or heavy fuel oil piped into its 8-bucket tank: "
                         "256 JE/t, a bucket of diesel every 1,000 ticks (256,000 JE) or heavy fuel oil twice as fast "
                         "(128,000 JE a bucket). It refuses crude oil and other fluids.",
     "electrolytic_cell": "Three wide, three tall and two deep. Splits brine with electricity: a bucket gives 250 mB of "
                          "chlorine (out of the top row), 250 mB of hydrogen (the middle row) and 500 mB of lye (the "
-                         "bottom row), every 10 seconds at 256 JE/t. Make brine in the chemical mixer from two salt "
-                         "and a bucket of water.",
-    "chemical_reactor": "Two by two by two, lined with lead against the acid. Burns sulfur and absorbs it in water: two "
-                        "sulfur dust and a bucket of water make a bucket of sulfuric acid, every 5 seconds.",
+                         "bottom row), every 10 seconds at 256 JE/t. Make brine in the chemical reactor from two salt "
+                         "and a bucket of water. It also splits plain water, slowly: a bucket gives 500 mB of hydrogen "
+                         "(middle row) and 250 mB of oxygen (top row) every 40 seconds, an early fuel for the fuel cell.",
+    "chemical_reactor": "Two by two by two, lined with lead against the acid: the general chemistry vessel, with two "
+                        "item slots, a tank in and a tank out. Two sulfur dust and a bucket of water make a bucket of "
+                        "sulfuric acid. It also mixes: two salt and a bucket of water make brine; two sand, a dried "
+                        "kelp and a bucket of water make fracking fluid. Its other reactions are on its recipe pages.",
     "air_separation_unit": "Two by two and six tall: a cold box and its distillation column. It needs no input: it "
                            "liquefies air and splits it, 8 mB of nitrogen a tick out of the top row, 2 mB of oxygen "
                            "out of the bottom row and a little argon (1 mB every 2 ticks) out of the middle, at 64 "
-                           "JE/t. Pipe the gases to the synthesis converter, the steel foundry, the crystal grower or "
+                           "JE/t. Pipe the gases to the synthesis converter, the steel foundry, the arc furnace or "
                            "a gas holder; it stops while any tank is full.",
     "synthesis_converter": "Three wide, four tall and two deep: a high-pressure catalytic converter. Haber-Bosch: 300 mB "
                            "of hydrogen and 100 mB of nitrogen make 200 mB of ammonia. Ostwald: 100 mB of ammonia, 200 "
                            "mB of oxygen and 100 mB of water make 200 mB of nitric acid. Each takes 2 seconds at 128 "
                            "JE/t.",
-    "crystal_grower": "Two blocks tall. Melts 4 silicon with a phosphate (the dopant) and slowly pulls a single "
-                      "crystal out of the melt: a silicon boule, every 20 seconds at 128 JE/t. Saw the boule into 8 "
-                      "wafers in the sawmill. Pipe argon in to shield the melt and it grows twice as fast, for 1 mB "
-                      "of argon a tick.",
     "network_terminal": "A beige retro computer. Cable it into a power network and right-click it: it shows the "
                         "network's cables, the rate its slowest cable sets, how many devices it reaches and the "
                         "energy they hold. It uses no power.",
@@ -199,7 +194,7 @@ ABOUT = {
                               "into a plastic sheet.",
     "gas_turbine": "Four wide, two tall and two deep. Burns gasoline or refinery gas from its 16-bucket tank: 512 JE/t, "
                    "384,000 JE a bucket of gasoline or 192,000 JE a bucket of gas. Its second tank takes lubricant "
-                   "from the vacuum distillation unit: 1 mB every second of running, and it stops when it runs dry.",
+                   "from the distillation tower: 1 mB every second of running, and it stops when it runs dry.",
     "deposit_drill": "Three blocks square and two tall. Build it on a surface deposit (coal, iron, copper or tin, on "
                      "stony hills): every 15 seconds it takes one coal or raw ore from each kind of deposit under it "
                      "or one block round it, down to 3 blocks deep, using 16 JE/t. It pushes what it mines out of every side "
@@ -391,7 +386,8 @@ PROGRESSION = [
         ("charging_station", "Charging station"), ("mining_drill", "Mining drill")]),
     ("Oil", "crude_oil_bucket", "Crude oil becomes fuel, plastic and asphalt.", [
         "Prospect for a reservoir and pump it with a pumpjack. Steel pipes and tanks carry the oil.",
-        "Distil it; burn diesel in a diesel generator. Crack heavy oil, make plastic, and run a gas turbine."], [
+        "Distil it; burn diesel in a diesel generator. Crack heavy oil and reform naphtha in the cracker, make plastic, "
+        "and run a gas turbine."], [
         ("prospector", "Find oil"), ("pumpjack", "Pumpjack"), ("steel_fluid_pipe", "Steel pipes"),
         ("distillation_tower", "Distillation tower"), ("diesel_generator", "Diesel generator"),
         ("catalytic_cracker", "Cracker"), ("plastic_sheet", "Plastic"), ("gas_turbine", "Gas turbine"),
@@ -405,9 +401,9 @@ PROGRESSION = [
         ("lithium_battery_bank", "Lithium bank"), ("air_separation_unit", "Air separation"),
         ("synthesis_converter", "Ammonia, nitric acid")]),
     ("Electronics", "processor", "Silicon becomes chips and processors.", [
-        "Grow silicon boules, saw them into wafers and etch microchips in the lithography station.",
+        "Pull silicon boules in the arc furnace, saw them into wafers and etch microchips in the lithography station.",
         "Four microchips and an advanced circuit make a processor, for the top machines."], [
-        ("crystal_grower", "Crystal grower"), ("silicon_wafer", "Wafers"), ("lithography_station", "Lithography"),
+        ("silicon_boule", "Boule: arc furnace"), ("silicon_wafer", "Wafers"), ("lithography_station", "Lithography"),
         ("microchip", "Microchips"), ("processor", "Processor"), ("network_terminal", "Network terminal")]),
     ("Late Game", "flow_battery", "Big, efficient power.", [
         "Magnet dynamos and motors lose almost nothing. Fit a turbocharger to the advanced engine and give it "
@@ -418,7 +414,8 @@ PROGRESSION = [
         ("flywheel", "Flywheel"), ("advanced_solar_panel", "Advanced solar"), ("solar_tracker", "Solar tracker"),
         ("heliostat", "Heliostats"), ("solar_receiver", "Solar receiver"), ("flow_battery", "Flow battery")]),
     ("Special Materials", "borosilicate_glass", "Rubber, glass and weapons from the chemistry you already run.", [
-        "Butadiene from the cracker becomes rubber and gaskets, for sealed pipes and the turbocharger.",
+        "Naphtha cracked to butadiene in the chemical reactor becomes rubber and gaskets, for sealed pipes and the "
+        "turbocharger.",
         "Borax turns sand into borosilicate glass: glass tanks that join into big see-through stores, tank gauges "
         "and optical fibre for processors. Guncotton fills grenades."], [
         ("rubber", "Rubber"), ("gasket", "Gaskets"), ("borosilicate_glass", "Borosilicate glass"),
@@ -514,12 +511,8 @@ def build():
                 "It is a thick, slow fluid that never makes new sources, so every reservoir runs dry in the end.",
                 "Pipes, pumps and tanks carry it like water; refineries turn it into fuels."]},
             machine_page("pumpjack"),
-            machine_page("oil_sand_extractor"),
             machine_page("distillation_tower"),
             machine_page("catalytic_cracker"),
-            machine_page("vacuum_distillation_unit"),
-            machine_page("catalytic_reformer"),
-            machine_page("chemical_mixer"),
             machine_page("fracking_rig"),
             machine_page("flowback_treatment_unit"),
             {"title": "Fuel Values", "icon": f"{MOD}:diesel_bucket", "text": [
@@ -534,7 +527,8 @@ def build():
             machine_page("diesel_engine"),
             machine_page("advanced_engine"),
             {"title": "Asphalt", "icon": f"{MOD}:asphalt", "text": [
-                "Eight gravel around an asphalt binder (from the vacuum distillation unit) make eight asphalt.",
+                "Eight gravel around an asphalt binder (heavy fuel oil boiled in the distillation tower) make eight "
+                "asphalt.",
                 "Walking on asphalt, its slabs or road line is 1.3 times as fast. Three asphalt make six slabs.",
                 "Four asphalt and a yellow dye make four road line blocks; the dashed line points the way you face "
                 "when you place it."],
@@ -542,12 +536,12 @@ def build():
                        "result": f"{MOD}:asphalt", "count": 8}},
             {"title": "Cracking Catalyst", "icon": f"{MOD}:cracking_catalyst", "text": [
                 "Bauxite (alumina) and sand (silica) with a nickel ingot make four. The catalytic cracker uses one for "
-                "each bucket of heavy fuel oil it cracks."], "craft": craft("cracking_catalyst")},
+                "each bucket of heavy fuel oil it cracks or naphtha it reforms."], "craft": craft("cracking_catalyst")},
         ]},
         {"title": "Chemistry", "icon": f"{MOD}:brine_bucket", "pages": [
             {"title": "Industrial Chemistry", "icon": f"{MOD}:salt", "text": [
                 "Salt, sulfur, phosphate and bauxite get their real uses here.",
-                "Dissolve salt in water to make brine (chemical mixer), then split it in the electrolytic cell into "
+                "Dissolve salt in water to make brine (chemical reactor), then split it in the electrolytic cell into "
                 "chlorine, hydrogen and lye. Gases live only in tanks and pipes."]},
             machine_page("electrolytic_cell"),
             machine_page("chemical_reactor"),
@@ -614,9 +608,8 @@ def build():
             {"title": "From Sand to Silicon", "icon": f"{MOD}:silicon_boule", "text": [
                 "The electronics tier turns silicon into chips. It has the cyan look: dark casings, cyan glass and "
                 "screens, violet conduits.",
-                "Grow a silicon boule from 4 silicon and a phosphate in the crystal grower, then saw it into 8 silicon "
+                "Pull a silicon boule from 4 silicon and a phosphate in the arc furnace, then saw it into 8 silicon "
                 "wafers in the sawmill."]},
-            machine_page("crystal_grower"),
             machine_page("lithography_station"),
             {"title": "Processors", "icon": f"{MOD}:processor", "text": [
                 "Four microchips, an advanced circuit and a gold ingot make a processor in the circuit assembler: the "

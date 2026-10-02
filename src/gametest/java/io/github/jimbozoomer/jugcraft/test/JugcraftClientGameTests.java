@@ -176,9 +176,11 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.setScreen(() -> null);
 
 			// One screen in each of the other two themes (batch 22): the electric battery box and the lab's circuit
-			// assembler.
-			for (MachineKind kind : List.of(MachineKind.BATTERY_BOX, MachineKind.CIRCUIT_ASSEMBLER)) {
-				BlockPos machine = new BlockPos(x - 7 + singleIndex(kind), y, z - 5);
+			// assembler; and the distillation tower, whose screen holds the most outputs (five tanks and a slot, batch
+			// 24).
+			for (MachineKind kind : List.of(MachineKind.BATTERY_BOX, MachineKind.CIRCUIT_ASSEMBLER, MachineKind.DISTILLATION_TOWER)) {
+				BlockPos machine = kind.isLarge() ? new BlockPos(x + largeOffset(kind), y, z - 5)
+						: new BlockPos(x - 7 + singleIndex(kind), y, z - 5);
 				server.runCommand("tp @p %d %d %d 180 30".formatted(machine.getX(), y, z - 3));
 				context.waitTicks(10);
 				context.getInput().lookAt(machine);
@@ -380,6 +382,20 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 	/** Blocks a multi-block machine takes across its front (it extends to its right, +x when facing south). */
 	private static int width(MachineKind kind) {
 		return 1 + kind.footprint().offsets().stream().mapToInt(offset -> Math.abs(offset.getX())).max().orElse(0);
+	}
+
+	/** How far east of the showroom's origin a multi-block machine's master stands (see buildShowroom). */
+	private static int largeOffset(MachineKind target) {
+		int offset = 20;
+		for (MachineKind kind : MachineKind.values()) {
+			if (kind == target) {
+				return offset;
+			}
+			if (kind.isLarge()) {
+				offset += width(kind) + 2;
+			}
+		}
+		throw new IllegalArgumentException(target.id);
 	}
 
 	/** Length of the multi-block row: each machine's width plus a two-block gap. */
