@@ -279,6 +279,10 @@ public class TownGameTests {
 			level.setBlock(fire, Blocks.FIRE.defaultBlockState(), 3);
 			helper.runAfterDelay(80, () -> {
 				boolean out = !level.getBlockState(fire).is(Blocks.FIRE);
+				// The town stays as built once its chunks tick: no water spreading from the fountain or wells, no blocks
+				// falling or leaves decaying (decor sites aside). Only air and fluid are compared, since random ticks may
+				// rightly change other states (grass under a block, a crop's age).
+				String drift = drift(level, data, origin, chunks, sites);
 				// The townsfolk are in the world, each the one the town recorded for its place.
 				List<Townsfolk> people = recordedTownsfolk(level, state, places);
 				if (people.size() != places.size()) {
@@ -301,9 +305,43 @@ public class TownGameTests {
 						+ people.size() + " of " + places.size());
 				helper.assertTrue(unhurt, "A townsperson can't be hurt by a player");
 				helper.assertTrue(out, "Fire in the town goes out");
+				helper.assertTrue(drift == null, "The town changed after its chunks began to tick: " + drift);
 				helper.succeed();
 			});
 		});
+	}
+
+	/**
+	 * Blocks of the town in {@code chunks} that became air or stopped being air, or gained or lost a fluid, since they were
+	 * built (decor sites aside): a count and the first one, or null if none did.
+	 */
+	private static String drift(ServerLevel level, TownData data, BlockPos origin, List<ChunkPos> chunks, Set<Long> sites) {
+		int drifted = 0;
+		String first = null;
+		for (ChunkPos pos : chunks) {
+			for (int wx = pos.x() << 4; wx < (pos.x() << 4) + 16; wx++) {
+				for (int wz = pos.z() << 4; wz < (pos.z() << 4) + 16; wz++) {
+					int x = wx - origin.getX();
+					int z = wz - origin.getZ();
+					for (int y = data.yMin; y < data.yMin + data.height; y++) {
+						int index = data.index(x, y, z);
+						if (index == TownData.KEEP || sites.contains(BlockPos.asLong(x, y, z))) {
+							continue;
+						}
+						BlockState want = data.state(index);
+						BlockState found = level.getBlockState(origin.offset(x, y, z));
+						if (want.isAir() != found.isAir() || want.getFluidState().isEmpty() != found.getFluidState().isEmpty()) {
+							drifted++;
+							if (first == null) {
+								first = x + " " + y + " " + z + ": " + found + " instead of " + want;
+							}
+						}
+					}
+				}
+			}
+		}
+		LOGGER.info("Test town: {} blocks drifted after ticking{}", drifted, first == null ? "" : " (first: " + first + ")");
+		return drifted == 0 ? null : drifted + " blocks, first " + first;
 	}
 
 	/**

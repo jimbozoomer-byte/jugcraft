@@ -19,6 +19,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
@@ -56,20 +57,22 @@ public class TownClientGameTests implements FabricClientGameTest {
 			BlockPos centre = Town.centre(origin);
 			LOGGER.info("Town, seed {}: middle at {} {} {}, {} blocks from the start at {} {} {}", SEED, centre.getX(), centre.getY(),
 					centre.getZ(), (int) Math.sqrt(centre.distSqr(start.atY(centre.getY()))), start.getX(), start.getY(), start.getZ());
-			// Over the town from the south, while its chunks load and build.
-			fly(context, server, origin, 96, 90, 176, 180, 36);
+			// Over the middle of the town, so that every chunk of it is in reach, while they load and build (run
+			// 37076304887, waiting over the south edge, built only 96 of 144); then over the town from the south.
+			fly(context, server, origin, 96, 60, 96, 180, 90);
 			int size = TownData.get().size;
 			int chunks = (size / 16) * (size / 16);
 			int built = 0;
 			for (int wait = 0; wait < 90; wait++) {
 				context.waitTicks(20);
 				built = server.computeOnServer(minecraft -> builtChunks(minecraft.overworld(), origin));
-				if (built >= chunks - 30 && wait > 20) {
+				if (built >= chunks) {
 					break;
 				}
 			}
+			LOGGER.info("Town, seed {}: {} of {} chunks built", SEED, built, chunks);
+			fly(context, server, origin, 96, 90, 176, 180, 36);
 			singleplayer.getConnection().waitForChunksRender();
-			LOGGER.info("Town, seed {}: {} chunks built", SEED, built);
 			context.takeScreenshot("jugcraft_town_overview");
 			// The square, looking north to the church, in the theme of the day; then at Halloween and in December.
 			fly(context, server, origin, 96, 3, 113, 180, -8);
@@ -88,8 +91,15 @@ public class TownClientGameTests implements FabricClientGameTest {
 				TownDecor.force(null);
 				redecorate(minecraft.overworld());
 			});
-			// The south gate from outside.
-			fly(context, server, origin, 96, 6, 186, 180, 5);
+			// The south gate from outside, standing on the land there (outside the wall it keeps its own height) and looking
+			// at the middle of the gatehouse.
+			int gateZ = 184;
+			int ground = server.computeOnServer(minecraft -> minecraft.overworld().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+					origin.getX() + 96, origin.getZ() + gateZ));
+			int stand = ground - origin.getY();
+			int pitch = (int) Math.round(Math.toDegrees(Math.atan2(stand + 1.6 - 7, gateZ - 168)));
+			LOGGER.info("Town, seed {}: gate shot from 96 {} {} (ground {}), pitch {}", SEED, stand, gateZ, ground, pitch);
+			fly(context, server, origin, 96, stand, gateZ, 180, pitch);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_town_gate");
 			// The townsfolk, a shop and an ATM.
@@ -128,12 +138,12 @@ public class TownClientGameTests implements FabricClientGameTest {
 		}
 	}
 
-	/** Puts the player at a town position (x, ground + up, z) looking along `yaw`, `pitch`, on a barrier if in the air. */
+	/** Puts the player at a town position (x, floor + up, z) looking along `yaw`, `pitch`, on a barrier if in the air. */
 	private static void fly(ClientGameTestContext context, TestServerContext server, BlockPos origin, int x, int up, int z, int yaw, int pitch) {
 		BlockPos at = origin.offset(x, up, z);
-		if (up > 3) {
-			server.runCommand("setblock %d %d %d minecraft:barrier".formatted(at.getX(), at.getY() - 1, at.getZ()));
-		}
+		// Something to stand on when in the air (only where there is nothing: never over a block of the world).
+		server.runCommand("execute if block %d %d %d minecraft:air run setblock %d %d %d minecraft:barrier".formatted(
+				at.getX(), at.getY() - 1, at.getZ(), at.getX(), at.getY() - 1, at.getZ()));
 		server.runCommand(String.format(Locale.ROOT, "tp @p %d.5 %d %d.5 %d %d", at.getX(), at.getY(), at.getZ(), yaw, pitch));
 		context.waitTicks(40);
 	}
