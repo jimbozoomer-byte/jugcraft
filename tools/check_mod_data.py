@@ -796,6 +796,9 @@ def check_agriculture():
     check_fireworks(java, main)
     check_lanterns(java, main)
     check_feast(java, main)
+    check_maze(java, main)
+    check_ghosts(java, main)
+    check_face_paint(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2468,6 +2471,129 @@ def check_feast(java, main):
         err(f"The feast table needs its loot table and a recipe making {fe['per_craft']}")
     if not (DATA / "jugcraft" / "advancement" / "harvest_home.json").exists():
         err("A grand feast needs its advancement")
+
+def check_maze(java, main):
+    """The corn maze: CornMaze.java and CornMazeGateBlockEntity.java match MAZE in tools/agriculture.py; the gate, finish
+    post and maze corn are registered with models for every state, the words for every message and size, loot (maze corn
+    giving back its kernel from the bottom only), the gate's recipe and the advancement."""
+    mz = ag.MAZE
+    maze = java.get("CornMaze", "")
+    cells = re.search(r"CELLS = \{([^}]*)\}", maze)
+    sizes = re.search(r"SIZES = \{([^}]*)\}", maze)
+    if not cells or [int(v) for v in cells.group(1).split(",")] != mz["cells"] or not sizes or re.findall(r'"([a-z]+)"', sizes.group(1)) != mz["sizes"]:
+        err("CornMaze's sizes differ from MAZE in tools/agriculture.py")
+    found = {name: float(value) for name, value in re.findall(r"static final (?:int|double) ([A-Z_]+) = ([\d.]+);", java.get("CornMazeGateBlockEntity", ""))}
+    for name, value in {"PLANT_PER_TICK": mz["plant_per_tick"], "MAX_RUN": mz["max_run"], "SHORTCUT": mz["shortcut"],
+                        "MAX_RUNNERS": mz["max_runners"]}.items():
+        if name not in found or abs(found[name] - value) > 1e-9:
+            err(f"CornMazeGateBlockEntity.{name} = {found.get(name)} differs from MAZE in tools/agriculture.py ({value})")
+    for needed in (f'registerBlock("{mz["corn"]}", MazeCornBlock::new', f'registerBlock("{mz["gate"]}", CornMazeGateBlock::new',
+                   f'registerBlock("{mz["finish"]}", CornMazeFinishBlock::new'):
+        if needed not in main:
+            err(f"JugcraftAgriculture.java must register {needed}")
+    corn_states = (load(ASSETS / "blockstates" / f"{mz['corn']}.json") or {}).get("variants", {})
+    if sorted(corn_states) != [f"section={s}" for s in range(3)]:
+        err("Maze corn needs a model for each of its three sections")
+    for block in (mz["gate"], mz["finish"]):
+        states = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+        if sorted(states) != sorted(f"facing={f}" for f in ("north", "south", "east", "west")):
+            err(f"{block} needs a model for every facing")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = ["go", "shortcut", "finished", "planted", "plan", "size_set", "needs", "blocked", "already", "planting"]
+    keys += [f"void.{why}" for why in ("flew", "climbed", "left", "slow")] + [f"size.{size}" for size in mz["sizes"]]
+    for key in keys:
+        if f"message.jugcraft.corn_maze.{key}" not in lang:
+            err(f"The corn maze has no words for {key}")
+    corn_loot = json.dumps(load(DATA / "jugcraft" / "loot_table" / "blocks" / f"{mz['corn']}.json") or {})
+    if f"jugcraft:{mz['kernel']}" not in corn_loot or '"section": "0"' not in corn_loot:
+        err("Maze corn must give back its kernel, from its bottom section only")
+    if not (DATA / "jugcraft" / "recipe" / f"{mz['gate']}.json").exists() or not (DATA / "jugcraft" / "advancement" / "amazing.json").exists():
+        err("The corn maze gate needs its recipe, and finishing a maze its advancement")
+
+def check_ghosts(java, main):
+    """Ghost hunting: Spirits.java and RestlessSpirit.java match GHOSTS in tools/agriculture.py; the spirit is registered
+    with its attributes and no loot, named; the Spirit Lantern and Ectoplasm are registered, named and drawn, Ectoplasm
+    giving its bottle back and scenting wax (the Ghostly scent); the lantern has its recipe and tooltip; every grave takes
+    random ticks and stirs; catching a spirit has its advancement."""
+    gh = ag.GHOSTS
+
+    def numbers(source):
+        return {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;",
+                                                                    java.get(source, ""))}
+
+    expected = {"Spirits": {"STIR_CHANCE": gh["stir_chance"], "NEAR_CAP": gh["near_cap"], "NEAR_RANGE": gh["near_range"],
+                            "REVEAL_RADIUS": gh["reveal_radius"]},
+                "RestlessSpirit": {"HAUNT_RADIUS": gh["haunt_radius"], "HAUNT_HEIGHT": gh["haunt_height"], "SHY_RADIUS": gh["shy_radius"],
+                                   "SNEAK_SHY_RADIUS": gh["sneak_shy_radius"], "DRIFT_SPEED": gh["drift_speed"], "SHY_SPEED": gh["shy_speed"],
+                                   "REVEAL_TICKS": gh["reveal_ticks"], "LOOK_TICKS": gh["look_ticks"], "FADE_TICKS": gh["fade_ticks"]}}
+    for source, values in expected.items():
+        found = numbers(source)
+        for name, value in values.items():
+            if name not in found or abs(found[name] - value) > 1e-9:
+                err(f"{source}.{name} = {found.get(name)} differs from GHOSTS in tools/agriculture.py ({value})")
+    if f'entity("{gh["entity"]}", EntityType.Builder.<RestlessSpirit>of(RestlessSpirit::new' not in main \
+            or "FabricDefaultAttributeRegistry.register(RESTLESS_SPIRIT" not in main:
+        err("JugcraftAgriculture.java must register the restless spirit and its attributes")
+    if f'registerItem("{gh["lantern"]}", SpiritLanternItem::new' not in main \
+            or f'registerItem("{gh["ectoplasm"]}", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE)' not in main:
+        err("JugcraftAgriculture.java must register the Spirit Lantern, and Ectoplasm giving back its glass bottle")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key, display in ((f"entity.jugcraft.{gh['entity']}", gh["display"]), (f"item.jugcraft.{gh['lantern']}", gh["lantern_display"]),
+                         (f"item.jugcraft.{gh['ectoplasm']}", gh["ectoplasm_display"])):
+        if lang.get(key) != display:
+            err(f"{key} must be named {display!r}")
+    if "item.jugcraft.spirit_lantern.tooltip" not in lang:
+        err("The Spirit Lantern has no tooltip")
+    for item in (gh["lantern"], gh["ectoplasm"]):
+        if not (ASSETS / "textures" / "item" / f"{item}.png").exists() or not (ASSETS / "items" / f"{item}.json").exists():
+            err(f"{item} needs its texture and item model")
+    if not (ASSETS / "textures" / "entity" / f"{gh['entity']}.png").exists():
+        err("The restless spirit needs its texture")
+    if f"jugcraft:{gh['ectoplasm']}" not in ag.CHANDLERY["scents"].get("ghostly", {}).get("items", []):
+        err("Ectoplasm must be the Ghostly candle scent")
+    if not (DATA / "jugcraft" / "recipe" / f"{gh['lantern']}.json").exists() or not (DATA / "jugcraft" / "advancement" / "ghost_hunter.json").exists():
+        err("The Spirit Lantern needs its recipe, and catching a spirit its advancement")
+    if main.count(".noOcclusion().randomTicks());") < 2:
+        err("The gravestones and the grave mound must take random ticks, so graves stir")
+    for source in ("GravestoneBlock", "GraveMoundBlock"):
+        if "Spirits.stir(level, pos, random)" not in java.get(source, ""):
+            err(f"{source} must stir at night (Spirits.stir in randomTick)")
+
+def check_face_paint(java, main):
+    """Face paint: FacePaint.java and FacePaintKitItem.java match FACE_PAINT in tools/agriculture.py (the designs in order,
+    the uses, the time to paint your own face, how often paint washes off); the kit, its design component and the paint
+    attachment are registered; every design has its name and its texture; the kit has its texture, words, recipe and
+    advancement; and a painted face counts as a costume for trick-or-treating and the costume contest."""
+    fp = ag.FACE_PAINT
+    paint = java.get("FacePaint", "")
+    designs = re.search(r"enum Design implements StringRepresentable \{\s*([A-Z_,\s]+);", paint)
+    if not designs or [d.strip().lower() for d in designs.group(1).split(",")] != list(fp["designs"]):
+        err("FacePaint.Design differs from FACE_PAINT['designs'] in tools/agriculture.py")
+    found = {name: float(value) for source in ("FacePaint", "FacePaintKitItem")
+             for name, value in re.findall(r"static final int ([A-Z_]+) = (\d+);", java.get(source, ""))}
+    for name, value in {"WASH_TICKS": fp["wash_ticks"], "USES": fp["uses"], "USE_TICKS": fp["use_ticks"]}.items():
+        if found.get(name) != value:
+            err(f"{name} = {found.get(name)} differs from FACE_PAINT in tools/agriculture.py ({value})")
+    if f'registerItem("{fp["kit"]}", FacePaintKitItem::new, new Item.Properties().durability(FacePaintKitItem.USES)' not in main \
+            or f'Jugcraft.id("{fp["component"]}")' not in main:
+        err("JugcraftAgriculture.java must register the Face Paint Kit (worn by use) and its design component")
+    if f'buildAndRegister(Jugcraft.id("{fp["attachment"]}"))' not in paint or "syncWith(" not in paint:
+        err("FacePaint must register the face paint attachment, sent to the clients that see the player")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"item.jugcraft.{fp['kit']}", "item.jugcraft.face_paint_kit.design", "item.jugcraft.face_paint_kit.hint",
+            "message.jugcraft.face_paint.design", "message.jugcraft.face_paint.painted", "message.jugcraft.face_paint.washed"]
+    for key in keys + [f"face_paint.jugcraft.{design}" for design in fp["designs"]]:
+        if key not in lang:
+            err(f"Face paint has no words for {key}")
+    for design in fp["designs"]:
+        if not (ASSETS / "textures" / "entity" / "face_paint" / f"{design}.png").exists():
+            err(f"The {design} face paint needs its texture")
+    if not (ASSETS / "textures" / "item" / f"{fp['kit']}.png").exists() or not (DATA / "jugcraft" / "recipe" / f"{fp['kit']}.json").exists() \
+            or not (DATA / "jugcraft" / "advancement" / "face_painter.json").exists():
+        err("The Face Paint Kit needs its texture, recipe and advancement")
+    for source in ("TrickOrTreat", "JudgesTableBlockEntity"):
+        if "FacePaint.inCostume(player)" not in java.get(source, ""):
+            err(f"{source} must count a painted face as a costume (FacePaint.inCostume)")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has
