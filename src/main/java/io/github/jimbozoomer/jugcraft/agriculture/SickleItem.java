@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -24,7 +25,8 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>one-block crops, including vanilla wheat, carrots, potatoes and beetroots, drop their loot and
  * are replanted with one seed from that loot;</li>
- * <li>tall crops are picked and stay standing.</li>
+ * <li>tall crops and ripe cranberry bushes are picked and stay standing;</li>
+ * <li>squash and gourds that a stem is still attached to are cut off, so the stem grows another.</li>
  * </ul>
  * Unripe crops are left alone. Costs 1 durability per use that harvests anything. All work happens on
  * the server, and each block is checked against spawn protection and claims ({@code mayInteract}).
@@ -38,7 +40,8 @@ public class SickleItem extends Item {
 	}
 
 	private static boolean isCrop(BlockState state) {
-		return state.getBlock() instanceof TallCropBlock || state.getBlock() instanceof CropBlock;
+		return state.getBlock() instanceof TallCropBlock || state.getBlock() instanceof CropBlock
+				|| state.getBlock() instanceof CranberryBushBlock || state.getBlock() instanceof GourdBlock;
 	}
 
 	@Override
@@ -72,11 +75,29 @@ public class SickleItem extends Item {
 		return InteractionResult.SUCCESS_SERVER;
 	}
 
+	/** Whether an attached stem next to the gourd at {@code pos} holds it; gourds a player set down are left alone. */
+	private static boolean isOnStem(ServerLevel level, BlockPos pos) {
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			BlockPos stem = pos.relative(side);
+			BlockState state = level.getBlockState(stem);
+			if (state.getBlock() instanceof AttachedGourdStemBlock attached && attached.holds(state, stem, pos)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Harvests one ripe crop at {@code pos}. Returns false if there is none. */
 	static boolean harvest(ServerLevel level, BlockPos pos, @Nullable Player player, ItemStack sickle) {
 		BlockState state = level.getBlockState(pos);
 		if (state.getBlock() instanceof TallCropBlock tall) {
 			return state.getValue(TallCropBlock.SECTION) == 0 && tall.pick(level, pos, pos.above());
+		}
+		if (state.getBlock() instanceof CranberryBushBlock bush) {
+			return bush.pick(level, pos, pos.above());
+		}
+		if (state.getBlock() instanceof GourdBlock) {
+			return isOnStem(level, pos) && level.destroyBlock(pos, true, player);
 		}
 		if (!(state.getBlock() instanceof CropBlock crop) || !crop.isMaxAge(state)) {
 			return false;

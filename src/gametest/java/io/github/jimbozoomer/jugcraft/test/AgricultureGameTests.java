@@ -248,7 +248,8 @@ public class AgricultureGameTests {
 		helper.setBlock(CROP, Blocks.SHORT_GRASS);
 		BlockState grass = helper.getBlockState(CROP);
 		String[] seeds = {"corn_kernels", "sunflower_seeds", "beans", "sweet_potato", "flax_seeds", "tomato_seeds", "pepper_seeds",
-				"onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds"};
+				"onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds", "butternut_squash_seeds", "acorn_squash_seeds",
+				"warty_gourd_seeds", "turnip", "cranberries", "chestnut"};
 		int[] found = new int[seeds.length];
 		int breaks = 4000;
 		int total = 0;
