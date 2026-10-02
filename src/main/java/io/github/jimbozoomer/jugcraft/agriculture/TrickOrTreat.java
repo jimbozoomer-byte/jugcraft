@@ -60,7 +60,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>it is between dusk and midnight ({@link #DUSK} to {@link #MIDNIGHT} of the overworld day);</li>
  * <li>the player wears a costume on their head (item tag {@code jugcraft:trick_or_treat_costumes}: a carved
- * pumpkin or one of the costume hats);</li>
+ * pumpkin or one of the costume hats), or has a painted face ({@link FacePaint});</li>
  * <li>a porch light burns within {@link #PORCH_RADIUS} blocks of the door (block tag {@code jugcraft:porch_lights},
  * or any lit hand-carved or giant pumpkin);</li>
  * <li>a villager whose home bed is within {@link #HOME_RADIUS} blocks of the door lives there.</li>
@@ -217,10 +217,11 @@ public final class TrickOrTreat {
 		if (!isWoodenDoor(state)) {
 			return Result.NOT_A_DOOR;
 		}
-		ItemStack head = player.getItemBySlot(EquipmentSlot.HEAD);
-		if (!head.is(COSTUMES)) {
+		// A costume on the head, or a painted face (FacePaint).
+		if (!FacePaint.inCostume(player)) {
 			return Result.NO_COSTUME;
 		}
+		ItemStack head = player.getItemBySlot(EquipmentSlot.HEAD);
 		if (!porchLight(level, door)) {
 			return Result.NO_PORCH_LIGHT;
 		}

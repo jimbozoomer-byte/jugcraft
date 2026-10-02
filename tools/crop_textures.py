@@ -886,4 +886,6 @@ def crop_textures():
     out.update(maze_textures())
     from ghost_textures import ghost_textures  # and ghost hunting
     out.update(ghost_textures())
+    from face_paint_textures import face_paint_textures  # and face paint
+    out.update(face_paint_textures())
     return out
