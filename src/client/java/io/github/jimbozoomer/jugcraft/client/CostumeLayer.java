@@ -96,12 +96,12 @@ public class CostumeLayer<S extends HumanoidRenderState, M extends HumanoidModel
 			part.translateAndRotate(pose);
 			for (Joint joint : piece.joints()) {
 				pose.translate(joint.x() / 16.0F, joint.y() / 16.0F, joint.z() / 16.0F);
-				float angle = angle(joint.motion(), state, airborne);
-				pose.mulPose(switch (joint.axis()) {
-					case "x" -> Axis.XP.rotation(angle);
-					case "z" -> Axis.ZP.rotation(angle);
-					default -> Axis.YP.rotation(angle);
-				});
+				float degrees = (float) Math.toDegrees(angle(joint.motion(), state, airborne));
+				pose.rotateDegrees(switch (joint.axis()) {
+					case "x" -> Axis.XP;
+					case "z" -> Axis.ZP;
+					default -> Axis.YP;
+				}, degrees);
 			}
 			collector.submitCustomGeometry(pose, outfit.type(), (matrix, buffer) -> {
 				for (Box box : piece.boxes()) {
