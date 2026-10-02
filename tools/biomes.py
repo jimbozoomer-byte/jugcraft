@@ -339,6 +339,31 @@ EXTRAS = {
         "step": 9, "placement": [{"type": "minecraft:count_on_every_layer", "count": 1}, {"type": "minecraft:biome"}]},
     "sulfur_spikes": {"feature": "minecraft:sulfur_spike_cluster", "step": 9, "placement": [
         {"type": "minecraft:count_on_every_layer", "count": 2}, {"type": "minecraft:biome"}]},
+    # Batch 9: the End.
+    "dead_coral": {"configured": {"type": "minecraft:simple_block", "to_place": {"type": "minecraft:weighted", "entries": [
+        {"data": {"id": f"minecraft:dead_{coral}", "properties": {"waterlogged": "false"}}, "weight": 1}
+        for coral in ("tube_coral", "brain_coral", "bubble_coral", "fire_coral", "horn_coral",
+                      "tube_coral_fan", "brain_coral_fan", "bubble_coral_fan", "fire_coral_fan", "horn_coral_fan")]}},
+        "step": 9, "patches": 3, "count": 24},
+    "reef_pools": {"configured": {"type": "minecraft:lake", "barrier": {"id": "minecraft:sandstone"},
+                                  "can_place_feature": {"type": "minecraft:true"},
+                                  "can_replace_with_air_or_fluid": {"type": "minecraft:not", "predicate": {
+                                      "type": "minecraft:matching_block_tag", "tag": "minecraft:features_cannot_replace"}},
+                                  "can_replace_with_barrier": {"type": "minecraft:not", "predicate": {
+                                      "type": "minecraft:matching_block_tag", "tag": "minecraft:lava_pool_stone_cannot_replace"}},
+                                  "fluid": {"id": "minecraft:water", "properties": {"level": "0"}}},
+                   "step": 1, "placement": [{"type": "minecraft:rarity_filter", "chance": 3}, {"type": "minecraft:in_square"},
+                                            {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"}, {"type": "minecraft:biome"}]},
+    "sandstone_pillars": {"configured": {"type": "minecraft:block_column", "allowed_placement": {
+        "type": "minecraft:matching_block_tag", "tag": "minecraft:air"}, "direction": "up", "layers": [
+        {"height": {"type": "minecraft:uniform", "max_inclusive": 5, "min_inclusive": 2}, "provider": {"id": "minecraft:sandstone"}}],
+        "prioritize_tip": False}, "step": 9, "rarity": 2, "count": 3},
+    "obsidian_pillars": {"configured": {"type": "minecraft:block_column", "allowed_placement": {
+        "type": "minecraft:matching_block_tag", "tag": "minecraft:air"}, "direction": "up", "layers": [
+        {"height": {"type": "minecraft:uniform", "max_inclusive": 6, "min_inclusive": 2}, "provider": {"id": "minecraft:obsidian"}}],
+        "prioritize_tip": False}, "step": 9, "rarity": 3, "count": 3},
+    "pale_moss_carpets": {"block": "minecraft:pale_moss_carpet", "step": 9, "patches": 2, "count": 32},
+    "pale_flowers": {"feature": "minecraft:pale_forest_flower", "step": 9, "rarity": 2, "count": 24},
     # Batch 7. Cave extras are placed like vanilla's lush caves': on cave floors (or under ceilings) found by scanning
     # from random heights.
     "dandelions": {"block": "minecraft:dandelion", "step": 9, "rarity": 2, "count": 24},
@@ -1282,6 +1307,66 @@ BIOMES = {
         "trees": None,
         "drop": ["minecraft:glowstone_extra", "minecraft:glowstone"],
         "monsters": [["minecraft:enderman", 40, 1, 4], ["minecraft:skeleton", 60, 1, 3]],
+        "tags": [],
+    },
+    # ---------------------------------------------------------------- batch 9: the End
+    # Placed by Fabric's End biome API among the outer End's highlands (or as barrens); each keeps the End's chorus
+    # and End cities where its base has them.
+    # A reef of the End: sand, sandstone and dead coral blocks among the chorus, dead corals and fans, still pools and
+    # sandstone pillars.
+    "chorus_reef": {
+        "display": "Chorus Reef", "base": "end_highlands", "temperature": 0.5, "downfall": 0.5, "seasons": False,
+        "dimension": "end", "end": {"zone": "highlands", "weight": 0.25},
+        "ground": {"blocks": {"minecraft:end_stone": 3, "minecraft:sand": 2, "minecraft:sandstone": 1, "minecraft:dead_brain_coral_block": 1,
+                              "minecraft:dead_tube_coral_block": 1, "minecraft:dead_horn_coral_block": 1},
+                   "replaceable": "#jugcraft:end_ground_replaceable"},
+        "trees": None,
+        "extras": ["reef_pools", "dead_coral", "sandstone_pillars"],
+        "tags": [],
+    },
+    # Wild growth in the End: moss over the end stone, violet jacarandas and azaleas, glowcaps and glimmerblooms,
+    # glinting motes.
+    "ender_wilds": {
+        "display": "Ender Wilds", "base": "end_highlands", "temperature": 0.5, "downfall": 0.5, "seasons": False,
+        "dimension": "end", "end": {"zone": "highlands", "weight": 0.25},
+        "attributes": {"minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:glow"}, "probability": 0.003}],
+                                                               "modifier": "append"}},
+        "ground": {"blocks": {"minecraft:moss_block": 3, "minecraft:end_stone": 2}, "replaceable": "#jugcraft:end_ground_replaceable"},
+        "trees": {"count": [2, 3], "default": "jugcraft:jacaranda_checked", "picks": [["jugcraft:azalea_tree_checked", 0.3]]},
+        "extras": ["glimmerblooms", "surface_glowcaps"],
+        "tags": [],
+    },
+    # The outer flats: low, wide barrens of end stone, sand and gravel at the islands' edges, with dead bushes.
+    "outer_flats": {
+        "display": "Outer Flats", "base": "end_barrens", "temperature": 0.5, "downfall": 0.5, "seasons": False,
+        "dimension": "end", "end": {"zone": "barrens", "highlands": "minecraft:end_highlands", "weight": 0.5},
+        "ground": {"blocks": {"minecraft:end_stone": 4, "minecraft:sand": 2, "minecraft:gravel": 1},
+                   "replaceable": "#jugcraft:end_ground_replaceable"},
+        "trees": None,
+        "extras": ["patch_dead_bush"],
+        "tags": [],
+    },
+    # A phantom garden: pale moss and its carpets, pale oaks and eyeblossoms, in the End's dark.
+    "phantom_garden": {
+        "display": "Phantom Garden", "base": "end_highlands", "temperature": 0.5, "downfall": 0.5, "seasons": False,
+        "dimension": "end", "end": {"zone": "highlands", "weight": 0.25},
+        "ground": {"blocks": {"minecraft:pale_moss_block": 3, "minecraft:end_stone": 1}, "plant": "jugcraft:pale_moss_carpets",
+                   "plant_chance": 0.3, "replaceable": "#jugcraft:end_ground_replaceable"},
+        "trees": {"count": [2, 3], "default": "minecraft:pale_oak_checked", "picks": []},
+        "extras": ["pale_flowers"],
+        "tags": [],
+    },
+    # A rotted expanse: coarse dirt and soul soil seeping through the end stone, dead trees, obsidian pillars and
+    # murky pools; no endermen.
+    "rotted_expanse": {
+        "display": "Rotted Expanse", "base": "end_highlands", "temperature": 0.5, "downfall": 0.5, "seasons": False,
+        "dimension": "end", "end": {"zone": "highlands", "weight": 0.25},
+        "effects": {"water_color": "#4a4a3a"},
+        "ground": {"blocks": {"minecraft:end_stone": 3, "minecraft:coarse_dirt": 2, "minecraft:soul_soil": 1},
+                   "replaceable": "#jugcraft:end_ground_replaceable"},
+        "trees": {"count": [1, 2], "default": "jugcraft:dead_tree_checked", "picks": []},
+        "extras": ["ponds", "obsidian_pillars"],
+        "monsters": [],
         "tags": [],
     },
     # ---------------------------------------------------------------- batch 2: fields and meadows

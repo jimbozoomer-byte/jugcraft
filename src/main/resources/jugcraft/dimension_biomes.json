@@ -55,5 +55,32 @@
       "offset": 0.35
     }
   ],
-  "end": []
+  "end": [
+    {
+      "biome": "jugcraft:chorus_reef",
+      "zone": "highlands",
+      "weight": 0.25
+    },
+    {
+      "biome": "jugcraft:ender_wilds",
+      "zone": "highlands",
+      "weight": 0.25
+    },
+    {
+      "biome": "jugcraft:outer_flats",
+      "zone": "barrens",
+      "highlands": "minecraft:end_highlands",
+      "weight": 0.5
+    },
+    {
+      "biome": "jugcraft:phantom_garden",
+      "zone": "highlands",
+      "weight": 0.25
+    },
+    {
+      "biome": "jugcraft:rotted_expanse",
+      "zone": "highlands",
+      "weight": 0.25
+    }
+  ]
 }

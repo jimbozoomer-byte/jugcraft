@@ -221,6 +221,8 @@ def tags(tags):
     for name in bm.BIOMES:
         for tag in bm.biome_tags(name):
             tags.add("worldgen/biome", tag, rid(name))
+    # What an End biome's ground patches may replace.
+    tags.add("block", rid("end_ground_replaceable"), "minecraft:end_stone")
 
 
 def lang(lang):
