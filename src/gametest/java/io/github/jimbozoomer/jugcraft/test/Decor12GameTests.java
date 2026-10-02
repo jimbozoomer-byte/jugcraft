@@ -203,8 +203,11 @@ public class Decor12GameTests {
 		TrickOrTreaters.Visit visit = TrickOrTreaters.send(level, helper.absolutePos(bowl), helper.absolutePos(door), helper.absolutePos(new BlockPos(6, 2, 6)), 2);
 		helper.assertTrue(visit.kids().size() == 2, "Two children come");
 		for (UUID id : visit.kids()) {
-			helper.assertTrue(level.getEntity(id) instanceof Villager kid && kid.isBaby() && kid.isInvulnerable()
-					&& !kid.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).isEmpty(), "Each is a village child in costume, unhurtable");
+			helper.assertTrue(level.getEntity(id) instanceof Villager kid && kid.isBaby()
+					&& !kid.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).isEmpty(), "Each is a village child in costume");
+			Villager kid = (Villager) level.getEntity(id);
+			float health = kid.getHealth();
+			helper.assertTrue(!kid.hurtServer(level, level.damageSources().generic(), 4.0F) && kid.getHealth() == health, "and can't be hurt");
 		}
 		arrive(level, visit);
 		helper.runAfterDelay(TrickOrTreaters.WAIT_TICKS + 40, () -> {

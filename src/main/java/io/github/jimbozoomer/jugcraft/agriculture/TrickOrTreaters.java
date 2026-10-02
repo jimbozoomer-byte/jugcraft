@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -22,6 +23,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -133,6 +135,9 @@ public final class TrickOrTreaters {
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(TrickOrTreaters::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> VISITS.clear());
+		// The children can't be hurt (only what passes through invulnerability, such as the void or /kill, harms them).
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !entity.entityTags().contains(TAG)
+				|| source.is(DamageTypeTags.BYPASSES_INVULNERABILITY));
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity.entityTags().contains(TAG) && VISITS.stream().noneMatch(visit -> visit.kids.contains(entity.getUUID()))) {
 				entity.discard();
@@ -235,7 +240,6 @@ public final class TrickOrTreaters {
 			String costume = COSTUMES.get(random.nextInt(COSTUMES.size()));
 			kid.setItemSlot(EquipmentSlot.HEAD, new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(costume))));
 			kid.setDropChance(EquipmentSlot.HEAD, 0.0F);
-			kid.setInvulnerable(true);
 			kid.addTag(TAG);
 			visit.kids.add(kid.getUUID());
 			if (!level.addFreshEntity(kid)) {
