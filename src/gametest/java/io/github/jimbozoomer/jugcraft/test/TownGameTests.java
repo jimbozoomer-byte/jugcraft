@@ -32,6 +32,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -274,27 +275,53 @@ public class TownGameTests {
 		level.setBlock(fire, Blocks.FIRE.defaultBlockState(), 3);
 		helper.runAfterDelay(80, () -> {
 			boolean out = !level.getBlockState(fire).is(Blocks.FIRE);
-			// The townsfolk are in the world, each the one the town recorded for its place.
-			List<Townsfolk> people = places.stream().map(s -> state.townsperson(s.index())).filter(id -> id != null).map(level::getEntity)
-					.filter(e -> e instanceof Townsfolk).map(e -> (Townsfolk) e).toList();
-			LOGGER.info("Test town: {} townsfolk by the square for {} places: {}", people.size(), places.size(),
-					people.stream().map(p -> p.getName().getString() + " (" + p.role() + (p.shop().isEmpty() ? "" : ", " + p.shop()) + ")").toList());
 			// Townsfolk shrug off a player's blows.
+			List<Townsfolk> early = recordedTownsfolk(level, state, places);
+			logTownsfolk(level, state, origin, places, "80");
 			boolean unhurt = false;
-			if (!people.isEmpty()) {
-				Townsfolk someone = people.get(0);
+			if (!early.isEmpty()) {
+				Townsfolk someone = early.get(0);
 				boolean hurt = someone.hurtServer(level, level.damageSources().playerAttack(player), 100.0F);
 				unhurt = !hurt && someone.getHealth() == someone.getMaxHealth() && someone.isAlive();
 			}
-			state.forget();
-			for (ChunkPos pos : chunks) {
-				level.setChunkForced(pos.x(), pos.z(), false);
-			}
-			helper.assertTrue(people.size() == places.size(), "One townsperson in the world for each place by the square: "
-					+ people.size() + " of " + places.size());
-			helper.assertTrue(unhurt, "A townsperson can't be hurt by a player");
-			helper.assertTrue(out, "Fire in the town goes out");
-			helper.succeed();
+			boolean wasUnhurt = unhurt;
+			// The townsfolk are in the world, each the one the town recorded for its place (looked at again later in case a
+			// chunk's entities show late).
+			helper.runAfterDelay(120, () -> {
+				List<Townsfolk> people = recordedTownsfolk(level, state, places);
+				logTownsfolk(level, state, origin, places, "200");
+				state.forget();
+				for (ChunkPos pos : chunks) {
+					level.setChunkForced(pos.x(), pos.z(), false);
+				}
+				helper.assertTrue(people.size() == places.size(), "One townsperson in the world for each place by the square: "
+						+ people.size() + " of " + places.size());
+				helper.assertTrue(wasUnhurt, "A townsperson can't be hurt by a player");
+				helper.assertTrue(out, "Fire in the town goes out");
+				helper.succeed();
+			});
 		});
+	}
+
+	/** The townsfolk the town recorded for these places that are in the world now. */
+	private static List<Townsfolk> recordedTownsfolk(ServerLevel level, TownState state, List<TownData.Spot> places) {
+		return places.stream().map(s -> state.townsperson(s.index())).filter(id -> id != null).map(level::getEntity)
+				.filter(e -> e instanceof Townsfolk).map(e -> (Townsfolk) e).toList();
+	}
+
+	/** Logs each place (its chunk, whether that ticks entities, its recorded townsperson) and every townsperson in the level. */
+	private static void logTownsfolk(ServerLevel level, TownState state, BlockPos origin, List<TownData.Spot> places, String when) {
+		for (TownData.Spot s : places) {
+			BlockPos at = origin.offset(s.pos());
+			UUID id = state.townsperson(s.index());
+			LOGGER.info("Test town, tick {}: place {} {} ({}) at {} chunk {} entity-ticking {}: recorded {} found {}", when, s.index(), s.name(),
+					s.role(), s.pos().toShortString(), ChunkPos.containing(at), level.isPositionEntityTicking(at), id,
+					id != null && level.getEntity(id) != null);
+		}
+		List<String> all = level.getEntities(EntityTypeTest.forClass(Townsfolk.class), t -> true).stream()
+				.map(t -> t.getName().getString() + " spot " + t.spot() + " at " + t.blockPosition().subtract(origin).toShortString()
+						+ (t.isAlive() ? "" : " (dead: " + t.getRemovalReason() + ")"))
+				.toList();
+		LOGGER.info("Test town, tick {}: {} townsfolk in the level: {}", when, all.size(), all);
 	}
 }
