@@ -50,23 +50,22 @@ public final class JugcraftSeasons {
 		SeasonCommand.register();
 		PayloadTypeRegistry.clientboundPlay().register(SeasonPayload.TYPE, SeasonPayload.CODEC);
 		CommonLifecycleEvents.TAGS_LOADED.register((registries, client) -> SeasonalBiome.updateFlags(registries));
-		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-			lastDay = -1;
-			lastEvents = List.of();
-			update(server, false);
-		});
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> SeasonState.setSnowing(false));
+		ServerLifecycleEvents.SERVER_STARTED.register(JugcraftSeasons::serverStarted);
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> SeasonState.serverStopped());
 		ServerPlayConnectionEvents.JOIN.register((listener, sender, server) -> {
 			if (ServerPlayNetworking.canSend(listener, SeasonPayload.TYPE)) {
 				sender.sendPacket(payload());
 			}
 			List<SeasonCalendar.Event> events = settings.eventsOn(date());
-			if (!events.isEmpty()) {
+			if (!events.isEmpty() && settings.fixedDate() == null) {
 				listener.player.sendSystemMessage(eventsMessage(events, "On now"));
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			SeasonalSnow.tick(server, settings.snowDepth());
+			// A frozen game (/tick freeze) lays no snow, as it lets no weather or random tick happen either.
+			if (server.tickRateManager().runsNormally()) {
+				SeasonalSnow.tick(server, settings.snowDepth());
+			}
 			if (++ticks >= CHECK_TICKS) {
 				ticks = 0;
 				update(server, true);
@@ -76,6 +75,20 @@ public final class JugcraftSeasons {
 
 	public static SeasonCalendar.Settings settings() {
 		return settings;
+	}
+
+	/**
+	 * What a server starting does (public for tests): it begins from the operator's settings in the config file, so
+	 * {@link #setMode}, {@link #setFixedDate} and {@link #setSnow} last until the server stops, also when one game
+	 * opens world after world, and then tells every player the season.
+	 */
+	public static void serverStarted(MinecraftServer server) {
+		SeasonState.serverStarted();
+		settings = SeasonCalendar.Settings.fromConfig();
+		lastDay = -1;
+		lastEvents = List.of();
+		ticks = 0;
+		update(server, false);
 	}
 
 	/** Today's date in the configured zone (the real date; see {@link SeasonCalendar.Settings#effectiveDate}). */
@@ -88,7 +101,10 @@ public final class JugcraftSeasons {
 		return settings.dayOn(date());
 	}
 
-	/** Whether {@code event} is running today. Seasonal content can read this; never trust a client's date. */
+	/**
+	 * Whether {@code event} is running today (or on the date an operator previews with {@code /jugcraft season date}).
+	 * Seasonal content can read this; never trust a client's date.
+	 */
 	public static boolean isActive(SeasonCalendar.Event event) {
 		return settings.eventsOn(date()).contains(event);
 	}
@@ -99,10 +115,13 @@ public final class JugcraftSeasons {
 		update(server, true);
 	}
 
-	/** Acts as if it were {@code date} (null: today again) until the server stops, for previews; tells every player. */
+	/**
+	 * Acts as if it were {@code date} (null: today again) until the server stops, for previews. Players get the
+	 * preview's colours and snow, but no announcement: a preview is not the calendar.
+	 */
 	public static void setFixedDate(MinecraftServer server, MonthDay date) {
 		settings = settings.withFixedDate(date);
-		update(server, true);
+		update(server, false);
 	}
 
 	/** Winter snow on or off until the server stops (the config file is unchanged); tells every player. */
@@ -112,7 +131,7 @@ public final class JugcraftSeasons {
 	}
 
 	private static SeasonPayload payload() {
-		return new SeasonPayload(today(), SeasonState.snowing());
+		return new SeasonPayload(today(), SeasonState.serverSnowing());
 	}
 
 	/** Recomputes the day, snow and events; tells players what changed and announces events that began. */
@@ -120,7 +139,7 @@ public final class JugcraftSeasons {
 		LocalDate date = date();
 		int day = settings.dayOn(date);
 		boolean snowing = settings.snowOn(date);
-		SeasonState.setSnowing(snowing);
+		SeasonState.setServerSnowing(snowing);
 		List<SeasonCalendar.Event> events = settings.eventsOn(date);
 		if (day != lastDay || snowing != lastSnowing) {
 			SeasonPayload payload = new SeasonPayload(day, snowing);
@@ -131,7 +150,7 @@ public final class JugcraftSeasons {
 			}
 		}
 		List<SeasonCalendar.Event> started = events.stream().filter(event -> !lastEvents.contains(event)).toList();
-		if (announce && !started.isEmpty()) {
+		if (announce && settings.fixedDate() == null && !started.isEmpty()) {
 			server.getPlayerList().broadcastSystemMessage(eventsMessage(started, "Starting today"), false);
 		}
 		lastDay = day;
@@ -147,7 +166,7 @@ public final class JugcraftSeasons {
 			if (event == SeasonCalendar.Event.HARVEST_FEAST) {
 				LocalDate[] window = settings.feastWindow(settings.effectiveDate(date()).getYear());
 				if (window != null) {
-					text.append(" (until ").append(window[1].format(DateTimeFormatter.ofPattern("d MMMM", Locale.ROOT))).append(")");
+					text.append(" (until ").append(window[1].format(DateTimeFormatter.ofPattern("d MMMM", Locale.ENGLISH))).append(")");
 				}
 			}
 		}

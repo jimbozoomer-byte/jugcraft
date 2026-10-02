@@ -9,7 +9,7 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 No numbered release yet. Everything below is on `main`.
 
 ### Unmerged: Seasons (colours, events and winter snow)
-- **Grass and leaves change colour with the server's date** in every biome that has four seasons: plains, meadows, forests (dark, dappled and cherry groves included), taigas, windswept hills, swamps and rivers.
+- **Grass and leaves change colour with the server's date** in every biome that has four seasons: plains, meadows, forests (dark, dappled and cherry groves included), taigas, windswept hills and swamps.
   - Winter is dull and dormant, spring is fresh green and summer is vanilla.
   - Autumn turns oak leaves gold, orange and red in patches, then russet.
   - Colours change a little each day.

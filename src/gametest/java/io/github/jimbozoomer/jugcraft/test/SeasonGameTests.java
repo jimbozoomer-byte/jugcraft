@@ -73,16 +73,23 @@ public class SeasonGameTests {
 
 	@GameTest
 	public void overridesLastUntilRestart(GameTestHelper helper) {
-		// The test server's config file has the defaults, and a mode set at runtime is not written back, so a
-		// restart reads the file again.
+		// The test server's config file has the defaults. Overrides change the settings in memory only, and a server
+		// starting (a restart, or the next world opened in the same game) begins from the file again.
+		MinecraftServer server = helper.getLevel().getServer();
 		SeasonCalendar.Settings fromFile = SeasonCalendar.Settings.fromConfig();
 		equal(helper, fromFile, SeasonCalendar.Settings.DEFAULT, "settings in the test config");
-		SeasonCalendar.Settings before = JugcraftSeasons.settings();
-		JugcraftSeasons.setMode(helper.getLevel().getServer(), SeasonCalendar.Mode.WINTER);
-		equal(helper, JugcraftSeasons.today(), 15, "winter override");
-		equal(helper, SeasonCalendar.Settings.fromConfig(), fromFile, "settings after an override");
-		JugcraftSeasons.setMode(helper.getLevel().getServer(), before.mode());
-		equal(helper, JugcraftSeasons.settings(), before, "restored settings");
+		try {
+			JugcraftSeasons.setMode(server, SeasonCalendar.Mode.WINTER);
+			JugcraftSeasons.setSnow(server, true);
+			JugcraftSeasons.setFixedDate(server, MonthDay.of(1, 10));
+			helper.assertTrue(SeasonState.serverSnowing(), "Not snowing on a 10 January preview with snow on");
+			equal(helper, SeasonCalendar.Settings.fromConfig(), fromFile, "settings in the file after overrides");
+			JugcraftSeasons.serverStarted(server);
+			equal(helper, JugcraftSeasons.settings(), fromFile, "settings after a server start");
+			helper.assertTrue(!SeasonState.serverSnowing(), "Still snowing after a server start with seasons.snow off");
+		} finally {
+			JugcraftSeasons.serverStarted(server);
+		}
 		helper.succeed();
 	}
 
@@ -134,10 +141,10 @@ public class SeasonGameTests {
 			helper.assertTrue(SeasonalBiome.of(biomes.getOrThrow(biome).value()).jugcraft$hasSeasons(), biome.identifier() + "'s flag is not set");
 		}
 		for (ResourceKey<Biome> biome : List.of(Biomes.DESERT, Biomes.JUNGLE, Biomes.MANGROVE_SWAMP, Biomes.SAVANNA, Biomes.BADLANDS,
-				Biomes.SNOWY_PLAINS, Biomes.OCEAN, Biomes.PALE_GARDEN)) {
+				Biomes.SNOWY_PLAINS, Biomes.OCEAN, Biomes.PALE_GARDEN, Biomes.RIVER)) {
 			helper.assertTrue(!biomes.getOrThrow(biome).is(JugcraftSeasons.HAS_SEASONS), biome.identifier() + " has seasons");
 		}
-		// Winter snow: the seasonal biomes and the pale garden, not rivers (they also run through deserts).
+		// Winter snow: the seasonal biomes and the pale garden, not rivers (they also run through jungles and deserts).
 		helper.assertTrue(biomes.getOrThrow(Biomes.PALE_GARDEN).is(JugcraftSeasons.HAS_WINTER_SNOW), "The pale garden gets no winter snow");
 		helper.assertTrue(biomes.getOrThrow(Biomes.PLAINS).is(JugcraftSeasons.HAS_WINTER_SNOW), "Plains get no winter snow");
 		helper.assertTrue(!biomes.getOrThrow(Biomes.RIVER).is(JugcraftSeasons.HAS_WINTER_SNOW), "Rivers get winter snow");
@@ -177,6 +184,11 @@ public class SeasonGameTests {
 		helper.assertTrue(us.withSnow(true).snowOn(LocalDate.of(2027, 1, 10)), "No snow on 10 January in the north");
 		helper.assertTrue(!us.withSnow(true).snowOn(LocalDate.of(2027, 3, 1)), "Snow on 1 March in the north");
 		helper.assertTrue(south.snowOn(LocalDate.of(2026, 7, 10)), "No snow on 10 July in the south");
+		helper.assertTrue(south.snowOn(LocalDate.of(2026, 6, 1)) && south.snowOn(LocalDate.of(2026, 8, 31)),
+				"The southern snow season does not run from 1 June to 31 August");
+		helper.assertTrue(!south.snowOn(LocalDate.of(2026, 5, 31)) && !south.snowOn(LocalDate.of(2026, 9, 1)),
+				"Snow outside June to August in the south");
+		helper.assertTrue(us.withSnow(true).snowOn(LocalDate.of(2028, 2, 29)), "No snow on 29 February in the north");
 		helper.assertTrue(!us.snowOn(LocalDate.of(2027, 1, 10)), "Snow while seasons.snow is off");
 		// A preview date drives the season and the events.
 		SeasonCalendar.Settings preview = us.withMode(SeasonCalendar.Mode.WINTER).withFixedDate(MonthDay.of(11, 26));
@@ -188,7 +200,15 @@ public class SeasonGameTests {
 	@GameTest
 	public void seasonCommandChangesTheSeason(GameTestHelper helper) {
 		MinecraftServer server = helper.getLevel().getServer();
-		SeasonCalendar.Settings before = JugcraftSeasons.settings();
+		try {
+			commandsChangeTheSeason(helper, server);
+		} finally {
+			JugcraftSeasons.serverStarted(server);
+		}
+		helper.succeed();
+	}
+
+	private static void commandsChangeTheSeason(GameTestHelper helper, MinecraftServer server) {
 		CommandSourceStack operator = server.createCommandSourceStack().withSuppressedOutput();
 		server.getCommands().performPrefixedCommand(operator, "jugcraft season set winter");
 		equal(helper, JugcraftSeasons.today(), 15, "after set winter");
@@ -196,25 +216,32 @@ public class SeasonGameTests {
 		helper.assertTrue(JugcraftSeasons.isActive(SeasonCalendar.Event.HARVEST_FEAST), "No Harvest Feast on a 26 November preview");
 		equal(helper, JugcraftSeasons.today(), 330, "after date 11-26");
 		server.getCommands().performPrefixedCommand(operator, "jugcraft season snow on");
-		helper.assertTrue(!SeasonState.snowing(), "Snowing in November");
+		helper.assertTrue(!SeasonState.serverSnowing(), "Snowing in November");
 		server.getCommands().performPrefixedCommand(operator, "jugcraft season date 01-10");
-		helper.assertTrue(SeasonState.snowing(), "Not snowing on 10 January with snow on");
+		helper.assertTrue(SeasonState.serverSnowing(), "Not snowing on 10 January with snow on");
 		helper.assertTrue(SeasonCommand.describe().contains("winter"), "The description does not say winter: " + SeasonCommand.describe());
 		server.getCommands().performPrefixedCommand(operator, "jugcraft season snow off");
-		helper.assertTrue(!SeasonState.snowing(), "Snowing with snow off");
+		helper.assertTrue(!SeasonState.serverSnowing(), "Snowing with snow off");
 		server.getCommands().performPrefixedCommand(operator, "jugcraft season date today");
 		equal(helper, JugcraftSeasons.settings().fixedDate(), null, "after date today");
-		JugcraftSeasons.setSnow(server, before.snow());
-		JugcraftSeasons.setMode(server, before.mode());
-		equal(helper, JugcraftSeasons.settings(), before, "restored settings");
-		helper.succeed();
+		// Ending a preview goes back to the mode held before it, not to following the date.
+		equal(helper, JugcraftSeasons.settings().mode(), SeasonCalendar.Mode.WINTER, "mode after date today");
+		equal(helper, JugcraftSeasons.today(), 15, "season day after date today");
 	}
 
 	@GameTest
 	public void winterSnowLiesAndMeltsInSpring(GameTestHelper helper) {
+		MinecraftServer server = helper.getLevel().getServer();
+		try {
+			snowLiesAndMelts(helper, server);
+		} finally {
+			JugcraftSeasons.serverStarted(server);
+		}
+		helper.succeed();
+	}
+
+	private static void snowLiesAndMelts(GameTestHelper helper, MinecraftServer server) {
 		ServerLevel level = helper.getLevel();
-		MinecraftServer server = level.getServer();
-		SeasonCalendar.Settings before = JugcraftSeasons.settings();
 		// A biome lookup blends the 4x4x4 biome cells around the block (vanilla's BiomeManager), reaching up to 5 blocks
 		// away, so the plains reach 5 blocks past every block this test reads (x 1 to 7, y 1 to 2, z 1). With only the
 		// test's own blocks filled, lookups near its edge could see the natural biome of wherever the test was placed.
@@ -273,10 +300,6 @@ public class SeasonGameTests {
 		BlockPos vanillaSnow = helper.absolutePos(new BlockPos(5, 2, 1));
 		level.getBlockState(vanillaSnow).randomTick(level, vanillaSnow, level.getRandom());
 		helper.assertBlockPresent(Blocks.SNOW, new BlockPos(5, 2, 1));
-
-		JugcraftSeasons.setSnow(server, before.snow());
-		JugcraftSeasons.setMode(server, before.mode());
-		helper.succeed();
 	}
 
 	private static void equal(GameTestHelper helper, Object actual, Object expected, String what) {

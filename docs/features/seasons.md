@@ -29,7 +29,7 @@ Primary specialty and supported player role: exploration and building (looks), s
   - From March it melts away layer by layer.
   - It never freezes water and never lies on farmland or paths.
   - It never touches snow the player placed, or the snow vanilla already has on cold mountains.
-- **Events**, all on the same clock. An event is announced in chat when it begins and when a player joins during it.
+- **Events**, all on the same clock. An event is announced in chat when it begins and when a player joins during it (not while an operator previews a date).
   - **Harvest Feast** (Thanksgiving). By default it follows the US date: from the fourth Thursday of November over the weekend (26–29 November 2026). Operators can use Canada's date instead (the weekend up to the second Monday of October: 9–12 October 2026) or turn it off.
   - **December**: 1 December to 6 January by default.
   - The Halloween event, in the agriculture pull requests, joins this clock once both are merged.
@@ -37,16 +37,18 @@ Primary specialty and supported player role: exploration and building (looks), s
   - Anyone can see the season, the day, the events running and the snow.
   - Operators can use:
     - `set <auto|spring|summer|autumn|winter|off>`;
-    - `date <MM-DD>` to preview a date (season and events), and `date today` to end the preview;
+    - `date <MM-DD>` to preview a date (season and events), and `date today` to end the preview and go back to the mode held before it;
     - `snow <on|off>`.
-  - These changes last until the server stops; the config file is unchanged.
+  - These changes last until the server stops; the config file is unchanged. A server starting, including the next world opened in the same game, begins from the file again.
+  - A preview is not announced in chat, but seasonal content follows it as it would the real date (`JugcraftSeasons.isActive`): preview on a test server.
 - **Biomes with seasons** (`#jugcraft:has_seasons`, listed in `tools/seasons.py`):
   - plains, sunflower plains and meadow;
   - forest, flower forest, birch forest, old growth birch forest, dark forest, dappled forest and cherry grove;
   - taiga, old growth pine taiga and old growth spruce taiga;
   - windswept forest, windswept hills and windswept gravelly hills;
-  - swamp and river.
-- **Winter snow biomes** (`#jugcraft:has_winter_snow`): the same biomes, without rivers (they also run through deserts), plus the pale garden.
+  - swamp.
+  - Not rivers: a river runs through jungles and deserts too, and its banks would turn autumn-gold there.
+- **Winter snow biomes** (`#jugcraft:has_winter_snow`): the same biomes, plus the pale garden.
 - **Unchanged all year:**
   - the tropics (jungles, mangrove swamp);
   - dry lands (deserts, savannas, badlands);
@@ -97,9 +99,9 @@ Primary specialty and supported player role: exploration and building (looks), s
   - The level's tint cache keeps the results, so this costs nothing per frame.
   - When the season day changes, the client clears the tint cache and rebuilds the chunk meshes once (about once a day).
 - **Snow.**
-  - A common mixin (`mixin/BiomeSeasonMixin`) turns rain into snow in winter-snow biomes while it is snowing. Rendering and weather rules then match vanilla's snowy biomes: for example, rain does not water farmland, and lightning does not strike in snow.
+  - A common mixin (`mixin/BiomeSeasonMixin`) turns rain into snow in winter-snow biomes while it is snowing. Rendering and weather rules then match vanilla's snowy biomes: rain does not water farmland, lightning does not strike, fires are not put out by the weather, Riptide tridents do not work, endermen are not hurt, and empty cauldrons fill with powder snow, as in vanilla's snowy biomes.
   - Biome temperature is untouched, so world generation, ice and vanilla snow are unchanged.
-  - The season lays its own block, `jugcraft:seasonal_snow`. It looks like vanilla snow and is in `#minecraft:snow`, so grass under it turns snowy. It does not occlude: vanilla kills grass under anything that shuts out its light except one layer of vanilla snow, so grass under seasonal snow would otherwise turn to dirt over winter and have no grass to spread back from in spring. It is placed by `SeasonalSnow`: 2 spots per player per tick, within 48 blocks, only in loaded chunks and only while it rains.
+  - The season lays its own block, `jugcraft:seasonal_snow`. It looks like vanilla snow and is in `#minecraft:snow`, so grass under it turns snowy. Its light is reckoned by block, not by its shape (`useShapeForLightOcclusion` is false): vanilla kills grass under anything whose shape shuts out its light except one layer of vanilla snow, so grass under seasonal snow would otherwise turn to dirt over winter and have no grass to spread back from in spring. Below a full block of 8 layers grass lives; the layers still hide the faces they cover from rendering. It is placed by `SeasonalSnow`: 2 spots per player per tick, within 48 blocks, only in loaded chunks, only while it rains and not while the game is frozen (`/tick freeze`).
   - Once it is no longer snowing, the block's random ticks melt it.
 - A client without the mod, or a server without Jugcraft, shows vanilla colours and rain. Leaving a server resets both.
 - **Saved data.** Nothing is saved for colours or events. Seasonal snow is ordinary block data in loaded chunks:
@@ -125,7 +127,8 @@ Results are recorded under "Results" below after CI runs.
 - Server game tests (`SeasonGameTests`):
   - Calendar days: northern and southern hemispheres, leap years, New Year; every day of a leap year is within 1–365.
   - Mode overrides, and the time zone deciding the day at midnight.
-  - A runtime override is not written to the config file, so a restart goes back to the file.
+  - A runtime override is not written to the config file, and a server starting goes back to the file (it runs what `SERVER_STARTED` runs).
+  - Every test that changes the season puts the file's settings back even when it fails.
   - The palette:
     - summer and off are vanilla;
     - autumn leaves are redder, with alpha kept;
@@ -218,6 +221,7 @@ Later, on a branch built on this one (run [36968803297](https://github.com/jimbo
 - **The Halloween event** (agriculture pull requests) has its own dates and time zone settings for now. Once both are merged, a small follow-up moves it onto this clock, as a third event window, and drops the duplicate time zone setting.
 - **Content for the Harvest Feast and December**, such as a feast table or gifts, belongs to the branches that own the food and decorations. This change only provides the dated windows and the announcements.
 - **Data packs that change tags** (`/reload`) are picked up the next time tags load.
+- **Autumn colour work** is done for each biome sample the client blends, so at large biome blend radii a chunk rebuild costs more, and the blend softens the smallest autumn speckles. It happens only when chunks are drawn or the season day changes.
 - **The Alpine Spawn biome** (next) will use all of this:
   - a large alpine valley where new worlds start, with villages;
   - its own seasonal features: larches that turn gold, then bare;

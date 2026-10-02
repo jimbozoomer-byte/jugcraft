@@ -27,13 +27,13 @@ public final class SeasonColors {
 
 	public static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(SeasonPayload.TYPE, (payload, context) -> {
-			SeasonState.setSnowing(payload.snowing());
+			SeasonState.setClientSnowing(payload.snowing());
 			setDay(payload.day());
 		});
 		// Leaving a server returns to vanilla colours and rain, so a server without Jugcraft shows no seasons.
 		ClientPlayConnectionEvents.DISCONNECT.register((listener, client) -> {
 			day = 0;
-			SeasonState.setSnowing(false);
+			SeasonState.setClientSnowing(false);
 		});
 		// New biome tags (the biome flags were just updated, see SeasonalBiome) can change which biomes have seasons.
 		CommonLifecycleEvents.TAGS_LOADED.register((registries, client) -> {
