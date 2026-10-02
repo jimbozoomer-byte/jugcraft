@@ -201,7 +201,29 @@ Not run: a two-client dedicated-server playtest, and any play by hand.
 
 ### Autumn foraging verification
 
-Pending CI (recorded when it runs).
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-26` stacked on the candy kitchen:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares autumn foraging with Java: spreading, the fairy ring's size, chance, check interval and blessing; checks the mushrooms (the jack o'lantern mushroom's light), the basket and the foods are registered, every mushroom has its texture, words, loot and worldgen, the tags hold the mushrooms and the forage, the cooked foods have their recipes, and the two advancements exist) | Pass, 641 IDs |
+| `./gradlew build` on `2e14ff6` (Build workflow run 37069783476) | Pass |
+| Game tests on the headless server, same run: 400 in total, 4 of them new here (`ForagingGameTests`) | **All 400 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `c42f88d` (run 37067986302) and `2e14ff6` (run 37069783476), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#autumn-foraging) from the first |
+
+The 4 new game tests (`ForagingGameTests`):
+1. a porcini stands on grass but not on stone; spreading (as bone meal makes it) it puts out another of its kind, one at a time, until five are near, and no more; the jack o'lantern mushroom glows (light 9) and the others don't;
+2. seven fly agarics round a circle are no ring and eight are; a player at the centre is blessed with Luck II for five minutes and earns Away with the Fairies, once a night; rings bless on full-moon nights only; one chanterelle sprouts a ring of its kind round it;
+3. the basket refuses stone and takes berries; each of the five mushrooms picked with the basket in the other hand goes straight into it; all five earn Forager;
+4. the dishes', basket's and stew's recipes and every mushroom's patch load.
+
+Found by CI and fixed before this record:
+- 26.3's `playerDestroy` takes a `ServerLevel` and a `ServerPlayer` (`d9d3786`, `a3efb90`).
+- 26.3's `minecraft:dirt` block tag doesn't include grass, so a mushroom couldn't stand on a grass block: wild mushrooms now grow on a tag of their own, `jugcraft:mushroom_soil`, which their patches use too (`c42f88d`).
+- `main`'s `PetroGameTests.heliostatsHeatASolarReceiver` failed twice on this branch's `c42f88d` (run 37067986302 and its re-run: "The receiver made 48 JE/t, expected 36 on tick 25"). The solar receiver counts its heliostats on its first tick, before the test's stone roof has cut off the sky light, and again only when the game time is a multiple of 100, so the test passes or fails by the game time it starts at. `main` has already fixed the test (it gives the receiver water only after its next count); this branch carries the same change (`f23f040`), and the test passes since.
+
+Not run: a two-client dedicated-server playtest, and any play by hand.
+
 
 ## World and event applicability
 - A Candy Kettle works anywhere there is heat under it, in every dimension, all year. Nothing is seasonal.
