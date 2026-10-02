@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft;
 
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.biome.JugcraftDimensions;
+import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroBlocks;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroItems;
@@ -28,6 +30,7 @@ import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
 
 import io.github.jimbozoomer.jugcraft.solar.JugcraftSolar;
 import io.github.jimbozoomer.jugcraft.weapons.JugcraftWeapons;
+import io.github.jimbozoomer.jugcraft.world.AlpineSpawn;
 import io.github.jimbozoomer.jugcraft.world.PixelHollows;
 import io.github.jimbozoomer.jugcraft.world.RetroTrader;
 import net.fabricmc.api.ModInitializer;
@@ -80,6 +83,9 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.drone.CreativeSupplyCrateBlock.register();
 		PixelHollows.register();
 		RetroTrader.register();
+		AlpineSpawn.register();
+		JugcraftRegions.register();
+		JugcraftDimensions.register();
 		JugcraftSeasons.register();
 		FeatureEnabledCondition.register();
 		JugcraftWorldgen.register();

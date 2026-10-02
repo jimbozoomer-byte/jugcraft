@@ -5,7 +5,7 @@ berry bushes, oak wood, oak leaves and trees, read from the game jar. No model o
 stem and wood models below reuse vanilla's templates (stairs, slab, fence, fence gate) with Jugcraft
 textures, and the stem models are rebuilt here without vanilla's biome tint.
 """
-from agriculture import (GOURDS, CRANBERRY, BOG_SOIL_TAG, BOG_SOIL, CHESTNUT, WOOD, WOOD_TAG, TREE_BLOCKS, DECOR,
+from agriculture import (GOURDS, CRANBERRY, BOG_SOIL_TAG, BOG_SOIL, CHESTNUT, WOOD, WOOD_SETS, WOOD_TAGS, TREE_BLOCKS, DECOR,
                          FOUND_WILD, GOURD_PATCH, CRANBERRY_PATCH, CHESTNUT_TREES, stem, attached_stem)
 
 MOD = "jugcraft"
@@ -128,12 +128,22 @@ def stairs_variants(model):
 
 
 def wood_assets(root, write, lang):
-    log, log_top = rid("block/chestnut_log"), rid("block/chestnut_log_top")
-    stripped, stripped_top = rid("block/stripped_chestnut_log"), rid("block/stripped_chestnut_log_top")
-    planks = rid("block/chestnut_planks")
+    for wood in WOOD_SETS:
+        wood_set_assets(wood, root, write)
+    for name, display in WOOD.items():
+        model = f"{name.removesuffix('_fence')}_fence_inventory" if name.endswith("_fence") else name
+        write(root / "items" / f"{name}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{model}")}})
+        lang[f"block.{MOD}.{name}"] = display
+
+
+def wood_set_assets(wood, root, write):
+    """One wood set's block models and blockstates (vanilla oak's layouts, the wood's own textures)."""
+    log, log_top = rid(f"block/{wood}_log"), rid(f"block/{wood}_log_top")
+    stripped, stripped_top = rid(f"block/stripped_{wood}_log"), rid(f"block/stripped_{wood}_log_top")
+    planks = rid(f"block/{wood}_planks")
     models = root / "models" / "block"
-    for name, side, end in (("chestnut_log", log, log_top), ("stripped_chestnut_log", stripped, stripped_top),
-                            ("chestnut_wood", log, log), ("stripped_chestnut_wood", stripped, stripped)):
+    for name, side, end in ((f"{wood}_log", log, log_top), (f"stripped_{wood}_log", stripped, stripped_top),
+                            (f"{wood}_wood", log, log), (f"stripped_{wood}_wood", stripped, stripped)):
         write(models / f"{name}.json", {"parent": "minecraft:block/cube_column", "textures": {"end": end, "side": side}})
         if name.endswith("_log"):
             write(models / f"{name}_horizontal.json", {"parent": "minecraft:block/cube_column_horizontal",
@@ -144,44 +154,40 @@ def wood_assets(root, write, lang):
         write(root / "blockstates" / f"{name}.json", {"variants": {
             "axis=x": {"model": horizontal, "x": 90, "y": 90}, "axis=y": {"model": rid(f"block/{name}")},
             "axis=z": {"model": horizontal, "x": 90}}})
-    write(models / "chestnut_planks.json", {"parent": "minecraft:block/cube_all", "textures": {"all": planks}})
-    write(root / "blockstates" / "chestnut_planks.json", {"variants": {"": {"model": rid("block/chestnut_planks")}}})
+    write(models / f"{wood}_planks.json", {"parent": "minecraft:block/cube_all", "textures": {"all": planks}})
+    write(root / "blockstates" / f"{wood}_planks.json", {"variants": {"": {"model": rid(f"block/{wood}_planks")}}})
     three = {"bottom": planks, "side": planks, "top": planks}
     for suffix, parent in (("", "stairs"), ("_inner", "inner_stairs"), ("_outer", "outer_stairs")):
-        write(models / f"chestnut_stairs{suffix}.json", {"parent": f"minecraft:block/{parent}", "textures": three})
-    write(root / "blockstates" / "chestnut_stairs.json", stairs_variants("chestnut_stairs"))
-    write(models / "chestnut_slab.json", {"parent": "minecraft:block/slab", "textures": three})
-    write(models / "chestnut_slab_top.json", {"parent": "minecraft:block/slab_top", "textures": three})
-    write(root / "blockstates" / "chestnut_slab.json", {"variants": {
-        "type=bottom": {"model": rid("block/chestnut_slab")}, "type=double": {"model": rid("block/chestnut_planks")},
-        "type=top": {"model": rid("block/chestnut_slab_top")}}})
+        write(models / f"{wood}_stairs{suffix}.json", {"parent": f"minecraft:block/{parent}", "textures": three})
+    write(root / "blockstates" / f"{wood}_stairs.json", stairs_variants(f"{wood}_stairs"))
+    write(models / f"{wood}_slab.json", {"parent": "minecraft:block/slab", "textures": three})
+    write(models / f"{wood}_slab_top.json", {"parent": "minecraft:block/slab_top", "textures": three})
+    write(root / "blockstates" / f"{wood}_slab.json", {"variants": {
+        "type=bottom": {"model": rid(f"block/{wood}_slab")}, "type=double": {"model": rid(f"block/{wood}_planks")},
+        "type=top": {"model": rid(f"block/{wood}_slab_top")}}})
     for suffix, parent in (("_post", "fence_post"), ("_side", "fence_side"), ("_inventory", "fence_inventory")):
-        write(models / f"chestnut_fence{suffix}.json", {"parent": f"minecraft:block/{parent}", "textures": {"texture": planks}})
-    parts = [{"apply": {"model": rid("block/chestnut_fence_post")}}]
+        write(models / f"{wood}_fence{suffix}.json", {"parent": f"minecraft:block/{parent}", "textures": {"texture": planks}})
+    parts = [{"apply": {"model": rid(f"block/{wood}_fence_post")}}]
     for direction, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
-        apply = {"model": rid("block/chestnut_fence_side"), "uvlock": True}
+        apply = {"model": rid(f"block/{wood}_fence_side"), "uvlock": True}
         if y:
             apply["y"] = y
         parts.append({"apply": apply, "when": {direction: "true"}})
-    write(root / "blockstates" / "chestnut_fence.json", {"multipart": parts})
+    write(root / "blockstates" / f"{wood}_fence.json", {"multipart": parts})
     gate_models = {"": "template_fence_gate", "_open": "template_fence_gate_open", "_wall": "template_fence_gate_wall",
                    "_wall_open": "template_fence_gate_wall_open"}
     for suffix, parent in gate_models.items():
-        write(models / f"chestnut_fence_gate{suffix}.json", {"parent": f"minecraft:block/{parent}", "textures": {"texture": planks}})
+        write(models / f"{wood}_fence_gate{suffix}.json", {"parent": f"minecraft:block/{parent}", "textures": {"texture": planks}})
     gate = {}
     for facing, y in (("south", 0), ("west", 90), ("north", 180), ("east", 270)):
         for in_wall in ("false", "true"):
             for is_open in ("false", "true"):
                 suffix = ("_wall" if in_wall == "true" else "") + ("_open" if is_open == "true" else "")
-                variant = {"model": rid(f"block/chestnut_fence_gate{suffix}"), "uvlock": True}
+                variant = {"model": rid(f"block/{wood}_fence_gate{suffix}"), "uvlock": True}
                 if y:
                     variant["y"] = y
                 gate[f"facing={facing},in_wall={in_wall},open={is_open}"] = variant
-    write(root / "blockstates" / "chestnut_fence_gate.json", {"variants": gate})
-    for name, display in WOOD.items():
-        model = "chestnut_fence_inventory" if name == "chestnut_fence" else name
-        write(root / "items" / f"{name}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{model}")}})
-        lang[f"block.{MOD}.{name}"] = display
+    write(root / "blockstates" / f"{wood}_fence_gate.json", {"variants": gate})
 
 
 def assets(root, write, lang):
@@ -302,7 +308,7 @@ def loot(out, write):
     sapling["pools"][0]["entries"][0]["name"] = nut
     write(out / f"{CHESTNUT['sapling']}.json", sapling)
     for block in WOOD:
-        if block == "chestnut_slab":
+        if block.endswith("_slab"):
             write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{"entries": [{"type": "minecraft:item", "modifier": [
                 {"type": "minecraft:set_count", "condition": {"type": "minecraft:match_block", "blocks": rid(block),
                                                               "state": {"type": "double"}}, "count": 2},
@@ -333,20 +339,21 @@ def tags(tags):
     tags.add("block", "minecraft:mineable/axe", rid("turnip_lantern"))
     tags.add("block", "minecraft:sword_efficient", rid(CRANBERRY["block"]))
 
-    # The chestnut wood behaves like vanilla wood: burnable logs (charcoal, fuel), planks for every planks
-    # recipe, fences that connect to other wooden fences, and leaves and a sapling in the vanilla tags.
-    logs = ["chestnut_log", "chestnut_wood", "stripped_chestnut_log", "stripped_chestnut_wood"]
+    # Every wood set behaves like vanilla wood: burnable logs (charcoal, fuel), planks for every planks recipe,
+    # fences that connect to other wooden fences, and leaves and saplings in the vanilla tags.
+    for wood, log_tag in WOOD_TAGS.items():
+        for registry in ("block", "item"):
+            for log in (f"{wood}_log", f"{wood}_wood", f"stripped_{wood}_log", f"stripped_{wood}_wood"):
+                tags.add(registry, log_tag, rid(log))
+            tags.add(registry, "minecraft:logs_that_burn", f"#{log_tag}")
+            tags.add(registry, "minecraft:planks", rid(f"{wood}_planks"))
+            tags.add(registry, "minecraft:wooden_stairs", rid(f"{wood}_stairs"))
+            tags.add(registry, "minecraft:wooden_slabs", rid(f"{wood}_slab"))
+            tags.add(registry, "minecraft:wooden_fences", rid(f"{wood}_fence"))
+            tags.add(registry, "minecraft:fence_gates", rid(f"{wood}_fence_gate"))
+        tags.add("block", "minecraft:overworld_natural_logs", rid(f"{wood}_log"))
     for registry in ("block", "item"):
-        for log in logs:
-            tags.add(registry, WOOD_TAG, rid(log))
-        tags.add(registry, "minecraft:logs_that_burn", f"#{WOOD_TAG}")
-        tags.add(registry, "minecraft:planks", rid("chestnut_planks"))
-        tags.add(registry, "minecraft:wooden_stairs", rid("chestnut_stairs"))
-        tags.add(registry, "minecraft:wooden_slabs", rid("chestnut_slab"))
-        tags.add(registry, "minecraft:wooden_fences", rid("chestnut_fence"))
-        tags.add(registry, "minecraft:fence_gates", rid("chestnut_fence_gate"))
         tags.add(registry, "minecraft:leaves", rid(CHESTNUT["leaves"]))
-    tags.add("block", "minecraft:overworld_natural_logs", rid("chestnut_log"))
     tags.add("block", "minecraft:saplings", rid(CHESTNUT["sapling"]))
 
 

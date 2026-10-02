@@ -26,6 +26,11 @@ import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
 import pixel_hollows as ph
+import alpine as al
+import biomes as bm
+import biomes_data
+import trees as tr
+import plants
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -134,7 +139,8 @@ def check_assets(registered):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
-                model(variant["model"])
+                for choice in variant if isinstance(variant, list) else [variant]:  # a list: weighted, picked by position
+                    model(choice["model"])
             for part in state.get("multipart", []):
                 model(part["apply"]["model"])
         if f"block.{MOD}.{block}" not in lang:
@@ -239,8 +245,8 @@ NON_METAL = set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | 
 def item_units(ref):
     """Returns {metal: units} for an item or tag reference."""
     ns, path = split(ref.lstrip("#"))
-    if ref.startswith("#") and (ns == "minecraft" or ref[1:] in (ag.WOOD_TAG, ag.HEIRLOOM_TAG)):
-        return {}  # vanilla tags used here (logs, planks), chestnut logs and heirloom pumpkins hold no metal
+    if ref.startswith("#") and (ns == "minecraft" or ref[1:] in (*ag.WOOD_TAGS.values(), ag.HEIRLOOM_TAG)):
+        return {}  # vanilla tags used here (logs, planks), Jugcraft logs and heirloom pumpkins hold no metal
     if ref.startswith("#"):
         form, _, metal = path.partition("/")
         if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path == "fermentable":
@@ -374,7 +380,7 @@ def check_machine_recipe_files(registered):
 
 
 # Jugcraft entries of registries other than blocks and items that tags may name.
-OTHER_ENTRIES = {"worldgen": {"pixel_hollows"}, "point_of_interest_type": {"arcade_cabinet"},
+OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE} | set(bm.BIOMES), "point_of_interest_type": {"arcade_cabinet"},
                  "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES}}
 
 
@@ -503,6 +509,7 @@ def check_worldgen():
             block = split(target["state"])[1]
             if block not in all_blocks() + ph.blocks():
                 err(f"{path.name}: places unknown block {block}")
+    check_nested_features()
     for path in sorted((DATA / MOD / "worldgen" / "placed_feature").glob("*.json")):
         namespace, feature = split((load(path) or {})["feature"])
         # Vanilla configured features (the Pixel Hollows' bonus ores) are checked by the game tests, which load them.
@@ -604,6 +611,71 @@ def check_gear():
                 err(f"Missing item texture {frame}.png")
 
 
+def check_end_shares():
+    """End biomes give shares, which tools/end_noise.py turns into Fabric weights: highlands shares leave vanilla's End
+    Highlands some, and one barrens biome at most, keyed by vanilla's End Highlands (the only case the weight maths
+    covers). The noise quantiles rise from 0 to 1."""
+    import end_noise
+    quantiles = end_noise.QUANTILES
+    if quantiles[0] != 0 or quantiles[-1] != 1 or any(b <= a for a, b in zip(quantiles, quantiles[1:])):
+        err("tools/end_noise.py QUANTILES must rise from 0 to 1")
+    ends = {name: info["end"] for name, info in bm.BIOMES.items() if info.get("dimension") == "end"}
+    highlands = [end["share"] for end in ends.values() if end.get("zone") == "highlands"]
+    barrens = [name for name, end in ends.items() if end.get("zone") == "barrens"]
+    for name, end in ends.items():
+        if end.get("zone") not in ("highlands", "barrens") or not 0 < end.get("share", 0) < 1 or "weight" in end:
+            err(f"{name}: an End biome needs a zone (highlands or barrens) and a share between 0 and 1, not a weight")
+    if not 0 < 1 - sum(highlands) < 1:
+        err(f"End highlands shares {highlands} must leave vanilla's End Highlands a share")
+    if len(barrens) > 1 or any(ends[name].get("highlands") != "minecraft:end_highlands" for name in barrens):
+        err(f"End barrens {barrens}: at most one, keyed by minecraft:end_highlands")
+
+
+NESTED_PLACED = ("default", "feature_true", "feature_false", "vegetation_feature")
+
+
+def check_nested_features():
+    """A placed feature inside another feature (a random selector's picks, a vegetation patch's plant) must not have a
+    biome filter: only a biome's own top-level features know their biome, and a nested one with the filter throws while
+    the chunk generates, which stops that chunk for good. Vanilla's top-level features (those its biomes list) have the
+    filter, so they cannot be nested either; their checked forms (birch_bees_0002, super_birch_bees ...) can."""
+    from biome_bases import BASES
+    vanilla_top = {feature for base in BASES.values() for step in base["steps"] for feature in step}
+    placed = DATA / MOD / "worldgen" / "placed_feature"
+
+    def check(holder, where):
+        if isinstance(holder, dict):
+            if any(m.get("type") == "minecraft:biome" for m in holder.get("placement", [])):
+                err(f"{where}: a nested placed feature has a biome filter")
+            if isinstance(holder.get("feature"), dict):
+                walk(holder["feature"], where)
+            return
+        ns, path = split(str(holder))
+        if ns == MOD:
+            nested = load(placed / f"{path}.json") or {}
+            if any(m.get("type") == "minecraft:biome" for m in nested.get("placement", [])):
+                err(f"{where}: nests {holder}, which has a biome filter")
+        elif holder in vanilla_top:
+            err(f"{where}: nests vanilla's top-level {holder}, which has a biome filter")
+
+    def walk(feature, where):
+        for key in NESTED_PLACED:
+            if key in feature:
+                check(feature[key], where)
+        kind = feature.get("type")
+        if kind == "minecraft:random_selector":
+            for entry in feature.get("features", []):
+                check(entry["feature"], where)
+        elif kind == "minecraft:simple_random_selector" and isinstance(feature.get("features"), list):
+            for entry in feature["features"]:
+                check(entry, where)
+        elif kind in ("minecraft:random_patch", "minecraft:root_system") and "feature" in feature:
+            check(feature["feature"], where)
+
+    for path in sorted((DATA / MOD / "worldgen" / "feature").glob("*.json")):
+        walk(load(path) or {}, path.name)
+
+
 def check_seasons():
     """The seasons biome tags match tools/seasons.py, seasonal snow is registered as data says, and the palette and
     calendar days are in the year."""
@@ -636,6 +708,159 @@ def check_seasons():
                    "harvest_feast", "harvest_feast.days", "december"):
         if f'"{option}"' not in options:
             err(f"JugcraftConfig.TEXT_OPTIONS has no {option}")
+
+
+def check_region_rules():
+    """Region rules: valid layouts, bands and biomes; no two rules can match the same entry in the same layout; and the
+    generated /jugcraft/region_rules.json is current."""
+    from biome_bases import BASES
+    for rule in bm.RULES:
+        where = f"rule {rule['replaces']} -> {rule['biome']}"
+        if not rule["layouts"] or any(not 0 <= layout < bm.LAYOUTS for layout in rule["layouts"]):
+            err(f"{where}: layouts {rule['layouts']} outside 0..{bm.LAYOUTS - 1}")
+        for name in ("temperature", "humidity"):
+            low, high = rule[name]
+            if not 0 <= low <= high <= 4:
+                err(f"{where}: {name} bands {rule[name]}")
+        if rule["weirdness"] not in (-1, 0, 1):
+            err(f"{where}: weirdness {rule['weirdness']}")
+        if rule["replaces"].split(":")[1] not in BASES:
+            err(f"{where}: {rule['replaces']} is not a vanilla biome")
+        if rule["biome"].split(":")[1] not in bm.BIOMES:
+            err(f"{where}: {rule['biome']} is not a biome in tools/biomes.py")
+    for i, a in enumerate(bm.RULES):
+        for b in bm.RULES[i + 1:]:
+            if (a["replaces"] == b["replaces"] and set(a["layouts"]) & set(b["layouts"])
+                    and a["temperature"][0] <= b["temperature"][1] and b["temperature"][0] <= a["temperature"][1]
+                    and a["humidity"][0] <= b["humidity"][1] and b["humidity"][0] <= a["humidity"][1]
+                    and (a["weirdness"] == 0 or b["weirdness"] == 0 or a["weirdness"] == b["weirdness"])):
+                err(f"Region rules overlap: {a['replaces']} -> {a['biome']} and -> {b['biome']} in layouts "
+                    f"{sorted(set(a['layouts']) & set(b['layouts']))}")
+    if load(RES / MOD / "region_rules.json") != bm.rules_file():
+        err("src/main/resources/jugcraft/region_rules.json is out of date (run tools/generate_material_data.py)")
+    if load(RES / MOD / "dimension_biomes.json") != bm.dimension_file():
+        err("src/main/resources/jugcraft/dimension_biomes.json is out of date (run tools/generate_material_data.py)")
+    if "JugcraftDimensions.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft.java does not place the Nether and End biomes (JugcraftDimensions.register)")
+
+
+def check_biomes():
+    """The biomes branch: Java's region rules and options match tools/biomes.py, each biome's files are complete,
+    every feature a biome or tree selector names exists, and the four-season biomes have seasons."""
+    java = (JAVA_ROOT / "biome" / "JugcraftRegions.java").read_text(encoding="utf-8")
+    check_region_rules()
+    for expected in (f'FEATURE = "{bm.FEATURE}"', f"SIZE = {bm.REGIONS['size']};", f"SHARE = {bm.REGIONS['share']};",
+                     f"LAYOUTS = {bm.LAYOUTS};",
+                     "TEMPERATURE_BANDS = {" + ", ".join(f"{v}F" for v in bm.TEMPERATURE_BANDS) + "}",
+                     "HUMIDITY_BANDS = {" + ", ".join(f"{v}F" for v in bm.HUMIDITY_BANDS) + "}"):
+        if expected not in java:
+            err(f"JugcraftRegions.java has no {expected} (tools/biomes.py)")
+    config = CONFIG.read_text(encoding="utf-8")
+    if (f'"biomes.region_size", "{bm.REGIONS["size"]}"' not in config or f'"biomes.region_share", "{bm.REGIONS["share"]}"' not in config
+            or bm.FEATURE not in FEATURES):
+        err("JugcraftConfig's biomes switch or region options differ from tools/biomes.py")
+    check_end_shares()
+    placed = DATA / MOD / "worldgen" / "placed_feature"
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for name, info in bm.BIOMES.items():
+        if info.get("dimension") in ("nether", "end"):
+            if f"{MOD}:{name}" in {rule["biome"] for rule in bm.RULES} or "surface" in info or info["seasons"]:
+                err(f"{name}: a {info['dimension']} biome has region rules, an Overworld surface or seasons")
+        elif f"{MOD}:{name}" not in {rule["biome"] for rule in bm.RULES}:
+            err(f"No region rule places the {name} biome")
+        if lang.get(f"biome.{MOD}.{name}") != info["display"]:
+            err(f"No name for the {name} biome")
+        for step in biomes_data.steps(name):
+            for feature in step:
+                ns, path = split(feature)
+                if ns == MOD and not (placed / f"{path}.json").is_file():
+                    err(f"{name}: unknown placed feature {feature}")
+        picks = [] if info["trees"] is None else [info["trees"]["default"]] + [feature for feature, _ in info["trees"]["picks"]]
+        for feature in picks:
+            ns, path = split(feature)
+            if ns == MOD and not (placed / f"{path}.json").is_file():
+                err(f"{name}'s trees: unknown placed feature {feature}")
+        if info["seasons"] != (f"{MOD}:{name}" in seasons.BIOMES):
+            err(f"{name}: seasons {info['seasons']} but seasons.BIOMES says otherwise")
+    features = DATA / MOD / "worldgen" / "feature"
+    for shape, info in tr.SHAPES.items():
+        vanilla = info["wood"] in ("minecraft:oak", "minecraft:birch", "minecraft:spruce", "minecraft:jungle", "minecraft:acacia",
+                                   "minecraft:dark_oak", "minecraft:cherry", "minecraft:mangrove", "minecraft:pale_oak")
+        if not vanilla and (info["wood"] not in ag.WOOD_SETS or (info["foliage"] and info["wood"] not in ag.TREES)):
+            err(f"Tree shape {shape} grows unknown wood or leaves ({info['wood']})")
+            continue
+        # Generated seasonal leaves need the decorator to start in today's look (world generation skips onPlace).
+        seasonal = bool(info["foliage"]) and not vanilla and ag.TREES[info["wood"]]["season"] is not None
+        decorators = [decorator.get("type") for decorator in (load(features / f"{shape}.json") or {}).get("decorators", [])]
+        if seasonal != (f"{MOD}:{tr.DECORATOR}" in decorators):
+            err(f"Tree shape {shape}: the {MOD}:{tr.DECORATOR} decorator belongs on exactly the trees with seasonal leaves")
+    agriculture = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8")
+    if f'TREE_DECORATOR_TYPE, Jugcraft.id("{tr.DECORATOR}")' not in agriculture:
+        err(f"JugcraftAgriculture.java does not register the {tr.DECORATOR} tree decorator")
+    # Wild plants: Java registers every kind tools/plants.py uses.
+    for plant, info in plants.PLANTS.items():
+        if info["kind"] not in plants.KINDS or f'case "{info["kind"]}" ->' not in agriculture:
+            err(f"Wild plant {plant}: JugcraftAgriculture.registerWildPlants has no case for kind {info['kind']}")
+    # Giant trees: four saplings in a square grow them (GiantSaplingBlock), so Java's growers match agriculture.TREES.
+    giants = {tree: info["giant"] for tree, info in ag.TREES.items() if info.get("giant")}
+    for tree, shape in giants.items():
+        grower = f"{shape.upper()}_GROWER"
+        if (f'{grower} = grower("{shape}")' not in agriculture or f'"{tree}", {grower}' not in agriculture
+                or not tr.SHAPES.get(shape, {}).get("giant") or tr.SHAPES[shape]["wood"] != tree):
+            err(f"The {tree} tree's giant ({shape}) is not a giant {tree} shape in tools/trees.py with its grower in GIANT_GROWERS")
+    for shape, info in tr.SHAPES.items():
+        if info.get("giant") and shape not in giants.values():
+            err(f"Tree shape {shape} is giant but no tree's saplings grow it (agriculture.TREES \"giant\")")
+
+
+def check_alpine():
+    """Alpine Spawn: Java's placement and spawn numbers match tools/alpine.py, and its data is all there."""
+    java = (WORLD_JAVA / "AlpineSpawn.java").read_text(encoding="utf-8")
+    for expected in (f'FEATURE = "{al.FEATURE}"', f'Jugcraft.id("{al.BIOME}")', f"PLATEAU_TEMPERATURE = {al.PLATEAU['temperature']};",
+                     f"PLATEAU_HUMIDITY_MIN = {al.PLATEAU['humidity'][0]};", f"PLATEAU_HUMIDITY_MAX = {al.PLATEAU['humidity'][-1]};",
+                     f"SEARCH_RADIUS = {al.SPAWN['radius']};", f"SEARCH_STEP = {al.SPAWN['step']};",
+                     f"VILLAGE_CELLS = {al.SPAWN['village_cells']};", f'Jugcraft.id("{al.VILLAGE_STRUCTURES.split(":")[1]}")'):
+        if expected not in java:
+            err(f"AlpineSpawn.java has no {expected} (tools/alpine.py)")
+    if al.FEATURE not in FEATURES:
+        err(f"{al.FEATURE} is not a feature switch")
+    if '"alpine_spawn.start"' not in CONFIG.read_text(encoding="utf-8"):
+        err("JugcraftConfig has no alpine_spawn.start")
+    folder = DATA / MOD / "worldgen"
+    for path in sorted((folder / "biome").glob("*.json")):
+        # 26.3 reads an attribute as either a plain value or {"modifier", "argument"}; an argument alone fails to load.
+        for name, value in ((load(path) or {}).get("attributes") or {}).items():
+            if isinstance(value, dict) and "argument" in value and "modifier" not in value:
+                err(f"{path.name}: attribute {name} has an argument but no modifier")
+    biome = load(folder / "biome" / f"{al.BIOME}.json") or {}
+    if biome.get("temperature") != al.TEMPERATURE or biome.get("downfall") != al.DOWNFALL:
+        err(f"{al.BIOME}.json climate differs from tools/alpine.py")
+    for step in biome.get("features", []):
+        for feature in step:
+            ns, path = split(feature)
+            if ns == MOD and not (folder / "placed_feature" / f"{path}.json").is_file():
+                err(f"{al.BIOME}.json: unknown placed feature {feature}")
+    structure = load(folder / "structure" / f"{al.VILLAGE}.json") or {}
+    if structure.get("biomes") != f"#{al.VILLAGE_TAG}":
+        err(f"{al.VILLAGE}.json should generate in #{al.VILLAGE_TAG}")
+    placement = (load(folder / "structure_set" / f"{al.VILLAGE_SET}.json") or {}).get("placement", {})
+    if [placement.get(k) for k in ("spacing", "separation", "salt")] != [al.VILLAGES[k] for k in ("spacing", "separation", "salt")]:
+        err(f"{al.VILLAGE_SET}.json differs from VILLAGES in tools/alpine.py")
+    if f"{MOD}:{al.BIOME}" not in seasons.BIOMES:
+        err("Alpine Spawn has no seasons")
+    if al.SPAWN["village_cells"] * al.VILLAGES["spacing"] * 16 < al.SPAWN["radius"]:
+        err("The start search looks for alpine villages less far than for the biome (SPAWN in tools/alpine.py)")
+    selector = load(folder / "feature" / f"{al.TREES['feature']}.json") or {}
+    picks = {selector.get("default")} | {entry.get("feature") for entry in selector.get("features", [])}
+    if picks != {al.TREES["larch"], al.TREES["spruce"]}:
+        err(f"{al.TREES['feature']}.json should pick larches and spruces, found {sorted(map(str, picks))}")
+    for placed in picks:
+        ns, path = split(str(placed))
+        if ns == MOD and not (folder / "placed_feature" / f"{path}.json").is_file():
+            err(f"{al.TREES['feature']}.json: unknown placed feature {placed}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"biome.{MOD}.{al.BIOME}") != al.DISPLAY:
+        err(f"No name for the {al.BIOME} biome")
 
 
 def check_java():
@@ -1185,18 +1410,60 @@ def check_festival(java, main):
     chestnut = ag.CHESTNUT
     if numbers != {"FRUIT_CHANCE": chestnut["fruit_chance"], "PICK_MIN": chestnut["pick"]["min"], "PICK_MAX": chestnut["pick"]["max"]}:
         err("ChestnutLeavesBlock.java differs from CHESTNUT in tools/agriculture.py")
-    for block in list(ag.WOOD) + list(ag.TREE_BLOCKS) + list(ag.DECOR) + [ag.CRANBERRY["block"]]:
+    tree_blocks = {block for tree in ag.TREES for block in (ag.sapling(tree), ag.TREES[tree]["leaves"])}
+    for block in [b for b in ag.TREE_BLOCKS if b not in tree_blocks] + list(ag.DECOR) + [ag.CRANBERRY["block"]]:
         if f'registerBlock("{block}"' not in main:
             err(f"JugcraftAgriculture.java does not register {block}")
+    for tree, info in ag.TREES.items():  # registerTree registers the sapling, the leaves and the wood set
+        base = info["base"].upper()
+        if not re.search(rf'registerTree\("{tree}", "{info["leaves"]}", {tree.upper()}_GROWER, '
+                         rf'{tree.upper() + "_LEAVES" if info["season"] else "null"}, Blocks\.{base}_SAPLING, Blocks\.{base}_LEAVES,', main):
+            err(f"JugcraftAgriculture.java does not register the {tree} tree as TREES in tools/agriculture.py says")
+    for wood in ag.WOOD_SETS:  # registerWoodSet registers every block in agriculture.wood_blocks
+        if f'registerWoodSet("{wood}",' not in main and wood not in ag.TREES:
+            err(f"JugcraftAgriculture.java does not register the {wood} wood set")
+    check_seasonal_trees(main, java.get("SeasonalLeavesBlock", ""))
     for block, info in ag.DECOR.items():
         if f"lightLevel(state -> {info['light']})" not in main:
             err(f"{block}: light level differs from DECOR in tools/agriculture.py")
     expected_states = {ag.stem(g): {f"age={a}" for a in range(8)} for g in ag.GOURDS}
     expected_states[ag.CRANBERRY["block"]] = {f"age={a}" for a in range(len(ag.CRANBERRY["stages"]))}
     expected_states[ag.CHESTNUT["leaves"]] = {f"fruit={f}" for f in range(3)}
+    for tree, info in ag.TREES.items():
+        expected_states[info["leaves"]] = {f"season={state}" for state in ag.SEASON_STATES} if info["season"] else {""}
     for block, variants in expected_states.items():
         if set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})) != variants:
             err(f"{block}: blockstate does not cover every stage")
+
+
+def check_seasonal_trees(main, leaves):
+    """Each seasonal tree's leaf schedule in Java matches TREES, SeasonalLeavesBlock matches JITTER, SPREAD and the
+    states, and every fixed season mode shows its own look on every block, whatever its jitter."""
+    numbers = {name: int(value) for name, value in re.findall(r"int (JITTER|SPREAD) = (\d+);", leaves)}
+    if numbers != {"JITTER": ag.JITTER, "SPREAD": ag.SPREAD}:
+        err(f"SeasonalLeavesBlock.java {numbers} differs from JITTER and SPREAD in tools/agriculture.py")
+    states = re.findall(r"^\t\t([A-Z, ]+);", leaves.partition("enum Foliage")[2], re.M)
+    if not states or [state.strip().lower() for state in states[0].split(",")] != ag.SEASON_STATES:
+        err(f"SeasonalLeavesBlock.Foliage differs from SEASON_STATES {ag.SEASON_STATES}")
+    schedules = {name.lower(): [int(a), int(b), int(c)] for name, a, b, c in
+                 re.findall(r"(\w+)_LEAVES = new SeasonalLeavesBlock\.Schedule\((\d+), (\d+), (\d+)\);", main)}
+    expected = {tree: info["season"] for tree, info in ag.TREES.items() if info["season"]}
+    if schedules != expected:
+        err(f"JugcraftAgriculture.java leaf schedules {schedules} differ from TREES in tools/agriculture.py {expected}")
+    calendar = (ROOT / "src/main/java/io/github/jimbozoomer/jugcraft/season/SeasonCalendar.java").read_text(encoding="utf-8")
+    modes = {name.lower(): int(day) for name, day in re.findall(r"\b(SPRING|SUMMER|AUTUMN|WINTER)\((\d+)\)", calendar)}
+    if len(modes) != 4:
+        err(f"SeasonCalendar.Mode days not found ({modes})")
+    wanted = {"spring": "green", "summer": "green", "autumn": "gold", "winter": "bare"}
+    for tree, (green_from, gold_from, bare_from) in expected.items():
+        def look(day):
+            if bare_from <= day or day < green_from:
+                return "bare"
+            return "gold" if day >= gold_from else "green"
+        for mode, day in modes.items():
+            seen = {look((day - 1 + shift) % 365 + 1) for shift in range(-ag.JITTER, ag.JITTER + 1)}
+            if seen != {wanted[mode]}:
+                err(f"/jugcraft season set {mode} (day {day}) shows {tree} leaves {sorted(seen)}, not only {wanted[mode]}")
 
 
 def check_carving(java, main):
@@ -3108,6 +3375,8 @@ def main():
     check_exosuit()
     check_plastic()
     check_seasons()
+    check_alpine()
+    check_biomes()
     check_machines(registered)
     check_large_machines()
     check_style_pack()
