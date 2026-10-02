@@ -24,6 +24,7 @@ import gear
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
+import pixel_hollows as ph
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -35,6 +36,7 @@ CONFIG = JAVA_ROOT / "config" / "JugcraftConfig.java"
 SEASON_JAVA = JAVA_ROOT / "season"
 WORLDGEN = JAVA_ROOT / "materials" / "JugcraftWorldgen.java"
 MACHINE_JAVA = JAVA_ROOT / "machine" / "MachineKind.java"
+WORLD_JAVA = JAVA_ROOT / "world"
 STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
 
 # Tags that Jugcraft reads but that vanilla/Fabric API define.
@@ -119,7 +121,7 @@ def item_models(definition):
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
-                  + plastic.blocks() + seasons.BLOCKS):
+                  + plastic.blocks() + ph.blocks() + seasons.BLOCKS):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -137,7 +139,7 @@ def check_assets(registered):
         if definition:
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
-                        + plastic.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + plastic.blocks() + ph.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -219,7 +221,7 @@ UNITS = {"ingots": 9, "nuggets": 1, "raw_materials": 9, "ores": 9, "storage_bloc
 
 
 import guide_books
-NON_METAL = set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS)
+NON_METAL = set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items())
 
 
 def item_units(ref):
@@ -359,6 +361,11 @@ def check_machine_recipe_files(registered):
                 err(f"{label}: unknown item {ref}")
 
 
+# Jugcraft entries of registries other than blocks and items that tags may name.
+OTHER_ENTRIES = {"worldgen": {"pixel_hollows"}, "point_of_interest_type": {"arcade_cabinet"},
+                 "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES}}
+
+
 def check_fluid_recipes(registered):
     """Fluid recipes (tools/petro.py): every item and fluid resolves, slots and tanks exist, and none makes fluid from
     nothing. Recipes with no item input must not give out more fluid than they take in; recipes with item input must
@@ -448,7 +455,12 @@ def check_fluid_recipes(registered):
 def check_tags():
     for path in sorted(DATA.rglob("tags/*/**/*.json")):
         registry = path.relative_to(DATA).parts[2]
+        known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + machine_items()
+                                                    + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
+                                                    + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
+                                                    + gear.items() + plastic.blocks() + exosuit.items())
         for value in (load(path) or {}).get("values", []):
+            value = value["id"] if isinstance(value, dict) else value
             if value.startswith("#"):
                 if not tag_exists(registry, value[1:]):
                     err(f"{path.relative_to(ROOT)}: unknown tag {value}")
@@ -459,11 +471,7 @@ def check_tags():
             elif registry == "fluid":
                 if split(value)[1] not in petro.fluid_ids():
                     err(f"{path.relative_to(ROOT)}: unknown fluid {value}")
-            elif split(value)[0] == MOD and split(value)[1] not in (all_blocks() + all_items() + machine_blocks()
-                                                                    + machine_items() + petro.petro_blocks()
-                                                                    + petro.petro_items() + list(deposits.DEPOSITS) + list(tank_display.BLOCKS)
-                                                                    + gear.items() + plastic.blocks()
-                                                                    + exosuit.items() + seasons.BLOCKS):
+            elif split(value)[0] == MOD and split(value)[1] not in known:
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
 
@@ -476,12 +484,20 @@ def check_worldgen():
             err(f"{path.name}: 26.x features have no \"config\" wrapper")
         for target in feature.get("targets", []):
             block = split(target["state"])[1]
-            if block not in all_blocks():
+            if block not in all_blocks() + ph.blocks():
                 err(f"{path.name}: places unknown block {block}")
     for path in sorted((DATA / MOD / "worldgen" / "placed_feature").glob("*.json")):
-        feature = split((load(path) or {})["feature"])[1]
-        if not (DATA / MOD / "worldgen" / "feature" / f"{feature}.json").is_file():
+        namespace, feature = split((load(path) or {})["feature"])
+        # Vanilla configured features (the Pixel Hollows' bonus ores) are checked by the game tests, which load them.
+        if namespace == MOD and not (DATA / MOD / "worldgen" / "feature" / f"{feature}.json").is_file():
             err(f"{path.name}: unknown configured feature {feature}")
+    biome = load(DATA / MOD / "worldgen" / "biome" / "pixel_hollows.json") or {}
+    if len(biome.get("features", [])) != len(ph.STEPS):
+        err("pixel_hollows.json: needs one feature list per generation step")
+    for step in biome.get("features", []):
+        for ref in step:
+            if split(ref)[0] == MOD and not (DATA / MOD / "worldgen" / "placed_feature" / f"{split(ref)[1]}.json").is_file():
+                err(f"pixel_hollows.json: unknown placed feature {ref}")
 
 
 def check_exosuit():
@@ -922,6 +938,56 @@ def check_style_pack():
             err(f"{block}: the two styles cover different block states")
 
 
+def check_pixel_hollows():
+    """The cave's shards stay finite, and the Retro Trader's Java numbers match tools/pixel_hollows.py without a
+    profit loop between his shard sale and buyback."""
+    for path in sorted((DATA / MOD / "recipe").rglob("*.json")):
+        if f'"{MOD}:{ph.SHARD}"' in json_result(path):
+            err(f"{path.name}: makes pixel shards (they must only come from clusters and trade)")
+
+    trader = (WORLD_JAVA / "RetroTrader.java").read_text(encoding="utf-8")
+    if f"SHOP_WEIGHT = {ph.SHOP_WEIGHT};" not in trader:
+        err("RetroTrader.SHOP_WEIGHT differs from tools/pixel_hollows.py")
+    listed = re.search(r'VILLAGE_HOUSES =\s*List\.of\(([^;]*)\);', trader)
+    names = {const: village for const, village in re.findall(r'([A-Z_]+) = houses\("([a-z]+)"\)', trader)}
+    villages = [names.get(item.strip(), item.strip()) if not item.strip().startswith("houses(") else
+                re.match(r'houses\("([a-z]+)"\)', item.strip()).group(1)
+                for item in (listed.group(1).split(",") if listed else [])]
+    if villages != ph.SHOP_VILLAGES:
+        err(f"RetroTrader.VILLAGE_HOUSES {villages} differs from SHOP_VILLAGES {ph.SHOP_VILLAGES} in tools/pixel_hollows.py")
+    for level in ph.TRADE_LEVELS:
+        if f'"retro_trader/level_{level}"' not in trader:
+            err(f"RetroTrader's profession does not name the level {level} trade set")
+    maps = (WORLD_JAVA / "PixelHollowsMaps.java").read_text(encoding="utf-8")
+    for name, java in (("radius", "RADIUS"), ("step", "STEP"), ("vertical_step", "VERTICAL_STEP"), ("start_y", "START_Y")):
+        if f"{java} = {ph.MAP_SEARCH[name]};" not in maps:
+            err(f"PixelHollowsMaps.{java} differs from MAP_SEARCH in tools/pixel_hollows.py")
+    for path in sorted((DATA / MOD / "villager_trade").rglob("*.json")):
+        trade = load(path) or {}
+        for key in ("wants", "additional_wants", "gives"):
+            ref = trade.get(key, {}).get("id", "")
+            if split(ref)[0] == MOD and split(ref)[1] not in set(all_items()) | set(ph.blocks()) | set(ph.items()):
+                err(f"villager_trade {path.stem}: unknown item {ref}")
+
+    # Cheapest shard sale: a discount can bring the price down to 1 emerald. Best buyback: price multiplier 0 means no
+    # reputation discount; Hero of the Village V takes floor(0.55 * count) (at least 1) off.
+    shard = f"{MOD}:{ph.SHARD}"
+    sale = min(1 / t["gives"][1] for t in ph.TRADES.values() if t["wants"][0] == "minecraft:emerald" and t["gives"][0] == shard)
+    for name, t in ph.TRADES.items():
+        if t["wants"][0] == shard:
+            if t["reputation_discount"] != 0:
+                err(f"{name}: the shard buyback needs reputation_discount 0, or discounts make a profit loop")
+            best = t["gives"][1] / max(1, t["wants"][1] - max(1, int(0.55 * t["wants"][1])))
+            if best >= sale:
+                err(f"{name} pays {best:.3f} emeralds per shard, but a shard can be bought for {sale:.3f}: a profit loop")
+
+
+def json_result(path):
+    """A recipe's outputs as text: its "result", or the "results" of machine recipes."""
+    data = load(path) or {}
+    return json.dumps([data.get("result", {}), data.get("results", [])])
+
+
 def check_deposits():
     """Surface deposits: Java registration, worldgen and capacity match tools/deposits.py."""
     java = (JAVA_ROOT / "deposit" / "JugcraftDeposits.java").read_text(encoding="utf-8")
@@ -955,7 +1021,8 @@ def check_deposits():
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(petro.petro_items()) | set(petro.petro_blocks()) | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
-                  | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()))
+                  | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items())
+                  | set(ph.blocks()) | set(ph.items()))
     check_assets(sorted(registered))
     check_petro()
     check_loot(registered)
@@ -978,6 +1045,7 @@ def main():
     check_guide_books()
     check_handbook(registered)
     check_advancements(registered)
+    check_pixel_hollows()
     for path in RES.rglob("*.json"):
         load(path)
     if errors:

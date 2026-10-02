@@ -22,7 +22,8 @@ public final class JugcraftConfig {
 	public static final List<String> FEATURES = List.of(
 			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
 			"salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines",
-			"deposits", "explosives", "parties", "drones");
+			"deposits", "explosives", "parties", "drones",
+			"pixel_hollows", "retro_trader");
 
 	/**
 	 * Text options, with their defaults (see {@code season/SeasonCalendar.Settings}). The season follows the
