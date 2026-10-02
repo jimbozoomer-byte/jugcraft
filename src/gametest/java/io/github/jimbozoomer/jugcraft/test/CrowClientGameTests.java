@@ -55,7 +55,7 @@ public class CrowClientGameTests implements FabricClientGameTest {
 					.getEntitiesOfClass(Crow.class, client.player.getBoundingBox().inflate(40.0)).stream().filter(Crow::pecking).count()));
 
 			shoot(context, singleplayer, x + 7, y + 2, z + 3, 180, 14, "jugcraft_crows_and_scarecrow");
-			shoot(context, singleplayer, x + 13, y + 1, z - 3, 180, 30, "jugcraft_crows");
+			shoot(context, singleplayer, x + 13, y + 1, z - 5, 180, 50, "jugcraft_crows");
 		}
 	}
 
