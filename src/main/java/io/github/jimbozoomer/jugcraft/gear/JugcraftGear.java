@@ -212,8 +212,10 @@ public final class JugcraftGear {
 		return ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id(metal));
 	}
 
-	private static void item(String name, Function<Item.Properties, Item> factory) {
+	private static Item item(String name, Function<Item.Properties, Item> factory) {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Jugcraft.id(name));
-		ITEMS.put(name, Registry.register(BuiltInRegistries.ITEM, key, factory.apply(new Item.Properties().setId(key))));
+		Item item = Registry.register(BuiltInRegistries.ITEM, key, factory.apply(new Item.Properties().setId(key)));
+		ITEMS.put(name, item);
+		return item;
 	}
 }

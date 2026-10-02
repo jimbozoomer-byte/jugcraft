@@ -48,7 +48,7 @@ public final class PetroBlocks {
 		ASPHALT_ROAD_LINE = register("asphalt_road_line", GlazedTerracottaBlock::new);
 
 		for (String color : PLASTIC_COLORS) {
-			PLASTIC.put(color, block(color + "_plastic", BlockBehaviour.Properties.ofFullCopy(Blocks.WHITE_CONCRETE)
+			PLASTIC.put(color, block(color + "_plastic", BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)
 					.strength(1.5F, 6.0F).sound(SoundType.STONE), Block::new));
 		}
 
