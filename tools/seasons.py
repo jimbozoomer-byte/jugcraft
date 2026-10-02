@@ -17,15 +17,15 @@ BIOMES = [
     "minecraft:dark_forest", "minecraft:dappled_forest", "minecraft:cherry_grove",
     "minecraft:taiga", "minecraft:old_growth_pine_taiga", "minecraft:old_growth_spruce_taiga",
     "minecraft:windswept_forest", "minecraft:windswept_hills", "minecraft:windswept_gravelly_hills",
-    "minecraft:swamp", "minecraft:river",
+    "minecraft:swamp",
     "jugcraft:alpine_spawn",
 ] + [f"jugcraft:{name}" for name, info in __import__("biomes").BIOMES.items() if info["seasons"]]
 
 TAG = "jugcraft:has_seasons"
 
 # Jugcraft biomes with mild winters ("winter_snow": False in tools/biomes.py) keep their seasonal colours but no snow.
-WINTER_SNOW = [biome for biome in BIOMES if biome != "minecraft:river"
-               and __import__("biomes").BIOMES.get(biome.removeprefix("jugcraft:"), {}).get("winter_snow", True)] + ["minecraft:pale_garden"]
+WINTER_SNOW = [biome for biome in BIOMES
+               if __import__("biomes").BIOMES.get(biome.removeprefix("jugcraft:"), {}).get("winter_snow", True)] + ["minecraft:pale_garden"]
 
 WINTER_SNOW_TAG = "jugcraft:has_winter_snow"
 
