@@ -7,7 +7,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 /**
  * Boxes and planes in a block's space, in pixels, drawn in one colour over a 16x16 texture that each face reads where a
  * block model's face would (from its position), for renderers that tint what they draw (the Aura Candle, the wax in the
- * Wax Melting Pot). Drawn with a render type that shows both sides, so the order of a face's corners doesn't matter.
+ * Wax Melting Pot). The render type culls back faces, so each face is wound to face along its normal whatever the order of
+ * its corners, and a flame's plane is drawn from both sides.
  */
 final class TintedBoxes {
 	private TintedBoxes() {
@@ -36,19 +37,30 @@ final class TintedBoxes {
 
 	/**
 	 * A plane standing upright through the middle of the block, turned {@code turn} about the vertical, {@code width} wide and
-	 * from {@code y0} to {@code y1}, showing the whole texture (for flames).
+	 * from {@code y0} to {@code y1}, showing the whole texture from both sides (for flames).
 	 */
 	static void plane(VertexConsumer buffer, PoseStack.Pose matrix, double turn, float width, float y0, float y1, int argb, int light) {
 		float dx = (float) Math.cos(turn) * width / 2;
 		float dz = (float) Math.sin(turn) * width / 2;
 		float[][] corners = {{8 - dx, y1, 8 - dz}, {8 + dx, y1, 8 + dz}, {8 + dx, y0, 8 + dz}, {8 - dx, y0, 8 - dz}};
 		float[][] uv = {{0, 0}, {16, 0}, {16, 16}, {0, 16}};
-		face(buffer, matrix, argb, light, (float) -Math.sin(turn), 0, (float) Math.cos(turn), corners, uv);
+		float nx = (float) -Math.sin(turn);
+		float nz = (float) Math.cos(turn);
+		face(buffer, matrix, argb, light, nx, 0, nz, corners, uv);
+		face(buffer, matrix, argb, light, -nx, 0, -nz, corners, uv);
 	}
 
+	/** Draws a quad facing along (nx, ny, nz): counter-clockwise seen from that side, reversing its corners if need be. */
 	private static void face(VertexConsumer buffer, PoseStack.Pose matrix, int argb, int light, float nx, float ny, float nz, float[][] corners,
 			float[][] uv) {
-		for (int i = 0; i < 4; i++) {
+		float[] a = corners[0];
+		float[] b = corners[1];
+		float[] c = corners[2];
+		float ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
+		float vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+		float facing = (uy * vz - uz * vy) * nx + (uz * vx - ux * vz) * ny + (ux * vy - uy * vx) * nz;
+		for (int k = 0; k < 4; k++) {
+			int i = facing >= 0 ? k : (4 - k) % 4;
 			buffer.addVertex(matrix, corners[i][0] / 16.0F, corners[i][1] / 16.0F, corners[i][2] / 16.0F).setColor(argb)
 					.setUv(uv[i][0] / 16.0F, uv[i][1] / 16.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(matrix, nx, ny, nz);
 		}

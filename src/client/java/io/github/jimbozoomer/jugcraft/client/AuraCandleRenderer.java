@@ -24,8 +24,8 @@ import org.jspecify.annotations.Nullable;
  * flickering flame in its first scent's colour (warm yellow when it has none), at full brightness.
  */
 public class AuraCandleRenderer implements BlockEntityRenderer<AuraCandleBlockEntity, AuraCandleRenderer.State> {
-	private static final RenderType WAX = RenderTypes.entityCutoutNoCull(Jugcraft.id("textures/entity/candle_wax.png"));
-	private static final RenderType FLAME = RenderTypes.entityCutoutNoCull(Jugcraft.id("textures/entity/candle_flame.png"));
+	private static final RenderType WAX = RenderTypes.entityCutout(Jugcraft.id("textures/entity/candle_wax.png"));
+	private static final RenderType FLAME = RenderTypes.entityCutout(Jugcraft.id("textures/entity/candle_flame.png"));
 	private static final int FULL_BRIGHT = 0xF000F0;
 	private static final int WICK = 0xFF2A2018;
 	private static final int WARM_FLAME = 0xFFFFC870;

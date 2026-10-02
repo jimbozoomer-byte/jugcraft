@@ -19,7 +19,7 @@ import org.jspecify.annotations.Nullable;
  * own), glossy and bright while molten, dull once set.
  */
 public class WaxPotRenderer implements BlockEntityRenderer<WaxPotBlockEntity, WaxPotRenderer.State> {
-	private static final RenderType SURFACE = RenderTypes.entityCutoutNoCull(Jugcraft.id("textures/entity/wax_surface.png"));
+	private static final RenderType SURFACE = RenderTypes.entityCutout(Jugcraft.id("textures/entity/wax_surface.png"));
 
 	public static final class State extends BlockEntityRenderState {
 		int total;
