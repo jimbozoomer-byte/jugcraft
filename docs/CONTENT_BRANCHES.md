@@ -41,6 +41,8 @@ Biomes should belong geographically: temperature, moisture, elevation, water, ne
 
 Specify transition rules and whether resources are unique or obtainable elsewhere. Avoid forcing essential early items into an extremely rare distant biome. Review exploration distance, seed behavior and existing-chunk compatibility. Keep ambient sounds and effects adjustable and readable.
 
+The biomes branch's roster (a remake of the Biomes O' Plenty catalog's biomes in nine batches, placed in Jugcraft regions) is in [branches/BIOMES.md](branches/BIOMES.md).
+
 ## Caves, dungeons and bosses
 
 Underground danger can include hostile cave ecology, environmental hazards, structures, puzzles and dungeon inhabitants. Telegraph difficulty through biome/structure design and allow preparation or retreat. Define spawn limits, lighting behavior, structure frequency, mining/progression implications and existing-world generation.

@@ -87,7 +87,7 @@ Results are recorded under "Results" below after CI runs.
   - the biome's name;
   - that it has seasons.
 - `python3 tools/check_mod_data.py` also checks the larch:
-  - `LarchNeedlesBlock`'s season days and jitter match `LARCH`;
+  - the larch's season days in Java (`JugcraftAgriculture.LARCH_LEAVES`, read by the shared `SeasonalLeavesBlock`) and the jitter match `TREES` in `tools/agriculture.py`;
   - each fixed season mode shows only its own look on every block, whatever the jitter (spring and summer green, autumn gold, winter bare);
   - the needles' blockstate covers every look;
   - the wood set is registered.

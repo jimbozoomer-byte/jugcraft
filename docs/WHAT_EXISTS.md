@@ -383,12 +383,18 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - **The start.** On a new world's first start (game time 0, multi-noise Overworld only), `findStart` looks for the alpine village (`#jugcraft:alpine_villages`) nearest the origin, up to `VILLAGE_CELLS` (25) grid cells away, and starts on the nearest Alpine Spawn ground within `VILLAGE_REACH` (96) of it, with `VILLAGE_MARGIN` (16) around it if possible. If there is no village, it finds the nearest Alpine Spawn within `SEARCH_RADIUS` (6,400) and moves inward by `MARGIN` (48). The spawn is then set with `/setworldspawn`.
 - **Villages.** `jugcraft:village_alpine` (taiga pieces, `#jugcraft:has_structure/village_alpine`) on the structure set `jugcraft:alpine_villages` (spacing 16, separation 5). It is in `#minecraft:village` and `#jugcraft:alpine_villages`.
 - **Trees.** `worldgen/feature/alpine_spawn_trees` picks a larch (`jugcraft:larch_checked`) 60% of the time, otherwise a spruce; 0 to 2 tries per chunk.
-- **Larch** (`agriculture/LarchNeedlesBlock`, `LARCH` in `tools/agriculture.py`):
+- **Larch** (`agriculture/SeasonalLeavesBlock`, `TREES` in `tools/agriculture.py`):
   - `larch_needles` has a `season` state (`green`, `gold`, `bare`). It follows `JugcraftSeasons.today()` on random ticks and when placed: green from day 91, gold from 268, bare from 318. Each block is shifted by up to `JITTER` (7) days by its position. With seasons off, needles stay green.
   - A needle that changes on a random tick brings up to `SPREAD` (128) touching needles in loaded chunks up to date, so trees turn together.
   - `larch_sapling` grows `worldgen/feature/larch` (spruce foliage shape on a 7 to 10 block trunk).
   - The wood set comes from `JugcraftAgriculture.registerWoodSet`, shared with the chestnut; `WOOD_SETS` in `tools/agriculture.py` generates both. Its hand recipes follow `alpine_spawn.enabled`. There are sawmill (`sawing/larch_logs`) and tree farm (`tree_growing/larch_sapling`) recipes.
 - **Settings.** `alpine_spawn.enabled` and `alpine_spawn.start`.
+
+### Biomes branch (`biome/JugcraftRegions`, `tools/biomes.py`; roster in [branches/BIOMES.md](branches/BIOMES.md))
+
+- **Jugcraft regions.** Irregular cells about `biomes.region_size` (1024) blocks across; `biomes.region_share` (0.5) of them use the Jugcraft layout, vanilla's climate table with `JugcraftRegions.RULES` applied. `mixin/OverworldBiomeBuilderMixin` records the layout (`JugcraftRegions.Recorder`) and lists each Jugcraft biome in vanilla's table at `UNREACHABLE`; `mixin/MultiNoiseBiomeSourceMixin` answers `getNoiseBiome` from the layout in Jugcraft regions. The region of a place comes from a fingerprint of the seeded climate sampler. `biomes.enabled=false` turns regions off.
+- **Batch 1, seasonal forests** ([features/seasonal-forests.md](features/seasonal-forests.md)): `coniferous_forest` (cool taiga), `snowy_coniferous_forest` (snowy taiga), `maple_woods` (cool forest), `seasonal_forest` (temperate forest), `aspen_glade` (birch forests), `dead_forest` and `tundra` (cool plains, dry and moist), `snowy_forest` and `muskeg` (snowy plains, moister and drier). Biome files come from `tools/biomes_data.py`, built on vanilla bases (`tools/biome_bases.py`).
+- **Trees** (`tools/trees.py`, `tools/trees_data.py`): `JugcraftAgriculture.registerTree` registers each tree's sapling, leaves and wood set: larch, maple and aspen leaves are `SeasonalLeavesBlock`s with their own `Schedule` (`LARCH_LEAVES`, `MAPLE_LEAVES`, `ASPEN_LEAVES`); fir needles are evergreen. `dead` is a wood set with no tree block of its own. Shapes: `larch`, `maple`, `big_maple`, `maple_bush`, `aspen`, `fir`, `tall_fir`, `dead_tree`, and fallen logs. Maple's autumn look is a weighted pick of red, orange and gold models.
 
 ### Registration (`materials/`)
 
