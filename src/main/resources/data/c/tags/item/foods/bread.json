@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:barley_bread"
+    "jugcraft:barley_bread",
+    "jugcraft:pumpkin_bread"
   ]
 }
