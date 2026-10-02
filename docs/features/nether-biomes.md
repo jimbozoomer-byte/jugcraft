@@ -50,7 +50,7 @@ Nine new Nether biomes join vanilla's five. They are rarer than vanilla's: each 
 ## Verification
 Results are recorded under "Results" below after CI runs.
 - `python3 tools/check_mod_data.py`: biomes and their features, the generated placements current, Java placing them, no Nether biome with region rules, an Overworld surface or seasons.
-- Server game test (`BiomeGameTests.dimensionBiomesArePlaced`): every Nether biome is in the Nether's biome source, and at least half are found within 3,200 blocks of the origin (distances logged).
+- Server game test (`BiomeGameTests.dimensionBiomesArePlaced`): the game test server's Nether has one fixed biome, so the test builds the Nether's biome source as a real world does; every Jugcraft Nether biome must be among its biomes, and their features must sort into one order (no feature order cycle).
 - Client game test (`BiomeClientGameTests`): each Nether biome's nearest place to the origin, a standing spot on its floor, and a screenshot.
 - Not run: play, a dedicated server, two clients.
 

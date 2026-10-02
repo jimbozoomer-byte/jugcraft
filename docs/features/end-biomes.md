@@ -44,7 +44,7 @@ Five new biomes of the outer End islands. Four share the highlands with vanilla'
 ## Verification
 Results are recorded under "Results" below after CI runs.
 - `python3 tools/check_mod_data.py`: biomes and their features, the generated placements current, no End biome with region rules, an Overworld surface or seasons.
-- Server game test (`BiomeGameTests.dimensionBiomesArePlaced`): every End biome is in the End's biome source, and at least half are found within 3,200 blocks of the origin (distances logged).
+- Server game test (`BiomeGameTests.dimensionBiomesArePlaced`): the game test server's End has one fixed biome, so the test builds the End's biome source as a real world does; every Jugcraft End biome must be among its biomes, and their features must sort into one order (no feature order cycle).
 - Client game test (`BiomeClientGameTests`): each End biome's nearest place to the origin, a standing spot on its ground, and a screenshot.
 - Not run: play, a dedicated server, two clients.
 
