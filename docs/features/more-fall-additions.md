@@ -1,6 +1,6 @@
 # More Fall Additions
 
-Status: the candy kitchen (addition 11), autumn foraging (addition 12), the Bat House (addition 13), the Hay Golem (addition 14), knitting (addition 15) and pie baking (addition 16) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
+Status: the candy kitchen (addition 11), autumn foraging (addition 12), the Bat House (addition 13), the Hay Golem (addition 14), knitting (addition 15), pie baking (addition 16) and the Spirit Board (addition 17) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets do another 10 detailed halloween and fall themed additions", then "start them now stacked on #33"). They follow the ten [fall additions](fall-additions.md), numbered on from them, one per pull request, each stacked on the one before:
 11. the candy kitchen: the Candy Kettle, its thermometer and the candy stages, the Candy Tray, and ten candies;
 12. autumn foraging: five wild mushrooms that spread in the shade and sprout fairy rings under the full moon, the Foraging Basket, and four mushroom dishes;
@@ -8,16 +8,16 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets d
 14. the Hay Golem: a straw man with a carved pumpkin head that guards crops from crows and tends them, carrying the harvest home;
 15. knitting: the Spinning Wheel spins wool into yarn, Knitting Needles knit it into beanies, socks and five sweaters, and knitwear keeps you cosy by a campfire;
 16. pie baking: the Hearth Oven, a brick bread oven that bakes five pies golden (or black, left too long), placed on the table and eaten or cut a slice at a time;
-17. the Spirit Board (planned);
+17. the Spirit Board: a candlelit séance on which a restless spirit spells its name and the one thing it wishes for, and the gift that lays it to rest;
 18. wild turkeys (planned);
 19. the theremin (planned);
 20. the Día de Muertos ofrenda (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick. The Hay Golem is Discovery tier: four hay bales (36 wheat) and a carved pumpkin. Knitting is Discovery tier: planks, sticks and string (the wheel), two iron nuggets and two sticks (the needles), and wool. Pie baking is Discovery tier: seven bricks and a furnace (the oven), coal, charcoal or logs to burn, and wheat, an egg, sugar and the fillings: apples, a pumpkin and milk, the Festival Crops' cranberries, the Kitchen Garden's sweet potatoes or the cider mill's roasted chestnuts.
-Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near. The Hay Golem is a farmhand: it keeps crows off a field and brings in the ripe crops, so a small farm runs while its farmer is away mining. Knitting is for crafters and shepherds: wool becomes clothes in any colour, warm against powder snow, and a set of knitwear by a campfire heals a party back up between trips. Pie baking is for cooks: a pie is four filling slices from one bake, to set out at a feast or cut and carried on a trip, and baking it right takes watching the oven.
+Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick. The Hay Golem is Discovery tier: four hay bales (36 wheat) and a carved pumpkin. Knitting is Discovery tier: planks, sticks and string (the wheel), two iron nuggets and two sticks (the needles), and wool. Pie baking is Discovery tier: seven bricks and a furnace (the oven), coal, charcoal or logs to burn, and wheat, an egg, sugar and the fillings: apples, a pumpkin and milk, the Festival Crops' cranberries, the Kitchen Garden's sweet potatoes or the cider mill's roasted chestnuts. The Spirit Board is Discovery tier: two birch slabs, an ink sac and a glass pane, and a candle; the spirits it speaks with come with ghost hunting, and seeing them takes a Spirit Lantern.
+Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near. The Hay Golem is a farmhand: it keeps crows off a field and brings in the ripe crops, so a small farm runs while its farmer is away mining. Knitting is for crafters and shepherds: wool becomes clothes in any colour, warm against powder snow, and a set of knitwear by a campfire heals a party back up between trips. Pie baking is for cooks: a pie is four filling slices from one bake, to set out at a feast or cut and carried on a trip, and baking it right takes watching the oven. The Spirit Board is for ghost hunters and friends together: a séance goes faster with more hands on the planchette, and finding what a spirit wishes for sends the group to the baker, the knitter, the candy maker or the orchard.
 
-Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night, a Hay Golem works all year, knitwear is worn in any season, and pies bake all year.
+Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night, a Hay Golem works all year, knitwear is worn in any season, pies bake all year, and spirits answer on any night.
 
 ## Player experience
 ### The Candy Kettle
@@ -163,6 +163,16 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 4. **Slices:** Apple, Pumpkin Cream and Sweet Potato 4 hunger, Cranberry 3, Chestnut 5 (saturation 0.6, or 0.7 for sweet potato and chestnut). Comparators read the slices left.
 5. **A Burnt Pie** is eaten the same way, but a slice is only 1 hunger, and one time in three gives Hunger ("that was very burnt"). It can't be cut.
 
+### The Spirit Board
+1. A lettered talking board of pale birch: YES by a sun and NO by a moon, two arcs of letters, the numbers and GOODBYE, inside an inked border; on it a walnut planchette shaped like a heart, gold-rimmed, with a glass lens (two birch slabs, an ink sac and a glass pane). It is read from the side it faces.
+2. **Hold a séance:** light a candle within four blocks of it (any candle, an aura candle, a floating candle or a candle skull), then use it with an empty hand to rest your fingers on the planchette. You must be within three blocks of it ("sit closer to the board").
+3. **Friends join in:** up to four players can put their fingers on the planchette. With two or more it moves faster: a stop every 12 ticks instead of 20.
+4. **Who answers:** the nearest restless spirit within 16 blocks. The planchette slides to YES (everyone with fingers on it earns **Is Anybody There?**), spells the spirit's name and the one thing it wishes for, letter by letter, then goes to GOODBYE. Everyone within eight blocks sees the letters as they come ("The planchette spells: MABEL PIE"), and at the end what it means ("Mabel wishes for a pie, or a slice of one"). With no spirit near, it goes to NO and GOODBYE.
+5. **What spirits wish for:** a pie (any pie or slice), a candle, a bottle of cider, a knitted sweater, a piece of candy, an apple (or a golden or caramel apple), a rose (a poppy or a rose bush), or a pumpkin (plain, carved or a jack o'lantern). A spirit keeps the name and wish it first gave; there are sixteen names.
+6. **Hands lift** if a player wanders more than four blocks off; with no hands left the séance breaks off and the spirit slips away. After a séance the board rests for two seconds.
+7. **Laying a spirit to rest:** reveal it (a Spirit Lantern, or a Revealing candle) and give it what it wished for. It takes one and rises away in a column of light: the giver gets 20 experience and Luck for five minutes, and earns **Unfinished Business**. Anything else, it turns away from.
+8. Comparators read where the planchette is: 15 on YES, 1 on NO, 4 on GOODBYE, 8 on a letter, 0 at rest.
+
 ## Connections
 - Candy kitchen, input producer: sugar cane (sugar); bottles of water and cows (milk); cocoa, sweet berries, glow berries and bees; the Festival Crops (cranberries, roasted chestnuts) and the cider mill (mulling spices); dyes; sticks; vanilla copper and iron; Jugcraft's `jugcraft:heat_sources`.
 - Candy kitchen, output consumer:
@@ -207,6 +217,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - Pie baking, entry path: early items only; no other Jugcraft block needed.
 - Pie baking, required vs optional: optional; vanilla's pumpkin pie is unchanged.
 - Pie baking, trade and solo routes: one player can bake alone; a pie is a trade good, and slices carry.
+- Spirit Board, input producer: birch slabs, an ink sac, a glass pane; candles (vanilla, and the chandlery's aura candles, floating candles and candle skulls); ghost hunting's restless spirits, rising from the graveyard decorations' graves.
+- Spirit Board, output consumer: the wishes send players to other additions (pies, knitted sweaters, the candy kitchen's candy, the cider mill's cider, caramel apples, candles, pumpkins); laying a spirit to rest gives experience and Luck (for fishing or opening loot).
+- Spirit Board, technology connection: comparators read the planchette, so a séance can drive redstone (a door that opens on YES).
+- Spirit Board, entry path: early items only; a séance needs a candle, and its answer needs a restless spirit near.
+- Spirit Board, required vs optional: optional; ghost hunting is unchanged without it.
+- Spirit Board, trade and solo routes: one player can hold a séance alone (slower); the things spirits wish for are trade goods.
 
 ## Balance and automation
 - **Candy kitchen:**
@@ -250,6 +266,11 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
   - Fuel: coal, charcoal and coke as long as generators burn them, a log as long as a furnace, so the oven is never a cheaper way to use fuel.
   - Food: a pie is four slices, 12 to 20 hunger in all, against its fillings' own food (two apples or two roasted chestnuts are 8, two cranberries 4). Baking adds to them, as vanilla cooking does, for the dough, sugar, fuel and the baker's watching; a burnt pie is nearly worthless.
   - No loop: a pie makes nothing that makes pies.
+- **Spirit Board:**
+  - Costs: two birch slabs, an ink sac and a glass pane; a lit candle near.
+  - Units: stops (letters, YES, NO, GOODBYE), ticks, blocks.
+  - Reward: 20 experience and five minutes of Luck for each spirit laid to rest, and the wished-for item is used up. Spirits rise only at night from graves, at most three near a grave.
+  - No loop: nothing the board or a spirit gives makes spirits or boards.
 
 ## Multiplayer and persistence
 - **Candy kitchen, server authority:** filling, reading, tipping out and pouring all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server, which checks the base, the sugar and flavour limits, and the temperature. Pulling and breaking up a tray go through vanilla's item use; the server checks the tray's own record of when it was poured and how often it has been pulled, by its own game time.
@@ -289,6 +310,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - **Pie baking, bounded work:** an oven's tick is a few counters, and it sends an update only when its fire goes out or lights, a pie goes in or out, or the pie passes another tenth of its baking.
 - **Pie baking, IDs:** blocks and items `hearth_oven` (block entity too), `apple_pie`, `pumpkin_cream_pie`, `cranberry_pie`, `sweet_potato_pie`, `chestnut_pie`, `burnt_pie`; items `pastry_dough`, `raw_<filling>_pie` and `<filling>_pie_slice` for each filling; item tag `jugcraft:hearth_oven_wood`; recipes `hearth_oven`, `pastry_dough`, `raw_<filling>_pie`; advancement `as_easy_as_pie`. All new.
 - **Pie baking, disable behaviour:** with the agriculture feature off, the recipes don't load; ovens still bake and pies are still eaten, and everything stays registered.
+- **Spirit Board, server authority:** who may put their fingers on the planchette (distance, a lit candle, room for more hands), which spirit answers and what it spells, and laying a spirit to rest are all the server's. Use goes through vanilla's block and entity use paths (reach, spawn protection, adventure mode). Clients are told only where the planchette is going.
+- **Spirit Board, what clients get:** the planchette's last stop, its next and when it set off (to slide it there), and whether a séance is going on (to circle it); the letters as overlay messages to the players near.
+- **Spirit Board, persistence:** the board saves the hands on it, what it is spelling and how far it has got, and its rest; a spirit saves its name and wish.
+- **Spirit Board, bounded work:** the board does nothing between séances. Starting one looks at 9 by 9 by 9 blocks for a candle and asks the entity lookup for spirits within 16 blocks, once; each tick of a séance checks its hands (four at most).
+- **Spirit Board, IDs:** block and item `spirit_board`, block entity `spirit_board`; block tag `jugcraft:seance_candles`; item tags `jugcraft:spirit_wishes/<wish>` for pie, candle, cider, sweater, candy, apple, rose and pumpkin; recipe `spirit_board`; advancements `is_anybody_there` and `unfinished_business`. All new. A restless spirit's save gains `spirit_name` and `wish`.
+- **Spirit Board, disable behaviour:** with the agriculture feature off, the recipe doesn't load and no spirits rise to answer; the board stays registered.
 
 ## Dependencies and assets
 Candy kitchen:
@@ -324,6 +351,12 @@ Pie baking:
 - Models (the oven lit and unlit; each pie whole and with one, two and three slices gone), blockstates, item models, names, messages, loot (a pie only while whole) and tags come from `tools/pie_data.py`; the numbers from `PIES` in `tools/agriculture.py`.
 - The client's `HearthOvenRenderer` draws the pie in the oven's mouth, its crust dough-pale, golden or black as it bakes.
 - Sounds are vanilla's (a fire charge as fuel goes in, wood for a pie in and out, a note block's chime when it is baked, fire going out when it burns, eating).
+
+Spirit Board:
+- No new dependencies. Textures are drawn by code in `tools/spirit_board_textures.py`: the board's lettered face (64 by 48: YES, NO, two arcs of letters, the numbers and GOODBYE in a three-by-five letter of its own, a sun and moon, a double border), the walnut planchette with its gold rim and glass lens, its wood, the board's birch top and edge, and the item.
+- The model, blockstate, words (the messages and what each wish is called), loot and tags come from `tools/spirit_board_data.py`; the numbers, names and wishes from `SPIRIT_BOARD` in `tools/agriculture.py`. The checker matches every letter's place on the face against `SpiritBoard.place`.
+- The client's `SpiritBoardRenderer` lays the face over the board and slides the planchette from stop to stop, easing in and out, swivelling towards the board's ends, and circling slowly on a letter while fingers are on it.
+- Sounds are vanilla's (an amethyst hum as a séance starts, a wooden tap at each stop, an amethyst chime as a spirit is laid to rest).
 
 ## Verification
 ### Candy kitchen verification
@@ -477,6 +510,32 @@ Found by CI and fixed before this record:
 
 Not run: a two-client dedicated-server playtest, and any play by hand.
 
+### Spirit Board verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-31` stacked on pie baking:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the Spirit Board with Java: the candle, spirit, hand and watching ranges, the most hands, the two letter times, the rest after a séance, a spirit's reward, the face's size, the names and the wishes in order; checks that YES, NO, GOODBYE and every letter and number sit on the face where the texture draws them, the registration, the face and planchette textures at their sizes, words, tags, recipe, loot and advancements) | Pass, 672 IDs |
+| `./gradlew build` on `acbf7c9` (Build workflow run 37077527188) | Pass |
+| Game tests on the headless server, same run: 423 in total, 6 of them new here (`SpiritBoardGameTests`) | **All 423 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `acbf7c9` (run 37077527188), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-spirit-board) |
+
+The 6 new game tests (`SpiritBoardGameTests`):
+1. with no candle, or an unlit one, no séance starts; a lit candle two blocks off lets one start; a player too far off can't touch the planchette; four pairs of hands fit, not a fifth;
+2. with no spirit near, the planchette goes to NO (a comparator reads 1), then GOODBYE, a stop every 20 ticks under one pair of hands, and rests, having spelled "NO … GOODBYE" (if another test's spirit happens to be near, it answers instead and the test checks for YES);
+3. with a spirit near, named Mabel and wishing for a pie, and two pairs of hands: YES (a comparator reads 15, and both players earn Is Anybody There?), then "MABEL", "PIE" and GOODBYE, a stop every 12 ticks; then the board rests and won't start again at once;
+4. a player who walks away lifts their hands, and with none left the séance breaks off;
+5. a revealed spirit wishing for an apple turns from a poppy; given an apple it takes one and is laid to rest: 20 experience, Luck and Unfinished Business;
+6. the wishes' tags hold what they should (a pie slice is a pie, wool socks aren't a sweater), candles and aura candles light a séance, and the recipe, loot table and advancements load.
+
+Found by CI and fixed before this record:
+- 26.3 has no `PushReaction.DESTROY`; the board pops off when pushed (`POPPED`), as the pies do (`292af1a`).
+- The first screenshots were too far off to read the letters; the cameras moved closer (`acbf7c9`).
+
+Not run: a two-client dedicated-server playtest, and any play by hand. A séance has been seen only in the game tests, with mock players and posed spirits.
+
 ## World and event applicability
 - A Candy Kettle works anywhere there is heat under it, in every dimension, all year. Nothing is seasonal.
 - Wild mushrooms generate only in newly generated Overworld chunks of their biomes; existing chunks don't get them, but one mushroom brought in spreads. They can be planted and spread in any dimension with soil and shade. Fairy rings bless only in the Overworld, on full-moon nights (by the Overworld's moon).
@@ -484,6 +543,7 @@ Not run: a two-client dedicated-server playtest, and any play by hand.
 - A Hay Golem works in any dimension.
 - Knitting works anywhere; cosiness needs a lit campfire, in any dimension.
 - The Hearth Oven bakes in any dimension.
+- A séance works in any dimension, but restless spirits rise only on the Overworld's night.
 
 ## Rollout and open questions
 - Candy can't be poured by hoppers or dispensers; trays are filled and broken up by hand.
@@ -504,3 +564,5 @@ Not run: a two-client dedicated-server playtest, and any play by hand.
 - The oven holds one pie at a time, and hoppers don't feed it or take the pie out; baking is done by hand.
 - A coal block (800 seconds) is more than the oven can bank, so it is refused.
 - Vanilla's pumpkin pie is unchanged and isn't baked in the oven.
+- The board spells only a spirit's name and wish; players can't ask it questions of their own.
+- A spirit's wish is one of eight, chosen at random the first time a séance asks it; it fades at dawn whether or not it was given its wish.

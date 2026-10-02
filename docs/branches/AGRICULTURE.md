@@ -898,6 +898,19 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Bake** in a Hearth Oven fed coal, charcoal, coke or logs: a raw pie bakes golden at 600 points while the oven is hot enough, and burns at 1,200.
 - Pies are placed like cakes and eaten or cut a slice at a time. Details: [more fall additions](../features/more-fall-additions.md#the-hearth-oven).
 
+### The Spirit Board
+
+| **Spirit Boards**, one facing each way, the planchette on M, YES, NO and GOODBYE | **Up close**: the letters, and the planchette on M |
+| --- | --- |
+| ![Spirit Boards](../images/ingame_spirit_boards.jpg) | ![A Spirit Board up close](../images/ingame_spirit_board.jpg) |
+| **A séance** at night: a board between lit candles, a revealed restless spirit over it | |
+| ![A séance](../images/ingame_seance.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`SpiritBoardClientGameTests`, software rendering, small previews). The planchettes and the spirit are posed for the picture.*
+
+- **Hold a séance** by candlelight, fingers on the planchette (friends make it faster): the nearest restless spirit spells its name and its wish.
+- Give a revealed spirit its wish and it is laid to rest. Details: [more fall additions](../features/more-fall-additions.md#the-spirit-board).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

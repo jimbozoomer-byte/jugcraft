@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: fall additions 17, the Spirit Board (pull request pending, stacked on pie baking)
+- **Spirit Board:** a lettered talking board with a walnut planchette. By candlelight, up to four players rest their fingers on it; the nearest restless spirit answers YES and spells its name and the one thing it wishes for, then GOODBYE (Is Anybody There?). More hands, faster letters; no spirit, NO.
+- Give a revealed spirit what it wished for (a pie, a candle, cider, a sweater, candy, an apple, a rose or a pumpkin) and it is laid to rest: experience and Luck (Unfinished Business).
+- The planchette slides, eases and swivels over a 64 by 48 lettered face; comparators read YES and NO. New server game tests and a client test with screenshots.
+
 ### Agriculture: fall additions 16, pie baking (pull request pending, stacked on knitting)
 - **Hearth Oven:** a brick bread oven fed coal, charcoal, coke or logs. It heats to 100 degrees and bakes a raw pie while at 50 or more: baked at 600 points (As Easy as Pie), burnt at 1,200. The pie shows in its mouth, going golden, then black. Comparators read it.
 - **Pies:** Pastry Dough (wheat and an egg) with two of a filling and sugar makes a raw Apple, Pumpkin Cream, Cranberry, Sweet Potato or Chestnut pie. Baked, a pie is placed like a cake and eaten or cut with a Carving Knife a slice at a time; a Burnt Pie is barely food.
