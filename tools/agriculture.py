@@ -218,6 +218,9 @@ ITEMS = {
     "oat_porridge": {"display": "Oat Porridge", "food": [6, 0.6], "stew": True, "tags": ["c:foods/soup"]},
     "chili": {"display": "Chili", "food": [10, 0.8], "stew": True, "tags": ["c:foods/soup"]},
     "cabbage_rolls": {"display": "Cabbage Rolls", "food": [6, 0.8], "tags": ["c:foods"]},
+    # Fall additions 18: a wild turkey's meat, raw (it cooks into a whole roast turkey) and carved from the roast.
+    "raw_turkey": {"display": "Raw Turkey", "food": [3, 0.3], "tags": ["c:foods", "c:foods/raw_meat"]},
+    "turkey_slice": {"display": "Slice of Roast Turkey", "food": [3, 0.6], "tags": ["c:foods", "c:foods/cooked_meat"]},
     # Festival crops. Gourd seeds plant stems; a chestnut plants a chestnut tree sapling; cranberries are
     # planted in shallow water ("bog_seed").
     "butternut_squash_seeds": {"display": "Butternut Squash Seeds", "plants": "butternut_squash_stem", "compost": "low",
@@ -554,6 +557,9 @@ HALLOWEEN_ADVANCEMENTS = {
                          "description": "Hold a séance at a Spirit Board and have a restless spirit answer", "frame": "task"},
     "unfinished_business": {"icon": "jugcraft:ectoplasm", "title": "Unfinished Business",
                             "description": "Give a restless spirit the thing it wishes for, and lay it to rest", "frame": "goal"},
+    "gobble_gobble": {"icon": "jugcraft:raw_turkey", "title": "Gobble Gobble", "description": "Breed two wild turkeys", "frame": "task"},
+    "carving_the_bird": {"icon": "jugcraft:roast_turkey", "title": "Carving the Bird",
+                         "description": "Carve a slice from a roast turkey with a Carving Knife", "frame": "task"},
     "as_easy_as_pie": {"icon": "jugcraft:apple_pie", "title": "As Easy as Pie", "description": "Take a perfectly baked pie out of a Hearth Oven",
                        "frame": "task"},
     "man_of_straw": {"icon": "minecraft:hay_block", "title": "Man of Straw", "description": "Build a Hay Golem from hay bales and a carved pumpkin",
@@ -1567,6 +1573,26 @@ SPIRIT_BOARD = {"block": "spirit_board", "display": "Spirit Board", "candle_rang
                     "pumpkin": {"display": "a pumpkin", "items": ["minecraft:pumpkin", "minecraft:carved_pumpkin", "minecraft:jack_o_lantern"]}}}
 
 
+# Wild turkeys (fall additions 18): Turkey (an Animal, `health` and `speed`; MobCategory.CREATURE, `size` wide and tall)
+# eats and breeds on item tag `food_tag`; a grown tom with a player or hen within `strut_range` blocks starts to strut
+# one tick in `strut_chance`, for `strut_ticks`; a hen lays a vanilla egg every `egg_min` to `egg_max` ticks. Turkeys
+# (spawning): every `spawn_ticks`, for each overworld player, `spawn_chance` of the time, a spot `min_distance` to
+# `max_distance` away on grass in biome tag `habitat_tag` gets a flock of `flock` (min, max), the first a tom; at most
+# `near_cap` within `near_range` of a player and `level_cap` in the world, by day only. Each turkey drops a raw turkey
+# and `feathers` (min, max) feathers. A raw turkey cooks (COOKING) into a roast turkey (RoastTurkeyBlock): `servings`
+# servings of `serving` food (hunger, saturation), eaten at the table or carved with a Carving Knife into slices; the
+# last leaves a bone.
+TURKEYS = {"entity": "turkey", "display": "Wild Turkey", "health": 8, "speed": 0.25, "size": [0.6, 0.95], "food_tag": "jugcraft:turkey_food",
+           "food": ["minecraft:wheat_seeds", "minecraft:beetroot_seeds", "minecraft:melon_seeds", "minecraft:pumpkin_seeds",
+                    "minecraft:sweet_berries", "jugcraft:corn_kernels", "jugcraft:sunflower_seeds", "jugcraft:oat_seeds", "jugcraft:barley_seeds"],
+           "strut_range": 6, "strut_ticks": 80, "strut_chance": 200, "egg_min": 6000, "egg_max": 12000,
+           "spawn_ticks": 400, "spawn_chance": 0.25, "min_distance": 24, "max_distance": 48, "flock": [3, 5], "near_cap": 10,
+           "near_range": 64, "level_cap": 40, "habitat_tag": "jugcraft:turkey_habitat",
+           "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow"],
+           "table": "entities/turkey", "feathers": [1, 3], "raw": "raw_turkey", "raw_food": [3, 0.3], "roast": "roast_turkey",
+           "roast_display": "Roast Turkey", "slice": "turkey_slice", "servings": 6, "serving": [3, 0.6]}
+
+
 def pie_blocks():
     return [PIES["oven"], PIES["burnt"]] + [f"{f}_pie" for f in PIES["fillings"]]
 
@@ -1695,6 +1721,7 @@ SICKLE_PATTERN = [" M ", "  M", "SM "]
 
 # Cooking: every cooked food works in the furnace, smoker and on a campfire (vanilla timings).
 COOKING = {
+    "roast_turkey": {"input": "raw_turkey", "xp": 0.35},
     "roasted_corn": {"input": "corn", "xp": 0.35},
     "popcorn": {"input": "corn_kernels", "xp": 0.1},
     "baked_sweet_potato": {"input": "sweet_potato", "xp": 0.35},
@@ -2258,7 +2285,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"]])
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"]])
 
 
 def all_items():
@@ -2269,7 +2296,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"]])
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"]])
 
 
 def owns(entry_id):

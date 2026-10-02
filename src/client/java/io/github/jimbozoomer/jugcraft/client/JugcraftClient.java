@@ -128,10 +128,12 @@ public final class JugcraftClient implements ClientModInitializer {
 		ModelLayerRegistry.registerModelLayer(WispModel.LAYER, WispModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(CrowModel.LAYER, CrowModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(HayGolemModel.LAYER, HayGolemModel::createLayer);
+		ModelLayerRegistry.registerModelLayer(TurkeyModel.LAYER, TurkeyModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(HorsemanModel.LAYER, HorsemanModel::createLayer);
 		EntityRendererRegistry.register(JugcraftAgriculture.WILL_O_WISP, WispRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.CROW, CrowRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.HAY_GOLEM, HayGolemRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.TURKEY, TurkeyRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.HEADLESS_HORSEMAN, HorsemanRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.FLYING_PUMPKIN, context -> new ThrownItemRenderer<>(context, 1.5F, false));
 		EntityRendererRegistry.register(JugcraftAgriculture.FLAMING_PUMPKIN, context -> new ThrownItemRenderer<>(context, 1.5F, true));

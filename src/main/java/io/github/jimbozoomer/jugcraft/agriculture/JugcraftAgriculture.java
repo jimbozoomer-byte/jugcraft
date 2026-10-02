@@ -252,6 +252,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<CandyKettleBlockEntity> CANDY_KETTLE_ENTITY;
 	public static BlockEntityType<BatHouseBlockEntity> BAT_HOUSE_ENTITY;
 	public static EntityType<HayGolem> HAY_GOLEM;
+	public static EntityType<Turkey> TURKEY;
 	public static DataComponentType<KnittingWork> KNITTING;
 	public static BlockEntityType<SpinningWheelBlockEntity> SPINNING_WHEEL_ENTITY;
 	public static BlockEntityType<HearthOvenBlockEntity> HEARTH_OVEN_ENTITY;
@@ -1439,6 +1440,19 @@ public final class JugcraftAgriculture {
 		SPIRIT_BOARD_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("spirit_board"),
 				FabricBlockEntityTypeBuilder.create(SpiritBoardBlockEntity::new, spiritBoard).build());
 		registerItem("spirit_board", props -> new BlockItem(spiritBoard, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 18, wild turkeys: flocks in woods and meadows; toms strut, hens lay eggs; a roast turkey is set on the
+		// table and carved a serving at a time.
+		TURKEY = entity("turkey", EntityType.Builder.<Turkey>of(Turkey::new, MobCategory.CREATURE).sized(0.6F, 0.95F).eyeHeight(0.8F)
+				.clientTrackingRange(10));
+		FabricDefaultAttributeRegistry.register(TURKEY, Turkey.createAttributes());
+		Turkeys.register();
+		meal("raw_turkey", 3, 0.3F);
+		Block roastTurkey = registerBlock("roast_turkey", RoastTurkeyBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+		registerItem("roast_turkey", props -> new BlockItem(roastTurkey, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1),
+				FOOD_TAB);
+		meal("turkey_slice", 3, 0.6F);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

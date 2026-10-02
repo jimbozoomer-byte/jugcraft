@@ -902,4 +902,6 @@ def crop_textures():
     out.update(pie_textures())
     from spirit_board_textures import spirit_board_textures  # and the Spirit Board
     out.update(spirit_board_textures())
+    from turkey_textures import turkey_textures  # and wild turkeys
+    out.update(turkey_textures())
     return out

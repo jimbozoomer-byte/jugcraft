@@ -37,7 +37,8 @@ EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_repla
                   "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires", "minecraft:mineable/axe",
                   "minecraft:mineable/shovel", "minecraft:leaves", "minecraft:eggs", "minecraft:dirt", "minecraft:mud",
                   "minecraft:grass_blocks", "minecraft:sand", "minecraft:wool", "minecraft:logs", "minecraft:candles",
-                  "minecraft:stairs", "minecraft:slabs", "minecraft:walls", "minecraft:coals", "minecraft:dyes"}
+                  "minecraft:stairs", "minecraft:slabs", "minecraft:walls", "minecraft:coals", "minecraft:dyes",
+                  "minecraft:is_forest", "minecraft:is_taiga"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -812,6 +813,7 @@ def check_agriculture():
     check_knitting(java, main)
     check_pies(java, main)
     check_spirit_board(java, main)
+    check_turkeys(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -3031,6 +3033,63 @@ def check_spirit_board(java, main):
     for path in paths:
         if not path.exists():
             err(f"The Spirit Board needs {path.relative_to(ROOT)}")
+
+
+def check_turkeys(java, main):
+    """Wild turkeys: Turkey.java, Turkeys.java and RoastTurkeyBlock.java match TURKEYS in tools/agriculture.py (health,
+    speed, strutting, eggs; spawning; servings and their food); the turkey is registered with its size and attributes
+    and its spawning; it is named and drops a raw turkey and feathers; its food and habitat tags, textures, roast models,
+    cooking and advancements exist; and its model lays its boxes where the textures paint them."""
+    import turkey_textures
+    tk = ag.TURKEYS
+
+    def numbers(source):
+        text = java.get(source, "")
+        return {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;", text)}
+
+    expected = {("Turkey", "MAX_HEALTH"): tk["health"], ("Turkey", "SPEED"): tk["speed"], ("Turkey", "STRUT_RANGE"): tk["strut_range"],
+                ("Turkey", "STRUT_TICKS"): tk["strut_ticks"], ("Turkey", "STRUT_CHANCE"): tk["strut_chance"], ("Turkey", "EGG_MIN"): tk["egg_min"],
+                ("Turkey", "EGG_MAX"): tk["egg_max"], ("Turkeys", "SPAWN_TICKS"): tk["spawn_ticks"],
+                ("Turkeys", "SPAWN_CHANCE"): tk["spawn_chance"], ("Turkeys", "MIN_DISTANCE"): tk["min_distance"],
+                ("Turkeys", "MAX_DISTANCE"): tk["max_distance"], ("Turkeys", "FLOCK_MIN"): tk["flock"][0],
+                ("Turkeys", "FLOCK_MAX"): tk["flock"][1], ("Turkeys", "NEAR_CAP"): tk["near_cap"], ("Turkeys", "NEAR_RANGE"): tk["near_range"],
+                ("Turkeys", "LEVEL_CAP"): tk["level_cap"], ("RoastTurkeyBlock", "SERVINGS"): tk["servings"],
+                ("RoastTurkeyBlock", "NUTRITION"): tk["serving"][0], ("RoastTurkeyBlock", "SATURATION"): tk["serving"][1]}
+    for (source, name), value in expected.items():
+        found = numbers(source).get(name)
+        if found is None or abs(found - value) > 1e-6:
+            err(f"{source}.{name} = {found} differs from TURKEYS in tools/agriculture.py ({value})")
+    for source, tag in (("Turkey", tk["food_tag"]), ("Turkeys", tk["habitat_tag"])):
+        if f'Jugcraft.id("{tag.split(":", 1)[1]}")' not in java.get(source, ""):
+            err(f"{source} must use the tag {tag}")
+    if ag.ITEMS.get(tk["slice"], {}).get("food") != tk["serving"]:
+        err("A slice of roast turkey must be worth a serving at the table")
+    width, height = tk["size"]
+    if (f'entity("{tk["entity"]}", EntityType.Builder.<Turkey>of(Turkey::new, MobCategory.CREATURE).sized({width}F, {height}F)' not in main
+            or "FabricDefaultAttributeRegistry.register(TURKEY, Turkey.createAttributes())" not in main or "Turkeys.register()" not in main):
+        err("JugcraftAgriculture.java must register the turkey with its size, attributes and spawning")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"entity.jugcraft.{tk['entity']}") != tk["display"] or lang.get(f"block.jugcraft.{tk['roast']}") != tk["roast_display"]:
+        err("The turkey and the roast turkey need their names")
+    table = json.dumps(load(DATA / "jugcraft" / "loot_table" / f"{tk['table']}.json") or {})
+    if f"jugcraft:{tk['raw']}" not in table or "minecraft:feather" not in table:
+        err("A turkey must drop a raw turkey and feathers")
+    if ag.COOKING.get(tk["roast"], {}).get("input") != tk["raw"]:
+        err("A raw turkey must cook into a roast turkey")
+    paths = [ASSETS / "textures" / "entity" / f"turkey_{kind}.png" for kind in turkey_textures.BIRDS]
+    paths += [ASSETS / "models" / "block" / f"{tk['roast']}{stage}.json" for stage in ("", "_carved", "_breast", "_carcass")]
+    paths += [DATA / "jugcraft" / "tags" / "item" / f"{tk['food_tag'].split(':')[1]}.json",
+              DATA / "jugcraft" / "tags" / "worldgen" / "biome" / f"{tk['habitat_tag'].split(':')[1]}.json",
+              DATA / "jugcraft" / "advancement" / "gobble_gobble.json", DATA / "jugcraft" / "advancement" / "carving_the_bird.json",
+              DATA / "jugcraft" / "recipe" / f"{tk['roast']}.json"]
+    for path in paths:
+        if not path.exists():
+            err(f"Wild turkeys need {path.relative_to(ROOT)}")
+    model_path = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "TurkeyModel.java"
+    model = model_path.read_text(encoding="utf-8") if model_path.exists() else ""
+    for name, (u, v, *_size) in turkey_textures.BOXES.items():
+        if f"texOffs({u}, {v})" not in model:
+            err(f"TurkeyModel has no box at ({u}, {v}) for the texture's {name}")
 
 
 def check_model_uvs():
