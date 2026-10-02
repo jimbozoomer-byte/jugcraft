@@ -17,7 +17,8 @@ import net.minecraft.world.level.block.Blocks;
 
 /**
  * Client game test for the Bat House: four houses on a barn wall, their ledges holding no guano, a little, more and a
- * pile, a pile of Bat Guano in a frame; then at dusk, the houses letting their bats out. CI job {@code client}.
+ * pile, a pile of Bat Guano in a frame, and from above, the guano in their trays; then at dusk, the houses letting their
+ * bats out. CI job {@code client}.
  */
 public class BatHouseClientGameTests implements FabricClientGameTest {
 	@Override
@@ -43,6 +44,8 @@ public class BatHouseClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 
 			shoot(context, singleplayer, x + 4, y + 1, z - 2, 180, 0, "jugcraft_bat_houses");
+			// From above and close, to see the guano piling up in the trays.
+			shoot(context, singleplayer, x + 4, y + 4, z - 3, 180, 45, "jugcraft_bat_house_guano");
 			server.runCommand("time set 13200");
 			server.runOnServer(minecraft -> {
 				ServerLevel level = minecraft.overworld();
@@ -78,10 +81,10 @@ public class BatHouseClientGameTests implements FabricClientGameTest {
 		int x = origin.getX();
 		int y = origin.getY();
 		int z = origin.getZ();
-		// A barn wall of dark oak, four houses hung on it, each with more guano on its ledge.
+		// A barn wall of pale birch, four houses hung on it, each with more guano on its ledge.
 		for (int dx = 0; dx <= 10; dx++) {
 			for (int dy = 0; dy <= 5; dy++) {
-				level.setBlock(new BlockPos(x + dx, y + dy, z - 7), Blocks.DARK_OAK_PLANKS.defaultBlockState(), Block.UPDATE_ALL);
+				level.setBlock(new BlockPos(x + dx, y + dy, z - 7), Blocks.BIRCH_PLANKS.defaultBlockState(), Block.UPDATE_ALL);
 			}
 		}
 		for (int i = 0; i < 4; i++) {
