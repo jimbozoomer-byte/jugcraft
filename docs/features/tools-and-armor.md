@@ -10,7 +10,7 @@ Design inspiration: Mekanism: Tools by aidancbrady and team (MIT). Only the idea
 ## Player experience
 - **Bronze and steel tool sets:** sword, pickaxe, axe, shovel and hoe, crafted like iron tools from bronze or steel ingots.
   - Bronze is iron-tier: same drops, a little more durable (320 uses) and quicker.
-  - Steel reaches diamond-tier drops (obsidian, diamonds) and lasts 900 uses: between iron and diamond.
+  - Steel reaches diamond-tier drops (obsidian, ancient debris) and lasts 900 uses: between iron and diamond.
 - **Bronze and steel armor:** helmet, chestplate, leggings and boots.
   - Bronze matches iron's defense with a little toughness.
   - Steel sits between iron and diamond.
@@ -59,7 +59,7 @@ No new dependencies. Icons and worn layers are drawn by `tools/gear_textures.py`
   - recipes and tags resolve, and the metal audit counts the gear.
 - Game test `paxelsAndBronzeAndSteelGear`:
   - paxels mine stone, logs and dirt fast;
-  - bronze gets iron ore but not diamond ore, and steel gets diamond ore and obsidian;
+  - bronze gets diamond ore but not obsidian, and steel gets obsidian;
   - paxels last three times their tier's pickaxe;
   - the netherite paxel resists fire;
   - every armor piece equips to its slot.

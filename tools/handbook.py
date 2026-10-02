@@ -352,7 +352,7 @@ def gear_pages():
             "Bronze and steel make swords, pickaxes, axes, shovels, hoes and armor, shaped like iron ones.",
             "Bronze tools get the same drops as iron and last a little longer. Bronze armor matches iron's and is "
             "slightly tougher.",
-            "Steel tools mine obsidian and diamond, and last nearly four times as long as iron. Steel armor sits "
+            "Steel tools mine obsidian and ancient debris, and last over three times as long as iron. Steel armor sits "
             "between iron and diamond."],
          "craft": {"grid": grid, "result": f"{MOD}:steel_pickaxe", "count": 1}},
         {"title": "Paxels", "icon": f"{MOD}:steel_paxel", "text": [

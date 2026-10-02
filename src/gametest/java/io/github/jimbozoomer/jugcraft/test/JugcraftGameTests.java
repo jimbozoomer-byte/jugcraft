@@ -1353,8 +1353,8 @@ public class JugcraftGameTests {
 	}
 
 	/**
-	 * Batch 25 gear. A paxel mines stone, logs and dirt fast. Bronze reaches iron ore but not diamond ore; steel reaches
-	 * both. Paxels last three times as long as the tier's tools. The armor goes in the right slots.
+	 * Batch 25 gear. A paxel mines stone, logs and dirt fast. Bronze (iron tier) reaches diamond ore but not obsidian;
+	 * steel (diamond tier) reaches both. Paxels last three times as long as the tier's tools. The armor goes in the right slots.
 	 */
 	@GameTest
 	public void paxelsAndBronzeAndSteelGear(GameTestHelper helper) {
@@ -1364,9 +1364,10 @@ public class JugcraftGameTests {
 				Blocks.DIRT.defaultBlockState())) {
 			helper.assertTrue(bronze.getDestroySpeed(state) > 1.0F, "A bronze paxel mines " + state + " like a hand");
 		}
-		helper.assertTrue(bronze.isCorrectToolForDrops(Blocks.IRON_ORE.defaultBlockState()), "Bronze cannot get iron ore");
-		helper.assertTrue(!bronze.isCorrectToolForDrops(Blocks.DIAMOND_ORE.defaultBlockState()), "Bronze gets diamond ore");
-		helper.assertTrue(steel.isCorrectToolForDrops(Blocks.DIAMOND_ORE.defaultBlockState()), "Steel cannot get diamond ore");
+		// Iron tier (bronze) reaches diamond ore but not obsidian; diamond tier (steel) reaches both.
+		helper.assertTrue(bronze.isCorrectToolForDrops(Blocks.DIAMOND_ORE.defaultBlockState()), "Bronze cannot get diamond ore");
+		helper.assertTrue(!bronze.isCorrectToolForDrops(Blocks.OBSIDIAN.defaultBlockState()), "Bronze gets obsidian");
+		helper.assertTrue(steel.isCorrectToolForDrops(Blocks.OBSIDIAN.defaultBlockState()), "A steel paxel cannot get obsidian");
 		helper.assertTrue(new ItemStack(item("steel_pickaxe")).isCorrectToolForDrops(Blocks.OBSIDIAN.defaultBlockState()),
 				"A steel pickaxe cannot get obsidian");
 		helper.assertTrue(bronze.getMaxDamage() == 3 * new ItemStack(item("bronze_pickaxe")).getMaxDamage(),
