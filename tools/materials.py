@@ -13,7 +13,7 @@ MOD = "jugcraft"
 # Feature switches (config/jugcraft.properties). Order is the config file order.
 FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
             "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines", "deposits",
-            "explosives",
+            "explosives", "parties", "drones",
             "pixel_hollows", "retro_trader"]
 
 # Metals use the vanilla form set. "mined" adds ore, deepslate ore, raw item and raw block.
@@ -210,6 +210,12 @@ def feature_of(entry_id):
         return FEATURE
     import petro
     if entry_id in petro.petro_items() or entry_id in petro.petro_blocks():
+        return FEATURE
+    import guide_books  # the Drone Tower guide books go with the drones, part of the machines
+    if entry_id in guide_books.BOOKS:
+        return FEATURE
+    import tank_display
+    if entry_id in tank_display.BLOCKS:
         return FEATURE
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

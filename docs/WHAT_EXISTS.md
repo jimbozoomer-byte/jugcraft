@@ -208,6 +208,10 @@ Records: [pixel-hollows.md](features/pixel-hollows.md), [retro-trader.md](featur
 - **Industrial chemistry:** `ELECTROLYTIC_CELL` (`electrolysis`: brine → chlorine/hydrogen/lye by layer; alumina + coke → aluminum), `CHEMICAL_REACTOR` (`chemical_reaction`: sulfuric acid, alumina, fertilizer), `FUEL_CELL` (hydrogen → JE). Items `alumina`, `fertilizer`, `titanium_sponge`, `lithium_cell`, `neodymium_magnet`, and the electronics items `silicon_boule`, `silicon_wafer`, `microchip` (`chemistry/FertilizerItem`, area bone meal on crops). Fluids `brine`, `lye`, `sulfuric_acid`; gases `chlorine`, `hydrogen`. `check_mod_data` audits metal in fluid recipes.
 - **Nitrogen chemistry (batch 12):** `AIR_SEPARATION_UNIT` (no recipes, like the pumpjack: `tickAirSeparation` fills nitrogen `ASU_NITROGEN_PER_TICK` into tank 0, drawn off layer 5, and oxygen `ASU_OXYGEN_PER_TICK` into tank 1, layer 0) and `SYNTHESIS_CONVERTER` (`gas_synthesis`: Haber–Bosch ammonia, Ostwald nitric acid; three input tanks, one output). Gases `nitrogen`, `oxygen`, `ammonia`; fluid `nitric_acid`. Chemical reactor `ammonium_phosphate` and lithography `microchip_nitric` recipes.
 - **Glass chemistry (batch 16):** rock `tincal` (`ROCKS`, desert/badlands, drops `borax`); items `borax`, `borosilicate_glass`, `optical_fibre`, `ferroboron` (`materials.ITEMS`). Machine recipes may set `"name"` for a second recipe with the same output. `MachineRecipes.multiRecipes` sorts by ingredient count, most first.
+- **Machine screens (batch 22):** `client/MachineScreen` is 268 wide: the 176-wide bay and inventory (slot positions unchanged) and a terminal (tagline, status, progress, power, rate, condition, side controls). Themes and colours come from `assets/jugcraft/gui/machine_themes.json` (`client/MachineScreenThemes`), written with the backgrounds and taglines by `tools/gui_textures.py`.
+- **Solar thermal (batch 21):** package `solar`: `SOLAR_TRACKER` (`SolarTrackerBlockEntity`, generator), `HELIOSTAT` (`HeliostatBlockEntity`, empty, for the renderer), `SOLAR_RECEIVER` (`SolarReceiverBlockEntity`: `countHeliostats`, water tank, `JE_PER_HELIOSTAT`, `MAX_HELIOSTATS`, `JE_PER_MB`). `SunTrackingBlock` keeps `turning` true so the client draws the top part; rotors in `kinetic_models.ROTORS` with `"mode": "sun"` tilt with the day time (`client/KineticRotors`). Their models are built with the kinetic blocks (`KINETIC_BLOCKS`).
+- **Joined tanks and gauges (batch 20):** `fluid/TankGroup` (a `CombinedStorage` over face-joined `FluidTankBlockEntity`s, lowest first, one fluid, drains from the top) is what `FluidStorage.SIDED`, buckets and comparators get for a tank. `GLASS_TANK` shares the tank block entity and syncs its fluid to clients (`client/GlassTankRenderer`). `TANK_GAUGE` (`fluid/TankGaugeBlock`): `FACING`, `LEVEL` 0-8, reads `FluidStorage.SIDED` behind it every 10 ticks. Assets in `tools/tank_display.py`.
+- **Turbocharger and flywheel (batch 19):** item `turbocharger` (`PetroItems`); the advanced engine has one item slot (turbocharger only, `canPlaceItem`) and a coolant tank (input 1, water); `tickDieselEngine` uses `TURBO_OUTPUT`, `TURBO_EFFICIENCY_PERCENT` and `TURBO_WATER_PER_TICK`. Block `flywheel` (`kinetic/FlywheelBlock`, `FlywheelBlockEntity`: a `KineticConsumer` on every face but its front, pushes from its front; `CAPACITY`, `RATE`, `FRICTION_DIVISOR`).
 - **Explosive weapons (batch 18):** package `weapons`: `JugcraftWeapons.GRENADE` (entity type), `GrenadeEntity` (a `ThrowableItemProjectile` that calls `Blast.detonate` on hit), `GrenadeItem`, `GrenadeLauncherItem`, and `Blast` (damage to `LivingEntity` only, falloff and `ServerExplosion.getSeenPercent` shielding, never touches blocks). Items `guncotton`, `grenade`, `grenade_launcher` (`PetroItems`). Feature switch `explosives`.
 - **Flow batteries (batch 17):** fluid `vanadium_electrolyte` (chemical reactor); `FLOW_BATTERY` is a battery (`isBattery`, `keepsContents`) whose reservoir takes only electrolyte and cannot be extracted from. `SimpleEnergyStorage` takes an optional ceiling (`LongSupplier`); the flow battery's is electrolyte mB × `FLOW_BATTERY_JE_PER_MB`. `loadAdditional` reads the reservoir before the energy.
 - **Chlor-alkali (batch 15):** gas `vinyl_chloride`; items `pvc_resin`, `soap` (`chemistry/SoapItem`: use to clear status effects).
@@ -272,9 +276,36 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ### Feature switches (`config/`)
 
-- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials, `machines`, `deposits` (surface deposit worldgen), `pixel_hollows` and `retro_trader`.
+- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives`, `parties`, `drones`, `pixel_hollows` and `retro_trader`.
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
+
+### Parties (`party/`)
+
+- **Shared team rule.** Call the static methods on `JugcraftParties`: `sameParty`, `isLeader`, `partyMembers`, `partyId`, `addListener`.
+- **`mayServe(systemOwner, systemMode, jobOwner, jobMode)`** with `UseMode.PERSONAL`/`PARTY` is the one rule for whether an automated system may work on another player's job. Use it; don't write your own.
+- **Logic and storage:**
+  - `PartyManager` holds the rules and has no Minecraft types.
+  - `PartyStore` saves `<world>/jugcraft/parties.txt`.
+  - `PartyCommands` provides `/party`.
+- Details: [features/parties.md](features/parties.md).
+
+### Drones (`drone/`)
+
+- **`BuildJobs`** is the build-job interface. A `Source` offers open positions; depots reserve them, fly the materials there and call `fill`. Blueprints (#23) will be a source. `SimpleBuildJobs` is a minimal one, used by tests and the development-only `/dronetest` command.
+- **Pure logic (no Minecraft types), testable on its own:**
+  - `PlatformLayout` scans the platform the Drone Tower places: separated 5x5 pads and 3x3 supply pickups. A terminal without a tower flies no drones (`allowTiersWithoutTower` is for tests and `/dronetest` only).
+  - `DroneFleet` holds the roster and the cached pooled power; `DockLayout` places docked drones round the pads.
+  - `FlightScheduler` runs the timed flights; `FlightPath` is each flight's shape and timing (shared by server and client).
+- **World side:**
+  - `DroneTerminalBlockEntity` does power, dispatch and delivery, forms pads and pickups, and sends clients a `DepotView`.
+  - `DroneRoutes` picks each leg's cruise height over the terrain.
+  - `DroneDepots` is the registry of loaded terminals.
+  - `LandingPadBlock`, `SupplyPickupBlock`, `ControlScreenBlock` and `HoloTableBlock` are the combining plates, panels and table sections; `DepotDisplayBlockEntity` links a formed screen or table to the nearest terminal.
+- **Client side:** `DroneDepotRenderer` and `DroneModel` draw the drones (all nine tiers) and the pickup lift; `ControlScreenRenderer` draws the wall display; `HoloMapRenderer` draws the hologram map; `DroneTerminalScreen` is the terminal screen.
+- Tier numbers live in `DroneTier` and `tools/drones.py`; the checker keeps them in sync.
+- Details: [features/drone-depot.md](features/drone-depot.md).
+- **Drone Tower (`tower/`):** `JugcraftTower` registers the building blocks, furniture (`FurnitureBlock`), the Tower Core (`TowerCoreBlock`, `TowerCoreBlockEntity`) and modules. `TowerData` loads `data/jugcraft/drone_tower/tower.json.gz` (made by `tools/drone_tower.py`). `TowerBuildJobs` is the `BuildJobs.Source` for tiers 2–9. `TowerUpgradePayload` is the screen's upgrade request, and `TowerScreen` is the client screen. The terminal links to the core, and the tower gives it hangars, pickups, capacity and the drone tier cap. Details: [features/drone-tower.md](features/drone-tower.md).
 
 ### Registration (`materials/`)
 
@@ -282,7 +313,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - `MetalFamily.builder(name).mined().extraItem(...).build()` registers a whole metal set. `MineralFamily.register(name)` does the same for minerals.
 - `JugcraftWorldgen` adds placed features to biomes. In 26.x, configured features live in `data/jugcraft/worldgen/feature/` (there is no `configured_feature` folder), with no `config` wrapper and with block states written as plain IDs.
 - Surface deposits (`deposit/`): `JugcraftDeposits` registers the `DepositBlock`s (mirrors `tools/deposits.py`); `Deposits` keeps how much each touched deposit block has given (`SavedData`, `jugcraft_deposits.dat`) and turns an empty one to stone. `JugcraftWorldgen.addDeposit` adds their disk features to the stony hill biomes at `LOCAL_MODIFICATIONS`.
-- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → deposits → machines → fluids → logistics → storage → electronics → farming → prospecting → kinetics → tools → guide → Pixel Hollows → Retro Trader → conditions → worldgen → style pack.
+- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → machines → fluids → logistics → guide → Pixel Hollows → Retro Trader → conditions → worldgen → parties → style pack (drones, the tower and blueprints register right after the guide).
 
 ### Looks (`tools/model_writer.py`, `tools/steampunk_*.py`)
 
