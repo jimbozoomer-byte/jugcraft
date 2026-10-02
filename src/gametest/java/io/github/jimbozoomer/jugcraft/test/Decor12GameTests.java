@@ -19,14 +19,17 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.Item;
@@ -304,10 +307,12 @@ public class Decor12GameTests {
 		cook.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK));
 		helper.assertTrue(!bonfire.cook(level, cook.getMainHandItem(), cook), "Nothing that a campfire doesn't cook goes on");
 
-		ServerPlayer victim = player(helper, pos.east(), 0.0F, ItemStack.EMPTY);
+		// A pig, as a player who has just joined can't be hurt for a few seconds.
+		LivingEntity victim = (LivingEntity) helper.spawn(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("pig")), pos.east());
 		float health = victim.getHealth();
 		helper.getBlockState(pos).getBlock().stepOn(level, helper.absolutePos(pos), helper.getBlockState(pos), victim);
 		helper.assertTrue(victim.getHealth() < health, "It burns whoever stands on it");
+		victim.discard();
 
 		helper.runAfterDelay(600 / HalloweenBonfireBlockEntity.SPEED + 10, () -> {
 			helper.assertTrue(dropped(helper, item("roasted_chestnuts")) == 4 && bonfire.items().stream().allMatch(ItemStack::isEmpty),
