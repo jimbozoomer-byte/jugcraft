@@ -798,6 +798,7 @@ def check_agriculture():
     check_feast(java, main)
     check_maze(java, main)
     check_ghosts(java, main)
+    check_face_paint(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2557,6 +2558,42 @@ def check_ghosts(java, main):
     for source in ("GravestoneBlock", "GraveMoundBlock"):
         if "Spirits.stir(level, pos, random)" not in java.get(source, ""):
             err(f"{source} must stir at night (Spirits.stir in randomTick)")
+
+def check_face_paint(java, main):
+    """Face paint: FacePaint.java and FacePaintKitItem.java match FACE_PAINT in tools/agriculture.py (the designs in order,
+    the uses, the time to paint your own face, how often paint washes off); the kit, its design component and the paint
+    attachment are registered; every design has its name and its texture; the kit has its texture, words, recipe and
+    advancement; and a painted face counts as a costume for trick-or-treating and the costume contest."""
+    fp = ag.FACE_PAINT
+    paint = java.get("FacePaint", "")
+    designs = re.search(r"enum Design implements StringRepresentable \{\s*([A-Z_,\s]+);", paint)
+    if not designs or [d.strip().lower() for d in designs.group(1).split(",")] != list(fp["designs"]):
+        err("FacePaint.Design differs from FACE_PAINT['designs'] in tools/agriculture.py")
+    found = {name: float(value) for source in ("FacePaint", "FacePaintKitItem")
+             for name, value in re.findall(r"static final int ([A-Z_]+) = (\d+);", java.get(source, ""))}
+    for name, value in {"WASH_TICKS": fp["wash_ticks"], "USES": fp["uses"], "USE_TICKS": fp["use_ticks"]}.items():
+        if found.get(name) != value:
+            err(f"{name} = {found.get(name)} differs from FACE_PAINT in tools/agriculture.py ({value})")
+    if f'registerItem("{fp["kit"]}", FacePaintKitItem::new, new Item.Properties().durability(FacePaintKitItem.USES)' not in main \
+            or f'Jugcraft.id("{fp["component"]}")' not in main:
+        err("JugcraftAgriculture.java must register the Face Paint Kit (worn by use) and its design component")
+    if f'buildAndRegister(Jugcraft.id("{fp["attachment"]}"))' not in paint or "syncWith(" not in paint:
+        err("FacePaint must register the face paint attachment, sent to the clients that see the player")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"item.jugcraft.{fp['kit']}", "item.jugcraft.face_paint_kit.design", "item.jugcraft.face_paint_kit.hint",
+            "message.jugcraft.face_paint.design", "message.jugcraft.face_paint.painted", "message.jugcraft.face_paint.washed"]
+    for key in keys + [f"face_paint.jugcraft.{design}" for design in fp["designs"]]:
+        if key not in lang:
+            err(f"Face paint has no words for {key}")
+    for design in fp["designs"]:
+        if not (ASSETS / "textures" / "entity" / "face_paint" / f"{design}.png").exists():
+            err(f"The {design} face paint needs its texture")
+    if not (ASSETS / "textures" / "item" / f"{fp['kit']}.png").exists() or not (DATA / "jugcraft" / "recipe" / f"{fp['kit']}.json").exists() \
+            or not (DATA / "jugcraft" / "advancement" / "face_painter.json").exists():
+        err("The Face Paint Kit needs its texture, recipe and advancement")
+    for source in ("TrickOrTreat", "JudgesTableBlockEntity"):
+        if "FacePaint.inCostume(player)" not in java.get(source, ""):
+            err(f"{source} must count a painted face as a costume (FacePaint.inCostume)")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

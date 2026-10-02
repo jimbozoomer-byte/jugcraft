@@ -535,6 +535,8 @@ HALLOWEEN_ADVANCEMENTS = {
                 "frame": "task"},
     "ghost_hunter": {"icon": "jugcraft:spirit_lantern", "title": "Ghost Hunter", "description": "Catch a restless spirit in a glass bottle",
                      "frame": "goal"},
+    "face_painter": {"icon": "jugcraft:face_paint_kit", "title": "Face Painter", "description": "Paint another player's face",
+                     "frame": "task"},
 }
 
 
@@ -1330,6 +1332,16 @@ GHOSTS = {"lantern": "spirit_lantern", "lantern_display": "Spirit Lantern", "ect
           "haunt_radius": 6, "haunt_height": 3.0, "shy_radius": 3.0, "sneak_shy_radius": 1.5, "drift_speed": 0.04, "shy_speed": 0.12,
           "reveal_ticks": 40, "look_ticks": 10, "fade_ticks": 10}
 
+# ---------------------------------------------------------------- Fall additions 10: face paint
+# A Face Paint Kit (FacePaintKitItem) paints one of `designs` on a player's face (FacePaint: a Fabric data attachment,
+# saved and sent to every client that sees the player, drawn by the client's FacePaintLayer). Its dial (data component
+# `component`) picks the design; it lasts `uses` faces; painting your own face takes `use_ticks`. The paint washes off
+# when the player's head is under water (checked every `wash_ticks`) or at death. A painted face counts as a costume.
+FACE_PAINT = {"kit": "face_paint_kit", "kit_display": "Face Paint Kit", "component": "face_paint_design", "attachment": "face_paint",
+              "uses": 16, "use_ticks": 32, "wash_ticks": 20,
+              "designs": {"skull": "Skull", "pumpkin": "Jack o'Lantern", "black_cat": "Black Cat", "vampire": "Vampire",
+                          "witch": "Witch", "scarecrow": "Scarecrow"}}
+
 
 def pantry_blocks():
     return [PANTRY["kettle"], PANTRY["shelf"]]
@@ -1349,6 +1361,10 @@ def firework_items():
 
 def ghost_items():
     return [GHOSTS["lantern"], GHOSTS["ectoplasm"]]
+
+
+def face_paint_items():
+    return [FACE_PAINT["kit"]]
 
 
 def lantern_items():
@@ -1975,7 +1991,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items())
 
 
 def owns(entry_id):

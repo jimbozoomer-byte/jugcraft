@@ -1,6 +1,6 @@
 # Fall Additions
 
-Status: the chandlery (addition 1), the cider mill (addition 2), the preserves pantry (addition 3), crows and working scarecrows (addition 4), spooky fireworks (addition 5), the sky lantern festival (addition 6), the Harvest Feast Table (addition 7), the corn maze (addition 8) and ghost hunting (addition 9) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
+Status: the chandlery (addition 1), the cider mill (addition 2), the preserves pantry (addition 3), crows and working scarecrows (addition 4), spooky fireworks (addition 5), the sky lantern festival (addition 6), the Harvest Feast Table (addition 7), the corn maze (addition 8), ghost hunting (addition 9) and face paint (addition 10) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok lets build another 10 more thorough and well thought out festive halloween and fall additions, maybe for one we do candle making with an interesting process to make them allowing you to make a bunch of different combinations and then light them to give different cool effects to an aoe area like beacons do"). The ten additions ship one per pull request, each stacked on the one before:
 1. the chandlery: the Wax Melting Pot and Aura Candles;
 2. the cider mill: apple trees, the Cider Press, the Cider Barrel and four ciders;
@@ -11,11 +11,11 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok let
 7. the Harvest Feast Table: a long table to set with the harvest, and a feast that grows with its variety and its company;
 8. the corn maze: a gate that plants a maze of corn from its own seed, and times runners through it;
 9. ghost hunting: restless spirits that rise from graves at night, the Spirit Lantern that reveals them, and Ectoplasm, the Ghostly candle scent;
-10. face paint (planned).
+10. face paint: a kit that paints six designs on players' faces, which count as costumes.
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace). Spooky fireworks are Discovery tier too: paper, gunpowder and the picture's ingredients (a feather and black dye, a carved pumpkin, a phantom membrane or a bone), and glowstone dust to twinkle; the Show Launcher is a dispenser, iron ingots, planks and redstone. Crows need nothing to come but a ripe crop; the scarecrow that keeps them off is the existing one (a hay bale, wool and sticks), and its pumpkin heads come from any pumpkin patch. The sky lantern festival is Discovery tier too: paper, string and a candle (lanterns), any dye for a colour and an anvil for a wish; mooncakes are baked in the Kitchen Garden's Cooking Pot from wheat, sugar, an egg and beans, roasted chestnuts or a pumpkin. The Harvest Feast Table is Discovery tier too: wooden slabs and logs; what it rewards is a varied harvest, so its best feasts come as a farm grows. The corn maze is Discovery tier too: a hay bale and sticks (the gate) and corn kernels, a kernel a stalk of wall. Ghost hunting is Discovery tier too: gold nuggets, glass panes, an amethyst shard and a candle (the Spirit Lantern), glass bottles, and the graveyard decorations' gravestones and grave mounds.
-Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast. Crows are for farmers: a little pressure on open fields, answered by building and dressing scarecrows, and a source of feathers for fletchers and chandlers. Spooky fireworks are for anyone throwing a party: one rocket for a moment, or a Show Launcher's nine tubes for a planned show. Sky lanterns are for gatherings: one player can let eight go and hold a festival alone, but a crowd fills the sky faster, and everyone there shares the Luck; mooncakes are for cooks, and for anyone out under a full moon. The feast table is for farmers and cooks to share their harvest: a host sets a long table, and everyone who eats there shares the blessing, so a group fills up before a dig, a raid or a boss. The corn maze is for farmers who grow corn and for anyone at a harvest party: one player plants it, and anyone can run it against the clock. Ghost hunting is for explorers and chandlers: a hunter with a lantern reveals the spirits haunting a graveyard to everyone near, friends corner them, and the Ectoplasm they catch scents candles.
+Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace). Spooky fireworks are Discovery tier too: paper, gunpowder and the picture's ingredients (a feather and black dye, a carved pumpkin, a phantom membrane or a bone), and glowstone dust to twinkle; the Show Launcher is a dispenser, iron ingots, planks and redstone. Crows need nothing to come but a ripe crop; the scarecrow that keeps them off is the existing one (a hay bale, wool and sticks), and its pumpkin heads come from any pumpkin patch. The sky lantern festival is Discovery tier too: paper, string and a candle (lanterns), any dye for a colour and an anvil for a wish; mooncakes are baked in the Kitchen Garden's Cooking Pot from wheat, sugar, an egg and beans, roasted chestnuts or a pumpkin. The Harvest Feast Table is Discovery tier too: wooden slabs and logs; what it rewards is a varied harvest, so its best feasts come as a farm grows. The corn maze is Discovery tier too: a hay bale and sticks (the gate) and corn kernels, a kernel a stalk of wall. Ghost hunting is Discovery tier too: gold nuggets, glass panes, an amethyst shard and a candle (the Spirit Lantern), glass bottles, and the graveyard decorations' gravestones and grave mounds. Face paint is Discovery tier too: a bowl and white, black, orange and green dye.
+Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast. Crows are for farmers: a little pressure on open fields, answered by building and dressing scarecrows, and a source of feathers for fletchers and chandlers. Spooky fireworks are for anyone throwing a party: one rocket for a moment, or a Show Launcher's nine tubes for a planned show. Sky lanterns are for gatherings: one player can let eight go and hold a festival alone, but a crowd fills the sky faster, and everyone there shares the Luck; mooncakes are for cooks, and for anyone out under a full moon. The feast table is for farmers and cooks to share their harvest: a host sets a long table, and everyone who eats there shares the blessing, so a group fills up before a dig, a raid or a boss. The corn maze is for farmers who grow corn and for anyone at a harvest party: one player plants it, and anyone can run it against the clock. Ghost hunting is for explorers and chandlers: a hunter with a lantern reveals the spirits haunting a graveyard to everyone near, friends corner them, and the Ectoplasm they catch scents candles. Face paint is for anyone dressing up: a painter does a friend's face in a moment, and a painted face is a costume that leaves the head free for a hat, or for a helmet once the party's over.
 
 Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, and preserves put up, all year; crows come to fields all year too, and fireworks and sky lanterns go up whenever someone lets them go. A mooncake's Luck comes with every full moon, one night in eight, and a feast can be held, or a maze run, any day.
 
@@ -204,6 +204,13 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 75. **Catching one:** use a glass bottle on a revealed spirit and the bottle fills with **Ectoplasm**, glowing green ooze. The first catch earns **Ghost Hunter**. A spirit drops nothing else.
 76. **Ectoplasm** is the **Ghostly** candle scent: stirred into molten wax it gives its bottle back, and a lit Ghostly candle turns the players in its aura **invisible**.
 
+### Face paint
+77. **The Face Paint Kit:** a tin palette of greasepaints and a brush (a bowl and white, black, orange and green dye), good for **16 faces**. Its dial is set to one of six designs: a **skull**, a **jack o'lantern**, a **black cat**, a **vampire**, a **witch** or a **scarecrow**. Sneak and use it to turn the dial; the kit's tooltip shows the design.
+78. **Painting:** use the kit on another player to paint their face at once, or hold use for a second and a half to paint your own. Painting over a painted face replaces the design. Each face wears the kit by one use. Painting a friend's face earns **Face Painter**.
+79. **On the face:** the design is drawn over the face of the painted player's skin, for everyone who can see them, turning and nodding with the head. Designs leave the skin showing where they don't paint (the cat's whiskers, the scarecrow's rosy cheeks), and some leave the eyes clear (the vampire, the witch). A helmet or a pumpkin on the head covers the face as it would.
+80. **Washing off:** paint lasts until the player's head goes under water, or they die.
+81. **A costume:** a painted face counts as a costume for trick-or-treating (with nothing on the head) and for the costume contest's runway. A costume hat's extra treat still needs the hat.
+
 ## Connections
 - Existing input producer: vanilla copper (the pot), bees (honeycomb), zombies (rotten flesh), spiders (string), dyes, and the scent items above; Jugcraft's `jugcraft:heat_sources` (the Cooking Pot's heat).
 - Existing output consumer:
@@ -251,6 +258,10 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - Ghosts, output consumer: the chandlery: Ectoplasm is its twelfth scent, Ghostly (Invisibility), for hide-and-seek, haunted houses and sneaking past mobs. The advancement Ghost Hunter.
 - Ghosts, entry path: the lantern is early-game (an amethyst shard from a geode); a gravestone is cut from stone on a stonecutter, and a grave mound is two dirt and a rotten flesh; spirits need only a grave and a night.
 - Ghosts, required vs optional: optional and all year; one hunter can corner a spirit alone, and a group, with one lantern among them, all see the spirits.
+- Face paint, input producer: dyes (white, black, orange, green) and a bowl.
+- Face paint, output consumer: trick-or-treating and the costume contest, which now take a painted face as a costume; parties and screenshots.
+- Face paint, entry path: everything is early-game.
+- Face paint, required vs optional: cosmetic, all year; one player can paint their own face.
 - Crows and the plans: [AGRICULTURE.md](../branches/AGRICULTURE.md) promised that the scarecrow would one day keep crop-eating birds away; it now does.
 - Cider mill and the plans:
   - [AGRICULTURE.md](../branches/AGRICULTURE.md) plans orchards (slice 4) and a Fruit and Seed Press (apples into cider, grapes into juice, seed oil for engineers).
@@ -373,6 +384,10 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
   - Units: a grave stirs on 1 random tick in 4, at night only; at most 3 spirits within 16 blocks; a spirit's haunt is 6 blocks across and 3 up; it drifts at 0.04 blocks a tick and shies at 0.12 (a walking player covers about 0.22); a lantern reveals within 12 blocks, looking every 10 ticks, each look lasting 40.
   - Yield: one Ectoplasm a spirit; one Ectoplasm scents a pot of wax, as any scent item does. A graveyard of a dozen graves gives about two or three spirits a minute at night while it has room for them; a single grave about two a night.
   - Nothing is made from nothing: a spirit needs a grave and a night, a catch needs a bottle, and Ectoplasm only scents wax. No loop.
+- **Face paint:**
+  - Costs: a kit from a bowl and four dyes, good for 16 faces.
+  - Units: painting your own face takes 32 ticks; the server looks for painted faces under water every 20 ticks.
+  - Face paint makes nothing and gives no effect: it is a costume, and the costume rules' rewards (one treat a home a night, a contest ribbon by vote) are unchanged. No loop.
 
 ## Multiplayer and persistence
 - **Server authority:**
@@ -472,6 +487,11 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - **Ghosts, bounded work:** graves stir only on vanilla's random ticks, which reach only chunks near players; each stir counts the spirits within 16 blocks once. A spirit looks for a lantern every 10 ticks (one search among the level's players). Nothing loads a chunk.
 - **Ghosts, IDs:** entity `restless_spirit`; items `spirit_lantern` and `ectoplasm`; the item tag `jugcraft:candle_scents/ghostly`; advancement `ghost_hunter`; the lantern's recipe. All new. The gravestones and the grave mound keep their IDs; they only gain random ticks.
 - **Ghosts, disable behaviour:** with the agriculture feature off, graves raise no spirits, spirits about fade, and the lantern's recipe doesn't load; everything stays registered.
+- **Face paint, server authority:** painting goes through vanilla's item use and entity interaction (reach checked by the server); turning the dial changes the kit on the server. The paint is a Fabric data attachment the server sets and clears; the server sends it to every client that can see the player, and clients only draw it. Whether a player is in costume is the server's own check.
+- **Face paint, persistence:** the paint is saved with the player and kept across a restart; it washes off under water, and is not kept at death. The kit saves its design as a data component.
+- **Face paint, bounded work:** every 20 ticks the server looks at each online player once (a water check for the painted ones). Each client finds a painted player among the level's players when drawing them.
+- **Face paint, IDs:** item `face_paint_kit`; data component `jugcraft:face_paint_design`; attachment `jugcraft:face_paint`; advancement `face_painter`; the kit's recipe. All new.
+- **Face paint, disable behaviour:** with the agriculture feature off, the kit's recipe doesn't load; kits already made still paint, paint already on stays, and everything stays registered.
 
 ## Dependencies and assets
 No new dependencies. Every texture is drawn by code (`tools/chandlery_textures.py`): the pot's hammered copper and dark inside, the brass dish, the wax (pale, tinted by its colour as it is drawn), the wax's surface in the pot, the flame (white at its heart, tinted by its scent) and the candle's item in two layers (its body, tinted by its dyed colour; its wick and dish, not). The models, blockstates, item model, names, tooltip, messages, loot and tags come from `tools/chandlery_data.py`; the numbers from `CHANDLERY` in `tools/agriculture.py`. The client's `WaxPotRenderer` draws the wax in the pot at its level and colour; `AuraCandleRenderer` draws the candle at its height, layers and colour and its flame; both share `TintedBoxes`. The item's colour is the vanilla `dyed_color` component, read by the item model's dye tint. Sounds are vanilla's (honeycomb waxing, dye use, brewing, a bottle filling, a honey slide, a bucket emptying, a candle going out).
@@ -522,6 +542,12 @@ Ghost hunting:
 - A spirit is drawn by `RestlessSpiritRenderer`: see-through boxes for its hood, robe, reaching arms and swaying tail, with hollow eyes and mouth, glowing faintly, bobbing, and fading in and out as it is revealed and hidden.
 - Item models, the lantern's recipe and words come from `tools/ghost_data.py`; the Ghostly scent's tag from `CHANDLERY`; the numbers from `GHOSTS` in `tools/agriculture.py`.
 - Sounds are vanilla's (an amethyst chime when one is revealed, a ghast's moan pitched up, a bottle filling).
+
+Face paint:
+- Textures are drawn by code in `tools/face_paint_textures.py`: the kit, and each design as a 16x16 laid over the face's 8x8, see-through where the skin shows.
+- The paint is drawn by `FacePaintLayer`, added to the player renderers: one quad a hair in front of the head's front, posed with the head.
+- The kit's item model, recipe and words come from `tools/face_paint_data.py`; the numbers from `FACE_PAINT` in `tools/agriculture.py`.
+- Sounds are vanilla's (dye being used, a bucket emptying when paint washes off).
 
 ## Verification
 ### Chandlery verification
@@ -799,6 +825,31 @@ Found by CI and fixed before this record: nothing; ghost hunting's tests and cli
 - graves stirring by their own random ticks over a real night (the tests raise spirits directly);
 - the sounds.
 
+### Face paint verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-24` stacked on ghost hunting:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares face paint with Java: the designs in order, the kit's uses, the time to paint your own face and how often paint washes off; checks the kit is registered and worn by use, its design component and the paint attachment are registered and the attachment is sent to clients, every design has its name and texture, the kit has its texture, words, recipe and advancement, and trick-or-treating and the costume contest take a painted face as a costume) | Pass, 621 IDs |
+| `./gradlew build` on `5cb4d12` (Build workflow run 37045137269) | Pass |
+| Game tests on the headless server, same run: 389 in total, 3 of them new here (`FacePaintGameTests`) | **All 389 pass**, the existing trick-or-treat and costume contest tests among them |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `5cb4d12` (run 37045137269): the player, painted on the server with each design in turn, seen from the front, with the paint drawn on their face. The screenshots are in [AGRICULTURE.md](../branches/AGRICULTURE.md#face-paint) |
+
+The 3 new game tests (`FacePaintGameTests`):
+1. a bare face is no costume; used on a friend, the kit paints a skull at once, wears by one use and earns Face Painter; used sneaking it turns its dial to a jack o'lantern and paints nothing; that then paints over the skull; painting your own face takes 32 ticks, brushing, and at the end paints it; the kit paints no zombie; after its last face it is used up; its recipe loads;
+2. paint stays on a dry face; standing in water two deep, the head is under and the paint washes off; the paint attachment is saved, and a design saved reads back the same;
+3. bare-headed and unpainted, a player knocking at a door on a Halloween night gets "no costume"; painted, the costume rule passes and only the missing porch light turns them away.
+
+Found by CI and fixed before this record: the player renderers are found by 26.3's `EntityTypes.PLAYER` (`EntityType.PLAYER` is gone there) (`5cb4d12`). The common code, the attachment included, compiled first time.
+
+**Not run (face paint):**
+- a person playing it in a client: painting a friend, painting your own face, washing it off in a lake;
+- a dedicated server with two players, each seeing the other's paint (the client test paints its own player, on its own server);
+- the paint after a restart or on rejoining (the tests check that the attachment is saved and its design reads back, not a real restart);
+- trick-or-treating and the costume contest in play with a painted face.
+
 ## World and event applicability
 - Candles and pots work anywhere, in every dimension, all year. Nothing is seasonal. The aura doesn't depend on biome, time or weather; harvest helps only plants that would grow there anyway.
 - Revealing shows creatures through walls (Glowing), which can help find hostile mobs in caves; it gives no other information.
@@ -812,6 +863,7 @@ Found by CI and fixed before this record: nothing; ghost hunting's tests and cli
 - A feast table works anywhere, in every dimension, all year.
 - A corn maze can be planted on any solid ground, in any dimension, all year. It needs no farmland or light.
 - Spirits rise at night on the Overworld clock, from graves in any dimension, all year; they aren't tied to the Halloween event.
+- Face paint works anywhere, all year.
 
 ## Rollout and open questions
 - The aura's area is a box reaching the radius in every direction, up and down too (a beacon's reaches the whole height of the world).
@@ -854,5 +906,8 @@ Found by CI and fixed before this record: nothing; ghost hunting's tests and cli
 - A revealed spirit is revealed to everyone who can see it, by design: one lantern serves a whole party.
 - Spirits pass no walls: they float, but bump into blocks like other creatures.
 - A Ghostly candle turns every player in its aura invisible, friend or foe, as a potion of Invisibility would; armour and held items still show.
+- Anyone holding a kit can paint another player's face without asking; the paint is harmless and washes off in water.
+- Face paint shows on players only; armor stands, mannequins and mobs can't be painted.
+- Rain doesn't wash paint off; only putting your head under water does.
 - Jars of preserves can't be served: a jar has no food component (it is eaten a serving at a time from the hand, with its own sealing and spoiling), and the table serves only items that do. Serving preserves at the table would be a follow-up.
 - A mooncake's Luck goes by the Overworld clock's moon wherever it is eaten, and needs only the sky open above the eater; it isn't limited to the Overworld.

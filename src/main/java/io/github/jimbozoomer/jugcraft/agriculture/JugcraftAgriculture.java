@@ -243,6 +243,8 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<ShowLauncherBlockEntity> SHOW_LAUNCHER_ENTITY;
 	/** A spooky firework made with glowstone dust: its sparks twinkle. */
 	public static DataComponentType<Boolean> TWINKLE;
+	/** The design a Face Paint Kit's dial is set to. */
+	public static DataComponentType<FacePaint.Design> FACE_PAINT_DESIGN;
 	/** A spooky firework's coloured spark, drawn by the client's SpookySparkParticle. */
 	public static final ParticleType<SpookySparkOptions> SPOOKY_SPARK = FabricParticleTypes.complex(true, SpookySparkOptions.CODEC,
 			SpookySparkOptions.STREAM_CODEC);
@@ -1308,6 +1310,13 @@ public final class JugcraftAgriculture {
 		RESTLESS_SPIRIT = entity("restless_spirit", EntityType.Builder.<RestlessSpirit>of(RestlessSpirit::new, MobCategory.AMBIENT).noLootTable()
 				.sized(0.6F, 1.4F).eyeHeight(1.15F).fireImmune().clientTrackingRange(8));
 		FabricDefaultAttributeRegistry.register(RESTLESS_SPIRIT, RestlessSpirit.createAttributes());
+
+		// Fall additions 10, face paint: a kit that paints a design on a player's face, which counts as a costume.
+		FACE_PAINT_DESIGN = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("face_paint_design"),
+				DataComponentType.<FacePaint.Design>builder().persistent(FacePaint.Design.CODEC).networkSynchronized(FacePaint.Design.STREAM_CODEC).build());
+		registerItem("face_paint_kit", FacePaintKitItem::new, new Item.Properties().durability(FacePaintKitItem.USES)
+				.component(FACE_PAINT_DESIGN, FacePaint.Design.SKULL), EQUIPMENT_TAB);
+		FacePaint.register();
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
