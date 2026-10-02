@@ -8,13 +8,19 @@ import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.biome.TheEndBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.FeatureSorter;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -30,7 +36,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
@@ -388,41 +393,45 @@ public class BiomeGameTests {
 	}
 
 	/**
-	 * The Nether and End biomes (batches 8 and 9): the search finds most of them within {@link #DIMENSION_SEARCH} blocks
-	 * of the origin, and every one it finds is among its dimension's biomes (which world generation sorts features by).
-	 * Distances, and whether each is listed, are logged.
+	 * The Nether and End biomes (batches 8 and 9). The game test server's Nether and End have a single fixed biome, so
+	 * this builds their biome sources as a real world's are built (vanilla's Nether preset, {@code TheEndBiomeSource.create},
+	 * which Fabric's biome API extends): every Jugcraft biome is among their biomes, their features sort into one order
+	 * (no feature order cycle), and sampling each dimension's own climate noise over a square {@link #DIMENSION_SEARCH}
+	 * blocks round the origin finds most of them (counts logged).
 	 */
 	@GameTest(maxTicks = 400)
 	public void dimensionBiomesArePlaced(GameTestHelper helper) {
-		MinecraftServer server = helper.getLevel().getServer();
-		for (ResourceKey<Level> dimension : List.of(Level.NETHER, Level.END)) {
-			List<ResourceKey<Biome>> biomes = dimension == Level.NETHER ? JugcraftDimensions.nether() : JugcraftDimensions.end();
-			ServerLevel level = server.getLevel(dimension);
-			helper.assertTrue(level != null, "No " + dimension.identifier());
-			Set<ResourceKey<Biome>> possible = new HashSet<>();
-			for (Holder<Biome> holder : level.getChunkSource().getGenerator().getBiomeSource().possibleBiomes()) {
-				holder.unwrapKey().ifPresent(possible::add);
-			}
-			LOGGER.info("{}: biome source {}, {} biomes", dimension.identifier().getPath(),
-					level.getChunkSource().getGenerator().getBiomeSource().getClass().getSimpleName(), possible.size());
-			int found = 0;
-			List<String> unlisted = new ArrayList<>();
+		ServerLevel level = helper.getLevel();
+		HolderGetter<Biome> biomeLookup = level.registryAccess().lookupOrThrow(Registries.BIOME);
+		BiomeSource nether = MultiNoiseBiomeSource.createFromPreset(level.registryAccess()
+				.lookupOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST).getOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER));
+		BiomeSource end = TheEndBiomeSource.create(biomeLookup);
+		Map<String, BiomeSource> sources = new LinkedHashMap<>();
+		sources.put("nether", nether);
+		sources.put("end", end);
+		Map<String, ResourceKey<NoiseGeneratorSettings>> noise = Map.of("nether", NoiseGeneratorSettings.NETHER, "end", NoiseGeneratorSettings.END);
+		for (Map.Entry<String, BiomeSource> dimension : sources.entrySet()) {
+			String name = dimension.getKey();
+			BiomeSource source = dimension.getValue();
+			List<ResourceKey<Biome>> biomes = name.equals("nether") ? JugcraftDimensions.nether() : JugcraftDimensions.end();
+			helper.assertTrue(!biomes.isEmpty(), "No Jugcraft " + name + " biomes were placed");
+			List<Holder<Biome>> possible = List.copyOf(source.possibleBiomes());
 			for (ResourceKey<Biome> biome : biomes) {
-				Pair<BlockPos, Holder<Biome>> nearest = level.findClosestBiome3d(holder -> holder.is(biome), BlockPos.ZERO.atY(64),
-						DIMENSION_SEARCH, 32, 32);
-				boolean listed = possible.contains(biome);
-				LOGGER.info("{}: {} {}; {}", dimension.identifier().getPath(), biome.identifier().getPath(), nearest == null
-						? "not within " + DIMENSION_SEARCH + " blocks"
-						: "at " + nearest.getFirst().getX() + " " + nearest.getFirst().getY() + " " + nearest.getFirst().getZ(),
-						listed ? "listed" : "not listed");
-				found += nearest == null ? 0 : 1;
-				if (nearest != null && !listed) {
-					unlisted.add(biome.identifier().toString());
+				helper.assertTrue(possible.stream().anyMatch(holder -> holder.is(biome)), biome.identifier() + " is not among the " + name + "'s biomes");
+			}
+			FeatureSorter.buildFeaturesPerStep(possible, holder -> holder.value().getGenerationSettings().features(), true);
+			Climate.Sampler sampler = RandomState.create(level.registryAccess(), noise.get(name), level.getSeed()).sampler();
+			Map<String, Integer> counts = new TreeMap<>();
+			for (int x = -DIMENSION_SEARCH; x <= DIMENSION_SEARCH; x += 32) {
+				for (int z = -DIMENSION_SEARCH; z <= DIMENSION_SEARCH; z += 32) {
+					source.getNoiseBiome(x >> 2, 64 >> 2, z >> 2, sampler).unwrapKey()
+							.filter(biomes::contains).ifPresent(key -> counts.merge(key.identifier().getPath(), 1, Integer::sum));
 				}
 			}
-			helper.assertTrue(unlisted.isEmpty(), "Generated but not among the " + dimension.identifier() + "'s biomes: " + unlisted);
-			helper.assertTrue(found * 2 >= biomes.size(), "Only " + found + " of " + biomes.size() + " Jugcraft biomes within "
-					+ DIMENSION_SEARCH + " blocks in the " + dimension.identifier());
+			LOGGER.info("The {}: {} biomes, Jugcraft's sampled every 32 blocks over {} blocks round the origin: {}", name, possible.size(),
+					DIMENSION_SEARCH, counts);
+			helper.assertTrue(counts.size() * 2 >= biomes.size(), "Only " + counts.size() + " of " + biomes.size() + " Jugcraft "
+					+ name + " biomes sampled: " + counts);
 		}
 		helper.succeed();
 	}
