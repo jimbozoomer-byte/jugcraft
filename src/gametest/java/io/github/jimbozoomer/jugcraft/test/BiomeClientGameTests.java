@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.SeasonalLeavesBlock;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The biomes branch in a real, normally generated world (seed "jugcraft"): how far from the start each seasonal-forest
  * biome is (logged), that their trees' seasonal leaves are generated in today's look, and screenshots of those found,
- * seen from above the treetops.
+ * seen from above the treetops where the biome is on the surface.
  */
 public class BiomeClientGameTests implements FabricClientGameTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger("jugcraft-test");
@@ -43,6 +44,14 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 	private static final int LEAF_REACH = 24;
 	/** How far below the top block of a column to look for leaves. */
 	private static final int LEAF_DEPTH = 40;
+	/**
+	 * The search finds a biome at any height (its nearest sample may be underground, under another biome); screenshots
+	 * and leaf counts use the nearest column within this many blocks whose surface has the biome.
+	 */
+	private static final int SURFACE_REACH = 64;
+	private static final int SURFACE_STEP = 8;
+	/** A spot is preferred where the surface 16 blocks to each side has the biome too. */
+	private static final int SURFACE_MARGIN = 16;
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -61,6 +70,7 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 			BlockPos start = context.computeOnClient(client -> BlockPos.containing(client.player.position()));
 			List<String> found = new ArrayList<>();
 			List<BlockPos> places = new ArrayList<>();
+			List<ResourceKey<Biome>> keys = new ArrayList<>();
 			for (ResourceKey<Biome> biome : JugcraftRegions.biomes()) {
 				BlockPos place = server.computeOnServer(minecraft -> {
 					Pair<BlockPos, Holder<Biome>> nearest = minecraft.overworld().findClosestBiome3d(holder -> holder.is(biome), start,
@@ -74,6 +84,7 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 				if (place != null) {
 					found.add(name);
 					places.add(place);
+					keys.add(biome);
 				}
 			}
 			// Vanilla regions keep the biomes the Jugcraft layout replaces.
@@ -90,13 +101,22 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 					vanillaMissing.add(biome.identifier().getPath());
 				}
 			}
+			List<BlockPos> spots = new ArrayList<>();
+			for (int i = 0; i < found.size(); i++) {
+				BlockPos place = places.get(i);
+				ResourceKey<Biome> biome = keys.get(i);
+				BlockPos spot = server.computeOnServer(minecraft -> surfaceSpot(minecraft.overworld(), place, biome));
+				LOGGER.info("Biomes, seed {}: {} on the surface {}", SEED, found.get(i), spot == null ? "not within " + SURFACE_REACH
+						+ " blocks of where it was found; using that place" : "at " + spot.getX() + " " + spot.getY() + " " + spot.getZ());
+				spots.add(spot == null ? place : spot);
+			}
 			// The chunks around each biome found are generated now, far from the player, so no random tick has turned
 			// their leaves: the seasonal_leaves tree decorator must have generated them in today's look.
 			int leaves = 0;
 			int stale = 0;
 			for (int i = 0; i < found.size(); i++) {
-				BlockPos place = places.get(i);
-				int[] counts = server.computeOnServer(minecraft -> leafLooks(minecraft.overworld(), place));
+				BlockPos spot = spots.get(i);
+				int[] counts = server.computeOnServer(minecraft -> leafLooks(minecraft.overworld(), spot));
 				LOGGER.info("Biomes, seed {}: {} generated seasonal leaves green {}, gold {}, bare {}; {} not in today's look (day {})",
 						SEED, found.get(i), counts[0], counts[1], counts[2], counts[3], JugcraftSeasons.today());
 				leaves += counts[0] + counts[1] + counts[2];
@@ -107,7 +127,7 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 				if (index < 0) {
 					continue;
 				}
-				BlockPos place = places.get(index);
+				BlockPos place = spots.get(index);
 				int ground = server.computeOnServer(minecraft -> {
 					ServerLevel level = minecraft.overworld();
 					level.getChunk(place.getX() >> 4, place.getZ() >> 4);
@@ -131,6 +151,45 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 						+ SEARCH + " blocks of the start (seed " + SEED + "): " + found);
 			}
 		}
+	}
+
+	/**
+	 * The column nearest {@code place} (within {@link #SURFACE_REACH} blocks, every {@link #SURFACE_STEP}) whose surface
+	 * has {@code biome}, preferring one with the biome {@link #SURFACE_MARGIN} blocks to each side too; null if none.
+	 */
+	private static BlockPos surfaceSpot(ServerLevel level, BlockPos place, ResourceKey<Biome> biome) {
+		List<int[]> offsets = new ArrayList<>();
+		for (int dx = -SURFACE_REACH; dx <= SURFACE_REACH; dx += SURFACE_STEP) {
+			for (int dz = -SURFACE_REACH; dz <= SURFACE_REACH; dz += SURFACE_STEP) {
+				offsets.add(new int[] {dx, dz});
+			}
+		}
+		offsets.sort(Comparator.comparingInt(offset -> offset[0] * offset[0] + offset[1] * offset[1]));
+		BlockPos edge = null;
+		for (int[] offset : offsets) {
+			int x = place.getX() + offset[0];
+			int z = place.getZ() + offset[1];
+			if (!surfaceIs(level, x, z, biome)) {
+				continue;
+			}
+			if (surfaceIs(level, x + SURFACE_MARGIN, z, biome) && surfaceIs(level, x - SURFACE_MARGIN, z, biome)
+					&& surfaceIs(level, x, z + SURFACE_MARGIN, biome) && surfaceIs(level, x, z - SURFACE_MARGIN, biome)) {
+				return surface(level, x, z);
+			}
+			if (edge == null) {
+				edge = surface(level, x, z);
+			}
+		}
+		return edge;
+	}
+
+	private static BlockPos surface(ServerLevel level, int x, int z) {
+		level.getChunk(x >> 4, z >> 4);
+		return new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
+	}
+
+	private static boolean surfaceIs(ServerLevel level, int x, int z, ResourceKey<Biome> biome) {
+		return level.getBiome(surface(level, x, z)).is(biome);
 	}
 
 	/**
