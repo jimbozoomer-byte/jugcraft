@@ -8,6 +8,8 @@
     "jugcraft:fir_log",
     "jugcraft:dead_log",
     "jugcraft:jacaranda_log",
-    "jugcraft:willow_log"
+    "jugcraft:willow_log",
+    "jugcraft:palm_log",
+    "jugcraft:cypress_log"
   ]
 }

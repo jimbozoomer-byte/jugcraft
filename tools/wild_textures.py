@@ -28,7 +28,21 @@ WOODS = {
                "heart": pal("8f7c48", "a08d56", "b19e66", "c1af78"),
                "sap": pal("d6caa0", "dfd4ae", "e7ddbb", "eee6c8"),
                "style": "furrowed"},
+    # Palm: grey-brown bark in rings where old fronds fell; pale, sandy wood.
+    "palm": {"bark": pal("4a4036", "5f5345", "766855", "8c7e68", "a2957c"),
+             "plank": pal("a88a5c", "bc9e6c", "cdb07d", "dcc18f", "e8d2a3"),
+             "heart": pal("9a7c4c", "ab8d5b", "bc9e6b", "cbaf7d"),
+             "sap": pal("d9c7a0", "e2d1ae", "eadbbb", "f1e4c8"),
+             "style": "ringed"},
+    # Cypress: reddish, stringy bark; warm orange-brown wood.
+    "cypress": {"bark": pal("3e2620", "55342a", "6c4436", "835543", "996752"),
+                "plank": pal("8f5634", "a66641", "ba7750", "cc895f", "dc9c71"),
+                "heart": pal("8a4a2a", "9c5833", "ae673e", "bf774b"),
+                "sap": pal("d0a585", "dab293", "e2bea1", "eac9ae"),
+                "style": "stringy"},
 }
+FRONDS = pal("173d14", "1f5019", "2b671f", "3a8028", "4f9a34", "6db44c")
+SCALES = pal("0f2a1a", "163522", "1e432b", "275235", "326240", "41754e")
 WILLOW = {"green": pal("223f18", "2f5620", "3f6e29", "548834", "6fa244", "93bd62"),
           "gold": pal("6a5a0e", "8f7a12", "b39a1c", "cdb52e", "e2cd4a", "f0e27c")}
 TWIG = pal("2a221c", "3e3228", "564637", "6e5a48")
@@ -47,6 +61,12 @@ def bark(wood, seed):
                 # Smooth plates split by shallow, wandering vertical fissures.
                 lane = (x + (y // 5) % 2) % 5
                 shade = 1 if lane == 0 else 3 if lane == 2 else 2
+            elif w["style"] == "ringed":
+                # Rings where old fronds fell, every few rows.
+                shade = 1 if y % 4 == 0 else 3 if y % 4 == 1 else 2
+            elif w["style"] == "stringy":
+                # Long, fibrous strands.
+                shade = 3 if (x * 2 + y // 4) % 5 == 0 else 1 if x % 3 == 0 else 2
             elif w["style"] == "furrowed":
                 # Deep, interlacing furrows between narrow ridges.
                 lane = (x + (1 if (y // 3) % 2 else 0)) % 3
@@ -196,6 +216,64 @@ def willow_sapling():
         for k in range(5):
             c.px(x0 + (1 if k > 2 and x0 > 8 else 0) - (1 if k > 2 and x0 < 8 else 0), 4 + k, green[4 if k % 2 else 3])
     c.line(5, 4, 11, 4, green[2])
+    return c.img
+
+
+def fronds_leaves(seed):
+    """Palm fronds: long feathery leaves with a midrib, crossing the tile."""
+    rng = random.Random(seed)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.img.putpixel((x, y), FRONDS[0] + (0,))
+    for _ in range(5):
+        x0, y0 = rng.randrange(16), rng.randrange(16)
+        dx, dy = rng.choice(((1, 0), (0, 1), (1, 1), (1, -1)))
+        for k in range(-7, 8):
+            x, y = (x0 + dx * k) % 16, (y0 + dy * k) % 16
+            c.px(x, y, FRONDS[2])
+            for side in (-1, 1):
+                if k % 2 == 0:
+                    c.px((x + dy * side) % 16, (y - dx * side) % 16, FRONDS[4 if side > 0 else 3])
+    for y in range(16):
+        for x in range(16):
+            if c.empty(x, y) and rng.random() < 0.3:
+                c.px(x, y, FRONDS[1])
+    return c.img
+
+
+def scale_leaves(seed):
+    """Dense cypress scale-leaves: small upright sprays, dark and nearly closed."""
+    rng = random.Random(seed)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, SCALES[rng.choice((0, 1, 1, 2))])
+    for _ in range(20):
+        x, y = rng.randrange(16), rng.randrange(16)
+        c.px(x, y, SCALES[4])
+        c.px(x, (y + 1) % 16, SCALES[3])
+        c.px((x + 1) % 16, (y + 1) % 16, SCALES[5] if rng.random() < 0.3 else SCALES[3])
+    return c.img
+
+
+def palm_sapling():
+    c = Canvas()
+    stem = WOODS["palm"]["bark"][3]
+    c.line(8, 15, 9, 7, stem)
+    for dx, dy in ((-4, 2), (4, 1), (-3, -2), (3, -3), (0, -4)):
+        c.line(9, 6, 9 + dx, 6 + dy, FRONDS[3])
+        c.px(9 + dx, 6 + dy, FRONDS[5])
+    return c.img
+
+
+def cypress_sapling():
+    c = Canvas()
+    c.line(8, 15, 8, 11, WOODS["cypress"]["bark"][3])
+    for y in range(3, 12):
+        half = 1 if y < 6 or y > 9 else 2
+        for dx in range(-half, half + 1):
+            c.px(8 + dx, y, SCALES[3 + (dx + y) % 3])
     return c.img
 
 
@@ -405,6 +483,10 @@ def wild_textures():
         out[("block", f"{wood}_planks")] = planks(wood, 521 + index)
     out[("block", "jacaranda_leaves")] = blossom_leaves("jacaranda", 531)
     out[("block", "jacaranda_sapling")] = blossom_sapling("jacaranda")
+    out[("block", "palm_fronds")] = fronds_leaves(551)
+    out[("block", "palm_sapling")] = palm_sapling()
+    out[("block", "cypress_leaves")] = scale_leaves(561)
+    out[("block", "cypress_sapling")] = cypress_sapling()
     out[("block", "willow_leaves")] = willow_leaves("green", 541)
     out[("block", "willow_leaves_gold")] = willow_leaves("gold", 541)
     out[("block", "willow_leaves_bare")] = willow_leaves("bare", 543)

@@ -54,6 +54,20 @@ SHAPES = {
                       "trunk": {"type": "straight", "base_height": 6, "height_rand_a": 3},
                       "foliage": {"type": "blob", "radius": 3, "offset": 0, "height": 3},
                       "decorators": [{"type": "minecraft:leave_vine", "probability": 0.25}]},
+    # Palm: a tall trunk that bends as it rises (vanilla's bending trunk), crowned with a flat spray of fronds. It
+    # grows on sand as well as grass (placed where a dead bush could stand).
+    "palm": {"wood": "palm", "sapling": True, "survives_as": "minecraft:dead_bush",
+             "trunk": {"type": "bending", "base_height": 6, "height_rand_a": 3, "min_height_for_leaves": 5,
+                       "bend_length": [1, 2]},
+             "foliage": {"type": "acacia", "radius": 2, "offset": 0}},
+    # Cypress: a tall, narrow column of dark scale-leaves.
+    "cypress": {"wood": "cypress", "sapling": True,
+                "trunk": {"type": "straight", "base_height": 9, "height_rand_a": 4},
+                "foliage": {"type": "spruce", "radius": [1, 1], "offset": [0, 1], "trunk_height": [1, 2]}},
+    # A small acacia of dry country (vanilla acacia wood), growing on sand too.
+    "desert_acacia": {"wood": "minecraft:acacia", "survives_as": "minecraft:dead_bush",
+                      "trunk": {"type": "forking", "base_height": 3, "height_rand_a": 1, "height_rand_b": 1},
+                      "foliage": {"type": "acacia", "radius": 1, "offset": 0}},
     # An oak bush: one oak log in a ball of oak leaves, the fields' scrub (vanilla oak wood; no sapling of its own).
     "oak_bush": {"wood": "minecraft:oak",
                  "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},

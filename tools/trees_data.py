@@ -79,8 +79,11 @@ def uniform(value):
 
 
 def trunk_placer(trunk):
-    return {"type": f"minecraft:{trunk['type']}_trunk_placer", "base_height": trunk["base_height"],
-            "height_rand_a": trunk["height_rand_a"], "height_rand_b": trunk.get("height_rand_b", 0)}
+    out = {"type": f"minecraft:{trunk['type']}_trunk_placer", "base_height": trunk["base_height"],
+           "height_rand_a": trunk["height_rand_a"], "height_rand_b": trunk.get("height_rand_b", 0)}
+    # Any other field of vanilla's placer (the bending trunk's bend length, for example), ranges as uniform.
+    out.update({key: uniform(value) for key, value in trunk.items() if key not in ("type", "base_height", "height_rand_a", "height_rand_b")})
+    return out
 
 
 def foliage_placer(foliage):

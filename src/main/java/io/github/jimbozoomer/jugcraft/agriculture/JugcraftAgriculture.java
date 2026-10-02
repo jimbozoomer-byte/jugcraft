@@ -81,7 +81,6 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.TallFlowerBlock;
-import net.minecraft.world.level.block.WaterlilyBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.TintedParticleLeavesBlock;
@@ -132,6 +131,8 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower FIR_GROWER = grower("fir");
 	public static final TreeGrower JACARANDA_GROWER = grower("jacaranda");
 	public static final TreeGrower WILLOW_GROWER = grower("willow");
+	public static final TreeGrower PALM_GROWER = grower("palm");
+	public static final TreeGrower CYPRESS_GROWER = grower("cypress");
 	/** The dead tree, which no sapling grows; it stands in the Dead Forest (and game tests grow it). */
 	public static final TreeGrower DEAD_TREE_GROWER = grower("dead_tree");
 	/** Seasonal trees' leaf schedules, in season days. Keep in sync with TREES in tools/agriculture.py. */
@@ -275,6 +276,10 @@ public final class JugcraftAgriculture {
 				MapColor.TERRACOTTA_GRAY, MapColor.TERRACOTTA_PINK);
 		registerTree("willow", "willow_leaves", WILLOW_GROWER, WILLOW_LEAVES, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
 				MapColor.TERRACOTTA_BROWN, MapColor.TERRACOTTA_YELLOW);
+		registerTree("palm", "palm_fronds", PALM_GROWER, null, Blocks.JUNGLE_SAPLING, Blocks.JUNGLE_LEAVES,
+				MapColor.TERRACOTTA_LIGHT_GRAY, MapColor.SAND);
+		registerTree("cypress", "cypress_leaves", CYPRESS_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
+				MapColor.TERRACOTTA_RED, MapColor.TERRACOTTA_ORANGE);
 		registerWoodSet("dead", MapColor.COLOR_LIGHT_GRAY, MapColor.TERRACOTTA_LIGHT_GRAY);
 		registerWildPlants();
 
@@ -900,7 +905,8 @@ public final class JugcraftAgriculture {
 	/**
 	 * The biomes branch's wild plants (tools/plants.py), from the generated {@code /jugcraft/plants.json}: small flowers
 	 * (with their potted forms), tall flowers and tall plants, flowerbeds (ground cover, {@link GroundCoverBlock}), water
-	 * plants ({@link WaterPlantBlock}) and plants floating on water, copying a vanilla plant's properties. They compost and burn like vanilla's flowers.
+	 * plants ({@link WaterPlantBlock}) and plants floating on water ({@link FloatingPlantBlock}), copying a vanilla plant's
+	 * properties. They compost and burn like vanilla's flowers.
 	 */
 	private static void registerWildPlants() {
 		JsonArray plants;
@@ -952,14 +958,14 @@ public final class JugcraftAgriculture {
 					yield water;
 				}
 				case "surface" -> {
-					Block floating = registerBlock(id, WaterlilyBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LILY_PAD));
+					Block floating = registerBlock(id, FloatingPlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LILY_PAD));
 					registerItem(id, props -> new PlaceOnWaterBlockItem(floating, props), new Item.Properties().useBlockDescriptionPrefix()
 							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
 					yield floating;
 				}
 				default -> throw new IllegalStateException("Unknown wild plant kind in /jugcraft/plants.json: " + plant);
 			};
-			if (!(block instanceof WaterPlantBlock) && !(block instanceof WaterlilyBlock)) {
+			if (!(block instanceof WaterPlantBlock) && !(block instanceof FloatingPlantBlock)) {
 				fire.add(block, 60, 100);
 			}
 		}

@@ -7,7 +7,7 @@ Each plant is registered alike from the generated /jugcraft/plants.json (agricul
 - "flowerbed": ground cover of up to four clumps (agriculture/GroundCoverBlock, like pink petals).
 - "tall_plant": a two-block plant that is not a flower (DoublePlantBlock), dropping itself from its lower half.
 - "water_plant": a plant under water (agriculture/WaterPlantBlock, like seagrass); only shears take it.
-- "surface": a plant floating on still water (vanilla's lily pad block); placed on water like a lily pad.
+- "surface": a plant floating on still water (agriculture/FloatingPlantBlock, like a lily pad); placed on water.
 Every plant composts, burns like vanilla flowers and follows the "biomes" feature switch for its recipes. Textures are
 drawn by tools/wild_textures.py. Biomes place them through tools/biomes.py EXTRAS.
 """

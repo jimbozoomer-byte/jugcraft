@@ -52,7 +52,7 @@ Fourteen wet biomes, most in the **wetland** layout of Jugcraft regions. The swa
 - Existing worlds: new chunks only.
 
 ## Dependencies and assets
-- Plants are registered from `/jugcraft/plants.json` (`tools/plants.py`): cattail is vanilla's DoublePlantBlock, watergrass `agriculture/WaterPlantBlock` (seagrass-like, our own), duckweed vanilla's lily pad block with our texture.
+- Plants are registered from `/jugcraft/plants.json` (`tools/plants.py`): cattail is vanilla's DoublePlantBlock, watergrass `agriculture/WaterPlantBlock` (seagrass-like, our own), duckweed `agriculture/FloatingPlantBlock` (rests on water like a lily pad).
 - Ponds are vanilla's lake feature filled with water and banked with mud; mud patches are vanilla's disk feature. Willows use vanilla's cherry foliage shape and vine decorator.
 - Textures drawn by code in `tools/wild_textures.py`. No Mojang file is copied.
 

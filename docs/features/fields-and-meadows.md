@@ -1,6 +1,6 @@
 # Fields and meadows (biomes batch 2)
 
-Status: in progress on branch `claude/biomes`, with the region engine ([biome-regions.md](biome-regions.md)). Awaiting CI. **Not yet played.**
+Status: in progress on branch `claude/biomes`, with the region engine ([biome-regions.md](biome-regions.md)). Green in CI (server and client game tests). **Not yet played.**
 Proposal issue: none. The owner asked on 2 October 2026 to remake the Biomes O' Plenty catalog's biomes ([branches/BIOMES.md](../branches/BIOMES.md)), and then to carry on through every batch. Everything here is original: the catalog guided the concepts only.
 Owner: @jimbozoomer-byte
 Target milestone and tier: world generation and building (Discovery).
@@ -64,7 +64,11 @@ Results are recorded under "Results" below after CI runs.
 - Not run: play, a dedicated server, two clients.
 
 ### Results
-Not yet run in CI.
+- **Run [37035901054](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37035901054) (commit b48ea821): failed to compile.** 26.3's `FlowerBedBlock` takes another constructor argument, so clover got its own `GroundCoverBlock`.
+- **Run [37036379281](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37036379281) (commit bfc35e1f): green.**
+  - Server game tests: all 309 required tests passed. `wildPlantsWork`: tall lavender dropped 1, a clover patch of four dropped 4. `jacarandaSaplingsGrow`: a jacaranda of 11 logs and 86 leaves. Every batch 2 rule placed its biome in the meadow layout (Field 172 entries, Grassland 172, Heathland 178, Lush Grassland 172, Flower Meadow 80, Prairie 80, Steppe 80, Lavender Field 76, Shrubland 76). The four layouts covered 2,515, 2,414, 2,033 and 1,860 of 16,384 samples.
+  - Client game test, a real world with seed `jugcraft`: all 18 Jugcraft biomes were within 6,400 blocks of the start. Batch 2's: Grassland 550, Field 607, Lush Grassland 2,020, Prairie 2,176, Heathland 2,485, Steppe 2,489, Shrubland 3,303, Lavender Field 3,724 and Flower Meadow 3,765 blocks away. Generated seasonal leaves near them were all in today's look.
+  - Screenshots (2 October, autumn): the Prairie shows goldenrod and tall grass under a big oak in autumn colours; the Steppe tan, dry grass; the Lavender Field lavender on grass below snowy peaks; the Heathland pines, oak bushes and wildflowers; the Field small spruces and oak bushes among yellow flowers; the Shrubland oak bushes in grass; the Lush Grassland oak bushes on a warm shore; the Flower Meadow a hillside of poppies and tulips. The Grassland shot mostly shows the snowy Muskeg next to it.
 
 ## World and event applicability
 - Biome fit: each biome takes the climate of the vanilla biome it replaces, so it borders what that biome bordered.

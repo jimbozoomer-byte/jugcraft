@@ -331,12 +331,12 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 # alike (festival_data.wood_assets) and registered alike (JugcraftAgriculture.registerWoodSet). Logs and wood strip
 # with an axe; logs saw into planks (sawmill). The chestnut is the Festival Crops' fruit tree; the larch is Alpine
 # Spawn's seasonal conifer; maple, aspen, fir and dead wood come from the biomes branch's seasonal forests, the
-# jacaranda from its fields and meadows, and the willow from its wetlands.
+# jacaranda from its fields and meadows, the willow from its wetlands, and palm and cypress from its warm, dry lands.
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
-             "jacaranda": "Jacaranda", "willow": "Willow"}
+             "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress"}
 # The feature switch each wood's hand recipes follow: the switch of whatever grows the tree.
 WOOD_SWITCHES = {"chestnut": FEATURE, "larch": "alpine_spawn", "maple": "biomes", "aspen": "biomes", "fir": "biomes",
-                 "dead": "biomes", "jacaranda": "biomes", "willow": "biomes"}
+                 "dead": "biomes", "jacaranda": "biomes", "willow": "biomes", "palm": "biomes", "cypress": "biomes"}
 
 
 def wood_blocks(wood, display):
@@ -374,6 +374,9 @@ TREES = {
     # The willow of the wetlands: leaves out early and holds them late, turning yellow before they fall.
     "willow": {"leaves": "willow_leaves", "leaves_display": "Willow Leaves", "season": [88, 283, 328], "autumn": {"gold": 1},
                "base": "oak"},
+    # Warm and dry lands: the palm of oases (and later the tropics), and the tall, narrow Mediterranean cypress.
+    "palm": {"leaves": "palm_fronds", "leaves_display": "Palm Fronds", "season": None, "base": "jungle"},
+    "cypress": {"leaves": "cypress_leaves", "leaves_display": "Cypress Leaves", "season": None, "base": "spruce"},
 }
 SEASON_STATES = ["green", "gold", "bare"]
 JITTER = 7
