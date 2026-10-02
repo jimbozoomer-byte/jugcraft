@@ -14,7 +14,9 @@ Design inspiration: Mekanism: Tools by aidancbrady and team (MIT). Only the idea
 - **Bronze and steel armor:** helmet, chestplate, leggings and boots.
   - Bronze matches iron's defense with a little toughness.
   - Steel sits between iron and diamond.
-  - Both have their own worn look: plated bands with rivets and a visor slit.
+  - **Bronze is steampunk:** a brass-crowned aviator cap with teal goggles on the brow, a breastplate with a pressure gauge, a copper boiler on the back, brass pauldrons, leather straps and buckled boots.
+  - **Steel is kaiserpunk:** a black Pickelhaube with a gold star plate and spike base, a field-grey tunic over a steel cuirass with gold buttons, a medal and red piping, gold-fringed epaulettes, red-striped breeches and tall polished jackboots.
+  - The owner asked for this (2 October 2026): "make sure the armor looks really cool and the copper and bronze armor is steampunk and the other one is kaiserpunk". The art is drawn pixel by pixel in `tools/armor_styles.py`.
 - **Paxels for every tier** (wood, stone, iron, gold, diamond, netherite, bronze, steel).
   - One tool that mines like a pickaxe, an axe and a shovel.
   - Crafted from the tier's pickaxe, axe and shovel; lasts as long as all three together.
@@ -50,7 +52,7 @@ Design inspiration: Mekanism: Tools by aidancbrady and team (MIT). Only the idea
 Plain items; nothing new is saved. Recipes follow the `tin` (bronze) and `machines` (steel, paxels) feature switches.
 
 ## Dependencies and assets
-No new dependencies. Icons and worn layers are drawn by `tools/gear_textures.py` from hand-made masks and the mod's own metal palettes; no vanilla or Mekanism texture is traced or recoloured.
+No new dependencies. Tool icons are drawn by `tools/gear_textures.py` from hand-made masks and the mod's own metal palettes. Armor icons and worn layers are hand-drawn pixel maps in `tools/armor_styles.py`. No vanilla or Mekanism texture is traced or recoloured.
 
 ## Verification
 - `tools/check_mod_data.py`:
@@ -63,7 +65,8 @@ No new dependencies. Icons and worn layers are drawn by `tools/gear_textures.py`
   - paxels last three times their tier's pickaxe;
   - the netherite paxel resists fire;
   - every armor piece equips to its slot.
-- Not run: client play (how the icons and worn armor look in game), two players.
+- Client screenshots: `jugcraft_steel_armor_worn` (front), `jugcraft_bronze_armor_worn` (front) and `jugcraft_bronze_armor_back`.
+- Not run: client play, two players.
 
 ## World and event applicability
 Not applicable.

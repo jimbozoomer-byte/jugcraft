@@ -11,6 +11,7 @@ No numbered release yet. Everything below is on `main`.
 ### Unmerged: Tools, armor and paxels, batch 25
 - Bronze and steel swords, pickaxes, axes, shovels, hoes and armor (bronze iron-tier, steel between iron and diamond).
 - Paxels (pickaxe, axe and shovel in one) for every tier from wood to netherite, bronze and steel.
+- Bronze armor is steampunk (goggles, pressure gauge, boiler); steel armor is kaiserpunk (Pickelhaube, field-grey tunic, jackboots).
 - Two advancements and handbook pages. Inspired by Mekanism: Tools (MIT); all code and art original.
 
 ### Unmerged: Fewer chemistry machines, batch 24
