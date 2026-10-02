@@ -50,6 +50,10 @@
     "jugcraft:costume_trunk",
     "jugcraft:cider_press",
     "jugcraft:cider_barrel",
-    "jugcraft:pantry_shelf"
+    "jugcraft:pantry_shelf",
+    "jugcraft:show_launcher",
+    "jugcraft:feast_table",
+    "jugcraft:corn_maze_gate",
+    "jugcraft:corn_maze_finish"
   ]
 }
