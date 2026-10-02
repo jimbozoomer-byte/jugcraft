@@ -6,6 +6,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.LightCoordsUtil;
 
 /**
  * One spark of a spooky firework's picture: a bright point in its colour that flies out with the rest of the picture,
@@ -13,7 +14,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
  * sparks are.
  */
 public class SpookySparkParticle extends SingleQuadParticle {
-	private static final int FULL_BRIGHT = 0xF000F0;
 	private final boolean twinkle;
 	private final float size;
 
@@ -47,8 +47,8 @@ public class SpookySparkParticle extends SingleQuadParticle {
 	}
 
 	@Override
-	protected int getLightColor(float partialTick) {
-		return FULL_BRIGHT;
+	protected int getLightCoords(float partialTick) {
+		return LightCoordsUtil.FULL_BRIGHT;
 	}
 
 	@Override
