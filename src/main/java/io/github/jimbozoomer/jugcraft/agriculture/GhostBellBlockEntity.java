@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * A round of Ghost Tag, run on the server by a {@link GhostBellBlock}. Ringing the bell starts a round of
@@ -79,7 +80,7 @@ public class GhostBellBlockEntity extends BlockEntity {
 		}
 		List<ServerPlayer> near = new ArrayList<>();
 		for (ServerPlayer other : level.players()) {
-			if (!other.isSpectator() && other.distanceToSqr(worldPosition.getCenter()) <= (double) RANGE * RANGE && near.size() < MAX_PLAYERS) {
+			if (!other.isSpectator() && other.distanceToSqr(Vec3.atCenterOf(worldPosition)) <= (double) RANGE * RANGE && near.size() < MAX_PLAYERS) {
 				near.add(other);
 			}
 		}
@@ -112,7 +113,7 @@ public class GhostBellBlockEntity extends BlockEntity {
 		}
 		players.removeIf(id -> {
 			ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
-			return player == null || player.level() != level || player.distanceToSqr(worldPosition.getCenter()) > (double) LEAVE_RANGE * LEAVE_RANGE;
+			return player == null || player.level() != level || player.distanceToSqr(Vec3.atCenterOf(worldPosition)) > (double) LEAVE_RANGE * LEAVE_RANGE;
 		});
 		if (players.size() < 2 || level.getGameTime() >= endsAt) {
 			end(level);

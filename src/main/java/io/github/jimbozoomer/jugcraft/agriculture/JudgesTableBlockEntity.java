@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * A round of the costume contest, run on the server by a {@link JudgesTableBlock}. Ringing the bell opens a round of
@@ -110,7 +111,7 @@ public class JudgesTableBlockEntity extends BlockEntity {
 	}
 
 	private boolean inRange(Player player) {
-		return player.distanceToSqr(worldPosition.getCenter()) <= (double) RANGE * RANGE;
+		return player.distanceToSqr(Vec3.atCenterOf(worldPosition)) <= (double) RANGE * RANGE;
 	}
 
 	/** Rings the bell to open a round, or tells {@code player} how the round stands. */
@@ -192,7 +193,7 @@ public class JudgesTableBlockEntity extends BlockEntity {
 
 	private void announce(ServerLevel level, Component message) {
 		for (ServerPlayer player : level.players()) {
-			if (player.distanceToSqr(worldPosition.getCenter()) <= (double) ANNOUNCE_RANGE * ANNOUNCE_RANGE) {
+			if (player.distanceToSqr(Vec3.atCenterOf(worldPosition)) <= (double) ANNOUNCE_RANGE * ANNOUNCE_RANGE) {
 				player.sendSystemMessage(message);
 			}
 		}
