@@ -33,6 +33,7 @@ import feast_data
 import maze_data
 import ghost_data
 import face_paint_data
+import candy_data
 import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -196,6 +197,8 @@ def assets(root, write, lang):
         write(root / "models" / "item" / f"{item}.json", {"parent": parent, "textures": {"layer0": rid(f"item/{item}")}})
         write(root / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
         lang[f"item.{MOD}.{item}"] = info["display"]
+    # After the plain food items: candy corn's tinted model replaces its plain one.
+    candy_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -308,6 +311,7 @@ def loot(data, write):
     chandlery_data.loot(out, write)
     cider_data.loot(out, write)
     pantry_data.loot(out, write)
+    candy_data.loot(out, write)
     crow_data.loot(out, write)
     firework_data.loot(out, write)
     feast_data.loot(out, write)
@@ -413,6 +417,7 @@ def tags(tags):
     lantern_data.tags(tags)
     feast_data.tags(tags)
     maze_data.tags(tags)
+    candy_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

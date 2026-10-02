@@ -888,4 +888,6 @@ def crop_textures():
     out.update(ghost_textures())
     from face_paint_textures import face_paint_textures  # and face paint
     out.update(face_paint_textures())
+    from candy_textures import candy_textures  # and the candy kitchen
+    out.update(candy_textures())
     return out

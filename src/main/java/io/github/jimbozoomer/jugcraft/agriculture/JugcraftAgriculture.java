@@ -245,6 +245,12 @@ public final class JugcraftAgriculture {
 	public static DataComponentType<Boolean> TWINKLE;
 	/** The design a Face Paint Kit's dial is set to. */
 	public static DataComponentType<FacePaint.Design> FACE_PAINT_DESIGN;
+	/** The candy poured onto a Candy Tray. */
+	public static DataComponentType<CandyBatch> CANDY_BATCH;
+	public static BlockEntityType<CandyKettleBlockEntity> CANDY_KETTLE_ENTITY;
+	/** The Candy Kettle's own candies (it also makes candy corn and caramel). */
+	public static final List<String> CANDIES = List.of("rock_candy", "salt_water_taffy", "hard_candy", "lollipop", "fudge", "cream_caramel",
+			"toffee", "burnt_sugar");
 	/** A spooky firework's coloured spark, drawn by the client's SpookySparkParticle. */
 	public static final ParticleType<SpookySparkOptions> SPOOKY_SPARK = FabricParticleTypes.complex(true, SpookySparkOptions.CODEC,
 			SpookySparkOptions.STREAM_CODEC);
@@ -1317,6 +1323,24 @@ public final class JugcraftAgriculture {
 		registerItem("face_paint_kit", FacePaintKitItem::new, new Item.Properties().durability(FacePaintKitItem.USES)
 				.component(FACE_PAINT_DESIGN, FacePaint.Design.SKULL), EQUIPMENT_TAB);
 		FacePaint.register();
+
+		// Fall additions 11, the candy kitchen: the Candy Kettle, the Candy Tray its candy is poured onto, and its candies.
+		CANDY_BATCH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("candy_batch"),
+				DataComponentType.<CandyBatch>builder().persistent(CandyBatch.CODEC).networkSynchronized(CandyBatch.STREAM_CODEC).build());
+		Block candyKettle = registerBlock("candy_kettle", CandyKettleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(2.5F).sound(SoundType.COPPER).noOcclusion());
+		CANDY_KETTLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("candy_kettle"),
+				FabricBlockEntityTypeBuilder.create(CandyKettleBlockEntity::new, candyKettle).build());
+		registerItem("candy_kettle", props -> new BlockItem(candyKettle, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem("candy_tray", CandyTrayItem::new, new Item.Properties().stacksTo(16), TOOL_TAB);
+		candy("rock_candy", 2, 0.1F);
+		candy("salt_water_taffy", 2, 0.2F);
+		candy("hard_candy", 1, 0.1F);
+		candy("lollipop", 2, 0.1F);
+		candy("fudge", 3, 0.3F);
+		candy("cream_caramel", 2, 0.2F);
+		candy("toffee", 2, 0.2F);
+		candy("burnt_sugar", 1, 0.0F);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
@@ -1539,6 +1563,13 @@ public final class JugcraftAgriculture {
 		Consumable eaten = Consumables.defaultFood().onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(effect, seconds * 20)))
 				.build();
 		registerItem(id, Item::new, new Item.Properties().food(food, eaten), FOOD_TAB);
+	}
+
+	/** A piece of the Candy Kettle's candy: quick to eat, even on a full stomach (a flavoured piece carries its effects). */
+	private static void candy(String id, int nutrition, float saturation) {
+		FoodProperties food = new FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation).alwaysEdible().build();
+		registerItem(id, Item::new, new Item.Properties().food(food, Consumables.defaultFood().consumeSeconds(Candies.EAT_SECONDS).build())
+				.compostable(COMPOST_MEDIUM_HIGH), FOOD_TAB);
 	}
 
 	/** A jar of preserves ({@link PreserveJarItem}): four servings of {@code nutrition} each, and an effect (or none). */

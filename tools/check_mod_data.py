@@ -799,6 +799,7 @@ def check_agriculture():
     check_maze(java, main)
     check_ghosts(java, main)
     check_face_paint(java, main)
+    check_candy(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2594,6 +2595,95 @@ def check_face_paint(java, main):
     for source in ("TrickOrTreat", "JudgesTableBlockEntity"):
         if "FacePaint.inCostume(player)" not in java.get(source, ""):
             err(f"{source} must count a painted face as a costume (FacePaint.inCostume)")
+
+def check_candy(java, main):
+    """The candy kitchen: the kettle's, tray's and candies' Java matches CANDY in tools/agriculture.py (the batch limits,
+    temperatures and heating rates; the tray's setting, pulling, crystal and layer times; the eating time and candy corn's
+    bands; the stages and where each starts; which candy each base sets into at each stage; each kind's colour; each
+    flavour's effect, time and colour; the candies' food), the kettle, tray, candies and batch component are registered,
+    and every candy, stage, base and flavour has its words, textures and tags; the kettle and tray have recipes, and the
+    two advancements exist."""
+    cd = ag.CANDY
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("CandyKettleBlockEntity", "MAX_SUGAR"): cd["max_sugar"], ("CandyKettleBlockEntity", "PIECES_PER_SUGAR"): cd["pieces_per_sugar"],
+                ("CandyKettleBlockEntity", "MAX_FLAVOURS"): cd["max_flavours"], ("CandyKettleBlockEntity", "ROOM"): cd["room"],
+                ("CandyKettleBlockEntity", "BOIL"): cd["boil"], ("CandyKettleBlockEntity", "BOILED"): cd["boiled"],
+                ("CandyKettleBlockEntity", "MAX_TEMP"): cd["max_temp"], ("CandyKettleBlockEntity", "ADD_BELOW"): cd["add_below"],
+                ("CandyKettleBlockEntity", "HEAT_TICKS"): cd["heat_ticks"], ("CandyKettleBlockEntity", "BOIL_TICKS"): cd["boil_ticks"],
+                ("CandyKettleBlockEntity", "COOK_TICKS"): cd["cook_ticks"], ("CandyKettleBlockEntity", "COOL_TICKS"): cd["cool_ticks"],
+                ("CandyTrayItem", "SET_TICKS"): cd["set_ticks"], ("CandyTrayItem", "WARM_TICKS"): cd["warm_ticks"],
+                ("CandyTrayItem", "PULL_TICKS"): cd["pull_ticks"], ("CandyTrayItem", "PULLS"): cd["pulls"],
+                ("CandyTrayItem", "CRYSTAL_TICKS"): cd["crystal_ticks"], ("CandyTrayItem", "MAX_LAYERS"): cd["max_layers"],
+                ("Candies", "EAT_SECONDS"): cd["eat_seconds"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from CANDY in tools/agriculture.py ({value})")
+    bands = re.search(r"CORN_BANDS = \{([^}]+)\};", java.get("Candies", ""))
+    if not bands or [int(v.strip(), 16) for v in bands.group(1).replace("0x", "").split(",")] != cd["corn_bands"]:
+        err("Candies.CORN_BANDS differs from CANDY['corn_bands'] in tools/agriculture.py")
+    stages = {name.lower(): int(start) for name, start in re.findall(r"\b([A-Z_]+)\((\d+)\)", java.get("CandyStage", ""))}
+    if stages != {name: start for name, (_, start) in cd["stages"].items()}:
+        err(f"CandyStage {stages} differs from CANDY['stages'] in tools/agriculture.py")
+    makes = re.search(r"MAKES = \{\s*\{([^}]*)\},\s*\{([^}]*)\}\};", java.get("CandyBase", ""))
+    if not makes:
+        err("CandyBase.MAKES not found")
+    else:
+        for base, row in zip(("syrup", "cream"), makes.groups()):
+            found = [None if v.strip() == "null" else v.strip().split(".")[1].lower() for v in row.split(",")]
+            if found != cd["makes"][base]:
+                err(f"CandyBase.MAKES for {base} {found} differs from CANDY['makes'] in tools/agriculture.py")
+    kinds = {name.lower(): int(c, 16) for name, c in re.findall(r"\b([A-Z_]+)\(0x([0-9A-F]{6})\)", java.get("CandyKind", ""))}
+    if kinds != cd["kinds"]:
+        err(f"CandyKind {kinds} differs from CANDY['kinds'] in tools/agriculture.py")
+    flavours = {name.lower(): (effect, int(sec), int(c, 16)) for name, effect, sec, c in
+                re.findall(r"\b([A-Z_]+)\(MobEffects\.([A-Z_]+), (\d+), 0x([0-9A-F]{6})\)", java.get("CandyFlavour", ""))}
+    if flavours != {name: (info["effect"], info["seconds"], info["color"]) for name, info in cd["flavours"].items()}:
+        err(f"CandyFlavour {flavours} differs from CANDY['flavours'] in tools/agriculture.py")
+    foods = {name: [int(n), float(sat)] for name, n, sat in re.findall(r'\bcandy\("([a-z_]+)", (\d+), ([\d.]+)F\);', main)}
+    if foods != {name: info["food"] for name, info in cd["candies"].items()}:
+        err(f"The candies registered in JugcraftAgriculture.java {foods} differ from CANDY['candies'] in tools/agriculture.py")
+    listed = re.search(r"CANDIES = List\.of\(([^)]*)\);", main)
+    if not listed or [v.strip().strip('"') for v in listed.group(1).split(",")] != list(cd["candies"]):
+        err("JugcraftAgriculture.CANDIES differs from CANDY['candies'] in tools/agriculture.py")
+    for needle in (f'registerBlock("{cd["kettle"]}", CandyKettleBlock::new', f'registerItem("{cd["tray"]}", CandyTrayItem::new',
+                   f'Jugcraft.id("{cd["component"]}")', f'Jugcraft.id("{cd["kettle"]}")'):
+        if needle not in main:
+            err(f"JugcraftAgriculture.java must register {needle}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"block.jugcraft.{cd['kettle']}", f"item.jugcraft.{cd['tray']}"] + [f"item.jugcraft.{c}" for c in cd["candies"]]
+    keys += [f"candy_stage.jugcraft.{s}" for s in cd["stages"]] + [f"candy_base.jugcraft.{b}" for b in cd["bases"]]
+    keys += [f"candy_flavour.jugcraft.{f}" for f in cd["flavours"]]
+    keys += [f"tooltip.jugcraft.candy_tray.{k}" for k in cd["kinds"] if k != "lollipop"]
+    for source in ("CandyKettleBlock", "CandyTrayItem", "Candies"):
+        keys += [f"message.jugcraft.candy_kettle.{k}" for k in re.findall(r'MESSAGES \+ "([a-z_]+)"', java.get(source, ""))]
+        keys += re.findall(r'"((?:message|tooltip|item)\.jugcraft\.candy[a-z_]*\.[a-z_]+)"', java.get(source, ""))
+    for key in keys:
+        if key not in lang:
+            err(f"The candy kitchen has no words for {key}")
+    textures = ["block/candy_kettle", "block/candy_kettle_inside", "block/candy_dial", "entity/candy_syrup", "entity/candy_needle",
+                "item/candy_tray", "item/candy_tray_candy", "item/candy_corn_tip", "item/candy_corn_middle", "item/candy_corn_base",
+                "item/candy_corn_outline"] + [f"item/{c}" for c in cd["candies"]]
+    for texture in textures:
+        if not (ASSETS / "textures" / f"{texture}.png").exists():
+            err(f"The candy kitchen needs its texture {texture}")
+    for recipe in (cd["kettle"], cd["tray"]):
+        if not (DATA / "jugcraft" / "recipe" / f"{recipe}.json").exists():
+            err(f"The {recipe} needs its recipe")
+    for advancement in ("candy_maker", "taffy_puller"):
+        if not (DATA / "jugcraft" / "advancement" / f"{advancement}.json").exists():
+            err(f"The candy kitchen needs its advancement {advancement}")
+    candy_tag = (load(DATA / "c" / "tags" / "item" / "foods" / "candy.json") or {}).get("values", [])
+    for candy in cd["candies"]:
+        if f"jugcraft:{candy}" not in candy_tag:
+            err(f"{candy} must count as candy (c:foods/candy)")
+    for name, info in cd["flavours"].items():
+        if (load(DATA / "jugcraft" / "tags" / "item" / "candy_flavours" / f"{name}.json") or {}).get("values") != info["items"]:
+            err(f"Item tag jugcraft:candy_flavours/{name} differs from tools/agriculture.py")
+
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

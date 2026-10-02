@@ -537,6 +537,10 @@ HALLOWEEN_ADVANCEMENTS = {
                      "frame": "goal"},
     "face_painter": {"icon": "jugcraft:face_paint_kit", "title": "Face Painter", "description": "Paint another player's face",
                      "frame": "task"},
+    "candy_maker": {"icon": "jugcraft:candy_kettle", "title": "Sweet Science", "description": "Pour a batch of candy from a Candy Kettle",
+                    "frame": "task"},
+    "taffy_puller": {"icon": "jugcraft:salt_water_taffy", "title": "Pulling Power", "description": "Pull a tray of warm taffy until it's done",
+                     "frame": "task"},
 }
 
 
@@ -1342,6 +1346,68 @@ FACE_PAINT = {"kit": "face_paint_kit", "kit_display": "Face Paint Kit", "compone
               "designs": {"skull": "Skull", "pumpkin": "Jack o'Lantern", "black_cat": "Black Cat", "vampire": "Vampire",
                           "witch": "Witch", "scarecrow": "Scarecrow"}}
 
+# ---------------------------------------------------------------- Fall additions 11: the candy kitchen
+# The Candy Kettle (CandyKettleBlock + entity) boils a batch: a base (a water bottle for syrup, a milk bucket for cream),
+# up to `max_sugar` sugar (`pieces_per_sugar` pieces each), up to `max_flavours` flavours (item tags
+# jugcraft:candy_flavours/<flavour>) and dyes, all added below `add_below` degrees. Over heat it warms a degree every
+# `heat_ticks` up to the boil (`boil`), every `boil_ticks` while its water boils off (to `boiled`), then every `cook_ticks`
+# up to `max_temp`; off the heat it cools a degree every `cool_ticks` to `room`. The hottest it has been sets its stage
+# (`stages`: name and the degree it starts at); `makes` gives the candy each base sets into at each stage (None: too runny
+# to pour). It pours onto a Candy Tray (CandyTrayItem, component `component`): most candy sets in `set_ticks`, rock candy
+# grows for `crystal_ticks`, taffy must be pulled `pulls` times (`pull_ticks` each) within `warm_ticks` or it sets hard
+# (as hard candy), candy corn takes up to `max_layers` layers, and hard candy with sticks makes lollipops. `candies`: the
+# kettle's own candy items (food: nutrition, saturation; eaten in `eat_seconds`, even when full). Flavoured candy gives
+# each flavour's effect (vanilla MobEffects field, seconds) when eaten.
+CANDY = {"kettle": "candy_kettle", "kettle_display": "Candy Kettle", "tray": "candy_tray", "tray_display": "Candy Tray",
+         "component": "candy_batch", "max_sugar": 4, "pieces_per_sugar": 2, "max_flavours": 2,
+         "room": 20, "boil": 100, "boiled": 110, "max_temp": 190, "add_below": 100,
+         "heat_ticks": 4, "boil_ticks": 12, "cook_ticks": 6, "cool_ticks": 8,
+         "set_ticks": 100, "warm_ticks": 600, "pull_ticks": 20, "pulls": 4, "crystal_ticks": 24000, "max_layers": 3,
+         "eat_seconds": 0.8,
+         "stages": {"syrup": ("Syrup", 0), "thread": ("Thread", 110), "soft_ball": ("Soft Ball", 115), "firm_ball": ("Firm Ball", 120),
+                    "hard_ball": ("Hard Ball", 125), "soft_crack": ("Soft Crack", 132), "hard_crack": ("Hard Crack", 145),
+                    "caramel": ("Caramel", 155), "burnt": ("Burnt", 175)},
+         "bases": {"syrup": "Sugar Syrup", "cream": "Cream"},
+         "makes": {"syrup": [None, "rock_candy", "candy_corn", "candy_corn", "salt_water_taffy", "salt_water_taffy", "hard_candy", "caramel",
+                             "burnt_sugar"],
+                   "cream": [None, None, "fudge", "cream_caramel", "cream_caramel", "toffee", "toffee", "burnt_sugar", "burnt_sugar"]},
+         "candies": {"rock_candy": {"display": "Rock Candy", "food": [2, 0.1]},
+                     "salt_water_taffy": {"display": "Salt Water Taffy", "food": [2, 0.2]},
+                     "hard_candy": {"display": "Hard Candy", "food": [1, 0.1]},
+                     "lollipop": {"display": "Lollipop", "food": [2, 0.1]},
+                     "fudge": {"display": "Fudge", "food": [3, 0.3]},
+                     "cream_caramel": {"display": "Cream Caramel", "food": [2, 0.2]},
+                     "toffee": {"display": "Toffee", "food": [2, 0.2]},
+                     "burnt_sugar": {"display": "Burnt Sugar", "food": [1, 0.0]}},
+         # The kinds, in CandyKind order, with the colour each sets to undyed and unflavoured.
+         "kinds": {"rock_candy": 0xE6DEF6, "candy_corn": 0xF8F4EA, "salt_water_taffy": 0xF4E2C8, "hard_candy": 0xE8A838,
+                   "lollipop": 0xE8A838, "caramel": 0xC07828, "fudge": 0x7A4A2A, "cream_caramel": 0xC8883A, "toffee": 0xB0702A,
+                   "burnt_sugar": 0x2A1A10},
+         # Candy corn's bands, tip to base, where a layer is undyed.
+         "corn_bands": [0xF8F4EA, 0xF08A24, 0xF6C836],
+         "flavours": {"chocolate": {"display": "Chocolate", "items": ["minecraft:cocoa_beans"], "effect": "SPEED", "seconds": 10,
+                                    "color": 0x5A3218},
+                      "berry": {"display": "Berry", "items": ["minecraft:sweet_berries"], "effect": "REGENERATION", "seconds": 4,
+                                "color": 0xC8283C},
+                      "glow_berry": {"display": "Glow Berry", "items": ["minecraft:glow_berries"], "effect": "NIGHT_VISION", "seconds": 30,
+                                     "color": 0xF0B030},
+                      "honey": {"display": "Honey", "items": ["minecraft:honey_bottle"], "effect": "ABSORPTION", "seconds": 10,
+                                "color": 0xE8A020},
+                      "cranberry": {"display": "Cranberry", "items": ["jugcraft:cranberries"], "effect": "RESISTANCE", "seconds": 10,
+                                    "color": 0xB0122E},
+                      "spiced": {"display": "Spiced", "items": ["jugcraft:mulling_spices"], "effect": "FIRE_RESISTANCE", "seconds": 15,
+                                 "color": 0xA0522D},
+                      "chestnut": {"display": "Chestnut", "items": ["jugcraft:roasted_chestnuts"], "effect": "HASTE", "seconds": 15,
+                                   "color": 0x8A5A30}}}
+
+
+def candy_blocks():
+    return [CANDY["kettle"]]
+
+
+def candy_items():
+    return candy_blocks() + [CANDY["tray"]] + list(CANDY["candies"])
+
 
 def pantry_blocks():
     return [PANTRY["kettle"], PANTRY["shelf"]]
@@ -1846,6 +1912,11 @@ SHAPED = [
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
     # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
     # (the ring) baked in; sugar round a red dye.
+    # Fall additions 11: a copper sugar pot with a glass thermometer on its rim; a tin tray of iron nuggets.
+    {"id": "candy_kettle", "pattern": ["CGC", "C C", "CCC"], "key": {"C": "minecraft:copper_ingot", "G": "minecraft:glass_pane"},
+     "result": "candy_kettle", "count": 1, "category": "misc"},
+    {"id": "candy_tray", "pattern": ["N N", "NNN"], "key": {"N": "minecraft:iron_nugget"}, "result": "candy_tray", "count": 1,
+     "category": "misc"},
     # Fall additions 1: a copper pot for melting wax.
     {"id": "wax_melting_pot", "pattern": ["C C", "C C", "CCC"], "key": {"C": "minecraft:copper_ingot"},
      "result": "wax_melting_pot", "count": 1, "category": "misc"},
@@ -1980,7 +2051,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks())
 
 
 def all_items():
@@ -1991,7 +2062,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items())
 
 
 def owns(entry_id):
