@@ -772,6 +772,17 @@ Ten more fall and Halloween additions, one per pull request ([features/fall-addi
 - **The lantern festival:** eight let go within 32 blocks in two minutes fill the sky, with Luck and A Sky Full of Wishes for everyone near.
 - **Mooncakes** baked in the Cooking Pot, with Luck when eaten outdoors under a full moon. Details: [fall additions](../features/fall-additions.md#sky-lanterns).
 
+### The Harvest Feast Table
+
+| **A Harvest Feast Table** of four lengths, set with eight foods between hay bale seats | **The dishes** up close: bread, roasted corn, pumpkin pie, chicken, apples, mooncakes, baked potatoes and cookies, each heaped by its servings |
+| --- | --- |
+| ![A Harvest Feast Table](../images/ingame_harvest_feast.jpg) | ![The dishes on a feast table](../images/ingame_feast_dishes.jpg) |
+
+*Real screenshots from the client game test that CI runs (`FeastClientGameTests`, software rendering, small previews). The dishes are served on the server and drawn by the client.*
+
+- **Harvest Feast Table:** lengths end to end join into one long table; each holds two dishes of up to eight servings of any food or drink.
+- **The feast** grows with the variety on the table and the company at it: Regeneration, then Absorption, then Haste and Luck, then Health Boost and Harvest Home, shared with everyone who ate there lately. Details: [fall additions](../features/fall-additions.md#the-harvest-feast-table).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

@@ -1,6 +1,6 @@
 # Fall Additions
 
-Status: the chandlery (addition 1), the cider mill (addition 2), the preserves pantry (addition 3), crows and working scarecrows (addition 4), spooky fireworks (addition 5) and the sky lantern festival (addition 6) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
+Status: the chandlery (addition 1), the cider mill (addition 2), the preserves pantry (addition 3), crows and working scarecrows (addition 4), spooky fireworks (addition 5), the sky lantern festival (addition 6) and the Harvest Feast Table (addition 7) are implemented in source, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below).
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok lets build another 10 more thorough and well thought out festive halloween and fall additions, maybe for one we do candle making with an interesting process to make them allowing you to make a bunch of different combinations and then light them to give different cool effects to an aoe area like beacons do"). The ten additions ship one per pull request, each stacked on the one before:
 1. the chandlery: the Wax Melting Pot and Aura Candles;
 2. the cider mill: apple trees, the Cider Press, the Cider Barrel and four ciders;
@@ -8,16 +8,16 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("ok let
 4. crows and working scarecrows: crows that raid ripe crops, and scarecrows that keep them off;
 5. spooky fireworks: rockets that burst into a bat, a jack o'lantern, a ghost or a skull drawn in sparks, and the Show Launcher;
 6. the sky lantern festival: Sky Lanterns that drift up together, the festival eight of them make, and mooncakes for a full moon;
-7. a harvest feast table (planned);
+7. the Harvest Feast Table: a long table to set with the harvest, and a feast that grows with its variety and its company;
 8. a corn maze (planned);
 9. ghost hunting (planned; its ectoplasm is to become a candle scent);
 10. face paint (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace). Spooky fireworks are Discovery tier too: paper, gunpowder and the picture's ingredients (a feather and black dye, a carved pumpkin, a phantom membrane or a bone), and glowstone dust to twinkle; the Show Launcher is a dispenser, iron ingots, planks and redstone. Crows need nothing to come but a ripe crop; the scarecrow that keeps them off is the existing one (a hay bale, wool and sticks), and its pumpkin heads come from any pumpkin patch. The sky lantern festival is Discovery tier too: paper, string and a candle (lanterns), any dye for a colour and an anvil for a wish; mooncakes are baked in the Kitchen Garden's Cooking Pot from wheat, sugar, an egg and beans, roasted chestnuts or a pumpkin.
-Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast. Crows are for farmers: a little pressure on open fields, answered by building and dressing scarecrows, and a source of feathers for fletchers and chandlers. Spooky fireworks are for anyone throwing a party: one rocket for a moment, or a Show Launcher's nine tubes for a planned show. Sky lanterns are for gatherings: one player can let eight go and hold a festival alone, but a crowd fills the sky faster, and everyone there shares the Luck; mooncakes are for cooks, and for anyone out under a full moon.
+Target milestone and tier: the chandlery is Discovery tier: copper ingots (the pot), honeycomb or rotten flesh (wax), string (wicks), dyes, and vanilla items an early player can gather (sugar, a rabbit's foot, a golden carrot, a feather, a pufferfish, magma cream, an amethyst shard, a ghast tear, a fermented spider eye, bone meal, a glow ink sac, glowstone dust and redstone). The ghast tear and magma cream are Nether items; every other scent is from the Overworld. The cider mill is Discovery tier too: planks, an iron ingot, a grindstone and wooden slabs (the press); a barrel, iron and gold nuggets and sticks (the barrel); apples (from oak leaves, and then apple trees), glass bottles, and for the extras sugar, sweet berries, cocoa beans, wheat and an egg. So is the pantry: glass and an iron nugget (jars), a cauldron, blue dye and iron bars (the kettle), planks and slabs (the shelf), and what the preserves are made of (sweet berries, apples, a pumpkin, cranberries, glow berries, beetroot, peppers, corn, onions, sugar, and the cider mill's sweet cider, mulling spices, aged cider and pomace). Spooky fireworks are Discovery tier too: paper, gunpowder and the picture's ingredients (a feather and black dye, a carved pumpkin, a phantom membrane or a bone), and glowstone dust to twinkle; the Show Launcher is a dispenser, iron ingots, planks and redstone. Crows need nothing to come but a ripe crop; the scarecrow that keeps them off is the existing one (a hay bale, wool and sticks), and its pumpkin heads come from any pumpkin patch. The sky lantern festival is Discovery tier too: paper, string and a candle (lanterns), any dye for a colour and an anvil for a wish; mooncakes are baked in the Kitchen Garden's Cooking Pot from wheat, sugar, an egg and beans, roasted chestnuts or a pumpkin. The Harvest Feast Table is Discovery tier too: wooden slabs and logs; what it rewards is a varied harvest, so its best feasts come as a farm grows.
+Primary specialty and supported player role: crafting and support. Chandlers make candles for builders (light in any colour), farmers (the harvest aura), explorers and miners (night vision, water breathing, fire resistance, haste), and groups (one candle covers everyone near it). Candles are easy to trade: each one carries its own wax, colour, scents and burn time. The cider mill is for farmers and cooks: orchard keepers grow apples, and a cider maker presses them and ages the cider. Its drinks are for anyone (haste for miners, jump boost, absorption before a fight, regeneration after), and a barrel of aged cider is the centrepiece of a harvest party. The pantry is for cooks who put up the harvest: preserves keep (once sealed) and travel, so a stocked pantry feeds a long expedition or a harvest feast. Crows are for farmers: a little pressure on open fields, answered by building and dressing scarecrows, and a source of feathers for fletchers and chandlers. Spooky fireworks are for anyone throwing a party: one rocket for a moment, or a Show Launcher's nine tubes for a planned show. Sky lanterns are for gatherings: one player can let eight go and hold a festival alone, but a crowd fills the sky faster, and everyone there shares the Luck; mooncakes are for cooks, and for anyone out under a full moon. The feast table is for farmers and cooks to share their harvest: a host sets a long table, and everyone who eats there shares the blessing, so a group fills up before a dig, a raid or a boss.
 
-Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, and preserves put up, all year; crows come to fields all year too, and fireworks and sky lanterns go up whenever someone lets them go. A mooncake's Luck comes with every full moon, one night in eight.
+Nothing here depends on the Halloween event: candles are made and burned, and cider pressed and aged, and preserves put up, all year; crows come to fields all year too, and fireworks and sky lanterns go up whenever someone lets them go. A mooncake's Luck comes with every full moon, one night in eight, and a feast can be held any day.
 
 ## Player experience
 ### The Wax Melting Pot
@@ -171,6 +171,19 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 57. **Three mooncakes**, baked four at a time in the Cooking Pot (15 seconds) from two wheat, a sugar, an egg and a filling: **red bean** (two beans), **chestnut** (two roasted chestnuts) or **pumpkin** (a pumpkin).
 58. Each is 3 food. Eaten **outdoors on a full-moon night** (the sky open above you), a mooncake also gives **Luck for five minutes**.
 
+### The Harvest Feast Table
+59. **A long trestle table** of honey oak with an orange runner: three wooden slabs over two logs make two lengths. Lengths placed end to end along the same line **join into one table**, with legs only at its ends; a length placed against a table's end carries on along it, and one placed across stands alone.
+60. **Serving:** each length holds **two dishes**, one at each half. Use it holding any food or drink to serve it on the dish you point at: **up to eight servings**, one food to a dish. Each dish sits on a cream plate, heaped higher the more servings are left. Sneak and use it with an empty hand to take a dish back; broken, a length spills its dishes.
+61. **Eating:** use it with an empty hand to eat a serving from the dish you point at. It feeds you just as eating it would, and a stew leaves its bowl. You can eat a serving whether or not you are hungry.
+
+### The feast
+62. **A feast's score** is how many different foods are on the whole table plus how many players have eaten at it in the last two minutes. Every serving eaten works it out and blesses every recent diner within 16 blocks, the eater included:
+    - 3 or more, **a good meal**: Regeneration for 10 seconds;
+    - 5 or more, **a feast**: Absorption for two minutes as well;
+    - 8 or more, **a harvest feast**: Haste and Luck for five minutes as well;
+    - 11 or more, **a grand feast**: Health Boost for five minutes as well, and the advancement **Harvest Home**.
+63. The eater is told how the meal went ("A harvest feast! (7 dishes, 1 at the table)"). Alone at a table of seven foods you reach a harvest feast; a grand feast needs friends (six foods and five diners) or a very varied table (ten foods alone).
+
 ## Connections
 - Existing input producer: vanilla copper (the pot), bees (honeycomb), zombies (rotten flesh), spiders (string), dyes, and the scent items above; Jugcraft's `jugcraft:heat_sources` (the Cooking Pot's heat).
 - Existing output consumer:
@@ -206,6 +219,10 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - Lanterns, output consumer: gatherings: the Halloween events, the harvest feast to come, and any celebration. Luck (vanilla's: better loot rolls and fishing) for everyone at a festival or under a full moon. Not a progression item.
 - Lanterns, entry path: everything is early-game; the Cooking Pot is the Kitchen Garden's first station.
 - Lanterns, required vs optional: purely celebratory, all year, reachable solo (one player can let eight go).
+- Feast, input producer: every food and drink in the game: the Kitchen Garden's Cooking Pot dishes, the festival crops, the cider mill's ciders, mooncakes and vanilla food; wooden slabs and logs for the table.
+- Feast, output consumer: groups before a dig, a raid or a boss (Regeneration, Absorption, Haste, Luck and Health Boost), and the advancement Harvest Home. It gives every food a second use and rewards growing many crops rather than one.
+- Feast, entry path: the table is wood, and any food at all makes a meal; its higher feasts come with a varied farm and with friends.
+- Feast, required vs optional: optional and all year; reachable solo up to a harvest feast.
 - Crows and the plans: [AGRICULTURE.md](../branches/AGRICULTURE.md) promised that the scarecrow would one day keep crop-eating birds away; it now does.
 - Cider mill and the plans:
   - [AGRICULTURE.md](../branches/AGRICULTURE.md) plans orchards (slice 4) and a Fruit and Seed Press (apples into cider, grapes into juice, seed oil for engineers).
@@ -314,6 +331,11 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - **Mooncakes:**
   - Costs: four cakes from two wheat, a sugar, an egg and the filling, in 300 ticks in the Cooking Pot.
   - 3 food each, saturation modifier 0.6. Luck for 6,000 ticks, only outdoors on a full-moon night: one night in eight.
+- **The feast table:**
+  - Costs: two lengths from three wooden slabs and two logs. Every blessing costs a serving: one food item eaten.
+  - Units: a dish holds 8 servings; a table counts at most 8 lengths (16 dishes) from where you eat; diners count for 2,400 ticks after they last ate; the blessing reaches 16 blocks.
+  - Tiers by score: 3, 5, 8 and 11. Regeneration I for 200 ticks; Absorption I for 2,400; Haste I, Luck and Health Boost I for 6,000. A higher tier gives the lower tiers' effects too, and another serving refreshes them; they don't stack in strength.
+  - Unlike a beacon, the feast uses food for every blessing, and its effects end. Nothing is made: a serving is eaten, and its container (a bowl, a bottle) comes back as it would. No loop.
 
 ## Multiplayer and persistence
 - **Server authority:**
@@ -396,6 +418,12 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 - **Lanterns, bounded work:** a lantern ticks like any entity, one fixed step a tick, and is tracked by clients within 10 chunks. Each release looks once through at most 256 remembered releases. Nothing loads a chunk.
 - **Lanterns, IDs:** item `sky_lantern` and entity `sky_lantern`; items `red_bean_mooncake`, `chestnut_mooncake` and `pumpkin_mooncake`; advancement `lantern_festival`; the lantern's recipe and the three Cooking Pot recipes. All new.
 - **Lanterns, disable behaviour:** with the agriculture feature off, the recipes don't load; lanterns already made can still be let go, and everything stays registered.
+- **Feast, server authority:** serving, eating and taking a dish back go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server. The server checks that the item is food, that the dish is empty or holds the same food and has room, and that a dish eaten from isn't empty. The score, the diners and the blessing are worked out on the server; a diner is blessed only if alive and within 16 blocks of the table. Clients are sent the dishes, to draw them; they decide nothing.
+- **Feast, concurrent use:** two players eating from one dish each take their own serving, one after the other on the server; the last serving goes to whoever's use arrives first.
+- **Feast, persistence:** each length saves its two dishes. Who has eaten there is kept in memory only: a restart forgets the diners, never the dishes.
+- **Feast, bounded work:** a table never ticks. A meal walks at most 8 lengths of table and looks through their recent diners once.
+- **Feast, IDs:** block with item `feast_table` and its block entity; advancement `harvest_home`; the table's recipe. All new.
+- **Feast, disable behaviour:** with the agriculture feature off, the recipe doesn't load; tables already placed still serve and feast, and everything stays registered.
 
 ## Dependencies and assets
 No new dependencies. Every texture is drawn by code (`tools/chandlery_textures.py`): the pot's hammered copper and dark inside, the brass dish, the wax (pale, tinted by its colour as it is drawn), the wax's surface in the pot, the flame (white at its heart, tinted by its scent) and the candle's item in two layers (its body, tinted by its dyed colour; its wick and dish, not). The models, blockstates, item model, names, tooltip, messages, loot and tags come from `tools/chandlery_data.py`; the numbers from `CHANDLERY` in `tools/agriculture.py`. The client's `WaxPotRenderer` draws the wax in the pot at its level and colour; `AuraCandleRenderer` draws the candle at its height, layers and colour and its flame; both share `TintedBoxes`. The item's colour is the vanilla `dyed_color` component, read by the item model's dye tint. Sounds are vanilla's (honeycomb waxing, dye use, brewing, a bottle filling, a honey slide, a bucket emptying, a candle going out).
@@ -429,6 +457,12 @@ Sky lanterns:
 - A lantern in flight is drawn by `SkyLanternRenderer`: its paper body on its ring, glowing at full brightness and flickering, dimming as it burns out.
 - Models, the recipe, the `minecraft:dyeable` tag and words come from `tools/lantern_data.py`; the mooncakes' Cooking Pot recipes from `POT_RECIPES`; the numbers from `LANTERNS` in `tools/agriculture.py`.
 - Sounds are vanilla's (flint and steel to light one, a fire going out when one is torn).
+
+The feast table:
+- Textures are drawn by code in `tools/feast_textures.py`: the table's honey-oak top, its darker trestle wood, its orange runner with a border of little leaves, and the cream plate each dish sits on.
+- The dishes are drawn by `FeastTableRenderer`: each on its plate on the runner, the food lying on it, one, two or three pieces high as the servings run down.
+- Models (a length on its own, at the start, in the middle and at the end, along either axis), blockstates, loot, the recipe, the advancement and words come from `tools/feast_data.py`; the numbers from `FEAST` in `tools/agriculture.py`.
+- Sounds are vanilla's (a decorated pot's when a dish is served).
 
 ## Verification
 ### Chandlery verification
@@ -625,6 +659,32 @@ Found by CI and fixed before this record: nothing in the lanterns; their tests p
 - a server restart in the middle of a festival's count;
 - the sounds.
 
+### Feast verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-21` stacked on the sky lantern festival:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the feast with Java: the dishes, servings, diners' window and longest table; the four tiers, the effects' lengths and the reach; checks the table is registered and named, has a model for every axis and part, words for every tier, loot, a recipe making two, and its advancement) | Pass, 615 IDs |
+| `./gradlew build` on `c892a9d` (Build workflow run 37038153230) | Pass |
+| Game tests on the headless server, same run: 377 in total, 4 of them new here (`FeastGameTests`) | **All 377 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `c892a9d` (run 37038153230), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-harvest-feast-table): a four-length table set with eight foods between hay bale seats |
+
+The 4 new game tests (`FeastGameTests`):
+1. lengths end to end along one line join into a table with legs at its ends; a length across them stands alone;
+2. food is served eight to a dish, one food to a dish, and a stick isn't served; a serving of bread feeds a hungry diner by five, and two dishes and one diner make a good meal (Regeneration, not yet Absorption); sneaking takes a dish back; a stew leaves its bowl; broken, the table spills its dishes;
+3. at a table of six foods, the first diner has a feast (Absorption), a second makes it a harvest feast for both (Haste and Luck), and the fifth a grand feast for all five (Health Boost and Harvest Home);
+4. the table's recipe and loot table load.
+
+Found by CI and fixed before this record: nothing; the feast's tests passed on their first run.
+
+**Not run (feast):**
+- a person playing it in a client: setting a table, eating at it, a feast with friends;
+- a dedicated server with two or more players eating together (the grand feast test uses five mock players on the headless server);
+- a restart with diners counted;
+- how it balances in play against a beacon or a potion.
+
 ## World and event applicability
 - Candles and pots work anywhere, in every dimension, all year. Nothing is seasonal. The aura doesn't depend on biome, time or weather; harvest helps only plants that would grow there anyway.
 - Revealing shows creatures through walls (Glowing), which can help find hostile mobs in caves; it gives no other information.
@@ -635,6 +695,7 @@ Found by CI and fixed before this record: nothing in the lanterns; their tests p
 - Crows come to the Overworld only, by day (on the Overworld clock), wherever there are ripe crops open to the sky; they don't depend on the biome or the season.
 
 - Sky lanterns go up in any dimension, all year. A festival counts lanterns in one dimension at a time.
+- A feast table works anywhere, in every dimension, all year.
 
 ## Rollout and open questions
 - The aura's area is a box reaching the radius in every direction, up and down too (a beacon's reaches the whole height of the world).
@@ -664,4 +725,9 @@ Found by CI and fixed before this record: nothing in the lanterns; their tests p
 - The wind is the same everywhere in a world and turns with game time; weather doesn't change it.
 - The festival's memory is the server's alone and is lost on a restart (see Multiplayer and persistence).
 - Lanterns can't be let go from a dispenser.
+- A serving can be eaten at the table whether or not the diner is hungry, so a blessing's only cost is the food. That is open to balance review in play.
+- Variety counts kinds of food: two dishes of bread count once. A table longer than eight lengths is counted eight lengths at a time, from where you eat.
+- Only players are diners; pets and villagers at the table don't count.
+- Dishes can't be filled or emptied by hoppers.
+- Jars of preserves can't be served: a jar has no food component (it is eaten a serving at a time from the hand, with its own sealing and spoiling), and the table serves only items that do. Serving preserves at the table would be a follow-up.
 - A mooncake's Luck goes by the Overworld clock's moon wherever it is eaten, and needs only the sky open above the eater; it isn't limited to the Overworld.
