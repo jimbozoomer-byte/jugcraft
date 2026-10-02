@@ -1222,11 +1222,11 @@ public final class JugcraftAgriculture {
 		CANNING_KETTLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("canning_kettle"),
 				FabricBlockEntityTypeBuilder.create(CanningKettleBlockEntity::new, kettle).build());
 		registerItem("canning_kettle", props -> new BlockItem(kettle, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
-		Block shelf = registerBlock("pantry_shelf", PantryShelfBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F)
-				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		Block pantryShelf = registerBlock("pantry_shelf", PantryShelfBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
 		PANTRY_SHELF_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("pantry_shelf"),
-				FabricBlockEntityTypeBuilder.create(PantryShelfBlockEntity::new, shelf).build());
-		registerItem("pantry_shelf", props -> new BlockItem(shelf, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+				FabricBlockEntityTypeBuilder.create(PantryShelfBlockEntity::new, pantryShelf).build());
+		registerItem("pantry_shelf", props -> new BlockItem(pantryShelf, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
