@@ -155,10 +155,11 @@ public class ChandleryGameTests {
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.GLOWSTONE_DUST, 2));
 		use(helper, player, pos);
 		use(helper, player, pos);
-		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.REDSTONE));
+		helper.assertTrue(pot.bright() && player.getMainHandItem().getCount() == 1, "Brightened once: the second dust stays in hand");
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.REDSTONE, 2));
 		use(helper, player, pos);
-		helper.assertTrue(pot.bright() && pot.lasting() && player.getInventory().countItem(Items.GLOWSTONE_DUST) == 1,
-				"Brightened and extended, each once");
+		use(helper, player, pos);
+		helper.assertTrue(pot.lasting() && player.getMainHandItem().getCount() == 1, "Extended once: the second redstone stays in hand");
 		helper.succeed();
 	}
 
