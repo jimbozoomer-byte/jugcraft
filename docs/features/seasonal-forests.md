@@ -1,6 +1,6 @@
 # Seasonal forests (biomes batch 1)
 
-Status: in progress on branch `claude/biomes`, with the region engine ([biome-regions.md](biome-regions.md)). Awaiting CI. **Not yet played.**
+Status: in progress on branch `claude/biomes`, with the region engine ([biome-regions.md](biome-regions.md)). Green in CI (server and client game tests). **Not yet played.**
 Proposal issue: none. The owner asked on 2 October 2026 to remake the Biomes O' Plenty catalog's biomes ([branches/BIOMES.md](../branches/BIOMES.md)) and chose the seasonal forests as the first batch. Everything here is original: the catalog guided the concepts only.
 Owner: @jimbozoomer-byte
 Target milestone and tier: world generation and building (Discovery).
@@ -79,7 +79,7 @@ Results are recorded under "Results" below after CI runs.
   - Client game tests: every biome's surface was found within 64 blocks of where the search found it; the Tundra's spot is 16 blocks east, at 0 66 976. The 14,050 seasonal leaves generated around those spots were all gold on day 275 (Aspen Glade 5,060, Maple Woods 4,747, Seasonal Forest 2,930), none out of date.
   - Screenshots: Aspen Glade is a sea of gold aspens round a red maple. The Tundra is brown-green ground with red and orange maple scrub and a mossy boulder in front, and the snowy Muskeg (spruces, dead trunks) behind it: the earlier snowy view was the Muskeg. Dead Forest, Maple Woods, Seasonal Forest and Coniferous Forest look as before.
   - Server game tests: 1 of 307 failed, `SeasonGameTests.winterSnowLiesAndMeltsInSpring` ("Winter rain does not fall as snow"), from the seasons work (#80), untouched here and green in the runs before. It filled only its own blocks with plains, but a biome lookup blends the 4×4×4 biome cells up to 5 blocks around, so near the edge it could read the natural biome wherever the test was placed (this run: x 14,773,808). Tests are placed differently each run, so it failed only sometimes. Fix: the test fills plains 5 blocks past every block it reads, and asserts that the fill took.
-- **Next run: pending.**
+- **Run [36969999816](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/36969999816) (commit bfd59885): green.** All 307 required server game tests passed, the widened winter snow test among them; the client game tests passed.
 
 ## World and event applicability
 - Biome fit: each biome takes the climate of the vanilla biome it replaces, so it borders what that biome bordered.
