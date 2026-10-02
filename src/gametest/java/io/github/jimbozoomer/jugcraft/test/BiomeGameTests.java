@@ -6,10 +6,8 @@ import io.github.jimbozoomer.jugcraft.agriculture.SeasonalLeavesBlock;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -29,7 +27,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
 import net.minecraft.world.level.block.Block;
@@ -37,8 +34,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.RandomState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +82,8 @@ public class BiomeGameTests {
 	/** About the configured share of the land is in Jugcraft regions, the same for a seed every time, and seeds differ. */
 	@GameTest
 	public void regionsSplitTheWorld(GameTestHelper helper) {
-		long seed = 0x1234_5678_9ABCL;
+		long seed = JugcraftRegions.fingerprint(0x1234_5678_9ABCL);
+		long next = JugcraftRegions.fingerprint(0x1234_5678_9ABDL);
 		int inside = 0;
 		int total = 0;
 		int differ = 0;
@@ -96,7 +92,7 @@ public class BiomeGameTests {
 				boolean jugcraft = JugcraftRegions.isJugcraft(seed, x, z);
 				helper.assertTrue(jugcraft == JugcraftRegions.isJugcraft(seed, x, z), "Regions changed between lookups");
 				inside += jugcraft ? 1 : 0;
-				differ += jugcraft != JugcraftRegions.isJugcraft(seed + 1, x, z) ? 1 : 0;
+				differ += jugcraft != JugcraftRegions.isJugcraft(next, x, z) ? 1 : 0;
 				total++;
 			}
 		}
@@ -106,42 +102,6 @@ public class BiomeGameTests {
 		helper.assertTrue(share > JugcraftRegions.SHARE - 0.2 && share < JugcraftRegions.SHARE + 0.2,
 				"Jugcraft regions cover " + share + " of the land, far from " + JugcraftRegions.SHARE);
 		helper.assertTrue(differ > total / 5, "Another seed gives almost the same regions");
-		helper.succeed();
-	}
-
-	/**
-	 * A real Overworld biome source, sampled over a 16 km square of a seeded world: Jugcraft biomes appear (from the
-	 * Jugcraft regions), only where the region says so, and the vanilla biome they replace is still found elsewhere.
-	 */
-	@GameTest(maxTicks = 400)
-	public void anOverworldHasJugcraftRegions(GameTestHelper helper) {
-		ServerLevel level = helper.getLevel();
-		MultiNoiseBiomeSource source = MultiNoiseBiomeSource.createFromPreset(overworldPreset(level));
-		RandomState random = RandomState.create(level.registryAccess(), NoiseGeneratorSettings.OVERWORLD, 20261002L);
-		Climate.Sampler sampler = random.sampler();
-		long print = JugcraftRegions.fingerprint(sampler);
-		Set<ResourceKey<Biome>> jugcraft = JugcraftRegions.biomes();
-		Map<String, Integer> found = new TreeMap<>();
-		Set<String> vanilla = new HashSet<>();
-		int wrongRegion = 0;
-		for (int x = -2048; x < 2048; x += 16) {
-			for (int z = -2048; z < 2048; z += 16) {
-				Holder<Biome> biome = source.getNoiseBiome(x, 16, z, sampler);
-				ResourceKey<Biome> key = biome.unwrapKey().orElseThrow();
-				if (jugcraft.contains(key)) {
-					found.merge(key.identifier().getPath(), 1, Integer::sum);
-					if (!JugcraftRegions.isJugcraft(print, x, z)) {
-						wrongRegion++;
-					}
-				} else {
-					vanilla.add(key.identifier().getPath());
-				}
-			}
-		}
-		LOGGER.info("A seeded Overworld, 65536 samples over 16 km: Jugcraft biomes {}; {} vanilla biomes", found, vanilla.size());
-		helper.assertTrue(!found.isEmpty(), "No Jugcraft biome in 16 km of a real Overworld biome source");
-		helper.assertTrue(wrongRegion == 0, wrongRegion + " Jugcraft biomes outside Jugcraft regions");
-		helper.assertTrue(vanilla.contains("forest") && vanilla.contains("taiga"), "Vanilla forest or taiga is gone outside the regions");
 		helper.succeed();
 	}
 

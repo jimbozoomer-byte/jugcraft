@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -28,7 +29,7 @@ import net.minecraft.world.level.biome.Climate;
  * ({@link #recorder}), and lists every Jugcraft biome in vanilla's table at {@link #UNREACHABLE}, a climate no place
  * has, so world generation knows its features and structures. {@code mixin/MultiNoiseBiomeSourceMixin} then answers
  * biome lookups in Jugcraft regions from the Jugcraft layout ({@link Source}). Which cells are Jugcraft regions comes
- * from the world seed, through the climate sampler every lookup carries, so a seed always makes the same world.
+ * from the world seed (read as the server starts, before any world generates), so a seed always makes the same world.
  * {@code biomes.enabled=false} turns regions off for new chunks; the biomes stay registered.
  */
 public final class JugcraftRegions {
@@ -69,6 +70,7 @@ public final class JugcraftRegions {
 			rule(Biomes.SNOWY_PLAINS, 0, 0, 1, 1, "muskeg"));
 
 	private static volatile List<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> layout;
+	private static volatile long seedPrint = mix(0L);
 	private static volatile int cellQuarts = SIZE / 4;
 	private static volatile int share = (int) (SHARE * 65536);
 
@@ -79,8 +81,9 @@ public final class JugcraftRegions {
 		return new Rule(replaces, minT, maxT, minH, maxH, ResourceKey.create(Registries.BIOME, Jugcraft.id(biome)));
 	}
 
-	/** Reads the region options (after the config has loaded). */
+	/** Reads the region options (after the config has loaded), and each server's world seed as it starts. */
 	public static void register() {
+		ServerLifecycleEvents.SERVER_STARTING.register(server -> seedPrint = fingerprint(server.getWorldData().worldGenOptions().seed()));
 		int size = SIZE;
 		double fraction = SHARE;
 		try {
@@ -190,16 +193,9 @@ public final class JugcraftRegions {
 		return new Climate.ParameterList<>(values);
 	}
 
-	/** A number that differs from seed to seed: the climate at two fixed places. */
-	public static long fingerprint(Climate.Sampler sampler) {
-		long out = 0x5DEECE66DL;
-		for (Climate.TargetPoint point : new Climate.TargetPoint[] {sampler.sample(0, 0, 0), sampler.sample(1024, 0, -1024)}) {
-			for (long value : new long[] {point.temperature(), point.humidity(), point.continentalness(), point.erosion(),
-					point.depth(), point.weirdness()}) {
-				out = mix(out ^ value);
-			}
-		}
-		return out;
+	/** The number regions are drawn from for a world seed. */
+	public static long fingerprint(long seed) {
+		return mix(seed ^ 0x5DEECE66DL);
 	}
 
 	/** Whether the place at quart coordinates (block / 4) is in a Jugcraft region, for a seed's {@link #fingerprint}. */
@@ -233,18 +229,17 @@ public final class JugcraftRegions {
 		return value ^ value >>> 33;
 	}
 
-	/** One biome source's region state: its Jugcraft layout and its sampler's fingerprint (held by the mixin). */
+	/** One biome source's region state: its Jugcraft layout, built once (held by the mixin). */
 	public static final class Source {
 		private volatile Climate.ParameterList<Holder<Biome>> regional;
 		private volatile boolean checked;
-		private volatile Fingerprint fingerprint;
 
-		private record Fingerprint(Climate.Sampler sampler, long value) {
-		}
-
-		/** The biome at quart coordinates if they lie in a Jugcraft region of this source; null to let vanilla answer. */
-		public Holder<Biome> biome(BiomeSource source, int x, int y, int z, Climate.Sampler sampler) {
-			if (!enabled()) {
+		/**
+		 * The biome for a climate {@code target} at quart coordinates {@code x}, {@code z} if they lie in a Jugcraft region
+		 * of this source; null to let vanilla answer.
+		 */
+		public Holder<Biome> biome(BiomeSource source, int x, int z, Climate.TargetPoint target) {
+			if (!enabled() || !isJugcraft(seedPrint, x, z)) {
 				return null;
 			}
 			if (!checked) {
@@ -252,15 +247,7 @@ public final class JugcraftRegions {
 				checked = true;
 			}
 			Climate.ParameterList<Holder<Biome>> list = regional;
-			if (list == null) {
-				return null;
-			}
-			Fingerprint print = fingerprint;
-			if (print == null || print.sampler() != sampler) {
-				print = new Fingerprint(sampler, JugcraftRegions.fingerprint(sampler));
-				fingerprint = print;
-			}
-			return isJugcraft(print.value(), x, z) ? list.findValue(sampler.sample(x, y, z)) : null;
+			return list == null ? null : list.findValue(target);
 		}
 	}
 }

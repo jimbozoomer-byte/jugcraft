@@ -16,6 +16,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import org.slf4j.Logger;
@@ -67,6 +68,20 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 					places.add(place);
 				}
 			}
+			// Vanilla regions keep the biomes the Jugcraft layout replaces.
+			List<String> vanillaMissing = new ArrayList<>();
+			for (ResourceKey<Biome> biome : List.of(Biomes.TAIGA, Biomes.FOREST, Biomes.BIRCH_FOREST)) {
+				BlockPos place = server.computeOnServer(minecraft -> {
+					Pair<BlockPos, Holder<Biome>> nearest = minecraft.overworld().findClosestBiome3d(holder -> holder.is(biome), start,
+							SEARCH, 64, 64);
+					return nearest == null ? null : nearest.getFirst();
+				});
+				LOGGER.info("Biomes, seed {}: vanilla {} {}", SEED, biome.identifier().getPath(), place == null ? "not within " + SEARCH
+						+ " blocks" : "at " + place.getX() + " " + place.getZ());
+				if (place == null) {
+					vanillaMissing.add(biome.identifier().getPath());
+				}
+			}
 			for (String shot : SHOTS) {
 				int index = found.indexOf(shot);
 				if (index < 0) {
@@ -84,6 +99,9 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 				context.waitTicks(60);
 				singleplayer.getConnection().waitForChunksRender();
 				context.takeScreenshot("jugcraft_biome_" + shot);
+			}
+			if (!vanillaMissing.isEmpty()) {
+				throw new AssertionError("Vanilla " + vanillaMissing + " not within " + SEARCH + " blocks of the start (seed " + SEED + ")");
 			}
 			if (found.size() < FOUND_AT_LEAST) {
 				throw new AssertionError("Only " + found.size() + " of " + JugcraftRegions.biomes().size() + " batch 1 biomes within "

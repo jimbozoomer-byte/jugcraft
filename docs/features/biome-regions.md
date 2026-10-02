@@ -24,7 +24,7 @@ Nothing to obtain from the engine itself. Its rules decide where each batch's bi
 
 ## Multiplayer and persistence
 - **Server authority.** Biomes are chosen by the server's world generation only.
-- **Seeds.** Which cells are Jugcraft regions comes from the world seed, through the climate sampler every biome lookup carries: the same seed always makes the same world, and different seeds differ.
+- **Seeds.** Which cells are Jugcraft regions comes from the world seed, read as the server starts (before any world generates): the same seed always makes the same world, and different seeds differ.
 - **Settings** (config/jugcraft.properties):
   - `biomes.enabled=false` turns Jugcraft regions off for new chunks: the whole world is vanilla again there. The biomes, blocks and items stay registered, so old chunks and inventories keep them.
   - `biomes.region_size` (blocks across, 256 to 8192; default 1024) and `biomes.region_share` (0 to 1; default 0.5). Changing them on an existing world moves the borders for new chunks only, which can leave seams.
@@ -34,7 +34,7 @@ Nothing to obtain from the engine itself. Its rules decide where each batch's bi
 ## How it works
 - `mixin/OverworldBiomeBuilderMixin` wraps vanilla's Overworld biome builder. Alpine Spawn's replacements apply first; then `JugcraftRegions.Recorder` passes every entry on to vanilla's table and records its Jugcraft-layout version (`RULES`: a vanilla biome, in vanilla's temperature and humidity bands, becomes a Jugcraft biome).
 - At the builder's end it lists every Jugcraft biome in vanilla's table once, at a climate no place has (`UNREACHABLE`: every parameter at the edge, plus the largest offset). World generation then knows the biomes' features and structures, while vanilla's own lookups never pick them.
-- `mixin/MultiNoiseBiomeSourceMixin` answers `getNoiseBiome` from the Jugcraft layout when the place is in a Jugcraft region and the source is an Overworld that lists the Jugcraft biomes; otherwise vanilla answers. Every lookup of world generation, structures, spawning and `/locate` goes through it.
+- `mixin/MultiNoiseBiomeSourceMixin` wraps the climate lookup inside the source's resolvers (26.3's `createResolver` and `createResolverForChunk`, where the place is known) and answers from the Jugcraft layout when the place is in a Jugcraft region and the source is an Overworld that lists the Jugcraft biomes; otherwise vanilla answers. Every lookup of world generation, structures, spawning and `/locate` goes through them.
 - Regions are a jittered Voronoi diagram of cells `region_size` across; a hash of the seed and the cell decides whether a cell is Jugcraft.
 - Rules and settings are data in `tools/biomes.py`; `python3 tools/check_mod_data.py` checks that Java matches.
 
@@ -47,9 +47,8 @@ Results are recorded under "Results" below after CI runs.
 - Server game tests (`BiomeGameTests`):
   - the Jugcraft layout was recorded, every rule placed its biome (counts logged), and vanilla's table lists every Jugcraft biome exactly once, at the unreachable climate;
   - regions cover about the configured share of a 128 km square, are the same on every lookup, and change with the seed (logged);
-  - a real Overworld biome source for a seeded world, sampled 65,536 times over 16 km: Jugcraft biomes appear, only inside Jugcraft regions, and vanilla forest and taiga remain elsewhere (logged).
 - `PixelHollowsGameTests.overworldFeatureOrderHasNoCycle` covers the new biomes' features too.
-- Client game test (`BiomeClientGameTests`): a real world (seed `jugcraft`) finds at least six of the nine batch 1 biomes within 6,400 blocks of the start (distances logged), with screenshots.
+- Client game test (`BiomeClientGameTests`): a real world (seed `jugcraft`) finds at least six of the nine batch 1 biomes, and vanilla taiga, forest and birch forest, within 6,400 blocks of the start (distances logged), with screenshots. This is the test of the lookup mixin in a real world.
 - Not run: a dedicated server, other seeds, the look of region borders in play, performance measurements.
 
 ### Results
