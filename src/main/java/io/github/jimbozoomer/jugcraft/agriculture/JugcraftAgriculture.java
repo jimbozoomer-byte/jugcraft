@@ -73,7 +73,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
-import net.minecraft.world.level.block.FlowerBedBlock;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.LanternBlock;
@@ -894,8 +893,8 @@ public final class JugcraftAgriculture {
 
 	/**
 	 * The biomes branch's wild plants (tools/plants.py), from the generated {@code /jugcraft/plants.json}: small flowers
-	 * (with their potted forms), tall flowers and flowerbeds, each a vanilla block class copying a vanilla plant's
-	 * properties. They compost and burn like vanilla's flowers.
+	 * (with their potted forms), tall flowers and flowerbeds (ground cover, {@link GroundCoverBlock}), copying a vanilla
+	 * plant's properties. They compost and burn like vanilla's flowers.
 	 */
 	private static void registerWildPlants() {
 		JsonArray plants;
@@ -929,7 +928,7 @@ public final class JugcraftAgriculture {
 					yield tall;
 				}
 				case "flowerbed" -> {
-					Block bed = registerBlock(id, FlowerBedBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.PINK_PETALS));
+					Block bed = registerBlock(id, GroundCoverBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.PINK_PETALS));
 					registerItem(id, props -> new BlockItem(bed, props), new Item.Properties().useBlockDescriptionPrefix()
 							.compostable(COMPOST_LOW), SEEDS_TAB);
 					yield bed;

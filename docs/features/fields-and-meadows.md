@@ -49,7 +49,7 @@ Nine open biomes grow in the **meadow** layout of Jugcraft regions (a quarter of
 - Existing worlds: new chunks only; see [biome-regions.md](biome-regions.md).
 
 ## Dependencies and assets
-- Plants are registered alike from the generated `/jugcraft/plants.json` (`tools/plants.py`, `JugcraftAgriculture.registerWildPlants`): vanilla's FlowerBlock, TallFlowerBlock and FlowerBedBlock with vanilla properties. Models use vanilla's cross, potted-cross and flowerbed shapes by reference.
+- Plants are registered alike from the generated `/jugcraft/plants.json` (`tools/plants.py`, `JugcraftAgriculture.registerWildPlants`): vanilla's FlowerBlock and TallFlowerBlock, and `GroundCoverBlock` (ground cover that works like pink petals), with vanilla properties. Models use vanilla's cross, potted-cross and flowerbed shapes by reference.
 - Textures drawn by code in `tools/wild_textures.py`; nothing read, traced or recoloured.
 - Biomes start from vanilla bases by reference (`tools/biome_bases.py`) and add their own plants (`tools/biomes.py` EXTRAS). No Mojang file is copied.
 

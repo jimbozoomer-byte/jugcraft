@@ -1,10 +1,10 @@
 """Wild plants of the biomes branch (docs/branches/BIOMES.md): flowers and ground cover that its biomes grow.
 
 Each plant is registered alike from the generated /jugcraft/plants.json (agriculture/JugcraftAgriculture
-.registerWildPlants), so Java needs no list of its own. Kinds, each a vanilla block class with vanilla behaviour:
+.registerWildPlants), so Java needs no list of its own. Kinds, each with vanilla behaviour:
 - "flower": a small flower (vanilla's FlowerBlock, like the dandelion), with its potted form; dye and suspicious stew.
 - "tall_flower": a two-block flower (TallFlowerBlock, like the lilac); bone meal drops a copy; dye x2.
-- "flowerbed": ground cover of up to four clumps (FlowerBedBlock, like pink petals).
+- "flowerbed": ground cover of up to four clumps (agriculture/GroundCoverBlock, like pink petals).
 Every plant composts, burns like vanilla flowers and follows the "biomes" feature switch for its recipes. Textures are
 drawn by tools/wild_textures.py. Biomes place them through tools/biomes.py EXTRAS.
 """
