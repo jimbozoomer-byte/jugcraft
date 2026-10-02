@@ -268,6 +268,33 @@ No numbered release yet. Everything below is on `main`.
 - Also: composting, pig, chicken and parrot feed, `c:` crop, seed and food tags, and a new `agriculture` feature switch.
 - Original textures from `tools/crop_textures.py`. Twelve game tests, plus a client game test with screenshots of a corn maze, the fields and every growth stage.
 
+### Unmerged: biomes branch, Jugcraft regions and nine batches of biomes (stacked on Alpine Spawn)
+- **Remaking the Biomes O' Plenty catalog in Jugcraft**, with original art and names: the roster in [docs/branches/BIOMES.md](docs/branches/BIOMES.md) plans 98 biomes in nine batches.
+- **Jugcraft regions:** about half the Overworld, in regions about 1 km across, grows the new biomes in place of some vanilla ones; the rest stays vanilla. New settings: `biomes.enabled`, `biomes.region_size`, `biomes.region_share`.
+- **Batch 1, the seasonal forests:** Coniferous Forest, Snowy Coniferous Forest, Maple Woods, Seasonal Forest, Aspen Glade, Dead Forest, Tundra, Snowy Forest and Muskeg.
+- **New trees and wood:** maples turn red, orange and gold in autumn and stand bare in winter; aspens turn gold; firs stay green; dead wood stands grey. Each has a full wood set (dead wood without a sapling), sawmill and tree farm recipes.
+- **Region layouts:** Jugcraft regions come in four layouts (woodland, meadow, wetland, wild), so one vanilla climate can grow different Jugcraft biomes in different regions.
+- **Batch 2, fields and meadows** (meadow layout): Field, Flower Meadow, Grassland, Heathland, Lavender Field, Lush Grassland, Prairie, Shrubland and Steppe.
+- **New plants:** lavender and tall lavender, goldenrod, heather, orange cosmos (all make dye, the small ones go in flower pots) and clover. **New tree:** the jacaranda, in violet bloom all year, with a full wood set.
+- **Batch 3, wetlands** (wetland layout; swamps also elsewhere): Bog (with wild cranberries), Dead Swamp, Lush Swamp, Swamp Woods, Bayou, Floodplain, Ghost Forest, Sludge Mire, Lush River, Fen, Lake District, Quagmire, Marsh and Wetland, with muddy ponds and mud.
+- **More plants:** cattails, watergrass (under water) and duckweed (on water). **New tree:** the willow, with hanging leaves and vines, yellow in autumn and bare in winter.
+- **Batch 4, warm and dry:** Dryland, Xeric Shrubland, Jacaranda Glade, Lush Desert, Bone Flats, Dry River, Cold Desert, Scrubland, Lush Savanna, Outback, Oasis, Wasteland, Burnt Forest, Mediterranean Forest and Orchard, with their own ground (red sand, coarse dirt, gravel, salt flats). **New trees:** palm and cypress.
+- **Batch 5, big trees and rainforests** (mostly the woodland layout): Rainforest, Eucalyptus Forest, Tropics, Subtropics, Dense Forest, Redwood Forest, Temperate Rainforest and Woodland.
+- **New trees:** redwood and mahogany (four saplings in a square grow a giant, two blocks wide) and eucalyptus (rainbow-streaked bark), each with a full wood set. **New flowers:** hibiscus and hydrangea.
+- **Batch 6, mountains, coasts and volcanoes:** Volcano, Canyon, Highland, Basin, Shield, Karst Pinnacles and Hot Springs (wild layout), Gravel Beach, Dune Beach, Overgrown Beach and Flower Isle (wetland layout), Ice Sheet and Ocean Trench (both). **New plant:** sea oats, which grow on sand.
+- **Fixed:** the Cold Desert is no longer buried in snow.
+- **Batch 7, wonders and caves:** Cinder Barrens, Elder Vale, Frostlight Garden, Gilded Shrubland, Glimmer Grove, Gloomweald, Hallowed Bog, Highsun Meadow, Mycelial Jungle, Shrine Springs, Snowpetal Grove, Starlit Wood, Toadstool Field, Webwood and Wild Greens, and two cave biomes, the Glowcap Grotto and the Spider Nest. **New plants:** glowcaps and glimmerblooms (both glow), frost irises and snowpetals.
+- **Batch 8, the Nether:** Ashfall Wastes, Blighted Sands, Frost Rift, Fungal Thicket, Magma Fields, Marrow Heap, Netherbrush, Quartz Rift and Withered Hollow, rarer than vanilla's five. **New plant:** brambles.
+- **Batch 9, the End:** Chorus Reef, Ender Wilds, Outer Flats, Phantom Garden and Rotted Expanse on the outer islands. With it, every biome on the roster is built.
+
+### Unmerged: Alpine Spawn, parts 1 and 2 (stacked on the agriculture pull requests, #53 and #80)
+- **New worlds start in Alpine Spawn, at an alpine village.** Alpine Spawn is a large, cool alpine meadow on mountain plateaus; it takes the place of every vanilla meadow and of the cool plateau's forest and taiga. The server moves a new world's spawn to the alpine village nearest the origin, or into the biome when there is no alpine village within 6,400 blocks.
+- **Alpine villages are common:** vanilla's taiga villages on a 16-chunk grid (vanilla's is 34), only in this biome.
+- **Larches** (part 2): a conifer that changes with the seasons. Its needles are green in spring and summer, turn gold in autumn and fall in winter, leaving bare twigs, then bud green again; each block turns within a week either side, so crowns change gradually. Larches grow among spruces in Alpine Spawn. The tree drops larch saplings, and comes with a full larch wood set (logs, wood, stripped forms, planks, stairs, slab, fence and gate). Larch logs saw into planks in the sawmill, and saplings grow in the tree farm.
+- It has seasonal colours and winter snow from the start. Seasonal flowers, bilberries and an alpine winter come in the next parts.
+- New settings: `alpine_spawn.enabled` (generation, and the larch's hand recipes) and `alpine_spawn.start` (`on` or `off`: start there).
+- Server game tests for its climate entries, tags and villages, and a client test in a real world that it is where the world starts.
+
 ### Unmerged: Powered exosuit, batch 28
 - Four JE-powered armor pieces (netherite protection, unbreakable): night vision, an energy shield and jetpack, speed, and fall immunity with step assist.
 - Two liveries: Vanguard (gunmetal with teal lights) and Ronin (crimson and silver, conical hat, red eyes), with 3D shoulder plates, skirts and hat. Smithing liveries switch between them and keep the charge.

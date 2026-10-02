@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:random_selector",
+  "default": "jugcraft:fir_checked",
+  "features": [
+    {
+      "chance": 0.2,
+      "feature": "jugcraft:tall_fir_checked"
+    },
+    {
+      "chance": 0.02,
+      "feature": "jugcraft:fallen_fir_tree"
+    }
+  ]
+}

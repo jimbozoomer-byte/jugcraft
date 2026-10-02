@@ -162,6 +162,10 @@ def assets():
     import guide_books
     guide_books.write_assets(write, rid, ASSETS, DATA, lang)
     seasons_assets(lang)
+    import alpine_data
+    alpine_data.lang(lang)
+    import biomes_data
+    biomes_data.lang(lang)
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
 
 
@@ -1293,6 +1297,10 @@ def tags():
         tags.add("worldgen/biome", seasons.TAG, biome)
     for biome in seasons.WINTER_SNOW:
         tags.add("worldgen/biome", seasons.WINTER_SNOW_TAG, biome)
+    import alpine_data
+    alpine_data.tags(tags)
+    import biomes_data
+    biomes_data.tags(tags)
     # Seasonal snow counts as snow (grass under it turns snowy) and is dug with a shovel.
     tags.add("block", "minecraft:snow", rid(seasons.SNOW_BLOCK))
     tags.add("block", "minecraft:mineable/shovel", rid(seasons.SNOW_BLOCK))
@@ -1346,6 +1354,10 @@ def worldgen():
                                          "state": rid(rock)}])
         placed_feature(rock, gen)
     agriculture_data.worldgen(DATA, write)
+    import alpine_data
+    alpine_data.worldgen(DATA, write)
+    import biomes_data
+    biomes_data.worldgen(DATA, write)
     pixel_hollows_worldgen()
 
 

@@ -47,7 +47,9 @@
 			"io.github.jimbozoomer.jugcraft.test.TowerGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BlueprintGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PixelHollowsGameTests",
-			"io.github.jimbozoomer.jugcraft.test.SeasonGameTests"
+			"io.github.jimbozoomer.jugcraft.test.SeasonGameTests",
+			"io.github.jimbozoomer.jugcraft.test.AlpineGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BiomeGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
@@ -88,7 +90,9 @@
 			"io.github.jimbozoomer.jugcraft.test.BlueprintClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.GuideScreenshotGameTests",
 			"io.github.jimbozoomer.jugcraft.test.JugcraftServerClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.SeasonClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.SeasonClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.AlpineClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BiomeClientGameTests"
 		]
 	},
 	"depends": {
