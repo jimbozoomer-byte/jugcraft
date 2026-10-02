@@ -450,7 +450,8 @@ def lamp_post(height=3):
 # ---------------------------------------------------------------- fountain
 
 def fountain():
-    """A round stone fountain, nine across: a basin of water, a column with a bowl, water spilling from the top."""
+    """A round stone fountain, nine across: a basin of water and a column with a bowl of water on top. The bowl's own
+    rim holds its water: water spilling from it would spread over the basin's rim and flood the square (it did in CI)."""
     n = 9
     p = Piece(n, n)
     v = p.v
@@ -471,6 +472,8 @@ def fountain():
     for dx, dz, facing in ((1, 0, "west"), (-1, 0, "east"), (0, 1, "north"), (0, -1, "south")):
         v.set(c + dx, 3, c + dz, S("stone_brick_stairs", facing=facing, half="top"))
     v.set(c, 4, c, S("water", level="0"))
+    for dx, dz, facing in ((1, 0, "east"), (-1, 0, "west"), (0, 1, "south"), (0, -1, "north")):
+        v.set(c + dx, 4, c + dz, S("stone_brick_stairs", facing=facing, half="bottom"))
     return p
 
 
