@@ -1195,6 +1195,38 @@ def cider_items():
     return [CIDER["tree"]["leaves"], CIDER["press"]["block"], CIDER["barrel"]["block"]]
 
 
+# ---------------------------------------------------------------- Fall additions 3: the preserves pantry
+# Preserves (PreserveJarItem) are cooked into a Mason Jar in the Cooking Pot (POT_RECIPES). A jar holds `servings`
+# servings, eaten one at a time (`food` each, and `effect` [vanilla MobEffects field, seconds] if any); the last leaves the
+# jar. Fresh from the pot a jar is unsealed and spoils `spoil_ticks` after it was cooked (a spoiled serving: 1 food,
+# Hunger and Nausea). The Canning Kettle (CanningKettleBlock + entity) holds water and up to `kettle_jars` full jars; over
+# heat its water boils after `boil_ticks`, and a jar in boiling water for `process_ticks` is sealed (component
+# jugcraft:sealed): it keeps until opened, when its days start. The Pantry Shelf (PantryShelfBlock + entity) shows up to
+# `shelf_slots` jars. `color`: what is in the jar, for the item textures and the renderers.
+PANTRY = {"jar": "mason_jar", "jar_display": "Mason Jar", "vinegar": "cider_vinegar", "vinegar_display": "Cider Vinegar",
+          "kettle": "canning_kettle", "kettle_display": "Canning Kettle", "shelf": "pantry_shelf", "shelf_display": "Pantry Shelf",
+          "servings": 4, "spoil_ticks": 72000, "kettle_jars": 4, "boil_ticks": 200, "process_ticks": 400, "shelf_slots": 6,
+          "preserves": {
+              "sweet_berry_jam": {"display": "Sweet Berry Jam", "food": [3, 0.4], "effect": None, "color": 0x9A1E3A, "kind": "sweet"},
+              "apple_butter": {"display": "Apple Butter", "food": [4, 0.5], "effect": None, "color": 0x7A3A14, "kind": "sweet"},
+              "pumpkin_butter": {"display": "Pumpkin Butter", "food": [4, 0.5], "effect": None, "color": 0xC8701E, "kind": "sweet"},
+              "cranberry_preserves": {"display": "Cranberry Preserves", "food": [3, 0.4], "effect": None, "color": 0xB0122E, "kind": "sweet"},
+              "glow_berry_jelly": {"display": "Glow Berry Jelly", "food": [2, 0.3], "effect": ["NIGHT_VISION", 30], "color": 0xF0B030,
+                                   "kind": "sweet"},
+              "pickled_beets": {"display": "Pickled Beets", "food": [2, 0.4], "effect": None, "color": 0x7A1040, "kind": "pickle"},
+              "pickled_peppers": {"display": "Pickled Peppers", "food": [2, 0.4], "effect": ["FIRE_RESISTANCE", 15], "color": 0x4A8A2A,
+                                  "kind": "pickle"},
+              "corn_relish": {"display": "Corn Relish", "food": [3, 0.5], "effect": None, "color": 0xE0B828, "kind": "pickle"}}}
+
+
+def pantry_blocks():
+    return [PANTRY["kettle"], PANTRY["shelf"]]
+
+
+def pantry_items():
+    return pantry_blocks() + [PANTRY["jar"], PANTRY["vinegar"]] + list(PANTRY["preserves"])
+
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -1309,10 +1341,27 @@ POT_RECIPES = {
     "witchs_licorice": {"inputs": {"minecraft:sugar": 2, "minecraft:wheat": 1, "minecraft:ink_sac": 1}, "count": 4, "time": 200},
     # Fall additions 2: sparkling cider simmered with mulling spices, a bottle a batch.
     "mulled_cider": {"inputs": {"jugcraft:sparkling_cider": 1, "jugcraft:mulling_spices": 1}, "time": 200},
+    # Fall additions 3: cider vinegar (aged cider soured on pomace); preserves, each cooked down into a Mason Jar: jams and
+    # fruit butters with sugar (apple butter cooked in sweet cider, pumpkin butter with mulling spices), and pickles and
+    # relish in cider vinegar.
+    "cider_vinegar": {"inputs": {"jugcraft:aged_cider": 1, "jugcraft:apple_pomace": 1}, "time": 200},
+    "sweet_berry_jam": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:sweet_berries": 6, "minecraft:sugar": 2}, "time": 300},
+    "apple_butter": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:apple": 3, "minecraft:sugar": 1, "jugcraft:sweet_cider": 1}, "time": 300},
+    "pumpkin_butter": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:pumpkin": 1, "minecraft:sugar": 2, "jugcraft:mulling_spices": 1},
+                       "time": 300},
+    "cranberry_preserves": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:cranberries": 6, "minecraft:sugar": 2}, "time": 300},
+    "glow_berry_jelly": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:glow_berries": 6, "minecraft:sugar": 2}, "time": 300},
+    "pickled_beets": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:beetroot": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
+    "pickled_peppers": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:pepper": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
+    "corn_relish": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:corn": 2, "jugcraft:pepper": 1, "jugcraft:onion": 1,
+                               "jugcraft:cider_vinegar": 1}, "time": 300},
 }
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    # Fall additions 3: a canning kettle is a cauldron enamelled blue, with an iron-bar jar rack.
+    {"id": "canning_kettle", "inputs": ["minecraft:cauldron", "minecraft:blue_dye", "minecraft:iron_bars"], "result": "canning_kettle",
+     "count": 1, "category": "misc"},
     # Fall additions 2: mulling spices; apple seeds picked out of pomace; apple cider donuts (the cider's bottle comes back).
     {"id": "mulling_spices", "inputs": ["minecraft:sugar", "minecraft:sweet_berries", "minecraft:cocoa_beans"], "result": "mulling_spices",
      "count": 2, "category": "misc"},
@@ -1649,6 +1698,11 @@ SHAPED = [
     {"id": "cider_press", "pattern": ["PIP", "PGP", "SSS"], "key": {"P": "#minecraft:planks", "I": "minecraft:iron_ingot",
                                                                    "G": "minecraft:grindstone", "S": "#minecraft:wooden_slabs"},
      "result": "cider_press", "count": 1, "category": "misc"},
+    # Fall additions 3: Mason Jars of glass with an iron lid; a pantry shelf of planks and slabs.
+    {"id": "mason_jar", "pattern": [" N ", "G G", "GGG"], "key": {"N": "minecraft:iron_nugget", "G": "minecraft:glass"},
+     "result": "mason_jar", "count": 3, "category": "misc"},
+    {"id": "pantry_shelf", "pattern": ["SSS", "P P", "SSS"], "key": {"S": "#minecraft:wooden_slabs", "P": "#minecraft:planks"},
+     "result": "pantry_shelf", "count": 1, "category": "misc"},
     {"id": "cider_barrel", "pattern": [" G ", "NBN", "S S"], "key": {"G": "minecraft:gold_nugget", "N": "minecraft:iron_nugget",
                                                                     "B": "minecraft:barrel", "S": "minecraft:stick"},
      "result": "cider_barrel", "count": 1, "category": "misc"},
@@ -1769,7 +1823,7 @@ def all_blocks():
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
-            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks())
+            + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks())
 
 
 def all_items():
@@ -1779,7 +1833,7 @@ def all_items():
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
-            + chandlery_items() + cider_items())
+            + chandlery_items() + cider_items() + pantry_items())
 
 
 def owns(entry_id):

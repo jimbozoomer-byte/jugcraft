@@ -224,6 +224,12 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<CiderBarrelBlockEntity> CIDER_BARREL_ENTITY;
 	/** The cider a broken Cider Barrel keeps (its servings and when its batch started ageing). */
 	public static DataComponentType<BarrelCider> BARREL_CIDER;
+	public static BlockEntityType<CanningKettleBlockEntity> CANNING_KETTLE_ENTITY;
+	public static BlockEntityType<PantryShelfBlockEntity> PANTRY_SHELF_ENTITY;
+	/** A jar of preserves sealed in a Canning Kettle: it keeps for ever (its item model shows a cloth cap). */
+	public static DataComponentType<Boolean> SEALED;
+	/** What is left in an unsealed jar of preserves, and when it was cooked or opened. */
+	public static DataComponentType<JarContents> JAR_CONTENTS;
 	/** The outfits of decorations batch 14, worn on the head and drawn over the whole body (the client's CostumeLayer). */
 	public static final List<String> OUTFITS = List.of("vampire_cape", "mummy_wraps", "skeleton_suit", "werewolf_mask", "cat_ears_and_tail",
 			"bat_wings");
@@ -1194,6 +1200,33 @@ public final class JugcraftAgriculture {
 		CIDER_BARREL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("cider_barrel"),
 				FabricBlockEntityTypeBuilder.create(CiderBarrelBlockEntity::new, barrel).build());
 		registerItem("cider_barrel", props -> new CiderBarrelItem(barrel, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 3, the preserves pantry: Mason Jars, cider vinegar, preserves cooked into jars in the Cooking Pot, the
+		// Canning Kettle that seals them and the Pantry Shelf that shows them off.
+		SEALED = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("sealed"),
+				DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+		JAR_CONTENTS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("jar_contents"),
+				DataComponentType.<JarContents>builder().persistent(JarContents.CODEC).networkSynchronized(JarContents.STREAM_CODEC).build());
+		registerItem("mason_jar", Item::new, new Item.Properties().stacksTo(16), INGREDIENT_TAB);
+		registerItem("cider_vinegar", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE).stacksTo(16), INGREDIENT_TAB);
+		preserve("sweet_berry_jam", 3, 0.4F, null, 0, 0x9A1E3A);
+		preserve("apple_butter", 4, 0.5F, null, 0, 0x7A3A14);
+		preserve("pumpkin_butter", 4, 0.5F, null, 0, 0xC8701E);
+		preserve("cranberry_preserves", 3, 0.4F, null, 0, 0xB0122E);
+		preserve("glow_berry_jelly", 2, 0.3F, MobEffects.NIGHT_VISION, 30, 0xF0B030);
+		preserve("pickled_beets", 2, 0.4F, null, 0, 0x7A1040);
+		preserve("pickled_peppers", 2, 0.4F, MobEffects.FIRE_RESISTANCE, 15, 0x4A8A2A);
+		preserve("corn_relish", 3, 0.5F, null, 0, 0xE0B828);
+		Block kettle = registerBlock("canning_kettle", CanningKettleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE)
+				.strength(2.0F).sound(SoundType.LANTERN).noOcclusion());
+		CANNING_KETTLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("canning_kettle"),
+				FabricBlockEntityTypeBuilder.create(CanningKettleBlockEntity::new, kettle).build());
+		registerItem("canning_kettle", props -> new BlockItem(kettle, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block shelf = registerBlock("pantry_shelf", PantryShelfBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		PANTRY_SHELF_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("pantry_shelf"),
+				FabricBlockEntityTypeBuilder.create(PantryShelfBlockEntity::new, shelf).build());
+		registerItem("pantry_shelf", props -> new BlockItem(shelf, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
@@ -1416,6 +1449,12 @@ public final class JugcraftAgriculture {
 		Consumable eaten = Consumables.defaultFood().onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(effect, seconds * 20)))
 				.build();
 		registerItem(id, Item::new, new Item.Properties().food(food, eaten), FOOD_TAB);
+	}
+
+	/** A jar of preserves ({@link PreserveJarItem}): four servings of {@code nutrition} each, and an effect (or none). */
+	private static void preserve(String id, int nutrition, float saturation, @Nullable Holder<MobEffect> effect, int seconds, int color) {
+		registerItem(id, props -> new PreserveJarItem(props, nutrition, saturation, effect, seconds, color), new Item.Properties().stacksTo(16),
+				FOOD_TAB);
 	}
 
 	/** A drink in a glass bottle, like a potion: drunk even on a full stomach for a short effect, leaving the bottle. */

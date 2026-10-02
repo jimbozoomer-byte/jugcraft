@@ -121,10 +121,15 @@ def check_assets(registered):
 
 
 def item_models(definition):
-    """Every model an item definition can show: a plain model, or each case and the fallback of a select."""
+    """Every model an item definition can show: a plain model, each case and the fallback of a select, or both sides of a
+    condition."""
     if definition.get("type") == "minecraft:select":
         return [ref for case in definition["cases"] for ref in item_models(case["model"])] + item_models(definition["fallback"])
+    if definition.get("type") == "minecraft:condition":
+        return item_models(definition["on_true"]) + item_models(definition["on_false"])
     return [definition["model"]]
+
+
 def check_petro():
     """Petroleum fluids: Java registers exactly tools/petro.py's fluids, each with its block, textures and names."""
     java = (JAVA_ROOT / "chemistry" / "PetroFluids.java").read_text(encoding="utf-8")
@@ -786,6 +791,7 @@ def check_agriculture():
     check_decor14(java)
     check_chandlery(java)
     check_cider(java)
+    check_pantry(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2227,6 +2233,49 @@ def check_cider(java):
     table = load(DATA / "jugcraft" / "loot_table" / "blocks" / f"{barrel['block']}.json") or {}
     if "jugcraft:barrel_cider" not in json.dumps(table):
         err(f"{barrel['block']}: its loot must keep its cider (copy jugcraft:barrel_cider)")
+
+
+def check_pantry(java, main):
+    """The preserves pantry: Java matches PANTRY in tools/agriculture.py (servings, spoiling time, the kettle's jars and
+    timings, the shelf's slots, and every preserve's food, effect and colour), every preserve is cooked into a Mason Jar in
+    the Cooking Pot, its item model shows the cloth cap once sealed, and every message and tooltip has its words."""
+    pantry = ag.PANTRY
+
+    def numbers(source, names):
+        return {name: int(value) for name, value in re.findall(rf"int ({names}) = (\d+);", java.get(source, ""))}
+
+    for source, expected in (("PreserveJarItem", {"SERVINGS": pantry["servings"], "SPOIL_TICKS": pantry["spoil_ticks"]}),
+                             ("CanningKettleBlockEntity", {"JARS": pantry["kettle_jars"], "BOIL_TICKS": pantry["boil_ticks"],
+                                                           "PROCESS_TICKS": pantry["process_ticks"]}),
+                             ("PantryShelfBlockEntity", {"SLOTS": pantry["shelf_slots"]})):
+        if numbers(source, "|".join(expected)) != expected:
+            err(f"{source}.java differs from PANTRY in tools/agriculture.py")
+    registered = {name: (int(n), float(sat), None if effect == "null" else [effect.split(".")[1], int(seconds)], int(color, 16))
+                  for name, n, sat, effect, seconds, color in re.findall(
+                      r'\bpreserve\("([a-z_]+)", (\d+), ([\d.]+)F, (null|MobEffects\.\w+), (\d+), 0x([0-9A-F]{6})\)', main)}
+    expected = {name: (info["food"][0], info["food"][1], info["effect"], info["color"]) for name, info in pantry["preserves"].items()}
+    if registered != expected:
+        err(f"JugcraftAgriculture.java preserves {registered} differ from PANTRY in tools/agriculture.py")
+    jar = f"jugcraft:{pantry['jar']}"
+    for preserve in pantry["preserves"]:
+        recipe = ag.POT_RECIPES.get(preserve)
+        if not recipe or recipe["inputs"].get(jar) != 1 or recipe.get("count", 1) != 1:
+            err(f"{preserve}: must be cooked into one Mason Jar in the Cooking Pot")
+        model = (load(ASSETS / "items" / f"{preserve}.json") or {}).get("model", {})
+        if model.get("type") != "minecraft:condition" or model.get("component") != "jugcraft:sealed":
+            err(f"{preserve}: its item model must show the sealed jar (a condition on jugcraft:sealed)")
+    if pantry["vinegar"] not in ag.POT_RECIPES:
+        err("Cider vinegar must be cooked in the Cooking Pot")
+    if f'registerItem("{pantry["vinegar"]}", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE)' not in main:
+        err("Cider vinegar must give its bottle back when cooked into preserves")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"message.jugcraft.{pantry['kettle']}.{k}" for k in re.findall(r'MESSAGES \+ (?:\([^"]*)?"([a-z_]+)"', java.get("CanningKettleBlock", ""))]
+    keys += [f"message.jugcraft.{pantry['kettle']}.{k}" for k in ("no_water", "already_sealed", "opened", "full")]
+    keys += [f"message.jugcraft.{pantry['shelf']}.{k}" for k in re.findall(r'MESSAGES \+ "([a-z_]+)"', java.get("PantryShelfBlock", ""))]
+    keys += [f"tooltip.jugcraft.preserves.{k}" for k in re.findall(r'TOOLTIP \+ "([a-z_]+)"', java.get("PreserveJarItem", ""))]
+    for key in keys:
+        if key not in lang:
+            err(f"Missing words for {key}")
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

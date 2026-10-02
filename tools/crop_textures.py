@@ -872,4 +872,6 @@ def crop_textures():
     out.update(chandlery_textures())
     from cider_textures import cider_textures  # and the cider mill
     out.update(cider_textures())
+    from pantry_textures import pantry_textures  # and the preserves pantry
+    out.update(pantry_textures())
     return out
