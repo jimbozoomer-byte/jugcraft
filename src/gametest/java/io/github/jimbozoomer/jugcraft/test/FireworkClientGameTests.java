@@ -48,7 +48,7 @@ public class FireworkClientGameTests implements FabricClientGameTest {
 			server.runOnServer(minecraft -> build(minecraft.overworld(), launcher));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
-			shoot(context, singleplayer, x + 4, y + 1, z - 5, 180, 35, "jugcraft_show_launcher");
+			shoot(context, singleplayer, x + 4, y + 1, z - 6, 180, 45, "jugcraft_show_launcher");
 
 			// At midnight, the four pictures side by side, burst straight on this client facing the camera.
 			server.runCommand("time set midnight");
@@ -56,7 +56,7 @@ public class FireworkClientGameTests implements FabricClientGameTest {
 			context.runOnClient(client -> {
 				FireworkShape[] shapes = FireworkShape.values();
 				for (int i = 0; i < shapes.length; i++) {
-					SpookyBursts.burst(client.level, new Vec3(x - 8.0 + i * 8.0 + 0.5, y + 13.0, z - 20.0), shapes[i], false);
+					SpookyBursts.burst(client.level, new Vec3(x - 8.0 + i * 8.0 + 0.5, y + 11.0, z - 14.0), shapes[i], false);
 				}
 			});
 			context.waitTicks(20);
