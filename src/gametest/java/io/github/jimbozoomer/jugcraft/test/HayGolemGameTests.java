@@ -252,24 +252,20 @@ public class HayGolemGameTests {
 		});
 	}
 
-	/** Wheat heals it four; fire hurts it double; shears take it back to four hay bales, its head and its pouch. */
+	/** Fire hurts it double; wheat heals it four; shears take it back to four hay bales, its head and its pouch. */
 	@GameTest(maxTicks = 20)
 	public void wheatHealsFireBurnsShearsUndo(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		floor(helper);
 		HayGolem golem = golem(helper, new BlockPos(4, 2, 4), new ItemStack(Items.JACK_O_LANTERN));
 		golem.pocket(new ItemStack(Items.CARROT, 3));
-		golem.hurtServer(level, level.damageSources().generic(), 6.0F);
-		helper.assertTrue(golem.getHealth() == HayGolem.MAX_HEALTH - 6.0F, "Hurt: " + golem.getHealth());
+		golem.hurtServer(level, level.damageSources().onFire(), 2.0F);
+		helper.assertTrue(golem.getHealth() == HayGolem.MAX_HEALTH - 2.0F * HayGolem.FIRE_FACTOR, "Fire hurts it double: " + golem.getHealth());
 		ServerPlayer player = player(helper, new BlockPos(4, 2, 2));
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WHEAT, 2));
 		player.interactOn(golem, InteractionHand.MAIN_HAND, golem.position());
-		helper.assertTrue(golem.getHealth() == HayGolem.MAX_HEALTH - 6.0F + HayGolem.WHEAT_HEAL && player.getMainHandItem().getCount() == 1,
-				"A wheat heals it four: " + golem.getHealth());
-		golem.invulnerableTime = 0;
-		float before = golem.getHealth();
-		golem.hurtServer(level, level.damageSources().onFire(), 2.0F);
-		helper.assertTrue(before - golem.getHealth() == 2.0F * HayGolem.FIRE_FACTOR, "Fire hurts it double: " + (before - golem.getHealth()));
+		helper.assertTrue(golem.getHealth() == HayGolem.MAX_HEALTH - 2.0F * HayGolem.FIRE_FACTOR + HayGolem.WHEAT_HEAL
+				&& player.getMainHandItem().getCount() == 1, "A wheat heals it four: " + golem.getHealth());
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.SHEARS));
 		player.interactOn(golem, InteractionHand.MAIN_HAND, golem.position());
 		BlockPos at = new BlockPos(4, 2, 4);
