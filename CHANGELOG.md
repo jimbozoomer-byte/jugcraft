@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: more Halloween, batch 8, the mad scientist and monsters (pull request pending, stacked on batch 7)
+- **Tesla Coil:** a two-block coil on the electric network (20 JE a tick) that hums, glows and throws harmless violet arcs to other running coils nearby.
+- **Lab Table:** a two-block operating table whose sheeted patient sits bolt upright on a redstone signal, and twitches at night.
+- **Specimen Jar:** glowing green fluid with an eye, a tentacle, a tiny pumpkin or a brain bobbing in it.
+- **Mummy Sarcophagus:** a click or redstone and the lid grinds open, the mummy lurches out with its arms up, then goes back.
+- **Raven on a Perch:** watches the nearest player, ruffles and croaks, caws and flaps when used.
+- **Black Cat Figure:** swishes its tail, its eyes glow at night, and it arches its back and hisses at anyone who runs past.
+- Arcs, the patient, the specimens, the lid and mummy, the raven and the cat's tail and eyes are drawn by each client. The checker compares the numbers with Java. New server game tests and a client test with screenshots.
+
 ### Agriculture: more Halloween, batch 7, the haunted house inside (pull request pending, stacked on decorations batch 6)
 - **Haunted Chandelier:** eight candles on an iron ring that sways on its chain; at night a draft blows them all out and they relight one by one.
 - **Phantom Pipe Organ:** a three-by-two organ, one prop, that plays the opening of Bach's Toccata and Fugue in D minor on a click or redstone, its keys going down by themselves; at night it sometimes plays alone.

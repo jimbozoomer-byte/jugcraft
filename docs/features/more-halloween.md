@@ -1,9 +1,9 @@
 # More Halloween
 
-Status: implemented in source for batch 7, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below). Batches 8 to 14 are planned and follow one pull request at a time.
+Status: implemented in source for batches 7 and 8, not yet played. The Build workflow compiles it, and CI's game tests pass (recorded below). Batches 9 to 14 are planned and follow one pull request at a time.
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("I want to make more halloween content more decorations and fun festive content", then "Lets do those 45 by each category starting with Haunted House inside then Mad Scientist and Mosnters then Yard and Porch then Lighting and Glow then Party Games then Night Events then Treats then Costumes"). The 45 ideas ship one category per pull request, each stacked on the one before:
 - batch 7, the haunted house inside: the Haunted Chandelier, the Phantom Pipe Organ, the Suit of Armor, the Dust Sheet, the Spirit Mirror, Tattered Curtains and the Creepy Doll;
-- batch 8, the mad scientist and monsters (planned);
+- batch 8, the mad scientist and monsters: the Tesla Coil, the Lab Table, the Specimen Jar, the Mummy Sarcophagus, the Raven on a Perch and the Black Cat Figure;
 - batch 9, the yard and porch (planned);
 - batch 10, lighting and glow (planned);
 - batch 11, party games (planned);
@@ -12,10 +12,10 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("I want
 - batch 14, costumes (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: batch 7 is Discovery tier (iron, candles, a note block, bones, planks, an armor stand, white carpet, glass, gold nuggets, soul sand, string, clay and wool).
+Target milestone and tier: batch 7 is Discovery tier (iron, candles, a note block, bones, planks, an armor stand, white carpet, glass, gold nuggets, soul sand, string, clay and wool). Batch 8 is Discovery tier too (iron, glass, a slime ball, sandstone, paper, rotten flesh, feathers, sticks, black terracotta, glowstone dust), apart from the Tesla Coil, which needs copper and copper cable (the tin and bronze tier) and a generator to run.
 Primary specialty and supported player role: building and play; builders (haunted houses), groups (a shared haunted house to explore), and anyone who likes a prop that does something when you are not looking.
 
-Event-only activities in later batches follow the rule the earlier Halloween work set: they run only in the Halloween window, and anything crafted or placed stays all year. Nothing in batch 7 depends on the event.
+Event-only activities in later batches follow the rule the earlier Halloween work set: they run only in the Halloween window, and anything crafted or placed stays all year. Nothing in batches 7 and 8 depends on the event.
 
 ## Player experience
 ### Batch 7: the Haunted Chandelier
@@ -52,10 +52,32 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
 19. **Its head never moves while you watch it.** Look away and look back, and it has turned: usually toward you, now and then (one time in three) far off to one side. Each player sees it turn for themselves.
 20. Wind it (use it) and its music box plays a note.
 
+### Batch 8: the Tesla Coil
+21. A mad scientist's coil two blocks tall: a riveted iron base, a copper primary, a tall copper winding and a polished toroid on top (a lightning rod, two copper ingots, copper cable and three iron ingots). Cables connect to its base.
+22. **Use it to switch it on.** With power (20 JE a tick) it hums, its winding glows (light 8), sparks spit from the toroid, and every second or two it throws a crackling violet arc to another running coil within eight blocks, or into the air if it stands alone. The arcs are harmless: nothing is struck.
+
+### Batch 8: the Lab Table
+23. A riveted steel operating table two blocks long with leather straps, and on it a patient under a stained sheet, one grey hand slipped out from under it. Place it and it lies away from you; breaking either block picks up the whole table.
+24. **Give it a redstone signal and the patient sits bolt upright**, with a crackle of sparks and a groan; it lies back down when the power goes. At night it twitches now and then.
+
+### Batch 8: the Specimen Jar
+25. A tall glass jar of glowing green fluid (light 7) under an iron lid, with an eye, a tentacle, a tiny pumpkin or a brain floating in it, bobbing and turning slowly while bubbles rise past. Sneak-use it to put in the next; broken, it keeps its specimen.
+
+### Batch 8: the Mummy Sarcophagus
+26. A painted sarcophagus two blocks tall, gold and lapis on sandstone, standing up. **Use it, or give it a redstone signal**, and its lid grinds open, the mummy lurches out at you with its arms coming up and a groan, and four seconds later it shuffles back and the lid shuts.
+
+### Batch 8: the Raven on a Perch
+27. A raven on a turned wooden perch. Its head turns to watch the nearest player within eight blocks; now and then it ruffles its feathers and croaks. Use it and it caws and beats its wings at you.
+
+### Batch 8: the Black Cat Figure
+28. A glazed black cat sitting tall, its tail swishing slowly. At night its eyes glow green.
+29. **Run past it** (sprinting within three blocks) and it arches its back and hisses, for a second and a half; then it won't again for three seconds. Use it and it purrs.
+
 ## Connections
+- Batch 8 inputs: a lightning rod, copper, copper cable and iron, and the electric network's power (the coil); iron, white wool and rotten flesh, and redstone (the table); glass, an iron nugget and a slime ball (the jar); sandstone, gold nuggets, paper and rotten flesh, and redstone (the sarcophagus); feathers, black dye and sticks (the raven); black terracotta and glowstone dust (the cat).
 - Existing input producer: iron, candles, flint and steel or fire charges (the chandelier); iron, bone, a note block and planks, and redstone (the organ); iron and an armor stand (the suit); white carpet (the sheet); a glass pane, gold nuggets and soul sand (the mirror); iron nuggets and string (the curtains); clay, wool and string (the doll). The sheet covers the earlier batches' Rocking Chair, Hay Bale Seat, Crystal Ball and Grimoire Stand, this batch's doll and mirror, and vanilla furniture.
 - Existing output consumer: decoration, light (the chandelier), music (the organ), storage kept under a sheet.
-- Technology connection: none needed; the organ answers redstone.
+- Technology connection: none needed for batch 7; the organ answers redstone. Batch 8's Tesla Coil runs on the electric network through the shared energy interface (`EnergyStorage.SIDED`), so any Jugcraft generator powers it, and its recipe needs copper cable; the lab table and sarcophagus answer redstone.
 - Magic connection: none yet.
 - Reachable entry path: everything is crafted from vanilla materials an early player has.
 - Required vs optional: all optional decoration; nothing in progression needs them.
@@ -64,6 +86,7 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
 ## Balance and automation
 - No energy. A chandelier costs two iron nuggets, an iron ingot and three candles; an organ three iron ingots, two bones, a note block and three planks; a suit of armor four iron ingots and an armor stand; a sheet three white carpets (two wool); a mirror seven gold nuggets, a glass pane and a soul sand; three curtains three iron nuggets and six string; a doll a clay ball, two wool and a string.
 - Light: the chandelier 3 for every two burning candles (12 with all eight).
+- Batch 8: the Tesla Coil uses 20 JE a tick while it runs (buffer 4,000 JE, up to 64 JE a tick in): a coal generator runs it easily, a solar panel (8 JE a tick) can't alone. Nothing else in batch 8 uses energy. A coil costs a lightning rod, two copper ingots, a copper cable and three iron ingots; a table two white wool, a rotten flesh and five iron ingots; a jar an iron nugget, three glass and a slime ball; a sarcophagus five sandstone, two gold nuggets, a paper and a rotten flesh; a raven two feathers, a black dye and four sticks; a cat five black terracotta and a glowstone dust. Light: a running coil 8, a jar 7.
 - **The Dust Sheet makes nothing.** It only moves a block (and that block's saved data) under itself and back. Breaking a sheeted block gives the covered block's own drops, with the tool the player is using: a sheet over stone stairs broken by hand gives only the sheet, as breaking stone stairs by hand gives nothing. A sheeted chest's contents spill once, from the sheet, never also from the chest.
 - No conversion loops; nothing here makes items or energy.
 
@@ -72,23 +95,30 @@ Event-only activities in later batches follow the rule the earlier Halloween wor
   - Lighting and snuffing the chandelier, playing and stopping the organ, covering and uncovering, opening and closing curtains, and using the mirror, suit and doll go through vanilla's block and item use paths (reach, spawn protection, adventure mode) and are decided on the server.
   - The chandelier's gusts and relighting, the organ's night playing and its notes run on the server, for everyone near.
   - **Covering a container closes it first** for anyone looking into it, and its contents move under the sheet before the chest is replaced, so nothing can be taken out of a covered chest or spilled twice. Clients are only told which block is under a sheet, never a chest's contents.
+- **Batch 8, server authority.** Switching a coil, sitting the patient up, changing a specimen, opening the sarcophagus and using the raven and cat go through vanilla's block use path (reach, spawn protection) or redstone, and are decided on the server. A coil's power, running and arcs (and which coil it arcs to) are worked out on the server and sent as block events; the cat watches for runners on the server, from where players really are, every 5 ticks, at the level's player list. The raven's flap is a block event.
 - **Client only.** The chandelier's sway and flames, the organ's keys, the suit's helmet and visor glow, the sheet's drape and breathing, the mirror's face, the curtains' sway and the doll's head are drawn by each client from what it already has (the time, the block states, where players are, its own camera), so nothing about them is sent or trusted. Every client works out the same nearest player for the suit. The doll turns for each player alone, by when that player last saw it.
+- **Batch 8, client only.** The arcs (from the block event), the patient sitting up (from the block state), the specimens bobbing, the lid and mummy, the raven's head and wings, and the cat's tail and eyes are drawn by each client from what it already has. The coil keeps a set of running coils per level, so finding a partner searches no blocks.
 - **Saved state.**
   - Block states: the chandelier's `lit` and `burning`; the organ's `part`, `facing`, `playing` and `powered`; the suit's `facing` and `half`; the mirror's `facing`; the curtains' `facing`, `open` and `part`; the doll's `facing`.
   - The organ's master block entity saves where it is in its tune (`tick`) and when it started (`start_time`, for the keys).
   - A sheet's block entity saves the covered block (`covered`) and, if that block had a block entity, its full saved data with its type (`covered_data`).
+  - Batch 8 block states: the coil's `facing`, `half`, `enabled` and `active`; the table's `facing`, `part` (`foot`, `head`) and `powered`; the jar's `specimen`; the sarcophagus's `facing`, `half`, `open` and `powered`; the raven's `facing`; the cat's `facing` and `hissing`. The coil's lower half saves its energy (`energy`); the cat saves when it calms and when it may hiss again (`calm_at`, `ready_at`). A sarcophagus shuts by a scheduled tick.
 - **Bounded work.**
   - Only a playing organ ticks, on its master block, for its 200 ticks. A lit chandelier and the organ's master take random ticks; a relighting chandelier schedules one tick per candle.
   - The renderers do a little arithmetic a frame. The suit looks through the level's player list; the curtains look up at most eight blocks above them; the suit and doll keep one small entry per block entity in a weak map.
+  - Batch 8: a running coil ticks (its energy, and an arc every 15 to 40 ticks); a cat looks every 5 ticks; nothing else ticks. Arcs, the patient, the specimens, the mummy, the raven and the cat's tail are a little arithmetic a frame on each client; the raven looks through the level's player list.
 - New IDs only:
   - blocks with items: `haunted_chandelier`, `phantom_pipe_organ`, `suit_of_armor`, `spirit_mirror`, `tattered_curtains`, `creepy_doll`;
   - the `dust_sheet` block and the `dust_sheet` item (an item, not a block item: it covers blocks rather than being placed);
   - block entities: `haunted_chandelier`, `suit_of_armor`, `spirit_mirror`, `tattered_curtains`, `creepy_doll` (empty, for the client's drawing), `phantom_pipe_organ` (the tune) and `dust_sheet` (what it covers);
   - block tag `jugcraft:dust_sheet_coverable`, so packs can let sheets cover more or fewer blocks.
+- Batch 8 new IDs: blocks with items `tesla_coil`, `lab_table`, `specimen_jar`, `mummy_sarcophagus`, `raven_perch`, `black_cat_figure`; block entities of the same names (`tesla_coil` its energy, `black_cat_figure` its timers, the rest empty, for drawing).
 - **The `agriculture` switch** turns off their recipes; placed blocks stay and work, and sheets can still be pulled off.
 
 ## Dependencies and assets
 No new dependencies. Every texture is drawn by code (`tools/decor7_textures.py`); the models, loot, tags and recipes come from `tools/decor7_data.py`. The organ and the suit are modelled whole and cut into one model per block. The chandelier, the suit's helmet and the doll's head are written out as quads to `assets/jugcraft/decor7_quads.json` for their renderers (`HauntedChandelierRenderer`, `SuitOfArmorRenderer`, `CreepyDollRenderer`, through `DecorQuads`); the organ's keys, the sheet, the mirror's face and the curtains are drawn by `PipeOrganRenderer`, `DustSheetRenderer`, `SpiritMirrorRenderer` and `TatteredCurtainsRenderer` (with `DecorDraw`).
+
+Batch 8's textures are drawn by code in `tools/decor8_textures.py` and its models, loot, tags and quads come from `tools/decor8_data.py` (the quads in `assets/jugcraft/decor8_quads.json`); the renderers are `TeslaCoilRenderer`, `LabTableRenderer`, `SpecimenJarRenderer`, `MummySarcophagusRenderer`, `RavenRenderer` and `BlackCatRenderer`. 26.3 has no plain cat sounds (cats use sound variants), so the cat hisses with a creeper's fuse, pitched up, and purrs with a low fox sniff; the raven croaks and caws with a parrot's call pitched far down.
 
 The organ's tune is the opening of J. S. Bach's Toccata and Fugue in D minor, BWV 565, which is in the public domain; the arrangement for note-block sounds is written here.
 
@@ -128,10 +158,46 @@ Found by CI and fixed before this record:
 - the organ's sound (the CI client has no sound device);
 - the doll turning as a real player looks away and back (its rule is tested; the screenshot shows it once).
 
+### Batch 8 verification
+
+Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-8` stacked on batch 7:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the coil's power, range and arcs, the table's sitting and twitching, the jar's specimens, light and bob, the sarcophagus's timing and swing, the raven's watching and ruffling and the cat's reach, hiss and swish with Java; checks every block state has a blockstate entry, and that the quads and textures the client draws and the coil's and jar's messages exist) | Pass, 524 IDs |
+| `./gradlew build` on `86cb7a5` and on `f413e66` (which only moves the client test's camera and coils; later commits only change docs and screenshots) | Pass |
+| Game tests on the headless server, same commits: 288 in total, 7 of them new here (`Decor8GameTests`) | **All 288 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `86cb7a5` and `f413e66`; no model, texture or quad errors in the log |
+
+The 7 new game tests (`Decor8GameTests`):
+1. arc offsets pack and unpack; a coil stands two blocks tall, its power found on the lower half; using either half switches it on, but without power it doesn't run; with power it runs, glowing (light 8), using 20 JE a tick; two running coils three blocks apart arc to each other, not into the air; switched off, it stops;
+2. a lab table lies away from the player, foot where aimed and head beyond, the patient drawn from the foot; a redstone block by the head sits the patient up and taking it away lays it down; it sits up to 70 degrees and lies back 6 degrees a tick; by day it lies still and at night twitches 4 ticks in each 97; breaking the head breaks the table, dropping it once;
+3. a specimen jar glows (light 7) with an eye in it; sneak-use puts in the tentacle, pumpkin, brain, then the eye again; it never bobs more than its bob; broken, it drops once and keeps its tentacle;
+4. a sarcophagus stands two tall facing the player; used, both halves open; the lid swings a little a tick; after its time it shuts; a redstone block opens it and it shuts again though the power stays;
+5. a raven faces the player who placed it; it ruffles for its ticks of each period; used, it flaps;
+6. a walking player beside the black cat doesn't upset it; a sprinting one makes it hiss, its tail still; it settles after its time and, with the runner still there, rests until its cooldown is over, then hisses again;
+7. the six recipes and loot tables load.
+
+The client game test (`Decor8ClientGameTests`) builds a stone-brick lab open at the front: two running Tesla Coils, a Lab Table over a block of redstone (the patient sitting up), a counter of Specimen Jars (one of each specimen), a Mummy Sarcophagus, a Raven on a Perch and two Black Cat Figures. It photographs them by day and at midnight, waiting for a coil to arc before photographing the coils, opening the sarcophagus and setting one cat hissing: the arcs show between the coils, the patient sits up under its sheet, the specimens float in their green fluid, the lid stands open with the mummy stepping out, one cat arches its back with its tail up, and at night the cats' eyes glow green.
+
+Found by CI and fixed before this record:
+- 26.3 has no `SoundEvents.CAT_PURR` or `CAT_HISS` (cats use sound variants), a compile error; the cat purrs with a fox sniff and hisses with a creeper's fuse instead.
+- The first screenshots had a coil in front of the jars and the sarcophagus cut off at the bottom; the coils and camera were moved (`f413e66`).
+
+**Not run (batch 8):**
+- a person playing it in a client;
+- a dedicated server with two players (one running past the cat while the other walks; both seeing the same arcs; the raven turning from one player to the other);
+- a coil on a real generator and cable (the tests fill its buffer directly; it uses the same `EnergyStorage.SIDED` lookup as the other machines);
+- the sounds (the CI client has no sound device);
+- the patient's night twitching and the jars' bubbles in motion (the rules are tested; screenshots are still).
+
 ## World and event applicability
-- Batch 7 works anywhere, all year. The chandelier's gusts, the organ's night playing, the suit's visor glow, the sheets' breathing, the mirror's face and the curtains' night draft follow the Overworld's clock (as the earlier decorations' night effects do).
+- Batches 7 and 8 work anywhere, all year. The chandelier's gusts, the organ's night playing, the suit's visor glow, the sheets' breathing, the mirror's face and the curtains' night draft follow the Overworld's clock (as the earlier decorations' night effects do); so do batch 8's twitching patient and glowing cat eyes.
 
 ## Rollout and open questions
+- Tesla Coils only arc to coils that are running; a coil in an unloaded chunk drops out of the set until it runs again.
+- The Lab Table's patient and the sarcophagus's mummy are props: they can't be fought, and nothing comes out of them.
 - The Dust Sheet covers only blocks in its tag, and only those that hold nothing a sheet could lose: no block entity, an empty one (the Jugcraft decorations'), or a container (chests, barrels, chiseled bookshelves). Shulker boxes, lecterns, jukeboxes and two-block things (doors, beds, the suit of armor) are left out on purpose.
 - A sheeted chest that is half of a double chest becomes a single chest beside its other half; pulled off, the two join again.
 - A sheet over a block keeps that block's shape but not its light, redstone or comparator output.

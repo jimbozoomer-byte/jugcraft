@@ -1,6 +1,6 @@
 # Agriculture branch
 
-Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife), the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations), the pumpkin regatta and trick-or-treating, the Halloween festivities (the carving contest, costumed mobs, the Halloween Peddler, spooky decorations and sweets), Halloween nights (will-o'-wisps, the Pumpkin Chunkin' Trebuchet, a bigger Candy Bag, the Harvest Moon and the Headless Horseman), and the thirty Halloween decorations (string lights, the Candy Bowl, the Coffin, the Haunted Portrait, the Fog Machine, luminarias, floating candles, the Skeleton Hand Sconce, soul-flame carvings, bat bunting, the graveyard: the cemetery fence and gate, the crypt set, the Grave Mound, the Mourning Angel and the Pop-Up Skeleton, the witch's cottage: the Bubbling Cauldron, the Apothecary Shelf, the Crystal Ball, the Grimoire Stand and the Witch's Broom, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat, the Autumn Wreath and the Leaf Piles, and the haunted house and yard: the Rocking Chair, the Lurking Eyes, the Silhouette Window, the Spooky Music Box and the Giant Fake Spider), and the first batch of more Halloween, the haunted house inside (the Haunted Chandelier, the Phantom Pipe Organ, the Suit of Armor, the Dust Sheet, the Spirit Mirror, Tattered Curtains and the Creepy Doll).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md), [../features/halloween-harvest.md](../features/halloween-harvest.md) , [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md) [../features/halloween-festivities.md](../features/halloween-festivities.md) [../features/halloween-nights.md](../features/halloween-nights.md), [../features/halloween-decorations.md](../features/halloween-decorations.md) and [../features/more-halloween.md](../features/more-halloween.md) for the implemented slices and their test evidence.
+Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife), the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations), the pumpkin regatta and trick-or-treating, the Halloween festivities (the carving contest, costumed mobs, the Halloween Peddler, spooky decorations and sweets), Halloween nights (will-o'-wisps, the Pumpkin Chunkin' Trebuchet, a bigger Candy Bag, the Harvest Moon and the Headless Horseman), and the thirty Halloween decorations (string lights, the Candy Bowl, the Coffin, the Haunted Portrait, the Fog Machine, luminarias, floating candles, the Skeleton Hand Sconce, soul-flame carvings, bat bunting, the graveyard: the cemetery fence and gate, the crypt set, the Grave Mound, the Mourning Angel and the Pop-Up Skeleton, the witch's cottage: the Bubbling Cauldron, the Apothecary Shelf, the Crystal Ball, the Grimoire Stand and the Witch's Broom, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat, the Autumn Wreath and the Leaf Piles, and the haunted house and yard: the Rocking Chair, the Lurking Eyes, the Silhouette Window, the Spooky Music Box and the Giant Fake Spider), and the first two batches of more Halloween, the haunted house inside (the Haunted Chandelier, the Phantom Pipe Organ, the Suit of Armor, the Dust Sheet, the Spirit Mirror, Tattered Curtains and the Creepy Doll) and the mad scientist and monsters (the Tesla Coil, the Lab Table, the Specimen Jar, the Mummy Sarcophagus, the Raven on a Perch and the Black Cat Figure).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md), [../features/halloween-harvest.md](../features/halloween-harvest.md) , [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md) [../features/halloween-festivities.md](../features/halloween-festivities.md) [../features/halloween-nights.md](../features/halloween-nights.md), [../features/halloween-decorations.md](../features/halloween-decorations.md) and [../features/more-halloween.md](../features/more-halloween.md) for the implemented slices and their test evidence.
 
 Agriculture is Jugcraft's third starting branch, alongside technology and magic ([DESIGN.md](../DESIGN.md)). A farmer can begin on day one with a hoe and whatever grows nearby, and never needs a machine or a spell. Industrial farming (powered harvesters, planters, sprinklers, crop processors) comes later and belongs to the engineering branch; see [Boundaries](#boundaries).
 
@@ -524,7 +524,7 @@ The haunted house and yard:
 
 ## What exists now: more Halloween
 
-Forty-five more Halloween ideas, one category a batch. The first is the haunted house inside. All of it works all year. Details, numbers and test evidence: [../features/more-halloween.md](../features/more-halloween.md).
+Forty-five more Halloween ideas, one category a batch: so far the haunted house inside and the mad scientist and monsters. All of it works all year. Details, numbers and test evidence: [../features/more-halloween.md](../features/more-halloween.md).
 
 | **The haunted room** by day: the organ, the suit of armor, sheeted furniture and the doll | **At midnight**, lit by the chandelier |
 | --- | --- |
@@ -545,6 +545,27 @@ Forty-five more Halloween ideas, one category a batch. The first is the haunted 
 - **Spirit Mirror:** at night a pale face fades in and out of the glass.
 - **Tattered Curtains:** ragged cheesecloth drapes that sway in a draft and open and shut together.
 - **Creepy Doll:** its head has turned every time you look back.
+
+### The mad scientist and monsters
+
+| **The mad lab** by day: Tesla Coils, specimen jars, the lab table, the sarcophagus, a raven and two black cats | **At midnight** |
+| --- | --- |
+| ![The mad lab](../images/ingame_mad_lab.jpg) | ![The mad lab at night](../images/ingame_mad_lab_night.jpg) |
+| **Two Tesla Coils** running, arcing to each other | **The Lab Table**, its patient sitting up on redstone |
+| ![Tesla coils](../images/ingame_tesla_coils.jpg) | ![The lab table](../images/ingame_lab_table.jpg) |
+| **Specimen Jars**: an eye, a tentacle, a tiny pumpkin and a brain | **The Mummy Sarcophagus** open, its mummy stepping out |
+| ![Specimen jars](../images/ingame_specimen_jars.jpg) | ![The mummy sarcophagus](../images/ingame_mummy_sarcophagus.jpg) |
+| **The Raven** on its perch and **two Black Cats**, one hissing | **The black cats** at night, eyes glowing |
+| ![The raven and cats](../images/ingame_raven_and_cats.jpg) | ![The black cats at night](../images/ingame_black_cats_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor8ClientGameTests`, software rendering, small previews).*
+
+- **Tesla Coil:** runs on the electric network (20 JE a tick); hums, glows and throws harmless violet arcs to other running coils within eight blocks.
+- **Lab Table:** a sheeted patient that sits bolt upright on a redstone signal, and twitches at night.
+- **Specimen Jar:** glowing green fluid with an eye, a tentacle, a tiny pumpkin or a brain floating in it; sneak-use to change it.
+- **Mummy Sarcophagus:** use it or power it and the lid grinds open, the mummy lurches out, and four seconds later it all shuts again.
+- **Raven on a Perch:** watches the nearest player, ruffles and croaks, caws when used.
+- **Black Cat Figure:** its tail swishes, its eyes glow at night, and it hisses at anyone who runs past.
 
 ## Crop roster: what comes next (planned)
 
