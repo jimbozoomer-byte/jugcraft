@@ -2735,6 +2735,9 @@ def check_foraging(java, main):
     mushrooms = (load(DATA / "jugcraft" / "tags" / "item" / "wild_mushrooms.json") or {}).get("values")
     if mushrooms != [f"jugcraft:{m}" for m in fg["mushrooms"]]:
         err("Item tag jugcraft:wild_mushrooms differs from FORAGING['mushrooms'] in tools/agriculture.py")
+    soil = (load(DATA / "jugcraft" / "tags" / "block" / "mushroom_soil.json") or {}).get("values")
+    if soil != fg["soil"] or 'Jugcraft.id("mushroom_soil")' not in java.get("WildMushroomBlock", ""):
+        err("Block tag jugcraft:mushroom_soil differs from FORAGING['soil'], or WildMushroomBlock doesn't use it")
     forage = (load(DATA / "jugcraft" / "tags" / "item" / "forage.json") or {}).get("values")
     if forage != fg["forage"]:
         err("Item tag jugcraft:forage differs from FORAGING['forage'] in tools/agriculture.py")
