@@ -270,15 +270,16 @@ public class TownGameTests {
 		boolean plain = level.getBlockState(lampPos).is(Blocks.LANTERN);
 		TownDecor.force(null);
 		helper.assertTrue(soul && plain, "The lamp changes with the theme (soul lantern " + soul + ", lantern " + plain + ")");
-		// Fire on the square goes out before it can burn anything.
+		// The rest needs the square's chunks ticking: a chunk ticks (and shows) its entities and runs its block ticks only
+		// once the chunks round it are generated, which happens off the server thread while the test server races through
+		// ticks, so wait for that rather than for a number of ticks.
 		BlockPos fire = paving.offset(2, 1, 0);
-		level.setBlock(fire, Blocks.FIRE.defaultBlockState(), 3);
-		helper.runAfterDelay(80, () -> {
-			boolean out = !level.getBlockState(fire).is(Blocks.FIRE);
-			// The townsfolk are in the world, each the one the town recorded for its place. A chunk ticks (and shows) its
-			// entities only once the chunks round it are generated, which happens off the server thread while the test
-			// server races through ticks, so wait for that rather than for a number of ticks.
-			whenEntitiesTick(helper, level, chunks, 0, () -> {
+		whenEntitiesTick(helper, level, chunks, 0, () -> {
+			// Fire on the square goes out before it can burn anything.
+			level.setBlock(fire, Blocks.FIRE.defaultBlockState(), 3);
+			helper.runAfterDelay(80, () -> {
+				boolean out = !level.getBlockState(fire).is(Blocks.FIRE);
+				// The townsfolk are in the world, each the one the town recorded for its place.
 				List<Townsfolk> people = recordedTownsfolk(level, state, places);
 				if (people.size() != places.size()) {
 					logTownsfolk(level, state, origin, places);
@@ -307,7 +308,7 @@ public class TownGameTests {
 
 	/**
 	 * Runs {@code then} once every one of {@code chunks} ticks its entities (checked every 20 ticks), or, failing that,
-	 * after waiting 3,600 ticks (the test allows 4,000).
+	 * after waiting 3,600 ticks (the test allows 4,000, leaving room for the checks after).
 	 */
 	private static void whenEntitiesTick(GameTestHelper helper, ServerLevel level, List<ChunkPos> chunks, int waited, Runnable then) {
 		boolean ticking = chunks.stream().allMatch(c -> level.isPositionEntityTicking(new BlockPos(c.x() << 4, level.getMinY() + 4, c.z() << 4)));
