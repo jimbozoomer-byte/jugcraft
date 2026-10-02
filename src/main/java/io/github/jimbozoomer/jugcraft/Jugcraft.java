@@ -20,6 +20,7 @@ import io.github.jimbozoomer.jugcraft.materials.JugcraftMaterials;
 import io.github.jimbozoomer.jugcraft.materials.JugcraftWorldgen;
 import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
 import io.github.jimbozoomer.jugcraft.prospecting.JugcraftProspecting;
+import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.storage.JugcraftStorage;
 import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
@@ -73,6 +74,7 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.blueprint.JugcraftBlueprints.register();
 		io.github.jimbozoomer.jugcraft.energy.CreativeEnergyCellBlock.register();
 		io.github.jimbozoomer.jugcraft.drone.CreativeSupplyCrateBlock.register();
+		JugcraftSeasons.register();
 		FeatureEnabledCondition.register();
 		JugcraftWorldgen.register();
 		JugcraftParties.register();
