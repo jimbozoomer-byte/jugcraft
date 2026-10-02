@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: fall additions 12, autumn foraging (pull request pending, stacked on the candy kitchen)
+- **Wild mushrooms:** chanterelles, porcini, puffballs, fly agarics and the glowing jack o'lantern mushroom grow in patches on forest floors (each in its own biomes), on soil. They spread in the shade, up to five of a kind together; bone meal spreads them in any light.
+- **Fairy rings:** on a full-moon night a mushroom may sprout a ring of its kind round it. Stand in a ring's centre on a full-moon night for Luck II (once a night) and Away with the Fairies.
+- **Foraging Basket:** a wicker bundle for mushrooms, berries, nuts and wild fruit. Mushrooms picked with it in hand go straight in; all five earn Forager.
+- **Dishes:** Sautéed Chanterelles, Roasted Porcini, Fried Puffball, and Forager's Stew from the Cooking Pot.
+- All decided on the server. The checker compares the spreading, rings, soil and biomes with Java. New server game tests and a client test with screenshots.
+
 ### Agriculture: fall additions 11, the candy kitchen (pull request pending, stacked on #33)
 - **Candy Kettle:** a copper sugar pot with a candy thermometer. Fill it before it boils with a water bottle (syrup) or milk (cream), up to four sugar, up to two flavours (chocolate, berry, glow berry, honey, cranberry, spiced or chestnut) and any dyes. Over a fire it climbs through the candy stages, ringing a bell at each; the hottest it reaches decides the candy, so taking it off the heat holds it.
 - **Candy Tray:** pour onto it, and break the candy up once set. Syrup makes rock candy (grown for a day), candy corn (poured in up to three coloured layers), salt water taffy (pulled four times while warm, or it sets hard), hard candy and lollipops, and caramel; cream makes fudge, cream caramels and toffee. Too hot burns it.
