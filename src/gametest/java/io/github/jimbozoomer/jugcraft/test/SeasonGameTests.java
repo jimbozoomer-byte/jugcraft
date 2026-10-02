@@ -2,22 +2,34 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
+import io.github.jimbozoomer.jugcraft.season.SeasonCommand;
 import io.github.jimbozoomer.jugcraft.season.SeasonPalette;
+import io.github.jimbozoomer.jugcraft.season.SeasonState;
+import io.github.jimbozoomer.jugcraft.season.SeasonalBiome;
+import io.github.jimbozoomer.jugcraft.season.SeasonalSnow;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.MonthDay;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SnowLayerBlock;
 
-/** Seasonal colours: the server's calendar, the operator's settings, the palette and the biome tag. */
+/** Seasons: the server's calendar and events, the operator's settings and command, the palette, the biome tags and winter snow. */
 public class SeasonGameTests {
 	@GameTest
 	public void seasonDaysFollowTheCalendar(GameTestHelper helper) {
@@ -45,7 +57,7 @@ public class SeasonGameTests {
 	@GameTest
 	public void modesAndTimeZonesSetTheDay(GameTestHelper helper) {
 		LocalDate june = LocalDate.of(2026, 6, 1);
-		SeasonCalendar.Settings settings = new SeasonCalendar.Settings(SeasonCalendar.Mode.AUTO, false, ZoneOffset.UTC);
+		SeasonCalendar.Settings settings = SeasonCalendar.Settings.DEFAULT.withMode(SeasonCalendar.Mode.AUTO);
 		equal(helper, settings.dayOn(june), SeasonCalendar.seasonDay(june, false), "auto follows the date");
 		equal(helper, settings.withMode(SeasonCalendar.Mode.AUTUMN).dayOn(june), 293, "autumn override");
 		equal(helper, settings.withMode(SeasonCalendar.Mode.WINTER).dayOn(june), 15, "winter override");
@@ -113,14 +125,136 @@ public class SeasonGameTests {
 	}
 
 	@GameTest
-	public void temperateBiomesHaveSeasons(GameTestHelper helper) {
+	public void fourSeasonBiomesHaveSeasons(GameTestHelper helper) {
 		Registry<Biome> biomes = helper.getLevel().registryAccess().lookupOrThrow(Registries.BIOME);
-		for (ResourceKey<Biome> biome : List.of(Biomes.PLAINS, Biomes.FOREST, Biomes.DARK_FOREST, Biomes.TAIGA, Biomes.MEADOW)) {
+		for (ResourceKey<Biome> biome : List.of(Biomes.PLAINS, Biomes.FOREST, Biomes.DARK_FOREST, Biomes.TAIGA, Biomes.MEADOW,
+				Biomes.SWAMP, Biomes.DAPPLED_FOREST, Biomes.CHERRY_GROVE)) {
 			helper.assertTrue(biomes.getOrThrow(biome).is(JugcraftSeasons.HAS_SEASONS), biome.identifier() + " has no seasons");
+			helper.assertTrue(SeasonalBiome.of(biomes.getOrThrow(biome).value()).jugcraft$hasSeasons(), biome.identifier() + "'s flag is not set");
 		}
-		for (ResourceKey<Biome> biome : List.of(Biomes.DESERT, Biomes.JUNGLE, Biomes.SWAMP, Biomes.CHERRY_GROVE, Biomes.SNOWY_PLAINS)) {
+		for (ResourceKey<Biome> biome : List.of(Biomes.DESERT, Biomes.JUNGLE, Biomes.MANGROVE_SWAMP, Biomes.SAVANNA, Biomes.BADLANDS,
+				Biomes.SNOWY_PLAINS, Biomes.OCEAN, Biomes.PALE_GARDEN)) {
 			helper.assertTrue(!biomes.getOrThrow(biome).is(JugcraftSeasons.HAS_SEASONS), biome.identifier() + " has seasons");
 		}
+		// Winter snow: the seasonal biomes and the pale garden, not rivers (they also run through deserts).
+		helper.assertTrue(biomes.getOrThrow(Biomes.PALE_GARDEN).is(JugcraftSeasons.HAS_WINTER_SNOW), "The pale garden gets no winter snow");
+		helper.assertTrue(biomes.getOrThrow(Biomes.PLAINS).is(JugcraftSeasons.HAS_WINTER_SNOW), "Plains get no winter snow");
+		helper.assertTrue(!biomes.getOrThrow(Biomes.RIVER).is(JugcraftSeasons.HAS_WINTER_SNOW), "Rivers get winter snow");
+		helper.assertTrue(!biomes.getOrThrow(Biomes.DESERT).is(JugcraftSeasons.HAS_WINTER_SNOW), "Deserts get winter snow");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void eventsFollowTheCalendar(GameTestHelper helper) {
+		// Thanksgiving: the fourth Thursday of November in the US, the second Monday of October in Canada.
+		equal(helper, SeasonCalendar.harvestFeastDay(SeasonCalendar.Feast.US, 2026), LocalDate.of(2026, 11, 26), "US 2026");
+		equal(helper, SeasonCalendar.harvestFeastDay(SeasonCalendar.Feast.US, 2027), LocalDate.of(2027, 11, 25), "US 2027");
+		equal(helper, SeasonCalendar.harvestFeastDay(SeasonCalendar.Feast.CANADA, 2026), LocalDate.of(2026, 10, 12), "Canada 2026");
+		SeasonCalendar.Settings us = SeasonCalendar.Settings.DEFAULT;
+		SeasonCalendar.Settings canada = new SeasonCalendar.Settings(SeasonCalendar.Mode.AUTO, false, us.zone(), false, 2,
+				SeasonCalendar.Feast.CANADA, 4, us.december(), null);
+		SeasonCalendar.Settings off = new SeasonCalendar.Settings(SeasonCalendar.Mode.AUTO, false, us.zone(), false, 2,
+				SeasonCalendar.Feast.OFF, 4, null, null);
+		List<SeasonCalendar.Event> feast = List.of(SeasonCalendar.Event.HARVEST_FEAST);
+		List<SeasonCalendar.Event> december = List.of(SeasonCalendar.Event.DECEMBER);
+		// The American feast runs from Thursday over the weekend; the Canadian one ends on its Monday.
+		equal(helper, us.eventsOn(LocalDate.of(2026, 11, 25)), List.of(), "US, the Wednesday before");
+		equal(helper, us.eventsOn(LocalDate.of(2026, 11, 26)), feast, "US, Thanksgiving");
+		equal(helper, us.eventsOn(LocalDate.of(2026, 11, 29)), feast, "US, the Sunday after");
+		equal(helper, us.eventsOn(LocalDate.of(2026, 11, 30)), List.of(), "US, the Monday after");
+		equal(helper, canada.eventsOn(LocalDate.of(2026, 10, 9)), feast, "Canada, the Friday before");
+		equal(helper, canada.eventsOn(LocalDate.of(2026, 10, 13)), List.of(), "Canada, the Tuesday after");
+		// December runs over New Year.
+		equal(helper, us.eventsOn(LocalDate.of(2026, 12, 1)), december, "1 December");
+		equal(helper, us.eventsOn(LocalDate.of(2027, 1, 6)), december, "6 January");
+		equal(helper, us.eventsOn(LocalDate.of(2027, 1, 7)), List.of(), "7 January");
+		equal(helper, off.eventsOn(LocalDate.of(2026, 11, 26)), List.of(), "events off");
+		// Events follow the calendar in both hemispheres; the snow season follows the hemisphere.
+		SeasonCalendar.Settings south = new SeasonCalendar.Settings(SeasonCalendar.Mode.AUTO, true, us.zone(), true, 2,
+				SeasonCalendar.Feast.US, 4, us.december(), null);
+		equal(helper, south.eventsOn(LocalDate.of(2026, 11, 26)), feast, "the feast in the south");
+		helper.assertTrue(us.withSnow(true).snowOn(LocalDate.of(2027, 1, 10)), "No snow on 10 January in the north");
+		helper.assertTrue(!us.withSnow(true).snowOn(LocalDate.of(2027, 3, 1)), "Snow on 1 March in the north");
+		helper.assertTrue(south.snowOn(LocalDate.of(2026, 7, 10)), "No snow on 10 July in the south");
+		helper.assertTrue(!us.snowOn(LocalDate.of(2027, 1, 10)), "Snow while seasons.snow is off");
+		// A preview date drives the season and the events.
+		SeasonCalendar.Settings preview = us.withMode(SeasonCalendar.Mode.WINTER).withFixedDate(MonthDay.of(11, 26));
+		equal(helper, preview.dayOn(LocalDate.of(2026, 6, 1)), 330, "preview day");
+		equal(helper, preview.eventsOn(LocalDate.of(2026, 6, 1)), feast, "preview events");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void seasonCommandChangesTheSeason(GameTestHelper helper) {
+		MinecraftServer server = helper.getLevel().getServer();
+		SeasonCalendar.Settings before = JugcraftSeasons.settings();
+		CommandSourceStack operator = server.createCommandSourceStack().withSuppressedOutput();
+		server.getCommands().performPrefixedCommand(operator, "jugcraft season set winter");
+		equal(helper, JugcraftSeasons.today(), 15, "after set winter");
+		server.getCommands().performPrefixedCommand(operator, "jugcraft season date 11-26");
+		helper.assertTrue(JugcraftSeasons.isActive(SeasonCalendar.Event.HARVEST_FEAST), "No Harvest Feast on a 26 November preview");
+		equal(helper, JugcraftSeasons.today(), 330, "after date 11-26");
+		server.getCommands().performPrefixedCommand(operator, "jugcraft season snow on");
+		helper.assertTrue(!SeasonState.snowing(), "Snowing in November");
+		server.getCommands().performPrefixedCommand(operator, "jugcraft season date 01-10");
+		helper.assertTrue(SeasonState.snowing(), "Not snowing on 10 January with snow on");
+		helper.assertTrue(SeasonCommand.describe().contains("winter"), "The description does not say winter: " + SeasonCommand.describe());
+		server.getCommands().performPrefixedCommand(operator, "jugcraft season snow off");
+		helper.assertTrue(!SeasonState.snowing(), "Snowing with snow off");
+		server.getCommands().performPrefixedCommand(operator, "jugcraft season date today");
+		equal(helper, JugcraftSeasons.settings().fixedDate(), null, "after date today");
+		JugcraftSeasons.setSnow(server, before.snow());
+		JugcraftSeasons.setMode(server, before.mode());
+		equal(helper, JugcraftSeasons.settings(), before, "restored settings");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void winterSnowLiesAndMeltsInSpring(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		MinecraftServer server = level.getServer();
+		SeasonCalendar.Settings before = JugcraftSeasons.settings();
+		BlockPos low = helper.absolutePos(new BlockPos(0, 0, 0));
+		BlockPos high = helper.absolutePos(new BlockPos(8, 3, 2));
+		server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), String.format(Locale.ROOT,
+				"fillbiome %d %d %d %d %d %d minecraft:plains", low.getX(), low.getY(), low.getZ(), high.getX(), high.getY(), high.getZ()));
+		for (int x = 0; x <= 8; x++) {
+			helper.setBlock(new BlockPos(x, 1, 1), Blocks.STONE);
+		}
+		helper.setBlock(new BlockPos(3, 1, 1), Blocks.FARMLAND);
+		helper.setBlock(new BlockPos(5, 2, 1), Blocks.SNOW);
+		helper.setBlock(new BlockPos(7, 1, 1), Blocks.WATER);
+		BlockPos open = helper.absolutePos(new BlockPos(1, 2, 1));
+		Biome plains = level.getBiome(open).value();
+
+		JugcraftSeasons.setMode(server, SeasonCalendar.Mode.WINTER);
+		JugcraftSeasons.setSnow(server, true);
+		helper.assertTrue(plains.getPrecipitationAt(open, level.getSeaLevel()) == Biome.Precipitation.SNOW, "Winter rain does not fall as snow");
+		helper.assertTrue(SeasonalSnow.snowAt(level, open, 2), "No first layer of seasonal snow");
+		helper.assertTrue(SeasonalSnow.snowAt(level, open, 2), "No second layer of seasonal snow");
+		helper.assertTrue(!SeasonalSnow.snowAt(level, open, 2), "A third layer past the depth of 2");
+		helper.assertTrue(level.getBlockState(open).is(SeasonalSnow.BLOCK) && level.getBlockState(open).getValue(SnowLayerBlock.LAYERS) == 2,
+				"Not two layers of seasonal snow: " + level.getBlockState(open));
+		helper.assertTrue(!SeasonalSnow.snowAt(level, helper.absolutePos(new BlockPos(3, 2, 1)), 2), "Snow on farmland");
+		helper.assertTrue(!SeasonalSnow.snowAt(level, helper.absolutePos(new BlockPos(5, 2, 1)), 2), "Seasonal snow over vanilla snow");
+		helper.assertBlockPresent(Blocks.SNOW, new BlockPos(5, 2, 1));
+		helper.assertTrue(!SeasonalSnow.snowAt(level, helper.absolutePos(new BlockPos(7, 2, 1)), 2), "Snow on water");
+		helper.assertBlockPresent(Blocks.WATER, new BlockPos(7, 1, 1));
+
+		// Spring: the season's snow melts a layer per random tick; vanilla snow stays.
+		JugcraftSeasons.setMode(server, SeasonCalendar.Mode.SPRING);
+		helper.assertTrue(plains.getPrecipitationAt(open, level.getSeaLevel()) == Biome.Precipitation.RAIN, "Spring rain still falls as snow");
+		level.getBlockState(open).randomTick(level, open, level.getRandom());
+		helper.assertTrue(level.getBlockState(open).is(SeasonalSnow.BLOCK) && level.getBlockState(open).getValue(SnowLayerBlock.LAYERS) == 1,
+				"Not one layer left after a spring tick: " + level.getBlockState(open));
+		level.getBlockState(open).randomTick(level, open, level.getRandom());
+		helper.assertBlockNotPresent(SeasonalSnow.BLOCK, new BlockPos(1, 2, 1));
+		BlockPos vanillaSnow = helper.absolutePos(new BlockPos(5, 2, 1));
+		level.getBlockState(vanillaSnow).randomTick(level, vanillaSnow, level.getRandom());
+		helper.assertBlockPresent(Blocks.SNOW, new BlockPos(5, 2, 1));
+
+		JugcraftSeasons.setSnow(server, before.snow());
+		JugcraftSeasons.setMode(server, before.mode());
 		helper.succeed();
 	}
 

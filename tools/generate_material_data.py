@@ -134,7 +134,27 @@ def assets():
     deposits.write_all(write, ASSETS, DATA / MOD, lang)
     import advancements
     lang.update(advancements.generate(MOD)[1])
+    seasons_assets(lang)
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
+
+
+def seasons_assets(lang):
+    """Seasonal snow: vanilla snow layers' models (layers 1-7, then a full block), its name and its drops."""
+    import seasons
+    block = seasons.SNOW_BLOCK
+    models = {layers: f"minecraft:block/snow_height{layers * 2}" for layers in range(1, 8)}
+    models[8] = "minecraft:block/snow_block"
+    write(ASSETS / "blockstates" / f"{block}.json",
+          {"variants": {f"layers={layers}": {"model": model} for layers, model in models.items()}})
+    lang[f"block.{MOD}.{block}"] = seasons.SNOW_DISPLAY
+    # Broken by a player or mob, a snowball per layer, like vanilla snow layers (never the block itself).
+    write(DATA / MOD / "loot_table" / "blocks" / f"{block}.json", {"type": "minecraft:block", "pools": [{
+        "condition": {"type": "minecraft:entity_properties", "entity": "this", "predicate": {}},
+        "entries": [{"type": "minecraft:alternatives", "children": [
+            {"type": "minecraft:item", "condition": block_state(block, {"layers": str(layers)}),
+             "modifier": {"type": "minecraft:set_count", "count": layers}, "name": "minecraft:snowball"}
+            for layers in range(1, 9)]}],
+        "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
 
 
 def write_alternate_pack(lang):
@@ -925,6 +945,11 @@ def tags():
     import seasons
     for biome in seasons.BIOMES:
         tags.add("worldgen/biome", seasons.TAG, biome)
+    for biome in seasons.WINTER_SNOW:
+        tags.add("worldgen/biome", seasons.WINTER_SNOW_TAG, biome)
+    # Seasonal snow counts as snow (grass under it turns snowy) and is dug with a shovel.
+    tags.add("block", "minecraft:snow", rid(seasons.SNOW_BLOCK))
+    tags.add("block", "minecraft:mineable/shovel", rid(seasons.SNOW_BLOCK))
     tags.write()
 
 

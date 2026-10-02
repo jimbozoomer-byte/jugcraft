@@ -257,16 +257,24 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ### Seasons (`season/`, `client/SeasonColors`, `tools/seasons.py`)
 
-- **Clock.** `JugcraftSeasons.today()` is the server's season day:
-  - 1–365 on the northern calendar; 29 February shares the 28th's day, and the south is `SOUTH_OFFSET` (182) days on;
-  - a fixed mode's day (`SeasonCalendar.Mode`: spring 105, summer 196, autumn 293, winter 15);
-  - 0 when off.
-- **Settings.** They come from `seasons.mode`, `seasons.hemisphere` and `seasons.timezone` (`JugcraftConfig.TEXT_OPTIONS`; read them with `JugcraftConfig.textOption`). `JugcraftSeasons.setMode` overrides the mode until the server stops.
-- **Sync.** The server sends `SeasonPayload` on join and again when the day changes; it checks once a minute.
+- **The clock.** `JugcraftSeasons` is the one season clock.
+  - `today()` gives the season day:
+    - 1–365 on the northern calendar, where 29 February shares the 28th's day and the south is `SOUTH_OFFSET` (182) days on;
+    - a fixed mode's day (`SeasonCalendar.Mode`: spring 105, summer 196, autumn 293, winter 15);
+    - 0 when off.
+  - `isActive(SeasonCalendar.Event)` tells whether an event is running: `HARVEST_FEAST` or `DECEMBER`. Events are calendar windows in the same zone.
+- **Settings.** `SeasonCalendar.Settings` reads `seasons.mode`, `seasons.hemisphere`, `seasons.timezone`, `seasons.snow`, `seasons.snow_depth`, `harvest_feast`, `harvest_feast.days` and `december` (`JugcraftConfig.TEXT_OPTIONS`; read them with `JugcraftConfig.textOption`).
+- **Overrides until the server stops.** `setMode`, `setFixedDate` (a preview date) and `setSnow` change the settings in memory only. The command `/jugcraft season [set|date|snow]` (`SeasonCommand`, permission level 2 to change) calls them.
+- **Sync.** The server sends `SeasonPayload` (day and snowing) on join and whenever anything changes; it checks once a minute. Events are announced in chat.
 - **Colours.**
   - `season/SeasonPalette.colour(day, vanilla, foliage, x, z)` holds the colour maths: keyframes `YEAR` and patchy autumn hues.
-  - The client applies it to grass and foliage tints in `#jugcraft:has_seasons` (`JugcraftSeasons.HAS_SEASONS`), through the client mixin `mixin/client/ClientLevelSeasonMixin` on `ClientLevel.calculateBlockTint`.
-- **For later seasonal content.** Read `JugcraftSeasons.today()` on the server. Never trust a client's date.
+  - The client applies it to grass and foliage tints in `#jugcraft:has_seasons`, through the client mixin `mixin/client/ClientLevelSeasonMixin` on `ClientLevel.calculateBlockTint`.
+- **Biome flags.** `mixin/BiomeSeasonMixin` gives every biome `SeasonalBiome` flags, `jugcraft$hasSeasons()` and `jugcraft$hasWinterSnow()`. They are set from the two biome tags whenever tags load, so hot paths need no tag lookups.
+- **Winter snow.**
+  - `SeasonState.snowing()` is true when `seasons.snow` is on and the season day is in 1 December to 28 February.
+  - While it is true, `BiomeSeasonMixin` makes rain fall as snow in `#jugcraft:has_winter_snow`.
+  - `SeasonalSnow` lays `jugcraft:seasonal_snow` (`SeasonalSnowBlock`, vanilla snow models, in `#minecraft:snow`) round players while it rains. Once it is no longer snowing, the block melts on random ticks.
+- **For later seasonal content.** Read `JugcraftSeasons.today()`, `isActive(event)` or `SeasonState.snowing()` on the server. Never trust a client's date.
 
 ### Registration (`materials/`)
 
@@ -336,7 +344,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `…/logistics/` | item pipe, extractor, sorter, wrench, item networks |
 | `…/machine/` | machine kinds, blocks, block entity, menu, recipes, footprints, power ports, side config, arc furnace structure |
 | `src/client/java/.../client/` | `JugcraftClient` (screen registration), `MachineScreen` |
-| `…/season/`, `src/client/.../SeasonColors.java`, `src/client/.../mixin/client/` | seasonal colours: calendar, palette, sync, the client tint hook |
+| `…/season/`, `…/mixin/BiomeSeasonMixin.java`, `src/client/.../SeasonColors.java`, `src/client/.../mixin/client/` | seasons: calendar and events, palette, sync, command, winter snow, the client tint hook |
 | `src/gametest/java/.../test/JugcraftGameTests.java` | game tests (run by `./gradlew build`) |
 | `src/gametest/java/.../test/JugcraftClientGameTests.java` | client game tests with screenshots (CI job `client`) |
 | `…/guide/`, `src/client/.../HandbookScreen.java`, `tools/handbook.py` | Engineer's Handbook |
@@ -357,7 +365,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Electronics beyond processors: a monitor-bank multi-block, computers that control machines, and uses for processors in the tiers above.
 - EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
-- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md), apart from seasonal grass and leaf colours. Farming has a harvester, sprinkler and cotton; greenhouses and rubber trees are not built.
+- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md), apart from the seasons (colours, the Harvest Feast and December windows, and winter snow). Farming has a harvester, sprinkler and cotton; greenhouses and rubber trees are not built.
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).
 - Handbook translations (English only).
 

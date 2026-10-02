@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.test;
 import io.github.jimbozoomer.jugcraft.client.SeasonColors;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
+import io.github.jimbozoomer.jugcraft.season.SeasonalSnow;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
@@ -15,15 +16,18 @@ import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Seasonal colours in a real client: a grove of oaks on the plains of a flat world, seen in each season the server
- * sets, with screenshots, and the leaves' and grass's tints read back from the client's level.
+ * Seasons in a real client: a grove of oaks on the plains of a flat world, seen in each season the server sets, with
+ * screenshots, and the leaves' and grass's tints read back from the client's level; then winter snow falling and lying.
  */
 public class SeasonClientGameTests implements FabricClientGameTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger("jugcraft-test");
@@ -76,6 +80,35 @@ public class SeasonClientGameTests implements FabricClientGameTest {
 						Integer.toHexString(tint[0] & 0xFFFFFF), Integer.toHexString(tint[1] & 0xFFFFFF));
 				context.takeScreenshot("jugcraft_season_" + mode.name().toLowerCase(Locale.ROOT));
 			}
+			// Winter snow (opt-in): rain falls as snow over the grove, and the season's snow covers the ground and crowns.
+			server.runCommand("weather rain");
+			server.runOnServer(minecraft -> {
+				JugcraftSeasons.setMode(minecraft, SeasonCalendar.Mode.WINTER);
+				JugcraftSeasons.setSnow(minecraft, true);
+				ServerLevel level = minecraft.overworld();
+				for (int layer = 0; layer < 2; layer++) {
+					for (int dx = -16; dx <= 16; dx++) {
+						for (int dz = -20; dz <= 4; dz++) {
+							BlockPos column = origin.offset(dx, 0, dz);
+							SeasonalSnow.snowAt(level, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, column), 2);
+						}
+					}
+				}
+			});
+			context.waitTicks(120);
+			singleplayer.getConnection().waitForChunksRender();
+			boolean snowFalls = context.computeOnClient(client -> client.level.getBiome(ground.above()).value()
+					.getPrecipitationAt(ground.above(), client.level.getSeaLevel()) == Biome.Precipitation.SNOW);
+			boolean snowyGrass = server.computeOnServer(minecraft -> minecraft.overworld().getBlockState(ground)
+					.getValue(BlockStateProperties.SNOWY));
+			LOGGER.info("Winter snow: client sees snow falling {}, grass under the season's snow is snowy {}", snowFalls, snowyGrass);
+			context.takeScreenshot("jugcraft_season_winter_snow");
+			server.runOnServer(minecraft -> JugcraftSeasons.setSnow(minecraft, false));
+			server.runCommand("weather clear");
+			if (!snowFalls || !snowyGrass) {
+				throw new AssertionError("Winter snow: falling on the client " + snowFalls + ", snowy grass " + snowyGrass);
+			}
+
 			server.runOnServer(minecraft -> JugcraftSeasons.setMode(minecraft, configured));
 
 			int[] summer = tints.get(SeasonCalendar.Mode.SUMMER);

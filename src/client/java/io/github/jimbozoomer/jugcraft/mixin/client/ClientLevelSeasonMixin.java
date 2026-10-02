@@ -19,6 +19,6 @@ public abstract class ClientLevelSeasonMixin {
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/ColorResolver;getColor(Lnet/minecraft/world/level/biome/Biome;DD)I"))
 	private int jugcraft$seasonalTint(ColorResolver resolver, Biome biome, double x, double z, Operation<Integer> original) {
 		int vanilla = original.call(resolver, biome, x, z);
-		return SeasonColors.adjust(((ClientLevel) (Object) this).registryAccess(), resolver, biome, x, z, vanilla);
+		return SeasonColors.adjust(resolver, biome, x, z, vanilla);
 	}
 }

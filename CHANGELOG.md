@@ -8,17 +8,23 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### Unmerged: Seasonal colours
-- **Grass and leaves change colour with the server's date** in temperate biomes: plains, meadows, forests, taigas, windswept hills and rivers.
+### Unmerged: Seasons (colours, events and winter snow)
+- **Grass and leaves change colour with the server's date** in every biome that has four seasons: plains, meadows, forests (dark, dappled and cherry groves included), taigas, windswept hills, swamps and rivers.
   - Winter is dull and dormant, spring is fresh green and summer is vanilla.
   - Autumn turns oak leaves gold, orange and red in patches, then russet.
   - Colours change a little each day.
-- **Server settings** in `config/jugcraft.properties`:
-  - `seasons.mode`: `auto` follows the date; `spring`, `summer`, `autumn` or `winter` hold one season; `off` gives vanilla colours.
-  - `seasons.hemisphere`: `north` or `south`.
-  - `seasons.timezone`.
-- The server decides the season; clients never use their own clock. Nothing is saved to the world.
-- Server and client game tests, with a screenshot per season.
+- **Winter snow (opt-in, `seasons.snow=on`):**
+  - From December to February, rain falls as snow in those biomes, and up to `seasons.snow_depth` layers settle.
+  - The snow melts in spring.
+  - It never freezes water, lies on farmland or touches snow you placed.
+- **Events on one clock:**
+  - the **Harvest Feast** (`harvest_feast`: the US Thanksgiving weekend by default, Canada's, or off);
+  - **December** (`december`: 1 December to 6 January by default).
+  - Both are announced in chat.
+- **`/jugcraft season`** shows the season, day and events. Operators can set a season, preview a date or switch snow on or off until the server stops.
+- **Server settings** in `config/jugcraft.properties`: `seasons.mode`, `seasons.hemisphere`, `seasons.timezone`, plus the snow and event settings above.
+- The server decides everything; clients never use their own clock. Colours and events save nothing; seasonal snow melts away.
+- Server and client game tests, with a screenshot per season and one of winter snow.
 
 ### Unmerged: Explosive weapons, batch 18
 - **Guncotton** (2 cotton + 250 mB nitric acid, chemical reactor).

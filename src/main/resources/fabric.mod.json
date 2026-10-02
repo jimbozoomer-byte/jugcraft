@@ -18,6 +18,7 @@
 		"jei_mod_plugin": ["io.github.jimbozoomer.jugcraft.client.compat.JugcraftJeiPlugin"]
 	},
 	"mixins": [
+		"jugcraft.seasons.mixins.json",
 		{"config": "jugcraft.client.mixins.json", "environment": "client"}
 	],
 	"depends": {

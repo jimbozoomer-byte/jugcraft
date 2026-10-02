@@ -1,93 +1,167 @@
-# Seasonal colours
+# Seasons: colours, events and winter snow
 
-Status: implemented on branch `claude/seasons`. Compiles and passes its server and client game tests in CI (see Results). **Not yet played.**
-Proposal issue: none. On 1 October 2026 the owner asked for seasonal biomes that change colour with the real date, and chose "Seasonal colours first" on a new branch.
+Status: implemented on branch `claude/seasons` (PR #80). The first part, seasonal colours, compiles and passes its server and client game tests in CI (see Results); the upgrade (events, command, more biomes, winter snow) is awaiting CI. **Not yet played.**
+Proposal issue: none.
+- On 1 October 2026 the owner asked for seasonal biomes that change colour with the real date, and chose "Seasonal colours first" on a new branch.
+- On 2 October they chose:
+  - one season clock with a Thanksgiving Harvest Feast;
+  - opt-in real snow cover;
+  - seasons in every biome that has four seasons;
+  - this upgrade before the Alpine Spawn biome.
+
 Owner: @jimbozoomer-byte
-Target milestone and tier: none; world atmosphere for every tier.
-Primary specialty and supported player role: exploration and building (looks only)
+Target milestone and tier: none; world atmosphere and events for every tier.
+Primary specialty and supported player role: exploration and building (looks), seasonal events
 
 ## Player experience
-- Grass and tree leaves in temperate biomes change colour through the year, following the **server's** date:
+- **Colours.** Grass and tree leaves in four-season biomes change colour through the year, following the **server's** date:
   - **Winter** (around January): dull, olive-brown and dormant.
   - **Spring** (March to May): first green, then a fresh, bright green.
   - **Summer** (July): the vanilla colours.
-  - **Autumn** (September to November): leaves yellow from September. In late October they turn gold, orange and red in patches about 12 blocks across, with smaller speckles, so neighbouring trees turn different colours. By late November they are russet. Grass goes straw-coloured.
+  - **Autumn** (September to November):
+    - Leaves yellow from September.
+    - In late October they turn gold, orange and red in patches about 12 blocks across, with smaller speckles, so neighbouring trees turn different colours.
+    - By late November they are russet. Grass goes straw-coloured.
 - Colours change a little each day (no sudden jumps) and blend smoothly into neighbouring biomes that have no seasons.
-- Biomes with seasons (`#jugcraft:has_seasons`, listed in `tools/seasons.py`):
+- **Winter snow (opt-in, `seasons.snow=on`).** From 1 December to 28 February (northern dates):
+  - Rain falls as snow in the winter-snow biomes.
+  - Snow settles on the ground, roofs and tree crowns, up to `seasons.snow_depth` layers (default 2).
+  - From March it melts away layer by layer.
+  - It never freezes water and never lies on farmland or paths.
+  - It never touches snow the player placed, or the snow vanilla already has on cold mountains.
+- **Events**, all on the same clock. An event is announced in chat when it begins and when a player joins during it.
+  - **Harvest Feast** (Thanksgiving). By default it follows the US date: from the fourth Thursday of November over the weekend (26–29 November 2026). Operators can use Canada's date instead (the weekend up to the second Monday of October: 9–12 October 2026) or turn it off.
+  - **December**: 1 December to 6 January by default.
+  - The Halloween event, in the agriculture pull requests, joins this clock once both are merged.
+- **`/jugcraft season`**:
+  - Anyone can see the season, the day, the events running and the snow.
+  - Operators can use:
+    - `set <auto|spring|summer|autumn|winter|off>`;
+    - `date <MM-DD>` to preview a date (season and events), and `date today` to end the preview;
+    - `snow <on|off>`.
+  - These changes last until the server stops; the config file is unchanged.
+- **Biomes with seasons** (`#jugcraft:has_seasons`, listed in `tools/seasons.py`):
   - plains, sunflower plains and meadow;
-  - forest, flower forest, birch forest, old growth birch forest and dark forest;
+  - forest, flower forest, birch forest, old growth birch forest, dark forest, dappled forest and cherry grove;
   - taiga, old growth pine taiga and old growth spruce taiga;
   - windswept forest, windswept hills and windswept gravelly hills;
-  - river.
-- Deserts, jungles, savannas, swamps, snowy biomes, oceans, and biomes with fixed colours (cherry grove, pale garden, badlands) stay the same all year.
+  - swamp and river.
+- **Winter snow biomes** (`#jugcraft:has_winter_snow`): the same biomes, without rivers (they also run through deserts), plus the pale garden.
+- **Unchanged all year:**
+  - the tropics (jungles, mangrove swamp);
+  - dry lands (deserts, savannas, badlands);
+  - always-frozen biomes (snowy plains, ice spikes, the peaks, grove);
+  - oceans, beaches and caves;
+  - the pale garden's grey.
 
 ## Connections
 - Input producer: the server's clock. Nothing in the game feeds it.
-- Output consumer: none. Seasons are colours only: no item, block, recipe, drop, spawn or progression step depends on them.
+- Output consumer: none yet. No item, block, recipe, drop, spawn or progression step depends on seasons.
+  - The seasonal snow block drops snowballs, as vanilla snow does, so snow adds nothing new.
+  - `JugcraftSeasons.isActive(event)` and `today()` are the shared clock that seasonal content reads, such as the Halloween and Harvest Feast content in the agriculture branch.
 - Technology connection: none.
-- Magic connection: none yet. A shared season clock (`JugcraftSeasons.today()`) is ready for later seasonal content, such as the Halloween branches, to share.
-- Reachable entry path: nothing to unlock; colours show from the first join.
-- Required vs optional connections; trade and solo routes: not applicable (cosmetic).
+- Magic connection: none yet.
+- Reachable entry path: nothing to unlock.
+- Required vs optional connections; trade and solo routes: not applicable.
 - How this stays useful without other branches: it needs none.
-- Cosmetics: works in every Overworld biome in the tag. Other dimensions and modded biomes are unchanged unless a data pack adds them to `#jugcraft:has_seasons`.
+- Cosmetics and data packs:
+  - It works in every Overworld biome in the tags.
+  - Other dimensions and modded biomes are unchanged unless a data pack adds them to the tags.
 
 ## Balance and automation
-None: no resources, units, conversions or rewards.
+- No resources, units, conversions or rewards.
+- Seasonal snow gives snowballs (1 per layer) when dug, exactly like vanilla snow layers. Snow is already unlimited in vanilla (snow golems), so this is no new source.
 
 ## Multiplayer and persistence
-- **Server authority.** The server works out the season day and sends it to each player when they join (`SeasonPayload`, one number). It checks the date once a minute (`JugcraftSeasons.CHECK_TICKS` = 1,200) and tells everyone again when the day changes. The client never reads its own clock.
-- **Operator settings** in `config/jugcraft.properties` (read at startup):
-  - `seasons.mode`:
-    - `auto` (default) follows the date.
-    - `spring`, `summer`, `autumn` or `winter` hold that season, for testing and off-season worlds.
-    - `off` gives vanilla colours.
-  - `seasons.hemisphere`: `north` (default) or `south`. The south is half a year on: October there is spring.
-  - `seasons.timezone`: an IANA zone such as `Europe/London`; default `UTC`. It decides when the day turns over.
-  - An unreadable value falls back to its default and logs a warning.
-- **Client.** A client mixin (`mixin/client/ClientLevelSeasonMixin`) adjusts each biome sample of grass and foliage tints. The level's tint cache keeps the results, so this costs nothing per frame. When the season day changes, the client clears the tint cache and rebuilds the chunk meshes once (about once a day).
-- A client without the server's mod, or a server without Jugcraft, simply shows vanilla colours. Leaving a server resets the colours.
-- **Nothing is saved.** No world data, block, item or player data is written, so there is nothing to migrate, back up or lose. Switching seasons off returns vanilla colours at once.
+- **Server authority.**
+  - The server works out the season day, the events and whether snow is falling.
+  - It sends the day and the snow flag to each player when they join (`SeasonPayload`: a number and a flag).
+  - It checks the date once a minute (`JugcraftSeasons.CHECK_TICKS` = 1,200) and tells everyone again when anything changes.
+  - The client never reads its own clock.
+  - Commands are checked on the server. Changing the season needs permission level 2.
+- **Operator settings** in `config/jugcraft.properties`, read at startup:
+
+  | Setting | Values | Default |
+  | --- | --- | --- |
+  | `seasons.mode` | `auto` follows the date; `spring`, `summer`, `autumn` or `winter` hold that season (for testing and off-season worlds); `off` gives vanilla colours | `auto` |
+  | `seasons.hemisphere` | `north` or `south`. The south is half a year on: October there is spring, and its snow falls in June to August. | `north` |
+  | `seasons.timezone` | an IANA zone such as `Europe/London`. It decides when the day turns over, for colours and events alike. | `UTC` |
+  | `seasons.snow` | `off` or `on` (opt-in winter snow) | `off` |
+  | `seasons.snow_depth` | the most layers winter lays, 1–8 | 2 |
+  | `harvest_feast` | `us`, `canada` or `off` | `us` |
+  | `harvest_feast.days` | how long the feast lasts, 1–7 | 4 |
+  | `december` | `MM-DD..MM-DD` or `off` | `12-01..01-06` |
+
+  An unreadable value falls back to its default and logs a warning.
+- **Client.** A client mixin (`mixin/client/ClientLevelSeasonMixin`) adjusts each biome sample of grass and foliage tints.
+  - The level's tint cache keeps the results, so this costs nothing per frame.
+  - When the season day changes, the client clears the tint cache and rebuilds the chunk meshes once (about once a day).
+- **Snow.**
+  - A common mixin (`mixin/BiomeSeasonMixin`) turns rain into snow in winter-snow biomes while it is snowing. Rendering and weather rules then match vanilla's snowy biomes: for example, rain does not water farmland, and lightning does not strike in snow.
+  - Biome temperature is untouched, so world generation, ice and vanilla snow are unchanged.
+  - The season lays its own block, `jugcraft:seasonal_snow`. It looks like vanilla snow and is in `#minecraft:snow`, so grass under it turns snowy. It is placed by `SeasonalSnow`: 2 spots per player per tick, within 48 blocks, only in loaded chunks and only while it rains.
+  - Once it is no longer snowing, the block's random ticks melt it.
+- A client without the mod, or a server without Jugcraft, shows vanilla colours and rain. Leaving a server resets both.
+- **Saved data.** Nothing is saved for colours or events. Seasonal snow is ordinary block data in loaded chunks:
+  - It melts away in spring wherever it is ticked.
+  - It also melts if snow is switched off.
+  - Turning seasons off never unregisters the block, so old saves still load it.
 
 ## Dependencies and assets
-- Fabric API only: networking, lifecycle events and MixinExtras, which Fabric Loader bundles.
-- No textures. Colours are code (`season/SeasonPalette`).
+- Fabric API only: networking, lifecycle events, the command API, and MixinExtras (bundled with Fabric Loader).
+- No textures:
+  - Colours are code (`season/SeasonPalette`).
+  - Seasonal snow uses vanilla snow's models by name; no Mojang file is copied.
 - No new dependencies.
 
 ## Verification
 Results are recorded under "Results" below after CI runs.
-- `python3 tools/check_mod_data.py` (offline):
-  - the biome tag matches `tools/seasons.py`;
-  - palette keyframe days rise within the year;
-  - the fixed-mode days lie within the year;
-  - the three `seasons.*` options exist.
+- `python3 tools/check_mod_data.py` (offline) checks:
+  - both biome tags match `tools/seasons.py`, and Java reads them;
+  - every winter-snow biome but the pale garden has seasons;
+  - the seasonal snow block's ID and its tags;
+  - the palette keyframe and mode days lie within the year;
+  - every `seasons.*`, `harvest_feast*` and `december` option exists.
 - Server game tests (`SeasonGameTests`):
-  - calendar days, including the northern and southern hemispheres, leap years, and New Year;
-  - every day of a leap year is within 1–365;
-  - the mode overrides;
-  - the time zone deciding the day at midnight;
-  - a runtime override is not written to the config file, so a restart goes back to the file;
-  - summer is vanilla and off is vanilla;
-  - autumn leaves are redder, with alpha kept;
-  - no day-to-day jump bigger than 4 levels per colour channel (New Year included);
-  - autumn patches include both red and gold;
-  - the biome tag includes plains and forest and excludes desert, jungle, swamp, cherry grove and snowy plains.
+  - Calendar days: northern and southern hemispheres, leap years, New Year; every day of a leap year is within 1–365.
+  - Mode overrides, and the time zone deciding the day at midnight.
+  - A runtime override is not written to the config file, so a restart goes back to the file.
+  - The palette:
+    - summer and off are vanilla;
+    - autumn leaves are redder, with alpha kept;
+    - no day-to-day change is bigger than 4 levels per colour channel;
+    - autumn patches include red and gold.
+  - The biome tags and flags: four-season biomes in, the tropics, dry lands, frozen biomes, oceans and the pale garden's colours out; rivers have no winter snow.
+  - Events:
+    - US and Canadian Thanksgiving dates and windows;
+    - December across New Year;
+    - events off;
+    - events in the southern hemisphere;
+    - the snow season by hemisphere;
+    - a preview date.
+  - The command: `set winter`, `date 11-26` (Harvest Feast), `snow on` (none in November, falling on 10 January), `snow off`, `date today`.
+  - Winter snow, in a patch of plains:
+    - rain becomes snow in winter;
+    - two layers lie, and no third past the depth;
+    - no snow on farmland, on water (which stays water) or over vanilla snow;
+    - in spring rain falls as rain again;
+    - each random tick melts a layer, while vanilla snow stays.
 - Client game test (`SeasonClientGameTests`):
-  - a real client joins a flat world;
-  - it checks that the client received today's season day on joining;
-  - it builds a grove of oaks;
-  - for each mode (summer, spring, autumn, winter, off and today's date) it sets the mode on the server, checks that the client's day matches, reads the leaf and grass tints back from the client's level and takes a screenshot `jugcraft_season_<mode>`;
-  - it asserts:
-    - summer equals off (vanilla);
-    - autumn leaves are clearly redder and autumn grass differs;
-    - spring and winter differ from summer.
+  - A real client joins a flat world, receives today's day, and sees a grove of oaks in each mode, with checks on the tints.
+  - Then winter snow with rain:
+    - the client sees snow falling;
+    - the grass under the season's snow is snowy;
+    - a screenshot `jugcraft_season_winter_snow`.
 - Not run:
   - a dedicated server with two clients;
   - a server restart across midnight;
-  - real biomes in a normal world (the test uses the flat world's plains).
+  - real biomes in a normal world;
+  - a whole winter of snowfall and a spring thaw in real time;
+  - performance under many players.
 
 ### Results
-From Build run [36915807158](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/36915807158) on 86eae42 (Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25, GitHub-hosted Ubuntu, Mesa for the client), run on 1 October 2026:
-- `./gradlew build`: all 125 game tests pass, including the five `SeasonGameTests`.
+Seasonal colours, from Build run [36915807158](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/36915807158) on 86eae42 (Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25, GitHub-hosted Ubuntu, Mesa for the client), run on 1 October 2026:
+- `./gradlew build`: all 125 game tests pass, including the five `SeasonGameTests` of that version.
 - `./gradlew runClientGameTest`: pass.
   - The client had the server's season day as soon as it joined.
   - After each mode change, the client's day matched the server's.
@@ -110,18 +184,30 @@ From Build run [36915807158](https://github.com/jimbozoomer-byte/jugcraft/action
   - today's date (1 October) shows the oaks partly turned.
 - An earlier screenshot round (run 36914731990) showed autumn as a flat olive-gold, because leaf textures darken the tint. The palette was strengthened, and the autumn patches made smaller, before these results.
 
+Upgrade (events, command, more biomes, winter snow): not yet run in CI.
+
 ## World and event applicability
 - **Seasonal rules** ([CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md)):
-  - **Activation** and **deactivation**: tested by switching modes, including `off`.
-  - **Timezone and manual override**: tested.
-  - **Restart across the boundary**: the season is worked out from the date on every check and nothing is stored, so a restart simply works out the current day again. The test covers that overrides do not persist.
+  - **Activation** and **deactivation**: tested by switching modes (including `off`), previewing dates, and switching snow on and off.
+  - **Timezone and manual override**: tested; one zone serves the colours and every event.
+  - **Restart across the boundary**:
+    - The season and events are worked out from the date on every check, and nothing about them is stored.
+    - Overrides do not persist; this is tested.
+    - Seasonal snow left at a restart melts if the new date is past winter.
   - **Duplicate rewards**: none exist.
-  - **Earned content**: none is created, so none can be lost.
-- Old chunks are not rewritten: only their colours change while they are drawn.
+  - **Earned content**: none is created.
+    - Seasonal snow only lies on top of blocks and melts away, leaving them as they were.
+    - Player-placed snow is vanilla snow and never melts this way.
+- Old chunks are not rewritten. Colours change while chunks are drawn. Snow lies only in loaded chunks near players, and melts the same way.
 
 ## Rollout and open questions
-- **Default on.** `seasons.mode=auto` is the default, as the owner asked for colours that follow the real date. Set `seasons.mode=off` for vanilla colours.
-- **Fixed leaf colours.** Birch, spruce, cherry, mangrove and azalea leaves have fixed colours in vanilla, so they do not change. Their biomes still change grass, and oak and dark oak leaves change.
-- **No change to snow, weather or crops.** This is only colour. Autumn-themed biomes (such as the planned Amberwood) and seasonal crops would be separate features.
-- **Data packs that change tags** (`/reload`) are picked up the next time tags reach the client.
-- A `/jugcraft season` operator command could change the mode without a restart. It is not built: the config file is the override for now.
+- **Colours default on** (`seasons.mode=auto`), as the owner asked for colours that follow the real date. **Snow defaults off** (opt-in), because it changes the world while it lies: for example, it covers mob-farm floors in winter.
+- **Fixed leaf colours.** Birch, spruce, cherry, poplar, mangrove and azalea leaves have fixed colours in vanilla, so they do not change. Their biomes still change grass, and oak and dark oak leaves change.
+- **The Halloween event** (agriculture pull requests) has its own dates and time zone settings for now. Once both are merged, a small follow-up moves it onto this clock, as a third event window, and drops the duplicate time zone setting.
+- **Content for the Harvest Feast and December**, such as a feast table or gifts, belongs to the branches that own the food and decorations. This change only provides the dated windows and the announcements.
+- **Data packs that change tags** (`/reload`) are picked up the next time tags load.
+- **The Alpine Spawn biome** (next) will use all of this:
+  - a large alpine valley where new worlds start, with villages;
+  - its own seasonal features: larches that turn gold, then bare;
+  - seasonal flowers and berries;
+  - a moving snow line.

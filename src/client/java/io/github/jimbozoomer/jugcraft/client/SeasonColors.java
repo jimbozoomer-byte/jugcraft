@@ -1,18 +1,15 @@
 package io.github.jimbozoomer.jugcraft.client;
 
-import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
 import io.github.jimbozoomer.jugcraft.season.SeasonPalette;
 import io.github.jimbozoomer.jugcraft.season.SeasonPayload;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import io.github.jimbozoomer.jugcraft.season.SeasonState;
+import io.github.jimbozoomer.jugcraft.season.SeasonalBiome;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BiomeColors;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.biome.Biome;
 
@@ -23,26 +20,25 @@ import net.minecraft.world.level.biome.Biome;
  * tint caches, so the work happens once per block and season change, not every frame.
  */
 public final class SeasonColors {
-	/** Biomes already looked up in the tag. Chunk meshing threads read it, hence a concurrent map. */
-	private static final Map<Biome, Boolean> SEASONAL = new ConcurrentHashMap<>();
 	private static volatile int day;
 
 	private SeasonColors() {
 	}
 
 	public static void register() {
-		ClientPlayNetworking.registerGlobalReceiver(SeasonPayload.TYPE, (payload, context) -> setDay(payload.day()));
-		// Leaving a server returns to vanilla colours, so a server without Jugcraft shows no seasons.
+		ClientPlayNetworking.registerGlobalReceiver(SeasonPayload.TYPE, (payload, context) -> {
+			SeasonState.setSnowing(payload.snowing());
+			setDay(payload.day());
+		});
+		// Leaving a server returns to vanilla colours and rain, so a server without Jugcraft shows no seasons.
 		ClientPlayConnectionEvents.DISCONNECT.register((listener, client) -> {
 			day = 0;
-			SEASONAL.clear();
+			SeasonState.setSnowing(false);
 		});
+		// New biome tags (the biome flags were just updated, see SeasonalBiome) can change which biomes have seasons.
 		CommonLifecycleEvents.TAGS_LOADED.register((registries, client) -> {
-			if (client) {
-				SEASONAL.clear();
-				if (day != 0) {
-					Minecraft.getInstance().execute(SeasonColors::redraw);
-				}
+			if (client && day != 0) {
+				Minecraft.getInstance().execute(SeasonColors::redraw);
 			}
 		});
 	}
@@ -70,7 +66,7 @@ public final class SeasonColors {
 	}
 
 	/** The grass or foliage tint a biome gives at (x, z), shifted for the season if the biome has seasons. */
-	public static int adjust(RegistryAccess registries, ColorResolver resolver, Biome biome, double x, double z, int vanilla) {
+	public static int adjust(ColorResolver resolver, Biome biome, double x, double z, int vanilla) {
 		int today = day;
 		if (today == 0) {
 			return vanilla;
@@ -79,8 +75,6 @@ public final class SeasonColors {
 		if (!foliage && resolver != BiomeColors.GRASS_COLOR_RESOLVER) {
 			return vanilla;
 		}
-		boolean seasonal = SEASONAL.computeIfAbsent(biome,
-				key -> registries.lookupOrThrow(Registries.BIOME).wrapAsHolder(key).is(JugcraftSeasons.HAS_SEASONS));
-		return seasonal ? SeasonPalette.colour(today, vanilla, foliage, x, z) : vanilla;
+		return SeasonalBiome.of(biome).jugcraft$hasSeasons() ? SeasonPalette.colour(today, vanilla, foliage, x, z) : vanilla;
 	}
 }
