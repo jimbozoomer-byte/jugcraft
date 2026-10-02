@@ -37,6 +37,7 @@ import candy_data
 import foraging_data
 import bat_data
 import hay_golem_data
+import knitting_data
 import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
@@ -205,6 +206,7 @@ def assets(root, write, lang):
     foraging_data.assets(root, write, lang)
     bat_data.assets(root, write, lang)
     hay_golem_data.assets(root, write, lang)
+    knitting_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -321,6 +323,7 @@ def loot(data, write):
     foraging_data.loot(out, write)
     bat_data.loot(out, write)
     hay_golem_data.loot(out, write)
+    knitting_data.loot(out, write)
     crow_data.loot(out, write)
     firework_data.loot(out, write)
     feast_data.loot(out, write)
@@ -430,6 +433,7 @@ def tags(tags):
     foraging_data.tags(tags)
     bat_data.tags(tags)
     hay_golem_data.tags(tags)
+    knitting_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

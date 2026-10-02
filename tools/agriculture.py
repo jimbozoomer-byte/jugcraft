@@ -546,6 +546,10 @@ HALLOWEEN_ADVANCEMENTS = {
                     "frame": "task"},
     "night_shift": {"icon": "jugcraft:bat_house", "title": "Night Shift", "description": "Watch bats pour out of a Bat House at dusk",
                     "frame": "task"},
+    "knit_one_purl_two": {"icon": "jugcraft:knitting_needles", "title": "Knit One, Purl Two", "description": "Knit a garment on Knitting Needles",
+                          "frame": "task"},
+    "snug_as_a_bug": {"icon": "jugcraft:knit_sweater", "title": "Snug as a Bug",
+                      "description": "Warm yourself by a campfire in a knit beanie, sweater and wool socks", "frame": "goal"},
     "man_of_straw": {"icon": "minecraft:hay_block", "title": "Man of Straw", "description": "Build a Hay Golem from hay bales and a carved pumpkin",
                      "frame": "task"},
     "fairy_ring": {"icon": "jugcraft:fly_agaric", "title": "Away with the Fairies",
@@ -1481,6 +1485,31 @@ HAY_GOLEM = {"entity": "hay_golem", "display": "Hay Golem", "health": 20, "speed
              "wheat": [2, 5], "table": "entities/hay_golem"}
 
 
+# Knitting (fall additions 15): the Spinning Wheel (SpinningWheelBlock + entity) spins a skein of wool in `turns` turns of
+# the treadle (each turn runs the wheel `spin_ticks`) into `yarn_per_wool` balls of yarn in the wool's colour; knitwear
+# used on it unravels into a ball a row less `unravel_loss`. Knitting Needles (`needles_durability` uses) knit a row a
+# ball of yarn, holding use `row_ticks`; each garment takes its `rows` and is worn in its slot, dyed the blend of its
+# yarns, with the equipment asset `asset`. Wearing `cozy.pieces` or more within `cozy.range` blocks of a lit campfire
+# (looked at every `cozy.ticks`) gives Regeneration I for `cozy.effect_ticks`. Undyed yarn is `undyed`.
+KNITTING = {"wheel": "spinning_wheel", "wheel_display": "Spinning Wheel", "yarn": "yarn", "yarn_display": "Ball of Yarn",
+            "needles": "knitting_needles", "needles_display": "Knitting Needles", "needles_durability": 128, "row_ticks": 40,
+            "turns": 4, "spin_ticks": 20, "yarn_per_wool": 4, "unravel_loss": 1, "undyed": 0xF0E6D2,
+            "cozy": {"ticks": 40, "pieces": 2, "range": 4, "effect_ticks": 60}, "knitwear_tag": "jugcraft:knitwear",
+            # In the order of the Knitwear enum (the needles' cycle).
+            "garments": {
+                "knit_beanie": {"display": "Knit Beanie", "slot": "HEAD", "rows": 2, "asset": "knit"},
+                "wool_socks": {"display": "Wool Socks", "slot": "FEET", "rows": 2, "asset": "knit"},
+                "knit_sweater": {"display": "Knit Sweater", "slot": "CHEST", "rows": 5, "asset": "knit"},
+                "striped_sweater": {"display": "Striped Sweater", "slot": "CHEST", "rows": 5, "asset": "knit_striped", "motif": "stripes"},
+                "pumpkin_sweater": {"display": "Pumpkin Sweater", "slot": "CHEST", "rows": 5, "asset": "knit_pumpkin", "motif": "pumpkin"},
+                "bat_sweater": {"display": "Bat Sweater", "slot": "CHEST", "rows": 5, "asset": "knit_bat", "motif": "bat"},
+                "leaf_sweater": {"display": "Autumn Leaf Sweater", "slot": "CHEST", "rows": 5, "asset": "knit_leaf", "motif": "leaf"}}}
+
+
+def knitting_items():
+    return [KNITTING["wheel"], KNITTING["yarn"], KNITTING["needles"]] + list(KNITTING["garments"])
+
+
 def bat_blocks():
     return [BATS["house"]]
 
@@ -2002,6 +2031,12 @@ SHAPED = [
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
     # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
     # (the ring) baked in; sugar round a red dye.
+    # Fall additions 15: a spoked wheel of planks and sticks with a string drive band; two sticks tipped with iron.
+    {"id": "spinning_wheel", "pattern": [" P ", "PSP", "STS"], "key": {"P": "#minecraft:planks", "S": "minecraft:stick",
+                                                                     "T": "minecraft:string"},
+     "result": "spinning_wheel", "count": 1, "category": "building"},
+    {"id": "knitting_needles", "pattern": ["N N", "S S"], "key": {"N": "minecraft:iron_nugget", "S": "minecraft:stick"},
+     "result": "knitting_needles", "count": 1, "category": "equipment"},
     # Fall additions 13: a slatted roost of planks.
     {"id": "bat_house", "pattern": ["PPP", "PSP", "P P"], "key": {"P": "#minecraft:planks", "S": "minecraft:stick"}, "result": "bat_house",
      "count": 1, "category": "building"},
@@ -2147,7 +2182,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]])
 
 
 def all_items():
@@ -2158,7 +2193,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items())
 
 
 def owns(entry_id):

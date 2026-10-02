@@ -65,6 +65,7 @@ import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.biome.Biome;
@@ -251,6 +252,10 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<CandyKettleBlockEntity> CANDY_KETTLE_ENTITY;
 	public static BlockEntityType<BatHouseBlockEntity> BAT_HOUSE_ENTITY;
 	public static EntityType<HayGolem> HAY_GOLEM;
+	public static DataComponentType<KnittingWork> KNITTING;
+	public static BlockEntityType<SpinningWheelBlockEntity> SPINNING_WHEEL_ENTITY;
+	/** How many uses Knitting Needles have. */
+	public static final int NEEDLES_DURABILITY = 128;
 	/** Bat guano fertilizes the crops this far round where it is used (a 3x3 patch), with this many doses of bone meal each. */
 	public static final int GUANO_RADIUS = 1;
 	public static final int GUANO_DOSES = 1;
@@ -1383,6 +1388,27 @@ public final class JugcraftAgriculture {
 				.clientTrackingRange(10));
 		FabricDefaultAttributeRegistry.register(HAY_GOLEM, HayGolem.createAttributes());
 		UseBlockCallback.EVENT.register(HayGolem::onUseBlock);
+
+		// Fall additions 15, knitting: the Spinning Wheel spins wool into yarn; Knitting Needles knit yarn into beanies,
+		// socks and sweaters, worn (dyed the yarn's colour) to keep warm by a campfire.
+		KNITTING = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("knitting"),
+				DataComponentType.<KnittingWork>builder().persistent(KnittingWork.CODEC).networkSynchronized(KnittingWork.STREAM_CODEC).build());
+		Block spinningWheel = registerBlock("spinning_wheel", SpinningWheelBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		SPINNING_WHEEL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("spinning_wheel"),
+				FabricBlockEntityTypeBuilder.create(SpinningWheelBlockEntity::new, spinningWheel).build());
+		registerItem("spinning_wheel", props -> new BlockItem(spinningWheel, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem("yarn", Item::new, new Item.Properties().component(DataComponents.DYED_COLOR, new DyedItemColor(Knitting.UNDYED)),
+				INGREDIENT_TAB);
+		registerItem("knitting_needles", KnittingNeedlesItem::new, new Item.Properties().durability(NEEDLES_DURABILITY)
+				.component(KNITTING, KnittingWork.NONE), TOOL_TAB);
+		for (Knitwear knit : Knitwear.values()) {
+			Equippable worn = Equippable.builder(knit.slot).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER)
+					.setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id(knit.asset))).build();
+			registerItem(knit.item, Item::new, new Item.Properties().stacksTo(1).component(DataComponents.EQUIPPABLE, worn)
+					.component(DataComponents.DYED_COLOR, new DyedItemColor(Knitting.UNDYED)), EQUIPMENT_TAB);
+		}
+		Knitting.register();
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */

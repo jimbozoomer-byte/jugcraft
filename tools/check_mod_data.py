@@ -804,6 +804,7 @@ def check_agriculture():
     check_foraging(java, main)
     check_bats(java, main)
     check_hay_golem(java, main)
+    check_knitting(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -2834,6 +2835,66 @@ def check_hay_golem(java, main):
     for name, (u, v, *_size) in hay_golem_textures.BOXES.items():
         if f"texOffs({u}, {v})" not in model:
             err(f"HayGolemModel has no box at ({u}, {v}) for the texture's {name}")
+
+
+def check_knitting(java, main):
+    """Knitting: the Java matches KNITTING in tools/agriculture.py (the wheel's turns, spin time and unravelling loss; yarn
+    per wool, cosiness and undyed colour; the needles' row time and durability; each garment's slot, rows and look, in
+    the needles' order); the wheel, yarn, needles and garments are registered; every garment has its words, item model
+    and equipment asset (the dyeable knit, and its motif); and the tags, recipes and advancements exist."""
+    kn = ag.KNITTING
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?(?:0x)?[\dA-Fa-f.]+)[FLD]?;", java.get(source, ""))
+        if not match:
+            return None
+        value = match.group(1)
+        return float(int(value, 16)) if value.startswith("0x") else float(value)
+
+    expected = {("SpinningWheelBlockEntity", "TURNS"): kn["turns"], ("SpinningWheelBlockEntity", "SPIN_TICKS"): kn["spin_ticks"],
+                ("SpinningWheelBlockEntity", "UNRAVEL_LOSS"): kn["unravel_loss"], ("Knitting", "YARN_PER_WOOL"): kn["yarn_per_wool"],
+                ("Knitting", "COZY_TICKS"): kn["cozy"]["ticks"], ("Knitting", "COZY_PIECES"): kn["cozy"]["pieces"],
+                ("Knitting", "COZY_RANGE"): kn["cozy"]["range"], ("Knitting", "COZY_EFFECT_TICKS"): kn["cozy"]["effect_ticks"],
+                ("Knitting", "UNDYED"): kn["undyed"], ("KnittingNeedlesItem", "ROW_TICKS"): kn["row_ticks"],
+                ("JugcraftAgriculture", "NEEDLES_DURABILITY"): kn["needles_durability"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(found - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from KNITTING in tools/agriculture.py ({value})")
+    enum = java.get("Knitwear", "")
+    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", EquipmentSlot\.([A-Z]+), (\d+), "([a-z_]+)"\)', enum, re.M)
+    wanted = [(garment, info["slot"], str(info["rows"]), info["asset"]) for garment, info in kn["garments"].items()]
+    if [(item, slot, rows, asset) for _, item, slot, rows, asset in declared] != wanted:
+        err("Knitwear.java's garments (item, slot, rows, look, in order) differ from KNITTING in tools/agriculture.py")
+    for call in ('registerBlock("spinning_wheel", SpinningWheelBlock::new', 'registerItem("yarn", Item::new',
+                 'registerItem("knitting_needles", KnittingNeedlesItem::new', "for (Knitwear knit : Knitwear.values())", "Knitting.register()"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in [f"block.jugcraft.{kn['wheel']}", f"item.jugcraft.{kn['yarn']}", f"item.jugcraft.{kn['needles']}"] + [
+            f"item.jugcraft.{g}" for g in kn["garments"]]:
+        if key not in lang:
+            err(f"Knitting has no words for {key}")
+    for garment, info in kn["garments"].items():
+        model = load(ASSETS / "items" / f"{garment}.json") or {}
+        if (model.get("model", {}).get("tints") or [{}])[0].get("type") != "minecraft:dye":
+            err(f"{garment}'s item model must be tinted by its dyed colour")
+        asset = load(ASSETS / "equipment" / f"{info['asset']}.json") or {}
+        layers = asset.get("layers", {}).get("humanoid", [])
+        if not layers or "dyeable" not in layers[0] or ("motif" in info) != (len(layers) == 2):
+            err(f"The equipment asset {info['asset']} must be the dyeable knit (and the motif over it for a motif sweater)")
+    for path in [ASSETS / "textures" / "entity" / "equipment" / "humanoid" / "knit.png", ASSETS / "textures" / "item" / "yarn.png",
+                 DATA / "jugcraft" / "recipe" / "spinning_wheel.json", DATA / "jugcraft" / "recipe" / "knitting_needles.json",
+                 DATA / "jugcraft" / "loot_table" / "blocks" / "spinning_wheel.json",
+                 DATA / "jugcraft" / "advancement" / "knit_one_purl_two.json", DATA / "jugcraft" / "advancement" / "snug_as_a_bug.json"]:
+        if not path.exists():
+            err(f"Knitting needs {path.relative_to(ROOT)}")
+    knitwear = (load(DATA / "jugcraft" / "tags" / "item" / "knitwear.json") or {}).get("values", [])
+    frozen = (load(DATA / "minecraft" / "tags" / "item" / "freeze_immune_wearables.json") or {}).get("values", [])
+    dyeable = (load(DATA / "minecraft" / "tags" / "item" / "dyeable.json") or {}).get("values", [])
+    for garment in kn["garments"]:
+        if f"jugcraft:{garment}" not in knitwear or f"jugcraft:{garment}" not in frozen or f"jugcraft:{garment}" not in dyeable:
+            err(f"{garment} must be knitwear, freeze-immune and dyeable")
 
 
 def check_model_uvs():

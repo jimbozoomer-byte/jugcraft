@@ -896,4 +896,6 @@ def crop_textures():
     out.update(bat_textures())
     from hay_golem_textures import hay_golem_textures  # and the Hay Golem
     out.update(hay_golem_textures())
+    from knitting_textures import knitting_textures  # and knitting
+    out.update(knitting_textures())
     return out

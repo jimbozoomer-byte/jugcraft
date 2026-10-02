@@ -121,6 +121,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftAgriculture.RESTLESS_SPIRIT, RestlessSpiritRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FEAST_TABLE_ENTITY, FeastTableRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CANDY_KETTLE_ENTITY, CandyKettleRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPINNING_WHEEL_ENTITY, SpinningWheelRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(SpookyBurstPayload.TYPE, (payload, context) -> SpookyBursts.receive(payload));
 		ModelLayerRegistry.registerModelLayer(WispModel.LAYER, WispModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(CrowModel.LAYER, CrowModel::createLayer);
