@@ -113,7 +113,23 @@ def model(ref):
 def _hi_res(name):
     """The drone tower's realistic block textures (tools/tower_art.py) are 64x64."""
     import tower_art
-    return name in tower_art.TEXTURES or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_"))
+    import blueprints
+    return (name in tower_art.TEXTURES or name in blueprints.TABLE_TEXTURES
+            or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_")))
+
+
+def item_models(definition):
+    """Every model an item definition can show, through select (the blueprint's kinds), condition and range_dispatch
+    (the power bow's draw)."""
+    if "model" in definition:
+        model(definition["model"])
+    for case in definition.get("cases", []):
+        item_models(case["model"])
+    for key in ("on_true", "on_false", "fallback"):
+        if key in definition:
+            item_models(definition[key])
+    for entry in definition.get("entries", []):
+        item_models(entry["model"])
 
 
 def check_assets(registered):
@@ -137,25 +153,10 @@ def check_assets(registered):
             continue
         definition = load(ASSETS / "items" / f"{item}.json")
         if definition:
-            for ref in item_models(definition["model"]):
-                model(ref)
+            item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
-
-
-def item_models(definition):
-    """Every model an item definition can show: a plain model, each case and the fallback of a select, both sides of a
-    condition, or each entry and the fallback of a range_dispatch (the power bow's draw)."""
-    kind = definition.get("type")
-    if kind == "minecraft:select":
-        return [ref for case in definition["cases"] for ref in item_models(case["model"])] + item_models(definition["fallback"])
-    if kind == "minecraft:condition":
-        return item_models(definition["on_true"]) + item_models(definition["on_false"])
-    if kind == "minecraft:range_dispatch":
-        refs = [ref for entry in definition.get("entries", []) for ref in item_models(entry["model"])]
-        return refs + (item_models(definition["fallback"]) if "fallback" in definition else [])
-    return [definition["model"]]
 
 
 def check_petro():

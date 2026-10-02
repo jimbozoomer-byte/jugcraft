@@ -49,6 +49,9 @@ public final class JugcraftConfig {
 	 * <li>{@code alpine_spawn.start} ({@code on} or {@code off}): new worlds start in the Alpine Spawn biome.</li>
 	 * <li>Jugcraft regions (see {@code biome/JugcraftRegions}): {@code biomes.region_size} (blocks across, 256 to 8192)
 	 * and {@code biomes.region_share} (the fraction of regions with the biomes branch's biomes, 0 to 1).</li>
+	 * <li>Party limits (see {@code party/JugcraftParties}): {@code parties.max_size} members (2 to 64),
+	 * {@code parties.invite_minutes} before an invite expires (1 to 60) and {@code parties.invites_per_minute}
+	 * each player may send (1 to 60).</li>
 	 * </ul>
 	 */
 	public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
@@ -58,6 +61,7 @@ public final class JugcraftConfig {
 			Map.entry("seasons.snow", "off"), Map.entry("seasons.snow_depth", "2"),
 			Map.entry("harvest_feast", "us"), Map.entry("harvest_feast.days", "4"),
 			Map.entry("december", "12-01..01-06"),
+			Map.entry("parties.max_size", "8"), Map.entry("parties.invite_minutes", "5"), Map.entry("parties.invites_per_minute", "10"),
 			Map.entry("alpine_spawn.start", "on"),
 			Map.entry("biomes.region_size", "1024"), Map.entry("biomes.region_share", "0.5"));
 
@@ -128,7 +132,8 @@ public final class JugcraftConfig {
 					+ " the Halloween event runs: start and end as MM-DD, a timezone, mode auto, on or off, and the Harvest Moon's day;"
 					+ " seasons.*: seasonal colours follow the server's date; mode auto, spring, summer, autumn, winter or off,"
 					+ " hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"
-					+ " december MM-DD..MM-DD or off; alpine_spawn.start on or off: new worlds start in the Alpine Spawn biome;"
+					+ " december MM-DD..MM-DD or off; parties.max_size 2-64, parties.invite_minutes 1-60, parties.invites_per_minute 1-60;"
+					+ " alpine_spawn.start on or off: new worlds start in the Alpine Spawn biome;"
 					+ " biomes.region_size in blocks and biomes.region_share from 0 to 1: Jugcraft regions with the new biomes).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);

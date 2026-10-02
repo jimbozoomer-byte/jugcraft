@@ -370,7 +370,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 - `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives`, `agriculture`, `parties`, `drones`, `pixel_hollows` and `retro_trader`.
 - It also holds other server options, `JugcraftConfig.OPTIONS` (read with `JugcraftConfig.option(key)`): `carving.free_draw` (default `true`).
-- Text options, `JugcraftConfig.TEXT_OPTIONS` (read with `JugcraftConfig.textOption(key)`): the `seasons.*`, `harvest_feast*` and `december` settings (season/SeasonCalendar), and the Halloween event's `halloween.start` and `halloween.end` (`MM-DD`, defaults `10-20` and `11-03`), `halloween.timezone` (default `UTC`) and `halloween.mode` (`auto`, `on` or `off`). `HalloweenSeason` reads the Halloween ones; a bad value is logged and its default kept.
+- Text options, `JugcraftConfig.TEXT_OPTIONS` (read with `JugcraftConfig.textOption(key)`): the `seasons.*`, `harvest_feast*` and `december` settings (season/SeasonCalendar), the `parties.*` limits (party/JugcraftParties), and the Halloween event's `halloween.start` and `halloween.end` (`MM-DD`, defaults `10-20` and `11-03`), `halloween.timezone` (default `UTC`) and `halloween.mode` (`auto`, `on` or `off`). `HalloweenSeason` reads the Halloween ones; a bad value is logged and its default kept.
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
 
@@ -407,7 +407,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ### Drones (`drone/`)
 
-- **`BuildJobs`** is the build-job interface. A `Source` offers open positions; depots reserve them, fly the materials there and call `fill`. Blueprints (#23) will be a source. `SimpleBuildJobs` is a minimal one, used by tests and the development-only `/dronetest` command.
+- **`BuildJobs`** is the build-job interface. A `Source` offers open positions; depots reserve them, fly the materials there and call `fill`. Blueprints (#23) will be a source. `SimpleBuildJobs` is a minimal one, used by tests and the operator-only `/dronetest` command.
 - **Pure logic (no Minecraft types), testable on its own:**
   - `PlatformLayout` scans the platform the Drone Tower places: separated 5x5 pads and 3x3 supply pickups. A terminal without a tower flies no drones (`allowTiersWithoutTower` is for tests and `/dronetest` only).
   - `DroneFleet` holds the roster and the cached pooled power; `DockLayout` places docked drones round the pads.
