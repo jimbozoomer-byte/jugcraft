@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft;
 
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.biome.JugcraftDimensions;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroBlocks;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
@@ -70,6 +71,7 @@ public final class Jugcraft implements ModInitializer {
 		RetroTrader.register();
 		AlpineSpawn.register();
 		JugcraftRegions.register();
+		JugcraftDimensions.register();
 		JugcraftSeasons.register();
 		FeatureEnabledCondition.register();
 		JugcraftWorldgen.register();

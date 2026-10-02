@@ -59,7 +59,7 @@
   },
   {
     "id": "glowcap",
-    "kind": "glow_plant",
+    "kind": "floor_plant",
     "light": 10
   },
   {
@@ -78,5 +78,9 @@
   {
     "id": "snowpetals",
     "kind": "flowerbed"
+  },
+  {
+    "id": "bramble",
+    "kind": "floor_plant"
   }
 ]

@@ -528,6 +528,10 @@ def check_region_rules():
                     f"{sorted(set(a['layouts']) & set(b['layouts']))}")
     if load(RES / MOD / "region_rules.json") != bm.rules_file():
         err("src/main/resources/jugcraft/region_rules.json is out of date (run tools/generate_material_data.py)")
+    if load(RES / MOD / "dimension_biomes.json") != bm.dimension_file():
+        err("src/main/resources/jugcraft/dimension_biomes.json is out of date (run tools/generate_material_data.py)")
+    if "JugcraftDimensions.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft.java does not place the Nether and End biomes (JugcraftDimensions.register)")
 
 
 def check_biomes():
@@ -548,7 +552,10 @@ def check_biomes():
     placed = DATA / MOD / "worldgen" / "placed_feature"
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for name, info in bm.BIOMES.items():
-        if f"{MOD}:{name}" not in {rule["biome"] for rule in bm.RULES}:
+        if info.get("dimension") in ("nether", "end"):
+            if f"{MOD}:{name}" in {rule["biome"] for rule in bm.RULES} or "surface" in info or info["seasons"]:
+                err(f"{name}: a {info['dimension']} biome has region rules, an Overworld surface or seasons")
+        elif f"{MOD}:{name}" not in {rule["biome"] for rule in bm.RULES}:
             err(f"No region rule places the {name} biome")
         if lang.get(f"biome.{MOD}.{name}") != info["display"]:
             err(f"No name for the {name} biome")

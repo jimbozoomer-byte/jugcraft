@@ -966,9 +966,9 @@ public final class JugcraftAgriculture {
 							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
 					yield tall;
 				}
-				case "glow_plant" -> {
-					int light = plant.get("light").getAsInt();
-					Block glow = registerBlock(id, GlowPlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM)
+				case "floor_plant" -> {
+					int light = plant.has("light") ? plant.get("light").getAsInt() : 0;
+					Block glow = registerBlock(id, FloorPlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM)
 							.lightLevel(state -> light));
 					registerItem(id, props -> new BlockItem(glow, props), new Item.Properties().useBlockDescriptionPrefix()
 							.compostable(COMPOST_MEDIUM), SEEDS_TAB);

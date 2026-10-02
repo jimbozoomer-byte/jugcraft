@@ -3,12 +3,15 @@ package io.github.jimbozoomer.jugcraft.test;
 import com.mojang.datafixers.util.Pair;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.SeasonalLeavesBlock;
+import io.github.jimbozoomer.jugcraft.biome.JugcraftDimensions;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -27,6 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
@@ -382,6 +386,40 @@ public class BiomeGameTests {
 			helper.succeed();
 		});
 	}
+
+	/**
+	 * The Nether and End biomes (batches 8 and 9) are in their dimension's biome source, and the search finds most of
+	 * them within {@link #DIMENSION_SEARCH} blocks of the origin (distances logged).
+	 */
+	@GameTest(maxTicks = 400)
+	public void dimensionBiomesArePlaced(GameTestHelper helper) {
+		MinecraftServer server = helper.getLevel().getServer();
+		Map<ResourceKey<Level>, List<ResourceKey<Biome>>> dimensions = Map.of(Level.NETHER, JugcraftDimensions.nether(),
+				Level.END, JugcraftDimensions.end());
+		for (Map.Entry<ResourceKey<Level>, List<ResourceKey<Biome>>> dimension : dimensions.entrySet()) {
+			ServerLevel level = server.getLevel(dimension.getKey());
+			helper.assertTrue(level != null, "No " + dimension.getKey().identifier());
+			Set<ResourceKey<Biome>> possible = new HashSet<>();
+			for (Holder<Biome> holder : level.getChunkSource().getGenerator().getBiomeSource().possibleBiomes()) {
+				holder.unwrapKey().ifPresent(possible::add);
+			}
+			int found = 0;
+			for (ResourceKey<Biome> biome : dimension.getValue()) {
+				helper.assertTrue(possible.contains(biome), biome.identifier() + " is not in the " + dimension.getKey().identifier() + "'s biomes");
+				Pair<BlockPos, Holder<Biome>> nearest = level.findClosestBiome3d(holder -> holder.is(biome), BlockPos.ZERO.atY(64),
+						DIMENSION_SEARCH, 32, 32);
+				LOGGER.info("{}: {} {}", dimension.getKey().identifier().getPath(), biome.identifier().getPath(), nearest == null
+						? "not within " + DIMENSION_SEARCH + " blocks"
+						: "at " + nearest.getFirst().getX() + " " + nearest.getFirst().getY() + " " + nearest.getFirst().getZ());
+				found += nearest == null ? 0 : 1;
+			}
+			helper.assertTrue(found * 2 >= dimension.getValue().size(), "Only " + found + " of " + dimension.getValue().size()
+					+ " Jugcraft biomes within " + DIMENSION_SEARCH + " blocks in the " + dimension.getKey().identifier());
+		}
+		helper.succeed();
+	}
+
+	private static final int DIMENSION_SEARCH = 3200;
 
 	private static int dropped(GameTestHelper helper, Block block) {
 		AABB area = new AABB(helper.absolutePos(BlockPos.ZERO)).inflate(16);

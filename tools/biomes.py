@@ -158,6 +158,23 @@ def rules_file():
     return RULES
 
 
+def dimension_file():
+    """The generated Nether and End placements Java reads (/jugcraft/dimension_biomes.json; biome/JugcraftDimensions):
+    a Nether biome's [temperature, humidity, offset], an End biome's zone and weight."""
+    out = {"nether": [], "end": []}
+    for name, info in BIOMES.items():
+        if info.get("dimension") == "nether":
+            temperature, humidity, offset = info["nether"]
+            out["nether"].append({"biome": f"{MOD}:{name}", "temperature": temperature, "humidity": humidity, "offset": offset})
+        elif info.get("dimension") == "end":
+            out["end"].append({"biome": f"{MOD}:{name}", **info["end"]})
+    return out
+
+
+# Count per floor layer: how many ground patches a Nether or End biome lays per chunk ("ground", below).
+GROUND_COUNT = 5
+
+
 # Features the biomes add, in one fixed order, after their base's own (keeps the Overworld's feature order acyclic).
 EXTRAS = {
     "tundra_rocks": {"feature": "minecraft:forest_rock", "step": 2, "placement": [
@@ -304,6 +321,24 @@ EXTRAS = {
         "step": 10, "placement": [{"type": "minecraft:count", "count": 3}, {"type": "minecraft:in_square"},
                                   {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}]},
     "sea_oats": {"feature": "jugcraft:sea_oats", "step": 9, "patches": 2, "count": 24},
+    # Batch 8: the Nether, placed on every floor layer (vanilla's Nether placement).
+    "nether_glowcaps": {"feature": "jugcraft:glowcap", "step": 9, "placement": [
+        {"type": "minecraft:count_on_every_layer", "count": 4}, {"type": "minecraft:biome"}]},
+    "nether_brambles": {"feature": "jugcraft:bramble", "step": 9, "placement": [
+        {"type": "minecraft:count_on_every_layer", "count": 8}, {"type": "minecraft:biome"}]},
+    "nether_huge_red_mushrooms": {"feature": "minecraft:huge_red_mushroom", "step": 9, "placement": [
+        {"type": "minecraft:count_on_every_layer", "count": 1}, {"type": "minecraft:biome"}]},
+    "nether_huge_brown_mushrooms": {"feature": "minecraft:huge_brown_mushroom", "step": 9, "placement": [
+        {"type": "minecraft:rarity_filter", "chance": 2}, {"type": "minecraft:count_on_every_layer", "count": 1}, {"type": "minecraft:biome"}]},
+    "nether_bone_spires": {"feature": "jugcraft:bone_spikes", "step": 9, "placement": [
+        {"type": "minecraft:count_on_every_layer", "count": 3}, {"type": "minecraft:biome"}]},
+    "quartz_spires": {"configured": {"type": "minecraft:block_column", "allowed_placement": {
+        "type": "minecraft:matching_block_tag", "tag": "minecraft:air"}, "direction": "up", "layers": [
+        {"height": {"type": "minecraft:uniform", "max_inclusive": 6, "min_inclusive": 2},
+         "provider": {"id": "minecraft:quartz_pillar", "properties": {"axis": "y"}}}], "prioritize_tip": False},
+        "step": 9, "placement": [{"type": "minecraft:count_on_every_layer", "count": 1}, {"type": "minecraft:biome"}]},
+    "sulfur_spikes": {"feature": "minecraft:sulfur_spike_cluster", "step": 9, "placement": [
+        {"type": "minecraft:count_on_every_layer", "count": 2}, {"type": "minecraft:biome"}]},
     # Batch 7. Cave extras are placed like vanilla's lush caves': on cave floors (or under ceilings) found by scanning
     # from random heights.
     "dandelions": {"block": "minecraft:dandelion", "step": 9, "rarity": 2, "count": 24},
@@ -364,6 +399,9 @@ EXTRAS = {
 # Each biome: its base, climate values, trees (count: [usual, sometimes]; default and weighted picks of placed
 # features; None: no trees), base features it drops or swaps, extras it adds, mob changes ("creatures" and "monsters":
 # [entity, weight, min, max] lists replacing the base's; [] for none), tags, and seasons.
+# Nether and End biomes ("dimension") are placed by dimension_file() instead of region rules, and lay their own
+# "ground": patches of {block: weight} over the floors of every layer (vanilla's vegetation patch feature, so no
+# vanilla material rule is copied), optionally grown with a plant; "surface" is for Overworld biomes.
 # "seasons": in #jugcraft:has_seasons and #jugcraft:has_winter_snow (four-season biomes; not the frozen ones);
 # "winter_snow": False keeps a seasonal biome out of #jugcraft:has_winter_snow (mild winters).
 BIOMES = {
@@ -1139,6 +1177,111 @@ BIOMES = {
         "extras": ["tall_grass_dense", "clover", "large_ferns", "field_flowers", "meadow_wildflowers"],
         "creatures": [["minecraft:cow", 10, 4, 4], ["minecraft:sheep", 12, 4, 4], ["minecraft:chicken", 10, 4, 4]],
         "untags": ["minecraft:is_forest"],
+        "tags": [],
+    },
+    # ---------------------------------------------------------------- batch 8: the Nether
+    # Placed by Fabric's Nether biome API at [temperature, humidity, offset] in the Nether's climate; the offsets keep
+    # them rarer than vanilla's five.
+    # Ash-grey wastes of tuff and gravel, smouldering with magma, under falling ash.
+    "ashfall_wastes": {
+        "display": "Ashfall Wastes", "base": "nether_wastes", "temperature": 2.0, "downfall": 0.0, "seasons": False,
+        "dimension": "nether", "nether": [0.5, -0.5, 0.2],
+        "attributes": {"minecraft:visual/fog_color": "#5e5048",
+                       "minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:white_ash"}, "probability": 0.04}],
+                                                             "modifier": "append"}},
+        "ground": {"blocks": {"minecraft:tuff": 6, "minecraft:gravel": 2, "minecraft:magma_block": 1, "minecraft:netherrack": 1}},
+        "trees": None,
+        "tags": [],
+    },
+    # Blighted dunes of soul sand and soul soil, overgrown with brambles, soul fire flickering.
+    "blighted_sands": {
+        "display": "Blighted Sands", "base": "soul_sand_valley", "temperature": 2.0, "downfall": 0.0, "seasons": False,
+        "dimension": "nether", "nether": [-0.3, -0.75, 0.25],
+        "attributes": {"minecraft:visual/fog_color": "#4e3e30"},
+        "ground": {"blocks": {"minecraft:soul_sand": 5, "minecraft:soul_soil": 3}, "plant": "jugcraft:bramble", "plant_chance": 0.12},
+        "trees": None,
+        "tags": [],
+    },
+    # A frozen rift: floors of snow, packed ice and blue ice under a cold blue haze, snow on the air, no glowstone;
+    # strays among the piglins.
+    "frost_rift": {
+        "display": "Frost Rift", "base": "nether_wastes", "temperature": 2.0, "downfall": 0.0, "seasons": False,
+        "dimension": "nether", "nether": [-0.8, 0.45, 0.4],
+        "attributes": {"minecraft:visual/fog_color": "#2e4a78",
+                       "minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:snowflake"}, "probability": 0.01}],
+                                                             "modifier": "append"}},
+        "ground": {"blocks": {"minecraft:snow_block": 4, "minecraft:packed_ice": 3, "minecraft:blue_ice": 1}},
+        "trees": None,
+        "drop": ["minecraft:glowstone_extra", "minecraft:glowstone"],
+        "monsters": [["minecraft:zombified_piglin", 60, 2, 4], ["minecraft:stray", 40, 2, 4], ["minecraft:ghast", 20, 4, 4]],
+        "tags": [],
+    },
+    # A thicket of fungi: mycelium and crimson nylium under huge red and brown mushrooms, crimson fungi and glowcaps.
+    "fungal_thicket": {
+        "display": "Fungal Thicket", "base": "crimson_forest", "temperature": 2.0, "downfall": 0.0, "seasons": False,
+        "dimension": "nether", "nether": [0.55, 0.55, 0.3],
+        "attributes": {"minecraft:visual/fog_color": "#5a3a4a"},
+        "ground": {"blocks": {"minecraft:mycelium": 3, "minecraft:crimson_nylium": 2}},
+        "trees": None,
+        "extras": ["nether_glowcaps", "nether_huge_red_mushrooms", "nether_huge_brown_mushrooms"],
+        "tags": [],
+    },
+    # Volcanic fields of sulfur and cinnabar, magma and blackstone, sulfur spikes, lava deltas and basalt, under an
+    # orange haze.
+    "magma_fields": {
+        "display": "Magma Fields", "base": "basalt_deltas", "temperature": 2.0, "downfall": 0.0, "seasons": False,
+        "dimension": "nether", "nether": [0.8, -0.2, 0.25],
+        "attributes": {"minecraft:visual/fog_color": "#b8704a"},
+        "ground": {"blocks": {"minecraft:sulfur": 4, "minecraft:cinnabar": 2, "minecraft:magma_block": 2, "minecraft:blackstone": 1}},
+        "trees": None,
+        "extras": ["sulfur_spikes"],
+        "tags": [],
+    },
+    # A heap of bone and nether wart, with spires of bone, under a dark red haze.
+    "marrow_heap": {
+        "display": "Marrow Heap", "base": "nether_wastes", "temperature": 2.0, "downfall": 0.0, "seasons": False,
+        "dimension": "nether", "nether": [0.2, -0.95, 0.3],
+        "attributes": {"minecraft:visual/fog_color": "#4a0a12"},
+        "ground": {"blocks": {"minecraft:bone_block": 3, "minecraft:nether_wart_block": 3, "minecraft:netherrack": 2}},
+        "trees": None,
+        "extras": ["nether_bone_spires"],
+        "tags": [],
+    },
+    # A green brush of the Nether: warped and crimson nylium thick with brambles, roots and warped fungi, spores in
+    # the green air.
+    "netherbrush": {
+        "display": "Netherbrush", "base": "warped_forest", "temperature": 2.0, "downfall": 0.0, "seasons": False,
+        "dimension": "nether", "nether": [-0.4, 0.8, 0.25],
+        "attributes": {"minecraft:visual/fog_color": "#2e4a22"},
+        "ground": {"blocks": {"minecraft:warped_nylium": 3, "minecraft:crimson_nylium": 1, "minecraft:netherrack": 1},
+                   "plant": "jugcraft:bramble", "plant_chance": 0.2},
+        "trees": None,
+        "extras": ["nether_brambles"],
+        "tags": [],
+    },
+    # A rift of pale stone and quartz: calcite floors seamed with quartz ore, quartz spires, white sparks in a scarlet
+    # haze.
+    "quartz_rift": {
+        "display": "Quartz Rift", "base": "nether_wastes", "temperature": 2.0, "downfall": 0.0, "seasons": False,
+        "dimension": "nether", "nether": [-0.9, -0.3, 0.3],
+        "attributes": {"minecraft:visual/fog_color": "#7a1a2a",
+                       "minecraft:visual/ambient_particles": {"argument": [{"particle": {"type": "minecraft:end_rod"}, "probability": 0.003}],
+                                                             "modifier": "append"}},
+        "ground": {"blocks": {"minecraft:netherrack": 3, "minecraft:calcite": 2, "minecraft:nether_quartz_ore": 1}},
+        "trees": None,
+        "extras": ["quartz_spires"],
+        "tags": [],
+    },
+    # A withered hollow, near black: blackstone floors with obsidian and a little crying obsidian, no glowstone;
+    # endermen and skeletons.
+    "withered_hollow": {
+        "display": "Withered Hollow", "base": "nether_wastes", "temperature": 2.0, "downfall": 0.0, "seasons": False,
+        "dimension": "nether", "nether": [0.9, 0.9, 0.35],
+        "attributes": {"minecraft:visual/fog_color": "#0e0a10"},
+        "ground": {"blocks": {"minecraft:blackstone": 12, "minecraft:obsidian": 2, "minecraft:crying_obsidian": 1}},
+        "trees": None,
+        "drop": ["minecraft:glowstone_extra", "minecraft:glowstone"],
+        "monsters": [["minecraft:enderman", 40, 1, 4], ["minecraft:skeleton", 60, 1, 3]],
         "tags": [],
     },
     # ---------------------------------------------------------------- batch 2: fields and meadows

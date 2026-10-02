@@ -703,6 +703,28 @@ def snowpetals_stem():
     return c.img
 
 
+BRAMBLE = pal("2a0e0e", "4a1a16", "6a2a20", "8a3c2a")
+BRAMBLE_LEAF = pal("3a2a1a", "54402a", "6e5636")
+THORN = pal("c8a888", "e2c8a8")
+
+
+def bramble():
+    """Bramble: arching, dark red canes armed with pale thorns, a few dry leaves."""
+    rng = random.Random(495)
+    c = Canvas()
+    for x0, lean, top in ((3, 1, 3), (7, -1, 1), (10, 1, 4), (13, -1, 6)):
+        for y in range(15, top - 1, -1):
+            x = x0 + round(lean * (15 - y) * 0.25)
+            c.px(x, y, BRAMBLE[1 + (y % 3 == 0)])
+            if y % 3 == 1:
+                c.px(x + rng.choice((-1, 1)), y, THORN[rng.randrange(2)])
+    for _ in range(6):
+        x, y = rng.randrange(2, 14), rng.randrange(4, 13)
+        c.px(x, y, BRAMBLE_LEAF[rng.randrange(3)])
+        c.px(x + 1, y, BRAMBLE_LEAF[1])
+    return c.img
+
+
 CATTAIL_LEAF = pal("2f4a20", "3e6229", "507a33", "679541")
 CATTAIL_HEAD = pal("3a2214", "53311c", "6b4226", "855533")
 WATERGRASS = pal("1c4a2a", "245e35", "2f7543", "3d8c52", "52a566")
@@ -774,6 +796,7 @@ def wild_textures():
     out[("block", "eucalyptus_sapling")] = eucalyptus_sapling()
     out[("block", "mahogany_leaves")] = mahogany_leaves(591)
     out[("block", "mahogany_sapling")] = mahogany_sapling()
+    out[("block", "bramble")] = bramble()
     out[("block", "glowcap")] = glowcap()
     out[("block", "glimmerbloom")] = glimmerbloom()
     out[("block", "frost_iris")] = frost_iris()

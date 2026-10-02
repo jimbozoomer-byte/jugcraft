@@ -35,7 +35,7 @@ def assets(root, write, lang):
             write(root / "blockstates" / f"{plant}.json", {"variants": {
                 "half=lower": {"model": rid(f"block/{plant}_bottom")}, "half=upper": {"model": rid(f"block/{plant}_top")}}})
             icon = tex(f"{plant}_top")
-        elif kind in ("water_plant", "glow_plant"):
+        elif kind in ("water_plant", "floor_plant"):
             write(models / f"{plant}.json", {"parent": "minecraft:block/cross", "textures": {"cross": tex(plant)}})
             write(root / "blockstates" / f"{plant}.json", {"variants": {"": {"model": rid(f"block/{plant}")}}})
             icon = tex(plant)
@@ -91,7 +91,7 @@ def loot(out, write):
             write(out / f"{plant}.json", {"type": "minecraft:block", "pools": [
                 {"condition": "minecraft:tool/can_shear", "entries": [{"type": "minecraft:item", "name": rid(plant)}], "rolls": 1}],
                 "random_sequence": rid(f"blocks/{plant}")})
-        elif kind in ("surface", "glow_plant"):
+        elif kind in ("surface", "floor_plant"):
             write(out / f"{plant}.json", {"type": "minecraft:block", "pools": [
                 {"condition": explosion, "entries": [{"type": "minecraft:item", "name": rid(plant)}], "rolls": 1}],
                 "random_sequence": rid(f"blocks/{plant}")})
@@ -105,7 +105,7 @@ def loot(out, write):
 def tags(tags):
     for plant, info in pl.PLANTS.items():
         kind = info["kind"]
-        if kind in ("tall_plant", "dune_plant", "glow_plant", "water_plant", "surface"):
+        if kind in ("tall_plant", "dune_plant", "floor_plant", "water_plant", "surface"):
             if kind in ("tall_plant", "dune_plant"):
                 tags.add("block", "minecraft:replaceable_by_trees", rid(plant))
                 tags.add("block", "minecraft:sword_efficient", rid(plant))
@@ -133,7 +133,7 @@ def placement_state(plant):
         return {"id": rid(plant)}
     if kind in pl.TALL:
         return {"id": rid(plant), "properties": {"half": "lower"}}
-    if kind in ("water_plant", "surface", "glow_plant"):
+    if kind in ("water_plant", "surface", "floor_plant"):
         return {"id": rid(plant)}
     return {"type": "minecraft:weighted", "entries": [
         {"data": {"id": rid(plant), "properties": {"facing": facing, "flower_amount": str(n)}}, "weight": 1}

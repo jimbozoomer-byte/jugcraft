@@ -7,7 +7,7 @@ Each plant is registered alike from the generated /jugcraft/plants.json (agricul
 - "flowerbed": ground cover of up to four clumps (agriculture/GroundCoverBlock, like pink petals).
 - "tall_plant": a two-block plant that is not a flower (DoublePlantBlock), dropping itself from its lower half.
 - "dune_plant": a tall plant that also stands on sand (agriculture/DunePlantBlock: wherever vanilla's dry grass can).
-- "glow_plant": a small glowing plant on any sturdy floor, stone and mud included (agriculture/GlowPlantBlock).
+- "floor_plant": a small plant on any sturdy floor, stone, mud and netherrack included (agriculture/FloorPlantBlock).
 A plant's "light" (0-15) makes it glow (flowers and glow plants).
 - "water_plant": a plant under water (agriculture/WaterPlantBlock, like seagrass); only shears take it.
 - "surface": a plant floating on still water (agriculture/FloatingPlantBlock, like a lily pad); placed on water.
@@ -37,13 +37,15 @@ PLANTS = {
     # Batch 6: mountains, coasts and volcanoes.
     "sea_oats": {"kind": "dune_plant", "display": "Sea Oats"},
     # Batch 7: wonders and caves.
-    "glowcap": {"kind": "glow_plant", "display": "Glowcap", "light": 10},
+    "glowcap": {"kind": "floor_plant", "display": "Glowcap", "light": 10},
     "glimmerbloom": {"kind": "flower", "display": "Glimmerbloom", "dye": "magenta", "effect": "minecraft:glowing", "seconds": 8.0,
                      "light": 7},
     "frost_iris": {"kind": "flower", "display": "Frost Iris", "dye": "light_blue", "effect": "minecraft:slow_falling", "seconds": 4.0},
     "snowpetals": {"kind": "flowerbed", "display": "Snowpetals"},
+    # Batch 8: the Nether.
+    "bramble": {"kind": "floor_plant", "display": "Bramble"},
 }
-KINDS = ("flower", "tall_flower", "flowerbed", "tall_plant", "dune_plant", "glow_plant", "water_plant", "surface")
+KINDS = ("flower", "tall_flower", "flowerbed", "tall_plant", "dune_plant", "floor_plant", "water_plant", "surface")
 TALL = ("tall_flower", "tall_plant", "dune_plant")
 
 

@@ -22,9 +22,13 @@ def spawn(entry):
     return {"type": kind, "count": count, "weight": weight}
 
 
+STEPS = 11  # vanilla's generation steps (raw generation to top layer modification)
+
+
 def base_trees(base):
     """The base's tree feature (vanilla's trees_* placed feature in its vegetation step), if it has one."""
-    for feature in BASES[base]["steps"][9]:
+    steps = BASES[base]["steps"]
+    for feature in steps[9] if len(steps) > 9 else []:
         if feature.startswith("minecraft:trees_"):
             return feature
     return None
@@ -35,6 +39,8 @@ def steps(name):
     biome), drops and swaps applied, and its extras appended in EXTRAS order."""
     info = bm.BIOMES[name]
     out = copy.deepcopy(BASES[info["base"]]["steps"])
+    # Nether and End bases list only the steps they use; every biome lists all of them.
+    out += [[] for _ in range(STEPS - len(out))]
     tree = info.get("base_trees") or base_trees(info["base"])
     drop = list(info.get("drop", []))
     if info["trees"] is None:
@@ -50,10 +56,26 @@ def steps(name):
             elif feature in info.get("swap", {}):
                 step[i] = info["swap"][feature]
         step[:] = [f for f in step if f not in drop]
+    if "ground" in info:
+        # Laid first (step 2, local modifications), so the base's and the biome's features stand on it.
+        out[2].append(rid(f"ground_{name}"))
     for extra in bm.EXTRAS:
         if extra in info.get("extras", []):
             out[bm.EXTRAS[extra]["step"]].append(rid(extra))
     return out
+
+
+def ground_feature(name):
+    """A Nether or End biome's ground: vegetation patches of its blocks over the floor, optionally with a plant."""
+    ground = bm.BIOMES[name]["ground"]
+    blocks = {"type": "minecraft:weighted", "entries": [{"data": block, "weight": weight} for block, weight in ground["blocks"].items()]}
+    plant = ground.get("plant")
+    return {"type": "minecraft:vegetation_patch", "depth": {"type": "minecraft:uniform", "max_inclusive": 2, "min_inclusive": 1},
+            "extra_bottom_block_chance": 0.0, "extra_edge_column_chance": 0.3, "ground_state": blocks,
+            "replaceable": ground.get("replaceable", "#minecraft:base_stone_nether"), "surface": "floor",
+            "vegetation_chance": ground.get("plant_chance", 0.0) if plant else 0.0,
+            "vegetation_feature": {"feature": plant or "jugcraft:glowcap", "placement": []}, "vertical_range": 5,
+            "xz_radius": {"type": "minecraft:uniform", "max_inclusive": 7, "min_inclusive": 4}}
 
 
 def biome(name):
@@ -108,6 +130,7 @@ def extra_placement(extra):
 
 def worldgen(data, write):
     write(data.parent / MOD / "region_rules.json", bm.rules_file())
+    write(data.parent / MOD / "dimension_biomes.json", bm.dimension_file())
     write(data / MOD / "worldgen" / "material_rule" / "overworld" / "surface.json", surface_rule())
     write(data / "minecraft" / "worldgen" / "material_rule" / "overworld.json", OVERWORLD_MATERIAL_RULE)
     for tree, (feature, survives) in bm.PLACED_TREES.items():
@@ -116,6 +139,11 @@ def worldgen(data, write):
     folder = data / MOD / "worldgen"
     for name, info in bm.BIOMES.items():
         write(folder / "biome" / f"{name}.json", biome(name))
+        if "ground" in info:
+            write(folder / "feature" / f"ground_{name}.json", ground_feature(name))
+            write(folder / "placed_feature" / f"ground_{name}.json", {"feature": rid(f"ground_{name}"), "placement": [
+                {"type": "minecraft:count_on_every_layer", "count": info["ground"].get("count", bm.GROUND_COUNT)},
+                {"type": "minecraft:biome"}]})
         trees = info["trees"]
         if trees is None:
             continue

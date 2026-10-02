@@ -56,7 +56,7 @@ Fifteen rare, strange lands and two cave biomes, spread over all four layouts of
 - Existing worlds: new chunks only.
 
 ## Dependencies and assets
-- Glowcaps are `agriculture/GlowPlantBlock` (any sturdy floor, gives light). Glimmerbloom and frost iris are vanilla's `FlowerBlock`, the glimmerbloom with a light level; snowpetals are `GroundCoverBlock`.
+- Glowcaps are `agriculture/FloorPlantBlock` (any sturdy floor, gives light). Glimmerbloom and frost iris are vanilla's `FlowerBlock`, the glimmerbloom with a light level; snowpetals are `GroundCoverBlock`.
 - Cave features follow vanilla's lush caves: floors and ceilings found by scanning from random heights. The grotto's mud is vanilla's vegetation patch feature, its moss vanilla's moss patch. Cobwebs are vanilla's simple block feature. Giant mushrooms are vanilla's, placed where an oak sapling could stand.
 - Air colours, particles (vanilla's white ash, snowflakes and end rod motes) and water colours are biome attributes.
 - Textures drawn by code in `tools/wild_textures.py`. No Mojang file is copied.

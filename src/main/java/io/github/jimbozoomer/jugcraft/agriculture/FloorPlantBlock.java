@@ -10,13 +10,14 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * A small glowing plant of caves and dim places (tools/plants.py kind "glow_plant"): it gives light (its "light" in
- * plants.json) and stands on any floor with a sturdy top, stone and mud as well as soil. The glowcap is one.
+ * A small plant of caves and the Nether (tools/plants.py kind "floor_plant"): it stands on any floor with a sturdy top,
+ * stone, mud, netherrack and soul sand as well as soil, and may give light (its "light" in plants.json). The glowcap
+ * and the bramble are two.
  */
-public class GlowPlantBlock extends VegetationBlock {
+public class FloorPlantBlock extends VegetationBlock {
 	private static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 9.0, 12.0);
 
-	public GlowPlantBlock(Properties properties) {
+	public FloorPlantBlock(Properties properties) {
 		super(properties);
 	}
 
