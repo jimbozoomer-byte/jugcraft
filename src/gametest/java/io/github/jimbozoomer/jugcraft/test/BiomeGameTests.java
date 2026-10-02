@@ -37,6 +37,7 @@ import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -248,6 +249,78 @@ public class BiomeGameTests {
 			}
 		}
 		helper.succeed();
+	}
+
+	/**
+	 * Redwood, eucalyptus and mahogany saplings (big trees and rainforests) grow their trees; four redwood or mahogany
+	 * saplings in a square grow a giant, its trunk two blocks wide.
+	 */
+	@GameTest(maxTicks = 100)
+	public void bigTreesGrow(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = open(helper, new BlockPos(3, 2, 3));
+		String[][] trees = {{"redwood", "redwood_needles"}, {"eucalyptus", "eucalyptus_leaves"}, {"mahogany", "mahogany_leaves"}};
+		TreeGrower[] growers = {JugcraftAgriculture.REDWOOD_GROWER, JugcraftAgriculture.EUCALYPTUS_GROWER, JugcraftAgriculture.MAHOGANY_GROWER};
+		for (int i = 0; i < trees.length; i++) {
+			int[] counts = grow(helper, growers[i], at, block(trees[i][0] + "_sapling"), trees[i][0] + "_log", trees[i][1]);
+			LOGGER.info("A {}: {} logs, {} leaves", trees[i][0], counts[0], counts[1]);
+			helper.assertTrue(counts[0] >= 6 && counts[1] >= 10, "A small " + trees[i][0] + ": " + counts[0] + " logs, " + counts[1] + " leaves");
+			clear(helper, at);
+		}
+		for (String tree : new String[] {"redwood", "mahogany"}) {
+			Block sapling = block(tree + "_sapling");
+			BlockPos absolute = helper.absolutePos(at);
+			List<BlockPos> square = List.of(absolute, absolute.east(), absolute.south(), absolute.south().east());
+			for (BlockPos pos : square) {
+				level.setBlock(pos.below(), Blocks.DIRT.defaultBlockState(), Block.UPDATE_ALL);
+				level.setBlock(pos, sapling.defaultBlockState().setValue(SaplingBlock.STAGE, 1), Block.UPDATE_ALL);
+			}
+			((SaplingBlock) sapling).advanceTree(level, absolute, level.getBlockState(absolute), level.getRandom());
+			Block log = block(tree + "_log");
+			boolean wide = square.stream().allMatch(pos -> level.getBlockState(pos).is(log));
+			int logs = 0;
+			for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-8, 0, -8), absolute.offset(9, 48, 9))) {
+				logs += level.getBlockState(pos).is(log) ? 1 : 0;
+			}
+			LOGGER.info("A giant {} from four saplings: {} logs, trunk two wide: {}", tree, logs, wide);
+			helper.assertTrue(wide && logs >= 40, "Four " + tree + " saplings grew no giant: " + logs + " logs, two wide " + wide);
+			clear(helper, at);
+		}
+		helper.succeed();
+	}
+
+	/** Air in a box round a grown tree, big enough for a giant. */
+	private static void clear(GameTestHelper helper, BlockPos at) {
+		BlockPos absolute = helper.absolutePos(at);
+		for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-8, 0, -8), absolute.offset(9, 48, 9))) {
+			helper.getLevel().setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+		}
+	}
+
+	/** The tropical plants (batch 5): hibiscus is a small flower with a potted form; a hydrangea takes two blocks and drops one. */
+	@GameTest
+	public void tropicalPlantsWork(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos pos = new BlockPos(1, 2, 1);
+		helper.setBlock(pos.below(), Blocks.GRASS_BLOCK);
+		Block hibiscus = block("hibiscus");
+		helper.assertTrue(hibiscus instanceof FlowerBlock, "Hibiscus is not a flower");
+		helper.setBlock(pos, hibiscus);
+		helper.assertTrue(helper.getBlockState(pos).canSurvive(level, helper.absolutePos(pos)), "Hibiscus cannot stand on grass");
+		helper.assertTrue(block("potted_hibiscus") instanceof FlowerPotBlock pot && pot.getPotted() == hibiscus, "No potted hibiscus");
+		BlockPos tall = new BlockPos(4, 2, 4);
+		helper.setBlock(tall.below(), Blocks.GRASS_BLOCK);
+		Block hydrangea = block("hydrangea");
+		DoublePlantBlock.placeAt(level, hydrangea.defaultBlockState(), helper.absolutePos(tall), Block.UPDATE_ALL);
+		helper.assertBlockPresent(hydrangea, tall.above());
+		level.destroyBlock(helper.absolutePos(tall), true);
+		helper.runAfterDelay(2, () -> {
+			int drops = dropped(helper, hydrangea);
+			LOGGER.info("Tropical plants: a broken hydrangea dropped {}", drops);
+			helper.assertTrue(drops == 1, "A hydrangea dropped " + drops);
+			helper.assertBlockNotPresent(hydrangea, tall.above());
+			helper.succeed();
+		});
 	}
 
 	private static int dropped(GameTestHelper helper, Block block) {

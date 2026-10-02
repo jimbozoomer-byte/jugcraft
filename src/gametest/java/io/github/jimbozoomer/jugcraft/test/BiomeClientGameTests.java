@@ -47,7 +47,8 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 			"bog", "dead_swamp", "lush_swamp", "swamp_woods", "bayou", "floodplain", "ghost_forest", "sludge_mire", "lush_river", "fen",
 			"lake_district", "quagmire", "marsh", "wetland",
 			"dryland", "xeric_shrubland", "jacaranda_glade", "lush_desert", "bone_flats", "dry_river", "cold_desert", "scrubland",
-			"lush_savanna", "outback", "oasis", "wasteland", "burnt_forest", "mediterranean_forest", "orchard"};
+			"lush_savanna", "outback", "oasis", "wasteland", "burnt_forest", "mediterranean_forest", "orchard",
+			"rainforest", "eucalyptus_forest", "tropics", "subtropics", "dense_forest", "redwood_forest", "temperate_rainforest", "woodland"};
 	/** Seasonal leaves are counted within this many blocks (east-west and north-south) of each biome found. */
 	private static final int LEAF_REACH = 24;
 	/** How far below the top block of a column to look for leaves. */

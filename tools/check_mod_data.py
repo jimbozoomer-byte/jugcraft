@@ -578,6 +578,16 @@ def check_biomes():
     agriculture = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8")
     if f'TREE_DECORATOR_TYPE, Jugcraft.id("{tr.DECORATOR}")' not in agriculture:
         err(f"JugcraftAgriculture.java does not register the {tr.DECORATOR} tree decorator")
+    # Giant trees: four saplings in a square grow them (GiantSaplingBlock), so Java's growers match agriculture.TREES.
+    giants = {tree: info["giant"] for tree, info in ag.TREES.items() if info.get("giant")}
+    for tree, shape in giants.items():
+        grower = f"{shape.upper()}_GROWER"
+        if (f'{grower} = grower("{shape}")' not in agriculture or f'"{tree}", {grower}' not in agriculture
+                or not tr.SHAPES.get(shape, {}).get("giant") or tr.SHAPES[shape]["wood"] != tree):
+            err(f"The {tree} tree's giant ({shape}) is not a giant {tree} shape in tools/trees.py with its grower in GIANT_GROWERS")
+    for shape, info in tr.SHAPES.items():
+        if info.get("giant") and shape not in giants.values():
+            err(f"Tree shape {shape} is giant but no tree's saplings grow it (agriculture.TREES \"giant\")")
 
 
 def check_alpine():

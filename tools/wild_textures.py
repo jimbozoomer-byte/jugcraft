@@ -40,7 +40,30 @@ WOODS = {
                 "heart": pal("8a4a2a", "9c5833", "ae673e", "bf774b"),
                 "sap": pal("d0a585", "dab293", "e2bea1", "eac9ae"),
                 "style": "stringy"},
+    # Redwood: thick, deep red-brown bark in long, shaggy ridges; rich red wood.
+    "redwood": {"bark": pal("3a1a12", "552519", "6e3121", "88402b", "a35238"),
+                "plank": pal("8a3a26", "a1482f", "b6583b", "c86b4a", "d8805e"),
+                "heart": pal("7e2f1e", "923a26", "a54730", "b6563c"),
+                "sap": pal("cf9a80", "d9a98f", "e2b79e", "eac4ad"),
+                "style": "shaggy"},
+    # Eucalyptus: smooth bark peeling in streaks of green, orange, purple and blue (the rainbow eucalyptus); pale,
+    # honey-coloured wood.
+    "eucalyptus": {"bark": pal("4d6b4a", "6f8f5a", "8fae6c", "b4c486", "d7d9a4"),
+                   "streaks": pal("d07a2e", "9a4f9e", "4f7fb8", "c9a63a", "5ea06a"),
+                   "plank": pal("b08a5a", "c39c69", "d3ad7a", "e1be8c", "ecce9f"),
+                   "heart": pal("a3784a", "b38858", "c29867", "d0a877"),
+                   "sap": pal("dccaa4", "e4d4b1", "ebdebe", "f2e7cb"),
+                   "style": "streaked"},
+    # Mahogany: grey-brown bark in small, flaking plates; deep reddish-brown wood.
+    "mahogany": {"bark": pal("2e2420", "433530", "584741", "6e5a52", "856e64"),
+                 "plank": pal("44201a", "54281f", "653126", "763b2d", "874636"),
+                 "heart": pal("50201a", "622a20", "733428", "843f31"),
+                 "sap": pal("b88a74", "c49883", "cfa692", "d9b4a1"),
+                 "style": "scaly"},
 }
+NEEDLES = pal("102414", "16301b", "1d3d22", "264c2b", "315c35", "3f6f42")
+EUCALYPTUS = pal("2c4a44", "3a5f56", "4a7468", "5e8a7c", "77a194", "96bcb0")
+MAHOGANY = pal("0e2a12", "143719", "1b4520", "245529", "2f6634", "3d7a42")
 FRONDS = pal("173d14", "1f5019", "2b671f", "3a8028", "4f9a34", "6db44c")
 SCALES = pal("0f2a1a", "163522", "1e432b", "275235", "326240", "41754e")
 WILLOW = {"green": pal("223f18", "2f5620", "3f6e29", "548834", "6fa244", "93bd62"),
@@ -67,6 +90,17 @@ def bark(wood, seed):
             elif w["style"] == "stringy":
                 # Long, fibrous strands.
                 shade = 3 if (x * 2 + y // 4) % 5 == 0 else 1 if x % 3 == 0 else 2
+            elif w["style"] == "shaggy":
+                # Long, thick ridges with deep, dark grooves, broken here and there.
+                lane = (x + (1 if (y // 7) % 2 else 0)) % 4
+                shade = 0 if lane == 0 else 4 if lane == 2 and y % 5 else 3 if lane == 2 else 2
+            elif w["style"] == "streaked":
+                # Smooth green bark; streaks of colour are laid over it below.
+                shade = 2 if (x + y // 6) % 4 else 3
+            elif w["style"] == "scaly":
+                # Small plates, offset row by row, edged dark.
+                plate_x = (x + (2 if (y // 3) % 2 else 0)) % 4
+                shade = 1 if plate_x == 0 or y % 3 == 0 else 3 if plate_x == 2 else 2
             elif w["style"] == "furrowed":
                 # Deep, interlacing furrows between narrow ridges.
                 lane = (x + (1 if (y // 3) % 2 else 0)) % 3
@@ -76,6 +110,16 @@ def bark(wood, seed):
             if rng.random() < 0.08:
                 shade = max(0, min(4, shade + rng.choice((-1, 1))))
             c.px(x, y, p[shade])
+    if w["style"] == "streaked":
+        # Long vertical streaks where the bark has peeled, each in one of the wood's streak colours.
+        for i in range(7):
+            x = rng.randrange(16)
+            top = rng.randrange(16)
+            colour = w["streaks"][i % len(w["streaks"])]
+            for k in range(rng.randrange(5, 12)):
+                c.px(x, (top + k) % 16, colour)
+                if k % 3 == 1:
+                    c.px((x + 1) % 16, (top + k) % 16, colour)
     return c.img
 
 
@@ -257,6 +301,95 @@ def scale_leaves(seed):
     return c.img
 
 
+def needle_leaves(seed):
+    """Redwood needles: short, flat sprays of dark needles along twigs, nearly closed."""
+    rng = random.Random(seed)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, NEEDLES[rng.choice((0, 1, 1))])
+    for _ in range(9):
+        x0, y0 = rng.randrange(16), rng.randrange(16)
+        for k in range(-3, 4):
+            x = (x0 + k) % 16
+            c.px(x, y0, NEEDLES[2])
+            c.px(x, (y0 - 1) % 16, NEEDLES[4 if k % 2 else 3])
+            c.px(x, (y0 + 1) % 16, NEEDLES[3 if k % 2 else 5])
+    return c.img
+
+
+def eucalyptus_leaves(seed):
+    """Eucalyptus: long, narrow, sickle-shaped leaves in a dusty blue-green, hanging loosely. Gaps keep a dark colour,
+    so fast graphics (drawn opaque) still look dense."""
+    rng = random.Random(seed)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.img.putpixel((x, y), EUCALYPTUS[0] + (0,))
+    for _ in range(11):
+        x0, y0 = rng.randrange(16), rng.randrange(16)
+        bend = rng.choice((-1, 1))
+        for k in range(6):
+            x = (x0 + (bend if k >= 3 else 0) + (bend if k >= 5 else 0)) % 16
+            c.px(x, (y0 + k) % 16, EUCALYPTUS[3 + (k % 2) if k < 5 else 2])
+        c.px(x0, y0, EUCALYPTUS[5])
+    for y in range(16):
+        for x in range(16):
+            if c.empty(x, y) and rng.random() < 0.3:
+                c.px(x, y, EUCALYPTUS[1])
+    return c.img
+
+
+def mahogany_leaves(seed):
+    """Mahogany: glossy, broad, paired leaflets in a deep green, densely set."""
+    rng = random.Random(seed)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, MAHOGANY[rng.choice((0, 1))])
+    for _ in range(14):
+        x0, y0 = rng.randrange(16), rng.randrange(16)
+        for dx, dy, shade in ((0, 0, 3), (1, 0, 4), (0, 1, 2), (1, 1, 3), (2, 0, 2), (-1, 1, 2)):
+            c.px((x0 + dx) % 16, (y0 + dy) % 16, MAHOGANY[shade])
+        c.px((x0 + 1) % 16, (y0 - 1) % 16, MAHOGANY[5])
+    return c.img
+
+
+def redwood_sapling():
+    c = Canvas()
+    c.line(8, 15, 8, 3, WOODS["redwood"]["bark"][3])
+    for y in range(3, 13):
+        half = 1 + (y - 3) // 4
+        for dx in range(-half, half + 1):
+            if dx and (y + dx) % 2 == 0:
+                c.px(8 + dx, y, NEEDLES[3 + abs(dx) % 3])
+    c.px(8, 2, NEEDLES[5])
+    return c.img
+
+
+def eucalyptus_sapling():
+    c = Canvas()
+    stem = WOODS["eucalyptus"]["bark"][3]
+    c.line(8, 15, 8, 4, stem)
+    c.px(8, 9, WOODS["eucalyptus"]["streaks"][0])
+    for x0, y0, side in ((8, 5, -1), (8, 7, 1), (8, 9, -1), (8, 11, 1), (8, 4, 1)):
+        for k in range(1, 4):
+            c.px(x0 + side * k, y0 + k // 2, EUCALYPTUS[3 + k % 2])
+    return c.img
+
+
+def mahogany_sapling():
+    c = Canvas()
+    stem = WOODS["mahogany"]["bark"][3]
+    c.line(8, 15, 8, 7, stem)
+    c.line(8, 9, 5, 6, stem)
+    c.line(8, 8, 11, 5, stem)
+    for x0, y0 in ((4, 5), (11, 4), (8, 5), (6, 3), (10, 2)):
+        for dx, dy, shade in ((0, 0, 3), (1, 0, 4), (0, 1, 2), (-1, 0, 2), (0, -1, 5)):
+            c.px(x0 + dx, y0 + dy, MAHOGANY[shade])
+    return c.img
+
+
 def palm_sapling():
     c = Canvas()
     stem = WOODS["palm"]["bark"][3]
@@ -422,6 +555,58 @@ def clover_stem():
     return c.img
 
 
+HIBISCUS = pal("7a1838", "a8244e", "d03a68", "ec6a8e", "f8a2bc")
+HYDRANGEA = pal("2d3f86", "3c58ae", "5277cc", "6f95e0", "9ab6ee", "c4d4f6")
+
+
+def hibiscus():
+    """Hibiscus: glossy leaves and two big, open pink flowers, each with a long stamen."""
+    c = Canvas()
+    c.line(8, 15, 8, 8, STEM[1])
+    c.line(8, 12, 5, 9, STEM[2])
+    for x0, y0 in ((4, 11), (10, 11), (11, 8)):
+        c.px(x0, y0, STEM[3])
+        c.px(x0 + 1, y0, STEM[2])
+        c.px(x0, y0 - 1, STEM[3])
+    for cx, cy in ((5, 6), (10, 4)):
+        for i in range(5):
+            a = 2 * math.pi * i / 5 - math.pi / 2
+            for r in (1, 2, 3):
+                c.px(cx + math.cos(a) * r, cy + math.sin(a) * r, HIBISCUS[4 - r if r > 1 else 1])
+        c.px(cx, cy, HIBISCUS[0])
+        c.line(cx, cy, cx + 2, cy - 3, HIBISCUS[1])
+        c.px(cx + 2, cy - 3, GOLD[3])
+    return c.img
+
+
+def hydrangea(part):
+    """Hydrangea: a leafy shrub (bottom) under round mopheads of small blue florets (top)."""
+    rng = random.Random({"bottom": 471, "top": 473}[part])
+    c = Canvas()
+    if part == "bottom":
+        for x in (3, 6, 9, 12):
+            c.line(x, 15, x + rng.choice((-1, 0, 1)), 0, STEM[1 + x % 2])
+        for _ in range(14):
+            x, y = rng.randrange(1, 15), rng.randrange(1, 15)
+            for dx, dy, shade in ((0, 0, 2), (1, 0, 3), (0, 1, 1)):
+                c.px(x + dx, y + dy, STEM[shade])
+        return c.img
+    for x in (4, 8, 12):
+        c.line(x, 15, x, 9, STEM[1])
+    for cx, cy, r in ((4, 8, 3), (11, 6, 3), (8, 4, 2)):
+        for y in range(cy - r, cy + r + 1):
+            for x in range(cx - r, cx + r + 1):
+                if (x - cx) ** 2 + (y - cy) ** 2 <= r * r + 1:
+                    shade = 4 if (x + y) % 2 else 3
+                    if rng.random() < 0.2:
+                        shade = rng.choice((2, 5))
+                    c.px(x, y, HYDRANGEA[shade])
+    for x0, y0 in ((2, 12), (13, 11)):
+        c.px(x0, y0, STEM[3])
+        c.px(x0 + 1, y0 - 1, STEM[2])
+    return c.img
+
+
 CATTAIL_LEAF = pal("2f4a20", "3e6229", "507a33", "679541")
 CATTAIL_HEAD = pal("3a2214", "53311c", "6b4226", "855533")
 WATERGRASS = pal("1c4a2a", "245e35", "2f7543", "3d8c52", "52a566")
@@ -487,6 +672,15 @@ def wild_textures():
     out[("block", "palm_sapling")] = palm_sapling()
     out[("block", "cypress_leaves")] = scale_leaves(561)
     out[("block", "cypress_sapling")] = cypress_sapling()
+    out[("block", "redwood_needles")] = needle_leaves(571)
+    out[("block", "redwood_sapling")] = redwood_sapling()
+    out[("block", "eucalyptus_leaves")] = eucalyptus_leaves(581)
+    out[("block", "eucalyptus_sapling")] = eucalyptus_sapling()
+    out[("block", "mahogany_leaves")] = mahogany_leaves(591)
+    out[("block", "mahogany_sapling")] = mahogany_sapling()
+    out[("block", "hibiscus")] = hibiscus()
+    out[("block", "hydrangea_bottom")] = hydrangea("bottom")
+    out[("block", "hydrangea_top")] = hydrangea("top")
     out[("block", "willow_leaves")] = willow_leaves("green", 541)
     out[("block", "willow_leaves_gold")] = willow_leaves("gold", 541)
     out[("block", "willow_leaves_bare")] = willow_leaves("bare", 543)

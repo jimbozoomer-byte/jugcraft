@@ -42,5 +42,15 @@
   {
     "id": "duckweed",
     "kind": "surface"
+  },
+  {
+    "id": "hibiscus",
+    "kind": "flower",
+    "effect": "minecraft:water_breathing",
+    "seconds": 5.0
+  },
+  {
+    "id": "hydrangea",
+    "kind": "tall_flower"
   }
 ]

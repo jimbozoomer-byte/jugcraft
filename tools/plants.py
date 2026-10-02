@@ -28,6 +28,9 @@ PLANTS = {
     "cattail": {"kind": "tall_plant", "display": "Cattail"},
     "watergrass": {"kind": "water_plant", "display": "Watergrass"},
     "duckweed": {"kind": "surface", "display": "Duckweed"},
+    # Batch 5: big trees and rainforests (the tropics and subtropics).
+    "hibiscus": {"kind": "flower", "display": "Hibiscus", "dye": "pink", "effect": "minecraft:water_breathing", "seconds": 5.0},
+    "hydrangea": {"kind": "tall_flower", "display": "Hydrangea", "dye": "light_blue"},
 }
 KINDS = ("flower", "tall_flower", "flowerbed", "tall_plant", "water_plant", "surface")
 TALL = ("tall_flower", "tall_plant")

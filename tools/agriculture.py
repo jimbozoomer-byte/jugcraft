@@ -331,12 +331,15 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 # alike (festival_data.wood_assets) and registered alike (JugcraftAgriculture.registerWoodSet). Logs and wood strip
 # with an axe; logs saw into planks (sawmill). The chestnut is the Festival Crops' fruit tree; the larch is Alpine
 # Spawn's seasonal conifer; maple, aspen, fir and dead wood come from the biomes branch's seasonal forests, the
-# jacaranda from its fields and meadows, the willow from its wetlands, and palm and cypress from its warm, dry lands.
+# jacaranda from its fields and meadows, the willow from its wetlands, palm and cypress from its warm, dry lands, and
+# redwood, eucalyptus and mahogany from its big forests and rainforests.
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
-             "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress"}
+             "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress", "redwood": "Redwood",
+             "eucalyptus": "Eucalyptus", "mahogany": "Mahogany"}
 # The feature switch each wood's hand recipes follow: the switch of whatever grows the tree.
 WOOD_SWITCHES = {"chestnut": FEATURE, "larch": "alpine_spawn", "maple": "biomes", "aspen": "biomes", "fir": "biomes",
-                 "dead": "biomes", "jacaranda": "biomes", "willow": "biomes", "palm": "biomes", "cypress": "biomes"}
+                 "dead": "biomes", "jacaranda": "biomes", "willow": "biomes", "palm": "biomes", "cypress": "biomes",
+                 "redwood": "biomes", "eucalyptus": "biomes", "mahogany": "biomes"}
 
 
 def wood_blocks(wood, display):
@@ -377,6 +380,13 @@ TREES = {
     # Warm and dry lands: the palm of oases (and later the tropics), and the tall, narrow Mediterranean cypress.
     "palm": {"leaves": "palm_fronds", "leaves_display": "Palm Fronds", "season": None, "base": "jungle"},
     "cypress": {"leaves": "cypress_leaves", "leaves_display": "Cypress Leaves", "season": None, "base": "spruce"},
+    # Big trees and rainforests: the redwood, the eucalyptus and the mahogany, all evergreen. "giant": the shape (in
+    # tools/trees.py) that four saplings planted in a square grow (agriculture/GiantSaplingBlock).
+    "redwood": {"leaves": "redwood_needles", "leaves_display": "Redwood Needles", "season": None, "base": "spruce",
+                "giant": "giant_redwood"},
+    "eucalyptus": {"leaves": "eucalyptus_leaves", "leaves_display": "Eucalyptus Leaves", "season": None, "base": "jungle"},
+    "mahogany": {"leaves": "mahogany_leaves", "leaves_display": "Mahogany Leaves", "season": None, "base": "jungle",
+                 "giant": "giant_mahogany"},
 }
 SEASON_STATES = ["green", "gold", "bare"]
 JITTER = 7

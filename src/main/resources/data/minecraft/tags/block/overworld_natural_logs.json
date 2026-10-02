@@ -10,6 +10,9 @@
     "jugcraft:jacaranda_log",
     "jugcraft:willow_log",
     "jugcraft:palm_log",
-    "jugcraft:cypress_log"
+    "jugcraft:cypress_log",
+    "jugcraft:redwood_log",
+    "jugcraft:eucalyptus_log",
+    "jugcraft:mahogany_log"
   ]
 }

@@ -10,6 +10,9 @@
     "jugcraft:jacaranda_fence",
     "jugcraft:willow_fence",
     "jugcraft:palm_fence",
-    "jugcraft:cypress_fence"
+    "jugcraft:cypress_fence",
+    "jugcraft:redwood_fence",
+    "jugcraft:eucalyptus_fence",
+    "jugcraft:mahogany_fence"
   ]
 }

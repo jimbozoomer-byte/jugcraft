@@ -3,6 +3,9 @@
   "values": [
     "jugcraft:coniferous_forest",
     "jugcraft:snowy_coniferous_forest",
-    "jugcraft:fen"
+    "jugcraft:fen",
+    "jugcraft:rainforest",
+    "jugcraft:redwood_forest",
+    "jugcraft:temperate_rainforest"
   ]
 }

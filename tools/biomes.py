@@ -91,6 +91,19 @@ RULES = [
     rule([3], "forest", (3, 3), (0, 4), "burnt_forest"),
     rule([0], "forest", (3, 3), (0, 4), "mediterranean_forest"),
     rule([0], "plains", (2, 2), (0, 4), "orchard"),
+    # Batch 5: big trees and rainforests. The woodland layout's tropical slots (jungles, savannas), its dark forests,
+    # flower forests and old-growth taigas; the old-growth taigas are giant forests in the wild layout too.
+    rule([0], "jungle", (3, 3), (4, 4), "rainforest"),
+    rule([0], "jungle", (3, 3), (3, 3), "eucalyptus_forest"),
+    rule([0], "savanna_plateau", (3, 3), (0, 4), "eucalyptus_forest"),
+    rule([0], "sparse_jungle", (3, 3), (0, 4), "tropics"),
+    rule([0], "savanna", (3, 3), (0, 4), "subtropics"),
+    rule([0], "plains", (3, 3), (0, 4), "subtropics"),
+    rule([0], "dark_forest", (0, 4), (0, 4), "dense_forest"),
+    rule([0, 3], "old_growth_pine_taiga", (0, 4), (0, 4), "redwood_forest"),
+    rule([0, 3], "old_growth_spruce_taiga", (0, 4), (0, 4), "temperate_rainforest"),
+    rule([0], "flower_forest", (0, 4), (0, 4), "woodland"),
+    rule([0], "sunflower_plains", (0, 4), (0, 4), "woodland"),
 ]
 
 # Trees from other features, given a placed feature ("<name>") that checks the given sapling-like block would survive.
@@ -201,6 +214,15 @@ EXTRAS = {
         "target": {"type": "minecraft:matching_blocks", "blocks": ["minecraft:calcite", "minecraft:coarse_dirt"]}},
         "step": 6, "placement": [{"type": "minecraft:rarity_filter", "chance": 3}, {"type": "minecraft:in_square"},
                                  {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR_WG"}, {"type": "minecraft:biome"}]},
+    # Batch 5.
+    "leaf_litter": {"feature": "minecraft:leaf_litter", "step": 9, "patches": 2, "count": 32, "on": "minecraft:grass_block"},
+    "poppies": {"block": "minecraft:poppy", "step": 9, "rarity": 2, "count": 24},
+    "melons": {"feature": "minecraft:melon", "step": 9, "rarity": 4, "count": 32, "on": "minecraft:grass_block"},
+    "bamboo_groves": {"feature": "minecraft:bamboo_no_podzol", "step": 9, "placement": [
+        {"type": "minecraft:rarity_filter", "chance": 3}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}]},
+    "hibiscus": {"feature": "jugcraft:hibiscus", "step": 9, "patches": 2, "count": 32},
+    "hydrangeas": {"feature": "jugcraft:hydrangea", "step": 9, "rarity": 2, "count": 24},
 }
 
 # Each biome: its base, climate values, trees (count: [usual, sometimes]; default and weighted picks of placed
@@ -561,6 +583,95 @@ BIOMES = {
             ["minecraft:oak_bees_002", 0.3], ["jugcraft:azalea_tree_checked", 0.15]]},
         "extras": ["rose_bushes", "oxeye_daisies"],
         "tags": ["c:is_plains"],
+    },
+    # ---------------------------------------------------------------- batch 5: big trees and rainforests
+    # A hot, steaming rainforest: tall mahoganies and giant ones, jungle trees and bushes over ferns, orange cosmos and
+    # puddles; only parrots.
+    "rainforest": {
+        "display": "Rainforest", "base": "jungle", "temperature": 0.95, "downfall": 0.95, "seasons": False,
+        "effects": {"grass_color": "#3fa82c", "foliage_color": "#2f9a24"},
+        "trees": {"count": [24, 28], "default": "jugcraft:mahogany_checked", "picks": [
+            ["jugcraft:giant_mahogany_checked", 0.12], ["minecraft:mega_jungle_tree_checked", 0.08],
+            ["minecraft:jungle_tree", 0.15], ["minecraft:jungle_bush", 0.25]]},
+        "extras": ["ponds", "ferns", "large_ferns", "orange_cosmos"],
+        "creatures": [["minecraft:parrot", 40, 1, 2]],
+        "tags": ["c:is_tropical", "c:is_wet"],
+    },
+    # A forest of tall eucalyptus, their bark streaked in rainbow colours, over oak scrub, melons and wildflowers;
+    # parrots.
+    "eucalyptus_forest": {
+        "display": "Eucalyptus Forest", "base": "sparse_jungle", "temperature": 0.95, "downfall": 0.8, "seasons": False,
+        "effects": {"grass_color": "#7fb653", "foliage_color": "#6aa84a"},
+        "trees": {"count": [8, 9], "default": "jugcraft:eucalyptus_checked", "picks": [
+            ["jugcraft:big_eucalyptus_checked", 0.3], ["jugcraft:oak_bush_checked", 0.25]]},
+        "extras": ["field_flowers", "melons", "bushes_dense"],
+        "creatures": [["minecraft:sheep", 12, 4, 4], ["minecraft:pig", 10, 4, 4], ["minecraft:chicken", 10, 4, 4],
+                      ["minecraft:cow", 8, 4, 4], ["minecraft:parrot", 20, 1, 2]],
+        "tags": ["c:is_tropical"],
+    },
+    # Bright green islands of palms, flowering azaleas and jungle bushes, hibiscus, hydrangeas and bamboo; parrots.
+    "tropics": {
+        "display": "Tropics", "base": "sparse_jungle", "temperature": 0.95, "downfall": 0.85, "seasons": False,
+        "effects": {"grass_color": "#5fcf3a", "foliage_color": "#4cc02e", "water_color": "#3fc7d8"},
+        "trees": {"count": [4, 5], "default": "jugcraft:palm_checked", "picks": [
+            ["jugcraft:small_palm_checked", 0.25], ["minecraft:jungle_bush", 0.2], ["jugcraft:azalea_tree_checked", 0.15]]},
+        "extras": ["hibiscus", "hydrangeas", "bamboo_groves"],
+        "creatures": [["minecraft:parrot", 30, 1, 2], ["minecraft:chicken", 10, 4, 4], ["minecraft:pig", 10, 4, 4],
+                      ["minecraft:sheep", 8, 4, 4]],
+        "tags": ["c:is_tropical", "minecraft:has_structure/jungle_temple"],
+    },
+    # Warm, green, plains-like country with flowering azaleas, oaks, birches, small palms and vine-hung oaks,
+    # hydrangeas and sugar cane; villages.
+    "subtropics": {
+        "display": "Subtropics", "base": "plains", "temperature": 0.9, "downfall": 0.7, "seasons": False,
+        "effects": {"grass_color": "#6cc043", "foliage_color": "#5ab035"},
+        "trees": {"count": [2, 3], "default": "jugcraft:azalea_tree_checked", "picks": [
+            ["minecraft:oak_checked", 0.3], ["minecraft:birch_checked", 0.1], ["jugcraft:small_palm_checked", 0.2],
+            ["jugcraft:tall_vine_oak_checked", 0.1]]},
+        "extras": ["hydrangeas", "field_flowers"],
+        "tags": [],
+    },
+    # A dense forest of big, spreading oaks, with dark oaks among them; leaf litter and ferns below; woodland
+    # mansions.
+    "dense_forest": {
+        "display": "Dense Forest", "base": "forest", "temperature": 0.7, "downfall": 0.8, "seasons": True,
+        "effects": {"grass_color": "#5a9a3a", "foliage_color": "#4a8a2c"},
+        "trees": {"count": [14, 16], "default": "minecraft:fancy_oak_checked", "picks": [
+            ["minecraft:oak_checked", 0.3], ["minecraft:dark_oak_checked", 0.1], ["jugcraft:oak_bush_checked", 0.1]]},
+        "extras": ["leaf_litter", "ferns"],
+        "tags": ["minecraft:has_structure/woodland_mansion"],
+    },
+    # A forest of giant redwoods two blocks wide and tall single ones, on podzol broken by moss; ferns and tall ferns.
+    "redwood_forest": {
+        "display": "Redwood Forest", "base": "old_growth_pine_taiga", "temperature": 0.5, "downfall": 0.8, "seasons": True,
+        "winter_snow": False,
+        "surface": {"floor": "minecraft:podzol", "under": "minecraft:dirt",
+                    "patches": [[-0.12, 0.12, "minecraft:moss_block"], [0.4, 0.55, "minecraft:coarse_dirt"]]},
+        "trees": {"count": [10, 11], "default": "jugcraft:redwood_checked", "picks": [
+            ["jugcraft:giant_redwood_checked", 0.35], ["minecraft:spruce_checked", 0.1], ["jugcraft:fallen_redwood_tree", 0.02]]},
+        "extras": ["ferns", "large_ferns"],
+        "tags": ["c:is_coniferous_tree", "c:is_old_growth"],
+    },
+    # A cool, dripping rainforest under firs and redwoods, vine-hung oaks and willows, thick with ferns.
+    "temperate_rainforest": {
+        "display": "Temperate Rainforest", "base": "old_growth_spruce_taiga", "temperature": 0.45, "downfall": 0.95,
+        "seasons": True, "winter_snow": False,
+        "effects": {"grass_color": "#78c84a", "foliage_color": "#62b53a"},
+        "trees": {"count": [11, 12], "default": "jugcraft:fir_checked", "picks": [
+            ["jugcraft:redwood_checked", 0.3], ["jugcraft:tall_fir_checked", 0.2], ["jugcraft:tall_vine_oak_checked", 0.2],
+            ["jugcraft:willow_checked", 0.1]]},
+        "extras": ["ferns", "large_ferns", "berry_bushes"],
+        "tags": ["c:is_wet"],
+    },
+    # Plain oak woodland: oaks big and small, fallen logs, leaf litter, poppies, daisies and berry bushes; villages
+    # and woodland mansions.
+    "woodland": {
+        "display": "Woodland", "base": "forest", "temperature": 0.7, "downfall": 0.8, "seasons": True,
+        "effects": {"grass_color": "#7aa84a", "foliage_color": "#68983e"},
+        "trees": {"count": [9, 10], "default": "minecraft:oak_leaf_litter", "picks": [
+            ["minecraft:fancy_oak_leaf_litter", 0.25], ["jugcraft:oak_bush_checked", 0.1], ["minecraft:fallen_oak_tree", 0.03]]},
+        "extras": ["leaf_litter", "berry_bushes", "oxeye_daisies", "poppies"],
+        "tags": ["minecraft:has_structure/village_plains", "minecraft:has_structure/woodland_mansion"],
     },
     # ---------------------------------------------------------------- batch 2: fields and meadows
     # Cool, flat land with teal grass, scattered small spruces and clumps of oak bush, and many flowers.

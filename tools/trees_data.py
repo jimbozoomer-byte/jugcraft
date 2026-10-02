@@ -93,8 +93,9 @@ def foliage_placer(foliage):
     out = {"type": f"minecraft:{foliage['type']}_foliage_placer", "offset": foliage["offset"], "radius": foliage["radius"]}
     if "height" in foliage:
         out["height"] = foliage["height"]
-    # Any other field of vanilla's placer (the cherry placer's hanging leaves, for example) as given.
-    out.update({key: value for key, value in foliage.items() if key not in ("type", "offset", "radius", "height")})
+    # Any other field of vanilla's placer (the cherry placer's hanging leaves, the mega pine's crown height, for
+    # example), ranges as uniform.
+    out.update({key: uniform(value) for key, value in foliage.items() if key not in ("type", "offset", "radius", "height")})
     return out
 
 
@@ -109,6 +110,9 @@ def tree_blocks(wood):
 def minimum_size(info):
     """The free space a tree needs, as vanilla sets it for the same placers (spruce, fancy oak, bush, oak)."""
     foliage = (info["foliage"] or {}).get("type")
+    if info.get("giant"):
+        # Vanilla's giant spruce and mega jungle tree.
+        return {"type": "minecraft:two_layers_feature_size", "lower_size": 1, "upper_size": 2}
     if foliage == "spruce":
         return {"type": "minecraft:two_layers_feature_size", "limit": 2, "upper_size": 2}
     if info["trunk"]["type"] == "fancy":
