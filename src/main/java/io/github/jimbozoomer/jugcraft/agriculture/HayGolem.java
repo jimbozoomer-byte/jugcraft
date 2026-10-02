@@ -20,7 +20,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -213,7 +212,7 @@ public class HayGolem extends PathfinderMob {
 		}
 		golem.setPos(legs.getX() + 0.5, legs.getY(), legs.getZ() + 0.5);
 		float yaw = builder == null ? 0.0F
-				: (float) (Mth.atan2(builder.getZ() - golem.getZ(), builder.getX() - golem.getX()) * Mth.RAD_TO_DEG) - 90.0F;
+				: (float) Math.toDegrees(Math.atan2(builder.getZ() - golem.getZ(), builder.getX() - golem.getX())) - 90.0F;
 		golem.setYRot(yaw);
 		golem.setYHeadRot(yaw);
 		golem.setYBodyRot(yaw);
