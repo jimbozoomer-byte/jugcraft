@@ -1,6 +1,6 @@
 # End biomes (biomes batch 9)
 
-Status: in progress on branch `claude/biomes`. Awaiting CI. **Not yet played.**
+Status: in progress on branch `claude/biomes`. Green in CI (server and client game tests); three of the five not yet photographed. **Not yet played.**
 Proposal issue: none. The owner asked on 2 October 2026 to remake the Biomes O' Plenty catalog's biomes ([branches/BIOMES.md](../branches/BIOMES.md)) and to carry on through every batch. Everything here is original: the catalog guided the concepts only, and its invented names are replaced by our own.
 Owner: @jimbozoomer-byte
 Target milestone and tier: the outer End (after the dragon).
@@ -49,7 +49,12 @@ Results are recorded under "Results" below after CI runs.
 - Not run: play, a dedicated server, two clients.
 
 ### Results
-Not yet run in CI.
+- **Run [37048482576](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37048482576) (commit a4b96787): green.**
+  - Server game tests: all 316 passed. `dimensionBiomesArePlaced`: the End's biome source, built as a real world's is (`TheEndBiomeSource.create`, which Fabric's biome API extends), lists 10 biomes, all five of Jugcraft's among them, and their features sort into one order.
+  - Client game test, the real End of a world with seed `jugcraft`:
+    - Chorus Reef: standing at 768 60 -736; the shot shows end stone patched with grey, chorus beside the camera.
+    - Phantom Garden: standing at 2,752 62 2,016; pale moss over end stone in the dark.
+    - Ender Wilds, Outer Flats and Rotted Expanse: no standing room within 32 blocks of each one's nearest place to the origin, which lies over the outer End's void. The client test now looks up to 384 blocks round that place (commit 079af8b8).
 
 ## World and event applicability
 - Biome fit: the outer End's highlands and barrens, beside vanilla's.

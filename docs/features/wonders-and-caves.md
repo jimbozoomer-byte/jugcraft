@@ -1,6 +1,6 @@
 # Wonders and caves (biomes batch 7)
 
-Status: in progress on branch `claude/biomes`, with the region engine ([biome-regions.md](biome-regions.md)). Awaiting CI. **Not yet played.**
+Status: in progress on branch `claude/biomes`, with the region engine ([biome-regions.md](biome-regions.md)). Green in CI (server and client game tests). **Not yet played.**
 Proposal issue: none. The owner asked on 2 October 2026 to remake the Biomes O' Plenty catalog's biomes ([branches/BIOMES.md](../branches/BIOMES.md)) and to carry on through every batch. Everything here is original: the catalog guided the concepts only, and its invented names are replaced by our own.
 Owner: @jimbozoomer-byte
 Target milestone and tier: world generation (Discovery).
@@ -83,6 +83,18 @@ Results are recorded under "Results" below after CI runs.
     - Not within 6,400 blocks: the Cinder Barrens (badlands, none near this start), the Elder Vale and Toadstool Field (mushroom islands) and the Webwood (mangrove swamps, the nearest vanilla one 4,457 blocks away).
   - The test then hung while finding a surface spot for the Gloomweald, after the Glimmer Grove's, and the job was cancelled at its 30-minute limit, so there are no screenshots.
   - Cause, found in run [37044032454](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37044032454)'s log: a chunk-generation worker threw "Tried to biome check an unregistered feature, or a feature that should not restrict the biome", so that chunk never finished. The Starlit Wood's tree selector picked vanilla's `minecraft:birch_tall`, a biome's top-level placed feature with a biome filter, which cannot be placed inside another feature. It now picks `minecraft:super_birch_bees` (commit a4b96787), and `check_mod_data.py` fails on any nested placed feature with a biome filter.
+
+- **Run [37048482576](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37048482576) (commit a4b96787): green.**
+  - Server game tests: all 316 passed, with the same `glowingPlantsWork` results.
+  - Client game test: no chunk-generation error. The same thirteen were found at the same distances, and each surface biome was photographed. The two caves were found but, as caves, not photographed.
+  - Screenshots (2 October, autumn):
+    - Glimmer Grove: violet jacarandas round pink water under a pink sky.
+    - Gloomweald: dark oaks and giant red mushrooms under a dim violet sky.
+    - Mycelial Jungle: giant red and brown mushrooms by the water under a spore-green sky.
+    - Highsun Meadow: golden-green grass dotted with flowers beside a river.
+    - Wild Greens: tall grass, purple wildflowers and coarse dirt on terraced slopes.
+    - Frostlight Garden: a frost iris in the snow under firs. Snowpetal Grove: snowy ground under birches.
+    - Close-ups only: the Gilded Shrubland (the camera stood in golden oak scrub), the Hallowed Bog's and Starlit Wood's grass, and the Shrine Springs' slope (the camera looked into a neighbouring sparse jungle).
 
 ## World and event applicability
 - Biome fit: each biome takes the climate and land shape of the vanilla biome it replaces.

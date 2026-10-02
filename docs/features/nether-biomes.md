@@ -1,6 +1,6 @@
 # Nether biomes (biomes batch 8)
 
-Status: in progress on branch `claude/biomes`. Awaiting CI. **Not yet played.**
+Status: in progress on branch `claude/biomes`. Green in CI (server and client game tests). **Not yet played.**
 Proposal issue: none. The owner asked on 2 October 2026 to remake the Biomes O' Plenty catalog's biomes ([branches/BIOMES.md](../branches/BIOMES.md)) and to carry on through every batch. Everything here is original: the catalog guided the concepts only, and its invented names are replaced by our own.
 Owner: @jimbozoomer-byte
 Target milestone and tier: the Nether (after a Nether portal).
@@ -55,7 +55,19 @@ Results are recorded under "Results" below after CI runs.
 - Not run: play, a dedicated server, two clients.
 
 ### Results
-Not yet run in CI.
+- **Run [37048482576](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37048482576) (commit a4b96787): green.** Before it, run [37044032454](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37044032454) failed `dimensionBiomesArePlaced`, which then looked in the game test server's own Nether and End, each a single fixed biome, and run [37047123464](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37047123464) did not compile.
+  - Server game tests: all 316 passed. `dimensionBiomesArePlaced`: the Nether's biome source, built from vanilla's Nether preset as a real world's is, lists 14 biomes, all nine of Jugcraft's among them, and their features sort into one order.
+  - Client game test, the real Nether of a world with seed `jugcraft`: every biome had a standing spot:
+    - Ashfall Wastes at -432 65 -504, Blighted Sands -96 99 -96, Frost Rift 160 67 -320;
+    - Fungal Thicket 280 36 -128, Magma Fields 648 75 536, Marrow Heap 384 100 672;
+    - Netherbrush 160 54 -224, Quartz Rift -224 102 -96, Withered Hollow -1,824 54 -832.
+  - Screenshots:
+    - Frost Rift: packed ice under a cold blue haze, with snow on the air.
+    - Marrow Heap: a floor of bone blocks and nether wart blocks under a dark red haze.
+    - Magma Fields: sulfur spikes and magma under a red-orange haze.
+    - Fungal Thicket: crimson nylium and crimson fungi beside a lava sea.
+    - Netherbrush: warped nylium and roots in the dark. Blighted Sands: a dim floor of soul sand.
+    - The Ashfall Wastes' shot looked into lava, and the Quartz Rift's and Withered Hollow's at a wall. The client test now needs air ahead of the camera and no fluid beside the spot (commit 079af8b8).
 
 ## World and event applicability
 - Biome fit: each takes a climate point in the Nether, next to vanilla's.
