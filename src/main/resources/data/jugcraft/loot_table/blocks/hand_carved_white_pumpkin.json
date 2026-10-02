@@ -21,7 +21,8 @@
               "type": "minecraft:copy_state",
               "block": "jugcraft:hand_carved_white_pumpkin",
               "properties": [
-                "lit"
+                "lit",
+                "soul"
               ]
             }
           ]

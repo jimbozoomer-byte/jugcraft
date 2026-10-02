@@ -15,10 +15,10 @@ import net.minecraft.core.UUIDUtil;
  * A giant pumpkin carried as an item (the {@code jugcraft:giant_pumpkin} component): how wide it is, the growth
  * points and weight it had, which pumpkin it is (so the Harvest Scale knows it again), whether a torch is inside, what
  * is carved into its sides and who carved it. Breaking a giant pumpkin drops it whole with this; placing the item puts
- * the same pumpkin back.
+ * the same pumpkin back. A torch inside may be a soul torch ({@code soul}).
  */
 public record GiantPumpkinData(int size, int points, int weight, Optional<UUID> id, boolean lit, Map<Direction, int[]> faces,
-		Optional<UUID> carverId, String carverName) {
+		Optional<UUID> carverId, String carverName, boolean soul) {
 	private static final Codec<int[]> FACE_CODEC = Codec.INT_STREAM.xmap(stream -> stream.toArray(), Arrays::stream);
 	public static final Codec<GiantPumpkinData> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.intRange(1, GiantPumpkinBlock.MAX_SIZE).fieldOf("size").forGetter(GiantPumpkinData::size),
@@ -28,11 +28,12 @@ public record GiantPumpkinData(int size, int points, int weight, Optional<UUID> 
 			Codec.BOOL.optionalFieldOf("lit", false).forGetter(GiantPumpkinData::lit),
 			Codec.unboundedMap(Direction.CODEC, FACE_CODEC).optionalFieldOf("carving", Map.of()).forGetter(GiantPumpkinData::faces),
 			UUIDUtil.CODEC.optionalFieldOf("carved_by").forGetter(GiantPumpkinData::carverId),
-			Codec.STRING.optionalFieldOf("carved_by_name", "").forGetter(GiantPumpkinData::carverName)).apply(i, GiantPumpkinData::new));
+			Codec.STRING.optionalFieldOf("carved_by_name", "").forGetter(GiantPumpkinData::carverName),
+			Codec.BOOL.optionalFieldOf("soul", false).forGetter(GiantPumpkinData::soul)).apply(i, GiantPumpkinData::new));
 
 	/** A full-grown, uncarved giant pumpkin at its starting weight (the item as the creative menu gives it). */
 	public static final GiantPumpkinData FULL_GROWN = new GiantPumpkinData(GiantPumpkinBlock.MAX_SIZE, 0, GiantPumpkinBlockEntity.START_WEIGHT,
-			Optional.empty(), false, Map.of(), Optional.empty(), "");
+			Optional.empty(), false, Map.of(), Optional.empty(), "", false);
 
 	public GiantPumpkinData {
 		Map<Direction, int[]> valid = new EnumMap<>(Direction.class);
@@ -52,6 +53,7 @@ public record GiantPumpkinData(int size, int points, int weight, Optional<UUID> 
 	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof GiantPumpkinData that) || size != that.size || points != that.points || weight != that.weight || lit != that.lit
+				|| soul != that.soul
 				|| !id.equals(that.id) || !carverId.equals(that.carverId) || !carverName.equals(that.carverName)
 				|| !faces.keySet().equals(that.faces.keySet())) {
 			return false;
@@ -66,7 +68,7 @@ public record GiantPumpkinData(int size, int points, int weight, Optional<UUID> 
 
 	@Override
 	public int hashCode() {
-		int hash = Objects.hash(size, points, weight, id, lit, carverId, carverName);
+		int hash = Objects.hash(size, points, weight, id, lit, carverId, carverName, soul);
 		for (Map.Entry<Direction, int[]> entry : faces.entrySet()) {
 			hash = 31 * hash + entry.getKey().hashCode() * 17 + Arrays.hashCode(entry.getValue());
 		}

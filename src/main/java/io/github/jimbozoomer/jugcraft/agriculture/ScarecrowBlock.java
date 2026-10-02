@@ -1,9 +1,12 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import java.util.Locale;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -31,9 +34,10 @@ import org.jspecify.annotations.Nullable;
  * The Scarecrow: a straw figure on a post, two blocks tall, in a flannel shirt. Use any dye on it to change the
  * shirt's colour ({@link #SHIRT}). Give it a pumpkin of any kind (the {@code jugcraft:scarecrow_heads} item tag) and
  * it wears it for a head, on its shoulders the way an armor stand wears a pumpkin, carving and all
- * ({@link ScarecrowBlockEntity}, on the upper half); an empty hand takes the head back, and a torch lights a
- * hand-carved one. A lit head lights the scarecrow ({@link #LIGHT}). It is a decoration for now; once crop-eating birds
- * exist, it will keep them off nearby fields (docs/branches/AGRICULTURE.md).
+ * ({@link ScarecrowBlockEntity}, on the upper half); an empty hand takes the head back, and a torch or soul torch
+ * lights a hand-carved one. A lit head lights the scarecrow ({@link #LIGHT}). Wearing a lit head, sneak-used at midnight during the
+ * Halloween event, it summons the Headless Horseman ({@link HorsemanSummoning}). It keeps crows ({@link Crow}) off the
+ * crops round it, the farther the better it is dressed ({@link Scarecrows}).
  */
 public class ScarecrowBlock extends TallDecorationBlock implements EntityBlock {
 	public static final EnumProperty<DyeColor> SHIRT = EnumProperty.create("shirt", DyeColor.class);
@@ -90,7 +94,7 @@ public class ScarecrowBlock extends TallDecorationBlock implements EntityBlock {
 			InteractionHand hand, BlockHitResult hit) {
 		DyeColor color = dyeColor(stack);
 		boolean head = stack.is(JugcraftAgriculture.SCARECROW_HEADS);
-		boolean torch = stack.is(Items.TORCH) && canLight(head(level, pos, state));
+		boolean torch = CarvedPumpkinBlock.isTorch(stack) && canLight(head(level, pos, state));
 		if ((color == null || state.getValue(SHIRT) == color) && !head && !torch) {
 			return stack.isEmpty() ? InteractionResult.TRY_WITH_EMPTY_HAND : InteractionResult.PASS;
 		}
@@ -111,7 +115,7 @@ public class ScarecrowBlock extends TallDecorationBlock implements EntityBlock {
 		} else if (torch) {
 			ItemStack lit = scarecrow.head().copy();
 			lit.set(DataComponents.BLOCK_STATE, lit.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY)
-					.with(CarvedPumpkinBlock.LIT, true));
+					.with(CarvedPumpkinBlock.LIT, true).with(CarvedPumpkinBlock.SOUL, stack.is(Items.SOUL_TORCH)));
 			scarecrow.setHead(lit);
 			stack.consume(1, player);
 			level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 0.9F);
@@ -124,10 +128,23 @@ public class ScarecrowBlock extends TallDecorationBlock implements EntityBlock {
 		return InteractionResult.SUCCESS;
 	}
 
-	/** An empty hand takes the head off (sneaking is left for other uses). */
+	/**
+	 * An empty hand takes the head off. Sneak-used with an empty hand at midnight during the Halloween event, wearing a
+	 * lit head, the scarecrow summons the Headless Horseman ({@link HorsemanSummoning}).
+	 */
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-		if (player.isSecondaryUseActive() || head(level, pos, state).isEmpty()) {
+		if (player.isSecondaryUseActive()) {
+			if (player instanceof ServerPlayer caller) {
+				BlockPos lower = state.getValue(HALF) == DoubleBlockHalf.LOWER ? pos : pos.below();
+				HorsemanSummoning.Result result = HorsemanSummoning.summon(caller, lower);
+				if (result != HorsemanSummoning.Result.SUMMONED) {
+					caller.sendOverlayMessage(Component.translatable("message.jugcraft.horseman." + result.name().toLowerCase(Locale.ROOT)));
+				}
+			}
+			return InteractionResult.SUCCESS;
+		}
+		if (head(level, pos, state).isEmpty()) {
 			return InteractionResult.PASS;
 		}
 		if (!level.isClientSide()) {

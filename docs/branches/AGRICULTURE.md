@@ -1,6 +1,6 @@
 # Agriculture branch
 
-Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife) and the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md) and [../features/halloween-harvest.md](../features/halloween-harvest.md) for the implemented slices and their test evidence.
+Status: **three slices implemented in source: the Fall Harvest (crops, wild plants, sickles), the Kitchen Garden (trellises, seven crops, the Cooking Pot) and the Festival Crops (gourds on stems, turnips and Turnip Lanterns, cranberry bogs, the chestnut tree), plus pumpkin carving (the Carving Knife), the Halloween harvest (giant pumpkins, the Harvest Scale, scarecrows, heirloom pumpkins, ornamental corn and fall decorations), the pumpkin regatta and trick-or-treating, the Halloween festivities (the carving contest, costumed mobs, the Halloween Peddler, spooky decorations and sweets), Halloween nights (will-o'-wisps, the Pumpkin Chunkin' Trebuchet, a bigger Candy Bag, the Harvest Moon and the Headless Horseman), and the thirty Halloween decorations (string lights, the Candy Bowl, the Coffin, the Haunted Portrait, the Fog Machine, luminarias, floating candles, the Skeleton Hand Sconce, soul-flame carvings, bat bunting, the graveyard: the cemetery fence and gate, the crypt set, the Grave Mound, the Mourning Angel and the Pop-Up Skeleton, the witch's cottage: the Bubbling Cauldron, the Apothecary Shelf, the Crystal Ball, the Grimoire Stand and the Witch's Broom, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat, the Autumn Wreath and the Leaf Piles, and the haunted house and yard: the Rocking Chair, the Lurking Eyes, the Silhouette Window, the Spooky Music Box and the Giant Fake Spider), and the eight batches of more Halloween, the haunted house inside (the Haunted Chandelier, the Phantom Pipe Organ, the Suit of Armor, the Dust Sheet, the Spirit Mirror, Tattered Curtains and the Creepy Doll) the mad scientist and monsters (the Tesla Coil, the Lab Table, the Specimen Jar, the Mummy Sarcophagus, the Raven on a Perch and the Black Cat Figure) the yard and porch (the Yard Inflatables, the Animatronic Porch Witch, Grasping Hands, the Poseable Skeleton, Bone Wind Chimes, the Weathervanes, the Spooky Sign, the Haunted Archway and the Dead Hollow Tree) lighting and glow (the Black Light and Glow Paint, the Witch Fire Brazier, the Shadow Puppet Lamp, the Mini Pumpkin Stack and the Floating Witch Hat) party games (the Jump-Scare Trap, the Costume Contest, Pumpkin Bowling, the Candy Cache, the Monster Mash Dance Floor, Ghost Tag and the Fortune Teller's Table) night events (trick-or-treaters at your door, Toilet Paper Rolls, the Haunted Hayride and the Halloween Bonfire) treats (the Witch's Brew Punch Bowl, Soul Cakes and the Barmbrack, pumpkin spice lattes, pumpkin bread, spiderweb cupcakes, bat-wing cookies and Giant Candy) and costumes (the Vampire Cape, Mummy Wraps, the Skeleton Suit, the Werewolf Mask, Cat Ears and Tail, Bat Wings and the Costume Trunk).** They compile in CI and have automated in-game tests, but nobody has played them yet. Everything marked *planned* below is a design proposal, not a promise. See [../features/fall-harvest.md](../features/fall-harvest.md), [../features/kitchen-garden.md](../features/kitchen-garden.md), [../features/festival-crops.md](../features/festival-crops.md), [../features/pumpkin-carving.md](../features/pumpkin-carving.md), [../features/halloween-harvest.md](../features/halloween-harvest.md) , [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md) [../features/halloween-festivities.md](../features/halloween-festivities.md) [../features/halloween-nights.md](../features/halloween-nights.md), [../features/halloween-decorations.md](../features/halloween-decorations.md) and [../features/more-halloween.md](../features/more-halloween.md) for the implemented slices and their test evidence.
 
 Agriculture is Jugcraft's third starting branch, alongside technology and magic ([DESIGN.md](../DESIGN.md)). A farmer can begin on day one with a hoe and whatever grows nearby, and never needs a machine or a spell. Industrial farming (powered harvesters, planters, sprinklers, crop processors) comes later and belongs to the engineering branch; see [Boundaries](#boundaries).
 
@@ -39,6 +39,7 @@ Corn is built for fields you want to look at and walk through.
 - **Walls you cannot walk through.** Once corn is two blocks tall it blocks movement like a hedge, and mobs path around it. Knee-high corn can still be walked through, like wheat. That is what makes a maze work: plant the walls, leave the paths as grass or dirt path, and wait.
 - **No irrigation needed.** Corn keeps its farmland from drying back to dirt (the same rule as vanilla crops). Water nearby only makes it grow faster.
 - **Easy to shape.** Corn only grows into air. A block above a plant stops it at that height, and breaking any block of a plant removes the whole plant and drops its kernel.
+- **Or let a gate plant it.** The [Corn Maze Gate](#the-corn-maze) carves a maze from its own seed and plants it in close-set maze corn, ready to run at once and timed on the server.
 
 The maze in the screenshots above is 13 × 11 blocks with one-block paths, planted by the client game test in `AgricultureClientGameTests`.
 
@@ -319,12 +320,502 @@ Put a **Harvest Scale** beside a full-grown giant pumpkin (or carry the pumpkin 
 | --- | --- | --- |
 | **Pumpkin Stencil** | Use a Blank Stencil (two paper) on a carved side | Traces the design; hold it in your other hand while carving to press it in, on any pumpkin or a giant |
 | **White, Jarrahdale and Cinderella pumpkins** | Wild in birch forests and snowy places, savannas and windswept hills, plains and flower forests; grass drops their seeds | Grow from stems; carve like pumpkins into their own hand-carved blocks; bake into pumpkin pie |
-| **Scarecrow** | Wool over hay between sticks | Two blocks tall; dye its flannel shirt any colour; give it any pumpkin and it wears it for a head (a lit one lights it) |
+| **Scarecrow** | Wool over hay between sticks | Two blocks tall; dye its flannel shirt any colour; give it any pumpkin and it wears it for a head (a lit one lights it); it keeps [crows](#crows-and-working-scarecrows) off the crops round it |
 | **Ornamental corn** | Wild Corn sometimes drops its kernels; grass drops them | Grows like corn; its multicoloured ears tie into an **Ornamental Corn Bundle** for walls and door frames |
 | **Corn Shock** | Six Corn Stalks (from breaking any corn 3 blocks tall) and string | A two-block stook for porches |
 | **Caramel, Caramel Apple, Popcorn Ball** | Smelt sugar; add an apple and a stick, or two popcorn | Treats (2, 6 and 5 hunger); the apple's stick comes back |
 | **Bottle Gourd** | Wild in jungles and savannas; grass drops its seeds | Dry it in a furnace; with string it makes a **Gourd Birdhouse** (stands or hangs), with leather a **Gourd Canteen** (3 sips of water for giant pumpkins, farmland, fire or a cauldron) |
 | **Mums** | Wild patches in flower forests, meadows and forests | Yellow, orange, red and purple flowers for pots, dye and suspicious stew |
+
+## What exists now: the pumpkin regatta and trick-or-treating
+
+Two things to do with the Halloween harvest. The regatta works all year; trick-or-treating only while the Halloween event runs. Details, numbers and test evidence: [../features/pumpkin-regatta-and-trick-or-treat.md](../features/pumpkin-regatta-and-trick-or-treat.md).
+
+| **The regatta pond:** a carved Pumpkin Barge with two villagers aboard, a Pumpkin Racer, numbered buoys and the Regatta Flag on the shore | **The barge** close up: a 3×3×3 giant hollowed out, its carved face kept |
+| --- | --- |
+| ![The regatta pond](../images/ingame_pumpkin_regatta.jpg) | ![A Pumpkin Barge and a Pumpkin Racer](../images/ingame_pumpkin_barge.jpg) |
+| **At midnight:** the barge's torch lights its carving | **Costumes:** a carved pumpkin, Witch Hat, Ghost Sheet, Scarecrow Hat and a hand-carved pumpkin, by a door with its jack o'lantern porch light |
+| ![The barge at night](../images/ingame_pumpkin_barge_night.jpg) | ![Costumes on armor stands](../images/ingame_costumes.jpg) |
+| **The Ghost Sheet** on its stand: a hood with eye holes, draped to the ground | **Worn by a player:** the sheet over the head, body and arms, moving with them |
+| ![The Ghost Sheet on an armor stand](../images/ingame_ghost_sheet.jpg) | ![A player wearing the Ghost Sheet](../images/ingame_ghost_sheet_worn.jpg) |
+
+*Real screenshots from the client game test that CI runs (`RegattaClientGameTests`, software rendering, small previews).*
+
+### Pumpkin boats and the regatta
+
+Sneak and use the Carving Knife on top of a giant pumpkin to **hollow it out into a boat**. A full-grown 3×3×3 giant makes a **Pumpkin Barge**: four seats, and it keeps its weight, carving and torch, so a carved barge glows on the water at night. A 2×2×2 giant (stop it there by cutting its vine or giving it no room) makes a **Pumpkin Racer** for one. Lighter boats are faster: a racer 1.15–1.30× a boat, a barge 0.70–0.95×. Hollowing gives the pumpkin's guts and, full grown, its giant seeds, but not its pumpkins.
+
+For a race, put a **Regatta Flag** on the shore and **Regatta Buoys** on still water, and number them by using them (1–16; sneak to count down). Used on foot, the flag finds its course and shows the board. Used from a pumpkin boat's driver's seat, it starts a run: after a three-second countdown, pass within 5 blocks of each buoy in order and come back to the flag. The server times it. The flag keeps the three best times, one per racer, and the first time you place you get the Harvest Scale's ribbon for that place.
+
+### Trick-or-treating
+
+While the Halloween event runs (by default 20 October to 3 November; the server operator sets the dates), use a **Candy Bag** on a villager's wooden door between dusk and midnight. Wear a costume on your head (a carved pumpkin, any hand-carved one, or a **Witch Hat**, **Ghost Sheet** or **Scarecrow Hat**), and make sure a porch light burns by the door (a jack o'lantern, a turnip lantern, or a lit hand-carved or giant pumpkin). The villager whose bed is inside opens up and hands you a treat: candy, caramel, cookies, a popcorn ball, a caramel apple or, rarely, a **King-Size Candy Bar**. Each home gives each player one treat a night; knock again and you get a harmless prank. Ten homes in one night earn **Full Bag**. When the event ends, nobody answers, but every treat and costume stays.
+
+## What exists now: the Halloween festivities
+
+More to do around Halloween, and decorations and sweets for any time of year. Voting, costumed mobs and the Peddler only happen while the Halloween event runs. Details, numbers and test evidence: [../features/halloween-festivities.md](../features/halloween-festivities.md).
+
+| **The festivities:** costumed mobs, the graveyard, a haunted arch, the Judging Stand, the sweets and the Peddler | **At midnight:** the Candle Skulls and the carved pumpkin on the stand glow |
+| --- | --- |
+| ![The Halloween festivities](../images/ingame_halloween_festivities.jpg) | ![The festivities at night](../images/ingame_halloween_festivities_night.jpg) |
+| **The graveyard:** Rounded, Cross and Obelisk Gravestones, engraved, with Candle Skulls | **An engraving** up close: "Here lies Jack O'Lantern, carved too deep" |
+| ![Gravestones and Candle Skulls](../images/ingame_gravestones.jpg) | ![An engraved gravestone](../images/ingame_gravestone_engraving.jpg) |
+| **The Judging Stand** with a lit carving, the four sweets, and the Halloween Peddler in his Witch Hat | |
+| ![The Judging Stand, the sweets and the Peddler](../images/ingame_judging_stand.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`FestivityClientGameTests`, software rendering, small previews).*
+
+### The carving contest
+
+Put a hand-carved pumpkin on a **Judging Stand** and use the stand with an empty hand to enter it (only its carver can). While the event runs, everyone else uses the stand to vote for its carver: one vote per player per Halloween, moved by voting elsewhere, never for yourself. Sneak-use a stand for the standings. When the event ends, the three carvers with the most votes get the Harvest Scale's ribbons, once.
+
+### Costumed mobs and the Halloween Peddler
+
+During the event, 15 % of zombies, husks, skeletons, strays and zombie villagers wear a Witch Hat, Ghost Sheet, Scarecrow Hat or carved pumpkin, and drop a sweet when a player kills them. Wandering traders arrive as the **Halloween Peddler**, in a Witch Hat, selling four Halloween goods for emeralds: pumpkin seeds (giant and heirloom), costumes, decorations and sweets.
+
+### Spooky decorations and sweets
+
+**Gravestones** (Rounded, Cross and Obelisk, from a stonecutter) take a name: use a Name Tag named in an anvil on one, and its name is engraved on the stone. The **Spun Cobweb** looks like a cobweb but never slows anyone; the **Hanging Ghost** hangs under a block; the **Candle Skull** lights and snuffs like a candle. The Cooking Pot boils sugar into four sweets that work even on a full stomach: **Glow Gum** (Glowing), **Ghost Taffy** (a moment of invisibility), **Fizz Rocks** (Jump Boost) and **Witch's Licorice** (Night Vision).
+
+## What exists now: Halloween nights
+
+Things that happen on Halloween nights, and a throwing contest for any time of year. Wisps, the Horseman and the Harvest Moon only come while the Halloween event runs; everything they leave behind stays. Details, numbers and test evidence: [../features/halloween-nights.md](../features/halloween-nights.md).
+
+| **Halloween nights** by day: the cornfield and scarecrow, three trebuchets, jars and lanterns, the cloak | **At midnight:** wisps over the corn, the Horseman, glowing jars and lanterns |
+| --- | --- |
+| ![Halloween nights](../images/ingame_halloween_nights.jpg) | ![Halloween nights at midnight](../images/ingame_halloween_nights_night.jpg) |
+| **Trebuchets:** loaded, ready and just thrown, with a landing marker | **Wisps in Jars and Horseman's Lanterns**, standing and hanging, and the cloak on an armor stand |
+| ![Three trebuchets](../images/ingame_trebuchets.jpg) | ![Jars and lanterns](../images/ingame_wisp_jars_and_lanterns.jpg) |
+| **Will-o'-wisps** over the corn at midnight | **The Headless Horseman** between two of his lanterns |
+| ![Will-o'-wisps over corn](../images/ingame_wisps.jpg) | ![The Headless Horseman](../images/ingame_headless_horseman.jpg) |
+| **The Harvest Moon:** sparks over lit carvings | |
+| ![Harvest Moon sparks](../images/ingame_harvest_moon_sparks.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`NightClientGameTests`, software rendering, small previews).*
+
+### Will-o'-wisps
+
+On event nights, little glowing **will-o'-wisps** drift over swamps and cornfields and dart away when you come near (sneak to get close). Use a **glass bottle** on one to catch it in a **Wisp in a Jar**, a lantern that glows all year. At dawn they fade.
+
+### The Pumpkin Chunkin' Trebuchet
+
+Load a **Trebuchet** with a pumpkin (any kind, carved or not), sneak-use it to set the release angle (30°–60°), and use it with an empty hand to fling the pumpkin about 50 blocks. A marker shows where it landed and how far. The trebuchet keeps a board of the three longest throws and gives the Harvest Scale's ribbons once per thrower. Hollow carved pumpkins fly farthest. Throw 50 blocks for **Pumpkin Chunkin'**.
+
+### The Candy Bag and the Harvest Moon
+
+The **Candy Bag** now holds treats like a bundle; trick-or-treating fills it, and its tooltip counts tonight's homes. On the nights of 31 October (in the server's time zone) the **Harvest Moon** rises: crops and giant pumpkins grow twice as fast, and lit carvings throw sparks.
+
+### The Headless Horseman
+
+Near midnight during the event, give a Scarecrow a lit pumpkin for a head and sneak-use it under the open sky. The **Headless Horseman** rides in for his head: a boss with a boss bar who charges and throws flaming pumpkins (they burn creatures, never blocks), and throws three at once when enraged at half health. He keeps to his arena and rides off at dawn. Defeat him for the **Horseman's Lantern** and **Horseman's Cloak** and the **Lost His Head** advancement.
+
+## What exists now: Halloween decorations
+
+The first fifteen of thirty Halloween decorations; the rest follow five at a time. All of them work all year. Details, numbers and test evidence: [../features/halloween-decorations.md](../features/halloween-decorations.md).
+
+| **The decorations** by day: string lights on posts, Candy Bowls, Coffins, portraits and the Fog Machine's fog | **String lights** at midnight |
+| --- | --- |
+| ![Halloween decorations](../images/ingame_halloween_decorations.jpg) | ![String lights at night](../images/ingame_string_lights_night.jpg) |
+| **Candy Bowls:** empty, half full and heaped | **Coffins:** one open on its red velvet, one shut |
+| ![Candy Bowls](../images/ingame_candy_bowls.jpg) | ![Coffins](../images/ingame_coffins.jpg) |
+| **The Haunted Portraits:** the Lady in Black, the Old Captain, the Black Cat and the Owl | **At night** their eyes glow red |
+| ![Haunted Portraits](../images/ingame_haunted_portraits.jpg) | ![Haunted Portraits at night](../images/ingame_haunted_portraits_night.jpg) |
+| **The Fog Machine** at night, fog lying on the ground | |
+| ![Fog Machine at night](../images/ingame_fog_machine_night.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`DecorClientGameTests`, software rendering, small previews).*
+
+- **Jack-o'-Lantern String Lights:** fix **String Light Hooks** to floors, walls or ceilings and string a strand of tiny pumpkin bulbs between them (up to 16 blocks apart). A hook lights from redstone or from a trickle of electricity, and a strand glows while either end is lit.
+- **Candy Bowl:** fill it with candy and cookies for trick-or-treaters at your home. Each visitor may take one treat a night; you take any time.
+- **Coffin:** two blocks long; its lid lifts on a 27-slot chest, and sneak-using it lets you lie down in it like a bed to set your spawn.
+- **Haunted Portrait:** four sitters in a gilt frame whose eyes follow you, glowing red at night.
+- **Fog Machine:** a dieselpunk machine on the electric network that rolls low fog over the ground, 4 to 16 blocks around it.
+
+The second five:
+
+| **Batch 2** by day: luminarias, floating candles, sconces and soul-lit pumpkins | **Bat Bunting** beside string lights |
+| --- | --- |
+| ![Halloween decorations, batch 2](../images/ingame_halloween_decorations_2.jpg) | ![Bat Bunting](../images/ingame_bat_bunting.jpg) |
+| **Luminarias** at midnight, in eight colours | **Floating Candles** at midnight |
+| ![Luminarias at night](../images/ingame_luminarias_night.jpg) | ![Floating Candles at night](../images/ingame_floating_candles_night.jpg) |
+| **Skeleton Hand Sconces:** two burning, one snuffed | **At night** |
+| ![Skeleton Hand Sconces](../images/ingame_skeleton_hand_sconces.jpg) | ![Skeleton Hand Sconces at night](../images/ingame_skeleton_hand_sconces_night.jpg) |
+| **Soul-flame carvings:** a soul torch, a torch and none | **A giant pumpkin** lit by a soul torch |
+| ![Soul-flame carvings](../images/ingame_soul_carvings_night.jpg) | ![Soul-lit giant pumpkin](../images/ingame_soul_giant_pumpkin_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor2ClientGameTests`, software rendering, small previews).*
+
+- **Luminaria:** a paper bag with a candle in sand and a face cut in its sides. Light it like a candle, and dye it any of 16 colours.
+- **Floating Candles:** up to four candles that hang in the air and bob gently.
+- **Skeleton Hand Sconce:** a torch held out from a wall by a bony hand.
+- **Soul-Flame Carvings:** a soul torch lights any carved pumpkin, giant ones too, with an ice-blue glow.
+- **Bat Bunting:** orange and black pennants and paper bats, strung between String Light Hooks like the string lights.
+
+The graveyard:
+
+| **The graveyard** by day | **The fence** with a shut and an open gate |
+| --- | --- |
+| ![The graveyard](../images/ingame_graveyard.jpg) | ![Cemetery fence and gates](../images/ingame_cemetery_fence.jpg) |
+| **Grave Mounds:** three hands up, two down | **The crypt front:** crypt stone, pillars, a chiseled frieze and the Crypt Door |
+| ![Grave Mounds](../images/ingame_grave_mounds.jpg) | ![Crypt](../images/ingame_crypt.jpg) |
+| **The Mourning Angel** | **Pop-Up Skeletons:** one sprung, one in its crate |
+| ![Mourning Angel](../images/ingame_mourning_angel.jpg) | ![Pop-Up Skeletons](../images/ingame_pop_up_skeletons.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor3ClientGameTests`, software rendering, small previews).*
+
+- **Wrought-Iron Cemetery Fence and Gate:** spear-topped iron railings and a two-leaf gate.
+- **Crypt set:** crypt stone, a chiseled skull stone, fluted pillars and a heavy stone Crypt Door.
+- **Grave Mound:** a zombie's hand claws up out of the earth as you walk past (sneak to creep by).
+- **Mourning Angel:** a marble statue with its head in its hands that weeps at night.
+- **Pop-Up Skeleton:** a crate on the lawn whose skeleton springs out at passers-by.
+
+The witch's cottage:
+
+| **The witch's cottage** by day | **At midnight:** the brews and the gazing crystal ball glow |
+| --- | --- |
+| ![The witch's cottage](../images/ingame_witchs_cottage.jpg) | ![The witch's cottage at night](../images/ingame_witchs_cottage_night.jpg) |
+| **Bubbling Cauldrons:** a green brew over a campfire, purple, orange and water | **Apothecary Shelves,** each set out its own way, and the broom |
+| ![Bubbling Cauldrons](../images/ingame_bubbling_cauldrons.jpg) | ![Apothecary Shelves](../images/ingame_apothecary_shelves.jpg) |
+| **Crystal Balls** (one being gazed into) and the **Grimoire Stand** | **The cauldrons at night** |
+| ![Crystal balls and grimoire](../images/ingame_crystal_balls_and_grimoire.jpg) | ![Bubbling Cauldrons at night](../images/ingame_bubbling_cauldrons_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor4ClientGameTests`, software rendering, small previews).*
+
+- **Bubbling Cauldron:** water from a bucket, then a spider eye, nether wart or glowstone makes a glowing green, purple or orange brew that bubbles over a fire.
+- **Apothecary Shelf:** wall shelves of jars and tinctures; sneak-use to set them out another way.
+- **Crystal Ball:** gaze into its violet mist for one of ten fortunes.
+- **Grimoire Stand:** an open spellbook; use it to turn through four spreads.
+- **Witch's Broom:** a twig besom leaning on its bristles.
+
+The harvest party:
+
+| **The harvest party** by day | **Bobbing for Apples Tubs:** none, two and four apples |
+| --- | --- |
+| ![The harvest party](../images/ingame_harvest_party.jpg) | ![Bobbing tubs](../images/ingame_bobbing_tubs.jpg) |
+| **Pumpkin Crates:** pumpkins, and heirloom pumpkins, squash and gourds | **Hay Bale Seats** and **Autumn Wreaths** in all four colours |
+| ![Pumpkin crates](../images/ingame_pumpkin_crates.jpg) | ![Hay bales and wreaths](../images/ingame_hay_bales_and_wreaths.jpg) |
+| **A wreath on a door** | **Leaf Piles,** one to four layers of each colour |
+| ![Wreath on a door](../images/ingame_wreath_on_a_door.jpg) | ![Leaf piles](../images/ingame_leaf_piles.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor5ClientGameTests`, software rendering, small previews).*
+
+- **Bobbing for Apples Tub:** a tub of water with floating apples; duck for one with an empty hand.
+- **Pumpkin Crate:** a slatted crate that shows four of your pumpkins, squash or gourds.
+- **Hay Bale Seat:** a straw bale to sit on.
+- **Autumn Wreath:** leaves, corn and mums, on a wall or a door.
+- **Leaf Piles:** heaps of red, orange and yellow leaves to jump into.
+
+The haunted house and yard:
+
+| **The haunted house** by day | **At midnight:** the windows glow, eyes peer from the hedge |
+| --- | --- |
+| ![The haunted house](../images/ingame_haunted_house.jpg) | ![The haunted house at night](../images/ingame_haunted_house_night.jpg) |
+| **Rocking Chairs** on the porch | **The Spooky Music Box** playing, and the **Giant Fake Spider** |
+| ![Rocking chairs](../images/ingame_rocking_chairs.jpg) | ![Music box and spider](../images/ingame_music_box_and_spider.jpg) |
+| **Silhouette Windows** lit from inside: bat, cat and witch | **Lurking Eyes** in the hedge at night |
+| ![Silhouette windows](../images/ingame_silhouette_windows_night.jpg) | ![Lurking eyes](../images/ingame_lurking_eyes_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor6ClientGameTests`, software rendering, small previews).*
+
+- **Rocking Chair:** sit in it; at night, empty, it rocks on its own.
+- **Lurking Eyes:** glowing eyes in a hedge at night that vanish when you come close.
+- **Silhouette Window:** a bat, cat or witch cut-out that glows when a lamp lights the other side.
+- **Spooky Music Box:** an original waltz on note-block sounds, played by redstone or wound by hand.
+- **Giant Fake Spider:** a big hairy spider swaying on a silk thread.
+
+## What exists now: more Halloween
+
+Forty-five more Halloween ideas, one category a batch: the haunted house inside, the mad scientist and monsters, the yard and porch, lighting and glow, party games, night events, treats, and costumes. All of it works all year, except the trick-or-treaters, who come only during the Halloween event. Details, numbers and test evidence: [../features/more-halloween.md](../features/more-halloween.md).
+
+| **The haunted room** by day: the organ, the suit of armor, sheeted furniture and the doll | **At midnight**, lit by the chandelier |
+| --- | --- |
+| ![The haunted room](../images/ingame_haunted_room.jpg) | ![The haunted room at night](../images/ingame_haunted_room_night.jpg) |
+| **The Phantom Pipe Organ** playing, with **Tattered Curtains** at the windows (one drape drawn open) | **Dust Sheets** over a rocking chair, a chest and a stair |
+| ![The pipe organ](../images/ingame_pipe_organ.jpg) | ![Dust sheets](../images/ingame_dust_sheets.jpg) |
+| **The Creepy Doll**, turned away since it was last seen | **The Haunted Chandelier** at night |
+| ![The creepy doll](../images/ingame_creepy_doll.jpg) | ![The chandelier at night](../images/ingame_haunted_chandelier_night.jpg) |
+| **The Suit of Armor** at night, its visor glowing | **The Spirit Mirror** at night, its face showing |
+| ![The suit of armor at night](../images/ingame_suit_of_armor_night.jpg) | ![The spirit mirror at night](../images/ingame_spirit_mirror_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor7ClientGameTests`, software rendering, small previews).*
+
+- **Haunted Chandelier:** eight candles on an iron ring; at night a draft blows them out and they relight one by one.
+- **Phantom Pipe Organ:** three blocks wide, two tall; plays the opening of Bach's Toccata and Fugue in D minor, its keys pressing themselves, and sometimes plays alone at night.
+- **Suit of Armor:** its helmet slowly turns to follow the nearest player.
+- **Dust Sheet:** drape it over furniture or a chest for a house shut up long ago; pull it off and everything is as it was.
+- **Spirit Mirror:** at night a pale face fades in and out of the glass.
+- **Tattered Curtains:** ragged cheesecloth drapes that sway in a draft and open and shut together.
+- **Creepy Doll:** its head has turned every time you look back.
+
+### The mad scientist and monsters
+
+| **The mad lab** by day: Tesla Coils, specimen jars, the lab table, the sarcophagus, a raven and two black cats | **At midnight** |
+| --- | --- |
+| ![The mad lab](../images/ingame_mad_lab.jpg) | ![The mad lab at night](../images/ingame_mad_lab_night.jpg) |
+| **Two Tesla Coils** running, arcing to each other | **The Lab Table**, its patient sitting up on redstone |
+| ![Tesla coils](../images/ingame_tesla_coils.jpg) | ![The lab table](../images/ingame_lab_table.jpg) |
+| **Specimen Jars**: an eye, a tentacle, a tiny pumpkin and a brain | **The Mummy Sarcophagus** open, its mummy stepping out |
+| ![Specimen jars](../images/ingame_specimen_jars.jpg) | ![The mummy sarcophagus](../images/ingame_mummy_sarcophagus.jpg) |
+| **The Raven** on its perch and **two Black Cats**, one hissing | **The black cats** at night, eyes glowing |
+| ![The raven and cats](../images/ingame_raven_and_cats.jpg) | ![The black cats at night](../images/ingame_black_cats_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor8ClientGameTests`, software rendering, small previews).*
+
+- **Tesla Coil:** runs on the electric network (20 JE a tick); hums, glows and throws harmless violet arcs to other running coils within eight blocks.
+- **Lab Table:** a sheeted patient that sits bolt upright on a redstone signal, and twitches at night.
+- **Specimen Jar:** glowing green fluid with an eye, a tentacle, a tiny pumpkin or a brain floating in it; sneak-use to change it.
+- **Mummy Sarcophagus:** use it or power it and the lid grinds open, the mummy lurches out, and four seconds later it all shuts again.
+- **Raven on a Perch:** watches the nearest player, ruffles and croaks, caws when used.
+- **Black Cat Figure:** its tail swishes, its eyes glow at night, and it hisses at anyone who runs past.
+
+### The yard and porch
+
+| **The yard** by day: the porch and its witch, the inflatables, signs, hands, skeletons, the archway and the dead tree | **At midnight** |
+| --- | --- |
+| ![The yard](../images/ingame_yard.jpg) | ![The yard at night](../images/ingame_yard_night.jpg) |
+| **Yard Inflatables**: a ghost, a black cat, a pumpkin stack and a spider | **The inflatables at night**, glowing from inside |
+| ![Yard inflatables](../images/ingame_inflatables.jpg) | ![Yard inflatables at night](../images/ingame_inflatables_night.jpg) |
+| **The Animatronic Porch Witch**, cackling over her pot | **Bone Wind Chimes** under the porch roof |
+| ![The porch witch](../images/ingame_porch_witch.jpg) | ![Bone wind chimes](../images/ingame_wind_chimes.jpg) |
+| **The Poseable Skeleton** waving, lounging, hanging from a gallows and sitting on the porch | **Spooky Signs** and **Grasping Hands** |
+| ![Poseable skeletons](../images/ingame_skeletons.jpg) | ![Spooky signs and grasping hands](../images/ingame_spooky_signs_and_hands.jpg) |
+| **The Haunted Archway** and **the Dead Hollow Tree** | **At night**, their lanterns lit and the tree's eyes glowing |
+| ![The archway and the dead tree](../images/ingame_archway_and_tree.jpg) | ![The archway and the dead tree at night](../images/ingame_archway_and_tree_night.jpg) |
+| **Weathervanes** on the porch roof, a bat and a witch | |
+| ![Weathervanes](../images/ingame_weathervanes.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`Decor9ClientGameTests`, software rendering, small previews).*
+
+- **Yard Inflatables:** two blocks tall; a click or redstone and the blower fills them, they wobble and glow from inside; switched off, they sag flat.
+- **Animatronic Porch Witch:** stirs her pot and watches you; walk up and she throws her head back and cackles.
+- **Grasping Hands:** snatch at the ankles of anything that steps on them (a short, harmless Slowness II); sneak past.
+- **Poseable Skeleton:** use it to pose it: sitting, waving, lounging, hanging.
+- **Bone Wind Chimes:** swing and clack under a porch roof, more and louder in rain and storms.
+- **Weathervanes:** a bat or a witch, turning to point into one wind shared by the whole world.
+- **Spooky Sign:** painted warnings, or your own words from a named Name Tag or an anvil.
+- **Haunted Archway:** a lantern-lit gateway three blocks wide and tall, placed and broken as one.
+- **Dead Hollow Tree:** four blocks tall, a face in its bark with glowing eyes, lanterns hanging from its branches.
+
+### Lighting and glow
+
+| **Witch Fire Braziers**, Floating Witch Hats and Mini Pumpkin Stacks by day | **At midnight** |
+| --- | --- |
+| ![Lighting by day](../images/ingame_lighting.jpg) | ![Lighting at night](../images/ingame_lighting_night.jpg) |
+| **Witch fire**: orange, green, purple and blue | **The braziers at night** |
+| ![Witch fire braziers](../images/ingame_witch_fire_braziers.jpg) | ![Witch fire braziers at night](../images/ingame_witch_fire_braziers_night.jpg) |
+| **Glow Paint under Black Lights**, and the Shadow Puppet Lamp | **The same at night** |
+| ![Glow paint](../images/ingame_glow_paint.jpg) | ![Glow paint at night](../images/ingame_glow_paint_night.jpg) |
+| **The Shadow Puppet Lamp's** cat on the wall | **The black lights off**: the paint is only a faint smear |
+| ![The shadow puppet lamp](../images/ingame_shadow_puppet_lamp_night.jpg) | ![Glow paint with the lights off](../images/ingame_glow_paint_unlit_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor10ClientGameTests`, software rendering, small previews).*
+
+- **Black Light** and **Glow Paint:** paint a skull, bat, spider, web, handprint or eye on any face; it blazes green-white under a black light within six blocks.
+- **Witch Fire Brazier:** a dye turns its flame orange, green, purple or blue; a shovel puts it out; it burns nothing.
+- **Shadow Puppet Lamp:** its turning paper shade throws a bat, a cat and a witch round the walls.
+- **Mini Pumpkin Stack:** three little jack o'lanterns with candles in them.
+- **Floating Witch Hat:** a candle-lit hat floating in the air, bobbing and turning.
+
+### Party games
+
+| **The party** by day: the costume contest, the bowling lane, the dance floor, the traps, the ghost bell, the fortune teller and a candy cache | **At midnight**, lit by the dance floor |
+| --- | --- |
+| ![Party games by day](../images/ingame_party_games.jpg) | ![Party games at night](../images/ingame_party_games_night.jpg) |
+| **The costume contest:** a witch on the runway, the judges' score cards up | **Pumpkin bowling:** seven pins down |
+| ![The costume contest](../images/ingame_costume_contest.jpg) | ![Pumpkin bowling](../images/ingame_pumpkin_bowling.jpg) |
+| **The scoreboard** chalks the frame and the score | **Jump-Scare Traps:** one ready, one gone off |
+| ![The bowling scoreboard](../images/ingame_bowling_scoreboard.jpg) | ![Jump-scare traps](../images/ingame_jump_scare_traps.jpg) |
+| **The Ghost Bell** ringing, **the Fortune Teller's Table** and a **Candy Cache** | **A reading:** the Pumpkin card turned, the planchette at YES |
+| ![The ghost bell and fortune table](../images/ingame_ghost_bell_and_fortune_table.jpg) | ![A fortune reading](../images/ingame_fortune_reading.jpg) |
+| **The Monster Mash Dance Floor** at night, villagers on it | |
+| ![The dance floor at night](../images/ingame_dance_floor_night.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`Decor11ClientGameTests`, software rendering, small previews).*
+
+- **Jump-Scare Trap:** walk up to it (not sneaking), or trip a wire, and a ghost on a spring shoots out with a shriek.
+- **Costume Contest:** walk the Costume Runway in costume while the Judges' Table has a round open; the others vote by using their favourite; the most votes win a Best Costume Ribbon.
+- **Pumpkin Bowling:** roll a Bowling Pumpkin at Skeleton Pins; the Bowling Scoreboard keeps ten-pin score and stands the pins up.
+- **Candy Cache:** a hollow stump that hides treats like a Candy Bowl.
+- **Monster Mash Dance Floor:** lights up in pulsing colours from a playing jukebox or redstone; villagers dance on it.
+- **Ghost Tag:** ring the Ghost Bell; the ghost glows and tags others by hitting them, harmlessly.
+- **Fortune Teller's Table:** a tarot card, a planchette and twenty silly fortunes.
+
+### Night events
+
+| **Night events** by day: a toilet-papered yard, the bonfire and the hayride | **At night** |
+| --- | --- |
+| ![Night events by day](../images/ingame_night_events.jpg) | ![Night events at night](../images/ingame_night_events_night.jpg) |
+| **Toilet paper** hanging from the trees | **Trick-or-treaters** at the door, by the Candy Bowl |
+| ![A toilet-papered yard](../images/ingame_toilet_papered_yard.jpg) | ![Trick-or-treaters at night](../images/ingame_trick_or_treaters_night.jpg) |
+| **The Halloween Bonfire**, food on its skewers | **The Haunted Hayride**, children aboard |
+| ![The Halloween bonfire](../images/ingame_halloween_bonfire_night.jpg) | ![The haunted hayride](../images/ingame_haunted_hayride_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor12ClientGameTests`, software rendering, small previews). The children at the door are posed for the photograph; in play they walk up, knock and leave.*
+
+- **Trick-or-treaters:** during the Halloween event, village children in costume come to a Candy Bowl by a lit door between dusk and midnight; each takes a treat and leaves a thank-you gift, or, if the bowl is empty, they toilet-paper your trees.
+- **Toilet Paper Rolls:** thrown, they drape streamers from leaves and over fences; rain washes them off.
+- **Haunted Hayride:** a four-seat hay wagon on rails; at night its riders hear something spooky now and then.
+- **Halloween Bonfire:** cooks what a campfire cooks, four at a time, twice as fast; toast marshmallows on a stick over it.
+
+### Treats
+
+| **A Halloween party table** by day: barmbracks, punch bowls, a Candy Bowl and giant candy | **At night**, the punch glowing |
+| --- | --- |
+| ![Treats by day](../images/ingame_halloween_treats.jpg) | ![Treats at night](../images/ingame_halloween_treats_night.jpg) |
+| **The Witch's Brew Punch Bowl** at night, fog rolling over its rim | **Every treat**, framed on the wall |
+| ![The punch bowl at night](../images/ingame_witchs_brew_punch_bowl_night.jpg) | ![The treats](../images/ingame_treat_items.jpg) |
+| **The Barmbrack**, whole and cut | **Giant Candy**: candy corn, a lollipop, a wrapped sweet and a gumdrop |
+| ![The barmbrack](../images/ingame_barmbrack.jpg) | ![Giant candy](../images/ingame_giant_candy.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor13ClientGameTests`, software rendering, small previews).*
+
+- **Witch's Brew Punch Bowl:** a berry brews two servings of glowing punch, up to twelve; a glass bottle ladles one out. Drinking it makes you glow.
+- **Soul Cakes** and the **Barmbrack:** a fruit loaf eaten a slice at a time; one slice hides a ring, and every slice tells a fortune.
+- **Pumpkin Spice Latte** (Speed for thirty seconds), **Pumpkin Bread**, **Spiderweb Cupcakes** and **Bat-Wing Cookies**; soul cakes, cupcakes and cookies are treats for Candy Bowls and Candy Bags.
+- **Giant Candy:** block-sized props; an empty hand changes the design.
+
+### Costumes
+
+| **Six outfits** on armor stands: the vampire cape, mummy wraps, skeleton suit, werewolf mask, cat ears and tail, and bat wings | **From behind**: the cape, the tails and the folded wings |
+| --- | --- |
+| ![The outfits](../images/ingame_outfits.jpg) | ![The outfits from behind](../images/ingame_outfits_back.jpg) |
+| **At night** the skeleton suit's bones glow | **On mobs**: a crouching zombie wrapped in its cape, a skeleton in a werewolf mask, a husk in mummy wraps |
+| ![The outfits at night](../images/ingame_outfits_night.jpg) | ![Outfits on mobs](../images/ingame_outfits_on_mobs.jpg) |
+| **Bat wings** spread in the air | **The Costume Trunk**, open |
+| ![Bat wings in the air](../images/ingame_bat_wings_flying.jpg) | ![The costume trunk](../images/ingame_costume_trunk.jpg) |
+
+*Real screenshots from the client game test that CI runs (`Decor14ClientGameTests`, software rendering, small previews). The floating armor stand stands in for a jumping player.*
+
+- **Six outfits**, worn on the head and drawn over the whole body: the **Vampire Cape** flares as you walk and wraps round you when you sneak; **Mummy Wraps**; a **Skeleton Suit** whose bones glow; a **Werewolf Mask** with fur, claws and a tail; **Cat Ears and Tail**; **Bat Wings** that spread and flap when you jump. All count as costumes for trick-or-treating.
+- **Costume Trunk:** keeps nine costumes; an empty hand changes you into the next one.
+
+## Fall additions
+
+Ten more fall and Halloween additions, one per pull request ([features/fall-additions.md](../features/fall-additions.md)).
+
+### The chandlery
+
+| **The chandlery**: a pot of molten purple beeswax over a campfire, a cold pot of set tallow, and a table of Aura Candles | **Aura Candles** of one to four layers, in several colours and scents; the flame takes the colour of the first scent |
+| --- | --- |
+| ![The chandlery](../images/ingame_chandlery.jpg) | ![Aura candles](../images/ingame_aura_candles.jpg) |
+| **The Wax Melting Pot** from above: the wax in its colour, at its level | **At night**: the candles' light and flames |
+| ![The wax melting pot](../images/ingame_wax_melting_pot.jpg) | ![Aura candles at night](../images/ingame_aura_candles_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`ChandleryClientGameTests`, software rendering, small previews).*
+
+- **Wax Melting Pot:** set it over a fire and melt honeycomb (beeswax) or rotten flesh (tallow) in it; stir in dyes, up to two scents, glowstone dust (a stronger aura, a faster burn) and redstone (a longer burn).
+- **Aura Candles:** dip string to start one, then dip it again once each layer has cooled, up to four layers. Each layer makes it bigger, brighter and wider-reaching, and adds its wax's colour, scents and burn time. A third scent muddles it.
+- **Lit, a candle is a small beacon:** every four seconds it gives everyone in its radius its scents' effects, wards off monsters, makes creatures glow or speeds up crops, until it burns down. Broken, it keeps what is left.
+
+### The cider mill
+
+| **The cider mill**: an apple tree, two Cider Presses and three Cider Barrels | **An apple tree** in blossom and hung with ripe apples |
+| --- | --- |
+| ![The cider mill](../images/ingame_cider_mill.jpg) | ![An apple tree](../images/ingame_apple_tree.jpg) |
+| **Cider Presses** from above: apples in the hopper and pulp in the basket; a cheese halfway pressed, with juice in the trough | **Cider Barrels**: sweet, sparkling and aged, by their chalk marks |
+| ![Cider presses](../images/ingame_cider_presses.jpg) | ![Cider barrels](../images/ingame_cider_barrels.jpg) |
+
+*Real screenshots from the client game test that CI runs (`CiderClientGameTests`, software rendering, small previews).*
+
+- **Apple trees:** wild in plains and flower-rich places, or grown from apple seeds; the leaves blossom and then hang with apples to pick, without cutting the tree down.
+- **Cider Press:** turn the crank to grind apples into pulp, one at a time; then four turns of the screw press out the juice (a serving an apple) and knock out the pomace. Bottle the juice as Sweet Cider.
+- **Cider Barrel:** sweet cider ferments into Sparkling Cider in a day and matures into Aged Cider in three; broken, a barrel keeps its cider.
+- **Mulled Cider** (Cooking Pot), **Apple Cider Donuts**, and **Apple Pomace** for pigs, compost and seeds.
+
+### The preserves pantry
+
+| **The pantry**: a Canning Kettle at the boil over a campfire, and two Pantry Shelves of preserves | **The Canning Kettle** from above: four jars in the boiling water |
+| --- | --- |
+| ![The preserves pantry](../images/ingame_preserves_pantry.jpg) | ![The canning kettle](../images/ingame_canning_kettle.jpg) |
+| **Pantry Shelves**: jars sealed with gingham caps, and not | |
+| ![Pantry shelves](../images/ingame_pantry_shelves.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`PantryClientGameTests`, software rendering, small previews).*
+
+- **Preserves** cooked into **Mason Jars** in the Cooking Pot: jams, fruit butters, jelly, and pickles and relish in **Cider Vinegar**. A jar holds four servings; the last leaves the jar.
+- **Unsealed jars spoil** three days after cooking. The **Canning Kettle** seals them in a boiling water bath: sealed jars keep until opened, stack, and wear a gingham cap.
+- **Pantry Shelf:** shows off six jars.
+
+### Crows and working scarecrows
+
+| **Crows** over a carrot patch just out of a scarecrow's reach, and one of them down on it, pecking | **The working scarecrow**: wearing a pumpkin head, it guards the field eight blocks round |
+| --- | --- |
+| ![Crows](../images/ingame_crows.jpg) | ![Crows and a scarecrow](../images/ingame_crows_and_scarecrow.jpg) |
+
+*Real screenshots from the client game test that CI runs (`CrowClientGameTests`, software rendering, small previews). The pecking crow was sent after its crop and pecks for real; the others are posed in flight.*
+
+- **Crows** come to fields by day in small flocks, wheel over them, and drop onto ripe crops to peck them three growth stages back (only while `mob_griefing` is on). Crops under a roof, tall crops, gourds and bushes are safe.
+- **Scarecrows keep them off:** crows leave the crops within 4 blocks of a bare scarecrow alone, 8 of one wearing a pumpkin head, 12 of one wearing a lit head.
+- Crows fly off from a player who comes close, from a blow, and at nightfall; they drop feathers. Details: [fall additions](../features/fall-additions.md#crows).
+
+### Spooky fireworks
+
+| **Spooky fireworks** at midnight: a bat, a jack o'lantern, a ghost and a skull, each drawn in sparks facing the camera | **A finale** fired from a Show Launcher: nine rockets fanned out, their pictures bursting together |
+| --- | --- |
+| ![Spooky fireworks](../images/ingame_spooky_fireworks.jpg) | ![A fireworks finale](../images/ingame_fireworks_finale.jpg) |
+| **The Show Launcher**, loaded: a rocket's nose in each tube, the dial on its front set to "finale" | |
+| ![The Show Launcher](../images/ingame_show_launcher.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`FireworkClientGameTests`, software rendering, small previews). The four pictures in the first are burst straight on the client; the finale is fired from the launcher for real.*
+
+- **Spooky fireworks** burst into a bat, a jack o'lantern, a ghost or a skull in coloured sparks, the right way round for every player. Paper, gunpowder (the flight) and the picture's ingredients; glowstone dust to twinkle. They hurt and break nothing.
+- **Show Launcher:** nine tubes of sixteen rockets each (spooky or vanilla), fired in sequence, in volleys or as a finale, by hand or redstone. Details: [fall additions](../features/fall-additions.md#spooky-fireworks).
+
+### The sky lantern festival
+
+| **Sky Lanterns** let go together at night in seven colours, rising together; one carries a wish, "A good harvest" | **Mooncakes:** red bean, chestnut and pumpkin, and a Sky Lantern, in item frames |
+| --- | --- |
+| ![Sky lanterns](../images/ingame_sky_lanterns.jpg) | ![Mooncakes](../images/ingame_mooncakes.jpg) |
+
+*Real screenshots from the client game test that CI runs (`LanternClientGameTests`, software rendering, small previews). The lanterns are let go for real and photographed as they rise.*
+
+- **Sky Lanterns**, dyed any colour and named for a wish, rise glowing on a wind they all share and burn out after two minutes or so.
+- **The lantern festival:** eight let go within 32 blocks in two minutes fill the sky, with Luck and A Sky Full of Wishes for everyone near.
+- **Mooncakes** baked in the Cooking Pot, with Luck when eaten outdoors under a full moon. Details: [fall additions](../features/fall-additions.md#sky-lanterns).
+
+### The Harvest Feast Table
+
+| **A Harvest Feast Table** of four lengths, set with eight foods between hay bale seats | **The dishes** up close: bread, roasted corn, pumpkin pie, chicken, apples, mooncakes, baked potatoes and cookies, each heaped by its servings |
+| --- | --- |
+| ![A Harvest Feast Table](../images/ingame_harvest_feast.jpg) | ![The dishes on a feast table](../images/ingame_feast_dishes.jpg) |
+
+*Real screenshots from the client game test that CI runs (`FeastClientGameTests`, software rendering, small previews). The dishes are served on the server and drawn by the client.*
+
+- **Harvest Feast Table:** lengths end to end join into one long table; each holds two dishes of up to eight servings of any food or drink.
+- **The feast** grows with the variety on the table and the company at it: Regeneration, then Absorption, then Haste and Luck, then Health Boost and Harvest Home, shared with everyone who ate there lately. Details: [fall additions](../features/fall-additions.md#the-harvest-feast-table).
+
+### The corn maze
+
+| **A medium corn maze** (15 by 15) planted by its gate: the entrance on the near side, the exit with its finish post straight across | **The Corn Maze Gate**, its green pennant pointing into the maze between walls of maze corn |
+| --- | --- |
+| ![A corn maze from above](../images/ingame_corn_maze_planted.jpg) | ![The Corn Maze Gate](../images/ingame_corn_maze_gate.jpg) |
+
+*Real screenshots from the client game test that CI runs (`MazeClientGameTests`, software rendering, small previews). The gate plants the maze for real, a few stalks a tick.*
+
+- **Corn Maze Gate:** choose a size, then use it holding corn kernels to plant a maze of three-tall corn from a fresh seed, one way through, with a finish post at the exit.
+- **Runs** are timed on the server from the gate to the finish post and voided for flying, climbing out, leaving or a shortcut; the best times go on the gate's board, with prize ribbons and A-maze-ing. Details: [fall additions](../features/fall-additions.md#the-corn-maze).
+
+### Ghost hunting
+
+| **Restless spirits** revealed at night over a row of gravestones and grave mounds, lit by soul lanterns | **The hunter's kit:** a Spirit Lantern and a bottle of Ectoplasm in frames, and a lit Ghostly candle |
+| --- | --- |
+| ![Restless spirits in a graveyard](../images/ingame_restless_spirits.jpg) | ![The ghost hunter's kit](../images/ingame_ghost_hunting_kit.jpg) |
+
+*Real screenshots from the client game test that CI runs (`GhostClientGameTests`, software rendering, small previews). The spirits are revealed on the server and drawn by the client.*
+
+- **Restless spirits** rise from gravestones and grave mounds at night and drift about their graves, unseen until revealed.
+- **The Spirit Lantern** reveals every spirit within 12 blocks to everyone near; a revealed spirit shies away but can be cornered, and a glass bottle catches it as **Ectoplasm**, the Ghostly candle scent (invisibility). Details: [fall additions](../features/fall-additions.md#ghost-hunting).
+
+### Face paint
+
+| **Face paint**, all six designs on the player's face: a skull, a jack o'lantern, a black cat, a vampire, a witch and a scarecrow (cropped and enlarged from the test's screenshots) | **A vampire**, the whole frame: the player in third person, seen from the front |
+| --- | --- |
+| ![The six face paint designs](../images/ingame_face_paint.jpg) | ![A painted vampire face](../images/ingame_face_paint_vampire.jpg) |
+
+*Real screenshots from the client game test that CI runs (`FacePaintClientGameTests`, software rendering, small previews). Each design is painted on the server and drawn on the face by the client.*
+
+- **Face Paint Kit:** paints one of six designs on a friend at once, or on your own face after a held use; good for 16 faces.
+- **A painted face is a costume** for trick-or-treating and the costume contest, and washes off under water. Details: [fall additions](../features/fall-additions.md#face-paint).
 
 ## Crop roster: what comes next (planned)
 
@@ -335,7 +826,7 @@ The branch grows in small slices that each stand on their own. Each crop needs a
 | **1. Fall Harvest** ✅ | Corn, sunflower, beans, sweet potato, flax | Tall crops, picking, legumes, wild plants, sickles | Starter farming; mazes and fields; string, feed and stew |
 | **2. Kitchen garden** ✅ | Tomato, onion, garlic, cabbage, pepper, oats, barley | Trellises for climbing crops; the **Cooking Pot** for multi-ingredient meals | A real kitchen: soups, salads, porridge. Cabbage + salt → sauerkraut uses Jugcraft's salt. Garlic can later double as a ward against the planned Vampirism school (not built yet) |
 | **3. Festival Crops** ✅ | Butternut and acorn squash, warty gourds, turnip, cranberry, chestnut tree | Gourds grow from stems like pumpkins; bog crops in shallow water; a fruit tree | Halloween: Turnip Lanterns (the original jack-o'-lantern), gourd displays, candy corn. December: cranberry sauce, roasted chestnuts. All permanent, so nothing is lost after a season |
-| **4. Orchards and vines** | Apple, pear, peach, lemon and orange trees; grapes and hops on trellises; blueberries and raspberries | Fruit trees that grow from saplings and fruit every year without being cut down | Juices, pies, preserves; the cider press; long-term homestead beauty |
+| **4. Orchards and vines** (apple ✅) | Apple (built: [the cider mill](#the-cider-mill)), pear, peach, lemon and orange trees; grapes and hops on trellises; blueberries and raspberries | Fruit trees that grow from saplings and fruit every year without being cut down | Juices, pies, preserves; the cider press; long-term homestead beauty |
 | **5. Fibre, oil and industrial crops** | Cotton, canola, sugar beet, rubber tree, indigo and madder | Tapping (rubber) and retting (flax to linen) | What engineers need from farmers: rubber for insulated cables and belts, plant oil for lubricant and biodiesel, sugar and corn for ethanol, fibres for canvas, dyes |
 | **6. Magical botany** | One herb per magic school (proposal names: Emberroot, Frostcap, Stormreed, Stonebloom, Gravemoss, Bloodthorn, Nightshade, Moonpetal) | Attunement: an herb grows only near its school's influence or with a ritual catalyst | Reagents for the magic branch; see [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md#magical-workshops-and-schools) |
 | **7. Rice and wet farming** | Rice, taro, water chestnut | Paddy crops that grow in one block of still water | A distinct regional farm; rice dishes |
@@ -353,14 +844,14 @@ Hand tools and farmstead blocks, made from wood, stone and early metals. None ne
 | Seed Pouch | Holds several seed types; right-click plants a 3×3 patch of farmland from it | Discovery |
 | **Trellis (wood)** ✅ | Supports climbing crops (tomatoes now; grapes, hops and pole beans later); also a garden decoration | Discovery |
 | **Carving Knife** ✅ | Carves any face into the sides of a pumpkin, a pixel at a time; see [Pumpkin Carving](#what-exists-now-pumpkin-carving) | Discovery |
-| **Scarecrow** ✅ | Decoration for fields and Halloween, in a flannel shirt you dye, with any pumpkin for a head; see [the Halloween harvest](#what-exists-now-the-halloween-harvest). Later keeps crop-eating birds away once those creatures exist | Discovery |
+| **Scarecrow** ✅ | Decoration for fields and Halloween, in a flannel shirt you dye, with any pumpkin for a head; see [the Halloween harvest](#what-exists-now-the-halloween-harvest). Keeps [crows](#crows-and-working-scarecrows) off the crops round it (4 blocks, 8 with a head, 12 with a lit one) | Discovery |
 | **Corn Shock** ✅ | A stook of corn stalks for fall porches and markets (decoration) | Discovery |
 | **Harvest Scale** ✅ | Weighs giant pumpkins, keeps a board of the three heaviest and gives prize ribbons | Discovery |
 | Bushel Basket | Small produce storage for markets | Discovery |
 | Compost Bin | Turns scraps into Compost, an organic fertilizer that makes farmland *fertile* for a while (faster growth); the no-chemistry route | Discovery |
 | Quern (hand mill) | Grinds corn into cornmeal and grain into flour (cornbread, pancakes) | Discovery |
 | Drying Rack | Retts flax into linen fibre, dries herbs and fruit, makes jerky | Workshops |
-| Fruit and Seed Press | Apples into cider, grapes into juice, and **sunflower or flax seeds into plant oil at a low hand-press yield**, so engineers can buy early lubricant from farmers | Workshops |
+| Fruit and Seed Press (apples ✅) | Apples into cider (built: the **Cider Press**, a Discovery-tier hand press; see [the cider mill](#the-cider-mill)); grapes into juice, and **sunflower or flax seeds into plant oil at a low hand-press yield**, so engineers can buy early lubricant from farmers (planned) | Workshops |
 | Butter Churn and Cheese Press | Dairy from the husbandry slice | Workshops |
 | **Cooking Pot** ✅ | Multi-ingredient meals over a campfire (expedition rations later) | Discovery (iron and a campfire; planned for Workshops, moved earlier because it needs no workshop) |
 
