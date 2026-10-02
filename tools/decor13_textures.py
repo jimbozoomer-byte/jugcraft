@@ -6,7 +6,7 @@ punch.
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code or from the small pixel-art grids below,
 from fixed seeds; no Mojang texture is read, traced or recoloured. Block textures are 16x16 and opaque, except the
-bowl's glass (see-through in the middle) and the punch (translucent); the items are see-through round their shapes.
+bowl's glass (half see-through in the middle) and the punch (translucent); the items are see-through round their shapes.
 """
 import math
 import random
@@ -37,12 +37,12 @@ GLASS = [rgb("4a6a56"), rgb("6a8a76")]
 # ---------------------------------------------------------------- the punch bowl
 
 def bowl_glass():
-    """Pale green glass: a rim round the edges, clear (mostly see-through) between them, with a highlight."""
+    """Pale green glass: a rim round the edges, half see-through between them, with a highlight."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y in range(16):
         for x in range(16):
             edge = x in (0, 15) or y in (0, 15)
-            img.putpixel((x, y), (190, 230, 200, 210) if edge else (180, 225, 195, 56))
+            img.putpixel((x, y), (200, 236, 210, 235) if edge else (170, 215, 188, 120))
     for y in range(3, 10):
         img.putpixel((3, y), (240, 255, 245, 170))
     img.putpixel((4, 4), (240, 255, 245, 140))

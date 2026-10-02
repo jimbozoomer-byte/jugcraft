@@ -88,13 +88,13 @@ public class PunchBowlBlock extends Block {
 		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 
-	/** Dry-ice fog spilling over the rim and down the sides, and now and then a bubble. */
+	/** Now and then a puff of dry-ice fog spilling over the rim and down the sides, or a bubble. */
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (state.getValue(SERVINGS_LEFT) <= 0) {
 			return;
 		}
-		for (int i = 0; i < 2; i++) {
+		if (random.nextBoolean()) {
 			double angle = random.nextDouble() * Math.PI * 2;
 			double x = pos.getX() + 0.5 + Math.cos(angle) * 0.42;
 			double z = pos.getZ() + 0.5 + Math.sin(angle) * 0.42;
