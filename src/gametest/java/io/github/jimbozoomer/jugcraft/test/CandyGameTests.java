@@ -16,6 +16,7 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
@@ -47,6 +48,11 @@ import net.minecraft.world.phys.Vec3;
 public class CandyGameTests {
 	private static Item item(String id) {
 		return JugcraftAgriculture.item(id);
+	}
+
+	/** A vanilla dye (26.3 has no Items field for each). */
+	private static Item dye(String color) {
+		return BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("minecraft", color + "_dye"));
 	}
 
 	private static Block block(String id) {
@@ -149,11 +155,11 @@ public class CandyGameTests {
 		helper.assertTrue(kettle.flavours().equals(List.of(CandyFlavour.CHOCOLATE, CandyFlavour.BERRY)),
 				"Two flavours, each once: " + kettle.flavours());
 		helper.assertTrue(kettle.color() == CandyFlavour.CHOCOLATE.color, "Undyed, it takes its first flavour's colour");
-		use(helper, player, pos, new ItemStack(Items.RED_DYE));
+		use(helper, player, pos, new ItemStack(dye("red")));
 		helper.assertTrue(kettle.dyed() && kettle.color() != CandyFlavour.CHOCOLATE.color, "A dye colours it");
 		kettle.setTemperature(CandyKettleBlockEntity.ADD_BELOW);
 		helper.assertTrue(!kettle.cool(), "At the boil it is no longer cool");
-		ItemStack late = new ItemStack(Items.YELLOW_DYE);
+		ItemStack late = new ItemStack(dye("yellow"));
 		int color = kettle.color();
 		use(helper, player, pos, late);
 		helper.assertTrue(late.getCount() == 1 && kettle.color() == color, "Nothing more goes in");
@@ -347,7 +353,7 @@ public class CandyGameTests {
 		for (int i = 0; i < kettles.length; i++) {
 			CandyKettleBlockEntity kettle = batch(helper, player, kettles[i], false, 1);
 			if (i == 1) {
-				use(helper, player, kettles[i], new ItemStack(Items.LIME_DYE));
+				use(helper, player, kettles[i], new ItemStack(dye("lime")));
 			}
 			kettle.setTemperature(122);
 			use(helper, player, kettles[i], tray);
