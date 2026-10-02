@@ -18,6 +18,24 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
+      - name: Gear APIs
+        run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          echo "=== AbstractArrow"; javap -cp "$COMMON" net.minecraft.world.entity.projectile.arrow.AbstractArrow | grep -iE "BaseDamage|shoot|pickup|Pickup|setCritArrow|setPierce" | head -20
+          javap -p -cp "$COMMON" 'net.minecraft.world.entity.projectile.arrow.AbstractArrow$Pickup' | head
+          echo "=== Projectile"; javap -cp "$COMMON" net.minecraft.world.entity.projectile.Projectile | grep -iE "shoot" | head
+          echo "=== Attributes"; javap -cp "$COMMON" net.minecraft.world.entity.ai.attributes.Attributes | grep -iE "FALL|STEP|SAFE|OXYGEN|WATER|MOVEMENT_SPEED|ATTACK_DAMAGE|ARMOR\b" | head -20
+          echo "=== AttributeModifier"; javap -cp "$COMMON" net.minecraft.world.entity.ai.attributes.AttributeModifier | head -12
+          javap -cp "$COMMON" 'net.minecraft.world.entity.ai.attributes.AttributeModifier$Operation' | head -8
+          echo "=== ItemAttributeModifiers"; javap -cp "$COMMON" net.minecraft.world.item.component.ItemAttributeModifiers | head -30
+          javap -cp "$COMMON" 'net.minecraft.world.item.component.ItemAttributeModifiers$Builder' | head
+          echo "=== EquipmentSlotGroup"; javap -cp "$COMMON" net.minecraft.world.entity.EquipmentSlotGroup | grep static | head -12
+          echo "=== Item.Properties attributes"; javap -cp "$COMMON" 'net.minecraft.world.item.Item$Properties' | grep -iE "attributes|component|stacksTo|durability|rarity" | head
+          echo "=== Item.inventoryTick usage example"; javap -c -cp "$COMMON" net.minecraft.world.item.Item | grep -A3 "inventoryTick" | head
+          echo "=== Player"; javap -cp "$COMMON" net.minecraft.world.entity.player.Player | grep -iE "getProjectile|hasInfiniteMaterials|isCreative|getAbilities" | head
+          echo "=== SoundEvents"; javap -cp "$COMMON" net.minecraft.sounds.SoundEvents | grep -iE " ARROW_SHOOT| ARMOR_EQUIP_(LEATHER|IRON)| BUCKET_FILL;| PLAYER_ATTACK_SWEEP" | head
+          echo "=== Blocks DyeColor"; javap -cp "$COMMON" net.minecraft.world.item.DyeColor | grep -iE "getName|getSerializedName|getTextureDiffuseColor|getMapColor" | head
       - name: Tool and armor APIs
         run: |
           set +e
