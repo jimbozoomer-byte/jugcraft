@@ -136,6 +136,12 @@ def assets():
     deposits.write_all(write, ASSETS, DATA / MOD, lang)
     import tank_display
     tank_display.write_all(write, ASSETS, DATA / MOD, lang, model_writer)
+    import gear
+    gear.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import exosuit
+    exosuit.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import plastic
+    plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
     gui_textures.write_all(write, ASSETS, lang, MACHINES)
     import advancements
@@ -151,7 +157,27 @@ def assets():
     lang.update(drone_sounds.LANG)
     import guide_books
     guide_books.write_assets(write, rid, ASSETS, DATA, lang)
+    seasons_assets(lang)
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
+
+
+def seasons_assets(lang):
+    """Seasonal snow: vanilla snow layers' models (layers 1-7, then a full block), its name and its drops."""
+    import seasons
+    block = seasons.SNOW_BLOCK
+    models = {layers: f"minecraft:block/snow_height{layers * 2}" for layers in range(1, 8)}
+    models[8] = "minecraft:block/snow_block"
+    write(ASSETS / "blockstates" / f"{block}.json",
+          {"variants": {f"layers={layers}": {"model": model} for layers, model in models.items()}})
+    lang[f"block.{MOD}.{block}"] = seasons.SNOW_DISPLAY
+    # Broken by a player or mob, a snowball per layer, like vanilla snow layers (never the block itself).
+    write(DATA / MOD / "loot_table" / "blocks" / f"{block}.json", {"type": "minecraft:block", "pools": [{
+        "condition": {"type": "minecraft:entity_properties", "entity": "this", "predicate": {}},
+        "entries": [{"type": "minecraft:alternatives", "children": [
+            {"type": "minecraft:item", "condition": block_state(block, {"layers": str(layers)}),
+             "modifier": {"type": "minecraft:set_count", "count": layers}, "name": "minecraft:snowball"}
+            for layers in range(1, 9)]}],
+        "rolls": 1}], "random_sequence": rid(f"blocks/{block}")})
 
 
 def drone_assets(lang):
@@ -645,7 +671,7 @@ RECIPE_TYPES = {"crusher": "crushing", "arc_furnace": "arc_smelting", "alloy_sme
                 "metal_press": "pressing", "wire_drawer": "wire_drawing", "circuit_assembler": "circuit_assembly",
                 "pulverizer": "pulverizing", "ore_washer": "ore_washing", "sieve": "sifting", "sawmill": "sawing",
                 "coke_oven": "coking", "steel_foundry": "steelmaking",
-                "tree_farm": "tree_growing", "crystal_grower": "crystal_growing"}
+                "tree_farm": "tree_growing"}
 
 
 def machine_recipe_files(out):
@@ -760,7 +786,10 @@ def powered_tools(lang):
     # rocket_pack.png), and the pack itself in 3D on the back (client/RocketPackLayer draws these quads).
     write(ASSETS / "equipment" / "rocket_pack.json", {"layers": {"humanoid": [{"texture": rid("rocket_pack")}]}})
     import kinetic_rotors
-    write(ASSETS / "worn_models.json", {"rocket_pack": kinetic_rotors.quads(tool_models.ITEMS["rocket_pack"])})
+    # The exosuit's 3D parts (shoulder plates, skirt plates, the Ronin's hat) too: client/ExosuitLayer.
+    import exosuit
+    write(ASSETS / "worn_models.json", {"rocket_pack": kinetic_rotors.quads(tool_models.ITEMS["rocket_pack"]),
+                                        **exosuit.worn_models(kinetic_rotors.quads)})
     for module, (display, short, about) in UPGRADE_MODULES.items():
         lang[f"item.{MOD}.{module}"] = display
         lang[f"item.{MOD}.{module}.short"] = short
@@ -1075,6 +1104,12 @@ def storage_tags(tags, path, block_id, tool):
 
 def tags():
     tags = Tags()
+    import petro
+    for crop in petro.FERMENTABLE:
+        tags.add("item", f"{MOD}:fermentable", crop)
+    import plastic
+    for block in plastic.blocks():
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     for metal, info in METALS.items():
         tool = info.get("tool", "stone")
         tags.add("item", f"c:ingots/{metal}", rid(f"{metal}_ingot"))
@@ -1142,6 +1177,15 @@ def tags():
     import tank_display
     for block in tank_display.BLOCKS:
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    # Biomes whose grass and leaves change colour with the seasons (client/SeasonColors).
+    import seasons
+    for biome in seasons.BIOMES:
+        tags.add("worldgen/biome", seasons.TAG, biome)
+    for biome in seasons.WINTER_SNOW:
+        tags.add("worldgen/biome", seasons.WINTER_SNOW_TAG, biome)
+    # Seasonal snow counts as snow (grass under it turns snowy) and is dug with a shovel.
+    tags.add("block", "minecraft:snow", rid(seasons.SNOW_BLOCK))
+    tags.add("block", "minecraft:mineable/shovel", rid(seasons.SNOW_BLOCK))
     tags.write()
 
 

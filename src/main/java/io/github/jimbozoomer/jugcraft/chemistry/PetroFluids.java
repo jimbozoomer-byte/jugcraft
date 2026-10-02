@@ -130,6 +130,8 @@ public final class PetroFluids {
 	public static Entry NITRIC_ACID;
 	/** Vanadium leached into sulfuric acid (batch 17): the flow battery's electrolyte. */
 	public static Entry VANADIUM_ELECTROLYTE;
+	/** Crops fermented in the chemical reactor (batch 26): fuel for the gas turbine and the advanced engine. */
+	public static Entry BIOETHANOL;
 
 	private PetroFluids() {
 	}
@@ -181,6 +183,7 @@ public final class PetroFluids {
 		VINYL_CHLORIDE = gas("vinyl_chloride", 0xFFD6DEB6);
 		NITRIC_ACID = fluid("nitric_acid", 5, 4, 1, 0xFFE2D48C, MapColor.COLOR_YELLOW);
 		VANADIUM_ELECTROLYTE = fluid("vanadium_electrolyte", 6, 4, 1, 0xFF2C3E96, MapColor.COLOR_BLUE);
+		BIOETHANOL = fluid("bioethanol", 4, 4, 1, 0xFFE2D6A4, MapColor.SAND);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

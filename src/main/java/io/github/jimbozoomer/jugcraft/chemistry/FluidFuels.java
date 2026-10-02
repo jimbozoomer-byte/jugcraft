@@ -27,6 +27,12 @@ public final class FluidFuels {
 	 * the fuel is still used up, so never a loop. */
 	public static final int ADVANCED_DIESEL = 320;
 	public static final int ADVANCED_GASOLINE = 448;
+	/**
+	 * Bioethanol (batch 26), fermented from crops: as good as refinery gas in the gas turbine, and a little below diesel
+	 * in the advanced engine. A bucket of it takes 32 crops and 38,400 JE of fermenting.
+	 */
+	public static final int BIOETHANOL = 192;
+	public static final int ADVANCED_BIOETHANOL = 256;
 
 	private FluidFuels() {
 	}
@@ -40,9 +46,11 @@ public final class FluidFuels {
 					: fluid == PetroFluids.HEAVY_FUEL_OIL.source() ? HEAVY_FUEL_OIL : 0;
 			case FUEL_CELL -> fluid == PetroFluids.HYDROGEN.fluid() ? HYDROGEN : 0;
 			case ADVANCED_ENGINE -> fluid == PetroFluids.GASOLINE.source() ? ADVANCED_GASOLINE
-					: fluid == PetroFluids.DIESEL.source() ? ADVANCED_DIESEL : 0;
+					: fluid == PetroFluids.DIESEL.source() ? ADVANCED_DIESEL
+					: fluid == PetroFluids.BIOETHANOL.source() ? ADVANCED_BIOETHANOL : 0;
 			case GAS_TURBINE -> fluid == PetroFluids.GASOLINE.source() ? GASOLINE
-					: fluid == PetroFluids.REFINERY_GAS.fluid() ? REFINERY_GAS : 0;
+					: fluid == PetroFluids.REFINERY_GAS.fluid() ? REFINERY_GAS
+					: fluid == PetroFluids.BIOETHANOL.source() ? BIOETHANOL : 0;
 			default -> 0;
 		};
 	}

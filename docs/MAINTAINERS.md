@@ -19,7 +19,7 @@ Suggested labels: proposal, integration, approved, needs-design, blocked-platfor
 
 ## Review checklist
 
-1. Does it connect to the design and approved issue?
+1. Does it connect to the design and the proposal described in the PR or a linked issue? An approved issue is not required for a focused community prototype.
 2. Are implementation and diff understandable? Review AI-generated code as carefully as human code.
 3. Are checks real and relevant? Review changes to the checker/workflows themselves.
 4. Has multiplayer and integration evidence been supplied under docs/TESTING.md?

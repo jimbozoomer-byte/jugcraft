@@ -73,7 +73,7 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | BATTERY_BOX | battery_box | storage; outputs from the front only | 400k / 256 / 256 / – | – | – |
 | ELECTRIC_FURNACE | electric_furnace | vanilla smelting, 100 ticks | 10k / 128 / 0 / 10 | in, out | vanilla `smelting` |
 | CRUSHER | crusher | ore ×2, minerals, gravel/sand | 10k / 128 / 0 / 16 | in, out | `jugcraft:crushing` |
-| ARC_FURNACE | arc_furnace_controller | 3×3×3 casing structure | 50k / 512 / 0 / 64 | in, out | `jugcraft:arc_smelting` |
+| ARC_FURNACE | arc_furnace_controller | 3×3×3 casing structure; pulls silicon boules and takes argon as a boost gas since batch 24 (the crystal grower's jobs) | 50k / 512 / 0 / 64 | 2 in, out | `jugcraft:arc_smelting` (multi-ingredient since batch 24) |
 | SOLAR_PANEL | solar_panel | 8 JE/t in sun | 4k / 0 / 32 / – | – | – |
 | ADVANCED_SOLAR_PANEL | advanced_solar_panel | **pedestal + 3×3 layer (10 parts)**, 64 JE/t in sun (sky checked above the array) | 400k / 0 / 512 / – | – | – |
 | ADVANCED_ENGINE | advanced_engine | **2×1×1** KE generator: gasoline/diesel → up to 1,024 KE/t out of the master's back | none (KE) | – (8,000 mB fuel tank) | – |
@@ -90,7 +90,6 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | SAWMILL | sawmill | log → 6 planks + sawdust | 10k / 128 / 0 / 12 | in, out, 2 byproduct | `jugcraft:sawing` |
 | CAPACITOR_BANK | capacitor_bank | **2×2** battery: charges any side, outputs from its front | 4M / 4,096 / 4,096 / – | – | – |
 | LITHIUM_BATTERY_BANK | lithium_battery_bank | **3×2×1** battery (electric look): charges any side, outputs from all six front faces | 32M / 16,384 / 16,384 / – | – | – |
-| CRYSTAL_GROWER | crystal_grower | **1×2** (cyan look): 4 silicon + phosphate → silicon boule | 60k / 512 / 0 / 128 | 2 in, out | `jugcraft:crystal_growing` (multi) |
 | LITHOGRAPHY_STATION | lithography_station | **3×2×2** fluid processor (cyan look): wafer + 2 copper wire + 100 mB acid → 4 microchips | 60k / 1,024 / 0 / 192 | 2 in, out, 4,000 mB tank | `jugcraft:lithography` |
 | GAS_HOLDER | gas_holder | **3×3×3** tank, 1,024 buckets of one gas (`GasFluid` only), no power, no screen | none | – (gas) | – |
 | STEEL_TANK | steel_tank | **2×2** tank, 128 buckets, no power, no screen; drops with its fluid (`MachineKind.keepsContents`) | none | – (fluid) | – |
@@ -183,7 +182,8 @@ Other blocks:
 - **Gases** (`PetroFluids.Gas`, `GasFluid`): fluids with no block or bucket (refinery gas); Fabric names them from `block.<ns>.<id>`.
 - **Draw-offs:** `MachineKind.outputLayer(tank)` makes an output tank push only from the faces of one block layer (distillation tower, cracker, reformer).
 - **Items** (`PetroItems`): cracking catalyst, asphalt binder.
-- **Machines:** `PUMPJACK` (custom tick), `OIL_SAND_EXTRACTOR` (`jugcraft:oil_sand_extraction`), `DISTILLATION_TOWER` (`distillation`), `CATALYTIC_CRACKER` (`catalytic_cracking`), `VACUUM_DISTILLATION_UNIT` (`vacuum_distillation`), `CATALYTIC_REFORMER` (`reforming`), `CHEMICAL_MIXER` (`chemical_mixing`), `FRACKING_RIG` (custom tick; works over shale), `FLOWBACK_TREATMENT_UNIT` (`water_treatment`).
+- **Machines:** `PUMPJACK` (custom tick), `DISTILLATION_TOWER` (`distillation`: crude oil, and heavy fuel oil vacuum-distilled since batch 24), `CATALYTIC_CRACKER` (`catalytic_cracking`: cracking, and naphtha reforming since batch 24), `FRACKING_RIG` (custom tick; works over shale), `FLOWBACK_TREATMENT_UNIT` (`water_treatment`; the Settling Plant: flowback water, oil sand, bitumen, mud). The oil sand extractor, vacuum distillation unit, catalytic reformer and chemical mixer were removed in batch 24 (docs/features/machine-consolidation.md).
+- **Fluid results** may name their output tank (`"tank": n`, `FluidRecipe.resultTank`); without it they go by position.
 - **Industrial chemistry:** `ELECTROLYTIC_CELL` (`electrolysis`: brine → chlorine/hydrogen/lye by layer; alumina + coke → aluminum), `CHEMICAL_REACTOR` (`chemical_reaction`: sulfuric acid, alumina, fertilizer), `FUEL_CELL` (hydrogen → JE). Items `alumina`, `fertilizer`, `titanium_sponge`, `lithium_cell`, `neodymium_magnet`, and the electronics items `silicon_boule`, `silicon_wafer`, `microchip` (`chemistry/FertilizerItem`, area bone meal on crops). Fluids `brine`, `lye`, `sulfuric_acid`; gases `chlorine`, `hydrogen`. `check_mod_data` audits metal in fluid recipes.
 - **Nitrogen chemistry (batch 12):** `AIR_SEPARATION_UNIT` (no recipes, like the pumpjack: `tickAirSeparation` fills nitrogen `ASU_NITROGEN_PER_TICK` into tank 0, drawn off layer 5, and oxygen `ASU_OXYGEN_PER_TICK` into tank 1, layer 0) and `SYNTHESIS_CONVERTER` (`gas_synthesis`: Haber–Bosch ammonia, Ostwald nitric acid; three input tanks, one output). Gases `nitrogen`, `oxygen`, `ammonia`; fluid `nitric_acid`. Chemical reactor `ammonium_phosphate` and lithography `microchip_nitric` recipes.
 - **Glass chemistry (batch 16):** rock `tincal` (`ROCKS`, desert/badlands, drops `borax`); items `borax`, `borosilicate_glass`, `optical_fibre`, `ferroboron` (`materials.ITEMS`). Machine recipes may set `"name"` for a second recipe with the same output. `MachineRecipes.multiRecipes` sorts by ingredient count, most first.
@@ -255,9 +255,30 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ### Feature switches (`config/`)
 
-- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives`, `parties` and `drones`.
+- `config/jugcraft.properties` holds `<feature>.enabled` and the text options in `JugcraftConfig.TEXT_OPTIONS` (the `seasons.*` settings). The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives`, `parties` and `drones`.
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
+
+### Seasons (`season/`, `client/SeasonColors`, `tools/seasons.py`)
+
+- **The clock.** `JugcraftSeasons` is the one season clock.
+  - `today()` gives the season day:
+    - 1–365 on the northern calendar, where 29 February shares the 28th's day and the south is `SOUTH_OFFSET` (182) days on;
+    - a fixed mode's day (`SeasonCalendar.Mode`: spring 105, summer 196, autumn 293, winter 15);
+    - 0 when off.
+  - `isActive(SeasonCalendar.Event)` tells whether an event is running: `HARVEST_FEAST` or `DECEMBER`. Events are calendar windows in the same zone.
+- **Settings.** `SeasonCalendar.Settings` reads `seasons.mode`, `seasons.hemisphere`, `seasons.timezone`, `seasons.snow`, `seasons.snow_depth`, `harvest_feast`, `harvest_feast.days` and `december` (`JugcraftConfig.TEXT_OPTIONS`; read them with `JugcraftConfig.textOption`).
+- **Overrides until the server stops.** `setMode`, `setFixedDate` (a preview date) and `setSnow` change the settings in memory only. The command `/jugcraft season [set|date|snow]` (`SeasonCommand`, permission level 2 to change) calls them.
+- **Sync.** The server sends `SeasonPayload` (day and snowing) on join and whenever anything changes; it checks once a minute. Events are announced in chat.
+- **Colours.**
+  - `season/SeasonPalette.colour(day, vanilla, foliage, x, z)` holds the colour maths: keyframes `YEAR` and patchy autumn hues.
+  - The client applies it to grass and foliage tints in `#jugcraft:has_seasons`, through the client mixin `mixin/client/ClientLevelSeasonMixin` on `ClientLevel.calculateBlockTint`.
+- **Biome flags.** `mixin/BiomeSeasonMixin` gives every biome `SeasonalBiome` flags, `jugcraft$hasSeasons()` and `jugcraft$hasWinterSnow()`. They are set from the two biome tags whenever tags load, so hot paths need no tag lookups.
+- **Winter snow.**
+  - `SeasonState.snowing()` is true when `seasons.snow` is on and the season day is in 1 December to 28 February.
+  - While it is true, `BiomeSeasonMixin` makes rain fall as snow in `#jugcraft:has_winter_snow`.
+  - `SeasonalSnow` lays `jugcraft:seasonal_snow` (`SeasonalSnowBlock`, vanilla snow models, in `#minecraft:snow`) round players while it rains. Once it is no longer snowing, the block melts on random ticks.
+- **For later seasonal content.** Read `JugcraftSeasons.today()`, `isActive(event)` or `SeasonState.snowing()` on the server. Never trust a client's date.
 
 ### Parties (`party/`)
 
@@ -354,6 +375,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `…/logistics/` | item pipe, extractor, sorter, wrench, item networks |
 | `…/machine/` | machine kinds, blocks, block entity, menu, recipes, footprints, power ports, side config, arc furnace structure |
 | `src/client/java/.../client/` | `JugcraftClient` (screen registration), `MachineScreen` |
+| `…/season/`, `…/mixin/BiomeSeasonMixin.java`, `src/client/.../SeasonColors.java`, `src/client/.../mixin/client/` | seasons: calendar and events, palette, sync, command, winter snow, the client tint hook |
 | `src/gametest/java/.../test/JugcraftGameTests.java` | game tests (run by `./gradlew build`) |
 | `src/gametest/java/.../test/JugcraftClientGameTests.java` | client game tests with screenshots (CI job `client`) |
 | `…/guide/`, `src/client/.../HandbookScreen.java`, `tools/handbook.py` | Engineer's Handbook |
@@ -374,7 +396,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Electronics beyond processors: a monitor-bank multi-block, computers that control machines, and uses for processors in the tiers above.
 - EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
-- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md). Farming has a harvester, sprinkler and cotton; greenhouses and rubber trees are not built.
+- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md), apart from the seasons (colours, the Harvest Feast and December windows, and winter snow). Farming has a harvester, sprinkler and cotton; greenhouses and rubber trees are not built.
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).
 - Handbook translations (English only).
 

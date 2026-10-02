@@ -8,6 +8,57 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Powered exosuit, batch 28
+- Four JE-powered armor pieces (netherite protection, unbreakable): night vision, an energy shield and jetpack, speed, and fall immunity with step assist.
+- Two liveries: Vanguard (gunmetal with teal lights) and Ronin (crimson and silver, conical hat, red eyes), with 3D shoulder plates, skirts and hat. Smithing liveries switch between them and keep the charge.
+- The crimson Ronin katana. Inspired by Mekanism's MekaSuit (MIT); looks follow the owner's reference images; all art original.
+
+### Unmerged: Gear, weapons and plastic blocks, batch 27
+- **Scuba mask and tank:** breathe under water on oxygen (8,000 mB, 400 s); fill the tank from a gas holder or machine.
+- **Free runners:** boots with no fall damage and a one-block step.
+- **Power katana and power bow:** JE-powered weapons charged at the charging station; the bow fires energy arrows without ammo.
+- **Plastic blocks** in all sixteen dye colours, from plastic sheets.
+- High-detail art: an animated 32x32 energy katana, and double-resolution scuba gear and free runners.
+- Four advancements and handbook pages. Inspired by Mekanism and Mekanism: Additions (MIT); all code and art original.
+
+### Unmerged: Four-ingot ore and bioethanol, batch 26
+- **Acid leaching:** an ore and 250 mB of sulfuric acid in the chemical reactor give 4 washed ores (the best ore route).
+- **Bioethanol:** 8 crops and a bucket of water ferment into 250 mB in the chemical reactor; it burns in the gas turbine and the advanced engine.
+- Inspired by Mekanism (MIT); no new machines.
+
+### Unmerged: Tools, armor and paxels, batch 25
+- Bronze and steel swords, pickaxes, axes, shovels, hoes and armor (bronze iron-tier, steel between iron and diamond).
+- Paxels (pickaxe, axe and shovel in one) for every tier from wood to netherite, bronze and steel.
+- Bronze armor is steampunk (goggles, pressure gauge, boiler); steel armor is kaiserpunk (Pickelhaube, field-grey tunic, jackboots).
+- Two advancements and handbook pages. Inspired by Mekanism: Tools (MIT); all code and art original.
+
+### Unmerged: Fewer chemistry machines, batch 24
+- Five single-job machines folded into ones that already exist (65 machines down to 60):
+  - the distillation tower vacuum-distils heavy fuel oil (was the vacuum distillation unit);
+  - the catalytic cracker reforms naphtha, using a catalyst (was the catalytic reformer);
+  - the chemical reactor mixes brine and fracking fluid (was the chemical mixer);
+  - the **Settling Plant** (the flowback treatment unit, renamed) separates oil sand and bitumen (was the oil sand extractor);
+  - the arc furnace pulls silicon boules, with argon (was the crystal grower).
+- New uses: the settling plant presses mud into clay; the electrolytic cell splits water into hydrogen and oxygen.
+
+### Unmerged: Seasons (colours, events and winter snow)
+- **Grass and leaves change colour with the server's date** in every biome that has four seasons: plains, meadows, forests (dark, dappled and cherry groves included), taigas, windswept hills and swamps.
+  - Winter is dull and dormant, spring is fresh green and summer is vanilla.
+  - Autumn turns oak leaves gold, orange and red in patches, then russet.
+  - Colours change a little each day.
+- **Winter snow (opt-in, `seasons.snow=on`):**
+  - From December to February, rain falls as snow in those biomes, and up to `seasons.snow_depth` layers settle.
+  - The snow melts in spring.
+  - It never freezes water, lies on farmland or touches snow you placed.
+- **Events on one clock:**
+  - the **Harvest Feast** (`harvest_feast`: the US Thanksgiving weekend by default, Canada's, or off);
+  - **December** (`december`: 1 December to 6 January by default).
+  - Both are announced in chat.
+- **`/jugcraft season`** shows the season, day and events. Operators can set a season, preview a date or switch snow on or off until the server stops.
+- **Server settings** in `config/jugcraft.properties`: `seasons.mode`, `seasons.hemisphere`, `seasons.timezone`, plus the snow and event settings above.
+- The server decides everything; clients never use their own clock. Colours and events save nothing; seasonal snow melts away.
+- Server and client game tests, with a screenshot per season and one of winter snow.
+
 ### Blueprints and test blocks (same draft PR)
 - **Blueprint Table:**
   - LIBRARY of the mod's structures and imported blueprints, with a front view and materials; printing is free.
@@ -39,9 +90,7 @@ No numbered release yet. Everything below is on `main`.
 - **Feature switch:** `parties.enabled`.
 - **Tests:** seven new game tests, plus a checker rule that every party result has a chat message.
 
-### Unmerged: Explosive weapons, batch 18
-
-### Unmerged: Engineer's Handbook reorganised, batch 23
+### #81 Engineer's Handbook reorganised, batch 23
 - The book fits the window; the chapter list is a scrollable contents list where the open chapter shows its pages, and long pages scroll (mouse wheel or arrow keys).
 - New **Progression** chapter: the road through the mod in nine stages, each a plan and a numbered chain of the items to make in order.
 

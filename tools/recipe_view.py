@@ -43,7 +43,7 @@ def build():
     for block, recipes in petro.FLUID_RECIPES.items():
         rows = [{"items": [[ref, count] for ref, count in recipe.get("items", [])],
                  "fluids": [[fluid, mb] for fluid, mb in recipe.get("fluids", [])],
-                 "fluid_results": [[fluid, mb] for fluid, mb in recipe.get("fluid_results", [])],
+                 "fluid_results": [[r[0], r[1]] for r in recipe.get("fluid_results", [])],
                  "results": [[item, count] for item, count in recipe.get("results", [])],
                  "ticks": recipe["ticks"]} for recipe in recipes]
         fluid_machines.append({"block": f"{MOD}:{block}", "type": petro.FLUID_MACHINES[block]["recipe_type"],
