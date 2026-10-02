@@ -171,6 +171,25 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_scuba_gear_worn");
+			// Batch 28: the powered exosuit, Vanguard from the front and behind, then Ronin with its katana.
+			for (String[] slot : new String[][] {{"head", "helmet"}, {"chest", "chestplate"}, {"legs", "leggings"},
+					{"feet", "boots"}}) {
+				server.runCommand("item replace entity @p armor.%s with jugcraft:exosuit_%s".formatted(slot[0], slot[1]));
+			}
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:power_katana");
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_exosuit_vanguard");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_exosuit_vanguard_back");
+			for (String[] slot : new String[][] {{"head", "helmet"}, {"chest", "chestplate"}, {"legs", "leggings"},
+					{"feet", "boots"}}) {
+				server.runCommand("item replace entity @p armor.%s with jugcraft:ronin_exosuit_%s".formatted(slot[0], slot[1]));
+			}
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:ronin_katana");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_exosuit_ronin");
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			String[] plastics = {"white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray",
 					"cyan", "purple", "blue", "brown", "green", "red", "black"};

@@ -149,6 +149,9 @@ def write_all(write, assets, data, lang, condition):
     by_tag["foot_armor"].append(f"{MOD}:free_runners")
     by_tag["swords"].append(f"{MOD}:power_katana")
     by_tag.setdefault("enchantable/bow", []).append(f"{MOD}:power_bow")
+    import exosuit
+    for tag, values in exosuit.item_tags().items():
+        by_tag.setdefault(tag, []).extend(values)
     for tag, values in by_tag.items():
         write(tags / f"{tag}.json", {"replace": False, "values": values})
     for tier, info in GEAR_TIERS.items():

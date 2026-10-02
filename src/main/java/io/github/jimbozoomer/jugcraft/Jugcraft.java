@@ -9,6 +9,7 @@ import io.github.jimbozoomer.jugcraft.deposit.JugcraftDeposits;
 import io.github.jimbozoomer.jugcraft.electronics.JugcraftElectronics;
 import io.github.jimbozoomer.jugcraft.farming.JugcraftFarming;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
+import io.github.jimbozoomer.jugcraft.gear.JugcraftExosuit;
 import io.github.jimbozoomer.jugcraft.gear.JugcraftGear;
 import io.github.jimbozoomer.jugcraft.guide.JugcraftGuide;
 import io.github.jimbozoomer.jugcraft.kinetic.JugcraftKinetics;
@@ -62,6 +63,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftKinetics.register();
 		JugcraftTools.register();
 		JugcraftGear.register();
+		JugcraftExosuit.register();
 		JugcraftGuide.register();
 		FeatureEnabledCondition.register();
 		JugcraftWorldgen.register();

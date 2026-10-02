@@ -46,6 +46,11 @@ TREE = {
     "plastic_blocks": ("plastic", [f"{color}_plastic" for color in (
         "white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple",
         "blue", "brown", "green", "red", "black")], "Lego My Ego", "Mould coloured plastic blocks", "task"),
+    # Batch 28: the powered exosuit.
+    "exosuit": ("charging_station", [f"exosuit_{piece}" for piece in ("helmet", "chestplate", "leggings", "boots")],
+                "Steel Samurai", "Build a piece of the powered exosuit", "goal"),
+    "ronin": ("exosuit", [f"ronin_exosuit_{piece}" for piece in ("helmet", "chestplate", "leggings", "boots")]
+              + ["ronin_katana"], "Masterless", "Repaint your exosuit or katana in the Ronin livery", "task"),
     # The oil line (Chemistry branch).
     "crude_oil": ("steel", "crude_oil_bucket", "Black Gold", "Fill a bucket with crude oil", "task"),
     "pumpjack": ("crude_oil", "pumpjack", "Nodding Donkey", "Build a pumpjack over an oil reservoir", "task"),
