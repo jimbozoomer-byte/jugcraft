@@ -14,6 +14,7 @@
 			"io.github.jimbozoomer.jugcraft.test.DroneGameTests",
 			"io.github.jimbozoomer.jugcraft.test.TowerGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BlueprintGameTests",
+			"io.github.jimbozoomer.jugcraft.test.PixelHollowsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SeasonGameTests"
 		],
 		"fabric-client-gametest": [
@@ -22,6 +23,7 @@
 			"io.github.jimbozoomer.jugcraft.test.TowerClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BlueprintClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.GuideScreenshotGameTests",
+			"io.github.jimbozoomer.jugcraft.test.JugcraftServerClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SeasonClientGameTests"
 		]
 	},

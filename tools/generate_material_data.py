@@ -25,6 +25,7 @@ GENERATED_DIRS = [
     DATA / MOD / "advancement", ASSETS / "blockstates", ASSETS / "items", ASSETS / "models", ASSETS / "lang", ASSETS / "handbook",
     DATA / MOD / "loot_table", DATA / MOD / "recipe", DATA / MOD / "worldgen",
     DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD, PACKS,
+    DATA / MOD / "villager_trade", DATA / MOD / "trade_set", DATA / MOD / "tags" / "villager_trade",
 ]
 
 CABLE_ROTATION = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {"y": 270},
@@ -132,6 +133,7 @@ def assets():
         write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
         lang[f"item.{MOD}.{item}"] = item_name(item)
     machine_assets(lang)
+    pixel_hollows_assets(lang)
     import deposits
     deposits.write_all(write, ASSETS, DATA / MOD, lang)
     import tank_display
@@ -815,6 +817,67 @@ def powered_tools(lang):
     lang[f"message.{MOD}.charging_station.tool"] = "%s: %s / %s JE"
 
 
+def pixel_hollows_assets(lang):
+    """Pixel Hollows blocks, the shard, the Retro Trader's cabinet, names and sounds (tools/pixel_hollows.py)."""
+    import pixel_hollows as ph
+    import retro_models
+    for block, info in ph.CUBES.items():
+        write(ASSETS / "blockstates" / f"{block}.json", {"variants": {"": {"model": rid(f"block/{block}")}}})
+        write(ASSETS / "models" / "block" / f"{block}.json",
+              {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{block}")}})
+        write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+        lang[f"block.{MOD}.{block}"] = info["display"]
+
+    # The crystal cluster grows from whichever face it sits on, like an amethyst cluster.
+    elements = retro_models.pixel_crystal_cluster()
+    textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
+    textures["particle"] = rid("block/ph_crystal")
+    write(ASSETS / "models" / "block" / f"{ph.CLUSTER}.json", {
+        "parent": "minecraft:block/block", "textures": textures,
+        "elements": model_writer.slice_model(ph.CLUSTER, elements, [(0, 0, 0)])[0]})
+    write(ASSETS / "blockstates" / f"{ph.CLUSTER}.json", {"variants": {
+        f"facing={facing}": {"model": rid(f"block/{ph.CLUSTER}"), **rotation}
+        for facing, rotation in retro_models.CLUSTER_ROTATION.items()}})
+    write(ASSETS / "items" / f"{ph.CLUSTER}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{ph.CLUSTER}")}})
+
+    for item in ph.items():
+        write(ASSETS / "models" / "item" / f"{item}.json",
+              {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
+        write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
+
+    # The arcade cabinet: one model cut into a lower and an upper half, turned to four facings.
+    elements = retro_models.arcade_cabinet()
+    textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
+    textures["particle"] = rid("block/rt_side_art")
+    halves = model_writer.slice_model(ph.CABINET, elements, [(0, 0, 0), (0, 1, 0)])
+    for half, part in zip(("lower", "upper"), halves):
+        write(ASSETS / "models" / "block" / f"{ph.CABINET}_{half}.json",
+              {"parent": "minecraft:block/block", "textures": textures, "elements": part})
+    variants = {}
+    for facing, y in model_writer.FACING_Y.items():
+        for half in ("lower", "upper"):
+            variant = {"model": rid(f"block/{ph.CABINET}_{half}")}
+            if y:
+                variant["y"] = y
+            variants[f"facing={facing},half={half}"] = variant
+    write(ASSETS / "blockstates" / f"{ph.CABINET}.json", {"variants": variants})
+    write(ASSETS / "models" / "item" / f"{ph.CABINET}.json", {
+        "parent": "minecraft:block/block", "textures": textures, "elements": model_writer.scaled_elements(elements)})
+    write(ASSETS / "items" / f"{ph.CABINET}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{ph.CABINET}")}})
+
+    for entry, display in ph.NAMES.items():
+        lang[f"{'item' if entry in ph.items() else 'block'}.{MOD}.{entry}"] = display
+    lang[f"biome.{MOD}.pixel_hollows"] = "Pixel Hollows"
+    lang[f"entity.{MOD}.villager.retro_trader"] = "Retro Trader"
+    lang[f"filled_map.{MOD}.pixel_hollows"] = "Pixel Hollows, around Y %s"
+    lang[f"message.{MOD}.pixel_hollows_map.none"] = "No Pixel Hollows within %s blocks of here"
+    lang[f"message.{MOD}.pixel_hollows_map.found"] = "Pixel Hollows marked on the map, around Y %s"
+    for event, subtitle in ph.SUBTITLES.items():
+        lang[f"subtitles.{MOD}.{event}"] = subtitle
+    import drone_sounds
+    write(ASSETS / "sounds.json", {**drone_sounds.SOUNDS, **ph.SOUNDS})
+
+
 def petro_assets(lang):
     """Petroleum fluids (tools/petro.py): the liquid block (particles only; the fluid renderer draws the liquid) and
     the bucket."""
@@ -936,6 +999,24 @@ def loot_tables():
         drop = info["drop"]
         table = ore_drop(rock, drop["item"], drop["min"], drop["max"]) if drop else self_drop(rock)
         write(out / f"{rock}.json", table)
+    # Pixel Hollows: blocks drop themselves; a cluster drops 1-2 shards (Fortune: up to one more per level) or, with
+    # Silk Touch, itself. The cabinet drops from its lower half only.
+    import pixel_hollows as ph
+    for block in ph.CUBES:
+        write(out / f"{block}.json", self_drop(block))
+    low, high = ph.CLUSTER_DROPS
+    write(out / f"{ph.CLUSTER}.json", loot(ph.CLUSTER, [{"type": "minecraft:alternatives", "children": [
+        {"type": "minecraft:item", "condition": SILK, "name": rid(ph.CLUSTER)},
+        {"type": "minecraft:item", "modifier": [
+            {"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}},
+            {"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune",
+             "formula": "minecraft:uniform_bonus_count", "parameters": {"bonusMultiplier": 1}},
+            {"type": "minecraft:explosion_decay"}], "name": rid(ph.SHARD)},
+    ]}]))
+    table = self_drop(ph.CABINET)
+    table["pools"][0]["condition"] = {"type": "minecraft:all_of",
+                                      "terms": [SURVIVES_EXPLOSION, block_state(ph.CABINET, {"half": "lower"})]}
+    write(out / f"{ph.CABINET}.json", table)
 
 
 # ---------------------------------------------------------------- recipes
@@ -1046,6 +1127,16 @@ def recipes():
     string["result"] = {"id": "minecraft:string", "count": 1}
     write(out / "string_from_cotton.json", string)
 
+    # Pixel Hollows decor and the arcade cabinet. Nothing makes pixel shards: they only come from clusters (and trade).
+    import pixel_hollows as ph
+    for name, ingredient, result in ph.STONECUTTING:
+        write(out / f"{name}.json", {"fabric:load_conditions": condition(ph.CAVE), "type": "minecraft:stonecutting",
+                                     "ingredient": ingredient, "result": {"id": rid(result), "count": 1}})
+    for result, (features, pattern, key, count, category) in ph.SHAPED.items():
+        recipe = shaped(features[0], pattern, key, result, count, category)
+        recipe["fabric:load_conditions"] = [c for f in features for c in condition(f)]
+        write(out / f"{result}.json", recipe)
+
     # Gears: four plates of one metal (36 nugget units in, 36 out).
     for metal in COMPONENTS["gear"]:
         write(out / f"{metal}_gear.json", shaped(MACHINE_FEATURE, [" P ", "P P", " P "],
@@ -1155,6 +1246,20 @@ def tags():
             tags.add("item", f"c:{form}s/{metal}", rid(f"{metal}_{form}"))
             tags.add("item", f"c:{form}s", f"#c:{form}s/{metal}")
 
+    # Pixel Hollows: tools for its blocks, the biome's tags and the cabinet as a job site villagers can claim.
+    import pixel_hollows as ph
+    for block, info in ph.CUBES.items():
+        if info["tool"]:
+            tags.add("block", f"minecraft:mineable/{info['tool']}", rid(block))
+    tags.add("block", "minecraft:mineable/pickaxe", rid(ph.CLUSTER))
+    tags.add("block", "minecraft:mineable/axe", rid(ph.CABINET))
+    for tag in ph.BIOME_TAGS:
+        tags.add("worldgen/biome", tag, rid("pixel_hollows"))
+    tags.add("point_of_interest_type", "minecraft:acquirable_job_site", rid("arcade_cabinet"))
+    # Ores may replace the lining (a deepslate-like stone), so lining that spills into a chunk decorated later does
+    # not take that chunk's ores away; ore there becomes the deepslate kind.
+    tags.add("block", "minecraft:deepslate_ore_replaceables", rid(ph.LINING_BLOCK))
+
     for item, info in ITEMS.items():
         if info["tag"]:
             tags.add("item", f"c:{info['tag']}", rid(item))
@@ -1235,6 +1340,81 @@ def worldgen():
         ore_feature(rock, gen["size"], [{"target": {"predicate_type": "minecraft:tag_match", "tag": gen["target"]},
                                          "state": rid(rock)}])
         placed_feature(rock, gen)
+    pixel_hollows_worldgen()
+
+
+def pixel_hollows_worldgen():
+    """The biome, its bonus ores (vanilla ore features, more attempts, only inside it) and its lining feature."""
+    import pixel_hollows as ph
+    folder = DATA / MOD / "worldgen"
+    write(folder / "biome" / "pixel_hollows.json", ph.biome())
+    for name, gen in ph.BONUS_ORES.items():
+        write(folder / "placed_feature" / f"{name}.json", {
+            "feature": gen["feature"],
+            "placement": [
+                {"type": "minecraft:count", "count": gen["count"]},
+                {"type": "minecraft:in_square"},
+                {"type": "minecraft:height_range", "height": {
+                    "type": f"minecraft:{gen['shape']}",
+                    "min_inclusive": {"absolute": gen["min_y"]},
+                    "max_inclusive": {"absolute": gen["max_y"]},
+                }},
+                {"type": "minecraft:biome"},
+            ],
+        })
+    # The lining: circuitstone blobs replacing stone and deepslate (not ores), only inside the biome.
+    gen = ph.LINING_GEN
+    write(folder / "feature" / f"{ph.LINING}.json", {
+        "type": "minecraft:ore", "size": gen["size"], "discard_chance_on_air_exposure": 0.0,
+        "targets": [{"target": {"predicate_type": "minecraft:tag_match", "tag": "minecraft:base_stone_overworld"},
+                     "state": rid(ph.LINING_BLOCK)}]})
+    write(folder / "placed_feature" / f"{ph.LINING}.json", {"feature": rid(ph.LINING), "placement": [
+        {"type": "minecraft:count", "count": gen["count"]},
+        {"type": "minecraft:in_square"},
+        {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"absolute": gen["min_y"]},
+                                                      "max_inclusive": {"absolute": gen["max_y"]}}},
+        {"type": "minecraft:biome"}]})
+    # Crystal clusters: scan down (up) from a random point to the air just above a floor (below a ceiling) and sit
+    # there. 26.3 writes block states directly ("id" and "properties") instead of a simple_state_provider.
+    air = {"type": "minecraft:matching_blocks", "blocks": ["minecraft:air", "minecraft:cave_air"]}
+    for name, crystal in ph.CRYSTALS.items():
+        write(folder / "feature" / f"{name}.json", {"type": "minecraft:simple_block", "to_place": {
+            "id": rid(ph.CLUSTER), "properties": {"facing": crystal["facing"], "waterlogged": "false"}}})
+        support = {"type": "minecraft:has_sturdy_face", "offset": [0, -crystal["offset"], 0], "direction": crystal["facing"]}
+        write(folder / "placed_feature" / f"{name}.json", {"feature": rid(name), "placement": [
+            {"type": "minecraft:count", "count": crystal["count"]},
+            {"type": "minecraft:in_square"},
+            {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform", "min_inclusive": {"absolute": gen["min_y"]},
+                                                          "max_inclusive": {"absolute": gen["max_y"]}}},
+            {"type": "minecraft:environment_scan", "direction_of_search": crystal["scan"], "max_steps": 12,
+             "target_condition": {"type": "minecraft:all_of", "predicates": [air, support]},
+             "allowed_search_condition": air},
+            {"type": "minecraft:biome"}]})
+    retro_trader_trades()
+
+
+def retro_trader_trades():
+    """The Retro Trader's trades (26.1+ data): villager_trade files, a tag per level and the trade sets his profession
+    names. Tag entries are optional, so a trade switched off by its feature simply drops out."""
+    import pixel_hollows as ph
+
+    def cost(entry):
+        return {"id": entry[0], "count": entry[1]}
+
+    for name, trade in ph.TRADES.items():
+        data = {"fabric:load_conditions": [c for f in trade["features"] for c in condition(f)], "wants": cost(trade["wants"])}
+        if "additional_wants" in trade:
+            data["additional_wants"] = cost(trade["additional_wants"])
+        data.update({"gives": cost(trade["gives"]), "max_uses": trade["max_uses"], "xp": trade["xp"],
+                     "reputation_discount": trade["reputation_discount"]})
+        write(DATA / MOD / "villager_trade" / "retro_trader" / f"{name}.json", data)
+    for level in ph.TRADE_LEVELS:
+        names = [name for name, trade in ph.TRADES.items() if trade["level"] == level]
+        write(DATA / MOD / "tags" / "villager_trade" / "retro_trader" / f"level_{level}.json",
+              {"replace": False, "values": [{"id": rid(f"retro_trader/{name}"), "required": False} for name in names]})
+        write(DATA / MOD / "trade_set" / "retro_trader" / f"level_{level}.json", {
+            "amount": len(names), "trades": f"#{MOD}:retro_trader/level_{level}",
+            "random_sequence": rid(f"trade_set/retro_trader/level_{level}")})
 
 
 def main():

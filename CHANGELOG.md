@@ -14,6 +14,13 @@ No numbered release yet. Everything below is on `main`.
 - **`/party admin list | kick | leader | disband`** for operators (level 2), on any party.
 - **Limits in the server config:** `parties.max_size`, `parties.invite_minutes`, `parties.invites_per_minute` (defaults 8, 5 and 10, as before).
 - Commands and the shared party API are @Narvisius's from #31, already on main through #84.
+### Pixel Hollows and the Retro Trader
+- **Pixel Hollows:** a rare cave biome deep under the driest land, lined with **circuitstone** and lit only by scattered, faintly glowing **pixel crystal clusters**, with an original chiptune hum. It holds 1.5× the usual copper and redstone (and tin). New building blocks: circuitstone, polished circuitstone, circuitstone bricks and the **pixel lamp**; clusters drop **pixel shards**. One mixin adds the biome to the Overworld (Fabric API has no Overworld biome API).
+- **Retro Trader:** a villager profession at the new two-block-tall **arcade cabinet**. He sells a **Pixel Hollows Map** (use it to mark the nearest cave), circuitstone, lamps and shards, and buys shards back without any profit loop. Trades are 26.1+ data files.
+- **Retro Game Shop:** a small storefront in every new village (one per village, all five village types; not zombie villages), with the cabinet and a villager inside.
+- **Loot:** the cluster and cabinet use the 26.x loot format (#34 fixed the other tables on main), and new game tests check ore Silk Touch and Fortune and double slabs.
+- **Dedicated-server check (CI):** a real client joins the game's own dedicated server, opens a machine and trades with the Retro Trader over the network, leaves and rejoins; and a world is saved and reopened with its trader, machine contents and cabinet intact. The two-client checklist is in [docs/TESTING.md](docs/TESTING.md#dedicated-server-and-two-clients).
+- Seventeen game tests, eight client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
 
 ### Unmerged: Powered exosuit, batch 28
 - Four JE-powered armor pieces (netherite protection, unbreakable): night vision, an energy shield and jetpack, speed, and fall immunity with step assist.
@@ -48,7 +55,7 @@ No numbered release yet. Everything below is on `main`.
   - the arc furnace pulls silicon boules, with argon (was the crystal grower).
 - New uses: the settling plant presses mud into clay; the electrolytic cell splits water into hydrogen and oxygen.
 
-### Unmerged: Seasons (colours, events and winter snow)
+### #80 Seasons (colours, events and winter snow)
 - **Grass and leaves change colour with the server's date** in every biome that has four seasons: plains, meadows, forests (dark, dappled and cherry groves included), taigas, windswept hills and swamps.
   - Winter is dull and dormant, spring is fresh green and summer is vanilla.
   - Autumn turns oak leaves gold, orange and red in patches, then russet.

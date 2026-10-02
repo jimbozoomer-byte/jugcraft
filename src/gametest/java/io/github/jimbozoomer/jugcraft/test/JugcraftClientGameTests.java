@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.HandbookScreen;
 import io.github.jimbozoomer.jugcraft.client.MachineScreen;
 import io.github.jimbozoomer.jugcraft.client.ProspectorScreen;
@@ -26,7 +27,11 @@ import io.github.jimbozoomer.jugcraft.prospecting.OreSurvey;
 import io.github.jimbozoomer.jugcraft.tools.ChargingStationBlock;
 import io.github.jimbozoomer.jugcraft.tools.ChargingStationBlockEntity;
 import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
+import io.github.jimbozoomer.jugcraft.world.ArcadeCabinetBlock;
+import io.github.jimbozoomer.jugcraft.world.PixelHollows;
+import io.github.jimbozoomer.jugcraft.world.RetroTrader;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -40,12 +45,18 @@ import net.minecraft.client.CameraType;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
@@ -297,6 +308,188 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.waitTicks(60);
 			context.takeScreenshot("jugcraft_prospector");
 			context.setScreen(() -> null);
+
+			// Pixel Hollows blocks, then the Retro Trader at his cabinet, on a fresh floor south of everything else.
+			int pz = z + 16;
+			server.runCommand("fill %d %d %d %d %d %d minecraft:smooth_stone".formatted(x - 12, y - 1, z + 12, x + 64, y - 1, z + 40));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 12, y, z + 12, x + 64, y + 14, z + 40));
+			server.runOnServer(minecraft -> buildPixelHollowsShowroom(minecraft.overworld(), new BlockPos(x, y, pz)));
+			server.runCommand("tp @p %d %d %d 180 25".formatted(x, y + 1, pz + 6));
+			context.waitTicks(20);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_pixel_hollows_blocks");
+
+			// Block centres as numbers ("%d.5" would put a negative coordinate half a block the wrong way).
+			server.runCommand("summon minecraft:villager %s %d %s {NoAI:1b,Silent:1b,Rotation:[0f,0f]}".formatted(x + 10.5, y, pz + 0.5));
+			server.runOnServer(minecraft -> makeRetroTraders(minecraft.overworld()));
+			server.runCommand("tp @p %s %d %s 180 5".formatted(x + 10.5, y, pz + 3.2));
+			context.waitTicks(20);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_retro_trader");
+
+			// The Retro Game Shop as a village places it (its floor replaces the ground layer).
+			server.runCommand("place template jugcraft:village/plains/retro_game_shop %d %d %d".formatted(x - 8, y - 1, z + 24));
+			// A village turns the street jigsaw at the doorstep into its final state (air); a bare template keeps it.
+			server.runCommand("setblock %d %d %d minecraft:air".formatted(x - 4, y, z + 31));
+			server.runCommand("tp @p %d %d %d 180 8".formatted(x - 4, y + 1, z + 39));
+			context.waitTicks(20);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_retro_game_shop");
+
+			// The shop in a real village: a plains village generated far from the scenes (as /place structure does, once its
+			// area is loaded), seen from the street in front of the shop's door.
+			int vx = x + 640;
+			int vz = z + 640;
+			String villageArea = "%d %d %d %d".formatted(vx - 112, vz - 112, vx + 112, vz + 112);
+			server.runCommand("forceload add " + villageArea);
+			server.waitFor(minecraft -> areaLoaded(minecraft.overworld(), vx, vz, 112), 1200);
+			server.runCommand("place structure minecraft:village_plains %d %d %d".formatted(vx, y, vz));
+			server.runCommand(server.computeOnServer(minecraft -> shopCamera(minecraft.overworld(), new BlockPos(vx, y, vz), 112)));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_retro_game_shop_village");
+			server.runCommand("forceload remove " + villageArea);
+
+			// Inside a Pixel Hollows cave: a carved cavity in one chunk, its biome set to the Pixel Hollows, lined by the
+			// biome's own circuitstone feature placed around the walls, with crystals on its floor and ceiling; seen in
+			// spectator mode with night vision.
+			int cx = Math.floorDiv(x + 48, 16) * 16;
+			int cz = Math.floorDiv(z + 16, 16) * 16;
+			server.runOnServer(minecraft -> carveCave(minecraft.overworld(), new BlockPos(cx, y, cz)));
+			server.runCommand("fillbiome %d %d %d %d %d %d jugcraft:pixel_hollows".formatted(cx, y - 1, cz, cx + 15, y + 12, cz + 15));
+			int[][] blobs = {{2, 2, 2}, {13, 3, 3}, {2, 8, 13}, {13, 9, 12}, {8, 0, 8}, {8, 10, 8}, {3, 5, 8}, {13, 6, 8}, {8, 4, 2},
+					{8, 5, 15}, {4, 1, 12}, {12, 1, 4}, {5, 9, 4}, {11, 9, 13}};
+			for (int[] blob : blobs) {
+				server.runCommand("place feature jugcraft:pixel_hollows_lining %d %d %d".formatted(cx + blob[0], y + blob[1], cz + blob[2]));
+			}
+			server.runOnServer(minecraft -> growCrystals(minecraft.overworld(), new BlockPos(cx, y, cz)));
+			server.runCommand("gamemode spectator @p");
+			server.runCommand("effect give @p minecraft:night_vision infinite 0 true");
+			server.runCommand("tp @p %d %d %d 180 15".formatted(cx + 8, y + 4, cz + 13));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_pixel_hollows_cave");
+		}
+	}
+
+	/**
+	 * Circuitstone, polished circuitstone, bricks and a pixel lamp in a row facing the camera, crystal clusters on top
+	 * and on a small circuitstone wall, and the arcade cabinet at the end.
+	 */
+	private static void buildPixelHollowsShowroom(ServerLevel level, BlockPos row) {
+		Block[] blocks = {PixelHollows.CIRCUITSTONE, PixelHollows.POLISHED_CIRCUITSTONE, PixelHollows.CIRCUITSTONE_BRICKS, PixelHollows.PIXEL_LAMP};
+		BlockState cluster = PixelHollows.PIXEL_CRYSTAL_CLUSTER.defaultBlockState();
+		for (int i = 0; i < blocks.length; i++) {
+			level.setBlock(row.offset(-6 + i * 2, 0, 0), blocks[i].defaultBlockState(), 3);
+		}
+		level.setBlock(row.offset(-6, 1, 0), cluster.setValue(AmethystClusterBlock.FACING, Direction.UP), 3);
+		for (int dx = 1; dx <= 3; dx++) {
+			for (int dy = 0; dy <= 2; dy++) {
+				level.setBlock(row.offset(dx, dy, -1), PixelHollows.CIRCUITSTONE.defaultBlockState(), 3);
+			}
+		}
+		level.setBlock(row.offset(1, 1, 0), cluster.setValue(AmethystClusterBlock.FACING, Direction.SOUTH), 3);
+		level.setBlock(row.offset(3, 0, 0), cluster.setValue(AmethystClusterBlock.FACING, Direction.SOUTH), 3);
+		level.setBlock(row.offset(2, 3, -1), cluster.setValue(AmethystClusterBlock.FACING, Direction.UP), 3);
+		BlockState cabinet = RetroTrader.ARCADE_CABINET.defaultBlockState().setValue(ArcadeCabinetBlock.FACING, Direction.SOUTH);
+		level.setBlock(row.offset(6, 0, 0), cabinet, 3);
+		level.setBlock(row.offset(6, 1, 0), cabinet.setValue(ArcadeCabinetBlock.HALF, DoubleBlockHalf.UPPER), 3);
+		level.setBlock(row.offset(11, 0, 0), cabinet, 3);
+		level.setBlock(row.offset(11, 1, 0), cabinet.setValue(ArcadeCabinetBlock.HALF, DoubleBlockHalf.UPPER), 3);
+	}
+
+	private static boolean areaLoaded(ServerLevel level, int x, int z, int reach) {
+		for (int cx = (x - reach) >> 4; cx <= (x + reach) >> 4; cx++) {
+			for (int cz = (z - reach) >> 4; cz <= (z + reach) >> 4; cz++) {
+				if (!level.getChunkSource().hasChunk(cx, cz)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * A teleport command that puts the camera on the street in front of the village's Retro Game Shop, looking at its
+	 * door: the shop is found by its arcade cabinet, and its door is the nearest oak door to the cabinet.
+	 */
+	private static String shopCamera(ServerLevel level, BlockPos centre, int reach) {
+		BlockPos cabinet = null;
+		for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-reach, -12, -reach), centre.offset(reach, 24, reach))) {
+			BlockState state = level.getBlockState(pos);
+			if (state.is(RetroTrader.ARCADE_CABINET) && state.getValue(ArcadeCabinetBlock.HALF) == DoubleBlockHalf.LOWER) {
+				cabinet = pos.immutable();
+				break;
+			}
+		}
+		if (cabinet == null) {
+			throw new AssertionError("The generated plains village has no Retro Game Shop");
+		}
+		BlockPos door = null;
+		for (BlockPos pos : BlockPos.betweenClosed(cabinet.offset(-10, -2, -10), cabinet.offset(10, 2, 10))) {
+			BlockState state = level.getBlockState(pos);
+			if (state.is(Blocks.OAK_DOOR) && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER
+					&& (door == null || pos.distSqr(cabinet) < door.distSqr(cabinet))) {
+				door = pos.immutable();
+			}
+		}
+		if (door == null) {
+			throw new AssertionError("The Retro Game Shop at " + cabinet + " has no door");
+		}
+		// From above the street, looking down at the doorstep: the storefront and how it meets the village path.
+		Direction outside = level.getBlockState(door).getValue(DoorBlock.FACING).getOpposite();
+		BlockPos eye = door.relative(outside, 7).above(6);
+		BlockPos doorstep = door.relative(outside);
+		Jugcraft.LOGGER.info("[pixel-hollows] Retro Game Shop in a generated plains village: cabinet {}, door {}, doorstep {} ({}), beyond {}",
+				cabinet, door, doorstep, level.getBlockState(doorstep.below()), level.getBlockState(doorstep.relative(outside).below()));
+		return String.format(Locale.ROOT, "tp @p %.1f %d %.1f facing %.1f %.1f %.1f", eye.getX() + 0.5, eye.getY(), eye.getZ() + 0.5,
+				doorstep.getX() + 0.5, doorstep.getY() + 1.0, doorstep.getZ() + 0.5);
+	}
+
+	/** Gives every motionless (NoAI) villager the Retro Trader profession, at apprentice level. */
+	private static void makeRetroTraders(ServerLevel level) {
+		var trader = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(RetroTrader.PROFESSION);
+		for (Villager villager : level.getEntities(EntityTypeTest.forClass(Villager.class), villager -> villager.isNoAi())) {
+			villager.setVillagerData(villager.getVillagerData().withProfession(trader).withLevel(2));
+		}
+	}
+
+	/** Clusters on about one in six of the cave's open floors and ceilings (worldgen places them the same way). */
+	private static void growCrystals(ServerLevel level, BlockPos corner) {
+		RandomSource random = RandomSource.create(7L);
+		for (int dx = 0; dx < 16; dx++) {
+			for (int dz = 0; dz < 16; dz++) {
+				for (int dy = 0; dy <= 10; dy++) {
+					BlockPos pos = corner.offset(dx, dy, dz);
+					if (!level.getBlockState(pos).isAir() || random.nextInt(6) != 0) {
+						continue;
+					}
+					Direction facing = level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP) ? Direction.UP
+							: level.getBlockState(pos.above()).isFaceSturdy(level, pos.above(), Direction.DOWN) ? Direction.DOWN : null;
+					if (facing != null) {
+						level.setBlock(pos, PixelHollows.PIXEL_CRYSTAL_CLUSTER.defaultBlockState().setValue(AmethystClusterBlock.FACING, facing), 2);
+					}
+				}
+			}
+		}
+	}
+
+	/** A deepslate block filling one chunk, 13 high, hollowed into a few joined round chambers. */
+	private static void carveCave(ServerLevel level, BlockPos corner) {
+		int[][] chambers = {{8, 5, 8, 6}, {4, 4, 11, 4}, {12, 6, 4, 4}, {8, 3, 13, 3}};
+		for (int dx = 0; dx < 16; dx++) {
+			for (int dy = -1; dy <= 11; dy++) {
+				for (int dz = 0; dz < 16; dz++) {
+					boolean hollow = false;
+					for (int[] c : chambers) {
+						int ax = dx - c[0];
+						int ay = dy - c[1];
+						int az = dz - c[2];
+						hollow |= dy >= 0 && dy <= 10 && ax * ax + ay * ay + az * az < c[3] * c[3];
+					}
+					level.setBlock(corner.offset(dx, dy, dz), hollow ? Blocks.CAVE_AIR.defaultBlockState() : Blocks.DEEPSLATE.defaultBlockState(), 2);
+				}
+			}
 		}
 	}
 
