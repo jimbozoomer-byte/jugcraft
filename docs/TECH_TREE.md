@@ -11,7 +11,7 @@ How every implemented material, machine and part works and connects. **Implement
 | **Mechanical processing** | Implemented | Physical transformation of materials: smelting, crushing, alloying, pressing, drawing, assembling. |
 | **Fluids** | Implemented | Pipes, tanks and pumps that move and store water, lava and other mods' fluids; physical only, no reactions. See [Fluids](#fluids) below. |
 | **Chemistry** | **In progress** | Reactions that change what a substance *is*: electrolysis, acids, fertilizer, refining. The dieselpunk oil line is being built first: see [branches/CHEMISTRY.md](branches/CHEMISTRY.md) and [petrochemistry.md](features/petrochemistry.md). |
-| **Agriculture** | First slice implemented | Crops, seeds, food and hand farm tools; its own starting branch, needing no machines. Corn grows 3 blocks tall for fields and mazes. See [branches/AGRICULTURE.md](branches/AGRICULTURE.md). |
+| **Agriculture** | Three slices implemented | Crops, seeds, food and hand farm tools; its own starting branch, needing no machines. Corn grows 3 blocks tall for fields and mazes; tomatoes climb trellises; a Cooking Pot makes meals over a campfire; squash grows from stems, cranberries in bogs and chestnuts on a fruiting tree. See [branches/AGRICULTURE.md](branches/AGRICULTURE.md). |
 
 The mechanical branch changes the **shape or mix** of materials (crush, melt, alloy, press, draw, assemble). Anything that needs a chemical reaction belongs to the Chemistry branch, even when it currently has a temporary blast-furnace or arc-furnace stand-in.
 
@@ -632,6 +632,6 @@ Full numbers, conversion losses and the loops that were checked: [BALANCE.md](BA
 | Ore processing | `tools/machines.py` (`_pulverizer`, `_ore_washer`, `SIEVE`, `_sawmill`, `BYPRODUCTS`), `COMPONENTS["dust"]` and `WASHED_ORES` in `tools/materials.py`, plus `MachineKind` | `python3 tools/generate_material_data.py` |
 | Item logistics | `tools/machines.py` (`ITEM_PIPES`, `LOGISTICS_BLOCKS`, `TOOLS`), `tools/logistics_models.py`, plus the constants in `logistics/` | `python3 tools/generate_material_data.py` |
 | Textures | `tools/generate_textures.py` | `python3 tools/generate_textures.py` |
-| Crops, seeds, foods, sickles, wild plants (Agriculture) | `tools/agriculture.py` (plus the matching Java in `agriculture/`) | `python3 tools/generate_material_data.py` |
-| Crop and farm-item textures | `tools/crop_textures.py` (previews: `tools/render_agriculture.py`) | `python3 tools/generate_textures.py` |
+| Crops, seeds, foods, sickles, wild plants, trellis, Cooking Pot recipes, gourds, cranberries, the chestnut tree and its wood (Agriculture) | `tools/agriculture.py` (plus the matching Java in `agriculture/`) | `python3 tools/generate_material_data.py` |
+| Crop and farm-item textures | `tools/crop_textures.py` and `tools/kitchen_textures.py` (previews: `tools/render_agriculture.py`) | `python3 tools/generate_textures.py` |
 | Verify | — | `python3 tools/check_mod_data.py` and `./gradlew build` |

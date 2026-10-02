@@ -4,8 +4,39 @@ Called by generate_material_data.py. Loot tables and worldgen use the Minecraft 
 (singular "condition", "modifier", minecraft:match_block, inline block states), copied from
 vanilla 26.3's own crop and berry-bush files.
 """
+import carving_data
+import festival_data
+import festivity_data
+import halloween_data
+import night_data
+import decor_data
+import decor2_data
+import decor3_data
+import decor4_data
+import decor5_data
+import decor6_data
+import decor7_data
+import decor8_data
+import decor9_data
+import decor10_data
+import decor11_data
+import decor12_data
+import decor13_data
+import decor14_data
+import chandlery_data
+import cider_data
+import pantry_data
+import crow_data
+import firework_data
+import lantern_data
+import feast_data
+import maze_data
+import ghost_data
+import face_paint_data
+import regatta_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
-                         SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, LEGUME_TAG, crop_blocks)
+                         SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
+                         HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, STALKS, WILD_BONUS, crop_blocks)
 
 MOD = "jugcraft"
 
@@ -22,6 +53,58 @@ def stage_texture(crop, stage):
     return f"{CROPS[crop]['block'].removesuffix('_crop')}_stage{stage}"
 
 
+# ---------------------------------------------------------------- equipment models
+
+def plane(axis, at, texture, low=0, high=16, y0=0, y1=16):
+    """A double-sided upright plane: across x at z=`at` ("z") or across z at x=`at` ("x")."""
+    if axis == "z":
+        return {"from": [low, y0, at], "to": [high, y1, at], "shade": False,
+                "faces": {"north": {"uv": [0, 0, 16, 16], "texture": texture},
+                          "south": {"uv": [0, 0, 16, 16], "texture": texture}}}
+    return {"from": [at, y0, low], "to": [at, y1, high], "shade": False,
+            "faces": {"west": {"uv": [0, 0, 16, 16], "texture": texture},
+                      "east": {"uv": [0, 0, 16, 16], "texture": texture}}}
+
+
+def box(lo, hi, texture, faces=("north", "south", "east", "west", "up", "down")):
+    """A box whose faces take their UVs from its position, so textures line up across elements."""
+    return {"from": list(lo), "to": list(hi), "faces": {face: {"texture": texture} for face in faces}}
+
+
+def trellis_elements():
+    """A square lattice cage: four lattice walls just inside the block edge and a post at each corner."""
+    elements = [plane("z", 1.5, "#trellis"), plane("z", 14.5, "#trellis"), plane("x", 1.5, "#trellis"), plane("x", 14.5, "#trellis")]
+    for x in (1, 14):
+        for z in (1, 14):
+            elements.append(box((x, 0, z), (x + 1, 16, z + 1), "#post", faces=("north", "south", "east", "west", "up")))
+    return elements
+
+
+def trellis_crop_model():
+    """Template for a climbing crop: vanilla's four crop planes inside the trellis cage."""
+    crop = [plane("x", 4, "#crop", y0=-1, y1=15), plane("x", 12, "#crop", y0=-1, y1=15),
+            plane("z", 4, "#crop", y0=-1, y1=15), plane("z", 12, "#crop", y0=-1, y1=15)]
+    return {"parent": "minecraft:block/block", "ambientocclusion": False,
+            "textures": {"particle": "#crop"}, "elements": trellis_elements() + crop}
+
+
+def cooking_pot_model(contents):
+    """An iron pot: body, a raised rim around the contents, and a handle on each side."""
+    elements = [
+        box((3, 0, 3), (13, 7.5, 13), "#side", faces=("north", "south", "east", "west", "down")),
+        box((3.5, 7, 3.5), (12.5, 7, 12.5), "#contents", faces=("up",)),
+    ]
+    for lo, hi in (((2.5, 7, 2.5), (13.5, 8.5, 3.5)), ((2.5, 7, 12.5), (13.5, 8.5, 13.5)),
+                   ((2.5, 7, 3.5), (3.5, 8.5, 12.5)), ((12.5, 7, 3.5), (13.5, 8.5, 12.5))):
+        elements.append(box(lo, hi, "#rim", faces=("north", "south", "east", "west", "up")))
+    for lo, hi in (((1, 5, 7), (3, 6, 9)), ((13, 5, 7), (15, 6, 9))):
+        elements.append(box(lo, hi, "#rim"))
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/cooking_pot_side"), "side": rid("block/cooking_pot_side"),
+                         "rim": rid("block/cooking_pot_rim"), "contents": rid(f"block/cooking_pot_{contents}")},
+            "elements": elements}
+
+
 # ---------------------------------------------------------------- assets
 
 def assets(root, write, lang):
@@ -29,12 +112,17 @@ def assets(root, write, lang):
     def crop_model(texture, parent="minecraft:block/crop", key="crop"):
         write(root / "models" / "block" / f"{texture}.json", {"parent": parent, "textures": {key: rid(f"block/{texture}")}})
 
+    write(root / "models" / "block" / "trellis_crop.json", trellis_crop_model())
     for info in TALL_CROPS.values():
         block = info["block"]
         variants = {}
         for age, textures in enumerate(info["textures"]):
             for texture in textures:
-                crop_model(texture)
+                if info.get("trellis"):
+                    write(root / "models" / "block" / f"{texture}.json", {"parent": rid("block/trellis_crop"), "textures": {
+                        "crop": rid(f"block/{texture}"), "trellis": rid("block/trellis"), "post": rid("block/trellis_post")}})
+                else:
+                    crop_model(texture)
             for section in range(TALL_SECTIONS):
                 # Sections above the plant's height never exist; they reuse its top model.
                 variants[f"age={age},section={section}"] = {"model": rid(f"block/{textures[min(section, len(textures) - 1)]}")}
@@ -55,6 +143,53 @@ def assets(root, write, lang):
         write(root / "models" / "item" / f"{wild}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": texture}})
         write(root / "items" / f"{wild}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{wild}")}})
         lang[f"block.{MOD}.{wild}"] = info["display"]
+
+    # Equipment: the trellis and the cooking pot are blocks whose items show the block model.
+    write(root / "models" / "block" / "trellis.json", {
+        "parent": "minecraft:block/block", "ambientocclusion": False,
+        "textures": {"particle": rid("block/trellis_post"), "trellis": rid("block/trellis"), "post": rid("block/trellis_post")},
+        "elements": trellis_elements()})
+    write(root / "blockstates" / "trellis.json", {"variants": {"": {"model": rid("block/trellis")}}})
+    write(root / "models" / "block" / "cooking_pot.json", cooking_pot_model("empty"))
+    write(root / "models" / "block" / "cooking_pot_cooking.json", cooking_pot_model("soup"))
+    write(root / "blockstates" / "cooking_pot.json", {"variants": {
+        "cooking=false": {"model": rid("block/cooking_pot")}, "cooking=true": {"model": rid("block/cooking_pot_cooking")}}})
+    for block, info in EQUIPMENT.items():
+        write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
+        lang[f"block.{MOD}.{block}"] = info["display"]
+    lang[f"container.{MOD}.cooking_pot"] = "Cooking Pot"
+    lang[f"container.{MOD}.cooking_pot.cold"] = "Needs heat below"
+
+    festival_data.assets(root, write, lang)
+    carving_data.assets(root, write, lang)
+    halloween_data.assets(root, write, lang)
+    regatta_data.assets(root, write, lang)
+    festivity_data.assets(root, write, lang)
+    night_data.assets(root, write, lang)
+    decor_data.assets(root, write, lang)
+    decor2_data.assets(root, write, lang)
+    decor3_data.assets(root, write, lang)
+    decor4_data.assets(root, write, lang)
+    decor5_data.assets(root, write, lang)
+    decor6_data.assets(root, write, lang)
+    decor7_data.assets(root, write, lang)
+    decor8_data.assets(root, write, lang)
+    decor9_data.assets(root, write, lang)
+    decor10_data.assets(root, write, lang)
+    decor11_data.assets(root, write, lang)
+    decor12_data.assets(root, write, lang)
+    decor13_data.assets(root, write, lang)
+    decor14_data.assets(root, write, lang)
+    chandlery_data.assets(root, write, lang)
+    cider_data.assets(root, write, lang)
+    pantry_data.assets(root, write, lang)
+    crow_data.assets(root, write, lang)
+    firework_data.assets(root, write, lang)
+    lantern_data.assets(root, write, lang)
+    feast_data.assets(root, write, lang)
+    maze_data.assets(root, write, lang)
+    ghost_data.assets(root, write, lang)
+    face_paint_data.assets(root, write, lang)
 
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
@@ -110,11 +245,17 @@ def loot(data, write):
         block, pick = info["block"], info["pick"]
         # Only the bottom section has loot, so a broken plant drops once: its seed back, plus the
         # same harvest as picking if it was ripe.
-        write(out / f"{block}.json", table(
-            block,
-            pool(entry(info["seed"]), condition=match_block(block, section=0)),
-            pool(entry(pick["item"], uniform(pick["min"], pick["max"]), FORTUNE_UNIFORM),
-                 condition=match_block(block, section=0, age=7))))
+        pools = [pool(entry(info["seed"]), condition=match_block(block, section=0)),
+                 pool(entry(pick["item"], uniform(pick["min"], pick["max"]), FORTUNE_UNIFORM),
+                      condition=match_block(block, section=0, age=7))]
+        if info["seed"] in [TALL_CROPS[c]["seed"] for c in STALKS["crops"]]:
+            # A plant three blocks tall (picked or not) gives dry stalks for corn shocks.
+            pools.append(pool(entry(STALKS["item"], uniform(STALKS["min"], STALKS["max"])), condition={
+                "type": "minecraft:any_of", "terms": [match_block(block, section=0, age=age) for age in range(STALKS["from_age"], 8)]}))
+        if info.get("trellis"):
+            # Every block of a climbing plant stands in a trellis, which drops again.
+            pools.append(pool(entry("trellis"), condition={"type": "minecraft:survives_explosion"}))
+        write(out / f"{block}.json", table(block, *pools))
     for crop, info in CROPS.items():
         block, seed, produce = info["block"], info["seed"], info["produce"]
         ripe = match_block(block, age=7)
@@ -129,10 +270,48 @@ def loot(data, write):
                 pool(entry(seed, FORTUNE_BINOMIAL), condition=ripe)))
     for wild, info in WILD_CROPS.items():
         seed = TALL_CROPS[info["crop"]]["seed"] if info["crop"] in TALL_CROPS else CROPS[info["crop"]]["seed"]
-        write(out / f"{wild}.json", table(wild, pool({"type": "minecraft:alternatives", "children": [
+        pools = [pool({"type": "minecraft:alternatives", "children": [
             entry(wild, condition="minecraft:tool/can_shear"),
             entry(seed, uniform(1, 2), {"type": "minecraft:explosion_decay"}),
-        ]}), decay=False))
+        ]})]
+        if wild in WILD_BONUS:
+            # Now and then a different seed, unless shears took the plant.
+            bonus = WILD_BONUS[wild]
+            pools.append(pool(entry(bonus["item"], {"type": "minecraft:explosion_decay"}), condition={"type": "minecraft:all_of", "terms": [
+                {"type": "minecraft:inverted", "term": "minecraft:tool/can_shear"},
+                {"type": "minecraft:random_chance", "chance": bonus["chance"]}]}))
+        write(out / f"{wild}.json", table(wild, *pools, decay=False))
+    for block in EQUIPMENT:
+        # Like vanilla scaffolding and cauldrons: the block itself, unless an explosion destroys it.
+        write(out / f"{block}.json", table(block, pool(entry(block), condition={"type": "minecraft:survives_explosion"}), decay=False))
+    festival_data.loot(out, write)
+    carving_data.loot(out, write)
+    halloween_data.loot(out, write)
+    regatta_data.loot(out, write)
+    festivity_data.loot(out, write)
+    festivity_data.trades(data, write)
+    night_data.loot(out, write)
+    decor_data.loot(out, write)
+    decor2_data.loot(out, write)
+    decor3_data.loot(out, write)
+    decor4_data.loot(out, write)
+    decor5_data.loot(out, write)
+    decor6_data.loot(out, write)
+    decor7_data.loot(out, write)
+    decor8_data.loot(out, write)
+    decor9_data.loot(out, write)
+    decor10_data.loot(out, write)
+    decor11_data.loot(out, write)
+    decor12_data.loot(out, write)
+    decor13_data.loot(out, write)
+    decor14_data.loot(out, write)
+    chandlery_data.loot(out, write)
+    cider_data.loot(out, write)
+    pantry_data.loot(out, write)
+    crow_data.loot(out, write)
+    firework_data.loot(out, write)
+    feast_data.loot(out, write)
+    maze_data.loot(out, write)
 
 
 # ---------------------------------------------------------------- recipes
@@ -141,17 +320,51 @@ def recipes(out, write):
     for result, info in COOKING.items():
         for kind, time in COOK_TIMES.items():
             name = result if kind == "smelting" else f"{result}_from_{kind}"
-            write(out / f"{name}.json", {"fabric:load_conditions": conditions(), "type": f"minecraft:{kind}", "category": "food",
+            write(out / f"{name}.json", {"fabric:load_conditions": conditions(), "type": f"minecraft:{kind}",
+                                         "category": info.get("category", "food"),
                                          "ingredient": rid(info["input"]), "result": {"id": rid(result)},
                                          "experience": info["xp"], "cookingtime": time})
     for recipe in SHAPELESS:
-        write(out / f"{recipe['id']}.json", {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shapeless",
-                                              "category": "misc", "ingredients": recipe["inputs"],
-                                              "result": {"id": rid(recipe["result"]), "count": recipe["count"]}})
+        data = {"fabric:load_conditions": conditions(*recipe.get("features", [])), "type": "minecraft:crafting_shapeless",
+                "category": recipe.get("category", "misc")}
+        if "group" in recipe:
+            data["group"] = recipe["group"]
+        data.update({"ingredients": recipe["inputs"], "result": {"id": rid(recipe["result"]), "count": recipe["count"]}})
+        write(out / f"{recipe['id']}.json", data)
+    for recipe in SHAPED:
+        data = {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped", "category": recipe["category"]}
+        if "group" in recipe:
+            data["group"] = recipe["group"]
+        result = {"id": rid(recipe["result"]), "count": recipe["count"]}
+        if "components" in recipe:
+            result["components"] = recipe["components"]
+        data.update({"pattern": recipe["pattern"], "key": recipe["key"], "result": result})
+        write(out / f"{recipe['id']}.json", data)
+    for result, info in POT_RECIPES.items():
+        out_item = {"id": rid(result)}
+        if info.get("count", 1) != 1:
+            out_item["count"] = info["count"]
+        ingredients = []
+        for ref, count in info["inputs"].items():
+            part = {"ingredient": ref}
+            if count != 1:
+                part["count"] = count
+            ingredients.append(part)
+        write(out / "pot_cooking" / f"{result}.json", {"fabric:load_conditions": conditions(), "type": f"{MOD}:pot_cooking",
+                                                      "ingredients": ingredients, "result": out_item, "time": info["time"]})
     for sickle, info in SICKLES.items():
         write(out / f"{sickle}.json", {"fabric:load_conditions": conditions(*info["features"]), "type": "minecraft:crafting_shaped",
                                        "category": "equipment", "pattern": SICKLE_PATTERN,
                                        "key": {"M": info["material"], "S": "minecraft:stick"}, "result": {"id": rid(sickle), "count": 1}})
+    carving_data.recipes(out, write, conditions)
+    festivity_data.recipes(out, write, conditions)
+    firework_data.recipes(out, write, conditions)
+    lantern_data.recipes(out, write, conditions)
+    feast_data.recipes(out, write, conditions)
+    maze_data.recipes(out, write, conditions)
+    ghost_data.recipes(out, write, conditions)
+    face_paint_data.recipes(out, write, conditions)
+    decor3_data.recipes(out, write, conditions)
 
 
 # ---------------------------------------------------------------- tags
@@ -163,17 +376,55 @@ def tags(tags):
             namespace, _, path = tag.partition(":")
             if namespace == "c" and path.startswith(("seeds/", "crops/")):
                 tags.add("item", f"c:{path.split('/')[0]}", f"#{tag}")
-    for block in crop_blocks():
+    for block in crop_blocks() + ["trellis"]:
         tags.add("block", "minecraft:maintains_farmland", rid(block))
+    for source in HEAT_SOURCES:
+        tags.add("block", HEAT_TAG, source)
+    tags.add("block", "minecraft:mineable/axe", rid("trellis"))
+    tags.add("block", "minecraft:mineable/pickaxe", rid("cooking_pot"))
     for crop, info in CROPS.items():
         tags.add("block", "minecraft:crops", rid(info["block"]))
         if info["legume"]:
             tags.add("block", LEGUME_TAG, rid(info["block"]))
+    festival_data.tags(tags)
+    carving_data.tags(tags)
+    halloween_data.tags(tags)
+    regatta_data.tags(tags)
+    festivity_data.tags(tags)
+    night_data.tags(tags)
+    decor_data.tags(tags)
+    decor2_data.tags(tags)
+    decor3_data.tags(tags)
+    decor4_data.tags(tags)
+    decor5_data.tags(tags)
+    decor6_data.tags(tags)
+    decor7_data.tags(tags)
+    decor8_data.tags(tags)
+    decor9_data.tags(tags)
+    decor10_data.tags(tags)
+    decor11_data.tags(tags)
+    decor12_data.tags(tags)
+    decor13_data.tags(tags)
+    decor14_data.tags(tags)
+    chandlery_data.tags(tags)
+    cider_data.tags(tags)
+    pantry_data.tags(tags)
+    firework_data.tags(tags)
+    lantern_data.tags(tags)
+    feast_data.tags(tags)
+    maze_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen
 
+def advancements(data, write):
+    regatta_data.advancements(data, write)
+
+
 def worldgen(data, write):
+    festival_data.worldgen(data, write)
+    cider_data.worldgen(data, write)
+    halloween_data.worldgen(data, write)
     spread = WILD_PATCH["spread_xz"]
     for wild in WILD_CROPS:
         write(data / MOD / "worldgen" / "feature" / f"{wild}.json",

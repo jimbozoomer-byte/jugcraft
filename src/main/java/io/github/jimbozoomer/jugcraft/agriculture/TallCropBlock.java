@@ -42,6 +42,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * goes back to a younger age of the same height, so fields and mazes stay standing.</li>
  * <li>Breaking any section removes the whole plant. Only the bottom has loot, so it drops once.</li>
  * <li>From two blocks tall the plant blocks movement, like a hedge, which is what makes corn mazes work.</li>
+ * <li>Climbing crops ({@link TallCrop#trellis}) are planted on a {@link TrellisBlock} and grow up into
+ * trellis blocks instead of air. Every block of them drops its trellis again when broken, and they
+ * always block movement, as the trellis does.</li>
  * </ul>
  */
 public class TallCropBlock extends VegetationBlock implements BonemealableBlock {
@@ -64,6 +67,10 @@ public class TallCropBlock extends VegetationBlock implements BonemealableBlock 
 				shapes[age][section] = Block.box(2.0, 0.0, 2.0, 14.0, top, 14.0);
 			}
 		}
+	}
+
+	public TallCrop crop() {
+		return crop;
 	}
 
 	public static boolean isRipe(BlockState state) {
@@ -98,7 +105,7 @@ public class TallCropBlock extends VegetationBlock implements BonemealableBlock 
 	}
 
 	private boolean isWall(BlockState state) {
-		return crop.height(state.getValue(AGE)) >= 2;
+		return crop.trellis || crop.height(state.getValue(AGE)) >= 2;
 	}
 
 	// ---------------------------------------------------------------- placement and survival
@@ -162,11 +169,15 @@ public class TallCropBlock extends VegetationBlock implements BonemealableBlock 
 		}
 	}
 
-	/** Whether a plant at {@code bottom} has room to grow from {@code fromAge} to {@code toAge}: it only grows into air. */
+	/**
+	 * Whether a plant at {@code bottom} has room to grow from {@code fromAge} to {@code toAge}: it only
+	 * grows into air, or, for a climbing crop, only into trellis.
+	 */
 	public boolean canGrowTo(LevelReader level, BlockPos bottom, int fromAge, int toAge) {
 		for (int section = crop.height(fromAge); section < crop.height(toAge); section++) {
 			BlockPos pos = bottom.above(section);
-			if (level.isOutsideBuildHeight(pos) || !level.isEmptyBlock(pos)) {
+			if (level.isOutsideBuildHeight(pos)
+					|| !(crop.trellis ? level.getBlockState(pos).getBlock() instanceof TrellisBlock : level.isEmptyBlock(pos))) {
 				return false;
 			}
 		}
@@ -257,7 +268,8 @@ public class TallCropBlock extends VegetationBlock implements BonemealableBlock 
 	/**
 	 * Breaking an upper section drops the bottom's loot now (with the player's tool, so Fortune
 	 * applies) and removes the bottom without a second drop; the rest of the plant then falls apart.
-	 * Creative players get no drops. Vanilla double plants do the same.
+	 * Creative players get no drops. Vanilla double plants do the same. The other sections' own loot
+	 * (only a climbing crop's trellis) drops as they fall.
 	 */
 	@Override
 	public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {

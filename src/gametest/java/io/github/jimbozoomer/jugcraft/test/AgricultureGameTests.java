@@ -130,6 +130,17 @@ public class AgricultureGameTests {
 		helper.succeed();
 	}
 
+	/** A two- or three-block plant blocks movement, but it is still a plant: the farmland under it stays farmland. */
+	@GameTest(maxTicks = 60)
+	public void tallCornKeepsItsFarmland(GameTestHelper helper) {
+		plantCorn(helper, 7);
+		helper.runAtTickTime(40, () -> {
+			helper.assertBlockPresent(Blocks.FARMLAND, SOIL);
+			assertCorn(helper, 7, 3);
+			helper.succeed();
+		});
+	}
+
 	/** Corn kernels plant corn on farmland. */
 	@GameTest
 	public void kernelsPlantCorn(GameTestHelper helper) {
@@ -227,20 +238,39 @@ public class AgricultureGameTests {
 		helper.succeed();
 	}
 
-	/** Short grass can drop Jugcraft seeds, so every crop is reachable in any world. */
+	/**
+	 * Short grass drops one Jugcraft seed about one time in eight, like vanilla wheat seeds, and every
+	 * crop's seed turns up, so every crop is reachable in any world.
+	 */
 	@GameTest
 	public void grassDropsJugcraftSeeds(GameTestHelper helper) {
 		helper.setBlock(SOIL, Blocks.GRASS_BLOCK);
 		helper.setBlock(CROP, Blocks.SHORT_GRASS);
 		BlockState grass = helper.getBlockState(CROP);
-		boolean found = false;
-		for (int i = 0; i < 2000 && !found; i++) {
+		String[] seeds = {"corn_kernels", "sunflower_seeds", "beans", "sweet_potato", "flax_seeds", "tomato_seeds", "pepper_seeds",
+				"onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds", "butternut_squash_seeds", "acorn_squash_seeds",
+				"warty_gourd_seeds", "turnip", "cranberries", "chestnut"};
+		int[] found = new int[seeds.length];
+		int breaks = 4000;
+		int total = 0;
+		for (int i = 0; i < breaks; i++) {
+			int here = 0;
 			for (ItemStack drop : Block.getDrops(grass, helper.getLevel(), helper.absolutePos(CROP), null)) {
-				found |= drop.is(item("corn_kernels")) || drop.is(item("sunflower_seeds")) || drop.is(item("beans"))
-						|| drop.is(item("sweet_potato")) || drop.is(item("flax_seeds"));
+				for (int s = 0; s < seeds.length; s++) {
+					if (drop.is(item(seeds[s]))) {
+						found[s]++;
+						here++;
+					}
+				}
 			}
+			helper.assertTrue(here <= 1, "One broken short grass dropped " + here + " Jugcraft seeds");
+			total += here;
 		}
-		helper.assertTrue(found, "2,000 broken short grass dropped no Jugcraft seeds");
+		// Expected 500 in 4,000 (0.125); the bounds are over 6 standard deviations wide.
+		helper.assertTrue(total > 380 && total < 620, total + " Jugcraft seeds from " + breaks + " short grass; expected about 500");
+		for (int s = 0; s < seeds.length; s++) {
+			helper.assertTrue(found[s] > 0, seeds[s] + " never dropped from " + breaks + " short grass");
+		}
 		helper.succeed();
 	}
 }

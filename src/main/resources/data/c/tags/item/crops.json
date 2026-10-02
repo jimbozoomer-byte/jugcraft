@@ -5,6 +5,27 @@
     "#c:crops/sunflower",
     "#c:crops/beans",
     "#c:crops/sweet_potato",
-    "#c:crops/flax"
+    "#c:crops/flax",
+    "#c:crops/tomato",
+    "#c:crops/pepper",
+    "#c:crops/onion",
+    "#c:crops/garlic",
+    "#c:crops/cabbage",
+    "#c:crops/oat",
+    "#c:crops/barley",
+    "#c:crops/turnip",
+    "#c:crops/cranberry",
+    "#c:crops/chestnut",
+    "#c:crops/ornamental_corn",
+    "#c:crops/squash",
+    "#c:crops/butternut_squash",
+    "#c:crops/acorn_squash",
+    "#c:crops/gourd",
+    "#c:crops/warty_gourd",
+    "#c:crops/pumpkin",
+    "#c:crops/white_pumpkin",
+    "#c:crops/jarrahdale_pumpkin",
+    "#c:crops/cinderella_pumpkin",
+    "#c:crops/bottle_gourd"
   ]
 }
