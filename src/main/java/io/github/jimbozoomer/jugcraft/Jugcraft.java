@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft;
 
+import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroBlocks;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroItems;
@@ -71,6 +72,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftGear.register();
 		JugcraftExosuit.register();
 		JugcraftGuide.register();
+		JugcraftAgriculture.register();
 		JugcraftDrones.register();
 		io.github.jimbozoomer.jugcraft.tower.JugcraftTower.register();
 		io.github.jimbozoomer.jugcraft.blueprint.JugcraftBlueprints.register();

@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.blueprint.Blueprint;
 import io.github.jimbozoomer.jugcraft.blueprint.BlueprintItem;
+import io.github.jimbozoomer.jugcraft.blueprint.BlueprintTableBlock;
 import io.github.jimbozoomer.jugcraft.blueprint.JugcraftBlueprints;
 import io.github.jimbozoomer.jugcraft.blueprint.SurveyStakeBlockEntity;
 import io.github.jimbozoomer.jugcraft.drone.BuildJobs;
@@ -56,6 +57,35 @@ public class BlueprintGameTests {
 		helper.succeed();
 	}
 
+	/** Blueprint item colours (complete blue, part green, import red) and table categories (set, individual, partial). */
+	@GameTest
+	public void blueprintKinds(GameTestHelper helper) {
+		String hut = "{\"format\": 1, \"name\": \"Kind Test\", \"palette\": {\"S\": \"minecraft:stone_bricks\"},"
+				+ " \"layers\": [[\"SSS\"]], \"anchor\": [1, 0, 2]}";
+		try {
+			Blueprint church = Blueprint.get("small_church", false);
+			helper.assertTrue(church.kind == Blueprint.Kind.COMPLETE && church.category == Blueprint.Category.INDIVIDUAL, "a standalone building is blue, an individual structure");
+			Blueprint plant = Blueprint.parse("t/col", hut.replace("\"format\": 1", "\"format\": 1, \"kind\": \"set\""), "built in");
+			helper.assertTrue(plant.kind == Blueprint.Kind.COMPLETE && plant.category == Blueprint.Category.SET, "a set is blue, under STRUCTURE SET");
+			Blueprint tower = Blueprint.parse("t/part", hut.replace("\"format\": 1", "\"format\": 1, \"kind\": \"part\""), "built in");
+			helper.assertTrue(tower.kind == Blueprint.Kind.PART && tower.category == Blueprint.Category.PARTIAL, "a part of a set is green, a partial structure");
+			Blueprint imported = Blueprint.parse("t/imp", hut.replace("\"format\": 1", "\"format\": 1, \"kind\": \"set\""), "imported");
+			helper.assertTrue(imported.kind == Blueprint.Kind.IMPORTED, "an import is red whatever its file says");
+		} catch (Blueprint.Invalid e) {
+			throw new AssertionError("a valid blueprint was refused: " + e.getMessage());
+		}
+		try {
+			Blueprint.parse("t/bad", hut.replace("\"format\": 1", "\"format\": 1, \"kind\": \"giant\""), "built in");
+			throw new AssertionError("a built-in blueprint with an unknown kind was accepted");
+		} catch (Blueprint.Invalid e) {
+			helper.assertTrue(e.getMessage().contains("kind"), "the error names the kind");
+		}
+		net.minecraft.world.item.ItemStack stack = io.github.jimbozoomer.jugcraft.blueprint.BlueprintItem.stack("small_church");
+		net.minecraft.world.item.component.CustomModelData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA);
+		helper.assertTrue(data != null && "complete".equals(data.getString(0)), "the blueprint item carries its colour");
+		helper.succeed();
+	}
+
 	@GameTest
 	public void importChecksAndSaves(GameTestHelper helper) {
 		String good = "{\"format\": 1, \"name\": \"Game Test Hut\", \"palette\": {\"S\": \"minecraft:stone_bricks\"},"
@@ -84,6 +114,24 @@ public class BlueprintGameTests {
 		} catch (Blueprint.Invalid e) {
 			helper.assertTrue(e.getMessage().contains(reason), "message \"" + e.getMessage() + "\" mentions " + reason);
 		}
+	}
+
+	/** The drafting station is two blocks; breaking either half takes both and drops one table. */
+	@GameTest(structure = ARENA, maxTicks = 40, skyAccess = true)
+	public void blueprintTableIsTwoBlocks(GameTestHelper helper) {
+		BlockPos main = helper.absolutePos(new BlockPos(10, 1, 10));
+		BlockState state = JugcraftBlueprints.TABLE.defaultBlockState().setValue(BlueprintTableBlock.FACING, net.minecraft.core.Direction.NORTH);
+		BlockPos side = BlueprintTableBlock.partner(state, main);
+		helper.assertTrue(side.equals(main.west()), "facing north, the side half is to the west (the player's right)");
+		helper.getLevel().setBlockAndUpdate(main, state);
+		helper.getLevel().setBlockAndUpdate(side, state.setValue(BlueprintTableBlock.PART, BlueprintTableBlock.Part.SIDE));
+		helper.getLevel().destroyBlock(side, true);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(helper.getLevel().getBlockState(main).isAir(), "the main half went with the side half");
+			java.util.List<ItemEntity> drops = helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(main).inflate(3),
+					e -> e.getItem().is(JugcraftBlueprints.TABLE.asItem()));
+			helper.assertTrue(drops.stream().mapToInt(e -> e.getItem().getCount()).sum() == 1, "one table dropped");
+		});
 	}
 
 	@GameTest(structure = ARENA, maxTicks = 100, skyAccess = true)
@@ -156,8 +204,8 @@ public class BlueprintGameTests {
 		}
 		helper.succeedWhen(() -> {
 			helper.assertTrue(helper.getLevel().getBlockState(stakePos).is(Blocks.AIR), "the stake popped off");
-			helper.assertTrue(!helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(stakePos).inflate(2),
-					e -> e.getItem().is(JugcraftBlueprints.BLUEPRINT)).isEmpty(), "the blueprint came back");
+			helper.assertTrue(helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(stakePos).inflate(2),
+					e -> e.getItem().is(JugcraftBlueprints.BLUEPRINT)).isEmpty(), "the blueprint was used up: nothing drops");
 		});
 	}
 }
