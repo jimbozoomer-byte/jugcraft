@@ -764,6 +764,7 @@ def check_agriculture():
     check_decor7(java)
     check_decor8(java)
     check_decor9(java)
+    check_decor10(java)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -1804,6 +1805,58 @@ def check_decor9(java):
     for key in [f"spooky_sign.{w}" for w in ag.SPOOKY_SIGN["words"]] + ["spooky_sign.painted", "spooky_sign.unnamed_tag"]:
         if f"message.{MOD}.{key}" not in lang:
             err(f"Message {key} has no text")
+
+
+def check_decor10(java):
+    """Lighting and glow: Java matches tools/agriculture.py (the black light's light and range, the brazier's light and
+    flames, the lamp's light, turning and reach, the pumpkins' and hat's light, the hat's bob and turning), the glow
+    paint's designs agree, every block state has a model, and the textures and quads the client draws exist."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    light, paint, brazier, lamp, pumpkins, hat = ag.BLACK_LIGHT, ag.GLOW_PAINT, ag.BRAZIER, ag.SHADOW_LAMP, ag.MINI_PUMPKINS, ag.FLOATING_HAT
+    expected = {("BlackLightBlock", "LIGHT"): light["light"], ("BlackLightBlock", "RANGE"): light["range"],
+                ("WitchFireBrazierBlock", "LIGHT"): brazier["light"], ("ShadowPuppetLampBlock", "LIGHT"): lamp["light"],
+                ("ShadowPuppetLampBlock", "TURN_TICKS"): lamp["turn_ticks"], ("ShadowPuppetLampBlock", "RANGE"): lamp["range"],
+                ("MiniPumpkinStackBlock", "LIGHT"): pumpkins["light"], ("FloatingWitchHatBlock", "LIGHT"): hat["light"],
+                ("FloatingWitchHatBlock", "BOB"): hat["bob"], ("FloatingWitchHatBlock", "BOB_TICKS"): hat["bob_ticks"],
+                ("FloatingWitchHatBlock", "TURN_TICKS"): hat["turn_ticks"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from tools/agriculture.py ({value})")
+    designs = re.search(r"enum Design implements StringRepresentable \{\s*([A-Z_, ]+);", java.get("GlowPaintBlock", ""))
+    if not designs or [v.strip().lower() for v in designs.group(1).split(",")] != paint["designs"]:
+        err("GlowPaintBlock.Design differs from GLOW_PAINT's designs")
+    flames = re.findall(r"\b([A-Z]+)\(0x[0-9A-F]+, Items\.([A-Z_]+)\)", java.get("WitchFireBrazierBlock", ""))
+    if [(f.lower(), d.lower()) for f, d in flames] != list(brazier["flames"].items()):
+        err("WitchFireBrazierBlock.Flame differs from BRAZIER's flames and dyes")
+
+    def variants(block):
+        return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
+    horizontal = ("north", "east", "south", "west")
+    booleans = ("false", "true")
+    wanted = {light["block"]: {f"facing={f},lit={l},powered={p}" for f in horizontal for l in booleans for p in booleans},
+              paint["block"]: {f"design={d},facing={f}" for d in paint["designs"] for f in horizontal + ("up", "down")},
+              brazier["block"]: {f"flame={c},lit={l}" for c in brazier["flames"] for l in booleans},
+              lamp["block"]: {f"lit={l}" for l in booleans},
+              pumpkins["block"]: {f"facing={f},lit={l}" for f in horizontal for l in booleans},
+              hat["block"]: {f"lit={l}" for l in booleans}}
+    for block, keys in wanted.items():
+        if variants(block) != keys:
+            err(f"{block}: blockstate variants differ from its properties")
+    entity = ASSETS / "textures" / "entity"
+    for texture in ([f"glow_paint_{d}_glow" for d in paint["designs"]] + ["witch_fire_flame"]
+                    + [f"shadow_puppet_lamp_{d}_shadow" for d in ("bat", "cat", "witch")]):
+        if not (entity / f"{texture}.png").exists():
+            err(f"Missing entity texture {texture}")
+    for design in ("bat", "cat", "witch"):
+        if not (ASSETS / "textures" / "block" / f"shadow_puppet_lamp_paper_{design}.png").exists():
+            err(f"Missing lamp paper {design}")
+    quads = load(ASSETS / "decor10_quads.json") or {}
+    for name in ("floating_witch_hat", "floating_witch_hat_flame"):
+        if not quads.get(name):
+            err(f"decor10_quads.json has no quads for {name}")
 
 
 def check_model_uvs():

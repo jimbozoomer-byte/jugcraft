@@ -928,6 +928,36 @@ def decor9_blocks():
 def decor9_items():
     return decor9_blocks()
 
+
+# ---------------------------------------------------------------- Halloween decorations, batch 10: lighting and glow
+# The Black Light (BlackLightBlock + BlackLightBlockEntity, on a wall): switched on by hand or redstone it glows purple
+# (light `light`) and lights up Glow Paint within `range` blocks (drawn by the client).
+BLACK_LIGHT = {"block": "black_light", "display": "Black Light", "light": 6, "range": 6.0}
+# Glow Paint (GlowPaintBlock + DecorationBlockEntity): a design painted on any face of a block; faint by itself, it
+# glows bright under a black light. Use it to paint the next design.
+GLOW_PAINT = {"block": "glow_paint", "display": "Glow Paint", "designs": ["skull", "bat", "spider", "web", "hand", "eye"]}
+# The Witch Fire Brazier (WitchFireBrazierBlock + DecorationBlockEntity): an iron brazier lit by flint and steel (light
+# `light`), its flames dyed `flames` with a dye; a shovel puts it out. It burns nothing.
+BRAZIER = {"block": "witch_fire_brazier", "display": "Witch Fire Brazier", "light": 15,
+           "flames": {"orange": "orange_dye", "green": "green_dye", "purple": "purple_dye", "blue": "blue_dye"}}
+# The Shadow Puppet Lamp (ShadowPuppetLampBlock + DecorationBlockEntity): lit (light `light`), its paper shade turns
+# once every `turn_ticks` round a candle, throwing a bat, a cat and a witch onto walls up to `range` blocks away.
+SHADOW_LAMP = {"block": "shadow_puppet_lamp", "display": "Shadow Puppet Lamp", "light": 12, "turn_ticks": 240, "range": 6}
+# The Mini Pumpkin Stack (MiniPumpkinStackBlock): three little jack o'lanterns with candles in them (light `light`).
+MINI_PUMPKINS = {"block": "mini_pumpkin_stack", "display": "Mini Pumpkin Stack", "light": 12}
+# Floating Witch Hats (FloatingWitchHatBlock + DecorationBlockEntity): a witch's hat with a candle in it (light
+# `light`) floating where it is placed, bobbing `bob` pixels every `bob_ticks` and turning once every `turn_ticks`.
+FLOATING_HAT = {"block": "floating_witch_hat", "display": "Floating Witch Hat", "light": 10, "bob": 1.5, "bob_ticks": 100,
+                "turn_ticks": 600}
+
+
+def decor10_blocks():
+    return [BLACK_LIGHT["block"], GLOW_PAINT["block"], BRAZIER["block"], SHADOW_LAMP["block"], MINI_PUMPKINS["block"], FLOATING_HAT["block"]]
+
+
+def decor10_items():
+    return decor10_blocks()
+
 def night_blocks():
     return [WISPS["jar"], TREBUCHET["block"], HORSEMAN["lantern"]]
 
@@ -1044,6 +1074,9 @@ POT_RECIPES = {
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    # Decorations batch 10: glow ink thinned with bone meal.
+    {"id": "glow_paint", "inputs": ["minecraft:glow_ink_sac", "minecraft:bone_meal"], "result": "glow_paint", "count": 4,
+     "category": "building"},
     {"id": "corn_kernels", "inputs": ["jugcraft:corn"], "result": "corn_kernels", "count": 2},
     {"id": "three_sisters_stew", "inputs": ["minecraft:bowl", "jugcraft:corn", "jugcraft:beans", "minecraft:pumpkin"],
      "result": "three_sisters_stew", "count": 1},
@@ -1334,6 +1367,20 @@ SHAPED = [
     {"id": "dead_hollow_tree", "pattern": ["LSL", "TJT", " T "], "key": {"L": "minecraft:lantern", "S": "minecraft:stick",
                                                                       "T": "#minecraft:logs", "J": "minecraft:jack_o_lantern"},
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
+    # Decorations batch 10: a purple-dyed glass tube in an iron fixture with glowstone; glow ink with bone meal; an iron
+    # brazier on a campfire; paper round a candle on a plank base; three pumpkins and torches; a hat of wool round a candle.
+    {"id": "black_light", "pattern": ["III", "PGP"], "key": {"I": "minecraft:iron_nugget", "P": "minecraft:purple_stained_glass",
+                                                          "G": "minecraft:glowstone_dust"},
+     "result": "black_light", "count": 1, "category": "redstone"},
+    {"id": "witch_fire_brazier", "pattern": ["I I", "ICI", " I "], "key": {"I": "#c:ingots/iron", "C": "minecraft:campfire"},
+     "result": "witch_fire_brazier", "count": 1, "category": "building"},
+    {"id": "shadow_puppet_lamp", "pattern": ["PPP", "PCP", " S "], "key": {"P": "minecraft:paper", "C": "#minecraft:candles",
+                                                                        "S": "#minecraft:wooden_slabs"},
+     "result": "shadow_puppet_lamp", "count": 1, "category": "building"},
+    {"id": "mini_pumpkin_stack", "pattern": [" P ", "PTP"], "key": {"P": "minecraft:carved_pumpkin", "T": "minecraft:torch"},
+     "result": "mini_pumpkin_stack", "count": 2, "category": "building"},
+    {"id": "floating_witch_hat", "pattern": [" W ", "WCW", "WWW"], "key": {"W": "minecraft:black_wool", "C": "#minecraft:candles"},
+     "result": "floating_witch_hat", "count": 2, "category": "building"},
 ]
 
 # Growth rules shared with Java (agriculture/CropGrowth.java): non-legume crops next to a
@@ -1378,7 +1425,7 @@ def all_blocks():
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
-            + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks())
+            + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks())
 
 
 def all_items():
@@ -1387,7 +1434,7 @@ def all_items():
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
-            + decor9_items())
+            + decor9_items() + decor10_items())
 
 
 def owns(entry_id):

@@ -95,6 +95,10 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.WIND_CHIMES_ENTITY, BoneWindChimesRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.WEATHERVANE_ENTITY, WeathervaneRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPOOKY_SIGN_ENTITY, SpookySignRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.GLOW_PAINT_ENTITY, GlowPaintRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.BRAZIER_ENTITY, WitchFireBrazierRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHADOW_LAMP_ENTITY, ShadowPuppetLampRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.FLOATING_HAT_ENTITY, FloatingWitchHatRenderer::new);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.FOG, FogParticle::provider);
 		ModelLayerRegistry.registerModelLayer(WispModel.LAYER, WispModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(HorsemanModel.LAYER, HorsemanModel::createLayer);

@@ -192,6 +192,11 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> WIND_CHIMES_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> WEATHERVANE_ENTITY;
 	public static BlockEntityType<SpookySignBlockEntity> SPOOKY_SIGN_ENTITY;
+	public static BlockEntityType<BlackLightBlockEntity> BLACK_LIGHT_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> GLOW_PAINT_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> BRAZIER_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> SHADOW_LAMP_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> FLOATING_HAT_ENTITY;
 	/** The Dust Sheet: its item, and the block it becomes over what it covers. */
 	public static final String DUST_SHEET = "dust_sheet";
 	/** What a Dust Sheet may cover (block tag). */
@@ -982,6 +987,37 @@ public final class JugcraftAgriculture {
 		}
 		fire.add(sign, 5, 20);
 		fire.add(tree, 5, 5);
+
+		// Batch 10, lighting and glow: the Black Light and Glow Paint, the Witch Fire Brazier, the Shadow Puppet Lamp, the
+		// Mini Pumpkin Stack and the Floating Witch Hat.
+		Block blackLight = registerBlock("black_light", BlackLightBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(0.5F).sound(SoundType.GLASS).noOcclusion().noCollision().lightLevel(BlackLightBlock::light).pushReaction(PushReaction.POPPED));
+		BLACK_LIGHT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("black_light"),
+				FabricBlockEntityTypeBuilder.create(BlackLightBlockEntity::new, blackLight).build());
+		Block glowPaint = registerBlock("glow_paint", GlowPaintBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
+				.strength(0.1F).sound(SoundType.SLIME_BLOCK).noOcclusion().noCollision().lightLevel(state -> 1).pushReaction(PushReaction.POPPED));
+		GLOW_PAINT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("glow_paint"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(GLOW_PAINT_ENTITY, pos, state), glowPaint).build());
+		Block brazier = registerBlock("witch_fire_brazier", WitchFireBrazierBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+				.strength(2.0F).sound(SoundType.METAL).noOcclusion().lightLevel(WitchFireBrazierBlock::light).pushReaction(PushReaction.POPPED));
+		BRAZIER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("witch_fire_brazier"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(BRAZIER_ENTITY, pos, state), brazier).build());
+		Block lamp = registerBlock("shadow_puppet_lamp", ShadowPuppetLampBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(0.5F).sound(SoundType.WOOD).noOcclusion().lightLevel(ShadowPuppetLampBlock::light).pushReaction(PushReaction.POPPED));
+		SHADOW_LAMP_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("shadow_puppet_lamp"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(SHADOW_LAMP_ENTITY, pos, state), lamp).build());
+		Block miniPumpkins = registerBlock("mini_pumpkin_stack", MiniPumpkinStackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().lightLevel(MiniPumpkinStackBlock::light).pushReaction(PushReaction.POPPED));
+		Block hat = registerBlock("floating_witch_hat", FloatingWitchHatBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(0.2F).sound(SoundType.WOOL).noOcclusion().noCollision().lightLevel(FloatingWitchHatBlock::light).pushReaction(PushReaction.POPPED));
+		FLOATING_HAT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("floating_witch_hat"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(FLOATING_HAT_ENTITY, pos, state), hat).build());
+		for (Block block : List.of(blackLight, glowPaint, brazier, lamp, miniPumpkins, hat)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		fire.add(lamp, 5, 20);
+		fire.add(hat, 30, 60);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
