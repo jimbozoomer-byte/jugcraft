@@ -758,15 +758,16 @@ SIEVE = [
 
 
 def _sawmill():
-    """Logs -> 6 planks (4 by hand) with sawdust; planks -> 3 sticks (2 by hand). Vanilla woods and chestnut."""
+    """Logs -> 6 planks (4 by hand) with sawdust; planks -> 3 sticks (2 by hand). Vanilla woods, chestnut and larch."""
     recipes = []
     for wood, tag in WOODS.items():
         planks = 3 if wood == "bamboo" else 6
         recipes.append({"input": f"#minecraft:{tag}", "output": f"minecraft:{wood}_planks", "count": planks, "ticks": 100,
                         "features": [FEATURE], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
-    # Jugcraft's own wood: the Agriculture branch's chestnut tree.
-    recipes.append({"input": "#jugcraft:chestnut_logs", "output": "jugcraft:chestnut_planks", "count": 6, "ticks": 100,
-                    "features": [FEATURE], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
+    # Jugcraft's own woods: the Agriculture branch's chestnut tree and Alpine Spawn's larch.
+    for wood in ("chestnut", "larch"):
+        recipes.append({"input": f"#jugcraft:{wood}_logs", "output": f"jugcraft:{wood}_planks", "count": 6, "ticks": 100,
+                        "features": [FEATURE], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
     recipes.append({"input": "#minecraft:planks", "output": "minecraft:stick", "count": 3, "ticks": 60,
                     "features": [FEATURE]})
     # Electronics (batch 7): a wire saw slices a silicon boule into wafers.
@@ -802,11 +803,15 @@ TREES = {"oak": ("oak_sapling", "minecraft:apple"), "spruce": ("spruce_sapling",
          "pale_oak": ("pale_oak_sapling", "minecraft:pale_moss_carpet")}
 
 
+# Jugcraft's own trees with a sapling item (the chestnut's sapling is planted from a chestnut, so it has none).
+OWN_TREES = {"larch": ("larch_sapling", "minecraft:stick")}
+
+
 def _tree_farm():
-    return [{"input": f"minecraft:{sapling}", "output": f"minecraft:{wood}_log", "count": 6, "ticks": 400,
+    return [{"input": f"{ns}:{sapling}", "output": f"{ns}:{wood}_log", "count": 6, "ticks": 400,
              "features": [FEATURE], "renewable": True,
-             "byproducts": [[f"minecraft:{sapling}", 1, 1.0, None], [extra, 1, 0.1, None]]}
-            for wood, (sapling, extra) in TREES.items()]
+             "byproducts": [[f"{ns}:{sapling}", 1, 1.0, None], [extra, 1, 0.1, None]]}
+            for ns, trees in (("minecraft", TREES), ("jugcraft", OWN_TREES)) for wood, (sapling, extra) in trees.items()]
 
 
 def machine_recipes():

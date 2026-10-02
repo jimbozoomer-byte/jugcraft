@@ -4,10 +4,11 @@ The biome takes the place of vanilla's cool meadows in the Overworld climate tab
 temperature band is cool (at most -0.15, vanilla's cool band is -0.45..-0.15) becomes Alpine Spawn
 (world/AlpineSpawn, through mixin/OverworldBiomeBuilderMixin). Temperate meadows stay meadows.
 
-New worlds start in it: on a new world's first start the server finds the nearest Alpine Spawn within
-SPAWN["radius"] blocks of the origin and moves the world spawn there, onto a village when one stands in the biome
-within SPAWN["village_chunks"] chunks. Villages are common: taiga-style villages (and their Retro Game Shop) on
-their own grid, VILLAGES, much tighter than vanilla's 34 chunks.
+New worlds start in it, at a village when there is one: on a new world's first start the server looks for the
+alpine village nearest the origin, up to SPAWN["village_cells"] cells of the alpine village grid away (as far as
+SPAWN["radius"]), and moves the world spawn there. Only when there is none does it start in the nearest Alpine Spawn
+within SPAWN["radius"] blocks. Alpine villages are common: taiga-style villages (and their Retro Game Shop) that
+generate only in Alpine Spawn, on their own grid, VILLAGES, much tighter than vanilla's 34 chunks.
 
 Seasons: its grass and foliage follow the season colours, and winter snow covers it.
 """
@@ -27,17 +28,23 @@ DRY_FOLIAGE_COLOR = "#b8902a"
 REPLACES = "minecraft:meadow"
 COOL_MAX = -0.15
 
-SPAWN = {"radius": 6400, "step": 64, "village_chunks": 24}
+# The start search: alpine villages up to village_cells grid cells (spacing chunks each) from the origin, else
+# the nearest Alpine Spawn within radius blocks, sampled every step blocks.
+SPAWN = {"radius": 6400, "step": 64, "village_cells": 25}
 
 # Its own villages: vanilla's taiga villages (spruce houses suit the mountains), on a tight grid.
 VILLAGE = "village_alpine"
 VILLAGE_SET = "alpine_villages"
 VILLAGES = {"spacing": 16, "separation": 5, "salt": 20261002}
 VILLAGE_TAG = "jugcraft:has_structure/village_alpine"
+# Structure tag of the alpine villages, which the start search looks for.
+VILLAGE_STRUCTURES = "jugcraft:alpine_villages"
 
 # Vanilla biome tags it joins, like the meadow (but its own villages instead of plains villages).
 BIOME_TAGS = ["minecraft:is_overworld", "minecraft:is_mountain", "minecraft:stronghold_biased_to",
               "minecraft:has_structure/trial_chambers", "minecraft:has_structure/abandoned_camp_meadow"]
 
-# Trees for now: vanilla spruces, scattered (larches come with the next part).
-TREES = {"feature": "minecraft:spruce", "count": 1, "extra_chance": 0.5, "sapling": "minecraft:spruce_sapling"}
+# Trees: scattered larches (agriculture.LARCH, gold in autumn and bare in winter) among vanilla spruces. Each
+# chunk gets count - 1, count or count + 1 tree tries, evenly; larch_chance of them are larches.
+TREES = {"feature": "alpine_spawn_trees", "count": 1, "larch_chance": 0.6, "larch": "jugcraft:larch_checked",
+         "spruce": "minecraft:spruce_checked"}

@@ -830,6 +830,8 @@ def crop_textures():
     out.update(kitchen_textures())
     from festival_textures import festival_textures  # so do the festival crops
     out.update(festival_textures())
+    from larch_textures import larch_textures  # and Alpine Spawn's larch
+    out.update(larch_textures())
     from carving_textures import carving_textures  # and pumpkin carving
     out.update(carving_textures())
     from halloween_textures import halloween_textures  # and the Halloween harvest

@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:chestnut_planks"
+    "jugcraft:chestnut_planks",
+    "jugcraft:larch_planks"
   ]
 }

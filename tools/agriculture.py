@@ -325,17 +325,45 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
             "pick": {"item": "chestnut", "min": 1, "max": 2},
             # worldgen/feature/chestnut.json: a broad crown on a straight trunk.
             "trunk": {"base_height": 5, "height_rand_a": 2}, "foliage": {"radius": 3, "height": 3}}
-# The chestnut wood set: display names. Logs and wood strip with an axe; logs saw into planks (sawmill).
-WOOD = {
-    "chestnut_log": "Chestnut Log", "chestnut_wood": "Chestnut Wood", "stripped_chestnut_log": "Stripped Chestnut Log",
-    "stripped_chestnut_wood": "Stripped Chestnut Wood", "chestnut_planks": "Chestnut Planks", "chestnut_stairs": "Chestnut Stairs",
-    "chestnut_slab": "Chestnut Slab", "chestnut_fence": "Chestnut Fence", "chestnut_fence_gate": "Chestnut Fence Gate",
-}
-WOOD_TAG = "jugcraft:chestnut_logs"
-STRIPPED = {"chestnut_log": "stripped_chestnut_log", "chestnut_wood": "stripped_chestnut_wood"}
-TREE_BLOCKS = {"chestnut_sapling": "Chestnut Sapling", "chestnut_leaves": "Chestnut Leaves"}
+# Wood sets: each tree's log, wood, stripped log and wood, planks, stairs, slab, fence and fence gate, generated
+# alike (festival_data.wood_assets). Logs and wood strip with an axe; logs saw into planks (sawmill). The
+# chestnut is the Festival Crops' fruit tree; the larch is Alpine Spawn's seasonal conifer.
+WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch"}
+# The feature switch each wood's hand recipes follow: the switch of whatever grows the tree.
+WOOD_SWITCHES = {"chestnut": FEATURE, "larch": "alpine_spawn"}
+
+
+def wood_blocks(wood, display):
+    """One wood set's blocks and display names, in a fixed order."""
+    return {f"{wood}_log": f"{display} Log", f"{wood}_wood": f"{display} Wood", f"stripped_{wood}_log": f"Stripped {display} Log",
+            f"stripped_{wood}_wood": f"Stripped {display} Wood", f"{wood}_planks": f"{display} Planks",
+            f"{wood}_stairs": f"{display} Stairs", f"{wood}_slab": f"{display} Slab", f"{wood}_fence": f"{display} Fence",
+            f"{wood}_fence_gate": f"{display} Fence Gate"}
+
+
+WOOD = {block: name for wood, display in WOOD_SETS.items() for block, name in wood_blocks(wood, display).items()}
+WOOD_TAGS = {wood: f"jugcraft:{wood}_logs" for wood in WOOD_SETS}
+WOOD_TAG = WOOD_TAGS["chestnut"]
+STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS for part in ("log", "wood")}
+# The larch (Alpine Spawn): a conifer that changes with the seasons. Its needles (state "season": green, gold,
+# bare) follow the server's season day (season/JugcraftSeasons): green from green_from, gold from gold_from, bare
+# from bare_from until green_from comes round again (northern calendar days; seasons.hemisphere shifts the south).
+# Each block turns up to jitter days early or late, fixed by its position, so a crown turns gradually and trees
+# differ; blocks catch up on random ticks, and needles placed or grown from a sapling start in today's state.
+# With seasons off they stay green. The needles drop saplings and sticks like spruce leaves.
+LARCH = {"sapling": "larch_sapling", "needles": "larch_needles", "states": ["green", "gold", "bare"],
+         "green_from": 91, "gold_from": 268, "bare_from": 318, "jitter": 7,
+         "sapling_chances": [0.05, 0.0625, 0.083333336, 0.1],
+         # worldgen/feature/larch.json: a tall, narrow cone (vanilla's spruce foliage shape) on a straight trunk,
+         # its lowest trunk_height blocks bare. Ranges are [min, max].
+         "trunk": {"base_height": 7, "height_rand_a": 3},
+         "foliage": {"radius": [1, 2], "offset": [0, 1], "trunk_height": [2, 3]}}
+TREE_BLOCKS = {"chestnut_sapling": "Chestnut Sapling", "chestnut_leaves": "Chestnut Leaves",
+               "larch_sapling": "Larch Sapling", "larch_needles": "Larch Needles"}
 TREE_TEXTURES = ["chestnut_log", "chestnut_log_top", "stripped_chestnut_log", "stripped_chestnut_log_top", "chestnut_planks",
-                 "chestnut_leaves", "chestnut_leaves_burs", "chestnut_leaves_ripe", "chestnut_sapling"]
+                 "chestnut_leaves", "chestnut_leaves_burs", "chestnut_leaves_ripe", "chestnut_sapling",
+                 "larch_log", "larch_log_top", "stripped_larch_log", "stripped_larch_log_top", "larch_planks",
+                 "larch_needles", "larch_needles_gold", "larch_needles_bare", "larch_sapling"]
 
 # Decorations. The Turnip Lantern is the original jack-o'-lantern: a carved turnip with a candle inside.
 DECOR = {"turnip_lantern": {"display": "Turnip Lantern", "light": 13}}
@@ -929,8 +957,8 @@ SHAPELESS = [
      "count": 1},
     {"id": "candy_corn", "inputs": ["jugcraft:corn", "minecraft:sugar", "minecraft:honey_bottle"], "result": "candy_corn",
      "count": 4},
-    {"id": "chestnut_planks", "inputs": ["#jugcraft:chestnut_logs"], "result": "chestnut_planks", "count": 4,
-     "category": "building", "group": "planks"},
+    *[{"id": f"{wood}_planks", "inputs": [f"#{WOOD_TAGS[wood]}"], "result": f"{wood}_planks", "count": 4,
+       "category": "building", "group": "planks", "switch": WOOD_SWITCHES[wood]} for wood in WOOD_SETS],
     # Halloween harvest.
     {"id": "white_pumpkin_seeds", "inputs": ["jugcraft:white_pumpkin"], "result": "white_pumpkin_seeds", "count": 4},
     {"id": "jarrahdale_pumpkin_seeds", "inputs": ["jugcraft:jarrahdale_pumpkin"], "result": "jarrahdale_pumpkin_seeds", "count": 4},
@@ -1006,18 +1034,19 @@ SHAPED = [
     # Festival crops: the lantern (like vanilla's jack o'lantern recipe) and the chestnut wood set (like oak's).
     {"id": "turnip_lantern", "pattern": ["T", "B"], "key": {"T": "jugcraft:turnip", "B": "minecraft:torch"},
      "result": "turnip_lantern", "count": 1, "category": "building"},
-    {"id": "chestnut_wood", "pattern": ["##", "##"], "key": {"#": "jugcraft:chestnut_log"}, "result": "chestnut_wood",
-     "count": 3, "category": "building", "group": "bark"},
-    {"id": "stripped_chestnut_wood", "pattern": ["##", "##"], "key": {"#": "jugcraft:stripped_chestnut_log"},
-     "result": "stripped_chestnut_wood", "count": 3, "category": "building", "group": "bark"},
-    {"id": "chestnut_stairs", "pattern": ["#  ", "## ", "###"], "key": {"#": "jugcraft:chestnut_planks"}, "result": "chestnut_stairs",
-     "count": 4, "category": "building", "group": "wooden_stairs"},
-    {"id": "chestnut_slab", "pattern": ["###"], "key": {"#": "jugcraft:chestnut_planks"}, "result": "chestnut_slab",
-     "count": 6, "category": "building", "group": "wooden_slab"},
-    {"id": "chestnut_fence", "pattern": ["W#W", "W#W"], "key": {"W": "jugcraft:chestnut_planks", "#": "minecraft:stick"},
-     "result": "chestnut_fence", "count": 3, "category": "misc", "group": "wooden_fence"},
-    {"id": "chestnut_fence_gate", "pattern": ["#W#", "#W#"], "key": {"W": "jugcraft:chestnut_planks", "#": "minecraft:stick"},
-     "result": "chestnut_fence_gate", "count": 1, "category": "redstone", "group": "wooden_fence_gate"},
+    *[dict(recipe, switch=WOOD_SWITCHES[wood]) for wood in WOOD_SETS for recipe in (
+        {"id": f"{wood}_wood", "pattern": ["##", "##"], "key": {"#": f"jugcraft:{wood}_log"}, "result": f"{wood}_wood",
+         "count": 3, "category": "building", "group": "bark"},
+        {"id": f"stripped_{wood}_wood", "pattern": ["##", "##"], "key": {"#": f"jugcraft:stripped_{wood}_log"},
+         "result": f"stripped_{wood}_wood", "count": 3, "category": "building", "group": "bark"},
+        {"id": f"{wood}_stairs", "pattern": ["#  ", "## ", "###"], "key": {"#": f"jugcraft:{wood}_planks"}, "result": f"{wood}_stairs",
+         "count": 4, "category": "building", "group": "wooden_stairs"},
+        {"id": f"{wood}_slab", "pattern": ["###"], "key": {"#": f"jugcraft:{wood}_planks"}, "result": f"{wood}_slab",
+         "count": 6, "category": "building", "group": "wooden_slab"},
+        {"id": f"{wood}_fence", "pattern": ["W#W", "W#W"], "key": {"W": f"jugcraft:{wood}_planks", "#": "minecraft:stick"},
+         "result": f"{wood}_fence", "count": 3, "category": "misc", "group": "wooden_fence"},
+        {"id": f"{wood}_fence_gate", "pattern": ["#W#", "#W#"], "key": {"W": f"jugcraft:{wood}_planks", "#": "minecraft:stick"},
+         "result": f"{wood}_fence_gate", "count": 1, "category": "redstone", "group": "wooden_fence_gate"})],
     # Halloween harvest: a platform scale with a clock for a dial, a straw man on a post, a stook of stalks
     # and a hollowed gourd on a string.
     {"id": "harvest_scale", "pattern": [" C ", "III", "PPP"], "key": {"C": "minecraft:clock", "I": "#c:ingots/iron",
@@ -1173,7 +1202,7 @@ def all_blocks():
 
 def all_items():
     return (list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
-            + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
+            + [LARCH["sapling"], LARCH["needles"]] + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items())
@@ -1181,6 +1210,17 @@ def all_items():
 
 def owns(entry_id):
     return entry_id in all_blocks() or entry_id in all_items()
+
+
+def switch_of(entry_id):
+    """The feature switch that owns one of this branch's IDs: its tree's switch for a wood set (and the larch's sapling
+    and needles), otherwise FEATURE."""
+    for wood, switch in WOOD_SWITCHES.items():
+        if entry_id in wood_blocks(wood, WOOD_SETS[wood]):
+            return switch
+    if entry_id in (LARCH["sapling"], LARCH["needles"]):
+        return WOOD_SWITCHES["larch"]
+    return FEATURE
 
 
 def textures():

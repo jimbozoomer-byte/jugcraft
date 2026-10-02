@@ -213,6 +213,6 @@ def feature_of(entry_id):
         return FEATURE
     import agriculture
     if agriculture.owns(entry_id):
-        return agriculture.FEATURE
+        return agriculture.switch_of(entry_id)
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

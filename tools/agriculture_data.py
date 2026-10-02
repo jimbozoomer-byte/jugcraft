@@ -27,8 +27,9 @@ def rid(path):
     return path if ":" in path else f"{MOD}:{path}"
 
 
-def conditions(*features):
-    return [{"condition": f"{MOD}:feature_enabled", "feature": f} for f in (FEATURE, *features)]
+def conditions(*features, switch=FEATURE):
+    """Load conditions: the recipe's switch (the agriculture feature unless it belongs to another) and any others."""
+    return [{"condition": f"{MOD}:feature_enabled", "feature": f} for f in (switch, *features)]
 
 
 def stage_texture(crop, stage):
@@ -274,14 +275,16 @@ def recipes(out, write):
                                          "ingredient": rid(info["input"]), "result": {"id": rid(result)},
                                          "experience": info["xp"], "cookingtime": time})
     for recipe in SHAPELESS:
-        data = {"fabric:load_conditions": conditions(*recipe.get("features", [])), "type": "minecraft:crafting_shapeless",
+        data = {"fabric:load_conditions": conditions(*recipe.get("features", []), switch=recipe.get("switch", FEATURE)),
+                "type": "minecraft:crafting_shapeless",
                 "category": recipe.get("category", "misc")}
         if "group" in recipe:
             data["group"] = recipe["group"]
         data.update({"ingredients": recipe["inputs"], "result": {"id": rid(recipe["result"]), "count": recipe["count"]}})
         write(out / f"{recipe['id']}.json", data)
     for recipe in SHAPED:
-        data = {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped", "category": recipe["category"]}
+        data = {"fabric:load_conditions": conditions(switch=recipe.get("switch", FEATURE)), "type": "minecraft:crafting_shaped",
+                "category": recipe["category"]}
         if "group" in recipe:
             data["group"] = recipe["group"]
         result = {"id": rid(recipe["result"]), "count": recipe["count"]}

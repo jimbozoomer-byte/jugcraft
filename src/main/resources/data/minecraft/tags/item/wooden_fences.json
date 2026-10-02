@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:chestnut_fence"
+    "jugcraft:chestnut_fence",
+    "jugcraft:larch_fence"
   ]
 }

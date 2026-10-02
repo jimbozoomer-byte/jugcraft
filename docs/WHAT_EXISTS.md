@@ -378,8 +378,13 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 ### Alpine Spawn (`world/AlpineSpawn`, `tools/alpine.py`)
 
 - **Placement.** `AlpineSpawn.wrap` turns the Overworld biome builder's cool meadows (temperature band at most `COOL_MAX`, -0.15) into `jugcraft:alpine_spawn`. It runs through `mixin/OverworldBiomeBuilderMixin` (`@ModifyVariable` on `addBiomes`).
-- **The start.** On a new world's first start (game time 0, multi-noise Overworld only), `findStart` finds the nearest Alpine Spawn within `SEARCH_RADIUS` (6,400), moves inward by `MARGIN` (48), and prefers a village within `VILLAGE_CHUNKS` (24). The spawn is then set with `/setworldspawn`.
-- **Villages.** `jugcraft:village_alpine` (taiga pieces, `#jugcraft:has_structure/village_alpine`) on the structure set `jugcraft:alpine_villages` (spacing 16, separation 5). It is in `#minecraft:village`.
+- **The start.** On a new world's first start (game time 0, multi-noise Overworld only), `findStart` looks for the alpine village (`#jugcraft:alpine_villages`) nearest the origin, up to `VILLAGE_CELLS` (25) grid cells away. If there is none, it finds the nearest Alpine Spawn within `SEARCH_RADIUS` (6,400) and moves inward by `MARGIN` (48). The spawn is then set with `/setworldspawn`.
+- **Villages.** `jugcraft:village_alpine` (taiga pieces, `#jugcraft:has_structure/village_alpine`) on the structure set `jugcraft:alpine_villages` (spacing 16, separation 5). It is in `#minecraft:village` and `#jugcraft:alpine_villages`.
+- **Trees.** `worldgen/feature/alpine_spawn_trees` picks a larch (`jugcraft:larch_checked`) 60% of the time, otherwise a spruce; 0 to 2 tries per chunk.
+- **Larch** (`agriculture/LarchNeedlesBlock`, `LARCH` in `tools/agriculture.py`):
+  - `larch_needles` has a `season` state (`green`, `gold`, `bare`). It follows `JugcraftSeasons.today()` on random ticks and when placed: green from day 91, gold from 268, bare from 318. Each block is shifted by up to `JITTER` (7) days by its position. With seasons off, needles stay green.
+  - `larch_sapling` grows `worldgen/feature/larch` (spruce foliage shape on a 7 to 10 block trunk).
+  - The wood set comes from `JugcraftAgriculture.registerWoodSet`, shared with the chestnut; `WOOD_SETS` in `tools/agriculture.py` generates both. Its hand recipes follow `alpine_spawn.enabled`. There are sawmill (`sawing/larch_logs`) and tree farm (`tree_growing/larch_sapling`) recipes.
 - **Settings.** `alpine_spawn.enabled` and `alpine_spawn.start`.
 
 ### Registration (`materials/`)

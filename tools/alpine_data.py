@@ -82,14 +82,17 @@ def worldgen(data, write):
     folder = data / MOD / "worldgen"
     write(folder / "biome" / f"{al.BIOME}.json", biome())
     trees = al.TREES
-    write(folder / "placed_feature" / "trees_alpine_spawn.json", {"feature": trees["feature"], "placement": [
+    write(folder / "feature" / f"{trees['feature']}.json", {
+        "type": "minecraft:random_selector", "default": trees["spruce"],
+        "features": [{"chance": trees["larch_chance"], "feature": trees["larch"]}]})
+    write(folder / "placed_feature" / "trees_alpine_spawn.json", {"feature": rid(trees["feature"]), "placement": [
         {"type": "minecraft:count", "count": {"type": "minecraft:weighted_list", "distribution": [
-            {"data": 0, "weight": 1}, {"data": trees["count"], "weight": 1}, {"data": trees["count"] + 1, "weight": 1}]}},
+            {"data": trees["count"] - 1, "weight": 1}, {"data": trees["count"], "weight": 1},
+            {"data": trees["count"] + 1, "weight": 1}]}},
         {"type": "minecraft:in_square"},
         {"type": "minecraft:surface_water_depth_filter", "max_water_depth": 0},
         {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"},
         {"type": "minecraft:biome"},
-        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": trees["sapling"]}},
     ]})
     # Villages: vanilla's taiga village pieces, in Alpine Spawn only, on their own tight grid.
     write(folder / "structure" / f"{al.VILLAGE}.json", {
@@ -109,6 +112,8 @@ def tags(tags):
         tags.add("worldgen/biome", tag, biome)
     # Maps, /locate and villagers' village logic know it as a village.
     tags.add("worldgen/structure", "minecraft:village", rid(al.VILLAGE))
+    # The start search looks for these.
+    tags.add("worldgen/structure", al.VILLAGE_STRUCTURES, rid(al.VILLAGE))
 
 
 def lang(lang):

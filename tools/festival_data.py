@@ -5,7 +5,7 @@ berry bushes, oak wood, oak leaves and trees, read from the game jar. No model o
 stem and wood models below reuse vanilla's templates (stairs, slab, fence, fence gate) with Jugcraft
 textures, and the stem models are rebuilt here without vanilla's biome tint.
 """
-from agriculture import (GOURDS, CRANBERRY, BOG_SOIL_TAG, BOG_SOIL, CHESTNUT, WOOD, WOOD_TAG, TREE_BLOCKS, DECOR,
+from agriculture import (GOURDS, CRANBERRY, BOG_SOIL_TAG, BOG_SOIL, CHESTNUT, LARCH, WOOD, WOOD_SETS, WOOD_TAGS, TREE_BLOCKS, DECOR,
                          FOUND_WILD, GOURD_PATCH, CRANBERRY_PATCH, CHESTNUT_TREES, stem, attached_stem)
 
 MOD = "jugcraft"
@@ -127,13 +127,28 @@ def stairs_variants(model):
     return {"variants": out}
 
 
+def needle_texture(state):
+    """The larch needles' texture (and model) for a season state: larch_needles, larch_needles_gold, larch_needles_bare."""
+    return LARCH["needles"] if state == LARCH["states"][0] else f"{LARCH['needles']}_{state}"
+
+
 def wood_assets(root, write, lang):
-    log, log_top = rid("block/chestnut_log"), rid("block/chestnut_log_top")
-    stripped, stripped_top = rid("block/stripped_chestnut_log"), rid("block/stripped_chestnut_log_top")
-    planks = rid("block/chestnut_planks")
+    for wood in WOOD_SETS:
+        wood_set_assets(wood, root, write)
+    for name, display in WOOD.items():
+        model = f"{name.removesuffix('_fence')}_fence_inventory" if name.endswith("_fence") else name
+        write(root / "items" / f"{name}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{model}")}})
+        lang[f"block.{MOD}.{name}"] = display
+
+
+def wood_set_assets(wood, root, write):
+    """One wood set's block models and blockstates (vanilla oak's layouts, the wood's own textures)."""
+    log, log_top = rid(f"block/{wood}_log"), rid(f"block/{wood}_log_top")
+    stripped, stripped_top = rid(f"block/stripped_{wood}_log"), rid(f"block/stripped_{wood}_log_top")
+    planks = rid(f"block/{wood}_planks")
     models = root / "models" / "block"
-    for name, side, end in (("chestnut_log", log, log_top), ("stripped_chestnut_log", stripped, stripped_top),
-                            ("chestnut_wood", log, log), ("stripped_chestnut_wood", stripped, stripped)):
+    for name, side, end in ((f"{wood}_log", log, log_top), (f"stripped_{wood}_log", stripped, stripped_top),
+                            (f"{wood}_wood", log, log), (f"stripped_{wood}_wood", stripped, stripped)):
         write(models / f"{name}.json", {"parent": "minecraft:block/cube_column", "textures": {"end": end, "side": side}})
         if name.endswith("_log"):
             write(models / f"{name}_horizontal.json", {"parent": "minecraft:block/cube_column_horizontal",
@@ -144,44 +159,40 @@ def wood_assets(root, write, lang):
         write(root / "blockstates" / f"{name}.json", {"variants": {
             "axis=x": {"model": horizontal, "x": 90, "y": 90}, "axis=y": {"model": rid(f"block/{name}")},
             "axis=z": {"model": horizontal, "x": 90}}})
-    write(models / "chestnut_planks.json", {"parent": "minecraft:block/cube_all", "textures": {"all": planks}})
-    write(root / "blockstates" / "chestnut_planks.json", {"variants": {"": {"model": rid("block/chestnut_planks")}}})
+    write(models / f"{wood}_planks.json", {"parent": "minecraft:block/cube_all", "textures": {"all": planks}})
+    write(root / "blockstates" / f"{wood}_planks.json", {"variants": {"": {"model": rid(f"block/{wood}_planks")}}})
     three = {"bottom": planks, "side": planks, "top": planks}
     for suffix, parent in (("", "stairs"), ("_inner", "inner_stairs"), ("_outer", "outer_stairs")):
-        write(models / f"chestnut_stairs{suffix}.json", {"parent": f"minecraft:block/{parent}", "textures": three})
-    write(root / "blockstates" / "chestnut_stairs.json", stairs_variants("chestnut_stairs"))
-    write(models / "chestnut_slab.json", {"parent": "minecraft:block/slab", "textures": three})
-    write(models / "chestnut_slab_top.json", {"parent": "minecraft:block/slab_top", "textures": three})
-    write(root / "blockstates" / "chestnut_slab.json", {"variants": {
-        "type=bottom": {"model": rid("block/chestnut_slab")}, "type=double": {"model": rid("block/chestnut_planks")},
-        "type=top": {"model": rid("block/chestnut_slab_top")}}})
+        write(models / f"{wood}_stairs{suffix}.json", {"parent": f"minecraft:block/{parent}", "textures": three})
+    write(root / "blockstates" / f"{wood}_stairs.json", stairs_variants(f"{wood}_stairs"))
+    write(models / f"{wood}_slab.json", {"parent": "minecraft:block/slab", "textures": three})
+    write(models / f"{wood}_slab_top.json", {"parent": "minecraft:block/slab_top", "textures": three})
+    write(root / "blockstates" / f"{wood}_slab.json", {"variants": {
+        "type=bottom": {"model": rid(f"block/{wood}_slab")}, "type=double": {"model": rid(f"block/{wood}_planks")},
+        "type=top": {"model": rid(f"block/{wood}_slab_top")}}})
     for suffix, parent in (("_post", "fence_post"), ("_side", "fence_side"), ("_inventory", "fence_inventory")):
-        write(models / f"chestnut_fence{suffix}.json", {"parent": f"minecraft:block/{parent}", "textures": {"texture": planks}})
-    parts = [{"apply": {"model": rid("block/chestnut_fence_post")}}]
+        write(models / f"{wood}_fence{suffix}.json", {"parent": f"minecraft:block/{parent}", "textures": {"texture": planks}})
+    parts = [{"apply": {"model": rid(f"block/{wood}_fence_post")}}]
     for direction, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
-        apply = {"model": rid("block/chestnut_fence_side"), "uvlock": True}
+        apply = {"model": rid(f"block/{wood}_fence_side"), "uvlock": True}
         if y:
             apply["y"] = y
         parts.append({"apply": apply, "when": {direction: "true"}})
-    write(root / "blockstates" / "chestnut_fence.json", {"multipart": parts})
+    write(root / "blockstates" / f"{wood}_fence.json", {"multipart": parts})
     gate_models = {"": "template_fence_gate", "_open": "template_fence_gate_open", "_wall": "template_fence_gate_wall",
                    "_wall_open": "template_fence_gate_wall_open"}
     for suffix, parent in gate_models.items():
-        write(models / f"chestnut_fence_gate{suffix}.json", {"parent": f"minecraft:block/{parent}", "textures": {"texture": planks}})
+        write(models / f"{wood}_fence_gate{suffix}.json", {"parent": f"minecraft:block/{parent}", "textures": {"texture": planks}})
     gate = {}
     for facing, y in (("south", 0), ("west", 90), ("north", 180), ("east", 270)):
         for in_wall in ("false", "true"):
             for is_open in ("false", "true"):
                 suffix = ("_wall" if in_wall == "true" else "") + ("_open" if is_open == "true" else "")
-                variant = {"model": rid(f"block/chestnut_fence_gate{suffix}"), "uvlock": True}
+                variant = {"model": rid(f"block/{wood}_fence_gate{suffix}"), "uvlock": True}
                 if y:
                     variant["y"] = y
                 gate[f"facing={facing},in_wall={in_wall},open={is_open}"] = variant
-    write(root / "blockstates" / "chestnut_fence_gate.json", {"variants": gate})
-    for name, display in WOOD.items():
-        model = "chestnut_fence_inventory" if name == "chestnut_fence" else name
-        write(root / "items" / f"{name}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{model}")}})
-        lang[f"block.{MOD}.{name}"] = display
+    write(root / "blockstates" / f"{wood}_fence_gate.json", {"variants": gate})
 
 
 def assets(root, write, lang):
@@ -222,6 +233,19 @@ def assets(root, write, lang):
     write(root / "blockstates" / f"{leaves}.json", {"variants": {
         f"fruit={fruit}": {"model": rid(f"block/{texture}")} for fruit, texture in enumerate(leaf_textures)}})
     write(root / "items" / f"{leaves}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{leaves}")}})
+    # The larch: a sapling, and needles in each season's state (untinted: green, gold, or bare twigs).
+    sapling, needles = LARCH["sapling"], LARCH["needles"]
+    write(models / f"{sapling}.json", {"parent": "minecraft:block/cross", "textures": {"cross": rid(f"block/{sapling}")}})
+    write(root / "blockstates" / f"{sapling}.json", {"variants": {"": {"model": rid(f"block/{sapling}")}}})
+    write(root / "items" / f"{sapling}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{sapling}")}})
+    write(root / "models" / "item" / f"{sapling}.json", {"parent": "minecraft:item/generated",
+                                                          "textures": {"layer0": rid(f"block/{sapling}")}})
+    for state in LARCH["states"]:
+        texture = needle_texture(state)
+        write(models / f"{texture}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{texture}")}})
+    write(root / "blockstates" / f"{needles}.json", {"variants": {
+        f"season={state}": {"model": rid(f"block/{needle_texture(state)}")} for state in LARCH["states"]}})
+    write(root / "items" / f"{needles}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{needles}")}})
     for block, display in TREE_BLOCKS.items():
         lang[f"block.{MOD}.{block}"] = display
     wood_assets(root, write, lang)
@@ -301,8 +325,22 @@ def loot(out, write):
     sapling = self_drop(CHESTNUT["sapling"])
     sapling["pools"][0]["entries"][0]["name"] = nut
     write(out / f"{CHESTNUT['sapling']}.json", sapling)
+    needles, larch_sapling = LARCH["needles"], rid(LARCH["sapling"])
+    write(out / f"{needles}.json", {"type": "minecraft:block", "pools": [
+        {"entries": [{"type": "minecraft:alternatives", "children": [
+            {"type": "minecraft:item", "condition": SHEARS_OR_SILK, "name": rid(needles)},
+            {"type": "minecraft:item", "condition": {"type": "minecraft:all_of", "terms": [
+                {"type": "minecraft:survives_explosion"},
+                {"type": "minecraft:table_bonus", "chances": LARCH["sapling_chances"], "enchantment": "minecraft:fortune"}]},
+             "name": larch_sapling}]}], "rolls": 1},
+        {"condition": not_shears, "entries": [{"type": "minecraft:item", "condition": {
+            "type": "minecraft:table_bonus", "chances": [0.02, 0.022222223, 0.025, 0.033333335, 0.1], "enchantment": "minecraft:fortune"},
+            "modifier": [{"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 2}},
+                         {"type": "minecraft:explosion_decay"}], "name": "minecraft:stick"}], "rolls": 1}],
+        "random_sequence": rid(f"blocks/{needles}")})
+    write(out / f"{LARCH['sapling']}.json", self_drop(LARCH["sapling"]))
     for block in WOOD:
-        if block == "chestnut_slab":
+        if block.endswith("_slab"):
             write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{"entries": [{"type": "minecraft:item", "modifier": [
                 {"type": "minecraft:set_count", "condition": {"type": "minecraft:match_block", "blocks": rid(block),
                                                               "state": {"type": "double"}}, "count": 2},
@@ -333,20 +371,23 @@ def tags(tags):
     tags.add("block", "minecraft:mineable/axe", rid("turnip_lantern"))
     tags.add("block", "minecraft:sword_efficient", rid(CRANBERRY["block"]))
 
-    # The chestnut wood behaves like vanilla wood: burnable logs (charcoal, fuel), planks for every planks
-    # recipe, fences that connect to other wooden fences, and leaves and a sapling in the vanilla tags.
-    logs = ["chestnut_log", "chestnut_wood", "stripped_chestnut_log", "stripped_chestnut_wood"]
+    # Every wood set behaves like vanilla wood: burnable logs (charcoal, fuel), planks for every planks recipe,
+    # fences that connect to other wooden fences, and leaves and saplings in the vanilla tags.
+    for wood, log_tag in WOOD_TAGS.items():
+        for registry in ("block", "item"):
+            for log in (f"{wood}_log", f"{wood}_wood", f"stripped_{wood}_log", f"stripped_{wood}_wood"):
+                tags.add(registry, log_tag, rid(log))
+            tags.add(registry, "minecraft:logs_that_burn", f"#{log_tag}")
+            tags.add(registry, "minecraft:planks", rid(f"{wood}_planks"))
+            tags.add(registry, "minecraft:wooden_stairs", rid(f"{wood}_stairs"))
+            tags.add(registry, "minecraft:wooden_slabs", rid(f"{wood}_slab"))
+            tags.add(registry, "minecraft:wooden_fences", rid(f"{wood}_fence"))
+            tags.add(registry, "minecraft:fence_gates", rid(f"{wood}_fence_gate"))
+        tags.add("block", "minecraft:overworld_natural_logs", rid(f"{wood}_log"))
     for registry in ("block", "item"):
-        for log in logs:
-            tags.add(registry, WOOD_TAG, rid(log))
-        tags.add(registry, "minecraft:logs_that_burn", f"#{WOOD_TAG}")
-        tags.add(registry, "minecraft:planks", rid("chestnut_planks"))
-        tags.add(registry, "minecraft:wooden_stairs", rid("chestnut_stairs"))
-        tags.add(registry, "minecraft:wooden_slabs", rid("chestnut_slab"))
-        tags.add(registry, "minecraft:wooden_fences", rid("chestnut_fence"))
-        tags.add(registry, "minecraft:fence_gates", rid("chestnut_fence_gate"))
         tags.add(registry, "minecraft:leaves", rid(CHESTNUT["leaves"]))
-    tags.add("block", "minecraft:overworld_natural_logs", rid("chestnut_log"))
+        tags.add(registry, "minecraft:leaves", rid(LARCH["needles"]))
+        tags.add(registry, "minecraft:saplings", rid(LARCH["sapling"]))
     tags.add("block", "minecraft:saplings", rid(CHESTNUT["sapling"]))
 
 
@@ -408,6 +449,24 @@ def worldgen(data, write):
         "trunk_placer": {"type": "minecraft:straight_trunk_placer", "base_height": trunk["base_height"],
                          "height_rand_a": trunk["height_rand_a"], "height_rand_b": 0},
         "trunk_provider": {"id": rid("chestnut_log"), "properties": {"axis": "y"}}})
+    # The larch: a tall, narrow cone (vanilla's spruce foliage shape) on a straight trunk, needles starting green.
+    trunk, foliage = LARCH["trunk"], LARCH["foliage"]
+
+    def uniform(bounds):
+        return {"type": "minecraft:uniform", "max_inclusive": bounds[1], "min_inclusive": bounds[0]}
+
+    write(folder / "feature" / "larch.json", {
+        "type": "minecraft:tree", "below_trunk_provider": "minecraft:soil_beneath_tree", "decorators": [],
+        "foliage_placer": {"type": "minecraft:spruce_foliage_placer", "offset": uniform(foliage["offset"]),
+                           "radius": uniform(foliage["radius"]), "trunk_height": uniform(foliage["trunk_height"])},
+        "foliage_provider": {"id": rid(LARCH["needles"]), "properties": {
+            "distance": "7", "persistent": "false", "season": LARCH["states"][0], "waterlogged": "false"}},
+        "ignore_vines": True, "minimum_size": {"type": "minecraft:two_layers_feature_size", "limit": 2, "upper_size": 2},
+        "trunk_placer": {"type": "minecraft:straight_trunk_placer", "base_height": trunk["base_height"],
+                         "height_rand_a": trunk["height_rand_a"], "height_rand_b": 0},
+        "trunk_provider": {"id": rid("larch_log"), "properties": {"axis": "y"}}})
+    write(folder / "placed_feature" / "larch_checked.json", {"feature": rid("larch"), "placement": [
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": rid(LARCH["sapling"])}}]})
     write(folder / "placed_feature" / "patch_chestnut_tree.json", {"feature": rid("chestnut"), "placement": [
         {"type": "minecraft:rarity_filter", "chance": CHESTNUT_TREES["rarity"]},
         {"type": "minecraft:in_square"},

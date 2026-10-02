@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:chestnut_log"
+    "jugcraft:chestnut_log",
+    "jugcraft:larch_log"
   ]
 }

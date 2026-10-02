@@ -137,11 +137,12 @@ No numbered release yet. Everything below is on `main`.
 - **Dedicated-server check (CI):** a real client joins the game's own dedicated server, opens a machine and trades with the Retro Trader over the network, leaves and rejoins; and a world is saved and reopened with its trader, machine contents and cabinet intact. The two-client checklist is in [docs/TESTING.md](docs/TESTING.md#dedicated-server-and-two-clients).
 - Fourteen game tests, seven client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
 
-### Unmerged: Alpine Spawn, part 1 (stacked on the agriculture pull requests, #53 and #80)
-- **New worlds start in Alpine Spawn**, a large, cool alpine meadow on mountain plateaus. Vanilla's cool meadows become this biome, and the server moves a new world's spawn there, onto a village when one is nearby.
+### Unmerged: Alpine Spawn, parts 1 and 2 (stacked on the agriculture pull requests, #53 and #80)
+- **New worlds start in Alpine Spawn, at an alpine village.** Alpine Spawn is a large, cool alpine meadow on mountain plateaus; vanilla's cool meadows become this biome. The server moves a new world's spawn to the alpine village nearest the origin, or into the biome when there is no alpine village within 6,400 blocks.
 - **Alpine villages are common:** vanilla's taiga villages on a 16-chunk grid (vanilla's is 34), only in this biome.
-- It has seasonal colours and winter snow from the start. Larches, seasonal flowers, bilberries and an alpine winter come in the next parts.
-- New settings: `alpine_spawn.enabled` (generation) and `alpine_spawn.start` (`on` or `off`: start there).
+- **Larches** (part 2): a conifer that changes with the seasons. Its needles are green in spring and summer, turn gold in autumn and fall in winter, leaving bare twigs, then bud green again; each block turns within a week either side, so crowns change gradually. Larches grow among spruces in Alpine Spawn. The tree drops larch saplings, and comes with a full larch wood set (logs, wood, stripped forms, planks, stairs, slab, fence and gate). Larch logs saw into planks in the sawmill, and saplings grow in the tree farm.
+- It has seasonal colours and winter snow from the start. Seasonal flowers, bilberries and an alpine winter come in the next parts.
+- New settings: `alpine_spawn.enabled` (generation, and the larch's hand recipes) and `alpine_spawn.start` (`on` or `off`: start there).
 - Server game tests for its climate entries, tags and villages, and a client test in a real world that it is where the world starts.
 
 ### Unmerged: Surface deposits, batch 11

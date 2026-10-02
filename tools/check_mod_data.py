@@ -213,8 +213,8 @@ NON_METAL = {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | s
 def item_units(ref):
     """Returns {metal: units} for an item or tag reference."""
     ns, path = split(ref.lstrip("#"))
-    if ref.startswith("#") and (ns == "minecraft" or ref[1:] in (ag.WOOD_TAG, ag.HEIRLOOM_TAG)):
-        return {}  # vanilla tags used here (logs, planks), chestnut logs and heirloom pumpkins hold no metal
+    if ref.startswith("#") and (ns == "minecraft" or ref[1:] in (*ag.WOOD_TAGS.values(), ag.HEIRLOOM_TAG)):
+        return {}  # vanilla tags used here (logs, planks), Jugcraft logs and heirloom pumpkins hold no metal
     if ref.startswith("#"):
         form, _, metal = path.partition("/")
         if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()}:
@@ -500,7 +500,7 @@ def check_alpine():
     java = (WORLD_JAVA / "AlpineSpawn.java").read_text(encoding="utf-8")
     for expected in (f'FEATURE = "{al.FEATURE}"', f'Jugcraft.id("{al.BIOME}")', f"COOL_MAX = {al.COOL_MAX}F",
                      f"SEARCH_RADIUS = {al.SPAWN['radius']};", f"SEARCH_STEP = {al.SPAWN['step']};",
-                     f"VILLAGE_CHUNKS = {al.SPAWN['village_chunks']};"):
+                     f"VILLAGE_CELLS = {al.SPAWN['village_cells']};", f'Jugcraft.id("{al.VILLAGE_STRUCTURES.split(":")[1]}")'):
         if expected not in java:
             err(f"AlpineSpawn.java has no {expected} (tools/alpine.py)")
     if al.FEATURE not in FEATURES:
@@ -529,6 +529,16 @@ def check_alpine():
         err(f"{al.VILLAGE_SET}.json differs from VILLAGES in tools/alpine.py")
     if f"{MOD}:{al.BIOME}" not in seasons.BIOMES:
         err("Alpine Spawn has no seasons")
+    if al.SPAWN["village_cells"] * al.VILLAGES["spacing"] * 16 < al.SPAWN["radius"]:
+        err("The start search looks for alpine villages less far than for the biome (SPAWN in tools/alpine.py)")
+    selector = load(folder / "feature" / f"{al.TREES['feature']}.json") or {}
+    picks = {selector.get("default")} | {entry.get("feature") for entry in selector.get("features", [])}
+    if picks != {al.TREES["larch"], al.TREES["spruce"]}:
+        err(f"{al.TREES['feature']}.json should pick larches and spruces, found {sorted(map(str, picks))}")
+    for placed in picks:
+        ns, path = split(str(placed))
+        if ns == MOD and not (folder / "placed_feature" / f"{path}.json").is_file():
+            err(f"{al.TREES['feature']}.json: unknown placed feature {placed}")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     if lang.get(f"biome.{MOD}.{al.BIOME}") != al.DISPLAY:
         err(f"No name for the {al.BIOME} biome")
@@ -950,18 +960,50 @@ def check_festival(java, main):
     chestnut = ag.CHESTNUT
     if numbers != {"FRUIT_CHANCE": chestnut["fruit_chance"], "PICK_MIN": chestnut["pick"]["min"], "PICK_MAX": chestnut["pick"]["max"]}:
         err("ChestnutLeavesBlock.java differs from CHESTNUT in tools/agriculture.py")
-    for block in list(ag.WOOD) + list(ag.TREE_BLOCKS) + list(ag.DECOR) + [ag.CRANBERRY["block"]]:
+    for block in list(ag.TREE_BLOCKS) + list(ag.DECOR) + [ag.CRANBERRY["block"]]:
         if f'registerBlock("{block}"' not in main:
             err(f"JugcraftAgriculture.java does not register {block}")
+    for wood in ag.WOOD_SETS:  # registerWoodSet registers every block in agriculture.wood_blocks
+        if f'registerWoodSet("{wood}",' not in main:
+            err(f"JugcraftAgriculture.java does not register the {wood} wood set")
+    check_larch(java.get("LarchNeedlesBlock", ""))
     for block, info in ag.DECOR.items():
         if f"lightLevel(state -> {info['light']})" not in main:
             err(f"{block}: light level differs from DECOR in tools/agriculture.py")
     expected_states = {ag.stem(g): {f"age={a}" for a in range(8)} for g in ag.GOURDS}
     expected_states[ag.CRANBERRY["block"]] = {f"age={a}" for a in range(len(ag.CRANBERRY["stages"]))}
     expected_states[ag.CHESTNUT["leaves"]] = {f"fruit={f}" for f in range(3)}
+    expected_states[ag.LARCH["needles"]] = {f"season={state}" for state in ag.LARCH["states"]}
     for block, variants in expected_states.items():
         if set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})) != variants:
             err(f"{block}: blockstate does not cover every stage")
+
+
+def check_larch(needles):
+    """LarchNeedlesBlock's season days match LARCH, and every fixed season mode shows its own needles on every block."""
+    larch = ag.LARCH
+    numbers = {name: int(value) for name, value in re.findall(r"int (GREEN_FROM|GOLD_FROM|BARE_FROM|JITTER) = (\d+);", needles)}
+    if numbers != {"GREEN_FROM": larch["green_from"], "GOLD_FROM": larch["gold_from"], "BARE_FROM": larch["bare_from"],
+                   "JITTER": larch["jitter"]}:
+        err(f"LarchNeedlesBlock.java {numbers} differs from LARCH in tools/agriculture.py")
+    states = re.findall(r"^\t\t([A-Z, ]+);", needles.partition("enum Needles")[2], re.M)
+    if not states or [state.strip().lower() for state in states[0].split(",")] != larch["states"]:
+        err(f"LarchNeedlesBlock.Needles differs from LARCH['states'] {larch['states']}")
+    calendar = (ROOT / "src/main/java/io/github/jimbozoomer/jugcraft/season/SeasonCalendar.java").read_text(encoding="utf-8")
+    modes = {name.lower(): int(day) for name, day in re.findall(r"\b(SPRING|SUMMER|AUTUMN|WINTER)\((\d+)\)", calendar)}
+
+    def needles_on(day):
+        if larch["bare_from"] <= day or day < larch["green_from"]:
+            return "bare"
+        return "gold" if day >= larch["gold_from"] else "green"
+
+    wanted = {"spring": "green", "summer": "green", "autumn": "gold", "winter": "bare"}
+    for mode, day in modes.items():
+        seen = {needles_on((day - 1 + shift) % 365 + 1) for shift in range(-larch["jitter"], larch["jitter"] + 1)}
+        if seen != {wanted[mode]}:
+            err(f"/jugcraft season set {mode} (day {day}) shows larch needles {sorted(seen)}, not only {wanted[mode]}")
+    if len(modes) != 4:
+        err(f"SeasonCalendar.Mode days not found ({modes})")
 
 
 def check_carving(java, main):

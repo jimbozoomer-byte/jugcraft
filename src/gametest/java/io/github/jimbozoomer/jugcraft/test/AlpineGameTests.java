@@ -2,29 +2,48 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.datafixers.util.Pair;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
+import io.github.jimbozoomer.jugcraft.agriculture.LarchNeedlesBlock;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
+import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
 import io.github.jimbozoomer.jugcraft.world.AlpineSpawn;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.StructureTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Alpine Spawn: its place in the Overworld climate table, its tags and seasons, and its villages. */
+/** Alpine Spawn: its place in the Overworld climate table, its tags and seasons, its villages, and its larches. */
 public class AlpineGameTests {
 	private static final Logger LOGGER = LoggerFactory.getLogger("jugcraft-test");
 
@@ -84,6 +103,149 @@ public class AlpineGameTests {
 				.getOrThrow(ResourceKey.create(Registries.STRUCTURE_SET, Jugcraft.id("alpine_villages"))).value();
 		helper.assertTrue(set.placement() instanceof RandomSpreadStructurePlacement spread && spread.spacing() < 34,
 				"Alpine villages are no closer together than vanilla's: " + set.placement());
+		helper.assertTrue(structure.is(AlpineSpawn.VILLAGES), "The start search does not look for the alpine village");
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- the larch
+
+	private static Block block(String id) {
+		return JugcraftAgriculture.block(id);
+	}
+
+	private static LarchNeedlesBlock.Needles needles(GameTestHelper helper, BlockPos pos) {
+		return helper.getBlockState(pos).getValue(LarchNeedlesBlock.SEASON);
+	}
+
+	/**
+	 * Larch needles follow the season on their random ticks, placed ones too: green in spring and summer, gold in autumn,
+	 * bare in winter, and green with seasons off. Needles placed in winter start bare.
+	 */
+	@GameTest
+	public void larchNeedlesFollowTheSeason(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		MinecraftServer server = level.getServer();
+		SeasonCalendar.Settings before = JugcraftSeasons.settings();
+		BlockPos log = new BlockPos(2, 2, 2);
+		BlockPos natural = log.east();
+		BlockPos placed = log.west();
+		helper.setBlock(log, block("larch_log"));
+		BlockState state = block("larch_needles").defaultBlockState().setValue(LeavesBlock.DISTANCE, 1);
+		helper.setBlock(natural, state.setValue(LeavesBlock.PERSISTENT, false));
+		helper.setBlock(placed, state.setValue(LeavesBlock.PERSISTENT, true));
+		SeasonCalendar.Mode[] modes = {SeasonCalendar.Mode.AUTUMN, SeasonCalendar.Mode.WINTER, SeasonCalendar.Mode.SPRING,
+				SeasonCalendar.Mode.AUTUMN, SeasonCalendar.Mode.SUMMER, SeasonCalendar.Mode.OFF};
+		LarchNeedlesBlock.Needles[] looks = {LarchNeedlesBlock.Needles.GOLD, LarchNeedlesBlock.Needles.BARE, LarchNeedlesBlock.Needles.GREEN,
+				LarchNeedlesBlock.Needles.GOLD, LarchNeedlesBlock.Needles.GREEN, LarchNeedlesBlock.Needles.GREEN};
+		try {
+			for (int i = 0; i < modes.length; i++) {
+				JugcraftSeasons.setMode(server, modes[i]);
+				for (BlockPos pos : new BlockPos[] {natural, placed}) {
+					helper.getBlockState(pos).randomTick(level, helper.absolutePos(pos), level.getRandom());
+					helper.assertTrue(needles(helper, pos) == looks[i],
+							"In " + modes[i] + " needles at " + pos + " should be " + looks[i] + ", found " + needles(helper, pos));
+				}
+			}
+			JugcraftSeasons.setMode(server, SeasonCalendar.Mode.WINTER);
+			BlockPos fresh = log.north();
+			helper.setBlock(fresh, state.setValue(LeavesBlock.PERSISTENT, true));
+			helper.assertTrue(needles(helper, fresh) == LarchNeedlesBlock.Needles.BARE, "Needles placed in winter are " + needles(helper, fresh));
+		} finally {
+			JugcraftSeasons.setMode(server, before.mode());
+		}
+		helper.assertTrue(helper.getBlockState(natural).is(BlockTags.LEAVES), "Larch needles should be leaves");
+		helper.succeed();
+	}
+
+	/** Across a year every block turns: a crown changes over the jitter's days, and each season day has one look per block. */
+	@GameTest
+	public void larchNeedlesTurnGradually(GameTestHelper helper) {
+		BlockPos a = new BlockPos(0, 64, 0);
+		int earliest = Integer.MAX_VALUE;
+		int latest = Integer.MIN_VALUE;
+		for (int x = 0; x < 16; x++) {
+			for (int z = 0; z < 16; z++) {
+				BlockPos pos = a.offset(x, 0, z);
+				int first = -1;
+				for (int day = LarchNeedlesBlock.GOLD_FROM - LarchNeedlesBlock.JITTER; day <= LarchNeedlesBlock.GOLD_FROM + LarchNeedlesBlock.JITTER; day++) {
+					if (LarchNeedlesBlock.forDay(day, pos) == LarchNeedlesBlock.Needles.GOLD) {
+						first = day;
+						break;
+					}
+				}
+				helper.assertTrue(first > 0, "Needles at " + pos + " never turn gold");
+				earliest = Math.min(earliest, first);
+				latest = Math.max(latest, first);
+			}
+		}
+		LOGGER.info("Larch needles in a 16x16 patch turn gold between season days {} and {}", earliest, latest);
+		helper.assertTrue(latest - earliest >= LarchNeedlesBlock.JITTER, "A crown turns all at once (" + earliest + " to " + latest + ")");
+		helper.assertTrue(LarchNeedlesBlock.forDay(0, a) == LarchNeedlesBlock.Needles.GREEN, "Needles with seasons off are not green");
+		helper.succeed();
+	}
+
+	/** A larch sapling grows a tall larch of logs and needles; grown in winter, its needles are bare from the start. */
+	@GameTest
+	public void larchSaplingsGrowLarches(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		MinecraftServer server = level.getServer();
+		SeasonCalendar.Settings before = JugcraftSeasons.settings();
+		BlockPos sapling = new BlockPos(3, 2, 3);
+		for (int dy = 0; dy <= 24; dy++) {
+			if (!helper.getBlockState(sapling.above(dy)).isAir()) {
+				sapling = sapling.above(dy + 1);
+				break;
+			}
+		}
+		helper.setBlock(sapling.below(), Blocks.DIRT);
+		helper.setBlock(sapling, block("larch_sapling"));
+		BlockPos absolute = helper.absolutePos(sapling);
+		JugcraftSeasons.setMode(server, SeasonCalendar.Mode.WINTER);
+		boolean grown;
+		try {
+			grown = JugcraftAgriculture.LARCH_GROWER.growTree(level, level.getChunkSource().getGenerator(), absolute,
+					level.getBlockState(absolute), level.getRandom());
+		} finally {
+			JugcraftSeasons.setMode(server, before.mode());
+		}
+		helper.assertTrue(grown, "The larch sapling at " + sapling + " should grow into a tree");
+		helper.assertBlockPresent(block("larch_log"), sapling);
+		int needles = 0;
+		int bare = 0;
+		int height = 0;
+		for (BlockPos pos : BlockPos.betweenClosed(absolute.offset(-4, 0, -4), absolute.offset(4, 16, 4))) {
+			BlockState state = level.getBlockState(pos);
+			if (state.is(block("larch_needles"))) {
+				needles++;
+				bare += state.getValue(LarchNeedlesBlock.SEASON) == LarchNeedlesBlock.Needles.BARE ? 1 : 0;
+			} else if (state.is(block("larch_log"))) {
+				height = Math.max(height, pos.getY() - absolute.getY() + 1);
+			}
+		}
+		LOGGER.info("A larch grown in winter: trunk {} blocks, {} needles, {} bare", height, needles, bare);
+		helper.assertTrue(needles >= 10 && height >= 7, "Expected a tall larch, found a " + height + "-block trunk and " + needles + " needles");
+		helper.assertTrue(bare == needles, bare + " of " + needles + " needles grown in winter are bare");
+		helper.succeed();
+	}
+
+	/** Any axe strips a larch log; larch wood joins vanilla's wood tags, burns, and the sapling is a sapling. */
+	@GameTest
+	public void larchWoodWorksLikeWood(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 2, 1);
+		helper.setBlock(pos, block("larch_log").defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.X));
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
+		helper.useBlock(pos, player);
+		BlockState stripped = helper.getBlockState(pos);
+		helper.assertTrue(stripped.is(block("stripped_larch_log")) && stripped.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.X,
+				"An axe should strip the log along its axis, found " + stripped);
+		helper.assertTrue(stripped.is(BlockTags.LOGS), "Larch logs should be logs");
+		helper.assertTrue(block("larch_sapling").defaultBlockState().is(BlockTags.SAPLINGS), "The larch sapling should be a sapling");
+		helper.assertTrue(new ItemStack(JugcraftAgriculture.item("larch_planks")).is(ItemTags.PLANKS), "Larch planks should be planks");
+		helper.assertTrue(new ItemStack(JugcraftAgriculture.item("larch_fence")).is(ItemTags.WOODEN_FENCES), "Larch fences should be wooden fences");
+		for (String wood : new String[] {"larch_log", "larch_planks", "larch_slab", "larch_fence_gate"}) {
+			helper.assertTrue(new ItemStack(JugcraftAgriculture.item(wood)).has(DataComponents.COOKING_FUEL), wood + " should burn as furnace fuel");
+		}
 		helper.succeed();
 	}
 }
