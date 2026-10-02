@@ -147,9 +147,9 @@ Actual results (2 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API
 | --- | --- |
 | `python3 scripts/check_repository.py` | Pass |
 | `python3 tools/check_mod_data.py` (now also compares the chandlery's numbers, waxes and scents with Java: capacity, timings, scent limit, burn factors, layers, pulse and effect time, harvest divisor, radii and light by layers, each wax's measures, burn and colour, each scent's effect and colour; checks every wax and scent tag, and the brightener and extender tags, hold `tools/agriculture.py`'s items; that the candle's blockstate has a variant for every state; and that every pot message, candle tooltip, candle name, wax and scent has its words) | Pass, 581 IDs |
-| `./gradlew build` (Build workflow) | PENDING |
-| Game tests on the headless server, same run | PENDING |
-| Client game test (real client, Mesa software rendering, CI job `client`) | PENDING |
+| `./gradlew build` on `1cdcf09` (Build workflow run 37021364812) | Pass on its second attempt (see the next row) |
+| Game tests on the headless server, same run: 336 in total, 8 of them new here (`ChandleryGameTests`) | **All 336 pass** on the second attempt. The first attempt failed one test from `main`, `PetroGameTests.heliostatsHeatASolarReceiver` ("The receiver made 48 JE/t, expected 36 on tick 25"), which this branch doesn't touch; the same tests had all passed on `f56071b` (run 37020041265), and the failed job was re-run once |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `1cdcf09`, with the screenshots above. No model or texture errors for the chandlery in the log |
 
 The 8 new game tests (`ChandleryGameTests`):
 1. honeycomb melts over a campfire and stays set on stone; a pot of beeswax takes no tallow;
@@ -165,6 +165,8 @@ Found by CI and fixed before this record:
 - 26.3's `LivingEntity.drop` takes a third argument; a candle that doesn't fit in the inventory pops out of the pot instead (`e61fa32`).
 - 26.3 has no `RenderTypes.entityCutoutNoCull`; the renderers use `entityCutout`, wind each face to face along its normal, and draw a flame's plane from both sides (`7ee4afb`).
 - 26.3's entity types are constants of `EntityTypes`, not `EntityType` (`5935bc2`).
+- A test swapped the glowstone dust in hand for redstone before counting it (a test bug, not the pot's); each is now checked while it is held (`f56071b`).
+- The first screenshots showed the flames as thin slivers in the scent's colour, lost against wax of the same colour; they are now about twice the size with a warm-white heart (`1cdcf09`).
 
 **Not run:**
 - a person playing it in a client: dipping by hand, watching the cooldown, walking in and out of an aura;
