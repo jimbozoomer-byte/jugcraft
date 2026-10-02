@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -73,6 +74,13 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 	 * about this many blocks west and north of the spot.
 	 */
 	private static final int SURFACE_VIEW = 20;
+	/** Nether and End shots: how far from the biome's nearest place to look for a standing spot, and how finely. */
+	private static final int STAND_REACH = 384;
+	private static final int STAND_STEP = 8;
+	/** At most this many columns are generated in looking for one. */
+	private static final int STAND_TRIES = 32;
+	/** Blocks of air the camera must have ahead of it, diagonally to the north-west at eye level. */
+	private static final int STAND_VIEW = 4;
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -183,12 +191,11 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 				for (ResourceKey<Biome> biome : biomes) {
 					BlockPos spot = server.computeOnServer(minecraft -> standingSpot(minecraft.getLevel(dimension), biome));
 					String name = biome.identifier().getPath();
-					LOGGER.info("Biomes, seed {}: {} in {} {}", SEED, name, dimension.identifier().getPath(), spot == null
-							? "not found standing room within " + SEARCH + " blocks of the origin"
-							: "standing at " + spot.getX() + " " + spot.getY() + " " + spot.getZ());
 					if (spot == null) {
 						continue;
 					}
+					LOGGER.info("Biomes, seed {}: {} in {} standing at {} {} {}", SEED, name, dimension.identifier().getPath(),
+							spot.getX(), spot.getY(), spot.getZ());
 					server.runCommand(String.format(Locale.ROOT, "execute in %s run tp @p %d.5 %d %d.5 135 15", dimension.identifier(),
 							spot.getX(), spot.getY(), spot.getZ()));
 					context.waitTicks(80);
@@ -249,37 +256,70 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 	}
 
 	/**
-	 * In a Nether or End level: the biome's nearest place to the origin, and there, within 32 blocks, the highest open
-	 * floor in the biome with three blocks of air to stand in (below the Nether's roof). Null if none.
+	 * In a Nether or End level, a spot to photograph the biome from. From the biome's nearest place to the origin, the
+	 * columns within {@link #STAND_REACH} blocks (every {@link #STAND_STEP}) that have the biome, nearest first, found by
+	 * the biome lookup alone, which generates no chunk: the first {@link #STAND_TRIES} are generated and searched from
+	 * below the Nether's roof down for a solid floor in the biome with three blocks of air to stand in, no fluid beside
+	 * them, and air ahead at eye level where the camera looks (north-west). Null if none; why is logged.
 	 */
 	private static BlockPos standingSpot(ServerLevel level, ResourceKey<Biome> biome) {
+		String where = biome.identifier().getPath() + " in " + level.dimension().identifier().getPath();
 		Pair<BlockPos, Holder<Biome>> nearest = level.findClosestBiome3d(holder -> holder.is(biome), BlockPos.ZERO.atY(64), SEARCH, 32, 32);
 		if (nearest == null) {
+			LOGGER.info("Biomes, seed {}: {} not within {} blocks of the origin", SEED, where, SEARCH);
 			return null;
 		}
 		BlockPos place = nearest.getFirst();
+		List<int[]> offsets = new ArrayList<>();
+		for (int dx = -STAND_REACH; dx <= STAND_REACH; dx += STAND_STEP) {
+			for (int dz = -STAND_REACH; dz <= STAND_REACH; dz += STAND_STEP) {
+				offsets.add(new int[] {dx, dz});
+			}
+		}
+		offsets.sort(Comparator.comparingInt(offset -> offset[0] * offset[0] + offset[1] * offset[1]));
 		int top = Math.min(level.getMaxY() - 1, level.getMinY() + 120);
-		for (int reach = 0; reach <= 32; reach += 8) {
-			for (int dx = -reach; dx <= reach; dx += 8) {
-				for (int dz = -reach; dz <= reach; dz += 8) {
-					if (Math.max(Math.abs(dx), Math.abs(dz)) != reach) {
-						continue;
-					}
-					int x = place.getX() + dx;
-					int z = place.getZ() + dz;
-					level.getChunk(x >> 4, z >> 4);
-					for (int y = top; y > level.getMinY() + 4; y--) {
-						BlockPos feet = new BlockPos(x, y, z);
-						if (level.getBlockState(feet).isAir() && level.getBlockState(feet.above()).isAir()
-								&& level.getBlockState(feet.above(2)).isAir() && level.getBlockState(feet.below()).isSolid()
-								&& level.getBiome(feet).is(biome)) {
-							return feet;
-						}
-					}
+		int tries = 0;
+		for (int[] offset : offsets) {
+			int x = place.getX() + offset[0];
+			int z = place.getZ() + offset[1];
+			if (!level.getBiome(new BlockPos(x, place.getY(), z)).is(biome)) {
+				continue;
+			}
+			if (++tries > STAND_TRIES) {
+				break;
+			}
+			level.getChunk(x >> 4, z >> 4);
+			for (int y = top; y > level.getMinY() + 4; y--) {
+				BlockPos feet = new BlockPos(x, y, z);
+				if (level.getBlockState(feet.below()).isSolid() && roomToStand(level, feet) && level.getBiome(feet).is(biome)) {
+					return feet;
 				}
 			}
 		}
+		LOGGER.info("Biomes, seed {}: {} nearest the origin at {} {} {}; no standing room with a view in the {} columns of it searched",
+				SEED, where, place.getX(), place.getY(), place.getZ(), Math.min(tries, STAND_TRIES));
 		return null;
+	}
+
+	/** Three blocks of air at {@code feet}, no fluid beside them to flow in, and air ahead of the eyes to the north-west. */
+	private static boolean roomToStand(ServerLevel level, BlockPos feet) {
+		for (int up = 0; up < 3; up++) {
+			BlockPos at = feet.above(up);
+			if (!level.getBlockState(at).isAir()) {
+				return false;
+			}
+			for (Direction side : Direction.Plane.HORIZONTAL) {
+				if (!level.getFluidState(at.relative(side)).isEmpty()) {
+					return false;
+				}
+			}
+		}
+		for (int ahead = 1; ahead <= STAND_VIEW; ahead++) {
+			if (!level.getBlockState(feet.above().offset(-ahead, 0, -ahead)).isAir()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** The biome on the surface where the camera looks from {@code spot}. */
