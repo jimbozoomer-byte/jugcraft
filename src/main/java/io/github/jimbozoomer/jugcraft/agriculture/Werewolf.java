@@ -428,7 +428,7 @@ public class Werewolf extends Monster {
 		}
 		LivingEntity nearest = null;
 		for (LivingEntity prey : level.getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(PREY_REACH),
-				prey -> prey.isAlive() && prey.getType().is(PREY) && canAttack(prey) && hasLineOfSight(prey))) {
+				prey -> prey.isAlive() && isPrey(prey.getType()) && canAttack(prey) && hasLineOfSight(prey))) {
 			if (nearest == null || distanceToSqr(prey) < distanceToSqr(nearest)) {
 				nearest = prey;
 			}
@@ -437,6 +437,12 @@ public class Werewolf extends Monster {
 			setTarget(nearest);
 		}
 		return nearest;
+	}
+
+	/** Whether a brown werewolf hunts {@code type} ({@code jugcraft:werewolf_prey}). */
+	public static boolean isPrey(EntityType<?> type) {
+		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, BuiltInRegistries.ENTITY_TYPE.getKey(type));
+		return BuiltInRegistries.ENTITY_TYPE.getOrThrow(key).is(PREY);
 	}
 
 	/**
