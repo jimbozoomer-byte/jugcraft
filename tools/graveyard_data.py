@@ -601,7 +601,8 @@ def vase_assets(root, write, lang):
     wilting; its item, the empty vase."""
     vase = GRAVE_VASE["block"]
     models = root / "models" / "block"
-    tex = {"rough": "gy_granite_rough_clean", "stone": "gy_granite_clean", "bronze": "gy_bronze_worn", "pit": "gy_pit", "leaves": "gy_leaves"}
+    tex = {"rough": "gy_granite_rough_clean", "stone": "gy_granite_clean", "top": "gy_granite_clean", "bronze": "gy_bronze_worn",
+           "pit": "gy_pit", "leaves": "gy_leaves"}
 
     def model(elements, petals):
         t = dict(tex)

@@ -3844,6 +3844,54 @@ def check_graveyard(java, main):
     check_graveyard_grounds(java, main, lang)
 
 
+def check_model_textures():
+    """Every model a blockstate or item draws directly defines each texture variable its faces use, itself or through
+    its Jugcraft parents (a template only used as a parent may leave them to its children). An undefined one draws the
+    missing-texture pattern in game."""
+    models = ASSETS / "models"
+
+    def model(ref):
+        if not isinstance(ref, str) or not ref.startswith(f"{MOD}:"):
+            return None
+        return load(models / f"{ref.split(':', 1)[1]}.json")
+
+    def textures(m):
+        out = dict(textures(model(m["parent"]))) if model(m.get("parent")) else {}
+        out.update(m.get("textures") or {})
+        return out
+
+    def refs(node):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key == "model" and isinstance(value, str):
+                    yield value
+                else:
+                    yield from refs(value)
+        elif isinstance(node, list):
+            for value in node:
+                yield from refs(value)
+
+    used = set()
+    for folder in ("blockstates", "items"):
+        for path in (ASSETS / folder).glob("*.json"):
+            used.update(refs(load(path) or {}))
+    for ref in sorted(used):
+        m = model(ref)
+        if not m:
+            continue
+        chain, elements = m, m.get("elements")
+        while elements is None and model(chain.get("parent")):
+            chain = model(chain["parent"])
+            elements = chain.get("elements")
+        defined = textures(m)
+        for element in elements or []:
+            for face in element.get("faces", {}).values():
+                variable = face.get("texture", "")
+                if variable.startswith("#") and variable[1:] not in defined:
+                    err(f"{ref}: texture {variable} is not defined (it would draw as missing)")
+                    break
+
+
 def check_graveyard_grounds(java, main, lang):
     """Pack 4: the grave vase's wilting and calming, the lamp post's light and check, the open grave's stirring and the
     bench's seat match tools/graveyard.py; the vase and lamp post are registered with their models for every state,
@@ -4193,6 +4241,7 @@ def main():
                   | set(field_chemistry.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
+    check_model_textures()
     check_petro()
     check_loot(registered)
     check_recipes(registered)

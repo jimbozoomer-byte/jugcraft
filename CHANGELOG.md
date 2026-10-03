@@ -13,6 +13,12 @@ No numbered release yet. Everything below is on `main`.
 - **Shrinking** makes you half size for 3 minutes, small enough for one-block gaps. **Giant** makes you 1.6 times your size for 3 minutes, with a block more reach and a higher step, and is refused where there is no room to grow. A shrunk player with no room to grow back stays small until there is. **Flying Ointment** gives 30 seconds of slow falling.
 - Two advancements (Drink Me, Fee-Fi-Fo-Fum), three game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#hex-brews).
 
+### Unmerged: Graveyard pack 4, grounds
+- **Kerbed Grave** in polished granite and marble chippings with an open book; **Planted Grave** whose flower bed goes to weeds as it is neglected; **Memorial Bench** with an inscribed plaque that seats a player; **Open Grave**, freshly dug with boards, straps, a spoil heap, a spade and a waiting cross.
+- **Grave Vase**: small flowers make a bouquet of their colour (Flowers for the Dead). Fresh flowers calm the graves within 3 blocks to half the spirits; they wilt in about a day. An open grave stirs spirits twice as often.
+- **Cemetery Lamp Post**: three blocks of cast iron, its lantern lit after dark and out by day.
+- Game and client tests. Record: [graveyard.md](docs/features/graveyard.md#grounds).
+
 ### Unmerged: Graveyard pack 3, buildings
 - **Family Mausoleum**: an 85-block marble temple front with a portico of Tuscan columns, the family name on its frieze, and a room inside with twelve crypt fronts that each take their own inscription, an altar under a stained-glass window and a sanctuary lamp.
 - **Lych Gate** of oak and slate on rubble walls, its tie beam inscribed; **Cemetery Gateway** of granite piers with lanterns and a wrought-iron arch bearing the cemetery's name; **Columbarium** of six inscribed niches.
