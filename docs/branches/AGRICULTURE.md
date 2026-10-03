@@ -1075,6 +1075,14 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 ### The Pumpkling
 
+| **Three Pumpklings** in a pumpkin patch; a carved pumpkin not yet woken on a hay bale, and a Wisp in a Jar | **Up close:** stencilled faces, one lit, one soul-lit blue |
+| --- | --- |
+| ![Pumpklings](../images/ingame_pumpklings.jpg) | ![Pumpklings up close](../images/ingame_pumpkling_close.jpg) |
+| **At nightfall** | |
+| ![Pumpklings at nightfall](../images/ingame_pumpklings_nightfall.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`PumpklingClientGameTests`, software rendering, small previews).*
+
 - **Wake a carved pumpkin:** use a Wisp in a Jar or a bottle of Ectoplasm on a hand-carved pumpkin with a face. It hops up as a Pumpkling, a little pet on vine legs wearing the face you carved.
 - It follows you and sits when you use it with an empty hand. A torch lights its face. Crows keep away from crops near it, as from a scarecrow. A glass bottle settles it back into its pumpkin. Details: [even more fall additions](../features/even-more-fall-additions.md#the-pumpkling).
 

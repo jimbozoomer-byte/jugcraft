@@ -1,7 +1,9 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -281,21 +283,46 @@ public class Pumpkling extends PathfinderMob implements CropGuard {
 		return owner == null ? null : level().getPlayerByUUID(owner);
 	}
 
-	/** Comes to its owner: to open ground two or three blocks from them. Returns whether it found a spot. */
+	/** The spots round its owner it may come to: two or three blocks off, across or along. */
+	private static final int[][] AROUND = around();
+
+	private static int[][] around() {
+		List<int[]> out = new ArrayList<>();
+		for (int dx = -3; dx <= 3; dx++) {
+			for (int dz = -3; dz <= 3; dz++) {
+				if (Math.abs(dx) >= 2 || Math.abs(dz) >= 2) {
+					out.add(new int[] {dx, dz});
+				}
+			}
+		}
+		return out.toArray(new int[0][]);
+	}
+
+	/**
+	 * Comes to its owner: to open ground two or three blocks from them. Every such spot is tried, in a fresh order each
+	 * time so it doesn't always come to the same side, so it fails only when there is no room by them. Returns whether it
+	 * found a spot.
+	 */
 	public boolean comeToOwner() {
 		Player player = ownerPlayer();
 		if (player == null || player.level() != level()) {
 			return false;
 		}
 		BlockPos center = player.blockPosition();
-		for (int i = 0; i < 12; i++) {
-			int dx = random.nextIntBetweenInclusive(-3, 3);
-			int dz = random.nextIntBetweenInclusive(-3, 3);
-			if (Math.abs(dx) < 2 && Math.abs(dz) < 2) {
-				continue;
-			}
+		int[] order = new int[AROUND.length];
+		for (int i = 0; i < order.length; i++) {
+			order[i] = i;
+		}
+		for (int i = order.length - 1; i > 0; i--) {
+			int j = random.nextInt(i + 1);
+			int swap = order[i];
+			order[i] = order[j];
+			order[j] = swap;
+		}
+		for (int index : order) {
+			int[] offset = AROUND[index];
 			for (int dy = 1; dy >= -1; dy--) {
-				BlockPos spot = center.offset(dx, dy, dz);
+				BlockPos spot = center.offset(offset[0], dy, offset[1]);
 				Vec3 to = Vec3.atBottomCenterOf(spot);
 				if (level().getBlockState(spot.below()).isFaceSturdy(level(), spot.below(), Direction.UP)
 						&& level().noCollision(this, getBoundingBox().move(to.subtract(position())))) {

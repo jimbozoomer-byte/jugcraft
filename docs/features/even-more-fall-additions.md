@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21) and the flying broomstick (addition 22) are implemented in source and pass CI's game tests; full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25) and the fall fair midway (addition 26) are implemented in source. None is yet played by hand. Additions 27 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21), the flying broomstick (addition 22), full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25) and the fall fair midway (addition 26) are implemented in source and pass CI's game tests. None is yet played by hand. Additions 27 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
@@ -259,7 +259,7 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - Costs: one carved pumpkin and one spark (a Wisp in a Jar or Ectoplasm; the glass bottle comes back). Settling it gives both back (a Pumpkling woken by command, with no spark, gives Ectoplasm). Nothing is made or lost: no loop.
   - Units: 16 health, speed 0.3 (a wolf: 8 and 0.3 untamed); follows past 6 blocks, stops at 2.5, comes to its owner past 16; a treat heals 4 health. Guard radius 8 or 12 blocks, as a scarecrow's head (`Scarecrows.HEADED`, `LIT`).
   - Automation: none. Crows are the only thing it affects.
-  - Cost on the server: a following Pumpkling paths to its owner about once a second while more than 2.5 blocks off, and tries up to 12 spots when it comes to them. Crows ask about guards in an entity box around a crop; Hay Golems and Pumpklings now answer through one interface, `CropGuard`.
+  - Cost on the server: a following Pumpkling paths to its owner about once a second while more than 2.5 blocks off, and when it comes to them tries each spot two or three blocks from them (40 at most, a block up or down), once a second at most. Crows ask about guards in an entity box around a crop; Hay Golems and Pumpklings now answer through one interface, `CropGuard`.
 - **Midway:**
   - Costs: the striker is 6 planks, 2 redstone lamps and a bell; the mallet a log, 2 red wool and 2 sticks (a wooden tool: 59 uses, 1 damage over the hand, and slow: 0.6 swings a second, so a full charge takes about 1.7 seconds); Ring Toss 6 glass bottles and 3 wooden slabs; 4 rings 2 sticks and a string.
   - Units: lamps 8 (two a part), the bell the 9th step; up a lamp every 2 ticks, a rest of 30 ticks, down a lamp a tick. Strength: charge × 0.7 to 1.0, + 0.15 critical; 0.95 rings; less climbs that share of 9, at least 1 lamp. Ring Toss: necks at 3.5, 8 and 12.5 pixels across each way; a ringer within 1.25 pixels of one, from 3 blocks or more; a ringer stays 60 ticks. A ring is tossed at 0.75 blocks a tick.
@@ -467,15 +467,33 @@ Not run: squirrels burying acorns over a long time in play, and a sapling sprout
 
 ### Pumpkling verification
 
-Not run yet: CI has not built this branch. The planned checks are:
-- `PumpklingGameTests`, 6 game tests:
-  1. a Wisp in a Jar used on a lit carved pumpkin with a face wakes a Pumpkling there, owned by its waker, wearing the same face and lit, gives back a glass bottle and earns Little Jack; ectoplasm doesn't wake a blank pumpkin, nor for a player in adventure mode;
-  2. a stranger can't have it sit; its owner has it sit and get up; it finds a spot beside its owner;
-  3. unlit it guards 8 blocks, lit 12, and a crop six blocks off is guarded;
-  4. a stranger can't light it; its owner's torch lights it, another torch takes its torch back, an empty hand has it sit rather than lighting it, a soul torch lights it blue; a stranger's pumpkin seeds heal it; its owner's blow doesn't hurt it; a glass bottle settles it, filling with its spark, and its pumpkin drops with its face;
-  5. slain by a stranger, it drops its pumpkin with its face;
-  6. the advancement and tags load.
-- `PumpklingClientGameTests` takes screenshots: three Pumpklings in a pumpkin patch wearing three stencils' faces (lit, soul-lit, and unlit sitting) beside a carved pumpkin not yet woken and a Wisp in a Jar; up close; and at nightfall.
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-25-pumpkling` stacked on squirrels and acorns:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `PUMPKLING` with Java: health, speed, following, the treats' heal, the guard; and checks the entity, its tags, advancement and textures) | Pass, 1073 IDs |
+| `./gradlew build` on `450e3ab9` (Build workflow run [37156381277](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37156381277)) | Pass |
+| Game tests on the headless server, same run: 630 in total, 6 of them new here (`PumpklingGameTests`) | **All 630 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `450e3ab9` (all three client shards) |
+
+The 6 new game tests (`PumpklingGameTests`):
+1. a Wisp in a Jar used on a lit carved pumpkin with a face wakes a Pumpkling there, owned by its waker, wearing the same face and lit, gives back a glass bottle and earns Little Jack; ectoplasm doesn't wake a blank pumpkin, nor for a player in adventure mode;
+2. its owner, with an empty hand, has it sit; a stranger can't change that; its owner has it get up; it finds a spot beside its owner;
+3. unlit it guards 8 blocks, lit 12, and a crop six blocks off is guarded;
+4. a stranger can't light it; its owner's torch lights it, another torch takes its torch back, an empty hand has it sit rather than lighting it, a soul torch lights it blue; a stranger's pumpkin seeds heal it; its owner's blow doesn't hurt it; a glass bottle settles it, filling with its spark, and its pumpkin drops with its face;
+5. slain by a stranger, it drops its pumpkin with its face;
+6. the advancement and tags load.
+
+Found by CI and fixed before this record:
+- Comparing an item stack with a block doesn't compile in 26.3; the tests and the drop compare with the carved pumpkin's item.
+- A Pumpkling's tempt goal needs the `tempt_range` attribute, which a plain mob's attributes lack; it now has 10 blocks.
+- The sit test stood its players beyond entity reach (3 blocks); they now stand within it.
+- The sit test still failed: the owner's use came back PASS. Its report showed why: test players start out holding the Creative Tower Guide, so the "empty hand" held a book. The tests now empty their hands first. Along the way the controls changed to a tame wolf's: an empty hand sits it (it was a sneaking, empty-handed use), and a torch used on a lit Pumpkling takes its torch back (it was an empty hand).
+
+Found later: Build workflow run [37158111759](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37158111759), on the piñata's branch stacked above this one, failed the sit test's last step, "It finds a spot by its owner". A Pumpkling coming to its owner tried 12 spots at random within three blocks of them. In the test its owner stands near the edge of an 8 × 8 floor, where only 16 of the 49 spots have ground, so about one run in a hundred all 12 missed; in play it would have failed the same way by a cliff or a wall. It now tries every spot two or three blocks off, in a fresh random order, so it fails only when none has room. That change is not yet run.
+
+The client test's screenshots (run 37156381277), in [the guide](../branches/AGRICULTURE.md#the-pumpkling): three Pumpklings in a pumpkin patch wearing three stencils' faces (lit, soul-lit, and unlit sitting) beside a carved pumpkin not yet woken on a hay bale and a Wisp in a Jar; up close; and at nightfall. Its log has no missing model or texture.
 
 Not run: a Pumpkling following its owner about in play (its path-finding), and crows turning from its crops (the guard check is tested directly); a two-client dedicated-server playtest.
 
