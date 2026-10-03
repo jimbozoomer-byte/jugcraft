@@ -763,7 +763,7 @@ public class JugcraftGameTests {
 		helper.assertFalse(nickel.canPlaceItem(0, new ItemStack(Items.DIRT)), "The bath took dirt to plate");
 		helper.assertFalse(nickel.canPlaceItem(1, new ItemStack(Items.IRON_INGOT)), "The bath took iron to plate with");
 
-		var stand = helper.spawn(net.minecraft.world.entity.EntityType.ARMOR_STAND, new BlockPos(1, 2, 4));
+		var stand = helper.spawn(net.minecraft.world.entity.EntityTypes.ARMOR_STAND, new BlockPos(1, 2, 4));
 		ItemStack chest = new ItemStack(Items.IRON_CHESTPLATE);
 		stand.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, chest);
 		helper.assertFalse(net.minecraft.world.entity.monster.piglin.PiglinAi.isWearingSafeArmor(stand),
