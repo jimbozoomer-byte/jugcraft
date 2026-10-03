@@ -59,6 +59,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Block;
+import io.github.jimbozoomer.jugcraft.chemistry.FoamSprayerItem;
+import io.github.jimbozoomer.jugcraft.chemistry.ConstructionChemistry;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -234,6 +236,38 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.waitTicks(20);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_plastic_blocks");
+			// Batch 32: a trench bridged with sprayed construction foam, a foam blob set against a wall, and concrete and
+			// blast-proof concrete with their slabs and stairs; the foam sprayer in hand.
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:foam_sprayer");
+			server.runOnServer(minecraft -> {
+				ServerLevel level = minecraft.overworld();
+				BlockPos base = new BlockPos(x - 24, y, z + 7);
+				for (int dx = 2; dx <= 4; dx++) {
+					for (int dz = -1; dz <= 1; dz++) {
+						for (int dy = 1; dy <= 3; dy++) {
+							level.setBlockAndUpdate(base.offset(dx, -dy, dz), Blocks.AIR.defaultBlockState());
+						}
+						level.setBlockAndUpdate(base.offset(dx, -4, dz), Blocks.WATER.defaultBlockState());
+					}
+				}
+				ServerPlayer player = minecraft.getPlayerList().getPlayers().get(0);
+				for (BlockPos pos : FoamSprayerItem.fill(level, player, base.offset(3, -1, 0), ConstructionChemistry.SPRAY_BLOCKS)) {
+					level.setBlockAndUpdate(pos, ConstructionChemistry.CONSTRUCTION_FOAM.defaultBlockState());
+				}
+				String[] row = {"concrete", "concrete_slab", "concrete_stairs", "blastproof_concrete", "blastproof_concrete_slab",
+						"blastproof_concrete_stairs"};
+				for (int i = 0; i < row.length; i++) {
+					Block block = BuiltInRegistries.BLOCK.getValue(Jugcraft.id(row[i]));
+					level.setBlockAndUpdate(base.offset(6 + i, 0, -1), block.defaultBlockState());
+				}
+				level.setBlockAndUpdate(base.offset(6, 1, -1), ConstructionChemistry.BLASTPROOF_CONCRETE.defaultBlockState());
+				level.setBlockAndUpdate(base.offset(9, 1, -1), ConstructionChemistry.CONSTRUCTION_FOAM.defaultBlockState());
+			});
+			// Back from the scene and a little to the left, looking slightly down; wait for the advancement toasts to go.
+			server.runCommand("tp @p %d %d %d 190 22".formatted(x - 17, y + 1, z + 12));
+			context.waitTicks(140);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_foam_sprayer");
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			context.getInput().pressKey(options -> options.keyToggleGui);
 			server.runCommand("clear @p");

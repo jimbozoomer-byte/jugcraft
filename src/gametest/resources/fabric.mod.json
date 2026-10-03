@@ -66,7 +66,8 @@
 			"io.github.jimbozoomer.jugcraft.test.SeasonGameTests",
 			"io.github.jimbozoomer.jugcraft.test.AlpineGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BiomeGameTests",
-			"io.github.jimbozoomer.jugcraft.test.TownGameTests"
+			"io.github.jimbozoomer.jugcraft.test.TownGameTests",
+			"io.github.jimbozoomer.jugcraft.test.DiagonalConnectionsGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
@@ -126,7 +127,8 @@
 			"io.github.jimbozoomer.jugcraft.test.GraveyardBuildingClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.GraveyardGroundsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.HexBrewClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.BroomstickClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.BroomstickClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.DiagonalClientGameTests"
 		]
 	},
 	"depends": {

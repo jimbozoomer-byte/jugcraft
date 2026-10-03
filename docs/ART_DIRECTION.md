@@ -38,3 +38,13 @@ The owner asked on 1 October 2026 for the electrical things to look like a moder
 
 ## Outside the tech tiers: the Pixel Hollows and the arcade
 Places and decor that are not machines keep their own identity. The Pixel Hollows and the Retro Trader are retro electronics: dark slate with copper traces, square-faceted teal and violet crystals, LED-pixel lamps, and an 1980s arcade cabinet with neon side art, a CRT and a lit marquee. Everything is original (no real consoles, games, brands or characters). Textures are drawn by `tools/pixel_hollows_textures.py` (names `ph_*` and `rt_*`) and the cluster and cabinet models are in `tools/retro_models.py`. The arcade cabinet is real-life sized: two blocks tall.
+
+## High-detail items (64x64)
+Items that need more than 16 pixels, starting with the batch 32 construction tools, are drawn at 64x64 with `tools/hd_art.py`, a small shaded-shape renderer:
+- **Shapes:** capsules (rods and tubes), bevelled boxes, domes and discs, rims, flat polygons and lumpy blobs. They are painted in order onto a canvas, so later shapes cover earlier ones.
+- **Lighting:** every shape gives each pixel a surface normal, lit from the top left with a specular glint.
+- **Pixel-art finish:** the brightness snaps to the material's colour ramp, with ordered dithering only across the falloff between two steps, so the result stays crisp pixel art rather than a blurry render.
+- **Materials:** a shared palette (steel, gunmetal, chrome, brass, rubber, olive drab, safety yellow, hazard black, glass, foam and more), plus paint helpers for hazard stripes and paint worn through to bare metal at the edges (`hazard`, `worn`).
+- **Tool space:** `construction_art.Tool` lays a tool out along its barrel (s) and across it (t), so a diagonal held tool can be drawn with straight-line coordinates.
+
+The 64x64 items are listed in `construction_art.ITEMS`; `tools/check_mod_data.py` allows 64x64 for them. New high-detail items should use the same renderer and palette, so they match each other.

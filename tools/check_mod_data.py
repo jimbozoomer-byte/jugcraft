@@ -23,6 +23,9 @@ import tank_display
 import exosuit
 import grapple
 import field_chemistry
+import construction
+import hydroponics
+import electroplating
 import gear
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
@@ -35,6 +38,7 @@ import trees as tr
 import plants
 import town_assets
 import graveyard as gy
+import diagonal_connections as dg
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -102,7 +106,7 @@ def texture(ref):
         if animated and not (width in (16, 32) and height % width == 0 and height > width):
             err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16 or 32x32 frames")
         elif not animated and img.size not in ((16, 16), (32, 32)) and not (img.size == (64, 64) and _hi_res(png.stem)):
-            err(f"Texture {ref} is {img.size}, expected 16x16 or 32x32 (64x64 only for tower_art textures)")
+            err(f"Texture {ref} is {img.size}, expected 16x16 or 32x32 (64x64 only for tower_art and hd_art textures)")
 
 
 def model(ref):
@@ -118,10 +122,12 @@ def model(ref):
 
 
 def _hi_res(name):
-    """The drone tower's realistic block textures (tools/tower_art.py) are 64x64."""
+    """64x64 textures: the drone tower's realistic block textures (tools/tower_art.py) and items drawn with the
+    high-detail renderer (tools/hd_art.py: construction_art.ITEMS so far)."""
     import tower_art
     import blueprints
-    return (name in tower_art.TEXTURES or name in blueprints.TABLE_TEXTURES
+    import construction_art
+    return (name in tower_art.TEXTURES or name in blueprints.TABLE_TEXTURES or name in construction_art.ITEMS
             or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_")))
 
 
@@ -142,7 +148,8 @@ def item_models(definition):
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
-                  + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS):
+                  + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS
+                  + construction.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -162,7 +169,8 @@ def check_assets(registered):
         if definition:
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
-                        + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()
+                        + construction.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -298,7 +306,8 @@ def item_units(ref):
         return {"aluminum": 9}
     if path in NON_METAL:
         return {}
-    if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items():
+    if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
+            or path in construction.items() or path in construction.blocks():
         return {}
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
@@ -489,7 +498,7 @@ def check_tags():
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -574,6 +583,47 @@ def check_exosuit():
             for _, _, tex in boxes:
                 if not (textures / "block" / f"{tex}.png").exists():
                     err(f"Missing exosuit part texture block/{tex}.png")
+
+
+def check_hydroponics():
+    """MachineKind's hydroponic bay numbers against tools/hydroponics.py."""
+    java = MACHINE_JAVA.read_text(encoding="utf-8")
+    for const, value in (("HYDROPONIC_TANK", hydroponics.TANK), ("HYDROPONIC_SOLUTION_PER_HARVEST", hydroponics.SOLUTION_PER_HARVEST)):
+        if f"int {const} = {value:_};" not in java and f"int {const} = {value};" not in java:
+            err(f"MachineKind.{const} differs from tools/hydroponics.py ({value})")
+
+
+def check_electroplating():
+    """machine/Electroplating.java against tools/electroplating.py: the numbers, metals and tooltips."""
+    java = (JAVA_ROOT / "machine" / "Electroplating.java").read_text(encoding="utf-8")
+    for const in ("TICKS", "ACID_PER_PLATING", "TANK", "NICKEL_DURABILITY_PERCENT", "SILVER_SMITE"):
+        value = getattr(electroplating, const)
+        if f"int {const} = {value:_};" not in java and f"int {const} = {value};" not in java:
+            err(f"Electroplating.{const} differs from tools/electroplating.py ({value})")
+    lang = json.loads((ASSETS / "lang" / "en_us.json").read_text(encoding="utf-8"))
+    for metal, (tag, _, _) in electroplating.METALS.items():
+        if f'"{metal}"' not in java or f'"{tag.split(":")[1]}"' not in java:
+            err(f"Electroplating.java does not plate with {metal} ({tag})")
+        if f"tooltip.jugcraft.plating.{metal}" not in lang:
+            err(f"Missing tooltip for {metal} plating")
+
+
+def check_construction():
+    """chemistry/ConstructionChemistry.java against tools/construction.py: the numbers, blocks and items."""
+    java = (JAVA_ROOT / "chemistry" / "ConstructionChemistry.java").read_text(encoding="utf-8")
+    for const in ("SPRAY_RANGE", "SPRAY_BLOCKS", "SPRAY_RADIUS", "SPRAY_COOLDOWN", "CANISTER_FOAM"):
+        value = getattr(construction, const)
+        m = re.search(rf"\b{const} = ([0-9_.]+)F?;", java)
+        if not m or float(m.group(1).replace("_", "")) != float(value):
+            err(f"ConstructionChemistry.{const} differs from tools/construction.py ({value})")
+    for block, (_, hardness, blast, variants) in construction.BLOCKS.items():
+        if f'"{block}"' not in java:
+            err(f"ConstructionChemistry does not register {block}")
+        if f"strength({hardness}F, {blast}F)" not in java:
+            err(f"ConstructionChemistry: {block} is not strength({hardness}F, {blast}F) as in tools/construction.py")
+    for item in construction.items():
+        if f'item("{item}"' not in java:
+            err(f"ConstructionChemistry does not register {item}")
 
 
 def check_field_chemistry():
@@ -2063,7 +2113,8 @@ def check_decor3(java):
         if variants(block) != keys:
             err(f"{block}: blockstate variants differ from its properties")
     parts = (load(ASSETS / "blockstates" / f"{fence}.json") or {}).get("multipart", [])
-    if sorted(next(iter(p.get("when", {"post": 1}))) for p in parts) != sorted(["post", "north", "east", "south", "west"]):
+    straight = [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)]  # diagonals: check_diagonal_connections
+    if sorted(next(iter(p.get("when", {"post": 1}))) for p in straight) != sorted(["post", "north", "east", "south", "west"]):
         err(f"{fence}: the multipart needs the post and a side for each direction")
     for tag, entry in (("fences", fence), ("fence_gates", gate), ("doors", crypt["door"])):
         for registry in ("block", "item"):
@@ -4274,12 +4325,57 @@ def check_deposits():
             err(f"MachineKind.{constant} is not {stats[key]} as in tools/machines.py")
 
 
+def check_diagonal_connections():
+    """Diagonal connections (tools/diagonal_connections.py): every block in #jugcraft:connects_diagonally has a
+    blockstate with one arm part for each diagonal, turned toward it, and an arm model of turned elements; every
+    Jugcraft blockstate shaped like a fence, pane or bars (a part for each straight direction) is in the tag; vanilla's
+    rebuilt blockstates keep vanilla's own parts; and the Java property names match."""
+    tag = set((load(RES / "data" / MOD / "tags" / "block" / "connects_diagonally.json") or {}).get("values", []))
+    if tag != set(dg.blocks()):
+        err(f"#{dg.TAG} differs from tools/diagonal_connections.py: {sorted(tag ^ set(dg.blocks()))}")
+    for block in sorted(tag):
+        namespace, name = block.split(":")
+        root = RES / "assets" / namespace
+        parts = (load(root / "blockstates" / f"{name}.json") or {}).get("multipart", [])
+        arms = {next(iter(p["when"])): p["apply"] for p in parts if set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)}
+        if sorted(arms) != sorted(dg.DIAGONAL_NAMES):
+            err(f"{block}: needs one diagonal arm part for each of {dg.DIAGONAL_NAMES}, has {sorted(arms)}")
+            continue
+        for diagonal, y in dg.DIAGONALS:
+            if arms[diagonal].get("y", 0) != y or arms[diagonal]["model"] != f"{MOD}:block/diagonal/{name}":
+                err(f"{block}: its {diagonal} arm should be {MOD}:block/diagonal/{name} turned y={y}")
+        model = load(ASSETS / "models" / "block" / "diagonal" / f"{name}.json") or {}
+        elements = model.get("elements", [])
+        if not elements or any(e.get("rotation", {}).get("axis") != "y" or e["rotation"].get("angle") != dg.ANGLE
+                               or not e["rotation"].get("rescale") for e in elements):
+            err(f"{block}: its diagonal arm model needs elements turned {dg.ANGLE} degrees about y, with rescale")
+        if not model.get("parent"):
+            err(f"{block}: its diagonal arm model needs the block's side model as parent (for its textures)")
+    vanilla = dg.vanilla_blockstates()
+    for name, (own, _side, _kind) in vanilla.items():
+        parts = (load(RES / "assets" / "minecraft" / "blockstates" / f"{name}.json") or {}).get("multipart", [])
+        if [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)] != own:
+            err(f"minecraft:{name}: the rebuilt blockstate lost vanilla's own parts")
+    for path in sorted((ASSETS / "blockstates").glob("*.json")):
+        parts = (load(path) or {}).get("multipart", [])
+        sides = {next(iter(p["when"])) for p in parts if len(p.get("when", {})) == 1 and list(p["when"].values()) == ["true"]}
+        if {"north", "east", "south", "west"} <= sides and not sides & {"up", "down"} and f"{MOD}:{path.stem}" not in tag:
+            err(f"{MOD}:{path.stem} joins like a fence but is not in #{dg.TAG}; add it to tools/diagonal_connections.py")
+    java = (ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "diagonal" / "DiagonalConnections.java")
+    source = java.read_text(encoding="utf-8") if java.exists() else ""
+    for diagonal, _y in dg.DIAGONALS:
+        if f'"{diagonal}"' not in source:
+            err(f"diagonal/DiagonalConnections.java does not name the property {diagonal}")
+    if f'"{dg.TAG.split(":")[1]}"' not in source:
+        err(f"diagonal/DiagonalConnections.java does not name the tag {dg.TAG}")
+
+
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
@@ -4296,6 +4392,9 @@ def main():
     check_exosuit()
     check_grapple()
     check_field_chemistry()
+    check_construction()
+    check_hydroponics()
+    check_electroplating()
     check_plastic()
     check_seasons()
     check_alpine()
@@ -4313,6 +4412,7 @@ def main():
     check_model_uvs()
     check_pixel_hollows()
     check_town()
+    check_diagonal_connections()
     for path in RES.rglob("*.json"):
         load(path)
     if errors:
