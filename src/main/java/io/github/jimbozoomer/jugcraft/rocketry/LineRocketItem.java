@@ -72,7 +72,7 @@ public class LineRocketItem extends Item {
 		double bestDistance = Double.MAX_VALUE;
 		for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-reach, -reach, -reach), centre.offset(reach, reach, reach))) {
 			if (!pos.equals(target) && level.getBlockEntity(pos) instanceof ZiplineAnchorBlockEntity anchor && anchor.link() == null) {
-				double distance = pos.getCenter().distanceToSqr(player.position());
+				double distance = net.minecraft.world.phys.Vec3.atCenterOf(pos).distanceToSqr(player.position());
 				if (distance < bestDistance) {
 					bestDistance = distance;
 					best = pos.immutable();
