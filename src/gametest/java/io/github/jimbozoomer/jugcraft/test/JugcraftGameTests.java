@@ -288,7 +288,19 @@ public class JugcraftGameTests {
 	public void rocketPostDelivers(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		Block padBlock = io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD;
-		BlockPos from = helper.absolutePos(new BlockPos(1, 1, 1));
+		// The launching pad needs open sky. Test areas sit side by side, and a neighbour's tall build (a giant tree) can
+		// overhang this one, so launch from a column of the area that is open to the sky.
+		BlockPos from = null;
+		for (int x = 1; x <= 6 && from == null; x++) {
+			for (int z = 1; z <= 4 && from == null; z++) {
+				BlockPos candidate = helper.absolutePos(new BlockPos(x, 1, z));
+				if (level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, candidate.getX(), candidate.getZ())
+						<= candidate.getY()) {
+					from = candidate;
+				}
+			}
+		}
+		helper.assertTrue(from != null, "No column of the test area is open to the sky");
 		BlockPos to = helper.absolutePos(new BlockPos(6, 1, 6));
 		BlockPos roofed = helper.absolutePos(new BlockPos(1, 1, 6));
 		for (BlockPos pos : List.of(from, to, roofed)) {
@@ -313,7 +325,8 @@ public class JugcraftGameTests {
 				"A failed launch used up the rocket");
 		var launched = sender.launch(level);
 		helper.assertTrue(launched == io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.Result.LAUNCHED,
-				"The pad did not launch: " + launched);
+				"The pad did not launch: " + launched + " (sky height " + level.getHeight(
+						net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, from.getX(), from.getZ()) + ", pad " + from.getY() + ")");
 		helper.assertTrue(sender.getItem(0).isEmpty(), "The cargo stayed on the pad");
 		helper.assertTrue(sender.getItem(io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.ROCKET).isEmpty(),
 				"The rocket was not used up");
