@@ -18,6 +18,23 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
+      - name: Batch 36 APIs
+        run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-clientOnly-deobf-26.3.jar' | head -1)
+          echo "=== BlockBehaviour signal"; javap -p -cp "$COMMON" net.minecraft.world.level.block.state.BlockBehaviour | grep -iE "signal|getShape\(|neighborChanged|onPlace\(|tick\(|useItemOn|useWithoutItem|affectNeighborsAfterRemoval|getAnalogOutputSignal"
+          echo "=== Level updateNeighbors"; javap -cp "$COMMON" net.minecraft.world.level.Level | grep -iE "updateNeighborsAt|updateNeighborsAtExceptFromFacing|hasNeighborSignal|getBestNeighborSignal"
+          echo "=== DirectionalBlock"; javap -cp "$COMMON" net.minecraft.world.level.block.DirectionalBlock | head
+          echo "=== BlockStateProperties POWER"; javap -cp "$COMMON" net.minecraft.world.level.block.state.properties.BlockStateProperties | grep -E " POWER;| POWERED;| FACING;"
+          echo "=== ValueInput"; javap -cp "$COMMON" net.minecraft.world.level.storage.ValueInput | head -40
+          echo "=== ValueOutput"; javap -cp "$COMMON" net.minecraft.world.level.storage.ValueOutput | head -30
+          echo "=== Button"; javap -cp "$CLIENT:$COMMON" net.minecraft.client.gui.components.AbstractWidget | grep -E "setMessage|getMessage|active"
+          echo "=== Component withColor"; javap -cp "$COMMON" net.minecraft.network.chat.MutableComponent | grep -iE "withColor|withStyle"
+          echo "=== AbstractContainerScreen"; javap -p -cp "$CLIENT:$COMMON" net.minecraft.client.gui.screens.inventory.AbstractContainerScreen | grep -E "containerTick|tick\(|extract"
+          echo "=== GuiGraphicsExtractor"; javap -cp "$CLIENT:$COMMON" net.minecraft.client.gui.GuiGraphicsExtractor | grep -E " fill\(| text\(" | head
+          echo "=== DyeColor"; javap -cp "$COMMON" net.minecraft.world.item.DyeColor | grep -E "public" | head -20
+          echo "=== Shapes/Block.box"; javap -cp "$COMMON" net.minecraft.world.level.block.Block | grep -E " box\(|column" | head
       - name: Batch 35 APIs
         run: |
           set +e
