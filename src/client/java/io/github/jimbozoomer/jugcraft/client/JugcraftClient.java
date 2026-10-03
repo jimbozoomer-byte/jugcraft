@@ -140,6 +140,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftAgriculture.SPOOKY_ROCKET, context -> new ThrownItemRenderer<>(context, 1.0F, true));
 		EntityRendererRegistry.register(JugcraftAgriculture.SKY_LANTERN, SkyLanternRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.FLYING_BROOMSTICK, BroomstickRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.WEREWOLF, WerewolfRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.gear.JugcraftGrapple.GRAPPLE_HOOK, GrappleHookRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.weapons.FieldChemistry.CHEMICAL_CLOUD,
 				net.minecraft.client.renderer.entity.NoopRenderer::new);
@@ -156,6 +157,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		ModelLayerRegistry.registerModelLayer(HayGolemModel.LAYER, HayGolemModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(TurkeyModel.LAYER, TurkeyModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(HorsemanModel.LAYER, HorsemanModel::createLayer);
+		ModelLayerRegistry.registerModelLayer(WerewolfModel.LAYER, WerewolfModel::createLayer);
 		EntityRendererRegistry.register(JugcraftAgriculture.WILL_O_WISP, WispRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.CROW, CrowRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.HAY_GOLEM, HayGolemRenderer::new);

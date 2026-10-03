@@ -670,6 +670,12 @@ HALLOWEEN_ADVANCEMENTS.update({
                     "frame": "task"},
     "over_the_moon": {"icon": "jugcraft:flying_broomstick", "title": "Over the Moon",
                       "description": "Fly a broomstick high across the sky on a full-moon night", "frame": "challenge"},
+    "silver_lining": {"icon": "jugcraft:silver_dagger", "title": "Silver Lining", "description": "Slay a werewolf with silver",
+                      "frame": "task"},
+    "leader_of_the_pack": {"icon": "jugcraft:shadow_werewolf_pelt", "title": "Leader of the Pack", "description": "Slay a shadow werewolf",
+                           "frame": "challenge"},
+    "wolfsbane_ward": {"icon": "jugcraft:wolfsbane", "title": "Not Tonight", "description": "Keep a werewolf at bay with wolfsbane",
+                       "frame": "task"},
 })
 
 
@@ -903,6 +909,53 @@ BROOMSTICK = {"item": "flying_broomstick", "display": "Flying Broomstick", "char
               "accel": 0.05, "strafe": 0.025, "climb": 0.04, "drag": 0.91, "brake": 0.8, "max_speed": 0.6, "hat_bonus": 1.25,
               "sink": 0.08, "check_ticks": 20, "tolerance": 3.0, "dry_climb": 2.0, "low_charge": 400, "slow_fall_ticks": 100,
               "moon_height": 48, "inputs": ["jugcraft:witchs_broom", "jugcraft:flying_ointment", "minecraft:feather", "minecraft:feather"]}
+# Full-moon werewolves (fall addition 23; Werewolf, Werewolves, client/WerewolfModel): a werewolf comes out of the woods
+# (biome tag jugcraft:werewolf_haunts) only on full-moon nights and is gone at dawn. Every `spawn_ticks`, for each player,
+# `spawn_chance` of the time a spot `min_distance` to `max_distance` blocks off is tried; fewer than `near_cap` near a
+# player, `level_cap` in all. Its hide takes `hide_factor` of any damage but silver's, which does `silver_factor`; it heals
+# a point every `regen_ticks` unless silver wounded it in the last `silver_wound_ticks`. Wolfsbane wards it off (held, or
+# within `ward_reach` blocks); a warded target is left alone `shun_ticks`. Silver: a dagger and arrows; its pelt makes a rug.
+WEREWOLF = {"entity": "werewolf", "display": "Werewolf", "size": [0.9, 2.4], "hide_factor": 0.5, "silver_factor": 2.5,
+            "regen_ticks": 40, "silver_wound_ticks": 100, "shun_ticks": 200, "spawn_ticks": 200, "spawn_chance": 0.3,
+            "min_distance": 24, "max_distance": 40, "near_cap": 2, "level_cap": 8, "ward_reach": 6,
+            "haunts": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:grove"],
+            # Which kind comes out: a snow werewolf in snowy biomes; a shadow werewolf `shadow_haunt_chance` of the time
+            # in its haunts and `shadow_chance` elsewhere; otherwise a brown one.
+            "snow_haunts": ["#c:is_snowy"],
+            "shadow_haunts": ["minecraft:dark_forest", "minecraft:pale_garden", "jugcraft:gloomweald", "jugcraft:ghost_forest"],
+            "shadow_chance": 0.08, "shadow_haunt_chance": 0.5,
+            # Three kinds, three tiers of danger: their attributes, the experience they give and what they drop.
+            "kinds": {
+                "brown": {"tier": 1, "display": "Brown Werewolf", "health": 40.0, "damage": 6.0, "armor": 2.0, "speed": 0.33,
+                          "scale": 1.0, "knockback": 0.3, "xp": 10, "pelt": "werewolf_pelt", "rug": "werewolf_rug"},
+                "snow": {"tier": 2, "display": "Snow Werewolf", "health": 50.0, "damage": 8.0, "armor": 4.0, "speed": 0.32,
+                         "scale": 1.05, "knockback": 0.4, "xp": 20, "pelt": "snow_werewolf_pelt", "rug": "snow_werewolf_rug"},
+                "shadow": {"tier": 3, "display": "Shadow Werewolf", "health": 80.0, "damage": 11.0, "armor": 6.0, "speed": 0.36,
+                           "scale": 1.15, "knockback": 0.6, "xp": 40, "pelt": "shadow_werewolf_pelt", "rug": "shadow_werewolf_rug"}},
+            # The brown werewolf: hunts livestock too (`prey`); its howl calls brown werewolves within `pack_reach` to its
+            # prey; below `flee_below` of its health it flees until healed to `flee_until`.
+            "prey": ["minecraft:sheep", "minecraft:pig", "minecraft:cow", "minecraft:chicken", "minecraft:rabbit"],
+            "pack_reach": 32, "flee_below": 0.25, "flee_until": 0.5,
+            # The snow werewolf: its bite slows (Slowness II) for `frostbite_ticks` and chills by `frostbite_chill` frozen
+            # ticks; it never freezes; on snow it is `snow_stride` faster.
+            "frostbite_ticks": 60, "frostbite_chill": 80, "snow_stride": 0.25,
+            # The shadow werewolf: steps out of the shadows behind prey at least `shadow_step_min` blocks off, every
+            # `shadow_step_ticks`; its howl darkens the night for players within `alpha_reach` for `darkness_ticks` and
+            # sends werewolves within `frenzy_reach` into a frenzy (Strength and Speed) for `frenzy_ticks`. A sprig in
+            # hand doesn't ward it.
+            "shadow_step_min": 6, "shadow_step_ticks": 200, "alpha_reach": 16, "darkness_ticks": 160, "frenzy_reach": 24,
+            "frenzy_ticks": 200, "howl_cooldown": 600,
+            "dagger": "silver_dagger", "arrow": "silver_arrow",
+            "dagger_material": {"durability": 200, "speed": 6.0, "bonus": 1.5, "enchantability": 20, "damage": 2.5, "attack_speed": -1.8},
+            "displays": {"werewolf_pelt": "Werewolf Pelt", "werewolf_rug": "Werewolf Rug", "snow_werewolf_pelt": "Snow Werewolf Pelt",
+                         "snow_werewolf_rug": "Snow Werewolf Rug", "shadow_werewolf_pelt": "Shadow Werewolf Pelt",
+                         "shadow_werewolf_rug": "Shadow Werewolf Rug", "silver_dagger": "Silver Dagger", "silver_arrow": "Silver Arrow"}}
+WEREWOLF_PELTS = [k["pelt"] for k in WEREWOLF["kinds"].values()]
+WEREWOLF_RUGS = [k["rug"] for k in WEREWOLF["kinds"].values()]
+# Wolfsbane (fall addition 23): a wild flower of taiga and forest (new chunks), plantable and potted, that wards werewolves
+# off; in suspicious stew it poisons for `seconds`.
+WOLFSBANE = {"block": "wolfsbane", "display": "Wolfsbane", "effect": "POISON", "seconds": 8.0, "biomes": ["IS_TAIGA", "IS_FOREST"],
+             "patch": {"rarity": 20, "tries": 24, "spread_xz": 5, "spread_y": 2}}
 # The Apothecary Shelf (ApothecaryShelfBlock): wall shelves of jars; sneak-use cycles `arrangements` ways to set them.
 APOTHECARY_SHELF = {"block": "apothecary_shelf", "display": "Apothecary Shelf", "arrangements": 4}
 # The Crystal Ball (CrystalBallBlock): glows `light`; gazing flares it to `gazing_light` for `gaze_ticks` and tells a
@@ -2438,7 +2491,7 @@ def planted_blocks():
 def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"]] + giant_blocks()
-            + [potted(m) for m in MUMS] + [MAZE["finish"], MAZE["corn"]] + plants.itemless())
+            + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless())
 
 
 def all_blocks():
@@ -2449,7 +2502,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + plants.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + plants.blocks())
 
 
 def all_items():
@@ -2460,7 +2513,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + plants.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + plants.items())
 
 
 def owns(entry_id):
@@ -2516,3 +2569,14 @@ SHAPELESS += [{"id": "marigold_petals", "inputs": ["jugcraft:marigold"], "result
 
 # Fall additions 22: a flying broomstick is a witch's broom anointed with Flying Ointment and fletched with feathers.
 SHAPELESS += [{"id": BROOMSTICK["item"], "inputs": BROOMSTICK["inputs"], "result": BROOMSTICK["item"], "count": 1, "category": "misc"}]
+
+# Fall additions 23: silver against werewolves. A silver dagger; silver-tipped arrows; a werewolf's pelt laid out as a rug
+# or cut into leather.
+SHAPED += [{"id": WEREWOLF["dagger"], "pattern": ["S", "T"], "key": {"S": "#c:ingots/silver", "T": "minecraft:stick"},
+            "result": WEREWOLF["dagger"], "count": 1, "category": "equipment", "features": ["silver"]},
+           ] + [{"id": k["rug"], "pattern": ["PP"], "key": {"P": f"jugcraft:{k['pelt']}"}, "result": k["rug"], "count": 1,
+                 "category": "building"} for k in WEREWOLF["kinds"].values()]
+SHAPELESS += [{"id": WEREWOLF["arrow"], "inputs": ["#c:nuggets/silver"] + ["minecraft:arrow"] * 4, "result": WEREWOLF["arrow"], "count": 4,
+               "category": "equipment", "features": ["silver"]},
+              ] + [{"id": f"leather_from_{k['pelt']}", "inputs": [f"jugcraft:{k['pelt']}"], "result": "minecraft:leather", "count": 2,
+                    "category": "misc"} for k in WEREWOLF["kinds"].values()]

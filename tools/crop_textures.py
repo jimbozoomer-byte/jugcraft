@@ -914,6 +914,8 @@ def crop_textures():
     out.update(theremin_textures())
     from broom_textures import broom_textures  # and the flying broomstick
     out.update(broom_textures())
+    from werewolf_textures import werewolf_textures  # and full-moon werewolves
+    out.update(werewolf_textures())
     from ofrenda_textures import ofrenda_textures  # and the ofrenda
     out.update(ofrenda_textures())
     from graveyard_textures import graveyard_textures  # and the graveyard pack

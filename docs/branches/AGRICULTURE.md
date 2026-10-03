@@ -1052,6 +1052,22 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 - **Make one** from a Witch's Broom, a Flying Ointment and two feathers, and use it to get on. It flies where you look: forward to go, back to brake, jump to climb. It's a quarter faster in a witch hat.
 - **Ointment is its fuel:** 2 minutes of flight each, up to 6. Run dry, it sinks gently down. Anoint a waiting broom with more; sneak-use takes it back. Fly high on a full-moon night for Over the Moon. Details: [even more fall additions](../features/even-more-fall-additions.md#the-flying-broomstick).
 
+### Full-moon werewolves
+
+| **Wolfsbane** growing wild in a spruce clearing, and potted on a stump | **Silver** framed above the fire: the dagger, silver arrows and a pelt |
+| --- | --- |
+| ![Wolfsbane](../images/ingame_wolfsbane.jpg) | ![Silver and a pelt](../images/ingame_werewolf_rug_and_silver.jpg) |
+| **The three kinds** on a full-moon night: brown, snow and shadow | **In the clearing**, the shadow werewolf snarling |
+| ![Three werewolves](../images/ingame_werewolf.jpg) | ![The werewolves](../images/ingame_werewolves_full_moon.jpg) |
+
+*Real screenshots from the client game test that CI runs (`WerewolfClientGameTests`, software rendering, small previews; the night is lit by night vision for the picture).*
+
+- **On full-moon nights,** werewolves come howling out of forests and taiga. They're fast, leap at you, shrug off half of any blow, and are gone at dawn. There are three kinds:
+  - the **Brown Werewolf** (tier I) hunts your livestock too, calls its pack with a howl, and runs when badly hurt;
+  - the **Snow Werewolf** (tier II), in snowy woods, freezes you with its bite (wear leather) and is faster on snow;
+  - the rare **Shadow Werewolf** (tier III), most often in dark woods, steps out behind you from the shadows. Its howl darkens the night and sends the pack into a frenzy. Only planted wolfsbane keeps it off.
+- **Silver** hurts them most: a Silver Dagger or Silver Arrows. **Wolfsbane**, a wild violet flower, wards them off: hold a sprig or plant it round your home. Each kind's pelt makes its own rug. Details: [even more fall additions](../features/even-more-fall-additions.md#full-moon-werewolves).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
