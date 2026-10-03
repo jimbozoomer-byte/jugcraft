@@ -230,18 +230,26 @@ def lamb():
     # A beaded border round the panel.
     out += [b((4.6, 2.6, 6.2), (11.4, 2.9, z0), "#relief"), b((4.6, 8.3, 6.2), (11.4, 8.6, z0), "#relief"),
             b((4.6, 2.9, 6.2), (4.9, 8.3, z0), "#relief"), b((11.1, 2.9, 6.2), (11.4, 8.3, z0), "#relief")]
-    # A moulded cap, and the lamb in carved marble lying on it, legs folded, its head raised and turned to the front.
+    # A moulded cap, and the lamb in carved marble lying on it, sculpted (tools/sculpt.py): legs folded under it, its
+    # head raised and turned to whoever stands at the grave, ears drooping, a fleece of soft curls.
+    from sculpt import Sculpture, Ellipsoid, Limb
     r = "#relief"
     out += [b((3.7, 9.0, 6.2), (12.3, 9.5, 9.8), r)]
-    out += [b((6.2, 9.5, 7.0), (11.0, 11.3, 9.0), r), b((5.8, 9.7, 7.2), (11.4, 11.0, 8.8), r), b((6.6, 11.3, 7.4), (10.6, 11.7, 8.6), r),
-            b((10.6, 9.7, 7.3), (11.8, 10.9, 8.7), r)]
-    # Neck, head, muzzle and drooping ears.
-    out += [b((5.0, 10.4, 7.4), (6.6, 11.9, 8.6), r), b((4.0, 11.4, 6.9), (5.8, 13.0, 8.4), r), b((4.35, 11.5, 6.3), (5.45, 12.4, 6.9), r),
-            b((3.5, 11.9, 7.3), (4.1, 12.5, 8.1), r), b((5.7, 11.9, 7.3), (6.3, 12.5, 8.1), r)]
-    # Folded forelegs at its chest, a hind leg and the tail; a few curls along its back.
-    out += [b((5.2, 9.5, 6.6), (6.8, 9.95, 7.3), r), b((9.6, 9.5, 6.75), (11.2, 10.2, 7.3), r), b((11.8, 10.2, 7.7), (12.25, 10.8, 8.3), r)]
-    for x, z in ((7.0, 7.6), (8.5, 7.9), (9.8, 7.5)):
-        out.append(b((x, 11.6, z), (x + 0.6, 11.95, z + 0.6), r))
+    s = Sculpture(0.5)
+    y = 9.5
+    s.add(Ellipsoid((8.6, y + 1.5, 8.0), (3.3, 1.6, 1.7), r), Ellipsoid((10.6, y + 1.3, 8.0), (1.6, 1.4, 1.6), r),
+          Ellipsoid((6.4, y + 1.7, 8.0), (1.5, 1.6, 1.5), r))
+    for x, z in ((7.2, 7.0), (8.8, 6.9), (10.2, 7.1), (8.0, 9.0), (9.6, 9.1), (7.4, 8.4), (9.0, 8.0)):
+        s.add(Ellipsoid((x, y + 2.8, z), (0.7, 0.55, 0.7), r))
+    # Legs folded beneath, the forefeet showing at the chest; a little tail.
+    s.add(Limb((6.2, y + 0.4, 6.6), (4.6, y + 0.35, 6.4), 0.45, 0.4, r), Limb((10.8, y + 0.4, 6.5), (9.2, y + 0.35, 6.3), 0.5, 0.4, r),
+          Ellipsoid((12.0, y + 1.6, 8.0), (0.5, 0.6, 0.45), r))
+    # The neck rising to the head, turned toward the front; muzzle, and ears hanging down at the sides.
+    s.add(Limb((6.2, y + 2.2, 7.8), (5.2, y + 3.4, 7.2), 1.0, 0.85, r), Ellipsoid((5.0, y + 3.8, 6.9), (1.1, 1.0, 1.2), r),
+          Limb((5.0, y + 3.5, 6.2), (5.0, y + 3.2, 5.5), 0.55, 0.45, r),
+          Limb((4.1, y + 4.2, 7.2), (3.6, y + 3.4, 7.5), 0.3, 0.25, r, flat=((1, 0, 0), 0.5)),
+          Limb((5.9, y + 4.2, 7.2), (6.4, y + 3.4, 7.5), 0.3, 0.25, r, flat=((1, 0, 0), 0.5)))
+    out += s.boxes()
     return out
 
 
