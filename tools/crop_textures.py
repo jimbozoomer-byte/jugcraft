@@ -894,4 +894,24 @@ def crop_textures():
     out.update(ghost_textures())
     from face_paint_textures import face_paint_textures  # and face paint
     out.update(face_paint_textures())
+    from candy_textures import candy_textures  # and the candy kitchen
+    out.update(candy_textures())
+    from foraging_textures import foraging_textures  # and autumn foraging
+    out.update(foraging_textures())
+    from bat_textures import bat_textures  # and the Bat House
+    out.update(bat_textures())
+    from hay_golem_textures import hay_golem_textures  # and the Hay Golem
+    out.update(hay_golem_textures())
+    from knitting_textures import knitting_textures  # and knitting
+    out.update(knitting_textures())
+    from pie_textures import pie_textures  # and pie baking
+    out.update(pie_textures())
+    from spirit_board_textures import spirit_board_textures  # and the Spirit Board
+    out.update(spirit_board_textures())
+    from turkey_textures import turkey_textures  # and wild turkeys
+    out.update(turkey_textures())
+    from theremin_textures import theremin_textures  # and the theremin
+    out.update(theremin_textures())
+    from ofrenda_textures import ofrenda_textures  # and the ofrenda
+    out.update(ofrenda_textures())
     return out

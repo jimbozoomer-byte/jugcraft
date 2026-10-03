@@ -50,6 +50,7 @@ MUM_COLORS = {
     "orange_mum": [rgb("9a420a"), rgb("cc6414"), rgb("ec8a26"), rgb("f8b25a")],
     "red_mum": [rgb("5e0c12"), rgb("8a1820"), rgb("b42c30"), rgb("d85a54")],
     "purple_mum": [rgb("3c1446"), rgb("5e2468"), rgb("84408c"), rgb("ac6cb0")],
+    "marigold": [rgb("a8520a"), rgb("e07a10"), rgb("f8a020"), rgb("ffc84a")],
 }
 
 
