@@ -151,6 +151,9 @@ public class PumpklingGameTests {
 		ServerPlayer owner = player(helper, new BlockPos(2, 2, 1), GameType.SURVIVAL);
 		ServerPlayer stranger = player(helper, new BlockPos(1, 2, 3), GameType.SURVIVAL);
 		Pumpkling pumpkling = pumpkling(helper, new BlockPos(1, 2, 1), owner, false);
+		// Test players start out holding the Creative Tower Guide: empty their hands.
+		owner.getInventory().clearContent();
+		stranger.getInventory().clearContent();
 		InteractionResult first = interact(owner, pumpkling, false);
 		boolean sat = pumpkling.sitting();
 		InteractionResult strangers = interact(stranger, pumpkling, false);

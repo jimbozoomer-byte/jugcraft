@@ -220,8 +220,7 @@ public class Pumpkling extends PathfinderMob implements CropGuard {
 	/**
 	 * Anyone feeds it treats to heal it. Its owner, with an empty hand, has it sit or get up, as with a tame wolf; with a
 	 * torch or a soul torch lights it, or takes a lit one's torch back out; and, sneaking with a glass bottle, settles it
-	 * back into its pumpkin. (Sitting isn't a sneak-use: in the game tests a sneaking, empty-handed use never reached
-	 * this method.) Decided on the server, where its owner is known.
+	 * back into its pumpkin. Decided on the server, where its owner is known.
 	 */
 	@Override
 	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
