@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:random_selector",
+  "default": "jugcraft:dead_tree_checked",
+  "features": []
+}

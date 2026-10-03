@@ -1,0 +1,18 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "alpine_spawn"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks",
+  "ingredients": [
+    "#jugcraft:larch_logs"
+  ],
+  "result": {
+    "id": "jugcraft:larch_planks",
+    "count": 4
+  }
+}
