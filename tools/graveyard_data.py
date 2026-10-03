@@ -671,3 +671,8 @@ def vase_tags(tags):
     for colour, flowers in GRAVE_VASE["flowers"].items():
         for flower in flowers:
             tags.add("item", f"jugcraft:grave_flowers/{colour}", flower)
+        tags.add("item", "jugcraft:grave_flowers", f"#jugcraft:grave_flowers/{colour}")
+    for flower in GRAVE_VASE["others"]:
+        tags.add("item", "jugcraft:grave_flowers", flower)
+    # Vanilla's small flowers, and those of any pack that adds to them.
+    tags.add("item", "jugcraft:grave_flowers", {"id": "#minecraft:small_flowers", "required": False})

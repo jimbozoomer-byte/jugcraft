@@ -145,7 +145,7 @@ HEADSTONES = {
         "display": "Planted Grave", "stone": "sandstone", "model": "planted_grave", "cells": LONG, "overgrowth": "slab", "pack": 4,
         "shapes": [[(0.6, 0, 0.1, 15.4, 2.6, 16)], [(0.6, 0, 0, 15.4, 2.6, 15.9)]],
         "text": {"face": "TOP", "x": 8.0, "y": 2.6, "z": 27.1, "width": 5.4, "height": 3.4, "max_scale": 1 / 80},
-        "recipe": {"pattern": ["SFS", "SDS"], "key": {"S": "minecraft:smooth_sandstone", "F": "#minecraft:small_flowers", "D": "minecraft:dirt"}}},
+        "recipe": {"pattern": ["SFS", "SDS"], "key": {"S": "minecraft:smooth_sandstone", "F": "#jugcraft:grave_flowers", "D": "minecraft:dirt"}}},
     "memorial_bench": {
         "display": "Memorial Bench", "stone": "iron", "model": "memorial_bench", "cells": WIDE2, "overgrowth": "small", "pack": 4,
         "shapes": [[(0, 0, 2.0, 15.6, 7.6, 12.2), (0, 7.6, 9.6, 15.8, 16.0, 11.0)], [(0.4, 0, 2.0, 16, 7.6, 12.2), (0.2, 7.6, 9.6, 16, 16.0, 11.0)]],
@@ -236,6 +236,9 @@ GRAVE_VASE = {"block": "grave_vase", "display": "Grave Vase", "calm": 0.5, "calm
                                      "jugcraft:goldenrod", "jugcraft:marigold", "jugcraft:orange_cosmos"],
                           "purple": ["minecraft:allium", "minecraft:cornflower", "minecraft:blue_orchid", "jugcraft:lavender", "jugcraft:heather",
                                      "jugcraft:purple_mum", "jugcraft:frost_iris"]},
+              # Every flower the vase takes (jugcraft:grave_flowers): the colours' tags, these, and vanilla's small flowers.
+              "others": ["minecraft:pink_tulip", "minecraft:torchflower", "minecraft:wither_rose", "minecraft:open_eyeblossom",
+                         "minecraft:closed_eyeblossom"],
               "recipe": {"pattern": ["B B", " B ", " G "], "key": {"B": "#c:ingots/bronze", "G": "minecraft:polished_granite"}}}
 # The cemetery lamp post: three blocks tall, its lamp lit while it is dark outside, looked at every `check_ticks`.
 LAMP_POST = {"block": "cemetery_lamp_post", "display": "Cemetery Lamp Post", "light": 15, "check_ticks": 100,

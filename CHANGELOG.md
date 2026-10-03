@@ -13,6 +13,12 @@ No numbered release yet. Everything below is on `main`.
 - **Shrinking** makes you half size for 3 minutes, small enough for one-block gaps. **Giant** makes you 1.6 times your size for 3 minutes, with a block more reach and a higher step, and is refused where there is no room to grow. A shrunk player with no room to grow back stays small until there is. **Flying Ointment** gives 30 seconds of slow falling.
 - Two advancements (Drink Me, Fee-Fi-Fo-Fum), three game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#hex-brews).
 
+### Unmerged: Graveyard pack 3, buildings
+- **Family Mausoleum**: an 85-block marble temple front with a portico of Tuscan columns, the family name on its frieze, and a room inside with twelve crypt fronts that each take their own inscription, an altar under a stained-glass window and a sanctuary lamp.
+- **Lych Gate** of oak and slate on rubble walls, its tie beam inscribed; **Cemetery Gateway** of granite piers with lanterns and a wrought-iron arch bearing the cemetery's name; **Columbarium** of six inscribed niches.
+- **Bronze Mausoleum Door**, opened by hand. Doorways and passages are left open for doors and gates of your own.
+- Buildings weather, wax and stir spirits like headstones and break as one, keeping every inscription. Game and client tests. Record: [graveyard.md](docs/features/graveyard.md#buildings).
+
 ### Unmerged: Graveyard pack 2, monuments
 - **Six monuments**: a four-block **Grand Obelisk** in granite, a **Draped Urn**, the **Angel at the Tomb** (a grieving angel kneeling at an altar tomb, two blocks wide), a four-block **Trumpeting Angel** on a fluted column, an iron **Mortsafe** caged over a grave, and a bronze **Faithful Hound** watching on its plinth. The angels, urn and hound are sculpted.
 - They weather, wax, take epitaphs and stir spirits like the headstones; the mortsafe rusts and the hound grows verdigris.

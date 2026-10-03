@@ -10,13 +10,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
@@ -32,8 +32,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * The grave vase (graveyard pack 4): a bronze vase to bring flowers to a grave. Any small flower put in it makes a
- * bouquet (its colour from the item tags {@code jugcraft:grave_flowers/<colour>}, mixed for any other); fresh flowers
+ * The grave vase (graveyard pack 4): a bronze vase to bring flowers to a grave. Any small flower put in it (item tag
+ * {@code jugcraft:grave_flowers}) makes a bouquet (its colour from the item tags {@code jugcraft:grave_flowers/<colour>},
+ * mixed for any other); fresh flowers
  * wilt in time ({@value #WILT_CHANCE} of its random ticks, about a day of play), and new ones replace the old. While
  * fresh, they calm the graves within {@value #CALM_REACH} blocks: those stir restless spirits only {@value #CALM} as
  * often ({@link #calms}). Shears clear it. Changing it needs build rights.
@@ -43,6 +44,8 @@ public class GraveVaseBlock extends Block {
 	public static final int CALM_REACH = 3;
 	public static final float CALM = 0.5F;
 	public static final EnumProperty<Bouquet> FLOWERS = EnumProperty.create("flowers", Bouquet.class);
+	/** Every flower the vase takes: each colour's, and every other small flower. */
+	public static final TagKey<Item> FLOWERS_IT_TAKES = TagKey.create(Registries.ITEM, Jugcraft.id("grave_flowers"));
 	public static final BooleanProperty WILTED = BooleanProperty.create("wilted");
 	private static final VoxelShape SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 9.0, 11.0);
 	private static final VoxelShape WITH_FLOWERS = Block.box(5.0, 0.0, 5.0, 11.0, 15.0, 11.0);
@@ -105,7 +108,7 @@ public class GraveVaseBlock extends Block {
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 			BlockHitResult hit) {
-		boolean flower = stack.is(ItemTags.SMALL_FLOWERS);
+		boolean flower = stack.is(FLOWERS_IT_TAKES);
 		boolean shears = stack.is(Items.SHEARS) && state.getValue(FLOWERS) != Bouquet.NONE;
 		if (!flower && !shears) {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;

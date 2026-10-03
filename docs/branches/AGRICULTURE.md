@@ -983,6 +983,25 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Six monuments**, two to four blocks each: a granite **obelisk**, a marble **draped urn**, the **Angel at the Tomb** grieving over an altar, a **trumpeting angel** on a fluted column, an iron **mortsafe** caged over a grave against the body-snatchers, and a bronze **faithful hound** on its plinth.
 - They are headstones in every way: they weather (the mortsafe rusts, the hound grows verdigris), take an epitaph from the chisel and stir spirits. Details: [the graveyard pack](../features/graveyard.md#monuments).
 
+### The Graveyard: buildings
+
+| **The four buildings** along the path: the mausoleum, the lych gate, the cemetery gateway and the columbarium | **The family mausoleum**, its Bronze Mausoleum Door hung |
+| --- | --- |
+| ![The buildings](../images/ingame_graveyard_buildings.jpg) | ![The family mausoleum](../images/ingame_graveyard_mausoleum.jpg) |
+| **Inside**: the altar under the stained glass, the sanctuary lamp | **The crypt fronts**, each cut with its own name |
+| ![The mausoleum's altar](../images/ingame_graveyard_mausoleum_altar.jpg) | ![The crypt fronts](../images/ingame_graveyard_mausoleum_crypts.jpg) |
+| **The lych gate**, its tie beam inscribed | **The cemetery gateway**, its name in gilt between the lanterns |
+| ![The lych gate](../images/ingame_graveyard_lych_gate.jpg) | ![The cemetery gateway](../images/ingame_graveyard_gateway.jpg) |
+| **The columbarium**, six niches and a frieze | **The mausoleum overgrown** |
+| ![The columbarium](../images/ingame_graveyard_columbarium.jpg) | ![The mausoleum overgrown](../images/ingame_graveyard_mausoleum_overgrown.jpg) |
+| **At night**, the gateway's lanterns lit | |
+| ![The buildings at night](../images/ingame_graveyard_buildings_night.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`GraveyardBuildingClientGameTests`, software rendering, small previews). The inscriptions and stages are set for the picture.*
+
+- **Four buildings**, each one item placed whole and broken as one: a walk-in **family mausoleum** (85 blocks: a temple front, twelve crypt fronts, an altar, stained glass and a sanctuary lamp), a **lych gate** of oak and slate, a granite and wrought-iron **cemetery gateway** with lanterns, and a marble **columbarium** of six niches.
+- Every crypt front and niche takes **its own inscription** from the chisel, and the building its main one. They weather, wax and stir spirits as one. The **Bronze Mausoleum Door** fits the mausoleum's doorway. Details: [the graveyard pack](../features/graveyard.md#buildings).
+
 ## Even more fall additions
 
 Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).
