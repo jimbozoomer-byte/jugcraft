@@ -1,5 +1,5 @@
 """Original textures for the Theremin (fall additions 19) (requires Pillow): figured walnut for the cabinet and legs; its
-front, a speaker grille of woven cloth behind walnut bars over a brass inlay line; polished brass for the top; copper
+front, a speaker grille of woven cloth behind walnut bars over a brass inlay line; polished brass for the lid's edge; copper
 for the antennas; black bakelite for the knobs and insulator; and the magic-eye tube, dark green glass at rest and a
 glowing green fan while it plays.
 
