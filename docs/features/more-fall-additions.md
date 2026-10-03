@@ -1,6 +1,6 @@
 # More Fall Additions
 
-Status: the candy kitchen (addition 11), autumn foraging (addition 12), the Bat House (addition 13), the Hay Golem (addition 14), knitting (addition 15), pie baking (addition 16) and the Spirit Board (addition 17) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
+Status: the candy kitchen (addition 11), autumn foraging (addition 12), the Bat House (addition 13), the Hay Golem (addition 14), knitting (addition 15), pie baking (addition 16), the Spirit Board (addition 17) and wild turkeys (addition 18) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets do another 10 detailed halloween and fall themed additions", then "start them now stacked on #33"). They follow the ten [fall additions](fall-additions.md), numbered on from them, one per pull request, each stacked on the one before:
 11. the candy kitchen: the Candy Kettle, its thermometer and the candy stages, the Candy Tray, and ten candies;
 12. autumn foraging: five wild mushrooms that spread in the shade and sprout fairy rings under the full moon, the Foraging Basket, and four mushroom dishes;
@@ -9,15 +9,15 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets d
 15. knitting: the Spinning Wheel spins wool into yarn, Knitting Needles knit it into beanies, socks and five sweaters, and knitwear keeps you cosy by a campfire;
 16. pie baking: the Hearth Oven, a brick bread oven that bakes five pies golden (or black, left too long), placed on the table and eaten or cut a slice at a time;
 17. the Spirit Board: a candlelit séance on which a restless spirit spells its name and the one thing it wishes for, and the gift that lays it to rest;
-18. wild turkeys (planned);
+18. wild turkeys: flocks in woods and meadows, toms that strut and gobble, hens that lay eggs, and a roast turkey carved at the table;
 19. the theremin (planned);
 20. the Día de Muertos ofrenda (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick. The Hay Golem is Discovery tier: four hay bales (36 wheat) and a carved pumpkin. Knitting is Discovery tier: planks, sticks and string (the wheel), two iron nuggets and two sticks (the needles), and wool. Pie baking is Discovery tier: seven bricks and a furnace (the oven), coal, charcoal or logs to burn, and wheat, an egg, sugar and the fillings: apples, a pumpkin and milk, the Festival Crops' cranberries, the Kitchen Garden's sweet potatoes or the cider mill's roasted chestnuts. The Spirit Board is Discovery tier: two birch slabs, an ink sac and a glass pane, and a candle; the spirits it speaks with come with ghost hunting, and seeing them takes a Spirit Lantern.
-Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near. The Hay Golem is a farmhand: it keeps crows off a field and brings in the ripe crops, so a small farm runs while its farmer is away mining. Knitting is for crafters and shepherds: wool becomes clothes in any colour, warm against powder snow, and a set of knitwear by a campfire heals a party back up between trips. Pie baking is for cooks: a pie is four filling slices from one bake, to set out at a feast or cut and carried on a trip, and baking it right takes watching the oven. The Spirit Board is for ghost hunters and friends together: a séance goes faster with more hands on the planchette, and finding what a spirit wishes for sends the group to the baker, the knitter, the candy maker or the orchard.
+Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick. The Hay Golem is Discovery tier: four hay bales (36 wheat) and a carved pumpkin. Knitting is Discovery tier: planks, sticks and string (the wheel), two iron nuggets and two sticks (the needles), and wool. Pie baking is Discovery tier: seven bricks and a furnace (the oven), coal, charcoal or logs to burn, and wheat, an egg, sugar and the fillings: apples, a pumpkin and milk, the Festival Crops' cranberries, the Kitchen Garden's sweet potatoes or the cider mill's roasted chestnuts. The Spirit Board is Discovery tier: two birch slabs, an ink sac and a glass pane, and a candle; the spirits it speaks with come with ghost hunting, and seeing them takes a Spirit Lantern. Wild turkeys are Discovery tier: they wander into woods, taiga, plains and meadows by day, seeds bring them and breed them, and a raw turkey roasts in a furnace, smoker or on a campfire.
+Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near. The Hay Golem is a farmhand: it keeps crows off a field and brings in the ripe crops, so a small farm runs while its farmer is away mining. Knitting is for crafters and shepherds: wool becomes clothes in any colour, warm against powder snow, and a set of knitwear by a campfire heals a party back up between trips. Pie baking is for cooks: a pie is four filling slices from one bake, to set out at a feast or cut and carried on a trip, and baking it right takes watching the oven. The Spirit Board is for ghost hunters and friends together: a séance goes faster with more hands on the planchette, and finding what a spirit wishes for sends the group to the baker, the knitter, the candy maker or the orchard. Wild turkeys are for farmers and hunters: a second bird to keep, whose hens lay eggs and whose toms put on a show, and a roast that feeds a table of six.
 
-Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night, a Hay Golem works all year, knitwear is worn in any season, pies bake all year, and spirits answer on any night.
+Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night, a Hay Golem works all year, knitwear is worn in any season, pies bake all year, spirits answer on any night, and turkeys come in every season.
 
 ## Player experience
 ### The Candy Kettle
@@ -173,6 +173,19 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 7. **Laying a spirit to rest:** reveal it (a Spirit Lantern, or a Revealing candle) and give it what it wished for. It takes one and rises away in a column of light: the giver gets 20 experience and Luck for five minutes, and earns **Unfinished Business**. Anything else, it turns away from.
 8. Comparators read where the planchette is: 15 on YES, 1 on NO, 4 on GOODBYE, 8 on a letter, 0 at rest.
 
+### Wild turkeys
+1. **Wild Turkeys** live in flocks in forests, taiga, plains, sunflower plains and meadows (biome tag `jugcraft:turkey_habitat`). By day a flock of three to five, a tom among them, now and then wanders onto open grass 24 to 48 blocks from a player. No new flock comes while ten turkeys are within 64 blocks of the player, or forty are in the world; once come, they stay, like any farm animal.
+2. **Toms and hens:** half are toms: bronze, barred in black, with a dark breast and beard, white-barred wings, a pale blue head, a red wattle and a snood over the beak, and a great chestnut tail. Hens are mottled brown with a grey-blue head and a shorter tail. Poults are buff down striped brown.
+3. **Strutting:** a tom with an audience (a player or a grown hen within six blocks) now and then stops, raises his tail into a full fan, puffs out his breast, drops his wings to the ground and gobbles, for four seconds.
+4. **Eggs:** a hen lays an egg (vanilla's) every five to ten minutes.
+5. **Farming:** seeds (wheat, beetroot, melon, pumpkin, the Fall Farm's corn kernels, sunflower seeds, oat and barley seeds) and sweet berries tempt turkeys and breed them; breeding two earns **Gobble Gobble**. A poult grows up in twenty minutes. Turkeys flutter down rather than fall, and take no fall damage.
+6. **Drops:** a raw turkey (3 hunger) and one to three feathers.
+7. **Roast Turkey:** a raw turkey roasts in a furnace (10 seconds), a smoker (5) or on a campfire (30) into a Roast Turkey, golden on a silver platter with cranberries and herbs. Place it on a table:
+   - a hungry player using it eats a serving (3 hunger, saturation 0.6);
+   - a Carving Knife carves off a Slice of Roast Turkey to take away (the same food), earning **Carving the Bird**;
+   - it has six servings: first the drumsticks go, then the breast is carved, then only the carcass is left; the last serving takes the platter and leaves a bone;
+   - comparators read the servings left. Only a whole roast can be picked up again.
+
 ## Connections
 - Candy kitchen, input producer: sugar cane (sugar); bottles of water and cows (milk); cocoa, sweet berries, glow berries and bees; the Festival Crops (cranberries, roasted chestnuts) and the cider mill (mulling spices); dyes; sticks; vanilla copper and iron; Jugcraft's `jugcraft:heat_sources`.
 - Candy kitchen, output consumer:
@@ -223,6 +236,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - Spirit Board, entry path: early items only; a séance needs a candle, and its answer needs a restless spirit near.
 - Spirit Board, required vs optional: optional; ghost hunting is unchanged without it.
 - Spirit Board, trade and solo routes: one player can hold a séance alone (slower); the things spirits wish for are trade goods.
+- Wild turkeys, input producer: seeds and sweet berries (vanilla, and the Fall Farm's corn kernels, sunflower seeds, oat and barley seeds); fuel for roasting.
+- Wild turkeys, output consumer: players (food); the Harvest Feast Table (a raw turkey and a slice are foods on it, `c:foods`); eggs for cakes and pie baking's pastry dough; feathers for arrows and books and quills; the roast's bone for bone meal; trade.
+- Wild turkeys, technology connection: comparators read a roast's servings left.
+- Wild turkeys, entry path: turkeys come to the woods and meadows by themselves; no Jugcraft block is needed. A Carving Knife (from pumpkin carving) is needed only to carve slices to carry.
+- Wild turkeys, required vs optional: optional; chickens are unchanged.
+- Wild turkeys, trade and solo routes: one player can keep and breed turkeys alone; a roast is a trade good, and slices carry.
 
 ## Balance and automation
 - **Candy kitchen:**
@@ -271,6 +290,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
   - Units: stops (letters, YES, NO, GOODBYE), ticks, blocks.
   - Reward: 20 experience and five minutes of Luck for each spirit laid to rest, and the wished-for item is used up. Spirits rise only at night from graves, at most three near a grave.
   - No loop: nothing the board or a spirit gives makes spirits or boards.
+- **Wild turkeys:**
+  - Costs: seeds to breed them, fuel to roast.
+  - Units: hunger points, saturation, ticks, blocks.
+  - Food: a turkey is one raw turkey (3 hunger raw); roasted, six servings of 3, 18 hunger in all. That is more than cooked chicken's 6, for a bird with 8 health that comes one roast per bird and takes breeding to replace. A hen's eggs are vanilla's, at about a chicken's rate.
+  - Spawning: a try every 20 seconds for each player, a quarter of the time, capped near players and in the world.
+  - No loop: a turkey makes nothing that makes turkeys; seeds breed them.
 
 ## Multiplayer and persistence
 - **Candy kitchen, server authority:** filling, reading, tipping out and pouring all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server, which checks the base, the sugar and flavour limits, and the temperature. Pulling and breaking up a tray go through vanilla's item use; the server checks the tray's own record of when it was poured and how often it has been pulled, by its own game time.
@@ -316,6 +341,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - **Spirit Board, bounded work:** the board does nothing between séances. Starting one looks at 9 by 9 by 9 blocks for a candle and asks the entity lookup for spirits within 16 blocks, once; each tick of a séance checks its hands (four at most).
 - **Spirit Board, IDs:** block and item `spirit_board`, block entity `spirit_board`; block tag `jugcraft:seance_candles`; item tags `jugcraft:spirit_wishes/<wish>` for pie, candle, cider, sweater, candy, apple, rose and pumpkin; recipe `spirit_board`; advancements `is_anybody_there` and `unfinished_business`. All new. A restless spirit's save gains `spirit_name` and `wish`.
 - **Spirit Board, disable behaviour:** with the agriculture feature off, the recipe doesn't load and no spirits rise to answer; the board stays registered.
+- **Wild turkeys, server authority:** spawning, strutting, laying, breeding and every serving are the server's. Feeding and breeding go through vanilla's animal interaction; eating and carving through vanilla's block use path (reach, spawn protection, adventure mode).
+- **Wild turkeys, what clients get:** whether a turkey is a tom and how long he has left to strut (synced entity data), from which the client fans the tail; the roast's servings are its block state.
+- **Wild turkeys, persistence:** a turkey saves whether it is a tom and a hen's time to her next egg, besides vanilla's animal data (age, love).
+- **Wild turkeys, bounded work:** spawning runs once every 400 ticks: it counts the world's turkeys once, then for a quarter of the players counts the turkeys within 64 blocks and reads one spot's height, block and biome, in a loaded chunk only; it never loads a chunk. A tom looks for an audience only on the tick he might strut (one in 200).
+- **Wild turkeys, IDs:** entity `turkey`; block and item `roast_turkey`; items `raw_turkey`, `turkey_slice`; item tag `jugcraft:turkey_food`; biome tag `jugcraft:turkey_habitat`; recipes `roast_turkey`, `roast_turkey_from_smoking`, `roast_turkey_from_campfire_cooking`; loot tables `entities/turkey`, `blocks/roast_turkey`; advancements `gobble_gobble`, `carving_the_bird`. All new. The raw turkey joins `c:foods/raw_meat`, the slice `c:foods/cooked_meat`, and both `c:foods`.
+- **Wild turkeys, disable behaviour:** with the agriculture feature off, no flocks come and the roasting recipes don't load; turkeys already in the world stay, and everything stays registered.
 
 ## Dependencies and assets
 Candy kitchen:
@@ -357,6 +388,12 @@ Spirit Board:
 - The model, blockstate, words (the messages and what each wish is called), loot and tags come from `tools/spirit_board_data.py`; the numbers, names and wishes from `SPIRIT_BOARD` in `tools/agriculture.py`. The checker matches every letter's place on the face against `SpiritBoard.place`.
 - The client's `SpiritBoardRenderer` lays the face over the board and slides the planchette from stop to stop, easing in and out, swivelling towards the board's ends, and circling slowly on a letter while fingers are on it.
 - Sounds are vanilla's (an amethyst hum as a séance starts, a wooden tap at each stop, an amethyst chime as a spirit is laid to rest).
+
+Wild turkeys:
+- No new dependencies. Textures are drawn by code in `tools/turkey_textures.py`: the tom, hen and poult (64 by 64, laid out for the client's `TurkeyModel`), the roast turkey (crisp golden skin, carved meat, bone, a silver platter, cranberries and herbs), and the raw turkey and slice as items.
+- The roast's models (whole; the drumsticks gone; the breast carved; the carcass), blockstate, words, loot and tags come from `tools/turkey_data.py`; the numbers from `TURKEYS` in `tools/agriculture.py`. The checker matches each of the model's boxes against where the textures paint it.
+- The client's `TurkeyModel` and `TurkeyRenderer` draw a deep round body and full breast, folded wings, long legs with spread toes, a bare neck and small head with beak, wattle and (on a tom) the snood, and a tail of feathers. Walking, the legs stride and the head bobs; strutting, a tom's tail rises and spreads into a fan, his breast puffs out, his wings droop and his neck draws back. Poults are drawn at half size.
+- Sounds are vanilla's (a parrot's call pitched low for the gobble and warble, wool for a laid egg, grass for steps, eating, honey sliding as a slice is carved).
 
 ## Verification
 ### Candy kitchen verification
@@ -536,6 +573,33 @@ Found by CI and fixed before this record:
 
 Not run: a two-client dedicated-server playtest, and any play by hand. A séance has been seen only in the game tests, with mock players and posed spirits.
 
+### Wild turkeys verification
+
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-32` stacked on the Spirit Board, with main merged in (the agriculture branch as merged, #116 and #118):
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares wild turkeys with Java: health, speed, the strut's range, length and chance, the hens' laying times, the spawning's interval, chance, distances, flock size and caps, and the roast's servings and their food; checks the turkey's registration, size, attributes and spawning, its name and loot, the food and habitat tags, its textures, the roast's models, cooking and loot, the advancements, and that the model lays its boxes where the textures paint them) | Pass, 991 IDs |
+| `./gradlew build` on `62af9ff` (Build workflow run 37082602698) | Pass |
+| Game tests on the headless server, same run: 541 in total, 6 of them new here (`TurkeyGameTests`) | **All 541 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `62af9ff` (run 37082602698), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#wild-turkeys) |
+
+The 6 new game tests (`TurkeyGameTests`):
+1. a tom and a hen, each fed wheat seeds by the same player, fall in love and breed a poult, and the player earns Gobble Gobble;
+2. a hen doesn't strut; a player three blocks off is an audience for a tom, who struts, and the strut ends after 80 ticks;
+3. when her time comes a hen lays an egg (vanilla's) and starts on the next; a tom lays none;
+4. a flock comes as three to five turkeys with a tom among them, and never to bare stone;
+5. a whole roast turkey drops itself; a hungry player eats a serving (3 hunger) and a carved one drops nothing; a Carving Knife carves a slice off (Carving the Bird); the last serving takes the platter and leaves a bone;
+6. seeds and corn kernels tempt turkeys and wheat doesn't; plains and forests are turkey country and deserts aren't; the three roasting recipes, the loot tables and the advancements load.
+
+Found by CI and fixed before this record:
+- 26.3's `SoundEvents` has no chicken sounds (they belong to each chicken variant); turkeys use a parrot's call pitched low, wool for a laid egg and grass for their steps (`fb07cf7`).
+- The first screenshots showed the turkeys from behind (a mob's yaw 0 faces south); they were turned to face the camera (`68af67e`).
+- Main's client tests now run in three parallel jobs, and only the first job's opening test hides the HUD; in another job the first screenshots showed the hotbar and chat. The test now hides them itself (`62af9ff`).
+
+Not run: a two-client dedicated-server playtest, and any play by hand. Turkeys coming to a player's woods by themselves haven't been watched; the tests call the flock spawning directly.
+
 ## World and event applicability
 - A Candy Kettle works anywhere there is heat under it, in every dimension, all year. Nothing is seasonal.
 - Wild mushrooms generate only in newly generated Overworld chunks of their biomes; existing chunks don't get them, but one mushroom brought in spreads. They can be planted and spread in any dimension with soil and shade. Fairy rings bless only in the Overworld, on full-moon nights (by the Overworld's moon).
@@ -544,6 +608,7 @@ Not run: a two-client dedicated-server playtest, and any play by hand. A séance
 - Knitting works anywhere; cosiness needs a lit campfire, in any dimension.
 - The Hearth Oven bakes in any dimension.
 - A séance works in any dimension, but restless spirits rise only on the Overworld's night.
+- Wild turkeys come only to the Overworld, by day, while mobs spawn (the `spawn_mobs` game rule), onto grass in their biomes; existing worlds get them as players walk. Brought elsewhere, they live and breed anywhere.
 
 ## Rollout and open questions
 - Candy can't be poured by hoppers or dispensers; trays are filled and broken up by hand.
@@ -566,3 +631,6 @@ Not run: a two-client dedicated-server playtest, and any play by hand. A séance
 - Vanilla's pumpkin pie is unchanged and isn't baked in the oven.
 - The board spells only a spirit's name and wish; players can't ask it questions of their own.
 - A spirit's wish is one of eight, chosen at random the first time a séance asks it; it fades at dawn whether or not it was given its wish.
+- Turkeys don't spawn with world generation: flocks come to players as they explore. Spawn eggs aren't added.
+- Turkeys use a parrot's call pitched low; there is no recorded gobble.
+- A tom fans his tail only when strutting; there is no display between toms.
