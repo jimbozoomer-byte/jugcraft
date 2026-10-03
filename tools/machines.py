@@ -92,6 +92,8 @@ MACHINES = {
     "electroplating_bath": {"display": "Electroplating Bath", "lit": True},
     # Batch 35 (tools/gas_storage.py): freezes water into ice with ammonia refrigerant, and packs ice into blue ice.
     "ammonia_chiller": {"display": "Ammonia Chiller", "lit": True},
+    # Batch 38 (tools/rocketry.py): assembles solid propellant, rocket parts and rockets from up to three ingredients.
+    "rocket_workshop": {"display": "Rocket Workshop", "lit": True},
     # Kinetic: a 2x2x3 V8 diesel engine; its shaft leaves the back of the upper right back block.
     "diesel_engine": {"display": "Diesel Engine", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
@@ -249,6 +251,8 @@ STATS = {
     "electroplating_bath": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32},
     # A block of ice (or a pressing) every 100 ticks for 5 mB of ammonia; a bucket of water per ice block.
     "ammonia_chiller": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 24, "tank": 8_000},
+    # Like the circuit assembler, three ingredients in any slots, at 48 JE/t.
+    "rocket_workshop": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 48},
     # 2 tall. Mines one c:ores block per 40 ticks from a 9x9 column below it, down to the bottom of the world.
     "ore_drill": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "ticks": 40, "radius": 4},
     # 3x3x2. Every 300 ticks (15 s) takes 1 unit (item) from each kind of deposit under its base and 1 block round
@@ -461,6 +465,9 @@ CRAFTING = {
     # Glass walls, grow lights (glowstone), a tank for the solution and a steel frame.
     # A plastic-lined tank of electrolyte between two electrodes on a rectifier (circuit).
     # A compressor (a piston driven by an electric motor), coils of pipe and a tank, in a steel case.
+    # A steel bench with a press (piston), a welder (circuit) and a vice (anvil) on a casing.
+    "rocket_workshop": (["SPS", "AMC", "SSS"], {"S": "#c:plates/steel", "P": "minecraft:piston", "A": "minecraft:anvil",
+                                               "M": "jugcraft:machine_casing", "C": "jugcraft:advanced_circuit"}, 1),
     "ammonia_chiller": (["PMP", "CTC", "PKP"], {"P": "#c:plates/steel", "M": "jugcraft:electric_motor",
                                                "C": "jugcraft:bronze_fluid_pipe", "T": "jugcraft:fluid_tank",
                                                "K": "minecraft:piston"}, 1),
@@ -856,7 +863,8 @@ def machine_recipes():
             "metal_press": _metal_press(), "wire_drawer": _wire_drawer(), "circuit_assembler": CIRCUIT_ASSEMBLER,
             "pulverizer": _pulverizer(), "ore_washer": _ore_washer(), "sieve": SIEVE, "sawmill": _sawmill(),
             "coke_oven": COKE_OVEN, "steel_foundry": STEEL_FOUNDRY, "tree_farm": _tree_farm(),
-            "hydroponic_bay": __import__("hydroponics").recipes()}
+            "hydroponic_bay": __import__("hydroponics").recipes(),
+            "rocket_workshop": __import__("rocketry").workshop_recipes()}
 
 
 def _arc_furnace():

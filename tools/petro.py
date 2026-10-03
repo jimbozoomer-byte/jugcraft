@@ -467,6 +467,9 @@ FLUID_RECIPES["chemical_reactor"] += _leaching()
 import gas_storage as _gas_storage  # noqa: E402
 FLUID_MACHINES["ammonia_chiller"] = _gas_storage.FLUID_MACHINE
 FLUID_RECIPES["ammonia_chiller"] = _gas_storage.FLUID_RECIPES
+# Rocketry (batch 38, tools/rocketry.py): iodine from kelp and ammonium perchlorate in the chemical reactor.
+import rocketry as _rocketry  # noqa: E402
+FLUID_RECIPES["chemical_reactor"] += _rocketry.REACTOR_RECIPES
 
 # Crops that ferment into bioethanol (data/jugcraft/tags/item/fermentable.json).
 FERMENTABLE = ["minecraft:wheat", "minecraft:sugar_cane", "minecraft:potato", "minecraft:carrot", "minecraft:beetroot",

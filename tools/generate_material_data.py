@@ -159,6 +159,8 @@ def assets():
     gas_storage.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import control_electronics
     control_electronics.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    import rocketry
+    rocketry.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
@@ -698,7 +700,8 @@ RECIPE_TYPES = {"crusher": "crushing", "arc_furnace": "arc_smelting", "alloy_sme
                 "pulverizer": "pulverizing", "ore_washer": "ore_washing", "sieve": "sifting", "sawmill": "sawing",
                 "coke_oven": "coking", "steel_foundry": "steelmaking",
                 "tree_farm": "tree_growing",
-                "hydroponic_bay": "hydroponics"}
+                "hydroponic_bay": "hydroponics",
+                "rocket_workshop": "rocket_assembly"}
 
 
 def machine_recipe_files(out):
