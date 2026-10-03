@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Rocket launcher, batch 41
+- **Rocket launcher** with **high-explosive** and **homing rockets** (rocket workshop). Rockets fly straight, burst on impact and hurt living things only: no block is ever broken. Homing rockets lock on to the hostile mob nearest the crosshair and steer into it.
+- Handbook page, two game tests. Record: [rocket-launcher.md](docs/features/rocket-launcher.md).
+
 ### Unmerged: Zipline, batch 40
 - **Zipline anchors** and the **line-throwing rocket:** fire a steel line between two anchors up to 96 blocks apart with a clear path, then use an anchor to ride the line to the other end. Steeper lines are faster; sneak to let go.
 - Handbook page, game test. Record: [zipline.md](docs/features/zipline.md).
