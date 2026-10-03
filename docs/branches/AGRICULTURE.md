@@ -1112,6 +1112,12 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 ### The piñata party
 
+| **Three piñatas** (pumpkin, star and bat) hanging from a pergola | **Torn**, after half their hits |
+| --- | --- |
+| ![Piñatas](../images/ingame_pinatas.jpg) | ![Torn piñatas](../images/ingame_pinatas_torn.jpg) |
+| **The star bursts** in confetti, its candy flying | **Through the Blindfold** |
+| ![A piñata bursting](../images/ingame_pinata_burst.jpg) | ![The Blindfold's view](../images/ingame_blindfold.jpg) |
+
 - **Hang a piñata** (a pumpkin, a star or a bat, of crepe-paper fringe) from the underside of a block, and let everyone fill it with candy and treats: anything goes in, a stack at a time.
 - **Put on the Blindfold** and swing: a charged swing is a hit, and the Piñata Stick hits twice as hard. It tears as it weakens and bursts in confetti on its last hit, spraying its contents everywhere. Details: [even more fall additions](../features/even-more-fall-additions.md#the-piñata-party).
 
