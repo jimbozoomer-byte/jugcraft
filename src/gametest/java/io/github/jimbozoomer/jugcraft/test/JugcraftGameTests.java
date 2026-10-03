@@ -284,23 +284,12 @@ public class JugcraftGameTests {
 	 * the plan, and the cargo lands in that pad. A pad under a roof will not launch. A delivery to an area that is not
 	 * loaded waits instead of landing (nothing is force-loaded).
 	 */
-	@GameTest(maxTicks = 300)
+	@GameTest(maxTicks = 300, skyAccess = true)
 	public void rocketPostDelivers(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		Block padBlock = io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD;
-		// The launching pad needs open sky. Test areas sit side by side, and a neighbour's tall build (a giant tree) can
-		// overhang this one, so launch from a column of the area that is open to the sky.
-		BlockPos from = null;
-		for (int x = 1; x <= 6 && from == null; x++) {
-			for (int z = 1; z <= 4 && from == null; z++) {
-				BlockPos candidate = helper.absolutePos(new BlockPos(x, 1, z));
-				if (level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, candidate.getX(), candidate.getZ())
-						<= candidate.getY()) {
-					from = candidate;
-				}
-			}
-		}
-		helper.assertTrue(from != null, "No column of the test area is open to the sky");
+		// The launching pad needs open sky: without sky access the test area has a barrier ceiling.
+		BlockPos from = helper.absolutePos(new BlockPos(1, 1, 1));
 		BlockPos to = helper.absolutePos(new BlockPos(6, 1, 6));
 		BlockPos roofed = helper.absolutePos(new BlockPos(1, 1, 6));
 		for (BlockPos pos : List.of(from, to, roofed)) {
