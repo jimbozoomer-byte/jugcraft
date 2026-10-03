@@ -370,7 +370,7 @@ public class HeadstoneBlock extends BaseEntityBlock {
 		} else if (axe) {
 			setWeather(level, master, stage, false);
 			stack.hurtAndBreak(1, player, hand);
-			level.playSound(null, pos, SoundEvents.AXE_WAX_OFF, SoundSource.BLOCKS, 1.0F, 1.0F);
+			level.playSound(null, pos, SoundEvents.AXE_WAX_OFF.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
 			server.sendParticles(ParticleTypes.WAX_OFF, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 8, 0.35, 0.35, 0.35, 0.02);
 		} else {
 			if (waxed) {
