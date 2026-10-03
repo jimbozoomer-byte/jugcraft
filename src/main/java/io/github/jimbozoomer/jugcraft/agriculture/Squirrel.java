@@ -51,7 +51,8 @@ import org.jspecify.annotations.Nullable;
  * {@code jugcraft:squirrel_food}: acorns, chestnuts).
  *
  * <p>It gathers acorns: a squirrel with nothing in its paws goes for an acorn lying within {@value #SEEK_RANGE} blocks
- * and carries it off. After {@value #BURY_TICKS} ticks it buries it in the earth it stands on, and
+ * and carries it off. After {@value #BURY_TICKS} ticks it buries it in the earth it stands on (woodland floor, as
+ * {@link Werewolves#woodlandFloor} judges it), and
  * {@value #SAPLING_CHANCE} of the time a forgotten acorn sprouts there as an oak sapling (not within
  * {@value #SAPLING_SPACE} blocks of another sapling or a log). So squirrels plant the woods they live in.
  */
@@ -149,7 +150,7 @@ public class Squirrel extends Animal {
 	public boolean bury(ServerLevel level) {
 		BlockPos spot = blockPosition();
 		BlockState ground = level.getBlockState(spot.below());
-		if (!carrying() || !ground.is(BlockTags.DIRT)) {
+		if (!carrying() || !Werewolves.woodlandFloor(level, spot)) {
 			return false;
 		}
 		setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
@@ -164,7 +165,7 @@ public class Squirrel extends Animal {
 
 	/** Whether an oak sapling may sprout at {@code spot}: open air on earth, no sapling or log within the spacing. */
 	public static boolean roomForSapling(ServerLevel level, BlockPos spot) {
-		if (!level.getBlockState(spot).isAir() || !level.getBlockState(spot.below()).is(BlockTags.DIRT)) {
+		if (!level.getBlockState(spot).isAir() || !Werewolves.woodlandFloor(level, spot)) {
 			return false;
 		}
 		for (BlockPos at : BlockPos.betweenClosed(spot.offset(-SAPLING_SPACE, -1, -SAPLING_SPACE), spot.offset(SAPLING_SPACE, 2, SAPLING_SPACE))) {

@@ -110,10 +110,10 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
    - It **climbs tree trunks**: to a squirrel, a log it runs into is a ladder. It takes no fall damage.
    - It bolts when hurt, and looks round at players nearby.
 3. **Acorns:** oak and dark oak leaves drop an **Acorn** 5% of the time they are broken or decay, as they drop apples.
-   - **Plant one** on the top of grass, dirt or other earth (block tag `minecraft:dirt`) with open air above it, and it's an **oak sapling**.
+   - **Plant one** on the top of grass, dirt or any other earth an oak sapling grows on, with open air above it, and it's an **oak sapling**.
    - **Roast it** in a furnace, smoker or campfire: **Roasted Acorns**, a snack (3 hunger).
    - It composts, and it counts as a seed (`c:seeds`).
-4. **Gathering:** a grown squirrel with empty paws goes for an acorn lying within 10 blocks, takes it and carries it about in its forepaws. After 10 seconds it **buries it** in the earth it stands on, with a scatter of dirt. One in four buried acorns sprouts there as an **oak sapling**, if no sapling or log stands within 3 blocks. On stone it keeps its acorn until it finds earth. So squirrels slowly plant the woods they live in, and a player who drops acorns near them gets some of them planted.
+4. **Gathering:** a grown squirrel with empty paws goes for an acorn lying within 10 blocks, takes it and carries it about in its forepaws. After 10 seconds it **buries it** in the earth it stands on (anything an oak sapling grows on), with a scatter of dirt. One in four buried acorns sprouts there as an **oak sapling**, if no sapling or log stands within 3 blocks. On stone it keeps its acorn until it finds earth. So squirrels slowly plant the woods they live in, and a player who drops acorns near them gets some of them planted.
 5. **Nuts:** acorns, chestnuts and roasted chestnuts (item tag `jugcraft:squirrel_food`) tempt squirrels to follow, and breed two into a **kit**, red or grey after either parent. Breeding them earns **Nuts About Squirrels**.
 6. **Drops:** a squirrel drops only the acorn it was carrying.
 
@@ -280,7 +280,7 @@ Not run: flying it by hand, which no automated test can do (the client test's ri
 Not run yet: CI has not built this branch. The planned checks are:
 - `SquirrelGameTests`, 5 game tests:
   1. a squirrel goes for an acorn lying several blocks off and takes it, and the acorn is gone from the ground;
-  2. a squirrel on grass buries its acorn, one on stone keeps it; open earth has room for an oak to sprout, stone has none, and nor has earth beside a log;
+  2. open earth has room for an oak to sprout, stone has none, and nor has earth beside a log; a squirrel on grass buries its acorn, one on stone keeps it;
   3. an acorn used on the top of grass plants an oak sapling and is used up; on stone, nothing;
   4. acorns and chestnuts are squirrel food, wheat isn't; two squirrels in love breed a kit, earning Nuts About Squirrels;
   5. the roasting recipes and the advancement load, and roasted chestnuts are squirrel food.

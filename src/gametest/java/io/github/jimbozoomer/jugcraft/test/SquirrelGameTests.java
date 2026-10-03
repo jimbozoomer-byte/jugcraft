@@ -24,9 +24,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * In-game tests for squirrels and acorns (fall addition 24): a squirrel goes for an acorn lying near and takes it;
- * buried on earth the acorn is gone from its paws, on stone it keeps it; an oak sapling sprouts only on open earth
- * away from saplings and logs; an acorn planted by a player is an oak sapling; nuts tempt and breed squirrels (Nuts About
+ * In-game tests for squirrels and acorns (fall addition 24): a squirrel goes for an acorn lying near and takes it; an
+ * oak sapling sprouts only on open earth away from saplings and logs; buried on earth the acorn is gone from its paws,
+ * on stone it keeps it; an acorn planted by a player is an oak sapling; nuts tempt and breed squirrels (Nuts About
  * Squirrels); and the data loads.
  */
 public class SquirrelGameTests {
@@ -64,14 +64,20 @@ public class SquirrelGameTests {
 	}
 
 	/**
-	 * Burying on earth empties its paws; on stone it keeps its acorn. An oak may sprout on open earth, not where there is
-	 * no earth, nor near a sapling or a log.
+	 * An oak may sprout on open earth, not where there is no earth, nor near a log. Burying on earth empties its paws;
+	 * on stone it keeps its acorn. (The room is checked first: a buried acorn may sprout a sapling, which would leave no
+	 * room near it.)
 	 */
 	@GameTest
 	public void buriedAcornsMaySproutOaks(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		floor(helper, Blocks.GRASS_BLOCK);
 		helper.setBlock(new BlockPos(7, 1, 7), Blocks.STONE);
+		helper.assertTrue(Squirrel.roomForSapling(level, helper.absolutePos(new BlockPos(4, 2, 4))), "Open earth has room for an oak");
+		helper.assertTrue(!Squirrel.roomForSapling(level, helper.absolutePos(new BlockPos(7, 2, 7))), "Stone has none");
+		helper.setBlock(new BlockPos(2, 2, 5), Blocks.OAK_LOG);
+		helper.assertTrue(!Squirrel.roomForSapling(level, helper.absolutePos(new BlockPos(4, 2, 5))), "Nor beside a tree");
+
 		Squirrel digger = helper.spawn(JugcraftAgriculture.SQUIRREL, new BlockPos(1, 2, 1));
 		digger.setNoAi(true);
 		digger.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Squirrel.acorn()));
@@ -80,11 +86,6 @@ public class SquirrelGameTests {
 		onStone.setNoAi(true);
 		onStone.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Squirrel.acorn()));
 		helper.assertTrue(!onStone.bury(level) && onStone.carrying(), "On stone, it keeps it");
-
-		helper.assertTrue(Squirrel.roomForSapling(level, helper.absolutePos(new BlockPos(4, 2, 4))), "Open earth has room for an oak");
-		helper.assertTrue(!Squirrel.roomForSapling(level, helper.absolutePos(new BlockPos(7, 2, 7))), "Stone has none");
-		helper.setBlock(new BlockPos(2, 2, 5), Blocks.OAK_LOG);
-		helper.assertTrue(!Squirrel.roomForSapling(level, helper.absolutePos(new BlockPos(4, 2, 5))), "Nor beside a tree");
 		helper.succeed();
 	}
 

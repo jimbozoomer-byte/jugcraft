@@ -11,7 +11,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -115,7 +114,7 @@ public final class Squirrels {
 			return null;
 		}
 		BlockPos spot = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
-		if (!level.getBlockState(spot.below()).is(BlockTags.DIRT) || !level.getBiome(spot).is(HABITAT)) {
+		if (!Werewolves.woodlandFloor(level, spot) || !level.getBiome(spot).is(HABITAT)) {
 			return null;
 		}
 		return spot;
