@@ -33,7 +33,7 @@ def write_all(write, assets, data, lang, condition):
     write(data / "recipe" / "pneumatic_grapple.json", {
         "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped", "category": "equipment",
         "pattern": ["GCH", "SPT", "S  "],
-        "key": {"G": f"{MOD}:gasket", "C": "minecraft:chain", "H": "minecraft:tripwire_hook", "S": "#c:plates/steel",
+        "key": {"G": f"{MOD}:gasket", "C": "minecraft:iron_chain", "H": "minecraft:tripwire_hook", "S": "#c:plates/steel",
                 "P": "minecraft:piston", "T": f"{MOD}:fluid_tank"},
         "result": {"id": f"{MOD}:pneumatic_grapple"}})
 

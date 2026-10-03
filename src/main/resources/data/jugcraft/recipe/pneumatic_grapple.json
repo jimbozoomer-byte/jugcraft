@@ -14,7 +14,7 @@
   ],
   "key": {
     "G": "jugcraft:gasket",
-    "C": "minecraft:chain",
+    "C": "minecraft:iron_chain",
     "H": "minecraft:tripwire_hook",
     "S": "#c:plates/steel",
     "P": "minecraft:piston",
