@@ -230,6 +230,9 @@ def feature_of(entry_id):
     import exosuit
     if entry_id in exosuit.items():
         return FEATURE
+    import arms
+    if entry_id in arms.items():
+        return arms.feature(entry_id)
     import grapple
     if entry_id in grapple.items():
         return FEATURE
