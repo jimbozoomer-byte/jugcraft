@@ -233,7 +233,7 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - Costs: one carved pumpkin and one spark (a Wisp in a Jar or Ectoplasm; the glass bottle comes back). Settling it gives both back (a Pumpkling woken by command, with no spark, gives Ectoplasm). Nothing is made or lost: no loop.
   - Units: 16 health, speed 0.3 (a wolf: 8 and 0.3 untamed); follows past 6 blocks, stops at 2.5, comes to its owner past 16; a treat heals 4 health. Guard radius 8 or 12 blocks, as a scarecrow's head (`Scarecrows.HEADED`, `LIT`).
   - Automation: none. Crows are the only thing it affects.
-  - Cost on the server: a following Pumpkling paths to its owner about once a second while more than 2.5 blocks off, and tries up to 12 spots when it comes to them. Crows ask about guards in an entity box around a crop; Hay Golems and Pumpklings now answer through one interface, `CropGuard`.
+  - Cost on the server: a following Pumpkling paths to its owner about once a second while more than 2.5 blocks off, and when it comes to them tries each spot two or three blocks from them (40 at most, a block up or down), once a second at most. Crows ask about guards in an entity box around a crop; Hay Golems and Pumpklings now answer through one interface, `CropGuard`.
 - **Hex brews, cost on the server:** one look at each online player per server tick (a duration and effect check; a collision check only when a shrinking is about to end). No block entity, no block ticks. The glyphs and bubbles are client particles.
 
 ## Multiplayer and persistence
@@ -446,6 +446,8 @@ Found by CI and fixed before this record:
 - A Pumpkling's tempt goal needs the `tempt_range` attribute, which a plain mob's attributes lack; it now has 10 blocks.
 - The sit test stood its players beyond entity reach (3 blocks); they now stand within it.
 - The sit test still failed: the owner's use came back PASS. Its report showed why: test players start out holding the Creative Tower Guide, so the "empty hand" held a book. The tests now empty their hands first. Along the way the controls changed to a tame wolf's: an empty hand sits it (it was a sneaking, empty-handed use), and a torch used on a lit Pumpkling takes its torch back (it was an empty hand).
+
+Found later: Build workflow run [37158111759](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37158111759), on the piñata's branch stacked above this one, failed the sit test's last step, "It finds a spot by its owner". A Pumpkling coming to its owner tried 12 spots at random within three blocks of them. In the test its owner stands near the edge of an 8 × 8 floor, where only 16 of the 49 spots have ground, so about one run in a hundred all 12 missed; in play it would have failed the same way by a cliff or a wall. It now tries every spot two or three blocks off, in a fresh random order, so it fails only when none has room. That change is not yet run.
 
 The client test's screenshots (run 37156381277), in [the guide](../branches/AGRICULTURE.md#the-pumpkling): three Pumpklings in a pumpkin patch wearing three stencils' faces (lit, soul-lit, and unlit sitting) beside a carved pumpkin not yet woken on a hay bale and a Wisp in a Jar; up close; and at nightfall. Its log has no missing model or texture.
 
