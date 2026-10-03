@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_halberd",
+  "textures": {
+    "layer0": "jugcraft:item/bronze_halberd"
+  }
+}
