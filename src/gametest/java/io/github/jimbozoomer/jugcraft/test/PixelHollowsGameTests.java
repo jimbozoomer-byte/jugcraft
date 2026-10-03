@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.world.ArcadeCabinetBlock;
 import io.github.jimbozoomer.jugcraft.world.PixelHollows;
 import io.github.jimbozoomer.jugcraft.world.PixelHollowsMaps;
+import io.github.jimbozoomer.jugcraft.world.RetroShopPlacement;
 import io.github.jimbozoomer.jugcraft.world.RetroTrader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -379,28 +380,30 @@ public class PixelHollowsGameTests {
 	/** How far from a village's start the shop search and the loaded area reach (villages stay within 80 blocks). */
 	private static final int VILLAGE_REACH = 112;
 	private static final String[] VILLAGE_TYPES = {"plains", "desert", "savanna", "snowy", "taiga"};
+	/** Rounds of one village of each type, generated one round at a time so only five villages' chunks are loaded. */
+	private static final int VILLAGE_ROUNDS = 4;
 
 	/**
-	 * Every new village has exactly one Retro Game Shop. One village of each type is generated as /place structure does,
-	 * far from the other tests, after its area is force-loaded; then its arcade cabinets (one per shop), villagers and
-	 * zombie villagers are counted. A zombie village (about 2% of villages; no villagers) gets no shop.
+	 * Every new village has exactly one Retro Game Shop. Each round, one village of each type is generated as /place
+	 * structure does, far from the other tests, after its area is force-loaded; then its arcade cabinets (one per shop),
+	 * villagers and zombie villagers are counted. A zombie village (about 2% of villages; no villagers) gets no shop.
+	 * Now and then a village's first layout has no house slot with room for the shop and it is laid out again (see
+	 * RetroShopPlacement); the log says how many were.
 	 */
-	@GameTest(maxTicks = 1200)
+	@GameTest(maxTicks = 4800)
 	public void everyVillageHasOneShop(GameTestHelper helper) {
+		helper.assertTrue(RetroShopPlacement.canRelayout(), "A village without room for its shop cannot be laid out again");
 		ServerLevel level = helper.getLevel();
 		var server = level.getServer();
 		BlockPos base = helper.absolutePos(BlockPos.ZERO);
-		List<BlockPos> centres = new ArrayList<>();
-		for (int i = 0; i < VILLAGE_TYPES.length; i++) {
-			BlockPos centre = new BlockPos(base.getX() + 1024 + i * 320, base.getY(), base.getZ() + 1024);
-			centres.add(centre);
-			command(server, "forceload add %d %d %d %d".formatted(centre.getX() - VILLAGE_REACH, centre.getZ() - VILLAGE_REACH,
-					centre.getX() + VILLAGE_REACH, centre.getZ() + VILLAGE_REACH));
-		}
+		int relayoutsBefore = RetroShopPlacement.relayouts();
+		int[] round = {0};
+		forceload(server, villageCentres(base, 0), "add");
 		List<String> results = new ArrayList<>();
 		List<String> problems = new ArrayList<>();
 		helper.succeedWhen(() -> {
-			if (results.isEmpty()) {
+			if (round[0] < VILLAGE_ROUNDS) {
+				List<BlockPos> centres = villageCentres(base, round[0]);
 				for (BlockPos centre : centres) {
 					for (int x = centre.getX() - VILLAGE_REACH; x <= centre.getX() + VILLAGE_REACH; x += 16) {
 						for (int z = centre.getZ() - VILLAGE_REACH; z <= centre.getZ() + VILLAGE_REACH; z += 16) {
@@ -423,13 +426,34 @@ public class PixelHollowsGameTests {
 					} else if (counts[0] != 1) {
 						problems.add("the " + type + " village has " + counts[0] + " shops");
 					}
-					command(server, "forceload remove %d %d %d %d".formatted(centre.getX() - VILLAGE_REACH, centre.getZ() - VILLAGE_REACH,
-							centre.getX() + VILLAGE_REACH, centre.getZ() + VILLAGE_REACH));
 				}
-				Jugcraft.LOGGER.info("[pixel-hollows] generated villages: {}", results);
+				forceload(server, centres, "remove");
+				round[0]++;
+				if (round[0] < VILLAGE_ROUNDS) {
+					forceload(server, villageCentres(base, round[0]), "add");
+					throw helper.assertionException("Round " + (round[0] + 1) + " of " + VILLAGE_ROUNDS + " villages still to come");
+				}
+				Jugcraft.LOGGER.info("[pixel-hollows] generated {} villages, {} laid out again for room for the shop: {}",
+						results.size(), RetroShopPlacement.relayouts() - relayoutsBefore, results);
 			}
 			helper.assertTrue(problems.isEmpty(), "Villages without exactly one shop: " + problems + " (" + results + ")");
 		});
+	}
+
+	/** One village start of each type for a round, 320 blocks apart, far from the other tests. */
+	private static List<BlockPos> villageCentres(BlockPos base, int round) {
+		List<BlockPos> centres = new ArrayList<>();
+		for (int i = 0; i < VILLAGE_TYPES.length; i++) {
+			centres.add(new BlockPos(base.getX() + 1024 + i * 320, base.getY(), base.getZ() + 1024 + round * 320));
+		}
+		return centres;
+	}
+
+	private static void forceload(net.minecraft.server.MinecraftServer server, List<BlockPos> centres, String action) {
+		for (BlockPos centre : centres) {
+			command(server, "forceload %s %d %d %d %d".formatted(action, centre.getX() - VILLAGE_REACH, centre.getZ() - VILLAGE_REACH,
+					centre.getX() + VILLAGE_REACH, centre.getZ() + VILLAGE_REACH));
+		}
 	}
 
 	private static void command(net.minecraft.server.MinecraftServer server, String command) {

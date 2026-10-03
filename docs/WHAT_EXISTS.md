@@ -532,7 +532,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `…/logistics/` | item pipe, extractor, sorter, wrench, item networks |
 | `…/machine/` | machine kinds, blocks, block entity, menu, recipes, footprints, power ports, side config, arc furnace structure |
 | `…/world/` | Pixel Hollows (blocks, lining feature, map search) and the Retro Trader (cabinet, profession, trades, village shop) |
-| `…/mixin/` | the five mixins (Overworld biome table, village pool accessor, one shop per village) |
+| `…/mixin/` | the mixins: Overworld biome table and Jugcraft regions, seasonal biome colours, village pool accessor, and one shop per village (pool order, placer, placed pieces, a new layout when the shop has no room) |
 | `src/client/java/.../client/` | `JugcraftClient` (screen registration), `MachineScreen` |
 | `…/season/`, `…/mixin/BiomeSeasonMixin.java`, `src/client/.../SeasonColors.java`, `src/client/.../mixin/client/` | seasons: calendar and events, palette, sync, command, winter snow, the client tint hook |
 | `src/gametest/java/.../test/JugcraftGameTests.java` | game tests (run by `./gradlew build`) |
