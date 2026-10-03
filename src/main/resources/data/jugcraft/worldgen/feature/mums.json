@@ -26,6 +26,12 @@
           "id": "jugcraft:purple_mum"
         },
         "weight": 1
+      },
+      {
+        "data": {
+          "id": "jugcraft:marigold"
+        },
+        "weight": 1
       }
     ]
   }
