@@ -54,12 +54,12 @@ public class MidwayClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 
-			shoot(context, singleplayer, x + 1, y + 2, z + 4, 180, 12, "jugcraft_midway");
+			shoot(context, singleplayer, x + 1, y + 2, z - 1, 180, 14, "jugcraft_midway");
 			shoot(context, singleplayer, x - 2, y + 1, z - 3, 180, 25, "jugcraft_midway_prizes");
-			shoot(context, singleplayer, x + 5, y + 1, z - 4, 180, 30, "jugcraft_ring_toss");
+			shoot(context, singleplayer, x + 6, y + 1, z - 4, 180, 28, "jugcraft_ring_toss");
 			server.runCommand("time set 13000");
 			context.waitTicks(10);
-			shoot(context, singleplayer, x + 1, y + 3, z + 6, 180, 15, "jugcraft_midway_dusk");
+			shoot(context, singleplayer, x + 1, y + 2, z, 180, 12, "jugcraft_midway_dusk");
 			server.runCommand("time set noon");
 		}
 	}
