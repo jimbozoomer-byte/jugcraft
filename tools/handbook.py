@@ -778,6 +778,14 @@ def build():
                 "A relay gives a full redstone signal on every side while the controller has its channel on. Set a "
                 "machine beside it to a redstone mode and the controller runs the machine."]},
             block_page("logic_controller", "Logic Controller"),
+            {"title": "The Control Room", "icon": f"{MOD}:control_monitor", "text": [
+                "Six control monitor panels in a wall, three wide and two tall, all facing the same way, form one "
+                "screen. Run a data cable from any panel to a logic controller and it shows every channel: its "
+                "colour, reading, a bar, a two-minute graph and whether the controller has it on.",
+                "An alarm klaxon is switched like a relay: while its channel is on it lights up and sounds.",
+                "A control remote flips one channel by hand. Use it on a logic controller to bind it, sneak and use it "
+                "to pick the channel, and use it to switch. The controller's rules may switch the channel back when "
+                "their condition next holds. It works within 256 blocks of the controller."]},
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

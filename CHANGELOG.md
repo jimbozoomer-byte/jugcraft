@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Control room, batch 37
+- **Control Monitor:** six panels form a 3x2 wall screen. Cabled to a logic controller, it shows every channel's reading, a bar, a two-minute graph and ON/OFF.
+- **Alarm Klaxon:** a controller switches it like a relay; it lights and sounds.
+- **Control Remote:** bind it to a controller and flip a channel by hand from up to 256 blocks away.
+- Advancement, handbook page, game test. Record: [control-electronics.md](docs/features/control-electronics.md).
+
 ### Unmerged: Diagonal walls
 - **Walls join diagonally.** All 32 of vanilla's walls join a wall a diagonal step away with a low wall side at 45 degrees, on the same rule as fences: neither may join straight into the corner between them, so a block in the corner keeps them apart.
 - **Posts follow vanilla's rule.** A wall that runs straight on along a diagonal has no post, as a straight wall has none, unless something above calls for one (a torch, a block, a wall's post). Ends, corners and junctions keep their posts.

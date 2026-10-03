@@ -114,6 +114,7 @@ TREE = {
     "processor": ("microchip", "processor", "Central Processing", "Assemble a processor", "task"),
     "network_terminal": ("processor", "network_terminal", "Hello, World", "Build a network terminal", "goal"),
     "logic_controller": ("network_terminal", "logic_controller", "In Control", "Build a logic controller", "task"),
+    "control_monitor": ("logic_controller", "control_monitor", "Mission Control", "Build control monitor panels", "task"),
     # Fluid logistics (batch 8).
     "gas_holder": ("electrolytic_cell", "gas_holder", "Under Pressure", "Build a gas holder", "goal"),
     "fluid_valve": ("crude_oil", "fluid_valve", "Shut-Off Valve", "Make a fluid valve", "task"),

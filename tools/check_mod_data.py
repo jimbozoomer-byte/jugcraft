@@ -129,7 +129,7 @@ def _hi_res(name):
     import blueprints
     import construction_art
     return (name in tower_art.TEXTURES or name in blueprints.TABLE_TEXTURES or name in construction_art.ITEMS
-            or name in gas_storage.HD_ITEMS
+            or name in gas_storage.HD_ITEMS or name in control_electronics.HD_ITEMS
             or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_")))
 
 
@@ -309,7 +309,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items():
         return {}
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
@@ -493,6 +493,10 @@ def check_fluid_recipes(registered):
                 err(f"{label}: {fluid_out} mB out from {fluid_in} mB in")
 
 
+# The diagonal walls (tools/diagonal_connections.py), which join #minecraft:walls.
+DIAGONAL_WALLS = {dg.DIAGONAL_WALL.format(name) for name in dg.VANILLA_WALLS}
+
+
 def check_tags():
     for path in sorted(DATA.rglob("tags/*/**/*.json")):
         registry = path.relative_to(DATA).parts[2]
@@ -500,9 +504,8 @@ def check_tags():
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks()
-                                                    + ag.all_blocks() + ag.all_items() + town_assets.blocks()
-                                                    + [dg.DIAGONAL_WALL.format(name) for name in dg.VANILLA_WALLS])
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items()
+                                                    + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
             if value.startswith("#"):
@@ -519,7 +522,7 @@ def check_tags():
                 namespace, trade = split(value)
                 if namespace == MOD and not (DATA / MOD / "villager_trade" / f"{trade}.json").exists():
                     err(f"{path.relative_to(ROOT)}: unknown villager trade {value}")
-            elif split(value)[0] == MOD and split(value)[1] not in known:
+            elif split(value)[0] == MOD and split(value)[1] not in known and split(value)[1] not in DIAGONAL_WALLS:
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
 
@@ -629,7 +632,12 @@ def check_control_electronics():
                                ("LogicControllerBlockEntity.java", "INTERVAL", control_electronics.CONTROLLER_INTERVAL),
                                ("LogicControllerBlockEntity.java", "RULES", control_electronics.RULES),
                                ("LogicControllerBlockEntity.java", "STEP", control_electronics.THRESHOLD_STEP),
-                               ("ControlNetwork.java", "MAX_CABLES", control_electronics.MAX_CABLES)):
+                               ("ControlNetwork.java", "MAX_CABLES", control_electronics.MAX_CABLES),
+                               ("ControlMonitorBlockEntity.java", "RELINK_INTERVAL", control_electronics.MONITOR_RELINK),
+                               ("LogicControllerBlockEntity.java", "HISTORY", control_electronics.HISTORY),
+                               ("LogicControllerBlockEntity.java", "HISTORY_EVERY", control_electronics.HISTORY_EVERY),
+                               ("AlarmBlock.java", "INTERVAL", control_electronics.ALARM_INTERVAL),
+                               ("ControlRemoteItem.java", "RANGE", control_electronics.REMOTE_RANGE)):
         java = (control / path).read_text(encoding="utf-8")
         if f"int {const} = {value:_};" not in java and f"int {const} = {value};" not in java:
             err(f"{path} {const} differs from tools/control_electronics.py ({value})")
@@ -4121,7 +4129,7 @@ def main():
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_petro()

@@ -1,6 +1,6 @@
-# Control electronics: data cables, sensors, relays and the logic controller
+# Control electronics: data cables, sensors, relays, the logic controller and the control room
 
-Status: implemented on `feature/control-electronics-36` (batch 36), stacked on `feature/gas-storage-35`, awaiting review. Compiles and tests in CI only; **not yet played**.
+Status: batch 36 is implemented on `feature/control-electronics-36`, stacked on `feature/gas-storage-35`. Batch 37 (the control room) is on `feature/control-room-37`, stacked on batch 36. Both await review. They compile and test in CI only; **not yet played**.
 Proposal issue: the owner, 3 October 2026, chose control electronics first, then rocketry ("lets begin doing all these but start with the order you recommend").
 Owner: jimbozoomer-byte
 Target milestone and tier: electronics tier (processors, optical fibre, the network terminal).
@@ -26,6 +26,20 @@ Until now, machines only reacted to redstone wired right next to them. This batc
   - Every part of a rule is a button on its screen. A strip along the bottom shows each channel's reading and whether the controller has it on.
 - Advancement **In Control** (build a logic controller). Handbook: "Control Networks" and "Logic Controller" pages in the Electronics chapter.
 
+### The control room (batch 37)
+- **Control Monitor** (6 from 2 plastic sheets, 4 glass panes, a microchip and a data cable): a thin panel hung on a wall.
+  - Six panels, three wide and two tall, all facing the same way, form one screen.
+  - Run a data cable from any panel to a logic controller to link it; it re-checks the link every two seconds.
+  - The screen lists every channel that has a sensor or is on: its colour and name, reading, a bar, a two-minute graph (a sample every 5 seconds) and ON/OFF.
+  - Loose panels show a standby pattern.
+- **Alarm Klaxon** (orange stained glass, 2 note blocks, a microchip, 2 plastic sheets and a data cable): switched by a controller like a relay. While on, its dome lights and it sounds every 1.5 seconds, loud enough to hear across a base.
+- **Control Remote** (copper wire, a processor, 2 plastic sheets and a stone button):
+  - Use it on a logic controller to bind it.
+  - Sneak and use it in the air to pick the next channel.
+  - Use it in the air to flip that channel on the controller, which switches its relays and alarms at once. The controller's rules may switch it back the next time their condition holds.
+  - It works in the same dimension, within 256 blocks, with the controller loaded.
+- Advancement **Mission Control** (build control monitor panels). Handbook page "The Control Room".
+
 ## Connections
 - Input producer: plastic, optical fibre (glass chemistry), microchips and processors (electronics), the network terminal.
 - Output consumer: every machine with a redstone mode, and anything else redstone drives.
@@ -38,12 +52,15 @@ Control only switches machines that already exist; it makes and stores nothing. 
 ## Multiplayer and persistence
 - Everything runs on the server.
 - Rules and channel states are saved on the controller. Channels and relay states are block states.
+- The controller sends its readings, states and history to nearby clients when they change (block entity update packets), at most once a second. The monitor's text is drawn on the client from that data.
+- The remote stores its controller as a position and dimension on the item.
 - Only players who may build at the controller can change its rules.
 
 ## Performance
 - Sensors re-read every 20 ticks.
 - A controller walks its network every 20 ticks, staggered by position, along at most 1,024 cables. It stops at unloaded chunks.
 - Cables have no block entity and no tick.
+- A monitor's anchor walks the cables from its six panels every 40 ticks. Other panels do nothing.
 
 ## Dependencies and assets
 No new dependencies. All textures (cable, sixteen channel lamps, relay indicator, key strip) are drawn in `tools/control_electronics.py`. Models reuse the existing electric casing textures. All original.
@@ -55,11 +72,14 @@ No new dependencies. All textures (cable, sixteen channel lamps, relay indicator
   - the sensor gives 15;
   - at 50% the relay stays on (the dead band);
   - at 10% it goes off and the signal stops.
-- Not run: the screen in game, client play.
+- Game test `controlRoomWorks` (CI):
+  - six panels form one screen (parts 1 to 6) and link over the cable to the controller;
+  - the remote switches a relay and the controller's channel on;
+  - the remote sounds the alarm on another channel, then silences it.
+- Not run: the screens and the alarm sound in game, client play.
 
 ## World and event applicability
 Not applicable.
 
 ## Rollout and open questions
-- Batch 37: the control-room monitor (gauges and history graphs), alarm klaxon and handheld remote.
 - Possible later: timers and counters as rule conditions, higher-tier controllers with more rules.

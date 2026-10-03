@@ -178,6 +178,72 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/**
+	 * Batch 37: six monitor panels form one 3x2 screen whose top-left panel links over a data cable to the logic
+	 * controller; a rule sounds an alarm on its channel; a bound remote flips another channel and its relay at once.
+	 */
+	@GameTest(maxTicks = 100)
+	public void controlRoomWorks(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos controllerPos = new BlockPos(1, 1, 1);
+		helper.setBlock(controllerPos, io.github.jimbozoomer.jugcraft.control.JugcraftControl.LOGIC_CONTROLLER.defaultBlockState());
+		var controller = helper.getBlockEntity(controllerPos, io.github.jimbozoomer.jugcraft.control.LogicControllerBlockEntity.class);
+		// A cable run east from the controller, with an alarm, a relay and the monitor's middle bottom panel on it.
+		for (int x = 2; x <= 5; x++) {
+			helper.setBlock(new BlockPos(x, 1, 1), io.github.jimbozoomer.jugcraft.control.JugcraftControl.DATA_CABLE.defaultBlockState());
+		}
+		BlockPos alarm = new BlockPos(2, 2, 1);
+		helper.setBlock(alarm, io.github.jimbozoomer.jugcraft.control.JugcraftControl.ALARM.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.control.Channels.CHANNEL, net.minecraft.world.item.DyeColor.ORANGE));
+		BlockPos relay = new BlockPos(3, 1, 2);
+		helper.setBlock(relay, io.github.jimbozoomer.jugcraft.control.JugcraftControl.RELAY.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.control.Channels.CHANNEL, net.minecraft.world.item.DyeColor.GREEN));
+		// The screen, facing north, in the wall at z = 0 in front of the cable (its panels' backs touch z = 1).
+		for (int x = 4; x <= 6; x++) {
+			for (int y = 1; y <= 2; y++) {
+				helper.setBlock(new BlockPos(x, y, 0), io.github.jimbozoomer.jugcraft.control.JugcraftControl.CONTROL_MONITOR.defaultBlockState()
+						.setValue(io.github.jimbozoomer.jugcraft.control.ControlMonitorBlock.FACING, Direction.NORTH));
+			}
+		}
+		java.util.Set<Integer> parts = new java.util.HashSet<>();
+		BlockPos anchor = null;
+		for (int x = 4; x <= 6; x++) {
+			for (int y = 1; y <= 2; y++) {
+				int part = helper.getBlockState(new BlockPos(x, y, 0)).getValue(io.github.jimbozoomer.jugcraft.control.ControlMonitorBlock.PART);
+				parts.add(part);
+				if (part == 1) {
+					anchor = new BlockPos(x, y, 0);
+				}
+			}
+		}
+		helper.assertTrue(parts.equals(java.util.Set.of(1, 2, 3, 4, 5, 6)), "The panels did not form one screen: " + parts);
+		var monitor = helper.getBlockEntity(anchor, io.github.jimbozoomer.jugcraft.control.ControlMonitorBlockEntity.class);
+		helper.assertTrue(helper.absolutePos(controllerPos).equals(monitor.controller()),
+				"The monitor linked to " + monitor.controller() + ", not the controller");
+
+		// Alarm: a rule with no sensor never fires, so switch it by hand through the remote instead, then a rule.
+		ItemStack remote = new ItemStack(io.github.jimbozoomer.jugcraft.control.JugcraftControl.CONTROL_REMOTE);
+		remote.set(io.github.jimbozoomer.jugcraft.control.JugcraftControl.REMOTE_LINK,
+				net.minecraft.core.GlobalPos.of(level.dimension(), helper.absolutePos(controllerPos)));
+		remote.set(io.github.jimbozoomer.jugcraft.control.JugcraftControl.REMOTE_CHANNEL, net.minecraft.world.item.DyeColor.GREEN.ordinal());
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		Vec3 at = helper.absoluteVec(new Vec3(2.5, 1, 3.5));
+		player.setPos(at.x, at.y, at.z);
+		player.setItemInHand(InteractionHand.MAIN_HAND, remote);
+		remote.use(level, player, InteractionHand.MAIN_HAND);
+		helper.assertTrue(helper.getBlockState(relay).getValue(io.github.jimbozoomer.jugcraft.control.RelayBlock.POWERED),
+				"The remote did not switch the green relay on");
+		helper.assertTrue(controller.isOn(net.minecraft.world.item.DyeColor.GREEN), "The controller does not have green on");
+		remote.set(io.github.jimbozoomer.jugcraft.control.JugcraftControl.REMOTE_CHANNEL, net.minecraft.world.item.DyeColor.ORANGE.ordinal());
+		remote.use(level, player, InteractionHand.MAIN_HAND);
+		helper.assertTrue(helper.getBlockState(alarm).getValue(io.github.jimbozoomer.jugcraft.control.AlarmBlock.POWERED),
+				"The remote did not sound the orange alarm");
+		remote.use(level, player, InteractionHand.MAIN_HAND);
+		helper.assertTrue(!helper.getBlockState(alarm).getValue(io.github.jimbozoomer.jugcraft.control.AlarmBlock.POWERED),
+				"The remote did not silence the alarm");
+		helper.succeed();
+	}
+
 	/** Ores drop their raw material to a plain pickaxe, more with Fortune; only Silk Touch takes the ore block itself. */
 	@GameTest
 	public void oresNeedSilkTouchToDropThemselves(GameTestHelper helper) {
