@@ -21,7 +21,8 @@ LISTS = {"crusher": ("crusher", "crushing"), "arc_furnace_controller": ("arc_fur
          "wire_drawer": ("wire_drawer", "wire_drawing"), "circuit_assembler": ("circuit_assembler", "circuit_assembly"),
          "pulverizer": ("pulverizer", "pulverizing"), "ore_washer": ("ore_washer", "ore_washing"),
          "sieve": ("sieve", "sifting"), "sawmill": ("sawmill", "sawing"), "coke_oven": ("coke_oven", "coking"),
-         "steel_foundry": ("steel_foundry", "steelmaking"), "tree_farm": ("tree_farm", "tree_growing")}
+         "steel_foundry": ("steel_foundry", "steelmaking"), "tree_farm": ("tree_farm", "tree_growing"),
+         "hydroponic_bay": ("hydroponic_bay", "hydroponics")}
 
 
 def build():

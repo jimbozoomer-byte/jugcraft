@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:concrete",
+    "jugcraft:concrete_slab",
+    "jugcraft:concrete_stairs",
     "jugcraft:tin_block",
     "jugcraft:raw_tin_block",
     "jugcraft:tin_ore",

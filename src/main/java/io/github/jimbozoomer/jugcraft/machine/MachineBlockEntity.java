@@ -214,6 +214,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case LARGE_STEAM_ENGINE -> new TankInlet(Fluids.WATER, MachineKind.LARGE_ENGINE_TANK);
 			case GEOTHERMAL_GENERATOR -> new TankInlet(Fluids.LAVA, MachineKind.GEOTHERMAL_TANK);
 			case ORE_WASHER -> new TankInlet(Fluids.WATER, MachineKind.WASHER_TANK);
+			case HYDROPONIC_BAY -> new TankInlet(PetroFluids.NUTRIENT_SOLUTION.source(), MachineKind.HYDROPONIC_TANK);
+			case ELECTROPLATING_BATH -> new TankInlet(PetroFluids.SULFURIC_ACID.source(), Electroplating.TANK);
 			case STEEL_FOUNDRY -> new TankInlet(PetroFluids.OXYGEN.fluid(), MachineKind.BOOST_TANK);
 			case ARC_FURNACE -> new TankInlet(PetroFluids.ARGON.fluid(), MachineKind.BOOST_TANK);
 			default -> null;
@@ -461,6 +463,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case COBBLESTONE_GENERATOR -> tickCobble(level, pos, state);
 			case WATER_WHEEL -> tickWaterWheel(level, pos, state);
 			case AUTO_CRAFTER -> tickCrafter(level, pos, state);
+			case ELECTROPLATING_BATH -> tickElectroplating(level, pos, state);
 			case PUMPJACK -> tickPumpjack(level, pos, state);
 			case AIR_SEPARATION_UNIT -> tickAirSeparation(level, pos, state);
 			case FRACKING_RIG -> tickFrackingRig(level, pos, state);
@@ -781,7 +784,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 
 		Optional<Result> result = findResult(level);
-		boolean water = kind != MachineKind.ORE_WASHER || tank >= MachineKind.WASHER_WATER_PER_OPERATION;
+		boolean water = switch (kind) {
+			case ORE_WASHER -> tank >= MachineKind.WASHER_WATER_PER_OPERATION;
+			case HYDROPONIC_BAY -> tank >= MachineKind.HYDROPONIC_SOLUTION_PER_HARVEST;
+			default -> true;
+		};
 		if (result.isEmpty() || !water || !canOutput(result.get().stack()) || !byproductsFit(result.get().byproducts())) {
 			if (progress != 0) {
 				progress = 0;
@@ -826,6 +833,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			}
 			if (kind == MachineKind.ORE_WASHER) {
 				tank -= MachineKind.WASHER_WATER_PER_OPERATION;
+			} else if (kind == MachineKind.HYDROPONIC_BAY) {
+				tank -= MachineKind.HYDROPONIC_SOLUTION_PER_HARVEST;
 			}
 		}
 		setChanged();
@@ -1550,6 +1559,47 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		return true;
 	}
 
+	/**
+	 * The electroplating bath: plates the item in slot 0 with the ingot in slot 1 over {@link Electroplating#TICKS},
+	 * taking {@link Electroplating#ACID_PER_PLATING} mB of sulfuric acid when it finishes. Nothing is used up if the
+	 * item cannot take that metal (it already has another plating).
+	 */
+	private boolean tickElectroplating(ServerLevel level, BlockPos pos, BlockState state) {
+		if (sides.eject() && level.getGameTime() % EJECT_INTERVAL == 0) {
+			eject(level, pos, state);
+		}
+		ItemStack item = items.get(0);
+		String metal = Electroplating.metalOf(items.get(1));
+		ItemStack result = metal == null || item.isEmpty() ? ItemStack.EMPTY
+				: Electroplating.plate(item, metal, level.registryAccess());
+		if (result.isEmpty() || tank < Electroplating.ACID_PER_PLATING || !items.get(kind.outputSlot()).isEmpty()) {
+			if (progress != 0) {
+				progress = 0;
+				setChanged();
+			}
+			return false;
+		}
+		if (!sides.redstone().allows(poweredByRedstone(level, pos, state))) {
+			return false;
+		}
+		MachineUpgrades.Effect upgrades = upgrades();
+		maxProgress = upgrades.ticks(Electroplating.TICKS);
+		long use = upgrades.use(kind.usePerTick);
+		if (energy.getAmount() < use) {
+			return false; // Keeps progress; resumes when power returns.
+		}
+		energy.setAmount(energy.getAmount() - use);
+		if (++progress >= maxProgress) {
+			progress = 0;
+			items.set(kind.outputSlot(), result);
+			item.shrink(1);
+			items.get(1).shrink(1);
+			tank -= Electroplating.ACID_PER_PLATING;
+		}
+		setChanged();
+		return true;
+	}
+
 	/** Slots in the auto-crafter's pattern grid. */
 	public static final int GRID = 9;
 
@@ -1757,6 +1807,13 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return switch (slot) {
 				case SLOT_FUEL -> GeneratorFuels.steamBurnTicks(stack) > 0;
 				case SLOT_WATER_IN -> stack.is(Items.WATER_BUCKET);
+				default -> false;
+			};
+		}
+		if (kind == MachineKind.ELECTROPLATING_BATH) {
+			return switch (slot) {
+				case 0 -> Electroplating.platable(stack);
+				case 1 -> Electroplating.metalOf(stack) != null;
 				default -> false;
 			};
 		}

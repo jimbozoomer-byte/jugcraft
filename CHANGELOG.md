@@ -8,6 +8,24 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Electroplating, batch 34
+- **Electroplating Bath:** plates a tool, weapon or piece of armor with an ingot in sulfuric acid, repairing it fully without experience. **Nickel** makes it half as durable again, **silver** gives a sword or axe Smite III, **gold** makes armor count as gold for piglins. Plating again with the same metal repairs it again.
+- Advancement, handbook page, tooltips, game test. Record: [electroplating.md](docs/features/electroplating.md).
+
+### Unmerged: Hydroponics, batch 33
+- **Hydroponic Bay:** grows a seed or cutting into a harvest every 30 seconds on power and **nutrient solution** (fertilizer in water, from the chemical reactor), giving the seed back. It needs no soil, sunlight or water source, so it works underground or in any dimension. It grows the vanilla crops, cotton and every agriculture crop.
+- Advancement, handbook page, game test. Record: [hydroponics.md](docs/features/hydroponics.md).
+
+### Unmerged: Construction chemistry, batch 32
+- **Foam Sprayer:** fills up to 12 open blocks (air, water, lava, plants) where you aim, from 16 blocks away, with construction foam from foam canisters (chemical reactor: plastic and ammonia). Bridge gaps, seal caves, stop floods and lava. Respects spawn protection and the walled town.
+- **Cement** (calcite or bone block, clay and sand, smelted) sets foam into **concrete**; concrete also crafts from cement, gravel and water. **Blast-proof concrete** (concrete round a rebar) is as blast-proof as obsidian. Both come as slabs and stairs.
+- Two advancements, two handbook pages, a game test. Record: [construction-chemistry.md](docs/features/construction-chemistry.md).
+
+### Unmerged: Diagonal connections (framework)
+- **Fences, glass panes and bars join diagonally.** Two of a kind a diagonal step apart join with a rail, pane or bars at 45 degrees, as long as neither joins straight into the corner between them. This covers vanilla's 14 fences, 17 panes and 9 iron and copper bars, and all 14 Jugcraft fences, including the wrought-iron cemetery fence.
+- Diagonals update live (placing, breaking, filling the corner), are part of the outline and collision, and turn with rotated or mirrored structures. Switch: `diagonal_connections.enabled`.
+- The framework: four block-state properties on every fence and bars block, the tag `#jugcraft:connects_diagonally`, and a generator (`tools/diagonal_connections.py`) that gives any tagged block its 45-degree arm model from its own side model. Seven game tests and a client screenshot test. Record: [diagonal-connections.md](docs/features/diagonal-connections.md).
+
 ### Unmerged: Field chemistry, batch 31
 - **Chemical grenades** for hand or launcher: **chlorine** (a cloud that hurts what breathes, through armor), **smoke** (mobs lose their target; players inside can't see), **thermite** (a burning pool that never lights blocks) and the **flashbang** (blinds players, staggers mobs, no damage). None breaks a block; other players only where PvP is on, never party members.
 - **Gas mask:** keeps out chlorine, smoke and the flash; the filter wears in gas and is repaired with charcoal. A sealed scuba set also works while it has oxygen.
@@ -49,9 +67,8 @@ No numbered release yet. Everything below is on `main`.
 - **Dedicated-server check (CI):** a real client joins the game's own dedicated server, opens a machine and trades with the Retro Trader over the network, leaves and rejoins; and a world is saved and reopened with its trader, machine contents and cabinet intact. The two-client checklist is in [docs/TESTING.md](docs/TESTING.md#dedicated-server-and-two-clients).
 - Seventeen game tests, eight client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
 
-### Fixes: dyeing sky lanterns, and the giant mahogany test (pull request pending)
+### Fix: dyeing sky lanterns (pull request pending)
 - **Sky lanterns take dye again.** Minecraft 26.3 dyes leather by a recipe per item, not by the `minecraft:dyeable` tag, so the lantern had no way to be dyed. It now has its own dyeing recipe (a lantern and any dye) and a water cauldron washes the dye out. A new game test checks both.
-- **Giant tree test:** the biome tests asked a giant mahogany for 40 logs, but the shortest one has 37 (a trunk ten tall, two wide, and by chance no branches). Each giant is now held to its own fewest: redwood 85, mahogany 37.
 
 ### Agriculture: fall additions 20, the Día de Muertos ofrenda (pull request pending, stacked on the theremin)
 - **Ofrenda:** a three-tier home altar under an embroidered cloth. Set out up to six offerings; with flowers, a light, bread, a sugar skull and a drink it is complete: it glows and, at night, welcomes the restless spirits near, who come to it and show themselves, calm (Remembered).
