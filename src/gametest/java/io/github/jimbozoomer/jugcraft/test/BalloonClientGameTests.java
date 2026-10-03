@@ -1,36 +1,37 @@
 package io.github.jimbozoomer.jugcraft.test;
 
-import com.mojang.authlib.GameProfile;
-import io.github.jimbozoomer.jugcraft.agriculture.BalloonControlPayload;
 import io.github.jimbozoomer.jugcraft.agriculture.HotAirBalloon;
 import io.github.jimbozoomer.jugcraft.agriculture.HotAirBalloonItem;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MooringPostBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.PibalItem;
-import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
+import java.util.Optional;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
-import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Client game test for the hot-air balloon fiesta (fall addition 29): three balloons over a field (Harvest Stripes on
- * the ground, the Jack-o'-Lantern moored to a post, Harvest Moon aloft) with pibals rising; a basket up close; the view
- * from the moored basket; its riders seen from outside; and the night glow, the burners firing. The balloons aloft are
- * piloted by server-side stand-ins (Fabric's FakePlayer), so their burners can fire while the camera is elsewhere. CI job
- * {@code client}.
+ * Client game test for the hot-air balloon fiesta (fall addition 29): a basket up close; the test player climbing aboard
+ * the Jack-o'-Lantern, moored to a post, and firing its burner (holding jump) until the rope holds it; the view from up
+ * there and its rider seen from outside; then, from a camera stand on the ground, the field with the Jack-o'-Lantern aloft
+ * over the other two and pibals rising, and the night glow with its burner roaring. CI job {@code client}.
  */
 public class BalloonClientGameTests implements FabricClientGameTest {
+	/** Where the overview camera stands: in front of the field, looking north across it. */
+	private static final Vec3 OVERVIEW = new Vec3(0.5, 2.0, 14.5);
+
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		try (TestSingleplayerContext singleplayer = context.worldBuilder()
@@ -54,40 +55,47 @@ public class BalloonClientGameTests implements FabricClientGameTest {
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 24, y, z - 34, x + 24, y + 30, z + 16));
 			context.waitTicks(10);
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
-			// Pibals let go a second apart, rising at different heights.
+			context.waitTicks(20);
+			singleplayer.getConnection().waitForChunksRender();
+
+			shoot(context, singleplayer, x - 8, y, z - 6, 180, -12, "jugcraft_balloon_basket");
+
+			// Aboard the moored Jack-o'-Lantern as its pilot: hold the burner until the rope holds it up.
+			place(context, singleplayer, x + 2, y, z - 12, 180, 0);
+			server.runCommand("execute as @p at @s run ride @s mount @e[type=jugcraft:hot_air_balloon,limit=1,sort=nearest]");
+			context.waitTicks(10);
+			context.getInput().holdKey(options -> options.keyJump);
+			context.waitTicks(180);
+			context.getInput().releaseKey(options -> options.keyJump);
+			double up = server.computeOnServer(minecraft -> pumpkin(minecraft.overworld(), origin).map(b -> b.getY() - y).orElse(-1.0));
+			System.out.println("[jugcraft balloon client test] the Jack-o'-Lantern is " + up + " blocks up");
+
+			// The view from up there, out over the field; then its rider seen from outside.
+			server.runCommand("rotate @p 200 35");
+			context.waitTicks(20);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_balloon_ride");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			server.runCommand("rotate @p 160 15");
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_balloon_riders");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
+
+			// From the ground: the field, the Jack-o'-Lantern aloft on its rope, pibals let go a second apart.
 			for (int i = 0; i < 3; i++) {
 				int k = i;
 				server.runOnServer(minecraft -> PibalItem.release(minecraft.overworld(), Vec3.atCenterOf(origin.offset(4 + k, 1, 2))));
 				context.waitTicks(20);
 			}
-			context.waitTicks(20);
-			singleplayer.getConnection().waitForChunksRender();
+			watchFrom(context, singleplayer, origin, OVERVIEW, 180.0F, -18.0F, "jugcraft_balloons");
 
-			shoot(context, singleplayer, x, y + 2, z + 14, 180, -18, "jugcraft_balloons");
-			shoot(context, singleplayer, x - 8, y, z - 6, 180, -12, "jugcraft_balloon_basket");
-
-			// Aboard the moored Jack-o'-Lantern beside its pilot, looking out over the field; then seen from outside.
-			place(context, singleplayer, x + 2, y, z - 12, 180, 0);
-			server.runCommand("ride @p mount @e[type=jugcraft:hot_air_balloon,limit=1,sort=nearest]");
-			context.waitTicks(20);
-			server.runCommand("rotate @p 220 5");
-			context.waitTicks(20);
-			singleplayer.getConnection().waitForChunksRender();
-			context.takeScreenshot("jugcraft_balloon_ride");
-			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
-			server.runCommand("rotate @p 0 -10");
-			context.waitTicks(20);
-			context.takeScreenshot("jugcraft_balloon_riders");
-			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
-			server.runCommand("ride @p dismount");
-			context.waitTicks(10);
-
-			// The night glow: the pilots fire their burners.
+			// The night glow: the pilot fires the burner.
 			server.runCommand("time set 18000");
-			server.runOnServer(minecraft -> fire(minecraft.overworld(), origin, true));
-			context.waitTicks(10);
-			shoot(context, singleplayer, x, y + 2, z + 14, 180, -18, "jugcraft_balloons_night");
-			server.runOnServer(minecraft -> fire(minecraft.overworld(), origin, false));
+			context.getInput().holdKey(options -> options.keyJump);
+			context.waitTicks(20);
+			watchFrom(context, singleplayer, origin, OVERVIEW, 180.0F, -18.0F, "jugcraft_balloons_night");
+			watchFrom(context, singleplayer, origin, new Vec3(2.5, 6.0, -2.5), 180.0F, -38.0F, "jugcraft_balloon_glow");
+			context.getInput().releaseKey(options -> options.keyJump);
 			server.runCommand("time set 1000");
 		}
 	}
@@ -108,45 +116,63 @@ public class BalloonClientGameTests implements FabricClientGameTest {
 		context.takeScreenshot(name);
 	}
 
-	/** Stand-in pilot {@code i}: the same one each time it is asked for. */
-	private static FakePlayer pilot(ServerLevel level, int i) {
-		return FakePlayer.get(level, new GameProfile(UUID.nameUUIDFromBytes(("jugcraft-balloon-pilot-" + i).getBytes()), "Pilot" + i));
+	/**
+	 * Looks through an invisible armor stand at {@code at} (from the origin) along yaw and pitch, so the player can stay
+	 * aboard their balloon, burner and all, while the camera stands elsewhere; then gives the camera back.
+	 */
+	private static void watchFrom(ClientGameTestContext context, TestSingleplayerContext singleplayer, BlockPos origin, Vec3 at, float yaw,
+			float pitch, String name) {
+		TestServerContext server = singleplayer.getServer();
+		int id = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			ArmorStand stand = new ArmorStand(level, origin.getX() + at.x, origin.getY() + at.y, origin.getZ() + at.z);
+			stand.snapTo(stand.getX(), stand.getY(), stand.getZ(), yaw, pitch);
+			stand.setYHeadRot(yaw);
+			stand.setInvisible(true);
+			stand.setNoGravity(true);
+			level.addFreshEntity(stand);
+			return stand.getId();
+		});
+		context.waitTicks(10);
+		context.runOnClient(client -> {
+			Entity stand = client.level.getEntity(id);
+			if (stand != null) {
+				client.setCameraEntity(stand);
+			}
+		});
+		context.waitTicks(20);
+		singleplayer.getConnection().waitForChunksRender();
+		context.takeScreenshot(name);
+		context.runOnClient(client -> client.setCameraEntity(client.player));
+		server.runOnServer(minecraft -> {
+			Entity stand = minecraft.overworld().getEntity(id);
+			if (stand != null) {
+				stand.discard();
+			}
+		});
 	}
 
-	/** Every balloon with a stand-in pilot fires its burner, or stops. */
-	private static void fire(ServerLevel level, BlockPos origin, boolean on) {
-		for (int i = 0; i < 2; i++) {
-			BalloonControlPayload.apply(pilot(level, i), on, false);
-		}
+	/** The Jack-o'-Lantern balloon, wherever it has got to. */
+	private static Optional<HotAirBalloon> pumpkin(ServerLevel level, BlockPos origin) {
+		return level.getEntitiesOfClass(HotAirBalloon.class, new AABB(origin).inflate(48.0), b -> b.kind() == HotAirBalloon.Kind.PUMPKIN).stream()
+				.findFirst();
 	}
 
 	/**
-	 * The fiesta field: Harvest Stripes cold on the ground; a Mooring Post with the Jack-o'-Lantern tied to it, a few
-	 * blocks up; Harvest Moon aloft further off. The two aloft have stand-in pilots, fuel, and heat to float.
+	 * The fiesta field: Harvest Stripes and Harvest Moon cold on the ground, and the Jack-o'-Lantern, warm and fuelled,
+	 * tied to a Mooring Post; a few pumpkins and hay bales about.
 	 */
 	private static void build(ServerLevel level, BlockPos origin) {
 		BlockPos ground = origin.below();
 		HotAirBalloonItem.setUp(level, ground.offset(-8, 0, -12), HotAirBalloon.Kind.HARVEST, 0.0F, 400);
+		HotAirBalloonItem.setUp(level, ground.offset(12, 0, -26), HotAirBalloon.Kind.MOON, 0.0F, 400);
 		BlockPos post = origin.offset(-1, 0, -14);
 		level.setBlock(post, JugcraftAgriculture.block(MooringPostBlock.ID).defaultBlockState(), Block.UPDATE_ALL);
 		HotAirBalloon pumpkin = HotAirBalloonItem.setUp(level, ground.offset(2, 0, -16), HotAirBalloon.Kind.PUMPKIN, 0.0F, 6000);
-		HotAirBalloon moon = HotAirBalloonItem.setUp(level, ground.offset(12, 0, -26), HotAirBalloon.Kind.MOON, 0.0F, 6000);
-		List<HotAirBalloon> aloft = new java.util.ArrayList<>();
 		if (pumpkin != null) {
-			pumpkin.setPos(pumpkin.getX(), pumpkin.getY() + 4, pumpkin.getZ());
 			pumpkin.moor(post);
-			aloft.add(pumpkin);
+			pumpkin.setHeat(0.75F);
 		}
-		if (moon != null) {
-			moon.setPos(moon.getX(), moon.getY() + 9, moon.getZ());
-			aloft.add(moon);
-		}
-		for (int i = 0; i < aloft.size(); i++) {
-			HotAirBalloon balloon = aloft.get(i);
-			balloon.setHeat(HotAirBalloon.NEUTRAL + 0.02F);
-			pilot(level, i).startRiding(balloon);
-		}
-		// A few pumpkins and hay bales about the field.
 		for (int i = 0; i < 5; i++) {
 			level.setBlock(origin.offset(-14 + i * 7, 0, -4 - (i % 2) * 3), (i % 2 == 0 ? Blocks.HAY_BLOCK : Blocks.PUMPKIN).defaultBlockState(),
 					Block.UPDATE_ALL);
