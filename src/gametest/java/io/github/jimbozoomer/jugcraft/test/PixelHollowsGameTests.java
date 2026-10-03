@@ -393,18 +393,6 @@ public class PixelHollowsGameTests {
 	 */
 	@GameTest(maxTicks = 4800)
 	public void everyVillageHasOneShop(GameTestHelper helper) {
-		// PROBE ONLY (never merged): log 26.3 class files to read their method signatures.
-		for (String name : new String[] {"net/minecraft/world/level/block/Block", "net/minecraft/world/level/block/CrossCollisionBlock",
-				"net/minecraft/world/level/block/FenceBlock", "net/minecraft/world/level/block/IronBarsBlock",
-				"net/minecraft/world/level/block/state/BlockBehaviour", "net/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase",
-				"net/minecraft/world/level/Level", "net/minecraft/world/level/block/WallBlock", "net/minecraft/world/level/block/FenceGateBlock",
-				"net/minecraft/world/level/block/state/StateDefinition$Builder", "net/minecraft/world/phys/shapes/Shapes"}) {
-			try (InputStream in = Jugcraft.class.getClassLoader().getResourceAsStream(name + ".class")) {
-				Jugcraft.LOGGER.info("[probe] CLASS {} {}", name, in == null ? "missing" : java.util.Base64.getEncoder().encodeToString(in.readAllBytes()));
-			} catch (IOException exception) {
-				Jugcraft.LOGGER.info("[probe] CLASS {} unreadable: {}", name, exception.toString());
-			}
-		}
 		ServerLevel level = helper.getLevel();
 		var server = level.getServer();
 		BlockPos base = helper.absolutePos(BlockPos.ZERO);
