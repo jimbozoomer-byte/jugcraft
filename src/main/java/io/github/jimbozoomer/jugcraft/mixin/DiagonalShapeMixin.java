@@ -28,10 +28,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin({CrossCollisionBlock.class, WallBlock.class})
 public abstract class DiagonalShapeMixin {
-	@Shadow
+	// Not remapped: Mixin refuses remappable shadows in a mixin with more than one target, and 26.3's names need none.
+	@Shadow(remap = false)
 	@Final
 	private Function<BlockState, VoxelShape> shapes;
-	@Shadow
+	@Shadow(remap = false)
 	@Final
 	private Function<BlockState, VoxelShape> collisionShapes;
 	@Unique
