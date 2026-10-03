@@ -245,5 +245,8 @@ def feature_of(entry_id):
     import control_electronics
     if entry_id in control_electronics.blocks() or entry_id in control_electronics.items():
         return "machines"
+    import rocketry
+    if entry_id in rocketry.items():
+        return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)
