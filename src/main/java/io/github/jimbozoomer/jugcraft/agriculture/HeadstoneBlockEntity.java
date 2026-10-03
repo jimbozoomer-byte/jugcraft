@@ -1,5 +1,9 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentGetter;
@@ -7,34 +11,79 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 /**
- * A headstone's {@link Epitaph}, on the block that holds it (part 0 of a {@link HeadstoneBlock}). It goes with the item
- * when the headstone is broken (data component {@code jugcraft:epitaph}) and comes back when it is placed again; a
- * headstone renamed in an anvil is placed with its name as the first line. Clients get it to draw.
+ * A memorial's inscriptions, on the block of its part 0 (a {@link HeadstoneBlock}): its {@link Epitaph}, and on a
+ * building of pack 3 the rest of them (a mausoleum's crypt fronts, a columbarium's niches), each by its slot in
+ * {@link HeadstoneBlock.Layout#texts()}. They go with the item when it is broken (data components
+ * {@code jugcraft:epitaph} and {@code jugcraft:inscriptions}) and come back when it is placed again; one renamed in an
+ * anvil is placed with its name as the epitaph's first line. Clients get them to draw.
  */
 public class HeadstoneBlockEntity extends BlockEntity {
+	/** The most inscriptions after the epitaph that one memorial may keep. */
+	public static final int MORE = 15;
+	public static final Codec<List<Epitaph>> MORE_CODEC = Epitaph.CODEC.sizeLimitedListOf(MORE);
+	public static final StreamCodec<ByteBuf, List<Epitaph>> MORE_STREAM_CODEC = Epitaph.STREAM_CODEC.apply(ByteBufCodecs.list(MORE));
+
 	private Epitaph epitaph = Epitaph.BLANK;
+	/** Inscriptions 1 and on, without blank ones at the end. */
+	private List<Epitaph> more = List.of();
 
 	public HeadstoneBlockEntity(BlockPos pos, BlockState state) {
-		super(JugcraftAgriculture.HEADSTONE_ENTITY, pos, state);
+		this(JugcraftAgriculture.HEADSTONE_ENTITY, pos, state);
+	}
+
+	public HeadstoneBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+		super(type, pos, state);
 	}
 
 	public Epitaph epitaph() {
 		return epitaph;
 	}
 
-	/** Cuts {@code cut} into the stone, replacing what was there, and sends it to clients. */
+	/** Inscription {@code slot}: 0 is the epitaph; blank if none is cut there. */
+	public Epitaph inscription(int slot) {
+		if (slot == 0) {
+			return epitaph;
+		}
+		return slot > 0 && slot <= more.size() ? more.get(slot - 1) : Epitaph.BLANK;
+	}
+
+	/** Every inscription after the epitaph, by slot from 1. */
+	public List<Epitaph> more() {
+		return more;
+	}
+
+	/** Cuts {@code cut} as the epitaph, replacing what was there, and sends it to clients. */
 	public void engrave(Epitaph cut) {
-		epitaph = cut;
+		engrave(0, cut);
+	}
+
+	/** Cuts {@code cut} as inscription {@code slot} (0 to {@value #MORE}), replacing what was there, and sends it to clients. */
+	public void engrave(int slot, Epitaph cut) {
+		if (slot == 0) {
+			epitaph = cut;
+		} else if (slot > 0 && slot <= MORE) {
+			List<Epitaph> out = new ArrayList<>(more);
+			while (out.size() < slot) {
+				out.add(Epitaph.BLANK);
+			}
+			out.set(slot - 1, cut);
+			more = trimmed(out);
+		} else {
+			return;
+		}
 		setChanged();
 		if (level != null) {
 			BlockState state = getBlockState();
@@ -42,10 +91,19 @@ public class HeadstoneBlockEntity extends BlockEntity {
 		}
 	}
 
+	private static List<Epitaph> trimmed(List<Epitaph> list) {
+		int end = Math.min(list.size(), MORE);
+		while (end > 0 && list.get(end - 1).isBlank()) {
+			end--;
+		}
+		return List.copyOf(list.subList(0, end));
+	}
+
 	@Override
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
 		epitaph = input.read("epitaph", Epitaph.CODEC).orElse(Epitaph.BLANK);
+		more = trimmed(input.read("inscriptions", MORE_CODEC).orElse(List.of()));
 	}
 
 	@Override
@@ -53,6 +111,9 @@ public class HeadstoneBlockEntity extends BlockEntity {
 		super.saveAdditional(output);
 		if (!epitaph.isBlank()) {
 			output.store("epitaph", Epitaph.CODEC, epitaph);
+		}
+		if (!more.isEmpty()) {
+			output.store("inscriptions", MORE_CODEC, more);
 		}
 	}
 
@@ -66,6 +127,10 @@ public class HeadstoneBlockEntity extends BlockEntity {
 		} else if (name != null) {
 			epitaph = Epitaph.BLANK.withFirstLine(name.getString());
 		}
+		List<Epitaph> carriedMore = components.get(JugcraftAgriculture.INSCRIPTIONS);
+		if (carriedMore != null) {
+			more = trimmed(carriedMore);
+		}
 	}
 
 	@Override
@@ -74,12 +139,16 @@ public class HeadstoneBlockEntity extends BlockEntity {
 		if (!epitaph.isBlank()) {
 			components.set(JugcraftAgriculture.EPITAPH, epitaph);
 		}
+		if (!more.isEmpty()) {
+			components.set(JugcraftAgriculture.INSCRIPTIONS, more);
+		}
 	}
 
 	@Override
 	public void removeComponentsFromTag(ValueOutput output) {
 		super.removeComponentsFromTag(output);
 		output.discard("epitaph");
+		output.discard("inscriptions");
 	}
 
 	@Override

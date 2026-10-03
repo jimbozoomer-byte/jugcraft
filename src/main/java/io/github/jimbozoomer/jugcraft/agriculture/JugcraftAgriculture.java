@@ -206,6 +206,8 @@ public final class JugcraftAgriculture {
 	/** The graveyard pack: every headstone's block entity, the epitaph it carries as an item, and the chisel's wear. */
 	public static BlockEntityType<HeadstoneBlockEntity> HEADSTONE_ENTITY;
 	public static DataComponentType<Epitaph> EPITAPH;
+	public static DataComponentType<List<Epitaph>> INSCRIPTIONS;
+	public static BlockEntityType<HeadstoneBlockEntity> GRAVEYARD_BUILDING_ENTITY;
 	public static final int CHISEL_USES = 250;
 	public static DataComponentType<CandyBagItem.Night> CANDY_BAG_NIGHT;
 	public static EntityType<WillOWisp> WILL_O_WISP;
@@ -1582,7 +1584,58 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(HeadstoneBlockEntity::new, headstones.toArray(Block[]::new)).build());
 		registerItem(Epitaphs.CHISEL, StonemasonsChiselItem::new, new Item.Properties().durability(CHISEL_USES), EQUIPMENT_TAB);
 		Epitaphs.register();
+		registerGraveyardBuildings();
 	}
+
+	/**
+	 * The graveyard pack's buildings (pack 3), from the generated {@code /jugcraft/graveyard_buildings.json}: each one a
+	 * {@link GraveyardBuildingBlock} of many parts with its item, all sharing one block entity type for their
+	 * inscriptions (data component {@code jugcraft:inscriptions} for those after the epitaph); and the Bronze Mausoleum
+	 * Door, a door opened by hand that fits a mausoleum's doorway.
+	 */
+	private static void registerGraveyardBuildings() {
+		INSCRIPTIONS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("inscriptions"),
+				DataComponentType.<List<Epitaph>>builder().persistent(HeadstoneBlockEntity.MORE_CODEC)
+						.networkSynchronized(HeadstoneBlockEntity.MORE_STREAM_CODEC).build());
+		JsonArray list;
+		try (InputStream stream = JugcraftAgriculture.class.getResourceAsStream("/jugcraft/graveyard_buildings.json")) {
+			if (stream == null) {
+				throw new IOException("missing");
+			}
+			list = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).getAsJsonArray();
+		} catch (IOException | RuntimeException e) {
+			throw new IllegalStateException("Could not read /jugcraft/graveyard_buildings.json", e);
+		}
+		List<Block> buildings = new ArrayList<>();
+		for (JsonElement element : list) {
+			GraveyardBuildingBlock.Building building = GraveyardBuildingBlock.Building.read(element.getAsJsonObject());
+			MapColor colour = switch (building.stone()) {
+				case MARBLE -> MapColor.QUARTZ;
+				case SLATE -> MapColor.DEEPSLATE;
+				case GRANITE -> MapColor.DIRT;
+				case SANDSTONE -> MapColor.SAND;
+				case IRON -> MapColor.METAL;
+			};
+			// Random ticks: buildings weather as the headstones do, and stir spirits at night.
+			Block block = registerBlock(building.id(), props -> GraveyardBuildingBlock.create(props, building), BlockBehaviour.Properties.of()
+					.mapColor(building.wooden() ? MapColor.WOOD : colour).requiresCorrectToolForDrops().strength(3.0F, 6.0F)
+					.sound(building.wooden() ? SoundType.WOOD : SoundType.STONE).noOcclusion().randomTicks()
+					.lightLevel(state -> building.light(state.getValue(building.part()))));
+			registerItem(building.id(), props -> new HeadstoneItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+			buildings.add(block);
+		}
+		GRAVEYARD_BUILDING_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("graveyard_building"),
+				FabricBlockEntityTypeBuilder.create((pos, state) -> new HeadstoneBlockEntity(GRAVEYARD_BUILDING_ENTITY, pos, state),
+						buildings.toArray(Block[]::new)).build());
+		// Opened by hand, like a copper door; the mausoleum places nothing in its doorway itself.
+		Block door = registerBlock(MAUSOLEUM_DOOR, props -> new DoorBlock(BlockSetType.COPPER, props), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.TERRACOTTA_ORANGE).strength(4.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.COPPER)
+				.noOcclusion().pushReaction(PushReaction.POPPED));
+		registerItem(MAUSOLEUM_DOOR, props -> new BlockItem(door, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+	}
+
+	/** The Bronze Mausoleum Door. */
+	public static final String MAUSOLEUM_DOOR = "bronze_mausoleum_door";
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
 	public static final List<String> INFLATABLE_DESIGNS = List.of("ghost", "cat", "pumpkin", "spider");

@@ -8,8 +8,11 @@ part's block). `text`: where the epitaph is cut, facing north: FRONT on a face w
 top face at height `y`, centred at (`x`, `y`) or (`x`, `z`) (z may run into the next block back), `width` by `height`
 pixels; each line is drawn as large as fits, up to `max_scale` blocks per font pixel.
 
-Models: tools/graveyard_models.py (geometry), graveyard_data.py (one model per part and stage). Textures:
-tools/graveyard_textures.py. Everything follows the agriculture feature switch for its recipes.
+Pack 3, buildings (agriculture/GraveyardBuildingBlock.java): BUILDINGS below, each many blocks, with the layout Java
+reads generated into /jugcraft/graveyard_buildings.json.
+
+Models: tools/graveyard_models.py and graveyard_buildings.py (geometry), graveyard_data.py (one model per part and
+stage). Textures: tools/graveyard_textures.py. Everything follows the agriculture feature switch for its recipes.
 """
 
 FEATURE = "agriculture"
@@ -132,6 +135,71 @@ HEADSTONES = {
         "recipe": {"pattern": ["BBB", "GGG"], "key": {"B": "#c:ingots/bronze", "G": "minecraft:polished_granite"}}},
 }
 
+# ---------------------------------------------------------------- pack 3: buildings
+# Each building is one block (GraveyardBuildingBlock) of many parts, one for each block of its design grid that holds
+# any of it, except those in `open` (a doorway, a room, a passage), which are left free to walk into and to hang a
+# door or gates in. `size`: blocks wide, tall and deep, facing north (its front at z = 0); its roof may rise up to a
+# block above its top row. `origin`: the grid cell of part 0, the block placed (on the ground in front). `texts`: where
+# each inscription is cut, in design pixels (as a headstone's `text`; FACE EAST and WEST are upright faces whose plane
+# is x = `x`), the first being its epitaph; `slots`: which inscription the chisel or a name tag cuts when used on the
+# part at a grid cell (any other cuts the first). `light`: the light the part at a grid cell gives. `sound` and
+# `tool`: what it sounds like and is mined with. Models: tools/graveyard_buildings.py.
+MAUSOLEUM_OPEN = [(2, 0, 1), (2, 1, 1)] + [(x, y, z) for x in (1, 2, 3) for y in (0, 1) for z in (2, 3)]
+
+
+def _mausoleum_texts():
+    import graveyard_buildings as gb
+    return [{"face": "FRONT", "x": 40.0, "y": 48.0, "z": 3.5, "width": 56.0, "height": 6.4, "max_scale": 1 / 28}] + gb.mausoleum_crypt_texts()
+
+
+def _mausoleum_slots():
+    """The crypt fronts, in the order of mausoleum_crypt_texts: the west wall's then the east's, each bay top down."""
+    out = {}
+    slot = 1
+    for gx in (0, 4):
+        for gz in (2, 3):
+            for gy in (2, 1, 0):
+                out[(gx, gy, gz)] = slot
+                slot += 1
+    return out
+
+
+def _columbarium_texts():
+    import graveyard_buildings as gb
+    return gb.columbarium_texts()
+
+
+BUILDINGS = {
+    "family_mausoleum": {
+        "display": "Family Mausoleum", "stone": "marble", "model": "mausoleum", "ivy": "mausoleum_ivy", "pack": 3,
+        "size": (5, 4, 5), "origin": (2, 0, 0), "open": MAUSOLEUM_OPEN, "texts": _mausoleum_texts, "slots": _mausoleum_slots,
+        "light": {(2, 2, 3): 10}, "sound": "stone", "tool": "pickaxe",
+        "recipe": {"pattern": ["CCC", "CGC", "CBC"], "key": {"C": "minecraft:calcite", "G": "minecraft:glass_pane", "B": "#c:ingots/bronze"}}},
+    "lych_gate": {
+        "display": "Lych Gate", "stone": "granite", "model": "lych_gate", "ivy": "lych_gate_ivy", "pack": 3,
+        "size": (4, 4, 2), "origin": (0, 0, 0), "open": [(x, y, z) for x in (1, 2) for y in (0, 1) for z in (0, 1)],
+        "texts": lambda: [{"face": "FRONT", "x": 32.0, "y": 40.0, "z": 0.0, "width": 38.0, "height": 5.6, "max_scale": 1 / 28}],
+        "slots": dict, "light": {}, "sound": "wood", "tool": "axe",
+        "recipe": {"pattern": ["SSS", "LPL", "W W"], "key": {"S": "minecraft:deepslate_tile_slab", "L": "minecraft:oak_log",
+                                                            "P": "minecraft:oak_planks", "W": "minecraft:cobblestone_wall"}}},
+    "cemetery_gateway": {
+        "display": "Cemetery Gateway", "stone": "granite", "model": "gateway", "ivy": "gateway_ivy", "pack": 3,
+        "size": (5, 4, 1), "origin": (0, 0, 0), "open": [(x, y, 0) for x in (1, 2, 3) for y in (0, 1)],
+        "texts": lambda: [{"face": "FRONT", "x": 40.0, "y": 46.4, "z": 7.2, "width": 25.0, "height": 5.2, "max_scale": 1 / 30}],
+        "slots": dict, "light": {(0, 3, 0): 14, (4, 3, 0): 14}, "sound": "stone", "tool": "pickaxe",
+        "recipe": {"pattern": ["L L", "GIG", "G G"], "key": {"L": "minecraft:lantern", "G": "minecraft:polished_granite", "I": "minecraft:iron_bars"}}},
+    "columbarium": {
+        "display": "Columbarium", "stone": "marble", "model": "columbarium", "ivy": "columbarium_ivy", "pack": 3,
+        "size": (3, 3, 1), "origin": (1, 0, 0), "open": [], "texts": _columbarium_texts,
+        "slots": lambda: {(2, 1, 0): 1, (1, 1, 0): 2, (0, 1, 0): 3, (2, 0, 0): 4, (1, 0, 0): 5, (0, 0, 0): 6},
+        "light": {}, "sound": "stone", "tool": "pickaxe",
+        "recipe": {"pattern": ["CCC", "CBC", "CCC"], "key": {"C": "minecraft:calcite", "B": "#c:ingots/bronze"}}},
+}
+
+# The Bronze Mausoleum Door: a door opened by hand (as a copper door) that fits the mausoleum's doorway.
+MAUSOLEUM_DOOR = {"id": "bronze_mausoleum_door", "display": "Bronze Mausoleum Door",
+                  "recipe": {"pattern": ["BB", "BG", "BB"], "key": {"B": "#c:ingots/bronze", "G": "minecraft:glass_pane"}, "count": 2}}
+
 # Advancements granted from code (agriculture.HALLOWEEN_ADVANCEMENTS).
 ADVANCEMENTS = {
     "here_lies": {"icon": "jugcraft:stonemasons_chisel", "title": "Here Lies…",
@@ -152,11 +220,11 @@ def parts(headstone):
 
 
 def blocks():
-    return list(HEADSTONES)
+    return list(HEADSTONES) + list(BUILDINGS) + [MAUSOLEUM_DOOR["id"]]
 
 
 def items():
-    return list(HEADSTONES) + [EPITAPH["chisel"]]
+    return list(HEADSTONES) + [EPITAPH["chisel"]] + list(BUILDINGS) + [MAUSOLEUM_DOOR["id"]]
 
 
 def textures():
@@ -168,4 +236,6 @@ def textures():
                 out += [f"gy_{stone}_{suffix}", f"gy_{stone}_relief_{suffix}"]
     out += [f"gy_granite_rough_{stage}" for stage in STAGES] + [f"gy_granite_knot_{stage}_upper" for stage in STAGES]
     out += [f"gy_{metal}_{stage}" for metal in ("iron", "bronze") for stage in STAGES]
+    out += [f"gy_{wood}_{stage}" for wood in ("oak", "roof_slate") for stage in STAGES]
+    out += ["gy_stained_glass", "gy_marble_floor", "gy_lamp_glass", "gy_lantern_glass", "gy_door_glass"]
     return out + ["gy_ivy"]

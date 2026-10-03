@@ -3857,6 +3857,62 @@ def check_graveyard(java, main):
     for key in gy.ADVANCEMENTS:
         if not (DATA / "jugcraft" / "advancement" / f"{key}.json").exists():
             err(f"Missing advancement {key}")
+    check_graveyard_buildings(java, main, lang)
+
+
+def check_graveyard_buildings(java, main, lang):
+    """Pack 3: the buildings' layout file holds every building of tools/graveyard.py with as many slots and lights as
+    parts, every part's cell, shape and inscription where graveyard_data.py puts them, and no more inscriptions than a
+    block entity keeps; Java reads it and registers the inscriptions component, the buildings' block entity and the
+    door; each building's blockstate draws every part at every stage facing every way; models, loot (part 0, keeping
+    every inscription), recipes, words and tags exist."""
+    import graveyard_data as gyd
+    layouts = load(ROOT / "src" / "main" / "resources" / "jugcraft" / "graveyard_buildings.json") or []
+    if [entry.get("id") for entry in layouts] != list(gy.BUILDINGS):
+        err("src/main/resources/jugcraft/graveyard_buildings.json must list BUILDINGS of tools/graveyard.py, in order")
+    entity = java.get("HeadstoneBlockEntity", "")
+    more = re.search(r"static final int MORE = (\d+);", entity)
+    for entry in layouts:
+        bid = entry.get("id")
+        if bid not in gy.BUILDINGS:
+            continue
+        want = gyd.building_layout(bid)
+        if entry != json.loads(json.dumps(want)):
+            err(f"{bid}: graveyard_buildings.json differs from tools/graveyard_data.py (regenerate)")
+        parts = len(entry["cells"])
+        if len(entry["slots"]) != parts or len(entry["light"]) != parts or len(entry["shapes"]) != parts or entry["cells"][0] != [0, 0, 0]:
+            err(f"{bid}: every part needs its slot, light and shape, and part 0 its own cell")
+        if not more or len(entry["texts"]) > 1 + int(more.group(1)) or max(entry["slots"]) >= len(entry["texts"]):
+            err(f"{bid}: more inscriptions than HeadstoneBlockEntity.MORE keeps, or a part cutting one it lacks")
+        state = load(ASSETS / "blockstates" / f"{bid}.json") or {}
+        drawn = {(c["when"]["facing"], c["when"]["part"], c["when"]["weathering"]) for c in state.get("multipart", [])}
+        need = {(f, str(p), str(w)) for f in ("north", "east", "south", "west") for p in range(parts) for w in range(4)}
+        if not need <= drawn:
+            err(f"{bid}: its blockstate must draw every part at every stage facing every way")
+        for c in state.get("multipart", []):
+            if not (ASSETS / "models" / "block" / (c["apply"]["model"].split("/", 1)[1] + ".json")).exists():
+                err(f"{bid}: missing model {c['apply']['model']}")
+                break
+        table = json.dumps(load(DATA / "jugcraft" / "loot_table" / "blocks" / f"{bid}.json") or {})
+        if '"part": "0"' not in table or "jugcraft:epitaph" not in table or "jugcraft:inscriptions" not in table:
+            err(f"{bid}: its loot must drop from part 0 only and keep every inscription")
+        if not (DATA / "jugcraft" / "recipe" / f"{bid}.json").exists() or f"block.jugcraft.{bid}" not in lang:
+            err(f"{bid} needs its recipe and words")
+        tool = gy.BUILDINGS[bid]["tool"]
+        if bid not in json.dumps(load(DATA / "minecraft" / "tags" / "block" / "mineable" / f"{tool}.json") or {}):
+            err(f"{bid} must be mineable with a {tool}")
+    for call in ('Jugcraft.id("inscriptions")', 'Jugcraft.id("graveyard_building")', '"/jugcraft/graveyard_buildings.json"',
+                 "GraveyardBuildingBlock.create(props, building)", "registerGraveyardBuildings();"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    door = gy.MAUSOLEUM_DOOR["id"]
+    if f'MAUSOLEUM_DOOR = "{door}"' not in main or "new DoorBlock(BlockSetType.COPPER" not in main:
+        err(f"JugcraftAgriculture.MAUSOLEUM_DOOR must be {door}, a door opened by hand")
+    for path in (ASSETS / "blockstates" / f"{door}.json", ASSETS / "models" / "block" / f"{door}_bottom.json",
+                 ASSETS / "models" / "block" / f"{door}_top.json", ASSETS / "textures" / "item" / f"{door}.png",
+                 DATA / "jugcraft" / "loot_table" / "blocks" / f"{door}.json", DATA / "jugcraft" / "recipe" / f"{door}.json"):
+        if not path.exists():
+            err(f"The Bronze Mausoleum Door needs {path.relative_to(ROOT)}")
 
 def check_ofrenda(java, main):
     """The ofrenda: OfrendaBlockEntity and OfrendaBlock match OFRENDA in tools/agriculture.py (slots, how often it looks,

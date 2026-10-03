@@ -53,6 +53,7 @@
 			"io.github.jimbozoomer.jugcraft.test.OfrendaGameTests",
 			"io.github.jimbozoomer.jugcraft.test.HeadstoneGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MonumentGameTests",
+			"io.github.jimbozoomer.jugcraft.test.GraveyardBuildingGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PetroGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PartyGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DroneGameTests",
@@ -120,6 +121,7 @@
 			"io.github.jimbozoomer.jugcraft.test.TownClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.HeadstoneClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MonumentClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.GraveyardBuildingClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DiagonalClientGameTests"
 		]
 	},
