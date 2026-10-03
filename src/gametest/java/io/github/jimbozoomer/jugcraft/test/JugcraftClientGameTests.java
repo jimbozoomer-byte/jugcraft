@@ -263,8 +263,9 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 				level.setBlockAndUpdate(base.offset(6, 1, -1), ConstructionChemistry.BLASTPROOF_CONCRETE.defaultBlockState());
 				level.setBlockAndUpdate(base.offset(9, 1, -1), ConstructionChemistry.CONSTRUCTION_FOAM.defaultBlockState());
 			});
-			server.runCommand("tp @p %d %d %d 180 35".formatted(x - 18, y, z + 11));
-			context.waitTicks(20);
+			// Back from the scene and a little to the left, looking slightly down; wait for the advancement toasts to go.
+			server.runCommand("tp @p %d %d %d 190 22".formatted(x - 17, y + 1, z + 12));
+			context.waitTicks(140);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_foam_sprayer");
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
