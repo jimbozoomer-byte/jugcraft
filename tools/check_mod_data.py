@@ -101,7 +101,7 @@ def texture(ref):
         if animated and not (width in (16, 32) and height % width == 0 and height > width):
             err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16 or 32x32 frames")
         elif not animated and img.size not in ((16, 16), (32, 32)) and not (img.size == (64, 64) and _hi_res(png.stem)):
-            err(f"Texture {ref} is {img.size}, expected 16x16 or 32x32 (64x64 only for tower_art textures)")
+            err(f"Texture {ref} is {img.size}, expected 16x16 or 32x32 (64x64 only for tower_art and hd_art textures)")
 
 
 def model(ref):
@@ -117,10 +117,12 @@ def model(ref):
 
 
 def _hi_res(name):
-    """The drone tower's realistic block textures (tools/tower_art.py) are 64x64."""
+    """64x64 textures: the drone tower's realistic block textures (tools/tower_art.py) and items drawn with the
+    high-detail renderer (tools/hd_art.py: construction_art.ITEMS so far)."""
     import tower_art
     import blueprints
-    return (name in tower_art.TEXTURES or name in blueprints.TABLE_TEXTURES
+    import construction_art
+    return (name in tower_art.TEXTURES or name in blueprints.TABLE_TEXTURES or name in construction_art.ITEMS
             or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_")))
 
 

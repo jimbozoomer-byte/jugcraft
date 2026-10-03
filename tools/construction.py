@@ -277,5 +277,7 @@ def foam_sprayer():
 def draw_all(save):
     for block in BLOCKS:
         save(globals()[block](), "block", block)
+    # Items are drawn at 64x64 with the high-detail renderer (tools/hd_art.py, tools/construction_art.py).
+    import construction_art
     for item in ITEMS:
-        save(globals()[item](), "item", item)
+        save(construction_art.ITEMS[item](), "item", item)
