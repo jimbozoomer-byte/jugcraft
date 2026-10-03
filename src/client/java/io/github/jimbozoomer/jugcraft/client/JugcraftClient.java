@@ -52,6 +52,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftLogistics.CONVEYOR_ENTITY, ConveyorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftTools.CHARGING_STATION_ENTITY, ChargingStationRenderer::new);
 		RocketPackClient.register();
+		BroomstickClient.register();
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);
 		PetroFluidsClient.register();
 		RocketPackLayer.register();
@@ -138,6 +139,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOW_LAUNCHER_ENTITY, ShowLauncherRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.SPOOKY_ROCKET, context -> new ThrownItemRenderer<>(context, 1.0F, true));
 		EntityRendererRegistry.register(JugcraftAgriculture.SKY_LANTERN, SkyLanternRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.FLYING_BROOMSTICK, BroomstickRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.gear.JugcraftGrapple.GRAPPLE_HOOK, GrappleHookRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.weapons.FieldChemistry.CHEMICAL_CLOUD,
 				net.minecraft.client.renderer.entity.NoopRenderer::new);

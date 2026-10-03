@@ -2173,6 +2173,47 @@ def check_decor4(java):
         if sorted(values) != sorted(items):
             err(f"The item tag {MOD}:brew/{colour} differs from CAULDRON's brews")
     check_hexes(java, number, lang)
+    check_broomstick(java, number, lang)
+
+
+def check_broomstick(java, number, lang):
+    """Fall addition 22: Broomstick matches BROOMSTICK in tools/agriculture.py (charge, flight, the server's checks);
+    the item, entity, component and use callback are registered, the client steers and draws it, and its words,
+    recipe, advancements and textures exist."""
+    br = ag.BROOMSTICK
+    names = {"CHARGE_PER_OINTMENT": "charge_per_ointment", "MAX_CHARGE": "max_charge", "ACCEL": "accel", "STRAFE": "strafe",
+             "CLIMB": "climb", "DRAG": "drag", "BRAKE": "brake", "MAX_SPEED": "max_speed", "HAT_BONUS": "hat_bonus", "SINK": "sink",
+             "CHECK_TICKS": "check_ticks", "TOLERANCE": "tolerance", "DRY_CLIMB": "dry_climb", "LOW_CHARGE": "low_charge",
+             "SLOW_FALL_TICKS": "slow_fall_ticks", "MOON_HEIGHT": "moon_height"}
+    for name, key in names.items():
+        value = number("Broomstick", name)
+        if value is None or abs(value - br[key]) > 1e-9:
+            err(f"Broomstick.{name} = {value} differs from BROOMSTICK['{key}'] in tools/agriculture.py ({br[key]})")
+    if f'ITEM = "{br["item"]}"' not in java.get("Broomstick", ""):
+        err("Broomstick.ITEM differs from BROOMSTICK['item']")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ("registerItem(Broomstick.ITEM, FlyingBroomstickItem::new", "FLYING_BROOMSTICK = entity(Broomstick.ITEM",
+                 'Jugcraft.id("broom_charge")', "Broomstick.use(player, level, hand, entity)"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    registry = (client / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "BroomstickClient.register();" not in registry or "FLYING_BROOMSTICK, BroomstickRenderer::new" not in registry:
+        err("JugcraftClient.java must register BroomstickClient and BroomstickRenderer")
+    for key in (f"item.{MOD}.{br['item']}", f"entity.{MOD}.{br['item']}", "message.jugcraft.broom.needs_ointment",
+                "message.jugcraft.broom.anointed", "message.jugcraft.broom.full", "message.jugcraft.broom.thin", "message.jugcraft.broom.dry",
+                "message.jugcraft.broom.bucked", "tooltip.jugcraft.broom.charge", "tooltip.jugcraft.broom.empty", "tooltip.jugcraft.broom.how"):
+        if key not in lang:
+            err(f"The flying broomstick has no words for {key}")
+    recipe = load(DATA / MOD / "recipe" / f"{br['item']}.json") or {}
+    if sorted(recipe.get("ingredients", [])) != sorted(br["inputs"]):
+        err("The flying broomstick's recipe differs from BROOMSTICK['inputs']")
+    for advancement in ("up_and_away", "over_the_moon"):
+        if not (DATA / MOD / "advancement" / f"{advancement}.json").exists():
+            err(f"The advancement {advancement} is missing")
+    for path in (ASSETS / "textures" / "item" / f"{br['item']}.png", ASSETS / "textures" / "entity" / f"{br['item']}.png"):
+        if not path.exists():
+            err(f"The flying broomstick needs {path.relative_to(ROOT)}")
 
 
 def check_hexes(java, number, lang):

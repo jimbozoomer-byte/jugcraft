@@ -280,6 +280,8 @@ public final class JugcraftAgriculture {
 	public static EntityType<SpookyRocket> SPOOKY_ROCKET;
 	/** Sky lanterns let go: they rise, drift with the wind and burn out. */
 	public static EntityType<SkyLantern> SKY_LANTERN;
+	public static EntityType<Broomstick> FLYING_BROOMSTICK;
+	public static DataComponentType<Integer> BROOM_CHARGE;
 	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
 	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
 	/** The mooncakes, baked in the Cooking Pot. */
@@ -986,6 +988,16 @@ public final class JugcraftAgriculture {
 			registerItem(Hexes.draughtId(hex), props -> new HexDraughtItem(props, hex), new Item.Properties().component(DataComponents.CONSUMABLE,
 					Consumables.defaultDrink().build()).usingConvertsTo(Items.GLASS_BOTTLE).stacksTo(16), FOOD_TAB);
 		}
+		// Fall additions 22, the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by
+		// looking; the ointment is its fuel, kept on the item.
+		BROOM_CHARGE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("broom_charge"),
+				DataComponentType.<Integer>builder().persistent(Codec.intRange(0, Broomstick.MAX_CHARGE)).networkSynchronized(ByteBufCodecs.VAR_INT)
+						.build());
+		registerItem(Broomstick.ITEM, FlyingBroomstickItem::new, new Item.Properties().stacksTo(1).component(BROOM_CHARGE,
+				Broomstick.CHARGE_PER_OINTMENT), EQUIPMENT_TAB);
+		FLYING_BROOMSTICK = entity(Broomstick.ITEM, EntityType.Builder.<Broomstick>of(Broomstick::new, MobCategory.MISC).noLootTable()
+				.sized(0.9F, 0.6F).clientTrackingRange(10).updateInterval(1));
+		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> Broomstick.use(player, level, hand, entity));
 
 		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
 		// entity players sit on), the Autumn Wreath and the Leaf Piles.

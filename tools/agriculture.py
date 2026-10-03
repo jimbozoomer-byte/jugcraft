@@ -666,6 +666,10 @@ HALLOWEEN_ADVANCEMENTS.update(graveyard.ADVANCEMENTS)
 HALLOWEEN_ADVANCEMENTS.update({
     "drink_me": {"icon": "jugcraft:shrinking_draught", "title": "Drink Me", "description": "Drink a Shrinking Draught", "frame": "task"},
     "fee_fi_fo_fum": {"icon": "jugcraft:giants_draught", "title": "Fee-Fi-Fo-Fum", "description": "Drink a Giant's Draught", "frame": "task"},
+    "up_and_away": {"icon": "jugcraft:flying_broomstick", "title": "Up and Away", "description": "Take off on a flying broomstick",
+                    "frame": "task"},
+    "over_the_moon": {"icon": "jugcraft:flying_broomstick", "title": "Over the Moon",
+                      "description": "Fly a broomstick high across the sky on a full-moon night", "frame": "challenge"},
 })
 
 
@@ -888,6 +892,17 @@ HEX = {"doses": 3, "room_extend_ticks": 100,
                            "effect": "giant", "effect_display": "Giant", "scale": 0.6, "step": 0.5, "reach": 1.0, "seconds": 180},
                  "flying": {"brew": "purple", "ingredients": ["minecraft:phantom_membrane"], "item": "flying_ointment",
                             "display": "Flying Ointment", "seconds": 30}}}
+# The flying broomstick (fall addition 22; Broomstick, FlyingBroomstickItem, client/BroomstickClient): a witch's broom
+# anointed with Flying Ointment, ridden and steered by looking. Each ointment is `charge_per_ointment` ticks of flight,
+# up to `max_charge`, burnt while ridden off the ground. Forward pushes `accel` a tick along the look, strafe `strafe`
+# sideways, jump `climb` up; `drag` of the speed is kept each tick (`brake` of that when braking); at most `max_speed`
+# blocks a tick, times `hat_bonus` in a witch hat. Dry, it sinks at `sink`. The server checks every `check_ticks` ticks
+# that it went no further than its top speed allows (`tolerance` times, for lag) and, dry, climbed no more than
+# `dry_climb`; getting off in the air gives `slow_fall_ticks` of slow falling.
+BROOMSTICK = {"item": "flying_broomstick", "display": "Flying Broomstick", "charge_per_ointment": 2400, "max_charge": 7200,
+              "accel": 0.05, "strafe": 0.025, "climb": 0.04, "drag": 0.91, "brake": 0.8, "max_speed": 0.6, "hat_bonus": 1.25,
+              "sink": 0.08, "check_ticks": 20, "tolerance": 3.0, "dry_climb": 2.0, "low_charge": 400, "slow_fall_ticks": 100,
+              "moon_height": 48, "inputs": ["jugcraft:witchs_broom", "jugcraft:flying_ointment", "minecraft:feather", "minecraft:feather"]}
 # The Apothecary Shelf (ApothecaryShelfBlock): wall shelves of jars; sneak-use cycles `arrangements` ways to set them.
 APOTHECARY_SHELF = {"block": "apothecary_shelf", "display": "Apothecary Shelf", "arrangements": 4}
 # The Crystal Ball (CrystalBallBlock): glows `light`; gazing flares it to `gazing_light` for `gaze_ticks` and tells a
@@ -2445,7 +2460,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + plants.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + plants.items())
 
 
 def owns(entry_id):
@@ -2498,3 +2513,6 @@ SHAPELESS += [{"id": "marigold_petals", "inputs": ["jugcraft:marigold"], "result
                                                "minecraft:light_blue_dye"], "result": "sugar_skull", "count": 2, "category": "building"},
               {"id": "pan_de_muerto_dough", "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:wheat", "minecraft:egg",
                                                        "minecraft:sugar"], "result": "pan_de_muerto_dough", "count": 2, "category": "misc"}]
+
+# Fall additions 22: a flying broomstick is a witch's broom anointed with Flying Ointment and fletched with feathers.
+SHAPELESS += [{"id": BROOMSTICK["item"], "inputs": BROOMSTICK["inputs"], "result": BROOMSTICK["item"], "count": 1, "category": "misc"}]

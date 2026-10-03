@@ -42,6 +42,7 @@ import pie_data
 import spirit_board_data
 import turkey_data
 import theremin_data
+import broom_data
 import ofrenda_data
 import graveyard_data
 import regatta_data
@@ -222,6 +223,7 @@ def assets(root, write, lang):
     spirit_board_data.assets(root, write, lang)
     turkey_data.assets(root, write, lang)
     theremin_data.assets(root, write, lang)
+    broom_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
 
