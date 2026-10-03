@@ -3768,6 +3768,15 @@
             "Homing rockets (with a guidance unit instead of the casing) lock on to the hostile mob nearest your crosshair within 48 blocks, if you can see it, and steer into it. Their blast is smaller.",
             "Like grenades, rockets hurt living things only: they never break, move or burn a block."
           ]
+        },
+        {
+          "title": "Booster Rails",
+          "icon": "jugcraft:booster_rail",
+          "text": [
+            "A booster rail is a straight rail with rocket thrusters. Power it with redstone like a powered rail; unpowered it is an ordinary rail and does not brake.",
+            "Load it with solid propellant (use it on the rail, or feed it from a hopper): each gives 8 boosts, up to 64 held.",
+            "A cart that rolls on to a powered, loaded booster rail (or stands on it) is kicked to full speed and held there for 10 seconds, up slopes too, trailing flame. A cart standing still goes uphill, or away from a block at one end."
+          ]
         }
       ]
     },
