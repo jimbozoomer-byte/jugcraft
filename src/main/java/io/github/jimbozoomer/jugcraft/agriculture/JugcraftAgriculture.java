@@ -288,6 +288,8 @@ public final class JugcraftAgriculture {
 	public static EntityType<Pumpkling> PUMPKLING;
 	public static EntityType<TossRing> TOSS_RING;
 	public static BlockEntityType<HighStrikerBlockEntity> HIGH_STRIKER_ENTITY;
+	public static EntityType<FerrisWheel> FERRIS_WHEEL;
+	public static BlockEntityType<FerrisWheelBlockEntity> FERRIS_WHEEL_BOOTH;
 	public static DataComponentType<Integer> BROOM_CHARGE;
 	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
 	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
@@ -1061,6 +1063,15 @@ public final class JugcraftAgriculture {
 			registerItem(plush.id(), props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
 		Midway.register();
+		// Fall additions 27, the Ferris wheel: its booth (the block, which raises the wheel, boards riders and takes kinetic
+		// power) and the wheel itself.
+		Block booth = registerBlock(FerrisWheelBlock.ID, FerrisWheelBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.strength(3.0F, 6.0F).sound(SoundType.METAL).requiresCorrectToolForDrops().pushReaction(PushReaction.IMMOVEABLE));
+		registerItem(FerrisWheelBlock.ID, props -> new BlockItem(booth, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		FERRIS_WHEEL_BOOTH = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(FerrisWheelBlock.ID),
+				FabricBlockEntityTypeBuilder.create(FerrisWheelBlockEntity::new, booth).build());
+		FERRIS_WHEEL = entity("ferris_wheel", EntityType.Builder.<FerrisWheel>of(FerrisWheel::new, MobCategory.MISC).noLootTable().noSummon()
+				.sized(1.0F, 1.0F).clientTrackingRange(10).updateInterval(20));
 
 		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
 		// entity players sit on), the Autumn Wreath and the Leaf Piles.

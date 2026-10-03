@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: The Ferris wheel, fall addition 27
+- **A fairground big wheel**, real-life sized: place the **Ferris Wheel** booth and the wheel rises over it, 16 blocks high, two lattice A-frames, red trussed rims with 128 bulbs, and eight cars (pumpkin, cranberry, mustard and spruce) seating two each.
+- **Kinetic power turns it:** a hand crank, shaft or engine against the booth; 12 KE a tick is full speed, a turn in 40 seconds. One player can crank while friends ride.
+- **Ride it:** use the booth to board the car at the bottom; sneak to get off and you're set down by the booth. A block in a car's way jams it. Round and Round, and Two to a Car for riding round together.
+- It takes the planned ghost train's place (the Haunted Hayride and Jump-Scare Trap already cover that). Painted at 64 × 64. Seven game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-ferris-wheel).
+
 ### Unmerged: The fall fair midway, fall addition 26
 - **The High Striker:** a red-and-white fairground tower five blocks tall with lamps up its front and a bell on top. Hit its pad with a **Carnival Mallet**: the puck climbs as far as the blow was strong, lighting the lamps with a rising note. Ring the bell (a fully charged swing, better still a falling one) to win a prize (Ring the Bell).
 - **Ring Toss:** a crate of nine bottles. Toss **Toss Rings** at it from three blocks or more; one over a bottle's neck is a ringer and wins a prize (Ringer!).

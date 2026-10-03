@@ -169,7 +169,8 @@ public final class Midway {
 		return prizes;
 	}
 
-	private static SoundEvent sound(String id, SoundEvent fallback) {
+	/** The vanilla sound {@code id}, or {@code fallback} if there is none by that name. */
+	static SoundEvent sound(String id, SoundEvent fallback) {
 		return BuiltInRegistries.SOUND_EVENT.getOptional(Identifier.withDefaultNamespace(id)).orElse(fallback);
 	}
 }

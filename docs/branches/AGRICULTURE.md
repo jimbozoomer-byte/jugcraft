@@ -1084,6 +1084,12 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 - **Ring Toss:** toss **Toss Rings** at a crate of nine bottles from three blocks off or more. Land one over a bottle's neck to win a prize; misses can be picked up and thrown again.
 - **Prizes** are plushes: a pumpkin, a ghost, a bat, a black cat, a squirrel, a rare werewolf, and the very rare Jumbo Pumpkin Plush. Squeeze one and it squeaks. Details: [even more fall additions](../features/even-more-fall-additions.md#the-fall-fair-midway).
 
+### The Ferris wheel
+
+- **Raise one** by placing the **Ferris Wheel** booth where it has room (15 blocks across, 16 high, 3 deep). The wheel stands over it, facing you, with eight cars of two seats.
+- **Turn it** with kinetic power against the booth: a **hand crank** (planks and an iron shaft) turns it at full speed, five seconds a crank, so one friend cranks while others ride; an engine turns it all day.
+- **Ride it:** use the booth to climb into the car at the bottom. Sneak to get off and you're set down by the booth. Its lights come on while it turns. Details: [even more fall additions](../features/even-more-fall-additions.md#the-ferris-wheel).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

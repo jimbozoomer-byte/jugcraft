@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21) and the flying broomstick (addition 22) are implemented in source and pass CI's game tests; full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25) and the fall fair midway (addition 26) are implemented in source. None is yet played by hand. Additions 27 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21) and the flying broomstick (addition 22) are implemented in source and pass CI's game tests; full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25) the fall fair midway (addition 26) and the Ferris wheel (addition 27) are implemented in source. None is yet played by hand. Additions 28 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
@@ -8,7 +8,7 @@ Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Let
 24. squirrels and acorns: squirrels in the woods gather and bury acorns, and some grow into oaks; acorns plant oaks and roast;
 25. the Pumpkling: a carved pumpkin woken by a wisp or ectoplasm into a pet that wears its face, follows you and keeps crows off your crops;
 26. the fall fair midway: a five-block High Striker rung with a Carnival Mallet, Ring Toss, and plush prizes;
-27. the ghost-train dark ride (planned);
+27. the Ferris wheel: a fairground big wheel standing over its booth, eight cars of two seats, turned by kinetic power (one player can crank it for their friends). It takes the place of the planned ghost-train dark ride, which the Haunted Hayride and the Jump-Scare Trap already cover;
 28. the piñata (planned);
 29. the hot-air balloon fiesta (planned);
 30. the leaf blower (planned).
@@ -36,6 +36,8 @@ The flying broomstick is Discovery tier too: the Witch's Broom (two sticks and a
 
 The fall fair midway is Discovery tier: the High Striker is planks, two redstone lamps and a bell; its Carnival Mallet a log, two red wool and two sticks; Ring Toss six glass bottles over wooden slabs; and four Toss Rings two sticks and a string. The plushes are only won.
 
+The Ferris wheel is Discovery tier to build (2 redstone lamps, 4 iron bars, an iron block and 2 wool) and turns on kinetic power, so it comes with the first shafts: a hand crank (planks and an iron shaft) turns it at full speed.
+
 Primary specialty and supported player role: witchcraft and exploration. A witch brews hexes for others:
 - **Shrinking:** gets a player into one-block gaps, under low ceilings and into cramped caves, and makes them a smaller target.
 - **Giant:** gives a block more reach and half a block more step, for building and climbing, but makes the player a bigger target.
@@ -50,6 +52,8 @@ The Pumpkling is for carvers and farmers: a pet that wears a face its owner carv
 Squirrels and acorns are for foresters, cooks and anyone who likes animals: acorns are an early snack and another way to plant oaks, and squirrels slowly plant the woods they live in. Tame-minded players can breed them with nuts.
 
 The midway is for builders of fairs and anyone who likes a game: a showpiece that lights up when it's struck, a test of timing (a fully charged swing, better still a falling one) and aim (a soft toss over a bottle's neck from three blocks off), and a shelf of plush prizes to win, trade and decorate with. A fair needs someone to build it; anyone can play.
+
+The Ferris wheel is for fair builders and engineers: the showpiece of a fair, real-life sized, and a first use for kinetic power that isn't a machine. One player cranks while friends ride; riding all the way round with someone beside you is a milestone for two (Two to a Car).
 
 The flying broomstick is a witch's way to travel: slower than elytra but found long before them, good for scouting, crossing ravines and reaching rooftops, and fuelled by the ointment a witch brews.
 
@@ -178,6 +182,16 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 4. **Prizes:** each prize is one plush, one roll of the loot table `jugcraft:gameplay/midway_prize`: Pumpkin Plush (24 in 102), Ghost Plush (24), Bat Plush (20), Black Cat Plush (20), Squirrel Plush (9), Werewolf Plush (4), and the **Jumbo Pumpkin Plush** (1 in 102). Winning one earns **Step Right Up**, and the jumbo plush **Jackpot**.
 5. **Plushes** are stuffed felt toys with stitched seams and embroidered faces. Each sits facing whoever places it, and squeaks (with a heart) when squeezed with an empty hand. They are only won, not crafted.
 
+### The Ferris wheel
+1. **Raise it:** place the **Ferris Wheel** (its booth) and the wheel rises over it, facing you: two A-frames of lattice steel on concrete footings, the hub 8½ blocks up, two red trussed rims 6 blocks round with 32 spokes, and **eight cars** hanging between the rims, in pumpkin, cranberry, mustard and spruce, each with a striped canopy, a tufted bench for two and a brass grab bar. It is about 15 blocks across, 16 high and 3 deep, and it needs that space clear (air, grass or flowers); otherwise it says so and isn't placed.
+2. **The booth** at its foot is the loading platform: painted panels, a plank deck with a safety edge, and the operator's controls (a brass lever, a speed gauge and two buttons). It is the wheel's only real block: break it and the wheel comes down, setting any riders on the ground.
+3. **Turn it** with kinetic power: put a hand crank, shaft or gearbox against the booth, as you would a machine. **12 KE a tick** turns it at full speed, **once round in 40 seconds**; less turns it slower in proportion. It eases up to speed in 2 seconds and coasts to a stop in 3 when the power stops. A **hand crank** (16 KE a tick) turns it at full speed, five seconds a crank, so one player can crank for their friends; an engine turns it all day.
+4. **Ride it:** use the booth to climb into the car at the bottom, beside whoever is in it. If that car is full, wait for the next. You sit in your car as the wheel carries you round, and look where you like.
+5. **Get off** (sneak) whenever you like: you're set down on the ground in front of the booth, however high your car was.
+6. **Lights:** 128 bulbs on the rims and spokes light up while it turns or anyone rides.
+7. **Jams:** if a block stands where a car is about to go, the wheel stops and says it is jammed, until the block is cleared. It never carries a rider into a block.
+8. **Advancements:** **Round and Round** for riding all the way round; **Two to a Car** for riding all the way round with someone in the seat beside you.
+
 ## Connections
 - Hex brews, input producer:
   - the Bubbling Cauldron and its brews (the witch's cottage decorations);
@@ -217,6 +231,10 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 - Midway, output consumer: decoration (plushes, the lit striker), trading (plushes are rare prizes), and a reason to gather for a fair.
 - Midway, entry path: everything is Overworld and early; a bell is found in villages.
 - Midway, required vs optional: optional. Nothing is gated behind it. One player can build the fair and others play it.
+- Ferris wheel, input producer: iron (bars and a block), redstone lamps, wool; and kinetic power from the tech branch (a hand crank, steam engine, electric motor or flywheel, through shafts, gearboxes and belts).
+- Ferris wheel, output consumer: a fair's showpiece and a ride; it makes nothing. It is the first use of kinetic power that isn't a machine.
+- Ferris wheel, entry path: everything is Overworld and early: a hand crank is planks and an iron shaft (the machines feature).
+- Ferris wheel, required vs optional: optional. Nothing is gated behind it.
 
 ## Balance and automation
 - **Costs:** the cauldron is a cauldron and two iron ingots, reused. One brew is a water bucket (the bucket comes back), one brew ingredient, one hex ingredient and three glass bottles, which come back when drunk. That makes three draughts.
@@ -266,6 +284,12 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - Prizes cost a full swing and luck (a ring in six plain, two in three falling, every 3 seconds at best: the puck's climb and fall), or a ringer (a quarter string, and aim). Plushes are decoration and lead to nothing else, so there is no loop; the jumbo plush is 1 prize in 102.
   - Automation: none. Only a player's left click strikes, only a thrown ring lands, and the prize goes to the player who struck or threw.
   - Cost on the server: a struck striker sets its five blocks once a step (about 20 steps a strike); a ring checks the block it hits once. No ticking block entity: the striker's base runs on scheduled ticks only while its puck moves.
+- **Ferris wheel:**
+  - Costs: 2 redstone lamps, 4 iron bars, an iron block and 2 wool (any colour); and its power, all the while it turns.
+  - Units: 12 KE a tick for full speed (2π/800 radians a tick, a turn in 800 ticks); it takes no more than 12 KE a tick from all sources, and shares a network's power as any machine does. Up to speed in 40 ticks, down in 60. Hub 8.5 blocks up, cars 6 blocks round, 8 cars of 2 seats; a rider sits 0.94 blocks under their car's pivot, 0.34 either side of its middle. Boarding within 4 blocks of the booth.
+  - The power goes into the turning: nothing comes back out, so there is no loop. It gives nothing but the ride and two advancements.
+  - Automation: none to speak of. Any kinetic source turns it; only players ride it.
+  - Cost on the server: while it turns, a wheel checks 4 points of each of its 8 cars for blocks each tick (32 block reads) and counts its riders' way round; it syncs its speed when it changes and its angle once a second. Standing still it does neither. The booth's drive has no ticker and saves nothing.
 - **Hex brews, cost on the server:** one look at each online player per server tick (a duration and effect check; a collision check only when a shrinking is about to end). No block entity, no block ticks. The glyphs and bubbles are client particles.
 
 ## Multiplayer and persistence
@@ -321,6 +345,11 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 - **Midway, persistence:** the striker's base saves where its puck is going, whether it is falling and who struck it, so a strike in flight finishes after a restart (a prize then goes only to a striker who is still there). Plushes are blocks; a ringer's ring comes off on its scheduled tick.
 - **Midway, IDs (all new):** blocks and items `high_striker`, `ring_toss`, `pumpkin_plush`, `ghost_plush`, `bat_plush`, `black_cat_plush`, `squirrel_plush`, `werewolf_plush`, `jumbo_pumpkin_plush`; items `carnival_mallet`, `toss_ring`; entity `toss_ring`; block entity `high_striker`; item tag `jugcraft:plushes`; loot table `gameplay/midway_prize`; advancements `step_right_up`, `ring_the_bell`, `ringer`, `jackpot`; recipes `high_striker`, `carnival_mallet`, `ring_toss`, `toss_ring`.
 - **Midway, disable behaviour:** with the agriculture feature off the recipes don't load and the striker can't be struck; everything stays registered, and plushes stay where they are.
+- **Ferris wheel, server authority:** placing the booth goes through vanilla's block placement (reach, build rights); the server checks the wheel's space. Boarding is the booth's use, decided on the server: within 4 blocks, not already riding, a seat free in the car at the bottom. Where riders sit, when the wheel turns and the advancements are all the server's; clients only draw it.
+- **Ferris wheel, what clients get:** the wheel is an entity: its facing, speed, angle (once a second, as a correction; the client turns it in between), whether it is jammed, and who sits in each of its 16 seats (by entity id). The booth is a block with a facing.
+- **Ferris wheel, persistence:** the wheel saves its facing, angle and speed; riders don't stay seated across a save (players aren't saved as passengers). If its booth is gone (an explosion, a command) the wheel takes itself down within a second; if the wheel is gone, using the booth raises it again.
+- **Ferris wheel, IDs (all new):** block and item `ferris_wheel` (the booth), entity `ferris_wheel` (the wheel), block entity `ferris_wheel`; advancements `round_and_round`, `two_to_a_car`; recipe `ferris_wheel`.
+- **Ferris wheel, disable behaviour:** with the agriculture feature off its recipe doesn't load; a wheel already standing keeps turning if driven. With the machines feature off there are no hand cranks to make, so it turns only from another kinetic source.
 
 ## Dependencies and assets
 - No new dependencies.
@@ -342,6 +371,10 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - `tools/midway.py` holds the numbers (`HIGH_STRIKER`, `RING_TOSS`, `PLUSHES`), the advancements and the recipes; the checker compares them with Java.
   - `tools/midway_data.py` writes the models: the striker's base and pad, its tower with each lamp lit and unlit and the puck where it is, the bell rung or not; the crate with a ring over each bottle in turn; each plush. It also writes the blockstates, words, loot and tags.
   - `tools/midway_textures.py` paints every texture at 64 × 64 (docs/ART_DIRECTION.md, "High resolution"), with `tools/fur_paint.py`: painted boards, lacquer and gold pinstripes, brass, glowing lamps, glass bottles, felt with stitched seams and embroidered faces, and the three item icons.
+- The Ferris wheel: no new dependencies.
+  - `tools/ferris_wheel.py` holds the numbers (`FERRIS_WHEEL`), the cars' colours, the advancements and the recipe; the checker compares them with Java.
+  - `tools/ferris_wheel_data.py` writes the booth's model and the quads the client draws the wheel from (`assets/jugcraft/ferris_wheel_quads.json`): the frame; a sixteenth of the wheel (both rims' outer and inner rings, their ties and a spoke), drawn sixteen times round; the hub plates; a car's pivot bar; a sixteenth's bulbs; and a car in each colour. The same boxes make the preview the art was checked against.
+  - `tools/ferris_wheel_textures.py` paints every texture at 64 × 64 (docs/ART_DIRECTION.md, "High resolution"), with `tools/fur_paint.py`: lattice steel cut out between its bracing, cream enamel with rivets, red rims with a gold pinstripe, a brass sunburst hub, bulbs, four cars with leaf cartouches, striped canopies and scalloped valances, tufted leather, planks, the booth's panels, deck, controls and gauge, and the item. All original; nothing is copied or traced.
   - Sounds and particles are vanilla's: an anvil's clang pitched up for the strike, note-block bits rising with the puck, a bell, glass and an amethyst chime for a ringer; crits, fireworks, hearts and happy-villager sparks.
 
 ## Verification
@@ -496,6 +529,22 @@ The 8 new game tests (`MidwayGameTests`):
 
 Not run: swinging a mallet and tossing rings by hand, which no automated test can do; a two-client dedicated-server playtest.
 
+### Ferris wheel verification
+Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1085 IDs and now compares `tools/ferris_wheel.py` with Java; `python3 scripts/check_repository.py` passes. The wheel's look was checked in a render of its quads before any game run.
+
+The 7 new game tests (`FerrisWheelGameTests`), in a 44 by 44 empty arena:
+1. placed from its item where there is room, the booth faces whoever placed it, one wheel stands over it facing the same way, and its drive is there; with a block in its way, a second can't be placed and the item is kept;
+2. the booth takes 12 KE in a tick and no more; a real hand crank beside it, cranked for 60 ticks, brings the wheel up to full speed, turned and lit; when the crank stops, the wheel stops;
+3. from 10 blocks off a player can't board; within reach they board the car at the bottom, a second sits beside them, a third finds the car full; a rider sits just over the booth; getting off sets them down in front of the booth, and their seat is free again;
+4. nothing is in a new wheel's way; a block where a car hangs blocks it; driven, it stays jammed; cleared, it turns again;
+5. half way round earns nothing; all the way round earns Round and Round, and with a friend beside you, Two to a Car;
+6. breaking the booth takes the wheel down, sets its rider off and drops the booth once;
+7. the recipe, advancements and loot load.
+
+`FerrisWheelClientGameTests` takes screenshots: the wheel at a fair, turned by a hand crank, a High Striker and plushes beside it; its foot, the booth and crank close up; the view from a car at the top; and at night, lit.
+
+Not run: riding it in play for a whole turn (the tests turn it directly), and a two-client dedicated-server playtest (two riders in one car, seen from the ground).
+
 ## World and event applicability
 - A cauldron brews hexes in any dimension, all year. Nothing is seasonal.
 - The hex ingredients come from the Overworld: brown mushrooms, beans, and phantoms.
@@ -505,8 +554,12 @@ Not run: swinging a mallet and tossing rings by hand, which no automated test ca
 - Squirrels come only to the Overworld's forests and taiga, by day, all year. Acorns drop from oak and dark oak leaves anywhere, and plant on any grass or dirt.
 
 - The midway works in any dimension, all year. Nothing generates in the world.
+- The Ferris wheel works in any dimension with room for it, all year. Nothing generates in the world.
 
 ## Rollout and open questions
+- A Ferris wheel has no collision of its own: players and mobs walk through its frame and cars. Only its booth is solid. Its space is checked when it is placed, and after that it stops for blocks in its cars' way rather than breaking them.
+- Getting off a Ferris wheel anywhere sets you down at the booth, as if the operator brought your car down; there is no stepping off at the top.
+- Riders don't stay seated across a save or a log-out. A wheel larger or smaller, or with more cars, is not made; its size and speed are open to balance review once played.
 - A hex brew can't be drawn by hoppers or dispensers. Bottles are filled by hand.
 - Breaking a cauldron loses its brew, as before.
 - How big a giant is (×1.6) and how long each effect lasts are open to balance review once played. A giant is easier to hit, which is the trade for its reach.

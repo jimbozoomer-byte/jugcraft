@@ -18,6 +18,7 @@ from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS
 import agriculture as ag
 import werewolf_model
 import midway
+import ferris_wheel
 import petro
 import deposits
 import seasons
@@ -2173,6 +2174,7 @@ def check_decor4(java):
     check_squirrels(java, number, lang)
     check_pumpkling(java, number, lang)
     check_midway(java, number, lang)
+    check_ferris_wheel(java, number, lang)
 
 
 def check_midway(java, number, lang):
@@ -2228,6 +2230,59 @@ def check_midway(java, number, lang):
             ASSETS / "models" / "block" / f"{m}.json" for m in ("high_striker_base", "high_striker_4_rung", "ring_toss", "ring_toss_ringed_9")]:
         if not path.exists():
             err(f"The midway needs {path.relative_to(ROOT)}")
+
+
+def check_ferris_wheel(java, number, lang):
+    """Fall addition 27: the Ferris wheel matches tools/ferris_wheel.py (its size, its cars and seats, its power and
+    speed, how far a player may board from); the booth, its block entity (a kinetic consumer) and the wheel are
+    registered and drawn from the quads; its words, loot, recipe, advancements, models and quads exist."""
+    fw = ferris_wheel.FERRIS_WHEEL
+    expected = {("FerrisWheel", "CARS"): fw["cars"], ("FerrisWheel", "SEATS"): fw["seats"], ("FerrisWheel", "HUB"): fw["hub"],
+                ("FerrisWheel", "RADIUS"): fw["radius"], ("FerrisWheel", "SEAT_ACROSS"): fw["seat_across"],
+                ("FerrisWheel", "SEAT_DOWN"): fw["seat_down"], ("FerrisWheel", "SEAT_BACK"): fw["seat_back"],
+                ("FerrisWheel", "NEED"): fw["need"], ("FerrisWheel", "TURN_TICKS"): fw["turn_ticks"],
+                ("FerrisWheel", "BOARD_REACH"): fw["board_reach"], ("FerrisWheelBlock", "WIDTH"): fw["width"],
+                ("FerrisWheelBlock", "HEIGHT"): fw["height"], ("FerrisWheelBlock", "DEPTH"): fw["depth"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/ferris_wheel.py ({value})")
+    wheel = java.get("FerrisWheel", "")
+    for rate, share in (("ACCEL", fw["accel"]), ("DECEL", fw["decel"])):
+        if f"{rate} = FULL_SPEED / {round(1 / share)}.0F" not in wheel:
+            err(f"FerrisWheel.{rate} must be full speed / {round(1 / share)} (tools/ferris_wheel.py)")
+    if "implements KineticConsumer" not in java.get("FerrisWheelBlockEntity", ""):
+        err("The Ferris Wheel's booth must take power through the shared KineticConsumer interface")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ("registerBlock(FerrisWheelBlock.ID, FerrisWheelBlock::new", "FerrisWheelBlockEntity::new, booth",
+                 "EntityType.Builder.<FerrisWheel>of(FerrisWheel::new"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client_dir = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    if "JugcraftAgriculture.FERRIS_WHEEL, FerrisWheelRenderer::new" not in (client_dir / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient.java must draw the Ferris wheel")
+    if '"ferris_wheel_quads.json"' not in (client_dir / "DecorQuads.java").read_text(encoding="utf-8"):
+        err("DecorQuads must read ferris_wheel_quads.json")
+    quads = load(ASSETS / "ferris_wheel_quads.json") or {}
+    for name in ["ferris_wheel_frame", "ferris_wheel_section", "ferris_wheel_hub", "ferris_wheel_pivot", "ferris_wheel_lights"] + [
+            f"ferris_wheel_car_{c}" for c in ferris_wheel.CAR_COLOURS]:
+        if not quads.get(name):
+            err(f"ferris_wheel_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"ferris_wheel_quads.json's {name} draws missing texture {quad['texture']}")
+                break
+    if lang.get(f"block.{MOD}.{fw['block']}") != fw["display"] or lang.get(f"entity.{MOD}.{fw['entity']}") != fw["entity_display"]:
+        err("The Ferris wheel has no words")
+    for key in ("no_room", "full", "jammed"):
+        if f"message.{MOD}.ferris_wheel.{key}" not in lang:
+            err(f"The Ferris wheel has no words for message.{MOD}.ferris_wheel.{key}")
+    for path in [DATA / MOD / "advancement" / f"{a}.json" for a in ferris_wheel.ADVANCEMENTS] + [
+            DATA / MOD / "recipe" / f"{r['id']}.json" for r in ferris_wheel.SHAPED] + [
+            DATA / MOD / "loot_table" / "blocks" / f"{fw['block']}.json", ASSETS / "blockstates" / f"{fw['block']}.json",
+            ASSETS / "models" / "block" / f"{fw['block']}.json", ASSETS / "textures" / "item" / f"{fw['block']}.png"]:
+        if not path.exists():
+            err(f"The Ferris wheel needs {path.relative_to(ROOT)}")
 
 
 def check_pumpkling(java, number, lang):
