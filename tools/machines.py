@@ -92,6 +92,8 @@ MACHINES = {
     "electroplating_bath": {"display": "Electroplating Bath", "lit": True},
     # Batch 35 (tools/gas_storage.py): freezes water into ice with ammonia refrigerant, and packs ice into blue ice.
     "ammonia_chiller": {"display": "Ammonia Chiller", "lit": True},
+    # Batch 43 (tools/rocketry.py): condenses oxygen into liquid oxygen for liquid rocket motors.
+    "cryogenic_liquefier": {"display": "Cryogenic Liquefier", "lit": True},
     # Batch 38 (tools/rocketry.py): assembles solid propellant, rocket parts and rockets from up to three ingredients.
     "rocket_workshop": {"display": "Rocket Workshop", "lit": True},
     # Kinetic: a 2x2x3 V8 diesel engine; its shaft leaves the back of the upper right back block.
@@ -251,6 +253,8 @@ STATS = {
     "electroplating_bath": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32},
     # A block of ice (or a pressing) every 100 ticks for 5 mB of ammonia; a bucket of water per ice block.
     "ammonia_chiller": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 24, "tank": 8_000},
+    # 250 mB of liquid oxygen from a bucket of oxygen every 80 ticks, at 96 JE/t: the cold costs 7,680 JE a batch.
+    "cryogenic_liquefier": {"capacity": 40_000, "input_per_tick": 512, "use_per_tick": 96, "tank": 8_000},
     # Like the circuit assembler, three ingredients in any slots, at 48 JE/t.
     "rocket_workshop": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 48},
     # 2 tall. Mines one c:ores block per 40 ticks from a 9x9 column below it, down to the bottom of the world.
@@ -468,6 +472,9 @@ CRAFTING = {
     # A steel bench with a press (piston), a welder (circuit) and a vice (anvil) on a casing.
     "rocket_workshop": (["SPS", "AMC", "SSS"], {"S": "#c:plates/steel", "P": "minecraft:piston", "A": "minecraft:anvil",
                                                "M": "jugcraft:machine_casing", "C": "jugcraft:advanced_circuit"}, 1),
+    "cryogenic_liquefier": (["PCP", "TMT", "PAP"], {"P": "#c:plates/steel", "C": "jugcraft:ammonia_chiller",
+                                                    "T": "jugcraft:fluid_tank", "M": "jugcraft:electric_motor",
+                                                    "A": "jugcraft:advanced_circuit"}, 1),
     "ammonia_chiller": (["PMP", "CTC", "PKP"], {"P": "#c:plates/steel", "M": "jugcraft:electric_motor",
                                                "C": "jugcraft:bronze_fluid_pipe", "T": "jugcraft:fluid_tank",
                                                "K": "minecraft:piston"}, 1),
