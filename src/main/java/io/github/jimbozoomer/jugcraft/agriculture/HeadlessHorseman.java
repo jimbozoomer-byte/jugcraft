@@ -232,9 +232,13 @@ public class HeadlessHorseman extends Monster implements RangedAttackMob {
 	public void die(DamageSource source) {
 		super.die(source);
 		if (level() instanceof ServerLevel level) {
+			// The advancement is for beating him: only when a player struck the killing blow (or shot it).
+			boolean byPlayer = source.getEntity() instanceof Player;
 			for (ServerPlayer player : level.getPlayers(p -> p.distanceToSqr(this) < LEAVE_RANGE * LEAVE_RANGE)) {
 				player.sendSystemMessage(Component.translatable("message.jugcraft.horseman.defeated"));
-				TrickOrTreat.award(player, "headless_horseman");
+				if (byPlayer) {
+					TrickOrTreat.award(player, "headless_horseman");
+				}
 			}
 		}
 	}

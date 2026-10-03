@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -101,9 +102,9 @@ public final class TrickOrTreat {
 	private record OpenDoor(ResourceKey<Level> dimension, BlockPos door, long closeAt) {
 	}
 
-	/** One knock waiting for an answer, and one door to close, per player. */
+	/** One knock waiting for an answer per player, and the doors to close (one per answered knock, so a quick second knock never leaves the first door open). */
 	private static final Map<UUID, Knock> KNOCKS = new HashMap<>();
-	private static final Map<UUID, OpenDoor> OPEN_DOORS = new HashMap<>();
+	private static final List<OpenDoor> OPEN_DOORS = new ArrayList<>();
 
 	private TrickOrTreat() {
 	}
@@ -178,7 +179,7 @@ public final class TrickOrTreat {
 				message(player, near ? answer(player, knock.door(), level.getOverworldClockTime()) : Result.GONE);
 			}
 		}
-		for (Iterator<OpenDoor> it = OPEN_DOORS.values().iterator(); it.hasNext(); ) {
+		for (Iterator<OpenDoor> it = OPEN_DOORS.iterator(); it.hasNext(); ) {
 			OpenDoor open = it.next();
 			ServerLevel level = server.getLevel(open.dimension());
 			if (level == null || level.getGameTime() >= open.closeAt()) {
@@ -206,7 +207,8 @@ public final class TrickOrTreat {
 	 */
 	public static Result answer(ServerPlayer player, BlockPos door, long dayTime) {
 		ServerLevel level = player.level();
-		if (!HalloweenSeason.active()) {
+		// With the agriculture switch off there are no treats, as for every other part of Halloween.
+		if (!JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE) || !HalloweenSeason.active()) {
 			return Result.OUT_OF_SEASON;
 		}
 		long hour = Math.floorMod(dayTime, DAY);
@@ -305,7 +307,7 @@ public final class TrickOrTreat {
 		BlockState state = level.getBlockState(door);
 		if (state.getBlock() instanceof DoorBlock doorBlock && !state.getValue(DoorBlock.OPEN)) {
 			doorBlock.setOpen(host, level, state, door, true);
-			OPEN_DOORS.put(player.getUUID(), new OpenDoor(level.dimension(), door, level.getGameTime() + DOOR_OPEN_TICKS));
+			OPEN_DOORS.add(new OpenDoor(level.dimension(), door, level.getGameTime() + DOOR_OPEN_TICKS));
 		}
 		level.playSound(null, door, SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 1.0F, 1.0F);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, door.getX() + 0.5, door.getY() + 1.5, door.getZ() + 0.5, 8, 0.4, 0.4, 0.4, 0.0);

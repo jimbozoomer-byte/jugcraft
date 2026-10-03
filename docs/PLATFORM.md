@@ -19,16 +19,16 @@ The bootstrap scaffold pins these in `gradle.properties`:
 | Fabric API | 0.161.0+26.3 | Modrinth listing |
 | Fabric Loader | 0.19.3 | Required by Fabric API 0.161.0+26.3 (found by the game tests: 0.18.4 cannot load it) |
 
-All pins resolved and the mod compiled in the Build workflow on 30 September 2026 (`./gradlew build` → BUILD SUCCESSFUL, Temurin JDK 25.0.4; PR #4). That proves compilation only: the client, dedicated server and two-client test have not been run yet.
+All pins resolved and the mod compiled in the Build workflow on 30 September 2026 (`./gradlew build` → BUILD SUCCESSFUL, Temurin JDK 25.0.4; PR #4). That proved compilation only; see step 4 and 6 below for what has run since.
 
 ## Bootstrap status
 
 1. ~~Generate a Minecraft 26.3 Fabric project~~ Done in PR #4 (Loom project, `jugcraft` metadata, separate client source set).
 2. ~~Pin and verify the full toolchain~~ Done: see the table above. There is no mapping configuration, because 26.x is unobfuscated.
 3. ~~Add `jugcraft` metadata, client code and a minimal item/recipe~~ Done, and expanded by PRs #4–#7.
-4. Document tested Windows and Unix build, client launch, dedicated-server launch and game-test commands. **Partly done:** `./gradlew build` is verified in CI; `runClient`/`runServer` are documented but not yet run.
+4. Document tested Windows and Unix build, client launch, dedicated-server launch and game-test commands. **Partly done:** `./gradlew build` and `./gradlew runClientGameTest` (a real client with rendering) are verified in CI on Ubuntu; the client test also starts the game's own dedicated server in-process and joins it (first passed in Build run 36815372169, PR #53). `runClient`/`runServer` themselves and Windows are not yet run.
 5. ~~Replace the foundation-only source gate with actual compilation~~ Done: the Build workflow compiles the mod and runs the data checks. GameTests are not written yet. Requiring the Build check on `main` is a GitHub settings step for the owner.
-6. Run a dedicated server with two clients, test save/restart, and record exact versions and evidence. **Not done yet.**
+6. Run a dedicated server with two clients, test save/restart, and record exact versions and evidence. **Partly done:** CI joins an in-process dedicated server with one client (machine screen, Retro Trader trades, leave and rejoin) and saves and reopens a world (`JugcraftServerClientGameTests`, Build run 36815372169). Two clients and a restart of the dedicated server itself are manual; the checklist is in [TESTING.md](TESTING.md#dedicated-server-and-two-clients).
 7. ~~Select the project license~~ Done: MIT (see [LICENSE_POLICY.md](../LICENSE_POLICY.md)). Publish accurate installation requirements with the first release.
 
 Next, establish shared material, recipe, resource, progression and persistence interfaces before accepting disconnected large systems. Follow the owner-directed [design](DESIGN.md) and [specialties](CONTENT_BRANCHES.md).
