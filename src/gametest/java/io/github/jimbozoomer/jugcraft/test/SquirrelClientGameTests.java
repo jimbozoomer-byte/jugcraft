@@ -23,8 +23,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 /**
  * Client game test for squirrels and acorns (fall addition 24): in an oak wood, a red squirrel sitting up on a stump
  * with an acorn in its paws, a grey one and a kit on the grass with acorns lying about, and an oak sapling one of them
- * planted; up close, and the wood from further off; then acorns and roasted acorns in frames by a smoker. CI job
- * {@code client}.
+ * planted; up close, side-on, and the wood from further off; then acorns and roasted acorns in frames by a smoker. CI
+ * job {@code client}.
  */
 public class SquirrelClientGameTests implements FabricClientGameTest {
 	@Override
@@ -62,6 +62,7 @@ public class SquirrelClientGameTests implements FabricClientGameTest {
 
 			shoot(context, singleplayer, x + 2, y, z - 1, 180, 24, "jugcraft_squirrel_acorn");
 			shoot(context, singleplayer, x + 2, y, z, 180, 22, "jugcraft_squirrels");
+			shoot(context, singleplayer, x + 6, y, z - 3, 90, 22, "jugcraft_squirrel_side");
 			shoot(context, singleplayer, x + 3, y + 2, z + 4, 180, 15, "jugcraft_squirrel_wood");
 			shoot(context, singleplayer, x + 10, y, z - 3, 180, 10, "jugcraft_acorns");
 			server.runCommand("kill @e[type=jugcraft:squirrel]");
