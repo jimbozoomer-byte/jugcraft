@@ -59,9 +59,10 @@ EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_repla
                   "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires", "minecraft:mineable/axe",
                   "minecraft:mineable/shovel", "minecraft:leaves", "minecraft:eggs", "minecraft:dirt", "minecraft:mud",
                   "minecraft:grass_blocks", "minecraft:sand", "minecraft:wool", "minecraft:logs", "minecraft:candles",
-                  "minecraft:stairs", "minecraft:slabs", "minecraft:walls", "minecraft:coals",
+                  "minecraft:stairs", "minecraft:slabs", "minecraft:walls", "minecraft:coals", "minecraft:dyes",
                   # The town's usable blocks (tools/town_assets.py USABLE): vanilla 26.3's own block tags.
-                  "minecraft:wooden_doors", "minecraft:fence_gates", "minecraft:buttons", "minecraft:beds"}
+                  "minecraft:wooden_doors", "minecraft:fence_gates", "minecraft:buttons", "minecraft:beds",
+                  "minecraft:is_forest", "minecraft:is_taiga"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -340,6 +341,11 @@ def check_recipes(registered):
             inputs = [recipe["key"][ch] for ch in symbols if ch != " "]
         elif kind == "minecraft:crafting_shapeless":
             inputs = recipe["ingredients"]
+        elif kind == "minecraft:crafting_dye":
+            # 26.3's dyeing (as vanilla's leather_helmet_dyed): the item and a dye give the item back, dyed.
+            inputs = [recipe["target"], recipe["dye"]]
+            if recipe["result"]["id"] != recipe["target"]:
+                err(f"{name}: a dyeing recipe must give back the item it dyes")
         elif kind == "minecraft:smithing_transform":
             inputs = [recipe["template"], recipe["base"], recipe["addition"]]
         else:
@@ -1403,6 +1409,7 @@ def check_agriculture():
     expected["chestnut_tree"] = ag.CHESTNUT_TREES["biomes"]
     expected["apple_tree"] = ag.CIDER["tree"]["biomes"]
     expected["mums"] = ag.MUM_PATCH["biomes"]
+    expected.update({name: info["biomes"] for name, info in ag.FORAGING["mushrooms"].items()})
     if patches != expected:
         err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
     seeds = re.search(r'GRASS_SEEDS = List\.of\(([^)]*)\)', main)
@@ -1445,6 +1452,16 @@ def check_agriculture():
     check_maze(java, main)
     check_ghosts(java, main)
     check_face_paint(java, main)
+    check_candy(java, main)
+    check_foraging(java, main)
+    check_bats(java, main)
+    check_hay_golem(java, main)
+    check_knitting(java, main)
+    check_pies(java, main)
+    check_spirit_board(java, main)
+    check_turkeys(java, main)
+    check_theremin(java, main)
+    check_ofrenda(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -3282,6 +3299,549 @@ def check_face_paint(java, main):
     for source in ("TrickOrTreat", "JudgesTableBlockEntity"):
         if "FacePaint.inCostume(player)" not in java.get(source, ""):
             err(f"{source} must count a painted face as a costume (FacePaint.inCostume)")
+
+def check_candy(java, main):
+    """The candy kitchen: the kettle's, tray's and candies' Java matches CANDY in tools/agriculture.py (the batch limits,
+    temperatures and heating rates; the tray's setting, pulling, crystal and layer times; the eating time and candy corn's
+    bands; the stages and where each starts; which candy each base sets into at each stage; each kind's colour; each
+    flavour's effect, time and colour; the candies' food), the kettle, tray, candies and batch component are registered,
+    and every candy, stage, base and flavour has its words, textures and tags; the kettle and tray have recipes, and the
+    two advancements exist."""
+    cd = ag.CANDY
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("CandyKettleBlockEntity", "MAX_SUGAR"): cd["max_sugar"], ("CandyKettleBlockEntity", "PIECES_PER_SUGAR"): cd["pieces_per_sugar"],
+                ("CandyKettleBlockEntity", "MAX_FLAVOURS"): cd["max_flavours"], ("CandyKettleBlockEntity", "ROOM"): cd["room"],
+                ("CandyKettleBlockEntity", "BOIL"): cd["boil"], ("CandyKettleBlockEntity", "BOILED"): cd["boiled"],
+                ("CandyKettleBlockEntity", "MAX_TEMP"): cd["max_temp"], ("CandyKettleBlockEntity", "ADD_BELOW"): cd["add_below"],
+                ("CandyKettleBlockEntity", "HEAT_TICKS"): cd["heat_ticks"], ("CandyKettleBlockEntity", "BOIL_TICKS"): cd["boil_ticks"],
+                ("CandyKettleBlockEntity", "COOK_TICKS"): cd["cook_ticks"], ("CandyKettleBlockEntity", "COOL_TICKS"): cd["cool_ticks"],
+                ("CandyTrayItem", "SET_TICKS"): cd["set_ticks"], ("CandyTrayItem", "WARM_TICKS"): cd["warm_ticks"],
+                ("CandyTrayItem", "PULL_TICKS"): cd["pull_ticks"], ("CandyTrayItem", "PULLS"): cd["pulls"],
+                ("CandyTrayItem", "CRYSTAL_TICKS"): cd["crystal_ticks"], ("CandyTrayItem", "MAX_LAYERS"): cd["max_layers"],
+                ("Candies", "EAT_SECONDS"): cd["eat_seconds"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from CANDY in tools/agriculture.py ({value})")
+    bands = re.search(r"CORN_BANDS = \{([^}]+)\};", java.get("Candies", ""))
+    if not bands or [int(v.strip(), 16) for v in bands.group(1).replace("0x", "").split(",")] != cd["corn_bands"]:
+        err("Candies.CORN_BANDS differs from CANDY['corn_bands'] in tools/agriculture.py")
+    stages = {name.lower(): int(start) for name, start in re.findall(r"\b([A-Z_]+)\((\d+)\)", java.get("CandyStage", ""))}
+    if stages != {name: start for name, (_, start) in cd["stages"].items()}:
+        err(f"CandyStage {stages} differs from CANDY['stages'] in tools/agriculture.py")
+    makes = re.search(r"MAKES = \{\s*\{([^}]*)\},\s*\{([^}]*)\}\};", java.get("CandyBase", ""))
+    if not makes:
+        err("CandyBase.MAKES not found")
+    else:
+        for base, row in zip(("syrup", "cream"), makes.groups()):
+            found = [None if v.strip() == "null" else v.strip().split(".")[1].lower() for v in row.split(",")]
+            if found != cd["makes"][base]:
+                err(f"CandyBase.MAKES for {base} {found} differs from CANDY['makes'] in tools/agriculture.py")
+    kinds = {name.lower(): int(c, 16) for name, c in re.findall(r"\b([A-Z_]+)\(0x([0-9A-F]{6})\)", java.get("CandyKind", ""))}
+    if kinds != cd["kinds"]:
+        err(f"CandyKind {kinds} differs from CANDY['kinds'] in tools/agriculture.py")
+    flavours = {name.lower(): (effect, int(sec), int(c, 16)) for name, effect, sec, c in
+                re.findall(r"\b([A-Z_]+)\(MobEffects\.([A-Z_]+), (\d+), 0x([0-9A-F]{6})\)", java.get("CandyFlavour", ""))}
+    if flavours != {name: (info["effect"], info["seconds"], info["color"]) for name, info in cd["flavours"].items()}:
+        err(f"CandyFlavour {flavours} differs from CANDY['flavours'] in tools/agriculture.py")
+    foods = {name: [int(n), float(sat)] for name, n, sat in re.findall(r'\bcandy\("([a-z_]+)", (\d+), ([\d.]+)F\);', main)}
+    if foods != {name: info["food"] for name, info in cd["candies"].items()}:
+        err(f"The candies registered in JugcraftAgriculture.java {foods} differ from CANDY['candies'] in tools/agriculture.py")
+    listed = re.search(r"CANDIES = List\.of\(([^)]*)\);", main)
+    if not listed or [v.strip().strip('"') for v in listed.group(1).split(",")] != list(cd["candies"]):
+        err("JugcraftAgriculture.CANDIES differs from CANDY['candies'] in tools/agriculture.py")
+    for needle in (f'registerBlock("{cd["kettle"]}", CandyKettleBlock::new', f'registerItem("{cd["tray"]}", CandyTrayItem::new',
+                   f'Jugcraft.id("{cd["component"]}")', f'Jugcraft.id("{cd["kettle"]}")'):
+        if needle not in main:
+            err(f"JugcraftAgriculture.java must register {needle}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"block.jugcraft.{cd['kettle']}", f"item.jugcraft.{cd['tray']}"] + [f"item.jugcraft.{c}" for c in cd["candies"]]
+    keys += [f"candy_stage.jugcraft.{s}" for s in cd["stages"]] + [f"candy_base.jugcraft.{b}" for b in cd["bases"]]
+    keys += [f"candy_flavour.jugcraft.{f}" for f in cd["flavours"]]
+    keys += [f"tooltip.jugcraft.candy_tray.{k}" for k in cd["kinds"] if k != "lollipop"]
+    for source in ("CandyKettleBlock", "CandyTrayItem", "Candies"):
+        keys += [f"message.jugcraft.candy_kettle.{k}" for k in re.findall(r'MESSAGES \+ "([a-z_]+)"', java.get(source, ""))]
+        keys += re.findall(r'"((?:message|tooltip|item)\.jugcraft\.candy[a-z_]*\.[a-z_]+)"', java.get(source, ""))
+    for key in keys:
+        if key not in lang:
+            err(f"The candy kitchen has no words for {key}")
+    textures = ["block/candy_kettle", "block/candy_kettle_inside", "block/candy_dial", "entity/candy_syrup", "entity/candy_needle",
+                "item/candy_tray", "item/candy_tray_candy", "item/candy_corn_tip", "item/candy_corn_middle", "item/candy_corn_base",
+                "item/candy_corn_outline"] + [f"item/{c}" for c in cd["candies"]]
+    for texture in textures:
+        if not (ASSETS / "textures" / f"{texture}.png").exists():
+            err(f"The candy kitchen needs its texture {texture}")
+    for recipe in (cd["kettle"], cd["tray"]):
+        if not (DATA / "jugcraft" / "recipe" / f"{recipe}.json").exists():
+            err(f"The {recipe} needs its recipe")
+    for advancement in ("candy_maker", "taffy_puller"):
+        if not (DATA / "jugcraft" / "advancement" / f"{advancement}.json").exists():
+            err(f"The candy kitchen needs its advancement {advancement}")
+    candy_tag = (load(DATA / "c" / "tags" / "item" / "foods" / "candy.json") or {}).get("values", [])
+    for candy in cd["candies"]:
+        if f"jugcraft:{candy}" not in candy_tag:
+            err(f"{candy} must count as candy (c:foods/candy)")
+    for name, info in cd["flavours"].items():
+        if (load(DATA / "jugcraft" / "tags" / "item" / "candy_flavours" / f"{name}.json") or {}).get("values") != info["items"]:
+            err(f"Item tag jugcraft:candy_flavours/{name} differs from tools/agriculture.py")
+
+
+def check_foraging(java, main):
+    """Autumn foraging: WildMushroomBlock and FairyRings match FORAGING in tools/agriculture.py (spreading, the fairy ring's
+    size, chance, check interval and blessing), JugcraftAgriculture registers the mushrooms (the jack o'lantern
+    mushroom's light), the basket and the foods; every mushroom has its texture, words, loot and worldgen, the tags hold
+    the mushrooms and the forage, the cooked foods have their recipes, and the two advancements exist."""
+    fg = ag.FORAGING
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("WildMushroomBlock", "SPREAD_CHANCE"): fg["spread_chance"], ("WildMushroomBlock", "SPREAD_CAP"): fg["spread_cap"],
+                ("WildMushroomBlock", "SPREAD_LIGHT"): fg["spread_light"], ("WildMushroomBlock", "RING_CHANCE"): fg["ring_chance"],
+                ("FairyRings", "RING_MUSHROOMS"): fg["ring_mushrooms"], ("FairyRings", "INNER"): fg["inner"],
+                ("FairyRings", "OUTER"): fg["outer"], ("FairyRings", "CHECK_TICKS"): fg["check_ticks"],
+                ("FairyRings", "LUCK_TICKS"): fg["luck_ticks"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from FORAGING in tools/agriculture.py ({value})")
+    listed = re.search(r"WILD_MUSHROOMS = List\.of\(([^)]*)\);", main)
+    if not listed or [v.strip().strip('"') for v in listed.group(1).split(",")] != list(fg["mushrooms"]):
+        err("JugcraftAgriculture.WILD_MUSHROOMS differs from FORAGING['mushrooms'] in tools/agriculture.py")
+    glowing = [name for name, info in fg["mushrooms"].items() if info["light"]]
+    for name in glowing:
+        if f'id.equals("{name}") ? {fg["mushrooms"][name]["light"]} : 0' not in main:
+            err(f"The {name} must give light {fg['mushrooms'][name]['light']} (JugcraftAgriculture.java)")
+    if f'registerItem("{fg["basket"]}", ForagingBasketItem::new' not in main or "FairyRings.register();" not in main:
+        err("JugcraftAgriculture.java must register the Foraging Basket and the fairy rings")
+    for food in fg["foods"]:
+        if f'"{food}"' not in main:
+            err(f"JugcraftAgriculture.java must register {food}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"block.jugcraft.{m}" for m in fg["mushrooms"]] + [f"item.jugcraft.{fg['basket']}", "item.jugcraft.foraging_basket.hint",
+                                                             "message.jugcraft.fairy_ring.blessed"]
+    for key in keys:
+        if key not in lang:
+            err(f"Autumn foraging has no words for {key}")
+    for mushroom in fg["mushrooms"]:
+        for path in (ASSETS / "textures" / "block" / f"{mushroom}.png", DATA / "jugcraft" / "loot_table" / "blocks" / f"{mushroom}.json",
+                     DATA / "jugcraft" / "worldgen" / "placed_feature" / f"patch_{mushroom}.json"):
+            if not path.exists():
+                err(f"The {mushroom} needs {path.relative_to(ROOT)}")
+    for item in [fg["basket"]] + fg["foods"]:
+        if not (ASSETS / "textures" / "item" / f"{item}.json".replace(".json", ".png")).exists():
+            err(f"{item} needs its texture")
+    mushrooms = (load(DATA / "jugcraft" / "tags" / "item" / "wild_mushrooms.json") or {}).get("values")
+    if mushrooms != [f"jugcraft:{m}" for m in fg["mushrooms"]]:
+        err("Item tag jugcraft:wild_mushrooms differs from FORAGING['mushrooms'] in tools/agriculture.py")
+    soil = (load(DATA / "jugcraft" / "tags" / "block" / "mushroom_soil.json") or {}).get("values")
+    if soil != fg["soil"] or 'Jugcraft.id("mushroom_soil")' not in java.get("WildMushroomBlock", ""):
+        err("Block tag jugcraft:mushroom_soil differs from FORAGING['soil'], or WildMushroomBlock doesn't use it")
+    forage = (load(DATA / "jugcraft" / "tags" / "item" / "forage.json") or {}).get("values")
+    if forage != fg["forage"]:
+        err("Item tag jugcraft:forage differs from FORAGING['forage'] in tools/agriculture.py")
+    for recipe in [fg["basket"]] + fg["foods"]:
+        if not (DATA / "jugcraft" / "recipe" / f"{recipe}.json").exists() \
+                and not (DATA / "jugcraft" / "recipe" / "pot_cooking" / f"{recipe}.json").exists():
+            err(f"{recipe} needs its recipe")
+    for advancement in ("fairy_ring", "forager"):
+        if not (DATA / "jugcraft" / "advancement" / f"{advancement}.json").exists():
+            err(f"Autumn foraging needs its advancement {advancement}")
+
+
+def check_bats(java, main):
+    """The Bat House: BatHouseBlockEntity and JugcraftAgriculture match BATS in tools/agriculture.py (room, guano, range,
+    move-in chance, check interval, the bats' tag, guano's area and doses); the house and guano are registered (guano as
+    a FertilizerItem); and the house has its models (one for each guano level), words, loot, recipe and advancement, and
+    guano its texture and its phosphate recipe."""
+    bt = ag.BATS
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("BatHouseBlockEntity", "CAPACITY"): bt["capacity"], ("BatHouseBlockEntity", "GUANO_CAP"): bt["guano_cap"],
+                ("BatHouseBlockEntity", "RETURN_RANGE"): bt["return_range"], ("BatHouseBlockEntity", "MOVE_IN_CHANCE"): bt["move_in_chance"],
+                ("BatHouseBlockEntity", "CHECK_TICKS"): bt["check_ticks"], ("JugcraftAgriculture", "GUANO_RADIUS"): bt["guano_radius"],
+                ("JugcraftAgriculture", "GUANO_DOSES"): bt["guano_doses"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-9:
+            err(f"{source}.{name} = {number(source, name)} differs from BATS in tools/agriculture.py ({value})")
+    if f'TAG = "{bt["tag"]}"' not in java.get("BatHouseBlockEntity", ""):
+        err(f"BatHouseBlockEntity.TAG must be {bt['tag']}")
+    if f'registerBlock("{bt["house"]}", BatHouseBlock::new' not in main or f'registerItem("{bt["guano"]}", props -> new FertilizerItem(' not in main:
+        err("JugcraftAgriculture.java must register the Bat House and guano (a FertilizerItem)")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in (f"block.jugcraft.{bt['house']}", f"item.jugcraft.{bt['guano']}", "message.jugcraft.bat_house.status",
+                "message.jugcraft.bat_house.scooped"):
+        if key not in lang:
+            err(f"The Bat House has no words for {key}")
+    paths = [ASSETS / "models" / "block" / f"{bt['house']}.json"] + [ASSETS / "models" / "block" / f"{bt['house']}_guano_{g}.json" for g in (1, 2, 3)]
+    paths += [ASSETS / "textures" / "item" / f"{bt['guano']}.png", DATA / "jugcraft" / "loot_table" / "blocks" / f"{bt['house']}.json",
+              DATA / "jugcraft" / "recipe" / f"{bt['house']}.json", DATA / "jugcraft" / "recipe" / "phosphate_from_bat_guano.json",
+              DATA / "jugcraft" / "advancement" / "night_shift.json"]
+    for path in paths:
+        if not path.exists():
+            err(f"The Bat House needs {path.relative_to(ROOT)}")
+    guano = load(DATA / "jugcraft" / "recipe" / "phosphate_from_bat_guano.json") or {}
+    if guano.get("ingredients") != [f"jugcraft:{bt['guano']}"] * bt["guano_per_phosphate"]:
+        err(f"Phosphate takes {bt['guano_per_phosphate']} guano (tools/agriculture.py)")
+
+
+def check_hay_golem(java, main):
+    """The Hay Golem: HayGolem.java matches HAY_GOLEM in tools/agriculture.py (health, speed, post radius, search height,
+    tending, work, give-up and idle times, pouch, carry, wheat's healing, fire, hay bales, reach, leading range); it is
+    registered with its size and attributes and its building callback; it guards as a scarecrow (Scarecrows looks for
+    golems); it is named, drops wheat, has its head tag, texture and advancement; and its model lays its boxes where the
+    texture paints them."""
+    hg = ag.HAY_GOLEM
+    source = java.get("HayGolem", "")
+    found = {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;", source)}
+    expected = {"MAX_HEALTH": hg["health"], "SPEED": hg["speed"], "POST_RADIUS": hg["post_radius"], "SEARCH_HEIGHT": hg["search_height"],
+                "TEND_TICKS": hg["tend_ticks"], "WORK_TICKS": hg["work_ticks"], "GIVE_UP_TICKS": hg["give_up_ticks"],
+                "POUCH_SLOTS": hg["pouch_slots"], "CARRY": hg["carry"], "IDLE_TICKS": hg["idle_ticks"], "WHEAT_HEAL": hg["wheat_heal"],
+                "FIRE_FACTOR": hg["fire_factor"], "HAY_BALES": hg["hay_bales"], "REACH": hg["reach"], "LEAD_RANGE": hg["lead_range"]}
+    for name, value in expected.items():
+        if name not in found or abs(found[name] - value) > 1e-6:
+            err(f"HayGolem.{name} = {found.get(name)} differs from HAY_GOLEM in tools/agriculture.py ({value})")
+    if f'Jugcraft.id("{hg["heads_tag"].split(":", 1)[1]}")' not in source:
+        err(f"HayGolem.HEADS must be {hg['heads_tag']}")
+    width, height = hg["size"]
+    if (f'entity("{hg["entity"]}", EntityType.Builder.<HayGolem>of(HayGolem::new, MobCategory.MISC).sized({width}F, {height}F)' not in main
+            or "FabricDefaultAttributeRegistry.register(HAY_GOLEM, HayGolem.createAttributes())" not in main
+            or "UseBlockCallback.EVENT.register(HayGolem::onUseBlock)" not in main):
+        err("JugcraftAgriculture.java must register the Hay Golem with its size, attributes and building callback")
+    if "HayGolem.class" not in java.get("Scarecrows", ""):
+        err("Scarecrows.guarded must count Hay Golems")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"entity.jugcraft.{hg['entity']}") != hg["display"]:
+        err("The Hay Golem has no name")
+    table = load(DATA / "jugcraft" / "loot_table" / f"{hg['table']}.json") or {}
+    if "minecraft:wheat" not in json.dumps(table):
+        err("A Hay Golem must drop wheat")
+    heads = load(DATA / "jugcraft" / "tags" / "item" / f"{hg['heads_tag'].split(':', 1)[1]}.json") or {}
+    if sorted(heads.get("values", [])) != sorted(hg["heads"]):
+        err(f"The tag {hg['heads_tag']} must hold the heads in HAY_GOLEM")
+    for path in (ASSETS / "textures" / "entity" / f"{hg['entity']}.png", DATA / "jugcraft" / "advancement" / "man_of_straw.json"):
+        if not path.exists():
+            err(f"The Hay Golem needs {path.relative_to(ROOT)}")
+    import hay_golem_textures
+    model_path = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "HayGolemModel.java"
+    model = model_path.read_text(encoding="utf-8") if model_path.exists() else ""
+    for name, (u, v, *_size) in hay_golem_textures.BOXES.items():
+        if f"texOffs({u}, {v})" not in model:
+            err(f"HayGolemModel has no box at ({u}, {v}) for the texture's {name}")
+
+
+def check_knitting(java, main):
+    """Knitting: the Java matches KNITTING in tools/agriculture.py (the wheel's turns, spin time and unravelling loss; yarn
+    per wool, cosiness and undyed colour; the needles' row time and durability; each garment's slot, rows and look, in
+    the needles' order); the wheel, yarn, needles and garments are registered; every garment has its words, item model
+    and equipment asset (the dyeable knit, and its motif); and the tags, recipes and advancements exist."""
+    kn = ag.KNITTING
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?(?:0x)?[\dA-Fa-f.]+)[FLD]?;", java.get(source, ""))
+        if not match:
+            return None
+        value = match.group(1)
+        return float(int(value, 16)) if value.startswith("0x") else float(value)
+
+    expected = {("SpinningWheelBlockEntity", "TURNS"): kn["turns"], ("SpinningWheelBlockEntity", "SPIN_TICKS"): kn["spin_ticks"],
+                ("SpinningWheelBlockEntity", "UNRAVEL_LOSS"): kn["unravel_loss"], ("Knitting", "YARN_PER_WOOL"): kn["yarn_per_wool"],
+                ("Knitting", "COZY_TICKS"): kn["cozy"]["ticks"], ("Knitting", "COZY_PIECES"): kn["cozy"]["pieces"],
+                ("Knitting", "COZY_RANGE"): kn["cozy"]["range"], ("Knitting", "COZY_EFFECT_TICKS"): kn["cozy"]["effect_ticks"],
+                ("Knitting", "UNDYED"): kn["undyed"], ("KnittingNeedlesItem", "ROW_TICKS"): kn["row_ticks"],
+                ("JugcraftAgriculture", "NEEDLES_DURABILITY"): kn["needles_durability"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(found - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from KNITTING in tools/agriculture.py ({value})")
+    enum = java.get("Knitwear", "")
+    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", EquipmentSlot\.([A-Z]+), (\d+), "([a-z_]+)"\)', enum, re.M)
+    wanted = [(garment, info["slot"], str(info["rows"]), info["asset"]) for garment, info in kn["garments"].items()]
+    if [(item, slot, rows, asset) for _, item, slot, rows, asset in declared] != wanted:
+        err("Knitwear.java's garments (item, slot, rows, look, in order) differ from KNITTING in tools/agriculture.py")
+    for call in ('registerBlock("spinning_wheel", SpinningWheelBlock::new', 'registerItem("yarn", Item::new',
+                 'registerItem("knitting_needles", KnittingNeedlesItem::new', "for (Knitwear knit : Knitwear.values())", "Knitting.register()"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in [f"block.jugcraft.{kn['wheel']}", f"item.jugcraft.{kn['yarn']}", f"item.jugcraft.{kn['needles']}"] + [
+            f"item.jugcraft.{g}" for g in kn["garments"]]:
+        if key not in lang:
+            err(f"Knitting has no words for {key}")
+    for garment, info in kn["garments"].items():
+        model = load(ASSETS / "items" / f"{garment}.json") or {}
+        if (model.get("model", {}).get("tints") or [{}])[0].get("type") != "minecraft:dye":
+            err(f"{garment}'s item model must be tinted by its dyed colour")
+        asset = load(ASSETS / "equipment" / f"{info['asset']}.json") or {}
+        layers = asset.get("layers", {}).get("humanoid", [])
+        if not layers or "dyeable" not in layers[0] or ("motif" in info) != (len(layers) == 2):
+            err(f"The equipment asset {info['asset']} must be the dyeable knit (and the motif over it for a motif sweater)")
+    for path in [ASSETS / "textures" / "entity" / "equipment" / "humanoid" / "knit.png", ASSETS / "textures" / "item" / "yarn.png",
+                 DATA / "jugcraft" / "recipe" / "spinning_wheel.json", DATA / "jugcraft" / "recipe" / "knitting_needles.json",
+                 DATA / "jugcraft" / "loot_table" / "blocks" / "spinning_wheel.json",
+                 DATA / "jugcraft" / "advancement" / "knit_one_purl_two.json", DATA / "jugcraft" / "advancement" / "snug_as_a_bug.json"]:
+        if not path.exists():
+            err(f"Knitting needs {path.relative_to(ROOT)}")
+    knitwear = (load(DATA / "jugcraft" / "tags" / "item" / "knitwear.json") or {}).get("values", [])
+    frozen = (load(DATA / "minecraft" / "tags" / "item" / "freeze_immune_wearables.json") or {}).get("values", [])
+    washed = (load(DATA / "minecraft" / "tags" / "item" / f"{kn['wash_tag'].split(':')[1]}.json") or {}).get("values", [])
+    for garment in kn["garments"]:
+        if f"jugcraft:{garment}" not in knitwear or f"jugcraft:{garment}" not in frozen:
+            err(f"{garment} must be knitwear and freeze-immune")
+    for item in [kn["yarn"]] + list(kn["garments"]):
+        recipe = load(DATA / "jugcraft" / "recipe" / f"{item}_dyed.json") or {}
+        if recipe.get("type") != kn["dye_recipe"] or recipe.get("target") != f"jugcraft:{item}" or f"jugcraft:{item}" not in washed:
+            err(f"{item} must have its dyeing recipe ({item}_dyed) and wash clean in a cauldron")
+
+
+def check_pies(java, main):
+    """Pie baking: the Java matches PIES in tools/agriculture.py (the oven's fuel bank, heat, heating and cooling, baking
+    heat, baked and burnt points and light; the pie's slices and a burnt slice's food and chance of Hunger; each filling's
+    slice food and colour, in order); the oven, pies, raw pies, slices and dough are registered; every pie has a model for
+    each slice gone and its words, textures and loot (only while whole); the raw pies have recipes; the advancement exists."""
+    pies = ag.PIES
+
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    expected = {("HearthOvenBlockEntity", "MAX_BURN"): pies["max_burn"], ("HearthOvenBlockEntity", "WOOD_BURN"): pies["wood_burn"],
+                ("HearthOvenBlockEntity", "MAX_HEAT"): pies["max_heat"],
+                ("HearthOvenBlockEntity", "HEAT_TICKS"): pies["heat_ticks"], ("HearthOvenBlockEntity", "COOL_TICKS"): pies["cool_ticks"],
+                ("HearthOvenBlockEntity", "BAKE_HEAT"): pies["bake_heat"], ("HearthOvenBlockEntity", "BAKED"): pies["baked"],
+                ("HearthOvenBlockEntity", "BURNT"): pies["burnt_points"], ("HearthOvenBlock", "LIGHT"): pies["light"],
+                ("PieBlock", "SLICES"): pies["slices"], ("PieBlock", "BURNT_NUTRITION"): pies["burnt_nutrition"],
+                ("PieBlock", "BURNT_SICK_CHANCE"): pies["burnt_sick_chance"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(found - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from PIES in tools/agriculture.py ({value})")
+    declared = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", (\d+), ([\d.]+)F, 0x([0-9A-Fa-f]{6})\)', java.get("PieFilling", ""), re.M)
+    wanted = [(f, str(i["food"][0]), str(i["food"][1]), f"{i['color']:06X}") for f, i in pies["fillings"].items()]
+    if [(name, food, sat, color.upper()) for _, name, food, sat, color in declared] != wanted:
+        err("PieFilling.java's fillings (slice food, colour, in order) differ from PIES in tools/agriculture.py")
+    for call in ('registerBlock("hearth_oven", HearthOvenBlock::new', 'registerItem("pastry_dough"', "for (PieFilling filling : PieFilling.values())",
+                 'registerBlock("burnt_pie", props -> new PieBlock(null, props)'):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    pies_blocks = [f"{f}_pie" for f in pies["fillings"]] + [pies["burnt"]]
+    for block in pies_blocks:
+        if f"block.jugcraft.{block}" not in lang:
+            err(f"Pie baking has no words for {block}")
+        for bites in range(pies["slices"]):
+            name = f"{block}.json" if bites == 0 else f"{block}_slice{bites}.json"
+            if not (ASSETS / "models" / "block" / name).exists():
+                err(f"{block} needs its model {name}")
+        loot = json.dumps(load(DATA / "jugcraft" / "loot_table" / "blocks" / f"{block}.json") or {})
+        if '"bites": "0"' not in loot:
+            err(f"{block} must drop only while whole")
+        for texture in (f"{block}_top", f"{block}_inside"):
+            if not (ASSETS / "textures" / "block" / f"{texture}.png").exists():
+                err(f"{block} needs its texture {texture}")
+    for filling in pies["fillings"]:
+        for item in (f"raw_{filling}_pie", f"{filling}_pie_slice"):
+            if f"item.jugcraft.{item}" not in lang or not (ASSETS / "textures" / "item" / f"{item}.png").exists():
+                err(f"Pie baking needs the words and texture of {item}")
+        if not (DATA / "jugcraft" / "recipe" / f"raw_{filling}_pie.json").exists():
+            err(f"raw_{filling}_pie needs its recipe")
+    if f'"{pies["wood_tag"].split(":")[1]}"' not in java.get("HearthOvenBlockEntity", ""):
+        err("HearthOvenBlockEntity.WOOD must be the tag PIES['wood_tag'] in tools/agriculture.py")
+    for path in (DATA / "jugcraft" / "recipe" / "hearth_oven.json", DATA / "jugcraft" / "recipe" / "pastry_dough.json",
+                 DATA / "jugcraft" / "tags" / "item" / "hearth_oven_wood.json",
+                 DATA / "jugcraft" / "loot_table" / "blocks" / "hearth_oven.json", ASSETS / "models" / "block" / "hearth_oven_lit.json",
+                 DATA / "jugcraft" / "advancement" / "as_easy_as_pie.json"):
+        if not path.exists():
+            err(f"Pie baking needs {path.relative_to(ROOT)}")
+
+
+def check_spirit_board(java, main):
+    """The Spirit Board: the Java matches SPIRIT_BOARD in tools/agriculture.py (the séance's ranges, hands, letter times,
+    rest, watch range and a spirit's reward; the names; the wishes, in order); its words, YES, NO and GOODBYE sit on the
+    face where tools/spirit_board_textures.py draws them; the block is registered; its model, textures (the face at its
+    size), words, tags, recipe, loot and advancements exist."""
+    import spirit_board_textures as sbt
+    board = ag.SPIRIT_BOARD
+    source = java.get("SpiritBoard", "")
+
+    def number(name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", source)
+        return float(match.group(1)) if match else None
+
+    expected = {"CANDLE_RANGE": board["candle_range"], "SPIRIT_RANGE": board["spirit_range"], "HAND_RANGE": board["hand_range"],
+                "MAX_HANDS": board["max_hands"], "LETTER_TICKS": board["letter_ticks"], "FAST_LETTER_TICKS": board["fast_letter_ticks"],
+                "COOLDOWN_TICKS": board["cooldown_ticks"], "WATCH_RANGE": board["watch_range"], "REST_XP": board["rest_xp"],
+                "REST_LUCK_TICKS": board["rest_luck_ticks"], "FACE_WIDTH": sbt.FACE[0], "FACE_HEIGHT": sbt.FACE[1]}
+    for name, value in expected.items():
+        found = number(name)
+        if found is None or abs(found - value) > 1e-9:
+            err(f"SpiritBoard.{name} = {found} differs from SPIRIT_BOARD in tools/agriculture.py ({value})")
+    names = re.search(r"NAMES = \{([^}]*)\}", source)
+    if not names or re.findall(r'"([A-Z]+)"', names.group(1)) != board["names"]:
+        err("SpiritBoard.NAMES differs from SPIRIT_BOARD['names'] in tools/agriculture.py")
+    wishes = re.search(r"enum Wish \{\s*([A-Z_, ]+);", source)
+    if not wishes or [w.strip().lower() for w in wishes.group(1).split(",")] != list(board["wishes"]):
+        err("SpiritBoard.Wish differs from SPIRIT_BOARD['wishes'] in tools/agriculture.py (in order)")
+    if f'"{board["candles_tag"].split(":")[1]}"' not in source:
+        err("SpiritBoard.CANDLES must be the tag SPIRIT_BOARD['candles_tag']")
+    # Each word's middle on the face, as SpiritBoard.place() has it, is where the texture draws it.
+    stops = {"YES": "YES", "NO": "NO", "GOODBYE": "GOODBYE"}
+    for word, stop in stops.items():
+        x, y = sbt.WORDS[word]
+        middle = (x + (4 * len(word) - 1) / 2, y + 2.5)
+        found = re.search(rf"case {stop} -> new float\[\] \{{([\d.]+)F, ([\d.]+)F\}}", source)
+        if not found or (float(found.group(1)), float(found.group(2))) != middle:
+            err(f"SpiritBoard.place({word}) must be {middle}, the middle of the word on the face")
+    for formula in ("7.5F + 4 * i, 15.5F - arc(i)", "7.5F + 4 * i, 24.5F - arc(i)", "13.5F + 4 * i, 33.5F"):
+        if formula not in source:
+            err(f"SpiritBoard.place() must put the letters where spirit_board_textures.letter_places() draws them ({formula})")
+    if 'registerBlock("spirit_board", SpiritBoardBlock::new' not in main:
+        err('JugcraftAgriculture.java must call registerBlock("spirit_board", SpiritBoardBlock::new')
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    keys = [f"block.jugcraft.{board['block']}"] + [f"spirit_wish.jugcraft.{w}" for w in board["wishes"]]
+    for key in keys:
+        if key not in lang:
+            err(f"The Spirit Board has no words for {key}")
+    for texture, size in (("entity/spirit_board", sbt.FACE), ("entity/planchette", (32, 32)), ("entity/planchette_wood", (16, 16))):
+        png = ASSETS / "textures" / f"{texture}.png"
+        if not png.is_file():
+            err(f"The Spirit Board needs its texture {texture}")
+            continue
+        with Image.open(png) as img:
+            if img.size != size:
+                err(f"{texture} is {img.size}, expected {size}")
+    tags = DATA / "jugcraft" / "tags"
+    paths = [tags / "block" / f"{board['candles_tag'].split(':')[1]}.json", DATA / "jugcraft" / "recipe" / "spirit_board.json",
+             DATA / "jugcraft" / "loot_table" / "blocks" / "spirit_board.json", DATA / "jugcraft" / "advancement" / "is_anybody_there.json",
+             DATA / "jugcraft" / "advancement" / "unfinished_business.json"] + [tags / "item" / "spirit_wishes" / f"{w}.json" for w in board["wishes"]]
+    for path in paths:
+        if not path.exists():
+            err(f"The Spirit Board needs {path.relative_to(ROOT)}")
+
+
+def check_turkeys(java, main):
+    """Wild turkeys: Turkey.java, Turkeys.java and RoastTurkeyBlock.java match TURKEYS in tools/agriculture.py (health,
+    speed, strutting, eggs; spawning; servings and their food); the turkey is registered with its size and attributes
+    and its spawning; it is named and drops a raw turkey and feathers; its food and habitat tags, textures, roast models,
+    cooking and advancements exist; and its model lays its boxes where the textures paint them."""
+    import turkey_textures
+    tk = ag.TURKEYS
+
+    def numbers(source):
+        text = java.get(source, "")
+        return {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;", text)}
+
+    expected = {("Turkey", "MAX_HEALTH"): tk["health"], ("Turkey", "SPEED"): tk["speed"], ("Turkey", "STRUT_RANGE"): tk["strut_range"],
+                ("Turkey", "STRUT_TICKS"): tk["strut_ticks"], ("Turkey", "STRUT_CHANCE"): tk["strut_chance"], ("Turkey", "EGG_MIN"): tk["egg_min"],
+                ("Turkey", "EGG_MAX"): tk["egg_max"], ("Turkeys", "SPAWN_TICKS"): tk["spawn_ticks"],
+                ("Turkeys", "SPAWN_CHANCE"): tk["spawn_chance"], ("Turkeys", "MIN_DISTANCE"): tk["min_distance"],
+                ("Turkeys", "MAX_DISTANCE"): tk["max_distance"], ("Turkeys", "FLOCK_MIN"): tk["flock"][0],
+                ("Turkeys", "FLOCK_MAX"): tk["flock"][1], ("Turkeys", "NEAR_CAP"): tk["near_cap"], ("Turkeys", "NEAR_RANGE"): tk["near_range"],
+                ("Turkeys", "LEVEL_CAP"): tk["level_cap"], ("RoastTurkeyBlock", "SERVINGS"): tk["servings"],
+                ("RoastTurkeyBlock", "NUTRITION"): tk["serving"][0], ("RoastTurkeyBlock", "SATURATION"): tk["serving"][1]}
+    for (source, name), value in expected.items():
+        found = numbers(source).get(name)
+        if found is None or abs(found - value) > 1e-6:
+            err(f"{source}.{name} = {found} differs from TURKEYS in tools/agriculture.py ({value})")
+    for source, tag in (("Turkey", tk["food_tag"]), ("Turkeys", tk["habitat_tag"])):
+        if f'Jugcraft.id("{tag.split(":", 1)[1]}")' not in java.get(source, ""):
+            err(f"{source} must use the tag {tag}")
+    if ag.ITEMS.get(tk["slice"], {}).get("food") != tk["serving"]:
+        err("A slice of roast turkey must be worth a serving at the table")
+    width, height = tk["size"]
+    if (f'entity("{tk["entity"]}", EntityType.Builder.<Turkey>of(Turkey::new, MobCategory.CREATURE).sized({width}F, {height}F)' not in main
+            or "FabricDefaultAttributeRegistry.register(TURKEY, Turkey.createAttributes())" not in main or "Turkeys.register()" not in main):
+        err("JugcraftAgriculture.java must register the turkey with its size, attributes and spawning")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"entity.jugcraft.{tk['entity']}") != tk["display"] or lang.get(f"block.jugcraft.{tk['roast']}") != tk["roast_display"]:
+        err("The turkey and the roast turkey need their names")
+    table = json.dumps(load(DATA / "jugcraft" / "loot_table" / f"{tk['table']}.json") or {})
+    if f"jugcraft:{tk['raw']}" not in table or "minecraft:feather" not in table:
+        err("A turkey must drop a raw turkey and feathers")
+    if ag.COOKING.get(tk["roast"], {}).get("input") != tk["raw"]:
+        err("A raw turkey must cook into a roast turkey")
+    paths = [ASSETS / "textures" / "entity" / f"turkey_{kind}.png" for kind in turkey_textures.BIRDS]
+    paths += [ASSETS / "models" / "block" / f"{tk['roast']}{stage}.json" for stage in ("", "_carved", "_breast", "_carcass")]
+    paths += [DATA / "jugcraft" / "tags" / "item" / f"{tk['food_tag'].split(':')[1]}.json",
+              DATA / "jugcraft" / "tags" / "worldgen" / "biome" / f"{tk['habitat_tag'].split(':')[1]}.json",
+              DATA / "jugcraft" / "advancement" / "gobble_gobble.json", DATA / "jugcraft" / "advancement" / "carving_the_bird.json",
+              DATA / "jugcraft" / "recipe" / f"{tk['roast']}.json"]
+    for path in paths:
+        if not path.exists():
+            err(f"Wild turkeys need {path.relative_to(ROOT)}")
+    model_path = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "TurkeyModel.java"
+    model = model_path.read_text(encoding="utf-8") if model_path.exists() else ""
+    for name, (u, v, *_size) in turkey_textures.BOXES.items():
+        if f"texOffs({u}, {v})" not in model:
+            err(f"TurkeyModel has no box at ({u}, {v}) for the texture's {name}")
+
+
+def check_theremin(java, main):
+    """The Theremin: ThereminBlockEntity and ThereminBlock match THEREMIN in tools/agriculture.py (how often it looks, its
+    range, the range that earns Good Vibrations, its pitch, vibrato and light); it is registered; its models (silent and
+    playing), words, recipe (gated on machines, for its copper wire), loot and advancement exist."""
+    th = ag.THEREMIN
+    source = java.get("ThereminBlockEntity", "") + java.get("ThereminBlock", "")
+    found = {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;", source)}
+    expected = {"SENSE_TICKS": th["sense_ticks"], "RANGE": th["range"], "PLAYER_RANGE": th["player_range"], "LOW": th["low"],
+                "HIGH": th["high"], "VIBRATO": th["vibrato"], "VIBRATO_SPEED": th["vibrato_speed"], "LIGHT": th["light"]}
+    for name, value in expected.items():
+        if name not in found or abs(found[name] - value) > 1e-6:
+            err(f"Theremin {name} = {found.get(name)} differs from THEREMIN in tools/agriculture.py ({value})")
+    if 'registerBlock("theremin", ThereminBlock::new' not in main:
+        err('JugcraftAgriculture.java must call registerBlock("theremin", ThereminBlock::new')
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in (f"block.jugcraft.{th['block']}", "message.jugcraft.theremin.on", "message.jugcraft.theremin.off"):
+        if key not in lang:
+            err(f"The theremin has no words for {key}")
+    recipe = load(DATA / "jugcraft" / "recipe" / f"{th['block']}.json") or {}
+    if "machines" not in json.dumps(recipe.get("fabric:load_conditions", [])):
+        err("The theremin's recipe must load only with the machines feature (it takes copper wire)")
+    for path in (ASSETS / "models" / "block" / f"{th['block']}.json", ASSETS / "models" / "block" / f"{th['block']}_on.json",
+                 DATA / "jugcraft" / "loot_table" / "blocks" / f"{th['block']}.json", DATA / "jugcraft" / "advancement" / "good_vibrations.json"):
+        if not path.exists():
+            err(f"The theremin needs {path.relative_to(ROOT)}")
+
+
+def check_ofrenda(java, main):
+    """The ofrenda: OfrendaBlockEntity and OfrendaBlock match OFRENDA in tools/agriculture.py (slots, how often it looks,
+    its ranges and light; the kinds of offering, in order); the ofrenda, petals, papel picado and sugar skull are
+    registered and the marigold is one of MUMS; their models, words, loot, the offering tags, pan de muerto's cooking and
+    the advancement exist."""
+    of = ag.OFRENDA
+    source = java.get("OfrendaBlockEntity", "") + java.get("OfrendaBlock", "")
+    found = {name: float(value) for name, value in re.findall(r"static final (?:int|double|float) ([A-Z_]+) = ([\d.]+)[FD]?;", source)}
+    expected = {"SLOTS": of["slots"], "CHECK_TICKS": of["check_ticks"], "WELCOME_RANGE": of["welcome_range"], "ARRIVED": of["arrived"],
+                "WITNESS_RANGE": of["witness_range"], "LIGHT": of["light"]}
+    for name, value in expected.items():
+        if name not in found or abs(found[name] - value) > 1e-6:
+            err(f"Ofrenda {name} = {found.get(name)} differs from OFRENDA in tools/agriculture.py ({value})")
+    kinds = re.search(r"enum Kind \{\s*([A-Z_, ]+);", source)
+    if not kinds or [k.strip().lower() for k in kinds.group(1).split(",")] != list(of["kinds"]):
+        err("OfrendaBlockEntity.Kind differs from OFRENDA['kinds'] in tools/agriculture.py (in order)")
+    for call in ('registerBlock("ofrenda", OfrendaBlock::new', 'registerBlock("marigold_petals", CarpetBlock::new', 'registerBlock("papel_picado"',
+                 'registerBlock("sugar_skull", SugarSkullBlock::new'):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    if "marigold" not in ag.MUMS or ag.COOKING.get("pan_de_muerto", {}).get("input") != "pan_de_muerto_dough":
+        err("The marigold must be one of MUMS, and pan de muerto must bake from its dough")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for block in [of["block"]] + list(of["decor"]):
+        if f"block.jugcraft.{block}" not in lang or not (ASSETS / "models" / "block" / f"{block}.json").exists():
+            err(f"The ofrenda set needs the words and model of {block}")
+        if not (DATA / "jugcraft" / "loot_table" / "blocks" / f"{block}.json").exists():
+            err(f"{block} needs its loot table")
+    tags = DATA / "jugcraft" / "tags" / "item" / "ofrenda"
+    for path in [tags / f"{kind}.json" for kind in of["kinds"]] + [tags / "offerings.json", DATA / "jugcraft" / "advancement" / "remembered.json"]:
+        if not path.exists():
+            err(f"The ofrenda needs {path.relative_to(ROOT)}")
+
 
 def check_model_uvs():
     """Minecraft 26.3 refuses to bake a block model face that reads outside its texture when the texture has

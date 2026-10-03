@@ -9,11 +9,18 @@
     "jugcraft:sauerkraut",
     "jugcraft:garden_salad",
     "jugcraft:cabbage_rolls",
+    "jugcraft:pan_de_muerto",
+    "jugcraft:raw_turkey",
+    "jugcraft:turkey_slice",
     "jugcraft:roasted_chestnuts",
     "jugcraft:baked_acorn_squash",
     "jugcraft:squash_pie",
     "jugcraft:cranberry_sauce",
     "jugcraft:soul_cake",
+    "jugcraft:sauteed_chanterelles",
+    "jugcraft:roasted_porcini",
+    "jugcraft:fried_puffball",
+    "jugcraft:foragers_stew",
     "jugcraft:sweet_berry_jam",
     "jugcraft:apple_butter",
     "jugcraft:pumpkin_butter",
@@ -24,6 +31,11 @@
     "jugcraft:corn_relish",
     "jugcraft:red_bean_mooncake",
     "jugcraft:chestnut_mooncake",
-    "jugcraft:pumpkin_mooncake"
+    "jugcraft:pumpkin_mooncake",
+    "jugcraft:apple_pie_slice",
+    "jugcraft:pumpkin_cream_pie_slice",
+    "jugcraft:cranberry_pie_slice",
+    "jugcraft:sweet_potato_pie_slice",
+    "jugcraft:chestnut_pie_slice"
   ]
 }
