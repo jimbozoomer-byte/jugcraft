@@ -1266,6 +1266,9 @@ def machines():
     save(window(3301, [(30, 40, 34), (38, 50, 40)]), "block", "hydroponic_bay_front")
     save(window(3301, [(30, 40, 34)], glow=[(200, 110, 230), (236, 150, 250), (150, 210, 110)]), "block",
          "hydroponic_bay_front_on")
+    save(window(3401, [(40, 46, 60), (50, 58, 74)]), "block", "electroplating_bath_front")
+    save(window(3401, [(40, 46, 60)], glow=[(90, 170, 230), (150, 210, 250), (60, 130, 200)]), "block",
+         "electroplating_bath_front_on")
     save(tank_side(959), "block", "water_wheel_front")
     save(boiler(961, False), "block", "large_steam_engine_front")
     save(boiler(961, True), "block", "large_steam_engine_front_on")

@@ -88,6 +88,8 @@ MACHINES = {
     "crop_harvester": {"display": "Crop Harvester", "lit": True},
     # Batch 33 (tools/hydroponics.py): grows crops in nutrient solution, anywhere.
     "hydroponic_bay": {"display": "Hydroponic Bay", "lit": True},
+    # Batch 34 (tools/electroplating.py): plates and repairs tools, weapons and armor.
+    "electroplating_bath": {"display": "Electroplating Bath", "lit": True},
     # Kinetic: a 2x2x3 V8 diesel engine; its shaft leaves the back of the upper right back block.
     "diesel_engine": {"display": "Diesel Engine", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
@@ -241,6 +243,8 @@ STATS = {
     "crop_harvester": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 24, "ticks": 20, "radius": 4},
     # A harvest every 600 ticks on 100 mB of nutrient solution; the seed comes back.
     "hydroponic_bay": {"capacity": 20_000, "input_per_tick": 128, "use_per_tick": 12},
+    # A plating every 200 ticks: an ingot of nickel, silver or gold and 100 mB of sulfuric acid.
+    "electroplating_bath": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32},
     # 2 tall. Mines one c:ores block per 40 ticks from a 9x9 column below it, down to the bottom of the world.
     "ore_drill": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "ticks": 40, "radius": 4},
     # 3x3x2. Every 300 ticks (15 s) takes 1 unit (item) from each kind of deposit under its base and 1 block round
@@ -451,6 +455,10 @@ CRAFTING = {
                                                      "C": "jugcraft:processor", "P": "jugcraft:aluminum_cable",
                                                      "T": "#c:ingots/titanium"}, 1),
     # Glass walls, grow lights (glowstone), a tank for the solution and a steel frame.
+    # A plastic-lined tank of electrolyte between two electrodes on a rectifier (circuit).
+    "electroplating_bath": (["PCP", "WTW", "SAS"], {"P": "jugcraft:plastic_sheet", "C": "#c:ingots/copper",
+                                                    "W": "jugcraft:copper_cable", "T": "jugcraft:fluid_tank",
+                                                    "S": "#c:plates/steel", "A": "jugcraft:advanced_circuit"}, 1),
     "hydroponic_bay": (["GLG", "TMT", "PCP"], {"G": "minecraft:glass", "L": "minecraft:glowstone",
                                               "T": "jugcraft:fluid_tank", "M": "jugcraft:machine_casing",
                                               "P": "#c:plates/steel", "C": "jugcraft:advanced_circuit"}, 1),

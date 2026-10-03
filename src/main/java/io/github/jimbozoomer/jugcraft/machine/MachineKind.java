@@ -106,6 +106,9 @@ public enum MachineKind implements StringRepresentable {
 	// Hydroponics (batch 33): grows a seed or cutting in nutrient solution, with no soil or sunlight; the seed comes
 	// back. One input, the output and two byproduct slots, as for the tree farm.
 	HYDROPONIC_BAY("hydroponic_bay", 20_000, 128, 0, 12, 4),
+	// Electroplating (batch 34): plates a tool, weapon or piece of armor with nickel, silver or gold in sulfuric acid,
+	// repairing it (see Electroplating). The item, the metal ingot and the output slot.
+	ELECTROPLATING_BATH("electroplating_bath", 20_000, 256, 0, 32, 3),
 	// Chemistry (batch 17, the electric look): a 3x3x2 vanadium redox flow battery. Its charge is capped by the
 	// electrolyte in its tanks (FLOW_BATTERY_JE_PER_MB a millibucket); it gives power out of its front.
 	FLOW_BATTERY("flow_battery", 64_000_000, 8_192, 8_192, 0, 0);
@@ -310,7 +313,7 @@ public enum MachineKind implements StringRepresentable {
 				|| this == PULVERIZER || this == ORE_WASHER || this == SIEVE || this == SAWMILL
 				|| this == COKE_OVEN || this == STEEL_FOUNDRY || this == ORE_DRILL || this == DEPOSIT_DRILL
 				|| this == COBBLESTONE_GENERATOR || this == TREE_FARM || this == AUTO_CRAFTER
-				|| this == CROP_HARVESTER || this == HYDROPONIC_BAY;
+				|| this == CROP_HARVESTER || this == HYDROPONIC_BAY || this == ELECTROPLATING_BATH;
 	}
 
 	/** Stores energy and gives it out of its front face only. */
@@ -472,6 +475,7 @@ public enum MachineKind implements StringRepresentable {
 			case GEOTHERMAL_GENERATOR -> GEOTHERMAL_TANK;
 			case ORE_WASHER -> WASHER_TANK;
 			case HYDROPONIC_BAY -> HYDROPONIC_TANK;
+			case ELECTROPLATING_BATH -> Electroplating.TANK;
 			default -> 0;
 		};
 	}

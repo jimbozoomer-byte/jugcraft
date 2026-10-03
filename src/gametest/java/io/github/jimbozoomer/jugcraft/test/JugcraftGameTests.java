@@ -727,6 +727,71 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/** Fills a machine's tank with {@code mb} of sulfuric acid through its top. */
+	private static void acid(GameTestHelper helper, BlockPos pos, long mb) {
+		Storage<FluidVariant> inlet = FluidStorage.SIDED.find(helper.getLevel(), helper.absolutePos(pos), Direction.UP);
+		try (Transaction transaction = Transaction.openOuter()) {
+			long accepted = inlet.insert(FluidVariant.of(io.github.jimbozoomer.jugcraft.chemistry.PetroFluids.SULFURIC_ACID.source()),
+					mb * 81, transaction);
+			helper.assertTrue(accepted == mb * 81, "The bath took " + accepted / 81 + " mB of acid");
+			transaction.commit();
+		}
+	}
+
+	/**
+	 * The electroplating bath: nickel makes a worn iron sword half as durable again and repairs it; silver gives it Smite
+	 * III; a nickel-plated sword refuses gold; without acid nothing happens. Gold-plated armor counts as gold for piglins.
+	 */
+	@GameTest(maxTicks = 600)
+	public void electroplatingPlatesAndRepairs(GameTestHelper helper) {
+		ItemStack worn = new ItemStack(Items.IRON_SWORD);
+		worn.setDamageValue(200);
+		int ironMax = worn.getMaxDamage();
+		MachineBlockEntity nickel = processing(helper, new BlockPos(1, 1, 1), MachineKind.ELECTROPLATING_BATH, worn.copy());
+		nickel.setItem(1, new ItemStack(item("nickel_ingot")));
+		acid(helper, new BlockPos(1, 1, 1), 1000);
+		MachineBlockEntity silver = processing(helper, new BlockPos(3, 1, 1), MachineKind.ELECTROPLATING_BATH, worn.copy());
+		silver.setItem(1, new ItemStack(item("silver_ingot")));
+		acid(helper, new BlockPos(3, 1, 1), 1000);
+		ItemStack plated = worn.copy();
+		plated.set(io.github.jimbozoomer.jugcraft.machine.Electroplating.PLATING, "nickel");
+		MachineBlockEntity refused = processing(helper, new BlockPos(5, 1, 1), MachineKind.ELECTROPLATING_BATH, plated);
+		refused.setItem(1, new ItemStack(Items.GOLD_INGOT));
+		acid(helper, new BlockPos(5, 1, 1), 1000);
+		MachineBlockEntity dry = processing(helper, new BlockPos(7, 1, 1), MachineKind.ELECTROPLATING_BATH, worn.copy());
+		dry.setItem(1, new ItemStack(item("nickel_ingot")));
+		helper.assertFalse(nickel.canPlaceItem(0, new ItemStack(Items.DIRT)), "The bath took dirt to plate");
+		helper.assertFalse(nickel.canPlaceItem(1, new ItemStack(Items.IRON_INGOT)), "The bath took iron to plate with");
+
+		var stand = helper.spawn(net.minecraft.world.entity.EntityTypes.ARMOR_STAND, new BlockPos(1, 2, 4));
+		ItemStack chest = new ItemStack(Items.IRON_CHESTPLATE);
+		stand.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, chest);
+		helper.assertFalse(net.minecraft.world.entity.monster.piglin.PiglinAi.isWearingSafeArmor(stand),
+				"Plain iron armor counts as gold");
+		chest.set(io.github.jimbozoomer.jugcraft.machine.Electroplating.PLATING, "gold");
+		stand.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, chest);
+		helper.assertTrue(net.minecraft.world.entity.monster.piglin.PiglinAi.isWearingSafeArmor(stand),
+				"Gold-plated armor does not count as gold");
+
+		var smite = helper.getLevel().registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+				.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.SMITE);
+		helper.succeedWhen(() -> {
+			int out = MachineKind.ELECTROPLATING_BATH.outputSlot();
+			ItemStack n = nickel.getItem(out);
+			helper.assertTrue(n.is(Items.IRON_SWORD) && n.getDamageValue() == 0 && n.getMaxDamage() == ironMax * 3 / 2
+					&& "nickel".equals(n.get(io.github.jimbozoomer.jugcraft.machine.Electroplating.PLATING)),
+					"Nickel bath output is " + n + " (max damage " + n.getMaxDamage() + ")");
+			helper.assertTrue(nickel.getItem(0).isEmpty() && nickel.getItem(1).isEmpty(), "The nickel bath kept its inputs");
+			ItemStack s = silver.getItem(out);
+			helper.assertTrue(s.is(Items.IRON_SWORD) && s.getDamageValue() == 0
+					&& net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(smite, s) == 3,
+					"Silver bath output is " + s);
+			helper.assertTrue(refused.getItem(out).isEmpty() && refused.getItem(0).is(Items.IRON_SWORD)
+					&& refused.getItem(1).is(Items.GOLD_INGOT), "A nickel-plated sword took gold");
+			helper.assertTrue(dry.getItem(out).isEmpty() && dry.getItem(0).is(Items.IRON_SWORD), "A bath without acid plated");
+		});
+	}
+
 	/** Dust smelts back into an ingot in the electric furnace. */
 	@GameTest(maxTicks = 300)
 	public void dustSmeltsIntoIngot(GameTestHelper helper) {

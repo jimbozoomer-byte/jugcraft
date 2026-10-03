@@ -64,6 +64,11 @@ ABOUT = {
     "sprinkler": "Pipe water in (or use a water bucket) and it sprays the crops within 4 blocks, at its height and one "
                  "below: every 5 seconds it uses 50 mB and gives each growing crop an extra growth tick. Load up to 16 "
                  "fertilizer (by hand or hopper) and every 30 seconds it spreads one over the 5x5 crops around it.",
+    "electroplating_bath": "Plates a tool, weapon or piece of armor and repairs it fully, without experience, so "
+                           "enchanted gear keeps going. Put the item in the first slot and an ingot in the second, with "
+                           "sulfuric acid piped in: 10 seconds and 100 mB a plating. Nickel makes it half as durable "
+                           "again; silver gives a weapon Smite III; gold makes armor count as gold for piglins. Plate "
+                           "again with the same metal to repair; a different metal is refused.",
     "hydroponic_bay": "Grows a seed or cutting in nutrient solution under grow lights: no soil, sunlight or farmland, "
                       "so it works underground, in the Nether or the End. A harvest every 30 seconds uses 100 mB of "
                       "solution (a fertilizer in a bucket of water, in the chemical reactor) and gives the seed back.",
@@ -670,6 +675,7 @@ def build():
             machine_page("electrolytic_cell"),
             machine_page("chemical_reactor"),
             machine_page("fuel_cell"),
+            machine_page("electroplating_bath"),
             {"title": "Rubber", "icon": f"{MOD}:rubber", "text": [
                 "Crack a bucket of naphtha in the chemical reactor: 500 mB of butadiene. The polymerization reactor "
                 "turns 500 mB of butadiene into four synthetic rubber.",
