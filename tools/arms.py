@@ -1,0 +1,244 @@
+"""Arms, batch 42 (docs/features/arms.md): longswords, greatswords, rapiers, flanged maces, war hammers, glaives,
+halberds, spears and lances in bronze and steel.
+
+After studying Epic Knights (all rights reserved) and Simply Swords (Timefall Development License) for how they draw,
+animate and keep their weapons cheap; none of their code, models, numbers or art is used. What carried over is the
+approach: one table of weapon kinds and their traits, one sprite and one model per weapon over a shared in-hand pose
+per kind, and no per-tick code. Every trait is one of 26.3's own item components (swing animation, attack range,
+blocking, piercing and kinetic attacks, shield disabling), so the game runs and checks them like its own weapons.
+
+Java: weapons/JugcraftArms.java (keep KINDS and the numbers in sync; tools/check_mod_data.py checks them). Art:
+tools/arms_art.py.
+"""
+import math
+
+from PIL import Image
+
+import arms_art
+import gear
+
+MOD = "jugcraft"
+
+# Each kind of arm. Attack damage is added to the metal's bonus (bronze 2, steel 2.5) and the hand's 1, as a sword's
+# 3 is; the iron sword makes 6 at 1.6 attacks a second. Speed is the attack-speed modifier (the sword's is -2.4: 4 -
+# 2.4 = 1.6 a second). swing: the attack animation and how long it lasts in ticks (a plain swing is 6). reach: the
+# nearest and farthest a hit lands, in blocks (a hand reaches 3; creative adds 2); margin widens the target's hitbox.
+# disable: seconds a hit stops a shield blocking (the axe's 5). wear: durability a hit costs. knockback: extra attack
+# knockback. parry: the share of damage from in front that blocking with it stops (a shield stops all).
+# held: how much larger than a sword it is held. pierce: it thrusts through every target in line, as the spear's
+# jab does. tags: the vanilla item tags it joins (the enchantments follow).
+KINDS = {
+    "longsword": {"display": "Longsword", "damage": 4.0, "speed": -2.7, "swing": ("whack", 8), "reach": (0.0, 3.25),
+                  "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.6, "held": 1.3,
+                  "tags": ["swords"], "pattern": [" # ", " # ", "#L#"],
+                  "tooltip": "Use to parry: blocks 60% of the damage from in front."},
+    "greatsword": {"display": "Greatsword", "damage": 7.0, "speed": -3.2, "swing": ("whack", 11), "reach": (0.0, 3.75),
+                   "margin": 0.0, "disable": 2.0, "wear": 1, "knockback": 0.5, "parry": 0.0, "held": 1.7,
+                   "tags": ["swords"], "pattern": [" # ", "###", "#L#"],
+                   "tooltip": "Two-handed: slow, heavy sweeps with a long reach. Staggers shields."},
+    "rapier": {"display": "Rapier", "damage": 1.5, "speed": -2.0, "swing": ("stab", 5), "reach": (0.0, 3.5),
+               "margin": 0.125, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.35, "held": 1.2,
+               "tags": ["swords"], "pattern": ["  #", " # ", "L  "],
+               "tooltip": "Quick thrusts. Use to parry: blocks 35% of the damage from in front."},
+    "flanged_mace": {"display": "Flanged Mace", "damage": 6.0, "speed": -3.1, "swing": ("whack", 9),
+                     "reach": (0.0, 3.0), "margin": 0.0, "disable": 3.0, "wear": 1, "knockback": 0.0, "parry": 0.0,
+                     "held": 1.15, "tags": ["enchantable/melee_weapon", "enchantable/durability"],
+                     "pattern": [" ##", " ##", "S  "], "tooltip": "Breaks a shield's guard for 3 seconds."},
+    "war_hammer": {"display": "War Hammer", "damage": 8.0, "speed": -3.3, "swing": ("whack", 12),
+                   "reach": (0.0, 3.0), "margin": 0.0, "disable": 5.0, "wear": 2, "knockback": 1.0, "parry": 0.0,
+                   "held": 1.35, "tags": ["enchantable/melee_weapon", "enchantable/durability"],
+                   "pattern": ["###", "#S#", " S "], "tooltip": "Knocks foes back and breaks a shield's guard for 5 seconds."},
+    "glaive": {"display": "Glaive", "damage": 6.0, "speed": -3.1, "swing": ("whack", 10), "reach": (0.0, 4.25),
+               "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 2.0,
+               "tags": ["swords"], "pattern": [" ##", " S#", "S  "],
+               "tooltip": "A blade on a pole: sweeps at a long reach."},
+    "halberd": {"display": "Halberd", "damage": 7.0, "speed": -3.2, "swing": ("stab", 12), "reach": (1.0, 4.5),
+                "margin": 0.125, "disable": 3.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 2.1, "pierce": True,
+                "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["###", " S#", "S  "],
+                "tooltip": "Thrusts through every foe in line, at a long reach. Breaks a shield's guard for 3 seconds."},
+    # The spear and the lance charge like vanilla's spears: use and hold to charge, faster with a run or a horse.
+    "spear": {"display": "Spear", "pattern": ["  #", " S ", "S  "], "tags": ["spears"], "held": 1.0,
+              "tooltip": "Jab, or hold use to charge with it."},
+    "lance": {"display": "Lance", "pattern": ["  #", "#S#", "S  "], "tags": ["spears"], "held": 1.3,
+              "tooltip": "A horseman's charge: hits harder and unhorses riders. Long reach, slow jabs."},
+}
+METALS = list(gear.GEAR_TIERS)
+# The charging kinds, as Item.Properties.spear takes them, by metal: jab duration (s), charge damage multiplier,
+# charge delay (s), then for unhorsing, knockback and damage the longest a charge counts (s) and the speed it needs.
+# Vanilla's iron spear is (0.95, 0.95, 0.6, 2.5, 11.0, 6.75, 5.1, 11.25, 4.6) and diamond (1.05, 1.075, 0.5, 3.0,
+# 10.0, 6.5, 5.1, 10.0, 4.6). The lance trades a slow jab for a harder charge that unhorses at lower speeds.
+CHARGE = {
+    ("spear", "bronze"): (0.95, 1.0, 0.6, 2.5, 11.0, 6.75, 5.1, 11.25, 4.6),
+    ("spear", "steel"): (1.0, 1.04, 0.55, 2.75, 10.5, 6.6, 5.1, 10.6, 4.6),
+    ("lance", "bronze"): (1.25, 1.3, 0.9, 3.5, 9.0, 8.0, 4.5, 14.0, 4.0),
+    ("lance", "steel"): (1.3, 1.4, 0.8, 4.0, 8.5, 8.5, 4.5, 15.0, 4.0),
+}
+# The lance's jab adds this to the spear's (the metal's bonus) and reaches farther.
+LANCE_DAMAGE = 1.0
+LANCE_REACH = (2.5, 5.5)
+CHARGING = ("spear", "lance")
+# What a parry's blocking is like: the angle either side of straight ahead it covers (degrees; a shield's is 90), the
+# delay before it blocks (s; a shield's is 0.25), and its wear: a parried hit of 3 or more costs 1 + a share of it.
+PARRY_ANGLE = 60.0
+PARRY_DELAY = 0.1
+PARRY_WEAR = (3.0, 1.0, 0.5)
+# Crafting keys besides "#", the metal's ingot.
+KEYS = {"S": "minecraft:stick", "L": "minecraft:leather"}
+
+# Vanilla's item/handheld hand poses (rotation, translation, scale) and where a vanilla sword sprite is held, in
+# pixels from its centre (x right, y up).
+HANDHELD = {
+    "thirdperson_righthand": ((0, -90, 55), (0, 4.0, 0.5), 0.85),
+    "firstperson_righthand": ((0, -90, 25), (1.13, 3.2, 1.13), 0.68),
+}
+SWORD_GRIP = (-4.5, -4.5)
+# Vanilla's item/spear_in_hand poses, for the lance (its sprite is drawn point to the top left), and where that sprite
+# is held.
+SPEAR_IN_HAND = {
+    "thirdperson_righthand": ((5, 270, -40), (0, 2, 2), (1.7, 1.7, 0.85)),
+    "firstperson_righthand": ((-20, 90, -35), (3.13, 2.0, 0.13), (1.36, 1.36, 0.68)),
+}
+SPEAR_GRIP = (3.0, -3.0)
+
+
+def items():
+    """Every arm, in registration order: each kind in bronze, then in steel."""
+    return [f"{metal}_{kind}" for metal in METALS for kind in KINDS]
+
+
+def split(item):
+    metal, kind = item.split("_", 1)
+    return metal, kind
+
+
+def display(item):
+    metal, kind = split(item)
+    return f"{gear.GEAR_TIERS[metal]['display']} {KINDS[kind]['display']}"
+
+
+def feature(item):
+    return gear.GEAR_TIERS[split(item)[0]]["feature"]
+
+
+def metal_content(item):
+    """Nuggets of its metal an arm is made of (9 an ingot), for the recipe audit."""
+    metal, kind = split(item)
+    return {metal: 9 * "".join(KINDS[kind]["pattern"]).count("#")}
+
+
+def textures():
+    """Every arm's sprite (64x64, drawn by tools/arms_art.py): one each, and an in-hand one for a spear or lance."""
+    names = []
+    for item in items():
+        names.append(item)
+        if split(item)[1] in CHARGING:
+            names.append(f"{item}_in_hand")
+    return names
+
+
+def item_tags():
+    """Vanilla item tag -> arms, merged into tools/gear.py's tag files (they share swords)."""
+    tags = {}
+    for item in items():
+        for tag in KINDS[split(item)[1]]["tags"]:
+            tags.setdefault(tag, []).append(f"{MOD}:{item}")
+    return tags
+
+
+def _rotation(degrees):
+    """The matrix of a display rotation: about x, then y, then z, as Minecraft's rotationXYZ."""
+    x, y, z = (math.radians(d) for d in degrees)
+    rx = ((1, 0, 0), (0, math.cos(x), -math.sin(x)), (0, math.sin(x), math.cos(x)))
+    ry = ((math.cos(y), 0, math.sin(y)), (0, 1, 0), (-math.sin(y), 0, math.cos(y)))
+    rz = ((math.cos(z), -math.sin(z), 0), (math.sin(z), math.cos(z), 0), (0, 0, 1))
+
+    def mul(a, b):
+        return tuple(tuple(sum(a[i][k] * b[k][j] for k in range(3)) for j in range(3)) for i in range(3))
+    return mul(mul(rx, ry), rz)
+
+
+def _pose(rotation, translation, scale, grip, base_scale, base_grip, factor):
+    """A hand pose `factor` times the base one's size, moved so that `grip` (where this sprite is held) lands where the
+    base pose holds `base_grip`. Minecraft scales a model, then rotates it, then moves it; so the grip's offset from
+    the base one, scaled and rotated, is taken off the translation."""
+    scales = base_scale if isinstance(base_scale, tuple) else (base_scale,) * 3
+    new = tuple(round(s * factor, 3) for s in scales)
+    delta = (scales[0] * base_grip[0] - new[0] * grip[0], scales[1] * base_grip[1] - new[1] * grip[1], 0.0)
+    r = _rotation(rotation)
+    shift = tuple(sum(r[i][k] * delta[k] for k in range(3)) for i in range(3))
+    moved = tuple(round(t + d, 2) + 0.0 for t, d in zip(translation, shift))
+    left_moved = (round(translation[0] - shift[0], 2) + 0.0, moved[1], moved[2])
+    return ({"rotation": list(rotation), "translation": list(moved), "scale": list(new)},
+            {"rotation": [rotation[0], -rotation[1], -rotation[2]], "translation": list(left_moved), "scale": list(new)})
+
+
+def _grip(kind, mirrored=False):
+    """Where a kind's sprite is held, in pixels from the centre of a 16-pixel model (x right, y up)."""
+    x, y = arms_art.held_at(kind)
+    x = 64 - x if mirrored else x
+    return (x / 4 - 8, 8 - y / 4)
+
+
+def held_model(kind):
+    """The shared model a kind's arms are held with: vanilla's sword (or, for the lance, spear) poses, larger by the
+    kind's `held` and moved so the hand stays on the grip."""
+    charging = kind in CHARGING
+    base, base_grip = (SPEAR_IN_HAND, SPEAR_GRIP) if charging else (HANDHELD, SWORD_GRIP)
+    grip = _grip(kind, mirrored=charging)
+    display = {}
+    for context, (rotation, translation, scale) in base.items():
+        right, left = _pose(rotation, translation, scale, grip, scale, base_grip, KINDS[kind]["held"])
+        display[context] = right
+        display[context.replace("righthand", "lefthand")] = left
+    return {"parent": "minecraft:item/spear_in_hand" if charging else "minecraft:item/handheld", "display": display}
+
+
+def write_all(write, assets, data, lang, condition):
+    """Shared in-hand models, each arm's model and definition, names and tooltips, recipes and repair tags."""
+    models = assets / "models" / "item"
+    for kind in KINDS:
+        if kind != "spear":
+            write(models / f"arms_{kind}.json", held_model(kind))
+        lang[f"tooltip.{MOD}.arms.{kind}"] = KINDS[kind]["tooltip"]
+    for item in items():
+        metal, kind = split(item)
+        lang[f"item.{MOD}.{item}"] = display(item)
+        info = KINDS[kind]
+        if kind in CHARGING:
+            # As vanilla's spears: the plain sprite in inventories, frames and on the ground, and in the hand one
+            # drawn point to the top left, which the spear's hand poses hold couched.
+            write(models / f"{item}.json", {"parent": "minecraft:item/handheld",
+                                            "textures": {"layer0": f"{MOD}:item/{item}"}})
+            parent = "minecraft:item/spear_in_hand" if kind == "spear" else f"{MOD}:item/arms_{kind}"
+            write(models / f"{item}_in_hand.json", {"parent": parent, "textures": {"layer0": f"{MOD}:item/{item}_in_hand"}})
+            model = {"type": "minecraft:select", "property": "minecraft:display_context",
+                     "cases": [{"when": ["gui", "ground", "fixed", "on_shelf"],
+                                "model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}}],
+                     "fallback": {"type": "minecraft:model", "model": f"{MOD}:item/{item}_in_hand"}}
+            swap = 1.95 * info["held"]
+        else:
+            write(models / f"{item}.json", {"parent": f"{MOD}:item/arms_{kind}",
+                                            "textures": {"layer0": f"{MOD}:item/{item}"}})
+            model = {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}
+            swap = info["held"]
+        # A longer arm comes up into the hand faster, as vanilla's spear does, so it never hangs half-raised.
+        write(assets / "items" / f"{item}.json", {"model": model, "swap_animation_scale": round(swap, 2)})
+
+        key = {"#": gear.GEAR_TIERS[metal]["ingot"]}
+        for row in info["pattern"]:
+            for ch in row:
+                if ch in KEYS:
+                    key[ch] = KEYS[ch]
+        write(data / "recipe" / f"{item}.json", {
+            "fabric:load_conditions": condition(feature(item)), "type": "minecraft:crafting_shaped",
+            "category": "equipment", "pattern": info["pattern"], "key": key, "result": {"id": f"{MOD}:{item}", "count": 1}})
+
+
+def draw_all(save):
+    """Each arm's 64x64 sprite; a spear's or lance's is also drawn mirrored, point to the top left, for the hand."""
+    for item in items():
+        metal, kind = split(item)
+        img = arms_art.draw(kind, metal)
+        save(img, "item", item)
+        if kind in CHARGING:
+            save(img.transpose(Image.Transpose.FLIP_LEFT_RIGHT), "item", f"{item}_in_hand")
