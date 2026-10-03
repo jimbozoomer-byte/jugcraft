@@ -91,6 +91,10 @@ public final class JugcraftRocketry {
 	public static Item HE_ROCKET;
 	public static Item HOMING_ROCKET;
 	public static EntityType<CombatRocket> COMBAT_ROCKET;
+	/** Batch 42: booster rails, fuelled with solid propellant. */
+	public static Item SOLID_PROPELLANT;
+	public static Block BOOSTER_RAIL;
+	public static BlockEntityType<BoosterRailBlockEntity> BOOSTER_RAIL_ENTITY;
 
 	private record Flight(ServerLevel level, UUID player, String name, RocketItem.Kind kind, Vec3 at, long due) {
 	}
@@ -105,7 +109,7 @@ public final class JugcraftRocketry {
 		for (String[] part : PARTS) {
 			boolean described = !part[1].isEmpty();
 			String path = part[0];
-			item(path, properties -> new Item(properties) {
+			Item registered = item(path, properties -> new Item(properties) {
 				@Override
 				public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
 						Consumer<Component> tooltip, TooltipFlag flag) {
@@ -114,6 +118,9 @@ public final class JugcraftRocketry {
 					}
 				}
 			});
+			if (path.equals("solid_propellant")) {
+				SOLID_PROPELLANT = registered;
+			}
 		}
 		SURVEY_ROCKET = rocket("survey_rocket", RocketItem.Kind.SURVEY);
 		CLOUD_SEEDING_ROCKET = rocket("cloud_seeding_rocket", RocketItem.Kind.RAIN);
@@ -123,11 +130,14 @@ public final class JugcraftRocketry {
 		registerPost();
 		registerZipline();
 		registerLauncher();
+		registerBoosterRail();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		ServerTickEvents.END_SERVER_TICK.register(JugcraftRocketry::tick);
 		ServerTickEvents.END_SERVER_TICK.register(RocketPost::tick);
+		ServerTickEvents.END_SERVER_TICK.register(BoosterRails::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FLIGHTS.clear();
+			BoosterRails.clear();
 			nextWeather = 0;
 		});
 	}
@@ -178,6 +188,22 @@ public final class JugcraftRocketry {
 		COMBAT_ROCKET = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder
 				.<CombatRocket>of(CombatRocket::new, MobCategory.MISC).sized(0.3F, 0.3F)
 				.clientTrackingRange(8).updateInterval(2).build(key));
+	}
+
+	/** Batch 42: the booster rail. */
+	private static void registerBoosterRail() {
+		ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, Jugcraft.id("booster_rail"));
+		BOOSTER_RAIL = Registry.register(BuiltInRegistries.BLOCK, key,
+				new BoosterRailBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POWERED_RAIL).setId(key)));
+		item("booster_rail", properties -> new BlockItem(BOOSTER_RAIL, properties.useBlockDescriptionPrefix()) {
+			@Override
+			public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+					Consumer<Component> tooltip, TooltipFlag flag) {
+				tooltip.accept(Component.translatable("tooltip.jugcraft.booster_rail").withStyle(ChatFormatting.GRAY));
+			}
+		});
+		BOOSTER_RAIL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("booster_rail"),
+				FabricBlockEntityTypeBuilder.create(BoosterRailBlockEntity::new, BOOSTER_RAIL).build());
 	}
 
 	/** A plain item with a grey tooltip line, {@code tooltip.jugcraft.<path>}. */

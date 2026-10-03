@@ -1240,6 +1240,8 @@ def tags():
     import rocketry
     for block in rocketry.blocks():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    tags.add("block", "minecraft:rails", rid("booster_rail"))
+    tags.add("item", "minecraft:rails", rid("booster_rail"))
     import construction
     for block in construction.blocks():
         if block.startswith("concrete"):
