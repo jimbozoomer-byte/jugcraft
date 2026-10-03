@@ -388,24 +388,18 @@ public class PixelHollowsGameTests {
 	 * structure does, far from the other tests, after its area is force-loaded; then its arcade cabinets (one per shop),
 	 * villagers and zombie villagers are counted. A zombie village (about 2% of villages; no villagers) gets no shop.
 	 * Now and then a village's first layout has no house slot with room for the shop and it is laid out again (see
-	 * RetroShopPlacement); the log says how many were.
+	 * RetroShopPlacement). The last round's villages have the shop withheld from their first layout, so each of them
+	 * must be laid out again, and still has exactly one shop.
 	 */
 	@GameTest(maxTicks = 4800)
 	public void everyVillageHasOneShop(GameTestHelper helper) {
 		helper.assertTrue(RetroShopPlacement.canRelayout(), "A village without room for its shop cannot be laid out again");
-		// TEMPORARY diagnostic: the 26.3 jigsaw placer's class files, to find the method that runs the placer's loop.
-		for (String name : new String[] {"JigsawPlacement", "JigsawPlacement$Placer", "JigsawPlacement$PieceState"}) {
-			try (InputStream in = Jugcraft.class.getClassLoader().getResourceAsStream("net/minecraft/world/level/levelgen/structure/pools/" + name + ".class")) {
-				Jugcraft.LOGGER.info("[pixel-hollows] CLASS {} {}", name, in == null ? "missing" : java.util.Base64.getEncoder().encodeToString(in.readAllBytes()));
-			} catch (IOException exception) {
-				Jugcraft.LOGGER.info("[pixel-hollows] CLASS {} unreadable: {}", name, exception.toString());
-			}
-		}
 		ServerLevel level = helper.getLevel();
 		var server = level.getServer();
 		BlockPos base = helper.absolutePos(BlockPos.ZERO);
 		int relayoutsBefore = RetroShopPlacement.relayouts();
 		int[] round = {0};
+		int[] lastRoundRelayouts = {0};
 		forceload(server, villageCentres(base, 0), "add");
 		List<String> results = new ArrayList<>();
 		List<String> problems = new ArrayList<>();
@@ -419,18 +413,28 @@ public class PixelHollowsGameTests {
 						}
 					}
 				}
+				// The last round's villages get no shop in their first layout, so each must be laid out again.
+				boolean withhold = round[0] == VILLAGE_ROUNDS - 1;
+				int relayoutsBeforeRound = RetroShopPlacement.relayouts();
+				int withVillagers = 0;
 				for (int i = 0; i < VILLAGE_TYPES.length; i++) {
 					String type = VILLAGE_TYPES[i];
 					BlockPos centre = centres.get(i);
 					String place = "place structure minecraft:village_%s %d %d %d".formatted(type, centre.getX(), centre.getY(), centre.getZ());
 					try {
+						RetroShopPlacement.withholdShopForTests(withhold ? 1 : 0);
 						// Through the dispatcher, so an exception inside generation reaches the test instead of a chat line.
 						server.getCommands().getDispatcher().execute(place, server.createCommandSourceStack());
 					} catch (Exception exception) {
 						Jugcraft.LOGGER.error("[pixel-hollows] /{} failed", place, exception);
 						problems.add(type + " village failed to place: " + exception);
+					} finally {
+						RetroShopPlacement.withholdShopForTests(0);
 					}
 					int[] counts = countVillage(level, centre);
+					if (counts[1] > 0) {
+						withVillagers++;
+					}
 					results.add("%s: %d shop(s), %d villagers, %d zombie villagers".formatted(type, counts[0], counts[1], counts[2]));
 					if (counts[1] == 0 && counts[2] == 0) {
 						problems.add(type + " village did not generate");
@@ -442,16 +446,23 @@ public class PixelHollowsGameTests {
 						problems.add("the " + type + " village has " + counts[0] + " shops");
 					}
 				}
+				int relaidOut = RetroShopPlacement.relayouts() - relayoutsBeforeRound;
+				if (withhold) {
+					lastRoundRelayouts[0] = relaidOut;
+				}
+				if (withhold && relaidOut < withVillagers) {
+					problems.add("with the shop withheld from first layouts, only " + relaidOut + " of " + withVillagers + " villages were laid out again");
+				}
 				forceload(server, centres, "remove");
 				round[0]++;
 				if (round[0] < VILLAGE_ROUNDS) {
 					forceload(server, villageCentres(base, round[0]), "add");
 					throw helper.assertionException("Round " + (round[0] + 1) + " of " + VILLAGE_ROUNDS + " villages still to come");
 				}
-				Jugcraft.LOGGER.info("[pixel-hollows] generated {} villages, {} laid out again for room for the shop: {}",
-						results.size(), RetroShopPlacement.relayouts() - relayoutsBefore, results);
+				Jugcraft.LOGGER.info("[pixel-hollows] generated {} villages, {} new layouts ({} in the last round, whose first layouts had"
+						+ " the shop withheld): {}", results.size(), RetroShopPlacement.relayouts() - relayoutsBefore, lastRoundRelayouts[0], results);
 			}
-			helper.assertTrue(problems.isEmpty(), "Villages without exactly one shop: " + problems + " (" + results + ")");
+			helper.assertTrue(problems.isEmpty(), "Village shop problems: " + problems + " (" + results + ")");
 		});
 	}
 

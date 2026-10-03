@@ -10,7 +10,7 @@ No numbered release yet. Everything below is on `main`.
 
 ### Unmerged: Room for the Retro Game Shop in every village (fix for #53)
 - **Every new village gets its Retro Game Shop.** Village houses are built inside their street's plot, and some villages were laid out with no plot big enough for the 9 by 8 shop (roughly one village in thirty, going by CI runs and a model of the placer). Such a village is now laid out again, up to 8 layouts; a world seed still makes the same village.
-- The village shop test now generates four rounds of the five village types (20 villages) instead of five, and reports how many needed a new layout.
+- The village shop test now generates four rounds of the five village types (20 villages) instead of five. In the last round the shop is withheld from each village's first layout (a test-only switch), so every one of those villages must be laid out again and still get exactly one shop.
 
 ### Unmerged: Parties finished (from #31)
 - **Party screen** on the P key: members with online lights, the leader and you marked; LEAD, KICK, DISBAND or LEAVE; invite by name; accept or decline the latest invite. Every button runs the ordinary `/party` command.

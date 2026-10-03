@@ -19,7 +19,13 @@ import org.spongepowered.asm.mixin.injection.At;
  */
 @Mixin(JigsawPlacement.class)
 public abstract class JigsawPlacementMixin {
-	@WrapOperation(method = "addPieces", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/SequencedPriorityIterator;hasNext()Z"))
+	// JigsawPlacement has two methods named addPieces; this is the private one that runs the placer's loop.
+	@WrapOperation(method = "addPieces(Lnet/minecraft/world/level/levelgen/RandomState;IZLnet/minecraft/world/level/chunk/ChunkGenerator;"
+			+ "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplateManager;Lnet/minecraft/world/level/LevelHeightAccessor;"
+			+ "Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/Registry;Lnet/minecraft/world/level/levelgen/structure/PoolElementStructurePiece;"
+			+ "Ljava/util/List;Lnet/minecraft/world/phys/shapes/VoxelShape;Lnet/minecraft/world/level/levelgen/structure/pools/alias/PoolAliasLookup;"
+			+ "Lnet/minecraft/world/level/levelgen/structure/templatesystem/LiquidSettings;)V",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/util/SequencedPriorityIterator;hasNext()Z"), remap = false)
 	private static boolean jugcraft$newLayoutForShop(SequencedPriorityIterator<?> placing, Operation<Boolean> original,
 			@Local(argsOnly = true) PoolElementStructurePiece start, @Local(argsOnly = true) List<PoolElementStructurePiece> pieces,
 			@Local(argsOnly = true) VoxelShape free) {

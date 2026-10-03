@@ -39,6 +39,8 @@ public final class RetroShopPlacement {
 	private static final ThreadLocal<State> STATE = new ThreadLocal<>();
 	/** New layouts made since the game started (for tests). */
 	private static final AtomicInteger RELAYOUTS = new AtomicInteger();
+	/** For tests: how many first layouts of each structure started on this thread are built without the shop. */
+	private static final ThreadLocal<Integer> WITHHELD = ThreadLocal.withInitial(() -> 0);
 	private static volatile @Nullable Constructor<?> pieceState;
 	private static volatile boolean pieceStateMissing;
 
@@ -52,11 +54,23 @@ public final class RetroShopPlacement {
 		boolean offered;
 		/** Layouts tried so far, this one included. */
 		int layouts = 1;
+		/** Layouts built without the shop (tests only; see {@link #withholdShopForTests}). */
+		int withheld;
 	}
 
 	/** A jigsaw structure (a village, or anything else) starts being built on this thread. */
 	public static void beginStructure() {
-		STATE.set(new State());
+		State state = new State();
+		state.withheld = WITHHELD.get();
+		STATE.set(state);
+	}
+
+	/**
+	 * For tests: structures started on this thread build their first {@code layouts} layouts without the shop, so a
+	 * village has to be laid out again to get one. 0 (the default) turns this off.
+	 */
+	public static void withholdShopForTests(int layouts) {
+		WITHHELD.set(layouts);
 	}
 
 	/** The placer created a piece for this element. */
@@ -79,7 +93,7 @@ public final class RetroShopPlacement {
 		}
 		state.offered = true;
 		List<StructurePoolElement> out = new ArrayList<>(shuffled.size());
-		if (!state.placed) {
+		if (!state.placed && state.layouts > state.withheld) {
 			out.add(shop);
 		}
 		for (StructurePoolElement element : shuffled) {
