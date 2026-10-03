@@ -10,7 +10,10 @@ import io.github.jimbozoomer.jugcraft.chemistry.PetroItems;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
 import io.github.jimbozoomer.jugcraft.farming.JugcraftFarming;
+import io.github.jimbozoomer.jugcraft.gear.GrappleHook;
 import io.github.jimbozoomer.jugcraft.gear.JugcraftGear;
+import io.github.jimbozoomer.jugcraft.gear.JugcraftGrapple;
+import io.github.jimbozoomer.jugcraft.gear.PneumaticGrappleItem;
 import io.github.jimbozoomer.jugcraft.gear.ScubaTankItem;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.minecraft.world.item.context.UseOnContext;
@@ -1215,6 +1218,101 @@ public class PetroGameTests {
 		long left = StorageUtil.simulateExtract(holder, FluidVariant.of(PetroFluids.OXYGEN.fluid()), Long.MAX_VALUE, null);
 		helper.assertTrue(left == 2_000 * FluidNetworks.DROPLETS_PER_MB, "The holder has " + left / FluidNetworks.DROPLETS_PER_MB + " mB left");
 		helper.succeed();
+	}
+
+	/** Batch 30: the pneumatic grapple fills with nitrogen from a gas holder, up to its 4,000 mB. */
+	@GameTest
+	public void grappleFillsFromAGasHolder(GameTestHelper helper) {
+		BlockPos master = new BlockPos(5, 1, 1);
+		placeUnpowered(helper, MachineKind.GAS_HOLDER, master);
+		BlockPos at = helper.absolutePos(master);
+		Storage<FluidVariant> holder = FluidStorage.SIDED.find(helper.getLevel(), at, Direction.UP);
+		try (Transaction transaction = Transaction.openOuter()) {
+			holder.insert(FluidVariant.of(PetroFluids.NITROGEN.fluid()), 10 * FluidConstants.BUCKET, transaction);
+			transaction.commit();
+		}
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftGrapple.PNEUMATIC_GRAPPLE));
+		ItemStack grapple = player.getItemInHand(InteractionHand.MAIN_HAND);
+		grapple.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false)));
+		helper.assertTrue(PneumaticGrappleItem.nitrogen(grapple) == JugcraftGrapple.CAPACITY, "The grapple holds " + PneumaticGrappleItem.nitrogen(grapple) + " mB");
+		long left = StorageUtil.simulateExtract(holder, FluidVariant.of(PetroFluids.NITROGEN.fluid()), Long.MAX_VALUE, null);
+		helper.assertTrue(left == 6_000 * FluidNetworks.DROPLETS_PER_MB, "The holder has " + left / FluidNetworks.DROPLETS_PER_MB + " mB left");
+		helper.succeed();
+	}
+
+	/** A survival player holding a grapple with {@code nitrogen} mB, standing at {@code pos}. */
+	private static ServerPlayer grappler(GameTestHelper helper, int nitrogen, Vec3 pos) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL);
+		Vec3 world = helper.absoluteVec(pos);
+		player.setPos(world.x, world.y, world.z);
+		ItemStack grapple = new ItemStack(JugcraftGrapple.PNEUMATIC_GRAPPLE);
+		PneumaticGrappleItem.setNitrogen(grapple, nitrogen);
+		player.setItemInHand(InteractionHand.MAIN_HAND, grapple);
+		return player;
+	}
+
+	/** Batch 30: a shot costs 25 mB and puts a hook out; using it again lets go; an empty grapple does not fire. */
+	@GameTest
+	public void grappleFiresAndLetsGo(GameTestHelper helper) {
+		ServerPlayer player = grappler(helper, 100, new Vec3(2.5, 1, 2.5));
+		ItemStack grapple = player.getMainHandItem();
+		JugcraftGrapple.PNEUMATIC_GRAPPLE.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+		helper.assertTrue(GrappleHook.active(player) != null, "No hook out");
+		helper.assertTrue(PneumaticGrappleItem.nitrogen(grapple) == 75, "Nitrogen left: " + PneumaticGrappleItem.nitrogen(grapple));
+		JugcraftGrapple.PNEUMATIC_GRAPPLE.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+		helper.assertTrue(GrappleHook.active(player) == null, "The hook is still out");
+		helper.assertTrue(PneumaticGrappleItem.nitrogen(grapple) == 75, "Letting go used nitrogen");
+		ServerPlayer empty = grappler(helper, JugcraftGrapple.SHOT_COST - 1, new Vec3(4.5, 1, 4.5));
+		JugcraftGrapple.PNEUMATIC_GRAPPLE.use(helper.getLevel(), empty, InteractionHand.MAIN_HAND);
+		helper.assertTrue(GrappleHook.active(empty) == null, "An empty grapple fired");
+		helper.succeed();
+	}
+
+	/** A hook flying from {@code from} along {@code motion}, owned by {@code owner}. */
+	private static GrappleHook launch(GameTestHelper helper, ServerPlayer owner, Vec3 from, Vec3 motion) {
+		GrappleHook hook = new GrappleHook(helper.getLevel(), owner, owner.getMainHandItem().copyWithCount(1));
+		Vec3 world = helper.absoluteVec(from);
+		hook.setPos(world.x, world.y, world.z);
+		hook.setDeltaMovement(motion);
+		helper.getLevel().addFreshEntity(hook);
+		return hook;
+	}
+
+	/** Batch 30: a hook that bites a wall reels its owner toward it and takes away their fall distance. */
+	@GameTest(maxTicks = 100)
+	public void grappleReelsItsOwnerToAWall(GameTestHelper helper) {
+		for (int y = 1; y <= 4; y++) {
+			for (int z = 0; z <= 4; z++) {
+				helper.setBlock(new BlockPos(7, y, z), Blocks.STONE);
+			}
+		}
+		ServerPlayer player = grappler(helper, 100, new Vec3(1.5, 1, 2.5));
+		player.fallDistance = 10;
+		GrappleHook hook = launch(helper, player, new Vec3(3.0, 2.5, 2.5), new Vec3(1.5, 0, 0));
+		helper.succeedWhen(() -> {
+			helper.assertTrue(hook.isAnchored(), "The hook has not bitten");
+			helper.assertTrue(player.getDeltaMovement().x > 0.5, "The owner is not reeled in: " + player.getDeltaMovement());
+			helper.assertTrue(player.fallDistance == 0, "Fall distance " + player.fallDistance);
+		});
+	}
+
+	/** Batch 30: a hooked pig is dragged toward the owner; an iron golem is too heavy and the hook lets go. */
+	@GameTest(maxTicks = 100)
+	public void grappleDragsLightMobsOnly(GameTestHelper helper) {
+		ServerPlayer player = grappler(helper, 100, new Vec3(1.5, 1, 1.5));
+		Mob pig = helper.spawn(EntityTypes.PIG, new BlockPos(6, 1, 1));
+		Mob golem = helper.spawn(EntityTypes.IRON_GOLEM, new BlockPos(6, 1, 5));
+		golem.setNoAi(true);
+		GrappleHook onPig = launch(helper, player, new Vec3(3.0, 1.5, 1.5), new Vec3(1.5, 0, 0));
+		GrappleHook onGolem = launch(helper, player, new Vec3(3.0, 1.5, 5.5), new Vec3(1.5, 0, 0));
+		helper.succeedWhen(() -> {
+			helper.assertTrue(onPig.hookedId() == pig.getId() || pig.getX() < helper.absoluteVec(new Vec3(5, 0, 0)).x,
+					"The pig was not hooked");
+			helper.assertTrue(pig.getX() < helper.absoluteVec(new Vec3(5, 0, 0)).x, "The pig was not dragged: " + pig.position());
+			helper.assertTrue(onGolem.isRemoved() && onGolem.hookedId() < 0, "The golem was hooked");
+		});
 	}
 
 	/** A sprinkler with water and fertilizer uses its water a pulse at a time and spreads fertilizer on the crop beside it. */

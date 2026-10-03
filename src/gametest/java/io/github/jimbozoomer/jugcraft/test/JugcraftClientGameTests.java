@@ -1,5 +1,9 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.server.level.ServerPlayer;
+import io.github.jimbozoomer.jugcraft.gear.JugcraftGrapple;
+import io.github.jimbozoomer.jugcraft.gear.GrappleHook;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.HandbookScreen;
 import io.github.jimbozoomer.jugcraft.client.MachineScreen;
@@ -204,6 +208,21 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_exosuit_ronin");
+			// Batch 30: the pneumatic grapple in hand, its hook hanging out on its slack line beside the player.
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:pneumatic_grapple");
+			server.runOnServer(minecraft -> {
+				ServerPlayer owner = minecraft.getPlayerList().getPlayers().get(0);
+				Vec3 look = owner.getLookAngle();
+				GrappleHook hook = new GrappleHook(minecraft.overworld(), owner, new ItemStack(JugcraftGrapple.PNEUMATIC_GRAPPLE));
+				// On the player's right, which the front camera shows on the left, clear of the advancement toasts.
+				hook.setPos(owner.getX() + look.x * 1.5 - look.z * 1.6, owner.getY() + 1.4, owner.getZ() + look.z * 1.5 + look.x * 1.6);
+				hook.setNoGravity(true);
+				hook.setDeltaMovement(Vec3.ZERO);
+				minecraft.overworld().addFreshEntity(hook);
+			});
+			context.waitTicks(10);
+			context.takeScreenshot("jugcraft_pneumatic_grapple");
+			server.runCommand("kill @e[type=jugcraft:grapple_hook]");
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			String[] plastics = {"white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray",
 					"cyan", "purple", "blue", "brown", "green", "red", "black"};

@@ -437,6 +437,14 @@ Empty tools mine like a bare hand and get no drops.
 
 **Code:** `gear/` (`JugcraftExosuit`, `ExosuitItem`, `Exosuit`), `tools/Jetpack`, client `ExosuitLayer`; data and art from `tools/exosuit.py` and `tools/exosuit_art.py` ([feature record](features/exosuit.md)).
 
+### Pneumatic grapple (batch 30)
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Pneumatic Grapple | Holds 4,000 mB of nitrogen (use on a gas holder or the air separation unit to fill); 25 mB a shot. The hook flies up to 32 blocks: in a block it reels you in (no fall damage, a hop at the end), in a mob it drags the mob to you (not 100+ health). Use again to let go | gasket, chain, tripwire hook, 2 steel plates, piston, fluid tank |
+
+**Code:** `gear/` (`JugcraftGrapple`, `PneumaticGrappleItem`, `GrappleHook`), client `GrappleHookRenderer`; data and art from `tools/grapple.py` ([feature record](features/pneumatic-grapple.md)).
+
 ## Oil
 
 The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line), [feature record](features/petrochemistry.md)).
