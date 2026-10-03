@@ -15,8 +15,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -109,7 +109,7 @@ public class LeafBlowerGameTests {
 		behind.setDeltaMovement(Vec3.ZERO);
 		level.addFreshEntity(ahead);
 		level.addFreshEntity(behind);
-		Pig pig = EntityType.PIG.create(level, EntitySpawnReason.TRIGGERED);
+		Pig pig = EntityTypes.PIG.create(level, EntitySpawnReason.TRIGGERED);
 		helper.assertTrue(pig != null, "A pig");
 		BlockPos at = helper.absolutePos(new BlockPos(9, 1, 10));
 		pig.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.0F, 0.0F);
