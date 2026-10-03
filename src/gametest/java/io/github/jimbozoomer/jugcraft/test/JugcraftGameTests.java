@@ -138,8 +138,8 @@ public class JugcraftGameTests {
 		ServerLevel level = helper.getLevel();
 		BlockPos battery = new BlockPos(1, 1, 1);
 		helper.setBlock(battery, machine(MachineKind.BATTERY_BOX));
-		charge(helper, battery, Direction.UP);
-		SimpleEnergyStorage energy = (SimpleEnergyStorage) EnergyStorage.SIDED.find(level, helper.absolutePos(battery), Direction.UP);
+		charge(helper, battery, null); // The battery box's sided storages are wrappers; the unsided one is the real battery.
+		SimpleEnergyStorage energy = (SimpleEnergyStorage) EnergyStorage.SIDED.find(level, helper.absolutePos(battery), null);
 		BlockPos sensor = new BlockPos(2, 1, 1);
 		helper.setBlock(sensor, io.github.jimbozoomer.jugcraft.control.JugcraftControl.SENSOR.defaultBlockState()
 				.setValue(io.github.jimbozoomer.jugcraft.control.SensorBlock.FACING, Direction.EAST)
