@@ -983,6 +983,15 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Six monuments**, two to four blocks each: a granite **obelisk**, a marble **draped urn**, the **Angel at the Tomb** grieving over an altar, a **trumpeting angel** on a fluted column, an iron **mortsafe** caged over a grave against the body-snatchers, and a bronze **faithful hound** on its plinth.
 - They are headstones in every way: they weather (the mortsafe rusts, the hound grows verdigris), take an epitaph from the chisel and stir spirits. Details: [the graveyard pack](../features/graveyard.md#monuments).
 
+## Even more fall additions
+
+Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).
+
+### Hex brews
+
+- **Brew a hex:** over a lit campfire, fire or magma, stir a brown mushroom into the Bubbling Cauldron's green brew, beans into the orange or a phantom membrane into the purple. A hex brew fills three glass bottles.
+- **Shrinking Draught:** half your size for 3 minutes, through one-block gaps. **Giant's Draught:** 1.6 times your size for 3 minutes, a block more reach, only where there is room. Each cancels the other. **Flying Ointment:** 30 seconds of slow falling. Details: [even more fall additions](../features/even-more-fall-additions.md#hex-brews).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

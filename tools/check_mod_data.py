@@ -2091,8 +2091,8 @@ def check_decor4(java):
     def enum(source, name):
         match = re.search(rf"enum {name} implements StringRepresentable \{{\s*([A-Z_, ]+);", java.get(source, ""))
         return [v.strip().lower() for v in match.group(1).split(",")] if match else None
-    if enum("BubblingCauldronBlock", "Brew") != ["empty", "water"] + list(cauldron["brews"]):
-        err(f"BubblingCauldronBlock.Brew {enum('BubblingCauldronBlock', 'Brew')} differs from CAULDRON's brews")
+    if enum("BubblingCauldronBlock", "Brew") != ["empty", "water"] + list(cauldron["brews"]) + list(ag.HEX["brews"]):
+        err(f"BubblingCauldronBlock.Brew {enum('BubblingCauldronBlock', 'Brew')} differs from CAULDRON's brews and HEX's")
     if enum("GrimoireStandBlock", "Spread") != list(grimoire["spreads"]):
         err(f"GrimoireStandBlock.Spread {enum('GrimoireStandBlock', 'Spread')} differs from GRIMOIRE's spreads")
 
@@ -2100,7 +2100,8 @@ def check_decor4(java):
         return set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {}))
     horizontal = ("north", "east", "south", "west")
     wanted = {
-        cauldron["block"]: {f"contents={c}" for c in ["empty", "water"] + list(cauldron["brews"])},
+        cauldron["block"]: {f"contents={c}" for c in ["empty", "water"] + list(cauldron["brews"])}
+        | {f"contents={h},doses={d}" for h in ag.HEX["brews"] for d in range(1, ag.HEX["doses"] + 1)},
         shelf["block"]: {f"arrangement={n},facing={f}" for f in horizontal for n in range(shelf["arrangements"])},
         ball["block"]: {"gazing=false", "gazing=true"},
         grimoire["block"]: {f"facing={f},page={p}" for f in horizontal for p in grimoire["spreads"]},
@@ -2120,6 +2121,38 @@ def check_decor4(java):
         values = (load(DATA / MOD / "tags" / "item" / "brew" / f"{colour}.json") or {}).get("values", [])
         if sorted(values) != sorted(items):
             err(f"The item tag {MOD}:brew/{colour} differs from CAULDRON's brews")
+    check_hexes(java, number, lang)
+
+
+def check_hexes(java, number, lang):
+    """Fall addition 21: Hexes and the cauldron match HEX in tools/agriculture.py (doses, the room check's extension,
+    each draught's scale, steps, reach and time, and which brew each hex comes from); the hex tags, items, effects,
+    words and advancements exist."""
+    hx = ag.HEX
+    brews = hx["brews"]
+    expected = {("BubblingCauldronBlock", "DOSES"): hx["doses"], ("Hexes", "ROOM_EXTEND_TICKS"): hx["room_extend_ticks"],
+                ("Hexes", "SHRUNK_SCALE"): abs(brews["shrinking"]["scale"]), ("Hexes", "GIANT_SCALE"): brews["giant"]["scale"],
+                ("Hexes", "GIANT_STEP"): brews["giant"]["step"], ("Hexes", "GIANT_REACH"): brews["giant"]["reach"],
+                ("Hexes", "SHRINKING_SECONDS"): brews["shrinking"]["seconds"], ("Hexes", "GIANT_SECONDS"): brews["giant"]["seconds"],
+                ("Hexes", "FLYING_SECONDS"): brews["flying"]["seconds"]}
+    for (source, name), value in expected.items():
+        if number(source, name) is None or abs(number(source, name) - value) > 1e-6:
+            err(f"{source}.{name} = {number(source, name)} differs from HEX in tools/agriculture.py ({value})")
+    source = java.get("BubblingCauldronBlock", "")
+    for hex_name, info in brews.items():
+        if f"{hex_name.upper()}(Brew.{info['brew'].upper()}" not in source and f"case {hex_name.upper()} -> {info['brew'].upper()}" not in source:
+            err(f"BubblingCauldronBlock must make the {hex_name} hex from the {info['brew']} brew")
+        values = (load(DATA / MOD / "tags" / "item" / "hex" / f"{hex_name}.json") or {}).get("values", [])
+        if sorted(values) != sorted(info["ingredients"]):
+            err(f"The item tag {MOD}:hex/{hex_name} differs from HEX in tools/agriculture.py")
+        if f"item.{MOD}.{info['item']}" not in lang or not (ASSETS / "textures" / "item" / f"{info['item']}.png").exists():
+            err(f"{info['item']} needs its words and texture")
+        if "effect" in info and (f"effect.{MOD}.{info['effect']}" not in lang
+                                 or not (ASSETS / "textures" / "mob_effect" / f"{info['effect']}.png").exists()):
+            err(f"The {info['effect']} effect needs its words and icon")
+    for key in ("drink_me", "fee_fi_fo_fum"):
+        if not (DATA / MOD / "advancement" / f"{key}.json").exists():
+            err(f"Missing advancement {key}")
 
 
 def check_decor5(java):

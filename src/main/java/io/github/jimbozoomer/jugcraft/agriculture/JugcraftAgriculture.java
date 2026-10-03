@@ -979,6 +979,13 @@ public final class JugcraftAgriculture {
 			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
 			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
+		// Fall addition 21: the hex brews' effects and their draughts, drunk like potions (the glass bottle back).
+		Hexes.register();
+		for (BubblingCauldronBlock.Brew hex : List.of(BubblingCauldronBlock.Brew.SHRINKING, BubblingCauldronBlock.Brew.GIANT,
+				BubblingCauldronBlock.Brew.FLYING)) {
+			registerItem(Hexes.draughtId(hex), props -> new HexDraughtItem(props, hex), new Item.Properties().component(DataComponents.CONSUMABLE,
+					Consumables.defaultDrink().build()).usingConvertsTo(Items.GLASS_BOTTLE).stacksTo(16), FOOD_TAB);
+		}
 
 		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
 		// entity players sit on), the Autumn Wreath and the Leaf Piles.
