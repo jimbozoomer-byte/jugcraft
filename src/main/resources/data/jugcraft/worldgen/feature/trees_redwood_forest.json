@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:random_selector",
+  "default": "jugcraft:redwood_checked",
+  "features": [
+    {
+      "chance": 0.35,
+      "feature": "jugcraft:giant_redwood_checked"
+    },
+    {
+      "chance": 0.1,
+      "feature": "minecraft:spruce_checked"
+    },
+    {
+      "chance": 0.02,
+      "feature": "jugcraft:fallen_redwood_tree"
+    }
+  ]
+}

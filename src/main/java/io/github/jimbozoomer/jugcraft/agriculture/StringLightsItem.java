@@ -27,6 +27,13 @@ import net.minecraft.world.level.Level;
 public class StringLightsItem extends Item {
 	private static final Map<UUID, GlobalPos> FIRST = new HashMap<>();
 
+	/** Forgets a player's half-strung lights when they leave, and everyone's when the server stops. */
+	public static void registerCleanup() {
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register(
+				(handler, server) -> FIRST.remove(handler.getPlayer().getUUID()));
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> FIRST.clear());
+	}
+
 	public enum Result {
 		FIRST, STRUNG, SAME_HOOK, TOO_FAR, GONE, ALREADY_STRUNG
 	}

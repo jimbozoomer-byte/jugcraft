@@ -16,7 +16,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * A chestnut log or wood block. Any axe (item tag {@code minecraft:axes}) strips it, keeping its axis,
+ * A Jugcraft log or wood block (chestnut, larch). Any axe (item tag {@code minecraft:axes}) strips it, keeping its axis,
  * as vanilla axes strip vanilla logs: the block handles the axe itself, so no vanilla tool data changes.
  */
 public class StrippableLogBlock extends RotatedPillarBlock {
