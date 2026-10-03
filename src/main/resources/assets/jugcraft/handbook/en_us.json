@@ -676,13 +676,14 @@
             "King Cotton: Grow cotton.",
             "Make It Rain: Build a sprinkler.",
             "Silver Lining: Build an electroplating bath.",
-            "Soil Optional: Build a hydroponic bay."
+            "Ice Cold: Build an ammonia chiller."
           ]
         },
         {
           "title": "Milestones (18)",
-          "icon": "jugcraft:crop_harvester",
+          "icon": "jugcraft:hydroponic_bay",
           "text": [
+            "Soil Optional: Build a hydroponic bay.",
             "Reaping What You Sow: Build a crop harvester."
           ]
         }
@@ -3202,7 +3203,7 @@
           "icon": "jugcraft:salt",
           "text": [
             "Salt, sulfur, phosphate and bauxite get their real uses here.",
-            "Dissolve salt in water to make brine (chemical reactor), then split it in the electrolytic cell into chlorine, hydrogen and lye. Gases live only in tanks and pipes."
+            "Dissolve salt in water to make brine (chemical reactor), then split it in the electrolytic cell into chlorine, hydrogen and lye. Gases live only in tanks, pipes and gas cylinders."
           ]
         },
         {
@@ -3399,6 +3400,38 @@
             "result": "jugcraft:synthesis_converter",
             "count": 1
           }
+        },
+        {
+          "title": "Ammonia Chiller",
+          "icon": "jugcraft:ammonia_chiller",
+          "text": [
+            "Ammonia boiling in its coils draws the heat out of water. Pipe ammonia into its first tank and water into its second: every 5 seconds a bucket of water freezes into a block of ice. Put four ice in its slot and it presses them into packed ice, and four packed ice into blue ice, against nine of each by crafting. Each batch loses 5 mB of ammonia. It works anywhere, even in the Nether.",
+            "Uses 24 JE/t while working. Holds 20,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:electric_motor",
+              "jugcraft:steel_plate",
+              "jugcraft:bronze_fluid_pipe",
+              "jugcraft:fluid_tank",
+              "jugcraft:bronze_fluid_pipe",
+              "jugcraft:steel_plate",
+              "minecraft:piston",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:ammonia_chiller",
+            "count": 1
+          }
+        },
+        {
+          "title": "Gas Cylinders",
+          "icon": "jugcraft:gas_cylinder",
+          "text": [
+            "A gas cylinder carries 8 buckets of one gas: hydrogen to a far-off fuel cell, ammonia to a chiller, oxygen or nitrogen into the field.",
+            "Use it on a tank, gas holder, pipe or machine to fill it from there; sneak and use it to empty it back. Its bar shows how full it is.",
+            "Used in the air with a scuba tank or a pneumatic grapple in the other hand, it tops that up with oxygen or nitrogen."
+          ]
         },
         {
           "title": "Grenades",

@@ -64,6 +64,11 @@ ABOUT = {
     "sprinkler": "Pipe water in (or use a water bucket) and it sprays the crops within 4 blocks, at its height and one "
                  "below: every 5 seconds it uses 50 mB and gives each growing crop an extra growth tick. Load up to 16 "
                  "fertilizer (by hand or hopper) and every 30 seconds it spreads one over the 5x5 crops around it.",
+    "ammonia_chiller": "Ammonia boiling in its coils draws the heat out of water. Pipe ammonia into its first tank and "
+                       "water into its second: every 5 seconds a bucket of water freezes into a block of ice. Put four "
+                       "ice in its slot and it presses them into packed ice, and four packed ice into blue ice, against "
+                       "nine of each by crafting. Each batch loses 5 mB of ammonia. It works anywhere, even in the "
+                       "Nether.",
     "electroplating_bath": "Plates a tool, weapon or piece of armor and repairs it fully, without experience, so "
                            "enchanted gear keeps going. Put the item in the first slot and an ingot in the second, with "
                            "sulfuric acid piped in: 10 seconds and 100 mB a plating. Nickel makes it half as durable "
@@ -671,7 +676,7 @@ def build():
             {"title": "Industrial Chemistry", "icon": f"{MOD}:salt", "text": [
                 "Salt, sulfur, phosphate and bauxite get their real uses here.",
                 "Dissolve salt in water to make brine (chemical reactor), then split it in the electrolytic cell into "
-                "chlorine, hydrogen and lye. Gases live only in tanks and pipes."]},
+                "chlorine, hydrogen and lye. Gases live only in tanks, pipes and gas cylinders."]},
             machine_page("electrolytic_cell"),
             machine_page("chemical_reactor"),
             machine_page("fuel_cell"),
@@ -707,6 +712,14 @@ def build():
                 "Nitric acid etches microchips with half as much acid as sulfuric."]},
             machine_page("air_separation_unit"),
             machine_page("synthesis_converter"),
+            machine_page("ammonia_chiller"),
+            {"title": "Gas Cylinders", "icon": f"{MOD}:gas_cylinder", "text": [
+                "A gas cylinder carries 8 buckets of one gas: hydrogen to a far-off fuel cell, ammonia to a chiller, "
+                "oxygen or nitrogen into the field.",
+                "Use it on a tank, gas holder, pipe or machine to fill it from there; sneak and use it to empty it "
+                "back. Its bar shows how full it is.",
+                "Used in the air with a scuba tank or a pneumatic grapple in the other hand, it tops that up with "
+                "oxygen or nitrogen."]},
             {"title": "Grenades", "icon": f"{MOD}:grenade", "text": [
                 "Two cotton in 250 mB of nitric acid in the chemical reactor make two guncotton.",
                 "Two steel plates, a guncotton and an iron nugget make four grenades. Throw one with right-click; it "

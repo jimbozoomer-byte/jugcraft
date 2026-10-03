@@ -5791,6 +5791,77 @@
           "ticks": 60
         }
       ]
+    },
+    {
+      "block": "jugcraft:ammonia_chiller",
+      "type": "chilling",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:ammonia",
+              5
+            ],
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "minecraft:ice",
+              1
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "minecraft:ice",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:ammonia",
+              5
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "minecraft:packed_ice",
+              1
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "minecraft:packed_ice",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:ammonia",
+              5
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "minecraft:blue_ice",
+              1
+            ]
+          ],
+          "ticks": 100
+        }
+      ]
     }
   ]
 }

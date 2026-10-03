@@ -1269,6 +1269,9 @@ def machines():
     save(window(3401, [(40, 46, 60), (50, 58, 74)]), "block", "electroplating_bath_front")
     save(window(3401, [(40, 46, 60)], glow=[(90, 170, 230), (150, 210, 250), (60, 130, 200)]), "block",
          "electroplating_bath_front_on")
+    save(window(3501, [(46, 56, 66), (60, 74, 86)]), "block", "ammonia_chiller_front")
+    save(window(3501, [(46, 56, 66)], glow=[(170, 220, 250), (220, 244, 255), (120, 190, 240)]), "block",
+         "ammonia_chiller_front_on")
     save(tank_side(959), "block", "water_wheel_front")
     save(boiler(961, False), "block", "large_steam_engine_front")
     save(boiler(961, True), "block", "large_steam_engine_front_on")
@@ -1344,6 +1347,8 @@ def machines():
     field_chemistry.draw_all(save, save_armor)
     import construction
     construction.draw_all(save)
+    import gas_storage
+    gas_storage.draw_all(save)
     import plastic
     plastic.draw_all(save)
     save(conveyor_frame(0), "block", "conveyor_belt")

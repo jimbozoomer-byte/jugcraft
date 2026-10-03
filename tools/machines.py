@@ -90,6 +90,8 @@ MACHINES = {
     "hydroponic_bay": {"display": "Hydroponic Bay", "lit": True},
     # Batch 34 (tools/electroplating.py): plates and repairs tools, weapons and armor.
     "electroplating_bath": {"display": "Electroplating Bath", "lit": True},
+    # Batch 35 (tools/gas_storage.py): freezes water into ice with ammonia refrigerant, and packs ice into blue ice.
+    "ammonia_chiller": {"display": "Ammonia Chiller", "lit": True},
     # Kinetic: a 2x2x3 V8 diesel engine; its shaft leaves the back of the upper right back block.
     "diesel_engine": {"display": "Diesel Engine", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
@@ -245,6 +247,8 @@ STATS = {
     "hydroponic_bay": {"capacity": 20_000, "input_per_tick": 128, "use_per_tick": 12},
     # A plating every 200 ticks: an ingot of nickel, silver or gold and 100 mB of sulfuric acid.
     "electroplating_bath": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32},
+    # A block of ice (or a pressing) every 100 ticks for 5 mB of ammonia; a bucket of water per ice block.
+    "ammonia_chiller": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 24, "tank": 8_000},
     # 2 tall. Mines one c:ores block per 40 ticks from a 9x9 column below it, down to the bottom of the world.
     "ore_drill": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "ticks": 40, "radius": 4},
     # 3x3x2. Every 300 ticks (15 s) takes 1 unit (item) from each kind of deposit under its base and 1 block round
@@ -456,6 +460,10 @@ CRAFTING = {
                                                      "T": "#c:ingots/titanium"}, 1),
     # Glass walls, grow lights (glowstone), a tank for the solution and a steel frame.
     # A plastic-lined tank of electrolyte between two electrodes on a rectifier (circuit).
+    # A compressor (a piston driven by an electric motor), coils of pipe and a tank, in a steel case.
+    "ammonia_chiller": (["PMP", "CTC", "PKP"], {"P": "#c:plates/steel", "M": "jugcraft:electric_motor",
+                                               "C": "jugcraft:bronze_fluid_pipe", "T": "jugcraft:fluid_tank",
+                                               "K": "minecraft:piston"}, 1),
     "electroplating_bath": (["PCP", "WTW", "SAS"], {"P": "jugcraft:plastic_sheet", "C": "#c:ingots/copper",
                                                     "W": "jugcraft:copper_cable", "T": "jugcraft:fluid_tank",
                                                     "S": "#c:plates/steel", "A": "jugcraft:advanced_circuit"}, 1),
