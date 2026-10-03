@@ -18,6 +18,13 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
+      - name: Batch 38b APIs
+        run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          echo "=== WeatherData"; javap -p -cp "$COMMON" net.minecraft.world.level.saveddata.WeatherData
+          echo "=== WeatherCommand"; javap -p -c -cp "$COMMON" net.minecraft.server.commands.WeatherCommand | grep -E "invoke|private static|public static" | head -40
+          echo "=== LevelReader"; javap -cp "$COMMON" net.minecraft.world.level.LevelReader | grep -iE "hasChunk"
       - name: Batch 38 APIs
         run: |
           set +e
