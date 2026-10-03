@@ -90,19 +90,43 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 7. **Advancements:** **Up and Away** for taking off; **Over the Moon** (a challenge) for flying 48 blocks above sea level on a full-moon night.
 
 ### Full-moon werewolves
-1. **When and where:** only on **full-moon nights**, only in the Overworld's **forests and taiga** (biome tag `jugcraft:werewolf_haunts`). Every 10 seconds, for each player, there's a 30% chance a werewolf steps out of the woods 24 to 40 blocks away onto open woodland floor (grass, dirt, podzol and the like: earth a sapling could grow on), with a long, low **howl**. At most 2 near a player and 8 in the world. None come in peaceful or while mobs don't spawn.
-2. **The werewolf:** a hulking wolf-man about 2.4 m tall, with a barrel chest hunched under a shaggy mane, a long snout, long clawed arms and legs bent like a wolf's.
-   - It has 20 hearts, hits for 7 and is fast.
-   - It leaps at its prey and hunts players and villagers.
-   - Hunting, it hunches lower, its arms raised and its jaws open. With nothing to hunt, it howls at the moon.
-3. **Its hide:** anything but silver does **half** its damage, and it heals half a heart every 2 seconds.
-4. **Silver:** silver does **two and a half times** its damage and stops the healing for 5 seconds. Electric sparks fly where silver bites.
+1. **When and where:** only on **full-moon nights**, only in the Overworld's **forests, taiga and groves** (biome tag `jugcraft:werewolf_haunts`). Every 10 seconds, for each player, there's a 30% chance a werewolf steps out of the woods 24 to 40 blocks away onto open woodland floor (grass, dirt, podzol and the like: earth a sapling could grow on), with a long, low **howl**. At most 2 near a player and 8 in the world. None come in peaceful or while mobs don't spawn.
+2. **The werewolf:** a hulking wolf-man about 2.4 m tall, hunched forward. It has:
+   - a barrel chest under a shaggy hump of mane, with a ruff at the throat;
+   - a long snout with open jaws full of teeth and fangs, cheek tufts and tall pointed ears;
+   - long arms ending in four hooked claws, hanging below its knees;
+   - legs bent like a wolf's hind legs, standing on clawed paws;
+   - a bushy tail.
+
+   Its eyes glow in the dark. It leaps at its prey and hunts players and villagers. Hunting, it hunches lower, raises its claws and snaps its jaws. With nothing to hunt, it howls at the moon.
+3. **Three kinds, three tiers of danger.** Each has its own fur, its own pelt and its own rug.
+
+   | Kind | Tier | Where | Health | Hits for | Armour | Speed | Size | Experience |
+   | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+   | **Brown Werewolf** | I | any werewolf wood; the most common | 20 hearts | 6 | 2 | 0.33 | 2.4 m | 10 |
+   | **Snow Werewolf** | II | snowy woods: snowy taiga, groves (`jugcraft:snow_werewolf_haunts`, `#c:is_snowy`) | 25 hearts | 8 | 4 | 0.32 | 2.5 m | 20 |
+   | **Shadow Werewolf** | III | rare: 1 in 12 anywhere, 1 in 2 in its haunts (`jugcraft:shadow_werewolf_haunts`: dark forests, the pale garden, the Gloomweald, the ghost forest) | 40 hearts | 11 | 6 | 0.36 | 2.8 m | 40 |
+
+   - **Brown, the pack hunter.** Dark brown, red-eyed.
+     - It raids **livestock** as well as people: sheep, pigs, cows, chickens and rabbits it can see within 16 blocks (`jugcraft:werewolf_prey`). It still goes for a player who comes near.
+     - When it finds new prey, its howl **calls the pack**: brown werewolves within 32 blocks that aren't hunting join the hunt (at most one call every 5 seconds).
+     - Below a quarter of its health it **flees**, whining, from whoever is nearest. It won't hunt again until it has healed to half (about 20 seconds without silver).
+   - **Snow, the stalker.** White fur, red eyes, a little bigger.
+     - Its bite brings **frostbite**: Slowness II for 3 seconds, and 4 seconds' worth of freezing. Bitten again soon after, you freeze through and take freezing damage. **Leather** keeps the chill out (as in powder snow), not the slowing.
+     - It never freezes itself, and on snow (a snow layer, a snow block or powder snow) it runs a **quarter faster**.
+   - **Shadow, the alpha.** Near-black, amber-eyed, a head taller than the brown, with 2½ times its armour and nearly twice its bite.
+     - **Shadow step:** when its prey is 6 or more blocks off, it vanishes in smoke and steps out **behind them**, onto solid ground with room to stand, at most every 10 seconds.
+     - **Alpha howl:** on the hunt, at most every 30 seconds. It brings **Darkness** for 8 seconds to players within 16 blocks (not in creative or spectating). It drives every other werewolf within 24 blocks into a **frenzy**: Strength and Speed for 10 seconds, and its prey for any not hunting.
+     - **A sprig of wolfsbane in hand won't stop it.** Only planted or potted wolfsbane wards it off.
+     - Slaying one earns **Leader of the Pack** (a challenge).
+4. **Its hide:** anything but silver does **half** its damage, and it heals half a heart every 2 seconds.
+5. **Silver:** silver does **two and a half times** its damage and stops the healing for 5 seconds. Electric sparks fly where silver bites.
    - The **Silver Dagger** (a silver ingot and a stick): quick and light (5 damage, 2.2 attacks a second), easily enchanted, repaired with silver.
    - **Silver Arrows** (a silver nugget and four arrows make four): fired from any bow or crossbow.
    - Slaying a werewolf with silver earns **Silver Lining**.
-5. **Wolfsbane** wards them off. It's a tall flower of hooded violet-blue blooms that grows wild in taiga and forests, and can be planted or potted. Its suspicious stew poisons. A werewolf won't hunt anyone holding a sprig, or anyone within 6 blocks of growing or potted wolfsbane. A werewolf hunting someone who becomes warded drops them, slinks off whining, and leaves them alone for 10 seconds. Being saved by wolfsbane earns **Not Tonight**. Plant it round the homestead, and werewolves can't step out of the woods near it either.
-6. **At dawn,** or whenever it finds it isn't a full-moon night, a werewolf is gone in a swirl of smoke.
-7. **Drops:** a **Werewolf Pelt** and a bone or two. Two pelts make a **Werewolf Rug**: a pelt laid flat with its snarling head at one end, for the floor. A pelt can also be cut into two leather.
+6. **Wolfsbane** wards them off. It's a tall flower of hooded violet-blue blooms that grows wild in taiga and forests, and can be planted or potted. Its suspicious stew poisons. A werewolf won't hunt anyone holding a sprig (except a shadow werewolf), or anyone within 6 blocks of growing or potted wolfsbane. That includes livestock penned by wolfsbane. A werewolf hunting someone who becomes warded drops them, slinks off whining, and leaves them alone for 10 seconds. Being saved by wolfsbane earns **Not Tonight**. Plant it round the homestead, and werewolves can't step out of the woods near it either.
+7. **At dawn,** or whenever it finds it isn't a full-moon night, a werewolf is gone in a swirl of smoke.
+8. **Drops:** its kind's pelt (**Werewolf Pelt**, **Snow Werewolf Pelt** or **Shadow Werewolf Pelt**) and a bone or two. Two pelts of a kind make that kind's rug (**Werewolf Rug**, **Snow Werewolf Rug**, **Shadow Werewolf Rug**): a pelt laid flat with its snarling head at one end, for the floor. Any pelt can also be cut into two leather.
 
 ### Squirrels and acorns
 1. **Where and when:** squirrels live in the Overworld's **forests and taiga** (biome tag `jugcraft:squirrel_habitat`). By day, every 20 seconds, for each player there's a 25% chance one or two come out 20 to 40 blocks away, onto open earth. None come while 6 are within 64 blocks of the player or 30 are in the world, nor while mobs don't spawn.
@@ -159,10 +183,20 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 - **No loops:** nothing turns a draught back into anything. Water is neither made nor lost: the bucket goes in and the pot empties as the last dose is drawn.
 - **Automation:** none. Brewing and drawing are by hand (block use). Hoppers and dispensers don't fill bottles from the pot.
 - **Werewolves:**
-  - A werewolf has 40 health, 2 armour, hits for 7 and moves at 0.33 (a zombie: 20, 2, 3, 0.23). Without silver it takes half damage and heals a point (half a heart) every 40 ticks, so an iron sword (6) does 3, and fighting one without silver is meant to be hard. With silver it takes 2.5 times: the silver dagger (5) does 12.5, and four hits kill it.
+  - Tiers (a zombie: 20 health, 2 armour, hits for 3, speed 0.23):
+    - brown: 40 health, 2 armour, hits for 6, speed 0.33;
+    - snow: 50, 4, 8, 0.32;
+    - shadow: 80, 6, 11, 0.36.
+
+    Without silver it takes half damage and heals a point (half a heart) every 40 ticks, so an iron sword (6) does 3, and fighting one without silver is meant to be hard. With silver it takes 2.5 times: the silver dagger (5) does 12.5 (before armour). Four hits kill a brown werewolf, five a snow one and seven a shadow one.
+  - A shadow werewolf can be fought without silver, but takes more than 30 iron-sword hits. It is meant for prepared groups and isn't needed for anything: its pelt and rug are decoration and leather, like the brown's.
+  - The snow werewolf's frostbite adds 80 ticks of freezing a bite, capped at full freezing (140), which wears off at 2 a tick as vanilla's does.
   - The dagger: 200 uses (iron 250), enchantability 20, silver's repair. Silver arrows: four for a nugget and four arrows.
-  - A pelt is two leather (a cow drops 0–2), and two pelts make a rug. Nothing makes werewolves or pelts, so there is no loop.
+  - A pelt of any kind is two leather (a cow drops 0–2), and two pelts make a rug. Nothing makes werewolves or pelts, so there is no loop.
   - Cost on the server: the spawner tries one spot a player every 10 seconds, only on full-moon nights. A werewolf checks the moon once a second, and its target's ward every half second (a sprig in hand, or 13 × 7 × 13 blocks around the target). The spawner's ward check reads the same box once per attempt.
+    - A brown werewolf with nothing to hunt looks for livestock within 16 blocks once a second. Its pack call looks for werewolves within 32 blocks once a hunt, at most every 5 seconds.
+    - A snow werewolf reads the two blocks at its feet each tick.
+    - A shadow werewolf on the hunt tries its step at most every 10 seconds (up to 9 spots). Its howl looks at the level's players and the werewolves within 24 blocks at most every 30 seconds.
 - **Flying broomstick:**
   - Costs: a Witch's Broom (two sticks and a wheat), one Flying Ointment and two feathers. Each further 2 minutes of flight is one Flying Ointment, so one hex brew (one phantom membrane) flies a broom for 6 minutes.
   - Units: ticks of charge (2,400 an ointment, 7,200 at most, one a tick in the air); blocks a tick (push 0.05 forward, 0.025 sideways, 0.04 up; speed kept 0.91 a tick, 0.728 braking; top 0.6, 0.75 in a witch hat; dry, it sinks at up to 0.08).
@@ -194,9 +228,18 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 
   The cauldron's `contents` property gains `shrinking`, `giant` and `flying`, and a new property `doses` (1–3) is added. Cauldrons already placed keep their contents and take the default of 3 doses (not used until a hex is brewed).
 - **Disable behaviour:** the hexes are part of the agriculture feature's blocks and stay registered. With the agriculture feature off, the broom's recipe doesn't load; brooms already made still fly and stay registered.
-- **Werewolves, server authority:** spawning, damage, healing, wards and turning back are all decided on the server; clients only draw the werewolf and hear it. The ward is checked against the target's hands and the blocks around them on the server.
-- **Werewolves, persistence:** a werewolf is an ordinary monster: it despawns far from players, and one saved in a chunk turns back on its first full-moon check if the night has ended. Wolfsbane and the rug are blocks; the dagger and arrows items.
-- **Werewolves, IDs (all new):** entity `werewolf`; blocks and items `wolfsbane` (and block `potted_wolfsbane`), `werewolf_rug`; items `silver_dagger`, `silver_arrow`, `werewolf_pelt`; tags `jugcraft:silver_weapons`, `jugcraft:repairs_silver_gear`, `jugcraft:werewolf_haunts` (biome); advancements `silver_lining`, `wolfsbane_ward`; recipes `silver_dagger`, `silver_arrow`, `werewolf_rug`, `leather_from_werewolf_pelt`; worldgen `jugcraft:wolfsbane`, `jugcraft:patch_wolfsbane`.
+- **Werewolves, server authority:** spawning, the kind, damage, healing, wards, the pack call, fleeing, frostbite, the shadow step, the howl's effects and turning back are all decided on the server. Clients only draw the werewolf (its kind is synced entity data) and hear it. The ward is checked against the target's hands and the blocks around them on the server. The shadow step only lands on solid ground with room for the werewolf, so it can't step into walls.
+- **Werewolves, persistence:** a werewolf is an ordinary monster: it despawns far from players, and one saved in a chunk turns back on its first full-moon check if the night has ended. It saves its kind (`kind`: `brown`, `snow` or `shadow`). One saved before there were kinds loads as brown, with the brown's attributes. Wolfsbane and the rugs are blocks; the dagger, arrows and pelts items. `/summon jugcraft:werewolf ~ ~ ~ {kind:"shadow"}` brings one of a kind at full health.
+- **Werewolves, IDs (all new):**
+  - entity `werewolf`;
+  - blocks and items `wolfsbane` (and block `potted_wolfsbane`), `werewolf_rug`, `snow_werewolf_rug`, `shadow_werewolf_rug`;
+  - items `silver_dagger`, `silver_arrow`, `werewolf_pelt`, `snow_werewolf_pelt`, `shadow_werewolf_pelt`;
+  - tags `jugcraft:silver_weapons`, `jugcraft:repairs_silver_gear`, `jugcraft:werewolf_haunts`, `jugcraft:snow_werewolf_haunts`, `jugcraft:shadow_werewolf_haunts` (biome), `jugcraft:werewolf_prey` (entity type);
+  - loot tables `entities/werewolf` (bones) and `entities/werewolf/brown`, `snow`, `shadow` (each kind's pelt, rolled when it dies, if mobs drop loot);
+  - advancements `silver_lining`, `wolfsbane_ward`, `leader_of_the_pack`;
+  - recipes `silver_dagger`, `silver_arrow`, one rug and one `leather_from_<pelt>` for each pelt;
+  - worldgen `jugcraft:wolfsbane`, `jugcraft:patch_wolfsbane`;
+  - the attribute modifier `jugcraft:snow_stride` (transient, never saved).
 - **Werewolves, disable behaviour:** with the agriculture feature off, werewolves stop coming and the recipes don't load; everything stays registered. The silver recipes also need the silver feature.
 - **Squirrels and acorns, server authority:** spawning, gathering, burying, sprouting and breeding are decided on the server. Planting an acorn goes through vanilla's item use on a block, needs build rights at the spot (spawn protection, adventure mode), and only happens on the server.
 - **Squirrels and acorns, what clients get:** the squirrel's colour (synced entity data) and the acorn in its paws (vanilla's equipment sync), so every player sees a squirrel carrying one.
@@ -218,7 +261,11 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 - `tools/check_mod_data.py` compares them with Java.
 - Sounds and particles are vanilla's: a brewing stand's brew pitched low, a bottle filling, witch's sparkles and enchanting glyphs.
 
-- Werewolves: no new dependencies. `tools/werewolf_textures.py` draws the werewolf (128 × 64, laid out as `client/WerewolfModel.java`'s boxes), wolfsbane, the rug, the dagger, the arrow and the pelt. `tools/werewolf_data.py` writes the flower's and rug's models, the items, words, loot, tags and worldgen. The numbers come from `WEREWOLF` and `WOLFSBANE` in `tools/agriculture.py`, which the checker compares with Java. Sounds are vanilla's (a wolf's howl, growl, whine, hurt and death, pitched low), and particles vanilla's (electric sparks, large smoke).
+- Werewolves: no new dependencies.
+  - `tools/werewolf_model.py` holds the model's parts and boxes as data. `client/WerewolfModel.java` builds the same boxes, and the checker compares the two box by box.
+  - `tools/werewolf_textures.py` paints each kind's fur from those boxes (128 × 128, face by face) and its glowing eyes alone; also wolfsbane, each kind's rug and pelt, the dagger and the arrow.
+  - The look follows reference pictures the owner gave (a white, a dark brown and a dark grey werewolf): hunched, long-snouted, open-jawed, tall-eared, long-clawed, wolf-legged, bushy-tailed, with red or yellow eyes. Every pixel is drawn by code; nothing is traced or copied from them.
+  - `tools/werewolf_data.py` writes the flower's and rugs' models, the items, words, loot, tags and worldgen. The numbers come from `WEREWOLF` and `WOLFSBANE` in `tools/agriculture.py`, which the checker compares with Java. Sounds are vanilla's (a wolf's howl, growl, whine, hurt and death, pitched low), and particles vanilla's (electric sparks, large smoke).
 - Squirrels and acorns: no new dependencies. `tools/squirrel_textures.py` draws the red and grey squirrels (32 × 32, laid out as `client/SquirrelModel.java`'s boxes: soft fur, a cream belly, a bushy tail paler at its tip), the acorn and roasted acorns. `tools/squirrel_data.py` writes the acorn's item model, words and tags; roasted acorns, the recipes and the advancement come from `ITEMS`, `COOKING` and `ADVANCEMENTS` in `tools/agriculture.py`. The numbers come from `SQUIRRELS` in `tools/agriculture.py`, which the checker compares with Java. Sounds are a fox's, pitched high; particles are the earth's own block dust.
 - The flying broomstick: no new dependencies. `tools/broom_textures.py` draws the item (a broom aslant, purple cord, fanned straw, sparkles) and the entity's pale grain, which `client/BroomstickRenderer.java` tints for the ash handle, the cord and the straw (greyer when dry) on boxes of its own. `tools/broom_data.py` writes the item model and words. The numbers come from `BROOMSTICK` in `tools/agriculture.py`, which the checker compares with `Broomstick.java`. Sounds and particles are vanilla's: a phantom's flap on take-off, a brewing stand when anointed, witch's sparkles and smoke.
 
@@ -275,6 +322,19 @@ Found by CI and fixed before this record:
 The client test's screenshots (from run [37147539009](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37147539009) on `1244c712`, whose client test is the same) show wolfsbane growing wild and potted on a stump in a spruce clearing, the silver dagger, silver arrows and a pelt framed above the fire, and two werewolves in the clearing on the full-moon night, up close and from further off ([the guide](../branches/AGRICULTURE.md#full-moon-werewolves) has them). Its log has no missing model or texture. The rug lay at the picture's bottom edge, cut off; `1087fddd` moves the camera back for it, not yet run.
 
 Not run: a werewolf hunting a player in play, which no automated test watches from start to end; a two-client dedicated-server playtest.
+
+#### The three kinds (snow white, brown and dark grey)
+Added after the record above, on the same branch. The model was rebuilt (128 × 128 texture: a deeper chest and mane, a longer snout with open jaws and fangs, taller ears, longer clawed arms and legs, a bushier tail) and the werewolf became three kinds, with the abilities above. Eight game tests are new (`WerewolfGameTests`):
+1. each kind is tougher than the last (health, damage, armour, size, tier) and has its kind's attributes; an unknown kind reads as brown; snowy woods bring snow werewolves, its haunts a shadow werewolf half the time and elsewhere rarely; snowy taiga and dark forests are in the right biome tags;
+2. a brown werewolf goes after a sheep; its howl calls a brown werewolf near to the hunt, not a snow one; a snow werewolf leaves livestock alone;
+3. below a quarter of its health a brown werewolf drops its prey and flees until healed to half; a snow werewolf doesn't flee;
+4. a snow werewolf's bite slows and chills a villager, and only slows one in leather boots; it can't freeze, a brown one can; on snow it runs a quarter faster, a brown one doesn't;
+5. a shadow werewolf steps out two blocks behind prey seven blocks off, on the ground; not when close; a brown one never;
+6. a shadow werewolf's howl gives a player near Darkness and a brown werewolf near Strength, Speed and its prey;
+7. a sprig in hand wards off a brown werewolf, not a shadow one; wolfsbane planted by its prey wards off the shadow one;
+8. each kind drops its own pelt; slaying a shadow werewolf earns Leader of the Pack, a brown one doesn't.
+
+Locally, `python3 tools/check_mod_data.py` passes with 1071 IDs. It now also compares each kind's tier, attributes and abilities, the pelt tables and haunts, and every box of the model with `tools/werewolf_model.py`. `python3 scripts/check_repository.py` passes. The build, the game tests and the client test with the three kinds have not run yet.
 
 ### Flying broomstick verification
 
@@ -333,7 +393,7 @@ Not run: squirrels burying acorns over a long time in play, and a sapling sprout
 ## World and event applicability
 - A cauldron brews hexes in any dimension, all year. Nothing is seasonal.
 - The hex ingredients come from the Overworld: brown mushrooms, beans, and phantoms.
-- Werewolves come only to the Overworld's forests and taiga, on full-moon nights. Wild wolfsbane generates only in newly generated chunks of those biomes; existing chunks don't get it, but a sprig brought in can be planted anywhere.
+- Werewolves come only to the Overworld's forests, taiga and groves, on full-moon nights. Snow werewolves only where it snows, shadow werewolves anywhere they come (most often in dark woods). Wild wolfsbane generates only in newly generated chunks of those biomes; existing chunks don't get it, but a sprig brought in can be planted anywhere.
 - A broom flies in any dimension. Over the Moon is earned only in the Overworld. Nothing is seasonal.
 - Squirrels come only to the Overworld's forests and taiga, by day, all year. Acorns drop from oak and dark oak leaves anywhere, and plant on any grass or dirt.
 
@@ -343,6 +403,8 @@ Not run: squirrels burying acorns over a long time in play, and a sapling sprout
 - How big a giant is (×1.6) and how long each effect lasts are open to balance review once played. A giant is easier to hit, which is the trade for its reach.
 - Mobs aren't affected: a splash or lingering hex is not made.
 - Werewolves don't break doors or blocks, and don't turn players into werewolves; there is no curse.
+- Werewolves don't fight each other; a shadow werewolf's frenzy helps any kind.
+- A brown werewolf killing a farm's livestock is intended: wolfsbane planted by the pen keeps them off.
 - A werewolf ignores wolfsbane once it isn't hunting; the ward is about who it hunts and where it may come out, not where it may walk.
 - How often they come and how hard they hit are open to balance review once played.
 - A broom carries one rider and nothing else; it can't be led, put in a minecart or flown by mobs.

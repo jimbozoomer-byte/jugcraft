@@ -16,6 +16,7 @@ import drones
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS, PART_UNITS, CIRCUITS, WASHED_ORES,
                        all_blocks, all_items, feature_of)
 import agriculture as ag
+import werewolf_model
 import petro
 import deposits
 import seasons
@@ -62,7 +63,9 @@ EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_repla
                   "minecraft:stairs", "minecraft:slabs", "minecraft:walls", "minecraft:coals", "minecraft:dyes",
                   # The town's usable blocks (tools/town_assets.py USABLE): vanilla 26.3's own block tags.
                   "minecraft:wooden_doors", "minecraft:fence_gates", "minecraft:buttons", "minecraft:beds",
-                  "minecraft:is_forest", "minecraft:is_taiga"}
+                  "minecraft:is_forest", "minecraft:is_taiga",
+                  # Fabric's conventional biome tag (ConventionalBiomeTags.IS_SNOWY): the snow werewolf's haunts.
+                  "c:is_snowy"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -2226,53 +2229,115 @@ def check_squirrels(java, number, lang):
 
 def check_werewolves(java, number, lang):
     """Fall addition 23: Werewolf and Werewolves match WEREWOLF and WOLFSBANE in tools/agriculture.py (the hide and
-    silver, healing, shunning, spawning and the ward, the attributes, the silver blade); the entity, flower, potted
-    flower, items and rug are registered and drawn; their words, loot, tags, worldgen, recipes and advancements exist."""
+    silver, healing, shunning, spawning and the ward, each kind's tier and attributes and abilities, the silver blade);
+    every box of tools/werewolf_model.py is in WerewolfModel, which the texture is painted from; the entity, flower,
+    potted flower, items, pelts and rugs are registered and drawn; their words, loot, tags, worldgen, recipes and
+    advancements exist."""
     ww, wb = ag.WEREWOLF, ag.WOLFSBANE
     expected = {("Werewolf", "HIDE_FACTOR"): ww["hide_factor"], ("Werewolf", "SILVER_FACTOR"): ww["silver_factor"],
                 ("Werewolf", "REGEN_TICKS"): ww["regen_ticks"], ("Werewolf", "SILVER_WOUND_TICKS"): ww["silver_wound_ticks"],
-                ("Werewolf", "SHUN_TICKS"): ww["shun_ticks"], ("Werewolf", "MAX_HEALTH"): ww["health"],
+                ("Werewolf", "SHUN_TICKS"): ww["shun_ticks"], ("Werewolf", "PACK_REACH"): ww["pack_reach"],
+                ("Werewolf", "FLEE_BELOW"): ww["flee_below"], ("Werewolf", "FLEE_UNTIL"): ww["flee_until"],
+                ("Werewolf", "FROSTBITE_TICKS"): ww["frostbite_ticks"], ("Werewolf", "FROSTBITE_CHILL"): ww["frostbite_chill"],
+                ("Werewolf", "SNOW_STRIDE"): ww["snow_stride"], ("Werewolf", "SHADOW_STEP_MIN"): ww["shadow_step_min"],
+                ("Werewolf", "SHADOW_STEP_TICKS"): ww["shadow_step_ticks"], ("Werewolf", "ALPHA_REACH"): ww["alpha_reach"],
+                ("Werewolf", "DARKNESS_TICKS"): ww["darkness_ticks"], ("Werewolf", "FRENZY_REACH"): ww["frenzy_reach"],
+                ("Werewolf", "FRENZY_TICKS"): ww["frenzy_ticks"], ("Werewolf", "HOWL_COOLDOWN"): ww["howl_cooldown"],
                 ("Werewolves", "SPAWN_TICKS"): ww["spawn_ticks"], ("Werewolves", "SPAWN_CHANCE"): ww["spawn_chance"],
                 ("Werewolves", "MIN_DISTANCE"): ww["min_distance"], ("Werewolves", "MAX_DISTANCE"): ww["max_distance"],
                 ("Werewolves", "NEAR_CAP"): ww["near_cap"], ("Werewolves", "LEVEL_CAP"): ww["level_cap"],
-                ("Werewolves", "WARD_REACH"): ww["ward_reach"], ("Werewolves", "STEW_SECONDS"): wb["seconds"]}
+                ("Werewolves", "WARD_REACH"): ww["ward_reach"], ("Werewolves", "STEW_SECONDS"): wb["seconds"],
+                ("Werewolves", "SHADOW_CHANCE"): ww["shadow_chance"], ("Werewolves", "SHADOW_HAUNT_CHANCE"): ww["shadow_haunt_chance"]}
     for (source, name), value in expected.items():
         found = number(source, name)
         if found is None or abs(float(found) - value) > 1e-9:
             err(f"{source}.{name} = {found} differs from tools/agriculture.py ({value})")
     werewolf = java.get("Werewolf", "")
-    for attribute, key in (("MOVEMENT_SPEED", "speed"), ("ATTACK_DAMAGE", "damage"), ("ARMOR", "armor")):
-        if f"Attributes.{attribute}, {ww[key]})" not in werewolf:
-            err(f"Werewolf's {attribute} differs from WEREWOLF['{key}']")
+    for kind, k in ww["kinds"].items():
+        entry = (f'{kind.upper()}("{kind}", {k["tier"]}, {k["health"]}, {k["damage"]}, {k["armor"]}, {k["speed"]}, {k["scale"]}, '
+                 f'{k["knockback"]}, {k["xp"]}, "{k["pelt"]}", "{k["rug"]}")')
+        if entry not in werewolf:
+            err(f"Werewolf.Kind must have {entry}, as WEREWOLF['kinds'] says")
+    for attribute in ("MAX_HEALTH", "MOVEMENT_SPEED", "ATTACK_DAMAGE", "ARMOR", "KNOCKBACK_RESISTANCE", "SCALE"):
+        if f"Attributes.{attribute}, kind." not in werewolf:
+            err(f"Werewolf.setKind must set {attribute} from its kind")
     blade = ww["dagger_material"]
     if (f"INCORRECT_FOR_IRON_TOOL, {blade['durability']}, {blade['speed']}F, {blade['bonus']}F, {blade['enchantability']}," not in werewolf):
         err("Werewolf.SILVER differs from WEREWOLF['dagger_material']")
+    for call in ("Werewolves.warded(level, target, kind() != Kind.SHADOW)", "kind() == Kind.SNOW && target instanceof LivingEntity",
+                 '"leader_of_the_pack"', "kind().peltTable()", "GameRules.MOB_DROPS"):
+        if call not in werewolf:
+            err(f"Werewolf.java must have {call}")
+    if "werewolf.setKind(kindFor(level, spot, random));" not in java.get("Werewolves", ""):
+        err("Werewolves.trySpawn must choose the kind by kindFor")
     main = java.get("JugcraftAgriculture", "")
     for call in ('entity("werewolf"', f".sized({ww['size'][0]}F, {ww['size'][1]}F)", "Werewolves.register();",
                  f"props.sword(Werewolf.SILVER, {blade['damage']}F, {blade['attack_speed']}F)", "registerItem(Werewolves.SILVER_ARROW, ArrowItem::new",
-                 '"werewolf_pelt"', "WerewolfRugBlock::new", f"MobEffects.{wb['effect']}"):
+                 "for (Werewolf.Kind kind : Werewolf.Kind.values())", "registerItem(kind.pelt, Item::new", "registerBlock(kind.rug, WerewolfRugBlock::new",
+                 f"MobEffects.{wb['effect']}"):
         if call not in main:
             err(f"JugcraftAgriculture.java must call {call}")
-    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8")
+    client_root = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    client = (client_root / "JugcraftClient.java").read_text(encoding="utf-8")
     if "JugcraftAgriculture.WEREWOLF, WerewolfRenderer::new" not in client or "WerewolfModel.LAYER, WerewolfModel::createLayer" not in client:
         err("JugcraftClient.java must register WerewolfRenderer and WerewolfModel's layer")
-    for key in (f"entity.{MOD}.werewolf", f"block.{MOD}.{wb['block']}", f"block.{MOD}.potted_{wb['block']}", f"block.{MOD}.{ww['rug']}",
-                f"item.{MOD}.{ww['dagger']}", f"item.{MOD}.{ww['arrow']}", f"item.{MOD}.{ww['pelt']}"):
+    renderer = (client_root / "WerewolfRenderer.java").read_text(encoding="utf-8")
+    for call in ('"textures/entity/werewolf_" + kind.id + ".png"', '"textures/entity/werewolf_" + kind.id + "_eyes.png"', "state.kind == kind"):
+        if call not in renderer:
+            err(f"WerewolfRenderer.java must have {call}")
+    check_werewolf_model((client_root / "WerewolfModel.java").read_text(encoding="utf-8"))
+    for key in [f"entity.{MOD}.werewolf", f"block.{MOD}.{wb['block']}", f"block.{MOD}.potted_{wb['block']}", f"item.{MOD}.{ww['dagger']}",
+                f"item.{MOD}.{ww['arrow']}"] + [key for kind, k in ww["kinds"].items() for key in (
+                f"entity.{MOD}.werewolf.{kind}", f"block.{MOD}.{k['rug']}", f"item.{MOD}.{k['pelt']}")]:
         if key not in lang:
             err(f"Werewolves have no words for {key}")
-    for path in (DATA / MOD / "loot_table" / "entities" / "werewolf.json", DATA / MOD / "loot_table" / "blocks" / f"{wb['block']}.json",
-                 DATA / MOD / "worldgen" / "placed_feature" / f"patch_{wb['block']}.json", DATA / MOD / "advancement" / "silver_lining.json",
-                 DATA / MOD / "advancement" / "wolfsbane_ward.json", ASSETS / "textures" / "entity" / "werewolf.png",
-                 ASSETS / "textures" / "block" / f"{wb['block']}.png", DATA / MOD / "recipe" / f"{ww['dagger']}.json"):
+    paths = [DATA / MOD / "loot_table" / "entities" / "werewolf.json", DATA / MOD / "loot_table" / "blocks" / f"{wb['block']}.json",
+             DATA / MOD / "worldgen" / "placed_feature" / f"patch_{wb['block']}.json", DATA / MOD / "advancement" / "silver_lining.json",
+             DATA / MOD / "advancement" / "wolfsbane_ward.json", DATA / MOD / "advancement" / "leader_of_the_pack.json",
+             ASSETS / "textures" / "block" / f"{wb['block']}.png", DATA / MOD / "recipe" / f"{ww['dagger']}.json"]
+    for kind, k in ww["kinds"].items():
+        paths += [DATA / MOD / "loot_table" / "entities" / "werewolf" / f"{kind}.json", DATA / MOD / "loot_table" / "blocks" / f"{k['rug']}.json",
+                  ASSETS / "textures" / "entity" / f"werewolf_{kind}.png", ASSETS / "textures" / "entity" / f"werewolf_{kind}_eyes.png",
+                  ASSETS / "textures" / "block" / f"{k['rug']}.png", ASSETS / "textures" / "item" / f"{k['pelt']}.png",
+                  DATA / MOD / "recipe" / f"{k['rug']}.json", DATA / MOD / "recipe" / f"leather_from_{k['pelt']}.json"]
+        pelts = (load(DATA / MOD / "loot_table" / "entities" / "werewolf" / f"{kind}.json") or {}).get("pools", [])
+        if [e.get("name") for pool in pelts for e in pool.get("entries", [])] != [f"{MOD}:{k['pelt']}"]:
+            err(f"The {kind} werewolf's pelt table must drop {MOD}:{k['pelt']}")
+    for path in paths:
         if not path.exists():
             err(f"Werewolves need {path.relative_to(ROOT)}")
-    haunts = (load(DATA / MOD / "tags" / "worldgen" / "biome" / "werewolf_haunts.json") or {}).get("values", [])
-    if sorted(haunts) != sorted(ww["haunts"]):
-        err("jugcraft:werewolf_haunts differs from WEREWOLF['haunts']")
+    texture = ASSETS / "textures" / "entity" / "werewolf_brown.png"
+    if texture.exists() and Image.open(texture).size != tuple(werewolf_model.TEXTURE_SIZE):
+        err("The werewolf's textures must be the size tools/werewolf_model.py gives")
+    for tag, values in (("werewolf_haunts", ww["haunts"]), ("snow_werewolf_haunts", ww["snow_haunts"]),
+                        ("shadow_werewolf_haunts", ww["shadow_haunts"])):
+        found = (load(DATA / MOD / "tags" / "worldgen" / "biome" / f"{tag}.json") or {}).get("values", [])
+        if sorted(found) != sorted(values):
+            err(f"{MOD}:{tag} differs from tools/agriculture.py")
+    prey = (load(DATA / MOD / "tags" / "entity_type" / "werewolf_prey.json") or {}).get("values", [])
+    if sorted(prey) != sorted(ww["prey"]):
+        err(f"{MOD}:werewolf_prey differs from WEREWOLF['prey']")
     arrows = (load(DATA / "minecraft" / "tags" / "item" / "arrows.json") or {}).get("values", [])
     weapons = (load(DATA / MOD / "tags" / "item" / "silver_weapons.json") or {}).get("values", [])
     if f"{MOD}:{ww['arrow']}" not in arrows or f"{MOD}:{ww['dagger']}" not in weapons:
         err("The silver arrow must be in minecraft:arrows and the dagger in jugcraft:silver_weapons")
+
+
+def check_werewolf_model(model):
+    """Every box of tools/werewolf_model.py (texture offset, corner and size) is in WerewolfModel.java, so the texture
+    painted from it lines up with the model, and the texture is the size the model declares."""
+    def f(value):
+        return f"{float(value)}F"
+
+    flat = re.sub(r"\s+", "", model).replace(".mirror()", "").replace(".mirror(false)", "")
+    for part in werewolf_model.PARTS:
+        for u, v, x, y, z, w, h, d, _mirrored in part["boxes"]:
+            box = f".texOffs({u},{v}).addBox({f(x)},{f(y)},{f(z)},{f(w)},{f(h)},{f(d)})"
+            if box not in flat:
+                err(f"WerewolfModel.java lacks {part['name']}'s box {box} from tools/werewolf_model.py")
+    width, height = werewolf_model.TEXTURE_SIZE
+    if f"LayerDefinition.create(mesh,{width},{height})" not in flat:
+        err(f"WerewolfModel's texture must be {width} by {height}, as tools/werewolf_model.py says")
 
 
 def check_broomstick(java, number, lang):

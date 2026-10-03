@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,8 +32,13 @@ import org.jspecify.annotations.Nullable;
  * {@value #WARD_REACH} blocks, a werewolf steps out there, howling. Fewer than {@value #NEAR_CAP} may be near a player and
  * at most {@value #LEVEL_CAP} in the world; none come in peaceful, or while mobs don't spawn.
  *
- * <p>Wolfsbane ({@link #warded}) wards a creature off them: holding a sprig, or standing within {@value #WARD_REACH}
- * blocks of a planted or potted one.
+ * <p>Which kind ({@link #kindFor}): a shadow werewolf {@value #SHADOW_HAUNT_CHANCE} of the time in its haunts (biome
+ * tag {@code jugcraft:shadow_werewolf_haunts}: dark forests, the pale garden, the Gloomweald and the ghost forest) and
+ * {@value #SHADOW_CHANCE} elsewhere; otherwise a snow werewolf in snowy woods ({@code jugcraft:snow_werewolf_haunts})
+ * and a brown one anywhere else.
+ *
+ * <p>Wolfsbane ({@link #warded}) wards a creature off them: holding a sprig (not against a shadow werewolf), or
+ * standing within {@value #WARD_REACH} blocks of a planted or potted one.
  */
 public final class Werewolves {
 	public static final int SPAWN_TICKS = 200;
@@ -48,6 +54,10 @@ public final class Werewolves {
 	public static final float STEW_SECONDS = 8.0F;
 	public static final String SILVER_ARROW = "silver_arrow";
 	public static final TagKey<Biome> HAUNTS = TagKey.create(Registries.BIOME, Jugcraft.id("werewolf_haunts"));
+	public static final TagKey<Biome> SNOW_HAUNTS = TagKey.create(Registries.BIOME, Jugcraft.id("snow_werewolf_haunts"));
+	public static final TagKey<Biome> SHADOW_HAUNTS = TagKey.create(Registries.BIOME, Jugcraft.id("shadow_werewolf_haunts"));
+	public static final float SHADOW_CHANCE = 0.08F;
+	public static final float SHADOW_HAUNT_CHANCE = 0.5F;
 
 	private Werewolves() {
 	}
@@ -99,12 +109,31 @@ public final class Werewolves {
 		if (werewolf == null) {
 			return 0;
 		}
+		werewolf.setKind(kindFor(level, spot, random));
+		werewolf.setHealth(werewolf.getMaxHealth());
 		werewolf.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 		if (!level.addFreshEntity(werewolf)) {
 			return 0;
 		}
 		werewolf.howl(level);
 		return 1;
+	}
+
+	/** The kind of werewolf that comes out at {@code spot}, by its biome. */
+	public static Werewolf.Kind kindFor(ServerLevel level, BlockPos spot, RandomSource random) {
+		Holder<Biome> biome = level.getBiome(spot);
+		return kindFor(biome.is(SNOW_HAUNTS), biome.is(SHADOW_HAUNTS), random.nextFloat());
+	}
+
+	/**
+	 * The kind that comes out where it is {@code snowy} or {@code shadowy} (a shadow werewolf's haunt) for a {@code roll}
+	 * between 0 and 1.
+	 */
+	public static Werewolf.Kind kindFor(boolean snowy, boolean shadowy, float roll) {
+		if (roll < (shadowy ? SHADOW_HAUNT_CHANCE : SHADOW_CHANCE)) {
+			return Werewolf.Kind.SHADOW;
+		}
+		return snowy ? Werewolf.Kind.SNOW : Werewolf.Kind.BROWN;
 	}
 
 	/** The block above open woodland floor in werewolf country at (x, z), in a loaded chunk, or null. */
@@ -149,6 +178,11 @@ public final class Werewolves {
 
 	/** Whether wolfsbane wards {@code target} off: a sprig in either hand, or wolfsbane near them. */
 	public static boolean warded(ServerLevel level, LivingEntity target) {
-		return target.getMainHandItem().is(wolfsbane()) || target.getOffhandItem().is(wolfsbane()) || wardNear(level, target.blockPosition());
+		return warded(level, target, true);
+	}
+
+	/** Whether wolfsbane wards {@code target} off: a sprig in either hand (if {@code sprigs} count), or wolfsbane near them. */
+	public static boolean warded(ServerLevel level, LivingEntity target, boolean sprigs) {
+		return sprigs && (target.getMainHandItem().is(wolfsbane()) || target.getOffhandItem().is(wolfsbane())) || wardNear(level, target.blockPosition());
 	}
 }
