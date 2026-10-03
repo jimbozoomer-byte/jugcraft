@@ -22,7 +22,7 @@ No numbered release yet. Everything below is on `main`.
 
 ### Unmerged: The Pumpkling, fall addition 25
 - **Wake a carved pumpkin:** use a Wisp in a Jar or a bottle of Ectoplasm on a hand-carved pumpkin with a face, and it hops up as a **Pumpkling**, a pet on little vine legs wearing the face you carved (Little Jack).
-- It **follows** you, comes to you from afar, and **sits and stays** when you sneak-use it. A torch lights its face (a soul torch, blue); treats heal it.
+- It **follows** you, comes to you from afar, and **sits and stays** when you use it with an empty hand. A torch lights its face (a soul torch, blue); treats heal it.
 - **It guards crops:** crows keep away from crops near it, as from a scarecrow. A glass bottle settles it back into its pumpkin.
 - Six game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-pumpkling).
 
