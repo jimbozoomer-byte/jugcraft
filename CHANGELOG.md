@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Graveyard pack 1, headstones
+- **Nine life-sized, finely carved headstones** in four stones: a **gothic** marble headstone, two New England **slates** (willow and urn; winged skull), a child's **lamb** stone, a **broken column**, a three-block **Celtic high cross**, a **rustic scroll** on a granite boulder, a two-block **table tomb** and a **ledger stone**.
+- **They weather**: clean, worn, mossy, overgrown (ivy at the last). A brush scrubs a stage off, honeycomb waxes them, an axe takes the wax off, bone meal ages them. The letters fade as the stone weathers.
+- **The Stonemason's Chisel** opens an epitaph screen of four lines, checked on the server; each line is cut as large as it fits. A named Name Tag cuts the first line. Epitaphs go with the broken headstone.
+- **Neglected graves stir restless spirits more often**; a well-kept churchyard is quiet.
+- Two advancements, four game tests, client screenshots. Record: [graveyard.md](docs/features/graveyard.md).
+
 ### Unmerged: Electroplating, batch 34
 - **Electroplating Bath:** plates a tool, weapon or piece of armor with an ingot in sulfuric acid, repairing it fully without experience. **Nickel** makes it half as durable again, **silver** gives a sword or axe Smite III, **gold** makes armor count as gold for piglins. Plating again with the same metal repairs it again.
 - Advancement, handbook page, tooltips, game test. Record: [electroplating.md](docs/features/electroplating.md).

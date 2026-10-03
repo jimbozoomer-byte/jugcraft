@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.client;
 import io.github.jimbozoomer.jugcraft.agriculture.HarvestMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
+import io.github.jimbozoomer.jugcraft.agriculture.OpenEpitaphPayload;
 import io.github.jimbozoomer.jugcraft.agriculture.SpookyBurstPayload;
 import io.github.jimbozoomer.jugcraft.drone.DroneTerminalBlock;
 import io.github.jimbozoomer.jugcraft.drone.JugcraftDrones;
@@ -87,6 +88,9 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.GIANT_PUMPKIN_ENTITY, GiantPumpkinRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SCARECROW_ENTITY, ScarecrowRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.GRAVESTONE_ENTITY, GravestoneRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.HEADSTONE_ENTITY, HeadstoneRenderer::new);
+		ClientPlayNetworking.registerGlobalReceiver(OpenEpitaphPayload.TYPE,
+				(payload, context) -> Minecraft.getInstance().gui.setScreen(new EpitaphScreen(payload)));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.STRING_LIGHT_HOOK_ENTITY, StringLightsRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.HAUNTED_PORTRAIT_ENTITY, HauntedPortraitRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FLOATING_CANDLE_ENTITY, FloatingCandleRenderer::new);

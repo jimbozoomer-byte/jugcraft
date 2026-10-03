@@ -51,6 +51,7 @@
 			"io.github.jimbozoomer.jugcraft.test.TurkeyGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ThereminGameTests",
 			"io.github.jimbozoomer.jugcraft.test.OfrendaGameTests",
+			"io.github.jimbozoomer.jugcraft.test.HeadstoneGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PetroGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PartyGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DroneGameTests",
@@ -116,6 +117,7 @@
 			"io.github.jimbozoomer.jugcraft.test.AlpineClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BiomeClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.TownClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.HeadstoneClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DiagonalClientGameTests"
 		]
 	},

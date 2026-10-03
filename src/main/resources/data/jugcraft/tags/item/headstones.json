@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:gothic_headstone",
+    "jugcraft:willow_urn_headstone",
+    "jugcraft:winged_skull_headstone",
+    "jugcraft:lamb_headstone",
+    "jugcraft:broken_column",
+    "jugcraft:celtic_cross",
+    "jugcraft:rustic_scroll_headstone",
+    "jugcraft:table_tomb",
+    "jugcraft:ledger_stone"
+  ]
+}

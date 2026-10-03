@@ -950,6 +950,24 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Set out an ofrenda** with flowers, a light, bread, a sugar skull and a drink, and at night it welcomes the spirits near.
 - Marigolds, papel picado, sugar skulls and pan de muerto to make and decorate with. Details: [more fall additions](../features/more-fall-additions.md#the-día-de-muertos-ofrenda).
 
+### The Graveyard: headstones
+
+| **A gothic headstone** in white marble, a willow-and-urn slate behind | **Slates**: a willow and urn, a winged skull, and the lamb |
+| --- | --- |
+| ![A gothic headstone](../images/ingame_graveyard_gothic.jpg) | ![Slate headstones](../images/ingame_graveyard_slates.jpg) |
+| **A lamb for a child**, and a mossy rustic scroll | **A broken column** and a Celtic high cross |
+| ![The lamb and the scroll](../images/ingame_graveyard_lamb_and_scroll.jpg) | ![A broken column and a Celtic cross](../images/ingame_graveyard_column_and_cross.jpg) |
+| **A table tomb and a ledger stone**, from their feet | **Weathering**: clean, worn, mossy and overgrown |
+| ![A table tomb and a ledger stone](../images/ingame_graveyard_tomb_and_ledger.jpg) | ![Four stages of weathering](../images/ingame_graveyard_weathering.jpg) |
+| **The epitaph screen**, opened with the Stonemason's Chisel | |
+| ![The epitaph screen](../images/ingame_graveyard_epitaph_screen.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`HeadstoneClientGameTests`, software rendering, small previews). The epitaphs and stages are set for the picture.*
+
+- **Nine life-sized, carved memorials** in marble, slate, granite and sandstone, cut in a stonecutter or a crafting table from vanilla stone: the tall ones stand two or three blocks high, the tomb and ledger lie two blocks long.
+- **Cut an epitaph** with the Stonemason's Chisel (an iron ingot over a stick): four lines, each as large as fits the stone. A named Name Tag cuts a name.
+- **They weather**: worn, mossy, then overgrown with lichen and ivy, and the letters fade. A Brush scrubs them, honeycomb waxes them, bone meal ages them. Neglected graves stir more restless spirits at night. Details: [the graveyard pack](../features/graveyard.md).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
