@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21), the flying broomstick (addition 22), full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25), the fall fair midway (addition 26) and the Ferris wheel (addition 27) are implemented in source and pass CI's game tests; the piñata party (addition 28) is implemented in source. None is yet played by hand. Additions 29 and 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21), the flying broomstick (addition 22), full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25), the fall fair midway (addition 26), the Ferris wheel (addition 27) and the piñata party (addition 28) are implemented in source and pass CI's game tests. None is yet played by hand. Additions 29 and 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
@@ -609,7 +609,7 @@ Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API
 | `./gradlew build` on `c4679261` (Build workflow run [37156864812](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37156864812)) | Pass |
 | Game tests on the headless server, same run: 645 in total, 7 of them new here (`FerrisWheelGameTests`) | **All 645 pass** on `c4679261` |
 | Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `c4679261` (all three client shards) |
-| The same, on `75fff507` (the fixes below) | Not yet run |
+| The same on `27eb6841`: the fixes below, with the midway's branch merged (Build workflow run [37159101161](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37159101161)) | **Pass:** the build, all 645 server game tests and the three client shards |
 
 The wheel's look was checked in a render of its quads before any game run. The first run's screenshots then showed two faults the tests couldn't, fixed in `75fff507`:
 - **The wheel drew black**, frame, wheel and cars, though the booth beside it was lit. The wheel entity stands in its booth block, where there is no light, and took its light from there. The frame now takes its light from just above the booth, the wheel from its hub, and each car from where it hangs.
@@ -626,10 +626,23 @@ The 7 new game tests (`FerrisWheelGameTests`), in a 44 by 44 empty arena:
 
 `FerrisWheelClientGameTests` takes screenshots: the wheel at a fair, turned by a hand crank, a High Striker and plushes beside it; its foot, the booth and crank close up; the view from a car at the top; and at night, lit.
 
+Its screenshots from run 37159101161, in [the guide](../branches/AGRICULTURE.md#the-ferris-wheel): the wheel lit by the day, its cream lattice A-frames, red rims and the cars in their four colours, beside a High Striker and plushes; its foot, the booth with the cars hanging over it; the view from a car near the top, over its grab bar and between its brass posts to the field below; and the wheel at night, its bulbs lit round both rims. Its log has no missing model or texture.
+
 Not run: riding it in play for a whole turn (the tests turn it directly), and a two-client dedicated-server playtest (two riders in one car, seen from the ground).
 
 ### Piñata verification
-Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1090 IDs and now compares `tools/pinata.py` with Java; `python3 scripts/check_repository.py` passes. The piñatas' shapes were checked in a render of their quads.
+
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-28-pinata` stacked on the Ferris wheel:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `tools/pinata.py` with Java: the slots, the drop, a charged swing, the stick's hits, each kind's hits and item; and checks the items, entity, Blindfold, quads, words, recipes and advancements) | Pass, 1090 IDs |
+| `./gradlew build` on `32ed20d8` (Build workflow run [37159206076](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37159206076)) | Pass |
+| Game tests on the headless server, same run: 650 in total, 5 of them new here (`PinataGameTests`) | **All 650 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `32ed20d8` (all three client shards) |
+
+The piñatas' shapes were checked in a render of their quads before any game run. The first run (run [37158111759](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37158111759), on `ca3f3061`) failed only in the Pumpkling's sit test, which came to its owner by chance; that was fixed on the Pumpkling's own branch (see its verification) and merged in. Its screenshots showed the torn piñatas cut off at the picture's edge and the Piñata Party toast over the Blindfold's view; `32ed20d8` moves the camera and waits for the toast.
 
 The 5 new game tests (`PinataGameTests`):
 1. a star piñata used on a block's side does nothing; on its underside it hangs, its foot a block and a half below, one used; not where there is no room below; a guest puts in a whole stack of cookies; nine stacks fill it and the tenth won't go in;
@@ -639,6 +652,8 @@ The 5 new game tests (`PinataGameTests`):
 5. the recipes and advancements load, and the Blindfold goes on the head.
 
 `PinataClientGameTests` takes screenshots: the three hanging from an oak pergola; torn after half their hits; the star bursting; and the view through the Blindfold.
+
+Its screenshots from run 37159206076, in [the guide](../branches/AGRICULTURE.md#the-piñata-party): the pumpkin, star and bat piñatas hanging from an oak pergola over hay bales and pumpkins; the three closer, torn, their paper ripped through; the star bursting in a cloud of confetti, its candy flying; and the Blindfold's view, dark from edge to edge. Its log has no missing model or texture.
 
 Not run: hitting one by hand blindfolded, and a two-client dedicated-server playtest (the party).
 
