@@ -67,10 +67,10 @@ public final class TownPlanner {
 		Jugcraft.LOGGER.info("Town: placed with its middle at {} {} {}", centre.getX(), centre.getY(), centre.getZ());
 	}
 
-	/** The corner (origin) of the town whose middle stands at (x, ground, z), aligned to chunk borders. */
+	/** The corner (origin) of the town whose middle stands nearest (x, ground, z), aligned to chunk borders. */
 	public static BlockPos originAround(int x, int ground, int z) {
 		int half = TownData.get().size / 2;
-		return new BlockPos(Math.floorDiv(x - half, 16) * 16, ground, Math.floorDiv(z - half, 16) * 16);
+		return new BlockPos(Math.floorDiv(x - half + 8, 16) * 16, ground, Math.floorDiv(z - half + 8, 16) * 16);
 	}
 
 	/** The best site, as the town's origin; null if every candidate is wet. */
@@ -81,8 +81,15 @@ public final class TownPlanner {
 		BlockPos best = null;
 		for (int r = MIN_DISTANCE; r <= MAX_DISTANCE; r += RING_STEP) {
 			for (int a = 0; a < 360; a += ANGLE_STEP) {
-				int cx = start.getX() + (int) Math.round(r * Math.cos(Math.toRadians(a)));
-				int cz = start.getZ() + (int) Math.round(r * Math.sin(Math.toRadians(a)));
+				// The town's middle as built (its corner sits on a chunk border), which must itself be in range.
+				BlockPos middle = Town.centre(originAround(start.getX() + (int) Math.round(r * Math.cos(Math.toRadians(a))), 0,
+						start.getZ() + (int) Math.round(r * Math.sin(Math.toRadians(a)))));
+				int cx = middle.getX();
+				int cz = middle.getZ();
+				double distance = Math.hypot(cx - start.getX(), cz - start.getZ());
+				if (distance < MIN_DISTANCE || distance > MAX_DISTANCE) {
+					continue;
+				}
 				int[] heights = new int[GRID * GRID];
 				int wet = 0;
 				int n = 0;

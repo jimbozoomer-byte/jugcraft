@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.town.ShopMenu;
 import io.github.jimbozoomer.jugcraft.town.Town;
 import io.github.jimbozoomer.jugcraft.town.TownData;
 import io.github.jimbozoomer.jugcraft.town.TownDecor;
+import io.github.jimbozoomer.jugcraft.town.TownPlanner;
 import io.github.jimbozoomer.jugcraft.town.TownState;
 import io.github.jimbozoomer.jugcraft.town.Townsfolk;
 import java.util.List;
@@ -55,8 +56,13 @@ public class TownClientGameTests implements FabricClientGameTest {
 			}
 			BlockPos start = server.computeOnServer(minecraft -> minecraft.overworld().getRespawnData().pos());
 			BlockPos centre = Town.centre(origin);
+			double distance = Math.sqrt(centre.distSqr(start.atY(centre.getY())));
 			LOGGER.info("Town, seed {}: middle at {} {} {}, {} blocks from the start at {} {} {}", SEED, centre.getX(), centre.getY(),
-					centre.getZ(), (int) Math.sqrt(centre.distSqr(start.atY(centre.getY()))), start.getX(), start.getY(), start.getZ());
+					centre.getZ(), (int) distance, start.getX(), start.getY(), start.getZ());
+			if (distance < TownPlanner.MIN_DISTANCE || distance > TownPlanner.MAX_DISTANCE) {
+				throw new AssertionError("The town's middle is " + (int) distance + " blocks from the start, not "
+						+ TownPlanner.MIN_DISTANCE + " to " + TownPlanner.MAX_DISTANCE);
+			}
 			// Over the middle of the town, so that every chunk of it is in reach, while they load and build (run
 			// 37076304887, waiting over the south edge, built only 96 of 144); then over the town from the south.
 			fly(context, server, origin, 96, 60, 96, 180, 90);
@@ -71,7 +77,11 @@ public class TownClientGameTests implements FabricClientGameTest {
 				}
 			}
 			LOGGER.info("Town, seed {}: {} of {} chunks built", SEED, built, chunks);
-			fly(context, server, origin, 96, 90, 176, 180, 36);
+			// Up to 90 blocks over the town's floor but under the clouds (about y 192; run 37078631445's town in Alpine Spawn,
+			// floor at y 106, was shot from above them), looking down at the square.
+			int up = Math.max(20, Math.min(90, 180 - origin.getY()));
+			int down = (int) Math.round(Math.toDegrees(Math.atan2(up + 1.6, 176 - 104)));
+			fly(context, server, origin, 96, up, 176, 180, down);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_town_overview");
 			// The square, looking north to the church, in the theme of the day; then at Halloween and in December.

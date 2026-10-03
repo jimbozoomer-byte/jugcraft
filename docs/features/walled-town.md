@@ -1,6 +1,6 @@
 # The walled town
 
-Status: implemented in source on branch `claude/walled-town`; **not yet played**. Results of the CI runs are recorded under Verification.
+Status: implemented, green in CI (server and real-world client tests); **not yet played** by a person. Results are under Verification.
 Proposal issue: none. The owner asked for the town on 2 October 2026 and chose its size, place and currency (see "Owner approval" below).
 Owner: @jimbozoomer-byte
 Target milestone and tier: the start of every new world (Discovery). Nothing in it needs anything but walking there.
@@ -109,26 +109,59 @@ Primary specialty and supported player role: a shared hub. It serves traders and
 - **Fabric events:** block breaking, using blocks and items, attacking and using entities, entity loading (to stop natural hostile spawns inside the wall), chunk loading and server ticks.
 
 ## Verification
-Results are recorded below after CI runs.
 - **`python3 tools/check_mod_data.py`** checks that:
   - the town's data and shops are written and current;
   - the shops have no profit loop;
   - every townsperson's skin and every line they say exist;
   - every decor kind has every theme;
-  - the feature switch and the shop's button numbering match Java.
+  - the feature switch and the shop's button numbering match Java;
+  - the town's water stays put (`check_town_water`): no water block has air beside or under it, and no block that can hold water (a wall, a slab, stairs) touches two water blocks.
 - **Server game tests (`TownGameTests`):**
   - `townDataReadsWhole`: every palette state is real, and every site kind shows something in every theme.
   - `shopsMakeSense`: every offer is a real item at a positive price, and nothing is both sold and bought.
   - `jugsStayInBounds`: no negative balances, no sending more than one has or to oneself, and the maximum holds.
   - `shopTradesCheckEverything`: buying and selling pay and take the right amounts, and refuse without the Jugs or the goods. A seasonal offer sells only in its theme.
   - `atmSendsJugsBetweenPlayers`.
-  - `testTownIsBuiltAndKept`: a test town far from other tests has its square's 12 chunks built and checked block by block against the data, with one townsperson for each place. A survival player can't break, place or pour there, and an explosion and a fire leave it as it was. A townsperson can't be hurt by a player, and a lamp changes between Halloween and summer.
-- **Client game test (`TownClientGameTests`):** a new world with seed `jugcraft` must have a town. The test logs its distance from the start, the chunks built and the townsfolk out, and takes screenshots:
-  - the town from above;
+  - `testTownIsBuiltAndKept`:
+    - a test town far from other tests has its square's 12 chunks built and checked block by block against the data;
+    - the town records one townsperson for each place;
+    - a survival player can't break, place or pour there, an explosion leaves it as it was, and a lamp changes between Halloween and summer;
+    - then, once the chunks tick their entities (the test waits for it), each recorded townsperson is in the world, one can't be hurt by a player, and a fire on the square goes out;
+    - 80 ticks after that, no block of the town has become or stopped being air, or gained or lost water.
+- **Client game test (`TownClientGameTests`):** a new world with seed `jugcraft` must have a town between 170 and 300 blocks from the start. The test waits over the middle of the town until every chunk is built, logs the chunks built and the townsfolk out, and takes screenshots:
+  - the town from above (under the clouds);
   - the square in today's theme, at Halloween and in December;
-  - the south gate;
+  - the south gate, standing on the land outside it;
   - a shop screen and a Jug Teller's screen.
 - Not run: play, two clients on a dedicated server, a restart, performance measurement.
+
+### Results
+- **Run [37078631445](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37078631445) (commit 8b8454a3, with the biomes and Alpine Spawn on main): green.**
+  - Server game tests: all 507 required tests passed. `testTownIsBuiltAndKept`:
+    - 171,148 blocks checked, 0 differ;
+    - the square's chunks ticked their entities after 3,100 ticks;
+    - all 10 townsfolk were in the world;
+    - after ticking, 0 blocks had drifted.
+  - Client game test, a real world with seed `jugcraft` (it starts in Alpine Spawn at 304 105 528):
+    - the town's middle is at 384 106 672, 164 blocks from the start (see the fix below);
+    - 144 of 144 chunks were built;
+    - the welcome message gave 20 Jugs;
+    - 25 townsfolk were out round the camera, of every role;
+    - the seasonal stall's shop screen opened with its autumn offers, and the Jug Teller is in place.
+  - Screenshots:
+    - the square: the fountain's water stays in its basin and townsfolk stand about; the church faces it;
+    - Halloween: soul lanterns, a dead tree hung with cobwebs and jack o'lanterns;
+    - December: the tree of lights over its presents;
+    - the gatehouse, seen from the land 10 blocks below the town's floor.
+    - The overview was taken from above the clouds (the town's floor was at y 106), so it showed little. It is now taken from under them.
+- **Fixed on the way, from earlier runs:**
+  - **The fountain flooded the square** (runs 37077754832 and 37078159370: 247 and 219 blocks of water over the paving). The rim alternated walls and stone bricks. At its inside corners a wall touched two of the basin's water sources, and the game's infinite-water rule filled it (the test logged `stone_brick_wall[... waterlogged=true]` at 85 1 102), so it spilled outward. The rim is now full blocks, and the checker refuses such water.
+  - **The town's distance.** The planner measured 170 to 300 blocks before setting the town's corner on a chunk border, which moved the middle up to 15 blocks. It now measures from the middle as built, and the client test asserts the range.
+  - **Test timing, not the town:**
+    - The test server races through ticks while the chunks round a forced chunk generate, so the test now waits until the square's chunks tick before looking for townsfolk or lighting the fire.
+    - A render distance of 16 was too slow to render.
+    - The gate camera stood inside the hill outside the wall.
+- `PixelHollowsGameTests.everyVillageHasOneShop` (from #53) failed once on this branch, on a desert village with no room for the shop. It is not the town's; it passed on the re-run and in every other run.
 
 ## World and event applicability
 - **Biome fit:** the town takes the flattest dry ground near the start, whatever the biome. In Alpine Spawn worlds, that is near the alpine village the world starts beside.
