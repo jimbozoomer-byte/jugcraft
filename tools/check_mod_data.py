@@ -38,6 +38,7 @@ import biomes_data
 import trees as tr
 import plants
 import town_assets
+import diagonal_connections as dg
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -2123,7 +2124,8 @@ def check_decor3(java):
         if variants(block) != keys:
             err(f"{block}: blockstate variants differ from its properties")
     parts = (load(ASSETS / "blockstates" / f"{fence}.json") or {}).get("multipart", [])
-    if sorted(next(iter(p.get("when", {"post": 1}))) for p in parts) != sorted(["post", "north", "east", "south", "west"]):
+    straight = [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)]  # diagonals: check_diagonal_connections
+    if sorted(next(iter(p.get("when", {"post": 1}))) for p in straight) != sorted(["post", "north", "east", "south", "west"]):
         err(f"{fence}: the multipart needs the post and a side for each direction")
     for tag, entry in (("fences", fence), ("fence_gates", gate), ("doors", crypt["door"])):
         for registry in ("block", "item"):
@@ -4028,6 +4030,51 @@ def check_deposits():
             err(f"MachineKind.{constant} is not {stats[key]} as in tools/machines.py")
 
 
+def check_diagonal_connections():
+    """Diagonal connections (tools/diagonal_connections.py): every block in #jugcraft:connects_diagonally has a
+    blockstate with one arm part for each diagonal, turned toward it, and an arm model of turned elements; every
+    Jugcraft blockstate shaped like a fence, pane or bars (a part for each straight direction) is in the tag; vanilla's
+    rebuilt blockstates keep vanilla's own parts; and the Java property names match."""
+    tag = set((load(RES / "data" / MOD / "tags" / "block" / "connects_diagonally.json") or {}).get("values", []))
+    if tag != set(dg.blocks()):
+        err(f"#{dg.TAG} differs from tools/diagonal_connections.py: {sorted(tag ^ set(dg.blocks()))}")
+    for block in sorted(tag):
+        namespace, name = block.split(":")
+        root = RES / "assets" / namespace
+        parts = (load(root / "blockstates" / f"{name}.json") or {}).get("multipart", [])
+        arms = {next(iter(p["when"])): p["apply"] for p in parts if set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)}
+        if sorted(arms) != sorted(dg.DIAGONAL_NAMES):
+            err(f"{block}: needs one diagonal arm part for each of {dg.DIAGONAL_NAMES}, has {sorted(arms)}")
+            continue
+        for diagonal, y in dg.DIAGONALS:
+            if arms[diagonal].get("y", 0) != y or arms[diagonal]["model"] != f"{MOD}:block/diagonal/{name}":
+                err(f"{block}: its {diagonal} arm should be {MOD}:block/diagonal/{name} turned y={y}")
+        model = load(ASSETS / "models" / "block" / "diagonal" / f"{name}.json") or {}
+        elements = model.get("elements", [])
+        if not elements or any(e.get("rotation", {}).get("axis") != "y" or e["rotation"].get("angle") != dg.ANGLE
+                               or not e["rotation"].get("rescale") for e in elements):
+            err(f"{block}: its diagonal arm model needs elements turned {dg.ANGLE} degrees about y, with rescale")
+        if not model.get("parent"):
+            err(f"{block}: its diagonal arm model needs the block's side model as parent (for its textures)")
+    vanilla = dg.vanilla_blockstates()
+    for name, (own, _side, _kind) in vanilla.items():
+        parts = (load(RES / "assets" / "minecraft" / "blockstates" / f"{name}.json") or {}).get("multipart", [])
+        if [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)] != own:
+            err(f"minecraft:{name}: the rebuilt blockstate lost vanilla's own parts")
+    for path in sorted((ASSETS / "blockstates").glob("*.json")):
+        parts = (load(path) or {}).get("multipart", [])
+        sides = {next(iter(p["when"])) for p in parts if len(p.get("when", {})) == 1 and list(p["when"].values()) == ["true"]}
+        if {"north", "east", "south", "west"} <= sides and not sides & {"up", "down"} and f"{MOD}:{path.stem}" not in tag:
+            err(f"{MOD}:{path.stem} joins like a fence but is not in #{dg.TAG}; add it to tools/diagonal_connections.py")
+    java = (ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "diagonal" / "DiagonalConnections.java")
+    source = java.read_text(encoding="utf-8") if java.exists() else ""
+    for diagonal, _y in dg.DIAGONALS:
+        if f'"{diagonal}"' not in source:
+            err(f"diagonal/DiagonalConnections.java does not name the property {diagonal}")
+    if f'"{dg.TAG.split(":")[1]}"' not in source:
+        err(f"diagonal/DiagonalConnections.java does not name the tag {dg.TAG}")
+
+
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
@@ -4070,6 +4117,7 @@ def main():
     check_model_uvs()
     check_pixel_hollows()
     check_town()
+    check_diagonal_connections()
     for path in RES.rglob("*.json"):
         load(path)
     if errors:
