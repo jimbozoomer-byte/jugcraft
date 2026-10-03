@@ -36,6 +36,18 @@ final class TintedBoxes {
 	}
 
 	/**
+	 * A flat quad facing up, its corners at {@code corners} (in pixels) showing the texture's corners at {@code uv} (0 to 1
+	 * across the whole texture), for a picture laid on a surface (the Spirit Board's face, the planchette).
+	 */
+	static void flat(VertexConsumer buffer, PoseStack.Pose matrix, float[][] corners, float[][] uv, int argb, int light) {
+		float[][] scaled = new float[4][];
+		for (int k = 0; k < 4; k++) {
+			scaled[k] = new float[] {uv[k][0] * 16.0F, uv[k][1] * 16.0F};
+		}
+		face(buffer, matrix, argb, light, 0, 1, 0, corners, scaled);
+	}
+
+	/**
 	 * A plane standing upright through the middle of the block, turned {@code turn} about the vertical, {@code width} wide and
 	 * from {@code y0} to {@code y1}, showing the whole texture from both sides (for flames).
 	 */

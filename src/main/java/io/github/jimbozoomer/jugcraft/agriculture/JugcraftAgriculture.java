@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import java.io.IOException;
@@ -73,11 +74,13 @@ import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CarpetBlock;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
@@ -280,6 +283,28 @@ public final class JugcraftAgriculture {
 	public static DataComponentType<Boolean> TWINKLE;
 	/** The design a Face Paint Kit's dial is set to. */
 	public static DataComponentType<FacePaint.Design> FACE_PAINT_DESIGN;
+	/** The candy poured onto a Candy Tray. */
+	public static DataComponentType<CandyBatch> CANDY_BATCH;
+	public static BlockEntityType<CandyKettleBlockEntity> CANDY_KETTLE_ENTITY;
+	public static BlockEntityType<BatHouseBlockEntity> BAT_HOUSE_ENTITY;
+	public static EntityType<HayGolem> HAY_GOLEM;
+	public static EntityType<Turkey> TURKEY;
+	public static DataComponentType<KnittingWork> KNITTING;
+	public static BlockEntityType<SpinningWheelBlockEntity> SPINNING_WHEEL_ENTITY;
+	public static BlockEntityType<HearthOvenBlockEntity> HEARTH_OVEN_ENTITY;
+	public static BlockEntityType<SpiritBoardBlockEntity> SPIRIT_BOARD_ENTITY;
+	public static BlockEntityType<ThereminBlockEntity> THEREMIN_ENTITY;
+	public static BlockEntityType<OfrendaBlockEntity> OFRENDA_ENTITY;
+	/** How many uses Knitting Needles have. */
+	public static final int NEEDLES_DURABILITY = 128;
+	/** Bat guano fertilizes the crops this far round where it is used (a 3x3 patch), with this many doses of bone meal each. */
+	public static final int GUANO_RADIUS = 1;
+	public static final int GUANO_DOSES = 1;
+	/** The five wild autumn mushrooms. */
+	public static final List<String> WILD_MUSHROOMS = List.of("chanterelle", "porcini", "puffball", "fly_agaric", "jack_o_lantern_mushroom");
+	/** The Candy Kettle's own candies (it also makes candy corn and caramel). */
+	public static final List<String> CANDIES = List.of("rock_candy", "salt_water_taffy", "hard_candy", "lollipop", "fudge", "cream_caramel",
+			"toffee", "burnt_sugar");
 	/** A spooky firework's coloured spark, drawn by the client's SpookySparkParticle. */
 	public static final ParticleType<SpookySparkOptions> SPOOKY_SPARK = FabricParticleTypes.complex(true, SpookySparkOptions.CODEC,
 			SpookySparkOptions.STREAM_CODEC);
@@ -698,6 +723,8 @@ public final class JugcraftAgriculture {
 		mum("orange_mum", MobEffects.FIRE_RESISTANCE, 4.0F);
 		mum("red_mum", MobEffects.REGENERATION, 8.0F);
 		mum("purple_mum", MobEffects.NIGHT_VISION, 5.0F);
+		// Fall additions 20: the cempasúchil marigold, the flower of Día de Muertos.
+		mum("marigold", MobEffects.LUCK, 6.0F);
 	}
 
 	/**
@@ -1378,6 +1405,148 @@ public final class JugcraftAgriculture {
 		registerItem("face_paint_kit", FacePaintKitItem::new, new Item.Properties().durability(FacePaintKitItem.USES)
 				.component(FACE_PAINT_DESIGN, FacePaint.Design.SKULL), EQUIPMENT_TAB);
 		FacePaint.register();
+
+		// Fall additions 11, the candy kitchen: the Candy Kettle, the Candy Tray its candy is poured onto, and its candies.
+		CANDY_BATCH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("candy_batch"),
+				DataComponentType.<CandyBatch>builder().persistent(CandyBatch.CODEC).networkSynchronized(CandyBatch.STREAM_CODEC).build());
+		Block candyKettle = registerBlock("candy_kettle", CandyKettleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(2.5F).sound(SoundType.COPPER).noOcclusion());
+		CANDY_KETTLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("candy_kettle"),
+				FabricBlockEntityTypeBuilder.create(CandyKettleBlockEntity::new, candyKettle).build());
+		registerItem("candy_kettle", props -> new BlockItem(candyKettle, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem("candy_tray", CandyTrayItem::new, new Item.Properties().stacksTo(16), TOOL_TAB);
+		candy("rock_candy", 2, 0.1F);
+		candy("salt_water_taffy", 2, 0.2F);
+		candy("hard_candy", 1, 0.1F);
+		candy("lollipop", 2, 0.1F);
+		candy("fudge", 3, 0.3F);
+		candy("cream_caramel", 2, 0.2F);
+		candy("toffee", 2, 0.2F);
+		candy("burnt_sugar", 1, 0.0F);
+
+		// Fall additions 12, autumn foraging: five wild mushrooms that spread in the shade and sprout fairy rings under a
+		// full moon (the jack o'lantern mushroom glows), the Foraging Basket, and what they cook into.
+		for (String id : WILD_MUSHROOMS) {
+			int light = id.equals("jack_o_lantern_mushroom") ? 9 : 0;
+			Block mushroom = registerBlock(id, WildMushroomBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM)
+					.lightLevel(state -> light).randomTicks());
+			registerItem(id, props -> new BlockItem(mushroom, props), new Item.Properties().useBlockDescriptionPrefix().compostable(COMPOST_MEDIUM),
+					INGREDIENT_TAB);
+		}
+		registerItem("foraging_basket", ForagingBasketItem::new, new Item.Properties().stacksTo(1)
+				.component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY), TOOL_TAB);
+		food("sauteed_chanterelles", 5, 0.6F, COMPOST_MEDIUM_HIGH);
+		food("roasted_porcini", 6, 0.6F, COMPOST_MEDIUM_HIGH);
+		food("fried_puffball", 4, 0.5F, COMPOST_MEDIUM_HIGH);
+		stew("foragers_stew", 10, 0.8F);
+		FairyRings.register();
+
+		// Fall additions 13, the Bat House: a roost that lets bats out at dusk and takes them in at dawn, and the guano they
+		// leave, a fertilizer (superphosphate's rule over a 3x3 patch, one dose) and a source of phosphate.
+		Block batHouse = registerBlock("bat_house", BatHouseBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		BAT_HOUSE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("bat_house"),
+				FabricBlockEntityTypeBuilder.create(BatHouseBlockEntity::new, batHouse).build());
+		registerItem("bat_house", props -> new BlockItem(batHouse, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem("bat_guano", props -> new FertilizerItem(props, GUANO_RADIUS, GUANO_DOSES), new Item.Properties()
+				.compostable(COMPOST_MEDIUM_HIGH), INGREDIENT_TAB);
+
+		// Fall additions 14, the Hay Golem: built from four hay bales and a carved head; a walking scarecrow that tends the
+		// crops round its post and carries the harvest home.
+		HAY_GOLEM = entity("hay_golem", EntityType.Builder.<HayGolem>of(HayGolem::new, MobCategory.MISC).sized(0.9F, 2.5F).eyeHeight(2.2F)
+				.clientTrackingRange(10));
+		FabricDefaultAttributeRegistry.register(HAY_GOLEM, HayGolem.createAttributes());
+		UseBlockCallback.EVENT.register(HayGolem::onUseBlock);
+
+		// Fall additions 15, knitting: the Spinning Wheel spins wool into yarn; Knitting Needles knit yarn into beanies,
+		// socks and sweaters, worn (dyed the yarn's colour) to keep warm by a campfire.
+		KNITTING = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("knitting"),
+				DataComponentType.<KnittingWork>builder().persistent(KnittingWork.CODEC).networkSynchronized(KnittingWork.STREAM_CODEC).build());
+		Block spinningWheel = registerBlock("spinning_wheel", SpinningWheelBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		SPINNING_WHEEL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("spinning_wheel"),
+				FabricBlockEntityTypeBuilder.create(SpinningWheelBlockEntity::new, spinningWheel).build());
+		registerItem("spinning_wheel", props -> new BlockItem(spinningWheel, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem("yarn", Item::new, new Item.Properties().component(DataComponents.DYED_COLOR, new DyedItemColor(Knitting.UNDYED)),
+				INGREDIENT_TAB);
+		registerItem("knitting_needles", KnittingNeedlesItem::new, new Item.Properties().durability(NEEDLES_DURABILITY)
+				.component(KNITTING, KnittingWork.NONE), TOOL_TAB);
+		for (Knitwear knit : Knitwear.values()) {
+			Equippable worn = Equippable.builder(knit.slot).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER)
+					.setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id(knit.asset))).build();
+			registerItem(knit.item, Item::new, new Item.Properties().stacksTo(1).component(DataComponents.EQUIPPABLE, worn)
+					.component(DataComponents.DYED_COLOR, new DyedItemColor(Knitting.UNDYED)), EQUIPMENT_TAB);
+		}
+		Knitting.register();
+
+		// Fall additions 16, pie baking: a brick Hearth Oven fed with fuel bakes raw pies (pastry, a filling and sugar) into
+		// pies placed like cakes, eaten or cut a slice at a time; left in too long they burn.
+		Block oven = registerBlock("hearth_oven", HearthOvenBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.strength(2.0F, 6.0F).sound(SoundType.STONE).requiresCorrectToolForDrops().noOcclusion()
+				.lightLevel(state -> state.getValue(HearthOvenBlock.LIT) ? HearthOvenBlock.LIGHT : 0));
+		HEARTH_OVEN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("hearth_oven"),
+				FabricBlockEntityTypeBuilder.create(HearthOvenBlockEntity::new, oven).build());
+		registerItem("hearth_oven", props -> new BlockItem(oven, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem("pastry_dough", Item::new, new Item.Properties().compostable(COMPOST_MEDIUM), INGREDIENT_TAB);
+		for (PieFilling filling : PieFilling.values()) {
+			registerItem(filling.rawPie(), Item::new, new Item.Properties().stacksTo(16).compostable(COMPOST_MEDIUM_HIGH), FOOD_TAB);
+			Block pie = registerBlock(filling.pie(), props -> new PieBlock(filling, props), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+					.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+			registerItem(filling.pie(), props -> new BlockItem(pie, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);
+			food(filling.slice(), filling.nutrition, filling.saturation, COMPOST_MEDIUM_HIGH);
+		}
+		Block burnt = registerBlock("burnt_pie", props -> new PieBlock(null, props), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+		registerItem("burnt_pie", props -> new BlockItem(burnt, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), FOOD_TAB);
+
+		// Fall additions 17, the Spirit Board: a candlelit séance spells out a restless spirit's name and the one thing it
+		// wishes for; given it, the spirit is laid to rest.
+		Block spiritBoard = registerBlock("spirit_board", SpiritBoardBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
+				.strength(0.8F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		SPIRIT_BOARD_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("spirit_board"),
+				FabricBlockEntityTypeBuilder.create(SpiritBoardBlockEntity::new, spiritBoard).build());
+		registerItem("spirit_board", props -> new BlockItem(spiritBoard, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 18, wild turkeys: flocks in woods and meadows; toms strut, hens lay eggs; a roast turkey is set on the
+		// table and carved a serving at a time.
+		TURKEY = entity("turkey", EntityType.Builder.<Turkey>of(Turkey::new, MobCategory.CREATURE).sized(0.6F, 0.95F).eyeHeight(0.8F)
+				.clientTrackingRange(10));
+		FabricDefaultAttributeRegistry.register(TURKEY, Turkey.createAttributes());
+		Turkeys.register();
+		meal("raw_turkey", 3, 0.3F);
+		Block roastTurkey = registerBlock("roast_turkey", RoastTurkeyBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(0.5F).sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+		registerItem("roast_turkey", props -> new BlockItem(roastTurkey, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1),
+				FOOD_TAB);
+		meal("turkey_slice", 3, 0.6F);
+
+		// Fall additions 19, the Theremin: an eerie electronic instrument played without touching, singing higher the nearer
+		// someone stands; comparators read how near, so it doubles as a proximity sensor.
+		Block theremin = registerBlock("theremin", ThereminBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(state -> ThereminBlock.playing(state) ? ThereminBlock.LIGHT : 0));
+		THEREMIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("theremin"),
+				FabricBlockEntityTypeBuilder.create(ThereminBlockEntity::new, theremin).build());
+		registerItem("theremin", props -> new BlockItem(theremin, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		// Fall additions 20, the Día de Muertos ofrenda: an altar of three tiers for offerings to those remembered, with
+		// marigold petals, papel picado, sugar skulls and pan de muerto; complete, it welcomes the restless spirits near.
+		Block ofrenda = registerBlock("ofrenda", OfrendaBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).strength(1.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(state -> state.getValue(OfrendaBlock.COMPLETE) ? OfrendaBlock.LIGHT : 0));
+		OFRENDA_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ofrenda"),
+				FabricBlockEntityTypeBuilder.create(OfrendaBlockEntity::new, ofrenda).build());
+		registerItem("ofrenda", props -> new BlockItem(ofrenda, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block petals = registerBlock("marigold_petals", CarpetBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.PINK_PETALS)
+				.mapColor(MapColor.COLOR_ORANGE));
+		registerItem("marigold_petals", props -> new BlockItem(petals, props), new Item.Properties().useBlockDescriptionPrefix()
+				.compostable(COMPOST_LOW), BUILDING_TAB);
+		Block papel = registerBlock("papel_picado", props -> new WallDecorationBlock(props, 1.0, 1.0, 15.0), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_PINK).instabreak().noCollision().sound(SoundType.WOOL).ignitedByLava().pushReaction(PushReaction.POPPED));
+		registerItem("papel_picado", props -> new BlockItem(papel, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block skull = registerBlock("sugar_skull", SugarSkullBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(0.3F)
+				.sound(SoundType.STONE).noOcclusion().pushReaction(PushReaction.POPPED));
+		registerItem("sugar_skull", props -> new BlockItem(skull, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		plain("pan_de_muerto_dough", COMPOST_MEDIUM);
+		food("pan_de_muerto", 6, 0.7F, COMPOST_MEDIUM_HIGH);
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
@@ -1615,6 +1784,12 @@ public final class JugcraftAgriculture {
 		wildPatch("cinderella_pumpkin", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FLORAL);
 		wildPatch("bottle_gourd", ConventionalBiomeTags.IS_JUNGLE, ConventionalBiomeTags.IS_SAVANNA);
 		wildPatch("mums", ConventionalBiomeTags.IS_FLORAL, ConventionalBiomeTags.IS_FOREST);
+		// Autumn foraging: wild mushrooms on forest floors.
+		wildPatch("chanterelle", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_BIRCH_FOREST);
+		wildPatch("porcini", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_FOREST);
+		wildPatch("puffball", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FOREST);
+		wildPatch("fly_agaric", ConventionalBiomeTags.IS_BIRCH_FOREST, ConventionalBiomeTags.IS_TAIGA);
+		wildPatch("jack_o_lantern_mushroom", ConventionalBiomeTags.IS_SPOOKY, ConventionalBiomeTags.IS_FOREST);
 	}
 
 	@SafeVarargs
@@ -1717,6 +1892,13 @@ public final class JugcraftAgriculture {
 		Consumable eaten = Consumables.defaultFood().onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(effect, seconds * 20)))
 				.build();
 		registerItem(id, Item::new, new Item.Properties().food(food, eaten), FOOD_TAB);
+	}
+
+	/** A piece of the Candy Kettle's candy: quick to eat, even on a full stomach (a flavoured piece carries its effects). */
+	private static void candy(String id, int nutrition, float saturation) {
+		FoodProperties food = new FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation).alwaysEdible().build();
+		registerItem(id, Item::new, new Item.Properties().food(food, Consumables.defaultFood().consumeSeconds(Candies.EAT_SECONDS).build())
+				.compostable(COMPOST_MEDIUM_HIGH), FOOD_TAB);
 	}
 
 	/** A jar of preserves ({@link PreserveJarItem}): four servings of {@code nutrition} each, and an effect (or none). */
