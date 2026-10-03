@@ -93,6 +93,10 @@ TREE = {
     "gas_mask": ("air_separation_unit", "gas_mask", "Filtered", "Make a gas mask", "task"),
     "chemical_grenade": ("grenade", ["chlorine_grenade", "smoke_grenade", "thermite_grenade", "flashbang"],
                          "Chemical Arsenal", "Make a chlorine, smoke or thermite grenade or a flashbang", "task"),
+    # Batch 32: construction chemistry.
+    "foam_sprayer": ("synthesis_converter", "foam_sprayer", "Expanding Foam", "Make a foam sprayer", "task"),
+    "blastproof_concrete": ("steel", "blastproof_concrete", "Bunker Down", "Cast blast-proof concrete, as blast-proof as "
+                            "obsidian", "task"),
     "first_aid_kit": ("air_separation_unit", "first_aid_kit", "Field Medic", "Make a first aid kit in the chemical reactor",
                       "task"),
     "synthesis_converter": ("air_separation_unit", "synthesis_converter", "Bread from Air",
@@ -125,6 +129,9 @@ TREE = {
     # Farming (batch 9).
     "cotton": ("bronze", "cotton", "King Cotton", "Grow cotton", "task"),
     "sprinkler": ("cotton", "sprinkler", "Make It Rain", "Build a sprinkler", "task"),
+    "electroplating_bath": ("electrolytic_cell", "electroplating_bath", "Silver Lining", "Build an electroplating bath",
+                            "task"),
+    "hydroponic_bay": ("crop_harvester", "hydroponic_bay", "Soil Optional", "Build a hydroponic bay", "task"),
     "crop_harvester": ("steel", "crop_harvester", "Reaping What You Sow", "Build a crop harvester", "goal"),
 }
 # Background of the tab (a block texture), shown behind the tree.
