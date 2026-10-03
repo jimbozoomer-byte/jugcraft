@@ -290,6 +290,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<HighStrikerBlockEntity> HIGH_STRIKER_ENTITY;
 	public static EntityType<FerrisWheel> FERRIS_WHEEL;
 	public static BlockEntityType<FerrisWheelBlockEntity> FERRIS_WHEEL_BOOTH;
+	public static EntityType<Pinata> PINATA;
 	public static DataComponentType<Integer> BROOM_CHARGE;
 	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
 	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
@@ -1072,6 +1073,18 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(FerrisWheelBlockEntity::new, booth).build());
 		FERRIS_WHEEL = entity("ferris_wheel", EntityType.Builder.<FerrisWheel>of(FerrisWheel::new, MobCategory.MISC).noLootTable().noSummon()
 				.sized(1.0F, 1.0F).clientTrackingRange(10).updateInterval(20));
+		// Fall additions 28, the piñata party: the three piñatas (items that hang the piñata), the Piñata Stick and the
+		// Blindfold, worn on the head and seen through as a dark cloth.
+		for (Pinata.Kind kind : Pinata.Kind.values()) {
+			registerItem(kind.item, props -> new PinataItem(props, kind), new Item.Properties().stacksTo(16), TOOL_TAB);
+		}
+		registerItem(Pinatas.STICK, props -> new Item(props.sword(ToolMaterial.WOOD, 1.0F, -2.8F)), new Item.Properties(), TOOL_TAB);
+		Equippable blindfold = Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER)
+				.setCameraOverlay(Jugcraft.id("misc/blindfold")).setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id("blindfold"))).build();
+		registerItem(Pinatas.BLINDFOLD, Item::new, new Item.Properties().stacksTo(1).component(DataComponents.EQUIPPABLE, blindfold), EQUIPMENT_TAB);
+		PINATA = entity("pinata", EntityType.Builder.<Pinata>of(Pinata::new, MobCategory.MISC).noLootTable().noSummon().sized(0.9F, 0.9F)
+				.clientTrackingRange(10).updateInterval(20));
+		Pinatas.register();
 
 		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
 		// entity players sit on), the Autumn Wreath and the Leaf Piles.

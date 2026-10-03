@@ -10,6 +10,7 @@ import plants
 import graveyard
 import midway
 import ferris_wheel
+import pinata
 
 FEATURE = "agriculture"
 
@@ -689,6 +690,8 @@ HALLOWEEN_ADVANCEMENTS.update({
 HALLOWEEN_ADVANCEMENTS.update(midway.ADVANCEMENTS)
 # The Ferris wheel (tools/ferris_wheel.py).
 HALLOWEEN_ADVANCEMENTS.update(ferris_wheel.ADVANCEMENTS)
+# The piñata party (tools/pinata.py).
+HALLOWEEN_ADVANCEMENTS.update(pinata.ADVANCEMENTS)
 
 
 # ---------------------------------------------------------------- Halloween festivities
@@ -2544,7 +2547,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + plants.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + plants.items())
 
 
 def owns(entry_id):
@@ -2616,3 +2619,6 @@ SHAPED += midway.SHAPED
 SHAPELESS += midway.SHAPELESS
 # The Ferris wheel's recipe (tools/ferris_wheel.py).
 SHAPED += ferris_wheel.SHAPED
+# The piñata party's recipes (tools/pinata.py).
+SHAPED += pinata.SHAPED
+SHAPELESS += pinata.SHAPELESS

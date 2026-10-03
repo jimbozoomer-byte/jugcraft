@@ -19,6 +19,7 @@ import agriculture as ag
 import werewolf_model
 import midway
 import ferris_wheel
+import pinata
 import petro
 import deposits
 import seasons
@@ -2175,6 +2176,7 @@ def check_decor4(java):
     check_pumpkling(java, number, lang)
     check_midway(java, number, lang)
     check_ferris_wheel(java, number, lang)
+    check_pinata(java, number, lang)
 
 
 def check_midway(java, number, lang):
@@ -2283,6 +2285,56 @@ def check_ferris_wheel(java, number, lang):
             ASSETS / "models" / "block" / f"{fw['block']}.json", ASSETS / "textures" / "item" / f"{fw['block']}.png"]:
         if not path.exists():
             err(f"The Ferris wheel needs {path.relative_to(ROOT)}")
+
+
+def check_pinata(java, number, lang):
+    """Fall addition 28: the piñatas match tools/pinata.py (slots, drop, a charged swing, the stick's hits, each kind's
+    hits and item); the items, entity and Blindfold are registered and drawn from the quads; the Blindfold's view and
+    worn band exist; their words, recipes and advancements exist."""
+    pn = pinata.PINATA
+    expected = {("Pinata", "SLOTS"): pn["slots"], ("Pinata", "DROP"): pn["drop"], ("Pinata", "CHARGED"): pn["charged"],
+                ("Pinata", "STICK_HITS"): pn["stick_hits"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/pinata.py ({value})")
+    source = java.get("Pinata", "")
+    for kind, spec in pinata.KINDS.items():
+        if f'("{kind}", "{spec["item"]}", {spec["hits"]},' not in source:
+            err(f"Pinata.Kind must have {kind} with item {spec['item']} and {spec['hits']} hits (tools/pinata.py)")
+    pinatas = java.get("Pinatas", "")
+    if f'STICK = "{pn["stick"]}"' not in pinatas or f'BLINDFOLD = "{pn["blindfold"]}"' not in pinatas:
+        err("Pinatas.STICK and BLINDFOLD must match tools/pinata.py")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ("new PinataItem(props, kind)", "registerItem(Pinatas.STICK", 'setCameraOverlay(Jugcraft.id("misc/blindfold"))',
+                 "EntityType.Builder.<Pinata>of(Pinata::new", "Pinatas.register();"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client_dir = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    if "JugcraftAgriculture.PINATA, PinataRenderer::new" not in (client_dir / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient.java must draw the piñatas")
+    if '"pinata_quads.json"' not in (client_dir / "DecorQuads.java").read_text(encoding="utf-8"):
+        err("DecorQuads must read pinata_quads.json")
+    quads = load(ASSETS / "pinata_quads.json") or {}
+    for name in [f"pinata_{k}{t}" for k in pinata.KINDS for t in ("", "_torn")] + ["pinata_rope", "pinata_rope_star"]:
+        if not quads.get(name):
+            err(f"pinata_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"pinata_quads.json's {name} draws missing texture {quad['texture']}")
+                break
+    for item, display in pinata.displays().items():
+        if lang.get(f"item.{MOD}.{item}") != display:
+            err(f"The piñata party has no words for item.{MOD}.{item}")
+    for key in ("full", "no_room", "filled"):
+        if f"message.{MOD}.pinata.{key}" not in lang:
+            err(f"The piñata party has no words for message.{MOD}.pinata.{key}")
+    for path in [DATA / MOD / "advancement" / f"{a}.json" for a in pinata.ADVANCEMENTS] + [
+            DATA / MOD / "recipe" / f"{r['id']}.json" for r in pinata.SHAPED + pinata.SHAPELESS] + [
+            ASSETS / "textures" / "misc" / "blindfold.png", ASSETS / "textures" / "entity" / "equipment" / "humanoid" / "blindfold.png",
+            ASSETS / "equipment" / "blindfold.json"] + [ASSETS / "items" / f"{i}.json" for i in pinata.items()]:
+        if not path.exists():
+            err(f"The piñata party needs {path.relative_to(ROOT)}")
 
 
 def check_pumpkling(java, number, lang):

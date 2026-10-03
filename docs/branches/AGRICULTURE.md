@@ -1090,6 +1090,11 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 - **Turn it** with kinetic power against the booth: a **hand crank** (planks and an iron shaft) turns it at full speed, five seconds a crank, so one friend cranks while others ride; an engine turns it all day.
 - **Ride it:** use the booth to climb into the car at the bottom. Sneak to get off and you're set down by the booth. Its lights come on while it turns. Details: [even more fall additions](../features/even-more-fall-additions.md#the-ferris-wheel).
 
+### The piñata party
+
+- **Hang a piñata** (a pumpkin, a star or a bat, of crepe-paper fringe) from the underside of a block, and let everyone fill it with candy and treats: anything goes in, a stack at a time.
+- **Put on the Blindfold** and swing: a charged swing is a hit, and the Piñata Stick hits twice as hard. It tears as it weakens and bursts in confetti on its last hit, spraying its contents everywhere. Details: [even more fall additions](../features/even-more-fall-additions.md#the-piñata-party).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21) and the flying broomstick (addition 22) are implemented in source and pass CI's game tests; full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25) the fall fair midway (addition 26) and the Ferris wheel (addition 27) are implemented in source. None is yet played by hand. Additions 28 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21) and the flying broomstick (addition 22) are implemented in source and pass CI's game tests; full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25) the fall fair midway (addition 26) the Ferris wheel (addition 27) and the piñata party (addition 28) are implemented in source. None is yet played by hand. Additions 29 and 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
@@ -9,7 +9,7 @@ Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Let
 25. the Pumpkling: a carved pumpkin woken by a wisp or ectoplasm into a pet that wears its face, follows you and keeps crows off your crops;
 26. the fall fair midway: a five-block High Striker rung with a Carnival Mallet, Ring Toss, and plush prizes;
 27. the Ferris wheel: a fairground big wheel standing over its booth, eight cars of two seats, turned by kinetic power (one player can crank it for their friends). It takes the place of the planned ghost-train dark ride, which the Haunted Hayride and the Jump-Scare Trap already cover;
-28. the piñata (planned);
+28. the piñata party: papier-mâché piñatas (a pumpkin, a star and a bat) hung from a ceiling, filled by the party and swung at blindfolded until they burst;
 29. the hot-air balloon fiesta (planned);
 30. the leaf blower (planned).
 
@@ -38,6 +38,8 @@ The fall fair midway is Discovery tier: the High Striker is planks, two redstone
 
 The Ferris wheel is Discovery tier to build (2 redstone lamps, 4 iron bars, an iron block and 2 wool) and turns on kinetic power, so it comes with the first shafts: a hand crank (planks and an iron shaft) turns it at full speed.
 
+The piñata party is Discovery tier: a piñata is five paper, a string and a dye; the Piñata Stick two sticks and red and white dye; the Blindfold black wool and a string. What goes in a piñata is whatever the party brings.
+
 Primary specialty and supported player role: witchcraft and exploration. A witch brews hexes for others:
 - **Shrinking:** gets a player into one-block gaps, under low ceilings and into cramped caves, and makes them a smaller target.
 - **Giant:** gives a block more reach and half a block more step, for building and climbing, but makes the player a bigger target.
@@ -54,6 +56,8 @@ Squirrels and acorns are for foresters, cooks and anyone who likes animals: acor
 The midway is for builders of fairs and anyone who likes a game: a showpiece that lights up when it's struck, a test of timing (a fully charged swing, better still a falling one) and aim (a soft toss over a bottle's neck from three blocks off), and a shelf of plush prizes to win, trade and decorate with. A fair needs someone to build it; anyone can play.
 
 The Ferris wheel is for fair builders and engineers: the showpiece of a fair, real-life sized, and a first use for kinetic power that isn't a machine. One player cranks while friends ride; riding all the way round with someone beside you is a milestone for two (Two to a Car).
+
+The piñata party is for anyone throwing a party: one player hangs a piñata, everyone brings something to fill it (candy from the candy kitchen, treats, anything), and the blindfolded take turns at it while the rest call out where it is. It is a way to share out a haul, and a game for a crowd.
 
 The flying broomstick is a witch's way to travel: slower than elytra but found long before them, good for scouting, crossing ravines and reaching rooftops, and fuelled by the ointment a witch brews.
 
@@ -192,6 +196,18 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 7. **Jams:** if a block stands where a car is about to go, the wheel stops and says it is jammed, until the block is cleared. It never carries a rider into a block.
 8. **Advancements:** **Round and Round** for riding all the way round; **Two to a Car** for riding all the way round with someone in the seat beside you.
 
+### The piñata party
+1. **Three piñatas:** papier-mâché in tiers of crepe-paper fringe.
+   - The **Pumpkin Piñata**: ribbed orange fringe, a green paper stem and leaf, a black-paper jack-o'-lantern face. Takes 8 hits.
+   - The **Star Piñata**: a ball with seven cones of pink, yellow, turquoise and orange fringe, tassels streaming from its lower points. Takes 10.
+   - The **Bat Piñata**: black fringe with pointed ears, round yellow eyes and fangs, and scalloped purple-black wings spread wide. Takes 6.
+2. **Hang one:** use it on the underside of a block (a ceiling, a beam, a branch, a fence) with two clear blocks below. It hangs on a rope, its foot a block and a half down.
+3. **Fill it:** anyone can use it with anything in hand (but the stick): the whole stack goes in, up to 9 stacks. Whoever hung it can take it down again, sneaking with an empty hand; its contents come back out with it.
+4. **Hit it:** a **charged swing** (three quarters of your full attack or more) is a hit; a quick tap only sets it swinging. The **Piñata Stick**, a red-and-white painted stick, counts each hit twice. Each hit sets it swinging on its rope and throws a little confetti. Once it has taken half its hits it hangs **torn**, the fringe ripped to the papier-mâché beneath.
+5. **Burst it:** on its last hit it bursts in a shower of confetti in its colours, and its contents spray out round it for everyone to scramble for. Bursting one earns **Piñata Party**.
+6. **The Blindfold:** worn on the head, it blacks out your view but for a sliver at the bottom; others see a black band tied round your eyes. Bursting a piñata blindfolded earns **Blind Luck**.
+7. Nothing but a player's swing touches a piñata: arrows, mobs and fire don't. If what it hangs from goes, it falls and drops itself and its contents.
+
 ## Connections
 - Hex brews, input producer:
   - the Bubbling Cauldron and its brews (the witch's cottage decorations);
@@ -235,6 +251,10 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 - Ferris wheel, output consumer: a fair's showpiece and a ride; it makes nothing. It is the first use of kinetic power that isn't a machine.
 - Ferris wheel, entry path: everything is Overworld and early: a hand crank is planks and an iron shaft (the machines feature).
 - Ferris wheel, required vs optional: optional. Nothing is gated behind it.
+- Piñata party, input producer: paper (sugar cane), string, dyes, black wool; its filling is anything players bring, most of all the candy kitchen's sweets, trick-or-treat candy and the harvest's treats.
+- Piñata party, output consumer: the contents go back out to the party. The Blindfold makes any game a blindfold game.
+- Piñata party, entry path: everything is Overworld and early.
+- Piñata party, required vs optional: optional. Nothing is gated behind it.
 
 ## Balance and automation
 - **Costs:** the cauldron is a cauldron and two iron ingots, reused. One brew is a water bucket (the bucket comes back), one brew ingredient, one hex ingredient and three glass bottles, which come back when drunk. That makes three draughts.
@@ -290,6 +310,12 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - The power goes into the turning: nothing comes back out, so there is no loop. It gives nothing but the ride and two advancements.
   - Automation: none to speak of. Any kinetic source turns it; only players ride it.
   - Cost on the server: while it turns, a wheel checks 4 points of each of its 8 cars for blocks each tick (32 block reads) and counts its riders' way round; it syncs its speed when it changes and its angle once a second. Standing still it does neither. The booth's drive has no ticker and saves nothing.
+- **Piñata party:**
+  - Costs: a piñata is 5 paper, a string and a dye, used up when it bursts; the stick (2 sticks, 2 dyes) and the Blindfold (black wool and string) last.
+  - Units: 9 stacks; 8, 10 or 6 hits; a hit is a swing of at least 0.75 of the hitter's attack damage; the stick counts 2. Its foot hangs 1.5 blocks below its block.
+  - No gain: what goes in comes out, nothing more; the piñata itself is spent. Nothing turns confetti back into paper.
+  - Automation: none. Only a player's own swing counts.
+  - Cost on the server: a piñata checks what it hangs from once a second; nothing else ticks. Hits, fills and bursts happen only when players act.
 - **Hex brews, cost on the server:** one look at each online player per server tick (a duration and effect check; a collision check only when a shrinking is about to end). No block entity, no block ticks. The glyphs and bubbles are client particles.
 
 ## Multiplayer and persistence
@@ -350,6 +376,11 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 - **Ferris wheel, persistence:** the wheel saves its facing, angle and speed; riders don't stay seated across a save (players aren't saved as passengers). If its booth is gone (an explosion, a command) the wheel takes itself down within a second; if the wheel is gone, using the booth raises it again.
 - **Ferris wheel, IDs (all new):** block and item `ferris_wheel` (the booth), entity `ferris_wheel` (the wheel), block entity `ferris_wheel`; advancements `round_and_round`, `two_to_a_car`; recipe `ferris_wheel`.
 - **Ferris wheel, disable behaviour:** with the agriculture feature off its recipe doesn't load; a wheel already standing keeps turning if driven. With the machines feature off there are no hand cranks to make, so it turns only from another kinetic source.
+- **Piñata, server authority:** hanging goes through vanilla's item use on a block (reach, build rights). Filling and taking down are entity uses decided on the server; only whoever hung it can take it down. A hit is the server's own attack on the piñata, from a player's own swing, its strength from the attack's damage; the server bursts it and hands out the advancements. Clients only draw it.
+- **Piñata, what clients get:** its kind, its hits (for the torn paper) and a count of swings at it with whether the last was a hit (to set it swinging). Its contents and hanger stay on the server.
+- **Piñata, persistence:** it saves its kind, hits, hanger and contents. A piñata never despawns.
+- **Piñata, IDs (all new):** items `pumpkin_pinata`, `star_pinata`, `bat_pinata`, `pinata_stick`, `blindfold`; entity `pinata`; equipment asset `blindfold`; advancements `pinata_party`, `blind_luck`; their recipes.
+- **Piñata, disable behaviour:** with the agriculture feature off the recipes don't load; piñatas already hung stay and can still be burst.
 
 ## Dependencies and assets
 - No new dependencies.
@@ -375,6 +406,10 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - `tools/ferris_wheel.py` holds the numbers (`FERRIS_WHEEL`), the cars' colours, the advancements and the recipe; the checker compares them with Java.
   - `tools/ferris_wheel_data.py` writes the booth's model and the quads the client draws the wheel from (`assets/jugcraft/ferris_wheel_quads.json`): the frame; a sixteenth of the wheel (both rims' outer and inner rings, their ties and a spoke), drawn sixteen times round; the hub plates; a car's pivot bar; a sixteenth's bulbs; and a car in each colour. The same boxes make the preview the art was checked against.
   - `tools/ferris_wheel_textures.py` paints every texture at 64 × 64 (docs/ART_DIRECTION.md, "High resolution"), with `tools/fur_paint.py`: lattice steel cut out between its bracing, cream enamel with rivets, red rims with a gold pinstripe, a brass sunburst hub, bulbs, four cars with leaf cartouches, striped canopies and scalloped valances, tufted leather, planks, the booth's panels, deck, controls and gauge, and the item. All original; nothing is copied or traced.
+- The piñata party: no new dependencies.
+  - `tools/pinata.py` holds the numbers (`PINATA`, `KINDS`), the advancements and the recipes; the checker compares them with Java.
+  - `tools/pinata_data.py` writes the quads the client draws the piñatas from (`assets/jugcraft/pinata_quads.json`), each kind whole and torn, and the ropes; the items' models; and the Blindfold's equipment asset.
+  - `tools/pinata_textures.py` paints every texture at 64 × 64: crepe-paper fringe in tiers in six colours, whole and torn; the faces; a cut-out fringe skirt and tassels; the bat's wings; the rope; the items; the Blindfold's view (256 × 128, as vanilla's pumpkin blur) and its band as worn (256 × 128, four times the armour layout). All original.
   - Sounds and particles are vanilla's: an anvil's clang pitched up for the strike, note-block bits rising with the puck, a bell, glass and an amethyst chime for a ringer; crits, fireworks, hearts and happy-villager sparks.
 
 ## Verification
@@ -545,6 +580,20 @@ The 7 new game tests (`FerrisWheelGameTests`), in a 44 by 44 empty arena:
 
 Not run: riding it in play for a whole turn (the tests turn it directly), and a two-client dedicated-server playtest (two riders in one car, seen from the ground).
 
+### Piñata verification
+Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1090 IDs and now compares `tools/pinata.py` with Java; `python3 scripts/check_repository.py` passes. The piñatas' shapes were checked in a render of their quads.
+
+The 5 new game tests (`PinataGameTests`):
+1. a star piñata used on a block's side does nothing; on its underside it hangs, its foot a block and a half below, one used; not where there is no room below; a guest puts in a whole stack of cookies; nine stacks fill it and the tenth won't go in;
+2. a stranger can't take it down; its hanger can, getting the piñata and the cookies back;
+3. a weak swing only rocks it; a player's charged swing is a hit; nothing else hurts it; half its hits tear it; its last bursts it and its cookies and apples spray out, earning Piñata Party but not Blind Luck; with the stick and a Blindfold a bat piñata bursts in three swings and earns Blind Luck;
+4. when its beam goes it falls, dropping itself and its cookies;
+5. the recipes and advancements load, and the Blindfold goes on the head.
+
+`PinataClientGameTests` takes screenshots: the three hanging from an oak pergola; torn after half their hits; the star bursting; and the view through the Blindfold.
+
+Not run: hitting one by hand blindfolded, and a two-client dedicated-server playtest (the party).
+
 ## World and event applicability
 - A cauldron brews hexes in any dimension, all year. Nothing is seasonal.
 - The hex ingredients come from the Overworld: brown mushrooms, beans, and phantoms.
@@ -555,8 +604,11 @@ Not run: riding it in play for a whole turn (the tests turn it directly), and a 
 
 - The midway works in any dimension, all year. Nothing generates in the world.
 - The Ferris wheel works in any dimension with room for it, all year. Nothing generates in the world.
+- Piñatas hang and burst in any dimension, all year. Nothing generates in the world.
 
 ## Rollout and open questions
+- A piñata keeps whatever it is given, nine stacks of anything; a party should trust whoever hung it, who alone can take it down.
+- A piñata can't be hit by projectiles, so it is a melee game.
 - A Ferris wheel has no collision of its own: players and mobs walk through its frame and cars. Only its booth is solid. Its space is checked when it is placed, and after that it stops for blocks in its cars' way rather than breaking them.
 - Getting off a Ferris wheel anywhere sets you down at the booth, as if the operator brought your car down; there is no stepping off at the top.
 - Riders don't stay seated across a save or a log-out. A wheel larger or smaller, or with more cars, is not made; its size and speed are open to balance review once played.

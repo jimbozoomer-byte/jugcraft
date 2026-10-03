@@ -24,12 +24,13 @@ import org.jspecify.annotations.Nullable;
  * the floating witch hat and its flame) and decor11_quads.json (tools/decor11_data.py: the jump-scare trap's lid, ghost
  * and spring, the bowling pumpkin, the ghost bell and its clapper, and the fortune teller's planchette) and
  * decor12_quads.json (tools/decor12_data.py: the haunted hayride's wagon and lantern) and ferris_wheel_quads.json
- * (tools/ferris_wheel_data.py: the Ferris wheel's frame, wheel, lights and cars).
+ * (tools/ferris_wheel_data.py: the Ferris wheel's frame, wheel, lights and cars) and pinata_quads.json
+ * (tools/pinata_data.py: the piñatas, whole and torn, and their ropes).
  */
 public final class DecorQuads {
 	private static final List<Identifier> FILES = List.of(Jugcraft.id("decor_quads.json"), Jugcraft.id("decor7_quads.json"),
 			Jugcraft.id("decor8_quads.json"), Jugcraft.id("decor9_quads.json"), Jugcraft.id("decor10_quads.json"),
-			Jugcraft.id("decor11_quads.json"), Jugcraft.id("decor12_quads.json"), Jugcraft.id("ferris_wheel_quads.json"));
+			Jugcraft.id("decor11_quads.json"), Jugcraft.id("decor12_quads.json"), Jugcraft.id("ferris_wheel_quads.json"), Jugcraft.id("pinata_quads.json"));
 	private static @Nullable Map<String, QuadModel> models;
 
 	private DecorQuads() {

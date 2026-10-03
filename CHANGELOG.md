@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: The piñata party, fall addition 28
+- **Three piñatas** of crepe-paper fringe: a jack-o'-lantern Pumpkin, a seven-pointed Star with tassels, and a winged Bat. Hang one from the underside of a block, and anyone can fill it with anything, up to nine stacks.
+- **Swing at it:** a charged swing is a hit (the red-and-white **Piñata Stick** counts two); it swings on its rope, tears at half its hits, and bursts in confetti on the last, spraying its contents out. Piñata Party.
+- **The Blindfold** blacks out your view but for a sliver; burst one blindfolded for Blind Luck.
+- Painted at 64 × 64. Five game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-piñata-party).
+
 ### Unmerged: The Ferris wheel, fall addition 27
 - **A fairground big wheel**, real-life sized: place the **Ferris Wheel** booth and the wheel rises over it, 16 blocks high, two lattice A-frames, red trussed rims with 128 bulbs, and eight cars (pumpkin, cranberry, mustard and spruce) seating two each.
 - **Kinetic power turns it:** a hand crank, shaft or engine against the booth; 12 KE a tick is full speed, a turn in 40 seconds. One player can crank while friends ride.
