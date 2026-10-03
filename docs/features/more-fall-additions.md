@@ -1,6 +1,6 @@
 # More Fall Additions
 
-Status: the candy kitchen (addition 11), autumn foraging (addition 12), the Bat House (addition 13), the Hay Golem (addition 14), knitting (addition 15), pie baking (addition 16), the Spirit Board (addition 17) and wild turkeys (addition 18) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
+Status: the candy kitchen (addition 11), autumn foraging (addition 12), the Bat House (addition 13), the Hay Golem (addition 14), knitting (addition 15), pie baking (addition 16), the Spirit Board (addition 17), wild turkeys (addition 18) and the theremin (addition 19) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets do another 10 detailed halloween and fall themed additions", then "start them now stacked on #33"). They follow the ten [fall additions](fall-additions.md), numbered on from them, one per pull request, each stacked on the one before:
 11. the candy kitchen: the Candy Kettle, its thermometer and the candy stages, the Candy Tray, and ten candies;
 12. autumn foraging: five wild mushrooms that spread in the shade and sprout fairy rings under the full moon, the Foraging Basket, and four mushroom dishes;
@@ -10,14 +10,14 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets d
 16. pie baking: the Hearth Oven, a brick bread oven that bakes five pies golden (or black, left too long), placed on the table and eaten or cut a slice at a time;
 17. the Spirit Board: a candlelit séance on which a restless spirit spells its name and the one thing it wishes for, and the gift that lays it to rest;
 18. wild turkeys: flocks in woods and meadows, toms that strut and gobble, hens that lay eggs, and a roast turkey carved at the table;
-19. the theremin (planned);
+19. the theremin: an eerie instrument played without touching, singing higher the nearer you stand, that doubles as a proximity sensor;
 20. the Día de Muertos ofrenda (planned).
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick. The Hay Golem is Discovery tier: four hay bales (36 wheat) and a carved pumpkin. Knitting is Discovery tier: planks, sticks and string (the wheel), two iron nuggets and two sticks (the needles), and wool. Pie baking is Discovery tier: seven bricks and a furnace (the oven), coal, charcoal or logs to burn, and wheat, an egg, sugar and the fillings: apples, a pumpkin and milk, the Festival Crops' cranberries, the Kitchen Garden's sweet potatoes or the cider mill's roasted chestnuts. The Spirit Board is Discovery tier: two birch slabs, an ink sac and a glass pane, and a candle; the spirits it speaks with come with ghost hunting, and seeing them takes a Spirit Lantern. Wild turkeys are Discovery tier: they wander into woods, taiga, plains and meadows by day, seeds bring them and breed them, and a raw turkey roasts in a furnace, smoker or on a campfire.
-Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near. The Hay Golem is a farmhand: it keeps crows off a field and brings in the ripe crops, so a small farm runs while its farmer is away mining. Knitting is for crafters and shepherds: wool becomes clothes in any colour, warm against powder snow, and a set of knitwear by a campfire heals a party back up between trips. Pie baking is for cooks: a pie is four filling slices from one bake, to set out at a feast or cut and carried on a trip, and baking it right takes watching the oven. The Spirit Board is for ghost hunters and friends together: a séance goes faster with more hands on the planchette, and finding what a spirit wishes for sends the group to the baker, the knitter, the candy maker or the orchard. Wild turkeys are for farmers and hunters: a second bird to keep, whose hens lay eggs and whose toms put on a show, and a roast that feeds a table of six.
+Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick. The Hay Golem is Discovery tier: four hay bales (36 wheat) and a carved pumpkin. Knitting is Discovery tier: planks, sticks and string (the wheel), two iron nuggets and two sticks (the needles), and wool. Pie baking is Discovery tier: seven bricks and a furnace (the oven), coal, charcoal or logs to burn, and wheat, an egg, sugar and the fillings: apples, a pumpkin and milk, the Festival Crops' cranberries, the Kitchen Garden's sweet potatoes or the cider mill's roasted chestnuts. The Spirit Board is Discovery tier: two birch slabs, an ink sac and a glass pane, and a candle; the spirits it speaks with come with ghost hunting, and seeing them takes a Spirit Lantern. Wild turkeys are Discovery tier: they wander into woods, taiga, plains and meadows by day, seeds bring them and breed them, and a raw turkey roasts in a furnace, smoker or on a campfire. The theremin is Mechanical tier: two copper wires (from the Wire Drawer), two planks, a note block and two sticks.
+Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near. The Hay Golem is a farmhand: it keeps crows off a field and brings in the ripe crops, so a small farm runs while its farmer is away mining. Knitting is for crafters and shepherds: wool becomes clothes in any colour, warm against powder snow, and a set of knitwear by a campfire heals a party back up between trips. Pie baking is for cooks: a pie is four filling slices from one bake, to set out at a feast or cut and carried on a trip, and baking it right takes watching the oven. The Spirit Board is for ghost hunters and friends together: a séance goes faster with more hands on the planchette, and finding what a spirit wishes for sends the group to the baker, the knitter, the candy maker or the orchard. Wild turkeys are for farmers and hunters: a second bird to keep, whose hens lay eggs and whose toms put on a show, and a roast that feeds a table of six. The theremin is for builders and redstone engineers: the haunted house's music, played by whoever walks past, and a sensor that tells how near someone is.
 
-Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night, a Hay Golem works all year, knitwear is worn in any season, pies bake all year, spirits answer on any night, and turkeys come in every season.
+Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night, a Hay Golem works all year, knitwear is worn in any season, pies bake all year, spirits answer on any night, turkeys come in every season, and a theremin plays all year.
 
 ## Player experience
 ### The Candy Kettle
@@ -186,6 +186,13 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
    - it has six servings: first the drumsticks go, then the breast is carved, then only the carcass is left; the last serving takes the platter and leaves a bone;
    - comparators read the servings left. Only a whole roast can be picked up again.
 
+### The Theremin
+1. A walnut cabinet on four slender legs, its lid edged in brass; a tall copper pitch antenna on a bakelite insulator at its player's right and a copper volume loop held out at the left; a speaker grille, two bakelite knobs and a magic-eye tube in front (two copper wires, two planks, a note block and two sticks). It faces whoever places it, as its player.
+2. **Switch it on** with an empty hand ("The theremin hums into life: wave a hand at its antenna"), and off again; or a redstone signal plays it while it lasts. Playing, its magic eye glows green and it gives off a little light (7).
+3. **Played without touching:** five times a second it listens for the nearest creature (a player or any mob; not a spectator or an armour stand) within eight blocks of its pitch antenna, and sings for them: a note block's flute that rises over two octaves as they come in from eight blocks off to the antenna, with a slow vibrato, louder the nearer they are. A note rises from the antenna in the colour of its pitch.
+4. Playing it from within three blocks earns **Good Vibrations**.
+5. **A proximity sensor:** comparators read how near the nearest creature is, playing or silent: 15 at the antenna, 8 at four blocks, 0 at eight and beyond. A silent theremin by a door can open it for whoever comes near; a playing one in a haunted house is sung by every mob that wanders past.
+
 ## Connections
 - Candy kitchen, input producer: sugar cane (sugar); bottles of water and cows (milk); cocoa, sweet berries, glow berries and bees; the Festival Crops (cranberries, roasted chestnuts) and the cider mill (mulling spices); dyes; sticks; vanilla copper and iron; Jugcraft's `jugcraft:heat_sources`.
 - Candy kitchen, output consumer:
@@ -242,6 +249,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - Wild turkeys, entry path: turkeys come to the woods and meadows by themselves; no Jugcraft block is needed. A Carving Knife (from pumpkin carving) is needed only to carve slices to carry.
 - Wild turkeys, required vs optional: optional; chickens are unchanged.
 - Wild turkeys, trade and solo routes: one player can keep and breed turkeys alone; a roast is a trade good, and slices carry.
+- Theremin, input producer: copper wire from the machines branch's Wire Drawer; planks, a note block, sticks.
+- Theremin, output consumer: redstone (a comparator reads how near the nearest creature is); players (music, and the haunted house and mad lab decorations' mood).
+- Theremin, technology connection: it needs the Wire Drawer's copper wire, so it asks for the machines branch; it uses no power. As a sensor it reads distance, which a pressure plate or tripwire can't.
+- Theremin, entry path: Mechanical tier, once a Wire Drawer runs; the recipe needs the machines feature as well as agriculture.
+- Theremin, required vs optional: optional; nothing needs it.
+- Theremin, trade and solo routes: one player can build and play it alone; copper wire and theremins trade.
 
 ## Balance and automation
 - **Candy kitchen:**
@@ -296,6 +309,10 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
   - Food: a turkey is one raw turkey (3 hunger raw); roasted, six servings of 3, 18 hunger in all. That is more than cooked chicken's 6, for a bird with 8 health that comes one roast per bird and takes breeding to replace. A hen's eggs are vanilla's, at about a chicken's rate.
   - Spawning: a try every 20 seconds for each player, a quarter of the time, capped near players and in the world.
   - No loop: a turkey makes nothing that makes turkeys; seeds breed them.
+- **Theremin:**
+  - Costs: two copper wires (two thirds of a copper ingot through the Wire Drawer), two planks, a note block, two sticks. It uses no power and burns nothing.
+  - Units: blocks (from the pitch antenna), ticks, pitch (0.5 to 2.0, a note block's range), comparator levels (0 to 15, one for each eight-fifteenths of a block).
+  - No loop: it makes nothing.
 
 ## Multiplayer and persistence
 - **Candy kitchen, server authority:** filling, reading, tipping out and pouring all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server, which checks the base, the sugar and flavour limits, and the temperature. Pulling and breaking up a tray go through vanilla's item use; the server checks the tray's own record of when it was poured and how often it has been pulled, by its own game time.
@@ -347,6 +364,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - **Wild turkeys, bounded work:** spawning runs once every 400 ticks: it counts the world's turkeys once, then for a quarter of the players counts the turkeys within 64 blocks and reads one spot's height, block and biome, in a loaded chunk only; it never loads a chunk. A tom looks for an audience only on the tick he might strut (one in 200).
 - **Wild turkeys, IDs:** entity `turkey`; block and item `roast_turkey`; items `raw_turkey`, `turkey_slice`; item tag `jugcraft:turkey_food`; biome tag `jugcraft:turkey_habitat`; recipes `roast_turkey`, `roast_turkey_from_smoking`, `roast_turkey_from_campfire_cooking`; loot tables `entities/turkey`, `blocks/roast_turkey`; advancements `gobble_gobble`, `carving_the_bird`. All new. The raw turkey joins `c:foods/raw_meat`, the slice `c:foods/cooked_meat`, and both `c:foods`.
 - **Wild turkeys, disable behaviour:** with the agriculture feature off, no flocks come and the roasting recipes don't load; turkeys already in the world stay, and everything stays registered.
+- **Theremin, server authority:** switching it on goes through vanilla's block use path (reach, spawn protection, adventure mode); redstone, listening, the comparator, the notes and Good Vibrations are all decided on the server.
+- **Theremin, what clients get:** its block state (on, powered: the glowing eye and the light), and the notes and particles the server sends to players near. The notes are in the jukebox and note block sound category, so players can turn them down.
+- **Theremin, persistence:** its block state saves whether it is on or powered; the block entity saves its last comparator reading.
+- **Theremin, bounded work:** every four ticks, one entity lookup in a 16-block box round the antenna; while playing with someone near, one sound and one particle.
+- **Theremin, IDs:** block and item `theremin`, block entity `theremin`; recipe `theremin`; advancement `good_vibrations`. All new.
+- **Theremin, disable behaviour:** with the agriculture or machines feature off, the recipe doesn't load; theremins already built still play and sense, and everything stays registered.
 
 ## Dependencies and assets
 Candy kitchen:
@@ -394,6 +417,11 @@ Wild turkeys:
 - The roast's models (whole; the drumsticks gone; the breast carved; the carcass), blockstate, words, loot and tags come from `tools/turkey_data.py`; the numbers from `TURKEYS` in `tools/agriculture.py`. The checker matches each of the model's boxes against where the textures paint it.
 - The client's `TurkeyModel` and `TurkeyRenderer` draw a deep round body and full breast, folded wings, long legs with spread toes, a bare neck and small head with beak, wattle and (on a tom) the snood, and a tail of feathers. Walking, the legs stride and the head bobs; strutting, a tom's tail rises and spreads into a fan, his breast puffs out, his wings droop and his neck draws back. Poults are drawn at half size.
 - Sounds are vanilla's (a parrot's call pitched low for the gobble and warble, wool for a laid egg, grass for steps, eating, honey sliding as a slice is carved).
+
+Theremin:
+- No new dependencies. Textures are drawn by code in `tools/theremin_textures.py`: figured walnut, the front's speaker grille of woven cloth behind walnut bars over a brass inlay, polished brass, copper, black bakelite, and the magic-eye tube dark and lit.
+- The models (silent, and playing with the eye lit and glowing in the dark), blockstate, words and loot come from `tools/theremin_data.py`; the numbers from `THEREMIN` in `tools/agriculture.py`.
+- Sounds are vanilla's (a note block's flute, bent in pitch; a lever's click as it is switched).
 
 ## Verification
 ### Candy kitchen verification
@@ -600,6 +628,30 @@ Found by CI and fixed before this record:
 
 Not run: a two-client dedicated-server playtest, and any play by hand. Turkeys coming to a player's woods by themselves haven't been watched; the tests call the flock spawning directly.
 
+### Theremin verification
+
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-33` stacked on wild turkeys, with main merged in:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the theremin with Java: how often it listens, its range and the range that earns Good Vibrations, its lowest and highest pitch, its vibrato and its light; checks the registration, both models (silent and playing) and the blockstate, the textures, words, recipe, loot and advancement) | Pass, 992 IDs |
+| `./gradlew build` on `65ce0f7` (Build workflow run 37082604826) | Pass |
+| Game tests on the headless server, same run: 545 in total, 4 of them new here (`ThereminGameTests`) | **All 545 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `65ce0f7` (run 37082604826), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-theremin) |
+
+The 4 new game tests (`ThereminGameTests`):
+1. the pitch runs from 0.5 at the edge of its range to 2.0 at the antenna, rising all the way in; a comparator reads 15 at the antenna, 8 at four blocks, and 0 at eight blocks and beyond;
+2. switched off, it still listens: a player two blocks from the antenna reads high (11 or more), moved to six blocks reads 3 to 5, and moved away is no longer heard;
+3. an empty hand switches it on, and a player a block and a half off earns Good Vibrations; switched off again, a redstone block beside it plays it, and taken away, it is silent;
+4. the recipe (with the machines feature on), loot table and advancement load.
+
+Found before this record:
+- The first screenshots showed the lid as a slab of brass and were taken from too far off to see the magic eye. The lid is now walnut edged in brass, the eye is larger, and the cameras moved closer (`7004a5f`).
+- Main's client tests now run in three parallel jobs, and only the first job's opening test hides the HUD; in another job the first screenshots showed the hotbar and chat. The test now hides them itself (`65ce0f7`).
+
+Not run: a two-client dedicated-server playtest, and any play by hand. The theremin has not been heard: CI has no sound, so the pitches are checked by numbers, not by ear.
+
 ## World and event applicability
 - A Candy Kettle works anywhere there is heat under it, in every dimension, all year. Nothing is seasonal.
 - Wild mushrooms generate only in newly generated Overworld chunks of their biomes; existing chunks don't get them, but one mushroom brought in spreads. They can be planted and spread in any dimension with soil and shade. Fairy rings bless only in the Overworld, on full-moon nights (by the Overworld's moon).
@@ -609,6 +661,7 @@ Not run: a two-client dedicated-server playtest, and any play by hand. Turkeys c
 - The Hearth Oven bakes in any dimension.
 - A séance works in any dimension, but restless spirits rise only on the Overworld's night.
 - Wild turkeys come only to the Overworld, by day, while mobs spawn (the `spawn_mobs` game rule), onto grass in their biomes; existing worlds get them as players walk. Brought elsewhere, they live and breed anywhere.
+- A theremin plays in any dimension.
 
 ## Rollout and open questions
 - Candy can't be poured by hoppers or dispensers; trays are filled and broken up by hand.
@@ -634,3 +687,5 @@ Not run: a two-client dedicated-server playtest, and any play by hand. Turkeys c
 - Turkeys don't spawn with world generation: flocks come to players as they explore. Spawn eggs aren't added.
 - Turkeys use a parrot's call pitched low; there is no recorded gobble.
 - A tom fans his tail only when strutting; there is no display between toms.
+- The theremin sings with a note block's flute, the nearest vanilla sound to its wail; it is a quick run of notes, five a second, not one gliding tone.
+- It hears only the nearest creature; two players can't play a duet on one theremin. The volume loop is for show: it is louder the nearer the player, not by a second hand.

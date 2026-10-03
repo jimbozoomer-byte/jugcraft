@@ -924,6 +924,19 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Wild turkeys** come to woods and meadows in flocks; seeds breed them, hens lay eggs, and toms strut for an audience.
 - **Roast one** and set it on the table: six servings, eaten or carved. Details: [more fall additions](../features/more-fall-additions.md#wild-turkeys).
 
+### The Theremin
+
+| **Theremins**: the left one playing, its magic eye lit; the right one silent | **Up close**: the antennas, grille, knobs and the glowing eye |
+| --- | --- |
+| ![Theremins](../images/ingame_theremins.jpg) | ![A theremin up close](../images/ingame_theremin.jpg) |
+| **At night**: the playing theremin's eye glows | |
+| ![Theremins at night](../images/ingame_theremin_night.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`ThereminClientGameTests`, software rendering, small previews). The note above the playing one is the camera standing in its range.*
+
+- **Switch a theremin on** and it sings for whoever is nearest, higher the nearer they come.
+- Silent or playing, **comparators read how near** the nearest creature is. Details: [more fall additions](../features/more-fall-additions.md#the-theremin).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
