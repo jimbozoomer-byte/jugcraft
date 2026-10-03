@@ -256,7 +256,7 @@ def item_units(ref):
         return {}  # vanilla tags used here (logs, planks), Jugcraft logs and heirloom pumpkins hold no metal
     if ref.startswith("#"):
         form, _, metal = path.partition("/")
-        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path == "fermentable":
+        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path in ("fermentable", "grave_flowers"):
             return {}
         if form not in UNITS or not metal:
             err(f"Recipe uses unsupported tag {ref}")
@@ -3847,6 +3847,12 @@ def check_graveyard_grounds(java, main, lang):
         tag = load(DATA / "jugcraft" / "tags" / "item" / "grave_flowers" / f"{colour}.json") or {}
         if sorted(tag.get("values", [])) != sorted(flowers):
             err(f"jugcraft:grave_flowers/{colour} must list GRAVE_VASE['flowers']['{colour}'] of tools/graveyard.py")
+    every = (load(DATA / "jugcraft" / "tags" / "item" / "grave_flowers.json") or {}).get("values", [])
+    want = [f"#jugcraft:grave_flowers/{c}" for c in vase["flowers"]] + vase["others"] + [{"id": "#minecraft:small_flowers", "required": False}]
+    if sorted(map(json.dumps, every)) != sorted(map(json.dumps, want)):
+        err("jugcraft:grave_flowers must hold every colour's tag, GRAVE_VASE['others'] and vanilla's small flowers (optional)")
+    if 'TagKey.create(Registries.ITEM, Jugcraft.id("grave_flowers"))' not in java.get("GraveVaseBlock", ""):
+        err("GraveVaseBlock must take the flowers of jugcraft:grave_flowers")
 
 
 def check_graveyard_buildings(java, main, lang):
