@@ -112,6 +112,22 @@ Checks:
 - Not covered by a test: the pathfinding change (mobs' diagonal steps) and the break particles.
 
 ### Results
+**Walls (PR #142):**
+- **Run [37144595581](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37144595581) on 6b033f47 (swapped diagonal walls): `mod` green; client shards 0 and 1 green, with the diagonal screenshots in shard 1.**
+  - **Server:** all 582 required game tests passed. The logs showed:
+    - walls placed by a player became `jugcraft:diagonal_cobblestone_wall[post, north_east]` and `[post, south_west]`; a third made the middle `[north_east, south_west]` with no post;
+    - a vanilla cobblestone wall beside a diagonal wall joined it (`north=low`); with its diagonal gone under a stone, the diagonal wall was `minecraft:cobblestone_wall[south=tall, post]` again;
+    - walls joined walls of any kind, and not bars, fences or panes; "86 blocks join diagonally, 32 diagonal walls; problems: []".
+  - **Block states and heap** (heap after a full collection; it varies by about 20 MB from run to run):
+    | Build | Block states | `BlockState` objects (shallow) | Heap |
+    |---|---|---|---|
+    | main, before walls (probe run 37142381337) | 90,121 | 9.4 MB | 835 MB |
+    | walls with the properties on vanilla's walls (runs 37142353134, 37143200753) | 245,641 | 25.5 MB | 860–880 MB |
+    | swapped diagonal walls (this run) | 122,889 | 12.8 MB | 837 MB |
+  - **Client:** the walls joined as logged: the cobblestone diamond closed all round; in the stone brick run only the middle under the torch kept a post; the andesite zigzag's straight steps and diagonals joined; in the two-high mossy stone brick run the lower layer kept its posts under the upper walls. The three wall screenshots were looked at: the diamond, the run with its torch, the zigzag and the two-high run read as unbroken walls at 45 degrees, drawn with the walls' own stone and no missing models.
+- **Failed, then fixed:** run 37142353134 on 8dfe69fc (properties on vanilla's walls) compiled, but eight diagonal tests failed: Mixin refused the shape mixin once it targeted both CrossCollisionBlock and WallBlock ("Found a remappable @Shadow annotation"), so no diagonal shapes, rotation or neighbour updates applied. Run 37143200753 on 46af105a, with the shadows not remapped, passed all 581 tests and every client shard. The swap design then replaced that approach.
+
+**Fences, panes and bars (PR #138):**
 - **Run [37137139804](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37137139804) on 6ad6205b: green**: `mod`, all three client shards and `client`; `repository` passed in run 37137139776.
   - **Server:** all 577 required game tests passed, including the seven diagonal tests. They logged:
     - placed oak fences as `oak_fence[north_east]` and `oak_fence[south_west]`;
