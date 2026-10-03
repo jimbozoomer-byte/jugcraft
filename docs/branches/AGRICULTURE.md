@@ -817,6 +817,139 @@ Ten more fall and Halloween additions, one per pull request ([features/fall-addi
 - **Face Paint Kit:** paints one of six designs on a friend at once, or on your own face after a held use; good for 16 faces.
 - **A painted face is a costume** for trick-or-treating and the costume contest, and washes off under water. Details: [fall additions](../features/fall-additions.md#face-paint).
 
+## More fall additions
+
+Ten more fall and Halloween additions, numbered on from the first ten, one per pull request ([features/more-fall-additions.md](../features/more-fall-additions.md)).
+
+### The candy kitchen
+
+| **Candy Kettles** on iron trivets over campfires, each at its own stage on the thermometer, the last one burning | **Candy** in frames: rock candy, lollipops, taffy, hard candy, fudge and the rest, flavoured and dyed |
+| --- | --- |
+| ![Candy Kettles](../images/ingame_candy_kettles.jpg) | ![Candies](../images/ingame_candies.jpg) |
+
+*Real screenshots from the client game test that CI runs (`CandyClientGameTests`, software rendering, small previews). Each kettle was filled and set to its temperature on the server.*
+
+- **Candy Kettle:** a copper sugar pot with a candy thermometer. A base (water for syrup, milk for cream), up to four sugar, two flavours and dyes go in before it boils; over a fire it climbs through the candy stages, a bell at each, and the hottest it reaches decides the candy.
+- **Candy Tray:** rock candy grown for a day, candy corn in three coloured layers, taffy pulled while warm, hard candy and lollipops, caramel, fudge, cream caramels and toffee. Flavoured candy gives short effects. Details: [more fall additions](../features/more-fall-additions.md#the-candy-kettle).
+
+### Autumn foraging
+
+| **The forest floor**: chanterelles, porcini, puffballs, fly agarics and jack o'lantern mushrooms under the trees | **Wild mushrooms** up close |
+| --- | --- |
+| ![The forest floor](../images/ingame_forest_floor.jpg) | ![Wild mushrooms](../images/ingame_wild_mushrooms.jpg) |
+| **A fairy ring at night**, the jack o'lantern mushrooms glowing | **The Foraging Basket and the dishes** in frames |
+| ![A fairy ring at night](../images/ingame_fairy_ring_night.jpg) | ![The basket and dishes](../images/ingame_foraging_basket.jpg) |
+
+*Real screenshots from the client game test that CI runs (`ForagingClientGameTests`, software rendering, small previews).*
+
+- **Wild mushrooms** grow in patches on forest floors, each in its own biomes, and spread in the shade up to five of a kind; bone meal spreads them in any light. The jack o'lantern mushroom glows.
+- **Fairy rings:** on a full-moon night a mushroom may sprout a ring of its kind. Stand in the centre of a ring on a full-moon night for Luck II, once a night.
+- **Foraging Basket:** holds forage; mushrooms picked with it in hand go straight in. Cook chanterelles, porcini and puffballs, or make Forager's Stew in the Cooking Pot. Details: [more fall additions](../features/more-fall-additions.md#wild-mushrooms).
+
+### The Bat House
+
+| **Bat Houses** on a barn wall, their trays holding no guano, a little, more and a pile; Bat Guano in a frame | **From above**, the guano in the trays |
+| --- | --- |
+| ![Bat Houses](../images/ingame_bat_houses.jpg) | ![Guano in the trays](../images/ingame_bat_house_guano.jpg) |
+| **At dusk** the bats pour out | |
+| ![Bats at dusk](../images/ingame_bat_houses_dusk.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`BatHouseClientGameTests`, software rendering, small previews). Each house was filled with four bats and let them out itself, on the server.*
+
+- **Bat House:** bats roost in it by day and pour out at dusk; at dawn the nearest bats come back in, up to four, each leaving a guano on the tray. A house with room gains a bat at dusk now and then. Scoop the guano with an empty hand; comparators read the bats.
+- **Bat Guano** fertilizes the crops in a 3x3 patch, and four make a phosphate. Details: [more fall additions](../features/more-fall-additions.md#the-bat-house).
+
+### The Hay Golem
+
+| **Hay Golems** in a carrot and wheat field: one in a carved pumpkin, one bent over the carrots harvesting, one in a lit hand-carved white pumpkin with a cat's face; a chest at a post, and a T of hay waiting for its head | **Up close** |
+| --- | --- |
+| ![Hay Golems](../images/ingame_hay_golems.jpg) | ![A Hay Golem up close](../images/ingame_hay_golem_close.jpg) |
+| **At night**, the lit head glowing | |
+| ![Hay Golems at night](../images/ingame_hay_golems_night.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`HayGolemClientGameTests`, software rendering, small previews). The golems are posed (no AI) for the picture.*
+
+- **Build one** from a T of four hay bales with a carved pumpkin on top. It keeps crows off crops within eight blocks (twelve with a lit head), harvests and replants the ripe crops round its post, and carries the harvest to the chest under its post.
+- Lead it with wheat; wheat heals it; shears take it apart. Details: [more fall additions](../features/more-fall-additions.md#the-hay-golem).
+
+### Knitting
+
+| **Knitting:** Spinning Wheels (bare, with a skein of orange wool, half spun with purple) and, by a campfire, armour stands in knitwear: a cream beanie, pumpkin sweater and socks; a red striped sweater and green beanie; an orange bat sweater and black socks | **The knitwear** up close |
+| --- | --- |
+| ![Knitting](../images/ingame_knitting.jpg) | ![Knitwear on armour stands](../images/ingame_knitwear.jpg) |
+| **Spinning Wheels**, turning | **Yarn, needles and garments** |
+| ![Spinning Wheels](../images/ingame_spinning_wheels.jpg) | ![Yarn, needles and garments](../images/ingame_knitting_items.jpg) |
+
+*Real screenshots from the client game test that CI runs (`KnittingClientGameTests`, software rendering, small previews).*
+
+- **Spin** wool into yarn on the Spinning Wheel, by hand or with redstone; **knit** it a row at a time on Knitting Needles into beanies, socks and sweaters, the colour of the blend of their rows.
+- Knitwear keeps out powder snow, takes dye like leather, and two pieces by a campfire make you cosy. Details: [more fall additions](../features/more-fall-additions.md#knitting-needles-and-yarn).
+
+### Pie baking
+
+| **Pie baking:** three Hearth Ovens (lit with an apple pie baked golden, lit with a pumpkin cream pie just gone in, and cold with a burnt cranberry pie) and a table of pies | **The ovens** up close |
+| --- | --- |
+| ![Pie baking](../images/ingame_pie_baking.jpg) | ![Hearth Ovens](../images/ingame_hearth_ovens.jpg) |
+| **Pies**: whole, with one, two and three slices gone, and burnt | **Dough, raw pies, slices** and an oven |
+| ![Pies](../images/ingame_pies.jpg) | ![Pastry, raw pies and slices](../images/ingame_pie_items.jpg) |
+
+*Real screenshots from the client game test that CI runs (`PieClientGameTests`, software rendering, small previews).*
+
+- **Bake** in a Hearth Oven fed coal, charcoal, coke or logs: a raw pie bakes golden at 600 points while the oven is hot enough, and burns at 1,200.
+- Pies are placed like cakes and eaten or cut a slice at a time. Details: [more fall additions](../features/more-fall-additions.md#the-hearth-oven).
+
+### The Spirit Board
+
+| **Spirit Boards**, one facing each way, the planchette on M, YES, NO and GOODBYE | **Up close**: the letters, and the planchette on M |
+| --- | --- |
+| ![Spirit Boards](../images/ingame_spirit_boards.jpg) | ![A Spirit Board up close](../images/ingame_spirit_board.jpg) |
+| **A séance** at night: a board between lit candles, a revealed restless spirit over it | |
+| ![A séance](../images/ingame_seance.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`SpiritBoardClientGameTests`, software rendering, small previews). The planchettes and the spirit are posed for the picture.*
+
+- **Hold a séance** by candlelight, fingers on the planchette (friends make it faster): the nearest restless spirit spells its name and its wish.
+- Give a revealed spirit its wish and it is laid to rest. Details: [more fall additions](../features/more-fall-additions.md#the-spirit-board).
+
+### Wild turkeys
+
+| **A flock**: two toms (one strutting), two hens and three poults | **Strutting toms** up close, their tails fanned |
+| --- | --- |
+| ![Wild turkeys](../images/ingame_turkeys.jpg) | ![A strutting tom](../images/ingame_turkey_strut.jpg) |
+| **Roast turkeys** on the table: whole, the drumsticks gone, the breast carved, the carcass | |
+| ![Roast turkeys](../images/ingame_roast_turkeys.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`TurkeyClientGameTests`, software rendering, small previews). The turkeys are placed and the strut held for the picture.*
+
+- **Wild turkeys** come to woods and meadows in flocks; seeds breed them, hens lay eggs, and toms strut for an audience.
+- **Roast one** and set it on the table: six servings, eaten or carved. Details: [more fall additions](../features/more-fall-additions.md#wild-turkeys).
+
+### The Theremin
+
+| **Theremins**: the left one playing, its magic eye lit; the right one silent | **Up close**: the antennas, grille, knobs and the glowing eye |
+| --- | --- |
+| ![Theremins](../images/ingame_theremins.jpg) | ![A theremin up close](../images/ingame_theremin.jpg) |
+| **At night**: the playing theremin's eye glows | |
+| ![Theremins at night](../images/ingame_theremin_night.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`ThereminClientGameTests`, software rendering, small previews). The note above the playing one is the camera standing in its range.*
+
+- **Switch a theremin on** and it sings for whoever is nearest, higher the nearer they come.
+- Silent or playing, **comparators read how near** the nearest creature is. Details: [more fall additions](../features/more-fall-additions.md#the-theremin).
+
+### The Ofrenda
+
+| **An ofrenda** under papel picado, a welcomed spirit over it, marigolds, candles and sugar skulls either side and a path of petals | **Up close**: the offerings on its tiers |
+| --- | --- |
+| ![An ofrenda](../images/ingame_ofrenda.jpg) | ![The ofrenda up close](../images/ingame_ofrenda_close.jpg) |
+| **At night**: complete and glowing, a spirit welcomed among the offerings | |
+| ![The ofrenda at night](../images/ingame_ofrenda_night.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`OfrendaClientGameTests`, software rendering, small previews). The offerings and the spirit are placed for the picture.*
+
+- **Set out an ofrenda** with flowers, a light, bread, a sugar skull and a drink, and at night it welcomes the spirits near.
+- Marigolds, papel picado, sugar skulls and pan de muerto to make and decorate with. Details: [more fall additions](../features/more-fall-additions.md#the-día-de-muertos-ofrenda).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
