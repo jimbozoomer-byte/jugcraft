@@ -3732,6 +3732,8 @@ def check_graveyard(java, main):
     renderer fades ink as graveyard.py says; every part and stage has its model, every state a variant; each headstone
     has its loot (part 0 only, keeping the epitaph), recipe and words; the textures and advancements exist."""
     source = java.get("HeadstoneBlock", "")
+    if f"IntegerProperty.create(\"part\", 0, {gy.PARTS - 1})" not in source:
+        err("HeadstoneBlock.PART must run 0 to PARTS - 1 (tools/graveyard.py)")
     styles = re.findall(r'[A-Z_]+\("([a-z_]+)", Stone\.([A-Z]+), ([A-Z0-9]+),\s*new double\[\]\[\]\[\] \{(.*?)\},\s*'
                         r'new Text\((true|false), ([^)]*)\)\)', source, re.S)
     found = {}
@@ -3741,7 +3743,7 @@ def check_graveyard(java, main):
         values = [float(eval(v.replace("F", ""))) for v in text.split(",")]
         found[sid] = {"stone": stone.lower(), "cells": cells, "boxes": parts, "top": top == "true", "text": values}
     cell_names = {tuple(map(tuple, gy.SINGLE)): "SINGLE", tuple(map(tuple, gy.TALL2)): "TALL2", tuple(map(tuple, gy.TALL3)): "TALL3",
-                  tuple(map(tuple, gy.LONG)): "LONG"}
+                  tuple(map(tuple, gy.LONG)): "LONG", tuple(map(tuple, gy.TALL4)): "TALL4", tuple(map(tuple, gy.WIDE)): "WIDE"}
     if set(found) != set(gy.HEADSTONES):
         err(f"HeadstoneBlock.Style {sorted(found)} differs from HEADSTONES in tools/graveyard.py {sorted(gy.HEADSTONES)}")
     for sid, info in gy.HEADSTONES.items():
@@ -3788,7 +3790,7 @@ def check_graveyard(java, main):
                 if not (ASSETS / "models" / "block" / f"{name}.json").exists():
                     err(f"{sid} needs model {name}")
         variants = set((load(ASSETS / "blockstates" / f"{sid}.json") or {}).get("variants", {}))
-        want = {f"facing={f},part={p},waxed={w},weathering={s}" for f in ("north", "east", "south", "west") for p in range(3)
+        want = {f"facing={f},part={p},waxed={w},weathering={s}" for f in ("north", "east", "south", "west") for p in range(gy.PARTS)
                 for w in ("false", "true") for s in range(4)}
         if variants != want:
             err(f"{sid}: its blockstate must cover every facing, part, wax and stage")

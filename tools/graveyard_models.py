@@ -8,6 +8,8 @@ moss, for top faces and parts above the first block), #relief (carved or polishe
 
 Block models may turn an element only by 22.5 or 45 degrees, and keep every coordinate within -16..32 of their block.
 """
+import math
+
 from decor_data import box
 
 SIDES = ("north", "south", "east", "west")
@@ -392,3 +394,223 @@ def overgrowth(kind):
     else:
         out += [b((1.6, 1.8, 6.2), (2.3, 7.5, 7.0), ivy), b((2.0, 7.0, 6.0), (3.3, 7.9, 6.9), ivy)]
     return out
+
+
+# ---------------------------------------------------------------- pack 2: monuments
+
+def octagon(x0, y0, z0, x1, y1, z1, tex, chamfer=None):
+    """An octagonal prism (two crossed boxes) filling (x0, z0)-(x1, z1) from y0 to y1."""
+    c = chamfer if chamfer is not None else min(x1 - x0, z1 - z0) * 0.29
+    return [b((x0 + c, y0, z0), (x1 - c, y1, z1), tex), b((x0, y0, z0 + c), (x1, y1, z1 - c), tex)]
+
+
+def obelisk():
+    """A granite obelisk on a stepped base: a die with a moulded cornice carries the epitaph on a polished panel, and
+    the tapering shaft, a laurel wreath carved near its top, ends in a pyramidion. 60 pixels tall (3.75 m)."""
+    out = [b((0, 0, 0), (16, 2, 16), "#rough"), b((1, 2, 1), (15, 4, 15)), b((1.8, 4, 1.8), (14.2, 5, 14.2), "#relief"),
+           b((2.5, 5, 2.5), (13.5, 15, 13.5)), b((2, 15, 2), (14, 16.2, 14), "#relief"), b((2.6, 16.2, 2.6), (13.4, 16.8, 13.4), "#relief"),
+           b((3.5, 16.8, 3.5), (12.5, 18.5, 12.5))]
+    # The panel on the die's front, polished, framed by a bead.
+    out += [b((3.6, 6.2, 2.2), (12.4, 13.8, 2.5), "#relief"), b((3.3, 5.9, 2.0), (12.7, 6.2, 2.5), "#relief"),
+            b((3.3, 13.8, 2.0), (12.7, 14.1, 2.5), "#relief"), b((3.3, 6.2, 2.0), (3.6, 13.8, 2.5), "#relief"),
+            b((12.4, 6.2, 2.0), (12.7, 13.8, 2.5), "#relief")]
+    # The shaft, tapering in steps, polished.
+    width, y = 8.6, 18.5
+    while y < 55.5:
+        half = width / 2
+        out.append(b((8 - half, y, 8 - half), (8 + half, y + 4.2, 8 + half), "#relief", top="#relief_top"))
+        y += 4.2
+        width -= 0.42
+    half = width / 2
+    out += [b((8 - half + 0.2, y, 8 - half + 0.2), (8 + half - 0.2, y + 1.0, 8 + half - 0.2), "#relief_top"),
+            b((6.6, y + 1.0, 6.6), (9.4, y + 2.2, 9.4), "#relief_top"), b((7.2, y + 2.2, 7.2), (8.8, y + 3.2, 8.8), "#relief_top"),
+            b((7.7, y + 3.2, 7.7), (8.3, y + 4.0, 8.3), "#relief_top")]
+    # A laurel wreath on the shaft's front, near its top: a ring of leaves and its ribbon.
+    import math
+    cx, cy, z = 8.0, 46.0, 8 - (8.6 - 0.42 * 6.5) / 2 - 0.35
+    for i in range(12):
+        a = math.radians(i * 30)
+        x, yy = cx + 1.9 * math.cos(a), cy + 1.9 * math.sin(a)
+        out.append(b((x - 0.45, yy - 0.45, z), (x + 0.45, yy + 0.45, z + 0.4), "#stone"))
+    out += [b((7.2, 43.2, z - 0.05), (8.8, 43.8, z + 0.4), "#stone"), b((6.8, 42.4, z - 0.05), (7.4, 43.4, z + 0.4), "#stone"),
+            b((8.6, 42.4, z - 0.05), (9.2, 43.4, z + 0.4), "#stone")]
+    return out
+
+
+def draped_urn():
+    """A marble pedestal carrying a funerary urn half veiled by a shroud, the Victorian emblem of mourning. The die
+    carries the epitaph. 28 pixels tall (1.75 m)."""
+    r = "#relief"
+    out = [b((2, 0, 2), (14, 2, 14)), b((2.6, 2, 2.6), (13.4, 2.8, 13.4), r), b((3, 2.8, 3), (13, 13, 13)),
+           b((2.4, 13, 2.4), (13.6, 14.4, 13.6), r), b((3.0, 14.4, 3.0), (13.0, 15.0, 13.0), r)]
+    out += [b((3.8, 4.2, 2.7), (12.2, 4.6, 3.0), r), b((3.8, 11.6, 2.7), (12.2, 12.0, 3.0), r),
+            b((3.8, 4.6, 2.7), (4.2, 11.6, 3.0), r), b((11.8, 4.6, 2.7), (12.2, 11.6, 3.0), r)]
+    # The urn and its shroud, sculpted: foot, stem, swelling body, neck and lid; the cloth thrown over the lid and
+    # one shoulder, hanging in folds down the left side to the cornice and tied with a tasselled cord.
+    from sculpt import Sculpture, Ellipsoid, Limb
+    t, cloth = "#relief_top", "#top"
+    s = Sculpture(0.5)
+    s.add(Limb((8.0, 15.0, 8.0), (8.0, 15.8, 8.0), 2.3, 2.1, t), Limb((8.0, 15.8, 8.0), (8.0, 17.0, 8.0), 1.2, 1.4, t),
+          Ellipsoid((8.0, 19.6, 8.0), (3.7, 3.0, 3.7), t), Limb((8.0, 22.0, 8.0), (8.0, 24.6, 8.0), 2.4, 1.4, t),
+          Limb((8.0, 24.6, 8.0), (8.0, 25.4, 8.0), 2.1, 2.1, t), Ellipsoid((8.0, 26.2, 8.0), (1.3, 1.2, 1.3), t),
+          Ellipsoid((8.0, 27.4, 8.0), (0.6, 0.7, 0.6), t))
+    # The shroud: over the lid, down the front-left shoulder and side in long folds, gathered at the bottom.
+    s.add(Ellipsoid((6.6, 25.6, 7.4), (2.2, 1.0, 2.6), cloth), Ellipsoid((5.4, 22.6, 6.6), (1.6, 3.4, 2.4), cloth,
+          axes=((1, 0.25, 0), (-0.25, 1, 0), (0, 0, 1))))
+    for k, (x, z) in enumerate(((4.3, 5.0), (4.0, 7.2), (4.3, 9.4), (5.6, 4.4))):
+        s.add(Limb((x + 0.6, 24.0, z), (x - 0.2, 15.4, z + (k - 1.5) * 0.2), 0.75, 0.95, cloth))
+    s.add(Limb((4.0, 18.6, 4.6), (4.0, 18.6, 10.0), 0.35, 0.35, "#relief"), Limb((3.6, 18.4, 4.6), (3.4, 16.2, 4.4), 0.25, 0.4, "#relief"))
+    out += s.boxes()
+    return out
+
+
+def feather_row(x0, x1, y, z0, z1, tex, droop=0.0):
+    """A row of feathers along x, each a little box, the ends dropping by `droop`."""
+    out = []
+    n = max(2, int((x1 - x0) / 1.1))
+    for i in range(n):
+        xa = x0 + (x1 - x0) * i / n
+        xb = x0 + (x1 - x0) * (i + 1) / n
+        t = i / max(1, n - 1)
+        drop = droop * t * t
+        out.append(b((xa, y - drop - 0.9, z0), (xb + 0.15, y - drop, z1), tex))
+    return out
+
+
+def angel_figure(t="#relief_top"):
+    """The grieving angel, sculpted (tools/sculpt.py): kneeling on the plinth at the altar's left end, bowed forward
+    with her head buried in her arms folded on its top, her robe pooled about her knees, and her wings folded and
+    rising high behind her, their tips sweeping down to the ground."""
+    from sculpt import Sculpture, Ellipsoid, Limb
+    s = Sculpture(0.5)
+    ground = 2.4
+    # Robe pooled about the knees, and the thighs under it.
+    s.add(Ellipsoid((5.4, ground + 0.8, 8.0), (3.4, 1.2, 3.0), t), Limb((4.2, ground + 1.2, 8.0), (7.6, ground + 2.4, 8.0), 2.0, 1.6, t),
+          Limb((3.6, ground + 1.0, 8.0), (3.4, ground + 5.6, 8.0), 2.1, 1.9, t))
+    # Torso, leaning forward from the hips to the shoulders.
+    s.add(Limb((3.6, ground + 6.0, 8.0), (6.6, ground + 10.6, 8.0), 1.9, 1.7, t), Ellipsoid((6.8, ground + 10.6, 8.0), (1.8, 1.4, 2.2), t))
+    # Arms folded on the altar top, the head bowed onto them, hair knotted at the nape.
+    s.add(Limb((7.0, ground + 10.6, 6.2), (11.0, 14.6, 6.6), 0.8, 0.8, t), Limb((7.0, ground + 10.6, 9.8), (11.0, 14.6, 9.4), 0.8, 0.8, t),
+          Limb((11.0, 14.7, 6.4), (11.2, 14.7, 9.6), 0.9, 0.9, t), Ellipsoid((9.2, 15.4, 8.0), (1.5, 1.4, 1.5), t),
+          Ellipsoid((8.2, 16.2, 8.0), (0.9, 0.9, 1.0), t))
+    # The wings, folded and rising high behind her shoulders, coverts at the root and long feathers to the tips,
+    # which sweep back down to the plinth.
+    for z, lean in ((6.2, -0.4), (9.8, 0.4)):
+        s.add(Ellipsoid((3.0, ground + 15.0, z), (2.3, 7.0, 0.8), t, axes=((1, 0.15, 0), (-0.15, 1, 0), (0, 0, 1))))
+        for k in range(5):
+            top = ground + 25.0 - k * 2.6
+            s.add(Limb((4.6, ground + 10.4, z), (1.2 - k * 0.5, top, z + lean * k), 0.9, 0.4, t, flat=((0, 0, 1), 0.45)))
+        s.add(Limb((1.4, ground + 21.0, z), (0.6, ground + 0.4, z), 0.8, 0.45, t, flat=((0, 0, 1), 0.45)),
+              Limb((2.0, ground + 16.0, z), (1.4, ground + 1.0, z + lean), 0.7, 0.4, t, flat=((0, 0, 1), 0.45)))
+    return s.boxes()
+
+
+def angel_of_grief():
+    """A grieving angel at an altar tomb, after the Victorian mourning statues: she kneels at its left end, bowed over
+    it with her head in her folded arms, her wings rising behind her. Two blocks wide and two tall, the altar's front
+    carrying the epitaph. Designed 32 pixels wide (x), facing north."""
+    r = "#relief"
+    out = [b((0, 0, 0), (32, 1.6, 16)), b((0.8, 1.6, 0.8), (31.2, 2.4, 15.2), r), b((10, 2.4, 2.5), (30, 12, 14)),
+           b((9.4, 12, 1.9), (30.6, 13.2, 14.6), r), b((9.0, 13.2, 1.5), (31.0, 14.0, 15.0), r)]
+    # The altar's front: a long panel for the epitaph between two carved wreaths.
+    out += [b((13.0, 3.6, 2.2), (26.0, 4.0, 2.5), r), b((13.0, 10.4, 2.2), (26.0, 10.8, 2.5), r),
+            b((13.0, 4.0, 2.2), (13.4, 10.4, 2.5), r), b((25.6, 4.0, 2.2), (26.0, 10.4, 2.5), r)]
+    for cx in (11.6, 28.0):
+        out += [b((cx - 1.4, 6.0, 2.2), (cx + 1.4, 8.8, 2.5), r), b((cx - 0.8, 6.6, 2.0), (cx + 0.8, 8.2, 2.3), "#stone")]
+    return out + angel_figure()
+
+
+def trumpet_figure(base, t="#relief_top"):
+    """The angel of the Resurrection, sculpted, standing at `base` (her feet's height) on top of a column: her robe
+    falling in folds to her feet, one hand raising a long trumpet to her lips and up to the sky, wings rising behind."""
+    from sculpt import Sculpture, Ellipsoid, Limb
+    s = Sculpture(0.5)
+    y = base
+    s.add(Limb((8.0, y, 8.0), (8.0, y + 8.0, 8.0), 2.6, 1.7, t), Limb((7.2, y, 7.0), (7.4, y + 6.0, 7.4), 1.2, 1.0, t),
+          Limb((8.8, y, 9.0), (8.6, y + 6.0, 8.6), 1.2, 1.0, t))
+    # Torso, shoulders, neck and head tipped back to blow; her hair falling behind.
+    s.add(Limb((8.0, y + 8.0, 8.0), (8.0, y + 11.0, 8.0), 1.7, 1.9, t), Ellipsoid((8.0, y + 11.4, 8.0), (2.4, 1.0, 1.4), t),
+          Limb((8.0, y + 12.0, 8.0), (8.0, y + 12.8, 7.8), 0.6, 0.6, t), Ellipsoid((8.0, y + 13.8, 7.6), (1.2, 1.4, 1.3), t),
+          Limb((8.0, y + 14.0, 8.6), (8.0, y + 11.6, 9.4), 0.9, 0.6, t))
+    # Arms: the right lifting the trumpet to her lips, the left at her side, holding her robe.
+    s.add(Limb((6.2, y + 11.2, 8.0), (6.4, y + 12.6, 5.6), 0.55, 0.5, t), Limb((6.4, y + 12.6, 5.6), (7.6, y + 13.4, 5.0), 0.5, 0.45, t),
+          Limb((9.8, y + 11.2, 8.0), (10.2, y + 7.4, 7.6), 0.55, 0.5, t))
+    # The trumpet: from her lips, up and out to a flared bell.
+    s.add(Limb((7.8, y + 13.6, 6.4), (7.9, y + 18.6, 0.6), 0.3, 0.32, t), Limb((7.9, y + 18.2, 1.0), (7.9, y + 19.4, -0.4), 0.45, 1.25, t))
+    # Wings rising behind her shoulders: a fan of long feathers each side, the inner ones shorter.
+    for x, side in ((6.6, -1), (9.4, 1)):
+        for k in range(10):
+            angle = math.radians(74 - k * 6.5)
+            length = 9.5 - abs(k - 3) * 0.6
+            tip = (x + side * length * math.cos(angle), y + 11.0 + length * math.sin(angle), 10.4 + k * 0.12)
+            s.add(Limb((x, y + 11.0, 10.0), tip, 0.75, 0.3, t, flat=((0, 0, 1), 0.45)))
+    return s.boxes()
+
+
+def trumpet_angel():
+    """A tall memorial column: a pedestal with the epitaph, a fluted shaft and a capital, and on it an angel of the
+    Resurrection raising a long trumpet, her wings up behind her. 64 pixels tall (4 m)."""
+    r, t = "#relief", "#relief_top"
+    out = [b((1, 0, 1), (15, 2, 15)), b((1.6, 2, 1.6), (14.4, 2.8, 14.4), r), b((2, 2.8, 2), (14, 12, 14)),
+           b((1.5, 12, 1.5), (14.5, 13.4, 14.5), r), b((2.6, 13.4, 2.6), (13.4, 14.2, 13.4), r)]
+    out += [b((3.2, 4.0, 1.7), (12.8, 4.4, 2.0), r), b((3.2, 10.4, 1.7), (12.8, 10.8, 2.0), r),
+            b((3.2, 4.4, 1.7), (3.6, 10.4, 2.0), r), b((12.4, 4.4, 1.7), (12.8, 10.4, 2.0), r)]
+    out += octagon(4.0, 14.2, 4.0, 12.0, 15.6, 12.0, t) + octagon(5.0, 15.6, 5.0, 11.0, 40.0, 11.0, t)
+    for x in (6.6, 7.75, 8.9):
+        out += [b((x, 16.0, 4.95), (x + 0.5, 39.6, 5.0), "#top")]
+    out += octagon(4.3, 40.0, 4.3, 11.7, 41.6, 11.7, t) + [b((3.6, 41.6, 3.6), (12.4, 42.8, 12.4), t),
+                                                           b((5.2, 42.8, 5.2), (10.8, 43.6, 10.8), t)]
+    return out + trumpet_figure(43.6)
+
+
+def mortsafe():
+    """An iron mortsafe, the cage Scots set over a new grave against the body-snatchers: a heavy frame, spear-topped
+    bars on every side, a grid of bars over the top and ball finials on its corner posts, over a mound of earth. Two
+    blocks long (z 0 to 32), a plate at its foot for the name."""
+    i = "#iron"
+    out = [b((0.5, 0, 0.5), (15.5, 1.4, 1.8), i), b((0.5, 0, 30.2), (15.5, 1.4, 31.5), i), b((0.5, 0, 1.8), (1.8, 1.4, 30.2), i),
+           b((14.2, 0, 1.8), (15.5, 1.4, 30.2), i)]
+    # The grave's mound of earth inside.
+    out += [b((1.8, 0, 1.8), (14.2, 1.6, 30.2), "#soil"), b((3.0, 1.6, 3.5), (13.0, 2.6, 28.5), "#soil"), b((4.5, 2.6, 6.0), (11.5, 3.2, 26.0), "#soil")]
+    for x in (0.6, 14.0):
+        for z in (0.6, 30.0):
+            out += [b((x, 1.4, z), (x + 1.4, 14.0, z + 1.4), i), b((x + 0.1, 14.0, z + 0.1), (x + 1.3, 15.2, z + 1.3), i),
+                    b((x + 0.3, 15.2, z + 0.3), (x + 1.1, 15.8, z + 1.1), i)]
+    for z in [2.6 + 2.15 * k for k in range(13)]:
+        for x in (0.95, 14.45):
+            out += [b((x, 1.4, z), (x + 0.6, 13.0, z + 0.6), i), b((x + 0.15, 13.0, z + 0.15), (x + 0.45, 13.8, z + 0.45), i)]
+    for x in [2.8 + 2.1 * k for k in range(6)]:
+        for z in (0.95, 30.45):
+            out += [b((x, 1.4, z), (x + 0.6, 13.0, z + 0.6), i), b((x + 0.15, 13.0, z + 0.15), (x + 0.45, 13.8, z + 0.45), i)]
+    out += [b((0.8, 12.2, 0.8), (15.2, 12.9, 1.6), i), b((0.8, 12.2, 30.4), (15.2, 12.9, 31.2), i),
+            b((0.8, 12.2, 1.6), (1.6, 12.9, 30.4), i), b((14.4, 12.2, 1.6), (15.2, 12.9, 30.4), i)]
+    for z in (6.0, 11.5, 17.0, 22.5, 28.0):
+        out.append(b((1.6, 12.3, z), (14.4, 12.8, z + 0.6), i))
+    out += [b((7.7, 12.3, 1.6), (8.3, 12.8, 30.4), i)]
+    # The name plate on the foot rail.
+    out += [b((5.0, 5.2, 0.4), (11.0, 8.6, 0.95), i)]
+    return out
+
+
+def hound():
+    """A faithful hound in bronze, lying at its master's grave with its head up and watching, on a granite plinth that
+    carries the epitaph."""
+    from sculpt import Sculpture, Ellipsoid, Limb
+    br = "#bronze"
+    out = [b((1.0, 0, 2.0), (15.0, 1.2, 14.0), "#rough"), b((1.6, 1.2, 2.6), (14.4, 5.4, 13.4)), b((1.2, 5.4, 2.2), (14.8, 6.2, 13.8), "#relief")]
+    s = Sculpture(0.5)
+    y = 6.2
+    # Body lying along x, deep chest at the front, haunch tucked at the back, tail curled round.
+    s.add(Ellipsoid((8.4, y + 1.7, 8.4), (4.2, 1.8, 2.2), br), Ellipsoid((5.4, y + 2.0, 8.2), (2.0, 2.0, 2.0), br),
+          Ellipsoid((11.6, y + 1.6, 8.8), (2.0, 1.7, 2.4), br), Limb((13.0, y + 0.6, 10.6), (9.0, y + 0.5, 11.6), 0.5, 0.35, br))
+    # Forelegs stretched out in front, paws together; a hind leg folded along its side.
+    s.add(Limb((4.6, y + 0.7, 6.8), (1.6, y + 0.5, 6.8), 0.65, 0.6, br), Limb((4.6, y + 0.7, 9.4), (1.6, y + 0.5, 9.4), 0.65, 0.6, br),
+          Limb((12.2, y + 0.8, 6.2), (9.4, y + 0.5, 6.2), 0.7, 0.55, br))
+    # Neck and head held up, looking out; muzzle, nose, drooping ears.
+    s.add(Limb((5.2, y + 2.8, 8.2), (3.8, y + 5.0, 8.2), 1.3, 1.1, br), Ellipsoid((3.6, y + 5.6, 8.2), (1.5, 1.3, 1.3), br),
+          Limb((2.6, y + 5.2, 8.2), (0.9, y + 4.8, 8.2), 0.75, 0.6, br), Ellipsoid((0.6, y + 4.9, 8.2), (0.35, 0.35, 0.45), "#iron"),
+          Limb((4.0, y + 6.2, 6.8), (4.4, y + 4.2, 6.4), 0.45, 0.35, br, flat=((0, 0, 1), 0.5)),
+          Limb((4.0, y + 6.2, 9.6), (4.4, y + 4.2, 10.0), 0.45, 0.35, br, flat=((0, 0, 1), 0.5)))
+    # Its collar.
+    s.add(Limb((4.4, y + 3.6, 6.9), (4.4, y + 3.6, 9.5), 0.5, 0.5, "#iron"))
+    return out + s.boxes()

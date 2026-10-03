@@ -1569,10 +1569,12 @@ public final class JugcraftAgriculture {
 				case SLATE -> MapColor.DEEPSLATE;
 				case GRANITE -> MapColor.DIRT;
 				case SANDSTONE -> MapColor.SAND;
+				case IRON -> MapColor.METAL;
 			};
 			// Random ticks: headstones weather, and graves stir at night.
 			Block stone = registerBlock(style.id, props -> new HeadstoneBlock(props, style), BlockBehaviour.Properties.of().mapColor(colour)
-					.requiresCorrectToolForDrops().strength(2.0F, 6.0F).sound(SoundType.STONE).noOcclusion().randomTicks());
+					.requiresCorrectToolForDrops().strength(2.0F, 6.0F).sound(style.stone == HeadstoneBlock.Stone.IRON ? SoundType.METAL : SoundType.STONE)
+					.noOcclusion().randomTicks());
 			registerItem(style.id, props -> new HeadstoneItem(stone, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 			headstones.add(stone);
 		}

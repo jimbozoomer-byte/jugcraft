@@ -56,7 +56,7 @@ import org.jspecify.annotations.Nullable;
  */
 public class HeadstoneBlock extends BaseEntityBlock {
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
-	public static final IntegerProperty PART = IntegerProperty.create("part", 0, 2);
+	public static final IntegerProperty PART = IntegerProperty.create("part", 0, 3);
 	public static final IntegerProperty WEATHERING = IntegerProperty.create("weathering", 0, 3);
 	public static final BooleanProperty WAXED = BooleanProperty.create("waxed");
 	public static final int CLEAN = 0;
@@ -70,13 +70,17 @@ public class HeadstoneBlock extends BaseEntityBlock {
 	static final int[][] TALL2 = {{0, 0, 0}, {0, 1, 0}};
 	static final int[][] TALL3 = {{0, 0, 0}, {0, 1, 0}, {0, 2, 0}};
 	static final int[][] LONG = {{0, 0, 0}, {0, 0, 1}};
+	static final int[][] TALL4 = {{0, 0, 0}, {0, 1, 0}, {0, 2, 0}, {0, 3, 0}};
+	/** The Angel at the Tomb: the altar's two halves and, above the one to the placer's right, the angel's wings. */
+	static final int[][] WIDE = {{0, 0, 0}, {1, 0, 0}, {1, 1, 0}};
 
 	/** A stone: the colour of letters cut into it, and the colour they fade towards as it weathers. */
 	public enum Stone {
 		MARBLE(0xFF2C2B30, 0xFFB9B7B0),
 		SLATE(0xFFD3D8DE, 0xFF4B525C),
 		GRANITE(0xFFE6DFD6, 0xFF7A7270),
-		SANDSTONE(0xFF3E2C1A, 0xFFB59C6E);
+		SANDSTONE(0xFF3E2C1A, 0xFFB59C6E),
+		IRON(0xFFC9A961, 0xFF6E3A1E);
 
 		public final int ink;
 		public final int fadeTo;
@@ -126,7 +130,32 @@ public class HeadstoneBlock extends BaseEntityBlock {
 				new Text(true, 8.0F, 12.6F, 16.0F, 11.0F, 24.0F, 1.0F / 40)),
 		LEDGER("ledger_stone", Stone.SANDSTONE, LONG,
 				new double[][][] {{{1, 0, 1, 15, 2.4, 16}}, {{1, 0, 0, 15, 2.4, 15}}},
-				new Text(true, 8.0F, 2.4F, 10.2F, 9.6F, 14.0F, 1.0F / 48));
+				new Text(true, 8.0F, 2.4F, 10.2F, 9.6F, 14.0F, 1.0F / 48)),
+		// Pack 2: monuments.
+		GRAND_OBELISK("grand_obelisk", Stone.GRANITE, TALL4,
+				new double[][][] {{{0, 0, 0, 16, 2, 16}, {1, 2, 1, 15, 4, 15}, {2.5, 4, 2.5, 13.5, 16, 13.5}},
+						{{2.6, 0, 2.6, 13.4, 0.8, 13.4}, {3.5, 0.8, 3.5, 12.5, 2.5, 12.5}, {3.7, 2.5, 3.7, 12.3, 16, 12.3}},
+						{{4.4, 0, 4.4, 11.6, 16, 11.6}}, {{5.2, 0, 5.2, 10.8, 12, 10.8}}},
+				new Text(false, 8.0F, 10.0F, 2.2F, 8.2F, 7.2F, 1.0F / 72)),
+		DRAPED_URN("draped_urn", Stone.MARBLE, TALL2,
+				new double[][][] {{{2, 0, 2, 14, 2.8, 14}, {3, 2.8, 3, 13, 13, 13}, {2.4, 13, 2.4, 13.6, 15, 13.6}, {4, 15, 4, 12, 16, 12}},
+						{{4, 0, 4, 12, 12.2, 12}}},
+				new Text(false, 8.0F, 8.0F, 3.0F, 7.6F, 6.6F, 1.0F / 80)),
+		ANGEL_AT_THE_TOMB("angel_at_the_tomb", Stone.MARBLE, WIDE,
+				new double[][][] {{{0, 0, 0, 16, 2.4, 16}, {0, 2.4, 2.5, 14, 14, 14}},
+						{{0, 0, 0, 16, 2.4, 16}, {10, 2.4, 2.5, 16, 14, 14}, {1, 2.4, 4, 10, 16, 12}},
+						{{0, 0, 5, 9, 12, 11}}},
+				new Text(false, 3.5F, 7.2F, 2.5F, 11.5F, 6.0F, 1.0F / 64)),
+		TRUMPETING_ANGEL("trumpeting_angel", Stone.MARBLE, TALL4,
+				new double[][][] {{{1, 0, 1, 15, 2.8, 15}, {2, 2.8, 2, 14, 12, 14}, {1.5, 12, 1.5, 14.5, 14.2, 14.5}, {4, 14.2, 4, 12, 16, 12}},
+						{{5, 0, 5, 11, 16, 11}}, {{5, 0, 5, 11, 8, 11}, {3.6, 8, 3.6, 12.4, 11.6, 12.4}}, {{5, 0, 4, 11, 15, 12}}},
+				new Text(false, 8.0F, 7.4F, 2.0F, 8.8F, 6.0F, 1.0F / 72)),
+		MORTSAFE("mortsafe", Stone.IRON, LONG,
+				new double[][][] {{{0.5, 0, 0.5, 15.5, 13.9, 16}}, {{0.5, 0, 0, 15.5, 13.9, 15.5}}},
+				new Text(false, 8.0F, 6.9F, 0.4F, 5.4F, 2.8F, 1.0F / 96)),
+		FAITHFUL_HOUND("faithful_hound", Stone.GRANITE, SINGLE,
+				new double[][][] {{{1, 0, 2, 15, 6.2, 14}, {1, 6.2, 4.5, 14.5, 12.5, 12}}},
+				new Text(false, 8.0F, 3.3F, 2.6F, 11.0F, 3.6F, 1.0F / 80));
 
 		public final String id;
 		public final Stone stone;
