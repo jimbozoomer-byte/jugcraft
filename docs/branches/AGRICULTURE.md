@@ -1121,6 +1121,12 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 - **Hang a piñata** (a pumpkin, a star or a bat, of crepe-paper fringe) from the underside of a block, and let everyone fill it with candy and treats: anything goes in, a stack at a time.
 - **Put on the Blindfold** and swing: a charged swing is a hit, and the Piñata Stick hits twice as hard. It tears as it weakens and bursts in confetti on its last hit, spraying its contents everywhere. Details: [even more fall additions](../features/even-more-fall-additions.md#the-piñata-party).
 
+### The hot-air balloon fiesta
+
+- **Balloons:** Harvest Stripes, the Jack-o'-Lantern and Harvest Moon. Set one up on open ground, fuel it with coal, charcoal or coke, and climb in: up to four ride, and the first aboard pilots.
+- **Fly by heat:** hold jump to fire the burner and back to open the vent. You can't steer: the winds blow different ways at different heights, so pick the height that blows your way. Let a **pibal** go to see them. Go out low and come home higher for The Box.
+- **Mooring Posts** tether a balloon for rides at a fair. At night, the envelopes glow while their burners fire. Details: [even more fall additions](../features/even-more-fall-additions.md#the-hot-air-balloon-fiesta).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

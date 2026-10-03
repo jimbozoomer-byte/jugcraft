@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21), the flying broomstick (addition 22), full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25), the fall fair midway (addition 26), the Ferris wheel (addition 27) and the piñata party (addition 28) are implemented in source and pass CI's game tests. None is yet played by hand. Additions 29 and 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21), the flying broomstick (addition 22), full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25), the fall fair midway (addition 26), the Ferris wheel (addition 27) and the piñata party (addition 28) are implemented in source and pass CI's game tests; the hot-air balloon fiesta (addition 29) is implemented in source. None is yet played by hand. Addition 30 is planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
@@ -10,7 +10,7 @@ Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Let
 26. the fall fair midway: a five-block High Striker rung with a Carnival Mallet, Ring Toss, and plush prizes;
 27. the Ferris wheel: a fairground big wheel standing over its booth, eight cars of two seats, turned by kinetic power (one player can crank it for their friends). It takes the place of the planned ghost-train dark ride, which the Haunted Hayride and the Jump-Scare Trap already cover;
 28. the piñata party: papier-mâché piñatas (a pumpkin, a star and a bat) hung from a ceiling, filled by the party and swung at blindfolded until they burst;
-29. the hot-air balloon fiesta (planned);
+29. the hot-air balloon fiesta: hot-air balloons in three designs that rise on a burner and drift on winds that blow different ways at different heights, pibals to read the winds, and mooring posts for tethered rides;
 30. the leaf blower (planned).
 
 Owner: @jimbozoomer-byte
@@ -40,6 +40,8 @@ The Ferris wheel is Discovery tier to build (2 redstone lamps, 4 iron bars, an i
 
 The piñata party is Discovery tier: a piñata is five paper, a string and a dye; the Piñata Stick two sticks and red and white dye; the Blindfold black wool and a string. What goes in a piñata is whatever the party brings.
 
+The hot-air balloon fiesta is Discovery tier, with a little copper and iron: the Balloon Burner is four copper ingots, an iron ingot and a flint and steel; a balloon is five wool round its design (orange dye, a carved pumpkin or blue dye) over the burner and three bamboo; a Mooring Post is a lead, three iron ingots and three stone; pibals are a slime ball and a string (four). It burns what a generator burns: coal, charcoal, coke or a coal block.
+
 Primary specialty and supported player role: witchcraft and exploration. A witch brews hexes for others:
 - **Shrinking:** gets a player into one-block gaps, under low ceilings and into cramped caves, and makes them a smaller target.
 - **Giant:** gives a block more reach and half a block more step, for building and climbing, but makes the player a bigger target.
@@ -58,6 +60,8 @@ The midway is for builders of fairs and anyone who likes a game: a showpiece tha
 The Ferris wheel is for fair builders and engineers: the showpiece of a fair, real-life sized, and a first use for kinetic power that isn't a machine. One player cranks while friends ride; riding all the way round with someone beside you is a milestone for two (Two to a Car).
 
 The piñata party is for anyone throwing a party: one player hangs a piñata, everyone brings something to fill it (candy from the candy kitchen, treats, anything), and the blindfolded take turns at it while the rest call out where it is. It is a way to share out a haul, and a game for a crowd.
+
+The hot-air balloon fiesta is for explorers and anyone who likes a view: a slow, quiet way to see the land from above, with a skill to it. A balloon can't be steered, only taken up or down, so a pilot reads the winds (a pibal shows them) and picks the height that blows their way. Fuel ties it to the tech branch's fuels; a mooring post makes it a fair ride for friends; several balloons aloft together are a mass ascension.
 
 The flying broomstick is a witch's way to travel: slower than elytra but found long before them, good for scouting, crossing ravines and reaching rooftops, and fuelled by the ointment a witch brews.
 
@@ -208,6 +212,22 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 6. **The Blindfold:** worn on the head, it blacks out your view but for a sliver at the bottom; others see a black band tied round your eyes. Bursting a piñata blindfolded earns **Blind Luck**.
 7. Nothing but a player's swing touches a piñata: arrows, mobs and fire don't. If what it hangs from goes, it falls and drops itself and its contents.
 
+### The hot-air balloon fiesta
+1. **Three balloons:** each a wicker basket with a padded leather rim, a fuel tank in a leather pocket on either side and a panel of three green-lit dials, four suede-sleeved uprights to a steel load frame, a twin-coil burner over the riders' heads, and eight cables up to the envelope, 11 blocks tall and 9 across.
+   - **Harvest Stripes:** gores of pumpkin, gold, cranberry and cream, a band of maple leaves round its widest.
+   - **The Jack-o'-Lantern:** a special shape, a ribbed orange pumpkin with a stem on its crown, carved faces front and back, over a skirt of green leaves.
+   - **Harvest Moon:** a night sky with stars, a great harvest moon with a witch on her broom across it, bats, and hills with pumpkins round its foot.
+2. **Set one up:** use it on open ground with room over it (four blocks of air). It faces you, cold. It comes as an item with whatever fuel it had.
+3. **Fuel it:** use coal, charcoal, coke or a coal block on it, from inside or out. A unit of fuel is a tick of burner: coal gives 400 (20 seconds of burner), a coal block 4000; it holds 12000 (10 minutes).
+4. **Climb in:** use it. Up to four ride, standing in the corners; the first aboard is the **pilot**. Sneak to get out: on the ground you step out beside the basket; aloft you float down slowly for ten seconds.
+5. **Fly it:** the pilot holds **jump** to fire the burner (a roar and a tongue of flame) and **back** to open the vent at the crown. Heat lifts it: about 8 seconds of burner gets a cold balloon off the ground; once aloft, about a fifth of the time on the burner holds it level; the vent brings it down. The higher it goes the thinner the air, so it tops out. Gauges over the hotbar show its height over the ground, the envelope's heat, the wind (where it blows and how hard) and the burner time left.
+6. **The winds:** a balloon can't be steered. Aloft it drifts on the wind at its envelope's height. From sea level up the sky is eight layers 16 blocks deep, each with its own direction and strength for the day, stronger higher up and in rain. The lowest two blow roughly opposite ways, so you can go out low and come home higher: **the box**. On the ground it stays put; in water its basket floats.
+7. **Pibals:** let one go (use it) and watch it rise and drift: its path bends where the layers change, showing a pilot which height blows which way. It pops after 30 seconds.
+8. **Mooring Posts:** a cast-iron bollard on a granite plinth with a winch. Use it to tie the nearest balloon within 10 blocks to it, or to cast it off. A tethered balloon goes up and sways in the wind but no further than 8 blocks across from the post or 16 above it: rides at a fiesta. Breaking the post casts it off.
+9. **Night glow:** while its burner fires, the envelope lights up from inside, and the Jack-o'-Lantern's faces glow.
+10. **Safety:** a block where its envelope, burner or riders' heads would go stops it moving that way; with nobody aboard its vent opens of itself, so a balloon left aloft comes down near where it was left.
+11. **Advancements:** **Up, Up and Away** (32 blocks over the ground); **The Box** (fly out at least 64 blocks and land within 16 of where you took off); **Mass Ascension** (aloft with two other balloons aloft nearby).
+
 ## Connections
 - Hex brews, input producer:
   - the Bubbling Cauldron and its brews (the witch's cottage decorations);
@@ -255,6 +275,10 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 - Piñata party, output consumer: the contents go back out to the party. The Blindfold makes any game a blindfold game.
 - Piñata party, entry path: everything is Overworld and early.
 - Piñata party, required vs optional: optional. Nothing is gated behind it.
+- Hot-air balloons, input producer: wool and dyes (or a carved pumpkin), copper, iron, flint and steel, bamboo; slime and string for pibals; a lead, iron and stone for a post; fuel from the tech branch's fuels (coal, charcoal, coke).
+- Hot-air balloons, output consumer: travel and sightseeing (a slow, unsteerable way to cross country), a fair ride, and the fiesta's advancements. It makes nothing.
+- Hot-air balloons, entry path: everything is Overworld and early; copper and iron from the first mines.
+- Hot-air balloons, required vs optional: optional. Nothing is gated behind it.
 
 ## Balance and automation
 - **Costs:** the cauldron is a cauldron and two iron ingots, reused. One brew is a water bucket (the bucket comes back), one brew ingredient, one hex ingredient and three glass bottles, which come back when drunk. That makes three draughts.
@@ -310,6 +334,13 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - The power goes into the turning: nothing comes back out, so there is no loop. It gives nothing but the ride and two advancements.
   - Automation: none to speak of. Any kinetic source turns it; only players ride it.
   - Cost on the server: while it turns, a wheel checks 4 points of each of its 8 cars for blocks each tick (32 block reads) and counts its riders' way round; it syncs its speed when it changes and its angle once a second. Standing still it does neither. The booth's drive has no ticker and saves nothing.
+- **Hot-air balloons:**
+  - Costs: a balloon is 5 wool, its design's dye or pumpkin, a burner (4 copper, an iron ingot, a flint and steel) and 3 bamboo, and lasts; flying costs fuel.
+  - Units: heat from 0 to 1; firing +0.004 a tick, cooling 0.0008 a tick, the vent 0.006 more; it floats at 0.5. It heads for 0.5 blocks a tick up or down for each unit of heat over or under, at most 0.25 up and 0.15 down, easing 4% of the way a tick; each 400 blocks above sea level takes a unit of lift. Aloft it takes up 2% of the wind's speed a tick. Fuel: a unit for every 4 ticks a generator would burn the fuel (coal 400, charcoal 300, coke 800, a coal block 4000); 12000 at most.
+  - Winds: 8 layers of 16 blocks; 0.05 blocks a tick at the bottom (1 a second), 0.015 more for each layer up, a fifth either way by the day; the lowest two within 30 degrees of opposite; each swings 30 degrees either way through the day; half as strong again in rain; blended over the top 30% of a layer.
+  - No gain: fuel is burned, nothing comes back. Nothing it does makes items.
+  - Automation: none. Only a pilot's keys fire the burner.
+  - Cost on the server: a balloon ticks like a boat: its flight, a wind lookup, a dozen-odd block checks round its envelope and riders, and the pilot's gauges every half second; ridden balloons look for others aloft within 128 blocks every two seconds. A pibal looks up the wind each tick for its 30 seconds. Balloons are tracked to clients every tick so riders ride smoothly.
 - **Piñata party:**
   - Costs: a piñata is 5 paper, a string and a dye, used up when it bursts; the stick (2 sticks, 2 dyes) and the Blindfold (black wool and string) last.
   - Units: 9 stacks; 8, 10 or 6 hits; a hit is a swing of at least 0.75 of the hitter's attack damage; the stick counts 2. Its foot hangs 1.5 blocks below its block.
@@ -381,6 +412,11 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 - **Piñata, persistence:** it saves its kind, hits, hanger and contents. A piñata never despawns.
 - **Piñata, IDs (all new):** items `pumpkin_pinata`, `star_pinata`, `bat_pinata`, `pinata_stick`, `blindfold`; entity `pinata`; equipment asset `blindfold`; advancements `pinata_party`, `blind_luck`; their recipes.
 - **Piñata, disable behaviour:** with the agriculture feature off the recipes don't load; piñatas already hung stay and can still be burst.
+- **Hot-air balloon, server authority:** the server flies it. The pilot's client sends only its two keys (`BalloonControlPayload`, two booleans, when they change); the server takes them only from the balloon's pilot, for the balloon they are in. Setting one up goes through vanilla's item use on a block (reach, build rights); fuelling, boarding and packing up are entity uses decided on the server; only an empty balloon on the ground packs up. The winds come from the world's seed on the server; the advancements are the server's.
+- **Hot-air balloon, what clients get:** its design, heat, whether the burner is firing, and its mooring post (synced entity data), and its position every tick. Fuel, keys and flight records stay on the server; the pilot reads them in the gauges.
+- **Hot-air balloon, persistence:** a balloon saves its design, heat, fuel and mooring. Riders aren't saved aboard (players aren't saved as passengers). A pibal saves its age. A balloon never despawns.
+- **Hot-air balloon, IDs (all new):** items `harvest_balloon`, `pumpkin_balloon`, `harvest_moon_balloon`, `balloon_burner`, `pibal`; block and item `mooring_post`; entities `hot_air_balloon`, `pibal`; data component `balloon_fuel`; payload `balloon_control`; advancements `up_up_and_away`, `the_box`, `mass_ascension`; their recipes.
+- **Hot-air balloon, disable behaviour:** with the agriculture feature off the recipes don't load; balloons already set up stay and fly.
 
 ## Dependencies and assets
 - No new dependencies.
@@ -410,6 +446,10 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - `tools/pinata.py` holds the numbers (`PINATA`, `KINDS`), the advancements and the recipes; the checker compares them with Java.
   - `tools/pinata_data.py` writes the quads the client draws the piñatas from (`assets/jugcraft/pinata_quads.json`), each kind whole and torn, and the ropes; the items' models; and the Blindfold's equipment asset.
   - `tools/pinata_textures.py` paints every texture at 64 × 64: crepe-paper fringe in tiers in six colours, whole and torn; the faces; a cut-out fringe skirt and tassels; the bat's wings; the rope; the items; the Blindfold's view (256 × 128, as vanilla's pumpkin blur) and its band as worn (256 × 128, four times the armour layout). All original.
+- The hot-air balloon fiesta: no new dependencies.
+  - `tools/hot_air_balloon.py` holds the numbers (`HOT_AIR_BALLOON`, `WINDS`, `MOORING`, `PIBAL`, `ADVANCEMENT_RULES`), the designs, the envelopes' profiles, the advancements and the recipes; the checker compares them with Java.
+  - `tools/hot_air_balloon_data.py` writes the quads the client draws the balloons from (`assets/jugcraft/balloon_quads.json`): the basket and rigging (boxes and bars); the burner's flames; each envelope, a surface of 24 gores turned about its axis with a normal at each corner so it is lit smoothly, drawn from both sides so it shows from inside the basket; the Jack-o'-Lantern's ribs, stem and its faces' glow; the pibal; and the mooring rope. It also writes the Mooring Post's model and the items'. The shared `QuadModel` gained "nocull" and per-corner "normals" for this.
+  - `tools/hot_air_balloon_textures.py` paints the basket, burner, rigging and post at 64 × 64, and each envelope as one 768 × 384 wrap (32 pixels to a gore, the crown at the top), in `textures/entity/hot_air_balloon/`. All original; checked in renders of the quads before any game run.
   - Sounds and particles are vanilla's: an anvil's clang pitched up for the strike, note-block bits rising with the puck, a bell, glass and an amethyst chime for a ringer; crits, fireworks, hearts and happy-villager sparks.
 
 ## Verification
@@ -657,6 +697,24 @@ Its screenshots from run 37159206076, in [the guide](../branches/AGRICULTURE.md#
 
 Not run: hitting one by hand blindfolded, and a two-client dedicated-server playtest (the party).
 
+### Hot-air balloon verification
+Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1096 IDs and now compares `tools/hot_air_balloon.py` with Java (it fails as it should with a number changed); `python3 scripts/check_repository.py` passes. The balloons were checked in renders of their quads, by day and night, and from under the envelope.
+
+The 9 new game tests (`HotAirBalloonGameTests`), most in a 44 by 44 by 26 empty arena:
+1. set up on open ground it stands, its design and fuel from the item; not under a block three up, nor over air;
+2. coal loads 400 units and one coal goes; dirt doesn't; full tanks refuse more; packed up by sneaking with an empty hand, the item keeps its fuel;
+3. two climb in, the first pilots; four fit, not five; a passenger's keys don't count, the pilot's do; fired, it lifts off and climbs, burning fuel; the vent cools it fast;
+4. one on the ground stays put while one aloft drifts with the wind;
+5. the winds: the two lowest layers within 30 degrees of opposite on each of 20 days; the same every time; stronger high up and half as strong again in rain; swinging through the day; a layer's own wind inside it and a blend near its top; compass points;
+6. a Mooring Post ties the nearest balloon and casts it off; at the rope's end it can't go further out, nor above the tether; within them it goes as the wind takes it; breaking the post casts it off; nothing to tie far off;
+7. a pibal rises and drifts with the wind; an old one pops;
+8. its climb for its heat (fastest up hot, fastest down cold, level at 0.5, less high up), and what counts as a box;
+9. the recipes, advancements and loot load.
+
+`BalloonClientGameTests` takes screenshots: three balloons over a field (one on the ground, one moored, one aloft) with pibals rising; a basket up close; the view from the moored basket; its riders seen from outside; and the night glow, the burners firing.
+
+Not run: flying one by hand (the tests fire the burner directly), a box flown in play, and a two-client dedicated-server playtest (riders together, a mass ascension).
+
 ## World and event applicability
 - A cauldron brews hexes in any dimension, all year. Nothing is seasonal.
 - The hex ingredients come from the Overworld: brown mushrooms, beans, and phantoms.
@@ -668,10 +726,14 @@ Not run: hitting one by hand blindfolded, and a two-client dedicated-server play
 - The midway works in any dimension, all year. Nothing generates in the world.
 - The Ferris wheel works in any dimension with room for it, all year. Nothing generates in the world.
 - Piñatas hang and burst in any dimension, all year. Nothing generates in the world.
+- Balloons fly in any dimension, all year; the winds are layered from that dimension's sea level. Nothing generates in the world.
 
 ## Rollout and open questions
 - A piñata keeps whatever it is given, nine stacks of anything; a party should trust whoever hung it, who alone can take it down.
 - A piñata can't be hit by projectiles, so it is a melee game.
+- A balloon's envelope and riders don't collide with mobs or players, only with blocks (and then it stops). It can't be shot down.
+- Getting out of a balloon high up is safe only for the ten seconds of slow falling; from very high a rider should come down first.
+- The winds are the same for everyone in a world on a day, from the world's seed, so a pibal's reading holds for every pilot. Sky lanterns keep their own gentle surface breeze.
 - A Ferris wheel has no collision of its own: players and mobs walk through its frame and cars. Only its booth is solid. Its space is checked when it is placed, and after that it stops for blocks in its cars' way rather than breaking them.
 - Getting off a Ferris wheel anywhere sets you down at the booth, as if the operator brought your car down; there is no stepping off at the top.
 - Riders don't stay seated across a save or a log-out. A wheel larger or smaller, or with more cars, is not made; its size and speed are open to balance review once played.
