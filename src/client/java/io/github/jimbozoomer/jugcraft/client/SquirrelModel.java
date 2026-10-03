@@ -57,9 +57,9 @@ public class SquirrelModel extends EntityModel<SquirrelRenderer.State> {
 				.texOffs(22, 11).addBox(1.0F, -4.5F, -1.5F, 1.0F, 2.0F, 1.0F),
 				PartPose.offset(0.0F, 18.5F, -3.5F));
 		PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(0, 19).addBox(-1.5F, -6.0F, -1.5F, 3.0F, 6.0F, 3.0F),
-				PartPose.offsetAndRotation(0.0F, -1.0F, 3.5F, -0.5F, 0.0F, 0.0F));
+				PartPose.offsetAndRotation(0.0F, -1.0F, 3.5F, -0.85F, 0.0F, 0.0F));
 		tail.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(12, 19).addBox(-2.0F, -5.0F, -2.0F, 4.0F, 5.0F, 4.0F),
-				PartPose.offsetAndRotation(0.0F, -6.0F, 0.0F, 0.9F, 0.0F, 0.0F));
+				PartPose.offsetAndRotation(0.0F, -6.0F, 0.0F, 1.55F, 0.0F, 0.0F));
 		for (int side = -1; side <= 1; side += 2) {
 			root.addOrReplaceChild(side < 0 ? "front_right" : "front_left",
 					CubeListBuilder.create().texOffs(24, 0).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 3.0F, 1.0F),
@@ -87,8 +87,10 @@ public class SquirrelModel extends EntityModel<SquirrelRenderer.State> {
 		// Running, the tail streams out behind; still, it curls up over the back and flicks.
 		float still = 1.0F - speed;
 		float flick = still * 0.15F * Mth.sin(t * 0.3F) * (Mth.sin(t * 0.05F) > 0.6F ? 1.0F : 0.0F);
-		tail.xRot = Mth.lerp(still, -1.2F, -0.4F) + flick;
-		tailTip.xRot = Mth.lerp(still, 0.2F, 1.1F);
+		// At rest the tail sweeps up and back at about 50 degrees and its tip curls forward over the back, the S of a
+		// squirrel's tail; running, it streams out nearly level.
+		tail.xRot = Mth.lerp(still, -1.35F, -0.85F) + flick;
+		tailTip.xRot = Mth.lerp(still, 0.3F, 1.55F);
 		if (state.carrying) {
 			// Sitting up a little, forepaws together at the chin round the acorn.
 			frontRight.xRot = frontLeft.xRot = -0.9F;
