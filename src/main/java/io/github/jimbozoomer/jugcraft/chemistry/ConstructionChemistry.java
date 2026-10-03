@@ -57,7 +57,7 @@ public final class ConstructionChemistry {
 
 	public static void register() {
 		CONSTRUCTION_FOAM = block("construction_foam", BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
-				.strength(0.3F, 0.5F).sound(SoundType.WOOL).pushReaction(PushReaction.DESTROY), Block::new);
+				.strength(0.3F, 0.5F).sound(SoundType.WOOL).pushReaction(PushReaction.POPPED), Block::new);
 		CONCRETE = family("concrete", BlockBehaviour.Properties.ofFullCopy(Blocks.STONE).mapColor(MapColor.STONE)
 				.strength(2.5F, 9.0F).requiresCorrectToolForDrops());
 		REINFORCED_CONCRETE = family("reinforced_concrete", BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)
