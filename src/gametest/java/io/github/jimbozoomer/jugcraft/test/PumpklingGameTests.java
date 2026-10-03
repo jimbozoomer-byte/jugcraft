@@ -151,12 +151,16 @@ public class PumpklingGameTests {
 		ServerPlayer owner = player(helper, new BlockPos(2, 2, 1), GameType.SURVIVAL);
 		ServerPlayer stranger = player(helper, new BlockPos(1, 2, 3), GameType.SURVIVAL);
 		Pumpkling pumpkling = pumpkling(helper, new BlockPos(1, 2, 1), owner, false);
-		interact(stranger, pumpkling, false);
-		helper.assertTrue(!pumpkling.sitting(), "A stranger can't have it sit");
-		InteractionResult sat = interact(owner, pumpkling, false);
-		helper.assertTrue(pumpkling.sitting(), "Its owner has it sit: " + sat);
-		interact(owner, pumpkling, false);
-		helper.assertTrue(!pumpkling.sitting(), "and get up again");
+		InteractionResult first = interact(owner, pumpkling, false);
+		boolean sat = pumpkling.sitting();
+		InteractionResult strangers = interact(stranger, pumpkling, false);
+		boolean stillSat = pumpkling.sitting();
+		InteractionResult second = interact(owner, pumpkling, false);
+		boolean stood = !pumpkling.sitting();
+		String report = "owner " + first + " -> " + sat + "; stranger " + strangers + " -> " + stillSat + "; owner " + second + " -> " + !stood
+				+ " (alive " + pumpkling.isAlive() + ", owned by the owner " + pumpkling.ownedBy(owner) + ", by the stranger " + pumpkling.ownedBy(stranger)
+				+ ", the owner's hand " + owner.getMainHandItem() + ", eyes " + owner.getEyePosition().distanceTo(pumpkling.position()) + " off)";
+		helper.assertTrue(sat && stillSat && stood, "Its owner has it sit and get up; a stranger can't: " + report);
 		BlockPos far = helper.absolutePos(new BlockPos(6, 2, 6));
 		owner.setPos(far.getX() + 0.5, far.getY(), far.getZ() + 0.5);
 		helper.assertTrue(pumpkling.comeToOwner(), "It finds a spot by its owner");
