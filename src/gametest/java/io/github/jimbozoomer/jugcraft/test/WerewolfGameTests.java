@@ -436,7 +436,7 @@ public class WerewolfGameTests {
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id(table)))
 					!= LootTable.EMPTY, table + " loads");
 		}
-		helper.assertTrue(EntityTypes.SHEEP.is(Werewolf.PREY) && !villager().is(Werewolf.PREY), "Sheep are a brown werewolf's prey");
+		helper.assertTrue(Werewolf.isPrey(EntityTypes.SHEEP) && !Werewolf.isPrey(villager()), "Sheep are a brown werewolf's prey");
 		for (String id : List.of("silver_lining", "wolfsbane_ward", "leader_of_the_pack")) {
 			helper.assertTrue(level.getServer().getAdvancements().get(Jugcraft.id(id)) != null, id + " loads");
 		}
