@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21), the flying broomstick (addition 22) and full-moon werewolves (addition 23) are implemented in source and pass CI's game tests; squirrels and acorns (addition 24) are implemented in source. None is yet played by hand. Additions 25 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21), the flying broomstick (addition 22) and full-moon werewolves (addition 23) and squirrels and acorns (addition 24) are implemented in source and pass CI's game tests. None is yet played by hand. Additions 25 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
@@ -305,14 +305,28 @@ Not run: flying it by hand, which no automated test can do (the client test's ri
 
 ### Squirrels verification
 
-Not run yet: CI has not built this branch. The planned checks are:
-- `SquirrelGameTests`, 5 game tests:
-  1. a squirrel goes for an acorn lying several blocks off and takes it, and the acorn is gone from the ground;
-  2. open earth has room for an oak to sprout, stone has none, and nor has earth beside a log; a squirrel on grass buries its acorn, one on stone keeps it;
-  3. an acorn used on the top of grass plants an oak sapling and is used up; on stone, nothing;
-  4. acorns and chestnuts are squirrel food, wheat isn't; two squirrels in love breed a kit, earning Nuts About Squirrels;
-  5. the roasting recipes and the advancement load, and roasted chestnuts are squirrel food.
-- `SquirrelClientGameTests` takes screenshots: in an oak wood, a red squirrel sitting on a stump with an acorn in its paws, a grey one and a kit with acorns lying about, up close and from further off; then acorns and roasted acorns in frames by a smoker.
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-24-squirrels` stacked on full-moon werewolves:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `SQUIRRELS` with `Squirrel` and `Squirrels`: the squirrel, its gathering, burying and sprouting, spawning and acorns from leaves; and checks the entity, acorn and roasted acorns are registered and drawn, and their words, tags, recipes, advancement and textures) | Pass, 1054 IDs |
+| `./gradlew build` on `e71302ed` (Build workflow run [37148025075](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37148025075)) | Pass |
+| Game tests on the headless server, same run: 606 in total, 5 of them new here (`SquirrelGameTests`) | **All 606 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `e71302ed` (all three client shards of that run) |
+
+The 5 new game tests (`SquirrelGameTests`):
+1. a squirrel goes for an acorn lying several blocks off and takes it, and the acorn is gone from the ground;
+2. open earth has room for an oak to sprout, stone has none, and nor has earth beside a log; a squirrel on grass buries its acorn, one on stone keeps it;
+3. an acorn used on the top of grass plants an oak sapling and is used up; on stone, nothing;
+4. acorns and chestnuts are squirrel food, wheat isn't; two squirrels in love breed a kit, earning Nuts About Squirrels;
+5. the roasting recipes and the advancement load, and roasted chestnuts are squirrel food.
+
+Found by CI and fixed before this record:
+- The first run failed in two of these tests at once, on grass: burying and planting asked for `minecraft:dirt`, which grass didn't pass in 26.3. They (and where squirrels come out) now ask whether an oak sapling could grow there (`Werewolves.woodlandFloor`). The same check had kept werewolves off grass; that was fixed on the branch below.
+- The bury test also checked for room to sprout after a squirrel had buried an acorn, which sprouts a sapling one time in four and leaves no room near it: it now checks the room first.
+
+The client test's first screenshots showed a squirrel at rest with its tail standing straight up behind its head, a column from the front. At rest the tail now sweeps up and back and its tip curls forward over the back (`2845d4ad`), and the test adds a side-on picture. Those screenshots come from this pull request's run.
 
 Not run: squirrels burying acorns over a long time in play, and a sapling sprouting from one (a 1 in 4 chance, which no test waits for); a two-client dedicated-server playtest.
 
