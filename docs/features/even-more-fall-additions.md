@@ -120,7 +120,7 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
      - It never freezes itself, and on snow (a snow layer, a snow block or powder snow) it runs a **quarter faster**.
    - **Shadow, the alpha.** Near-black, amber-eyed, a head taller than the brown, with 2½ times its armour and nearly twice its bite.
      - **Shadow step:** when its prey is 6 or more blocks off, it vanishes in smoke and steps out **behind them**, onto solid ground with room to stand, at most every 10 seconds.
-     - **Alpha howl:** on the hunt, at most every 30 seconds. It brings **Darkness** for 8 seconds to players within 16 blocks (not in creative or spectating). It drives every other werewolf within 24 blocks into a **frenzy**: Strength and Speed for 10 seconds, and its prey for any not hunting.
+     - **Alpha howl:** on the hunt, at most every 30 seconds. It brings **Darkness** for 8 seconds to players within 16 blocks in survival or adventure (as the warden does). It drives every other werewolf within 24 blocks into a **frenzy**: Strength and Speed for 10 seconds, and its prey for any not hunting.
      - **A sprig of wolfsbane in hand won't stop it.** Only planted or potted wolfsbane wards it off.
      - Slaying one earns **Leader of the Pack** (a challenge).
 4. **Its hide:** anything but silver does **half** its damage, and it heals half a heart every 2 seconds.
