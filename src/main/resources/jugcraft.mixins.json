@@ -10,7 +10,11 @@
     "OverworldBiomeBuilderMixin",
     "PoolElementStructurePieceMixin",
     "StructureTemplatePoolAccessor",
-    "StructureTemplatePoolMixin"
+    "StructureTemplatePoolMixin",
+    "TownEntityExplosionMixin",
+    "TownExplosionCalculatorMixin",
+    "TownFireBlockMixin",
+    "TownPistonMixin"
   ],
   "injectors": {
     "defaultRequire": 1
