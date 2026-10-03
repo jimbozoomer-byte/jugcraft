@@ -33,6 +33,16 @@ import feast_data
 import maze_data
 import ghost_data
 import face_paint_data
+import candy_data
+import foraging_data
+import bat_data
+import hay_golem_data
+import knitting_data
+import pie_data
+import spirit_board_data
+import turkey_data
+import theremin_data
+import ofrenda_data
 import regatta_data
 import plants_data
 import trees_data
@@ -201,6 +211,17 @@ def assets(root, write, lang):
         write(root / "models" / "item" / f"{item}.json", {"parent": parent, "textures": {"layer0": rid(f"item/{item}")}})
         write(root / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
         lang[f"item.{MOD}.{item}"] = info["display"]
+    # After the plain food items: candy corn's tinted model replaces its plain one.
+    candy_data.assets(root, write, lang)
+    foraging_data.assets(root, write, lang)
+    bat_data.assets(root, write, lang)
+    hay_golem_data.assets(root, write, lang)
+    knitting_data.assets(root, write, lang)
+    pie_data.assets(root, write, lang)
+    spirit_board_data.assets(root, write, lang)
+    turkey_data.assets(root, write, lang)
+    theremin_data.assets(root, write, lang)
+    ofrenda_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -315,6 +336,16 @@ def loot(data, write):
     chandlery_data.loot(out, write)
     cider_data.loot(out, write)
     pantry_data.loot(out, write)
+    candy_data.loot(out, write)
+    foraging_data.loot(out, write)
+    bat_data.loot(out, write)
+    hay_golem_data.loot(out, write)
+    knitting_data.loot(out, write)
+    pie_data.loot(out, write)
+    spirit_board_data.loot(out, write)
+    turkey_data.loot(out, write)
+    theremin_data.loot(out, write)
+    ofrenda_data.loot(out, write)
     crow_data.loot(out, write)
     firework_data.loot(out, write)
     feast_data.loot(out, write)
@@ -340,8 +371,8 @@ def recipes(out, write):
         data.update({"ingredients": recipe["inputs"], "result": {"id": rid(recipe["result"]), "count": recipe["count"]}})
         write(out / f"{recipe['id']}.json", data)
     for recipe in SHAPED:
-        data = {"fabric:load_conditions": conditions(switch=recipe.get("switch", FEATURE)), "type": "minecraft:crafting_shaped",
-                "category": recipe["category"]}
+        data = {"fabric:load_conditions": conditions(*recipe.get("features", []), switch=recipe.get("switch", FEATURE)),
+                "type": "minecraft:crafting_shaped", "category": recipe["category"]}
         if "group" in recipe:
             data["group"] = recipe["group"]
         result = {"id": rid(recipe["result"]), "count": recipe["count"]}
@@ -371,6 +402,7 @@ def recipes(out, write):
     lantern_data.recipes(out, write, conditions)
     feast_data.recipes(out, write, conditions)
     maze_data.recipes(out, write, conditions)
+    knitting_data.recipes(out, write, conditions)
     ghost_data.recipes(out, write, conditions)
     face_paint_data.recipes(out, write, conditions)
     decor3_data.recipes(out, write, conditions)
@@ -424,6 +456,16 @@ def tags(tags):
     lantern_data.tags(tags)
     feast_data.tags(tags)
     maze_data.tags(tags)
+    candy_data.tags(tags)
+    foraging_data.tags(tags)
+    bat_data.tags(tags)
+    hay_golem_data.tags(tags)
+    knitting_data.tags(tags)
+    pie_data.tags(tags)
+    spirit_board_data.tags(tags)
+    turkey_data.tags(tags)
+    theremin_data.tags(tags)
+    ofrenda_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen
@@ -438,6 +480,7 @@ def worldgen(data, write):
     trees_data.worldgen(data, write)
     plants_data.worldgen(data, write)
     halloween_data.worldgen(data, write)
+    foraging_data.worldgen(data, write)
     spread = WILD_PATCH["spread_xz"]
     for wild in WILD_CROPS:
         write(data / MOD / "worldgen" / "feature" / f"{wild}.json",

@@ -220,6 +220,12 @@ ITEMS = {
     "oat_porridge": {"display": "Oat Porridge", "food": [6, 0.6], "stew": True, "tags": ["c:foods/soup"]},
     "chili": {"display": "Chili", "food": [10, 0.8], "stew": True, "tags": ["c:foods/soup"]},
     "cabbage_rolls": {"display": "Cabbage Rolls", "food": [6, 0.8], "tags": ["c:foods"]},
+    # Fall additions 20: pan de muerto, the sweet bread of Día de Muertos, its top crossed with dough "bones".
+    "pan_de_muerto_dough": {"display": "Pan de Muerto Dough", "compost": "medium", "tags": []},
+    "pan_de_muerto": {"display": "Pan de Muerto", "food": [6, 0.7], "compost": "medium_high", "tags": ["c:foods", "c:foods/bread"]},
+    # Fall additions 18: a wild turkey's meat, raw (it cooks into a whole roast turkey) and carved from the roast.
+    "raw_turkey": {"display": "Raw Turkey", "food": [3, 0.3], "tags": ["c:foods", "c:foods/raw_meat"]},
+    "turkey_slice": {"display": "Slice of Roast Turkey", "food": [3, 0.6], "tags": ["c:foods", "c:foods/cooked_meat"]},
     # Festival crops. Gourd seeds plant stems; a chestnut plants a chestnut tree sapling; cranberries are
     # planted in shallow water ("bog_seed").
     "butternut_squash_seeds": {"display": "Butternut Squash Seeds", "plants": "butternut_squash_stem", "compost": "low",
@@ -296,6 +302,11 @@ ITEMS = {
     "aged_cider": {"display": "Aged Cider", "food": [4, 0.6], "drink": ["ABSORPTION", 120], "tags": []},
     "mulled_cider": {"display": "Mulled Cider", "food": [6, 0.8], "drink": ["REGENERATION", 15], "tags": []},
     "mulling_spices": {"display": "Mulling Spices", "compost": "medium", "tags": []},
+    # Fall additions 12: wild mushrooms cooked on their own, and stewed together.
+    "sauteed_chanterelles": {"display": "Sautéed Chanterelles", "food": [5, 0.6], "compost": "medium_high", "tags": ["c:foods"]},
+    "roasted_porcini": {"display": "Roasted Porcini", "food": [6, 0.6], "compost": "medium_high", "tags": ["c:foods"]},
+    "fried_puffball": {"display": "Fried Puffball", "food": [4, 0.5], "compost": "medium_high", "tags": ["c:foods"]},
+    "foragers_stew": {"display": "Forager's Stew", "food": [10, 0.8], "stew": True, "tags": ["c:foods"]},
     "apple_cider_donut": {"display": "Apple Cider Donut", "food": [3, 0.4], "compost": "medium_high", "tags": ["c:foods/candy"]},
 }
 
@@ -542,6 +553,8 @@ MUMS = {
     "orange_mum": {"display": "Orange Mum", "dye": "orange", "effect": "FIRE_RESISTANCE", "seconds": 4.0},
     "red_mum": {"display": "Red Mum", "dye": "red", "effect": "REGENERATION", "seconds": 8.0},
     "purple_mum": {"display": "Purple Mum", "dye": "purple", "effect": "NIGHT_VISION", "seconds": 5.0},
+    # Fall additions 20: the cempasúchil marigold, grown and found wild with the mums.
+    "marigold": {"display": "Cempasúchil Marigold", "dye": "orange", "effect": "LUCK", "seconds": 6.0},
 }
 MUM_PATCH = {"biomes": ["IS_FLORAL", "IS_FOREST"], "rarity": 16, "tries": 32, "spread_xz": 5, "spread_y": 2}
 
@@ -616,6 +629,35 @@ HALLOWEEN_ADVANCEMENTS = {
     "ghost_hunter": {"icon": "jugcraft:spirit_lantern", "title": "Ghost Hunter", "description": "Catch a restless spirit in a glass bottle",
                      "frame": "goal"},
     "face_painter": {"icon": "jugcraft:face_paint_kit", "title": "Face Painter", "description": "Paint another player's face",
+                     "frame": "task"},
+    "candy_maker": {"icon": "jugcraft:candy_kettle", "title": "Sweet Science", "description": "Pour a batch of candy from a Candy Kettle",
+                    "frame": "task"},
+    "night_shift": {"icon": "jugcraft:bat_house", "title": "Night Shift", "description": "Watch bats pour out of a Bat House at dusk",
+                    "frame": "task"},
+    "knit_one_purl_two": {"icon": "jugcraft:knitting_needles", "title": "Knit One, Purl Two", "description": "Knit a garment on Knitting Needles",
+                          "frame": "task"},
+    "snug_as_a_bug": {"icon": "jugcraft:knit_sweater", "title": "Snug as a Bug",
+                      "description": "Warm yourself by a campfire in a knit beanie, sweater and wool socks", "frame": "goal"},
+    "is_anybody_there": {"icon": "jugcraft:spirit_board", "title": "Is Anybody There?",
+                         "description": "Hold a séance at a Spirit Board and have a restless spirit answer", "frame": "task"},
+    "unfinished_business": {"icon": "jugcraft:ectoplasm", "title": "Unfinished Business",
+                            "description": "Give a restless spirit the thing it wishes for, and lay it to rest", "frame": "goal"},
+    "gobble_gobble": {"icon": "jugcraft:raw_turkey", "title": "Gobble Gobble", "description": "Breed two wild turkeys", "frame": "task"},
+    "carving_the_bird": {"icon": "jugcraft:roast_turkey", "title": "Carving the Bird",
+                         "description": "Carve a slice from a roast turkey with a Carving Knife", "frame": "task"},
+    "good_vibrations": {"icon": "jugcraft:theremin", "title": "Good Vibrations", "description": "Play a theremin without touching it",
+                        "frame": "task"},
+    "remembered": {"icon": "jugcraft:marigold", "title": "Remembered", "description": "Welcome a spirit to a complete ofrenda on a quiet night",
+                   "frame": "goal"},
+    "as_easy_as_pie": {"icon": "jugcraft:apple_pie", "title": "As Easy as Pie", "description": "Take a perfectly baked pie out of a Hearth Oven",
+                       "frame": "task"},
+    "man_of_straw": {"icon": "minecraft:hay_block", "title": "Man of Straw", "description": "Build a Hay Golem from hay bales and a carved pumpkin",
+                     "frame": "task"},
+    "fairy_ring": {"icon": "jugcraft:fly_agaric", "title": "Away with the Fairies",
+                   "description": "Stand in a fairy ring under a full moon", "frame": "goal"},
+    "forager": {"icon": "jugcraft:foraging_basket", "title": "Forager", "description": "Carry all five wild mushrooms in a Foraging Basket",
+                "frame": "task"},
+    "taffy_puller": {"icon": "jugcraft:salt_water_taffy", "title": "Pulling Power", "description": "Pull a tray of warm taffy until it's done",
                      "frame": "task"},
 }
 
@@ -1422,6 +1464,272 @@ FACE_PAINT = {"kit": "face_paint_kit", "kit_display": "Face Paint Kit", "compone
               "designs": {"skull": "Skull", "pumpkin": "Jack o'Lantern", "black_cat": "Black Cat", "vampire": "Vampire",
                           "witch": "Witch", "scarecrow": "Scarecrow"}}
 
+# ---------------------------------------------------------------- Fall additions 11: the candy kitchen
+# The Candy Kettle (CandyKettleBlock + entity) boils a batch: a base (a water bottle for syrup, a milk bucket for cream),
+# up to `max_sugar` sugar (`pieces_per_sugar` pieces each), up to `max_flavours` flavours (item tags
+# jugcraft:candy_flavours/<flavour>) and dyes, all added below `add_below` degrees. Over heat it warms a degree every
+# `heat_ticks` up to the boil (`boil`), every `boil_ticks` while its water boils off (to `boiled`), then every `cook_ticks`
+# up to `max_temp`; off the heat it cools a degree every `cool_ticks` to `room`. The hottest it has been sets its stage
+# (`stages`: name and the degree it starts at); `makes` gives the candy each base sets into at each stage (None: too runny
+# to pour). It pours onto a Candy Tray (CandyTrayItem, component `component`): most candy sets in `set_ticks`, rock candy
+# grows for `crystal_ticks`, taffy must be pulled `pulls` times (`pull_ticks` each) within `warm_ticks` or it sets hard
+# (as hard candy), candy corn takes up to `max_layers` layers, and hard candy with sticks makes lollipops. `candies`: the
+# kettle's own candy items (food: nutrition, saturation; eaten in `eat_seconds`, even when full). Flavoured candy gives
+# each flavour's effect (vanilla MobEffects field, seconds) when eaten.
+CANDY = {"kettle": "candy_kettle", "kettle_display": "Candy Kettle", "tray": "candy_tray", "tray_display": "Candy Tray",
+         "component": "candy_batch", "max_sugar": 4, "pieces_per_sugar": 2, "max_flavours": 2,
+         "room": 20, "boil": 100, "boiled": 110, "max_temp": 190, "add_below": 100,
+         "heat_ticks": 4, "boil_ticks": 12, "cook_ticks": 6, "cool_ticks": 8,
+         "set_ticks": 100, "warm_ticks": 600, "pull_ticks": 20, "pulls": 4, "crystal_ticks": 24000, "max_layers": 3,
+         "eat_seconds": 0.8,
+         "stages": {"syrup": ("Syrup", 0), "thread": ("Thread", 110), "soft_ball": ("Soft Ball", 115), "firm_ball": ("Firm Ball", 120),
+                    "hard_ball": ("Hard Ball", 125), "soft_crack": ("Soft Crack", 132), "hard_crack": ("Hard Crack", 145),
+                    "caramel": ("Caramel", 155), "burnt": ("Burnt", 175)},
+         "bases": {"syrup": "Sugar Syrup", "cream": "Cream"},
+         "makes": {"syrup": [None, "rock_candy", "candy_corn", "candy_corn", "salt_water_taffy", "salt_water_taffy", "hard_candy", "caramel",
+                             "burnt_sugar"],
+                   "cream": [None, None, "fudge", "cream_caramel", "cream_caramel", "toffee", "toffee", "burnt_sugar", "burnt_sugar"]},
+         "candies": {"rock_candy": {"display": "Rock Candy", "food": [2, 0.1]},
+                     "salt_water_taffy": {"display": "Salt Water Taffy", "food": [2, 0.2]},
+                     "hard_candy": {"display": "Hard Candy", "food": [1, 0.1]},
+                     "lollipop": {"display": "Lollipop", "food": [2, 0.1]},
+                     "fudge": {"display": "Fudge", "food": [3, 0.3]},
+                     "cream_caramel": {"display": "Cream Caramel", "food": [2, 0.2]},
+                     "toffee": {"display": "Toffee", "food": [2, 0.2]},
+                     "burnt_sugar": {"display": "Burnt Sugar", "food": [1, 0.0]}},
+         # The kinds, in CandyKind order, with the colour each sets to undyed and unflavoured.
+         "kinds": {"rock_candy": 0xE6DEF6, "candy_corn": 0xF8F4EA, "salt_water_taffy": 0xF4E2C8, "hard_candy": 0xE8A838,
+                   "lollipop": 0xE8A838, "caramel": 0xC07828, "fudge": 0x7A4A2A, "cream_caramel": 0xC8883A, "toffee": 0xB0702A,
+                   "burnt_sugar": 0x2A1A10},
+         # Candy corn's bands, tip to base, where a layer is undyed.
+         "corn_bands": [0xF8F4EA, 0xF08A24, 0xF6C836],
+         "flavours": {"chocolate": {"display": "Chocolate", "items": ["minecraft:cocoa_beans"], "effect": "SPEED", "seconds": 10,
+                                    "color": 0x5A3218},
+                      "berry": {"display": "Berry", "items": ["minecraft:sweet_berries"], "effect": "REGENERATION", "seconds": 4,
+                                "color": 0xC8283C},
+                      "glow_berry": {"display": "Glow Berry", "items": ["minecraft:glow_berries"], "effect": "NIGHT_VISION", "seconds": 30,
+                                     "color": 0xF0B030},
+                      "honey": {"display": "Honey", "items": ["minecraft:honey_bottle"], "effect": "ABSORPTION", "seconds": 10,
+                                "color": 0xE8A020},
+                      "cranberry": {"display": "Cranberry", "items": ["jugcraft:cranberries"], "effect": "RESISTANCE", "seconds": 10,
+                                    "color": 0xB0122E},
+                      "spiced": {"display": "Spiced", "items": ["jugcraft:mulling_spices"], "effect": "FIRE_RESISTANCE", "seconds": 15,
+                                 "color": 0xA0522D},
+                      "chestnut": {"display": "Chestnut", "items": ["jugcraft:roasted_chestnuts"], "effect": "HASTE", "seconds": 15,
+                                   "color": 0x8A5A30}}}
+
+
+def candy_blocks():
+    return [CANDY["kettle"]]
+
+
+def candy_items():
+    return candy_blocks() + [CANDY["tray"]] + list(CANDY["candies"])
+
+# ---------------------------------------------------------------- Fall additions 12: autumn foraging
+# Wild mushrooms (WildMushroomBlock) grow on soil (block tag `soil_tag`, `soil`) in patches on forest floors (`biomes`,
+# `patch`). One random tick in `spread_chance`, a mushroom with fewer than `spread_cap` of its kind within 4 blocks (and
+# 1 up or down) puts out another within 2, where the light is below `spread_light`; bone meal makes it try at once, in any
+# light. On a full-moon night one random tick in `ring_chance` sprouts a fairy ring of its kind instead: eight round a
+# circle of radius three. A fairy ring (FairyRings) is `ring_mushrooms` or more wild mushrooms between `inner` and `outer`
+# blocks from a centre; a player at its centre on a full-moon night is blessed once a night (Luck II for `luck_ticks`;
+# players looked at every `check_ticks`). `light`: the light a mushroom gives. The Foraging Basket (ForagingBasketItem)
+# holds forage (item tag `forage_tag`) like a bundle.
+FORAGING = {"basket": "foraging_basket", "basket_display": "Foraging Basket", "forage_tag": "jugcraft:forage",
+            "soil_tag": "jugcraft:mushroom_soil", "soil": ["minecraft:grass_block", "minecraft:dirt", "minecraft:coarse_dirt", "minecraft:rooted_dirt",
+                                                            "minecraft:podzol", "minecraft:mycelium", "minecraft:moss_block"],
+            "spread_chance": 25, "spread_cap": 5, "spread_light": 13, "ring_chance": 40,
+            "ring_mushrooms": 8, "inner": 2.5, "outer": 3.6, "check_ticks": 20, "luck_ticks": 6000,
+            "patch": {"rarity": 16, "tries": 12, "spread_xz": 4, "spread_y": 1},
+            "mushrooms": {"chanterelle": {"display": "Chanterelle", "biomes": ["IS_FOREST", "IS_BIRCH_FOREST"], "light": 0},
+                          "porcini": {"display": "Porcini", "biomes": ["IS_TAIGA", "IS_FOREST"], "light": 0},
+                          "puffball": {"display": "Puffball", "biomes": ["IS_PLAINS", "IS_FOREST"], "light": 0},
+                          "fly_agaric": {"display": "Fly Agaric", "biomes": ["IS_BIRCH_FOREST", "IS_TAIGA"], "light": 0},
+                          "jack_o_lantern_mushroom": {"display": "Jack o'Lantern Mushroom", "biomes": ["IS_SPOOKY", "IS_FOREST"], "light": 9}},
+            "forage": ["#jugcraft:wild_mushrooms", "minecraft:brown_mushroom", "minecraft:red_mushroom", "minecraft:sweet_berries",
+                       "minecraft:glow_berries", "minecraft:apple", "minecraft:cocoa_beans", "jugcraft:chestnut", "jugcraft:cranberries"],
+            "foods": ["sauteed_chanterelles", "roasted_porcini", "fried_puffball", "foragers_stew"]}
+
+
+def foraging_blocks():
+    return list(FORAGING["mushrooms"])
+
+
+def foraging_items():
+    return foraging_blocks() + [FORAGING["basket"]]
+
+# ---------------------------------------------------------------- Fall additions 13: the Bat House
+# The Bat House (BatHouseBlock + entity) holds up to `capacity` roosting bats. At dusk (the Overworld clock, looked at every
+# `check_ticks`), while mobs spawn, a house with room gains a bat one time in 1/`move_in_chance`; then every roosting bat
+# flies out (vanilla bats, tagged `tag`). At dawn the nearest bats within `return_range` blocks come in, up to the room,
+# and each leaves a guano (up to `guano_cap` waiting). Bat Guano is a fertilizer (FertilizerItem): every crop within
+# `guano_radius` gets `guano_doses` doses of bone meal; `guano_per_phosphate` guano make a phosphate.
+BATS = {"house": "bat_house", "house_display": "Bat House", "guano": "bat_guano", "guano_display": "Bat Guano", "tag": "jugcraft.bat_house",
+        "capacity": 4, "guano_cap": 16, "return_range": 32, "move_in_chance": 0.5, "check_ticks": 20,
+        "guano_radius": 1, "guano_doses": 1, "guano_per_phosphate": 4}
+
+
+# The Hay Golem (HayGolem, an entity): built from `hay_bales` hay bales (two stacked, an arm either side of the upper one)
+# and a carved head from `heads_tag`. It keeps a post (where it was built or was last led with wheat, `lead_range`) and
+# guards crops from crows as a scarecrow wearing its head would (CROWS["guard"]). Every `tend_ticks` it harvests the
+# nearest ripe crop within `post_radius` (and `search_height` up or down) of its post, working `work_ticks` at it,
+# replanting from the drops, pouching the rest (`pouch_slots` stacks); it carries `carry` items or more home, or what it has
+# after `idle_ticks` without a harvest, giving up on a crop or the trip after `give_up_ticks`. Wheat heals `wheat_heal`;
+# fire hurts `fire_factor` times; killed it drops `wheat` wheat (min, max), its head and pouch.
+HAY_GOLEM = {"entity": "hay_golem", "display": "Hay Golem", "health": 20, "speed": 0.25, "size": [0.9, 2.5],
+             "post_radius": 8, "search_height": 2, "tend_ticks": 100, "work_ticks": 10, "give_up_ticks": 300,
+             "pouch_slots": 9, "carry": 32, "idle_ticks": 200, "wheat_heal": 4.0, "fire_factor": 2.0, "hay_bales": 4,
+             "reach": 1.8, "lead_range": 8.0, "heads_tag": "jugcraft:hay_golem_heads",
+             "heads": ["minecraft:carved_pumpkin", "minecraft:jack_o_lantern", "jugcraft:hand_carved_pumpkin",
+                       "jugcraft:hand_carved_white_pumpkin", "jugcraft:hand_carved_jarrahdale_pumpkin",
+                       "jugcraft:hand_carved_cinderella_pumpkin"],
+             "wheat": [2, 5], "table": "entities/hay_golem"}
+
+
+# Knitting (fall additions 15): the Spinning Wheel (SpinningWheelBlock + entity) spins a skein of wool in `turns` turns of
+# the treadle (each turn runs the wheel `spin_ticks`) into `yarn_per_wool` balls of yarn in the wool's colour; knitwear
+# used on it unravels into a ball a row less `unravel_loss`. Knitting Needles (`needles_durability` uses) knit a row a
+# ball of yarn, holding use `row_ticks`; each garment takes its `rows` and is worn in its slot, dyed the blend of its
+# yarns, with the equipment asset `asset`. Wearing `cozy.pieces` or more within `cozy.range` blocks of a lit campfire
+# (looked at every `cozy.ticks`) gives Regeneration I for `cozy.effect_ticks`. Undyed yarn is `undyed`.
+KNITTING = {"wheel": "spinning_wheel", "wheel_display": "Spinning Wheel", "yarn": "yarn", "yarn_display": "Ball of Yarn",
+            "needles": "knitting_needles", "needles_display": "Knitting Needles", "needles_durability": 128, "row_ticks": 40,
+            "turns": 4, "spin_ticks": 20, "yarn_per_wool": 4, "unravel_loss": 1, "undyed": 0xF0E6D2,
+            "cozy": {"ticks": 40, "pieces": 2, "range": 4, "effect_ticks": 60}, "knitwear_tag": "jugcraft:knitwear",
+            # Dyeing, as Minecraft 26.3 dyes leather armour: a recipe of this type for each dyeable item (yarn and the
+            # garments), taking any dye; a water cauldron washes the dye out of anything in vanilla's tag.
+            "dye_recipe": "minecraft:crafting_dye", "dye_group": "dyed_knitwear", "wash_tag": "minecraft:cauldron_can_remove_dye",
+            # In the order of the Knitwear enum (the needles' cycle).
+            "garments": {
+                "knit_beanie": {"display": "Knit Beanie", "slot": "HEAD", "rows": 2, "asset": "knit"},
+                "wool_socks": {"display": "Wool Socks", "slot": "FEET", "rows": 2, "asset": "knit"},
+                "knit_sweater": {"display": "Knit Sweater", "slot": "CHEST", "rows": 5, "asset": "knit"},
+                "striped_sweater": {"display": "Striped Sweater", "slot": "CHEST", "rows": 5, "asset": "knit_striped", "motif": "stripes"},
+                "pumpkin_sweater": {"display": "Pumpkin Sweater", "slot": "CHEST", "rows": 5, "asset": "knit_pumpkin", "motif": "pumpkin"},
+                "bat_sweater": {"display": "Bat Sweater", "slot": "CHEST", "rows": 5, "asset": "knit_bat", "motif": "bat"},
+                "leaf_sweater": {"display": "Autumn Leaf Sweater", "slot": "CHEST", "rows": 5, "asset": "knit_leaf", "motif": "leaf"}}}
+
+
+# Pie baking (fall additions 16): the Hearth Oven (HearthOvenBlock + entity) banks up to `max_burn` ticks of fuel (coal,
+# charcoal and coke as long as generators burn them, GeneratorFuels; logs, item tag `wood_tag`, `wood_burn` ticks each);
+# burning, it heats a degree every `heat_ticks` to `max_heat`, cooling a degree every `cool_ticks` when out. A pie bakes
+# at `bake_heat` or hotter, a point a tick (two at full heat): baked at `baked` points, burnt at `burnt`. Its light when
+# lit is `light`. Pies (PieBlock) have `slices` slices; each filling's slice gives its nutrition and
+# saturation; a burnt pie's slice gives `burnt_nutrition` and Hunger one time in `burnt_sick_chance`.
+PIES = {"oven": "hearth_oven", "oven_display": "Hearth Oven", "dough": "pastry_dough", "dough_display": "Pastry Dough",
+        "burnt": "burnt_pie", "burnt_display": "Burnt Pie", "max_burn": 3200, "wood_burn": 300,
+        "wood_tag": "jugcraft:hearth_oven_wood", "wood": ["#minecraft:logs_that_burn"], "max_heat": 100, "heat_ticks": 2, "cool_ticks": 4,
+        "bake_heat": 50, "baked": 600, "burnt_points": 1200, "light": 13, "slices": 4, "burnt_nutrition": 1, "burnt_sick_chance": 3,
+        # In the order of the PieFilling enum: display name, slice food, filling colour, and the raw pie's ingredients
+        # (with the pastry and sugar).
+        "fillings": {
+            "apple": {"display": "Apple", "food": [4, 0.6], "color": 0xC89A48, "with": ["minecraft:apple", "minecraft:apple"]},
+            "pumpkin_cream": {"display": "Pumpkin Cream", "food": [4, 0.6], "color": 0xE0822A,
+                              "with": ["minecraft:pumpkin", "minecraft:milk_bucket"]},
+            "cranberry": {"display": "Cranberry", "food": [3, 0.6], "color": 0xA01C34, "with": ["jugcraft:cranberries", "jugcraft:cranberries"]},
+            "sweet_potato": {"display": "Sweet Potato", "food": [4, 0.7], "color": 0xD8682A,
+                             "with": ["jugcraft:sweet_potato", "jugcraft:sweet_potato"]},
+            "chestnut": {"display": "Chestnut", "food": [5, 0.7], "color": 0x6A3E1E,
+                         "with": ["jugcraft:roasted_chestnuts", "jugcraft:roasted_chestnuts"]}}}
+
+
+# The Spirit Board (fall additions 17): a séance (SpiritBoard, SpiritBoardBlock + entity) needs a lit candle (block tag
+# `candles_tag`, anything in it with the vanilla `lit` property set) within `candle_range` blocks, and players' fingers on
+# the planchette (up to `max_hands`, each within `hand_range` blocks; a hand lifts beyond `hand_range` + 1). The restless
+# spirit nearest the board within `spirit_range` blocks answers: YES, its name and its wish, then GOODBYE, a stop every
+# `letter_ticks` with one hand on the planchette or every `fast_letter_ticks` with two or more; no spirit, NO and GOODBYE.
+# The board rests `cooldown_ticks` after; players within `watch_range` see the letters. Given what it wishes for (an item
+# in `jugcraft:spirit_wishes/<wish>`), a revealed spirit is laid to rest: `rest_xp` experience and Luck for
+# `rest_luck_ticks` ticks to the giver. Names and wishes are drawn at random the first time a séance asks a spirit.
+SPIRIT_BOARD = {"block": "spirit_board", "display": "Spirit Board", "candle_range": 4, "spirit_range": 16, "hand_range": 3,
+                "max_hands": 4, "letter_ticks": 20, "fast_letter_ticks": 12, "cooldown_ticks": 40, "watch_range": 8, "rest_xp": 20,
+                "rest_luck_ticks": 6000, "candles_tag": "jugcraft:seance_candles",
+                "candles": ["#minecraft:candles", "jugcraft:aura_candle", "jugcraft:floating_candle", "jugcraft:candle_skull"],
+                "names": ["MABEL", "OTIS", "EZRA", "HATTIE", "JASPER", "AGNES", "SILAS", "WINNIE", "AMOS", "PRUDENCE", "ELIJAH", "OPAL",
+                          "CORNELIUS", "BEATRIX", "HORACE", "LUELLA"],
+                # In the order of SpiritBoard.Wish: what the message calls it, and the items that grant it.
+                "wishes": {
+                    "pie": {"display": "a pie, or a slice of one",
+                            "items": [f"jugcraft:{f}_pie" for f in PIES["fillings"]] + [f"jugcraft:{f}_pie_slice" for f in PIES["fillings"]]},
+                    "candle": {"display": "a candle", "items": ["#minecraft:candles", "jugcraft:aura_candle"]},
+                    "cider": {"display": "a bottle of cider",
+                              "items": ["jugcraft:sweet_cider", "jugcraft:sparkling_cider", "jugcraft:aged_cider", "jugcraft:mulled_cider"]},
+                    "sweater": {"display": "a knitted sweater",
+                                "items": [f"jugcraft:{g}" for g, i in KNITTING["garments"].items() if i["slot"] == "CHEST"]},
+                    "candy": {"display": "a piece of candy", "items": [f"jugcraft:{c}" for c in CANDY["candies"]]},
+                    "apple": {"display": "an apple", "items": ["minecraft:apple", "minecraft:golden_apple", "jugcraft:caramel_apple"]},
+                    "rose": {"display": "a rose (a poppy, or a rose bush)", "items": ["minecraft:poppy", "minecraft:rose_bush"]},
+                    "pumpkin": {"display": "a pumpkin", "items": ["minecraft:pumpkin", "minecraft:carved_pumpkin", "minecraft:jack_o_lantern"]}}}
+
+
+# Wild turkeys (fall additions 18): Turkey (an Animal, `health` and `speed`; MobCategory.CREATURE, `size` wide and tall)
+# eats and breeds on item tag `food_tag`; a grown tom with a player or hen within `strut_range` blocks starts to strut
+# one tick in `strut_chance`, for `strut_ticks`; a hen lays a vanilla egg every `egg_min` to `egg_max` ticks. Turkeys
+# (spawning): every `spawn_ticks`, for each overworld player, `spawn_chance` of the time, a spot `min_distance` to
+# `max_distance` away on grass in biome tag `habitat_tag` gets a flock of `flock` (min, max), the first a tom; at most
+# `near_cap` within `near_range` of a player and `level_cap` in the world, by day only. Each turkey drops a raw turkey
+# and `feathers` (min, max) feathers. A raw turkey cooks (COOKING) into a roast turkey (RoastTurkeyBlock): `servings`
+# servings of `serving` food (hunger, saturation), eaten at the table or carved with a Carving Knife into slices; the
+# last leaves a bone.
+TURKEYS = {"entity": "turkey", "display": "Wild Turkey", "health": 8, "speed": 0.25, "size": [0.6, 0.95], "food_tag": "jugcraft:turkey_food",
+           "food": ["minecraft:wheat_seeds", "minecraft:beetroot_seeds", "minecraft:melon_seeds", "minecraft:pumpkin_seeds",
+                    "minecraft:sweet_berries", "jugcraft:corn_kernels", "jugcraft:sunflower_seeds", "jugcraft:oat_seeds", "jugcraft:barley_seeds"],
+           "strut_range": 6, "strut_ticks": 80, "strut_chance": 200, "egg_min": 6000, "egg_max": 12000,
+           "spawn_ticks": 400, "spawn_chance": 0.25, "min_distance": 24, "max_distance": 48, "flock": [3, 5], "near_cap": 10,
+           "near_range": 64, "level_cap": 40, "habitat_tag": "jugcraft:turkey_habitat",
+           "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow"],
+           "table": "entities/turkey", "feathers": [1, 3], "raw": "raw_turkey", "raw_food": [3, 0.3], "roast": "roast_turkey",
+           "roast_display": "Roast Turkey", "slice": "turkey_slice", "servings": 6, "serving": [3, 0.6]}
+
+
+# The Theremin (fall additions 19; ThereminBlock + entity): every `sense_ticks` it finds the nearest player or mob within
+# `range` blocks of its pitch antenna; comparators read 15 at the antenna down to 0 at `range`. Playing (switched on with
+# an empty hand, or powered), it sounds a flute note each look, from `low` pitch at `range` to `high` at the antenna (two
+# octaves), with a vibrato of `vibrato` at `vibrato_speed` radians a tick; a player within `player_range` earns Good
+# Vibrations. Its magic eye glows (`light`) while it plays. Made with copper wire, so it needs the machines feature.
+THEREMIN = {"block": "theremin", "display": "Theremin", "sense_ticks": 4, "range": 8.0, "player_range": 3.0, "low": 0.5, "high": 2.0,
+            "vibrato": 0.03, "vibrato_speed": 0.7, "light": 7}
+
+
+# The Día de Muertos ofrenda (fall additions 20; OfrendaBlock + entity): `slots` offerings, two to each of three tiers.
+# Anything in `offerings_tag` may be offered; complete holds one of each `kinds` (item tags jugcraft:ofrenda/<kind>).
+# Every `check_ticks` a complete ofrenda glows (`light`) and, at night, welcomes the restless spirits within
+# `welcome_range` blocks: each makes the ofrenda its home and shows itself there, calm, until dawn; when one is within
+# `arrived` blocks every player within `witness_range` earns Remembered. Marigold petals, papel picado and sugar skulls
+# are decorations and offerings; pan de muerto is in ITEMS.
+OFRENDA = {"block": "ofrenda", "display": "Ofrenda", "slots": 6, "check_ticks": 40, "welcome_range": 16, "arrived": 3.0, "witness_range": 8,
+           "light": 8, "offerings_tag": "jugcraft:ofrenda/offerings",
+           "kinds": {"flowers": ["jugcraft:marigold", "jugcraft:marigold_petals"],
+                     "light": ["#minecraft:candles", "jugcraft:aura_candle"],
+                     "bread": ["jugcraft:pan_de_muerto", "minecraft:bread"],
+                     "sugar": ["jugcraft:sugar_skull"],
+                     "drink": ["minecraft:potion", "minecraft:honey_bottle", "minecraft:milk_bucket", "jugcraft:sweet_cider", "jugcraft:mulled_cider"]},
+           # Keepsakes: a picture, a likeness, a favourite food, the papel picado, any flower of the season.
+           "keepsakes": ["minecraft:painting", "minecraft:player_head", "#c:foods", "jugcraft:papel_picado", "minecraft:poppy",
+                         "jugcraft:orange_mum", "jugcraft:yellow_mum"],
+           "decor": {"marigold_petals": "Marigold Petals", "papel_picado": "Papel Picado", "sugar_skull": "Sugar Skull"}}
+
+
+def pie_blocks():
+    return [PIES["oven"], PIES["burnt"]] + [f"{f}_pie" for f in PIES["fillings"]]
+
+
+def pie_items():
+    return (pie_blocks() + [PIES["dough"]] + [f"raw_{f}_pie" for f in PIES["fillings"]]
+            + [f"{f}_pie_slice" for f in PIES["fillings"]])
+
+
+def knitting_items():
+    return [KNITTING["wheel"], KNITTING["yarn"], KNITTING["needles"]] + list(KNITTING["garments"])
+
+
+def bat_blocks():
+    return [BATS["house"]]
+
+
+def bat_items():
+    return bat_blocks() + [BATS["guano"]]
+
 
 def pantry_blocks():
     return [PANTRY["kettle"], PANTRY["shelf"]]
@@ -1530,6 +1838,8 @@ SICKLE_PATTERN = [" M ", "  M", "SM "]
 
 # Cooking: every cooked food works in the furnace, smoker and on a campfire (vanilla timings).
 COOKING = {
+    "pan_de_muerto": {"input": "pan_de_muerto_dough", "xp": 0.35},
+    "roast_turkey": {"input": "raw_turkey", "xp": 0.35},
     "roasted_corn": {"input": "corn", "xp": 0.35},
     "popcorn": {"input": "corn_kernels", "xp": 0.1},
     "baked_sweet_potato": {"input": "sweet_potato", "xp": 0.35},
@@ -1540,6 +1850,10 @@ COOKING = {
     # Halloween harvest. Sugar melts into caramel; a bottle gourd dries hard enough to hollow out.
     "caramel": {"input": "minecraft:sugar", "xp": 0.1},
     "dried_bottle_gourd": {"input": "bottle_gourd", "xp": 0.1, "category": "misc"},
+    # Fall additions 12: wild mushrooms.
+    "sauteed_chanterelles": {"input": "chanterelle", "xp": 0.35},
+    "roasted_porcini": {"input": "porcini", "xp": 0.35},
+    "fried_puffball": {"input": "puffball", "xp": 0.35},
 }
 COOK_TIMES = {"smelting": 200, "smoking": 100, "campfire_cooking": 600}
 
@@ -1583,6 +1897,9 @@ POT_RECIPES = {
                        "time": 300},
     "cranberry_preserves": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:cranberries": 6, "minecraft:sugar": 2}, "time": 300},
     "glow_berry_jelly": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:glow_berries": 6, "minecraft:sugar": 2}, "time": 300},
+    # Fall additions 12: the three edible wild mushrooms stewed with a potato.
+    "foragers_stew": {"inputs": {"minecraft:bowl": 1, "jugcraft:chanterelle": 1, "jugcraft:porcini": 1, "jugcraft:puffball": 1,
+                                 "minecraft:potato": 1}, "time": 200},
     "pickled_beets": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:beetroot": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
     "pickled_peppers": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:pepper": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
     "corn_relish": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:corn": 2, "jugcraft:pepper": 1, "jugcraft:onion": 1,
@@ -1595,6 +1912,9 @@ for _cake, _info in LANTERNS["mooncakes"].items():
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    # Fall additions 13: bat guano is rich in phosphate.
+    {"id": "phosphate_from_bat_guano", "inputs": ["jugcraft:bat_guano"] * 4, "result": "phosphate", "count": 1, "category": "misc",
+     "features": ["phosphate"]},
     # Fall additions 3: a canning kettle is a cauldron enamelled blue, with an iron-bar jar rack.
     {"id": "canning_kettle", "inputs": ["minecraft:cauldron", "minecraft:blue_dye", "minecraft:iron_bars"], "result": "canning_kettle",
      "count": 1, "category": "misc"},
@@ -1676,6 +1996,7 @@ SHAPELESS = [
     {"id": "yellow_dye_from_yellow_mum", "inputs": ["jugcraft:yellow_mum"], "result": "minecraft:yellow_dye", "count": 1, "group": "yellow_dye"},
     {"id": "orange_dye_from_orange_mum", "inputs": ["jugcraft:orange_mum"], "result": "minecraft:orange_dye", "count": 1, "group": "orange_dye"},
     {"id": "red_dye_from_red_mum", "inputs": ["jugcraft:red_mum"], "result": "minecraft:red_dye", "count": 1, "group": "red_dye"},
+    {"id": "orange_dye_from_marigold", "inputs": ["jugcraft:marigold"], "result": "minecraft:orange_dye", "count": 1, "group": "orange_dye"},
     {"id": "purple_dye_from_purple_mum", "inputs": ["jugcraft:purple_mum"], "result": "minecraft:purple_dye", "count": 1,
      "group": "purple_dye"},
     # Halloween festivities: a sheet ghost on a string, and a candle melted onto a bone skull.
@@ -1929,6 +2250,36 @@ SHAPED = [
      "result": "dead_hollow_tree", "count": 1, "category": "building"},
     # Decorations batch 13: a glass bowl round glow berries; a fruit loaf of wheat, sugar and berries with a gold nugget
     # (the ring) baked in; sugar round a red dye.
+    # Fall additions 20: an altar of three tiers, planks under a white cloth.
+    {"id": "ofrenda", "pattern": ["WWW", "PPP", "PPP"], "key": {"W": "minecraft:white_carpet", "P": "#minecraft:planks"},
+     "result": "ofrenda", "count": 1, "category": "building"},
+    # Fall additions 19: two copper-wire antennas over a note block in a wooden cabinet on legs (copper wire needs machines).
+    {"id": "theremin", "pattern": ["W W", "PNP", "S S"], "key": {"W": "jugcraft:copper_wire", "P": "#minecraft:planks",
+                                                               "N": "minecraft:note_block", "S": "minecraft:stick"},
+     "result": "theremin", "count": 1, "category": "redstone", "features": ["machines"]},
+    # Fall additions 17: a birch board lettered in ink under a glass-lensed planchette.
+    {"id": "spirit_board", "pattern": [" G ", "SIS"], "key": {"G": "minecraft:glass_pane", "S": "minecraft:birch_slab", "I": "minecraft:ink_sac"},
+     "result": "spirit_board", "count": 1, "category": "building"},
+    # Fall additions 16: a brick oven over a furnace's fire.
+    {"id": "hearth_oven", "pattern": ["BBB", "B B", "BFB"], "key": {"B": "minecraft:brick", "F": "minecraft:furnace"},
+     "result": "hearth_oven", "count": 1, "category": "building"},
+    # Fall additions 15: a spoked wheel of planks and sticks with a string drive band; two sticks tipped with iron.
+    {"id": "spinning_wheel", "pattern": [" P ", "PSP", "STS"], "key": {"P": "#minecraft:planks", "S": "minecraft:stick",
+                                                                     "T": "minecraft:string"},
+     "result": "spinning_wheel", "count": 1, "category": "building"},
+    {"id": "knitting_needles", "pattern": ["N N", "S S"], "key": {"N": "minecraft:iron_nugget", "S": "minecraft:stick"},
+     "result": "knitting_needles", "count": 1, "category": "equipment"},
+    # Fall additions 13: a slatted roost of planks.
+    {"id": "bat_house", "pattern": ["PPP", "PSP", "P P"], "key": {"P": "#minecraft:planks", "S": "minecraft:stick"}, "result": "bat_house",
+     "count": 1, "category": "building"},
+    # Fall additions 12: a wicker basket of sugar cane with a stick handle.
+    {"id": "foraging_basket", "pattern": [" S ", "C C", "CCC"], "key": {"S": "minecraft:stick", "C": "minecraft:sugar_cane"},
+     "result": "foraging_basket", "count": 1, "category": "equipment"},
+    # Fall additions 11: a copper sugar pot with a glass thermometer on its rim; a tin tray of iron nuggets.
+    {"id": "candy_kettle", "pattern": ["CGC", "C C", "CCC"], "key": {"C": "minecraft:copper_ingot", "G": "minecraft:glass_pane"},
+     "result": "candy_kettle", "count": 1, "category": "misc"},
+    {"id": "candy_tray", "pattern": ["N N", "NNN"], "key": {"N": "minecraft:iron_nugget"}, "result": "candy_tray", "count": 1,
+     "category": "misc"},
     # Fall additions 1: a copper pot for melting wax.
     {"id": "wax_melting_pot", "pattern": ["C C", "C C", "CCC"], "key": {"C": "minecraft:copper_ingot"},
      "result": "wax_melting_pot", "count": 1, "category": "misc"},
@@ -2063,7 +2414,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + plants.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + plants.blocks())
 
 
 def all_items():
@@ -2074,7 +2425,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + plants.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + plants.items())
 
 
 def owns(entry_id):
@@ -2109,3 +2460,21 @@ def textures():
 
 
 EQUIPMENT_TEXTURES = ["trellis", "trellis_post", "cooking_pot_side", "cooking_pot_rim", "cooking_pot_empty", "cooking_pot_soup"]
+
+# Fall additions 16: pastry from wheat and an egg; a raw pie of pastry, its filling and sugar (a milk bucket leaves its
+# bucket, as crafting with one does).
+SHAPELESS += [{"id": PIES["dough"], "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:egg"], "result": PIES["dough"], "count": 2,
+               "category": "misc"}]
+SHAPELESS += [{"id": f"raw_{filling}_pie", "inputs": [f"jugcraft:{PIES['dough']}"] + info["with"] + ["minecraft:sugar"],
+               "result": f"raw_{filling}_pie", "count": 1, "category": "misc"} for filling, info in PIES["fillings"].items()]
+
+# Fall additions 20: marigold petals strewn from a flower; papel picado cut from paper on a string; sugar skulls moulded
+# from sugar and an egg white, iced; pan de muerto dough (baked in COOKING).
+SHAPELESS += [{"id": "marigold_petals", "inputs": ["jugcraft:marigold"], "result": "marigold_petals", "count": 4, "category": "building"},
+              {"id": "papel_picado", "inputs": ["minecraft:paper", "minecraft:paper", "minecraft:paper", "minecraft:string",
+                                                "minecraft:pink_dye", "minecraft:orange_dye"], "result": "papel_picado", "count": 6,
+               "category": "building"},
+              {"id": "sugar_skull", "inputs": ["minecraft:sugar", "minecraft:sugar", "minecraft:sugar", "minecraft:egg",
+                                               "minecraft:light_blue_dye"], "result": "sugar_skull", "count": 2, "category": "building"},
+              {"id": "pan_de_muerto_dough", "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:wheat", "minecraft:egg",
+                                                       "minecraft:sugar"], "result": "pan_de_muerto_dough", "count": 2, "category": "misc"}]
