@@ -52,8 +52,8 @@ import org.jspecify.annotations.Nullable;
  * item tag {@code jugcraft:pumpkling_sparks}), hopping about on little vine legs and wearing the face that was carved
  * into it. It belongs to whoever woke it and follows them, as a pet does, coming to them when they are far off.
  *
- * <p>Its owner can sneak-use it with an empty hand to have it sit and stay, light it with a torch or a soul torch (an
- * empty hand takes the torch back out), and settle it back into its pumpkin with a glass bottle while sneaking, which
+ * <p>Its owner can use it with an empty hand to have it sit and stay, light it with a torch or a soul torch (a torch
+ * used on a lit one takes its torch back out), and settle it back into its pumpkin with a glass bottle while sneaking, which
  * fills with its spark again. Anyone can feed it treats ({@code jugcraft:pumpkling_treats}) to heal it. Crows keep away
  * from crops near it, as from a scarecrow wearing that head ({@link Scarecrows}). Its owner's blows don't hurt it;
  * slain, it drops its carved pumpkin, face and all, and its spark goes out.
@@ -218,9 +218,9 @@ public class Pumpkling extends PathfinderMob implements CropGuard {
 	// ---------------------------------------------------------------- using it
 
 	/**
-	 * Anyone feeds it treats to heal it. Its owner, sneaking with an empty hand, has it sit or get up; with a torch or a
-	 * soul torch lights it; with an empty hand takes a lit one's torch back out; and, sneaking with a glass bottle, settles
-	 * it back into its pumpkin. Decided on the server, where its owner is known.
+	 * Anyone feeds it treats to heal it. Its owner, with an empty hand, has it sit or get up, as with a tame wolf; with a
+	 * torch or a soul torch lights it, or takes a lit one's torch back out; and, sneaking with a glass bottle, settles it
+	 * back into its pumpkin. Decided on the server, where its owner is known.
 	 */
 	@Override
 	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
@@ -244,7 +244,7 @@ public class Pumpkling extends PathfinderMob implements CropGuard {
 			settle(level, player, hand);
 			return InteractionResult.SUCCESS;
 		}
-		if (sneaking && held.isEmpty()) {
+		if (held.isEmpty()) {
 			setSitting(!sitting());
 			playSound(SoundEvents.WOOD_PLACE, 0.6F, sitting() ? 0.8F : 1.4F);
 			return InteractionResult.SUCCESS;
@@ -255,7 +255,7 @@ public class Pumpkling extends PathfinderMob implements CropGuard {
 			playSound(SoundEvents.WOOD_PLACE, 1.0F, 1.2F);
 			return InteractionResult.SUCCESS;
 		}
-		if (held.isEmpty() && lit()) {
+		if (CarvedPumpkinBlock.isTorch(held)) {
 			ItemStack torch = CarvedPumpkinBlock.torch(ScarecrowBlockEntity.soul(head()));
 			setLit(false, false);
 			if (!player.getInventory().add(torch)) {
