@@ -754,6 +754,34 @@ def crop_harvester():
     return m
 
 
+def hydroponic_bay():
+    """An open two-tier grow rack (batch 33): rows of leafy crops in gunmetal channels under violet grow lights, a
+    gunmetal frame, the olive nutrient tank across the back with chrome bands, and a phosphor gauge on the front post."""
+    glow = "el_glow_violet!"
+    m = [box((0, 0, 0), (16, 1.5, 16), {"*": GUNMETAL, "north": HAZARD})]
+    # The nutrient tank across the back, banded, with a feed pipe down to each tier.
+    m.append(box((1, 1.5, 11.5), (15, 14.5, 15), {"*": OLIVE, "north": STENCIL}))
+    for y in (4, 11):
+        m.append(box((0.75, y, 11.25), (15.25, y + 0.75, 15.25), CHROME))
+    m.append(pipe((7, 3, 10), (9, 12.5, 11.5), CHROME))
+    # Four corner posts and the roof with its top grow light.
+    for x in (0.5, 14):
+        for z in (0.5, 10):
+            m.append(box((x, 1.5, z), (x + 1.5, 15, z + 1.5), GUNMETAL))
+    m.append(box((0.25, 15, 0.25), (15.75, 16, 15.75), {"*": GUNMETAL, "up": GRILLE}))
+    # Two tiers: a channel tray with rows of crops, each lit from above.
+    for base, light in ((1.5, 7.25), (8.5, 14.25)):
+        m.append(box((1.5, base, 1.5), (14.5, base + 1.25, 10.5), {"*": GUNMETAL, "up": RUBBER}))
+        for x in (2.5, 6.25, 10):
+            m.append(box((x, base + 1.25, 2.5), (x + 3.25, base + 2.25, 9.5), "sp_leaves"))
+            m.append(box((x + 0.5, base + 2.25, 3.5), (x + 2.75, base + 3.75, 8.5), "sp_leaves"))
+        m.append(box((2, light, 2.5), (14, light + 0.75, 9.5), {"*": GUNMETAL, "down": glow}))
+    # The middle shelf the upper tray sits on, and the gauge on the front left post.
+    m.append(box((0.5, 7.75, 0.5), (15.5, 8.5, 11.5), GUNMETAL))
+    m.append(dial("north", (1.25, 5, 0.25), 1.25, texture=GAUGE, body=CHROME))
+    return m
+
+
 def air_separation_unit():
     """Two by two, six tall: an air separation plant. A tall olive cold box with gunmetal corner posts and chrome frost
     bands stands at the back, with the chrome distillation column in front of it rising to a nitrogen vent; an air
@@ -909,4 +937,4 @@ MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), 
           "electrolytic_cell": electrolytic_cell(),
           "chemical_reactor": chemical_reactor(), "air_separation_unit": air_separation_unit(),
           "synthesis_converter": synthesis_converter(), "gas_holder": gas_holder(),
-          "crop_harvester": crop_harvester()}
+          "crop_harvester": crop_harvester(), "hydroponic_bay": hydroponic_bay()}

@@ -86,6 +86,8 @@ MACHINES = {
     "advanced_engine": {"display": "Advanced Combustion Engine", "lit": True},
     # Farming (batch 9): harvests and replants ripe crops in the 9x9 field in front of it.
     "crop_harvester": {"display": "Crop Harvester", "lit": True},
+    # Batch 33 (tools/hydroponics.py): grows crops in nutrient solution, anywhere.
+    "hydroponic_bay": {"display": "Hydroponic Bay", "lit": True},
     # Kinetic: a 2x2x3 V8 diesel engine; its shaft leaves the back of the upper right back block.
     "diesel_engine": {"display": "Diesel Engine", "lit": True},
     "wind_turbine": {"display": "Wind Turbine", "lit": False},
@@ -237,6 +239,8 @@ STATS = {
     "advanced_engine": {"capacity": 0, "tank": 8_000},
     # 2 tall. One ripe crop per 20 ticks from the 9x9 field in front of it; replants with one of the seeds.
     "crop_harvester": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 24, "ticks": 20, "radius": 4},
+    # A harvest every 600 ticks on 100 mB of nutrient solution; the seed comes back.
+    "hydroponic_bay": {"capacity": 20_000, "input_per_tick": 128, "use_per_tick": 12},
     # 2 tall. Mines one c:ores block per 40 ticks from a 9x9 column below it, down to the bottom of the world.
     "ore_drill": {"capacity": 20_000, "input_per_tick": 256, "use_per_tick": 32, "ticks": 40, "radius": 4},
     # 3x3x2. Every 300 ticks (15 s) takes 1 unit (item) from each kind of deposit under its base and 1 block round
@@ -446,6 +450,10 @@ CRAFTING = {
     "advanced_solar_panel": (["SSS", "ACA", "PTP"], {"S": "jugcraft:solar_panel", "A": "#c:plates/aluminum",
                                                      "C": "jugcraft:processor", "P": "jugcraft:aluminum_cable",
                                                      "T": "#c:ingots/titanium"}, 1),
+    # Glass walls, grow lights (glowstone), a tank for the solution and a steel frame.
+    "hydroponic_bay": (["GLG", "TMT", "PCP"], {"G": "minecraft:glass", "L": "minecraft:glowstone",
+                                              "T": "jugcraft:fluid_tank", "M": "jugcraft:machine_casing",
+                                              "P": "#c:plates/steel", "C": "jugcraft:advanced_circuit"}, 1),
     "crop_harvester": (["GSG", "HMH", "PCP"], {"G": "#c:gears/steel", "S": "minecraft:shears",
                                                "H": "minecraft:hopper", "M": "jugcraft:machine_casing",
                                                "P": "#c:plates/steel", "C": "jugcraft:basic_circuit"}, 1),
@@ -831,7 +839,8 @@ def machine_recipes():
     return {"crusher": _crusher(), "arc_furnace": _arc_furnace(), "alloy_smelter": ALLOY_SMELTER,
             "metal_press": _metal_press(), "wire_drawer": _wire_drawer(), "circuit_assembler": CIRCUIT_ASSEMBLER,
             "pulverizer": _pulverizer(), "ore_washer": _ore_washer(), "sieve": SIEVE, "sawmill": _sawmill(),
-            "coke_oven": COKE_OVEN, "steel_foundry": STEEL_FOUNDRY, "tree_farm": _tree_farm()}
+            "coke_oven": COKE_OVEN, "steel_foundry": STEEL_FOUNDRY, "tree_farm": _tree_farm(),
+            "hydroponic_bay": __import__("hydroponics").recipes()}
 
 
 def _arc_furnace():

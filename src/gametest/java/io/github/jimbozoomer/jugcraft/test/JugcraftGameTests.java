@@ -698,6 +698,35 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/**
+	 * Batch 33: the hydroponic bay grows wheat seeds into wheat on nutrient solution, gives the seed back and uses 100 mB
+	 * a harvest; with no solution it grows nothing.
+	 */
+	@GameTest(maxTicks = 900)
+	public void hydroponicBayGrowsOnNutrients(GameTestHelper helper) {
+		MachineBlockEntity bay = processing(helper, new BlockPos(2, 1, 2), MachineKind.HYDROPONIC_BAY, new ItemStack(Items.WHEAT_SEEDS));
+		MachineBlockEntity dry = processing(helper, new BlockPos(5, 1, 2), MachineKind.HYDROPONIC_BAY, new ItemStack(Items.WHEAT_SEEDS));
+		Storage<FluidVariant> inlet = FluidStorage.SIDED.find(helper.getLevel(), helper.absolutePos(new BlockPos(2, 1, 2)), Direction.UP);
+		try (Transaction transaction = Transaction.openOuter()) {
+			long accepted = inlet.insert(FluidVariant.of(io.github.jimbozoomer.jugcraft.chemistry.PetroFluids.NUTRIENT_SOLUTION.source()),
+					FluidConstants.BUCKET, transaction);
+			helper.assertTrue(accepted == FluidConstants.BUCKET, "The bay took " + accepted / 81 + " mB of nutrient solution");
+			long water = inlet.insert(FluidVariant.of(net.minecraft.world.level.material.Fluids.WATER), FluidConstants.BUCKET, transaction);
+			helper.assertTrue(water == 0, "The bay took plain water");
+			transaction.commit();
+		}
+		helper.succeedWhen(() -> {
+			ItemStack wheat = bay.getItem(MachineKind.HYDROPONIC_BAY.outputSlot());
+			helper.assertTrue(wheat.is(Items.WHEAT) && wheat.getCount() >= 2, "Hydroponic bay output is " + wheat);
+			boolean seedBack = false;
+			for (int slot = 0; slot < bay.getContainerSize(); slot++) {
+				seedBack |= slot != 0 && bay.getItem(slot).is(Items.WHEAT_SEEDS);
+			}
+			helper.assertTrue(seedBack, "The seed did not come back");
+			helper.assertTrue(dry.getItem(MachineKind.HYDROPONIC_BAY.outputSlot()).isEmpty(), "A dry bay grew something");
+		});
+	}
+
 	/** Dust smelts back into an ingot in the electric furnace. */
 	@GameTest(maxTicks = 300)
 	public void dustSmeltsIntoIngot(GameTestHelper helper) {

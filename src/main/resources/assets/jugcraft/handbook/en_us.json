@@ -675,6 +675,7 @@
             "Four on the Floor: Build an advanced combustion engine.",
             "King Cotton: Grow cotton.",
             "Make It Rain: Build a sprinkler.",
+            "Soil Optional: Build a hydroponic bay.",
             "Reaping What You Sow: Build a crop harvester."
           ]
         }
@@ -4008,6 +4009,111 @@
             "result": "jugcraft:crop_harvester",
             "count": 1
           }
+        },
+        {
+          "title": "Hydroponic Bay",
+          "icon": "jugcraft:hydroponic_bay",
+          "text": [
+            "Grows a seed or cutting in nutrient solution under grow lights: no soil, sunlight or farmland, so it works underground, in the Nether or the End. A harvest every 30 seconds uses 100 mB of solution (a fertilizer in a bucket of water, in the chemical reactor) and gives the seed back.",
+            "Uses 12 JE/t while working. Holds 20,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:glass",
+              "minecraft:glowstone",
+              "minecraft:glass",
+              "jugcraft:fluid_tank",
+              "jugcraft:machine_casing",
+              "jugcraft:fluid_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:hydroponic_bay",
+            "count": 1
+          },
+          "recipes": [
+            {
+              "in": [
+                [
+                  "minecraft:wheat_seeds",
+                  1
+                ]
+              ],
+              "out": [
+                "minecraft:wheat",
+                2
+              ],
+              "extra": [
+                [
+                  "minecraft:wheat_seeds",
+                  1.0
+                ],
+                [
+                  "minecraft:wheat_seeds",
+                  0.5
+                ]
+              ]
+            },
+            {
+              "in": [
+                [
+                  "minecraft:carrot",
+                  1
+                ]
+              ],
+              "out": [
+                "minecraft:carrot",
+                3
+              ],
+              "extra": [
+                [
+                  "minecraft:carrot",
+                  1.0
+                ]
+              ]
+            },
+            {
+              "in": [
+                [
+                  "minecraft:potato",
+                  1
+                ]
+              ],
+              "out": [
+                "minecraft:potato",
+                3
+              ],
+              "extra": [
+                [
+                  "minecraft:potato",
+                  1.0
+                ]
+              ]
+            },
+            {
+              "in": [
+                [
+                  "minecraft:beetroot_seeds",
+                  1
+                ]
+              ],
+              "out": [
+                "minecraft:beetroot",
+                2
+              ],
+              "extra": [
+                [
+                  "minecraft:beetroot_seeds",
+                  1.0
+                ],
+                [
+                  "minecraft:beetroot_seeds",
+                  0.5
+                ]
+              ]
+            }
+          ]
         },
         {
           "title": "Sprinkler",

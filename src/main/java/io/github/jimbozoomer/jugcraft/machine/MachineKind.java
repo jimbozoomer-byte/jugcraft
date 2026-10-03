@@ -103,6 +103,9 @@ public enum MachineKind implements StringRepresentable {
 	// Farming (batch 9): a two-block gantry that harvests and replants ripe crops in the 9x9 field in front of it.
 	// No inputs; three result slots.
 	CROP_HARVESTER("crop_harvester", 20_000, 256, 0, 24, 3),
+	// Hydroponics (batch 33): grows a seed or cutting in nutrient solution, with no soil or sunlight; the seed comes
+	// back. One input, the output and two byproduct slots, as for the tree farm.
+	HYDROPONIC_BAY("hydroponic_bay", 20_000, 128, 0, 12, 4),
 	// Chemistry (batch 17, the electric look): a 3x3x2 vanadium redox flow battery. Its charge is capped by the
 	// electrolyte in its tanks (FLOW_BATTERY_JE_PER_MB a millibucket); it gives power out of its front.
 	FLOW_BATTERY("flow_battery", 64_000_000, 8_192, 8_192, 0, 0);
@@ -147,6 +150,9 @@ public enum MachineKind implements StringRepresentable {
 	public static final int WASHER_TANK = 8_000;
 	/** Water (mB) the ore washer uses per operation, taken when the operation finishes. */
 	public static final int WASHER_WATER_PER_OPERATION = 500;
+	/** The hydroponic bay's nutrient solution tank (mB), and what one harvest uses, taken when it finishes. */
+	public static final int HYDROPONIC_TANK = 8_000;
+	public static final int HYDROPONIC_SOLUTION_PER_HARVEST = 100;
 	/** mB per tick drawn from a water source block directly beneath the ore washer. */
 	public static final int WASHER_SOURCE_REFILL = 20;
 	/** Ore drill: blocks mined in each direction from the drill's column, so 4 means a 9x9 area. */
@@ -304,7 +310,7 @@ public enum MachineKind implements StringRepresentable {
 				|| this == PULVERIZER || this == ORE_WASHER || this == SIEVE || this == SAWMILL
 				|| this == COKE_OVEN || this == STEEL_FOUNDRY || this == ORE_DRILL || this == DEPOSIT_DRILL
 				|| this == COBBLESTONE_GENERATOR || this == TREE_FARM || this == AUTO_CRAFTER
-				|| this == CROP_HARVESTER;
+				|| this == CROP_HARVESTER || this == HYDROPONIC_BAY;
 	}
 
 	/** Stores energy and gives it out of its front face only. */
@@ -341,6 +347,7 @@ public enum MachineKind implements StringRepresentable {
 			case COKE_OVEN -> "coking";
 			case STEEL_FOUNDRY -> "steelmaking";
 			case TREE_FARM -> "tree_growing";
+			case HYDROPONIC_BAY -> "hydroponics";
 			case DISTILLATION_TOWER -> "distillation";
 			case CATALYTIC_CRACKER -> "catalytic_cracking";
 			case FLOWBACK_TREATMENT_UNIT -> "water_treatment";
@@ -433,7 +440,7 @@ public enum MachineKind implements StringRepresentable {
 			return 1; // Container remainders, such as the empty bucket from a cake.
 		}
 		return this == PULVERIZER || this == SIEVE || this == SAWMILL || this == ORE_DRILL || this == DEPOSIT_DRILL
-				|| this == TREE_FARM || this == CROP_HARVESTER ? 2 : 0;
+				|| this == TREE_FARM || this == CROP_HARVESTER || this == HYDROPONIC_BAY ? 2 : 0;
 	}
 
 	/**
@@ -464,6 +471,7 @@ public enum MachineKind implements StringRepresentable {
 			case LARGE_STEAM_ENGINE -> LARGE_ENGINE_TANK;
 			case GEOTHERMAL_GENERATOR -> GEOTHERMAL_TANK;
 			case ORE_WASHER -> WASHER_TANK;
+			case HYDROPONIC_BAY -> HYDROPONIC_TANK;
 			default -> 0;
 		};
 	}

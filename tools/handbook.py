@@ -19,7 +19,8 @@ MOD = "jugcraft"
 RECIPE_LISTS = {"crusher": "crusher", "arc_furnace_controller": "arc_furnace", "alloy_smelter": "alloy_smelter",
                 "metal_press": "metal_press", "wire_drawer": "wire_drawer", "circuit_assembler": "circuit_assembler",
                 "pulverizer": "pulverizer", "ore_washer": "ore_washer", "sieve": "sieve", "sawmill": "sawmill",
-                "coke_oven": "coke_oven", "steel_foundry": "steel_foundry", "tree_farm": "tree_farm"}
+                "coke_oven": "coke_oven", "steel_foundry": "steel_foundry", "tree_farm": "tree_farm",
+                "hydroponic_bay": "hydroponic_bay"}
 
 # What each block is for, in a sentence or two. Numbers are added from the tables below.
 ABOUT = {
@@ -63,6 +64,9 @@ ABOUT = {
     "sprinkler": "Pipe water in (or use a water bucket) and it sprays the crops within 4 blocks, at its height and one "
                  "below: every 5 seconds it uses 50 mB and gives each growing crop an extra growth tick. Load up to 16 "
                  "fertilizer (by hand or hopper) and every 30 seconds it spreads one over the 5x5 crops around it.",
+    "hydroponic_bay": "Grows a seed or cutting in nutrient solution under grow lights: no soil, sunlight or farmland, "
+                      "so it works underground, in the Nether or the End. A harvest every 30 seconds uses 100 mB of "
+                      "solution (a fertilizer in a bucket of water, in the chemical reactor) and gives the seed back.",
     "crop_harvester": "Two blocks tall. Harvests the ripe crops in the 9x9 field in front of it, starting the block in "
                       "front: one crop a second at 24 JE/t. It keeps the drops and plants one of the seeds again, and "
                       "waits when its three result slots are full. Crops on farmland sit at its own height.",
@@ -762,6 +766,7 @@ def build():
             [machine_page(m) for m in ("water_wheel", "cobblestone_generator", "tree_farm")]},
         {"title": "Farming", "icon": f"{MOD}:crop_harvester", "pages": [
             machine_page("crop_harvester"),
+            machine_page("hydroponic_bay"),
             block_page("sprinkler", FARMING_BLOCKS["sprinkler"]["display"]),
             {"title": "Cotton", "icon": f"{MOD}:cotton", "text": [
                 "Sift coarse dirt in the sieve: now and then it turns up cotton seeds (and wheat seeds).",

@@ -214,6 +214,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case LARGE_STEAM_ENGINE -> new TankInlet(Fluids.WATER, MachineKind.LARGE_ENGINE_TANK);
 			case GEOTHERMAL_GENERATOR -> new TankInlet(Fluids.LAVA, MachineKind.GEOTHERMAL_TANK);
 			case ORE_WASHER -> new TankInlet(Fluids.WATER, MachineKind.WASHER_TANK);
+			case HYDROPONIC_BAY -> new TankInlet(PetroFluids.NUTRIENT_SOLUTION.source(), MachineKind.HYDROPONIC_TANK);
 			case STEEL_FOUNDRY -> new TankInlet(PetroFluids.OXYGEN.fluid(), MachineKind.BOOST_TANK);
 			case ARC_FURNACE -> new TankInlet(PetroFluids.ARGON.fluid(), MachineKind.BOOST_TANK);
 			default -> null;
@@ -781,7 +782,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 
 		Optional<Result> result = findResult(level);
-		boolean water = kind != MachineKind.ORE_WASHER || tank >= MachineKind.WASHER_WATER_PER_OPERATION;
+		boolean water = switch (kind) {
+			case ORE_WASHER -> tank >= MachineKind.WASHER_WATER_PER_OPERATION;
+			case HYDROPONIC_BAY -> tank >= MachineKind.HYDROPONIC_SOLUTION_PER_HARVEST;
+			default -> true;
+		};
 		if (result.isEmpty() || !water || !canOutput(result.get().stack()) || !byproductsFit(result.get().byproducts())) {
 			if (progress != 0) {
 				progress = 0;
@@ -826,6 +831,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			}
 			if (kind == MachineKind.ORE_WASHER) {
 				tank -= MachineKind.WASHER_WATER_PER_OPERATION;
+			} else if (kind == MachineKind.HYDROPONIC_BAY) {
+				tank -= MachineKind.HYDROPONIC_SOLUTION_PER_HARVEST;
 			}
 		}
 		setChanged();
