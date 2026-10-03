@@ -125,7 +125,7 @@ No new dependencies. Every texture is drawn by code in `tools/graveyard_textures
 | Pack 3: server game tests (`GraveyardBuildingGameTests`, 6) | Pass: all 583 required tests passed (run 37141476426, commit ea0f16f6) |
 | Pack 3: client game test (`GraveyardBuildingClientGameTests`) | Pass (client shard 0 of that run) |
 | Pack 4: server game tests (`GraveyardGroundsGameTests`, 5) | Pass: all 588 required tests passed (run 37144212183, commit eb501f92) |
-| Pack 4: client game test (`GraveyardGroundsClientGameTests`) | Pass (client shard 1 of that run); its log showed the grave vase's models missing a texture, fixed after it (below) |
+| Pack 4: client game test (`GraveyardGroundsClientGameTests`) | Pass (client shard 1 of that run); its log showed the grave vase's models missing a texture, fixed after it and passing in run [37145416331](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37145416331) (below) |
 
 The four game tests:
 1. a Celtic cross placed from its item goes up three blocks and a table tomb back two, facing the player; with a block in the way nothing is placed; breaking the cross's top or the tomb's head breaks the whole and drops one;
@@ -160,7 +160,9 @@ The client game test builds a churchyard of all nine headstones, engraved and at
 ### Pack 4 verification
 Run [37144212183](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37144212183) on commit eb501f92 passed every job: the data check (1,042 IDs), the build and all 588 server game tests, and the three client shards. The run before it failed to compile: 26.3 has no `ItemTags.SMALL_FLOWERS`, so the vase now takes the flowers of its own tag `jugcraft:grave_flowers`. In the client test:
 - the kerbed, planted, open graves, the bench and the lamp posts drew with their models and textures; the screenshots show the white chippings and open book, the kept grave in flower beside the neglected one gone to weeds, the open grave's pit, boards, spoil heap, spade and waiting cross, the bench's plaque, and the lamps lit at night ([the guide](../branches/AGRICULTURE.md#the-graveyard-grounds) has them);
-- the grave vase's granite base drew the missing-texture pattern on its top: its models used a texture (`#top`) they never defined, and the log said so. Its models now define it, and the checker now fails any model a blockstate or item draws that uses a texture it doesn't define. This fix is not yet in a CI run.
+- the grave vase's granite base drew the missing-texture pattern on its top: its models used a texture (`#top`) they never defined, and the log said so. Its models now define it, and the checker now fails any model a blockstate or item draws that uses a texture it doesn't define.
+
+Run [37145416331](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37145416331), the pull request's run on commit 13437872 with that fix, passed every job: the data check, the build, all 588 server game tests and the three client shards. Its client log has no missing model or texture, and the vases' granite bases draw whole, with a bouquet of each colour in them ([the guide](../branches/AGRICULTURE.md#the-graveyard-grounds) has the picture).
 
 ### Pack 3 verification
 Run [37141476426](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37141476426) on commit ea0f16f6: the data check (1,036 IDs), the build and all 583 server game tests passed, and client shard 0, which runs `GraveyardBuildingClientGameTests`, passed. The run before it failed to compile: 26.3 has no `PushReaction.DESTROY`, so the door now pops off as `POPPED`. In the client test:
