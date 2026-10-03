@@ -574,7 +574,7 @@ public final class ArmsMotion {
 		float w = pose.weight;
 		// The bone's offset is in the arm's space; the hand's frame here is that turned by XP -90 then YP 180.
 		poseStack.translate(-s * v[o + 3] * w / 16.0F, -v[o + 5] * w / 16.0F, -v[o + 4] * w / 16.0F);
-		poseStack.mulPose(Q.rotationZYX(s * v[o + 2] * DEG * w, s * v[o + 1] * DEG * w, v[o] * DEG * w));
+		poseStack.rotate(Q.rotationZYX(s * v[o + 2] * DEG * w, s * v[o + 1] * DEG * w, v[o] * DEG * w));
 	}
 
 	// ---------------------------------------------------------------- first person
@@ -637,7 +637,7 @@ public final class ArmsMotion {
 		}
 		float s = arm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
 		poseStack.translate(s * FP[3] / 16.0F, FP[4] / 16.0F, FP[5] / 16.0F);
-		poseStack.mulPose(Q.rotationZYX(s * FP[2] * DEG, s * FP[1] * DEG, FP[0] * DEG));
+		poseStack.rotate(Q.rotationZYX(s * FP[2] * DEG, s * FP[1] * DEG, FP[0] * DEG));
 	}
 
 	// ---------------------------------------------------------------- 3x3 maths (row-major, ModelPart's Z*Y*X order)
