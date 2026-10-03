@@ -1630,7 +1630,7 @@ public final class JugcraftAgriculture {
 		// Opened by hand, like a copper door; the mausoleum places nothing in its doorway itself.
 		Block door = registerBlock(MAUSOLEUM_DOOR, props -> new DoorBlock(BlockSetType.COPPER, props), BlockBehaviour.Properties.of()
 				.mapColor(MapColor.TERRACOTTA_ORANGE).strength(4.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.COPPER)
-				.noOcclusion().pushReaction(PushReaction.DESTROY));
+				.noOcclusion().pushReaction(PushReaction.POPPED));
 		registerItem(MAUSOLEUM_DOOR, props -> new BlockItem(door, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 	}
 
