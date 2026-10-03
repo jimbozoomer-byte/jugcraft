@@ -3743,7 +3743,8 @@ def check_graveyard(java, main):
         values = [float(eval(v.replace("F", ""))) for v in text.split(",")]
         found[sid] = {"stone": stone.lower(), "cells": cells, "boxes": parts, "top": top == "true", "text": values}
     cell_names = {tuple(map(tuple, gy.SINGLE)): "SINGLE", tuple(map(tuple, gy.TALL2)): "TALL2", tuple(map(tuple, gy.TALL3)): "TALL3",
-                  tuple(map(tuple, gy.LONG)): "LONG", tuple(map(tuple, gy.TALL4)): "TALL4", tuple(map(tuple, gy.WIDE)): "WIDE"}
+                  tuple(map(tuple, gy.LONG)): "LONG", tuple(map(tuple, gy.TALL4)): "TALL4", tuple(map(tuple, gy.WIDE)): "WIDE",
+                  tuple(map(tuple, gy.WIDE2)): "WIDE2"}
     if set(found) != set(gy.HEADSTONES):
         err(f"HeadstoneBlock.Style {sorted(found)} differs from HEADSTONES in tools/graveyard.py {sorted(gy.HEADSTONES)}")
     for sid, info in gy.HEADSTONES.items():
@@ -3807,6 +3808,45 @@ def check_graveyard(java, main):
         if not (DATA / "jugcraft" / "advancement" / f"{key}.json").exists():
             err(f"Missing advancement {key}")
     check_graveyard_buildings(java, main, lang)
+    check_graveyard_grounds(java, main, lang)
+
+
+def check_graveyard_grounds(java, main, lang):
+    """Pack 4: the grave vase's wilting and calming, the lamp post's light and check, the open grave's stirring and the
+    bench's seat match tools/graveyard.py; the vase and lamp post are registered with their models for every state,
+    loot, recipe, words and tags; every bouquet's flowers are tagged."""
+    def numbers(name):
+        return {k: float(v) for k, v in re.findall(r"static final (?:int|float|double) ([A-Z_]+) = ([\d.]+)[FD]?;", java.get(name, ""))}
+    vase, post = gy.GRAVE_VASE, gy.LAMP_POST
+    got = numbers("GraveVaseBlock")
+    if got.get("WILT_CHANCE") != vase["wilt_chance"] or got.get("CALM_REACH") != vase["calm_reach"] or got.get("CALM") != vase["calm"]:
+        err("GraveVaseBlock WILT_CHANCE / CALM_REACH / CALM differ from GRAVE_VASE in tools/graveyard.py")
+    bouquets = re.search(r"enum Bouquet implements StringRepresentable \{\s*([A-Z_, ]+);", java.get("GraveVaseBlock", ""))
+    if not bouquets or [b.strip().lower() for b in bouquets.group(1).split(",")] != ["none"] + vase["colours"]:
+        err("GraveVaseBlock.Bouquet must be NONE then GRAVE_VASE['colours'] of tools/graveyard.py, in order")
+    got = numbers("LampPostBlock")
+    if got.get("LIGHT") != post["light"] or got.get("CHECK_TICKS") != post["check_ticks"]:
+        err("LampPostBlock LIGHT / CHECK_TICKS differ from LAMP_POST in tools/graveyard.py")
+    if numbers("HeadstoneBlock").get("OPEN_GRAVE_STIR") != gy.STIR_BY_KIND["open_grave"] or numbers("MemorialBenchBlock").get("SEAT") != gy.BENCH_SEAT:
+        err("HeadstoneBlock.OPEN_GRAVE_STIR / MemorialBenchBlock.SEAT differ from tools/graveyard.py")
+    for call, const in (("GraveVaseBlock::new", f'GRAVE_VASE = "{vase["block"]}"'), ("LampPostBlock::new", f'LAMP_POST = "{post["block"]}"'),
+                        ("new MemorialBenchBlock(props, style)", "registerGraveyardGrounds();")):
+        if call not in main or const not in main:
+            err(f"JugcraftAgriculture.java must register {call} ({const})")
+    states = set((load(ASSETS / "blockstates" / f"{vase['block']}.json") or {}).get("variants", {}))
+    if states != {f"flowers={c},wilted={w}" for c in ["none"] + vase["colours"] for w in ("false", "true")}:
+        err("The grave vase's blockstate must cover every bouquet, fresh and wilted")
+    states = set((load(ASSETS / "blockstates" / f"{post['block']}.json") or {}).get("variants", {}))
+    if states != {f"facing={f},lit={l},part={p}" for f in ("north", "east", "south", "west") for l in ("false", "true") for p in range(3)}:
+        err("The lamp post's blockstate must cover every part, lit and not, facing every way")
+    for block in (vase["block"], post["block"]):
+        if f"block.jugcraft.{block}" not in lang or not (DATA / "jugcraft" / "recipe" / f"{block}.json").exists() \
+                or not (DATA / "jugcraft" / "loot_table" / "blocks" / f"{block}.json").exists():
+            err(f"{block} needs its words, recipe and loot")
+    for colour, flowers in vase["flowers"].items():
+        tag = load(DATA / "jugcraft" / "tags" / "item" / "grave_flowers" / f"{colour}.json") or {}
+        if sorted(tag.get("values", [])) != sorted(flowers):
+            err(f"jugcraft:grave_flowers/{colour} must list GRAVE_VASE['flowers']['{colour}'] of tools/graveyard.py")
 
 
 def check_graveyard_buildings(java, main, lang):
