@@ -19,9 +19,12 @@ import net.minecraft.resources.Identifier;
  * Textured quads exported from the generators' model boxes (tools/kinetic_rotors.py): a JSON list of
  * {texture, normal, vertices [x, y, z (pixels), u, v]}, and "cutout": true for a quad drawn cut out. Drawn by block entity renderers and render
  * layers that show parts of a block or item model moving (spinning rotors, a rocket pack on a back).
+ *
+ * <p>A quad may also have "nocull": true, to be drawn from both sides (a balloon's envelope, seen from inside its
+ * basket), and "normals", one for each corner, for a curved surface lit smoothly across its quads.
  */
 public final class QuadModel {
-	private record Quad(float[] normal, float[][] vertices) {
+	private record Quad(float[][] normals, float[][] vertices) {
 	}
 
 	private final Map<RenderType, List<Quad>> quads = new LinkedHashMap<>();
@@ -39,8 +42,19 @@ public final class QuadModel {
 			Identifier texture = Jugcraft.id(name.contains("/") ? "textures/" + name + ".png" : "textures/block/" + name + ".png");
 			// A quad marked "cutout" (a silhouette) leaves out its texture's see-through pixels.
 			boolean cutout = quad.has("cutout") && quad.get("cutout").getAsBoolean();
-			RenderType type = cutout ? RenderTypes.entityCutout(texture) : RenderTypes.entitySolid(texture);
+			// A quad marked "nocull" is drawn from both sides.
+			boolean nocull = quad.has("nocull") && quad.get("nocull").getAsBoolean();
+			RenderType type = nocull ? RenderTypes.entityCutoutNoCull(texture) : cutout ? RenderTypes.entityCutout(texture) : RenderTypes.entitySolid(texture);
 			JsonArray n = quad.getAsJsonArray("normal");
+			float[] flat = {n.get(0).getAsFloat(), n.get(1).getAsFloat(), n.get(2).getAsFloat()};
+			float[][] normals = {flat, flat, flat, flat};
+			if (quad.has("normals")) {
+				JsonArray each = quad.getAsJsonArray("normals");
+				for (int i = 0; i < 4; i++) {
+					JsonArray c = each.get(i).getAsJsonArray();
+					normals[i] = new float[] {c.get(0).getAsFloat(), c.get(1).getAsFloat(), c.get(2).getAsFloat()};
+				}
+			}
 			JsonArray corners = quad.getAsJsonArray("vertices");
 			float[][] vertices = new float[4][];
 			for (int i = 0; i < 4; i++) {
@@ -48,8 +62,7 @@ public final class QuadModel {
 				vertices[i] = new float[] {v.get(0).getAsFloat() / 16, v.get(1).getAsFloat() / 16, v.get(2).getAsFloat() / 16,
 						v.get(3).getAsFloat(), v.get(4).getAsFloat()};
 			}
-			model.quads.computeIfAbsent(type, t -> new ArrayList<>())
-					.add(new Quad(new float[] {n.get(0).getAsFloat(), n.get(1).getAsFloat(), n.get(2).getAsFloat()}, vertices));
+			model.quads.computeIfAbsent(type, t -> new ArrayList<>()).add(new Quad(normals, vertices));
 		}
 		return model;
 	}
@@ -60,10 +73,11 @@ public final class QuadModel {
 			List<Quad> list = entry.getValue();
 			collector.submitCustomGeometry(pose, entry.getKey(), (matrix, buffer) -> {
 				for (Quad quad : list) {
-					for (float[] v : quad.vertices()) {
+					for (int i = 0; i < 4; i++) {
+						float[] v = quad.vertices()[i];
+						float[] n = quad.normals()[i];
 						buffer.addVertex(matrix, v[0], v[1], v[2]).setColor(0xFFFFFFFF).setUv(v[3], v[4])
-								.setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-								.setNormal(matrix, quad.normal()[0], quad.normal()[1], quad.normal()[2]);
+								.setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(matrix, n[0], n[1], n[2]);
 					}
 				}
 			});
