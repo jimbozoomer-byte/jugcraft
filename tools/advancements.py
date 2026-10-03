@@ -37,6 +37,10 @@ TREE = {
                     "Make a piece of steel armor", "task"),
     "paxel": ("steel", [f"{tier}_paxel" for tier in ("wood", "stone", "iron", "gold", "diamond", "netherite", "bronze",
                                                       "steel")], "Jack of All Trades", "Make a paxel", "task"),
+    # Batch 42: the arms, in bronze from the bronze age on.
+    "arms": ("bronze", [f"{metal}_{kind}" for metal in ("bronze", "steel") for kind in (
+        "longsword", "greatsword", "rapier", "flanged_mace", "war_hammer", "glaive", "halberd", "spear", "lance")],
+        "Man-at-Arms", "Forge a longsword, greatsword, rapier, mace, war hammer, glaive, halberd, spear or lance", "task"),
     # Batch 27: gear and plastic blocks.
     "scuba": ("rubber", ["scuba_mask", "scuba_tank"], "Deep Breath", "Make scuba gear and breathe under water on oxygen",
               "task"),

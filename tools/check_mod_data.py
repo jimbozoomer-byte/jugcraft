@@ -29,6 +29,7 @@ import electroplating
 import gas_storage
 import control_electronics
 import gear
+import arms
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
@@ -129,7 +130,7 @@ def _hi_res(name):
     import blueprints
     import construction_art
     return (name in tower_art.TEXTURES or name in blueprints.TABLE_TEXTURES or name in construction_art.ITEMS
-            or name in gas_storage.HD_ITEMS
+            or name in gas_storage.HD_ITEMS or name in arms.textures()
             or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_")))
 
 
@@ -311,6 +312,8 @@ def item_units(ref):
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
             or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks():
         return {}
+    if path in arms.items():
+        return arms.metal_content(path)
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
         # hold nothing the audit tracks, like the vanilla tools they are made from.
@@ -499,6 +502,7 @@ def check_tags():
         known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + machine_items()
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
+                                                    + arms.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
@@ -745,6 +749,55 @@ def check_gear():
         for frame in frames:
             if not (ASSETS / "textures" / "item" / f"{frame}.png").exists():
                 err(f"Missing item texture {frame}.png")
+
+
+def check_arms():
+    """weapons/JugcraftArms.java against tools/arms.py (batch 42): the metals, each kind's numbers and traits in order,
+    the charging kinds' numbers, the lance and parry constants, and that each arm's model has its held pose."""
+    java = (JAVA_ROOT / "weapons" / "JugcraftArms.java").read_text(encoding="utf-8")
+
+    def f(value):
+        return f"{float(value)}F"
+    metals = re.findall(r'"([a-z_]+)"', re.search(r"METALS = List\.of\(([^)]*)\)", java).group(1))
+    if metals != arms.METALS:
+        err(f"JugcraftArms.METALS {metals} != tools/arms.py {arms.METALS}")
+    swung = [kind for kind in arms.KINDS if kind not in arms.CHARGING]
+    found = re.findall(r'new Kind\("([a-z_]+)"', java)
+    if found != swung:
+        err(f"JugcraftArms.KINDS {found} != tools/arms.py {swung}")
+    for kind in swung:
+        info = arms.KINDS[kind]
+        swing, ticks = info["swing"]
+        low, high = info["reach"]
+        expected = (f'new Kind("{kind}", {f(info["damage"])}, {f(info["speed"])}, SwingAnimationType.{swing.upper()}, {ticks}, '
+                    f'{f(low)}, {f(high)}, {f(info["margin"])}, {f(info["disable"])}, {info["wear"]}, {f(info["knockback"])}, '
+                    f'{f(info["parry"])}, {str("swords" in info["tags"]).lower()}, {str(info.get("pierce", False)).lower()})')
+        if expected not in java:
+            err(f"JugcraftArms: {kind} is not {expected}")
+    charges = re.findall(r'new Charge\("([a-z_]+)", "([a-z_]+)"', java)
+    if sorted(charges) != sorted(arms.CHARGE):
+        err(f"JugcraftArms.CHARGES {charges} != tools/arms.py {list(arms.CHARGE)}")
+    for (kind, metal), values in arms.CHARGE.items():
+        expected = f'new Charge("{kind}", "{metal}", ' + ", ".join(f(v) for v in values) + ")"
+        if expected not in java:
+            err(f"JugcraftArms: the {metal} {kind} is not {expected}")
+    for name, value in (("LANCE_DAMAGE", arms.LANCE_DAMAGE), ("LANCE_MIN_REACH", arms.LANCE_REACH[0]),
+                        ("LANCE_MAX_REACH", arms.LANCE_REACH[1]), ("PARRY_ANGLE", arms.PARRY_ANGLE),
+                        ("PARRY_DELAY", arms.PARRY_DELAY), ("PARRY_WEAR_THRESHOLD", arms.PARRY_WEAR[0]),
+                        ("PARRY_WEAR_BASE", arms.PARRY_WEAR[1]), ("PARRY_WEAR_FACTOR", arms.PARRY_WEAR[2])):
+        if f"{name} = {f(value)};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({value})")
+    for kind, info in arms.KINDS.items():
+        if kind in arms.CHARGING:
+            continue
+        held = load(ASSETS / "models" / "item" / f"arms_{kind}.json") or {}
+        if held != arms.held_model(kind):
+            err(f"models/item/arms_{kind}.json is not tools/arms.py's held pose")
+    for item in arms.items():
+        _metal, kind = arms.split(item)
+        definition = load(ASSETS / "items" / f"{item}.json") or {}
+        if not definition.get("swap_animation_scale"):
+            err(f"items/{item}.json has no swap_animation_scale")
 
 
 def check_end_shares():
@@ -4098,6 +4151,7 @@ def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
+                  | set(arms.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
                   | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
@@ -4112,6 +4166,7 @@ def main():
     check_java()
     check_deposits()
     check_gear()
+    check_arms()
     check_exosuit()
     check_grapple()
     check_field_chemistry()
