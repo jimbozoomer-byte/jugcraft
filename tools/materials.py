@@ -236,5 +236,8 @@ def feature_of(entry_id):
     import field_chemistry
     if entry_id in field_chemistry.items():
         return FEATURE
+    import construction
+    if entry_id in construction.items() or entry_id in construction.blocks():
+        return FEATURE
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)
