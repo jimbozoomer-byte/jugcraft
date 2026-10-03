@@ -2188,7 +2188,8 @@ def check_pumpkling(java, number, lang):
     is registered and drawn, guards crops as a CropGuard, wakes from a carved pumpkin, and its words, tags and
     advancement exist."""
     pk = ag.PUMPKLING
-    expected = {"MAX_HEALTH": pk["health"], "SPEED": pk["speed"], "FOLLOW_START": pk["follow_start"], "FOLLOW_STOP": pk["follow_stop"],
+    expected = {"MAX_HEALTH": pk["health"], "SPEED": pk["speed"], "TEMPT_RANGE": pk["tempt_range"], "FOLLOW_START": pk["follow_start"],
+                "FOLLOW_STOP": pk["follow_stop"],
                 "TELEPORT_DISTANCE": pk["teleport"], "TREAT_HEAL": pk["treat_heal"]}
     for name, value in expected.items():
         found = number("Pumpkling", name)

@@ -61,6 +61,8 @@ import org.jspecify.annotations.Nullable;
 public class Pumpkling extends PathfinderMob implements CropGuard {
 	public static final int MAX_HEALTH = 16;
 	public static final double SPEED = 0.3;
+	/** How far off it notices a treat held out to it (the attribute its tempt goal reads). */
+	public static final double TEMPT_RANGE = 10.0;
 	/** It follows its owner once they are further than this, in blocks, and stops this near. */
 	public static final double FOLLOW_START = 6.0;
 	public static final double FOLLOW_STOP = 2.5;
@@ -82,7 +84,8 @@ public class Pumpkling extends PathfinderMob implements CropGuard {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, MAX_HEALTH).add(Attributes.MOVEMENT_SPEED, SPEED);
+		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, MAX_HEALTH).add(Attributes.MOVEMENT_SPEED, SPEED)
+				.add(Attributes.TEMPT_RANGE, TEMPT_RANGE);
 	}
 
 	@Override

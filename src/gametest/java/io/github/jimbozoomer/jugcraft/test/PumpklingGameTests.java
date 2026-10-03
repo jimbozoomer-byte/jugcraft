@@ -145,8 +145,9 @@ public class PumpklingGameTests {
 	@GameTest
 	public void itSitsAndComesToItsOwner(GameTestHelper helper) {
 		floor(helper);
-		ServerPlayer owner = player(helper, new BlockPos(4, 2, 4), GameType.SURVIVAL);
-		ServerPlayer stranger = player(helper, new BlockPos(1, 2, 6), GameType.SURVIVAL);
+		// Both within reach (3 blocks) of it.
+		ServerPlayer owner = player(helper, new BlockPos(2, 2, 1), GameType.SURVIVAL);
+		ServerPlayer stranger = player(helper, new BlockPos(1, 2, 3), GameType.SURVIVAL);
 		Pumpkling pumpkling = pumpkling(helper, new BlockPos(1, 2, 1), owner, false);
 		interact(stranger, pumpkling, true);
 		helper.assertTrue(!pumpkling.sitting(), "A stranger can't have it sit");
@@ -154,6 +155,8 @@ public class PumpklingGameTests {
 		helper.assertTrue(pumpkling.sitting(), "Its owner has it sit");
 		interact(owner, pumpkling, true);
 		helper.assertTrue(!pumpkling.sitting(), "and get up again");
+		BlockPos far = helper.absolutePos(new BlockPos(6, 2, 6));
+		owner.setPos(far.getX() + 0.5, far.getY(), far.getZ() + 0.5);
 		helper.assertTrue(pumpkling.comeToOwner(), "It finds a spot by its owner");
 		double away = pumpkling.distanceTo(owner);
 		helper.assertTrue(away <= 4.5, "and comes to them: " + away + " blocks off");
