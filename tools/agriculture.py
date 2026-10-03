@@ -12,6 +12,7 @@ import midway
 import ferris_wheel
 import pinata
 import hot_air_balloon
+import leaf_blower
 
 FEATURE = "agriculture"
 
@@ -695,6 +696,8 @@ HALLOWEEN_ADVANCEMENTS.update(ferris_wheel.ADVANCEMENTS)
 HALLOWEEN_ADVANCEMENTS.update(pinata.ADVANCEMENTS)
 # The hot-air balloon fiesta (tools/hot_air_balloon.py).
 HALLOWEEN_ADVANCEMENTS.update(hot_air_balloon.ADVANCEMENTS)
+# The leaf blower (tools/leaf_blower.py).
+HALLOWEEN_ADVANCEMENTS.update(leaf_blower.ADVANCEMENTS)
 
 
 # ---------------------------------------------------------------- Halloween festivities
@@ -2550,7 +2553,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + plants.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items())
 
 
 def owns(entry_id):
@@ -2628,3 +2631,5 @@ SHAPELESS += pinata.SHAPELESS
 # The hot-air balloon fiesta's recipes (tools/hot_air_balloon.py).
 SHAPED += hot_air_balloon.SHAPED
 SHAPELESS += hot_air_balloon.SHAPELESS
+# The leaf blower's recipe (tools/leaf_blower.py).
+SHAPED += leaf_blower.SHAPED

@@ -9,6 +9,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
+import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -1107,6 +1108,9 @@ public final class JugcraftAgriculture {
 		PIBAL = entity("pibal", EntityType.Builder.<Pibal>of(Pibal::new, MobCategory.MISC).noLootTable().noSummon().sized(0.6F, 0.6F)
 				.clientTrackingRange(16).updateInterval(2));
 		Balloons.register();
+		// Fall additions 30, the leaf blower: a dieselpunk electric leaf blower, charged at the Charging Station.
+		registerItem(LeafBlowerItem.ID, LeafBlowerItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)
+				.component(JugcraftTools.ENERGY, 0L), TOOL_TAB);
 
 		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
 		// entity players sit on), the Autumn Wreath and the Leaf Piles.

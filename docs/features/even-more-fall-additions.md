@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21), the flying broomstick (addition 22), full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25), the fall fair midway (addition 26), the Ferris wheel (addition 27) and the piñata party (addition 28) are implemented in source and pass CI's game tests; the hot-air balloon fiesta (addition 29) is implemented in source. None is yet played by hand. Addition 30 is planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21), the flying broomstick (addition 22), full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25), the fall fair midway (addition 26), the Ferris wheel (addition 27) and the piñata party (addition 28) are implemented in source and pass CI's game tests; the hot-air balloon fiesta (addition 29) and the leaf blower (addition 30) are implemented in source. None is yet played by hand. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
@@ -11,7 +11,7 @@ Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Let
 27. the Ferris wheel: a fairground big wheel standing over its booth, eight cars of two seats, turned by kinetic power (one player can crank it for their friends). It takes the place of the planned ghost-train dark ride, which the Haunted Hayride and the Jump-Scare Trap already cover;
 28. the piñata party: papier-mâché piñatas (a pumpkin, a star and a bat) hung from a ceiling, filled by the party and swung at blindfolded until they burst;
 29. the hot-air balloon fiesta: hot-air balloons in three designs that rise on a burner and drift on winds that blow different ways at different heights, pibals to read the winds, and mooring posts for tethered rides;
-30. the leaf blower (planned).
+30. the leaf blower: a dieselpunk electric leaf blower, charged at the Charging Station, that herds fallen leaves into heaps, blows items along and candles out, and, sneaking, vacuums leaves up for the composter.
 
 Owner: @jimbozoomer-byte
 Target milestone and tier: hex brews are Discovery tier. You need:
@@ -42,6 +42,8 @@ The piñata party is Discovery tier: a piñata is five paper, a string and a dye
 
 The hot-air balloon fiesta is Discovery tier, with a little copper and iron: the Balloon Burner is four copper ingots, an iron ingot and a flint and steel; a balloon is five wool round its design (orange dye, a carved pumpkin or blue dye) over the burner and three bamboo; a Mooring Post is a lead, three iron ingots and three stone; pibals are a slime ball and a string (four). It burns what a generator burns: coal, charcoal, coke or a coal block.
 
+The leaf blower is steel tier, the gentlest of the powered tools: three steel plates, a steel gear, a basic circuit, iron bars and a lever, from the machines feature. It runs on JE, charged at the Charging Station as the Mining Drill and Chainsaw are.
+
 Primary specialty and supported player role: witchcraft and exploration. A witch brews hexes for others:
 - **Shrinking:** gets a player into one-block gaps, under low ceilings and into cramped caves, and makes them a smaller target.
 - **Giant:** gives a block more reach and half a block more step, for building and climbing, but makes the player a bigger target.
@@ -62,6 +64,8 @@ The Ferris wheel is for fair builders and engineers: the showpiece of a fair, re
 The piñata party is for anyone throwing a party: one player hangs a piñata, everyone brings something to fill it (candy from the candy kitchen, treats, anything), and the blindfolded take turns at it while the rest call out where it is. It is a way to share out a haul, and a game for a crowd.
 
 The hot-air balloon fiesta is for explorers and anyone who likes a view: a slow, quiet way to see the land from above, with a skill to it. A balloon can't be steered, only taken up or down, so a pilot reads the winds (a pibal shows them) and picks the height that blows their way. Fuel ties it to the tech branch's fuels; a mooring post makes it a fair ride for friends; several balloons aloft together are a mass ascension.
+
+The leaf blower is for gardeners and anyone who keeps a tidy yard: autumn's leaf piles, scattered by the wind and every mob that walks through them, can be herded back into a heap in a few seconds, and vacuumed up for the composter. It clears drops off a lawn or out of a doorway, and blows out a room of candles at once. It is a first use for a charged tool that isn't a weapon or a pick.
 
 The flying broomstick is a witch's way to travel: slower than elytra but found long before them, good for scouting, crossing ravines and reaching rooftops, and fuelled by the ointment a witch brews.
 
@@ -228,6 +232,17 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 10. **Safety:** a block where its envelope, burner or riders' heads would go stops it moving that way; with nobody aboard its vent opens of itself, so a balloon left aloft comes down near where it was left.
 11. **Advancements:** **Up, Up and Away** (32 blocks over the ground); **The Box** (fly out at least 64 blocks and land within 16 of where you took off); **Mass Ascension** (aloft with two other balloons aloft nearby).
 
+### The leaf blower
+1. **The blower:** an olive-drab dieselpunk blower: a round, stencilled motor housing with a hazard-striped band and louvred intake grilles either side, a gunmetal power cell at its back with a charge gauge, a long chrome tube from a gunmetal collar to a rubber-lipped nozzle, and a ribbed Bakelite pistol grip. A charge bar and a tooltip line show its JE, like the other powered tools. It starts empty: hang it on a Charging Station to charge it.
+2. **Blow:** hold **use**. It roars (a breeze's rush) and puffs of air stream from its nozzle. The stream is a cone 8 blocks long, 25 degrees either side of where you look.
+   - Dropped items and experience in it are blown along it, quickest close to the nozzle.
+   - Mobs are nudged gently, less those that resist knockback. Other players only where you could fight them (PvP on, and not a team-mate with friendly fire off). Nothing is hurt.
+   - Every fifth of a second, each leaf pile within 6 blocks in the stream gives a layer to the block beyond it (the way you face, rounded to north, south, east or west): onto a pile of its colour there with room, or a new pile on open ground there or a step down. Against a wall, a full pile or a pile of another colour it stays. So leaves heap up where the stream stops them: herd them against a fence and they pile four layers deep. **Gone with the Wind** is earned the first time a pile moves.
+   - Lit candles (and candles on a cake) within 6 blocks in the stream go out.
+3. **Vacuum:** sneak and hold **use**. Air is drawn in instead: items within 4 blocks in front come to you, and every fifth of a second a layer of each leaf pile (and a piece of vanilla leaf litter) within 4 blocks in front comes up into your inventory (or drops at your feet if it is full). A layer is one leaf pile item, as breaking it gives: compost them, or set them down again.
+4. **Charge:** blowing uses 4 JE a tick, vacuuming 6; a full 40,000 JE is about 8 minutes of blowing. When it runs flat it stops and says so.
+5. **Whose leaves:** it moves and takes up only leaves where you could build (not in adventure mode, not in spawn protection or another's claim the server guards).
+
 ## Connections
 - Hex brews, input producer:
   - the Bubbling Cauldron and its brews (the witch's cottage decorations);
@@ -279,6 +294,10 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 - Hot-air balloons, output consumer: travel and sightseeing (a slow, unsteerable way to cross country), a fair ride, and the fiesta's advancements. It makes nothing.
 - Hot-air balloons, entry path: everything is Overworld and early; copper and iron from the first mines.
 - Hot-air balloons, required vs optional: optional. Nothing is gated behind it.
+- Leaf blower, input producer: steel plates and a steel gear, a basic circuit (the machines feature), iron bars and a lever; JE from any generator, through the Charging Station.
+- Leaf blower, output consumer: tidier yards: leaf piles herded or taken up (for composters or to place again), drops blown or drawn in, candles put out. It makes nothing.
+- Leaf blower, entry path: steel and circuits from the machines feature; the Charging Station (steel plates, a redstone lamp, copper cable, an advanced circuit and a battery box) to charge it. It needs no other powered tool.
+- Leaf blower, required vs optional: optional. Nothing is gated behind it.
 
 ## Balance and automation
 - **Costs:** the cauldron is a cauldron and two iron ingots, reused. One brew is a water bucket (the bucket comes back), one brew ingredient, one hex ingredient and three glass bottles, which come back when drunk. That makes three draughts.
@@ -341,6 +360,12 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - No gain: fuel is burned, nothing comes back. Nothing it does makes items.
   - Automation: none. Only a pilot's keys fire the burner.
   - Cost on the server: a balloon ticks like a boat: its flight, a wind lookup, a dozen-odd block checks round its envelope and riders, and the pilot's gauges every half second; ridden balloons look for others aloft within 128 blocks every two seconds. A pibal looks up the wind each tick for its 30 seconds. Balloons are tracked to clients every tick so riders ride smoothly.
+- **Leaf blower:**
+  - Costs: 3 steel plates, a steel gear, a basic circuit, iron bars and a lever, once; then JE: 4 a tick blowing, 6 vacuuming, from a 40,000 JE charge (10,000 ticks of blowing, about 8 minutes).
+  - Units: blocks (stream 8 long, 25 degrees either side; piles moved within 6, a slightly wider 35 degrees for blocks on the ground; vacuum 4); blocks a tick (items 0.12, mobs 0.05, each falling off to nothing 10 blocks out; no faster than 0.8 across); a leaf tick every 4 ticks.
+  - No gain: a layer moved is a layer taken from the pile behind; a layer vacuumed is the one item that layer drops when broken, and placing that item lays one layer. Leaf litter likewise, a piece for a piece. Nothing is made.
+  - Automation: none. Only a player holding it blows, and only where that player may build.
+  - Cost on the server: while one is held in use, a look for entities within 8 blocks each tick; on a leaf tick, a scan of the blocks round its user (13 by 5 by 13 for piles and again for candles while blowing; 9 by 5 by 9 vacuuming), only those in the stream and the user's to change acted on. Nothing ticks when it isn't in use; the puffs of air are its user's client's particles.
 - **Piñata party:**
   - Costs: a piñata is 5 paper, a string and a dye, used up when it bursts; the stick (2 sticks, 2 dyes) and the Blindfold (black wool and string) last.
   - Units: 9 stacks; 8, 10 or 6 hits; a hit is a swing of at least 0.75 of the hitter's attack damage; the stick counts 2. Its foot hangs 1.5 blocks below its block.
@@ -417,6 +442,11 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 - **Hot-air balloon, persistence:** a balloon saves its design, heat, fuel and mooring. Riders aren't saved aboard (players aren't saved as passengers). A pibal saves its age. A balloon never despawns.
 - **Hot-air balloon, IDs (all new):** items `harvest_balloon`, `pumpkin_balloon`, `harvest_moon_balloon`, `balloon_burner`, `pibal`; block and item `mooring_post`; entities `hot_air_balloon`, `pibal`; data component `balloon_fuel`; payload `balloon_control`; advancements `up_up_and_away`, `the_box`, `mass_ascension`; their recipes.
 - **Hot-air balloon, disable behaviour:** with the agriculture feature off the recipes don't load; balloons already set up stay and fly.
+- **Leaf blower, server authority:** blowing and vacuuming happen on the server, from vanilla's item use (the server's own using-item ticks), and drain the server's copy of the charge. Leaf piles, leaf litter and candles change only where the user may build (`mayBuild` and the level's `mayInteract`, so spawn protection and claims hold). Other players are pushed only where the user could harm them (`canHarmPlayer`: PvP on, friendly fire). The advancement is the server's. The client only draws the puffs of air.
+- **Leaf blower, what clients get:** nothing new: the item's charge travels in its own data component, the blocks and entities it moves in vanilla's updates.
+- **Leaf blower, persistence:** the charge is the shared `jugcraft:energy` component, saved with the item. Nothing else is saved.
+- **Leaf blower, IDs (all new):** item `leaf_blower`; advancement `gone_with_the_wind`; its recipe. It reuses the leaf piles (`red_leaf_pile`, `orange_leaf_pile`, `yellow_leaf_pile`) and the energy component.
+- **Leaf blower, disable behaviour:** its recipe needs both the agriculture and machines features; with either off it doesn't load. A blower already made keeps its charge and still works.
 
 ## Dependencies and assets
 - No new dependencies.
@@ -451,6 +481,10 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - `tools/hot_air_balloon_data.py` writes the quads the client draws the balloons from (`assets/jugcraft/balloon_quads.json`): the basket and rigging (boxes and bars); the burner's flames; each envelope, a surface of 24 gores turned about its axis with a normal at each corner so it is lit smoothly, drawn from both sides so it shows from inside the basket; the Jack-o'-Lantern's ribs, stem and its faces' glow; the pibal; and the mooring rope. It also writes the Mooring Post's model and the items'. The shared `QuadModel` gained "nocull" and per-corner "normals" for this.
   - `tools/hot_air_balloon_textures.py` paints the basket, burner, rigging and post at 64 × 64, and each envelope as one 768 × 384 wrap (32 pixels to a gore, the crown at the top), in `textures/entity/hot_air_balloon/`. All original; checked in renders of the quads before any game run.
   - Sounds and particles are vanilla's: an anvil's clang pitched up for the strike, note-block bits rising with the puck, a bell, glass and an amethyst chime for a ringer; crits, fireworks, hearts and happy-villager sparks.
+- The leaf blower: no new dependencies.
+  - `tools/leaf_blower.py` holds the numbers (`LEAF_BLOWER`), the advancement and the recipe; the checker compares them with `LeafBlowerItem.java`.
+  - `tools/leaf_blower_data.py` builds its model from the powered tools' dieselpunk boxes, cylinders and dial (`tools/steampunk_models.py`) and their textures (olive paint, gunmetal, chrome, hazard stripes, ribbed rubber, Bakelite, a gauge), so it matches the Mining Drill and Chainsaw. It also writes its words. No new textures.
+  - Sounds and particles are vanilla's: a breeze's rush of air, clouds and white ash for the stream, the leaves' own block dust.
 
 ## Verification
 ### Hex brews verification
@@ -715,6 +749,23 @@ The 9 new game tests (`HotAirBalloonGameTests`), most in a 44 by 44 by 26 empty 
 
 Not run: flying one by hand (the tests fire the burner directly), a box flown in play, and a two-client dedicated-server playtest (riders together, a mass ascension).
 
+### Leaf blower verification
+Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1097 IDs and now compares `tools/leaf_blower.py` with Java (it fails as it should with a number changed); `python3 scripts/check_repository.py` passes.
+
+The 8 new game tests (`LeafBlowerGameTests`), on a stone floor in an open arena, the blower facing east:
+1. flat, it won't start; charged, it starts; each tick of blowing costs its JE, until it is too flat for another and stops; it holds 40,000 JE;
+2. an item ahead is blown along, a pig more gently, an item behind not at all;
+3. a team-mate with friendly fire off isn't pushed;
+4. a pile in the stream gives a layer to the block beyond it, a pile against a wall stays, and it earns Gone with the Wind; in adventure mode nothing moves;
+5. a pile can't heap past a full one or onto another colour;
+6. lit candles in the stream go out, ones behind don't;
+7. sneaking, it takes up a layer of a pile in reach into the inventory, leaves one out of reach, and draws an item in;
+8. the recipe and advancement load.
+
+`LeafBlowerClientGameTests` takes screenshots: the blower held, with the hotbar; blowing a lawn of leaf piles, seen from behind; the heap they make; vacuuming; and the blower itself three times life size.
+
+Not run: blowing by hand, and a two-client dedicated-server playtest (pushing a friend with PvP on and off).
+
 ## World and event applicability
 - A cauldron brews hexes in any dimension, all year. Nothing is seasonal.
 - The hex ingredients come from the Overworld: brown mushrooms, beans, and phantoms.
@@ -727,8 +778,11 @@ Not run: flying one by hand (the tests fire the burner directly), a box flown in
 - The Ferris wheel works in any dimension with room for it, all year. Nothing generates in the world.
 - Piñatas hang and burst in any dimension, all year. Nothing generates in the world.
 - Balloons fly in any dimension, all year; the winds are layered from that dimension's sea level. Nothing generates in the world.
+- The leaf blower works in any dimension, all year. Leaf piles are the harvest party's placed decorations and vanilla's leaf litter lies in its woods; both are there all year. Nothing generates in the world.
 
 ## Rollout and open questions
+- The leaf blower moves leaf piles only along north, south, east or west (the way its user faces, rounded), a layer a block at a time, so herding is deliberate rather than a gust. Mods' leaf blocks and vanilla's leaves aren't moved; vanilla leaf litter is only vacuumed, not blown.
+- It pushes but never hurts, and its push is weak enough to walk against. Whether it should push other players at all on a PvP server is open to review once played.
 - A piñata keeps whatever it is given, nine stacks of anything; a party should trust whoever hung it, who alone can take it down.
 - A piñata can't be hit by projectiles, so it is a melee game.
 - A balloon's envelope and riders don't collide with mobs or players, only with blocks (and then it stops). It can't be shot down.
