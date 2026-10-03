@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: fall additions 18, wild turkeys (pull request pending, stacked on the Spirit Board)
+- **Wild Turkeys:** flocks of three to five come to forests, taiga, plains and meadows by day. Toms are bronze with a red wattle and a great chestnut tail; hens are brown. A tom with an audience struts: tail fanned, breast puffed, wings down, a gobble.
+- Seeds and corn tempt and breed them (Gobble Gobble); hens lay eggs; each drops a raw turkey and feathers, and they flutter down instead of falling.
+- **Roast Turkey:** roast a raw turkey in a furnace, smoker or on a campfire and set it on the table: six servings, eaten by hand or carved off with a Carving Knife (Carving the Bird), the drumsticks first, then the breast, then the carcass and a bone.
+- New server game tests and a client test with screenshots.
+
 ### Agriculture: fall additions 17, the Spirit Board (pull request pending, stacked on pie baking)
 - **Spirit Board:** a lettered talking board with a walnut planchette. By candlelight, up to four players rest their fingers on it; the nearest restless spirit answers YES and spells its name and the one thing it wishes for, then GOODBYE (Is Anybody There?). More hands, faster letters; no spirit, NO.
 - Give a revealed spirit what it wished for (a pie, a candle, cider, a sweater, candy, an apple, a rose or a pumpkin) and it is laid to rest: experience and Luck (Unfinished Business).

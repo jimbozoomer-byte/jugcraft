@@ -911,6 +911,19 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Hold a séance** by candlelight, fingers on the planchette (friends make it faster): the nearest restless spirit spells its name and its wish.
 - Give a revealed spirit its wish and it is laid to rest. Details: [more fall additions](../features/more-fall-additions.md#the-spirit-board).
 
+### Wild turkeys
+
+| **A flock**: two toms (one strutting), two hens and three poults | **Strutting toms** up close, their tails fanned |
+| --- | --- |
+| ![Wild turkeys](../images/ingame_turkeys.jpg) | ![A strutting tom](../images/ingame_turkey_strut.jpg) |
+| **Roast turkeys** on the table: whole, the drumsticks gone, the breast carved, the carcass | |
+| ![Roast turkeys](../images/ingame_roast_turkeys.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`TurkeyClientGameTests`, software rendering, small previews). The turkeys are placed and the strut held for the picture.*
+
+- **Wild turkeys** come to woods and meadows in flocks; seeds breed them, hens lay eggs, and toms strut for an audience.
+- **Roast one** and set it on the table: six servings, eaten or carved. Details: [more fall additions](../features/more-fall-additions.md#wild-turkeys).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
