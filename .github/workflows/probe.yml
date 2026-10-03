@@ -18,6 +18,15 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
+      - name: Batch 35 APIs
+        run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          T=$(find ~/.gradle/caches -name 'fabric-transfer-api-v1*.jar' | grep -v sources | head -1); echo "jar $T"
+          unzip -l "$T" | grep -E "item/base|context/" 
+          for c in net.fabricmc.fabric.api.transfer.v1.item.base.SingleVariantItemStorage net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil net.fabricmc.fabric.api.transfer.v1.item.ItemVariant net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage; do echo "=== $c"; javap -cp "$T:$COMMON" "$c" 2>&1 | head -60; done
+          echo "=== Item use"; javap -cp "$COMMON" net.minecraft.world.item.Item | grep -E " use\(| useOn\(|getMaxStackSize|stacksTo"
+          echo "=== Items ice"; javap -cp "$COMMON" net.minecraft.world.item.Items | grep -E " ICE;| PACKED_ICE;| BLUE_ICE;| SNOW_BLOCK;| POWDER_SNOW_BUCKET;"
       - name: Batch 34 APIs
         run: |
           set +e
