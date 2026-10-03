@@ -13,7 +13,11 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -27,11 +31,16 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.saveddata.WeatherData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -63,6 +72,13 @@ public final class JugcraftRocketry {
 	public static Item CLEAR_SKY_ROCKET;
 	public static Item SIGNAL_FLARE;
 	public static Item ILLUMINATION_FLARE;
+	/** Batch 39: the rocket post. */
+	public static Item DELIVERY_ROCKET;
+	public static Item FLIGHT_PLAN;
+	public static Block ROCKET_PAD;
+	public static BlockEntityType<RocketPadBlockEntity> ROCKET_PAD_ENTITY;
+	public static ExtendedMenuType<RocketPadMenu, BlockPos> ROCKET_PAD_MENU;
+	public static DataComponentType<GlobalPos> FLIGHT_TARGET;
 
 	private record Flight(ServerLevel level, UUID player, String name, RocketItem.Kind kind, Vec3 at, long due) {
 	}
@@ -92,12 +108,36 @@ public final class JugcraftRocketry {
 		CLEAR_SKY_ROCKET = rocket("clear_sky_rocket", RocketItem.Kind.CLEAR);
 		SIGNAL_FLARE = rocket("signal_flare", RocketItem.Kind.SIGNAL);
 		ILLUMINATION_FLARE = rocket("illumination_flare", RocketItem.Kind.ILLUMINATION);
+		registerPost();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		ServerTickEvents.END_SERVER_TICK.register(JugcraftRocketry::tick);
+		ServerTickEvents.END_SERVER_TICK.register(RocketPost::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FLIGHTS.clear();
 			nextWeather = 0;
 		});
+	}
+
+	/** Batch 39: the rocket pad, delivery rockets and flight plans. */
+	private static void registerPost() {
+		FLIGHT_TARGET = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("flight_target"),
+				DataComponentType.<GlobalPos>builder().persistent(GlobalPos.CODEC).networkSynchronized(GlobalPos.STREAM_CODEC).build());
+		DELIVERY_ROCKET = item("delivery_rocket", properties -> new Item(properties.stacksTo(16)) {
+			@Override
+			public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+					Consumer<Component> tooltip, TooltipFlag flag) {
+				tooltip.accept(Component.translatable("tooltip.jugcraft.delivery_rocket").withStyle(ChatFormatting.GRAY));
+			}
+		});
+		FLIGHT_PLAN = item("flight_plan", properties -> new FlightPlanItem(properties.stacksTo(1)));
+		ResourceKey<Block> padKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("rocket_pad"));
+		ROCKET_PAD = Registry.register(BuiltInRegistries.BLOCK, padKey, new RocketPadBlock(
+				BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).strength(2.0F).noOcclusion().setId(padKey)));
+		item("rocket_pad", properties -> new BlockItem(ROCKET_PAD, properties.useBlockDescriptionPrefix()));
+		ROCKET_PAD_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("rocket_pad"),
+				FabricBlockEntityTypeBuilder.create(RocketPadBlockEntity::new, ROCKET_PAD).build());
+		ROCKET_PAD_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("rocket_pad"),
+				new ExtendedMenuType<>((containerId, inventory, pos) -> new RocketPadMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
 	}
 
 	private static Item rocket(String path, RocketItem.Kind kind) {
