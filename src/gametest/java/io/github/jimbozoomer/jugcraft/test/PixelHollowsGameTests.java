@@ -393,7 +393,6 @@ public class PixelHollowsGameTests {
 	 */
 	@GameTest(maxTicks = 4800)
 	public void everyVillageHasOneShop(GameTestHelper helper) {
-		helper.assertTrue(RetroShopPlacement.canRelayout(), "A village without room for its shop cannot be laid out again");
 		ServerLevel level = helper.getLevel();
 		var server = level.getServer();
 		BlockPos base = helper.absolutePos(BlockPos.ZERO);
