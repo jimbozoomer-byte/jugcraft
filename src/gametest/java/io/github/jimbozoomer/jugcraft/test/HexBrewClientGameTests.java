@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -17,9 +18,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 /**
- * Client game test for the hex brews: the three hex brews bubbling in cauldrons over campfires, their draughts framed
- * on a wall behind; then the same seen by a player shrunk by the Shrinking Draught and by one grown by the Giant's
- * Draught. CI job {@code client}.
+ * Client game test for the hex brews: the three hex brews bubbling in cauldrons over magma, their draughts framed on a
+ * wall behind, and a look down into the shrinking brew; then the pots as a player shrunk by the Shrinking Draught sees
+ * them, and, from in front, a shrunk player among them and a giant. CI job {@code client}.
  */
 public class HexBrewClientGameTests implements FabricClientGameTest {
 	private static final List<Brew> HEXES = List.of(Brew.SHRINKING, Brew.GIANT, Brew.FLYING);
@@ -55,15 +56,21 @@ public class HexBrewClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 
-			shoot(context, singleplayer, x + 3, y + 1, z + 1, 180, 25, "jugcraft_hex_brews");
-			shoot(context, singleplayer, x + 1, y + 1, z - 2, 180, 45, "jugcraft_hex_shrinking_brew");
+			shoot(context, singleplayer, x + 3, y + 3, z + 1, 180, 40, "jugcraft_hex_brews");
+			shoot(context, singleplayer, x + 1, y + 2, z - 2, 180, 62, "jugcraft_hex_shrinking_brew");
 			// As a shrunk player sees it: the pot towers overhead.
 			server.runCommand("effect give @p jugcraft:shrunk 120 0 true");
 			shoot(context, singleplayer, x + 3, y, z - 1, 180, -10, "jugcraft_hex_shrunk");
+			// And seen from in front: a shrunk player among the pots, then a giant.
+			place(context, singleplayer, x + 3, y, z - 1, 0, 10);
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_hex_shrunk_seen");
 			server.runCommand("effect clear @p");
-			// And as a giant: the pots at their feet.
 			server.runCommand("effect give @p jugcraft:giant 120 0 true");
-			shoot(context, singleplayer, x + 3, y, z + 1, 180, 22, "jugcraft_hex_giant");
+			context.waitTicks(20);
+			context.takeScreenshot("jugcraft_hex_giant_seen");
+			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			server.runCommand("effect clear @p");
 		}
 	}
@@ -85,7 +92,7 @@ public class HexBrewClientGameTests implements FabricClientGameTest {
 		context.takeScreenshot(name);
 	}
 
-	/** Three cauldrons over campfires, each holding a hex brew, before a cobbled wall for the framed draughts. */
+	/** Three cauldrons over magma blocks, each holding a hex brew, before a cobbled wall for the framed draughts. */
 	private static void build(ServerLevel level, BlockPos origin) {
 		int x = origin.getX();
 		int y = origin.getY();
@@ -97,7 +104,7 @@ public class HexBrewClientGameTests implements FabricClientGameTest {
 		}
 		for (int i = 0; i < HEXES.size(); i++) {
 			BlockPos pot = new BlockPos(x + 1 + 2 * i, y + 1, z - 3);
-			level.setBlock(pot.below(), Blocks.CAMPFIRE.defaultBlockState(), Block.UPDATE_ALL);
+			level.setBlock(pot.below(), Blocks.MAGMA_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
 			level.setBlock(pot, JugcraftAgriculture.block("bubbling_cauldron").defaultBlockState().setValue(BubblingCauldronBlock.CONTENTS, HEXES.get(i))
 					.setValue(BubblingCauldronBlock.DOSES_LEFT, BubblingCauldronBlock.DOSES - i), Block.UPDATE_ALL);
 		}
