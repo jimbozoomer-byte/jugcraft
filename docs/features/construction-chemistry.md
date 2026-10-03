@@ -50,7 +50,8 @@ No new dependencies. Block and item textures, models, recipes and loot tables co
   - a canister runs down and is used up;
   - cement turns foam into concrete and is consumed;
   - reinforced concrete's blast resistance is at least 1200.
-- Not run: client play (aiming, the look of the blocks), two players, the walled town in play.
+- Client screenshot: `jugcraft_foam_sprayer` (a foam-bridged trench and the concrete blocks, sprayer in hand).
+- Not run: client play (aiming), two players, the walled town in play.
 
 ## World and event applicability
 Not applicable: no worldgen, mobs or dimensions.
