@@ -1263,6 +1263,9 @@ def machines():
     save(grate(957, glow=[(250, 140, 30), (255, 190, 60), (220, 80, 20)]), "block", "cobblestone_generator_front_on")
     save(window(958, [(28, 44, 30), (36, 56, 38)]), "block", "tree_farm_front")
     save(window(958, [(28, 44, 30)], glow=[(120, 200, 90), (170, 230, 120), (90, 170, 70)]), "block", "tree_farm_front_on")
+    save(window(3301, [(30, 40, 34), (38, 50, 40)]), "block", "hydroponic_bay_front")
+    save(window(3301, [(30, 40, 34)], glow=[(200, 110, 230), (236, 150, 250), (150, 210, 110)]), "block",
+         "hydroponic_bay_front_on")
     save(tank_side(959), "block", "water_wheel_front")
     save(boiler(961, False), "block", "large_steam_engine_front")
     save(boiler(961, True), "block", "large_steam_engine_front_on")

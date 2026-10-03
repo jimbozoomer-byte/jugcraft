@@ -84,6 +84,7 @@
     "advanced_solar_panel": "electric",
     "advanced_engine": "electric",
     "crop_harvester": "diesel",
+    "hydroponic_bay": "diesel",
     "diesel_engine": "diesel",
     "wind_turbine": "diesel"
   }
