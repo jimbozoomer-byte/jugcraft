@@ -553,7 +553,38 @@ public enum MachineKind implements StringRepresentable {
 			case ADVANCED_SOLAR_PANEL -> Footprint.of(Vec3i.ZERO, new Vec3i(0, 1, 0), new Vec3i(-1, 1, 0), new Vec3i(1, 1, 0),
 					new Vec3i(0, 1, -1), new Vec3i(0, 1, 1), new Vec3i(-1, 1, -1), new Vec3i(1, 1, -1), new Vec3i(-1, 1, 1),
 					new Vec3i(1, 1, 1));
+			// Batch 44: machines that were one block and are now big dieselpunk multi-blocks (see enlarged()).
+			case COAL_GENERATOR -> Footprint.cuboid(2, 2, 3);
+			case STEAM_GENERATOR -> Footprint.cuboid(3, 3, 2);
+			case ELECTRIC_FURNACE -> Footprint.cuboid(2, 2, 2);
+			case CRUSHER -> Footprint.cuboid(2, 3, 2);
+			case METAL_PRESS -> Footprint.cuboid(2, 3, 2);
+			case WIRE_DRAWER -> Footprint.cuboid(4, 1, 2);
+			case CIRCUIT_ASSEMBLER -> Footprint.cuboid(3, 2, 2);
+			case PULVERIZER -> Footprint.cuboid(3, 2, 2);
+			case ORE_WASHER -> Footprint.cuboid(2, 2, 4);
+			case SIEVE -> Footprint.cuboid(2, 2, 3);
+			case SAWMILL -> Footprint.cuboid(2, 2, 5);
+			case FUEL_CELL -> Footprint.cuboid(2, 2, 2);
+			case HYDROPONIC_BAY -> Footprint.cuboid(3, 2, 3);
+			case ELECTROPLATING_BATH -> Footprint.cuboid(4, 2, 2);
+			case AMMONIA_CHILLER -> Footprint.cuboid(2, 3, 2);
+			case ROCKET_WORKSHOP -> Footprint.cuboid(5, 3, 3);
 			default -> Footprint.SINGLE;
+		};
+	}
+
+	/**
+	 * Machines that were one block before batch 44 and are multi-blocks now. Copies already standing in a world keep
+	 * working as they are: their saved block has no {@code compact} property, so it loads as compact (one block, the
+	 * old model); placing the item builds the full machine (see {@link EnlargedMachineBlock}).
+	 */
+	public boolean enlarged() {
+		return switch (this) {
+			case COAL_GENERATOR, STEAM_GENERATOR, ELECTRIC_FURNACE, CRUSHER, METAL_PRESS, WIRE_DRAWER, CIRCUIT_ASSEMBLER,
+					PULVERIZER, ORE_WASHER, SIEVE, SAWMILL, FUEL_CELL, HYDROPONIC_BAY, ELECTROPLATING_BATH, AMMONIA_CHILLER,
+					ROCKET_WORKSHOP -> true;
+			default -> false;
 		};
 	}
 

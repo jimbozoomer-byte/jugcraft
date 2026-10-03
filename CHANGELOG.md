@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Dieselpunk giants, batch 44
+- Sixteen one-block machines are now big, detailed multi-blocks (from 2x2x2 up to the 5x3x3 rocket workshop, with long ones like the 2x2x5 sawmill and the 4x1x2 wire drawer) in a weathered dieselpunk look: rust, patina, perforated covers, ribbed coil stacks, banded domes, copper pipes with hex fittings and amber glow.
+- Machines already built in a world stay one block and keep working (`compact` state); placing the item builds the full machine.
+- Game tests for forming, the compact copies and breaking. Record: [dieselpunk-giants.md](docs/features/dieselpunk-giants.md).
+
 ### Unmerged: Rocketry, batch 38
 - **Rocket Workshop** and propellant chemistry: ammonium perchlorate, iodine (from kelp), silver iodide and solid propellant; rocket casings, nozzles, guidance units and motors.
 - **Survey rocket:** surveys ores and oil under 7x7 chunks. **Cloud-seeding** and **clear-sky rockets:** five minutes of rain or clear sky, with a shared cooldown. **Signal flares:** tell nearby players where you are. **Illumination flares:** make hostile mobs glow.

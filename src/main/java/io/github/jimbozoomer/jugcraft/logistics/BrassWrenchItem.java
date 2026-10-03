@@ -54,7 +54,8 @@ public class BrassWrenchItem extends Item {
 		}
 		BlockState turned = turn(state);
 		if (turned == null) {
-			if (player != null && !level.isClientSide() && state.getBlock() instanceof LargeMachineBlock) {
+			if (player != null && !level.isClientSide() && state.getBlock() instanceof LargeMachineBlock large
+					&& large.footprint(state).size() > 1) {
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.wrench.large"));
 			}
 			return InteractionResult.PASS;
@@ -67,7 +68,7 @@ public class BrassWrenchItem extends Item {
 
 	private static BlockState turn(BlockState state) {
 		Block block = state.getBlock();
-		if (block instanceof LargeMachineBlock) {
+		if (block instanceof LargeMachineBlock large && large.footprint(state).size() > 1) {
 			return null;
 		}
 		if (block instanceof MachineBlock) {
