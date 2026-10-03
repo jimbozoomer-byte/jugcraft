@@ -21,6 +21,20 @@ public class WeaponProbeGameTests {
 				"net/minecraft/world/item/MaceItem", "net/minecraft/world/item/component/ItemAttributeModifiers"}) {
 			names.add(name);
 		}
+		// Second round: how vanilla builds the shield's and the spear's components, the swing types, sounds, damage tags,
+		// blocking and sweeping, and (if present on this classpath) the first-person item renderer.
+		for (String name : new String[] {"net/minecraft/world/item/Items", "net/minecraft/world/item/SwingAnimationType",
+				"net/minecraft/sounds/SoundEvents", "net/minecraft/tags/DamageTypeTags", "net/minecraft/world/entity/LivingEntity",
+				"net/minecraft/world/entity/player/Player", "net/minecraft/world/item/ShieldItem",
+				"net/minecraft/client/renderer/ItemInHandRenderer", "net/minecraft/client/model/HumanoidModel",
+				"net/minecraft/client/renderer/item/ItemModelResolver"}) {
+			names.add(name);
+		}
+		try {
+			add(names, Class.forName("net.minecraft.core.component.DataComponentInitializers"));
+		} catch (ClassNotFoundException exception) {
+			Jugcraft.LOGGER.info("[probe] FIELD none DataComponentInitializers missing");
+		}
 		for (Field field : DataComponents.class.getFields()) {
 			String upper = field.getName();
 			if (!(upper.contains("ATTACK") || upper.contains("KINETIC") || upper.contains("PIERCING") || upper.contains("WEAPON")
