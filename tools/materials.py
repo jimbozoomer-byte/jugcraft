@@ -233,5 +233,8 @@ def feature_of(entry_id):
     import grapple
     if entry_id in grapple.items():
         return FEATURE
+    import field_chemistry
+    if entry_id in field_chemistry.items():
+        return FEATURE
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

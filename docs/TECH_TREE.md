@@ -445,6 +445,22 @@ Empty tools mine like a bare hand and get no drops.
 
 **Code:** `gear/` (`JugcraftGrapple`, `PneumaticGrappleItem`, `GrappleHook`), client `GrappleHookRenderer`; data and art from `tools/grapple.py` ([feature record](features/pneumatic-grapple.md)).
 
+### Field chemistry (batch 31)
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Chlorine Grenade | 3-block cloud for 10 s: 2 damage a second through armor to what breathes | chemical reactor: steel plate, iron nugget, 500 mB chlorine (makes 2) |
+| Smoke Grenade | 4-block screen for 15 s: mobs lose their target, players inside are blinded | chemical reactor: steel plate, 2 sugar, 250 mB ammonia (makes 2) |
+| Thermite | Filling for thermite grenades | aluminum ingot, 2 iron dust (makes 3) |
+| Thermite Grenade | Burning pool for 6 s: 4 damage a second through armor, sets alight | 2 steel plates, thermite, iron nugget (makes 4) |
+| Flashbang | Blinds players who see it (4 s), staggers mobs (3 s), no damage | 2 steel plates, aluminum nugget, glowstone dust, iron nugget (makes 4) |
+| Gas Mask | Keeps out chlorine, smoke and the flash; filter lasts 220 s in gas, repaired with charcoal | 3 rubber, 2 glass panes, steel plate, charcoal |
+| First Aid Kit | Heals four hearts; 10 s cooldown | chemical reactor: 2 cotton, soap, 250 mB bioethanol (makes 2) |
+| Antidote | Clears harmful effects, keeps good ones | chemical reactor: 2 charcoal, glass bottle, 250 mB lye |
+| Stimulant | Speed II and Haste II for 60 s, with hunger | chemical reactor: 4 cocoa beans, glass bottle, 250 mB bioethanol |
+
+**Code:** `weapons/` (`FieldChemistry`, `Warhead`, `ChemicalCloud`, `Flash`, `DescribedItem`); data and art from `tools/field_chemistry.py` ([feature record](features/field-chemistry.md)).
+
 ## Oil
 
 The first part of the Chemistry branch: the dieselpunk oil line ([plan](branches/CHEMISTRY.md#petrochemistry-the-dieselpunk-oil-line), [feature record](features/petrochemistry.md)).

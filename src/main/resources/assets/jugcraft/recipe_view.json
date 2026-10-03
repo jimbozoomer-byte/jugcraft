@@ -3958,6 +3958,136 @@
         {
           "items": [
             [
+              "#c:plates/steel",
+              1
+            ],
+            [
+              "minecraft:iron_nugget",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:chlorine",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:chlorine_grenade",
+              2
+            ]
+          ],
+          "ticks": 80
+        },
+        {
+          "items": [
+            [
+              "#c:plates/steel",
+              1
+            ],
+            [
+              "minecraft:sugar",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:ammonia",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:smoke_grenade",
+              2
+            ]
+          ],
+          "ticks": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:cotton",
+              2
+            ],
+            [
+              "jugcraft:soap",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:bioethanol",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:first_aid_kit",
+              2
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "minecraft:charcoal",
+              2
+            ],
+            [
+              "minecraft:glass_bottle",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:lye",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:antidote",
+              1
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "minecraft:cocoa_beans",
+              4
+            ],
+            [
+              "minecraft:glass_bottle",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:bioethanol",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:stimulant",
+              1
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "items": [
+            [
               "jugcraft:asphalt_binder",
               2
             ]

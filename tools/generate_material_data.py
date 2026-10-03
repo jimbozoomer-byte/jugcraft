@@ -146,6 +146,8 @@ def assets():
     exosuit.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import grapple
     grapple.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import field_chemistry
+    field_chemistry.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures

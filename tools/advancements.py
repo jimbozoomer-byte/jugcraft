@@ -89,6 +89,12 @@ TREE = {
                             "Build an air separation unit", "goal"),
     # Batch 30: the pneumatic grapple, on nitrogen from the air separation unit.
     "pneumatic_grapple": ("air_separation_unit", "pneumatic_grapple", "Reel Me In", "Make a pneumatic grapple", "task"),
+    # Batch 31: field chemistry.
+    "gas_mask": ("air_separation_unit", "gas_mask", "Filtered", "Make a gas mask", "task"),
+    "chemical_grenade": ("grenade", ["chlorine_grenade", "smoke_grenade", "thermite_grenade", "flashbang"],
+                         "Chemical Arsenal", "Make a chlorine, smoke or thermite grenade or a flashbang", "task"),
+    "first_aid_kit": ("air_separation_unit", "first_aid_kit", "Field Medic", "Make a first aid kit in the chemical reactor",
+                      "task"),
     "synthesis_converter": ("air_separation_unit", "synthesis_converter", "Bread from Air",
                             "Build a synthesis converter, to make ammonia from air", "goal"),
     "nitric_acid": ("synthesis_converter", "nitric_acid_bucket", "Aqua Fortis", "Make nitric acid", "task"),
