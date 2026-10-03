@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 643 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit` and `hay_golem` |
+| Registered IDs | 959 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit` and `hay_golem`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
 
 ## Build, generate, check
 
@@ -73,7 +73,7 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | BATTERY_BOX | battery_box | storage; outputs from the front only | 400k / 256 / 256 / – | – | – |
 | ELECTRIC_FURNACE | electric_furnace | vanilla smelting, 100 ticks | 10k / 128 / 0 / 10 | in, out | vanilla `smelting` |
 | CRUSHER | crusher | ore ×2, minerals, gravel/sand | 10k / 128 / 0 / 16 | in, out | `jugcraft:crushing` |
-| ARC_FURNACE | arc_furnace_controller | 3×3×3 casing structure | 50k / 512 / 0 / 64 | in, out | `jugcraft:arc_smelting` |
+| ARC_FURNACE | arc_furnace_controller | 3×3×3 casing structure; pulls silicon boules and takes argon as a boost gas since batch 24 (the crystal grower's jobs) | 50k / 512 / 0 / 64 | 2 in, out | `jugcraft:arc_smelting` (multi-ingredient since batch 24) |
 | SOLAR_PANEL | solar_panel | 8 JE/t in sun | 4k / 0 / 32 / – | – | – |
 | ADVANCED_SOLAR_PANEL | advanced_solar_panel | **pedestal + 3×3 layer (10 parts)**, 64 JE/t in sun (sky checked above the array) | 400k / 0 / 512 / – | – | – |
 | ADVANCED_ENGINE | advanced_engine | **2×1×1** KE generator: gasoline/diesel → up to 1,024 KE/t out of the master's back | none (KE) | – (8,000 mB fuel tank) | – |
@@ -90,7 +90,6 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | SAWMILL | sawmill | log → 6 planks + sawdust | 10k / 128 / 0 / 12 | in, out, 2 byproduct | `jugcraft:sawing` |
 | CAPACITOR_BANK | capacitor_bank | **2×2** battery: charges any side, outputs from its front | 4M / 4,096 / 4,096 / – | – | – |
 | LITHIUM_BATTERY_BANK | lithium_battery_bank | **3×2×1** battery (electric look): charges any side, outputs from all six front faces | 32M / 16,384 / 16,384 / – | – | – |
-| CRYSTAL_GROWER | crystal_grower | **1×2** (cyan look): 4 silicon + phosphate → silicon boule | 60k / 512 / 0 / 128 | 2 in, out | `jugcraft:crystal_growing` (multi) |
 | LITHOGRAPHY_STATION | lithography_station | **3×2×2** fluid processor (cyan look): wafer + 2 copper wire + 100 mB acid → 4 microchips | 60k / 1,024 / 0 / 192 | 2 in, out, 4,000 mB tank | `jugcraft:lithography` |
 | GAS_HOLDER | gas_holder | **3×3×3** tank, 1,024 buckets of one gas (`GasFluid` only), no power, no screen | none | – (gas) | – |
 | STEEL_TANK | steel_tank | **2×2** tank, 128 buckets, no power, no screen; drops with its fluid (`MachineKind.keepsContents`) | none | – (fluid) | – |
@@ -214,6 +213,27 @@ The Agriculture branch ([branches/AGRICULTURE.md](branches/AGRICULTURE.md)). Eve
 | Tools | `flint_sickle` (3×3), `bronze_sickle` (5×5) | `SickleItem` | harvests and replants ripe crops, vanilla crops included |
 | Equipment | `trellis`, `cooking_pot` | `TrellisBlock`; `CookingPotBlock`, `CookingPotBlockEntity`, `CookingPotMenu`, `client/CookingPotScreen` | the pot cooks `jugcraft:pot_cooking` recipes over a block in `jugcraft:heat_sources` |
 
+### World: Pixel Hollows and the Retro Trader (`world/`, `tools/pixel_hollows.py`)
+
+Records: [pixel-hollows.md](features/pixel-hollows.md), [retro-trader.md](features/retro-trader.md).
+
+| ID | Class / data | What |
+| --- | --- | --- |
+| `pixel_hollows` (biome) | `data/jugcraft/worldgen/biome/pixel_hollows.json`; `world/PixelHollows.PARAMETERS`; `mixin/OverworldBiomeBuilderMixin` | rare cave biome under the driest land, depth 0.3–0.9; added to the Overworld climate table by the mixin (Fabric API has no Overworld biome API) |
+| `pixel_hollows_lining`, `pixel_crystals_floor`, `pixel_crystals_ceiling` (features) | data only | a circuitstone ore feature (96 × size 64, after the ores, biome-filtered); `simple_block` clusters found by `environment_scan` on floors and ceilings |
+| `pixel_hollows_copper`, `…_redstone`, `…_redstone_lower`, `…_tin` (placed features) | vanilla ore features (and `jugcraft:ore_tin`) | half the vanilla attempts again, biome-filtered: 1.5× ore inside the biome; tin added from Java only while `tin` is on |
+| `circuitstone`, `polished_circuitstone`, `circuitstone_bricks`, `pixel_lamp` | `JugcraftRegistry.block` (copies deepslate, polished deepslate, deepslate bricks, sea lantern) | building palette; stonecutter and 2×2 recipes; lamp = 4 shards + glass |
+| `pixel_crystal_cluster`, `pixel_shard` | vanilla `AmethystClusterBlock(13, 2)`, light 3 | static clusters (no ticks) drop 1–2 shards, Fortune bonus, Silk Touch takes the cluster |
+| `arcade_cabinet` | `world/ArcadeCabinetBlock` (2-tall, `facing`, `half`) | the Retro Trader's job site (POI `jugcraft:arcade_cabinet`, lower half only, in `#minecraft:acquirable_job_site`) |
+| `retro_trader` (profession) | `world/RetroTrader` (Fabric `PoiHelper`; `VillagerProfession` constructor naming its trade sets) | trades are data (26.1+): `villager_trade/retro_trader/*`, tags `#jugcraft:retro_trader/level_<n>`, `trade_set/retro_trader/level_<n>`, all from `TRADES` in `tools/pixel_hollows.py`; the buyback's `reputation_discount` is 0 so there is no profit loop |
+| `pixel_hollows` (map decoration) | `RetroTrader.MAP_MARKER`; `textures/map/decorations/pixel_hollows.png` | the map's marker |
+| `pixel_hollows_map` (item) | `world/PixelHollowsMapItem`, `PixelHollowsMaps` | used: `ServerLevel.findClosestBiome3d` from the player (radius 2,048, 64-block columns, every 32 blocks of height) → a marked explorer map; none in reach → a message, item kept; 5 s cooldown |
+| `village/plains/retro_game_shop` (template) | `data/jugcraft/structure/…/retro_game_shop.nbt` from `tools/retro_game_shop.py`; `mixin/StructureTemplatePoolAccessor`, `world/RetroShopPlacement` with `mixin/StructureTemplatePoolMixin`, `JigsawPlacerMixin`, `PoolElementStructurePieceMixin` | added to the five `minecraft:village/<type>/houses` pools at server start; exactly one per new village (not zombie villages) |
+| sounds | `assets/jugcraft/sounds.json`; `sounds/ambient/pixel_hollows_loop.ogg` from `tools/pixel_hollows_sound.py` | biome loop and bleeps; the trader's work sound |
+| textures | `tools/pixel_hollows_textures.py` (`ph_*`, `rt_*`, the villager overlay `entity/villager/profession/retro_trader.png` and its zombie twin) | original |
+
+**Mixins:** `jugcraft.mixins.json` holds five: the Overworld biome table (`OverworldBiomeBuilderMixin`), the village pool accessor (`StructureTemplatePoolAccessor`), and the one-shop-per-village trio (`JigsawPlacerMixin`, `PoolElementStructurePieceMixin`, `StructureTemplatePoolMixin`, which only reorders the houses pools that hold the shop). Add one only when no API can do the job, and say why in its Javadoc.
+
 ## Shared systems and how to plug in
 
 ### Energy (`energy/`)
@@ -256,7 +276,8 @@ The Agriculture branch ([branches/AGRICULTURE.md](branches/AGRICULTURE.md)). Eve
 - **Gases** (`PetroFluids.Gas`, `GasFluid`): fluids with no block or bucket (refinery gas); Fabric names them from `block.<ns>.<id>`.
 - **Draw-offs:** `MachineKind.outputLayer(tank)` makes an output tank push only from the faces of one block layer (distillation tower, cracker, reformer).
 - **Items** (`PetroItems`): cracking catalyst, asphalt binder.
-- **Machines:** `PUMPJACK` (custom tick), `OIL_SAND_EXTRACTOR` (`jugcraft:oil_sand_extraction`), `DISTILLATION_TOWER` (`distillation`), `CATALYTIC_CRACKER` (`catalytic_cracking`), `VACUUM_DISTILLATION_UNIT` (`vacuum_distillation`), `CATALYTIC_REFORMER` (`reforming`), `CHEMICAL_MIXER` (`chemical_mixing`), `FRACKING_RIG` (custom tick; works over shale), `FLOWBACK_TREATMENT_UNIT` (`water_treatment`).
+- **Machines:** `PUMPJACK` (custom tick), `DISTILLATION_TOWER` (`distillation`: crude oil, and heavy fuel oil vacuum-distilled since batch 24), `CATALYTIC_CRACKER` (`catalytic_cracking`: cracking, and naphtha reforming since batch 24), `FRACKING_RIG` (custom tick; works over shale), `FLOWBACK_TREATMENT_UNIT` (`water_treatment`; the Settling Plant: flowback water, oil sand, bitumen, mud). The oil sand extractor, vacuum distillation unit, catalytic reformer and chemical mixer were removed in batch 24 (docs/features/machine-consolidation.md).
+- **Fluid results** may name their output tank (`"tank": n`, `FluidRecipe.resultTank`); without it they go by position.
 - **Industrial chemistry:** `ELECTROLYTIC_CELL` (`electrolysis`: brine → chlorine/hydrogen/lye by layer; alumina + coke → aluminum), `CHEMICAL_REACTOR` (`chemical_reaction`: sulfuric acid, alumina, fertilizer), `FUEL_CELL` (hydrogen → JE). Items `alumina`, `fertilizer`, `titanium_sponge`, `lithium_cell`, `neodymium_magnet`, and the electronics items `silicon_boule`, `silicon_wafer`, `microchip` (`chemistry/FertilizerItem`, area bone meal on crops). Fluids `brine`, `lye`, `sulfuric_acid`; gases `chlorine`, `hydrogen`. `check_mod_data` audits metal in fluid recipes.
 - **Nitrogen chemistry (batch 12):** `AIR_SEPARATION_UNIT` (no recipes, like the pumpjack: `tickAirSeparation` fills nitrogen `ASU_NITROGEN_PER_TICK` into tank 0, drawn off layer 5, and oxygen `ASU_OXYGEN_PER_TICK` into tank 1, layer 0) and `SYNTHESIS_CONVERTER` (`gas_synthesis`: Haber–Bosch ammonia, Ostwald nitric acid; three input tanks, one output). Gases `nitrogen`, `oxygen`, `ammonia`; fluid `nitric_acid`. Chemical reactor `ammonium_phosphate` and lithography `microchip_nitric` recipes.
 - **Glass chemistry (batch 16):** rock `tincal` (`ROCKS`, desert/badlands, drops `borax`); items `borax`, `borosilicate_glass`, `optical_fibre`, `ferroboron` (`materials.ITEMS`). Machine recipes may set `"name"` for a second recipe with the same output. `MachineRecipes.multiRecipes` sorts by ingredient count, most first.
@@ -353,11 +374,90 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 ### Feature switches (`config/`)
 
-- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives` and `agriculture`.
+- `config/jugcraft.properties` holds `<feature>.enabled`. The features are the `JugcraftConfig.FEATURES` list: 16 materials plus `machines`, `deposits` (surface deposit worldgen), `explosives`, `agriculture`, `parties`, `drones`, `pixel_hollows` and `retro_trader`.
 - It also holds other server options, `JugcraftConfig.OPTIONS` (read with `JugcraftConfig.option(key)`): `carving.free_draw` (default `true`).
-- Text options, `JugcraftConfig.TEXT_OPTIONS` (read with `JugcraftConfig.textOption(key)`): the Halloween event's `halloween.start` and `halloween.end` (`MM-DD`, defaults `10-20` and `11-03`), `halloween.timezone` (default `UTC`) and `halloween.mode` (`auto`, `on` or `off`). `HalloweenSeason` reads them; a bad value is logged and its default kept.
+- Text options, `JugcraftConfig.TEXT_OPTIONS` (read with `JugcraftConfig.textOption(key)`): the `seasons.*`, `harvest_feast*` and `december` settings (season/SeasonCalendar), the `parties.*` limits (party/JugcraftParties), and the Halloween event's `halloween.start` and `halloween.end` (`MM-DD`, defaults `10-20` and `11-03`), `halloween.timezone` (default `UTC`) and `halloween.mode` (`auto`, `on` or `off`). `HalloweenSeason` reads the Halloween ones; a bad value is logged and its default kept.
 - A switch disables **acquisition only** (worldgen, recipes, byproducts). It never unregisters items or blocks, so saves survive.
 - Check a switch with `JugcraftConfig.isFeatureEnabled(name)`.
+
+### Seasons (`season/`, `client/SeasonColors`, `tools/seasons.py`)
+
+- **The clock.** `JugcraftSeasons` is the one season clock.
+  - `today()` gives the season day:
+    - 1–365 on the northern calendar, where 29 February shares the 28th's day and the south is `SOUTH_OFFSET` (182) days on;
+    - a fixed mode's day (`SeasonCalendar.Mode`: spring 105, summer 196, autumn 293, winter 15);
+    - 0 when off.
+  - `isActive(SeasonCalendar.Event)` tells whether an event is running: `HARVEST_FEAST` or `DECEMBER`. Events are calendar windows in the same zone.
+- **Settings.** `SeasonCalendar.Settings` reads `seasons.mode`, `seasons.hemisphere`, `seasons.timezone`, `seasons.snow`, `seasons.snow_depth`, `harvest_feast`, `harvest_feast.days` and `december` (`JugcraftConfig.TEXT_OPTIONS`; read them with `JugcraftConfig.textOption`).
+- **Overrides until the server stops.** `setMode`, `setFixedDate` (a preview date) and `setSnow` change the settings in memory only. The command `/jugcraft season [set|date|snow]` (`SeasonCommand`, permission level 2 to change) calls them.
+- **Sync.** The server sends `SeasonPayload` (day and snowing) on join and whenever anything changes; it checks once a minute. Events are announced in chat.
+- **Colours.**
+  - `season/SeasonPalette.colour(day, vanilla, foliage, x, z)` holds the colour maths: keyframes `YEAR` and patchy autumn hues.
+  - The client applies it to grass and foliage tints in `#jugcraft:has_seasons`, through the client mixin `mixin/client/ClientLevelSeasonMixin` on `ClientLevel.calculateBlockTint`.
+- **Biome flags.** `mixin/BiomeSeasonMixin` gives every biome `SeasonalBiome` flags, `jugcraft$hasSeasons()` and `jugcraft$hasWinterSnow()`. They are set from the two biome tags whenever tags load, so hot paths need no tag lookups.
+- **Winter snow.**
+  - `SeasonState.snowing()` is true when `seasons.snow` is on and the season day is in 1 December to 28 February.
+  - While it is true, `BiomeSeasonMixin` makes rain fall as snow in `#jugcraft:has_winter_snow`.
+  - `SeasonalSnow` lays `jugcraft:seasonal_snow` (`SeasonalSnowBlock`, vanilla snow models, in `#minecraft:snow`) round players while it rains. Once it is no longer snowing, the block melts on random ticks.
+- **For later seasonal content.** Read `JugcraftSeasons.today()`, `isActive(event)` or `SeasonState.snowing()` on the server. Never trust a client's date.
+
+### Parties (`party/`)
+
+- **Shared team rule.** Call the static methods on `JugcraftParties`: `sameParty`, `isLeader`, `partyMembers`, `partyId`, `addListener`.
+- **`mayServe(systemOwner, systemMode, jobOwner, jobMode)`** with `UseMode.PERSONAL`/`PARTY` is the one rule for whether an automated system may work on another player's job. Use it; don't write your own.
+- **Logic and storage:**
+  - `PartyManager` holds the rules and has no Minecraft types.
+  - `PartyStore` saves `<world>/jugcraft/parties.txt`.
+  - `PartyCommands` provides `/party`.
+- Details: [features/parties.md](features/parties.md).
+
+### Drones (`drone/`)
+
+- **`BuildJobs`** is the build-job interface. A `Source` offers open positions; depots reserve them, fly the materials there and call `fill`. Blueprints (#23) will be a source. `SimpleBuildJobs` is a minimal one, used by tests and the operator-only `/dronetest` command.
+- **Pure logic (no Minecraft types), testable on its own:**
+  - `PlatformLayout` scans the platform the Drone Tower places: separated 5x5 pads and 3x3 supply pickups. A terminal without a tower flies no drones (`allowTiersWithoutTower` is for tests and `/dronetest` only).
+  - `DroneFleet` holds the roster and the cached pooled power; `DockLayout` places docked drones round the pads.
+  - `FlightScheduler` runs the timed flights; `FlightPath` is each flight's shape and timing (shared by server and client).
+- **World side:**
+  - `DroneTerminalBlockEntity` does power, dispatch and delivery, forms pads and pickups, and sends clients a `DepotView`.
+  - `DroneRoutes` picks each leg's cruise height over the terrain.
+  - `DroneDepots` is the registry of loaded terminals.
+  - `LandingPadBlock`, `SupplyPickupBlock`, `ControlScreenBlock` and `HoloTableBlock` are the combining plates, panels and table sections; `DepotDisplayBlockEntity` links a formed screen or table to the nearest terminal.
+- **Client side:** `DroneDepotRenderer` and `DroneModel` draw the drones (all nine tiers) and the pickup lift; `ControlScreenRenderer` draws the wall display; `HoloMapRenderer` draws the hologram map; `DroneTerminalScreen` is the terminal screen.
+- Tier numbers live in `DroneTier` and `tools/drones.py`; the checker keeps them in sync.
+- Details: [features/drone-depot.md](features/drone-depot.md).
+- **Drone Tower (`tower/`):** `JugcraftTower` registers the building blocks, furniture (`FurnitureBlock`), the Tower Core (`TowerCoreBlock`, `TowerCoreBlockEntity`) and modules. `TowerData` loads `data/jugcraft/drone_tower/tower.json.gz` (made by `tools/drone_tower.py`). `TowerBuildJobs` is the `BuildJobs.Source` for tiers 2–9. `TowerUpgradePayload` is the screen's upgrade request, and `TowerScreen` is the client screen. The terminal links to the core, and the tower gives it hangars, pickups, capacity and the drone tier cap. Details: [features/drone-tower.md](features/drone-tower.md).
+
+### Alpine Spawn (`world/AlpineSpawn`, `tools/alpine.py`)
+
+- **Placement.** Through `mixin/OverworldBiomeBuilderMixin`:
+  - `AlpineSpawn.wrap` turns every meadow the Overworld biome builder outputs into `jugcraft:alpine_spawn` (`@ModifyVariable` on `addBiomes`);
+  - `AlpineSpawn.takesPlateau` gives it the plateau table's cool row (temperature index 1) at humidity indexes 2 to 3, vanilla's forest and taiga there (`@Inject` at the head of `pickPlateauBiome`). Lowland forest and taiga are untouched.
+- **The start.** On a new world's first start (game time 0, multi-noise Overworld only), `findStart` looks for the alpine village (`#jugcraft:alpine_villages`) nearest the origin, up to `VILLAGE_CELLS` (25) grid cells away, and starts on the nearest Alpine Spawn ground within `VILLAGE_REACH` (96) of it, with `VILLAGE_MARGIN` (16) around it if possible. If there is no village, it finds the nearest Alpine Spawn within `SEARCH_RADIUS` (6,400) and moves inward by `MARGIN` (48). The spawn is then set with `/setworldspawn`.
+- **Villages.** `jugcraft:village_alpine` (taiga pieces, `#jugcraft:has_structure/village_alpine`) on the structure set `jugcraft:alpine_villages` (spacing 16, separation 5). It is in `#minecraft:village` and `#jugcraft:alpine_villages`.
+- **Trees.** `worldgen/feature/alpine_spawn_trees` picks a larch (`jugcraft:larch_checked`) 60% of the time, otherwise a spruce; 0 to 2 tries per chunk.
+- **Larch** (`agriculture/SeasonalLeavesBlock`, `TREES` in `tools/agriculture.py`):
+  - `larch_needles` has a `season` state (`green`, `gold`, `bare`). It follows `JugcraftSeasons.today()` on random ticks and when placed: green from day 91, gold from 268, bare from 318. Each block is shifted by up to `JITTER` (7) days by its position. With seasons off, needles stay green.
+  - A needle that changes on a random tick brings up to `SPREAD` (128) touching needles in loaded chunks up to date, so trees turn together.
+  - `larch_sapling` grows `worldgen/feature/larch` (spruce foliage shape on a 7 to 10 block trunk).
+  - The wood set comes from `JugcraftAgriculture.registerWoodSet`, shared with the chestnut; `WOOD_SETS` in `tools/agriculture.py` generates both. Its hand recipes follow `alpine_spawn.enabled`. There are sawmill (`sawing/larch_logs`) and tree farm (`tree_growing/larch_sapling`) recipes.
+- **Settings.** `alpine_spawn.enabled` and `alpine_spawn.start`.
+
+### Biomes branch (`biome/JugcraftRegions`, `tools/biomes.py`; roster in [branches/BIOMES.md](branches/BIOMES.md))
+
+- **Jugcraft regions.** Irregular cells about `biomes.region_size` (1024) blocks across; `biomes.region_share` (0.5) of them are Jugcraft regions, each in one of `JugcraftRegions.LAYOUTS` (4) layouts: vanilla's climate table with that layout's rules applied. Rules are data (`RULES` in `tools/biomes.py`, generated to `/jugcraft/region_rules.json`): layouts, vanilla biome, temperature and humidity bands, weirdness half, Jugcraft biome. The recorder cuts vanilla's entries at the band edges first (`JugcraftRegions.split`). `mixin/OverworldBiomeBuilderMixin` records the layouts (`JugcraftRegions.Recorder`) and lists each Jugcraft biome in vanilla's table at `UNREACHABLE`; `mixin/MultiNoiseBiomeSourceMixin` answers lookups from the region's layout. The region of a place comes from the world seed (`ServerLevelEvents.LOAD`). `biomes.enabled=false` turns regions off.
+- **Batch 1, seasonal forests** ([features/seasonal-forests.md](features/seasonal-forests.md)): `coniferous_forest` (cool taiga), `snowy_coniferous_forest` (snowy taiga), `maple_woods` (cool forest), `seasonal_forest` (temperate forest), `aspen_glade` (birch forests), `dead_forest` and `tundra` (cool plains, dry and moist), `snowy_forest` and `muskeg` (snowy plains, moister and drier). Biome files come from `tools/biomes_data.py`, built on vanilla bases (`tools/biome_bases.py`).
+- **Batch 2, fields and meadows** ([features/fields-and-meadows.md](features/fields-and-meadows.md), meadow layout): `field`, `flower_meadow`, `grassland`, `heathland`, `lavender_field`, `lush_grassland`, `prairie`, `shrubland`, `steppe`.
+- **Batch 3, wetlands** ([features/wetlands.md](features/wetlands.md), wetland layout; swamps and bayous also in the woodland and wild layouts): `bog`, `dead_swamp`, `lush_swamp`, `swamp_woods`, `bayou`, `floodplain`, `ghost_forest`, `sludge_mire`, `lush_river`, `fen`, `lake_district`, `quagmire`, `marsh`, `wetland`. Extras include `ponds` (vanilla lake feature, water with mud banks), `mud` (vanilla disk feature), `cranberries` (the agriculture branch's bush, ripe, in shallow water).
+- **Batch 4, warm and dry** ([features/warm-and-dry.md](features/warm-and-dry.md)): meadow layout `dryland`, `xeric_shrubland`, `jacaranda_glade`, `lush_desert`, `bone_flats`, `dry_river`, `cold_desert`; wild layout `scrubland`, `lush_savanna`, `outback`, `oasis`, `wasteland`, `burnt_forest`; woodland layout `mediterranean_forest`, `orchard`.
+- **Batch 5, big trees and rainforests** ([features/big-trees-and-rainforests.md](features/big-trees-and-rainforests.md)): woodland layout `rainforest`, `eucalyptus_forest`, `tropics`, `subtropics`, `dense_forest`, `woodland`; woodland and wild layouts `redwood_forest`, `temperate_rainforest`.
+- **Batch 6, mountains, coasts and volcanoes** ([features/mountains-coasts-and-volcanoes.md](features/mountains-coasts-and-volcanoes.md)): wild layout `volcano`, `canyon`, `highland`, `basin`, `shield`, `karst_pinnacles`, `hot_springs`; wetland layout `gravel_beach`, `dune_beach`, `overgrown_beach`, `flower_isle`; both `ice_sheet`, `ocean_trench`. A surface's floor or under may be a material rule written out (the Canyon's `minecraft:bandlands`).
+- **Batch 7, wonders and caves** ([features/wonders-and-caves.md](features/wonders-and-caves.md)): woodland layout `frostlight_garden`, `toadstool_field`; meadow layout `cinder_barrens`, `elder_vale`, `hallowed_bog`, `starlit_wood`, `webwood`; wetland layout `gilded_shrubland`, `highsun_meadow`, `wild_greens` and the cave `glowcap_grotto`; wild layout `glimmer_grove`, `gloomweald`, `mycelial_jungle`, `shrine_springs`, `snowpetal_grove` and the cave `spider_nest`. Biomes may replace their base's monster list (`"monsters"`). Huge mushrooms are tree picks (`huge_red_mushroom_on_soil`, `huge_brown_mushroom_on_soil`).
+- **Batch 8, the Nether** ([features/nether-biomes.md](features/nether-biomes.md)): `ashfall_wastes`, `blighted_sands`, `frost_rift`, `fungal_thicket`, `magma_fields`, `marrow_heap`, `netherbrush`, `quartz_rift`, `withered_hollow`. Placed by Fabric's `NetherBiomes` from the generated `/jugcraft/dimension_biomes.json` (`biome/JugcraftDimensions`; a biome's `"dimension"` and `"nether": [temperature, humidity, offset]` in `tools/biomes.py`). Their `"ground"` is a generated `jugcraft:ground_<biome>` vegetation patch on every floor layer (step 2).
+- **Batch 9, the End** ([features/end-biomes.md](features/end-biomes.md)): highlands `chorus_reef`, `ender_wilds`, `phantom_garden`, `rotted_expanse` (an eighth of the highlands each) and barrens `outer_flats` (a third of the barrens beside vanilla's End Highlands), placed by Fabric's `TheEndBiomes`. `tools/biomes.py` gives `"end": {"zone", "share"}`; the generator turns shares into Fabric weights with `tools/end_noise.py`, because Fabric's noise-based pick does not give shares in proportion to weights. Their ground replaces `#jugcraft:end_ground_replaceable` (end stone).
+- **Surfaces.** A biome's `"surface"` (floor, under, noise patches) is generated into the material rule `jugcraft:overworld/surface`, run first by an override of `minecraft:overworld`'s top-level material rule (`OVERWORLD_MATERIAL_RULE` in `tools/biomes_data.py`). Tree wrappers `PLACED_TREES` (`chestnut_checked`, `azalea_tree_checked`).
+- **Wild plants** (`tools/plants.py`, `tools/plants_data.py`, textures `tools/wild_textures.py`): registered alike from the generated `/jugcraft/plants.json` by `JugcraftAgriculture.registerWildPlants`: flowers (`FlowerBlock`, with `potted_` forms), tall flowers (`TallFlowerBlock`) and flowerbeds (`GroundCoverBlock`, like pink petals). Batch 2: `lavender`, `tall_lavender`, `goldenrod`, `heather`, `orange_cosmos`, `clover`. Batch 3: `cattail` (tall plant, `DoublePlantBlock`), `watergrass` (`WaterPlantBlock`, seagrass-like), `duckweed` (`FloatingPlantBlock`, like a lily pad). Batch 5: `hibiscus` (flower), `hydrangea` (tall flower). Batch 6: `sea_oats` (`DunePlantBlock`, a tall plant that stands on `#minecraft:supports_dry_vegetation`, sand included). Batch 7: `glowcap` (`FloorPlantBlock`: light 10, any sturdy floor), `glimmerbloom` (flower, light 7), `frost_iris` (flower), `snowpetals` (flowerbed). Batch 8: `bramble` (`FloorPlantBlock`). A plant's `"light"` makes it glow. Each has a placement feature `jugcraft:<plant>` that biomes scatter through `EXTRAS`.
+- **Trees** (`tools/trees.py`, `tools/trees_data.py`): `JugcraftAgriculture.registerTree` registers each tree's sapling, leaves and wood set: larch, maple and aspen leaves are `SeasonalLeavesBlock`s with their own `Schedule` (`LARCH_LEAVES`, `MAPLE_LEAVES`, `ASPEN_LEAVES`); fir needles are evergreen. `dead` is a wood set with no tree block of its own. Shapes: `larch`, `maple`, `big_maple`, `maple_bush`, `aspen`, `fir`, `tall_fir`, `jacaranda` (evergreen blossom leaves), `willow` (seasonal `WILLOW_LEAVES`, cherry foliage shape with hanging leaves, vine decorator), `palm` (bending trunk, acacia fronds; placed where a dead bush could stand), `cypress`, `desert_acacia` (vanilla acacia), `oak_bush` and `tall_vine_oak` (vanilla oak), `redwood` and `giant_redwood` (giant trunk, mega pine crown, podzol), `eucalyptus` (random-spread crown) and `big_eucalyptus`, `mahogany` (forking, vines) and `giant_mahogany` (mega jungle trunk), `small_palm`, `spruce_bush` (vanilla spruce), `great_oak` (vanilla oak, giant trunk), `dead_tree`, and fallen logs. Redwood and mahogany saplings are `agriculture/GiantSaplingBlock`s: four in a square grow the giant (`GIANT_GROWERS`; agriculture.TREES `"giant"`). Maple's autumn look is a weighted pick of red, orange and gold models. Every tree feature with seasonal leaves lists the `jugcraft:seasonal_leaves` tree decorator (`agriculture/SeasonalLeavesDecorator`), which gives generated leaves today's look.
 
 ### Registration (`materials/`)
 
@@ -365,7 +465,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - `MetalFamily.builder(name).mined().extraItem(...).build()` registers a whole metal set. `MineralFamily.register(name)` does the same for minerals.
 - `JugcraftWorldgen` adds placed features to biomes. In 26.x, configured features live in `data/jugcraft/worldgen/feature/` (there is no `configured_feature` folder), with no `config` wrapper and with block states written as plain IDs.
 - Surface deposits (`deposit/`): `JugcraftDeposits` registers the `DepositBlock`s (mirrors `tools/deposits.py`); `Deposits` keeps how much each touched deposit block has given (`SavedData`, `jugcraft_deposits.dat`) and turns an empty one to stone. `JugcraftWorldgen.addDeposit` adds their disk features to the stony hill biomes at `LOCAL_MODIFICATIONS`.
-- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → deposits → machines → fluids → petroleum → logistics → storage → electronics → farming → prospecting → kinetics → tools → guide → agriculture → conditions → worldgen → style pack.
+- Initialization order is in `Jugcraft.onInitialize()`: config → materials → components → deposits → machines → fluids → petroleum → logistics → storage → electronics → farming → prospecting → kinetics → tools → guide → agriculture → drones, the tower and blueprints → Pixel Hollows → Retro Trader → seasons → conditions → worldgen → parties → style pack.
 
 ### Looks (`tools/model_writer.py`, `tools/steampunk_*.py`)
 
@@ -423,7 +523,8 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Every recipe has a feature-switch condition that includes its result's feature.
 - Python lists must match Java: `MachineKind` numbers and recipe types, `JugcraftComponents` lists, materials, features, worldgen, and every agriculture number (`TallCrop`, items, foods, compost tiers, sickles, wild-plant and wild-patch biomes, grass seeds, legume bonus, gourds, cranberry and chestnut numbers, the lantern's light, and the carving numbers, starter faces and messages).
 - Every tall-crop age and section, and every crop age, has a model. Agriculture recipes (crafting, cooking and Cooking Pot) never form a loop, no two Cooking Pot recipes share their ingredients, a seed is a trellis seed exactly when it plants a climbing crop, and a bog seed exactly when it plants the cranberry bush. Every stem age, cranberry age and leaf fruit state has a model.
-- Every ID has a model, a texture, a name, and a loot table (for blocks). Both machine styles cover every block state. Model elements stay within −16..32.
+- Every ID has a model, a texture, a name, and a loot table (for blocks). Both machine styles cover every block state. Model elements stay within −16..32. Loot tables are written in 26.3's form (`condition`, `modifier`, `type`); the checker rejects the pre-26 `conditions`/`functions`/`function` keys, which 26.3 ignores without an error.
+- No recipe makes pixel shards. The Retro Trader's Java trades and map-search bounds match `tools/pixel_hollows.py`, and his shard buyback never pays more per shard than his cheapest possible shard sale.
 
 ## File map
 
@@ -436,8 +537,12 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `…/fluid/` | pipe, tank, pump, fluid networks |
 | `…/logistics/` | item pipe, extractor, sorter, wrench, item networks |
 | `…/machine/` | machine kinds, blocks, block entity, menu, recipes, footprints, power ports, side config, arc furnace structure |
+| `…/world/` | Pixel Hollows (blocks, lining feature, map search) and the Retro Trader (cabinet, profession, trades, village shop) |
+| `…/mixin/` | the five mixins (Overworld biome table, village pool accessor, one shop per village) |
 | `src/client/java/.../client/` | `JugcraftClient` (screen registration), `MachineScreen` |
+| `…/season/`, `…/mixin/BiomeSeasonMixin.java`, `src/client/.../SeasonColors.java`, `src/client/.../mixin/client/` | seasons: calendar and events, palette, sync, command, winter snow, the client tint hook |
 | `src/gametest/java/.../test/JugcraftGameTests.java` | game tests (run by `./gradlew build`) |
+| `src/gametest/java/.../test/PixelHollowsGameTests.java` | Pixel Hollows and Retro Trader game tests (drops, recipes, worldgen order, map, trades, job site, shop template) |
 | `src/gametest/java/.../test/JugcraftClientGameTests.java` | client game tests with screenshots (CI job `client`) |
 | `…/guide/`, `src/client/.../HandbookScreen.java`, `tools/handbook.py` | Engineer's Handbook |
 | `…/agriculture/`, `tools/agriculture.py`, `tools/agriculture_data.py`, `tools/festival_data.py`, `tools/carving_data.py`, `tools/crop_textures.py`, `tools/kitchen_textures.py`, `tools/festival_textures.py`, `tools/carving_textures.py`, `tools/render_agriculture.py` | Agriculture branch: crops, wild plants, sickles, trellis, Cooking Pot, gourds, cranberries, the chestnut tree, pumpkin carving, their data, textures and doc previews |
@@ -445,7 +550,8 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `src/main/resources/assets/jugcraft/` | generated models, blockstates, lang, textures |
 | `src/main/resources/data/jugcraft/` | generated recipes (`recipe/<type>/` for machines), loot, tags, worldgen |
 | `src/main/resources/resourcepacks/alternate_machines/` | classic look pack |
-| `tools/materials.py`, `tools/machines.py` | **source of truth** for content and numbers |
+| `tools/materials.py`, `tools/machines.py`, `tools/pixel_hollows.py` | **source of truth** for content and numbers |
+| `tools/pixel_hollows_textures.py`, `tools/retro_models.py`, `tools/retro_game_shop.py`, `tools/pixel_hollows_sound.py` | Pixel Hollows and Retro Trader textures, models, shop template and ambient loop |
 | `tools/generate_*.py`, `tools/model_writer.py`, `tools/steampunk_*.py`, `tools/large_machines.py`, `tools/logistics_models.py` | generators |
 | `tools/check_mod_data.py` | offline audit |
 | `docs/TECH_TREE.md` | player-facing guide |
@@ -459,7 +565,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Electronics beyond processors: a monitor-bank multi-block, computers that control machines, and uses for processors in the tiers above.
 - EMI and REI plugins (JEI has one).
 - A faster fluid pipe (pointless until pumps are faster).
-- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md). Farming has a harvester, sprinkler and cotton (`farming/`), and the agriculture branch its first three slices; greenhouses, rubber trees and the rest of the crop roster are not built (planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md)).
+- Any magic, creature, travel or seasonal content from [CONTENT_BRANCHES.md](CONTENT_BRANCHES.md), apart from the seasons (colours, the Harvest Feast and December windows, and winter snow) and the agriculture branch's Halloween. Farming has a harvester, sprinkler and cotton (`farming/`), and the agriculture branch its slices so far; greenhouses, rubber trees and the rest of the crop roster are not built (planned in [branches/AGRICULTURE.md](branches/AGRICULTURE.md)). (The Pixel Hollows is the first cave biome; it has no creatures, structures or bosses yet.)
 - Human play-testing, two-client dedicated-server tests and performance measurements (the client game tests render the game but do not play it).
 - Handbook translations (English only).
 

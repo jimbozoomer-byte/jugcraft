@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:random_selector",
+  "default": "jugcraft:aspen_checked",
+  "features": [
+    {
+      "chance": 0.1,
+      "feature": "jugcraft:maple_checked"
+    },
+    {
+      "chance": 0.0125,
+      "feature": "jugcraft:fallen_aspen_tree"
+    }
+  ]
+}

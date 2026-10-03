@@ -40,6 +40,8 @@ import hay_golem_data
 import knitting_data
 import pie_data
 import regatta_data
+import plants_data
+import trees_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
                          SICKLE_PATTERN, COOKING, COOK_TIMES, SHAPELESS, SHAPED, POT_RECIPES, EQUIPMENT,
                          HEAT_TAG, HEAT_SOURCES, LEGUME_TAG, STALKS, WILD_BONUS, crop_blocks)
@@ -51,8 +53,9 @@ def rid(path):
     return path if ":" in path else f"{MOD}:{path}"
 
 
-def conditions(*features):
-    return [{"condition": f"{MOD}:feature_enabled", "feature": f} for f in (FEATURE, *features)]
+def conditions(*features, switch=FEATURE):
+    """Load conditions: the recipe's switch (the agriculture feature unless it belongs to another) and any others."""
+    return [{"condition": f"{MOD}:feature_enabled", "feature": f} for f in (switch, *features)]
 
 
 def stage_texture(crop, stage):
@@ -167,6 +170,8 @@ def assets(root, write, lang):
     lang[f"container.{MOD}.cooking_pot.cold"] = "Needs heat below"
 
     festival_data.assets(root, write, lang)
+    trees_data.assets(root, write)
+    plants_data.assets(root, write, lang)
     carving_data.assets(root, write, lang)
     halloween_data.assets(root, write, lang)
     regatta_data.assets(root, write, lang)
@@ -298,6 +303,8 @@ def loot(data, write):
         # Like vanilla scaffolding and cauldrons: the block itself, unless an explosion destroys it.
         write(out / f"{block}.json", table(block, pool(entry(block), condition={"type": "minecraft:survives_explosion"}), decay=False))
     festival_data.loot(out, write)
+    trees_data.loot(out, write)
+    plants_data.loot(out, write)
     carving_data.loot(out, write)
     halloween_data.loot(out, write)
     regatta_data.loot(out, write)
@@ -344,14 +351,16 @@ def recipes(out, write):
                                          "ingredient": rid(info["input"]), "result": {"id": rid(result)},
                                          "experience": info["xp"], "cookingtime": time})
     for recipe in SHAPELESS:
-        data = {"fabric:load_conditions": conditions(*recipe.get("features", [])), "type": "minecraft:crafting_shapeless",
+        data = {"fabric:load_conditions": conditions(*recipe.get("features", []), switch=recipe.get("switch", FEATURE)),
+                "type": "minecraft:crafting_shapeless",
                 "category": recipe.get("category", "misc")}
         if "group" in recipe:
             data["group"] = recipe["group"]
         data.update({"ingredients": recipe["inputs"], "result": {"id": rid(recipe["result"]), "count": recipe["count"]}})
         write(out / f"{recipe['id']}.json", data)
     for recipe in SHAPED:
-        data = {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped", "category": recipe["category"]}
+        data = {"fabric:load_conditions": conditions(switch=recipe.get("switch", FEATURE)), "type": "minecraft:crafting_shaped",
+                "category": recipe["category"]}
         if "group" in recipe:
             data["group"] = recipe["group"]
         result = {"id": rid(recipe["result"]), "count": recipe["count"]}
@@ -407,6 +416,8 @@ def tags(tags):
         if info["legume"]:
             tags.add("block", LEGUME_TAG, rid(info["block"]))
     festival_data.tags(tags)
+    trees_data.tags(tags)
+    plants_data.tags(tags)
     carving_data.tags(tags)
     halloween_data.tags(tags)
     regatta_data.tags(tags)
@@ -450,6 +461,8 @@ def advancements(data, write):
 def worldgen(data, write):
     festival_data.worldgen(data, write)
     cider_data.worldgen(data, write)
+    trees_data.worldgen(data, write)
+    plants_data.worldgen(data, write)
     halloween_data.worldgen(data, write)
     foraging_data.worldgen(data, write)
     spread = WILD_PATCH["spread_xz"]

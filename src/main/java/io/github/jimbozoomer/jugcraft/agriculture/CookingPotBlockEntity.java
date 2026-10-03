@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.minecraft.core.BlockPos;
@@ -18,6 +20,7 @@ import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.Level;
@@ -70,6 +73,12 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 	/** Just loaded from disk: the first lookup keeps the saved progress. */
 	private boolean loaded;
 	private @Nullable CookingPotRecipe recipe;
+	/**
+	 * What the input slots held at the last tick, to notice changes made without setItem: hoppers and shift-clicks
+	 * top up a stack in place.
+	 */
+	private final @Nullable Item[] seenItems = new Item[INPUTS];
+	private final int[] seenCounts = new int[INPUTS];
 
 	private final ContainerData data = new ContainerData() {
 		@Override
@@ -104,6 +113,9 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 
 	public void serverTick(ServerLevel level, BlockPos pos, BlockState state) {
 		heated = isHeated(level, pos);
+		if (inputsChanged()) {
+			recheck = true;
+		}
 		if (recheck) {
 			recheck = false;
 			CookingPotRecipe found = CookingPotRecipe.find(level.getServer(), items.subList(0, INPUTS))
@@ -115,7 +127,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 			loaded = false;
 			time = recipe == null ? 0 : recipe.time();
 		}
-		boolean cooking = heated && recipe != null && resultSlotFor(served(recipe.output(), level.getGameTime())) >= 0;
+		boolean cooking = heated && recipe != null && resultSlotFor(recipe.output().create()) >= 0;
 		if (cooking) {
 			progress++;
 			if (progress >= time) {
@@ -141,6 +153,21 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 		return meal;
 	}
 
+	/** Whether the input slots changed since the last tick (and remembers them). */
+	private boolean inputsChanged() {
+		boolean changed = false;
+		for (int slot = 0; slot < INPUTS; slot++) {
+			ItemStack stack = items.get(slot);
+			Item item = stack.isEmpty() ? null : stack.getItem();
+			if (item != seenItems[slot] || stack.getCount() != seenCounts[slot]) {
+				seenItems[slot] = item;
+				seenCounts[slot] = stack.getCount();
+				changed = true;
+			}
+		}
+		return changed;
+	}
+
 	/** A result slot that can take the whole meal: one already holding it with room, else an empty one, else -1. */
 	private int resultSlotFor(ItemStack meal) {
 		int empty = -1;
@@ -148,11 +175,42 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 			ItemStack result = items.get(slot);
 			if (result.isEmpty()) {
 				empty = empty < 0 ? slot : empty;
-			} else if (ItemStack.isSameItemSameComponents(result, meal) && result.getCount() + meal.getCount() <= result.getMaxStackSize()) {
+			} else if (sameMeal(result, meal) && result.getCount() + meal.getCount() <= result.getMaxStackSize()) {
 				return slot;
 			}
 		}
 		return empty;
+	}
+
+	/**
+	 * Whether two meals stack in a result slot: the same item and components, or jars of the same preserve cooked at
+	 * different times. Jars added to a stack take on the stack's (earlier) time, so none comes out fresher.
+	 */
+	private static boolean sameMeal(ItemStack result, ItemStack meal) {
+		if (result.getItem() instanceof PreserveJarItem && meal.is(result.getItem())) {
+			return PreserveJarItem.sealed(result) == PreserveJarItem.sealed(meal)
+					&& PreserveJarItem.servings(result) == PreserveJarItem.servings(meal);
+		}
+		return ItemStack.isSameItemSameComponents(result, meal);
+	}
+
+	/** Puts a container left from an ingredient (a bucket, a bottle) where automation can take it: the result slots. */
+	private boolean storeLeftover(ItemStack leftover) {
+		for (int slot = RESULT; slot < SLOTS; slot++) {
+			ItemStack result = items.get(slot);
+			if (!result.isEmpty() && ItemStack.isSameItemSameComponents(result, leftover)
+					&& result.getCount() + leftover.getCount() <= result.getMaxStackSize()) {
+				result.grow(leftover.getCount());
+				return true;
+			}
+		}
+		for (int slot = RESULT; slot < SLOTS; slot++) {
+			if (items.get(slot).isEmpty()) {
+				items.set(slot, leftover);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Takes one batch of ingredients (leaving containers such as buckets behind) and adds the meal. */
@@ -169,6 +227,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 			return;
 		}
 		int[] take = match.get().take();
+		List<ItemStack> leftovers = new ArrayList<>();
 		for (int input = 0; input < INPUTS; input++) {
 			if (take[input] == 0) {
 				continue;
@@ -177,17 +236,19 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements W
 			ItemStackTemplate remainder = stack.getItem().getCraftingRemainder();
 			stack.shrink(take[input]);
 			for (int n = 0; remainder != null && n < take[input]; n++) {
-				if (items.get(input).isEmpty()) {
-					items.set(input, remainder.create());
-				} else {
-					Block.popResource(level, pos.above(), remainder.create());
-				}
+				leftovers.add(remainder.create());
 			}
 		}
 		if (items.get(slot).isEmpty()) {
 			items.set(slot, meal);
 		} else {
 			items.get(slot).grow(meal.getCount());
+		}
+		// Containers go to the result slots, never back among the ingredients, where they would stop the next batch.
+		for (ItemStack leftover : leftovers) {
+			if (!storeLeftover(leftover)) {
+				Block.popResource(level, pos.above(), leftover);
+			}
 		}
 		level.playSound(null, pos, SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.BLOCKS, 0.8F, 0.9F + level.getRandom().nextFloat() * 0.2F);
 		recheck = true;

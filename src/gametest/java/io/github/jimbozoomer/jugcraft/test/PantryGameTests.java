@@ -85,7 +85,7 @@ public class PantryGameTests {
 
 	/**
 	 * Jam cooks into a Mason Jar in the Cooking Pot, stamped with the time it was cooked; pickles in cider vinegar leave the
-	 * vinegar's bottle in the pot.
+	 * vinegar's bottle in a result slot, out of the way of the next batch.
 	 */
 	@GameTest(maxTicks = 600)
 	public void preservesCookIntoJars(GameTestHelper helper) {
@@ -111,7 +111,8 @@ public class PantryGameTests {
 			helper.assertTrue(contents != null && contents.servings() == PreserveJarItem.SERVINGS && contents.made() >= start
 					&& !PreserveJarItem.sealed(made), "The jar is full, unsealed, and stamped with when it was cooked");
 			helper.assertTrue(pickles.getItem(CookingPotBlockEntity.RESULT).is(item("pickled_beets")), "Beets pickle in cider vinegar");
-			helper.assertTrue(pickles.getItem(2).is(Items.GLASS_BOTTLE), "The vinegar's bottle stays in the pot");
+			helper.assertTrue(pickles.getItem(CookingPotBlockEntity.RESULT + 1).is(Items.GLASS_BOTTLE) && pickles.getItem(2).isEmpty(),
+					"The vinegar's bottle goes to a result slot, not back among the ingredients");
 		});
 	}
 

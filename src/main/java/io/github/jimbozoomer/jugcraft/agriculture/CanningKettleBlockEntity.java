@@ -77,7 +77,7 @@ public class CanningKettleBlockEntity extends BlockEntity {
 
 	/** Puts a full, unsealed jar in, if there is water and room. */
 	public boolean add(ItemStack jar) {
-		if (!water || jars.size() >= JARS || !PreserveJarItem.sealable(jar)) {
+		if (!water || jars.size() >= JARS || level == null || !PreserveJarItem.sealable(jar, level.getGameTime())) {
 			return false;
 		}
 		jars.add(jar.copyWithCount(1));
@@ -134,7 +134,8 @@ public class CanningKettleBlockEntity extends BlockEntity {
 				ItemStack jar = jars.get(i);
 				if (!PreserveJarItem.sealed(jar)) {
 					processed.set(i, processed.get(i) + 1);
-					if (processed.get(i) >= PROCESS_TICKS) {
+					// A jar that spoiled while it boiled stays unsealed.
+					if (processed.get(i) >= PROCESS_TICKS && !PreserveJarItem.spoiled(jar, level.getGameTime())) {
 						PreserveJarItem.seal(jar);
 						sealedOne = true;
 					}

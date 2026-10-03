@@ -207,7 +207,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case GEOTHERMAL_GENERATOR -> new TankInlet(Fluids.LAVA, MachineKind.GEOTHERMAL_TANK);
 			case ORE_WASHER -> new TankInlet(Fluids.WATER, MachineKind.WASHER_TANK);
 			case STEEL_FOUNDRY -> new TankInlet(PetroFluids.OXYGEN.fluid(), MachineKind.BOOST_TANK);
-			case CRYSTAL_GROWER -> new TankInlet(PetroFluids.ARGON.fluid(), MachineKind.BOOST_TANK);
+			case ARC_FURNACE -> new TankInlet(PetroFluids.ARGON.fluid(), MachineKind.BOOST_TANK);
 			default -> null;
 		};
 		FluidMachineSpec spec = kind.fluidSpec();
@@ -253,7 +253,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	/**
 	 * Fluid exposed on a side (the same on every side and every part): the steam generator and ore
 	 * washer take water and the geothermal generator takes lava into their tanks; the steel foundry takes oxygen and
-	 * the crystal grower argon as boost gases. Other machines have none.
+	 * the arc furnace argon as boost gases. Other machines have none.
 	 */
 	public @Nullable Storage<FluidVariant> fluidFor(@Nullable Direction side) {
 		if (tanks != null) {
@@ -790,7 +790,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 		energy.setAmount(energy.getAmount() - use);
 		progress++;
-		// Boost gas (oxygen in the foundry, argon in the crystal grower): a second step this tick, for the gas.
+		// Boost gas (oxygen in the foundry, argon in the arc furnace): a second step this tick, for the gas.
 		if (kind.boostPerTick() > 0 && tank >= kind.boostPerTick() && progress < maxProgress) {
 			tank -= kind.boostPerTick();
 			progress++;
@@ -854,7 +854,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				tanks.input(i).drain(recipe.fluids().get(i).amount());
 			}
 			for (int i = 0; i < recipe.fluidResults().size(); i++) {
-				tanks.output(i).fill(recipe.fluidResults().get(i).fluid(), recipe.fluidResults().get(i).amount());
+				tanks.output(recipe.resultTank(i)).fill(recipe.fluidResults().get(i).fluid(), recipe.fluidResults().get(i).amount());
 			}
 			for (int i = 0; i < recipe.results().size(); i++) {
 				ItemStack result = recipe.results().get(i).create();

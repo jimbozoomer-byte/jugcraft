@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -258,10 +259,28 @@ public final class TrickOrTreaters {
 			ServerLevel level = server.getLevel(visit.dimension);
 			if (level == null || step(level, visit)) {
 				if (level != null) {
-					kids(level, visit).forEach(kid -> kid.discard());
+					// A visiting child may have claimed a bed or work place on the way: give it back before it goes.
+					kids(level, visit).forEach(kid -> {
+						releasePlaces(server, kid);
+						kid.discard();
+					});
 				}
 				it.remove();
 			}
+		}
+	}
+
+	/** Frees the bed, work place and meeting point a child claimed (Villager's own release is private). */
+	private static void releasePlaces(MinecraftServer server, Villager kid) {
+		for (MemoryModuleType<GlobalPos> memory : List.of(MemoryModuleType.HOME, MemoryModuleType.JOB_SITE,
+				MemoryModuleType.POTENTIAL_JOB_SITE, MemoryModuleType.MEETING_POINT)) {
+			kid.getBrain().getMemory(memory).ifPresent(place -> {
+				ServerLevel level = server.getLevel(place.dimension());
+				// Only a place that is still there (a broken bed's claim is gone with it).
+				if (level != null && level.getPoiManager().getType(place.pos()).isPresent()) {
+					level.getPoiManager().release(place.pos());
+				}
+			});
 		}
 	}
 
