@@ -855,12 +855,27 @@ public class PetroGameTests {
 		});
 	}
 
+	/** How long the heliostat test waits for sky light to settle under the roof it places. */
+	private static final int ROOF_SETTLE_TICKS = 100;
+
+	/** Runs {@code then} once the receiver at {@code absolute} counts {@code expected} heliostats; fails after {@code left} ticks. */
+	private static void awaitHeliostatCount(GameTestHelper helper, BlockPos absolute, int expected, int left, Runnable then) {
+		int count = SolarReceiverBlockEntity.countHeliostats(helper.getLevel(), absolute);
+		if (count == expected) {
+			then.run();
+		} else if (left <= 0) {
+			helper.assertTrue(false, "The receiver counted " + count + " heliostats under open sky");
+		} else {
+			helper.runAfterDelay(1, () -> awaitHeliostatCount(helper, absolute, expected, left - 1, then));
+		}
+	}
+
 	/**
 	 * Solar thermal (batch 21): a receiver counts the heliostats under open sky in the field below it (not one that is
 	 * roofed over), makes nothing without water, and with water makes 12 JE/t a heliostat in daylight (half in rain),
 	 * boiling water for it. The test world's time and weather are not fixed, so daylight is read from the level.
 	 */
-	@GameTest(maxTicks = 200)
+	@GameTest(maxTicks = 320)
 	public void heliostatsHeatASolarReceiver(GameTestHelper helper) {
 		BlockPos receiverPos = new BlockPos(4, 5, 4);
 		helper.setBlock(receiverPos, JugcraftSolar.SOLAR_RECEIVER);
@@ -870,10 +885,9 @@ public class PetroGameTests {
 		helper.setBlock(new BlockPos(6, 2, 1), Blocks.STONE);
 		BlockPos absolute = helper.absolutePos(receiverPos);
 		SolarReceiverBlockEntity receiver = helper.getBlockEntity(receiverPos, SolarReceiverBlockEntity.class);
-		// Sky light (what "open sky" reads) catches up with the new roof a few ticks after it is placed.
-		helper.runAfterDelay(20, () -> {
-			int count = SolarReceiverBlockEntity.countHeliostats(helper.getLevel(), absolute);
-			helper.assertTrue(count == 3, "The receiver counted " + count + " heliostats under open sky");
+		// Sky light (what "open sky" reads) catches up with the new roof some ticks after it is placed, later on a busy
+		// server: wait until the count settles (at most ROOF_SETTLE_TICKS) rather than a fixed delay.
+		awaitHeliostatCount(helper, absolute, 3, ROOF_SETTLE_TICKS, () -> {
 			helper.assertTrue(receiver.lastOutput() == 0 && receiver.energy().getAmount() == 0, "It made power without water");
 			// The receiver counted on its first tick, before the roof's sky light settled, and counts again only when the
 			// game time is a multiple of SCAN_INTERVAL: give it water after its next count, so the test does not depend
