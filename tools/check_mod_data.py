@@ -17,6 +17,7 @@ from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS
                        all_blocks, all_items, feature_of)
 import agriculture as ag
 import werewolf_model
+import midway
 import petro
 import deposits
 import seasons
@@ -2171,6 +2172,62 @@ def check_decor4(java):
     check_werewolves(java, number, lang)
     check_squirrels(java, number, lang)
     check_pumpkling(java, number, lang)
+    check_midway(java, number, lang)
+
+
+def check_midway(java, number, lang):
+    """Fall addition 26: the High Striker, Midway, Ring Toss and the plushes match tools/midway.py (levels, timing,
+    strength, the ringer's reach and distance, each plush's footprint); the blocks, items, block entity and thrown ring
+    are registered and drawn; the strike is wired to left clicks; their words, loot (the prize table's plushes and
+    weights), models, recipes and advancements exist."""
+    hs, rt = midway.HIGH_STRIKER, midway.RING_TOSS
+    expected = {("HighStrikerBlock", "LEVELS"): hs["levels"], ("HighStrikerBlock", "RISE_TICKS"): hs["rise_ticks"],
+                ("HighStrikerBlock", "HOLD_TICKS"): hs["hold_ticks"], ("HighStrikerBlock", "LIGHT"): hs["light"],
+                ("Midway", "FULL_LOW"): hs["full_low"], ("Midway", "FULL_HIGH"): hs["full_high"], ("Midway", "CRIT_BONUS"): hs["crit_bonus"],
+                ("Midway", "RING_AT"): hs["ring_at"], ("RingTossBlock", "RINGER_RADIUS"): rt["ringer_radius"],
+                ("RingTossBlock", "MIN_DISTANCE"): rt["min_distance"], ("RingTossBlock", "RINGER_TICKS"): rt["ringer_ticks"],
+                ("RingTossBlock", "TOP"): rt["top"], ("TossRingItem", "SPEED"): rt["ring_speed"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/midway.py ({value})")
+    necks = ", ".join(str(n) for n in rt["necks"])
+    if f"NECKS = {{{necks}}}" not in java.get("RingTossBlock", ""):
+        err("RingTossBlock.NECKS differs from RING_TOSS['necks']")
+    mid = java.get("Midway", "")
+    for name, plush in midway.PLUSHES.items():
+        x0, z0, x1, z1, h = plush["shape"]
+        if f'new Plush("{name}", {x0}, {z0}, {x1}, {z1}, {h})' not in mid:
+            err(f"Midway.PLUSHES must have {name} with the footprint tools/midway.py gives")
+    if 'AttackBlockCallback.EVENT.register' not in mid or 'player.resetAttackStrengthTicker()' not in mid:
+        err("Midway must strike the High Striker from left clicks and spend the swing's charge")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ('registerBlock("high_striker", HighStrikerBlock::new', "HighStrikerBlockEntity::new, striker",
+                 f"props.sword(ToolMaterial.WOOD, {hs['mallet_damage']}F, {hs['mallet_speed']}F)",
+                 'registerBlock("ring_toss", RingTossBlock::new', "registerItem(TossRingItem.ID, TossRingItem::new",
+                 "EntityType.Builder.<TossRing>of(TossRing::new", "new PlushBlock(props, plush)", "Midway.register();"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "JugcraftAgriculture.TOSS_RING, ThrownItemRenderer::new" not in client:
+        err("JugcraftClient.java must draw the thrown Toss Ring")
+    for item, display in midway.displays().items():
+        kind = "item" if item in (hs["mallet"], rt["ring"]) else "block"
+        if lang.get(f"{kind}.{MOD}.{item}") != display:
+            err(f"The midway has no words for {kind}.{MOD}.{item}")
+    prizes = load(DATA / MOD / "loot_table" / f"{midway.PRIZE_TABLE}.json") or {}
+    entries = {e.get("name"): e.get("weight") for pool in prizes.get("pools", []) for e in pool.get("entries", [])}
+    if entries != {f"{MOD}:{name}": plush["weight"] for name, plush in midway.PLUSHES.items()}:
+        err("The midway's prize table must hold each plush at its weight")
+    striker_loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{hs['block']}.json") or {})
+    if '"part": "0"' not in striker_loot:
+        err("The High Striker must drop only from its base")
+    for path in [DATA / MOD / "advancement" / f"{a}.json" for a in midway.ADVANCEMENTS] + [
+            DATA / MOD / "recipe" / f"{r['id']}.json" for r in midway.SHAPED + midway.SHAPELESS] + [
+            ASSETS / "blockstates" / f"{b}.json" for b in midway.blocks()] + [
+            ASSETS / "models" / "block" / f"{m}.json" for m in ("high_striker_base", "high_striker_4_rung", "ring_toss", "ring_toss_ringed_9")]:
+        if not path.exists():
+            err(f"The midway needs {path.relative_to(ROOT)}")
 
 
 def check_pumpkling(java, number, lang):

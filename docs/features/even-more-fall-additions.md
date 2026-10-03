@@ -1,13 +1,13 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21) and the flying broomstick (addition 22) are implemented in source and pass CI's game tests; full-moon werewolves (addition 23), squirrels and acorns (addition 24) and the Pumpkling (addition 25) are implemented in source. None is yet played by hand. Additions 26 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21) and the flying broomstick (addition 22) are implemented in source and pass CI's game tests; full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25) and the fall fair midway (addition 26) are implemented in source. None is yet played by hand. Additions 27 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
 23. full-moon werewolves: they come out of the woods only on full-moon nights; wolfsbane wards them off and silver hurts them;
 24. squirrels and acorns: squirrels in the woods gather and bury acorns, and some grow into oaks; acorns plant oaks and roast;
 25. the Pumpkling: a carved pumpkin woken by a wisp or ectoplasm into a pet that wears its face, follows you and keeps crows off your crops;
-26. the fall fair midway: high striker, ring toss and plush prizes (planned);
+26. the fall fair midway: a five-block High Striker rung with a Carnival Mallet, Ring Toss, and plush prizes;
 27. the ghost-train dark ride (planned);
 28. the piñata (planned);
 29. the hot-air balloon fiesta (planned);
@@ -34,6 +34,8 @@ Squirrels and acorns are Discovery tier: squirrels come to any player in Overwor
 
 The flying broomstick is Discovery tier too: the Witch's Broom (two sticks and a wheat), one Flying Ointment and two feathers.
 
+The fall fair midway is Discovery tier: the High Striker is planks, two redstone lamps and a bell; its Carnival Mallet a log, two red wool and two sticks; Ring Toss six glass bottles over wooden slabs; and four Toss Rings two sticks and a string. The plushes are only won.
+
 Primary specialty and supported player role: witchcraft and exploration. A witch brews hexes for others:
 - **Shrinking:** gets a player into one-block gaps, under low ceilings and into cramped caves, and makes them a smaller target.
 - **Giant:** gives a block more reach and half a block more step, for building and climbing, but makes the player a bigger target.
@@ -47,9 +49,11 @@ The Pumpkling is for carvers and farmers: a pet that wears a face its owner carv
 
 Squirrels and acorns are for foresters, cooks and anyone who likes animals: acorns are an early snack and another way to plant oaks, and squirrels slowly plant the woods they live in. Tame-minded players can breed them with nuts.
 
+The midway is for builders of fairs and anyone who likes a game: a showpiece that lights up when it's struck, a test of timing (a fully charged swing, better still a falling one) and aim (a soft toss over a bottle's neck from three blocks off), and a shelf of plush prizes to win, trade and decorate with. A fair needs someone to build it; anyone can play.
+
 The flying broomstick is a witch's way to travel: slower than elytra but found long before them, good for scouting, crossing ravines and reaching rooftops, and fuelled by the ointment a witch brews.
 
-None of this depends on the Halloween event: a cauldron brews hexes and a broom flies all year, werewolves come on every full moon, squirrels live in the woods all year, and a Pumpkling can be woken with ectoplasm any night.
+None of this depends on the Halloween event: a cauldron brews hexes and a broom flies all year, werewolves come on every full moon, squirrels live in the woods all year, a Pumpkling can be woken with ectoplasm any night, and the midway plays all year.
 
 ## Player experience
 ### Hex brews
@@ -157,6 +161,23 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 
 Only its owner can sit it, light it, put it out or settle it; anyone can feed it.
 
+### The fall fair midway
+1. **The High Striker:** a fairground strength test five blocks tall, placed as one, facing you.
+   - It has a red-and-white tower with a brass rail up its front, two lamps to each block of it, and a brass bell under a crown sign on top. Its foot is a strike pad on a painted base.
+   - Breaking any part breaks it all; it drops once.
+2. **Strike it:** hit the base with a **Carnival Mallet** (left click).
+   - The red puck climbs the rail, lighting a lamp at a time with a rising note, as far as the blow was strong. It rests at the top of its climb for a second and a half, then drops back.
+   - Strength is how charged the swing is (as an attack's is) times a roll: a full swing is 70% to 100% strong. A **critical** swing (falling, as a critical hit is) is 15% stronger.
+   - At 95% or more the puck hits the **bell**: it rings, fireworks spark above, and you win a **prize** and **Ring the Bell**. A plain full swing rings it about one time in six; a falling one about two in three.
+   - A swing spends its charge, so swinging fast only taps the puck up a lamp. The puck must be back at the bottom before it can be struck again.
+   - Lit lamps give light, more with the bell rung, so a striker in play lights up a fair at night.
+3. **Ring Toss:** a slatted, painted crate of nine bottles (green, amber and milk glass), necks up in three rows.
+   - **Toss Rings** are thrown softly (they arc), from your hand.
+   - A ring that comes down on the crate within a pixel and a quarter of a bottle's neck, thrown from **3 or more blocks** off, is a **ringer**: it settles over that bottle for 3 seconds, and you win a prize and **Ringer!** The ringer is used up.
+   - Any other landing drops the ring back on the ground, to be thrown again.
+4. **Prizes:** each prize is one plush, one roll of the loot table `jugcraft:gameplay/midway_prize`: Pumpkin Plush (24 in 102), Ghost Plush (24), Bat Plush (20), Black Cat Plush (20), Squirrel Plush (9), Werewolf Plush (4), and the **Jumbo Pumpkin Plush** (1 in 102). Winning one earns **Step Right Up**, and the jumbo plush **Jackpot**.
+5. **Plushes** are stuffed felt toys with stitched seams and embroidered faces. Each sits facing whoever places it, and squeaks (with a heart) when squeezed with an empty hand. They are only won, not crafted.
+
 ## Connections
 - Hex brews, input producer:
   - the Bubbling Cauldron and its brews (the witch's cottage decorations);
@@ -191,6 +212,11 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 - Flying broomstick, output consumer: travel and exploration; the full-moon night (mooncakes, fairy rings) for Over the Moon. Every witch's cottage piece now has a use: the cauldron brews the ointment that flies the broom.
 - Flying broomstick, entry path: everything is Discovery tier; the first broom comes charged. Nothing needs the End.
 - Flying broomstick, required vs optional: optional. A broom flies one player; anyone can anoint anyone's broom.
+
+- Midway, input producer: planks, logs, sticks, string, red wool, glass bottles, redstone lamps (redstone and glowstone) and a bell (found in villages).
+- Midway, output consumer: decoration (plushes, the lit striker), trading (plushes are rare prizes), and a reason to gather for a fair.
+- Midway, entry path: everything is Overworld and early; a bell is found in villages.
+- Midway, required vs optional: optional. Nothing is gated behind it. One player can build the fair and others play it.
 
 ## Balance and automation
 - **Costs:** the cauldron is a cauldron and two iron ingots, reused. One brew is a water bucket (the bucket comes back), one brew ingredient, one hex ingredient and three glass bottles, which come back when drunk. That makes three draughts.
@@ -234,6 +260,12 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - Units: 16 health, speed 0.3 (a wolf: 8 and 0.3 untamed); follows past 6 blocks, stops at 2.5, comes to its owner past 16; a treat heals 4 health. Guard radius 8 or 12 blocks, as a scarecrow's head (`Scarecrows.HEADED`, `LIT`).
   - Automation: none. Crows are the only thing it affects.
   - Cost on the server: a following Pumpkling paths to its owner about once a second while more than 2.5 blocks off, and tries up to 12 spots when it comes to them. Crows ask about guards in an entity box around a crop; Hay Golems and Pumpklings now answer through one interface, `CropGuard`.
+- **Midway:**
+  - Costs: the striker is 6 planks, 2 redstone lamps and a bell; the mallet a log, 2 red wool and 2 sticks (a wooden tool: 59 uses, 1 damage over the hand, and slow: 0.6 swings a second, so a full charge takes about 1.7 seconds); Ring Toss 6 glass bottles and 3 wooden slabs; 4 rings 2 sticks and a string.
+  - Units: lamps 8 (two a part), the bell the 9th step; up a lamp every 2 ticks, a rest of 30 ticks, down a lamp a tick. Strength: charge × 0.7 to 1.0, + 0.15 critical; 0.95 rings; less climbs that share of 9, at least 1 lamp. Ring Toss: necks at 3.5, 8 and 12.5 pixels across each way; a ringer within 1.25 pixels of one, from 3 blocks or more; a ringer stays 60 ticks. A ring is tossed at 0.75 blocks a tick.
+  - Prizes cost a full swing and luck (a ring in six plain, two in three falling, every 3 seconds at best: the puck's climb and fall), or a ringer (a quarter string, and aim). Plushes are decoration and lead to nothing else, so there is no loop; the jumbo plush is 1 prize in 102.
+  - Automation: none. Only a player's left click strikes, only a thrown ring lands, and the prize goes to the player who struck or threw.
+  - Cost on the server: a struck striker sets its five blocks once a step (about 20 steps a strike); a ring checks the block it hits once. No ticking block entity: the striker's base runs on scheduled ticks only while its puck moves.
 - **Hex brews, cost on the server:** one look at each online player per server tick (a duration and effect check; a collision check only when a shrinking is about to end). No block entity, no block ticks. The glyphs and bubbles are client particles.
 
 ## Multiplayer and persistence
@@ -284,6 +316,12 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 - **Flying broomstick, persistence:** a broom saves its charge. Riding is vanilla's: a player who logs out riding is back on their broom when they log in. The item keeps its charge in `jugcraft:broom_charge`.
 - **Flying broomstick, IDs (all new):** item and entity `flying_broomstick`; data component `jugcraft:broom_charge`; advancements `up_and_away`, `over_the_moon`; the recipe `flying_broomstick`.
 
+- **Midway, server authority:** a strike is a left click the server sees itself (Fabric's block-attack event), checked for build rights there (spawn protection), within 6 blocks, the mallet in hand and the puck at rest; the swing's charge and whether it is falling come from the server's own view of the player. A ring's landing is judged where the server's ring came down and where the server saw it thrown from. Prizes are rolled on the server and go straight to the player who won.
+- **Midway, what clients get:** the striker's lamps and puck and the ring on a bottle are block states; the thrown ring is an entity drawn as its item.
+- **Midway, persistence:** the striker's base saves where its puck is going, whether it is falling and who struck it, so a strike in flight finishes after a restart (a prize then goes only to a striker who is still there). Plushes are blocks; a ringer's ring comes off on its scheduled tick.
+- **Midway, IDs (all new):** blocks and items `high_striker`, `ring_toss`, `pumpkin_plush`, `ghost_plush`, `bat_plush`, `black_cat_plush`, `squirrel_plush`, `werewolf_plush`, `jumbo_pumpkin_plush`; items `carnival_mallet`, `toss_ring`; entity `toss_ring`; block entity `high_striker`; item tag `jugcraft:plushes`; loot table `gameplay/midway_prize`; advancements `step_right_up`, `ring_the_bell`, `ringer`, `jackpot`; recipes `high_striker`, `carnival_mallet`, `ring_toss`, `toss_ring`.
+- **Midway, disable behaviour:** with the agriculture feature off the recipes don't load and the striker can't be struck; everything stays registered, and plushes stay where they are.
+
 ## Dependencies and assets
 - No new dependencies.
 - Textures are drawn by code in `tools/decor4_textures.py`: each hex brew's liquid, the three draughts and the two effect icons (a mouse-sized figure and a towering one).
@@ -299,6 +337,12 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 - The Pumpkling: no new dependencies. `tools/pumpkling_textures.py` draws its vine body (32 × 32, laid out as `client/PumpklingModel.java`'s boxes); the pumpkin is the carved pumpkin's own item model, with the carving drawn over it as the Hay Golem's head is (`client/PumpklingRenderer.java`, using `CarvingTextures`). `tools/pumpkling_data.py` writes its name and tags. The numbers come from `PUMPKLING` in `tools/agriculture.py`, which the checker compares with `Pumpkling.java`. Sounds are vanilla's (an amethyst chime as it wakes, wood as it's hurt), particles vanilla's (soul fire, hearts).
 - Squirrels and acorns: no new dependencies. `tools/squirrel_textures.py` draws the red and grey squirrels (32 × 32, laid out as `client/SquirrelModel.java`'s boxes: soft fur, a cream belly, a bushy tail paler at its tip), the acorn and roasted acorns. `tools/squirrel_data.py` writes the acorn's item model, words and tags; roasted acorns, the recipes and the advancement come from `ITEMS`, `COOKING` and `ADVANCEMENTS` in `tools/agriculture.py`. The numbers come from `SQUIRRELS` in `tools/agriculture.py`, which the checker compares with Java. Sounds are a fox's, pitched high; particles are the earth's own block dust.
 - The flying broomstick: no new dependencies. `tools/broom_textures.py` draws the item (a broom aslant, purple cord, fanned straw, sparkles) and the entity's pale grain, which `client/BroomstickRenderer.java` tints for the ash handle, the cord and the straw (greyer when dry) on boxes of its own. `tools/broom_data.py` writes the item model and words. The numbers come from `BROOMSTICK` in `tools/agriculture.py`, which the checker compares with `Broomstick.java`. Sounds and particles are vanilla's: a phantom's flap on take-off, a brewing stand when anointed, witch's sparkles and smoke.
+
+- The fall fair midway: no new dependencies.
+  - `tools/midway.py` holds the numbers (`HIGH_STRIKER`, `RING_TOSS`, `PLUSHES`), the advancements and the recipes; the checker compares them with Java.
+  - `tools/midway_data.py` writes the models: the striker's base and pad, its tower with each lamp lit and unlit and the puck where it is, the bell rung or not; the crate with a ring over each bottle in turn; each plush. It also writes the blockstates, words, loot and tags.
+  - `tools/midway_textures.py` paints every texture at 64 × 64 (docs/ART_DIRECTION.md, "High resolution"), with `tools/fur_paint.py`: painted boards, lacquer and gold pinstripes, brass, glowing lamps, glass bottles, felt with stitched seams and embroidered faces, and the three item icons.
+  - Sounds and particles are vanilla's: an anvil's clang pitched up for the strike, note-block bits rising with the puck, a bell, glass and an amethyst chime for a ringer; crits, fireworks, hearts and happy-villager sparks.
 
 ## Verification
 ### Hex brews verification
@@ -435,6 +479,23 @@ Not run yet: CI has not built this branch. The planned checks are:
 
 Not run: a Pumpkling following its owner about in play (its path-finding), and crows turning from its crops (the guard check is tested directly); a two-client dedicated-server playtest.
 
+### Midway verification
+Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1084 IDs and now compares `tools/midway.py` with Java; `python3 scripts/check_repository.py` passes.
+
+The 8 new game tests (`MidwayGameTests`):
+1. placed from its item, the striker stands five blocks tall and its base keeps the puck; breaking its fourth block breaks it all and drops it once;
+2. a full swing's strongest roll rings the bell, its weakest climbs more than half way; a swing with no charge climbs a lamp; a critical swing rings it from a middling roll, a plain one doesn't;
+3. struck to the top, the puck climbs a lamp at a time, reaches the bell, lights the tower, wins its striker a plush, Ring the Bell and Step Right Up, and falls back to the bottom; struck again in flight, nothing happens;
+4. a left click with dirt in hand passes and strikes nothing; with the mallet it strikes; a click on the tower isn't a strike; from 8 blocks off, nothing;
+5. necks are numbered row by row, and between two is none; a ring between the necks, or tossed from a block off, isn't a ringer; over the middle neck from 5 blocks off it is: it settles over the fifth bottle, wins a plush and Ringer!, and comes off after 3 seconds;
+6. a Toss Ring thrown from the hand flies, owned by its thrower, one fewer in the stack;
+7. every plush squeaks when squeezed and is in `jugcraft:plushes`; 20 prizes are 20 plushes, one each, given to the winner;
+8. the recipes, advancements and prize table load.
+
+`MidwayClientGameTests` takes screenshots: two High Strikers (one half way, one rung), a prize booth under a striped awning, the plushes, and Ring Toss with a ringer; the prizes up close; Ring Toss; and at dusk.
+
+Not run: swinging a mallet and tossing rings by hand, which no automated test can do; a two-client dedicated-server playtest.
+
 ## World and event applicability
 - A cauldron brews hexes in any dimension, all year. Nothing is seasonal.
 - The hex ingredients come from the Overworld: brown mushrooms, beans, and phantoms.
@@ -442,6 +503,8 @@ Not run: a Pumpkling following its owner about in play (its path-finding), and c
 - A broom flies in any dimension. Over the Moon is earned only in the Overworld. Nothing is seasonal.
 - A Pumpkling can be woken anywhere a carved pumpkin can be placed, all year (with Ectoplasm; wisps come only on Halloween nights). It follows its owner within a dimension, not through portals.
 - Squirrels come only to the Overworld's forests and taiga, by day, all year. Acorns drop from oak and dark oak leaves anywhere, and plant on any grass or dirt.
+
+- The midway works in any dimension, all year. Nothing generates in the world.
 
 ## Rollout and open questions
 - A hex brew can't be drawn by hoppers or dispensers. Bottles are filled by hand.
@@ -460,3 +523,5 @@ Not run: a Pumpkling following its owner about in play (its path-finding), and c
 - How often squirrels come and how often a buried acorn sprouts are open to balance review once played.
 - A Pumpkling doesn't fight, give light to the world (its glow is drawn, not block light) or follow through portals. A giant carved pumpkin can't be woken. It can't be handed to another owner.
 - A shrunk player's grace is 5 seconds at a time. A player who logs out shrunk under a low ceiling stays shrunk until there is room.
+- The High Striker only takes the Carnival Mallet, and only from a player; a ring is judged by where it lands, not how it flies. How often the bell rings and how near a ringer must come are open to balance review once played.
+- Plushes can't be crafted, dyed or combined; a prize booth to put them on is any counter.

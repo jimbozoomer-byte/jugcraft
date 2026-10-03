@@ -60,6 +60,7 @@
 			"io.github.jimbozoomer.jugcraft.test.WerewolfGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SquirrelGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PumpklingGameTests",
+			"io.github.jimbozoomer.jugcraft.test.MidwayGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PetroGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PartyGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DroneGameTests",
@@ -134,6 +135,7 @@
 			"io.github.jimbozoomer.jugcraft.test.WerewolfClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SquirrelClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PumpklingClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.MidwayClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DiagonalClientGameTests"
 		]
 	},

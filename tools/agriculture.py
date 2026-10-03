@@ -8,6 +8,7 @@ See docs/branches/AGRICULTURE.md for the design.
 
 import plants
 import graveyard
+import midway
 
 FEATURE = "agriculture"
 
@@ -683,6 +684,8 @@ HALLOWEEN_ADVANCEMENTS.update({
     "little_jack": {"icon": "jugcraft:hand_carved_pumpkin", "title": "Little Jack",
                     "description": "Wake a carved pumpkin with a wisp or ectoplasm", "frame": "task"},
 })
+# The fall fair midway (tools/midway.py).
+HALLOWEEN_ADVANCEMENTS.update(midway.ADVANCEMENTS)
 
 
 # ---------------------------------------------------------------- Halloween festivities
@@ -2527,7 +2530,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + plants.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + plants.blocks())
 
 
 def all_items():
@@ -2538,7 +2541,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + plants.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + plants.items())
 
 
 def owns(entry_id):
@@ -2605,3 +2608,6 @@ SHAPELESS += [{"id": WEREWOLF["arrow"], "inputs": ["#c:nuggets/silver"] + ["mine
                "category": "equipment", "features": ["silver"]},
               ] + [{"id": f"leather_from_{k['pelt']}", "inputs": [f"jugcraft:{k['pelt']}"], "result": "minecraft:leather", "count": 2,
                     "category": "misc"} for k in WEREWOLF["kinds"].values()]
+# The fall fair midway's recipes (tools/midway.py).
+SHAPED += midway.SHAPED
+SHAPELESS += midway.SHAPELESS

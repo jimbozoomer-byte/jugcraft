@@ -68,6 +68,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MinecartItem;
 import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.Consumables;
@@ -285,6 +286,8 @@ public final class JugcraftAgriculture {
 	public static EntityType<Werewolf> WEREWOLF;
 	public static EntityType<Squirrel> SQUIRREL;
 	public static EntityType<Pumpkling> PUMPKLING;
+	public static EntityType<TossRing> TOSS_RING;
+	public static BlockEntityType<HighStrikerBlockEntity> HIGH_STRIKER_ENTITY;
 	public static DataComponentType<Integer> BROOM_CHARGE;
 	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
 	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
@@ -1037,6 +1040,27 @@ public final class JugcraftAgriculture {
 		PUMPKLING = entity("pumpkling", EntityType.Builder.<Pumpkling>of(Pumpkling::new, MobCategory.MISC).noLootTable().sized(0.6F, 0.9F)
 				.eyeHeight(0.6F).clientTrackingRange(10));
 		FabricDefaultAttributeRegistry.register(PUMPKLING, Pumpkling.createAttributes());
+		// Fall additions 26, the fall fair midway: the High Striker and its Carnival Mallet, Ring Toss and its rings, and
+		// the plush prizes they give.
+		Block striker = registerBlock("high_striker", HighStrikerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().lightLevel(HighStrikerBlock::light).pushReaction(PushReaction.BLOCK)
+				.ignitedByLava());
+		registerItem("high_striker", props -> new BlockItem(striker, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		HIGH_STRIKER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("high_striker"),
+				FabricBlockEntityTypeBuilder.create(HighStrikerBlockEntity::new, striker).build());
+		registerItem(Midway.MALLET, props -> new Item(props.sword(ToolMaterial.WOOD, 1.0F, -3.4F)), new Item.Properties(), TOOL_TAB);
+		Block ringToss = registerBlock("ring_toss", RingTossBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion());
+		registerItem("ring_toss", props -> new BlockItem(ringToss, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem(TossRingItem.ID, TossRingItem::new, new Item.Properties().stacksTo(16), TOOL_TAB);
+		TOSS_RING = entity(TossRingItem.ID, EntityType.Builder.<TossRing>of(TossRing::new, MobCategory.MISC).noLootTable()
+				.sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10));
+		for (Midway.Plush plush : Midway.PLUSHES) {
+			Block block = registerBlock(plush.id(), props -> new PlushBlock(props, plush), BlockBehaviour.Properties.of().mapColor(MapColor.WOOL)
+					.strength(0.2F).sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
+			registerItem(plush.id(), props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		Midway.register();
 
 		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
 		// entity players sit on), the Autumn Wreath and the Leaf Piles.

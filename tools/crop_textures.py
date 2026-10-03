@@ -920,6 +920,8 @@ def crop_textures():
     out.update(squirrel_textures())
     from pumpkling_textures import pumpkling_textures  # and the Pumpkling
     out.update(pumpkling_textures())
+    from midway_textures import midway_textures  # and the fall fair midway
+    out.update(midway_textures())
     from ofrenda_textures import ofrenda_textures  # and the ofrenda
     out.update(ofrenda_textures())
     from graveyard_textures import graveyard_textures  # and the graveyard pack

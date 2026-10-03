@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: The fall fair midway, fall addition 26
+- **The High Striker:** a red-and-white fairground tower five blocks tall with lamps up its front and a bell on top. Hit its pad with a **Carnival Mallet**: the puck climbs as far as the blow was strong, lighting the lamps with a rising note. Ring the bell (a fully charged swing, better still a falling one) to win a prize (Ring the Bell).
+- **Ring Toss:** a crate of nine bottles. Toss **Toss Rings** at it from three blocks or more; one over a bottle's neck is a ringer and wins a prize (Ringer!).
+- **Plush prizes:** a pumpkin, a ghost, a bat, a black cat, a squirrel, a rare werewolf and the 1-in-102 **Jumbo Pumpkin Plush** (Jackpot). Squeeze one and it squeaks. Step Right Up for any prize.
+- Painted at 64 × 64. Eight game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-fall-fair-midway).
+
 ### Unmerged: The Pumpkling, fall addition 25
 - **Wake a carved pumpkin:** use a Wisp in a Jar or a bottle of Ectoplasm on a hand-carved pumpkin with a face, and it hops up as a **Pumpkling**, a pet on little vine legs wearing the face you carved (Little Jack).
 - It **follows** you, comes to you from afar, and **sits and stays** when you sneak-use it. A torch lights its face (a soul torch, blue); treats heal it.
