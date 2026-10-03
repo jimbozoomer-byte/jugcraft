@@ -13,7 +13,8 @@ MOD = "jugcraft"
 # Feature switches (config/jugcraft.properties). Order is the config file order.
 FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
             "salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines", "deposits",
-            "explosives", "agriculture"]
+            "explosives", "agriculture", "parties", "drones",
+            "pixel_hollows", "retro_trader", "alpine_spawn", "biomes"]
 
 # Metals use the vanilla form set. "mined" adds ore, deepslate ore, raw item and raw block.
 # cook: which vanilla cookers can smelt the ore/raw form. tool: minimum pickaxe tier.
@@ -210,10 +211,24 @@ def feature_of(entry_id):
     import petro
     if entry_id in petro.petro_items() or entry_id in petro.petro_blocks():
         return FEATURE
+    import guide_books  # the Drone Tower guide books go with the drones, part of the machines
+    if entry_id in guide_books.BOOKS:
+        return FEATURE
     import tank_display
     if entry_id in tank_display.BLOCKS:
         return FEATURE
     import agriculture
     if agriculture.owns(entry_id):
-        return agriculture.FEATURE
-    raise KeyError(entry_id)
+        return agriculture.switch_of(entry_id)
+    import plastic
+    if entry_id in plastic.blocks():
+        return "crude_oil"
+    import gear
+    if entry_id in gear.items():
+        tier = entry_id.rsplit("_", 1)[0]
+        return gear.GEAR_TIERS[tier]["feature"] if tier in gear.GEAR_TIERS else FEATURE
+    import exosuit
+    if entry_id in exosuit.items():
+        return FEATURE
+    import pixel_hollows
+    return pixel_hollows.feature_of(entry_id)

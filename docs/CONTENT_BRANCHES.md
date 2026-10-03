@@ -1,6 +1,6 @@
 # Specialties and contribution briefs
 
-This is a contribution map for the owner's vision, not a claim of shipped content or blanket approval of every implementation. Open one focused proposal, establish shared interfaces first, and build one usable slice per PR. Example specialties may be refined during review.
+This is a contribution map for the owner's vision, not a claim of shipped content or guaranteed acceptance. You may start one focused prototype in your fork and submit a draft PR without an approved issue. Reuse shared interfaces and build one usable slice per PR. Coordinate major shared-API changes first. Example specialties may be refined during review.
 
 ## Factory engineering
 
@@ -40,6 +40,8 @@ The branch's first three slices (the Fall Harvest: tall corn, wild plants and si
 Biomes should belong geographically: temperature, moisture, elevation, water, neighboring terrain, vegetation and animal ecology need a coherent explanation. Give players attractive building palettes, usable regional resources, quiet scenic places and ambient life. Example proposals: orchard valleys, misty woodland workshops, warm meadows or sheltered snowy groves.
 
 Specify transition rules and whether resources are unique or obtainable elsewhere. Avoid forcing essential early items into an extremely rare distant biome. Review exploration distance, seed behavior and existing-chunk compatibility. Keep ambient sounds and effects adjustable and readable.
+
+The biomes branch's roster (a remake of the Biomes O' Plenty catalog's biomes in nine batches, placed in Jugcraft regions) is in [branches/BIOMES.md](branches/BIOMES.md).
 
 ## Caves, dungeons and bosses
 
