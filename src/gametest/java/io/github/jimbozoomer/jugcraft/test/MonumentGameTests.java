@@ -44,7 +44,7 @@ public class MonumentGameTests {
 	}
 
 	private static void floor(GameTestHelper helper) {
-		for (int x = 0; x <= 9; x++) {
+		for (int x = 0; x <= 7; x++) {
 			for (int z = 0; z <= 7; z++) {
 				helper.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
 			}
@@ -71,6 +71,12 @@ public class MonumentGameTests {
 				.filter(entity -> entity.getItem().is(item)).mapToInt(entity -> entity.getItem().getCount()).sum();
 	}
 
+	/** Stands the player two blocks in front of (north of) {@code spot}, in easy reach, still looking south. */
+	private static void standBefore(GameTestHelper helper, ServerPlayer player, BlockPos spot) {
+		BlockPos absolute = helper.absolutePos(spot);
+		player.setPos(absolute.getX() + 0.5, absolute.getY() + 1, absolute.getZ() - 1.5);
+	}
+
 	private static boolean isPart(GameTestHelper helper, BlockPos pos, String id, int part) {
 		BlockState state = helper.getBlockState(pos);
 		return state.is(block(id)) && state.getValue(HeadstoneBlock.PART) == part && state.getValue(HeadstoneBlock.FACING) == Direction.NORTH;
@@ -91,17 +97,20 @@ public class MonumentGameTests {
 		helper.assertBlockNotPresent(block("angel_at_the_tomb"), new BlockPos(5, 3, 2));
 
 		mason.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("grand_obelisk")));
+		standBefore(helper, mason, new BlockPos(1, 1, 2));
 		use(helper, mason, new BlockPos(1, 1, 2), Direction.UP);
 		for (int part = 0; part < 4; part++) {
 			helper.assertTrue(isPart(helper, new BlockPos(1, 2 + part, 2), "grand_obelisk", part), "Obelisk part " + part);
 		}
 		mason.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("mortsafe")));
-		use(helper, mason, new BlockPos(8, 1, 2), Direction.UP);
-		helper.assertTrue(isPart(helper, new BlockPos(8, 2, 2), "mortsafe", 0) && isPart(helper, new BlockPos(8, 2, 3), "mortsafe", 1),
+		standBefore(helper, mason, new BlockPos(7, 1, 2));
+		use(helper, mason, new BlockPos(7, 1, 2), Direction.UP);
+		helper.assertTrue(isPart(helper, new BlockPos(7, 2, 2), "mortsafe", 0) && isPart(helper, new BlockPos(7, 2, 3), "mortsafe", 1),
 				"The mortsafe runs back over the grave");
 
 		helper.setBlock(new BlockPos(4, 3, 5), Blocks.STONE);
 		mason.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("angel_at_the_tomb")));
+		standBefore(helper, mason, new BlockPos(5, 1, 5));
 		use(helper, mason, new BlockPos(5, 1, 5), Direction.UP);
 		helper.assertBlockNotPresent(block("angel_at_the_tomb"), new BlockPos(5, 2, 5));
 		helper.succeed();
