@@ -1,6 +1,6 @@
 # The Graveyard Pack
 
-Status: packs 1 (headstones, weathering and the Stonemason's Chisel), 2 (monuments) and 3 (buildings) are implemented in source, not yet played by hand. The Build workflow compiles them; CI's game tests and client screenshots are recorded below.
+Status: all four packs are implemented in source: 1 (headstones, weathering and the Stonemason's Chisel), 2 (monuments), 3 (buildings) and 4 (grounds). None is yet played by hand. The Build workflow compiles them; CI's game tests and client screenshots are recorded below.
 Proposal issue: none; requested directly by the owner on 3 October 2026 ("do a serious high quality graveyard pack with high quality detailed blocks and multiblocks"). It comes in four packs, one pull request each, each stacked on the one before:
 1. headstones: nine life-sized memorials in four stones that weather with the years, and the Stonemason's Chisel that cuts their epitaphs;
 2. monuments: an obelisk, a draped urn, an angel at a tomb, a trumpeting angel on a column, an iron mortsafe and a faithful hound;
@@ -10,8 +10,8 @@ Proposal issue: none; requested directly by the owner on 3 October 2026 ("do a s
 It goes beyond the Halloween decorations' plain gravestones and crypt set (batch 3): those stay as they are, and this pack's memorials are the serious, finely carved kind. Nothing in it depends on the Halloween event.
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: Discovery tier. Every headstone is cut from a vanilla stone (calcite for marble, polished deepslate for slate, granite, smooth sandstone), in a stonecutter or a crafting table; the chisel is an iron ingot and a stick. The monuments add feathers, a flower pot, iron bars and, for the hound, bronze ingots (smelted from bronze blend); the buildings add oak, slates, lanterns, glass and bronze.
-Primary specialty and supported player role: building. A builder lays out a churchyard of real-sized, carved memorials, each with its own epitaph, and decides how old it looks: kept clean and waxed, or left to moss and ivy. Ghost hunters gain a reason to let one go to ruin, since neglected graves raise more restless spirits.
+Target milestone and tier: Discovery tier. Every headstone is cut from a vanilla stone (calcite for marble, polished deepslate for slate, granite, smooth sandstone), in a stonecutter or a crafting table; the chisel is an iron ingot and a stick. The monuments add feathers, a flower pot, iron bars and, for the hound, bronze ingots (smelted from bronze blend); the buildings add oak, slates, lanterns, glass and bronze; the grounds add small flowers, coarse dirt, an iron shovel, iron, bronze and a lantern.
+Primary specialty and supported player role: building. A builder lays out a churchyard of real-sized, carved memorials, each with its own epitaph, and decides how old it looks: kept clean and waxed, or left to moss and ivy. Ghost hunters gain a reason to let one go to ruin, since neglected graves raise more restless spirits. A groundskeeper (pack 4) keeps the graves: fresh flowers in a grave vase calm the graves around it, and a lamp post lights the paths after dark.
 
 ## Player experience
 ### Headstones
@@ -48,6 +48,24 @@ The chisel, or a named Name Tag, cuts the inscription of the part it is used on:
 
 **The Bronze Mausoleum Door** (five bronze ingots and a glass pane make two): a door opened by hand, like a copper door, cast as a pair of narrow leaves with a grille over smoked glass, raised panels below and pulls on both faces.
 
+### Grounds
+Pack 4 lays out the ground between the memorials and gives a reason to keep it.
+1. **Kerbed Grave** (polished granite kerbs, white marble chippings; four polished granite and a calcite): a grave plot 1 × 2 m, kerbed in polished granite with a post and pyramid cap at each corner, filled with white marble chippings. A white marble open book on a little lectern stands at its head with the epitaph across its pages. Set it before a headstone, or alone.
+2. **Planted Grave** (sandstone kerbs; four smooth sandstone, a small flower and dirt): a kerbed bed planted with flowers and a little polished plaque for the epitaph. As it weathers, the bed goes from flowers to **weeds coming through**, then grass and brambles; a brush tends it back a stage, like any headstone.
+3. **Memorial Bench** (oak slats on cast-iron ends with scrolled arms; two oak slabs, a bronze ingot, two iron ingots; two blocks wide): a park bench in memory of someone, with the inscription on a bronze plaque on its top rail. Either half, used with an empty hand, **seats a player** (the seat at 0.46 m). Its oak silvers and its iron rusts as it weathers.
+4. **Open Grave** (oak planks, an iron shovel, three coarse dirt; two blocks long): a grave freshly dug. The cut in the turf goes down into darkness, two boards lie across it with the lowering straps over them, the spoil is heaped along one side with the spade stuck in it, and a wooden cross waits at its head with a little board for the name. It is a prop: the pit is drawn, not dug, so it stands on solid ground. **An open grave stirs spirits twice as often** as another grave at its stage.
+5. **Grave Vase** (three bronze ingots and a polished granite): a fluted bronze vase on a granite block. Any small flower put in it makes a bouquet (one flower is used):
+   - **white**: lily of the valley, oxeye daisy, white tulip, azure bluet;
+   - **red**: poppy, red tulip, red mum, hibiscus;
+   - **yellow**: dandelion, orange tulip, yellow and orange mums, goldenrod, marigold, orange cosmos;
+   - **purple**: allium, cornflower, blue orchid, lavender, heather, purple mum, frost iris;
+   - **mixed**: any other small flower.
+
+   The colours are item tags (`jugcraft:grave_flowers/<colour>`), and every flower the vase takes is in `jugcraft:grave_flowers` (the colours, the other vanilla small flowers, and anything added to vanilla's `small_flowers`), so packs can add flowers. The first bouquet earns **Flowers for the Dead**. **Fresh flowers calm the graves within 3 blocks**: they stir restless spirits only half as often. In time they **wilt** (each random tick has a 1 in 20 chance, about a day of play), their heads hanging and brown, and calm nothing; new flowers replace them. Shears clear the vase.
+6. **Cemetery Lamp Post** (four iron ingots and a lantern): a Victorian cast-iron lamp post three blocks tall (2.9 m), with a fluted base, a slender column with a ladder bar and a four-sided lantern under a domed cap. It is **lit while it is dark outside** (light 15) and out by day, and looks at the sky every 5 seconds. It is placed whole, facing the player, and breaking any block of it breaks the post and drops it once.
+
+The four grounds memorials (1 to 4) are headstones in every way: they weather, wax, take an epitaph from the chisel and stir spirits.
+
 ### Weathering
 - A headstone weathers in four stages: **clean**, **worn** (duller, grime run down from the top, chipped), **mossy** (moss creeping up from the ground in cushions, lichen rosettes, orange on granite and sandstone) and **overgrown** (green to a third of its height, crusted with lichen, ivy clumps at its foot and a trail climbing one side).
 - Each random tick an unwaxed headstone takes the next stage 2% of the time, twice that with open sky above it: about an hour of play per stage, half that under open sky.
@@ -64,12 +82,12 @@ The chisel, or a named Name Tag, cuts the inscription of the part it is used on:
 - A broken headstone keeps its epitaph on the item (shown in its tooltip) and brings it back when placed again.
 
 ### Neglected graves
-Headstones are graves for ghost hunting: at night they stir restless spirits as the other graves do, but a quarter as often while clean, half as often when worn, as often when mossy and half as often again when overgrown. A well-kept churchyard is a quiet one.
+Headstones are graves for ghost hunting: at night they stir restless spirits as the other graves do, but a quarter as often while clean, half as often when worn, as often when mossy and half as often again when overgrown. A well-kept churchyard is a quiet one. An open grave stirs them twice as often again, and fresh flowers in a grave vase within 3 blocks halve the rate.
 
 ## Connections
-- Existing input producer: vanilla calcite, deepslate, granite, sandstone and iron; the Brush (vanilla archaeology), honeycomb (bees), bone meal; for the monuments, feathers, a flower pot, iron bars and the materials branch's bronze.
+- Existing input producer: vanilla calcite, deepslate, granite, sandstone and iron; the Brush (vanilla archaeology), honeycomb (bees), bone meal; for the monuments, feathers, a flower pot, iron bars and the materials branch's bronze; for the grounds, small flowers (vanilla's and the Agriculture branch's mums, lavender, heather, goldenrod, marigolds, cosmos, hibiscus and frost irises), coarse dirt, oak, an iron shovel and a lantern.
 - Existing output consumer: ghost hunting (restless spirits rise from the headstones, more from neglected ones; the Spirit Board, the ofrenda and the Spirit Lantern all work with them). Building: the batch 3 cemetery fence, crypt stone and mourning angel, the Halloween lights and candles.
-- Technology connection: none needed; a stonecutter cuts most of them.
+- Technology connection: none needed; a stonecutter cuts most of them. The lamp post lights itself by the time of day, with no redstone.
 - Magic connection: the restless spirits of ghost hunting.
 - Reachable entry path (prove no circular unlock): calcite, deepslate, granite and sandstone are found in any world from the first day; an iron ingot and a stick make the chisel; bronze ingots smelt from bronze blend in a furnace. Nothing here is gated behind anything else in the pack.
 - Which connections are required vs optional; trade and solo routes: all optional; one player can build a churchyard alone, and headstones (engraved or not) trade like any block.
@@ -78,7 +96,8 @@ Headstones are graves for ghost hunting: at night they stir restless spirits as 
 
 ## Balance and automation
 - Each headstone costs one to six vanilla stone blocks, each monument up to eight blocks or bars (the hound three bronze ingots), each building nine items or fewer (a decoration's price, though it fills up to 85 blocks), and returns only itself when broken: nothing breaks down into anything else, so there is no conversion loop.
-- The buildings' lamps and lanterns are light only: they need no fuel and burn for ever, as vanilla lanterns do.
+- The buildings' lamps and lanterns are light only: they need no fuel and burn for ever, as vanilla lanterns do. So does the lamp post, lit only while it is dark.
+- Each grounds piece costs four to six items. A grave vase's bouquet costs one small flower, which is used up and not given back; flowers last about a day of play. The vase's calm (×0.5) and the open grave's stir (×2) only change how often spirits rise, never ghost hunting's cap.
 - Weathering needs no fuel and makes nothing. Brushing costs brush wear; waxing costs a honeycomb; aging costs a bone meal.
 - Spirits only rise at night, at most three within 16 blocks of a grave (ghost hunting's own cap); a churchyard of neglected headstones does not raise more than any other graves would, only more often up to that cap.
 
@@ -86,11 +105,12 @@ Headstones are graves for ghost hunting: at night they stir restless spirits as 
 - **Server authority.** Everything that changes a headstone needs build rights (`mayBuild`), like editing a sign; placing one needs the player allowed to build in every block it fills. The epitaph screen's lines are checked on the server before they are cut: the player must have opened a session on exactly that memorial and inscription with the chisel within the last 6,000 ticks (one session, one cut), still hold a chisel, be within reach of the block they used it on, be allowed to use items there, the block must still be part of that memorial and the inscription one it has, and they may send at most 4 lines of 24 characters (the network codec refuses anything much larger before it is read). Control characters are dropped and lines trimmed. Sessions end when the player leaves or the server stops.
 - Every inscription lives in the block entity of the memorial's first block (and its item: `jugcraft:epitaph` for the first, `jugcraft:inscriptions` for a building's others); weathering and wax are block state on every block, so they survive restarts and chunk unloads.
 - Each building's block has a part property with exactly as many values as it has blocks (85 for the mausoleum), so the smaller ones carry no states they never use. Its layout (cells, collision boxes, inscriptions, lights) is generated into `/jugcraft/graveyard_buildings.json`, which the game reads at start-up.
+- **Pack 4.** Filling and clearing a vase needs build rights; its bouquet and wilting are block state. The lamp post's light is block state, checked by a scheduled tick on its top block every 100 ticks (none in between). Sitting on the bench uses the same seat entity as the other seats, which exists only while someone sits.
 - With the agriculture feature off, the recipes do not load and headstones stop weathering; placed ones keep their stage, wax and epitaph, and everything stays registered.
-- New IDs only: blocks with items `gothic_headstone`, `willow_urn_headstone`, `winged_skull_headstone`, `lamb_headstone`, `broken_column`, `celtic_cross`, `rustic_scroll_headstone`, `table_tomb`, `ledger_stone`; item `stonemasons_chisel`; block entity `headstone`; data component `epitaph`; tags `jugcraft:headstones` (block and item); advancements `here_lies` and `groundskeeper`. Pack 2 adds blocks with items `grand_obelisk`, `draped_urn`, `angel_at_the_tomb`, `trumpeting_angel`, `mortsafe`, `faithful_hound` (in the same tag and block entity type). Pack 3 adds blocks with items `family_mausoleum`, `lych_gate`, `cemetery_gateway`, `columbarium` (tag `jugcraft:graveyard_buildings`, block entity `graveyard_building`) and `bronze_mausoleum_door`, and the data component `inscriptions`. No migration.
+- New IDs only: blocks with items `gothic_headstone`, `willow_urn_headstone`, `winged_skull_headstone`, `lamb_headstone`, `broken_column`, `celtic_cross`, `rustic_scroll_headstone`, `table_tomb`, `ledger_stone`; item `stonemasons_chisel`; block entity `headstone`; data component `epitaph`; tags `jugcraft:headstones` (block and item); advancements `here_lies` and `groundskeeper`. Pack 2 adds blocks with items `grand_obelisk`, `draped_urn`, `angel_at_the_tomb`, `trumpeting_angel`, `mortsafe`, `faithful_hound` (in the same tag and block entity type). Pack 3 adds blocks with items `family_mausoleum`, `lych_gate`, `cemetery_gateway`, `columbarium` (tag `jugcraft:graveyard_buildings`, block entity `graveyard_building`) and `bronze_mausoleum_door`, and the data component `inscriptions`. Pack 4 adds blocks with items `kerbed_grave`, `planted_grave`, `memorial_bench`, `open_grave` (in the headstones' tag and block entity type), `grave_vase` and `cemetery_lamp_post`; item tags `jugcraft:grave_flowers` and `jugcraft:grave_flowers/white`, `red`, `yellow`, `purple`; and the advancement `flowers_for_the_dead`. No migration.
 
 ## Dependencies and assets
-No new dependencies. Every texture is drawn by code in `tools/graveyard_textures.py` (the four stones at four stages, carved and rough faces, knotwork, ivy, cast iron and bronze at four stages, the chisel; for the buildings, weathering oak and roof slates, stained glass, a chequered marble floor, lamp and lantern glass, smoked glass and the door's item). Models are generated by `tools/graveyard_models.py` (boxes, with the lamb, the urn's shroud, the two angels and the hound sculpted by `tools/sculpt.py`), `tools/graveyard_buildings.py` (the buildings and the door) and `tools/graveyard_data.py`, which cuts each building into one model per block, its collision boxes and its layout. Sounds are vanilla's (stonecutter, brush, honeycomb, axe, bone meal). The letters are drawn by the client with the game's own font (`HeadstoneRenderer`).
+No new dependencies. Every texture is drawn by code in `tools/graveyard_textures.py` (the four stones at four stages, carved and rough faces, knotwork, ivy, cast iron and bronze at four stages, the chisel; for the buildings, weathering oak and roof slates, stained glass, a chequered marble floor, lamp and lantern glass, smoked glass and the door's item; for the grounds, marble chippings, a flower bed going to weeds, the open grave's dark pit, fresh soil, the lowering straps, petals in five colours and wilted, leaves, and the lamp post's unlit glass). Models are generated by `tools/graveyard_models.py` (boxes, with the lamb, the urn's shroud, the two angels and the hound sculpted by `tools/sculpt.py`), `tools/graveyard_buildings.py` (the buildings and the door), `tools/graveyard_grounds.py` (the grounds, with the spoil heap and bouquets sculpted) and `tools/graveyard_data.py`, which cuts each building into one model per block, its collision boxes and its layout. Sounds are vanilla's (stonecutter, brush, honeycomb, axe, bone meal). The letters are drawn by the client with the game's own font (`HeadstoneRenderer`).
 
 ## Verification
 | Check | Result |
@@ -104,6 +124,8 @@ No new dependencies. Every texture is drawn by code in `tools/graveyard_textures
 | Pack 2: client game test (`MonumentClientGameTests`) | Pass (client shard 2 of that run) |
 | Pack 3: server game tests (`GraveyardBuildingGameTests`, 6) | Pass: all 583 required tests passed (run 37141476426, commit ea0f16f6) |
 | Pack 3: client game test (`GraveyardBuildingClientGameTests`) | Pass (client shard 0 of that run) |
+| Pack 4: server game tests (`GraveyardGroundsGameTests`, 5) | Pass: all 588 required tests passed (run 37144212183, commit eb501f92) |
+| Pack 4: client game test (`GraveyardGroundsClientGameTests`) | Pass (client shard 1 of that run); its log showed the grave vase's models missing a texture, fixed after it and passing in run [37145416331](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37145416331) (below) |
 
 The four game tests:
 1. a Celtic cross placed from its item goes up three blocks and a table tomb back two, facing the player; with a block in the way nothing is placed; breaking the cross's top or the tomb's head breaks the whole and drops one;
@@ -124,9 +146,23 @@ The six building tests:
 5. the cemetery gateway places whole with its opening free, and its lanterns give light;
 6. every building's recipe and loot, and the Bronze Mausoleum Door's, load, and the door opens by hand.
 
+The five grounds tests:
+1. placed by a player, the kerbed, planted and open graves run back two blocks and the bench a block to the right; used with an empty hand, the bench seats the player;
+2. a stick does nothing in a grave vase; a poppy makes fresh red flowers, used up, and earns Flowers for the Dead; a pink tulip makes a mixed bouquet; fresh flowers calm a grave three blocks off and not one four off; in time they wilt and calm nothing; shears clear the vase;
+3. the lamp post stands three blocks tall, lit only in the dark, giving light 15 when lit; set the wrong way, its own check sets the whole post right; breaking its lantern breaks it all;
+4. an open grave stirs spirits twice as often as another grave;
+5. every grounds recipe and loot table and the advancement load.
+
 The client game test builds a churchyard of all nine headstones, engraved and at mixed stages, between a gravel path and a wrought-iron fence with lanterns, and a row of four gothic headstones at the four stages; it photographs the whole by day and night, each group up close, the table tomb and ledger stone from their feet, the four stages, and the epitaph screen. It prints the epitaph each client block entity received.
 
 **Not run:** a person playing it in a client (opening the epitaph screen with the chisel and typing; weathering over real hours; walking into the mausoleum and hanging its door); a dedicated server with two or more players cutting epitaphs at once.
+
+### Pack 4 verification
+Run [37144212183](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37144212183) on commit eb501f92 passed every job: the data check (1,042 IDs), the build and all 588 server game tests, and the three client shards. The run before it failed to compile: 26.3 has no `ItemTags.SMALL_FLOWERS`, so the vase now takes the flowers of its own tag `jugcraft:grave_flowers`. In the client test:
+- the kerbed, planted, open graves, the bench and the lamp posts drew with their models and textures; the screenshots show the white chippings and open book, the kept grave in flower beside the neglected one gone to weeds, the open grave's pit, boards, spoil heap, spade and waiting cross, the bench's plaque, and the lamps lit at night ([the guide](../branches/AGRICULTURE.md#the-graveyard-grounds) has them);
+- the grave vase's granite base drew the missing-texture pattern on its top: its models used a texture (`#top`) they never defined, and the log said so. Its models now define it, and the checker now fails any model a blockstate or item draws that uses a texture it doesn't define.
+
+Run [37145416331](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37145416331), the pull request's run on commit 13437872 with that fix, passed every job: the data check, the build, all 588 server game tests and the three client shards. Its client log has no missing model or texture, and the vases' granite bases draw whole, with a bouquet of each colour in them ([the guide](../branches/AGRICULTURE.md#the-graveyard-grounds) has the picture).
 
 ### Pack 3 verification
 Run [37141476426](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37141476426) on commit ea0f16f6: the data check (1,036 IDs), the build and all 583 server game tests passed, and client shard 0, which runs `GraveyardBuildingClientGameTests`, passed. The run before it failed to compile: 26.3 has no `PushReaction.DESTROY`, so the door now pops off as `POPPED`. In the client test:
@@ -148,6 +184,7 @@ The commit after it changes only the client test's camera (it no longer leaves h
 ## World and event applicability
 - No worldgen: headstones are only placed by players.
 - Spirits rise only at night on the Overworld clock, as ghost hunting's do.
+- The lamp post lights wherever it is dark outside, by its own dimension's daylight.
 - Not seasonal: nothing here waits for Halloween, and nothing is removed after it.
 
 ## Rollout and open questions
@@ -155,4 +192,7 @@ The commit after it changes only the client test's camera (it no longer leaves h
 - A building's inscriptions are drawn even when its first block is out of view (`GraveyardBuildingRenderer`), as they may be cut a few blocks from it.
 - The mausoleum's room floor and the doorway's threshold are drawn over the ground the building stands on; inside, players walk on that ground.
 - Epitaphs are plain text: no colours or formatting codes.
+- The open grave is a prop: nothing is buried in it, and it can't be dug into or filled in.
+- A grave vase holds one bouquet; flowers cleared with shears are not given back.
+- The lamp post can't be switched by redstone; it follows the daylight only.
 - Weathering is by random ticks, so a churchyard far from any player does not age (as crops do not grow).

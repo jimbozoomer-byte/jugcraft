@@ -1574,7 +1574,8 @@ public final class JugcraftAgriculture {
 				case IRON -> MapColor.METAL;
 			};
 			// Random ticks: headstones weather, and graves stir at night.
-			Block stone = registerBlock(style.id, props -> new HeadstoneBlock(props, style), BlockBehaviour.Properties.of().mapColor(colour)
+			Block stone = registerBlock(style.id, props -> style == HeadstoneBlock.Style.MEMORIAL_BENCH ? new MemorialBenchBlock(props, style)
+					: new HeadstoneBlock(props, style), BlockBehaviour.Properties.of().mapColor(colour)
 					.requiresCorrectToolForDrops().strength(2.0F, 6.0F).sound(style.stone == HeadstoneBlock.Stone.IRON ? SoundType.METAL : SoundType.STONE)
 					.noOcclusion().randomTicks());
 			registerItem(style.id, props -> new HeadstoneItem(stone, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
@@ -1585,7 +1586,27 @@ public final class JugcraftAgriculture {
 		registerItem(Epitaphs.CHISEL, StonemasonsChiselItem::new, new Item.Properties().durability(CHISEL_USES), EQUIPMENT_TAB);
 		Epitaphs.register();
 		registerGraveyardBuildings();
+		registerGraveyardGrounds();
 	}
+
+	/**
+	 * The graveyard pack's grounds (pack 4) beyond its headstone styles: the Grave Vase, whose fresh flowers calm the
+	 * graves about it, and the Cemetery Lamp Post, lit at night.
+	 */
+	private static void registerGraveyardGrounds() {
+		Block vase = registerBlock(GRAVE_VASE, GraveVaseBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_ORANGE)
+				.strength(1.5F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.METAL).noOcclusion().randomTicks()
+				.pushReaction(PushReaction.POPPED));
+		registerItem(GRAVE_VASE, props -> new BlockItem(vase, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block post = registerBlock(LAMP_POST, LampPostBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(3.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.METAL).noOcclusion().lightLevel(LampPostBlock::light)
+				.pushReaction(PushReaction.POPPED));
+		registerItem(LAMP_POST, props -> new BlockItem(post, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+	}
+
+	/** The Grave Vase and the Cemetery Lamp Post. */
+	public static final String GRAVE_VASE = "grave_vase";
+	public static final String LAMP_POST = "cemetery_lamp_post";
 
 	/**
 	 * The graveyard pack's buildings (pack 3), from the generated {@code /jugcraft/graveyard_buildings.json}: each one a
