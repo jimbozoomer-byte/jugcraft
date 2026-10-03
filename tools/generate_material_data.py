@@ -144,6 +144,8 @@ def assets():
     gear.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import exosuit
     exosuit.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import grapple
+    grapple.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures

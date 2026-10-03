@@ -1332,6 +1332,8 @@ def machines():
     gear_textures.draw_all(save, save_armor, part_palette)
     import exosuit_art
     exosuit_art.draw_all(save, save_armor)
+    import grapple
+    grapple.draw_all(save)
     import plastic
     plastic.draw_all(save)
     save(conveyor_frame(0), "block", "conveyor_belt")

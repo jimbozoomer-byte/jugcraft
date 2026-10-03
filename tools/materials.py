@@ -230,5 +230,8 @@ def feature_of(entry_id):
     import exosuit
     if entry_id in exosuit.items():
         return FEATURE
+    import grapple
+    if entry_id in grapple.items():
+        return FEATURE
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)
