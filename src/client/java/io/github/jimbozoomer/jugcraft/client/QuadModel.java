@@ -42,9 +42,10 @@ public final class QuadModel {
 			Identifier texture = Jugcraft.id(name.contains("/") ? "textures/" + name + ".png" : "textures/block/" + name + ".png");
 			// A quad marked "cutout" (a silhouette) leaves out its texture's see-through pixels.
 			boolean cutout = quad.has("cutout") && quad.get("cutout").getAsBoolean();
-			// A quad marked "nocull" is drawn from both sides.
+			// A quad marked "nocull" is drawn from both sides: 26.3's translucent entity type doesn't cull (its culling one is
+			// entityTranslucentCull). An opaque texture draws through it as solid.
 			boolean nocull = quad.has("nocull") && quad.get("nocull").getAsBoolean();
-			RenderType type = nocull ? RenderTypes.entityCutoutNoCull(texture) : cutout ? RenderTypes.entityCutout(texture) : RenderTypes.entitySolid(texture);
+			RenderType type = nocull ? RenderTypes.entityTranslucent(texture) : cutout ? RenderTypes.entityCutout(texture) : RenderTypes.entitySolid(texture);
 			JsonArray n = quad.getAsJsonArray("normal");
 			float[] flat = {n.get(0).getAsFloat(), n.get(1).getAsFloat(), n.get(2).getAsFloat()};
 			float[][] normals = {flat, flat, flat, flat};
