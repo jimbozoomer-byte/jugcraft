@@ -968,6 +968,21 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Cut an epitaph** with the Stonemason's Chisel (an iron ingot over a stick): four lines, each as large as fits the stone. A named Name Tag cuts a name.
 - **They weather**: worn, mossy, then overgrown with lichen and ivy, and the letters fade. A Brush scrubs them, honeycomb waxes them, bone meal ages them. Neglected graves stir more restless spirits at night. Details: [the graveyard pack](../features/graveyard.md).
 
+### The Graveyard: monuments
+
+| **A grand obelisk** in granite, the draped urn beside it | **The draped urn** on its pedestal |
+| --- | --- |
+| ![The grand obelisk](../images/ingame_graveyard_obelisk.jpg) | ![The draped urn](../images/ingame_graveyard_draped_urn.jpg) |
+| **The Angel at the Tomb**, kneeling at its end | **The trumpeting angel** on her column |
+| ![The Angel at the Tomb](../images/ingame_graveyard_angel_at_the_tomb.jpg) | ![The trumpeting angel](../images/ingame_graveyard_trumpeting_angel.jpg) |
+| **An iron mortsafe** and **the faithful hound** | **The row** along the path |
+| ![A mortsafe and the hound](../images/ingame_graveyard_mortsafe_and_hound.jpg) | ![The monuments](../images/ingame_graveyard_monuments.jpg) |
+
+*Real screenshots from the client game test that CI runs (`MonumentClientGameTests`, software rendering, small previews). The epitaphs and stages are set for the picture.*
+
+- **Six monuments**, two to four blocks each: a granite **obelisk**, a marble **draped urn**, the **Angel at the Tomb** grieving over an altar, a **trumpeting angel** on a fluted column, an iron **mortsafe** caged over a grave against the body-snatchers, and a bronze **faithful hound** on its plinth.
+- They are headstones in every way: they weather (the mortsafe rusts, the hound grows verdigris), take an epitaph from the chisel and stir spirits. Details: [the graveyard pack](../features/graveyard.md#monuments).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

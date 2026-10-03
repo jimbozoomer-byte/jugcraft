@@ -1,6 +1,6 @@
 # The Graveyard Pack
 
-Status: pack 1 (headstones, weathering and the Stonemason's Chisel) is implemented in source, not yet played by hand. The Build workflow compiles it; CI's game tests and client screenshots are recorded below.
+Status: packs 1 (headstones, weathering and the Stonemason's Chisel) and 2 (monuments) are implemented in source, not yet played by hand. The Build workflow compiles them; CI's game tests and client screenshots are recorded below.
 Proposal issue: none; requested directly by the owner on 3 October 2026 ("do a serious high quality graveyard pack with high quality detailed blocks and multiblocks"). It comes in four packs, one pull request each, each stacked on the one before:
 1. headstones: nine life-sized memorials in four stones that weather with the years, and the Stonemason's Chisel that cuts their epitaphs;
 2. monuments: an obelisk, a draped urn, an angel at a tomb, a trumpeting angel on a column, an iron mortsafe and a faithful hound;
@@ -10,7 +10,7 @@ Proposal issue: none; requested directly by the owner on 3 October 2026 ("do a s
 It goes beyond the Halloween decorations' plain gravestones and crypt set (batch 3): those stay as they are, and this pack's memorials are the serious, finely carved kind. Nothing in it depends on the Halloween event.
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: Discovery tier. Every headstone is cut from a vanilla stone (calcite for marble, polished deepslate for slate, granite, smooth sandstone), in a stonecutter or a crafting table; the chisel is an iron ingot and a stick.
+Target milestone and tier: Discovery tier. Every headstone is cut from a vanilla stone (calcite for marble, polished deepslate for slate, granite, smooth sandstone), in a stonecutter or a crafting table; the chisel is an iron ingot and a stick. The monuments add feathers, a flower pot, iron bars and, for the hound, bronze ingots (smelted from bronze blend).
 Primary specialty and supported player role: building. A builder lays out a churchyard of real-sized, carved memorials, each with its own epitaph, and decides how old it looks: kept clean and waxed, or left to moss and ivy. Ghost hunters gain a reason to let one go to ruin, since neglected graves raise more restless spirits.
 
 ## Player experience
@@ -26,6 +26,16 @@ Primary specialty and supported player role: building. A builder lays out a chur
 9. **Ledger Stone** (sandstone; two smooth sandstone slabs side by side, two blocks long): a bevelled slab lying on the grave with an incised border, a cross carved at its head and the epitaph across its foot half.
 
 Each faces whoever places it and needs all its blocks free. Breaking any block of a tall or long one breaks the whole and drops it once, keeping its epitaph.
+
+### Monuments
+1. **Grand Obelisk** (granite; five polished granite in an obelisk's shape, four blocks tall, 3.75 m): a stepped, rock-faced base and a die whose polished, beaded panel carries the epitaph, a moulded cornice, and a polished shaft tapering in steps to a pyramidion, a laurel wreath carved near its top.
+2. **Draped Urn** (marble; calcite, a flower pot and calcite in a column, two blocks tall, 1.75 m): a pedestal whose die carries the epitaph, and on it a funerary urn half veiled by a shroud, sculpted: the Victorian emblem of mourning.
+3. **Angel at the Tomb** (marble; three calcite under two feathers and a calcite; two blocks wide, two tall): an altar tomb, its front carrying the epitaph, with a grieving angel sculpted kneeling at its end, bowed over it with her head in her folded arms, her robe pooled about her knees and her wings rising high behind her.
+4. **Trumpeting Angel** (marble; four calcite and two feathers, four blocks tall, 4 m): a memorial column: a pedestal with the epitaph, a fluted shaft and a capital, and on top the angel of the Resurrection, sculpted, raising a long trumpet to the sky, her wings up behind her.
+5. **Mortsafe** (cast iron; eight iron bars in a ring, two blocks long): the iron cage Scots set over a new grave against the body-snatchers: a heavy frame, spear-topped bars on every side, a grid of bars over the top, ball finials on its corner posts, over a mound of earth, and a plate at its foot for the name in gilt. It weathers from black paint to rust.
+6. **Faithful Hound** (bronze on granite; three bronze ingots over three polished granite): a bronze hound, sculpted, lying at its master's grave with its head up and watching, on a granite plinth that carries the epitaph. Its bronze darkens and grows verdigris as it weathers.
+
+The monuments are headstones in every other way: they weather, wax, take an epitaph and stir spirits alike, and break as one.
 
 ### Weathering
 - A headstone weathers in four stages: **clean**, **worn** (duller, grime run down from the top, chipped), **mossy** (moss creeping up from the ground in cushions, lichen rosettes, orange on granite and sandstone) and **overgrown** (green to a third of its height, crusted with lichen, ivy clumps at its foot and a trail climbing one side).
@@ -46,17 +56,17 @@ Each faces whoever places it and needs all its blocks free. Breaking any block o
 Headstones are graves for ghost hunting: at night they stir restless spirits as the other graves do, but a quarter as often while clean, half as often when worn, as often when mossy and half as often again when overgrown. A well-kept churchyard is a quiet one.
 
 ## Connections
-- Existing input producer: vanilla calcite, deepslate, granite, sandstone and iron; the Brush (vanilla archaeology), honeycomb (bees), bone meal.
+- Existing input producer: vanilla calcite, deepslate, granite, sandstone and iron; the Brush (vanilla archaeology), honeycomb (bees), bone meal; for the monuments, feathers, a flower pot, iron bars and the materials branch's bronze.
 - Existing output consumer: ghost hunting (restless spirits rise from the headstones, more from neglected ones; the Spirit Board, the ofrenda and the Spirit Lantern all work with them). Building: the batch 3 cemetery fence, crypt stone and mourning angel, the Halloween lights and candles.
 - Technology connection: none needed; a stonecutter cuts most of them.
 - Magic connection: the restless spirits of ghost hunting.
-- Reachable entry path (prove no circular unlock): calcite, deepslate, granite and sandstone are found in any world from the first day; an iron ingot and a stick make the chisel. Nothing here is gated behind anything else in the pack.
+- Reachable entry path (prove no circular unlock): calcite, deepslate, granite and sandstone are found in any world from the first day; an iron ingot and a stick make the chisel; bronze ingots smelt from bronze blend in a furnace. Nothing here is gated behind anything else in the pack.
 - Which connections are required vs optional; trade and solo routes: all optional; one player can build a churchyard alone, and headstones (engraved or not) trade like any block.
 - How this specialty stays useful without mastering every other branch: it is decoration with upkeep; no other branch needs it.
 - For infrastructure/cosmetics, supported systems and reason resource links do not apply: decoration; the only effect on play is the spirits.
 
 ## Balance and automation
-- Each headstone costs one to six vanilla stone blocks and returns only itself when broken: nothing breaks down into anything else, so there is no conversion loop.
+- Each headstone costs one to six vanilla stone blocks, each monument up to eight blocks or bars (the hound three bronze ingots), and returns only itself when broken: nothing breaks down into anything else, so there is no conversion loop.
 - Weathering needs no fuel and makes nothing. Brushing costs brush wear; waxing costs a honeycomb; aging costs a bone meal.
 - Spirits only rise at night, at most three within 16 blocks of a grave (ghost hunting's own cap); a churchyard of neglected headstones does not raise more than any other graves would, only more often up to that cap.
 
@@ -64,10 +74,10 @@ Headstones are graves for ghost hunting: at night they stir restless spirits as 
 - **Server authority.** Everything that changes a headstone needs build rights (`mayBuild`), like editing a sign. The epitaph screen's lines are checked on the server before they are cut: the player must have opened a session on exactly that headstone with the chisel within the last 6,000 ticks (one session, one cut), still hold a chisel, be within reach, be allowed to use items there, and send at most 4 lines of 24 characters (the network codec refuses anything much larger before it is read). Control characters are dropped and lines trimmed. Sessions end when the player leaves or the server stops.
 - The epitaph lives in the block entity of the headstone's first block (and its item); weathering and wax are block state on every block, so they survive restarts and chunk unloads.
 - With the agriculture feature off, the recipes do not load and headstones stop weathering; placed ones keep their stage, wax and epitaph, and everything stays registered.
-- New IDs only: blocks with items `gothic_headstone`, `willow_urn_headstone`, `winged_skull_headstone`, `lamb_headstone`, `broken_column`, `celtic_cross`, `rustic_scroll_headstone`, `table_tomb`, `ledger_stone`; item `stonemasons_chisel`; block entity `headstone`; data component `epitaph`; tags `jugcraft:headstones` (block and item); advancements `here_lies` and `groundskeeper`. No migration.
+- New IDs only: blocks with items `gothic_headstone`, `willow_urn_headstone`, `winged_skull_headstone`, `lamb_headstone`, `broken_column`, `celtic_cross`, `rustic_scroll_headstone`, `table_tomb`, `ledger_stone`; item `stonemasons_chisel`; block entity `headstone`; data component `epitaph`; tags `jugcraft:headstones` (block and item); advancements `here_lies` and `groundskeeper`. Pack 2 adds blocks with items `grand_obelisk`, `draped_urn`, `angel_at_the_tomb`, `trumpeting_angel`, `mortsafe`, `faithful_hound` (in the same tag and block entity type). No migration.
 
 ## Dependencies and assets
-No new dependencies. Every texture is drawn by code in `tools/graveyard_textures.py` (the four stones at four stages, carved and rough faces, knotwork, ivy and the chisel). Models are generated by `tools/graveyard_models.py` (boxes, with the lamb sculpted by `tools/sculpt.py`) and `tools/graveyard_data.py`. Sounds are vanilla's (stonecutter, brush, honeycomb, axe, bone meal). The letters are drawn by the client with the game's own font (`HeadstoneRenderer`).
+No new dependencies. Every texture is drawn by code in `tools/graveyard_textures.py` (the four stones at four stages, carved and rough faces, knotwork, ivy, cast iron and bronze at four stages, and the chisel). Models are generated by `tools/graveyard_models.py` (boxes, with the lamb, the urn's shroud, the two angels and the hound sculpted by `tools/sculpt.py`) and `tools/graveyard_data.py`. Sounds are vanilla's (stonecutter, brush, honeycomb, axe, bone meal). The letters are drawn by the client with the game's own font (`HeadstoneRenderer`).
 
 ## Verification
 | Check | Result |
@@ -77,6 +87,8 @@ No new dependencies. Every texture is drawn by code in `tools/graveyard_textures
 | Build workflow: `./gradlew build` | Pass (run 37137610198, commit d358fb5b) |
 | Server game tests (`HeadstoneGameTests`, 4) | Pass: all 574 required tests passed in that run |
 | Client game test (`HeadstoneClientGameTests`) | Pass (client shard 1 of that run); screenshots below |
+| Pack 2: server game tests (`MonumentGameTests`, 3) | Pass: all 577 required tests passed (run 37140597225, commit 39bb8482) |
+| Pack 2: client game test (`MonumentClientGameTests`) | Pass (client shard 2 of that run) |
 
 The four game tests:
 1. a Celtic cross placed from its item goes up three blocks and a table tomb back two, facing the player; with a block in the way nothing is placed; breaking the cross's top or the tomb's head breaks the whole and drops one;
@@ -84,9 +96,17 @@ The four game tests:
 3. bone meal ages a slate to overgrown (a fourth is not used), a brush scrubs a stage off and wears (Groundskeeper), honeycomb waxes it, after which 2,000 random ticks and bone meal change nothing; an axe scrapes the wax off and 2,000 random ticks weather it to overgrown; both blocks of a broken column age together; a player without build rights changes nothing; the more weathered, the more often a grave stirs;
 4. every headstone's recipe and loot table, the chisel's recipe and both advancements load.
 
+The three monument tests:
+1. placed by a player, the Angel at the Tomb stands two blocks wide with her wings over the end to the placer's right, the obelisk four blocks tall and the mortsafe two long; with a block where her wings go, she is not placed;
+2. bone meal on her wings ages all three of her blocks; breaking her wings breaks the whole and drops her once with her epitaph;
+3. every monument's recipe and loot load.
+
 The client game test builds a churchyard of all nine headstones, engraved and at mixed stages, between a gravel path and a wrought-iron fence with lanterns, and a row of four gothic headstones at the four stages; it photographs the whole by day and night, each group up close, the table tomb and ledger stone from their feet, the four stages, and the epitaph screen. It prints the epitaph each client block entity received.
 
 **Not run:** a person playing it in a client (opening the epitaph screen with the chisel and typing; weathering over real hours); a dedicated server with two or more players cutting epitaphs at once.
+
+### Pack 2 verification
+Run [37140597225](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37140597225) on commit 39bb8482 passed every job: the data check (1,031 IDs), the build and all 577 server game tests, and the three client shards. Two runs before it failed in `MonumentGameTests` alone: the mortsafe stood at x = 8, outside the test's own eight-block area; it now stands at x = 7. In the client test every monument drew with its model and textures; the screenshots show the obelisk's epitaph on its die, the sculpted urn, the angel kneeling at her altar, the trumpeting angel on her column, the rusting mortsafe and the bronze hound ([the guide](../branches/AGRICULTURE.md#the-graveyard-monuments) has them).
 
 ### Pack 1 verification
 Run [37137610198](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37137610198) on commit d358fb5b passed every job: the data check (1,025 IDs), the build and all 574 server game tests, and the three client shards. In the client game test:
