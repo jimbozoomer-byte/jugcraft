@@ -1054,11 +1054,11 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 ### Full-moon werewolves
 
-| **Wolfsbane** growing wild in a spruce clearing, and potted on a stump | **Silver** framed above the fire: the dagger, silver arrows and a pelt |
+| **Wolfsbane** growing wild in a spruce clearing, and potted on a stump | **Silver** framed above the fire, and the three rugs: brown, snow and shadow |
 | --- | --- |
 | ![Wolfsbane](../images/ingame_wolfsbane.jpg) | ![Silver and a pelt](../images/ingame_werewolf_rug_and_silver.jpg) |
-| **The three kinds** on a full-moon night: brown, snow and shadow | **In the clearing**, the shadow werewolf snarling |
-| ![Three werewolves](../images/ingame_werewolf.jpg) | ![The werewolves](../images/ingame_werewolves_full_moon.jpg) |
+| **Up close** on a full-moon night: the snow werewolf, and the shadow werewolf snarling | **The three kinds** in the clearing: brown, snow and shadow, and their rugs by the fire |
+| ![The snow and shadow werewolves](../images/ingame_werewolf.jpg) | ![Three werewolves](../images/ingame_werewolves_full_moon.jpg) |
 
 *Real screenshots from the client game test that CI runs (`WerewolfClientGameTests`, software rendering, small previews; the night is lit by night vision for the picture).*
 
