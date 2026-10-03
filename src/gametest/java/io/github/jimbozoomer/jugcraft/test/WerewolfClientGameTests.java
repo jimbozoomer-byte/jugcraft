@@ -58,7 +58,7 @@ public class WerewolfClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 
 			shoot(context, singleplayer, x + 2, y + 2, z + 1, 180, 35, "jugcraft_wolfsbane");
-			shoot(context, singleplayer, x + 9, y + 1, z - 1, 180, 20, "jugcraft_werewolf_rug_and_silver");
+			shoot(context, singleplayer, x + 9, y + 1, z, 180, 30, "jugcraft_werewolf_rug_and_silver");
 
 			// The full-moon night: the first night of the world's first moon cycle.
 			server.runCommand("time set midnight");
