@@ -128,6 +128,56 @@ public class JugcraftGameTests {
 		return JugcraftMachines.MACHINES.get(kind).defaultBlockState();
 	}
 
+	/**
+	 * Batch 36: a sensor on a battery box reports on its channel through a data cable to a logic controller, whose two
+	 * rules ("red above 90% → blue on", "red below 20% → blue off") switch a relay on the blue channel, with a dead
+	 * band between. The sensor gives a comparator-like signal; the relay a full one.
+	 */
+	@GameTest(maxTicks = 200)
+	public void logicControllerSwitchesRelays(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos battery = new BlockPos(1, 1, 1);
+		helper.setBlock(battery, machine(MachineKind.BATTERY_BOX));
+		charge(helper, battery, null); // The battery box's sided storages are wrappers; the unsided one is the real battery.
+		SimpleEnergyStorage energy = (SimpleEnergyStorage) EnergyStorage.SIDED.find(level, helper.absolutePos(battery), null);
+		BlockPos sensor = new BlockPos(2, 1, 1);
+		helper.setBlock(sensor, io.github.jimbozoomer.jugcraft.control.JugcraftControl.SENSOR.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.control.SensorBlock.FACING, Direction.EAST)
+				.setValue(io.github.jimbozoomer.jugcraft.control.Channels.CHANNEL, net.minecraft.world.item.DyeColor.RED));
+		helper.setBlock(new BlockPos(3, 1, 1), io.github.jimbozoomer.jugcraft.control.JugcraftControl.DATA_CABLE.defaultBlockState());
+		BlockPos controllerPos = new BlockPos(4, 1, 1);
+		helper.setBlock(controllerPos, io.github.jimbozoomer.jugcraft.control.JugcraftControl.LOGIC_CONTROLLER.defaultBlockState());
+		helper.setBlock(new BlockPos(5, 1, 1), io.github.jimbozoomer.jugcraft.control.JugcraftControl.DATA_CABLE.defaultBlockState());
+		BlockPos relay = new BlockPos(6, 1, 1);
+		helper.setBlock(relay, io.github.jimbozoomer.jugcraft.control.JugcraftControl.RELAY.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.control.Channels.CHANNEL, net.minecraft.world.item.DyeColor.BLUE));
+		var controller = helper.getBlockEntity(controllerPos, io.github.jimbozoomer.jugcraft.control.LogicControllerBlockEntity.class);
+		var red = net.minecraft.world.item.DyeColor.RED;
+		var blue = net.minecraft.world.item.DyeColor.BLUE;
+		controller.setRule(0, true, red, true, 90, blue, true);
+		controller.setRule(1, true, red, false, 20, blue, false);
+		BlockPos absController = helper.absolutePos(controllerPos);
+		BlockPos beyond = helper.absolutePos(new BlockPos(7, 1, 1));
+		java.util.function.BooleanSupplier relayOn = () -> helper.getBlockState(relay).getValue(io.github.jimbozoomer.jugcraft.control.RelayBlock.POWERED);
+
+		controller.evaluate(level, absController);
+		helper.assertTrue(controller.reading(red) == 100, "Red reads " + controller.reading(red));
+		helper.assertTrue(relayOn.getAsBoolean(), "A full battery did not switch the relay on");
+		helper.assertTrue(level.hasNeighborSignal(beyond), "The relay gives no redstone signal");
+		helper.runAfterDelay(30, () -> {
+			int power = helper.getBlockState(sensor).getValue(io.github.jimbozoomer.jugcraft.control.SensorBlock.POWER);
+			helper.assertTrue(power == 15, "A full battery's sensor gives " + power);
+			energy.setAmount(energy.getCapacity() / 2);
+			controller.evaluate(level, absController);
+			helper.assertTrue(relayOn.getAsBoolean(), "The relay went off inside the dead band");
+			energy.setAmount(energy.getCapacity() / 10);
+			controller.evaluate(level, absController);
+			helper.assertTrue(!relayOn.getAsBoolean(), "A low battery did not switch the relay off");
+			helper.assertTrue(!level.hasNeighborSignal(beyond), "An off relay still gives a signal");
+			helper.succeed();
+		});
+	}
+
 	/** Ores drop their raw material to a plain pickaxe, more with Fortune; only Silk Touch takes the ore block itself. */
 	@GameTest
 	public void oresNeedSilkTouchToDropThemselves(GameTestHelper helper) {
