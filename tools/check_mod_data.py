@@ -661,6 +661,13 @@ def check_rocketry():
                          ("BLOCKS_PER_TICK", rocketry.POST_BLOCKS_PER_TICK), ("CHECK_INTERVAL", rocketry.POST_CHECK_INTERVAL)):
         if f"int {const} = {value:_};" not in post and f"int {const} = {value};" not in post:
             err(f"RocketPost.{const} differs from tools/rocketry.py ({value})")
+    anchor = (JAVA_ROOT / "rocketry" / "ZiplineAnchorBlockEntity.java").read_text(encoding="utf-8")
+    for const, value in (("RANGE", rocketry.LINE_RANGE), ("REACH", rocketry.ANCHOR_REACH)):
+        if f"int {const} = {value};" not in anchor:
+            err(f"ZiplineAnchorBlockEntity.{const} differs from tools/rocketry.py ({value})")
+    for result in rocketry.LINE_RESULTS:
+        if result.upper() not in anchor:
+            err(f"ZiplineAnchorBlockEntity.Result lacks {result.upper()}")
     pad = (JAVA_ROOT / "rocketry" / "RocketPadBlockEntity.java").read_text(encoding="utf-8")
     if f"int CARGO = {rocketry.PAD_CARGO};" not in pad:
         err(f"RocketPadBlockEntity.CARGO differs from tools/rocketry.py ({rocketry.PAD_CARGO})")

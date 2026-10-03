@@ -46,6 +46,8 @@ ITEMS = {
     # Batch 39: the rocket post.
     "delivery_rocket": "Delivery Rocket",
     "flight_plan": "Flight Plan",
+    # Batch 40: the zipline.
+    "line_rocket": "Line-Throwing Rocket",
 }
 ROCKETS = ["survey_rocket", "cloud_seeding_rocket", "clear_sky_rocket", "signal_flare", "illumination_flare"]
 TOOLTIPS = {
@@ -62,6 +64,8 @@ TOOLTIPS = {
     "signal_flare": "A red star burst seen from far away; players within 512 blocks are told where it went up.",
     "illumination_flare": "A white burst that makes hostile mobs within 48 blocks glow for 30 seconds.",
     "delivery_rocket": "Carries a rocket pad's cargo to the pad its flight plan names. Used up on launch.",
+    "line_rocket": "Stand by a zipline anchor and use it while looking at another anchor up to 96 blocks away: it "
+                   "strings a steel line between them.",
 }
 
 # Batch 39 (docs/features/rocket-post.md): rocket pads send their cargo to another pad (Java: rocketry/RocketPost,
@@ -72,7 +76,16 @@ POST_MIN_FLIGHT = 60
 POST_BLOCKS_PER_TICK = 4
 POST_CHECK_INTERVAL = 20
 PAD_CARGO = 9
-BLOCKS = {"rocket_pad": "Rocket Pad"}
+BLOCKS = {"rocket_pad": "Rocket Pad", "zipline_anchor": "Zipline Anchor"}
+# Batch 40 (docs/features/zipline.md): the longest line, and how close the player must stand to the anchor it leaves
+# from (Java: ZiplineAnchorBlockEntity.RANGE and REACH).
+LINE_RANGE = 96
+ANCHOR_REACH = 4
+LINE_RESULTS = {
+    "not_anchor": "Aim at a zipline anchor", "same_anchor": "That is the same anchor",
+    "in_use": "One of the anchors already has a line", "too_far": "Too far: a line reaches 96 blocks",
+    "blocked": "Something is in the way of the line",
+}
 PAD_RESULTS = {
     "none": "", "launched": "Launched!", "no_rocket": "No rocket", "no_plan": "No flight plan",
     "no_cargo": "No cargo", "same_pad": "That is this pad", "other_dimension": "Other dimension",
@@ -111,6 +124,8 @@ def workshop_recipes():
          "output": rid("clear_sky_rocket"), "count": 1, "ticks": 200, "features": feature},
         {"inputs": [[rid("rocket_motor"), 1], [rid("rocket_casing"), 1], [rid("guidance_unit"), 1]],
          "output": rid("delivery_rocket"), "count": 1, "ticks": 300, "features": feature},
+        {"inputs": [[rid("rocket_motor"), 1], [rid("aluminum_wire"), 4], ["minecraft:string", 8]],
+         "output": rid("line_rocket"), "count": 1, "ticks": 200, "features": feature + ["aluminum"]},
         {"inputs": [[rid("solid_propellant"), 1], ["minecraft:paper", 2], ["minecraft:red_dye", 1]],
          "output": rid("signal_flare"), "count": 4, "ticks": 100, "features": feature},
         {"inputs": [[rid("solid_propellant"), 1], ["minecraft:paper", 2], ["minecraft:glowstone_dust", 1]],
@@ -148,6 +163,38 @@ def write_all(write, assets, data, lang, condition, self_drop):
         "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shapeless", "category": "misc",
         "ingredients": [f"{MOD}:silver_dust", f"{MOD}:iodine"], "result": {"id": f"{MOD}:silver_iodide", "count": 2}})
     write_post(write, assets, data, lang, condition, self_drop)
+    write_zipline(write, assets, data, lang, condition)
+
+
+def write_zipline(write, assets, data, lang, condition):
+    """Batch 40: the zipline anchor (model, recipe), the rider entity's name and the messages."""
+    lang[f"entity.{MOD}.zipline_rider"] = "Zipline Trolley"
+    lang[f"message.{MOD}.zipline.no_line"] = "No line: string one with a line-throwing rocket"
+    lang[f"message.{MOD}.zipline.cannot_ride"] = "Can't ride: the far anchor isn't loaded, or the line is too short"
+    lang[f"message.{MOD}.line_rocket.no_target"] = "Look at a zipline anchor to fire the line to"
+    lang[f"message.{MOD}.line_rocket.no_anchor"] = "Stand within 4 blocks of a zipline anchor with no line"
+    lang[f"message.{MOD}.line_rocket.strung"] = "Line strung: %s blocks"
+    for key, text in LINE_RESULTS.items():
+        lang[f"message.{MOD}.line_rocket.{key}"] = text
+    textures = {"post": f"{MOD}:block/dp_gunmetal", "cap": f"{MOD}:block/dp_hazard", "wheel": f"{MOD}:block/dp_chrome",
+                "particle": f"{MOD}:block/dp_gunmetal"}
+    write(assets / "models" / "block" / "zipline_anchor.json", {"parent": "minecraft:block/block", "textures": textures,
+                                                               "elements": anchor_model()})
+    write(assets / "blockstates" / "zipline_anchor.json", {"variants": {"": {"model": f"{MOD}:block/zipline_anchor"}}})
+    write(assets / "items" / "zipline_anchor.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:block/zipline_anchor"}})
+    write(data / "recipe" / "zipline_anchor.json", {
+        "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped", "category": "redstone",
+        "pattern": ["PHP", " B ", "PBP"],
+        "key": {"P": "#c:plates/steel", "H": "minecraft:tripwire_hook", "B": "minecraft:iron_bars"},
+        "result": {"id": f"{MOD}:zipline_anchor", "count": 2}})
+
+
+def anchor_model():
+    """A steel post on a base plate, a hazard-striped collar and a chrome pulley wheel at the top where the line ties on."""
+    return [{"from": [4, 0, 4], "to": [12, 1, 12], "faces": _faces("#post", up="#cap")},
+            {"from": [6, 1, 6], "to": [10, 12, 10], "faces": _faces("#post")},
+            {"from": [5, 12, 5], "to": [11, 15, 11], "faces": _faces("#cap", up="#post", down="#post")},
+            {"from": [7, 15, 4], "to": [9, 16, 12], "faces": _faces("#wheel")}]
 
 
 def write_post(write, assets, data, lang, condition, self_drop):
@@ -347,7 +394,22 @@ HD_ITEMS = {"survey_rocket": survey_rocket, "cloud_seeding_rocket": cloud_seedin
             "rocket_motor": rocket_motor, "rocket_casing": rocket_casing, "rocket_nozzle": rocket_nozzle,
             "guidance_unit": guidance_unit, "iodine": iodine, "ammonium_perchlorate": ammonium_perchlorate,
             "silver_iodide": silver_iodide, "solid_propellant": solid_propellant,
-            "delivery_rocket": lambda: delivery_rocket(), "flight_plan": lambda: flight_plan()}
+            "delivery_rocket": lambda: delivery_rocket(), "flight_plan": lambda: flight_plan(),
+            "line_rocket": lambda: line_rocket()}
+
+
+def line_rocket():
+    """A slim red rocket trailing a coil of yellow line from its tail."""
+    import hd_art as hd
+    c = hd.Canvas()
+    # The line pays out of the tail to a coil lying in the corner.
+    c.line((12, 56), (22, 60), (200, 160, 30), width=1.8)
+    c.line((22, 60), (38, 54), (200, 160, 30), width=1.8)
+    for r in (9.0, 6.5, 4.0):
+        c.ring((48, 50), r + 1.6, r, hd.SAFETY_YELLOW)
+    _rocket(c, hd, hd.RED, hd.WHITE_PAINT, hd.STEEL, fins=True, tip=hd.CHROME)
+    c.line((14, 56), (12, 56), (200, 160, 30), width=1.8)
+    return c.finish()
 
 
 def delivery_rocket():
