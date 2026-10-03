@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21) and the flying broomstick (addition 22) are implemented in source and pass CI's game tests; full-moon werewolves (addition 23) are implemented in source. None is yet played by hand. Additions 24 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21), the flying broomstick (addition 22) and full-moon werewolves (addition 23) are implemented in source and pass CI's game tests. None is yet played by hand. Additions 24 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
@@ -219,14 +219,28 @@ Not run: a two-client dedicated-server playtest, and any play by hand.
 
 ### Werewolves verification
 
-Not run yet: CI has not built this branch. The planned checks are:
-- `WerewolfGameTests`, 5 game tests:
-  1. an iron sword's 8 damage does 4 to a werewolf, the silver dagger's 20; a plain arrow 4, a silver arrow 20; silver stops its healing; slain with silver it earns Silver Lining;
-  2. a werewolf is gone within a second when it isn't a full-moon night, and stays when it is;
-  3. wolfsbane in hand or within reach wards a player, beyond reach doesn't; a werewolf keeps hunting a villager with nothing in hand, and drops one holding a sprig and won't attack them; a warded player is left alone and earns Not Tonight;
-  4. no werewolf comes past the cap near a player; grass is woodland floor for one to step onto, stone isn't;
-  5. the recipes, loot tables, advancements and tags load.
-- `WerewolfClientGameTests` takes screenshots: wolfsbane wild and potted in a spruce clearing, the rug before a fire with the silver dagger, arrows and pelt framed, and two werewolves in the clearing on the full-moon night.
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-23-werewolves` stacked on the flying broomstick:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `WEREWOLF` and `WOLFSBANE` with Java: the hide and silver, healing, shunning, spawning and ward, the attributes and the silver blade; and checks the entity, flower, rug, items, words, loot, tags, worldgen, recipes and advancements) | Pass, 1052 IDs |
+| `./gradlew build` on `b5b16e54` (Build workflow run [37148023636](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37148023636)) | Pass |
+| Game tests on the headless server, same run: 601 in total, 5 of them new here (`WerewolfGameTests`) | **All 601 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `b5b16e54` (all three client shards of that run) |
+
+The 5 new game tests (`WerewolfGameTests`):
+1. an iron sword's 8 damage does 4 to a werewolf, the silver dagger's 20; a plain arrow 4, a silver arrow 20; silver stops its healing; slain with silver it earns Silver Lining;
+2. a werewolf is gone within a second when it isn't a full-moon night, and stays when it is;
+3. wolfsbane in hand or within reach wards a player, beyond reach doesn't; a werewolf keeps hunting a villager with nothing in hand, and drops one holding a sprig and won't attack them; a warded player is left alone and earns Not Tonight;
+4. no werewolf comes past the cap near a player; grass is woodland floor for one to step onto, stone isn't;
+5. the recipes, loot tables, advancements and tags load.
+
+Found by CI and fixed before this record:
+- The ward test failed twice: a werewolf never took the test's player as its target. A player who has only just joined can't be targeted yet (the Horseman's code notes the same), so setting the target never took. The ward check is now tested on villagers, which werewolves also hunt, and a player's shunning and Not Tonight through `wardedOff`, which the ward check calls.
+- Werewolves could never have come out onto grass: the spawn ground had to be in `minecraft:dirt`, and the squirrel tests on the branch above failed on grass with the same check in 26.3. The ground is now any block an oak sapling could grow on (`Werewolves.woodlandFloor`), and the fourth test checks grass and stone.
+
+The client test's screenshots (from run [37147539009](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37147539009) on `1244c712`, whose client test is the same) show wolfsbane growing wild and potted on a stump in a spruce clearing, the silver dagger, silver arrows and a pelt framed above the fire, and two werewolves in the clearing on the full-moon night, up close and from further off ([the guide](../branches/AGRICULTURE.md#full-moon-werewolves) has them). Its log has no missing model or texture. The rug lay at the picture's bottom edge, cut off; `1087fddd` moves the camera back for it, not yet run.
 
 Not run: a werewolf hunting a player in play, which no automated test watches from start to end; a two-client dedicated-server playtest.
 
