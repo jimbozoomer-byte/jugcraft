@@ -1,6 +1,6 @@
 # Diagonal connections
 
-Status: implemented, framework stage; **not yet played** by a person. Results are under Verification.
+Status: implemented, framework stage, green in CI with screenshots; **not yet played** by a person. Results are under Verification.
 Proposal issue: none. The owner asked for it on 3 October 2026 (see "Owner request" below).
 Owner: @jimbozoomer-byte
 Target milestone and tier: building, from the first day (no tier).
@@ -83,7 +83,17 @@ Checks:
 - Client game test (`DiagonalClientGameTests`): photographs oak and bamboo fence zigzags, cemetery and aspen fence diamonds, and slanted rows of panes, stained glass, and iron and copper bars, from above and from the side.
 
 ### Results
-To be filled in from CI.
+- **Run [37137139804](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37137139804) on 6ad6205b: green**: `mod`, all three client shards and `client`; `repository` passed in run 37137139776.
+  - **Server:** all 577 required game tests passed, including the seven diagonal tests. They logged:
+    - placed oak fences as `oak_fence[north_east]` and `oak_fence[south_west]`;
+    - every pair joining as expected: oak with spruce and with aspen, the cemetery fence with itself, glass with iron bars, red glass with copper bars, bamboo with bamboo; and oak not joining nether brick, the cemetery fence oak, or iron bars oak;
+    - "54 blocks join diagonally; problems: []".
+  - **Client:** the scene's joins were logged (each diamond's four corners and sides, each zigzag's steps, each slanted row), and the four screenshots were looked at:
+    - from above, the zigzags and slanted rows read as unbroken 45-degree lines;
+    - the oak and bamboo zigzags run post to post with diagonal rails;
+    - the glass, light-blue glass, iron bars and copper bars rows run unbroken on the slant;
+    - the cemetery fence and aspen fence diamonds close all the way round, the cemetery fence's pickets spread along its diagonal rails.
+- **Failed, then fixed:** run 37137013971 on ca67de64 did not compile its tests: 26.3 has no `Blocks` field for each stained glass pane, and an `Identifier` does not concatenate with a list. The main code and mixins compiled in that run too.
 
 Not run: play; two clients on a dedicated server; a save and reload of joined fences; other mods' fences.
 
