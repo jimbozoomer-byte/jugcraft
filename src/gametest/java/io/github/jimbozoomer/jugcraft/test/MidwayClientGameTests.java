@@ -13,6 +13,8 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -108,10 +110,12 @@ public class MidwayClientGameTests implements FabricClientGameTest {
 		striker(level, x + 1, y, z - 8, 5);
 		striker(level, x + 3, y, z - 8, HighStrikerBlock.RUNG);
 		// The prize booth: a counter, posts, and a striped awning.
+		BlockState red = BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace("red_wool")).defaultBlockState();
+		BlockState white = BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace("white_wool")).defaultBlockState();
 		for (int dx = -5; dx <= -1; dx++) {
 			set(level, x + dx, y, z - 7, Blocks.SPRUCE_PLANKS.defaultBlockState());
-			set(level, x + dx, y + 3, z - 7, (dx & 1) == 0 ? Blocks.RED_WOOL.defaultBlockState() : Blocks.WHITE_WOOL.defaultBlockState());
-			set(level, x + dx, y + 3, z - 8, (dx & 1) == 0 ? Blocks.RED_WOOL.defaultBlockState() : Blocks.WHITE_WOOL.defaultBlockState());
+			set(level, x + dx, y + 3, z - 7, (dx & 1) == 0 ? red : white);
+			set(level, x + dx, y + 3, z - 8, (dx & 1) == 0 ? red : white);
 			set(level, x + dx, y, z - 9, Blocks.SPRUCE_PLANKS.defaultBlockState());
 		}
 		for (int dy = 1; dy <= 2; dy++) {
