@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 959 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit` and `hay_golem`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
+| Registered IDs | 960 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit` and `hay_golem`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
 
 ## Build, generate, check
 
@@ -232,6 +232,22 @@ Records: [pixel-hollows.md](features/pixel-hollows.md), [retro-trader.md](featur
 | textures | `tools/pixel_hollows_textures.py` (`ph_*`, `rt_*`, the villager overlay `entity/villager/profession/retro_trader.png` and its zombie twin) | original |
 
 **Mixins:** `jugcraft.mixins.json` holds five: the Overworld biome table (`OverworldBiomeBuilderMixin`), the village pool accessor (`StructureTemplatePoolAccessor`), and the one-shop-per-village trio (`JigsawPlacerMixin`, `PoolElementStructurePieceMixin`, `StructureTemplatePoolMixin`, which only reorders the houses pools that hold the shop). Add one only when no API can do the job, and say why in its Javadoc.
+
+### The walled town (`town/`, `tools/town*.py`)
+
+Record: [walled-town.md](features/walled-town.md).
+
+| ID / part | Class / data | What |
+| --- | --- | --- |
+| the town's design | `data/jugcraft/town/town.json.gz` from `tools/town.py` (`TownData`) | 192 x 192 x 64 blocks as palette indexes, the ground mask, 285 decor sites, 32 places, 4 ATMs, the decor themes |
+| shops | `data/jugcraft/town/shops.json` from `tools/town_shops.py` (`TownShops`) | four shops' offers in Jugs, the welcome gift, the maximum balance, trade and ATM reach |
+| `jugcraft:atm` (Jug Teller) | `town/AtmBlock`, `AtmMenu`; client `AtmScreen` | shows a player's Jugs and sends Jugs to a player online |
+| `jugcraft:townsfolk` (entity) | `town/Townsfolk`; client `TownsfolkRenderer`, `TownsfolkModel` (player layout), skins from `tools/town_skins.py` | invulnerable except to `/kill`; roles: shopkeeper, vendor, guard, decorator, townsfolk, banker, mayor, priest, innkeeper, baker |
+| placement and building | `town/TownPlanner` (new worlds, game time 0), `TownBuilder` (one chunk a tick as chunks load), `TownState` (data/jugcraft_town.dat) | levels inside the wall, blends 12 blocks outside |
+| protection | `town/TownProtection`; mixins `TownExplosionCalculatorMixin`, `TownEntityExplosionMixin`, `TownFireBlockMixin`, `TownPistonMixin`; tag `#jugcraft:town_usable` | no breaking, placing or item use by non-operators; blocks immune to explosions, fire and pistons; no natural hostile spawns inside |
+| decor | `town/TownDecor`, themes in `tools/town_decor.py` | theme = December, Halloween, Harvest Feast or the season; decorators change sites, the rest after 5 minutes |
+| Jugs | `town/Jugs` (data/jugcraft_jugs.dat), `ShopMenu`; client `ShopScreen` | per-player credit; buying and selling through menu buttons, checked on the server |
+| commands | `town/TownCommand` | `/jugcraft town [place|theme]`, `/jugcraft jugs [give|take]` |
 
 ## Shared systems and how to plug in
 
