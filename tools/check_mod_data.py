@@ -103,13 +103,13 @@ def texture(ref):
         return
     animated = png.with_name(png.name + ".mcmeta").is_file()
     with Image.open(png) as img:
-        # 16x16, 32x32 for the high-detail gear (tools/hitech.py), or 64x64 for the tower's art. Animated textures
-        # are a vertical strip of square frames with an .mcmeta beside them.
+        # Square: 16x16, or 32x32 or 64x64 for high-resolution art (docs/ART_DIRECTION.md, "High resolution"). Animated
+        # textures are a vertical strip of square frames with an .mcmeta beside them.
         width, height = img.size
         if animated and not (width in (16, 32) and height % width == 0 and height > width):
             err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16 or 32x32 frames")
-        elif not animated and img.size not in ((16, 16), (32, 32)) and not (img.size == (64, 64) and _hi_res(png.stem)):
-            err(f"Texture {ref} is {img.size}, expected 16x16 or 32x32 (64x64 only for tower_art and hd_art textures)")
+        elif not animated and img.size not in ((16, 16), (32, 32), (64, 64)):
+            err(f"Texture {ref} is {img.size}, expected 16x16, 32x32 or 64x64")
 
 
 def model(ref):
@@ -122,16 +122,6 @@ def model(ref):
     for tex in data.get("textures", {}).values():
         # A texture is a reference, or {"sprite": reference, "force_translucent": ...}.
         texture(tex["sprite"] if isinstance(tex, dict) else tex)
-
-
-def _hi_res(name):
-    """64x64 textures: the drone tower's realistic block textures (tools/tower_art.py) and items drawn with the
-    high-detail renderer (tools/hd_art.py: construction_art.ITEMS so far)."""
-    import tower_art
-    import blueprints
-    import construction_art
-    return (name in tower_art.TEXTURES or name in blueprints.TABLE_TEXTURES or name in construction_art.ITEMS
-            or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_")))
 
 
 def item_models(definition):
@@ -2306,9 +2296,12 @@ def check_werewolves(java, number, lang):
     for path in paths:
         if not path.exists():
             err(f"Werewolves need {path.relative_to(ROOT)}")
-    texture = ASSETS / "textures" / "entity" / "werewolf_brown.png"
-    if texture.exists() and Image.open(texture).size != tuple(werewolf_model.TEXTURE_SIZE):
-        err("The werewolf's textures must be the size tools/werewolf_model.py gives")
+    painted = tuple(n * werewolf_model.TEXTURE_SCALE for n in werewolf_model.TEXTURE_SIZE)
+    for kind in ww["kinds"]:
+        for suffix in ("", "_eyes"):
+            texture = ASSETS / "textures" / "entity" / f"werewolf_{kind}{suffix}.png"
+            if texture.exists() and Image.open(texture).size != painted:
+                err(f"werewolf_{kind}{suffix}.png must be {painted}: tools/werewolf_model.py's texture size times its scale")
     for tag, values in (("werewolf_haunts", ww["haunts"]), ("snow_werewolf_haunts", ww["snow_haunts"]),
                         ("shadow_werewolf_haunts", ww["shadow_haunts"])):
         found = (load(DATA / MOD / "tags" / "worldgen" / "biome" / f"{tag}.json") or {}).get("values", [])
