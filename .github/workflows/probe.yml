@@ -18,6 +18,24 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
+      - name: Batch 34 APIs
+        run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-clientOnly-deobf-26.3.jar' | head -1)
+          echo "=== PiglinAi"; javap -p -cp "$COMMON" net.minecraft.world.entity.monster.piglin.PiglinAi | grep -iE "armor|gold|safe" 
+          echo "=== ItemTags piglin"; javap -cp "$COMMON" net.minecraft.tags.ItemTags | grep -iE "PIGLIN" 
+          echo "=== ItemStack"; javap -cp "$COMMON" net.minecraft.world.item.ItemStack | grep -E "enchant|getMaxDamage|setDamageValue|isDamageableItem|copy\(|getEnchantments|isEnchanted" 
+          echo "=== Enchantments"; javap -cp "$COMMON" net.minecraft.world.item.enchantment.Enchantments | grep -E " SMITE| SHARPNESS| UNBREAKING"
+          echo "=== EnchantmentHelper"; javap -cp "$COMMON" net.minecraft.world.item.enchantment.EnchantmentHelper | grep -E "updateEnchantments|getItemEnchantmentLevel|setEnchantments" 
+          echo "=== ItemEnchantments.Mutable"; javap -cp "$COMMON" 'net.minecraft.world.item.enchantment.ItemEnchantments$Mutable' | head -20
+          echo "=== DataComponents"; javap -cp "$COMMON" net.minecraft.core.component.DataComponents | grep -E " MAX_DAMAGE| DAMAGE;| ENCHANTMENTS| REPAIR_COST" 
+          echo "=== fabric tooltip"; for j in $(find ~/.gradle/caches -name 'fabric-item-api-v1*.jar' | head -3); do unzip -l "$j" | grep -i tooltip; done
+          echo "=== fabric livingentity events"; for j in $(find ~/.gradle/caches -name 'fabric-entity-events-v1*.jar' | head -2); do unzip -l "$j" | grep -iE "ServerLivingEntityEvents"; done
+          J=$(find ~/.gradle/caches -name 'fabric-entity-events-v1*.jar' | grep -v sources | head -1); javap -cp "$J" 'net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents$AfterDamage' 'net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents$AllowDamage' 2>&1 | head
+          J2=$(find ~/.gradle/caches -name 'fabric-item-api-v1*.jar' | grep -v sources | head -1); javap -cp "$J2" net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback 2>&1 | head
+          echo "=== LivingEntity undead"; javap -cp "$COMMON" net.minecraft.world.entity.LivingEntity | grep -iE "isInvertedHealAndHarm|undead|getType" | head
+          echo "=== mixins dir"; ls src/main/resources/*.mixins.json; cat src/main/resources/*.mixins.json | head -30
       - name: Batch 31 APIs
         run: |
           set +e
