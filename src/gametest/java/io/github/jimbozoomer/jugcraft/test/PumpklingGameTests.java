@@ -18,6 +18,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -97,10 +98,11 @@ public class PumpklingGameTests {
 		return pumpkling;
 	}
 
-	private static void interact(ServerPlayer player, Pumpkling pumpkling, boolean sneaking) {
+	private static InteractionResult interact(ServerPlayer player, Pumpkling pumpkling, boolean sneaking) {
 		player.setShiftKeyDown(sneaking);
-		player.interactOn(pumpkling, InteractionHand.MAIN_HAND, pumpkling.position());
+		InteractionResult result = player.interactOn(pumpkling, InteractionHand.MAIN_HAND, pumpkling.position());
 		player.setShiftKeyDown(false);
+		return result;
 	}
 
 	/**
@@ -151,8 +153,8 @@ public class PumpklingGameTests {
 		Pumpkling pumpkling = pumpkling(helper, new BlockPos(1, 2, 1), owner, false);
 		interact(stranger, pumpkling, true);
 		helper.assertTrue(!pumpkling.sitting(), "A stranger can't have it sit");
-		interact(owner, pumpkling, true);
-		helper.assertTrue(pumpkling.sitting(), "Its owner has it sit");
+		InteractionResult sat = interact(owner, pumpkling, true);
+		helper.assertTrue(pumpkling.sitting(), "Its owner has it sit (the interaction gave " + sat + ")");
 		interact(owner, pumpkling, true);
 		helper.assertTrue(!pumpkling.sitting(), "and get up again");
 		BlockPos far = helper.absolutePos(new BlockPos(6, 2, 6));
