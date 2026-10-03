@@ -44,7 +44,7 @@ public class MonumentGameTests {
 	}
 
 	private static void floor(GameTestHelper helper) {
-		for (int x = 0; x <= 9; x++) {
+		for (int x = 0; x <= 7; x++) {
 			for (int z = 0; z <= 7; z++) {
 				helper.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
 			}
@@ -103,9 +103,9 @@ public class MonumentGameTests {
 			helper.assertTrue(isPart(helper, new BlockPos(1, 2 + part, 2), "grand_obelisk", part), "Obelisk part " + part);
 		}
 		mason.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item("mortsafe")));
-		standBefore(helper, mason, new BlockPos(8, 1, 2));
-		use(helper, mason, new BlockPos(8, 1, 2), Direction.UP);
-		helper.assertTrue(isPart(helper, new BlockPos(8, 2, 2), "mortsafe", 0) && isPart(helper, new BlockPos(8, 2, 3), "mortsafe", 1),
+		standBefore(helper, mason, new BlockPos(7, 1, 2));
+		use(helper, mason, new BlockPos(7, 1, 2), Direction.UP);
+		helper.assertTrue(isPart(helper, new BlockPos(7, 2, 2), "mortsafe", 0) && isPart(helper, new BlockPos(7, 2, 3), "mortsafe", 1),
 				"The mortsafe runs back over the grave");
 
 		helper.setBlock(new BlockPos(4, 3, 5), Blocks.STONE);
