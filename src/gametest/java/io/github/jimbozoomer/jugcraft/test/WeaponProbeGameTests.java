@@ -77,7 +77,10 @@ public class WeaponProbeGameTests {
 				"net/minecraft/client/entity/ClientAvatarEntity", "net/minecraft/client/renderer/item/ItemModelResolver",
 				"net/minecraft/client/player/AbstractClientPlayer", "net/minecraft/client/model/AnimationUtils",
 				"net/minecraft/client/renderer/entity/state/ArmorStandRenderState", "net/minecraft/world/entity/HumanoidArm",
-				"net/minecraft/util/Mth"}) {
+				"net/minecraft/util/Mth", "net/minecraft/world/entity/LivingEntity$SwingDescription",
+				"net/minecraft/world/entity/LivingEntity$SwingState", "net/minecraft/client/model/HumanoidModel$ArmPose",
+				"net/fabricmc/fabric/api/client/rendering/v1/FabricRenderState",
+				"net/fabricmc/fabric/api/client/rendering/v1/RenderStateDataKey"}) {
 			names.add(name);
 		}
 		java.net.URL url = Jugcraft.class.getClassLoader().getResource("net/minecraft/client/model/HumanoidModel.class");
