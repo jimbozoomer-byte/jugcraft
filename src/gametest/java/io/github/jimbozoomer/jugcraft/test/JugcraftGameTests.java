@@ -423,17 +423,21 @@ public class JugcraftGameTests {
 	@GameTest(maxTicks = 100)
 	public void boosterRailLaunchesACart(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		BlockPos boosterPos = helper.absolutePos(new BlockPos(1, 1, 1));
+		// Rails need solid ground: a stone bed under the track, which runs south from the booster rail.
+		for (int z = 1; z <= 6; z++) {
+			level.setBlockAndUpdate(helper.absolutePos(new BlockPos(1, 1, z)), Blocks.STONE.defaultBlockState());
+		}
+		BlockPos boosterPos = helper.absolutePos(new BlockPos(1, 2, 1));
 		level.setBlockAndUpdate(boosterPos, io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.BOOSTER_RAIL.defaultBlockState());
 		for (int z = 2; z <= 6; z++) {
-			level.setBlockAndUpdate(helper.absolutePos(new BlockPos(1, 1, z)), Blocks.RAIL.defaultBlockState());
+			level.setBlockAndUpdate(helper.absolutePos(new BlockPos(1, 2, z)), Blocks.RAIL.defaultBlockState());
 		}
-		level.setBlockAndUpdate(helper.absolutePos(new BlockPos(0, 1, 1)), Blocks.REDSTONE_BLOCK.defaultBlockState());
+		level.setBlockAndUpdate(helper.absolutePos(new BlockPos(0, 2, 1)), Blocks.REDSTONE_BLOCK.defaultBlockState());
 		var rail = (io.github.jimbozoomer.jugcraft.rocketry.BoosterRailBlockEntity) level.getBlockEntity(boosterPos);
 		rail.setItem(0, new ItemStack(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.SOLID_PROPELLANT));
 		helper.assertTrue(level.getBlockState(boosterPos).getValue(net.minecraft.world.level.block.PoweredRailBlock.POWERED),
 				"The booster rail is not powered");
-		var cart = helper.spawn(net.minecraft.world.entity.EntityTypes.MINECART, new Vec3(1.5, 1.1, 1.5));
+		var cart = helper.spawn(net.minecraft.world.entity.EntityTypes.MINECART, new Vec3(1.5, 2.1, 1.5));
 		helper.succeedWhen(() -> {
 			helper.assertTrue(rail.charges() == io.github.jimbozoomer.jugcraft.rocketry.BoosterRailBlockEntity.CHARGES_PER_PROPELLANT - 1,
 					"The rail holds " + rail.charges() + " boosts");
