@@ -168,7 +168,7 @@ public class WerewolfGameTests {
 		helper.succeed();
 	}
 
-	/** No more werewolves come near a player than the cap allows. */
+	/** No more werewolves come near a player than the cap allows; they step out onto woodland floor, not stone. */
 	@GameTest
 	public void werewolvesKeepToTheirCap(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -177,6 +177,9 @@ public class WerewolfGameTests {
 			werewolf(helper, new BlockPos(2 + 2 * n, 2, 2));
 		}
 		helper.assertTrue(Werewolves.trySpawn(level, helper.absolutePos(new BlockPos(3, 2, 3)), level.getRandom()) == 0, "None come past the cap");
+		helper.setBlock(new BlockPos(6, 1, 6), Blocks.STONE);
+		helper.assertTrue(Werewolves.woodlandFloor(level, helper.absolutePos(new BlockPos(3, 2, 6))), "Grass is woodland floor");
+		helper.assertTrue(!Werewolves.woodlandFloor(level, helper.absolutePos(new BlockPos(6, 2, 6))), "Stone isn't");
 		helper.assertTrue(Werewolves.ground(level, helper.absolutePos(new BlockPos(3, 2, 3)).getX(), helper.absolutePos(new BlockPos(3, 2, 3)).getZ())
 				== null || level.getBiome(helper.absolutePos(new BlockPos(3, 2, 3))).is(Werewolves.HAUNTS), "Only werewolf country is ground for one");
 		helper.succeed();

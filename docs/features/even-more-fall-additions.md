@@ -90,7 +90,7 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 7. **Advancements:** **Up and Away** for taking off; **Over the Moon** (a challenge) for flying 48 blocks above sea level on a full-moon night.
 
 ### Full-moon werewolves
-1. **When and where:** only on **full-moon nights**, only in the Overworld's **forests and taiga** (biome tag `jugcraft:werewolf_haunts`). Every 10 seconds, for each player, there's a 30% chance a werewolf steps out of the woods 24 to 40 blocks away onto open earth, with a long, low **howl**. At most 2 near a player and 8 in the world. None come in peaceful or while mobs don't spawn.
+1. **When and where:** only on **full-moon nights**, only in the Overworld's **forests and taiga** (biome tag `jugcraft:werewolf_haunts`). Every 10 seconds, for each player, there's a 30% chance a werewolf steps out of the woods 24 to 40 blocks away onto open woodland floor (grass, dirt, podzol and the like: earth a sapling could grow on), with a long, low **howl**. At most 2 near a player and 8 in the world. None come in peaceful or while mobs don't spawn.
 2. **The werewolf:** a hulking wolf-man about 2.4 m tall, with a barrel chest hunched under a shaggy mane, a long snout, long clawed arms and legs bent like a wolf's.
    - It has 20 hearts, hits for 7 and is fast.
    - It leaps at its prey and hunts players and villagers.
@@ -256,7 +256,7 @@ Not run yet: CI has not built this branch. The planned checks are:
   1. an iron sword's 8 damage does 4 to a werewolf, the silver dagger's 20; a plain arrow 4, a silver arrow 20; silver stops its healing; slain with silver it earns Silver Lining;
   2. a werewolf is gone within a second when it isn't a full-moon night, and stays when it is;
   3. wolfsbane in hand or within reach wards a player, beyond reach doesn't; a werewolf keeps hunting a villager with nothing in hand, and drops one holding a sprig and won't attack them; a warded player is left alone and earns Not Tonight;
-  4. no werewolf comes past the cap near a player;
+  4. no werewolf comes past the cap near a player; grass is woodland floor for one to step onto, stone isn't;
   5. the recipes, loot tables, advancements and tags load.
 - `WerewolfClientGameTests` takes screenshots: wolfsbane wild and potted in a spruce clearing, the rug before a fire with the silver dagger, arrows and pelt framed, and two werewolves in the clearing on the full-moon night.
 
