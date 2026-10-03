@@ -115,7 +115,7 @@ public class DiagonalClientGameTests implements FabricClientGameTest {
 					BlockState state = level.getBlockState(pos);
 					int mask = DiagonalConnections.mask(state);
 					if (mask != 0) {
-						String post = state.getBlock() instanceof WallBlock ? state.getValue(WallBlock.UP) ? "+post" : "-post" : "";
+						String post = state.hasProperty(WallBlock.UP) ? state.getValue(WallBlock.UP) ? "+post" : "-post" : "";
 						joins.add("%d,%d,%d=%s%s".formatted(dx, dy, dz, Integer.toBinaryString(mask), post));
 					}
 				}

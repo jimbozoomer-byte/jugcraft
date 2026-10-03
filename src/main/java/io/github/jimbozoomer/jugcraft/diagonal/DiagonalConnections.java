@@ -2,7 +2,6 @@ package io.github.jimbozoomer.jugcraft.diagonal;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
-import io.github.jimbozoomer.jugcraft.mixin.WallBlockInvoker;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,17 +32,17 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * Diagonal connections: fences, glass panes, bars and walls join their diagonal neighbours as well as their straight
  * ones (docs/features/diagonal-connections.md).
  *
- * <p>Every {@link FenceBlock}, {@link IronBarsBlock} and {@link WallBlock} (vanilla's, Jugcraft's and other mods') has
- * four more properties, {@link #NORTH_EAST}, {@link #SOUTH_EAST}, {@link #SOUTH_WEST} and {@link #NORTH_WEST}, false by
- * default ({@code mixin/DiagonalStateMixin}). They are set only for blocks in {@link #TAG}, the blocks that have
- * diagonal arm models (tools/diagonal_connections.py writes the models and the tag), so no block joins diagonally
- * without an arm to show for it.
+ * <p>Every {@link FenceBlock} and {@link IronBarsBlock} (vanilla's, Jugcraft's and other mods') has four more
+ * properties, {@link #NORTH_EAST}, {@link #SOUTH_EAST}, {@link #SOUTH_WEST} and {@link #NORTH_WEST}, false by default
+ * ({@code mixin/DiagonalStateMixin}). They are set only for blocks in {@link #TAG}, the blocks that have diagonal arm
+ * models (tools/diagonal_connections.py writes the models and the tag), so no block joins diagonally without an arm to
+ * show for it. Walls are not given the properties: a wall that joins diagonally becomes a {@link DiagonalWallBlock}
+ * while it does ({@link DiagonalWalls}).
  *
  * <p>The rule, the same from either end: two blocks a diagonal step apart join when they would join if they were side
  * by side (fences of one kind with each other, panes and bars with each other, walls with walls), and neither has a
  * straight connection into the two blocks between them. So a corner that already joins straight, or a wall or solid
- * block in the corner, keeps them apart, and two diagonals can never cross. A wall's diagonals are always low, and a
- * wall that runs straight on along a diagonal drops its post as a straight wall does ({@link #withPost}).
+ * block in the corner, keeps them apart, and two diagonals can never cross.
  *
  * <p>Diagonal neighbours do not get the game's neighbour updates, so a fence, bars block or wall that is placed, broken
  * or changed asks its four diagonal neighbours to look again ({@link #updateDiagonalNeighbours}, through
@@ -62,9 +61,6 @@ public final class DiagonalConnections {
 	public static final BooleanProperty SOUTH_WEST = BooleanProperty.create("south_west");
 	public static final BooleanProperty NORTH_WEST = BooleanProperty.create("north_west");
 
-	// Masks of a straight run along a diagonal (bits in Diagonal order; literals, so this class's set-up needs no Diagonal).
-	private static final int RUN_NORTH_EAST = 0b0101;
-	private static final int RUN_NORTH_WEST = 0b1010;
 	private static final List<Direction> SIDES = List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST);
 
 	/** A diagonal: its property and the two straight directions it lies between. */
@@ -111,7 +107,7 @@ public final class DiagonalConnections {
 	private DiagonalConnections() {
 	}
 
-	/** Whether the block takes diagonal properties (every fence, bars block and wall does). */
+	/** Whether the block has the diagonal properties (every fence, bars block and diagonal wall does). */
 	public static boolean hasDiagonals(BlockState state) {
 		return state.hasProperty(NORTH_EAST);
 	}
@@ -130,7 +126,7 @@ public final class DiagonalConnections {
 		return mask;
 	}
 
-	/** The state with no diagonals, as every fence, bars block and wall starts. */
+	/** The state with no diagonals, as every fence, bars block and diagonal wall starts. */
 	public static BlockState withoutDiagonals(BlockState state) {
 		if (!hasDiagonals(state)) {
 			return state;
@@ -141,41 +137,27 @@ public final class DiagonalConnections {
 		return state;
 	}
 
-	/**
-	 * The state with its diagonals worked out from the world, its straight connections being already up to date. A wall
-	 * that has or had diagonals also has its post worked out again.
-	 */
+	/** A fence's or bars block's state with its diagonals worked out from the world, its straight sides being up to date. */
 	public static BlockState withDiagonals(BlockState state, BlockGetter level, BlockPos pos) {
 		if (!hasDiagonals(state)) {
 			return state;
 		}
-		int before = mask(state);
-		boolean joins = state.is(TAG) && JugcraftConfig.isFeatureEnabled(FEATURE);
+		int mask = state.is(TAG) && JugcraftConfig.isFeatureEnabled(FEATURE) ? diagonals(state, level, pos) : 0;
 		for (Diagonal diagonal : Diagonal.ALL) {
-			state = state.setValue(diagonal.property, joins && joins(state, level, pos, diagonal));
-		}
-		if (state.getBlock() instanceof WallBlock wall && (before != 0 || mask(state) != 0)) {
-			state = withPost(wall, state, level, pos);
+			state = state.setValue(diagonal.property, (mask & 1 << diagonal.ordinal()) != 0);
 		}
 		return state;
 	}
 
-	/**
-	 * A wall's post, raised by vanilla's own rule with the diagonals counted. A wall with no straight sides and one pair
-	 * of opposite diagonals runs straight on, so the rule sees it as a straight low wall: no post unless something above
-	 * calls for one (a torch, a wall's post, a block over the middle). Any other wall with diagonals is an end, a corner or
-	 * a junction, and the rule gives it its post. A wall whose diagonals have just gone gets vanilla's post back.
-	 */
-	private static BlockState withPost(WallBlock wall, BlockState state, BlockGetter level, BlockPos pos) {
-		BlockPos abovePos = pos.above();
-		BlockState above = level.getBlockState(abovePos);
-		VoxelShape aboveShape = above.getCollisionShape(level, abovePos).getFaceShape(Direction.DOWN);
-		BlockState seen = state;
-		int mask = mask(state);
-		if ((mask == RUN_NORTH_EAST || mask == RUN_NORTH_WEST) && SIDES.stream().noneMatch(side -> straight(state, side))) {
-			seen = state.setValue(WallBlock.NORTH, WallSide.LOW).setValue(WallBlock.SOUTH, WallSide.LOW);
+	/** The diagonals a block would join at `pos`, one bit each in {@link Diagonal} order, its straight sides being up to date. */
+	public static int diagonals(BlockState state, BlockGetter level, BlockPos pos) {
+		int mask = 0;
+		for (Diagonal diagonal : Diagonal.ALL) {
+			if (joins(state, level, pos, diagonal)) {
+				mask |= 1 << diagonal.ordinal();
+			}
 		}
-		return state.setValue(WallBlock.UP, ((WallBlockInvoker) wall).jugcraft$shouldRaisePost(seen, above, aboveShape));
+		return mask;
 	}
 
 	private static boolean joins(BlockState state, BlockGetter level, BlockPos pos, Diagonal diagonal) {
@@ -183,26 +165,29 @@ public final class DiagonalConnections {
 			return false;
 		}
 		BlockState other = level.getBlockState(diagonal.from(pos));
-		if (!hasDiagonals(other) || !other.is(TAG) || !sameKind(state, other, diagonal) || !sameKind(other, state, diagonal.opposite())) {
+		if (!canJoin(other) || !sameKind(state, other, diagonal) || !sameKind(other, state, diagonal.opposite())) {
 			return false;
 		}
 		return !straight(other, diagonal.northSouth.getOpposite()) && !straight(other, diagonal.eastWest.getOpposite());
 	}
 
-	/** Whether the block joins straight toward `direction`: a fence's or bars block's side, or a wall's, low or tall. */
+	/** Whether the block could join diagonally: a tagged fence or bars block, a tagged vanilla wall, or a diagonal wall. */
+	private static boolean canJoin(BlockState state) {
+		if (state.getBlock() instanceof DiagonalWallBlock) {
+			return true;
+		}
+		return (state.getBlock() instanceof WallBlock || hasDiagonals(state)) && state.is(TAG);
+	}
+
+	/**
+	 * Whether the block joins straight toward `direction`: a vanilla wall's side, low or tall, or a fence's, bars block's
+	 * or diagonal wall's.
+	 */
 	private static boolean straight(BlockState state, Direction direction) {
 		if (state.getBlock() instanceof WallBlock) {
 			return state.getValue(WallBlock.PROPERTY_BY_DIRECTION.get(direction)) != WallSide.NONE;
 		}
 		return state.getValue(CrossCollisionBlock.PROPERTY_BY_DIRECTION.get(direction));
-	}
-
-	/** The state joined straight toward `direction`, or not: a low side for a wall. */
-	private static BlockState withStraight(BlockState state, Direction direction, boolean joined) {
-		if (state.getBlock() instanceof WallBlock) {
-			return state.setValue(WallBlock.PROPERTY_BY_DIRECTION.get(direction), joined ? WallSide.LOW : WallSide.NONE);
-		}
-		return state.setValue(CrossCollisionBlock.PROPERTY_BY_DIRECTION.get(direction), joined);
 	}
 
 	/**
@@ -216,8 +201,8 @@ public final class DiagonalConnections {
 		if (state.getBlock() instanceof IronBarsBlock bars) {
 			return other.getBlock() instanceof IronBarsBlock && bars.attachsTo(other, false);
 		}
-		if (state.getBlock() instanceof WallBlock) {
-			return other.getBlock() instanceof WallBlock;
+		if (DiagonalWalls.isWall(state)) {
+			return DiagonalWalls.isWall(other);
 		}
 		return false;
 	}
@@ -230,13 +215,31 @@ public final class DiagonalConnections {
 		for (Diagonal diagonal : Diagonal.ALL) {
 			BlockPos other = diagonal.from(pos);
 			BlockState state = level.getBlockState(other);
-			if (hasDiagonals(state)) {
-				BlockState updated = withDiagonals(state, level, other);
-				if (updated != state) {
-					Block.updateOrDestroy(state, updated, level, other, flags, recursionLeft);
-				}
+			BlockState updated = state;
+			if (DiagonalWalls.isWall(state)) {
+				// The update a wall gets when the block above it changes: it works out its sides, post and diagonals again.
+				BlockPos above = other.above();
+				updated = state.updateShape(level, level, other, Direction.UP, above, level.getBlockState(above), level.getRandom());
+			} else if (hasDiagonals(state)) {
+				updated = withDiagonals(state, level, other);
+			}
+			if (updated != state) {
+				Block.updateOrDestroy(state, updated, level, other, flags, recursionLeft);
 			}
 		}
+	}
+
+	/**
+	 * Whether two blocks a diagonal step apart, `second` at `dx`, `dz` from `first`, are joined to each other, so that
+	 * nothing can pass between them across the corner.
+	 */
+	public static boolean joinedAcross(BlockState first, BlockState second, int dx, int dz) {
+		for (Diagonal diagonal : Diagonal.ALL) {
+			if (diagonal.eastWest.getStepX() == dx && diagonal.northSouth.getStepZ() == dz) {
+				return (mask(first) & 1 << diagonal.ordinal()) != 0 && (mask(second) & 1 << diagonal.opposite().ordinal()) != 0;
+			}
+		}
+		return false;
 	}
 
 	/** The rotated block's diagonals: `rotated` has the straight connections turned already. */
@@ -269,7 +272,7 @@ public final class DiagonalConnections {
 	 *
 	 * <p>Every state that differs only in its diagonals gets the same shape object from the block's shape function
 	 * ({@code mixin/DiagonalBlockMixin}), so the shapes with arms are kept for each of those shapes and each set of
-	 * diagonals, and are shared by blocks whose shapes and arms are alike (every vanilla wall, every wooden fence).
+	 * diagonals, and are shared by blocks whose shapes and arms are alike (every wooden fence, every pane).
 	 */
 	public static final class Arms {
 		/** Shapes with arms, by the shape without them and the arm, for every block. */
@@ -281,6 +284,11 @@ public final class DiagonalConnections {
 		private final Map<VoxelShape, AtomicReferenceArray<VoxelShape>> byShape = new ConcurrentHashMap<>();
 		/** This block's arm, worked out once from its shape function; empty if it has none. */
 		private volatile Geometry geometry;
+
+		/** Arms `half` wide either side of each diagonal in `mask`, from `low` to `high` (in blocks): one shape, kept. */
+		public static VoxelShape of(double half, double low, double high, int mask) {
+			return new Geometry(half, low, high).arms(mask);
+		}
 
 		/** The block's `shape` for `state`, from `shapes`, with the state's joined diagonals' arms added. */
 		public VoxelShape apply(VoxelShape shape, BlockState state, Function<BlockState, VoxelShape> shapes) {
@@ -317,12 +325,9 @@ public final class DiagonalConnections {
 			static Geometry of(BlockState state, Function<BlockState, VoxelShape> shapes) {
 				BlockState bare = withoutDiagonals(state);
 				for (Direction side : SIDES) {
-					bare = withStraight(bare, side, false);
+					bare = bare.setValue(CrossCollisionBlock.PROPERTY_BY_DIRECTION.get(side), false);
 				}
-				if (bare.getBlock() instanceof WallBlock) {
-					bare = bare.setValue(WallBlock.UP, false);
-				}
-				VoxelShape arm = Shapes.join(shapes.apply(withStraight(bare, Direction.NORTH, true)), shapes.apply(bare), BooleanOp.ONLY_FIRST);
+				VoxelShape arm = Shapes.join(shapes.apply(bare.setValue(CrossCollisionBlock.NORTH, true)), shapes.apply(bare), BooleanOp.ONLY_FIRST);
 				if (arm.isEmpty()) {
 					return EMPTY;
 				}

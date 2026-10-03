@@ -10,7 +10,6 @@ import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
-import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,11 +19,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Fences, bars (glass panes are bars too) and walls get the four diagonal properties, and work out their diagonals
- * wherever they work out their straight connections: when placed and when a neighbour changes (see
- * DiagonalConnections). A wall also has a private updateShape of its own, so the public one is named in full.
+ * Fences and bars (glass panes are bars too) get the four diagonal properties, and work out their diagonals wherever
+ * they work out their straight connections: when placed and when a neighbour changes (see DiagonalConnections).
  */
-@Mixin({FenceBlock.class, IronBarsBlock.class, WallBlock.class})
+@Mixin({FenceBlock.class, IronBarsBlock.class})
 public abstract class DiagonalStateMixin {
 	@Inject(method = "createBlockStateDefinition", at = @At("TAIL"))
 	private void jugcraft$diagonalProperties(StateDefinition.Builder<Block, BlockState> builder, CallbackInfo callback) {

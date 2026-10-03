@@ -8,7 +8,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.CrossCollisionBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -21,18 +20,16 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * A fence's, bars block's or wall's diagonals in its outline and collision (DiagonalConnections.Arms), in rotation and
- * mirroring (structures and the structure block), and for its diagonal neighbours when it is placed, broken or changed
- * (see DiagonalConnections). Blocks without the diagonal properties are left as they are. Both classes keep their shape
- * functions in fields of the same names.
+ * A fence's or bars block's diagonals in its outline and collision (DiagonalConnections.Arms), in rotation and mirroring
+ * (structures and the structure block), and for its diagonal neighbours when it is placed, broken or changed (see
+ * DiagonalConnections). Blocks without the diagonal properties are left as they are.
  */
-@Mixin({CrossCollisionBlock.class, WallBlock.class})
+@Mixin(CrossCollisionBlock.class)
 public abstract class DiagonalShapeMixin {
-	// Not remapped: Mixin refuses remappable shadows in a mixin with more than one target, and 26.3's names need none.
-	@Shadow(remap = false)
+	@Shadow
 	@Final
 	private Function<BlockState, VoxelShape> shapes;
-	@Shadow(remap = false)
+	@Shadow
 	@Final
 	private Function<BlockState, VoxelShape> collisionShapes;
 	@Unique
@@ -67,7 +64,7 @@ public abstract class DiagonalShapeMixin {
 	}
 
 	/**
-	 * Added to CrossCollisionBlock and WallBlock, where it overrides BlockBehaviour's empty method: the game calls it for a block's
+	 * Added to CrossCollisionBlock, where it overrides BlockBehaviour's empty method: the game calls it for a block's
 	 * old and new state whenever it is set without UPDATE_KNOWN_SHAPE.
 	 */
 	protected void updateIndirectNeighbourShapes(BlockState state, LevelAccessor level, BlockPos pos, int flags, int recursionLeft) {

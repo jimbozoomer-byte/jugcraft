@@ -4,8 +4,9 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.diagonal.DiagonalConnections;
 import io.github.jimbozoomer.jugcraft.diagonal.DiagonalConnections.Diagonal;
+import io.github.jimbozoomer.jugcraft.diagonal.DiagonalWallBlock;
+import io.github.jimbozoomer.jugcraft.diagonal.DiagonalWalls;
 import java.lang.management.ManagementFactory;
-import java.lang.ref.Reference;
 import java.util.ArrayList;
 import java.util.List;
 import javax.management.ObjectName;
@@ -17,6 +18,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -31,8 +33,6 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.WallSide;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -44,9 +44,10 @@ import org.slf4j.LoggerFactory;
  * Diagonal connections (docs/features/diagonal-connections.md): fences, panes, bars and walls a diagonal step apart join
  * across an open corner, from either end; a straight connection or a block in the corner keeps them apart; breaking one
  * lets the other go; only kinds that join straight join diagonally; rotation and mirroring turn the diagonals; the arms
- * show in the outline and the collision, and alike blocks share them; a wall running on along a diagonal drops its post
- * unless something above calls for one; every fence, bars block and wall has the properties, starting false; and the
- * block states the properties add are counted and weighed in the log.
+ * show in the outline and the collision, and alike blocks share them; a wall that joins diagonally becomes its
+ * diagonal wall, which players get as the vanilla wall and which turns back into it; a wall running on along a diagonal
+ * drops its post unless something above calls for one; every fence and bars block has the properties, starting false,
+ * and every vanilla wall has a diagonal wall; and the block states are counted and weighed in the log.
  */
 public class DiagonalConnectionsGameTests {
 	private static final Logger LOGGER = LoggerFactory.getLogger("jugcraft-diagonal-tests");
@@ -102,7 +103,7 @@ public class DiagonalConnectionsGameTests {
 				joined.add(direction.getName());
 			}
 		}
-		if (state.getBlock() instanceof WallBlock && state.getValue(WallBlock.UP)) {
+		if (state.hasProperty(WallBlock.UP) && state.getValue(WallBlock.UP)) {
 			joined.add("post");
 		}
 		for (Diagonal diagonal : Diagonal.ALL) {
@@ -245,7 +246,7 @@ public class DiagonalConnectionsGameTests {
 	/** Rotating and mirroring a fence or a wall (structures, the structure block) turn its diagonals with it. */
 	@GameTest
 	public void rotationAndMirroringTurnTheDiagonals(GameTestHelper helper) {
-		for (Block block : List.of(Blocks.OAK_FENCE, vanilla("cobblestone_wall"))) {
+		for (Block block : List.of(Blocks.OAK_FENCE, DiagonalWalls.of(vanilla("cobblestone_wall")))) {
 			BlockState northEast = block.defaultBlockState().setValue(DiagonalConnections.NORTH_EAST, true);
 			Object[][] cases = {
 					{northEast.rotate(Rotation.CLOCKWISE_90), Diagonal.SOUTH_EAST}, {northEast.rotate(Rotation.CLOCKWISE_180), Diagonal.SOUTH_WEST},
@@ -276,6 +277,8 @@ public class DiagonalConnectionsGameTests {
 		BlockState other = helper.getBlockState(NORTH_EAST);
 		LOGGER.info("Walls placed diagonally: {} and {}", describe(first), describe(other));
 		helper.assertTrue(joinedPair(helper), "The walls join diagonally: " + describe(first) + ", " + describe(other));
+		helper.assertTrue(first.getBlock() instanceof DiagonalWallBlock && other.getBlock() instanceof DiagonalWallBlock,
+				"Joined, both are diagonal walls: " + describe(first) + ", " + describe(other));
 		helper.assertTrue(post(helper, FIRST) && post(helper, NORTH_EAST), "Two walls joined diagonally are ends, with posts");
 
 		ServerLevel level = helper.getLevel();
@@ -300,6 +303,9 @@ public class DiagonalConnectionsGameTests {
 		helper.destroyBlock(BEYOND);
 		helper.assertTrue(post(helper, NORTH_EAST) && DiagonalConnections.mask(helper.getBlockState(NORTH_EAST)) == 1 << Diagonal.SOUTH_WEST.ordinal(),
 				"With an end broken the middle is an end, with its post: " + describe(helper.getBlockState(NORTH_EAST)));
+		helper.destroyBlock(FIRST);
+		helper.assertTrue(helper.getBlockState(NORTH_EAST).is(vanilla("cobblestone_wall")),
+				"With no diagonal left it is the vanilla wall again: " + describe(helper.getBlockState(NORTH_EAST)));
 		helper.succeed();
 	}
 
@@ -342,7 +348,8 @@ public class DiagonalConnectionsGameTests {
 		ServerLevel level = helper.getLevel();
 		BlockPos pos = helper.absolutePos(FIRST);
 		List<String> unshared = new ArrayList<>();
-		for (Block[] pair : new Block[][] {{vanilla("cobblestone_wall"), vanilla("andesite_wall")}, {Blocks.OAK_FENCE, Blocks.SPRUCE_FENCE}}) {
+		for (Block[] pair : new Block[][] {{DiagonalWalls.of(vanilla("cobblestone_wall")), DiagonalWalls.of(vanilla("andesite_wall"))},
+				{Blocks.OAK_FENCE, Blocks.SPRUCE_FENCE}}) {
 			VoxelShape[] shapes = new VoxelShape[2];
 			for (int i = 0; i < 2; i++) {
 				BlockState state = pair[i].defaultBlockState().setValue(DiagonalConnections.NORTH_EAST, true)
@@ -358,34 +365,62 @@ public class DiagonalConnectionsGameTests {
 	}
 
 	/**
-	 * Logs the block states that the diagonal properties add and what they weigh: the game's block states in all, those
-	 * of blocks with diagonals and of walls, the heap after a full collection with the classes that hold block states,
-	 * and the memory a wall's states take with and without the four properties (built here, apart from the game's).
-	 * Nothing is asserted: these are numbers for the feature record.
+	 * A diagonal wall is the vanilla wall to players and to other blocks: a vanilla wall beside it joins it, it is a wall
+	 * by tag, it is named, picked and dropped as the vanilla wall. When its last diagonal goes it is the vanilla wall
+	 * again, and its sides rise to the block above as a vanilla wall's do.
+	 */
+	@GameTest
+	public void aDiagonalWallIsTheVanillaWallToPlayers(GameTestHelper helper) {
+		floor(helper);
+		Block cobblestone = vanilla("cobblestone_wall");
+		BlockPos south = FIRST.south();
+		set(helper, south, cobblestone);
+		set(helper, FIRST, cobblestone);
+		set(helper, NORTH_EAST, cobblestone);
+		BlockState first = helper.getBlockState(FIRST);
+		LOGGER.info("A wall joined south and north-east: {}; its southern neighbour: {}", describe(first), describe(helper.getBlockState(south)));
+		helper.assertTrue(first.getBlock() instanceof DiagonalWallBlock && DiagonalConnections.mask(first) == 1 << Diagonal.NORTH_EAST.ordinal()
+				&& first.getValue(CrossCollisionBlock.SOUTH), "It is a diagonal wall, joined south and north-east: " + describe(first));
+		helper.assertTrue(helper.getBlockState(south).getValue(WallBlock.NORTH) != WallSide.NONE,
+				"The vanilla wall to its south joins it: " + describe(helper.getBlockState(south)));
+		List<ItemStack> drops = Block.getDrops(first, helper.getLevel(), helper.absolutePos(FIRST), null);
+		helper.assertTrue(first.is(BlockTags.WALLS) && first.getBlock().asItem() == cobblestone.asItem()
+				&& first.getBlock().getName().equals(cobblestone.getName()) && drops.size() == 1 && drops.getFirst().is(cobblestone.asItem()),
+				"It is a wall named, picked and dropped as the cobblestone wall: " + drops);
+
+		set(helper, FIRST.above(), Blocks.STONE);
+		set(helper, NORTH_EAST, Blocks.AIR);
+		BlockState back = helper.getBlockState(FIRST);
+		LOGGER.info("With its diagonal gone, under stone: {}", describe(back));
+		helper.assertTrue(back.is(cobblestone) && back.getValue(WallBlock.SOUTH) == WallSide.TALL,
+				"It is the vanilla wall again, its side tall under the stone: " + describe(back));
+		helper.succeed();
+	}
+
+	/**
+	 * Logs the block states and what they weigh: the game's block states in all, those of fences and bars with diagonals,
+	 * of vanilla's walls and of the diagonal walls, and the heap after a full collection with the classes that hold block
+	 * states. Nothing is asserted: these are numbers for the feature record.
 	 */
 	@GameTest
 	public void theStatesDiagonalsAddAreCounted(GameTestHelper helper) {
 		int withDiagonals = 0;
 		int walls = 0;
+		int diagonalWalls = 0;
 		for (Block block : BuiltInRegistries.BLOCK) {
 			int states = block.getStateDefinition().getPossibleStates().size();
-			if (DiagonalConnections.hasDiagonals(block.defaultBlockState())) {
+			if (block instanceof DiagonalWallBlock) {
+				diagonalWalls += states;
+			} else if (DiagonalConnections.hasDiagonals(block.defaultBlockState())) {
 				withDiagonals += states;
 			}
 			if (block instanceof WallBlock) {
 				walls += states;
 			}
 		}
-		LOGGER.info("Block states: {} in all, {} in blocks with diagonals, {} in walls", Block.BLOCK_STATE_REGISTRY.size(), withDiagonals, walls);
+		LOGGER.info("Block states: {} in all, {} in fences and bars with diagonals, {} in vanilla's walls, {} in diagonal walls",
+				Block.BLOCK_STATE_REGISTRY.size(), withDiagonals, walls, diagonalWalls);
 		LOGGER.info("Heap after a full collection: {} MB; {}", heapAfterCollection() / (1024 * 1024), histogram());
-		Property<?>[] wall = {WallBlock.UP, WallBlock.NORTH, WallBlock.EAST, WallBlock.SOUTH, WallBlock.WEST, WallBlock.WATERLOGGED};
-		Property<?>[] diagonal = {DiagonalConnections.NORTH_EAST, DiagonalConnections.SOUTH_EAST, DiagonalConnections.SOUTH_WEST,
-				DiagonalConnections.NORTH_WEST};
-		Property<?>[] both = new Property<?>[10];
-		System.arraycopy(wall, 0, both, 0, 6);
-		System.arraycopy(diagonal, 0, both, 6, 4);
-		LOGGER.info("A wall state takes about {} bytes without diagonals and {} bytes with them (states and their tables only)",
-				bytesPerState(wall, 320), bytesPerState(both, 20));
 		helper.succeed();
 	}
 
@@ -395,22 +430,6 @@ public class DiagonalConnectionsGameTests {
 			System.gc();
 		}
 		return runtime.totalMemory() - runtime.freeMemory();
-	}
-
-	/** The bytes each block state takes, from the heap before and after building `copies` state definitions. */
-	private static long bytesPerState(Property<?>[] properties, int copies) {
-		List<StateDefinition<Block, BlockState>> kept = new ArrayList<>();
-		long before = heapAfterCollection();
-		int states = 0;
-		for (int i = 0; i < copies; i++) {
-			StateDefinition<Block, BlockState> definition = new StateDefinition.Builder<Block, BlockState>(vanilla("cobblestone_wall"))
-					.add(properties).create(Block::defaultBlockState, BlockState::new);
-			kept.add(definition);
-			states += definition.getPossibleStates().size();
-		}
-		long after = heapAfterCollection();
-		Reference.reachabilityFence(kept);
-		return (after - before) / states;
 	}
 
 	/** The class histogram's lines for block states and their caches, and its total (a full collection runs first). */
@@ -432,8 +451,10 @@ public class DiagonalConnectionsGameTests {
 	}
 
 	/**
-	 * Every fence, bars block and wall has the four properties and starts with them false; every block in the tag is one
-	 * (vanilla's 14 fences, 17 panes, 9 bars and 32 walls, Jugcraft's 14 fences: 86).
+	 * Every fence and bars block has the four properties and starts with them false. Vanilla's walls keep their own
+	 * states, without the properties, and each has a diagonal wall that starts with none and is a wall by tag. Every
+	 * block in the tag is a fence, bars block or wall (vanilla's 14 fences, 17 panes, 9 bars and 32 walls, Jugcraft's 14
+	 * fences: 86).
 	 */
 	@GameTest
 	public void everyFenceBarsBlockAndWallHasDiagonals(GameTestHelper helper) {
@@ -441,20 +462,28 @@ public class DiagonalConnectionsGameTests {
 		int tagged = 0;
 		for (Block block : BuiltInRegistries.BLOCK) {
 			BlockState state = block.defaultBlockState();
-			boolean crossing = block instanceof FenceBlock || block instanceof IronBarsBlock || block instanceof WallBlock;
+			boolean crossing = block instanceof FenceBlock || block instanceof IronBarsBlock;
 			if (crossing && (!DiagonalConnections.hasDiagonals(state) || DiagonalConnections.mask(state) != 0)) {
 				problems.add(BuiltInRegistries.BLOCK.getKey(block) + " lacks diagonals or starts joined");
 			}
+			if (block instanceof WallBlock && (DiagonalConnections.hasDiagonals(state)
+					|| BuiltInRegistries.BLOCK.getKey(block).getNamespace().equals("minecraft") && DiagonalWalls.of(block) == null)) {
+				problems.add(BuiltInRegistries.BLOCK.getKey(block) + " has diagonal properties or no diagonal wall");
+			}
+			if (block instanceof DiagonalWallBlock && (DiagonalConnections.mask(state) != 0 || !state.is(BlockTags.WALLS))) {
+				problems.add(BuiltInRegistries.BLOCK.getKey(block) + " starts joined or is not a wall by tag");
+			}
 			if (state.is(DiagonalConnections.TAG)) {
 				tagged++;
-				if (!crossing) {
+				if (!crossing && !(block instanceof WallBlock)) {
 					problems.add(BuiltInRegistries.BLOCK.getKey(block) + " is tagged but is no fence, bars or wall");
 				}
 			}
 		}
-		LOGGER.info("{} blocks join diagonally; problems: {}", tagged, problems);
+		LOGGER.info("{} blocks join diagonally, {} diagonal walls; problems: {}", tagged, DiagonalWalls.all().size(), problems);
 		helper.assertTrue(problems.isEmpty(), "Problems: " + problems);
-		helper.assertTrue(tagged == 86, "86 blocks join diagonally, not " + tagged);
+		helper.assertTrue(tagged == 86 && DiagonalWalls.all().size() == 32, "86 blocks join diagonally and 32 walls have diagonal walls, not "
+				+ tagged + " and " + DiagonalWalls.all().size());
 		helper.succeed();
 	}
 }

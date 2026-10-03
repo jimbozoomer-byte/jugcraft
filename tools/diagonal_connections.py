@@ -1,8 +1,10 @@
 """Diagonal connections (docs/features/diagonal-connections.md) for tools/generate_material_data.py.
 
 Fences, glass panes, bars and walls join diagonally as well as straight. The Java side (diagonal/DiagonalConnections)
-gives every FenceBlock, IronBarsBlock and WallBlock four more properties, north_east, south_east, south_west and
-north_west, and sets them only for blocks in the block tag #jugcraft:connects_diagonally. Here each of those blocks gets:
+gives every FenceBlock and IronBarsBlock four more properties, north_east, south_east, south_west and north_west, and
+sets them only for blocks in the block tag #jugcraft:connects_diagonally. A vanilla wall in the tag keeps its own states
+and becomes its diagonal wall, jugcraft:diagonal_<wall> (diagonal/DiagonalWallBlock), while it joins diagonally. Here
+each block in the tag gets:
 
 - a diagonal arm model, jugcraft:block/diagonal/<block>: a child of the block's own side model (so it keeps the
   block's textures, translucency and lighting) whose elements are turned 45 degrees about the post. Minecraft's
@@ -12,8 +14,9 @@ north_west, and sets them only for blocks in the block tag #jugcraft:connects_di
 - four more multipart parts in its blockstate: that arm turned 0, 90, 180 and 270 degrees for north_east, south_east,
   south_west and north_west.
 
-Vanilla's fences, panes, bars and walls are rebuilt in assets/minecraft/blockstates: vanilla's own parts, naming vanilla's
-models by ID, plus the diagonals. Jugcraft's fences get their diagonal parts added to the blockstates their own
+Vanilla's fences, panes and bars are rebuilt in assets/minecraft/blockstates: vanilla's own parts, naming vanilla's models
+by ID, plus the diagonals. Vanilla's walls are left as they are; each diagonal wall gets a blockstate of its own: the
+wall's post, its low sides and the diagonals. Jugcraft's fences get their diagonal parts added to the blockstates their own
 generators wrote, so this runs last in generate_material_data.assets().
 """
 import json
@@ -47,6 +50,8 @@ STONES = ["andesite", "blackstone", "brick", "cinnabar_brick", "cinnabar", "cobb
           "polished_cinnabar", "polished_deepslate", "polished_sulfur", "polished_tuff", "prismarine", "red_nether_brick",
           "red_sandstone", "resin_brick", "sandstone", "stone_brick", "sulfur_brick", "sulfur", "tuff_brick", "tuff"]
 VANILLA_WALLS = [f"{stone}_wall" for stone in STONES]
+# The block each vanilla wall becomes while it joins diagonally.
+DIAGONAL_WALL = "diagonal_{}"
 
 
 def jugcraft_fences():
@@ -159,9 +164,7 @@ def turned(elements):
     return out
 
 
-ARMS = {"fence": fence_arm, "bamboo_fence": bamboo_fence_arm, "pane": pane_arm, "bars": bars_arm, "wall": wall_arm}
-# Arm kinds whose blockstates uvlock their arms, as vanilla uvlocks fence and wall sides.
-UVLOCKED = {"fence", "wall"}
+ARMS = {"fence": fence_arm, "bamboo_fence": bamboo_fence_arm, "pane": pane_arm, "bars": bars_arm}
 
 
 # ---------------------------------------------------------------- blockstates
@@ -230,6 +233,16 @@ def vanilla_wall(name):
     return parts, f"{m}_side"
 
 
+def diagonal_wall(name):
+    """A diagonal wall's own parts: the wall's post when raised and its low side for each joined side (uvlocked, as
+    vanilla's). Its sides are only joined or not; they are never tall."""
+    m = f"minecraft:block/{name}"
+    parts = [_part(f"{m}_post", {"up": "true"})]
+    for direction, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+        parts.append(_part(f"{m}_side", {direction: "true"}, y, uvlock=True))
+    return parts
+
+
 def vanilla_blockstates():
     """name -> (vanilla's own parts, its north side model, arm kind)."""
     out = {}
@@ -239,8 +252,6 @@ def vanilla_blockstates():
         out[name] = vanilla_pane(name) + ("pane",)
     for name, family in VANILLA_BARS.items():
         out[name] = vanilla_bars(family) + ("bars",)
-    for name in VANILLA_WALLS:
-        out[name] = vanilla_wall(name) + ("wall",)
     return out
 
 
@@ -263,7 +274,12 @@ def write_all(write, assets_dir, minecraft_assets_dir):
         arm = f"{MOD}:block/diagonal/{name}"
         write(models / f"{name}.json", {"parent": side, "elements": ARMS[kind]()})
         write(minecraft_assets_dir / "blockstates" / f"{name}.json",
-              {"multipart": parts + diagonal_parts(arm, uvlock=kind in UVLOCKED)})
+              {"multipart": parts + diagonal_parts(arm, uvlock=kind == "fence")})  # as vanilla uvlocks its fence sides
+    for name in VANILLA_WALLS:
+        arm = f"{MOD}:block/diagonal/{name}"
+        write(models / f"{name}.json", {"parent": f"minecraft:block/{name}_side", "elements": wall_arm()})
+        write(assets_dir / "blockstates" / f"{DIAGONAL_WALL.format(name)}.json",
+              {"multipart": diagonal_wall(name) + diagonal_parts(arm, uvlock=True)})
     for name in jugcraft_fences():
         path = assets_dir / "blockstates" / f"{name}.json"
         state = _load(path)
@@ -279,6 +295,19 @@ def write_all(write, assets_dir, minecraft_assets_dir):
         write(path, state)
 
 
+def arm_blockstate(block):
+    """(namespace, blockstate name) of the blockstate that shows a tagged block's diagonal arms: a vanilla wall's are its
+    diagonal wall's."""
+    namespace, name = block.split(":")
+    if namespace == "minecraft" and name in VANILLA_WALLS:
+        return MOD, DIAGONAL_WALL.format(name)
+    return namespace, name
+
+
 def tags(tags):
     for block in blocks():
         tags.add("block", TAG, block)
+    # Diagonal walls are walls to everything else: walls, fence gates and bars join them, pickaxes mine them, mobs
+    # treat them as walls.
+    for name in VANILLA_WALLS:
+        tags.add("block", "minecraft:walls", f"{MOD}:{DIAGONAL_WALL.format(name)}")

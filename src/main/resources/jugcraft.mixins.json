@@ -5,8 +5,10 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "DiagonalBlockMixin",
+    "DiagonalPathMixin",
     "DiagonalShapeMixin",
     "DiagonalStateMixin",
+    "DiagonalWallMixin",
     "JigsawPlacementMixin",
     "MultiNoiseBiomeSourceMixin",
     "OverworldBiomeBuilderMixin",

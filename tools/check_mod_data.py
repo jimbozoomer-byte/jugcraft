@@ -490,7 +490,8 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + field_chemistry.items()
-                                                    + ag.all_blocks() + ag.all_items() + town_assets.blocks())
+                                                    + ag.all_blocks() + ag.all_items() + town_assets.blocks()
+                                                    + [dg.DIAGONAL_WALL.format(name) for name in dg.VANILLA_WALLS])
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
             if value.startswith("#"):
@@ -3972,15 +3973,16 @@ def check_diagonal_connections():
     """Diagonal connections (tools/diagonal_connections.py): every block in #jugcraft:connects_diagonally has a
     blockstate with one arm part for each diagonal, turned toward it, and an arm model of turned elements; every
     Jugcraft blockstate shaped like a fence, pane or bars (a part for each straight direction) or like a wall (a low or
-    tall part for each) is in the tag; vanilla's rebuilt blockstates keep vanilla's own parts; and the Java property
+    tall part for each) is in the tag; vanilla's rebuilt blockstates keep vanilla's own parts; vanilla's walls are left
+    as they are and each has a diagonal wall (its arms, post and low sides) in #minecraft:walls; and the Java property
     names match."""
     tag = set((load(RES / "data" / MOD / "tags" / "block" / "connects_diagonally.json") or {}).get("values", []))
     if tag != set(dg.blocks()):
         err(f"#{dg.TAG} differs from tools/diagonal_connections.py: {sorted(tag ^ set(dg.blocks()))}")
     for block in sorted(tag):
-        namespace, name = block.split(":")
-        root = RES / "assets" / namespace
-        parts = (load(root / "blockstates" / f"{name}.json") or {}).get("multipart", [])
+        name = block.split(":")[1]
+        namespace, state_name = dg.arm_blockstate(block)
+        parts = (load(RES / "assets" / namespace / "blockstates" / f"{state_name}.json") or {}).get("multipart", [])
         arms = {next(iter(p["when"])): p["apply"] for p in parts if set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)}
         if sorted(arms) != sorted(dg.DIAGONAL_NAMES):
             err(f"{block}: needs one diagonal arm part for each of {dg.DIAGONAL_NAMES}, has {sorted(arms)}")
@@ -4000,7 +4002,19 @@ def check_diagonal_connections():
         parts = (load(RES / "assets" / "minecraft" / "blockstates" / f"{name}.json") or {}).get("multipart", [])
         if [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)] != own:
             err(f"minecraft:{name}: the rebuilt blockstate lost vanilla's own parts")
+    walls = set((load(RES / "data" / "minecraft" / "tags" / "block" / "walls.json") or {}).get("values", []))
+    for name in dg.VANILLA_WALLS:
+        diagonal = dg.DIAGONAL_WALL.format(name)
+        if (RES / "assets" / "minecraft" / "blockstates" / f"{name}.json").exists():
+            err(f"minecraft:{name}: its blockstate is overridden; vanilla's walls are left as they are")
+        parts = (load(ASSETS / "blockstates" / f"{diagonal}.json") or {}).get("multipart", [])
+        if [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)] != dg.diagonal_wall(name):
+            err(f"{MOD}:{diagonal}: needs the wall's post and low sides, as tools/diagonal_connections.py writes them")
+        if f"{MOD}:{diagonal}" not in walls:
+            err(f"{MOD}:{diagonal} is not in #minecraft:walls, so walls, gates and bars would not join it")
     for path in sorted((ASSETS / "blockstates").glob("*.json")):
+        if path.stem.startswith(dg.DIAGONAL_WALL.format("")):
+            continue
         parts = (load(path) or {}).get("multipart", [])
         sides = {next(iter(p["when"])) for p in parts if len(p.get("when", {})) == 1 and list(p["when"].values()) == ["true"]}
         if {"north", "east", "south", "west"} <= sides and not sides & {"up", "down"} and f"{MOD}:{path.stem}" not in tag:
@@ -4016,6 +4030,9 @@ def check_diagonal_connections():
             err(f"diagonal/DiagonalConnections.java does not name the property {diagonal}")
     if f'"{dg.TAG.split(":")[1]}"' not in source:
         err(f"diagonal/DiagonalConnections.java does not name the tag {dg.TAG}")
+    walls_java = java.with_name("DiagonalWalls.java")
+    if f'"{dg.DIAGONAL_WALL.format("")}"' not in (walls_java.read_text(encoding="utf-8") if walls_java.exists() else ""):
+        err(f"diagonal/DiagonalWalls.java does not register the diagonal walls as {dg.DIAGONAL_WALL}")
 
 
 def main():
