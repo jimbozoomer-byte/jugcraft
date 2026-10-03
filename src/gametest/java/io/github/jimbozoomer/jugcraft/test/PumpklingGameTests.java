@@ -121,7 +121,7 @@ public class PumpklingGameTests {
 		helper.assertTrue(woken.size() == 1, "One Pumpkling wakes, not " + woken.size());
 		Pumpkling pumpkling = woken.get(0);
 		helper.assertTrue(pumpkling.ownedBy(waker), "It belongs to its waker");
-		helper.assertTrue(pumpkling.head().is(carvedPumpkin()) && pumpkling.head().getOrDefault(JugcraftAgriculture.CARVING, PumpkinCarving.BLANK).equals(face())
+		helper.assertTrue(pumpkling.head().is(carvedPumpkin().asItem()) && pumpkling.head().getOrDefault(JugcraftAgriculture.CARVING, PumpkinCarving.BLANK).equals(face())
 				&& pumpkling.lit(), "It wears the pumpkin's face, lit as it was");
 		helper.assertTrue(waker.getMainHandItem().is(Items.GLASS_BOTTLE), "The jar is a glass bottle again");
 		helper.assertTrue(earned(waker, "little_jack"), "Little Jack is earned");
@@ -232,7 +232,7 @@ public class PumpklingGameTests {
 
 	private static boolean droppedPumpkin(GameTestHelper helper, BlockPos near) {
 		return !helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(near)).inflate(2.0),
-				drop -> drop.getItem().is(carvedPumpkin()) && drop.getItem().getOrDefault(JugcraftAgriculture.CARVING, PumpkinCarving.BLANK).equals(face()))
+				drop -> drop.getItem().is(carvedPumpkin().asItem()) && drop.getItem().getOrDefault(JugcraftAgriculture.CARVING, PumpkinCarving.BLANK).equals(face()))
 				.isEmpty();
 	}
 
