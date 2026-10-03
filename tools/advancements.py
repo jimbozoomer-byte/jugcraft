@@ -129,6 +129,8 @@ TREE = {
     # Farming (batch 9).
     "cotton": ("bronze", "cotton", "King Cotton", "Grow cotton", "task"),
     "sprinkler": ("cotton", "sprinkler", "Make It Rain", "Build a sprinkler", "task"),
+    "electroplating_bath": ("electrolytic_cell", "electroplating_bath", "Silver Lining", "Build an electroplating bath",
+                            "task"),
     "hydroponic_bay": ("crop_harvester", "hydroponic_bay", "Soil Optional", "Build a hydroponic bay", "task"),
     "crop_harvester": ("steel", "crop_harvester", "Reaping What You Sow", "Build a crop harvester", "goal"),
 }

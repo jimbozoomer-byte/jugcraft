@@ -13,7 +13,8 @@
     "TownEntityExplosionMixin",
     "TownExplosionCalculatorMixin",
     "TownFireBlockMixin",
-    "TownPistonMixin"
+    "TownPistonMixin",
+    "PiglinSafeArmorMixin"
   ],
   "injectors": {
     "defaultRequire": 1

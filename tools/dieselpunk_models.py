@@ -782,6 +782,38 @@ def hydroponic_bay():
     return m
 
 
+def electroplating_bath():
+    """An open electroplating tank (batch 34): a rubber-lined gunmetal tub of yellow sulfuric acid with a hazard band,
+    copper busbars across the top carrying a nickel and a silver anode plate and, between them, a sword hung from a
+    hook on the work bar; a rectifier box with a gauge and a lamp stands on the front left."""
+    m = [box((0, 0, 0), (16, 1.5, 16), {"*": GUNMETAL, "north": HAZARD})]
+    # The tub: four walls round a sunken acid surface, lined with rubber.
+    m.append(box((0.5, 1.5, 4), (15.5, 10, 5), {"*": GUNMETAL, "north": HAZARD, "south": RUBBER}))
+    m.append(box((0.5, 1.5, 15), (15.5, 10, 15.5), {"*": GUNMETAL, "north": RUBBER}))
+    m.append(box((0.5, 1.5, 5), (1.5, 10, 15), {"*": GUNMETAL, "east": RUBBER}))
+    m.append(box((14.5, 1.5, 5), (15.5, 10, 15), {"*": GUNMETAL, "west": RUBBER}))
+    m.append(box((1.5, 1.5, 5), (14.5, 8.5, 15), {"*": RUBBER, "up": "sulfuric_acid_still!"}))
+    # Copper busbars across the tub on chrome insulators, and the plates hanging from them into the acid.
+    for z, plate in ((6.5, "nickel_block"), (13.5, "silver_block")):
+        m.append(box((0.25, 11, z - 0.5), (15.75, 12, z + 0.5), "copper_busbar"))
+        for x in (0.5, 14.5):
+            m.append(box((x, 10, z - 0.5), (x + 1, 11, z + 0.5), CHROME))
+        m.append(box((3, 4.5, z - 0.25), (13, 11, z + 0.25), plate))
+    # The work bar between them, a hook and the sword hanging point down.
+    m.append(box((0.25, 12.5, 9.5), (15.75, 13.25, 10.5), "copper_busbar"))
+    m.append(box((7.5, 10.5, 9.75), (8.5, 12.5, 10.25), CHROME))
+    m.append(box((6, 9.75, 9.75), (10, 10.5, 10.25), GUNMETAL))  # crossguard
+    m.append(box((7.25, 10.5, 9.75), (8.75, 11, 10.25), BAKELITE))  # grip end
+    m.append(box((7.25, 3, 9.85), (8.75, 9.75, 10.15), CHROME))  # blade, dipped in the acid
+    # The rectifier on the front left: a box with a gauge, a lamp and cables to the busbars.
+    m.append(box((1, 1.5, 0.5), (6.5, 7, 3.5), {"*": OLIVE, "north": STENCIL, "up": GRILLE}))
+    m.append(dial("north", (2.75, 4.5, 0.25), 2.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (5.25, 5, 0.25), 1.25, texture=LAMP, body=GUNMETAL))
+    m.append(pipe((3, 7, 2), (4, 11.5, 3), RUBBER))
+    m.append(pipe((3, 11, 3), (4, 11.5, 6), RUBBER))
+    return m
+
+
 def air_separation_unit():
     """Two by two, six tall: an air separation plant. A tall olive cold box with gunmetal corner posts and chrome frost
     bands stands at the back, with the chrome distillation column in front of it rising to a nitrogen vent; an air
@@ -937,4 +969,5 @@ MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), 
           "electrolytic_cell": electrolytic_cell(),
           "chemical_reactor": chemical_reactor(), "air_separation_unit": air_separation_unit(),
           "synthesis_converter": synthesis_converter(), "gas_holder": gas_holder(),
-          "crop_harvester": crop_harvester(), "hydroponic_bay": hydroponic_bay()}
+          "crop_harvester": crop_harvester(), "hydroponic_bay": hydroponic_bay(),
+          "electroplating_bath": electroplating_bath()}
