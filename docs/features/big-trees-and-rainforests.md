@@ -80,6 +80,9 @@ Results are recorded under "Results" below after CI runs.
     - Dense Forest: big oaks packed close, in autumn colours. Temperate Rainforest: firs and redwoods with a yellow willow.
     - Woodland: the camera stood inside an oak's crown.
     - Redwood Forest: the camera looked down into a lake. The client test now prefers dry ground.
+- **Fixed later (3 October 2026): `bigTreesGrow` asked too much of a giant mahogany.**
+  - It wanted at least 40 logs from each giant. A trunk two blocks wide has four logs a level and one at its top, 4h − 3 for a trunk h tall. A giant mahogany's mega jungle trunk is at least 10 tall (`tools/trees.py`) and may by chance have no branches, so it can have as few as 37. CI grew fewer than 40 and failed.
+  - #134 lowered the floor to 30 logs for both giants. The trunk two blocks wide is what proves a giant.
 
 ## World and event applicability
 - Biome fit: each biome takes the climate of the vanilla biome it replaces.
