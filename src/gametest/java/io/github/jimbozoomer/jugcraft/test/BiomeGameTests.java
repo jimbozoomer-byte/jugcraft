@@ -262,6 +262,9 @@ public class BiomeGameTests {
 	 * Redwood, eucalyptus and mahogany saplings (big trees and rainforests) grow their trees; four redwood or mahogany
 	 * saplings in a square grow a giant, its trunk two blocks wide.
 	 */
+	/** Fewest logs a giant redwood or mahogany may have (bigTreesGrow); see the comment there. */
+	private static final int GIANT_MIN_LOGS = 30;
+
 	@GameTest(maxTicks = 100)
 	public void bigTreesGrow(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -290,7 +293,9 @@ public class BiomeGameTests {
 				logs += level.getBlockState(pos).is(log) ? 1 : 0;
 			}
 			LOGGER.info("A giant {} from four saplings: {} logs, trunk two wide: {}", tree, logs, wide);
-			helper.assertTrue(wide && logs >= 40, "Four " + tree + " saplings grew no giant: " + logs + " logs, two wide " + wide);
+			// A giant is random in height: the shortest giant mahogany (a 10-block trunk) can grow under 40 logs (CI saw
+			// 38), so the floor is 30. The two-wide trunk is what proves it is a giant; a lone sapling grows about 10.
+			helper.assertTrue(wide && logs >= GIANT_MIN_LOGS, "Four " + tree + " saplings grew no giant: " + logs + " logs, two wide " + wide);
 			clear(helper, at);
 		}
 		helper.succeed();
