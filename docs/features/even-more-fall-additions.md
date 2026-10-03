@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21) are implemented in source and pass CI's game tests; the flying broomstick (addition 22) and full-moon werewolves (addition 23) are implemented in source. None is yet played by hand. Additions 24 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21) and the flying broomstick (addition 22) are implemented in source and pass CI's game tests; full-moon werewolves (addition 23) are implemented in source. None is yet played by hand. Additions 24 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
@@ -232,14 +232,28 @@ Not run: a werewolf hunting a player in play, which no automated test watches fr
 
 ### Flying broomstick verification
 
-Not run yet: CI has not built this branch. The planned checks are:
-- `BroomstickGameTests`, 5 game tests:
-  1. forward flies along the look, climbing when looking up; it slows with nothing pressed and faster braking; jump climbs; strafe drifts; held forward it tops out under its top speed, a quarter faster in a witch hat; dry, it can't climb or speed up and sinks no faster than it may; the server's distance check allows a broom's top speed and no more;
-  2. the item lays out the broom and seats its user (Up and Away), used up; a rider can't lay out another; a dry broom is only laid out;
-  3. ointment anoints a broom up to 6 minutes, returning bottles, and no further; sneak-use takes it back with its charge; a blow breaks a riderless broom into its item, keeping its charge, but not a ridden one;
-  4. ridden in the air, the server burns its charge until it is dry; climbing while dry throws its rider off, slow falling;
-  5. its recipe, advancements and entity load, and a new broom holds one ointment.
-- `BroomstickClientGameTests` takes screenshots: brooms by a cauldron of flying ointment (one hovering, one dry on the grass, the item framed), the player in a witch hat riding one, from behind and the front, and at midnight.
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-22-flying-broomstick` stacked on hex brews:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `BROOMSTICK` with `Broomstick.java`: charge, flight, the server's checks; and checks the item, entity, component and callback are registered, the client steers and draws it, and its words, recipe, advancements and textures exist) | Pass, 1046 IDs |
+| `./gradlew build` on `ada0c49a` (Build workflow run [37146789337](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37146789337)) | Pass |
+| Game tests on the headless server, same run: 596 in total, 5 of them new here (`BroomstickGameTests`) | **All 596 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `ada0c49a` (client shard 0 of that run) |
+
+The 5 new game tests (`BroomstickGameTests`):
+1. forward flies along the look, climbing when looking up; it slows with nothing pressed and faster braking; jump climbs; strafe drifts; held forward it tops out under its top speed, a quarter faster in a witch hat; dry, it can't climb or speed up and sinks no faster than it may; the server's distance check allows a broom's top speed and no more;
+2. the item lays out the broom and seats its user (Up and Away), used up; a rider can't lay out another; a dry broom is only laid out;
+3. ointment anoints a broom up to 6 minutes, returning bottles, and no further; sneak-use takes it back with its charge; a blow breaks a riderless broom into its item, keeping its charge, but not a ridden one;
+4. ridden in the air by a player in a witch hat, the server burns its charge until it is dry, and keeps its rider while it doesn't climb; moved up while dry, the next check throws its rider off, who falls slowly;
+5. its recipe, advancements and entity load, and a new broom holds one ointment.
+
+Found by CI and fixed before this record:
+- The first run failed to compile: 26.3's client has no `screen` field; the open screen is `client.gui.screen()`.
+- The next failed in the fourth test: a rider thrown off in the air didn't fall slowly. Slow falling was given from the broom's passenger removal, which the test never saw take effect. The broom now gives it itself: at once when it throws a rider, and the tick after any rider gets off, if they are alive, off the ground and not riding.
+
+The client test's screenshots show the brooms by the cauldron of flying ointment (one hovering, one dry on the grass with its straw greyed, the item framed), a player in a witch hat riding one from behind (the bristles below them) and in front, and at midnight ([the guide](../branches/AGRICULTURE.md#the-flying-broomstick) has them). Its log has no missing model or texture. From in front, the rider hides most of the handle.
 
 Not run: flying it by hand, which no automated test can do (the client test's rider has no keys pressed); a two-client dedicated-server playtest.
 
