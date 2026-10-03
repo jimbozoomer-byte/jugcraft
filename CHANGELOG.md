@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Flying broomstick, fall addition 22
+- **Flying Broomstick**: a Witch's Broom anointed with Flying Ointment and two feathers. Use it to get on; it flies where you look (forward, back to brake, jump to climb), up to about 10 blocks a second, a quarter faster in a witch hat. It hovers where you leave it.
+- **Ointment is its fuel**: 2 minutes of flight each, up to 6, burnt only in the air. Run dry, it sinks gently to the ground. Anoint a broom with Flying Ointment; sneak-use takes it back with its flight.
+- No fall damage while riding, and slow falling when you get off in the air. The server checks each broom's flight and throws off a rider who moves it impossibly.
+- Two advancements (Up and Away; Over the Moon, a challenge), five game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-flying-broomstick).
+
 ### Unmerged: Hex brews, fall addition 21
 - **Hex brews at the Bubbling Cauldron.** Over a fire, a brew takes a hex ingredient: green and a brown mushroom make the **Shrinking Draught**, orange and beans the **Giant's Draught**, purple and a phantom membrane **Flying Ointment**. A hex brew fills three bottles.
 - **Shrinking** makes you half size for 3 minutes, small enough for one-block gaps. **Giant** makes you 1.6 times your size for 3 minutes, with a block more reach and a higher step, and is refused where there is no room to grow. A shrunk player with no room to grow back stays small until there is. **Flying Ointment** gives 30 seconds of slow falling.

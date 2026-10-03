@@ -1011,6 +1011,11 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 - **Brew a hex:** over a lit campfire, fire or magma, stir a brown mushroom into the Bubbling Cauldron's green brew, beans into the orange or a phantom membrane into the purple. A hex brew fills three glass bottles.
 - **Shrinking Draught:** half your size for 3 minutes, through one-block gaps. **Giant's Draught:** 1.6 times your size for 3 minutes, a block more reach, only where there is room. Each cancels the other. **Flying Ointment:** 30 seconds of slow falling. Details: [even more fall additions](../features/even-more-fall-additions.md#hex-brews).
 
+### The flying broomstick
+
+- **Make one** from a Witch's Broom, a Flying Ointment and two feathers, and use it to get on. It flies where you look: forward to go, back to brake, jump to climb. It's a quarter faster in a witch hat.
+- **Ointment is its fuel:** 2 minutes of flight each, up to 6. Run dry, it sinks gently down. Anoint a waiting broom with more; sneak-use takes it back. Fly high on a full-moon night for Over the Moon. Details: [even more fall additions](../features/even-more-fall-additions.md#the-flying-broomstick).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
