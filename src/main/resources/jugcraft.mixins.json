@@ -4,6 +4,9 @@
   "package": "io.github.jimbozoomer.jugcraft.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "DiagonalDefaultStateMixin",
+    "DiagonalShapeMixin",
+    "DiagonalStateMixin",
     "JigsawPlacementMixin",
     "MultiNoiseBiomeSourceMixin",
     "OverworldBiomeBuilderMixin",
@@ -13,7 +16,8 @@
     "TownEntityExplosionMixin",
     "TownExplosionCalculatorMixin",
     "TownFireBlockMixin",
-    "TownPistonMixin"
+    "TownPistonMixin",
+    "PiglinSafeArmorMixin"
   ],
   "injectors": {
     "defaultRequire": 1
