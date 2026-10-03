@@ -8,14 +8,18 @@ import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -27,8 +31,9 @@ import net.minecraft.world.level.storage.loot.LootTable;
 /**
  * In-game tests for full-moon werewolves (fall addition 23): silver (the dagger in hand, a silver arrow) does two and a
  * half times its damage, anything else half, and slaying one with silver earns Silver Lining; silver stops it healing;
- * it is gone soon after it finds it isn't a full-moon night; wolfsbane in hand or near wards a player off, and a warded
- * target is dropped and left alone (Not Tonight); no more come near a player than the cap; and the data loads.
+ * it is gone soon after it finds it isn't a full-moon night; wolfsbane in hand or near wards someone off, and a warded
+ * target is dropped and left alone (a player earns Not Tonight); no more come near a player than the cap; and the data
+ * loads.
  */
 public class WerewolfGameTests {
 	private static final double EPSILON = 1.0E-4;
@@ -44,6 +49,11 @@ public class WerewolfGameTests {
 		player.setPos(absolute.getX() + 0.5, absolute.getY(), absolute.getZ() + 0.5);
 		player.setItemInHand(InteractionHand.MAIN_HAND, held);
 		return player;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static EntityType<Villager> villager() {
+		return (EntityType<Villager>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("villager"));
 	}
 
 	private static boolean earned(ServerPlayer player, String id) {
@@ -123,7 +133,8 @@ public class WerewolfGameTests {
 
 	/**
 	 * A player with wolfsbane in hand is warded, as is one standing near planted wolfsbane, and not one further off; a
-	 * werewolf hunting a warded player drops them and leaves them alone, earning them Not Tonight.
+	 * werewolf keeps hunting a villager with nothing, and drops one holding a sprig and leaves them alone; a warded
+	 * player is left alone and earns Not Tonight.
 	 */
 	@GameTest
 	public void wolfsbaneWardsWerewolvesOff(GameTestHelper helper) {
@@ -138,14 +149,21 @@ public class WerewolfGameTests {
 		helper.assertTrue(!Werewolves.wardNear(level, helper.absolutePos(new BlockPos(0, 2, 7)).east(Werewolves.WARD_REACH + 1)),
 				"but not beyond its reach");
 
-		// Without AI, so only its own ward check (not a target goal) changes its target.
+		// A villager can be hunted at once, where a player who has only just appeared can't be yet. Without AI, so only
+		// its own ward check (not a target goal) changes its target.
+		Villager unwarded = helper.spawnWithNoFreeWill(villager(), new BlockPos(7, 2, 5));
+		Villager sprigged = helper.spawnWithNoFreeWill(villager(), new BlockPos(1, 2, 3));
+		sprigged.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Werewolves.wolfsbane()));
 		Werewolf werewolf = werewolf(helper, new BlockPos(3, 2, 3));
-		werewolf.setTarget(bare);
-		helper.assertTrue(!werewolf.checkWard(level) && werewolf.getTarget() == bare, "It keeps hunting someone unwarded");
-		werewolf.setTarget(holder);
+		werewolf.setTarget(unwarded);
+		helper.assertTrue(werewolf.getTarget() == unwarded, "It hunts a villager");
+		helper.assertTrue(!werewolf.checkWard(level) && werewolf.getTarget() == unwarded, "It keeps hunting someone unwarded");
+		werewolf.setTarget(sprigged);
 		helper.assertTrue(werewolf.checkWard(level), "Its ward check finds wolfsbane on its target");
-		helper.assertTrue(werewolf.getTarget() == null && werewolf.shuns(holder) && !werewolf.canAttack(holder),
+		helper.assertTrue(werewolf.getTarget() == null && werewolf.shuns(sprigged) && !werewolf.canAttack(sprigged),
 				"It drops a warded target and leaves them alone");
+		werewolf.wardedOff(holder);
+		helper.assertTrue(werewolf.shuns(holder) && !werewolf.canAttack(holder), "It leaves a warded player alone");
 		helper.assertTrue(earned(holder, "wolfsbane_ward"), "Not Tonight is earned");
 		helper.succeed();
 	}

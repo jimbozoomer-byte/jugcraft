@@ -253,7 +253,7 @@ Not run yet: CI has not built this branch. The planned checks are:
 - `WerewolfGameTests`, 5 game tests:
   1. an iron sword's 8 damage does 4 to a werewolf, the silver dagger's 20; a plain arrow 4, a silver arrow 20; silver stops its healing; slain with silver it earns Silver Lining;
   2. a werewolf is gone within a second when it isn't a full-moon night, and stays when it is;
-  3. wolfsbane in hand or within reach wards a player, beyond reach doesn't; a werewolf hunting a warded player drops them and won't attack them (Not Tonight);
+  3. wolfsbane in hand or within reach wards a player, beyond reach doesn't; a werewolf keeps hunting a villager with nothing in hand, and drops one holding a sprig and won't attack them; a warded player is left alone and earns Not Tonight;
   4. no werewolf comes past the cap near a player;
   5. the recipes, loot tables, advancements and tags load.
 - `WerewolfClientGameTests` takes screenshots: wolfsbane wild and potted in a spruce clearing, the rug before a fire with the silver dagger, arrows and pelt framed, and two werewolves in the clearing on the full-moon night.
