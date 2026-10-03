@@ -45,8 +45,8 @@ public class ArmsMotionClientGameTests implements FabricClientGameTest {
 			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 0", x + 0.5, y, z + 0.5));
 			context.waitTicks(20);
 
-			// Third person, from the front, the HUD hidden: each kind's guard, then two ticks into a swing.
-			context.getInput().pressKey(options -> options.keyToggleGui);
+			// Third person, from the front: each kind's guard, then two ticks into a swing. The HUD stays up throughout, since
+			// hiding it also hides the hand in first person.
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			for (String kind : KINDS) {
 				hold(context, server, kind);
@@ -60,8 +60,6 @@ public class ArmsMotionClientGameTests implements FabricClientGameTest {
 				strike(context, "longsword", "jugcraft_motion_longsword_combo_" + blow);
 				context.waitTicks(12);
 			}
-			context.getInput().pressKey(options -> options.keyToggleGui);
-
 			// First person: the guard and a stroke on screen.
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			for (String kind : List.of("longsword", "war_hammer", "glaive")) {
