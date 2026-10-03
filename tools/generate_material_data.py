@@ -160,7 +160,7 @@ def assets():
     import control_electronics
     control_electronics.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import rocketry
-    rocketry.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    rocketry.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
@@ -1236,6 +1236,9 @@ def tags():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     import control_electronics
     for block in control_electronics.blocks():
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import rocketry
+    for block in rocketry.blocks():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     import construction
     for block in construction.blocks():

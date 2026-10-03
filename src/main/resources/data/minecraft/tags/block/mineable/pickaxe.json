@@ -23,6 +23,7 @@
     "jugcraft:logic_controller",
     "jugcraft:control_monitor",
     "jugcraft:alarm",
+    "jugcraft:rocket_pad",
     "jugcraft:concrete",
     "jugcraft:concrete_slab",
     "jugcraft:concrete_stairs",

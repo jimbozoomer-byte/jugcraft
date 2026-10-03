@@ -4466,6 +4466,28 @@
         {
           "in": [
             [
+              "jugcraft:rocket_motor",
+              1
+            ],
+            [
+              "jugcraft:rocket_casing",
+              1
+            ],
+            [
+              "jugcraft:guidance_unit",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:delivery_rocket",
+            1
+          ],
+          "extra": [],
+          "ticks": 300
+        },
+        {
+          "in": [
+            [
               "jugcraft:solid_propellant",
               1
             ],
