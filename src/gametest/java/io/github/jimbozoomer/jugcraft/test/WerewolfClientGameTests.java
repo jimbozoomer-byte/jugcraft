@@ -142,7 +142,8 @@ public class WerewolfClientGameTests implements FabricClientGameTest {
 		int x = origin.getX();
 		int y = origin.getY();
 		int z = origin.getZ();
-		float[][] poses = {{1.0F, -8.5F, 70.0F}, {3.5F, -7.5F, 0.0F}, {6.0F, -8.5F, -15.0F}};
+		// Clear of the trunks: one standing in a trunk suffocates, and flashes red in the picture.
+		float[][] poses = {{1.0F, -8.5F, 70.0F}, {3.5F, -7.5F, 0.0F}, {6.0F, -6.8F, -15.0F}};
 		for (int n = 0; n < poses.length; n++) {
 			float[] pose = poses[n];
 			Werewolf werewolf = JugcraftAgriculture.WEREWOLF.create(level, EntitySpawnReason.COMMAND);
