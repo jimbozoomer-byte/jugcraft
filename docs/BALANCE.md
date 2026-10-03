@@ -16,11 +16,12 @@ Energy is in **JE** (Jugcraft Energy) and rotation in **KE**, both per tick (20 
 | Steam Engine | 64 KE/t | coal 102,400 KE | burns only while something takes the power |
 | Large Steam Engine | 256 KE/t | coal 102,400 KE | four times the small engine, at the same fuel efficiency |
 | Hand Crank | 16 KE/t | a little hunger | 5 s per click |
-| Diesel Generator | 256 JE/t | diesel 256,000 · heavy fuel oil 128,000 per bucket | stops burning when full |
-| Gas Turbine | 512 JE/t | gasoline 384,000 · refinery gas 192,000 per bucket | plus 1 mB lubricant per 20 ticks running (a bucket per 10,240,000 JE) |
-| Diesel Engine | up to 512 KE/t | diesel 256,000 KE · heavy fuel oil 128,000 KE per bucket | burns only for what the line takes |
-| Advanced Combustion Engine | up to 1,024 KE/t | gasoline 448,000 KE · diesel 320,000 KE per bucket | burns only for what the line takes |
+| Diesel Generator | 256 JE/t | diesel 256,000 · heavy fuel oil 128,000 · premium diesel 320,000 per bucket | stops burning when full |
+| Gas Turbine | 512 JE/t | gasoline 384,000 · premium gasoline 448,000 · refinery gas 192,000 per bucket | plus 1 mB lubricant per 20 ticks running (a bucket per 10,240,000 JE) |
+| Diesel Engine | up to 512 KE/t | diesel 256,000 KE · premium diesel 320,000 KE · heavy fuel oil 128,000 KE per bucket | burns only for what the line takes |
+| Advanced Combustion Engine | up to 1,024 KE/t | premium gasoline 512,000 KE · gasoline 448,000 KE · premium diesel 400,000 KE · diesel 320,000 KE per bucket | burns only for what the line takes |
 | Fuel Cell | 128 JE/t | hydrogen 128,000 per bucket | a bucket of hydrogen costs 204,800 JE of electrolysis |
+| Heat Recovery Unit (batch 29) | 30% of a touching diesel generator (77 JE/t) or gas turbine (154 JE/t) | the generator's own fuel | 1 mB water per 64 JE; 1 mB lubricant per 40 ticks; two units share one generator's heat |
 | Steam Generator, bitumen | 64 JE/t | 51,200 per bitumen | unchanged by the oil line |
 
 Charcoal burns three quarters as long as coal in Jugcraft's generators and engines. Vanilla furnaces are unchanged.
@@ -104,6 +105,7 @@ A processor costs about 64,000 JE of crystal growing and etching (two wafers' wo
 - **Motor ↔ dynamo:** loses 44% per round trip; magnet motor ↔ magnet dynamo loses 9.75% (game test `magnetMotorAndDynamoLoopLosesPower`).
 - **Electrolysis and the fuel cell:** a bucket of brine costs 51,200 JE and gives 250 mB of hydrogen, worth 32,000 JE in the fuel cell: a 37.5% return, never a loop.
 - **Bioethanol (batch 26):** 8 crops and 9,600 JE of fermenting (100 ticks at 96 JE/t) give 250 mB, worth 48,000 JE in the gas turbine: 4,800 JE a crop after fermenting. One harvester field (81 crops, each regrowing in roughly 20–40 minutes) feeds about 10–20 JE/t on average: a renewable trickle, a few solar panels' worth, never a rival to oil. Crops are renewable, so this is a renewable power source like the sun, not a loop.
+- **Refinery upgrades (batch 29):** hydrotreating a bucket of diesel costs 15,360 JE and 100 mB of hydrogen for +64,000 JE in the diesel generator; with water-electrolysis hydrogen (about 41,000 JE per 100 mB) that is only about +7,600, with the brine cell's by-product hydrogen about +48,600. Blending 900 mB gasoline + 100 mB bioethanol costs 5,120 JE for +83,200 JE in the gas turbine. Both use up oil (and crops), so they are upgrades, not loops. The heat recovery unit only turns a generator's fuel heat into 30% more power; it takes that heat from the generator, so it cannot recover from itself and two units cannot share the same heat twice (game test `heatRecoveryUnitsShareOneTurbine`). Sulfur recovery: 200 mB of hydrogen sulfide (from 2 buckets of diesel) gives a sulfur dust.
 - **Acid leaching (batch 26):** an ore + 250 mB of sulfuric acid gives 4 washed ores, the 4× route (washer 3×, crusher 2×). The acid costs half a sulfur dust per ore, so the extra ingot is paid for in sulfur.
 - **Water electrolysis (batch 24):** a bucket of water costs 204,800 JE (800 ticks at 256 JE/t) and gives 500 mB of hydrogen, worth 64,000 JE in the fuel cell: a 31% return. Fluid processors take no upgrade cards, so nothing makes it cheaper. Its 250 mB of oxygen is a by-product for the steel foundry or nitric acid.
 - **Aluminum:** the Bayer route gets two ingots per bauxite for about 35,000 JE an ingot; the arc furnace gets one for 12,800 JE. More metal for more power, not more of both.

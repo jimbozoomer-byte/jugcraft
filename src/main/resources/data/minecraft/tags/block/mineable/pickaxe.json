@@ -109,6 +109,8 @@
     "jugcraft:air_separation_unit",
     "jugcraft:synthesis_converter",
     "jugcraft:fuel_cell",
+    "jugcraft:hydrotreater",
+    "jugcraft:heat_recovery_unit",
     "jugcraft:lithium_battery_bank",
     "jugcraft:flow_battery",
     "jugcraft:lithography_station",

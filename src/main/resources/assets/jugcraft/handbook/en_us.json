@@ -271,6 +271,14 @@
             {
               "item": "jugcraft:diesel_engine",
               "label": "Diesel engine"
+            },
+            {
+              "item": "jugcraft:hydrotreater",
+              "label": "Premium fuels"
+            },
+            {
+              "item": "jugcraft:heat_recovery_unit",
+              "label": "Heat recovery"
             }
           ]
         },
@@ -568,91 +576,93 @@
             "Tight Spot: Build a fracking rig for shale oil.",
             "Diesel Power: Build a diesel generator.",
             "Spool Up: Build a gas turbine.",
-            "Eight Cylinders: Build a diesel engine.",
-            "Fantastic Plastic: Press a plastic sheet."
+            "Top Shelf: Make premium diesel or premium gasoline in the hydrotreater.",
+            "Waste Not: Build a heat recovery unit to make power from a generator's exhaust."
           ]
         },
         {
           "title": "Milestones (9)",
-          "icon": "jugcraft:rubber",
+          "icon": "jugcraft:diesel_engine",
           "text": [
+            "Eight Cylinders: Build a diesel engine.",
+            "Fantastic Plastic: Press a plastic sheet.",
             "Bouncing Back: Make synthetic rubber.",
             "Vinyl Revival: Make PVC resin from chlorine.",
-            "Squeaky Clean: Boil soap from lye.",
-            "Light Speed: Draw borosilicate glass into optical fibre.",
-            "Pin Pulled: Make a grenade."
+            "Squeaky Clean: Boil soap from lye."
           ]
         },
         {
           "title": "Milestones (10)",
-          "icon": "jugcraft:flow_battery",
+          "icon": "jugcraft:optical_fibre",
           "text": [
+            "Light Speed: Draw borosilicate glass into optical fibre.",
+            "Pin Pulled: Make a grenade.",
             "Going with the Flow: Build a flow battery.",
             "Hit the Road: Lay asphalt, and walk faster on it.",
-            "Split Decision: Build an electrolytic cell.",
-            "Oil of Vitriol: Make sulfuric acid.",
-            "Green Revolution: Make fertilizer."
+            "Split Decision: Build an electrolytic cell."
           ]
         },
         {
           "title": "Milestones (11)",
-          "icon": "jugcraft:bioethanol_bucket",
+          "icon": "jugcraft:sulfuric_acid_bucket",
           "text": [
+            "Oil of Vitriol: Make sulfuric acid.",
+            "Green Revolution: Make fertilizer.",
             "Moonshine: Ferment crops into bioethanol.",
             "The Bayer Way: Digest bauxite into alumina.",
-            "Clean Burn: Build a hydrogen fuel cell.",
-            "Thin Air: Build an air separation unit.",
-            "Bread from Air: Build a synthesis converter, to make ammonia from air."
+            "Clean Burn: Build a hydrogen fuel cell."
           ]
         },
         {
           "title": "Milestones (12)",
-          "icon": "jugcraft:nitric_acid_bucket",
+          "icon": "jugcraft:air_separation_unit",
           "text": [
+            "Thin Air: Build an air separation unit.",
+            "Bread from Air: Build a synthesis converter, to make ammonia from air.",
             "Aqua Fortis: Make nitric acid.",
             "Kroll Call: Chlorinate titanium and melt the sponge.",
-            "Power Wall: Build a lithium battery bank.",
-            "Strong Attraction: Make a neodymium magnet.",
-            "Lossless (Almost): Build a magnet dynamo or magnet motor."
+            "Power Wall: Build a lithium battery bank."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:silicon_boule",
+          "icon": "jugcraft:neodymium_magnet",
           "text": [
+            "Strong Attraction: Make a neodymium magnet.",
+            "Lossless (Almost): Build a magnet dynamo or magnet motor.",
             "Pulling Strings: Pull a silicon boule in the arc furnace.",
             "Etched in Light: Etch microchips in the lithography station.",
-            "Central Processing: Assemble a processor.",
-            "Hello, World: Build a network terminal.",
-            "Under Pressure: Build a gas holder."
+            "Central Processing: Assemble a processor."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:fluid_valve",
+          "icon": "jugcraft:network_terminal",
           "text": [
+            "Hello, World: Build a network terminal.",
+            "Under Pressure: Build a gas holder.",
             "Shut-Off Valve: Make a fluid valve.",
             "Strained Relations: Make a fluid filter.",
-            "Here Comes the Sun: Build an advanced solar panel.",
-            "Full of It: Make a tank gauge.",
-            "Concentrate: Build a solar receiver for a heliostat field."
+            "Here Comes the Sun: Build an advanced solar panel."
           ]
         },
         {
           "title": "Milestones (15)",
-          "icon": "jugcraft:turbocharger",
+          "icon": "jugcraft:tank_gauge",
           "text": [
+            "Full of It: Make a tank gauge.",
+            "Concentrate: Build a solar receiver for a heliostat field.",
             "Spool Up: Make a turbocharger for the advanced engine.",
             "Keep It Spinning: Build a flywheel.",
-            "Four on the Floor: Build an advanced combustion engine.",
-            "King Cotton: Grow cotton.",
-            "Make It Rain: Build a sprinkler."
+            "Four on the Floor: Build an advanced combustion engine."
           ]
         },
         {
           "title": "Milestones (16)",
-          "icon": "jugcraft:crop_harvester",
+          "icon": "jugcraft:cotton",
           "text": [
+            "King Cotton: Grow cotton.",
+            "Make It Rain: Build a sprinkler.",
             "Reaping What You Sow: Build a crop harvester."
           ]
         }
@@ -3001,6 +3011,61 @@
               "jugcraft:titanium_ingot"
             ],
             "result": "jugcraft:advanced_engine",
+            "count": 1
+          }
+        },
+        {
+          "title": "Hydrotreater",
+          "icon": "jugcraft:hydrotreater",
+          "text": [
+            "Two by two and three tall, its catalyst built in. Pipe diesel into its first tank and hydrogen into its second: 1,000 mB of diesel and 100 mB of hydrogen become 1,000 mB of premium diesel (base) and 100 mB of hydrogen sulfide (top), every 6 seconds. Or blend 900 mB of gasoline with 100 mB of bioethanol into a bucket of premium gasoline. 128 JE/t.",
+            "Uses 128 JE/t while working. Holds 40,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:cracking_catalyst",
+              "jugcraft:steel_plate",
+              "jugcraft:fluid_tank",
+              "jugcraft:advanced_circuit",
+              "jugcraft:fluid_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:hydrotreater",
+            "count": 1
+          }
+        },
+        {
+          "title": "Premium Fuels",
+          "icon": "jugcraft:premium_diesel_bucket",
+          "text": [
+            "Premium diesel burns a quarter better: 320,000 JE a bucket in the diesel generator, 320,000 KE in the diesel engine and 400,000 KE in the advanced engine.",
+            "Premium gasoline: 448,000 JE a bucket in the gas turbine (gasoline and bioethanol apart give 364,800) and 512,000 KE in the advanced engine.",
+            "Hydrotreating pays best with the electrolytic cell's spare hydrogen. Its hydrogen sulfide goes to the chemical reactor: 200 mB make a sulfur dust, so oil becomes a source of sulfur for the acids."
+          ]
+        },
+        {
+          "title": "Heat Recovery Unit",
+          "icon": "jugcraft:heat_recovery_unit",
+          "text": [
+            "One block, two tall. Put it against a running diesel generator or gas turbine: it boils water in their exhaust and makes 30% of their power again (77 or 154 JE/t). It needs water (1 mB per 64 JE, piped in or from a water source right below it) and lubricant (1 mB every 2 seconds). Two units on one generator share its heat.",
+            "Makes 30% of a touching generator's output. Holds 20,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "minecraft:iron_bars",
+              "jugcraft:steel_plate",
+              "minecraft:copper_ingot",
+              "jugcraft:fluid_tank",
+              "minecraft:copper_ingot",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_gear",
+              "jugcraft:steel_fluid_pipe"
+            ],
+            "result": "jugcraft:heat_recovery_unit",
             "count": 1
           }
         },

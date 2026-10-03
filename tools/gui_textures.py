@@ -102,6 +102,8 @@ TAGLINES = {
     "air_separation_unit": "Splits air into nitrogen, oxygen, argon.",
     "synthesis_converter": "Makes ammonia and nitric acid.",
     "fuel_cell": "Turns hydrogen into power.",
+    "hydrotreater": "Upgrades diesel and gasoline to premium.",
+    "heat_recovery_unit": "Power from a generator's exhaust heat.",
     "lithium_battery_bank": "Stores 32M JE. Gives it out of its front.",
     "flow_battery": "Stores 1,000 JE per mB of electrolyte.",
     "lithography_station": "Etches wafers into microchips.",

@@ -196,6 +196,14 @@ ABOUT = {
     "polymerization_reactor": "Two by two and three blocks tall. Polymerizes refinery gas into plastic: a bucket of gas "
                               "gives four plastic pellets, every 5 seconds. The metal press flattens each pellet "
                               "into a plastic sheet.",
+    "hydrotreater": "Two by two and three tall, its catalyst built in. Pipe diesel into its first tank and hydrogen "
+                    "into its second: 1,000 mB of diesel and 100 mB of hydrogen become 1,000 mB of premium diesel (base) "
+                    "and 100 mB of hydrogen sulfide (top), every 6 seconds. Or blend 900 mB of gasoline with 100 mB "
+                    "of bioethanol into a bucket of premium gasoline. 128 JE/t.",
+    "heat_recovery_unit": "One block, two tall. Put it against a running diesel generator or gas turbine: it boils "
+                          "water in their exhaust and makes 30% of their power again (77 or 154 JE/t). It needs water "
+                          "(1 mB per 64 JE, piped in or from a water source right below it) and lubricant (1 mB every "
+                          "2 seconds). Two units on one generator share its heat.",
     "gas_turbine": "Four wide, two tall and two deep. Burns gasoline or refinery gas from its 16-bucket tank: 512 JE/t, "
                    "384,000 JE a bucket of gasoline or 192,000 JE a bucket of gas. Its second tank takes lubricant "
                    "from the distillation tower: 1 mB every second of running, and it stops when it runs dry.",
@@ -313,6 +321,8 @@ def power_line(block):
         return f"Uses {stats['use_per_tick']} JE/t while working. Holds {stats['capacity']:,} JE."
     if "generation_per_tick" in stats:
         return f"Makes up to {stats['generation_per_tick']} JE/t. Holds {stats['capacity']:,} JE."
+    if "recovery_percent" in stats:
+        return f"Makes {stats['recovery_percent']}% of a touching generator's output. Holds {stats['capacity']:,} JE."
     return f"Holds {stats['capacity']:,} JE; {stats['io_per_tick']} JE/t in and out."
 
 
@@ -443,7 +453,7 @@ PROGRESSION = [
         ("prospector", "Find oil"), ("pumpjack", "Pumpjack"), ("steel_fluid_pipe", "Steel pipes"),
         ("distillation_tower", "Distillation tower"), ("diesel_generator", "Diesel generator"),
         ("catalytic_cracker", "Cracker"), ("plastic_sheet", "Plastic"), ("gas_turbine", "Gas turbine"),
-        ("diesel_engine", "Diesel engine")]),
+        ("diesel_engine", "Diesel engine"), ("hydrotreater", "Premium fuels"), ("heat_recovery_unit", "Heat recovery")]),
     ("Chemistry", "electrolytic_cell", "Salt, sulfur and air become acids, metals and gases.", [
         "Make brine and split it in the electrolytic cell into chlorine, hydrogen and lye.",
         "The chemical reactor makes sulfuric acid, titanium sponge, lithium and rare earths.",
@@ -582,6 +592,15 @@ def build():
             machine_page("polymerization_reactor"),
             machine_page("diesel_engine"),
             machine_page("advanced_engine"),
+            machine_page("hydrotreater"),
+            {"title": "Premium Fuels", "icon": f"{MOD}:premium_diesel_bucket", "text": [
+                "Premium diesel burns a quarter better: 320,000 JE a bucket in the diesel generator, 320,000 KE in the "
+                "diesel engine and 400,000 KE in the advanced engine.",
+                "Premium gasoline: 448,000 JE a bucket in the gas turbine (gasoline and bioethanol apart give 364,800) "
+                "and 512,000 KE in the advanced engine.",
+                "Hydrotreating pays best with the electrolytic cell's spare hydrogen. Its hydrogen sulfide goes to the "
+                "chemical reactor: 200 mB make a sulfur dust, so oil becomes a source of sulfur for the acids."]},
+            machine_page("heat_recovery_unit"),
             {"title": "Asphalt", "icon": f"{MOD}:asphalt", "text": [
                 "Eight gravel around an asphalt binder (heavy fuel oil boiled in the distillation tower) make eight "
                 "asphalt.",

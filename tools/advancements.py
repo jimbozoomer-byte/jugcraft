@@ -60,6 +60,11 @@ TREE = {
     "fracking_rig": ("distillation_tower", "fracking_rig", "Tight Spot", "Build a fracking rig for shale oil", "goal"),
     "diesel_generator": ("distillation_tower", "diesel_generator", "Diesel Power", "Build a diesel generator", "task"),
     "gas_turbine": ("diesel_generator", "gas_turbine", "Spool Up", "Build a gas turbine", "goal"),
+    # Batch 29: refinery upgrades.
+    "premium_fuel": ("diesel_generator", ["premium_diesel_bucket", "premium_gasoline_bucket"], "Top Shelf",
+                     "Make premium diesel or premium gasoline in the hydrotreater", "task"),
+    "heat_recovery_unit": ("gas_turbine", "heat_recovery_unit", "Waste Not",
+                           "Build a heat recovery unit to make power from a generator's exhaust", "goal"),
     "diesel_engine": ("diesel_generator", "diesel_engine", "Eight Cylinders", "Build a diesel engine", "goal"),
     "plastic": ("distillation_tower", "plastic_sheet", "Fantastic Plastic", "Press a plastic sheet", "task"),
     "rubber": ("plastic", "rubber", "Bouncing Back", "Make synthetic rubber", "task"),

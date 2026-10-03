@@ -136,6 +136,14 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	private int burn;
 	private int maxBurn;
 	/**
+	 * Batch 29. A diesel generator or gas turbine: exhaust heat (JE) it has made that no heat recovery unit has taken
+	 * yet, at most two ticks' worth. Not saved: it is only ever a tick or two old.
+	 */
+	private int exhaust;
+	/** A heat recovery unit: the remainders of its last share (hundredths of a JE) and of its last water (JE not yet boiled). */
+	private int recoveryCarry;
+	private int waterCarry;
+	/**
 	 * Arc furnace: structure complete. Wind turbine: rotor has room to turn. Water wheel: flowing water at the
 	 * wheel. Cobblestone generator: water and lava beside it.
 	 */
@@ -229,6 +237,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case ADVANCED_ENGINE -> tank == 0 ? FluidFuels.jePerMb(kind, variant.getFluid()) > 0 : variant.isOf(Fluids.WATER);
 			case GAS_TURBINE -> tank == 0 ? FluidFuels.jePerMb(kind, variant.getFluid()) > 0
 					: variant.isOf(PetroFluids.LUBRICANT.source());
+			// The heat recovery unit boils water and keeps its little turbine oiled.
+			case HEAT_RECOVERY_UNIT -> tank == 0 ? variant.isOf(Fluids.WATER) : variant.isOf(PetroFluids.LUBRICANT.source());
 			default -> FluidRecipes.usesFluid(server.getServer(), kind, tank, variant);
 		};
 	}
@@ -458,6 +468,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case GAS_TURBINE -> tickFluidGenerator(level, pos, state, MachineKind.TURBINE_OUTPUT);
 			case DIESEL_ENGINE, ADVANCED_ENGINE -> tickDieselEngine(level, pos, state);
 			case FUEL_CELL -> tickFluidGenerator(level, pos, state, MachineKind.FUEL_CELL_OUTPUT);
+			case HEAT_RECOVERY_UNIT -> tickHeatRecovery(level, pos, state);
 			default -> kind.isFluidProcessor() ? tickFluidProcessor(level, pos, state) : tickProcessor(level, pos, state);
 		};
 		if (state.getValue(MachineBlock.LIT) != active) {
@@ -1012,6 +1023,9 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				burn -= output;
 				energy.setAmount(energy.getAmount() + output);
 				running = true;
+				if (kind == MachineKind.DIESEL_GENERATOR || kind == MachineKind.GAS_TURBINE) {
+					exhaust = Math.min(exhaust + output, output * 2);
+				}
 				if (lubricant != null && level.getGameTime() % FluidFuels.LUBRICANT_TICKS == 0) {
 					lubricant.drain(1);
 				}
@@ -1023,6 +1037,72 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 		pushFromAllParts(level, pos, state);
 		return running;
+	}
+
+	/** Takes up to {@code max} JE of the exhaust heat this generator has banked (for a heat recovery unit). */
+	int takeExhaust(int max) {
+		int taken = Math.min(exhaust, Math.max(0, max));
+		exhaust -= taken;
+		return taken;
+	}
+
+	/**
+	 * The heat recovery unit (batch 29): boils water in the exhaust of every diesel generator or gas turbine it touches
+	 * and makes {@link MachineKind#RECOVERY_PERCENT}% of their output again from the steam. The heat is taken from each
+	 * generator, so two units on one generator share it, never double it. It needs water (piped in, or a spring
+	 * directly below) at 1 mB per {@link MachineKind#RECOVERY_JE_PER_WATER} JE, and 1 mB of lubricant every
+	 * {@link MachineKind#RECOVERY_LUBRICANT_TICKS} ticks it runs.
+	 */
+	private boolean tickHeatRecovery(ServerLevel level, BlockPos pos, BlockState state) {
+		FluidTank water = tanks.input(0);
+		FluidTank lubricant = tanks.input(1);
+		if (level.getFluidState(pos.below()).isSourceOfType(Fluids.WATER)
+				&& water.fits(Fluids.WATER, MachineKind.STEAM_SOURCE_REFILL)) {
+			water.fill(Fluids.WATER, MachineKind.STEAM_SOURCE_REFILL);
+			setChanged();
+		}
+		int recovered = 0;
+		long room = energy.getCapacity() - energy.getAmount();
+		if (room > 0 && water.millibuckets() > 0 && lubricant.millibuckets() > 0
+				&& sides.redstone().allows(poweredByRedstone(level, pos, state))) {
+			// The most heat worth taking: what fits in the buffer and what the water in the tank can carry away.
+			long limit = Math.min(room, (long) water.millibuckets() * MachineKind.RECOVERY_JE_PER_WATER) * 100 / MachineKind.RECOVERY_PERCENT;
+			Footprint footprint = kind.footprint();
+			Direction facing = state.getValue(MachineBlock.FACING);
+			Set<BlockPos> seen = new HashSet<>();
+			for (int part = 0; part < footprint.size() && limit > 0; part++) {
+				BlockPos partPos = footprint.partPos(pos, facing, part);
+				for (Direction side : Direction.values()) {
+					BlockPos next = partPos.relative(side);
+					MachineBlockEntity other = MachineBlock.machineAt(level, next, level.getBlockState(next));
+					if (other == null || other == this || !seen.add(other.getBlockPos())
+							|| (other.kind != MachineKind.DIESEL_GENERATOR && other.kind != MachineKind.GAS_TURBINE)) {
+						continue;
+					}
+					int heat = other.takeExhaust((int) Math.min(limit, Integer.MAX_VALUE));
+					limit -= heat;
+					recoveryCarry += heat * MachineKind.RECOVERY_PERCENT;
+				}
+			}
+			recovered = recoveryCarry / 100;
+			recoveryCarry %= 100;
+			if (recovered > 0) {
+				energy.setAmount(Math.min(energy.getCapacity(), energy.getAmount() + recovered));
+				waterCarry += recovered;
+				int boiled = Math.min(water.millibuckets(), waterCarry / MachineKind.RECOVERY_JE_PER_WATER);
+				water.drain(boiled);
+				waterCarry -= boiled * MachineKind.RECOVERY_JE_PER_WATER;
+				if (level.getGameTime() % MachineKind.RECOVERY_LUBRICANT_TICKS == 0) {
+					lubricant.drain(1);
+				}
+				setChanged();
+			}
+		}
+		maxBurn = (int) kind.maxOutput;
+		maxProgress = (int) kind.maxOutput;
+		progress = recovered;
+		pushFromAllParts(level, pos, state);
+		return recovered > 0;
 	}
 
 	/** Ticks per stroke of the pumpjack, for its screen's progress arrow. */
