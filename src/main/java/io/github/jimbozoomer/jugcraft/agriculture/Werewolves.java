@@ -7,15 +7,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -106,16 +107,24 @@ public final class Werewolves {
 		return 1;
 	}
 
-	/** The block above open earth in werewolf country at (x, z), in a loaded chunk, or null. */
+	/** The block above open woodland floor in werewolf country at (x, z), in a loaded chunk, or null. */
 	public static @Nullable BlockPos ground(ServerLevel level, int x, int z) {
 		if (!level.isLoaded(new BlockPos(x, level.getSeaLevel(), z))) {
 			return null;
 		}
 		BlockPos spot = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
-		if (!level.getBlockState(spot.below()).is(BlockTags.DIRT) || !level.getBiome(spot).is(HAUNTS)) {
+		if (!woodlandFloor(level, spot) || !level.getBiome(spot).is(HAUNTS)) {
 			return null;
 		}
 		return spot;
+	}
+
+	/**
+	 * Whether the block under {@code spot} is woodland floor: earth a tree could grow on (grass, dirt, podzol, moss and
+	 * the like), as an oak sapling judges it.
+	 */
+	public static boolean woodlandFloor(LevelReader level, BlockPos spot) {
+		return Blocks.OAK_SAPLING.defaultBlockState().canSurvive(level, spot);
 	}
 
 	public static Item wolfsbane() {
