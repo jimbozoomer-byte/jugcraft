@@ -14,6 +14,17 @@ No numbered release yet. Everything below is on `main`.
 - **Heat Recovery Unit:** set against a running diesel generator or gas turbine, it makes 30% of their power again from the exhaust, using water and a little lubricant.
 - Two advancements, handbook pages, six game tests. Record: [refinery-upgrades.md](docs/features/refinery-upgrades.md).
 
+### Unmerged: Room for the Retro Game Shop in every village (fix for #53)
+- **Every new village gets its Retro Game Shop.** Village houses are built inside their street's plot, and some villages were laid out with no plot big enough for the 9 by 8 shop (roughly one village in thirty, going by CI runs and a model of the placer). Such a village is now laid out again, up to 8 layouts; a world seed still makes the same village.
+- The village shop test now generates four rounds of the five village types (20 villages) instead of five. In the last round the shop is withheld from each village's first layout (a test-only switch), so every one of those villages must be laid out again and still get exactly one shop.
+
+### The walled town and Jugs
+- **A walled medieval town near the start of every new world**, 170–300 blocks away on the flattest dry ground: about 160 blocks across, with a stone curtain wall, 13 round towers and three gatehouses, a church with two spires, a market square with a fountain and six stalls, a bank, a town hall, and 44 half-timbered houses and shops. It is built into chunks as they load, levelled inside the wall and blended into the land outside.
+- **Townsfolk:** 32 named, player-shaped townspeople in 18 original skins. Nobody can hurt them. They include shopkeepers, guards who fight monsters in town, strollers, a priest, the mayor, and decorators who change the town's decor for the seasons, Halloween, the Harvest Feast and December.
+- **Protection:** players can't break or place blocks in the town, or use items on them; explosions, fire and pistons can't change it; hostile mobs don't spawn inside the wall. Operators in creative mode are exempt, and `town.protection=off` lifts it.
+- **Jugs**, the town's credit, kept per player by the server: the General Store buys farm and mine goods, and the Seasonal Stall, Curiosities and the Florist sell decoration and fun items. **Jug Tellers** (ATMs) in the bank send Jugs to other players. There is no profit loop between the shops.
+- Commands: `/jugcraft town`, `/jugcraft jugs`, and for operators `town place`, `town theme`, `jugs give|take`. Record: [walled-town.md](docs/features/walled-town.md).
+
 ### Unmerged: Parties finished (from #31)
 - **Party screen** on the P key: members with online lights, the leader and you marked; LEAD, KICK, DISBAND or LEAVE; invite by name; accept or decline the latest invite. Every button runs the ordinary `/party` command.
 - **Clickable [Accept] and [Decline]** on invites in chat.
