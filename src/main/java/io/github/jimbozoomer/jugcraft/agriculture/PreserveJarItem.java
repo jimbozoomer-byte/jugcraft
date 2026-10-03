@@ -89,9 +89,12 @@ public class PreserveJarItem extends Item {
 		stack.set(JugcraftAgriculture.SEALED, true);
 	}
 
-	/** Whether a jar can be sealed: full and not yet sealed (an opened jar can't be put up again). */
-	public static boolean sealable(ItemStack stack) {
-		return stack.getItem() instanceof PreserveJarItem && !sealed(stack) && servings(stack) == SERVINGS;
+	/**
+	 * Whether a jar can be sealed at game time {@code now}: full, not yet sealed and not spoiled (an opened jar can't be
+	 * put up again, and sealing a spoiled one would make it keep for ever).
+	 */
+	public static boolean sealable(ItemStack stack, long now) {
+		return stack.getItem() instanceof PreserveJarItem && !sealed(stack) && servings(stack) == SERVINGS && !spoiled(stack, now);
 	}
 
 	@Override

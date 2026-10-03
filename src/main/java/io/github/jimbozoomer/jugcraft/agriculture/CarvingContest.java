@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import java.util.ArrayList;
@@ -221,8 +222,16 @@ public final class CarvingContest {
 
 	/** Every contest kept (the latest {@link #MAX_CONTESTS}) and the prizes still owed (data/jugcraft_carving_contest.dat). */
 	public static final class Data extends SavedData {
+		/** A contest's year as a map key: a bad key is a decoding error, not an exception. */
+		private static final Codec<Integer> YEAR = Codec.STRING.comapFlatMap(text -> {
+			try {
+				return DataResult.success(Integer.parseInt(text));
+			} catch (NumberFormatException e) {
+				return DataResult.error(() -> "Not a contest year: " + text);
+			}
+		}, String::valueOf);
 		public static final Codec<Data> CODEC = RecordCodecBuilder.create(i -> i.group(
-				Codec.unboundedMap(Codec.STRING.xmap(Integer::parseInt, String::valueOf), Contest.CODEC).fieldOf("contests").forGetter(d -> d.contests),
+				Codec.unboundedMap(YEAR, Contest.CODEC).fieldOf("contests").forGetter(d -> d.contests),
 				Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.STRING.listOf()).fieldOf("prizes").forGetter(d -> d.prizes))
 				.apply(i, Data::new));
 		static final SavedDataType<Data> TYPE = new SavedDataType<>(Jugcraft.id("carving_contest"), Data::new, CODEC, null);

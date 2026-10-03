@@ -96,7 +96,7 @@ public class CanningKettleBlock extends BaseEntityBlock {
 			return InteractionResult.SUCCESS;
 		}
 		String refusal = !kettle.water() ? "no_water" : PreserveJarItem.sealed(stack) ? "already_sealed"
-				: !PreserveJarItem.sealable(stack) ? "opened" : kettle.jars().size() >= CanningKettleBlockEntity.JARS ? "full" : null;
+				: !PreserveJarItem.sealable(stack, level.getGameTime()) ? "opened" : kettle.jars().size() >= CanningKettleBlockEntity.JARS ? "full" : null;
 		if (refusal != null) {
 			player.sendOverlayMessage(Component.translatable(MESSAGES + refusal));
 			return InteractionResult.SUCCESS;

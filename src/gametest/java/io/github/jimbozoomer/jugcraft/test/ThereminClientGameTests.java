@@ -40,11 +40,11 @@ public class ThereminClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 
-			shoot(context, singleplayer, x + 3, y + 1, z - 1, 180, 20, "jugcraft_theremins");
-			shoot(context, singleplayer, x + 2, y + 1, z - 3, 180, 20, "jugcraft_theremin");
+			shoot(context, singleplayer, x + 3, y, z - 3, 180, 15, "jugcraft_theremins");
+			shoot(context, singleplayer, x + 2, y, z - 4, 180, 20, "jugcraft_theremin");
 			server.runCommand("time set midnight");
 			context.waitTicks(10);
-			shoot(context, singleplayer, x + 3, y + 1, z - 1, 180, 20, "jugcraft_theremin_night");
+			shoot(context, singleplayer, x + 3, y, z - 3, 180, 15, "jugcraft_theremin_night");
 		}
 	}
 

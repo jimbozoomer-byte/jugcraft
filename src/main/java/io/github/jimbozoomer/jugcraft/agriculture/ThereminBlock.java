@@ -32,7 +32,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The Theremin: a walnut cabinet on slender legs with a brass top, a tall copper pitch antenna at its right and a copper
+ * The Theremin: a walnut cabinet on slender legs, its lid edged in brass, a tall copper pitch antenna at its right and a copper
  * volume loop at its left, a speaker grille in front and a magic-eye tube that glows green while it plays
  * ({@link ThereminBlockEntity}). Use it with an empty hand to switch it on or off; a redstone signal plays it too. It is
  * played without touching: the nearer a player (or any creature) to the pitch antenna, the higher it sings. Comparators
