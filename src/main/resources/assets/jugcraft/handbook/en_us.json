@@ -619,50 +619,59 @@
           "text": [
             "Thin Air: Build an air separation unit.",
             "Reel Me In: Make a pneumatic grapple.",
-            "Bread from Air: Build a synthesis converter, to make ammonia from air.",
-            "Aqua Fortis: Make nitric acid.",
-            "Kroll Call: Chlorinate titanium and melt the sponge."
+            "Filtered: Make a gas mask.",
+            "Chemical Arsenal: Make a chlorine, smoke or thermite grenade or a flashbang.",
+            "Field Medic: Make a first aid kit in the chemical reactor."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:lithium_battery_bank",
+          "icon": "jugcraft:synthesis_converter",
           "text": [
+            "Bread from Air: Build a synthesis converter, to make ammonia from air.",
+            "Aqua Fortis: Make nitric acid.",
+            "Kroll Call: Chlorinate titanium and melt the sponge.",
             "Power Wall: Build a lithium battery bank.",
-            "Strong Attraction: Make a neodymium magnet.",
-            "Lossless (Almost): Build a magnet dynamo or magnet motor.",
-            "Pulling Strings: Pull a silicon boule in the arc furnace.",
-            "Etched in Light: Etch microchips in the lithography station."
+            "Strong Attraction: Make a neodymium magnet."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:processor",
+          "icon": "jugcraft:magnet_dynamo",
           "text": [
+            "Lossless (Almost): Build a magnet dynamo or magnet motor.",
+            "Pulling Strings: Pull a silicon boule in the arc furnace.",
+            "Etched in Light: Etch microchips in the lithography station.",
             "Central Processing: Assemble a processor.",
-            "Hello, World: Build a network terminal.",
-            "Under Pressure: Build a gas holder.",
-            "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter."
+            "Hello, World: Build a network terminal."
           ]
         },
         {
           "title": "Milestones (15)",
-          "icon": "jugcraft:advanced_solar_panel",
+          "icon": "jugcraft:gas_holder",
           "text": [
+            "Under Pressure: Build a gas holder.",
+            "Shut-Off Valve: Make a fluid valve.",
+            "Strained Relations: Make a fluid filter.",
             "Here Comes the Sun: Build an advanced solar panel.",
-            "Full of It: Make a tank gauge.",
-            "Concentrate: Build a solar receiver for a heliostat field.",
-            "Spool Up: Make a turbocharger for the advanced engine.",
-            "Keep It Spinning: Build a flywheel."
+            "Full of It: Make a tank gauge."
           ]
         },
         {
           "title": "Milestones (16)",
-          "icon": "jugcraft:advanced_engine",
+          "icon": "jugcraft:solar_receiver",
           "text": [
+            "Concentrate: Build a solar receiver for a heliostat field.",
+            "Spool Up: Make a turbocharger for the advanced engine.",
+            "Keep It Spinning: Build a flywheel.",
             "Four on the Floor: Build an advanced combustion engine.",
-            "King Cotton: Grow cotton.",
+            "King Cotton: Grow cotton."
+          ]
+        },
+        {
+          "title": "Milestones (17)",
+          "icon": "jugcraft:sprinkler",
+          "text": [
             "Make It Rain: Build a sprinkler.",
             "Reaping What You Sow: Build a crop harvester."
           ]
@@ -2599,6 +2608,35 @@
             "A harpoon gun on compressed nitrogen. It holds 4,000 mB; fill it by using it on the air separation unit's nitrogen or a gas holder. Each shot uses 25 mB.",
             "The hook flies up to 32 blocks on its line. In a block, it reels you in fast with no fall damage and lets go with a hop at the end, so you can climb cliffs and cross gaps. In a mob, it drags the mob to you; bosses and golems are too heavy.",
             "Use it again to let go. Party members are never hooked; other players only where PvP is on."
+          ]
+        },
+        {
+          "title": "Chemical Grenades",
+          "icon": "jugcraft:chlorine_grenade",
+          "text": [
+            "Thrown by hand or fired from the grenade launcher like the frag grenade. None of them breaks or burns a block.",
+            "Chlorine: a 3-block cloud for 10 s that hurts whatever breathes inside, through armor (not fish or the undead). Steel plate and nugget with 500 mB of chlorine in the chemical reactor.",
+            "Smoke: a 4-block screen for 15 s. Mobs lose sight of anyone inside; players inside without a mask can't see. Steel plate and sugar with ammonia in the reactor.",
+            "Thermite: a white-hot pool for 6 s that burns whatever stands in it, through armor. Thermite is an aluminum ingot and two iron dust; fill grenades like frag grenades.",
+            "Flashbang: blinds players who see it and staggers mobs (they lose their target, slowed and weakened). No damage."
+          ]
+        },
+        {
+          "title": "Gas Mask",
+          "icon": "jugcraft:gas_mask",
+          "text": [
+            "Keeps out chlorine and smoke; its tinted lenses keep out a flashbang.",
+            "The filter wears a point a second in gas or smoke (220 s in all): repair it with charcoal on an anvil.",
+            "The scuba mask and tank also keep gas out while the tank has oxygen (20 mB a second)."
+          ]
+        },
+        {
+          "title": "Medicines",
+          "icon": "jugcraft:first_aid_kit",
+          "text": [
+            "Made in the chemical reactor. First aid kit: two cotton and a soap in bioethanol. Heals four hearts, then a 10 s wait.",
+            "Antidote: two charcoal and a bottle in lye. Clears poison, wither and every other harmful effect, and keeps the good ones (milk clears both).",
+            "Stimulant: four cocoa beans and a bottle in bioethanol. Speed II and Haste II for 60 s, with hunger."
           ]
         }
       ]

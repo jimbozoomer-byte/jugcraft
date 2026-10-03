@@ -127,6 +127,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftAgriculture.SPOOKY_ROCKET, context -> new ThrownItemRenderer<>(context, 1.0F, true));
 		EntityRendererRegistry.register(JugcraftAgriculture.SKY_LANTERN, SkyLanternRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.gear.JugcraftGrapple.GRAPPLE_HOOK, GrappleHookRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.weapons.FieldChemistry.CHEMICAL_CLOUD,
+				net.minecraft.client.renderer.entity.NoopRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.RESTLESS_SPIRIT, RestlessSpiritRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FEAST_TABLE_ENTITY, FeastTableRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CANDY_KETTLE_ENTITY, CandyKettleRenderer::new);

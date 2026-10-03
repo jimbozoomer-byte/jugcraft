@@ -1334,6 +1334,8 @@ def machines():
     exosuit_art.draw_all(save, save_armor)
     import grapple
     grapple.draw_all(save)
+    import field_chemistry
+    field_chemistry.draw_all(save, save_armor)
     import plastic
     plastic.draw_all(save)
     save(conveyor_frame(0), "block", "conveyor_belt")
