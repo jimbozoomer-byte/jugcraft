@@ -302,7 +302,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 						.formatted(x - 23 + i % 5 * 2, y + 1 + i / 5, z - 9, rockets[i]));
 			}
 			server.runCommand("item replace entity @p hotbar.0 with jugcraft:rocket_launcher");
-			server.runCommand("tp @p %d %d %d 160 14".formatted(x - 15, y + 2, z + 1));
+			server.runCommand("tp @p %d %d %d 180 10".formatted(x - 18, y + 1, z - 2));
 			context.waitTicks(80);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_rocketry");
@@ -814,7 +814,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 		level.setBlock(base.offset(5, 0, 3), io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD.defaultBlockState(), 3);
 		// A zipline from the top of the wall down to an anchor near the camera.
 		BlockPos top = base.offset(10, 3, 0);
-		BlockPos low = base.offset(14, 0, 7);
+		BlockPos low = base.offset(13, 0, 4);
 		BlockState anchor = io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_ANCHOR.defaultBlockState();
 		level.setBlock(top, anchor, 3);
 		level.setBlock(low, anchor, 3);
@@ -822,13 +822,13 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 		// A powered booster rail line along the front, with a minecart on it.
 		BlockState rail = io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.BOOSTER_RAIL.defaultBlockState()
 				.setValue(net.minecraft.world.level.block.PoweredRailBlock.SHAPE, net.minecraft.world.level.block.state.properties.RailShape.EAST_WEST);
-		for (int dx = 1; dx <= 7; dx++) {
-			level.setBlock(base.offset(dx, 0, 6), rail, 3);
+		for (int dx = 1; dx <= 8; dx++) {
+			level.setBlock(base.offset(dx, 0, 5), rail, 3);
 		}
-		level.setBlock(base.offset(0, 0, 6), Blocks.REDSTONE_BLOCK.defaultBlockState(), 3);
+		level.setBlock(base.offset(0, 0, 5), Blocks.REDSTONE_BLOCK.defaultBlockState(), 3);
 		var cart = net.minecraft.world.entity.EntityTypes.MINECART.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
 		if (cart != null) {
-			BlockPos at = base.offset(4, 0, 6);
+			BlockPos at = base.offset(5, 0, 5);
 			cart.snapTo(at.getX() + 0.5, at.getY() + 0.1, at.getZ() + 0.5, 90, 0);
 			level.addFreshEntity(cart);
 		}
