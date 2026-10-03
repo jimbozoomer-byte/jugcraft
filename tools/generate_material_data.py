@@ -28,6 +28,7 @@ GENERATED_DIRS = [
     DATA / MOD / "loot_table", DATA / MOD / "recipe", DATA / MOD / "worldgen",
     DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD, PACKS,
     DATA / MOD / "villager_trade", DATA / MOD / "trade_set", DATA / MOD / "tags" / "villager_trade",
+    RES / "assets" / "minecraft",
 ]
 
 CABLE_ROTATION = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {"y": 270},
@@ -172,6 +173,9 @@ def assets():
     alpine_data.lang(lang)
     import biomes_data
     biomes_data.lang(lang)
+    # Last: it adds diagonal parts to the fence blockstates written above.
+    import diagonal_connections
+    diagonal_connections.write_all(write, ASSETS, RES / "assets" / "minecraft")
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
 
 
@@ -1317,6 +1321,8 @@ def tags():
     # Seasonal snow counts as snow (grass under it turns snowy) and is dug with a shovel.
     tags.add("block", "minecraft:snow", rid(seasons.SNOW_BLOCK))
     tags.add("block", "minecraft:mineable/shovel", rid(seasons.SNOW_BLOCK))
+    import diagonal_connections
+    diagonal_connections.tags(tags)
     tags.write()
 
 

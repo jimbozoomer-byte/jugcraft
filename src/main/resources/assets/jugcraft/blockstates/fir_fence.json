@@ -43,6 +43,45 @@
       "when": {
         "west": "true"
       }
+    },
+    {
+      "apply": {
+        "model": "jugcraft:block/diagonal/fir_fence",
+        "uvlock": true
+      },
+      "when": {
+        "north_east": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "jugcraft:block/diagonal/fir_fence",
+        "uvlock": true,
+        "y": 90
+      },
+      "when": {
+        "south_east": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "jugcraft:block/diagonal/fir_fence",
+        "uvlock": true,
+        "y": 180
+      },
+      "when": {
+        "south_west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "jugcraft:block/diagonal/fir_fence",
+        "uvlock": true,
+        "y": 270
+      },
+      "when": {
+        "north_west": "true"
+      }
     }
   ]
 }
