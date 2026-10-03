@@ -242,5 +242,8 @@ def feature_of(entry_id):
     import gas_storage
     if entry_id in gas_storage.items():
         return "machines"
+    import control_electronics
+    if entry_id in control_electronics.blocks():
+        return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

@@ -156,6 +156,8 @@ def assets():
     electroplating.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import gas_storage
     gas_storage.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import control_electronics
+    control_electronics.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
@@ -1224,6 +1226,9 @@ def tags():
         tags.add("item", f"{MOD}:fermentable", crop)
     import plastic
     for block in plastic.blocks():
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import control_electronics
+    for block in control_electronics.blocks():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     import construction
     for block in construction.blocks():

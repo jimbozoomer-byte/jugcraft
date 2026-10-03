@@ -27,6 +27,7 @@ import construction
 import hydroponics
 import electroplating
 import gas_storage
+import control_electronics
 import gear
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
@@ -148,7 +149,7 @@ def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS
-                  + construction.blocks()):
+                  + construction.blocks() + control_electronics.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -169,7 +170,7 @@ def check_assets(registered):
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()
-                        + construction.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + construction.blocks() + control_electronics.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -306,7 +307,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks():
         return {}
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
@@ -492,7 +493,7 @@ def check_tags():
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -611,6 +612,24 @@ def check_gas_storage():
     for const, value in (("CHILLER_AMMONIA_TANK", gas_storage.AMMONIA_TANK), ("CHILLER_WATER_TANK", gas_storage.WATER_TANK)):
         if f"int {const} = {value:_};" not in kinds:
             err(f"MachineKind.{const} differs from tools/gas_storage.py ({value})")
+
+
+def check_control_electronics():
+    """control/ against tools/control_electronics.py: the numbers and the channel colours."""
+    control = JAVA_ROOT / "control"
+    for path, const, value in (("SensorBlock.java", "INTERVAL", control_electronics.SENSOR_INTERVAL),
+                               ("LogicControllerBlockEntity.java", "INTERVAL", control_electronics.CONTROLLER_INTERVAL),
+                               ("LogicControllerBlockEntity.java", "RULES", control_electronics.RULES),
+                               ("LogicControllerBlockEntity.java", "STEP", control_electronics.THRESHOLD_STEP),
+                               ("ControlNetwork.java", "MAX_CABLES", control_electronics.MAX_CABLES)):
+        java = (control / path).read_text(encoding="utf-8")
+        if f"int {const} = {value:_};" not in java and f"int {const} = {value};" not in java:
+            err(f"{path} {const} differs from tools/control_electronics.py ({value})")
+    screen = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+              / "LogicControllerScreen.java").read_text(encoding="utf-8")
+    for rgb in control_electronics.CHANNEL_COLORS.values():
+        if "0x%02X%02X%02X" % rgb not in screen:
+            err(f"LogicControllerScreen.COLORS lacks channel colour {rgb}")
 
 
 def check_construction():
@@ -3473,7 +3492,7 @@ def main():
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_petro()
@@ -3493,6 +3512,7 @@ def main():
     check_hydroponics()
     check_electroplating()
     check_gas_storage()
+    check_control_electronics()
     check_plastic()
     check_seasons()
     check_alpine()
