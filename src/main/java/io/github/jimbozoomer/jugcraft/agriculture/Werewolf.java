@@ -156,18 +156,28 @@ public class Werewolf extends Monster {
 			heal(1.0F);
 		}
 		if (tickCount % WARD_CHECK_TICKS == 0) {
-			LivingEntity target = getTarget();
-			if (target != null && Werewolves.warded(level, target)) {
-				shun(target);
-				if (target instanceof ServerPlayer player) {
-					TrickOrTreat.award(player, "wolfsbane_ward");
-				}
-			}
+			checkWard(level);
 		}
 		if (getTarget() == null && --nextHowl <= 0) {
 			howl(level);
 			nextHowl = HOWL_MIN + random.nextInt(HOWL_MAX - HOWL_MIN + 1);
 		}
+	}
+
+	/**
+	 * If wolfsbane wards whoever it hunts, it drops them and leaves them alone (earning them Not Tonight). Returns
+	 * whether it did.
+	 */
+	public boolean checkWard(ServerLevel level) {
+		LivingEntity target = getTarget();
+		if (target == null || !Werewolves.warded(level, target)) {
+			return false;
+		}
+		shun(target);
+		if (target instanceof ServerPlayer player) {
+			TrickOrTreat.award(player, "wolfsbane_ward");
+		}
+		return true;
 	}
 
 	/** Leaves {@code target} alone for {@value #SHUN_TICKS} ticks and slinks away from them. */

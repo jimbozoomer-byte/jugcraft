@@ -125,7 +125,7 @@ public class WerewolfGameTests {
 	 * A player with wolfsbane in hand is warded, as is one standing near planted wolfsbane, and not one further off; a
 	 * werewolf hunting a warded player drops them and leaves them alone, earning them Not Tonight.
 	 */
-	@GameTest(maxTicks = 60)
+	@GameTest
 	public void wolfsbaneWardsWerewolvesOff(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		floor(helper);
@@ -133,20 +133,21 @@ public class WerewolfGameTests {
 		helper.assertTrue(Werewolves.warded(level, holder), "Wolfsbane in hand wards");
 		ServerPlayer bare = player(helper, new BlockPos(7, 2, 7), ItemStack.EMPTY);
 		helper.assertTrue(!Werewolves.warded(level, bare), "An empty hand with no wolfsbane near doesn't");
-		helper.setBlock(new BlockPos(1, 2, 7), JugcraftAgriculture.block(Werewolves.WOLFSBANE));
-		helper.assertTrue(Werewolves.wardNear(level, helper.absolutePos(new BlockPos(5, 2, 7))), "Planted wolfsbane wards four blocks off");
-		helper.assertTrue(!Werewolves.wardNear(level, helper.absolutePos(new BlockPos(1, 2, 7)).east(Werewolves.WARD_REACH + 1)),
+		helper.setBlock(new BlockPos(0, 2, 7), JugcraftAgriculture.block(Werewolves.WOLFSBANE));
+		helper.assertTrue(Werewolves.wardNear(level, helper.absolutePos(new BlockPos(5, 2, 7))), "Planted wolfsbane wards five blocks off");
+		helper.assertTrue(!Werewolves.wardNear(level, helper.absolutePos(new BlockPos(0, 2, 7)).east(Werewolves.WARD_REACH + 1)),
 				"but not beyond its reach");
 
 		// Without AI, so only its own ward check (not a target goal) changes its target.
 		Werewolf werewolf = werewolf(helper, new BlockPos(3, 2, 3));
+		werewolf.setTarget(bare);
+		helper.assertTrue(!werewolf.checkWard(level) && werewolf.getTarget() == bare, "It keeps hunting someone unwarded");
 		werewolf.setTarget(holder);
-		helper.runAfterDelay(Werewolf.WARD_CHECK_TICKS + 2, () -> {
-			helper.assertTrue(werewolf.isRemoved() || (werewolf.getTarget() != holder && werewolf.shuns(holder) && !werewolf.canAttack(holder)),
-					"It drops a warded target and leaves them alone");
-			helper.assertTrue(werewolf.isRemoved() || earned(holder, "wolfsbane_ward"), "Not Tonight is earned");
-			helper.succeed();
-		});
+		helper.assertTrue(werewolf.checkWard(level), "Its ward check finds wolfsbane on its target");
+		helper.assertTrue(werewolf.getTarget() == null && werewolf.shuns(holder) && !werewolf.canAttack(holder),
+				"It drops a warded target and leaves them alone");
+		helper.assertTrue(earned(holder, "wolfsbane_ward"), "Not Tonight is earned");
+		helper.succeed();
 	}
 
 	/** No more werewolves come near a player than the cap allows. */
