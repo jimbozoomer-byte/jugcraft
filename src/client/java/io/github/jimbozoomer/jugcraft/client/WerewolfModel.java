@@ -99,8 +99,8 @@ public class WerewolfModel extends EntityModel<WerewolfRenderer.State> {
 		// The jaw, hinged under the back of the muzzle and hanging open, its lower fangs pointing up.
 		head.addOrReplaceChild("jaw", CubeListBuilder.create()
 				.texOffs(98, 8).addBox(-2.5F, 0.0F, -6.5F, 5.0F, 2.0F, 7.0F)
-				.texOffs(118, 0).addBox(-2.3F, -1.5F, -6.3F, 1.0F, 2.0F, 1.0F)
-				.texOffs(118, 0).addBox(1.3F, -1.5F, -6.3F, 1.0F, 2.0F, 1.0F),
+				.texOffs(122, 4).addBox(-2.3F, -1.5F, -6.3F, 1.0F, 2.0F, 1.0F)
+				.texOffs(122, 4).addBox(1.3F, -1.5F, -6.3F, 1.0F, 2.0F, 1.0F),
 				PartPose.offsetAndRotation(0.0F, -2.0F, -7.5F, 0.35F, 0.0F, 0.0F));
 		// Tall pointed ears, splayed a little.
 		for (int side = -1; side <= 1; side += 2) {

@@ -23,8 +23,8 @@ PARTS = [
         (118, 0, 1.7, -2, -13.8, 1, 2, 1, False)]},
     {"name": "jaw", "parent": "head", "pivot": (0, -2, -7.5), "rot": (0.35, 0, 0), "boxes": [
         (98, 8, -2.5, 0, -6.5, 5, 2, 7, False),
-        (118, 0, -2.3, -1.5, -6.3, 1, 2, 1, False),   # lower fangs
-        (118, 0, 1.3, -1.5, -6.3, 1, 2, 1, False)]},
+        (122, 4, -2.3, -1.5, -6.3, 1, 2, 1, False),   # lower fangs (their own patch, as they point up)
+        (122, 4, 1.3, -1.5, -6.3, 1, 2, 1, False)]},
     {"name": "right_ear", "parent": "head", "pivot": (-2.8, -7.5, -2), "rot": (-0.1, 0, -0.2), "boxes": [
         (98, 0, -1, -5, -1, 2, 5, 2, False),
         (118, 3, -0.5, -6.5, -0.5, 1, 2, 1, False)]},
@@ -58,6 +58,9 @@ PARTS += [
 ]
 
 TEXTURE_SIZE = (128, 128)
+# The texture is painted this many times finer than TEXTURE_SIZE (512 by 512): the model samples it by its declared size,
+# so each model pixel shows a patch of painted fur (docs/ART_DIRECTION.md, "High resolution").
+TEXTURE_SCALE = 4
 
 
 def boxes():
