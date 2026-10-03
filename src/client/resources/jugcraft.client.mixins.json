@@ -4,6 +4,10 @@
   "package": "io.github.jimbozoomer.jugcraft.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "ArmsFirstPersonMixin",
+    "ArmsHumanoidModelMixin",
+    "ArmsItemInHandLayerMixin",
+    "ArmsRenderStateMixin",
     "ClientLevelSeasonMixin",
     "DiagonalParticlesMixin"
   ],

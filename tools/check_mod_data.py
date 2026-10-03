@@ -825,6 +825,53 @@ def check_arms():
             err(f"items/{item}.json has no swap_animation_scale")
 
 
+def check_arms_motion():
+    """client/arms/ArmsMotion.java against tools/arms_motion.py and tools/arms_moves.py (batch 43): every kind of arm has
+    its motion file as the generator writes it, with whole poses, keys in time order from 0 to 1 and tensions from 0 to
+    1; the Java player reads the same kinds and bones; and its mixins are registered."""
+    import arms_motion
+    import arms_moves
+    client = ROOT / "src" / "client"
+    java = (client / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "arms" / "ArmsMotion.java").read_text(encoding="utf-8")
+    kinds = re.findall(r'"([a-z_]+)"', re.search(r"KINDS = List\.of\(([^)]*)\)", java).group(1))
+    if kinds != list(arms.KINDS):
+        err(f"ArmsMotion.KINDS {kinds} != tools/arms.py {list(arms.KINDS)}")
+    if list(arms_moves.MOVES) != list(arms.KINDS):
+        err(f"tools/arms_moves.py MOVES {list(arms_moves.MOVES)} != tools/arms.py {list(arms.KINDS)}")
+    bones = re.findall(r'"([a-z_]+)"', re.search(r"BONE_NAMES = List\.of\(([^)]*)\)", java).group(1))
+    if bones != arms_motion.BONES:
+        err(f"ArmsMotion.BONE_NAMES {bones} != tools/arms_motion.py {arms_motion.BONES}")
+    size = len(arms_motion.BONES) * len(arms_motion.CHANNELS)
+
+    def track(label, times, tension, keys, width):
+        if len(times) < 2 or times[0] != 0 or times[-1] != 1 or any(b <= a for a, b in zip(times, times[1:])):
+            err(f"{label}: key times {times} do not rise from 0 to 1")
+        if len(tension) != len(times) or any(not 0 <= k <= 1 for k in tension):
+            err(f"{label}: tensions {tension} are not one per key, from 0 to 1")
+        if len(keys) != len(times) or any(len(key) != width for key in keys):
+            err(f"{label}: keys are not {len(times)} poses of {width} numbers")
+    for kind in arms.KINDS:
+        path = ASSETS / "arms_motion" / f"{kind}.json"
+        motion = load(path)
+        if motion is None:
+            err(f"assets/{MOD}/arms_motion/{kind}.json is missing")
+            continue
+        if kind in arms_moves.MOVES and motion != json.loads(json.dumps(arms_motion.kind_json(arms_moves.MOVES[kind]))):
+            err(f"arms_motion/{kind}.json is not what tools/arms_motion.py writes (run tools/generate_material_data.py)")
+        if len(motion["hold"]) != size or (motion["use"] is not None and len(motion["use"]) != size) or len(motion["fp_hold"]) != 6:
+            err(f"arms_motion/{kind}.json: a hold or use pose is the wrong size")
+        if not motion["attacks"]:
+            err(f"arms_motion/{kind}.json has no attacks")
+        for attack in motion["attacks"]:
+            label = f"arms_motion/{kind}.json {attack['name']}"
+            track(label, attack["times"], attack["tension"], attack["keys"], size)
+            track(label + " (first person)", attack["fp_times"], attack["fp_tension"], attack["fp_keys"], 6)
+    mixins = load(client / "resources" / f"{MOD}.client.mixins.json") or {}
+    for mixin in ("ArmsRenderStateMixin", "ArmsHumanoidModelMixin", "ArmsItemInHandLayerMixin", "ArmsFirstPersonMixin"):
+        if mixin not in mixins.get("client", []):
+            err(f"{MOD}.client.mixins.json does not list {mixin}")
+
+
 def check_end_shares():
     """End biomes give shares, which tools/end_noise.py turns into Fabric weights: highlands shares leave vanilla's End
     Highlands some, and one barrens biome at most, keyed by vanilla's End Highlands (the only case the weight maths
@@ -4213,6 +4260,7 @@ def main():
     check_deposits()
     check_gear()
     check_arms()
+    check_arms_motion()
     check_exosuit()
     check_grapple()
     check_field_chemistry()
