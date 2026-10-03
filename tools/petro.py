@@ -463,6 +463,11 @@ def _leaching():
 
 FLUID_RECIPES["chemical_reactor"] += _leaching()
 
+# Gas storage (batch 35, tools/gas_storage.py): the ammonia chiller, ammonia first and water second.
+import gas_storage as _gas_storage  # noqa: E402
+FLUID_MACHINES["ammonia_chiller"] = _gas_storage.FLUID_MACHINE
+FLUID_RECIPES["ammonia_chiller"] = _gas_storage.FLUID_RECIPES
+
 # Crops that ferment into bioethanol (data/jugcraft/tags/item/fermentable.json).
 FERMENTABLE = ["minecraft:wheat", "minecraft:sugar_cane", "minecraft:potato", "minecraft:carrot", "minecraft:beetroot",
                "minecraft:sweet_berries", "minecraft:melon_slice", "minecraft:apple"]

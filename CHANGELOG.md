@@ -16,6 +16,11 @@ No numbered release yet. Everything below is on `main`.
 - Shapes are worked out once for each set of straight sides, not once per state, and blocks with alike shapes share their diagonal shapes. This applies to fences, panes and bars too.
 - Five more server game tests and three wall screenshots. Record: [diagonal-connections.md](docs/features/diagonal-connections.md).
 
+### Unmerged: Gas storage, batch 35
+- **Gas Cylinder:** carries 8 buckets of one gas. Use it on a tank, pipe or machine to fill it, sneak to empty it; used in the air it tops up a scuba tank or grapple in the other hand. Machines and the fluid filter treat it like a bucket.
+- **Ammonia Chiller:** freezes a bucket of water into ice with 5 mB of ammonia, anywhere (even the Nether), and presses four ice into packed ice and four packed ice into blue ice.
+- Advancement, handbook pages, game tests. Record: [gas-storage.md](docs/features/gas-storage.md).
+
 ### Unmerged: Electroplating, batch 34
 - **Electroplating Bath:** plates a tool, weapon or piece of armor with an ingot in sulfuric acid, repairing it fully without experience. **Nickel** makes it half as durable again, **silver** gives a sword or axe Smite III, **gold** makes armor count as gold for piglins. Plating again with the same metal repairs it again.
 - Advancement, handbook page, tooltips, game test. Record: [electroplating.md](docs/features/electroplating.md).

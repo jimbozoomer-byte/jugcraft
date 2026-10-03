@@ -155,6 +155,8 @@ def assets():
     construction.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import electroplating
     electroplating.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import gas_storage
+    gas_storage.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
