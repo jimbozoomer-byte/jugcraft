@@ -1088,6 +1088,12 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 ### The fall fair midway
 
+| **The midway:** a prize booth under a striped awning, two High Strikers (one rung, its tower lit) and Ring Toss | **The prizes** on the booth's counter |
+| --- | --- |
+| ![The fall fair midway](../images/ingame_midway.jpg) | ![Plush prizes](../images/ingame_midway_prizes.jpg) |
+| **Ring Toss:** crates of nine bottles, one up on a hay bale | **At dusk** |
+| ![Ring Toss](../images/ingame_ring_toss.jpg) | ![The midway at dusk](../images/ingame_midway_dusk.jpg) |
+
 - **The High Striker** stands five blocks tall: a red-and-white tower with lamps up its front and a bell on top. Hit its pad with a **Carnival Mallet** and the puck climbs, lighting the lamps, as far as you hit it. A fully charged swing sometimes rings the bell; jump and hit it on the way down and it usually does. Ring it and win a prize.
 - **Ring Toss:** toss **Toss Rings** at a crate of nine bottles from three blocks off or more. Land one over a bottle's neck to win a prize; misses can be picked up and thrown again.
 - **Prizes** are plushes: a pumpkin, a ghost, a bat, a black cat, a squirrel, a rare werewolf, and the very rare Jumbo Pumpkin Plush. Squeeze one and it squeaks. Details: [even more fall additions](../features/even-more-fall-additions.md#the-fall-fair-midway).

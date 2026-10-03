@@ -498,7 +498,16 @@ The client test's screenshots (run 37156381277), in [the guide](../branches/AGRI
 Not run: a Pumpkling following its owner about in play (its path-finding), and crows turning from its crops (the guard check is tested directly); a two-client dedicated-server playtest.
 
 ### Midway verification
-Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1084 IDs and now compares `tools/midway.py` with Java; `python3 scripts/check_repository.py` passes.
+
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-26-midway` stacked on the Pumpkling:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `tools/midway.py` with Java: the striker's lamps, steps and strengths, the necks and ringer distances, the plushes and prize weights; and checks the blocks, items, entity, tags, loot, advancements and textures) | Pass, 1084 IDs |
+| `./gradlew build` on `8c39c033` (Build workflow run [37157678923](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37157678923)) | Pass |
+| Game tests on the headless server, same run: 638 in total, 8 of them new here (`MidwayGameTests`) | **All 638 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `8c39c033` (all three client shards) |
 
 The 8 new game tests (`MidwayGameTests`):
 1. placed from its item, the striker stands five blocks tall and its base keeps the puck; breaking its fourth block breaks it all and drops it once;
@@ -511,6 +520,13 @@ The 8 new game tests (`MidwayGameTests`):
 8. the recipes, advancements and prize table load.
 
 `MidwayClientGameTests` takes screenshots: two High Strikers (one half way, one rung), a prize booth under a striped awning, the plushes, and Ring Toss with a ringer; the prizes up close; Ring Toss; and at dusk.
+
+Found by CI and fixed before this record:
+- 26.3 names push reactions `IMMOVEABLE` and `POPPED` (not `BLOCK` and `DESTROY`), and `SoundEvents.ANVIL_LAND` didn't compile as a fallback sound. The striker and plushes use the new names; the strike and bell sounds fall back on `WOOD_HIT` and `BELL_BLOCK`, which the mod already uses.
+- The client test's awning used a wool constant 26.3 doesn't have; it looks the wool up by ID.
+- The first screenshots framed the midway too far off to see the prizes; the cameras moved closer (`8c39c033`).
+
+The client test's screenshots (run 37157678923), in [the guide](../branches/AGRICULTURE.md#the-fall-fair-midway): the prize booth under its striped awning with the plushes on its counter, two High Strikers and Ring Toss on a plank floor; the prizes up close; Ring Toss's crates of bottles; and the midway at dusk. Its log has no missing model or texture.
 
 Not run: swinging a mallet and tossing rings by hand, which no automated test can do; a two-client dedicated-server playtest.
 
