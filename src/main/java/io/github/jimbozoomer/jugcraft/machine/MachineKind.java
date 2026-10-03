@@ -109,6 +109,9 @@ public enum MachineKind implements StringRepresentable {
 	// Electroplating (batch 34): plates a tool, weapon or piece of armor with nickel, silver or gold in sulfuric acid,
 	// repairing it (see Electroplating). The item, the metal ingot and the output slot.
 	ELECTROPLATING_BATH("electroplating_bath", 20_000, 256, 0, 32, 3),
+	// Gas storage (batch 35): an ammonia refrigeration unit freezing water into ice and packing ice down to blue ice.
+	// Ammonia in the first tank, water in the second; one input slot and one output.
+	AMMONIA_CHILLER("ammonia_chiller", 20_000, 256, 0, 24, 2),
 	// Chemistry (batch 17, the electric look): a 3x3x2 vanadium redox flow battery. Its charge is capped by the
 	// electrolyte in its tanks (FLOW_BATTERY_JE_PER_MB a millibucket); it gives power out of its front.
 	FLOW_BATTERY("flow_battery", 64_000_000, 8_192, 8_192, 0, 0);
@@ -287,6 +290,9 @@ public enum MachineKind implements StringRepresentable {
 	public static final int REACTOR_TANK = 8_000;
 	/** Lithography station: its sulfuric acid (etchant) tank. */
 	public static final int LITHOGRAPHY_TANK = 4_000;
+	/** The ammonia chiller's tanks (mB): ammonia refrigerant, and water to freeze. */
+	public static final int CHILLER_AMMONIA_TANK = 4_000;
+	public static final int CHILLER_WATER_TANK = 8_000;
 	/** Ticks the electric furnace needs per item (the vanilla furnace needs 200). */
 	public static final int ELECTRIC_FURNACE_TICKS = 100;
 
@@ -360,6 +366,7 @@ public enum MachineKind implements StringRepresentable {
 			case HYDROTREATER -> "hydrotreating";
 			case CHEMICAL_REACTOR -> "chemical_reaction";
 			case LITHOGRAPHY_STATION -> "lithography";
+			case AMMONIA_CHILLER -> "chilling";
 			default -> null;
 		};
 	}
@@ -399,6 +406,7 @@ public enum MachineKind implements StringRepresentable {
 					List.of(CONVERTER_TANK), 0, 0);
 			case CHEMICAL_REACTOR -> new FluidMachineSpec(List.of(CHEM_REACTOR_TANK), List.of(CHEM_REACTOR_TANK), 2, 1);
 			case LITHOGRAPHY_STATION -> new FluidMachineSpec(List.of(LITHOGRAPHY_TANK), List.of(), 2, 1);
+			case AMMONIA_CHILLER -> new FluidMachineSpec(List.of(CHILLER_AMMONIA_TANK, CHILLER_WATER_TANK), List.of(), 1, 1);
 			case FUEL_CELL -> new FluidMachineSpec(List.of(FUEL_CELL_TANK), List.of(), 0, 0);
 			case HYDROTREATER -> new FluidMachineSpec(List.of(HYDROTREATER_TANK, HYDROTREATER_TANK),
 					List.of(HYDROTREATER_TANK, HYDROTREATER_TANK), 0, 0);

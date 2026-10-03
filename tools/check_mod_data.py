@@ -26,6 +26,7 @@ import field_chemistry
 import construction
 import hydroponics
 import electroplating
+import gas_storage
 import gear
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
@@ -125,6 +126,7 @@ def _hi_res(name):
     import blueprints
     import construction_art
     return (name in tower_art.TEXTURES or name in blueprints.TABLE_TEXTURES or name in construction_art.ITEMS
+            or name in gas_storage.HD_ITEMS
             or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_")))
 
 
@@ -304,7 +306,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items():
         return {}
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
@@ -490,7 +492,7 @@ def check_tags():
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -598,6 +600,17 @@ def check_electroplating():
             err(f"Electroplating.java does not plate with {metal} ({tag})")
         if f"tooltip.jugcraft.plating.{metal}" not in lang:
             err(f"Missing tooltip for {metal} plating")
+
+
+def check_gas_storage():
+    """fluid/GasCylinderItem.java and MachineKind's ammonia chiller against tools/gas_storage.py."""
+    java = (JAVA_ROOT / "fluid" / "GasCylinderItem.java").read_text(encoding="utf-8")
+    if f"int CAPACITY = {gas_storage.CYLINDER_CAPACITY:_};" not in java:
+        err(f"GasCylinderItem.CAPACITY differs from tools/gas_storage.py ({gas_storage.CYLINDER_CAPACITY})")
+    kinds = MACHINE_JAVA.read_text(encoding="utf-8")
+    for const, value in (("CHILLER_AMMONIA_TANK", gas_storage.AMMONIA_TANK), ("CHILLER_WATER_TANK", gas_storage.WATER_TANK)):
+        if f"int {const} = {value:_};" not in kinds:
+            err(f"MachineKind.{const} differs from tools/gas_storage.py ({value})")
 
 
 def check_construction():
@@ -3460,7 +3473,7 @@ def main():
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_petro()
@@ -3479,6 +3492,7 @@ def main():
     check_construction()
     check_hydroponics()
     check_electroplating()
+    check_gas_storage()
     check_plastic()
     check_seasons()
     check_alpine()

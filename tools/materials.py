@@ -239,5 +239,8 @@ def feature_of(entry_id):
     import construction
     if entry_id in construction.items() or entry_id in construction.blocks():
         return FEATURE
+    import gas_storage
+    if entry_id in gas_storage.items():
+        return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

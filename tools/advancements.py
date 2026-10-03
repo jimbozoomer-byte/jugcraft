@@ -131,6 +131,7 @@ TREE = {
     "sprinkler": ("cotton", "sprinkler", "Make It Rain", "Build a sprinkler", "task"),
     "electroplating_bath": ("electrolytic_cell", "electroplating_bath", "Silver Lining", "Build an electroplating bath",
                             "task"),
+    "ammonia_chiller": ("synthesis_converter", "ammonia_chiller", "Ice Cold", "Build an ammonia chiller", "task"),
     "hydroponic_bay": ("crop_harvester", "hydroponic_bay", "Soil Optional", "Build a hydroponic bay", "task"),
     "crop_harvester": ("steel", "crop_harvester", "Reaping What You Sow", "Build a crop harvester", "goal"),
 }
