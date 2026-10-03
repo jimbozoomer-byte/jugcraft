@@ -95,7 +95,7 @@ TREE = {
                          "Chemical Arsenal", "Make a chlorine, smoke or thermite grenade or a flashbang", "task"),
     # Batch 32: construction chemistry.
     "foam_sprayer": ("synthesis_converter", "foam_sprayer", "Expanding Foam", "Make a foam sprayer", "task"),
-    "reinforced_concrete": ("steel", "reinforced_concrete", "Bunker Down", "Cast reinforced concrete, as blast-proof as "
+    "blastproof_concrete": ("steel", "blastproof_concrete", "Bunker Down", "Cast blast-proof concrete, as blast-proof as "
                             "obsidian", "task"),
     "first_aid_kit": ("air_separation_unit", "first_aid_kit", "Field Medic", "Make a first aid kit in the chemical reactor",
                       "task"),

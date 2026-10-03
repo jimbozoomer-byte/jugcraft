@@ -455,7 +455,7 @@ Empty tools mine like a bare hand and get no drops.
 | Cement Mix / Cement | Smelt mix into cement | calcite or bone block, clay ball, sand (makes 4 mix) |
 | Concrete (+ slab, stairs) | Hardness 2.5, blast resistance 9 | 4 cement, 4 gravel, water bucket (makes 8) |
 | Rebar | Steel reinforcing bar | 3 steel ingots (makes 6) |
-| Reinforced Concrete (+ slab, stairs) | Hardness 15, blast resistance 1200 (obsidian) | 8 concrete, rebar (makes 8) |
+| Blast-Proof Concrete (+ slab, stairs) | Hardness 15, blast resistance 1200 (obsidian) | 8 concrete, rebar (makes 8) |
 
 **Code:** `chemistry/` (`ConstructionChemistry`, `FoamSprayerItem`, `CementItem`); data and art from `tools/construction.py` ([feature record](features/construction-chemistry.md)).
 

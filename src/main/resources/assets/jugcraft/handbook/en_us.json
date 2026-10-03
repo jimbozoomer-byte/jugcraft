@@ -626,9 +626,9 @@
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:reinforced_concrete",
+          "icon": "jugcraft:blastproof_concrete",
           "text": [
-            "Bunker Down: Cast reinforced concrete, as blast-proof as obsidian.",
+            "Bunker Down: Cast blast-proof concrete, as blast-proof as obsidian.",
             "Field Medic: Make a first aid kit in the chemical reactor.",
             "Bread from Air: Build a synthesis converter, to make ammonia from air.",
             "Aqua Fortis: Make nitric acid.",
@@ -2643,11 +2643,11 @@
         },
         {
           "title": "Concrete",
-          "icon": "jugcraft:reinforced_concrete",
+          "icon": "jugcraft:blastproof_concrete",
           "text": [
             "Cement mix: calcite (or a bone block), clay and sand; smelt it into cement.",
             "Four cement, four gravel and a water bucket make eight concrete, as hard as stone and tougher.",
-            "Eight concrete round a rebar make eight reinforced concrete: as blast-proof as obsidian, mined with a diamond or steel pickaxe. Both come as slabs and stairs."
+            "Eight concrete round a rebar make eight blast-proof concrete: as blast-proof as obsidian, mined with a diamond or steel pickaxe. Both come as slabs and stairs."
           ]
         },
         {

@@ -1,8 +1,8 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:reinforced_concrete",
-    "jugcraft:reinforced_concrete_slab",
-    "jugcraft:reinforced_concrete_stairs"
+    "jugcraft:blastproof_concrete",
+    "jugcraft:blastproof_concrete_slab",
+    "jugcraft:blastproof_concrete_stairs"
   ]
 }

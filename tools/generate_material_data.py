@@ -1225,7 +1225,7 @@ def tags():
         if block.startswith("concrete"):
             tags.add("block", "minecraft:mineable/pickaxe", rid(block))
             tags.add("block", "minecraft:needs_stone_tool", rid(block))
-        elif block.startswith("reinforced_concrete"):
+        elif block.startswith("blastproof_concrete"):
             tags.add("block", "minecraft:mineable/pickaxe", rid(block))
             tags.add("block", "minecraft:needs_diamond_tool", rid(block))
     for metal, info in METALS.items():

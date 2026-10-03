@@ -237,7 +237,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_plastic_blocks");
 			// Batch 32: a trench bridged with sprayed construction foam, a foam blob set against a wall, and concrete and
-			// reinforced concrete with their slabs and stairs; the foam sprayer in hand.
+			// blast-proof concrete with their slabs and stairs; the foam sprayer in hand.
 			server.runCommand("item replace entity @p hotbar.0 with jugcraft:foam_sprayer");
 			server.runOnServer(minecraft -> {
 				ServerLevel level = minecraft.overworld();
@@ -254,13 +254,13 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 				for (BlockPos pos : FoamSprayerItem.fill(level, player, base.offset(3, -1, 0), ConstructionChemistry.SPRAY_BLOCKS)) {
 					level.setBlockAndUpdate(pos, ConstructionChemistry.CONSTRUCTION_FOAM.defaultBlockState());
 				}
-				String[] row = {"concrete", "concrete_slab", "concrete_stairs", "reinforced_concrete", "reinforced_concrete_slab",
-						"reinforced_concrete_stairs"};
+				String[] row = {"concrete", "concrete_slab", "concrete_stairs", "blastproof_concrete", "blastproof_concrete_slab",
+						"blastproof_concrete_stairs"};
 				for (int i = 0; i < row.length; i++) {
 					Block block = BuiltInRegistries.BLOCK.getValue(Jugcraft.id(row[i]));
 					level.setBlockAndUpdate(base.offset(6 + i, 0, -1), block.defaultBlockState());
 				}
-				level.setBlockAndUpdate(base.offset(6, 1, -1), ConstructionChemistry.REINFORCED_CONCRETE.defaultBlockState());
+				level.setBlockAndUpdate(base.offset(6, 1, -1), ConstructionChemistry.BLASTPROOF_CONCRETE.defaultBlockState());
 				level.setBlockAndUpdate(base.offset(9, 1, -1), ConstructionChemistry.CONSTRUCTION_FOAM.defaultBlockState());
 			});
 			server.runCommand("tp @p %d %d %d 180 35".formatted(x - 18, y, z + 11));

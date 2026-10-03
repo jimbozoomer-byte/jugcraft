@@ -1537,8 +1537,8 @@ public class PetroGameTests {
 				new BlockHitResult(Vec3.atCenterOf(helper.absolutePos(foam)), Direction.UP, helper.absolutePos(foam), false)));
 		helper.assertBlockPresent(ConstructionChemistry.CONCRETE, foam);
 		helper.assertTrue(player.getMainHandItem().getCount() == 1, "Cement left: " + player.getMainHandItem());
-		helper.assertTrue(ConstructionChemistry.REINFORCED_CONCRETE.getExplosionResistance() >= 1200.0F,
-				"Reinforced concrete is not blast-proof");
+		helper.assertTrue(ConstructionChemistry.BLASTPROOF_CONCRETE.getExplosionResistance() >= 1200.0F,
+				"Blast-proof concrete is not blast-proof");
 		helper.succeed();
 	}
 }

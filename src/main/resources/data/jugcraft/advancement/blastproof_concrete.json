@@ -1,13 +1,13 @@
 {
   "display": {
     "icon": {
-      "id": "jugcraft:reinforced_concrete"
+      "id": "jugcraft:blastproof_concrete"
     },
     "title": {
-      "translate": "advancements.jugcraft.reinforced_concrete.title"
+      "translate": "advancements.jugcraft.blastproof_concrete.title"
     },
     "description": {
-      "translate": "advancements.jugcraft.reinforced_concrete.description"
+      "translate": "advancements.jugcraft.blastproof_concrete.description"
     },
     "frame": "task",
     "show_toast": true,
@@ -20,7 +20,7 @@
         "items": [
           {
             "items": [
-              "jugcraft:reinforced_concrete"
+              "jugcraft:blastproof_concrete"
             ]
           }
         ]

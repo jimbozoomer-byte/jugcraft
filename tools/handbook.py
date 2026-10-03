@@ -434,10 +434,10 @@ def gear_pages():
             f"Bridge gaps, seal caves, stop a flood or a lava flow. Each canister holds {cn.CANISTER_FOAM} blocks of foam; "
             "make canisters in the chemical reactor from plastic pellets and an iron nugget in ammonia.",
             "Foam breaks in a moment and drops nothing. Use cement on it to set it into concrete."]},
-        {"title": "Concrete", "icon": f"{MOD}:reinforced_concrete", "text": [
+        {"title": "Concrete", "icon": f"{MOD}:blastproof_concrete", "text": [
             "Cement mix: calcite (or a bone block), clay and sand; smelt it into cement.",
             "Four cement, four gravel and a water bucket make eight concrete, as hard as stone and tougher.",
-            "Eight concrete round a rebar make eight reinforced concrete: as blast-proof as obsidian, mined with a "
+            "Eight concrete round a rebar make eight blast-proof concrete: as blast-proof as obsidian, mined with a "
             "diamond or steel pickaxe. Both come as slabs and stairs."]},
         {"title": "Medicines", "icon": f"{MOD}:first_aid_kit", "text": [
             "Made in the chemical reactor. First aid kit: two cotton and a soap in bioethanol. Heals four hearts, "

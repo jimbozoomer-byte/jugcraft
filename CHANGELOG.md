@@ -10,7 +10,7 @@ No numbered release yet. Everything below is on `main`.
 
 ### Unmerged: Construction chemistry, batch 32
 - **Foam Sprayer:** fills up to 12 open blocks (air, water, lava, plants) where you aim, from 16 blocks away, with construction foam from foam canisters (chemical reactor: plastic and ammonia). Bridge gaps, seal caves, stop floods and lava. Respects spawn protection and the walled town.
-- **Cement** (calcite or bone block, clay and sand, smelted) sets foam into **concrete**; concrete also crafts from cement, gravel and water. **Reinforced concrete** (concrete round a rebar) is as blast-proof as obsidian. Both come as slabs and stairs.
+- **Cement** (calcite or bone block, clay and sand, smelted) sets foam into **concrete**; concrete also crafts from cement, gravel and water. **Blast-proof concrete** (concrete round a rebar) is as blast-proof as obsidian. Both come as slabs and stairs.
 - Two advancements, two handbook pages, a game test. Record: [construction-chemistry.md](docs/features/construction-chemistry.md).
 
 ### Unmerged: Field chemistry, batch 31

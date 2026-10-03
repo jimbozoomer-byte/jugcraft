@@ -29,7 +29,7 @@ import net.minecraft.world.level.material.PushReaction;
 
 /**
  * Construction chemistry (batch 32, docs/features/construction-chemistry.md): the foam sprayer and its canisters,
- * construction foam, cement, concrete and reinforced concrete. Keep the numbers in sync with tools/construction.py;
+ * construction foam, cement, concrete and blast-proof concrete. Keep the numbers in sync with tools/construction.py;
  * tools/check_mod_data.py checks them.
  */
 public final class ConstructionChemistry {
@@ -43,7 +43,7 @@ public final class ConstructionChemistry {
 
 	public static Block CONSTRUCTION_FOAM;
 	public static Block CONCRETE;
-	public static Block REINFORCED_CONCRETE;
+	public static Block BLASTPROOF_CONCRETE;
 	public static Item CEMENT_MIX;
 	public static Item CEMENT;
 	public static Item REBAR;
@@ -60,7 +60,7 @@ public final class ConstructionChemistry {
 				.strength(0.3F, 0.5F).sound(SoundType.WOOL).pushReaction(PushReaction.POPPED), Block::new);
 		CONCRETE = family("concrete", BlockBehaviour.Properties.ofFullCopy(Blocks.STONE).mapColor(MapColor.STONE)
 				.strength(2.5F, 9.0F).requiresCorrectToolForDrops());
-		REINFORCED_CONCRETE = family("reinforced_concrete", BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)
+		BLASTPROOF_CONCRETE = family("blastproof_concrete", BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)
 				.mapColor(MapColor.COLOR_GRAY).strength(15.0F, 1200.0F).requiresCorrectToolForDrops());
 		CEMENT_MIX = item("cement_mix", Item::new);
 		CEMENT = item("cement", CementItem::new);
@@ -112,7 +112,7 @@ public final class ConstructionChemistry {
 
 	/** The grey line from {@code tooltip.jugcraft.<path>}, for the items and blocks that have one. */
 	static void describe(String path, Consumer<Component> tooltip) {
-		if (java.util.List.of("construction_foam", "reinforced_concrete", "cement", "foam_canister", "foam_sprayer").contains(path)) {
+		if (java.util.List.of("construction_foam", "blastproof_concrete", "cement", "foam_canister", "foam_sprayer").contains(path)) {
 			tooltip.accept(Component.translatable("tooltip.jugcraft." + path).withStyle(ChatFormatting.GRAY));
 		}
 	}

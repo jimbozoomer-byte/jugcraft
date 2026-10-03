@@ -22,7 +22,7 @@ CANISTER_FOAM = 32
 BLOCKS = {
     "construction_foam": ("Construction Foam", 0.3, 0.5, False),
     "concrete": ("Concrete", 2.5, 9.0, True),
-    "reinforced_concrete": ("Reinforced Concrete", 15.0, 1200.0, True),
+    "blastproof_concrete": ("Blast-Proof Concrete", 15.0, 1200.0, True),
 }
 ITEMS = {
     "cement_mix": "Cement Mix",
@@ -37,7 +37,7 @@ TOOLTIPS = {
     "foam_sprayer": "Sprays construction foam where you aim, filling up to 12 open blocks: bridge gaps, seal caves and "
                     "hold back water or lava. Uses foam canisters from your inventory.",
     "construction_foam": "Light and quick to break. Use cement on it to set it into concrete.",
-    "reinforced_concrete": "As blast-proof as obsidian.",
+    "blastproof_concrete": "As blast-proof as obsidian.",
 }
 
 
@@ -123,8 +123,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
     write(recipes / "concrete.json", shaped(condition, ["CGC", "GWG", "CGC"], {
         "C": f"{MOD}:cement", "G": "minecraft:gravel", "W": "minecraft:water_bucket"}, "concrete", 8, "building"))
     write(recipes / "rebar.json", shaped(condition, ["  S", " S ", "S  "], {"S": "#c:ingots/steel"}, "rebar", 6, "misc"))
-    write(recipes / "reinforced_concrete.json", shaped(condition, ["CCC", "CRC", "CCC"], {
-        "C": f"{MOD}:concrete", "R": f"{MOD}:rebar"}, "reinforced_concrete", 8, "building"))
+    write(recipes / "blastproof_concrete.json", shaped(condition, ["CCC", "CRC", "CCC"], {
+        "C": f"{MOD}:concrete", "R": f"{MOD}:rebar"}, "blastproof_concrete", 8, "building"))
     write(recipes / "foam_sprayer.json", shaped(condition, ["PPN", "RT ", "S  "], {
         "P": "#c:plates/steel", "N": "minecraft:iron_nugget", "R": f"{MOD}:rubber", "T": "minecraft:piston",
         "S": "#c:plates/steel"}, "foam_sprayer", 1, "equipment"))
@@ -157,7 +157,7 @@ def concrete():
     return _speckle((148, 150, 150), 5, 3202, dots)
 
 
-def reinforced_concrete():
+def blastproof_concrete():
     """Cast panel: darker concrete with formwork seams and the four tie-holes of the shuttering."""
     img = _speckle((122, 126, 128), 4, 3203)
     for i in range(16):
