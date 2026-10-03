@@ -18,6 +18,17 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
+      - name: Batch 31 APIs
+        run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          for c in net.minecraft.world.item.component.Consumable 'net.minecraft.world.item.component.Consumable$Builder' net.minecraft.world.item.component.Consumables net.minecraft.world.item.component.UseCooldown net.minecraft.world.item.component.UseRemainder net.minecraft.world.item.ItemUseAnimation net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect net.minecraft.world.item.consume_effects.RemoveStatusEffectsConsumeEffect net.minecraft.world.item.consume_effects.ClearAllStatusEffectsConsumeEffect net.minecraft.world.effect.MobEffectCategory net.minecraft.world.effect.MobEffects net.minecraft.world.damagesource.DamageSource net.minecraft.world.damagesource.DamageSources net.minecraft.world.damagesource.DamageTypes net.minecraft.tags.DamageTypeTags net.minecraft.tags.EntityTypeTags net.minecraft.world.entity.Mob net.minecraft.world.entity.LivingEntity net.minecraft.world.effect.MobEffectInstance net.minecraft.world.item.equipment.ArmorMaterial net.minecraft.world.level.ServerExplosion net.minecraft.world.entity.AreaEffectCloud net.minecraft.core.particles.ParticleTypes net.minecraft.world.item.Item 'net.minecraft.world.item.Item$Properties' net.minecraft.core.HolderSet net.minecraft.world.entity.ai.targeting.TargetingConditions; do echo "=== $c"; javap -cp "$COMMON" "$c" 2>&1 | grep -vE "^Compiled" | head -120; done
+          echo "=== damage_type jsons"; unzip -l "$COMMON" | grep -E "data/minecraft/damage_type/" | head -60
+          unzip -p "$COMMON" data/minecraft/damage_type/in_fire.json; unzip -p "$COMMON" data/minecraft/damage_type/magic.json; unzip -p "$COMMON" data/minecraft/damage_type/indirect_magic.json
+          echo "=== tags"; unzip -l "$COMMON" | grep -E "data/minecraft/tags/damage_type/" | head -80
+          unzip -p "$COMMON" data/minecraft/tags/entity_type/can_breathe_under_water.json; unzip -p "$COMMON" data/minecraft/tags/entity_type/undead.json
+          echo "=== death lang"; unzip -p "$COMMON" assets/minecraft/lang/en_us.json 2>/dev/null | grep -E "death.attack.(magic|indirectMagic|inFire|onFire)" 
+          echo "=== honey bottle consumable usage"; javap -c -cp "$COMMON" net.minecraft.world.item.component.Consumables | grep -E "HONEY|DRINK|invoke" | head -40
       - name: Grapple APIs
         run: |
           set +e
