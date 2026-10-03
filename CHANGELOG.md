@@ -16,6 +16,10 @@ No numbered release yet. Everything below is on `main`.
 - Shapes are worked out once for each set of straight sides, not once per state, and blocks with alike shapes share their diagonal shapes. This applies to fences, panes and bars too.
 - Five more server game tests and three wall screenshots. Record: [diagonal-connections.md](docs/features/diagonal-connections.md).
 
+### Unmerged: Control electronics, batch 36
+- **Data Cable**, **Sensor**, **Relay** and **Logic Controller**. Sensors read how full a tank, battery, machine or chest is and report on a dye-colour channel. The controller's eight rules ("IF red above 90% THEN blue OFF") switch relays, whose redstone runs machines. It gives a dead band when two rules pair up.
+- Advancement, handbook pages, game test. Record: [control-electronics.md](docs/features/control-electronics.md).
+
 ### Unmerged: Gas storage, batch 35
 - **Gas Cylinder:** carries 8 buckets of one gas. Use it on a tank, pipe or machine to fill it, sneak to empty it; used in the air it tops up a scuba tank or grapple in the other hand. Machines and the fluid filter treat it like a bucket.
 - **Ammonia Chiller:** freezes a bucket of water into ice with 5 mB of ammonia, anywhere (even the Nether), and presses four ice into packed ice and four packed ice into blue ice.
