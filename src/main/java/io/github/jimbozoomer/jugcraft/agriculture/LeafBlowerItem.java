@@ -12,12 +12,14 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -183,7 +185,10 @@ public class LeafBlowerItem extends Item implements Chargeable {
 		}
 	}
 
-	/** Adds {@code push} to an entity's motion, no faster across than {@link #MAX_DRIVE}, and tells its client. */
+	/**
+	 * Adds {@code push} to an entity's motion, no faster across than {@link #MAX_DRIVE}. A player moves themselves, so a
+	 * pushed player's client is told.
+	 */
 	private static void drive(Entity entity, Vec3 push) {
 		Vec3 motion = entity.getDeltaMovement().add(push);
 		double across = motion.horizontalDistance();
@@ -191,7 +196,9 @@ public class LeafBlowerItem extends Item implements Chargeable {
 			motion = new Vec3(motion.x * MAX_DRIVE / across, motion.y, motion.z * MAX_DRIVE / across);
 		}
 		entity.setDeltaMovement(motion);
-		entity.hurtMarked = true;
+		if (entity instanceof ServerPlayer pushed) {
+			pushed.connection.send(new ClientboundSetEntityMotionPacket(pushed));
+		}
 	}
 
 	/** Whether the leaf blower's user may change the block at {@code pos} (build rights, spawn protection). */
@@ -293,10 +300,8 @@ public class LeafBlowerItem extends Item implements Chargeable {
 				state -> state.getBlock() instanceof LeafPileBlock || state.is(litter) && litter != Blocks.AIR)) {
 			BlockState state = level.getBlockState(pos);
 			if (takeLayer(level, pos, state)) {
-				ItemStack taken = new ItemStack(state.getBlock().asItem());
-				if (!player.getInventory().add(taken)) {
-					player.drop(taken, false);
-				}
+				// Into the inventory, or at its user's feet if it is full.
+				player.getInventory().placeItemBackInInventory(new ItemStack(state.getBlock().asItem()), Prediction.SERVER_ONLY);
 				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), pos.getX() + 0.5, pos.getY() + 0.2, pos.getZ() + 0.5, 4,
 						0.2, 0.05, 0.2, 0.02);
 			}
