@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21) are implemented in source, not yet played by hand. Additions 22 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21) are implemented in source and pass CI's game tests, not yet played by hand. Additions 22 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick (planned);
@@ -114,12 +114,25 @@ None of this depends on the Halloween event: a cauldron brews hexes all year.
 ## Verification
 ### Hex brews verification
 
-Not run yet: CI has not built this branch. The planned checks are:
-- `HexBrewGameTests`, 3 game tests:
-  1. a heated green brew and a brown mushroom make the shrinking brew with three doses; a brew ingredient does not spoil it; a player without build rights draws nothing; three bottles draw three draughts and empty the pot; a cold pot ignores the hex; the giant's and flying hexes need their own brews;
-  2. the Shrinking Draught halves the player and earns Drink Me, leaving a bottle; under a low ceiling the Giant's Draught is refused and not used up; a shrunk player with no room to grow stays small; in the open the Giant's Draught cancels the shrinking, makes the player 1.6 times their size with a block more reach and earns Fee-Fi-Fo-Fum; the shrinking cancels it again; Flying Ointment gives Slow Falling;
-  3. the tags, effects, draughts and advancements load.
-- `HexBrewClientGameTests` takes screenshots: the three hex brews over campfires with the draughts framed behind them, a look into the shrinking brew, and the same scene seen by a shrunk player and by a giant.
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-21-hex-brews` stacked on graveyard pack 4:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the hexes with Java: the doses, the room check's extension, each draught's scale, step, reach and time, and which brew each hex is made from; and checks the hex tags, the cauldron's models for every hex and dose, the draughts, the effects' icons and words, and the advancements) | Pass, 1045 IDs |
+| `./gradlew build` on `ef65d069` (Build workflow run [37144213831](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37144213831)) | Pass |
+| Game tests on the headless server, same run: 591 in total, 3 of them new here (`HexBrewGameTests`) | **All 591 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `ef65d069` (client shard 2 of that run) |
+
+The 3 new game tests (`HexBrewGameTests`):
+1. over a magma block, water, a spider eye and a brown mushroom make the shrinking brew with three doses, glowing; a spider eye then doesn't spoil it; an adventure-mode player draws nothing; three glass bottles draw three Shrinking Draughts and the third empties the pot; the same in a cold pot stays green; beans make the orange brew a giant's, a phantom membrane the purple brew flying ointment, and neither works on the wrong brew;
+2. the Shrinking Draught halves the drinker (scale 0.5), leaves a glass bottle and earns Drink Me; under a two-block ceiling the Giant's Draught is refused (use fails) and isn't used up even when drunk to the end; a shrunk player whose shrinking is about to end with no room to grow keeps it longer; in the open the Giant's Draught cancels the shrinking, scales the drinker 1.6 with a block more reach and earns Fee-Fi-Fo-Fum; the Shrinking Draught cancels it again; Flying Ointment gives Slow Falling;
+3. the hex tags, effects, draughts and advancements load.
+
+Found by CI and fixed before this record:
+- The first run failed to compile in graveyard pack 4, below this branch (26.3 has no `ItemTags.SMALL_FLOWERS`); fixed there.
+
+The client test's first screenshots showed the cauldrons over campfires lost in smoke, and from too low to see into them. It now sets them over magma, looks down into the brews, and shows a shrunk player and a giant from in front. Those screenshots come from the next run.
 
 Not run: a two-client dedicated-server playtest, and any play by hand.
 
