@@ -89,7 +89,7 @@ public class DiagonalConnectionsGameTests {
 				joined.add(diagonal.property.getName());
 			}
 		}
-		return BuiltInRegistries.BLOCK.getKey(state.getBlock()) + joined;
+		return BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString() + joined;
 	}
 
 	/** Whether the first block and its north-east neighbour are joined to each other and to nothing else diagonally. */
@@ -189,10 +189,11 @@ public class DiagonalConnectionsGameTests {
 		Block cemetery = JugcraftAgriculture.block("cemetery_fence");
 		Block aspen = BuiltInRegistries.BLOCK.getValue(Jugcraft.id("aspen_fence"));
 		Block copperBars = BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace("copper_bars"));
+		Block redPane = BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace("red_stained_glass_pane"));
 		Object[][] pairs = {
 				{Blocks.OAK_FENCE, Blocks.SPRUCE_FENCE, true}, {Blocks.OAK_FENCE, aspen, true}, {Blocks.OAK_FENCE, Blocks.NETHER_BRICK_FENCE, false},
 				{cemetery, cemetery, true}, {cemetery, Blocks.OAK_FENCE, false}, {Blocks.GLASS_PANE, Blocks.IRON_BARS, true},
-				{Blocks.RED_STAINED_GLASS_PANE, copperBars, true}, {Blocks.IRON_BARS, Blocks.OAK_FENCE, false},
+				{redPane, copperBars, true}, {Blocks.IRON_BARS, Blocks.OAK_FENCE, false},
 				{Blocks.BAMBOO_FENCE, Blocks.BAMBOO_FENCE, true}};
 		List<String> wrong = new ArrayList<>();
 		for (Object[] pair : pairs) {

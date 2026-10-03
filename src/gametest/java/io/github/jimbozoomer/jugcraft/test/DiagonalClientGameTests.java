@@ -90,7 +90,7 @@ public class DiagonalClientGameTests implements FabricClientGameTest {
 		// Panes and bars on a slant.
 		int[][] slant = {{0, 0}, {1, -1}, {2, -2}, {3, -3}};
 		run(level, origin.offset(9, 0, -9), Blocks.GLASS_PANE, slant);
-		run(level, origin.offset(13, 0, -9), Blocks.LIGHT_BLUE_STAINED_GLASS_PANE, slant);
+		run(level, origin.offset(13, 0, -9), vanilla("light_blue_stained_glass_pane"), slant);
 		run(level, origin.offset(17, 0, -9), Blocks.IRON_BARS, slant);
 		run(level, origin.offset(21, 0, -9), vanilla("copper_bars"), slant);
 		List<String> joins = new ArrayList<>();
