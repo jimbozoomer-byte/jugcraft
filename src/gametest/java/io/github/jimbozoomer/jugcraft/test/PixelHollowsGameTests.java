@@ -393,6 +393,14 @@ public class PixelHollowsGameTests {
 	@GameTest(maxTicks = 4800)
 	public void everyVillageHasOneShop(GameTestHelper helper) {
 		helper.assertTrue(RetroShopPlacement.canRelayout(), "A village without room for its shop cannot be laid out again");
+		// TEMPORARY diagnostic: the 26.3 jigsaw placer's class files, to find the method that runs the placer's loop.
+		for (String name : new String[] {"JigsawPlacement", "JigsawPlacement$Placer", "JigsawPlacement$PieceState"}) {
+			try (InputStream in = Jugcraft.class.getClassLoader().getResourceAsStream("net/minecraft/world/level/levelgen/structure/pools/" + name + ".class")) {
+				Jugcraft.LOGGER.info("[pixel-hollows] CLASS {} {}", name, in == null ? "missing" : java.util.Base64.getEncoder().encodeToString(in.readAllBytes()));
+			} catch (IOException exception) {
+				Jugcraft.LOGGER.info("[pixel-hollows] CLASS {} unreadable: {}", name, exception.toString());
+			}
+		}
 		ServerLevel level = helper.getLevel();
 		var server = level.getServer();
 		BlockPos base = helper.absolutePos(BlockPos.ZERO);
