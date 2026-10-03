@@ -82,6 +82,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SCARECROW_ENTITY, ScarecrowRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.GRAVESTONE_ENTITY, GravestoneRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.HEADSTONE_ENTITY, HeadstoneRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.GRAVEYARD_BUILDING_ENTITY, GraveyardBuildingRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(OpenEpitaphPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new EpitaphScreen(payload)));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.STRING_LIGHT_HOOK_ENTITY, StringLightsRenderer::new);

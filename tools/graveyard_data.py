@@ -161,6 +161,7 @@ def assets(root, write, lang):
     write(root / "models" / "item" / f"{chisel}.json", {"parent": "minecraft:item/handheld", "textures": {"layer0": rid(f"item/{chisel}")}})
     write(root / "items" / f"{chisel}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{chisel}")}})
     lang[f"item.{MOD}.{chisel}"] = EPITAPH["chisel_display"]
+    building_assets(root, write, lang)
     lang.update({
         "screen.jugcraft.epitaph.title": "Cut an Epitaph",
         "screen.jugcraft.epitaph.line": "Line %s",
@@ -190,6 +191,7 @@ def loot(out, write):
             "entries": [{"type": "minecraft:item", "name": rid(headstone), "modifier": [
                 {"type": "minecraft:copy_components", "include": [rid(EPITAPH["component"])], "source": "block_entity"}]}],
             "rolls": 1}], "random_sequence": f"{MOD}:blocks/{headstone}"})
+    building_loot(out, write)
 
 
 def recipes(out, write, conditions):
@@ -205,6 +207,7 @@ def recipes(out, write, conditions):
     write(out / f"{EPITAPH['chisel']}.json", {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped",
                                              "category": "equipment", "pattern": CHISEL_RECIPE["pattern"], "key": CHISEL_RECIPE["key"],
                                              "result": {"id": rid(EPITAPH["chisel"]), "count": 1}})
+    building_recipes(out, write, conditions)
 
 
 def tags(tags):
@@ -212,3 +215,370 @@ def tags(tags):
         tags.add("block", "minecraft:mineable/pickaxe", rid(headstone))
         tags.add("block", "jugcraft:headstones", rid(headstone))
         tags.add("item", "jugcraft:headstones", rid(headstone))
+    building_tags(tags)
+
+
+# ---------------------------------------------------------------- pack 3: buildings
+import math
+
+import graveyard_buildings as gb
+from graveyard import BUILDINGS, MAUSOLEUM_DOOR
+from decor3_data import default_uv, DOOR_CLOSED, DOOR_OPEN
+
+# Grid cells to try, nearest first, when something drawn falls in a cell the building leaves open (a doorway's
+# threshold, a room's floor): the one below, those beside, then those across a corner, then above.
+NEIGHBOURS = sorted(((dx, dy, dz) for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 0, 1) if (dx, dy, dz) != (0, 0, 0)),
+                    key=lambda d: (d[1] > 0, abs(d[0]) + abs(d[2]) + abs(d[1]), d[1] != -1, d))
+EXTRA_TEXTURES = {"floor": "gy_marble_floor", "glass": "gy_stained_glass", "lamp": "gy_lamp_glass", "lantern": "gy_lantern_glass",
+                  "door_glass": "gy_door_glass"}
+
+
+def building_textures(stone, stage, upper):
+    tex = textures(stone, stage, upper)
+    tex.update({"oak": f"gy_oak_{stage}", "roof": f"gy_roof_slate_{stage}", **EXTRA_TEXTURES})
+    return tex
+
+
+def fit_uvs(elements):
+    """Pins the UVs of faces reaching outside the block inside the texture: moved in when they fit, squeezed when a
+    face is longer than a block."""
+    for element in elements:
+        for side, face in element["faces"].items():
+            if "uv" in face:
+                continue
+            u0, v0, u1, v1 = default_uv(side, element["from"], element["to"])
+            if min(u0, v0, u1, v1) >= 0 and max(u0, v0, u1, v1) <= 16:
+                continue
+            out = []
+            for a, z in ((u0, u1), (v0, v1)):
+                lo, hi = min(a, z), max(a, z)
+                if hi - lo > 16:
+                    lo, hi = 0.0, 16.0
+                else:
+                    shift = min(max(lo, 0), 16 - (hi - lo)) - lo
+                    lo, hi = lo + shift, hi + shift
+                out.append((round(lo, 3), round(hi, 3)) if a <= z else (round(hi, 3), round(lo, 3)))
+            face["uv"] = [out[0][0], out[1][0], out[0][1], out[1][1]]
+    return elements
+
+
+def grid_cut(elements, size):
+    """`elements` (design pixels) cut into the cells of a grid `size` blocks wide, tall and deep: {cell: fragments}.
+    Unturned boxes are cut at every cell boundary inside the grid (and the faces at a cut dropped); what reaches past
+    the grid's outer faces stays with its outermost cells. Turned boxes go whole to the cell their middle is in."""
+    out = {}
+    for e in elements:
+        if "rotation" in e:
+            middle = [(e["from"][k] + e["to"][k]) / 2 for k in range(3)]
+            cell = tuple(min(max(int(math.floor(middle[k] / 16)), 0), size[k] - 1) for k in range(3))
+            out.setdefault(cell, []).append(e)
+            continue
+        ranges = []
+        for k in range(3):
+            a, z = e["from"][k], e["to"][k]
+            first = min(max(int(math.floor(a / 16)), 0), size[k] - 1)
+            last = min(max(int(math.floor((z - 1e-6) / 16)), 0), size[k] - 1)
+            pieces = []
+            for i in range(first, last + 1):
+                lo = a if i == 0 else max(a, 16 * i)
+                hi = z if i == size[k] - 1 else min(z, 16 * (i + 1))
+                if hi - lo > 1e-6:
+                    pieces.append((i, lo, hi))
+            ranges.append(pieces)
+        for ix, x0, x1 in ranges[0]:
+            for iy, y0, y1 in ranges[1]:
+                for iz, z0, z1 in ranges[2]:
+                    faces = dict(e["faces"])
+                    lo, hi = (x0, y0, z0), (x1, y1, z1)
+                    for k, (low_face, high_face) in FACE_AXES.items():
+                        if lo[k] > e["from"][k] + 1e-6:
+                            faces.pop(low_face, None)
+                        if hi[k] < e["to"][k] - 1e-6:
+                            faces.pop(high_face, None)
+                    if faces:
+                        out.setdefault((ix, iy, iz), []).append({**e, "from": [round(v, 4) for v in lo], "to": [round(v, 4) for v in hi],
+                                                                 "faces": faces})
+    return out
+
+
+def building_parts(building):
+    """The grid cells of `building`'s parts, part 0 first: every cell holding any of it but those left open."""
+    info = BUILDINGS[building]
+    frags = grid_cut(getattr(gb, info["model"])(), info["size"])
+    open_cells = set(info["open"])
+    cells = sorted((c for c in frags if c not in open_cells), key=lambda c: (c != tuple(info["origin"]), c[1], c[2], c[0]))
+    if cells[0] != tuple(info["origin"]):
+        raise SystemExit(f"{building}: its origin {info['origin']} holds nothing")
+    return cells
+
+
+def building_fragments(building, ivy=False):
+    """{part cell: its elements in design pixels}, those falling in open cells given to the nearest part beside them:
+    the building itself, or (`ivy`) only the ivy that grows over it when it is overgrown."""
+    info = BUILDINGS[building]
+    elements = getattr(gb, info["ivy" if ivy else "model"])()
+    cells = building_parts(building)
+    parts = set(cells)
+    frags = grid_cut(elements, info["size"])
+    out = {c: [] for c in cells}
+    for cell, items in frags.items():
+        if cell in parts:
+            out[cell] += items
+            continue
+        for d in NEIGHBOURS:
+            near = (cell[0] + d[0], cell[1] + d[1], cell[2] + d[2])
+            if near in parts:
+                out[near] += items
+                break
+        else:
+            raise SystemExit(f"{building}: nothing beside open cell {cell} to draw what falls in it")
+    return out
+
+
+def moved(elements, cell):
+    """`elements` in design pixels moved into the block of grid `cell`."""
+    shift = [16 * cell[k] for k in range(3)]
+    out = []
+    for e in elements:
+        m = {**e, "from": [round(e["from"][k] - shift[k], 4) for k in range(3)], "to": [round(e["to"][k] - shift[k], 4) for k in range(3)],
+             "faces": {side: dict(face) for side, face in e["faces"].items()}}
+        if "rotation" in e:
+            m["rotation"] = {**e["rotation"], "origin": [round(e["rotation"]["origin"][k] - shift[k], 4) for k in range(3)]}
+        for v in m["from"] + m["to"]:
+            if v < -16 or v > 32:
+                raise SystemExit(f"An element reaches {v} pixels from its block at cell {cell}: {e['from']} {e['to']}")
+        out.append(m)
+    return out
+
+
+def _corners(e):
+    """The eight corners of element `e`, turned by its rotation."""
+    pts = [(x, y, z) for x in (e["from"][0], e["to"][0]) for y in (e["from"][1], e["to"][1]) for z in (e["from"][2], e["to"][2])]
+    if "rotation" not in e:
+        return pts
+    r = e["rotation"]
+    a = math.radians(r["angle"])
+    c, s = math.cos(a), math.sin(a)
+    o = r["origin"]
+    out = []
+    for p in pts:
+        x, y, z = p[0] - o[0], p[1] - o[1], p[2] - o[2]
+        if r["axis"] == "z":
+            x, y = x * c - y * s, x * s + y * c
+        elif r["axis"] == "y":
+            x, z = x * c + z * s, -x * s + z * c
+        else:
+            y, z = y * c - z * s, y * s + z * c
+        out.append((x + o[0], y + o[1], z + o[2]))
+    return out
+
+
+def collision(elements, step=2, overlap=0.5):
+    """The boxes a part can be walked into and hit by: its elements (their bounds, if turned) in voxels of `step`
+    pixels, each filled if an element covers at least `overlap` of it along every axis, merged into as few boxes as
+    a greedy sweep finds. Ivy and thin skins (floors drawn over the ground) are left out."""
+    n = 16 // step
+    grid = [[[False] * n for _ in range(n)] for _ in range(n)]
+    for e in elements:
+        if any(face.get("texture") == "#ivy" for face in e["faces"].values()):
+            continue
+        pts = _corners(e)
+        lo = [max(0.0, min(p[k] for p in pts)) for k in range(3)]
+        hi = [min(16.0, max(p[k] for p in pts)) for k in range(3)]
+        if any(hi[k] - lo[k] < 0.3 for k in range(3)):
+            continue
+        ranges = []
+        for k in range(3):
+            ranges.append([i for i in range(n) if min(hi[k], (i + 1) * step) - max(lo[k], i * step) >= overlap - 1e-6])
+        for i in ranges[0]:
+            for j in ranges[1]:
+                for k in ranges[2]:
+                    grid[i][j][k] = True
+    used = [[[False] * n for _ in range(n)] for _ in range(n)]
+    boxes = []
+    for j in range(n):
+        for k in range(n):
+            for i in range(n):
+                if not grid[i][j][k] or used[i][j][k]:
+                    continue
+                i1 = i
+                while i1 + 1 < n and grid[i1 + 1][j][k] and not used[i1 + 1][j][k]:
+                    i1 += 1
+                k1 = k
+                while k1 + 1 < n and all(grid[a][j][k1 + 1] and not used[a][j][k1 + 1] for a in range(i, i1 + 1)):
+                    k1 += 1
+                j1 = j
+                while j1 + 1 < n and all(grid[a][j1 + 1][c] and not used[a][j1 + 1][c] for a in range(i, i1 + 1) for c in range(k, k1 + 1)):
+                    j1 += 1
+                for a in range(i, i1 + 1):
+                    for bb in range(j, j1 + 1):
+                        for c in range(k, k1 + 1):
+                            used[a][bb][c] = True
+                boxes.append([i * step, j * step, k * step, (i1 + 1) * step, (j1 + 1) * step, (k1 + 1) * step])
+    return boxes
+
+
+def relative(building, cell):
+    """Grid `cell` as Java gives a part's cell: right, up and back from part 0."""
+    o = BUILDINGS[building]["origin"]
+    return [o[0] - cell[0], cell[1] - o[1], cell[2] - o[2]]
+
+
+def building_layout(building):
+    """What GraveyardBuildingBlock.Building reads: cells, collision boxes, inscriptions (relative to part 0), which
+    inscription each part cuts, and each part's light."""
+    info = BUILDINGS[building]
+    cells = building_parts(building)
+    clean = building_fragments(building)
+    o = info["origin"]
+    texts = []
+    for t in info["texts"]():
+        texts.append({**t, "x": round(t["x"] - 16 * o[0], 4), "y": round(t["y"] - 16 * o[1], 4), "z": round(t["z"] - 16 * o[2], 4),
+                      "max_scale": round(t["max_scale"], 6)})
+    slots = info["slots"]()
+    shapes = []
+    for c in cells:
+        boxes = collision(moved(clean[c], c))
+        if not boxes:
+            boxes = [[6, 0, 6, 10, 2, 10]]
+        shapes.append(boxes)
+    return {"id": building, "stone": info["stone"], "sound": info["sound"], "cells": [relative(building, c) for c in cells],
+            "shapes": shapes, "texts": texts, "slots": [slots.get(c, 0) for c in cells],
+            "light": [info["light"].get(c, 0) for c in cells]}
+
+
+def building_model_name(building, part, stage=None):
+    return f"{building}_{part}" if stage is None else f"{building}_{part}_{stage}"
+
+
+def building_assets(root, write, lang):
+    """Each building's models: one of every part's shape, a small one for each stage of weathering giving it that
+    stage's textures, and one of the ivy over each part it grows on; a blockstate drawing the part at its stage, and
+    its ivy when overgrown; the item model; and the layout Java reads."""
+    models = root / "models" / "block"
+    layouts = []
+    for building, info in BUILDINGS.items():
+        cells = building_parts(building)
+        clean = building_fragments(building)
+        ivy = building_fragments(building, ivy=True)
+        parts = []
+        for n, cell in enumerate(cells):
+            upper = cell[1] > 0
+            base = fit_uvs(moved(clean[cell], cell))
+            tex = building_textures(info["stone"], "clean", upper)
+            used = {face["texture"][1:] for e in base for face in e["faces"].values()}
+            write(models / f"{building_model_name(building, n)}.json",
+                  block_model({k: v for k, v in tex.items() if k in used}, base, _particle(tex, used)))
+            for weathering, stage in enumerate(STAGES):
+                tex = building_textures(info["stone"], stage, upper)
+                textures_used = {k: (v if ":" in v else rid(f"block/{v}")) for k, v in tex.items() if k in used}
+                write(models / f"{building_model_name(building, n, stage)}.json",
+                      {"parent": rid(f"block/{building_model_name(building, n)}"),
+                       "textures": {"particle": rid(f"block/{_particle(tex, used)}"), **textures_used}})
+                for facing in HORIZONTAL:
+                    parts.append({"when": {"facing": facing, "part": str(n), "weathering": str(weathering)},
+                                  "apply": turned(rid(f"block/{building_model_name(building, n, stage)}"), facing)})
+            if ivy[cell]:
+                write(models / f"{building_model_name(building, n)}_ivy.json",
+                      block_model({"ivy": "gy_ivy"}, fit_uvs(moved(ivy[cell], cell)), "gy_ivy"))
+                for facing in HORIZONTAL:
+                    parts.append({"when": {"facing": facing, "part": str(n), "weathering": "3"},
+                                  "apply": turned(rid(f"block/{building_model_name(building, n)}_ivy"), facing)})
+        write(root / "blockstates" / f"{building}.json", {"multipart": parts})
+        write(models / f"{building}_item.json", building_item_model(building))
+        write(root / "items" / f"{building}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{building}_item")}})
+        lang[f"block.{MOD}.{building}"] = info["display"]
+        layouts.append(building_layout(building))
+    write(root.parent.parent / MOD / "graveyard_buildings.json", layouts)
+    door_assets(root, write, lang)
+
+
+def _particle(tex, used):
+    for key in ("stone", "rough", "oak", "iron", "bronze"):
+        if key in used and key in tex:
+            return tex[key]
+    return tex[sorted(used)[0]] if used else tex["stone"]
+
+
+def building_item_model(building, limit=160):
+    """The whole building, clean, scaled down to an item's square; its largest elements only, so an item in the hand
+    is not as heavy to draw as the building itself."""
+    info = BUILDINGS[building]
+    elements = getattr(gb, info["model"])()
+
+    def volume(e):
+        return (e["to"][0] - e["from"][0]) * (e["to"][1] - e["from"][1]) * (e["to"][2] - e["from"][2])
+    elements = sorted(elements, key=volume, reverse=True)[:limit]
+    width = max(e["to"][0] for e in elements) - min(e["from"][0] for e in elements)
+    height = max(e["to"][1] for e in elements)
+    depth = max(e["to"][2] for e in elements) - min(e["from"][2] for e in elements)
+    x0 = min(e["from"][0] for e in elements)
+    z0 = min(e["from"][2] for e in elements)
+    factor = 16 / max(width, height, depth)
+    offset = ((16 - width * factor) / 2 - x0 * factor, 0, (16 - depth * factor) / 2 - z0 * factor)
+    small = scaled(elements, factor, offset)
+    tex = building_textures(info["stone"], "clean", True)
+    used = {face["texture"][1:] for e in small for face in e["faces"].values()}
+    return fitted(block_model({k: v for k, v in tex.items() if k in used}, small, _particle(tex, used)))
+
+
+def door_assets(root, write, lang):
+    """The Bronze Mausoleum Door: one model for each half, the same whichever way it is hung or swung (it is
+    symmetric), turned as vanilla turns a door."""
+    door = MAUSOLEUM_DOOR["id"]
+    models = root / "models" / "block"
+    whole = gb.mausoleum_door()
+    tex = {"bronze": "gy_bronze_clean", "door_glass": "gy_door_glass"}
+    for half, cell in (("bottom", (0, 0, 0)), ("top", (0, 1, 0))):
+        frags = grid_cut(whole, (1, 2, 1)).get(cell, [])
+        write(models / f"{door}_{half}.json", fitted(block_model(tex, moved(frags, cell), "gy_bronze_clean")))
+    variants = {}
+    for facing in HORIZONTAL:
+        for half, part in (("lower", "bottom"), ("upper", "top")):
+            for hinge in ("left", "right"):
+                for is_open in ("false", "true"):
+                    y = DOOR_OPEN[hinge][facing] if is_open == "true" else DOOR_CLOSED[facing]
+                    variant = {"model": rid(f"block/{door}_{part}")}
+                    if y:
+                        variant["y"] = y
+                    variants[f"facing={facing},half={half},hinge={hinge},open={is_open}"] = variant
+    write(root / "blockstates" / f"{door}.json", {"variants": variants})
+    write(root / "models" / "item" / f"{door}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{door}")}})
+    write(root / "items" / f"{door}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{door}")}})
+    lang[f"block.{MOD}.{door}"] = MAUSOLEUM_DOOR["display"]
+
+
+def building_loot(out, write):
+    for building in BUILDINGS:
+        write(out / f"{building}.json", {"type": "minecraft:block", "pools": [{
+            "condition": {"type": "minecraft:all_of", "terms": [
+                {"type": "minecraft:survives_explosion"},
+                {"type": "minecraft:match_block", "blocks": rid(building), "state": {"part": "0"}}]},
+            "entries": [{"type": "minecraft:item", "name": rid(building), "modifier": [
+                {"type": "minecraft:copy_components", "include": [rid(EPITAPH["component"]), rid("inscriptions")], "source": "block_entity"}]}],
+            "rolls": 1}], "random_sequence": f"{MOD}:blocks/{building}"})
+    door = MAUSOLEUM_DOOR["id"]
+    write(out / f"{door}.json", {"type": "minecraft:block", "pools": [{
+        "condition": {"type": "minecraft:all_of", "terms": [
+            {"type": "minecraft:survives_explosion"},
+            {"type": "minecraft:match_block", "blocks": rid(door), "state": {"half": "lower"}}]},
+        "entries": [{"type": "minecraft:item", "name": rid(door)}], "rolls": 1}], "random_sequence": f"{MOD}:blocks/{door}"})
+
+
+def building_recipes(out, write, conditions):
+    for building, info in list(BUILDINGS.items()) + [(MAUSOLEUM_DOOR["id"], MAUSOLEUM_DOOR)]:
+        recipe = info["recipe"]
+        write(out / f"{building}.json", {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped",
+                                         "category": "building", "pattern": recipe["pattern"], "key": recipe["key"],
+                                         "result": {"id": rid(building), "count": recipe.get("count", 1)}})
+
+
+def building_tags(tags):
+    for building, info in BUILDINGS.items():
+        tags.add("block", f"minecraft:mineable/{info['tool']}", rid(building))
+        tags.add("block", "jugcraft:graveyard_buildings", rid(building))
+        tags.add("item", "jugcraft:graveyard_buildings", rid(building))
+    door = MAUSOLEUM_DOOR["id"]
+    tags.add("block", "minecraft:mineable/pickaxe", rid(door))
+    for registry in ("block", "item"):
+        tags.add(registry, "minecraft:doors", rid(door))
