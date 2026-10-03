@@ -4152,20 +4152,26 @@ def check_diagonal_connections():
         name = block.split(":")[1]
         namespace, state_name = dg.arm_blockstate(block)
         parts = (load(RES / "assets" / namespace / "blockstates" / f"{state_name}.json") or {}).get("multipart", [])
-        arms = {next(iter(p["when"])): p["apply"] for p in parts if set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)}
-        if sorted(arms) != sorted(dg.DIAGONAL_NAMES):
-            err(f"{block}: needs one diagonal arm part for each of {dg.DIAGONAL_NAMES}, has {sorted(arms)}")
+        models = dg.arm_models(block)
+        arms = {}
+        for part in parts:
+            diagonals = set(part.get("when", {})) & set(dg.DIAGONAL_NAMES)
+            if diagonals:
+                arms.setdefault(diagonals.pop(), []).append(part["apply"])
+        if sorted(arms) != sorted(dg.DIAGONAL_NAMES) or any(sorted(a["model"] for a in arms[d]) != sorted(models) for d in arms):
+            err(f"{block}: needs one diagonal arm part for each of {dg.DIAGONAL_NAMES} and each of {list(models)}, has {arms}")
             continue
         for diagonal, y in dg.DIAGONALS:
-            if arms[diagonal].get("y", 0) != y or arms[diagonal]["model"] != f"{MOD}:block/diagonal/{name}":
-                err(f"{block}: its {diagonal} arm should be {MOD}:block/diagonal/{name} turned y={y}")
-        model = load(ASSETS / "models" / "block" / "diagonal" / f"{name}.json") or {}
-        elements = model.get("elements", [])
-        if not elements or any(e.get("rotation", {}).get("axis") != "y" or e["rotation"].get("angle") != dg.ANGLE
-                               or not e["rotation"].get("rescale") for e in elements):
-            err(f"{block}: its diagonal arm model needs elements turned {dg.ANGLE} degrees about y, with rescale")
-        if not model.get("parent"):
-            err(f"{block}: its diagonal arm model needs the block's side model as parent (for its textures)")
+            if any(apply.get("y", 0) != y for apply in arms[diagonal]):
+                err(f"{block}: its {diagonal} arms should be turned y={y}")
+        for arm in models:
+            model = load(ASSETS / "models" / "block" / "diagonal" / f"{arm.split('/')[-1]}.json") or {}
+            elements = model.get("elements", [])
+            if not elements or any(e.get("rotation", {}).get("axis") != "y" or e["rotation"].get("angle") != dg.ANGLE
+                                   or not e["rotation"].get("rescale") for e in elements):
+                err(f"{block}: its diagonal arm model {arm} needs elements turned {dg.ANGLE} degrees about y, with rescale")
+            if not model.get("parent"):
+                err(f"{block}: its diagonal arm model {arm} needs the block's side model as parent (for its textures)")
     vanilla = dg.vanilla_blockstates()
     for name, (own, _side, _kind) in vanilla.items():
         parts = (load(RES / "assets" / "minecraft" / "blockstates" / f"{name}.json") or {}).get("multipart", [])
