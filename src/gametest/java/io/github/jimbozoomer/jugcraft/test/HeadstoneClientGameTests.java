@@ -85,7 +85,7 @@ public class HeadstoneClientGameTests implements FabricClientGameTest {
 				}
 			});
 
-			shoot(context, singleplayer, x + 5, y + 2, z + 3, 180, 20, "jugcraft_graveyard_headstones");
+			shoot(context, singleplayer, x + 5, y + 3, z, 180, 24, "jugcraft_graveyard_headstones");
 			shoot(context, singleplayer, x, y, z - 3, 180, 18, "jugcraft_graveyard_gothic");
 			shoot(context, singleplayer, x + 3, y, z - 2, 180, 14, "jugcraft_graveyard_slates");
 			shoot(context, singleplayer, x + 7, y, z - 3, 180, 20, "jugcraft_graveyard_lamb_and_scroll");
@@ -94,7 +94,7 @@ public class HeadstoneClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 3, y, z - 10, 180, 14, "jugcraft_graveyard_weathering");
 			server.runCommand("time set midnight");
 			context.waitTicks(10);
-			shoot(context, singleplayer, x + 5, y + 2, z + 3, 180, 20, "jugcraft_graveyard_headstones_night");
+			shoot(context, singleplayer, x + 5, y + 3, z, 180, 24, "jugcraft_graveyard_headstones_night");
 			server.runCommand("time set noon");
 			context.setScreen(() -> new EpitaphScreen(new OpenEpitaphPayload(new BlockPos(x, y, z - 5), Epitaph.of(GRAVES.get(0).lines()).padded())));
 			context.waitTicks(10);
@@ -106,7 +106,8 @@ public class HeadstoneClientGameTests implements FabricClientGameTest {
 	/** Stands the camera at (x, y, z) looking along yaw and pitch, and waits for the world to draw. */
 	private static void place(ClientGameTestContext context, TestSingleplayerContext singleplayer, int x, int y, int z, int yaw, int pitch) {
 		TestServerContext server = singleplayer.getServer();
-		server.runCommand("setblock %d %d %d minecraft:barrier".formatted(x, y - 1, z));
+		// Only into air, so standing on the ground leaves no hole in it for the later pictures.
+		server.runCommand("fill %d %d %d %d %d %d minecraft:barrier replace minecraft:air".formatted(x, y - 1, z, x, y - 1, z));
 		server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f %d %d", x + 0.5, y, z + 0.5, yaw, pitch));
 		context.waitTicks(20);
 		singleplayer.getConnection().waitForChunksRender();
