@@ -62,21 +62,23 @@ public class MonumentClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 
-			shoot(context, singleplayer, x + 8, y + 3, z + 6, 180, 18, "jugcraft_graveyard_monuments");
-			shoot(context, singleplayer, x + 1, y + 2, z - 1, 180, 6, "jugcraft_graveyard_obelisk_and_urn");
-			shoot(context, singleplayer, x + 7, y + 1, z - 2, 180, 18, "jugcraft_graveyard_angel_at_the_tomb");
-			shoot(context, singleplayer, x + 11, y + 3, z - 1, 180, 0, "jugcraft_graveyard_trumpeting_angel");
-			shoot(context, singleplayer, x + 15, y + 1, z - 2, 180, 26, "jugcraft_graveyard_mortsafe_and_hound");
+			shoot(context, singleplayer, x + 8, y + 3, z + 3, 180, 15, "jugcraft_graveyard_monuments");
+			shoot(context, singleplayer, x, y + 2, z - 2, 180, 15, "jugcraft_graveyard_obelisk");
+			shoot(context, singleplayer, x + 3, y, z - 3, 180, 12, "jugcraft_graveyard_draped_urn");
+			shoot(context, singleplayer, x + 8, y + 1, z - 3, 171, 22, "jugcraft_graveyard_angel_at_the_tomb");
+			shoot(context, singleplayer, x + 11, y + 3, z - 1, 180, 20, "jugcraft_graveyard_trumpeting_angel");
+			shoot(context, singleplayer, x + 15, y + 2, z - 1, 180, 28, "jugcraft_graveyard_mortsafe_and_hound");
 			server.runCommand("time set midnight");
 			context.waitTicks(10);
-			shoot(context, singleplayer, x + 8, y + 3, z + 6, 180, 18, "jugcraft_graveyard_monuments_night");
+			shoot(context, singleplayer, x + 8, y + 3, z + 3, 180, 15, "jugcraft_graveyard_monuments_night");
 		}
 	}
 
 	/** Stands the camera at (x, y, z) looking along yaw and pitch, and waits for the world to draw. */
 	private static void place(ClientGameTestContext context, TestSingleplayerContext singleplayer, int x, int y, int z, int yaw, int pitch) {
 		TestServerContext server = singleplayer.getServer();
-		server.runCommand("setblock %d %d %d minecraft:barrier".formatted(x, y - 1, z));
+		// Only into air, so standing on the ground leaves no hole in it for the later pictures.
+		server.runCommand("fill %d %d %d %d %d %d minecraft:barrier replace minecraft:air".formatted(x, y - 1, z, x, y - 1, z));
 		server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f %d %d", x + 0.5, y, z + 0.5, yaw, pitch));
 		context.waitTicks(20);
 		singleplayer.getConnection().waitForChunksRender();
@@ -93,13 +95,13 @@ public class MonumentClientGameTests implements FabricClientGameTest {
 		int x = origin.getX();
 		int y = origin.getY();
 		int z = origin.getZ();
-		// A gravel path in front, and lanterns along it for the night.
+		// A gravel path in front, and lanterns behind the row for the night, out of the way of the close pictures.
 		for (int dx = -2; dx <= 20; dx++) {
 			level.setBlock(new BlockPos(x + dx, y - 1, z - 3), Blocks.GRAVEL.defaultBlockState(), Block.UPDATE_ALL);
 		}
 		for (int dx : new int[] {-2, 5, 13, 20}) {
-			level.setBlock(new BlockPos(x + dx, y, z - 4), Blocks.STONE_BRICK_WALL.defaultBlockState(), Block.UPDATE_ALL);
-			level.setBlock(new BlockPos(x + dx, y + 1, z - 4), Blocks.LANTERN.defaultBlockState(), Block.UPDATE_ALL);
+			level.setBlock(new BlockPos(x + dx, y, z - 9), Blocks.STONE_BRICK_WALL.defaultBlockState(), Block.UPDATE_ALL);
+			level.setBlock(new BlockPos(x + dx, y + 1, z - 9), Blocks.LANTERN.defaultBlockState(), Block.UPDATE_ALL);
 		}
 		for (Monument monument : MONUMENTS) {
 			BlockPos pos = new BlockPos(x + monument.dx(), y, z - monument.dz());
