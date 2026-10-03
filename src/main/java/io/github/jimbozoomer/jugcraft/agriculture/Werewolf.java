@@ -173,11 +173,16 @@ public class Werewolf extends Monster {
 		if (target == null || !Werewolves.warded(level, target)) {
 			return false;
 		}
+		wardedOff(target);
+		return true;
+	}
+
+	/** Drops {@code target}, whom wolfsbane wards, and leaves them alone; a player earns Not Tonight. */
+	public void wardedOff(LivingEntity target) {
 		shun(target);
 		if (target instanceof ServerPlayer player) {
 			TrickOrTreat.award(player, "wolfsbane_ward");
 		}
-		return true;
 	}
 
 	/** Leaves {@code target} alone for {@value #SHUN_TICKS} ticks and slinks away from them. */
