@@ -57,6 +57,68 @@ public class WeaponProbeGameTests {
 		helper.succeed();
 	}
 
+	/** Third round: the client classes a player-animation layer would hook (they are on this classpath). */
+	@GameTest
+	public void logAnimationClasses(GameTestHelper helper) throws Exception {
+		Set<String> names = new LinkedHashSet<>();
+		for (String name : new String[] {"net/minecraft/client/renderer/entity/state/HumanoidRenderState",
+				"net/minecraft/client/renderer/entity/state/ArmedEntityRenderState", "net/minecraft/client/renderer/entity/state/LivingEntityRenderState",
+				"net/minecraft/client/renderer/entity/state/AvatarRenderState", "net/minecraft/client/renderer/entity/state/EntityRenderState",
+				"net/minecraft/client/model/player/PlayerModel", "net/minecraft/client/model/geom/ModelPart", "net/minecraft/client/model/geom/PartPose",
+				"net/minecraft/client/renderer/entity/layers/ItemInHandLayer", "net/minecraft/client/renderer/entity/player/AvatarRenderer",
+				"net/minecraft/client/renderer/entity/HumanoidMobRenderer", "net/minecraft/client/renderer/entity/LivingEntityRenderer",
+				"net/minecraft/world/entity/Avatar", "com/mojang/blaze3d/vertex/PoseStack", "net/minecraft/client/model/ArmedModel",
+				"net/minecraft/client/renderer/entity/ArmorStandRenderer", "net/minecraft/client/model/object/armorstand/ArmorStandModel",
+				"net/minecraft/client/Minecraft", "net/minecraft/client/player/LocalPlayer", "net/minecraft/client/Camera",
+				"net/minecraft/client/renderer/item/ItemStackRenderState", "net/minecraft/client/renderer/GameRenderer",
+				"net/minecraft/client/DeltaTracker"}) {
+			names.add(name);
+		}
+		java.net.URL url = Jugcraft.class.getClassLoader().getResource("net/minecraft/client/model/HumanoidModel.class");
+		Jugcraft.LOGGER.info("[probe] FIELD url {}", url);
+		java.net.URI uri = url.toURI();
+		java.nio.file.Path root;
+		if (uri.getScheme().equals("jar")) {
+			java.nio.file.FileSystem fs;
+			try {
+				fs = java.nio.file.FileSystems.newFileSystem(uri, java.util.Map.of());
+			} catch (java.nio.file.FileSystemAlreadyExistsException exists) {
+				fs = java.nio.file.FileSystems.getFileSystem(uri);
+			}
+			root = fs.getPath("/");
+		} else {
+			java.nio.file.Path path = java.nio.file.Path.of(uri);
+			for (int i = 0; i < 5; i++) {
+				path = path.getParent();
+			}
+			root = path;
+		}
+		try (java.util.stream.Stream<java.nio.file.Path> walk = java.nio.file.Files.walk(root)) {
+			for (java.nio.file.Path path : (Iterable<java.nio.file.Path>) walk::iterator) {
+				String entry = root.relativize(path).toString().replace('\\', '/');
+				if (!entry.endsWith(".class") || entry.contains("$")) {
+					continue;
+				}
+				String bare = entry.substring(entry.lastIndexOf('/') + 1);
+				if (bare.contains("InHand") || bare.contains("Avatar") || bare.contains("ArmPose") || bare.contains("SwingAnimation")
+						|| bare.contains("HumanoidArm") || bare.contains("FirstPerson") || bare.startsWith("PlayerRender") || bare.contains("HandRender")) {
+					Jugcraft.LOGGER.info("[probe] FIELD found {}", entry);
+					if (bare.contains("InHand") || bare.contains("ArmPose") || bare.contains("HandRender")) {
+						names.add(entry.substring(0, entry.length() - 6));
+					}
+				}
+			}
+		}
+		for (String name : names) {
+			try (InputStream in = Jugcraft.class.getClassLoader().getResourceAsStream(name + ".class")) {
+				Jugcraft.LOGGER.info("[probe] CLASS {} {}", name, in == null ? "missing" : java.util.Base64.getEncoder().encodeToString(in.readAllBytes()));
+			} catch (Exception exception) {
+				Jugcraft.LOGGER.info("[probe] CLASS {} unreadable: {}", name, exception.toString());
+			}
+		}
+		helper.succeed();
+	}
+
 	private static void add(Set<String> names, Class<?> type) {
 		if (type.getName().startsWith("net.minecraft") && names.add(type.getName().replace('.', '/'))) {
 			for (Class<?> inner : type.getDeclaredClasses()) {
