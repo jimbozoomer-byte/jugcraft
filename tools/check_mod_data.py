@@ -22,6 +22,7 @@ import seasons
 import tank_display
 import exosuit
 import grapple
+import field_chemistry
 import gear
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
@@ -295,7 +296,7 @@ def item_units(ref):
         return {"aluminum": 9}
     if path in NON_METAL:
         return {}
-    if path in plastic.blocks() or path in exosuit.items() or path in grapple.items():
+    if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items():
         return {}
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
@@ -481,6 +482,7 @@ def check_tags():
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
+                                                    + field_chemistry.items()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -565,6 +567,30 @@ def check_exosuit():
             for _, _, tex in boxes:
                 if not (textures / "block" / f"{tex}.png").exists():
                     err(f"Missing exosuit part texture block/{tex}.png")
+
+
+def check_field_chemistry():
+    """weapons/FieldChemistry.java against tools/field_chemistry.py: the numbers, items, cloud entity and damage types."""
+    java = (JAVA_ROOT / "weapons" / "FieldChemistry.java").read_text(encoding="utf-8")
+    for const in ("CHLORINE_RADIUS", "CHLORINE_TICKS", "CHLORINE_DAMAGE", "SMOKE_RADIUS", "SMOKE_TICKS", "THERMITE_RADIUS",
+                  "THERMITE_TICKS", "THERMITE_DAMAGE", "THERMITE_FIRE_SECONDS", "FLASH_RADIUS", "FLASH_BLIND_TICKS",
+                  "FLASH_STUN_TICKS", "GAS_MASK_DURABILITY", "SCUBA_GAS_OXYGEN", "FIRST_AID_COOLDOWN", "STIMULANT_TICKS"):
+        value = getattr(field_chemistry, const)
+        m = re.search(rf"\b{const} = ([0-9_.]+)F?;", java)
+        if not m or float(m.group(1).replace("_", "")) != float(value):
+            err(f"FieldChemistry.{const} differs from tools/field_chemistry.py ({value})")
+    for item in field_chemistry.items():
+        if f'item("{item}"' not in java:
+            err(f"FieldChemistry does not register {item}")
+        if not (ASSETS / "textures" / "item" / f"{item}.png").is_file():
+            err(f"missing texture item/{item}.png")
+    if 'Jugcraft.id("chemical_cloud")' not in java:
+        err("FieldChemistry does not register the chemical cloud")
+    for name in field_chemistry.DAMAGE_TYPES:
+        if f'Jugcraft.id("{name}")' not in java or not (DATA / MOD / "damage_type" / f"{name}.json").is_file():
+            err(f"damage type {MOD}:{name} is not registered in Java and data")
+    if not (ASSETS / "textures" / "entity" / "equipment" / "humanoid" / "gas_mask.png").is_file():
+        err("missing the worn gas mask texture")
 
 
 def check_grapple():
@@ -3385,6 +3411,7 @@ def main():
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
+                  | set(field_chemistry.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_petro()
@@ -3399,6 +3426,7 @@ def main():
     check_gear()
     check_exosuit()
     check_grapple()
+    check_field_chemistry()
     check_plastic()
     check_seasons()
     check_alpine()

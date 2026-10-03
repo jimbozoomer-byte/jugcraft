@@ -360,6 +360,7 @@ def gear_pages():
     """Batch 25: bronze and steel tools and armor, and paxels; batch 27 gear; batch 28 exosuit."""
     import exosuit
     import grapple
+    import field_chemistry as fc
     import gear
     grid = [item_for(gear.GEAR_TIERS["steel"]["ingot"]) if ch == "#" else ("minecraft:stick" if ch == "S" else None)
             for row in gear.PATTERNS["pickaxe"] for ch in row.ljust(3)]
@@ -409,6 +410,29 @@ def gear_pages():
             "damage and lets go with a hop at the end, so you can climb cliffs and cross gaps. In a mob, it drags the "
             "mob to you; bosses and golems are too heavy.",
             "Use it again to let go. Party members are never hooked; other players only where PvP is on."]},
+        {"title": "Chemical Grenades", "icon": f"{MOD}:chlorine_grenade", "text": [
+            "Thrown by hand or fired from the grenade launcher like the frag grenade. None of them breaks or burns a block.",
+            f"Chlorine: a {fc.CHLORINE_RADIUS:g}-block cloud for {fc.CHLORINE_TICKS // 20} s that hurts whatever breathes "
+            "inside, through armor (not fish or the undead). Steel plate and nugget with 500 mB of chlorine in the "
+            "chemical reactor.",
+            f"Smoke: a {fc.SMOKE_RADIUS:g}-block screen for {fc.SMOKE_TICKS // 20} s. Mobs lose sight of anyone inside; "
+            "players inside without a mask can't see. Steel plate and sugar with ammonia in the reactor.",
+            f"Thermite: a white-hot pool for {fc.THERMITE_TICKS // 20} s that burns whatever stands in it, through armor. "
+            "Thermite is an aluminum ingot and two iron dust; fill grenades like frag grenades.",
+            "Flashbang: blinds players who see it and staggers mobs (they lose their target, slowed and weakened). "
+            "No damage."]},
+        {"title": "Gas Mask", "icon": f"{MOD}:gas_mask", "text": [
+            "Keeps out chlorine and smoke; its tinted lenses keep out a flashbang.",
+            f"The filter wears a point a second in gas or smoke ({11 * fc.GAS_MASK_DURABILITY} s in all): repair it "
+            "with charcoal on an anvil.",
+            f"The scuba mask and tank also keep gas out while the tank has oxygen ({fc.SCUBA_GAS_OXYGEN} mB a second)."]},
+        {"title": "Medicines", "icon": f"{MOD}:first_aid_kit", "text": [
+            "Made in the chemical reactor. First aid kit: two cotton and a soap in bioethanol. Heals four hearts, "
+            f"then a {fc.FIRST_AID_COOLDOWN} s wait.",
+            "Antidote: two charcoal and a bottle in lye. Clears poison, wither and every other harmful effect, and "
+            "keeps the good ones (milk clears both).",
+            f"Stimulant: four cocoa beans and a bottle in bioethanol. Speed II and Haste II for "
+            f"{fc.STIMULANT_TICKS // 20} s, with hunger."]},
     ]
 
 

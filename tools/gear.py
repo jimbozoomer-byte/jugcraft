@@ -145,6 +145,7 @@ def write_all(write, assets, data, lang, condition):
         for tag in ("pickaxes", "axes", "shovels"):
             by_tag.setdefault(tag, []).append(f"{MOD}:{tier}_paxel")
     by_tag["head_armor"].append(f"{MOD}:scuba_mask")
+    by_tag["head_armor"].append(f"{MOD}:gas_mask")  # batch 31, tools/field_chemistry.py
     by_tag["chest_armor"].append(f"{MOD}:scuba_tank")
     by_tag["foot_armor"].append(f"{MOD}:free_runners")
     by_tag["swords"].append(f"{MOD}:power_katana")

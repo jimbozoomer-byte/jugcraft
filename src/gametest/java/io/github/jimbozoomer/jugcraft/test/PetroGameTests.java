@@ -1,6 +1,11 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import net.minecraft.world.entity.EquipmentSlot;
+import io.github.jimbozoomer.jugcraft.weapons.Warhead;
+import io.github.jimbozoomer.jugcraft.weapons.Flash;
+import io.github.jimbozoomer.jugcraft.weapons.FieldChemistry;
+import io.github.jimbozoomer.jugcraft.weapons.ChemicalCloud;
 import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidFuels;
 import io.github.jimbozoomer.jugcraft.chemistry.OilReservoirs;
@@ -1405,5 +1410,94 @@ public class PetroGameTests {
 			helper.assertTrue(out.is(BuiltInRegistries.ITEM.getValue(Jugcraft.id("lithium_carbonate"))) && out.getCount() == 2,
 					"Lithium carbonate: " + out);
 		});
+	}
+
+	/** Batch 31: chlorine hurts a pig, not a pig in a gas mask (whose filter wears), a sealed scuba set or a zombie. */
+	@GameTest
+	public void chlorineHurtsWhatBreathesUnlessMasked(GameTestHelper helper) {
+		Mob bare = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(3, 1, 3));
+		Mob masked = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(4, 1, 3));
+		Mob diver = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(3, 1, 4));
+		Mob zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(4, 1, 4));
+		masked.setItemSlot(EquipmentSlot.HEAD, new ItemStack(FieldChemistry.GAS_MASK));
+		ItemStack tank = new ItemStack(JugcraftGear.SCUBA_TANK);
+		ScubaTankItem.setOxygen(tank, 1000);
+		diver.setItemSlot(EquipmentSlot.HEAD, new ItemStack(JugcraftGear.SCUBA_MASK));
+		diver.setItemSlot(EquipmentSlot.CHEST, tank);
+		ChemicalCloud cloud = ChemicalCloud.spawn(helper.getLevel(), helper.absoluteVec(new Vec3(4.0, 1.5, 4.0)),
+				ChemicalCloud.Kind.CHLORINE, null);
+		helper.assertTrue(bare.getHealth() < bare.getMaxHealth(), "The bare pig was not hurt: " + bare.getHealth());
+		helper.assertTrue(masked.getHealth() == masked.getMaxHealth(), "The masked pig was hurt: " + masked.getHealth());
+		helper.assertTrue(masked.getItemBySlot(EquipmentSlot.HEAD).getDamageValue() == 1, "The filter did not wear");
+		helper.assertTrue(diver.getHealth() == diver.getMaxHealth(), "The diver was hurt: " + diver.getHealth());
+		helper.assertTrue(ScubaTankItem.oxygen(diver.getItemBySlot(EquipmentSlot.CHEST)) == 1000 - FieldChemistry.SCUBA_GAS_OXYGEN,
+				"Oxygen left: " + ScubaTankItem.oxygen(diver.getItemBySlot(EquipmentSlot.CHEST)));
+		helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), "The zombie was hurt: " + zombie.getHealth());
+		helper.assertTrue(!cloud.shouldBeSaved(), "Clouds should not be saved");
+		helper.succeed();
+	}
+
+	/** Batch 31: a mob hunting something inside smoke loses its target. */
+	@GameTest(maxTicks = 40)
+	public void smokeHidesFromMobs(GameTestHelper helper) {
+		Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(2, 1, 2));
+		Mob zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(9, 1, 2));
+		zombie.setTarget(pig);
+		ChemicalCloud.spawn(helper.getLevel(), helper.absoluteVec(new Vec3(2.5, 1.5, 2.5)), ChemicalCloud.Kind.SMOKE, null);
+		helper.succeedWhen(() -> helper.assertTrue(zombie.getTarget() == null, "The zombie still sees the pig"));
+	}
+
+	/** Batch 31: thermite burns what stands in it and lights no block. */
+	@GameTest(maxTicks = 60)
+	public void thermiteBurnsButLightsNothing(GameTestHelper helper) {
+		Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(3, 1, 3));
+		helper.setBlock(new BlockPos(4, 1, 3), Blocks.OAK_PLANKS);
+		Warhead.THERMITE.detonate(helper.getLevel(), helper.absoluteVec(new Vec3(3.5, 2.5, 3.5)), null, null);
+		helper.assertTrue(pig.getHealth() < pig.getMaxHealth() && pig.getRemainingFireTicks() > 0,
+				"The pig was not burnt: " + pig.getHealth() + ", fire " + pig.getRemainingFireTicks());
+		helper.runAfterDelay(40, () -> {
+			for (int x = 1; x <= 5; x++) {
+				for (int z = 1; z <= 5; z++) {
+					BlockPos pos = new BlockPos(x, 1, z);
+					helper.assertTrue(!helper.getBlockState(pos).is(Blocks.FIRE), "Fire at " + pos);
+				}
+			}
+			helper.assertBlockPresent(Blocks.OAK_PLANKS, new BlockPos(4, 1, 3));
+			helper.succeed();
+		});
+	}
+
+	/** Batch 31: a flashbang staggers a mob that sees it, not one behind a wall, and hurts nothing. */
+	@GameTest
+	public void flashbangStaggersWhatSeesIt(GameTestHelper helper) {
+		for (int y = 1; y <= 3; y++) {
+			for (int z = 1; z <= 6; z++) {
+				helper.setBlock(new BlockPos(6, y, z), Blocks.STONE);
+			}
+		}
+		Mob seen = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(2, 1, 6));
+		Mob hidden = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(8, 1, 3));
+		int dazzled = Flash.detonate(helper.getLevel(), helper.absoluteVec(new Vec3(4.5, 1.5, 3.5)), null);
+		helper.assertTrue(seen.hasEffect(MobEffects.SLOWNESS), "The zombie in sight was not staggered");
+		helper.assertTrue(!hidden.hasEffect(MobEffects.SLOWNESS), "The wall did not shield the flash");
+		helper.assertTrue(dazzled == 1 && seen.getHealth() == seen.getMaxHealth(), "Dazzled " + dazzled + ", health " + seen.getHealth());
+		helper.succeed();
+	}
+
+	/** Batch 31: the antidote clears poison and keeps speed; the stimulant hastes; the first aid kit heals. */
+	@GameTest(maxTicks = 40)
+	public void medicinesWork(GameTestHelper helper) {
+		Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(2, 1, 2));
+		pig.addEffect(new MobEffectInstance(MobEffects.POISON, 200, 0));
+		pig.addEffect(new MobEffectInstance(MobEffects.SPEED, 200, 0));
+		new ItemStack(FieldChemistry.ANTIDOTE).finishUsingItem(helper.getLevel(), pig);
+		helper.assertTrue(!pig.hasEffect(MobEffects.POISON), "The antidote left the poison");
+		helper.assertTrue(pig.hasEffect(MobEffects.SPEED), "The antidote cleared speed");
+		new ItemStack(FieldChemistry.STIMULANT).finishUsingItem(helper.getLevel(), pig);
+		helper.assertTrue(pig.hasEffect(MobEffects.HASTE), "The stimulant gave no haste");
+		pig.setHealth(2.0F);
+		new ItemStack(FieldChemistry.FIRST_AID_KIT).finishUsingItem(helper.getLevel(), pig);
+		// Instant health works on the pig's next tick.
+		helper.succeedWhen(() -> helper.assertTrue(pig.getHealth() >= 9.0F, "The first aid kit healed to " + pig.getHealth()));
 	}
 }

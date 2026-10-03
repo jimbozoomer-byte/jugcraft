@@ -339,6 +339,26 @@ FLUID_RECIPES = {
         # Guncotton (batch 18): cotton nitrated in nitric acid (nitrocellulose), the grenade's charge.
         {"name": "guncotton", "items": [("jugcraft:cotton", 2)], "fluids": [("jugcraft:nitric_acid", 250)],
          "results": [("jugcraft:guncotton", 2)], "ticks": 100, "features": ["machines", "explosives"]},
+        # Field chemistry (batch 31, tools/field_chemistry.py). Chlorine grenades: a steel case charged with chlorine.
+        {"name": "chlorine_grenade", "items": [("#c:plates/steel", 1), ("minecraft:iron_nugget", 1)],
+         "fluids": [("jugcraft:chlorine", 500)], "results": [("jugcraft:chlorine_grenade", 2)], "ticks": 80,
+         "features": ["machines", "salt"]},
+        # Smoke grenades: sugar to burn and an ammonium salt to make a thick white smoke.
+        {"name": "smoke_grenade", "items": [("#c:plates/steel", 1), ("minecraft:sugar", 2)],
+         "fluids": [("jugcraft:ammonia", 250)], "results": [("jugcraft:smoke_grenade", 2)], "ticks": 80,
+         "features": ["machines"]},
+        # Medicines. A first aid kit: cotton dressings and soap, sterilised in bioethanol.
+        {"name": "first_aid_kit", "items": [("jugcraft:cotton", 2), ("jugcraft:soap", 1)],
+         "fluids": [("jugcraft:bioethanol", 250)], "results": [("jugcraft:first_aid_kit", 2)], "ticks": 100,
+         "features": ["machines"]},
+        # Antidote: charcoal activated in lye, in a bottle of water.
+        {"name": "antidote", "items": [("minecraft:charcoal", 2), ("minecraft:glass_bottle", 1)],
+         "fluids": [("jugcraft:lye", 250)], "results": [("jugcraft:antidote", 1)], "ticks": 100,
+         "features": ["machines", "salt"]},
+        # Stimulant: caffeine extracted from cocoa beans with bioethanol.
+        {"name": "stimulant", "items": [("minecraft:cocoa_beans", 4), ("minecraft:glass_bottle", 1)],
+         "fluids": [("jugcraft:bioethanol", 250)], "results": [("jugcraft:stimulant", 1)], "ticks": 100,
+         "features": ["machines"]},
         # Vanadium electrolyte (batch 17): the vanadium in heavy oil residue leached into sulfuric acid, for the flow
         # battery. As much electrolyte as acid goes in.
         {"name": "vanadium_electrolyte", "items": [("jugcraft:asphalt_binder", 2)],
