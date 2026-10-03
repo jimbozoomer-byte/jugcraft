@@ -62,7 +62,8 @@
 			"io.github.jimbozoomer.jugcraft.test.BiomeGameTests",
 			"io.github.jimbozoomer.jugcraft.test.TownGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DiagonalConnectionsGameTests",
-			"io.github.jimbozoomer.jugcraft.test.DiagonalBaselineGameTests"
+			"io.github.jimbozoomer.jugcraft.test.DiagonalBaselineGameTests",
+			"io.github.jimbozoomer.jugcraft.test.WeaponProbeGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
