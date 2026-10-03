@@ -236,7 +236,7 @@ Records: [pixel-hollows.md](features/pixel-hollows.md), [retro-trader.md](featur
 | sounds | `assets/jugcraft/sounds.json`; `sounds/ambient/pixel_hollows_loop.ogg` from `tools/pixel_hollows_sound.py` | biome loop and bleeps; the trader's work sound |
 | textures | `tools/pixel_hollows_textures.py` (`ph_*`, `rt_*`, the villager overlay `entity/villager/profession/retro_trader.png` and its zombie twin) | original |
 
-**Mixins:** `jugcraft.mixins.json` holds ten: the Overworld biome table (`OverworldBiomeBuilderMixin`) and Jugcraft regions (`MultiNoiseBiomeSourceMixin`), the village pool accessor (`StructureTemplatePoolAccessor`), the one-shop-per-village trio (`JigsawPlacementMixin`, which wraps the jigsaw placer's run and lays a village out again when it has no shop; `PoolElementStructurePieceMixin`; `StructureTemplatePoolMixin`, which only reorders the houses pools that hold the shop), and the town's protection (`TownExplosionCalculatorMixin`, `TownEntityExplosionMixin`, `TownFireBlockMixin`, `TownPistonMixin`). `jugcraft.seasons.mixins.json` holds `BiomeSeasonMixin` and `jugcraft.client.mixins.json` holds `ClientLevelSeasonMixin`. Add one only when no API can do the job, and say why in its Javadoc.
+**Mixins:** `jugcraft.mixins.json` holds thirteen: diagonal connections (`DiagonalStateMixin`, `DiagonalDefaultStateMixin`, `DiagonalShapeMixin`; see below), the Overworld biome table (`OverworldBiomeBuilderMixin`) and Jugcraft regions (`MultiNoiseBiomeSourceMixin`), the village pool accessor (`StructureTemplatePoolAccessor`), the one-shop-per-village trio (`JigsawPlacementMixin`, which wraps the jigsaw placer's run and lays a village out again when it has no shop; `PoolElementStructurePieceMixin`; `StructureTemplatePoolMixin`, which only reorders the houses pools that hold the shop), and the town's protection (`TownExplosionCalculatorMixin`, `TownEntityExplosionMixin`, `TownFireBlockMixin`, `TownPistonMixin`). `jugcraft.seasons.mixins.json` holds `BiomeSeasonMixin` and `jugcraft.client.mixins.json` holds `ClientLevelSeasonMixin`. Add one only when no API can do the job, and say why in its Javadoc.
 
 ### The walled town (`town/`, `tools/town*.py`)
 
@@ -255,6 +255,9 @@ Record: [walled-town.md](features/walled-town.md).
 | commands | `town/TownCommand` | `/jugcraft town [place|theme]`, `/jugcraft jugs [give|take]` |
 
 ## Shared systems and how to plug in
+
+### Diagonal connections (`diagonal/`, `tools/diagonal_connections.py`)
+Every `FenceBlock` and `IronBarsBlock` has the properties `north_east`, `south_east`, `south_west` and `north_west`; only blocks in `#jugcraft:connects_diagonally` set them. To make a new fence, pane or bars block join diagonally, add it to `tools/diagonal_connections.py`. The generator writes its 45-degree arm model (a child of its side model) and its four blockstate parts, and tags it; `check_diagonal_connections` fails if a fence-shaped Jugcraft blockstate is left out. Record: [diagonal-connections.md](features/diagonal-connections.md).
 
 ### Energy (`energy/`)
 
@@ -568,7 +571,8 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `…/logistics/` | item pipe, extractor, sorter, wrench, item networks |
 | `…/machine/` | machine kinds, blocks, block entity, menu, recipes, footprints, power ports, side config, arc furnace structure |
 | `…/world/` | Pixel Hollows (blocks, lining feature, map search) and the Retro Trader (cabinet, profession, trades, village shop) |
-| `…/mixin/` | the mixins: Overworld biome table and Jugcraft regions, seasonal biome colours, village pool accessor, one shop per village (pool order, placer, placed pieces, a new layout when the shop has no room) and the town's protection (explosions, fire, pistons) |
+| `…/diagonal/` | `DiagonalConnections`: diagonal joins for fences, panes and bars (properties, rule, shapes, updates) |
+| `…/mixin/` | the mixins: diagonal connections (properties and placement, default states, shapes and rotation), Overworld biome table and Jugcraft regions, seasonal biome colours, village pool accessor, one shop per village (pool order, placer, placed pieces, a new layout when the shop has no room) and the town's protection (explosions, fire, pistons) |
 | `src/client/java/.../client/` | `JugcraftClient` (screen registration), `MachineScreen` |
 | `…/season/`, `…/mixin/BiomeSeasonMixin.java`, `src/client/.../SeasonColors.java`, `src/client/.../mixin/client/` | seasons: calendar and events, palette, sync, command, winter snow, the client tint hook |
 | `src/gametest/java/.../test/JugcraftGameTests.java` | game tests (run by `./gradlew build`) |
