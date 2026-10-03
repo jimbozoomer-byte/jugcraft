@@ -500,17 +500,17 @@ public class Werewolf extends Monster {
 	}
 
 	/**
-	 * The alpha's howl: Darkness for the players within {@value #ALPHA_REACH} blocks (not in creative or spectating);
-	 * Strength and Speed for the werewolves within {@value #FRENZY_REACH}, and its prey for any not hunting. Returns how
-	 * many werewolves it roused.
+	 * The alpha's howl: Darkness for the players within {@value #ALPHA_REACH} blocks in survival or adventure (as the
+	 * warden gives it); Strength and Speed for the werewolves within {@value #FRENZY_REACH}, and its prey for any not
+	 * hunting. Returns how many werewolves it roused.
 	 */
 	public int alphaHowl(ServerLevel level) {
 		LivingEntity target = getTarget();
 		howledFor = target == null ? null : target.getUUID();
 		nextAlphaHowl = tickCount + HOWL_COOLDOWN;
 		level.playSound(null, getX(), getY(), getZ(), sound("entity.wolf.howl", SoundEvents.ZOMBIE_AMBIENT), SoundSource.HOSTILE, 6.0F, 0.4F);
-		for (ServerPlayer player : level.players()) {
-			if (!player.isSpectator() && !player.isCreative() && player.distanceToSqr(this) <= ALPHA_REACH * ALPHA_REACH) {
+		for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(ALPHA_REACH))) {
+			if (player.gameMode.isSurvival() && player.distanceToSqr(this) <= ALPHA_REACH * ALPHA_REACH) {
 				player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, DARKNESS_TICKS, 0), this);
 			}
 		}
