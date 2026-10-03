@@ -1,6 +1,6 @@
 # The Graveyard Pack
 
-Status: packs 1 (headstones, weathering and the Stonemason's Chisel) and 2 (monuments) are implemented in source, not yet played by hand. The Build workflow compiles them; CI's game tests and client screenshots are recorded below.
+Status: packs 1 (headstones, weathering and the Stonemason's Chisel), 2 (monuments) and 3 (buildings) are implemented in source, not yet played by hand. The Build workflow compiles them; CI's game tests and client screenshots are recorded below.
 Proposal issue: none; requested directly by the owner on 3 October 2026 ("do a serious high quality graveyard pack with high quality detailed blocks and multiblocks"). It comes in four packs, one pull request each, each stacked on the one before:
 1. headstones: nine life-sized memorials in four stones that weather with the years, and the Stonemason's Chisel that cuts their epitaphs;
 2. monuments: an obelisk, a draped urn, an angel at a tomb, a trumpeting angel on a column, an iron mortsafe and a faithful hound;
@@ -10,7 +10,7 @@ Proposal issue: none; requested directly by the owner on 3 October 2026 ("do a s
 It goes beyond the Halloween decorations' plain gravestones and crypt set (batch 3): those stay as they are, and this pack's memorials are the serious, finely carved kind. Nothing in it depends on the Halloween event.
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: Discovery tier. Every headstone is cut from a vanilla stone (calcite for marble, polished deepslate for slate, granite, smooth sandstone), in a stonecutter or a crafting table; the chisel is an iron ingot and a stick. The monuments add feathers, a flower pot, iron bars and, for the hound, bronze ingots (smelted from bronze blend).
+Target milestone and tier: Discovery tier. Every headstone is cut from a vanilla stone (calcite for marble, polished deepslate for slate, granite, smooth sandstone), in a stonecutter or a crafting table; the chisel is an iron ingot and a stick. The monuments add feathers, a flower pot, iron bars and, for the hound, bronze ingots (smelted from bronze blend); the buildings add oak, slates, lanterns, glass and bronze.
 Primary specialty and supported player role: building. A builder lays out a churchyard of real-sized, carved memorials, each with its own epitaph, and decides how old it looks: kept clean and waxed, or left to moss and ivy. Ghost hunters gain a reason to let one go to ruin, since neglected graves raise more restless spirits.
 
 ## Player experience
@@ -36,6 +36,17 @@ Each faces whoever places it and needs all its blocks free. Breaking any block o
 6. **Faithful Hound** (bronze on granite; three bronze ingots over three polished granite): a bronze hound, sculpted, lying at its master's grave with its head up and watching, on a granite plinth that carries the epitaph. Its bronze darkens and grows verdigris as it weathers.
 
 The monuments are headstones in every other way: they weather, wax, take an epitaph and stir spirits alike, and break as one.
+
+### Buildings
+Each building is one item, placed facing whoever places it with every block it needs free (and the player allowed to build in each), and broken as one: break any of its blocks and the whole comes down, dropping it once with every inscription cut on it, all of which come back when it is placed again. The blocks a doorway, a room or a passage needs are left out of it, so it can be walked into and a door or gates of the player's own hung in its openings.
+1. **Family Mausoleum** (white marble; seven calcite, a glass pane and a bronze ingot; 85 blocks, 5 × 5 m and 4.6 m to the cross): a temple front of four Tuscan columns on a low platform carries the entablature, its frieze cut with the family's name, and a pediment with a carved laurel wreath, a cross on its peak and a marble roof behind with ribs over its joints. The sides have sunken panels with carved crosses, the back a round-headed stained-glass window behind a bronze grille. The doorway (1 × 2) takes any door; the **Bronze Mausoleum Door** is made for it. Inside: a chequered marble floor, **twelve crypt fronts** on the side walls, each a polished tablet with bronze rosettes and **its own inscription**, a coffered ceiling, an altar with a cross and two candlesticks under the window, and a **sanctuary lamp** burning on its chain (light 10). The stained glass glows faintly at night.
+2. **Lych Gate** (oak, slate and rubble; three deepslate tile slabs, two oak logs, oak planks and two cobblestone walls; 4 × 2 blocks, 4.5 m to the ridge): the roofed gateway of an old churchyard, where a coffin rested on its way in. Oak posts on low rubble walls, with benches inside, carry a steep slate roof whose gables are boarded and finished with bargeboards, a pendant and a cross. The front tie beam's carved board takes an inscription. The passage between is two blocks wide, for a pair of gates of the player's own. Its oak silvers and its slates gather moss as it weathers.
+3. **Cemetery Gateway** (granite and wrought iron; two lanterns, four polished granite and iron bars; 5 blocks wide, 4.3 m to its cross): two rock-faced granite piers with polished panels carved with an inverted torch, moulded cornices and stepped caps carrying **lanterns** (light 14), and a wrought-iron overthrow arched between them: scrolls in its spandrels, a ringed cross on its crown, and **the cemetery's name in gilt** on the plate the arch frames. The opening is three blocks wide; three cemetery gates fit it.
+4. **Columbarium** (marble; eight calcite and a bronze ingot; 3 × 3 blocks): a wall of **six niches** for the ashes of the dead, each closed by a polished tablet with bronze rosettes and a little bronze vase, and each carrying **its own inscription**; pilasters between them, a frieze for one more inscription, a cornice, a pediment with a carved cross and urns at its ends.
+
+The chisel, or a named Name Tag, cuts the inscription of the part it is used on: a crypt front or niche its own, anywhere else the building's main one (the family name, the tie beam, the name plate, the frieze). A building weathers, waxes and stirs spirits as one, as a headstone does.
+
+**The Bronze Mausoleum Door** (five bronze ingots and a glass pane make two): a door opened by hand, like a copper door, cast as a pair of narrow leaves with a grille over smoked glass, raised panels below and pulls on both faces.
 
 ### Weathering
 - A headstone weathers in four stages: **clean**, **worn** (duller, grime run down from the top, chipped), **mossy** (moss creeping up from the ground in cushions, lichen rosettes, orange on granite and sandstone) and **overgrown** (green to a third of its height, crusted with lichen, ivy clumps at its foot and a trail climbing one side).
@@ -66,18 +77,20 @@ Headstones are graves for ghost hunting: at night they stir restless spirits as 
 - For infrastructure/cosmetics, supported systems and reason resource links do not apply: decoration; the only effect on play is the spirits.
 
 ## Balance and automation
-- Each headstone costs one to six vanilla stone blocks, each monument up to eight blocks or bars (the hound three bronze ingots), and returns only itself when broken: nothing breaks down into anything else, so there is no conversion loop.
+- Each headstone costs one to six vanilla stone blocks, each monument up to eight blocks or bars (the hound three bronze ingots), each building nine items or fewer (a decoration's price, though it fills up to 85 blocks), and returns only itself when broken: nothing breaks down into anything else, so there is no conversion loop.
+- The buildings' lamps and lanterns are light only: they need no fuel and burn for ever, as vanilla lanterns do.
 - Weathering needs no fuel and makes nothing. Brushing costs brush wear; waxing costs a honeycomb; aging costs a bone meal.
 - Spirits only rise at night, at most three within 16 blocks of a grave (ghost hunting's own cap); a churchyard of neglected headstones does not raise more than any other graves would, only more often up to that cap.
 
 ## Multiplayer and persistence
-- **Server authority.** Everything that changes a headstone needs build rights (`mayBuild`), like editing a sign. The epitaph screen's lines are checked on the server before they are cut: the player must have opened a session on exactly that headstone with the chisel within the last 6,000 ticks (one session, one cut), still hold a chisel, be within reach, be allowed to use items there, and send at most 4 lines of 24 characters (the network codec refuses anything much larger before it is read). Control characters are dropped and lines trimmed. Sessions end when the player leaves or the server stops.
-- The epitaph lives in the block entity of the headstone's first block (and its item); weathering and wax are block state on every block, so they survive restarts and chunk unloads.
+- **Server authority.** Everything that changes a headstone needs build rights (`mayBuild`), like editing a sign; placing one needs the player allowed to build in every block it fills. The epitaph screen's lines are checked on the server before they are cut: the player must have opened a session on exactly that memorial and inscription with the chisel within the last 6,000 ticks (one session, one cut), still hold a chisel, be within reach of the block they used it on, be allowed to use items there, the block must still be part of that memorial and the inscription one it has, and they may send at most 4 lines of 24 characters (the network codec refuses anything much larger before it is read). Control characters are dropped and lines trimmed. Sessions end when the player leaves or the server stops.
+- Every inscription lives in the block entity of the memorial's first block (and its item: `jugcraft:epitaph` for the first, `jugcraft:inscriptions` for a building's others); weathering and wax are block state on every block, so they survive restarts and chunk unloads.
+- Each building's block has a part property with exactly as many values as it has blocks (85 for the mausoleum), so the smaller ones carry no states they never use. Its layout (cells, collision boxes, inscriptions, lights) is generated into `/jugcraft/graveyard_buildings.json`, which the game reads at start-up.
 - With the agriculture feature off, the recipes do not load and headstones stop weathering; placed ones keep their stage, wax and epitaph, and everything stays registered.
-- New IDs only: blocks with items `gothic_headstone`, `willow_urn_headstone`, `winged_skull_headstone`, `lamb_headstone`, `broken_column`, `celtic_cross`, `rustic_scroll_headstone`, `table_tomb`, `ledger_stone`; item `stonemasons_chisel`; block entity `headstone`; data component `epitaph`; tags `jugcraft:headstones` (block and item); advancements `here_lies` and `groundskeeper`. Pack 2 adds blocks with items `grand_obelisk`, `draped_urn`, `angel_at_the_tomb`, `trumpeting_angel`, `mortsafe`, `faithful_hound` (in the same tag and block entity type). No migration.
+- New IDs only: blocks with items `gothic_headstone`, `willow_urn_headstone`, `winged_skull_headstone`, `lamb_headstone`, `broken_column`, `celtic_cross`, `rustic_scroll_headstone`, `table_tomb`, `ledger_stone`; item `stonemasons_chisel`; block entity `headstone`; data component `epitaph`; tags `jugcraft:headstones` (block and item); advancements `here_lies` and `groundskeeper`. Pack 2 adds blocks with items `grand_obelisk`, `draped_urn`, `angel_at_the_tomb`, `trumpeting_angel`, `mortsafe`, `faithful_hound` (in the same tag and block entity type). Pack 3 adds blocks with items `family_mausoleum`, `lych_gate`, `cemetery_gateway`, `columbarium` (tag `jugcraft:graveyard_buildings`, block entity `graveyard_building`) and `bronze_mausoleum_door`, and the data component `inscriptions`. No migration.
 
 ## Dependencies and assets
-No new dependencies. Every texture is drawn by code in `tools/graveyard_textures.py` (the four stones at four stages, carved and rough faces, knotwork, ivy, cast iron and bronze at four stages, and the chisel). Models are generated by `tools/graveyard_models.py` (boxes, with the lamb, the urn's shroud, the two angels and the hound sculpted by `tools/sculpt.py`) and `tools/graveyard_data.py`. Sounds are vanilla's (stonecutter, brush, honeycomb, axe, bone meal). The letters are drawn by the client with the game's own font (`HeadstoneRenderer`).
+No new dependencies. Every texture is drawn by code in `tools/graveyard_textures.py` (the four stones at four stages, carved and rough faces, knotwork, ivy, cast iron and bronze at four stages, the chisel; for the buildings, weathering oak and roof slates, stained glass, a chequered marble floor, lamp and lantern glass, smoked glass and the door's item). Models are generated by `tools/graveyard_models.py` (boxes, with the lamb, the urn's shroud, the two angels and the hound sculpted by `tools/sculpt.py`), `tools/graveyard_buildings.py` (the buildings and the door) and `tools/graveyard_data.py`, which cuts each building into one model per block, its collision boxes and its layout. Sounds are vanilla's (stonecutter, brush, honeycomb, axe, bone meal). The letters are drawn by the client with the game's own font (`HeadstoneRenderer`).
 
 ## Verification
 | Check | Result |
@@ -89,6 +102,8 @@ No new dependencies. Every texture is drawn by code in `tools/graveyard_textures
 | Client game test (`HeadstoneClientGameTests`) | Pass (client shard 1 of that run); screenshots below |
 | Pack 2: server game tests (`MonumentGameTests`, 3) | Pass: all 577 required tests passed (run 37140597225, commit 39bb8482) |
 | Pack 2: client game test (`MonumentClientGameTests`) | Pass (client shard 2 of that run) |
+| Pack 3: server game tests (`GraveyardBuildingGameTests`, 6) | Pass: all 583 required tests passed (run 37141476426, commit ea0f16f6) |
+| Pack 3: client game test (`GraveyardBuildingClientGameTests`) | Pass (client shard 0 of that run) |
 
 The four game tests:
 1. a Celtic cross placed from its item goes up three blocks and a table tomb back two, facing the player; with a block in the way nothing is placed; breaking the cross's top or the tomb's head breaks the whole and drops one;
@@ -101,9 +116,23 @@ The three monument tests:
 2. bone meal on her wings ages all three of her blocks; breaking her wings breaks the whole and drops her once with her epitaph;
 3. every monument's recipe and loot load.
 
+The six building tests:
+1. placed by a player looking south, the mausoleum stands five blocks wide, four tall and five deep, every one of its 85 blocks part of it, with its doorway and room left open; with a block where its roof goes, nothing is placed;
+2. the chisel on a crypt front opens a session for that crypt's own inscription, and anywhere else on the mausoleum for the family name; each is cut only with its own session, and no slot beyond those it has; a named Name Tag cuts the first line of the part it is used on;
+3. bone meal on its roof ages every block; its sanctuary lamp gives light; breaking a roof block breaks it all and drops it once with its family name and every crypt's inscription, which come back when it is placed again;
+4. the columbarium and the lych gate place whole, the gate's passage left free; each niche cuts its own inscription and the rest the frieze's;
+5. the cemetery gateway places whole with its opening free, and its lanterns give light;
+6. every building's recipe and loot, and the Bronze Mausoleum Door's, load, and the door opens by hand.
+
 The client game test builds a churchyard of all nine headstones, engraved and at mixed stages, between a gravel path and a wrought-iron fence with lanterns, and a row of four gothic headstones at the four stages; it photographs the whole by day and night, each group up close, the table tomb and ledger stone from their feet, the four stages, and the epitaph screen. It prints the epitaph each client block entity received.
 
-**Not run:** a person playing it in a client (opening the epitaph screen with the chisel and typing; weathering over real hours); a dedicated server with two or more players cutting epitaphs at once.
+**Not run:** a person playing it in a client (opening the epitaph screen with the chisel and typing; weathering over real hours; walking into the mausoleum and hanging its door); a dedicated server with two or more players cutting epitaphs at once.
+
+### Pack 3 verification
+Run [37141476426](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37141476426) on commit ea0f16f6: the data check (1,036 IDs), the build and all 583 server game tests passed, and client shard 0, which runs `GraveyardBuildingClientGameTests`, passed. The run before it failed to compile: 26.3 has no `PushReaction.DESTROY`, so the door now pops off as `POPPED`. In the client test:
+- every building drew with its model and textures, and the log shows no missing model or texture;
+- the client received every inscription, printed in the log, e.g. `family_mausoleum on the client: [HALLOWAY] [Epitaph[lines=[SIR EDMUND, HALLOWAY, 1690 - 1761]], …]`, `lych_gate on the client: [I AM THE RESURRECTION, AND THE LIFE]`, `cemetery_gateway on the client: [HOLLOWMERE]`;
+- the screenshots show the four buildings along the path, the mausoleum's front with its door hung, its altar under the stained glass and its lamp, its crypt fronts each cut with a name, the lych gate, the gateway's gilt name plate and lanterns, the columbarium's niches, the mausoleum overgrown with ivy, and the row at night ([the guide](../branches/AGRICULTURE.md#the-graveyard-buildings) has them).
 
 ### Pack 2 verification
 Run [37140597225](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37140597225) on commit 39bb8482 passed every job: the data check (1,031 IDs), the build and all 577 server game tests, and the three client shards. Two runs before it failed in `MonumentGameTests` alone: the mortsafe stood at x = 8, outside the test's own eight-block area; it now stands at x = 7. In the client test every monument drew with its model and textures; the screenshots show the obelisk's epitaph on its die, the sculpted urn, the angel kneeling at her altar, the trumpeting angel on her column, the rusting mortsafe and the bronze hound ([the guide](../branches/AGRICULTURE.md#the-graveyard-monuments) has them).
@@ -122,6 +151,8 @@ The commit after it changes only the client test's camera (it no longer leaves h
 - Not seasonal: nothing here waits for Halloween, and nothing is removed after it.
 
 ## Rollout and open questions
-- The statues of pack 2 and the buildings of pack 3 use the same block (`HeadstoneBlock`), so they weather, wax and take epitaphs the same way.
+- The statues of pack 2 and the buildings of pack 3 use the same block (`HeadstoneBlock`, the buildings a subclass of it), so they weather, wax and take inscriptions the same way.
+- A building's inscriptions are drawn even when its first block is out of view (`GraveyardBuildingRenderer`), as they may be cut a few blocks from it.
+- The mausoleum's room floor and the doorway's threshold are drawn over the ground the building stands on; inside, players walk on that ground.
 - Epitaphs are plain text: no colours or formatting codes.
 - Weathering is by random ticks, so a churchyard far from any player does not age (as crops do not grow).
