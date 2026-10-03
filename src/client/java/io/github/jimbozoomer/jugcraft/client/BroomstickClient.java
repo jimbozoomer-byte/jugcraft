@@ -22,7 +22,7 @@ public final class BroomstickClient {
 		if (player == null || !(player.getVehicle() instanceof Broomstick broom)) {
 			return;
 		}
-		boolean paused = client.isPaused() || client.screen != null;
+		boolean paused = client.isPaused() || client.gui.screen() != null;
 		float forward = paused ? 0.0F : (client.options.keyUp.isDown() ? 1.0F : 0.0F) - (client.options.keyDown.isDown() ? 1.0F : 0.0F);
 		float strafe = paused ? 0.0F : (client.options.keyRight.isDown() ? 1.0F : 0.0F) - (client.options.keyLeft.isDown() ? 1.0F : 0.0F);
 		broom.steer(forward, strafe, !paused && client.options.keyJump.isDown());
