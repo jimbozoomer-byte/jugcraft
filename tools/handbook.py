@@ -361,6 +361,7 @@ def gear_pages():
     import exosuit
     import grapple
     import field_chemistry as fc
+    import construction as cn
     import gear
     grid = [item_for(gear.GEAR_TIERS["steel"]["ingot"]) if ch == "#" else ("minecraft:stick" if ch == "S" else None)
             for row in gear.PATTERNS["pickaxe"] for ch in row.ljust(3)]
@@ -426,6 +427,18 @@ def gear_pages():
             f"The filter wears a point a second in gas or smoke ({11 * fc.GAS_MASK_DURABILITY} s in all): repair it "
             "with charcoal on an anvil.",
             f"The scuba mask and tank also keep gas out while the tank has oxygen ({fc.SCUBA_GAS_OXYGEN} mB a second)."]},
+        {"title": "Foam Sprayer", "icon": f"{MOD}:foam_sprayer", "text": [
+            f"Aim at a block up to {cn.SPRAY_RANGE} blocks away: foam fills the open space in front of it, up to "
+            f"{cn.SPRAY_BLOCKS} blocks at a time, through air, water, lava and plants. It never replaces a solid block or "
+            "fills a space a mob stands in.",
+            f"Bridge gaps, seal caves, stop a flood or a lava flow. Each canister holds {cn.CANISTER_FOAM} blocks of foam; "
+            "make canisters in the chemical reactor from plastic pellets and an iron nugget in ammonia.",
+            "Foam breaks in a moment and drops nothing. Use cement on it to set it into concrete."]},
+        {"title": "Concrete", "icon": f"{MOD}:reinforced_concrete", "text": [
+            "Cement mix: calcite (or a bone block), clay and sand; smelt it into cement.",
+            "Four cement, four gravel and a water bucket make eight concrete, as hard as stone and tougher.",
+            "Eight concrete round a rebar make eight reinforced concrete: as blast-proof as obsidian, mined with a "
+            "diamond or steel pickaxe. Both come as slabs and stairs."]},
         {"title": "Medicines", "icon": f"{MOD}:first_aid_kit", "text": [
             "Made in the chemical reactor. First aid kit: two cotton and a soap in bioethanol. Heals four hearts, "
             f"then a {fc.FIRST_AID_COOLDOWN} s wait.",

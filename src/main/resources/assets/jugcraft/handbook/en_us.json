@@ -621,57 +621,59 @@
             "Reel Me In: Make a pneumatic grapple.",
             "Filtered: Make a gas mask.",
             "Chemical Arsenal: Make a chlorine, smoke or thermite grenade or a flashbang.",
-            "Field Medic: Make a first aid kit in the chemical reactor."
+            "Expanding Foam: Make a foam sprayer."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:synthesis_converter",
+          "icon": "jugcraft:reinforced_concrete",
           "text": [
+            "Bunker Down: Cast reinforced concrete, as blast-proof as obsidian.",
+            "Field Medic: Make a first aid kit in the chemical reactor.",
             "Bread from Air: Build a synthesis converter, to make ammonia from air.",
             "Aqua Fortis: Make nitric acid.",
-            "Kroll Call: Chlorinate titanium and melt the sponge.",
-            "Power Wall: Build a lithium battery bank.",
-            "Strong Attraction: Make a neodymium magnet."
+            "Kroll Call: Chlorinate titanium and melt the sponge."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:magnet_dynamo",
+          "icon": "jugcraft:lithium_battery_bank",
           "text": [
+            "Power Wall: Build a lithium battery bank.",
+            "Strong Attraction: Make a neodymium magnet.",
             "Lossless (Almost): Build a magnet dynamo or magnet motor.",
             "Pulling Strings: Pull a silicon boule in the arc furnace.",
-            "Etched in Light: Etch microchips in the lithography station.",
-            "Central Processing: Assemble a processor.",
-            "Hello, World: Build a network terminal."
+            "Etched in Light: Etch microchips in the lithography station."
           ]
         },
         {
           "title": "Milestones (15)",
-          "icon": "jugcraft:gas_holder",
+          "icon": "jugcraft:processor",
           "text": [
+            "Central Processing: Assemble a processor.",
+            "Hello, World: Build a network terminal.",
             "Under Pressure: Build a gas holder.",
             "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter.",
-            "Here Comes the Sun: Build an advanced solar panel.",
-            "Full of It: Make a tank gauge."
+            "Strained Relations: Make a fluid filter."
           ]
         },
         {
           "title": "Milestones (16)",
-          "icon": "jugcraft:solar_receiver",
+          "icon": "jugcraft:advanced_solar_panel",
           "text": [
+            "Here Comes the Sun: Build an advanced solar panel.",
+            "Full of It: Make a tank gauge.",
             "Concentrate: Build a solar receiver for a heliostat field.",
             "Spool Up: Make a turbocharger for the advanced engine.",
-            "Keep It Spinning: Build a flywheel.",
-            "Four on the Floor: Build an advanced combustion engine.",
-            "King Cotton: Grow cotton."
+            "Keep It Spinning: Build a flywheel."
           ]
         },
         {
           "title": "Milestones (17)",
-          "icon": "jugcraft:sprinkler",
+          "icon": "jugcraft:advanced_engine",
           "text": [
+            "Four on the Floor: Build an advanced combustion engine.",
+            "King Cotton: Grow cotton.",
             "Make It Rain: Build a sprinkler.",
             "Reaping What You Sow: Build a crop harvester."
           ]
@@ -2628,6 +2630,24 @@
             "Keeps out chlorine and smoke; its tinted lenses keep out a flashbang.",
             "The filter wears a point a second in gas or smoke (220 s in all): repair it with charcoal on an anvil.",
             "The scuba mask and tank also keep gas out while the tank has oxygen (20 mB a second)."
+          ]
+        },
+        {
+          "title": "Foam Sprayer",
+          "icon": "jugcraft:foam_sprayer",
+          "text": [
+            "Aim at a block up to 16 blocks away: foam fills the open space in front of it, up to 12 blocks at a time, through air, water, lava and plants. It never replaces a solid block or fills a space a mob stands in.",
+            "Bridge gaps, seal caves, stop a flood or a lava flow. Each canister holds 32 blocks of foam; make canisters in the chemical reactor from plastic pellets and an iron nugget in ammonia.",
+            "Foam breaks in a moment and drops nothing. Use cement on it to set it into concrete."
+          ]
+        },
+        {
+          "title": "Concrete",
+          "icon": "jugcraft:reinforced_concrete",
+          "text": [
+            "Cement mix: calcite (or a bone block), clay and sand; smelt it into cement.",
+            "Four cement, four gravel and a water bucket make eight concrete, as hard as stone and tougher.",
+            "Eight concrete round a rebar make eight reinforced concrete: as blast-proof as obsidian, mined with a diamond or steel pickaxe. Both come as slabs and stairs."
           ]
         },
         {

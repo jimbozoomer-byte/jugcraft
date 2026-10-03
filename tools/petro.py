@@ -347,6 +347,11 @@ FLUID_RECIPES = {
         {"name": "smoke_grenade", "items": [("#c:plates/steel", 1), ("minecraft:sugar", 2)],
          "fluids": [("jugcraft:ammonia", 250)], "results": [("jugcraft:smoke_grenade", 2)], "ticks": 80,
          "features": ["machines"]},
+        # Construction chemistry (batch 32, tools/construction.py). A foam canister: polyurethane-style foam from plastic
+        # and ammonia, in a steel can.
+        {"name": "foam_canister", "items": [("jugcraft:plastic_pellets", 2), ("minecraft:iron_nugget", 1)],
+         "fluids": [("jugcraft:ammonia", 250)], "results": [("jugcraft:foam_canister", 1)], "ticks": 80,
+         "features": ["machines", "crude_oil"]},
         # Medicines. A first aid kit: cotton dressings and soap, sterilised in bioethanol.
         {"name": "first_aid_kit", "items": [("jugcraft:cotton", 2), ("jugcraft:soap", 1)],
          "fluids": [("jugcraft:bioethanol", 250)], "results": [("jugcraft:first_aid_kit", 2)], "ticks": 100,

@@ -23,6 +23,7 @@ import tank_display
 import exosuit
 import grapple
 import field_chemistry
+import construction
 import gear
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
@@ -140,7 +141,8 @@ def item_models(definition):
 def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
-                  + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS):
+                  + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS
+                  + construction.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -160,7 +162,8 @@ def check_assets(registered):
         if definition:
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
-                        + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()
+                        + construction.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -296,7 +299,8 @@ def item_units(ref):
         return {"aluminum": 9}
     if path in NON_METAL:
         return {}
-    if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items():
+    if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
+            or path in construction.items() or path in construction.blocks():
         return {}
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
@@ -482,7 +486,7 @@ def check_tags():
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -567,6 +571,24 @@ def check_exosuit():
             for _, _, tex in boxes:
                 if not (textures / "block" / f"{tex}.png").exists():
                     err(f"Missing exosuit part texture block/{tex}.png")
+
+
+def check_construction():
+    """chemistry/ConstructionChemistry.java against tools/construction.py: the numbers, blocks and items."""
+    java = (JAVA_ROOT / "chemistry" / "ConstructionChemistry.java").read_text(encoding="utf-8")
+    for const in ("SPRAY_RANGE", "SPRAY_BLOCKS", "SPRAY_RADIUS", "SPRAY_COOLDOWN", "CANISTER_FOAM"):
+        value = getattr(construction, const)
+        m = re.search(rf"\b{const} = ([0-9_.]+)F?;", java)
+        if not m or float(m.group(1).replace("_", "")) != float(value):
+            err(f"ConstructionChemistry.{const} differs from tools/construction.py ({value})")
+    for block, (_, hardness, blast, variants) in construction.BLOCKS.items():
+        if f'"{block}"' not in java:
+            err(f"ConstructionChemistry does not register {block}")
+        if f"strength({hardness}F, {blast}F)" not in java:
+            err(f"ConstructionChemistry: {block} is not strength({hardness}F, {blast}F) as in tools/construction.py")
+    for item in construction.items():
+        if f'item("{item}"' not in java:
+            err(f"ConstructionChemistry does not register {item}")
 
 
 def check_field_chemistry():
@@ -3411,7 +3433,7 @@ def main():
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_petro()
@@ -3427,6 +3449,7 @@ def main():
     check_exosuit()
     check_grapple()
     check_field_chemistry()
+    check_construction()
     check_plastic()
     check_seasons()
     check_alpine()

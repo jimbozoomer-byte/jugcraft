@@ -4010,6 +4010,32 @@
         {
           "items": [
             [
+              "jugcraft:plastic_pellets",
+              2
+            ],
+            [
+              "minecraft:iron_nugget",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:ammonia",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:foam_canister",
+              1
+            ]
+          ],
+          "ticks": 80
+        },
+        {
+          "items": [
+            [
               "jugcraft:cotton",
               2
             ],

@@ -445,6 +445,20 @@ Empty tools mine like a bare hand and get no drops.
 
 **Code:** `gear/` (`JugcraftGrapple`, `PneumaticGrappleItem`, `GrappleHook`), client `GrappleHookRenderer`; data and art from `tools/grapple.py` ([feature record](features/pneumatic-grapple.md)).
 
+### Construction chemistry (batch 32)
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Foam Sprayer | Fills up to 12 open blocks within 2.5 of where it lands, 16 blocks away, with construction foam | 3 steel plates, iron nugget, rubber, piston |
+| Foam Canister | 32 blocks of foam | chemical reactor: 2 plastic pellets, iron nugget, 250 mB ammonia |
+| Construction Foam | Weak, drops nothing; cement sets it into concrete | foam sprayer |
+| Cement Mix / Cement | Smelt mix into cement | calcite or bone block, clay ball, sand (makes 4 mix) |
+| Concrete (+ slab, stairs) | Hardness 2.5, blast resistance 9 | 4 cement, 4 gravel, water bucket (makes 8) |
+| Rebar | Steel reinforcing bar | 3 steel ingots (makes 6) |
+| Reinforced Concrete (+ slab, stairs) | Hardness 15, blast resistance 1200 (obsidian) | 8 concrete, rebar (makes 8) |
+
+**Code:** `chemistry/` (`ConstructionChemistry`, `FoamSprayerItem`, `CementItem`); data and art from `tools/construction.py` ([feature record](features/construction-chemistry.md)).
+
 ### Field chemistry (batch 31)
 
 | Item | What it does | Built from |

@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.chemistry.FoamSprayerItem;
+import io.github.jimbozoomer.jugcraft.chemistry.ConstructionChemistry;
 import net.minecraft.world.entity.EquipmentSlot;
 import io.github.jimbozoomer.jugcraft.weapons.Warhead;
 import io.github.jimbozoomer.jugcraft.weapons.Flash;
@@ -1499,5 +1501,44 @@ public class PetroGameTests {
 		new ItemStack(FieldChemistry.FIRST_AID_KIT).finishUsingItem(helper.getLevel(), pig);
 		// Instant health works on the pig's next tick.
 		helper.succeedWhen(() -> helper.assertTrue(pig.getHealth() >= 9.0F, "The first aid kit healed to " + pig.getHealth()));
+	}
+
+	/** Batch 32: foam fills open space (air and water) but no solid block or space a mob stands in; canisters run down; cement sets foam. */
+	@GameTest
+	public void foamFillsOpenSpaceAndCementSetsIt(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		helper.setBlock(new BlockPos(3, 1, 3), Blocks.STONE);
+		helper.setBlock(new BlockPos(2, 1, 2), Blocks.WATER);
+		Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(4, 1, 2));
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL);
+		player.setPos(helper.absoluteVec(new Vec3(0.5, 1, 7.5)));
+		BlockPos start = helper.absolutePos(new BlockPos(3, 1, 2));
+		List<BlockPos> filled = FoamSprayerItem.fill(level, player, start, ConstructionChemistry.SPRAY_BLOCKS);
+		helper.assertTrue(!filled.isEmpty() && filled.size() <= ConstructionChemistry.SPRAY_BLOCKS, "Filled " + filled.size());
+		helper.assertTrue(filled.contains(helper.absolutePos(new BlockPos(2, 1, 2))), "The foam did not fill the water");
+		helper.assertTrue(!filled.contains(helper.absolutePos(new BlockPos(3, 1, 3))), "The foam replaced stone");
+		helper.assertTrue(filled.stream().noneMatch(pos -> pig.getBoundingBox().intersects(new net.minecraft.world.phys.AABB(pos))),
+				"The foam filled the pig's space");
+		helper.assertTrue(filled.stream().allMatch(pos -> pos.distSqr(start) <= ConstructionChemistry.SPRAY_RADIUS
+				* ConstructionChemistry.SPRAY_RADIUS), "The foam spread too far");
+
+		player.getInventory().add(new ItemStack(ConstructionChemistry.FOAM_CANISTER));
+		helper.assertTrue(FoamSprayerItem.foamLeft(player) == ConstructionChemistry.CANISTER_FOAM, "Foam: " + FoamSprayerItem.foamLeft(player));
+		FoamSprayerItem.useFoam(player, 12);
+		helper.assertTrue(FoamSprayerItem.foamLeft(player) == ConstructionChemistry.CANISTER_FOAM - 12, "Foam left: " + FoamSprayerItem.foamLeft(player));
+		FoamSprayerItem.useFoam(player, ConstructionChemistry.CANISTER_FOAM - 12);
+		helper.assertTrue(FoamSprayerItem.foamLeft(player) == 0, "The empty canister was not used up");
+
+		BlockPos foam = new BlockPos(5, 1, 5);
+		helper.setBlock(foam, ConstructionChemistry.CONSTRUCTION_FOAM);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ConstructionChemistry.CEMENT, 2));
+		ConstructionChemistry.CEMENT.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(helper.absolutePos(foam)), Direction.UP, helper.absolutePos(foam), false)));
+		helper.assertBlockPresent(ConstructionChemistry.CONCRETE, foam);
+		helper.assertTrue(player.getMainHandItem().getCount() == 1, "Cement left: " + player.getMainHandItem());
+		helper.assertTrue(ConstructionChemistry.REINFORCED_CONCRETE.getExplosionResistance() >= 1200.0F,
+				"Reinforced concrete is not blast-proof");
+		helper.succeed();
 	}
 }

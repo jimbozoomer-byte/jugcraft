@@ -150,6 +150,8 @@ def assets():
     grapple.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import field_chemistry
     field_chemistry.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import construction
+    construction.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
@@ -1218,6 +1220,14 @@ def tags():
     import plastic
     for block in plastic.blocks():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import construction
+    for block in construction.blocks():
+        if block.startswith("concrete"):
+            tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+            tags.add("block", "minecraft:needs_stone_tool", rid(block))
+        elif block.startswith("reinforced_concrete"):
+            tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+            tags.add("block", "minecraft:needs_diamond_tool", rid(block))
     for metal, info in METALS.items():
         tool = info.get("tool", "stone")
         tags.add("item", f"c:ingots/{metal}", rid(f"{metal}_ingot"))

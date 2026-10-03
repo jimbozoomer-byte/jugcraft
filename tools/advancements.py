@@ -93,6 +93,10 @@ TREE = {
     "gas_mask": ("air_separation_unit", "gas_mask", "Filtered", "Make a gas mask", "task"),
     "chemical_grenade": ("grenade", ["chlorine_grenade", "smoke_grenade", "thermite_grenade", "flashbang"],
                          "Chemical Arsenal", "Make a chlorine, smoke or thermite grenade or a flashbang", "task"),
+    # Batch 32: construction chemistry.
+    "foam_sprayer": ("synthesis_converter", "foam_sprayer", "Expanding Foam", "Make a foam sprayer", "task"),
+    "reinforced_concrete": ("steel", "reinforced_concrete", "Bunker Down", "Cast reinforced concrete, as blast-proof as "
+                            "obsidian", "task"),
     "first_aid_kit": ("air_separation_unit", "first_aid_kit", "Field Medic", "Make a first aid kit in the chemical reactor",
                       "task"),
     "synthesis_converter": ("air_separation_unit", "synthesis_converter", "Bread from Air",
