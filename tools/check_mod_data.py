@@ -34,6 +34,7 @@ import biomes_data
 import trees as tr
 import plants
 import town_assets
+import graveyard as gy
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -1376,6 +1377,7 @@ def check_agriculture():
     check_turkeys(java, main)
     check_theremin(java, main)
     check_ofrenda(java, main)
+    check_graveyard(java, main)
     pot = java.get("CookingPotBlockEntity", "")
     inputs = re.search(r'int INPUTS = (\d+);', pot)
     outputs = re.search(r'int OUTPUTS = (\d+);', pot)
@@ -3722,6 +3724,86 @@ def check_theremin(java, main):
         if not path.exists():
             err(f"The theremin needs {path.relative_to(ROOT)}")
 
+
+
+def check_graveyard(java, main):
+    """The graveyard pack: HeadstoneBlock's styles (id, stone, cells, boxes per part, where the epitaph goes), its
+    weathering numbers, the stones' ink, Epitaph's limits, the chisel and the session match tools/graveyard.py; the
+    renderer fades ink as graveyard.py says; every part and stage has its model, every state a variant; each headstone
+    has its loot (part 0 only, keeping the epitaph), recipe and words; the textures and advancements exist."""
+    source = java.get("HeadstoneBlock", "")
+    styles = re.findall(r'[A-Z_]+\("([a-z_]+)", Stone\.([A-Z]+), ([A-Z0-9]+),\s*new double\[\]\[\]\[\] \{(.*?)\},\s*'
+                        r'new Text\((true|false), ([^)]*)\)\)', source, re.S)
+    found = {}
+    for sid, stone, cells, boxes, top, text in styles:
+        parts = [[[float(v) for v in box.split(",")] for box in re.findall(r"\{([\d., ]+)\}", part)]
+                 for part in re.findall(r"\{(\{[\d., ]+\}(?:, \{[\d., ]+\})*)\}", boxes)]
+        values = [float(eval(v.replace("F", ""))) for v in text.split(",")]
+        found[sid] = {"stone": stone.lower(), "cells": cells, "boxes": parts, "top": top == "true", "text": values}
+    cell_names = {tuple(map(tuple, gy.SINGLE)): "SINGLE", tuple(map(tuple, gy.TALL2)): "TALL2", tuple(map(tuple, gy.TALL3)): "TALL3",
+                  tuple(map(tuple, gy.LONG)): "LONG"}
+    if set(found) != set(gy.HEADSTONES):
+        err(f"HeadstoneBlock.Style {sorted(found)} differs from HEADSTONES in tools/graveyard.py {sorted(gy.HEADSTONES)}")
+    for sid, info in gy.HEADSTONES.items():
+        got = found.get(sid)
+        if not got:
+            continue
+        text = info["text"]
+        want_text = [text["x"], text["y"], text["z"], text["width"], text["height"], text["max_scale"]]
+        want_boxes = [[list(map(float, box)) for box in part] for part in info["shapes"]]
+        if (got["stone"] != info["stone"] or got["cells"] != cell_names.get(tuple(map(tuple, info["cells"])))
+                or got["top"] != (text["face"] == "TOP") or any(abs(a - b) > 1e-4 for a, b in zip(got["text"], want_text))
+                or got["boxes"] != want_boxes):
+            err(f"HeadstoneBlock.Style for {sid} differs from tools/graveyard.py")
+    numbers = {name: float(value) for name, value in re.findall(r"static final (?:int|float|long) ([A-Z_]+) = ([\d.]+)[FL]?;", source)}
+    weather = gy.WEATHERING
+    if numbers.get("AGE_CHANCE") != weather["age_chance"] or numbers.get("SKY_FACTOR") != weather["sky_factor"]:
+        err("HeadstoneBlock AGE_CHANCE / SKY_FACTOR differ from WEATHERING in tools/graveyard.py")
+    stir = re.search(r"STIR = \{([\d.F, ]+)\}", source)
+    if not stir or [float(v.strip().rstrip("F")) for v in stir.group(1).split(",")] != weather["stir"]:
+        err("HeadstoneBlock.STIR differs from WEATHERING['stir'] in tools/graveyard.py")
+    inks = {name.lower(): (int(ink, 16), int(fade, 16)) for name, ink, fade in re.findall(r"([A-Z]+)\(0x([0-9A-F]{8}), 0x([0-9A-F]{8})\)", source)}
+    if inks != {stone: (info["ink"], info["fade_to"]) for stone, info in gy.STONES.items()}:
+        err("HeadstoneBlock.Stone inks differ from STONES in tools/graveyard.py")
+    renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "HeadstoneRenderer.java")
+    fade = re.search(r"INK_FADE = \{([\d.F, ]+)\}", renderer.read_text(encoding="utf-8") if renderer.exists() else "")
+    if not fade or [float(v.strip().rstrip("F")) for v in fade.group(1).split(",")] != weather["ink_fade"]:
+        err("HeadstoneRenderer.INK_FADE differs from WEATHERING['ink_fade'] in tools/graveyard.py")
+    epitaph = java.get("Epitaph", "")
+    limits = {name: int(value) for name, value in re.findall(r"static final int ([A-Z_]+) = (\d+);", epitaph)}
+    if limits.get("LINES") != gy.EPITAPH["lines"] or limits.get("LINE_LENGTH") != gy.EPITAPH["line_length"]:
+        err("Epitaph LINES / LINE_LENGTH differ from EPITAPH in tools/graveyard.py")
+    epitaphs = java.get("Epitaphs", "")
+    if f'CHISEL = "{gy.EPITAPH["chisel"]}"' not in epitaphs or f"SESSION_TICKS = {gy.EPITAPH['session_ticks']};" not in epitaphs:
+        err("Epitaphs CHISEL / SESSION_TICKS differ from EPITAPH in tools/graveyard.py")
+    for call in ('Jugcraft.id("epitaph")', 'Jugcraft.id("headstone")', "registerItem(Epitaphs.CHISEL", "Epitaphs.register()"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for sid, info in gy.HEADSTONES.items():
+        parts = len(info["cells"])
+        for part in range(parts):
+            for stage in gy.STAGES:
+                name = f"{sid}_{stage}" if parts == 1 else f"{sid}_{part}_{stage}"
+                if not (ASSETS / "models" / "block" / f"{name}.json").exists():
+                    err(f"{sid} needs model {name}")
+        variants = set((load(ASSETS / "blockstates" / f"{sid}.json") or {}).get("variants", {}))
+        want = {f"facing={f},part={p},waxed={w},weathering={s}" for f in ("north", "east", "south", "west") for p in range(3)
+                for w in ("false", "true") for s in range(4)}
+        if variants != want:
+            err(f"{sid}: its blockstate must cover every facing, part, wax and stage")
+        table = load(DATA / "jugcraft" / "loot_table" / "blocks" / f"{sid}.json") or {}
+        if "jugcraft:epitaph" not in json.dumps(table) or '"part": "0"' not in json.dumps(table):
+            err(f"{sid}: its loot must drop from part 0 only and keep the epitaph")
+        recipe = DATA / "jugcraft" / "recipe" / (f"{sid}_from_stonecutting.json" if "stonecutting" in info["recipe"] else f"{sid}.json")
+        if not recipe.exists() or f"block.jugcraft.{sid}" not in lang:
+            err(f"{sid} needs its recipe and words")
+    for texture in gy.textures():
+        if not (ASSETS / "textures" / "block" / f"{texture}.png").is_file():
+            err(f"Missing graveyard texture {texture}")
+    for key in gy.ADVANCEMENTS:
+        if not (DATA / "jugcraft" / "advancement" / f"{key}.json").exists():
+            err(f"Missing advancement {key}")
 
 def check_ofrenda(java, main):
     """The ofrenda: OfrendaBlockEntity and OfrendaBlock match OFRENDA in tools/agriculture.py (slots, how often it looks,

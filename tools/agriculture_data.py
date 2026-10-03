@@ -43,6 +43,7 @@ import spirit_board_data
 import turkey_data
 import theremin_data
 import ofrenda_data
+import graveyard_data
 import regatta_data
 import plants_data
 import trees_data
@@ -222,6 +223,7 @@ def assets(root, write, lang):
     turkey_data.assets(root, write, lang)
     theremin_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
+    graveyard_data.assets(root, write, lang)
 
 
 # ---------------------------------------------------------------- loot tables
@@ -346,6 +348,7 @@ def loot(data, write):
     turkey_data.loot(out, write)
     theremin_data.loot(out, write)
     ofrenda_data.loot(out, write)
+    graveyard_data.loot(out, write)
     crow_data.loot(out, write)
     firework_data.loot(out, write)
     feast_data.loot(out, write)
@@ -406,6 +409,7 @@ def recipes(out, write):
     ghost_data.recipes(out, write, conditions)
     face_paint_data.recipes(out, write, conditions)
     decor3_data.recipes(out, write, conditions)
+    graveyard_data.recipes(out, write, conditions)
 
 
 # ---------------------------------------------------------------- tags
@@ -466,6 +470,7 @@ def tags(tags):
     turkey_data.tags(tags)
     theremin_data.tags(tags)
     ofrenda_data.tags(tags)
+    graveyard_data.tags(tags)
 
 
 # ---------------------------------------------------------------- worldgen

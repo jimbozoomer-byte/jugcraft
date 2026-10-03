@@ -203,6 +203,10 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<RegattaBuoyBlockEntity> REGATTA_BUOY_ENTITY;
 	public static BlockEntityType<JudgingStandBlockEntity> JUDGING_STAND_ENTITY;
 	public static BlockEntityType<GravestoneBlockEntity> GRAVESTONE_ENTITY;
+	/** The graveyard pack: every headstone's block entity, the epitaph it carries as an item, and the chisel's wear. */
+	public static BlockEntityType<HeadstoneBlockEntity> HEADSTONE_ENTITY;
+	public static DataComponentType<Epitaph> EPITAPH;
+	public static final int CHISEL_USES = 250;
 	public static DataComponentType<CandyBagItem.Night> CANDY_BAG_NIGHT;
 	public static EntityType<WillOWisp> WILL_O_WISP;
 	public static EntityType<FlyingPumpkin> FLYING_PUMPKIN;
@@ -1547,6 +1551,35 @@ public final class JugcraftAgriculture {
 		registerItem("sugar_skull", props -> new BlockItem(skull, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		plain("pan_de_muerto_dough", COMPOST_MEDIUM);
 		food("pan_de_muerto", 6, 0.7F, COMPOST_MEDIUM_HIGH);
+
+		registerGraveyard();
+	}
+
+	/**
+	 * The graveyard pack (tools/graveyard.py): headstones that weather, one to three blocks each, each part of one block
+	 * entity type; the epitaph's data component; the Stonemason's Chisel and its epitaph screen.
+	 */
+	private static void registerGraveyard() {
+		EPITAPH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("epitaph"),
+				DataComponentType.<Epitaph>builder().persistent(Epitaph.CODEC).networkSynchronized(Epitaph.STREAM_CODEC).build());
+		List<Block> headstones = new ArrayList<>();
+		for (HeadstoneBlock.Style style : HeadstoneBlock.Style.values()) {
+			MapColor colour = switch (style.stone) {
+				case MARBLE -> MapColor.QUARTZ;
+				case SLATE -> MapColor.DEEPSLATE;
+				case GRANITE -> MapColor.DIRT;
+				case SANDSTONE -> MapColor.SAND;
+			};
+			// Random ticks: headstones weather, and graves stir at night.
+			Block stone = registerBlock(style.id, props -> new HeadstoneBlock(props, style), BlockBehaviour.Properties.of().mapColor(colour)
+					.requiresCorrectToolForDrops().strength(2.0F, 6.0F).sound(SoundType.STONE).noOcclusion().randomTicks());
+			registerItem(style.id, props -> new HeadstoneItem(stone, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+			headstones.add(stone);
+		}
+		HEADSTONE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("headstone"),
+				FabricBlockEntityTypeBuilder.create(HeadstoneBlockEntity::new, headstones.toArray(Block[]::new)).build());
+		registerItem(Epitaphs.CHISEL, StonemasonsChiselItem::new, new Item.Properties().durability(CHISEL_USES), EQUIPMENT_TAB);
+		Epitaphs.register();
 	}
 
 	/** The Yard Inflatables' designs, one block each ({@code inflatable_<design>}). */
