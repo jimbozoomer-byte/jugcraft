@@ -118,6 +118,7 @@ TREE = {
     "processor": ("microchip", "processor", "Central Processing", "Assemble a processor", "task"),
     "network_terminal": ("processor", "network_terminal", "Hello, World", "Build a network terminal", "goal"),
     "logic_controller": ("network_terminal", "logic_controller", "In Control", "Build a logic controller", "task"),
+    "control_monitor": ("logic_controller", "control_monitor", "Mission Control", "Build control monitor panels", "task"),
     # Fluid logistics (batch 8).
     "gas_holder": ("electrolytic_cell", "gas_holder", "Under Pressure", "Build a gas holder", "goal"),
     "fluid_valve": ("crude_oil", "fluid_valve", "Shut-Off Valve", "Make a fluid valve", "task"),
@@ -137,6 +138,8 @@ TREE = {
     "electroplating_bath": ("electrolytic_cell", "electroplating_bath", "Silver Lining", "Build an electroplating bath",
                             "task"),
     "ammonia_chiller": ("synthesis_converter", "ammonia_chiller", "Ice Cold", "Build an ammonia chiller", "task"),
+    "rocket_workshop": ("processor", "rocket_workshop", "Rocket Science", "Build a rocket workshop", "goal"),
+    "survey_rocket": ("rocket_workshop", "survey_rocket", "Eye in the Sky", "Assemble a survey rocket", "task"),
     "hydroponic_bay": ("crop_harvester", "hydroponic_bay", "Soil Optional", "Build a hydroponic bay", "task"),
     "crop_harvester": ("steel", "crop_harvester", "Reaping What You Sow", "Build a crop harvester", "goal"),
 }

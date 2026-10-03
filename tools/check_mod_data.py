@@ -28,6 +28,7 @@ import hydroponics
 import electroplating
 import gas_storage
 import control_electronics
+import rocketry
 import gear
 import arms
 import plastic
@@ -126,11 +127,13 @@ def model(ref):
 def _hi_res(name):
     """64x64 textures: the drone tower's realistic block textures (tools/tower_art.py) and items drawn with the
     high-detail renderer (tools/hd_art.py: construction_art.ITEMS so far)."""
+    if name in arms.textures():  # batch 42's arms (tools/arms_art.py)
+        return True
     import tower_art
     import blueprints
     import construction_art
     return (name in tower_art.TEXTURES or name in blueprints.TABLE_TEXTURES or name in construction_art.ITEMS
-            or name in gas_storage.HD_ITEMS or name in arms.textures()
+            or name in gas_storage.HD_ITEMS or name in control_electronics.HD_ITEMS or name in rocketry.HD_ITEMS
             or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_")))
 
 
@@ -310,7 +313,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -504,7 +507,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -632,7 +635,12 @@ def check_control_electronics():
                                ("LogicControllerBlockEntity.java", "INTERVAL", control_electronics.CONTROLLER_INTERVAL),
                                ("LogicControllerBlockEntity.java", "RULES", control_electronics.RULES),
                                ("LogicControllerBlockEntity.java", "STEP", control_electronics.THRESHOLD_STEP),
-                               ("ControlNetwork.java", "MAX_CABLES", control_electronics.MAX_CABLES)):
+                               ("ControlNetwork.java", "MAX_CABLES", control_electronics.MAX_CABLES),
+                               ("ControlMonitorBlockEntity.java", "RELINK_INTERVAL", control_electronics.MONITOR_RELINK),
+                               ("LogicControllerBlockEntity.java", "HISTORY", control_electronics.HISTORY),
+                               ("LogicControllerBlockEntity.java", "HISTORY_EVERY", control_electronics.HISTORY_EVERY),
+                               ("AlarmBlock.java", "INTERVAL", control_electronics.ALARM_INTERVAL),
+                               ("ControlRemoteItem.java", "RANGE", control_electronics.REMOTE_RANGE)):
         java = (control / path).read_text(encoding="utf-8")
         if f"int {const} = {value:_};" not in java and f"int {const} = {value};" not in java:
             err(f"{path} {const} differs from tools/control_electronics.py ({value})")
@@ -641,6 +649,19 @@ def check_control_electronics():
     for rgb in control_electronics.CHANNEL_COLORS.values():
         if "0x%02X%02X%02X" % rgb not in screen:
             err(f"LogicControllerScreen.COLORS lacks channel colour {rgb}")
+
+
+def check_rocketry():
+    """rocketry/ against tools/rocketry.py: the numbers."""
+    java = (JAVA_ROOT / "rocketry" / "JugcraftRocketry.java").read_text(encoding="utf-8")
+    for const in ("LAUNCH_DELAY", "SURVEY_RADIUS", "SURVEY_STRIDE", "WEATHER_TICKS", "WEATHER_COOLDOWN", "FLARE_RADIUS",
+                  "GLOW_TICKS", "SIGNAL_RANGE", "COOLDOWN"):
+        value = getattr(rocketry, const)
+        if f"int {const} = {value:_};" not in java and f"int {const} = {value};" not in java:
+            err(f"JugcraftRocketry.{const} differs from tools/rocketry.py ({value})")
+    for item in rocketry.ITEMS:
+        if f'"{item}"' not in java:
+            err(f"JugcraftRocketry does not register {item}")
 
 
 def check_construction():
@@ -4153,7 +4174,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_petro()
@@ -4175,6 +4196,7 @@ def main():
     check_electroplating()
     check_gas_storage()
     check_control_electronics()
+    check_rocketry()
     check_plastic()
     check_seasons()
     check_alpine()

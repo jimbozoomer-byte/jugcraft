@@ -654,37 +654,46 @@
             "Central Processing: Assemble a processor.",
             "Hello, World: Build a network terminal.",
             "In Control: Build a logic controller.",
-            "Under Pressure: Build a gas holder."
+            "Mission Control: Build control monitor panels."
           ]
         },
         {
           "title": "Milestones (16)",
-          "icon": "jugcraft:fluid_valve",
+          "icon": "jugcraft:gas_holder",
           "text": [
+            "Under Pressure: Build a gas holder.",
             "Shut-Off Valve: Make a fluid valve.",
             "Strained Relations: Make a fluid filter.",
             "Here Comes the Sun: Build an advanced solar panel.",
-            "Full of It: Make a tank gauge.",
-            "Concentrate: Build a solar receiver for a heliostat field."
+            "Full of It: Make a tank gauge."
           ]
         },
         {
           "title": "Milestones (17)",
-          "icon": "jugcraft:turbocharger",
+          "icon": "jugcraft:solar_receiver",
           "text": [
+            "Concentrate: Build a solar receiver for a heliostat field.",
             "Spool Up: Make a turbocharger for the advanced engine.",
             "Keep It Spinning: Build a flywheel.",
             "Four on the Floor: Build an advanced combustion engine.",
-            "King Cotton: Grow cotton.",
-            "Make It Rain: Build a sprinkler."
+            "King Cotton: Grow cotton."
           ]
         },
         {
           "title": "Milestones (18)",
-          "icon": "jugcraft:electroplating_bath",
+          "icon": "jugcraft:sprinkler",
           "text": [
+            "Make It Rain: Build a sprinkler.",
             "Silver Lining: Build an electroplating bath.",
             "Ice Cold: Build an ammonia chiller.",
+            "Rocket Science: Build a rocket workshop.",
+            "Eye in the Sky: Assemble a survey rocket."
+          ]
+        },
+        {
+          "title": "Milestones (19)",
+          "icon": "jugcraft:hydroponic_bay",
+          "text": [
             "Soil Optional: Build a hydroponic bay.",
             "Reaping What You Sow: Build a crop harvester."
           ]
@@ -3680,6 +3689,131 @@
           "icon": "jugcraft:logic_controller",
           "text": [
             "Runs your factory by rules. Join sensors and relays to it with data cable, then right-click it: each of its eight rules reads \"IF channel below or above N% THEN channel ON or OFF\". Every second it averages each channel's sensors and works through the rules in order, a later rule overriding an earlier one; a channel no rule switches this time keeps its state, so two rules (off above 90%, on below 50%) leave a dead band. The strip along the bottom shows every channel's reading."
+          ]
+        },
+        {
+          "title": "The Control Room",
+          "icon": "jugcraft:control_monitor",
+          "text": [
+            "Six control monitor panels in a wall, three wide and two tall, all facing the same way, form one screen. Run a data cable from any panel to a logic controller and it shows every channel: its colour, reading, a bar, a two-minute graph and whether the controller has it on.",
+            "An alarm klaxon is switched like a relay: while its channel is on it lights up and sounds.",
+            "A control remote flips one channel by hand. Use it on a logic controller to bind it, sneak and use it to pick the channel, and use it to switch. The controller's rules may switch the channel back when their condition next holds. It works within 256 blocks of the controller."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Rocketry",
+      "icon": "jugcraft:survey_rocket",
+      "pages": [
+        {
+          "title": "Rocket Fuel",
+          "icon": "jugcraft:solid_propellant",
+          "text": [
+            "Rockets burn solid propellant: ammonium perchlorate (the oxidizer), aluminum and a rubber binder.",
+            "Ammonium perchlorate: a salt and 250 mB of ammonia in the chemical reactor make two. Iodine: eight dried kelp and 100 mB of sulfuric acid make one; with silver dust it makes silver iodide, which seeds clouds."
+          ]
+        },
+        {
+          "title": "Rocket Workshop",
+          "icon": "jugcraft:rocket_workshop",
+          "text": [
+            "Builds rockets from up to three ingredients in any slots, like the circuit assembler: solid propellant from ammonium perchlorate, aluminum and rubber; casings, nozzles and guidance units; motors; and the rockets themselves.",
+            "Uses 48 JE/t while working. Holds 20,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "minecraft:piston",
+              "jugcraft:steel_plate",
+              "minecraft:anvil",
+              "jugcraft:machine_casing",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:rocket_workshop",
+            "count": 1
+          },
+          "recipes": [
+            {
+              "in": [
+                [
+                  "jugcraft:ammonium_perchlorate",
+                  2
+                ],
+                [
+                  "jugcraft:aluminum_nugget",
+                  3
+                ],
+                [
+                  "jugcraft:rubber",
+                  1
+                ]
+              ],
+              "out": [
+                "jugcraft:solid_propellant",
+                2
+              ]
+            },
+            {
+              "in": [
+                [
+                  "jugcraft:steel_plate",
+                  3
+                ]
+              ],
+              "out": [
+                "jugcraft:rocket_casing",
+                1
+              ]
+            },
+            {
+              "in": [
+                [
+                  "jugcraft:tungsten_ingot",
+                  1
+                ],
+                [
+                  "jugcraft:steel_plate",
+                  1
+                ]
+              ],
+              "out": [
+                "jugcraft:rocket_nozzle",
+                2
+              ]
+            },
+            {
+              "in": [
+                [
+                  "jugcraft:processor",
+                  1
+                ],
+                [
+                  "jugcraft:microchip",
+                  2
+                ],
+                [
+                  "jugcraft:copper_wire",
+                  2
+                ]
+              ],
+              "out": [
+                "jugcraft:guidance_unit",
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Rockets",
+          "icon": "jugcraft:rocket_motor",
+          "text": [
+            "A rocket motor is a casing, a nozzle and two solid propellant. Fire any rocket with right-click under open sky; it rises like a firework and does its work at the top.",
+            "Survey rocket (motor, guidance unit, sensor): surveys ores and oil under 7x7 chunks. Cloud-seeding rocket (motor, two silver iodide): five minutes of rain. Clear-sky rocket (motor, two guncotton): five minutes of clear sky. Weather rockets share a two-minute cooldown.",
+            "Signal flares (four from propellant, paper and red dye) burst red and tell players within 512 blocks where they went up. Illumination flares (with glowstone) make hostile mobs within 48 blocks glow for 30 seconds."
           ]
         }
       ]

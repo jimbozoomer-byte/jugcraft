@@ -71,6 +71,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftStorage.register();
 		JugcraftElectronics.register();
 		io.github.jimbozoomer.jugcraft.control.JugcraftControl.register();
+		io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.register();
 		JugcraftFarming.register();
 		JugcraftProspecting.register();
 		JugcraftKinetics.register();

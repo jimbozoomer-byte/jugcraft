@@ -22,7 +22,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * gives a full redstone signal on every side. Put it next to a machine set to a redstone mode and the controller runs
  * the machine.
  */
-public class RelayBlock extends Block implements DataConnectable {
+public class RelayBlock extends Block implements ChannelSwitch {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
 	public RelayBlock(Properties properties) {
@@ -35,8 +35,8 @@ public class RelayBlock extends Block implements DataConnectable {
 		builder.add(Channels.CHANNEL, POWERED);
 	}
 
-	/** Switches the relay at {@code pos} (server side); true if it changed. */
-	public static boolean set(Level level, BlockPos pos, BlockState state, boolean on) {
+	@Override
+	public boolean switchTo(Level level, BlockPos pos, BlockState state, boolean on) {
 		if (state.getValue(POWERED) == on) {
 			return false;
 		}

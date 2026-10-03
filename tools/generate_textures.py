@@ -1272,6 +1272,9 @@ def machines():
     save(window(3501, [(46, 56, 66), (60, 74, 86)]), "block", "ammonia_chiller_front")
     save(window(3501, [(46, 56, 66)], glow=[(170, 220, 250), (220, 244, 255), (120, 190, 240)]), "block",
          "ammonia_chiller_front_on")
+    save(window(3801, [(54, 50, 44), (70, 64, 56)]), "block", "rocket_workshop_front")
+    save(window(3801, [(54, 50, 44)], glow=[(250, 160, 60), (255, 210, 120), (220, 110, 40)]), "block",
+         "rocket_workshop_front_on")
     save(tank_side(959), "block", "water_wheel_front")
     save(boiler(961, False), "block", "large_steam_engine_front")
     save(boiler(961, True), "block", "large_steam_engine_front_on")
@@ -1353,6 +1356,8 @@ def machines():
     gas_storage.draw_all(save)
     import control_electronics
     control_electronics.draw_all(save)
+    import rocketry
+    rocketry.draw_all(save)
     import plastic
     plastic.draw_all(save)
     save(conveyor_frame(0), "block", "conveyor_belt")
