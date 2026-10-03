@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Agriculture: fall additions 20, the Día de Muertos ofrenda (pull request pending, stacked on the theremin)
+- **Ofrenda:** a three-tier home altar under an embroidered cloth. Set out up to six offerings; with flowers, a light, bread, a sugar skull and a drink it is complete: it glows and, at night, welcomes the restless spirits near, who come to it and show themselves, calm (Remembered).
+- **Cempasúchil Marigolds** grow wild with the mums (orange dye, Marigold Petals to strew a path); **Papel Picado** flags for the wall; **Sugar Skulls**; and **Pan de Muerto** to bake.
+- Meant as a respectful remembrance, not a fright. New server game tests and a client test with screenshots.
+
 ### Agriculture: fall additions 19, the theremin (pull request pending, stacked on wild turkeys)
 - **Theremin:** a walnut cabinet on slender legs with a copper pitch antenna and volume loop, a speaker grille and a magic-eye tube, made with the Wire Drawer's copper wire and a note block.
 - Switched on (or powered), it sings for the nearest creature within eight blocks: higher the nearer they come to the antenna, over two octaves with a vibrato, its eye glowing green (Good Vibrations).

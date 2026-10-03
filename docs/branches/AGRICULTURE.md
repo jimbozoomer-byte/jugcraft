@@ -937,6 +937,19 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Switch a theremin on** and it sings for whoever is nearest, higher the nearer they come.
 - Silent or playing, **comparators read how near** the nearest creature is. Details: [more fall additions](../features/more-fall-additions.md#the-theremin).
 
+### The Ofrenda
+
+| **An ofrenda** under papel picado, a welcomed spirit over it, marigolds, candles and sugar skulls either side and a path of petals | **Up close**: the offerings on its tiers |
+| --- | --- |
+| ![An ofrenda](../images/ingame_ofrenda.jpg) | ![The ofrenda up close](../images/ingame_ofrenda_close.jpg) |
+| **At night**: complete and glowing, a spirit welcomed among the offerings | |
+| ![The ofrenda at night](../images/ingame_ofrenda_night.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`OfrendaClientGameTests`, software rendering, small previews). The offerings and the spirit are placed for the picture.*
+
+- **Set out an ofrenda** with flowers, a light, bread, a sugar skull and a drink, and at night it welcomes the spirits near.
+- Marigolds, papel picado, sugar skulls and pan de muerto to make and decorate with. Details: [more fall additions](../features/more-fall-additions.md#the-día-de-muertos-ofrenda).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

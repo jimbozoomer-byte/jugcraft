@@ -1,6 +1,6 @@
 # More Fall Additions
 
-Status: the candy kitchen (addition 11), autumn foraging (addition 12), the Bat House (addition 13), the Hay Golem (addition 14), knitting (addition 15), pie baking (addition 16), the Spirit Board (addition 17), wild turkeys (addition 18) and the theremin (addition 19) are implemented in source, not yet played by hand. The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
+Status: all ten are implemented in source, none yet played by hand: the candy kitchen (addition 11), autumn foraging (addition 12), the Bat House (addition 13), the Hay Golem (addition 14), knitting (addition 15), pie baking (addition 16), the Spirit Board (addition 17), wild turkeys (addition 18), the theremin (addition 19) and the Día de Muertos ofrenda (addition 20). The Build workflow compiles them, and CI's game tests and client screenshots are recorded below.
 Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets do another 10 detailed halloween and fall themed additions", then "start them now stacked on #33"). They follow the ten [fall additions](fall-additions.md), numbered on from them, one per pull request, each stacked on the one before:
 11. the candy kitchen: the Candy Kettle, its thermometer and the candy stages, the Candy Tray, and ten candies;
 12. autumn foraging: five wild mushrooms that spread in the shade and sprout fairy rings under the full moon, the Foraging Basket, and four mushroom dishes;
@@ -11,13 +11,13 @@ Proposal issue: none; requested directly by the owner on 2 October 2026 ("lets d
 17. the Spirit Board: a candlelit séance on which a restless spirit spells its name and the one thing it wishes for, and the gift that lays it to rest;
 18. wild turkeys: flocks in woods and meadows, toms that strut and gobble, hens that lay eggs, and a roast turkey carved at the table;
 19. the theremin: an eerie instrument played without touching, singing higher the nearer you stand, that doubles as a proximity sensor;
-20. the Día de Muertos ofrenda (planned).
+20. the Día de Muertos ofrenda: a home altar of remembrance, set with cempasúchil marigolds, candles, pan de muerto, sugar skulls and a drink, with papel picado and a path of petals, that welcomes the spirits near.
 
 Owner: @jimbozoomer-byte
-Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick. The Hay Golem is Discovery tier: four hay bales (36 wheat) and a carved pumpkin. Knitting is Discovery tier: planks, sticks and string (the wheel), two iron nuggets and two sticks (the needles), and wool. Pie baking is Discovery tier: seven bricks and a furnace (the oven), coal, charcoal or logs to burn, and wheat, an egg, sugar and the fillings: apples, a pumpkin and milk, the Festival Crops' cranberries, the Kitchen Garden's sweet potatoes or the cider mill's roasted chestnuts. The Spirit Board is Discovery tier: two birch slabs, an ink sac and a glass pane, and a candle; the spirits it speaks with come with ghost hunting, and seeing them takes a Spirit Lantern. Wild turkeys are Discovery tier: they wander into woods, taiga, plains and meadows by day, seeds bring them and breed them, and a raw turkey roasts in a furnace, smoker or on a campfire. The theremin is Mechanical tier: two copper wires (from the Wire Drawer), two planks, a note block and two sticks.
-Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near. The Hay Golem is a farmhand: it keeps crows off a field and brings in the ripe crops, so a small farm runs while its farmer is away mining. Knitting is for crafters and shepherds: wool becomes clothes in any colour, warm against powder snow, and a set of knitwear by a campfire heals a party back up between trips. Pie baking is for cooks: a pie is four filling slices from one bake, to set out at a feast or cut and carried on a trip, and baking it right takes watching the oven. The Spirit Board is for ghost hunters and friends together: a séance goes faster with more hands on the planchette, and finding what a spirit wishes for sends the group to the baker, the knitter, the candy maker or the orchard. Wild turkeys are for farmers and hunters: a second bird to keep, whose hens lay eggs and whose toms put on a show, and a roast that feeds a table of six. The theremin is for builders and redstone engineers: the haunted house's music, played by whoever walks past, and a sensor that tells how near someone is.
+Target milestone and tier: the candy kitchen is Discovery tier: copper ingots and a glass pane (the kettle), iron nuggets (the tray), sugar, a water bottle or a milk bucket, a campfire, dyes, sticks (for lollipops), and the flavours, all early: cocoa beans, sweet berries, glow berries, a honey bottle, and the Festival Crops' cranberries, the cider mill's mulling spices and roasted chestnuts. Autumn foraging is Discovery tier: the mushrooms are found on the forest floor from the first day, the basket is sugar cane and a stick, and the dishes cook in a furnace, smoker, campfire or the Cooking Pot. The Bat House is Discovery tier: seven planks and a stick. The Hay Golem is Discovery tier: four hay bales (36 wheat) and a carved pumpkin. Knitting is Discovery tier: planks, sticks and string (the wheel), two iron nuggets and two sticks (the needles), and wool. Pie baking is Discovery tier: seven bricks and a furnace (the oven), coal, charcoal or logs to burn, and wheat, an egg, sugar and the fillings: apples, a pumpkin and milk, the Festival Crops' cranberries, the Kitchen Garden's sweet potatoes or the cider mill's roasted chestnuts. The Spirit Board is Discovery tier: two birch slabs, an ink sac and a glass pane, and a candle; the spirits it speaks with come with ghost hunting, and seeing them takes a Spirit Lantern. Wild turkeys are Discovery tier: they wander into woods, taiga, plains and meadows by day, seeds bring them and breed them, and a raw turkey roasts in a furnace, smoker or on a campfire. The theremin is Mechanical tier: two copper wires (from the Wire Drawer), two planks, a note block and two sticks. The ofrenda is Discovery tier: planks and white carpet; marigolds grow wild with the mums and are planted anywhere; pan de muerto is wheat, an egg and sugar; sugar skulls are sugar, an egg and dye.
+Primary specialty and supported player role: cooking and crafting. A candy maker turns sugar cane into the treats that fill Candy Bowls and Candy Bags, and flavoured candy is a pocketful of short effects (speed, haste, night vision, resistance, fire resistance, absorption, regeneration) to hand round before a dig or a fight. Candy is easy to trade: each piece says its flavours in its name. Autumn foraging is for explorers and cooks: mushrooms to find, farm in the shade and cook, and fairy rings to find or plant for a night's Luck before fishing or opening loot. The Bat House is for farmers: a free trickle of fertilizer from a block on a wall, and phosphate for a chemist with no phosphorite near. The Hay Golem is a farmhand: it keeps crows off a field and brings in the ripe crops, so a small farm runs while its farmer is away mining. Knitting is for crafters and shepherds: wool becomes clothes in any colour, warm against powder snow, and a set of knitwear by a campfire heals a party back up between trips. Pie baking is for cooks: a pie is four filling slices from one bake, to set out at a feast or cut and carried on a trip, and baking it right takes watching the oven. The Spirit Board is for ghost hunters and friends together: a séance goes faster with more hands on the planchette, and finding what a spirit wishes for sends the group to the baker, the knitter, the candy maker or the orchard. Wild turkeys are for farmers and hunters: a second bird to keep, whose hens lay eggs and whose toms put on a show, and a roast that feeds a table of six. The theremin is for builders and redstone engineers: the haunted house's music, played by whoever walks past, and a sensor that tells how near someone is. The ofrenda is for builders, cooks and ghost hunters together: an altar made of other players' work (the baker's bread, the cider maker's drink, the chandler's candles, the gardener's flowers) that calls the wandering spirits home and shows them to everyone.
 
-Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night, a Hay Golem works all year, knitwear is worn in any season, pies bake all year, spirits answer on any night, turkeys come in every season, and a theremin plays all year.
+Nothing here depends on the Halloween event: the kettle boils candy all year, the mushrooms grow all year, and fairy rings bless on every full moon. Bats come and go every night, a Hay Golem works all year, knitwear is worn in any season, pies bake all year, spirits answer on any night, turkeys come in every season, a theremin plays all year, and an ofrenda can be set up on any night (Día de Muertos falls on 1 and 2 November, but nothing waits for the date).
 
 ## Player experience
 ### The Candy Kettle
@@ -193,6 +193,23 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 4. Playing it from within three blocks earns **Good Vibrations**.
 5. **A proximity sensor:** comparators read how near the nearest creature is, playing or silent: 15 at the antenna, 8 at four blocks, 0 at eight and beyond. A silent theremin by a door can open it for whoever comes near; a playing one in a haunted house is sung by every mob that wanders past.
 
+### The Día de Muertos ofrenda
+Día de Muertos, the Day of the Dead, is a living tradition, above all of Mexico, of remembering family and friends who have died. It is not Halloween, though it falls just after it. Families build an ofrenda, a home altar, and set on it what the dead loved, with cempasúchil marigolds, whose colour and scent are said to guide them home, candles, bread and sugar skulls. This addition is meant as a warm, respectful remembrance, not a fright: it borrows the altar's look and its welcome, and nothing on it is spooky.
+1. **Ofrenda** (three white carpets over six planks): a three-tier altar stepping up from the front under a white linen cloth, its risers embroidered with little flowers above a scalloped lace edge. It faces the player who places it.
+2. **Offerings:** use an offering on it to set it out, one at a time, up to six: two to a tier, from the top tier down, standing on the cloth facing the front. An empty hand takes back the last.
+3. **What may be offered:** the five kinds below, and keepsakes: a painting, a player's head (a likeness), any food (a favourite dish), papel picado, a poppy, or an orange or yellow mum.
+4. **Complete:** with one of each of the five kinds, it glows softly (light 8) and marigold-gold motes drift up from it.
+   - **Flowers:** a Cempasúchil Marigold, or Marigold Petals;
+   - **Light:** any candle, or an aura candle;
+   - **Bread:** Pan de Muerto, or bread;
+   - **Sugar:** a Sugar Skull;
+   - **A drink:** a potion or water bottle, a honey bottle, a milk bucket, or sweet or mulled cider.
+5. **The welcome:** at night, every two seconds, a complete ofrenda welcomes the restless spirits within 16 blocks. Each makes the ofrenda its home and drifts there, shows itself to everyone (no Spirit Lantern needed) and no longer shies away, until it fades at dawn. When a welcomed spirit has come within three blocks of it, every player within eight blocks earns **Remembered**. A shown spirit can be given its wish (from the Spirit Board) and laid to rest.
+6. **Cempasúchil Marigold:** a bright orange flower that grows wild in the mum patches of floral biomes and forests, and is planted, potted, and loved by bees. It makes orange dye, or four Marigold Petals to strew on the ground in a path to the ofrenda. In suspicious stew it gives Luck.
+7. **Papel Picado** (three paper, a string, pink and orange dye makes six): a string of cut-paper flags, pink, orange and purple, each cut through with a flower and scallops, hung on a wall.
+8. **Sugar Skull** (three sugar, an egg and light blue dye makes two): a small calavera of moulded white sugar, its eyes ringed with icing petals, a heart for a nose, a stitched smile and a flower on the brow. Placed, it faces you.
+9. **Pan de Muerto** (three wheat, an egg and sugar makes two doughs; bake in a furnace, smoker or on a campfire): a round sweet loaf crossed with dough "bones" (6 hunger, saturation 0.7).
+
 ## Connections
 - Candy kitchen, input producer: sugar cane (sugar); bottles of water and cows (milk); cocoa, sweet berries, glow berries and bees; the Festival Crops (cranberries, roasted chestnuts) and the cider mill (mulling spices); dyes; sticks; vanilla copper and iron; Jugcraft's `jugcraft:heat_sources`.
 - Candy kitchen, output consumer:
@@ -255,6 +272,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - Theremin, entry path: Mechanical tier, once a Wire Drawer runs; the recipe needs the machines feature as well as agriculture.
 - Theremin, required vs optional: optional; nothing needs it.
 - Theremin, trade and solo routes: one player can build and play it alone; copper wire and theremins trade.
+- Ofrenda, input producer: planks and white carpet; marigolds (wild, or planted); wheat, eggs and sugar; candles (vanilla, and the chandlery's aura candles); drinks (vanilla, and the cider mill's sweet and mulled cider); paper, string and dyes; any food as a keepsake.
+- Ofrenda, output consumer: ghost hunting (a complete ofrenda gathers and shows the restless spirits near, and the Spirit Board tells what each wishes for); decoration (papel picado, petals, sugar skulls, potted marigolds); orange dye; pan de muerto as food (`c:foods/bread`, and on the Harvest Feast Table).
+- Ofrenda, technology connection: none; it is a decoration with a ghost-hunting use.
+- Ofrenda, entry path: early items only; the drink and the light have vanilla choices.
+- Ofrenda, required vs optional: optional; nothing needs it.
+- Ofrenda, trade and solo routes: one player can set one up alone with vanilla bread, a candle and a water bottle; its offerings are trade goods, and a group can fill one with each other's work.
 
 ## Balance and automation
 - **Candy kitchen:**
@@ -313,6 +336,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
   - Costs: two copper wires (two thirds of a copper ingot through the Wire Drawer), two planks, a note block, two sticks. It uses no power and burns nothing.
   - Units: blocks (from the pitch antenna), ticks, pitch (0.5 to 2.0, a note block's range), comparator levels (0 to 15, one for each eight-fifteenths of a block).
   - No loop: it makes nothing.
+- **Ofrenda:**
+  - Costs: six planks and three white carpets; five offerings, which stay on it and can be taken back (nothing is used up).
+  - Food: two loaves of pan de muerto, 12 hunger, from three wheat, an egg and sugar (bread is 5 from three wheat), paid for by the egg, the sugar and the baking.
+  - Units: offerings, ticks, blocks.
+  - Reward: only Remembered and the spirits' company; a shown spirit's wish is still the Spirit Board's reward.
+  - No loop: an ofrenda makes nothing; the welcome calls only spirits already risen.
 
 ## Multiplayer and persistence
 - **Candy kitchen, server authority:** filling, reading, tipping out and pouring all go through vanilla's block use path (reach, spawn protection, adventure mode) and are decided on the server, which checks the base, the sugar and flavour limits, and the temperature. Pulling and breaking up a tray go through vanilla's item use; the server checks the tray's own record of when it was poured and how often it has been pulled, by its own game time.
@@ -370,6 +399,12 @@ From the boil, each stage lasts between 30 ticks (thread, soft ball, firm ball) 
 - **Theremin, bounded work:** every four ticks, one entity lookup in a 16-block box round the antenna; while playing with someone near, one sound and one particle.
 - **Theremin, IDs:** block and item `theremin`, block entity `theremin`; recipe `theremin`; advancement `good_vibrations`. All new.
 - **Theremin, disable behaviour:** with the agriculture or machines feature off, the recipe doesn't load; theremins already built still play and sense, and everything stays registered.
+- **Ofrenda, server authority:** setting out and taking back offerings go through vanilla's block use path (reach, spawn protection, adventure mode); the server checks the offerings tag and the six places, and decides completeness, the welcome and Remembered.
+- **Ofrenda, what clients get:** the offerings on it (to draw them) and whether it is complete (its block state: the glow).
+- **Ofrenda, persistence:** the ofrenda saves its offerings (at most six are read back); a welcomed spirit saves that it was welcomed, and its home.
+- **Ofrenda, bounded work:** every 40 ticks, a complete ofrenda at night asks the entity lookup for spirits within 16 blocks, once, and looks through the players only if one has arrived.
+- **Ofrenda, IDs:** blocks and items `ofrenda` (block entity too), `marigold`, `marigold_petals`, `papel_picado`, `sugar_skull`; block `potted_marigold`; items `pan_de_muerto_dough`, `pan_de_muerto`; item tags `jugcraft:ofrenda/offerings`, `jugcraft:ofrenda/flowers`, `…/light`, `…/bread`, `…/sugar`, `…/drink`; recipes `ofrenda`, `papel_picado`, `sugar_skull`, `marigold_petals`, `orange_dye_from_marigold`, `pan_de_muerto_dough`, `pan_de_muerto` (and from smoking and campfire cooking); advancement `remembered`. All new. A restless spirit's save gains `welcomed`. The marigold joins `minecraft:small_flowers`, `flower_pots` and `bee_attractive`, and pan de muerto `c:foods/bread`.
+- **Ofrenda, disable behaviour:** with the agriculture feature off, the recipes don't load and spirits fade; ofrendas keep their offerings, and everything stays registered.
 
 ## Dependencies and assets
 Candy kitchen:
@@ -422,6 +457,12 @@ Theremin:
 - No new dependencies. Textures are drawn by code in `tools/theremin_textures.py`: figured walnut, the front's speaker grille of woven cloth behind walnut bars over a brass inlay, polished brass, copper, black bakelite, and the magic-eye tube dark and lit.
 - The models (silent, and playing with the eye lit and glowing in the dark), blockstate, words and loot come from `tools/theremin_data.py`; the numbers from `THEREMIN` in `tools/agriculture.py`.
 - Sounds are vanilla's (a note block's flute, bent in pitch; a lever's click as it is switched).
+
+Ofrenda:
+- No new dependencies. Textures are drawn by code in `tools/ofrenda_textures.py`: the altar's linen and its embroidered, lace-edged riser fronts, scattered marigold petals, papel picado's three cut-paper flags, the sugar skull's iced face and sugar sides, and pan de muerto and its dough. The marigold is drawn with the mums.
+- The models, blockstates, words, loot and tags come from `tools/ofrenda_data.py`; the numbers and the five kinds from `OFRENDA` in `tools/agriculture.py`; the marigold is one of `MUMS`.
+- The client's `OfrendaRenderer` stands the offerings on the tiers, two to a tier, in the order they were set out.
+- Sounds are vanilla's (a decorated pot's insert as an offering is set out, an item frame's as one is taken back).
 
 ## Verification
 ### Candy kitchen verification
@@ -652,6 +693,30 @@ Found before this record:
 
 Not run: a two-client dedicated-server playtest, and any play by hand. The theremin has not been heard: CI has no sound, so the pitches are checked by numbers, not by ear.
 
+### Ofrenda verification
+
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/agriculture-halloween-decor-34` stacked on the theremin, with main merged in:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares the ofrenda with Java: its six places, how often it looks, the welcoming, arriving and witnessing ranges, its light, and the five kinds of offering in order; checks that the ofrenda, petals, papel picado and sugar skull are registered and the marigold is one of the mums; their models, words and loot, the offering tags, pan de muerto's baking and the advancement) | Pass, 1000 IDs |
+| `./gradlew build` on `8db38aa` (Build workflow run 37082606603) | Pass |
+| Game tests on the headless server, same run: 549 in total, 4 of them new here (`OfrendaGameTests`) | **All 549 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `8db38aa` (run 37082606603), with the screenshots in [AGRICULTURE.md](../branches/AGRICULTURE.md#the-ofrenda) |
+
+The 4 new game tests (`OfrendaGameTests`):
+1. a stick isn't an offering; marigolds are set out one at a time, six and no seventh; an empty hand takes back the last;
+2. a marigold, a candle, pan de muerto, a sugar skull and a honey bottle make it complete, and it glows; it welcomes a restless spirit near, which makes the ofrenda its home and shows itself; once the spirit has come to it, a player near earns Remembered (not before);
+3. missing one kind (no drink), it isn't complete and stays dark;
+4. each kind's tag holds its offering; a poppy, papel picado and an apple may be offered, a stone may not; the recipes, the baking and the advancement load.
+
+Found before this record:
+- In the first test a held stone would have been placed as a block rather than refused, so the test offers a stick instead.
+- Main's client tests now run in three parallel jobs, and only the first job's opening test hides the HUD; in another job the first screenshots showed the hotbar and chat. The test now hides them itself (`8db38aa`).
+
+Not run: a two-client dedicated-server playtest, and any play by hand. A welcomed spirit drifting to the ofrenda by itself hasn't been watched; the test moves it there.
+
 ## World and event applicability
 - A Candy Kettle works anywhere there is heat under it, in every dimension, all year. Nothing is seasonal.
 - Wild mushrooms generate only in newly generated Overworld chunks of their biomes; existing chunks don't get them, but one mushroom brought in spreads. They can be planted and spread in any dimension with soil and shade. Fairy rings bless only in the Overworld, on full-moon nights (by the Overworld's moon).
@@ -662,6 +727,7 @@ Not run: a two-client dedicated-server playtest, and any play by hand. The there
 - A séance works in any dimension, but restless spirits rise only on the Overworld's night.
 - Wild turkeys come only to the Overworld, by day, while mobs spawn (the `spawn_mobs` game rule), onto grass in their biomes; existing worlds get them as players walk. Brought elsewhere, they live and breed anywhere.
 - A theremin plays in any dimension.
+- An ofrenda can be set up anywhere, but welcomes spirits only at night, and restless spirits rise only on the Overworld's night. Wild marigolds generate only in newly generated Overworld chunks of floral biomes and forests, with the mums; existing chunks don't get them, but a marigold brought in can be planted anywhere.
 
 ## Rollout and open questions
 - Candy can't be poured by hoppers or dispensers; trays are filled and broken up by hand.
@@ -689,3 +755,6 @@ Not run: a two-client dedicated-server playtest, and any play by hand. The there
 - A tom fans his tail only when strutting; there is no display between toms.
 - The theremin sings with a note block's flute, the nearest vanilla sound to its wail; it is a quick run of notes, five a second, not one gliding tone.
 - It hears only the nearest creature; two players can't play a duet on one theremin. The volume loop is for show: it is louder the nearer the player, not by a second hand.
+- The ofrenda doesn't know the date: it welcomes spirits on any night of the year, not only on 1 and 2 November. Nothing seasonal gates it.
+- An ofrenda holds six offerings; hoppers don't fill it. Its welcome reaches only restless spirits, which rise from graves; it doesn't raise any.
+- There is no photograph item, so a painting or a player's head stands in for a picture of the person remembered.
