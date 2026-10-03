@@ -148,8 +148,8 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 ### The Pumpkling
 1. **Wake one:** use a **Wisp in a Jar** or a bottle of **Ectoplasm** (item tag `jugcraft:pumpkling_sparks`) on a hand-carved pumpkin with a face cut in it (any of the four kinds). The pumpkin hops up as a **Pumpkling**, facing the way it faced, wearing the face you carved, lit if it was lit. The bottle comes back empty. Waking one earns **Little Jack**. A blank pumpkin doesn't wake, and nobody can wake one in adventure mode.
 2. **The Pumpkling:** a pumpkin on two stubby twisted-vine legs, with leafy vine arms and a curling tendril on top. It hops along as it walks, swinging its arms, and turns its pumpkin to look about. It has 8 hearts.
-3. **It's yours:** it follows whoever woke it, comes to them at once from more than 16 blocks off, and otherwise potters about. Sneak-use it with an empty hand to have it **sit and stay** (it squats with its legs out); again to have it follow.
-4. **Light it:** use a **torch** on it and its face glows, at full brightness; a **soul torch** lights it blue. Use it with an empty hand to take the torch back out.
+3. **It's yours:** it follows whoever woke it, comes to them at once from more than 16 blocks off, and otherwise potters about. Use it with an empty hand to have it **sit and stay** (it squats with its legs out), as you would a tame wolf; again to have it follow.
+4. **Light it:** use a **torch** on it and its face glows, at full brightness; a **soul torch** lights it blue. Use another torch on a lit one to take its torch back out.
 5. **It guards crops:** crows keep away from crops near it, as from a scarecrow wearing that head: 8 blocks unlit, 12 lit. A sitting Pumpkling is a scarecrow that stays put; a following one guards wherever you go.
 6. **Treats:** anyone can feed it pumpkin seeds, roasted pumpkin seeds, pumpkin pie or candy corn (`jugcraft:pumpkling_treats`) to heal it 2 hearts.
 7. **Its owner can't hurt it.** To be rid of it, its owner sneak-uses it with a **glass bottle**: it settles back into its carved pumpkin, which drops face and all, and the bottle fills with the spark that woke it.
@@ -428,7 +428,7 @@ Not run yet: CI has not built this branch. The planned checks are:
   1. a Wisp in a Jar used on a lit carved pumpkin with a face wakes a Pumpkling there, owned by its waker, wearing the same face and lit, gives back a glass bottle and earns Little Jack; ectoplasm doesn't wake a blank pumpkin, nor for a player in adventure mode;
   2. a stranger can't have it sit; its owner has it sit and get up; it finds a spot beside its owner;
   3. unlit it guards 8 blocks, lit 12, and a crop six blocks off is guarded;
-  4. a stranger can't light it; its owner's torch lights it, an empty hand takes the torch back, a soul torch lights it blue; a stranger's pumpkin seeds heal it; its owner's blow doesn't hurt it; a glass bottle settles it, filling with its spark, and its pumpkin drops with its face;
+  4. a stranger can't light it; its owner's torch lights it, another torch takes its torch back, an empty hand has it sit rather than lighting it, a soul torch lights it blue; a stranger's pumpkin seeds heal it; its owner's blow doesn't hurt it; a glass bottle settles it, filling with its spark, and its pumpkin drops with its face;
   5. slain by a stranger, it drops its pumpkin with its face;
   6. the advancement and tags load.
 - `PumpklingClientGameTests` takes screenshots: three Pumpklings in a pumpkin patch wearing three stencils' faces (lit, soul-lit, and unlit sitting) beside a carved pumpkin not yet woken and a Wisp in a Jar; up close; and at nightfall.
