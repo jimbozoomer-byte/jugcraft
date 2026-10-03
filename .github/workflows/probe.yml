@@ -18,6 +18,17 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
+      - name: Batch 42 APIs
+        run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          echo "=== minecart classes"; unzip -l "$COMMON" | grep -iE "vehicle/minecart/(Abstract|Minecart|NewMinecart|OldMinecart)" | head
+          echo "=== PoweredRailBlock"; javap -p -cp "$COMMON" net.minecraft.world.level.block.PoweredRailBlock
+          echo "=== BaseRailBlock"; javap -cp "$COMMON" net.minecraft.world.level.block.BaseRailBlock | head -40
+          echo "=== AbstractMinecart"; javap -cp "$COMMON" net.minecraft.world.entity.vehicle.minecart.AbstractMinecart | grep -iE "maxspeed|getMaxSpeed|isOnRails|behavior|getCurrentBlockPos|isRideable|class"
+          echo "=== OldMinecartBehavior"; javap -p -cp "$COMMON" net.minecraft.world.entity.vehicle.minecart.OldMinecartBehavior | head -40
+          echo "=== RailShape"; javap -cp "$COMMON" net.minecraft.world.level.block.state.properties.RailShape | head -20
+          echo "=== BlockTags RAILS"; javap -cp "$COMMON" net.minecraft.tags.BlockTags | grep -E " RAILS;"
       - name: Batch 38b APIs
         run: |
           set +e
