@@ -58,6 +58,64 @@ No numbered release yet. Everything below is on `main`.
 - **Dedicated-server check (CI):** a real client joins the game's own dedicated server, opens a machine and trades with the Retro Trader over the network, leaves and rejoins; and a world is saved and reopened with its trader, machine contents and cabinet intact. The two-client checklist is in [docs/TESTING.md](docs/TESTING.md#dedicated-server-and-two-clients).
 - Seventeen game tests, eight client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
 
+### Agriculture: fall additions 20, the Día de Muertos ofrenda (pull request pending, stacked on the theremin)
+- **Ofrenda:** a three-tier home altar under an embroidered cloth. Set out up to six offerings; with flowers, a light, bread, a sugar skull and a drink it is complete: it glows and, at night, welcomes the restless spirits near, who come to it and show themselves, calm (Remembered).
+- **Cempasúchil Marigolds** grow wild with the mums (orange dye, Marigold Petals to strew a path); **Papel Picado** flags for the wall; **Sugar Skulls**; and **Pan de Muerto** to bake.
+- Meant as a respectful remembrance, not a fright. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 19, the theremin (pull request pending, stacked on wild turkeys)
+- **Theremin:** a walnut cabinet on slender legs with a copper pitch antenna and volume loop, a speaker grille and a magic-eye tube, made with the Wire Drawer's copper wire and a note block.
+- Switched on (or powered), it sings for the nearest creature within eight blocks: higher the nearer they come to the antenna, over two octaves with a vibrato, its eye glowing green (Good Vibrations).
+- Comparators read how near the nearest creature is, playing or not, so it doubles as a proximity sensor. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 18, wild turkeys (pull request pending, stacked on the Spirit Board)
+- **Wild Turkeys:** flocks of three to five come to forests, taiga, plains and meadows by day. Toms are bronze with a red wattle and a great chestnut tail; hens are brown. A tom with an audience struts: tail fanned, breast puffed, wings down, a gobble.
+- Seeds and corn tempt and breed them (Gobble Gobble); hens lay eggs; each drops a raw turkey and feathers, and they flutter down instead of falling.
+- **Roast Turkey:** roast a raw turkey in a furnace, smoker or on a campfire and set it on the table: six servings, eaten by hand or carved off with a Carving Knife (Carving the Bird), the drumsticks first, then the breast, then the carcass and a bone.
+- New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 17, the Spirit Board (pull request pending, stacked on pie baking)
+- **Spirit Board:** a lettered talking board with a walnut planchette. By candlelight, up to four players rest their fingers on it; the nearest restless spirit answers YES and spells its name and the one thing it wishes for, then GOODBYE (Is Anybody There?). More hands, faster letters; no spirit, NO.
+- Give a revealed spirit what it wished for (a pie, a candle, cider, a sweater, candy, an apple, a rose or a pumpkin) and it is laid to rest: experience and Luck (Unfinished Business).
+- The planchette slides, eases and swivels over a 64 by 48 lettered face; comparators read YES and NO. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 16, pie baking (pull request pending, stacked on knitting)
+- **Hearth Oven:** a brick bread oven fed coal, charcoal, coke or logs. It heats to 100 degrees and bakes a raw pie while at 50 or more: baked at 600 points (As Easy as Pie), burnt at 1,200. The pie shows in its mouth, going golden, then black. Comparators read it.
+- **Pies:** Pastry Dough (wheat and an egg) with two of a filling and sugar makes a raw Apple, Pumpkin Cream, Cranberry, Sweet Potato or Chestnut pie. Baked, a pie is placed like a cake and eaten or cut with a Carving Knife a slice at a time; a Burnt Pie is barely food.
+- 26.3 has no `Level.fuelValues()`, so the oven burns the generators' fuels and a log tag rather than vanilla's furnace fuel list. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 15, knitting (pull request pending, stacked on the Hay Golem)
+- **Spinning Wheel:** put a skein of wool on the distaff and work the treadle (or pulse it with redstone): four turns spin it into four balls of yarn in its colour, set out where a hopper can take them. It unravels knitwear back into yarn, less a ball.
+- **Knitting Needles:** with yarn in the other hand, knit a row at a time into a Knit Beanie, Wool Socks, or one of five sweaters (plain, striped, pumpkin, bat, autumn leaf), coloured the blend of its rows (Knit One, Purl Two). Sneak to change project or unpick.
+- **Knitwear** is worn and shows in its colour, keeps out powder snow, and takes dye (and washes clean in a cauldron) as leather does in 26.3. Two pieces by a lit campfire make you cosy (Regeneration I); a beanie, sweater and socks earn Snug as a Bug.
+- The checker's recipe audit knows 26.3's dyeing recipes. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 14, the Hay Golem (pull request pending, stacked on the Bat House)
+- **Hay Golem:** build a T of four hay bales and put a carved pumpkin (or jack o'lantern, or a hand-carved pumpkin with a face) on top, and it comes to life (Man of Straw).
+- A walking scarecrow: crows keep off crops within eight blocks of it, twelve with a lit head.
+- It tends the ripe crops round its post, replanting them from their drops, and carries the harvest to the chest, barrel or hopper under its post. Lead it with wheat to move its post.
+- Wheat heals it; shears take it apart again; fire hurts it double.
+- All decided on the server; the client draws its head and carving. The checker compares its numbers with Java. New server game tests (one walks it to a crop with its own AI) and a client test with screenshots.
+
+### Agriculture: fall additions 13, the Bat House (pull request pending, stacked on autumn foraging)
+- **Bat House:** a slatted roost to hang on a wall. Bats roost in it by day and pour out at dusk (Night Shift); at dawn the nearest bats come back in, up to four, each leaving a guano on its tray. A house with room gains a bat at dusk now and then. Scoop the guano with an empty hand; comparators read the bats.
+- **Bat Guano:** fertilizes the crops in a 3x3 patch (a dose of bone meal each), and four make a phosphate.
+- `FertilizerItem` takes its area and doses, so superphosphate and guano share one rule.
+- All decided on the server. The checker compares the house's numbers with Java. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 12, autumn foraging (pull request pending, stacked on the candy kitchen)
+- **Wild mushrooms:** chanterelles, porcini, puffballs, fly agarics and the glowing jack o'lantern mushroom grow in patches on forest floors (each in its own biomes), on soil. They spread in the shade, up to five of a kind together; bone meal spreads them in any light.
+- **Fairy rings:** on a full-moon night a mushroom may sprout a ring of its kind round it. Stand in a ring's centre on a full-moon night for Luck II (once a night) and Away with the Fairies.
+- **Foraging Basket:** a wicker bundle for mushrooms, berries, nuts and wild fruit. Mushrooms picked with it in hand go straight in; all five earn Forager.
+- **Dishes:** Sautéed Chanterelles, Roasted Porcini, Fried Puffball, and Forager's Stew from the Cooking Pot.
+- All decided on the server. The checker compares the spreading, rings, soil and biomes with Java. New server game tests and a client test with screenshots.
+
+### Agriculture: fall additions 11, the candy kitchen (pull request pending, stacked on #33)
+- **Candy Kettle:** a copper sugar pot with a candy thermometer. Fill it before it boils with a water bottle (syrup) or milk (cream), up to four sugar, up to two flavours (chocolate, berry, glow berry, honey, cranberry, spiced or chestnut) and any dyes. Over a fire it climbs through the candy stages, ringing a bell at each; the hottest it reaches decides the candy, so taking it off the heat holds it.
+- **Candy Tray:** pour onto it, and break the candy up once set. Syrup makes rock candy (grown for a day), candy corn (poured in up to three coloured layers), salt water taffy (pulled four times while warm, or it sets hard), hard candy and lollipops, and caramel; cream makes fudge, cream caramels and toffee. Too hot burns it.
+- Flavoured candy is named for its flavours and gives their short effects when eaten. All candy counts as candy for Candy Bowls and Bags.
+- All decided on the server; the client draws the syrup and the thermometer's needle. The checker compares the stages, rates and flavours with Java. New server game tests and a client test with screenshots.
+
 ### Agriculture: fall additions 10, face paint (pull request pending, stacked on ghost hunting)
 - **Face Paint Kit:** a tin palette and brush, good for 16 faces, that paints one of six designs: a skull, a jack o'lantern, a black cat, a vampire, a witch or a scarecrow. Use it on a friend to paint them at once, hold use to paint yourself, sneak to turn the dial.
 - The paint shows on the face for everyone who can see you and lasts until your head goes under water, or you die. A painted face counts as a costume for trick-or-treating and the costume contest.
