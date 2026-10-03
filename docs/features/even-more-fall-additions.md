@@ -1,12 +1,12 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21) and the flying broomstick (addition 22) are implemented in source and pass CI's game tests; full-moon werewolves (addition 23) and squirrels and acorns (addition 24) are implemented in source. None is yet played by hand. Additions 25 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21) and the flying broomstick (addition 22) are implemented in source and pass CI's game tests; full-moon werewolves (addition 23), squirrels and acorns (addition 24) and the Pumpkling (addition 25) are implemented in source. None is yet played by hand. Additions 26 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
 23. full-moon werewolves: they come out of the woods only on full-moon nights; wolfsbane wards them off and silver hurts them;
 24. squirrels and acorns: squirrels in the woods gather and bury acorns, and some grow into oaks; acorns plant oaks and roast;
-25. the Pumpkling, a pet that wears your carved pumpkin's face (planned);
+25. the Pumpkling: a carved pumpkin woken by a wisp or ectoplasm into a pet that wears its face, follows you and keeps crows off your crops;
 26. the fall fair midway: high striker, ring toss and plush prizes (planned);
 27. the ghost-train dark ride (planned);
 28. the piñata (planned);
@@ -28,6 +28,8 @@ Every hex can be made without leaving the Overworld:
 
 Werewolves are Discovery tier: they come to any player in Overworld woods on a full-moon night. Wolfsbane grows wild in taiga and forests; the silver dagger is a silver ingot and a stick, and silver arrows a silver nugget and four arrows (silver is mined from the first days).
 
+The Pumpkling is Discovery tier: a pumpkin carved with the Carving Knife, and a spark to wake it. A Wisp in a Jar (caught on Halloween nights) or a bottle of Ectoplasm (caught from a restless spirit at a grave, any night of the year) will do.
+
 Squirrels and acorns are Discovery tier: squirrels come to any player in Overworld woods by day, and oak and dark oak leaves drop acorns (as they drop apples). Roasting needs a furnace, smoker or campfire.
 
 The flying broomstick is Discovery tier too: the Witch's Broom (two sticks and a wheat), one Flying Ointment and two feathers.
@@ -41,11 +43,13 @@ Draughts stack to 16 and keep, so a witch can trade them.
 
 Werewolves are for fighters and hunters: a monthly danger in the woods, beaten by planning (wolfsbane about the homestead, silver in hand), and a reward in pelts. They give silver, until now only a cable metal, a use of its own.
 
+The Pumpkling is for carvers and farmers: a pet that wears a face its owner carved, keeps crows off the crops it sits by, and can be lit to guard further. A carver can carve faces for others to wake.
+
 Squirrels and acorns are for foresters, cooks and anyone who likes animals: acorns are an early snack and another way to plant oaks, and squirrels slowly plant the woods they live in. Tame-minded players can breed them with nuts.
 
 The flying broomstick is a witch's way to travel: slower than elytra but found long before them, good for scouting, crossing ravines and reaching rooftops, and fuelled by the ointment a witch brews.
 
-None of this depends on the Halloween event: a cauldron brews hexes and a broom flies all year, werewolves come on every full moon, and squirrels live in the woods all year.
+None of this depends on the Halloween event: a cauldron brews hexes and a broom flies all year, werewolves come on every full moon, squirrels live in the woods all year, and a Pumpkling can be woken with ectoplasm any night.
 
 ## Player experience
 ### Hex brews
@@ -117,6 +121,18 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 5. **Nuts:** acorns, chestnuts and roasted chestnuts (item tag `jugcraft:squirrel_food`) tempt squirrels to follow, and breed two into a **kit**, red or grey after either parent. Breeding them earns **Nuts About Squirrels**.
 6. **Drops:** a squirrel drops only the acorn it was carrying.
 
+### The Pumpkling
+1. **Wake one:** use a **Wisp in a Jar** or a bottle of **Ectoplasm** (item tag `jugcraft:pumpkling_sparks`) on a hand-carved pumpkin with a face cut in it (any of the four kinds). The pumpkin hops up as a **Pumpkling**, facing the way it faced, wearing the face you carved, lit if it was lit. The bottle comes back empty. Waking one earns **Little Jack**. A blank pumpkin doesn't wake, and nobody can wake one in adventure mode.
+2. **The Pumpkling:** a pumpkin on two stubby twisted-vine legs, with leafy vine arms and a curling tendril on top. It hops along as it walks, swinging its arms, and turns its pumpkin to look about. It has 8 hearts.
+3. **It's yours:** it follows whoever woke it, comes to them at once from more than 16 blocks off, and otherwise potters about. Sneak-use it with an empty hand to have it **sit and stay** (it squats with its legs out); again to have it follow.
+4. **Light it:** use a **torch** on it and its face glows, at full brightness; a **soul torch** lights it blue. Use it with an empty hand to take the torch back out.
+5. **It guards crops:** crows keep away from crops near it, as from a scarecrow wearing that head: 8 blocks unlit, 12 lit. A sitting Pumpkling is a scarecrow that stays put; a following one guards wherever you go.
+6. **Treats:** anyone can feed it pumpkin seeds, roasted pumpkin seeds, pumpkin pie or candy corn (`jugcraft:pumpkling_treats`) to heal it 2 hearts.
+7. **Its owner can't hurt it.** To be rid of it, its owner sneak-uses it with a **glass bottle**: it settles back into its carved pumpkin, which drops face and all, and the bottle fills with the spark that woke it.
+8. **Slain** by anything else, it drops its carved pumpkin, face and all; its spark goes out.
+
+Only its owner can sit it, light it, put it out or settle it; anyone can feed it.
+
 ## Connections
 - Hex brews, input producer:
   - the Bubbling Cauldron and its brews (the witch's cottage decorations);
@@ -143,6 +159,10 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 - Squirrels and acorns, output consumer: oak saplings (forestry and tree farms), Roasted Acorns (food), compost; acorns are seeds for anything that takes `c:seeds`.
 - Squirrels and acorns, entry path: everything is in the Overworld from the first day.
 - Squirrels and acorns, required vs optional: optional; acorns are one more way to get oak saplings and food, and nothing is gated behind squirrels.
+- Pumpkling, input producer: pumpkin carving (the Carving Knife and stencils, any of the four pumpkins), will-o'-wisps (Wisp in a Jar) or ghost hunting (Ectoplasm), torches, and treats from the pumpkin patch and the candy kitchen.
+- Pumpkling, output consumer: crop protection (crows and scarecrows); a companion that shows off a carving.
+- Pumpkling, entry path: everything is Overworld and early: a pumpkin, a knife, and a spark. Ectoplasm is caught from a restless spirit at any grave on any night, so the season isn't needed.
+- Pumpkling, required vs optional: optional; nothing is gated behind it. A carver can carve faces for others, and anyone can wake their own.
 - Flying broomstick, input producer: the Witch's Broom (the witch's cottage decorations), Flying Ointment (hex brews), feathers, and the witch hat costume for speed.
 - Flying broomstick, output consumer: travel and exploration; the full-moon night (mooncakes, fairy rings) for Over the Moon. Every witch's cottage piece now has a use: the cauldron brews the ointment that flies the broom.
 - Flying broomstick, entry path: everything is Discovery tier; the first broom comes charged. Nothing needs the End.
@@ -175,6 +195,11 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
   - No gain: one acorn plants one sapling. A squirrel buries one acorn and, a quarter of the time, one sapling sprouts; the rest are lost. Roasting is one for one, and nothing turns roasted acorns back. Oak trees already drop saplings in vanilla, so acorns add a way, not a loop.
   - Automation: leaves that are broken or decay drop acorns, so a tree farm yields them; planting is by hand or by squirrel. Nothing plants acorns from a dispenser.
   - Cost on the server: the spawner tries one spot a player every 20 seconds, by day; it counts squirrels near the player (a 129-block box) and in the level. A squirrel with empty paws looks for acorns within 10 blocks every second or two. One carrying an acorn checks the block under it each tick after 10 seconds, and a sprouting check reads at most 7 × 4 × 7 blocks, once per buried acorn a quarter of the time. Climbing checks one block, only while it is pressed against something.
+- **Pumpkling:**
+  - Costs: one carved pumpkin and one spark (a Wisp in a Jar or Ectoplasm; the glass bottle comes back). Settling it gives both back (a Pumpkling woken by command, with no spark, gives Ectoplasm). Nothing is made or lost: no loop.
+  - Units: 16 health, speed 0.3 (a wolf: 8 and 0.3 untamed); follows past 6 blocks, stops at 2.5, comes to its owner past 16; a treat heals 4 health. Guard radius 8 or 12 blocks, as a scarecrow's head (`Scarecrows.HEADED`, `LIT`).
+  - Automation: none. Crows are the only thing it affects.
+  - Cost on the server: a following Pumpkling paths to its owner about once a second while more than 2.5 blocks off, and tries up to 12 spots when it comes to them. Crows ask about guards in an entity box around a crop; Hay Golems and Pumpklings now answer through one interface, `CropGuard`.
 - **Hex brews, cost on the server:** one look at each online player per server tick (a duration and effect check; a collision check only when a shrinking is about to end). No block entity, no block ticks. The glyphs and bubbles are client particles.
 
 ## Multiplayer and persistence
@@ -203,6 +228,11 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 - **Squirrels and acorns, persistence:** a squirrel saves its colour, the acorn it holds and how long it has held it, and is saved with its chunk like any animal. Saplings are ordinary oak saplings.
 - **Squirrels and acorns, IDs (all new):** entity `squirrel`; items `acorn`, `roasted_acorns`; item tag `jugcraft:squirrel_food`, biome tag `jugcraft:squirrel_habitat`; advancement `nuts_about_squirrels`; recipes `roasted_acorns`, `roasted_acorns_from_smoking`, `roasted_acorns_from_campfire_cooking`. Acorns join `c:seeds`, and roasted acorns `c:foods`.
 - **Squirrels and acorns, disable behaviour:** with the agriculture feature off, squirrels stop coming, leaves stop dropping acorns and the recipes don't load; everything stays registered, and squirrels already in the world stay.
+- **Pumpkling, server authority:** waking goes through vanilla's block use (reach, spawn protection) and needs build rights. Sitting, lighting, putting out, settling and feeding are entity interactions decided on the server, where its owner is known; the client only guesses which use it was, to swing the arm. Its owner's blows are refused on the server.
+- **Pumpkling, what clients get:** the pumpkin it wears (with its carving and light, as synced entity data) and whether it sits; the carving draws through the same cached texture as a carved pumpkin's. The owner isn't sent to clients.
+- **Pumpkling, persistence:** it saves its pumpkin, its spark, its owner and whether it sits, and never despawns. If its owner is offline or in another dimension it waits where it is.
+- **Pumpkling, IDs (all new):** entity `pumpkling`; item tags `jugcraft:pumpkling_sparks`, `jugcraft:pumpkling_treats`; advancement `little_jack`. No new items or blocks.
+- **Pumpkling, disable behaviour:** it is part of the agriculture feature and stays registered; Pumpklings already woken keep following.
 - **Flying broomstick, server authority:**
   - As with a boat or a horse, the pilot's client flies the broom and sends its moves, and vanilla's vehicle checks run on the server. The broom has no gravity, so vanilla's floating kick doesn't apply.
   - The server burns the charge itself, and every 20 ticks compares where the broom is with where it was. If it went further than a broom can fly (three times its top speed, for lag), or climbed more than 2 blocks while dry since the last check, the rider is thrown off ("The broom bucks you off") and the broom is the server's again: it hovers or sinks.
@@ -219,6 +249,7 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 - Sounds and particles are vanilla's: a brewing stand's brew pitched low, a bottle filling, witch's sparkles and enchanting glyphs.
 
 - Werewolves: no new dependencies. `tools/werewolf_textures.py` draws the werewolf (128 × 64, laid out as `client/WerewolfModel.java`'s boxes), wolfsbane, the rug, the dagger, the arrow and the pelt. `tools/werewolf_data.py` writes the flower's and rug's models, the items, words, loot, tags and worldgen. The numbers come from `WEREWOLF` and `WOLFSBANE` in `tools/agriculture.py`, which the checker compares with Java. Sounds are vanilla's (a wolf's howl, growl, whine, hurt and death, pitched low), and particles vanilla's (electric sparks, large smoke).
+- The Pumpkling: no new dependencies. `tools/pumpkling_textures.py` draws its vine body (32 × 32, laid out as `client/PumpklingModel.java`'s boxes); the pumpkin is the carved pumpkin's own item model, with the carving drawn over it as the Hay Golem's head is (`client/PumpklingRenderer.java`, using `CarvingTextures`). `tools/pumpkling_data.py` writes its name and tags. The numbers come from `PUMPKLING` in `tools/agriculture.py`, which the checker compares with `Pumpkling.java`. Sounds are vanilla's (an amethyst chime as it wakes, wood as it's hurt), particles vanilla's (soul fire, hearts).
 - Squirrels and acorns: no new dependencies. `tools/squirrel_textures.py` draws the red and grey squirrels (32 × 32, laid out as `client/SquirrelModel.java`'s boxes: soft fur, a cream belly, a bushy tail paler at its tip), the acorn and roasted acorns. `tools/squirrel_data.py` writes the acorn's item model, words and tags; roasted acorns, the recipes and the advancement come from `ITEMS`, `COOKING` and `ADVANCEMENTS` in `tools/agriculture.py`. The numbers come from `SQUIRRELS` in `tools/agriculture.py`, which the checker compares with Java. Sounds are a fox's, pitched high; particles are the earth's own block dust.
 - The flying broomstick: no new dependencies. `tools/broom_textures.py` draws the item (a broom aslant, purple cord, fanned straw, sparkles) and the entity's pale grain, which `client/BroomstickRenderer.java` tints for the ash handle, the cord and the straw (greyer when dry) on boxes of its own. `tools/broom_data.py` writes the item model and words. The numbers come from `BROOMSTICK` in `tools/agriculture.py`, which the checker compares with `Broomstick.java`. Sounds and particles are vanilla's: a phantom's flap on take-off, a brewing stand when anointed, witch's sparkles and smoke.
 
@@ -302,11 +333,26 @@ Not run yet: CI has not built this branch. The planned checks are:
 
 Not run: squirrels burying acorns over a long time in play, and a sapling sprouting from one (a 1 in 4 chance, which no test waits for); a two-client dedicated-server playtest.
 
+### Pumpkling verification
+
+Not run yet: CI has not built this branch. The planned checks are:
+- `PumpklingGameTests`, 6 game tests:
+  1. a Wisp in a Jar used on a lit carved pumpkin with a face wakes a Pumpkling there, owned by its waker, wearing the same face and lit, gives back a glass bottle and earns Little Jack; ectoplasm doesn't wake a blank pumpkin, nor for a player in adventure mode;
+  2. a stranger can't have it sit; its owner has it sit and get up; it finds a spot beside its owner;
+  3. unlit it guards 8 blocks, lit 12, and a crop six blocks off is guarded;
+  4. a stranger can't light it; its owner's torch lights it, an empty hand takes the torch back, a soul torch lights it blue; a stranger's pumpkin seeds heal it; its owner's blow doesn't hurt it; a glass bottle settles it, filling with its spark, and its pumpkin drops with its face;
+  5. slain by a stranger, it drops its pumpkin with its face;
+  6. the advancement and tags load.
+- `PumpklingClientGameTests` takes screenshots: three Pumpklings in a pumpkin patch wearing three stencils' faces (lit, soul-lit, and unlit sitting) beside a carved pumpkin not yet woken and a Wisp in a Jar; up close; and at nightfall.
+
+Not run: a Pumpkling following its owner about in play (its path-finding), and crows turning from its crops (the guard check is tested directly); a two-client dedicated-server playtest.
+
 ## World and event applicability
 - A cauldron brews hexes in any dimension, all year. Nothing is seasonal.
 - The hex ingredients come from the Overworld: brown mushrooms, beans, and phantoms.
 - Werewolves come only to the Overworld's forests and taiga, on full-moon nights. Wild wolfsbane generates only in newly generated chunks of those biomes; existing chunks don't get it, but a sprig brought in can be planted anywhere.
 - A broom flies in any dimension. Over the Moon is earned only in the Overworld. Nothing is seasonal.
+- A Pumpkling can be woken anywhere a carved pumpkin can be placed, all year (with Ectoplasm; wisps come only on Halloween nights). It follows its owner within a dimension, not through portals.
 - Squirrels come only to the Overworld's forests and taiga, by day, all year. Acorns drop from oak and dark oak leaves anywhere, and plant on any grass or dirt.
 
 ## Rollout and open questions
@@ -322,4 +368,5 @@ Not run: squirrels burying acorns over a long time in play, and a sapling sprout
 - The top speed and the 2-minute charge are open to balance review once flown. A rider who loses connection mid-flight stays on their broom where it was.
 - A squirrel buries every acorn it gathers; it doesn't dig them up again or keep a store. A squirrel can't be tamed or led by anything but nuts.
 - How often squirrels come and how often a buried acorn sprouts are open to balance review once played.
+- A Pumpkling doesn't fight, give light to the world (its glow is drawn, not block light) or follow through portals. A giant carved pumpkin can't be woken. It can't be handed to another owner.
 - A shrunk player's grace is 5 seconds at a time. A player who logs out shrunk under a low ceiling stays shrunk until there is room.

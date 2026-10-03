@@ -2177,6 +2177,42 @@ def check_decor4(java):
     check_broomstick(java, number, lang)
     check_werewolves(java, number, lang)
     check_squirrels(java, number, lang)
+    check_pumpkling(java, number, lang)
+
+
+def check_pumpkling(java, number, lang):
+    """Fall addition 25: Pumpkling matches PUMPKLING in tools/agriculture.py (health, speed, following, healing); it
+    is registered and drawn, guards crops as a CropGuard, wakes from a carved pumpkin, and its words, tags and
+    advancement exist."""
+    pk = ag.PUMPKLING
+    expected = {"MAX_HEALTH": pk["health"], "SPEED": pk["speed"], "FOLLOW_START": pk["follow_start"], "FOLLOW_STOP": pk["follow_stop"],
+                "TELEPORT_DISTANCE": pk["teleport"], "TREAT_HEAL": pk["treat_heal"]}
+    for name, value in expected.items():
+        found = number("Pumpkling", name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"Pumpkling.{name} = {found} differs from tools/agriculture.py ({value})")
+    pumpkling = java.get("Pumpkling", "")
+    if "implements CropGuard" not in pumpkling:
+        err("Pumpkling must be a CropGuard, so crows keep away from it")
+    if "Pumpkling.wake(" not in java.get("CarvedPumpkinBlock", ""):
+        err("CarvedPumpkinBlock must wake a Pumpkling when given a spark")
+    main = java.get("JugcraftAgriculture", "")
+    for call in (f'entity("{pk["entity"]}"', f".sized({pk['size'][0]}F, {pk['size'][1]}F)",
+                 "FabricDefaultAttributeRegistry.register(PUMPKLING, Pumpkling.createAttributes())"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "JugcraftAgriculture.PUMPKLING, PumpklingRenderer::new" not in client or "PumpklingModel.LAYER, PumpklingModel::createLayer" not in client:
+        err("JugcraftClient.java must register PumpklingRenderer and PumpklingModel's layer")
+    if f"entity.{MOD}.{pk['entity']}" not in lang:
+        err("The Pumpkling has no name")
+    for path in (DATA / MOD / "advancement" / "little_jack.json", ASSETS / "textures" / "entity" / "pumpkling.png"):
+        if not path.exists():
+            err(f"The Pumpkling needs {path.relative_to(ROOT)}")
+    for tag, key in (("pumpkling_sparks", "sparks"), ("pumpkling_treats", "treats")):
+        values = (load(DATA / MOD / "tags" / "item" / f"{tag}.json") or {}).get("values", [])
+        if sorted(values) != sorted(pk[key]):
+            err(f"{MOD}:{tag} differs from PUMPKLING['{key}']")
 
 
 def check_squirrels(java, number, lang):
@@ -3654,8 +3690,8 @@ def check_hay_golem(java, main):
             or "FabricDefaultAttributeRegistry.register(HAY_GOLEM, HayGolem.createAttributes())" not in main
             or "UseBlockCallback.EVENT.register(HayGolem::onUseBlock)" not in main):
         err("JugcraftAgriculture.java must register the Hay Golem with its size, attributes and building callback")
-    if "HayGolem.class" not in java.get("Scarecrows", ""):
-        err("Scarecrows.guarded must count Hay Golems")
+    if "instanceof CropGuard" not in java.get("Scarecrows", "") or "implements CropGuard" not in java.get("HayGolem", ""):
+        err("Scarecrows.guarded must count every CropGuard, the Hay Golem among them")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     if lang.get(f"entity.jugcraft.{hg['entity']}") != hg["display"]:
         err("The Hay Golem has no name")

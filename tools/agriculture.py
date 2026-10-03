@@ -678,6 +678,8 @@ HALLOWEEN_ADVANCEMENTS.update({
                        "frame": "task"},
     "nuts_about_squirrels": {"icon": "jugcraft:acorn", "title": "Nuts About Squirrels", "description": "Breed two squirrels with nuts",
                              "frame": "task"},
+    "little_jack": {"icon": "jugcraft:hand_carved_pumpkin", "title": "Little Jack",
+                    "description": "Wake a carved pumpkin with a wisp or ectoplasm", "frame": "task"},
 })
 
 
@@ -941,6 +943,12 @@ SQUIRRELS = {"entity": "squirrel", "display": "Squirrel", "health": 6, "speed": 
              "acorn_leaves": ["oak_leaves", "dark_oak_leaves"], "acorn": "acorn", "acorn_display": "Acorn", "roasted": "roasted_acorns",
              "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga"],
              "food": ["jugcraft:acorn", "jugcraft:chestnut", "jugcraft:roasted_chestnuts"]}
+# The Pumpkling (Pumpkling): a hand-carved pumpkin woken by a spark into a pet; follows past `follow_start`, stops at
+# `follow_stop`, comes to its owner past `teleport`; treats heal `treat_heal`.
+PUMPKLING = {"entity": "pumpkling", "display": "Pumpkling", "health": 16, "speed": 0.3, "size": [0.6, 0.9],
+             "follow_start": 6.0, "follow_stop": 2.5, "teleport": 16.0, "treat_heal": 4.0,
+             "sparks": ["jugcraft:wisp_in_a_jar", "jugcraft:ectoplasm"],
+             "treats": ["minecraft:pumpkin_seeds", "jugcraft:roasted_pumpkin_seeds", "minecraft:pumpkin_pie", "jugcraft:candy_corn"]}
 # The Apothecary Shelf (ApothecaryShelfBlock): wall shelves of jars; sneak-use cycles `arrangements` ways to set them.
 APOTHECARY_SHELF = {"block": "apothecary_shelf", "display": "Apothecary Shelf", "arrangements": 4}
 # The Crystal Ball (CrystalBallBlock): glows `light`; gazing flares it to `gazing_light` for `gaze_ticks` and tells a

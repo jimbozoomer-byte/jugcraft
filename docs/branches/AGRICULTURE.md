@@ -1062,6 +1062,11 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 - **Squirrels**, red and grey, live in forests and taiga. They scamper up tree trunks, bolt when hurt, and follow anyone holding nuts: acorns or chestnuts breed them.
 - **Acorns** drop from oak and dark oak leaves. Plant one on grass for an oak sapling, or roast it for a snack. A squirrel takes acorns lying near and buries them, and one in four grows into an oak. Details: [even more fall additions](../features/even-more-fall-additions.md#squirrels-and-acorns).
 
+### The Pumpkling
+
+- **Wake a carved pumpkin:** use a Wisp in a Jar or a bottle of Ectoplasm on a hand-carved pumpkin with a face. It hops up as a Pumpkling, a little pet on vine legs wearing the face you carved.
+- It follows you and sits when you sneak-use it. A torch lights its face. Crows keep away from crops near it, as from a scarecrow. A glass bottle settles it back into its pumpkin. Details: [even more fall additions](../features/even-more-fall-additions.md#the-pumpkling).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

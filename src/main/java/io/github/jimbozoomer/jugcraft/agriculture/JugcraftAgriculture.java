@@ -284,6 +284,7 @@ public final class JugcraftAgriculture {
 	public static EntityType<Broomstick> FLYING_BROOMSTICK;
 	public static EntityType<Werewolf> WEREWOLF;
 	public static EntityType<Squirrel> SQUIRREL;
+	public static EntityType<Pumpkling> PUMPKLING;
 	public static DataComponentType<Integer> BROOM_CHARGE;
 	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
 	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
@@ -1028,6 +1029,10 @@ public final class JugcraftAgriculture {
 		registerItem(Squirrel.ACORN, AcornItem::new, new Item.Properties().compostable(COMPOST_LOW), SEEDS_TAB);
 		food("roasted_acorns", 3, 0.4F, COMPOST_MEDIUM);
 		Squirrels.register();
+		// Fall additions 25, the Pumpkling: a hand-carved pumpkin woken by a wisp or ectoplasm into a pet wearing its face.
+		PUMPKLING = entity("pumpkling", EntityType.Builder.<Pumpkling>of(Pumpkling::new, MobCategory.MISC).noLootTable().sized(0.6F, 0.9F)
+				.eyeHeight(0.6F).clientTrackingRange(10));
+		FabricDefaultAttributeRegistry.register(PUMPKLING, Pumpkling.createAttributes());
 
 		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
 		// entity players sit on), the Autumn Wreath and the Leaf Piles.

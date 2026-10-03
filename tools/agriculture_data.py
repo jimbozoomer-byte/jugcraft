@@ -45,6 +45,7 @@ import theremin_data
 import broom_data
 import werewolf_data
 import squirrel_data
+import pumpkling_data
 import ofrenda_data
 import graveyard_data
 import regatta_data
@@ -228,6 +229,7 @@ def assets(root, write, lang):
     broom_data.assets(root, write, lang)
     werewolf_data.assets(root, write, lang)
     squirrel_data.assets(root, write, lang)
+    pumpkling_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
 
@@ -445,6 +447,7 @@ def tags(tags):
     halloween_data.tags(tags)
     werewolf_data.tags(tags)
     squirrel_data.tags(tags)
+    pumpkling_data.tags(tags)
     regatta_data.tags(tags)
     festivity_data.tags(tags)
     night_data.tags(tags)
