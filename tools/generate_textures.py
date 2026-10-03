@@ -1351,6 +1351,8 @@ def machines():
     construction.draw_all(save)
     import gas_storage
     gas_storage.draw_all(save)
+    import control_electronics
+    control_electronics.draw_all(save)
     import plastic
     plastic.draw_all(save)
     save(conveyor_frame(0), "block", "conveyor_belt")

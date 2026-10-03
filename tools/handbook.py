@@ -180,6 +180,12 @@ ABOUT = {
                            "of hydrogen and 100 mB of nitrogen make 200 mB of ammonia. Ostwald: 100 mB of ammonia, 200 "
                            "mB of oxygen and 100 mB of water make 200 mB of nitric acid. Each takes 2 seconds at 128 "
                            "JE/t.",
+    "logic_controller": "Runs your factory by rules. Join sensors and relays to it with data cable, then right-click "
+                        "it: each of its eight rules reads \"IF channel below or above N% THEN channel ON or OFF\". "
+                        "Every second it averages each channel's sensors and works through the rules in order, a later "
+                        "rule overriding an earlier one; a channel no rule switches this time keeps its state, so two "
+                        "rules (off above 90%, on below 50%) leave a dead band. The strip along the bottom shows every "
+                        "channel's reading.",
     "network_terminal": "A beige retro computer. Cable it into a power network and right-click it: it shows the "
                         "network's cables, the rate its slowest cable sets, how many devices it reaches and the "
                         "energy they hold. It uses no power.",
@@ -801,6 +807,16 @@ def build():
                 "Four microchips, an advanced circuit and a gold ingot make a processor in the circuit assembler: the "
                 "third circuit tier."]},
             block_page("network_terminal", ELECTRONICS_BLOCKS["network_terminal"]["display"]),
+            {"title": "Control Networks", "icon": f"{MOD}:sensor", "text": [
+                "Data cable (optical fibre in a plastic sheath) joins sensors, relays and a logic controller. It "
+                "carries no power. Channels are the sixteen dye colours: use a dye on a sensor or relay to set its "
+                "channel.",
+                "A sensor goes on a tank, battery, machine or chest and reads how full it is: energy first, then "
+                "fluids, then items. It gives a redstone signal like a comparator's and reports the exact percentage "
+                "on its channel. Right-click it to see the reading.",
+                "A relay gives a full redstone signal on every side while the controller has its channel on. Set a "
+                "machine beside it to a redstone mode and the controller runs the machine."]},
+            block_page("logic_controller", "Logic Controller"),
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

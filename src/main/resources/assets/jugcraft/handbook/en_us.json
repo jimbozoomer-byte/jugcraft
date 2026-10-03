@@ -653,36 +653,37 @@
             "Etched in Light: Etch microchips in the lithography station.",
             "Central Processing: Assemble a processor.",
             "Hello, World: Build a network terminal.",
-            "Under Pressure: Build a gas holder.",
-            "Shut-Off Valve: Make a fluid valve."
+            "In Control: Build a logic controller.",
+            "Under Pressure: Build a gas holder."
           ]
         },
         {
           "title": "Milestones (16)",
-          "icon": "jugcraft:fluid_filter",
+          "icon": "jugcraft:fluid_valve",
           "text": [
+            "Shut-Off Valve: Make a fluid valve.",
             "Strained Relations: Make a fluid filter.",
             "Here Comes the Sun: Build an advanced solar panel.",
             "Full of It: Make a tank gauge.",
-            "Concentrate: Build a solar receiver for a heliostat field.",
-            "Spool Up: Make a turbocharger for the advanced engine."
+            "Concentrate: Build a solar receiver for a heliostat field."
           ]
         },
         {
           "title": "Milestones (17)",
-          "icon": "jugcraft:flywheel",
+          "icon": "jugcraft:turbocharger",
           "text": [
+            "Spool Up: Make a turbocharger for the advanced engine.",
             "Keep It Spinning: Build a flywheel.",
             "Four on the Floor: Build an advanced combustion engine.",
             "King Cotton: Grow cotton.",
-            "Make It Rain: Build a sprinkler.",
-            "Silver Lining: Build an electroplating bath."
+            "Make It Rain: Build a sprinkler."
           ]
         },
         {
           "title": "Milestones (18)",
-          "icon": "jugcraft:ammonia_chiller",
+          "icon": "jugcraft:electroplating_bath",
           "text": [
+            "Silver Lining: Build an electroplating bath.",
             "Ice Cold: Build an ammonia chiller.",
             "Soil Optional: Build a hydroponic bay.",
             "Reaping What You Sow: Build a crop harvester."
@@ -3664,6 +3665,22 @@
             "result": "jugcraft:network_terminal",
             "count": 1
           }
+        },
+        {
+          "title": "Control Networks",
+          "icon": "jugcraft:sensor",
+          "text": [
+            "Data cable (optical fibre in a plastic sheath) joins sensors, relays and a logic controller. It carries no power. Channels are the sixteen dye colours: use a dye on a sensor or relay to set its channel.",
+            "A sensor goes on a tank, battery, machine or chest and reads how full it is: energy first, then fluids, then items. It gives a redstone signal like a comparator's and reports the exact percentage on its channel. Right-click it to see the reading.",
+            "A relay gives a full redstone signal on every side while the controller has its channel on. Set a machine beside it to a redstone mode and the controller runs the machine."
+          ]
+        },
+        {
+          "title": "Logic Controller",
+          "icon": "jugcraft:logic_controller",
+          "text": [
+            "Runs your factory by rules. Join sensors and relays to it with data cable, then right-click it: each of its eight rules reads \"IF channel below or above N% THEN channel ON or OFF\". Every second it averages each channel's sensors and works through the rules in order, a later rule overriding an earlier one; a channel no rule switches this time keeps its state, so two rules (off above 90%, on below 50%) leave a dead band. The strip along the bottom shows every channel's reading."
+          ]
         }
       ]
     },
