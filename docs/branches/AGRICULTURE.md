@@ -1020,6 +1020,25 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - A **memorial bench** with an inscribed plaque that seats a player, and a **cemetery lamp post** three blocks tall, lit after dark.
 - **Grave vases**: put small flowers in for a bouquet of their colour. While fresh they calm the graves within 3 blocks to half the spirits, then they wilt. Details: [the graveyard pack](../features/graveyard.md#grounds).
 
+## Even more fall additions
+
+Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).
+
+### Hex brews
+
+| **Three hex brews** over magma, their draughts framed above | **The shrinking brew**, glyphs rising from it |
+| --- | --- |
+| ![Three hex brews](../images/ingame_hex_brews.jpg) | ![The shrinking brew](../images/ingame_hex_shrinking_brew.jpg) |
+| **Shrunk**: the cauldrons from half a player's height | **A shrunk player** beside the cauldrons |
+| ![Seen while shrunk](../images/ingame_hex_shrunk.jpg) | ![A shrunk player](../images/ingame_hex_shrunk_seen.jpg) |
+| **A giant**, 1.6 times as tall | |
+| ![A giant](../images/ingame_hex_giant_seen.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`HexBrewClientGameTests`, software rendering, small previews).*
+
+- **Brew a hex:** over a lit campfire, fire or magma, stir a brown mushroom into the Bubbling Cauldron's green brew, beans into the orange or a phantom membrane into the purple. A hex brew fills three glass bottles.
+- **Shrinking Draught:** half your size for 3 minutes, through one-block gaps. **Giant's Draught:** 1.6 times your size for 3 minutes, a block more reach, only where there is room. Each cancels the other. **Flying Ointment:** 30 seconds of slow falling. Details: [even more fall additions](../features/even-more-fall-additions.md#hex-brews).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

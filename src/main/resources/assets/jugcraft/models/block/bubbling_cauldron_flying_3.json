@@ -3,7 +3,7 @@
   "textures": {
     "particle": "jugcraft:block/bubbling_cauldron_iron",
     "iron": "jugcraft:block/bubbling_cauldron_iron",
-    "liquid": "jugcraft:block/bubbling_cauldron_brew_purple"
+    "liquid": "jugcraft:block/bubbling_cauldron_hex_flying"
   },
   "elements": [
     {
@@ -406,7 +406,7 @@
           "texture": "#liquid"
         }
       },
-      "light_emission": 10
+      "light_emission": 12
     }
   ]
 }

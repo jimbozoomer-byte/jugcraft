@@ -663,6 +663,10 @@ HALLOWEEN_ADVANCEMENTS = {
 }
 # The graveyard pack (tools/graveyard.py).
 HALLOWEEN_ADVANCEMENTS.update(graveyard.ADVANCEMENTS)
+HALLOWEEN_ADVANCEMENTS.update({
+    "drink_me": {"icon": "jugcraft:shrinking_draught", "title": "Drink Me", "description": "Drink a Shrinking Draught", "frame": "task"},
+    "fee_fi_fo_fum": {"icon": "jugcraft:giants_draught", "title": "Fee-Fi-Fo-Fum", "description": "Drink a Giant's Draught", "frame": "task"},
+})
 
 
 # ---------------------------------------------------------------- Halloween festivities
@@ -871,6 +875,19 @@ CAULDRON = {"block": "bubbling_cauldron", "display": "Bubbling Cauldron", "light
             "brews": {"green": ["minecraft:spider_eye", "minecraft:fermented_spider_eye", "minecraft:slime_ball"],
                       "purple": ["minecraft:nether_wart", "minecraft:chorus_fruit", "minecraft:amethyst_shard"],
                       "orange": ["minecraft:glowstone_dust", "minecraft:blaze_powder", "minecraft:magma_cream"]}}
+# Hex brewing (fall addition 21; BubblingCauldronBlock, Hexes, HexDraughtItem): a brew bubbling over a heat source
+# turns into a hex brew when its hex ingredient (item tags jugcraft:hex/<hex>) is stirred in; a glass bottle draws one
+# of its `doses`. The Shrinking Draught and Giant's Draught scale the drinker (attribute minecraft:scale, `scale` added
+# to 1 times the base) for `seconds`; the giant also steps higher and reaches further. A giant's draught is only drunk
+# with room to grow; a shrunk player without room to grow back stays small `room_extend_ticks` longer, again and again,
+# so nobody wakes up inside a wall. Flying Ointment, rubbed on, gives Slow Falling for `seconds` (and fuels a broom).
+HEX = {"doses": 3, "room_extend_ticks": 100,
+       "brews": {"shrinking": {"brew": "green", "ingredients": ["minecraft:brown_mushroom"], "item": "shrinking_draught",
+                               "display": "Shrinking Draught", "effect": "shrunk", "effect_display": "Shrunk", "scale": -0.5, "seconds": 180},
+                 "giant": {"brew": "orange", "ingredients": ["jugcraft:beans"], "item": "giants_draught", "display": "Giant's Draught",
+                           "effect": "giant", "effect_display": "Giant", "scale": 0.6, "step": 0.5, "reach": 1.0, "seconds": 180},
+                 "flying": {"brew": "purple", "ingredients": ["minecraft:phantom_membrane"], "item": "flying_ointment",
+                            "display": "Flying Ointment", "seconds": 30}}}
 # The Apothecary Shelf (ApothecaryShelfBlock): wall shelves of jars; sneak-use cycles `arrangements` ways to set them.
 APOTHECARY_SHELF = {"block": "apothecary_shelf", "display": "Apothecary Shelf", "arrangements": 4}
 # The Crystal Ball (CrystalBallBlock): glows `light`; gazing flares it to `gazing_light` for `gaze_ticks` and tells a
@@ -2428,7 +2445,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + plants.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + plants.items())
 
 
 def owns(entry_id):
