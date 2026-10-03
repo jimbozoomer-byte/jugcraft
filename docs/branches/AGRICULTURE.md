@@ -1075,10 +1075,24 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 ### The Pumpkling
 
+| **Three Pumpklings** in a pumpkin patch; a carved pumpkin not yet woken on a hay bale, and a Wisp in a Jar | **Up close:** stencilled faces, one lit, one soul-lit blue |
+| --- | --- |
+| ![Pumpklings](../images/ingame_pumpklings.jpg) | ![Pumpklings up close](../images/ingame_pumpkling_close.jpg) |
+| **At nightfall** | |
+| ![Pumpklings at nightfall](../images/ingame_pumpklings_nightfall.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`PumpklingClientGameTests`, software rendering, small previews).*
+
 - **Wake a carved pumpkin:** use a Wisp in a Jar or a bottle of Ectoplasm on a hand-carved pumpkin with a face. It hops up as a Pumpkling, a little pet on vine legs wearing the face you carved.
 - It follows you and sits when you use it with an empty hand. A torch lights its face. Crows keep away from crops near it, as from a scarecrow. A glass bottle settles it back into its pumpkin. Details: [even more fall additions](../features/even-more-fall-additions.md#the-pumpkling).
 
 ### The fall fair midway
+
+| **The midway:** a prize booth under a striped awning, two High Strikers (one rung, its tower lit) and Ring Toss | **The prizes** on the booth's counter |
+| --- | --- |
+| ![The fall fair midway](../images/ingame_midway.jpg) | ![Plush prizes](../images/ingame_midway_prizes.jpg) |
+| **Ring Toss:** crates of nine bottles, one up on a hay bale | **At dusk** |
+| ![Ring Toss](../images/ingame_ring_toss.jpg) | ![The midway at dusk](../images/ingame_midway_dusk.jpg) |
 
 - **The High Striker** stands five blocks tall: a red-and-white tower with lamps up its front and a bell on top. Hit its pad with a **Carnival Mallet** and the puck climbs, lighting the lamps, as far as you hit it. A fully charged swing sometimes rings the bell; jump and hit it on the way down and it usually does. Ring it and win a prize.
 - **Ring Toss:** toss **Toss Rings** at a crate of nine bottles from three blocks off or more. Land one over a bottle's neck to win a prize; misses can be picked up and thrown again.

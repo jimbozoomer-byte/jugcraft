@@ -45,10 +45,10 @@ import org.jspecify.annotations.Nullable;
 public class FerrisWheel extends Entity {
 	public static final int CARS = 8;
 	public static final int SEATS = 2;
-	public static final double HUB = 8.5;
+	public static final double HUB = 9.5;
 	public static final double RADIUS = 6.0;
 	public static final double SEAT_ACROSS = 0.34;
-	public static final double SEAT_DOWN = 0.94;
+	public static final double SEAT_DOWN = 1.75;
 	public static final double SEAT_BACK = 0.25;
 	public static final long NEED = 12;
 	public static final int TURN_TICKS = 800;
@@ -424,15 +424,15 @@ public class FerrisWheel extends Entity {
 	}
 
 	/**
-	 * Whether a block would stand in a car (or a rider) with the wheel at {@code next}: its floor, its seats and its
-	 * canopy are checked, for every car.
+	 * Whether a block would stand in a car (or a rider) with the wheel at {@code next}: its floor, its seats, its riders'
+	 * heads and its canopy are checked, for every car.
 	 */
 	public boolean blocked(Level level, float next) {
 		BlockPos booth = booth();
 		for (int car = 0; car < CARS; car++) {
 			Vec3 pivot = pivot(car, next);
-			double[][] points = {{0.0, -1.3, 0.0}, {-SEAT_ACROSS, -SEAT_DOWN + 0.3, SEAT_BACK}, {SEAT_ACROSS, -SEAT_DOWN + 0.3, SEAT_BACK},
-					{0.0, -0.4, 0.0}};
+			double[][] points = {{0.0, -2.15, 0.0}, {-SEAT_ACROSS, -SEAT_DOWN + 0.3, SEAT_BACK}, {SEAT_ACROSS, -SEAT_DOWN + 0.3, SEAT_BACK},
+					{0.0, -1.0, 0.0}, {0.0, -0.4, 0.0}};
 			for (double[] p : points) {
 				BlockPos pos = BlockPos.containing(toWorld(pivot.x + p[0], pivot.y + p[1], pivot.z + p[2]));
 				if (!pos.equals(booth) && !level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()) {

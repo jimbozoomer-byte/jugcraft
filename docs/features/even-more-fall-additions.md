@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21) and the flying broomstick (addition 22) are implemented in source and pass CI's game tests; full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25) the fall fair midway (addition 26) the Ferris wheel (addition 27) and the piñata party (addition 28) are implemented in source. None is yet played by hand. Additions 29 and 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21), the flying broomstick (addition 22), full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25), the fall fair midway (addition 26) and the Ferris wheel (addition 27) are implemented in source and pass CI's game tests; the piñata party (addition 28) is implemented in source. None is yet played by hand. Additions 29 and 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
@@ -187,7 +187,7 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 5. **Plushes** are stuffed felt toys with stitched seams and embroidered faces. Each sits facing whoever places it, and squeaks (with a heart) when squeezed with an empty hand. They are only won, not crafted.
 
 ### The Ferris wheel
-1. **Raise it:** place the **Ferris Wheel** (its booth) and the wheel rises over it, facing you: two A-frames of lattice steel on concrete footings, the hub 8½ blocks up, two red trussed rims 6 blocks round with 32 spokes, and **eight cars** hanging between the rims, in pumpkin, cranberry, mustard and spruce, each with a striped canopy, a tufted bench for two and a brass grab bar. It is about 15 blocks across, 16 high and 3 deep, and it needs that space clear (air, grass or flowers); otherwise it says so and isn't placed.
+1. **Raise it:** place the **Ferris Wheel** (its booth) and the wheel rises over it, facing you: two A-frames of lattice steel on concrete footings, the hub 9½ blocks up, two red trussed rims 6 blocks round with 32 spokes, and **eight cars** hanging between the rims, in pumpkin, cranberry, mustard and spruce, each with a striped canopy, a tufted bench for two and a brass grab bar. It is about 15 blocks across, 16 high and 3 deep, and it needs that space clear (air, grass or flowers); otherwise it says so and isn't placed.
 2. **The booth** at its foot is the loading platform: painted panels, a plank deck with a safety edge, and the operator's controls (a brass lever, a speed gauge and two buttons). It is the wheel's only real block: break it and the wheel comes down, setting any riders on the ground.
 3. **Turn it** with kinetic power: put a hand crank, shaft or gearbox against the booth, as you would a machine. **12 KE a tick** turns it at full speed, **once round in 40 seconds**; less turns it slower in proportion. It eases up to speed in 2 seconds and coasts to a stop in 3 when the power stops. A **hand crank** (16 KE a tick) turns it at full speed, five seconds a crank, so one player can crank for their friends; an engine turns it all day.
 4. **Ride it:** use the booth to climb into the car at the bottom, beside whoever is in it. If that car is full, wait for the next. You sit in your car as the wheel carries you round, and look where you like.
@@ -297,7 +297,7 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - Costs: one carved pumpkin and one spark (a Wisp in a Jar or Ectoplasm; the glass bottle comes back). Settling it gives both back (a Pumpkling woken by command, with no spark, gives Ectoplasm). Nothing is made or lost: no loop.
   - Units: 16 health, speed 0.3 (a wolf: 8 and 0.3 untamed); follows past 6 blocks, stops at 2.5, comes to its owner past 16; a treat heals 4 health. Guard radius 8 or 12 blocks, as a scarecrow's head (`Scarecrows.HEADED`, `LIT`).
   - Automation: none. Crows are the only thing it affects.
-  - Cost on the server: a following Pumpkling paths to its owner about once a second while more than 2.5 blocks off, and tries up to 12 spots when it comes to them. Crows ask about guards in an entity box around a crop; Hay Golems and Pumpklings now answer through one interface, `CropGuard`.
+  - Cost on the server: a following Pumpkling paths to its owner about once a second while more than 2.5 blocks off, and when it comes to them tries each spot two or three blocks from them (40 at most, a block up or down), once a second at most. Crows ask about guards in an entity box around a crop; Hay Golems and Pumpklings now answer through one interface, `CropGuard`.
 - **Midway:**
   - Costs: the striker is 6 planks, 2 redstone lamps and a bell; the mallet a log, 2 red wool and 2 sticks (a wooden tool: 59 uses, 1 damage over the hand, and slow: 0.6 swings a second, so a full charge takes about 1.7 seconds); Ring Toss 6 glass bottles and 3 wooden slabs; 4 rings 2 sticks and a string.
   - Units: lamps 8 (two a part), the bell the 9th step; up a lamp every 2 ticks, a rest of 30 ticks, down a lamp a tick. Strength: charge × 0.7 to 1.0, + 0.15 critical; 0.95 rings; less climbs that share of 9, at least 1 lamp. Ring Toss: necks at 3.5, 8 and 12.5 pixels across each way; a ringer within 1.25 pixels of one, from 3 blocks or more; a ringer stays 60 ticks. A ring is tossed at 0.75 blocks a tick.
@@ -306,7 +306,7 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
   - Cost on the server: a struck striker sets its five blocks once a step (about 20 steps a strike); a ring checks the block it hits once. No ticking block entity: the striker's base runs on scheduled ticks only while its puck moves.
 - **Ferris wheel:**
   - Costs: 2 redstone lamps, 4 iron bars, an iron block and 2 wool (any colour); and its power, all the while it turns.
-  - Units: 12 KE a tick for full speed (2π/800 radians a tick, a turn in 800 ticks); it takes no more than 12 KE a tick from all sources, and shares a network's power as any machine does. Up to speed in 40 ticks, down in 60. Hub 8.5 blocks up, cars 6 blocks round, 8 cars of 2 seats; a rider sits 0.94 blocks under their car's pivot, 0.34 either side of its middle. Boarding within 4 blocks of the booth.
+  - Units: 12 KE a tick for full speed (2π/800 radians a tick, a turn in 800 ticks); it takes no more than 12 KE a tick from all sources, and shares a network's power as any machine does. Up to speed in 40 ticks, down in 60. Hub 9.5 blocks up, cars 6 blocks round, 8 cars of 2 seats; a rider sits 1.75 blocks under their car's pivot, 0.34 either side of its middle. Boarding within 4 blocks of the booth.
   - The power goes into the turning: nothing comes back out, so there is no loop. It gives nothing but the ride and two advancements.
   - Automation: none to speak of. Any kinetic source turns it; only players ride it.
   - Cost on the server: while it turns, a wheel checks 4 points of each of its 8 cars for blocks each tick (32 block reads) and counts its riders' way round; it syncs its speed when it changes and its angle once a second. Standing still it does neither. The booth's drive has no ticker and saves nothing.
@@ -535,20 +535,47 @@ Not run: squirrels burying acorns over a long time in play, and a sapling sprout
 
 ### Pumpkling verification
 
-Not run yet: CI has not built this branch. The planned checks are:
-- `PumpklingGameTests`, 6 game tests:
-  1. a Wisp in a Jar used on a lit carved pumpkin with a face wakes a Pumpkling there, owned by its waker, wearing the same face and lit, gives back a glass bottle and earns Little Jack; ectoplasm doesn't wake a blank pumpkin, nor for a player in adventure mode;
-  2. a stranger can't have it sit; its owner has it sit and get up; it finds a spot beside its owner;
-  3. unlit it guards 8 blocks, lit 12, and a crop six blocks off is guarded;
-  4. a stranger can't light it; its owner's torch lights it, another torch takes its torch back, an empty hand has it sit rather than lighting it, a soul torch lights it blue; a stranger's pumpkin seeds heal it; its owner's blow doesn't hurt it; a glass bottle settles it, filling with its spark, and its pumpkin drops with its face;
-  5. slain by a stranger, it drops its pumpkin with its face;
-  6. the advancement and tags load.
-- `PumpklingClientGameTests` takes screenshots: three Pumpklings in a pumpkin patch wearing three stencils' faces (lit, soul-lit, and unlit sitting) beside a carved pumpkin not yet woken and a Wisp in a Jar; up close; and at nightfall.
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-25-pumpkling` stacked on squirrels and acorns:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `PUMPKLING` with Java: health, speed, following, the treats' heal, the guard; and checks the entity, its tags, advancement and textures) | Pass, 1073 IDs |
+| `./gradlew build` on `450e3ab9` (Build workflow run [37156381277](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37156381277)) | Pass |
+| Game tests on the headless server, same run: 630 in total, 6 of them new here (`PumpklingGameTests`) | **All 630 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `450e3ab9` (all three client shards) |
+
+The 6 new game tests (`PumpklingGameTests`):
+1. a Wisp in a Jar used on a lit carved pumpkin with a face wakes a Pumpkling there, owned by its waker, wearing the same face and lit, gives back a glass bottle and earns Little Jack; ectoplasm doesn't wake a blank pumpkin, nor for a player in adventure mode;
+2. its owner, with an empty hand, has it sit; a stranger can't change that; its owner has it get up; it finds a spot beside its owner;
+3. unlit it guards 8 blocks, lit 12, and a crop six blocks off is guarded;
+4. a stranger can't light it; its owner's torch lights it, another torch takes its torch back, an empty hand has it sit rather than lighting it, a soul torch lights it blue; a stranger's pumpkin seeds heal it; its owner's blow doesn't hurt it; a glass bottle settles it, filling with its spark, and its pumpkin drops with its face;
+5. slain by a stranger, it drops its pumpkin with its face;
+6. the advancement and tags load.
+
+Found by CI and fixed before this record:
+- Comparing an item stack with a block doesn't compile in 26.3; the tests and the drop compare with the carved pumpkin's item.
+- A Pumpkling's tempt goal needs the `tempt_range` attribute, which a plain mob's attributes lack; it now has 10 blocks.
+- The sit test stood its players beyond entity reach (3 blocks); they now stand within it.
+- The sit test still failed: the owner's use came back PASS. Its report showed why: test players start out holding the Creative Tower Guide, so the "empty hand" held a book. The tests now empty their hands first. Along the way the controls changed to a tame wolf's: an empty hand sits it (it was a sneaking, empty-handed use), and a torch used on a lit Pumpkling takes its torch back (it was an empty hand).
+
+Found later: Build workflow run [37158111759](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37158111759), on the piñata's branch stacked above this one, failed the sit test's last step, "It finds a spot by its owner". A Pumpkling coming to its owner tried 12 spots at random within three blocks of them. In the test its owner stands near the edge of an 8 × 8 floor, where only 16 of the 49 spots have ground, so about one run in a hundred all 12 missed; in play it would have failed the same way by a cliff or a wall. It now tries every spot two or three blocks off, in a fresh random order, so it fails only when none has room. That change is not yet run.
+
+The client test's screenshots (run 37156381277), in [the guide](../branches/AGRICULTURE.md#the-pumpkling): three Pumpklings in a pumpkin patch wearing three stencils' faces (lit, soul-lit, and unlit sitting) beside a carved pumpkin not yet woken on a hay bale and a Wisp in a Jar; up close; and at nightfall. Its log has no missing model or texture.
 
 Not run: a Pumpkling following its owner about in play (its path-finding), and crows turning from its crops (the guard check is tested directly); a two-client dedicated-server playtest.
 
 ### Midway verification
-Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1084 IDs and now compares `tools/midway.py` with Java; `python3 scripts/check_repository.py` passes.
+
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-26-midway` stacked on the Pumpkling:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `tools/midway.py` with Java: the striker's lamps, steps and strengths, the necks and ringer distances, the plushes and prize weights; and checks the blocks, items, entity, tags, loot, advancements and textures) | Pass, 1084 IDs |
+| `./gradlew build` on `8c39c033` (Build workflow run [37157678923](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37157678923)) | Pass |
+| Game tests on the headless server, same run: 638 in total, 8 of them new here (`MidwayGameTests`) | **All 638 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `8c39c033` (all three client shards) |
 
 The 8 new game tests (`MidwayGameTests`):
 1. placed from its item, the striker stands five blocks tall and its base keeps the puck; breaking its fourth block breaks it all and drops it once;
@@ -562,10 +589,31 @@ The 8 new game tests (`MidwayGameTests`):
 
 `MidwayClientGameTests` takes screenshots: two High Strikers (one half way, one rung), a prize booth under a striped awning, the plushes, and Ring Toss with a ringer; the prizes up close; Ring Toss; and at dusk.
 
+Found by CI and fixed before this record:
+- 26.3 names push reactions `IMMOVEABLE` and `POPPED` (not `BLOCK` and `DESTROY`), and `SoundEvents.ANVIL_LAND` didn't compile as a fallback sound. The striker and plushes use the new names; the strike and bell sounds fall back on `WOOD_HIT` and `BELL_BLOCK`, which the mod already uses.
+- The client test's awning used a wool constant 26.3 doesn't have; it looks the wool up by ID.
+- The first screenshots framed the midway too far off to see the prizes; the cameras moved closer (`8c39c033`).
+
+The client test's screenshots (run 37157678923), in [the guide](../branches/AGRICULTURE.md#the-fall-fair-midway): the prize booth under its striped awning with the plushes on its counter, two High Strikers and Ring Toss on a plank floor; the prizes up close; Ring Toss's crates of bottles; and the midway at dusk. Its log has no missing model or texture.
+
 Not run: swinging a mallet and tossing rings by hand, which no automated test can do; a two-client dedicated-server playtest.
 
 ### Ferris wheel verification
-Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1085 IDs and now compares `tools/ferris_wheel.py` with Java; `python3 scripts/check_repository.py` passes. The wheel's look was checked in a render of its quads before any game run.
+
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-27-ferris-wheel` stacked on the midway:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `tools/ferris_wheel.py` with Java: the hub, radius, cars and seats, the seat's place, the power, speed and reach; and checks the booth, entity, quads, tags, loot, advancements and textures) | Pass, 1085 IDs |
+| `./gradlew build` on `c4679261` (Build workflow run [37156864812](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37156864812)) | Pass |
+| Game tests on the headless server, same run: 645 in total, 7 of them new here (`FerrisWheelGameTests`) | **All 645 pass** on `c4679261` |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `c4679261` (all three client shards) |
+| The same, on `75fff507` (the fixes below) | Not yet run |
+
+The wheel's look was checked in a render of its quads before any game run. The first run's screenshots then showed two faults the tests couldn't, fixed in `75fff507`:
+- **The wheel drew black**, frame, wheel and cars, though the booth beside it was lit. The wheel entity stands in its booth block, where there is no light, and took its light from there. The frame now takes its light from just above the booth, the wheel from its hub, and each car from where it hangs.
+- **A rider's head came up through the canopy:** the view from a car was its canopy from above. A seated player's eyes are about a block over their seat, and the seat was under a block (0.94) below the pivot. The cars' tubs now hang 12 pixels lower, a seat 1.75 blocks under the pivot, with a rider's head under the canopy (checked in a render with two player-sized figures seated). The hub stands at 9½ blocks, a block higher, so the bottom car's floor still clears the booth, a step above its deck. The jam check also looks where the riders' heads are.
 
 The 7 new game tests (`FerrisWheelGameTests`), in a 44 by 44 empty arena:
 1. placed from its item where there is room, the booth faces whoever placed it, one wheel stands over it facing the same way, and its drive is there; with a block in its way, a second can't be placed and the item is kept;
