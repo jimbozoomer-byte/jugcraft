@@ -1485,7 +1485,7 @@ public class PetroGameTests {
 	}
 
 	/** Batch 31: the antidote clears poison and keeps speed; the stimulant hastes; the first aid kit heals. */
-	@GameTest
+	@GameTest(maxTicks = 40)
 	public void medicinesWork(GameTestHelper helper) {
 		Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(2, 1, 2));
 		pig.addEffect(new MobEffectInstance(MobEffects.POISON, 200, 0));
@@ -1497,7 +1497,7 @@ public class PetroGameTests {
 		helper.assertTrue(pig.hasEffect(MobEffects.HASTE), "The stimulant gave no haste");
 		pig.setHealth(2.0F);
 		new ItemStack(FieldChemistry.FIRST_AID_KIT).finishUsingItem(helper.getLevel(), pig);
-		helper.assertTrue(pig.getHealth() >= 9.0F, "The first aid kit healed to " + pig.getHealth());
-		helper.succeed();
+		// Instant health works on the pig's next tick.
+		helper.succeedWhen(() -> helper.assertTrue(pig.getHealth() >= 9.0F, "The first aid kit healed to " + pig.getHealth()));
 	}
 }
