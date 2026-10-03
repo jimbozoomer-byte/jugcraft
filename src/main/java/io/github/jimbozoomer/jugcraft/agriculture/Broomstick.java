@@ -82,6 +82,8 @@ public class Broomstick extends Entity {
 	private boolean inputUp;
 	private @Nullable Vec3 lastCheck;
 	private boolean dryAtLastCheck;
+	/** Who rode it last tick, so a rider who gets off in the air can be given slow falling. */
+	private @Nullable LivingEntity lastRider;
 
 	public Broomstick(EntityType<? extends Broomstick> type, Level level) {
 		super(type, level);
@@ -242,6 +244,10 @@ public class Broomstick extends Entity {
 	}
 
 	private void serverTick(ServerLevel level, @Nullable Player pilot) {
+		if (lastRider != null && lastRider != pilot) {
+			softLanding(lastRider);
+		}
+		lastRider = pilot;
 		if (!(pilot instanceof ServerPlayer flier)) {
 			lastCheck = null;
 			return;
@@ -264,6 +270,8 @@ public class Broomstick extends Entity {
 		if (!withinReason(lastCheck, position(), dryAtLastCheck && dry(), wearsHat(flier))) {
 			flier.sendOverlayMessage(Component.translatable("message.jugcraft.broom.bucked"));
 			ejectPassengers();
+			softLanding(flier);
+			lastRider = null;
 			lastCheck = null;
 			return;
 		}
@@ -312,11 +320,12 @@ public class Broomstick extends Entity {
 		}
 	}
 
-	/** Getting off in the air, the ointment still clings: a few seconds of slow falling. */
-	@Override
-	protected void removePassenger(Entity passenger) {
-		super.removePassenger(passenger);
-		if (!level().isClientSide() && passenger instanceof LivingEntity rider && !grounded()) {
+	/**
+	 * Off the broom and not on the ground, the ointment still clings to its rider: a few seconds of slow falling. The
+	 * server gives it the tick after a rider gets off, or at once when the broom throws them.
+	 */
+	private void softLanding(LivingEntity rider) {
+		if (rider.isAlive() && !rider.onGround() && !rider.isPassenger()) {
 			rider.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SLOW_FALL_TICKS));
 		}
 	}
