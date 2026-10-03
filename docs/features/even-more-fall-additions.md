@@ -1,10 +1,10 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21) are implemented in source and pass CI's game tests; the flying broomstick (addition 22) is implemented in source. Neither is yet played by hand. Additions 23 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21) are implemented in source and pass CI's game tests; the flying broomstick (addition 22) and full-moon werewolves (addition 23) are implemented in source. None is yet played by hand. Additions 24 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
-23. full-moon werewolves, wolfsbane and silver (planned);
+23. full-moon werewolves: they come out of the woods only on full-moon nights; wolfsbane wards them off and silver hurts them;
 24. squirrels and acorns (planned);
 25. the Pumpkling, a pet that wears your carved pumpkin's face (planned);
 26. the fall fair midway: high striker, ring toss and plush prizes (planned);
@@ -26,6 +26,8 @@ Every hex can be made without leaving the Overworld:
 - the orange brew comes from the glowstone dust that witches drop;
 - the purple brew comes from amethyst shards.
 
+Werewolves are Discovery tier: they come to any player in Overworld woods on a full-moon night. Wolfsbane grows wild in taiga and forests; the silver dagger is a silver ingot and a stick, and silver arrows a silver nugget and four arrows (silver is mined from the first days).
+
 The flying broomstick is Discovery tier too: the Witch's Broom (two sticks and a wheat), one Flying Ointment and two feathers.
 
 Primary specialty and supported player role: witchcraft and exploration. A witch brews hexes for others:
@@ -35,9 +37,11 @@ Primary specialty and supported player role: witchcraft and exploration. A witch
 
 Draughts stack to 16 and keep, so a witch can trade them.
 
+Werewolves are for fighters and hunters: a monthly danger in the woods, beaten by planning (wolfsbane about the homestead, silver in hand), and a reward in pelts. They give silver, until now only a cable metal, a use of its own.
+
 The flying broomstick is a witch's way to travel: slower than elytra but found long before them, good for scouting, crossing ravines and reaching rooftops, and fuelled by the ointment a witch brews.
 
-None of this depends on the Halloween event: a cauldron brews hexes and a broom flies all year.
+None of this depends on the Halloween event: a cauldron brews hexes and a broom flies all year, and werewolves come on every full moon.
 
 ## Player experience
 ### Hex brews
@@ -81,6 +85,21 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
    - a **blow** breaks a riderless broom back into its item.
 7. **Advancements:** **Up and Away** for taking off; **Over the Moon** (a challenge) for flying 48 blocks above sea level on a full-moon night.
 
+### Full-moon werewolves
+1. **When and where:** only on **full-moon nights**, only in the Overworld's **forests and taiga** (biome tag `jugcraft:werewolf_haunts`). Every 10 seconds, for each player, there's a 30% chance a werewolf steps out of the woods 24 to 40 blocks away onto open earth, with a long, low **howl**. At most 2 near a player and 8 in the world. None come in peaceful or while mobs don't spawn.
+2. **The werewolf:** a hulking wolf-man about 2.4 m tall, with a barrel chest hunched under a shaggy mane, a long snout, long clawed arms and legs bent like a wolf's.
+   - It has 20 hearts, hits for 7 and is fast.
+   - It leaps at its prey and hunts players and villagers.
+   - Hunting, it hunches lower, its arms raised and its jaws open. With nothing to hunt, it howls at the moon.
+3. **Its hide:** anything but silver does **half** its damage, and it heals half a heart every 2 seconds.
+4. **Silver:** silver does **two and a half times** its damage and stops the healing for 5 seconds. Electric sparks fly where silver bites.
+   - The **Silver Dagger** (a silver ingot and a stick): quick and light (5 damage, 2.2 attacks a second), easily enchanted, repaired with silver.
+   - **Silver Arrows** (a silver nugget and four arrows make four): fired from any bow or crossbow.
+   - Slaying a werewolf with silver earns **Silver Lining**.
+5. **Wolfsbane** wards them off. It's a tall flower of hooded violet-blue blooms that grows wild in taiga and forests, and can be planted or potted. Its suspicious stew poisons. A werewolf won't hunt anyone holding a sprig, or anyone within 6 blocks of growing or potted wolfsbane. A werewolf hunting someone who becomes warded drops them, slinks off whining, and leaves them alone for 10 seconds. Being saved by wolfsbane earns **Not Tonight**. Plant it round the homestead, and werewolves can't step out of the woods near it either.
+6. **At dawn,** or whenever it finds it isn't a full-moon night, a werewolf is gone in a swirl of smoke.
+7. **Drops:** a **Werewolf Pelt** and a bone or two. Two pelts make a **Werewolf Rug**: a pelt laid flat with its snarling head at one end, for the floor. A pelt can also be cut into two leather.
+
 ## Connections
 - Hex brews, input producer:
   - the Bubbling Cauldron and its brews (the witch's cottage decorations);
@@ -98,6 +117,11 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 - Entry path: every input is early-game and reachable in the Overworld (see the tier above). No hex needs another hex.
 - Required vs optional: optional, all year. Nothing is gated on a hex. One player can brew all three alone.
 - Trade and solo routes: draughts stack to 16, so a witch can sell them. Anyone can brew their own.
+- Werewolves, input producer: the full moon (the same moon as mooncakes and fairy rings); the woods; silver (mined ore, smelted).
+- Werewolves, output consumer: pelts (rugs, leather), bones; the wolfsbane flower for gardens and pots, and as a mixed bouquet in a grave vase.
+- Werewolves, technology connection: silver gets a use of its own beside cables.
+- Werewolves, entry path: everything is early; a player can stay safe on a full-moon night with a sprig of wolfsbane in hand from the first one.
+- Werewolves, required vs optional: optional; they are a danger to plan for, and nothing is gated behind them. A smith can make silver weapons for others.
 - Flying broomstick, input producer: the Witch's Broom (the witch's cottage decorations), Flying Ointment (hex brews), feathers, and the witch hat costume for speed.
 - Flying broomstick, output consumer: travel and exploration; the full-moon night (mooncakes, fairy rings) for Over the Moon. Every witch's cottage piece now has a use: the cauldron brews the ointment that flies the broom.
 - Flying broomstick, entry path: everything is Discovery tier; the first broom comes charged. Nothing needs the End.
@@ -113,6 +137,11 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
   - Flying ointment is vanilla Slow Falling, as from a phantom-membrane potion, and shorter than the potion's 90 seconds.
 - **No loops:** nothing turns a draught back into anything. Water is neither made nor lost: the bucket goes in and the pot empties as the last dose is drawn.
 - **Automation:** none. Brewing and drawing are by hand (block use). Hoppers and dispensers don't fill bottles from the pot.
+- **Werewolves:**
+  - A werewolf has 40 health, 2 armour, hits for 7 and moves at 0.33 (a zombie: 20, 2, 3, 0.23). Without silver it takes half damage and heals a point (half a heart) every 40 ticks, so an iron sword (6) does 3, and fighting one without silver is meant to be hard. With silver it takes 2.5 times: the silver dagger (5) does 12.5, and four hits kill it.
+  - The dagger: 200 uses (iron 250), enchantability 20, silver's repair. Silver arrows: four for a nugget and four arrows.
+  - A pelt is two leather (a cow drops 0–2), and two pelts make a rug. Nothing makes werewolves or pelts, so there is no loop.
+  - Cost on the server: the spawner tries one spot a player every 10 seconds, only on full-moon nights. A werewolf checks the moon once a second, and its target's ward every half second (a sprig in hand, or 13 × 7 × 13 blocks around the target). The spawner's ward check reads the same box once per attempt.
 - **Flying broomstick:**
   - Costs: a Witch's Broom (two sticks and a wheat), one Flying Ointment and two feathers. Each further 2 minutes of flight is one Flying Ointment, so one hex brew (one phantom membrane) flies a broom for 6 minutes.
   - Units: ticks of charge (2,400 an ointment, 7,200 at most, one a tick in the air); blocks a tick (push 0.05 forward, 0.025 sideways, 0.04 up; speed kept 0.91 a tick, 0.728 braking; top 0.6, 0.75 in a witch hat; dry, it sinks at up to 0.08).
@@ -139,6 +168,10 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 
   The cauldron's `contents` property gains `shrinking`, `giant` and `flying`, and a new property `doses` (1–3) is added. Cauldrons already placed keep their contents and take the default of 3 doses (not used until a hex is brewed).
 - **Disable behaviour:** the hexes are part of the agriculture feature's blocks and stay registered. With the agriculture feature off, the broom's recipe doesn't load; brooms already made still fly and stay registered.
+- **Werewolves, server authority:** spawning, damage, healing, wards and turning back are all decided on the server; clients only draw the werewolf and hear it. The ward is checked against the target's hands and the blocks around them on the server.
+- **Werewolves, persistence:** a werewolf is an ordinary monster: it despawns far from players, and one saved in a chunk turns back on its first full-moon check if the night has ended. Wolfsbane and the rug are blocks; the dagger and arrows items.
+- **Werewolves, IDs (all new):** entity `werewolf`; blocks and items `wolfsbane` (and block `potted_wolfsbane`), `werewolf_rug`; items `silver_dagger`, `silver_arrow`, `werewolf_pelt`; tags `jugcraft:silver_weapons`, `jugcraft:repairs_silver_gear`, `jugcraft:werewolf_haunts` (biome); advancements `silver_lining`, `wolfsbane_ward`; recipes `silver_dagger`, `silver_arrow`, `werewolf_rug`, `leather_from_werewolf_pelt`; worldgen `jugcraft:wolfsbane`, `jugcraft:patch_wolfsbane`.
+- **Werewolves, disable behaviour:** with the agriculture feature off, werewolves stop coming and the recipes don't load; everything stays registered. The silver recipes also need the silver feature.
 - **Flying broomstick, server authority:**
   - As with a boat or a horse, the pilot's client flies the broom and sends its moves, and vanilla's vehicle checks run on the server. The broom has no gravity, so vanilla's floating kick doesn't apply.
   - The server burns the charge itself, and every 20 ticks compares where the broom is with where it was. If it went further than a broom can fly (three times its top speed, for lag), or climbed more than 2 blocks while dry since the last check, the rider is thrown off ("The broom bucks you off") and the broom is the server's again: it hovers or sinks.
@@ -154,6 +187,7 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 - `tools/check_mod_data.py` compares them with Java.
 - Sounds and particles are vanilla's: a brewing stand's brew pitched low, a bottle filling, witch's sparkles and enchanting glyphs.
 
+- Werewolves: no new dependencies. `tools/werewolf_textures.py` draws the werewolf (128 × 64, laid out as `client/WerewolfModel.java`'s boxes), wolfsbane, the rug, the dagger, the arrow and the pelt. `tools/werewolf_data.py` writes the flower's and rug's models, the items, words, loot, tags and worldgen. The numbers come from `WEREWOLF` and `WOLFSBANE` in `tools/agriculture.py`, which the checker compares with Java. Sounds are vanilla's (a wolf's howl, growl, whine, hurt and death, pitched low), and particles vanilla's (electric sparks, large smoke).
 - The flying broomstick: no new dependencies. `tools/broom_textures.py` draws the item (a broom aslant, purple cord, fanned straw, sparkles) and the entity's pale grain, which `client/BroomstickRenderer.java` tints for the ash handle, the cord and the straw (greyer when dry) on boxes of its own. `tools/broom_data.py` writes the item model and words. The numbers come from `BROOMSTICK` in `tools/agriculture.py`, which the checker compares with `Broomstick.java`. Sounds and particles are vanilla's: a phantom's flap on take-off, a brewing stand when anointed, witch's sparkles and smoke.
 
 ## Verification
@@ -181,6 +215,19 @@ The client test's first screenshots showed the cauldrons over campfires lost in 
 
 Not run: a two-client dedicated-server playtest, and any play by hand.
 
+### Werewolves verification
+
+Not run yet: CI has not built this branch. The planned checks are:
+- `WerewolfGameTests`, 5 game tests:
+  1. an iron sword's 8 damage does 4 to a werewolf, the silver dagger's 20; a plain arrow 4, a silver arrow 20; silver stops its healing; slain with silver it earns Silver Lining;
+  2. a werewolf is gone within a second when it isn't a full-moon night, and stays when it is;
+  3. wolfsbane in hand or within reach wards a player, beyond reach doesn't; a werewolf hunting a warded player drops them and won't attack them (Not Tonight);
+  4. no werewolf comes past the cap near a player;
+  5. the recipes, loot tables, advancements and tags load.
+- `WerewolfClientGameTests` takes screenshots: wolfsbane wild and potted in a spruce clearing, the rug before a fire with the silver dagger, arrows and pelt framed, and two werewolves in the clearing on the full-moon night.
+
+Not run: a werewolf hunting a player in play, which no automated test watches from start to end; a two-client dedicated-server playtest.
+
 ### Flying broomstick verification
 
 Not run yet: CI has not built this branch. The planned checks are:
@@ -197,6 +244,7 @@ Not run: flying it by hand, which no automated test can do (the client test's ri
 ## World and event applicability
 - A cauldron brews hexes in any dimension, all year. Nothing is seasonal.
 - The hex ingredients come from the Overworld: brown mushrooms, beans, and phantoms.
+- Werewolves come only to the Overworld's forests and taiga, on full-moon nights. Wild wolfsbane generates only in newly generated chunks of those biomes; existing chunks don't get it, but a sprig brought in can be planted anywhere.
 - A broom flies in any dimension. Over the Moon is earned only in the Overworld. Nothing is seasonal.
 
 ## Rollout and open questions
@@ -204,6 +252,9 @@ Not run: flying it by hand, which no automated test can do (the client test's ri
 - Breaking a cauldron loses its brew, as before.
 - How big a giant is (×1.6) and how long each effect lasts are open to balance review once played. A giant is easier to hit, which is the trade for its reach.
 - Mobs aren't affected: a splash or lingering hex is not made.
+- Werewolves don't break doors or blocks, and don't turn players into werewolves; there is no curse.
+- A werewolf ignores wolfsbane once it isn't hunting; the ward is about who it hunts and where it may come out, not where it may walk.
+- How often they come and how hard they hit are open to balance review once played.
 - A broom carries one rider and nothing else; it can't be led, put in a minecart or flown by mobs.
 - A broom collides with blocks by its own small box, and stops moves that would put its rider's head in a block. Diving into a block is not slowed further than vanilla's collision.
 - The top speed and the 2-minute charge are open to balance review once flown. A rider who loses connection mid-flight stays on their broom where it was.

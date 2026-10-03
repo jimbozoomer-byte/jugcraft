@@ -1324,6 +1324,7 @@ def check_agriculture():
     expected["chestnut_tree"] = ag.CHESTNUT_TREES["biomes"]
     expected["apple_tree"] = ag.CIDER["tree"]["biomes"]
     expected["mums"] = ag.MUM_PATCH["biomes"]
+    expected[ag.WOLFSBANE["block"]] = ag.WOLFSBANE["biomes"]
     expected.update({name: info["biomes"] for name, info in ag.FORAGING["mushrooms"].items()})
     if patches != expected:
         err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
@@ -2123,6 +2124,58 @@ def check_decor4(java):
             err(f"The item tag {MOD}:brew/{colour} differs from CAULDRON's brews")
     check_hexes(java, number, lang)
     check_broomstick(java, number, lang)
+    check_werewolves(java, number, lang)
+
+
+def check_werewolves(java, number, lang):
+    """Fall addition 23: Werewolf and Werewolves match WEREWOLF and WOLFSBANE in tools/agriculture.py (the hide and
+    silver, healing, shunning, spawning and the ward, the attributes, the silver blade); the entity, flower, potted
+    flower, items and rug are registered and drawn; their words, loot, tags, worldgen, recipes and advancements exist."""
+    ww, wb = ag.WEREWOLF, ag.WOLFSBANE
+    expected = {("Werewolf", "HIDE_FACTOR"): ww["hide_factor"], ("Werewolf", "SILVER_FACTOR"): ww["silver_factor"],
+                ("Werewolf", "REGEN_TICKS"): ww["regen_ticks"], ("Werewolf", "SILVER_WOUND_TICKS"): ww["silver_wound_ticks"],
+                ("Werewolf", "SHUN_TICKS"): ww["shun_ticks"], ("Werewolf", "MAX_HEALTH"): ww["health"],
+                ("Werewolves", "SPAWN_TICKS"): ww["spawn_ticks"], ("Werewolves", "SPAWN_CHANCE"): ww["spawn_chance"],
+                ("Werewolves", "MIN_DISTANCE"): ww["min_distance"], ("Werewolves", "MAX_DISTANCE"): ww["max_distance"],
+                ("Werewolves", "NEAR_CAP"): ww["near_cap"], ("Werewolves", "LEVEL_CAP"): ww["level_cap"],
+                ("Werewolves", "WARD_REACH"): ww["ward_reach"], ("Werewolves", "STEW_SECONDS"): wb["seconds"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/agriculture.py ({value})")
+    werewolf = java.get("Werewolf", "")
+    for attribute, key in (("MOVEMENT_SPEED", "speed"), ("ATTACK_DAMAGE", "damage"), ("ARMOR", "armor")):
+        if f"Attributes.{attribute}, {ww[key]})" not in werewolf:
+            err(f"Werewolf's {attribute} differs from WEREWOLF['{key}']")
+    blade = ww["dagger_material"]
+    if (f"INCORRECT_FOR_IRON_TOOL, {blade['durability']}, {blade['speed']}F, {blade['bonus']}F, {blade['enchantability']}," not in werewolf):
+        err("Werewolf.SILVER differs from WEREWOLF['dagger_material']")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ('entity("werewolf"', f".sized({ww['size'][0]}F, {ww['size'][1]}F)", "Werewolves.register();",
+                 f"props.sword(Werewolf.SILVER, {blade['damage']}F, {blade['attack_speed']}F)", "registerItem(Werewolves.SILVER_ARROW, ArrowItem::new",
+                 '"werewolf_pelt"', "WerewolfRugBlock::new", f"MobEffects.{wb['effect']}"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "JugcraftAgriculture.WEREWOLF, WerewolfRenderer::new" not in client or "WerewolfModel.LAYER, WerewolfModel::createLayer" not in client:
+        err("JugcraftClient.java must register WerewolfRenderer and WerewolfModel's layer")
+    for key in (f"entity.{MOD}.werewolf", f"block.{MOD}.{wb['block']}", f"block.{MOD}.potted_{wb['block']}", f"block.{MOD}.{ww['rug']}",
+                f"item.{MOD}.{ww['dagger']}", f"item.{MOD}.{ww['arrow']}", f"item.{MOD}.{ww['pelt']}"):
+        if key not in lang:
+            err(f"Werewolves have no words for {key}")
+    for path in (DATA / MOD / "loot_table" / "entities" / "werewolf.json", DATA / MOD / "loot_table" / "blocks" / f"{wb['block']}.json",
+                 DATA / MOD / "worldgen" / "placed_feature" / f"patch_{wb['block']}.json", DATA / MOD / "advancement" / "silver_lining.json",
+                 DATA / MOD / "advancement" / "wolfsbane_ward.json", ASSETS / "textures" / "entity" / "werewolf.png",
+                 ASSETS / "textures" / "block" / f"{wb['block']}.png", DATA / MOD / "recipe" / f"{ww['dagger']}.json"):
+        if not path.exists():
+            err(f"Werewolves need {path.relative_to(ROOT)}")
+    haunts = (load(DATA / MOD / "tags" / "worldgen" / "biome" / "werewolf_haunts.json") or {}).get("values", [])
+    if sorted(haunts) != sorted(ww["haunts"]):
+        err("jugcraft:werewolf_haunts differs from WEREWOLF['haunts']")
+    arrows = (load(DATA / "minecraft" / "tags" / "item" / "arrows.json") or {}).get("values", [])
+    weapons = (load(DATA / MOD / "tags" / "item" / "silver_weapons.json") or {}).get("values", [])
+    if f"{MOD}:{ww['arrow']}" not in arrows or f"{MOD}:{ww['dagger']}" not in weapons:
+        err("The silver arrow must be in minecraft:arrows and the dagger in jugcraft:silver_weapons")
 
 
 def check_broomstick(java, number, lang):

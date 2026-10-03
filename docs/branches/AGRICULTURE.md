@@ -1032,6 +1032,11 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 - **Make one** from a Witch's Broom, a Flying Ointment and two feathers, and use it to get on. It flies where you look: forward to go, back to brake, jump to climb. It's a quarter faster in a witch hat.
 - **Ointment is its fuel:** 2 minutes of flight each, up to 6. Run dry, it sinks gently down. Anoint a waiting broom with more; sneak-use takes it back. Fly high on a full-moon night for Over the Moon. Details: [even more fall additions](../features/even-more-fall-additions.md#the-flying-broomstick).
 
+### Full-moon werewolves
+
+- **On full-moon nights,** werewolves come howling out of forests and taiga. They're fast, leap at you, shrug off half of any blow, and are gone at dawn.
+- **Silver** hurts them most: a Silver Dagger or Silver Arrows. **Wolfsbane**, a wild violet flower, wards them off: hold a sprig or plant it round your home. Their pelts make rugs. Details: [even more fall additions](../features/even-more-fall-additions.md#full-moon-werewolves).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

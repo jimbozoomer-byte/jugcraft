@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Full-moon werewolves, fall addition 23
+- **Werewolves** come out of forests and taiga only on full-moon nights, howling: hulking wolf-men that leap at players and villagers, shrug off half of any blow and heal, and are gone at dawn.
+- **Silver** hurts them two and a half times as much and stops their healing: a **Silver Dagger** and **Silver Arrows**. Slaying one with silver earns Silver Lining.
+- **Wolfsbane**, a wild flower of taiga and forest (plantable and potted), wards them off: they won't hunt anyone holding a sprig or near it (Not Tonight).
+- They drop a **Werewolf Pelt**: two make a **Werewolf Rug**, or cut one into leather. Five game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#full-moon-werewolves).
+
 ### Unmerged: Flying broomstick, fall addition 22
 - **Flying Broomstick**: a Witch's Broom anointed with Flying Ointment and two feathers. Use it to get on; it flies where you look (forward, back to brake, jump to climb), up to about 10 blocks a second, a quarter faster in a witch hat. It hovers where you leave it.
 - **Ointment is its fuel**: 2 minutes of flight each, up to 6, burnt only in the air. Run dry, it sinks gently to the ground. Anoint a broom with Flying Ointment; sneak-use takes it back with its flight.

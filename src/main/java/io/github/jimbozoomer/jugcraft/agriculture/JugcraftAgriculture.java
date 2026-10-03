@@ -59,6 +59,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -281,6 +282,7 @@ public final class JugcraftAgriculture {
 	/** Sky lanterns let go: they rise, drift with the wind and burn out. */
 	public static EntityType<SkyLantern> SKY_LANTERN;
 	public static EntityType<Broomstick> FLYING_BROOMSTICK;
+	public static EntityType<Werewolf> WEREWOLF;
 	public static DataComponentType<Integer> BROOM_CHARGE;
 	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
 	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
@@ -998,6 +1000,25 @@ public final class JugcraftAgriculture {
 		FLYING_BROOMSTICK = entity(Broomstick.ITEM, EntityType.Builder.<Broomstick>of(Broomstick::new, MobCategory.MISC).noLootTable()
 				.sized(0.9F, 0.6F).clientTrackingRange(10).updateInterval(1));
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> Broomstick.use(player, level, hand, entity));
+		// Fall additions 23, full-moon werewolves: the werewolf and where it comes from, wolfsbane to ward it off (a wild
+		// flower, potted too), silver to hurt it (a dagger and arrows), and its pelt.
+		WEREWOLF = entity("werewolf", EntityType.Builder.<Werewolf>of(Werewolf::new, MobCategory.MONSTER).sized(0.9F, 2.4F).eyeHeight(2.1F)
+				.notInPeaceful().clientTrackingRange(10));
+		FabricDefaultAttributeRegistry.register(WEREWOLF, Werewolf.createAttributes());
+		Werewolves.register();
+		Block wolfsbane = registerBlock(Werewolves.WOLFSBANE, props -> new FlowerBlock(MobEffects.POISON, Werewolves.STEW_SECONDS, props),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.DANDELION));
+		registerItem(Werewolves.WOLFSBANE, props -> new BlockItem(wolfsbane, props), new Item.Properties().useBlockDescriptionPrefix()
+				.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+		registerBlock("potted_" + Werewolves.WOLFSBANE, props -> new FlowerPotBlock(wolfsbane, props),
+				BlockBehaviour.Properties.ofFullCopy(Blocks.POTTED_DANDELION));
+		wildPatch("wolfsbane", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_FOREST);
+		registerItem("silver_dagger", props -> new Item(props.sword(Werewolf.SILVER, 2.5F, -1.8F)), new Item.Properties(), TOOL_TAB);
+		registerItem(Werewolves.SILVER_ARROW, ArrowItem::new, new Item.Properties(), TOOL_TAB);
+		registerItem("werewolf_pelt", Item::new, new Item.Properties(), INGREDIENT_TAB);
+		Block rug = registerBlock("werewolf_rug", WerewolfRugBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY)
+				.strength(0.1F).sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		registerItem("werewolf_rug", props -> new BlockItem(rug, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 
 		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
 		// entity players sit on), the Autumn Wreath and the Leaf Piles.
