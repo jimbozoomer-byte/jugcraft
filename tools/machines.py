@@ -68,6 +68,10 @@ MACHINES = {
     "synthesis_converter": {"display": "Synthesis Converter", "lit": True},
     # A one-block hydrogen fuel cell in the electric look: hydrogen -> JE.
     "fuel_cell": {"display": "Fuel Cell", "lit": True},
+    # Batch 29, refinery upgrades: a 2x2x3 hydrotreater (diesel + hydrogen -> premium diesel and sour gas; gasoline +
+    # bioethanol -> premium gasoline), and a two-tall heat recovery boiler for a diesel generator or gas turbine.
+    "hydrotreater": {"display": "Hydrotreater", "lit": True},
+    "heat_recovery_unit": {"display": "Heat Recovery Unit", "lit": True},
     # Storage (batch 6): a 3x2 lithium battery bank in the electric look.
     "lithium_battery_bank": {"display": "Lithium Battery Bank", "lit": False},
     # Chemistry (batch 17): a 3x3x2 vanadium redox flow battery in the electric look.
@@ -286,6 +290,11 @@ STATS = {
     "synthesis_converter": {"capacity": 60_000, "input_per_tick": 1_024, "use_per_tick": 128, "tank": 8_000},
     # One block. 128 JE/t from 1 mB of hydrogen a tick (128 JE/mB).
     "fuel_cell": {"capacity": 40_000, "output_per_tick": 512, "generation_per_tick": 128, "tank": 8_000},
+    # 2x2x3. 128 JE/t: a bucket of diesel hydrotreated per 120 ticks (15,360 JE), a bucket of gasoline blended per 40.
+    "hydrotreater": {"capacity": 40_000, "input_per_tick": 512, "use_per_tick": 128, "tank": 8_000},
+    # One block, two tall. Recovers 30% of the JE a touching diesel generator or gas turbine makes (77 or 154 JE/t),
+    # boiling 1 mB of water per 64 JE recovered and using 1 mB of lubricant every 40 ticks.
+    "heat_recovery_unit": {"capacity": 20_000, "output_per_tick": 512, "recovery_percent": 30, "tank": 8_000},
     # 3x2, one deep. Outputs from its front (all six blocks), charges from any other face.
     "lithium_battery_bank": {"capacity": 32_000_000, "io_per_tick": 16_384},
     # 3x3x2. Holds 1,000 JE per mB of vanadium electrolyte in its 64,000 mB tank, so 64,000,000 JE when full.
@@ -531,6 +540,14 @@ CRAFTING = {
     "fuel_cell": (["PWP", "SCS", "PTP"], {"P": "#c:plates/aluminum", "W": "jugcraft:aluminum_cable",
                                           "S": "#c:plates/steel", "C": "jugcraft:advanced_circuit",
                                           "T": "jugcraft:fluid_tank"}, 1),
+    # Batch 29: a catalyst-packed steel column (the bed is built in) between two fluid tanks.
+    "hydrotreater": (["PKP", "TCT", "PMP"], {"P": "#c:plates/steel", "K": "jugcraft:cracking_catalyst",
+                                            "T": "jugcraft:fluid_tank", "C": "jugcraft:advanced_circuit",
+                                            "M": "jugcraft:machine_casing"}, 1),
+    # A copper-tubed boiler with a steel stack and a small turbine.
+    "heat_recovery_unit": (["SBS", "CTC", "PGP"], {"S": "#c:plates/steel", "B": "minecraft:iron_bars",
+                                                  "C": "#c:ingots/copper", "T": "jugcraft:fluid_tank",
+                                                  "P": "jugcraft:steel_fluid_pipe", "G": "#c:gears/steel"}, 1),
     "lithography_station": (["GSG", "TCT", "PMP"], {"G": "minecraft:glass", "S": "minecraft:redstone_lamp",
                                                     "T": "#c:ingots/titanium", "C": "jugcraft:advanced_circuit",
                                                     "P": "#c:plates/aluminum", "M": "jugcraft:machine_casing"}, 1),
