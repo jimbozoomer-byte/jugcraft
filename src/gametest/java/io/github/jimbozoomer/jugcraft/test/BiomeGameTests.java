@@ -274,6 +274,10 @@ public class BiomeGameTests {
 			helper.assertTrue(counts[0] >= 6 && counts[1] >= 10, "A small " + trees[i][0] + ": " + counts[0] + " logs, " + counts[1] + " leaves");
 			clear(helper, at);
 		}
+		// The fewest logs each giant can have: a trunk two blocks wide is four logs a level and one at its top, 4h - 3 for a
+		// trunk h tall (tools/trees.py: a giant redwood's is at least 22 tall; a giant mahogany's at least 10, and its
+		// branches may by chance be none).
+		Map<String, Integer> fewestLogs = Map.of("redwood", 4 * 22 - 3, "mahogany", 4 * 10 - 3);
 		for (String tree : new String[] {"redwood", "mahogany"}) {
 			Block sapling = block(tree + "_sapling");
 			BlockPos absolute = helper.absolutePos(at);
@@ -290,7 +294,7 @@ public class BiomeGameTests {
 				logs += level.getBlockState(pos).is(log) ? 1 : 0;
 			}
 			LOGGER.info("A giant {} from four saplings: {} logs, trunk two wide: {}", tree, logs, wide);
-			helper.assertTrue(wide && logs >= 40, "Four " + tree + " saplings grew no giant: " + logs + " logs, two wide " + wide);
+			helper.assertTrue(wide && logs >= fewestLogs.get(tree), "Four " + tree + " saplings grew no giant: " + logs + " logs, two wide " + wide);
 			clear(helper, at);
 		}
 		helper.succeed();
