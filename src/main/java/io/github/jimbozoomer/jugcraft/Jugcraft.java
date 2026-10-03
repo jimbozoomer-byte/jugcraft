@@ -58,6 +58,7 @@ public final class Jugcraft implements ModInitializer {
 		// blocks and items are never lost. The config only controls acquisition.
 		JugcraftMaterials.register();
 		JugcraftComponents.register();
+		io.github.jimbozoomer.jugcraft.machine.Electroplating.register();
 		JugcraftDeposits.register();
 		JugcraftMachines.register();
 		JugcraftFluids.register();

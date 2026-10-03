@@ -3476,6 +3476,832 @@
           "ticks": 400
         }
       ]
+    },
+    {
+      "block": "jugcraft:hydroponic_bay",
+      "type": "hydroponics",
+      "recipes": [
+        {
+          "in": [
+            [
+              "minecraft:wheat_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:wheat",
+            2
+          ],
+          "extra": [
+            [
+              "minecraft:wheat_seeds",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:wheat_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:carrot",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:carrot",
+            3
+          ],
+          "extra": [
+            [
+              "minecraft:carrot",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:potato",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:potato",
+            3
+          ],
+          "extra": [
+            [
+              "minecraft:potato",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:beetroot_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:beetroot",
+            2
+          ],
+          "extra": [
+            [
+              "minecraft:beetroot_seeds",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:beetroot_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:melon_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:melon_slice",
+            6
+          ],
+          "extra": [
+            [
+              "minecraft:melon_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:pumpkin_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:pumpkin",
+            1
+          ],
+          "extra": [
+            [
+              "minecraft:pumpkin_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:sugar_cane",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:sugar_cane",
+            3
+          ],
+          "extra": [
+            [
+              "minecraft:sugar_cane",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:cactus",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:cactus",
+            2
+          ],
+          "extra": [
+            [
+              "minecraft:cactus",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:bamboo",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:bamboo",
+            4
+          ],
+          "extra": [
+            [
+              "minecraft:bamboo",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:sweet_berries",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:sweet_berries",
+            3
+          ],
+          "extra": [
+            [
+              "minecraft:sweet_berries",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:glow_berries",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:glow_berries",
+            2
+          ],
+          "extra": [
+            [
+              "minecraft:glow_berries",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:cocoa_beans",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:cocoa_beans",
+            3
+          ],
+          "extra": [
+            [
+              "minecraft:cocoa_beans",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:nether_wart",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:nether_wart",
+            3
+          ],
+          "extra": [
+            [
+              "minecraft:nether_wart",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:kelp",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:kelp",
+            3
+          ],
+          "extra": [
+            [
+              "minecraft:kelp",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:red_mushroom",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:red_mushroom",
+            2
+          ],
+          "extra": [
+            [
+              "minecraft:red_mushroom",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "minecraft:brown_mushroom",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:brown_mushroom",
+            2
+          ],
+          "extra": [
+            [
+              "minecraft:brown_mushroom",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:cotton_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cotton",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:cotton_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:cotton_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:beans",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:beans",
+            3
+          ],
+          "extra": [
+            [
+              "jugcraft:beans",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:sweet_potato",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:sweet_potato",
+            3
+          ],
+          "extra": [
+            [
+              "jugcraft:sweet_potato",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:flax_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:flax",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:flax_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:flax_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:onion",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:onion",
+            3
+          ],
+          "extra": [
+            [
+              "jugcraft:onion",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:garlic",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:garlic",
+            3
+          ],
+          "extra": [
+            [
+              "jugcraft:garlic",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:cabbage_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cabbage",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:cabbage_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:cabbage_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:oat_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:oats",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:oat_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:oat_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:barley_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:barley",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:barley_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:barley_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:turnip",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:turnip",
+            3
+          ],
+          "extra": [
+            [
+              "jugcraft:turnip",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:corn_kernels",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:corn",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:corn_kernels",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:corn_kernels",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:sunflower_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:sunflower_seeds",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:sunflower_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:sunflower_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:tomato_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:tomato",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:tomato_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:tomato_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:pepper_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:pepper",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:pepper_seeds",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:pepper_seeds",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:ornamental_corn_kernels",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:ornamental_corn",
+            2
+          ],
+          "extra": [
+            [
+              "jugcraft:ornamental_corn_kernels",
+              1,
+              1.0
+            ],
+            [
+              "jugcraft:ornamental_corn_kernels",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:butternut_squash_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:butternut_squash",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:butternut_squash_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:acorn_squash_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:acorn_squash",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:acorn_squash_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:warty_gourd_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:warty_gourd",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:warty_gourd_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:white_pumpkin_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:white_pumpkin",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:white_pumpkin_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jarrahdale_pumpkin_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jarrahdale_pumpkin",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:jarrahdale_pumpkin_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:cinderella_pumpkin_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:cinderella_pumpkin",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:cinderella_pumpkin_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:bottle_gourd_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:bottle_gourd",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:bottle_gourd_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        }
+      ]
     }
   ],
   "fluid_machines": [
@@ -4032,6 +4858,28 @@
             ]
           ],
           "ticks": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:fertilizer",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:nutrient_solution",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 40
         },
         {
           "items": [

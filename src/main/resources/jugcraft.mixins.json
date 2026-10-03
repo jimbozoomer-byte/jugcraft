@@ -19,6 +19,7 @@
     "TownExplosionCalculatorMixin",
     "TownFireBlockMixin",
     "TownPistonMixin",
+    "PiglinSafeArmorMixin",
     "WallBlockInvoker"
   ],
   "injectors": {

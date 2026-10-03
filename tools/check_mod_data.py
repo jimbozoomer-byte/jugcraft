@@ -24,6 +24,8 @@ import exosuit
 import grapple
 import field_chemistry
 import construction
+import hydroponics
+import electroplating
 import gear
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
@@ -581,6 +583,29 @@ def check_exosuit():
             for _, _, tex in boxes:
                 if not (textures / "block" / f"{tex}.png").exists():
                     err(f"Missing exosuit part texture block/{tex}.png")
+
+
+def check_hydroponics():
+    """MachineKind's hydroponic bay numbers against tools/hydroponics.py."""
+    java = MACHINE_JAVA.read_text(encoding="utf-8")
+    for const, value in (("HYDROPONIC_TANK", hydroponics.TANK), ("HYDROPONIC_SOLUTION_PER_HARVEST", hydroponics.SOLUTION_PER_HARVEST)):
+        if f"int {const} = {value:_};" not in java and f"int {const} = {value};" not in java:
+            err(f"MachineKind.{const} differs from tools/hydroponics.py ({value})")
+
+
+def check_electroplating():
+    """machine/Electroplating.java against tools/electroplating.py: the numbers, metals and tooltips."""
+    java = (JAVA_ROOT / "machine" / "Electroplating.java").read_text(encoding="utf-8")
+    for const in ("TICKS", "ACID_PER_PLATING", "TANK", "NICKEL_DURABILITY_PERCENT", "SILVER_SMITE"):
+        value = getattr(electroplating, const)
+        if f"int {const} = {value:_};" not in java and f"int {const} = {value};" not in java:
+            err(f"Electroplating.{const} differs from tools/electroplating.py ({value})")
+    lang = json.loads((ASSETS / "lang" / "en_us.json").read_text(encoding="utf-8"))
+    for metal, (tag, _, _) in electroplating.METALS.items():
+        if f'"{metal}"' not in java or f'"{tag.split(":")[1]}"' not in java:
+            err(f"Electroplating.java does not plate with {metal} ({tag})")
+        if f"tooltip.jugcraft.plating.{metal}" not in lang:
+            err(f"Missing tooltip for {metal} plating")
 
 
 def check_construction():
@@ -4081,6 +4106,8 @@ def main():
     check_grapple()
     check_field_chemistry()
     check_construction()
+    check_hydroponics()
+    check_electroplating()
     check_plastic()
     check_seasons()
     check_alpine()
