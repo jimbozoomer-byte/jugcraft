@@ -112,6 +112,8 @@ public enum MachineKind implements StringRepresentable {
 	// Gas storage (batch 35): an ammonia refrigeration unit freezing water into ice and packing ice down to blue ice.
 	// Ammonia in the first tank, water in the second; one input slot and one output.
 	AMMONIA_CHILLER("ammonia_chiller", 20_000, 256, 0, 24, 2),
+	// Rocketry (batch 38): like the circuit assembler, up to three ingredients in any slots, for rocket parts and rockets.
+	ROCKET_WORKSHOP("rocket_workshop", 20_000, 256, 0, 48, 4),
 	// Chemistry (batch 17, the electric look): a 3x3x2 vanadium redox flow battery. Its charge is capped by the
 	// electrolyte in its tanks (FLOW_BATTERY_JE_PER_MB a millibucket); it gives power out of its front.
 	FLOW_BATTERY("flow_battery", 64_000_000, 8_192, 8_192, 0, 0);
@@ -319,7 +321,7 @@ public enum MachineKind implements StringRepresentable {
 				|| this == PULVERIZER || this == ORE_WASHER || this == SIEVE || this == SAWMILL
 				|| this == COKE_OVEN || this == STEEL_FOUNDRY || this == ORE_DRILL || this == DEPOSIT_DRILL
 				|| this == COBBLESTONE_GENERATOR || this == TREE_FARM || this == AUTO_CRAFTER
-				|| this == CROP_HARVESTER || this == HYDROPONIC_BAY || this == ELECTROPLATING_BATH;
+				|| this == CROP_HARVESTER || this == HYDROPONIC_BAY || this == ELECTROPLATING_BATH || this == ROCKET_WORKSHOP;
 	}
 
 	/** Stores energy and gives it out of its front face only. */
@@ -334,7 +336,8 @@ public enum MachineKind implements StringRepresentable {
 
 	/** Processors whose recipes combine several ingredient stacks placed in any input slots. */
 	public boolean isMultiInput() {
-		return this == ALLOY_SMELTER || this == CIRCUIT_ASSEMBLER || this == STEEL_FOUNDRY || this == ARC_FURNACE;
+		return this == ALLOY_SMELTER || this == CIRCUIT_ASSEMBLER || this == STEEL_FOUNDRY || this == ARC_FURNACE
+				|| this == ROCKET_WORKSHOP;
 	}
 
 	/**
@@ -357,6 +360,7 @@ public enum MachineKind implements StringRepresentable {
 			case STEEL_FOUNDRY -> "steelmaking";
 			case TREE_FARM -> "tree_growing";
 			case HYDROPONIC_BAY -> "hydroponics";
+			case ROCKET_WORKSHOP -> "rocket_assembly";
 			case DISTILLATION_TOWER -> "distillation";
 			case CATALYTIC_CRACKER -> "catalytic_cracking";
 			case FLOWBACK_TREATMENT_UNIT -> "water_treatment";

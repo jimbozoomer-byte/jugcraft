@@ -244,6 +244,41 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Batch 38: the rocket workshop assembles a rocket motor from a casing, a nozzle and two solid propellant; an
+	 * illumination flare's burst makes a zombie glow but not a pig; a survey rocket's wide survey finds a tin ore.
+	 */
+	@GameTest(maxTicks = 400)
+	public void rocketryWorks(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		MachineBlockEntity workshop = processing(helper, new BlockPos(1, 1, 1), MachineKind.ROCKET_WORKSHOP,
+				new ItemStack(item("rocket_casing")));
+		workshop.setItem(1, new ItemStack(item("rocket_nozzle")));
+		workshop.setItem(2, new ItemStack(item("solid_propellant"), 2));
+
+		net.minecraft.world.entity.Mob zombie = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.ZOMBIE, new BlockPos(4, 1, 4));
+		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(6, 1, 4));
+		Vec3 burst = helper.absoluteVec(new Vec3(5, 1 + io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ARRIVAL_HEIGHT, 5));
+		io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.arrive(level, null, "test",
+				io.github.jimbozoomer.jugcraft.rocketry.RocketItem.Kind.ILLUMINATION, burst);
+		helper.assertTrue(zombie.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING), "The flare did not light up the zombie");
+		helper.assertTrue(!pig.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING), "The flare lit up a pig");
+
+		// A tin ore on a sampled column (every fourth block of a chunk) under the burst.
+		BlockPos column = helper.absolutePos(new BlockPos(2, 1, 6));
+		BlockPos ore = new BlockPos(column.getX() & ~3, column.getY() - 1, column.getZ() & ~3);
+		level.setBlockAndUpdate(ore, BuiltInRegistries.BLOCK.getValue(Jugcraft.id("tin_ore")).defaultBlockState());
+		var readings = io.github.jimbozoomer.jugcraft.prospecting.OreSurvey.survey(level, ore.above(30), level.getRandom(),
+				io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.SURVEY_RADIUS,
+				io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.SURVEY_STRIDE);
+		helper.assertTrue(readings.stream().anyMatch(r -> r.icon().getPath().equals("tin_ore")), "The survey missed the tin: " + readings);
+
+		helper.succeedWhen(() -> {
+			ItemStack motor = workshop.getItem(MachineKind.ROCKET_WORKSHOP.outputSlot());
+			helper.assertTrue(motor.is(item("rocket_motor")), "Rocket workshop output is " + motor);
+		});
+	}
+
 	/** Ores drop their raw material to a plain pickaxe, more with Fortune; only Silk Touch takes the ore block itself. */
 	@GameTest
 	public void oresNeedSilkTouchToDropThemselves(GameTestHelper helper) {
