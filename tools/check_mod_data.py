@@ -2169,6 +2169,52 @@ def check_decor4(java):
     check_hexes(java, number, lang)
     check_broomstick(java, number, lang)
     check_werewolves(java, number, lang)
+    check_squirrels(java, number, lang)
+
+
+def check_squirrels(java, number, lang):
+    """Fall addition 24: Squirrel and Squirrels match SQUIRRELS in tools/agriculture.py (the squirrel, its gathering and
+    burying, spawning, acorns from leaves); the entity, acorn and roasted acorns are registered and drawn; their words,
+    tags, recipes, advancement and textures exist."""
+    sq = ag.SQUIRRELS
+    expected = {("Squirrel", "MAX_HEALTH"): sq["health"], ("Squirrel", "SPEED"): sq["speed"], ("Squirrel", "SEEK_RANGE"): sq["seek_range"],
+                ("Squirrel", "BURY_TICKS"): sq["bury_ticks"], ("Squirrel", "SAPLING_CHANCE"): sq["sapling_chance"],
+                ("Squirrel", "SAPLING_SPACE"): sq["sapling_space"], ("Squirrels", "SPAWN_TICKS"): sq["spawn_ticks"],
+                ("Squirrels", "SPAWN_CHANCE"): sq["spawn_chance"], ("Squirrels", "MIN_DISTANCE"): sq["min_distance"],
+                ("Squirrels", "MAX_DISTANCE"): sq["max_distance"], ("Squirrels", "NEAR_CAP"): sq["near_cap"],
+                ("Squirrels", "LEVEL_CAP"): sq["level_cap"], ("Squirrels", "ACORN_CHANCE"): sq["acorn_chance"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/agriculture.py ({value})")
+    squirrel, squirrels = java.get("Squirrel", ""), java.get("Squirrels", "")
+    if f'ACORN = "{sq["acorn"]}"' not in squirrel:
+        err("Squirrel.ACORN differs from SQUIRRELS['acorn']")
+    leaves = "List.of(" + ", ".join(f'"{l}"' for l in sq["acorn_leaves"]) + ")"
+    if f"ACORN_LEAVES = {leaves}" not in squirrels:
+        err("Squirrels.ACORN_LEAVES differs from SQUIRRELS['acorn_leaves']")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ('entity("squirrel"', f".sized({sq['size'][0]}F, {sq['size'][1]}F)", "Squirrels.register();",
+                 "registerItem(Squirrel.ACORN, AcornItem::new", f'food("{sq["roasted"]}"'):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "JugcraftAgriculture.SQUIRREL, SquirrelRenderer::new" not in client or "SquirrelModel.LAYER, SquirrelModel::createLayer" not in client:
+        err("JugcraftClient.java must register SquirrelRenderer and SquirrelModel's layer")
+    for key in (f"entity.{MOD}.{sq['entity']}", f"item.{MOD}.{sq['acorn']}", f"item.{MOD}.{sq['roasted']}"):
+        if key not in lang:
+            err(f"Squirrels have no words for {key}")
+    for path in (DATA / MOD / "advancement" / "nuts_about_squirrels.json", DATA / MOD / "recipe" / f"{sq['roasted']}.json",
+                 ASSETS / "textures" / "entity" / "squirrel_red.png", ASSETS / "textures" / "entity" / "squirrel_grey.png",
+                 ASSETS / "textures" / "item" / f"{sq['acorn']}.png", ASSETS / "textures" / "item" / f"{sq['roasted']}.png"):
+        if not path.exists():
+            err(f"Squirrels need {path.relative_to(ROOT)}")
+    habitat = (load(DATA / MOD / "tags" / "worldgen" / "biome" / "squirrel_habitat.json") or {}).get("values", [])
+    if sorted(habitat) != sorted(sq["habitat"]):
+        err("jugcraft:squirrel_habitat differs from SQUIRRELS['habitat']")
+    food = (load(DATA / MOD / "tags" / "item" / "squirrel_food.json") or {}).get("values", [])
+    if sorted(food) != sorted(sq["food"]):
+        err("jugcraft:squirrel_food differs from SQUIRRELS['food']")
 
 
 def check_werewolves(java, number, lang):

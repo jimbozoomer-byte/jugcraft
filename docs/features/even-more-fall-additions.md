@@ -1,11 +1,11 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21), the flying broomstick (addition 22) and full-moon werewolves (addition 23) are implemented in source and pass CI's game tests. None is yet played by hand. Additions 24 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21), the flying broomstick (addition 22) and full-moon werewolves (addition 23) and squirrels and acorns (addition 24) are implemented in source and pass CI's game tests. None is yet played by hand. Additions 25 to 30 are planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
 23. full-moon werewolves: they come out of the woods only on full-moon nights; wolfsbane wards them off and silver hurts them;
-24. squirrels and acorns (planned);
+24. squirrels and acorns: squirrels in the woods gather and bury acorns, and some grow into oaks; acorns plant oaks and roast;
 25. the Pumpkling, a pet that wears your carved pumpkin's face (planned);
 26. the fall fair midway: high striker, ring toss and plush prizes (planned);
 27. the ghost-train dark ride (planned);
@@ -28,6 +28,8 @@ Every hex can be made without leaving the Overworld:
 
 Werewolves are Discovery tier: they come to any player in Overworld woods on a full-moon night. Wolfsbane grows wild in taiga and forests; the silver dagger is a silver ingot and a stick, and silver arrows a silver nugget and four arrows (silver is mined from the first days).
 
+Squirrels and acorns are Discovery tier: squirrels come to any player in Overworld woods by day, and oak and dark oak leaves drop acorns (as they drop apples). Roasting needs a furnace, smoker or campfire.
+
 The flying broomstick is Discovery tier too: the Witch's Broom (two sticks and a wheat), one Flying Ointment and two feathers.
 
 Primary specialty and supported player role: witchcraft and exploration. A witch brews hexes for others:
@@ -39,9 +41,11 @@ Draughts stack to 16 and keep, so a witch can trade them.
 
 Werewolves are for fighters and hunters: a monthly danger in the woods, beaten by planning (wolfsbane about the homestead, silver in hand), and a reward in pelts. They give silver, until now only a cable metal, a use of its own.
 
+Squirrels and acorns are for foresters, cooks and anyone who likes animals: acorns are an early snack and another way to plant oaks, and squirrels slowly plant the woods they live in. Tame-minded players can breed them with nuts.
+
 The flying broomstick is a witch's way to travel: slower than elytra but found long before them, good for scouting, crossing ravines and reaching rooftops, and fuelled by the ointment a witch brews.
 
-None of this depends on the Halloween event: a cauldron brews hexes and a broom flies all year, and werewolves come on every full moon.
+None of this depends on the Halloween event: a cauldron brews hexes and a broom flies all year, werewolves come on every full moon, and squirrels live in the woods all year.
 
 ## Player experience
 ### Hex brews
@@ -124,6 +128,19 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 7. **At dawn,** or whenever it finds it isn't a full-moon night, a werewolf is gone in a swirl of smoke.
 8. **Drops:** its kind's pelt (**Werewolf Pelt**, **Snow Werewolf Pelt** or **Shadow Werewolf Pelt**) and a bone or two. Two pelts of a kind make that kind's rug (**Werewolf Rug**, **Snow Werewolf Rug**, **Shadow Werewolf Rug**): a pelt laid flat with its snarling head at one end, for the floor. Any pelt can also be cut into two leather.
 
+### Squirrels and acorns
+1. **Where and when:** squirrels live in the Overworld's **forests and taiga** (biome tag `jugcraft:squirrel_habitat`). By day, every 20 seconds, for each player there's a 25% chance one or two come out 20 to 40 blocks away, onto open earth. None come while 6 are within 64 blocks of the player or 30 are in the world, nor while mobs don't spawn.
+2. **The squirrel:** small and quick (3 hearts, a third of a block long), **red or grey**, half and half. A slim body, a round head with tufted ears, and a great bushy tail that streams out as it bounds along and curls up over its back when it sits.
+   - It **climbs tree trunks**: to a squirrel, a log it runs into is a ladder. It takes no fall damage.
+   - It bolts when hurt, and looks round at players nearby.
+3. **Acorns:** oak and dark oak leaves drop an **Acorn** 5% of the time they are broken or decay, as they drop apples.
+   - **Plant one** on the top of grass, dirt or any other earth an oak sapling grows on, with open air above it, and it's an **oak sapling**.
+   - **Roast it** in a furnace, smoker or campfire: **Roasted Acorns**, a snack (3 hunger).
+   - It composts, and it counts as a seed (`c:seeds`).
+4. **Gathering:** a grown squirrel with empty paws goes for an acorn lying within 10 blocks, takes it and carries it about in its forepaws. After 10 seconds it **buries it** in the earth it stands on (anything an oak sapling grows on), with a scatter of dirt. One in four buried acorns sprouts there as an **oak sapling**, if no sapling or log stands within 3 blocks. On stone it keeps its acorn until it finds earth. So squirrels slowly plant the woods they live in, and a player who drops acorns near them gets some of them planted.
+5. **Nuts:** acorns, chestnuts and roasted chestnuts (item tag `jugcraft:squirrel_food`) tempt squirrels to follow, and breed two into a **kit**, red or grey after either parent. Breeding them earns **Nuts About Squirrels**.
+6. **Drops:** a squirrel drops only the acorn it was carrying.
+
 ## Connections
 - Hex brews, input producer:
   - the Bubbling Cauldron and its brews (the witch's cottage decorations);
@@ -146,6 +163,10 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
 - Werewolves, technology connection: silver gets a use of its own beside cables.
 - Werewolves, entry path: everything is early; a player can stay safe on a full-moon night with a sprig of wolfsbane in hand from the first one.
 - Werewolves, required vs optional: optional; they are a danger to plan for, and nothing is gated behind them. A smith can make silver weapons for others.
+- Squirrels and acorns, input producer: oak and dark oak trees (wild, or a player's tree farm) for acorns; the Festival Crops' chestnut tree for chestnuts to tempt and breed squirrels; any furnace, smoker or campfire.
+- Squirrels and acorns, output consumer: oak saplings (forestry and tree farms), Roasted Acorns (food), compost; acorns are seeds for anything that takes `c:seeds`.
+- Squirrels and acorns, entry path: everything is in the Overworld from the first day.
+- Squirrels and acorns, required vs optional: optional; acorns are one more way to get oak saplings and food, and nothing is gated behind squirrels.
 - Flying broomstick, input producer: the Witch's Broom (the witch's cottage decorations), Flying Ointment (hex brews), feathers, and the witch hat costume for speed.
 - Flying broomstick, output consumer: travel and exploration; the full-moon night (mooncakes, fairy rings) for Over the Moon. Every witch's cottage piece now has a use: the cauldron brews the ointment that flies the broom.
 - Flying broomstick, entry path: everything is Discovery tier; the first broom comes charged. Nothing needs the End.
@@ -183,6 +204,11 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
   - Nothing is made: the broom doesn't break down into anything, and its charge only burns.
   - Automation: none; anointing is by hand.
   - Cost on the server: one charge tick and a ground probe per ridden broom a tick, and a distance check every second. Riderless brooms run a short drift; dry ones a ground probe. The pilot's client does the flying.
+- **Squirrels and acorns:**
+  - Units: a squirrel has 6 health and moves at 0.32 (a rabbit: 3, 0.3). Acorns drop at 0.05 from oak and dark oak leaves (vanilla's apples: 0.005 at no Fortune; saplings 0.05). Roasted acorns: 3 hunger, 0.4 saturation modifier (roasted chestnuts: 4, 0.6); 200 ticks in a furnace.
+  - No gain: one acorn plants one sapling. A squirrel buries one acorn and, a quarter of the time, one sapling sprouts; the rest are lost. Roasting is one for one, and nothing turns roasted acorns back. Oak trees already drop saplings in vanilla, so acorns add a way, not a loop.
+  - Automation: leaves that are broken or decay drop acorns, so a tree farm yields them; planting is by hand or by squirrel. Nothing plants acorns from a dispenser.
+  - Cost on the server: the spawner tries one spot a player every 20 seconds, by day; it counts squirrels near the player (a 129-block box) and in the level. A squirrel with empty paws looks for acorns within 10 blocks every second or two. One carrying an acorn checks the block under it each tick after 10 seconds, and a sprouting check reads at most 7 × 4 × 7 blocks, once per buried acorn a quarter of the time. Climbing checks one block, only while it is pressed against something.
 - **Hex brews, cost on the server:** one look at each online player per server tick (a duration and effect check; a collision check only when a shrinking is about to end). No block entity, no block ticks. The glyphs and bubbles are client particles.
 
 ## Multiplayer and persistence
@@ -215,6 +241,11 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
   - worldgen `jugcraft:wolfsbane`, `jugcraft:patch_wolfsbane`;
   - the attribute modifier `jugcraft:snow_stride` (transient, never saved).
 - **Werewolves, disable behaviour:** with the agriculture feature off, werewolves stop coming and the recipes don't load; everything stays registered. The silver recipes also need the silver feature.
+- **Squirrels and acorns, server authority:** spawning, gathering, burying, sprouting and breeding are decided on the server. Planting an acorn goes through vanilla's item use on a block, needs build rights at the spot (spawn protection, adventure mode), and only happens on the server.
+- **Squirrels and acorns, what clients get:** the squirrel's colour (synced entity data) and the acorn in its paws (vanilla's equipment sync), so every player sees a squirrel carrying one.
+- **Squirrels and acorns, persistence:** a squirrel saves its colour, the acorn it holds and how long it has held it, and is saved with its chunk like any animal. Saplings are ordinary oak saplings.
+- **Squirrels and acorns, IDs (all new):** entity `squirrel`; items `acorn`, `roasted_acorns`; item tag `jugcraft:squirrel_food`, biome tag `jugcraft:squirrel_habitat`; advancement `nuts_about_squirrels`; recipes `roasted_acorns`, `roasted_acorns_from_smoking`, `roasted_acorns_from_campfire_cooking`. Acorns join `c:seeds`, and roasted acorns `c:foods`.
+- **Squirrels and acorns, disable behaviour:** with the agriculture feature off, squirrels stop coming, leaves stop dropping acorns and the recipes don't load; everything stays registered, and squirrels already in the world stay.
 - **Flying broomstick, server authority:**
   - As with a boat or a horse, the pilot's client flies the broom and sends its moves, and vanilla's vehicle checks run on the server. The broom has no gravity, so vanilla's floating kick doesn't apply.
   - The server burns the charge itself, and every 20 ticks compares where the broom is with where it was. If it went further than a broom can fly (three times its top speed, for lag), or climbed more than 2 blocks while dry since the last check, the rider is thrown off ("The broom bucks you off") and the broom is the server's again: it hovers or sinks.
@@ -235,6 +266,7 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
   - `tools/werewolf_textures.py` paints each kind's fur from those boxes, face by face, at four times the model's texture size (512 × 512 for its 128 × 128 layout), with `tools/fur_paint.py`: shaded faces, fur in locks with fine hairs over them, cut-out points for the shaggy mane, fangs and claws. It paints the glowing eyes alone too; each kind's rug and pelt at 64 × 64; and wolfsbane, the dagger and the arrow at 16 × 16.
   - The look follows reference pictures the owner gave (a white, a dark brown and a dark grey werewolf): hunched, long-snouted, open-jawed, tall-eared, long-clawed, wolf-legged, bushy-tailed, with red or yellow eyes. Every pixel is drawn by code; nothing is traced or copied from them.
   - `tools/werewolf_data.py` writes the flower's and rugs' models, the items, words, loot, tags and worldgen. The numbers come from `WEREWOLF` and `WOLFSBANE` in `tools/agriculture.py`, which the checker compares with Java. Sounds are vanilla's (a wolf's howl, growl, whine, hurt and death, pitched low), and particles vanilla's (electric sparks, large smoke).
+- Squirrels and acorns: no new dependencies. `tools/squirrel_textures.py` draws the red and grey squirrels (32 × 32, laid out as `client/SquirrelModel.java`'s boxes: soft fur, a cream belly, a bushy tail paler at its tip), the acorn and roasted acorns. `tools/squirrel_data.py` writes the acorn's item model, words and tags; roasted acorns, the recipes and the advancement come from `ITEMS`, `COOKING` and `ADVANCEMENTS` in `tools/agriculture.py`. The numbers come from `SQUIRRELS` in `tools/agriculture.py`, which the checker compares with Java. Sounds are a fox's, pitched high; particles are the earth's own block dust.
 - The flying broomstick: no new dependencies. `tools/broom_textures.py` draws the item (a broom aslant, purple cord, fanned straw, sparkles) and the entity's pale grain, which `client/BroomstickRenderer.java` tints for the ash handle, the cord and the straw (greyer when dry) on boxes of its own. `tools/broom_data.py` writes the item model and words. The numbers come from `BROOMSTICK` in `tools/agriculture.py`, which the checker compares with `Broomstick.java`. Sounds and particles are vanilla's: a phantom's flap on take-off, a brewing stand when anointed, witch's sparkles and smoke.
 
 ## Verification
@@ -331,11 +363,39 @@ The client test's screenshots show the brooms by the cauldron of flying ointment
 
 Not run: flying it by hand, which no automated test can do (the client test's rider has no keys pressed); a two-client dedicated-server playtest.
 
+### Squirrels verification
+
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-24-squirrels` stacked on full-moon werewolves:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `SQUIRRELS` with `Squirrel` and `Squirrels`: the squirrel, its gathering, burying and sprouting, spawning and acorns from leaves; and checks the entity, acorn and roasted acorns are registered and drawn, and their words, tags, recipes, advancement and textures) | Pass, 1054 IDs |
+| `./gradlew build` on `e71302ed` (Build workflow run [37148025075](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37148025075)) | Pass |
+| Game tests on the headless server, same run: 606 in total, 5 of them new here (`SquirrelGameTests`) | **All 606 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `e71302ed` (all three client shards of that run) |
+
+The 5 new game tests (`SquirrelGameTests`):
+1. a squirrel goes for an acorn lying several blocks off and takes it, and the acorn is gone from the ground;
+2. open earth has room for an oak to sprout, stone has none, and nor has earth beside a log; a squirrel on grass buries its acorn, one on stone keeps it;
+3. an acorn used on the top of grass plants an oak sapling and is used up; on stone, nothing;
+4. acorns and chestnuts are squirrel food, wheat isn't; two squirrels in love breed a kit, earning Nuts About Squirrels;
+5. the roasting recipes and the advancement load, and roasted chestnuts are squirrel food.
+
+Found by CI and fixed before this record:
+- The first run failed in two of these tests at once, on grass: burying and planting asked for `minecraft:dirt`, which grass didn't pass in 26.3. They (and where squirrels come out) now ask whether an oak sapling could grow there (`Werewolves.woodlandFloor`). The same check had kept werewolves off grass; that was fixed on the branch below.
+- The bury test also checked for room to sprout after a squirrel had buried an acorn, which sprouts a sapling one time in four and leaves no room near it: it now checks the room first.
+
+The client test's first screenshots showed a squirrel at rest with its tail standing straight up behind its head, a column from the front. At rest the tail now sweeps up and back and its tip curls forward over the back (`2845d4ad`), and the test adds a side-on picture. Those screenshots come from this pull request's run.
+
+Not run: squirrels burying acorns over a long time in play, and a sapling sprouting from one (a 1 in 4 chance, which no test waits for); a two-client dedicated-server playtest.
+
 ## World and event applicability
 - A cauldron brews hexes in any dimension, all year. Nothing is seasonal.
 - The hex ingredients come from the Overworld: brown mushrooms, beans, and phantoms.
 - Werewolves come only to the Overworld's forests, taiga and groves, on full-moon nights. Snow werewolves only where it snows, shadow werewolves anywhere they come (most often in dark woods). Wild wolfsbane generates only in newly generated chunks of those biomes; existing chunks don't get it, but a sprig brought in can be planted anywhere.
 - A broom flies in any dimension. Over the Moon is earned only in the Overworld. Nothing is seasonal.
+- Squirrels come only to the Overworld's forests and taiga, by day, all year. Acorns drop from oak and dark oak leaves anywhere, and plant on any grass or dirt.
 
 ## Rollout and open questions
 - A hex brew can't be drawn by hoppers or dispensers. Bottles are filled by hand.
@@ -350,4 +410,6 @@ Not run: flying it by hand, which no automated test can do (the client test's ri
 - A broom carries one rider and nothing else; it can't be led, put in a minecart or flown by mobs.
 - A broom collides with blocks by its own small box, and stops moves that would put its rider's head in a block. Diving into a block is not slowed further than vanilla's collision.
 - The top speed and the 2-minute charge are open to balance review once flown. A rider who loses connection mid-flight stays on their broom where it was.
+- A squirrel buries every acorn it gathers; it doesn't dig them up again or keep a store. A squirrel can't be tamed or led by anything but nuts.
+- How often squirrels come and how often a buried acorn sprouts are open to balance review once played.
 - A shrunk player's grace is 5 seconds at a time. A player who logs out shrunk under a low ceiling stays shrunk until there is room.
