@@ -3971,8 +3971,9 @@ def check_deposits():
 def check_diagonal_connections():
     """Diagonal connections (tools/diagonal_connections.py): every block in #jugcraft:connects_diagonally has a
     blockstate with one arm part for each diagonal, turned toward it, and an arm model of turned elements; every
-    Jugcraft blockstate shaped like a fence, pane or bars (a part for each straight direction) is in the tag; vanilla's
-    rebuilt blockstates keep vanilla's own parts; and the Java property names match."""
+    Jugcraft blockstate shaped like a fence, pane or bars (a part for each straight direction) or like a wall (a low or
+    tall part for each) is in the tag; vanilla's rebuilt blockstates keep vanilla's own parts; and the Java property
+    names match."""
     tag = set((load(RES / "data" / MOD / "tags" / "block" / "connects_diagonally.json") or {}).get("values", []))
     if tag != set(dg.blocks()):
         err(f"#{dg.TAG} differs from tools/diagonal_connections.py: {sorted(tag ^ set(dg.blocks()))}")
@@ -4004,6 +4005,10 @@ def check_diagonal_connections():
         sides = {next(iter(p["when"])) for p in parts if len(p.get("when", {})) == 1 and list(p["when"].values()) == ["true"]}
         if {"north", "east", "south", "west"} <= sides and not sides & {"up", "down"} and f"{MOD}:{path.stem}" not in tag:
             err(f"{MOD}:{path.stem} joins like a fence but is not in #{dg.TAG}; add it to tools/diagonal_connections.py")
+        heights = {next(iter(p["when"])) for p in parts
+                   if len(p.get("when", {})) == 1 and list(p["when"].values())[0] in ("low", "tall")}
+        if {"north", "east", "south", "west"} <= heights and f"{MOD}:{path.stem}" not in tag:
+            err(f"{MOD}:{path.stem} joins like a wall but is not in #{dg.TAG}; add it to tools/diagonal_connections.py")
     java = (ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "diagonal" / "DiagonalConnections.java")
     source = java.read_text(encoding="utf-8") if java.exists() else ""
     for diagonal, _y in dg.DIAGONALS:

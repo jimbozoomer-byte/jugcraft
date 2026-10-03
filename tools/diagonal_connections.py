@@ -1,8 +1,8 @@
 """Diagonal connections (docs/features/diagonal-connections.md) for tools/generate_material_data.py.
 
-Fences, glass panes and bars join diagonally as well as straight. The Java side (diagonal/DiagonalConnections) gives
-every FenceBlock and IronBarsBlock four more properties, north_east, south_east, south_west and north_west, and sets
-them only for blocks in the block tag #jugcraft:connects_diagonally. Here each of those blocks gets:
+Fences, glass panes, bars and walls join diagonally as well as straight. The Java side (diagonal/DiagonalConnections)
+gives every FenceBlock, IronBarsBlock and WallBlock four more properties, north_east, south_east, south_west and
+north_west, and sets them only for blocks in the block tag #jugcraft:connects_diagonally. Here each of those blocks gets:
 
 - a diagonal arm model, jugcraft:block/diagonal/<block>: a child of the block's own side model (so it keeps the
   block's textures, translucency and lighting) whose elements are turned 45 degrees about the post. Minecraft's
@@ -12,7 +12,7 @@ them only for blocks in the block tag #jugcraft:connects_diagonally. Here each o
 - four more multipart parts in its blockstate: that arm turned 0, 90, 180 and 270 degrees for north_east, south_east,
   south_west and north_west.
 
-Vanilla's fences, panes and bars are rebuilt in assets/minecraft/blockstates: vanilla's own parts, naming vanilla's
+Vanilla's fences, panes, bars and walls are rebuilt in assets/minecraft/blockstates: vanilla's own parts, naming vanilla's
 models by ID, plus the diagonals. Jugcraft's fences get their diagonal parts added to the blockstates their own
 generators wrote, so this runs last in generate_material_data.assets().
 """
@@ -41,6 +41,12 @@ VANILLA_BARS = {"iron_bars": "iron_bars"}
 for _age in ("", "exposed_", "weathered_", "oxidized_"):
     VANILLA_BARS[f"{_age}copper_bars"] = f"{_age}copper_bars"
     VANILLA_BARS[f"waxed_{_age}copper_bars"] = f"{_age}copper_bars"
+STONES = ["andesite", "blackstone", "brick", "cinnabar_brick", "cinnabar", "cobbled_deepslate", "cobblestone",
+          "deepslate_brick", "deepslate_tile", "diorite", "end_stone_brick", "granite", "mossy_cobblestone",
+          "mossy_stone_brick", "mud_brick", "nether_brick", "polished_blackstone_brick", "polished_blackstone",
+          "polished_cinnabar", "polished_deepslate", "polished_sulfur", "polished_tuff", "prismarine", "red_nether_brick",
+          "red_sandstone", "resin_brick", "sandstone", "stone_brick", "sulfur_brick", "sulfur", "tuff_brick", "tuff"]
+VANILLA_WALLS = [f"{stone}_wall" for stone in STONES]
 
 
 def jugcraft_fences():
@@ -51,7 +57,7 @@ def jugcraft_fences():
 
 def blocks():
     """Every block in #jugcraft:connects_diagonally, as IDs."""
-    return ([f"minecraft:{name}" for name in VANILLA_FENCES + VANILLA_PANES + list(VANILLA_BARS)]
+    return ([f"minecraft:{name}" for name in VANILLA_FENCES + VANILLA_PANES + list(VANILLA_BARS) + VANILLA_WALLS]
             + [f"{MOD}:{name}" for name in jugcraft_fences()])
 
 
@@ -120,6 +126,19 @@ def bars_arm():
     ]
 
 
+def wall_arm():
+    """A low wall side, as wide (6) and high (14) as vanilla's, from the corner to the middle; the stone is not
+    stretched along it. Walls join diagonally only low: a diagonal never rises to meet a wall or block above."""
+    x0, x1 = _narrow(3)
+    length = round(16 - ARM_UV, 4)
+    return [{"from": [x0, 0, 0], "to": [x1, 14, 8], "rotation": _rotation(), "faces": {
+        "down": {"uv": [5, ARM_UV, 11, 16], "texture": "#wall"},
+        "up": {"uv": [5, 0, 11, length], "texture": "#wall"},
+        "north": {"uv": [5, 2, 11, 16], "texture": "#wall"},
+        "west": {"uv": [0, 2, length, 16], "texture": "#wall"},
+        "east": {"uv": [ARM_UV, 2, 16, 16], "texture": "#wall"}}}]
+
+
 def turned(elements):
     """Any north side model's elements as a diagonal arm. Parts that run to the block's edge (rails) are stretched to
     the corner; the rest (pickets, finials) keep their size and are spread along the arm. Widths are kept. Elements that
@@ -140,7 +159,9 @@ def turned(elements):
     return out
 
 
-ARMS = {"fence": fence_arm, "bamboo_fence": bamboo_fence_arm, "pane": pane_arm, "bars": bars_arm}
+ARMS = {"fence": fence_arm, "bamboo_fence": bamboo_fence_arm, "pane": pane_arm, "bars": bars_arm, "wall": wall_arm}
+# Arm kinds whose blockstates uvlock their arms, as vanilla uvlocks fence and wall sides.
+UVLOCKED = {"fence", "wall"}
 
 
 # ---------------------------------------------------------------- blockstates
@@ -199,6 +220,16 @@ def vanilla_bars(family):
     return parts, f"{m}_side"
 
 
+def vanilla_wall(name):
+    """Vanilla's wall blockstate: the post when raised, and a low or tall side for each connection (uvlocked)."""
+    m = f"minecraft:block/{name}"
+    parts = [_part(f"{m}_post", {"up": "true"})]
+    for model, height in ((f"{m}_side", "low"), (f"{m}_side_tall", "tall")):
+        for direction, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+            parts.append(_part(model, {direction: height}, y, uvlock=True))
+    return parts, f"{m}_side"
+
+
 def vanilla_blockstates():
     """name -> (vanilla's own parts, its north side model, arm kind)."""
     out = {}
@@ -208,6 +239,8 @@ def vanilla_blockstates():
         out[name] = vanilla_pane(name) + ("pane",)
     for name, family in VANILLA_BARS.items():
         out[name] = vanilla_bars(family) + ("bars",)
+    for name in VANILLA_WALLS:
+        out[name] = vanilla_wall(name) + ("wall",)
     return out
 
 
@@ -230,7 +263,7 @@ def write_all(write, assets_dir, minecraft_assets_dir):
         arm = f"{MOD}:block/diagonal/{name}"
         write(models / f"{name}.json", {"parent": side, "elements": ARMS[kind]()})
         write(minecraft_assets_dir / "blockstates" / f"{name}.json",
-              {"multipart": parts + diagonal_parts(arm, uvlock=kind == "fence")})  # as vanilla uvlocks its fence sides
+              {"multipart": parts + diagonal_parts(arm, uvlock=kind in UVLOCKED)})
     for name in jugcraft_fences():
         path = assets_dir / "blockstates" / f"{name}.json"
         state = _load(path)
