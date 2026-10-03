@@ -111,7 +111,7 @@ public final class Midway {
 		if (!(level.getBlockEntity(base) instanceof HighStrikerBlockEntity striker) || !striker.launch(level, puck, player)) {
 			return 0;
 		}
-		level.playSound(null, base, sound("block.anvil.land", SoundEvents.ANVIL_LAND), SoundSource.BLOCKS, 0.5F, 1.6F);
+		level.playSound(null, base, sound("block.anvil.land", SoundEvents.WOOD_HIT), SoundSource.BLOCKS, 0.5F, 1.6F);
 		level.sendParticles(ParticleTypes.CRIT, base.getX() + 0.5, base.getY() + 0.3, base.getZ() + 0.5, 8, 0.3, 0.1, 0.3, 0.2);
 		return puck;
 	}
@@ -139,7 +139,7 @@ public final class Midway {
 	/** The puck hits the bell: it rings, sparks fly, and the striker (if still about) wins a prize and Ring the Bell. */
 	public static void ring(ServerLevel level, BlockPos base, @Nullable ServerPlayer striker) {
 		BlockPos bell = base.above(HighStrikerBlock.PARTS - 1);
-		level.playSound(null, bell, sound("block.bell.use", SoundEvents.ANVIL_LAND), SoundSource.BLOCKS, 2.0F, 1.0F);
+		level.playSound(null, bell, sound("block.bell.use", SoundEvents.BELL_BLOCK), SoundSource.BLOCKS, 2.0F, 1.0F);
 		level.sendParticles(ParticleTypes.FIREWORK, bell.getX() + 0.5, bell.getY() + 1.0, bell.getZ() + 0.5, 20, 0.4, 0.3, 0.4, 0.08);
 		if (striker != null) {
 			TrickOrTreat.award(striker, "ring_the_bell");

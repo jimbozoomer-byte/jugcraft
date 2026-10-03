@@ -1043,7 +1043,7 @@ public final class JugcraftAgriculture {
 		// Fall additions 26, the fall fair midway: the High Striker and its Carnival Mallet, Ring Toss and its rings, and
 		// the plush prizes they give.
 		Block striker = registerBlock("high_striker", HighStrikerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
-				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().lightLevel(HighStrikerBlock::light).pushReaction(PushReaction.BLOCK)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().lightLevel(HighStrikerBlock::light).pushReaction(PushReaction.IMMOVEABLE)
 				.ignitedByLava());
 		registerItem("high_striker", props -> new BlockItem(striker, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		HIGH_STRIKER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("high_striker"),
@@ -1057,7 +1057,7 @@ public final class JugcraftAgriculture {
 				.sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10));
 		for (Midway.Plush plush : Midway.PLUSHES) {
 			Block block = registerBlock(plush.id(), props -> new PlushBlock(props, plush), BlockBehaviour.Properties.of().mapColor(MapColor.WOOL)
-					.strength(0.2F).sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
+					.strength(0.2F).sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
 			registerItem(plush.id(), props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
 		Midway.register();
