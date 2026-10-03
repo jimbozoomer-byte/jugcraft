@@ -27,6 +27,13 @@ public class TurkeyClientGameTests implements FabricClientGameTest {
 		try (TestSingleplayerContext singleplayer = context.worldBuilder()
 				.adjustSettings(creator -> creator.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE)).create()) {
 			singleplayer.getConnection().waitForChunksRender();
+			// Hide the HUD, hand and chat whatever an earlier test in this client left: CI shares the client tests out
+			// between parallel jobs, and only the first job's opening test hides them.
+			context.runOnClient(client -> {
+				if (!client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
 			BlockPos origin = context.computeOnClient(client -> BlockPos.containing(client.player.position()));
 			int x = origin.getX();
 			int y = origin.getY();
