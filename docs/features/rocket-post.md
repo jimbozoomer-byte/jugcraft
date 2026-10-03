@@ -61,4 +61,4 @@ Primary specialty and supported player role: logistics over long distances, and 
 Not applicable.
 
 ## Rollout and open questions
-- Next rocketry batches: line-throwing rockets with ziplines, the rocket launcher (damage only), booster rails, and liquid fuels (kerosene, liquid oxygen).
+- Next rocketry batches: line-throwing rockets with ziplines (batch 40, [zipline.md](zipline.md)), the rocket launcher (damage only), booster rails, and liquid fuels (kerosene, liquid oxygen).

@@ -29,7 +29,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -79,6 +81,11 @@ public final class JugcraftRocketry {
 	public static BlockEntityType<RocketPadBlockEntity> ROCKET_PAD_ENTITY;
 	public static ExtendedMenuType<RocketPadMenu, BlockPos> ROCKET_PAD_MENU;
 	public static DataComponentType<GlobalPos> FLIGHT_TARGET;
+	/** Batch 40: the zipline. */
+	public static Item LINE_ROCKET;
+	public static Block ZIPLINE_ANCHOR;
+	public static BlockEntityType<ZiplineAnchorBlockEntity> ZIPLINE_ANCHOR_ENTITY;
+	public static EntityType<ZiplineRider> ZIPLINE_RIDER;
 
 	private record Flight(ServerLevel level, UUID player, String name, RocketItem.Kind kind, Vec3 at, long due) {
 	}
@@ -109,6 +116,7 @@ public final class JugcraftRocketry {
 		SIGNAL_FLARE = rocket("signal_flare", RocketItem.Kind.SIGNAL);
 		ILLUMINATION_FLARE = rocket("illumination_flare", RocketItem.Kind.ILLUMINATION);
 		registerPost();
+		registerZipline();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		ServerTickEvents.END_SERVER_TICK.register(JugcraftRocketry::tick);
 		ServerTickEvents.END_SERVER_TICK.register(RocketPost::tick);
@@ -138,6 +146,21 @@ public final class JugcraftRocketry {
 				FabricBlockEntityTypeBuilder.create(RocketPadBlockEntity::new, ROCKET_PAD).build());
 		ROCKET_PAD_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("rocket_pad"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new RocketPadMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
+	}
+
+	/** Batch 40: zipline anchors, the line-throwing rocket and the trolley riders hang from. */
+	private static void registerZipline() {
+		LINE_ROCKET = item("line_rocket", properties -> new LineRocketItem(properties.stacksTo(16)));
+		ResourceKey<Block> anchorKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("zipline_anchor"));
+		ZIPLINE_ANCHOR = Registry.register(BuiltInRegistries.BLOCK, anchorKey, new ZiplineAnchorBlock(
+				BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).strength(3.0F).noOcclusion().setId(anchorKey)));
+		item("zipline_anchor", properties -> new BlockItem(ZIPLINE_ANCHOR, properties.useBlockDescriptionPrefix()));
+		ZIPLINE_ANCHOR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("zipline_anchor"),
+				FabricBlockEntityTypeBuilder.create(ZiplineAnchorBlockEntity::new, ZIPLINE_ANCHOR).build());
+		ResourceKey<EntityType<?>> riderKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("zipline_rider"));
+		ZIPLINE_RIDER = Registry.register(BuiltInRegistries.ENTITY_TYPE, riderKey, EntityType.Builder
+				.<ZiplineRider>of(ZiplineRider::new, MobCategory.MISC).sized(0.001F, 0.001F).noSummon()
+				.clientTrackingRange(10).updateInterval(1).build(riderKey));
 	}
 
 	private static Item rocket(String path, RocketItem.Kind kind) {
