@@ -1011,6 +1011,8 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 | ![Kept and neglected](../images/ingame_graveyard_kept_and_neglected.jpg) | ![An open grave](../images/ingame_graveyard_open_grave.jpg) |
 | **A memorial bench** with its plaque | **At night**, the lamp posts lit |
 | ![A memorial bench](../images/ingame_graveyard_memorial_bench.jpg) | ![The grounds at night](../images/ingame_graveyard_grounds_night.jpg) |
+| **Grave vases** on their granite bases, a bouquet of each colour | |
+| ![Grave vases](../images/ingame_graveyard_grave_vases.jpg) | |
 
 *Real screenshots from the client game test that CI runs (`GraveyardGroundsClientGameTests`, software rendering, small previews). The stages and epitaphs are set for the picture.*
 
