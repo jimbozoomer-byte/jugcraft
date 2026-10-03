@@ -15,6 +15,7 @@ import model_writer
 import agriculture_data
 from party import party_lang
 import drones
+import town_assets
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -136,6 +137,7 @@ def assets():
     machine_assets(lang)
     agriculture_data.assets(ASSETS, write, lang)
     pixel_hollows_assets(lang)
+    town_assets.assets(ASSETS, write, lang)
     import deposits
     deposits.write_all(write, ASSETS, DATA / MOD, lang)
     import tank_display
@@ -1020,6 +1022,9 @@ def loot_tables():
              "formula": "minecraft:uniform_bonus_count", "parameters": {"bonusMultiplier": 1}},
             {"type": "minecraft:explosion_decay"}], "name": rid(ph.SHARD)},
     ]}]))
+    # The town's Jug Teller drops itself.
+    for block in town_assets.blocks():
+        write(out / f"{block}.json", self_drop(block))
     table = self_drop(ph.CABINET)
     table["pools"][0]["condition"] = {"type": "minecraft:all_of",
                                       "terms": [SURVIVES_EXPLOSION, block_state(ph.CABINET, {"half": "lower"})]}
@@ -1260,6 +1265,10 @@ def tags():
         if info["tool"]:
             tags.add("block", f"minecraft:mineable/{info['tool']}", rid(block))
     tags.add("block", "minecraft:mineable/pickaxe", rid(ph.CLUSTER))
+    for block in town_assets.blocks():
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    for value in town_assets.USABLE:
+        tags.add("block", "jugcraft:town_usable", value)
     tags.add("block", "minecraft:mineable/axe", rid(ph.CABINET))
     for tag in ph.BIOME_TAGS:
         tags.add("worldgen/biome", tag, rid("pixel_hollows"))
@@ -1452,6 +1461,9 @@ def main():
     for key, advancement in advancements.generate(MOD)[0].items():
         write(DATA / MOD / "advancement" / f"{key}.json", advancement)
     agriculture_data.advancements(DATA, write)
+    import town
+    for problem in town.write():
+        print("town:", problem)
 
 
 if __name__ == "__main__":
