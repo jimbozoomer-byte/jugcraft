@@ -88,6 +88,7 @@ TAGLINES = {
     "hydroponic_bay": "Grows crops in nutrient solution, anywhere.",
     "electroplating_bath": "Plates and repairs tools, weapons and armor.",
     "ammonia_chiller": "Freezes water into ice, anywhere.",
+    "rocket_workshop": "Builds rocket parts and rockets.",
     "water_wheel": "Turns flowing water into power.",
     "auto_crafter": "Crafts the pattern in its grid.",
     "large_steam_engine": "Boils water into rotation for shafts.",

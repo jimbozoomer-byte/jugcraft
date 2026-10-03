@@ -20,7 +20,7 @@ RECIPE_LISTS = {"crusher": "crusher", "arc_furnace_controller": "arc_furnace", "
                 "metal_press": "metal_press", "wire_drawer": "wire_drawer", "circuit_assembler": "circuit_assembler",
                 "pulverizer": "pulverizer", "ore_washer": "ore_washer", "sieve": "sieve", "sawmill": "sawmill",
                 "coke_oven": "coke_oven", "steel_foundry": "steel_foundry", "tree_farm": "tree_farm",
-                "hydroponic_bay": "hydroponic_bay"}
+                "hydroponic_bay": "hydroponic_bay", "rocket_workshop": "rocket_workshop"}
 
 # What each block is for, in a sentence or two. Numbers are added from the tables below.
 ABOUT = {
@@ -180,6 +180,9 @@ ABOUT = {
                            "of hydrogen and 100 mB of nitrogen make 200 mB of ammonia. Ostwald: 100 mB of ammonia, 200 "
                            "mB of oxygen and 100 mB of water make 200 mB of nitric acid. Each takes 2 seconds at 128 "
                            "JE/t.",
+    "rocket_workshop": "Builds rockets from up to three ingredients in any slots, like the circuit assembler: solid "
+                       "propellant from ammonium perchlorate, aluminum and rubber; casings, nozzles and guidance "
+                       "units; motors; and the rockets themselves.",
     "logic_controller": "Runs your factory by rules. Join sensors and relays to it with data cable, then right-click "
                         "it: each of its eight rules reads \"IF channel below or above N% THEN channel ON or OFF\". "
                         "Every second it averages each channel's sensors and works through the rules in order, a later "
@@ -786,6 +789,23 @@ def build():
                 "A control remote flips one channel by hand. Use it on a logic controller to bind it, sneak and use it "
                 "to pick the channel, and use it to switch. The controller's rules may switch the channel back when "
                 "their condition next holds. It works within 256 blocks of the controller."]},
+        ]},
+        {"title": "Rocketry", "icon": f"{MOD}:survey_rocket", "pages": [
+            {"title": "Rocket Fuel", "icon": f"{MOD}:solid_propellant", "text": [
+                "Rockets burn solid propellant: ammonium perchlorate (the oxidizer), aluminum and a rubber binder.",
+                "Ammonium perchlorate: a salt and 250 mB of ammonia in the chemical reactor make two. Iodine: eight "
+                "dried kelp and 100 mB of sulfuric acid make one; with silver dust it makes silver iodide, which "
+                "seeds clouds."]},
+            machine_page("rocket_workshop"),
+            {"title": "Rockets", "icon": f"{MOD}:rocket_motor", "text": [
+                "A rocket motor is a casing, a nozzle and two solid propellant. Fire any rocket with right-click under "
+                "open sky; it rises like a firework and does its work at the top.",
+                "Survey rocket (motor, guidance unit, sensor): surveys ores and oil under 7x7 chunks. Cloud-seeding "
+                "rocket (motor, two silver iodide): five minutes of rain. Clear-sky rocket (motor, two guncotton): "
+                "five minutes of clear sky. Weather rockets share a two-minute cooldown.",
+                "Signal flares (four from propellant, paper and red dye) burst red and tell players within 512 blocks "
+                "where they went up. Illumination flares (with glowstone) make hostile mobs within 48 blocks glow for "
+                "30 seconds."]},
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [
