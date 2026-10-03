@@ -18,6 +18,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -134,6 +135,29 @@ public class HotAirBalloonGameTests {
 				helper.assertTrue(balloon.heat() < hot - 0.2F, "Venting cools it fast: " + hot + " to " + balloon.heat());
 				helper.succeed();
 			});
+		});
+	}
+
+	/**
+	 * Riders sit facing along the basket's walls, round it like a pinwheel (the game draws every rider seated, so their
+	 * legs stay inside the wicker), and look no more than {@value HotAirBalloon#LOOK} degrees either way from there.
+	 */
+	@GameTest(structure = ARENA, skyAccess = true)
+	public void ridersSitAlongTheWalls(GameTestHelper helper) {
+		HotAirBalloon balloon = setUp(helper, HotAirBalloon.Kind.HARVEST, 0);
+		ServerPlayer first = player(helper, new BlockPos(22, 1, 20));
+		ServerPlayer second = player(helper, new BlockPos(21, 1, 20));
+		helper.assertTrue(first.startRiding(balloon) && second.startRiding(balloon), "Two climb in");
+		// The first sits facing 90 degrees left of the basket's front; turn them to look straight behind that.
+		first.setYRot(balloon.getYRot() + 90.0F);
+		helper.runAfterDelay(2, () -> {
+			float firstSits = Mth.wrapDegrees(first.yBodyRot - (balloon.getYRot() - 90.0F));
+			float secondSits = Mth.wrapDegrees(second.yBodyRot - balloon.getYRot());
+			float looks = Math.abs(Mth.wrapDegrees(first.getYRot() - (balloon.getYRot() - 90.0F)));
+			helper.assertTrue(Math.abs(firstSits) < 1.0F && Math.abs(secondSits) < 1.0F,
+					"Each sits along a wall: " + firstSits + ", " + secondSits);
+			helper.assertTrue(looks <= HotAirBalloon.LOOK + 0.01F, "and looks no more than " + HotAirBalloon.LOOK + " either way: " + looks);
+			helper.succeed();
 		});
 	}
 

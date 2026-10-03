@@ -64,8 +64,10 @@ public class BalloonClientGameTests implements FabricClientGameTest {
 			place(context, singleplayer, x + 2, y, z - 12, 180, 0);
 			server.runCommand("execute as @p at @s run ride @s mount @e[type=jugcraft:hot_air_balloon,limit=1,sort=nearest]");
 			context.waitTicks(10);
+			// Left without a pilot it vented while the other shots were taken: warm it again, as if the burner had been on.
+			server.runOnServer(minecraft -> pumpkin(minecraft.overworld(), origin).ifPresent(b -> b.setHeat(0.8F)));
 			context.getInput().holdKey(options -> options.keyJump);
-			context.waitTicks(180);
+			context.waitTicks(200);
 			context.getInput().releaseKey(options -> options.keyJump);
 			double up = server.computeOnServer(minecraft -> pumpkin(minecraft.overworld(), origin).map(b -> b.getY() - y).orElse(-1.0));
 			System.out.println("[jugcraft balloon client test] the Jack-o'-Lantern is " + up + " blocks up");
@@ -159,8 +161,8 @@ public class BalloonClientGameTests implements FabricClientGameTest {
 	}
 
 	/**
-	 * The fiesta field: Harvest Stripes and Harvest Moon cold on the ground, and the Jack-o'-Lantern, warm and fuelled,
-	 * tied to a Mooring Post; a few pumpkins and hay bales about.
+	 * The fiesta field: Harvest Stripes and Harvest Moon cold on the ground, and the Jack-o'-Lantern, fuelled, tied to a
+	 * Mooring Post; a few pumpkins and hay bales about.
 	 */
 	private static void build(ServerLevel level, BlockPos origin) {
 		BlockPos ground = origin.below();
@@ -171,7 +173,6 @@ public class BalloonClientGameTests implements FabricClientGameTest {
 		HotAirBalloon pumpkin = HotAirBalloonItem.setUp(level, ground.offset(2, 0, -16), HotAirBalloon.Kind.PUMPKIN, 0.0F, 6000);
 		if (pumpkin != null) {
 			pumpkin.moor(post);
-			pumpkin.setHeat(0.75F);
 		}
 		for (int i = 0; i < 5; i++) {
 			level.setBlock(origin.offset(-14 + i * 7, 0, -4 - (i % 2) * 3), (i % 2 == 0 ? Blocks.HAY_BLOCK : Blocks.PUMPKIN).defaultBlockState(),
