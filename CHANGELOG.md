@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Liquid fuels, batch 43
+- **RP-1 kerosene**, hydrocracked from heavy fuel oil and hydrogen in the catalytic cracker. It is jet fuel too, burning in the gas turbine and the advanced engine.
+- **Cryogenic Liquefier**: condenses oxygen into **liquid oxygen**.
+- **Kerosene and liquid oxygen tanks** (chemical reactor) make **liquid rocket motors**: three rocket motors from a tank of each and two nozzles, with no solid propellant.
+- Advancement, handbook pages, game test. Record: [liquid-fuels.md](docs/features/liquid-fuels.md).
+
 ### Unmerged: Booster rails, batch 42
 - **Booster rail:** a powered rail with rocket thrusters, loaded with solid propellant (8 boosts each). It kicks a minecart to full speed, from a standstill or uphill, and holds it there for 10 seconds, so long tracks and climbs need far fewer powered rails. Minecarts keep their normal speed limit.
 - Handbook page, game test. Record: [booster-rails.md](docs/features/booster-rails.md).

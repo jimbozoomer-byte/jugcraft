@@ -138,6 +138,9 @@ public final class PetroFluids {
 	public static Gas HYDROGEN_SULFIDE;
 	/** Hydroponics (batch 33): fertilizer dissolved in water, for the hydroponic bay. */
 	public static Entry NUTRIENT_SOLUTION;
+	/** Batch 43: liquid fuels. */
+	public static Entry KEROSENE;
+	public static Entry LIQUID_OXYGEN;
 
 	private PetroFluids() {
 	}
@@ -194,6 +197,8 @@ public final class PetroFluids {
 		PREMIUM_GASOLINE = fluid("premium_gasoline", 4, 4, 1, 0xFFECA082, MapColor.COLOR_PINK);
 		HYDROGEN_SULFIDE = gas("hydrogen_sulfide", 0xFFCCCC7E);
 		NUTRIENT_SOLUTION = fluid("nutrient_solution", 5, 4, 1, 0xFF6EAA64, MapColor.COLOR_GREEN);
+		KEROSENE = fluid("kerosene", 5, 4, 1, 0xFFE0E0C4, MapColor.SAND);
+		LIQUID_OXYGEN = fluid("liquid_oxygen", 3, 4, 1, 0xFFA0C8EC, MapColor.COLOR_LIGHT_BLUE);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {
