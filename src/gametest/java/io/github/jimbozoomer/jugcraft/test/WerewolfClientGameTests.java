@@ -19,9 +19,9 @@ import net.minecraft.world.level.block.Blocks;
 
 /**
  * Client game test for full-moon werewolves (fall addition 23): by day, wolfsbane wild on a forest floor and potted on a
- * stump, the Werewolf Rug before a fireplace, and the silver dagger, silver arrows and a pelt in frames; then, on the
- * full-moon night (with night vision, to see by), two werewolves posed in a spruce clearing, up close and from further
- * off. CI job {@code client}.
+ * stump, the three rugs (brown, snow and shadow) before a fireplace, and the silver dagger, silver arrows and the three
+ * pelts in frames; then, on the full-moon night (with night vision, to see by), the three kinds of werewolf posed in a
+ * spruce clearing, the shadow werewolf snarling, up close and from further off. CI job {@code client}.
  */
 public class WerewolfClientGameTests implements FabricClientGameTest {
 	@Override
@@ -50,9 +50,10 @@ public class WerewolfClientGameTests implements FabricClientGameTest {
 			context.waitTicks(10);
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
 			int i = 0;
-			for (String item : new String[] {"silver_dagger", Werewolves.SILVER_ARROW, "werewolf_pelt"}) {
+			for (String item : new String[] {"silver_dagger", Werewolves.SILVER_ARROW, Werewolf.Kind.BROWN.pelt, Werewolf.Kind.SNOW.pelt,
+					Werewolf.Kind.SHADOW.pelt}) {
 				server.runCommand("summon minecraft:item_frame %d %d %d {Facing:3b,Fixed:1b,Item:{id:\"jugcraft:%s\",count:1}}"
-						.formatted(x + 8 + i++, y + 2, z - 5, item));
+						.formatted(x + 7 + i++, y + 2, z - 5, item));
 			}
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
@@ -66,7 +67,7 @@ public class WerewolfClientGameTests implements FabricClientGameTest {
 			context.waitTicks(10);
 			server.runOnServer(minecraft -> werewolves(minecraft.overworld(), origin));
 			context.waitTicks(40);
-			shoot(context, singleplayer, x + 3, y + 1, z - 4, 180, 5, "jugcraft_werewolf");
+			shoot(context, singleplayer, x + 3, y + 1, z - 3, 180, 3, "jugcraft_werewolf");
 			shoot(context, singleplayer, x + 3, y + 3, z + 2, 180, 20, "jugcraft_werewolves_full_moon");
 			server.runCommand("effect clear @p");
 			server.runCommand("kill @e[type=jugcraft:werewolf]");
@@ -126,19 +127,30 @@ public class WerewolfClientGameTests implements FabricClientGameTest {
 			}
 		}
 		level.setBlock(new BlockPos(x + 9, y, z - 5), Blocks.CAMPFIRE.defaultBlockState(), Block.UPDATE_ALL);
-		level.setBlock(new BlockPos(x + 9, y, z - 3), JugcraftAgriculture.block("werewolf_rug").defaultBlockState()
-				.setValue(WerewolfRugBlock.FACING, Direction.NORTH), Block.UPDATE_ALL);
+		int dx = 8;
+		for (Werewolf.Kind kind : Werewolf.Kind.values()) {
+			level.setBlock(new BlockPos(x + dx++, y, z - 3), JugcraftAgriculture.block(kind.rug).defaultBlockState()
+					.setValue(WerewolfRugBlock.FACING, Direction.NORTH), Block.UPDATE_ALL);
+		}
 	}
 
-	/** Two werewolves posed in the clearing: one facing the camera, one side-on behind it. */
+	/**
+	 * The three kinds posed in the clearing: the brown werewolf side-on, the snow werewolf facing the camera, the shadow
+	 * werewolf snarling.
+	 */
 	private static void werewolves(ServerLevel level, BlockPos origin) {
 		int x = origin.getX();
 		int y = origin.getY();
 		int z = origin.getZ();
-		float[][] poses = {{3.5F, -7.5F, 0.0F}, {0.5F, -10.0F, 60.0F}};
-		for (float[] pose : poses) {
+		float[][] poses = {{1.0F, -8.5F, 70.0F}, {3.5F, -7.5F, 0.0F}, {6.0F, -8.5F, -15.0F}};
+		for (int n = 0; n < poses.length; n++) {
+			float[] pose = poses[n];
 			Werewolf werewolf = JugcraftAgriculture.WEREWOLF.create(level, EntitySpawnReason.COMMAND);
 			if (werewolf != null) {
+				Werewolf.Kind kind = Werewolf.Kind.values()[n];
+				werewolf.setKind(kind);
+				werewolf.setHealth(werewolf.getMaxHealth());
+				werewolf.setAggressive(kind == Werewolf.Kind.SHADOW);
 				werewolf.setNoAi(true);
 				werewolf.setPersistenceRequired();
 				werewolf.snapTo(x + pose[0], y, z + pose[1], pose[2], 0.0F);

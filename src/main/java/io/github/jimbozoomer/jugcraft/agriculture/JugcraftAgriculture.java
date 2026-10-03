@@ -1000,8 +1000,8 @@ public final class JugcraftAgriculture {
 		FLYING_BROOMSTICK = entity(Broomstick.ITEM, EntityType.Builder.<Broomstick>of(Broomstick::new, MobCategory.MISC).noLootTable()
 				.sized(0.9F, 0.6F).clientTrackingRange(10).updateInterval(1));
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> Broomstick.use(player, level, hand, entity));
-		// Fall additions 23, full-moon werewolves: the werewolf and where it comes from, wolfsbane to ward it off (a wild
-		// flower, potted too), silver to hurt it (a dagger and arrows), and its pelt.
+		// Fall additions 23, full-moon werewolves: the werewolf (brown, snow and shadow) and where it comes from, wolfsbane
+		// to ward it off (a wild flower, potted too), silver to hurt it (a dagger and arrows), and its pelts and rugs.
 		WEREWOLF = entity("werewolf", EntityType.Builder.<Werewolf>of(Werewolf::new, MobCategory.MONSTER).sized(0.9F, 2.4F).eyeHeight(2.1F)
 				.notInPeaceful().clientTrackingRange(10));
 		FabricDefaultAttributeRegistry.register(WEREWOLF, Werewolf.createAttributes());
@@ -1015,10 +1015,14 @@ public final class JugcraftAgriculture {
 		wildPatch("wolfsbane", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_FOREST);
 		registerItem("silver_dagger", props -> new Item(props.sword(Werewolf.SILVER, 2.5F, -1.8F)), new Item.Properties(), TOOL_TAB);
 		registerItem(Werewolves.SILVER_ARROW, ArrowItem::new, new Item.Properties(), TOOL_TAB);
-		registerItem("werewolf_pelt", Item::new, new Item.Properties(), INGREDIENT_TAB);
-		Block rug = registerBlock("werewolf_rug", WerewolfRugBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY)
-				.strength(0.1F).sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
-		registerItem("werewolf_rug", props -> new BlockItem(rug, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		// Each kind of werewolf drops its own pelt, and two make its rug.
+		for (Werewolf.Kind kind : Werewolf.Kind.values()) {
+			registerItem(kind.pelt, Item::new, new Item.Properties(), INGREDIENT_TAB);
+			MapColor colour = kind == Werewolf.Kind.SNOW ? MapColor.SNOW : kind == Werewolf.Kind.SHADOW ? MapColor.COLOR_BLACK : MapColor.COLOR_BROWN;
+			Block rug = registerBlock(kind.rug, WerewolfRugBlock::new, BlockBehaviour.Properties.of().mapColor(colour)
+					.strength(0.1F).sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+			registerItem(kind.rug, props -> new BlockItem(rug, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
 
 		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
 		// entity players sit on), the Autumn Wreath and the Leaf Piles.

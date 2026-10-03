@@ -9,10 +9,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 No numbered release yet. Everything below is on `main`.
 
 ### Unmerged: Full-moon werewolves, fall addition 23
-- **Werewolves** come out of forests and taiga only on full-moon nights, howling: hulking wolf-men that leap at players and villagers, shrug off half of any blow and heal, and are gone at dawn.
+- **Werewolves** come out of forests and taiga only on full-moon nights, howling: hulking, hunched wolf-men with long snouts, open jaws, long clawed arms and glowing eyes. They leap at players and villagers, shrug off half of any blow and heal, and are gone at dawn.
+- **Three kinds, three tiers:**
+  - the **Brown Werewolf** (I) raids livestock too, howls its pack to the hunt and flees when badly hurt;
+  - the **Snow Werewolf** (II), in snowy woods, bites with frostbite and runs faster on snow;
+  - the rare **Shadow Werewolf** (III), the alpha, steps out of the shadows behind its prey; its howl brings Darkness and drives the pack into a frenzy, and a sprig of wolfsbane won't stop it (Leader of the Pack).
 - **Silver** hurts them two and a half times as much and stops their healing: a **Silver Dagger** and **Silver Arrows**. Slaying one with silver earns Silver Lining.
 - **Wolfsbane**, a wild flower of taiga and forest (plantable and potted), wards them off: they won't hunt anyone holding a sprig or near it (Not Tonight).
-- They drop a **Werewolf Pelt**: two make a **Werewolf Rug**, or cut one into leather. Five game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#full-moon-werewolves).
+- Each kind drops its own **pelt**: two make that kind's **rug**, or cut one into leather. Thirteen game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#full-moon-werewolves).
 
 ### Unmerged: Flying broomstick, fall addition 22
 - **Flying Broomstick**: a Witch's Broom anointed with Flying Ointment and two feathers. Use it to get on; it flies where you look (forward, back to brake, jump to climb), up to about 10 blocks a second, a quarter faster in a witch hat. It hovers where you leave it.

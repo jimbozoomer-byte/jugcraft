@@ -1,8 +1,9 @@
 """JSON resources for full-moon werewolves (fall addition 23), from tools/agriculture.py: wolfsbane (vanilla's flower and
-potted-flower shapes) and its wild patch; the Werewolf Rug, a pelt laid flat with its head at one end; the silver dagger,
-silver arrow and pelt items; names; loot (the flower, the potted flower, the rug, and the werewolf's own drops); tags (the
-silver weapons, the dagger's repair metal, swords and arrows, the werewolf's haunts, the flower tags); and worldgen. The
-recipes are in SHAPED and SHAPELESS, the advancements in HALLOWEEN_ADVANCEMENTS.
+potted-flower shapes) and its wild patch; each kind's rug (brown, snow and shadow), a pelt laid flat with its head at one
+end; the silver dagger, silver arrow and pelt items; names (each kind of werewolf's too); loot (the flower, the potted
+flower, the rugs, the werewolf's bones and each kind's pelt); tags (the silver weapons, the dagger's repair metal, swords
+and arrows, the werewolf's haunts and its kinds', its prey, the flower tags); and worldgen. The recipes are in SHAPED and
+SHAPELESS, the advancements in HALLOWEEN_ADVANCEMENTS.
 
 Called from agriculture_data.py. Formats follow vanilla Minecraft 26.3's own files.
 """
@@ -12,7 +13,7 @@ from decor_data import MOD, rid, box, block_model, flat_item, self_drop, turned
 HORIZONTAL = ("north", "east", "south", "west")
 
 
-def rug():
+def rug(name):
     """The pelt laid flat, a little ragged at the edges, the legs splayed at the corners, the head at the north end."""
     p, h = "#pelt", "#head"
     elements = [box((2, 0, 3), (14, 0.6, 15), p),
@@ -23,7 +24,7 @@ def rug():
                 # The head: skull, snout and ears, snarling at the north end.
                 box((5, 0, 0.5), (11, 2.5, 4), h), box((6.5, 0, -1.5), (9.5, 1.6, 0.5), h),
                 box((5.2, 2.5, 2.5), (6.6, 3.8, 3.5), h), box((9.4, 2.5, 2.5), (10.8, 3.8, 3.5), h)]
-    return block_model({"pelt": "werewolf_rug", "head": "werewolf_rug_head"}, elements, "werewolf_rug")
+    return block_model({"pelt": name, "head": f"{name}_head"}, elements, name)
 
 
 def assets(root, write, lang):
@@ -38,24 +39,28 @@ def assets(root, write, lang):
     lang[f"block.{MOD}.{flower}"] = WOLFSBANE["display"]
     lang[f"block.{MOD}.{potted(flower)}"] = f"Potted {WOLFSBANE['display']}"
 
-    name = WEREWOLF["rug"]
-    write(models / f"{name}.json", rug())
-    write(root / "blockstates" / f"{name}.json", {"variants": {f"facing={f}": turned(rid(f"block/{name}"), f) for f in HORIZONTAL}})
-    write(root / "items" / f"{name}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{name}")}})
-    lang[f"block.{MOD}.{name}"] = WEREWOLF["displays"][name]
+    for kind, spec in WEREWOLF["kinds"].items():
+        name = spec["rug"]
+        write(models / f"{name}.json", rug(name))
+        write(root / "blockstates" / f"{name}.json", {"variants": {f"facing={f}": turned(rid(f"block/{name}"), f) for f in HORIZONTAL}})
+        write(root / "items" / f"{name}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{name}")}})
+        lang[f"block.{MOD}.{name}"] = WEREWOLF["displays"][name]
+        flat_item(root, write, spec["pelt"])
+        lang[f"item.{MOD}.{spec['pelt']}"] = WEREWOLF["displays"][spec["pelt"]]
+        lang[f"entity.{MOD}.{WEREWOLF['entity']}.{kind}"] = spec["display"]
 
     write(root / "models" / "item" / f"{WEREWOLF['dagger']}.json", {"parent": "minecraft:item/handheld",
                                                                   "textures": {"layer0": rid(f"item/{WEREWOLF['dagger']}")}})
     write(root / "items" / f"{WEREWOLF['dagger']}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{WEREWOLF['dagger']}")}})
-    for item in (WEREWOLF["arrow"], WEREWOLF["pelt"]):
-        flat_item(root, write, item)
-    for item in (WEREWOLF["dagger"], WEREWOLF["arrow"], WEREWOLF["pelt"]):
+    flat_item(root, write, WEREWOLF["arrow"])
+    for item in (WEREWOLF["dagger"], WEREWOLF["arrow"]):
         lang[f"item.{MOD}.{item}"] = WEREWOLF["displays"][item]
     lang[f"entity.{MOD}.{WEREWOLF['entity']}"] = WEREWOLF["display"]
 
 
 def loot(out, write):
-    """The flower, the potted flower and the rug drop themselves (out = loot_table/blocks); a werewolf its pelt and bones."""
+    """The flower, the potted flower and the rugs drop themselves (out = loot_table/blocks); a werewolf drops a bone or two
+    (its entity table) and its kind's pelt (entities/werewolf/<kind>, rolled by Werewolf.dropPelt)."""
     entities = out.parent / "entities"
     flower = WOLFSBANE["block"]
     write(out / f"{flower}.json", self_drop(flower))
@@ -63,13 +68,16 @@ def loot(out, write):
         {"condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": "minecraft:flower_pot"}], "rolls": 1},
         {"condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(flower)}], "rolls": 1}],
         "random_sequence": rid(f"blocks/{potted(flower)}")})
-    write(out / f"{WEREWOLF['rug']}.json", self_drop(WEREWOLF["rug"]))
-    # The werewolf: its pelt, and a bone or two.
+    # The werewolf, whatever its kind: a bone or two.
     write(entities / f"{WEREWOLF['entity']}.json", {"type": "minecraft:entity", "pools": [
-        {"rolls": 1, "entries": [{"type": "minecraft:item", "name": rid(WEREWOLF["pelt"])}]},
         {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "minecraft:bone", "modifier": {
             "type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 0, "max": 2}}}]}],
         "random_sequence": rid(f"entities/{WEREWOLF['entity']}")})
+    for kind, spec in WEREWOLF["kinds"].items():
+        write(out / f"{spec['rug']}.json", self_drop(spec["rug"]))
+        write(entities / WEREWOLF["entity"] / f"{kind}.json", {"type": "minecraft:entity", "pools": [
+            {"rolls": 1, "entries": [{"type": "minecraft:item", "name": rid(spec["pelt"])}]}],
+            "random_sequence": rid(f"entities/{WEREWOLF['entity']}/{kind}")})
 
 
 def tags(tags):
@@ -84,6 +92,12 @@ def tags(tags):
     tags.add("block", "minecraft:flower_pots", rid(potted(flower)))
     for haunt in WEREWOLF["haunts"]:
         tags.add("worldgen/biome", f"{MOD}:werewolf_haunts", haunt)
+    for haunt in WEREWOLF["snow_haunts"]:
+        tags.add("worldgen/biome", f"{MOD}:snow_werewolf_haunts", haunt)
+    for haunt in WEREWOLF["shadow_haunts"]:
+        tags.add("worldgen/biome", f"{MOD}:shadow_werewolf_haunts", haunt)
+    for prey in WEREWOLF["prey"]:
+        tags.add("entity_type", f"{MOD}:werewolf_prey", prey)
 
 
 def worldgen(data, write):
