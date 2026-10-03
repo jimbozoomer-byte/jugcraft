@@ -1054,6 +1054,14 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 ### Full-moon werewolves
 
+| **Wolfsbane** growing wild in a spruce clearing, and potted on a stump | **Silver** framed above the fire: the dagger, silver arrows and a pelt |
+| --- | --- |
+| ![Wolfsbane](../images/ingame_wolfsbane.jpg) | ![Silver and a pelt](../images/ingame_werewolf_rug_and_silver.jpg) |
+| **A werewolf** on a full-moon night | **Two werewolves** in the clearing |
+| ![A werewolf](../images/ingame_werewolf.jpg) | ![Two werewolves](../images/ingame_werewolves_full_moon.jpg) |
+
+*Real screenshots from the client game test that CI runs (`WerewolfClientGameTests`, software rendering, small previews; the night is lit by night vision for the picture).*
+
 - **On full-moon nights,** werewolves come howling out of forests and taiga. They're fast, leap at you, shrug off half of any blow, and are gone at dawn.
 - **Silver** hurts them most: a Silver Dagger or Silver Arrows. **Wolfsbane**, a wild violet flower, wards them off: hold a sprig or plant it round your home. Their pelts make rugs. Details: [even more fall additions](../features/even-more-fall-additions.md#full-moon-werewolves).
 
