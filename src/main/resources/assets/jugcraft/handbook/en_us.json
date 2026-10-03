@@ -2573,6 +2573,80 @@
           }
         },
         {
+          "title": "Arms: Swords",
+          "icon": "jugcraft:steel_longsword",
+          "text": [
+            "Bronze and steel make arms beyond the sword, each with its own way of fighting. All sweep like swords.",
+            "Longsword: a longer reach (3.25 blocks). Hold use to parry: it blocks 60% of a blow from in front, as a shield does all of it.",
+            "Greatsword: two-handed, slow and heavy, with a 3.75-block reach; a hit stops a shield blocking for 2 seconds.",
+            "Rapier: quick thrusts, two a second; its parry blocks 35%."
+          ],
+          "craft": {
+            "grid": [
+              null,
+              "jugcraft:steel_ingot",
+              null,
+              null,
+              "jugcraft:steel_ingot",
+              null,
+              "jugcraft:steel_ingot",
+              "minecraft:leather",
+              "jugcraft:steel_ingot"
+            ],
+            "result": "jugcraft:steel_longsword",
+            "count": 1
+          }
+        },
+        {
+          "title": "Arms: Maces and Hammers",
+          "icon": "jugcraft:steel_war_hammer",
+          "text": [
+            "Flanged mace: a hit stops a shield blocking for 3 seconds.",
+            "War hammer: the heaviest blow of all, knocking foes back; a hit stops a shield blocking for 5 seconds, as an axe's does.",
+            "Both take Sharpness, Smite, Bane of Arthropods, Knockback, Looting and Fire Aspect."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              "minecraft:stick",
+              "jugcraft:steel_ingot",
+              null,
+              "minecraft:stick",
+              null
+            ],
+            "result": "jugcraft:steel_war_hammer",
+            "count": 1
+          }
+        },
+        {
+          "title": "Arms: Polearms",
+          "icon": "jugcraft:steel_halberd",
+          "text": [
+            "Glaive: a blade on a pole that sweeps at 4.25 blocks.",
+            "Halberd: thrusts through every foe in line out to 4.5 blocks (not closer than 1); a hit stops a shield blocking for 3 seconds.",
+            "Spear: jab, or hold use to charge, as vanilla's spears do; faster on a horse or at a run.",
+            "Lance: a horseman's charge that hits harder and unhorses riders at lower speeds, reaching 5.5 blocks."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              null,
+              "minecraft:stick",
+              "jugcraft:steel_ingot",
+              "minecraft:stick",
+              null,
+              null
+            ],
+            "result": "jugcraft:steel_halberd",
+            "count": 1
+          }
+        },
+        {
           "title": "Paxels",
           "icon": "jugcraft:steel_paxel",
           "text": [
