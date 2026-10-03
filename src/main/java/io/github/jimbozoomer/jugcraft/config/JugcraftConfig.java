@@ -23,7 +23,7 @@ public final class JugcraftConfig {
 			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
 			"salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines",
 			"deposits", "explosives", "agriculture", "parties", "drones",
-			"pixel_hollows", "retro_trader", "alpine_spawn", "biomes");
+			"pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town");
 
 	/**
 	 * Other server options, with their defaults. {@code carving.free_draw}: players may carve any face into a
@@ -52,6 +52,7 @@ public final class JugcraftConfig {
 	 * <li>Party limits (see {@code party/JugcraftParties}): {@code parties.max_size} members (2 to 64),
 	 * {@code parties.invite_minutes} before an invite expires (1 to 60) and {@code parties.invites_per_minute}
 	 * each player may send (1 to 60).</li>
+	 * <li>{@code town.protection} ({@code on} or {@code off}) keeps the walled town as it was built (town/TownProtection).</li>
 	 * </ul>
 	 */
 	public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
@@ -63,7 +64,8 @@ public final class JugcraftConfig {
 			Map.entry("december", "12-01..01-06"),
 			Map.entry("parties.max_size", "8"), Map.entry("parties.invite_minutes", "5"), Map.entry("parties.invites_per_minute", "10"),
 			Map.entry("alpine_spawn.start", "on"),
-			Map.entry("biomes.region_size", "1024"), Map.entry("biomes.region_share", "0.5"));
+			Map.entry("biomes.region_size", "1024"), Map.entry("biomes.region_share", "0.5"),
+			Map.entry("town.protection", "on"));
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
@@ -134,7 +136,8 @@ public final class JugcraftConfig {
 					+ " hemisphere north or south, a timezone, and opt-in winter snow; harvest_feast us, canada or off;"
 					+ " december MM-DD..MM-DD or off; parties.max_size 2-64, parties.invite_minutes 1-60, parties.invites_per_minute 1-60;"
 					+ " alpine_spawn.start on or off: new worlds start in the Alpine Spawn biome;"
-					+ " biomes.region_size in blocks and biomes.region_share from 0 to 1: Jugcraft regions with the new biomes).");
+					+ " biomes.region_size in blocks and biomes.region_share from 0 to 1: Jugcraft regions with the new biomes;"
+					+ " town.protection on or off).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}
