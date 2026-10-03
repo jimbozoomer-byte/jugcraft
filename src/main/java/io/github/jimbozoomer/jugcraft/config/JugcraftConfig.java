@@ -23,7 +23,7 @@ public final class JugcraftConfig {
 			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "aluminum",
 			"salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines",
 			"deposits", "explosives", "agriculture", "parties", "drones",
-			"pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town");
+			"pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections");
 
 	/**
 	 * Other server options, with their defaults. {@code carving.free_draw}: players may carve any face into a
