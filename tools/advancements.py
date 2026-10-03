@@ -87,6 +87,8 @@ TREE = {
     # Nitrogen chemistry (batch 12).
     "air_separation_unit": ("electrolytic_cell", "air_separation_unit", "Thin Air",
                             "Build an air separation unit", "goal"),
+    # Batch 30: the pneumatic grapple, on nitrogen from the air separation unit.
+    "pneumatic_grapple": ("air_separation_unit", "pneumatic_grapple", "Reel Me In", "Make a pneumatic grapple", "task"),
     "synthesis_converter": ("air_separation_unit", "synthesis_converter", "Bread from Air",
                             "Build a synthesis converter, to make ammonia from air", "goal"),
     "nitric_acid": ("synthesis_converter", "nitric_acid_bucket", "Aqua Fortis", "Make nitric acid", "task"),

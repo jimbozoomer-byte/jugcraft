@@ -618,49 +618,50 @@
           "icon": "jugcraft:air_separation_unit",
           "text": [
             "Thin Air: Build an air separation unit.",
+            "Reel Me In: Make a pneumatic grapple.",
             "Bread from Air: Build a synthesis converter, to make ammonia from air.",
             "Aqua Fortis: Make nitric acid.",
-            "Kroll Call: Chlorinate titanium and melt the sponge.",
-            "Power Wall: Build a lithium battery bank."
+            "Kroll Call: Chlorinate titanium and melt the sponge."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:neodymium_magnet",
+          "icon": "jugcraft:lithium_battery_bank",
           "text": [
+            "Power Wall: Build a lithium battery bank.",
             "Strong Attraction: Make a neodymium magnet.",
             "Lossless (Almost): Build a magnet dynamo or magnet motor.",
             "Pulling Strings: Pull a silicon boule in the arc furnace.",
-            "Etched in Light: Etch microchips in the lithography station.",
-            "Central Processing: Assemble a processor."
+            "Etched in Light: Etch microchips in the lithography station."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:network_terminal",
+          "icon": "jugcraft:processor",
           "text": [
+            "Central Processing: Assemble a processor.",
             "Hello, World: Build a network terminal.",
             "Under Pressure: Build a gas holder.",
             "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter.",
-            "Here Comes the Sun: Build an advanced solar panel."
+            "Strained Relations: Make a fluid filter."
           ]
         },
         {
           "title": "Milestones (15)",
-          "icon": "jugcraft:tank_gauge",
+          "icon": "jugcraft:advanced_solar_panel",
           "text": [
+            "Here Comes the Sun: Build an advanced solar panel.",
             "Full of It: Make a tank gauge.",
             "Concentrate: Build a solar receiver for a heliostat field.",
             "Spool Up: Make a turbocharger for the advanced engine.",
-            "Keep It Spinning: Build a flywheel.",
-            "Four on the Floor: Build an advanced combustion engine."
+            "Keep It Spinning: Build a flywheel."
           ]
         },
         {
           "title": "Milestones (16)",
-          "icon": "jugcraft:cotton",
+          "icon": "jugcraft:advanced_engine",
           "text": [
+            "Four on the Floor: Build an advanced combustion engine.",
             "King Cotton: Grow cotton.",
             "Make It Rain: Build a sprinkler.",
             "Reaping What You Sow: Build a crop harvester."
@@ -2589,6 +2590,15 @@
           "text": [
             "The exosuit comes in Vanguard gunmetal. A Ronin livery at a smithing table, with a piece and red dye, repaints it crimson and silver, with the Ronin's hat and skirt; the power katana becomes the crimson Ronin katana.",
             "A Vanguard livery with cyan dye paints it back. Repainting keeps the charge, modules and enchantments."
+          ]
+        },
+        {
+          "title": "Pneumatic Grapple",
+          "icon": "jugcraft:pneumatic_grapple",
+          "text": [
+            "A harpoon gun on compressed nitrogen. It holds 4,000 mB; fill it by using it on the air separation unit's nitrogen or a gas holder. Each shot uses 25 mB.",
+            "The hook flies up to 32 blocks on its line. In a block, it reels you in fast with no fall damage and lets go with a hop at the end, so you can climb cliffs and cross gaps. In a mob, it drags the mob to you; bosses and golems are too heavy.",
+            "Use it again to let go. Party members are never hooked; other players only where PvP is on."
           ]
         }
       ]

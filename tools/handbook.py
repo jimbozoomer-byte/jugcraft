@@ -359,6 +359,7 @@ def machine_page(block):
 def gear_pages():
     """Batch 25: bronze and steel tools and armor, and paxels; batch 27 gear; batch 28 exosuit."""
     import exosuit
+    import grapple
     import gear
     grid = [item_for(gear.GEAR_TIERS["steel"]["ingot"]) if ch == "#" else ("minecraft:stick" if ch == "S" else None)
             for row in gear.PATTERNS["pickaxe"] for ch in row.ljust(3)]
@@ -401,6 +402,13 @@ def gear_pages():
             "repaints it crimson and silver, with the Ronin's hat and skirt; the power katana becomes the crimson Ronin "
             "katana.",
             "A Vanguard livery with cyan dye paints it back. Repainting keeps the charge, modules and enchantments."]},
+        {"title": "Pneumatic Grapple", "icon": f"{MOD}:pneumatic_grapple", "text": [
+            f"A harpoon gun on compressed nitrogen. It holds {grapple.CAPACITY:,} mB; fill it by using it on the air "
+            f"separation unit's nitrogen or a gas holder. Each shot uses {grapple.SHOT_COST} mB.",
+            f"The hook flies up to {grapple.RANGE} blocks on its line. In a block, it reels you in fast with no fall "
+            "damage and lets go with a hop at the end, so you can climb cliffs and cross gaps. In a mob, it drags the "
+            "mob to you; bosses and golems are too heavy.",
+            "Use it again to let go. Party members are never hooked; other players only where PvP is on."]},
     ]
 
 

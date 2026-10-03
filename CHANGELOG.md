@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Pneumatic grapple, batch 30
+- **Pneumatic Grapple:** a harpoon gun on compressed nitrogen (fill it at the air separation unit or a gas holder; 25 mB a shot). The hook flies up to 32 blocks: in a block it reels you in with no fall damage and a hop at the end; in a mob it drags the mob to you (not bosses or golems, never party members). Use it again to let go.
+- Advancement, handbook page, four game tests, a screenshot. Record: [pneumatic-grapple.md](docs/features/pneumatic-grapple.md).
+
 ### Unmerged: Refinery upgrades, batch 29
 - **Hydrotreater:** diesel + hydrogen → **premium diesel** (a quarter more power everywhere diesel burns) + hydrogen sulfide; gasoline + a tenth bioethanol → **premium gasoline** (448,000 JE a bucket in the gas turbine).
 - **Sulfur recovery:** the chemical reactor turns 200 mB of hydrogen sulfide into a sulfur dust, so oil feeds the acid recipes.

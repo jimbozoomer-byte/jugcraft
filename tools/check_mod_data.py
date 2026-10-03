@@ -21,6 +21,7 @@ import deposits
 import seasons
 import tank_display
 import exosuit
+import grapple
 import gear
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
@@ -294,7 +295,7 @@ def item_units(ref):
         return {"aluminum": 9}
     if path in NON_METAL:
         return {}
-    if path in plastic.blocks() or path in exosuit.items():
+    if path in plastic.blocks() or path in exosuit.items() or path in grapple.items():
         return {}
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
@@ -479,7 +480,7 @@ def check_tags():
         known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + machine_items()
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
-                                                    + gear.items() + plastic.blocks() + exosuit.items()
+                                                    + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -564,6 +565,24 @@ def check_exosuit():
             for _, _, tex in boxes:
                 if not (textures / "block" / f"{tex}.png").exists():
                     err(f"Missing exosuit part texture block/{tex}.png")
+
+
+def check_grapple():
+    """gear/JugcraftGrapple.java against tools/grapple.py: the numbers, the item and hook entity, their textures and names."""
+    java = (JAVA_ROOT / "gear" / "JugcraftGrapple.java").read_text(encoding="utf-8")
+    for const in ("CAPACITY", "SHOT_COST", "RANGE", "COOLDOWN"):
+        value = getattr(grapple, const)
+        if not re.search(rf"\bint {const} = {value:_};", java):
+            err(f"JugcraftGrapple.{const} differs from tools/grapple.py ({value:_})")
+    if 'item("pneumatic_grapple"' not in java or 'Jugcraft.id("grapple_hook")' not in java:
+        err("JugcraftGrapple does not register the grapple and its hook")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in (f"entity.{MOD}.grapple_hook", f"tooltip.{MOD}.nitrogen", f"message.{MOD}.pneumatic_grapple.empty"):
+        if key not in lang:
+            err(f"Missing name {key}")
+    for path in ("item/pneumatic_grapple.png", "entity/grapple_hook.png"):
+        if not (ASSETS / "textures" / path).exists():
+            err(f"Missing texture {path}")
 
 
 def check_plastic():
@@ -3365,7 +3384,7 @@ def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
-                  | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items())
+                  | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_petro()
@@ -3379,6 +3398,7 @@ def main():
     check_deposits()
     check_gear()
     check_exosuit()
+    check_grapple()
     check_plastic()
     check_seasons()
     check_alpine()
