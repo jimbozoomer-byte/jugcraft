@@ -414,7 +414,14 @@ public class PixelHollowsGameTests {
 				for (int i = 0; i < VILLAGE_TYPES.length; i++) {
 					String type = VILLAGE_TYPES[i];
 					BlockPos centre = centres.get(i);
-					command(server, "place structure minecraft:village_%s %d %d %d".formatted(type, centre.getX(), centre.getY(), centre.getZ()));
+					String place = "place structure minecraft:village_%s %d %d %d".formatted(type, centre.getX(), centre.getY(), centre.getZ());
+					try {
+						// Through the dispatcher, so an exception inside generation reaches the test instead of a chat line.
+						server.getCommands().getDispatcher().execute(place, server.createCommandSourceStack());
+					} catch (Exception exception) {
+						Jugcraft.LOGGER.error("[pixel-hollows] /{} failed", place, exception);
+						problems.add(type + " village failed to place: " + exception);
+					}
 					int[] counts = countVillage(level, centre);
 					results.add("%s: %d shop(s), %d villagers, %d zombie villagers".formatted(type, counts[0], counts[1], counts[2]));
 					if (counts[1] == 0 && counts[2] == 0) {
