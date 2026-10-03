@@ -574,7 +574,7 @@ Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API
 | `./gradlew build` on `c4679261` (Build workflow run [37156864812](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37156864812)) | Pass |
 | Game tests on the headless server, same run: 645 in total, 7 of them new here (`FerrisWheelGameTests`) | **All 645 pass** on `c4679261` |
 | Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `c4679261` (all three client shards) |
-| The same, on `75fff507` (the fixes below) | Not yet run |
+| The same on `27eb6841`: the fixes below, with the midway's branch merged (Build workflow run [37159101161](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37159101161)) | **Pass:** the build, all 645 server game tests and the three client shards |
 
 The wheel's look was checked in a render of its quads before any game run. The first run's screenshots then showed two faults the tests couldn't, fixed in `75fff507`:
 - **The wheel drew black**, frame, wheel and cars, though the booth beside it was lit. The wheel entity stands in its booth block, where there is no light, and took its light from there. The frame now takes its light from just above the booth, the wheel from its hub, and each car from where it hangs.
@@ -590,6 +590,8 @@ The 7 new game tests (`FerrisWheelGameTests`), in a 44 by 44 empty arena:
 7. the recipe, advancements and loot load.
 
 `FerrisWheelClientGameTests` takes screenshots: the wheel at a fair, turned by a hand crank, a High Striker and plushes beside it; its foot, the booth and crank close up; the view from a car at the top; and at night, lit.
+
+Its screenshots from run 37159101161, in [the guide](../branches/AGRICULTURE.md#the-ferris-wheel): the wheel lit by the day, its cream lattice A-frames, red rims and the cars in their four colours, beside a High Striker and plushes; its foot, the booth with the cars hanging over it; the view from a car near the top, over its grab bar and between its brass posts to the field below; and the wheel at night, its bulbs lit round both rims. Its log has no missing model or texture.
 
 Not run: riding it in play for a whole turn (the tests turn it directly), and a two-client dedicated-server playtest (two riders in one car, seen from the ground).
 

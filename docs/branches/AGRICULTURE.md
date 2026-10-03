@@ -1100,6 +1100,12 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 ### The Ferris wheel
 
+| **At the fair:** the wheel, a High Striker and the plush prizes | **Its foot:** the booth, with the cars hanging over it |
+| --- | --- |
+| ![The Ferris wheel](../images/ingame_ferris_wheel.jpg) | ![The booth](../images/ingame_ferris_wheel_booth.jpg) |
+| **From a car near the top** | **At night**, its lights on |
+| ![The view from a car](../images/ingame_ferris_wheel_ride.jpg) | ![The Ferris wheel at night](../images/ingame_ferris_wheel_night.jpg) |
+
 - **Raise one** by placing the **Ferris Wheel** booth where it has room (15 blocks across, 16 high, 3 deep). The wheel stands over it, facing you, with eight cars of two seats.
 - **Turn it** with kinetic power against the booth: a **hand crank** (planks and an iron shaft) turns it at full speed, five seconds a crank, so one friend cranks while others ride; an engine turns it all day.
 - **Ride it:** use the booth to climb into the car at the bottom. Sneak to get off and you're set down by the booth. Its lights come on while it turns. Details: [even more fall additions](../features/even-more-fall-additions.md#the-ferris-wheel).
