@@ -56,14 +56,17 @@ public class PinataClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x, y + 1, z, 180, -8, "jugcraft_pinatas");
 			server.runOnServer(minecraft -> hit(minecraft.overworld(), origin, false));
 			context.waitTicks(60);
-			shoot(context, singleplayer, x + 1, y + 1, z - 3, 180, -6, "jugcraft_pinatas_torn");
+			// Three blocks from the beam, all three in view.
+			shoot(context, singleplayer, x, y + 1, z - 2, 180, -4, "jugcraft_pinatas_torn");
 			place(context, singleplayer, x, y + 1, z, 180, -2);
 			server.runOnServer(minecraft -> hit(minecraft.overworld(), origin, true));
 			context.waitTicks(4);
 			context.takeScreenshot("jugcraft_pinata_burst");
 
 			// Through the Blindfold: the screen dark but for a sliver at its foot. The overlay is part of the HUD.
+			// Wait out the Piñata Party toast first, so it doesn't cover the view.
 			server.runCommand("item replace entity @p armor.head with jugcraft:blindfold");
+			context.waitTicks(120);
 			context.runOnClient(client -> client.gui.hud.toggle());
 			context.waitTicks(20);
 			context.takeScreenshot("jugcraft_blindfold");
