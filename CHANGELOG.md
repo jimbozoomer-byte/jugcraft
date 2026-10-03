@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Squirrels and acorns, fall addition 24
+- **Squirrels**, red and grey, come to forests and taiga by day. They bound about with their bushy tails, climb tree trunks, and bolt when hurt.
+- **Acorns** drop from oak and dark oak leaves. Plant one on grass for an oak sapling, or roast it into **Roasted Acorns**.
+- A squirrel takes an acorn lying near, carries it off and **buries it**; one in four grows into an oak. Nuts tempt and breed squirrels (Nuts About Squirrels).
+- Five game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#squirrels-and-acorns).
+
 ### Unmerged: Full-moon werewolves, fall addition 23
 - **Werewolves** come out of forests and taiga only on full-moon nights, howling: hulking wolf-men that leap at players and villagers, shrug off half of any blow and heal, and are gone at dawn.
 - **Silver** hurts them two and a half times as much and stops their healing: a **Silver Dagger** and **Silver Arrows**. Slaying one with silver earns Silver Lining.

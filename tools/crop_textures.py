@@ -916,6 +916,8 @@ def crop_textures():
     out.update(broom_textures())
     from werewolf_textures import werewolf_textures  # and full-moon werewolves
     out.update(werewolf_textures())
+    from squirrel_textures import squirrel_textures  # and squirrels and acorns
+    out.update(squirrel_textures())
     from ofrenda_textures import ofrenda_textures  # and the ofrenda
     out.update(ofrenda_textures())
     from graveyard_textures import graveyard_textures  # and the graveyard pack

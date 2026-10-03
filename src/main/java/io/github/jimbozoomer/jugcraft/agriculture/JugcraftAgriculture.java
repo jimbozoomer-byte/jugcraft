@@ -283,6 +283,7 @@ public final class JugcraftAgriculture {
 	public static EntityType<SkyLantern> SKY_LANTERN;
 	public static EntityType<Broomstick> FLYING_BROOMSTICK;
 	public static EntityType<Werewolf> WEREWOLF;
+	public static EntityType<Squirrel> SQUIRREL;
 	public static DataComponentType<Integer> BROOM_CHARGE;
 	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
 	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
@@ -1019,6 +1020,14 @@ public final class JugcraftAgriculture {
 		Block rug = registerBlock("werewolf_rug", WerewolfRugBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY)
 				.strength(0.1F).sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
 		registerItem("werewolf_rug", props -> new BlockItem(rug, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		// Fall additions 24, squirrels and acorns: squirrels in the woods by day, which gather acorns and plant oaks;
+		// acorns from oak leaves, planted as oak saplings or roasted.
+		SQUIRREL = entity("squirrel", EntityType.Builder.<Squirrel>of(Squirrel::new, MobCategory.CREATURE).noLootTable().sized(0.4F, 0.5F).eyeHeight(0.35F)
+				.clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(SQUIRREL, Squirrel.createAttributes());
+		registerItem(Squirrel.ACORN, AcornItem::new, new Item.Properties().compostable(COMPOST_LOW), SEEDS_TAB);
+		food("roasted_acorns", 3, 0.4F, COMPOST_MEDIUM);
+		Squirrels.register();
 
 		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
 		// entity players sit on), the Autumn Wreath and the Leaf Piles.
