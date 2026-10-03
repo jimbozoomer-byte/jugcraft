@@ -280,6 +280,16 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_power_gear");
 
+			// Batch 37: a control room. Two battery boxes with sensors (red, blue), a logic controller and a relay on a
+			// data cable, an alarm sounding, and a 3x2 control monitor showing the channels; the remote in hand.
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:control_remote");
+			server.runOnServer(minecraft -> buildControlRoom(minecraft.overworld(), new BlockPos(x - 24, y, z - 10)));
+			server.runCommand("tp @p %d %d %d 180 6".formatted(x - 21, y + 1, z - 3));
+			context.waitTicks(120);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_control_room");
+			server.runCommand("clear @p");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
@@ -722,6 +732,56 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 	 * bank and a charging station holding a drill, joined by copper, silver and aluminum cables (one rising over the
 	 * bank), then a charged electric motor turning a shaft into a dynamo, and an electric pump. All face south.
 	 */
+	/** Batch 37: the control room scene, along the back of the cleared floor (base: the west end of its cable). */
+	private static void buildControlRoom(ServerLevel level, BlockPos base) {
+		BlockState cable = io.github.jimbozoomer.jugcraft.control.JugcraftControl.DATA_CABLE.defaultBlockState();
+		for (int dx = 1; dx <= 5; dx++) {
+			level.setBlock(base.offset(dx, 1, 0), cable, 3);
+		}
+		for (int dx = 6; dx <= 9; dx++) {
+			level.setBlock(base.offset(dx, 0, 0), cable, 3);
+		}
+		BlockPos controllerPos = base.offset(6, 1, 0);
+		level.setBlock(controllerPos, io.github.jimbozoomer.jugcraft.control.JugcraftControl.LOGIC_CONTROLLER.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.control.LogicControllerBlock.FACING, Direction.SOUTH), 3);
+		var red = net.minecraft.world.item.DyeColor.RED;
+		var blue = net.minecraft.world.item.DyeColor.BLUE;
+		int[][] batteries = {{7, 70}, {9, 30}};
+		for (int i = 0; i < batteries.length; i++) {
+			BlockPos battery = base.offset(batteries[i][0], 0, 2);
+			level.setBlock(battery, JugcraftMachines.MACHINES.get(MachineKind.BATTERY_BOX).defaultBlockState()
+					.setValue(MachineBlock.FACING, Direction.SOUTH), 3);
+			if (level.getBlockEntity(battery) instanceof MachineBlockEntity box && box.energyFor(null) instanceof SimpleEnergyStorage energy) {
+				energy.setAmount(energy.getCapacity() * batteries[i][1] / 100);
+			}
+			level.setBlock(battery.north(), io.github.jimbozoomer.jugcraft.control.JugcraftControl.SENSOR.defaultBlockState()
+					.setValue(io.github.jimbozoomer.jugcraft.control.SensorBlock.FACING, Direction.NORTH)
+					.setValue(io.github.jimbozoomer.jugcraft.control.Channels.CHANNEL, i == 0 ? red : blue), 3);
+		}
+		level.setBlock(base.offset(8, 0, 1), io.github.jimbozoomer.jugcraft.control.JugcraftControl.RELAY.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.control.Channels.CHANNEL, net.minecraft.world.item.DyeColor.GREEN), 3);
+		level.setBlock(base.offset(1, 2, 0), io.github.jimbozoomer.jugcraft.control.JugcraftControl.ALARM.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.control.Channels.CHANNEL, net.minecraft.world.item.DyeColor.ORANGE), 3);
+		// The monitor last, so its panels find the cable behind them when they form.
+		for (int dx = 2; dx <= 4; dx++) {
+			for (int dy = 1; dy <= 2; dy++) {
+				level.setBlock(base.offset(dx, dy, 1), io.github.jimbozoomer.jugcraft.control.JugcraftControl.CONTROL_MONITOR.defaultBlockState()
+						.setValue(io.github.jimbozoomer.jugcraft.control.ControlMonitorBlock.FACING, Direction.SOUTH), 3);
+			}
+		}
+		for (BlockPos pos : BlockPos.betweenClosed(base, base.offset(9, 2, 0))) {
+			if (level.getBlockState(pos).is(io.github.jimbozoomer.jugcraft.control.JugcraftControl.DATA_CABLE)) {
+				level.setBlock(pos, Block.updateFromNeighbourShapes(level.getBlockState(pos), level, pos), 3);
+			}
+		}
+		if (level.getBlockEntity(controllerPos) instanceof io.github.jimbozoomer.jugcraft.control.LogicControllerBlockEntity controller) {
+			controller.setRule(0, true, red, true, 50, net.minecraft.world.item.DyeColor.GREEN, true);
+			controller.setRule(1, true, blue, false, 20, net.minecraft.world.item.DyeColor.ORANGE, true);
+			controller.evaluate(level, controllerPos);
+			controller.toggle(level, net.minecraft.world.item.DyeColor.ORANGE);
+		}
+	}
+
 	private static void buildPowerGear(ServerLevel level, BlockPos start) {
 		level.setBlock(start, JugcraftMachines.MACHINES.get(MachineKind.SOLAR_PANEL).defaultBlockState()
 				.setValue(MachineBlock.FACING, Direction.SOUTH), 3);

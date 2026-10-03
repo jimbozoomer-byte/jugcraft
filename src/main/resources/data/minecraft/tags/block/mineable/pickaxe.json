@@ -21,6 +21,8 @@
     "jugcraft:sensor",
     "jugcraft:relay",
     "jugcraft:logic_controller",
+    "jugcraft:control_monitor",
+    "jugcraft:alarm",
     "jugcraft:concrete",
     "jugcraft:concrete_slab",
     "jugcraft:concrete_stairs",
