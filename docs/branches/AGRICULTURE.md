@@ -1011,6 +1011,8 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 | ![Kept and neglected](../images/ingame_graveyard_kept_and_neglected.jpg) | ![An open grave](../images/ingame_graveyard_open_grave.jpg) |
 | **A memorial bench** with its plaque | **At night**, the lamp posts lit |
 | ![A memorial bench](../images/ingame_graveyard_memorial_bench.jpg) | ![The grounds at night](../images/ingame_graveyard_grounds_night.jpg) |
+| **Grave vases** on their granite bases, a bouquet of each colour | |
+| ![Grave vases](../images/ingame_graveyard_grave_vases.jpg) | |
 
 *Real screenshots from the client game test that CI runs (`GraveyardGroundsClientGameTests`, software rendering, small previews). The stages and epitaphs are set for the picture.*
 
@@ -1023,6 +1025,16 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).
 
 ### Hex brews
+
+| **Three hex brews** over magma, their draughts framed above | **The shrinking brew**, glyphs rising from it |
+| --- | --- |
+| ![Three hex brews](../images/ingame_hex_brews.jpg) | ![The shrinking brew](../images/ingame_hex_shrinking_brew.jpg) |
+| **Shrunk**: the cauldrons from half a player's height | **A shrunk player** beside the cauldrons |
+| ![Seen while shrunk](../images/ingame_hex_shrunk.jpg) | ![A shrunk player](../images/ingame_hex_shrunk_seen.jpg) |
+| **A giant**, 1.6 times as tall | |
+| ![A giant](../images/ingame_hex_giant_seen.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`HexBrewClientGameTests`, software rendering, small previews).*
 
 - **Brew a hex:** over a lit campfire, fire or magma, stir a brown mushroom into the Bubbling Cauldron's green brew, beans into the orange or a phantom membrane into the purple. A hex brew fills three glass bottles.
 - **Shrinking Draught:** half your size for 3 minutes, through one-block gaps. **Giant's Draught:** 1.6 times your size for 3 minutes, a block more reach, only where there is room. Each cancels the other. **Flying Ointment:** 30 seconds of slow falling. Details: [even more fall additions](../features/even-more-fall-additions.md#hex-brews).
