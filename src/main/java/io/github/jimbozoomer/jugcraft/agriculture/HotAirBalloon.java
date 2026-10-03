@@ -252,6 +252,40 @@ public class HotAirBalloon extends Entity {
 		return new Vec3(x, FLOOR + 0.6, z).yRot((float) Math.toRadians(-getYRot()));
 	}
 
+	/**
+	 * The way each corner's rider sits facing, relative to the basket: along a wall, round the basket like a pinwheel, so
+	 * that the game's seated pose (every rider is drawn seated) keeps their legs inside the wicker.
+	 */
+	private static final float[] CORNER_FACING = {-90.0F, 0.0F, 180.0F, 90.0F};
+	/** How far a rider can look either way from the way they sit, as in a boat. */
+	public static final float LOOK = 105.0F;
+
+	@Override
+	protected void positionRider(Entity passenger, Entity.MoveFunction move) {
+		super.positionRider(passenger, move);
+		faceAlongTheWall(passenger);
+	}
+
+	@Override
+	public void onPassengerTurned(Entity passenger) {
+		faceAlongTheWall(passenger);
+	}
+
+	/** Sits a rider facing along the wall from their corner, looking no more than {@link #LOOK} degrees either way. */
+	private void faceAlongTheWall(Entity passenger) {
+		int i = getPassengers().indexOf(passenger);
+		if (i < 0 || i >= CORNER_FACING.length) {
+			return;
+		}
+		float along = getYRot() + CORNER_FACING[i];
+		passenger.setYBodyRot(along);
+		float turn = Mth.wrapDegrees(passenger.getYRot() - along);
+		float held = Mth.clamp(turn, -LOOK, LOOK);
+		passenger.yRotO += held - turn;
+		passenger.setYRot(passenger.getYRot() + held - turn);
+		passenger.setYHeadRot(passenger.getYRot());
+	}
+
 	@Override
 	protected void addPassenger(Entity passenger) {
 		super.addPassenger(passenger);

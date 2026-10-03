@@ -223,7 +223,7 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
    - **Harvest Moon:** a night sky with stars, a great harvest moon with a witch on her broom across it, bats, and hills with pumpkins round its foot.
 2. **Set one up:** use it on open ground with room over it (four blocks of air). It faces you, cold. It comes as an item with whatever fuel it had.
 3. **Fuel it:** use coal, charcoal, coke or a coal block on it, from inside or out. A unit of fuel is a tick of burner: coal gives 400 (20 seconds of burner), a coal block 4000; it holds 12000 (10 minutes).
-4. **Climb in:** use it. Up to four ride, one in each corner (seated low, as the game draws every rider); the first aboard is the **pilot**. Sneak to get out: on the ground you step out beside the basket; aloft you float down slowly for ten seconds.
+4. **Climb in:** use it. Up to four ride, one in each corner, sitting facing along the basket's side (the game draws every rider seated) and free to look up to 105 degrees either way, out over the rail or in; the first aboard is the **pilot**. Sneak to get out: on the ground you step out beside the basket; aloft you float down slowly for ten seconds.
 5. **Fly it:** the pilot holds **jump** to fire the burner (a roar and a tongue of flame) and **back** to open the vent at the crown. Heat lifts it: about 8 seconds of burner gets a cold balloon off the ground; once aloft, about a fifth of the time on the burner holds it level; the vent brings it down. The higher it goes the thinner the air, so it tops out. Gauges over the hotbar show its height over the ground, the envelope's heat, the wind (where it blows and how hard) and the burner time left.
 6. **The winds:** a balloon can't be steered. Aloft it drifts on the wind at its envelope's height. From sea level up the sky is eight layers 16 blocks deep, each with its own direction and strength for the day, stronger higher up and in rain. The lowest two blow roughly opposite ways, so you can go out low and come home higher: **the box**. On the ground it stays put; in water its basket floats.
 7. **Pibals:** let one go (use it) and watch it rise and drift: its path bends where the layers change, showing a pilot which height blows which way. It pops after 30 seconds.
@@ -734,18 +734,19 @@ Not run: hitting one by hand blindfolded, and a two-client dedicated-server play
 ### Hot-air balloon verification
 Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1096 IDs and now compares `tools/hot_air_balloon.py` with Java (it fails as it should with a number changed); `python3 scripts/check_repository.py` passes. The balloons were checked in renders of their quads, by day and night, and from under the envelope.
 
-The 9 new game tests (`HotAirBalloonGameTests`), most in a 44 by 44 by 26 empty arena:
+The 10 new game tests (`HotAirBalloonGameTests`), most in a 44 by 44 by 26 empty arena:
 1. set up on open ground it stands, its design and fuel from the item; not under a block three up, nor over air;
 2. coal loads 400 units and one coal goes; dirt doesn't; full tanks refuse more; packed up by sneaking with an empty hand, the item keeps its fuel;
 3. two climb in, the first pilots; four fit, not five; a passenger's keys don't count, the pilot's do; fired, it lifts off and climbs, burning fuel; the vent cools it fast;
-4. one on the ground stays put while one aloft drifts with the wind;
-5. the winds: the two lowest layers within 30 degrees of opposite on each of 20 days; the same every time; stronger high up and half as strong again in rain; swinging through the day; a layer's own wind inside it and a blend near its top; compass points;
-6. a Mooring Post ties the nearest balloon and casts it off; at the rope's end it can't go further out, nor above the tether; within them it goes as the wind takes it; breaking the post casts it off; nothing to tie far off;
-7. a pibal rises and drifts with the wind; an old one pops;
-8. its climb for its heat (fastest up hot, fastest down cold, level at 0.5, less high up), and what counts as a box;
-9. the recipes, advancements and loot load.
+4. riders sit facing along the basket's walls, each its own way round, and look no more than 105 degrees either way;
+5. one on the ground stays put while one aloft drifts with the wind;
+6. the winds: the two lowest layers within 30 degrees of opposite on each of 20 days; the same every time; stronger high up and half as strong again in rain; swinging through the day; a layer's own wind inside it and a blend near its top; compass points;
+7. a Mooring Post ties the nearest balloon and casts it off; at the rope's end it can't go further out, nor above the tether; within them it goes as the wind takes it; breaking the post casts it off; nothing to tie far off;
+8. a pibal rises and drifts with the wind; an old one pops;
+9. its climb for its heat (fastest up hot, fastest down cold, level at 0.5, less high up), and what counts as a box;
+10. the recipes, advancements and loot load.
 
-`BalloonClientGameTests` takes screenshots: three balloons over a field (one on the ground, one moored, one aloft) with pibals rising; a basket up close; the view from the moored basket; its riders seen from outside; and the night glow, the burners firing.
+`BalloonClientGameTests` takes screenshots: a basket up close; the test player piloting the moored Jack-o'-Lantern (holding jump for the burner) up its rope, the view from its basket and its rider seen from outside; then, from a camera stand on the ground, the field with it aloft over the other two and pibals rising, and the night glow with its burner firing, from the field and from under the envelope.
 
 Not run: flying one by hand (the tests fire the burner directly), a box flown in play, and a two-client dedicated-server playtest (riders together, a mass ascension).
 
