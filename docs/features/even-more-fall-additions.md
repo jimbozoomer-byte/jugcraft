@@ -530,7 +530,21 @@ The 8 new game tests (`MidwayGameTests`):
 Not run: swinging a mallet and tossing rings by hand, which no automated test can do; a two-client dedicated-server playtest.
 
 ### Ferris wheel verification
-Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1085 IDs and now compares `tools/ferris_wheel.py` with Java; `python3 scripts/check_repository.py` passes. The wheel's look was checked in a render of its quads before any game run.
+
+Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-27-ferris-wheel` stacked on the midway:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `tools/ferris_wheel.py` with Java: the hub, radius, cars and seats, the seat's place, the power, speed and reach; and checks the booth, entity, quads, tags, loot, advancements and textures) | Pass, 1085 IDs |
+| `./gradlew build` on `c4679261` (Build workflow run [37156864812](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37156864812)) | Pass |
+| Game tests on the headless server, same run: 645 in total, 7 of them new here (`FerrisWheelGameTests`) | **All 645 pass** on `c4679261` |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `c4679261` (all three client shards) |
+| The same, on `75fff507` (the fixes below) | Not yet run |
+
+The wheel's look was checked in a render of its quads before any game run. The first run's screenshots then showed two faults the tests couldn't, fixed in `75fff507`:
+- **The wheel drew black**, frame, wheel and cars, though the booth beside it was lit. The wheel entity stands in its booth block, where there is no light, and took its light from there. The frame now takes its light from just above the booth, the wheel from its hub, and each car from where it hangs.
+- **A rider's head came up through the canopy:** the view from a car was its canopy from above. A seated player's eyes are about a block over their seat, and the seat was under a block (0.94) below the pivot. The cars' tubs now hang 12 pixels lower, a seat 1.75 blocks under the pivot, with a rider's head under the canopy (checked in a render with two player-sized figures seated). The hub stands at 9½ blocks, a block higher, so the bottom car's floor still clears the booth, a step above its deck. The jam check also looks where the riders' heads are.
 
 The 7 new game tests (`FerrisWheelGameTests`), in a 44 by 44 empty arena:
 1. placed from its item where there is room, the booth faces whoever placed it, one wheel stands over it facing the same way, and its drive is there; with a block in its way, a second can't be placed and the item is kept;
