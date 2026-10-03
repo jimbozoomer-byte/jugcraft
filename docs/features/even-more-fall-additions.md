@@ -374,6 +374,7 @@ Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API
 | `./gradlew build` on `e71302ed` (Build workflow run [37148025075](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37148025075)) | Pass |
 | Game tests on the headless server, same run: 606 in total, 5 of them new here (`SquirrelGameTests`) | **All 606 pass** |
 | Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `e71302ed` (all three client shards of that run) |
+| Again on `da7b7277`, with the werewolves' new art merged in (run [37153498026](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37153498026)): data check, build, game tests and client test | Pass, 1073 IDs; **all 624 game tests pass**; all three client shards pass |
 
 The 5 new game tests (`SquirrelGameTests`):
 1. a squirrel goes for an acorn lying several blocks off and takes it, and the acorn is gone from the ground;
@@ -386,7 +387,7 @@ Found by CI and fixed before this record:
 - The first run failed in two of these tests at once, on grass: burying and planting asked for `minecraft:dirt`, which grass didn't pass in 26.3. They (and where squirrels come out) now ask whether an oak sapling could grow there (`Werewolves.woodlandFloor`). The same check had kept werewolves off grass; that was fixed on the branch below.
 - The bury test also checked for room to sprout after a squirrel had buried an acorn, which sprouts a sapling one time in four and leaves no room near it: it now checks the room first.
 
-The client test's first screenshots showed a squirrel at rest with its tail standing straight up behind its head, a column from the front. At rest the tail now sweeps up and back and its tip curls forward over the back (`2845d4ad`), and the test adds a side-on picture. Those screenshots come from this pull request's run.
+The client test's first screenshots showed a squirrel at rest with its tail standing straight up behind its head, a column from the front. At rest the tail now sweeps up and back and its tip curls forward over the back (`2845d4ad`), and the test adds a side-on picture. The screenshots in the [agriculture guide](../branches/AGRICULTURE.md#squirrels-and-acorns) come from run 37153498026: three squirrels by a stump with acorns about (one on the stump holding an acorn), one side on with its tail curled over its back, and acorns and roasted acorns in frames.
 
 Not run: squirrels burying acorns over a long time in play, and a sapling sprouting from one (a 1 in 4 chance, which no test waits for); a two-client dedicated-server playtest.
 

@@ -1070,6 +1070,14 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 ### Squirrels and acorns
 
+| **A grey squirrel** with an acorn on a stump; a red and a grey one below | **Further back:** acorns on the ground and an oak sapling |
+| --- | --- |
+| ![A squirrel with an acorn](../images/ingame_squirrel_acorn.jpg) | ![Squirrels](../images/ingame_squirrels.jpg) |
+| **Side on:** the bushy tail curls up over its back | **Acorns** and roasted acorns, framed above a furnace |
+| ![A squirrel side on](../images/ingame_squirrel_side.jpg) | ![Acorns](../images/ingame_acorns.jpg) |
+
+*Real screenshots from the client game test that CI runs (`SquirrelClientGameTests`, software rendering, small previews).*
+
 - **Squirrels**, red and grey, live in forests and taiga. They scamper up tree trunks, bolt when hurt, and follow anyone holding nuts: acorns or chestnuts breed them.
 - **Acorns** drop from oak and dark oak leaves. Plant one on grass for an oak sapling, or roast it for a snack. A squirrel takes acorns lying near and buries them, and one in four grows into an oak. Details: [even more fall additions](../features/even-more-fall-additions.md#squirrels-and-acorns).
 
