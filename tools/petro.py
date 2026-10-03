@@ -66,6 +66,10 @@ FLUIDS = {
     "premium_gasoline": {"display": "Premium Gasoline", "feature": "crude_oil",
                          "colors": [(170, 70, 60), (214, 110, 90), (236, 160, 130), (252, 214, 196)],
                          "tick_delay": 4, "slope": 4, "drop_off": 1},
+    # Batch 33: hydroponics. Fertilizer dissolved in water, for the hydroponic bay: a cloudy green.
+    "nutrient_solution": {"display": "Nutrient Solution", "feature": "machines",
+                          "colors": [(40, 90, 50), (70, 130, 70), (110, 170, 100), (170, 214, 150)],
+                          "tick_delay": 5, "slope": 4, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -347,6 +351,14 @@ FLUID_RECIPES = {
         {"name": "smoke_grenade", "items": [("#c:plates/steel", 1), ("minecraft:sugar", 2)],
          "fluids": [("jugcraft:ammonia", 250)], "results": [("jugcraft:smoke_grenade", 2)], "ticks": 80,
          "features": ["machines"]},
+        # Construction chemistry (batch 32, tools/construction.py). A foam canister: polyurethane-style foam from plastic
+        # and ammonia, in a steel can.
+        {"name": "foam_canister", "items": [("jugcraft:plastic_pellets", 2), ("minecraft:iron_nugget", 1)],
+         "fluids": [("jugcraft:ammonia", 250)], "results": [("jugcraft:foam_canister", 1)], "ticks": 80,
+         "features": ["machines", "crude_oil"]},
+        # Hydroponics (batch 33): nutrient solution, a fertilizer dissolved in a bucket of water; enough for ten harvests.
+        {"name": "nutrient_solution", "items": [("jugcraft:fertilizer", 1)], "fluids": [("minecraft:water", 1000)],
+         "fluid_results": [("jugcraft:nutrient_solution", 1000)], "ticks": 40, "features": ["machines"]},
         # Medicines. A first aid kit: cotton dressings and soap, sterilised in bioethanol.
         {"name": "first_aid_kit", "items": [("jugcraft:cotton", 2), ("jugcraft:soap", 1)],
          "fluids": [("jugcraft:bioethanol", 250)], "results": [("jugcraft:first_aid_kit", 2)], "ticks": 100,
