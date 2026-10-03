@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.test;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.diagonal.DiagonalConnections;
+import io.github.jimbozoomer.jugcraft.diagonal.DiagonalWallBlock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -26,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * Client game test for diagonal connections: in a creative world, rows of fences, panes, bars and walls run diagonally
  * (oak and bamboo fences in zigzags, a wrought-iron cemetery fence and an aspen fence in diamonds, glass panes, stained
  * glass, iron and copper bars on a slant; a cobblestone wall diamond, a stone brick wall run with a torch on its middle,
- * an andesite wall zigzag and a mossy stone brick wall run two high), photographed from above and from the side (CI job
+ * an andesite wall zigzag and a mossy stone brick wall run two high, its lower walls tall), photographed from above and from the side (CI job
  * {@code client}). The log lists each block's joins and each wall's post, so a screenshot can be read against them.
  */
 public class DiagonalClientGameTests implements FabricClientGameTest {
@@ -116,6 +117,7 @@ public class DiagonalClientGameTests implements FabricClientGameTest {
 					int mask = DiagonalConnections.mask(state);
 					if (mask != 0) {
 						String post = state.hasProperty(WallBlock.UP) ? state.getValue(WallBlock.UP) ? "+post" : "-post" : "";
+						post += state.hasProperty(DiagonalWallBlock.TALL) && state.getValue(DiagonalWallBlock.TALL) ? "+tall" : "";
 						joins.add("%d,%d,%d=%s%s".formatted(dx, dy, dz, Integer.toBinaryString(mask), post));
 					}
 				}

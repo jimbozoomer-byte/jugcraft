@@ -131,17 +131,18 @@ def bars_arm():
     ]
 
 
-def wall_arm():
-    """A low wall side, as wide (6) and high (14) as vanilla's, from the corner to the middle; the stone is not
-    stretched along it. Walls join diagonally only low: a diagonal never rises to meet a wall or block above."""
+def wall_arm(height=14):
+    """A wall side, as wide (6) as vanilla's and `height` high (14 low, 16 tall), from the corner to the middle; the
+    stone is not stretched along it."""
     x0, x1 = _narrow(3)
     length = round(16 - ARM_UV, 4)
-    return [{"from": [x0, 0, 0], "to": [x1, 14, 8], "rotation": _rotation(), "faces": {
+    top = 16 - height
+    return [{"from": [x0, 0, 0], "to": [x1, height, 8], "rotation": _rotation(), "faces": {
         "down": {"uv": [5, ARM_UV, 11, 16], "texture": "#wall"},
         "up": {"uv": [5, 0, 11, length], "texture": "#wall"},
-        "north": {"uv": [5, 2, 11, 16], "texture": "#wall"},
-        "west": {"uv": [0, 2, length, 16], "texture": "#wall"},
-        "east": {"uv": [ARM_UV, 2, 16, 16], "texture": "#wall"}}}]
+        "north": {"uv": [5, top, 11, 16], "texture": "#wall"},
+        "west": {"uv": [0, top, length, 16], "texture": "#wall"},
+        "east": {"uv": [ARM_UV, top, 16, 16], "texture": "#wall"}}}]
 
 
 def turned(elements):
@@ -181,8 +182,8 @@ def _part(model, when=None, y=0, uvlock=False):
     return part
 
 
-def diagonal_parts(arm_model, uvlock=False):
-    return [_part(arm_model, {name: "true"}, y, uvlock) for name, y in DIAGONALS]
+def diagonal_parts(arm_model, uvlock=False, when=None):
+    return [_part(arm_model, {name: "true", **(when or {})}, y, uvlock) for name, y in DIAGONALS]
 
 
 def vanilla_fence(name):
@@ -234,13 +235,19 @@ def vanilla_wall(name):
 
 
 def diagonal_wall(name):
-    """A diagonal wall's own parts: the wall's post when raised and its low side for each joined side (uvlocked, as
-    vanilla's). Its sides are only joined or not; they are never tall."""
+    """A diagonal wall's own parts: the wall's post when raised and, for each joined side, its low side, or its tall
+    side when the diagonal wall is tall (uvlocked, as vanilla's)."""
     m = f"minecraft:block/{name}"
     parts = [_part(f"{m}_post", {"up": "true"})]
-    for direction, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
-        parts.append(_part(f"{m}_side", {direction: "true"}, y, uvlock=True))
+    for model, tall in ((f"{m}_side", "false"), (f"{m}_side_tall", "true")):
+        for direction, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+            parts.append(_part(model, {direction: "true", "tall": tall}, y, uvlock=True))
     return parts
+
+
+def wall_arm_models(name):
+    """A diagonal wall's arm models: low, and tall."""
+    return f"{MOD}:block/diagonal/{name}", f"{MOD}:block/diagonal/{name}_tall"
 
 
 def vanilla_blockstates():
@@ -276,10 +283,12 @@ def write_all(write, assets_dir, minecraft_assets_dir):
         write(minecraft_assets_dir / "blockstates" / f"{name}.json",
               {"multipart": parts + diagonal_parts(arm, uvlock=kind == "fence")})  # as vanilla uvlocks its fence sides
     for name in VANILLA_WALLS:
-        arm = f"{MOD}:block/diagonal/{name}"
+        low, tall = wall_arm_models(name)
         write(models / f"{name}.json", {"parent": f"minecraft:block/{name}_side", "elements": wall_arm()})
+        write(models / f"{name}_tall.json", {"parent": f"minecraft:block/{name}_side_tall", "elements": wall_arm(16)})
         write(assets_dir / "blockstates" / f"{DIAGONAL_WALL.format(name)}.json",
-              {"multipart": diagonal_wall(name) + diagonal_parts(arm, uvlock=True)})
+              {"multipart": diagonal_wall(name) + diagonal_parts(low, True, {"tall": "false"})
+               + diagonal_parts(tall, True, {"tall": "true"})})
     for name in jugcraft_fences():
         path = assets_dir / "blockstates" / f"{name}.json"
         state = _load(path)
@@ -293,6 +302,14 @@ def write_all(write, assets_dir, minecraft_assets_dir):
         state["multipart"] = [p for p in state["multipart"] if not set(p.get("when", {})) & {d for d, _ in DIAGONALS}]
         state["multipart"] += diagonal_parts(arm, uvlock)
         write(path, state)
+
+
+def arm_models(block):
+    """The arm models a tagged block's blockstate names: its arm, and a wall's tall arm too."""
+    namespace, name = block.split(":")
+    if namespace == "minecraft" and name in VANILLA_WALLS:
+        return wall_arm_models(name)
+    return (f"{MOD}:block/diagonal/{name}",)
 
 
 def arm_blockstate(block):
