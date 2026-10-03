@@ -259,12 +259,16 @@ public class BiomeGameTests {
 	}
 
 	/**
+	 * The fewest logs each giant can grow, for bigTreesGrow. A trunk two blocks wide is four logs a level and one at its
+	 * top: 4h - 3 for a trunk h tall. tools/trees.py's shortest trunks: a giant redwood's 22, a giant mahogany's 10 (its
+	 * branches, a mega jungle tree's, may by chance be none).
+	 */
+	private static final Map<String, Integer> GIANT_FEWEST_LOGS = Map.of("redwood", 4 * 22 - 3, "mahogany", 4 * 10 - 3);
+
+	/**
 	 * Redwood, eucalyptus and mahogany saplings (big trees and rainforests) grow their trees; four redwood or mahogany
 	 * saplings in a square grow a giant, its trunk two blocks wide.
 	 */
-	/** Fewest logs a giant redwood or mahogany may have (bigTreesGrow); see the comment there. */
-	private static final int GIANT_MIN_LOGS = 30;
-
 	@GameTest(maxTicks = 100)
 	public void bigTreesGrow(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -293,9 +297,10 @@ public class BiomeGameTests {
 				logs += level.getBlockState(pos).is(log) ? 1 : 0;
 			}
 			LOGGER.info("A giant {} from four saplings: {} logs, trunk two wide: {}", tree, logs, wide);
-			// A giant is random in height: the shortest giant mahogany (a 10-block trunk) can grow under 40 logs (CI saw
-			// 38), so the floor is 30. The two-wide trunk is what proves it is a giant; a lone sapling grows about 10.
-			helper.assertTrue(wide && logs >= GIANT_MIN_LOGS, "Four " + tree + " saplings grew no giant: " + logs + " logs, two wide " + wide);
+			// Each giant is held to its own fewest: a giant redwood to 85 logs, a giant mahogany to 37 (CI has seen 37 and
+			// 38). A lone sapling grows about 10.
+			helper.assertTrue(wide && logs >= GIANT_FEWEST_LOGS.get(tree),
+					"Four " + tree + " saplings grew no giant: " + logs + " logs (at least " + GIANT_FEWEST_LOGS.get(tree) + "), two wide " + wide);
 			clear(helper, at);
 		}
 		helper.succeed();
