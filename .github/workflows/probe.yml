@@ -18,6 +18,20 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
+      - name: Batch 38 APIs
+        run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          echo "=== FireworkExplosion"; javap -cp "$COMMON" net.minecraft.world.item.component.FireworkExplosion | head -20
+          javap -cp "$COMMON" 'net.minecraft.world.item.component.FireworkExplosion$Shape' | head
+          echo "=== ServerLevel weather"; javap -cp "$COMMON" net.minecraft.server.level.ServerLevel | grep -iE "weather|raining|thunder"
+          echo "=== Level weather"; javap -cp "$COMMON" net.minecraft.world.level.Level | grep -iE "weather|raining|thunder"
+          echo "=== DimensionType"; javap -cp "$COMMON" net.minecraft.world.level.dimension.DimensionType | grep -iE "skylight|ceiling|hasSky"
+          echo "=== Monster"; javap -cp "$COMMON" net.minecraft.world.entity.monster.Monster | head -5
+          echo "=== Enemy"; javap -cp "$COMMON" net.minecraft.world.entity.monster.Enemy | head -5
+          echo "=== MobEffectInstance"; javap -cp "$COMMON" net.minecraft.world.effect.MobEffectInstance | grep -E "MobEffectInstance\(" | head
+          echo "=== FireworkRocketEntity"; javap -cp "$COMMON" net.minecraft.world.entity.projectile.FireworkRocketEntity | grep -E "FireworkRocketEntity\(" 
+          echo "=== ServerLevel hasChunk"; javap -cp "$COMMON" net.minecraft.world.level.Level | grep -E "hasChunk|isLoaded"
       - name: Batch 36 APIs
         run: |
           set +e
