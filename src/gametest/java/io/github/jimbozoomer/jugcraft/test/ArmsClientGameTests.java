@@ -72,7 +72,8 @@ public class ArmsClientGameTests implements FabricClientGameTest {
 			context.waitTicks(10);
 			context.getInput().holdKey(options -> options.keyUse);
 			context.waitTicks(15);
-			Jugcraft.LOGGER.info("[arms client] holding use with a longsword: blocking {}", context.computeOnClient(client -> client.player.isBlocking()));
+			boolean blocking = context.computeOnClient(client -> client.player.isBlocking());
+			Jugcraft.LOGGER.info("[arms client] holding use with a longsword: blocking {}", blocking);
 			context.takeScreenshot("jugcraft_arms_parry_front");
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			context.waitTicks(5);
@@ -82,7 +83,8 @@ public class ArmsClientGameTests implements FabricClientGameTest {
 			context.waitTicks(10);
 			context.getInput().holdKey(options -> options.keyUse);
 			context.waitTicks(15);
-			Jugcraft.LOGGER.info("[arms client] holding use with a lance: using {}", context.computeOnClient(client -> client.player.isUsingItem()));
+			boolean charging = context.computeOnClient(client -> client.player.isUsingItem());
+			Jugcraft.LOGGER.info("[arms client] holding use with a lance: using {}", charging);
 			context.takeScreenshot("jugcraft_arms_lance_charge");
 			context.getInput().releaseKey(options -> options.keyUse);
 		}

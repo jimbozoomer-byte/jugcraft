@@ -9,6 +9,7 @@ import java.util.Map;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
@@ -138,7 +139,9 @@ public class ArmsGameTests {
 
 	/** A still husk (it does not burn by day) with no armor, facing south (yaw 0) or north (180), holding the stack. */
 	private static Mob fighter(GameTestHelper helper, BlockPos pos, ItemStack held, float yaw) {
-		Mob husk = helper.spawnWithNoFreeWill(EntityType.HUSK, pos);
+		@SuppressWarnings("unchecked")
+		EntityType<Mob> type = (EntityType<Mob>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("husk"));
+		Mob husk = helper.spawnWithNoFreeWill(type, pos);
 		husk.getAttribute(Attributes.ARMOR).setBaseValue(0.0);
 		husk.setItemSlot(EquipmentSlot.MAINHAND, held);
 		husk.setYRot(yaw);
