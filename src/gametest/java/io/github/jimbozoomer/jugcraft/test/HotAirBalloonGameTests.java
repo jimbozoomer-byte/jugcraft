@@ -122,7 +122,11 @@ public class HotAirBalloonGameTests {
 		double startY = balloon.getY();
 		balloon.setHeat(0.6F);
 		helper.runAfterDelay(120, () -> {
-			helper.assertTrue(balloon.getY() > startY + 1.0, "Fired, it lifts off and climbs: " + (balloon.getY() - startY) + " up");
+			String state = " (heat " + balloon.heat() + ", fuel " + balloon.fuel() + ", burner " + balloon.burnerKey() + ", burning " + balloon.burning()
+					+ ", pilot " + (balloon.pilot() == pilot) + ", riders " + balloon.getPassengers().size() + ", grounded " + balloon.grounded()
+					+ ", removed " + balloon.isRemoved() + ", y " + balloon.getY() + ", sea " + helper.getLevel().getSeaLevel() + ", climb "
+					+ HotAirBalloon.climbFor(balloon.heat(), balloon.getY(), helper.getLevel().getSeaLevel()) + ", motion " + balloon.getDeltaMovement() + ")";
+			helper.assertTrue(balloon.getY() > startY + 1.0, "Fired, it lifts off and climbs: " + (balloon.getY() - startY) + " up" + state);
 			helper.assertTrue(balloon.fuel() <= 2000 - 110, "burning fuel: " + balloon.fuel() + " left");
 			float hot = balloon.heat();
 			BalloonControlPayload.apply(pilot, false, true);
