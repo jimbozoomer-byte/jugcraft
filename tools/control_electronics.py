@@ -34,7 +34,18 @@ BLOCKS = {
     "sensor": "Sensor",
     "relay": "Relay",
     "logic_controller": "Logic Controller",
+    # Batch 37: the control room.
+    "control_monitor": "Control Monitor",
+    "alarm": "Alarm Klaxon",
 }
+ITEMS = {"control_remote": "Control Remote"}
+# Batch 37 numbers: the monitor's relink interval, the controller's history (samples, passes per sample), the alarm's
+# interval and the remote's range.
+MONITOR_RELINK = 40
+HISTORY = 24
+HISTORY_EVERY = 5
+ALARM_INTERVAL = 30
+REMOTE_RANGE = 256
 
 FACINGS = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {"y": 270}, "up": {"x": 270}, "down": {"x": 90}}
 CABLE_LO, CABLE_HI = 6, 10  # 4 pixels thick
@@ -42,6 +53,10 @@ CABLE_LO, CABLE_HI = 6, 10  # 4 pixels thick
 
 def blocks():
     return list(BLOCKS)
+
+
+def items():
+    return list(ITEMS)
 
 
 def rid(path):
@@ -87,6 +102,31 @@ def _on_side(side, x0, y0, x1, y1, texture):
     if side == "east":
         return _box((15, y0, x0), (15.5, y1, x1), "#frame", east=texture)
     return _box((0.5, y0, 16 - x1), (1, y1, 16 - x0), "#frame", west=texture)
+
+
+def monitor_model():
+    """Facing north: a 3-pixel panel against the wall behind (south), its face the screen."""
+    return [_box((0, 0, 13), (16, 16, 16), "#frame", north="#screen")]
+
+
+def alarm_model():
+    """A graphite base with the channel lamp on each side, an amber dome on top and a cap."""
+    elements = [_box((3, 0, 3), (13, 3, 13), "#casing"),
+                _box((4.5, 3, 4.5), (11.5, 9, 11.5), "#dome"),
+                _box((6, 9, 6), (10, 10.5, 10), "#frame")]
+    for side in ("north", "east", "south", "west"):
+        elements.append(_alarm_lamp(side))
+    return elements
+
+
+def _alarm_lamp(side):
+    if side == "north":
+        return _box((6.5, 0.5, 2.5), (9.5, 2.5, 3), "#frame", north="#lamp")
+    if side == "south":
+        return _box((6.5, 0.5, 13), (9.5, 2.5, 13.5), "#frame", south="#lamp")
+    if side == "east":
+        return _box((13, 0.5, 6.5), (13.5, 2.5, 9.5), "#frame", east="#lamp")
+    return _box((2.5, 0.5, 6.5), (3, 2.5, 9.5), "#frame", west="#lamp")
 
 
 def controller_model():
@@ -159,6 +199,48 @@ def write_all(write, assets, data, lang, condition, self_drop):
         for facing, rotation in FACINGS.items() if facing not in ("up", "down")}})
     write(assets / "items" / "logic_controller.json", {"model": {"type": "minecraft:model", "model": rid("block/logic_controller")}})
 
+    # Control monitor: a loose panel shows a standby pattern; panels of a formed screen are plain dark glass.
+    monitor_variants = {}
+    for part, screen in (("loose", "control_monitor_loose"), ("formed", "control_monitor_glass")):
+        write(models / f"control_monitor_{part}.json", {"parent": "minecraft:block/block", "textures": {
+            **base_textures, "screen": rid(f"block/{screen}")}, "elements": monitor_model()})
+    for facing, rotation in FACINGS.items():
+        if facing in ("up", "down"):
+            continue
+        for part in range(7):
+            monitor_variants[f"facing={facing},part={part}"] = {
+                "model": rid(f"block/control_monitor_{'loose' if part == 0 else 'formed'}"), **rotation}
+    write(assets / "blockstates" / "control_monitor.json", {"variants": monitor_variants})
+    write(assets / "items" / "control_monitor.json", {"model": {"type": "minecraft:model", "model": rid("block/control_monitor_loose")}})
+
+    # Alarm: one model per channel colour, lit and unlit.
+    alarm_variants = {}
+    for color in CHANNEL_COLORS:
+        for powered in (False, True):
+            suffix = "on" if powered else "off"
+            write(models / f"alarm_{color}_{suffix}.json", {"parent": "minecraft:block/block", "textures": {
+                **base_textures, "lamp": rid(f"block/control_lamp_{color}"), "dome": rid(f"block/control_alarm_{suffix}")},
+                "elements": alarm_model()})
+            alarm_variants[f"channel={color},powered={str(powered).lower()}"] = {"model": rid(f"block/alarm_{color}_{suffix}")}
+    write(assets / "blockstates" / "alarm.json", {"variants": alarm_variants})
+    write(assets / "items" / "alarm.json", {"model": {"type": "minecraft:model", "model": rid("block/alarm_red_off")}})
+
+    for item, name in ITEMS.items():
+        lang[f"item.{MOD}.{item}"] = name
+        write(assets / "models" / "item" / f"{item}.json",
+              {"parent": "minecraft:item/handheld", "textures": {"layer0": rid(f"item/{item}")}})
+        write(assets / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
+
+    lang[f"message.{MOD}.alarm.on"] = "Alarm sounding (channel %s)"
+    lang[f"message.{MOD}.alarm.off"] = "Alarm quiet (channel %s)"
+    lang[f"message.{MOD}.control_remote.bound"] = "Remote bound to the logic controller at %s, %s, %s"
+    lang[f"message.{MOD}.control_remote.unbound"] = "Use the remote on a logic controller first"
+    lang[f"message.{MOD}.control_remote.out_of_range"] = "The bound controller is out of range"
+    lang[f"message.{MOD}.control_remote.on"] = "Channel %s switched ON"
+    lang[f"message.{MOD}.control_remote.off"] = "Channel %s switched OFF"
+    lang[f"tooltip.{MOD}.control_remote.channel"] = "Channel: %s"
+    lang[f"tooltip.{MOD}.control_remote.bound"] = "Bound to the controller at %s, %s, %s"
+    lang[f"tooltip.{MOD}.control_remote.unbound"] = "Not bound: use it on a logic controller"
     lang[f"message.{MOD}.channel"] = "Channel: %s"
     lang[f"message.{MOD}.sensor"] = "Sensor: %s%% full, channel %s"
     lang[f"message.{MOD}.sensor.none"] = "Sensor: nothing to read here (channel %s)"
@@ -179,6 +261,15 @@ def write_all(write, assets, data, lang, condition, self_drop):
     write(recipes / "logic_controller.json", shaped(condition, ["SNS", "XQX", "SCS"], {
         "S": "#c:plates/steel", "N": rid("network_terminal"), "X": rid("microchip"), "Q": rid("processor"),
         "C": rid("data_cable")}, "logic_controller", 1))
+    write(recipes / "control_monitor.json", shaped(condition, ["PGP", "GXG", "PCP"], {
+        "P": rid("plastic_sheet"), "G": "minecraft:glass_pane", "X": rid("microchip"), "C": rid("data_cable")},
+        "control_monitor", 6))
+    write(recipes / "alarm.json", shaped(condition, [" D ", "NXN", "PCP"], {
+        "D": "minecraft:orange_stained_glass", "N": "minecraft:note_block", "X": rid("microchip"),
+        "P": rid("plastic_sheet"), "C": rid("data_cable")}, "alarm", 1))
+    write(recipes / "control_remote.json", shaped(condition, ["  A", " X ", "PBP"], {
+        "A": rid("copper_wire"), "X": rid("processor"), "P": rid("plastic_sheet"), "B": "minecraft:stone_button"},
+        "control_remote", 1))
 
 
 def shaped(condition, pattern, key, result, count):
@@ -265,7 +356,66 @@ def keys():
     return img
 
 
+def monitor_glass():
+    """A formed screen's panel: dark cyan-black glass with a faint scanline; no border, so six tile into one."""
+    img = _img()
+    for y in range(16):
+        for x in range(16):
+            img.putpixel((x, y), (8, 26, 30, 255) if y % 4 else (12, 34, 40, 255))
+    return img
+
+
+def monitor_loose():
+    """A loose panel: a bezel round dark glass showing a standby pattern."""
+    img = monitor_glass()
+    for i in range(16):
+        for x, y in ((i, 0), (i, 15), (0, i), (15, i)):
+            img.putpixel((x, y), GRAPHITE[3] + (255,))
+    for x in range(4, 12):
+        img.putpixel((x, 7), CYAN[1] + (255,))
+    for x in (4, 7, 10):
+        img.putpixel((x, 9), CYAN[2] + (255,))
+    return img
+
+
+def alarm_dome(on):
+    """The klaxon's dome: amber glass, glowing when sounding."""
+    img = _img()
+    ramp = [(200, 110, 20), (250, 170, 40), (255, 230, 140)] if on else [(90, 50, 14), (130, 76, 20), (170, 110, 40)]
+    for y in range(16):
+        for x in range(16):
+            c = ramp[2] if (x - 5) ** 2 + (y - 4) ** 2 < 6 else ramp[1] if x in range(3, 13) else ramp[0]
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
+def control_remote():
+    """64x64 (tools/hd_art.py): a handheld remote: a dark casing, a cyan screen, two buttons and a whip antenna."""
+    import hd_art as hd
+    from hd_art import Canvas
+    c = Canvas()
+    c.capsule((40, 6), (36, 24), 1.2, hd.CHROME)  # antenna
+    c.disc((40, 5), 2.2, hd.RED, 0.8)
+    c.box((30, 38), 13, 22, 0, hd.GUNMETAL, bevel=4.0)
+    c.box((30, 28), 9, 7, 0, hd.GLASS, bevel=1.5)  # screen
+    for y in (26, 29):
+        c.line((24, y), (36, y), (120, 240, 250))
+    c.disc((24, 44), 3.4, hd.RED, 0.6)
+    c.disc((36, 44), 3.4, hd.OLIVE, 0.6)
+    c.box((30, 54), 9, 2.2, 0, hd.RUBBER, bevel=1.0)  # grip
+    return c.finish()
+
+
+HD_ITEMS = {"control_remote": control_remote}
+
+
 def draw_all(save):
+    save(monitor_glass(), "block", "control_monitor_glass")
+    save(monitor_loose(), "block", "control_monitor_loose")
+    save(alarm_dome(False), "block", "control_alarm_off")
+    save(alarm_dome(True), "block", "control_alarm_on")
+    for item, draw in HD_ITEMS.items():
+        save(draw(), "item", item)
     save(data_cable(), "block", "data_cable")
     for color, rgb in CHANNEL_COLORS.items():
         save(lamp(rgb), "block", f"control_lamp_{color}")

@@ -11,14 +11,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 
 /**
- * A control network (batch 36): the data cables joined to a logic controller, and the sensors and relays touching
- * them or the controller. Found by a walk along the cables, at most {@link #MAX_CABLES} long; devices do not pass the
- * network on, so two separate cable runs stay separate. Unloaded chunks end the walk.
+ * A control network (batch 36): the data cables joined to a block (a logic controller, or a monitor looking for
+ * one), and the sensors, switches (relays and alarms) and controllers touching them or that block. Found by a walk
+ * along the cables, at most {@link #MAX_CABLES} long; devices do not pass the network on, so two separate cable runs stay separate. Unloaded chunks end the walk.
  */
 public final class ControlNetwork {
 	public static final int MAX_CABLES = 1_024;
 
-	public record Devices(List<BlockPos> sensors, List<BlockPos> relays, int cables) {
+	public record Devices(List<BlockPos> sensors, List<BlockPos> switches, List<BlockPos> controllers, int cables) {
 	}
 
 	private ControlNetwork() {
@@ -26,7 +26,8 @@ public final class ControlNetwork {
 
 	public static Devices find(Level level, BlockPos controller) {
 		List<BlockPos> sensors = new ArrayList<>();
-		List<BlockPos> relays = new ArrayList<>();
+		List<BlockPos> switches = new ArrayList<>();
+		List<BlockPos> controllers = new ArrayList<>();
 		Set<BlockPos> seen = new HashSet<>();
 		ArrayDeque<BlockPos> queue = new ArrayDeque<>();
 		seen.add(controller);
@@ -45,11 +46,13 @@ public final class ControlNetwork {
 					queue.add(next);
 				} else if (block instanceof SensorBlock) {
 					sensors.add(next);
-				} else if (block instanceof RelayBlock) {
-					relays.add(next);
+				} else if (block instanceof ChannelSwitch) {
+					switches.add(next);
+				} else if (block instanceof LogicControllerBlock) {
+					controllers.add(next);
 				}
 			}
 		}
-		return new Devices(sensors, relays, cables);
+		return new Devices(sensors, switches, controllers, cables);
 	}
 }

@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Control room, batch 37
+- **Control Monitor:** six panels form a 3x2 wall screen. Cabled to a logic controller, it shows every channel's reading, a bar, a two-minute graph and ON/OFF.
+- **Alarm Klaxon:** a controller switches it like a relay; it lights and sounds.
+- **Control Remote:** bind it to a controller and flip a channel by hand from up to 256 blocks away.
+- Advancement, handbook page, game test. Record: [control-electronics.md](docs/features/control-electronics.md).
+
 ### Unmerged: Control electronics, batch 36
 - **Data Cable**, **Sensor**, **Relay** and **Logic Controller**. Sensors read how full a tank, battery, machine or chest is and report on a dye-colour channel. The controller's eight rules ("IF red above 90% THEN blue OFF") switch relays, whose redstone runs machines. It gives a dead band when two rules pair up.
 - Advancement, handbook pages, game test. Record: [control-electronics.md](docs/features/control-electronics.md).

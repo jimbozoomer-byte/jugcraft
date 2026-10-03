@@ -653,36 +653,37 @@
             "Central Processing: Assemble a processor.",
             "Hello, World: Build a network terminal.",
             "In Control: Build a logic controller.",
-            "Under Pressure: Build a gas holder.",
-            "Shut-Off Valve: Make a fluid valve."
+            "Mission Control: Build control monitor panels.",
+            "Under Pressure: Build a gas holder."
           ]
         },
         {
           "title": "Milestones (16)",
-          "icon": "jugcraft:fluid_filter",
+          "icon": "jugcraft:fluid_valve",
           "text": [
+            "Shut-Off Valve: Make a fluid valve.",
             "Strained Relations: Make a fluid filter.",
             "Here Comes the Sun: Build an advanced solar panel.",
             "Full of It: Make a tank gauge.",
-            "Concentrate: Build a solar receiver for a heliostat field.",
-            "Spool Up: Make a turbocharger for the advanced engine."
+            "Concentrate: Build a solar receiver for a heliostat field."
           ]
         },
         {
           "title": "Milestones (17)",
-          "icon": "jugcraft:flywheel",
+          "icon": "jugcraft:turbocharger",
           "text": [
+            "Spool Up: Make a turbocharger for the advanced engine.",
             "Keep It Spinning: Build a flywheel.",
             "Four on the Floor: Build an advanced combustion engine.",
             "King Cotton: Grow cotton.",
-            "Make It Rain: Build a sprinkler.",
-            "Silver Lining: Build an electroplating bath."
+            "Make It Rain: Build a sprinkler."
           ]
         },
         {
           "title": "Milestones (18)",
-          "icon": "jugcraft:ammonia_chiller",
+          "icon": "jugcraft:electroplating_bath",
           "text": [
+            "Silver Lining: Build an electroplating bath.",
             "Ice Cold: Build an ammonia chiller.",
             "Soil Optional: Build a hydroponic bay.",
             "Reaping What You Sow: Build a crop harvester."
@@ -3605,6 +3606,15 @@
           "icon": "jugcraft:logic_controller",
           "text": [
             "Runs your factory by rules. Join sensors and relays to it with data cable, then right-click it: each of its eight rules reads \"IF channel below or above N% THEN channel ON or OFF\". Every second it averages each channel's sensors and works through the rules in order, a later rule overriding an earlier one; a channel no rule switches this time keeps its state, so two rules (off above 90%, on below 50%) leave a dead band. The strip along the bottom shows every channel's reading."
+          ]
+        },
+        {
+          "title": "The Control Room",
+          "icon": "jugcraft:control_monitor",
+          "text": [
+            "Six control monitor panels in a wall, three wide and two tall, all facing the same way, form one screen. Run a data cable from any panel to a logic controller and it shows every channel: its colour, reading, a bar, a two-minute graph and whether the controller has it on.",
+            "An alarm klaxon is switched like a relay: while its channel is on it lights up and sounds.",
+            "A control remote flips one channel by hand. Use it on a logic controller to bind it, sneak and use it to pick the channel, and use it to switch. The controller's rules may switch the channel back when their condition next holds. It works within 256 blocks of the controller."
           ]
         }
       ]
