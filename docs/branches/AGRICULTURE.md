@@ -1002,6 +1002,22 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Four buildings**, each one item placed whole and broken as one: a walk-in **family mausoleum** (85 blocks: a temple front, twelve crypt fronts, an altar, stained glass and a sanctuary lamp), a **lych gate** of oak and slate, a granite and wrought-iron **cemetery gateway** with lanterns, and a marble **columbarium** of six niches.
 - Every crypt front and niche takes **its own inscription** from the chisel, and the building its main one. They weather, wax and stir spirits as one. The **Bronze Mausoleum Door** fits the mausoleum's doorway. Details: [the graveyard pack](../features/graveyard.md#buildings).
 
+### The Graveyard: grounds
+
+| **The grounds** along a gravel path, lamp posts at either end | **A kerbed grave** before its headstone, **planted graves** beside it |
+| --- | --- |
+| ![The grounds](../images/ingame_graveyard_grounds.jpg) | ![A kerbed grave and planted graves](../images/ingame_graveyard_kerbed_and_planted.jpg) |
+| **Kept and neglected**: one planted grave in flower, one gone to weeds | **An open grave**, its spoil heaped beside it, the cross waiting |
+| ![Kept and neglected](../images/ingame_graveyard_kept_and_neglected.jpg) | ![An open grave](../images/ingame_graveyard_open_grave.jpg) |
+| **A memorial bench** with its plaque | **At night**, the lamp posts lit |
+| ![A memorial bench](../images/ingame_graveyard_memorial_bench.jpg) | ![The grounds at night](../images/ingame_graveyard_grounds_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`GraveyardGroundsClientGameTests`, software rendering, small previews). The stages and epitaphs are set for the picture.*
+
+- **Graves to lay out**: a **kerbed grave** of polished granite and marble chippings with an open book at its head, a **planted grave** whose flowers go to weeds if it is left, and an **open grave**, freshly dug, which stirs spirits twice as often.
+- A **memorial bench** with an inscribed plaque that seats a player, and a **cemetery lamp post** three blocks tall, lit after dark.
+- **Grave vases**: put small flowers in for a bouquet of their colour. While fresh they calm the graves within 3 blocks to half the spirits, then they wilt. Details: [the graveyard pack](../features/graveyard.md#grounds).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.
