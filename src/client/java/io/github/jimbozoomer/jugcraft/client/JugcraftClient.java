@@ -71,6 +71,13 @@ public final class JugcraftClient implements ClientModInitializer {
 			if (stored != null) {
 				lines.add(stored.describe());
 			}
+			String plating = stack.get(io.github.jimbozoomer.jugcraft.machine.Electroplating.PLATING);
+			if (plating != null) {
+				lines.add(net.minecraft.network.chat.Component.translatable("tooltip.jugcraft.plating." + plating)
+						.withStyle(net.minecraft.ChatFormatting.GOLD));
+				lines.add(net.minecraft.network.chat.Component.translatable("tooltip.jugcraft.plating.repair")
+						.withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
 		});
 		EngineersHandbookItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
 		SeasonColors.register();
