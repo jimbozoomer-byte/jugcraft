@@ -18,26 +18,25 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileJava --no-daemon -q
-      - name: Party APIs
+      - name: Grapple APIs
         run: |
           set +e
           COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
           CLIENT=$(find ~/.gradle/caches -name 'minecraft-clientOnly-deobf-26.3.jar' | head -1)
-          [ -z "$CLIENT" ] && CLIENT=$(find ~/.gradle/caches -name 'minecraft-*client*26.3*.jar' | head -1)
-          echo "client jar: $CLIENT"
-          echo "=== KeyMapping"; javap -cp "$CLIENT:$COMMON" net.minecraft.client.KeyMapping | head -40
-          echo "=== KeyMapping.Category"; javap -cp "$CLIENT:$COMMON" 'net.minecraft.client.KeyMapping$Category' | head -30
-          echo "=== ClickEvent"; javap -cp "$COMMON" net.minecraft.network.chat.ClickEvent | head; javap -cp "$COMMON" 'net.minecraft.network.chat.ClickEvent$RunCommand' | head
-          echo "=== HoverEvent ShowText"; javap -cp "$COMMON" 'net.minecraft.network.chat.HoverEvent$ShowText' | head
-          echo "=== Style click"; javap -cp "$COMMON" net.minecraft.network.chat.Style | grep -iE "click|hover|withColor|withBold" | head
-          echo "=== MutableComponent"; javap -cp "$COMMON" net.minecraft.network.chat.MutableComponent | grep -iE "withStyle|append" | head
-          echo "=== Fabric keybinding"; for j in $(find ~/.gradle/caches -name 'fabric-key*.jar' | head -3); do echo "-- $j"; unzip -l $j | grep -E "\.class" | head -10; done
-          J=$(find ~/.gradle/caches -name 'fabric-key*.jar' | grep -v sources | head -1)
-          for c in $(unzip -l $J | grep -oE "net/fabricmc/[A-Za-z0-9/]*\.class" | grep -v impl | sed 's/\.class//;s#/#.#g'); do javap -cp "$J:$CLIENT:$COMMON" $c; done
-          echo "=== InputConstants"; javap -cp "$CLIENT:$COMMON" com.mojang.blaze3d.platform.InputConstants | grep -iE "KEY_P|Type" | head
-          echo "=== ClientTickEvents"; J2=$(find ~/.gradle/caches -name 'fabric-lifecycle-events*.jar' | grep -v sources | head -1); javap -cp "$J2" net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents | head
-          echo "=== EditBox"; javap -cp "$CLIENT:$COMMON" net.minecraft.client.gui.components.EditBox | grep -E "public .*(EditBox\(|getValue|setMaxLength|setHint)" | head
-          echo "=== KeyMapping usages in vanilla Options"; javap -c -p -cp "$CLIENT:$COMMON" net.minecraft.client.Options | grep -iE "KeyMapping.\"<init>\"|Category" | head -10
+          echo "=== SynchedEntityData"; javap -cp "$COMMON" net.minecraft.network.syncher.SynchedEntityData | grep -E "defineId|public .* (get|set)\(" | head
+          javap -cp "$COMMON" 'net.minecraft.network.syncher.SynchedEntityData$Builder' | head
+          echo "=== EntityDataSerializers"; javap -cp "$COMMON" net.minecraft.network.syncher.EntityDataSerializers | grep -E " BOOLEAN| INT;" 
+          echo "=== Entity bits"; javap -p -cp "$COMMON" net.minecraft.world.entity.Entity | grep -E "hurtMarked|defineSynchedData|resetFallDistance|fallDistance|isControlledByLocalInstance|LocalInstance|setDeltaMovement|addAdditionalSaveData|readAdditionalSaveData|markHurt" | head -20
+          echo "=== Projectile"; javap -p -cp "$COMMON" net.minecraft.world.entity.projectile.Projectile | grep -E "onHit|getOwner|spawnProjectileFromRotation|shootFromRotation|canHitEntity" | head -20
+          echo "=== ThrowableProjectile"; javap -p -cp "$COMMON" net.minecraft.world.entity.projectile.ThrowableProjectile | head -30
+          echo "=== ThrowableItemProjectile"; javap -p -cp "$COMMON" net.minecraft.world.entity.projectile.ThrowableItemProjectile | head -30
+          echo "=== Player cooldowns"; javap -cp "$COMMON" net.minecraft.world.item.ItemCooldowns | grep -E "addCooldown|isOnCooldown"
+          echo "=== Boss"; javap -cp "$COMMON" net.minecraft.world.entity.Entity | grep -iE "boss|canBeHitByProjectile|isPickable" | head
+          echo "=== EntityTypeTags boss"; javap -cp "$COMMON" net.minecraft.tags.EntityTypeTags | grep -iE "boss|immune" | head
+          echo "=== EntityRenderState fields"; javap -p -cp "$CLIENT:$COMMON" net.minecraft.client.renderer.entity.state.EntityRenderState | grep -E "public .*;" | head -30
+          echo "=== EntityRenderer extract"; javap -p -cp "$CLIENT:$COMMON" net.minecraft.client.renderer.entity.EntityRenderer | grep -E "extractRenderState|shouldRender|getRenderOffset" | head
+          echo "=== Player hand"; javap -cp "$COMMON" net.minecraft.world.entity.player.Player | grep -iE "getRopeHoldPosition|getMainArm|isLocalPlayer" | head
+          javap -cp "$COMMON" net.minecraft.world.entity.Entity | grep -iE "getRopeHoldPosition|getLeashOffset|getEyePosition" | head
       - name: Dye APIs
         run: |
           set +e
