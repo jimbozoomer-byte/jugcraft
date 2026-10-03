@@ -243,11 +243,7 @@ public class HotAirBalloon extends Entity {
 		return getPassengers().size() < RIDERS && passenger instanceof Player;
 	}
 
-	/** Riders stand in the basket (where the game lets a vehicle say so), one in each corner. */
-	public boolean shouldRiderSit() {
-		return false;
-	}
-
+	/** One rider in each corner of the basket. */
 	@Override
 	protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
 		int i = Math.max(0, getPassengers().indexOf(passenger));
@@ -367,10 +363,12 @@ public class HotAirBalloon extends Entity {
 	/** One tick of flight: towards the climb its heat gives, with the wind aloft, held by its mooring and kept clear of blocks. */
 	private void fly(ServerLevel level) {
 		Vec3 motion = getDeltaMovement();
-		double vy = motion.y + (climbFor(heat(), getY(), level.getSeaLevel()) - motion.y) * RESPONSE;
+		boolean grounded = grounded();
+		// Sat on the ground it isn't sinking: its lift builds from standing still, not from the settling nudge below.
+		double from = grounded ? Math.max(motion.y, 0.0) : motion.y;
+		double vy = from + (climbFor(heat(), getY(), level.getSeaLevel()) - from) * RESPONSE;
 		double vx = motion.x;
 		double vz = motion.z;
-		boolean grounded = grounded();
 		if (isInWater()) {
 			vy = Math.max(vy, 0.02);
 		}
