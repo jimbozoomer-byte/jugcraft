@@ -621,58 +621,68 @@
             "Reel Me In: Make a pneumatic grapple.",
             "Filtered: Make a gas mask.",
             "Chemical Arsenal: Make a chlorine, smoke or thermite grenade or a flashbang.",
-            "Field Medic: Make a first aid kit in the chemical reactor."
+            "Expanding Foam: Make a foam sprayer."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:synthesis_converter",
+          "icon": "jugcraft:blastproof_concrete",
           "text": [
+            "Bunker Down: Cast blast-proof concrete, as blast-proof as obsidian.",
+            "Field Medic: Make a first aid kit in the chemical reactor.",
             "Bread from Air: Build a synthesis converter, to make ammonia from air.",
             "Aqua Fortis: Make nitric acid.",
-            "Kroll Call: Chlorinate titanium and melt the sponge.",
-            "Power Wall: Build a lithium battery bank.",
-            "Strong Attraction: Make a neodymium magnet."
+            "Kroll Call: Chlorinate titanium and melt the sponge."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:magnet_dynamo",
+          "icon": "jugcraft:lithium_battery_bank",
           "text": [
+            "Power Wall: Build a lithium battery bank.",
+            "Strong Attraction: Make a neodymium magnet.",
             "Lossless (Almost): Build a magnet dynamo or magnet motor.",
             "Pulling Strings: Pull a silicon boule in the arc furnace.",
-            "Etched in Light: Etch microchips in the lithography station.",
-            "Central Processing: Assemble a processor.",
-            "Hello, World: Build a network terminal."
+            "Etched in Light: Etch microchips in the lithography station."
           ]
         },
         {
           "title": "Milestones (15)",
-          "icon": "jugcraft:gas_holder",
+          "icon": "jugcraft:processor",
           "text": [
+            "Central Processing: Assemble a processor.",
+            "Hello, World: Build a network terminal.",
             "Under Pressure: Build a gas holder.",
             "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter.",
-            "Here Comes the Sun: Build an advanced solar panel.",
-            "Full of It: Make a tank gauge."
+            "Strained Relations: Make a fluid filter."
           ]
         },
         {
           "title": "Milestones (16)",
-          "icon": "jugcraft:solar_receiver",
+          "icon": "jugcraft:advanced_solar_panel",
           "text": [
+            "Here Comes the Sun: Build an advanced solar panel.",
+            "Full of It: Make a tank gauge.",
             "Concentrate: Build a solar receiver for a heliostat field.",
             "Spool Up: Make a turbocharger for the advanced engine.",
-            "Keep It Spinning: Build a flywheel.",
-            "Four on the Floor: Build an advanced combustion engine.",
-            "King Cotton: Grow cotton."
+            "Keep It Spinning: Build a flywheel."
           ]
         },
         {
           "title": "Milestones (17)",
-          "icon": "jugcraft:sprinkler",
+          "icon": "jugcraft:advanced_engine",
           "text": [
+            "Four on the Floor: Build an advanced combustion engine.",
+            "King Cotton: Grow cotton.",
             "Make It Rain: Build a sprinkler.",
+            "Silver Lining: Build an electroplating bath.",
+            "Soil Optional: Build a hydroponic bay."
+          ]
+        },
+        {
+          "title": "Milestones (18)",
+          "icon": "jugcraft:crop_harvester",
+          "text": [
             "Reaping What You Sow: Build a crop harvester."
           ]
         }
@@ -2631,6 +2641,24 @@
           ]
         },
         {
+          "title": "Foam Sprayer",
+          "icon": "jugcraft:foam_sprayer",
+          "text": [
+            "Aim at a block up to 16 blocks away: foam fills the open space in front of it, up to 12 blocks at a time, through air, water, lava and plants. It never replaces a solid block or fills a space a mob stands in.",
+            "Bridge gaps, seal caves, stop a flood or a lava flow. Each canister holds 32 blocks of foam; make canisters in the chemical reactor from plastic pellets and an iron nugget in ammonia.",
+            "Foam breaks in a moment and drops nothing. Use cement on it to set it into concrete."
+          ]
+        },
+        {
+          "title": "Concrete",
+          "icon": "jugcraft:blastproof_concrete",
+          "text": [
+            "Cement mix: calcite (or a bone block), clay and sand; smelt it into cement.",
+            "Four cement, four gravel and a water bucket make eight concrete, as hard as stone and tougher.",
+            "Eight concrete round a rebar make eight blast-proof concrete: as blast-proof as obsidian, mined with a diamond or steel pickaxe. Both come as slabs and stairs."
+          ]
+        },
+        {
           "title": "Medicines",
           "icon": "jugcraft:first_aid_kit",
           "text": [
@@ -3243,6 +3271,29 @@
               "jugcraft:aluminum_plate"
             ],
             "result": "jugcraft:fuel_cell",
+            "count": 1
+          }
+        },
+        {
+          "title": "Electroplating Bath",
+          "icon": "jugcraft:electroplating_bath",
+          "text": [
+            "Plates a tool, weapon or piece of armor and repairs it fully, without experience, so enchanted gear keeps going. Put the item in the first slot and an ingot in the second, with sulfuric acid piped in: 10 seconds and 100 mB a plating. Nickel makes it half as durable again; silver gives a weapon Smite III; gold makes armor count as gold for piglins. Plate again with the same metal to repair; a different metal is refused.",
+            "Uses 32 JE/t while working. Holds 20,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:plastic_sheet",
+              "minecraft:copper_ingot",
+              "jugcraft:plastic_sheet",
+              "jugcraft:copper_cable",
+              "jugcraft:fluid_tank",
+              "jugcraft:copper_cable",
+              "jugcraft:steel_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:electroplating_bath",
             "count": 1
           }
         },
@@ -3988,6 +4039,111 @@
             "result": "jugcraft:crop_harvester",
             "count": 1
           }
+        },
+        {
+          "title": "Hydroponic Bay",
+          "icon": "jugcraft:hydroponic_bay",
+          "text": [
+            "Grows a seed or cutting in nutrient solution under grow lights: no soil, sunlight or farmland, so it works underground, in the Nether or the End. A harvest every 30 seconds uses 100 mB of solution (a fertilizer in a bucket of water, in the chemical reactor) and gives the seed back.",
+            "Uses 12 JE/t while working. Holds 20,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:glass",
+              "minecraft:glowstone",
+              "minecraft:glass",
+              "jugcraft:fluid_tank",
+              "jugcraft:machine_casing",
+              "jugcraft:fluid_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:hydroponic_bay",
+            "count": 1
+          },
+          "recipes": [
+            {
+              "in": [
+                [
+                  "minecraft:wheat_seeds",
+                  1
+                ]
+              ],
+              "out": [
+                "minecraft:wheat",
+                2
+              ],
+              "extra": [
+                [
+                  "minecraft:wheat_seeds",
+                  1.0
+                ],
+                [
+                  "minecraft:wheat_seeds",
+                  0.5
+                ]
+              ]
+            },
+            {
+              "in": [
+                [
+                  "minecraft:carrot",
+                  1
+                ]
+              ],
+              "out": [
+                "minecraft:carrot",
+                3
+              ],
+              "extra": [
+                [
+                  "minecraft:carrot",
+                  1.0
+                ]
+              ]
+            },
+            {
+              "in": [
+                [
+                  "minecraft:potato",
+                  1
+                ]
+              ],
+              "out": [
+                "minecraft:potato",
+                3
+              ],
+              "extra": [
+                [
+                  "minecraft:potato",
+                  1.0
+                ]
+              ]
+            },
+            {
+              "in": [
+                [
+                  "minecraft:beetroot_seeds",
+                  1
+                ]
+              ],
+              "out": [
+                "minecraft:beetroot",
+                2
+              ],
+              "extra": [
+                [
+                  "minecraft:beetroot_seeds",
+                  1.0
+                ],
+                [
+                  "minecraft:beetroot_seeds",
+                  0.5
+                ]
+              ]
+            }
+          ]
         },
         {
           "title": "Sprinkler",
