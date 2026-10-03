@@ -32,6 +32,10 @@ No numbered release yet. Everything below is on `main`.
 - **Control Remote:** bind it to a controller and flip a channel by hand from up to 256 blocks away.
 - Advancement, handbook page, game test. Record: [control-electronics.md](docs/features/control-electronics.md).
 
+### Unmerged: Tall sides on diagonal walls
+- **Diagonal walls rise to meet what is above them.** When the block above covers all of a diagonal wall's sides and arms (another wall, a full block, a slab), they rise to the top of the block as a vanilla wall's sides do, so a diagonal wall two high has no slot between its layers. A tall straight diagonal run has no post, as a tall straight wall has none.
+- One property, `tall`, on the diagonal walls: 2,048 states each, 32,768 more in all. Two more server game tests.
+
 ### Unmerged: Diagonal walls
 - **Walls join diagonally.** All 32 of vanilla's walls join a wall a diagonal step away with a low wall side at 45 degrees, on the same rule as fences: neither may join straight into the corner between them, so a block in the corner keeps them apart.
 - **Posts follow vanilla's rule.** A wall that runs straight on along a diagonal has no post, as a straight wall has none, unless something above calls for one (a torch, a block, a wall's post). Ends, corners and junctions keep their posts.
