@@ -32,12 +32,17 @@ EPITAPH = {"lines": 4, "line_length": 24, "session_ticks": 6000, "chisel": "ston
 STONES = {"marble": {"ink": 0xFF2C2B30, "fade_to": 0xFFB9B7B0, "vanilla": "minecraft:calcite"},
           "slate": {"ink": 0xFFD3D8DE, "fade_to": 0xFF4B525C, "vanilla": "minecraft:polished_deepslate"},
           "granite": {"ink": 0xFFE6DFD6, "fade_to": 0xFF7A7270, "vanilla": "minecraft:polished_granite"},
-          "sandstone": {"ink": 0xFF3E2C1A, "fade_to": 0xFFB59C6E, "vanilla": "minecraft:smooth_sandstone"}}
+          "sandstone": {"ink": 0xFF3E2C1A, "fade_to": 0xFFB59C6E, "vanilla": "minecraft:smooth_sandstone"},
+          # Pack 2: a mortsafe's cast-iron plate, its raised letters picked out in gilt.
+          "iron": {"ink": 0xFFC9A961, "fade_to": 0xFF6E3A1E, "vanilla": "minecraft:iron_bars"}}
 
 SINGLE = [(0, 0, 0)]
 TALL2 = [(0, 0, 0), (0, 1, 0)]
 TALL3 = [(0, 0, 0), (0, 1, 0), (0, 2, 0)]
 LONG = [(0, 0, 0), (0, 0, 1)]
+TALL4 = [(0, 0, 0), (0, 1, 0), (0, 2, 0), (0, 3, 0)]
+# The Angel at the Tomb: the altar's two halves and, above the left one (the placer's right), her wings.
+WIDE = [(0, 0, 0), (1, 0, 0), (1, 1, 0)]
 
 HEADSTONES = {
     "gothic_headstone": {
@@ -88,6 +93,43 @@ HEADSTONES = {
         "shapes": [[(1, 0, 1, 15, 2.4, 16)], [(1, 0, 0, 15, 2.4, 15)]],
         "text": {"face": "TOP", "x": 8.0, "y": 2.4, "z": 10.2, "width": 9.6, "height": 14.0, "max_scale": 1 / 48},
         "recipe": {"pattern": ["SS"], "key": {"S": "minecraft:smooth_sandstone_slab"}}},
+    # ---------------------------------------------------------------- pack 2: monuments
+    "grand_obelisk": {
+        "display": "Grand Obelisk", "stone": "granite", "model": "obelisk", "cells": TALL4, "overgrowth": "tall", "pack": 2,
+        "shapes": [[(0, 0, 0, 16, 2, 16), (1, 2, 1, 15, 4, 15), (2.5, 4, 2.5, 13.5, 16, 13.5)],
+                   [(2.6, 0, 2.6, 13.4, 0.8, 13.4), (3.5, 0.8, 3.5, 12.5, 2.5, 12.5), (3.7, 2.5, 3.7, 12.3, 16, 12.3)],
+                   [(4.4, 0, 4.4, 11.6, 16, 11.6)], [(5.2, 0, 5.2, 10.8, 12, 10.8)]],
+        "text": {"face": "FRONT", "x": 8.0, "y": 10.0, "z": 2.2, "width": 8.2, "height": 7.2, "max_scale": 1 / 72},
+        "recipe": {"pattern": [" G ", " G ", "GGG"], "key": {"G": "minecraft:polished_granite"}}},
+    "draped_urn": {
+        "display": "Draped Urn", "stone": "marble", "model": "draped_urn", "cells": TALL2, "overgrowth": "tall", "pack": 2,
+        "shapes": [[(2, 0, 2, 14, 2.8, 14), (3, 2.8, 3, 13, 13, 13), (2.4, 13, 2.4, 13.6, 15, 13.6), (4, 15, 4, 12, 16, 12)],
+                   [(4, 0, 4, 12, 12.2, 12)]],
+        "text": {"face": "FRONT", "x": 8.0, "y": 8.0, "z": 3.0, "width": 7.6, "height": 6.6, "max_scale": 1 / 80},
+        "recipe": {"pattern": ["C", "P", "C"], "key": {"C": "minecraft:calcite", "P": "minecraft:flower_pot"}}},
+    "angel_at_the_tomb": {
+        "display": "Angel at the Tomb", "stone": "marble", "model": "angel_of_grief", "cells": WIDE, "overgrowth": "small", "pack": 2,
+        "shapes": [[(0, 0, 0, 16, 2.4, 16), (0, 2.4, 2.5, 14, 14, 14)],
+                   [(0, 0, 0, 16, 2.4, 16), (10, 2.4, 2.5, 16, 14, 14), (1, 2.4, 4, 10, 16, 12)],
+                   [(0, 0, 5, 9, 12, 11)]],
+        "text": {"face": "FRONT", "x": 3.5, "y": 7.2, "z": 2.5, "width": 11.5, "height": 6.0, "max_scale": 1 / 64},
+        "recipe": {"pattern": ["FCF", "CCC"], "key": {"F": "minecraft:feather", "C": "minecraft:calcite"}}},
+    "trumpeting_angel": {
+        "display": "Trumpeting Angel", "stone": "marble", "model": "trumpet_angel", "cells": TALL4, "overgrowth": "tall", "pack": 2,
+        "shapes": [[(1, 0, 1, 15, 2.8, 15), (2, 2.8, 2, 14, 12, 14), (1.5, 12, 1.5, 14.5, 14.2, 14.5), (4, 14.2, 4, 12, 16, 12)],
+                   [(5, 0, 5, 11, 16, 11)], [(5, 0, 5, 11, 8, 11), (3.6, 8, 3.6, 12.4, 11.6, 12.4)], [(5, 0, 4, 11, 15, 12)]],
+        "text": {"face": "FRONT", "x": 8.0, "y": 7.4, "z": 2.0, "width": 8.8, "height": 6.0, "max_scale": 1 / 72},
+        "recipe": {"pattern": ["FCF", " C ", " C "], "key": {"F": "minecraft:feather", "C": "minecraft:calcite"}}},
+    "mortsafe": {
+        "display": "Mortsafe", "stone": "iron", "model": "mortsafe", "cells": LONG, "overgrowth": "slab", "pack": 2,
+        "shapes": [[(0.5, 0, 0.5, 15.5, 13.9, 16)], [(0.5, 0, 0, 15.5, 13.9, 15.5)]],
+        "text": {"face": "FRONT", "x": 8.0, "y": 6.9, "z": 0.4, "width": 5.4, "height": 2.8, "max_scale": 1 / 96},
+        "recipe": {"pattern": ["BBB", "B B", "BBB"], "key": {"B": "minecraft:iron_bars"}}},
+    "faithful_hound": {
+        "display": "Faithful Hound", "stone": "granite", "model": "hound", "cells": SINGLE, "overgrowth": "small", "pack": 2,
+        "shapes": [[(1, 0, 2, 15, 6.2, 14), (1, 6.2, 4.5, 14.5, 12.5, 12)]],
+        "text": {"face": "FRONT", "x": 8.0, "y": 3.3, "z": 2.6, "width": 11.0, "height": 3.6, "max_scale": 1 / 80},
+        "recipe": {"pattern": ["BBB", "GGG"], "key": {"B": "#c:ingots/bronze", "G": "minecraft:polished_granite"}}},
 }
 
 # Advancements granted from code (agriculture.HALLOWEEN_ADVANCEMENTS).
@@ -97,6 +139,9 @@ ADVANCEMENTS = {
     "groundskeeper": {"icon": "jugcraft:gothic_headstone", "title": "Groundskeeper",
                       "description": "Scrub an overgrown headstone back to clean stone with a brush", "frame": "task"},
 }
+
+# Every headstone's blockstate has parts 0 to PARTS - 1 (HeadstoneBlock.PART), however many it uses.
+PARTS = 4
 
 # The Stonemason's Chisel: an iron chisel struck with a mallet.
 CHISEL_RECIPE = {"pattern": ["I", "S"], "key": {"I": "minecraft:iron_ingot", "S": "minecraft:stick"}}
@@ -117,9 +162,10 @@ def items():
 def textures():
     """Every graveyard texture a model draws."""
     out = []
-    for stone in STONES:
+    for stone in (s for s in STONES if s != "iron"):
         for stage in STAGES:
             for suffix in (stage, f"{stage}_upper"):
                 out += [f"gy_{stone}_{suffix}", f"gy_{stone}_relief_{suffix}"]
     out += [f"gy_granite_rough_{stage}" for stage in STAGES] + [f"gy_granite_knot_{stage}_upper" for stage in STAGES]
+    out += [f"gy_{metal}_{stage}" for metal in ("iron", "bronze") for stage in STAGES]
     return out + ["gy_ivy"]

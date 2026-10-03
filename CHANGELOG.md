@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Graveyard pack 2, monuments
+- **Six monuments**: a four-block **Grand Obelisk** in granite, a **Draped Urn**, the **Angel at the Tomb** (a grieving angel kneeling at an altar tomb, two blocks wide), a four-block **Trumpeting Angel** on a fluted column, an iron **Mortsafe** caged over a grave, and a bronze **Faithful Hound** watching on its plinth. The angels, urn and hound are sculpted.
+- They weather, wax, take epitaphs and stir spirits like the headstones; the mortsafe rusts and the hound grows verdigris.
+- Three game tests, client screenshots. Record: [graveyard.md](docs/features/graveyard.md#monuments).
+
 ### Unmerged: Graveyard pack 1, headstones
 - **Nine life-sized, finely carved headstones** in four stones: a **gothic** marble headstone, two New England **slates** (willow and urn; winged skull), a child's **lamb** stone, a **broken column**, a three-block **Celtic high cross**, a **rustic scroll** on a granite boulder, a two-block **table tomb** and a **ledger stone**.
 - **They weather**: clean, worn, mossy, overgrown (ivy at the last). A brush scrubs a stage off, honeycomb waxes them, an axe takes the wax off, bone meal ages them. The letters fade as the stone weathers.

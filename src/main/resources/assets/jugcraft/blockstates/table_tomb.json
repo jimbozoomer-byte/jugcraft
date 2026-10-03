@@ -72,6 +72,30 @@
     "facing=north,part=2,waxed=true,weathering=3": {
       "model": "jugcraft:block/table_tomb_1_overgrown"
     },
+    "facing=north,part=3,waxed=false,weathering=0": {
+      "model": "jugcraft:block/table_tomb_1_clean"
+    },
+    "facing=north,part=3,waxed=true,weathering=0": {
+      "model": "jugcraft:block/table_tomb_1_clean"
+    },
+    "facing=north,part=3,waxed=false,weathering=1": {
+      "model": "jugcraft:block/table_tomb_1_worn"
+    },
+    "facing=north,part=3,waxed=true,weathering=1": {
+      "model": "jugcraft:block/table_tomb_1_worn"
+    },
+    "facing=north,part=3,waxed=false,weathering=2": {
+      "model": "jugcraft:block/table_tomb_1_mossy"
+    },
+    "facing=north,part=3,waxed=true,weathering=2": {
+      "model": "jugcraft:block/table_tomb_1_mossy"
+    },
+    "facing=north,part=3,waxed=false,weathering=3": {
+      "model": "jugcraft:block/table_tomb_1_overgrown"
+    },
+    "facing=north,part=3,waxed=true,weathering=3": {
+      "model": "jugcraft:block/table_tomb_1_overgrown"
+    },
     "facing=east,part=0,waxed=false,weathering=0": {
       "model": "jugcraft:block/table_tomb_0_clean",
       "y": 90
@@ -165,6 +189,38 @@
       "y": 90
     },
     "facing=east,part=2,waxed=true,weathering=3": {
+      "model": "jugcraft:block/table_tomb_1_overgrown",
+      "y": 90
+    },
+    "facing=east,part=3,waxed=false,weathering=0": {
+      "model": "jugcraft:block/table_tomb_1_clean",
+      "y": 90
+    },
+    "facing=east,part=3,waxed=true,weathering=0": {
+      "model": "jugcraft:block/table_tomb_1_clean",
+      "y": 90
+    },
+    "facing=east,part=3,waxed=false,weathering=1": {
+      "model": "jugcraft:block/table_tomb_1_worn",
+      "y": 90
+    },
+    "facing=east,part=3,waxed=true,weathering=1": {
+      "model": "jugcraft:block/table_tomb_1_worn",
+      "y": 90
+    },
+    "facing=east,part=3,waxed=false,weathering=2": {
+      "model": "jugcraft:block/table_tomb_1_mossy",
+      "y": 90
+    },
+    "facing=east,part=3,waxed=true,weathering=2": {
+      "model": "jugcraft:block/table_tomb_1_mossy",
+      "y": 90
+    },
+    "facing=east,part=3,waxed=false,weathering=3": {
+      "model": "jugcraft:block/table_tomb_1_overgrown",
+      "y": 90
+    },
+    "facing=east,part=3,waxed=true,weathering=3": {
       "model": "jugcraft:block/table_tomb_1_overgrown",
       "y": 90
     },
@@ -264,6 +320,38 @@
       "model": "jugcraft:block/table_tomb_1_overgrown",
       "y": 180
     },
+    "facing=south,part=3,waxed=false,weathering=0": {
+      "model": "jugcraft:block/table_tomb_1_clean",
+      "y": 180
+    },
+    "facing=south,part=3,waxed=true,weathering=0": {
+      "model": "jugcraft:block/table_tomb_1_clean",
+      "y": 180
+    },
+    "facing=south,part=3,waxed=false,weathering=1": {
+      "model": "jugcraft:block/table_tomb_1_worn",
+      "y": 180
+    },
+    "facing=south,part=3,waxed=true,weathering=1": {
+      "model": "jugcraft:block/table_tomb_1_worn",
+      "y": 180
+    },
+    "facing=south,part=3,waxed=false,weathering=2": {
+      "model": "jugcraft:block/table_tomb_1_mossy",
+      "y": 180
+    },
+    "facing=south,part=3,waxed=true,weathering=2": {
+      "model": "jugcraft:block/table_tomb_1_mossy",
+      "y": 180
+    },
+    "facing=south,part=3,waxed=false,weathering=3": {
+      "model": "jugcraft:block/table_tomb_1_overgrown",
+      "y": 180
+    },
+    "facing=south,part=3,waxed=true,weathering=3": {
+      "model": "jugcraft:block/table_tomb_1_overgrown",
+      "y": 180
+    },
     "facing=west,part=0,waxed=false,weathering=0": {
       "model": "jugcraft:block/table_tomb_0_clean",
       "y": 270
@@ -357,6 +445,38 @@
       "y": 270
     },
     "facing=west,part=2,waxed=true,weathering=3": {
+      "model": "jugcraft:block/table_tomb_1_overgrown",
+      "y": 270
+    },
+    "facing=west,part=3,waxed=false,weathering=0": {
+      "model": "jugcraft:block/table_tomb_1_clean",
+      "y": 270
+    },
+    "facing=west,part=3,waxed=true,weathering=0": {
+      "model": "jugcraft:block/table_tomb_1_clean",
+      "y": 270
+    },
+    "facing=west,part=3,waxed=false,weathering=1": {
+      "model": "jugcraft:block/table_tomb_1_worn",
+      "y": 270
+    },
+    "facing=west,part=3,waxed=true,weathering=1": {
+      "model": "jugcraft:block/table_tomb_1_worn",
+      "y": 270
+    },
+    "facing=west,part=3,waxed=false,weathering=2": {
+      "model": "jugcraft:block/table_tomb_1_mossy",
+      "y": 270
+    },
+    "facing=west,part=3,waxed=true,weathering=2": {
+      "model": "jugcraft:block/table_tomb_1_mossy",
+      "y": 270
+    },
+    "facing=west,part=3,waxed=false,weathering=3": {
+      "model": "jugcraft:block/table_tomb_1_overgrown",
+      "y": 270
+    },
+    "facing=west,part=3,waxed=true,weathering=3": {
       "model": "jugcraft:block/table_tomb_1_overgrown",
       "y": 270
     }

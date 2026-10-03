@@ -208,6 +208,63 @@ def knotwork(stone, stage, upper=False):
     return _weather(c, stone, STAGES.index(stage), STONES[stone][2] + 21, upper).img
 
 
+IRON = [rgb("1d1e21"), rgb("26282c"), rgb("303338"), rgb("3c4046")]
+RUST = [rgb("5a2e17"), rgb("7a3e1c"), rgb("9a5224"), rgb("b4682e")]
+BRONZE = [rgb("5e4220"), rgb("7a5a2c"), rgb("96723a"), rgb("b48c4c")]
+VERDIGRIS = [rgb("3f7a66"), rgb("4f927a"), rgb("68a88e"), rgb("86bea4")]
+
+
+def iron(stage, seed=7301):
+    """Cast iron painted black: chipped at worn, rust breaking through the paint at mossy, rusty all over (with the
+    moss) when overgrown."""
+    rng = random.Random(seed + stage)
+    c = Canvas()
+    rust = (0.0, 0.08, 0.3, 0.6)[stage]
+    for y in range(16):
+        for x in range(16):
+            colour = rng.choice(IRON) if rng.random() >= rust else rng.choice(RUST)
+            if stage >= 1 and rng.random() < 0.05:
+                colour = shade(colour, 1.4)
+            c.px(x, y, colour)
+    if stage >= 2:
+        for _ in range(2 if stage == 2 else 5):
+            x = rng.randrange(16)
+            for y in range(rng.randrange(8), 16):
+                if rng.random() < 0.7:
+                    c.px(x, y, rng.choice(RUST[:2]))
+    if stage == 3:
+        for _ in range(10):
+            c.px(rng.randrange(16), rng.randrange(10, 16), rng.choice(MOSS[1:]))
+    return c.img
+
+
+def bronze(stage, seed=7401):
+    """Cast bronze: warm and polished new, darkening to a brown patina, then streaked and crusted with verdigris."""
+    rng = random.Random(seed + stage)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            colour = rng.choice(BRONZE)
+            if stage >= 1:
+                colour = shade(colour, (1.0, 0.78, 0.68, 0.6)[stage])
+            c.px(x, y, colour)
+    # Polished highlights where hands and weather wear it.
+    for _ in range(6 if stage == 0 else 2):
+        c.px(rng.randrange(16), rng.randrange(16), shade(BRONZE[3], 1.2))
+    if stage >= 2:
+        for _ in range(4 if stage == 2 else 9):
+            x = rng.randrange(16)
+            length = rng.randint(4, 12)
+            start = rng.randrange(0, 8)
+            for y in range(start, min(16, start + length)):
+                if rng.random() < 0.8:
+                    c.px(x + (1 if rng.random() < 0.2 else 0), y, rng.choice(VERDIGRIS))
+    if stage == 3:
+        for _ in range(30):
+            c.px(rng.randrange(16), rng.randrange(16), rng.choice(VERDIGRIS[1:]))
+    return c.img
+
+
 def ivy():
     """Ivy leaves, dark and glossy, packed over their stems."""
     rng = random.Random(7201)
@@ -264,6 +321,9 @@ def graveyard_textures():
                 for upper in (False, True):
                     suffix = f"{stage}_upper" if upper else stage
                     out[("block", f"gy_granite_knot_{suffix}")] = knotwork(stone, stage, upper)
+    for k, stage in enumerate(STAGES):
+        out[("block", f"gy_iron_{stage}")] = iron(k)
+        out[("block", f"gy_bronze_{stage}")] = bronze(k)
     out[("block", "gy_ivy")] = ivy()
     out[("item", "stonemasons_chisel")] = chisel_item()
     return out
