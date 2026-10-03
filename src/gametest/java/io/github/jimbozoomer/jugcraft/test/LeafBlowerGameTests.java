@@ -163,11 +163,12 @@ public class LeafBlowerGameTests {
 		helper.setBlock(new BlockPos(7, 1, 10), red.defaultBlockState().setValue(LeafPileBlock.LAYERS, 2));
 		helper.setBlock(new BlockPos(9, 1, 9), Blocks.STONE);
 		helper.setBlock(new BlockPos(8, 1, 9), red.defaultBlockState().setValue(LeafPileBlock.LAYERS, 3));
-		int moved = LeafBlowerItem.blowLeaves(level, player, player.getEyePosition(), player.getLookAngle());
+		// A leaf tick of blowing: the leaves move, and the advancement is given for it.
+		LeafBlowerItem.blow(level, player, true);
 		helper.assertTrue(layers(helper, new BlockPos(7, 1, 10), red) == 1 && layers(helper, new BlockPos(8, 1, 10), red) == 1,
 				"A layer is blown on to the next block: " + layers(helper, new BlockPos(7, 1, 10), red) + " and " + layers(helper, new BlockPos(8, 1, 10), red));
 		helper.assertTrue(layers(helper, new BlockPos(8, 1, 9), red) == 3, "One against a wall stays");
-		helper.assertTrue(moved == 1 && earned(player, "gone_with_the_wind"), "One layer moved, and Gone with the Wind: " + moved);
+		helper.assertTrue(earned(player, "gone_with_the_wind"), "Moving a layer earns Gone with the Wind");
 
 		ServerPlayer visitor = blower(helper, new BlockPos(4, 1, 13), GameType.ADVENTURE);
 		helper.setBlock(new BlockPos(7, 1, 13), red.defaultBlockState().setValue(LeafPileBlock.LAYERS, 2));
