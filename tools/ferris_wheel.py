@@ -25,10 +25,10 @@ FERRIS_WHEEL = {
     "block": "ferris_wheel", "display": "Ferris Wheel", "entity": "ferris_wheel", "entity_display": "Ferris Wheel",
     # Geometry, in blocks: the hub's height above the booth's foot, the cars' pivots' radius, the A-frames' feet either
     # side of the booth, and the clear space the wheel needs.
-    "hub": 8.5, "radius": 6.0, "frame_feet": 4.5, "width": 15, "height": 16, "depth": 3,
+    "hub": 9.5, "radius": 6.0, "frame_feet": 4.5, "width": 15, "height": 16, "depth": 3,
     "cars": 8, "seats": 2,
     # A rider's seat, in blocks from their car's pivot: across the car (either side), down, and back from its middle.
-    "seat_across": 0.34, "seat_down": 0.94, "seat_back": 0.25,
+    "seat_across": 0.34, "seat_down": 1.75, "seat_back": 0.25,
     # Power and motion: KE a tick for full speed, ticks to a turn at full speed, speeding up and slowing down (a share
     # of full speed a tick).
     "need": 12, "turn_ticks": 800, "accel": 1 / 40, "decel": 1 / 60,

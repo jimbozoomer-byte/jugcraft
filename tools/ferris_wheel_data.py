@@ -200,27 +200,28 @@ def car():
     e.append(with_uvs(box((-13, -10, 10.5), (13, -7, 10.5), "#valance", faces=("north", "south")), {"north": FULL, "south": FULL}))
     e.append(with_uvs(box((-13, -10, -10.5), (-13, -7, 10.5), "#valance", faces=("east", "west")), {"east": FULL, "west": FULL}))
     e.append(with_uvs(box((13, -10, -10.5), (13, -7, 10.5), "#valance", faces=("east", "west")), {"east": FULL, "west": FULL}))
-    # Brass posts at the corners, from the tub's rim to the canopy.
+    # Brass posts at the corners, from the tub's rim to the canopy, tall enough for a rider sitting up under it.
     for x in (-11.5, 10.5):
         for z in (-8.5, 7.5):
-            e.append(with_uvs(box((x, -15, z), (x + 1, -7, z + 1), "#brass"), full))
-    # The tub: floor, back wall, side walls and the lower front wall, the painted panels outside.
-    e.append(with_uvs(box((-12, -24, -9), (12, -22, 9), "#steel", textures={"up": "#floor"}), full))
-    e.append(with_uvs(box((-12, -22, 8), (12, -14, 9), "#car"), full))
-    e.append(with_uvs(box((-12, -22, -9), (-11, -14, 8), "#car"), full))
-    e.append(with_uvs(box((11, -22, -9), (12, -14, 8), "#car"), full))
-    e.append(with_uvs(box((-11, -22, -9), (11, -17, -8), "#car"), full))
+            e.append(with_uvs(box((x, -27, z), (x + 1, -7, z + 1), "#brass"), full))
+    # The tub, hung low so a rider sits with their head under the canopy: floor, back wall, side walls and the lower
+    # front wall, the painted panels outside.
+    e.append(with_uvs(box((-12, -36, -9), (12, -34, 9), "#steel", textures={"up": "#floor"}), full))
+    e.append(with_uvs(box((-12, -34, 8), (12, -26, 9), "#car"), full))
+    e.append(with_uvs(box((-12, -34, -9), (-11, -26, 8), "#car"), full))
+    e.append(with_uvs(box((11, -34, -9), (12, -26, 8), "#car"), full))
+    e.append(with_uvs(box((-11, -34, -9), (11, -29, -8), "#car"), full))
     # A brass rim round the tub's top edge.
-    e.append(with_uvs(box((-12.25, -14, 8), (12.25, -13.5, 9.25), "#brass"), full))
-    e.append(with_uvs(box((-12.25, -14, -9.25), (-11, -13.5, 8), "#brass"), full))
-    e.append(with_uvs(box((11, -14, -9.25), (12.25, -13.5, 8), "#brass"), full))
-    e.append(with_uvs(box((-11, -17, -9.25), (11, -16.5, -8), "#brass"), full))
+    e.append(with_uvs(box((-12.25, -26, 8), (12.25, -25.5, 9.25), "#brass"), full))
+    e.append(with_uvs(box((-12.25, -26, -9.25), (-11, -25.5, 8), "#brass"), full))
+    e.append(with_uvs(box((11, -26, -9.25), (12.25, -25.5, 8), "#brass"), full))
+    e.append(with_uvs(box((-11, -29, -9.25), (11, -28.5, -8), "#brass"), full))
     # The bench and its back, and the grab bar.
-    e.append(with_uvs(box((-11, -22, 2), (11, -16, 8), "#seat"), full))
-    e.append(with_uvs(box((-11, -16, 6.5), (11, -10, 8), "#seat"), full))
-    e.append(with_uvs(box((-10, -13, -7.5), (10, -12, -6.5), "#brass"), full))
+    e.append(with_uvs(box((-11, -34, 2), (11, -28, 8), "#seat"), full))
+    e.append(with_uvs(box((-11, -28, 6.5), (11, -20, 8), "#seat"), full))
+    e.append(with_uvs(box((-10, -25, -7.5), (10, -24, -6.5), "#brass"), full))
     for x in (-10, 9):
-        e.append(with_uvs(box((x, -17, -7.5), (x + 1, -13, -6.5), "#brass"), full))
+        e.append(with_uvs(box((x, -29, -7.5), (x + 1, -25, -6.5), "#brass"), full))
     return e
 
 
