@@ -136,6 +136,22 @@ Primary specialty and supported player role: a shared hub. It serves traders and
 - Not run: play, two clients on a dedicated server, a restart, performance measurement.
 
 ### Results
+- **Run [37080204071](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37080204071) (commit 6b904d4c, the latest): green** (`mod`, all three client shards, `client`; `repository` in run 37080204079).
+  - Server game tests: all 507 required tests passed. `testTownIsBuiltAndKept`:
+    - 171,148 blocks checked, 0 differ;
+    - the square's chunks ticked their entities after 1,280 ticks;
+    - all 10 townsfolk were in the world;
+    - after ticking, 0 blocks had drifted.
+  - Client game test, a real world with seed `jugcraft` (it starts in Alpine Spawn at 304 105 528):
+    - the town's middle is at 432 97 656, **181 blocks from the start** (the test asserts 170 to 300);
+    - 144 of 144 chunks were built;
+    - the welcome message gave 20 Jugs (it shows in the overview);
+    - 26 townsfolk were out round the camera, of every role;
+    - the seasonal stall's shop screen opened, and the Jug Teller is in place.
+  - Screenshots, looked at:
+    - the overview, now from under the clouds (y 180, looking north over the south wall): the whole town's roofs, gatehouses and towers, hazy with distance;
+    - the square, Halloween (soul lanterns, cobwebs, jack o'lanterns) and December (the tree of lights);
+    - the gatehouse, from the ground 8 blocks below the town's floor.
 - **Run [37078631445](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37078631445) (commit 8b8454a3, with the biomes and Alpine Spawn on main): green.**
   - Server game tests: all 507 required tests passed. `testTownIsBuiltAndKept`:
     - 171,148 blocks checked, 0 differ;
@@ -161,7 +177,7 @@ Primary specialty and supported player role: a shared hub. It serves traders and
     - The test server races through ticks while the chunks round a forced chunk generate, so the test now waits until the square's chunks tick before looking for townsfolk or lighting the fire.
     - A render distance of 16 was too slow to render.
     - The gate camera stood inside the hill outside the wall.
-- `PixelHollowsGameTests.everyVillageHasOneShop` (from #53) failed once on this branch, on a desert village with no room for the shop. It is not the town's; it passed on the re-run and in every other run.
+- `PixelHollowsGameTests.everyVillageHasOneShop` (from #53) failed once on this branch, on a desert village with no room for the shop. It is not the town's; it passed on the re-run and in every other run. The fix (a village with no room is laid out again) is #122.
 
 ## World and event applicability
 - **Biome fit:** the town takes the flattest dry ground near the start, whatever the biome. In Alpine Spawn worlds, that is near the alpine village the world starts beside.
