@@ -28,6 +28,7 @@ GENERATED_DIRS = [
     DATA / MOD / "loot_table", DATA / MOD / "recipe", DATA / MOD / "worldgen",
     DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD, PACKS,
     DATA / MOD / "villager_trade", DATA / MOD / "trade_set", DATA / MOD / "tags" / "villager_trade",
+    RES / "assets" / "minecraft",
 ]
 
 CABLE_ROTATION = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {"y": 270},
@@ -150,6 +151,10 @@ def assets():
     grapple.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import field_chemistry
     field_chemistry.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import construction
+    construction.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    import electroplating
+    electroplating.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
@@ -172,6 +177,9 @@ def assets():
     alpine_data.lang(lang)
     import biomes_data
     biomes_data.lang(lang)
+    # Last: it adds diagonal parts to the fence blockstates written above.
+    import diagonal_connections
+    diagonal_connections.write_all(write, ASSETS, RES / "assets" / "minecraft")
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
 
 
@@ -685,7 +693,8 @@ RECIPE_TYPES = {"crusher": "crushing", "arc_furnace": "arc_smelting", "alloy_sme
                 "metal_press": "pressing", "wire_drawer": "wire_drawing", "circuit_assembler": "circuit_assembly",
                 "pulverizer": "pulverizing", "ore_washer": "ore_washing", "sieve": "sifting", "sawmill": "sawing",
                 "coke_oven": "coking", "steel_foundry": "steelmaking",
-                "tree_farm": "tree_growing"}
+                "tree_farm": "tree_growing",
+                "hydroponic_bay": "hydroponics"}
 
 
 def machine_recipe_files(out):
@@ -1218,6 +1227,14 @@ def tags():
     import plastic
     for block in plastic.blocks():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import construction
+    for block in construction.blocks():
+        if block.startswith("concrete"):
+            tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+            tags.add("block", "minecraft:needs_stone_tool", rid(block))
+        elif block.startswith("blastproof_concrete"):
+            tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+            tags.add("block", "minecraft:needs_diamond_tool", rid(block))
     for metal, info in METALS.items():
         tool = info.get("tool", "stone")
         tags.add("item", f"c:ingots/{metal}", rid(f"{metal}_ingot"))
@@ -1317,6 +1334,8 @@ def tags():
     # Seasonal snow counts as snow (grass under it turns snowy) and is dug with a shovel.
     tags.add("block", "minecraft:snow", rid(seasons.SNOW_BLOCK))
     tags.add("block", "minecraft:mineable/shovel", rid(seasons.SNOW_BLOCK))
+    import diagonal_connections
+    diagonal_connections.tags(tags)
     tags.write()
 
 

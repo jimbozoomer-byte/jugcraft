@@ -85,6 +85,8 @@ TAGLINES = {
     "deposit_drill": "Works surface deposits into ore.",
     "cobblestone_generator": "Makes cobblestone from water and lava.",
     "tree_farm": "Grows saplings into logs.",
+    "hydroponic_bay": "Grows crops in nutrient solution, anywhere.",
+    "electroplating_bath": "Plates and repairs tools, weapons and armor.",
     "water_wheel": "Turns flowing water into power.",
     "auto_crafter": "Crafts the pattern in its grid.",
     "large_steam_engine": "Boils water into rotation for shafts.",
