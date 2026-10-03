@@ -17,14 +17,17 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Client game test for diagonal connections: in a creative world, rows of fences, panes and bars run diagonally
+ * Client game test for diagonal connections: in a creative world, rows of fences, panes, bars and walls run diagonally
  * (oak and bamboo fences in zigzags, a wrought-iron cemetery fence and an aspen fence in diamonds, glass panes, stained
- * glass, iron and copper bars on a slant), photographed from above and from the side (CI job {@code client}). The log
- * lists each block's joins, so a screenshot can be read against them.
+ * glass, iron and copper bars on a slant; a cobblestone wall diamond, a stone brick wall run with a torch on its middle,
+ * an andesite wall zigzag and a mossy stone brick wall run two high), photographed from above and from the side (CI job
+ * {@code client}). The log lists each block's joins and each wall's post, so a screenshot can be read against them.
  */
 public class DiagonalClientGameTests implements FabricClientGameTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger("jugcraft-diagonal-client-tests");
@@ -54,6 +57,9 @@ public class DiagonalClientGameTests implements FabricClientGameTest {
 			shoot(context, singleplayer, x + 13, y + 5, z + 4, 180, 30, "jugcraft_diagonal_fences");
 			shoot(context, singleplayer, x + 16, y + 5, z - 2, 180, 30, "jugcraft_diagonal_panes_and_bars");
 			shoot(context, singleplayer, x + 6, y + 4, z - 12, 180, 30, "jugcraft_diagonal_cemetery_fence");
+			shoot(context, singleplayer, x + 21, y + 13, z - 21, 0, 90, "jugcraft_diagonal_walls_from_above");
+			shoot(context, singleplayer, x + 20, y + 5, z - 11, 180, 30, "jugcraft_diagonal_walls");
+			shoot(context, singleplayer, x + 16, y + 4, z - 19, 180, 25, "jugcraft_diagonal_walls_two_high");
 		}
 	}
 
@@ -93,13 +99,25 @@ public class DiagonalClientGameTests implements FabricClientGameTest {
 		run(level, origin.offset(13, 0, -9), vanilla("light_blue_stained_glass_pane"), slant);
 		run(level, origin.offset(17, 0, -9), Blocks.IRON_BARS, slant);
 		run(level, origin.offset(21, 0, -9), vanilla("copper_bars"), slant);
+		// Walls: a diamond, a straight diagonal run with a torch on its middle, a zigzag, and a run two high.
+		run(level, origin.offset(14, 0, -16), vanilla("cobblestone_wall"), diamond);
+		int[][] line = {{0, 0}, {1, -1}, {2, -2}, {3, -3}, {4, -4}};
+		run(level, origin.offset(20, 0, -16), vanilla("stone_brick_wall"), line);
+		level.setBlock(origin.offset(22, 1, -18), Blocks.TORCH.defaultBlockState(), Block.UPDATE_ALL);
+		run(level, origin.offset(20, 0, -23), vanilla("andesite_wall"), zigzag);
+		run(level, origin.offset(14, 0, -23), vanilla("mossy_stone_brick_wall"), slant);
+		run(level, origin.offset(14, 1, -23), vanilla("mossy_stone_brick_wall"), slant);
 		List<String> joins = new ArrayList<>();
-		for (int dx = 0; dx <= 26; dx++) {
-			for (int dz = -24; dz <= 2; dz++) {
-				BlockPos pos = origin.offset(dx, 0, dz);
-				int mask = DiagonalConnections.mask(level.getBlockState(pos));
-				if (mask != 0) {
-					joins.add("%d,%d=%s".formatted(dx, dz, Integer.toBinaryString(mask)));
+		for (int dy = 0; dy <= 1; dy++) {
+			for (int dx = 0; dx <= 30; dx++) {
+				for (int dz = -28; dz <= 2; dz++) {
+					BlockPos pos = origin.offset(dx, dy, dz);
+					BlockState state = level.getBlockState(pos);
+					int mask = DiagonalConnections.mask(state);
+					if (mask != 0) {
+						String post = state.hasProperty(WallBlock.UP) ? state.getValue(WallBlock.UP) ? "+post" : "-post" : "";
+						joins.add("%d,%d,%d=%s%s".formatted(dx, dy, dz, Integer.toBinaryString(mask), post));
+					}
 				}
 			}
 		}
