@@ -448,6 +448,124 @@ public class PetroGameTests {
 		});
 	}
 
+	/** Batch 29: the hydrotreater turns diesel and hydrogen into premium diesel (base tank) and hydrogen sulfide (top). */
+	@GameTest(maxTicks = 300)
+	public void hydrotreaterMakesPremiumDiesel(GameTestHelper helper) {
+		MachineBlockEntity hydrotreater = place(helper, MachineKind.HYDROTREATER, new BlockPos(4, 1, 2));
+		hydrotreater.tanks().input(0).fill(PetroFluids.DIESEL.source(), 1000);
+		hydrotreater.tanks().input(1).fill(PetroFluids.HYDROGEN.fluid(), 100);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(hydrotreater.tanks().output(0).has(PetroFluids.PREMIUM_DIESEL.source(), 1000), "No premium diesel");
+			helper.assertTrue(hydrotreater.tanks().output(1).has(PetroFluids.HYDROGEN_SULFIDE.fluid(), 100), "No hydrogen sulfide");
+			helper.assertTrue(hydrotreater.tanks().input(0).millibuckets() == 0 && hydrotreater.tanks().input(1).millibuckets() == 0,
+					"Left over: " + hydrotreater.tanks().input(0).millibuckets() + " diesel, " + hydrotreater.tanks().input(1).millibuckets() + " hydrogen");
+		});
+	}
+
+	/** Batch 29: 900 mB of gasoline blended with 100 mB of bioethanol make a bucket of premium gasoline. */
+	@GameTest(maxTicks = 200)
+	public void hydrotreaterBlendsPremiumGasoline(GameTestHelper helper) {
+		MachineBlockEntity hydrotreater = place(helper, MachineKind.HYDROTREATER, new BlockPos(4, 1, 2));
+		hydrotreater.tanks().input(0).fill(PetroFluids.GASOLINE.source(), 900);
+		hydrotreater.tanks().input(1).fill(PetroFluids.BIOETHANOL.source(), 100);
+		helper.succeedWhen(() -> helper.assertTrue(hydrotreater.tanks().output(0).has(PetroFluids.PREMIUM_GASOLINE.source(), 1000),
+				"No premium gasoline"));
+	}
+
+	/** Batch 29: the chemical reactor recovers a sulfur dust from 200 mB of hydrogen sulfide (the Claus process). */
+	@GameTest(maxTicks = 200)
+	public void reactorRecoversSulfur(GameTestHelper helper) {
+		MachineBlockEntity reactor = place(helper, MachineKind.CHEMICAL_REACTOR, new BlockPos(4, 1, 2));
+		reactor.tanks().input(0).fill(PetroFluids.HYDROGEN_SULFIDE.fluid(), 200);
+		helper.succeedWhen(() -> {
+			ItemStack out = reactor.getItem(MachineKind.CHEMICAL_REACTOR.outputSlot());
+			helper.assertTrue(out.is(BuiltInRegistries.ITEM.getValue(Jugcraft.id("sulfur_dust"))) && out.getCount() == 1, "Got " + out);
+			helper.assertTrue(reactor.tanks().input(0).millibuckets() == 0, "Gas left over");
+		});
+	}
+
+	/** Batch 29: premium diesel is worth 320 JE a mB in the diesel generator, a quarter more than diesel. */
+	@GameTest(maxTicks = 200)
+	public void premiumDieselBurnsBetter(GameTestHelper helper) {
+		BlockPos master = new BlockPos(4, 1, 2);
+		MachineBlockEntity generator = place(helper, MachineKind.DIESEL_GENERATOR, master);
+		SimpleEnergyStorage energy = (SimpleEnergyStorage) EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.UP);
+		energy.setAmount(0);
+		generator.tanks().input(0).fill(PetroFluids.PREMIUM_DIESEL.source(), 1000);
+		helper.runAfterDelay(40, () -> {
+			int burnt = 1000 - generator.tanks().input(0).millibuckets();
+			long expected = (long) burnt * FluidFuels.PREMIUM_DIESEL;
+			helper.assertTrue(burnt > 0, "Burnt no premium diesel");
+			helper.assertTrue(energy.getAmount() <= expected && energy.getAmount() > expected - MachineKind.DIESEL_OUTPUT,
+					"Energy " + energy.getAmount() + " for " + burnt + " mB");
+			helper.succeed();
+		});
+	}
+
+	/** A gas turbine (master at {@code master}) running on gasoline with lubricant, its buffer emptied. */
+	private static MachineBlockEntity runningTurbine(GameTestHelper helper, BlockPos master) {
+		MachineBlockEntity turbine = place(helper, MachineKind.GAS_TURBINE, master);
+		((SimpleEnergyStorage) EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.UP)).setAmount(0);
+		turbine.tanks().input(0).fill(PetroFluids.GASOLINE.source(), 4000);
+		turbine.tanks().input(1).fill(PetroFluids.LUBRICANT.source(), 100);
+		return turbine;
+	}
+
+	/** A heat recovery unit at {@code pos}, its buffer emptied, with water and lubricant (or without water). */
+	private static SimpleEnergyStorage recoveryUnit(GameTestHelper helper, BlockPos pos, boolean water) {
+		MachineBlockEntity unit = place(helper, MachineKind.HEAT_RECOVERY_UNIT, pos);
+		SimpleEnergyStorage energy = (SimpleEnergyStorage) EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(pos), Direction.UP);
+		energy.setAmount(0);
+		if (water) {
+			unit.tanks().input(0).fill(Fluids.WATER, 4000);
+		}
+		unit.tanks().input(1).fill(PetroFluids.LUBRICANT.source(), 100);
+		return energy;
+	}
+
+	/**
+	 * Batch 29: a heat recovery unit in front of a running gas turbine makes 30% of the turbine's output again from its
+	 * exhaust, boiling water as it goes; one without water makes nothing.
+	 */
+	@GameTest(maxTicks = 200)
+	public void heatRecoveryUnitUsesTurbineExhaust(GameTestHelper helper) {
+		BlockPos master = new BlockPos(5, 1, 3);
+		runningTurbine(helper, master);
+		SimpleEnergyStorage turbine = (SimpleEnergyStorage) EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.UP);
+		SimpleEnergyStorage dry = recoveryUnit(helper, new BlockPos(5, 1, 5), false);
+		SimpleEnergyStorage unit = recoveryUnit(helper, new BlockPos(5, 1, 2), true);
+		MachineBlockEntity unitEntity = helper.getBlockEntity(new BlockPos(5, 1, 2), MachineBlockEntity.class);
+		helper.runAfterDelay(60, () -> {
+			long made = turbine.getAmount();
+			long share = made * MachineKind.RECOVERY_PERCENT / 100;
+			long slack = 2L * MachineKind.TURBINE_OUTPUT * MachineKind.RECOVERY_PERCENT / 100 + 1;
+			helper.assertTrue(made > 0, "The turbine made nothing");
+			helper.assertTrue(unit.getAmount() <= share && unit.getAmount() >= share - slack,
+					"Recovered " + unit.getAmount() + " JE of the turbine's " + made);
+			int boiled = 4000 - unitEntity.tanks().input(0).millibuckets();
+			helper.assertTrue(Math.abs(boiled - unit.getAmount() / MachineKind.RECOVERY_JE_PER_WATER) <= 1,
+					"Boiled " + boiled + " mB of water for " + unit.getAmount() + " JE");
+			helper.assertTrue(dry.getAmount() == 0, "A unit without water made " + dry.getAmount() + " JE");
+			helper.succeed();
+		});
+	}
+
+	/** Batch 29: two heat recovery units on one turbine share its exhaust heat; together they never make more than one. */
+	@GameTest(maxTicks = 200)
+	public void heatRecoveryUnitsShareOneTurbine(GameTestHelper helper) {
+		BlockPos master = new BlockPos(5, 1, 3);
+		runningTurbine(helper, master);
+		SimpleEnergyStorage turbine = (SimpleEnergyStorage) EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(master), Direction.UP);
+		SimpleEnergyStorage front = recoveryUnit(helper, new BlockPos(5, 1, 2), true);
+		SimpleEnergyStorage back = recoveryUnit(helper, new BlockPos(5, 1, 5), true);
+		helper.runAfterDelay(60, () -> {
+			long share = turbine.getAmount() * MachineKind.RECOVERY_PERCENT / 100;
+			long both = front.getAmount() + back.getAmount();
+			helper.assertTrue(both > 0 && both <= share, "Two units recovered " + both + " JE of a one-turbine share of " + share);
+			helper.succeed();
+		});
+	}
+
 	/** The polymerization reactor turns a bucket of refinery gas into four plastic pellets. */
 	@GameTest(maxTicks = 300)
 	public void reactorMakesPlasticPellets(GameTestHelper helper) {

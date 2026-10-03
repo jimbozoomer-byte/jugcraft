@@ -4000,6 +4000,23 @@
           "ticks": 100
         },
         {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen_sulfide",
+              200
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:sulfur_dust",
+              1
+            ]
+          ],
+          "ticks": 60
+        },
+        {
           "items": [
             [
               "minecraft:sand",
@@ -4486,6 +4503,58 @@
             ]
           ],
           "ticks": 160
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:hydrotreater",
+      "type": "hydrotreating",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:diesel",
+              1000
+            ],
+            [
+              "jugcraft:hydrogen",
+              100
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:premium_diesel",
+              1000
+            ],
+            [
+              "jugcraft:hydrogen_sulfide",
+              100
+            ]
+          ],
+          "results": [],
+          "ticks": 120
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:gasoline",
+              900
+            ],
+            [
+              "jugcraft:bioethanol",
+              100
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:premium_gasoline",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 40
         }
       ]
     },

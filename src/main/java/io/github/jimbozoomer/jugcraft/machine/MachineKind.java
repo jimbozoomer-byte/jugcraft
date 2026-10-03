@@ -84,6 +84,11 @@ public enum MachineKind implements StringRepresentable {
 	SYNTHESIS_CONVERTER("synthesis_converter", 60_000, 1_024, 0, 128, 0),
 	// A one-block hydrogen fuel cell (electric look): hydrogen in, JE out.
 	FUEL_CELL("fuel_cell", 40_000, 0, 512, 0, 0),
+	// Batch 29, refinery upgrades: a 2x2x3 hydrotreater (diesel + hydrogen -> premium diesel and hydrogen sulfide;
+	// gasoline + bioethanol -> premium gasoline), its catalyst bed built in.
+	HYDROTREATER("hydrotreater", 40_000, 512, 0, 128, 0),
+	// A two-tall boiler bolted to a running diesel generator or gas turbine: steam from its exhaust heat, JE out.
+	HEAT_RECOVERY_UNIT("heat_recovery_unit", 20_000, 0, 512, 0, 0),
 	// Storage (batch 6): a 3x2 lithium battery bank, one deep, giving power out of its front like the capacitor bank.
 	LITHIUM_BATTERY_BANK("lithium_battery_bank", 32_000_000, 16_384, 16_384, 0, 0),
 	// Electronics (batch 7, the cyan look): a 3x2x2 cleanroom with a monitor bank: wafers etched with sulfuric acid into microchips.
@@ -198,6 +203,18 @@ public enum MachineKind implements StringRepresentable {
 	 */
 	public static final int CRACKER_TANK = 8_000;
 	private static final int[] CRACKER_DRAW_OFFS = {0, 2, 3, 1};
+	/** Hydrotreater (batch 29): each tank, and where its products are drawn off (finished fuel at the base, sour gas at the top). */
+	public static final int HYDROTREATER_TANK = 8_000;
+	private static final int[] HYDROTREATER_DRAW_OFFS = {0, 2};
+	/**
+	 * Heat recovery unit (batch 29): the share of a touching generator's output it recovers from the exhaust, the JE
+	 * each mB of boiled water carries, its lubricant upkeep (1 mB per this many running ticks) and its tanks.
+	 */
+	public static final int RECOVERY_PERCENT = 30;
+	public static final int RECOVERY_JE_PER_WATER = 64;
+	public static final int RECOVERY_LUBRICANT_TICKS = 40;
+	public static final int RECOVERY_WATER_TANK = 8_000;
+	public static final int RECOVERY_LUBRICANT_TANK = 4_000;
 	/**
 	 * Fracking rig, per powered tick over shale: fracking fluid pumped down, oil freed from the reservoir (three
 	 * quarters crude oil, a quarter refinery gas) and flowback water returned. A quarter of the fluid stays in the rock.
@@ -330,6 +347,7 @@ public enum MachineKind implements StringRepresentable {
 			case POLYMERIZATION_REACTOR -> "polymerization";
 			case ELECTROLYTIC_CELL -> "electrolysis";
 			case SYNTHESIS_CONVERTER -> "gas_synthesis";
+			case HYDROTREATER -> "hydrotreating";
 			case CHEMICAL_REACTOR -> "chemical_reaction";
 			case LITHOGRAPHY_STATION -> "lithography";
 			default -> null;
@@ -372,6 +390,9 @@ public enum MachineKind implements StringRepresentable {
 			case CHEMICAL_REACTOR -> new FluidMachineSpec(List.of(CHEM_REACTOR_TANK), List.of(CHEM_REACTOR_TANK), 2, 1);
 			case LITHOGRAPHY_STATION -> new FluidMachineSpec(List.of(LITHOGRAPHY_TANK), List.of(), 2, 1);
 			case FUEL_CELL -> new FluidMachineSpec(List.of(FUEL_CELL_TANK), List.of(), 0, 0);
+			case HYDROTREATER -> new FluidMachineSpec(List.of(HYDROTREATER_TANK, HYDROTREATER_TANK),
+					List.of(HYDROTREATER_TANK, HYDROTREATER_TANK), 0, 0);
+			case HEAT_RECOVERY_UNIT -> new FluidMachineSpec(List.of(RECOVERY_WATER_TANK, RECOVERY_LUBRICANT_TANK), List.of(), 0, 0);
 			default -> null;
 		};
 	}
@@ -384,6 +405,7 @@ public enum MachineKind implements StringRepresentable {
 		return switch (this) {
 			case DISTILLATION_TOWER -> TOWER_DRAW_OFFS[tank];
 			case CATALYTIC_CRACKER -> CRACKER_DRAW_OFFS[tank];
+			case HYDROTREATER -> HYDROTREATER_DRAW_OFFS[tank];
 			case FRACKING_RIG -> FRACK_DRAW_OFFS[tank];
 			case ELECTROLYTIC_CELL -> CELL_DRAW_OFFS[tank];
 			case AIR_SEPARATION_UNIT -> ASU_DRAW_OFFS[tank];
@@ -450,7 +472,7 @@ public enum MachineKind implements StringRepresentable {
 	public boolean isGenerator() {
 		return this == COAL_GENERATOR || this == SOLAR_PANEL || this == STEAM_GENERATOR
 				|| this == GEOTHERMAL_GENERATOR || this == WIND_TURBINE || this == WATER_WHEEL || this == DIESEL_GENERATOR
-				|| this == GAS_TURBINE || this == FUEL_CELL || this == ADVANCED_SOLAR_PANEL;
+				|| this == GAS_TURBINE || this == FUEL_CELL || this == ADVANCED_SOLAR_PANEL || this == HEAT_RECOVERY_UNIT;
 	}
 
 	/**
@@ -493,6 +515,8 @@ public enum MachineKind implements StringRepresentable {
 			case AIR_SEPARATION_UNIT -> Footprint.cuboid(2, 6, 2);
 			case SYNTHESIS_CONVERTER -> Footprint.cuboid(3, 4, 2);
 			case CHEMICAL_REACTOR -> Footprint.cuboid(2, 2, 2);
+			case HYDROTREATER -> Footprint.cuboid(2, 3, 2);
+			case HEAT_RECOVERY_UNIT -> Footprint.tall(2);
 			// Three wide, two tall, one deep, so every block's front is a power socket.
 			case LITHIUM_BATTERY_BANK -> Footprint.cuboid(3, 2, 1);
 			// The cleanroom (left) and the operator's desk with its monitor bank (right), two deep.

@@ -75,6 +75,8 @@
     "air_separation_unit": "lab",
     "synthesis_converter": "lab",
     "fuel_cell": "electric",
+    "hydrotreater": "diesel",
+    "heat_recovery_unit": "diesel",
     "lithium_battery_bank": "electric",
     "flow_battery": "electric",
     "lithography_station": "lab",

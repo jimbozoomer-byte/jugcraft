@@ -520,6 +520,65 @@ def polymerization_reactor():
     return m
 
 
+def hydrotreater():
+    """Two by two and three tall (batch 29): a tall olive hydrotreating reactor packed with catalyst (left), with
+    hazard bands and a chrome dome, fed through a gunmetal hydrogen compressor; a horizontal gunmetal separator drum
+    behind the control panel (the master block); a sight glass of premium diesel; and chrome draw-offs with red valves
+    at the base (the finished fuel) and at the top (the sour gas)."""
+    m = [box((-16, 0, 0), (16, 2, 32), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    # Control panel at the front right (the master block): gauge and running lamp.
+    m.append(box((1, 2, 0.5), (15, 12, 6), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(dial("north", (5, 8.5, 0.25), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 8.5, 0.25), 2, texture=LAMP, body=GUNMETAL))
+    # The reactor: a tall column of catalyst beds, banded, with a chrome dome and a feed nozzle.
+    m += cyl("y", -8, 18, 7, 2, 40, OLIVE, GUNMETAL)
+    for y in (10, 22, 34):
+        m += cyl("y", -8, 18, 7.4, y, y + 1.25, HAZARD)
+    m += cyl("y", -8, 18, 5, 40, 44, CHROME)
+    m += cyl("y", -8, 18, 2, 44, 47, GUNMETAL)
+    # Sight glass on the reactor's front showing the finished fuel.
+    m.append(box((-10, 14, 10.5), (-6, 30, 11), {"*": CHROME, "north": "premium_diesel_still"}))
+    # Hydrogen compressor: a grilled box with a flywheel, piped up into the reactor head.
+    m.append(box((2, 2, 22), (14, 12, 31), {"*": GUNMETAL, "east": GRILLE, "south": GRILLE, "up": STENCIL}))
+    m += wheel("x", 6, 26.5, 3.5, 14, 15, "sp_red_iron", CHROME)
+    m.append(box((6, 12, 25), (8, 42, 27), RUBBER))
+    m.append(box((-2, 40, 25), (8, 42, 27), RUBBER))
+    # High-pressure separator: a horizontal drum on saddles behind the panel.
+    for z in (9, 19):
+        m.append(box((3, 12, z), (13, 16, z + 2), GUNMETAL))
+    m += cyl("z", 8, 21, 5, 7, 21, GUNMETAL, CHROME)
+    m.append(box((7, 26, 13), (9, 32, 15), CHROME))
+    # Draw-offs out of the front: the finished fuel at the base, the sour gas at the top (layers 0 and 2).
+    for y in (9, 40):
+        m.append(box((-14, y - 2, 0.5), (-10, y + 2, 6.5), CHROME))
+        m.append(box((-15, y - 3, 0), (-9, y + 3, 0.5), GUNMETAL))
+        m += wheel("z", -12, y + 4.5, 1.5, 2.5, 3.25, "sp_red_iron", CHROME, spokes=False)
+    return m
+
+
+def heat_recovery_unit():
+    """One block, two tall (batch 29): a heat recovery boiler for a diesel generator or gas turbine. An olive casing
+    with grilled sides over the finned tubes, a front gauge and lamp, a sooty banded stack, a chrome steam drum on
+    top with a little turbine, and a lubricant sight glass."""
+    m = [box((0, 0, 0), (16, 2, 16), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    m.append(box((1, 2, 1), (15, 20, 15), {"*": OLIVE, "east": GRILLE, "west": GRILLE, "up": STENCIL, "north": OLIVE}))
+    for y in (7, 14):
+        m.append(box((0.5, y, 0.5), (15.5, y + 1, 15.5), GUNMETAL))
+    m.append(dial("north", (5, 16, 0.75), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (11, 16, 0.75), 2, texture=LAMP, body=GUNMETAL))
+    # Lubricant sight glass and the water inlet with its valve.
+    m.append(box((10, 4, 0.5), (12, 11, 1), {"*": CHROME, "north": "lubricant_still"}))
+    m.append(box((3, 3, 0.5), (6, 6, 1), CHROME))
+    m += wheel("z", 4.5, 7.5, 1.5, 0.25, 1, "sp_red_iron", CHROME, spokes=False)
+    # Steam drum across the top and the turbine housing on it.
+    m += cyl("x", 22.5, 7, 2.5, 2, 14, CHROME)
+    m.append(box((3, 23, 4), (8, 28, 12), {"*": GUNMETAL, "north": GRILLE}))
+    # The exhaust stack at the back.
+    m += cyl("y", 11, 11, 3, 20, 32, EXHAUST)
+    m += cyl("y", 11, 11, 3.4, 26, 27, HAZARD)
+    return m
+
+
 def diesel_engine():
     """Two wide, two tall and three long: a V8 diesel engine on a hazard-striped skid. Gunmetal crankcase, two olive
     cylinder banks with chrome rocker covers and a gunmetal intake manifold between them, four short sooty exhaust
@@ -845,6 +904,7 @@ MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), 
           "flowback_treatment_unit": flowback_treatment_unit(), "diesel_generator": diesel_generator(),
           "gas_turbine": gas_turbine(),
           "polymerization_reactor": polymerization_reactor(),
+          "hydrotreater": hydrotreater(), "heat_recovery_unit": heat_recovery_unit(),
           "diesel_engine": diesel_engine(),
           "electrolytic_cell": electrolytic_cell(),
           "chemical_reactor": chemical_reactor(), "air_separation_unit": air_separation_unit(),

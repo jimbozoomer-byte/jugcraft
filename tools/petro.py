@@ -58,6 +58,14 @@ FLUIDS = {
     "bioethanol": {"display": "Bioethanol", "feature": "machines",
                    "colors": [(170, 150, 90), (204, 188, 128), (226, 214, 164), (246, 240, 212)],
                    "tick_delay": 4, "slope": 4, "drop_off": 1},
+    # Batch 29: refinery upgrades. Hydrotreated diesel, its sulfur taken out with hydrogen: clear and pale gold.
+    "premium_diesel": {"display": "Premium Diesel", "feature": "crude_oil",
+                       "colors": [(150, 110, 30), (200, 160, 60), (228, 196, 100), (248, 230, 160)],
+                       "tick_delay": 8, "slope": 3, "drop_off": 1},
+    # Gasoline blended with a tenth of bioethanol: higher octane, so engines run leaner and hotter. Pink-orange.
+    "premium_gasoline": {"display": "Premium Gasoline", "feature": "crude_oil",
+                         "colors": [(170, 70, 60), (214, 110, 90), (236, 160, 130), (252, 214, 196)],
+                         "tick_delay": 4, "slope": 4, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -86,6 +94,10 @@ GASES = {
     # Batch 15: chlorine joined to refinery gas (standing in for ethylene), polymerized into PVC.
     "vinyl_chloride": {"display": "Vinyl Chloride", "feature": "salt",
                        "colors": [(170, 180, 130), (194, 204, 156), (214, 222, 182), (236, 240, 214)]},
+    # Batch 29: the sulfur hydrotreating strips out of diesel, carried off as hydrogen sulfide (sour gas). The
+    # chemical reactor recovers it as sulfur (the Claus process). A sickly yellow-green.
+    "hydrogen_sulfide": {"display": "Hydrogen Sulfide", "feature": "crude_oil",
+                         "colors": [(150, 150, 70), (178, 178, 96), (204, 204, 126), (230, 230, 170)]},
 }
 
 
@@ -219,15 +231,23 @@ FLUID_MACHINES = {
     # Refinery gas -> plastic pellets. 96 JE/t.
     "polymerization_reactor": {"inputs": [8_000], "outputs": [], "item_inputs": 0, "item_outputs": 1,
                                "recipe_type": "polymerization"},
+    # Batch 29. Fuel in tank 0, hydrogen or bioethanol in tank 1; the finished fuel is drawn off the base and the sour
+    # gas off the top (Java: MachineKind.outputLayer). Its catalyst bed is built in, so it has no item slots. 128 JE/t.
+    "hydrotreater": {"inputs": [8_000, 8_000], "outputs": [8_000, 8_000], "item_inputs": 0, "item_outputs": 0,
+                     "recipe_type": "hydrotreating"},
+    # Batch 29. Bolted to a running diesel generator or gas turbine, it boils water in that generator's exhaust and
+    # makes JE from the steam (no recipes): water in tank 0 (or a spring below it), lubricant in tank 1.
+    "heat_recovery_unit": {"inputs": [8_000, 4_000], "outputs": [], "item_inputs": 0, "item_outputs": 0,
+                           "recipe_type": None},
 }
 
 # JE per mB each fluid-burning generator gets from each fuel (Java: chemistry/FluidFuels).
 FLUID_FUELS = {
-    "diesel_generator": {"diesel": 256, "heavy_fuel_oil": 128},
-    "gas_turbine": {"gasoline": 384, "refinery_gas": 192, "bioethanol": 192},
-    "diesel_engine": {"diesel": 256, "heavy_fuel_oil": 128},
+    "diesel_generator": {"diesel": 256, "heavy_fuel_oil": 128, "premium_diesel": 320},
+    "gas_turbine": {"gasoline": 384, "refinery_gas": 192, "bioethanol": 192, "premium_gasoline": 448},
+    "diesel_engine": {"diesel": 256, "heavy_fuel_oil": 128, "premium_diesel": 320},
     "fuel_cell": {"hydrogen": 128},
-    "advanced_engine": {"gasoline": 448, "diesel": 320, "bioethanol": 256},
+    "advanced_engine": {"gasoline": 448, "diesel": 320, "bioethanol": 256, "premium_diesel": 400, "premium_gasoline": 512},
 }
 
 # Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],
@@ -328,6 +348,10 @@ FLUID_RECIPES = {
         # water make 250 mB of bioethanol for the gas turbine or the advanced engine.
         {"name": "bioethanol", "items": [("#jugcraft:fermentable", 8)], "fluids": [("minecraft:water", 1000)],
          "fluid_results": [("jugcraft:bioethanol", 250)], "source": 0, "ticks": 100, "features": ["machines"]},
+        # Sulfur recovery (batch 29, the Claus process): hydrogen sulfide from the hydrotreater partly burnt, and the
+        # rest reacted over a catalyst into sulfur: a renewable source of sulfur for the acid recipes.
+        {"name": "sulfur_recovery", "fluids": [("jugcraft:hydrogen_sulfide", 200)], "results": [("jugcraft:sulfur_dust", 1)],
+         "ticks": 60, "features": ["crude_oil", "sulfur"]},
         # Mixing jobs (batch 24, from the old chemical mixer). Fracking fluid: water carrying sand (to prop the
         # cracks open) and a gelling agent (dried kelp, standing in for guar gum) to carry the sand.
         {"name": "fracking_fluid", "items": [("minecraft:sand", 2), ("minecraft:dried_kelp", 1)],
@@ -336,6 +360,16 @@ FLUID_RECIPES = {
         # Brine for the electrolytic cell: two salt dissolved in a bucket of water.
         {"name": "brine", "items": [("jugcraft:salt", 2)], "fluids": [("minecraft:water", 1000)],
          "fluid_results": [("jugcraft:brine", 1000)], "source": 0, "ticks": 60, "features": ["salt"]},
+    ],
+    # Batch 29: refinery upgrades. Hydrotreating: diesel and hydrogen over the built-in catalyst bed. The sulfur
+    # leaves as hydrogen sulfide (the top tank), and the diesel burns a quarter better (FLUID_FUELS).
+    "hydrotreater": [
+        {"name": "premium_diesel", "fluids": [("jugcraft:diesel", 1000), ("jugcraft:hydrogen", 100)],
+         "fluid_results": [("jugcraft:premium_diesel", 1000), ("jugcraft:hydrogen_sulfide", 100)], "ticks": 120,
+         "features": ["crude_oil", "salt"]},
+        # Blending: a tenth of bioethanol raises gasoline's octane, worth more than the two fuels apart.
+        {"name": "premium_gasoline", "fluids": [("jugcraft:gasoline", 900), ("jugcraft:bioethanol", 100)],
+         "fluid_results": [("jugcraft:premium_gasoline", 1000)], "ticks": 40, "features": ["crude_oil", "machines"]},
     ],
     # Photolithography (batch 7): a wafer patterned and etched with sulfuric acid, with copper wire for the bonds.
     "lithography_station": [

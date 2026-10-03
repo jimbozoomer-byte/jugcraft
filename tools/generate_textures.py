@@ -1284,6 +1284,11 @@ def machines():
     save(window(972, [(34, 38, 44)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "gas_turbine_front_on")
     save(window(973, [(44, 46, 40), (58, 60, 52)]), "block", "polymerization_reactor_front")
     save(window(973, [(44, 46, 40)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "polymerization_reactor_front_on")
+    # Batch 29: the hydrotreater's sight glass (golden fuel) and the heat recovery unit's firebox glow.
+    save(window(2901, [(44, 46, 40), (58, 60, 52)]), "block", "hydrotreater_front")
+    save(window(2901, [(44, 46, 40)], glow=[(230, 190, 80), (250, 222, 140), (200, 160, 60)]), "block", "hydrotreater_front_on")
+    save(window(2902, [(44, 46, 40), (58, 60, 52)]), "block", "heat_recovery_unit_front")
+    save(window(2902, [(44, 46, 40)], glow=[(255, 120, 40), (255, 180, 90), (220, 90, 30)]), "block", "heat_recovery_unit_front_on")
     save(window(974, [(36, 40, 30), (48, 54, 40)]), "block", "diesel_engine_front")
     save(window(974, [(36, 40, 30)], glow=[(255, 170, 40), (255, 214, 110), (230, 140, 30)]), "block", "diesel_engine_front_on")
     save(window(975, [(40, 46, 50), (52, 60, 64)]), "block", "electrolytic_cell_front")

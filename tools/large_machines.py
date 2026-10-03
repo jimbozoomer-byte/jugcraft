@@ -53,6 +53,9 @@ FOOTPRINTS = {
     "diesel_generator": cuboid(3, 2, 2),
     "gas_turbine": cuboid(4, 2, 2),
     "polymerization_reactor": cuboid(2, 3, 2),
+    # Batch 29: refinery upgrades.
+    "hydrotreater": cuboid(2, 3, 2),
+    "heat_recovery_unit": [(0, 0, 0), (0, 1, 0)],
     "diesel_engine": cuboid(2, 2, 3),
     "electrolytic_cell": cuboid(3, 3, 2),
     "chemical_reactor": cuboid(2, 2, 2),
@@ -264,6 +267,20 @@ MODELS["polymerization_reactor"] = [
     ((-4, 40, 14), (4, 46, 22), STEEL),
 ]
 
+MODELS["hydrotreater"] = [
+    ((-16, 0, 0), (16, 2, 32), "heavy_plinth"),
+    ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((-14, 2, 6), (-2, 44, 28), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+    ((2, 12, 10), (14, 22, 30), {"*": "fluid_tank_side", "up": "fluid_tank_top"}),
+    ((-10, 44, 15), (-6, 47, 19), STEEL),
+]
+
+MODELS["heat_recovery_unit"] = [
+    ((0, 0, 0), (16, 2, 16), "heavy_plinth"),
+    ((1, 2, 1), (15, 20, 15), {"*": STEEL, "north": "#front", "up": TOP}),
+    ((8, 20, 8), (14, 32, 14), "geothermal_stack"),
+]
+
 MODELS["diesel_engine"] = [
     ((-16, 0, 0), (16, 2, 48), "heavy_plinth"),
     ((1, 2, 1), (15, 12, 9), {"*": STEEL, "north": "#front", "up": TOP}),
@@ -362,6 +379,8 @@ FRONTS = {
     "deposit_drill": "deposit_drill_front",
     "gas_turbine": "gas_turbine_front",
     "polymerization_reactor": "polymerization_reactor_front",
+    "hydrotreater": "hydrotreater_front",
+    "heat_recovery_unit": "heat_recovery_unit_front",
     "diesel_engine": "diesel_engine_front",
     "electrolytic_cell": "electrolytic_cell_front",
     "chemical_reactor": "chemical_reactor_front",
