@@ -1041,6 +1041,14 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 ### The flying broomstick
 
+| **Brooms** by a cauldron of flying ointment: one hovering, one dry | **Riding** in a witch hat, from behind |
+| --- | --- |
+| ![Brooms](../images/ingame_broomsticks.jpg) | ![Riding a broom](../images/ingame_broomstick_riding.jpg) |
+| **The rider** from in front | **At midnight** |
+| ![The rider](../images/ingame_broomstick_rider.jpg) | ![At midnight](../images/ingame_broomstick_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`BroomstickClientGameTests`, software rendering, small previews).*
+
 - **Make one** from a Witch's Broom, a Flying Ointment and two feathers, and use it to get on. It flies where you look: forward to go, back to brake, jump to climb. It's a quarter faster in a witch hat.
 - **Ointment is its fuel:** 2 minutes of flight each, up to 6. Run dry, it sinks gently down. Anoint a waiting broom with more; sneak-use takes it back. Fly high on a full-moon night for Over the Moon. Details: [even more fall additions](../features/even-more-fall-additions.md#the-flying-broomstick).
 
