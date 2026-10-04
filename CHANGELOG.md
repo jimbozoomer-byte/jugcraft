@@ -146,6 +146,11 @@ No numbered release yet. Everything below is on `main`.
 - **Neglected graves stir restless spirits more often**; a well-kept churchyard is quiet.
 - Two advancements, four game tests, client screenshots. Record: [graveyard.md](docs/features/graveyard.md).
 
+### Unmerged: Dieselpunk giants, batch 44
+- Sixteen one-block machines are now big, detailed multi-blocks (from 2x2x2 up to the 5x3x3 rocket workshop, with long ones like the 2x2x5 sawmill and the 4x1x2 wire drawer) in a weathered dieselpunk look: rust, patina, perforated covers, ribbed coil stacks, banded domes, copper pipes with hex fittings and amber glow.
+- Machines already built in a world stay one block and keep working (`compact` state); placing the item builds the full machine.
+- Game tests for forming, the compact copies and breaking. Record: [dieselpunk-giants.md](docs/features/dieselpunk-giants.md).
+
 ### Test fix: each giant tree's own fewest logs (#157)
 - `BiomeGameTests.bigTreesGrow` holds each giant to the fewest logs it can grow: a giant redwood 85, a giant mahogany 37 (a trunk two wide and at least 22 or 10 tall). #134's single floor of 30 let a stunted redwood pass. Test only; nothing in game changes. Record: [big-trees-and-rainforests.md](docs/features/big-trees-and-rainforests.md).
 

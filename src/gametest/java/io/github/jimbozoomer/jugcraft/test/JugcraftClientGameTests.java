@@ -319,7 +319,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			}
 
 			// A machine screen: walk up to the crusher and use it.
-			BlockPos crusher = new BlockPos(x - 7 + singleIndex(MachineKind.CRUSHER), y, z - 5);
+			BlockPos crusher = new BlockPos(x + largeOffset(MachineKind.CRUSHER), y, z - 5);
 			server.runCommand("tp @p %d %d %d 180 30".formatted(crusher.getX(), y, z - 3));
 			context.waitTicks(10);
 			context.getInput().lookAt(crusher);
@@ -894,6 +894,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			BlockState state = block.defaultBlockState().setValue(MachineBlock.FACING, Direction.SOUTH);
 			if (kind.isLarge()) {
 				BlockPos pos = row.offset(large, 0, 0);
+				state = ((LargeMachineBlock) block).formed(state);
 				level.setBlock(pos, state, 3);
 				((LargeMachineBlock) block).setPlacedBy(level, pos, state, null, ItemStack.EMPTY);
 				large += width(kind) + 2;
