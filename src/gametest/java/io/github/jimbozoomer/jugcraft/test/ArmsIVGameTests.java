@@ -146,7 +146,7 @@ public class ArmsIVGameTests {
 		helper.succeed();
 	}
 
-	/** A war pick mines stone and ore as its metal's pickaxe: a bronze one iron ore but not diamond ore, a steel one both. */
+	/** A war pick mines stone and ore as its metal's pickaxe: bronze as iron (diamond ore, not obsidian), steel as diamond (obsidian too). */
 	@GameTest
 	public void aWarPickDelvesAsAPickaxe(GameTestHelper helper) {
 		ItemStack bronze = arm("bronze_war_pick");
@@ -155,11 +155,12 @@ public class ArmsIVGameTests {
 		float log = bronze.getDestroySpeed(Blocks.OAK_LOG.defaultBlockState());
 		boolean bronzeIron = bronze.isCorrectToolForDrops(Blocks.IRON_ORE.defaultBlockState());
 		boolean bronzeDiamond = bronze.isCorrectToolForDrops(Blocks.DIAMOND_ORE.defaultBlockState());
-		boolean steelDiamond = steel.isCorrectToolForDrops(Blocks.DIAMOND_ORE.defaultBlockState());
-		Jugcraft.LOGGER.info("[arms iv] war pick: stone {}, log {}; bronze on iron ore {}, on diamond ore {}; steel on diamond ore {}",
-				stone, log, bronzeIron, bronzeDiamond, steelDiamond);
+		boolean bronzeObsidian = bronze.isCorrectToolForDrops(Blocks.OBSIDIAN.defaultBlockState());
+		boolean steelObsidian = steel.isCorrectToolForDrops(Blocks.OBSIDIAN.defaultBlockState());
+		Jugcraft.LOGGER.info("[arms iv] war pick: stone {}, log {}; bronze on iron ore {}, diamond ore {}, obsidian {}; steel on obsidian {}",
+				stone, log, bronzeIron, bronzeDiamond, bronzeObsidian, steelObsidian);
 		helper.assertTrue(stone > 1.0F && near(log, 1.0F), "The war pick mines stone at " + stone + " and logs at " + log);
-		helper.assertTrue(bronzeIron && !bronzeDiamond && steelDiamond, "The war picks' mining tiers are wrong");
+		helper.assertTrue(bronzeIron && bronzeDiamond && !bronzeObsidian && steelObsidian, "The war picks' mining tiers are wrong");
 		helper.succeed();
 	}
 

@@ -15,7 +15,7 @@ Five more kinds, each in bronze and steel, drawn in a new ornate style after the
 | Battleblade | 10 / 10.5 | 0.8 | 3.5 | two-handed, 20 ticks, blow at 7; 110°, 4 foes | **Sunder:** each hit wears every piece of armor the foe wears by 4 more. |
 | War Fork | 8.5 / 9 | 0.9 | 4.5 | two-handed thrust, 18 ticks, blow at 6; 30°, 2 foes | **Brace:** half again as much damage to a foe coming at you at 2 blocks a second or faster (a charging mob, a rider, a sprinting player). |
 | Kama | 4.5 / 5 | 2.0 | 2.75 | 5 ticks | **Clear:** use on grass, ferns, vines or leaves to cut every one of them in the 3 by 3 by 3 about it. Each drops what it drops with a blade (not shears), at 1 durability each. Crops are never cut. |
-| War Pick | 6 / 6.5 | 1.4 | 3 | 7 ticks | **Delve:** mines stone and ore as its metal's pickaxe does (bronze to iron ore, steel to diamond). |
+| War Pick | 6 / 6.5 | 1.4 | 3 | 7 ticks | **Delve:** mines stone and ore as its metal's pickaxe does (bronze as iron, to diamond ore; steel as diamond, to obsidian). |
 
 - **Motion:**
   - labrys: a side swing, then the whirl (wound far round, the axe carried flat all the way across);
@@ -108,7 +108,7 @@ The earlier arms keep their art. Giving them stones and the ornate finish would 
   - `aBattlebladeSundersArmor`: a hit wears a husk's iron helmet and chestplate by 4 each;
   - `aWarForkBracesAgainstACharge`: +50% against a husk that came 0.3 blocks towards the wielder; nothing against one going or standing;
   - `aKamaClearsGrassAndLeaves`: a mock player's use cuts a 3 by 3 of grass and the leaves above it, keeps the grass 3 blocks off, and wears the kama by 10;
-  - `aWarPickDelvesAsAPickaxe`: it mines stone fast and logs at hand speed; bronze is right for iron ore but not diamond; steel is right for diamond.
+  - `aWarPickDelvesAsAPickaxe`: it mines stone fast and logs at hand speed; bronze is right for iron and diamond ore but not obsidian; steel is right for obsidian. (The first run expected bronze to stop short of diamond ore; it is iron's tier, which mines diamond ore, so the test was corrected.)
 - Client game tests: the racks (now four parts a metal) and frames; each new kind's guard and swing in `ArmsMotionClientGameTests`, and first person for the labrys and kama.
 - **Not run:**
   - play;
