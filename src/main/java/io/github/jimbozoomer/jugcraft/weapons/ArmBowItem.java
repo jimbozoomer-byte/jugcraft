@@ -20,7 +20,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 /**
- * A longbow (Arms VI, batch 50, docs/features/arms-vi.md; {@link JugcraftArms#RANGED}): vanilla's bow, drawn over the
+ * A longbow (Arms VI, batch 52, docs/features/arms-vi.md; {@link JugcraftArms#RANGED}): vanilla's bow, drawn over the
  * longbow's own draw on vanilla's curve, loosing its arrow at the longbow's speed with the longbow's base damage. Ammo,
  * enchantments (Power, Punch, Flame, Infinity) and the shot itself are vanilla's, through
  * ProjectileWeaponItem's draw and shoot, so arrows are used and picked up as a bow's are.

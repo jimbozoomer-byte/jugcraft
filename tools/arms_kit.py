@@ -1,4 +1,4 @@
-"""The Arms VI kit's models and item definitions (batch 50, docs/features/arms-vi.md): the longbows and arbalests of
+"""The Arms VI kit's models and item definitions (batch 52, docs/features/arms-vi.md): the longbows and arbalests of
 tools/arms.py RANGED, held as vanilla's bow and crossbow are, and the shields of SHIELDS, built in 3D. Sprites:
 tools/arms_kit_art.py.
 

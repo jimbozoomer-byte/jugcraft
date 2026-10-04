@@ -27,7 +27,7 @@ public final class Channels {
 	}
 
 	/** Sets the channel of the block at {@code pos} from a dye in hand, or passes if the item is not a new colour. */
-	static InteractionResult dye(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player) {
+	public static InteractionResult dye(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player) {
 		DyeColor color = ScarecrowBlock.dyeColor(stack);
 		if (color == null || state.getValue(CHANNEL) == color) {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;

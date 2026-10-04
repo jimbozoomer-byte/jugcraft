@@ -838,6 +838,67 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/** Batch 50: every trench block places; the duckboard is low, the searchlight shines and the wire lets things through. */
+	@GameTest
+	public void trenchBlocksPlace(GameTestHelper helper) {
+		var blocks = io.github.jimbozoomer.jugcraft.building.Trenchworks.BLOCKS;
+		helper.assertTrue(blocks.size() == 10, "Expected 10 trench blocks, got " + blocks.size());
+		BlockPos at = new BlockPos(1, 1, 1);
+		for (var entry : blocks.entrySet()) {
+			helper.setBlock(at, entry.getValue().defaultBlockState());
+			helper.assertTrue(helper.getBlockState(at).is(entry.getValue()), entry.getKey() + " did not place");
+		}
+		ServerLevel level = helper.getLevel();
+		BlockPos abs = helper.absolutePos(at);
+		helper.setBlock(at, blocks.get("duckboard").defaultBlockState());
+		helper.assertTrue(helper.getBlockState(at).getShape(level, abs).max(net.minecraft.core.Direction.Axis.Y) < 0.2,
+				"A duckboard is a low walkway");
+		helper.setBlock(at, blocks.get("barbed_wire").defaultBlockState());
+		helper.assertTrue(helper.getBlockState(at).getCollisionShape(level, abs).isEmpty(), "Barbed wire is walked into, not on");
+		helper.setBlock(at, blocks.get("searchlight").defaultBlockState());
+		helper.assertTrue(helper.getBlockState(at).getLightEmission() == io.github.jimbozoomer.jugcraft.building.Trenchworks.SEARCHLIGHT_LIGHT,
+				"A searchlight should shine");
+		helper.succeed();
+	}
+
+	/** Batch 50: a pig pushed through barbed wire is cut. */
+	@GameTest(maxTicks = 100)
+	public void barbedWireCuts(GameTestHelper helper) {
+		for (int x = 1; x <= 6; x++) {
+			helper.setBlock(new BlockPos(x, 1, 2), io.github.jimbozoomer.jugcraft.building.Trenchworks.BLOCKS.get("barbed_wire"));
+		}
+		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(1, 1, 2));
+		helper.onEachTick(() -> pig.setDeltaMovement(0.15, pig.getDeltaMovement().y, 0));
+		helper.succeedWhen(() -> helper.assertTrue(pig.getHealth() < pig.getMaxHealth(), "The wire should cut the pig"));
+	}
+
+	/**
+	 * Batch 50: powering a field telephone's back makes another on its channel ring and light a lamp in front of it; one
+	 * on a different channel stays quiet.
+	 */
+	@GameTest(maxTicks = 100)
+	public void fieldTelephonesRing(GameTestHelper helper) {
+		Block phone = io.github.jimbozoomer.jugcraft.building.Trenchworks.BLOCKS.get("field_telephone");
+		BlockState north = phone.defaultBlockState();
+		helper.setBlock(new BlockPos(1, 1, 2), north);
+		helper.setBlock(new BlockPos(4, 1, 2), north);
+		helper.setBlock(new BlockPos(7, 1, 2), north.setValue(io.github.jimbozoomer.jugcraft.control.Channels.CHANNEL,
+				net.minecraft.world.item.DyeColor.RED));
+		helper.setBlock(new BlockPos(4, 1, 1), Blocks.REDSTONE_LAMP);
+		helper.setBlock(new BlockPos(7, 1, 1), Blocks.REDSTONE_LAMP);
+		helper.runAfterDelay(5, () -> helper.setBlock(new BlockPos(1, 1, 3), Blocks.REDSTONE_BLOCK));
+		helper.succeedWhen(() -> {
+			helper.assertTrue(helper.getBlockState(new BlockPos(4, 1, 2)).getValue(io.github.jimbozoomer.jugcraft.building.FieldTelephoneBlock.RINGING),
+					"The telephone on the same channel should ring");
+			helper.assertTrue(helper.getBlockState(new BlockPos(4, 1, 1)).getValue(net.minecraft.world.level.block.RedstoneLampBlock.LIT),
+					"A ringing telephone should light the lamp in front of it");
+			helper.assertFalse(helper.getBlockState(new BlockPos(7, 1, 2)).getValue(io.github.jimbozoomer.jugcraft.building.FieldTelephoneBlock.RINGING),
+					"A telephone on another channel should stay quiet");
+			helper.assertFalse(helper.getBlockState(new BlockPos(7, 1, 1)).getValue(net.minecraft.world.level.block.RedstoneLampBlock.LIT),
+					"Its lamp should stay dark");
+		});
+	}
+
 	/** Batch 49: a Landship's fuel is saved with it. */
 	@GameTest
 	public void landshipKeepsFuel(GameTestHelper helper) {

@@ -3,7 +3,7 @@
 Status: implemented on `claude/arms-restyle`, awaiting review. Compiles and tests in CI only; **not yet played**.
 Proposal issue: the owner, 4 October 2026: "Refine all the weapons make them look better, study how other people have made weapons that actually look good and copy that currently they look AWFUL", with Simply Swords, Epic Knights and RPG Style More Weapons attached to study ("i like these too for more unique weapons").
 Owner: jimbozoomer-byte
-Target milestone and tier: art only, for every arm of batches 42 to 50 ([arms.md](arms.md) to [arms-vi.md](arms-vi.md)).
+Target milestone and tier: art only, for every arm of batches 42 to 52 ([arms.md](arms.md) to [arms-vi.md](arms-vi.md)).
 Primary specialty and supported player role: fighting (looks only).
 
 ## Player experience
@@ -65,6 +65,8 @@ Not applicable (art only).
 - **`python3 scripts/check_repository.py`:** PASS (local).
 - **Every arm model is checked to be within the JSON model limits:** coordinates −16 to 32, ±45° turns, UVs 0 to 16.
 - **CI:** the client tests' racks, frames, held-arm, two-handed, weapon-art and Arms VI screenshots show the new art in game. Results are in the pull request.
+  - **The run on fdae38d2** showed every kind's model in third person and ten in first person. The scythe's blade point floated apart from the blade, so the toolkit now joins pieces that per-texel sampling splits.
+  - **The run on fb178b85** shows the scythe and kama blades whole in first and third person, and the flail, kusarigama, rapier and twinblade in one piece.
 - **Not run:** play; how the models look in every pose of the arms motion.
 
 ## World and event applicability
