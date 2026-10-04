@@ -1,7 +1,7 @@
 """JSON resources for full-moon werewolves (fall addition 23), from tools/agriculture.py: wolfsbane (vanilla's flower and
 potted-flower shapes) and its wild patch; each kind's rug (brown, snow and shadow), a pelt laid flat with its head at one
 end; the silver dagger, silver arrow and pelt items; names (each kind of werewolf's too); loot (the flower, the potted
-flower, the rugs, the werewolf's bones and each kind's pelt); tags (the silver weapons, the dagger's repair metal, swords
+flower, the rugs, the werewolf's bones and each kind's pelt); tags (the silver weapons, the dagger's repair metal
 and arrows, the werewolf's haunts and its kinds', its prey, the flower tags); and worldgen. The recipes are in SHAPED and
 SHAPELESS, the advancements in HALLOWEEN_ADVANCEMENTS.
 
@@ -83,7 +83,6 @@ def loot(out, write):
 def tags(tags):
     tags.add("item", f"{MOD}:silver_weapons", rid(WEREWOLF["dagger"]))
     tags.add("item", f"{MOD}:repairs_silver_gear", "#c:ingots/silver")
-    tags.add("item", "minecraft:swords", rid(WEREWOLF["dagger"]))
     tags.add("item", "minecraft:arrows", rid(WEREWOLF["arrow"]))
     flower = WOLFSBANE["block"]
     for registry in ("block", "item"):

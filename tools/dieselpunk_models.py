@@ -814,6 +814,57 @@ def electroplating_bath():
     return m
 
 
+def ammonia_chiller():
+    """An ammonia refrigeration unit (batch 35): an olive cabinet with the compressor and its motor on top under a fan
+    grille, frosted chrome condenser coils down the right side, the ammonia receiver (a gunmetal cylinder) along the
+    back, a frost-blue sight glass and a gauge on the front, and an ice chute at the bottom."""
+    cold = "el_glow_cyan!"
+    m = [box((0, 0, 0), (16, 1.5, 16), {"*": GUNMETAL, "north": HAZARD})]
+    # The cabinet.
+    m.append(box((1, 1.5, 1.5), (12.5, 11, 14.5), {"*": OLIVE, "north": STENCIL}))
+    # Condenser coils down the right side: chrome runs between gunmetal headers.
+    m.append(box((12.5, 1.5, 2), (15, 2.5, 14), GUNMETAL))
+    m.append(box((12.5, 10, 2), (15, 11, 14), GUNMETAL))
+    for z in (3, 5.5, 8, 10.5, 13):
+        m.append(box((13, 2.5, z - 0.6), (14.5, 10, z + 0.6), CHROME))
+    # The ammonia receiver along the back.
+    m += cyl("x", 13.5, 13.5, 1.75, 1.5, 12, GUNMETAL, CHROME)
+    # Compressor and motor on top, under the fan grille.
+    m += cyl("y", 5, 9, 3, 11, 14.5, OLIVE, GRILLE)
+    m.append(box((8.5, 11, 6.5), (12, 13.5, 11.5), {"*": GUNMETAL, "up": GRILLE}))
+    m.append(pipe((7.5, 13, 8.5), (9, 14, 9.5), CHROME))
+    # Front: the frost-blue sight glass, a gauge and the status lamp.
+    m.append(box((3, 6, 1), (8, 9.5, 1.5), cold))
+    m.append(dial("north", (10, 8, 1.25), 2.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (10, 4.5, 1.25), 1.25, texture=LAMP, body=GUNMETAL))
+    # The ice chute at the bottom front.
+    m.append(box((2.5, 1.5, 0.25), (8.5, 4.5, 1.5), {"*": GUNMETAL, "north": RUBBER}))
+    return m
+
+
+def rocket_workshop():
+    """A rocket workshop (batch 38): a gunmetal bench with hazard edging; a white rocket body lies in a cradle on it
+    with a yellow band and a nose cone, a press arm leans over its far end and a welding lamp glows at the front."""
+    m = [box((0, 0, 0), (16, 2, 16), {"*": GUNMETAL, "north": HAZARD})]
+    m.append(box((1, 2, 2), (15, 8, 14), {"*": OLIVE, "north": STENCIL}))
+    m.append(box((0.5, 8, 1.5), (15.5, 9, 14.5), {"*": GUNMETAL, "up": GRILLE}))
+    # The cradle and the rocket in it, lying along x.
+    for x in (3, 11):
+        m.append(box((x, 9, 6), (x + 2, 10.5, 10), GUNMETAL))
+    m += cyl("x", 8, 12, 2.5, 2, 12, "sp_window", CHROME)
+    m.append(box((6, 9.5, 5.5), (8, 14.5, 10.5), {"*": HAZARD, "north": HAZARD}))
+    m += cyl("x", 8, 12, 1.5, 12, 14.5, CHROME)
+    m += cyl("x", 8, 12, 1.8, 0.5, 2, GUNMETAL)
+    # The press arm on a post at the back right.
+    m.append(box((12.5, 9, 12.5), (14.5, 16, 14.5), GUNMETAL))
+    m.append(box((9, 14.5, 11), (14.5, 16, 13), {"*": GUNMETAL, "down": HAZARD}))
+    m.append(pipe((10, 12.5, 11.5), (11, 14.5, 12.5), CHROME))
+    # The welding lamp and a gauge on the front.
+    m.append(dial("north", (3.5, 5, 1.75), 2.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (12.5, 5, 1.75), 1.5, texture=LAMP, body=GUNMETAL))
+    return m
+
+
 def air_separation_unit():
     """Two by two, six tall: an air separation plant. A tall olive cold box with gunmetal corner posts and chrome frost
     bands stands at the back, with the chrome distillation column in front of it rising to a nitrogen vent; an air
@@ -970,4 +1021,5 @@ MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), 
           "chemical_reactor": chemical_reactor(), "air_separation_unit": air_separation_unit(),
           "synthesis_converter": synthesis_converter(), "gas_holder": gas_holder(),
           "crop_harvester": crop_harvester(), "hydroponic_bay": hydroponic_bay(),
-          "electroplating_bath": electroplating_bath()}
+          "electroplating_bath": electroplating_bath(), "ammonia_chiller": ammonia_chiller(),
+          "rocket_workshop": rocket_workshop()}
