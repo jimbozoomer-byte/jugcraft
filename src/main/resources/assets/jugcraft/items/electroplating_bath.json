@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:block/electroplating_bath"
+    "model": "jugcraft:item/electroplating_bath"
   }
 }
