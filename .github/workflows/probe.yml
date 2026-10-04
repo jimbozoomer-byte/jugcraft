@@ -1,0 +1,67 @@
+name: API probe (temporary, Witching Season)
+on:
+  push:
+    branches: ['claude/crypt-and-ossuary']
+    paths: ['.github/workflows/probe.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Resolve Minecraft
+        run: ./gradlew compileJava --no-daemon -q
+      - name: Batch 18 client and block APIs
+        run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-clientOnly-deobf-26.3.jar' | head -1)
+          CP="$CLIENT:$COMMON"
+          l() { echo "=== $1 /${2:-.}/"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-60}; }
+          m() { echo "=== $1 /$2/ (code)"; javap -cp "$CP" -c -p "$1" 2>&1 | awk -v re="$2" '/^  [a-z].*[(]/{p=($0 ~ re)} p' | head -${3:-120}; }
+          OB=$(find ~/.gradle/caches -name 'fabric-object-builder-api-v1*.jar' | grep -v sources | head -1)
+          echo "=== object builder: $OB"; unzip -l "$OB" | grep -E "api/.*\.class" | head -30
+          javap -cp "$OB:$CP" -p net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityType 2>&1 | head -20
+          javap -cp "$OB:$CP" -p net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder 2>&1 | head -30
+          l net.minecraft.world.level.block.ChiseledBookShelfBlock 'ChiseledBookShelfBlock\(|codec|getAnalog|newBlockEntity|getSlotCount|getRows|getColumns|getHitSlot'
+          l net.minecraft.world.level.block.SelectableSlotContainer
+          m net.minecraft.world.level.block.SelectableSlotContainer 'getHitSlot|getSection|getRelative' 80
+          l net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity 'ChiseledBookShelfBlockEntity\(|updateState|getItem|removeItem|canPlaceItem|acceptsItemType'
+          l net.minecraft.world.level.block.entity.BlockEntityType 'isValid|getValidBlocks|validBlocks|BlockEntityType\(|CHISELED'
+          l net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider\$Context
+          l net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer
+          l net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer
+          l net.minecraft.client.model.HumanoidModel 'HumanoidModel\(|createMesh|setAllVisible|head|body|Arm|Leg|hat'
+          l net.minecraft.client.model.geom.ModelLayers 'ARMOR|SKELETON|PLAYER|ARMOR_STAND'
+          l net.minecraft.client.renderer.entity.ArmorModelSet
+          l net.minecraft.client.model.geom.EntityModelSet
+          l net.minecraft.client.resources.model.EquipmentClientInfo\$LayerType
+          l net.minecraft.client.renderer.entity.ArmorStandRenderer
+          l net.minecraft.client.renderer.entity.state.HumanoidRenderState 'headEquipment|chestEquipment|legsEquipment|feetEquipment'
+          l net.minecraft.world.item.equipment.Equippable 'slot|assetId|Equippable\('
+          l net.minecraft.core.component.DataComponents 'EQUIPPABLE|CUSTOM_DATA|DYED'
+          l net.minecraft.world.level.biome.Biome 'Precipitation|getPrecipitationAt|hasPrecipitation|coldEnough|warmEnough'
+          l net.minecraft.world.level.Level 'getHeightmapPos|getHeight\(|canSeeSky|getSeaLevel|isBrightOutside|isDarkOutside|getDayTime|getOverworldClockTime|getDefaultClockTime'
+          l net.minecraft.world.level.levelgen.Heightmap\$Types
+          l net.minecraft.server.level.ServerLevel 'setWeatherParameters|resetWeatherCycle'
+          l net.minecraft.world.level.block.LayeredCauldronBlock 'LEVEL'
+          l net.minecraft.world.level.block.Blocks ' CAULDRON;| WATER_CAULDRON;'
+          l net.minecraft.world.item.ItemStack 'hurtAndBreak|isDamageableItem|getDamageValue'
+          l net.minecraft.world.entity.player.Inventory 'placeItemBackInInventory|add\('
+          l net.minecraft.world.item.crafting.CustomRecipe 'matches|assemble|getRemaining'
+          m net.minecraft.world.item.crafting.BookCloningRecipe 'getRemainingItems|assemble' 120
+          l net.minecraft.world.item.crafting.Recipe
+          l net.minecraft.world.item.crafting.RecipeInput
+          l com.mojang.serialization.MapCodec 'unit'
+          l net.minecraft.network.codec.StreamCodec ' unit'
+          l net.minecraft.world.entity.Entity 'getEyePosition|level\(\)|getId\(\)|isAlive|blockPosition'
+          l net.minecraft.world.level.Level 'getEntity\(|getEntitiesOfClass|getNearestEntity'
+          l net.minecraft.world.level.block.entity.BlockEntity 'getUpdatePacket|getUpdateTag|triggerEvent|setChanged|sendBlockUpdated'
