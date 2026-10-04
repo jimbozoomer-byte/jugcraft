@@ -23,7 +23,7 @@ A rideable crawler tank about five blocks long, in the shape of the first tanks:
 | Board (3 seats) | Use it. The first rider drives from the turret hatch; two more ride on the engine deck |
 | Drive | Forward and back keys (back is half speed); left and right turn it, on the spot too |
 | Cannon | Attack: fires a shell where the driver looks (25° up to 10° down), using one cannon shell from their inventory (none in creative), once every 2 seconds |
-| Side guns | Hold use: a burst every 5 ticks along the driver's aim, 24 blocks' reach |
+| Side guns | Hold use: a burst every half second along the driver's aim, 24 blocks' reach |
 | Refuel | Use a diesel, premium diesel or RP-1 kerosene bucket on it (+1000 mB each, 6000 mB tank) |
 | Pick up | Hit it until it drops (120 damage; it heals slowly). Players only; in creative it just goes |
 
@@ -33,7 +33,7 @@ While the driver is aboard, their own hands do nothing: attack and use go to the
 - **Cannon shell:** it flies in a shallow arc and bursts on whatever it hits.
   - The burst is the grenades' and rockets' blast: 22 damage at the centre, falling to none at 3.5 blocks. Walls shield it, and blast protection counts.
   - It hurts living things only and **never breaks, moves or burns a block**.
-- **Side guns:** 2 damage a hit, as the driver's attack, about 8 damage a second when held on a target. A wall stops them.
+- **Side guns:** 4 damage a hit, as the driver's attack, so 8 damage a second when held on a target (a burst every 10 ticks, the same as a creature's hurt cooldown). A wall stops them.
 - **Crushing:** driving forward into something living does 4 damage, as the driver's attack, and shoves it aside. It never pushes or breaks blocks.
 - **Fuel:** driving and turning burn 5 mB a second, so a full tank lasts about 20 minutes. Standing still and firing burn nothing. With an empty tank it can still fire but cannot move. The driver sees the fuel left above the hotbar.
 

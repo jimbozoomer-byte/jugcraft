@@ -47,8 +47,8 @@ public class Landship extends Entity {
 	public static final double SHELL_SPEED = 2.5;
 	public static final double SHELL_RADIUS = 3.5;
 	public static final float SHELL_DAMAGE = 22F;
-	public static final int GUN_INTERVAL = 5;
-	public static final float GUN_DAMAGE = 2F;
+	public static final int GUN_INTERVAL = 10;
+	public static final float GUN_DAMAGE = 4F;
 	public static final int GUN_RANGE = 24;
 	public static final float CRUSH_DAMAGE = 4F;
 	public static final int FUEL_TANK = 6000;
@@ -312,7 +312,6 @@ public class Landship extends Entity {
 		}
 		Vec3 impact = hit != null ? from.add(aim.scale(Math.sqrt(nearest))) : to;
 		if (hit != null) {
-			hit.invulnerableTime = 0;
 			hit.hurtServer(level, level.damageSources().playerAttack(driver), GUN_DAMAGE);
 		}
 		level.sendParticles(ParticleTypes.CRIT, impact.x, impact.y, impact.z, 4, 0.1, 0.1, 0.1, 0.1);

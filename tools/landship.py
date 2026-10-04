@@ -30,9 +30,9 @@ CANNON_COOLDOWN = 40
 SHELL_SPEED = 2.5
 SHELL_RADIUS = 3.5
 SHELL_DAMAGE = 22
-# The sponson guns: ticks between bursts, damage a hit and reach.
-GUN_INTERVAL = 5
-GUN_DAMAGE = 2
+# The sponson guns: ticks between bursts (the same as a creature's hurt cooldown), damage a hit and reach.
+GUN_INTERVAL = 10
+GUN_DAMAGE = 4
 GUN_RANGE = 24
 # Crushing: damage to anything the hull drives into.
 CRUSH_DAMAGE = 4
