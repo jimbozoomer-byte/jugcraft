@@ -167,6 +167,8 @@ def assets():
     rocketry.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import dieselworks
     dieselworks.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    import zeppelin
+    zeppelin.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures

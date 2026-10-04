@@ -57,6 +57,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftLogistics.CONVEYOR_ENTITY, ConveyorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftTools.CHARGING_STATION_ENTITY, ChargingStationRenderer::new);
 		RocketPackClient.register();
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN, ZeppelinRenderer::new);
+		ZeppelinClient.register();
 		ArmsMotion.load();
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);
 		PetroFluidsClient.register();

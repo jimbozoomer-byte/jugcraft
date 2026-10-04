@@ -598,6 +598,55 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Batch 46: in open air a fuelled zeppelin left alone hovers, one with an empty tank sinks, and a piloted one climbs
+	 * and flies forward when its pilot holds forward and jump, burning fuel.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void zeppelinHoversSinksAndFlies(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		var type = io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN;
+		io.github.jimbozoomer.jugcraft.airship.Zeppelin empty = helper.spawn(type, new Vec3(10.5, 10, 10.5));
+		io.github.jimbozoomer.jugcraft.airship.Zeppelin parked = helper.spawn(type, new Vec3(10.5, 10, 32.5));
+		io.github.jimbozoomer.jugcraft.airship.Zeppelin flown = helper.spawn(type, new Vec3(32.5, 10, 20.5));
+		parked.setFuel(1000);
+		flown.setFuel(1000);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		pilot.setPos(flown.getX(), flown.getY(), flown.getZ());
+		helper.assertTrue(pilot.startRiding(flown, true, true), "The pilot could not board");
+		double emptyY = empty.getY();
+		double parkedY = parked.getY();
+		Vec3 start = flown.position();
+		helper.onEachTick(() -> flown.steer(pilot, 1, 0, 1));
+		helper.runAfterDelay(40, () -> {
+			helper.assertTrue(empty.getY() < emptyY - 0.5, "An empty zeppelin should sink, but went from " + emptyY + " to " + empty.getY());
+			helper.assertTrue(Math.abs(parked.getY() - parkedY) < 0.05, "A fuelled zeppelin left alone should hover");
+			helper.assertTrue(flown.getY() > start.y + 2, "Holding jump should climb: " + start.y + " to " + flown.getY());
+			helper.assertTrue(flown.position().subtract(start).horizontalDistance() > 1, "Holding forward should fly forward");
+			helper.assertTrue(flown.fuel() < 1000, "Flying should burn fuel");
+			helper.succeed();
+		});
+	}
+
+	/** Batch 46: a zeppelin's fuel and cargo are saved with it. */
+	@GameTest
+	public void zeppelinKeepsFuelAndCargo(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		var type = io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN;
+		io.github.jimbozoomer.jugcraft.airship.Zeppelin zeppelin = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		zeppelin.setFuel(3000);
+		zeppelin.cargo().setItem(4, new ItemStack(Items.COAL, 17));
+		net.minecraft.world.level.storage.TagValueOutput out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+				net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess());
+		zeppelin.saveWithoutId(out);
+		io.github.jimbozoomer.jugcraft.airship.Zeppelin copy = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		copy.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,
+				level.registryAccess(), out.buildResult()));
+		helper.assertTrue(copy.fuel() == 3000, "Fuel should be saved, got " + copy.fuel());
+		helper.assertTrue(copy.cargo().getItem(4).is(Items.COAL) && copy.cargo().getItem(4).getCount() == 17, "Cargo should be saved");
+		helper.succeed();
+	}
+
 	/** Coal generator -> copper cables -> electric furnace smelts raw iron. */
 	@GameTest(maxTicks = 600)
 	public void cablesCarryPower(GameTestHelper helper) {
