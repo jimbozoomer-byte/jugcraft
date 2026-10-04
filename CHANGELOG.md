@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Arms VII, batch 53
+- **32 named variant arms,** each fighting as its kind does:
+  - **Crafted styles** at a smithing table, from a steel arm, the style's pattern and a material (enchantments and wear kept): **gilded** (gold; enchants as gold), **ironclad** (dieselpunk; lasts twice as long), **bonecarved** (bone; harder against the undead) and **runebound** (glowing runes; marks foes so they glow).
+  - **Boss trophies** for eight bosses still to be made, two each with a boon: the Yeti King (frost), the Cinder Tyrant (ember), the Mire Hag (venom), the Crypt Lich (drain, wither), the Iron Dreadnought (shock), the Alpha Werewolf (howl), the Storm Roc (gale) and the Abyssal Leviathan (tide). Their loot tables are ready; creative-only until the bosses exist.
+- Glowing parts light up in the dark. A boss brainstorm: [branches/BOSSES.md](docs/branches/BOSSES.md). Record: [arms-vii.md](docs/features/arms-vii.md).
+
 ### Unmerged: arms restyle
 - **Every arm redrawn:**
   - **Icons:** crisp pixel-art icons (32 or 48 pixels, on the diagonal, flat tones, outlined);

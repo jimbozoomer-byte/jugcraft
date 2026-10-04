@@ -4,9 +4,11 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.town.TownProtection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -23,6 +25,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -41,6 +44,7 @@ import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * An arm (batches 42 and 45 to 47, {@link JugcraftArms}): its numbers and most traits are item components, with a grey line
@@ -59,12 +63,21 @@ public class ArmItem extends Item {
 	private final String kind;
 	private final JugcraftArms.Trait trait;
 	private final JugcraftArms.Art art;
+	private final String line;
+	private final ArmVariants.Boon boon;
 
 	public ArmItem(String kind, Properties properties) {
+		this(kind, null, null, properties);
+	}
+
+	/** An Arms VII variant ({@link ArmVariants}): of `kind`, in `line` (a style or a boss), with `boon` (or null). */
+	public ArmItem(String kind, String line, ArmVariants.Boon boon, Properties properties) {
 		super(properties);
 		this.kind = kind;
 		this.trait = JugcraftArms.TRAITS.get(kind);
 		this.art = JugcraftArms.ARTS.get(kind);
+		this.line = line;
+		this.boon = boon;
 	}
 
 	/**
@@ -81,6 +94,11 @@ public class ArmItem extends Item {
 		return trait;
 	}
 
+	/** An Arms VII variant's boon, or null. */
+	public ArmVariants.Boon boon() {
+		return boon;
+	}
+
 	@Override
 	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip,
 			TooltipFlag flag) {
@@ -90,6 +108,13 @@ public class ArmItem extends Item {
 		}
 		if (art != null) {
 			tooltip.accept(Component.translatable("tooltip.jugcraft.arms.art." + art.move().id()).withStyle(ChatFormatting.GOLD));
+		}
+		if (boon != null) {
+			tooltip.accept(Component.translatable("tooltip.jugcraft.arms.boon." + boon.name().toLowerCase(Locale.ROOT))
+					.withStyle(ChatFormatting.AQUA));
+		}
+		if (line != null) {
+			tooltip.accept(Component.translatable("tooltip.jugcraft.arms.line." + line).withStyle(ChatFormatting.DARK_PURPLE));
 		}
 	}
 
@@ -111,7 +136,19 @@ public class ArmItem extends Item {
 
 	@Override
 	public float getAttackDamageBonus(Entity target, float damage, DamageSource source) {
-		return super.getAttackDamageBonus(target, damage, source) + traitBonus(trait, target, damage, source.getEntity());
+		return super.getAttackDamageBonus(target, damage, source) + traitBonus(trait, target, damage, source.getEntity())
+				+ boonBonus(boon, target, damage);
+	}
+
+	/** What an Arms VII boon adds to a blow of `damage` on `target`: TIDE against a foe in water or rain, GRAVEBANE on the undead. */
+	static float boonBonus(ArmVariants.Boon boon, Entity target, float damage) {
+		if (boon == ArmVariants.Boon.TIDE && target.isInWaterOrRain()) {
+			return damage * ArmVariants.TIDE;
+		}
+		if (boon == ArmVariants.Boon.GRAVEBANE && target.getType().is(EntityTypeTags.UNDEAD)) {
+			return damage * ArmVariants.GRAVEBANE;
+		}
+		return 0.0F;
 	}
 
 	/** What a trait adds to a blow of `damage` from `attacker` (null if none) on `target`. */
@@ -173,6 +210,87 @@ public class ArmItem extends Item {
 		if (trait == JugcraftArms.Trait.IGNITE && !target.level().isClientSide()) {
 			target.igniteForSeconds(JugcraftArms.IGNITE_SECONDS);
 		}
+		if (boon != null && target.level() instanceof ServerLevel level) {
+			boon(level, boon, target, attacker);
+		}
+	}
+
+	/**
+	 * An Arms VII boon, on the server, when its arm has struck `target`: each effect refreshed by another hit, never
+	 * stacked; a puff of particles shows it. SHOCK arcs only from a player, to a foe that player may strike.
+	 */
+	static void boon(ServerLevel level, ArmVariants.Boon boon, LivingEntity target, LivingEntity attacker) {
+		double y = target.getY() + target.getBbHeight() * 0.6;
+		switch (boon) {
+			case FROST -> {
+				target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ArmVariants.FROST_TICKS, ArmVariants.FROST_AMPLIFIER), attacker);
+				level.sendParticles(ParticleTypes.SNOWFLAKE, target.getX(), y, target.getZ(), 8, 0.3, 0.4, 0.3, 0.02);
+			}
+			case EMBER -> {
+				target.igniteForSeconds(ArmVariants.EMBER_SECONDS);
+				level.sendParticles(ParticleTypes.FLAME, target.getX(), y, target.getZ(), 6, 0.3, 0.4, 0.3, 0.02);
+			}
+			case VENOM -> {
+				target.addEffect(new MobEffectInstance(MobEffects.POISON, ArmVariants.VENOM_TICKS, ArmVariants.VENOM_AMPLIFIER), attacker);
+				level.sendParticles(ParticleTypes.ITEM_SLIME, target.getX(), y, target.getZ(), 6, 0.3, 0.4, 0.3, 0.02);
+			}
+			case DRAIN -> {
+				attacker.heal(ArmVariants.DRAIN_HEAL);
+				level.sendParticles(ParticleTypes.SOUL, target.getX(), y, target.getZ(), 4, 0.2, 0.3, 0.2, 0.02);
+			}
+			case WITHER -> {
+				target.addEffect(new MobEffectInstance(MobEffects.WITHER, ArmVariants.WITHER_TICKS, ArmVariants.WITHER_AMPLIFIER), attacker);
+				level.sendParticles(ParticleTypes.SMOKE, target.getX(), y, target.getZ(), 6, 0.3, 0.4, 0.3, 0.02);
+			}
+			case SHOCK -> shock(level, target, attacker);
+			case GALE -> {
+				target.knockback(ArmVariants.GALE_KNOCKBACK, attacker.getX() - target.getX(), attacker.getZ() - target.getZ(),
+						level.damageSources().mobAttack(attacker), 0.0F);
+				target.push(0.0, ArmVariants.GALE_LIFT, 0.0);
+				level.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY() + 0.2, target.getZ(), 8, 0.4, 0.1, 0.4, 0.04);
+			}
+			case HOWL -> {
+				target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ArmVariants.HOWL_TICKS, ArmVariants.HOWL_AMPLIFIER), attacker);
+				level.sendParticles(ParticleTypes.POOF, target.getX(), y, target.getZ(), 6, 0.3, 0.3, 0.3, 0.02);
+			}
+			case MARK -> {
+				target.addEffect(new MobEffectInstance(MobEffects.GLOWING, ArmVariants.MARK_TICKS, 0), attacker);
+				level.sendParticles(ParticleTypes.ENCHANT, target.getX(), y, target.getZ(), 10, 0.3, 0.4, 0.3, 0.3);
+			}
+			default -> {
+			}
+		}
+	}
+
+	/**
+	 * SHOCK: an arc from the struck foe to the nearest other one within SHOCK_RANGE that the wielder (a player) may strike,
+	 * for SHOCK_SHARE of the wielder's attack damage.
+	 */
+	static void shock(ServerLevel level, LivingEntity target, LivingEntity attacker) {
+		if (!(attacker instanceof ServerPlayer player)) {
+			return;
+		}
+		LivingEntity next = null;
+		double best = ArmVariants.SHOCK_RANGE * ArmVariants.SHOCK_RANGE;
+		for (LivingEntity foe : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(ArmVariants.SHOCK_RANGE))) {
+			double distance = foe.distanceToSqr(target);
+			if (foe != target && distance <= best && TwoHanded.target(player, foe) && TwoHanded.allowed(player, level, foe)) {
+				best = distance;
+				next = foe;
+			}
+		}
+		Vec3 from = target.getBoundingBox().getCenter();
+		if (next == null) {
+			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, from.x, from.y, from.z, 6, 0.3, 0.4, 0.3, 0.1);
+			return;
+		}
+		Vec3 to = next.getBoundingBox().getCenter();
+		for (int i = 0; i <= 8; i++) {
+			Vec3 at = from.lerp(to, i / 8.0);
+			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.0);
+		}
+		float blow = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE) * ArmVariants.SHOCK_SHARE;
+		next.hurtServer(level, level.damageSources().playerAttack(player), blow);
 	}
 
 	/** The battleblade's sunder: every piece of armor the target wears takes SUNDER more wear. */

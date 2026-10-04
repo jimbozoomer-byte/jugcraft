@@ -514,6 +514,32 @@ def arms_pages():
             "while held.",
             "Hold use to block with either, as with a shield. An axe's blow still knocks them down for a while."],
          "craft": craft("tower_shield")},
+    ] + variant_pages()
+
+
+def variant_pages():
+    """Arms VII (batch 53): the styles' patterns and the bosses' trophies."""
+    import arms_variants as av
+    rows, key = av.STYLES["gilded"]["pattern_recipe"]
+    grid = [item_for(key[ch]) if ch in key else None for row in rows for ch in row.ljust(3)]
+    styles = ", ".join(info["display"].lower() for info in av.STYLES.values())
+    return [
+        {"title": "Arms: Styles", "icon": f"{MOD}:gilded_longsword", "text": [
+            f"Four styles restyle a steel arm at a smithing table: {styles}. Put the style's pattern, the steel arm and "
+            "the style's material in; the arm keeps its enchantments and wear.",
+            f"Gilded (a gold ingot): longsword, rapier, sabre, halberd. Takes enchantments as gold does.",
+            f"Ironclad (a steel plate): zweihander, maul, war pick, battle axe. Painted, plated and bolted; lasts twice as long.",
+            f"Bonecarved (a bone block): dagger, flail, glaive, labrys. {round(av.GRAVEBANE * 100)}% harder against the undead.",
+            "Runebound (ectoplasm): nodachi, moonblade, staff, war hammer. Its runes glow, and a foe it strikes glows "
+            f"for {av.MARK_TICKS // 20} seconds, seen through walls.",
+            "Each fights as its kind does: the same swing, reach, trait and art."],
+         "craft": {"grid": grid, "result": f"{MOD}:gilders_pattern", "count": 1}},
+        {"title": "Arms: Trophies", "icon": f"{MOD}:glacier_maul", "text": [
+            "Great foes yet to be met in the world will each carry two arms of their own, with a boon:",
+            ] + [f"{info['display'][0].upper()}{info['display'][1:]}: "
+                 + " and ".join(av.BY_ID[name][3] for name in av.trophies(boss)) + "."
+                 for boss, info in av.BOSSES.items()] + [
+            "Trophies last twice as long as steel, and fight as their kinds do."]},
     ]
 
 

@@ -545,6 +545,29 @@ Two more arms and a war kit in bronze and steel. Shot for shot the longbow and a
 
 **Code:** `weapons/` (`ArmBowItem`, `ArmCrossbowItem`, `JugcraftArms.RANGED`, `SHIELDS` and `KIT`, `WeaponArts` for the cuts, `ArmItem` for the fire); data from `tools/arms.py` and `tools/arms_kit.py`, art from `tools/arms_art.py` and `tools/arms_kit_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-vi.md)).
 
+### Arms VII (batch 53): variant arms, crafted styles and boss trophies
+
+32 named arms, each a variant of a kind above that fights as its kind does, in steel. Sixteen are crafted at a smithing table: a style's pattern, a steel arm of the kind and the style's material, keeping its enchantments and wear. Sixteen are trophies of eight bosses still to be made ([branches/BOSSES.md](branches/BOSSES.md)): no recipe, each boss's loot table ready; creative only until then. No variant deals as much a second as a netherite sword.
+
+| Line | Arms | Perk or boon | Made from |
+| --- | --- | --- | --- |
+| Gilded | longsword, rapier, sabre, halberd | enchantability 22 (gold's) | Gilder's Pattern (8 gold nuggets, paper) + gold ingot |
+| Ironclad | zweihander, maul, war pick, battle axe | lasts twice as long | Ironclad Pattern (dyes, steel plate) + steel plate |
+| Bonecarved | dagger, flail, glaive, labrys | Gravebane: 20% harder against the undead | Bonecarver's Pattern (bone, flint, leather, paper) + bone block |
+| Runebound | nodachi, moonblade, staff, war hammer | Mark: a struck foe glows for 4 s | Runecarver's Pattern (amethyst, ectoplasm, paper) + ectoplasm |
+| The Yeti King | Glacier Maul, Rimeclaw | Frost: Slowness II, 3 s | trophy |
+| The Cinder Tyrant | Cinderbrand, Magmaw | Ember: alight 3 s | trophy |
+| The Mire Hag | Hagthorn, Bogfang | Venom: Poison, 4 s | trophy |
+| The Crypt Lich | Soulreaver, Gravewarden | Drain: heals half a heart a hit; Wither, 3 s | trophy |
+| The Iron Dreadnought | Dynamo Halberd, Piston Hammer | Shock: arcs to a foe within 4 blocks for 30% of the blow | trophy |
+| The Alpha Werewolf | Moonfang, Howler | Howl: Weakness, 3 s | trophy |
+| The Storm Roc | Stormcaller, Galefeather | Gale: throws the foe up and back | trophy |
+| The Abyssal Leviathan | Tidebreaker, Leviathan's Hook | Tide: 25% harder against a foe in water or rain | trophy |
+
+Trophies last twice as long as steel. Glowing parts (runes, magma, venom, soul fire, sparks) are lit in the dark.
+
+**Code:** `weapons/ArmVariants` (the variants, boons and numbers), `ArmItem` (`boon`, `boonBonus`, `shock`); data from `tools/arms_variants.py`, art from `tools/arms_variants_art.py` ([feature record](features/arms-vii.md)).
+
 ### Construction chemistry (batch 32)
 
 | Item | What it does | Built from |
