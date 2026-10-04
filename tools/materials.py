@@ -272,5 +272,8 @@ def feature_of(entry_id):
     import artillery
     if entry_id in artillery.ITEMS:
         return "machines"
+    import tower_guns
+    if entry_id in tower_guns.items():
+        return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)
