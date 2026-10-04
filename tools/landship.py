@@ -80,7 +80,7 @@ def _polygon_span(y, inset):
 
 
 def side_frame(sign):
-    """One side's track frame: riveted rust plate filling the rhomboid inside the track, the hub with the crest, the
+    """One side's track frame: riveted steel plate filling the rhomboid inside the track, the hub with the crest, the
     sponson and its gun."""
     x0, x1 = (TRACK_INNER, TRACK_OUTER) if sign > 0 else (-TRACK_OUTER, -TRACK_INNER)
     m = []
@@ -223,12 +223,12 @@ def _rect(img, x0, y0, x1, y1, c):
 
 
 def icon():
-    """The item: the landship side-on, black casemate and turret, rust track frame, gold hub."""
+    """The item: the landship side-on, black casemate and turret, steel track frame, gold hub."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    black, rust, tread_c, gold, steel = (30, 30, 38), (128, 68, 34), (52, 50, 46), (220, 176, 70), (150, 150, 146)
+    black, rust, tread_c, gold, steel = (30, 30, 38), (106, 101, 97), (52, 50, 46), (220, 176, 70), (150, 150, 146)
     _rect(img, 5, 3, 9, 5, black)       # turret
     _rect(img, 9, 4, 14, 4, steel)      # barrel
-    _rect(img, 6, 2, 7, 2, (184, 112, 58))
+    _rect(img, 6, 2, 7, 2, (128, 122, 116))
     _rect(img, 3, 5, 12, 7, black)      # casemate
     _rect(img, 3, 7, 12, 7, gold)
     for x in range(1, 15):              # track outline

@@ -7,7 +7,7 @@ Target milestone and tier: every tier that had one-block machines
 Primary specialty and supported player role: industry and building (visual scale; no balance change)
 
 ## Player experience
-Sixteen machines that used to be one block are now big multi-blocks in a rusted, patina-green dieselpunk style. They stand on skid feet, with riveted rust plate, perforated green covers, ribbed coil stacks, banded domes, copper and rusty pipe runs with hex-nut fittings, red handwheels, blue caps, gauges and glowing amber windows. Placing the item builds the whole machine if the space is free (like the existing multi-blocks); breaking any block removes all of it and drops the one item.
+Sixteen machines that used to be one block are now big multi-blocks in a weathered, patina-green dieselpunk style. They stand on skid feet, with riveted steel plate, perforated green covers, ribbed coil stacks, banded domes, copper and steel pipe runs with hex-nut fittings, red handwheels, blue caps, gauges and glowing amber windows. Placing the item builds the whole machine if the space is free (like the existing multi-blocks); breaking any block removes all of it and drops the one item.
 
 | Machine | Size (wide x tall x deep) | What it looks like |
 | --- | --- | --- |

@@ -175,7 +175,7 @@ def icon():
     """The item: the walker from the front, red chest, barrel shoulders, fist and drill, amber core."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     red, dark, iron, band, amber = (150, 40, 28), (98, 30, 22), (70, 65, 62), (52, 48, 46), (255, 190, 60)
-    rust, steel = (128, 68, 34), (160, 160, 156)
+    rust, steel = (106, 101, 97), (160, 160, 156)  # "rust": the giants' weathered steel plate (dr_rust)
 
     def rect(x0, y0, x1, y1, c):
         for y in range(y0, y1 + 1):
