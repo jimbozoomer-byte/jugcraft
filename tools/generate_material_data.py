@@ -147,6 +147,10 @@ def assets():
     gear.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import exosuit
     exosuit.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import arms
+    arms.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import arms_motion
+    arms_motion.write_all(write, ASSETS)
     import grapple
     grapple.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import field_chemistry
@@ -155,6 +159,12 @@ def assets():
     construction.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import electroplating
     electroplating.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import gas_storage
+    gas_storage.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import control_electronics
+    control_electronics.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    import rocketry
+    rocketry.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
@@ -694,7 +704,8 @@ RECIPE_TYPES = {"crusher": "crushing", "arc_furnace": "arc_smelting", "alloy_sme
                 "pulverizer": "pulverizing", "ore_washer": "ore_washing", "sieve": "sifting", "sawmill": "sawing",
                 "coke_oven": "coking", "steel_foundry": "steelmaking",
                 "tree_farm": "tree_growing",
-                "hydroponic_bay": "hydroponics"}
+                "hydroponic_bay": "hydroponics",
+                "rocket_workshop": "rocket_assembly"}
 
 
 def machine_recipe_files(out):
@@ -1227,6 +1238,14 @@ def tags():
     import plastic
     for block in plastic.blocks():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import control_electronics
+    for block in control_electronics.blocks():
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import rocketry
+    for block in rocketry.blocks():
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    tags.add("block", "minecraft:rails", rid("booster_rail"))
+    tags.add("item", "minecraft:rails", rid("booster_rail"))
     import construction
     for block in construction.blocks():
         if block.startswith("concrete"):

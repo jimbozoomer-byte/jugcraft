@@ -70,6 +70,14 @@ FLUIDS = {
     "nutrient_solution": {"display": "Nutrient Solution", "feature": "machines",
                           "colors": [(40, 90, 50), (70, 130, 70), (110, 170, 100), (170, 214, 150)],
                           "tick_delay": 5, "slope": 4, "drop_off": 1},
+    # Batch 43: liquid fuels (tools/rocketry.py). RP-1 rocket kerosene, hydrocracked from heavy fuel oil: water-clear
+    # with a straw tint. Liquid oxygen, condensed in the cryogenic liquefier: pale sky blue, runs fast.
+    "kerosene": {"display": "RP-1 Kerosene", "feature": "crude_oil",
+                 "colors": [(150, 150, 120), (196, 196, 160), (224, 224, 196), (246, 246, 228)],
+                 "tick_delay": 5, "slope": 4, "drop_off": 1},
+    "liquid_oxygen": {"display": "Liquid Oxygen", "feature": "machines",
+                      "colors": [(70, 120, 180), (110, 160, 214), (160, 200, 236), (214, 234, 250)],
+                      "tick_delay": 3, "slope": 4, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -248,10 +256,11 @@ FLUID_MACHINES = {
 # JE per mB each fluid-burning generator gets from each fuel (Java: chemistry/FluidFuels).
 FLUID_FUELS = {
     "diesel_generator": {"diesel": 256, "heavy_fuel_oil": 128, "premium_diesel": 320},
-    "gas_turbine": {"gasoline": 384, "refinery_gas": 192, "bioethanol": 192, "premium_gasoline": 448},
+    "gas_turbine": {"gasoline": 384, "refinery_gas": 192, "bioethanol": 192, "premium_gasoline": 448, "kerosene": 448},
     "diesel_engine": {"diesel": 256, "heavy_fuel_oil": 128, "premium_diesel": 320},
     "fuel_cell": {"hydrogen": 128},
-    "advanced_engine": {"gasoline": 448, "diesel": 320, "bioethanol": 256, "premium_diesel": 400, "premium_gasoline": 512},
+    "advanced_engine": {"gasoline": 448, "diesel": 320, "bioethanol": 256, "premium_diesel": 400, "premium_gasoline": 512,
+                        "kerosene": 480},
 }
 
 # Fluid recipes per machine. Each: name, item ingredients [(item or #tag, count)], fluids in [(fluid, mB)],
@@ -462,6 +471,19 @@ def _leaching():
 
 
 FLUID_RECIPES["chemical_reactor"] += _leaching()
+
+# Gas storage (batch 35, tools/gas_storage.py): the ammonia chiller, ammonia first and water second.
+import gas_storage as _gas_storage  # noqa: E402
+FLUID_MACHINES["ammonia_chiller"] = _gas_storage.FLUID_MACHINE
+FLUID_RECIPES["ammonia_chiller"] = _gas_storage.FLUID_RECIPES
+# Rocketry (batch 38, tools/rocketry.py): iodine from kelp and ammonium perchlorate in the chemical reactor.
+import rocketry as _rocketry  # noqa: E402
+FLUID_RECIPES["chemical_reactor"] += _rocketry.REACTOR_RECIPES
+# Liquid fuels (batch 43, tools/rocketry.py): hydrocracking to kerosene, the cryogenic liquefier, propellant tanks.
+FLUID_RECIPES["catalytic_cracker"] += _rocketry.CRACKER_RECIPES
+FLUID_MACHINES["cryogenic_liquefier"] = _rocketry.LIQUEFIER
+FLUID_RECIPES["cryogenic_liquefier"] = _rocketry.LIQUEFIER_RECIPES
+FLUID_RECIPES["chemical_reactor"] += _rocketry.TANK_RECIPES
 
 # Crops that ferment into bioethanol (data/jugcraft/tags/item/fermentable.json).
 FERMENTABLE = ["minecraft:wheat", "minecraft:sugar_cane", "minecraft:potato", "minecraft:carrot", "minecraft:beetroot",

@@ -109,6 +109,13 @@ public enum MachineKind implements StringRepresentable {
 	// Electroplating (batch 34): plates a tool, weapon or piece of armor with nickel, silver or gold in sulfuric acid,
 	// repairing it (see Electroplating). The item, the metal ingot and the output slot.
 	ELECTROPLATING_BATH("electroplating_bath", 20_000, 256, 0, 32, 3),
+	// Gas storage (batch 35): an ammonia refrigeration unit freezing water into ice and packing ice down to blue ice.
+	// Ammonia in the first tank, water in the second; one input slot and one output.
+	AMMONIA_CHILLER("ammonia_chiller", 20_000, 256, 0, 24, 2),
+	/** Batch 43 (tools/rocketry.py): condenses oxygen into liquid oxygen. */
+	CRYOGENIC_LIQUEFIER("cryogenic_liquefier", 40_000, 512, 0, 96, 0),
+	// Rocketry (batch 38): like the circuit assembler, up to three ingredients in any slots, for rocket parts and rockets.
+	ROCKET_WORKSHOP("rocket_workshop", 20_000, 256, 0, 48, 4),
 	// Chemistry (batch 17, the electric look): a 3x3x2 vanadium redox flow battery. Its charge is capped by the
 	// electrolyte in its tanks (FLOW_BATTERY_JE_PER_MB a millibucket); it gives power out of its front.
 	FLOW_BATTERY("flow_battery", 64_000_000, 8_192, 8_192, 0, 0);
@@ -287,6 +294,11 @@ public enum MachineKind implements StringRepresentable {
 	public static final int REACTOR_TANK = 8_000;
 	/** Lithography station: its sulfuric acid (etchant) tank. */
 	public static final int LITHOGRAPHY_TANK = 4_000;
+	/** The ammonia chiller's tanks (mB): ammonia refrigerant, and water to freeze. */
+	public static final int CHILLER_AMMONIA_TANK = 4_000;
+	public static final int CHILLER_WATER_TANK = 8_000;
+	/** The cryogenic liquefier's oxygen and liquid oxygen tanks (tools/rocketry.py LIQUEFIER_TANK). */
+	public static final int LIQUEFIER_TANK = 8_000;
 	/** Ticks the electric furnace needs per item (the vanilla furnace needs 200). */
 	public static final int ELECTRIC_FURNACE_TICKS = 100;
 
@@ -313,7 +325,7 @@ public enum MachineKind implements StringRepresentable {
 				|| this == PULVERIZER || this == ORE_WASHER || this == SIEVE || this == SAWMILL
 				|| this == COKE_OVEN || this == STEEL_FOUNDRY || this == ORE_DRILL || this == DEPOSIT_DRILL
 				|| this == COBBLESTONE_GENERATOR || this == TREE_FARM || this == AUTO_CRAFTER
-				|| this == CROP_HARVESTER || this == HYDROPONIC_BAY || this == ELECTROPLATING_BATH;
+				|| this == CROP_HARVESTER || this == HYDROPONIC_BAY || this == ELECTROPLATING_BATH || this == ROCKET_WORKSHOP;
 	}
 
 	/** Stores energy and gives it out of its front face only. */
@@ -328,7 +340,8 @@ public enum MachineKind implements StringRepresentable {
 
 	/** Processors whose recipes combine several ingredient stacks placed in any input slots. */
 	public boolean isMultiInput() {
-		return this == ALLOY_SMELTER || this == CIRCUIT_ASSEMBLER || this == STEEL_FOUNDRY || this == ARC_FURNACE;
+		return this == ALLOY_SMELTER || this == CIRCUIT_ASSEMBLER || this == STEEL_FOUNDRY || this == ARC_FURNACE
+				|| this == ROCKET_WORKSHOP;
 	}
 
 	/**
@@ -351,6 +364,7 @@ public enum MachineKind implements StringRepresentable {
 			case STEEL_FOUNDRY -> "steelmaking";
 			case TREE_FARM -> "tree_growing";
 			case HYDROPONIC_BAY -> "hydroponics";
+			case ROCKET_WORKSHOP -> "rocket_assembly";
 			case DISTILLATION_TOWER -> "distillation";
 			case CATALYTIC_CRACKER -> "catalytic_cracking";
 			case FLOWBACK_TREATMENT_UNIT -> "water_treatment";
@@ -360,6 +374,8 @@ public enum MachineKind implements StringRepresentable {
 			case HYDROTREATER -> "hydrotreating";
 			case CHEMICAL_REACTOR -> "chemical_reaction";
 			case LITHOGRAPHY_STATION -> "lithography";
+			case AMMONIA_CHILLER -> "chilling";
+			case CRYOGENIC_LIQUEFIER -> "liquefaction";
 			default -> null;
 		};
 	}
@@ -399,6 +415,8 @@ public enum MachineKind implements StringRepresentable {
 					List.of(CONVERTER_TANK), 0, 0);
 			case CHEMICAL_REACTOR -> new FluidMachineSpec(List.of(CHEM_REACTOR_TANK), List.of(CHEM_REACTOR_TANK), 2, 1);
 			case LITHOGRAPHY_STATION -> new FluidMachineSpec(List.of(LITHOGRAPHY_TANK), List.of(), 2, 1);
+			case AMMONIA_CHILLER -> new FluidMachineSpec(List.of(CHILLER_AMMONIA_TANK, CHILLER_WATER_TANK), List.of(), 1, 1);
+			case CRYOGENIC_LIQUEFIER -> new FluidMachineSpec(List.of(LIQUEFIER_TANK), List.of(LIQUEFIER_TANK), 0, 0);
 			case FUEL_CELL -> new FluidMachineSpec(List.of(FUEL_CELL_TANK), List.of(), 0, 0);
 			case HYDROTREATER -> new FluidMachineSpec(List.of(HYDROTREATER_TANK, HYDROTREATER_TANK),
 					List.of(HYDROTREATER_TANK, HYDROTREATER_TANK), 0, 0);

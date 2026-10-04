@@ -20,7 +20,7 @@ RECIPE_LISTS = {"crusher": "crusher", "arc_furnace_controller": "arc_furnace", "
                 "metal_press": "metal_press", "wire_drawer": "wire_drawer", "circuit_assembler": "circuit_assembler",
                 "pulverizer": "pulverizer", "ore_washer": "ore_washer", "sieve": "sieve", "sawmill": "sawmill",
                 "coke_oven": "coke_oven", "steel_foundry": "steel_foundry", "tree_farm": "tree_farm",
-                "hydroponic_bay": "hydroponic_bay"}
+                "hydroponic_bay": "hydroponic_bay", "rocket_workshop": "rocket_workshop"}
 
 # What each block is for, in a sentence or two. Numbers are added from the tables below.
 ABOUT = {
@@ -64,6 +64,14 @@ ABOUT = {
     "sprinkler": "Pipe water in (or use a water bucket) and it sprays the crops within 4 blocks, at its height and one "
                  "below: every 5 seconds it uses 50 mB and gives each growing crop an extra growth tick. Load up to 16 "
                  "fertilizer (by hand or hopper) and every 30 seconds it spreads one over the 5x5 crops around it.",
+    "cryogenic_liquefier": "A cold box of chrome heat exchangers under frost. Pipe oxygen (from the air separation unit) "
+                           "into its tank: every 4 seconds a bucket of oxygen condenses into 250 mB of liquid oxygen, "
+                           "the oxidizer for liquid rocket motors. 96 JE/t.",
+    "ammonia_chiller": "Ammonia boiling in its coils draws the heat out of water. Pipe ammonia into its first tank and "
+                       "water into its second: every 5 seconds a bucket of water freezes into a block of ice. Put four "
+                       "ice in its slot and it presses them into packed ice, and four packed ice into blue ice, against "
+                       "nine of each by crafting. Each batch loses 5 mB of ammonia. It works anywhere, even in the "
+                       "Nether.",
     "electroplating_bath": "Plates a tool, weapon or piece of armor and repairs it fully, without experience, so "
                            "enchanted gear keeps going. Put the item in the first slot and an ingot in the second, with "
                            "sulfuric acid piped in: 10 seconds and 100 mB a plating. Nickel makes it half as durable "
@@ -175,6 +183,15 @@ ABOUT = {
                            "of hydrogen and 100 mB of nitrogen make 200 mB of ammonia. Ostwald: 100 mB of ammonia, 200 "
                            "mB of oxygen and 100 mB of water make 200 mB of nitric acid. Each takes 2 seconds at 128 "
                            "JE/t.",
+    "rocket_workshop": "Builds rockets from up to three ingredients in any slots, like the circuit assembler: solid "
+                       "propellant from ammonium perchlorate, aluminum and rubber; casings, nozzles and guidance "
+                       "units; motors; and the rockets themselves.",
+    "logic_controller": "Runs your factory by rules. Join sensors and relays to it with data cable, then right-click "
+                        "it: each of its eight rules reads \"IF channel below or above N% THEN channel ON or OFF\". "
+                        "Every second it averages each channel's sensors and works through the rules in order, a later "
+                        "rule overriding an earlier one; a channel no rule switches this time keeps its state, so two "
+                        "rules (off above 90%, on below 50%) leave a dead band. The strip along the bottom shows every "
+                        "channel's reading.",
     "network_terminal": "A beige retro computer. Cable it into a power network and right-click it: it shows the "
                         "network's cables, the rate its slowest cable sets, how many devices it reaches and the "
                         "energy they hold. It uses no power.",
@@ -365,6 +382,44 @@ def machine_page(block):
     return block_page(block, MACHINES[block]["display"])
 
 
+def arms_pages():
+    """Batch 42: the arms, three pages: swords, maces and hammers, polearms."""
+    import arms
+    import gear
+
+    def grid(kind):
+        key = {"#": item_for(gear.GEAR_TIERS["steel"]["ingot"]), **arms.KEYS}
+        return [key.get(ch) for row in arms.KINDS[kind]["pattern"] for ch in row.ljust(3)]
+
+    def craft(kind):
+        return {"grid": grid(kind), "result": f"{MOD}:steel_{kind}", "count": 1}
+    k = arms.KINDS
+    return [
+        {"title": "Arms: Swords", "icon": f"{MOD}:steel_longsword", "text": [
+            "Bronze and steel make arms beyond the sword, each with its own way of fighting. All sweep like swords.",
+            f"Longsword: a longer reach ({k['longsword']['reach'][1]} blocks). Hold use to parry: it blocks "
+            f"{round(k['longsword']['parry'] * 100)}% of a blow from in front, as a shield does all of it.",
+            f"Greatsword: two-handed, slow and heavy, with a {k['greatsword']['reach'][1]}-block reach; a hit stops a "
+            f"shield blocking for {k['greatsword']['disable']:g} seconds.",
+            f"Rapier: quick thrusts, two a second; its parry blocks {round(k['rapier']['parry'] * 100)}%."],
+         "craft": craft("longsword")},
+        {"title": "Arms: Maces and Hammers", "icon": f"{MOD}:steel_war_hammer", "text": [
+            f"Flanged mace: a hit stops a shield blocking for {k['flanged_mace']['disable']:g} seconds.",
+            f"War hammer: the heaviest blow of all, knocking foes back; a hit stops a shield blocking for "
+            f"{k['war_hammer']['disable']:g} seconds, as an axe's does.",
+            "Both take Sharpness, Smite, Bane of Arthropods, Knockback, Looting and Fire Aspect."],
+         "craft": craft("war_hammer")},
+        {"title": "Arms: Polearms", "icon": f"{MOD}:steel_halberd", "text": [
+            f"Glaive: a blade on a pole that sweeps at {k['glaive']['reach'][1]} blocks.",
+            f"Halberd: thrusts through every foe in line out to {k['halberd']['reach'][1]} blocks (not closer than "
+            f"{k['halberd']['reach'][0]:g}); a hit stops a shield blocking for {k['halberd']['disable']:g} seconds.",
+            "Spear: jab, or hold use to charge, as vanilla's spears do; faster on a horse or at a run.",
+            f"Lance: a horseman's charge that hits harder and unhorses riders at lower speeds, reaching "
+            f"{arms.LANCE_REACH[1]} blocks."],
+         "craft": craft("halberd")},
+    ]
+
+
 def gear_pages():
     """Batch 25: bronze and steel tools and armor, and paxels; batch 27 gear; batch 28 exosuit."""
     import exosuit
@@ -382,6 +437,7 @@ def gear_pages():
             "Steel tools mine obsidian and ancient debris, and last over three times as long as iron. Steel armor sits "
             "between iron and diamond: a spiked helmet, a field-grey tunic over a steel cuirass, and jackboots."],
          "craft": {"grid": grid, "result": f"{MOD}:steel_pickaxe", "count": 1}},
+    ] + arms_pages() + [
         {"title": "Paxels", "icon": f"{MOD}:steel_paxel", "text": [
             "A paxel is a pickaxe, an axe and a shovel in one tool: it mines stone, wood and dirt at full speed.",
             "Craft one from a pickaxe, an axe and a shovel of the same tier, from wood to netherite, bronze or steel. "
@@ -671,7 +727,7 @@ def build():
             {"title": "Industrial Chemistry", "icon": f"{MOD}:salt", "text": [
                 "Salt, sulfur, phosphate and bauxite get their real uses here.",
                 "Dissolve salt in water to make brine (chemical reactor), then split it in the electrolytic cell into "
-                "chlorine, hydrogen and lye. Gases live only in tanks and pipes."]},
+                "chlorine, hydrogen and lye. Gases live only in tanks, pipes and gas cylinders."]},
             machine_page("electrolytic_cell"),
             machine_page("chemical_reactor"),
             machine_page("fuel_cell"),
@@ -707,6 +763,15 @@ def build():
                 "Nitric acid etches microchips with half as much acid as sulfuric."]},
             machine_page("air_separation_unit"),
             machine_page("synthesis_converter"),
+            machine_page("ammonia_chiller"),
+            machine_page("cryogenic_liquefier"),
+            {"title": "Gas Cylinders", "icon": f"{MOD}:gas_cylinder", "text": [
+                "A gas cylinder carries 8 buckets of one gas: hydrogen to a far-off fuel cell, ammonia to a chiller, "
+                "oxygen or nitrogen into the field.",
+                "Use it on a tank, gas holder, pipe or machine to fill it from there; sneak and use it to empty it "
+                "back. Its bar shows how full it is.",
+                "Used in the air with a scuba tank or a pneumatic grapple in the other hand, it tops that up with "
+                "oxygen or nitrogen."]},
             {"title": "Grenades", "icon": f"{MOD}:grenade", "text": [
                 "Two cotton in 250 mB of nitric acid in the chemical reactor make two guncotton.",
                 "Two steel plates, a guncotton and an iron nugget make four grenades. Throw one with right-click; it "
@@ -749,6 +814,79 @@ def build():
                 "Four microchips, an advanced circuit and a gold ingot make a processor in the circuit assembler: the "
                 "third circuit tier."]},
             block_page("network_terminal", ELECTRONICS_BLOCKS["network_terminal"]["display"]),
+            {"title": "Control Networks", "icon": f"{MOD}:sensor", "text": [
+                "Data cable (optical fibre in a plastic sheath) joins sensors, relays and a logic controller. It "
+                "carries no power. Channels are the sixteen dye colours: use a dye on a sensor or relay to set its "
+                "channel.",
+                "A sensor goes on a tank, battery, machine or chest and reads how full it is: energy first, then "
+                "fluids, then items. It gives a redstone signal like a comparator's and reports the exact percentage "
+                "on its channel. Right-click it to see the reading.",
+                "A relay gives a full redstone signal on every side while the controller has its channel on. Set a "
+                "machine beside it to a redstone mode and the controller runs the machine."]},
+            block_page("logic_controller", "Logic Controller"),
+            {"title": "The Control Room", "icon": f"{MOD}:control_monitor", "text": [
+                "Six control monitor panels in a wall, three wide and two tall, all facing the same way, form one "
+                "screen. Run a data cable from any panel to a logic controller and it shows every channel: its "
+                "colour, reading, a bar, a two-minute graph and whether the controller has it on.",
+                "An alarm klaxon is switched like a relay: while its channel is on it lights up and sounds.",
+                "A control remote flips one channel by hand. Use it on a logic controller to bind it, sneak and use it "
+                "to pick the channel, and use it to switch. The controller's rules may switch the channel back when "
+                "their condition next holds. It works within 256 blocks of the controller."]},
+        ]},
+        {"title": "Rocketry", "icon": f"{MOD}:survey_rocket", "pages": [
+            {"title": "Rocket Fuel", "icon": f"{MOD}:solid_propellant", "text": [
+                "Rockets burn solid propellant: ammonium perchlorate (the oxidizer), aluminum and a rubber binder.",
+                "Ammonium perchlorate: a salt and 250 mB of ammonia in the chemical reactor make two. Iodine: eight "
+                "dried kelp and 100 mB of sulfuric acid make one; with silver dust it makes silver iodide, which "
+                "seeds clouds."]},
+            machine_page("rocket_workshop"),
+            {"title": "Rockets", "icon": f"{MOD}:rocket_motor", "text": [
+                "A rocket motor is a casing, a nozzle and two solid propellant. Fire any rocket with right-click under "
+                "open sky; it rises like a firework and does its work at the top.",
+                "Survey rocket (motor, guidance unit, sensor): surveys ores and oil under 7x7 chunks. Cloud-seeding "
+                "rocket (motor, two silver iodide): five minutes of rain. Clear-sky rocket (motor, two guncotton): "
+                "five minutes of clear sky. Weather rockets share a two-minute cooldown.",
+                "Signal flares (four from propellant, paper and red dye) burst red and tell players within 512 blocks "
+                "where they went up. Illumination flares (with glowstone) make hostile mobs within 48 blocks glow for "
+                "30 seconds."]},
+            {"title": "Rocket Post", "icon": f"{MOD}:delivery_rocket", "text": [
+                "A rocket pad sends its cargo to another pad up to 4096 blocks away in the same dimension. Sneak and "
+                "use a flight plan on the pad to deliver to, then put the plan, a delivery rocket (motor, casing, "
+                "guidance unit) and up to nine stacks of cargo in the sending pad.",
+                "Press Launch, or give the pad a redstone pulse. It needs open sky. The flight takes three seconds "
+                "plus a second for every 80 blocks; the cargo lands in the target pad's slots.",
+                "If nobody is near the target, the rocket waits and lands as soon as that area is loaded again. "
+                "Hoppers load a pad from the top and sides and unload it from the bottom."]},
+            {"title": "Ziplines", "icon": f"{MOD}:line_rocket", "text": [
+                "Place two zipline anchors up to 96 blocks apart with nothing solid between them. Stand within 4 "
+                "blocks of one and use a line-throwing rocket while looking at the other: it strings a steel line.",
+                "Use either anchor with an empty hand to ride the line to the other end, hanging below it. A steeper "
+                "drop is faster. Sneak to let go early (you fall from there).",
+                "Breaking either anchor takes the line down. Each anchor holds one line."]},
+            {"title": "Rocket Launcher", "icon": f"{MOD}:rocket_launcher", "text": [
+                "The rocket launcher fires a rocket from your inventory (the other hand first), straight and fast. One "
+                "shot every two seconds.",
+                "High-explosive rockets (four from two solid propellant, two guncotton and a rocket casing in the "
+                "rocket workshop) burst hard where they hit: twelve hearts at the centre, falling off over 5 blocks.",
+                "Homing rockets (with a guidance unit instead of the casing) lock on to the hostile mob nearest your "
+                "crosshair within 48 blocks, if you can see it, and steer into it. Their blast is smaller.",
+                "Like grenades, rockets hurt living things only: they never break, move or burn a block."]},
+            {"title": "Liquid Fuels", "icon": f"{MOD}:lox_tank", "text": [
+                "RP-1 kerosene: hydrocrack heavy fuel oil with hydrogen (in the water tank) over the catalyst in the "
+                "catalytic cracker. A bucket and 200 mB of hydrogen give 800 mB of kerosene, drawn off with the "
+                "naphtha. It is jet fuel too: 448 JE/mB in the gas turbine, 480 in the advanced engine.",
+                "Liquid oxygen: the cryogenic liquefier condenses a bucket of oxygen into 250 mB.",
+                "Fill a rocket casing with a bucket of each in the chemical reactor to make a kerosene tank and a "
+                "liquid oxygen tank. With two nozzles they make three rocket motors in the rocket workshop, with no "
+                "solid propellant."]},
+            {"title": "Booster Rails", "icon": f"{MOD}:booster_rail", "text": [
+                "A booster rail is a straight rail with rocket thrusters. Power it with redstone like a powered rail; "
+                "unpowered it is an ordinary rail and does not brake.",
+                "Load it with solid propellant (use it on the rail, or feed it from a hopper): each gives 8 boosts, "
+                "up to 64 held.",
+                "A cart that rolls on to a powered, loaded booster rail (or stands on it) is kicked to full speed and "
+                "held there for 10 seconds, up slopes too, trailing flame. A cart standing still goes uphill, or away "
+                "from a block at one end."]},
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

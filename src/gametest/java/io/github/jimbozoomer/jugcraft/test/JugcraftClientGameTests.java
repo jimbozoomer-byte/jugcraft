@@ -280,6 +280,34 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_power_gear");
 
+			// Batch 37: a control room. Two battery boxes with sensors (red, blue), a logic controller and a relay on a
+			// data cable, an alarm sounding, and a 3x2 control monitor showing the channels; the remote in hand.
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:control_remote");
+			server.runOnServer(minecraft -> buildControlRoom(minecraft.overworld(), new BlockPos(x - 24, y, z - 10)));
+			server.runCommand("tp @p %d %d %d 180 6".formatted(x - 21, y + 1, z - 3));
+			context.waitTicks(120);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_control_room");
+			server.runCommand("clear @p");
+
+			// Rocketry (batches 38-43), where the control room was: a wall of item frames with the rockets, the rocket
+			// workshop, cryogenic liquefier and a rocket pad, a zipline strung from the top of the wall, and a powered
+			// booster rail line with a minecart; the rocket launcher in hand.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 26, y, z - 10, x - 10, y + 6, z + 1));
+			server.runOnServer(minecraft -> buildRocketry(minecraft.overworld(), new BlockPos(x - 24, y, z - 10)));
+			String[] rockets = {"survey_rocket", "signal_flare", "delivery_rocket", "line_rocket", "he_rocket", "homing_rocket",
+					"kerosene_tank", "lox_tank", "rocket_motor", "flight_plan"};
+			for (int i = 0; i < rockets.length; i++) {
+				server.runCommand("summon minecraft:item_frame %d %d %d {Facing:3b,Fixed:1b,Item:{id:\"jugcraft:%s\",count:1}}"
+						.formatted(x - 23 + i % 5 * 2, y + 1 + i / 5, z - 9, rockets[i]));
+			}
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:rocket_launcher");
+			server.runCommand("tp @p %d %d %d 180 10".formatted(x - 18, y + 1, z - 2));
+			context.waitTicks(80);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_rocketry");
+			server.runCommand("clear @p");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
@@ -722,6 +750,90 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 	 * bank and a charging station holding a drill, joined by copper, silver and aluminum cables (one rising over the
 	 * bank), then a charged electric motor turning a shaft into a dynamo, and an electric pump. All face south.
 	 */
+	/** Batch 37: the control room scene, along the back of the cleared floor (base: the west end of its cable). */
+	private static void buildControlRoom(ServerLevel level, BlockPos base) {
+		BlockState cable = io.github.jimbozoomer.jugcraft.control.JugcraftControl.DATA_CABLE.defaultBlockState();
+		for (int dx = 1; dx <= 5; dx++) {
+			level.setBlock(base.offset(dx, 1, 0), cable, 3);
+		}
+		for (int dx = 6; dx <= 9; dx++) {
+			level.setBlock(base.offset(dx, 0, 0), cable, 3);
+		}
+		BlockPos controllerPos = base.offset(6, 1, 0);
+		level.setBlock(controllerPos, io.github.jimbozoomer.jugcraft.control.JugcraftControl.LOGIC_CONTROLLER.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.control.LogicControllerBlock.FACING, Direction.SOUTH), 3);
+		var red = net.minecraft.world.item.DyeColor.RED;
+		var blue = net.minecraft.world.item.DyeColor.BLUE;
+		int[][] batteries = {{7, 70}, {9, 30}};
+		for (int i = 0; i < batteries.length; i++) {
+			BlockPos battery = base.offset(batteries[i][0], 0, 2);
+			level.setBlock(battery, JugcraftMachines.MACHINES.get(MachineKind.BATTERY_BOX).defaultBlockState()
+					.setValue(MachineBlock.FACING, Direction.SOUTH), 3);
+			if (level.getBlockEntity(battery) instanceof MachineBlockEntity box && box.energyFor(null) instanceof SimpleEnergyStorage energy) {
+				energy.setAmount(energy.getCapacity() * batteries[i][1] / 100);
+			}
+			level.setBlock(battery.north(), io.github.jimbozoomer.jugcraft.control.JugcraftControl.SENSOR.defaultBlockState()
+					.setValue(io.github.jimbozoomer.jugcraft.control.SensorBlock.FACING, Direction.NORTH)
+					.setValue(io.github.jimbozoomer.jugcraft.control.Channels.CHANNEL, i == 0 ? red : blue), 3);
+		}
+		level.setBlock(base.offset(8, 0, 1), io.github.jimbozoomer.jugcraft.control.JugcraftControl.RELAY.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.control.Channels.CHANNEL, net.minecraft.world.item.DyeColor.GREEN), 3);
+		level.setBlock(base.offset(1, 2, 0), io.github.jimbozoomer.jugcraft.control.JugcraftControl.ALARM.defaultBlockState()
+				.setValue(io.github.jimbozoomer.jugcraft.control.Channels.CHANNEL, net.minecraft.world.item.DyeColor.ORANGE), 3);
+		// The monitor last, so its panels find the cable behind them when they form.
+		for (int dx = 2; dx <= 4; dx++) {
+			for (int dy = 1; dy <= 2; dy++) {
+				level.setBlock(base.offset(dx, dy, 1), io.github.jimbozoomer.jugcraft.control.JugcraftControl.CONTROL_MONITOR.defaultBlockState()
+						.setValue(io.github.jimbozoomer.jugcraft.control.ControlMonitorBlock.FACING, Direction.SOUTH), 3);
+			}
+		}
+		for (BlockPos pos : BlockPos.betweenClosed(base, base.offset(9, 2, 0))) {
+			if (level.getBlockState(pos).is(io.github.jimbozoomer.jugcraft.control.JugcraftControl.DATA_CABLE)) {
+				level.setBlock(pos, Block.updateFromNeighbourShapes(level.getBlockState(pos), level, pos), 3);
+			}
+		}
+		if (level.getBlockEntity(controllerPos) instanceof io.github.jimbozoomer.jugcraft.control.LogicControllerBlockEntity controller) {
+			controller.setRule(0, true, red, true, 50, net.minecraft.world.item.DyeColor.GREEN, true);
+			controller.setRule(1, true, blue, false, 20, net.minecraft.world.item.DyeColor.ORANGE, true);
+			controller.evaluate(level, controllerPos);
+			controller.toggle(level, net.minecraft.world.item.DyeColor.ORANGE);
+		}
+	}
+
+	/** Batches 38-43: the rocketry scene (base: the west end of the back wall). */
+	private static void buildRocketry(ServerLevel level, BlockPos base) {
+		for (int dx = 0; dx <= 10; dx++) {
+			for (int dy = 0; dy <= 2; dy++) {
+				level.setBlock(base.offset(dx, dy, 0), Blocks.SMOOTH_STONE.defaultBlockState(), 3);
+			}
+		}
+		level.setBlock(base.offset(1, 0, 3), JugcraftMachines.MACHINES.get(MachineKind.ROCKET_WORKSHOP).defaultBlockState()
+				.setValue(MachineBlock.FACING, Direction.SOUTH), 3);
+		level.setBlock(base.offset(3, 0, 3), JugcraftMachines.MACHINES.get(MachineKind.CRYOGENIC_LIQUEFIER).defaultBlockState()
+				.setValue(MachineBlock.FACING, Direction.SOUTH), 3);
+		level.setBlock(base.offset(5, 0, 3), io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD.defaultBlockState(), 3);
+		// A zipline from the top of the wall down to an anchor near the camera.
+		BlockPos top = base.offset(10, 3, 0);
+		BlockPos low = base.offset(13, 0, 4);
+		BlockState anchor = io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_ANCHOR.defaultBlockState();
+		level.setBlock(top, anchor, 3);
+		level.setBlock(low, anchor, 3);
+		io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.connect(level, top, low, null);
+		// A powered booster rail line along the front, with a minecart on it.
+		BlockState rail = io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.BOOSTER_RAIL.defaultBlockState()
+				.setValue(net.minecraft.world.level.block.PoweredRailBlock.SHAPE, net.minecraft.world.level.block.state.properties.RailShape.EAST_WEST);
+		for (int dx = 1; dx <= 8; dx++) {
+			level.setBlock(base.offset(dx, 0, 5), rail, 3);
+		}
+		level.setBlock(base.offset(0, 0, 5), Blocks.REDSTONE_BLOCK.defaultBlockState(), 3);
+		var cart = net.minecraft.world.entity.EntityTypes.MINECART.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+		if (cart != null) {
+			BlockPos at = base.offset(5, 0, 5);
+			cart.snapTo(at.getX() + 0.5, at.getY() + 0.1, at.getZ() + 0.5, 90, 0);
+			level.addFreshEntity(cart);
+		}
+	}
+
 	private static void buildPowerGear(ServerLevel level, BlockPos start) {
 		level.setBlock(start, JugcraftMachines.MACHINES.get(MachineKind.SOLAR_PANEL).defaultBlockState()
 				.setValue(MachineBlock.FACING, Direction.SOUTH), 3);

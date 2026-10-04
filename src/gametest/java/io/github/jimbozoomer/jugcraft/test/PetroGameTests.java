@@ -29,6 +29,9 @@ import io.github.jimbozoomer.jugcraft.farming.SprinklerBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.FluidTankBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
+import io.github.jimbozoomer.jugcraft.fluid.GasCylinderItem;
+import io.github.jimbozoomer.jugcraft.fluid.StoredFluid;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import io.github.jimbozoomer.jugcraft.fluid.TankGaugeBlock;
 import io.github.jimbozoomer.jugcraft.kinetic.DynamoBlockEntity;
 import io.github.jimbozoomer.jugcraft.kinetic.FlywheelBlock;
@@ -1239,6 +1242,122 @@ public class PetroGameTests {
 		long left = StorageUtil.simulateExtract(holder, FluidVariant.of(PetroFluids.OXYGEN.fluid()), Long.MAX_VALUE, null);
 		helper.assertTrue(left == 2_000 * FluidNetworks.DROPLETS_PER_MB, "The holder has " + left / FluidNetworks.DROPLETS_PER_MB + " mB left");
 		helper.succeed();
+	}
+
+	/**
+	 * Batch 35: a gas cylinder fills from a gas holder up to its 8,000 mB, empties into a fuel cell when used sneaking,
+	 * refuses liquids and a second gas, and tops up a scuba tank in the other hand with its oxygen.
+	 */
+	@GameTest
+	public void gasCylinderCarriesGas(GameTestHelper helper) {
+		BlockPos master = new BlockPos(5, 1, 1);
+		placeUnpowered(helper, MachineKind.GAS_HOLDER, master);
+		BlockPos at = helper.absolutePos(master);
+		Storage<FluidVariant> holder = FluidStorage.SIDED.find(helper.getLevel(), at, Direction.UP);
+		FluidVariant hydrogen = FluidVariant.of(PetroFluids.HYDROGEN.fluid());
+		try (Transaction transaction = Transaction.openOuter()) {
+			holder.insert(hydrogen, 10 * FluidConstants.BUCKET, transaction);
+			transaction.commit();
+		}
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftFluids.GAS_CYLINDER));
+		player.getItemInHand(InteractionHand.MAIN_HAND).useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false)));
+		StoredFluid held = GasCylinderItem.contents(player.getItemInHand(InteractionHand.MAIN_HAND));
+		helper.assertTrue(held != null && held.variant().equals(hydrogen)
+				&& held.amount() == GasCylinderItem.CAPACITY * FluidNetworks.DROPLETS_PER_MB, "The cylinder holds " + held);
+		long left = StorageUtil.simulateExtract(holder, hydrogen, Long.MAX_VALUE, null);
+		helper.assertTrue(left == 2_000 * FluidNetworks.DROPLETS_PER_MB, "The holder has " + left / FluidNetworks.DROPLETS_PER_MB + " mB left");
+
+		Storage<FluidVariant> cylinder = GasCylinderItem.storage(
+				ContainerItemContext.withConstant(player.getItemInHand(InteractionHand.MAIN_HAND)));
+		helper.assertTrue(StorageUtil.simulateInsert(cylinder, FluidVariant.of(PetroFluids.OXYGEN.fluid()), FluidConstants.BUCKET, null) == 0,
+				"A hydrogen cylinder took oxygen");
+		Storage<FluidVariant> empty = GasCylinderItem.storage(ContainerItemContext.withConstant(new ItemStack(JugcraftFluids.GAS_CYLINDER)));
+		helper.assertTrue(StorageUtil.simulateInsert(empty, FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET, null) == 0,
+				"The cylinder took water");
+
+		BlockPos cellPos = new BlockPos(1, 1, 5);
+		helper.setBlock(cellPos, JugcraftMachines.MACHINES.get(MachineKind.FUEL_CELL).defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH));
+		MachineBlockEntity cell = helper.getBlockEntity(cellPos, MachineBlockEntity.class);
+		BlockPos cellAt = helper.absolutePos(cellPos);
+		player.setShiftKeyDown(true);
+		player.getItemInHand(InteractionHand.MAIN_HAND).useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(cellAt), Direction.UP, cellAt, false)));
+		helper.assertTrue(GasCylinderItem.contents(player.getItemInHand(InteractionHand.MAIN_HAND)) == null,
+				"The cylinder kept " + GasCylinderItem.contents(player.getItemInHand(InteractionHand.MAIN_HAND)));
+		helper.assertTrue(cell.tanks().input(0).millibuckets() == GasCylinderItem.CAPACITY,
+				"The fuel cell got " + cell.tanks().input(0).millibuckets() + " mB");
+		player.setShiftKeyDown(false);
+
+		FluidVariant oxygen = FluidVariant.of(PetroFluids.OXYGEN.fluid());
+		player.setItemInHand(InteractionHand.MAIN_HAND, GasCylinderItem.filled(new ItemStack(JugcraftFluids.GAS_CYLINDER), oxygen,
+				3_000 * FluidNetworks.DROPLETS_PER_MB));
+		player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(JugcraftGear.SCUBA_TANK));
+		player.getItemInHand(InteractionHand.MAIN_HAND).use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+		int scuba = ScubaTankItem.oxygen(player.getItemInHand(InteractionHand.OFF_HAND));
+		helper.assertTrue(scuba == 3_000, "The scuba tank got " + scuba + " mB");
+		helper.assertTrue(GasCylinderItem.contents(player.getItemInHand(InteractionHand.MAIN_HAND)) == null, "The oxygen cylinder is not empty");
+		helper.succeed();
+	}
+
+	/** Places a powered one-block machine facing north. */
+	private static MachineBlockEntity placeSingle(GameTestHelper helper, MachineKind kind, BlockPos pos) {
+		helper.setBlock(pos, JugcraftMachines.MACHINES.get(kind).defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH));
+		SimpleEnergyStorage energy = (SimpleEnergyStorage) EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(pos), Direction.UP);
+		energy.setAmount(energy.getCapacity());
+		return helper.getBlockEntity(pos, MachineBlockEntity.class);
+	}
+
+	/**
+	 * Batch 35: the ammonia chiller freezes a bucket of water into ice for 5 mB of ammonia, and presses four packed ice
+	 * into blue ice; it refuses lava.
+	 */
+	@GameTest(maxTicks = 400)
+	public void ammoniaChillerMakesIce(GameTestHelper helper) {
+		MachineBlockEntity freezer = placeSingle(helper, MachineKind.AMMONIA_CHILLER, new BlockPos(1, 1, 1));
+		MachineBlockEntity packer = placeSingle(helper, MachineKind.AMMONIA_CHILLER, new BlockPos(4, 1, 1));
+		Storage<FluidVariant> inlet = FluidStorage.SIDED.find(helper.getLevel(), helper.absolutePos(new BlockPos(1, 1, 1)), Direction.UP);
+		try (Transaction transaction = Transaction.openOuter()) {
+			long ammonia = inlet.insert(FluidVariant.of(PetroFluids.AMMONIA.fluid()), FluidConstants.BUCKET, transaction);
+			long water = inlet.insert(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET, transaction);
+			long lava = inlet.insert(FluidVariant.of(Fluids.LAVA), FluidConstants.BUCKET, transaction);
+			helper.assertTrue(ammonia == FluidConstants.BUCKET && water == FluidConstants.BUCKET,
+					"The chiller took " + ammonia / 81 + " mB ammonia and " + water / 81 + " mB water");
+			helper.assertTrue(lava == 0, "The chiller took lava");
+			transaction.commit();
+		}
+		packer.tanks().input(0).fill(PetroFluids.AMMONIA.fluid(), 100);
+		packer.setItem(0, new ItemStack(Items.PACKED_ICE, 4));
+		helper.succeedWhen(() -> {
+			int out = MachineKind.AMMONIA_CHILLER.outputSlot();
+			helper.assertTrue(freezer.getItem(out).is(Items.ICE), "Freezer output is " + freezer.getItem(out));
+			helper.assertTrue(freezer.tanks().input(0).millibuckets() == 995 && freezer.tanks().input(1).millibuckets() == 0,
+					"Freezer tanks: " + freezer.tanks().input(0).millibuckets() + " ammonia, " + freezer.tanks().input(1).millibuckets() + " water");
+			helper.assertTrue(packer.getItem(out).is(Items.BLUE_ICE) && packer.getItem(0).isEmpty(), "Packer output is " + packer.getItem(out));
+		});
+	}
+
+	/**
+	 * Batch 43 (liquid fuels): the cryogenic liquefier condenses a bucket of oxygen into 250 mB of liquid oxygen; RP-1
+	 * kerosene burns in the gas turbine and the advanced engine.
+	 */
+	@GameTest(maxTicks = 300)
+	public void cryogenicLiquefierMakesLiquidOxygen(GameTestHelper helper) {
+		MachineBlockEntity liquefier = placeSingle(helper, MachineKind.CRYOGENIC_LIQUEFIER, new BlockPos(1, 1, 1));
+		liquefier.tanks().input(0).fill(PetroFluids.OXYGEN.fluid(), 1000);
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.chemistry.FluidFuels.jePerMb(MachineKind.GAS_TURBINE,
+				PetroFluids.KEROSENE.source()) == io.github.jimbozoomer.jugcraft.chemistry.FluidFuels.KEROSENE,
+				"Kerosene does not burn in the gas turbine");
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.chemistry.FluidFuels.jePerMb(MachineKind.ADVANCED_ENGINE,
+				PetroFluids.KEROSENE.source()) == io.github.jimbozoomer.jugcraft.chemistry.FluidFuels.ADVANCED_KEROSENE,
+				"Kerosene does not burn in the advanced engine");
+		helper.succeedWhen(() -> {
+			int lox = liquefier.tanks().output(0).millibuckets();
+			helper.assertTrue(lox == 250 && liquefier.tanks().output(0).variant.isOf(PetroFluids.LIQUID_OXYGEN.source()),
+					"The liquefier holds " + lox + " mB of " + liquefier.tanks().output(0).variant);
+			helper.assertTrue(liquefier.tanks().input(0).millibuckets() == 0, "Oxygen left: " + liquefier.tanks().input(0).millibuckets());
+		});
 	}
 
 	/** Batch 30: the pneumatic grapple fills with nitrogen from a gas holder, up to its 4,000 mB. */
