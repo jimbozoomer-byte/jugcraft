@@ -22,10 +22,12 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.zombie.Zombie;
@@ -220,7 +222,7 @@ public class CryptAndOssuaryClientGameTests implements FabricClientGameTest {
 			}
 		}
 		for (int dz = -10; dz <= -5; dz++) {
-			put(level, origin, 2, -1, dz, Blocks.RED_WOOL.defaultBlockState());
+			put(level, origin, 2, -1, dz, BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace("red_wool")).defaultBlockState());
 		}
 		tall(level, origin, 2, 0, -11, block(JugcraftAgriculture.BONE_THRONE).defaultBlockState().setValue(TallDecorationBlock.FACING, Direction.SOUTH));
 		for (int dx : new int[] {0, 4}) {
@@ -283,7 +285,7 @@ public class CryptAndOssuaryClientGameTests implements FabricClientGameTest {
 		}
 		// The Gargoyle Sentinel on the path, turned toward a pumpkin-headed zombie by the femur.
 		put(level, origin, 10, 0, -2, block(JugcraftAgriculture.GARGOYLE_SENTINEL).defaultBlockState().setValue(GargoyleSentinelBlock.FACING, Direction.WEST));
-		Zombie zombie = EntityType.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
+		Zombie zombie = EntityTypes.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
 		if (zombie != null) {
 			zombie.snapTo(origin.getX() + 6.5, origin.getY(), origin.getZ() - 2.5, 90.0F, 0.0F);
 			zombie.setNoAi(true);
