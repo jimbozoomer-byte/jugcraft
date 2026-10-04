@@ -116,6 +116,9 @@ public class ArmsVGameTests {
 		Mob edge = husk(helper, new BlockPos(12, 2, 8));
 		Mob far = husk(helper, new BlockPos(14, 2, 12));
 		float base = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		// Where the husks stand before the slam throws them.
+		Vec3 closeAt = close.position();
+		Vec3 edgeAt = edge.position();
 		helper.assertTrue(WeaponArts.start(player, player.getMainHandItem()), "The leap did not start from the platform");
 		helper.assertTrue(near((float) player.getDeltaMovement().y, JugcraftArms.LEAP_UP), "The leap did not spring: " + player.getDeltaMovement());
 		Vec3 air = Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(9, 5, 8)));
@@ -124,8 +127,8 @@ public class ArmsVGameTests {
 		helper.runAfterDelay(3, () -> player.setPos(landing.x, landing.y, landing.z));
 		helper.runAfterDelay(JugcraftArms.LEAP_MIN_AIR + 2, () -> {
 			double drop = 3.0;
-			float closeShare = share(close, landing, drop);
-			float edgeShare = share(edge, landing, drop);
+			float closeShare = share(closeAt, landing, drop);
+			float edgeShare = share(edgeAt, landing, drop);
 			Jugcraft.LOGGER.info("[arms v] leap slam, {} blocks down: close {} (share {}), edge {} (share {}), far {}; close thrown up {}",
 					drop, close.getHealth(), closeShare, edge.getHealth(), edgeShare, far.getHealth(), close.getDeltaMovement().y);
 			helper.assertTrue(near(HEALTH - close.getHealth(), base * closeShare) && near(HEALTH - edge.getHealth(), base * edgeShare),
@@ -248,9 +251,9 @@ public class ArmsVGameTests {
 		});
 	}
 
-	/** The slam's share for a foe: LEAP_SHARE falling off towards the edge, plus LEAP_PER_BLOCK a block of drop. */
-	private static float share(Mob foe, Vec3 landing, double drop) {
-		double distance = Math.sqrt(Math.pow(foe.getX() - landing.x, 2) + Math.pow(foe.getZ() - landing.z, 2));
+	/** The slam's share for a foe standing at `at`: LEAP_SHARE falling off towards the edge, plus LEAP_PER_BLOCK a block of drop. */
+	private static float share(Vec3 at, Vec3 landing, double drop) {
+		double distance = Math.sqrt(Math.pow(at.x - landing.x, 2) + Math.pow(at.z - landing.z, 2));
 		double falloff = 1.0 - (1.0 - JugcraftArms.LEAP_EDGE) * Math.min(1.0, distance / JugcraftArms.LEAP_RADIUS);
 		return (float) (JugcraftArms.LEAP_SHARE * falloff + JugcraftArms.LEAP_PER_BLOCK * drop);
 	}

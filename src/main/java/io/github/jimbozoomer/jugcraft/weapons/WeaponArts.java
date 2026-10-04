@@ -50,7 +50,8 @@ import net.minecraft.world.phys.Vec3;
  * the dash ends;</li>
  * <li>{@link JugcraftArms.Move#LEAP_SLAM}: a leap; where the wielder lands, every foe about is struck, hardest at the
  * centre and harder the further below the take-off, and thrown up;</li>
- * <li>{@link JugcraftArms.Move#FLURRY}: quick jabs at the foe ahead, each landing in full, then a driving finish;</li>
+ * <li>{@link JugcraftArms.Move#FLURRY}: quick jabs at the foe ahead, each landing in full and holding it in reach, then a
+ * driving finish;</li>
  * <li>{@link JugcraftArms.Move#CRESCENT}: a wave that runs ahead, through every foe in its way (each weakening it), until
  * a block stops it;</li>
  * <li>{@link JugcraftArms.Move#CHAIN_LASH}: a chain at the first foe in line, which is struck and hauled in, then reaped
@@ -364,7 +365,12 @@ public final class WeaponArts {
 		List<LivingEntity> foes = TwoHanded.foes(player, active.stack, new JugcraftArms.Heavy(0, JugcraftArms.FLURRY_ARC, 1, 1));
 		if (!foes.isEmpty()) {
 			LivingEntity foe = foes.getFirst();
+			// A jab holds the foe where it is (vanilla's hit would knock it back out of reach); only the finish drives it off.
+			Vec3 motion = foe.getDeltaMovement();
 			if (hit(player, foe, finish ? JugcraftArms.FLURRY_FINISH : JugcraftArms.FLURRY_SHARE, finish, false)) {
+				if (!finish) {
+					push(foe, motion);
+				}
 				level.sendParticles(ParticleTypes.CRIT, foe.getX(), foe.getY(0.6), foe.getZ(), finish ? 14 : 5, 0.2, 0.3, 0.2, 0.2);
 			}
 		}
