@@ -1778,8 +1778,8 @@ public final class JugcraftAgriculture {
 		FLYING_EYEBALL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(FLYING_EYEBALL),
 				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(FLYING_EYEBALL_ENTITY, pos, state), eyeball)
 						.build());
-		Block ivory = registerBlock(IVORY_PILLAR_CANDLE, PillarCandleBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.WHITE_CANDLE));
-		Block black = registerBlock(BLACK_PILLAR_CANDLE, PillarCandleBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BLACK_CANDLE));
+		Block ivory = registerBlock(IVORY_PILLAR_CANDLE, PillarCandleBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.CANDLE).mapColor(MapColor.SAND));
+		Block black = registerBlock(BLACK_PILLAR_CANDLE, PillarCandleBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.CANDLE).mapColor(MapColor.COLOR_BLACK));
 		Block web = registerBlock(SPIDER_WEB, MultifaceBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).noCollision()
 				.strength(0.2F).sound(SoundType.COBWEB).noOcclusion().pushReaction(PushReaction.POPPED));
 		Block head = registerBlock(MONSTER_HEAD, MonsterHeadBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN)
