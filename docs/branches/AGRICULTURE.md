@@ -1022,7 +1022,17 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 
 ### The Graveyard: flora
 
-<!-- flora-shots -->
+| **A haunted churchyard**: the flora round headstones, a crypt wall, a mandrake bed and an oak hung with shroud moss | **The flowers**: black roses, spider lilies, foxgloves, a funeral lily, snowdrops, nightshade and bleeding hearts |
+| --- | --- |
+| ![The graveyard flora](../images/ingame_graveyard_flora.jpg) | ![The flowers](../images/ingame_graveyard_flora_flowers.jpg) |
+| **The tall plants** along the wall: foxglove, funeral lily, asphodel, withered grass and ghost ferns | **The crypt wall**: creeping ivy over its faces, potted flora on top |
+| ![The tall plants](../images/ingame_graveyard_flora_tall.jpg) | ![Creeping ivy on the crypt wall](../images/ingame_graveyard_flora_wall.jpg) |
+| **Shroud moss** hanging from the oak's leaves | **The mandrake bed**, from seed to ripe, and a pulled root |
+| ![Shroud moss](../images/ingame_graveyard_flora_shroud_moss.jpg) | ![Mandrakes](../images/ingame_graveyard_flora_mandrakes.jpg) |
+| **By night** | **Ghost pipes** glowing in the dark |
+| ![The graveyard flora at night](../images/ingame_graveyard_flora_night.jpg) | ![Ghost pipes at night](../images/ingame_graveyard_flora_ghost_pipes.jpg) |
+
+*Real screenshots from the client game test that CI runs (`GraveyardFloraClientGameTests`, software rendering, small previews). The crops' stages are set for the picture.*
 
 - **Seventeen plants for a haunted churchyard**, sculpted like hand-built plants (bent stems, cut-out leaves and petals at angles, bells and berries as little boxes) rather than crossed pictures:
   - flowers to pot and dye: **spider lily**, **snowdrop**, **deadly nightshade**, **bleeding heart** and the glowing **ghost pipe**;

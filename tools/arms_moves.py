@@ -312,3 +312,204 @@ MOVES["lance"] = {
     # Couched for the charge: leaning into it, braced.
     "use": P(body=(18, 4, 0, 0, 0.5, -1.6), head=(-14, -2, 0), **step(2.4, 2)),
 }
+
+# ================================================================ Arms II (batch 45)
+
+# ---------------------------------------------------------------- dagger: low guard, quick stabs and a slash
+
+LENGTH.update({"dagger": 11, "sabre": 19, "estoc": 22, "battle_axe": 20, "flail": 18, "scythe": 26, "quarterstaff": 30,
+               "pike": 34})
+
+DG_HOLD = P(body=(0, 16, 0), head=(0, -14, 0), right_arm=(-38, 2, 4), left_arm=(-28, 14, -10), item=(-48, 0, 0),
+            **step(0.7, 6))
+DG = {
+    "coil": P(body=(-2, 22, 0), head=(0, -18, 0), right_arm=(-30, 14, 10, 0, 0, 2.5), left_arm=(-34, 12, -12),
+              item=(-56, 0, 4), **step(0.5, 8)),
+    "stab": P(body=(10, 2, 0, 0, 0.3, -1.0), head=(-8, 0, 0), right_arm=(-90, -6, 0, 0, 0, -2.5), left_arm=(-10, 16, -16),
+              item=(-88, 0, 0), **step(1.8, 2)),
+    "high_in": P(body=(-4, 26, 0), head=(0, -22, 0), right_arm=(-120, 30, 20), left_arm=(-30, 10, -12), item=(40, 0, 30),
+                 **step(0.4, 8)),
+    "slash": P(body=(6, -24, 0), head=(-2, 20, 0), right_arm=(-76, -36, -6), left_arm=(6, -10, -14), item=(-10, 0, -40),
+               **step(1.2, -4)),
+}
+DG_FP = F(-30, 10, 4, -1, 0)
+MOVES["dagger"] = {
+    "hold": DG_HOLD, "fp_hold": DG_FP,
+    "attacks": [
+        fp(clip("stab", DG_HOLD, (0.12, DG["coil"]), (0.3, DG["stab"], 0.45), (0.58, settle(DG["stab"], DG_HOLD, 0.35))),
+           DG_FP, *fp_thrust(DG_FP, 0.8)),
+        fp(clip("slash", DG_HOLD, (0.14, DG["high_in"]), (0.32, DG["slash"], 0.2), (0.62, settle(DG["slash"], DG_HOLD))),
+           DG_FP, *fp_forehand(DG_FP, 0.8, keys=3)),
+    ],
+}
+
+# ---------------------------------------------------------------- sabre: a light cavalry blade, quick cuts both ways
+
+SB_HOLD = P(body=(0, 10, 0), head=(0, -10, 0), right_arm=(-34, 8, 8), left_arm=(-6, 2, -6), item=(44, 0, 10))
+SB = {
+    "wind_r": P(body=(-2, 34, 0), head=(0, -28, 0), right_arm=(-146, 34, 26), left_arm=(-20, 18, -12), item=(64, 0, 24),
+                **step(-0.4, 6)),
+    "cut_l": P(body=(6, -30, 0), head=(-2, 24, 0), right_arm=(-80, -42, -8), left_arm=(10, -14, -16), item=(-4, 0, -44),
+               **step(1.0, -6)),
+    "follow_l": P(body=(8, -40, 0), head=(-2, 30, 0), right_arm=(-44, -56, -14), left_arm=(16, -16, -18), item=(-22, 0, -52),
+                  **step(1.2, -8)),
+    "wind_l": P(body=(0, -30, 0), head=(0, 24, 0), right_arm=(-44, -64, -30), left_arm=(-6, -10, -10), item=(14, 0, -74),
+                **step(0.3, -4)),
+    "cut_r": P(body=(4, 32, 0), head=(-2, -26, 0), right_arm=(-112, 42, 28), left_arm=(-18, 12, -12), item=(42, 0, 54),
+               **step(0.9, 6)),
+    "follow_r": P(body=(2, 42, 0), head=(0, -32, 0), right_arm=(-136, 58, 36), left_arm=(-22, 14, -12), item=(58, 0, 64),
+                  **step(0.9, 8)),
+}
+SB_FP = F(0, 0, 12, -1, 1)
+MOVES["sabre"] = {
+    "hold": SB_HOLD, "fp_hold": SB_FP,
+    "attacks": [
+        fp(clip("forehand", SB_HOLD, (0.14, SB["wind_r"]), (0.3, SB["cut_l"], 0.15), (0.48, SB["follow_l"]),
+                (0.74, settle(SB["follow_l"], SB_HOLD))), SB_FP, *fp_forehand(SB_FP)),
+        fp(clip("backhand", SB_HOLD, (0.14, SB["wind_l"]), (0.3, SB["cut_r"], 0.15), (0.48, SB["follow_r"]),
+                (0.74, settle(SB["follow_r"], SB_HOLD))), SB_FP, *fp_backhand(SB_FP)),
+    ],
+}
+
+# ---------------------------------------------------------------- estoc: point forward, deep thrusts
+
+ES_HOLD = P(body=(0, 20, 0), head=(0, -18, 0), right_arm=(-58, -4, 2), left_arm=(-40, 26, -16), item=(-44, 0, 0),
+            **step(0.7, 6))
+ES = {
+    "draw": P(body=(-6, 26, 0), head=(0, -22, 0), right_arm=(-46, 16, 10, 0, 0, 3), left_arm=(-46, 24, -18), item=(-50, 0, 2),
+              **step(0.2, 8)),
+    "thrust": P(body=(14, 4, 0, 0, 0.4, -1.6), head=(-12, -2, 0), right_arm=(-94, -2, 0, 0, 0, -3), left_arm=(-14, 24, -30),
+                item=(-88, 0, 0), right_leg=(-30, 6, 0, 0, 0, -3.5), left_leg=(20, 6, 0, 0, 0, 2)),
+    "high_draw": P(body=(-8, 22, 0), head=(-6, -18, 0), right_arm=(-130, 20, 16, 0, 0, 2), left_arm=(-46, 24, -18),
+                   item=(-40, 0, 6), **step(0.2, 8)),
+    "high": P(body=(10, 6, 0, 0, 0.2, -1.0), head=(-4, -4, 0), right_arm=(-112, -4, 0, 0, 0, -3), left_arm=(-12, 20, -28),
+              item=(-92, 0, 0), **step(1.8, 2)),
+}
+ES_FP = F(-38, 12, 4, -2, 1)
+MOVES["estoc"] = {
+    "hold": ES_HOLD, "fp_hold": ES_FP,
+    "attacks": [
+        fp(clip("thrust", ES_HOLD, (0.14, ES["draw"]), (0.32, ES["thrust"], 0.45), (0.6, settle(ES["thrust"], ES_HOLD, 0.3))),
+           ES_FP, *fp_thrust(ES_FP, 1.3)),
+        fp(clip("high_thrust", ES_HOLD, (0.14, ES["high_draw"]), (0.32, ES["high"], 0.45), (0.6, settle(ES["high"], ES_HOLD, 0.3))),
+           ES_FP, *fp_thrust(ES_FP, 1.1)),
+    ],
+}
+
+# ---------------------------------------------------------------- battle axe: two hands, chops from high and from the side
+
+BA_HOLD = P(body=(0, 22, 0), head=(0, -20, 0), right_arm=(-36, 12, 10), item=(66, 0, -26), **step(0.6, 6))
+BA = {
+    "heave": P(body=(-14, 16, 0, 0, -0.4, 0.8), head=(-10, -12, 0), right_arm=(-176, 12, 10), item=(86, 0, -8), **step(-0.6, 4)),
+    "chop": P(body=(26, 4, 0, 0, 1.0, -2.0), head=(14, -4, 0), right_arm=(-64, 4, 0), item=(-30, 0, 0), **step(2.4)),
+    "bite": P(body=(30, 2, 0, 0, 1.1, -2.2), head=(18, -2, 0), right_arm=(-34, 2, 0), item=(-56, 0, 0), **step(2.6)),
+    "wind": P(body=(-6, 54, 0), head=(0, -44, 0), right_arm=(-94, 68, 30), item=(48, 0, 50), **step(-0.8, 12)),
+    "swing": P(body=(10, -32, 0), head=(-2, 26, 0), right_arm=(-82, -34, -4), item=(2, 0, -50), **step(2.0, -10)),
+    "carry": P(body=(14, -48, 0), head=(-4, 38, 0), right_arm=(-56, -50, -10), item=(-18, 0, -60), **step(2.2, -12)),
+}
+BA_FP = F(0, 30, 24, -3, -2)
+MOVES["battle_axe"] = {
+    "hold": BA_HOLD, "two_handed": 9, "fp_hold": BA_FP,
+    "attacks": [
+        fp(clip("chop", BA_HOLD, (0.18, BA["heave"]), (0.36, BA["chop"], 0.4), (0.5, BA["bite"], 0.2),
+                (0.8, settle(BA["bite"], BA_HOLD))), BA_FP, *fp_overhead(BA_FP, 1.2)),
+        fp(clip("swing", BA_HOLD, (0.18, BA["wind"]), (0.36, BA["swing"], 0.1), (0.54, BA["carry"]),
+                (0.8, settle(BA["carry"], BA_HOLD))), BA_FP, *fp_sweep(BA_FP, 0.95)),
+    ],
+}
+
+# ---------------------------------------------------------------- flail: the ball swung round overhead and brought down
+
+FL_HOLD = P(body=(0, 12, 0), head=(0, -10, 0), right_arm=(-20, 6, 10), left_arm=(-12, 0, -8), item=(40, 0, 10))
+FL = {
+    "whirl": P(body=(-10, 30, 0), head=(-8, -22, 0), right_arm=(-172, 30, 26), left_arm=(-40, 12, -20), item=(90, 0, 30),
+               **step(-0.6, 6)),
+    "smash": P(body=(20, -8, 0, 0, 0.6, -1.0), head=(10, 6, 0), right_arm=(-60, -10, -2), left_arm=(12, -10, -18),
+               item=(-50, 0, -10), **step(1.8)),
+    "drag": P(body=(24, -14, 0, 0, 0.8, -1.2), head=(14, 8, 0), right_arm=(-26, -14, -6), left_arm=(16, -12, -20),
+              item=(-80, 0, -10), **step(2.0)),
+    "wind_r": P(body=(-2, 42, 0), head=(0, -36, 0), right_arm=(-98, 72, 32), left_arm=(-20, 20, -14), item=(50, 0, 70),
+                **step(-0.4, 8)),
+    "swing_l": P(body=(6, -32, 0), head=(-2, 26, 0), right_arm=(-82, -36, -6), left_arm=(10, -12, -16), item=(10, 0, -60),
+                 **step(1.4, -6)),
+}
+FL_FP = F(0, 0, 10, 0, -1)
+MOVES["flail"] = {
+    "hold": FL_HOLD, "fp_hold": FL_FP,
+    "attacks": [
+        fp(clip("overhead", FL_HOLD, (0.18, FL["whirl"]), (0.34, FL["smash"], 0.35), (0.5, FL["drag"]),
+                (0.78, settle(FL["drag"], FL_HOLD))), FL_FP, *fp_overhead(FL_FP, 0.9)),
+        fp(clip("swing", FL_HOLD, (0.16, FL["wind_r"]), (0.32, FL["swing_l"], 0.15),
+                (0.5, add(FL["swing_l"], P(body=(4, -14, 0), right_arm=(22, -18, -4)))),
+                (0.76, settle(FL["swing_l"], FL_HOLD))), FL_FP, *fp_forehand(FL_FP, 1.1)),
+    ],
+}
+
+# ---------------------------------------------------------------- scythe: two hands on the snath, long low reaping sweeps
+
+SC_HOLD = P(body=(0, 28, 0), head=(0, -26, 0), right_arm=(-44, 18, 12), item=(50, 0, -24), **step(0.9, 8))
+SC = {
+    "wind": P(body=(-2, 62, 0), head=(0, -52, 0), right_arm=(-70, 76, 34), item=(20, 0, 64), **step(-0.4, 14)),
+    "reap": P(body=(14, -28, 0, 0, 0.4, -0.6), head=(4, 24, 0), right_arm=(-50, -36, -8), item=(-20, 0, -60),
+              **step(1.8, -10)),
+    "through": P(body=(16, -52, 0, 0, 0.4, -0.8), head=(2, 40, 0), right_arm=(-36, -54, -12), item=(-30, 0, -70),
+                 **step(2.0, -12)),
+    "back_wind": P(body=(4, -44, 0), head=(0, 36, 0), right_arm=(-40, -60, -20), item=(-20, 0, -70), **step(1.2, -10)),
+    "return": P(body=(10, 36, 0, 0, 0.3, -0.5), head=(2, -30, 0), right_arm=(-64, 50, 20), item=(10, 0, 60), **step(1.6, 10)),
+}
+SC_FP = F(-8, 30, 26, -3, -2)
+MOVES["scythe"] = {
+    "hold": SC_HOLD, "two_handed": 16, "fp_hold": SC_FP,
+    "attacks": [
+        fp(clip("reap", SC_HOLD, (0.16, SC["wind"]), (0.34, SC["reap"], 0.1), (0.52, SC["through"]),
+                (0.78, settle(SC["through"], SC_HOLD))), SC_FP, *fp_sweep(SC_FP, 1.2)),
+        fp(clip("return", SC_HOLD, (0.16, SC["back_wind"]), (0.34, SC["return"], 0.1), (0.52, settle(SC["return"], SC_HOLD, 0.3)),
+                (0.78, settle(SC["return"], SC_HOLD))), SC_FP, *fp_backhand(SC_FP, 1.1)),
+    ],
+}
+
+# ---------------------------------------------------------------- quarterstaff: two hands wide apart, strikes and jabs
+
+QS_HOLD = P(body=(0, 24, 0), head=(0, -22, 0), right_arm=(-48, 10, 8), item=(30, 0, -50), **step(0.8, 6))
+QS = {
+    "raise": P(body=(-8, 30, 0), head=(-6, -24, 0), right_arm=(-140, 24, 18), item=(60, 0, -40), **step(0.2, 8)),
+    "strike": P(body=(16, -6, 0, 0, 0.5, -1.0), head=(8, 6, 0), right_arm=(-70, -10, -4), item=(-10, 0, -50), **step(1.8)),
+    "draw": P(body=(-6, 30, 0), head=(0, -26, 0), right_arm=(-46, 28, 14, 0, 0, 3), item=(-40, 0, 0), **step(-0.2, 8)),
+    "jab": P(body=(12, 6, 0, 0, 0.4, -1.2), head=(-8, -4, 0), right_arm=(-90, 0, 0, 0, 0, -3), item=(-84, 0, 0), **step(2.2, 2)),
+    "wind": P(body=(-4, 50, 0), head=(0, -42, 0), right_arm=(-86, 64, 28), item=(30, 0, 40), **step(-0.4, 10)),
+    "sweep": P(body=(8, -30, 0), head=(-2, 24, 0), right_arm=(-74, -32, -6), item=(-10, 0, -60), **step(1.6, -8)),
+}
+QS_FP = F(-10, 30, 40, -4, -3)
+MOVES["quarterstaff"] = {
+    "hold": QS_HOLD, "two_handed": 13, "fp_hold": QS_FP,
+    "attacks": [
+        fp(clip("strike", QS_HOLD, (0.14, QS["raise"]), (0.3, QS["strike"], 0.3), (0.6, settle(QS["strike"], QS_HOLD))),
+           QS_FP, *fp_forehand(QS_FP, 0.9, keys=3)),
+        fp(clip("jab", QS_HOLD, (0.12, QS["draw"]), (0.28, QS["jab"], 0.45), (0.56, settle(QS["jab"], QS_HOLD, 0.35))),
+           QS_FP, *fp_thrust(QS_FP, 1.0)),
+        fp(clip("sweep", QS_HOLD, (0.14, QS["wind"]), (0.3, QS["sweep"], 0.1), (0.6, settle(QS["sweep"], QS_HOLD))),
+           QS_FP, *fp_forehand(QS_FP, 1.0, keys=3)),
+    ],
+}
+
+# ---------------------------------------------------------------- pike: two hands, levelled, long thrusts
+
+PK_HOLD = P(body=(0, 26, 0), head=(0, -24, 0), right_arm=(-30, 14, 10), item=(-30, 0, 0), **step(0.9, 8))
+PK = {
+    "draw": P(body=(-6, 32, 0), head=(0, -28, 0), right_arm=(-26, 30, 16, 0, 0, 3), item=(-36, 0, 0), **step(0.0, 10)),
+    "thrust": P(body=(16, 8, 0, 0, 0.5, -1.8), head=(-12, -6, 0), right_arm=(-80, 2, 0, 0, 0, -3), item=(-80, 0, 0),
+                **step(2.8, 2)),
+    "high_draw": P(body=(-8, 30, 0), head=(-6, -26, 0), right_arm=(-110, 26, 14, 0, 0, 2), item=(-56, 0, 0), **step(0.0, 10)),
+    "high": P(body=(12, 10, 0, 0, 0.4, -1.4), head=(-6, -8, 0), right_arm=(-118, 0, 0, 0, 0, -3), item=(-90, 0, 0),
+              **step(2.4, 2)),
+}
+PK_FP = F(-50, 20, 6, -3, -2)
+MOVES["pike"] = {
+    "hold": PK_HOLD, "two_handed": 14, "fp_hold": PK_FP,
+    "attacks": [
+        fp(clip("thrust", PK_HOLD, (0.14, PK["draw"]), (0.32, PK["thrust"], 0.45), (0.62, settle(PK["thrust"], PK_HOLD, 0.35))),
+           PK_FP, *fp_thrust(PK_FP, 1.4)),
+        fp(clip("high_thrust", PK_HOLD, (0.14, PK["high_draw"]), (0.32, PK["high"], 0.45), (0.62, settle(PK["high"], PK_HOLD, 0.35))),
+           PK_FP, *fp_thrust(PK_FP, 1.2)),
+    ],
+}
