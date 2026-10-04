@@ -15,7 +15,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 
 /**
- * Arms VII (batch 53, docs/features/arms-vii.md): named variants of the arms. Each is an {@link ArmItem} of one of
+ * Arms VII (batch 54, docs/features/arms-vii.md): named variants of the arms. Each is an {@link ArmItem} of one of
  * {@link JugcraftArms#KINDS}, so its swing, reach, trait, two-handed blow, weapon art and motion are its kind's, made as
  * a steel arm is, with its line's perk or boon:
  *

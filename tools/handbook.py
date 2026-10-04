@@ -492,7 +492,7 @@ def arms_pages():
             f"Kusarigama, Chain Lash: the chain catches the first foe in line up to {arms.LASH_RANGE:g} blocks off, hauls "
             "it in and the sickle reaps it as it comes."],
          "craft": craft("kusarigama")},
-        # Arms VI (batch 52).
+        # Arms VI (batch 53).
         {"title": "Arms: Katana and Brazier Mace", "icon": f"{MOD}:steel_katana", "text": [
             f"Katana, Seven Cuts: {arms.CUTS_COUNT} cuts in a breath, each across every foe ahead (up to "
             f"{arms.CUTS_TARGETS}), leaving arcs in the air: crimson from bronze, pale gold from steel.",
@@ -518,7 +518,7 @@ def arms_pages():
 
 
 def variant_pages():
-    """Arms VII (batch 53): the styles' patterns and the bosses' trophies."""
+    """Arms VII (batch 54): the styles' patterns and the bosses' trophies."""
     import arms_variants as av
     rows, key = av.STYLES["gilded"]["pattern_recipe"]
     grid = [item_for(key[ch]) if ch in key else None for row in rows for ch in row.ljust(3)]

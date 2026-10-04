@@ -8,7 +8,7 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### Unmerged: Arms VII, batch 53
+### Unmerged: Arms VII, batch 54
 - **32 named variant arms,** each fighting as its kind does:
   - **Crafted styles** at a smithing table, from a steel arm, the style's pattern and a material (enchantments and wear kept): **gilded** (gold; enchants as gold), **ironclad** (dieselpunk; lasts twice as long), **bonecarved** (bone; harder against the undead) and **runebound** (glowing runes; marks foes so they glow).
   - **Boss trophies** for eight bosses still to be made, two each with a boon: the Yeti King (frost), the Cinder Tyrant (ember), the Mire Hag (venom), the Crypt Lich (drain, wither), the Iron Dreadnought (shock), the Alpha Werewolf (howl), the Storm Roc (gale) and the Abyssal Leviathan (tide). Their loot tables are ready; creative-only until the bosses exist.
@@ -23,7 +23,7 @@ No numbered release yet. Everything below is on `main`.
 - **Refined:** bevelled two-tone blades with a glint; the pike's langets and tassel; the quarterstaff's shod ends; the kama, war pick, katar and kusarigama held larger.
 - After studying how Simply Swords, Epic Knights and RPG Style More Weapons make weapons that read well; nothing of theirs is copied. Record: [arms-restyle.md](docs/features/arms-restyle.md).
 
-### Unmerged: Arms VI, batch 52
+### Unmerged: Arms VI, batch 53
 - **Katana:** quick, clean cuts, and its art **Seven Cuts**: seven cuts in a breath across every foe ahead, each leaving an arc of colour in the air (crimson from bronze, pale gold from steel).
 - **Brazier mace:** a burning brazier on a haft, with a flickering flame. It sets what it hits alight and lights campfires, candles and the ground.
 - **Longbow and arbalest:** a tall bow and a crossbow with a metal prod. Each shot hits harder and flies flatter than a bow's or crossbow's, though they deal no more a second. Drawn and wound in three steps, as vanilla's are.
@@ -56,6 +56,11 @@ No numbered release yet. Everything below is on `main`.
 - They grow in the haunted biomes and some of vanilla's. Grave vases take them by colour. Eight game tests, client screenshots. Record: [graveyard-flora.md](docs/features/graveyard-flora.md).
 
 ### Arms IV, batch 47 (#170)
+
+### Unmerged: Clean dieselpunk textures, batch 52
+- Every dieselpunk texture is redrawn in a cleaner style: flat fills from short palettes, bevelled panels, recessed insets and two-by-two bolts, with wear only as a few small marks at corners and seams. No more per-pixel noise, and rust is now a small stain under a bolt rather than the whole surface. This covers the giants, Dieselworks blocks, zeppelin, Diesel Walker, Landship, trench works, big guns and the dieselpunk machine textures. The mechs and vehicles also get a clean soot texture for their smokestacks and openings, and the kaiserpunk brass and black lacquer lose their specks.
+- Rust Plate, Riveted Rust Plate, Ribbed Rust Pillar and Rust Grating are now called Weathered Steel Plate, Riveted Steel Plate, Ribbed Steel Pillar and Steel Grating. Their IDs are unchanged, so placed blocks and items keep working.
+- Record: [clean-dieselpunk-textures.md](docs/features/clean-dieselpunk-textures.md).
 
 ### Unmerged: Big guns, batch 51
 - **Siege Mortar**, **Self-Propelled Howitzer**, **Flak Gun** and **Observation Balloon**, with Heavy Shells, Flak Shells and a **Range Finder** to mark targets up to 256 blocks away.

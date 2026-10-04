@@ -145,7 +145,7 @@ public class ArmItem extends Item {
 		if (boon == ArmVariants.Boon.TIDE && target.isInWaterOrRain()) {
 			return damage * ArmVariants.TIDE;
 		}
-		if (boon == ArmVariants.Boon.GRAVEBANE && target.getType().is(EntityTypeTags.UNDEAD)) {
+		if (boon == ArmVariants.Boon.GRAVEBANE && target.is(EntityTypeTags.UNDEAD)) {
 			return damage * ArmVariants.GRAVEBANE;
 		}
 		return 0.0F;

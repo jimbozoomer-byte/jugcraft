@@ -1,4 +1,4 @@
-"""Arms VII, batch 53 (docs/features/arms-vii.md): named variants of the arms, each a kind of tools/arms.py KINDS with its
+"""Arms VII, batch 54 (docs/features/arms-vii.md): named variants of the arms, each a kind of tools/arms.py KINDS with its
 own look, in two lines:
 
 - styles, crafted at a smithing table from a steel arm, the style's pattern and a material, which keep the arm's

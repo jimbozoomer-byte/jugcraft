@@ -530,7 +530,7 @@ Against one foe an art does no better than plain blows over its cooldown; its wo
 
 **Code:** `weapons/` (`WeaponArts`, `WeaponArtPayload`, `JugcraftArms.ARTS`, `ArmItem.use`), client `client/arms/ArmsMotion`; data from `tools/arms.py`, art from `tools/arms_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-v.md)).
 
-### Arms VI (batch 52): katana, brazier mace, longbows, arbalests and shields
+### Arms VI (batch 53): katana, brazier mace, longbows, arbalests and shields
 
 Two more arms and a war kit in bronze and steel. Shot for shot the longbow and arbalest hit harder and fly flatter than a bow and crossbow, but not a second for a second. A shield covering more than vanilla's is slower to raise.
 
@@ -545,7 +545,7 @@ Two more arms and a war kit in bronze and steel. Shot for shot the longbow and a
 
 **Code:** `weapons/` (`ArmBowItem`, `ArmCrossbowItem`, `JugcraftArms.RANGED`, `SHIELDS` and `KIT`, `WeaponArts` for the cuts, `ArmItem` for the fire); data from `tools/arms.py` and `tools/arms_kit.py`, art from `tools/arms_art.py` and `tools/arms_kit_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-vi.md)).
 
-### Arms VII (batch 53): variant arms, crafted styles and boss trophies
+### Arms VII (batch 54): variant arms, crafted styles and boss trophies
 
 32 named arms, each a variant of a kind above that fights as its kind does, in steel. Sixteen are crafted at a smithing table: a style's pattern, a steel arm of the kind and the style's material, keeping its enchantments and wear. Sixteen are trophies of eight bosses still to be made ([branches/BOSSES.md](branches/BOSSES.md)): no recipe, each boss's loot table ready; creative only until then. No variant deals as much a second as a netherite sword.
 

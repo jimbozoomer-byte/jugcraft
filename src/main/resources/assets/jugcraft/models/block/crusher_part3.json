@@ -14,9 +14,9 @@
     "dr_rust_bare": "jugcraft:block/dr_rust_bare",
     "dr_rust_pipe": "jugcraft:block/dr_rust_pipe",
     "dr_skid": "jugcraft:block/dr_skid",
+    "dr_soot": "jugcraft:block/dr_soot",
     "sp_crusher_jaws": "jugcraft:block/sp_crusher_jaws",
     "sp_gauge": "jugcraft:block/sp_gauge",
-    "sp_hopper_inside": "jugcraft:block/sp_hopper_inside",
     "particle": "jugcraft:block/sp_iron_plate"
   },
   "elements": [

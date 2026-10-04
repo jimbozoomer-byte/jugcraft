@@ -1,4 +1,4 @@
-# Arms VII: variant arms, crafted styles and boss trophies (batch 53)
+# Arms VII: variant arms, crafted styles and boss trophies (batch 54)
 
 Status: implemented on `claude/arms-variants`, awaiting review. Compiles and tests in CI only; **not yet played**.
 Proposal issue: the owner, 4 October 2026, after the arms restyle ([arms-restyle.md](arms-restyle.md)): "refine and make more variants". Asked how, they chose:
@@ -59,7 +59,7 @@ The arm keeps its enchantments and wear.
 - **Required vs optional:** all optional.
   - The styles can be crafted solo or traded.
   - The trophies wait for their bosses. Until then they are creative-only, and that is on purpose: [branches/BOSSES.md](../branches/BOSSES.md) is a proposal, and no core progression needs a trophy.
-- **How the specialty stays useful:** a style is a look and a small perk, not a stronger tier. The arms of batches 42 to 52 stay as good.
+- **How the specialty stays useful:** a style is a look and a small perk, not a stronger tier. The arms of batches 42 to 53 stay as good.
 
 ## Balance and automation
 - **A variant's blow is its kind's in steel** (the same attack damage and speed). What differs is its line's perk or boon.
