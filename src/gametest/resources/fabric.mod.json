@@ -80,7 +80,8 @@
 			"io.github.jimbozoomer.jugcraft.test.ArmsIIGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsIIIGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsIVGameTests",
-			"io.github.jimbozoomer.jugcraft.test.ArmsVGameTests"
+			"io.github.jimbozoomer.jugcraft.test.ArmsVGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmsProbeGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
