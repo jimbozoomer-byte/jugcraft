@@ -1,6 +1,6 @@
 # The Crypt and the Ossuary
 
-Status: in progress. Built and tested by CI (below); not yet played by hand.
+Status: implemented. CI builds it and its game tests and client screenshots pass (below); not yet played by hand.
 Proposal issue: none. The owner asked for it directly on 4 October 2026 ("Lets come up with another 20 very detailed well thought out additions to add for the halloween / fall season using the first 3 images for ideas of prop sets … lets do them piece by piece maybe 5 at a time"). These are prop sets 6–10 of the [Witching Season plan](witching-season.md), drawn from the reference pictures' iron-strapped coffin, stone sarcophagus, bones, giant skeleton hand and winged gargoyles.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier. Every recipe takes early materials (bones, bone blocks, stone, iron, copper, glass, planks, wool, a chest, an armour stand). The Gargoyle Sentinel's ender eye needs a trip to the Nether for blaze powder first.
@@ -119,7 +119,35 @@ Primary specialty and supported player role: building, with useful pieces for st
 - **Originality**: all original. The look follows the owner's reference pictures, and nothing is traced from them.
 
 ## Verification
-Pending CI.
+CI's Build workflow passed on faa9be76 (run 37225719430): the generated data matched, the audit passed, the mod built, every server game test passed (these twelve among them), and all three client shards passed and took the screenshots in [the gallery](../branches/AGRICULTURE.md#the-crypt-and-the-ossuary). Run 37224214551 on 207a4fbd passed too, before the cameras were re-aimed. Runs before them found, and the commits after them fixed:
+- 37223096170: names that are different in 26.3 (the push reactions are `IMMOVEABLE` and `POPPED`, and there is no constant for the chiseled bookshelf's block entity type, so the bookcase finds it by its ID);
+- 37223237747: the test sources' mob constants (26.3 keeps them in `EntityTypes`) and red wool (looked up by ID);
+- 37223392458:
+  - one server test failed: a mock test player always reports itself creative, so the wardrobe let it take off cursed leggings. The wardrobe now asks whether the player builds in creative (its abilities), which the mock reports truly and which is the same thing in play;
+  - a client shard crashed drawing the wardrobe's armour, because 26.3 won't draw an entity with no ID; the wardrobe's display stand now takes a negative one.
+
+Those three runs were cancelled once their failure was found.
+
+- `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`: pass locally and in CI (1346 IDs).
+- `CryptAndOssuaryGameTests` (twelve tests):
+  1. the coffin locks to the key a blank is cut to (padlock on both halves); locked, an empty hand, another key and a blank are all refused and hoppers' faces are shut, its key in either hand opens it as a 54-slot chest, the lock is saved, and its key unlocks it for anyone;
+  2. a hopper over a locked coffin keeps its bone, and the unlocked coffin takes it;
+  3. a key and one to eight blanks copy the key, which stays in the grid; a key alone, blanks alone, two keys or anything else copy nothing;
+  4. armour hangs on the wardrobe and swaps for what hung there, an empty hand swaps everything worn, cursed leggings stay on, a stick does nothing, and breaking it drops what it held;
+  5. a sarcophagus opens as a 27-slot chest with its lid off both halves, a comparator reads it, the chisel carves all four lids in turn on both halves, it knocks only shut, at night, with a player near and once a minute, three times ten ticks apart, and breaking it spills and drops it;
+  6. the throne seats a player (not one sneaking), its eyes glow only while sat in at night and go dark when they rise; the footstool seats a player; the lamp is lit when placed, goes out when used and follows redstone;
+  7. the Ribcage Bookcase keeps a chiseled bookshelf's block entity, powers an enchanting table two blocks away, takes a book on the place aimed at and gives it back;
+  8. the Colossal Skull stands as eight blocks, redstone at any corner drops the jaw on all of them, use snaps it, breaking any block breaks all of it once, and with a block in the way it isn't placed;
+  9. two ribs facing two blocks apart join (arch open beneath) and part when one breaks; vertebrae lie along the face set on; the femur lies two blocks long;
+  10. the Gargoyle Sentinel watches the nearest monster (a spider), never a nearer cow, its signal by distance lights a lamp, and with the spider gone it looks past it;
+  11. the Gargoyle Rainspout pours a level at a time into a cauldron to full, into a Bubbling Cauldron and a Horned Skull Cauldron, not past a block in the way or out of reach, and falls without its wall;
+  12. the Chimera Finial's weather (rain, storm, snow, dry sky, roofed, desert), its signals, and that a placed finial shows the weather where it stands; recipes and loot load.
+- `CryptAndOssuaryClientGameTests`: eight screenshots of the crypt, the wardrobe, the parlour, the colossus, the church wall in a storm, and the parlour and colossus at night.
+
+Not run:
+- Building with them by hand.
+- A two-player dedicated server (one player locking a coffin, the other refused, then given a copied key).
+- This environment can't run a game client interactively.
 
 ## World and event applicability
 Placed by players only; no worldgen. They work all year, and nothing depends on the Halloween event.

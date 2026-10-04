@@ -1099,6 +1099,26 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Cabinet of curiosities**: the Curiosity Cabinet shows nine things on its shelves, the Bell Jar one, and the Moth Display Case pinned moths that stir at night.
 - **Oddity jars**: eyeballs that watch you, a heart that beats as a redstone clock, a bat that wakes as you come near, a two-headed snake and a drumming hand. Details: [the Witch's Workshop](../features/witchs-workshop.md).
 
+### The Crypt and the Ossuary
+
+| **The crypt, the parlour and the buried giant**: sarcophagi and coffins, the bone throne and its bookcases, the colossus before a church wall | **The crypt**: stone brick, deepslate and blackstone sarcophagi carved with a knight, a lady and a skull, the deepslate one open; a locked Iron-Bound Coffin and an open one |
+| --- | --- |
+| ![The Crypt and the Ossuary](../images/ingame_crypt_and_ossuary.jpg) | ![The crypt](../images/ingame_crypt_and_ossuary_crypt.jpg) |
+| **The Coffin Wardrobe**, dressed in odd armour, and an open coffin on its velvet | **The ossuary parlour**: the Bone Throne between two Ribcage Bookcases, the Skull Footstool and Vertebra Floor Lamps |
+| ![The wardrobe](../images/ingame_crypt_and_ossuary_wardrobe.jpg) | ![The parlour](../images/ingame_crypt_and_ossuary_parlour.jpg) |
+| **The Buried Colossus**: the skull with its jaw dropped, ribs arched over a spine, a femur and the Giant Bone Hand | **A church wall in a thunderstorm**: Chimera Finials with their wings spread, Gargoyle Rainspouts over cauldrons |
+| ![The colossus](../images/ingame_crypt_and_ossuary_colossus.jpg) | ![The gargoyles in the storm](../images/ingame_crypt_and_ossuary_gargoyles.jpg) |
+| **The parlour at night**, the throne's eyes burning | **The colossus at night**, a Gargoyle Sentinel watching a pumpkin-headed zombie |
+| ![The parlour at night](../images/ingame_crypt_and_ossuary_night.jpg) | ![The colossus at night](../images/ingame_crypt_and_ossuary_colossus_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`CryptAndOssuaryClientGameTests`, software rendering, small previews). The coffin is locked, the wardrobe dressed, the bookcases filled and the skull's jaw dropped, for the picture.*
+
+- **Iron-Bound Coffin**: 54 slots, locked to a Skeleton Key cut from a Key Blank; locked, only its key opens it and hoppers can't reach in. Keys copy onto blanks. The **Coffin Wardrobe** swaps the armour you wear for the armour on its skeleton mannequin.
+- **Stone Sarcophagi**: 27 slots under a lid that slides aside over a skeleton, recarved with the Stonemason's Chisel; at night, shut, they sometimes knock.
+- **The ossuary parlour**: the Bone Throne (its crest's eyes glow while sat in at night), the Ribcage Bookcase (a chiseled bookshelf that powers enchanting tables), the Skull Footstool and the Vertebra Floor Lamp.
+- **The Buried Colossus**: a Colossal Skull whose jaw drops on redstone, Colossal Ribs that meet as an arch, Colossal Vertebrae and a Colossal Femur.
+- **The gargoyles**: the Gargoyle Sentinel signals the nearest monster by its distance, the Gargoyle Rainspout fills a cauldron in the rain, and the Chimera Finial reads rain and storms. Details: [the Crypt and the Ossuary](../features/crypt-and-ossuary.md).
+
 ## Even more fall additions
 
 Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).
