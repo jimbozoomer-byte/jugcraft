@@ -22,7 +22,8 @@ import net.minecraft.core.BlockPos;
 public class ArmsMotionClientGameTests implements FabricClientGameTest {
 	private static final List<String> KINDS = List.of("longsword", "greatsword", "rapier", "flanged_mace", "war_hammer", "glaive",
 			"halberd", "lance", "dagger", "sabre", "estoc", "battle_axe", "flail", "scythe", "quarterstaff", "pike", "zweihander",
-			"maul", "executioner", "bill", "labrys", "battleblade", "war_fork", "kama", "war_pick");
+			"maul", "executioner", "bill", "labrys", "battleblade", "war_fork", "kama", "war_pick", "twinblade", "nodachi", "earthbreaker",
+			"katar", "moonblade", "kusarigama");
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
