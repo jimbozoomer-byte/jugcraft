@@ -570,7 +570,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 					}
 				}
 			});
-			server.runCommand("tp @p %d %d %d 180 4".formatted(x - 162, y + 3, z + 8));
+			server.runCommand("tp @p %d %d %d 180 -6".formatted(x - 162, y + 2, z + 4));
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_raiders");
