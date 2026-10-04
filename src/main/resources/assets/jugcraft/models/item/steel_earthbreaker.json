@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_earthbreaker",
+  "textures": {
+    "layer0": "jugcraft:item/steel_earthbreaker"
+  }
+}

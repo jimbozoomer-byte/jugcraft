@@ -20,6 +20,7 @@ import io.github.jimbozoomer.jugcraft.prospecting.SurveyPayload;
 import io.github.jimbozoomer.jugcraft.solar.JugcraftSolar;
 import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import io.github.jimbozoomer.jugcraft.weapons.JugcraftWeapons;
+import io.github.jimbozoomer.jugcraft.weapons.WeaponArtPayload;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -70,6 +71,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		LandshipClient.register();
 		ArmsMotion.load();
 		TwoHandedInput.register();
+		ClientPlayNetworking.registerGlobalReceiver(WeaponArtPayload.TYPE, (payload, context) -> ArmsMotion.receive(payload));
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);
 		PetroFluidsClient.register();
 		RocketPackLayer.register();
