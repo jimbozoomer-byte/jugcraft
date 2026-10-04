@@ -370,6 +370,16 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_landship");
 
+			// Trench works (batch 50), in the same spot: a revetted trench with duckboards, a sandbag parapet, barbed wire
+			// out front, a field telephone and a searchlight sweeping across.
+			server.runCommand("kill @e[type=jugcraft:landship]");
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 26, y, z - 10, x - 10, y + 8, z + 1));
+			server.runOnServer(minecraft -> buildTrench(minecraft.overworld(), new BlockPos(x - 24, y, z - 10)));
+			server.runCommand("tp @p %d %d %d 180 20".formatted(x - 19, y + 3, z));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_trench_works");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
@@ -897,6 +907,31 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 	}
 
 	/** Batch 45: the Dieselworks showcase (base: the west end of the wall). */
+	private static void buildTrench(ServerLevel level, BlockPos base) {
+		java.util.function.Function<String, BlockState> block = id ->
+				io.github.jimbozoomer.jugcraft.building.Trenchworks.BLOCKS.get(id).defaultBlockState();
+		for (int dx = 0; dx <= 10; dx++) {
+			for (int dy = 0; dy <= 1; dy++) {
+				level.setBlock(base.offset(dx, dy, 0), block.apply("timber_revetment"), 3);
+				level.setBlock(base.offset(dx, dy, 3), block.apply("sandbags"), 3);
+			}
+			level.setBlock(base.offset(dx, 2, 3), block.apply(dx % 2 == 0 ? "sandbags" : "sandbags_slab"), 3);
+			for (int dz = 1; dz <= 2; dz++) {
+				level.setBlock(base.offset(dx, 0, dz), block.apply("duckboard"), 3);
+			}
+			for (int dz = 5; dz <= 6; dz++) {
+				if ((dx + dz) % 3 != 0) {
+					level.setBlock(base.offset(dx, 0, dz), block.apply("barbed_wire"), 3);
+				}
+			}
+		}
+		level.setBlock(base.offset(2, 2, 0), block.apply("field_telephone")
+				.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.SOUTH), 3);
+		level.setBlock(base.offset(7, 3, 3), block.apply("searchlight")
+				.setValue(io.github.jimbozoomer.jugcraft.building.SearchlightBlock.YAW, 5)
+				.setValue(io.github.jimbozoomer.jugcraft.building.SearchlightBlock.TILT, 1), 3);
+	}
+
 	private static void buildKaiserworks(ServerLevel level, BlockPos base) {
 		java.util.function.Function<String, BlockState> block = id ->
 				io.github.jimbozoomer.jugcraft.building.Kaiserworks.BLOCKS.get(id).defaultBlockState();
