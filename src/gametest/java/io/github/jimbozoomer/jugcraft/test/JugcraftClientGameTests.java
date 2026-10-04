@@ -308,6 +308,17 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_rocketry");
 			server.runCommand("clear @p");
 
+			// Dieselworks (batch 45), in the same spot: a riveted wall with portholes and a dome-plate cornice, a
+			// grating catwalk on I-beams and amber cage lamps.
+			server.runCommand("kill @e[type=minecraft:item_frame]");
+			server.runCommand("kill @e[type=minecraft:minecart]");
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 26, y, z - 10, x - 10, y + 6, z + 1));
+			server.runOnServer(minecraft -> buildDieselworks(minecraft.overworld(), new BlockPos(x - 24, y, z - 10)));
+			server.runCommand("tp @p %d %d %d 180 4".formatted(x - 19, y + 1, z - 2));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_dieselworks");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
@@ -832,6 +843,40 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			cart.snapTo(at.getX() + 0.5, at.getY() + 0.1, at.getZ() + 0.5, 90, 0);
 			level.addFreshEntity(cart);
 		}
+	}
+
+	/** Batch 45: the Dieselworks showcase (base: the west end of the wall). */
+	private static void buildDieselworks(ServerLevel level, BlockPos base) {
+		java.util.function.Function<String, BlockState> block = id ->
+				io.github.jimbozoomer.jugcraft.building.Dieselworks.BLOCKS.get(id).defaultBlockState();
+		for (int dx = 0; dx <= 10; dx++) {
+			for (int dy = 0; dy <= 4; dy++) {
+				String id = dx % 5 == 0 ? (dx == 5 ? "ribbed_patina_pillar" : "ribbed_rust_pillar")
+						: dy <= 1 ? "riveted_rust_plate" : dy == 2 ? "riveted_band_block"
+						: dy == 4 ? "copper_dome_plate"
+						: dx == 2 || dx == 8 ? "porthole_window" : dx == 3 || dx == 7 ? "perforated_patina_plate" : "patina_plate";
+				level.setBlock(base.offset(dx, dy, 0), block.apply(id), 3);
+			}
+			level.setBlock(base.offset(dx, 5, 0), block.apply("red_iron_plate_slab"), 3);
+			for (int dz = 1; dz <= 5; dz++) {
+				level.setBlock(base.offset(dx, -1, dz), block.apply(dz == 1 ? "skid_iron_block" : "rust_plate"), 3);
+			}
+			// The catwalk: grating slabs two up, on I-beams at each end and in the middle.
+			level.setBlock(base.offset(dx, 2, 2), block.apply("rust_grating_slab"), 3);
+		}
+		for (int dx : new int[] {0, 5, 10}) {
+			level.setBlock(base.offset(dx, 0, 2), block.apply("steel_i_beam"), 3);
+			level.setBlock(base.offset(dx, 1, 2), block.apply("steel_i_beam"), 3);
+		}
+		for (int dx : new int[] {2, 8}) {
+			level.setBlock(base.offset(dx, 3, 2), block.apply("amber_cage_lamp"), 3);
+		}
+		level.setBlock(base.offset(4, 0, 4), block.apply("amber_cage_lamp"), 3);
+		for (int dx = 6; dx <= 9; dx++) {
+			level.setBlock(base.offset(dx, 0, 4), block.apply("red_iron_plate_stairs"), 3);
+		}
+		level.setBlock(base.offset(1, 0, 4), block.apply("rust_grating"), 3);
+		level.setBlock(base.offset(2, 0, 4), block.apply("copper_dome_plate_stairs"), 3);
 	}
 
 	private static void buildPowerGear(ServerLevel level, BlockPos start) {

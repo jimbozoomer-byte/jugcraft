@@ -251,5 +251,8 @@ def feature_of(entry_id):
     import rocketry
     if entry_id in rocketry.items() or entry_id in rocketry.blocks():
         return "machines"
+    import dieselworks
+    if entry_id in dieselworks.blocks():
+        return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)
