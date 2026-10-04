@@ -9,6 +9,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
+import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -291,6 +292,9 @@ public final class JugcraftAgriculture {
 	public static EntityType<FerrisWheel> FERRIS_WHEEL;
 	public static BlockEntityType<FerrisWheelBlockEntity> FERRIS_WHEEL_BOOTH;
 	public static EntityType<Pinata> PINATA;
+	public static EntityType<HotAirBalloon> HOT_AIR_BALLOON;
+	public static EntityType<Pibal> PIBAL;
+	public static DataComponentType<Integer> BALLOON_FUEL;
 	public static DataComponentType<Integer> BROOM_CHARGE;
 	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
 	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
@@ -1085,6 +1089,28 @@ public final class JugcraftAgriculture {
 		PINATA = entity("pinata", EntityType.Builder.<Pinata>of(Pinata::new, MobCategory.MISC).noLootTable().noSummon().sized(0.9F, 0.9F)
 				.clientTrackingRange(10).updateInterval(20));
 		Pinatas.register();
+		// Fall additions 29, the hot-air balloon fiesta: three balloons (items that set one up, keeping its fuel), the
+		// burner they are made with, pibals to read the winds aloft, and the Mooring Post to tether a balloon.
+		BALLOON_FUEL = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("balloon_fuel"),
+				DataComponentType.<Integer>builder().persistent(Codec.intRange(0, HotAirBalloon.MAX_FUEL)).networkSynchronized(ByteBufCodecs.VAR_INT)
+						.build());
+		for (HotAirBalloon.Kind kind : HotAirBalloon.Kind.values()) {
+			registerItem(kind.item, props -> new HotAirBalloonItem(props, kind), new Item.Properties().stacksTo(1).component(BALLOON_FUEL, 0),
+					TOOL_TAB);
+		}
+		registerItem("balloon_burner", Item::new, new Item.Properties(), INGREDIENT_TAB);
+		registerItem("pibal", PibalItem::new, new Item.Properties().stacksTo(16), TOOL_TAB);
+		Block mooringPost = registerBlock(MooringPostBlock.ID, MooringPostBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(3.0F, 6.0F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
+		registerItem(MooringPostBlock.ID, props -> new BlockItem(mooringPost, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		HOT_AIR_BALLOON = entity("hot_air_balloon", EntityType.Builder.<HotAirBalloon>of(HotAirBalloon::new, MobCategory.MISC).noLootTable()
+				.noSummon().sized((float) HotAirBalloon.BASKET, (float) HotAirBalloon.BASKET_HEIGHT).clientTrackingRange(16).updateInterval(1));
+		PIBAL = entity("pibal", EntityType.Builder.<Pibal>of(Pibal::new, MobCategory.MISC).noLootTable().noSummon().sized(0.6F, 0.6F)
+				.clientTrackingRange(16).updateInterval(2));
+		Balloons.register();
+		// Fall additions 30, the leaf blower: a dieselpunk electric leaf blower, charged at the Charging Station.
+		registerItem(LeafBlowerItem.ID, LeafBlowerItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)
+				.component(JugcraftTools.ENERGY, 0L), TOOL_TAB);
 
 		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
 		// entity players sit on), the Autumn Wreath and the Leaf Piles.
