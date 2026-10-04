@@ -266,8 +266,8 @@ public final class JugcraftArms {
 	public static final int LASH_THROW = 4;
 	public static final float LASH_RANGE = 9.0F;
 	public static final float LASH_SHARE = 0.5F;
-	public static final float LASH_PULL = 0.15F;
-	public static final float LASH_PULL_MAX = 1.4F;
+	public static final float LASH_PULL = 0.2F;
+	public static final float LASH_PULL_MAX = 1.6F;
 	public static final int LASH_REAP = 11;
 	public static final float LASH_REAP_SHARE = 0.8F;
 	public static final float LASH_REAP_REACH = 3.5F;

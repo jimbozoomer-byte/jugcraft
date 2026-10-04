@@ -25,7 +25,7 @@ import net.minecraft.world.phys.AABB;
 /**
  * Client game test for the weapon arts (Arms V, batch 48), end to end: the use key, pressed with each Arms V arm, goes
  * to the server, which works the art (weapons/WeaponArts) on real foes with real physics, while this client plays the
- * art's animation (client/arms/ArmsMotion, told by WeaponArtPayload). Each art is caught from the front in its
+ * art's animation (client/arms/ArmsMotion, told by WeaponArtPayload). Each art is caught from behind in its
  * stride, and its result read back from the server: the cyclone's three turns on four husks about the player, the iaido
  * dash carrying the player and its cut on the husks passed, the leap rising and slamming with no fall damage on level
  * ground, the flurry's jabs, the crescent through two husks in line, and the chain hauling a pig in to be reaped. Two
@@ -50,7 +50,8 @@ public class WeaponArtsClientGameTests implements FabricClientGameTest {
 			server.runCommand("fill %d %d %d %d %d %d minecraft:smooth_stone".formatted(x - 12, y - 1, z - 18, x + 12, y - 1, z + 8));
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 12, y, z - 18, x + 12, y + 8, z + 8));
 			server.runCommand("gamemode survival @p");
-			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			// From behind: the foes ahead stay in view past the player (a camera in front would sit among them).
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 			context.waitTicks(20);
 
 			// Cyclone: four husks about the player, two blocks off; three turns strike each of them three times.
