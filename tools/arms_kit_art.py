@@ -1,4 +1,4 @@
-"""Sprites of the Arms VI kit (batch 52, docs/features/arms-vi.md): the longbows and arbalests, drawn as vanilla's bow
+"""Sprites of the Arms VI kit (batch 53, docs/features/arms-vi.md): the longbows and arbalests, drawn as vanilla's bow
 and crossbow are (at rest and drawn in three steps; a crossbow also loaded), and the shields' painted faces, backs and
 metal trim, which tools/arms_kit.py maps onto their 3D models.
 

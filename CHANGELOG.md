@@ -8,7 +8,7 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### Unmerged: Arms VI, batch 52
+### Unmerged: Arms VI, batch 53
 - **Katana:** quick, clean cuts, and its art **Seven Cuts**: seven cuts in a breath across every foe ahead, each leaving an arc of colour in the air (crimson from bronze, pale gold from steel).
 - **Brazier mace:** a burning brazier on a haft, with a flickering flame. It sets what it hits alight and lights campfires, candles and the ground.
 - **Longbow and arbalest:** a tall bow and a crossbow with a metal prod. Each shot hits harder and flies flatter than a bow's or crossbow's, though they deal no more a second. Drawn and wound in three steps, as vanilla's are.

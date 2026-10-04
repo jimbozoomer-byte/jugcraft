@@ -38,7 +38,7 @@ import net.minecraft.world.item.component.Weapon;
  * (batch 46, docs/features/arms-iii.md): two-handed swings ({@link #TWO_HANDED}) and zweihanders, mauls, executioner's
  * swords and bills; and Arms IV (batch 47, docs/features/arms-iv.md): labryses, battleblades, war forks, kamas and war
  * picks; and Arms V (batch 48, docs/features/arms-v.md): twinblades, nodachis, earthbreakers, katars, moonblades and
- * kusarigamas, each with a weapon art ({@link #ARTS}, worked by {@link WeaponArts}); and Arms VI (batch 52,
+ * kusarigamas, each with a weapon art ({@link #ARTS}, worked by {@link WeaponArts}); and Arms VI (batch 53,
  * docs/features/arms-vi.md): katanas and brazier maces, longbows and arbalests ({@link #RANGED}) and heater and tower
  * shields ({@link #SHIELDS}).
  *
@@ -100,7 +100,7 @@ public final class JugcraftArms {
 			new Kind("katar", 1.5F, -2.0F, SwingAnimationType.STAB, 5, 0.0F, 2.75F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
 			new Kind("moonblade", 6.0F, -3.1F, SwingAnimationType.WHACK, 18, 0.0F, 3.75F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
 			new Kind("kusarigama", 2.0F, -2.3F, SwingAnimationType.WHACK, 6, 0.0F, 3.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
-			// Arms VI (batch 52); its bows, crossbows and shields are RANGED and SHIELDS.
+			// Arms VI (batch 53); its bows, crossbows and shields are RANGED and SHIELDS.
 			new Kind("katana", 3.0F, -2.5F, SwingAnimationType.WHACK, 7, 0.0F, 3.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
 			new Kind("brazier_mace", 5.0F, -3.0F, SwingAnimationType.WHACK, 10, 0.0F, 3.0F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false));
 
