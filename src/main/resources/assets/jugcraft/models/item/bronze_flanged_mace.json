@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_flanged_mace",
+  "textures": {
+    "layer0": "jugcraft:item/bronze_flanged_mace"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:bronze_flanged_mace",
+    "jugcraft:bronze_war_hammer",
+    "jugcraft:bronze_halberd",
+    "jugcraft:steel_flanged_mace",
+    "jugcraft:steel_war_hammer",
+    "jugcraft:steel_halberd"
+  ]
+}

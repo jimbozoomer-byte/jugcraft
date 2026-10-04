@@ -334,7 +334,20 @@ Added after the record above, on the same branch. The model was rebuilt (128 × 
 7. a sprig in hand wards off a brown werewolf, not a shadow one; wolfsbane planted by its prey wards off the shadow one;
 8. each kind drops its own pelt; slaying a shadow werewolf earns Leader of the Pack, a brown one doesn't.
 
-Locally, `python3 tools/check_mod_data.py` passes with 1071 IDs. It now also compares each kind's tier, attributes and abilities, the pelt tables and haunts, and every box of the model with `tools/werewolf_model.py`. `python3 scripts/check_repository.py` passes. The build, the game tests and the client test with the three kinds have not run yet.
+Locally, `python3 tools/check_mod_data.py` passes with 1071 IDs. It now also compares each kind's tier, attributes and abilities, the pelt tables and haunts, and every box of the model with `tools/werewolf_model.py`. `python3 scripts/check_repository.py` passes.
+
+Then the textures were painted again at four times the detail (512 × 512, docs/ART_DIRECTION.md, "High resolution"): fur in locks and strands, ragged edges, pointed fangs and claws. Actual results:
+
+| Check | Result |
+| --- | --- |
+| `./gradlew build` on `d979eaf1` (run [37153477545](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37153477545)) | Pass |
+| Game tests, same run, including the 13 in `WerewolfGameTests` | **All pass** |
+| Client test, same run | **Passes**, but its picture showed the shadow werewolf red: the test had stood it in a spruce trunk, where it suffocated and flashed with hurt. Its texture is dark grey. `ebf5b4ec` stands it clear. |
+| `./gradlew build` on `ebf5b4ec` (run [37154692054](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37154692054)) | Pass |
+| Game tests on the headless server, same run: 619 in total | **All 619 pass** |
+| Client test, same run (all three shards) | **Passes** |
+
+The screenshots in [the guide](../branches/AGRICULTURE.md#full-moon-werewolves) come from run 37154692054: wolfsbane in the clearing; the silver framed above the fire with the three rugs (brown, snow and shadow); the snow werewolf facing the camera with the shadow werewolf snarling beside it; and the three kinds in the clearing. They are small software-rendered previews; the fur's finer detail shows best up close in a real client.
 
 ### Flying broomstick verification
 
