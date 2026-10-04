@@ -280,6 +280,173 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/**
+	 * Batch 39 (rocket post): a pad launches its cargo to the pad its flight plan names, using up the rocket and keeping
+	 * the plan, and the cargo lands in that pad. A pad under a roof will not launch. A delivery to an area that is not
+	 * loaded waits instead of landing (nothing is force-loaded).
+	 */
+	@GameTest(maxTicks = 300, skyAccess = true)
+	public void rocketPostDelivers(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Block padBlock = io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD;
+		// The launching pad needs open sky: without sky access the test area has a barrier ceiling.
+		BlockPos from = helper.absolutePos(new BlockPos(1, 1, 1));
+		BlockPos to = helper.absolutePos(new BlockPos(6, 1, 6));
+		BlockPos roofed = helper.absolutePos(new BlockPos(1, 1, 6));
+		for (BlockPos pos : List.of(from, to, roofed)) {
+			level.setBlockAndUpdate(pos, padBlock.defaultBlockState());
+		}
+		level.setBlockAndUpdate(roofed.above(2), Blocks.STONE.defaultBlockState());
+		var sender = (io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity) level.getBlockEntity(from);
+		var receiver = (io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity) level.getBlockEntity(to);
+		var blocked = (io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity) level.getBlockEntity(roofed);
+		ItemStack plan = new ItemStack(item("flight_plan"));
+		plan.set(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.FLIGHT_TARGET,
+				net.minecraft.core.GlobalPos.of(level.dimension(), to));
+		for (var pad : List.of(sender, blocked)) {
+			pad.setItem(0, new ItemStack(Items.DIAMOND, 5));
+			pad.setItem(io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.ROCKET, new ItemStack(item("delivery_rocket")));
+			pad.setItem(io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.PLAN, plan.copy());
+		}
+		var noSky = blocked.launch(level);
+		helper.assertTrue(noSky == io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.Result.NO_SKY,
+				"A roofed pad launched: " + noSky);
+		helper.assertTrue(!blocked.getItem(io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.ROCKET).isEmpty(),
+				"A failed launch used up the rocket");
+		var launched = sender.launch(level);
+		helper.assertTrue(launched == io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.Result.LAUNCHED,
+				"The pad did not launch: " + launched + " (sky height " + level.getHeight(
+						net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, from.getX(), from.getZ()) + ", pad " + from.getY() + ")");
+		helper.assertTrue(sender.getItem(0).isEmpty(), "The cargo stayed on the pad");
+		helper.assertTrue(sender.getItem(io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.ROCKET).isEmpty(),
+				"The rocket was not used up");
+		helper.assertTrue(sender.getItem(io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.PLAN).is(item("flight_plan")),
+				"The flight plan was used up");
+
+		// A delivery to a far area nobody has loaded waits, however long it has been due.
+		BlockPos far = from.offset(3_000, 0, 3_000);
+		helper.assertTrue(!level.isLoaded(far), "The far target is loaded");
+		io.github.jimbozoomer.jugcraft.rocketry.RocketPost.send(level.getServer(), level.dimension(), far,
+				List.of(new ItemStack(Items.DIRT)), 0);
+		helper.succeedWhen(() -> {
+			ItemStack landed = receiver.getItem(0);
+			helper.assertTrue(landed.is(Items.DIAMOND) && landed.getCount() == 5, "The receiving pad holds " + landed);
+			// Both were due by now (the far one had no flight distance); only the loaded target took its delivery.
+			io.github.jimbozoomer.jugcraft.rocketry.RocketPost.deliver(level.getServer());
+			helper.assertTrue(io.github.jimbozoomer.jugcraft.rocketry.RocketPost.pending(level.getServer()).stream()
+					.anyMatch(d -> d.target().equals(far)), "A delivery to an unloaded area landed or was lost");
+		});
+	}
+
+	/**
+	 * Batch 40 (zipline): a line won't string through a wall; once the wall is gone it joins two anchors, a second line
+	 * from either is refused, a rider runs along it and is let off at the far anchor, and breaking an anchor takes the
+	 * line down at the other end.
+	 */
+	@GameTest(maxTicks = 200)
+	public void ziplineCarriesARider(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Block anchorBlock = io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_ANCHOR;
+		BlockPos from = helper.absolutePos(new BlockPos(1, 4, 1));
+		BlockPos to = helper.absolutePos(new BlockPos(7, 2, 7));
+		BlockPos wall = helper.absolutePos(new BlockPos(4, 3, 4));
+		level.setBlockAndUpdate(from, anchorBlock.defaultBlockState());
+		level.setBlockAndUpdate(to, anchorBlock.defaultBlockState());
+		level.setBlockAndUpdate(wall, Blocks.STONE.defaultBlockState());
+		var blocked = io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.connect(level, from, to, null);
+		helper.assertTrue(blocked == io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.Result.BLOCKED,
+				"A line went through a wall: " + blocked);
+		level.removeBlock(wall, false);
+		var strung = io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.connect(level, from, to, null);
+		helper.assertTrue(strung == io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.Result.OK, "The line was not strung: " + strung);
+		var again = io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.connect(level, to, from, null);
+		helper.assertTrue(again == io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.Result.IN_USE,
+				"A second line was strung: " + again);
+
+		net.minecraft.world.entity.Mob rider = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.ZOMBIE, new BlockPos(1, 1, 2));
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.rocketry.ZiplineRider.ride(level, from, rider), "The zombie could not ride the line");
+		helper.assertTrue(rider.getVehicle() instanceof io.github.jimbozoomer.jugcraft.rocketry.ZiplineRider, "The zombie is not on the trolley");
+		helper.succeedWhen(() -> {
+			helper.assertTrue(!rider.isPassenger(), "Still riding at " + rider.position());
+			double dx = rider.getX() - (to.getX() + 0.5);
+			double dz = rider.getZ() - (to.getZ() + 0.5);
+			helper.assertTrue(dx * dx + dz * dz <= 4.0, "The rider was let off away from the far anchor, at " + rider.position());
+			level.removeBlock(to, false);
+			var start = (io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity) level.getBlockEntity(from);
+			helper.assertTrue(start.link() == null, "Breaking the far anchor left the line up");
+		});
+	}
+
+	/**
+	 * Batch 41 (rocket launcher): a high-explosive rocket fired straight at a husk hurts it and leaves the glass beside
+	 * it standing (rockets never break blocks).
+	 */
+	@GameTest(maxTicks = 100)
+	public void heRocketHurtsButBreaksNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		net.minecraft.world.entity.Mob husk = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new BlockPos(6, 1, 1));
+		BlockPos glass = helper.absolutePos(new BlockPos(6, 1, 2));
+		level.setBlockAndUpdate(glass, Blocks.GLASS.defaultBlockState());
+		launch(helper, item("he_rocket"), new Vec3(1.5, 2.0, 1.5), new Vec3(1, 0, 0), null);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(husk.getHealth() < husk.getMaxHealth(), "The rocket did not hurt the husk");
+			helper.assertTrue(level.getBlockState(glass).is(Blocks.GLASS), "The rocket broke the glass");
+		});
+	}
+
+	/** Batch 41: a homing rocket fired past a husk turns and flies into it. */
+	@GameTest(maxTicks = 100)
+	public void homingRocketSteersIntoItsTarget(GameTestHelper helper) {
+		net.minecraft.world.entity.Mob husk = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new BlockPos(6, 1, 6));
+		launch(helper, item("homing_rocket"), new Vec3(1.5, 2.0, 1.5), new Vec3(1, 0, 0), husk);
+		helper.succeedWhen(() -> helper.assertTrue(husk.getHealth() < husk.getMaxHealth(), "The homing rocket missed the husk"));
+	}
+
+	/** Fires a rocket of {@code kind} from {@code from} (relative to the test) along {@code direction}, locked on to {@code target}. */
+	private static void launch(GameTestHelper helper, Item kind, Vec3 from, Vec3 direction,
+			net.minecraft.world.entity.LivingEntity target) {
+		var rocket = new io.github.jimbozoomer.jugcraft.rocketry.CombatRocket(
+				io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.COMBAT_ROCKET, helper.getLevel());
+		rocket.setItem(new ItemStack(kind));
+		Vec3 at = helper.absoluteVec(from);
+		rocket.setPos(at.x, at.y, at.z);
+		rocket.setDeltaMovement(direction.normalize().scale(io.github.jimbozoomer.jugcraft.rocketry.RocketLauncherItem.SPEED / 3.0));
+		if (target != null) {
+			rocket.lockOn(target);
+		}
+		helper.getLevel().addFreshEntity(rocket);
+	}
+
+	/**
+	 * Batch 42 (booster rails): a powered booster rail fed one solid propellant (eight boosts) starts a standing
+	 * minecart off along the track at speed, uses one boost and keeps the cart boosted.
+	 */
+	@GameTest(maxTicks = 100)
+	public void boosterRailLaunchesACart(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		// Rails need solid ground: a stone bed under the track, which runs south from the booster rail.
+		for (int z = 1; z <= 6; z++) {
+			level.setBlockAndUpdate(helper.absolutePos(new BlockPos(1, 1, z)), Blocks.STONE.defaultBlockState());
+		}
+		BlockPos boosterPos = helper.absolutePos(new BlockPos(1, 2, 1));
+		level.setBlockAndUpdate(boosterPos, io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.BOOSTER_RAIL.defaultBlockState());
+		for (int z = 2; z <= 6; z++) {
+			level.setBlockAndUpdate(helper.absolutePos(new BlockPos(1, 2, z)), Blocks.RAIL.defaultBlockState());
+		}
+		level.setBlockAndUpdate(helper.absolutePos(new BlockPos(0, 2, 1)), Blocks.REDSTONE_BLOCK.defaultBlockState());
+		var rail = (io.github.jimbozoomer.jugcraft.rocketry.BoosterRailBlockEntity) level.getBlockEntity(boosterPos);
+		rail.setItem(0, new ItemStack(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.SOLID_PROPELLANT));
+		helper.assertTrue(level.getBlockState(boosterPos).getValue(net.minecraft.world.level.block.PoweredRailBlock.POWERED),
+				"The booster rail is not powered");
+		var cart = helper.spawn(net.minecraft.world.entity.EntityTypes.MINECART, new Vec3(1.5, 2.1, 1.5));
+		helper.succeedWhen(() -> {
+			helper.assertTrue(rail.charges() == io.github.jimbozoomer.jugcraft.rocketry.BoosterRailBlockEntity.CHARGES_PER_PROPELLANT - 1,
+					"The rail holds " + rail.charges() + " boosts");
+			helper.assertTrue(io.github.jimbozoomer.jugcraft.rocketry.BoosterRails.boosted(cart), "The cart is not boosted");
+			helper.assertTrue(cart.getDeltaMovement().horizontalDistance() > 0.3, "The cart is going " + cart.getDeltaMovement());
+		});
+	}
+
 	/** Ores drop their raw material to a plain pickaxe, more with Fortune; only Silk Touch takes the ore block itself. */
 	@GameTest
 	public void oresNeedSilkTouchToDropThemselves(GameTestHelper helper) {

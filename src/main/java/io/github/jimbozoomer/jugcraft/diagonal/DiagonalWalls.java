@@ -21,6 +21,8 @@ import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WallSide;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
@@ -72,7 +74,8 @@ public final class DiagonalWalls {
 
 	/**
 	 * A vanilla wall's state, as vanilla worked it out, or the diagonal wall it becomes if it joins a wall diagonally: its
-	 * sides joined where vanilla's are (low or tall), its diagonals, and its post by vanilla's rule ({@link #post}).
+	 * sides joined where vanilla's are, its diagonals, tall if the block above covers them all ({@link #tall}), and its
+	 * post by vanilla's rule ({@link #post}).
 	 */
 	public static BlockState settle(BlockState wallState, BlockGetter level, BlockPos pos) {
 		DiagonalWallBlock diagonal = BY_WALL.get(wallState.getBlock());
@@ -90,38 +93,64 @@ public final class DiagonalWalls {
 		for (DiagonalConnections.Diagonal each : DiagonalConnections.Diagonal.ALL) {
 			state = state.setValue(each.property, (mask & 1 << each.ordinal()) != 0);
 		}
-		return state.setValue(DiagonalWallBlock.UP, post((WallBlock) wallState.getBlock(), wallState, mask, level, pos));
+		BlockPos abovePos = pos.above();
+		BlockState above = level.getBlockState(abovePos);
+		VoxelShape aboveFace = above.getCollisionShape(level, abovePos).getFaceShape(Direction.DOWN);
+		boolean tall = tall(wallState, mask, aboveFace);
+		return state.setValue(DiagonalWallBlock.TALL, tall)
+				.setValue(DiagonalWallBlock.UP, post((WallBlock) wallState.getBlock(), wallState, mask, tall, above, aboveFace));
 	}
 
 	/**
-	 * The vanilla wall a diagonal wall stands for, its sides low where joined. Vanilla works out which are tall from the
-	 * block above when it next updates the wall.
+	 * Whether every joined side and diagonal arm is covered by the block above, as vanilla raises a wall's side to the
+	 * tall height: vanilla has already found each straight side tall or low, and each diagonal arm is tested the same
+	 * way, with a thin line from the middle to the corner that the face of the block above must cover. The diagonal wall
+	 * has one height for all its arms, so one uncovered arm keeps them all low rather than raise an arm into the air.
+	 */
+	private static boolean tall(BlockState wallState, int mask, VoxelShape aboveFace) {
+		for (Direction side : HORIZONTAL) {
+			if (wallState.getValue(WallBlock.PROPERTY_BY_DIRECTION.get(side)) == WallSide.LOW) {
+				return false;
+			}
+		}
+		for (DiagonalConnections.Diagonal each : DiagonalConnections.Diagonal.ALL) {
+			if ((mask & 1 << each.ordinal()) != 0
+					&& Shapes.joinIsNotEmpty(DiagonalConnections.Arms.of(1 / 16.0, 0, 1, 1 << each.ordinal()), aboveFace, BooleanOp.ONLY_FIRST)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * The vanilla wall a diagonal wall stands for: its joined sides tall if it is tall, else low. Vanilla works out each
+	 * side's height from the block above again whenever it updates the wall's sides.
 	 */
 	public static BlockState toWall(BlockState state) {
 		DiagonalWallBlock diagonal = (DiagonalWallBlock) state.getBlock();
 		BlockState wall = diagonal.wall().defaultBlockState().setValue(WallBlock.UP, state.getValue(DiagonalWallBlock.UP))
 				.setValue(WallBlock.WATERLOGGED, state.getValue(DiagonalWallBlock.WATERLOGGED));
+		WallSide joined = state.getValue(DiagonalWallBlock.TALL) ? WallSide.TALL : WallSide.LOW;
 		for (Direction side : HORIZONTAL) {
-			wall = wall.setValue(WallBlock.PROPERTY_BY_DIRECTION.get(side), state.getValue(DiagonalWallBlock.SIDES.get(side)) ? WallSide.LOW : WallSide.NONE);
+			wall = wall.setValue(WallBlock.PROPERTY_BY_DIRECTION.get(side), state.getValue(DiagonalWallBlock.SIDES.get(side)) ? joined : WallSide.NONE);
 		}
 		return wall;
 	}
 
 	/**
 	 * A diagonal wall's post, raised by vanilla's own rule with the diagonals counted. A wall with no straight sides and
-	 * one pair of opposite diagonals runs straight on, so the rule sees it as a straight low wall: no post unless something
-	 * above calls for one (a torch, a wall's post, a block over the middle). Any other wall with diagonals is an end, a
-	 * corner or a junction, and the rule gives it its post.
+	 * one pair of opposite diagonals runs straight on, so the rule sees it as a straight wall, low or tall as the diagonal
+	 * wall is: a low run has no post unless something above calls for one (a torch, a wall's post, a block over the
+	 * middle), and a tall run has none, as vanilla's tall straight walls have none. Any other wall with diagonals is an
+	 * end, a corner or a junction, and the rule gives it its post.
 	 */
-	private static boolean post(WallBlock wall, BlockState wallState, int mask, BlockGetter level, BlockPos pos) {
-		BlockPos abovePos = pos.above();
-		BlockState above = level.getBlockState(abovePos);
-		VoxelShape aboveShape = above.getCollisionShape(level, abovePos).getFaceShape(Direction.DOWN);
+	private static boolean post(WallBlock wall, BlockState wallState, int mask, boolean tall, BlockState above, VoxelShape aboveFace) {
 		BlockState seen = wallState;
 		boolean noSides = HORIZONTAL.stream().allMatch(side -> wallState.getValue(WallBlock.PROPERTY_BY_DIRECTION.get(side)) == WallSide.NONE);
 		if ((mask == RUN_NORTH_EAST || mask == RUN_NORTH_WEST) && noSides) {
-			seen = wallState.setValue(WallBlock.NORTH, WallSide.LOW).setValue(WallBlock.SOUTH, WallSide.LOW);
+			WallSide height = tall ? WallSide.TALL : WallSide.LOW;
+			seen = wallState.setValue(WallBlock.NORTH, height).setValue(WallBlock.SOUTH, height);
 		}
-		return ((WallBlockInvoker) wall).jugcraft$shouldRaisePost(seen, above, aboveShape);
+		return ((WallBlockInvoker) wall).jugcraft$shouldRaisePost(seen, above, aboveFace);
 	}
 }

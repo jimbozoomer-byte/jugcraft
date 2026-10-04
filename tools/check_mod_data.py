@@ -30,6 +30,7 @@ import gas_storage
 import control_electronics
 import rocketry
 import gear
+import arms
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
@@ -126,6 +127,8 @@ def model(ref):
 def _hi_res(name):
     """64x64 textures: the drone tower's realistic block textures (tools/tower_art.py) and items drawn with the
     high-detail renderer (tools/hd_art.py: construction_art.ITEMS so far)."""
+    if name in arms.textures():  # batch 42's arms (tools/arms_art.py)
+        return True
     import tower_art
     import blueprints
     import construction_art
@@ -152,7 +155,7 @@ def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS
-                  + construction.blocks() + control_electronics.blocks()):
+                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -173,7 +176,7 @@ def check_assets(registered):
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()
-                        + construction.blocks() + control_electronics.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -310,8 +313,10 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks():
         return {}
+    if path in arms.items():
+        return arms.metal_content(path)
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
         # hold nothing the audit tracks, like the vanilla tools they are made from.
@@ -504,8 +509,9 @@ def check_tags():
         known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + machine_items()
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
+                                                    + arms.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -657,9 +663,37 @@ def check_rocketry():
         value = getattr(rocketry, const)
         if f"int {const} = {value:_};" not in java and f"int {const} = {value};" not in java:
             err(f"JugcraftRocketry.{const} differs from tools/rocketry.py ({value})")
-    for item in rocketry.ITEMS:
+    for item in list(rocketry.ITEMS) + list(rocketry.BLOCKS):
         if f'"{item}"' not in java:
             err(f"JugcraftRocketry does not register {item}")
+    post = (JAVA_ROOT / "rocketry" / "RocketPost.java").read_text(encoding="utf-8")
+    for const, value in (("RANGE", rocketry.POST_RANGE), ("MIN_FLIGHT", rocketry.POST_MIN_FLIGHT),
+                         ("BLOCKS_PER_TICK", rocketry.POST_BLOCKS_PER_TICK), ("CHECK_INTERVAL", rocketry.POST_CHECK_INTERVAL)):
+        if f"int {const} = {value:_};" not in post and f"int {const} = {value};" not in post:
+            err(f"RocketPost.{const} differs from tools/rocketry.py ({value})")
+    booster = (JAVA_ROOT / "rocketry" / "BoosterRailBlockEntity.java").read_text(encoding="utf-8")
+    for const in ("BOOST_TICKS", "CHARGES_PER_PROPELLANT", "MAX_CHARGES"):
+        if f"int {const} = {getattr(rocketry, const)};" not in booster:
+            err(f"BoosterRailBlockEntity.{const} differs from tools/rocketry.py ({getattr(rocketry, const)})")
+    launcher = (JAVA_ROOT / "rocketry" / "RocketLauncherItem.java").read_text(encoding="utf-8")
+    for const, value in (("COOLDOWN", rocketry.LAUNCHER_COOLDOWN), ("HOMING_RANGE", rocketry.HOMING_RANGE)):
+        if f"int {const} = {value};" not in launcher:
+            err(f"RocketLauncherItem.{const} differs from tools/rocketry.py ({value})")
+    if f"int LIFETIME = {rocketry.ROCKET_LIFETIME};" not in (JAVA_ROOT / "rocketry" / "CombatRocket.java").read_text(encoding="utf-8"):
+        err(f"CombatRocket.LIFETIME differs from tools/rocketry.py ({rocketry.ROCKET_LIFETIME})")
+    anchor = (JAVA_ROOT / "rocketry" / "ZiplineAnchorBlockEntity.java").read_text(encoding="utf-8")
+    for const, value in (("RANGE", rocketry.LINE_RANGE), ("REACH", rocketry.ANCHOR_REACH)):
+        if f"int {const} = {value};" not in anchor:
+            err(f"ZiplineAnchorBlockEntity.{const} differs from tools/rocketry.py ({value})")
+    for result in rocketry.LINE_RESULTS:
+        if result.upper() not in anchor:
+            err(f"ZiplineAnchorBlockEntity.Result lacks {result.upper()}")
+    pad = (JAVA_ROOT / "rocketry" / "RocketPadBlockEntity.java").read_text(encoding="utf-8")
+    if f"int CARGO = {rocketry.PAD_CARGO};" not in pad:
+        err(f"RocketPadBlockEntity.CARGO differs from tools/rocketry.py ({rocketry.PAD_CARGO})")
+    for result in rocketry.PAD_RESULTS:
+        if result.upper() not in pad:
+            err(f"RocketPadBlockEntity.Result lacks {result.upper()}")
 
 
 def check_construction():
@@ -768,6 +802,102 @@ def check_gear():
         for frame in frames:
             if not (ASSETS / "textures" / "item" / f"{frame}.png").exists():
                 err(f"Missing item texture {frame}.png")
+
+
+def check_arms():
+    """weapons/JugcraftArms.java against tools/arms.py (batch 42): the metals, each kind's numbers and traits in order,
+    the charging kinds' numbers, the lance and parry constants, and that each arm's model has its held pose."""
+    java = (JAVA_ROOT / "weapons" / "JugcraftArms.java").read_text(encoding="utf-8")
+
+    def f(value):
+        return f"{float(value)}F"
+    metals = re.findall(r'"([a-z_]+)"', re.search(r"METALS = List\.of\(([^)]*)\)", java).group(1))
+    if metals != arms.METALS:
+        err(f"JugcraftArms.METALS {metals} != tools/arms.py {arms.METALS}")
+    swung = [kind for kind in arms.KINDS if kind not in arms.CHARGING]
+    found = re.findall(r'new Kind\("([a-z_]+)"', java)
+    if found != swung:
+        err(f"JugcraftArms.KINDS {found} != tools/arms.py {swung}")
+    for kind in swung:
+        info = arms.KINDS[kind]
+        swing, ticks = info["swing"]
+        low, high = info["reach"]
+        expected = (f'new Kind("{kind}", {f(info["damage"])}, {f(info["speed"])}, SwingAnimationType.{swing.upper()}, {ticks}, '
+                    f'{f(low)}, {f(high)}, {f(info["margin"])}, {f(info["disable"])}, {info["wear"]}, {f(info["knockback"])}, '
+                    f'{f(info["parry"])}, {str("swords" in info["tags"]).lower()}, {str(info.get("pierce", False)).lower()})')
+        if expected not in java:
+            err(f"JugcraftArms: {kind} is not {expected}")
+    charges = re.findall(r'new Charge\("([a-z_]+)", "([a-z_]+)"', java)
+    if sorted(charges) != sorted(arms.CHARGE):
+        err(f"JugcraftArms.CHARGES {charges} != tools/arms.py {list(arms.CHARGE)}")
+    for (kind, metal), values in arms.CHARGE.items():
+        expected = f'new Charge("{kind}", "{metal}", ' + ", ".join(f(v) for v in values) + ")"
+        if expected not in java:
+            err(f"JugcraftArms: the {metal} {kind} is not {expected}")
+    for name, value in (("LANCE_DAMAGE", arms.LANCE_DAMAGE), ("LANCE_MIN_REACH", arms.LANCE_REACH[0]),
+                        ("LANCE_MAX_REACH", arms.LANCE_REACH[1]), ("PARRY_ANGLE", arms.PARRY_ANGLE),
+                        ("PARRY_DELAY", arms.PARRY_DELAY), ("PARRY_WEAR_THRESHOLD", arms.PARRY_WEAR[0]),
+                        ("PARRY_WEAR_BASE", arms.PARRY_WEAR[1]), ("PARRY_WEAR_FACTOR", arms.PARRY_WEAR[2])):
+        if f"{name} = {f(value)};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({value})")
+    for kind, info in arms.KINDS.items():
+        if kind in arms.CHARGING:
+            continue
+        held = load(ASSETS / "models" / "item" / f"arms_{kind}.json") or {}
+        if held != arms.held_model(kind):
+            err(f"models/item/arms_{kind}.json is not tools/arms.py's held pose")
+    for item in arms.items():
+        _metal, kind = arms.split(item)
+        definition = load(ASSETS / "items" / f"{item}.json") or {}
+        if not definition.get("swap_animation_scale"):
+            err(f"items/{item}.json has no swap_animation_scale")
+
+
+def check_arms_motion():
+    """client/arms/ArmsMotion.java against tools/arms_motion.py and tools/arms_moves.py (batch 43): every kind of arm has
+    its motion file as the generator writes it, with whole poses, keys in time order from 0 to 1 and tensions from 0 to
+    1; the Java player reads the same kinds and bones; and its mixins are registered."""
+    import arms_motion
+    import arms_moves
+    client = ROOT / "src" / "client"
+    java = (client / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "arms" / "ArmsMotion.java").read_text(encoding="utf-8")
+    kinds = re.findall(r'"([a-z_]+)"', re.search(r"KINDS = List\.of\(([^)]*)\)", java).group(1))
+    if kinds != list(arms.KINDS):
+        err(f"ArmsMotion.KINDS {kinds} != tools/arms.py {list(arms.KINDS)}")
+    if list(arms_moves.MOVES) != list(arms.KINDS):
+        err(f"tools/arms_moves.py MOVES {list(arms_moves.MOVES)} != tools/arms.py {list(arms.KINDS)}")
+    bones = re.findall(r'"([a-z_]+)"', re.search(r"BONE_NAMES = List\.of\(([^)]*)\)", java).group(1))
+    if bones != arms_motion.BONES:
+        err(f"ArmsMotion.BONE_NAMES {bones} != tools/arms_motion.py {arms_motion.BONES}")
+    size = len(arms_motion.BONES) * len(arms_motion.CHANNELS)
+
+    def track(label, times, tension, keys, width):
+        if len(times) < 2 or times[0] != 0 or times[-1] != 1 or any(b <= a for a, b in zip(times, times[1:])):
+            err(f"{label}: key times {times} do not rise from 0 to 1")
+        if len(tension) != len(times) or any(not 0 <= k <= 1 for k in tension):
+            err(f"{label}: tensions {tension} are not one per key, from 0 to 1")
+        if len(keys) != len(times) or any(len(key) != width for key in keys):
+            err(f"{label}: keys are not {len(times)} poses of {width} numbers")
+    for kind in arms.KINDS:
+        path = ASSETS / "arms_motion" / f"{kind}.json"
+        motion = load(path)
+        if motion is None:
+            err(f"assets/{MOD}/arms_motion/{kind}.json is missing")
+            continue
+        if kind in arms_moves.MOVES and motion != json.loads(json.dumps(arms_motion.kind_json(arms_moves.MOVES[kind]))):
+            err(f"arms_motion/{kind}.json is not what tools/arms_motion.py writes (run tools/generate_material_data.py)")
+        if len(motion["hold"]) != size or (motion["use"] is not None and len(motion["use"]) != size) or len(motion["fp_hold"]) != 6:
+            err(f"arms_motion/{kind}.json: a hold or use pose is the wrong size")
+        if not motion["attacks"]:
+            err(f"arms_motion/{kind}.json has no attacks")
+        for attack in motion["attacks"]:
+            label = f"arms_motion/{kind}.json {attack['name']}"
+            track(label, attack["times"], attack["tension"], attack["keys"], size)
+            track(label + " (first person)", attack["fp_times"], attack["fp_tension"], attack["fp_keys"], 6)
+    mixins = load(client / "resources" / f"{MOD}.client.mixins.json") or {}
+    for mixin in ("ArmsRenderStateMixin", "ArmsHumanoidModelMixin", "ArmsItemInHandLayerMixin", "ArmsFirstPersonMixin"):
+        if mixin not in mixins.get("client", []):
+            err(f"{MOD}.client.mixins.json does not list {mixin}")
 
 
 def check_end_shares():
@@ -4086,20 +4216,26 @@ def check_diagonal_connections():
         name = block.split(":")[1]
         namespace, state_name = dg.arm_blockstate(block)
         parts = (load(RES / "assets" / namespace / "blockstates" / f"{state_name}.json") or {}).get("multipart", [])
-        arms = {next(iter(p["when"])): p["apply"] for p in parts if set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)}
-        if sorted(arms) != sorted(dg.DIAGONAL_NAMES):
-            err(f"{block}: needs one diagonal arm part for each of {dg.DIAGONAL_NAMES}, has {sorted(arms)}")
+        models = dg.arm_models(block)
+        arms = {}
+        for part in parts:
+            diagonals = set(part.get("when", {})) & set(dg.DIAGONAL_NAMES)
+            if diagonals:
+                arms.setdefault(diagonals.pop(), []).append(part["apply"])
+        if sorted(arms) != sorted(dg.DIAGONAL_NAMES) or any(sorted(a["model"] for a in arms[d]) != sorted(models) for d in arms):
+            err(f"{block}: needs one diagonal arm part for each of {dg.DIAGONAL_NAMES} and each of {list(models)}, has {arms}")
             continue
         for diagonal, y in dg.DIAGONALS:
-            if arms[diagonal].get("y", 0) != y or arms[diagonal]["model"] != f"{MOD}:block/diagonal/{name}":
-                err(f"{block}: its {diagonal} arm should be {MOD}:block/diagonal/{name} turned y={y}")
-        model = load(ASSETS / "models" / "block" / "diagonal" / f"{name}.json") or {}
-        elements = model.get("elements", [])
-        if not elements or any(e.get("rotation", {}).get("axis") != "y" or e["rotation"].get("angle") != dg.ANGLE
-                               or not e["rotation"].get("rescale") for e in elements):
-            err(f"{block}: its diagonal arm model needs elements turned {dg.ANGLE} degrees about y, with rescale")
-        if not model.get("parent"):
-            err(f"{block}: its diagonal arm model needs the block's side model as parent (for its textures)")
+            if any(apply.get("y", 0) != y for apply in arms[diagonal]):
+                err(f"{block}: its {diagonal} arms should be turned y={y}")
+        for arm in models:
+            model = load(ASSETS / "models" / "block" / "diagonal" / f"{arm.split('/')[-1]}.json") or {}
+            elements = model.get("elements", [])
+            if not elements or any(e.get("rotation", {}).get("axis") != "y" or e["rotation"].get("angle") != dg.ANGLE
+                                   or not e["rotation"].get("rescale") for e in elements):
+                err(f"{block}: its diagonal arm model {arm} needs elements turned {dg.ANGLE} degrees about y, with rescale")
+            if not model.get("parent"):
+                err(f"{block}: its diagonal arm model {arm} needs the block's side model as parent (for its textures)")
     vanilla = dg.vanilla_blockstates()
     for name, (own, _side, _kind) in vanilla.items():
         parts = (load(RES / "assets" / "minecraft" / "blockstates" / f"{name}.json") or {}).get("multipart", [])
@@ -4142,8 +4278,9 @@ def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
+                  | set(arms.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_petro()
@@ -4156,6 +4293,8 @@ def main():
     check_java()
     check_deposits()
     check_gear()
+    check_arms()
+    check_arms_motion()
     check_exosuit()
     check_grapple()
     check_field_chemistry()

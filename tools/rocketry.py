@@ -43,6 +43,15 @@ ITEMS = {
     "clear_sky_rocket": "Clear-Sky Rocket",
     "signal_flare": "Signal Flare",
     "illumination_flare": "Illumination Flare",
+    # Batch 39: the rocket post.
+    "delivery_rocket": "Delivery Rocket",
+    "flight_plan": "Flight Plan",
+    # Batch 40: the zipline.
+    "line_rocket": "Line-Throwing Rocket",
+    # Batch 41: the rocket launcher.
+    "rocket_launcher": "Rocket Launcher",
+    "he_rocket": "High-Explosive Rocket",
+    "homing_rocket": "Homing Rocket",
 }
 ROCKETS = ["survey_rocket", "cloud_seeding_rocket", "clear_sky_rocket", "signal_flare", "illumination_flare"]
 TOOLTIPS = {
@@ -58,11 +67,58 @@ TOOLTIPS = {
                         "two-minute cooldown.",
     "signal_flare": "A red star burst seen from far away; players within 512 blocks are told where it went up.",
     "illumination_flare": "A white burst that makes hostile mobs within 48 blocks glow for 30 seconds.",
+    "delivery_rocket": "Carries a rocket pad's cargo to the pad its flight plan names. Used up on launch.",
+    "line_rocket": "Stand by a zipline anchor and use it while looking at another anchor up to 96 blocks away: it "
+                   "strings a steel line between them.",
+    "rocket_launcher": "Fires a rocket from your inventory. Rockets hurt living things only: they never break blocks.",
+    "he_rocket": "Rocket launcher ammunition: a big blast where it hits (12 hearts at the centre, 5 blocks across).",
+    "homing_rocket": "Rocket launcher ammunition: locks on to the hostile mob nearest your crosshair within 48 blocks "
+                     "and steers into it. A smaller blast.",
+}
+
+# Batch 41 (docs/features/rocket-launcher.md): the launcher's cooldown, how long a rocket flies before it bursts on its
+# own, and how far a homing rocket looks for a target (Java: RocketLauncherItem, CombatRocket). Blast sizes are in Java.
+LAUNCHER_COOLDOWN = 40
+ROCKET_LIFETIME = 100
+HOMING_RANGE = 48
+
+# Batch 39 (docs/features/rocket-post.md): rocket pads send their cargo to another pad (Java: rocketry/RocketPost,
+# RocketPadBlockEntity). Range in blocks, flight time (a minimum plus blocks per tick), how often waiting deliveries
+# are checked, and the pad's slots. A delivery whose target area is not loaded waits and lands when it loads.
+POST_RANGE = 4_096
+POST_MIN_FLIGHT = 60
+POST_BLOCKS_PER_TICK = 4
+POST_CHECK_INTERVAL = 20
+PAD_CARGO = 9
+BLOCKS = {"rocket_pad": "Rocket Pad", "zipline_anchor": "Zipline Anchor", "booster_rail": "Booster Rail"}
+# Batch 42 (docs/features/booster-rails.md): a boost holds a cart at full speed for BOOST_TICKS; one solid propellant
+# loaded into a booster rail gives CHARGES_PER_PROPELLANT boosts, and a rail holds at most MAX_CHARGES
+# (Java: BoosterRailBlockEntity).
+BOOST_TICKS = 200
+CHARGES_PER_PROPELLANT = 8
+MAX_CHARGES = 64
+# Batch 40 (docs/features/zipline.md): the longest line, and how close the player must stand to the anchor it leaves
+# from (Java: ZiplineAnchorBlockEntity.RANGE and REACH).
+LINE_RANGE = 96
+ANCHOR_REACH = 4
+LINE_RESULTS = {
+    "not_anchor": "Aim at a zipline anchor", "same_anchor": "That is the same anchor",
+    "in_use": "One of the anchors already has a line", "too_far": "Too far: a line reaches 96 blocks",
+    "blocked": "Something is in the way of the line",
+}
+PAD_RESULTS = {
+    "none": "", "launched": "Launched!", "no_rocket": "No rocket", "no_plan": "No flight plan",
+    "no_cargo": "No cargo", "same_pad": "That is this pad", "other_dimension": "Other dimension",
+    "too_far": "Too far away", "no_pad": "No pad there", "no_sky": "Roof overhead",
 }
 
 
 def items():
     return list(ITEMS)
+
+
+def blocks():
+    return list(BLOCKS)
 
 
 def workshop_recipes():
@@ -86,6 +142,14 @@ def workshop_recipes():
          "output": rid("cloud_seeding_rocket"), "count": 1, "ticks": 200, "features": feature},
         {"inputs": [[rid("rocket_motor"), 1], [rid("guncotton"), 2]],
          "output": rid("clear_sky_rocket"), "count": 1, "ticks": 200, "features": feature},
+        {"inputs": [[rid("rocket_motor"), 1], [rid("rocket_casing"), 1], [rid("guidance_unit"), 1]],
+         "output": rid("delivery_rocket"), "count": 1, "ticks": 300, "features": feature},
+        {"inputs": [[rid("rocket_motor"), 1], [rid("aluminum_wire"), 4], ["minecraft:string", 8]],
+         "output": rid("line_rocket"), "count": 1, "ticks": 200, "features": feature + ["aluminum"]},
+        {"inputs": [[rid("solid_propellant"), 2], [rid("guncotton"), 2], [rid("rocket_casing"), 1]],
+         "output": rid("he_rocket"), "count": 4, "ticks": 200, "features": feature},
+        {"inputs": [[rid("solid_propellant"), 2], [rid("guncotton"), 2], [rid("guidance_unit"), 1]],
+         "output": rid("homing_rocket"), "count": 4, "ticks": 300, "features": feature},
         {"inputs": [[rid("solid_propellant"), 1], ["minecraft:paper", 2], ["minecraft:red_dye", 1]],
          "output": rid("signal_flare"), "count": 4, "ticks": 100, "features": feature},
         {"inputs": [[rid("solid_propellant"), 1], ["minecraft:paper", 2], ["minecraft:glowstone_dust", 1]],
@@ -104,7 +168,7 @@ REACTOR_RECIPES = [
 ]
 
 
-def write_all(write, assets, data, lang, condition):
+def write_all(write, assets, data, lang, condition, self_drop):
     for item, name in ITEMS.items():
         lang[f"item.{MOD}.{item}"] = name
         write(assets / "models" / "item" / f"{item}.json",
@@ -122,6 +186,151 @@ def write_all(write, assets, data, lang, condition):
     write(data / "recipe" / "silver_iodide.json", {
         "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shapeless", "category": "misc",
         "ingredients": [f"{MOD}:silver_dust", f"{MOD}:iodine"], "result": {"id": f"{MOD}:silver_iodide", "count": 2}})
+    write_post(write, assets, data, lang, condition, self_drop)
+    write_zipline(write, assets, data, lang, condition)
+    write_booster(write, assets, data, lang, condition)
+    lang[f"entity.{MOD}.combat_rocket"] = "Rocket"
+    lang[f"message.{MOD}.rocket_launcher.empty"] = "No rockets"
+    write(data / "recipe" / "rocket_launcher.json", {
+        "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped", "category": "equipment",
+        "pattern": ["PPP", " GT", "  P"],
+        "key": {"P": "#c:plates/steel", "G": f"{MOD}:guidance_unit", "T": "minecraft:tripwire_hook"},
+        "result": {"id": f"{MOD}:rocket_launcher", "count": 1}})
+
+
+def write_zipline(write, assets, data, lang, condition):
+    """Batch 40: the zipline anchor (model, recipe), the rider entity's name and the messages."""
+    lang[f"entity.{MOD}.zipline_rider"] = "Zipline Trolley"
+    lang[f"message.{MOD}.zipline.no_line"] = "No line: string one with a line-throwing rocket"
+    lang[f"message.{MOD}.zipline.cannot_ride"] = "Can't ride: the far anchor isn't loaded, or the line is too short"
+    lang[f"message.{MOD}.line_rocket.no_target"] = "Look at a zipline anchor to fire the line to"
+    lang[f"message.{MOD}.line_rocket.no_anchor"] = "Stand within 4 blocks of a zipline anchor with no line"
+    lang[f"message.{MOD}.line_rocket.strung"] = "Line strung: %s blocks"
+    for key, text in LINE_RESULTS.items():
+        lang[f"message.{MOD}.line_rocket.{key}"] = text
+    textures = {"post": f"{MOD}:block/dp_gunmetal", "cap": f"{MOD}:block/dp_hazard", "wheel": f"{MOD}:block/dp_chrome",
+                "particle": f"{MOD}:block/dp_gunmetal"}
+    write(assets / "models" / "block" / "zipline_anchor.json", {"parent": "minecraft:block/block", "textures": textures,
+                                                               "elements": anchor_model()})
+    write(assets / "blockstates" / "zipline_anchor.json", {"variants": {"": {"model": f"{MOD}:block/zipline_anchor"}}})
+    write(assets / "items" / "zipline_anchor.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:block/zipline_anchor"}})
+    write(data / "recipe" / "zipline_anchor.json", {
+        "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped", "category": "redstone",
+        "pattern": ["PHP", " B ", "PBP"],
+        "key": {"P": "#c:plates/steel", "H": "minecraft:tripwire_hook", "B": "minecraft:iron_bars"},
+        "result": {"id": f"{MOD}:zipline_anchor", "count": 2}})
+
+
+def write_booster(write, assets, data, lang, condition):
+    """Batch 42: the booster rail's models (vanilla rail templates with its own texture), blockstate, item and recipe."""
+    lang[f"message.{MOD}.booster_rail.charges"] = "Booster rail: %s boosts loaded"
+    lang[f"tooltip.{MOD}.booster_rail"] = ("Powered by redstone and loaded with solid propellant (8 boosts each), it kicks "
+                                          "a passing minecart to full speed and keeps it there for 10 seconds, uphill too.")
+    models = assets / "models" / "block"
+    for suffix, texture in (("", "booster_rail"), ("_on", "booster_rail_on")):
+        textures = {"rail": f"{MOD}:block/{texture}"}
+        write(models / f"booster_rail{suffix}.json", {"parent": "minecraft:block/rail_flat", "textures": textures})
+        write(models / f"booster_rail{suffix}_raised_ne.json",
+              {"parent": "minecraft:block/template_rail_raised_ne", "textures": textures})
+        write(models / f"booster_rail{suffix}_raised_sw.json",
+              {"parent": "minecraft:block/template_rail_raised_sw", "textures": textures})
+    variants = {}
+    for powered, suffix in (("false", ""), ("true", "_on")):
+        base = f"{MOD}:block/booster_rail{suffix}"
+        variants[f"powered={powered},shape=north_south"] = {"model": base}
+        variants[f"powered={powered},shape=east_west"] = {"model": base, "y": 90}
+        variants[f"powered={powered},shape=ascending_north"] = {"model": base + "_raised_ne"}
+        variants[f"powered={powered},shape=ascending_east"] = {"model": base + "_raised_ne", "y": 90}
+        variants[f"powered={powered},shape=ascending_south"] = {"model": base + "_raised_sw"}
+        variants[f"powered={powered},shape=ascending_west"] = {"model": base + "_raised_sw", "y": 90}
+    write(assets / "blockstates" / "booster_rail.json", {"variants": variants})
+    write(assets / "models" / "item" / "booster_rail.json",
+          {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:block/booster_rail"}})
+    write(assets / "items" / "booster_rail.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/booster_rail"}})
+    write(data / "recipe" / "booster_rail.json", {
+        "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped", "category": "redstone",
+        "pattern": ["S S", "SNS", "SRS"],
+        "key": {"S": "#c:ingots/steel", "N": f"{MOD}:rocket_nozzle", "R": "minecraft:redstone"},
+        "result": {"id": f"{MOD}:booster_rail", "count": 6}})
+
+
+def booster_rail_texture(on):
+    """A 16x16 rail running north-south: steel rails on dark ties, every other tie a hazard-striped thruster block with a
+    nozzle that glows orange while the rail is powered. Transparent between the ties, like vanilla rails."""
+    from PIL import Image
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = img.load()
+    tie = [(58, 62, 72, 255), (44, 48, 56, 255)]
+    for y in range(16):
+        if y % 4 in (0, 1):  # ties
+            for x in range(1, 15):
+                px[x, y] = tie[y % 2]
+    for y in (2, 10):  # thrusters between the ties
+        for x in range(5, 11):
+            for dy in range(4):
+                stripe = (x + y + dy) % 4 < 2
+                px[x, y + dy] = (232, 188, 36, 255) if stripe else (30, 30, 34, 255)
+        nozzle = [(255, 160, 40, 255), (255, 230, 120, 255)] if on else [(90, 94, 104, 255), (60, 64, 72, 255)]
+        for x in range(7, 9):
+            for dy in range(1, 3):
+                px[x, y + dy] = nozzle[(x + dy) % 2]
+    for y in range(16):  # the rails
+        for x, shade in ((2, 186), (3, 146), (12, 186), (13, 146)):
+            px[x, y] = (shade, shade + 6, shade + 14, 255)
+    return img
+
+
+def anchor_model():
+    """A steel post on a base plate, a hazard-striped collar and a chrome pulley wheel at the top where the line ties on."""
+    return [{"from": [4, 0, 4], "to": [12, 1, 12], "faces": _faces("#post", up="#cap")},
+            {"from": [6, 1, 6], "to": [10, 12, 10], "faces": _faces("#post")},
+            {"from": [5, 12, 5], "to": [11, 15, 11], "faces": _faces("#cap", up="#post", down="#post")},
+            {"from": [7, 15, 4], "to": [9, 16, 12], "faces": _faces("#wheel")}]
+
+
+def write_post(write, assets, data, lang, condition, self_drop):
+    """Batch 39: the rocket pad (block, model, loot, recipe) and its screen's text, and the flight plan."""
+    for block, name in BLOCKS.items():
+        lang[f"block.{MOD}.{block}"] = name
+        write(data / "loot_table" / "blocks" / f"{block}.json", self_drop(block))
+    lang[f"container.{MOD}.rocket_pad"] = "Rocket Pad"
+    lang[f"screen.{MOD}.rocket_pad.launch"] = "Launch"
+    for key, text in PAD_RESULTS.items():
+        lang[f"screen.{MOD}.rocket_pad.{key}"] = text
+    lang[f"message.{MOD}.flight_plan.set"] = "Flight plan: deliver to the pad at %s, %s, %s"
+    lang[f"tooltip.{MOD}.flight_plan.blank"] = "Blank: sneak and use it on the rocket pad to deliver to"
+    lang[f"tooltip.{MOD}.flight_plan.target"] = "Deliver to the pad at %s, %s, %s (%s)"
+    textures = {"deck": f"{MOD}:block/dp_gunmetal", "edge": f"{MOD}:block/dp_hazard", "grille": f"{MOD}:block/dp_grille",
+                "lamp": f"{MOD}:block/dp_lamp", "particle": f"{MOD}:block/dp_gunmetal"}
+    write(assets / "models" / "block" / "rocket_pad.json", {"parent": "minecraft:block/block", "textures": textures,
+                                                           "elements": pad_model()})
+    write(assets / "blockstates" / "rocket_pad.json", {"variants": {
+        "powered=false": {"model": f"{MOD}:block/rocket_pad"}, "powered=true": {"model": f"{MOD}:block/rocket_pad"}}})
+    write(assets / "items" / "rocket_pad.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:block/rocket_pad"}})
+    write(data / "recipe" / "rocket_pad.json", {
+        "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped", "category": "redstone",
+        "pattern": [" X ", "PPP", "BBB"],
+        "key": {"X": f"{MOD}:microchip", "P": "#c:plates/steel", "B": "minecraft:smooth_stone"},
+        "result": {"id": f"{MOD}:rocket_pad", "count": 1}})
+    write(data / "recipe" / "flight_plan.json", {
+        "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shapeless", "category": "misc",
+        "ingredients": ["minecraft:paper", "minecraft:compass", f"{MOD}:microchip"],
+        "result": {"id": f"{MOD}:flight_plan", "count": 1}})
+
+
+def _faces(texture, **overrides):
+    return {side: {"texture": overrides.get(side, texture)} for side in ("north", "east", "south", "west", "up", "down")}
+
+
+def pad_model():
+    """A low gunmetal deck with hazard-striped edges, a grille in the middle where the rocket stands, a launch rail
+    at each corner and an amber lamp on the front."""
+    elements = [{"from": [0, 0, 0], "to": [16, 4, 16], "faces": _faces("#edge", up="#deck", down="#deck")},
+                {"from": [4, 4, 4], "to": [12, 4.5, 12], "faces": _faces("#deck", up="#grille")}]
+    for x, z in ((1, 1), (13, 1), (1, 13), (13, 13)):
+        elements.append({"from": [x, 4, z], "to": [x + 2, 6, z + 2], "faces": _faces("#deck")})
+    elements.append({"from": [7, 1, -0.5], "to": [9, 3, 0], "faces": _faces("#deck", north="#lamp")})
+    return elements
 
 
 # ------------------------------------------------------------------ art (64x64, tools/hd_art.py)
@@ -275,9 +484,85 @@ HD_ITEMS = {"survey_rocket": survey_rocket, "cloud_seeding_rocket": cloud_seedin
             "clear_sky_rocket": clear_sky_rocket, "signal_flare": signal_flare, "illumination_flare": illumination_flare,
             "rocket_motor": rocket_motor, "rocket_casing": rocket_casing, "rocket_nozzle": rocket_nozzle,
             "guidance_unit": guidance_unit, "iodine": iodine, "ammonium_perchlorate": ammonium_perchlorate,
-            "silver_iodide": silver_iodide, "solid_propellant": solid_propellant}
+            "silver_iodide": silver_iodide, "solid_propellant": solid_propellant,
+            "delivery_rocket": lambda: delivery_rocket(), "flight_plan": lambda: flight_plan(),
+            "line_rocket": lambda: line_rocket(), "rocket_launcher": lambda: rocket_launcher(),
+            "he_rocket": lambda: he_rocket(), "homing_rocket": lambda: homing_rocket()}
+
+
+def rocket_launcher():
+    """A shoulder-fired tube lying across the icon: an olive tube with a flared exhaust, a sight, a grip and a trigger."""
+    import hd_art as hd
+    c = hd.Canvas()
+    c.capsule((8, 40), (56, 22), 7.5, hd.OLIVE, flat_ends=True, bands=[(0.08, 0.14, hd.SAFETY_YELLOW), (0.86, 0.92, hd.GUNMETAL)])
+    c.polygon([(6, 33), (10, 47), (2, 50), (0, 30)], hd.GUNMETAL)  # flared exhaust at the back
+    c.disc((57, 22), 5.0, hd.HAZARD_BLACK, 0.3)  # the muzzle
+    c.box((34, 22), 4, 3, -0.36, hd.GUNMETAL, bevel=0.8)  # the sight
+    c.disc((36, 20), 1.5, hd.GLASS, 0.8)
+    c.capsule((30, 38), (28, 52), 3.0, hd.RUBBER, flat_ends=True)  # the grip
+    c.capsule((40, 34), (39, 46), 2.4, hd.RUBBER, flat_ends=True)  # the fore grip
+    c.line((32, 42), (35, 44), (40, 40, 44), width=1.4)  # trigger
+    return c.finish()
+
+
+def he_rocket():
+    """A gunmetal rocket with a red warning band and a yellow warhead nose."""
+    import hd_art as hd
+    c = hd.Canvas()
+    _rocket(c, hd, hd.GUNMETAL, hd.RED, hd.SAFETY_YELLOW, fins=True)
+    return c.finish()
+
+
+def homing_rocket():
+    """A white rocket with a red band and a glass seeker eye in its nose."""
+    import hd_art as hd
+    c = hd.Canvas()
+    _rocket(c, hd, hd.WHITE_PAINT, hd.RED, hd.RED, fins=True, tip=hd.GLASS)
+    return c.finish()
+
+
+def line_rocket():
+    """A slim red rocket trailing a coil of yellow line from its tail."""
+    import hd_art as hd
+    c = hd.Canvas()
+    # The line pays out of the tail to a coil lying in the corner.
+    c.line((12, 56), (22, 60), (200, 160, 30), width=1.8)
+    c.line((22, 60), (38, 54), (200, 160, 30), width=1.8)
+    for r in (9.0, 6.5, 4.0):
+        c.ring((48, 50), r + 1.6, r, hd.SAFETY_YELLOW)
+    _rocket(c, hd, hd.RED, hd.WHITE_PAINT, hd.STEEL, fins=True, tip=hd.CHROME)
+    c.line((14, 56), (12, 56), (200, 160, 30), width=1.8)
+    return c.finish()
+
+
+def delivery_rocket():
+    """A stubby olive cargo rocket with a hazard band, a wide grey nose for the cargo bay and a yellow tip."""
+    import hd_art as hd
+    c = hd.Canvas()
+    _rocket(c, hd, hd.OLIVE, hd.SAFETY_YELLOW, hd.STEEL, tip=hd.SAFETY_YELLOW)
+    _flame(c, hd)
+    return c.finish()
+
+
+def flight_plan():
+    """A folded sheet with a dashed flight arc from one pad marker to another and a compass rose."""
+    import hd_art as hd
+    c = hd.Canvas()
+    c.box((32, 34), 22, 24, -0.08, hd.PAPER, bevel=1.0)
+    c.disc((18, 48), 3.0, hd.RED, 0.5)
+    c.disc((46, 22), 3.0, hd.RED, 0.5)
+    def arc(t):
+        return 18 + (46 - 18) * t, 48 + (22 - 48) * t - 16 * math.sin(math.pi * t)
+    for i in range(1, 14, 2):  # a dashed arc between the two pads
+        c.line(arc((i - 0.5) / 14), arc((i + 0.5) / 14), (48, 52, 64), width=2.2)
+    c.ring((46, 48), 5, 3.8, hd.GUNMETAL)
+    c.line((46, 42), (46, 54), (60, 60, 66))
+    c.line((40, 48), (52, 48), (60, 60, 66))
+    return c.finish()
 
 
 def draw_all(save):
     for item, draw in HD_ITEMS.items():
         save(draw(), "item", item)
+    save(booster_rail_texture(False), "block", "booster_rail")
+    save(booster_rail_texture(True), "block", "booster_rail_on")

@@ -230,6 +230,9 @@ def feature_of(entry_id):
     import exosuit
     if entry_id in exosuit.items():
         return FEATURE
+    import arms
+    if entry_id in arms.items():
+        return arms.feature(entry_id)
     import grapple
     if entry_id in grapple.items():
         return FEATURE
@@ -246,7 +249,7 @@ def feature_of(entry_id):
     if entry_id in control_electronics.blocks() or entry_id in control_electronics.items():
         return "machines"
     import rocketry
-    if entry_id in rocketry.items():
+    if entry_id in rocketry.items() or entry_id in rocketry.blocks():
         return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

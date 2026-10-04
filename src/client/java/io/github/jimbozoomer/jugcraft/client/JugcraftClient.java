@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.HarvestMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
 import io.github.jimbozoomer.jugcraft.agriculture.SpookyBurstPayload;
+import io.github.jimbozoomer.jugcraft.client.arms.ArmsMotion;
 import io.github.jimbozoomer.jugcraft.drone.DroneTerminalBlock;
 import io.github.jimbozoomer.jugcraft.drone.JugcraftDrones;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
@@ -45,12 +46,18 @@ public final class JugcraftClient implements ClientModInitializer {
 			MenuScreens.register(JugcraftMachines.menuType(kind), MachineScreen::new);
 		}
 		MenuScreens.register(JugcraftAgriculture.COOKING_POT_MENU, CookingPotScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD_MENU, RocketPadScreen::new);
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_RIDER,
+				net.minecraft.client.renderer.entity.NoopRenderer::new);
+		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_ANCHOR_ENTITY, ZiplineRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.COMBAT_ROCKET, ThrownItemRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftMachines.MACHINE_ENTITY, WindTurbineRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.BELT_PULLEY_ENTITY, BeltRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.SHAFT_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftLogistics.CONVEYOR_ENTITY, ConveyorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftTools.CHARGING_STATION_ENTITY, ChargingStationRenderer::new);
 		RocketPackClient.register();
+		ArmsMotion.load();
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);
 		PetroFluidsClient.register();
 		RocketPackLayer.register();

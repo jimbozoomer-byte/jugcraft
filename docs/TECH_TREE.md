@@ -445,6 +445,30 @@ Empty tools mine like a bare hand and get no drops.
 
 **Code:** `gear/` (`JugcraftGrapple`, `PneumaticGrappleItem`, `GrappleHook`), client `GrappleHookRenderer`; data and art from `tools/grapple.py` ([feature record](features/pneumatic-grapple.md)).
 
+### Arms (batch 42)
+
+Each in bronze (from the tin feature) and steel (machines), crafted from the metal's ingots with sticks or leather.
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Longsword | Hits 7 (steel 7.5) at 1.3 a second, reaches 3.25 blocks; hold use to parry 60% of a blow from in front. Sweeps | 4 ingots, leather |
+| Greatsword | Hits 10 (10.5) at 0.8 a second, reaches 3.75; extra knockback; stops a shield for 2 s. Sweeps | 6 ingots, leather |
+| Rapier | Hits 4.5 (5) at 2 a second with quick thrusts, reaches 3.5; parries 35%. Sweeps | 2 ingots, leather |
+| Flanged Mace | Hits 9 (9.5) at 0.9 a second; stops a shield for 3 s | 4 ingots, stick |
+| War Hammer | Hits 11 (11.5) at 0.7 a second; knocks back; stops a shield for 5 s | 5 ingots, 2 sticks |
+| Glaive | Hits 9 (9.5) at 0.9 a second, sweeping at 4.25 blocks | 3 ingots, 2 sticks |
+| Halberd | Hits 10 (10.5) at 0.8 a second, thrusting through every target in line from 1 to 4.5 blocks; stops a shield for 3 s | 4 ingots, 2 sticks |
+| Spear | Vanilla's spear in Jugcraft metal: jab, or hold use to charge | 1 ingot, 2 sticks |
+| Lance | A spear for horsemen: 1.3 (1.4) times the charge damage, unhorses at lower speeds, reaches 2.5 to 5.5 blocks | 3 ingots, 2 sticks |
+
+**Code:** `weapons/` (`JugcraftArms`, `ArmItem`); data from `tools/arms.py`, art from `tools/arms_art.py` ([feature record](features/arms.md)).
+
+**Motion (batch 43).**
+- Each kind holds its own guard and swings a combo of whole-body attacks: longsword forehand, backhand and thrust; greatsword sweep and cleave; rapier lunge and cut; mace smash and swing; war hammer slam and swing; glaive sweep and rising cut; halberd thrust and chop.
+- Two-handed arms keep both hands on the grip. First person has its own guard and strokes.
+- Looks only: damage, reach and timing are unchanged.
+- Client code in `client/arms/` (`ArmsMotion`, `ArmsPose`); moves from `tools/arms_moves.py` on `tools/arms_motion.py` ([feature record](features/arms-motion.md)).
+
 ### Construction chemistry (batch 32)
 
 | Item | What it does | Built from |

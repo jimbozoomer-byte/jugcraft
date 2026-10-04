@@ -379,6 +379,44 @@ def machine_page(block):
     return block_page(block, MACHINES[block]["display"])
 
 
+def arms_pages():
+    """Batch 42: the arms, three pages: swords, maces and hammers, polearms."""
+    import arms
+    import gear
+
+    def grid(kind):
+        key = {"#": item_for(gear.GEAR_TIERS["steel"]["ingot"]), **arms.KEYS}
+        return [key.get(ch) for row in arms.KINDS[kind]["pattern"] for ch in row.ljust(3)]
+
+    def craft(kind):
+        return {"grid": grid(kind), "result": f"{MOD}:steel_{kind}", "count": 1}
+    k = arms.KINDS
+    return [
+        {"title": "Arms: Swords", "icon": f"{MOD}:steel_longsword", "text": [
+            "Bronze and steel make arms beyond the sword, each with its own way of fighting. All sweep like swords.",
+            f"Longsword: a longer reach ({k['longsword']['reach'][1]} blocks). Hold use to parry: it blocks "
+            f"{round(k['longsword']['parry'] * 100)}% of a blow from in front, as a shield does all of it.",
+            f"Greatsword: two-handed, slow and heavy, with a {k['greatsword']['reach'][1]}-block reach; a hit stops a "
+            f"shield blocking for {k['greatsword']['disable']:g} seconds.",
+            f"Rapier: quick thrusts, two a second; its parry blocks {round(k['rapier']['parry'] * 100)}%."],
+         "craft": craft("longsword")},
+        {"title": "Arms: Maces and Hammers", "icon": f"{MOD}:steel_war_hammer", "text": [
+            f"Flanged mace: a hit stops a shield blocking for {k['flanged_mace']['disable']:g} seconds.",
+            f"War hammer: the heaviest blow of all, knocking foes back; a hit stops a shield blocking for "
+            f"{k['war_hammer']['disable']:g} seconds, as an axe's does.",
+            "Both take Sharpness, Smite, Bane of Arthropods, Knockback, Looting and Fire Aspect."],
+         "craft": craft("war_hammer")},
+        {"title": "Arms: Polearms", "icon": f"{MOD}:steel_halberd", "text": [
+            f"Glaive: a blade on a pole that sweeps at {k['glaive']['reach'][1]} blocks.",
+            f"Halberd: thrusts through every foe in line out to {k['halberd']['reach'][1]} blocks (not closer than "
+            f"{k['halberd']['reach'][0]:g}); a hit stops a shield blocking for {k['halberd']['disable']:g} seconds.",
+            "Spear: jab, or hold use to charge, as vanilla's spears do; faster on a horse or at a run.",
+            f"Lance: a horseman's charge that hits harder and unhorses riders at lower speeds, reaching "
+            f"{arms.LANCE_REACH[1]} blocks."],
+         "craft": craft("halberd")},
+    ]
+
+
 def gear_pages():
     """Batch 25: bronze and steel tools and armor, and paxels; batch 27 gear; batch 28 exosuit."""
     import exosuit
@@ -396,6 +434,7 @@ def gear_pages():
             "Steel tools mine obsidian and ancient debris, and last over three times as long as iron. Steel armor sits "
             "between iron and diamond: a spiked helmet, a field-grey tunic over a steel cuirass, and jackboots."],
          "craft": {"grid": grid, "result": f"{MOD}:steel_pickaxe", "count": 1}},
+    ] + arms_pages() + [
         {"title": "Paxels", "icon": f"{MOD}:steel_paxel", "text": [
             "A paxel is a pickaxe, an axe and a shovel in one tool: it mines stone, wood and dirt at full speed.",
             "Craft one from a pickaxe, an axe and a shovel of the same tier, from wood to netherite, bronze or steel. "
@@ -806,6 +845,36 @@ def build():
                 "Signal flares (four from propellant, paper and red dye) burst red and tell players within 512 blocks "
                 "where they went up. Illumination flares (with glowstone) make hostile mobs within 48 blocks glow for "
                 "30 seconds."]},
+            {"title": "Rocket Post", "icon": f"{MOD}:delivery_rocket", "text": [
+                "A rocket pad sends its cargo to another pad up to 4096 blocks away in the same dimension. Sneak and "
+                "use a flight plan on the pad to deliver to, then put the plan, a delivery rocket (motor, casing, "
+                "guidance unit) and up to nine stacks of cargo in the sending pad.",
+                "Press Launch, or give the pad a redstone pulse. It needs open sky. The flight takes three seconds "
+                "plus a second for every 80 blocks; the cargo lands in the target pad's slots.",
+                "If nobody is near the target, the rocket waits and lands as soon as that area is loaded again. "
+                "Hoppers load a pad from the top and sides and unload it from the bottom."]},
+            {"title": "Ziplines", "icon": f"{MOD}:line_rocket", "text": [
+                "Place two zipline anchors up to 96 blocks apart with nothing solid between them. Stand within 4 "
+                "blocks of one and use a line-throwing rocket while looking at the other: it strings a steel line.",
+                "Use either anchor with an empty hand to ride the line to the other end, hanging below it. A steeper "
+                "drop is faster. Sneak to let go early (you fall from there).",
+                "Breaking either anchor takes the line down. Each anchor holds one line."]},
+            {"title": "Rocket Launcher", "icon": f"{MOD}:rocket_launcher", "text": [
+                "The rocket launcher fires a rocket from your inventory (the other hand first), straight and fast. One "
+                "shot every two seconds.",
+                "High-explosive rockets (four from two solid propellant, two guncotton and a rocket casing in the "
+                "rocket workshop) burst hard where they hit: twelve hearts at the centre, falling off over 5 blocks.",
+                "Homing rockets (with a guidance unit instead of the casing) lock on to the hostile mob nearest your "
+                "crosshair within 48 blocks, if you can see it, and steer into it. Their blast is smaller.",
+                "Like grenades, rockets hurt living things only: they never break, move or burn a block."]},
+            {"title": "Booster Rails", "icon": f"{MOD}:booster_rail", "text": [
+                "A booster rail is a straight rail with rocket thrusters. Power it with redstone like a powered rail; "
+                "unpowered it is an ordinary rail and does not brake.",
+                "Load it with solid propellant (use it on the rail, or feed it from a hopper): each gives 8 boosts, "
+                "up to 64 held.",
+                "A cart that rolls on to a powered, loaded booster rail (or stands on it) is kicked to full speed and "
+                "held there for 10 seconds, up slopes too, trailing flame. A cart standing still goes uphill, or away "
+                "from a block at one end."]},
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

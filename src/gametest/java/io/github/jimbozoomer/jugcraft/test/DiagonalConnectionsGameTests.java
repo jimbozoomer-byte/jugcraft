@@ -106,6 +106,9 @@ public class DiagonalConnectionsGameTests {
 		if (state.hasProperty(WallBlock.UP) && state.getValue(WallBlock.UP)) {
 			joined.add("post");
 		}
+		if (state.hasProperty(DiagonalWallBlock.TALL) && state.getValue(DiagonalWallBlock.TALL)) {
+			joined.add("tall");
+		}
 		for (Diagonal diagonal : Diagonal.ALL) {
 			if (DiagonalConnections.hasDiagonals(state) && state.getValue(diagonal.property)) {
 				joined.add(diagonal.property.getName());
@@ -120,6 +123,11 @@ public class DiagonalConnectionsGameTests {
 
 	private static boolean post(GameTestHelper helper, BlockPos pos) {
 		return helper.getBlockState(pos).getValue(WallBlock.UP);
+	}
+
+	private static boolean tall(GameTestHelper helper, BlockPos pos) {
+		BlockState state = helper.getBlockState(pos);
+		return state.hasProperty(DiagonalWallBlock.TALL) && state.getValue(DiagonalWallBlock.TALL);
 	}
 
 	/** Whether the first block and its north-east neighbour are joined to each other and to nothing else diagonally. */
@@ -310,9 +318,9 @@ public class DiagonalConnectionsGameTests {
 	}
 
 	/**
-	 * A block over the middle of a diagonal run of walls raises its post (as a torch or a block does over a straight low
-	 * wall), and so does a wall above with a post; with nothing above the post goes again. A stone in the corner joins
-	 * walls straight and keeps them apart, as it does fences.
+	 * A stone over the middle of a diagonal run of walls makes it tall, with no post, as a block over a straight wall
+	 * does; a wall above with a post raises its post and leaves it low (its arms are not covered); with nothing above it
+	 * is low again with no post. A stone in the corner joins walls straight and keeps them apart, as it does fences.
 	 */
 	@GameTest
 	public void wallPostsFollowWhatIsAbove(GameTestHelper helper) {
@@ -322,12 +330,14 @@ public class DiagonalConnectionsGameTests {
 		set(helper, BEYOND, vanilla("cobblestone_wall"));
 		helper.assertTrue(!post(helper, NORTH_EAST), "The middle of the run has no post: " + describe(helper.getBlockState(NORTH_EAST)));
 		set(helper, NORTH_EAST.above(), Blocks.STONE);
-		helper.assertTrue(post(helper, NORTH_EAST), "Stone above raises the post: " + describe(helper.getBlockState(NORTH_EAST)));
+		helper.assertTrue(tall(helper, NORTH_EAST) && !post(helper, NORTH_EAST),
+				"Stone above makes the middle tall, with no post: " + describe(helper.getBlockState(NORTH_EAST)));
 		set(helper, NORTH_EAST.above(), vanilla("andesite_wall"));
-		helper.assertTrue(post(helper, NORTH_EAST.above()) && post(helper, NORTH_EAST),
-				"A wall with a post above raises it: " + describe(helper.getBlockState(NORTH_EAST)));
+		helper.assertTrue(post(helper, NORTH_EAST.above()) && post(helper, NORTH_EAST) && !tall(helper, NORTH_EAST),
+				"A wall with a post above raises the post and leaves it low: " + describe(helper.getBlockState(NORTH_EAST)));
 		set(helper, NORTH_EAST.above(), Blocks.AIR);
-		helper.assertTrue(!post(helper, NORTH_EAST), "With nothing above the post goes: " + describe(helper.getBlockState(NORTH_EAST)));
+		helper.assertTrue(!post(helper, NORTH_EAST) && !tall(helper, NORTH_EAST),
+				"With nothing above it is low with no post: " + describe(helper.getBlockState(NORTH_EAST)));
 
 		set(helper, BEYOND, Blocks.AIR);
 		set(helper, NORTH_CORNER, Blocks.STONE);
@@ -336,6 +346,39 @@ public class DiagonalConnectionsGameTests {
 		helper.assertTrue(first.getValue(WallBlock.NORTH) != WallSide.NONE && other.getValue(WallBlock.WEST) != WallSide.NONE
 				&& DiagonalConnections.mask(first) == 0 && DiagonalConnections.mask(other) == 0,
 				"With stone in the corner both walls join it and not each other: " + describe(first) + ", " + describe(other));
+		helper.succeed();
+	}
+
+	/**
+	 * A diagonal run of walls two high: the lower walls are tall, their sides and arms rising to meet the walls above, and
+	 * the middle has no post, as a tall straight wall has none; its ends keep theirs. The upper walls are low. Its outline
+	 * reaches the top of the block along the arm. Taking the upper middle away lowers the lower middle, whose arms are no
+	 * longer all covered, and gives it back its post.
+	 */
+	@GameTest
+	public void twoHighDiagonalWallsAreTall(GameTestHelper helper) {
+		floor(helper);
+		Block mossy = vanilla("mossy_stone_brick_wall");
+		for (BlockPos pos : List.of(FIRST, NORTH_EAST, BEYOND)) {
+			set(helper, pos, mossy);
+			set(helper, pos.above(), mossy);
+		}
+		LOGGER.info("A diagonal run two high: lower {}, {}, {}; upper {}, {}, {}", describe(helper.getBlockState(FIRST)),
+				describe(helper.getBlockState(NORTH_EAST)), describe(helper.getBlockState(BEYOND)), describe(helper.getBlockState(FIRST.above())),
+				describe(helper.getBlockState(NORTH_EAST.above())), describe(helper.getBlockState(BEYOND.above())));
+		helper.assertTrue(tall(helper, FIRST) && tall(helper, NORTH_EAST) && tall(helper, BEYOND), "The lower walls are tall");
+		helper.assertTrue(!post(helper, NORTH_EAST) && post(helper, FIRST) && post(helper, BEYOND),
+				"The lower middle has no post and the lower ends have theirs");
+		helper.assertTrue(!tall(helper, FIRST.above()) && !tall(helper, NORTH_EAST.above()) && !tall(helper, BEYOND.above()),
+				"The upper walls are low");
+		BlockState middle = helper.getBlockState(NORTH_EAST);
+		VoxelShape outline = middle.getShape(helper.getLevel(), helper.absolutePos(NORTH_EAST));
+		helper.assertTrue(contains(outline, 0.9, 0.95, 0.1), "The tall arm reaches the top of the block: " + outline.bounds());
+
+		set(helper, NORTH_EAST.above(), Blocks.AIR);
+		helper.assertTrue(!tall(helper, NORTH_EAST) && !post(helper, NORTH_EAST),
+				"With the wall above gone the middle is low, a low run with no post: " + describe(helper.getBlockState(NORTH_EAST)));
+		helper.assertTrue(!tall(helper, FIRST), "The lower end, its arm no longer under a wall, is low: " + describe(helper.getBlockState(FIRST)));
 		helper.succeed();
 	}
 
