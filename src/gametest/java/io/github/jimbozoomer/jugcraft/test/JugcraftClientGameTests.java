@@ -380,6 +380,35 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_trench_works");
 
+			// Big guns (batch 51), behind the trench: the siege mortar, the self-propelled howitzer, a flak gun and an
+			// observation balloon hanging above, seen from further back.
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				io.github.jimbozoomer.jugcraft.artillery.SiegeMortar mortar = new io.github.jimbozoomer.jugcraft.artillery.SiegeMortar(
+						io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.SIEGE_MORTAR, overworld);
+				mortar.snapTo(x - 23.5, y, z - 3.5, 0.0F, 0.0F);
+				mortar.face(160.0F);
+				overworld.addFreshEntity(mortar);
+				io.github.jimbozoomer.jugcraft.artillery.SelfPropelledHowitzer howitzer = new io.github.jimbozoomer.jugcraft.artillery.SelfPropelledHowitzer(
+						io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HOWITZER, overworld);
+				howitzer.snapTo(x - 15.5, y, z - 2.5, 0.0F, 0.0F);
+				howitzer.face(150.0F);
+				overworld.addFreshEntity(howitzer);
+				io.github.jimbozoomer.jugcraft.artillery.FlakGun flak = new io.github.jimbozoomer.jugcraft.artillery.FlakGun(
+						io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.FLAK_GUN, overworld);
+				flak.snapTo(x - 19.5, y, z + 0.5, 0.0F, 0.0F);
+				flak.face(200.0F);
+				overworld.addFreshEntity(flak);
+				io.github.jimbozoomer.jugcraft.artillery.ObservationBalloon balloon = new io.github.jimbozoomer.jugcraft.artillery.ObservationBalloon(
+						io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.BALLOON, overworld);
+				balloon.snapTo(x - 12.5, y + 3, z - 12.5, 90.0F, 0.0F);
+				overworld.addFreshEntity(balloon);
+			});
+			server.runCommand("tp @p %d %d %d 200 15".formatted(x - 21, y + 5, z + 9));
+			context.waitTicks(60);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_big_guns");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
