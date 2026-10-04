@@ -2326,6 +2326,10 @@ def check_festivities(java, main):
     # The Peddler wants emeralds and gives Jugcraft goods that have another route; it never gives emeralds back.
     if not 1 <= peddler["amount"] <= len(peddler["trades"]):
         err("The Peddler must offer between one and all of its trades")
+    test = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "FestivityGameTests.java"
+    counted = re.search(r"set\.trades\(\)\.size\(\) == (\d+)", test.read_text(encoding="utf-8")) if test.is_file() else None
+    if not counted or int(counted.group(1)) != len(peddler["trades"]):
+        err(f"FestivityGameTests.festivityDataLoads must count the Peddler's {len(peddler['trades'])} trades")
     crafted = {r["result"] for r in ag.SHAPED + ag.SHAPELESS} | set(ag.POT_RECIPES)
     for trade, info in peddler["trades"].items():
         item, count = info["gives"]
