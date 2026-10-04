@@ -13,6 +13,9 @@ No numbered release yet. Everything below is on `main`.
 - Machines already built in a world stay one block and keep working (`compact` state); placing the item builds the full machine.
 - Game tests for forming, the compact copies and breaking. Record: [dieselpunk-giants.md](docs/features/dieselpunk-giants.md).
 
+### Test fix: each giant tree's own fewest logs (#157)
+- `BiomeGameTests.bigTreesGrow` holds each giant to the fewest logs it can grow: a giant redwood 85, a giant mahogany 37 (a trunk two wide and at least 22 or 10 tall). #134's single floor of 30 let a stunted redwood pass. Test only; nothing in game changes. Record: [big-trees-and-rainforests.md](docs/features/big-trees-and-rainforests.md).
+
 ### Unmerged: Arms motion, batch 43
 - **New animations for every arm of batch 42**, seen by everyone and in first person.
   - Each kind has a guard: the side-on stance, two hands on the greatswords, hammers and polearms, the rapier en garde. Each kind also has a combo of attacks with anticipation, the blow, follow-through and a settle. The torso turns and bends, the head counters, and the feet step.
@@ -139,6 +142,9 @@ No numbered release yet. Everything below is on `main`.
 - **Loot:** the cluster and cabinet use the 26.x loot format (#34 fixed the other tables on main), and new game tests check ore Silk Touch and Fortune and double slabs.
 - **Dedicated-server check (CI):** a real client joins the game's own dedicated server, opens a machine and trades with the Retro Trader over the network, leaves and rejoins; and a world is saved and reopened with its trader, machine contents and cabinet intact. The two-client checklist is in [docs/TESTING.md](docs/TESTING.md#dedicated-server-and-two-clients).
 - Seventeen game tests, eight client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
+
+### Fix: dyeing sky lanterns (pull request pending)
+- **Sky lanterns take dye again.** Minecraft 26.3 dyes leather by a recipe per item, not by the `minecraft:dyeable` tag, so the lantern had no way to be dyed. It now has its own dyeing recipe (a lantern and any dye) and a water cauldron washes the dye out. A new game test checks both.
 
 ### Agriculture: fall additions 20, the Día de Muertos ofrenda (pull request pending, stacked on the theremin)
 - **Ofrenda:** a three-tier home altar under an embroidered cloth. Set out up to six offerings; with flowers, a light, bread, a sugar skull and a drink it is complete: it glows and, at night, welcomes the restless spirits near, who come to it and show themselves, calm (Remembered).
