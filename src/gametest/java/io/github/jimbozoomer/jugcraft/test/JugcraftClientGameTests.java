@@ -543,7 +543,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 					gun.linkDirector(overworld, tablePos, table);
 				}
 			});
-			server.runCommand("tp @p %d %d %d 160 30".formatted(x - 127, y + 4, z + 4));
+			server.runCommand("tp @p %d %d %d 180 15".formatted(x - 129, y + 4, z + 5));
 			context.waitTicks(100);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_fire_control");
