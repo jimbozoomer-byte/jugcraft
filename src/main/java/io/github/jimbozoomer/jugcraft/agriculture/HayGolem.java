@@ -73,7 +73,7 @@ import org.jspecify.annotations.Nullable;
  * twice as much. It never despawns, and is saved with its head, post and pouch. Killed, it drops wheat (loot table
  * {@code jugcraft:entities/hay_golem}), its head and its pouch.
  */
-public class HayGolem extends PathfinderMob {
+public class HayGolem extends PathfinderMob implements CropGuard {
 	public static final int MAX_HEALTH = 20;
 	public static final double SPEED = 0.25;
 	/** How far round its post it tends crops and wanders. */
@@ -254,6 +254,7 @@ public class HayGolem extends PathfinderMob {
 	}
 
 	/** How far it guards crops from crows: as a scarecrow wearing its head would. */
+	@Override
 	public int guardRadius() {
 		ItemStack head = head();
 		return head.isEmpty() ? Scarecrows.BARE : ScarecrowBlockEntity.lit(head) ? Scarecrows.LIT : Scarecrows.HEADED;

@@ -914,6 +914,20 @@ def crop_textures():
     out.update(theremin_textures())
     from broom_textures import broom_textures  # and the flying broomstick
     out.update(broom_textures())
+    from werewolf_textures import werewolf_textures  # and full-moon werewolves
+    out.update(werewolf_textures())
+    from squirrel_textures import squirrel_textures  # and squirrels and acorns
+    out.update(squirrel_textures())
+    from pumpkling_textures import pumpkling_textures  # and the Pumpkling
+    out.update(pumpkling_textures())
+    from midway_textures import midway_textures  # and the fall fair midway
+    out.update(midway_textures())
+    from ferris_wheel_textures import ferris_wheel_textures  # and the Ferris wheel
+    out.update(ferris_wheel_textures())
+    from pinata_textures import pinata_textures  # and the piñata party
+    out.update(pinata_textures())
+    from hot_air_balloon_textures import hot_air_balloon_textures  # and the hot-air balloon fiesta
+    out.update(hot_air_balloon_textures())
     from ofrenda_textures import ofrenda_textures  # and the ofrenda
     out.update(ofrenda_textures())
     from graveyard_textures import graveyard_textures  # and the graveyard pack

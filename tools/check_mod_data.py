@@ -16,6 +16,12 @@ import drones
 from materials import (MOD, METALS, MINERALS, ROCKS, ITEMS, FEATURES, COMPONENTS, PART_UNITS, CIRCUITS, WASHED_ORES,
                        all_blocks, all_items, feature_of)
 import agriculture as ag
+import werewolf_model
+import midway
+import ferris_wheel
+import pinata
+import hot_air_balloon
+import leaf_blower
 import petro
 import deposits
 import seasons
@@ -66,7 +72,9 @@ EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_repla
                   "minecraft:stairs", "minecraft:slabs", "minecraft:walls", "minecraft:coals", "minecraft:dyes",
                   # The town's usable blocks (tools/town_assets.py USABLE): vanilla 26.3's own block tags.
                   "minecraft:wooden_doors", "minecraft:fence_gates", "minecraft:buttons", "minecraft:beds",
-                  "minecraft:is_forest", "minecraft:is_taiga"}
+                  "minecraft:is_forest", "minecraft:is_taiga",
+                  # Fabric's conventional biome tag (ConventionalBiomeTags.IS_SNOWY): the snow werewolf's haunts.
+                  "c:is_snowy"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
 
 errors = []
@@ -104,13 +112,13 @@ def texture(ref):
         return
     animated = png.with_name(png.name + ".mcmeta").is_file()
     with Image.open(png) as img:
-        # 16x16, 32x32 for the high-detail gear (tools/hitech.py), or 64x64 for the tower's art. Animated textures
-        # are a vertical strip of square frames with an .mcmeta beside them.
+        # Square: 16x16, or 32x32 or 64x64 for high-resolution art (docs/ART_DIRECTION.md, "High resolution"). Animated
+        # textures are a vertical strip of square frames with an .mcmeta beside them.
         width, height = img.size
         if animated and not (width in (16, 32) and height % width == 0 and height > width):
             err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16 or 32x32 frames")
-        elif not animated and img.size not in ((16, 16), (32, 32)) and not (img.size == (64, 64) and _hi_res(png.stem)):
-            err(f"Texture {ref} is {img.size}, expected 16x16 or 32x32 (64x64 only for tower_art and hd_art textures)")
+        elif not animated and img.size not in ((16, 16), (32, 32), (64, 64)):
+            err(f"Texture {ref} is {img.size}, expected 16x16, 32x32 or 64x64")
 
 
 def model(ref):
@@ -123,19 +131,6 @@ def model(ref):
     for tex in data.get("textures", {}).values():
         # A texture is a reference, or {"sprite": reference, "force_translucent": ...}.
         texture(tex["sprite"] if isinstance(tex, dict) else tex)
-
-
-def _hi_res(name):
-    """64x64 textures: the drone tower's realistic block textures (tools/tower_art.py) and items drawn with the
-    high-detail renderer (tools/hd_art.py: construction_art.ITEMS so far)."""
-    if name in arms.textures():  # batch 42's arms (tools/arms_art.py)
-        return True
-    import tower_art
-    import blueprints
-    import construction_art
-    return (name in tower_art.TEXTURES or name in blueprints.TABLE_TEXTURES or name in construction_art.ITEMS
-            or name in gas_storage.HD_ITEMS or name in control_electronics.HD_ITEMS or name in rocketry.HD_ITEMS
-            or name.startswith(("landing_pad_formed_", "supply_pickup_formed_", "hangar_pad_")))
 
 
 def item_models(definition):
@@ -1555,6 +1550,7 @@ def check_agriculture():
     expected["chestnut_tree"] = ag.CHESTNUT_TREES["biomes"]
     expected["apple_tree"] = ag.CIDER["tree"]["biomes"]
     expected["mums"] = ag.MUM_PATCH["biomes"]
+    expected[ag.WOLFSBANE["block"]] = ag.WOLFSBANE["biomes"]
     expected.update({name: info["biomes"] for name, info in ag.FORAGING["mushrooms"].items()})
     if patches != expected:
         err(f"JugcraftAgriculture.java wild patch biomes {patches} differ from tools/agriculture.py")
@@ -2355,6 +2351,496 @@ def check_decor4(java):
             err(f"The item tag {MOD}:brew/{colour} differs from CAULDRON's brews")
     check_hexes(java, number, lang)
     check_broomstick(java, number, lang)
+    check_werewolves(java, number, lang)
+    check_squirrels(java, number, lang)
+    check_pumpkling(java, number, lang)
+    check_midway(java, number, lang)
+    check_ferris_wheel(java, number, lang)
+    check_pinata(java, number, lang)
+    check_hot_air_balloon(java, number, lang)
+    check_leaf_blower(java, number, lang)
+
+
+def check_midway(java, number, lang):
+    """Fall addition 26: the High Striker, Midway, Ring Toss and the plushes match tools/midway.py (levels, timing,
+    strength, the ringer's reach and distance, each plush's footprint); the blocks, items, block entity and thrown ring
+    are registered and drawn; the strike is wired to left clicks; their words, loot (the prize table's plushes and
+    weights), models, recipes and advancements exist."""
+    hs, rt = midway.HIGH_STRIKER, midway.RING_TOSS
+    expected = {("HighStrikerBlock", "LEVELS"): hs["levels"], ("HighStrikerBlock", "RISE_TICKS"): hs["rise_ticks"],
+                ("HighStrikerBlock", "HOLD_TICKS"): hs["hold_ticks"], ("HighStrikerBlock", "LIGHT"): hs["light"],
+                ("Midway", "FULL_LOW"): hs["full_low"], ("Midway", "FULL_HIGH"): hs["full_high"], ("Midway", "CRIT_BONUS"): hs["crit_bonus"],
+                ("Midway", "RING_AT"): hs["ring_at"], ("RingTossBlock", "RINGER_RADIUS"): rt["ringer_radius"],
+                ("RingTossBlock", "MIN_DISTANCE"): rt["min_distance"], ("RingTossBlock", "RINGER_TICKS"): rt["ringer_ticks"],
+                ("RingTossBlock", "TOP"): rt["top"], ("TossRingItem", "SPEED"): rt["ring_speed"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/midway.py ({value})")
+    necks = ", ".join(str(n) for n in rt["necks"])
+    if f"NECKS = {{{necks}}}" not in java.get("RingTossBlock", ""):
+        err("RingTossBlock.NECKS differs from RING_TOSS['necks']")
+    mid = java.get("Midway", "")
+    for name, plush in midway.PLUSHES.items():
+        x0, z0, x1, z1, h = plush["shape"]
+        if f'new Plush("{name}", {x0}, {z0}, {x1}, {z1}, {h})' not in mid:
+            err(f"Midway.PLUSHES must have {name} with the footprint tools/midway.py gives")
+    if 'AttackBlockCallback.EVENT.register' not in mid or 'player.resetAttackStrengthTicker()' not in mid:
+        err("Midway must strike the High Striker from left clicks and spend the swing's charge")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ('registerBlock("high_striker", HighStrikerBlock::new', "HighStrikerBlockEntity::new, striker",
+                 f"props.sword(ToolMaterial.WOOD, {hs['mallet_damage']}F, {hs['mallet_speed']}F)",
+                 'registerBlock("ring_toss", RingTossBlock::new', "registerItem(TossRingItem.ID, TossRingItem::new",
+                 "EntityType.Builder.<TossRing>of(TossRing::new", "new PlushBlock(props, plush)", "Midway.register();"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "JugcraftAgriculture.TOSS_RING, ThrownItemRenderer::new" not in client:
+        err("JugcraftClient.java must draw the thrown Toss Ring")
+    for item, display in midway.displays().items():
+        kind = "item" if item in (hs["mallet"], rt["ring"]) else "block"
+        if lang.get(f"{kind}.{MOD}.{item}") != display:
+            err(f"The midway has no words for {kind}.{MOD}.{item}")
+    prizes = load(DATA / MOD / "loot_table" / f"{midway.PRIZE_TABLE}.json") or {}
+    entries = {e.get("name"): e.get("weight") for pool in prizes.get("pools", []) for e in pool.get("entries", [])}
+    if entries != {f"{MOD}:{name}": plush["weight"] for name, plush in midway.PLUSHES.items()}:
+        err("The midway's prize table must hold each plush at its weight")
+    striker_loot = json.dumps(load(DATA / MOD / "loot_table" / "blocks" / f"{hs['block']}.json") or {})
+    if '"part": "0"' not in striker_loot:
+        err("The High Striker must drop only from its base")
+    for path in [DATA / MOD / "advancement" / f"{a}.json" for a in midway.ADVANCEMENTS] + [
+            DATA / MOD / "recipe" / f"{r['id']}.json" for r in midway.SHAPED + midway.SHAPELESS] + [
+            ASSETS / "blockstates" / f"{b}.json" for b in midway.blocks()] + [
+            ASSETS / "models" / "block" / f"{m}.json" for m in ("high_striker_base", "high_striker_4_rung", "ring_toss", "ring_toss_ringed_9")]:
+        if not path.exists():
+            err(f"The midway needs {path.relative_to(ROOT)}")
+
+
+def check_ferris_wheel(java, number, lang):
+    """Fall addition 27: the Ferris wheel matches tools/ferris_wheel.py (its size, its cars and seats, its power and
+    speed, how far a player may board from); the booth, its block entity (a kinetic consumer) and the wheel are
+    registered and drawn from the quads; its words, loot, recipe, advancements, models and quads exist."""
+    fw = ferris_wheel.FERRIS_WHEEL
+    expected = {("FerrisWheel", "CARS"): fw["cars"], ("FerrisWheel", "SEATS"): fw["seats"], ("FerrisWheel", "HUB"): fw["hub"],
+                ("FerrisWheel", "RADIUS"): fw["radius"], ("FerrisWheel", "SEAT_ACROSS"): fw["seat_across"],
+                ("FerrisWheel", "SEAT_DOWN"): fw["seat_down"], ("FerrisWheel", "SEAT_BACK"): fw["seat_back"],
+                ("FerrisWheel", "NEED"): fw["need"], ("FerrisWheel", "TURN_TICKS"): fw["turn_ticks"],
+                ("FerrisWheel", "BOARD_REACH"): fw["board_reach"], ("FerrisWheelBlock", "WIDTH"): fw["width"],
+                ("FerrisWheelBlock", "HEIGHT"): fw["height"], ("FerrisWheelBlock", "DEPTH"): fw["depth"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/ferris_wheel.py ({value})")
+    wheel = java.get("FerrisWheel", "")
+    for rate, share in (("ACCEL", fw["accel"]), ("DECEL", fw["decel"])):
+        if f"{rate} = FULL_SPEED / {round(1 / share)}.0F" not in wheel:
+            err(f"FerrisWheel.{rate} must be full speed / {round(1 / share)} (tools/ferris_wheel.py)")
+    if "implements KineticConsumer" not in java.get("FerrisWheelBlockEntity", ""):
+        err("The Ferris Wheel's booth must take power through the shared KineticConsumer interface")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ("registerBlock(FerrisWheelBlock.ID, FerrisWheelBlock::new", "FerrisWheelBlockEntity::new, booth",
+                 "EntityType.Builder.<FerrisWheel>of(FerrisWheel::new"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client_dir = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    if "JugcraftAgriculture.FERRIS_WHEEL, FerrisWheelRenderer::new" not in (client_dir / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient.java must draw the Ferris wheel")
+    if '"ferris_wheel_quads.json"' not in (client_dir / "DecorQuads.java").read_text(encoding="utf-8"):
+        err("DecorQuads must read ferris_wheel_quads.json")
+    quads = load(ASSETS / "ferris_wheel_quads.json") or {}
+    for name in ["ferris_wheel_frame", "ferris_wheel_section", "ferris_wheel_hub", "ferris_wheel_pivot", "ferris_wheel_lights"] + [
+            f"ferris_wheel_car_{c}" for c in ferris_wheel.CAR_COLOURS]:
+        if not quads.get(name):
+            err(f"ferris_wheel_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"ferris_wheel_quads.json's {name} draws missing texture {quad['texture']}")
+                break
+    if lang.get(f"block.{MOD}.{fw['block']}") != fw["display"] or lang.get(f"entity.{MOD}.{fw['entity']}") != fw["entity_display"]:
+        err("The Ferris wheel has no words")
+    for key in ("no_room", "full", "jammed"):
+        if f"message.{MOD}.ferris_wheel.{key}" not in lang:
+            err(f"The Ferris wheel has no words for message.{MOD}.ferris_wheel.{key}")
+    for path in [DATA / MOD / "advancement" / f"{a}.json" for a in ferris_wheel.ADVANCEMENTS] + [
+            DATA / MOD / "recipe" / f"{r['id']}.json" for r in ferris_wheel.SHAPED] + [
+            DATA / MOD / "loot_table" / "blocks" / f"{fw['block']}.json", ASSETS / "blockstates" / f"{fw['block']}.json",
+            ASSETS / "models" / "block" / f"{fw['block']}.json", ASSETS / "textures" / "item" / f"{fw['block']}.png"]:
+        if not path.exists():
+            err(f"The Ferris wheel needs {path.relative_to(ROOT)}")
+
+
+def check_pinata(java, number, lang):
+    """Fall addition 28: the piñatas match tools/pinata.py (slots, drop, a charged swing, the stick's hits, each kind's
+    hits and item); the items, entity and Blindfold are registered and drawn from the quads; the Blindfold's view and
+    worn band exist; their words, recipes and advancements exist."""
+    pn = pinata.PINATA
+    expected = {("Pinata", "SLOTS"): pn["slots"], ("Pinata", "DROP"): pn["drop"], ("Pinata", "CHARGED"): pn["charged"],
+                ("Pinata", "STICK_HITS"): pn["stick_hits"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/pinata.py ({value})")
+    source = java.get("Pinata", "")
+    for kind, spec in pinata.KINDS.items():
+        if f'("{kind}", "{spec["item"]}", {spec["hits"]},' not in source:
+            err(f"Pinata.Kind must have {kind} with item {spec['item']} and {spec['hits']} hits (tools/pinata.py)")
+    pinatas = java.get("Pinatas", "")
+    if f'STICK = "{pn["stick"]}"' not in pinatas or f'BLINDFOLD = "{pn["blindfold"]}"' not in pinatas:
+        err("Pinatas.STICK and BLINDFOLD must match tools/pinata.py")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ("new PinataItem(props, kind)", "registerItem(Pinatas.STICK", 'setCameraOverlay(Jugcraft.id("misc/blindfold"))',
+                 "EntityType.Builder.<Pinata>of(Pinata::new", "Pinatas.register();"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client_dir = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    if "JugcraftAgriculture.PINATA, PinataRenderer::new" not in (client_dir / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient.java must draw the piñatas")
+    if '"pinata_quads.json"' not in (client_dir / "DecorQuads.java").read_text(encoding="utf-8"):
+        err("DecorQuads must read pinata_quads.json")
+    quads = load(ASSETS / "pinata_quads.json") or {}
+    for name in [f"pinata_{k}{t}" for k in pinata.KINDS for t in ("", "_torn")] + ["pinata_rope", "pinata_rope_star"]:
+        if not quads.get(name):
+            err(f"pinata_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"pinata_quads.json's {name} draws missing texture {quad['texture']}")
+                break
+    for item, display in pinata.displays().items():
+        if lang.get(f"item.{MOD}.{item}") != display:
+            err(f"The piñata party has no words for item.{MOD}.{item}")
+    for key in ("full", "no_room", "filled"):
+        if f"message.{MOD}.pinata.{key}" not in lang:
+            err(f"The piñata party has no words for message.{MOD}.pinata.{key}")
+    for path in [DATA / MOD / "advancement" / f"{a}.json" for a in pinata.ADVANCEMENTS] + [
+            DATA / MOD / "recipe" / f"{r['id']}.json" for r in pinata.SHAPED + pinata.SHAPELESS] + [
+            ASSETS / "textures" / "misc" / "blindfold.png", ASSETS / "textures" / "entity" / "equipment" / "humanoid" / "blindfold.png",
+            ASSETS / "equipment" / "blindfold.json"] + [ASSETS / "items" / f"{i}.json" for i in pinata.items()]:
+        if not path.exists():
+            err(f"The piñata party needs {path.relative_to(ROOT)}")
+
+
+def check_hot_air_balloon(java, number, lang):
+    """Fall addition 29: the balloons, winds, pibals and mooring posts match tools/hot_air_balloon.py; the items,
+    entities, block, payload and renderers are registered; the quads draw from textures that exist (the envelopes'
+    wraps 768 by 384); their words, recipes, advancements, loot and tags exist."""
+    hb, wd, mo, pb, rules = (hot_air_balloon.HOT_AIR_BALLOON, hot_air_balloon.WINDS, hot_air_balloon.MOORING, hot_air_balloon.PIBAL,
+                             hot_air_balloon.ADVANCEMENT_RULES)
+    expected = {("HotAirBalloon", "RIDERS"): hb["riders"], ("HotAirBalloon", "BASKET"): hb["basket"],
+                ("HotAirBalloon", "BASKET_HEIGHT"): hb["basket_height"], ("HotAirBalloon", "BURNER"): hb["burner"],
+                ("HotAirBalloon", "THROAT"): hb["throat"], ("HotAirBalloon", "ENVELOPE_HEIGHT"): hb["envelope_height"],
+                ("HotAirBalloon", "ENVELOPE_RADIUS"): hb["envelope_radius"], ("HotAirBalloon", "FIRE"): hb["fire"],
+                ("HotAirBalloon", "COOL"): hb["cool"], ("HotAirBalloon", "VENT"): hb["vent"], ("HotAirBalloon", "NEUTRAL"): hb["neutral"],
+                ("HotAirBalloon", "CLIMB"): hb["climb"], ("HotAirBalloon", "MAX_CLIMB"): hb["max_climb"],
+                ("HotAirBalloon", "MAX_SINK"): hb["max_sink"], ("HotAirBalloon", "THIN"): hb["thin"],
+                ("HotAirBalloon", "RESPONSE"): hb["response"], ("HotAirBalloon", "DRIFT"): hb["drift"],
+                ("HotAirBalloon", "FUEL_PER_BURN_TICK"): hb["fuel_per_burn_tick"], ("HotAirBalloon", "MAX_FUEL"): hb["max_fuel"],
+                ("HotAirBalloon", "GAUGE_TICKS"): hb["gauge_ticks"], ("HotAirBalloon", "MOOR_REACH"): mo["reach"],
+                ("HotAirBalloon", "ROPE"): mo["rope"], ("HotAirBalloon", "TETHER_HEIGHT"): mo["height"],
+                ("HotAirBalloon", "UP_HEIGHT"): rules["up_height"], ("HotAirBalloon", "BOX_HOME"): rules["box_home"],
+                ("HotAirBalloon", "BOX_AWAY"): rules["box_away"], ("HotAirBalloon", "ALOFT"): rules["aloft"],
+                ("HotAirBalloon", "CROWD"): rules["crowd"], ("HotAirBalloon", "CROWD_RANGE"): rules["crowd_range"],
+                ("FiestaWinds", "LAYER"): wd["layer"], ("FiestaWinds", "LAYERS"): wd["layers"], ("FiestaWinds", "BASE"): wd["base"],
+                ("FiestaWinds", "PER_LAYER"): wd["per_layer"], ("FiestaWinds", "BOX_SPREAD"): wd["box_spread"],
+                ("FiestaWinds", "SWAY"): wd["sway"], ("FiestaWinds", "STORM"): wd["storm"],
+                ("Pibal", "RISE"): pb["rise"], ("Pibal", "LIFE"): pb["life"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/hot_air_balloon.py ({value})")
+    source = java.get("HotAirBalloon", "")
+    for kind, spec in hot_air_balloon.KINDS.items():
+        if f'("{kind}", "{spec["item"]}")' not in source:
+            err(f"HotAirBalloon.Kind must have {kind} with item {spec['item']} (tools/hot_air_balloon.py)")
+    if f'ID = "{mo["block"]}"' not in java.get("MooringPostBlock", ""):
+        err("MooringPostBlock.ID must match tools/hot_air_balloon.py")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ("new HotAirBalloonItem(props, kind)", 'registerItem("balloon_burner"', 'registerItem("pibal", PibalItem::new',
+                 "registerBlock(MooringPostBlock.ID", "EntityType.Builder.<HotAirBalloon>of(HotAirBalloon::new",
+                 "EntityType.Builder.<Pibal>of(Pibal::new", "Balloons.register();"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    if "BalloonControlPayload.register();" not in java.get("Balloons", ""):
+        err("Balloons must register the pilot's control payload")
+    client_dir = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    client = (client_dir / "JugcraftClient.java").read_text(encoding="utf-8")
+    for call in ("JugcraftAgriculture.HOT_AIR_BALLOON, HotAirBalloonRenderer::new", "JugcraftAgriculture.PIBAL, PibalRenderer::new",
+                 "BalloonClient.register();"):
+        if call not in client:
+            err(f"JugcraftClient.java must call {call}")
+    if '"balloon_quads.json"' not in (client_dir / "DecorQuads.java").read_text(encoding="utf-8"):
+        err("DecorQuads must read balloon_quads.json")
+    quads = load(ASSETS / "balloon_quads.json") or {}
+    names = ["balloon_basket", "balloon_flame", "balloon_glow_pumpkin", "balloon_mooring_rope", "pibal"] + [
+        f"balloon_envelope_{k}" for k in hot_air_balloon.KINDS]
+    for name in names:
+        if not quads.get(name):
+            err(f"balloon_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            texture = quad["texture"]
+            path = ASSETS / "textures" / (f"{texture}.png" if "/" in texture else f"block/{texture}.png")
+            if not path.exists():
+                err(f"balloon_quads.json's {name} draws missing texture {texture}")
+                break
+    for kind in list(hot_air_balloon.KINDS) + ["glow_pumpkin"]:
+        name = f"envelope_{kind}" if kind in hot_air_balloon.KINDS else kind
+        path = ASSETS / "textures" / "entity" / "hot_air_balloon" / f"{name}.png"
+        if path.exists() and Image.open(path).size != (768, 384):
+            err(f"{path.relative_to(ROOT)} must be 768 by 384 (24 gores of 32 pixels)")
+    for item, display in hot_air_balloon.displays().items():
+        key = f"block.{MOD}.{item}" if item in hot_air_balloon.blocks() else f"item.{MOD}.{item}"
+        if lang.get(key) != display:
+            err(f"The hot-air balloon fiesta has no words for {key}")
+    for key in ("gauges", "moored", "controls", "fuelled", "fuel_full", "no_fuel", "no_room", "full"):
+        if f"message.{MOD}.balloon.{key}" not in lang:
+            err(f"The hot-air balloon fiesta has no words for message.{MOD}.balloon.{key}")
+    for key in ("tied", "untied", "none"):
+        if f"message.{MOD}.mooring.{key}" not in lang:
+            err(f"The hot-air balloon fiesta has no words for message.{MOD}.mooring.{key}")
+    for path in [DATA / MOD / "advancement" / f"{a}.json" for a in hot_air_balloon.ADVANCEMENTS] + [
+            DATA / MOD / "recipe" / f"{r['id']}.json" for r in hot_air_balloon.SHAPED + hot_air_balloon.SHAPELESS] + [
+            DATA / MOD / "loot_table" / "blocks" / f"{mo['block']}.json", ASSETS / "blockstates" / f"{mo['block']}.json"] + [
+            ASSETS / "items" / f"{i}.json" for i in hot_air_balloon.items()]:
+        if not path.exists():
+            err(f"The hot-air balloon fiesta needs {path.relative_to(ROOT)}")
+
+
+def check_leaf_blower(java, number, lang):
+    """Fall addition 30: the Leaf Blower matches tools/leaf_blower.py (charge, costs, stream); it is a Chargeable item
+    that starts empty, so the Charging Station charges it; its model draws from textures that exist; its words, recipe
+    and advancement exist."""
+    lb = leaf_blower.LEAF_BLOWER
+    expected = {"CAPACITY": lb["capacity"], "BLOW_JE": lb["blow_je"], "VACUUM_JE": lb["vacuum_je"], "RANGE": lb["range"],
+                "CONE": lb["cone"], "PUSH_ITEMS": lb["push_items"], "PUSH_MOBS": lb["push_mobs"], "PILE_RANGE": lb["pile_range"],
+                "PILE_EVERY": lb["pile_every"], "VACUUM_RANGE": lb["vacuum_range"]}
+    for name, value in expected.items():
+        found = number("LeafBlowerItem", name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"LeafBlowerItem.{name} = {found} differs from tools/leaf_blower.py ({value})")
+    source = java.get("LeafBlowerItem", "")
+    if f'ID = "{lb["item"]}"' not in source or "implements Chargeable" not in source:
+        err("LeafBlowerItem must be the Chargeable item tools/leaf_blower.py names")
+    if "registerItem(LeafBlowerItem.ID, LeafBlowerItem::new" not in java.get("JugcraftAgriculture", "") or \
+            "component(JugcraftTools.ENERGY, 0L)" not in java.get("JugcraftAgriculture", ""):
+        err("JugcraftAgriculture.java must register the Leaf Blower with an empty charge")
+    model = load(ASSETS / "models" / "item" / f"{lb['item']}.json") or {}
+    if not model.get("elements"):
+        err(f"The Leaf Blower needs its model, models/item/{lb['item']}.json")
+    for name, texture in model.get("textures", {}).items():
+        path = ASSETS / "textures" / f"{texture.split(':', 1)[1]}.png"
+        if not path.exists():
+            err(f"The Leaf Blower's model draws missing texture {texture}")
+    if lang.get(f"item.{MOD}.{lb['item']}") != lb["display"]:
+        err(f"The Leaf Blower has no words for item.{MOD}.{lb['item']}")
+    for key in (f"item.{MOD}.{lb['item']}.tooltip", f"message.{MOD}.leaf_blower.flat"):
+        if key not in lang:
+            err(f"The Leaf Blower has no words for {key}")
+    for path in [DATA / MOD / "advancement" / f"{a}.json" for a in leaf_blower.ADVANCEMENTS] + [
+            DATA / MOD / "recipe" / f"{r['id']}.json" for r in leaf_blower.SHAPED] + [ASSETS / "items" / f"{lb['item']}.json"]:
+        if not path.exists():
+            err(f"The Leaf Blower needs {path.relative_to(ROOT)}")
+
+
+def check_pumpkling(java, number, lang):
+    """Fall addition 25: Pumpkling matches PUMPKLING in tools/agriculture.py (health, speed, following, healing); it
+    is registered and drawn, guards crops as a CropGuard, wakes from a carved pumpkin, and its words, tags and
+    advancement exist."""
+    pk = ag.PUMPKLING
+    expected = {"MAX_HEALTH": pk["health"], "SPEED": pk["speed"], "TEMPT_RANGE": pk["tempt_range"], "FOLLOW_START": pk["follow_start"],
+                "FOLLOW_STOP": pk["follow_stop"],
+                "TELEPORT_DISTANCE": pk["teleport"], "TREAT_HEAL": pk["treat_heal"]}
+    for name, value in expected.items():
+        found = number("Pumpkling", name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"Pumpkling.{name} = {found} differs from tools/agriculture.py ({value})")
+    pumpkling = java.get("Pumpkling", "")
+    if "implements CropGuard" not in pumpkling:
+        err("Pumpkling must be a CropGuard, so crows keep away from it")
+    if "Pumpkling.wake(" not in java.get("CarvedPumpkinBlock", ""):
+        err("CarvedPumpkinBlock must wake a Pumpkling when given a spark")
+    main = java.get("JugcraftAgriculture", "")
+    for call in (f'entity("{pk["entity"]}"', f".sized({pk['size'][0]}F, {pk['size'][1]}F)",
+                 "FabricDefaultAttributeRegistry.register(PUMPKLING, Pumpkling.createAttributes())"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "JugcraftAgriculture.PUMPKLING, PumpklingRenderer::new" not in client or "PumpklingModel.LAYER, PumpklingModel::createLayer" not in client:
+        err("JugcraftClient.java must register PumpklingRenderer and PumpklingModel's layer")
+    if f"entity.{MOD}.{pk['entity']}" not in lang:
+        err("The Pumpkling has no name")
+    for path in (DATA / MOD / "advancement" / "little_jack.json", ASSETS / "textures" / "entity" / "pumpkling.png"):
+        if not path.exists():
+            err(f"The Pumpkling needs {path.relative_to(ROOT)}")
+    for tag, key in (("pumpkling_sparks", "sparks"), ("pumpkling_treats", "treats")):
+        values = (load(DATA / MOD / "tags" / "item" / f"{tag}.json") or {}).get("values", [])
+        if sorted(values) != sorted(pk[key]):
+            err(f"{MOD}:{tag} differs from PUMPKLING['{key}']")
+
+
+def check_squirrels(java, number, lang):
+    """Fall addition 24: Squirrel and Squirrels match SQUIRRELS in tools/agriculture.py (the squirrel, its gathering and
+    burying, spawning, acorns from leaves); the entity, acorn and roasted acorns are registered and drawn; their words,
+    tags, recipes, advancement and textures exist."""
+    sq = ag.SQUIRRELS
+    expected = {("Squirrel", "MAX_HEALTH"): sq["health"], ("Squirrel", "SPEED"): sq["speed"], ("Squirrel", "SEEK_RANGE"): sq["seek_range"],
+                ("Squirrel", "BURY_TICKS"): sq["bury_ticks"], ("Squirrel", "SAPLING_CHANCE"): sq["sapling_chance"],
+                ("Squirrel", "SAPLING_SPACE"): sq["sapling_space"], ("Squirrels", "SPAWN_TICKS"): sq["spawn_ticks"],
+                ("Squirrels", "SPAWN_CHANCE"): sq["spawn_chance"], ("Squirrels", "MIN_DISTANCE"): sq["min_distance"],
+                ("Squirrels", "MAX_DISTANCE"): sq["max_distance"], ("Squirrels", "NEAR_CAP"): sq["near_cap"],
+                ("Squirrels", "LEVEL_CAP"): sq["level_cap"], ("Squirrels", "ACORN_CHANCE"): sq["acorn_chance"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/agriculture.py ({value})")
+    squirrel, squirrels = java.get("Squirrel", ""), java.get("Squirrels", "")
+    if f'ACORN = "{sq["acorn"]}"' not in squirrel:
+        err("Squirrel.ACORN differs from SQUIRRELS['acorn']")
+    leaves = "List.of(" + ", ".join(f'"{l}"' for l in sq["acorn_leaves"]) + ")"
+    if f"ACORN_LEAVES = {leaves}" not in squirrels:
+        err("Squirrels.ACORN_LEAVES differs from SQUIRRELS['acorn_leaves']")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ('entity("squirrel"', f".sized({sq['size'][0]}F, {sq['size'][1]}F)", "Squirrels.register();",
+                 "registerItem(Squirrel.ACORN, AcornItem::new", f'food("{sq["roasted"]}"'):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "JugcraftAgriculture.SQUIRREL, SquirrelRenderer::new" not in client or "SquirrelModel.LAYER, SquirrelModel::createLayer" not in client:
+        err("JugcraftClient.java must register SquirrelRenderer and SquirrelModel's layer")
+    for key in (f"entity.{MOD}.{sq['entity']}", f"item.{MOD}.{sq['acorn']}", f"item.{MOD}.{sq['roasted']}"):
+        if key not in lang:
+            err(f"Squirrels have no words for {key}")
+    for path in (DATA / MOD / "advancement" / "nuts_about_squirrels.json", DATA / MOD / "recipe" / f"{sq['roasted']}.json",
+                 ASSETS / "textures" / "entity" / "squirrel_red.png", ASSETS / "textures" / "entity" / "squirrel_grey.png",
+                 ASSETS / "textures" / "item" / f"{sq['acorn']}.png", ASSETS / "textures" / "item" / f"{sq['roasted']}.png"):
+        if not path.exists():
+            err(f"Squirrels need {path.relative_to(ROOT)}")
+    habitat = (load(DATA / MOD / "tags" / "worldgen" / "biome" / "squirrel_habitat.json") or {}).get("values", [])
+    if sorted(habitat) != sorted(sq["habitat"]):
+        err("jugcraft:squirrel_habitat differs from SQUIRRELS['habitat']")
+    food = (load(DATA / MOD / "tags" / "item" / "squirrel_food.json") or {}).get("values", [])
+    if sorted(food) != sorted(sq["food"]):
+        err("jugcraft:squirrel_food differs from SQUIRRELS['food']")
+
+
+def check_werewolves(java, number, lang):
+    """Fall addition 23: Werewolf and Werewolves match WEREWOLF and WOLFSBANE in tools/agriculture.py (the hide and
+    silver, healing, shunning, spawning and the ward, each kind's tier and attributes and abilities, the silver blade);
+    every box of tools/werewolf_model.py is in WerewolfModel, which the texture is painted from; the entity, flower,
+    potted flower, items, pelts and rugs are registered and drawn; their words, loot, tags, worldgen, recipes and
+    advancements exist."""
+    ww, wb = ag.WEREWOLF, ag.WOLFSBANE
+    expected = {("Werewolf", "HIDE_FACTOR"): ww["hide_factor"], ("Werewolf", "SILVER_FACTOR"): ww["silver_factor"],
+                ("Werewolf", "REGEN_TICKS"): ww["regen_ticks"], ("Werewolf", "SILVER_WOUND_TICKS"): ww["silver_wound_ticks"],
+                ("Werewolf", "SHUN_TICKS"): ww["shun_ticks"], ("Werewolf", "PACK_REACH"): ww["pack_reach"],
+                ("Werewolf", "FLEE_BELOW"): ww["flee_below"], ("Werewolf", "FLEE_UNTIL"): ww["flee_until"],
+                ("Werewolf", "FROSTBITE_TICKS"): ww["frostbite_ticks"], ("Werewolf", "FROSTBITE_CHILL"): ww["frostbite_chill"],
+                ("Werewolf", "SNOW_STRIDE"): ww["snow_stride"], ("Werewolf", "SHADOW_STEP_MIN"): ww["shadow_step_min"],
+                ("Werewolf", "SHADOW_STEP_TICKS"): ww["shadow_step_ticks"], ("Werewolf", "ALPHA_REACH"): ww["alpha_reach"],
+                ("Werewolf", "DARKNESS_TICKS"): ww["darkness_ticks"], ("Werewolf", "FRENZY_REACH"): ww["frenzy_reach"],
+                ("Werewolf", "FRENZY_TICKS"): ww["frenzy_ticks"], ("Werewolf", "HOWL_COOLDOWN"): ww["howl_cooldown"],
+                ("Werewolves", "SPAWN_TICKS"): ww["spawn_ticks"], ("Werewolves", "SPAWN_CHANCE"): ww["spawn_chance"],
+                ("Werewolves", "MIN_DISTANCE"): ww["min_distance"], ("Werewolves", "MAX_DISTANCE"): ww["max_distance"],
+                ("Werewolves", "NEAR_CAP"): ww["near_cap"], ("Werewolves", "LEVEL_CAP"): ww["level_cap"],
+                ("Werewolves", "WARD_REACH"): ww["ward_reach"], ("Werewolves", "STEW_SECONDS"): wb["seconds"],
+                ("Werewolves", "SHADOW_CHANCE"): ww["shadow_chance"], ("Werewolves", "SHADOW_HAUNT_CHANCE"): ww["shadow_haunt_chance"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/agriculture.py ({value})")
+    werewolf = java.get("Werewolf", "")
+    for kind, k in ww["kinds"].items():
+        entry = (f'{kind.upper()}("{kind}", {k["tier"]}, {k["health"]}, {k["damage"]}, {k["armor"]}, {k["speed"]}, {k["scale"]}, '
+                 f'{k["knockback"]}, {k["xp"]}, "{k["pelt"]}", "{k["rug"]}")')
+        if entry not in werewolf:
+            err(f"Werewolf.Kind must have {entry}, as WEREWOLF['kinds'] says")
+    for attribute in ("MAX_HEALTH", "MOVEMENT_SPEED", "ATTACK_DAMAGE", "ARMOR", "KNOCKBACK_RESISTANCE", "SCALE"):
+        if f"Attributes.{attribute}, kind." not in werewolf:
+            err(f"Werewolf.setKind must set {attribute} from its kind")
+    blade = ww["dagger_material"]
+    if (f"INCORRECT_FOR_IRON_TOOL, {blade['durability']}, {blade['speed']}F, {blade['bonus']}F, {blade['enchantability']}," not in werewolf):
+        err("Werewolf.SILVER differs from WEREWOLF['dagger_material']")
+    for call in ("Werewolves.warded(level, target, kind() != Kind.SHADOW)", "kind() == Kind.SNOW && target instanceof LivingEntity",
+                 '"leader_of_the_pack"', "kind().peltTable()", "GameRules.MOB_DROPS"):
+        if call not in werewolf:
+            err(f"Werewolf.java must have {call}")
+    if "werewolf.setKind(kindFor(level, spot, random));" not in java.get("Werewolves", ""):
+        err("Werewolves.trySpawn must choose the kind by kindFor")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ('entity("werewolf"', f".sized({ww['size'][0]}F, {ww['size'][1]}F)", "Werewolves.register();",
+                 f"props.sword(Werewolf.SILVER, {blade['damage']}F, {blade['attack_speed']}F)", "registerItem(Werewolves.SILVER_ARROW, ArrowItem::new",
+                 "for (Werewolf.Kind kind : Werewolf.Kind.values())", "registerItem(kind.pelt, Item::new", "registerBlock(kind.rug, WerewolfRugBlock::new",
+                 f"MobEffects.{wb['effect']}"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client_root = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    client = (client_root / "JugcraftClient.java").read_text(encoding="utf-8")
+    if "JugcraftAgriculture.WEREWOLF, WerewolfRenderer::new" not in client or "WerewolfModel.LAYER, WerewolfModel::createLayer" not in client:
+        err("JugcraftClient.java must register WerewolfRenderer and WerewolfModel's layer")
+    renderer = (client_root / "WerewolfRenderer.java").read_text(encoding="utf-8")
+    for call in ('"textures/entity/werewolf_" + kind.id + ".png"', '"textures/entity/werewolf_" + kind.id + "_eyes.png"', "state.kind == kind"):
+        if call not in renderer:
+            err(f"WerewolfRenderer.java must have {call}")
+    check_werewolf_model((client_root / "WerewolfModel.java").read_text(encoding="utf-8"))
+    for key in [f"entity.{MOD}.werewolf", f"block.{MOD}.{wb['block']}", f"block.{MOD}.potted_{wb['block']}", f"item.{MOD}.{ww['dagger']}",
+                f"item.{MOD}.{ww['arrow']}"] + [key for kind, k in ww["kinds"].items() for key in (
+                f"entity.{MOD}.werewolf.{kind}", f"block.{MOD}.{k['rug']}", f"item.{MOD}.{k['pelt']}")]:
+        if key not in lang:
+            err(f"Werewolves have no words for {key}")
+    paths = [DATA / MOD / "loot_table" / "entities" / "werewolf.json", DATA / MOD / "loot_table" / "blocks" / f"{wb['block']}.json",
+             DATA / MOD / "worldgen" / "placed_feature" / f"patch_{wb['block']}.json", DATA / MOD / "advancement" / "silver_lining.json",
+             DATA / MOD / "advancement" / "wolfsbane_ward.json", DATA / MOD / "advancement" / "leader_of_the_pack.json",
+             ASSETS / "textures" / "block" / f"{wb['block']}.png", DATA / MOD / "recipe" / f"{ww['dagger']}.json"]
+    for kind, k in ww["kinds"].items():
+        paths += [DATA / MOD / "loot_table" / "entities" / "werewolf" / f"{kind}.json", DATA / MOD / "loot_table" / "blocks" / f"{k['rug']}.json",
+                  ASSETS / "textures" / "entity" / f"werewolf_{kind}.png", ASSETS / "textures" / "entity" / f"werewolf_{kind}_eyes.png",
+                  ASSETS / "textures" / "block" / f"{k['rug']}.png", ASSETS / "textures" / "item" / f"{k['pelt']}.png",
+                  DATA / MOD / "recipe" / f"{k['rug']}.json", DATA / MOD / "recipe" / f"leather_from_{k['pelt']}.json"]
+        pelts = (load(DATA / MOD / "loot_table" / "entities" / "werewolf" / f"{kind}.json") or {}).get("pools", [])
+        if [e.get("name") for pool in pelts for e in pool.get("entries", [])] != [f"{MOD}:{k['pelt']}"]:
+            err(f"The {kind} werewolf's pelt table must drop {MOD}:{k['pelt']}")
+    for path in paths:
+        if not path.exists():
+            err(f"Werewolves need {path.relative_to(ROOT)}")
+    painted = tuple(n * werewolf_model.TEXTURE_SCALE for n in werewolf_model.TEXTURE_SIZE)
+    for kind in ww["kinds"]:
+        for suffix in ("", "_eyes"):
+            texture = ASSETS / "textures" / "entity" / f"werewolf_{kind}{suffix}.png"
+            if texture.exists() and Image.open(texture).size != painted:
+                err(f"werewolf_{kind}{suffix}.png must be {painted}: tools/werewolf_model.py's texture size times its scale")
+    for tag, values in (("werewolf_haunts", ww["haunts"]), ("snow_werewolf_haunts", ww["snow_haunts"]),
+                        ("shadow_werewolf_haunts", ww["shadow_haunts"])):
+        found = (load(DATA / MOD / "tags" / "worldgen" / "biome" / f"{tag}.json") or {}).get("values", [])
+        if sorted(found) != sorted(values):
+            err(f"{MOD}:{tag} differs from tools/agriculture.py")
+    prey = (load(DATA / MOD / "tags" / "entity_type" / "werewolf_prey.json") or {}).get("values", [])
+    if sorted(prey) != sorted(ww["prey"]):
+        err(f"{MOD}:werewolf_prey differs from WEREWOLF['prey']")
+    arrows = (load(DATA / "minecraft" / "tags" / "item" / "arrows.json") or {}).get("values", [])
+    weapons = (load(DATA / MOD / "tags" / "item" / "silver_weapons.json") or {}).get("values", [])
+    if f"{MOD}:{ww['arrow']}" not in arrows or f"{MOD}:{ww['dagger']}" not in weapons:
+        err("The silver arrow must be in minecraft:arrows and the dagger in jugcraft:silver_weapons")
+    # The dagger joins minecraft:swords alongside every other Jugcraft sword; a writer that replaced the file would
+    # drop the others.
+    swords = (load(DATA / "minecraft" / "tags" / "item" / "swords.json") or {}).get("values", [])
+    for sword in [f"{MOD}:{ww['dagger']}", f"{MOD}:power_katana"] + [f"{MOD}:{tier}_sword" for tier in gear.GEAR_TIERS]:
+        if sword not in swords:
+            err(f"minecraft:swords must hold {sword}")
+
+
+def check_werewolf_model(model):
+    """Every box of tools/werewolf_model.py (texture offset, corner and size) is in WerewolfModel.java, so the texture
+    painted from it lines up with the model, and the texture is the size the model declares."""
+    def f(value):
+        return f"{float(value)}F"
+
+    flat = re.sub(r"\s+", "", model).replace(".mirror()", "").replace(".mirror(false)", "")
+    for part in werewolf_model.PARTS:
+        for u, v, x, y, z, w, h, d, _mirrored in part["boxes"]:
+            box = f".texOffs({u},{v}).addBox({f(x)},{f(y)},{f(z)},{f(w)},{f(h)},{f(d)})"
+            if box not in flat:
+                err(f"WerewolfModel.java lacks {part['name']}'s box {box} from tools/werewolf_model.py")
+    width, height = werewolf_model.TEXTURE_SIZE
+    if f"LayerDefinition.create(mesh,{width},{height})" not in flat:
+        err(f"WerewolfModel's texture must be {width} by {height}, as tools/werewolf_model.py says")
 
 
 def check_broomstick(java, number, lang):
@@ -3736,8 +4222,8 @@ def check_hay_golem(java, main):
             or "FabricDefaultAttributeRegistry.register(HAY_GOLEM, HayGolem.createAttributes())" not in main
             or "UseBlockCallback.EVENT.register(HayGolem::onUseBlock)" not in main):
         err("JugcraftAgriculture.java must register the Hay Golem with its size, attributes and building callback")
-    if "HayGolem.class" not in java.get("Scarecrows", ""):
-        err("Scarecrows.guarded must count Hay Golems")
+    if "instanceof CropGuard" not in java.get("Scarecrows", "") or "implements CropGuard" not in java.get("HayGolem", ""):
+        err("Scarecrows.guarded must count every CropGuard, the Hay Golem among them")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     if lang.get(f"entity.jugcraft.{hg['entity']}") != hg["display"]:
         err("The Hay Golem has no name")
