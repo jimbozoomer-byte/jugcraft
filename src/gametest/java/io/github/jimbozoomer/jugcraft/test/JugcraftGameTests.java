@@ -1337,14 +1337,14 @@ public class JugcraftGameTests {
 			}
 		}
 		// East of the table: outside a sector facing south.
-		var outside = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityType.HUSK, new Vec3(31.5, 1, 2.5));
+		var outside = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new Vec3(31.5, 1, 2.5));
 		// South, in the sector, but with a player standing beside it.
 		for (int x = 1; x <= 3; x++) {
 			for (int z = 27; z <= 29; z++) {
 				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
 			}
 		}
-		var guarded = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityType.HUSK, new Vec3(2.5, 1, 28.5));
+		var guarded = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new Vec3(2.5, 1, 28.5));
 		ServerPlayer friend = helper.makeMockServerPlayerInLevel();
 		friend.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
 		friend.setPos(helper.absoluteVec(new Vec3(4.5, 1, 28.5)));
@@ -1365,7 +1365,7 @@ public class JugcraftGameTests {
 					helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
 				}
 			}
-			var hostile = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityType.HUSK, new Vec3(2.5, 1, 32.5));
+			var hostile = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new Vec3(2.5, 1, 32.5));
 			hostile.setInvulnerable(true);
 		});
 		helper.runAfterDelay(280, () -> {
