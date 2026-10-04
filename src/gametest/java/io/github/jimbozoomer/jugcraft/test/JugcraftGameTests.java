@@ -337,6 +337,45 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/**
+	 * Batch 40 (zipline): a line won't string through a wall; once the wall is gone it joins two anchors, a second line
+	 * from either is refused, a rider runs along it and is let off at the far anchor, and breaking an anchor takes the
+	 * line down at the other end.
+	 */
+	@GameTest(maxTicks = 200)
+	public void ziplineCarriesARider(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Block anchorBlock = io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_ANCHOR;
+		BlockPos from = helper.absolutePos(new BlockPos(1, 4, 1));
+		BlockPos to = helper.absolutePos(new BlockPos(7, 2, 7));
+		BlockPos wall = helper.absolutePos(new BlockPos(4, 3, 4));
+		level.setBlockAndUpdate(from, anchorBlock.defaultBlockState());
+		level.setBlockAndUpdate(to, anchorBlock.defaultBlockState());
+		level.setBlockAndUpdate(wall, Blocks.STONE.defaultBlockState());
+		var blocked = io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.connect(level, from, to, null);
+		helper.assertTrue(blocked == io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.Result.BLOCKED,
+				"A line went through a wall: " + blocked);
+		level.removeBlock(wall, false);
+		var strung = io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.connect(level, from, to, null);
+		helper.assertTrue(strung == io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.Result.OK, "The line was not strung: " + strung);
+		var again = io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.connect(level, to, from, null);
+		helper.assertTrue(again == io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.Result.IN_USE,
+				"A second line was strung: " + again);
+
+		net.minecraft.world.entity.Mob rider = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.ZOMBIE, new BlockPos(1, 1, 2));
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.rocketry.ZiplineRider.ride(level, from, rider), "The zombie could not ride the line");
+		helper.assertTrue(rider.getVehicle() instanceof io.github.jimbozoomer.jugcraft.rocketry.ZiplineRider, "The zombie is not on the trolley");
+		helper.succeedWhen(() -> {
+			helper.assertTrue(!rider.isPassenger(), "Still riding at " + rider.position());
+			double dx = rider.getX() - (to.getX() + 0.5);
+			double dz = rider.getZ() - (to.getZ() + 0.5);
+			helper.assertTrue(dx * dx + dz * dz <= 4.0, "The rider was let off away from the far anchor, at " + rider.position());
+			level.removeBlock(to, false);
+			var start = (io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity) level.getBlockEntity(from);
+			helper.assertTrue(start.link() == null, "Breaking the far anchor left the line up");
+		});
+	}
+
 	/** Ores drop their raw material to a plain pickaxe, more with Fortune; only Silk Touch takes the ore block itself. */
 	@GameTest
 	public void oresNeedSilkTouchToDropThemselves(GameTestHelper helper) {
