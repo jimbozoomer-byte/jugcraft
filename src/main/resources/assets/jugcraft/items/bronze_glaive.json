@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jugcraft:item/bronze_glaive"
+  },
+  "swap_animation_scale": 2.0
+}
