@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Arms motion, batch 43
+- **New animations for every arm of batch 42**, seen by everyone and in first person.
+  - Each kind has a guard: the side-on stance, two hands on the greatswords, hammers and polearms, the rapier en garde. Each kind also has a combo of attacks with anticipation, the blow, follow-through and a settle. The torso turns and bends, the head counters, and the feet step.
+  - In first person, the held arm takes a guard and a stroke for each attack.
+  - The spear and lance keep vanilla's arms and add the body.
+- Keys joined by Hermite splines so the motion flows through them. Timed on vanilla's own swing, so there is no networking. Client only, with no allocation per frame and the arms only beyond 32 blocks; four client mixins.
+- Learned from the combat animation mods and packs the owner sent (Better Combat, Malfu, Player Animation Library, Fresh Animations and Fresh Moves, Mo' Bends, NdRz's weapons); nothing of theirs is used. Record: [arms-motion.md](docs/features/arms-motion.md).
+
 ### Unmerged: Liquid fuels, batch 43
 - **RP-1 kerosene**, hydrocracked from heavy fuel oil and hydrogen in the catalytic cracker. It is jet fuel too, burning in the gas turbine and the advanced engine.
 - **Cryogenic Liquefier**: condenses oxygen into **liquid oxygen**.
@@ -36,11 +44,28 @@ No numbered release yet. Everything below is on `main`.
 - **Survey rocket:** surveys ores and oil under 7x7 chunks. **Cloud-seeding** and **clear-sky rockets:** five minutes of rain or clear sky, with a shared cooldown. **Signal flares:** tell nearby players where you are. **Illumination flares:** make hostile mobs glow.
 - Advancements, a Rocketry handbook chapter, game test. Record: [rocketry.md](docs/features/rocketry.md).
 
+### Unmerged: Arms, batch 42
+- **Nine kinds of arms in bronze and steel:** longsword (parries 60% of a blow from in front), greatsword (two-handed, long reach), rapier (quick thrusts, a light parry), flanged mace and war hammer (break a shield's guard for 3 and 5 seconds; the hammer knocks back), glaive (sweeps at 4.25 blocks), halberd (thrusts through every target in line at 4.5), spear and lance (charge like vanilla's spears; the lance hits harder and unhorses riders).
+- Each has its own swing (26.3's whack and stab, from 5 to 12 ticks), reach and in-hand size; holding use parries or charges. Every trait is a vanilla item component, so the server runs and checks them as it does its own weapons, with no per-tick code.
+- 64x64 sprites, shared in-hand models, handbook pages, an advancement, three game tests and client screenshots. After studying Epic Knights and Simply Swords; nothing of theirs is used. Record: [arms.md](docs/features/arms.md).
+
 ### Unmerged: Control room, batch 37
 - **Control Monitor:** six panels form a 3x2 wall screen. Cabled to a logic controller, it shows every channel's reading, a bar, a two-minute graph and ON/OFF.
 - **Alarm Klaxon:** a controller switches it like a relay; it lights and sounds.
 - **Control Remote:** bind it to a controller and flip a channel by hand from up to 256 blocks away.
 - Advancement, handbook page, game test. Record: [control-electronics.md](docs/features/control-electronics.md).
+
+### Unmerged: Tall sides on diagonal walls
+- **Diagonal walls rise to meet what is above them.** When the block above covers all of a diagonal wall's sides and arms (another wall, a full block, a slab), they rise to the top of the block as a vanilla wall's sides do, so a diagonal wall two high has no slot between its layers. A tall straight diagonal run has no post, as a tall straight wall has none.
+- One property, `tall`, on the diagonal walls: 2,048 states each, 32,768 more in all. Two more server game tests.
+
+### Unmerged: Diagonal walls
+- **Walls join diagonally.** All 32 of vanilla's walls join a wall a diagonal step away with a low wall side at 45 degrees, on the same rule as fences: neither may join straight into the corner between them, so a block in the corner keeps them apart.
+- **Posts follow vanilla's rule.** A wall that runs straight on along a diagonal has no post, as a straight wall has none, unless something above calls for one (a torch, a block, a wall's post). Ends, corners and junctions keep their posts.
+- **Swapped, not enlarged** (the Diagonal Fences mod's approach, in Jugcraft's own code). Vanilla's walls keep their own states. A wall that joins diagonally becomes `jugcraft:diagonal_<wall>` while it does, and turns back when its last diagonal goes. It drops, picks and is named as the vanilla wall, and is in `#minecraft:walls`. Its sides are low or none, never tall. This adds 32,768 block states instead of the 155,520 that diagonal properties on vanilla's walls would add.
+- **Mobs** no longer try to step diagonally between two blocks joined diagonally, and a block with diagonals breaks into the particles of its shape without the arms.
+- Shapes are worked out once for each set of straight sides, not once per state, and blocks with alike shapes share their diagonal shapes. This applies to fences, panes and bars too.
+- Five more server game tests and three wall screenshots. Record: [diagonal-connections.md](docs/features/diagonal-connections.md).
 
 ### Unmerged: Control electronics, batch 36
 - **Data Cable**, **Sensor**, **Relay** and **Logic Controller**. Sensors read how full a tank, battery, machine or chest is and report on a dye-colour channel. The controller's eight rules ("IF red above 90% THEN blue OFF") switch relays, whose redstone runs machines. It gives a dead band when two rules pair up.
