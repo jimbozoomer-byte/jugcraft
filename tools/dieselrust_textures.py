@@ -1,13 +1,17 @@
-"""Original 16x16 textures for the weathered dieselpunk giants of batch 44 (tools/giant_models.py).
+"""Original 16x16 textures for the dieselpunk giants of batch 44 (tools/giant_models.py) and everything built from them.
 
-The owner's reference look: heavy rust and weathering, green verdigris patina on copper housings, riveted
-perforated covers with round holes, copper and rusty pipes with hex-nut fittings, banded ribbed domes and coil
-stacks, chipped red paint, skid feet and glowing amber conduits. Deterministic like the other texture sets:
-each texture draws from its own seed. Names start with "dr_". Called from generate_textures.py.
+The giants' parts: weathered riveted steel plate, green verdigris patina on copper housings, perforated covers with
+round holes, copper and steel pipes with hex-nut fittings, banded domes and coil stacks, chipped red paint, skid feet
+and glowing amber conduits.
+
+Drawn in the clean style the owner asked for on 4 October 2026 (tools/clean_metal.py, docs/ART_DIRECTION.md): flat
+fills from short palettes, bevelled panels and bolts, and wear only as a few small marks at corners and seams. Rust
+is an accent (a stain under a bolt, a run from a seam), never the whole surface. Deterministic: the same code always
+draws the same pixels. Names start with "dr_". Called from generate_textures.py.
 """
 import math
-import random
 
+from clean_metal import CHIP, CHIP_WIDE, bevel, bolt, corner_bolts, inset, patch, plate, ramp, rect, scuffs, stain
 from steampunk_textures import new, put, save
 
 RUST = [(46, 26, 18), (70, 38, 22), (98, 52, 28), (128, 68, 34), (156, 88, 44), (184, 112, 58), (206, 140, 80)]
@@ -20,127 +24,96 @@ BLUE = [(18, 40, 70), (28, 62, 104), (44, 88, 140), (78, 124, 176)]
 STEEL = [(64, 66, 68), (92, 94, 96), (124, 126, 126), (160, 160, 156), (196, 194, 188)]
 
 
-def mottle(rng, x, y, palette, low=1, high=4):
-    """A weathered pick from `palette`: mostly the middle shades, darker in low patches."""
-    n = math.sin(x * 1.7 + y * 0.6 + rng.random() * 0.9) + math.cos(y * 1.3 - x * 0.4) + rng.random() * 1.6
-    index = low + int((n + 2) / 5.6 * (high - low + 1))
-    return palette[max(low, min(high, index))]
+# The giants' weathered steel: a warm mid grey, like tuff, so the red paint, copper and patina stand out against it.
+PLATE = [(44, 42, 44), (66, 63, 63), (86, 82, 80), (106, 101, 97), (128, 122, 116), (152, 146, 138)]
+# Copper as vanilla draws it: warm orange with a pink-brown shadow and a pale highlight.
+BRIGHT_COPPER = [(118, 56, 40), (156, 80, 54), (190, 106, 74), (216, 134, 96), (236, 166, 128)]
+VERDIGRIS = [(40, 92, 82), (58, 120, 104), (78, 148, 126), (104, 174, 148), (140, 198, 172)]
+
+
+def rust_stain(img, x, y, drip=0):
+    """A small rust stain (a seam or bolt weeping), with an optional run below it."""
+    stain(img, x, y, RUST[2], RUST[3], RUST[3], drip)
 
 
 def rust_plate(seed, rivets=True):
-    """Heavily rusted steel: mottled browns and oranges, dark pits, rust runs streaking down, riveted edges."""
-    rng = random.Random(seed)
+    """Weathered steel plate: a bevelled panel split by a seam, bolted at the corners, rust weeping from two spots."""
     img = new()
-    for y in range(16):
-        for x in range(16):
-            put(img, x, y, mottle(rng, x, y, RUST, 2, 4) if rng.random() < 0.9 else RUST[5])
-    for _ in range(3):  # Rust runs down from a seam or a bolt.
-        x, y = rng.randrange(16), rng.randrange(0, 6)
-        for i in range(rng.randrange(5, 11)):
-            put(img, x, y + i, RUST[5] if i % 3 else RUST[6])
-    for _ in range(6):  # Pitting.
-        put(img, rng.randrange(16), rng.randrange(16), RUST[0])
+    plate(img, PLATE)
+    scuffs(img, PLATE[3], only=PLATE[2])
     if rivets:
-        for x in range(1, 16, 4):
-            for y in (1, 14):
-                put(img, x, y, IRON[1])
-                put(img, x + 1, y, RUST[6])
-        for x in range(16):
-            put(img, x, 0, RUST[2])
-            put(img, x, 15, RUST[1])
+        for x in range(1, 15):
+            put(img, x, 7, PLATE[1])
+            put(img, x, 8, PLATE[4])
+        corner_bolts(img, PLATE)
+        rust_stain(img, 12, 4, drip=2)
+        patch(img, CHIP_WIDE, RUST[3], 2, 13)
+    else:
+        rust_stain(img, 10 if seed % 2 else 4, 9, drip=1)
     return img
 
 
 def patina_plate(seed, holes=False):
-    """Copper gone green: verdigris mottle, rust bleeding at the seams, rivets round the edge; optionally a
-    perforated cover with round holes (the reference engine's riveted cover)."""
-    rng = random.Random(seed)
+    """Copper gone green: a bevelled verdigris panel with a recessed inset, bolted corners and bare copper showing
+    at two worn corners; optionally a perforated cover with nine round holes."""
     img = new()
-    for y in range(16):
-        for x in range(16):
-            c = mottle(rng, x, y, PATINA, 1, 4)
-            if rng.random() < 0.06:
-                c = RUST[4]
-            put(img, x, y, c)
-    for x in range(16):
-        put(img, x, 0, PATINA[0])
-        put(img, x, 15, RUST[2] if rng.random() < 0.5 else PATINA[0])
-    for y in range(16):
-        put(img, 0, y, PATINA[0])
-        put(img, 15, y, PATINA[1])
-    for i in range(2, 15, 3):
-        for x, y in ((i, 1), (i, 14), (1, i), (14, i)):
-            put(img, x, y, PATINA[5])
+    plate(img, VERDIGRIS)
+    scuffs(img, VERDIGRIS[3], only=VERDIGRIS[2])
+    patch(img, CHIP, BRIGHT_COPPER[2], 2, 2)
+    patch(img, [(0, 0), (-1, 0), (0, -1)], BRIGHT_COPPER[1], 13, 13)
     if holes:
-        for cy in (4, 8, 12):
-            for cx in (4, 8, 12):
-                for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
-                    put(img, cx - 1 + dx, cy - 1 + dy, IRON[0])
-                put(img, cx - 1, cy - 2, PATINA[0])
-                put(img, cx + 1, cy + 1, PATINA[4])
+        for cy in (3, 7, 11):
+            for cx in (3, 7, 11):
+                rect(img, cx, cy, cx + 1, cy + 1, IRON[0])
+                put(img, cx, cy, IRON[1])
+                put(img, cx + 2, cy + 1, VERDIGRIS[3])
+                put(img, cx + 1, cy + 2, VERDIGRIS[3])
+    else:
+        inset(img, 4, 4, 11, 11, VERDIGRIS[3], VERDIGRIS[1])
+        bolt(img, 12, 2, VERDIGRIS)
+        bolt(img, 2, 12, VERDIGRIS)
     return img
 
 
 def ribbed(seed, palette, accent=None):
-    """Horizontal ribs every other row (coil stacks, dome bands), each rib lit on top and shaded below."""
-    rng = random.Random(seed)
+    """Horizontal ribs every four rows (coil stacks, dome bands): each rib lit on top, shaded underneath."""
     img = new()
-    for y in range(16):
-        for x in range(16):
-            if y % 4 == 0:
-                c = palette[4]
-            elif y % 4 == 1:
-                c = palette[3]
-            elif y % 4 == 2:
-                c = palette[2]
-            else:
-                c = palette[0]
-            if accent and rng.random() < 0.08:
-                c = accent
-            put(img, x, y, c)
+    ramp(img, (len(palette) - 2, 2, 2, 0), palette, 4)
+    if accent:
+        for x, y in ((3, 1), (4, 1), (11, 9), (12, 9), (12, 10)):
+            put(img, x, y, accent)
     return img
 
 
 def banded_dome(seed):
-    """The reference hall's dome: rusty copper panels in bands, riveted seams and green streaks."""
-    rng = random.Random(seed)
+    """The dome: two courses of copper panels laid like brickwork, each lit along its top edge, a few rivets on the
+    seams and a touch of green where the rain sits."""
     img = new()
-    for y in range(16):
-        for x in range(16):
-            c = mottle(rng, x, y, COPPER, 1, 4)
-            if rng.random() < 0.15:
-                c = RUST[3]
-            if rng.random() < 0.05:
-                c = PATINA[2]
-            put(img, x, y, c)
-    for y in (0, 7, 8):
-        for x in range(16):
-            put(img, x, y, RUST[1] if y != 8 else COPPER[5])
-    for x in (0, 8):
-        for y in range(16):
-            put(img, x, y, RUST[2])
-    for x in range(2, 16, 4):
-        put(img, x, 7, COPPER[5])
+    for band, (y0, seams) in enumerate(((0, (0, 8)), (8, (4, 12)))):
+        bevel(img, 0, y0, 15, y0 + 7, BRIGHT_COPPER[3], BRIGHT_COPPER[0], BRIGHT_COPPER[2])
+        for x in seams:
+            for y in range(y0, y0 + 8):
+                put(img, x, y, BRIGHT_COPPER[0])
+                put(img, x + 1, y, BRIGHT_COPPER[3] if y > y0 else BRIGHT_COPPER[3])
+        for x in seams:
+            put(img, x + 1, y0 + 3, BRIGHT_COPPER[4])
+    scuffs(img, VERDIGRIS[2], [(6, 6, 2), (13, 14, 2)])
     return img
 
 
 def pipe_metal(seed, palette, spots):
-    """Pipe stock: a bright highlight row and a dark underside, with weathering spots of another colour."""
-    rng = random.Random(seed)
+    """Pipe stock: shaded like a cylinder (a bright highlight row and a dark underside), with one band of wear."""
     img = new()
-    for y in range(16):
-        for x in range(16):
-            band = y % 8
-            c = palette[[1, 2, 3, 4, 5, 3, 2, 1][band]]
-            if rng.random() < 0.1:
-                c = rng.choice(spots)
-            put(img, x, y, c)
+    ramp(img, (1, 2, 3, 4, 3, 2, 2, 1), palette, 8)
+    for x in (5, 6, 11):
+        put(img, x, 10, spots[0])
     return img
 
 
 def hex_nut():
-    """A hex-nut fitting seen face on: a six-sided steel nut round a dark bore."""
-    img = new(IRON[2])
+    """A hex-nut fitting seen face on: a six-sided steel nut round a dark bore, on a bevelled steel plate."""
+    img = new()
+    plate(img, PLATE, outline=False)
     for y in range(16):
         for x in range(16):
             dx, dy = x - 7.5, y - 7.5
@@ -157,66 +130,51 @@ def hex_nut():
 
 
 def red_paint(seed):
-    """Chipped red paint over rust (the reference engine's block)."""
-    rng = random.Random(seed)
+    """Red paint on steel: a bevelled panel with a recessed inset, bolts, and paint chipped to bare steel at two
+    corners."""
     img = new()
-    for y in range(16):
-        for x in range(16):
-            c = RED[2] if rng.random() < 0.75 else RED[3]
-            edge = min(x, y, 15 - x, 15 - y)
-            if edge == 0:
-                c = RED[1]
-            if (edge <= 1 and rng.random() < 0.3) or rng.random() < 0.05:
-                c = RUST[rng.randrange(2, 5)]
-            put(img, x, y, c)
-    for x, y in ((2, 2), (13, 2), (2, 13), (13, 13)):
-        put(img, x, y, IRON[1])
-        put(img, x + 1, y, RED[4])
+    plate(img, RED)
+    scuffs(img, RED[3], only=RED[2])
+    inset(img, 4, 4, 11, 11, RED[3], RED[1])
+    corner_bolts(img, PLATE)
+    patch(img, CHIP_WIDE, PLATE[3], 1, 12)
+    put(img, 2, 13, PLATE[2])
+    patch(img, CHIP, PLATE[3], 12, 1)
     return img
 
 
 def rivet_band(seed):
-    """A dark iron band with a row of domed rivets: flanges and hoops."""
-    rng = random.Random(seed)
+    """A dark steel band with a row of bolts along its middle: flanges and hoops."""
     img = new()
-    for y in range(16):
-        for x in range(16):
-            put(img, x, y, IRON[3] if rng.random() < 0.8 else RUST[2])
-    for x in range(16):
-        put(img, x, 0, IRON[5])
-        put(img, x, 15, IRON[1])
-    for x in range(1, 16, 4):
-        for y in range(1, 16, 4):
-            put(img, x, y, IRON[5])
-            put(img, x + 1, y, IRON[4])
-            put(img, x, y + 1, IRON[2])
-            put(img, x + 1, y + 1, IRON[1])
+    bevel(img, 0, 0, 15, 15, PLATE[3], PLATE[0], PLATE[1])
+    for x in range(1, 15):
+        put(img, x, 4, PLATE[0])
+        put(img, x, 11, PLATE[2])
+    for x in range(2, 15, 4):
+        bolt(img, x, 7, PLATE)
     return img
 
 
 def skid(seed):
-    """Dark skid iron with weld beads and grease."""
-    rng = random.Random(seed)
-    img = new()
-    for y in range(16):
+    """Dark skid steel with two weld beads across it and one grease mark."""
+    img = new(IRON[2])
+    for y in (3, 12):
         for x in range(16):
-            c = IRON[2] if rng.random() < 0.8 else IRON[1]
-            if y in (3, 12):
-                c = IRON[4] if x % 2 else IRON[3]
-            put(img, x, y, c)
-    for _ in range(5):
-        put(img, rng.randrange(16), rng.randrange(16), RUST[2])
+            put(img, x, y, IRON[4] if x % 2 else IRON[3])
+            put(img, x, y + 1, IRON[1])
+    scuffs(img, IRON[1], [(5, 7, 3), (10, 9, 2)])
     return img
 
 
 def grate(seed):
-    """Rusty floor grating: a diamond-ish grid with dark gaps."""
-    rng = random.Random(seed)
+    """Floor grating: a square grid of steel bars, lit on top, over dark gaps."""
     img = new(IRON[0])
     for y in range(16):
         for x in range(16):
-            if x % 4 == 0 or y % 4 == 0:
-                put(img, x, y, mottle(rng, x, y, RUST, 2, 5))
+            if y % 4 == 0:
+                put(img, x, y, PLATE[3])
+            elif x % 4 == 0:
+                put(img, x, y, PLATE[2] if y % 4 != 3 else PLATE[1])
     return img
 
 
@@ -237,27 +195,22 @@ def amber(on):
 
 
 def fire_door(on):
-    """Riveted firebox door with a slotted draft and a glowing slit."""
+    """A bolted steel firebox door with three draft slots that glow while it burns, and a latch."""
     img = new()
-    for y in range(16):
-        for x in range(16):
-            c = RUST[3] if (x + y) % 7 else RUST[2]
-            if x in (0, 15) or y in (0, 15):
-                c = IRON[1]
-            put(img, x, y, c)
+    plate(img, PLATE)
     for y in (5, 8, 11):
         for x in range(3, 13):
-            put(img, x, y, AMBER[4 if on else 1] if x % 3 else AMBER[5 if on else 2])
             put(img, x, y - 1, IRON[0])
-    for x, y in ((2, 2), (13, 2), (2, 13), (13, 13)):
-        put(img, x, y, IRON[5])
-    put(img, 13, 8, STEEL[4])
+            put(img, x, y, AMBER[4 if on else 1] if x % 3 else AMBER[5 if on else 2])
+    corner_bolts(img, PLATE)
+    put(img, 13, 7, STEEL[4])
+    put(img, 13, 8, STEEL[2])
     return img
 
 
 def fan():
-    """A turbine fan in its rusty housing, seen face on (the reference's big top-down fan)."""
-    img = new(RUST[1])
+    """A turbine fan in its steel housing, seen face on: a lit rim, steel blades and a blue hub."""
+    img = new(PLATE[1])
     for y in range(16):
         for x in range(16):
             dx, dy = x - 7.5, y - 7.5
@@ -265,7 +218,7 @@ def fan():
             if r > 7.6:
                 continue
             if r > 6.5:
-                put(img, x, y, RUST[4])
+                put(img, x, y, PLATE[4] if dy < 0 else PLATE[2])
                 continue
             angle = math.atan2(dy, dx)
             blade = (angle * 7 / (2 * math.pi) + r * 0.08) % 1.0
@@ -279,38 +232,27 @@ def fan():
 
 
 def coil(seed):
-    """Copper windings: tight horizontal turns with a green bloom here and there."""
-    rng = random.Random(seed)
+    """Copper windings: tight horizontal turns, each lit along its top."""
     img = new()
     for y in range(16):
         for x in range(16):
-            c = COPPER[3] if y % 2 == 0 else COPPER[1]
-            if (x + y * 3) % 11 == 0:
-                c = COPPER[5]
-            if rng.random() < 0.05:
-                c = PATINA[3]
+            c = BRIGHT_COPPER[3] if y % 2 == 0 else BRIGHT_COPPER[1]
+            if y % 2 == 0 and (x + y * 3) % 11 == 0:
+                c = BRIGHT_COPPER[4]
             put(img, x, y, c)
     return img
 
 
 def blue_cap(seed):
-    """Blue-painted end caps (the reference engine's pipe ends), worn at the rim."""
-    rng = random.Random(seed)
+    """Blue-painted end caps: a bevelled blue panel worn to bare steel at one corner."""
     img = new()
-    for y in range(16):
-        for x in range(16):
-            c = BLUE[2] if rng.random() < 0.8 else BLUE[3]
-            if min(x, y, 15 - x, 15 - y) == 0:
-                c = BLUE[0]
-            if rng.random() < 0.04:
-                c = STEEL[2]
-            put(img, x, y, c)
+    plate(img, BLUE + [(110, 150, 196)])
+    patch(img, CHIP, STEEL[2], 12, 12)
     return img
 
 
 def blade(seed):
     """Brushed saw steel in rings, with a bright edge where the teeth run."""
-    rng = random.Random(seed)
     img = new()
     for y in range(16):
         for x in range(16):
@@ -320,8 +262,6 @@ def blade(seed):
                 c = STEEL[4] if (x + y) % 2 else IRON[2]
             if r < 1.5:
                 c = IRON[1]
-            if rng.random() < 0.04:
-                c = RUST[3]
             put(img, x, y, c)
     return img
 
@@ -344,43 +284,63 @@ def crt(on):
     return img
 
 
+LEAF_GREENS = [(30, 70, 26), (44, 98, 34), (62, 128, 44), (90, 160, 60), (130, 194, 86)]
+# Each leaf: its top-left corner. They overlap like a canopy and the pattern wraps, so the texture tiles.
+LEAVES = ((0, 0), (8, 1), (4, 5), (12, 6), (0, 9), (8, 10), (4, 13), (12, 14))
+
+
 def leaves(seed):
-    """Lush hydroponic greens: overlapping leaves with bright veins."""
-    rng = random.Random(seed)
-    greens = [(26, 64, 22), (38, 92, 30), (56, 124, 40), (86, 160, 56), (130, 196, 84)]
-    img = new()
-    for y in range(16):
-        for x in range(16):
-            put(img, x, y, greens[rng.choice([0, 1, 1, 2, 2, 2, 3, 3, 4])])
+    """Hydroponic greens: a canopy of overlapping leaves, each lit along its top with a pale midrib."""
+    img = new(LEAF_GREENS[0])
+    for lx, ly in LEAVES:
+        for dy, row in enumerate(("  ##  ", " #### ", "######", " #### ", "  ##  ")):
+            for dx, ch in enumerate(row):
+                if ch == "#":
+                    c = LEAF_GREENS[3] if dy <= 1 else LEAF_GREENS[2] if dy <= 2 else LEAF_GREENS[1]
+                    img.putpixel(((lx + dx) % 16, (ly + dy) % 16), c + (255,))
+        for dx in range(1, 5):
+            img.putpixel(((lx + dx) % 16, (ly + 2) % 16), LEAF_GREENS[4] + (255,))
     return img
 
 
 def solution(seed, palette):
-    """A tank's liquid surface: ripples on a deep colour."""
-    rng = random.Random(seed)
-    img = new()
+    """A tank's liquid surface: a deep colour with long, regular ripple lines."""
+    img = new(palette[1])
     for y in range(16):
         for x in range(16):
-            c = palette[1]
-            if (x + 2 * y + rng.randrange(3)) % 9 == 0:
-                c = palette[3]
-            elif rng.random() < 0.2:
-                c = palette[2]
-            put(img, x, y, c)
+            wave = (x + 2 * y) % 16
+            if wave in (0, 1) and y % 4 == 1:
+                put(img, x, y, palette[3])
+            elif wave in (8, 9, 10) and y % 4 == 3:
+                put(img, x, y, palette[2])
     return img
 
 
+def soot():
+    """The sooty inside of a smokestack or engine opening: a dark steel rim round a near-black throat, one shade
+    darker at each step in."""
+    img = new(IRON[0])
+    for i, c in enumerate((PLATE[1], IRON[2], IRON[1])):
+        for x in range(i, 16 - i):
+            for y in (i, 15 - i):
+                put(img, x, y, c)
+                put(img, y, x, c)
+    return img
+
+
+ICE = [(150, 186, 196), (186, 214, 222), (220, 236, 240), (246, 250, 252)]
+
+
 def frost(seed):
-    """Frosted pipework: pale ice crusted over patina."""
-    rng = random.Random(seed)
+    """Frosted pipework: a pale ice crust in soft bands, a few bright crystals and green patina showing through."""
     img = new()
-    ice = [(150, 186, 196), (186, 214, 222), (220, 236, 240), (246, 250, 252)]
-    for y in range(16):
-        for x in range(16):
-            c = ice[rng.choice([0, 1, 1, 2, 2, 3])]
-            if rng.random() < 0.12:
-                c = PATINA[3]
-            put(img, x, y, c)
+    ramp(img, (1, 2, 2, 2, 1, 1, 2, 2), ICE, 8)
+    for x, y in ((3, 2), (11, 5), (6, 10), (13, 13), (1, 12)):
+        put(img, x, y, ICE[3])
+        put(img, x + 1, y, ICE[3])
+        put(img, x, y + 1, ICE[2])
+    patch(img, [(0, 0), (1, 0), (1, 1)], VERDIGRIS[3], 8, 7)
+    patch(img, [(0, 0), (1, 0)], VERDIGRIS[3], 2, 4)
     return img
 
 
@@ -389,11 +349,11 @@ def draw_all():
     save(rust_plate(4401, rivets=False), "dr_rust_bare")
     save(patina_plate(4402), "dr_patina")
     save(patina_plate(4403, holes=True), "dr_perforated")
-    save(ribbed(4404, PATINA, RUST[4]), "dr_ribbed_patina")
-    save(ribbed(4405, RUST, PATINA[2]), "dr_ribbed_rust")
+    save(ribbed(4404, VERDIGRIS), "dr_ribbed_patina")
+    save(ribbed(4405, PLATE), "dr_ribbed_rust")
     save(banded_dome(4406), "dr_dome")
-    save(pipe_metal(4407, COPPER, [PATINA[3], RUST[3]]), "dr_copper_pipe")
-    save(pipe_metal(4408, RUST, [RUST[0], IRON[2]]), "dr_rust_pipe")
+    save(pipe_metal(4407, [BRIGHT_COPPER[0]] + BRIGHT_COPPER, [VERDIGRIS[3]]), "dr_copper_pipe")
+    save(pipe_metal(4408, PLATE, [RUST[3]]), "dr_rust_pipe")
     save(hex_nut(), "dr_nut")
     save(red_paint(4409), "dr_red")
     save(rivet_band(4410), "dr_band")
@@ -413,3 +373,4 @@ def draw_all():
     save(solution(4417, [(10, 40, 46), (20, 70, 80), (40, 110, 120), (120, 190, 196)]), "dr_wash_water")
     save(solution(4418, [(20, 60, 30), (40, 110, 60), (70, 150, 90), (160, 220, 150)]), "dr_plating_bath")
     save(frost(4419), "dr_frost")
+    save(soot(), "dr_soot")

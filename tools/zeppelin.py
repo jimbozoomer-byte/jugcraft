@@ -10,7 +10,6 @@ quads exported here (assets/jugcraft/zeppelin_quads.json). tools/check_mod_data.
 """
 import json
 import math
-import random
 
 from PIL import Image
 
@@ -131,7 +130,7 @@ def gondola():
         m += cyl("z", px, py, 7.6, pz + 8, pz + 10, BAND)
         m += cyl("z", px, py, 4, pz + 22, pz + 26, RUST_BARE, BLUE)
         m += cyl("z", px, py, 2, pz - 2, pz + 2, "dr_nut")
-        m.append(box((px - 1, py + 7, pz + 12), (px + 1, py + 13, pz + 14), {"*": EXHAUST, "up": "sp_hopper_inside"}))
+        m.append(box((px - 1, py + 7, pz + 12), (px + 1, py + 13, pz + 14), {"*": EXHAUST, "up": "dr_soot"}))
     return m
 
 
@@ -244,14 +243,20 @@ CANVAS_COLORS = [(150, 138, 104), (170, 158, 122), (188, 176, 138), (204, 194, 1
 
 
 def canvas(seed, stripe=False, nose=False):
-    """Doped canvas: woven khaki with a stitched seam and rib lines; stripes are red and cream, the nose darker."""
-    rng = random.Random(seed)
+    """Doped canvas: a smooth khaki panel lit along its top, a stitched seam across it and a faint rib line; the
+    stripe band is red and cream, the nose a darker khaki."""
     img = Image.new("RGBA", (16, 16))
     for y in range(16):
         for x in range(16):
-            c = CANVAS_COLORS[1 + ((x + y) % 2)] if rng.random() < 0.85 else CANVAS_COLORS[rng.choice([0, 3])]
-            if x == 0 or y == 0:
+            c = CANVAS_COLORS[2]
+            if y == 0:
                 c = CANVAS_COLORS[0]
+            elif y == 1:
+                c = CANVAS_COLORS[3]
+            elif y == 8:
+                c = CANVAS_COLORS[1]
+            elif x == 0:
+                c = CANVAS_COLORS[1]
             if nose:
                 c = tuple(int(v * 0.72) for v in c)
             if stripe and 4 <= y < 12:
