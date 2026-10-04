@@ -1123,6 +1123,14 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 ### The hot-air balloon fiesta
 
+| **The fiesta field:** the Jack-o'-Lantern aloft on its mooring rope over Harvest Stripes and Harvest Moon, pibals rising | **Night glow:** its burner firing |
+| --- | --- |
+| ![Hot-air balloons](../images/ingame_balloons.jpg) | ![Balloons at night](../images/ingame_balloons_night.jpg) |
+| **Up close:** the wicker basket, twin-coil burner and rigging | **From the basket,** 17 blocks up at the top of the rope |
+| ![A balloon's basket](../images/ingame_balloon_basket.jpg) | ![The view from the basket](../images/ingame_balloon_ride.jpg) |
+| **Its pilot,** seated in a corner | **The glow** from below the envelope |
+| ![The pilot in the basket](../images/ingame_balloon_riders.jpg) | ![The glowing envelope from below](../images/ingame_balloon_glow.jpg) |
+
 - **Balloons:** Harvest Stripes, the Jack-o'-Lantern and Harvest Moon. Set one up on open ground, fuel it with coal, charcoal or coke, and climb in: up to four ride, and the first aboard pilots.
 - **Fly by heat:** hold jump to fire the burner and back to open the vent. You can't steer: the winds blow different ways at different heights, so pick the height that blows your way. Let a **pibal** go to see them. Go out low and come home higher for The Box.
 - **Mooring Posts** tether a balloon for rides at a fair. At night, the envelopes glow while their burners fire. Details: [even more fall additions](../features/even-more-fall-additions.md#the-hot-air-balloon-fiesta).

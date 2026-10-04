@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21), the flying broomstick (addition 22), full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25), the fall fair midway (addition 26), the Ferris wheel (addition 27) and the piñata party (addition 28) are implemented in source and pass CI's game tests; the hot-air balloon fiesta (addition 29) is implemented in source. None is yet played by hand. Addition 30 is planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21), the flying broomstick (addition 22), full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25), the fall fair midway (addition 26), the Ferris wheel (addition 27) and the piñata party (addition 28) and the hot-air balloon fiesta (addition 29) are implemented in source and pass CI's game tests. None is yet played by hand. Addition 30 is planned and not yet built. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
@@ -698,7 +698,22 @@ Its screenshots from run 37159206076, in [the guide](../branches/AGRICULTURE.md#
 Not run: hitting one by hand blindfolded, and a two-client dedicated-server playtest (the party).
 
 ### Hot-air balloon verification
-Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1096 IDs and now compares `tools/hot_air_balloon.py` with Java (it fails as it should with a number changed); `python3 scripts/check_repository.py` passes. The balloons were checked in renders of their quads, by day and night, and from under the envelope.
+
+Actual results (4 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-29-balloons` stacked on the piñata party:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `tools/hot_air_balloon.py` with Java: the balloon's sizes, heat, climb, fuel and gauges, the winds, the mooring, the pibal and the advancements' rules; and checks the items, entities, block, payload, renderers, quads and their textures, the envelopes' 768 × 384 wraps, words, recipes, advancements, loot and tags) | Pass, 1096 IDs; fails as it should with a number changed |
+| `./gradlew build` on `79a4576c` (Build workflow run [37163157583](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37163157583)) | Pass |
+| Game tests on the headless server, same run: 660 in total, 10 of them new here (`HotAirBalloonGameTests`) | **All 660 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `79a4576c` (all three client shards) |
+
+The balloons were checked in renders of their quads, by day and night and from under the envelope, before any game run. The game runs found four things, fixed before this result:
+- 26.3 has no cutout-without-culling entity type, so the two-sided envelopes draw with its translucent one (`835b0c10`).
+- A balloon fired on the ground never left it: the grounded branch reset its climb to the settling nudge each tick, so the burner's lift couldn't build. It now builds from standing still (`4262f8ad`).
+- The client test's stand-in pilots (Fabric's `FakePlayer`) can't ride, so its balloons vented and sat on the ground. The test player now pilots the Jack-o'-Lantern and the field is filmed from a camera stand (`4262f8ad`, `79a4576c`).
+- The game draws every rider seated, legs straight out, so from a corner they poked through the wicker. Riders now sit facing along the walls (`79a4576c`).
 
 The 10 new game tests (`HotAirBalloonGameTests`), most in a 44 by 44 by 26 empty arena:
 1. set up on open ground it stands, its design and fuel from the item; not under a block three up, nor over air;
@@ -713,6 +728,8 @@ The 10 new game tests (`HotAirBalloonGameTests`), most in a 44 by 44 by 26 empty
 10. the recipes, advancements and loot load.
 
 `BalloonClientGameTests` takes screenshots: a basket up close; the test player piloting the moored Jack-o'-Lantern (holding jump for the burner) up its rope, the view from its basket and its rider seen from outside; then, from a camera stand on the ground, the field with it aloft over the other two and pibals rising, and the night glow with its burner firing, from the field and from under the envelope.
+
+Its screenshots from run 37163157583, in [the guide](../branches/AGRICULTURE.md#the-hot-air-balloon-fiesta): Harvest Stripes' basket up close, its burner and rigging, the Jack-o'-Lantern behind; Harvest Moon below, seen over the rim of the Jack-o'-Lantern's basket at the top of its rope (17 blocks up); its rider, seated in a corner, from outside; the field by day, the Jack-o'-Lantern aloft on its rope over the other two with pibals rising; the same at night, the Jack-o'-Lantern glowing over the two dark ones; and its glowing envelope from below. Its log has no missing model or texture.
 
 Not run: flying one by hand (the tests fire the burner directly), a box flown in play, and a two-client dedicated-server playtest (riders together, a mass ascension).
 
