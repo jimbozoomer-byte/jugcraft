@@ -29,9 +29,10 @@ import org.jspecify.annotations.Nullable;
  * (tools/hot_air_balloon_data.py: the hot-air balloons' basket and rigging, flames and envelopes, and the pibal) and zeppelin_quads.json
  * (tools/zeppelin.py: the zeppelin's body and propeller) and walker_quads.json (tools/mech.py: the Diesel Walker) and landship_quads.json
  * (tools/landship.py: the Landship), decor16_quads.json (tools/decor16_data.py: the flying eyeball, its iris and its wings),
- * decor17_quads.json (tools/decor17_data.py: the enchanted broom, the cabinet's doors, the pinned moths and what is in the oddity jars)
- * and trench_quads.json (tools/trenchworks.py: the searchlight's yoke, drum, lens and beam), and decor18_quads.json
- * (tools/decor18_data.py: the sarcophagi's lids, the colossal skull's jaw and the gargoyle sentinel's head and eyes).
+ * decor17_quads.json (tools/decor17_data.py: the enchanted broom, the cabinet's doors, the pinned moths and what is in the oddity jars),
+ * trench_quads.json (tools/trenchworks.py: the searchlight's yoke, drum, lens and beam), artillery_quads.json
+ * (tools/artillery.py: the big guns and the observation balloon) and decor18_quads.json (tools/decor18_data.py: the
+ * sarcophagi's lids, the colossal skull's jaw and the gargoyle sentinel's head and eyes).
  */
 public final class DecorQuads {
 	private static final List<Identifier> FILES = List.of(Jugcraft.id("decor_quads.json"), Jugcraft.id("decor7_quads.json"),
@@ -40,7 +41,7 @@ public final class DecorQuads {
 			Jugcraft.id("balloon_quads.json"), Jugcraft.id("zeppelin_quads.json"),
 			Jugcraft.id("walker_quads.json"), Jugcraft.id("landship_quads.json"), Jugcraft.id("decor16_quads.json"),
 			Jugcraft.id("decor17_quads.json"), Jugcraft.id("trench_quads.json"),
-			Jugcraft.id("decor18_quads.json"));
+			Jugcraft.id("artillery_quads.json"), Jugcraft.id("decor18_quads.json"));
 	private static @Nullable Map<String, QuadModel> models;
 
 	private DecorQuads() {

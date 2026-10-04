@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: The Crypt and the Ossuary, Halloween decorations batch 18
+- **Iron-Bound Coffin** (54 slots; locks to a **Skeleton Key** cut from a **Key Blank**, and then opens only for someone holding that key and refuses hoppers and pipes; keys copy onto blanks at a crafting table) and the **Coffin Wardrobe** (a skeleton mannequin behind glass that swaps the armour you wear for the armour it holds; cursed pieces stay on).
+- **Stone, Deepslate and Blackstone Sarcophagi** (27 slots under a lid that slides aside over a skeleton; the Stonemason's Chisel carves the lid as a knight, a lady or a skull; at night, shut, they sometimes knock).
+- **Bone Throne** (a seat whose crest's eyes glow while sat in at night), **Ribcage Bookcase** (a chiseled bookshelf that powers enchanting tables), **Skull Footstool** and **Vertebra Floor Lamp**.
+- **The Buried Colossus**: a 2 × 2 × 2 **Colossal Skull** whose jaw drops on redstone, **Colossal Ribs** that meet as an arch, **Colossal Vertebrae** that line up as a spine, and a **Colossal Femur**.
+- **Gargoyle Sentinel** (watches for monsters within 16 blocks and gives a signal by their distance), **Gargoyle Rainspout** (pours rain into a cauldron below) and **Chimera Finial** (a rain and storm sensor that spreads its wings in a storm). Record: [crypt-and-ossuary.md](docs/features/crypt-and-ossuary.md).
+
 ### Unmerged: The Witch's Workshop, Halloween decorations batch 17
 - The [Witching Season plan](docs/features/witching-season.md): twenty Halloween and fall prop sets from the owner's reference pictures, in four batches, then two bosses (a scythe-bearing reaper and a spider seamstress) in their own pocket-dimension lairs. What the uploaded pocket-dimension and animation mods and the Soulslike Weaponry boss page taught, and how Jugcraft does the same without new dependencies.
 - **Horned Skull Cauldron** (holds water or three bottles of one potion with nothing gained or lost; bubbles and fumes over heat; the **Brew Ladle** wafts a lasting potion onto up to four players near at a quarter duration; ingredients float in it) and the **Ember Bed** heat source.
@@ -43,6 +50,11 @@ No numbered release yet. Everything below is on `main`.
 - They grow in the haunted biomes and some of vanilla's. Grave vases take them by colour. Eight game tests, client screenshots. Record: [graveyard-flora.md](docs/features/graveyard-flora.md).
 
 ### Arms IV, batch 47 (#170)
+
+### Unmerged: Big guns, batch 51
+- **Siege Mortar**, **Self-Propelled Howitzer**, **Flak Gun** and **Observation Balloon**, with Heavy Shells, Flak Shells and a **Range Finder** to mark targets up to 256 blocks away.
+- Guns turn to a marked target (the gunner's, or a nearby spotter's) and work out the elevation that lands the shell there. Without a mark they fire where the gunner looks. Flak bursts beside flyers.
+- Every burst hurts creatures and never breaks blocks. Five game tests and a screenshot scene. Record: [big-guns.md](docs/features/big-guns.md).
 
 ### Unmerged: Trench works, batch 50
 - Sandbags, timber revetment, duckboards and barbed wire. The wire slows and cuts whatever pushes through it; sneak to cross carefully.
