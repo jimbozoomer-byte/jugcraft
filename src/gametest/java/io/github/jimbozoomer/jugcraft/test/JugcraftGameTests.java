@@ -1099,8 +1099,9 @@ public class JugcraftGameTests {
 		gunner.getInventory().add(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 5));
 		gunner.setPos(battery.getX(), battery.getY(), battery.getZ());
 		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
-		gunner.setYRot(0.0F);
-		gunner.setXRot(-20.0F);
+		// The gunner's own mark straight ahead, in range: other tests' marks (which outlive their players) could
+		// otherwise draw the gun's aim away, as a gun follows the nearest spotter's mark when its gunner has none.
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.mark(gunner, helper.absolutePos(new BlockPos(2, 0, 30)));
 		// One press, held for a moment: the gun fires once it has turned onto the gunner's line.
 		for (int tick = 1; tick <= 40; tick++) {
 			int pressed = tick <= 30 ? 1 : 0;
@@ -1212,8 +1213,9 @@ public class JugcraftGameTests {
 		gunner.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
 		gunner.setPos(battery.getX(), battery.getY(), battery.getZ());
 		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
-		gunner.setYRot(0.0F);
-		gunner.setXRot(-20.0F);
+		// The gunner's own mark straight ahead, in range: other tests' marks (which outlive their players) could
+		// otherwise draw the gun's aim away, as a gun follows the nearest spotter's mark when its gunner has none.
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.mark(gunner, helper.absolutePos(new BlockPos(2, 0, 30)));
 		for (int tick = 1; tick <= 40; tick++) {
 			int pressed = tick <= 30 ? 1 : 0;
 			helper.runAfterDelay(tick, () -> battery.steer(gunner, 0, 0, pressed));
