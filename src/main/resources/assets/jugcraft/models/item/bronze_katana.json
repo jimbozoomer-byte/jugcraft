@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_katana",
+  "textures": {
+    "layer0": "jugcraft:item/bronze_katana"
+  }
+}

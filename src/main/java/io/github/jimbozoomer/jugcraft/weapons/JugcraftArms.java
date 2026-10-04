@@ -38,7 +38,9 @@ import net.minecraft.world.item.component.Weapon;
  * (batch 46, docs/features/arms-iii.md): two-handed swings ({@link #TWO_HANDED}) and zweihanders, mauls, executioner's
  * swords and bills; and Arms IV (batch 47, docs/features/arms-iv.md): labryses, battleblades, war forks, kamas and war
  * picks; and Arms V (batch 48, docs/features/arms-v.md): twinblades, nodachis, earthbreakers, katars, moonblades and
- * kusarigamas, each with a weapon art ({@link #ARTS}, worked by {@link WeaponArts}).
+ * kusarigamas, each with a weapon art ({@link #ARTS}, worked by {@link WeaponArts}); and Arms VI (batch 50,
+ * docs/features/arms-vi.md): katanas and brazier maces, longbows and arbalests ({@link #RANGED}) and heater and tower
+ * shields ({@link #SHIELDS}).
  *
  * <p>After studying how Epic Knights and Simply Swords make, show and animate their weapons (none of their code, models
  * or art is used): every trait here is one of 26.3's own item components, so these are plain items with no per-tick
@@ -97,7 +99,10 @@ public final class JugcraftArms {
 			new Kind("earthbreaker", 9.5F, -3.45F, SwingAnimationType.WHACK, 24, 0.0F, 3.25F, 0.0F, 5.0F, 2, 1.0F, 0.0F, false, false),
 			new Kind("katar", 1.5F, -2.0F, SwingAnimationType.STAB, 5, 0.0F, 2.75F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
 			new Kind("moonblade", 6.0F, -3.1F, SwingAnimationType.WHACK, 18, 0.0F, 3.75F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
-			new Kind("kusarigama", 2.0F, -2.3F, SwingAnimationType.WHACK, 6, 0.0F, 3.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false));
+			new Kind("kusarigama", 2.0F, -2.3F, SwingAnimationType.WHACK, 6, 0.0F, 3.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
+			// Arms VI (batch 50); its bows, crossbows and shields are RANGED and SHIELDS.
+			new Kind("katana", 3.0F, -2.5F, SwingAnimationType.WHACK, 7, 0.0F, 3.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
+			new Kind("brazier_mace", 5.0F, -3.0F, SwingAnimationType.WHACK, 10, 0.0F, 3.0F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false));
 
 	/**
 	 * What an Arms II kind does besides its numbers (tools/arms.py: TRAITS), worked by {@link ArmItem} on the server:
@@ -109,7 +114,7 @@ public final class JugcraftArms {
 	 * damage to a foe charging in; CLEAR, the kama cuts plants and leaves 3 by 3 by 3; DELVE, mines as a pickaxe.
 	 */
 	public enum Trait {
-		BACKSTAB, SADDLE, ARMOR_PIERCE, CHOP, DAZE, REAP, RIDERS, QUAKE, EXECUTE, HOOK, WHIRL, SUNDER, BRACE, CLEAR, DELVE
+		BACKSTAB, SADDLE, ARMOR_PIERCE, CHOP, DAZE, REAP, RIDERS, QUAKE, EXECUTE, HOOK, WHIRL, SUNDER, BRACE, CLEAR, DELVE, IGNITE
 	}
 
 	public static final Map<String, Trait> TRAITS = Map.ofEntries(Map.entry("dagger", Trait.BACKSTAB), Map.entry("sabre", Trait.SADDLE),
@@ -117,7 +122,7 @@ public final class JugcraftArms {
 			Map.entry("scythe", Trait.REAP), Map.entry("pike", Trait.RIDERS), Map.entry("maul", Trait.QUAKE),
 			Map.entry("executioner", Trait.EXECUTE), Map.entry("bill", Trait.HOOK), Map.entry("labrys", Trait.WHIRL),
 			Map.entry("battleblade", Trait.SUNDER), Map.entry("war_fork", Trait.BRACE), Map.entry("kama", Trait.CLEAR),
-			Map.entry("war_pick", Trait.DELVE));
+			Map.entry("war_pick", Trait.DELVE), Map.entry("brazier_mace", Trait.IGNITE));
 	/** A backstab, within BACKSTAB_ANGLE degrees of straight behind the target's body, deals BACKSTAB of the blow more. */
 	public static final float BACKSTAB = 0.5F;
 	public static final float BACKSTAB_ANGLE = 70.0F;
@@ -159,6 +164,9 @@ public final class JugcraftArms {
 	/** A kama cuts every block in #jugcraft:kama_cuts within CLEAR_RADIUS of the one used on, at CLEAR_WEAR each. */
 	public static final int CLEAR_RADIUS = 1;
 	public static final int CLEAR_WEAR = 1;
+	/** A brazier mace's hit sets the foe alight for IGNITE_SECONDS; lighting a block with it costs IGNITE_WEAR. */
+	public static final int IGNITE_SECONDS = 4;
+	public static final int IGNITE_WEAR = 1;
 
 	/**
 	 * How a two-handed kind swings (tools/arms.py: TWO_HANDED; worked by {@link TwoHanded}): the blow lands strike ticks
@@ -195,7 +203,7 @@ public final class JugcraftArms {
 	 * reaped.
 	 */
 	public enum Move {
-		CYCLONE, IAIDO, LEAP_SLAM, FLURRY, CRESCENT, CHAIN_LASH;
+		CYCLONE, IAIDO, LEAP_SLAM, FLURRY, CRESCENT, CHAIN_LASH, SEVEN_CUTS;
 
 		/** The move's name in ids and translation keys (cyclone, iaido, leap_slam ...). */
 		public String id() {
@@ -216,7 +224,8 @@ public final class JugcraftArms {
 			Map.entry("earthbreaker", new Art(Move.LEAP_SLAM, 200, 8, 0.0F)),
 			Map.entry("katar", new Art(Move.FLURRY, 100, 20, 0.5F)),
 			Map.entry("moonblade", new Art(Move.CRESCENT, 140, 16, 0.5F)),
-			Map.entry("kusarigama", new Art(Move.CHAIN_LASH, 120, 16, 0.5F)));
+			Map.entry("kusarigama", new Art(Move.CHAIN_LASH, 120, 16, 0.5F)),
+			Map.entry("katana", new Art(Move.SEVEN_CUTS, 120, 18, 0.4F)));
 	/** Cyclone: CYCLONE_HITS hits from CYCLONE_FIRST, every CYCLONE_EVERY ticks, on every foe within CYCLONE_RADIUS. */
 	public static final int CYCLONE_FIRST = 6;
 	public static final int CYCLONE_EVERY = 6;
@@ -271,6 +280,44 @@ public final class JugcraftArms {
 	public static final int LASH_REAP = 11;
 	public static final float LASH_REAP_SHARE = 0.8F;
 	public static final float LASH_REAP_REACH = 3.5F;
+	/** Seven cuts: CUTS_COUNT cuts from CUTS_FIRST, every CUTS_EVERY ticks, each across every foe in reach and CUTS_ARC ahead. */
+	public static final int CUTS_FIRST = 3;
+	public static final int CUTS_EVERY = 2;
+	public static final int CUTS_COUNT = 7;
+	public static final float CUTS_SHARE = 0.22F;
+	public static final float CUTS_ARC = 110.0F;
+	public static final int CUTS_TARGETS = 4;
+
+	/**
+	 * A bow or crossbow in one metal (tools/arms.py: RANGED; Arms VI): a longbow draws fully in draw ticks on vanilla's
+	 * curve and looses at speed blocks a tick; an arbalest loads as vanilla's crossbow and shoots at speed; their arrows'
+	 * base damage is damage (vanilla's 2.0), which the game multiplies by the arrow's speed when it hits.
+	 */
+	public record Ranged(String name, String metal, int draw, float speed, float damage) {
+	}
+
+	public static final List<Ranged> RANGED = List.of(
+			new Ranged("longbow", "bronze", 26, 3.4F, 2.0F),
+			new Ranged("arbalest", "bronze", 0, 3.4F, 2.1F),
+			new Ranged("longbow", "steel", 26, 3.7F, 2.0F),
+			new Ranged("arbalest", "steel", 0, 3.55F, 2.1F));
+	/** Vanilla's crossbow shoots its arrows at this speed; an arbalest's bolts are this much faster, as its speed is. */
+	public static final float CROSSBOW_SPEED = 3.15F;
+
+	/**
+	 * A shield in one metal (tools/arms.py: SHIELDS; Arms VI): seconds to raise, degrees either side of ahead it covers,
+	 * how long an axe stops it (a share of vanilla's), its durability, the share of a blocked blow it takes in wear, and,
+	 * held in either hand, the knockback resistance it braces with and the share of speed it costs.
+	 */
+	public record Shield(String name, String metal, float delay, float angle, float disable, int durability, float wear, float brace,
+			float weight) {
+	}
+
+	public static final List<Shield> SHIELDS = List.of(
+			new Shield("heater_shield", "bronze", 0.15F, 90.0F, 1.0F, 400, 1.0F, 0.0F, 0.0F),
+			new Shield("tower_shield", "bronze", 0.4F, 130.0F, 0.6F, 600, 0.75F, 0.4F, 0.08F),
+			new Shield("heater_shield", "steel", 0.1F, 90.0F, 0.8F, 900, 1.0F, 0.0F, 0.0F),
+			new Shield("tower_shield", "steel", 0.35F, 130.0F, 0.5F, 1350, 0.75F, 0.5F, 0.08F));
 
 	/** A two-handed swing slows its wielder by this share while it is in the air. */
 	public static final float TWO_HANDED_SLOW = 0.6F;
@@ -312,6 +359,8 @@ public final class JugcraftArms {
 
 	/** Every arm, by id, in registration order: each metal's kinds, then its spear and lance. */
 	public static final Map<String, Item> ITEMS = new LinkedHashMap<>();
+	/** The Arms VI kit, by id, in registration order: each metal's longbow and arbalest, then its shields. */
+	public static final Map<String, Item> KIT = new LinkedHashMap<>();
 
 	private JugcraftArms() {
 	}
@@ -327,8 +376,25 @@ public final class JugcraftArms {
 					item(metal + "_" + charge.name(), charge.name(), properties -> charge(properties, material, charge));
 				}
 			}
+			for (Ranged ranged : RANGED) {
+				if (ranged.metal().equals(metal)) {
+					kit(metal + "_" + ranged.name(), properties -> {
+						Item.Properties base = properties.durability(material.durability() * 3 / 2).repairable(material.repairItems())
+								.enchantable(material.enchantmentValue());
+						return ranged.name().equals("longbow") ? new ArmBowItem(ranged, base) : new ArmCrossbowItem(ranged, base);
+					});
+				}
+			}
+			for (Shield shield : SHIELDS) {
+				if (shield.metal().equals(metal)) {
+					kit(metal + "_" + shield.name(), properties -> new ArmItem(shield.name(), shield(properties, material, shield)));
+				}
+			}
 		}
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> ITEMS.values().forEach(item -> output.accept(item)));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
+			ITEMS.values().forEach(item -> output.accept(item));
+			KIT.values().forEach(item -> output.accept(item));
+		});
 		TwoHanded.register();
 		WeaponArts.register();
 	}
@@ -375,6 +441,29 @@ public final class JugcraftArms {
 		return spear;
 	}
 
+	/**
+	 * A shield: blocks as vanilla's does (the blocks-attacks component, raised with the use key) with its own numbers; a
+	 * heavy one braces its bearer against knockback and slows them while held in either hand.
+	 */
+	static Item.Properties shield(Item.Properties properties, ToolMaterial material, Shield shield) {
+		Item.Properties base = properties.durability(shield.durability()).repairable(material.repairItems())
+				.enchantable(material.enchantmentValue());
+		base.delayedComponent(DataComponents.BLOCKS_ATTACKS, registries -> new BlocksAttacks(shield.delay(), shield.disable(),
+				List.of(new BlocksAttacks.DamageReduction(shield.angle(), Optional.empty(), 0.0F, 1.0F)),
+				new BlocksAttacks.ItemDamageFunction(3.0F, 1.0F, shield.wear()),
+				Optional.of(registries.getOrThrow(DamageTypeTags.BYPASSES_SHIELD)), Optional.of(SoundEvents.SHIELD_BLOCK),
+				Optional.of(SoundEvents.SHIELD_BREAK)));
+		if (shield.brace() > 0.0F || shield.weight() > 0.0F) {
+			base.attributes(ItemAttributeModifiers.builder()
+					.add(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(Jugcraft.id("shield_brace"), shield.brace(),
+							AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.HAND)
+					.add(Attributes.MOVEMENT_SPEED, new AttributeModifier(Jugcraft.id("shield_weight"), -shield.weight(),
+							AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), EquipmentSlotGroup.HAND)
+					.build());
+		}
+		return base;
+	}
+
 	private static ItemAttributeModifiers attributes(float damage, float speed, float knockback) {
 		ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder()
 				.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID, damage,
@@ -386,6 +475,12 @@ public final class JugcraftArms {
 					AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND);
 		}
 		return builder.build();
+	}
+
+	/** A piece of the kit (a bow, crossbow or shield), made by its own constructor. */
+	private static void kit(String name, Function<Item.Properties, Item> factory) {
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Jugcraft.id(name));
+		KIT.put(name, Registry.register(BuiltInRegistries.ITEM, key, factory.apply(new Item.Properties().setId(key))));
 	}
 
 	private static void item(String name, String kind, Function<Item.Properties, Item.Properties> traits) {

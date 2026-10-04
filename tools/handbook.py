@@ -292,7 +292,7 @@ ABOUT = {
 }
 
 TAG_ITEMS = {"#c:silicon": "jugcraft:silicon", "#minecraft:planks": "minecraft:oak_planks", "#minecraft:logs": "minecraft:oak_log",
-             "#minecraft:bamboo_blocks": "minecraft:bamboo_block", "#c:coal_coke": "jugcraft:coke"}
+             "#minecraft:bamboo_blocks": "minecraft:bamboo_block", "#c:coal_coke": "jugcraft:coke", "#minecraft:coals": "minecraft:coal"}
 
 
 def item_for(ref):
@@ -388,8 +388,8 @@ def arms_pages():
     import gear
 
     def grid(kind):
-        key = {"#": item_for(gear.GEAR_TIERS["steel"]["ingot"]), **arms.KEYS}
-        return [key.get(ch) for row in arms.KINDS[kind]["pattern"] for ch in row.ljust(3)]
+        key = {"#": item_for(gear.GEAR_TIERS["steel"]["ingot"]), **{ch: item_for(ref) for ch, ref in arms.KEYS.items()}}
+        return [key.get(ch) for row in arms.info(kind)["pattern"] for ch in row.ljust(3)]
 
     def craft(kind):
         return {"grid": grid(kind), "result": f"{MOD}:steel_{kind}", "count": 1}
@@ -492,6 +492,28 @@ def arms_pages():
             f"Kusarigama, Chain Lash: the chain catches the first foe in line up to {arms.LASH_RANGE:g} blocks off, hauls "
             "it in and the sickle reaps it as it comes."],
          "craft": craft("kusarigama")},
+        # Arms VI (batch 50).
+        {"title": "Arms: Katana and Brazier Mace", "icon": f"{MOD}:steel_katana", "text": [
+            f"Katana, Seven Cuts: {arms.CUTS_COUNT} cuts in a breath, each across every foe ahead (up to "
+            f"{arms.CUTS_TARGETS}), leaving arcs in the air: crimson from bronze, pale gold from steel.",
+            f"Brazier mace: a burning brazier on a haft. A hit sets the foe alight for {arms.IGNITE_SECONDS} seconds; use "
+            "it on a campfire, a candle or the ground to light it, as flint and steel does. Coal in its recipe."],
+         "craft": craft("brazier_mace")},
+        {"title": "Arms: Longbow and Arbalest", "icon": f"{MOD}:steel_longbow", "text": [
+            f"Longbow: slower to draw than a bow ({arms.RANGED[('longbow', 'steel')]['draw'] / 20:g} s for a full draw), "
+            "but its arrows fly faster and flatter, and hit harder for it.",
+            "Arbalest: a crossbow with a metal prod, loaded as a crossbow is; its bolts fly faster and hit harder.",
+            "Shot for shot they beat a bow and crossbow, but not a second for a second. Both take their vanilla "
+            "counterparts' enchantments and shoot ordinary arrows and (the arbalest) fireworks."],
+         "craft": craft("longbow")},
+        {"title": "Arms: Shields", "icon": f"{MOD}:steel_tower_shield", "text": [
+            "Heater shield: a light shield of planks and metal, quicker to raise than a shield.",
+            f"Tower shield: a great board that covers {arms.SHIELDS[('tower_shield', 'steel')]['angle']:g} degrees either "
+            "side of ahead (a shield: 90), wears less for each blow it stops and braces you against being knocked back, "
+            f"but is slower to raise and slows you by {round(arms.SHIELDS[('tower_shield', 'steel')]['weight'] * 100)}% "
+            "while held.",
+            "Hold use to block with either, as with a shield. An axe's blow still knocks them down for a while."],
+         "craft": craft("tower_shield")},
     ]
 
 

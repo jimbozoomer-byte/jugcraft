@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Arms VI, batch 50
+- **Katana:** quick, clean cuts, and its art **Seven Cuts**: seven cuts in a breath across every foe ahead, each leaving an arc of colour in the air (crimson from bronze, pale gold from steel).
+- **Brazier mace:** a burning brazier on a haft, with a flickering flame. It sets what it hits alight and lights campfires, candles and the ground.
+- **Longbow and arbalest:** a tall bow and a crossbow with a metal prod. Each shot hits harder and flies flatter than a bow's or crossbow's, though they deal no more a second. Drawn and wound in three steps, as vanilla's are.
+- **Heater and tower shields,** built in 3D: the heater is quick to raise; the tower covers your flanks and braces you, but is heavy and slow.
+- After the owner's reference sheets (studied for their look; nothing is copied). Handbook pages, the **War Kit** advancement, five game tests and a client test. Record: [arms-vi.md](docs/features/arms-vi.md).
+
 ### Unmerged: Arms V, batch 48
 - **Weapon arts:** six new arms in bronze and steel, each with a special move used with the use key, its own animation and its own way of dealing damage. Then a few seconds before it is ready again (shown on the hotbar); plain blows are not held back.
   - **twinblade** (two-handed), **Cyclone**: three spins, each striking every foe all round and drawing them in;

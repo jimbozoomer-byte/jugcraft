@@ -118,10 +118,10 @@ def texture(ref):
     animated = png.with_name(png.name + ".mcmeta").is_file()
     with Image.open(png) as img:
         # Square: 16x16, or 32x32 or 64x64 for high-resolution art (docs/ART_DIRECTION.md, "High resolution"). Animated
-        # textures are a vertical strip of square frames with an .mcmeta beside them.
+        # textures are a vertical strip of square frames of those sizes with an .mcmeta beside them.
         width, height = img.size
-        if animated and not (width in (16, 32) and height % width == 0 and height > width):
-            err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16 or 32x32 frames")
+        if animated and not (width in (16, 32, 64) and height % width == 0 and height > width):
+            err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16, 32x32 or 64x64 frames")
         elif not animated and img.size not in ((16, 16), (32, 32), (64, 64)):
             err(f"Texture {ref} is {img.size}, expected 16x16, 32x32 or 64x64")
 
@@ -992,21 +992,23 @@ def check_arms():
             err(f"tools/arms.py: the {kind}'s art {art} is out of range")
     for name in ("CYCLONE_FIRST", "CYCLONE_EVERY", "CYCLONE_HITS", "CYCLONE_TARGETS", "IAIDO_START", "IAIDO_DASH", "IAIDO_DELAY",
                  "IAIDO_TARGETS", "LEAP_MIN_AIR", "LEAP_STUCK", "LEAP_MAX_AIR", "LEAP_TARGETS", "FLURRY_FIRST", "FLURRY_EVERY",
-                 "FLURRY_JABS", "CRESCENT_RELEASE", "CRESCENT_TICKS", "CRESCENT_TARGETS", "LASH_THROW", "LASH_REAP"):
+                 "FLURRY_JABS", "CRESCENT_RELEASE", "CRESCENT_TICKS", "CRESCENT_TARGETS", "LASH_THROW", "LASH_REAP",
+                 "CUTS_FIRST", "CUTS_EVERY", "CUTS_COUNT", "CUTS_TARGETS", "IGNITE_SECONDS", "IGNITE_WEAR"):
         if f"{name} = {getattr(arms, name)};" not in java:
             err(f"JugcraftArms.{name} differs from tools/arms.py ({getattr(arms, name)})")
     for name in ("CYCLONE_RADIUS", "CYCLONE_SHARE", "CYCLONE_PULL", "IAIDO_SPEED", "IAIDO_WIDTH", "IAIDO_SHARE", "IAIDO_REACH",
                  "LEAP_UP", "LEAP_FORWARD", "LEAP_RADIUS", "LEAP_SHARE", "LEAP_EDGE", "LEAP_PER_BLOCK", "LEAP_DROP_MAX",
                  "LEAP_LIFT", "FLURRY_SHARE", "FLURRY_FINISH", "FLURRY_ARC", "CRESCENT_SPEED", "CRESCENT_WIDTH",
                  "CRESCENT_SHARE", "CRESCENT_FADE", "LASH_RANGE", "LASH_SHARE", "LASH_PULL", "LASH_PULL_MAX",
-                 "LASH_REAP_SHARE", "LASH_REAP_REACH"):
+                 "LASH_REAP_SHARE", "LASH_REAP_REACH", "CUTS_SHARE", "CUTS_ARC"):
         if f"{name} = {f(getattr(arms, name))};" not in java:
             err(f"JugcraftArms.{name} differs from tools/arms.py ({getattr(arms, name)})")
     # Each art's animation has a key at every tick the server lands a hit (to half a tick), so the blow is seen as it lands.
     hits = {"cyclone": [arms.CYCLONE_FIRST + i * arms.CYCLONE_EVERY for i in range(arms.CYCLONE_HITS)],
             "iaido": [arms.IAIDO_START + arms.IAIDO_DASH + arms.IAIDO_DELAY],
             "flurry": [arms.FLURRY_FIRST + i * arms.FLURRY_EVERY for i in range(arms.FLURRY_JABS + 1)],
-            "crescent": [arms.CRESCENT_RELEASE], "chain_lash": [arms.LASH_THROW, arms.LASH_REAP], "leap_slam": []}
+            "crescent": [arms.CRESCENT_RELEASE], "chain_lash": [arms.LASH_THROW, arms.LASH_REAP], "leap_slam": [],
+            "seven_cuts": [arms.CUTS_FIRST + i * arms.CUTS_EVERY for i in range(arms.CUTS_COUNT)]}
     for kind, art in arms.ARTS.items():
         clips = arms_moves.MOVES.get(kind, {}).get("arts", [])
         if not clips or clips[0].ticks != art["ticks"]:
@@ -1033,8 +1035,44 @@ def check_arms():
             average = (arms.art_share(kind) * blow + plain * (cycle - busy)) / cycle
             if average >= sword:
                 err(f"The {metal} {kind} with its art deals {average:.2f} a second to one foe, not below the sword's {sword:.2f}")
+    # Arms VI (batch 50): the bows, crossbows and shields as tools/arms.py has them, in registration order, and in range.
+    found_ranged = [(name, metal, {"draw": int(draw), "speed": float(speed), "damage": float(damage)})
+                    for name, metal, draw, speed, damage in re.findall(
+                        r'new Ranged\("([a-z_]+)", "([a-z]+)", (\d+), ([\d.]+)F, ([\d.]+)F\)', java)]
+    expected_ranged = [(name, metal, {"draw": info.get("draw", 0), "speed": float(info["speed"]), "damage": float(info["damage"])})
+                       for metal in arms.METALS for (name, at), info in arms.RANGED.items() if at == metal]
+    if found_ranged != expected_ranged:
+        err(f"JugcraftArms.RANGED {found_ranged} != tools/arms.py {expected_ranged}")
+    if f"CROSSBOW_SPEED = {f(arms.VANILLA_CROSSBOW['speed'])};" not in java:
+        err(f"JugcraftArms.CROSSBOW_SPEED is not vanilla's crossbow's {arms.VANILLA_CROSSBOW['speed']}")
+    bow = arms.VANILLA_BOW
+    vanilla_rate = bow["speed"] * bow["damage"] / (bow["draw"] / 20)
+    for (name, metal), info in arms.RANGED.items():
+        kind_type = arms.RANGED_KINDS[name]["type"]
+        cycle = (info["draw"] if kind_type == "bow" else arms.VANILLA_CROSSBOW["load"]) / 20
+        if kind_type == "bow" and info["draw"] < bow["draw"]:
+            err(f"The {metal} {name} draws faster than vanilla's bow")
+        if info["speed"] * info["damage"] / cycle >= vanilla_rate:
+            err(f"The {metal} {name} deals {info['speed'] * info['damage'] / cycle:.2f} a second, not below vanilla's bow's {vanilla_rate:.2f}")
+    found_shields = [(name, metal, [float(v) for v in (delay, angle, disable)] + [int(durability)]
+                      + [float(v) for v in (wear, brace, weight)])
+                     for name, metal, delay, angle, disable, durability, wear, brace, weight in re.findall(
+                         r'new Shield\("([a-z_]+)", "([a-z]+)", ([\d.]+)F, ([\d.]+)F, ([\d.]+)F, (\d+), ([\d.]+)F, ([\d.]+)F, ([\d.]+)F\)', java)]
+    expected_shields = [(name, metal, [float(info[k]) for k in ("delay", "angle", "disable")] + [info["durability"]]
+                         + [float(info[k]) for k in ("wear", "brace", "weight")])
+                        for metal in arms.METALS for (name, at), info in arms.SHIELDS.items() if at == metal]
+    if found_shields != expected_shields:
+        err(f"JugcraftArms.SHIELDS {found_shields} != tools/arms.py {expected_shields}")
+    for (name, metal), info in arms.SHIELDS.items():
+        if not (0 < info["delay"] <= 1 and 0 < info["angle"] <= 180 and 0 < info["disable"] <= 1 and info["durability"] > 0
+                and 0 < info["wear"] <= 1 and 0 <= info["brace"] <= 1 and 0 <= info["weight"] < 0.5):
+            err(f"tools/arms.py: the {metal} {name} {info} is out of range")
+        if info["angle"] > arms.VANILLA_SHIELD["angle"] and info["delay"] <= arms.VANILLA_SHIELD["delay"]:
+            err(f"The {metal} {name} covers more than vanilla's shield without being slower to raise")
+    if arms.kit() != [item for item in arms.items() if arms.split(item)[1] not in arms.KINDS]:
+        err("tools/arms.py: kit() is not the arms outside KINDS")
     # No arm may take an id another generator already registers (two items of one id stop the game at start).
-    clash = set(arms.items()) & (set(ag.all_items()) | set(all_items()) | set(all_blocks()))
+    clash = set(arms.items()) & (set(ag.all_items()) | set(all_items()) | set(all_blocks()) | set(gear.items()))
     if clash:
         err(f"tools/arms.py: arms ids already registered elsewhere: {sorted(clash)}")
     mixins = load(RES / f"{MOD}.mixins.json") or {}

@@ -40,8 +40,9 @@ public class ArmsClientGameTests implements FabricClientGameTest {
 			// them in item frames high on a wall behind.
 			List<String> bronze = JugcraftArms.ITEMS.keySet().stream().filter(id -> id.startsWith("bronze_")).toList();
 			List<String> steel = JugcraftArms.ITEMS.keySet().stream().filter(id -> id.startsWith("steel_")).toList();
-			// Batch 42's nine kinds a metal, Arms II's eight (batch 45), Arms III's four (batch 46), Arms IV's five (batch 47)
-			// and Arms V's six (batch 48): the racks and the frame wall widen with them.
+			// Batch 42's nine kinds a metal, Arms II's eight (batch 45), Arms III's four (batch 46), Arms IV's five (batch 47),
+			// Arms V's six (batch 48) and Arms VI's two (batch 50; its bows and shields are ArmsVIClientGameTests'): the
+			// racks and the frame wall widen with them.
 			int count = bronze.size();
 			server.runCommand("fill %d %d %d %d %d %d minecraft:spruce_planks".formatted(x, y, z - 13, x + count + 6, y + 5, z - 13));
 			for (int i = 0; i < count; i++) {
