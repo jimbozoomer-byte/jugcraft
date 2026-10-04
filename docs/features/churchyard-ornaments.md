@@ -40,9 +40,10 @@ Primary specialty and supported player role: building. These ornaments are for a
 No new dependencies. The gargoyle is sculpted with `tools/sculpt.py` (in `tools/graveyard_models.py`) on the graveyard's stone textures. The other models are built on `tools/flora_art.py` by `tools/decor15_data.py`, which paints their 64 × 64 textures by code. The lantern is vanilla's `LanternBlock` with these models. All original. The look follows the owner's reference pictures, and nothing is traced from them.
 
 ## Verification
-Automated checks run (results recorded once CI passes):
-- `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`. The audit's new churchyard check compares `BonePileBlock` and the lantern's light with `tools/decor15.py`. It checks that each ornament is registered, named, drops and has its recipe and 64 × 64 texture, and that the gargoyle is a headstone style. The graveyard check covers the gargoyle like every headstone.
-- `ChurchyardOrnamentsGameTests` (six tests):
+Automated checks run on CI's Build workflow: run 37177097502 on 2e913a39 (every job passed), and run 37178330514 on bfd738e9, after the close-ups were reframed and the flora (with main) merged in (every job passed). The branch has since merged the flora again, with Arms III from main:
+- `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`: pass (1206 IDs with the flora and main merged in). The audit's new churchyard check compares `BonePileBlock` and the lantern's light with `tools/decor15.py`. It checks that each ornament is registered, named, drops and has its recipe and 64 × 64 texture, and that the gargoyle is a headstone style. The graveyard check covers the gargoyle like every headstone.
+- `./gradlew build` with the game tests: pass in both runs, among them:
+- `ChurchyardOrnamentsGameTests` (six tests, all pass):
   1. a bone pile heaps to four layers and no more, gives one pile a layer, won't stand in the air and goes with its ground;
   2. an ossuary wall faces its builder and drops itself;
   3. the bone hand stands two tall, clenches both halves while powered, opens again, and breaks as one;
@@ -50,7 +51,7 @@ Automated checks run (results recorded once CI passes):
   5. the gargoyle is placed whole on its plinth and bone meal weathers both blocks;
   6. recipes and loot load.
 - The headstone tests' data check covers the gargoyle's recipe and loot.
-- `ChurchyardOrnamentsClientGameTests`: a catacomb corner by day, the ossuary walls and bone piles, the gargoyles (one mossy), the bone hands (one clenched) and the lanterns, and the whole by night.
+- `ChurchyardOrnamentsClientGameTests` (CI job `client`, pass): a catacomb corner by day, the ossuary walls and bone piles, the gargoyles (one mossy), the bone hands (one clenched) and the lanterns, and the whole by night. Its six screenshots are in [the agriculture branch](../branches/AGRICULTURE.md#the-churchyards-ornaments).
 
 Not run:
 - Building with them by hand.

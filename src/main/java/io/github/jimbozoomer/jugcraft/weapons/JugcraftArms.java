@@ -33,7 +33,9 @@ import net.minecraft.world.item.component.Weapon;
 /**
  * Arms (batch 42, docs/features/arms.md): longswords, greatswords, rapiers, flanged maces, war hammers, glaives,
  * halberds, spears and lances in bronze and steel; and Arms II (batch 45, docs/features/arms-ii.md): daggers, sabres,
- * estocs, battle axes, flails, scythes, quarterstaves and pikes, each with a {@link Trait} of its own.
+ * estocs, battle axes, flails, scythes, quarterstaves and pikes, each with a {@link Trait} of its own; and Arms III
+ * (batch 46, docs/features/arms-iii.md): two-handed swings ({@link #TWO_HANDED}) and zweihanders, mauls, executioner's
+ * swords and bills.
  *
  * <p>After studying how Epic Knights and Simply Swords make, show and animate their weapons (none of their code, models
  * or art is used): every trait here is one of 26.3's own item components, so these are plain items with no per-tick
@@ -60,34 +62,41 @@ public final class JugcraftArms {
 
 	public static final List<Kind> KINDS = List.of(
 			new Kind("longsword", 4.0F, -2.7F, SwingAnimationType.WHACK, 8, 0.0F, 3.25F, 0.0F, 0.0F, 1, 0.0F, 0.6F, true, false),
-			new Kind("greatsword", 7.0F, -3.2F, SwingAnimationType.WHACK, 11, 0.0F, 3.75F, 0.0F, 2.0F, 1, 0.5F, 0.0F, true, false),
+			new Kind("greatsword", 7.0F, -3.2F, SwingAnimationType.WHACK, 20, 0.0F, 3.75F, 0.0F, 2.0F, 1, 0.5F, 0.0F, true, false),
 			new Kind("rapier", 1.5F, -2.0F, SwingAnimationType.STAB, 5, 0.0F, 3.5F, 0.125F, 0.0F, 1, 0.0F, 0.35F, true, false),
 			new Kind("flanged_mace", 6.0F, -3.1F, SwingAnimationType.WHACK, 9, 0.0F, 3.0F, 0.0F, 3.0F, 1, 0.0F, 0.0F, false, false),
-			new Kind("war_hammer", 8.0F, -3.3F, SwingAnimationType.WHACK, 12, 0.0F, 3.0F, 0.0F, 5.0F, 2, 1.0F, 0.0F, false, false),
-			new Kind("glaive", 6.0F, -3.1F, SwingAnimationType.WHACK, 10, 0.0F, 4.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
+			new Kind("war_hammer", 8.0F, -3.3F, SwingAnimationType.WHACK, 22, 0.0F, 3.0F, 0.0F, 5.0F, 2, 1.0F, 0.0F, false, false),
+			new Kind("glaive", 6.0F, -3.1F, SwingAnimationType.WHACK, 18, 0.0F, 4.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
 			new Kind("halberd", 7.0F, -3.2F, SwingAnimationType.STAB, 12, 1.0F, 4.5F, 0.125F, 3.0F, 1, 0.0F, 0.0F, false, true),
 			// Arms II (batch 45).
 			new Kind("dagger", 1.0F, -1.7F, SwingAnimationType.STAB, 4, 0.0F, 2.5F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
 			new Kind("sabre", 2.0F, -2.2F, SwingAnimationType.WHACK, 6, 0.0F, 3.0F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
 			new Kind("estoc", 3.0F, -2.6F, SwingAnimationType.STAB, 7, 0.0F, 3.5F, 0.125F, 0.0F, 1, 0.0F, 0.0F, false, false),
-			new Kind("battle_axe", 8.0F, -3.3F, SwingAnimationType.WHACK, 12, 0.0F, 3.25F, 0.0F, 5.0F, 2, 0.5F, 0.0F, false, false),
+			new Kind("battle_axe", 8.0F, -3.3F, SwingAnimationType.WHACK, 22, 0.0F, 3.25F, 0.0F, 5.0F, 2, 0.5F, 0.0F, false, false),
 			new Kind("flail", 5.0F, -3.0F, SwingAnimationType.WHACK, 10, 0.0F, 3.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
-			new Kind("scythe", 5.0F, -3.0F, SwingAnimationType.WHACK, 10, 0.0F, 4.0F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
-			new Kind("quarterstaff", 2.0F, -2.4F, SwingAnimationType.WHACK, 7, 0.0F, 3.5F, 0.0F, 0.0F, 1, 1.0F, 0.5F, false, false),
-			new Kind("pike", 5.0F, -3.2F, SwingAnimationType.STAB, 10, 2.0F, 5.0F, 0.125F, 0.0F, 1, 0.0F, 0.0F, false, false));
+			new Kind("scythe", 5.0F, -3.0F, SwingAnimationType.WHACK, 18, 0.0F, 4.0F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
+			new Kind("quarterstaff", 2.0F, -2.4F, SwingAnimationType.WHACK, 12, 0.0F, 3.5F, 0.0F, 0.0F, 1, 1.0F, 0.5F, false, false),
+			new Kind("pike", 5.0F, -3.2F, SwingAnimationType.STAB, 16, 2.0F, 5.0F, 0.125F, 0.0F, 1, 0.0F, 0.0F, false, false),
+			// Arms III (batch 46).
+			new Kind("zweihander", 7.5F, -3.2F, SwingAnimationType.WHACK, 22, 0.0F, 4.0F, 0.0F, 2.0F, 1, 0.5F, 0.5F, true, false),
+			new Kind("maul", 10.0F, -3.45F, SwingAnimationType.WHACK, 24, 0.0F, 3.25F, 0.0F, 5.0F, 2, 1.5F, 0.0F, false, false),
+			new Kind("executioner", 8.0F, -3.3F, SwingAnimationType.WHACK, 22, 0.0F, 3.5F, 0.0F, 0.0F, 1, 0.5F, 0.0F, true, false),
+			new Kind("bill", 6.0F, -3.1F, SwingAnimationType.WHACK, 18, 0.0F, 4.5F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false));
 
 	/**
 	 * What an Arms II kind does besides its numbers (tools/arms.py: TRAITS), worked by {@link ArmItem} on the server:
 	 * BACKSTAB, a blow from behind deals more; SADDLE, more damage while riding; ARMOR_PIERCE, more the more armor the
 	 * target wears; CHOP, mines wood as its metal's axe; DAZE, a hit slows; REAP, use on ripe crops to harvest and
-	 * replant them; RIDERS, more damage against anything riding or ridden.
+	 * replant them; RIDERS, more damage against anything riding or ridden. Arms III adds QUAKE, the maul's finishing blow
+	 * shakes the ground; EXECUTE, more damage against a badly wounded foe; HOOK, a hit pulls the foe in and unhorses it.
 	 */
 	public enum Trait {
-		BACKSTAB, SADDLE, ARMOR_PIERCE, CHOP, DAZE, REAP, RIDERS
+		BACKSTAB, SADDLE, ARMOR_PIERCE, CHOP, DAZE, REAP, RIDERS, QUAKE, EXECUTE, HOOK
 	}
 
 	public static final Map<String, Trait> TRAITS = Map.of("dagger", Trait.BACKSTAB, "sabre", Trait.SADDLE, "estoc",
-			Trait.ARMOR_PIERCE, "battle_axe", Trait.CHOP, "flail", Trait.DAZE, "scythe", Trait.REAP, "pike", Trait.RIDERS);
+			Trait.ARMOR_PIERCE, "battle_axe", Trait.CHOP, "flail", Trait.DAZE, "scythe", Trait.REAP, "pike", Trait.RIDERS,
+			"maul", Trait.QUAKE, "executioner", Trait.EXECUTE, "bill", Trait.HOOK);
 	/** A backstab, within BACKSTAB_ANGLE degrees of straight behind the target's body, deals BACKSTAB of the blow more. */
 	public static final float BACKSTAB = 0.5F;
 	public static final float BACKSTAB_ANGLE = 70.0F;
@@ -104,6 +113,49 @@ public final class JugcraftArms {
 	public static final int REAP_WEAR = 1;
 	/** A pike deals RIDERS of the blow more against anything riding or ridden. */
 	public static final float RIDERS = 0.5F;
+	/**
+	 * A maul's finishing blow also strikes every foe within QUAKE_RADIUS blocks (and a block of the wielder's footing)
+	 * that the cleave missed, for QUAKE_SHARE of the blow, and slows every foe there for QUAKE_TICKS at Slowness amplifier
+	 * QUAKE_AMPLIFIER.
+	 */
+	public static final float QUAKE_RADIUS = 2.5F;
+	public static final float QUAKE_SHARE = 0.5F;
+	public static final int QUAKE_TICKS = 40;
+	public static final int QUAKE_AMPLIFIER = 1;
+	/** An executioner's sword deals EXECUTE of the blow more against a foe at or below EXECUTE_HEALTH of its most health. */
+	public static final float EXECUTE = 0.5F;
+	public static final float EXECUTE_HEALTH = 0.3F;
+	/** A bill's hit pulls the foe towards the wielder at HOOK blocks a tick, less its knockback resistance. */
+	public static final float HOOK = 0.6F;
+
+	/**
+	 * How a two-handed kind swings (tools/arms.py: TWO_HANDED; worked by {@link TwoHanded}): the blow lands strike ticks
+	 * after the click, sweeping arc degrees across the wielder's view and striking up to targets foes; the last of its
+	 * combo attacks is the finishing blow.
+	 */
+	public record Heavy(int strike, float arc, int targets, int combo) {
+	}
+
+	public static final Map<String, Heavy> TWO_HANDED = Map.ofEntries(
+			Map.entry("greatsword", new Heavy(7, 120.0F, 4, 2)),
+			Map.entry("war_hammer", new Heavy(8, 70.0F, 2, 2)),
+			Map.entry("glaive", new Heavy(6, 120.0F, 4, 2)),
+			Map.entry("battle_axe", new Heavy(8, 90.0F, 3, 2)),
+			Map.entry("scythe", new Heavy(6, 150.0F, 5, 2)),
+			Map.entry("quarterstaff", new Heavy(4, 100.0F, 3, 3)),
+			Map.entry("pike", new Heavy(5, 20.0F, 3, 2)),
+			Map.entry("zweihander", new Heavy(7, 140.0F, 5, 3)),
+			Map.entry("maul", new Heavy(9, 90.0F, 3, 2)),
+			Map.entry("executioner", new Heavy(8, 90.0F, 2, 2)),
+			Map.entry("bill", new Heavy(6, 90.0F, 3, 2)));
+	/** A two-handed swing slows its wielder by this share while it is in the air. */
+	public static final float TWO_HANDED_SLOW = 0.6F;
+	/** The finishing blow of a combo is this many times as strong. */
+	public static final float FINISHER = 1.25F;
+	/** A click this many ticks or fewer before a swing ends waits for it. */
+	public static final int QUEUE_TICKS = 4;
+	/** This many ticks without a click start the combo again. */
+	public static final int COMBO_WINDOW = 30;
 
 	/**
 	 * A charging kind in one metal (tools/arms.py: CHARGE), as {@link Item.Properties#spear} takes it: jab duration (s),
@@ -153,6 +205,7 @@ public final class JugcraftArms {
 			}
 		}
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> ITEMS.values().forEach(item -> output.accept(item)));
+		TwoHanded.register();
 	}
 
 	/** A swung or thrust arm: the metal's durability, repair and enchantability, and the kind's traits. */

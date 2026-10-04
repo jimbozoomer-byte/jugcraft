@@ -30,7 +30,7 @@ Every kind of arm from batch 42 now moves as a weapon of its weight, seen by eve
 
   - Every attack has anticipation (a short wind-up), the blow, follow-through and a settle back into the guard.
   - The whole body joins in: the torso turns up to about 60° and bends forward at the waist, the head counters to keep the eyes on the target, and the feet step through.
-  - The blow lands at the moment of the click, so the animation reaches it a quarter to a third of the way in. The rest of the swing is follow-through.
+  - The blow lands at the moment of the click, so the animation reaches it a quarter to a third of the way in. The rest of the swing is follow-through. A two-handed kind's blow lands later, at the animation's blow ([arms-iii.md](arms-iii.md)), and its swing is longer.
   - The spear and lance keep vanilla's arm and thrust animations (26.3's own spear work) and add the body.
 - **First person.** The held arm takes its own guard on screen and its own stroke for each attack, crossing the crosshair as the hit lands:
   - a cut sweeps from one side and out low to the other;
@@ -115,7 +115,7 @@ None. The animations change nothing in play: damage, reach, swing time and the m
   - checks that `ArmsMotion.java` reads the same kinds and bones;
   - checks that the four mixins are registered.
 - `ArmsMotionClientGameTests` (CI job `client`):
-  - checks that every kind's motion loads (seventeen, with Arms II);
+  - checks that every kind's motion loads (twenty-one, with Arms II and III);
   - screenshots the player from the front, holding each kind's guard and two ticks into a swing;
   - screenshots three longsword blows in a row (the combo);
   - screenshots guards and strokes in first person;
