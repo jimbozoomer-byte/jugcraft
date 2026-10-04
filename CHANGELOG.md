@@ -8,16 +8,16 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### Unmerged: The haunted house's props (Halloween decorations batch 16)
+### The haunted house's props, Halloween decorations batch 16 (#175)
 - **Flying Eyeball** (hovers on bat wings and stares at the nearest player), **Pillar Candles** in ivory and black (vanilla candles, one to four in a dripping cluster), **Spider Web** (on any face), and the **Monster's Head** (wakes on a redstone signal: jaw open, eyes glowing, bolts sparking).
 - Five **harvest plushes** for the midway's prize table: owl, hedgehog, acorn, corn and maple leaf.
 - Sculpted from the owner's reference pictures; 64 × 64 textures. Six game tests, client screenshots. Record: [haunted-house-props.md](docs/features/haunted-house-props.md).
 
-### Unmerged: The churchyard's ornaments (Halloween decorations batch 15)
+### The churchyard's ornaments, Halloween decorations batch 15 (#174)
 - **Gargoyle** on a granite plinth (a graveyard monument: it weathers and takes an inscription), **Bone Pile** (heaps to four layers), **Ossuary Wall** (skulls and long bones), **Giant Bone Hand** (clenches on a redstone signal) and **Witch's Lantern** (violet glass, standing or hanging).
 - Sculpted from the owner's reference pictures; 64 × 64 textures. Six game tests, client screenshots. Record: [churchyard-ornaments.md](docs/features/churchyard-ornaments.md).
 
-### Unmerged: The graveyard flora
+### The graveyard flora (#172)
 - **Seventeen plants for a haunted churchyard**, sculpted like hand-built plants (bent stems, cut-out leaves and petals at angles, bells and berries as little boxes) on 64 × 64 textures: spider lily, snowdrop, deadly nightshade, bleeding heart and the glowing ghost pipe; black rose, foxglove, funeral lily and asphodel (two tall); withered grass and the ghost fern with their tall forms; dead man's fingers; grave moss; shroud moss hanging in strands; creeping ivy.
 - **The mandrake:** wild, or grown from its root; a ripe one screams when pulled, sickening bare-headed players within 8 blocks (Mind Your Ears). Its root makes Flying Ointment.
 - They grow in the haunted biomes and some of vanilla's. Grave vases take them by colour. Eight game tests, client screenshots. Record: [graveyard-flora.md](docs/features/graveyard-flora.md).
