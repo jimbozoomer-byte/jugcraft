@@ -82,8 +82,9 @@ public final class Dieselworks {
 			case "pillar" -> block(id, new RotatedPillarBlock(properties(id, metal)));
 			case "beam" -> block(id, new IBeamBlock(properties(id, metal.noOcclusion())));
 			case "grating" -> {
-				BlockBehaviour.Properties grate = metal.noOcclusion().isViewBlocking((state, level, pos) -> false)
-						.isSuffocating((state, level, pos) -> false).sound(SoundType.CHAIN);
+				// Glass's properties: see-through, never suffocating, never blocking the view.
+				BlockBehaviour.Properties grate = BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).mapColor(color)
+						.strength(hardness, blast).requiresCorrectToolForDrops().sound(SoundType.CHAIN);
 				Block full = block(id, new TransparentBlock(properties(id, grate)) {
 				});
 				block(id + "_slab", new SlabBlock(properties(id + "_slab", BlockBehaviour.Properties.ofFullCopy(full))));
