@@ -89,13 +89,13 @@ The arm keeps its enchantments and wear.
   - the tooltips;
   - the bounds, and the per-second ceiling above.
 - **`python3 scripts/check_repository.py`:** PASS (local).
-- **Game tests** (`ArmsVIIGameTests`, pending CI):
+- **Game tests** (`ArmsVIIGameTests`): pass in CI on ca45a035 (the `mod` job, with every other server test).
   - every variant is an arm of its kind, with its line's durability, enchantability, rarity and boon, and its kind's blow in steel;
   - Frost, Venom, Wither, Howl and Mark put their effect on a pig at their length and strength; Ember sets it alight;
   - Drain heals the wielder; Gale throws the foe up and away; Shock arcs to the near pig for its share and not to one beyond reach;
   - Gravebane adds its share on a husk and nothing on a pig; Tide adds its share in water and nothing on land;
   - every style recipe and pattern recipe loads, and each boss's table drops exactly its two trophies over 40 rolls.
-- **Client game test** (`ArmsVIIClientGameTests`, pending CI):
+- **Client game test** (`ArmsVIIClientGameTests`): passes in CI on ca45a035 (shard 0), and its shots show the variants in frames and on racks, trophies held by day, and the runes, magma and venom glowing at midnight. The Glacier Maul's blow left the pig at Slowness II with 43 ticks left. The first-person shot was blank, because hiding the GUI also hides the hand; the test now keeps the GUI up:
   - every variant and pattern in frames, and the variants on armor-stand racks;
   - trophies held from the front by day, glowing ones at midnight, and one in first person;
   - a Glacier Maul's blow with the real attack key, its frost read back from the server.

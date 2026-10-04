@@ -42,6 +42,7 @@ public class ArmsVIIClientGameTests implements FabricClientGameTest {
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 12, y, z - 18, x + 16, y + 8, z + 8));
 			context.waitTicks(10);
 
+			// The GUI stays up throughout: hiding it (F1) also hides the hand in first person.
 			// Every variant (eight a row) and the four patterns in frames on a wall.
 			List<String> variants = List.copyOf(ArmVariants.ITEMS.keySet());
 			server.runCommand("fill %d %d %d %d %d %d minecraft:spruce_planks".formatted(x - 1, y, z - 12, x + 10, y + 6, z - 12));
@@ -52,7 +53,6 @@ public class ArmsVIIClientGameTests implements FabricClientGameTest {
 				frame(server, x + 3 + i, y + 1, z - 11, ArmVariants.PATTERN_NAMES.get(i));
 			}
 			context.waitTicks(20);
-			context.getInput().pressKey(options -> options.keyToggleGui);
 			shoot(context, singleplayer, x + 4, y + 2, z - 6, 180, 8, "jugcraft_arms_vii_frames");
 			server.runCommand("kill @e[type=minecraft:item_frame]");
 
@@ -66,7 +66,6 @@ public class ArmsVIIClientGameTests implements FabricClientGameTest {
 				shoot(context, singleplayer, x + 1, y + 2, z - 1, 180, 18, "jugcraft_arms_vii_rack_" + (half + 1));
 				server.runCommand("kill @e[type=minecraft:armor_stand]");
 			}
-			context.getInput().pressKey(options -> options.keyToggleGui);
 
 			// Trophies held, from the front, by day; then the glowing ones at midnight.
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
