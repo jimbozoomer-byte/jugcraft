@@ -189,8 +189,8 @@ public class ArmsVGameTests {
 	}
 
 	/**
-	 * The chain catches only the first foe in line: far off, it is struck and hauled towards the wielder (out of reach of
-	 * the reap, as it cannot move here); close by, it is struck and then reaped. The foe behind the first is spared.
+	 * The chain catches only the first foe in line: one seven blocks off is struck, hauled in within the sickle's reach
+	 * and reaped; one close by is struck and reaped where it stands. The foe behind the close one is spared.
 	 */
 	@GameTest(structure = ARENA, maxTicks = 60, skyAccess = true)
 	public void aChainLashHaulsInTheFirstFoeAndReapsIt(GameTestHelper helper) {
@@ -201,6 +201,7 @@ public class ArmsVGameTests {
 		Mob close = husk(helper, new BlockPos(4, 2, 3));
 		Mob shielded = husk(helper, new BlockPos(4, 2, 6));
 		float base = (float) thrower.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		double startZ = distant.getZ();
 		helper.assertTrue(WeaponArts.start(thrower, thrower.getMainHandItem()) && WeaponArts.start(reaper, reaper.getMainHandItem()),
 				"The chain lashes did not start");
 		helper.runAfterDelay(JugcraftArms.LASH_THROW, () -> {
@@ -210,11 +211,13 @@ public class ArmsVGameTests {
 			helper.assertTrue(pull.z < -0.3, "The chain did not haul the foe in: " + pull);
 		});
 		helper.runAfterDelay(JugcraftArms.ARTS.get("kusarigama").ticks() + 2, () -> {
-			Jugcraft.LOGGER.info("[arms v] chain lash and reap: close {}, behind it {}, distant {}", HEALTH - close.getHealth(),
-					shielded.getHealth(), HEALTH - distant.getHealth());
-			helper.assertTrue(near(HEALTH - close.getHealth(), base * (JugcraftArms.LASH_SHARE + JugcraftArms.LASH_REAP_SHARE)),
-					"The close foe took " + (HEALTH - close.getHealth()));
-			helper.assertTrue(near(HEALTH - distant.getHealth(), base * JugcraftArms.LASH_SHARE), "The distant foe was reaped out of reach");
+			float both = base * (JugcraftArms.LASH_SHARE + JugcraftArms.LASH_REAP_SHARE);
+			double hauled = startZ - distant.getZ();
+			Jugcraft.LOGGER.info("[arms v] chain lash and reap: close {}, behind it {}, distant {} (hauled {} blocks in)",
+					HEALTH - close.getHealth(), shielded.getHealth(), HEALTH - distant.getHealth(), hauled);
+			helper.assertTrue(near(HEALTH - close.getHealth(), both), "The close foe took " + (HEALTH - close.getHealth()));
+			helper.assertTrue(near(HEALTH - distant.getHealth(), both) && hauled > 1.0,
+					"The distant foe took " + (HEALTH - distant.getHealth()) + ", hauled " + hauled + " blocks in");
 			helper.assertTrue(shielded.getHealth() == HEALTH, "The chain went through the first foe");
 			helper.succeed();
 		});

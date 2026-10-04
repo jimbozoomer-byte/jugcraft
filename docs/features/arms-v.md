@@ -144,7 +144,7 @@ Six more kinds, each in bronze and steel, each with a **weapon art**: a special 
   - `aLeapSlamsHardestAtItsCentreAndFromAHeight`: from a 3-block platform; the close husk takes more than the one at the edge (1.307 and 1.021 blows: the falloff and the drop's bonus), both are thrown up; one beyond the radius is spared;
   - `aFlurryLandsEveryJab`: five jabs and the finish on one husk, in full; none behind. The first CI run caught only 3 jabs landing: vanilla's hit knocked the husk out of reach, so the jabs now hold the foe in place;
   - `aCrescentRunsThroughFoesUntilAWall`: two husks in line (the second 15% less); one aside and one behind a wall are spared;
-  - `aChainLashHaulsInTheFirstFoeAndReapsIt`: a distant husk is struck and hauled in; a close one is struck and reaped; the one behind it is spared;
+  - `aChainLashHaulsInTheFirstFoeAndReapsIt`: a husk 7 blocks off is struck, hauled in and reaped (the reap needs it within 3.5 blocks; the reap's own knockback then throws it back a little); a close one is struck and reaped; the one behind it is spared. (The first end-to-end run left a pig 3.76 blocks off at the reap, short of the sickle's 3.5; the pull was raised from 0.15 to 0.2 a block.);
   - `anArtKeepsItsRules`: a two-handed art refuses with a shield (a katar's does not) and the leap refuses in mid-air; a plain hit is refused while busy and allowed after, while the cooldown still runs.
 - **Client game tests:**
   - `WeaponArtsClientGameTests`, end to end with the use key: each art on husks (the chain on a pig), with real movement:
