@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import io.github.jimbozoomer.jugcraft.agriculture.Epitaph;
 import io.github.jimbozoomer.jugcraft.agriculture.HeadstoneBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HeadstoneBlockEntity;
 import java.util.ArrayList;
@@ -21,11 +22,11 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Draws a headstone's epitaph cut into its stone, where its {@link HeadstoneBlock.Style} says: on its front, or on the
- * top of a table tomb or ledger stone, read from its foot. Each line is centred and drawn as large as fits the space,
- * up to the style's largest letters; if the lines together are too tall, all shrink alike. The letters take the
- * stone's ink and fade into it as it weathers ({@code tools/graveyard.py}: ink_fade), so a neglected stone grows hard
- * to read until it is scrubbed.
+ * Draws a memorial's inscriptions cut into its stone, each where its {@link HeadstoneBlock.Layout} says: on a front, on
+ * a side (a mausoleum's crypt fronts), or on the top of a table tomb or ledger stone, read from its foot. Each line is
+ * centred and drawn as large as fits the space, up to the place's largest letters; if the lines together are too tall,
+ * all shrink alike. The letters take the stone's ink and fade into it as it weathers ({@code tools/graveyard.py}:
+ * ink_fade), so a neglected stone grows hard to read until it is scrubbed.
  */
 public class HeadstoneRenderer implements BlockEntityRenderer<HeadstoneBlockEntity, HeadstoneRenderer.State> {
 	/** How much each stage of weathering fades the letters towards the stone. */
@@ -37,11 +38,13 @@ public class HeadstoneRenderer implements BlockEntityRenderer<HeadstoneBlockEnti
 
 	private final Font font;
 
+	/** One inscription ready to draw: its place, its lines and the scale of each. */
+	record Cut(HeadstoneBlock.Text text, List<FormattedCharSequence> lines, List<Float> scales) {
+	}
+
 	public static final class State extends BlockEntityRenderState {
-		List<FormattedCharSequence> lines = List.of();
-		List<Float> scales = List.of();
+		List<Cut> cuts = List.of();
 		Direction facing = Direction.NORTH;
-		HeadstoneBlock.@Nullable Style style;
 		int ink;
 	}
 
@@ -69,21 +72,35 @@ public class HeadstoneRenderer implements BlockEntityRenderer<HeadstoneBlockEnti
 	public void extractRenderState(HeadstoneBlockEntity stone, State state, float partialTick, Vec3 camera,
 			ModelFeatureRenderer.@Nullable CrumblingOverlay crumbling) {
 		BlockEntityRenderState.extractBase(stone, state, crumbling);
-		state.style = null;
+		state.cuts = List.of();
 		BlockState block = stone.getBlockState();
-		if (stone.epitaph().isBlank() || !(block.getBlock() instanceof HeadstoneBlock headstone)) {
+		if (!(block.getBlock() instanceof HeadstoneBlock headstone)) {
 			return;
 		}
-		HeadstoneBlock.Style style = headstone.style();
-		HeadstoneBlock.Text text = style.text;
-		state.style = style;
+		HeadstoneBlock.Layout layout = headstone.layout();
+		List<HeadstoneBlock.Text> texts = layout.texts();
+		List<Cut> cuts = new ArrayList<>();
+		for (int slot = 0; slot < texts.size(); slot++) {
+			Epitaph epitaph = stone.inscription(slot);
+			if (!epitaph.isBlank()) {
+				cuts.add(cut(texts.get(slot), epitaph));
+			}
+		}
+		if (cuts.isEmpty()) {
+			return;
+		}
+		state.cuts = cuts;
 		state.facing = block.getValue(HeadstoneBlock.FACING);
-		state.ink = fade(style.stone.ink, style.stone.fadeTo, INK_FADE[HeadstoneBlock.stage(block)]);
+		state.ink = fade(layout.stone().ink, layout.stone().fadeTo, INK_FADE[HeadstoneBlock.stage(block)]);
+	}
+
+	/** Each line of {@code epitaph} as large as it fits {@code text}'s place, all shrunk alike if they are too tall together. */
+	private Cut cut(HeadstoneBlock.Text text, Epitaph epitaph) {
 		List<FormattedCharSequence> lines = new ArrayList<>();
 		List<Float> scales = new ArrayList<>();
 		float width = text.width() / 16.0F;
 		float total = 0.0F;
-		for (String line : stone.epitaph().lines()) {
+		for (String line : epitaph.lines()) {
 			List<FormattedCharSequence> split = line.isEmpty() ? List.of() : font.split(FormattedText.of(line), Integer.MAX_VALUE);
 			FormattedCharSequence sequence = split.isEmpty() ? FormattedCharSequence.EMPTY : split.get(0);
 			int wide = Math.max(1, font.width(sequence));
@@ -97,44 +114,62 @@ public class HeadstoneRenderer implements BlockEntityRenderer<HeadstoneBlockEnti
 			float shrink = room / total;
 			scales.replaceAll(scale -> scale * shrink);
 		}
-		state.lines = lines;
-		state.scales = scales;
+		return new Cut(text, lines, scales);
 	}
 
 	@Override
 	public void submit(State state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
-		HeadstoneBlock.Style style = state.style;
-		if (style == null || state.lines.isEmpty()) {
-			return;
+		for (Cut cut : state.cuts) {
+			submit(state, cut, pose, collector);
 		}
-		HeadstoneBlock.Text text = style.text;
+	}
+
+	private void submit(State state, Cut cut, PoseStack pose, SubmitNodeCollector collector) {
+		HeadstoneBlock.Text text = cut.text();
 		pose.pushPose();
 		pose.translate(0.5F, 0.0F, 0.5F);
-		// Turn so that +z points out of a north-facing headstone's front (model -z), +x to its left (model -x).
+		// Turn so that +z points out of a north-facing memorial's front (model -z), +x to its left (model -x).
 		pose.rotateDegrees(Axis.YP, -state.facing.toYRot());
+		float x = -(text.x() - 8.0F) / 16.0F;
+		float y = text.y() / 16.0F;
+		float z = -(text.z() - 8.0F) / 16.0F;
+		switch (text.face()) {
+			case TOP -> {
+				pose.translate(x, y + OUT, z);
+				// Lie flat, letters up and the lines reading away from someone standing at the foot.
+				pose.rotateDegrees(Axis.XP, -90.0F);
+			}
+			case BACK -> {
+				pose.translate(x, y, z - OUT);
+				pose.rotateDegrees(Axis.YP, 180.0F);
+			}
+			case EAST -> {
+				// Model +x is -x here: the letters face that way and read towards the front.
+				pose.translate(x - OUT, y, z);
+				pose.rotateDegrees(Axis.YP, -90.0F);
+			}
+			case WEST -> {
+				pose.translate(x + OUT, y, z);
+				pose.rotateDegrees(Axis.YP, 90.0F);
+			}
+			default -> pose.translate(x, y, z + OUT);
+		}
 		float total = 0.0F;
-		for (float scale : state.scales) {
+		for (float scale : cut.scales()) {
 			total += font.lineHeight * scale * (1.0F + LEADING);
 		}
-		if (text.top()) {
-			pose.translate(-(text.x() - 8.0F) / 16.0F, text.y() / 16.0F + OUT, -(text.z() - 8.0F) / 16.0F);
-			// Lie flat, letters up and the lines reading away from someone standing at the foot.
-			pose.rotateDegrees(Axis.XP, -90.0F);
-		} else {
-			pose.translate(-(text.x() - 8.0F) / 16.0F, text.y() / 16.0F, -(text.z() - 8.0F) / 16.0F + OUT);
-		}
-		float y = total / 2.0F;
-		for (int i = 0; i < state.lines.size(); i++) {
-			float scale = state.scales.get(i);
-			FormattedCharSequence line = state.lines.get(i);
+		float top = total / 2.0F;
+		for (int i = 0; i < cut.lines().size(); i++) {
+			float scale = cut.scales().get(i);
+			FormattedCharSequence line = cut.lines().get(i);
 			float step = font.lineHeight * scale * (1.0F + LEADING);
 			pose.pushPose();
-			pose.translate(0.0F, y - font.lineHeight * scale * LEADING / 2.0F, 0.0F);
+			pose.translate(0.0F, top - font.lineHeight * scale * LEADING / 2.0F, 0.0F);
 			pose.scale(scale, -scale, scale);
 			collector.submitText(pose, -font.width(line) / 2.0F, 0.0F, line, false, Font.DisplayMode.POLYGON_OFFSET, state.lightCoords,
 					state.ink, 0, 0);
 			pose.popPose();
-			y -= step;
+			top -= step;
 		}
 		pose.popPose();
 	}

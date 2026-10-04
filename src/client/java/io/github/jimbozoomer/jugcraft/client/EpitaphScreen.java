@@ -26,6 +26,7 @@ public class EpitaphScreen extends Screen {
 	private static final int CUT = 0xFFC9CED5;
 
 	private final BlockPos pos;
+	private final int slot;
 	private final List<String> start;
 	private final List<EditBox> boxes = new ArrayList<>();
 	private int left;
@@ -34,6 +35,7 @@ public class EpitaphScreen extends Screen {
 	public EpitaphScreen(OpenEpitaphPayload payload) {
 		super(Component.translatable("screen.jugcraft.epitaph.title"));
 		pos = payload.pos();
+		slot = payload.slot();
 		start = payload.lines();
 	}
 
@@ -61,7 +63,7 @@ public class EpitaphScreen extends Screen {
 		for (EditBox box : boxes) {
 			lines.add(box.getValue());
 		}
-		ClientPlayNetworking.send(new EngravePayload(pos, lines));
+		ClientPlayNetworking.send(new EngravePayload(pos, slot, lines));
 		onClose();
 	}
 

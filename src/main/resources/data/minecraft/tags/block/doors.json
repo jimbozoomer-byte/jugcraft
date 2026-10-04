@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:crypt_door"
+    "jugcraft:crypt_door",
+    "jugcraft:bronze_mausoleum_door"
   ]
 }
