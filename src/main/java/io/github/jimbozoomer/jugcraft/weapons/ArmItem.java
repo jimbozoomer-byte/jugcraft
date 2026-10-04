@@ -1,19 +1,23 @@
 package io.github.jimbozoomer.jugcraft.weapons;
 
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.town.TownProtection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -29,13 +33,17 @@ import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * An arm (batches 42, 45 and 46, {@link JugcraftArms}): its numbers and most traits are item components, with a grey line
+ * An arm (batches 42 and 45 to 47, {@link JugcraftArms}): its numbers and most traits are item components, with a grey line
  * saying what its kind does, from {@code tooltip.jugcraft.arms.<kind>}. An Arms II kind's {@link JugcraftArms.Trait}
- * is worked here, on the server: a bonus to the blow (backstab, saddle, armor pierce, riders, execute), a daze or a hook
- * on a hit, or the scythe's reaping. Chopping is the axe's own tool component; the maul's quake is its finishing blow
+ * is worked here, on the server: a bonus to the blow (backstab, saddle, armor pierce, riders, execute, brace), a daze, a
+ * hook or a sunder on a hit, or the scythe's reaping and the kama's clearing. Delving is the pickaxe's tool component. Chopping is the axe's own tool component; the maul's quake is its finishing blow
  * ({@link TwoHanded}). A two-handed kind says so in a second line.
  */
 public class ArmItem extends Item {
+	/** The blocks a kama cuts (data/jugcraft/tags/block/kama_cuts.json). */
+	public static final TagKey<Block> KAMA_CUTS = TagKey.create(Registries.BLOCK, Jugcraft.id("kama_cuts"));
+	private static final List<EquipmentSlot> ARMOR = List.of(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS,
+			EquipmentSlot.FEET);
 	private final String kind;
 	private final JugcraftArms.Trait trait;
 
@@ -47,7 +55,8 @@ public class ArmItem extends Item {
 
 	/**
 	 * The kind of arm: longsword, greatsword, rapier, flanged_mace, war_hammer, glaive, halberd, spear, lance, dagger,
-	 * sabre, estoc, battle_axe, flail, scythe, quarterstaff, pike, zweihander, maul, executioner or bill.
+	 * sabre, estoc, battle_axe, flail, scythe, quarterstaff, pike, zweihander, maul, executioner, bill, labrys, battleblade,
+	 * war_fork, kama or war_pick.
 	 */
 	public String kind() {
 		return kind;
@@ -86,8 +95,20 @@ public class ArmItem extends Item {
 			case RIDERS -> target.isPassenger() || target.isVehicle() ? damage * JugcraftArms.RIDERS : 0.0F;
 			case EXECUTE -> target instanceof LivingEntity living && living.getHealth() <= living.getMaxHealth() * JugcraftArms.EXECUTE_HEALTH
 					? damage * JugcraftArms.EXECUTE : 0.0F;
+			case BRACE -> attacker != null && closing(target, attacker) >= JugcraftArms.BRACE_SPEED ? damage * JugcraftArms.BRACE : 0.0F;
 			default -> 0.0F;
 		};
+	}
+
+	/** How fast `target` came towards `attacker` over its last tick, in blocks a tick (below 0: it went away). */
+	static double closing(Entity target, Entity attacker) {
+		double dx = attacker.getX() - target.getX();
+		double dz = attacker.getZ() - target.getZ();
+		double length = Math.sqrt(dx * dx + dz * dz);
+		if (length < 1.0E-4) {
+			return 0.0;
+		}
+		return ((target.getX() - target.xo) * dx + (target.getZ() - target.zo) * dz) / length;
 	}
 
 	/** Whether `attacker` stands within BACKSTAB_ANGLE degrees of straight behind `target`'s body. */
@@ -113,6 +134,19 @@ public class ArmItem extends Item {
 		if (trait == JugcraftArms.Trait.HOOK && !target.level().isClientSide()) {
 			hook(target, attacker);
 		}
+		if (trait == JugcraftArms.Trait.SUNDER && !target.level().isClientSide()) {
+			sunder(target);
+		}
+	}
+
+	/** The battleblade's sunder: every piece of armor the target wears takes SUNDER more wear. */
+	static void sunder(LivingEntity target) {
+		for (EquipmentSlot slot : ARMOR) {
+			ItemStack armor = target.getItemBySlot(slot);
+			if (!armor.isEmpty() && armor.isDamageableItem()) {
+				armor.hurtAndBreak(JugcraftArms.SUNDER, target, slot);
+			}
+		}
 	}
 
 	/**
@@ -134,6 +168,9 @@ public class ArmItem extends Item {
 	 */
 	@Override
 	public InteractionResult useOn(UseOnContext context) {
+		if (trait == JugcraftArms.Trait.CLEAR) {
+			return clear(context);
+		}
 		if (trait != JugcraftArms.Trait.REAP) {
 			return super.useOn(context);
 		}
@@ -169,6 +206,51 @@ public class ArmItem extends Item {
 			}
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * The kama, used on a block in #jugcraft:kama_cuts: every such block within CLEAR_RADIUS (a cube) that the
+	 * player may change is cut, dropping what it drops, at CLEAR_WEAR durability each.
+	 */
+	private static InteractionResult clear(UseOnContext context) {
+		Level level = context.getLevel();
+		BlockPos center = context.getClickedPos();
+		if (!level.getBlockState(center).is(KAMA_CUTS)) {
+			return InteractionResult.PASS;
+		}
+		Player player = context.getPlayer();
+		ItemStack stack = context.getItemInHand();
+		int r = JugcraftArms.CLEAR_RADIUS;
+		List<BlockPos> cuts = new ArrayList<>();
+		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
+			if (level.getBlockState(pos).is(KAMA_CUTS) && (player == null
+					|| player.mayUseItemAt(pos, context.getClickedFace(), stack) && level.mayInteract(player, pos)
+							&& !TownProtection.denies(player, level, pos))) {
+				cuts.add(pos.immutable());
+			}
+		}
+		if (level instanceof ServerLevel server) {
+			for (BlockPos pos : cuts) {
+				cut(server, pos, player, stack);
+			}
+			if (player != null) {
+				stack.hurtAndBreak(cuts.size() * JugcraftArms.CLEAR_WEAR, player, context.getHand());
+			}
+		}
+		return InteractionResult.SUCCESS;
+	}
+
+	/** Cuts one block a kama cuts, dropping what it drops with the kama (not shears), unless it is already gone. */
+	static void cut(ServerLevel level, BlockPos pos, Entity cutter, ItemStack tool) {
+		BlockState state = level.getBlockState(pos);
+		if (!state.is(KAMA_CUTS)) {
+			return;
+		}
+		List<ItemStack> drops = Block.getDrops(state, level, pos, null, cutter, tool);
+		level.destroyBlock(pos, false);
+		for (ItemStack drop : drops) {
+			Block.popResource(level, pos, drop);
+		}
 	}
 
 	/** Harvests one ripe crop: its drops, less one seed, which replants it (or, with no seed, the crop is gone). */

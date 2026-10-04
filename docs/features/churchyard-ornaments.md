@@ -41,7 +41,7 @@ No new dependencies. The gargoyle is sculpted with `tools/sculpt.py` (in `tools/
 
 ## Verification
 Automated checks run on CI's Build workflow: run 37177097502 on 2e913a39 (every job passed), and run 37178330514 on bfd738e9, after the close-ups were reframed and the flora (with main) merged in (every job passed). The branch has since merged the flora again, with Arms III from main:
-- `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`: pass (1206 IDs with the flora and main merged in). The audit's new churchyard check compares `BonePileBlock` and the lantern's light with `tools/decor15.py`. It checks that each ornament is registered, named, drops and has its recipe and 64 × 64 texture, and that the gargoyle is a headstone style. The graveyard check covers the gargoyle like every headstone.
+- `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`: pass (1216 IDs with the flora and main merged in). The audit's new churchyard check compares `BonePileBlock` and the lantern's light with `tools/decor15.py`. It checks that each ornament is registered, named, drops and has its recipe and 64 × 64 texture, and that the gargoyle is a headstone style. The graveyard check covers the gargoyle like every headstone.
 - `./gradlew build` with the game tests: pass in both runs, among them:
 - `ChurchyardOrnamentsGameTests` (six tests, all pass):
   1. a bone pile heaps to four layers and no more, gives one pile a layer, won't stand in the air and goes with its ground;

@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 1206 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit`, `hay_golem`, `flying_broomstick`, `werewolf`, `squirrel`, `pumpkling`, `toss_ring`, `ferris_wheel`, `pinata`, `hot_air_balloon` and `pibal`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
+| Registered IDs | 1216 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit`, `hay_golem`, `flying_broomstick`, `werewolf`, `squirrel`, `pumpkling`, `toss_ring`, `ferris_wheel`, `pinata`, `hot_air_balloon` and `pibal`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
 
 ## Build, generate, check
 
@@ -351,6 +351,7 @@ Every `FenceBlock` and `IronBarsBlock` has the properties `north_east`, `south_e
   - foes protected by `AttackEntityCallback` are skipped, and vanilla's instant hit with these arms is refused.
   
   New kinds `<bronze|steel>_<zweihander|maul|executioner|bill>` with the traits `QUAKE`, `EXECUTE` and `HOOK` (in `ArmItem` and `TwoHanded`). Record: [arms-iii.md](features/arms-iii.md).
+- **Arms IV (batch 47):** five more kinds in `weapons/JugcraftArms` (`<bronze|steel>_<labrys|battleblade|war_fork|kama|war_pick>`) with the traits `WHIRL` (in `TwoHanded.strike`), `SUNDER` (`ArmItem.hurtEnemy`), `BRACE` (`ArmItem.getAttackDamageBonus`, from the foe's last-tick movement), `CLEAR` (`ArmItem.useOn`, blocks in `#jugcraft:kama_cuts`) and `DELVE` (`Item.Properties.pickaxe`). The art adds the ornate helpers to `tools/arms_art.py` (`gem`, `wing`, `pommel`, `flat`, `cut`, `arc_blade`, `rim`, `glints`). Record: [arms-iv.md](features/arms-iv.md).
 - **Arms motion (batch 43, client):**
   - `client/arms/ArmsMotion` plays keyframed guards, combos and parry poses for the arms, in third person (torso, head, arms, legs and the item in the hand, with the off hand kept on two-handed weapons) and first person. `ArmsPose` is one player's pose, kept on the render state with Fabric's render state data.
   - Motion files: `assets/jugcraft/arms_motion/<kind>.json`, from `tools/arms_moves.py` on `tools/arms_motion.py`. Preview renders: `tools/arms_motion_preview.py`.

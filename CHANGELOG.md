@@ -17,6 +17,15 @@ No numbered release yet. Everything below is on `main`.
 - **The mandrake:** wild, or grown from its root; a ripe one screams when pulled, sickening bare-headed players within 8 blocks (Mind Your Ears). Its root makes Flying Ointment.
 - They grow in the haunted biomes and some of vanilla's. Grave vases take them by colour. Eight game tests, client screenshots. Record: [graveyard-flora.md](docs/features/graveyard-flora.md).
 
+### Unmerged: Arms IV, batch 47
+- **Five ornate arms** in bronze and steel, drawn after the owner's reference sheets (nothing of them is copied): set stones (a garnet in bronze, a lit green phosphor stone in steel), flat-toned heads with bright edges, winged guards, lit rims and glints of light.
+  - **labrys** (two-handed): its finishing blow whirls right round, striking up to 6 foes about you;
+  - **battleblade** (two-handed): each hit wears every piece of the foe's armor;
+  - **war fork** (two-handed thrust): half again as much damage to a foe charging at you;
+  - **kama**: use on grass, ferns, vines or leaves to cut them all, 3 by 3 by 3;
+  - **war pick**: mines stone and ore as its metal's pickaxe.
+- Handbook pages, the **Masterwork** advancement, six game tests. The data check now also fails if an arm's id is taken elsewhere. Record: [arms-iv.md](docs/features/arms-iv.md).
+
 ### Unmerged: Arms III, batch 46
 - **Two-handed weapons**, after studying the Fiery Combat add-on the owner sent (nothing of it is used). Greatswords, war hammers, glaives, battle axes, scythes, quarterstaves, pikes and the new kinds now swing with both hands:
   - a click starts the swing, and the blow lands as the swing comes round, on the frame the animation lands it, not on the click;

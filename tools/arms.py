@@ -1,7 +1,8 @@
 """Arms, batch 42 (docs/features/arms.md): longswords, greatswords, rapiers, flanged maces, war hammers, glaives,
 halberds, spears and lances in bronze and steel; Arms II, batch 45: daggers, sabres, estocs, battle axes, flails,
-scythes, quarterstaves and pikes, each with a trait of its own (TRAITS); and Arms III, batch 46: two-handed swings
-for the heavy arms (TWO_HANDED) and zweihanders, mauls, executioner's swords and bills.
+scythes, quarterstaves and pikes, each with a trait of its own (TRAITS); Arms III, batch 46: two-handed swings for
+the heavy arms (TWO_HANDED) and zweihanders, mauls, executioner's swords and bills; and Arms IV, batch 47: labryses,
+battleblades, war forks, kamas and war picks, in an ornate style.
 
 After studying Epic Knights (all rights reserved) and Simply Swords (Timefall Development License) for how they draw,
 animate and keep their weapons cheap; none of their code, models, numbers or art is used. What carried over is the
@@ -115,6 +116,29 @@ KINDS = {
              "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 2.2,
              "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": [" ##", " S ", "S  "],
              "trait": "hook", "tooltip": "A hooked polearm: pulls the foes it strikes towards you and drags riders from the saddle."},
+    # Arms IV (batch 47): shapes from the owner's reference sheets, in the ornate style (tools/arms_art.py).
+    "labrys": {"display": "Labrys", "damage": 8.5, "speed": -3.3, "swing": ("whack", 22), "reach": (0.0, 3.25),
+               "margin": 0.0, "disable": 3.0, "wear": 1, "knockback": 0.5, "parry": 0.0, "held": 1.6,
+               "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["#S#", "#S#", " S "],
+               "trait": "whirl", "tooltip": "A double-bitted axe. Its finishing blow whirls right round, striking every foe about you."},
+    "battleblade": {"display": "Battleblade", "damage": 7.0, "speed": -3.2, "swing": ("whack", 20), "reach": (0.0, 3.5),
+                    "margin": 0.0, "disable": 2.0, "wear": 1, "knockback": 0.5, "parry": 0.0, "held": 1.8,
+                    "tags": ["swords"], "pattern": [" ##", "###", "L# "], "trait": "sunder",
+                    "tooltip": "A great saw-backed cleaver: each hit wears every piece of the foe's armor."},
+    "war_fork": {"display": "War Fork", "damage": 5.5, "speed": -3.1, "swing": ("stab", 18), "reach": (0.0, 4.5),
+                 "margin": 0.125, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 2.2,
+                 "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["# #", "#S#", " S "],
+                 "trait": "brace",
+                 "tooltip": "A barbed fork set against a charge: half again as much damage to a foe coming at you."},
+    "kama": {"display": "Kama", "damage": 1.5, "speed": -2.0, "swing": ("whack", 5), "reach": (0.0, 2.75),
+               "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 0.95,
+               "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["## ", "  #", " S "],
+               "trait": "clear",
+               "tooltip": "Quick hooking cuts. Use on grass, ferns, vines or leaves to cut all of them about it, 3 by 3 by 3."},
+    "war_pick": {"display": "War Pick", "damage": 3.0, "speed": -2.6, "swing": ("whack", 7), "reach": (0.0, 3.0),
+                 "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.1,
+                 "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["## ", " S#", " S "],
+                 "trait": "delve", "tooltip": "A beaked war pick that mines stone and ore as its metal's pickaxe does."},
 }
 # Arms II traits (weapons/ArmItem.java; JugcraftArms.TRAITS). backstab: a blow landing within BACKSTAB_ANGLE degrees of
 # straight behind the target's body deals BACKSTAB more (a share of the blow). saddle: SADDLE more damage while riding.
@@ -143,6 +167,23 @@ QUAKE_DAZE = (40, 1)
 EXECUTE = 0.5
 EXECUTE_HEALTH = 0.3
 HOOK = 0.6
+# Arms IV traits. whirl: the labrys's finishing blow sweeps all round (WHIRL_ARC degrees) and strikes up to WHIRL_TARGETS.
+# sunder: each hit wears every piece of armor the foe wears by SUNDER more. brace: BRACE more (a share of the blow) to a
+# foe closing on the wielder at BRACE_SPEED blocks a tick or faster (from where it was a tick before). clear: use on a
+# block in #jugcraft:kama_cuts to cut every such block within CLEAR_RADIUS (a cube), dropping what each drops, at
+# CLEAR_WEAR durability each. delve: mines as its metal's pickaxe.
+WHIRL_ARC = 360
+WHIRL_TARGETS = 6
+SUNDER = 4
+BRACE = 0.5
+BRACE_SPEED = 0.1
+CLEAR_RADIUS = 1
+CLEAR_WEAR = 1
+# What a kama cuts (data/jugcraft/tags/block/kama_cuts.json): leaves and the plants that grow wild, never crops.
+KAMA_CUTS = ["#minecraft:leaves", "minecraft:short_grass", "minecraft:tall_grass", "minecraft:fern", "minecraft:large_fern",
+               "minecraft:vine", "minecraft:dead_bush", "minecraft:glow_lichen", "minecraft:hanging_roots",
+               {"id": "minecraft:short_dry_grass", "required": False}, {"id": "minecraft:tall_dry_grass", "required": False},
+               {"id": "minecraft:bush", "required": False}, {"id": "minecraft:leaf_litter", "required": False}]
 
 # Arms III (batch 46): two-handed swings (weapons/TwoHanded.java; client/arms/TwoHandedInput.java), after studying the
 # greatsword of Fiery Combat (a Bedrock add-on; nothing of it is used). A click with one of these in the main hand
@@ -170,6 +211,9 @@ TWO_HANDED = {
     "maul": {"strike": 9, "arc": 90, "targets": 3, "combo": 2},
     "executioner": {"strike": 8, "arc": 90, "targets": 2, "combo": 2},
     "bill": {"strike": 6, "arc": 90, "targets": 3, "combo": 2},
+    "labrys": {"strike": 8, "arc": 100, "targets": 3, "combo": 2},
+    "battleblade": {"strike": 7, "arc": 110, "targets": 4, "combo": 2},
+    "war_fork": {"strike": 6, "arc": 30, "targets": 2, "combo": 2},
 }
 TWO_HANDED_SLOW = 0.6
 FINISHER = 1.25
@@ -315,6 +359,7 @@ def write_all(write, assets, data, lang, condition):
         lang[f"tooltip.{MOD}.arms.{kind}"] = KINDS[kind]["tooltip"]
     lang[f"tooltip.{MOD}.arms.two_handed"] = "Two-handed: the blow lands as the swing comes round, on every foe in its arc."
     lang[f"message.{MOD}.two_handed.off_hand"] = "Two hands for this one: put away what is in your off hand."
+    write(data / "tags" / "block" / "kama_cuts.json", {"values": KAMA_CUTS})
     for item in items():
         metal, kind = split(item)
         lang[f"item.{MOD}.{item}"] = display(item)

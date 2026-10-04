@@ -838,7 +838,7 @@ def check_arms():
         if f"{name} = {f(value)};" not in java:
             err(f"JugcraftArms.{name} differs from tools/arms.py ({value})")
     # Arms II traits (batch 45): the same kinds and traits, and the same numbers.
-    traits = dict(re.findall(r'"([a-z_]+)",\s*Trait\.([A-Z_]+)', re.search(r"TRAITS = Map\.of\((.*?)\);", java, re.S).group(1)))
+    traits = dict(re.findall(r'"([a-z_]+)",\s*Trait\.([A-Z_]+)', re.search(r"TRAITS = Map\.of(?:Entries)?\((.*?)\);", java, re.S).group(1)))
     if traits != {kind: trait.upper() for kind, trait in arms.TRAITS.items()}:
         err(f"JugcraftArms.TRAITS {traits} != tools/arms.py {arms.TRAITS}")
     for name, value in (("BACKSTAB", arms.BACKSTAB), ("BACKSTAB_ANGLE", arms.BACKSTAB_ANGLE), ("SADDLE", arms.SADDLE),
@@ -888,6 +888,10 @@ def check_arms():
             err(f"The {kind}'s swing ({ticks} ticks) is longer than the time between its blows")
         if not 0 < info["strike"] < ticks or not 0 < info["arc"] <= 180 or info["targets"] < 1:
             err(f"tools/arms.py: the {kind}'s two-handed swing {info} is out of range")
+    # No arm may take an id another generator already registers (two items of one id stop the game at start).
+    clash = set(arms.items()) & (set(ag.all_items()) | set(all_items()) | set(all_blocks()))
+    if clash:
+        err(f"tools/arms.py: arms ids already registered elsewhere: {sorted(clash)}")
     mixins = load(RES / f"{MOD}.mixins.json") or {}
     if "AttackStrengthAccessor" not in mixins.get("mixins", []):
         err(f"{MOD}.mixins.json does not list AttackStrengthAccessor (the two-handed swings need it)")
