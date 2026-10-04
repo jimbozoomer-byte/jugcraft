@@ -155,7 +155,7 @@ def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS
-                  + construction.blocks() + control_electronics.blocks()):
+                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -176,7 +176,7 @@ def check_assets(registered):
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()
-                        + construction.blocks() + control_electronics.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -313,7 +313,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -511,7 +511,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -663,9 +663,20 @@ def check_rocketry():
         value = getattr(rocketry, const)
         if f"int {const} = {value:_};" not in java and f"int {const} = {value};" not in java:
             err(f"JugcraftRocketry.{const} differs from tools/rocketry.py ({value})")
-    for item in rocketry.ITEMS:
+    for item in list(rocketry.ITEMS) + list(rocketry.BLOCKS):
         if f'"{item}"' not in java:
             err(f"JugcraftRocketry does not register {item}")
+    post = (JAVA_ROOT / "rocketry" / "RocketPost.java").read_text(encoding="utf-8")
+    for const, value in (("RANGE", rocketry.POST_RANGE), ("MIN_FLIGHT", rocketry.POST_MIN_FLIGHT),
+                         ("BLOCKS_PER_TICK", rocketry.POST_BLOCKS_PER_TICK), ("CHECK_INTERVAL", rocketry.POST_CHECK_INTERVAL)):
+        if f"int {const} = {value:_};" not in post and f"int {const} = {value};" not in post:
+            err(f"RocketPost.{const} differs from tools/rocketry.py ({value})")
+    pad = (JAVA_ROOT / "rocketry" / "RocketPadBlockEntity.java").read_text(encoding="utf-8")
+    if f"int CARGO = {rocketry.PAD_CARGO};" not in pad:
+        err(f"RocketPadBlockEntity.CARGO differs from tools/rocketry.py ({rocketry.PAD_CARGO})")
+    for result in rocketry.PAD_RESULTS:
+        if result.upper() not in pad:
+            err(f"RocketPadBlockEntity.Result lacks {result.upper()}")
 
 
 def check_construction():
@@ -4252,7 +4263,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_petro()

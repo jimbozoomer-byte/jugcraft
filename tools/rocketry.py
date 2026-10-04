@@ -43,6 +43,9 @@ ITEMS = {
     "clear_sky_rocket": "Clear-Sky Rocket",
     "signal_flare": "Signal Flare",
     "illumination_flare": "Illumination Flare",
+    # Batch 39: the rocket post.
+    "delivery_rocket": "Delivery Rocket",
+    "flight_plan": "Flight Plan",
 }
 ROCKETS = ["survey_rocket", "cloud_seeding_rocket", "clear_sky_rocket", "signal_flare", "illumination_flare"]
 TOOLTIPS = {
@@ -58,11 +61,31 @@ TOOLTIPS = {
                         "two-minute cooldown.",
     "signal_flare": "A red star burst seen from far away; players within 512 blocks are told where it went up.",
     "illumination_flare": "A white burst that makes hostile mobs within 48 blocks glow for 30 seconds.",
+    "delivery_rocket": "Carries a rocket pad's cargo to the pad its flight plan names. Used up on launch.",
+}
+
+# Batch 39 (docs/features/rocket-post.md): rocket pads send their cargo to another pad (Java: rocketry/RocketPost,
+# RocketPadBlockEntity). Range in blocks, flight time (a minimum plus blocks per tick), how often waiting deliveries
+# are checked, and the pad's slots. A delivery whose target area is not loaded waits and lands when it loads.
+POST_RANGE = 4_096
+POST_MIN_FLIGHT = 60
+POST_BLOCKS_PER_TICK = 4
+POST_CHECK_INTERVAL = 20
+PAD_CARGO = 9
+BLOCKS = {"rocket_pad": "Rocket Pad"}
+PAD_RESULTS = {
+    "none": "", "launched": "Launched!", "no_rocket": "No rocket", "no_plan": "No flight plan",
+    "no_cargo": "No cargo", "same_pad": "That is this pad", "other_dimension": "Other dimension",
+    "too_far": "Too far away", "no_pad": "No pad there", "no_sky": "Roof overhead",
 }
 
 
 def items():
     return list(ITEMS)
+
+
+def blocks():
+    return list(BLOCKS)
 
 
 def workshop_recipes():
@@ -86,6 +109,8 @@ def workshop_recipes():
          "output": rid("cloud_seeding_rocket"), "count": 1, "ticks": 200, "features": feature},
         {"inputs": [[rid("rocket_motor"), 1], [rid("guncotton"), 2]],
          "output": rid("clear_sky_rocket"), "count": 1, "ticks": 200, "features": feature},
+        {"inputs": [[rid("rocket_motor"), 1], [rid("rocket_casing"), 1], [rid("guidance_unit"), 1]],
+         "output": rid("delivery_rocket"), "count": 1, "ticks": 300, "features": feature},
         {"inputs": [[rid("solid_propellant"), 1], ["minecraft:paper", 2], ["minecraft:red_dye", 1]],
          "output": rid("signal_flare"), "count": 4, "ticks": 100, "features": feature},
         {"inputs": [[rid("solid_propellant"), 1], ["minecraft:paper", 2], ["minecraft:glowstone_dust", 1]],
@@ -104,7 +129,7 @@ REACTOR_RECIPES = [
 ]
 
 
-def write_all(write, assets, data, lang, condition):
+def write_all(write, assets, data, lang, condition, self_drop):
     for item, name in ITEMS.items():
         lang[f"item.{MOD}.{item}"] = name
         write(assets / "models" / "item" / f"{item}.json",
@@ -122,6 +147,52 @@ def write_all(write, assets, data, lang, condition):
     write(data / "recipe" / "silver_iodide.json", {
         "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shapeless", "category": "misc",
         "ingredients": [f"{MOD}:silver_dust", f"{MOD}:iodine"], "result": {"id": f"{MOD}:silver_iodide", "count": 2}})
+    write_post(write, assets, data, lang, condition, self_drop)
+
+
+def write_post(write, assets, data, lang, condition, self_drop):
+    """Batch 39: the rocket pad (block, model, loot, recipe) and its screen's text, and the flight plan."""
+    for block, name in BLOCKS.items():
+        lang[f"block.{MOD}.{block}"] = name
+        write(data / "loot_table" / "blocks" / f"{block}.json", self_drop(block))
+    lang[f"container.{MOD}.rocket_pad"] = "Rocket Pad"
+    lang[f"screen.{MOD}.rocket_pad.launch"] = "Launch"
+    for key, text in PAD_RESULTS.items():
+        lang[f"screen.{MOD}.rocket_pad.{key}"] = text
+    lang[f"message.{MOD}.flight_plan.set"] = "Flight plan: deliver to the pad at %s, %s, %s"
+    lang[f"tooltip.{MOD}.flight_plan.blank"] = "Blank: sneak and use it on the rocket pad to deliver to"
+    lang[f"tooltip.{MOD}.flight_plan.target"] = "Deliver to the pad at %s, %s, %s (%s)"
+    textures = {"deck": f"{MOD}:block/dp_gunmetal", "edge": f"{MOD}:block/dp_hazard", "grille": f"{MOD}:block/dp_grille",
+                "lamp": f"{MOD}:block/dp_lamp", "particle": f"{MOD}:block/dp_gunmetal"}
+    write(assets / "models" / "block" / "rocket_pad.json", {"parent": "minecraft:block/block", "textures": textures,
+                                                           "elements": pad_model()})
+    write(assets / "blockstates" / "rocket_pad.json", {"variants": {
+        "powered=false": {"model": f"{MOD}:block/rocket_pad"}, "powered=true": {"model": f"{MOD}:block/rocket_pad"}}})
+    write(assets / "items" / "rocket_pad.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:block/rocket_pad"}})
+    write(data / "recipe" / "rocket_pad.json", {
+        "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped", "category": "redstone",
+        "pattern": [" X ", "PPP", "BBB"],
+        "key": {"X": f"{MOD}:microchip", "P": "#c:plates/steel", "B": "minecraft:smooth_stone"},
+        "result": {"id": f"{MOD}:rocket_pad", "count": 1}})
+    write(data / "recipe" / "flight_plan.json", {
+        "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shapeless", "category": "misc",
+        "ingredients": ["minecraft:paper", "minecraft:compass", f"{MOD}:microchip"],
+        "result": {"id": f"{MOD}:flight_plan", "count": 1}})
+
+
+def _faces(texture, **overrides):
+    return {side: {"texture": overrides.get(side, texture)} for side in ("north", "east", "south", "west", "up", "down")}
+
+
+def pad_model():
+    """A low gunmetal deck with hazard-striped edges, a grille in the middle where the rocket stands, a launch rail
+    at each corner and an amber lamp on the front."""
+    elements = [{"from": [0, 0, 0], "to": [16, 4, 16], "faces": _faces("#edge", up="#deck", down="#deck")},
+                {"from": [4, 4, 4], "to": [12, 4.5, 12], "faces": _faces("#deck", up="#grille")}]
+    for x, z in ((1, 1), (13, 1), (1, 13), (13, 13)):
+        elements.append({"from": [x, 4, z], "to": [x + 2, 6, z + 2], "faces": _faces("#deck")})
+    elements.append({"from": [7, 1, -0.5], "to": [9, 3, 0], "faces": _faces("#deck", north="#lamp")})
+    return elements
 
 
 # ------------------------------------------------------------------ art (64x64, tools/hd_art.py)
@@ -275,7 +346,34 @@ HD_ITEMS = {"survey_rocket": survey_rocket, "cloud_seeding_rocket": cloud_seedin
             "clear_sky_rocket": clear_sky_rocket, "signal_flare": signal_flare, "illumination_flare": illumination_flare,
             "rocket_motor": rocket_motor, "rocket_casing": rocket_casing, "rocket_nozzle": rocket_nozzle,
             "guidance_unit": guidance_unit, "iodine": iodine, "ammonium_perchlorate": ammonium_perchlorate,
-            "silver_iodide": silver_iodide, "solid_propellant": solid_propellant}
+            "silver_iodide": silver_iodide, "solid_propellant": solid_propellant,
+            "delivery_rocket": lambda: delivery_rocket(), "flight_plan": lambda: flight_plan()}
+
+
+def delivery_rocket():
+    """A stubby olive cargo rocket with a hazard band, a wide grey nose for the cargo bay and a yellow tip."""
+    import hd_art as hd
+    c = hd.Canvas()
+    _rocket(c, hd, hd.OLIVE, hd.SAFETY_YELLOW, hd.STEEL, tip=hd.SAFETY_YELLOW)
+    _flame(c, hd)
+    return c.finish()
+
+
+def flight_plan():
+    """A folded sheet with a dashed flight arc from one pad marker to another and a compass rose."""
+    import hd_art as hd
+    c = hd.Canvas()
+    c.box((32, 34), 22, 24, -0.08, hd.PAPER, bevel=1.0)
+    c.disc((18, 48), 3.0, hd.RED, 0.5)
+    c.disc((46, 22), 3.0, hd.RED, 0.5)
+    def arc(t):
+        return 18 + (46 - 18) * t, 48 + (22 - 48) * t - 16 * math.sin(math.pi * t)
+    for i in range(1, 14, 2):  # a dashed arc between the two pads
+        c.line(arc((i - 0.5) / 14), arc((i + 0.5) / 14), (48, 52, 64), width=2.2)
+    c.ring((46, 48), 5, 3.8, hd.GUNMETAL)
+    c.line((46, 42), (46, 54), (60, 60, 66))
+    c.line((40, 48), (52, 48), (60, 60, 66))
+    return c.finish()
 
 
 def draw_all(save):

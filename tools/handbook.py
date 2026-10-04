@@ -845,6 +845,14 @@ def build():
                 "Signal flares (four from propellant, paper and red dye) burst red and tell players within 512 blocks "
                 "where they went up. Illumination flares (with glowstone) make hostile mobs within 48 blocks glow for "
                 "30 seconds."]},
+            {"title": "Rocket Post", "icon": f"{MOD}:delivery_rocket", "text": [
+                "A rocket pad sends its cargo to another pad up to 4096 blocks away in the same dimension. Sneak and "
+                "use a flight plan on the pad to deliver to, then put the plan, a delivery rocket (motor, casing, "
+                "guidance unit) and up to nine stacks of cargo in the sending pad.",
+                "Press Launch, or give the pad a redstone pulse. It needs open sky. The flight takes three seconds "
+                "plus a second for every 80 blocks; the cargo lands in the target pad's slots.",
+                "If nobody is near the target, the rocket waits and lands as soon as that area is loaded again. "
+                "Hoppers load a pad from the top and sides and unload it from the bottom."]},
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [

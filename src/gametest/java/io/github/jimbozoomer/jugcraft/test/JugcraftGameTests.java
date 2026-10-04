@@ -279,6 +279,64 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/**
+	 * Batch 39 (rocket post): a pad launches its cargo to the pad its flight plan names, using up the rocket and keeping
+	 * the plan, and the cargo lands in that pad. A pad under a roof will not launch. A delivery to an area that is not
+	 * loaded waits instead of landing (nothing is force-loaded).
+	 */
+	@GameTest(maxTicks = 300, skyAccess = true)
+	public void rocketPostDelivers(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Block padBlock = io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD;
+		// The launching pad needs open sky: without sky access the test area has a barrier ceiling.
+		BlockPos from = helper.absolutePos(new BlockPos(1, 1, 1));
+		BlockPos to = helper.absolutePos(new BlockPos(6, 1, 6));
+		BlockPos roofed = helper.absolutePos(new BlockPos(1, 1, 6));
+		for (BlockPos pos : List.of(from, to, roofed)) {
+			level.setBlockAndUpdate(pos, padBlock.defaultBlockState());
+		}
+		level.setBlockAndUpdate(roofed.above(2), Blocks.STONE.defaultBlockState());
+		var sender = (io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity) level.getBlockEntity(from);
+		var receiver = (io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity) level.getBlockEntity(to);
+		var blocked = (io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity) level.getBlockEntity(roofed);
+		ItemStack plan = new ItemStack(item("flight_plan"));
+		plan.set(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.FLIGHT_TARGET,
+				net.minecraft.core.GlobalPos.of(level.dimension(), to));
+		for (var pad : List.of(sender, blocked)) {
+			pad.setItem(0, new ItemStack(Items.DIAMOND, 5));
+			pad.setItem(io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.ROCKET, new ItemStack(item("delivery_rocket")));
+			pad.setItem(io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.PLAN, plan.copy());
+		}
+		var noSky = blocked.launch(level);
+		helper.assertTrue(noSky == io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.Result.NO_SKY,
+				"A roofed pad launched: " + noSky);
+		helper.assertTrue(!blocked.getItem(io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.ROCKET).isEmpty(),
+				"A failed launch used up the rocket");
+		var launched = sender.launch(level);
+		helper.assertTrue(launched == io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.Result.LAUNCHED,
+				"The pad did not launch: " + launched + " (sky height " + level.getHeight(
+						net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, from.getX(), from.getZ()) + ", pad " + from.getY() + ")");
+		helper.assertTrue(sender.getItem(0).isEmpty(), "The cargo stayed on the pad");
+		helper.assertTrue(sender.getItem(io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.ROCKET).isEmpty(),
+				"The rocket was not used up");
+		helper.assertTrue(sender.getItem(io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.PLAN).is(item("flight_plan")),
+				"The flight plan was used up");
+
+		// A delivery to a far area nobody has loaded waits, however long it has been due.
+		BlockPos far = from.offset(3_000, 0, 3_000);
+		helper.assertTrue(!level.isLoaded(far), "The far target is loaded");
+		io.github.jimbozoomer.jugcraft.rocketry.RocketPost.send(level.getServer(), level.dimension(), far,
+				List.of(new ItemStack(Items.DIRT)), 0);
+		helper.succeedWhen(() -> {
+			ItemStack landed = receiver.getItem(0);
+			helper.assertTrue(landed.is(Items.DIAMOND) && landed.getCount() == 5, "The receiving pad holds " + landed);
+			// Both were due by now (the far one had no flight distance); only the loaded target took its delivery.
+			io.github.jimbozoomer.jugcraft.rocketry.RocketPost.deliver(level.getServer());
+			helper.assertTrue(io.github.jimbozoomer.jugcraft.rocketry.RocketPost.pending(level.getServer()).stream()
+					.anyMatch(d -> d.target().equals(far)), "A delivery to an unloaded area landed or was lost");
+		});
+	}
+
 	/** Ores drop their raw material to a plain pickaxe, more with Fortune; only Silk Touch takes the ore block itself. */
 	@GameTest
 	public void oresNeedSilkTouchToDropThemselves(GameTestHelper helper) {
