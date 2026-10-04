@@ -52,13 +52,13 @@ public class GraveyardFloraClientGameTests implements FabricClientGameTest {
 			int y = origin.getY();
 			int z = origin.getZ();
 			TestServerContext server = singleplayer.getServer();
-			server.runCommand("time set 12600");
+			server.runCommand("time set 11000");
 			server.runCommand("weather clear");
 			server.runCommand("gamerule minecraft:send_command_feedback false");
 			server.runCommand("gamerule minecraft:spawn_mobs false");
 			server.runCommand("gamerule minecraft:advance_time false");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 9, y - 3, z - 14, x + 12, y - 1, z + 8));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 9, y, z - 14, x + 12, y + 10, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:grass_block".formatted(x - 9, y - 3, z - 14, x + 13, y - 1, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 9, y, z - 14, x + 13, y + 10, z + 8));
 			context.waitTicks(10);
 			server.runCommand("gamerule minecraft:random_tick_speed 0");
 			server.runOnServer(minecraft -> build(minecraft.overworld(), origin));
@@ -69,16 +69,16 @@ public class GraveyardFloraClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 
-			shoot(context, singleplayer, x + 1, y + 4, z + 4, 180, 26, "jugcraft_graveyard_flora");
+			shoot(context, singleplayer, x + 1, y + 5, z + 5, 180, 30, "jugcraft_graveyard_flora");
 			watchFrom(context, singleplayer, origin, new Vec3(1.5, 0.8, -2.2), 180.0F, 24.0F, "jugcraft_graveyard_flora_flowers");
 			watchFrom(context, singleplayer, origin, new Vec3(1.5, 1.6, -3.0), 180.0F, 6.0F, "jugcraft_graveyard_flora_tall");
 			watchFrom(context, singleplayer, origin, new Vec3(-2.5, 1.2, -6.0), 200.0F, 22.0F, "jugcraft_graveyard_flora_wall");
-			watchFrom(context, singleplayer, origin, new Vec3(7.5, 1.4, -0.8), 200.0F, 16.0F, "jugcraft_graveyard_flora_shroud_moss");
-			watchFrom(context, singleplayer, origin, new Vec3(-2.5, 1.0, 1.2), 180.0F, 30.0F, "jugcraft_graveyard_flora_mandrakes");
+			watchFrom(context, singleplayer, origin, new Vec3(7.0, 0.6, 1.5), 222.0F, -14.0F, "jugcraft_graveyard_flora_shroud_moss");
+			watchFrom(context, singleplayer, origin, new Vec3(-2.0, 1.4, 4.5), 180.0F, 34.0F, "jugcraft_graveyard_flora_mandrakes");
 			server.runCommand("time set 18000");
 			context.waitTicks(20);
-			shoot(context, singleplayer, x + 1, y + 4, z + 4, 180, 26, "jugcraft_graveyard_flora_night");
-			watchFrom(context, singleplayer, origin, new Vec3(3.5, 0.9, -1.6), 200.0F, 24.0F, "jugcraft_graveyard_flora_ghost_pipes");
+			shoot(context, singleplayer, x + 1, y + 5, z + 5, 180, 30, "jugcraft_graveyard_flora_night");
+			watchFrom(context, singleplayer, origin, new Vec3(4.0, 1.0, 0.4), 180.0F, 38.0F, "jugcraft_graveyard_flora_ghost_pipes");
 			server.runCommand("time set noon");
 			server.runCommand("gamerule minecraft:advance_time true");
 			server.runCommand("gamerule minecraft:random_tick_speed 3");
@@ -221,18 +221,18 @@ public class GraveyardFloraClientGameTests implements FabricClientGameTest {
 		BlockState log = Blocks.DARK_OAK_LOG.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
 		BlockState leaves = Blocks.DARK_OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
 		for (int dy = 0; dy < 5; dy++) {
-			put(level, origin, 9, dy, -3, log);
+			put(level, origin, 10, dy, -3, log);
 		}
-		for (int dx = 6; dx <= 11; dx++) {
+		for (int dx = 7; dx <= 12; dx++) {
 			for (int dz = -5; dz <= -1; dz++) {
 				put(level, origin, dx, 5, dz, leaves);
-				if (Math.abs(dx - 9) + Math.abs(dz + 3) <= 2) {
+				if (Math.abs(dx - 10) + Math.abs(dz + 3) <= 2) {
 					put(level, origin, dx, 6, dz, leaves);
 				}
 			}
 		}
 		BlockState strand = block("shroud_moss").defaultBlockState();
-		int[][] strands = {{6, -2, 3}, {7, -4, 2}, {8, -1, 3}, {10, -2, 2}, {11, -4, 1}, {7, -1, 1}, {10, -5, 2}};
+		int[][] strands = {{7, -2, 3}, {8, -4, 2}, {9, -1, 3}, {11, -2, 2}, {12, -4, 1}, {8, -1, 1}, {11, -5, 2}};
 		for (int[] s : strands) {
 			for (int i = 0; i < s[2]; i++) {
 				put(level, origin, s[0], 4 - i, s[1], strand.setValue(HangingPlantBlock.TIP, i == s[2] - 1));
