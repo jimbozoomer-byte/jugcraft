@@ -887,6 +887,65 @@ def check_arms():
             err(f"The {kind}'s swing ({ticks} ticks) is longer than the time between its blows")
         if not 0 < info["strike"] < ticks or not 0 < info["arc"] <= 180 or info["targets"] < 1:
             err(f"tools/arms.py: the {kind}'s two-handed swing {info} is out of range")
+    # Arms V (batch 48): the weapon arts, their numbers, their timing against their animations, and their balance.
+    found_arts = {kind: {"move": move.lower(), "cooldown": int(cooldown), "ticks": int(ticks), "slow": float(slow)}
+                  for kind, move, cooldown, ticks, slow in re.findall(
+                      r'Map\.entry\("([a-z_]+)", new Art\(Move\.([A-Z_]+), (\d+), (\d+), ([\d.]+)F\)\)', java)}
+    expected_arts = {kind: {"move": art["move"], "cooldown": art["cooldown"], "ticks": art["ticks"], "slow": float(art["slow"])}
+                     for kind, art in arms.ARTS.items()}
+    if found_arts != expected_arts:
+        err(f"JugcraftArms.ARTS {found_arts} != tools/arms.py {expected_arts}")
+    moves = re.search(r"enum Move \{\s*([A-Z_, ]+);", java)
+    if not moves or sorted(m.strip().lower() for m in moves.group(1).split(",")) != sorted({a["move"] for a in arms.ARTS.values()}):
+        err("JugcraftArms.Move does not name the arts' moves")
+    for kind, art in arms.ARTS.items():
+        if kind not in arms.KINDS or arms.KINDS[kind].get("art") != art["move"] or arms.KINDS[kind]["parry"] or "trait" in arms.KINDS[kind]:
+            err(f"tools/arms.py: ARTS {kind} is not a kind with that art (and no parry or trait, which would take the use key)")
+        if not 0 < art["ticks"] <= art["cooldown"] or not 0 <= art["slow"] < 1:
+            err(f"tools/arms.py: the {kind}'s art {art} is out of range")
+    for name in ("CYCLONE_FIRST", "CYCLONE_EVERY", "CYCLONE_HITS", "CYCLONE_TARGETS", "IAIDO_START", "IAIDO_DASH", "IAIDO_DELAY",
+                 "IAIDO_TARGETS", "LEAP_MIN_AIR", "LEAP_STUCK", "LEAP_MAX_AIR", "LEAP_TARGETS", "FLURRY_FIRST", "FLURRY_EVERY",
+                 "FLURRY_JABS", "CRESCENT_RELEASE", "CRESCENT_TICKS", "CRESCENT_TARGETS", "LASH_THROW", "LASH_REAP"):
+        if f"{name} = {getattr(arms, name)};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({getattr(arms, name)})")
+    for name in ("CYCLONE_RADIUS", "CYCLONE_SHARE", "CYCLONE_PULL", "IAIDO_SPEED", "IAIDO_WIDTH", "IAIDO_SHARE", "IAIDO_REACH",
+                 "LEAP_UP", "LEAP_FORWARD", "LEAP_RADIUS", "LEAP_SHARE", "LEAP_EDGE", "LEAP_PER_BLOCK", "LEAP_DROP_MAX",
+                 "LEAP_LIFT", "FLURRY_SHARE", "FLURRY_FINISH", "FLURRY_ARC", "CRESCENT_SPEED", "CRESCENT_WIDTH",
+                 "CRESCENT_SHARE", "CRESCENT_FADE", "LASH_RANGE", "LASH_SHARE", "LASH_PULL", "LASH_PULL_MAX",
+                 "LASH_REAP_SHARE", "LASH_REAP_REACH"):
+        if f"{name} = {f(getattr(arms, name))};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({getattr(arms, name)})")
+    # Each art's animation has a key at every tick the server lands a hit (to half a tick), so the blow is seen as it lands.
+    hits = {"cyclone": [arms.CYCLONE_FIRST + i * arms.CYCLONE_EVERY for i in range(arms.CYCLONE_HITS)],
+            "iaido": [arms.IAIDO_START + arms.IAIDO_DASH + arms.IAIDO_DELAY],
+            "flurry": [arms.FLURRY_FIRST + i * arms.FLURRY_EVERY for i in range(arms.FLURRY_JABS + 1)],
+            "crescent": [arms.CRESCENT_RELEASE], "chain_lash": [arms.LASH_THROW, arms.LASH_REAP], "leap_slam": []}
+    for kind, art in arms.ARTS.items():
+        clips = arms_moves.MOVES.get(kind, {}).get("arts", [])
+        if not clips or clips[0].ticks != art["ticks"]:
+            err(f"tools/arms_moves.py: the {kind}'s art has no clip, or its first lasts other than {art['ticks']} ticks")
+            continue
+        for tick in hits[art["move"]]:
+            if tick > art["ticks"] or not any(abs(t * art["ticks"] - tick) <= 0.5 for t, _pose, _k in clips[0].keys):
+                err(f"tools/arms_moves.py: the {kind}'s {clips[0].name} has no key at its hit on tick {tick}")
+        if art["move"] == "leap_slam" and (len(clips) != 2 or not clips[0].hold or clips[1].keys[0][1] != clips[0].keys[-1][1]):
+            err(f"tools/arms_moves.py: the {kind}'s leap must hold in the air and its slam start from there")
+    if not 0 < arms.LEAP_MIN_AIR < arms.LEAP_STUCK < arms.LEAP_MAX_AIR or arms.LASH_THROW >= arms.LASH_REAP:
+        err("tools/arms.py: the leap's or the chain's timing is out of order")
+    # Against one foe an art is no better than plain blows: over its cooldown (busy for its ticks, plain blows for the
+    # rest) an Arms V arm stays below its metal's sword, a second. Its worth is the shape: many foes, or getting there.
+    for kind, art in arms.ARTS.items():
+        info = arms.KINDS[kind]
+        combo = arms.TWO_HANDED.get(kind, {}).get("combo", 1)
+        finishing = (combo - 1 + arms.FINISHER) / combo if kind in arms.TWO_HANDED else 1.0
+        cycle, busy = art["cooldown"] / 20.0, art["ticks"] / 20.0
+        for metal, bonus in (("bronze", 2.0), ("steel", 2.5)):
+            blow = 1.0 + bonus + info["damage"]
+            plain = blow * (4.0 + info["speed"]) * finishing
+            sword = (1.0 + bonus + 3.0) * 1.6
+            average = (arms.art_share(kind) * blow + plain * (cycle - busy)) / cycle
+            if average >= sword:
+                err(f"The {metal} {kind} with its art deals {average:.2f} a second to one foe, not below the sword's {sword:.2f}")
     # No arm may take an id another generator already registers (two items of one id stop the game at start).
     clash = set(arms.items()) & (set(ag.all_items()) | set(all_items()) | set(all_blocks()))
     if clash:
@@ -956,10 +1015,19 @@ def check_arms_motion():
             err(f"arms_motion/{kind}.json: a hold or use pose is the wrong size")
         if not motion["attacks"]:
             err(f"arms_motion/{kind}.json has no attacks")
-        for attack in motion["attacks"]:
+        for attack in motion["attacks"] + motion.get("arts", []):
             label = f"arms_motion/{kind}.json {attack['name']}"
             track(label, attack["times"], attack["tension"], attack["keys"], size)
             track(label + " (first person)", attack["fp_times"], attack["fp_tension"], attack["fp_keys"], 6)
+        for art in motion.get("arts", []):
+            if not art["ticks"] or art["ticks"] <= 0 or (art["spin"] is not None and len(art["spin"]) != len(art["times"])):
+                err(f"arms_motion/{kind}.json {art['name']}: an art clip needs its ticks, and a spin a turn for each key")
+            if art["spin"] and art["spin"][-1] % 360 != 0:
+                err(f"arms_motion/{kind}.json {art['name']}: a spin must end a whole number of turns round, or the body snaps")
+        if bool(motion.get("arts")) != (kind in arms.ARTS):
+            err(f"arms_motion/{kind}.json: has art clips if and only if the kind has an art")
+    if "WeaponArtPayload.TYPE" not in (client / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient does not receive WeaponArtPayload (no client would see a weapon art)")
     mixins = load(client / "resources" / f"{MOD}.client.mixins.json") or {}
     for mixin in ("ArmsRenderStateMixin", "ArmsHumanoidModelMixin", "ArmsItemInHandLayerMixin", "ArmsFirstPersonMixin"):
         if mixin not in mixins.get("client", []):

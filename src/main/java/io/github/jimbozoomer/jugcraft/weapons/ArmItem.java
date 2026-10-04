@@ -10,8 +10,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -37,7 +39,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * saying what its kind does, from {@code tooltip.jugcraft.arms.<kind>}. An Arms II kind's {@link JugcraftArms.Trait}
  * is worked here, on the server: a bonus to the blow (backstab, saddle, armor pierce, riders, execute, brace), a daze, a
  * hook or a sunder on a hit, or the scythe's reaping and the kama's clearing. Delving is the pickaxe's tool component. Chopping is the axe's own tool component; the maul's quake is its finishing blow
- * ({@link TwoHanded}). A two-handed kind says so in a second line.
+ * ({@link TwoHanded}). A two-handed kind says so in a second line. An Arms V kind's weapon art is used from here
+ * ({@link #use}) and says what it does in a gold line.
  */
 public class ArmItem extends Item {
 	/** The blocks a kama cuts (data/jugcraft/tags/block/kama_cuts.json). */
@@ -46,17 +49,19 @@ public class ArmItem extends Item {
 			EquipmentSlot.FEET);
 	private final String kind;
 	private final JugcraftArms.Trait trait;
+	private final JugcraftArms.Art art;
 
 	public ArmItem(String kind, Properties properties) {
 		super(properties);
 		this.kind = kind;
 		this.trait = JugcraftArms.TRAITS.get(kind);
+		this.art = JugcraftArms.ARTS.get(kind);
 	}
 
 	/**
 	 * The kind of arm: longsword, greatsword, rapier, flanged_mace, war_hammer, glaive, halberd, spear, lance, dagger,
 	 * sabre, estoc, battle_axe, flail, scythe, quarterstaff, pike, zweihander, maul, executioner, bill, labrys, battleblade,
-	 * war_fork, kama or war_pick.
+	 * war_fork, kama, war_pick, twinblade, nodachi, earthbreaker, katar, moonblade or kusarigama.
 	 */
 	public String kind() {
 		return kind;
@@ -74,6 +79,25 @@ public class ArmItem extends Item {
 		if (JugcraftArms.TWO_HANDED.containsKey(kind)) {
 			tooltip.accept(Component.translatable("tooltip.jugcraft.arms.two_handed").withStyle(ChatFormatting.DARK_GRAY));
 		}
+		if (art != null) {
+			tooltip.accept(Component.translatable("tooltip.jugcraft.arms.art." + art.move().id()).withStyle(ChatFormatting.GOLD));
+		}
+	}
+
+	/**
+	 * An Arms V kind's weapon art ({@link WeaponArts}), used with the main hand: started on the server, which checks
+	 * everything; the client's use does nothing but wait for it (no swing of its own: the art's animation comes from the
+	 * server). An item cooldown, as vanilla's, keeps it from being used again too soon.
+	 */
+	@Override
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
+		if (art == null || hand != InteractionHand.MAIN_HAND) {
+			return super.use(level, player, hand);
+		}
+		if (player instanceof ServerPlayer server) {
+			return WeaponArts.start(server, player.getItemInHand(hand)) ? InteractionResult.CONSUME : InteractionResult.FAIL;
+		}
+		return InteractionResult.CONSUME;
 	}
 
 	@Override

@@ -8,7 +8,18 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### Unmerged: Arms IV, batch 47
+### Unmerged: Arms V, batch 48
+- **Weapon arts:** six new arms in bronze and steel, each with a special move used with the use key, its own animation and its own way of dealing damage. Then a few seconds before it is ready again (shown on the hotbar); plain blows are not held back.
+  - **twinblade** (two-handed), **Cyclone**: three spins, each striking every foe all round and drawing them in;
+  - **nodachi** (two-handed), **Iaido**: a dash; every foe passed is cut a moment later, all at once;
+  - **earthbreaker** (two-handed), **Leap Slam**: leap and slam where you land, hardest at the centre and harder from a height; throws foes up, and the leap costs no fall damage of its own;
+  - **katar**, **Flurry**: five quick jabs that all land, then a driving finish;
+  - **moonblade** (two-handed), **Crescent**: a wave runs ahead through every foe in line until a wall stops it;
+  - **kusarigama**, **Chain Lash**: the chain catches the first foe in line up to 9 blocks off, hauls it in, and the sickle reaps it.
+- Every art runs on the server and is seen by every player nearby. Against one foe an art is no better than plain blows; the data check holds it to that.
+- Handbook pages, the **Weapon Art** advancement, seven game tests and an end-to-end client test. Record: [arms-v.md](docs/features/arms-v.md).
+
+### Arms IV, batch 47 (#170)
 - **Five ornate arms** in bronze and steel, drawn after the owner's reference sheets (nothing of them is copied): set stones (a garnet in bronze, a lit green phosphor stone in steel), flat-toned heads with bright edges, winged guards, lit rims and glints of light.
   - **labrys** (two-handed): its finishing blow whirls right round, striking up to 6 foes about you;
   - **battleblade** (two-handed): each hit wears every piece of the foe's armor;
@@ -17,7 +28,7 @@ No numbered release yet. Everything below is on `main`.
   - **war pick**: mines stone and ore as its metal's pickaxe.
 - Handbook pages, the **Masterwork** advancement, six game tests. The data check now also fails if an arm's id is taken elsewhere. Record: [arms-iv.md](docs/features/arms-iv.md).
 
-### Unmerged: Arms III, batch 46
+### Arms III, batch 46 (#167)
 - **Two-handed weapons**, after studying the Fiery Combat add-on the owner sent (nothing of it is used). Greatswords, war hammers, glaives, battle axes, scythes, quarterstaves, pikes and the new kinds now swing with both hands:
   - a click starts the swing, and the blow lands as the swing comes round, on the frame the animation lands it, not on the click;
   - the blow strikes every foe in an arc (up to 2 to 5 by kind);
@@ -32,7 +43,7 @@ No numbered release yet. Everything below is on `main`.
   - **bill:** hooks foes towards you and drags riders from the saddle.
 - Handbook pages, the **Two-Hander** advancement, seven game tests and an end-to-end client test. Record: [arms-iii.md](docs/features/arms-iii.md).
 
-### Unmerged: Arms II, batch 45
+### Arms II, batch 45 (#164)
 - **Eight more arms** in bronze and steel, each with a trait of its own:
   - **dagger:** quick stabs; half again as much from behind;
   - **sabre:** 3 more damage from the saddle;

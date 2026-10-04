@@ -467,6 +467,31 @@ def arms_pages():
             "dropping what they drop.",
             "War pick: a beaked pick that fights and mines stone and ore as its metal's pickaxe does."],
          "craft": craft("war_pick")},
+        # Arms V (batch 48): weapon arts.
+        {"title": "Arms: Weapon Arts", "icon": f"{MOD}:steel_moonblade", "text": [
+            "Six arms each have a weapon art: a special move of their own, used with the use key. Each plays its own "
+            "move and strikes in its own way; then the arm needs a few seconds before its art is ready again (shown "
+            "on the hotbar). Plain blows are not held back.",
+            "An art's hits are the arm's own damage times a share, with its enchantments, and land in full even in "
+            "quick succession. While busy with one you cannot swing.",
+            "Against one foe an art does no better than plain blows: it pays against many, or to get somewhere."],
+         "craft": craft("moonblade")},
+        {"title": "Arms: Twinblade, Nodachi, Earthbreaker", "icon": f"{MOD}:steel_earthbreaker", "text": [
+            "Two-handed, all three.",
+            f"Twinblade, Cyclone: {arms.CYCLONE_HITS} spins, each cutting every foe within {arms.CYCLONE_RADIUS:g} blocks "
+            "all round and drawing them in.",
+            f"Nodachi, Iaido: a dash of about {arms.IAIDO_SPEED * arms.IAIDO_DASH:g} blocks; every foe you pass is cut a "
+            "moment later, all at once.",
+            f"Earthbreaker, Leap Slam: leap from the ground and slam where you land: hardest at the centre, and "
+            f"{round(arms.LEAP_PER_BLOCK * 100)}% more for each block you came down below your take-off."],
+         "craft": craft("earthbreaker")},
+        {"title": "Arms: Katar, Moonblade, Kusarigama", "icon": f"{MOD}:steel_kusarigama", "text": [
+            f"Katar, Flurry: {arms.FLURRY_JABS} quick jabs at the foe ahead, then a driving finish.",
+            f"Moonblade (two-handed), Crescent: a wave that runs ahead about {arms.CRESCENT_SPEED * arms.CRESCENT_TICKS:g} "
+            "blocks, through every foe in its way, weakening as it goes, until a wall stops it.",
+            f"Kusarigama, Chain Lash: the chain catches the first foe in line up to {arms.LASH_RANGE:g} blocks off, hauls "
+            "it in and the sickle reaps it as it comes."],
+         "craft": craft("kusarigama")},
     ]
 
 

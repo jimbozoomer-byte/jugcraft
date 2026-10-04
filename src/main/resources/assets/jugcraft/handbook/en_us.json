@@ -560,151 +560,152 @@
         },
         {
           "title": "Milestones (7)",
-          "icon": "jugcraft:scuba_mask",
+          "icon": "jugcraft:bronze_twinblade",
           "text": [
+            "Weapon Art: Forge a twinblade, nodachi, earthbreaker, katar, moonblade or kusarigama.",
             "Deep Breath: Make scuba gear and breathe under water on oxygen.",
             "Light on Your Feet: Make free runners and never take fall damage.",
             "Charged Up: Make a power katana or power bow.",
-            "Lego My Ego: Mould coloured plastic blocks.",
-            "Steel Samurai: Build a piece of the powered exosuit."
+            "Lego My Ego: Mould coloured plastic blocks."
           ]
         },
         {
           "title": "Milestones (8)",
-          "icon": "jugcraft:ronin_exosuit_helmet",
+          "icon": "jugcraft:exosuit_helmet",
           "text": [
+            "Steel Samurai: Build a piece of the powered exosuit.",
             "Masterless: Repaint your exosuit or katana in the Ronin livery.",
             "Black Gold: Fill a bucket with crude oil.",
             "Nodding Donkey: Build a pumpjack over an oil reservoir.",
-            "Fractional Thinking: Build a distillation tower.",
-            "Tight Spot: Build a fracking rig for shale oil."
+            "Fractional Thinking: Build a distillation tower."
           ]
         },
         {
           "title": "Milestones (9)",
-          "icon": "jugcraft:diesel_generator",
+          "icon": "jugcraft:fracking_rig",
           "text": [
+            "Tight Spot: Build a fracking rig for shale oil.",
             "Diesel Power: Build a diesel generator.",
             "Spool Up: Build a gas turbine.",
             "Top Shelf: Make premium diesel or premium gasoline in the hydrotreater.",
-            "Waste Not: Build a heat recovery unit to make power from a generator's exhaust.",
-            "Eight Cylinders: Build a diesel engine."
+            "Waste Not: Build a heat recovery unit to make power from a generator's exhaust."
           ]
         },
         {
           "title": "Milestones (10)",
-          "icon": "jugcraft:plastic_sheet",
+          "icon": "jugcraft:diesel_engine",
           "text": [
+            "Eight Cylinders: Build a diesel engine.",
             "Fantastic Plastic: Press a plastic sheet.",
             "Bouncing Back: Make synthetic rubber.",
             "Vinyl Revival: Make PVC resin from chlorine.",
-            "Squeaky Clean: Boil soap from lye.",
-            "Light Speed: Draw borosilicate glass into optical fibre."
+            "Squeaky Clean: Boil soap from lye."
           ]
         },
         {
           "title": "Milestones (11)",
-          "icon": "jugcraft:grenade",
+          "icon": "jugcraft:optical_fibre",
           "text": [
+            "Light Speed: Draw borosilicate glass into optical fibre.",
             "Pin Pulled: Make a grenade.",
             "Going with the Flow: Build a flow battery.",
             "Hit the Road: Lay asphalt, and walk faster on it.",
-            "Split Decision: Build an electrolytic cell.",
-            "Oil of Vitriol: Make sulfuric acid."
+            "Split Decision: Build an electrolytic cell."
           ]
         },
         {
           "title": "Milestones (12)",
-          "icon": "jugcraft:fertilizer",
+          "icon": "jugcraft:sulfuric_acid_bucket",
           "text": [
+            "Oil of Vitriol: Make sulfuric acid.",
             "Green Revolution: Make fertilizer.",
             "Moonshine: Ferment crops into bioethanol.",
             "The Bayer Way: Digest bauxite into alumina.",
-            "Clean Burn: Build a hydrogen fuel cell.",
-            "Thin Air: Build an air separation unit."
+            "Clean Burn: Build a hydrogen fuel cell."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:pneumatic_grapple",
+          "icon": "jugcraft:air_separation_unit",
           "text": [
+            "Thin Air: Build an air separation unit.",
             "Reel Me In: Make a pneumatic grapple.",
             "Filtered: Make a gas mask.",
             "Chemical Arsenal: Make a chlorine, smoke or thermite grenade or a flashbang.",
-            "Expanding Foam: Make a foam sprayer.",
-            "Bunker Down: Cast blast-proof concrete, as blast-proof as obsidian."
+            "Expanding Foam: Make a foam sprayer."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:first_aid_kit",
+          "icon": "jugcraft:blastproof_concrete",
           "text": [
+            "Bunker Down: Cast blast-proof concrete, as blast-proof as obsidian.",
             "Field Medic: Make a first aid kit in the chemical reactor.",
             "Bread from Air: Build a synthesis converter, to make ammonia from air.",
             "Aqua Fortis: Make nitric acid.",
-            "Kroll Call: Chlorinate titanium and melt the sponge.",
-            "Power Wall: Build a lithium battery bank."
+            "Kroll Call: Chlorinate titanium and melt the sponge."
           ]
         },
         {
           "title": "Milestones (15)",
-          "icon": "jugcraft:neodymium_magnet",
+          "icon": "jugcraft:lithium_battery_bank",
           "text": [
+            "Power Wall: Build a lithium battery bank.",
             "Strong Attraction: Make a neodymium magnet.",
             "Lossless (Almost): Build a magnet dynamo or magnet motor.",
             "Pulling Strings: Pull a silicon boule in the arc furnace.",
-            "Etched in Light: Etch microchips in the lithography station.",
-            "Central Processing: Assemble a processor."
+            "Etched in Light: Etch microchips in the lithography station."
           ]
         },
         {
           "title": "Milestones (16)",
-          "icon": "jugcraft:network_terminal",
+          "icon": "jugcraft:processor",
           "text": [
+            "Central Processing: Assemble a processor.",
             "Hello, World: Build a network terminal.",
             "In Control: Build a logic controller.",
             "Mission Control: Build control monitor panels.",
-            "Under Pressure: Build a gas holder.",
-            "Shut-Off Valve: Make a fluid valve."
+            "Under Pressure: Build a gas holder."
           ]
         },
         {
           "title": "Milestones (17)",
-          "icon": "jugcraft:fluid_filter",
+          "icon": "jugcraft:fluid_valve",
           "text": [
+            "Shut-Off Valve: Make a fluid valve.",
             "Strained Relations: Make a fluid filter.",
             "Here Comes the Sun: Build an advanced solar panel.",
             "Full of It: Make a tank gauge.",
-            "Concentrate: Build a solar receiver for a heliostat field.",
-            "Spool Up: Make a turbocharger for the advanced engine."
+            "Concentrate: Build a solar receiver for a heliostat field."
           ]
         },
         {
           "title": "Milestones (18)",
-          "icon": "jugcraft:flywheel",
+          "icon": "jugcraft:turbocharger",
           "text": [
+            "Spool Up: Make a turbocharger for the advanced engine.",
             "Keep It Spinning: Build a flywheel.",
             "Four on the Floor: Build an advanced combustion engine.",
             "King Cotton: Grow cotton.",
-            "Make It Rain: Build a sprinkler.",
-            "Silver Lining: Build an electroplating bath."
+            "Make It Rain: Build a sprinkler."
           ]
         },
         {
           "title": "Milestones (19)",
-          "icon": "jugcraft:ammonia_chiller",
+          "icon": "jugcraft:electroplating_bath",
           "text": [
+            "Silver Lining: Build an electroplating bath.",
             "Ice Cold: Build an ammonia chiller.",
             "Minus 183: Build a cryogenic liquefier.",
             "Rocket Science: Build a rocket workshop.",
-            "Eye in the Sky: Assemble a survey rocket.",
-            "Soil Optional: Build a hydroponic bay."
+            "Eye in the Sky: Assemble a survey rocket."
           ]
         },
         {
           "title": "Milestones (20)",
-          "icon": "jugcraft:crop_harvester",
+          "icon": "jugcraft:hydroponic_bay",
           "text": [
+            "Soil Optional: Build a hydroponic bay.",
             "Reaping What You Sow: Build a crop harvester."
           ]
         }
@@ -2798,6 +2799,79 @@
               null
             ],
             "result": "jugcraft:steel_war_pick",
+            "count": 1
+          }
+        },
+        {
+          "title": "Arms: Weapon Arts",
+          "icon": "jugcraft:steel_moonblade",
+          "text": [
+            "Six arms each have a weapon art: a special move of their own, used with the use key. Each plays its own move and strikes in its own way; then the arm needs a few seconds before its art is ready again (shown on the hotbar). Plain blows are not held back.",
+            "An art's hits are the arm's own damage times a share, with its enchantments, and land in full even in quick succession. While busy with one you cannot swing.",
+            "Against one foe an art does no better than plain blows: it pays against many, or to get somewhere."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              null,
+              null,
+              null,
+              "jugcraft:steel_ingot",
+              "minecraft:leather",
+              "jugcraft:steel_ingot",
+              null
+            ],
+            "result": "jugcraft:steel_moonblade",
+            "count": 1
+          }
+        },
+        {
+          "title": "Arms: Twinblade, Nodachi, Earthbreaker",
+          "icon": "jugcraft:steel_earthbreaker",
+          "text": [
+            "Two-handed, all three.",
+            "Twinblade, Cyclone: 3 spins, each cutting every foe within 3 blocks all round and drawing them in.",
+            "Nodachi, Iaido: a dash of about 6 blocks; every foe you pass is cut a moment later, all at once.",
+            "Earthbreaker, Leap Slam: leap from the ground and slam where you land: hardest at the centre, and 15% more for each block you came down below your take-off."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              "minecraft:stick",
+              "jugcraft:steel_ingot",
+              null,
+              "minecraft:stick",
+              "minecraft:stick"
+            ],
+            "result": "jugcraft:steel_earthbreaker",
+            "count": 1
+          }
+        },
+        {
+          "title": "Arms: Katar, Moonblade, Kusarigama",
+          "icon": "jugcraft:steel_kusarigama",
+          "text": [
+            "Katar, Flurry: 5 quick jabs at the foe ahead, then a driving finish.",
+            "Moonblade (two-handed), Crescent: a wave that runs ahead about 12 blocks, through every foe in its way, weakening as it goes, until a wall stops it.",
+            "Kusarigama, Chain Lash: the chain catches the first foe in line up to 9 blocks off, hauls it in and the sickle reaps it as it comes."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              null,
+              null,
+              null,
+              "jugcraft:steel_ingot",
+              "minecraft:iron_nugget",
+              "minecraft:iron_nugget",
+              null
+            ],
+            "result": "jugcraft:steel_kusarigama",
             "count": 1
           }
         },
