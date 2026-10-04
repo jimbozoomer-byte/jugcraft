@@ -32,16 +32,16 @@ public class ArmsClientGameTests implements FabricClientGameTest {
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
 			server.runCommand("gamerule minecraft:send_command_feedback false");
-			server.runCommand("fill %d %d %d %d %d %d minecraft:smooth_stone".formatted(x - 4, y - 1, z - 22, x + 42, y - 1, z + 8));
-			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 4, y, z - 22, x + 42, y + 8, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:smooth_stone".formatted(x - 4, y - 1, z - 22, x + 56, y - 1, z + 8));
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 4, y, z - 22, x + 56, y + 8, z + 8));
 			context.waitTicks(10);
 
 			// Bronze arms on a rack of armor stands facing south, steel arms on a second rack nearer the camera, and all of
 			// them in item frames high on a wall behind.
 			List<String> bronze = JugcraftArms.ITEMS.keySet().stream().filter(id -> id.startsWith("bronze_")).toList();
 			List<String> steel = JugcraftArms.ITEMS.keySet().stream().filter(id -> id.startsWith("steel_")).toList();
-			// Batch 42's nine kinds a metal, Arms II's eight (batch 45), Arms III's four (batch 46) and Arms IV's five
-			// (batch 47): the racks and the frame wall widen with them.
+			// Batch 42's nine kinds a metal, Arms II's eight (batch 45), Arms III's four (batch 46), Arms IV's five (batch 47)
+			// and Arms V's six (batch 48): the racks and the frame wall widen with them.
 			int count = bronze.size();
 			server.runCommand("fill %d %d %d %d %d %d minecraft:spruce_planks".formatted(x, y, z - 13, x + count + 6, y + 5, z - 13));
 			for (int i = 0; i < count; i++) {
@@ -54,7 +54,7 @@ public class ArmsClientGameTests implements FabricClientGameTest {
 			// Hide the HUD, hand and chat for the scenery shots.
 			context.getInput().pressKey(options -> options.keyToggleGui);
 			// Each rack in parts of seven stands, from far enough back to see each part whole.
-			String[] parts = {"", "_ii", "_iii", "_iv"};
+			String[] parts = {"", "_ii", "_iii", "_iv", "_v"};
 			for (int part = 0; part * 7 < count; part++) {
 				int at = x + 6 + part * 21 / 2;
 				shoot(context, singleplayer, at, y + 1, z - 5, 180, 12, "jugcraft_arms_bronze_rack" + parts[part]);
