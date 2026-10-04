@@ -54,6 +54,69 @@ def liquid(palette, seed, bubbles):
     return c.img
 
 
+# ---------------------------------------------------------------- hex brews (fall addition 21)
+
+HEXES = {"shrinking": [rgb("2a6a3a"), rgb("3e9a54"), rgb("6ccf7a"), rgb("d8ffd0")],
+         "giant": [rgb("8a3a0a"), rgb("c8601a"), rgb("f0962a"), rgb("ffe0a0")],
+         "flying": [rgb("2e1a5a"), rgb("4e2e8e"), rgb("8a62d0"), rgb("e8d8ff")]}
+DRAUGHTS = {"shrinking": "shrinking_draught", "giant": "giants_draught", "flying": "flying_ointment"}
+GLASS = [rgb("8aa8b8"), rgb("b8d0dc"), rgb("e6f2f8")]
+CORK = [rgb("8a6236"), rgb("a77a45")]
+
+
+def hex_liquid(palette, seed):
+    """A hex brew's surface: a slow spiral round the middle, glittering with motes."""
+    c = Canvas()
+    rng = random.Random(seed)
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x - 7.5, y - 7.5
+            angle = math.atan2(dy, dx)
+            radius = math.hypot(dx, dy)
+            band = (math.sin(angle * 2 + radius * 0.9) + 1) / 2
+            c.px(x, y, palette[min(len(palette) - 2, int(band * (len(palette) - 1)))])
+    for _ in range(9):
+        c.px(rng.randrange(16), rng.randrange(16), palette[-1])
+    return c.img
+
+
+def draught_item(hex_name, palette):
+    """A hex draught: a round-bellied bottle (a squat jar for the ointment), stoppered, the brew glowing inside."""
+    c = Canvas()
+    if hex_name == "flying":
+        c.rect(3, 6, 12, 14, GLASS[0])
+        c.rect(4, 7, 11, 13, palette[2])
+        c.rect(4, 7, 11, 8, palette[3])
+        c.rect(3, 4, 12, 5, CORK[1])
+        c.rect(4, 3, 11, 3, CORK[0])
+        c.px(5, 9, palette[3])
+        c.px(9, 11, palette[3])
+    else:
+        for y in range(7, 15):
+            half = 4 if 8 <= y <= 13 else 3
+            for x in range(8 - half, 8 + half):
+                c.px(x, y, palette[1] if y > 9 else palette[2])
+        c.rect(6, 4, 9, 6, GLASS[1])
+        c.rect(6, 2, 9, 3, CORK[1])
+        c.px(5, 10, palette[3])
+        c.px(6, 9, palette[3])
+        c.px(10, 12, GLASS[2])
+    outline(c, rgb("1a120c"))
+    return c.img
+
+
+def effect_icon(kind):
+    """The Shrunk and Giant effects' icons: a little figure beside a big one, the one that is the drinker brightest."""
+    c = Canvas()
+    small, big = (rgb("6ccf7a"), rgb("4a4a52")) if kind == "shrunk" else (rgb("4a4a52"), rgb("f0962a"))
+    c.rect(2, 10, 4, 14, small)
+    c.rect(2, 8, 4, 9, small)
+    c.rect(8, 6, 12, 14, big)
+    c.rect(9, 2, 11, 5, big)
+    outline(c, rgb("1a120c"))
+    return c.img
+
+
 # ---------------------------------------------------------------- the apothecary shelf
 
 def shelf_wood():
@@ -300,6 +363,11 @@ def decor4_textures():
     }
     for colour, palette in BREWS.items():
         out[("block", f"bubbling_cauldron_brew_{colour}")] = liquid(palette, 10050 + list(BREWS).index(colour), True)
+    for k, (hex_name, palette) in enumerate(HEXES.items()):
+        out[("block", f"bubbling_cauldron_hex_{hex_name}")] = hex_liquid(palette, 10070 + k)
+        out[("item", DRAUGHTS[hex_name])] = draught_item(hex_name, palette)
+    out[("mob_effect", "shrunk")] = effect_icon("shrunk")
+    out[("mob_effect", "giant")] = effect_icon("giant")
     for colour in JARS:
         out[("block", f"apothecary_shelf_{colour}")] = jar_contents(colour)
     for name in ("moons", "bats", "brew", "pumpkin"):

@@ -23,13 +23,17 @@ import org.jspecify.annotations.Nullable;
  * arm and head, the wind chimes' bones and skull, and the weathervanes' vanes) and decor10_quads.json (tools/decor10_data.py:
  * the floating witch hat and its flame) and decor11_quads.json (tools/decor11_data.py: the jump-scare trap's lid, ghost
  * and spring, the bowling pumpkin, the ghost bell and its clapper, and the fortune teller's planchette) and
- * decor12_quads.json (tools/decor12_data.py: the haunted hayride's wagon and lantern) and zeppelin_quads.json
+ * decor12_quads.json (tools/decor12_data.py: the haunted hayride's wagon and lantern) and ferris_wheel_quads.json
+ * (tools/ferris_wheel_data.py: the Ferris wheel's frame, wheel, lights and cars) and pinata_quads.json
+ * (tools/pinata_data.py: the piñatas, whole and torn, and their ropes) and balloon_quads.json
+ * (tools/hot_air_balloon_data.py: the hot-air balloons' basket and rigging, flames and envelopes, and the pibal) and zeppelin_quads.json
  * (tools/zeppelin.py: the zeppelin's body and propeller) and walker_quads.json (tools/mech.py: the Diesel Walker).
  */
 public final class DecorQuads {
 	private static final List<Identifier> FILES = List.of(Jugcraft.id("decor_quads.json"), Jugcraft.id("decor7_quads.json"),
 			Jugcraft.id("decor8_quads.json"), Jugcraft.id("decor9_quads.json"), Jugcraft.id("decor10_quads.json"),
-			Jugcraft.id("decor11_quads.json"), Jugcraft.id("decor12_quads.json"), Jugcraft.id("zeppelin_quads.json"),
+			Jugcraft.id("decor11_quads.json"), Jugcraft.id("decor12_quads.json"), Jugcraft.id("ferris_wheel_quads.json"), Jugcraft.id("pinata_quads.json"),
+			Jugcraft.id("balloon_quads.json"), Jugcraft.id("zeppelin_quads.json"),
 			Jugcraft.id("walker_quads.json"));
 	private static @Nullable Map<String, QuadModel> models;
 
