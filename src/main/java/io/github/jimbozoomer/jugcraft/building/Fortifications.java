@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.FilteringStorage;
 import net.minecraft.ChatFormatting;
@@ -76,7 +76,7 @@ public final class Fortifications {
 		// Pipes, hoppers and conveyors can load a hoist (never take from one, so a hopper under a shaft cannot rob it) and
 		// can stock or empty a ready rack.
 		ItemStorage.SIDED.registerForBlockEntity((hoist, side) -> FilteringStorage.insertOnlyOf(hoist.buffer), HOIST_ENTITY);
-		ItemStorage.SIDED.registerForBlockEntity((rack, side) -> InventoryStorage.of(rack.shells, side), RACK_ENTITY);
+		ItemStorage.SIDED.registerForBlockEntity((rack, side) -> ContainerStorage.of(rack.shells, side), RACK_ENTITY);
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.BUILDING_BLOCKS).register(output ->
 				BLOCKS.values().forEach(output::accept));
 	}
@@ -99,7 +99,7 @@ public final class Fortifications {
 			// A door places its own upper half (DoorBlock.setPlacedBy), so a plain block item will do.
 			case "door" -> block(id, new DoorBlock(BlockSetType.IRON, properties(id, BlockBehaviour.Properties.of()
 					.mapColor(MapColor.METAL).sound(SoundType.NETHERITE_BLOCK).requiresCorrectToolForDrops()
-					.strength(hardness, blast).noOcclusion().pushReaction(PushReaction.BLOCK))));
+					.strength(hardness, blast).noOcclusion().pushReaction(PushReaction.IMMOVEABLE))));
 			case "hoist" -> block(id, new AmmoHoistBlock(properties(id, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
 					.sound(SoundType.METAL).requiresCorrectToolForDrops().strength(hardness, blast).noOcclusion())));
 			case "rack" -> block(id, new ReadyRackBlock(properties(id, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)

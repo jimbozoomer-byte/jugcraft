@@ -87,7 +87,7 @@ public class ReadyRackBlock extends HorizontalDirectionalBlock implements Entity
 			if (!stack.isEmpty()) {
 				rack.shells.setItem(slot, ItemStack.EMPTY);
 				if (!player.getInventory().add(stack)) {
-					player.drop(stack, false);
+					Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, stack);
 				}
 				break;
 			}
