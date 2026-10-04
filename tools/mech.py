@@ -32,9 +32,9 @@ DRILL_REACH = 5.0
 DRILL_TICKS_PER_HARDNESS = 5
 DRILL_MIN_TICKS = 3
 DRILL_MAX_HARDNESS = 50
-# The fist: damage, knockback and ticks between punches.
+# The fist: damage, how hard it throws what it hits (blocks a tick) and ticks between punches.
 PUNCH_DAMAGE = 12
-PUNCH_KNOCKBACK = 1.5
+PUNCH_KNOCKBACK = 1.0
 PUNCH_COOLDOWN = 16
 # Fuel in mB: the tank, what a bucket adds and what walking or drilling burns a second.
 FUEL_TANK = 4000

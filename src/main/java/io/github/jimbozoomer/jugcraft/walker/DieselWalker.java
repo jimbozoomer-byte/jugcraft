@@ -56,7 +56,7 @@ public class DieselWalker extends Entity {
 	public static final int DRILL_MIN_TICKS = 3;
 	public static final int DRILL_MAX_HARDNESS = 50;
 	public static final int PUNCH_DAMAGE = 12;
-	public static final double PUNCH_KNOCKBACK = 1.5;
+	public static final double PUNCH_KNOCKBACK = 1.0;
 	public static final int PUNCH_COOLDOWN = 16;
 	public static final int FUEL_TANK = 4000;
 	public static final int FUEL_PER_BUCKET = 1000;
@@ -288,7 +288,11 @@ public class DieselWalker extends Entity {
 		AABB reach = new AABB(centre, centre).inflate(1.6);
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, reach, e -> e != pilot && e.isAlive())) {
 			if (target.hurtServer(level, level.damageSources().playerAttack(pilot), PUNCH_DAMAGE)) {
-				target.knockback(PUNCH_KNOCKBACK, -heading.x, -heading.z);
+				// Thrown along the walker's heading; a player's client is told, since a player moves themselves.
+				target.setDeltaMovement(target.getDeltaMovement().add(heading.x * PUNCH_KNOCKBACK, 0.4, heading.z * PUNCH_KNOCKBACK));
+				if (target instanceof ServerPlayer hit) {
+					hit.connection.send(new net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket(hit));
+				}
 			}
 		}
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.IRON_GOLEM_ATTACK, SoundSource.PLAYERS, 1.0F, 0.7F);
