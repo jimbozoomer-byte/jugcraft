@@ -269,5 +269,8 @@ def feature_of(entry_id):
     import landship
     if entry_id in landship.ITEMS:
         return "machines"
+    import artillery
+    if entry_id in artillery.ITEMS:
+        return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

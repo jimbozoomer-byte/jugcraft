@@ -916,6 +916,113 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/** Batch 51: the ballistics solver's elevations land shells where they were aimed, on both arcs. */
+	@GameTest
+	public void ballisticsLandWhereAimed(GameTestHelper helper) {
+		double speed = io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SPEED;
+		double gravity = io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_GRAVITY;
+		for (double distance : new double[] {30, 60, 100}) {
+			for (double rise : new double[] {0, -4, 6}) {
+				for (boolean high : new boolean[] {false, true}) {
+					Float pitch = io.github.jimbozoomer.jugcraft.artillery.Ballistics.solve(speed, gravity, distance, rise, high, -5.0F, 85.0F);
+					helper.assertTrue(pitch != null, "No elevation for " + distance + " blocks (rise " + rise + ", high " + high + ")");
+					double landed = io.github.jimbozoomer.jugcraft.artillery.Ballistics.range(speed, gravity, pitch, rise);
+					helper.assertTrue(Math.abs(landed - distance) < 1.0, "Aimed at " + distance + " but landed at " + landed);
+					helper.assertTrue(high == pitch > 45.0F, "The " + (high ? "high" : "low") + " arc chose " + pitch + " degrees");
+				}
+			}
+		}
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.artillery.Ballistics.solve(speed, gravity, 400, 0, true, 45.0F, 85.0F) == null,
+				"400 blocks should be out of reach");
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 51: a siege mortar, crewed by a gunner with a marked target 30 blocks away, turns, lobs a Heavy Shell (using
+	 * one) and hurts the pig at the target, without breaking the floor.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 600, skyAccess = true)
+	public void siegeMortarShellsTheMarkedTarget(GameTestHelper helper) {
+		for (int x = 0; x < 44; x++) {
+			for (int z = 0; z < 44; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.SIEGE_MORTAR;
+		io.github.jimbozoomer.jugcraft.artillery.SiegeMortar mortar = helper.spawn(type, new Vec3(6.5, 1, 6.5));
+		mortar.face(0.0F);
+		ServerPlayer gunner = helper.makeMockServerPlayerInLevel();
+		gunner.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		gunner.getInventory().add(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 3));
+		gunner.setPos(mortar.getX(), mortar.getY(), mortar.getZ());
+		helper.assertTrue(gunner.startRiding(mortar, true, true), "The gunner could not climb aboard");
+		BlockPos target = new BlockPos(28, 1, 27);
+		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, target);
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.mark(gunner, helper.absolutePos(target.below()));
+		helper.onEachTick(() -> mortar.steer(gunner, 0, 0, 1));
+		helper.succeedWhen(() -> {
+			helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(), "The shell should hurt the pig at the target");
+			helper.assertBlockPresent(Blocks.STONE, target.below());
+			int left = gunner.getInventory().countItem(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM);
+			helper.assertTrue(left < 3, "Firing should use a Heavy Shell");
+		});
+	}
+
+	/** Batch 51: a flak shell fired up past a hovering bat bursts beside it and hurts it. */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 100, skyAccess = true)
+	public void flakBurstsBesideFlyers(GameTestHelper helper) {
+		net.minecraft.world.entity.Mob bat = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.BAT, new BlockPos(20, 16, 20));
+		bat.setNoGravity(true);
+		var shell = new io.github.jimbozoomer.jugcraft.artillery.ArtilleryShell(
+				io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.FLAK_SHELL, helper.getLevel());
+		Vec3 start = helper.absoluteVec(new Vec3(21.5, 4, 20.5));
+		shell.setPos(start);
+		shell.shoot(0, 1, 0, (float) io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.FLAK_SPEED, 0.0F);
+		helper.getLevel().addFreshEntity(shell);
+		helper.succeedWhen(() -> helper.assertTrue(!bat.isAlive() || bat.getHealth() < bat.getMaxHealth(),
+				"The flak burst should hurt the bat"));
+	}
+
+	/** Batch 51: an observation balloon winches up while ridden and its anchor is saved. */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
+	public void observationBalloonRisesWithItsSpotter(GameTestHelper helper) {
+		for (int x = 0; x < 6; x++) {
+			for (int z = 0; z < 6; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.BALLOON;
+		io.github.jimbozoomer.jugcraft.artillery.ObservationBalloon balloon = helper.spawn(type, new Vec3(2.5, 1, 2.5));
+		ServerPlayer spotter = helper.makeMockServerPlayerInLevel();
+		spotter.setPos(balloon.getX(), balloon.getY(), balloon.getZ());
+		double start = balloon.getY();
+		helper.runAfterDelay(2, () -> helper.assertTrue(spotter.startRiding(balloon, true, true), "The spotter could not climb in"));
+		helper.runAfterDelay(160, () -> {
+			helper.assertTrue(balloon.getY() > start + 8, "A ridden balloon should rise, but went from " + start + " to " + balloon.getY());
+			helper.assertTrue(Math.abs(balloon.anchorY() - start) < 0.01, "The anchor should stay where the balloon was placed");
+			helper.succeed();
+		});
+	}
+
+	/** Batch 51: a self-propelled howitzer's fuel and aim are saved with it. */
+	@GameTest
+	public void howitzerKeepsFuelAndAim(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HOWITZER;
+		io.github.jimbozoomer.jugcraft.artillery.SelfPropelledHowitzer gun = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		gun.setFuel(3500);
+		gun.face(90.0F);
+		net.minecraft.world.level.storage.TagValueOutput out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+				net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess());
+		gun.saveWithoutId(out);
+		io.github.jimbozoomer.jugcraft.artillery.SelfPropelledHowitzer copy = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		copy.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,
+				level.registryAccess(), out.buildResult()));
+		helper.assertTrue(copy.fuel() == 3500, "Fuel should be saved, got " + copy.fuel());
+		helper.assertTrue(Math.abs(copy.aimYaw(1.0F) - 90.0F) < 0.01, "The gun's aim should be saved, got " + copy.aimYaw(1.0F));
+		helper.succeed();
+	}
+
 	/** Coal generator -> copper cables -> electric furnace smelts raw iron. */
 	@GameTest(maxTicks = 600)
 	public void cablesCarryPower(GameTestHelper helper) {
