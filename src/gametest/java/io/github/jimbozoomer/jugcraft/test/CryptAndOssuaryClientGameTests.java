@@ -52,7 +52,8 @@ import net.minecraft.world.phys.Vec3;
  * Vertebra Floor Lamps. To the east, a giant's bones before a church wall: the Colossal Skull with its jaw dropped, three
  * pairs of Colossal Ribs arched over a spine of Colossal Vertebrae, a Colossal Femur and a Giant Bone Hand, watched by a
  * Gargoyle Sentinel turned toward a pumpkin-headed zombie; Gargoyle Rainspouts over cauldrons and Chimera Finials on
- * the wall's buttresses. By day, close up, in a thunderstorm and at night (the throne's eyes lit). CI job {@code client}.
+ * the wall's buttresses. By day, close up, in a thunderstorm, and at night in the parlour (the throne's eyes lit) and by the
+ * colossus (its sockets glowing, the sentinel's eyes on the zombie). CI job {@code client}.
  */
 public class CryptAndOssuaryClientGameTests implements FabricClientGameTest {
 	@Override
@@ -86,18 +87,19 @@ public class CryptAndOssuaryClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 
 			shoot(context, singleplayer, x, y + 7, z + 7, 180, 30, "jugcraft_crypt_and_ossuary");
-			watchFrom(context, singleplayer, origin, new Vec3(-7.5, 3.5, 0.5), 180.0F, 30.0F, "jugcraft_crypt_and_ossuary_crypt");
-			watchFrom(context, singleplayer, origin, new Vec3(-8.5, 1.6, -1.0), 110.0F, 20.0F, "jugcraft_crypt_and_ossuary_wardrobe");
+			watchFrom(context, singleplayer, origin, new Vec3(-3.0, 4.0, -1.0), 128.0F, 28.0F, "jugcraft_crypt_and_ossuary_crypt");
+			watchFrom(context, singleplayer, origin, new Vec3(-8.0, 2.2, -1.5), 118.0F, 25.0F, "jugcraft_crypt_and_ossuary_wardrobe");
 			watchFrom(context, singleplayer, origin, new Vec3(2.5, 1.6, -4.0), 180.0F, 14.0F, "jugcraft_crypt_and_ossuary_parlour");
 			watchFrom(context, singleplayer, origin, new Vec3(6.5, 3.0, -1.0), 210.0F, 16.0F, "jugcraft_crypt_and_ossuary_colossus");
 			server.runCommand("weather thunder");
 			context.waitTicks(200);
-			watchFrom(context, singleplayer, origin, new Vec3(5.0, 5.0, -9.5), 228.0F, 15.0F, "jugcraft_crypt_and_ossuary_gargoyles");
+			watchFrom(context, singleplayer, origin, new Vec3(10.5, 4.0, -5.5), 180.0F, 8.0F, "jugcraft_crypt_and_ossuary_gargoyles");
 			server.runCommand("weather clear");
 			server.runCommand("time set 18000");
 			server.runOnServer(minecraft -> nightfall(minecraft.overworld(), origin));
 			context.waitTicks(40);
-			shoot(context, singleplayer, x, y + 7, z + 7, 180, 30, "jugcraft_crypt_and_ossuary_night");
+			watchFrom(context, singleplayer, origin, new Vec3(2.5, 1.6, -4.0), 180.0F, 14.0F, "jugcraft_crypt_and_ossuary_night");
+			watchFrom(context, singleplayer, origin, new Vec3(6.5, 3.0, -1.0), 210.0F, 16.0F, "jugcraft_crypt_and_ossuary_colossus_night");
 			server.runCommand("time set noon");
 			server.runCommand("gamerule minecraft:advance_time true");
 		}
