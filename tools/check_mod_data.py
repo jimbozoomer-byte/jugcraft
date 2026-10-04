@@ -19,6 +19,9 @@ import agriculture as ag
 import werewolf_model
 import midway
 import ferris_wheel
+import pinata
+import hot_air_balloon
+import leaf_blower
 import petro
 import deposits
 import seasons
@@ -2353,6 +2356,9 @@ def check_decor4(java):
     check_pumpkling(java, number, lang)
     check_midway(java, number, lang)
     check_ferris_wheel(java, number, lang)
+    check_pinata(java, number, lang)
+    check_hot_air_balloon(java, number, lang)
+    check_leaf_blower(java, number, lang)
 
 
 def check_midway(java, number, lang):
@@ -2461,6 +2467,177 @@ def check_ferris_wheel(java, number, lang):
             ASSETS / "models" / "block" / f"{fw['block']}.json", ASSETS / "textures" / "item" / f"{fw['block']}.png"]:
         if not path.exists():
             err(f"The Ferris wheel needs {path.relative_to(ROOT)}")
+
+
+def check_pinata(java, number, lang):
+    """Fall addition 28: the piñatas match tools/pinata.py (slots, drop, a charged swing, the stick's hits, each kind's
+    hits and item); the items, entity and Blindfold are registered and drawn from the quads; the Blindfold's view and
+    worn band exist; their words, recipes and advancements exist."""
+    pn = pinata.PINATA
+    expected = {("Pinata", "SLOTS"): pn["slots"], ("Pinata", "DROP"): pn["drop"], ("Pinata", "CHARGED"): pn["charged"],
+                ("Pinata", "STICK_HITS"): pn["stick_hits"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/pinata.py ({value})")
+    source = java.get("Pinata", "")
+    for kind, spec in pinata.KINDS.items():
+        if f'("{kind}", "{spec["item"]}", {spec["hits"]},' not in source:
+            err(f"Pinata.Kind must have {kind} with item {spec['item']} and {spec['hits']} hits (tools/pinata.py)")
+    pinatas = java.get("Pinatas", "")
+    if f'STICK = "{pn["stick"]}"' not in pinatas or f'BLINDFOLD = "{pn["blindfold"]}"' not in pinatas:
+        err("Pinatas.STICK and BLINDFOLD must match tools/pinata.py")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ("new PinataItem(props, kind)", "registerItem(Pinatas.STICK", 'setCameraOverlay(Jugcraft.id("misc/blindfold"))',
+                 "EntityType.Builder.<Pinata>of(Pinata::new", "Pinatas.register();"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    client_dir = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    if "JugcraftAgriculture.PINATA, PinataRenderer::new" not in (client_dir / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient.java must draw the piñatas")
+    if '"pinata_quads.json"' not in (client_dir / "DecorQuads.java").read_text(encoding="utf-8"):
+        err("DecorQuads must read pinata_quads.json")
+    quads = load(ASSETS / "pinata_quads.json") or {}
+    for name in [f"pinata_{k}{t}" for k in pinata.KINDS for t in ("", "_torn")] + ["pinata_rope", "pinata_rope_star"]:
+        if not quads.get(name):
+            err(f"pinata_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").exists():
+                err(f"pinata_quads.json's {name} draws missing texture {quad['texture']}")
+                break
+    for item, display in pinata.displays().items():
+        if lang.get(f"item.{MOD}.{item}") != display:
+            err(f"The piñata party has no words for item.{MOD}.{item}")
+    for key in ("full", "no_room", "filled"):
+        if f"message.{MOD}.pinata.{key}" not in lang:
+            err(f"The piñata party has no words for message.{MOD}.pinata.{key}")
+    for path in [DATA / MOD / "advancement" / f"{a}.json" for a in pinata.ADVANCEMENTS] + [
+            DATA / MOD / "recipe" / f"{r['id']}.json" for r in pinata.SHAPED + pinata.SHAPELESS] + [
+            ASSETS / "textures" / "misc" / "blindfold.png", ASSETS / "textures" / "entity" / "equipment" / "humanoid" / "blindfold.png",
+            ASSETS / "equipment" / "blindfold.json"] + [ASSETS / "items" / f"{i}.json" for i in pinata.items()]:
+        if not path.exists():
+            err(f"The piñata party needs {path.relative_to(ROOT)}")
+
+
+def check_hot_air_balloon(java, number, lang):
+    """Fall addition 29: the balloons, winds, pibals and mooring posts match tools/hot_air_balloon.py; the items,
+    entities, block, payload and renderers are registered; the quads draw from textures that exist (the envelopes'
+    wraps 768 by 384); their words, recipes, advancements, loot and tags exist."""
+    hb, wd, mo, pb, rules = (hot_air_balloon.HOT_AIR_BALLOON, hot_air_balloon.WINDS, hot_air_balloon.MOORING, hot_air_balloon.PIBAL,
+                             hot_air_balloon.ADVANCEMENT_RULES)
+    expected = {("HotAirBalloon", "RIDERS"): hb["riders"], ("HotAirBalloon", "BASKET"): hb["basket"],
+                ("HotAirBalloon", "BASKET_HEIGHT"): hb["basket_height"], ("HotAirBalloon", "BURNER"): hb["burner"],
+                ("HotAirBalloon", "THROAT"): hb["throat"], ("HotAirBalloon", "ENVELOPE_HEIGHT"): hb["envelope_height"],
+                ("HotAirBalloon", "ENVELOPE_RADIUS"): hb["envelope_radius"], ("HotAirBalloon", "FIRE"): hb["fire"],
+                ("HotAirBalloon", "COOL"): hb["cool"], ("HotAirBalloon", "VENT"): hb["vent"], ("HotAirBalloon", "NEUTRAL"): hb["neutral"],
+                ("HotAirBalloon", "CLIMB"): hb["climb"], ("HotAirBalloon", "MAX_CLIMB"): hb["max_climb"],
+                ("HotAirBalloon", "MAX_SINK"): hb["max_sink"], ("HotAirBalloon", "THIN"): hb["thin"],
+                ("HotAirBalloon", "RESPONSE"): hb["response"], ("HotAirBalloon", "DRIFT"): hb["drift"],
+                ("HotAirBalloon", "FUEL_PER_BURN_TICK"): hb["fuel_per_burn_tick"], ("HotAirBalloon", "MAX_FUEL"): hb["max_fuel"],
+                ("HotAirBalloon", "GAUGE_TICKS"): hb["gauge_ticks"], ("HotAirBalloon", "MOOR_REACH"): mo["reach"],
+                ("HotAirBalloon", "ROPE"): mo["rope"], ("HotAirBalloon", "TETHER_HEIGHT"): mo["height"],
+                ("HotAirBalloon", "UP_HEIGHT"): rules["up_height"], ("HotAirBalloon", "BOX_HOME"): rules["box_home"],
+                ("HotAirBalloon", "BOX_AWAY"): rules["box_away"], ("HotAirBalloon", "ALOFT"): rules["aloft"],
+                ("HotAirBalloon", "CROWD"): rules["crowd"], ("HotAirBalloon", "CROWD_RANGE"): rules["crowd_range"],
+                ("FiestaWinds", "LAYER"): wd["layer"], ("FiestaWinds", "LAYERS"): wd["layers"], ("FiestaWinds", "BASE"): wd["base"],
+                ("FiestaWinds", "PER_LAYER"): wd["per_layer"], ("FiestaWinds", "BOX_SPREAD"): wd["box_spread"],
+                ("FiestaWinds", "SWAY"): wd["sway"], ("FiestaWinds", "STORM"): wd["storm"],
+                ("Pibal", "RISE"): pb["rise"], ("Pibal", "LIFE"): pb["life"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/hot_air_balloon.py ({value})")
+    source = java.get("HotAirBalloon", "")
+    for kind, spec in hot_air_balloon.KINDS.items():
+        if f'("{kind}", "{spec["item"]}")' not in source:
+            err(f"HotAirBalloon.Kind must have {kind} with item {spec['item']} (tools/hot_air_balloon.py)")
+    if f'ID = "{mo["block"]}"' not in java.get("MooringPostBlock", ""):
+        err("MooringPostBlock.ID must match tools/hot_air_balloon.py")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ("new HotAirBalloonItem(props, kind)", 'registerItem("balloon_burner"', 'registerItem("pibal", PibalItem::new',
+                 "registerBlock(MooringPostBlock.ID", "EntityType.Builder.<HotAirBalloon>of(HotAirBalloon::new",
+                 "EntityType.Builder.<Pibal>of(Pibal::new", "Balloons.register();"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    if "BalloonControlPayload.register();" not in java.get("Balloons", ""):
+        err("Balloons must register the pilot's control payload")
+    client_dir = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    client = (client_dir / "JugcraftClient.java").read_text(encoding="utf-8")
+    for call in ("JugcraftAgriculture.HOT_AIR_BALLOON, HotAirBalloonRenderer::new", "JugcraftAgriculture.PIBAL, PibalRenderer::new",
+                 "BalloonClient.register();"):
+        if call not in client:
+            err(f"JugcraftClient.java must call {call}")
+    if '"balloon_quads.json"' not in (client_dir / "DecorQuads.java").read_text(encoding="utf-8"):
+        err("DecorQuads must read balloon_quads.json")
+    quads = load(ASSETS / "balloon_quads.json") or {}
+    names = ["balloon_basket", "balloon_flame", "balloon_glow_pumpkin", "balloon_mooring_rope", "pibal"] + [
+        f"balloon_envelope_{k}" for k in hot_air_balloon.KINDS]
+    for name in names:
+        if not quads.get(name):
+            err(f"balloon_quads.json has no quads for {name}")
+        for quad in quads.get(name, []):
+            texture = quad["texture"]
+            path = ASSETS / "textures" / (f"{texture}.png" if "/" in texture else f"block/{texture}.png")
+            if not path.exists():
+                err(f"balloon_quads.json's {name} draws missing texture {texture}")
+                break
+    for kind in list(hot_air_balloon.KINDS) + ["glow_pumpkin"]:
+        name = f"envelope_{kind}" if kind in hot_air_balloon.KINDS else kind
+        path = ASSETS / "textures" / "entity" / "hot_air_balloon" / f"{name}.png"
+        if path.exists() and Image.open(path).size != (768, 384):
+            err(f"{path.relative_to(ROOT)} must be 768 by 384 (24 gores of 32 pixels)")
+    for item, display in hot_air_balloon.displays().items():
+        key = f"block.{MOD}.{item}" if item in hot_air_balloon.blocks() else f"item.{MOD}.{item}"
+        if lang.get(key) != display:
+            err(f"The hot-air balloon fiesta has no words for {key}")
+    for key in ("gauges", "moored", "controls", "fuelled", "fuel_full", "no_fuel", "no_room", "full"):
+        if f"message.{MOD}.balloon.{key}" not in lang:
+            err(f"The hot-air balloon fiesta has no words for message.{MOD}.balloon.{key}")
+    for key in ("tied", "untied", "none"):
+        if f"message.{MOD}.mooring.{key}" not in lang:
+            err(f"The hot-air balloon fiesta has no words for message.{MOD}.mooring.{key}")
+    for path in [DATA / MOD / "advancement" / f"{a}.json" for a in hot_air_balloon.ADVANCEMENTS] + [
+            DATA / MOD / "recipe" / f"{r['id']}.json" for r in hot_air_balloon.SHAPED + hot_air_balloon.SHAPELESS] + [
+            DATA / MOD / "loot_table" / "blocks" / f"{mo['block']}.json", ASSETS / "blockstates" / f"{mo['block']}.json"] + [
+            ASSETS / "items" / f"{i}.json" for i in hot_air_balloon.items()]:
+        if not path.exists():
+            err(f"The hot-air balloon fiesta needs {path.relative_to(ROOT)}")
+
+
+def check_leaf_blower(java, number, lang):
+    """Fall addition 30: the Leaf Blower matches tools/leaf_blower.py (charge, costs, stream); it is a Chargeable item
+    that starts empty, so the Charging Station charges it; its model draws from textures that exist; its words, recipe
+    and advancement exist."""
+    lb = leaf_blower.LEAF_BLOWER
+    expected = {"CAPACITY": lb["capacity"], "BLOW_JE": lb["blow_je"], "VACUUM_JE": lb["vacuum_je"], "RANGE": lb["range"],
+                "CONE": lb["cone"], "PUSH_ITEMS": lb["push_items"], "PUSH_MOBS": lb["push_mobs"], "PILE_RANGE": lb["pile_range"],
+                "PILE_EVERY": lb["pile_every"], "VACUUM_RANGE": lb["vacuum_range"]}
+    for name, value in expected.items():
+        found = number("LeafBlowerItem", name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"LeafBlowerItem.{name} = {found} differs from tools/leaf_blower.py ({value})")
+    source = java.get("LeafBlowerItem", "")
+    if f'ID = "{lb["item"]}"' not in source or "implements Chargeable" not in source:
+        err("LeafBlowerItem must be the Chargeable item tools/leaf_blower.py names")
+    if "registerItem(LeafBlowerItem.ID, LeafBlowerItem::new" not in java.get("JugcraftAgriculture", "") or \
+            "component(JugcraftTools.ENERGY, 0L)" not in java.get("JugcraftAgriculture", ""):
+        err("JugcraftAgriculture.java must register the Leaf Blower with an empty charge")
+    model = load(ASSETS / "models" / "item" / f"{lb['item']}.json") or {}
+    if not model.get("elements"):
+        err(f"The Leaf Blower needs its model, models/item/{lb['item']}.json")
+    for name, texture in model.get("textures", {}).items():
+        path = ASSETS / "textures" / f"{texture.split(':', 1)[1]}.png"
+        if not path.exists():
+            err(f"The Leaf Blower's model draws missing texture {texture}")
+    if lang.get(f"item.{MOD}.{lb['item']}") != lb["display"]:
+        err(f"The Leaf Blower has no words for item.{MOD}.{lb['item']}")
+    for key in (f"item.{MOD}.{lb['item']}.tooltip", f"message.{MOD}.leaf_blower.flat"):
+        if key not in lang:
+            err(f"The Leaf Blower has no words for {key}")
+    for path in [DATA / MOD / "advancement" / f"{a}.json" for a in leaf_blower.ADVANCEMENTS] + [
+            DATA / MOD / "recipe" / f"{r['id']}.json" for r in leaf_blower.SHAPED] + [ASSETS / "items" / f"{lb['item']}.json"]:
+        if not path.exists():
+            err(f"The Leaf Blower needs {path.relative_to(ROOT)}")
 
 
 def check_pumpkling(java, number, lang):

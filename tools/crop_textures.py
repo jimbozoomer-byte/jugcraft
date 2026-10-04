@@ -924,6 +924,10 @@ def crop_textures():
     out.update(midway_textures())
     from ferris_wheel_textures import ferris_wheel_textures  # and the Ferris wheel
     out.update(ferris_wheel_textures())
+    from pinata_textures import pinata_textures  # and the piñata party
+    out.update(pinata_textures())
+    from hot_air_balloon_textures import hot_air_balloon_textures  # and the hot-air balloon fiesta
+    out.update(hot_air_balloon_textures())
     from ofrenda_textures import ofrenda_textures  # and the ofrenda
     out.update(ofrenda_textures())
     from graveyard_textures import graveyard_textures  # and the graveyard pack

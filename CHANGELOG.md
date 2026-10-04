@@ -8,6 +8,24 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: The leaf blower, fall addition 30
+- **Leaf Blower:** a dieselpunk electric leaf blower in the powered tools' olive drab, gunmetal and chrome, charged at the Charging Station (40,000 JE; 4 JE a tick blowing, 6 vacuuming).
+- **Blow** (hold use): a stream 8 blocks long blows items along and nudges mobs (other players only where PvP allows), puts out candles, and **herds leaf piles** a layer at a time into heaps against whatever stops them. Gone with the Wind.
+- **Vacuum** (sneak): draws items in and takes leaf piles and leaf litter up into your inventory, a layer for an item, for the composter.
+- Only where its user may build. Eight game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-leaf-blower).
+
+### Unmerged: The hot-air balloon fiesta, fall addition 29
+- **Hot-air balloons** in three designs: Harvest Stripes, a Jack-o'-Lantern special shape with carved faces, and Harvest Moon with a witch across the moon. A wicker basket for four under a twin-coil burner; fuel it with coal, charcoal or coke.
+- **Fly by heat:** the pilot fires the burner (jump) and opens the vent (back). It can't be steered: it drifts on **winds that blow different ways at different heights**, eight layers from sea level, the lowest two roughly opposite, so you can fly out low and come home higher (The Box). Gauges show height, heat, wind and fuel.
+- **Pibals** to see the winds aloft; **Mooring Posts** to tether a balloon for rides; a **night glow** while the burners fire. Up, Up and Away, The Box, Mass Ascension.
+- Envelopes are smooth turned surfaces painted as 768 × 384 wraps; the rest at 64 × 64. Ten game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-hot-air-balloon-fiesta).
+
+### Unmerged: The piñata party, fall addition 28
+- **Three piñatas** of crepe-paper fringe: a jack-o'-lantern Pumpkin, a seven-pointed Star with tassels, and a winged Bat. Hang one from the underside of a block, and anyone can fill it with anything, up to nine stacks.
+- **Swing at it:** a charged swing is a hit (the red-and-white **Piñata Stick** counts two); it swings on its rope, tears at half its hits, and bursts in confetti on the last, spraying its contents out. Piñata Party.
+- **The Blindfold** blacks out your view but for a sliver; burst one blindfolded for Blind Luck.
+- Painted at 64 × 64. Five game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-piñata-party).
+
 ### Unmerged: The Ferris wheel, fall addition 27
 - **A fairground big wheel**, real-life sized: place the **Ferris Wheel** booth and the wheel rises over it, 16 blocks high, two lattice A-frames, red trussed rims with 128 bulbs, and eight cars (pumpkin, cranberry, mustard and spruce) seating two each.
 - **Kinetic power turns it:** a hand crank, shaft or engine against the booth; 12 KE a tick is full speed, a turn in 40 seconds. One player can crank while friends ride.
