@@ -161,7 +161,7 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 52. Rockets leave the tubes **fanned out from the middle**, so a volley or a finale spreads across the sky. A show runs until the tubes are empty (a finale fires once). Comparators read how many tubes are loaded; broken, it spills its rockets.
 
 ### Sky lanterns
-53. **Sky Lanterns:** five paper, two string and a candle make two. Dye one in the crafting grid, as leather armour is dyed (warm red undyed), and name it in an anvil: the name is its **wish**, shown over it as it rises.
+53. **Sky Lanterns:** five paper, two string and a candle make two. Dye one in the crafting grid, as leather armour is dyed (warm red undyed; a water cauldron washes the dye out), and name it in an anvil: the name is its **wish**, shown over it as it rises.
 54. **Letting one go:** use it and it is lit and let go just in front of you. It rises 0.7 blocks a second, bobbing a little and turning slowly, and drifts on **a wind every lantern shares**: 0.3 blocks a second, its direction turning full circle every three days. Lanterns let go together drift together, so a festival's lanterns rise as one cloud.
 55. **Glowing and burning out:** the paper glows in its colour, lighter where the flame shines through, and flickers. A lantern burns for two minutes to two and a half, dims over its last five seconds and is gone; one that rises above the world is gone too. A blow tears it and puts it out with a hiss. It lights no blocks and sets nothing alight.
 
@@ -523,7 +523,7 @@ Fireworks:
 Sky lanterns:
 - Textures are drawn by code in `tools/lantern_textures.py`: the lantern's item in two layers (its paper, pale so the dye tints it, and, untinted, its bamboo ring and flame), the rice paper the client wraps a lantern in, and each mooncake (a scalloped golden cake pressed with a flower, a wedge cut away to show its filling).
 - A lantern in flight is drawn by `SkyLanternRenderer`: its paper body on its ring, glowing at full brightness and flickering, dimming as it burns out.
-- Models, the recipe, the `minecraft:dyeable` tag and words come from `tools/lantern_data.py`; the mooncakes' Cooking Pot recipes from `POT_RECIPES`; the numbers from `LANTERNS` in `tools/agriculture.py`.
+- Models, the recipe, the dyeing recipe (Minecraft 26.3's `minecraft:crafting_dye`, as leather's), the `minecraft:cauldron_can_remove_dye` tag and words come from `tools/lantern_data.py`; the mooncakes' Cooking Pot recipes from `POT_RECIPES`; the numbers from `LANTERNS` in `tools/agriculture.py`.
 - Sounds are vanilla's (flint and steel to light one, a fire going out when one is torn).
 
 The feast table:
@@ -737,6 +737,8 @@ The 4 new game tests (`LanternGameTests`):
 4. the first and ninth nights are full-moon nights, and noon, the second night and dawn aren't; the three mooncake recipes load; wheat, sugar, an egg and roasted chestnuts bake four chestnut mooncakes; a mooncake is three food.
 
 Found by CI and fixed before this record: nothing in the lanterns; their tests passed on their first run.
+
+Fixed later (3 October 2026): the lantern was dyed by listing it in `minecraft:dyeable`, which Minecraft 26.3 doesn't dye by (knitting found that leather isn't in it). It now has its own dyeing recipe, `sky_lantern_dyed` (`minecraft:crafting_dye`: the lantern and any dye give it back in that colour, as leather is dyed), and joins `minecraft:cauldron_can_remove_dye`, so a water cauldron washes it. The checker now looks for the recipe and the tag. A fifth test, `aLanternTakesDye`, shows a lantern and red dye make the same kind of recipe as a leather helmet and come out dyed, and a water cauldron washes the dye out. It passed in Build workflow run 37129429165 on `edceeff` (its second attempt; 571 server game tests in all, and the client tests). The first attempt failed only on `PixelHollowsGameTests.everyVillageHasOneShop`, a village test this fix doesn't touch, in which a taiga village got no shop.
 
 **Not run (lanterns):**
 - a person playing it in a client: letting lanterns go, watching a festival, eating a mooncake under a real full moon (the test checks the full-moon reckoning and the food, not the Luck from eating one at night);
