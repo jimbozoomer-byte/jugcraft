@@ -22,6 +22,14 @@ No numbered release yet. Everything below is on `main`.
 - **The mandrake:** wild, or grown from its root; a ripe one screams when pulled, sickening bare-headed players within 8 blocks (Mind Your Ears). Its root makes Flying Ointment.
 - They grow in the haunted biomes and some of vanilla's. Grave vases take them by colour. Eight game tests, client screenshots. Record: [graveyard-flora.md](docs/features/graveyard-flora.md).
 
+### Unmerged: Tower guns, batch 54
+- Five heavy emplacements for the top of a tower, after the owner's reference picture of a heavy mortar on a turntable mount: a concrete plinth, a railed turntable, a yellow cradle and a fat black barrel.
+  - For a 3x3 top: the **Bastion Mortar** and the twin-barrelled **Bastion Autocannon**.
+  - For a 5x5 top: the **Grand Mortar**, the long **Fortress Rifle** (out to about 210 blocks) and the three-barrelled **Triple Battery**.
+- Each needs a solid top under its whole footprint, and is crewed and aimed like the big guns.
+- The Grand Mortar fires the new **Great Shell** (2 Heavy Shells and TNT). Its burst reaches 7 blocks; like every shell, it hurts creatures and never breaks blocks.
+- Three game tests and a screenshot scene. Record: [tower-guns.md](docs/features/tower-guns.md).
+
 ### Unmerged: Clean steampunk textures, batch 53
 - The steampunk textures (`sp_*`) get the same clean style as the dieselpunk ones: flat fills, bevelled plates with rivets, banded sheens, and wear only as a few placed marks. Iron and brass plates, wrought iron, brass, copper, tanks, planks, firebrick, glass, red iron, the hopper inside, water, lava, leaves, bark and soil lose their per-pixel noise.
 - Record: [clean-steampunk-textures.md](docs/features/clean-steampunk-textures.md).

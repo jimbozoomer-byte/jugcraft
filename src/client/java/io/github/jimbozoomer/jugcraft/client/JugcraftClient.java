@@ -74,6 +74,10 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.BALLOON, ArtilleryRenderers.Balloon::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL, ThrownItemRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.FLAK_SHELL, ThrownItemRenderer::new);
+		for (var type : io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.TYPES.values()) {
+			EntityRendererRegistry.register(type, TowerGunRenderer::new);
+		}
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.GREAT_SHELL, ThrownItemRenderer::new);
 		ArtilleryClient.register();
 		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.building.Trenchworks.SEARCHLIGHT_ENTITY, SearchlightRenderer::new);
 		ArmsMotion.load();
