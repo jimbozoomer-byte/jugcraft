@@ -498,7 +498,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 				gun.face(200.0F);
 				overworld.addFreshEntity(gun);
 			});
-			server.runCommand("tp @p %d %d %d 168 22".formatted(x - 94, y + 9, z + 13));
+			server.runCommand("tp @p %d %d %d 168 6".formatted(x - 95, y + 6, z + 18));
 			context.waitTicks(60);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_fortifications");
