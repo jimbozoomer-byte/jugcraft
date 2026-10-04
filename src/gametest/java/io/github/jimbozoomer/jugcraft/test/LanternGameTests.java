@@ -14,21 +14,32 @@ import java.util.Optional;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -95,6 +106,38 @@ public class LanternGameTests {
 			lantern.discard();
 			helper.succeed();
 		});
+	}
+
+	/**
+	 * A lantern takes dye in the crafting grid by the same kind of recipe as a leather helmet (Minecraft 26.3 dyes by a recipe
+	 * for each item, not by the minecraft:dyeable tag) and comes out in the dye's colour; a water cauldron washes it out.
+	 */
+	@GameTest
+	public void aLanternTakesDye(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Item red = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace("red_dye"));
+		RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
+		Optional<RecipeHolder<CraftingRecipe>> leather = crafting.getRecipeFor(
+				CraftingInput.of(2, 1, List.of(new ItemStack(Items.LEATHER_HELMET), new ItemStack(red))), level);
+		helper.assertTrue(leather.isPresent(), "A leather helmet and red dye make a recipe");
+		CraftingInput input = CraftingInput.of(2, 1, List.of(new ItemStack(JugcraftAgriculture.item("sky_lantern")), new ItemStack(red)));
+		Optional<RecipeHolder<CraftingRecipe>> recipe = crafting.getRecipeFor(input, level);
+		helper.assertTrue(recipe.isPresent() && recipe.get().value().getClass() == leather.get().value().getClass(),
+				"A lantern takes dye as leather does");
+		ItemStack dyed = recipe.get().value().assemble(input);
+		DyedItemColor colour = dyed.get(DataComponents.DYED_COLOR);
+		helper.assertTrue(dyed.is(JugcraftAgriculture.item("sky_lantern")) && colour != null && colour.rgb() != SkyLantern.DEFAULT_COLOUR,
+				"It comes out dyed: " + dyed);
+		BlockPos cauldron = new BlockPos(1, 2, 1);
+		helper.setBlock(cauldron, Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3));
+		ServerPlayer washer = player(helper, new BlockPos(1, 2, 3), dyed);
+		BlockPos absolute = helper.absolutePos(cauldron);
+		washer.gameMode.useItemOn(washer, level, dyed, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(absolute), Direction.NORTH, absolute, false));
+		ItemStack washed = washer.getMainHandItem();
+		helper.assertTrue(washed.is(JugcraftAgriculture.item("sky_lantern")) && !washed.has(DataComponents.DYED_COLOR),
+				"A water cauldron washes the dye out: " + washed);
+		helper.succeed();
 	}
 
 	/** Lanterns let go together drift the same way; one dims over its last seconds; one above the world is gone; a blow tears one. */

@@ -383,7 +383,7 @@ def machine_page(block):
 
 
 def arms_pages():
-    """Batch 42: the arms, three pages: swords, maces and hammers, polearms."""
+    """Batch 42: the arms, three pages: swords, maces and hammers, polearms. Batch 45 (Arms II): two more."""
     import arms
     import gear
 
@@ -417,6 +417,43 @@ def arms_pages():
             f"Lance: a horseman's charge that hits harder and unhorses riders at lower speeds, reaching "
             f"{arms.LANCE_REACH[1]} blocks."],
          "craft": craft("halberd")},
+        # Arms II (batch 45).
+        {"title": "Arms: Blades of Skill", "icon": f"{MOD}:steel_dagger", "text": [
+            f"Dagger: quick stabs at a {k['dagger']['reach'][1]}-block reach; a blow from behind deals "
+            f"{round(arms.BACKSTAB * 100)}% more.",
+            f"Sabre: quick sweeping cuts, and {arms.SADDLE:g} more damage from the saddle.",
+            f"Estoc: thrusts through mail, {arms.ARMOR_PIERCE:g} more damage for each point of the foe's armor (at most "
+            f"{arms.ARMOR_PIERCE_MAX:g}).",
+            f"Quarterstaff: two-handed, knocks foes back; hold use to parry {round(k['quarterstaff']['parry'] * 100)}% of a "
+            "blow from in front."],
+         "craft": craft("dagger")},
+        {"title": "Arms: Heavy and Long", "icon": f"{MOD}:steel_battle_axe", "text": [
+            f"Battle axe: two-handed; chops wood like an axe and stops a shield blocking for "
+            f"{k['battle_axe']['disable']:g} seconds.",
+            f"Flail: a hit dazes the foe, slowing it for {arms.DAZE[0] // 20} seconds.",
+            f"Scythe: wide sweeps at {k['scythe']['reach'][1]:g} blocks. Use it on a ripe crop to reap every ripe crop "
+            "around it, 3 by 3, and replant them.",
+            f"Pike: the longest reach, {k['pike']['reach'][1]:g} blocks, but nothing nearer than {k['pike']['reach'][0]:g}; "
+            f"{round(arms.RIDERS * 100)}% more damage to riders and their mounts."],
+         "craft": craft("scythe")},
+        # Arms III (batch 46).
+        {"title": "Arms: Two Hands", "icon": f"{MOD}:steel_greatsword", "text": [
+            "Greatswords, war hammers, glaives, battle axes, scythes, quarterstaves, pikes and the two-handers swing "
+            "with both hands: a click starts the swing, and the blow lands as it comes round, on every foe in its arc.",
+            f"You slow to {round((1 - arms.TWO_HANDED_SLOW) * 100)}% of your speed while the swing is in the air. A click "
+            "near its end follows straight on.",
+            f"The last swing of each combo is the finishing blow, {round((arms.FINISHER - 1) * 100)}% stronger.",
+            "There is no hand left for a shield: with one in the off hand, a two-handed arm will not swing."],
+         "craft": craft("zweihander")},
+        {"title": "Arms: The Two-Handers", "icon": f"{MOD}:steel_maul", "text": [
+            f"Zweihander: the widest cleave, up to {arms.TWO_HANDED['zweihander']['targets']} foes; hold use to guard "
+            f"against {round(k['zweihander']['parry'] * 100)}% of a blow from in front.",
+            f"Maul: the heaviest blow; its finishing blow shakes the ground, striking foes within {arms.QUAKE_RADIUS:g} "
+            "blocks and slowing them.",
+            f"Executioner's sword: {round(arms.EXECUTE * 100)}% more damage to a foe at or below "
+            f"{round(arms.EXECUTE_HEALTH * 100)}% of its health.",
+            "Bill: a hooked polearm that pulls the foes it strikes towards you and drags riders from the saddle."],
+         "craft": craft("maul")},
     ]
 
 
