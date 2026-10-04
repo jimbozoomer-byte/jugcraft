@@ -1741,7 +1741,34 @@ public final class JugcraftAgriculture {
 				.strength(3.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.METAL).noOcclusion().lightLevel(LampPostBlock::light)
 				.pushReaction(PushReaction.POPPED));
 		registerItem(LAMP_POST, props -> new BlockItem(post, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerChurchyardOrnaments();
 	}
+
+	/**
+	 * Halloween decorations batch 15, the churchyard's ornaments (tools/decor15.py): the Bone Pile, the Ossuary Wall, the
+	 * Giant Bone Hand and the Witch's Lantern. (The Gargoyle is a headstone style.)
+	 */
+	private static void registerChurchyardOrnaments() {
+		Block pile = registerBlock(BONE_PILE, BonePileBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(0.4F)
+				.sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block wall = registerBlock(OSSUARY_WALL, OssuaryWallBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BONE_BLOCK));
+		Block hand = registerBlock(BONE_HAND, props -> new GiantBoneHandBlock(props, Block.box(2.5, 0.0, 2.5, 13.5, 16.0, 13.5),
+				Block.box(4.0, 0.0, 4.0, 12.0, 10.0, 12.0)), BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(1.5F)
+				.sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		Block lantern = registerBlock(WITCHS_LANTERN, LanternBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LANTERN)
+				.mapColor(MapColor.COLOR_PURPLE).lightLevel(state -> WITCHS_LANTERN_LIGHT));
+		for (Block block : List.of(pile, wall, lantern)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		registerItem(BONE_HAND, props -> new DoubleHighBlockItem(hand, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+	}
+
+	public static final String BONE_PILE = "bone_pile";
+	public static final String OSSUARY_WALL = "ossuary_wall";
+	public static final String BONE_HAND = "giant_bone_hand";
+	public static final String WITCHS_LANTERN = "witchs_lantern";
+	public static final int WITCHS_LANTERN_LIGHT = 13;
 
 	/** The Grave Vase and the Cemetery Lamp Post. */
 	public static final String GRAVE_VASE = "grave_vase";

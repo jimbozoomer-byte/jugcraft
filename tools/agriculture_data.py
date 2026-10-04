@@ -51,6 +51,7 @@ import ferris_wheel_data
 import pinata_data
 import hot_air_balloon_data
 import leaf_blower_data
+import decor15_data
 import ofrenda_data
 import graveyard_data
 import regatta_data
@@ -255,6 +256,7 @@ def assets(root, write, lang):
     pinata_data.assets(root, write, lang)
     hot_air_balloon_data.assets(root, write, lang)
     leaf_blower_data.assets(root, write, lang)
+    decor15_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
 
@@ -381,6 +383,7 @@ def loot(data, write):
     turkey_data.loot(out, write)
     werewolf_data.loot(out, write)
     midway_data.loot(out, write)
+    decor15_data.loot(out, write)
     ferris_wheel_data.loot(out, write)
     hot_air_balloon_data.loot(out, write)
     theremin_data.loot(out, write)
@@ -477,6 +480,7 @@ def tags(tags):
     squirrel_data.tags(tags)
     pumpkling_data.tags(tags)
     midway_data.tags(tags)
+    decor15_data.tags(tags)
     ferris_wheel_data.tags(tags)
     hot_air_balloon_data.tags(tags)
     regatta_data.tags(tags)

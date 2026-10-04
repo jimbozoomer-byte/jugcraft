@@ -1042,6 +1042,23 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **The mandrake:** pull a wild one for its roots and plant them on farmland. A ripe mandrake **screams** when pulled up, sickening every player within 8 blocks with nothing on their head (wear something: **Mind Your Ears**). Its root also makes **Flying Ointment** in the purple brew.
 - **Grave vases** take the flora's flowers by colour. Details: [the graveyard flora](../features/graveyard-flora.md).
 
+### The churchyard's ornaments
+
+| **A catacomb corner**: ossuary walls, bone piles, gargoyles, giant bone hands and witch's lanterns | **The ossuary walls** and bone piles heaped at their foot |
+| --- | --- |
+| ![The churchyard's ornaments](../images/ingame_churchyard_ornaments.jpg) | ![Ossuary walls and bone piles](../images/ingame_churchyard_ossuary.jpg) |
+| **Two gargoyles** on their inscribed plinths, one weathered to moss, and a bone hand | **The giant bone hands**, the right one clenched by a hidden redstone block |
+| ![Gargoyles](../images/ingame_churchyard_gargoyles.jpg) | ![Giant bone hands](../images/ingame_churchyard_bone_hands.jpg) |
+| **Witch's lanterns** hanging from a beam, and two standing | **By night**, by the lanterns' violet light |
+| ![Witch's lanterns](../images/ingame_churchyard_lanterns.jpg) | ![The ornaments at night](../images/ingame_churchyard_ornaments_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`ChurchyardOrnamentsClientGameTests`, software rendering, small previews). The gargoyles' inscriptions and weathering are set for the picture.*
+
+- **Gargoyle**: crouched on a granite plinth, wings folded, jaws open for the rain. It weathers and takes an inscription on its plinth like the graveyard's monuments.
+- **Bone Pile**: bones and skulls heaped up to four layers. **Ossuary Wall**: a catacomb's skulls and long bones as a building block.
+- **Giant Bone Hand**: two blocks tall out of grave earth, clenching into a fist on a redstone signal.
+- **Witch's Lantern**: gothic iron and violet glass, standing or hanging. Details: [the churchyard's ornaments](../features/churchyard-ornaments.md).
+
 ## Even more fall additions
 
 Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).
