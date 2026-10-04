@@ -76,6 +76,11 @@ class Clip:
     def __init__(self, name, keys):
         self.name = name
         self.keys = sorted(keys, key=lambda k: k[0])
+        # A weapon art's clip (Arms V): its length in ticks, whether it holds its last pose until the art's next phase,
+        # and the whole body's turn at each key (degrees), if it turns.
+        self.ticks = None
+        self.hold = False
+        self.spin = None
 
     def bones(self):
         used = set()
@@ -303,15 +308,24 @@ def kind_json(moves):
     moves (the spear's and lance's leave the arms to vanilla)."""
     hold = moves["hold"]
     clips = moves["attacks"]
+    arts = moves.get("arts", [])
     use = moves.get("use")
-    bones = mask(hold, *(pose for c in clips for _t, pose, _k in c.keys), *([use] if use else []))
+    bones = mask(hold, *(pose for c in clips + arts for _t, pose, _k in c.keys), *([use] if use else []))
     if moves.get("body_only"):
         bones &= ~(mask({"right_arm": 0, "left_arm": 0, "item": 0}))
     fp_hold = moves.get("fp_hold", (0.0,) * 6)
 
     def fp_keys(c):
         return getattr(c, "fp", None) or [(0.0, fp_hold, 0.0), (1.0, fp_hold, 0.0)]
-    return {
+
+    def clip_entry(c):
+        return {"name": c.name, "times": [round(t, 4) for t, _p, _k in c.keys],
+                "tension": [round(k, 3) for _t, _p, k in c.keys],
+                "keys": [flat(p) for _t, p, _k in c.keys],
+                "fp_times": [round(t, 4) for t, _p, _k in fp_keys(c)],
+                "fp_tension": [round(k, 3) for _t, _p, k in fp_keys(c)],
+                "fp_keys": [[round(v, 3) for v in p] for _t, p, _k in fp_keys(c)]}
+    out = {
         "bones": bones,
         "two_handed": moves.get("two_handed", 0),
         "hold": flat(hold),
@@ -319,13 +333,14 @@ def kind_json(moves):
         # First person: the held arm's turn and offset on screen (rx, ry, rz, x, y, z); while it is used (a parry),
         # vanilla's own blocking pose takes over.
         "fp_hold": [round(v, 3) for v in fp_hold],
-        "attacks": [{"name": c.name, "times": [round(t, 4) for t, _p, _k in c.keys],
-                     "tension": [round(k, 3) for _t, _p, k in c.keys],
-                     "keys": [flat(p) for _t, p, _k in c.keys],
-                     "fp_times": [round(t, 4) for t, _p, _k in fp_keys(c)],
-                     "fp_tension": [round(k, 3) for _t, _p, k in fp_keys(c)],
-                     "fp_keys": [[round(v, 3) for v in p] for _t, p, _k in fp_keys(c)]} for c in clips],
+        "attacks": [clip_entry(c) for c in clips],
     }
+    if arts:
+        # A weapon art's phases (Arms V), played when the server says each began: its ticks, whether it holds its last
+        # pose until the next phase, and the whole body's turn at each key.
+        out["arts"] = [{**clip_entry(c), "ticks": c.ticks, "hold": c.hold,
+                        "spin": [round(v, 3) for v in c.spin] if c.spin else None} for c in arts]
+    return out
 
 
 def write_all(write, assets):
