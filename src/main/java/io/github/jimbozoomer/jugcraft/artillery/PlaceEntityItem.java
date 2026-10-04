@@ -17,7 +17,10 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.phys.Vec3;
 
-/** A big gun or balloon as an item: use it on the ground to set it down there, facing the way you face. */
+/**
+ * A big gun or balloon as an item: use it on the ground to set it down there, facing the way you face. A tower gun
+ * (batch 54) is centred on the block above the one clicked and needs a solid top under its whole footprint.
+ */
 public class PlaceEntityItem extends Item {
 	private final Supplier<EntityType<? extends Entity>> type;
 	private final String tooltip;
@@ -44,6 +47,13 @@ public class PlaceEntityItem extends Item {
 		entity.snapTo(spot.x, spot.y, spot.z, yaw, 0.0F);
 		if (entity instanceof CrewedGun gun) {
 			gun.face(yaw);
+		}
+		if (entity instanceof TowerGun gun && !TowerGun.supported(level, at, gun.spec().footprint())) {
+			// A tower gun stands on a solid top as wide as it is: a tower's, a wall's or the ground.
+			if (player != null) {
+				player.sendOverlayMessage(Component.translatable("message.jugcraft.artillery.needs_top", gun.spec().footprint()));
+			}
+			return InteractionResult.FAIL;
 		}
 		if (!level.noCollision(entity, entity.getBoundingBox())) {
 			if (player != null) {

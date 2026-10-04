@@ -409,6 +409,42 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_big_guns");
 
+			// Tower guns (batch 54), each on its own stone-brick tower in a row: the Grand Mortar, the Bastion Mortar, the
+			// Fortress Rifle, the Bastion Autocannon and the Triple Battery, seen from behind and above. They stand well west
+			// of everything else (from x - 80 to x - 44), so the machine rows that later views open stay untouched.
+			for (String type : new String[] {"siege_mortar", "self_propelled_howitzer", "flak_gun", "observation_balloon"}) {
+				server.runCommand("kill @e[type=jugcraft:" + type + "]");
+			}
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 80, y, z - 12, x - 44, y + 12, z + 2));
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				String[] guns = {"grand_mortar", "bastion_mortar", "fortress_rifle", "bastion_autocannon", "triple_battery"};
+				int[] heights = {6, 4, 5, 3, 4};
+				float[] facing = {160.0F, 200.0F, 150.0F, 210.0F, 170.0F};
+				int cx = x - 76;
+				for (int i = 0; i < guns.length; i++) {
+					var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type(guns[i]);
+					int half = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.specOf(type).footprint() / 2;
+					cx += half;
+					for (int dx = -half; dx <= half; dx++) {
+						for (int dz = -half; dz <= half; dz++) {
+							for (int dy = 0; dy < heights[i]; dy++) {
+								overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + dy, z - 6 + dz), Blocks.STONE_BRICKS.defaultBlockState());
+							}
+						}
+					}
+					io.github.jimbozoomer.jugcraft.artillery.TowerGun gun = new io.github.jimbozoomer.jugcraft.artillery.TowerGun(type, overworld);
+					gun.snapTo(cx + 0.5, y + heights[i], z - 6 + 0.5, 0.0F, 0.0F);
+					gun.face(facing[i]);
+					overworld.addFreshEntity(gun);
+					cx += half + 2;
+				}
+			});
+			server.runCommand("tp @p %d %d %d 180 22".formatted(x - 62, y + 11, z + 14));
+			context.waitTicks(60);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_tower_guns");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;

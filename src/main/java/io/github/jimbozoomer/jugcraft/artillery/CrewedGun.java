@@ -46,6 +46,7 @@ import org.jspecify.annotations.Nullable;
  */
 public abstract class CrewedGun extends Entity {
 	private static final int INPUT_TIMEOUT = 10;
+	private static final double[] SINGLE_BARREL = {0.0};
 	private static final EntityDataAccessor<Float> AIM_YAW = SynchedEntityData.defineId(CrewedGun.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Float> AIM_PITCH = SynchedEntityData.defineId(CrewedGun.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Integer> FIRED_AT = SynchedEntityData.defineId(CrewedGun.class, EntityDataSerializers.INT);
@@ -108,6 +109,28 @@ public abstract class CrewedGun extends Entity {
 	/** Where a passenger sits, before turning with the gun. */
 	protected abstract Vec3 seat(int index);
 
+	/**
+	 * The point the barrel turns about: {@link #pivotHeight()} above the gun's feet, plus {@link #pivotForward()} along
+	 * its aim for a gun whose trunnions sit forward of its turntable.
+	 */
+	protected Vec3 pivot() {
+		double yaw = Math.toRadians(entityData.get(AIM_YAW));
+		return position().add(-Math.sin(yaw) * pivotForward(), pivotHeight(), Math.cos(yaw) * pivotForward());
+	}
+
+	/** How far forward of the turntable's centre the trunnions sit, in blocks. */
+	protected double pivotForward() {
+		return 0.0;
+	}
+
+	/**
+	 * Each barrel's offset across the gun, in blocks (positive to the gun's left). One press fires a shell from each,
+	 * using one shell each.
+	 */
+	protected double[] barrelOffsets() {
+		return SINGLE_BARREL;
+	}
+
 	/** Limits a wanted aim yaw (for a gun that can't turn all the way round). */
 	protected float limitYaw(float yaw) {
 		return yaw;
@@ -166,7 +189,7 @@ public abstract class CrewedGun extends Entity {
 		boolean listening = gunner instanceof ServerPlayer && tickCount - inputTick <= INPUT_TIMEOUT;
 		move(level, listening);
 		resetFallDistance();
-		Vec3 pivot = position().add(0, pivotHeight(), 0);
+		Vec3 pivot = pivot();
 		float[] wanted = gunner instanceof ServerPlayer player ? wantedAim(level, player, pivot) : null;
 		if (wanted != null) {
 			float yaw = entityData.get(AIM_YAW);
@@ -238,20 +261,31 @@ public abstract class CrewedGun extends Entity {
 	}
 
 	private void fire(ServerLevel level, ServerPlayer gunner, Vec3 pivot) {
-		if (!gunner.getAbilities().instabuild && !takeAmmo(gunner.getInventory())) {
+		Vec3 dir = barrelDirection();
+		double yaw = Math.toRadians(entityData.get(AIM_YAW));
+		Vec3 across = new Vec3(Math.cos(yaw), 0, Math.sin(yaw));
+		int fired = 0;
+		for (double offset : barrelOffsets()) {
+			// Each barrel uses a shell; a salvo fires as many barrels as there are shells for.
+			if (!gunner.getAbilities().instabuild && !takeAmmo(gunner.getInventory())) {
+				break;
+			}
+			Vec3 muzzle = pivot.add(across.scale(offset)).add(dir.scale(barrelLength()));
+			ArtilleryShell shell = new ArtilleryShell(shellType(), level, gunner);
+			shell.setPos(muzzle);
+			shell.shoot(dir.x, dir.y, dir.z, (float) shellSpeed(), 0.0F);
+			level.addFreshEntity(shell);
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, automatic() ? 2 : 12, 0.3, 0.3, 0.3, 0.03);
+			level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, automatic() ? 1 : 6, 0.1, 0.1, 0.1, 0.02);
+			fired++;
+		}
+		if (fired == 0) {
 			gunner.sendOverlayMessage(Component.translatable("message.jugcraft.artillery.no_shells", new ItemStack(ammo()).getHoverName()));
 			return;
 		}
 		lastShot = tickCount;
 		entityData.set(FIRED_AT, tickCount);
-		Vec3 dir = barrelDirection();
 		Vec3 muzzle = pivot.add(dir.scale(barrelLength()));
-		ArtilleryShell shell = new ArtilleryShell(shellType(), level, gunner);
-		shell.setPos(muzzle);
-		shell.shoot(dir.x, dir.y, dir.z, (float) shellSpeed(), 0.0F);
-		level.addFreshEntity(shell);
-		level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, automatic() ? 2 : 12, 0.3, 0.3, 0.3, 0.03);
-		level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, automatic() ? 1 : 6, 0.1, 0.1, 0.1, 0.02);
 		level.playSound(null, muzzle.x, muzzle.y, muzzle.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS,
 				automatic() ? 0.6F : 3.0F, automatic() ? 1.9F : 0.7F);
 	}
