@@ -41,6 +41,9 @@ public class SarcophagusBlockEntity extends BaseContainerBlockEntity {
 	private long lastKnock = Long.MIN_VALUE / 2;
 	private int knocksLeft;
 	private long marked = Long.MIN_VALUE;
+	/** The client's lid: how far it is pushed aside (0 shut, 1 open), and the time it was last moved toward its state. */
+	public float lid;
+	public float lidTime = -1.0F;
 	private final ContainerOpenersCounter openers = new ContainerOpenersCounter() {
 		@Override
 		protected void onOpen(Level level, BlockPos pos, BlockState state) {

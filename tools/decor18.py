@@ -40,7 +40,7 @@ FOOTSTOOL = {"block": "skull_footstool", "display": "Skull Footstool", "seat": 0
 LAMP = {"block": "vertebra_floor_lamp", "display": "Vertebra Floor Lamp", "light": 13}
 
 SKULL = {"block": "colossal_skull", "display": "Colossal Skull", "jaw_degrees": 28.0, "jaw_speed": 2.0}
-RIB = {"block": "colossal_rib", "display": "Colossal Rib", "span": 3}
+RIB = {"block": "colossal_rib", "display": "Colossal Rib", "span": 2}
 VERTEBRA = {"block": "colossal_vertebra", "display": "Colossal Vertebra"}
 FEMUR = {"block": "colossal_femur", "display": "Colossal Femur"}
 

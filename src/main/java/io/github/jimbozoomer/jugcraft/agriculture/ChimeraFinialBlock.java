@@ -56,11 +56,19 @@ public class ChimeraFinialBlock extends HorizontalDirectionalBlock {
 
 	/** The weather falling on the block at {@code pos}: rain or snow on it from an open sky, and thunder. */
 	public static Weather weather(Level level, BlockPos pos) {
-		if (!level.isRaining() || !level.canSeeSky(pos.above())
-				|| level.getBiome(pos).value().getPrecipitationAt(pos, level.getSeaLevel()) == Biome.Precipitation.NONE) {
+		return weather(level.isRaining(), level.isThundering(), level.canSeeSky(pos.above()),
+				level.getBiome(pos).value().getPrecipitationAt(pos, level.getSeaLevel()));
+	}
+
+	/**
+	 * The weather on a finial: {@code raining} and {@code thundering} in the world, {@code open} to the sky, and what its
+	 * biome lets fall there. Snow counts as rain; a desert's dry sky is clear, as is anywhere under a roof.
+	 */
+	public static Weather weather(boolean raining, boolean thundering, boolean open, Biome.Precipitation precipitation) {
+		if (!raining || !open || precipitation == Biome.Precipitation.NONE) {
 			return Weather.CLEAR;
 		}
-		return level.isThundering() ? Weather.STORM : Weather.RAIN;
+		return thundering ? Weather.STORM : Weather.RAIN;
 	}
 
 	@Override

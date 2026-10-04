@@ -41,6 +41,7 @@ import control_electronics
 import rocketry
 import dieselworks
 import kaiserworks
+import trenchworks
 import zeppelin
 import mech
 import landship
@@ -161,7 +162,7 @@ def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS
-                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks()):
+                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -182,7 +183,7 @@ def check_assets(registered):
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()
-                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -319,7 +320,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS:
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS:
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -526,7 +527,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS)
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS)
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -740,6 +741,28 @@ def check_dieselworks():
             err(f"Dieselworks.java: {block} is not registered as {kind}, strength({hardness}F, {blast}F)")
     if f"int LAMP_LIGHT = {dieselworks.LAMP_LIGHT};" not in java:
         err(f"Dieselworks.LAMP_LIGHT differs from tools/dieselworks.py ({dieselworks.LAMP_LIGHT})")
+
+
+def check_trenchworks():
+    """building/Trenchworks.java and its blocks against tools/trenchworks.py: kinds, strengths and the numbers."""
+    building = JAVA_ROOT / "building"
+    java = (building / "Trenchworks.java").read_text(encoding="utf-8")
+    for block, (_, kind, hardness, blast) in trenchworks.BLOCKS.items():
+        if f'"{block}", "{kind}", {hardness}F, {blast}F' not in java:
+            err(f"Trenchworks.java: {block} is not registered as {kind}, strength({hardness}F, {blast}F)")
+    for const, literal in (("WIRE_SLOW", f"{trenchworks.WIRE_SLOW}"), ("WIRE_DAMAGE", f"{trenchworks.WIRE_DAMAGE}F"),
+                           ("PHONE_RANGE", f"{trenchworks.PHONE_RANGE}"), ("SEARCHLIGHT_YAWS", f"{trenchworks.SEARCHLIGHT_YAWS}"),
+                           ("SEARCHLIGHT_TILTS", f"{trenchworks.SEARCHLIGHT_TILTS}"),
+                           ("SEARCHLIGHT_LIGHT", f"{trenchworks.SEARCHLIGHT_LIGHT}")):
+        if f" {const} = {literal};" not in java:
+            err(f"Trenchworks.{const} differs from tools/trenchworks.py ({literal})")
+    renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+                / "SearchlightRenderer.java")
+    pivot = "PIVOT = {" + ", ".join(str(v) for v in trenchworks.PIVOT) + "}"
+    if not renderer.is_file() or pivot not in renderer.read_text(encoding="utf-8"):
+        err(f"SearchlightRenderer lacks {pivot} from tools/trenchworks.py")
+    if not (ASSETS / "trench_quads.json").is_file():
+        err("assets/jugcraft/trench_quads.json is missing: run tools/generate_material_data.py")
 
 
 def check_kaiserworks():
@@ -988,6 +1011,65 @@ def check_arms():
             err(f"The {kind}'s swing ({ticks} ticks) is longer than the time between its blows")
         if not 0 < info["strike"] < ticks or not 0 < info["arc"] <= 180 or info["targets"] < 1:
             err(f"tools/arms.py: the {kind}'s two-handed swing {info} is out of range")
+    # Arms V (batch 48): the weapon arts, their numbers, their timing against their animations, and their balance.
+    found_arts = {kind: {"move": move.lower(), "cooldown": int(cooldown), "ticks": int(ticks), "slow": float(slow)}
+                  for kind, move, cooldown, ticks, slow in re.findall(
+                      r'Map\.entry\("([a-z_]+)", new Art\(Move\.([A-Z_]+), (\d+), (\d+), ([\d.]+)F\)\)', java)}
+    expected_arts = {kind: {"move": art["move"], "cooldown": art["cooldown"], "ticks": art["ticks"], "slow": float(art["slow"])}
+                     for kind, art in arms.ARTS.items()}
+    if found_arts != expected_arts:
+        err(f"JugcraftArms.ARTS {found_arts} != tools/arms.py {expected_arts}")
+    moves = re.search(r"enum Move \{\s*([A-Z_, ]+);", java)
+    if not moves or sorted(m.strip().lower() for m in moves.group(1).split(",")) != sorted({a["move"] for a in arms.ARTS.values()}):
+        err("JugcraftArms.Move does not name the arts' moves")
+    for kind, art in arms.ARTS.items():
+        if kind not in arms.KINDS or arms.KINDS[kind].get("art") != art["move"] or arms.KINDS[kind]["parry"] or "trait" in arms.KINDS[kind]:
+            err(f"tools/arms.py: ARTS {kind} is not a kind with that art (and no parry or trait, which would take the use key)")
+        if not 0 < art["ticks"] <= art["cooldown"] or not 0 <= art["slow"] < 1:
+            err(f"tools/arms.py: the {kind}'s art {art} is out of range")
+    for name in ("CYCLONE_FIRST", "CYCLONE_EVERY", "CYCLONE_HITS", "CYCLONE_TARGETS", "IAIDO_START", "IAIDO_DASH", "IAIDO_DELAY",
+                 "IAIDO_TARGETS", "LEAP_MIN_AIR", "LEAP_STUCK", "LEAP_MAX_AIR", "LEAP_TARGETS", "FLURRY_FIRST", "FLURRY_EVERY",
+                 "FLURRY_JABS", "CRESCENT_RELEASE", "CRESCENT_TICKS", "CRESCENT_TARGETS", "LASH_THROW", "LASH_REAP"):
+        if f"{name} = {getattr(arms, name)};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({getattr(arms, name)})")
+    for name in ("CYCLONE_RADIUS", "CYCLONE_SHARE", "CYCLONE_PULL", "IAIDO_SPEED", "IAIDO_WIDTH", "IAIDO_SHARE", "IAIDO_REACH",
+                 "LEAP_UP", "LEAP_FORWARD", "LEAP_RADIUS", "LEAP_SHARE", "LEAP_EDGE", "LEAP_PER_BLOCK", "LEAP_DROP_MAX",
+                 "LEAP_LIFT", "FLURRY_SHARE", "FLURRY_FINISH", "FLURRY_ARC", "CRESCENT_SPEED", "CRESCENT_WIDTH",
+                 "CRESCENT_SHARE", "CRESCENT_FADE", "LASH_RANGE", "LASH_SHARE", "LASH_PULL", "LASH_PULL_MAX",
+                 "LASH_REAP_SHARE", "LASH_REAP_REACH"):
+        if f"{name} = {f(getattr(arms, name))};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({getattr(arms, name)})")
+    # Each art's animation has a key at every tick the server lands a hit (to half a tick), so the blow is seen as it lands.
+    hits = {"cyclone": [arms.CYCLONE_FIRST + i * arms.CYCLONE_EVERY for i in range(arms.CYCLONE_HITS)],
+            "iaido": [arms.IAIDO_START + arms.IAIDO_DASH + arms.IAIDO_DELAY],
+            "flurry": [arms.FLURRY_FIRST + i * arms.FLURRY_EVERY for i in range(arms.FLURRY_JABS + 1)],
+            "crescent": [arms.CRESCENT_RELEASE], "chain_lash": [arms.LASH_THROW, arms.LASH_REAP], "leap_slam": []}
+    for kind, art in arms.ARTS.items():
+        clips = arms_moves.MOVES.get(kind, {}).get("arts", [])
+        if not clips or clips[0].ticks != art["ticks"]:
+            err(f"tools/arms_moves.py: the {kind}'s art has no clip, or its first lasts other than {art['ticks']} ticks")
+            continue
+        for tick in hits[art["move"]]:
+            if tick > art["ticks"] or not any(abs(t * art["ticks"] - tick) <= 0.5 for t, _pose, _k in clips[0].keys):
+                err(f"tools/arms_moves.py: the {kind}'s {clips[0].name} has no key at its hit on tick {tick}")
+        if art["move"] == "leap_slam" and (len(clips) != 2 or not clips[0].hold or clips[1].keys[0][1] != clips[0].keys[-1][1]):
+            err(f"tools/arms_moves.py: the {kind}'s leap must hold in the air and its slam start from there")
+    if not 0 < arms.LEAP_MIN_AIR < arms.LEAP_STUCK < arms.LEAP_MAX_AIR or arms.LASH_THROW >= arms.LASH_REAP:
+        err("tools/arms.py: the leap's or the chain's timing is out of order")
+    # Against one foe an art is no better than plain blows: over its cooldown (busy for its ticks, plain blows for the
+    # rest) an Arms V arm stays below its metal's sword, a second. Its worth is the shape: many foes, or getting there.
+    for kind, art in arms.ARTS.items():
+        info = arms.KINDS[kind]
+        combo = arms.TWO_HANDED.get(kind, {}).get("combo", 1)
+        finishing = (combo - 1 + arms.FINISHER) / combo if kind in arms.TWO_HANDED else 1.0
+        cycle, busy = art["cooldown"] / 20.0, art["ticks"] / 20.0
+        for metal, bonus in (("bronze", 2.0), ("steel", 2.5)):
+            blow = 1.0 + bonus + info["damage"]
+            plain = blow * (4.0 + info["speed"]) * finishing
+            sword = (1.0 + bonus + 3.0) * 1.6
+            average = (arms.art_share(kind) * blow + plain * (cycle - busy)) / cycle
+            if average >= sword:
+                err(f"The {metal} {kind} with its art deals {average:.2f} a second to one foe, not below the sword's {sword:.2f}")
     # No arm may take an id another generator already registers (two items of one id stop the game at start).
     clash = set(arms.items()) & (set(ag.all_items()) | set(all_items()) | set(all_blocks()))
     if clash:
@@ -1057,10 +1139,19 @@ def check_arms_motion():
             err(f"arms_motion/{kind}.json: a hold or use pose is the wrong size")
         if not motion["attacks"]:
             err(f"arms_motion/{kind}.json has no attacks")
-        for attack in motion["attacks"]:
+        for attack in motion["attacks"] + motion.get("arts", []):
             label = f"arms_motion/{kind}.json {attack['name']}"
             track(label, attack["times"], attack["tension"], attack["keys"], size)
             track(label + " (first person)", attack["fp_times"], attack["fp_tension"], attack["fp_keys"], 6)
+        for art in motion.get("arts", []):
+            if not art["ticks"] or art["ticks"] <= 0 or (art["spin"] is not None and len(art["spin"]) != len(art["times"])):
+                err(f"arms_motion/{kind}.json {art['name']}: an art clip needs its ticks, and a spin a turn for each key")
+            if art["spin"] and art["spin"][-1] % 360 != 0:
+                err(f"arms_motion/{kind}.json {art['name']}: a spin must end a whole number of turns round, or the body snaps")
+        if bool(motion.get("arts")) != (kind in arms.ARTS):
+            err(f"arms_motion/{kind}.json: has art clips if and only if the kind has an art")
+    if "WeaponArtPayload.TYPE" not in (client / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient does not receive WeaponArtPayload (no client would see a weapon art)")
     mixins = load(client / "resources" / f"{MOD}.client.mixins.json") or {}
     for mixin in ("ArmsRenderStateMixin", "ArmsHumanoidModelMixin", "ArmsItemInHandLayerMixin", "ArmsFirstPersonMixin"):
         if mixin not in mixins.get("client", []):
@@ -5507,7 +5598,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS)
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS)
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
@@ -5534,6 +5625,7 @@ def main():
     check_rocketry()
     check_dieselworks()
     check_kaiserworks()
+    check_trenchworks()
     check_zeppelin()
     check_walker()
     check_landship()

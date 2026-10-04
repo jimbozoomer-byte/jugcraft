@@ -55,9 +55,13 @@ public class GargoyleSentinelBlockEntity extends BlockEntity {
 	}
 
 	public void serverTick(ServerLevel level, BlockPos pos, BlockState state) {
-		if (Math.floorMod(level.getGameTime() + pos.asLong(), GargoyleSentinelBlock.CHECK_TICKS) != 0) {
-			return;
+		if (Math.floorMod(level.getGameTime() + pos.asLong(), GargoyleSentinelBlock.CHECK_TICKS) == 0) {
+			look(level, pos, state);
 		}
+	}
+
+	/** Looks for the nearest monster now: sets the signal for its distance and turns the head to it. */
+	public void look(ServerLevel level, BlockPos pos, BlockState state) {
 		Vec3 centre = Vec3.atCenterOf(pos);
 		Mob nearest = nearestEnemy(level, centre);
 		int power = nearest == null ? 0 : GargoyleSentinelBlock.signal(nearest.position().distanceTo(centre));

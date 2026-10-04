@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_twinblade",
+  "textures": {
+    "layer0": "jugcraft:item/bronze_twinblade"
+  }
+}

@@ -748,3 +748,281 @@ MOVES["war_pick"] = {
                 (0.76, settle(WP["swing_l"], WP_HOLD))), WP_FP, *fp_forehand(WP_FP, 1.0)),
     ],
 }
+
+# ================================================================ Arms V (batch 48): the weapon arts
+#
+# Each kind has its plain attacks and, under "arts", its weapon art's phases (tools/arms.py: ARTS; the server's
+# weapons/WeaponArts.java tells every client when a phase begins). An art's clip runs over its own ticks, not a swing,
+# and has a key at each moment the server lands a hit, so the blow is seen as it lands: tools/check_mod_data.py checks
+# them against the art's numbers. The cyclone also turns the whole body ("spin", degrees at each key). The leap's first
+# phase ends in the air and holds there until the second, the slam, begins as the wielder lands.
+
+LENGTH.update({"twinblade": 15, "nodachi": 30, "earthbreaker": 18, "katar": 10, "moonblade": 26, "kusarigama": 12})
+
+# The earthbreaker's slam, once landed: how long it plays (ticks).
+SLAM_TICKS = 10
+
+
+def art(name, ticks, hold, *keys, start=None, end=None, spin=None, hold_end=False):
+    """A weapon art's clip over `ticks` ticks: from `start` (the hold pose) through the keys (time, pose[, tension]) to
+    `end` (the hold pose); hold_end keeps the last pose until the art's next phase; spin turns the whole body (degrees,
+    one a key, the ends included)."""
+    full = [(0.0, start or hold, 0.0)]
+    for key in keys:
+        full.append((key[0], key[1], key[2] if len(key) > 2 else 0.0))
+    full.append((1.0, end or hold, 0.0))
+    c = Clip(name, full)
+    c.ticks = ticks
+    c.hold = hold_end
+    if spin is not None:
+        assert len(spin) == len(full), (name, len(spin), len(full))
+        c.spin = [float(v) for v in spin]
+    return c
+
+
+def fp_art(c, start, end, *poses):
+    """An art clip's first-person keys: one pose per inner key (same times), F(...) or (F(...), tension), from start to
+    end."""
+    inner = c.keys[1:-1]
+    assert len(poses) == len(inner), (c.name, len(poses), len(inner))
+    keys = [(0.0, start, 0.0)]
+    for (t, _pose, tension), pose in zip(inner, poses):
+        if isinstance(pose[0], tuple):
+            pose, tension = pose
+        keys.append((t, pose, tension))
+    c.fp = keys + [(1.0, end, 0.0)]
+    return c
+
+
+# ---------------------------------------------------------------- twinblade: cuts turn and turn about; the cyclone
+
+TB_HOLD = P(body=(0, 20, 0), head=(0, -18, 0), right_arm=(-42, 12, 8), item=(24, 0, -56), **step(0.7, 6))
+TB = {
+    "wind_r": P(body=(-4, 50, 0), head=(0, -42, 0), right_arm=(-96, 62, 28), item=(30, 0, 50), **step(-0.5, 10)),
+    "cut_l": P(body=(8, -32, 0), head=(-2, 26, 0), right_arm=(-80, -34, -6), item=(-6, 0, -56), **step(1.6, -8)),
+    "follow_l": P(body=(10, -44, 0), head=(-2, 36, 0), right_arm=(-54, -48, -10), item=(-22, 0, -64), **step(1.8, -10)),
+    "wind_l": P(body=(0, -40, 0), head=(0, 32, 0), right_arm=(-60, -62, -26), item=(14, 0, -76), **step(0.3, -8)),
+    "cut_r": P(body=(6, 34, 0), head=(-2, -28, 0), right_arm=(-104, 44, 24), item=(36, 0, 62), **step(1.4, 8)),
+    "follow_r": P(body=(4, 44, 0), head=(0, -36, 0), right_arm=(-120, 56, 30), item=(46, 0, 70), **step(1.4, 10)),
+    "low": P(body=(14, 30, 0, 0, 0.8, 0), head=(6, -26, 0), right_arm=(-20, 30, 20), item=(-40, 0, 40), **step(0.8, 6)),
+    "rise": P(body=(-10, -10, 0), head=(-10, 8, 0), right_arm=(-160, -10, -8), item=(80, 0, -20), **step(1.6, -2)),
+    # The cyclone: arms out and the blades level, the whole body turning (spin) through three turns.
+    "coil": P(body=(4, 44, 0, 0, 0.6, 0), head=(0, -36, 0), right_arm=(-70, 50, 30), item=(0, 0, 70), **step(-0.4, 12)),
+    "whirl_a": P(body=(8, -10, 0, 0, 0.8, 0), head=(2, 8, 0), right_arm=(-86, -20, 30), item=(0, 0, -84),
+                 right_leg=(0, 0, 14), left_leg=(0, 0, -14)),
+    "whirl_b": P(body=(10, -14, 0, 0, 0.9, 0), head=(4, 10, 0), right_arm=(-80, -26, 40), item=(-8, 0, -96),
+                 right_leg=(6, 0, 16), left_leg=(-6, 0, -16)),
+    "whirl_m": P(body=(6, -6, 0, 0, 0.7, 0), head=(2, 4, 0), right_arm=(-90, -14, 26), item=(4, 0, -78),
+                 right_leg=(-4, 0, 12), left_leg=(4, 0, -12)),
+}
+TB_FP = F(-10, 30, 40, -4, -2)
+FP_WHIRL_IN, FP_WHIRL_OUT = F(-24, 40, 84, -10, 2, -3), F(4, -10, -24, 3, 5)
+TB_CYCLONE = art("cyclone", 24, TB_HOLD, (0.12, TB["coil"]), (0.25, TB["whirl_a"], 0.1), (0.375, TB["whirl_m"]),
+                 (0.5, TB["whirl_b"], 0.1), (0.625, TB["whirl_m"]), (0.75, TB["whirl_a"], 0.1),
+                 (0.9, settle(TB["whirl_a"], TB_HOLD, 0.5)),
+                 spin=[0, -30, 180, 360, 540, 720, 900, 1080, 1080])
+MOVES["twinblade"] = {
+    "hold": TB_HOLD, "two_handed": 4, "fp_hold": TB_FP, "blow": 0.36,
+    "attacks": [
+        fp(clip("cut_l", TB_HOLD, (0.16, TB["wind_r"]), (0.36, TB["cut_l"], 0.1), (0.56, TB["follow_l"]),
+                (0.8, settle(TB["follow_l"], TB_HOLD))), TB_FP, *fp_forehand(TB_FP, 0.9)),
+        fp(clip("cut_r", TB_HOLD, (0.16, TB["wind_l"]), (0.36, TB["cut_r"], 0.1), (0.56, TB["follow_r"]),
+                (0.8, settle(TB["follow_r"], TB_HOLD))), TB_FP, *fp_backhand(TB_FP, 0.9)),
+        fp(clip("rise", TB_HOLD, (0.16, TB["low"]), (0.36, TB["rise"], 0.2), (0.7, settle(TB["rise"], TB_HOLD))),
+           TB_FP, *fp_rising(TB_FP)),
+    ],
+    "arts": [fp_art(TB_CYCLONE, TB_FP, TB_FP, F(6, -14, -30, 4, 6), (FP_WHIRL_IN, 0.1), FP_WHIRL_OUT, (FP_WHIRL_IN, 0.1),
+                    FP_WHIRL_OUT, (FP_WHIRL_IN, 0.1), fsettle(FP_WHIRL_IN, TB_FP, 0.5))],
+}
+
+# ---------------------------------------------------------------- nodachi: great cuts; iaido, the dash and the cut after
+
+ND_HOLD = P(body=(0, 18, 0), head=(0, -16, 0), right_arm=(-36, 10, 6), item=(46, 0, -8), **step(0.7, 6))
+ND = {
+    "wind": P(body=(-4, 56, 0), head=(0, -46, 0), right_arm=(-110, 66, 30), item=(30, 0, 54), **step(-0.8, 10)),
+    "cut": P(body=(8, -36, 0), head=(-2, 30, 0), right_arm=(-82, -36, -4), item=(-10, 0, -52), **step(1.9, -10)),
+    "follow": P(body=(12, -52, 0), head=(-4, 40, 0), right_arm=(-50, -56, -10), item=(-30, 0, -60), **step(2.1, -12)),
+    "low": P(body=(14, 34, 0, 0, 0.8, 0), head=(6, -28, 0), right_arm=(-16, 40, 24), item=(-50, 0, 50), **step(0.6, 8)),
+    "rising": P(body=(-8, -14, 0), head=(-8, 10, 0), right_arm=(-150, -16, -10), item=(70, 0, -30), **step(1.8, -4)),
+    "high": P(body=(-10, -24, 0), head=(-10, 18, 0), right_arm=(-170, -24, -14), item=(84, 0, -40), **step(1.8, -6)),
+    # Iaido: crouched with the blade drawn low behind, the dash leaning far over it, then the great cut across.
+    "stance": P(body=(16, 34, 0, 0, 1.0, -0.4), head=(-8, -30, 0), right_arm=(-14, 34, 22), item=(-24, 0, 76),
+                **step(1.2, 4)),
+    "lunge": P(body=(32, 22, 0, 0, 1.4, -2.0), head=(-24, -20, 0), right_arm=(14, 40, 22), item=(-40, 0, 84),
+               **step(2.6, 2)),
+    "stride": P(body=(30, 20, 0, 0, 1.3, -1.8), head=(-22, -18, 0), right_arm=(10, 42, 22), item=(-40, 0, 84),
+                **step(-2.2, 2)),
+    "coil": P(body=(10, 46, 0, 0, 0.6, 0), head=(-4, -40, 0), right_arm=(-64, 56, 30), item=(16, 0, 70), **step(1.4, 10)),
+    "draw_cut": P(body=(8, -44, 0, 0, 0.4, -0.6), head=(-2, 36, 0), right_arm=(-86, -48, -6), item=(-8, 0, -64),
+                  **step(2.0, -10)),
+    "flick": P(body=(4, -34, 0), head=(0, 28, 0), right_arm=(-44, -30, -4), item=(-64, 0, -24), **step(1.6, -8)),
+}
+ND_FP = F(-6, 30, 20, -3, -1)
+ND_IAIDO = art("iaido", 18, ND_HOLD, (0.1, ND["stance"]), (0.17, ND["lunge"], 0.2), (0.3, ND["stride"]), (0.44, ND["lunge"]),
+               (0.55, ND["coil"]), (0.6667, ND["draw_cut"], 0.4), (0.8, ND["flick"]))
+FP_TRAIL = F(-56, -24, -62, 7, -7, 4)
+MOVES["nodachi"] = {
+    "hold": ND_HOLD, "two_handed": 5, "fp_hold": ND_FP, "blow": 0.35,
+    "attacks": [
+        fp(clip("cut", ND_HOLD, (0.17, ND["wind"]), (0.35, ND["cut"], 0.1), (0.55, ND["follow"]),
+                (0.8, settle(ND["follow"], ND_HOLD))), ND_FP, *fp_sweep(ND_FP, 1.05)),
+        fp(clip("rising", ND_HOLD, (0.17, ND["low"]), (0.35, ND["rising"], 0.2), (0.55, ND["high"]),
+                (0.8, settle(ND["high"], ND_HOLD))), ND_FP, *fp_rising(ND_FP), fsettle(fp_rising(ND_FP)[1], ND_FP, 0.7)),
+    ],
+    "arts": [fp_art(ND_IAIDO, ND_FP, ND_FP, F(-40, -10, -32, 4, -3, 2), (FP_TRAIL, 0.2), FP_TRAIL, FP_TRAIL,
+                    F(10, -12, -44, 5, 3), (F(-24, 42, 84, -11, 2, -3), 0.4), F(-34, 40, 96, -15, -3, -2))],
+}
+
+# ---------------------------------------------------------------- earthbreaker: heavy swings; the leap and the slam
+
+EB_HOLD = P(body=(0, 22, 0), head=(0, -20, 0), right_arm=(-36, 14, 8), item=(70, 0, -30), **step(0.8, 6))
+EB = {
+    "wind": P(body=(-6, 60, 0), head=(0, -48, 0), right_arm=(-92, 74, 30), item=(56, 0, 50), **step(-0.9, 12)),
+    "swing": P(body=(10, -36, 0), head=(-2, 30, 0), right_arm=(-84, -36, -4), item=(0, 0, -52), **step(2.2, -10)),
+    "carry": P(body=(16, -54, 0), head=(-4, 42, 0), right_arm=(-54, -52, -10), item=(-20, 0, -62), **step(2.4, -12)),
+    "heave": P(body=(-20, 16, 0, 0, -0.6, 1.0), head=(-14, -12, 0), right_arm=(-180, 12, 10), item=(90, 0, -6),
+               **step(-0.8, 4)),
+    "smash": P(body=(32, 2, 0, 0, 1.2, -2.2), head=(18, -2, 0), right_arm=(-60, 2, 0), item=(-36, 0, 0), **step(2.8)),
+    "ground": P(body=(36, 0, 0, 0, 1.4, -2.6), head=(22, 0, 0), right_arm=(-28, 0, 0), item=(-64, 0, 0), **step(3.0)),
+    # The leap: crouch, spring with the hammer swung up, tucked in the air with it cocked behind the head; then the slam.
+    "crouch": P(body=(26, 12, 0, 0, 1.8, -1.0), head=(14, -10, 0), right_arm=(-18, 22, 12), item=(40, 0, -24),
+                right_leg=(-30, 0, 4), left_leg=(-10, 0, -4)),
+    "spring": P(body=(-14, 4, 0, 0, -0.8, 0.4), head=(-12, -4, 0), right_arm=(-168, 8, 6), item=(88, 0, 0),
+                right_leg=(16, 0, 4), left_leg=(22, 0, -4)),
+    "air": P(body=(-10, 0, 0, 0, -0.4, 0.4), head=(-14, 0, 0), right_arm=(-178, 4, 4), item=(104, 0, 0),
+             right_leg=(-52, 0, 8), left_leg=(-30, 0, -8)),
+    "slam": P(body=(36, 0, 0, 0, 1.8, -2.6), head=(22, 0, 0), right_arm=(-48, 0, 0), item=(-52, 0, 0),
+              right_leg=(-36, 0, 12), left_leg=(24, 0, -12)),
+    "quake": P(body=(38, 0, 0, 0, 2.0, -2.8), head=(24, 0, 0), right_arm=(-30, 0, 0), item=(-70, 0, 0),
+               right_leg=(-36, 0, 14), left_leg=(26, 0, -14)),
+}
+EB_FP = F(0, 30, 26, -3, -2)
+FP_OVERHEAD = F(32, 20, 10, -3, 12)
+EB_LEAP = art("leap", 8, EB_HOLD, (0.3, EB["crouch"], 0.3), (0.6, EB["spring"]), end=EB["air"], hold_end=True)
+EB_SLAM = art("slam", SLAM_TICKS, EB_HOLD, (0.2, EB["slam"], 0.5), (0.5, EB["quake"], 0.3), start=EB["air"])
+MOVES["earthbreaker"] = {
+    "hold": EB_HOLD, "two_handed": 9, "fp_hold": EB_FP, "blow": 0.36,
+    "attacks": [
+        fp(clip("swing", EB_HOLD, (0.18, EB["wind"]), (0.36, EB["swing"], 0.1), (0.54, EB["carry"]),
+                (0.8, settle(EB["carry"], EB_HOLD))), EB_FP, *fp_sweep(EB_FP, 0.95)),
+        fp(clip("smash", EB_HOLD, (0.18, EB["heave"]), (0.36, EB["smash"], 0.45), (0.5, EB["ground"], 0.25),
+                (0.82, settle(EB["ground"], EB_HOLD))), EB_FP, *fp_overhead(EB_FP, 1.5)),
+    ],
+    "arts": [fp_art(EB_LEAP, EB_FP, FP_OVERHEAD, (F(-24, 24, 22, -3, -7), 0.3), F(22, 20, 10, -3, 10)),
+             fp_art(EB_SLAM, FP_OVERHEAD, EB_FP, (F(-62, 40, 10, -5, 0, -4), 0.5), (F(-98, 40, 10, -5, -9, -3), 0.3))],
+}
+
+# ---------------------------------------------------------------- katar: straight jabs and a hook; the flurry
+
+KT_HOLD = P(body=(0, 14, 0), head=(0, -12, 0), right_arm=(-52, 4, 6), left_arm=(-44, 12, -10), item=(-80, 0, 0),
+            **step(0.7, 6))
+KT = {
+    "coil": P(body=(-2, 22, 0), head=(0, -18, 0), right_arm=(-34, 14, 10, 0, 0, 2.5), left_arm=(-50, 10, -12),
+              item=(-74, 0, 4), **step(0.5, 8)),
+    "jab": P(body=(10, 2, 0, 0, 0.3, -1.0), head=(-8, 0, 0), right_arm=(-90, -4, 0, 0, 0, -2.5), left_arm=(-30, 14, -14),
+             item=(-90, 0, 0), **step(1.8, 2)),
+    "wind": P(body=(-2, 34, 0), head=(0, -28, 0), right_arm=(-70, 50, 40), left_arm=(-46, 10, -12), item=(-70, 0, 30),
+              **step(0.3, 8)),
+    "hook": P(body=(8, -26, 0), head=(-2, 20, 0), right_arm=(-90, -30, -4), left_arm=(-20, -10, -14), item=(-90, 0, -20),
+              **step(1.2, -4)),
+    # The flurry: the katar and the off fist in turn, too fast to follow, then a driving lunge.
+    "jab_r": P(body=(8, -6, 0, 0, 0.3, -0.8), head=(-6, 4, 0), right_arm=(-92, -2, 0, 0, 0, -2.5), left_arm=(-40, 16, -10, 0, 0, 1.5),
+               item=(-90, 0, 0), **step(1.4, 2)),
+    "jab_l": P(body=(8, 20, 0, 0, 0.3, -0.8), head=(-6, -16, 0), right_arm=(-40, 14, 8, 0, 0, 1.5), left_arm=(-92, 6, 0, 0, 0, -2.5),
+               item=(-76, 0, 0), **step(1.4, 4)),
+    "back": P(body=(4, 8, 0, 0, 0.2, -0.2), head=(-2, -6, 0), right_arm=(-56, 10, 6, 0, 0, 1.5), left_arm=(-56, 10, -8, 0, 0, 1.5),
+              item=(-80, 0, 0), **step(1.0, 4)),
+    "gather": P(body=(-4, 30, 0, 0, 0.4, 0.6), head=(0, -24, 0), right_arm=(-30, 24, 14, 0, 0, 3.5), left_arm=(-60, 0, -12),
+                item=(-70, 0, 6), **step(0.2, 8)),
+    "drive": P(body=(18, -2, 0, 0, 0.8, -2.2), head=(-12, 2, 0), right_arm=(-94, -4, 0, 0, 0, -4), left_arm=(-10, 20, -20),
+               item=(-92, 0, 0), **step(2.8, 2)),
+}
+KT_FP = F(-40, 10, 4, -1, 0)
+FP_JAB, FP_RECOIL = F(-82, 24, 0, -6, 3, -7), F(-56, 12, 4, 1, -1, 3)
+KT_FLURRY = art("flurry", 20, KT_HOLD, (0.05, KT["coil"]), (0.1, KT["jab_r"], 0.4), (0.175, KT["back"]), (0.25, KT["jab_l"], 0.4),
+                (0.325, KT["back"]), (0.4, KT["jab_r"], 0.4), (0.475, KT["back"]), (0.55, KT["jab_l"], 0.4), (0.625, KT["back"]),
+                (0.7, KT["jab_r"], 0.4), (0.775, KT["gather"]), (0.85, KT["drive"], 0.5))
+MOVES["katar"] = {
+    "hold": KT_HOLD, "fp_hold": KT_FP,
+    "attacks": [
+        fp(clip("jab", KT_HOLD, (0.12, KT["coil"]), (0.3, KT["jab"], 0.45), (0.58, settle(KT["jab"], KT_HOLD, 0.35))),
+           KT_FP, *fp_thrust(KT_FP, 0.8)),
+        fp(clip("hook", KT_HOLD, (0.14, KT["wind"]), (0.32, KT["hook"], 0.2), (0.62, settle(KT["hook"], KT_HOLD))),
+           KT_FP, *fp_forehand(KT_FP, 0.6, keys=3)),
+    ],
+    # On screen only the katar's arm shows: it jabs on its own beats and draws back on the off fist's.
+    "arts": [fp_art(KT_FLURRY, KT_FP, KT_FP, FP_RECOIL, (FP_JAB, 0.4), FP_RECOIL, F(-60, 4, 8, 3, -2, 4), FP_RECOIL,
+                    (FP_JAB, 0.4), FP_RECOIL, F(-60, 4, 8, 3, -2, 4), FP_RECOIL, (FP_JAB, 0.4), F(-48, 10, 4, 2, -2, 6),
+                    (F(-86, 26, 0, -7, 3, -9), 0.5))],
+}
+
+# ---------------------------------------------------------------- moonblade: broad cuts; the crescent loosed
+
+MB_HOLD = P(body=(0, 18, 0), head=(0, -16, 0), right_arm=(-36, 10, 4), item=(48, 0, -14), **step(0.6, 4))
+MB = {
+    "wind": P(body=(-4, 54, 0), head=(0, -46, 0), right_arm=(-112, 66, 30), item=(32, 0, 52), **step(-0.8, 10)),
+    "sweep": P(body=(8, -38, 0), head=(-2, 30, 0), right_arm=(-80, -38, -4), item=(-10, 0, -52), **step(1.9, -10)),
+    "follow": P(body=(12, -56, 0), head=(-4, 42, 0), right_arm=(-50, -58, -10), item=(-30, 0, -62), **step(2.1, -12)),
+    "low": P(body=(14, 34, 0, 0, 0.8, 0), head=(6, -28, 0), right_arm=(-18, 38, 22), item=(-46, 0, 50), **step(0.6, 8)),
+    "rise": P(body=(-8, -16, 0), head=(-8, 12, 0), right_arm=(-150, -18, -10), item=(70, 0, -34), **step(1.8, -4)),
+    "high": P(body=(-10, -26, 0), head=(-10, 20, 0), right_arm=(-168, -26, -14), item=(84, 0, -44), **step(1.8, -6)),
+    # The crescent: gathered low behind, swept up across to loose the wave, the blade then levelled after it.
+    "gather": P(body=(14, 52, 0, 0, 1.0, 0), head=(4, -44, 0), right_arm=(-26, 60, 30), item=(-24, 0, 80), **step(-0.6, 10)),
+    "loose": P(body=(-8, -42, 0), head=(-8, 34, 0), right_arm=(-152, -42, -20), item=(60, 0, -72), **step(2.2, -8)),
+    "point": P(body=(8, -18, 0, 0, 0.3, -1.0), head=(-6, 14, 0), right_arm=(-96, -12, 0), item=(-80, 0, 0), **step(2.0, -4)),
+}
+MB_FP = F(-6, 30, 22, -3, -1)
+MB_CRESCENT = art("crescent", 16, MB_HOLD, (0.12, MB["gather"]), (0.3125, MB["loose"], 0.2), (0.45, MB["point"]),
+                  (0.75, settle(MB["point"], MB_HOLD)))
+MOVES["moonblade"] = {
+    "hold": MB_HOLD, "two_handed": 5, "fp_hold": MB_FP, "blow": 0.34,
+    "attacks": [
+        fp(clip("sweep", MB_HOLD, (0.16, MB["wind"]), (0.34, MB["sweep"], 0.1), (0.52, MB["follow"]),
+                (0.78, settle(MB["follow"], MB_HOLD))), MB_FP, *fp_sweep(MB_FP, 1.05)),
+        fp(clip("rise", MB_HOLD, (0.16, MB["low"]), (0.34, MB["rise"], 0.2), (0.52, MB["high"]),
+                (0.8, settle(MB["high"], MB_HOLD))), MB_FP, *fp_rising(MB_FP), fsettle(fp_rising(MB_FP)[1], MB_FP, 0.7)),
+    ],
+    "arts": [fp_art(MB_CRESCENT, MB_FP, MB_FP, F(-32, -20, -62, 6, -6, 2), (F(12, 40, 92, -12, 10, -3), 0.2),
+                    F(-72, 20, 10, -4, 2, -6), fsettle(F(-72, 20, 10, -4, 2, -6), MB_FP))],
+}
+
+# ---------------------------------------------------------------- kusarigama: hooking cuts; the chain thrown and hauled in
+
+KG_HOLD = P(body=(0, 12, 0), head=(0, -12, 0), right_arm=(-40, 8, 10), left_arm=(-20, 4, -8), item=(30, 0, 30))
+KG = {
+    "wind_r": P(body=(-2, 34, 0), head=(0, -28, 0), right_arm=(-140, 34, 26), left_arm=(-20, 18, -12), item=(70, 0, 40),
+                **step(-0.3, 6)),
+    "hook_l": P(body=(8, -28, 0), head=(-2, 22, 0), right_arm=(-76, -40, -8, 0, 0, 1), left_arm=(12, -14, -16), item=(0, 0, -30),
+                **step(1.0, -6)),
+    "draw_l": P(body=(6, -36, 0), head=(-2, 28, 0), right_arm=(-40, -50, -14, 0, 0, 2), left_arm=(16, -16, -18), item=(-20, 0, -40),
+                **step(0.6, -8)),
+    "wind_l": P(body=(0, -28, 0), head=(0, 22, 0), right_arm=(-48, -60, -30), left_arm=(-6, -10, -10), item=(20, 0, -60),
+                **step(0.3, -4)),
+    "hook_r": P(body=(4, 30, 0), head=(-2, -24, 0), right_arm=(-110, 40, 26, 0, 0, 1), left_arm=(-18, 12, -12), item=(50, 0, 50),
+                **step(0.9, 6)),
+    # The chain: whirled up at the side, flung out ahead, hauled back hand over hand, then the sickle brought round.
+    "twirl": P(body=(-4, 30, 0), head=(0, -26, 0), right_arm=(-150, 40, 60), left_arm=(-40, 10, -14), item=(60, 0, 60),
+               **step(0.2, 8)),
+    "throw": P(body=(10, -8, 0, 0, 0.4, -1.0), head=(-6, 6, 0), right_arm=(-100, -8, 0, 0, 0, -2), left_arm=(-10, 10, -16),
+               item=(-80, 0, 0), **step(1.6, 2)),
+    "haul": P(body=(-8, 30, 0, 0, 0, 1.0), head=(-2, -26, 0), right_arm=(-20, 30, 20, 0, 0, 3), left_arm=(-64, 20, -10),
+              item=(-30, 0, 30), **step(-0.8, 6)),
+    "ready": P(body=(-2, 34, 0), head=(0, -28, 0), right_arm=(-132, 38, 26), left_arm=(-30, 14, -12), item=(70, 0, 40),
+               **step(0.2, 6)),
+    "reap": P(body=(8, -30, 0), head=(-2, 24, 0), right_arm=(-76, -42, -8, 0, 0, 1), left_arm=(12, -14, -16), item=(0, 0, -34),
+              **step(1.2, -6)),
+}
+KG_FP = F(0, 0, 20, -1, 1)
+KG_LASH = art("chain_lash", 16, KG_HOLD, (0.1, KG["twirl"]), (0.25, KG["throw"], 0.3), (0.42, KG["haul"]), (0.55, KG["ready"]),
+              (0.6875, KG["reap"], 0.2), (0.85, settle(KG["reap"], KG_HOLD)))
+MOVES["kusarigama"] = {
+    "hold": KG_HOLD, "fp_hold": KG_FP,
+    "attacks": [
+        fp(clip("hook", KG_HOLD, (0.12, KG["wind_r"]), (0.28, KG["hook_l"], 0.2), (0.46, KG["draw_l"]),
+                (0.72, settle(KG["draw_l"], KG_HOLD))), KG_FP, *fp_forehand(KG_FP, 0.8)),
+        fp(clip("backhook", KG_HOLD, (0.12, KG["wind_l"]), (0.28, KG["hook_r"], 0.2), (0.62, settle(KG["hook_r"], KG_HOLD))),
+           KG_FP, *fp_forehand(KG_FP, 0.7, keys=3)),
+    ],
+    "arts": [fp_art(KG_LASH, KG_FP, KG_FP, F(10, -20, -40, 4, 6), (F(-82, 10, 0, -2, 2, -8), 0.3), F(-20, -20, -30, 6, -4, 4),
+                    F(6, 30, 50, -10, 5), (F(-22, 32, 62, -8, 4, -3), 0.2), fsettle(F(-22, 32, 62, -8, 4, -3), KG_FP))],
+}

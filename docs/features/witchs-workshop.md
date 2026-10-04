@@ -1,6 +1,6 @@
 # The Witch's Workshop
 
-Status: implemented in source. Not yet played by hand. The Build workflow compiles it; CI's game tests and client screenshots are recorded below.
+Status: implemented. CI builds it and its game tests and client screenshots pass (below); not yet played by hand.
 Proposal issue: none. The owner asked for it directly on 4 October 2026 ("Lets come up with another 20 very detailed well thought out additions to add for the halloween / fall season using the first 3 images for ideas of prop sets … lets do them piece by piece maybe 5 at a time"). These are prop sets 1–5 of the [Witching Season plan](witching-season.md), drawn from the reference pictures' cauldron, chandelier, broom and jars.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier for most sets; the Enchanted Broom needs Flying Ointment from the hex brews (a Bubbling Cauldron over a fire), and the Beating Heart Jar a brass nugget from the alloy smelter (Workshops tier).
@@ -146,14 +146,20 @@ Squat glass jars on dark bases under iron lids, with paper labels:
 - **Originality**: all original. The look follows the owner's reference pictures, and nothing is traced from them.
 
 ## Verification
-Pending: CI's Build workflow (run 37217854334 on a6f125a0) is running the checks below; this section is updated with what it reports.
-- `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`: pass locally. The audit's new Witch's Workshop check:
+CI's Build workflow passed on 9447e0b7 (run 37219365133): the generated data matched, the audit passed, the mod built, every server game test passed (these eight among them), and all three client shards passed and took the screenshots below. Runs before it found, and the commits after them fixed:
+- 37217854334: names that are gone in 26.3 (the dye items, the cat's hiss, `Player.drop`, `hurtMarked`);
+- 37218300868: the same dye name in a game test;
+- 37219004856: one game test aiming at the cabinet in floats, which can't hold a sixteenth of a block millions of blocks out; the test now aims in doubles.
+
+Run 37218545936 did not get as far as compiling: Maven Central refused Gradle's downloads (403). It was superseded rather than re-run.
+
+- `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`: pass locally and in CI. The audit's new Witch's Workshop check:
   - compares the cauldron's, broom's, Dustpan's, rack's, cabinet's, bell jar's, jars' and candelabra's numbers, tempos, waxes and flames with `tools/decor17.py`;
   - checks the generated candle layout;
   - checks each block is registered, named, drops and has its recipe and texture;
   - checks that the Ember Bed is a heat source and the two item tags match;
   - checks that the quads, `DecorQuads` and all seven renderers are wired up.
-- `WitchsWorkshopGameTests` (seven tests):
+- `WitchsWorkshopGameTests` (eight tests):
   1. the cauldron fills, empties, takes three of one potion and refuses a fourth or another, and gives the same potion back;
   2. over an Ember Bed it heats, and a ladle wafts long swiftness onto the four nearest of five players at a quarter duration, using one level (an instant potion doesn't waft);
   3. only ingredients float, three at most, an empty hand fishes one out, and breaking gives them back;

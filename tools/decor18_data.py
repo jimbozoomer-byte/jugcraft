@@ -640,7 +640,7 @@ def coffin_wardrobe():
     cap = sc.piece("cap", 30, 14, ebony(5))
     frame = sc.piece("frame", 4, 32, ebony(6))
     frame_h = sc.piece("frame_h", 30, 3, ebony(7))
-    pane = sc.piece("pane", 28, 30, d17d.glass(56))
+    pane = sc.piece("pane", 28, 30, d17d.glass(56, rim=False))
     strap = sc.piece("strap", 8, 3, iron_plate(8))
     knob = sc.piece("knob", 3, 3, solid(BRASS[2:], 9))
     rod = sc.piece("rod", 2, 16, strip(IRON, 10, light=True))
@@ -1029,7 +1029,7 @@ def vertebra_floor_lamp():
            cube((6.4, 1.6, 6.4), (9.6, 3.6, 9.6), faces(pelvis, ALL6))]
     y = 3.6
     for i in range(9):
-        h = 2.0
+        h = 1.8
         els.append(cube((6.7, y, 6.7), (9.3, y + h, 9.3), faces(body, ALL6)))
         els.append(cube((5.4, y + 0.6, 7.4), (10.6, y + 1.4, 8.6), faces(process, ALL6)))
         els.append(cube((7.5, y + 0.4, 9.3), (8.5, y + 1.6, 10.8), faces(process, ALL6), rotation((8.0, y + 1.0, 9.3), "x", 22.5)))
@@ -1111,14 +1111,17 @@ def colossal_rib():
     bone_ = sc.piece("bone", 12, 40, cracked_bone(2, 3, moss=0.1))
     end = sc.piece("end", 8, 8, cracked_bone(3, 1))
     broken = sc.piece("broken", 8, 8, solid(SOCKET[1:] + [BONE[1], BONE[2]], 4))
-    els = [cube((6.4, -16.0, 10.4), (9.6, 4.0, 13.6), faces(bone_, SIDES4, down=end)),
-           cube((6.5, 2.0, 9.0), (9.5, 11.0, 12.4), faces(bone_, SIDES4), rotation((8.0, 3.0, 12.0), "x", 22.5)),
-           cube((6.6, 9.0, 4.4), (9.4, 15.6, 7.8), faces(bone_, SIDES4), rotation((8.0, 10.0, 7.6), "x", 45)),
-           cube((6.7, 12.6, -2.0), (9.3, 15.4, 5.0), faces(bone_, ("east", "west", "up", "down")))]
-    els.append(cube((5.4, -16.0, 9.4), (10.6, -15.0, 14.6), faces(end, ALL6)))
-    sc.models["colossal_rib_joined"] = els + [cube((6.6, 12.4, -8.0), (9.4, 15.6, -1.6), faces(bone_, ("east", "west", "up", "down"), north=end)),
-                                              cube((6.2, 12.0, -8.0), (9.8, 16.0, -6.6), faces(end, ALL6))]
-    sc.models["colossal_rib"] = els + [cube((6.8, 12.8, -4.6), (9.2, 15.2, -1.6), faces(bone_, ("east", "west", "up", "down"), north=broken))]
+    # The shaft stands on the centre line z 12; each piece above leans further north (a negative turn about x tips its
+    # top north) and starts where the one below it ends: 22.5 degrees from (y 2, z 12) to (y 10.3, z 8.6), then 45 to
+    # (y 14.1, z 4.1), then level. (The item draws it a block higher, so nothing may reach above 15.9.)
+    els = [cube((6.2, -15.9, 10.0), (9.8, 4.0, 14.0), faces(bone_, SIDES4, down=end)),
+           cube((6.3, 2.0, 10.2), (9.7, 11.4, 13.8), faces(bone_, SIDES4), rotation((8.0, 2.0, 12.0), "x", -22.5)),
+           cube((6.4, 9.4, 6.9), (9.6, 15.8, 10.3), faces(bone_, SIDES4), rotation((8.0, 9.6, 8.6), "x", -45)),
+           cube((6.5, 12.4, -2.0), (9.5, 15.6, 5.6), faces(bone_, ("east", "west", "up", "down")))]
+    els.append(cube((5.2, -15.9, 9.0), (10.8, -15.0, 15.0), faces(end, ALL6)))
+    sc.models["colossal_rib_joined"] = els + [cube((6.6, 12.5, -8.0), (9.4, 15.7, -1.6), faces(bone_, ("east", "west", "up", "down"), north=end)),
+                                              cube((6.2, 12.1, -8.0), (9.8, 16.1, -6.6), faces(end, ALL6))]
+    sc.models["colossal_rib"] = els + [cube((6.8, 12.8, -4.6), (9.2, 15.4, -1.6), faces(bone_, ("east", "west", "up", "down"), north=broken))]
     return sc
 
 

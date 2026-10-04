@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:sandbags",
+    "jugcraft:sandbags_slab",
+    "jugcraft:sandbags_stairs",
     "jugcraft:oil_sand",
     "jugcraft:bone_pile",
     "jugcraft:grave_mound",
