@@ -1903,12 +1903,12 @@ public final class JugcraftAgriculture {
 		registerItem(SKELETON_KEY, props -> new SkeletonKeyItem(props, false), new Item.Properties().stacksTo(16), TOOL_TAB);
 
 		Block coffin = registerBlock(IRON_BOUND_COFFIN, IronBoundCoffinBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
-				.strength(3.0F, 6.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.BLOCK));
+				.strength(3.0F, 6.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 		registerItem(IRON_BOUND_COFFIN, props -> new BlockItem(coffin, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), EQUIPMENT_TAB);
 		IRON_BOUND_COFFIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(IRON_BOUND_COFFIN),
 				FabricBlockEntityTypeBuilder.create(IronBoundCoffinBlockEntity::new, coffin).build());
 		Block wardrobe = registerBlock(COFFIN_WARDROBE, CoffinWardrobeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
-				.strength(2.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.BLOCK));
+				.strength(2.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
 		COFFIN_WARDROBE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(COFFIN_WARDROBE),
 				FabricBlockEntityTypeBuilder.create(CoffinWardrobeBlockEntity::new, wardrobe).build());
 		registerItem(COFFIN_WARDROBE, props -> new DoubleHighBlockItem(wardrobe, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
@@ -1917,7 +1917,7 @@ public final class JugcraftAgriculture {
 		for (String stone : SARCOPHAGUS_STONES) {
 			Block tomb = registerBlock(stone + "_sarcophagus", SarcophagusBlock::new, BlockBehaviour.Properties.of()
 					.mapColor(stone.equals("stone_brick") ? MapColor.STONE : MapColor.DEEPSLATE).strength(3.0F, 6.0F).requiresCorrectToolForDrops()
-					.sound(stone.equals("deepslate") ? SoundType.POLISHED_DEEPSLATE : SoundType.STONE).noOcclusion().pushReaction(PushReaction.BLOCK));
+					.sound(stone.equals("deepslate") ? SoundType.POLISHED_DEEPSLATE : SoundType.STONE).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 			tombs.add(tomb);
 		}
 		SARCOPHAGUS_TOMB_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("sarcophagus"),
@@ -1925,11 +1925,16 @@ public final class JugcraftAgriculture {
 		blocks.addAll(tombs);
 
 		Block throne = registerBlock(BONE_THRONE, BoneThroneBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(2.0F)
-				.sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.BLOCK).lightLevel(BoneThroneBlock::light));
+				.sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).lightLevel(BoneThroneBlock::light));
 		registerItem(BONE_THRONE, props -> new DoubleHighBlockItem(throne, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		Block bookcase = registerBlock(RIBCAGE_BOOKCASE, RibcageBookcaseBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
 				.strength(1.5F).sound(SoundType.BONE_BLOCK).noOcclusion());
-		((FabricBlockEntityType) BlockEntityType.CHISELED_BOOKSHELF).addValidBlock(bookcase);
+		// The bookcase keeps its books in vanilla's chiseled bookshelf block entity (26.3 names no constant for that type).
+		BlockEntityType<?> shelves = BuiltInRegistries.BLOCK_ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("chiseled_bookshelf"));
+		if (shelves == null) {
+			throw new IllegalStateException("No minecraft:chiseled_bookshelf block entity type to add the Ribcage Bookcase to");
+		}
+		((FabricBlockEntityType) shelves).addValidBlock(bookcase);
 		Block footstool = registerBlock(SKULL_FOOTSTOOL, SkullFootstoolBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
 				.strength(1.0F).sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.POPPED));
 		Block lamp = registerBlock(VERTEBRA_LAMP, VertebraFloorLampBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(1.0F)
@@ -1949,7 +1954,7 @@ public final class JugcraftAgriculture {
 		Block sentinel = registerBlock(GARGOYLE_SENTINEL, GargoyleSentinelBlock::new, gargoyle());
 		GARGOYLE_SENTINEL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(GARGOYLE_SENTINEL),
 				FabricBlockEntityTypeBuilder.create(GargoyleSentinelBlockEntity::new, sentinel).build());
-		Block spout = registerBlock(GARGOYLE_RAINSPOUT, GargoyleRainspoutBlock::new, gargoyle().pushReaction(PushReaction.DESTROY));
+		Block spout = registerBlock(GARGOYLE_RAINSPOUT, GargoyleRainspoutBlock::new, gargoyle().pushReaction(PushReaction.POPPED));
 		GARGOYLE_RAINSPOUT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(GARGOYLE_RAINSPOUT),
 				FabricBlockEntityTypeBuilder.create(GargoyleRainspoutBlockEntity::new, spout).build());
 		Block finial = registerBlock(CHIMERA_FINIAL, ChimeraFinialBlock::new, gargoyle());
@@ -1962,7 +1967,7 @@ public final class JugcraftAgriculture {
 
 	private static BlockBehaviour.Properties colossal() {
 		return BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(2.0F, 4.0F).requiresCorrectToolForDrops().sound(SoundType.BONE_BLOCK)
-				.noOcclusion().pushReaction(PushReaction.BLOCK);
+				.noOcclusion().pushReaction(PushReaction.IMMOVEABLE);
 	}
 
 	private static BlockBehaviour.Properties gargoyle() {
