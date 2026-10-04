@@ -573,6 +573,31 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Batch 45: every Dieselworks block is registered and placeable; the grating doesn't block the view, the I-beam is
+	 * not a full cube, and the amber cage lamp gives light.
+	 */
+	@GameTest
+	public void dieselworksBlocksPlace(GameTestHelper helper) {
+		var blocks = io.github.jimbozoomer.jugcraft.building.Dieselworks.BLOCKS;
+		helper.assertTrue(blocks.size() == 25, "Expected 25 Dieselworks blocks, got " + blocks.size());
+		BlockPos at = new BlockPos(1, 1, 1);
+		for (var entry : blocks.entrySet()) {
+			helper.setBlock(at, entry.getValue().defaultBlockState());
+			helper.assertTrue(helper.getBlockState(at).is(entry.getValue()), entry.getKey() + " did not place");
+		}
+		ServerLevel level = helper.getLevel();
+		BlockPos abs = helper.absolutePos(at);
+		helper.setBlock(at, blocks.get("rust_grating").defaultBlockState());
+		helper.assertFalse(helper.getBlockState(at).isViewBlocking(level, abs), "Rust grating should be see-through");
+		helper.setBlock(at, blocks.get("steel_i_beam").defaultBlockState());
+		helper.assertFalse(Block.isShapeFullBlock(helper.getBlockState(at).getShape(level, abs)), "An I-beam is not a full cube");
+		helper.setBlock(at, blocks.get("amber_cage_lamp").defaultBlockState());
+		helper.assertTrue(helper.getBlockState(at).getLightEmission() == io.github.jimbozoomer.jugcraft.building.Dieselworks.LAMP_LIGHT,
+				"The amber cage lamp should give light");
+		helper.succeed();
+	}
+
 	/** Coal generator -> copper cables -> electric furnace smelts raw iron. */
 	@GameTest(maxTicks = 600)
 	public void cablesCarryPower(GameTestHelper helper) {
