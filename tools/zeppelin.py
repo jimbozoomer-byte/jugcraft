@@ -130,7 +130,7 @@ def gondola():
         m += cyl("z", px, py, 7.6, pz + 8, pz + 10, BAND)
         m += cyl("z", px, py, 4, pz + 22, pz + 26, RUST_BARE, BLUE)
         m += cyl("z", px, py, 2, pz - 2, pz + 2, "dr_nut")
-        m.append(box((px - 1, py + 7, pz + 12), (px + 1, py + 13, pz + 14), {"*": EXHAUST, "up": "sp_hopper_inside"}))
+        m.append(box((px - 1, py + 7, pz + 12), (px + 1, py + 13, pz + 14), {"*": EXHAUST, "up": "dr_soot"}))
     return m
 
 

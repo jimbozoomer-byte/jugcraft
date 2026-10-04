@@ -19,7 +19,7 @@ The giants' main plate is now a warm weathered steel, close to tuff, instead of 
 
 | Set | Textures | Used by |
 | --- | --- | --- |
-| `dr_*` (`tools/dieselrust_textures.py`) | 28 | The dieselpunk giants, Dieselworks blocks, zeppelin gondola, Diesel Walker, Landship, trench works and big guns |
+| `dr_*` (`tools/dieselrust_textures.py`) | 28, plus the new `dr_soot` | The dieselpunk giants, Dieselworks blocks, zeppelin gondola, Diesel Walker, Landship, trench works and big guns |
 | `dp_*` (`tools/dieselpunk_textures.py`) | 15 | Steel-tier machines, powered tools, the charging station and parts of the walker and guns |
 | `dw_*` (`tools/dieselworks.py`) | 2 | Steel Grating and Porthole Window |
 | `dz_*` (`tools/zeppelin.py`) | 3 | Zeppelin envelope canvas |
@@ -27,6 +27,13 @@ The giants' main plate is now a warm weathered steel, close to tuff, instead of 
 | `ar_*` (`tools/artillery.py`) | 4 of 5 redrawn | Warning yellow, concrete, tread plate and armour. The wicker was already a pattern |
 
 The Diesel Walker and Landship item icons swap their rust brown for the same weathered steel.
+
+### Mechs and vehicles
+The owner asked for every mech and vehicle drawn with the old textures to be fixed as well. Most already were, because they draw from the shared sets above. A few borrowed textures from other sets were still noisy:
+- **Sooty openings:** the Diesel Walker, Landship, zeppelin, big guns and dieselpunk giants used the steampunk `sp_hopper_inside` (a noisy black) for smokestack throats and engine openings. They now use a new clean `dr_soot`: a dark steel rim stepping down to a black throat. The steampunk machines keep `sp_hopper_inside`.
+- **Kaiserpunk finishes:** `ik_brass` and `ik_lacquer` lose their random specks. They are on the Landship's casemate and turret, the guns and the searchlight, and are shared with the Kaiserworks blocks. The textures drawn over the lacquer (crest, frieze, gilt trim, iron column, riveted lacquer) lose them too. Their banding and sheen are unchanged.
+
+Offline renders of the Diesel Walker, Landship, zeppelin, Self-Propelled Howitzer, Siege Mortar, Flak Gun and Observation Balloon were checked after the change. The Ronin and Vanguard exosuits were already drawn in flat colours and are unchanged.
 
 Four Dieselworks blocks are renamed to match how they now look; their IDs do not change:
 

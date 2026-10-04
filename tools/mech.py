@@ -50,7 +50,7 @@ TOOLTIPS = {"diesel_walker": "A diesel mech with a drill arm and a big fist. Wal
 
 RUST, RUST_BARE, RED, BAND, SKID = "dr_rust", "dr_rust_bare", "dr_red", "dr_band", "dr_skid"
 PATINA, PERFORATED, RIB_RUST, GRATE = "dr_patina", "dr_perforated", "dr_ribbed_rust", "dr_grate"
-COPPER, NUT, BLUE, EXHAUST, SOOT = "dr_copper_pipe", "dr_nut", "dr_blue", "dp_exhaust", "sp_hopper_inside"
+COPPER, NUT, BLUE, EXHAUST, SOOT = "dr_copper_pipe", "dr_nut", "dr_blue", "dp_exhaust", "dr_soot"
 AMBER, DRILL_BIT = "dr_amber_on", "dp_drill_bit"
 
 # Joints, in pixels in the walker's own space (facing +z, the ground at y = 0). Keep in sync with

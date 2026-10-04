@@ -316,6 +316,18 @@ def solution(seed, palette):
     return img
 
 
+def soot():
+    """The sooty inside of a smokestack or engine opening: a dark steel rim round a near-black throat, one shade
+    darker at each step in."""
+    img = new(IRON[0])
+    for i, c in enumerate((PLATE[1], IRON[2], IRON[1])):
+        for x in range(i, 16 - i):
+            for y in (i, 15 - i):
+                put(img, x, y, c)
+                put(img, y, x, c)
+    return img
+
+
 ICE = [(150, 186, 196), (186, 214, 222), (220, 236, 240), (246, 250, 252)]
 
 
@@ -337,8 +349,8 @@ def draw_all():
     save(rust_plate(4401, rivets=False), "dr_rust_bare")
     save(patina_plate(4402), "dr_patina")
     save(patina_plate(4403, holes=True), "dr_perforated")
-    save(ribbed(4404, VERDIGRIS, RUST[3]), "dr_ribbed_patina")
-    save(ribbed(4405, PLATE, RUST[3]), "dr_ribbed_rust")
+    save(ribbed(4404, VERDIGRIS), "dr_ribbed_patina")
+    save(ribbed(4405, PLATE), "dr_ribbed_rust")
     save(banded_dome(4406), "dr_dome")
     save(pipe_metal(4407, [BRIGHT_COPPER[0]] + BRIGHT_COPPER, [VERDIGRIS[3]]), "dr_copper_pipe")
     save(pipe_metal(4408, PLATE, [RUST[3]]), "dr_rust_pipe")
@@ -361,3 +373,4 @@ def draw_all():
     save(solution(4417, [(10, 40, 46), (20, 70, 80), (40, 110, 120), (120, 190, 196)]), "dr_wash_water")
     save(solution(4418, [(20, 60, 30), (40, 110, 60), (70, 150, 90), (160, 220, 150)]), "dr_plating_bath")
     save(frost(4419), "dr_frost")
+    save(soot(), "dr_soot")

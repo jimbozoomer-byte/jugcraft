@@ -88,7 +88,7 @@ ENTITIES = ["siege_mortar", "self_propelled_howitzer", "flak_gun", "observation_
 
 YELLOW, GUNMETAL, OLIVE, HAZARD, CONCRETE, DECK = "ar_yellow", "dp_gunmetal", "dp_olive", "dp_hazard", "ar_concrete", "ar_deck"
 SKID, BAND, NUT, BRASS, LACQUER, COPPER = "dr_skid", "dr_band", "dr_nut", "ik_brass", "ik_lacquer", "dr_copper_pipe"
-EXHAUST, SOOT, CANVAS, STRIPE, WICKER, ARMOR = "dp_exhaust", "sp_hopper_inside", "dz_canvas", "dz_canvas_stripe", "ar_wicker", "ar_armor"
+EXHAUST, SOOT, CANVAS, STRIPE, WICKER, ARMOR = "dp_exhaust", "dr_soot", "dz_canvas", "dz_canvas_stripe", "ar_wicker", "ar_armor"
 
 # Pivots, in pixels from the entity's feet (facing +z). Keep in sync with client/ArtilleryRenderers.
 MORTAR_TURNTABLE = (0, 10, 0)

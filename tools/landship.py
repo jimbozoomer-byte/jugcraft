@@ -53,7 +53,7 @@ TOOLTIPS = {
 }
 
 RUST, RUST_BARE, BAND, SKID, NUT = "dr_rust", "dr_rust_bare", "dr_band", "dr_skid", "dr_nut"
-PERFORATED, DOME, EXHAUST, SOOT, AMBER = "dr_perforated", "dr_dome", "dp_exhaust", "sp_hopper_inside", "dr_amber_on"
+PERFORATED, DOME, EXHAUST, SOOT, AMBER = "dr_perforated", "dr_dome", "dp_exhaust", "dr_soot", "dr_amber_on"
 LACQUER, RIVETED, GILT, BRASS, CREST, FRIEZE = "ik_lacquer", "ik_lacquer_riveted", "ik_gilt_trim", "ik_brass", "ik_crest", "ik_frieze"
 TREAD = "ls_tread"
 
