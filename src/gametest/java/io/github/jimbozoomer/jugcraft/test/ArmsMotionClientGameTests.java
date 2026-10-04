@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.arms.ArmsMotion;
+import io.github.jimbozoomer.jugcraft.weapons.JugcraftArms;
 import java.util.List;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -14,13 +15,14 @@ import net.minecraft.core.BlockPos;
 
 /**
  * Client game test for the arms motion (batch 43): the motion files load; the player, seen from the front, holds each
- * kind's guard and is caught two ticks into a swing; three blows in a row with a longsword move through its combo; and
+ * kind's guard and is caught two ticks into a swing (a two-handed kind's at its blow); three blows in a row with a longsword move through its combo; and
  * the guard and a stroke on screen in first person (CI job {@code client}). The four mixins are applied as the game
  * starts, so a target 26.3 no longer has stops the game here.
  */
 public class ArmsMotionClientGameTests implements FabricClientGameTest {
 	private static final List<String> KINDS = List.of("longsword", "greatsword", "rapier", "flanged_mace", "war_hammer", "glaive",
-			"halberd", "lance", "dagger", "sabre", "estoc", "battle_axe", "flail", "scythe", "quarterstaff", "pike");
+			"halberd", "lance", "dagger", "sabre", "estoc", "battle_axe", "flail", "scythe", "quarterstaff", "pike", "zweihander",
+			"maul", "executioner", "bill");
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -45,7 +47,7 @@ public class ArmsMotionClientGameTests implements FabricClientGameTest {
 			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 0", x + 0.5, y, z + 0.5));
 			context.waitTicks(20);
 
-			// Third person, from the front: each kind's guard, then two ticks into a swing.
+			// Third person, from the front: each kind's guard, then two ticks into a swing (a two-handed kind's: at its blow).
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			for (String kind : KINDS) {
 				hold(context, server, kind);
@@ -63,7 +65,7 @@ public class ArmsMotionClientGameTests implements FabricClientGameTest {
 			// it also hides the hand, so it is shown with one press of its toggle (26.3's Options has no hideGui field to set).
 			context.getInput().pressKey(options -> options.keyToggleGui);
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
-			for (String kind : List.of("longsword", "war_hammer", "glaive", "dagger", "scythe", "pike")) {
+			for (String kind : List.of("longsword", "war_hammer", "glaive", "dagger", "scythe", "pike", "zweihander", "maul")) {
 				hold(context, server, kind);
 				// Vanilla lowers the arm on screen until the attack cooldown, reset by the swap, recovers (28 ticks for a
 				// war hammer).
@@ -82,7 +84,8 @@ public class ArmsMotionClientGameTests implements FabricClientGameTest {
 
 	private static void strike(ClientGameTestContext context, String kind, String screenshot) {
 		context.getInput().pressKey(options -> options.keyAttack);
-		context.waitTicks(2);
+		JugcraftArms.Heavy heavy = JugcraftArms.TWO_HANDED.get(kind);
+		context.waitTicks(heavy != null ? heavy.strike() : 2);
 		context.takeScreenshot(screenshot);
 		String pose = context.computeOnClient(client -> ArmsMotion.describe(client.player));
 		float swing = context.computeOnClient(client -> client.player.getSwingAnimation(1.0F));

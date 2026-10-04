@@ -14,11 +14,11 @@ Eight more kinds of arms, each in bronze and steel, drawn in the same two styles
 | Dagger | 4 / 4.5 | 2.3 | 2.5 | stab, 4 ticks | **Backstab:** a blow from behind (within 70° of straight behind the foe's body) deals half again as much. |
 | Sabre | 5 / 5.5 | 1.8 | 3 | whack, 6 ticks | **Saddle:** 3 more damage while riding. Sweeps. |
 | Estoc | 6 / 6.5 | 1.4 | 3.5 | stab, 7 ticks | **Armor pierce:** 0.3 more for each point of the foe's armor, at most 6. |
-| Battle Axe | 11 / 11.5 | 0.7 | 3.25 | whack, 12 ticks | **Chop:** mines wood as its metal's axe does. Stops a shield blocking for 5 s; wears 2 a hit. |
+| Battle Axe | 11 / 11.5 | 0.7 | 3.25 | whack, 22 ticks (12 before batch 46) | **Chop:** mines wood as its metal's axe does. Stops a shield blocking for 5 s; wears 2 a hit. |
 | Flail | 8 / 8.5 | 1.0 | 3.25 | whack, 10 ticks | **Daze:** a hit slows the foe (Slowness II) for 2 s. |
-| Scythe | 8 / 8.5 | 1.0 | 4 | whack, 10 ticks | **Reap:** use on a ripe crop to harvest every ripe crop in the 3 by 3 around it and replant them. Sweeps. |
-| Quarterstaff | 5 / 5.5 | 1.6 | 3.5 | whack, 7 ticks | Knocks back (1, as the war hammer); hold use to parry 50% of a blow from in front. |
-| Pike | 8 / 8.5 | 0.8 | 2–5 | stab, 10 ticks | **Riders:** half again as much damage against anything riding or ridden (a horseman, or his horse). The longest reach, but nothing nearer than 2 blocks. |
+| Scythe | 8 / 8.5 | 1.0 | 4 | whack, 18 ticks (10 before batch 46) | **Reap:** use on a ripe crop to harvest every ripe crop in the 3 by 3 around it and replant them. Sweeps. |
+| Quarterstaff | 5 / 5.5 | 1.6 | 3.5 | whack, 12 ticks (7 before batch 46) | Knocks back (1, as the war hammer); hold use to parry 50% of a blow from in front. |
+| Pike | 8 / 8.5 | 0.8 | 2–5 | stab, 16 ticks (10 before batch 46) | **Riders:** half again as much damage against anything riding or ridden (a horseman, or his horse). The longest reach, but nothing nearer than 2 blocks. |
 
 For comparison: the bronze sword hits 6 at 1.6 a second, the steel sword 6.5; the iron axe hits 9 at 0.9.
 
@@ -132,6 +132,7 @@ For comparison: the bronze sword hits 6 at 1.6 a second, the steel sword 6.5; th
 Not applicable: no worldgen, mobs or dimensions. Mobs do not spawn with arms. The scythe works on any crop all year; seasons change nothing.
 
 ## Rollout and open questions
+- Since Arms III (batch 46, [arms-iii.md](arms-iii.md)) the battle axe, scythe, quarterstaff and pike swing two-handed: a longer swing whose blow lands as it comes round, on every foe in an arc.
 - All numbers are first values for the owner to tune.
 - The backstab reads the foe's body turn, which for most mobs follows where they walk; a mob standing still and looking round may be backstabbed from where its head faces.
 - The pike's riders bonus does not apply to the spear's or lance's charge (those are vanilla's kinetic weapons and are untouched).

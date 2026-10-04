@@ -1,4 +1,4 @@
-"""High-detail (64x64) art for the arms of batches 42 and 45, drawn with tools/hd_art.py (docs/features/arms.md).
+"""High-detail (64x64) art for the arms of batches 42, 45 and 46, drawn with tools/hd_art.py (docs/features/arms.md).
 
 Each weapon is laid along the canvas diagonal, pommel or butt at the bottom left and point at the top right, the way
 vanilla draws its swords, so one sprite serves the inventory and the hand: the item models scale it up in the hand.
@@ -410,10 +410,94 @@ def pike(style):
     return c
 
 
+# ---------------------------------------------------------------- Arms III (batch 46)
+
+
+def zweihander(style):
+    c = Canvas()
+    w = Axis(origin=(3.0, 61.0), scale=0.82)
+    c.capsule(w(0.0), w(3.6), w.r(3.0), style.fitting)  # pommel
+    grip(c, w, 3.6, 25.0, 2.0, style)
+    c.capsule(w(14.0), w(15.0), w.r(2.4), style.fitting)  # the ring between the hands
+    c.grip = w(12.0)
+    # A wide crossguard with drooping, curled ends, then the leather-wrapped ricasso and its parrying lugs.
+    c.capsule(w(26.0, -12.0), w(26.0, 12.0), w.r(1.7), style.fitting)
+    for t in (-1, 1):
+        c.capsule(w(26.0, 12.0 * t), w(22.5, 15.0 * t), w.r(1.4), style.fitting)
+        c.disc(w(22.0, 15.4 * t), w.r(1.9), style.fitting)
+    c.box(w(31.0), w.r(4.2), w.r(3.4), w.angle, style.blade, bevel=1.0)
+    grip(c, w, 28.0, 33.0, 2.6, style, wraps=False)
+    for t in (-1, 1):
+        c.capsule(w(35.0, 4.0 * t), w(37.0, 7.0 * t), w.r(1.1), style.fitting)
+    blade(c, w, 35.5, 100.0, lambda f: 4.6 - 0.9 * f if f < 0.86 else (3.8 * (1 - f) / 0.14), style.blade, fuller=(0.02, 0.5))
+    c.disc(w(26.0), w.r(1.8), style.accent)
+    return c
+
+
+def maul(style):
+    c = Canvas()
+    w = Axis(origin=(7.0, 57.0), scale=0.94)
+    haft(c, w, 0.0, 56.0, 2.0, style, rings=(0.32, 0.72))
+    grip(c, w, 1.0, 15.0, 2.3, style)
+    c.grip = w(8.0)
+    c.capsule(w(-1.2), w(1.2), w.r(2.8), style.fitting)
+    c.capsule(w(44.0, 1.6), w(58.0, 1.6), w.r(0.8), style.fitting)  # langets
+    c.capsule(w(44.0, -1.6), w(58.0, -1.6), w.r(0.8), style.fitting)
+    # A great block of a head across the haft, banded at both ends, with broad striking faces.
+    c.box(w(57.0), w.r(6.5), w.r(14.0), w.angle, style.blade, bevel=2.4)
+    for t in (-10.5, 10.5):
+        c.box(w(57.0, t), w.r(7.2), w.r(1.6), w.angle, style.fitting, bevel=0.8)
+    for t in (-14.4, 14.4):
+        c.box(w(57.0, t), w.r(6.0), w.r(0.9), w.angle, style.blade, bevel=0.6, tint=0.12)
+    for s, t in ((54.0, -6.0), (60.0, -6.0), (54.0, 6.0), (60.0, 6.0)):
+        c.disc(w(s, t), w.r(0.9), style.accent)
+    return c
+
+
+def executioner(style):
+    c = Canvas()
+    w = Axis(origin=(5.0, 59.0), scale=0.9)
+    c.disc(w(1.8), w.r(3.2), style.fitting)  # a disc pommel
+    c.disc(w(1.8), w.r(1.3), style.accent)
+    grip(c, w, 4.0, 22.0, 1.9, style)
+    c.grip = w(12.0)
+    c.capsule(w(22.6, -8.0), w(22.6, 8.0), w.r(1.6), style.fitting)  # a short straight guard
+    for t in (-8.4, 8.4):
+        c.box(w(22.6, t), w.r(1.6), w.r(1.2), w.angle, style.fitting, bevel=0.6)
+    # A broad blade with parallel edges and a blunt, rounded end: made for one stroke, not for the point.
+    blade(c, w, 23.4, 88.0, lambda f: 5.6 if f < 0.93 else 5.6 * math.sqrt(max(0.0, 1.0 - ((f - 0.93) / 0.07) ** 2)),
+          style.blade, fuller=(0.02, 0.45))
+    for s in (74.0, 79.0):
+        c.disc(w(s), w.r(0.9), style.accent)
+    return c
+
+
+def bill(style):
+    c = Canvas()
+    w = Axis(origin=(3.5, 60.5), scale=0.78)
+    haft(c, w, 0.0, 80.0, 1.7, style, rings=(0.1, 0.5))
+    c.capsule(w(-1.5), w(1.0), w.r(2.2), style.fitting)
+    c.capsule(w(64.0, 1.3), w(80.0, 1.3), w.r(0.6), style.fitting)  # langets
+    c.capsule(w(64.0, -1.3), w(80.0, -1.3), w.r(0.6), style.fitting)
+    c.capsule(w(78.0), w(82.0), w.r(2.2), style.fitting)  # socket
+    # The billhook: a broad blade rising from the socket and curling forward into a hook, a back spike, a top spike.
+    hook = [w(80.0, 1.6), w(82.0, 7.0), w(88.0, 11.5), w(96.0, 13.0), w(101.0, 11.0), w(101.5, 7.5), w(98.0, 9.0),
+            w(93.0, 8.0), w(90.0, 4.0), w(91.0, 1.6)]
+    c.polygon(hook, style.blade, normal=_unit(-w.ux * 0.15, -w.uy * 0.15, 1.0), tint=-0.08)
+    for p, q in zip(hook[1:6], hook[2:7]):
+        c.line(p, q, (236, 240, 246), 1.0)
+    c.polygon([w(84.0, -2.0), w(88.0, -10.0), w(90.0, -2.0)], style.blade, normal=_unit(-w.ux * 0.4, -w.uy * 0.4, 1.0))
+    blade(c, w, 90.0, 106.0, lambda f: 1.8 * (1 - f) + 0.3, style.blade)
+    c.disc(w(85.0, 3.0), w.r(0.9), style.accent)
+    c.grip = w(18.0)
+    return c
+
+
 WEAPONS = {"longsword": longsword, "greatsword": greatsword, "rapier": rapier, "flanged_mace": flanged_mace,
            "war_hammer": war_hammer, "glaive": glaive, "halberd": halberd, "spear": spear, "lance": lance,
            "dagger": dagger, "sabre": sabre, "estoc": estoc, "battle_axe": battle_axe, "flail": flail, "scythe": scythe,
-           "quarterstaff": quarterstaff, "pike": pike}
+           "quarterstaff": quarterstaff, "pike": pike, "zweihander": zweihander, "maul": maul, "executioner": executioner,
+           "bill": bill}
 
 
 def draw(kind, metal):
