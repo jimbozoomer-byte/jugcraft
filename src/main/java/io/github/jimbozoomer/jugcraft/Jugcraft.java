@@ -74,6 +74,7 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.register();
 		io.github.jimbozoomer.jugcraft.building.Dieselworks.register();
 		io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.register();
+		io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.register();
 		JugcraftFarming.register();
 		JugcraftProspecting.register();
 		JugcraftKinetics.register();

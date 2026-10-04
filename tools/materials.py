@@ -257,5 +257,8 @@ def feature_of(entry_id):
     import zeppelin
     if entry_id in zeppelin.ITEMS:
         return "machines"
+    import mech
+    if entry_id in mech.ITEMS:
+        return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

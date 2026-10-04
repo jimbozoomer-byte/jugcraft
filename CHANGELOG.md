@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Diesel Walker, batch 47
+- **Diesel Walker:** a rideable dieselpunk mech, about four blocks tall, with an open cockpit, a glowing core, a big fist and a drill arm. Walk with the movement keys (it climbs one-block steps), jump, hold use to drill the block you look at and press attack to punch. It burns diesel or kerosene from buckets. The server drives it from the pilot's keys.
+- The drill breaks one block at a time as the pilot would by hand, so protected land and break checks still apply. It is no quarry.
+- Four game tests and a screenshot scene. Record: [diesel-walker.md](docs/features/diesel-walker.md).
+
 ### Unmerged: Zeppelin, batch 46
 - **Zeppelin:** a rideable dieselpunk airship for four. You steer it with the movement keys, jump to climb and sprint to sink. It burns diesel or kerosene from buckets and has a 27-slot cargo hold. It hovers where it is left and sinks gently when out of fuel. The server flies it from the pilot's keys.
 - Two game tests and a screenshot scene. Record: [zeppelin.md](docs/features/zeppelin.md).

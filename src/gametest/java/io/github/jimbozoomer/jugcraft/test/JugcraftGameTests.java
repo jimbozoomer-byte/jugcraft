@@ -648,6 +648,96 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/** Batch 47: lays a stone floor under the empty depot structure for the Diesel Walker tests. */
+	private static void walkerFloor(GameTestHelper helper) {
+		for (int x = 0; x < 16; x++) {
+			for (int z = 0; z < 16; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+	}
+
+	private static io.github.jimbozoomer.jugcraft.walker.DieselWalker pilotedWalker(GameTestHelper helper, Vec3 at, ServerPlayer pilot) {
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = helper.spawn(
+				io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.DIESEL_WALKER, at);
+		walker.setFuel(1000);
+		pilot.setPos(walker.getX(), walker.getY(), walker.getZ());
+		helper.assertTrue(pilot.startRiding(walker, true, true), "The pilot could not climb in");
+		return walker;
+	}
+
+	/** Batch 47: a fuelled Diesel Walker walks forward for its pilot and burns fuel; an empty one stands still. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 200)
+	public void dieselWalkerWalksOnFuel(GameTestHelper helper) {
+		walkerFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		ServerPlayer stranded = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = pilotedWalker(helper, new Vec3(3.5, 1, 2.5), pilot);
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker empty = pilotedWalker(helper, new Vec3(11.5, 1, 2.5), stranded);
+		empty.setFuel(0);
+		Vec3 start = walker.position();
+		Vec3 emptyStart = empty.position();
+		helper.onEachTick(() -> {
+			walker.steer(pilot, 1, 0, 0, 0, 0);
+			empty.steer(stranded, 1, 0, 0, 0, 0);
+		});
+		helper.runAfterDelay(40, () -> {
+			double walked = walker.position().subtract(start).horizontalDistance();
+			helper.assertTrue(walked > 3, "Holding forward should walk it forward, but it moved " + walked);
+			helper.assertTrue(walker.fuel() < 1000, "Walking should burn fuel");
+			helper.assertTrue(empty.position().subtract(emptyStart).horizontalDistance() < 0.1, "An empty walker should not move");
+			helper.succeed();
+		});
+	}
+
+	/** Batch 47: holding use drills the block the pilot looks at, and it drops as if they broke it. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 200)
+	public void dieselWalkerDrillsWhatThePilotLooksAt(GameTestHelper helper) {
+		walkerFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = pilotedWalker(helper, new Vec3(7.5, 1, 3.5), pilot);
+		BlockPos rock = new BlockPos(7, 2, 7);
+		helper.setBlock(rock, Blocks.COBBLESTONE);
+		Vec3 target = Vec3.atCenterOf(helper.absolutePos(rock));
+		helper.onEachTick(() -> {
+			pilot.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, target);
+			walker.steer(pilot, 0, 0, 0, 1, 0);
+		});
+		helper.succeedWhen(() -> {
+			helper.assertBlockPresent(Blocks.AIR, rock);
+			helper.assertItemEntityPresent(Items.COBBLESTONE);
+			helper.assertTrue(walker.fuel() < 1000, "Drilling should burn fuel");
+		});
+	}
+
+	/** Batch 47: the fist hits what stands in front of the walker. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 100)
+	public void dieselWalkerPunches(GameTestHelper helper) {
+		walkerFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = pilotedWalker(helper, new Vec3(7.5, 1, 3.5), pilot);
+		net.minecraft.world.entity.LivingEntity pig = helper.spawn(net.minecraft.world.entity.EntityType.PIG, new Vec3(7.5, 1, 5.7));
+		helper.runAfterDelay(5, () -> walker.steer(pilot, 0, 0, 0, 0, 1));
+		helper.succeedWhen(() -> helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(), "The fist should hit the pig"));
+	}
+
+	/** Batch 47: a Diesel Walker's fuel is saved with it. */
+	@GameTest
+	public void dieselWalkerKeepsFuel(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		var type = io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.DIESEL_WALKER;
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		walker.setFuel(2500);
+		net.minecraft.world.level.storage.TagValueOutput out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+				net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess());
+		walker.saveWithoutId(out);
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker copy = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		copy.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,
+				level.registryAccess(), out.buildResult()));
+		helper.assertTrue(copy.fuel() == 2500, "Fuel should be saved, got " + copy.fuel());
+		helper.succeed();
+	}
+
 	/** Coal generator -> copper cables -> electric furnace smelts raw iron. */
 	@GameTest(maxTicks = 600)
 	public void cablesCarryPower(GameTestHelper helper) {
