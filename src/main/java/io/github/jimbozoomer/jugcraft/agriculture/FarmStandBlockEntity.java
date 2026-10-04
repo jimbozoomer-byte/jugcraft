@@ -32,12 +32,17 @@ public class FarmStandBlockEntity extends BlockEntity {
 	public static final int CRATES = 6;
 	private @Nullable UUID owner;
 	private String ownerName = "";
-	private final SimpleContainer crates = new SimpleContainer(CRATES);
+	private final SimpleContainer crates = new SimpleContainer(CRATES) {
+		@Override
+		public void setChanged() {
+			super.setChanged();
+			changed();
+		}
+	};
 	private final long[] prices = {1, 1, 1, 1, 1, 1};
 
 	public FarmStandBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.FARM_STAND_ENTITY, pos, state);
-		crates.addListener(container -> changed());
 	}
 
 	public @Nullable UUID owner() {

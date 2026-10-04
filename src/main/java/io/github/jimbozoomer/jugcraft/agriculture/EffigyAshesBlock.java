@@ -65,7 +65,7 @@ public class EffigyAshesBlock extends Block {
 			}
 			server.destroyBlock(pos, true, player);
 			stack.hurtAndBreak(1, player, hand);
-			level.playSound(null, pos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0F, 0.8F);
+			level.playSound(null, pos, SoundEvents.SHOVEL_FLATTEN.value(), SoundSource.BLOCKS, 1.0F, 0.8F);
 		}
 		return InteractionResult.SUCCESS;
 	}

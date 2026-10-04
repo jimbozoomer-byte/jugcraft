@@ -2136,7 +2136,7 @@ public final class JugcraftAgriculture {
 				FabricBlockEntityTypeBuilder.create(HarvestEffigyBlockEntity::new, effigy).build());
 		registerItem(HARVEST_EFFIGY, props -> new BlockItem(effigy, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		Block ashes = registerBlock(EFFIGY_ASHES, EffigyAshesBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY)
-				.strength(0.3F).sound(SoundType.SAND).noOcclusion().pushReaction(PushReaction.DESTROY));
+				.strength(0.3F).sound(SoundType.SAND).noOcclusion().pushReaction(PushReaction.POPPED));
 		registerItem(EFFIGY_ASHES, props -> new BlockItem(ashes, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		registerItem(HEARTH_ASH, props -> new FertilizerItem(props, HEARTH_ASH_RADIUS, HEARTH_ASH_DOSES), new Item.Properties(), INGREDIENT_TAB);
 
@@ -2146,7 +2146,7 @@ public final class JugcraftAgriculture {
 			String id = SINGING_PUMPKIN + voice.id();
 			Block pumpkin = registerBlock(id, props -> new SingingPumpkinBlock(props, voice), BlockBehaviour.Properties.of()
 					.mapColor(MapColor.COLOR_ORANGE).strength(1.0F).sound(SoundType.WOOD).lightLevel(state -> SingingPumpkinBlock.LIGHT)
-					.pushReaction(PushReaction.DESTROY));
+					.pushReaction(PushReaction.POPPED));
 			registerItem(id, props -> new BlockItem(pumpkin, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 			pumpkins.add(pumpkin);
 		}

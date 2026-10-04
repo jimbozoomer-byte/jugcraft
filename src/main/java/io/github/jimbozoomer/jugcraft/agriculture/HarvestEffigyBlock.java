@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
@@ -184,7 +185,7 @@ public class HarvestEffigyBlock extends MultiDecorationBlock implements EntityBl
 		level.playSound(null, master.above(), JugcraftAgriculture.EFFIGY_BURN, SoundSource.BLOCKS, 2.0F, 0.8F);
 		level.playSound(null, master, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1.0F, 0.7F);
 		for (Crow crow : level.getEntitiesOfClass(Crow.class, new AABB(master).inflate(CROW_RADIUS))) {
-			crow.flee(level, master.getCenter());
+			crow.flee(level, Vec3.atCenterOf(master));
 		}
 	}
 

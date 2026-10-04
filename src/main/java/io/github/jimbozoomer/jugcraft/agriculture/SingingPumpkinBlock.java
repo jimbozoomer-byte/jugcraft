@@ -63,9 +63,9 @@ public class SingingPumpkinBlock extends HorizontalDirectionalBlock implements E
 		return voice;
 	}
 
-	/** The pitch to play {@code note} at (note 12 is the voice's middle note, pitch 1), as a note block plays. */
+	/** The pitch to play {@code note} at (note 12 is the voice's middle note, pitch 1), as a note block plays: a semitone a note. */
 	public static float pitch(int note) {
-		return MusicBoxBlock.pitch(note);
+		return (float) Math.pow(2.0, (note - 12) / 12.0);
 	}
 
 	/** {@code note}'s name with the octave above the voice's lowest note, as 0 to 2: F#0 to F#2. */
