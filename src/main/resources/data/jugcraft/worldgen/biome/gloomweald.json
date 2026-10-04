@@ -185,7 +185,14 @@
       "jugcraft:trees_gloomweald",
       "jugcraft:leaf_litter",
       "jugcraft:toadstools",
-      "jugcraft:brown_toadstools"
+      "jugcraft:brown_toadstools",
+      "jugcraft:flora_ghost_pipe",
+      "jugcraft:flora_ghost_fern",
+      "jugcraft:flora_large_ghost_fern",
+      "jugcraft:flora_deadly_nightshade",
+      "jugcraft:flora_foxglove",
+      "jugcraft:flora_wild_mandrake",
+      "jugcraft:flora_creeping_ivy"
     ],
     [
       "minecraft:freeze_top_layer"

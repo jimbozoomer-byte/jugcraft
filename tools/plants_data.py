@@ -2,6 +2,7 @@
 the registration list Java reads (/jugcraft/plants.json) and a placement feature per plant (worldgen/feature/<plant>)
 that biomes scatter (tools/biomes.py EXTRAS).
 """
+import flora_data
 import plants as pl
 
 MOD = "jugcraft"
@@ -21,6 +22,11 @@ def assets(root, write, lang):
     for plant, info in pl.PLANTS.items():
         kind = info["kind"]
         lang[f"block.{MOD}.{plant}"] = info["display"]
+        if info.get("art") == "flora":
+            flora_data.plant_assets(root, write, plant)
+            if kind == "flower":
+                lang[f"block.{MOD}.{pl.potted(plant)}"] = f"Potted {info['display']}"
+            continue
         if kind == "flower":
             # Vanilla's flower and potted-flower shapes, with our textures.
             write(models / f"{plant}.json", {"parent": "minecraft:block/cross", "textures": {"cross": tex(plant)}})
@@ -81,6 +87,24 @@ def loot(out, write):
                 {"condition": explosion, "entries": [{"type": "minecraft:item", "name": "minecraft:flower_pot"}], "rolls": 1},
                 {"condition": explosion, "entries": [{"type": "minecraft:item", "name": rid(plant)}], "rolls": 1}],
                 "random_sequence": rid(f"blocks/{pl.potted(plant)}")})
+        elif kind == "tall_grass":
+            # Only shears take it, from the lower half, like tall grass.
+            write(out / f"{plant}.json", {"type": "minecraft:block", "pools": [
+                {"condition": {"type": "minecraft:all_of", "terms": [match_block(plant, half="lower"), "minecraft:tool/can_shear"]},
+                 "entries": [{"type": "minecraft:item", "name": rid(plant)}], "rolls": 1}], "random_sequence": rid(f"blocks/{plant}")})
+        elif kind in ("grass", "hanging"):
+            # Only shears take it, like short grass and hanging moss.
+            write(out / f"{plant}.json", {"type": "minecraft:block", "pools": [
+                {"condition": "minecraft:tool/can_shear", "entries": [{"type": "minecraft:item", "name": rid(plant)}], "rolls": 1}],
+                "random_sequence": rid(f"blocks/{plant}")})
+        elif kind == "vine":
+            # Shears take one for each face it covers, like glow lichen.
+            write(out / f"{plant}.json", {"type": "minecraft:block", "pools": [
+                {"condition": "minecraft:tool/can_shear", "entries": [{"type": "minecraft:item", "name": rid(plant), "modifier": [
+                    *[{"type": "minecraft:set_count", "add": True, "count": 1, "condition": match_block(plant, **{face: "true"})}
+                      for face in ("down", "up", "north", "south", "west", "east")],
+                    {"type": "minecraft:set_count", "add": True, "count": -1}, {"type": "minecraft:explosion_decay"}]}], "rolls": 1}],
+                "random_sequence": rid(f"blocks/{plant}")})
         elif kind in pl.TALL:
             # From the lower half only, like the lilac.
             write(out / f"{plant}.json", {"type": "minecraft:block", "pools": [
@@ -105,6 +129,13 @@ def loot(out, write):
 def tags(tags):
     for plant, info in pl.PLANTS.items():
         kind = info["kind"]
+        if kind in ("grass", "tall_grass", "hanging", "vine"):
+            # Like vanilla's grasses, hanging moss and vines: cut quickly by a sword, and trees grow through them.
+            tags.add("block", "minecraft:sword_efficient", rid(plant))
+            tags.add("block", "minecraft:replaceable_by_trees", rid(plant))
+            if kind in ("grass", "tall_grass"):
+                tags.add("block", "minecraft:enchantment_power_transmitter", rid(plant))
+            continue
         if kind in ("tall_plant", "dune_plant", "floor_plant", "water_plant", "surface"):
             if kind in ("tall_plant", "dune_plant"):
                 tags.add("block", "minecraft:replaceable_by_trees", rid(plant))
@@ -129,7 +160,7 @@ def tags(tags):
 def placement_state(plant):
     """What a plant's feature places: one block, the lower half of a tall flower, or clumps of any size and facing."""
     kind = pl.PLANTS[plant]["kind"]
-    if kind == "flower":
+    if kind in ("flower", "grass"):
         return {"id": rid(plant)}
     if kind in pl.TALL:
         return {"id": rid(plant), "properties": {"half": "lower"}}
@@ -140,7 +171,71 @@ def placement_state(plant):
         for n in range(1, 5) for facing in FACINGS]}
 
 
+def feature(plant):
+    """A plant's own feature: one of it placed (simple_block), or for a hanging plant a strand hanging down from where
+    it starts, or for a vine a spread of it over nearby faces (vanilla's glow lichen feature)."""
+    kind = pl.PLANTS[plant]["kind"]
+    if kind == "hanging":
+        length = pl.HANGING["worldgen_length"]
+        return {"type": "minecraft:block_column", "allowed_placement": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+                "direction": "down", "prioritize_tip": True, "layers": [
+                    {"height": {"type": "minecraft:uniform", "min_inclusive": 0, "max_inclusive": length - 1},
+                     "provider": {"id": rid(plant), "properties": {"tip": "false"}}},
+                    {"height": 1, "provider": {"id": rid(plant), "properties": {"tip": "true"}}}]}
+    if kind == "vine":
+        return {"type": "minecraft:multiface_growth", "block": rid(plant), "can_be_placed_on": VINE_HOSTS, "can_place_on_ceiling": False,
+                "can_place_on_floor": False, "can_place_on_wall": True, "chance_of_spreading": 0.6, "search_range": 6}
+    return {"type": "minecraft:simple_block", "to_place": placement_state(plant)}
+
+
+# What creeping ivy grows over in the wild: logs, stone, cobblestone and mossy stone.
+VINE_HOSTS = ["minecraft:oak_log", "minecraft:dark_oak_log", "minecraft:spruce_log", "minecraft:birch_log", "minecraft:pale_oak_log",
+              "minecraft:stone", "minecraft:cobblestone", "minecraft:mossy_cobblestone", "minecraft:andesite", "minecraft:tuff",
+              "jugcraft:dead_log"]
+# Where a hanging plant may start: just under leaves or a log, with air below.
+HANG_FROM = {"type": "minecraft:all_of", "predicates": [
+    {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+    {"type": "minecraft:any_of", "predicates": [
+        {"type": "minecraft:matching_block_tag", "tag": "minecraft:leaves", "offset": [0, 1, 0]},
+        {"type": "minecraft:matching_block_tag", "tag": "minecraft:logs", "offset": [0, 1, 0]}]}]}
+
+
+def hanging_placement(count):
+    """Strands under the canopy: from the ground up to just below the leaves or a branch."""
+    return [{"type": "minecraft:count", "count": count}, {"type": "minecraft:in_square"},
+            {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING_NO_LEAVES"},
+            {"type": "minecraft:environment_scan", "direction_of_search": "up", "max_steps": 14, "target_condition": HANG_FROM,
+             "allowed_search_condition": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"}},
+            {"type": "minecraft:biome"}]
+
+
+def vine_placement(count):
+    return [{"type": "minecraft:count", "count": count}, {"type": "minecraft:in_square"},
+            {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING_NO_LEAVES"},
+            {"type": "minecraft:random_offset", "xz_spread": 0, "y_spread": {"type": "minecraft:uniform", "min_inclusive": 0, "max_inclusive": 3}},
+            {"type": "minecraft:biome"}]
+
+
+def patch_placement(plant):
+    """Where a plant's "patch" scatters it in vanilla's biomes: one patch in about `rarity` chunks."""
+    info = pl.PLANTS[plant]["patch"]
+    kind = pl.PLANTS[plant]["kind"]
+    if kind == "hanging":
+        return [{"type": "minecraft:rarity_filter", "chance": info["rarity"]}] + hanging_placement(info["tries"])
+    if kind == "vine":
+        return [{"type": "minecraft:rarity_filter", "chance": info["rarity"]}] + vine_placement(info["tries"])
+    return [{"type": "minecraft:rarity_filter", "chance": info["rarity"]}, {"type": "minecraft:in_square"},
+            {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"},
+            {"type": "minecraft:count", "count": info["tries"]},
+            {"type": "minecraft:offset", "x": {"type": "minecraft:trapezoid", "max": 6, "min": -6, "plateau": 0},
+             "y": {"type": "minecraft:trapezoid", "max": 2, "min": -2, "plateau": 0},
+             "z": {"type": "minecraft:trapezoid", "max": 6, "min": -6, "plateau": 0}},
+            {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"}}]
+
+
 def worldgen(data, write):
     write(data.parent / MOD / "plants.json", pl.registration())
-    for plant in pl.PLANTS:
-        write(data / MOD / "worldgen" / "feature" / f"{plant}.json", {"type": "minecraft:simple_block", "to_place": placement_state(plant)})
+    for plant, info in pl.PLANTS.items():
+        write(data / MOD / "worldgen" / "feature" / f"{plant}.json", feature(plant))
+        if "patch" in info:
+            write(data / MOD / "worldgen" / "placed_feature" / f"patch_{plant}.json", {"feature": rid(plant), "placement": patch_placement(plant)})

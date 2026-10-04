@@ -2363,6 +2363,59 @@ def check_decor4(java):
     check_pinata(java, number, lang)
     check_hot_air_balloon(java, number, lang)
     check_leaf_blower(java, number, lang)
+    check_graveyard_flora(java, number, lang)
+
+
+def check_graveyard_flora(java, number, lang):
+    """The graveyard flora: the mandrake's scream matches tools/agriculture.py MANDRAKE; every sculpted model turns its
+    elements only as block models may (one axis, 22.5 or 45 degrees) and stays within -16..32; each flora plant's texture
+    is the 64 x 64 one its models draw on; vanilla-biome patches have their placed features; the flying ointment takes a
+    mandrake root."""
+    md = ag.MANDRAKE
+    expected = {"SCREAM_RADIUS": md["scream_radius"], "NAUSEA_SECONDS": md["nausea_seconds"]}
+    for name, value in expected.items():
+        found = number("Mandrakes", name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"Mandrakes.{name} = {found} differs from tools/agriculture.py MANDRAKE ({value})")
+    source = java.get("Mandrakes", "")
+    for key in ("crop", "wild", "root", "advancement"):
+        if f'"{md[key]}"' not in source:
+            err(f"Mandrakes.java does not name the mandrake's {key} ({md[key]})")
+    if "Mandrakes.register()" not in java.get("JugcraftAgriculture", ""):
+        err("JugcraftAgriculture.java must register the mandrake's scream")
+    if f"jugcraft:{md['root']}" not in ag.HEX["brews"]["flying"]["ingredients"]:
+        err("Flying Ointment must take a mandrake root (tools/agriculture.py HEX)")
+    sculpted = [p for p in plants.flora()] + ["mandrake"]
+    models = ASSETS / "models" / "block"
+    for name in sculpted:
+        texture = ASSETS / "textures" / "block" / f"{name}.png"
+        if not texture.is_file():
+            err(f"The graveyard flora's {name} has no texture")
+        else:
+            with Image.open(texture) as img:
+                if img.size != (64, 64):
+                    err(f"textures/block/{name}.png is {img.size}, not 64 x 64")
+    for path in sorted(models.glob("*.json")):
+        model = load(path) or {}
+        if model.get("textures", {}).get("p", "").split("/")[-1] not in sculpted:
+            continue
+        for e in model.get("elements", []):
+            for c in e["from"] + e["to"]:
+                if not -16 <= c <= 32:
+                    err(f"{path.name}: an element reaches {c}, outside -16..32")
+                    break
+            r = e.get("rotation")
+            if r and (r.get("axis") not in ("x", "y", "z") or r.get("angle") not in (-45, -22.5, 22.5, 45)):
+                err(f"{path.name}: an element turns {r}, which block models cannot")
+    for plant, info in plants.PLANTS.items():
+        if "patch" in info and not (DATA / MOD / "worldgen" / "placed_feature" / f"patch_{plant}.json").is_file():
+            err(f"{plant} has a vanilla-biome patch but no placed feature patch_{plant}")
+        if info["kind"] == "grass" and plants.PLANTS.get(info.get("tall"), {}).get("kind") != "tall_grass":
+            err(f"{plant}: bone meal grows it into {info.get('tall')}, which is not a tall_grass plant")
+    for key in [f"advancements.{MOD}.{md['advancement']}.title", f"item.{MOD}.{md['root']}", f"block.{MOD}.{md['wild']}",
+                f"block.{MOD}.{md['crop']}"]:
+        if key not in lang:
+            err(f"The graveyard flora has no words for {key}")
 
 
 def check_midway(java, number, lang):

@@ -230,12 +230,13 @@ MAUSOLEUM_DOOR = {"id": "bronze_mausoleum_door", "display": "Bronze Mausoleum Do
 STIR_BY_KIND = {"open_grave": 2.0}
 GRAVE_VASE = {"block": "grave_vase", "display": "Grave Vase", "calm": 0.5, "calm_reach": 3, "wilt_chance": 0.05,
               "colours": ["white", "red", "yellow", "purple", "mixed"],
-              "flowers": {"white": ["minecraft:lily_of_the_valley", "minecraft:oxeye_daisy", "minecraft:white_tulip", "minecraft:azure_bluet"],
-                          "red": ["minecraft:poppy", "minecraft:red_tulip", "jugcraft:red_mum", "jugcraft:hibiscus"],
+              "flowers": {"white": ["minecraft:lily_of_the_valley", "minecraft:oxeye_daisy", "minecraft:white_tulip", "minecraft:azure_bluet",
+                                    "jugcraft:snowdrop", "jugcraft:ghost_pipe"],
+                          "red": ["minecraft:poppy", "minecraft:red_tulip", "jugcraft:red_mum", "jugcraft:hibiscus", "jugcraft:spider_lily"],
                           "yellow": ["minecraft:dandelion", "minecraft:orange_tulip", "jugcraft:yellow_mum", "jugcraft:orange_mum",
                                      "jugcraft:goldenrod", "jugcraft:marigold", "jugcraft:orange_cosmos"],
                           "purple": ["minecraft:allium", "minecraft:cornflower", "minecraft:blue_orchid", "jugcraft:lavender", "jugcraft:heather",
-                                     "jugcraft:purple_mum", "jugcraft:frost_iris"]},
+                                     "jugcraft:purple_mum", "jugcraft:frost_iris", "jugcraft:deadly_nightshade"]},
               # Every flower the vase takes (jugcraft:grave_flowers): the colours' tags, these, and vanilla's small flowers.
               "others": ["minecraft:pink_tulip", "minecraft:torchflower", "minecraft:wither_rose", "minecraft:open_eyeblossom",
                          "minecraft:closed_eyeblossom"],
