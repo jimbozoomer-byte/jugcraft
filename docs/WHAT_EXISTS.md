@@ -22,7 +22,7 @@ A map of everything built so far, written for AI agents and contributors who nee
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 1216 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit`, `hay_golem`, `flying_broomstick`, `werewolf`, `squirrel`, `pumpkling`, `toss_ring`, `ferris_wheel`, `pinata`, `hot_air_balloon` and `pibal`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
+| Registered IDs | 1271 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit`, `hay_golem`, `flying_broomstick`, `werewolf`, `squirrel`, `pumpkling`, `toss_ring`, `ferris_wheel`, `pinata`, `hot_air_balloon` and `pibal`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
 
 ## Build, generate, check
 
