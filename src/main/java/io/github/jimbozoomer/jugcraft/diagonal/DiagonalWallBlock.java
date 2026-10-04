@@ -33,8 +33,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * left exactly as it is, with its 324 states; it becomes this block only while it has a diagonal, and goes back to the
  * vanilla wall when its last diagonal goes ({@link DiagonalWalls}).
  *
- * <p>Its sides are only joined or not, as walls were before they had tall sides: a post, four sides, four diagonals and
- * waterlogged make 1,024 states, where the same properties on the vanilla wall would make 5,184. Players see the vanilla
+ * <p>Its sides are joined or not, and one property, {@link #TALL}, raises them all, straight and diagonal, to meet the
+ * block above: a post, four sides, four diagonals, tall and waterlogged make 2,048 states, where the same properties on
+ * the vanilla wall would make 5,184. Players see the vanilla
  * wall: it drops it, picks as it, is named as it and is in {@code #minecraft:walls}, so walls, fence gates, bars, tools
  * and mobs treat it as one. Its updates are the vanilla wall's own: it hands each to the wall it stands for, which works
  * out the sides, the tall sides and the post and turns back into this block if it still joins diagonally.
@@ -42,20 +43,22 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class DiagonalWallBlock extends Block implements SimpleWaterloggedBlock {
 	public static final BooleanProperty UP = WallBlock.UP;
 	public static final BooleanProperty WATERLOGGED = WallBlock.WATERLOGGED;
+	/** Every joined side and diagonal arm rises to the top of the block, to meet the block above (DiagonalWalls.settle). */
+	public static final BooleanProperty TALL = BooleanProperty.create("tall");
 	/** Its straight sides: the same properties fences and bars use, so the diagonal rule reads them alike. */
 	public static final Map<Direction, BooleanProperty> SIDES = CrossCollisionBlock.PROPERTY_BY_DIRECTION;
 	private static final List<Direction> HORIZONTAL = List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST);
 
-	/** Outlines and collisions for every combination of post, sides and diagonals, shared by every diagonal wall. */
-	private static final AtomicReferenceArray<VoxelShape> OUTLINES = new AtomicReferenceArray<>(512);
-	private static final AtomicReferenceArray<VoxelShape> COLLISIONS = new AtomicReferenceArray<>(512);
+	/** Outlines and collisions for every combination of post, sides, diagonals and height, shared by every diagonal wall. */
+	private static final AtomicReferenceArray<VoxelShape> OUTLINES = new AtomicReferenceArray<>(1024);
+	private static final AtomicReferenceArray<VoxelShape> COLLISIONS = new AtomicReferenceArray<>(1024);
 
 	private final WallBlock wall;
 
 	public DiagonalWallBlock(WallBlock wall, Properties properties) {
 		super(properties);
 		this.wall = wall;
-		BlockState state = stateDefinition.any().setValue(UP, true).setValue(WATERLOGGED, false);
+		BlockState state = stateDefinition.any().setValue(UP, true).setValue(TALL, false).setValue(WATERLOGGED, false);
 		for (Direction side : HORIZONTAL) {
 			state = state.setValue(SIDES.get(side), false);
 		}
@@ -70,7 +73,7 @@ public class DiagonalWallBlock extends Block implements SimpleWaterloggedBlock {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(UP, SIDES.get(Direction.NORTH), SIDES.get(Direction.EAST), SIDES.get(Direction.SOUTH), SIDES.get(Direction.WEST),
-				WATERLOGGED, DiagonalConnections.NORTH_EAST, DiagonalConnections.SOUTH_EAST, DiagonalConnections.SOUTH_WEST,
+				TALL, WATERLOGGED, DiagonalConnections.NORTH_EAST, DiagonalConnections.SOUTH_EAST, DiagonalConnections.SOUTH_WEST,
 				DiagonalConnections.NORTH_WEST);
 	}
 
@@ -108,7 +111,7 @@ public class DiagonalWallBlock extends Block implements SimpleWaterloggedBlock {
 
 	@Override
 	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-		return shape(state, OUTLINES, 14, 16);
+		return shape(state, OUTLINES, state.getValue(TALL) ? 16 : 14, 16);
 	}
 
 	@Override
@@ -151,7 +154,8 @@ public class DiagonalWallBlock extends Block implements SimpleWaterloggedBlock {
 
 	/**
 	 * The shape for the state's post, sides and diagonals, as vanilla's walls are drawn: an 8-pixel post, 6-pixel sides
-	 * to the edge and diagonal arms as wide. Worked out once for each of the 512 combinations, for every diagonal wall.
+	 * to the edge and diagonal arms as wide, `sideHeight` pixels high. Worked out once for each of the 1,024 combinations
+	 * (with the height), for every diagonal wall.
 	 */
 	private static VoxelShape shape(BlockState state, AtomicReferenceArray<VoxelShape> cache, double sideHeight, double postHeight) {
 		int index = state.getValue(UP) ? 1 : 0;
@@ -159,6 +163,7 @@ public class DiagonalWallBlock extends Block implements SimpleWaterloggedBlock {
 			index |= state.getValue(SIDES.get(HORIZONTAL.get(i))) ? 2 << i : 0;
 		}
 		index |= DiagonalConnections.mask(state) << 5;
+		index |= state.getValue(TALL) ? 1 << 9 : 0;
 		VoxelShape shape = cache.get(index);
 		if (shape == null) {
 			shape = (index & 1) != 0 ? Block.column(8, 0, postHeight) : Shapes.empty();
@@ -168,7 +173,7 @@ public class DiagonalWallBlock extends Block implements SimpleWaterloggedBlock {
 					shape = Shapes.or(shape, sides.get(HORIZONTAL.get(i)));
 				}
 			}
-			shape = Shapes.or(shape, DiagonalConnections.Arms.of(3 / 16.0, 0, sideHeight / 16, index >> 5)).optimize();
+			shape = Shapes.or(shape, DiagonalConnections.Arms.of(3 / 16.0, 0, sideHeight / 16, index >> 5 & 0b1111)).optimize();
 			cache.set(index, shape);
 		}
 		return shape;

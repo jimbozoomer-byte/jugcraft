@@ -463,6 +463,12 @@ Each in bronze (from the tin feature) and steel (machines), crafted from the met
 
 **Code:** `weapons/` (`JugcraftArms`, `ArmItem`); data from `tools/arms.py`, art from `tools/arms_art.py` ([feature record](features/arms.md)).
 
+**Motion (batch 43).**
+- Each kind holds its own guard and swings a combo of whole-body attacks: longsword forehand, backhand and thrust; greatsword sweep and cleave; rapier lunge and cut; mace smash and swing; war hammer slam and swing; glaive sweep and rising cut; halberd thrust and chop.
+- Two-handed arms keep both hands on the grip. First person has its own guard and strokes.
+- Looks only: damage, reach and timing are unchanged.
+- Client code in `client/arms/` (`ArmsMotion`, `ArmsPose`); moves from `tools/arms_moves.py` on `tools/arms_motion.py` ([feature record](features/arms-motion.md)).
+
 ### Construction chemistry (batch 32)
 
 | Item | What it does | Built from |

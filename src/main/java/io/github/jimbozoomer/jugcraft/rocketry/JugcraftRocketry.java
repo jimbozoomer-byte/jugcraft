@@ -13,7 +13,11 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -25,13 +29,20 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.saveddata.WeatherData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -63,6 +74,23 @@ public final class JugcraftRocketry {
 	public static Item CLEAR_SKY_ROCKET;
 	public static Item SIGNAL_FLARE;
 	public static Item ILLUMINATION_FLARE;
+	/** Batch 39: the rocket post. */
+	public static Item DELIVERY_ROCKET;
+	public static Item FLIGHT_PLAN;
+	public static Block ROCKET_PAD;
+	public static BlockEntityType<RocketPadBlockEntity> ROCKET_PAD_ENTITY;
+	public static ExtendedMenuType<RocketPadMenu, BlockPos> ROCKET_PAD_MENU;
+	public static DataComponentType<GlobalPos> FLIGHT_TARGET;
+	/** Batch 40: the zipline. */
+	public static Item LINE_ROCKET;
+	public static Block ZIPLINE_ANCHOR;
+	public static BlockEntityType<ZiplineAnchorBlockEntity> ZIPLINE_ANCHOR_ENTITY;
+	public static EntityType<ZiplineRider> ZIPLINE_RIDER;
+	/** Batch 41: the rocket launcher. */
+	public static Item ROCKET_LAUNCHER;
+	public static Item HE_ROCKET;
+	public static Item HOMING_ROCKET;
+	public static EntityType<CombatRocket> COMBAT_ROCKET;
 
 	private record Flight(ServerLevel level, UUID player, String name, RocketItem.Kind kind, Vec3 at, long due) {
 	}
@@ -92,11 +120,74 @@ public final class JugcraftRocketry {
 		CLEAR_SKY_ROCKET = rocket("clear_sky_rocket", RocketItem.Kind.CLEAR);
 		SIGNAL_FLARE = rocket("signal_flare", RocketItem.Kind.SIGNAL);
 		ILLUMINATION_FLARE = rocket("illumination_flare", RocketItem.Kind.ILLUMINATION);
+		registerPost();
+		registerZipline();
+		registerLauncher();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		ServerTickEvents.END_SERVER_TICK.register(JugcraftRocketry::tick);
+		ServerTickEvents.END_SERVER_TICK.register(RocketPost::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FLIGHTS.clear();
 			nextWeather = 0;
+		});
+	}
+
+	/** Batch 39: the rocket pad, delivery rockets and flight plans. */
+	private static void registerPost() {
+		FLIGHT_TARGET = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("flight_target"),
+				DataComponentType.<GlobalPos>builder().persistent(GlobalPos.CODEC).networkSynchronized(GlobalPos.STREAM_CODEC).build());
+		DELIVERY_ROCKET = item("delivery_rocket", properties -> new Item(properties.stacksTo(16)) {
+			@Override
+			public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+					Consumer<Component> tooltip, TooltipFlag flag) {
+				tooltip.accept(Component.translatable("tooltip.jugcraft.delivery_rocket").withStyle(ChatFormatting.GRAY));
+			}
+		});
+		FLIGHT_PLAN = item("flight_plan", properties -> new FlightPlanItem(properties.stacksTo(1)));
+		ResourceKey<Block> padKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("rocket_pad"));
+		ROCKET_PAD = Registry.register(BuiltInRegistries.BLOCK, padKey, new RocketPadBlock(
+				BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).strength(2.0F).noOcclusion().setId(padKey)));
+		item("rocket_pad", properties -> new BlockItem(ROCKET_PAD, properties.useBlockDescriptionPrefix()));
+		ROCKET_PAD_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("rocket_pad"),
+				FabricBlockEntityTypeBuilder.create(RocketPadBlockEntity::new, ROCKET_PAD).build());
+		ROCKET_PAD_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("rocket_pad"),
+				new ExtendedMenuType<>((containerId, inventory, pos) -> new RocketPadMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));
+	}
+
+	/** Batch 40: zipline anchors, the line-throwing rocket and the trolley riders hang from. */
+	private static void registerZipline() {
+		LINE_ROCKET = item("line_rocket", properties -> new LineRocketItem(properties.stacksTo(16)));
+		ResourceKey<Block> anchorKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("zipline_anchor"));
+		ZIPLINE_ANCHOR = Registry.register(BuiltInRegistries.BLOCK, anchorKey, new ZiplineAnchorBlock(
+				BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).strength(3.0F).noOcclusion().setId(anchorKey)));
+		item("zipline_anchor", properties -> new BlockItem(ZIPLINE_ANCHOR, properties.useBlockDescriptionPrefix()));
+		ZIPLINE_ANCHOR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("zipline_anchor"),
+				FabricBlockEntityTypeBuilder.create(ZiplineAnchorBlockEntity::new, ZIPLINE_ANCHOR).build());
+		ResourceKey<EntityType<?>> riderKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("zipline_rider"));
+		ZIPLINE_RIDER = Registry.register(BuiltInRegistries.ENTITY_TYPE, riderKey, EntityType.Builder
+				.<ZiplineRider>of(ZiplineRider::new, MobCategory.MISC).sized(0.001F, 0.001F).noSummon()
+				.clientTrackingRange(10).updateInterval(1).build(riderKey));
+	}
+
+	/** Batch 41: the rocket launcher, its two rockets and the rocket in flight. */
+	private static void registerLauncher() {
+		ROCKET_LAUNCHER = item("rocket_launcher", properties -> new RocketLauncherItem(properties.stacksTo(1)));
+		HE_ROCKET = described("he_rocket");
+		HOMING_ROCKET = described("homing_rocket");
+		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("combat_rocket"));
+		COMBAT_ROCKET = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder
+				.<CombatRocket>of(CombatRocket::new, MobCategory.MISC).sized(0.3F, 0.3F)
+				.clientTrackingRange(8).updateInterval(2).build(key));
+	}
+
+	/** A plain item with a grey tooltip line, {@code tooltip.jugcraft.<path>}. */
+	private static Item described(String path) {
+		return item(path, properties -> new Item(properties.stacksTo(16)) {
+			@Override
+			public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+					Consumer<Component> tooltip, TooltipFlag flag) {
+				tooltip.accept(Component.translatable("tooltip.jugcraft." + path).withStyle(ChatFormatting.GRAY));
+			}
 		});
 	}
 

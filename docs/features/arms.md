@@ -1,6 +1,6 @@
 # Arms
 
-Status: implemented on `claude/arms-42` (batch 42), awaiting review. Compiles and tests in CI only; **not yet played**.
+Status: merged in #152 (batch 42). Compiles and tests in CI only; **not yet played**.
 Proposal issue: the owner, 3 October 2026, with the Epic Knights and Simply Swords jars attached: "look at how these mods do weapons and animations and quality and depict the weapons and learn from it and make a bunch of new types of weapons / swords / maces / glaives / spears and give them nice animations and see how these mods keep them optimized", then "go ahead and start on the weapons in a new batch".
 Owner: jimbozoomer-byte
 Target milestone and tier: bronze (tin) and steel (machines), beside the bronze and steel swords of batch 25.

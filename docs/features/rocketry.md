@@ -72,5 +72,5 @@ Primary specialty and supported player role: exploration (prospecting), farming 
 Not applicable.
 
 ## Rollout and open questions
-- Next rocketry batches: the rocket post (landing pads, and whether a pad keeps its landing area loaded), line-throwing rockets with ziplines, the rocket launcher (damage only), booster rails, and liquid fuels (kerosene, liquid oxygen).
+- Next rocketry batches: the rocket post (batch 39, [rocket-post.md](rocket-post.md); deliveries to unloaded areas wait, nothing is force-loaded), line-throwing rockets with ziplines, the rocket launcher (damage only), booster rails, and liquid fuels (kerosene, liquid oxygen).
 - Space launches stay on hold until the owner decides.

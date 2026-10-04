@@ -8,8 +8,29 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### Test fix: each giant tree's own fewest logs (pull request pending)
+### Test fix: each giant tree's own fewest logs (#157)
 - `BiomeGameTests.bigTreesGrow` holds each giant to the fewest logs it can grow: a giant redwood 85, a giant mahogany 37 (a trunk two wide and at least 22 or 10 tall). #134's single floor of 30 let a stunted redwood pass. Test only; nothing in game changes. Record: [big-trees-and-rainforests.md](docs/features/big-trees-and-rainforests.md).
+
+### Unmerged: Arms motion, batch 43
+- **New animations for every arm of batch 42**, seen by everyone and in first person.
+  - Each kind has a guard: the side-on stance, two hands on the greatswords, hammers and polearms, the rapier en garde. Each kind also has a combo of attacks with anticipation, the blow, follow-through and a settle. The torso turns and bends, the head counters, and the feet step.
+  - In first person, the held arm takes a guard and a stroke for each attack.
+  - The spear and lance keep vanilla's arms and add the body.
+- Keys joined by Hermite splines so the motion flows through them. Timed on vanilla's own swing, so there is no networking. Client only, with no allocation per frame and the arms only beyond 32 blocks; four client mixins.
+- Learned from the combat animation mods and packs the owner sent (Better Combat, Malfu, Player Animation Library, Fresh Animations and Fresh Moves, Mo' Bends, NdRz's weapons); nothing of theirs is used. Record: [arms-motion.md](docs/features/arms-motion.md).
+
+### Unmerged: Rocket launcher, batch 41
+- **Rocket launcher** with **high-explosive** and **homing rockets** (rocket workshop). Rockets fly straight, burst on impact and hurt living things only: no block is ever broken. Homing rockets lock on to the hostile mob nearest the crosshair and steer into it.
+- Handbook page, two game tests. Record: [rocket-launcher.md](docs/features/rocket-launcher.md).
+
+### Unmerged: Zipline, batch 40
+- **Zipline anchors** and the **line-throwing rocket:** fire a steel line between two anchors up to 96 blocks apart with a clear path, then use an anchor to ride the line to the other end. Steeper lines are faster; sneak to let go.
+- Handbook page, game test. Record: [zipline.md](docs/features/zipline.md).
+
+### Unmerged: Rocket post, batch 39
+- **Rocket pads** send up to nine stacks to another pad up to 4096 blocks away: a **delivery rocket** (used up) and a **flight plan** (kept) naming the target pad. Launch from the pad's screen or with a redstone pulse.
+- Deliveries are saved with the world. One whose target area isn't loaded waits and lands when the area loads again; nothing is force-loaded.
+- Handbook page, game test. Record: [rocket-post.md](docs/features/rocket-post.md).
 
 ### Unmerged: Rocketry, batch 38
 - **Rocket Workshop** and propellant chemistry: ammonium perchlorate, iodine (from kelp), silver iodide and solid propellant; rocket casings, nozzles, guidance units and motors.
@@ -26,6 +47,10 @@ No numbered release yet. Everything below is on `main`.
 - **Alarm Klaxon:** a controller switches it like a relay; it lights and sounds.
 - **Control Remote:** bind it to a controller and flip a channel by hand from up to 256 blocks away.
 - Advancement, handbook page, game test. Record: [control-electronics.md](docs/features/control-electronics.md).
+
+### Unmerged: Tall sides on diagonal walls
+- **Diagonal walls rise to meet what is above them.** When the block above covers all of a diagonal wall's sides and arms (another wall, a full block, a slab), they rise to the top of the block as a vanilla wall's sides do, so a diagonal wall two high has no slot between its layers. A tall straight diagonal run has no post, as a tall straight wall has none.
+- One property, `tall`, on the diagonal walls: 2,048 states each, 32,768 more in all. Two more server game tests.
 
 ### Unmerged: Diagonal walls
 - **Walls join diagonally.** All 32 of vanilla's walls join a wall a diagonal step away with a low wall side at 45 degrees, on the same rule as fences: neither may join straight into the corner between them, so a block in the corner keeps them apart.
