@@ -1094,6 +1094,69 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 - **Wake a carved pumpkin:** use a Wisp in a Jar or a bottle of Ectoplasm on a hand-carved pumpkin with a face. It hops up as a Pumpkling, a little pet on vine legs wearing the face you carved.
 - It follows you and sits when you use it with an empty hand. A torch lights its face. Crows keep away from crops near it, as from a scarecrow. A glass bottle settles it back into its pumpkin. Details: [even more fall additions](../features/even-more-fall-additions.md#the-pumpkling).
 
+### The fall fair midway
+
+| **The midway:** a prize booth under a striped awning, two High Strikers (one rung, its tower lit) and Ring Toss | **The prizes** on the booth's counter |
+| --- | --- |
+| ![The fall fair midway](../images/ingame_midway.jpg) | ![Plush prizes](../images/ingame_midway_prizes.jpg) |
+| **Ring Toss:** crates of nine bottles, one up on a hay bale | **At dusk** |
+| ![Ring Toss](../images/ingame_ring_toss.jpg) | ![The midway at dusk](../images/ingame_midway_dusk.jpg) |
+
+- **The High Striker** stands five blocks tall: a red-and-white tower with lamps up its front and a bell on top. Hit its pad with a **Carnival Mallet** and the puck climbs, lighting the lamps, as far as you hit it. A fully charged swing sometimes rings the bell; jump and hit it on the way down and it usually does. Ring it and win a prize.
+- **Ring Toss:** toss **Toss Rings** at a crate of nine bottles from three blocks off or more. Land one over a bottle's neck to win a prize; misses can be picked up and thrown again.
+- **Prizes** are plushes: a pumpkin, a ghost, a bat, a black cat, a squirrel, a rare werewolf, and the very rare Jumbo Pumpkin Plush. Squeeze one and it squeaks. Details: [even more fall additions](../features/even-more-fall-additions.md#the-fall-fair-midway).
+
+### The Ferris wheel
+
+| **At the fair:** the wheel, a High Striker and the plush prizes | **Its foot:** the booth, with the cars hanging over it |
+| --- | --- |
+| ![The Ferris wheel](../images/ingame_ferris_wheel.jpg) | ![The booth](../images/ingame_ferris_wheel_booth.jpg) |
+| **From a car near the top** | **At night**, its lights on |
+| ![The view from a car](../images/ingame_ferris_wheel_ride.jpg) | ![The Ferris wheel at night](../images/ingame_ferris_wheel_night.jpg) |
+
+- **Raise one** by placing the **Ferris Wheel** booth where it has room (15 blocks across, 16 high, 3 deep). The wheel stands over it, facing you, with eight cars of two seats.
+- **Turn it** with kinetic power against the booth: a **hand crank** (planks and an iron shaft) turns it at full speed, five seconds a crank, so one friend cranks while others ride; an engine turns it all day.
+- **Ride it:** use the booth to climb into the car at the bottom. Sneak to get off and you're set down by the booth. Its lights come on while it turns. Details: [even more fall additions](../features/even-more-fall-additions.md#the-ferris-wheel).
+
+### The piñata party
+
+| **Three piñatas** (pumpkin, star and bat) hanging from a pergola | **Torn**, after half their hits |
+| --- | --- |
+| ![Piñatas](../images/ingame_pinatas.jpg) | ![Torn piñatas](../images/ingame_pinatas_torn.jpg) |
+| **The star bursts** in confetti, its candy flying | **Through the Blindfold** |
+| ![A piñata bursting](../images/ingame_pinata_burst.jpg) | ![The Blindfold's view](../images/ingame_blindfold.jpg) |
+
+- **Hang a piñata** (a pumpkin, a star or a bat, of crepe-paper fringe) from the underside of a block, and let everyone fill it with candy and treats: anything goes in, a stack at a time.
+- **Put on the Blindfold** and swing: a charged swing is a hit, and the Piñata Stick hits twice as hard. It tears as it weakens and bursts in confetti on its last hit, spraying its contents everywhere. Details: [even more fall additions](../features/even-more-fall-additions.md#the-piñata-party).
+
+### The hot-air balloon fiesta
+
+| **The fiesta field:** the Jack-o'-Lantern aloft on its mooring rope over Harvest Stripes and Harvest Moon, pibals rising | **Night glow:** its burner firing |
+| --- | --- |
+| ![Hot-air balloons](../images/ingame_balloons.jpg) | ![Balloons at night](../images/ingame_balloons_night.jpg) |
+| **Up close:** the wicker basket, twin-coil burner and rigging | **From the basket,** 17 blocks up at the top of the rope |
+| ![A balloon's basket](../images/ingame_balloon_basket.jpg) | ![The view from the basket](../images/ingame_balloon_ride.jpg) |
+| **Its pilot,** seated in a corner | **The glow** from below the envelope |
+| ![The pilot in the basket](../images/ingame_balloon_riders.jpg) | ![The glowing envelope from below](../images/ingame_balloon_glow.jpg) |
+
+- **Balloons:** Harvest Stripes, the Jack-o'-Lantern and Harvest Moon. Set one up on open ground, fuel it with coal, charcoal or coke, and climb in: up to four ride, and the first aboard pilots.
+- **Fly by heat:** hold jump to fire the burner and back to open the vent. You can't steer: the winds blow different ways at different heights, so pick the height that blows your way. Let a **pibal** go to see them. Go out low and come home higher for The Box.
+- **Mooring Posts** tether a balloon for rides at a fair. At night, the envelopes glow while their burners fire. Details: [even more fall additions](../features/even-more-fall-additions.md#the-hot-air-balloon-fiesta).
+
+### The leaf blower
+
+| **The Leaf Blower** at the foot of a leafy lawn | **Blowing:** the piles herded up to the fence |
+| --- | --- |
+| ![The Leaf Blower held](../images/ingame_leaf_blower.jpg) | ![Blowing leaves](../images/ingame_leaf_blower_blowing.jpg) |
+| **The heap** against the fence | **Vacuuming** it up |
+| ![The heap of leaves](../images/ingame_leaf_blower_heap.jpg) | ![Vacuuming the leaves](../images/ingame_leaf_blower_vacuum.jpg) |
+
+![The Leaf Blower in profile](../images/ingame_leaf_blower_model.jpg)
+
+- **The Leaf Blower** is a powered tool: charge it at a Charging Station. Hold use to blow, sneak and hold use to vacuum.
+- **Blowing** herds leaf piles along the way you face, a layer at a time, until a wall, a fence or a full pile stops them: sweep a lawn into one heap. It blows dropped items along, nudges mobs, and puts out candles.
+- **Vacuuming** takes leaf piles and leaf litter up into your inventory, a layer at a time, for the composter, and draws dropped items in. Details: [even more fall additions](../features/even-more-fall-additions.md#the-leaf-blower).
+
 ## Crop roster: what comes next (planned)
 
 The branch grows in small slices that each stand on their own. Each crop needs a job: a food, a material another branch wants, or a farming mechanic. Proposals are welcome.

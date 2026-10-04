@@ -9,6 +9,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
+import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -68,6 +69,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MinecartItem;
 import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.Consumables;
@@ -285,6 +287,14 @@ public final class JugcraftAgriculture {
 	public static EntityType<Werewolf> WEREWOLF;
 	public static EntityType<Squirrel> SQUIRREL;
 	public static EntityType<Pumpkling> PUMPKLING;
+	public static EntityType<TossRing> TOSS_RING;
+	public static BlockEntityType<HighStrikerBlockEntity> HIGH_STRIKER_ENTITY;
+	public static EntityType<FerrisWheel> FERRIS_WHEEL;
+	public static BlockEntityType<FerrisWheelBlockEntity> FERRIS_WHEEL_BOOTH;
+	public static EntityType<Pinata> PINATA;
+	public static EntityType<HotAirBalloon> HOT_AIR_BALLOON;
+	public static EntityType<Pibal> PIBAL;
+	public static DataComponentType<Integer> BALLOON_FUEL;
 	public static DataComponentType<Integer> BROOM_CHARGE;
 	public static BlockEntityType<FeastTableBlockEntity> FEAST_TABLE_ENTITY;
 	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
@@ -1037,6 +1047,70 @@ public final class JugcraftAgriculture {
 		PUMPKLING = entity("pumpkling", EntityType.Builder.<Pumpkling>of(Pumpkling::new, MobCategory.MISC).noLootTable().sized(0.6F, 0.9F)
 				.eyeHeight(0.6F).clientTrackingRange(10));
 		FabricDefaultAttributeRegistry.register(PUMPKLING, Pumpkling.createAttributes());
+		// Fall additions 26, the fall fair midway: the High Striker and its Carnival Mallet, Ring Toss and its rings, and
+		// the plush prizes they give.
+		Block striker = registerBlock("high_striker", HighStrikerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().lightLevel(HighStrikerBlock::light).pushReaction(PushReaction.IMMOVEABLE)
+				.ignitedByLava());
+		registerItem("high_striker", props -> new BlockItem(striker, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		HIGH_STRIKER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("high_striker"),
+				FabricBlockEntityTypeBuilder.create(HighStrikerBlockEntity::new, striker).build());
+		registerItem(Midway.MALLET, props -> new Item(props.sword(ToolMaterial.WOOD, 1.0F, -3.4F)), new Item.Properties(), TOOL_TAB);
+		Block ringToss = registerBlock("ring_toss", RingTossBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion());
+		registerItem("ring_toss", props -> new BlockItem(ringToss, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem(TossRingItem.ID, TossRingItem::new, new Item.Properties().stacksTo(16), TOOL_TAB);
+		TOSS_RING = entity(TossRingItem.ID, EntityType.Builder.<TossRing>of(TossRing::new, MobCategory.MISC).noLootTable()
+				.sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10));
+		for (Midway.Plush plush : Midway.PLUSHES) {
+			Block block = registerBlock(plush.id(), props -> new PlushBlock(props, plush), BlockBehaviour.Properties.of().mapColor(MapColor.WOOL)
+					.strength(0.2F).sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+			registerItem(plush.id(), props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		Midway.register();
+		// Fall additions 27, the Ferris wheel: its booth (the block, which raises the wheel, boards riders and takes kinetic
+		// power) and the wheel itself.
+		Block booth = registerBlock(FerrisWheelBlock.ID, FerrisWheelBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.strength(3.0F, 6.0F).sound(SoundType.METAL).requiresCorrectToolForDrops().pushReaction(PushReaction.IMMOVEABLE));
+		registerItem(FerrisWheelBlock.ID, props -> new BlockItem(booth, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		FERRIS_WHEEL_BOOTH = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(FerrisWheelBlock.ID),
+				FabricBlockEntityTypeBuilder.create(FerrisWheelBlockEntity::new, booth).build());
+		FERRIS_WHEEL = entity("ferris_wheel", EntityType.Builder.<FerrisWheel>of(FerrisWheel::new, MobCategory.MISC).noLootTable().noSummon()
+				.sized(1.0F, 1.0F).clientTrackingRange(10).updateInterval(20));
+		// Fall additions 28, the piñata party: the three piñatas (items that hang the piñata), the Piñata Stick and the
+		// Blindfold, worn on the head and seen through as a dark cloth.
+		for (Pinata.Kind kind : Pinata.Kind.values()) {
+			registerItem(kind.item, props -> new PinataItem(props, kind), new Item.Properties().stacksTo(16), TOOL_TAB);
+		}
+		registerItem(Pinatas.STICK, props -> new Item(props.sword(ToolMaterial.WOOD, 1.0F, -2.8F)), new Item.Properties(), TOOL_TAB);
+		Equippable blindfold = Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER)
+				.setCameraOverlay(Jugcraft.id("misc/blindfold")).setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id("blindfold"))).build();
+		registerItem(Pinatas.BLINDFOLD, Item::new, new Item.Properties().stacksTo(1).component(DataComponents.EQUIPPABLE, blindfold), EQUIPMENT_TAB);
+		PINATA = entity("pinata", EntityType.Builder.<Pinata>of(Pinata::new, MobCategory.MISC).noLootTable().noSummon().sized(0.9F, 0.9F)
+				.clientTrackingRange(10).updateInterval(20));
+		Pinatas.register();
+		// Fall additions 29, the hot-air balloon fiesta: three balloons (items that set one up, keeping its fuel), the
+		// burner they are made with, pibals to read the winds aloft, and the Mooring Post to tether a balloon.
+		BALLOON_FUEL = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("balloon_fuel"),
+				DataComponentType.<Integer>builder().persistent(Codec.intRange(0, HotAirBalloon.MAX_FUEL)).networkSynchronized(ByteBufCodecs.VAR_INT)
+						.build());
+		for (HotAirBalloon.Kind kind : HotAirBalloon.Kind.values()) {
+			registerItem(kind.item, props -> new HotAirBalloonItem(props, kind), new Item.Properties().stacksTo(1).component(BALLOON_FUEL, 0),
+					TOOL_TAB);
+		}
+		registerItem("balloon_burner", Item::new, new Item.Properties(), INGREDIENT_TAB);
+		registerItem("pibal", PibalItem::new, new Item.Properties().stacksTo(16), TOOL_TAB);
+		Block mooringPost = registerBlock(MooringPostBlock.ID, MooringPostBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(3.0F, 6.0F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion());
+		registerItem(MooringPostBlock.ID, props -> new BlockItem(mooringPost, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		HOT_AIR_BALLOON = entity("hot_air_balloon", EntityType.Builder.<HotAirBalloon>of(HotAirBalloon::new, MobCategory.MISC).noLootTable()
+				.noSummon().sized((float) HotAirBalloon.BASKET, (float) HotAirBalloon.BASKET_HEIGHT).clientTrackingRange(16).updateInterval(1));
+		PIBAL = entity("pibal", EntityType.Builder.<Pibal>of(Pibal::new, MobCategory.MISC).noLootTable().noSummon().sized(0.6F, 0.6F)
+				.clientTrackingRange(16).updateInterval(2));
+		Balloons.register();
+		// Fall additions 30, the leaf blower: a dieselpunk electric leaf blower, charged at the Charging Station.
+		registerItem(LeafBlowerItem.ID, LeafBlowerItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)
+				.component(JugcraftTools.ENERGY, 0L), TOOL_TAB);
 
 		// Batch 5, the harvest party: the Bobbing for Apples Tub, the Pumpkin Crate, the Hay Bale Seat (and the seat
 		// entity players sit on), the Autumn Wreath and the Leaf Piles.
