@@ -149,6 +149,8 @@ def assets():
     exosuit.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import arms
     arms.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import arms_motion
+    arms_motion.write_all(write, ASSETS)
     import grapple
     grapple.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import field_chemistry
