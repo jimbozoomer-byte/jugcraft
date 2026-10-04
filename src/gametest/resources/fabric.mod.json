@@ -78,7 +78,8 @@
 			"io.github.jimbozoomer.jugcraft.test.TownGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DiagonalConnectionsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsGameTests",
-			"io.github.jimbozoomer.jugcraft.test.ArmsIIGameTests"
+			"io.github.jimbozoomer.jugcraft.test.ArmsIIGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmsIIIGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.JugcraftClientGameTests",
@@ -150,7 +151,8 @@
 			"io.github.jimbozoomer.jugcraft.test.GraveyardFloraClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DiagonalClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.ArmsMotionClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.ArmsMotionClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.TwoHandedClientGameTests"
 		]
 	},
 	"depends": {
