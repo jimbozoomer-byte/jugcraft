@@ -1079,6 +1079,26 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Monster's Head**: a stitched green monster's head with bolts in its neck; on a redstone signal its jaw drops, its eyes glow and its bolts spark.
 - **Harvest plushes**: an owl, a hedgehog, an acorn, an ear of corn and a maple leaf, five more prizes at the midway. Details: [the haunted house's props](../features/haunted-house-props.md).
 
+### The Witch's Workshop
+
+| **The workshop**: two horned skull cauldrons over ember beds, the candelabra, the cabinet of curiosities, the jars and the broom | **The cauldrons**: a potion's colour, its fumes rising over the heat and things floating in it |
+| --- | --- |
+| ![The Witch's Workshop](../images/ingame_witchs_workshop.jpg) | ![The cauldrons](../images/ingame_witchs_workshop_cauldrons.jpg) |
+| **The cabinet of curiosities**, with candelabra in purple and red wax | **The oddity jars**: eyeballs, a beating heart, a bat and a two-headed snake |
+| ![The cabinet](../images/ingame_witchs_workshop_cabinet.jpg) | ![The jars](../images/ingame_witchs_workshop_jars.jpg) |
+| **The Enchanted Broom** and its Dustpan | **By candlelight** at night |
+| ![The broom](../images/ingame_witchs_workshop_broom.jpg) | ![The workshop at night](../images/ingame_witchs_workshop_night.jpg) |
+| **The branching chandelier** and the wall girandole | **The moth cases** and the bell jar |
+| ![The candelabra](../images/ingame_witchs_workshop_candelabra.jpg) | ![The moths](../images/ingame_witchs_workshop_moths.jpg) |
+
+*Real screenshots from the client game test that CI runs (`WitchsWorkshopClientGameTests`, software rendering, small previews). The cauldrons are filled, heated and stocked, the candles lit and recoloured, and the broom woken, for the picture.*
+
+- **Horned Skull Cauldron**: an iron pot with a ram's skull on its front that holds water or three bottles of one potion, brews over heat (an Ember Bed is one), floats a witch's ingredients, and, stirred with the Brew Ladle, wafts the potion onto up to four players near it at a quarter of its duration.
+- **Wrought-iron candelabra**: a floor candelabrum, a table candelabrum, a wall girandole and a branching chandelier, in six waxes and four flames, lit by flint, burning arrows or redstone, dripping wax as they burn.
+- **Enchanted Broom and Dustpan**: woken with Flying Ointment, the broom sweeps dropped items into a Dustpan for three in-game days. The Broom Rack shows three brooms.
+- **Cabinet of curiosities**: the Curiosity Cabinet shows nine things on its shelves, the Bell Jar one, and the Moth Display Case pinned moths that stir at night.
+- **Oddity jars**: eyeballs that watch you, a heart that beats as a redstone clock, a bat that wakes as you come near, a two-headed snake and a drumming hand. Details: [the Witch's Workshop](../features/witchs-workshop.md).
+
 ## Even more fall additions
 
 Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).
