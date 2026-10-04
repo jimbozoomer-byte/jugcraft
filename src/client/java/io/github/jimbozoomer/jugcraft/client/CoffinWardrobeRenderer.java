@@ -27,6 +27,7 @@ import org.jspecify.annotations.Nullable;
 public class CoffinWardrobeRenderer implements BlockEntityRenderer<CoffinWardrobeBlockEntity, CoffinWardrobeRenderer.State> {
 	public static final float SCALE = 0.8F;
 	public static final float FLOOR = 1.0F;
+	private static int nextDisplayId = -1_000_000;
 	private final EntityRenderDispatcher entities;
 
 	public static final class State extends BlockEntityRenderState {
@@ -62,6 +63,8 @@ public class CoffinWardrobeRenderer implements BlockEntityRenderer<CoffinWardrob
 		ArmorStand stand = wardrobe.display instanceof ArmorStand existing ? existing : null;
 		if (stand == null || stand.level() != wardrobe.getLevel()) {
 			stand = new ArmorStand(wardrobe.getLevel(), pos.getX() + 0.5, pos.getY() + FLOOR / 16, pos.getZ() + 0.5);
+			// Never in the world, so it gets no ID from it; drawing it needs one. Negative IDs never meet a real entity's.
+			stand.setId(nextDisplayId--);
 			stand.setInvisible(true);
 			stand.setNoBasePlate(true);
 			wardrobe.display = stand;

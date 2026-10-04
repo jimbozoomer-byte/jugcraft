@@ -52,9 +52,9 @@ public class CoffinWardrobeBlockEntity extends BlockEntity {
 		changed();
 	}
 
-	/** Whether {@code worn} must stay on {@code player}: cursed with Binding, outside creative. */
+	/** Whether {@code worn} must stay on {@code player}: cursed with Binding, unless they build in creative. */
 	public static boolean bound(Player player, ItemStack worn) {
-		return !player.isCreative() && !worn.isEmpty() && EnchantmentHelper.has(worn, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE);
+		return !player.getAbilities().instabuild && !worn.isEmpty() && EnchantmentHelper.has(worn, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE);
 	}
 
 	/** Swaps each piece {@code player} wears with the one hung here; bound pieces stay. Returns how many slots changed. */
