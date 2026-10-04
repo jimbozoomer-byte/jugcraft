@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: The Laboratory, the Larder and the Dining Room, Halloween decorations batch 19
+- **Lightning Harness** (fires on a strong signal, a Tesla Coil's arc or lightning, cracking arcs down to a Lab Table and waking its patient), **Brain-Vat Console** (an analogue memory cell: it remembers the strongest signal at its back until a side clears it) and **Crawling Hand** (drums its fingers; powered, it scuttles).
+- **Silk Cocoon** (a 9-slot larder hung from a ceiling that wriggles when opened), **Egg Sac Cluster** (pulsing sacs on any faces, like glow lichen; spiderlings skitter out at night), **Web Drape** (a 2 × 2 web curtain that slows you) and **Silk Spool Stack** (three spools, each dyed to any colour).
+- **Haunted Dining Chair** (sits you; at night slides out toward a player near), **Floating Table Setting** (laid for dinner, tea or a feast, bobbing over the table, its candle lit with flint) and **Grandfather Clock** (hands on the time of day, the moon's phase in its arch, a pulse and the hour struck each hour, a comparator reading the hour, and a face at the glass at midnight).
+- **Witchlight Lamp-Post**, **Path Stake** and **Hanging Witchlight** (wake as a player comes near, linger, then sleep; redstone keeps them awake; five dye colours).
+- **Yard Silhouette** (six black cut-out figures whose eyes glow at night, in sixteen turns) and the **Harvest Moon Lamp** (2 × 2; its face shows tonight's moon, which a comparator reads). Record: [laboratory-larder-dining.md](docs/features/laboratory-larder-dining.md).
+
 ### Unmerged: The Crypt and the Ossuary, Halloween decorations batch 18
 - **Iron-Bound Coffin** (54 slots; locks to a **Skeleton Key** cut from a **Key Blank**, and then opens only for someone holding that key and refuses hoppers and pipes; keys copy onto blanks at a crafting table) and the **Coffin Wardrobe** (a skeleton mannequin behind glass that swaps the armour you wear for the armour it holds; cursed pieces stay on).
 - **Stone, Deepslate and Blackstone Sarcophagi** (27 slots under a lid that slides aside over a skeleton; the Stonemason's Chisel carves the lid as a knight, a lady or a skull; at night, shut, they sometimes knock).

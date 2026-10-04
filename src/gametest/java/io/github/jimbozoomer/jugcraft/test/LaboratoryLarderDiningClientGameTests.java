@@ -24,6 +24,8 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -173,7 +175,7 @@ public class LaboratoryLarderDiningClientGameTests implements FabricClientGameTe
 	/** A redstone torch two blocks under (dx, dz), powering the ground block above it and so whatever stands on that. */
 	private static void powerFromBelow(ServerLevel level, BlockPos origin, int dx, int dz) {
 		put(level, origin, dx, -3, dz, Blocks.STONE.defaultBlockState());
-		put(level, origin, dx, -2, dz, Blocks.REDSTONE_TORCH.defaultBlockState());
+		put(level, origin, dx, -2, dz, BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace("redstone_torch")).defaultBlockState());
 	}
 
 	private static BlockState witchlight(String id, Witchlights.Colour colour) {

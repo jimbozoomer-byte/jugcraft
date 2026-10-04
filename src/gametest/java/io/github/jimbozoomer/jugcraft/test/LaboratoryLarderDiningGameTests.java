@@ -25,9 +25,11 @@ import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -73,6 +75,10 @@ public class LaboratoryLarderDiningGameTests {
 
 	private static Item item(String id) {
 		return JugcraftAgriculture.item(id);
+	}
+
+	private static Item dye(String colour) {
+		return BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(colour + "_dye"));
 	}
 
 	private static ServerPlayer player(GameTestHelper helper, BlockPos standAt, ItemStack held) {
@@ -283,7 +289,7 @@ public class LaboratoryLarderDiningGameTests {
 				&& SilkSpoolStackBlock.spoolAt(abs, Direction.NORTH, Vec3.atLowerCornerOf(abs).add(0.15, 0.5, 0.0)) == 2,
 				"Seen from the front, the spools run left to right");
 		SilkSpoolStackBlockEntity spools = (SilkSpoolStackBlockEntity) level.getBlockEntity(abs);
-		ServerPlayer player = player(helper, new BlockPos(4, 2, 2), new ItemStack(Items.BLUE_DYE, 2));
+		ServerPlayer player = player(helper, new BlockPos(4, 2, 2), new ItemStack(dye("blue"), 2));
 		helper.assertTrue(use(helper, player, at, new Vec3(0.15, 0.5, 0.0), Direction.NORTH).consumesAction(), "Dye takes");
 		helper.assertTrue(spools.colour(2) == DyeColor.BLUE && player.getMainHandItem().getCount() == 1, "on the spool it touched, for one dye");
 		helper.assertTrue(spools.colour(0) == DyeColor.WHITE && spools.colour(1) == DyeColor.PURPLE, "The others keep theirs");
@@ -409,7 +415,7 @@ public class LaboratoryLarderDiningGameTests {
 		helper.assertTrue(!asleep.getValue(Witchlights.LIT) && asleep.getLightEmission() == Witchlights.ASLEEP, "Asleep it barely glows");
 		BlockPos abs = helper.absolutePos(stake);
 		WitchlightBlockEntity lamp = (WitchlightBlockEntity) level.getBlockEntity(abs);
-		ServerPlayer player = player(helper, new BlockPos(2, 2, 2), new ItemStack(Items.LIME_DYE));
+		ServerPlayer player = player(helper, new BlockPos(2, 2, 2), new ItemStack(dye("lime")));
 		long now = level.getGameTime();
 		lamp.look(level, abs, helper.getBlockState(stake), now);
 		helper.assertTrue(helper.getBlockState(stake).getValue(Witchlights.LIT) && helper.getBlockState(stake).getLightEmission() == Witchlights.AWAKE,

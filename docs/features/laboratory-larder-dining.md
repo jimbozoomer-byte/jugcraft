@@ -97,7 +97,7 @@ Each lantern is a pierced iron base, four corner posts, leaded glass panes and a
 - **Drops on breaking**: the cocoon spills what it holds. The drape and the moon lamp drop once from their first block.
 - **New IDs**:
   - blocks and items `lightning_harness`, `brain_vat_console`, `crawling_hand`, `silk_cocoon`, `egg_sac_cluster`, `web_drape`, `silk_spool_stack`, `haunted_dining_chair`, `floating_table_setting`, `grandfather_clock`, `witchlight_lamp_post`, `witchlight_path_stake`, `hanging_witchlight`, `yard_silhouette`, `harvest_moon_lamp`;
-  - block entity types `lightning_harness`, `brain_vat_console`… (see `JugcraftAgriculture.registerLaboratoryLarderDining`): `lightning_harness`, `crawling_hand`, `silk_cocoon`, `egg_sac_cluster`, `silk_spool_stack`, `haunted_dining_chair`, `floating_table_setting`, `grandfather_clock`, `witchlight`, `yard_silhouette`, `harvest_moon_lamp`;
+  - block entity types `lightning_harness`, `crawling_hand`, `silk_cocoon`, `egg_sac_cluster`, `silk_spool_stack`, `haunted_dining_chair`, `floating_table_setting`, `grandfather_clock`, `witchlight`, `yard_silhouette`, `harvest_moon_lamp`;
   - their recipes.
 - **Feature switch**: the recipes follow the agriculture feature switch.
 
