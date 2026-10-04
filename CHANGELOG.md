@@ -18,7 +18,7 @@ No numbered release yet. Everything below is on `main`.
 - **Hot-air balloons** in three designs: Harvest Stripes, a Jack-o'-Lantern special shape with carved faces, and Harvest Moon with a witch across the moon. A wicker basket for four under a twin-coil burner; fuel it with coal, charcoal or coke.
 - **Fly by heat:** the pilot fires the burner (jump) and opens the vent (back). It can't be steered: it drifts on **winds that blow different ways at different heights**, eight layers from sea level, the lowest two roughly opposite, so you can fly out low and come home higher (The Box). Gauges show height, heat, wind and fuel.
 - **Pibals** to see the winds aloft; **Mooring Posts** to tether a balloon for rides; a **night glow** while the burners fire. Up, Up and Away, The Box, Mass Ascension.
-- Envelopes are smooth turned surfaces painted as 768 × 384 wraps; the rest at 64 × 64. Nine game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-hot-air-balloon-fiesta).
+- Envelopes are smooth turned surfaces painted as 768 × 384 wraps; the rest at 64 × 64. Ten game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-hot-air-balloon-fiesta).
 
 ### Unmerged: The piñata party, fall addition 28
 - **Three piñatas** of crepe-paper fringe: a jack-o'-lantern Pumpkin, a seven-pointed Star with tassels, and a winged Bat. Hang one from the underside of a block, and anyone can fill it with anything, up to nine stacks.
