@@ -6,17 +6,21 @@ Called from agriculture_data.py (assets, loot, tags). Formats follow vanilla Min
 element rotation, face rotation and light emission. Model rotations are right-handed: about x, a positive angle turns
 +y toward +z. Textures with see-through pixels are only used where every face reads inside them.
 """
-from agriculture import CAULDRON, APOTHECARY_SHELF, CRYSTAL_BALL, GRIMOIRE, BROOM
+from agriculture import CAULDRON, APOTHECARY_SHELF, CRYSTAL_BALL, GRIMOIRE, BROOM, HEX
 from decor_data import MOD, HORIZONTAL, SIDES, rid, turned, box, block_model, flat_item, self_drop
 from decor3_data import fitted, UP_SIDES
 
 BREW_COLOURS = ("green", "purple", "orange")
+HEXES = tuple(HEX["brews"])
+# How high a hex brew stands in the pot with each number of doses left (fall addition 21).
+HEX_LEVELS = {1: 7.5, 2: 9.0, 3: 10.5}
 
 
 # ---------------------------------------------------------------- the bubbling cauldron
 
-def cauldron_model(contents):
-    """An iron pot on three stubby legs with a lip round its rim; inside, water or a glowing brew."""
+def cauldron_model(contents, level=10.5):
+    """An iron pot on three stubby legs with a lip round its rim; inside, water, a glowing brew or a hex brew (lower
+    as its doses are drawn off)."""
     elements = [box((2, 2, 2), (14, 13, 3), "#iron"), box((2, 2, 13), (14, 13, 14), "#iron"),
                 box((2, 2, 3), (3, 13, 13), "#iron"), box((13, 2, 3), (14, 13, 13), "#iron"),
                 box((3, 2, 3), (13, 3, 13), "#iron"),
@@ -24,9 +28,12 @@ def cauldron_model(contents):
                 box((1.5, 12, 2.5), (2.5, 13.5, 13.5), "#iron"), box((13.5, 12, 2.5), (14.5, 13.5, 13.5), "#iron"),
                 box((3, 0, 3), (5, 2, 5), "#iron"), box((11, 0, 3), (13, 2, 5), "#iron"), box((7, 0, 11), (9, 2, 13), "#iron")]
     if contents != "empty":
-        elements.append(box((3, 10.5, 3), (13, 11, 13), "#liquid", faces=("up",), light=10 if contents in BREW_COLOURS else None))
+        glowing = contents in BREW_COLOURS or contents in HEXES
+        elements.append(box((3, level, 3), (13, level + 0.5, 13), "#liquid", faces=("up",), light=(12 if contents in HEXES else 10) if glowing else None))
     textures = {"iron": "bubbling_cauldron_iron"}
-    if contents != "empty":
+    if contents in HEXES:
+        textures["liquid"] = f"bubbling_cauldron_hex_{contents}"
+    elif contents != "empty":
         textures["liquid"] = "bubbling_cauldron_water" if contents == "water" else f"bubbling_cauldron_brew_{contents}"
     return block_model(textures, elements, "bubbling_cauldron_iron")
 
@@ -126,8 +133,21 @@ def assets(root, write, lang):
     cauldron = CAULDRON["block"]
     for contents in ("empty", "water") + BREW_COLOURS:
         write(models / f"{cauldron}_{contents}.json", cauldron_model(contents))
-    write(states / f"{cauldron}.json", {"variants": {f"contents={c}": {"model": rid(f"block/{cauldron}_{c}")}
-                                                     for c in ("empty", "water") + BREW_COLOURS}})
+    variants = {f"contents={c}": {"model": rid(f"block/{cauldron}_{c}")} for c in ("empty", "water") + BREW_COLOURS}
+    for hex_name in HEXES:
+        for doses, level in HEX_LEVELS.items():
+            write(models / f"{cauldron}_{hex_name}_{doses}.json", cauldron_model(hex_name, level))
+            variants[f"contents={hex_name},doses={doses}"] = {"model": rid(f"block/{cauldron}_{hex_name}_{doses}")}
+    write(states / f"{cauldron}.json", {"variants": variants})
+    for hex_name, info in HEX["brews"].items():
+        flat_item(root, write, info["item"])
+        lang[f"item.{MOD}.{info['item']}"] = info["display"]
+        if "effect" in info:
+            lang[f"effect.{MOD}.{info['effect']}"] = info["effect_display"]
+    lang.update({"message.jugcraft.hex.no_room": "There is no room to grow here",
+                 "tooltip.jugcraft.hex.shrinking": "Makes the drinker half their size",
+                 "tooltip.jugcraft.hex.giant": "Makes the drinker a giant, if there is room",
+                 "tooltip.jugcraft.hex.flying": "Rub on for a feather-light fall"})
     write(root / "items" / f"{cauldron}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{cauldron}_green")}})
     lang[f"block.{MOD}.{cauldron}"] = CAULDRON["display"]
 
@@ -174,6 +194,9 @@ def tags(tags):
     for colour, items in CAULDRON["brews"].items():
         for item in items:
             tags.add("item", f"{MOD}:brew/{colour}", item)
+    for hex_name, info in HEX["brews"].items():
+        for item in info["ingredients"]:
+            tags.add("item", f"{MOD}:hex/{hex_name}", item)
     for block in (CAULDRON["block"], CRYSTAL_BALL["block"]):
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     for block in (APOTHECARY_SHELF["block"], GRIMOIRE["block"], BROOM["block"]):

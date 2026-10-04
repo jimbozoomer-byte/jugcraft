@@ -1,6 +1,8 @@
 """Original textures for the graveyard pack (requires Pillow): the four memorial stones (white marble, dark slate,
 speckled granite, warm sandstone) at each of their four stages of weathering (clean, worn, mossy, overgrown), their
-carved and polished faces, rock-faced granite, Celtic knotwork, ivy, and the Stonemason's Chisel.
+carved and polished faces, rock-faced granite, Celtic knotwork, ivy, and the Stonemason's Chisel; for the buildings of
+pack 3, weathering oak and roof slates, stained glass, a chequered marble floor, lamp and lantern glass, a bronze door's
+smoked glass and the Bronze Mausoleum Door's item.
 
 Weathering is drawn the way stone weathers: worn stone is duller, with grime run down from the top and chipped arrises;
 mossy stone has moss creeping up from the ground and lichen rosettes; overgrown stone is green to a third of its height
@@ -307,6 +309,296 @@ def chisel_item():
     return c.img
 
 
+# ---------------------------------------------------------------- pack 3: buildings
+
+OAK = [rgb("6a4527"), rgb("7d5532"), rgb("8f643c"), rgb("a27448")]
+SILVER = rgb("8c8a84")
+SLATES = [rgb("2f343d"), rgb("373d47"), rgb("3f4651"), rgb("48505c")]
+
+
+def oak(stage, seed=7501):
+    """Oak timber with its grain running along it: warm brown when new, silvering grey as it weathers, then patched with
+    moss and lichen."""
+    rng = random.Random(seed + stage)
+    c = Canvas()
+    silver = (0.0, 0.35, 0.55, 0.65)[stage]
+    for x in range(16):
+        streak = rng.choice(OAK[1:])
+        for y in range(16):
+            colour = streak if rng.random() < 0.7 else rng.choice(OAK)
+            if (x * 5 + y // 7) % 6 == 0:
+                colour = shade(colour, 0.78)
+            colour = tuple(int(p + (g - p) * silver) for p, g in zip(colour, SILVER))
+            c.px(x, y, colour)
+    # Checks (cracks) along the grain, and a knot.
+    for _ in range(1 + stage):
+        x = rng.randrange(16)
+        start = rng.randrange(10)
+        for y in range(start, min(16, start + rng.randint(3, 7))):
+            c.px(x, y, shade(c.get(x, y)[:3], 0.62))
+    kx, ky = rng.randrange(3, 13), rng.randrange(3, 13)
+    for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
+        c.px(kx + dx, ky + dy, shade(OAK[0], 0.8))
+    if stage >= 2:
+        for _ in range(3 if stage == 2 else 7):
+            cx, cy = rng.randrange(16), rng.randrange(16)
+            for dx, dy in ((0, 0), (1, 0), (0, 1), (-1, 0), (0, -1), (1, 1)):
+                if rng.random() < 0.75:
+                    c.px(cx + dx, cy + dy, rng.choice(MOSS[1:4] + [rgb("a6b07a")]))
+    return c.img
+
+
+def roof_slate(stage, seed=7601):
+    """Roofing slates in courses (running across the texture's u, as a roof's slope lies along a box's length), their
+    lower edges dark; worn slates go dusty, then moss fills the joints and spreads, with yellow lichen."""
+    rng = random.Random(seed + stage)
+    c = Canvas()
+    dust = (1.0, 1.08, 1.0, 0.95)[stage]
+    for x in range(16):
+        course = x // 4
+        for y in range(16):
+            joint = (y + course * 3) % 6 == 0
+            colour = rng.choice(SLATES[1:]) if not joint else SLATES[0]
+            if x % 4 == 0:
+                colour = shade(SLATES[0], 0.8)
+            c.px(x, y, shade(colour, dust))
+    if stage >= 2:
+        for _ in range(4 if stage == 2 else 10):
+            x = rng.randrange(0, 16, 4)
+            y = rng.randrange(16)
+            for dy in range(rng.randint(1, 3)):
+                c.px(x, y + dy, rng.choice(MOSS[1:4]))
+                if stage == 3 and rng.random() < 0.6:
+                    c.px(x + 1, y + dy, rng.choice(MOSS[2:]))
+        for _ in range(2 if stage == 2 else 5):
+            cx, cy = rng.randrange(16), rng.randrange(16)
+            for dx, dy in ((0, 0), (1, 0), (0, 1)):
+                c.px(cx + dx, cy + dy, rng.choice(LICHEN["granite"]))
+    return c.img
+
+
+def stained_glass():
+    """Leaded stained glass, opaque: diamond quarries in a lattice of lead, deep blue and ruby by turns, with a gold
+    rosette where every other pair of leads cross."""
+    c = Canvas()
+    lead = rgb("2a2a2e")
+    blues = [rgb("1f3a8a"), rgb("2a4aa8"), rgb("3858bc")]
+    reds = [rgb("8c1422"), rgb("a81c2c"), rgb("c02a38")]
+    for y in range(16):
+        for x in range(16):
+            u, v = (x + y) % 8, (x - y) % 8
+            if u == 0 or v == 0:
+                c.px(x, y, lead)
+                continue
+            cell = ((x + y) // 8 + (x - y + 16) // 8) % 2
+            palette = blues if cell == 0 else reds
+            # Lighter towards each pane's middle, as light comes through thinner glass.
+            depth = min(u, 8 - u, v, 8 - v)
+            c.px(x, y, palette[min(2, depth - 1)])
+    for cx, cy in ((0, 0), (8, 8)):
+        for dx, dy in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)):
+            c.px((cx + dx) % 16, (cy + dy) % 16, rgb("d8a83a") if (dx, dy) != (0, 0) else rgb("f4d470"))
+    return c.img
+
+
+def marble_floor():
+    """A chequered floor of white marble and black slate in squares of four pixels (25 cm), polished."""
+    rng = random.Random(7701)
+    c = Canvas()
+    white = STONES["marble"][0]
+    dark = [rgb("26292e"), rgb("2e3238"), rgb("353a41")]
+    for y in range(16):
+        for x in range(16):
+            if (x // 4 + y // 4) % 2 == 0:
+                c.px(x, y, rng.choice(white[1:]))
+            else:
+                c.px(x, y, rng.choice(dark))
+    for x in range(16):
+        c.px(x, 0, shade(white[0], 0.85))
+    return c.img
+
+
+def lamp_glass():
+    """A sanctuary lamp's ruby glass, lit from within."""
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            glow = max(0.0, 1 - (abs(x - 7.5) + abs(y - 9)) / 12)
+            c.px(x, y, tuple(min(255, int(v + 90 * glow)) for v in (176, 24, 34)))
+    return c.img
+
+
+def lantern_glass():
+    """A lantern's panes with the flame's light behind them: warm amber, brightest in the middle."""
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            glow = max(0.0, 1 - (abs(x - 7.5) + abs(y - 8.5)) / 11)
+            c.px(x, y, (min(255, int(222 + 33 * glow)), min(255, int(150 + 80 * glow)), min(255, int(60 + 110 * glow))))
+    return c.img
+
+
+def door_glass():
+    """Smoked glass behind a bronze grille: nearly black, with a faint sheen."""
+    rng = random.Random(7801)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, rng.choice((rgb("15181c"), rgb("1b1f24"), rgb("22272d"))))
+    for i in range(5):
+        c.px(10 + i // 2, 2 + i, rgb("3c444e"))
+    return c.img
+
+
+def mausoleum_door_item():
+    """The Bronze Mausoleum Door as an item: a bronze frame with a meeting stile, a grille over smoked glass above and
+    raised panels below."""
+    c = Canvas()
+    for y in range(1, 16):
+        for x in range(3, 13):
+            c.px(x, y, BRONZE[1] if (x + y) % 3 else BRONZE[2])
+    for y in range(2, 8):
+        for x in (4, 5, 6, 9, 10, 11):
+            c.px(x, y, rgb("1b1f24"))
+    for y in range(2, 8):
+        c.px(5, y, BRONZE[2])
+        c.px(10, y, BRONZE[2])
+    for x in range(3, 13):
+        c.px(x, 5, BRONZE[2])
+    for y in range(10, 14):
+        for x in (5, 10):
+            c.px(x, y, BRONZE[3])
+    for y in range(1, 16):
+        c.px(7, y, BRONZE[0])
+        c.px(8, y, BRONZE[0])
+    c.px(6, 9, BRONZE[3])
+    c.px(9, 9, BRONZE[3])
+    outline(c, rgb("2a1d10"))
+    return c.img
+
+
+# ---------------------------------------------------------------- pack 4: the grounds
+
+CHIPS = [rgb("d9d8d2"), rgb("e6e5df"), rgb("f0efe9"), rgb("c4c3bc"), rgb("b0afa8")]
+SOIL = [rgb("3b2a1c"), rgb("46321f"), rgb("523b25")]
+FLOWERS = [rgb("c8283a"), rgb("f2efe6"), rgb("f0c838"), rgb("8a52b8")]
+GRASS = [rgb("3f6b24"), rgb("4e7f2c"), rgb("5f9234"), rgb("74a540")]
+
+
+def chippings(stage, seed=7901):
+    """White marble chippings: clean and bright, greying as dirt settles in, green with algae, then grassed over."""
+    rng = random.Random(seed + stage)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            colour = rng.choice(CHIPS[:3]) if rng.random() < 0.8 else rng.choice(CHIPS[3:])
+            if stage >= 1 and rng.random() < 0.12 * stage:
+                colour = shade(colour, 0.78)
+            c.px(x, y, colour)
+    if stage >= 2:
+        for _ in range(5 if stage == 2 else 9):
+            cx, cy = rng.randrange(16), rng.randrange(16)
+            for dx, dy in ((0, 0), (1, 0), (0, 1), (-1, 0), (1, 1)):
+                if rng.random() < 0.75:
+                    c.px(cx + dx, cy + dy, rng.choice(MOSS[2:]))
+    if stage == 3:
+        for _ in range(14):
+            x, y = rng.randrange(16), rng.randrange(16)
+            for dy in range(rng.randint(1, 3)):
+                c.px(x, y - dy, rng.choice(GRASS))
+    return c.img
+
+
+def flower_bed(stage, seed=8001):
+    """A grave's planted bed seen from above and from the side alike: kept, neat flowers in rows on dark earth; let
+    go, weeds and grass come through and the flowers thin; overgrown, grass and brambles."""
+    rng = random.Random(seed + stage)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, rng.choice(SOIL))
+    flowers = (1.0, 0.6, 0.25, 0.08)[stage]
+    weeds = (0.0, 0.25, 0.6, 0.9)[stage]
+    for y in range(1, 16, 3):
+        for x in range(1, 16, 3):
+            ox, oy = x + rng.choice((0, 0, 1)), y + rng.choice((0, 0, 1))
+            if rng.random() < flowers:
+                c.px(ox, oy + 1, GRASS[1])
+                c.px(ox + 1, oy + 1, GRASS[2])
+                c.px(ox, oy, FLOWERS[(x // 3 + y // 3) % 4])
+    for _ in range(int(60 * weeds)):
+        x, y = rng.randrange(16), rng.randrange(16)
+        c.px(x, y, rng.choice(GRASS))
+        if rng.random() < 0.5:
+            c.px(x, y - 1, rng.choice(GRASS))
+    if stage == 3:
+        for _ in range(6):
+            x, y = rng.randrange(16), rng.randrange(16)
+            c.px(x, y, rgb("3a1f2e"))
+            c.px(x + 1, y, rgb("5b2a40"))
+    return c.img
+
+
+def pit():
+    """An open grave's darkness, seen down into: nearly black earth, the same all over so a grave two blocks long
+    shows no seam (its rim is the fresh earth round it)."""
+    rng = random.Random(8301)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, rng.choice((rgb("0e0a07"), rgb("130e0a"), rgb("18120c"))))
+    return c.img
+
+
+def straps():
+    """Canvas lowering straps: webbing with a woven stripe."""
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, rgb("b8a27a") if (y % 4) else rgb("9c8660"))
+    return c.img
+
+
+PETALS = {"white": [rgb("e8e4d8"), rgb("f4f1e8"), rgb("fffdf6")], "red": [rgb("8c1422"), rgb("b01e2e"), rgb("d03644")],
+          "yellow": [rgb("d8a020"), rgb("eec030"), rgb("f8dc60")], "purple": [rgb("5a2e8a"), rgb("7442a8"), rgb("9264c4")]}
+
+
+def petals(colour, seed=8101):
+    """Flower heads in `colour` (or `mixed`: all of them), or `wilted`: browned and dry."""
+    rng = random.Random(seed + len(colour))
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            if colour == "wilted":
+                col = rng.choice((rgb("6e5a3a"), rgb("85704a"), rgb("5a4a30")))
+            elif colour == "mixed":
+                col = rng.choice(PETALS[("white", "red", "yellow", "purple")[((x // 4) + (y // 4)) % 4]])
+            else:
+                col = rng.choice(PETALS[colour])
+            c.px(x, y, col)
+    return c.img
+
+
+def leaves(seed=8201):
+    c = Canvas()
+    rng = random.Random(seed)
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, rng.choice(GRASS))
+    return c.img
+
+
+def lantern_unlit():
+    """A lantern's glass by day, unlit: dark amber with a gleam."""
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, rgb("4a3a22") if (x + y) % 5 else rgb("5c4a2c"))
+    for i in range(4):
+        c.px(11 + i // 2, 2 + i, rgb("8a7a5a"))
+    return c.img
+
+
 def graveyard_textures():
     out = {}
     for stone in STONES:
@@ -326,4 +618,22 @@ def graveyard_textures():
         out[("block", f"gy_bronze_{stage}")] = bronze(k)
     out[("block", "gy_ivy")] = ivy()
     out[("item", "stonemasons_chisel")] = chisel_item()
+    for k, stage in enumerate(STAGES):
+        out[("block", f"gy_oak_{stage}")] = oak(k)
+        out[("block", f"gy_roof_slate_{stage}")] = roof_slate(k)
+    out[("block", "gy_stained_glass")] = stained_glass()
+    out[("block", "gy_marble_floor")] = marble_floor()
+    out[("block", "gy_lamp_glass")] = lamp_glass()
+    out[("block", "gy_lantern_glass")] = lantern_glass()
+    out[("block", "gy_door_glass")] = door_glass()
+    out[("item", "bronze_mausoleum_door")] = mausoleum_door_item()
+    for k, stage in enumerate(STAGES):
+        out[("block", f"gy_chippings_{stage}")] = chippings(k)
+        out[("block", f"gy_flower_bed_{stage}")] = flower_bed(k)
+    out[("block", "gy_pit")] = pit()
+    out[("block", "gy_straps")] = straps()
+    for colour in ("white", "red", "yellow", "purple", "mixed", "wilted"):
+        out[("block", f"gy_petals_{colour}")] = petals(colour)
+    out[("block", "gy_leaves")] = leaves()
+    out[("block", "gy_lantern_unlit")] = lantern_unlit()
     return out

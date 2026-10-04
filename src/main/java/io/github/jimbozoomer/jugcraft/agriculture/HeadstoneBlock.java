@@ -39,6 +39,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import java.util.List;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -73,6 +74,10 @@ public class HeadstoneBlock extends BaseEntityBlock {
 	static final int[][] TALL4 = {{0, 0, 0}, {0, 1, 0}, {0, 2, 0}, {0, 3, 0}};
 	/** The Angel at the Tomb: the altar's two halves and, above the one to the placer's right, the angel's wings. */
 	static final int[][] WIDE = {{0, 0, 0}, {1, 0, 0}, {1, 1, 0}};
+	/** Two blocks side by side, the second to the placer's right (the memorial bench). */
+	static final int[][] WIDE2 = {{0, 0, 0}, {1, 0, 0}};
+	/** How much more often an open grave stirs a spirit than other graves. */
+	public static final float OPEN_GRAVE_STIR = 2.0F;
 
 	/** A stone: the colour of letters cut into it, and the colour they fade towards as it weathers. */
 	public enum Stone {
@@ -92,15 +97,71 @@ public class HeadstoneBlock extends BaseEntityBlock {
 	}
 
 	/**
-	 * Where the epitaph is cut, facing north, in pixels: on a FRONT face whose plane is z = {@code z}, or on a TOP face at
-	 * height {@code y}; centred at ({@code x}, {@code y}) or ({@code x}, {@code z}), {@code width} by {@code height}; no
-	 * letter larger than {@code maxScale} blocks per font pixel.
+	 * Where an inscription is cut, facing north, in pixels from the block of part 0: on an upright face whose plane is
+	 * z = {@code z} (FRONT, BACK) or x = {@code x} (EAST, WEST), or on a TOP face at height {@code y}; centred on
+	 * ({@code x}, {@code y}, {@code z}), {@code width} by {@code height}; no letter larger than {@code maxScale} blocks per
+	 * font pixel.
 	 */
-	public record Text(boolean top, float x, float y, float z, float width, float height, float maxScale) {
+	public record Text(Face face, float x, float y, float z, float width, float height, float maxScale) {
+		/** A FRONT or TOP place, as the headstones and monuments give theirs. */
+		public Text(boolean top, float x, float y, float z, float width, float height, float maxScale) {
+			this(top ? Face.TOP : Face.FRONT, x, y, z, width, height, maxScale);
+		}
+	}
+
+	/**
+	 * The face letters are cut on, for a memorial facing north: FRONT looks north (model -z), BACK south (+z), EAST and
+	 * WEST along x (a crypt front on a mausoleum's side wall), TOP up (read from the foot, as on a ledger).
+	 */
+	public enum Face {
+		FRONT, BACK, EAST, WEST, TOP
+	}
+
+	/**
+	 * What a memorial is: its id and stone, its cells (right, up, back from part 0), the shape of each part facing each
+	 * way, and where its inscriptions go. The headstones and monuments are {@link Style}s with one epitaph each; the
+	 * buildings of pack 3 ({@link GraveyardBuildingBlock}) are read from tools/graveyard.py's generated list and may
+	 * carry more (a mausoleum's crypt fronts, a columbarium's niches), all kept by the block entity of part 0.
+	 */
+	public interface Layout {
+		String id();
+
+		Stone stone();
+
+		int[][] cells();
+
+		VoxelShape shape(int part, Direction facing);
+
+		/** Where each inscription is cut: the epitaph first, then any more. */
+		List<Text> texts();
+
+		/** Which inscription the chisel or a name tag cuts when used on {@code part}. */
+		default int slot(int part) {
+			return 0;
+		}
+
+		/** The light {@code part} gives (a mausoleum's lamp, a gateway's lanterns). */
+		default int light(int part) {
+			return 0;
+		}
+
+		/** How much more often than other graves of its stage it stirs a spirit (an open grave the most). */
+		default float stir() {
+			return 1.0F;
+		}
+
+		/** How many blocks tall it stands above part 0. */
+		default int height() {
+			int top = 0;
+			for (int[] cell : cells()) {
+				top = Math.max(top, cell[1]);
+			}
+			return top + 1;
+		}
 	}
 
 	/** Each headstone: its id, stone, cells (right, up, back), boxes per part (facing north) and where its epitaph goes. */
-	public enum Style {
+	public enum Style implements Layout {
 		GOTHIC("gothic_headstone", Stone.MARBLE, SINGLE,
 				new double[][][] {{{1.5, 0, 4.5, 14.5, 2, 11.5}, {2.5, 2, 6, 13.5, 16, 9.5}, {4.5, 16, 6.5, 11.5, 20, 9.5}}},
 				new Text(false, 8.0F, 8.0F, 6.5F, 6.8F, 7.6F, 1.0F / 64)),
@@ -155,12 +216,26 @@ public class HeadstoneBlock extends BaseEntityBlock {
 				new Text(false, 8.0F, 6.9F, 0.4F, 5.4F, 2.8F, 1.0F / 96)),
 		FAITHFUL_HOUND("faithful_hound", Stone.GRANITE, SINGLE,
 				new double[][][] {{{1, 0, 2, 15, 6.2, 14}, {1, 6.2, 4.5, 14.5, 12.5, 12}}},
-				new Text(false, 8.0F, 3.3F, 2.6F, 11.0F, 3.6F, 1.0F / 80));
+				new Text(false, 8.0F, 3.3F, 2.6F, 11.0F, 3.6F, 1.0F / 80)),
+		// Pack 4: the grounds.
+		KERBED_GRAVE("kerbed_grave", Stone.GRANITE, LONG,
+				new double[][][] {{{0.6, 0, 0.1, 15.4, 3, 16}}, {{0.6, 0, 0, 15.4, 3, 15.9}, {3.4, 3, 7.4, 12.6, 4.8, 13.8}}},
+				new Text(true, 8.0F, 4.8F, 26.6F, 7.6F, 5.2F, 1.0F / 64)),
+		PLANTED_GRAVE("planted_grave", Stone.SANDSTONE, LONG,
+				new double[][][] {{{0.6, 0, 0.1, 15.4, 2.6, 16}}, {{0.6, 0, 0, 15.4, 2.6, 15.9}}},
+				new Text(true, 8.0F, 2.6F, 27.1F, 5.4F, 3.4F, 1.0F / 80)),
+		MEMORIAL_BENCH("memorial_bench", Stone.IRON, WIDE2,
+				new double[][][] {{{0, 0, 2, 15.6, 7.6, 12.2}, {0, 7.6, 9.6, 15.8, 16, 11}}, {{0.4, 0, 2, 16, 7.6, 12.2}, {0.2, 7.6, 9.6, 16, 16, 11}}},
+				new Text(false, 0.0F, 13.8F, 9.4F, 13.0F, 2.2F, 1.0F / 90)),
+		OPEN_GRAVE("open_grave", Stone.GRANITE, LONG,
+				new double[][][] {{{0, 0, 1, 6.4, 5, 16}, {5.4, 0, 8, 16, 1.2, 10.4}}, {{0, 0, 0, 6.2, 4.4, 14}, {5.4, 0, 4, 16, 1.2, 6.4}, {7.4, 0, 14, 14, 13, 15.2}}},
+				new Text(false, 10.7F, 6.7F, 29.6F, 4.4F, 2.6F, 1.0F / 80));
 
 		public final String id;
 		public final Stone stone;
 		public final int[][] cells;
 		public final Text text;
+		private final List<Text> texts;
 		private final VoxelShape[][] shapes;
 
 		Style(String id, Stone stone, int[][] cells, double[][][] boxes, Text text) {
@@ -168,6 +243,7 @@ public class HeadstoneBlock extends BaseEntityBlock {
 			this.stone = stone;
 			this.cells = cells;
 			this.text = text;
+			texts = List.of(text);
 			shapes = new VoxelShape[cells.length][4];
 			for (int part = 0; part < cells.length; part++) {
 				for (Direction facing : Direction.Plane.HORIZONTAL) {
@@ -180,8 +256,38 @@ public class HeadstoneBlock extends BaseEntityBlock {
 			}
 		}
 
+		@Override
+		public String id() {
+			return id;
+		}
+
+		@Override
+		public Stone stone() {
+			return stone;
+		}
+
+		@Override
+		public int[][] cells() {
+			return cells;
+		}
+
+		@Override
+		public List<Text> texts() {
+			return texts;
+		}
+
+		@Override
+		public VoxelShape shape(int part, Direction facing) {
+			return shapes[part][facing.get2DDataValue()];
+		}
+
+		@Override
+		public float stir() {
+			return this == OPEN_GRAVE ? OPEN_GRAVE_STIR : 1.0F;
+		}
+
 		/** A box given facing north, turned to face {@code facing} about the block's centre. */
-		private static VoxelShape turned(double[] b, Direction facing) {
+		static VoxelShape turned(double[] b, Direction facing) {
 			return switch (facing) {
 				case SOUTH -> Block.box(16 - b[3], b[1], 16 - b[5], 16 - b[0], b[4], 16 - b[2]);
 				case EAST -> Block.box(16 - b[5], b[1], b[0], 16 - b[2], b[4], b[3]);
@@ -191,17 +297,26 @@ public class HeadstoneBlock extends BaseEntityBlock {
 		}
 	}
 
-	private final Style style;
+	private final Layout layout;
 
-	public HeadstoneBlock(Properties properties, Style style) {
+	public HeadstoneBlock(Properties properties, Layout layout) {
 		super(properties);
-		this.style = style;
-		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, 0).setValue(WEATHERING, CLEAN)
+		this.layout = layout;
+		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(partProperty(), 0).setValue(WEATHERING, CLEAN)
 				.setValue(WAXED, false));
 	}
 
-	public Style style() {
-		return style;
+	public Layout layout() {
+		return layout;
+	}
+
+	/** The part property: 0 to 3 for headstones and monuments; buildings have many more parts. */
+	public IntegerProperty partProperty() {
+		return PART;
+	}
+
+	public int part(BlockState state) {
+		return state.getValue(partProperty());
 	}
 
 	public static int stage(BlockState state) {
@@ -212,32 +327,34 @@ public class HeadstoneBlock extends BaseEntityBlock {
 
 	/** Where part {@code part} of the headstone with its part 0 at {@code master}, facing {@code facing}, is. */
 	public BlockPos partPos(BlockPos master, Direction facing, int part) {
-		int[] cell = style.cells[part];
+		int[] cell = layout.cells()[part];
 		return master.relative(facing.getCounterClockWise(), cell[0]).above(cell[1]).relative(facing.getOpposite(), cell[2]);
 	}
 
 	/** Where part 0 of the headstone this block belongs to is. */
 	public BlockPos masterPos(BlockPos pos, BlockState state) {
-		int[] cell = style.cells[Math.min(state.getValue(PART), style.cells.length - 1)];
+		int[] cell = layout.cells()[Math.min(part(state), layout.cells().length - 1)];
 		Direction facing = state.getValue(FACING);
 		return pos.relative(facing.getCounterClockWise(), -cell[0]).below(cell[1]).relative(facing.getOpposite(), -cell[2]);
 	}
 
 	private boolean isPart(Level level, BlockPos pos, int part, Direction facing) {
 		BlockState state = level.getBlockState(pos);
-		return state.is(this) && state.getValue(PART) == part && state.getValue(FACING) == facing;
+		return state.is(this) && part(state) == part && state.getValue(FACING) == facing;
 	}
 
-	/** Placed facing the player, every block it needs free. */
+	/** Placed facing the player, every block it needs free and the player allowed to build in each. */
 	@Override
 	public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
 		Direction facing = context.getHorizontalDirection().getOpposite();
 		Level level = context.getLevel();
 		BlockPos master = context.getClickedPos();
-		for (int part = 1; part < style.cells.length; part++) {
+		Player player = context.getPlayer();
+		for (int part = 1; part < layout.cells().length; part++) {
 			BlockPos pos = partPos(master, facing, part);
 			if (level.isOutsideBuildHeight(pos) || !level.getWorldBorder().isWithinBounds(pos)
-					|| !level.getBlockState(pos).canBeReplaced(BlockPlaceContext.at(context, pos, Direction.UP))) {
+					|| !level.getBlockState(pos).canBeReplaced(BlockPlaceContext.at(context, pos, Direction.UP))
+					|| (player != null && !level.mayInteract(player, pos))) {
 				return null;
 			}
 		}
@@ -252,8 +369,8 @@ public class HeadstoneBlock extends BaseEntityBlock {
 			return;
 		}
 		Direction facing = state.getValue(FACING);
-		for (int part = 1; part < style.cells.length; part++) {
-			level.setBlock(partPos(pos, facing, part), state.setValue(PART, part), Block.UPDATE_ALL);
+		for (int part = 1; part < layout.cells().length; part++) {
+			level.setBlock(partPos(pos, facing, part), state.setValue(partProperty(), part), Block.UPDATE_ALL);
 		}
 	}
 
@@ -266,13 +383,13 @@ public class HeadstoneBlock extends BaseEntityBlock {
 		}
 		BlockPos master = masterPos(pos, state);
 		Direction facing = state.getValue(FACING);
-		if (state.getValue(PART) != 0) {
+		if (part(state) != 0) {
 			if (isPart(level, master, 0, facing)) {
 				level.destroyBlock(master, true);
 			}
 			return;
 		}
-		for (int part = 1; part < style.cells.length; part++) {
+		for (int part = 1; part < layout.cells().length; part++) {
 			BlockPos partPos = partPos(master, facing, part);
 			if (isPart(level, partPos, part, facing)) {
 				level.removeBlock(partPos, false);
@@ -283,7 +400,7 @@ public class HeadstoneBlock extends BaseEntityBlock {
 	/** In creative, breaking any block takes the whole headstone away without dropping it. */
 	@Override
 	public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-		if (!level.isClientSide() && player.getAbilities().instabuild && state.getValue(PART) != 0) {
+		if (!level.isClientSide() && player.getAbilities().instabuild && part(state) != 0) {
 			BlockPos master = masterPos(pos, state);
 			if (level.getBlockState(master).is(this)) {
 				level.removeBlock(master, false);
@@ -294,13 +411,13 @@ public class HeadstoneBlock extends BaseEntityBlock {
 
 	@Override
 	public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-		return state.getValue(PART) == 0 ? new HeadstoneBlockEntity(pos, state) : null;
+		return part(state) == 0 ? new HeadstoneBlockEntity(pos, state) : null;
 	}
 
 	@Override
 	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-		int part = Math.min(state.getValue(PART), style.cells.length - 1);
-		return style.shapes[part][state.getValue(FACING).get2DDataValue()];
+		int part = Math.min(part(state), layout.cells().length - 1);
+		return layout.shape(part, state.getValue(FACING));
 	}
 
 	// ---------------------------------------------------------------- weathering
@@ -312,7 +429,7 @@ public class HeadstoneBlock extends BaseEntityBlock {
 			return;
 		}
 		Direction facing = masterState.getValue(FACING);
-		for (int part = 0; part < style.cells.length; part++) {
+		for (int part = 0; part < layout.cells().length; part++) {
 			BlockPos pos = partPos(master, facing, part);
 			BlockState state = level.getBlockState(pos);
 			if (isPart(level, pos, part, facing)) {
@@ -324,20 +441,28 @@ public class HeadstoneBlock extends BaseEntityBlock {
 	/** Only part 0 weathers (and the rest follow it). */
 	@Override
 	protected boolean isRandomlyTicking(BlockState state) {
-		return state.getValue(PART) == 0;
+		return part(state) == 0;
 	}
 
-	/** Weathers now and then; at night the grave may stir, the more often the more neglected. */
+	/**
+	 * Weathers now and then; at night the grave may stir, the more often the more neglected (and for an open grave,
+	 * more often still), half as often while fresh flowers stand in a grave vase near it.
+	 */
 	@Override
 	protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		int stage = state.getValue(WEATHERING);
 		if (!state.getValue(WAXED) && stage < OVERGROWN && JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE)) {
-			float chance = AGE_CHANCE * (level.canSeeSky(pos.above(style.cells.length)) ? SKY_FACTOR : 1);
+			float chance = AGE_CHANCE * (level.canSeeSky(pos.above(layout.height())) ? SKY_FACTOR : 1);
 			if (random.nextFloat() < chance) {
 				setWeather(level, pos, stage + 1, false);
 			}
 		}
-		Spirits.stir(level, pos, random, STIR[stage]);
+		float factor = STIR[stage] * layout.stir();
+		// Spirits only rise at night, so the vases about it are only looked at then.
+		if (MourningAngelBlock.night(level) && GraveVaseBlock.calms(level, pos)) {
+			factor *= GraveVaseBlock.CALM;
+		}
+		Spirits.stir(level, pos, random, factor);
 	}
 
 	/** The brush, honeycomb, axe, bone meal, chisel and a named Name Tag; anything else does what it would anywhere. */
@@ -365,14 +490,16 @@ public class HeadstoneBlock extends BaseEntityBlock {
 		}
 		int stage = state.getValue(WEATHERING);
 		boolean waxed = state.getValue(WAXED);
+		// Part 0 keeps every inscription; the part used says which (a crypt front its own, any other the epitaph).
+		int slot = layout.slot(part(state));
 		if (chisel) {
-			Epitaphs.open(worker, master);
+			Epitaphs.open(worker, master, slot, pos);
 		} else if (tag) {
 			Component name = stack.get(DataComponents.CUSTOM_NAME);
 			if (name == null || name.getString().isBlank()) {
 				worker.sendOverlayMessage(Component.translatable("message.jugcraft.gravestone.unnamed_tag"));
 			} else if (level.getBlockEntity(master) instanceof HeadstoneBlockEntity stone) {
-				stone.engrave(stone.epitaph().withFirstLine(name.getString()));
+				stone.engrave(slot, stone.inscription(slot).withFirstLine(name.getString()));
 				level.playSound(null, pos, SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundSource.BLOCKS, 1.0F, 1.0F);
 			}
 		} else if (brush) {
@@ -431,6 +558,6 @@ public class HeadstoneBlock extends BaseEntityBlock {
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(FACING, PART, WEATHERING, WAXED);
+		builder.add(FACING, partProperty(), WEATHERING, WAXED);
 	}
 }
