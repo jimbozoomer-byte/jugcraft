@@ -11,9 +11,9 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.minecraft.client.CameraType;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.AABB;
@@ -87,7 +87,7 @@ public class TwoHandedClientGameTests implements FabricClientGameTest {
 	/** The husk's health, on the server. */
 	private static float health(TestServerContext server, int x, int y, int z) {
 		return server.computeOnServer(minecraft -> minecraft.overworld().getEntitiesOfClass(LivingEntity.class,
-				new AABB(x - 4, y - 2, z - 6, x + 5, y + 4, z + 2), entity -> entity.getType() == EntityType.HUSK)
+				new AABB(x - 4, y - 2, z - 6, x + 5, y + 4, z + 2), entity -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath().equals("husk"))
 				.stream().findFirst().map(LivingEntity::getHealth).orElse(-1.0F));
 	}
 }
