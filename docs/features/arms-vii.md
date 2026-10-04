@@ -23,7 +23,7 @@ The arm keeps its enchantments and wear.
 | Style | Pattern (recipe) | Material | Arms | Perk |
 |---|---|---|---|---|
 | Gilded: polished steel, gold, royal-blue velvet, sapphires | Gilder's Pattern: 8 gold nuggets round paper | gold ingot | longsword, rapier, sabre, halberd | takes enchantments as gold does (22; steel's 12) |
-| Ironclad (dieselpunk): gun steel, olive drab, hazard stripes, bolts, rubber grips | Ironclad Pattern: yellow and black dye round a steel plate | steel plate | zweihander, maul, war pick, battle axe | lasts twice as long (1,800) |
+| Ironclad (dieselpunk): gun steel, olive drab, hazard stripes, rubber grips | Ironclad Pattern: yellow and black dye round a steel plate | steel plate | zweihander, maul, war pick, battle axe | lasts twice as long (1,800) |
 | Bonecarved: bone, horn, leather, a garnet eye | Bonecarver's Pattern: bone, flint, leather, paper | bone block | dagger, flail (a skull on a chain of vertebrae), glaive (a jawbone blade), labrys (shoulder-blade bits) | **Gravebane:** 20% harder against the undead |
 | Runebound: void-dark steel with runes that glow cyan | Runecarver's Pattern: amethyst, ectoplasm, paper | ectoplasm | nodachi, moonblade, staff (quarterstaff), war hammer | **Mark:** a struck foe glows for 4 s, seen through walls |
 
@@ -45,6 +45,14 @@ The arm keeps its enchantments and wear.
 - Each arm is drawn with the restyle's toolkit: a pixel-art icon on the diagonal and a 3D model in the hand.
 - Glowing parts are lit at full brightness in the hand, so they show in the dark: runes, magma, venom, soul fire, charged coils and lightning.
 - Tooltips name the kind's trait or art, the boon (in aqua) and the line (in purple: the style's perk, or "A trophy of …").
+- **Second pass (the owner: "dont overcomplicate them"):** each design was checked against the studied mods at 8× and kept to one or two accents.
+  - **Gilded:** the rapier and sabre use the base arms' plainer hilts in gold. The halberd uses the larger halberd head, with a gold hook and one sapphire, and no chasing or tassels.
+  - **Ironclad:** no bolt grids.
+  - **Runebound:** the runes are one unbroken glowing line, not dashes, and the war hammer carries a single rune diamond.
+  - **Cinder Tyrant:** the Cinderbrand has a straight molten core instead of a web of cracks. The Magmaw has one seam of magma and no teeth.
+  - **Iron Dreadnought:** the Dynamo Halberd is the halberd head with a charged edge and a copper coil, without hazard band, bolts or loose arcs. The Piston Hammer has two rings and one vent.
+  - **Abyssal Leviathan:** the arms lose the coral. The Tidebreaker's tines rise from a bronze crossbar round a pearl. Leviathan's Hook is the bill's hook, with one glowing tide line and a pearl spike.
+  - **Rimeclaw:** an open frame with one fur grip.
 
 ## Connections
 - **Existing input producer:**
@@ -95,7 +103,12 @@ The arm keeps its enchantments and wear.
   - Drain heals the wielder; Gale throws the foe up and away; Shock arcs to the near pig for its share and not to one beyond reach;
   - Gravebane adds its share on a husk and nothing on a pig; Tide adds its share in water and nothing on land;
   - every style recipe and pattern recipe loads, and each boss's table drops exactly its two trophies over 40 rolls.
-- **Client game test** (`ArmsVIIClientGameTests`): passes in CI on ca45a035 (shard 0), and its shots show the variants in frames and on racks, trophies held by day, and the runes, magma and venom glowing at midnight. The Glacier Maul's blow left the pig at Slowness II with 43 ticks left. The first-person shot was blank: an earlier test in the shard leaves the GUI hidden, and hiding it hides the hand. The test now shows the GUI for that shot alone, as ArmsMotionClientGameTests does:
+- **Client game test** (`ArmsVIIClientGameTests`): passes in CI on ca45a035 (shard 0), and its shots show the variants in frames and on racks, trophies held by day, and the runes, magma and venom glowing at midnight. The Glacier Maul's blow left the pig at Slowness II with 43 ticks left.
+  - The first-person shot was blank on ca45a035: an earlier test in the shard leaves the GUI hidden, and hiding it hides the hand. The test now shows the GUI for that shot alone, as ArmsMotionClientGameTests does.
+  - On 2564ef92 (shard 0, passed) the shot shows the Runebound Moonblade in hand at night, its runes glowing. The frost blow again left Slowness II with 43 ticks.
+  - The second-pass art has not yet been through CI.
+
+  The test covers:
   - every variant and pattern in frames, and the variants on armor-stand racks;
   - trophies held from the front by day, glowing ones at midnight, and one in first person;
   - a Glacier Maul's blow with the real attack key, its frost read back from the server.

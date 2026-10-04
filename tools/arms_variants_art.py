@@ -3,15 +3,16 @@ tools/arms_pixel.py as a pixel-art icon on the diagonal and a 3D model in the ha
 (tools/arms_art.py, whose parts these reuse). Each line has its own materials:
 
 - gilded: polished steel, gold fittings, royal-blue velvet grips, sapphires;
-- ironclad (dieselpunk): dark gun steel, olive-drab paint, hazard stripes, black rubber grips, heavy bolts;
+- ironclad (dieselpunk): dark gun steel, olive-drab paint, hazard stripes, black rubber grips;
 - bonecarved: bone and horn, leather and sinew, a garnet eye;
 - runebound: void-dark steel and iron with runes that glow cyan (lit in the dark in the hand);
 - the bosses' trophies: ice and white fur (the Yeti King), obsidian and magma (the Cinder Tyrant), blackthorn and
   venom (the Mire Hag), dark iron and soul fire (the Crypt Lich), gunmetal, copper coils and arcs (the Iron
   Dreadnought), silver and wolf fur (the Alpha Werewolf), storm steel, feathers and lightning (the Storm Roc), and
-  sea-green bronze, coral and pearl (the Abyssal Leviathan).
+  sea-green bronze, pearl and a glowing tide line (the Abyssal Leviathan).
 
-All original; the designs follow their kinds' proportions (tools/arms_art.py), so each is held as its kind is.
+All original; the designs follow their kinds' proportions (tools/arms_art.py), so each is held as its kind is, and
+are kept plain as the studied mods' are: one or two accents an arm, clean silhouettes, no dotted or scattered detail.
 """
 import math
 
@@ -53,7 +54,6 @@ STORMSTEEL = M((14, 20, 32), (40, 52, 74), (66, 82, 108), (96, 114, 142), (134, 
 FEATHER = M((70, 66, 60), (120, 114, 104), (160, 154, 142), (198, 192, 180), (226, 222, 212), (246, 244, 238), shine=False)
 BOLT = M((90, 70, 0), (160, 126, 4), (220, 180, 10), (250, 220, 40), (255, 244, 120), (255, 255, 220), glow=True)
 SEABRONZE = M((6, 30, 34), (12, 60, 66), (20, 90, 96), (36, 124, 128), (70, 166, 166), (140, 214, 206))
-CORAL = M((70, 20, 24), (130, 40, 44), (180, 70, 64), (220, 110, 90), (246, 156, 128), (255, 210, 186))
 PEARL = M((90, 86, 100), (150, 146, 160), (196, 192, 206), (226, 222, 234), (242, 240, 248), (255, 255, 255))
 TIDEGLOW = M((4, 40, 44), (8, 80, 84), (16, 126, 128), (40, 180, 176), (110, 230, 218), (210, 255, 248), glow=True)
 
@@ -69,20 +69,15 @@ LICH = Style(DARK_IRON, BONE, VIOLET, DARK_IRON, SOUL, SOUL, VIOLET)
 DREADNOUGHT = Style(GUNSTEEL, px.GUNMETAL, px.RUBBER, px.GUNMETAL, ARC, COPPER, px.OLIVE)
 WEREWOLF = Style(SILVER, DARK_IRON, WOLF, px.DARK_WOOD, MOONSTONE, SILVER, WOLF)
 ROC = Style(STORMSTEEL, px.GUNMETAL, px.LEATHER, px.DARK_WOOD, BOLT, BOLT, FEATHER)
-LEVIATHAN = Style(SEABRONZE, SEABRONZE, px.LEATHER, px.DARK_WOOD, PEARL, CORAL, TIDEGLOW)
+LEVIATHAN = Style(SEABRONZE, SEABRONZE, px.LEATHER, px.DARK_WOOD, PEARL, PEARL, TIDEGLOW)
 
 
 # ---------------------------------------------------------------- shared parts
 
 
-def rune_line(d, s0, s1, t_of, width=0.32, gap=(2.0, 1.0), material=RUNE):
-    """Glowing runes inlaid along a path t_of(s): strokes `gap[0]` long, `gap[1]` apart."""
-    s = s0
-    while s < s1:
-        e = min(s1, s + gap[0])
-        d.strip(s, e, lambda v: width - t_of(v), lambda v: width + t_of(v), material=material, depth=1.5, z=3,
-                part=f"rune{round(s, 2)}")
-        s = e + gap[1]
+def rune_line(d, s0, s1, t_of, width=0.32, material=RUNE):
+    """A glowing rune line inlaid along a path t_of(s), one clean stroke (dashes read as noise at this size)."""
+    d.strip(s0, s1, lambda v: width - t_of(v), lambda v: width + t_of(v), material=material, depth=1.5, z=3, part="rune")
 
 
 def hazard(d, s0, s1, w, depth, z=1, period=1.0):
@@ -155,16 +150,12 @@ def gilded_rapier():
     d = Design(34, grip=5.0)
     pommel(d, 1.6, 1.5, st)
     grip(d, 2.4, 7.8, 0.85, st, period=1.6)
-    d.line(8.2, -0.6, 3.0, -3.2, 0.8, GOLD, depth=1.6)
-    d.line(3.0, -3.2, 2.4, -1.0, 0.8, GOLD, depth=1.6)
-    d.line(8.2, -1.6, 4.6, -4.2, 0.7, GOLD, depth=1.4)
-    d.ring(9.6, 0.0, 3.2, 2.1, GOLD, depth=1.6)
-    d.ring(9.6, 0.0, 2.0, 1.2, GOLD, depth=1.4)
-    d.strip(8.2, 9.0, 4.4, material=GOLD, depth=2.2)
-    d.line(8.6, 4.0, 11.4, 5.0, 0.8, GOLD, depth=1.6)
-    d.disc(11.6, 5.1, 0.6, SAPPHIRE, depth=2.0, z=2)
+    # The rapier's swept hilt in gold: quillons and a knuckle bow clear of the grip.
+    guard(d, 8.5, 3.6, st, thick=1.0, curl=1.0)
+    d.line(8.2, -3.8, 2.8, -3.8, 0.8, GOLD, depth=1.6)
+    d.line(2.8, -3.8, 1.6, -1.2, 0.8, GOLD, depth=1.6)
     blade(d, 9.0, 31.0, 0.75, 0.55, st, tip=3.0, ridge=True)
-    gem(d, 1.6, 0.0, 0.6, st)
+    gem(d, 8.5, 0.0, 0.6, st)
     return d
 
 
@@ -173,9 +164,9 @@ def gilded_sabre():
     d = Design(34, grip=4.8)
     pommel(d, 1.4, 1.3, st, cap=False)
     grip(d, 2.2, 7.6, 0.85, st, period=1.6)
-    d.strip(7.8, 8.8, 2.8, 3.2, material=GOLD, depth=2.2)
-    d.line(8.3, -2.8, 1.6, -2.3, 0.9, GOLD, depth=1.6)
-    d.line(6.0, -2.6, 4.0, -2.4, 1.2, GOLD, depth=1.8)   # a shell on the knuckle bow
+    d.strip(7.8, 8.8, 4.0, 1.8, material=GOLD, depth=2.2)
+    d.line(8.3, -3.6, 2.6, -3.6, 0.9, GOLD, depth=1.6)
+    d.line(2.6, -3.6, 1.4, -1.0, 0.9, GOLD, depth=1.6)
     curved(d, 8.8, 30.5, 1.2, lambda s: 0.006 * (s - 8.8) ** 2, st, tip=3.2)
     # A gold line etched along the back of the blade.
     d.strip(10.0, 24.0, lambda s: -0.75 + 0.006 * (s - 8.8) ** 2 + 0.2, lambda s: 0.95 - 0.006 * (s - 8.8) ** 2,
@@ -188,22 +179,16 @@ def gilded_halberd():
     st = GILDED
     d = Design(59, grip=13.0)
     d.disc(0.9, 0.0, 1.2, GOLD, depth=2.2)
-    haft(d, 0.8, 46.0, 0.8, st, rings=(24.0, 34.0))
+    haft(d, 0.8, 44.0, 0.8, st, rings=(24.0,))
     grip(d, 8.0, 18.0, 0.95, st)
-    d.strip(36.0, 40.0, 0.95, material=GOLD, depth=1.9, z=1)   # langets
-    socket(d, 40.0, 49.0, 1.2, st)
-    d.poly([(39.6, -0.8), (38.4, -2.3), (35.6, -2.0), (37.2, -0.8)], ROYAL, depth=1.2, part="tassel")
-    d.poly([(39.6, 0.8), (38.4, 2.3), (35.6, 2.0), (37.2, 0.8)], ROYAL, depth=1.2, part="tassel")
-    d.poly([(48.0, -1.1), (58.5, 0.0), (48.0, 1.1)], st.blade, depth=1.4, bevel=0.0)
+    socket(d, 37.0, 47.0, 1.2, st)
+    d.poly([(46.0, -1.2), (59.0, 0.0), (46.0, 1.2)], st.blade, depth=1.4, bevel=0.0)
     d.glint(55.0, -0.3)
-    d.poly([(41.0, 1.2), (48.5, 1.2), (50.8, 4.2), (49.8, 8.2), (46.0, 8.8), (42.0, 8.0), (40.2, 4.2)], st.blade,
-           depth=1.1, part="axe")
-    d.poly([(50.8, 4.2), (49.8, 8.2), (46.0, 8.8), (42.0, 8.0), (40.2, 4.2), (42.0, 7.0), (46.0, 7.7), (49.2, 7.2)],
-           st.blade, depth=1.1, z=1, tone=HIGHLIGHT)
-    # Gold chasing round the axe's inner edge, and a sapphire.
-    d.poly([(41.6, 1.2), (48.0, 1.2), (49.4, 3.6), (41.0, 3.6)], GOLD, depth=1.4, z=1, part="chase")
-    gem(d, 45.0, 4.6, 0.8, st)
-    d.poly([(44.0, -1.2), (46.5, -1.2), (50.0, -5.2), (48.4, -5.8), (45.0, -3.4)], GOLD, depth=1.1, part="hook")
+    # The halberd's head in polished steel, its hook in gold, a sapphire in the socket.
+    d.poly(arms_art.HALBERD_AXE, st.blade, depth=1.1, part="axe")
+    d.poly(arms_art.HALBERD_EDGE, st.blade, depth=1.1, z=1, tone=HIGHLIGHT)
+    d.poly(arms_art.HALBERD_HOOK, GOLD, depth=1.1, part="hook")
+    gem(d, 42.0, 0.0, 0.8, st)
     return d
 
 
@@ -219,11 +204,9 @@ def ironclad_zweihander():
     d.strip(15.5, 17.3, 8.4, material=px.GUNMETAL, depth=3.0, part="guard")   # a square, heavy crossguard
     hazard(d, 15.6, 17.2, 8.2, 3.2, period=0.9)
     d.strip(17.3, 23.0, 1.9, material=px.OLIVE, depth=1.8, part="ricasso")
-    bolts(d, [(19.0, 0.0), (21.6, 0.0)])
     blade(d, 23.0, 54.0, 2.5, 2.0, st, tip=5.0)
     # A painted reinforcing spine down the back half.
     d.strip(23.0, 46.0, 2.5, -1.2, material=px.OLIVE, depth=1.8, z=1, part="spine")
-    bolts(d, [(27.0, -1.9), (33.0, -1.9), (39.0, -1.9), (45.0, -1.9)])
     return d
 
 
@@ -236,12 +219,11 @@ def ironclad_maul():
         d.strip(s - 0.4, s + 0.4, 1.15, material=px.GUNMETAL, depth=2.3, z=1)
     grip(d, 2.0, 13.0, 1.15, st)
     socket(d, 33.0, 37.5, 1.5, st)
-    # An engine-block head: painted olive, steel striking plates at both faces, a hazard band and bolts.
+    # An engine-block head: painted olive, steel striking plates at both faces, a hazard band.
     d.strip(37.0, 47.5, 6.6, material=px.OLIVE, depth=7.0, part="head")
     for s0, s1 in ((37.0, 38.4), (46.1, 47.5)):
         d.strip(s0, s1, 7.0, material=GUNSTEEL, depth=7.4, z=1, part=f"plate{s0}")
     hazard(d, 41.4, 43.2, 6.7, 7.2, period=1.0)
-    bolts(d, [(39.6, -5.2), (39.6, 5.2), (44.9, -5.2), (44.9, 5.2)])
     return d
 
 
@@ -256,7 +238,6 @@ def ironclad_war_pick():
            part="beak")
     d.strip(22.6, 27.0, 4.4, -1.25, material=px.OLIVE, depth=3.6, part="face")   # a painted hammer block
     hazard(d, 23.4, 24.6, 4.5, 3.8, period=0.8)
-    bolts(d, [(25.6, -3.0)])
     d.poly([(27.5, -0.9), (31.0, 0.0), (27.5, 0.9)], GUNSTEEL, depth=1.6)
     return d
 
@@ -274,7 +255,6 @@ def ironclad_battle_axe():
            part="bit")
     d.strip(29.0, 41.5, -9.4, 11.0, material=GUNSTEEL, depth=1.2, z=1, part="edge")
     d.strip(29.0, 41.5, -10.4, 11.0, material=GUNSTEEL, depth=1.2, z=2, tone=HIGHLIGHT, part="edge")
-    bolts(d, [(33.0, 3.4), (37.0, 3.4), (33.0, 6.8), (37.0, 6.8)])
     d.poly([(37.0, -1.3), (39.5, -4.8), (35.5, -4.0), (33.5, -1.3)], GUNSTEEL, depth=1.2)
     return d
 
@@ -369,7 +349,7 @@ def runebound_nodachi():
     d.ring(16.8, 0.0, 2.6, 1.8, RUNE, depth=2.6, z=1)   # a glowing ring in the tsuba
     d.strip(17.6, 18.8, 1.4, material=DARK_IRON, depth=2.2, z=1)
     curved(d, 18.8, 52.5, 1.5, lambda s: 0.0016 * (s - 18.8) ** 2, st, tip=3.4)
-    rune_line(d, 21.0, 46.0, lambda s: -0.5 + 0.0016 * (s - 18.8) ** 2, width=0.5, gap=(2.2, 1.2))
+    rune_line(d, 21.0, 46.0, lambda s: -0.5 + 0.0016 * (s - 18.8) ** 2, width=0.45)
     gem(d, 16.8, 0.0, 0.8, st)
     return d
 
@@ -383,7 +363,7 @@ def runebound_moonblade():
     d.poly([(13.6, -1.6), (30.0, -2.4), (44.0, -1.8), (50.0, 0.0), (46.0, 2.2), (38.0, 5.4), (28.0, 6.4), (19.0, 4.8),
             (13.6, 1.8)], st.blade, depth=1.1, part="blade", bevel=lambda s: 1.2)
     # A crescent of runes inside the edge, and a glowing heart at the guard.
-    rune_line(d, 18.0, 44.0, lambda s: 3.9 - ((s - 31.0) / 13.0) ** 2 * 3.4, width=0.5, gap=(2.4, 1.3))
+    rune_line(d, 18.0, 44.0, lambda s: 3.9 - ((s - 31.0) / 13.0) ** 2 * 3.4, width=0.45)
     gem(d, 12.8, 0.0, 1.0, st)
     return d
 
@@ -400,8 +380,6 @@ def runebound_staff():
     for s in (6.0, 12.0, 38.0, 44.0):
         d.strip(s - 0.5, s + 0.5, 1.15, material=RUNE, depth=2.4, z=1, part=f"band{s}")
     grip(d, 20.0, 30.0, 1.15, st)
-    rune_line(d, 14.0, 19.0, lambda s: 0.0, width=0.3, gap=(1.0, 0.8))
-    rune_line(d, 31.0, 36.0, lambda s: 0.0, width=0.3, gap=(1.0, 0.8))
     return d
 
 
@@ -412,13 +390,11 @@ def runebound_war_hammer():
     haft(d, 1.0, 32.0, 0.85, st, rings=(16.0,))
     grip(d, 1.8, 10.5, 1.0, st)
     socket(d, 25.0, 32.0, 1.25, st)
-    d.poly([(27.0, 1.25), (34.5, 1.25), (35.0, 7.0), (26.5, 7.0)], st.blade, depth=4.2, part="face")
-    # A rune sigil on the face: a glowing diamond and its bar.
-    d.poly([(30.8, 2.6), (32.6, 4.2), (30.8, 5.8), (29.0, 4.2)], RUNE, depth=4.6, z=2, part="sigil")
-    d.strip(28.2, 33.4, 0.25, material=RUNE, depth=4.5, z=3)
-    d.strip(26.0, 27.0, 0.0, 7.0, material=DARK_IRON, depth=4.6, z=1)
-    d.poly([(28.5, -1.25), (33.0, -1.25), (31.0, -5.8), (28.0, -7.2)], st.blade, depth=2.0, part="beak")
-    d.poly([(32.0, -1.0), (37.5, 0.0), (32.0, 1.0)], RUNE, depth=1.8)
+    # The war hammer's head in void steel, a glowing rune diamond on its face.
+    d.poly([(27.0, 1.25), (33.5, 1.25), (34.0, 6.6), (26.5, 6.6)], st.blade, depth=4.2, part="face")
+    d.poly([(30.2, 2.4), (32.0, 3.9), (30.2, 5.4), (28.4, 3.9)], RUNE, depth=4.6, z=2, part="sigil")
+    d.poly([(28.0, -1.25), (32.5, -1.25), (29.6, -7.0)], st.blade, depth=2.0, part="beak")
+    d.poly([(32.0, -1.0), (37.5, 0.0), (32.0, 1.0)], st.blade, depth=1.8)
     return d
 
 
@@ -448,7 +424,7 @@ def rimeclaw():
     d = Design(24, grip=4.0)
     d.poly([(0.0, -4.2), (8.0, -4.2), (8.0, -2.8), (0.0, -2.8)], POLISHED, depth=1.8, part="frame")
     d.poly([(0.0, 2.8), (8.0, 2.8), (8.0, 4.2), (0.0, 4.2)], POLISHED, depth=1.8, part="frame")
-    d.strip(2.4, 6.2, 2.8, material=FUR, depth=2.2, part="fur")
+    d.strip(3.2, 5.0, 2.8, material=FUR, depth=2.2, part="fur")
     d.strip(7.6, 9.2, 4.2, material=POLISHED, depth=2.4, part="top")
     # Three ice claws, the middle one longest, each curving to its point.
     for t, top in ((-2.8, 19.0), (0.0, 24.0), (2.8, 19.0)):
@@ -473,13 +449,8 @@ def cinderbrand():
                 (14.4, side * 1.2)], OBSIDIAN, depth=2.6, part=f"guard{side}")
         d.poly([(13.0, side * 2.0), (13.2, side * 5.6), (15.2, side * 4.2)], MAGMA, depth=2.8, z=1)
     blade(d, 14.4, 43.0, 2.3, 1.8, st, tip=4.6)
-    # The magma that runs in its cracks.
-    d.line(15.0, 0.2, 22.0, -0.7, 0.8, MAGMA, depth=1.6, z=2)
-    d.line(22.0, -0.7, 28.0, 0.7, 0.8, MAGMA, depth=1.6, z=2)
-    d.line(28.0, 0.7, 35.0, -0.5, 0.8, MAGMA, depth=1.6, z=2)
-    d.line(35.0, -0.5, 42.0, 0.3, 0.7, MAGMA, depth=1.6, z=2)
-    d.line(24.0, 0.0, 26.4, 1.9, 0.6, MAGMA, depth=1.6, z=2)
-    d.line(31.6, 0.0, 33.6, -1.8, 0.6, MAGMA, depth=1.6, z=2)
+    # A molten core down the middle, as a fuller.
+    d.strip(15.0, 42.0, 0.55, material=MAGMA, depth=1.6, z=2, part="core")
     return d
 
 
@@ -490,16 +461,11 @@ def magmaw():
     haft(d, 1.0, 38.0, 1.0, st, rings=(20.0,))
     grip(d, 2.0, 13.5, 1.15, st)
     socket(d, 34.0, 38.0, 1.5, st)
-    # A drum of obsidian split by a glowing maw full of teeth.
+    # A drum of obsidian split by a glowing seam of magma.
     d.strip(38.0, 49.5, 6.0, material=OBSIDIAN, depth=6.6, part="head")
-    d.strip(42.0, 45.5, 6.2, material=MAGMA, depth=6.8, z=1, part="maw")
-    for t in (-4.5, -1.5, 1.5, 4.5):
-        d.poly([(42.0, t - 0.8), (43.6, t), (42.0, t + 0.8)], OBSIDIAN, depth=7.0, z=2)
-        d.poly([(45.5, t - 0.8), (43.9, t), (45.5, t + 0.8)], OBSIDIAN, depth=7.0, z=2)
+    d.strip(42.5, 45.0, 6.2, material=MAGMA, depth=6.8, z=1, part="maw")
     for s in (38.0, 49.5):
         d.strip(s - 0.8, s + 0.8, 7.2, material=OBSIDIAN, depth=7.4, z=1, part=f"flange{s}")
-    d.line(39.0, -5.0, 41.6, -2.4, 0.4, MAGMA, depth=6.8, z=2)
-    d.line(46.0, 2.6, 48.8, 5.2, 0.4, MAGMA, depth=6.8, z=2)
     return d
 
 
@@ -584,22 +550,15 @@ def dynamo_halberd():
     st = DREADNOUGHT
     d = Design(59, grip=13.0)
     d.disc(0.9, 0.0, 1.2, px.GUNMETAL, depth=2.2)
-    d.strip(0.8, 46.0, 0.85, material=px.GUNMETAL, depth=1.8)
+    d.strip(0.8, 44.0, 0.85, material=px.GUNMETAL, depth=1.8)
     grip(d, 8.0, 18.0, 1.0, st)
-    # A copper coil wound below the head, crackling.
-    d.strip(32.0, 40.0, 1.3, material=COPPER, depth=2.6, z=1, stripes=(0.7, DARK))
-    d.line(33.0, -1.6, 35.0, -2.6, 0.35, ARC, depth=2.0, z=2)
-    d.line(35.0, -2.6, 36.4, -1.4, 0.35, ARC, depth=2.0, z=2)
-    d.line(37.0, 1.6, 38.6, 2.8, 0.35, ARC, depth=2.0, z=2)
-    socket(d, 40.0, 49.0, 1.25, st)
-    hazard(d, 40.2, 41.6, 1.3, 3.0, period=0.7)
-    d.poly([(48.0, -1.0), (58.5, 0.0), (48.0, 1.0)], ARC, depth=1.4)   # a charged spike
-    d.poly([(41.0, 1.25), (48.5, 1.25), (50.5, 4.0), (49.5, 8.0), (46.0, 8.6), (42.0, 7.8), (40.5, 4.0)], GUNSTEEL,
-           depth=1.2, part="axe")
-    d.poly([(50.5, 4.0), (49.5, 8.0), (46.0, 8.6), (42.0, 7.8), (40.5, 4.0), (42.0, 6.8), (46.0, 7.5), (49.0, 7.0)],
-           ARC, depth=1.3, z=1, part="charge")
-    bolts(d, [(44.0, 2.6), (46.6, 2.6)], COPPER)
-    d.poly([(44.0, -1.25), (46.5, -1.25), (49.5, -4.8), (47.5, -5.4), (45.0, -3.2)], GUNSTEEL, depth=1.1, part="hook")
+    d.strip(30.0, 36.5, 1.3, material=COPPER, depth=2.6, z=1, stripes=(0.7, DARK))   # a copper coil below the head
+    socket(d, 37.0, 47.0, 1.25, st)
+    d.poly([(46.0, -1.2), (59.0, 0.0), (46.0, 1.2)], GUNSTEEL, depth=1.4)
+    # The halberd's head in gun steel, its edge charged.
+    d.poly(arms_art.HALBERD_AXE, GUNSTEEL, depth=1.2, part="axe")
+    d.poly(arms_art.HALBERD_EDGE, ARC, depth=1.3, z=1, part="charge")
+    d.poly(arms_art.HALBERD_HOOK, GUNSTEEL, depth=1.1, part="hook")
     return d
 
 
@@ -613,11 +572,10 @@ def piston_hammer():
     socket(d, 25.0, 32.0, 1.25, st)
     # A piston cylinder for a head, its rod the striking face, a vent glowing with charge.
     d.strip(26.0, 35.0, 2.2, 6.8, material=GUNSTEEL, depth=4.6, part="cylinder")
-    for s in (27.0, 30.5, 34.0):
+    for s in (27.0, 34.0):
         d.strip(s - 0.4, s + 0.4, 2.3, 7.0, material=COPPER, depth=5.0, z=1, part=f"ring{s}")
     d.strip(28.0, 33.0, -6.8, 8.6, material=POLISHED, depth=3.4, part="rod")   # the face, out to the right
-    d.strip(28.6, 29.6, -2.6, 5.4, material=ARC, depth=4.8, z=2, part="vent")
-    d.strip(31.4, 32.4, -2.6, 5.4, material=ARC, depth=4.8, z=2, part="vent2")
+    d.strip(30.0, 31.0, -2.6, 5.4, material=ARC, depth=4.8, z=2, part="vent")
     d.poly([(28.5, -2.2), (33.0, -2.2), (31.0, -5.8), (28.0, -7.0)], GUNSTEEL, depth=2.0, part="beak")
     return d
 
@@ -705,16 +663,14 @@ def tidebreaker():
     haft(d, 0.8, 49.0, 0.8, st, rings=(26.0, 40.0))
     grip(d, 8.5, 19.0, 0.95, st)
     socket(d, 45.0, 50.0, 1.25, st)
-    # A trident: three tines from a crest of coral, each barbed.
-    d.poly([(49.0, -5.8), (50.6, -6.6), (52.2, -5.4), (51.6, 5.4), (50.6, 6.6), (49.0, 5.8)], CORAL, depth=2.6,
-           part="crest")
+    # A trident: three barbed tines from a crossbar, a pearl at its heart.
+    d.strip(49.5, 51.5, 5.4, material=SEABRONZE, depth=2.6, part="crest")
     for t in (-4.4, 0.0, 4.4):
         top = 59.0 if t == 0 else 56.5
         d.poly([(51.5, t - 0.7), (top, t - 0.6), (top, t - 1.0), (top + 3.0, t), (top, t + 1.0), (top, t + 0.6),
                 (51.5, t + 0.7)], SEABRONZE, depth=1.6, part=f"tine{t}", bevel=t)
         d.poly([(top - 0.4, t - 0.65), (top - 1.8, t - 1.9), (top - 2.2, t - 0.65)], SEABRONZE, depth=1.4)
-    gem(d, 50.6, 0.0, 1.0, st)
-    d.disc(50.6, 0.0, 0.45, TIDEGLOW, depth=3.6, z=4)
+    gem(d, 50.5, 0.0, 1.0, st)
     return d
 
 
@@ -722,16 +678,14 @@ def leviathans_hook():
     st = LEVIATHAN
     d = Design(62, grip=14.0)
     d.disc(0.9, 0.0, 1.1, SEABRONZE, depth=2.2)
-    haft(d, 0.8, 49.0, 0.8, st, rings=(26.0,))
+    haft(d, 0.8, 46.0, 0.8, st, rings=(26.0,))
     grip(d, 8.5, 19.0, 0.95, st)
-    socket(d, 45.0, 50.0, 1.2, st)
-    # A great hooked fang, like a leviathan's tooth, curving back over the haft, with a glowing line.
-    d.poly([(49.0, -1.0), (49.0, 1.2), (51.5, 5.4), (56.0, 7.0), (60.5, 5.6), (62.0, 2.6), (59.6, 3.6), (56.6, 4.4),
-            (54.0, 2.0), (55.0, -1.0)], SEABRONZE, depth=1.2, part="blade", bevel=lambda s: 2.2)
-    d.line(51.0, 2.4, 56.0, 5.0, 0.4, TIDEGLOW, depth=1.6, z=2)
-    d.line(56.0, 5.0, 60.0, 4.4, 0.4, TIDEGLOW, depth=1.6, z=2)
-    d.poly([(55.0, -0.8), (61.0, 0.0), (55.0, 0.8)], PEARL, depth=1.4)
-    d.poly([(49.5, -1.2), (52.0, -1.2), (53.0, -4.6), (50.4, -3.2)], CORAL, depth=1.2, part="fluke")
+    socket(d, 41.0, 47.0, 1.2, st)
+    # The bill's hooked blade in sea bronze, like a leviathan's tooth, a glowing tide line along its edge; a pearl spike.
+    d.poly(arms_art.BILL_BLADE, SEABRONZE, depth=1.2, part="blade", bevel=lambda s: 2.2)
+    d.line(48.0, 4.2, 53.0, 4.8, 0.45, TIDEGLOW, depth=1.6, z=2)
+    d.line(53.0, 4.8, 57.6, 6.4, 0.45, TIDEGLOW, depth=1.6, z=2)
+    d.poly([(52.5, -0.9), (62.0, 0.0), (52.5, 0.9)], PEARL, depth=1.4)
     return d
 
 
