@@ -272,6 +272,17 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<ColossalSkullBlockEntity> COLOSSAL_SKULL_ENTITY;
 	public static BlockEntityType<GargoyleSentinelBlockEntity> GARGOYLE_SENTINEL_ENTITY;
 	public static BlockEntityType<GargoyleRainspoutBlockEntity> GARGOYLE_RAINSPOUT_ENTITY;
+	public static BlockEntityType<LightningHarnessBlockEntity> LIGHTNING_HARNESS_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> CRAWLING_HAND_ENTITY;
+	public static BlockEntityType<SilkCocoonBlockEntity> SILK_COCOON_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> EGG_SAC_ENTITY;
+	public static BlockEntityType<SilkSpoolStackBlockEntity> SILK_SPOOL_ENTITY;
+	public static BlockEntityType<HauntedDiningChairBlockEntity> DINING_CHAIR_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> TABLE_SETTING_ENTITY;
+	public static BlockEntityType<GrandfatherClockBlockEntity> GRANDFATHER_CLOCK_ENTITY;
+	public static BlockEntityType<WitchlightBlockEntity> WITCHLIGHT_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> SILHOUETTE_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> MOON_LAMP_ENTITY;
 	/** A Skeleton Key's wards ({@link SkeletonKeyItem}). */
 	public static DataComponentType<Integer> KEY_WARDS;
 	public static RecipeSerializer<KeyCopyingRecipe> KEY_COPYING_SERIALIZER;
@@ -1764,6 +1775,7 @@ public final class JugcraftAgriculture {
 		registerHauntedHouseProps();
 		registerWitchsWorkshop();
 		registerCryptAndOssuary();
+		registerLaboratoryLarderDining();
 	}
 
 	/**
@@ -1969,6 +1981,104 @@ public final class JugcraftAgriculture {
 		return BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(2.0F, 4.0F).requiresCorrectToolForDrops().sound(SoundType.BONE_BLOCK)
 				.noOcclusion().pushReaction(PushReaction.IMMOVEABLE);
 	}
+
+	/**
+	 * Halloween decorations batch 19, the Laboratory, the Larder and the Dining Room (tools/decor19.py): the Lightning
+	 * Harness, Brain-Vat Console and Crawling Hand; the Silk Cocoon, Egg Sac Cluster, Web Drape and Silk Spool Stack; the
+	 * Haunted Dining Chair, Floating Table Setting and Grandfather Clock; the three witchlights; the Yard Silhouette and
+	 * the Harvest Moon Lamp.
+	 */
+	private static void registerLaboratoryLarderDining() {
+		List<Block> blocks = new ArrayList<>();
+		Block harness = registerBlock(LIGHTNING_HARNESS, LightningHarnessBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(2.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.COPPER).noOcclusion().pushReaction(PushReaction.POPPED));
+		LIGHTNING_HARNESS_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(LIGHTNING_HARNESS),
+				FabricBlockEntityTypeBuilder.create(LightningHarnessBlockEntity::new, harness).build());
+		Block console = registerBlock(BRAIN_VAT_CONSOLE, BrainVatConsoleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.GOLD)
+				.strength(2.0F, 6.0F).sound(SoundType.METAL).noOcclusion().lightLevel(BrainVatConsoleBlock::light));
+		Block hand = registerBlock(CRAWLING_HAND, CrawlingHandBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN)
+				.strength(0.3F).sound(SoundType.SLIME_BLOCK).noOcclusion().pushReaction(PushReaction.POPPED));
+		CRAWLING_HAND_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(CRAWLING_HAND),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(CRAWLING_HAND_ENTITY, pos, state), hand)
+						.build());
+		blocks.addAll(List.of(harness, console, hand));
+
+		Block cocoon = registerBlock(SILK_COCOON, SilkCocoonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).strength(0.8F)
+				.sound(SoundType.WOOL).noOcclusion().pushReaction(PushReaction.POPPED));
+		SILK_COCOON_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(SILK_COCOON),
+				FabricBlockEntityTypeBuilder.create(SilkCocoonBlockEntity::new, cocoon).build());
+		Block sacs = registerBlock(EGG_SAC_CLUSTER, EggSacClusterBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).noCollision()
+				.strength(0.2F).sound(SoundType.FROGSPAWN).noOcclusion().pushReaction(PushReaction.POPPED));
+		EGG_SAC_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(EGG_SAC_CLUSTER),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(EGG_SAC_ENTITY, pos, state), sacs)
+						.build());
+		Block drape = registerBlock(WEB_DRAPE, WebDrapeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).noCollision().strength(0.6F)
+				.sound(SoundType.COBWEB).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		Block spools = registerBlock(SILK_SPOOL_STACK, SilkSpoolStackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		SILK_SPOOL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(SILK_SPOOL_STACK),
+				FabricBlockEntityTypeBuilder.create(SilkSpoolStackBlockEntity::new, spools).build());
+		blocks.addAll(List.of(cocoon, sacs, drape, spools));
+
+		Block chair = registerBlock(DINING_CHAIR, HauntedDiningChairBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
+		DINING_CHAIR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(DINING_CHAIR),
+				FabricBlockEntityTypeBuilder.create(HauntedDiningChairBlockEntity::new, chair).build());
+		Block setting = registerBlock(TABLE_SETTING, FloatingTableSettingBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.NONE)
+				.strength(0.3F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.POPPED).lightLevel(FloatingTableSettingBlock::light));
+		TABLE_SETTING_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(TABLE_SETTING),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(TABLE_SETTING_ENTITY, pos, state), setting)
+						.build());
+		Block clock = registerBlock(GRANDFATHER_CLOCK, GrandfatherClockBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		GRANDFATHER_CLOCK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(GRANDFATHER_CLOCK),
+				FabricBlockEntityTypeBuilder.create(GrandfatherClockBlockEntity::new, clock).build());
+		registerItem(GRANDFATHER_CLOCK, props -> new DoubleHighBlockItem(clock, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		blocks.addAll(List.of(chair, setting));
+
+		Block post = registerBlock(WITCHLIGHT_POST, WitchlightLampPostBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.5F)
+				.sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).lightLevel(WitchlightLampPostBlock::light));
+		registerItem(WITCHLIGHT_POST, props -> new DoubleHighBlockItem(post, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block stake = registerBlock(WITCHLIGHT_STAKE, props -> new WitchlightBlock(props, WitchlightBlock.Mount.STAKE), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.METAL).strength(1.0F).sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED).lightLevel(Witchlights::light));
+		Block hanging = registerBlock(HANGING_WITCHLIGHT, props -> new WitchlightBlock(props, WitchlightBlock.Mount.HANGING), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.METAL).strength(1.0F).sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED).lightLevel(Witchlights::light));
+		WITCHLIGHT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("witchlight"),
+				FabricBlockEntityTypeBuilder.create(WitchlightBlockEntity::new, post, stake, hanging).build());
+		blocks.addAll(List.of(stake, hanging));
+
+		Block silhouette = registerBlock(YARD_SILHOUETTE, YardSilhouetteBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		SILHOUETTE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(YARD_SILHOUETTE),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(SILHOUETTE_ENTITY, pos, state), silhouette)
+						.build());
+		Block moon = registerBlock(MOON_LAMP, HarvestMoonLampBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(1.5F)
+				.sound(SoundType.GLASS).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).lightLevel(HarvestMoonLampBlock::light));
+		MOON_LAMP_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(MOON_LAMP),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(MOON_LAMP_ENTITY, pos, state), moon)
+						.build());
+		blocks.addAll(List.of(silhouette, moon));
+		for (Block block : blocks) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	public static final String LIGHTNING_HARNESS = "lightning_harness";
+	public static final String BRAIN_VAT_CONSOLE = "brain_vat_console";
+	public static final String CRAWLING_HAND = "crawling_hand";
+	public static final String SILK_COCOON = "silk_cocoon";
+	public static final String EGG_SAC_CLUSTER = "egg_sac_cluster";
+	public static final String WEB_DRAPE = "web_drape";
+	public static final String SILK_SPOOL_STACK = "silk_spool_stack";
+	public static final String DINING_CHAIR = "haunted_dining_chair";
+	public static final String TABLE_SETTING = "floating_table_setting";
+	public static final String GRANDFATHER_CLOCK = "grandfather_clock";
+	public static final String WITCHLIGHT_POST = "witchlight_lamp_post";
+	public static final String WITCHLIGHT_STAKE = "witchlight_path_stake";
+	public static final String HANGING_WITCHLIGHT = "hanging_witchlight";
+	public static final String YARD_SILHOUETTE = "yard_silhouette";
+	public static final String MOON_LAMP = "harvest_moon_lamp";
 
 	private static BlockBehaviour.Properties gargoyle() {
 		return BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(2.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.STONE)
