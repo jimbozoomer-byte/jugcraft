@@ -733,12 +733,150 @@ def war_pick(style):
     return c
 
 
+# ---------------------------------------------------------------- Arms V (batch 48): the arms with weapon arts
+
+
+def flat_blade(c, w, s0, s1, half, style, fuller=None):
+    """A straight two-edged blade in flat tones (as the ornate heads): the half towards the light lit, the other in
+    shadow, a dark fuller line and bright edges."""
+    steps = 24
+    spine = [w(s0 + (s1 - s0) * i / steps, 0.0) for i in range(steps + 1)]
+    lit = [w(s0 + (s1 - s0) * i / steps, half(i / steps)) for i in range(steps + 1)]
+    shade = [w(s0 + (s1 - s0) * i / steps, -half(i / steps)) for i in range(steps + 1)]
+    flat(c, spine + lit[::-1], style.blade.ramp[4])
+    flat(c, spine + shade[::-1], style.blade.ramp[2])
+    if fuller:
+        f0, f1 = fuller
+        c.line(w(s0 + (s1 - s0) * f0, 0.0), w(s0 + (s1 - s0) * f1, 0.0), style.blade.ramp[1], 1.0)
+    for side in (lit, shade):
+        for p, q in zip(side, side[1:]):
+            c.line(p, q, style.blade.ramp[-1] if side is lit else style.blade.ramp[3], 1.0)
+
+
+def twinblade(style):
+    c = Canvas()
+    w = Axis(origin=(4.0, 60.0), scale=0.8)
+    # A grip in the middle, a winged guard and a stone at each end of it, and a blade out from each guard.
+    grip(c, w, 40.0, 60.0, 2.0, style)
+    c.grip = w(50.0)
+    for s0, s1, toward in ((61.5, 99.0, 1), (38.5, 1.0, -1)):
+        flat_blade(c, w, s0, s1, lambda f: 3.6 * (1 - f) ** 0.8 + 0.25, style, fuller=(0.05, 0.5))
+        for side in (1, -1):
+            wing(c, w, s0 - toward * 0.5, side * toward, 6.0, 4.5 * toward, style.fitting)
+        c.box(w(s0 - toward * 0.5), w.r(1.6), w.r(5.0), w.angle, style.fitting, bevel=0.8)
+        gem(c, w(s0 - toward * 0.5), w.r(2.0), style)
+    ornate(c, [w(100.0, 6.0), w(-2.0, -6.0), w(70.0, -8.0)], style)
+    return c
+
+
+def nodachi(style):
+    c = Canvas()
+    w = Axis(origin=(4.0, 60.0), scale=0.78)
+    c.capsule(w(0.5), w(2.5), w.r(1.9), style.fitting)  # the cap
+    grip(c, w, 2.5, 26.0, 1.7, style)
+    c.grip = w(13.0)
+    # A round guard with the stone set in it, a collar, and a long blade curving gently back, its edge bright.
+    c.disc(w(27.0), w.r(4.8), style.fitting, dome=0.4)
+    c.disc(w(27.0), w.r(3.4), style.fitting, dome=0.2, tint=-0.15)
+    c.capsule(w(28.0), w(31.0), w.r(2.0), style.accent)
+    curved_blade(c, w, 29.5, 110.0, lambda f: 3.0 - 0.6 * f if f < 0.9 else 2.46 * (1 - f) / 0.1 + 0.1, 9.0, style.blade,
+                 edge=style.blade.ramp[-1])
+    gem(c, w(27.0), w.r(1.9), style)
+    ornate(c, [w(104.0, 6.0), w(70.0, -12.0)], style)
+    return c
+
+
+def earthbreaker(style):
+    c = Canvas()
+    w = Axis(origin=(6.0, 58.0), scale=0.86)
+    haft(c, w, 0.0, 62.0, 2.0, style, rings=(0.36, 0.7))
+    grip(c, w, 2.0, 20.0, 2.3, style)
+    pommel(c, w, 1.6, style)
+    c.grip = w(11.0)
+    # A great block of a head, wide across the haft, bound with straps, capped at both faces, a spike on top.
+    c.box(w(56.0), w.r(7.5), w.r(13.0), w.angle, style.blade, bevel=1.8)
+    for side in (1, -1):
+        c.box(w(56.0, 13.6 * side), w.r(6.4), w.r(1.6), w.angle, style.blade, bevel=0.8, tint=0.15)
+        c.box(w(56.0, 9.0 * side), w.r(8.1), w.r(1.3), w.angle, style.fitting, bevel=0.6)
+        for s in (51.5, 60.5):
+            c.disc(w(s, 5.0 * side), w.r(0.9), style.accent)
+    c.capsule(w(63.5), w(68.5), w.r(1.8), style.blade)
+    c.polygon([w(68.0, 1.8), w(73.0, 0.0), w(68.0, -1.8)], style.blade, normal=_unit(w.ux * 0.3, w.uy * 0.3, 1.0))
+    gem(c, w(56.0), w.r(2.8), style)
+    ornate(c, [w(56.0, 18.0), w(74.0, 6.0), w(42.0, -12.0)], style)
+    return c
+
+
+def katar(style):
+    c = Canvas()
+    w = Axis(origin=(12.0, 52.0), scale=1.1)
+    # The frame: two side bars along the blade's line, joined by two cross grips the fist closes on.
+    for t in (5.5, -5.5):
+        c.capsule(w(0.0, t), w(14.0, t), w.r(1.3), style.fitting)
+    for s in (3.5, 8.5):
+        c.capsule(w(s, -5.5), w(s, 5.5), w.r(1.5), style.grip)
+    c.grip = w(6.0)
+    c.box(w(15.0), w.r(1.6), w.r(6.6), w.angle, style.fitting, bevel=0.8)
+    # A broad triangular blade, thick at its base, with a fuller.
+    flat_blade(c, w, 16.0, 46.0, lambda f: 5.0 * (1 - f) ** 1.2 + 0.2, style, fuller=(0.05, 0.55))
+    gem(c, w(15.0), w.r(1.9), style)
+    ornate(c, [w(46.0, 6.0), w(30.0, -9.0)], style)
+    return c
+
+
+def moonblade(style):
+    c = Canvas()
+    w = Axis(origin=(4.0, 60.0), scale=0.78)
+    pommel(c, w, 2.0, style)
+    grip(c, w, 3.0, 21.0, 1.9, style)
+    c.grip = w(12.0)
+    # A straight back and a crescent belly swelling out on the edge side, in flat tones, its edge bright.
+    def belly(f):
+        return 2.4 + 7.6 * math.sin(math.pi * min(f, 0.92) ** 0.8) if f < 0.92 else (2.4 + 7.6 * math.sin(math.pi * 0.92 ** 0.8)) * (1 - f) / 0.08
+    steps = 26
+    back = [w(26.0 + 74.0 * i / steps, 1.6) for i in range(steps + 1)]
+    spine = [w(26.0 + 74.0 * i / steps, -0.6) for i in range(steps + 1)]
+    edge = [w(26.0 + 74.0 * i / steps, -belly(i / steps)) for i in range(steps + 1)]
+    flat(c, back + spine[::-1], style.blade.ramp[4])
+    flat(c, spine + edge[::-1], style.blade.ramp[2])
+    flat(c, [w(30.0 + 62.0 * i / steps, -0.6 - 0.45 * belly(4.0 / 74.0 + 62.0 / 74.0 * i / steps)) for i in range(steps + 1)]
+         + spine[::-1][2:-2], style.blade.ramp[3])
+    for p, q in zip(edge, edge[1:]):
+        c.line(p, q, style.blade.ramp[-1], 1.0)
+    cut(c, [w(34.0, -3.0), w(38.0, -5.6), w(41.0, -3.0), w(38.0, -4.2)])  # a small crescent pierced near the hilt
+    for side in (1, -1):
+        wing(c, w, 23.5, side, 9.0, 6.0, style.fitting)
+    c.box(w(24.0), w.r(2.4), w.r(6.0), w.angle, style.fitting, bevel=1.0)
+    gem(c, w(24.0), w.r(2.6), style)
+    ornate(c, [w(100.0, -4.0), w(64.0, -14.0), w(40.0, 8.0)], style)
+    return c
+
+
+def kusarigama(style):
+    c = kama(style)
+    w = Axis(origin=(14.0, 50.0), scale=1.1)
+    # A weighted chain from the butt, slung round under the blade: links turning in and out of the light.
+    path = [w(0.0), (17.0, 56.0), (24.0, 60.0), (33.0, 61.0), (42.0, 59.0), (49.0, 55.5)]
+    points = []
+    for a, b in zip(path, path[1:]):
+        for i in range(4):
+            f = i / 4
+            points.append((a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f))
+    points.append(path[-1])
+    for i, (p, q) in enumerate(zip(points, points[1:])):
+        c.capsule(p, q, 0.9 if i % 2 else 0.7, style.fitting, tint=0.12 if i % 2 else -0.1)
+    c.disc((53.0, 53.5), 3.8, style.blade)
+    c.disc((52.2, 52.6), 1.2, style.blade, tint=0.3)
+    return c
+
+
 WEAPONS = {"longsword": longsword, "greatsword": greatsword, "rapier": rapier, "flanged_mace": flanged_mace,
            "war_hammer": war_hammer, "glaive": glaive, "halberd": halberd, "spear": spear, "lance": lance,
            "dagger": dagger, "sabre": sabre, "estoc": estoc, "battle_axe": battle_axe, "flail": flail, "scythe": scythe,
            "quarterstaff": quarterstaff, "pike": pike, "zweihander": zweihander, "maul": maul, "executioner": executioner,
            "bill": bill, "labrys": labrys, "battleblade": battleblade, "war_fork": war_fork, "kama": kama,
-           "war_pick": war_pick}
+           "war_pick": war_pick, "twinblade": twinblade, "nodachi": nodachi, "earthbreaker": earthbreaker, "katar": katar,
+           "moonblade": moonblade, "kusarigama": kusarigama}
 
 
 def draw(kind, metal):

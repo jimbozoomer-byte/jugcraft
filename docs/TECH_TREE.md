@@ -513,6 +513,23 @@ Five ornate arms in bronze and steel, set with a garnet (bronze) or a lit phosph
 
 **Code:** `weapons/` (`JugcraftArms`, `ArmItem`, `TwoHanded`); data from `tools/arms.py`, art from `tools/arms_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-iv.md)).
 
+### Arms V (batch 48): weapon arts
+
+Six more arms in bronze and steel, each with a **weapon art**: a special move used with the use key, with its own animation and its own way of dealing damage. Afterwards the arm needs a few seconds before its art is ready again (shown on the hotbar); plain blows are not held back. The twinblade, nodachi, earthbreaker and moonblade swing two-handed.
+
+| Item | Plain blows | Weapon art (ready again after) | Built from |
+| --- | --- | --- | --- |
+| Twinblade | 7 (steel 7.5) at 1.2 a second | **Cyclone** (6 s): three spins, each striking every foe within 3 blocks all round for half a blow and drawing them in | 4 ingots, leather |
+| Nodachi | 9.5 (10) at 0.8 a second, reaches 4 | **Iaido** (8 s): a dash of about 6 blocks; every foe passed is cut for 1.3 blows a moment after, all at once | 3 ingots, leather |
+| Earthbreaker | 12.5 (13) at 0.55 a second; stops a shield for 5 s | **Leap Slam** (10 s): leap and slam where you land: a blow at the centre, half at 3.5 blocks, +15% for each block landed below the take-off; throws foes up | 5 ingots, 3 sticks |
+| Katar | 4.5 (5) at 2 a second | **Flurry** (5 s): five jabs of 0.28 blows that all land, then a finish of 0.9 | 4 ingots, leather |
+| Moonblade | 9 (9.5) at 0.9 a second | **Crescent** (7 s): a wave runs 12 blocks ahead through every foe in line (0.9 blows, 15% less for each foe passed) until a wall stops it | 4 ingots, leather |
+| Kusarigama | 5 (5.5) at 1.7 a second | **Chain Lash** (6 s): the chain catches the first foe in line up to 9 blocks off (half a blow), hauls it in, and the sickle reaps it (0.8) | 3 ingots, 2 iron nuggets |
+
+Against one foe an art does no better than plain blows over its cooldown; its worth is many foes at once, or getting there.
+
+**Code:** `weapons/` (`WeaponArts`, `WeaponArtPayload`, `JugcraftArms.ARTS`, `ArmItem.use`), client `client/arms/ArmsMotion`; data from `tools/arms.py`, art from `tools/arms_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-v.md)).
+
 ### Construction chemistry (batch 32)
 
 | Item | What it does | Built from |
