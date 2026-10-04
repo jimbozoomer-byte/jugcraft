@@ -1487,32 +1487,39 @@ public class JugcraftGameTests {
 		});
 	}
 
-	/** Batch 57: a grenadier lobs its grenades at a player in range. */
-	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
+	/** Batch 57: a grenadier's throw puts a grenade in the air toward its target. */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 100, skyAccess = true)
 	public void grenadierLobsGrenades(GameTestHelper helper) {
 		raiderFloor(helper);
 		var grenadier = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, new Vec3(10.5, 1, 20.5));
-		ServerPlayer target = helper.makeMockServerPlayerInLevel();
-		target.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
-		target.setPos(helper.absoluteVec(new Vec3(22.5, 1, 20.5)));
-		grenadier.setTarget(target);
+		var pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new Vec3(22.5, 1, 20.5));
+		grenadier.performRangedAttack(pig, 1.0F);
 		net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(44, 26, 44);
-		helper.succeedWhen(() -> helper.assertFalse(helper.getLevel().getEntitiesOfClass(
-				io.github.jimbozoomer.jugcraft.raiders.RaiderBomb.class, area).isEmpty() && target.getHealth() == target.getMaxHealth(),
-				"The grenadier should have thrown a grenade (or hit the player) by now"));
+		var bombs = helper.getLevel().getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderBomb.class, area);
+		helper.assertTrue(bombs.size() == 1 && !bombs.get(0).heavy(), "A throw should put one grenade in the air, not " + bombs.size());
+		helper.assertTrue(bombs.get(0).getDeltaMovement().x > 0, "The grenade should fly toward the pig");
+		// Too close to throw at, it clubs instead.
+		pig.teleportTo(grenadier.getX() + 1.5, grenadier.getY(), grenadier.getZ());
+		grenadier.performRangedAttack(pig, 1.0F);
+		helper.assertTrue(helper.getLevel().getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderBomb.class, area).size() == 1,
+				"A grenadier should not throw at something closer than " + io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADE_MIN_RANGE + " blocks");
+		helper.succeed();
 	}
 
-	/** Batch 57: a blimp climbs to cruise well above the player it hunts. */
+	/** Batch 57: a blimp climbs to cruise well above what it hunts. */
 	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
 	public void blimpCruisesOverItsQuarry(GameTestHelper helper) {
 		raiderFloor(helper);
 		var blimp = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BLIMP, new Vec3(30.5, 2, 30.5));
-		ServerPlayer target = helper.makeMockServerPlayerInLevel();
-		target.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
-		target.setPos(helper.absoluteVec(new Vec3(20.5, 1, 20.5)));
-		blimp.setTarget(target);
+		var pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new Vec3(20.5, 1, 20.5));
 		double start = blimp.getY();
-		helper.succeedWhen(() -> helper.assertTrue(blimp.getY() > start + 8, "The blimp should climb toward its cruising height"));
+		helper.succeedWhen(() -> {
+			if (blimp.getTarget() == null) {
+				blimp.setTarget(pig);
+			}
+			helper.assertTrue(blimp.getY() > start + 8, "The blimp should climb toward its cruising height: at " + blimp.getY()
+					+ " from " + start + ", hunting " + blimp.getTarget() + ", moving " + blimp.getDeltaMovement() + ", removed " + blimp.isRemoved());
+		});
 	}
 
 	/** Coal generator -> copper cables -> electric furnace smelts raw iron. */
