@@ -8,6 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Pumpkin Night, Halloween decorations batch 20
+- **Red Kuri** and **Kabocha** pumpkins join the heirlooms: seeds from grass, wild patches and the Halloween Peddler; their own hand-carved pumpkins, glowing ember orange and greenish gold; **Red Kuri Soup** and **Kabocha Tempura** in the Cooking Pot; pumpkin pie, heads and the trebuchet as the other heirlooms.
+- **Farm Stand**: an owner's two-block stall of six crates under a striped awning. The owner stocks and prices them in Jugs; anyone in reach buys one item at a time and the Jugs go straight to the owner, every sale checked on the server. Only its owner takes it down.
+- **Pumpkin Vine Garland** and **Autumn Leaf Garland**, strung between String Light Hooks with warm bulbs that glow when a hook is lit.
+- **Harvest Effigy**: a three-block wicker man in a dyeable cloak who wears a carved pumpkin. Lit at night, he burns for 30 seconds; players near get **Harvest Cheer** (Regeneration and Luck) once a night; rain puts him out. Burnt through, he leaves **Effigy Ashes** that give **Hearth Ash**, a weak fertilizer.
+- **Singing Pumpkins** in four voices (bass, tenor, alto, soprano), tuned like note blocks over two octaves and sung by redstone, their mouths opening as they sing; the voices are Jugcraft's own, synthesised. Record: [pumpkin-night.md](docs/features/pumpkin-night.md).
+
 ### Unmerged: The Laboratory, the Larder and the Dining Room, Halloween decorations batch 19
 - **Lightning Harness** (fires on a strong signal, a Tesla Coil's arc or lightning, cracking arcs down to a Lab Table and waking its patient), **Brain-Vat Console** (an analogue memory cell: it remembers the strongest signal at its back until a side clears it) and **Crawling Hand** (drums its fingers; powered, it scuttles).
 - **Silk Cocoon** (a 9-slot larder hung from a ceiling that wriggles when opened), **Egg Sac Cluster** (pulsing sacs on any faces, like glow lichen; spiderlings skitter out at night), **Web Drape** (a 2 × 2 web curtain that slows you) and **Silk Spool Stack** (three spools, each dyed to any colour).
