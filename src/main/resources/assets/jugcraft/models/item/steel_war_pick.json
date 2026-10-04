@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_war_pick",
+  "textures": {
+    "layer0": "jugcraft:item/steel_war_pick"
+  }
+}

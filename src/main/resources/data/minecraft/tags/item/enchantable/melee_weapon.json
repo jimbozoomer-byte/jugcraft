@@ -12,6 +12,10 @@
     "jugcraft:bronze_pike",
     "jugcraft:bronze_maul",
     "jugcraft:bronze_bill",
+    "jugcraft:bronze_labrys",
+    "jugcraft:bronze_war_fork",
+    "jugcraft:bronze_kama",
+    "jugcraft:bronze_war_pick",
     "jugcraft:steel_flanged_mace",
     "jugcraft:steel_war_hammer",
     "jugcraft:steel_halberd",
@@ -22,6 +26,10 @@
     "jugcraft:steel_quarterstaff",
     "jugcraft:steel_pike",
     "jugcraft:steel_maul",
-    "jugcraft:steel_bill"
+    "jugcraft:steel_bill",
+    "jugcraft:steel_labrys",
+    "jugcraft:steel_war_fork",
+    "jugcraft:steel_kama",
+    "jugcraft:steel_war_pick"
   ]
 }
