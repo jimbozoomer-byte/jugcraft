@@ -177,6 +177,8 @@ def assets():
     mech.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import landship
     landship.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import artillery
+    artillery.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import plastic
     plastic.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import gui_textures
