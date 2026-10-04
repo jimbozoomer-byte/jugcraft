@@ -1119,6 +1119,26 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **The Buried Colossus**: a Colossal Skull whose jaw drops on redstone, Colossal Ribs that meet as an arch, Colossal Vertebrae and a Colossal Femur.
 - **The gargoyles**: the Gargoyle Sentinel signals the nearest monster by its distance, the Gargoyle Rainspout fills a cauldron in the rain, and the Chimera Finial reads rain and storms. Details: [the Crypt and the Ossuary](../features/crypt-and-ossuary.md).
 
+### The Laboratory, the Larder and the Dining Room
+
+| **The laboratory, the larder, the dining room and the yard**, from above | **The laboratory**: the Lightning Harness caught as it fires, the patient on the Lab Table sitting bolt upright; the Brain-Vat Consoles and a Tesla Coil |
+| --- | --- |
+| ![The Laboratory, the Larder and the Dining Room](../images/ingame_laboratory_larder_dining.jpg) | ![The laboratory](../images/ingame_laboratory_larder_dining_laboratory.jpg) |
+| **The spider's larder**: Silk Cocoons hung from a beam, Egg Sac Clusters on the floor and wall, a Web Drape across the door and a Silk Spool Stack in three colours | **The dining room**: a Harvest Feast Table laid with Floating Table Settings for dinner, tea and a feast, Haunted Dining Chairs round it and the Grandfather Clock by the wall |
+| ![The larder](../images/ingame_laboratory_larder_dining_larder.jpg) | ![The dining room](../images/ingame_laboratory_larder_dining_dining.jpg) |
+| **The yard**: a path of Witchlight Path Stakes in every colour, a Witchlight Lamp-Post, Hanging Witchlights under a fence arch, the six Yard Silhouettes and the Harvest Moon Lamp | **The dining room at midnight**: the candles lit and a chair slid out |
+| ![The yard](../images/ingame_laboratory_larder_dining_yard.jpg) | ![The dining room at midnight](../images/ingame_laboratory_larder_dining_dining_night.jpg) |
+| **The yard at midnight**: the witchlights awake, the full moon lit | **The laboratory at midnight** |
+| ![The yard at midnight](../images/ingame_laboratory_larder_dining_yard_night.jpg) | ![The laboratory at midnight](../images/ingame_laboratory_larder_dining_laboratory_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`LaboratoryLarderDiningClientGameTests`, software rendering, small previews). The harness is fired, the candles lit and a chair slid out for the picture; the witchlights are kept awake by redstone torches under the path.*
+
+- **The Reanimation Rig**: the Lightning Harness fires on a strong signal, a Tesla Coil's arc or lightning and wakes the Lab Table's patient; the Brain-Vat Console remembers the strongest signal at its back; the Crawling Hand drums its fingers and, powered, scuttles.
+- **The Spider's Larder**: the Silk Cocoon (a 9-slot larder that wriggles), Egg Sac Clusters (spiderlings at night), the Web Drape (2 × 2, slows you) and the Silk Spool Stack (dye each spool).
+- **The Poltergeist's Dinner Party**: the Haunted Dining Chair slides out at night, the Floating Table Setting is laid three ways, and the Grandfather Clock keeps the hour and the moon, strikes and pulses each hour, and shows a face at midnight.
+- **The Witchlight Lantern Path**: three lamps that wake for a player near, in five colours.
+- **The Yard Silhouettes and the Harvest Moon Lamp**: six black cut-outs whose eyes glow at night, and a 2 × 2 moon showing tonight's phase. Details: [the Laboratory, the Larder and the Dining Room](../features/laboratory-larder-dining.md).
+
 ## Even more fall additions
 
 Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).

@@ -108,7 +108,32 @@ Each lantern is a pierced iron base, four corner posts, leaded glass panes and a
 - **Originality**: all original. The look follows the owner's reference pictures, and nothing is traced from them.
 
 ## Verification
-To be filled in from CI.
+CI's Build workflow passed on d0675afc (run 37229731350): the generated data matched, the audit passed, the mod built, all 795 server game tests passed (these fourteen among them), and all three client shards passed and took the screenshots in [the gallery](../branches/AGRICULTURE.md#the-laboratory-the-larder-and-the-dining-room). Runs before it found, and the commits after them fixed:
+- 37229123018: a client renderer turned the spiderlings with a quaternion, and 26.3's `PoseStack.mulPose` takes only a matrix; it now builds one;
+- 37229257288: the test sources named `Items.BLUE_DYE` and `Items.LIME_DYE`, which 26.3 doesn't have; the tests look dyes (and the client test the redstone torch) up by ID. One client shard of this run died earlier, before building, on Maven Central's rate limit (HTTP 429).
+
+- `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`: pass locally and in CI (1367 IDs). The audit's new check holds Java's numbers to `tools/decor19.py`, checks every block is registered, named, textured, dropped and has its recipe, every renderer is registered and every quad model is generated.
+- `LaboratoryLarderDiningGameTests` (fourteen tests):
+  1. the harness finds a table three blocks below and none over bare floor, waits unpowered, fires on a strong signal, rests through its cooldown, wakes the patient, fires again once rested, and falls without its ceiling;
+  2. the console keeps the strongest signal, remembers a full signal after it goes, gives it from its front only (and to a comparator), and a side signal clears it and lets go;
+  3. the hand runs while powered and stops;
+  4. the cocoon is placed under a ceiling (not without one), holds nine stacks, a comparator reads it, it opens and wriggles, and with its ceiling gone it falls and spills what it held;
+  5. egg sacs cover the floor and a wall at once, with their block entity, and two faces drop two clusters;
+  6. the drape is placed in four parts, all walk-through, and breaking one brings all down for one drape;
+  7. the spools run left to right from the front, a dye recolours the spool it touches for one dye, the others keep theirs, and the colours are saved;
+  8. the chair's slide rules (night, empty, someone near, not out already), it seats a player, slides out and back in;
+  9. the setting is laid for dinner, tea, a feast and dinner again, nothing collides, flint lights the candle (light 7) and a sneaking hand snuffs it;
+  10. the clock's hours (dawn six, noon and midnight twelve), minutes, moon phases and midnight face; placed two tall, it notes the hour, a new hour pulses both halves and strikes, a comparator reads the hour, the hour it saw is saved, and the pulse ends;
+  11. witchlight rules (near or powered wakes, lingers, sleeps), a stake asleep at light 3, woken by a player near to 14, dyed green with lime dye, asleep again long after; a lamp-post woken by power at its foot, its light in its lantern; a hanging lantern needs something above;
+  12. a silhouette placed by someone looking south faces them, changes through all six figures and back, and falls without ground;
+  13. the moon lamp's brightness for all eight phases, placed in four lit parts, a comparator reads tonight's moon, one use darkens it all, and breaking any part brings it down for one lamp;
+  14. recipes and loot tables load for all fifteen blocks.
+- `LaboratoryLarderDiningClientGameTests`: eight screenshots of the whole scene, the laboratory as the harness fires, the larder, the dining room and the yard, then the dining room, the yard and the laboratory at midnight.
+
+Not run:
+- Building with them by hand.
+- A two-player dedicated server (one player walking a witchlight path while another watches the lamps wake and sleep; a chair sliding out for one player while another sits).
+- This environment can't run a game client interactively.
 
 ## World and event applicability
 Placed by players only; no worldgen. They work all year, and nothing depends on the Halloween event.
