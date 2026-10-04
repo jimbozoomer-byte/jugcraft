@@ -10,10 +10,10 @@ building/SearchlightBlock (and its block entity). tools/check_mod_data.py keeps 
 """
 import json
 import math
-import random
 
 from PIL import Image
 
+from clean_metal import corner_bolts, plate
 from steampunk_models import box, cyl
 from zeppelin import tiled_quads
 
@@ -226,7 +226,6 @@ WOOD = [(58, 40, 24), (84, 60, 36), (110, 80, 48), (136, 102, 64), (160, 124, 80
 
 def sandbags():
     """Stacked burlap sandbags: four courses of plump, wide sacks laid like brickwork, lit from above with dark seams."""
-    rng = random.Random(5001)
     img = _img()
     for y in range(16):
         course = y // 4
@@ -238,21 +237,22 @@ def sandbags():
                 shade = max(0, shade - 2)
             if by == 3 or (bx == 0 and by != 0):
                 shade = 0
-            if rng.random() < 0.12:
-                shade = max(0, shade - 1)
             _put(img, x, y, BURLAP[shade])
     return img
 
 
 def wood(seed=5002):
-    """Rough timber: grain lines along x."""
-    rng = random.Random(seed)
+    """Rough timber planks along x: four boards, each lit along its top edge, with a few grain lines and a knot."""
     img = _img()
     for y in range(16):
-        base = 2 + (1 if y % 5 == 2 else 0) - (1 if y % 5 == 0 else 0)
+        row = y % 4
         for x in range(16):
-            c = WOOD[max(0, min(4, base + (1 if rng.random() < 0.1 else 0) - (1 if rng.random() < 0.1 else 0)))]
-            _put(img, x, y, c)
+            _put(img, x, y, WOOD[3] if row == 0 else WOOD[0] if row == 3 else WOOD[2])
+    for x, y, length in ((2, 1, 5), (9, 2, 4), (5, 6, 6), (1, 10, 4), (8, 9, 5), (4, 14, 5), (12, 13, 3)):
+        for i in range(length):
+            _put(img, (x + i) % 16, y, WOOD[1])
+    _put(img, 12, 5, WOOD[1])
+    _put(img, 13, 5, WOOD[0])
     return img
 
 
@@ -290,18 +290,11 @@ def barbed_wire():
 
 
 def phone_case():
-    """The telephone's olive-drab case with darker corner seams and rivets."""
-    rng = random.Random(5004)
+    """The telephone's olive-drab case: a bevelled panel with a dark seam round it and a bolt in each corner."""
     img = _img()
-    olive = [(56, 62, 36), (72, 80, 46), (88, 98, 58), (104, 114, 70)]
-    for y in range(16):
-        for x in range(16):
-            c = olive[2 if rng.random() > 0.2 else 1]
-            if x in (0, 15) or y in (0, 15):
-                c = olive[0]
-            _put(img, x, y, c)
-    for x, y in ((2, 2), (13, 2), (2, 13), (13, 13)):
-        _put(img, x, y, (160, 150, 120))
+    olive = [(56, 62, 36), (72, 80, 46), (88, 98, 58), (104, 114, 70), (128, 136, 90)]
+    plate(img, olive)
+    corner_bolts(img, olive)
     return img
 
 

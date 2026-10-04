@@ -17,7 +17,7 @@ COPPER, RUST_PIPE, NUT, RED, BAND = "dr_copper_pipe", "dr_rust_pipe", "dr_nut", 
 SKID, GRATE, AMBER, DOOR, FAN = "dr_skid", "dr_grate", "dr_amber", "dr_fire_door", "dr_fan"
 COIL, BLUE, BLADE, CRT, LEAVES = "dr_coil", "dr_blue", "dr_blade", "dr_crt", "dr_leaves"
 WASH, BATH, FROST = "dr_wash_water", "dr_plating_bath", "dr_frost"
-GAUGE, SOOT, HAZARD, RUBBER = "sp_gauge", "sp_hopper_inside", "dp_hazard", "dp_rubber_ribbed"
+GAUGE, SOOT, HAZARD, RUBBER = "sp_gauge", "dr_soot", "dp_hazard", "dp_rubber_ribbed"
 
 
 # ------------------------------------------------------------------ parts

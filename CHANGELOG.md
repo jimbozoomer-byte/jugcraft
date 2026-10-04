@@ -42,6 +42,11 @@ No numbered release yet. Everything below is on `main`.
 
 ### Arms IV, batch 47 (#170)
 
+### Unmerged: Clean dieselpunk textures, batch 52
+- Every dieselpunk texture is redrawn in a cleaner style: flat fills from short palettes, bevelled panels, recessed insets and two-by-two bolts, with wear only as a few small marks at corners and seams. No more per-pixel noise, and rust is now a small stain under a bolt rather than the whole surface. This covers the giants, Dieselworks blocks, zeppelin, Diesel Walker, Landship, trench works, big guns and the dieselpunk machine textures. The mechs and vehicles also get a clean soot texture for their smokestacks and openings, and the kaiserpunk brass and black lacquer lose their specks.
+- Rust Plate, Riveted Rust Plate, Ribbed Rust Pillar and Rust Grating are now called Weathered Steel Plate, Riveted Steel Plate, Ribbed Steel Pillar and Steel Grating. Their IDs are unchanged, so placed blocks and items keep working.
+- Record: [clean-dieselpunk-textures.md](docs/features/clean-dieselpunk-textures.md).
+
 ### Unmerged: Big guns, batch 51
 - **Siege Mortar**, **Self-Propelled Howitzer**, **Flak Gun** and **Observation Balloon**, with Heavy Shells, Flak Shells and a **Range Finder** to mark targets up to 256 blocks away.
 - Guns turn to a marked target (the gunner's, or a nearby spotter's) and work out the elevation that lands the shell there. Without a mark they fire where the gunner looks. Flak bursts beside flyers.
