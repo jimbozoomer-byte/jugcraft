@@ -105,6 +105,19 @@ public class ArmsVIClientGameTests implements FabricClientGameTest {
 			Jugcraft.LOGGER.info("[arms vi client] arbalest: loaded {}, then fired {} with {} bolt(s) in flight", loaded, spent, bolts);
 			check(loaded && spent && bolts >= 1, "The arbalest did not load (" + loaded + ") or fire (" + spent + ", " + bolts + ")");
 
+			// Shields in first person, beside vanilla's for comparison: each in the main hand, idle, then raised.
+			for (String shield : List.of("minecraft:shield", "jugcraft:steel_heater_shield", "jugcraft:steel_tower_shield")) {
+				server.runCommand("item replace entity @p weapon.mainhand with " + shield);
+				context.waitTicks(20);
+				String name = shield.substring(shield.indexOf(':') + 1);
+				context.takeScreenshot("jugcraft_arms_vi_first_person_" + name);
+				context.getInput().holdKey(options -> options.keyUse);
+				context.waitTicks(15);
+				context.takeScreenshot("jugcraft_arms_vi_first_person_" + name + "_raised");
+				context.getInput().releaseKey(options -> options.keyUse);
+				context.waitTicks(5);
+			}
+
 			// Shields: a tower shield raised in the main hand, then a heater shield in the off hand beside a katana.
 			ready(context, server, x + 6, y, z, "steel_tower_shield");
 			context.getInput().holdKey(options -> options.keyUse);
