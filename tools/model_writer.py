@@ -274,15 +274,40 @@ class StyleWriter:
                     variants[f"facing={facing},lit={state},part={part}"] = {"model": model, **rotation}
         self.blockstate(name, {"variants": variants})
 
+    def enlarged_states(self, name, parts, lit):
+        """A batch 44 giant: compact=false is the multi-block (as large_states); compact=true is a copy built before it
+        was enlarged, one block with the old model ({name} and {name}_on) whatever its part."""
+        variants = {}
+        for facing, y in FACING_Y.items():
+            rotation = {"y": y} if y else {}
+            for state in ("false", "true"):
+                on = "_on" if state == "true" and lit else ""
+                for part in range(PART_STATES):
+                    big = rid(f"block/{name}_part{part}{on}") if part < parts else rid("block/large_machine_empty")
+                    variants[f"compact=false,facing={facing},lit={state},part={part}"] = {"model": big, **rotation}
+                    variants[f"compact=true,facing={facing},lit={state},part={part}"] = {
+                        "model": rid(f"block/{name}{on}"), **rotation}
+        self.blockstate(name, {"variants": variants})
+
     def empty_part(self, particle):
         self.model("large_machine_empty", {"textures": {"particle": rid(f"block/{particle}")}, "elements": []})
 
 
 def write_classic(root, machines, parts, fluid_blocks):
     """The original look: textured orientable cubes, plus the large machines in tools/large_machines.py."""
-    from large_machines import FOOTPRINTS, MODELS, FRONTS
+    from large_machines import ENLARGED, FOOTPRINTS, MODELS, FRONTS
     out = StyleWriter(root)
     for machine, info in machines.items():
+        if machine in ENLARGED:
+            # The compact look (copies built before batch 44) is the old orientable cube.
+            for suffix, front in (("", "front"), ("_on", "front_on")):
+                if suffix and not info["lit"]:
+                    continue
+                out.model(f"{machine}{suffix}", {
+                    "parent": "minecraft:block/orientable",
+                    "textures": {"top": rid(f"block/{info.get('top', 'machine_top')}"), "side": rid("block/machine_side"),
+                                 "front": rid(f"block/{info.get('front', f'{machine}_{front}')}")},
+                })
         if machine in FOOTPRINTS:
             front = FRONTS[machine]
             textures = {name: rid(f"block/{name}") for name in texture_names(MODELS[machine])}
@@ -294,7 +319,10 @@ def write_classic(root, machines, parts, fluid_blocks):
                     out.model(f"{machine}_part{index}_on", {"parent": rid(f"block/{machine}_part{index}"),
                                                             "textures": {"front": rid(f"block/{front}_on")}})
             out.empty_part("machine_side")
-            out.large_states(machine, len(FOOTPRINTS[machine]), info["lit"])
+            if machine in ENLARGED:
+                out.enlarged_states(machine, len(FOOTPRINTS[machine]), info["lit"])
+            else:
+                out.large_states(machine, len(FOOTPRINTS[machine]), info["lit"])
             out.item_model(machine, {"parent": "minecraft:block/block", "textures": textures,
                                      "elements": scaled_elements(MODELS[machine])})
             out.item(machine, rid(f"item/{machine}"))
@@ -327,8 +355,8 @@ def write_classic(root, machines, parts, fluid_blocks):
 
 def write_steampunk(root, machines, parts, fluid_blocks):
     """Detailed models for everything, from tools/steampunk_models.py."""
-    from large_machines import FOOTPRINTS
-    from steampunk_models import MODELS, GLOW, CUBES, PARTICLE
+    from large_machines import ENLARGED, FOOTPRINTS
+    from steampunk_models import COMPACT, MODELS, GLOW, CUBES, PARTICLE
     out = StyleWriter(root)
 
     def textures_for(elements):
@@ -351,7 +379,17 @@ def write_steampunk(root, machines, parts, fluid_blocks):
                     out.model(f"{machine}_part{index}_on", {"parent": rid(f"block/{machine}_part{index}"),
                                                             "textures": glow_override(elements)})
             out.empty_part(PARTICLE)
-            out.large_states(machine, len(FOOTPRINTS[machine]), lit)
+            if machine in ENLARGED:
+                # Copies built before batch 44 keep the old one-block model; it glows only if the big one does, since
+                # both share the LIT state.
+                compact = COMPACT[machine]
+                out.model(machine, {"parent": "minecraft:block/block", "textures": textures_for(compact),
+                                    "elements": slice_model(machine, compact, [(0, 0, 0)])[0]})
+                out.model(f"{machine}_on", {"parent": rid(f"block/{machine}"), "textures": glow_override(compact)}
+                          if lit and glow_override(compact) else {"parent": rid(f"block/{machine}")})
+                out.enlarged_states(machine, len(FOOTPRINTS[machine]), lit)
+            else:
+                out.large_states(machine, len(FOOTPRINTS[machine]), lit)
             out.item_model(machine, {"parent": "minecraft:block/block", "textures": textures,
                                      "elements": scaled_elements(elements)})
             out.item(machine, rid(f"item/{machine}"))

@@ -1361,6 +1361,16 @@ def machines():
     control_electronics.draw_all(save)
     import rocketry
     rocketry.draw_all(save)
+    import dieselworks
+    dieselworks.draw_all(save)
+    import kaiserworks
+    kaiserworks.draw_all(save)
+    import zeppelin
+    zeppelin.draw_all(save)
+    import mech
+    mech.draw_all(save)
+    import landship
+    landship.draw_all(save)
     import plastic
     plastic.draw_all(save)
     save(conveyor_frame(0), "block", "conveyor_belt")
@@ -1459,6 +1469,8 @@ def main():
     steampunk_textures.draw_all()
     import dieselpunk_textures
     dieselpunk_textures.draw_all()
+    import dieselrust_textures
+    dieselrust_textures.draw_all()
     electric_textures.draw_all()
     import crop_textures
     for (kind, name), image in crop_textures.crop_textures().items():

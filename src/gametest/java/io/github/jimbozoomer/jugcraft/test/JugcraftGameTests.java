@@ -30,6 +30,7 @@ import io.github.jimbozoomer.jugcraft.logistics.ConveyorSlopeBlock;
 import io.github.jimbozoomer.jugcraft.logistics.ItemSorterBlockEntity;
 import io.github.jimbozoomer.jugcraft.logistics.JugcraftLogistics;
 import io.github.jimbozoomer.jugcraft.logistics.PneumaticExtractorBlock;
+import io.github.jimbozoomer.jugcraft.machine.EnlargedMachineBlock;
 import io.github.jimbozoomer.jugcraft.machine.Footprint;
 import io.github.jimbozoomer.jugcraft.machine.GeneratorFuels;
 import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
@@ -509,6 +510,349 @@ public class JugcraftGameTests {
 			ItemStack output = crusher.getItem(MachineKind.CRUSHER.outputSlot());
 			helper.assertTrue(output.is(item("raw_tin")) && output.getCount() == 2, "Crusher output is " + output);
 		});
+	}
+
+	/**
+	 * Batch 44: a placed crusher fills its two by three by two footprint and crushes ore fed in through its top back
+	 * block; a compact crusher (one standing since before batch 44, which loads with the default state) is still one
+	 * block and still crushes.
+	 */
+	@GameTest(maxTicks = 400)
+	public void enlargedCrusherFormsAndOldCopiesKeepWorking(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		EnlargedMachineBlock block = (EnlargedMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.CRUSHER);
+		BlockPos master = new BlockPos(4, 1, 2);
+		helper.setBlock(master, block.formed(block.defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH)));
+		block.setPlacedBy(level, helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
+		Footprint footprint = MachineKind.CRUSHER.footprint();
+		helper.assertTrue(footprint.size() == 12, "The crusher should fill 12 blocks, not " + footprint.size());
+		for (int part = 0; part < footprint.size(); part++) {
+			BlockState at = level.getBlockState(footprint.partPos(helper.absolutePos(master), Direction.NORTH, part));
+			helper.assertTrue(at.is(block) && !at.getValue(EnlargedMachineBlock.COMPACT) && at.getValue(LargeMachineBlock.PART) == part,
+					"Part " + part + " is " + at);
+		}
+		BlockPos top = footprint.partPos(helper.absolutePos(master), Direction.NORTH, footprint.size() - 1);
+		MachineBlockEntity crusher = helper.getBlockEntity(master, MachineBlockEntity.class);
+		helper.assertTrue(block.getContainer(level.getBlockState(top), level, top) == crusher,
+				"The crusher's top back block should reach its slots");
+		charge(helper, master, Direction.UP);
+		crusher.setItem(0, new ItemStack(item("tin_ore")));
+
+		BlockPos old = new BlockPos(1, 1, 2);
+		helper.setBlock(old, machine(MachineKind.CRUSHER));
+		helper.assertTrue(helper.getBlockState(old).getValue(EnlargedMachineBlock.COMPACT), "A default crusher should be compact");
+		helper.assertTrue(block.footprint(helper.getBlockState(old)).size() == 1, "A compact crusher should be one block");
+		helper.assertBlockPresent(Blocks.AIR, old.above());
+		charge(helper, old, Direction.UP);
+		MachineBlockEntity oldCrusher = helper.getBlockEntity(old, MachineBlockEntity.class);
+		oldCrusher.setItem(0, new ItemStack(item("tin_ore")));
+		helper.succeedWhen(() -> {
+			for (MachineBlockEntity machine : List.of(crusher, oldCrusher)) {
+				ItemStack output = machine.getItem(MachineKind.CRUSHER.outputSlot());
+				helper.assertTrue(output.is(item("raw_tin")) && output.getCount() == 2, "Crusher output is " + output);
+			}
+		});
+	}
+
+	/** Breaking any block of an enlarged machine removes all of it and drops the one item. */
+	@GameTest
+	public void breakingAnEnlargedMachineRemovesItAll(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		EnlargedMachineBlock block = (EnlargedMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.SAWMILL);
+		BlockPos master = new BlockPos(4, 1, 1);
+		helper.setBlock(master, block.formed(block.defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH)));
+		block.setPlacedBy(level, helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
+		Footprint footprint = MachineKind.SAWMILL.footprint();
+		BlockPos far = footprint.partPos(helper.absolutePos(master), Direction.NORTH, footprint.size() - 1);
+		helper.assertTrue(level.getBlockState(far).is(block), "The sawmill's far block is missing");
+		level.destroyBlock(far, true);
+		for (int part = 0; part < footprint.size(); part++) {
+			BlockPos at = footprint.partPos(helper.absolutePos(master), Direction.NORTH, part);
+			helper.assertTrue(level.getBlockState(at).isAir(), "Part " + part + " of the sawmill is still there");
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 45: every Dieselworks block is registered and placeable; the grating doesn't hide what is behind it, the I-beam is
+	 * not a full cube, and the amber cage lamp gives light.
+	 */
+	@GameTest
+	public void dieselworksBlocksPlace(GameTestHelper helper) {
+		var blocks = io.github.jimbozoomer.jugcraft.building.Dieselworks.BLOCKS;
+		helper.assertTrue(blocks.size() == 25, "Expected 25 Dieselworks blocks, got " + blocks.size());
+		BlockPos at = new BlockPos(1, 1, 1);
+		for (var entry : blocks.entrySet()) {
+			helper.setBlock(at, entry.getValue().defaultBlockState());
+			helper.assertTrue(helper.getBlockState(at).is(entry.getValue()), entry.getKey() + " did not place");
+		}
+		ServerLevel level = helper.getLevel();
+		BlockPos abs = helper.absolutePos(at);
+		helper.setBlock(at, blocks.get("rust_grating").defaultBlockState());
+		helper.assertFalse(helper.getBlockState(at).isViewBlocking(level, abs, new net.minecraft.world.phys.AABB(abs)),
+				"Rust grating should be see-through");
+		helper.setBlock(at, blocks.get("steel_i_beam").defaultBlockState());
+		helper.assertFalse(Block.isShapeFullBlock(helper.getBlockState(at).getShape(level, abs)), "An I-beam is not a full cube");
+		helper.setBlock(at, blocks.get("amber_cage_lamp").defaultBlockState());
+		helper.assertTrue(helper.getBlockState(at).getLightEmission() == io.github.jimbozoomer.jugcraft.building.Dieselworks.LAMP_LIGHT,
+				"The amber cage lamp should give light");
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 46: in open air a fuelled zeppelin left alone hovers, one with an empty tank sinks, and a piloted one climbs
+	 * and flies forward when its pilot holds forward and jump, burning fuel.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void zeppelinHoversSinksAndFlies(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		var type = io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN;
+		io.github.jimbozoomer.jugcraft.airship.Zeppelin empty = helper.spawn(type, new Vec3(10.5, 10, 10.5));
+		io.github.jimbozoomer.jugcraft.airship.Zeppelin parked = helper.spawn(type, new Vec3(10.5, 10, 32.5));
+		io.github.jimbozoomer.jugcraft.airship.Zeppelin flown = helper.spawn(type, new Vec3(32.5, 10, 20.5));
+		parked.setFuel(1000);
+		flown.setFuel(1000);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		pilot.setPos(flown.getX(), flown.getY(), flown.getZ());
+		helper.assertTrue(pilot.startRiding(flown, true, true), "The pilot could not board");
+		double emptyY = empty.getY();
+		double parkedY = parked.getY();
+		Vec3 start = flown.position();
+		helper.onEachTick(() -> flown.steer(pilot, 1, 0, 1));
+		helper.runAfterDelay(40, () -> {
+			helper.assertTrue(empty.getY() < emptyY - 0.5, "An empty zeppelin should sink, but went from " + emptyY + " to " + empty.getY());
+			helper.assertTrue(Math.abs(parked.getY() - parkedY) < 0.05, "A fuelled zeppelin left alone should hover");
+			helper.assertTrue(flown.getY() > start.y + 2, "Holding jump should climb: " + start.y + " to " + flown.getY());
+			helper.assertTrue(flown.position().subtract(start).horizontalDistance() > 1, "Holding forward should fly forward");
+			helper.assertTrue(flown.fuel() < 1000, "Flying should burn fuel");
+			helper.succeed();
+		});
+	}
+
+	/** Batch 46: a zeppelin's fuel and cargo are saved with it. */
+	@GameTest
+	public void zeppelinKeepsFuelAndCargo(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		var type = io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN;
+		io.github.jimbozoomer.jugcraft.airship.Zeppelin zeppelin = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		zeppelin.setFuel(3000);
+		zeppelin.cargo().setItem(4, new ItemStack(Items.COAL, 17));
+		net.minecraft.world.level.storage.TagValueOutput out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+				net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess());
+		zeppelin.saveWithoutId(out);
+		io.github.jimbozoomer.jugcraft.airship.Zeppelin copy = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		copy.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,
+				level.registryAccess(), out.buildResult()));
+		helper.assertTrue(copy.fuel() == 3000, "Fuel should be saved, got " + copy.fuel());
+		helper.assertTrue(copy.cargo().getItem(4).is(Items.COAL) && copy.cargo().getItem(4).getCount() == 17, "Cargo should be saved");
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 48: every Kaiserworks block is registered and placeable; the lattice and leaded glass don't hide what is
+	 * behind them, the crest turns to face its placer and the gas lamp gives light.
+	 */
+	@GameTest
+	public void kaiserworksBlocksPlace(GameTestHelper helper) {
+		var blocks = io.github.jimbozoomer.jugcraft.building.Kaiserworks.BLOCKS;
+		helper.assertTrue(blocks.size() == 26, "Expected 26 Kaiserworks blocks, got " + blocks.size());
+		BlockPos at = new BlockPos(1, 1, 1);
+		for (var entry : blocks.entrySet()) {
+			helper.setBlock(at, entry.getValue().defaultBlockState());
+			helper.assertTrue(helper.getBlockState(at).is(entry.getValue()), entry.getKey() + " did not place");
+		}
+		ServerLevel level = helper.getLevel();
+		BlockPos abs = helper.absolutePos(at);
+		for (String id : new String[] {"wrought_iron_lattice", "leaded_glass"}) {
+			helper.setBlock(at, blocks.get(id).defaultBlockState());
+			helper.assertFalse(helper.getBlockState(at).isViewBlocking(level, abs, new net.minecraft.world.phys.AABB(abs)),
+					id + " should be see-through");
+		}
+		helper.setBlock(at, blocks.get("imperial_crest").defaultBlockState()
+				.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.EAST));
+		helper.assertTrue(helper.getBlockState(at).getValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING)
+				== net.minecraft.core.Direction.EAST, "The crest should keep the way it faces");
+		helper.setBlock(at, blocks.get("imperial_gas_lamp").defaultBlockState());
+		helper.assertTrue(helper.getBlockState(at).getLightEmission() == io.github.jimbozoomer.jugcraft.building.Kaiserworks.LAMP_LIGHT,
+				"The gas lamp should give light");
+		helper.succeed();
+	}
+
+	/** Batch 47: lays a stone floor under the empty depot structure for the Diesel Walker tests. */
+	private static void walkerFloor(GameTestHelper helper) {
+		for (int x = 0; x < 16; x++) {
+			for (int z = 0; z < 16; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+	}
+
+	private static io.github.jimbozoomer.jugcraft.walker.DieselWalker pilotedWalker(GameTestHelper helper, Vec3 at, ServerPlayer pilot) {
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = helper.spawn(
+				io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.DIESEL_WALKER, at);
+		walker.setFuel(1000);
+		pilot.setPos(walker.getX(), walker.getY(), walker.getZ());
+		helper.assertTrue(pilot.startRiding(walker, true, true), "The pilot could not climb in");
+		return walker;
+	}
+
+	/** Batch 47: a fuelled Diesel Walker walks forward for its pilot and burns fuel; an empty one stands still. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 200)
+	public void dieselWalkerWalksOnFuel(GameTestHelper helper) {
+		walkerFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		ServerPlayer stranded = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = pilotedWalker(helper, new Vec3(3.5, 1, 2.5), pilot);
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker empty = pilotedWalker(helper, new Vec3(11.5, 1, 2.5), stranded);
+		empty.setFuel(0);
+		Vec3 start = walker.position();
+		Vec3 emptyStart = empty.position();
+		helper.onEachTick(() -> {
+			walker.steer(pilot, 1, 0, 0, 0, 0);
+			empty.steer(stranded, 1, 0, 0, 0, 0);
+		});
+		helper.runAfterDelay(40, () -> {
+			double walked = walker.position().subtract(start).horizontalDistance();
+			helper.assertTrue(walked > 3, "Holding forward should walk it forward, but it moved " + walked);
+			helper.assertTrue(walker.fuel() < 1000, "Walking should burn fuel");
+			helper.assertTrue(empty.position().subtract(emptyStart).horizontalDistance() < 0.1, "An empty walker should not move");
+			helper.succeed();
+		});
+	}
+
+	/** Batch 47: holding use drills the block the pilot looks at, and it drops as if they broke it. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 200)
+	public void dieselWalkerDrillsWhatThePilotLooksAt(GameTestHelper helper) {
+		walkerFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = pilotedWalker(helper, new Vec3(7.5, 1, 3.5), pilot);
+		BlockPos rock = new BlockPos(7, 2, 7);
+		helper.setBlock(rock, Blocks.COBBLESTONE);
+		Vec3 target = Vec3.atCenterOf(helper.absolutePos(rock));
+		helper.onEachTick(() -> {
+			pilot.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, target);
+			walker.steer(pilot, 0, 0, 0, 1, 0);
+		});
+		helper.succeedWhen(() -> {
+			helper.assertBlockPresent(Blocks.AIR, rock);
+			helper.assertItemEntityPresent(Items.COBBLESTONE);
+			helper.assertTrue(walker.fuel() < 1000, "Drilling should burn fuel");
+		});
+	}
+
+	/** Batch 47: the fist hits what stands in front of the walker. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 100)
+	public void dieselWalkerPunches(GameTestHelper helper) {
+		walkerFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = pilotedWalker(helper, new Vec3(7.5, 1, 3.5), pilot);
+		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(7, 1, 5));
+		helper.runAfterDelay(5, () -> walker.steer(pilot, 0, 0, 0, 0, 1));
+		helper.succeedWhen(() -> helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(), "The fist should hit the pig"));
+	}
+
+	/** Batch 47: a Diesel Walker's fuel is saved with it. */
+	@GameTest
+	public void dieselWalkerKeepsFuel(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		var type = io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.DIESEL_WALKER;
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		walker.setFuel(2500);
+		net.minecraft.world.level.storage.TagValueOutput out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+				net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess());
+		walker.saveWithoutId(out);
+		io.github.jimbozoomer.jugcraft.walker.DieselWalker copy = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		copy.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,
+				level.registryAccess(), out.buildResult()));
+		helper.assertTrue(copy.fuel() == 2500, "Fuel should be saved, got " + copy.fuel());
+		helper.succeed();
+	}
+
+	private static io.github.jimbozoomer.jugcraft.landship.Landship drivenLandship(GameTestHelper helper, Vec3 at, ServerPlayer driver) {
+		io.github.jimbozoomer.jugcraft.landship.Landship landship = helper.spawn(
+				io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP, at);
+		landship.setFuel(1000);
+		driver.setPos(landship.getX(), landship.getY(), landship.getZ());
+		helper.assertTrue(driver.startRiding(landship, true, true), "The driver could not climb aboard");
+		return landship;
+	}
+
+	/** Batch 49: a fuelled Landship drives forward for its driver and burns fuel; an empty one stands still. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 200)
+	public void landshipDrivesOnFuel(GameTestHelper helper) {
+		walkerFloor(helper);
+		ServerPlayer driver = helper.makeMockServerPlayerInLevel();
+		ServerPlayer stranded = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.landship.Landship landship = drivenLandship(helper, new Vec3(4.5, 1, 2.5), driver);
+		io.github.jimbozoomer.jugcraft.landship.Landship empty = drivenLandship(helper, new Vec3(11.5, 1, 2.5), stranded);
+		empty.setFuel(0);
+		Vec3 start = landship.position();
+		Vec3 emptyStart = empty.position();
+		helper.onEachTick(() -> {
+			landship.steer(driver, 1, 0, 0, 0);
+			empty.steer(stranded, 1, 0, 0, 0);
+		});
+		helper.runAfterDelay(40, () -> {
+			double driven = landship.position().subtract(start).horizontalDistance();
+			helper.assertTrue(driven > 3, "Holding forward should drive it forward, but it moved " + driven);
+			helper.assertTrue(landship.fuel() < 1000, "Driving should burn fuel");
+			helper.assertTrue(empty.position().subtract(emptyStart).horizontalDistance() < 0.1, "An empty landship should not move");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 49: the cannon fires a shell that uses one from the driver's inventory and bursts against a wall, hurting
+	 * the pig in front of it and leaving every block of the wall standing.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 200)
+	public void landshipCannonHurtsButNeverBreaksBlocks(GameTestHelper helper) {
+		walkerFloor(helper);
+		for (int x = 0; x < 16; x++) {
+			for (int y = 1; y <= 5; y++) {
+				helper.setBlock(new BlockPos(x, y, 14), Blocks.STONE);
+			}
+		}
+		ServerPlayer driver = helper.makeMockServerPlayerInLevel();
+		driver.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		driver.getInventory().add(new ItemStack(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.CANNON_SHELL, 2));
+		io.github.jimbozoomer.jugcraft.landship.Landship landship = drivenLandship(helper, new Vec3(7.5, 1, 3.5), driver);
+		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(7, 1, 13));
+		int[] ticks = {0};
+		helper.onEachTick(() -> {
+			driver.setYRot(0.0F);
+			driver.setXRot(0.0F);
+			if (++ticks[0] > 5) {
+				landship.steer(driver, 0, 0, 1, 0);
+			}
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(), "The shell's burst should hurt the pig");
+			for (int x = 0; x < 16; x++) {
+				for (int y = 1; y <= 5; y++) {
+					helper.assertBlockPresent(Blocks.STONE, new BlockPos(x, y, 14));
+				}
+			}
+			int shells = driver.getInventory().countItem(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.CANNON_SHELL);
+			helper.assertTrue(shells == 1, "One shot should use one shell, " + shells + " left");
+		});
+	}
+
+	/** Batch 49: a Landship's fuel is saved with it. */
+	@GameTest
+	public void landshipKeepsFuel(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		var type = io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP;
+		io.github.jimbozoomer.jugcraft.landship.Landship landship = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		landship.setFuel(4500);
+		net.minecraft.world.level.storage.TagValueOutput out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+				net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess());
+		landship.saveWithoutId(out);
+		io.github.jimbozoomer.jugcraft.landship.Landship copy = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		copy.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,
+				level.registryAccess(), out.buildResult()));
+		helper.assertTrue(copy.fuel() == 4500, "Fuel should be saved, got " + copy.fuel());
+		helper.succeed();
 	}
 
 	/** Coal generator -> copper cables -> electric furnace smelts raw iron. */

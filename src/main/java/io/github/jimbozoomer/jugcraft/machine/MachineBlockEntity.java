@@ -535,7 +535,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	 */
 	private boolean tickWind(ServerLevel level, BlockPos pos, BlockState state) {
 		Direction facing = state.getValue(MachineBlock.FACING);
-		BlockPos top = kind.footprint().partPos(pos, facing, kind.footprint().size() - 1);
+		BlockPos top = footprint(state).partPos(pos, facing, footprint(state).size() - 1);
 		if (!checked || level.getGameTime() % MachineKind.WIND_CHECK_INTERVAL == 0) {
 			checked = true;
 			formed = rotorClear(level, top.relative(facing), facing);
@@ -589,7 +589,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return;
 		}
 		Storage<ItemVariant> output = new CombinedStorage<>(outputs);
-		Footprint footprint = kind.footprint();
+		Footprint footprint = footprint(state);
 		// Never hand results back to this machine through a pipe that touches another of its blocks.
 		Set<BlockPos> self = new HashSet<>();
 		for (int part = 0; part < footprint.size(); part++) {
@@ -613,7 +613,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 
 	/** Generators that fill several blocks can feed cables touching any of their parts. */
 	private void pushFromAllParts(ServerLevel level, BlockPos pos, BlockState state) {
-		Footprint footprint = kind.footprint();
+		Footprint footprint = footprint(state);
 		Direction facing = state.getValue(MachineBlock.FACING);
 		for (int part = 0; part < footprint.size(); part++) {
 			EnergyNetworks.pushToNeighbors(level, footprint.partPos(pos, facing, part), energy, kind.maxOutput,
@@ -668,7 +668,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false;
 		}
 		Direction facing = facing(state);
-		BlockPos output = kind.footprint().partPos(pos, facing, MachineKind.LARGE_ENGINE_OUTPUT_PART);
+		BlockPos output = footprint(state).partPos(pos, facing, MachineKind.LARGE_ENGINE_OUTPUT_PART);
 		long taken = KineticNetworks.push(level, output, facing.getOpposite(), MachineKind.LARGE_ENGINE_OUTPUT);
 		if (taken <= 0) {
 			return false;
@@ -715,7 +715,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false;
 		}
 		Direction facing = facing(state);
-		BlockPos shaft = advanced ? pos : kind.footprint().partPos(pos, facing, MachineKind.DIESEL_ENGINE_OUTPUT_PART);
+		BlockPos shaft = advanced ? pos : footprint(state).partPos(pos, facing, MachineKind.DIESEL_ENGINE_OUTPUT_PART);
 		long taken = KineticNetworks.push(level, shaft, facing.getOpposite(), Math.min(burn, output));
 		if (taken <= 0) {
 			return false;
@@ -752,12 +752,17 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	/** Batteries give power out of their front face only; the capacitor bank out of the front of all four blocks. */
 	private boolean tickBattery(ServerLevel level, BlockPos pos, BlockState state) {
 		Direction front = state.getValue(MachineBlock.FACING);
-		Footprint footprint = kind.footprint();
+		Footprint footprint = footprint(state);
 		long budget = kind.maxOutput;
 		for (int part = 0; part < footprint.size() && budget > 0; part++) {
 			budget -= EnergyNetworks.pushToNeighbors(level, footprint.partPos(pos, facing(state), part), energy, budget, List.of(front));
 		}
 		return false;
+	}
+
+	/** The blocks this machine fills now: one for a compact copy of an enlarged machine. */
+	private static Footprint footprint(BlockState state) {
+		return ((MachineBlock) state.getBlock()).footprint(state);
 	}
 
 	private static Direction facing(BlockState state) {
@@ -1076,7 +1081,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				&& sides.redstone().allows(poweredByRedstone(level, pos, state))) {
 			// The most heat worth taking: what fits in the buffer and what the water in the tank can carry away.
 			long limit = Math.min(room, (long) water.millibuckets() * MachineKind.RECOVERY_JE_PER_WATER) * 100 / MachineKind.RECOVERY_PERCENT;
-			Footprint footprint = kind.footprint();
+			Footprint footprint = footprint(state);
 			Direction facing = state.getValue(MachineBlock.FACING);
 			Set<BlockPos> seen = new HashSet<>();
 			for (int part = 0; part < footprint.size() && limit > 0; part++) {
@@ -1139,7 +1144,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		if (tanks == null || level.getGameTime() % FLUID_PUSH_INTERVAL != 0) {
 			return;
 		}
-		Footprint footprint = kind.footprint();
+		Footprint footprint = footprint(state);
 		Direction facing = facing(state);
 		List<BlockPos> parts = new ArrayList<>();
 		for (int part = 0; part < footprint.size(); part++) {
@@ -1392,7 +1397,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	 */
 	public List<BlockPos> findDeposits(ServerLevel level, BlockPos pos, BlockState state) {
 		Direction facing = state.getValue(MachineBlock.FACING);
-		Footprint footprint = kind.footprint();
+		Footprint footprint = footprint(state);
 		int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, minZ = Integer.MAX_VALUE, maxZ = Integer.MIN_VALUE;
 		for (int part = 0; part < footprint.size(); part++) {
 			BlockPos partPos = footprint.partPos(pos, facing, part);
@@ -1469,7 +1474,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		if (!checked || level.getGameTime() % MachineKind.SOURCE_CHECK_INTERVAL == 0) {
 			checked = true;
 			Direction wheelSide = facing(state).getCounterClockWise();
-			Footprint footprint = kind.footprint();
+			Footprint footprint = footprint(state);
 			int rate = 0;
 			for (int part = 0; part < footprint.size(); part++) {
 				FluidState fluid = level.getFluidState(footprint.partPos(pos, facing(state), part).relative(wheelSide));
@@ -1643,7 +1648,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 
 	/** Whether any block of the machine receives a redstone signal. */
 	private boolean poweredByRedstone(ServerLevel level, BlockPos pos, BlockState state) {
-		Footprint footprint = kind.footprint();
+		Footprint footprint = footprint(state);
 		Direction facing = state.getValue(MachineBlock.FACING);
 		for (int part = 0; part < footprint.size(); part++) {
 			if (level.hasNeighborSignal(footprint.partPos(pos, facing, part))) {

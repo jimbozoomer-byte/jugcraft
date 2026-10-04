@@ -1,0 +1,287 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "bronze_fluid_pipe": "jugcraft:block/bronze_fluid_pipe",
+    "fluid_tank_side": "jugcraft:block/fluid_tank_side",
+    "fluid_tank_top": "jugcraft:block/fluid_tank_top",
+    "heavy_plinth": "jugcraft:block/heavy_plinth",
+    "machine_side": "jugcraft:block/machine_side",
+    "machine_top": "jugcraft:block/machine_top",
+    "front": "jugcraft:block/sawmill_front",
+    "particle": "jugcraft:block/machine_side"
+  },
+  "elements": [
+    {
+      "from": [
+        4.8199,
+        5.2174,
+        0.0994
+      ],
+      "to": [
+        11.1801,
+        5.6149,
+        16.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#heavy_plinth",
+          "uv": [
+            0,
+            0,
+            6.36,
+            0.398
+          ]
+        },
+        "south": {
+          "texture": "#heavy_plinth",
+          "uv": [
+            0,
+            0,
+            6.36,
+            0.398
+          ]
+        },
+        "east": {
+          "texture": "#heavy_plinth",
+          "uv": [
+            0,
+            0,
+            15.901,
+            0.398
+          ]
+        },
+        "west": {
+          "texture": "#heavy_plinth",
+          "uv": [
+            0,
+            0,
+            15.901,
+            0.398
+          ]
+        },
+        "up": {
+          "texture": "#heavy_plinth",
+          "uv": [
+            0,
+            0,
+            6.36,
+            15.901
+          ]
+        },
+        "down": {
+          "texture": "#heavy_plinth",
+          "uv": [
+            0,
+            0,
+            6.36,
+            15.901
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        5.0186,
+        5.6149,
+        0.2981
+      ],
+      "to": [
+        10.9814,
+        10.7826,
+        6.2609
+      ],
+      "faces": {
+        "north": {
+          "texture": "#front",
+          "uv": [
+            0,
+            0,
+            5.963,
+            5.168
+          ]
+        },
+        "south": {
+          "texture": "#machine_side",
+          "uv": [
+            0,
+            0,
+            5.963,
+            5.168
+          ]
+        },
+        "east": {
+          "texture": "#machine_side",
+          "uv": [
+            0,
+            0,
+            5.963,
+            5.168
+          ]
+        },
+        "west": {
+          "texture": "#machine_side",
+          "uv": [
+            0,
+            0,
+            5.963,
+            5.168
+          ]
+        },
+        "up": {
+          "texture": "#machine_top",
+          "uv": [
+            0,
+            0,
+            5.963,
+            5.963
+          ]
+        },
+        "down": {
+          "texture": "#machine_side",
+          "uv": [
+            0,
+            0,
+            5.963,
+            5.963
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        5.4161,
+        5.6149,
+        6.8571
+      ],
+      "to": [
+        10.5839,
+        10.7826,
+        15.6025
+      ],
+      "faces": {
+        "north": {
+          "texture": "#fluid_tank_side",
+          "uv": [
+            0,
+            0,
+            5.168,
+            5.168
+          ]
+        },
+        "south": {
+          "texture": "#fluid_tank_side",
+          "uv": [
+            0,
+            0,
+            5.168,
+            5.168
+          ]
+        },
+        "east": {
+          "texture": "#fluid_tank_side",
+          "uv": [
+            0,
+            0,
+            8.745,
+            5.168
+          ]
+        },
+        "west": {
+          "texture": "#fluid_tank_side",
+          "uv": [
+            0,
+            0,
+            8.745,
+            5.168
+          ]
+        },
+        "up": {
+          "texture": "#fluid_tank_top",
+          "uv": [
+            0,
+            0,
+            5.168,
+            8.745
+          ]
+        },
+        "down": {
+          "texture": "#fluid_tank_side",
+          "uv": [
+            0,
+            0,
+            5.168,
+            8.745
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        9.7888,
+        7.6025,
+        0.0
+      ],
+      "to": [
+        10.5839,
+        8.3975,
+        0.0994
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bronze_fluid_pipe",
+          "uv": [
+            0,
+            0,
+            0.795,
+            0.795
+          ]
+        },
+        "south": {
+          "texture": "#bronze_fluid_pipe",
+          "uv": [
+            0,
+            0,
+            0.795,
+            0.795
+          ]
+        },
+        "east": {
+          "texture": "#bronze_fluid_pipe",
+          "uv": [
+            0,
+            0,
+            0.099,
+            0.795
+          ]
+        },
+        "west": {
+          "texture": "#bronze_fluid_pipe",
+          "uv": [
+            0,
+            0,
+            0.099,
+            0.795
+          ]
+        },
+        "up": {
+          "texture": "#bronze_fluid_pipe",
+          "uv": [
+            0,
+            0,
+            0.795,
+            0.099
+          ]
+        },
+        "down": {
+          "texture": "#bronze_fluid_pipe",
+          "uv": [
+            0,
+            0,
+            0.795,
+            0.099
+          ]
+        }
+      }
+    }
+  ]
+}

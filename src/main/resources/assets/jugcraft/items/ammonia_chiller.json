@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:block/ammonia_chiller"
+    "model": "jugcraft:item/ammonia_chiller"
   }
 }

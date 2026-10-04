@@ -35,6 +35,11 @@ import electroplating
 import gas_storage
 import control_electronics
 import rocketry
+import dieselworks
+import kaiserworks
+import zeppelin
+import mech
+import landship
 import gear
 import arms
 import plastic
@@ -151,7 +156,7 @@ def check_assets(registered):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks() + seasons.BLOCKS
-                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks()):
+                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks()):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
@@ -172,7 +177,7 @@ def check_assets(registered):
             item_models(definition["model"])
         if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + town_assets.blocks()
-                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks()) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -309,7 +314,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS:
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -507,7 +512,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS)
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -649,6 +654,88 @@ def check_control_electronics():
     for rgb in control_electronics.CHANNEL_COLORS.values():
         if "0x%02X%02X%02X" % rgb not in screen:
             err(f"LogicControllerScreen.COLORS lacks channel colour {rgb}")
+
+
+def check_zeppelin():
+    """airship/Zeppelin.java against tools/zeppelin.py: the flight, fuel and cargo numbers."""
+    java = (JAVA_ROOT / "airship" / "Zeppelin.java").read_text(encoding="utf-8")
+    for const in ("MAX_SPEED", "ACCELERATION", "CLIMB", "TURN", "DRIFT_SINK", "FUEL_TANK", "FUEL_PER_BUCKET",
+                  "FUEL_PER_SECOND", "SEATS", "CARGO_SLOTS", "HEALTH"):
+        value = getattr(zeppelin, const)
+        literal = f"{value}F" if const in ("TURN",) else str(value)
+        if f" {const} = {literal};" not in java:
+            err(f"Zeppelin.{const} differs from tools/zeppelin.py ({literal})")
+    if not (ASSETS / "zeppelin_quads.json").is_file():
+        err("assets/jugcraft/zeppelin_quads.json is missing: run tools/generate_material_data.py")
+
+
+def check_walker():
+    """walker/DieselWalker.java against tools/mech.py: the walking, drill, fist and fuel numbers."""
+    java = (JAVA_ROOT / "walker" / "DieselWalker.java").read_text(encoding="utf-8")
+    for const in ("WALK_SPEED", "TURN", "JUMP", "DRILL_REACH", "DRILL_TICKS_PER_HARDNESS", "DRILL_MIN_TICKS",
+                  "DRILL_MAX_HARDNESS", "PUNCH_DAMAGE", "PUNCH_KNOCKBACK", "PUNCH_COOLDOWN", "FUEL_TANK",
+                  "FUEL_PER_BUCKET", "FUEL_PER_SECOND", "HEALTH", "WIDTH", "HEIGHT"):
+        value = getattr(mech, const)
+        literal = f"{value}F" if const in ("TURN", "WIDTH", "HEIGHT") else str(value)
+        if f" {const} = {literal};" not in java:
+            err(f"DieselWalker.{const} differs from tools/mech.py ({literal})")
+    renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+                / "DieselWalkerRenderer.java")
+    text = renderer.read_text(encoding="utf-8") if renderer.is_file() else ""
+    joints = [*mech.HIPS.values(), mech.SHOULDERS["fist"], mech.SHOULDERS["drill"], mech.BIT]
+    for joint in joints:
+        if "{" + ", ".join(str(v) for v in joint) + "}" not in text:
+            err(f"DieselWalkerRenderer lacks the joint {joint} from tools/mech.py")
+    if not (ASSETS / "walker_quads.json").is_file():
+        err("assets/jugcraft/walker_quads.json is missing: run tools/generate_material_data.py")
+
+
+def check_landship():
+    """landship/Landship.java against tools/landship.py: the driving, gun, fuel and size numbers, and the renderer's
+    track path, link pitch and pivots."""
+    java = (JAVA_ROOT / "landship" / "Landship.java").read_text(encoding="utf-8")
+    for const in ("SPEED", "TURN", "CANNON_COOLDOWN", "SHELL_SPEED", "SHELL_RADIUS", "SHELL_DAMAGE", "GUN_INTERVAL",
+                  "GUN_DAMAGE", "GUN_RANGE", "CRUSH_DAMAGE", "FUEL_TANK", "FUEL_PER_BUCKET", "FUEL_PER_SECOND", "HEALTH",
+                  "SEATS", "WIDTH", "HEIGHT"):
+        value = getattr(landship, const)
+        literal = f"{value}F" if const in ("TURN", "WIDTH", "HEIGHT", "SHELL_DAMAGE", "GUN_DAMAGE", "CRUSH_DAMAGE") else str(value)
+        if f" {const} = {literal};" not in java:
+            err(f"Landship.{const} differs from tools/landship.py ({literal})")
+    renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+                / "LandshipRenderer.java")
+    text = renderer.read_text(encoding="utf-8") if renderer.is_file() else ""
+    for z, y in landship.TRACK_PATH:
+        if "{" + f"{z}, {y}" + "}" not in text:
+            err(f"LandshipRenderer.TRACK_PATH lacks ({z}, {y}) from tools/landship.py")
+    for name, joint in (("TURRET", landship.TURRET), ("BARREL", landship.BARREL)):
+        if f"{name} = " + "{" + ", ".join(str(v) for v in joint) + "}" not in text:
+            err(f"LandshipRenderer.{name} differs from tools/landship.py ({joint})")
+    for name, value in (("LINK_PITCH", landship.LINK_PITCH), ("TRACK_INNER", landship.TRACK_INNER),
+                        ("TRACK_OUTER", landship.TRACK_OUTER)):
+        if f" {name} = {value};" not in text:
+            err(f"LandshipRenderer.{name} differs from tools/landship.py ({value})")
+    if not (ASSETS / "landship_quads.json").is_file():
+        err("assets/jugcraft/landship_quads.json is missing: run tools/generate_material_data.py")
+
+
+def check_dieselworks():
+    """building/Dieselworks.java against tools/dieselworks.py: every block, its kind and its strength."""
+    java = (JAVA_ROOT / "building" / "Dieselworks.java").read_text(encoding="utf-8")
+    for block, (_, kind, hardness, blast) in dieselworks.BLOCKS.items():
+        if f'"{block}", "{kind}", {hardness}F, {blast}F' not in java:
+            err(f"Dieselworks.java: {block} is not registered as {kind}, strength({hardness}F, {blast}F)")
+    if f"int LAMP_LIGHT = {dieselworks.LAMP_LIGHT};" not in java:
+        err(f"Dieselworks.LAMP_LIGHT differs from tools/dieselworks.py ({dieselworks.LAMP_LIGHT})")
+
+
+def check_kaiserworks():
+    """building/Kaiserworks.java against tools/kaiserworks.py: every block, its kind and its strength."""
+    java = (JAVA_ROOT / "building" / "Kaiserworks.java").read_text(encoding="utf-8")
+    for block, (_, kind, hardness, blast) in kaiserworks.BLOCKS.items():
+        if f'"{block}", "{kind}", {hardness}F, {blast}F' not in java:
+            err(f"Kaiserworks.java: {block} is not registered as {kind}, strength({hardness}F, {blast}F)")
+    if f"int LAMP_LIGHT = {kaiserworks.LAMP_LIGHT};" not in java:
+        err(f"Kaiserworks.LAMP_LIGHT differs from tools/kaiserworks.py ({kaiserworks.LAMP_LIGHT})")
 
 
 def check_rocketry():
@@ -5234,7 +5321,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS)
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
@@ -5259,6 +5346,11 @@ def main():
     check_gas_storage()
     check_control_electronics()
     check_rocketry()
+    check_dieselworks()
+    check_kaiserworks()
+    check_zeppelin()
+    check_walker()
+    check_landship()
     check_plastic()
     check_seasons()
     check_alpine()

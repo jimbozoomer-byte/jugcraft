@@ -25,6 +25,9 @@ GLOW = {
     "el_screen": "el_screen_on",
     "el_screen_cyan": "el_screen_cyan_on",
     "el_glass": "el_glass_on",
+    "dr_amber": "dr_amber_on",
+    "dr_fire_door": "dr_fire_door_on",
+    "dr_crt": "dr_crt_on",
 }
 # Full-cube parts keep cube models; only their texture changes.
 CUBES = {"machine_casing": "sp_machine_casing", "arc_furnace_casing": "sp_arc_casing"}
@@ -1025,3 +1028,9 @@ MODELS.update(_HIGHTECH)
 # Tanks in the owner's reference look (batch 10): tools/tank_models.py.
 from tank_models import MODELS as _TANKS  # noqa: E402
 MODELS.update(_TANKS)
+# Batch 44: sixteen one-block machines are big dieselpunk multi-blocks now (tools/giant_models.py). Their one-block
+# models stay as the look of compact copies built before then.
+from large_machines import ENLARGED as _ENLARGED  # noqa: E402
+COMPACT = {machine: MODELS[machine] for machine in _ENLARGED}
+from giant_models import MODELS as _GIANTS  # noqa: E402
+MODELS.update(_GIANTS)
