@@ -41,6 +41,14 @@ No numbered release yet. Everything below is on `main`.
 - They grow in the haunted biomes and some of vanilla's. Grave vases take them by colour. Eight game tests, client screenshots. Record: [graveyard-flora.md](docs/features/graveyard-flora.md).
 
 ### Arms IV, batch 47 (#170)
+
+### Unmerged: Trench works, batch 50
+- Sandbags, timber revetment, duckboards and barbed wire. The wire slows and cuts whatever pushes through it; sneak to cross carefully.
+- **Field telephones:** power one's back and every telephone on its dye channel within 256 blocks rings and gives a redstone signal from its front.
+- **Searchlights:** a turning, tilting lamp that throws a long beam. Redstone switches it off.
+- Three game tests and a screenshot scene. Record: [trench-works.md](docs/features/trench-works.md).
+
+### Unmerged: Arms IV, batch 47
 - **Five ornate arms** in bronze and steel, drawn after the owner's reference sheets (nothing of them is copied): set stones (a garnet in bronze, a lit green phosphor stone in steel), flat-toned heads with bright edges, winged guards, lit rims and glints of light.
   - **labrys** (two-handed): its finishing blow whirls right round, striking up to 6 foes about you;
   - **battleblade** (two-handed): each hit wears every piece of the foe's armor;
