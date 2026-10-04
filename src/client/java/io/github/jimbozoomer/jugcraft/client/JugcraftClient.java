@@ -145,6 +145,14 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.DANCE_FLOOR_ENTITY, DanceFloorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.GHOST_BELL_ENTITY, GhostBellRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FLYING_EYEBALL_ENTITY, FlyingEyeballRenderer::new);
+		// Halloween decorations batch 17, the Witch's Workshop.
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.HORNED_SKULL_CAULDRON_ENTITY, HornedSkullCauldronRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CANDELABRUM_ENTITY, CandelabrumRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.ENCHANTED_BROOM_ENTITY, EnchantedBroomRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.DUSTPAN_ENTITY, DustpanRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOWCASE_ENTITY, ShowcaseRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.MOTH_CASE_ENTITY, MothCaseRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.ODDITY_JAR_ENTITY, OddityJarRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FORTUNE_TABLE_ENTITY, FortuneTellerTableRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.BONFIRE_ENTITY, HalloweenBonfireRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.WAX_POT_ENTITY, WaxPotRenderer::new);

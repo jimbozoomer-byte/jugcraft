@@ -938,4 +938,6 @@ def crop_textures():
     out.update(churchyard_textures())
     from decor16_data import textures as haunted_house_textures  # and the haunted house's props
     out.update(haunted_house_textures())
+    from decor17_data import textures as witchs_workshop_textures  # and the witch's workshop
+    out.update(witchs_workshop_textures())
     return out

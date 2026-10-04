@@ -258,6 +258,13 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<BlackLightBlockEntity> BLACK_LIGHT_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> GLOW_PAINT_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> FLYING_EYEBALL_ENTITY;
+	public static BlockEntityType<HornedSkullCauldronBlockEntity> HORNED_SKULL_CAULDRON_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> CANDELABRUM_ENTITY;
+	public static BlockEntityType<EnchantedBroomBlockEntity> ENCHANTED_BROOM_ENTITY;
+	public static BlockEntityType<DustpanBlockEntity> DUSTPAN_ENTITY;
+	public static BlockEntityType<ShowcaseBlockEntity> SHOWCASE_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> MOTH_CASE_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> ODDITY_JAR_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> BRAZIER_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> SHADOW_LAMP_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> FLOATING_HAT_ENTITY;
@@ -1745,6 +1752,7 @@ public final class JugcraftAgriculture {
 		registerItem(LAMP_POST, props -> new BlockItem(post, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		registerChurchyardOrnaments();
 		registerHauntedHouseProps();
+		registerWitchsWorkshop();
 	}
 
 	/**
@@ -1789,6 +1797,95 @@ public final class JugcraftAgriculture {
 			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
 	}
+
+	/**
+	 * Halloween decorations batch 17, the Witch's Workshop (tools/decor17.py): the Horned Skull Cauldron with its Ember
+	 * Bed and Brew Ladle; the four wrought-iron candelabra; the Enchanted Broom, Dustpan and Broom Rack; the Curiosity
+	 * Cabinet, Bell Jar and Moth Display Case; and the five Oddity Jars.
+	 */
+	private static void registerWitchsWorkshop() {
+		List<Block> blocks = new ArrayList<>();
+		Block cauldron = registerBlock(HORNED_SKULL_CAULDRON, HornedSkullCauldronBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(2.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.METAL).noOcclusion().lightLevel(HornedSkullCauldronBlock::light));
+		HORNED_SKULL_CAULDRON_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(HORNED_SKULL_CAULDRON),
+				FabricBlockEntityTypeBuilder.create(HornedSkullCauldronBlockEntity::new, cauldron).build());
+		blocks.add(cauldron);
+		blocks.add(registerBlock(EMBER_BED, EmberBedBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(2.0F, 6.0F)
+				.requiresCorrectToolForDrops().sound(SoundType.STONE).noOcclusion().lightLevel(state -> EmberBedBlock.LIGHT)));
+		registerItem(BREW_LADLE, Item::new, new Item.Properties().stacksTo(1), TOOL_TAB);
+
+		Block floor = registerBlock(FloorCandelabrumBlock.KIND, FloorCandelabrumBlock::new, candelabrum().lightLevel(state -> Candelabra.light(state, 14)));
+		Block table = registerBlock("table_candelabrum", props -> new CandelabrumBlock(props, "table_candelabrum", CandelabrumBlock.Mount.TABLE),
+				candelabrum().lightLevel(state -> Candelabra.light(state, 9)));
+		Block girandole = registerBlock("wall_girandole", props -> new CandelabrumBlock(props, "wall_girandole", CandelabrumBlock.Mount.WALL),
+				candelabrum().lightLevel(state -> Candelabra.light(state, 9)));
+		Block chandelier = registerBlock("branching_chandelier", props -> new CandelabrumBlock(props, "branching_chandelier", CandelabrumBlock.Mount.HANGING),
+				candelabrum().lightLevel(state -> Candelabra.light(state, 15)));
+		CANDELABRUM_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("candelabrum"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(CANDELABRUM_ENTITY, pos, state),
+						floor, table, girandole, chandelier).build());
+		registerItem(FloorCandelabrumBlock.KIND, props -> new DoubleHighBlockItem(floor, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		blocks.addAll(List.of(table, girandole, chandelier));
+
+		Block broom = registerBlock(ENCHANTED_BROOM, EnchantedBroomBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(0.5F)
+				.sound(SoundType.WOOD).noOcclusion().noCollision().pushReaction(PushReaction.POPPED));
+		ENCHANTED_BROOM_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(ENCHANTED_BROOM),
+				FabricBlockEntityTypeBuilder.create(EnchantedBroomBlockEntity::new, broom).build());
+		Block dustpan = registerBlock(DUSTPAN, DustpanBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(0.8F)
+				.sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED));
+		DUSTPAN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(DUSTPAN),
+				FabricBlockEntityTypeBuilder.create(DustpanBlockEntity::new, dustpan).build());
+		Block rack = registerBlock(BROOM_RACK, BroomRackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0F)
+				.sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.POPPED));
+		blocks.addAll(List.of(broom, dustpan, rack));
+
+		Block cabinet = registerBlock(CURIOSITY_CABINET, CuriosityCabinetBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(2.0F, 3.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block bellJar = registerBlock(BELL_JAR, BellJarBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.6F)
+				.sound(SoundType.GLASS).noOcclusion().pushReaction(PushReaction.POPPED));
+		SHOWCASE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("showcase"),
+				FabricBlockEntityTypeBuilder.create(ShowcaseBlockEntity::new, cabinet, bellJar, rack).build());
+		registerItem(CURIOSITY_CABINET, props -> new DoubleHighBlockItem(cabinet, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block mothCase = registerBlock(MOTH_CASE, MothCaseBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(0.5F)
+				.sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.POPPED));
+		MOTH_CASE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(MOTH_CASE),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(MOTH_CASE_ENTITY, pos, state), mothCase)
+						.build());
+		blocks.addAll(List.of(bellJar, mothCase));
+
+		Block eyeballs = registerBlock("jar_of_eyeballs", props -> new OddityJarBlock(props, OddityJarBlock.Kind.EYEBALLS), jar());
+		Block heart = registerBlock("beating_heart_jar", BeatingHeartJarBlock::new, jar());
+		Block bat = registerBlock("bat_in_a_jar", BatJarBlock::new, jar());
+		Block snake = registerBlock("two_headed_snake_jar", props -> new OddityJarBlock(props, OddityJarBlock.Kind.SNAKE), jar());
+		Block hand = registerBlock("hand_in_a_jar", HandJarBlock::new, jar());
+		ODDITY_JAR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("oddity_jar"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(ODDITY_JAR_ENTITY, pos, state),
+						eyeballs, heart, bat, snake, hand).build());
+		blocks.addAll(List.of(eyeballs, heart, bat, snake, hand));
+		for (Block block : blocks) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	private static BlockBehaviour.Properties candelabrum() {
+		return BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(1.0F).sound(SoundType.METAL).noOcclusion()
+				.pushReaction(PushReaction.POPPED).randomTicks();
+	}
+
+	private static BlockBehaviour.Properties jar() {
+		return BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.5F).sound(SoundType.GLASS).noOcclusion().pushReaction(PushReaction.POPPED);
+	}
+
+	public static final String HORNED_SKULL_CAULDRON = "horned_skull_cauldron";
+	public static final String EMBER_BED = "ember_bed";
+	public static final String BREW_LADLE = "brew_ladle";
+	public static final String ENCHANTED_BROOM = "enchanted_broom";
+	public static final String DUSTPAN = "dustpan";
+	public static final String BROOM_RACK = "broom_rack";
+	public static final String CURIOSITY_CABINET = "curiosity_cabinet";
+	public static final String BELL_JAR = "bell_jar";
+	public static final String MOTH_CASE = "moth_display_case";
 
 	public static final String FLYING_EYEBALL = "flying_eyeball";
 	public static final String IVORY_PILLAR_CANDLE = "ivory_pillar_candle";

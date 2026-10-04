@@ -24,6 +24,7 @@ import hot_air_balloon
 import leaf_blower
 import decor15
 import decor16
+import decor17
 import petro
 import deposits
 import seasons
@@ -119,13 +120,14 @@ def texture(ref):
         return
     animated = png.with_name(png.name + ".mcmeta").is_file()
     with Image.open(png) as img:
-        # Square: 16x16, or 32x32 or 64x64 for high-resolution art (docs/ART_DIRECTION.md, "High resolution"). Animated
-        # textures are a vertical strip of square frames with an .mcmeta beside them.
+        # Square: 16x16, or 32x32 or 64x64 for high-resolution art, or 128x128 for a sculpted prop's packed texture
+        # (docs/ART_DIRECTION.md, "High resolution"). Animated textures are a vertical strip of square frames with an
+        # .mcmeta beside them.
         width, height = img.size
         if animated and not (width in (16, 32) and height % width == 0 and height > width):
             err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16 or 32x32 frames")
-        elif not animated and img.size not in ((16, 16), (32, 32), (64, 64)):
-            err(f"Texture {ref} is {img.size}, expected 16x16, 32x32 or 64x64")
+        elif not animated and img.size not in ((16, 16), (32, 32), (64, 64), (128, 128)):
+            err(f"Texture {ref} is {img.size}, expected 16x16, 32x32, 64x64 or 128x128")
 
 
 def model(ref):
@@ -2530,6 +2532,7 @@ def check_decor4(java):
     check_graveyard_flora(java, number, lang)
     check_churchyard_ornaments(java, number, lang)
     check_haunted_house_props(java, lang)
+    check_witchs_workshop(java, lang)
 
 
 def check_churchyard_ornaments(java, number, lang):
@@ -2619,6 +2622,96 @@ def check_haunted_house_props(java, lang):
         err("DecorQuads.java must read decor16_quads.json")
     if "FLYING_EYEBALL_ENTITY, FlyingEyeballRenderer::new" not in (client / "JugcraftClient.java").read_text(encoding="utf-8"):
         err("JugcraftClient.java must draw the flying eyeball")
+
+
+def check_witchs_workshop(java, lang):
+    """Halloween decorations batch 17, the Witch's Workshop: Java's numbers match tools/decor17.py; each block is registered,
+    named, drawn on its texture, drops and has its recipe; the candelabra's layout is generated for Java; the ember bed is a
+    heat source; the renderers and their quads are wired up."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    cauldron, broom = decor17.CAULDRON, decor17.BROOM
+    expected = {("HornedSkullCauldronBlock", "LEVELS"): cauldron["levels"], ("HornedSkullCauldronBlock", "FLOATERS"): cauldron["floaters"],
+                ("HornedSkullCauldronBlock", "POTION_LIGHT"): cauldron["potion_light"], ("HornedSkullCauldronBlock", "HEAT_LIGHT"): cauldron["heat_light"],
+                ("HornedSkullCauldronBlock", "WAFT_PLAYERS"): cauldron["waft_players"], ("HornedSkullCauldronBlock", "WAFT_RANGE"): cauldron["waft_range"],
+                ("HornedSkullCauldronBlock", "WAFT_FRACTION"): cauldron["waft_fraction"], ("EmberBedBlock", "LIGHT"): decor17.EMBER_BED["light"],
+                ("Candelabra", "DRIP_STAGES"): decor17.DRIPS["drip_stages"], ("Candelabra", "DRIP_CHANCE"): decor17.DRIPS["drip_chance"],
+                ("Candelabra", "CANDLE_WIDTH"): decor17.CANDLE_WIDTH, ("EnchantedBroomBlock", "RANGE"): broom["range"],
+                ("EnchantedBroomBlock", "SWEEP_TICKS"): broom["sweep_ticks"], ("EnchantedBroomBlock", "MAX_MOVES"): broom["max_moves"],
+                ("EnchantedBroomBlock", "CHARGE_TICKS"): broom["charge_ticks"], ("EnchantedBroomBlock", "PAN_REACH"): broom["pan_reach"],
+                ("EnchantedBroomBlock", "PUSH_SPEED"): broom["push_speed"], ("DustpanBlockEntity", "SLOTS"): decor17.DUSTPAN["slots"],
+                ("BroomRackBlock", "PEGS"): decor17.BROOM_RACK["pegs"], ("CuriosityCabinetBlock", "PLACES"): decor17.CABINET["slots"],
+                ("CuriosityCabinetBlock", "DOOR_TICKS"): decor17.CABINET["door_ticks"], ("BellJarBlock", "TURN_TICKS"): decor17.BELL_JAR["turn_ticks"],
+                ("OddityJarBlock", "WATCH_RANGE"): decor17.JARS["jar_of_eyeballs"]["range"],
+                ("BeatingHeartJarBlock", "PULSE_TICKS"): decor17.JARS["beating_heart_jar"]["pulse_ticks"],
+                ("BatJarBlock", "WAKE_RANGE"): decor17.JARS["bat_in_a_jar"]["range"],
+                ("BatJarBlock", "FLUTTER_TICKS"): decor17.JARS["bat_in_a_jar"]["flutter_ticks"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(found - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/decor17.py ({value})")
+    tempos = re.search(r"TEMPOS = \{([^}]*)\}", java.get("BeatingHeartJarBlock", ""))
+    if not tempos or [int(t) for t in tempos.group(1).split(",")] != decor17.JARS["beating_heart_jar"]["tempos"]:
+        err("BeatingHeartJarBlock.TEMPOS differs from tools/decor17.py")
+    if (load(ROOT / "src" / "main" / "resources" / "jugcraft" / "candelabra.json") or {}) != decor17.layout():
+        err("src/main/resources/jugcraft/candelabra.json differs from tools/decor17.py CANDELABRA (regenerate)")
+    candelabra = java.get("Candelabra", "")
+    for wax, info in decor17.WAXES.items():
+        if f"{wax.upper()}(0x{''.join(f'{c:02X}' for c in info['rgb'])})" not in candelabra:
+            err(f"Candelabra.Wax.{wax.upper()} must be the colour of tools/decor17.py WAXES")
+    for flame, info in decor17.FLAMES.items():
+        if f"{flame.upper()}(0x{''.join(f'{c:02X}' for c in info['rgb'])})" not in candelabra:
+            err(f"Candelabra.Flame.{flame.upper()} must be the colour of tools/decor17.py FLAMES")
+    main = java.get("JugcraftAgriculture", "")
+    if "registerWitchsWorkshop();" not in main:
+        err("JugcraftAgriculture.java must call registerWitchsWorkshop()")
+    for kind, info in decor17.CANDELABRA.items():
+        if f"Candelabra.light(state, {info['light']})" not in main:
+            err(f"JugcraftAgriculture.java must light {kind} at {info['light']}")
+    floor_kind = 'KIND = "floor_candelabrum"' in java.get("FloorCandelabrumBlock", "") and "FloorCandelabrumBlock.KIND" in main
+    for block in decor17.blocks():
+        if f'"{block}"' not in main and not (block == "floor_candelabrum" and floor_kind):
+            err(f"JugcraftAgriculture.java does not register {block}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"{block} has no name")
+        if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
+            err(f"{block} has no loot table")
+        texture = "candelabra" if block in decor17.CANDELABRA else block
+        with Image.open(ASSETS / "textures" / "block" / f"{texture}.png") as img:
+            if img.size not in ((64, 64), (128, 128)):
+                err(f"textures/block/{texture}.png is {img.size}, not 64 x 64 or 128 x 128")
+    if f"item.{MOD}.{decor17.LADLE['item']}" not in lang or f'"{decor17.LADLE["item"]}"' not in main:
+        err("The Brew Ladle must be registered and named")
+    for recipe in decor17.SHAPED + decor17.SHAPELESS:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"The {recipe['id']} recipe is missing")
+    heat = (load(DATA / MOD / "tags" / "block" / "heat_sources.json") or {}).get("values", [])
+    if f"{MOD}:{decor17.EMBER_BED['block']}" not in heat:
+        err("The Ember Bed must be in the block tag jugcraft:heat_sources")
+    for tag, values in (("brooms", decor17.BROOMS), ("cauldron_floaters", decor17.FLOATERS)):
+        found = (load(DATA / MOD / "tags" / "item" / f"{tag}.json") or {}).get("values", [])
+        if found != values:
+            err(f"The item tag jugcraft:{tag} must list tools/decor17.py's")
+    quads = load(ASSETS / "decor17_quads.json") or {}
+    for model in ("enchanted_broom", "enchanted_broom_glow", "curiosity_cabinet_door_left", "curiosity_cabinet_door_right_pane", "oddity_eyeball",
+                  "oddity_heart", "oddity_bat_body", "oddity_snake_head", "oddity_hand_finger",
+                  *[f"moth_{m}_{part}" for m in decor17.MOTH_CASE["moths"] for part in ("body", "wing_left", "wing_right")]):
+        if not quads.get(model):
+            err(f"decor17_quads.json has no {model}")
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    if 'Jugcraft.id("decor17_quads.json")' not in (client / "DecorQuads.java").read_text(encoding="utf-8"):
+        err("DecorQuads.java must read decor17_quads.json")
+    registered = (client / "JugcraftClient.java").read_text(encoding="utf-8")
+    for entity, renderer in (("HORNED_SKULL_CAULDRON_ENTITY", "HornedSkullCauldronRenderer"), ("CANDELABRUM_ENTITY", "CandelabrumRenderer"),
+                             ("ENCHANTED_BROOM_ENTITY", "EnchantedBroomRenderer"), ("DUSTPAN_ENTITY", "DustpanRenderer"),
+                             ("SHOWCASE_ENTITY", "ShowcaseRenderer"), ("MOTH_CASE_ENTITY", "MothCaseRenderer"), ("ODDITY_JAR_ENTITY", "OddityJarRenderer")):
+        if f"{entity}, {renderer}::new" not in registered:
+            err(f"JugcraftClient.java must draw {entity} with {renderer}")
+    for name in ("witchs_workshop_brew", "witchs_workshop_fume", "witchs_workshop_wax", "witchs_workshop_flame", "witchs_workshop_glow"):
+        if not (ASSETS / "textures" / "entity" / f"{name}.png").is_file():
+            err(f"textures/entity/{name}.png is missing")
 
 
 def check_graveyard_flora(java, number, lang):
