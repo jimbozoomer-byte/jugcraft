@@ -352,6 +352,7 @@ Every `FenceBlock` and `IronBarsBlock` has the properties `north_east`, `south_e
   - foes protected by `AttackEntityCallback` are skipped, and vanilla's instant hit with these arms is refused.
   
   New kinds `<bronze|steel>_<zweihander|maul|executioner|bill>` with the traits `QUAKE`, `EXECUTE` and `HOOK` (in `ArmItem` and `TwoHanded`). Record: [arms-iii.md](features/arms-iii.md).
+- **Arms IV (batch 47):** five more kinds in `weapons/JugcraftArms` (`<bronze|steel>_<labrys|battleblade|war_fork|kama|war_pick>`) with the traits `WHIRL` (in `TwoHanded.strike`), `SUNDER` (`ArmItem.hurtEnemy`), `BRACE` (`ArmItem.getAttackDamageBonus`, from the foe's last-tick movement), `CLEAR` (`ArmItem.useOn`, blocks in `#jugcraft:kama_cuts`) and `DELVE` (`Item.Properties.pickaxe`). The art adds the ornate helpers to `tools/arms_art.py` (`gem`, `wing`, `pommel`, `flat`, `cut`, `arc_blade`, `rim`, `glints`). Record: [arms-iv.md](features/arms-iv.md).
 - **Arms motion (batch 43, client):**
   - `client/arms/ArmsMotion` plays keyframed guards, combos and parry poses for the arms, in third person (torso, head, arms, legs and the item in the hand, with the off hand kept on two-handed weapons) and first person. `ArmsPose` is one player's pose, kept on the render state with Fabric's render state data.
   - Motion files: `assets/jugcraft/arms_motion/<kind>.json`, from `tools/arms_moves.py` on `tools/arms_motion.py`. Preview renders: `tools/arms_motion_preview.py`.

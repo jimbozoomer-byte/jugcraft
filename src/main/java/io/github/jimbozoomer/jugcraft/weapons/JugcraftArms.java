@@ -35,7 +35,8 @@ import net.minecraft.world.item.component.Weapon;
  * halberds, spears and lances in bronze and steel; and Arms II (batch 45, docs/features/arms-ii.md): daggers, sabres,
  * estocs, battle axes, flails, scythes, quarterstaves and pikes, each with a {@link Trait} of its own; and Arms III
  * (batch 46, docs/features/arms-iii.md): two-handed swings ({@link #TWO_HANDED}) and zweihanders, mauls, executioner's
- * swords and bills.
+ * swords and bills; and Arms IV (batch 47, docs/features/arms-iv.md): labryses, battleblades, war forks, kamas and war
+ * picks.
  *
  * <p>After studying how Epic Knights and Simply Swords make, show and animate their weapons (none of their code, models
  * or art is used): every trait here is one of 26.3's own item components, so these are plain items with no per-tick
@@ -81,7 +82,13 @@ public final class JugcraftArms {
 			new Kind("zweihander", 7.5F, -3.2F, SwingAnimationType.WHACK, 22, 0.0F, 4.0F, 0.0F, 2.0F, 1, 0.5F, 0.5F, true, false),
 			new Kind("maul", 10.0F, -3.45F, SwingAnimationType.WHACK, 24, 0.0F, 3.25F, 0.0F, 5.0F, 2, 1.5F, 0.0F, false, false),
 			new Kind("executioner", 8.0F, -3.3F, SwingAnimationType.WHACK, 22, 0.0F, 3.5F, 0.0F, 0.0F, 1, 0.5F, 0.0F, true, false),
-			new Kind("bill", 6.0F, -3.1F, SwingAnimationType.WHACK, 18, 0.0F, 4.5F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false));
+			new Kind("bill", 6.0F, -3.1F, SwingAnimationType.WHACK, 18, 0.0F, 4.5F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
+			// Arms IV (batch 47).
+			new Kind("labrys", 8.5F, -3.3F, SwingAnimationType.WHACK, 22, 0.0F, 3.25F, 0.0F, 3.0F, 1, 0.5F, 0.0F, false, false),
+			new Kind("battleblade", 7.0F, -3.2F, SwingAnimationType.WHACK, 20, 0.0F, 3.5F, 0.0F, 2.0F, 1, 0.5F, 0.0F, true, false),
+			new Kind("war_fork", 5.5F, -3.1F, SwingAnimationType.STAB, 18, 0.0F, 4.5F, 0.125F, 0.0F, 1, 0.0F, 0.0F, false, false),
+			new Kind("kama", 1.5F, -2.0F, SwingAnimationType.WHACK, 5, 0.0F, 2.75F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
+			new Kind("war_pick", 3.0F, -2.6F, SwingAnimationType.WHACK, 7, 0.0F, 3.0F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false));
 
 	/**
 	 * What an Arms II kind does besides its numbers (tools/arms.py: TRAITS), worked by {@link ArmItem} on the server:
@@ -89,14 +96,19 @@ public final class JugcraftArms {
 	 * target wears; CHOP, mines wood as its metal's axe; DAZE, a hit slows; REAP, use on ripe crops to harvest and
 	 * replant them; RIDERS, more damage against anything riding or ridden. Arms III adds QUAKE, the maul's finishing blow
 	 * shakes the ground; EXECUTE, more damage against a badly wounded foe; HOOK, a hit pulls the foe in and unhorses it.
+	 * Arms IV adds WHIRL, the labrys's finishing blow strikes all round; SUNDER, a hit wears the foe's armor; BRACE, more
+	 * damage to a foe charging in; CLEAR, the kama cuts plants and leaves 3 by 3 by 3; DELVE, mines as a pickaxe.
 	 */
 	public enum Trait {
-		BACKSTAB, SADDLE, ARMOR_PIERCE, CHOP, DAZE, REAP, RIDERS, QUAKE, EXECUTE, HOOK
+		BACKSTAB, SADDLE, ARMOR_PIERCE, CHOP, DAZE, REAP, RIDERS, QUAKE, EXECUTE, HOOK, WHIRL, SUNDER, BRACE, CLEAR, DELVE
 	}
 
-	public static final Map<String, Trait> TRAITS = Map.of("dagger", Trait.BACKSTAB, "sabre", Trait.SADDLE, "estoc",
-			Trait.ARMOR_PIERCE, "battle_axe", Trait.CHOP, "flail", Trait.DAZE, "scythe", Trait.REAP, "pike", Trait.RIDERS,
-			"maul", Trait.QUAKE, "executioner", Trait.EXECUTE, "bill", Trait.HOOK);
+	public static final Map<String, Trait> TRAITS = Map.ofEntries(Map.entry("dagger", Trait.BACKSTAB), Map.entry("sabre", Trait.SADDLE),
+			Map.entry("estoc", Trait.ARMOR_PIERCE), Map.entry("battle_axe", Trait.CHOP), Map.entry("flail", Trait.DAZE),
+			Map.entry("scythe", Trait.REAP), Map.entry("pike", Trait.RIDERS), Map.entry("maul", Trait.QUAKE),
+			Map.entry("executioner", Trait.EXECUTE), Map.entry("bill", Trait.HOOK), Map.entry("labrys", Trait.WHIRL),
+			Map.entry("battleblade", Trait.SUNDER), Map.entry("war_fork", Trait.BRACE), Map.entry("kama", Trait.CLEAR),
+			Map.entry("war_pick", Trait.DELVE));
 	/** A backstab, within BACKSTAB_ANGLE degrees of straight behind the target's body, deals BACKSTAB of the blow more. */
 	public static final float BACKSTAB = 0.5F;
 	public static final float BACKSTAB_ANGLE = 70.0F;
@@ -127,6 +139,17 @@ public final class JugcraftArms {
 	public static final float EXECUTE_HEALTH = 0.3F;
 	/** A bill's hit pulls the foe towards the wielder at HOOK blocks a tick, less its knockback resistance. */
 	public static final float HOOK = 0.6F;
+	/** A labrys's finishing blow sweeps WHIRL_ARC degrees, all round, striking up to WHIRL_TARGETS foes. */
+	public static final float WHIRL_ARC = 360.0F;
+	public static final int WHIRL_TARGETS = 6;
+	/** A battleblade's hit wears every piece of armor the foe wears by SUNDER more. */
+	public static final int SUNDER = 4;
+	/** A war fork deals BRACE of the blow more to a foe closing on its wielder at BRACE_SPEED blocks a tick or more. */
+	public static final float BRACE = 0.5F;
+	public static final float BRACE_SPEED = 0.1F;
+	/** A kama cuts every block in #jugcraft:kama_cuts within CLEAR_RADIUS of the one used on, at CLEAR_WEAR each. */
+	public static final int CLEAR_RADIUS = 1;
+	public static final int CLEAR_WEAR = 1;
 
 	/**
 	 * How a two-handed kind swings (tools/arms.py: TWO_HANDED; worked by {@link TwoHanded}): the blow lands strike ticks
@@ -147,7 +170,10 @@ public final class JugcraftArms {
 			Map.entry("zweihander", new Heavy(7, 140.0F, 5, 3)),
 			Map.entry("maul", new Heavy(9, 90.0F, 3, 2)),
 			Map.entry("executioner", new Heavy(8, 90.0F, 2, 2)),
-			Map.entry("bill", new Heavy(6, 90.0F, 3, 2)));
+			Map.entry("bill", new Heavy(6, 90.0F, 3, 2)),
+			Map.entry("labrys", new Heavy(8, 100.0F, 3, 2)),
+			Map.entry("battleblade", new Heavy(7, 110.0F, 4, 2)),
+			Map.entry("war_fork", new Heavy(6, 30.0F, 2, 2)));
 	/** A two-handed swing slows its wielder by this share while it is in the air. */
 	public static final float TWO_HANDED_SLOW = 0.6F;
 	/** The finishing blow of a combo is this many times as strong. */
@@ -210,10 +236,11 @@ public final class JugcraftArms {
 
 	/** A swung or thrust arm: the metal's durability, repair and enchantability, and the kind's traits. */
 	static Item.Properties arm(Item.Properties properties, ToolMaterial material, Kind kind) {
-		// Swords' kinds start as a sword (cobwebs, no breaking blocks in creative), a chopping kind as an axe (wood); the
-		// others mine nothing, like the mace.
+		// Swords' kinds start as a sword (cobwebs, no breaking blocks in creative), a chopping kind as an axe (wood), a
+		// delving kind as a pickaxe (stone and ore); the others mine nothing, like the mace.
 		Item.Properties base = kind.sword() ? properties.sword(material, kind.damage(), kind.speed())
 				: TRAITS.get(kind.name()) == Trait.CHOP ? properties.axe(material, kind.damage(), kind.speed())
+				: TRAITS.get(kind.name()) == Trait.DELVE ? properties.pickaxe(material, kind.damage(), kind.speed())
 				: properties.durability(material.durability()).repairable(material.repairItems())
 						.enchantable(material.enchantmentValue()).component(DataComponents.TOOL, new Tool(List.of(), 1.0F, 2, false));
 		base.attributes(attributes(material.attackDamageBonus() + kind.damage(), kind.speed(), kind.knockback()))

@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_labrys",
+  "textures": {
+    "layer0": "jugcraft:item/bronze_labrys"
+  }
+}
