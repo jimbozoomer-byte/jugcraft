@@ -39,10 +39,11 @@ FARM_STAND = {"block": "farm_stand", "display": "Farm Stand", "crates": 6, "reac
               "price_steps": [1, 10, 100, 1000],
               # Where the client draws the goods and chalk (client/FarmStandRenderer.java), in pixels for a stand facing
               # north, x from the seam between its blocks: each crate's middle (x, floor, z), each row's price tags
-              # (height, face's distance from the north side), and the slate board (x, y, face, width).
+              # (height, face's distance from the north side), and the slate header board over the awning's front (x, y, face,
+              # width).
               "crate_middles": [[10.0, 8.5, 4.5], [0.0, 8.5, 4.5], [-10.0, 8.5, 4.5], [10.0, 13.5, 11.5], [0.0, 13.5, 11.5],
                                 [-10.0, 13.5, 11.5]],
-              "tags": [[6.4, 0.4], [14.8, 7.4]], "board": [-11.0, 19.0, 0.4, 8.0]}
+              "tags": [[6.4, 0.4], [14.8, 7.4]], "board": [0.0, 26.8, 0.2, 12.0]}
 
 # 18. The garlands: strand kinds hung between String Light Hooks, up to the string lights' length; their bulbs light with
 # the hook.

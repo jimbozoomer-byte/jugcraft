@@ -20,10 +20,10 @@ Primary specialty and supported player role: farming and trade, with building an
 - **Farm Stand** (two blocks wide; orange and white wool, planks, a chest and a hay bale): a trestle of weathered boards with a stepped riser at the back.
   - Six slatted crates sit on it, three on the table and three on the riser.
   - A striped orange-and-cream awning on four posts slopes to a scalloped valance.
-  - A slate price board hangs from the awning at one end, and each crate carries a slate price tag.
+  - A slate header board stands over the awning's front, and each crate carries a slate price tag.
   - There is a hay bale and pumpkins under the table and a bundle of ornamental corn on a post.
   - It faces whoever places it, its second block to their right.
-- **Whoever places it owns it.** The owner's name is chalked on the board.
+- **Whoever places it owns it.** The owner's name is chalked on the header board.
 - **Use it to open its screen**: the six crates, each with its price in Jugs under it, your own Jugs, and your inventory.
   - **The owner** puts goods into the crates (a stack each) and takes them out.
   - The owner picks a crate with its **Price** button and moves its price up or down by 1, 10, 100 or 1,000 Jugs. A price runs from 1 Jug to the town's maximum balance.
@@ -160,7 +160,7 @@ Pending: CI's Build workflow on this branch.
   - the cloak's quads are generated;
   - every renderer and the screen are registered.
   The garland strands are held to `tools/decor20.py` too.
-- `PumpkinNightGameTests` (twelve tests):
+- `PumpkinNightGameTests` (thirteen tests):
   1. each heirloom carves into its own hand-carved pumpkin and back, flies as listed, and its seeds plant its stem;
   2. a singing pumpkin starts on its middle note, use tunes it up, sneaking down, wrapping both ways; the pitch spans two octaves; the notes are named F#0 to F#2; each block has its voice; it glows;
   3. a rising redstone edge makes it sing, a second signal while powered does not, and losing the signal resets it;

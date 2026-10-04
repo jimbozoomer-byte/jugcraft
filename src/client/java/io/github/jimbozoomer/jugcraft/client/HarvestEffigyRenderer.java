@@ -27,8 +27,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * Draws what the Harvest Effigy's block models can't, from its first block: his tattered cloak in its dye
  * (decor20_quads.json {@code harvest_effigy_cloak}, a pale cloth tinted), the pumpkin he wears as his head
- * ({@link CarvedHead}, {@value #HEAD_PIXELS} pixels a side on his neck), and, while he burns, the blaze: crossed sheets of
- * flame that climb from the corn at his feet to over his head in the first {@value #CLIMB} of the burn, flare at his
+ * ({@link CarvedHead}, {@value #HEAD_PIXELS} pixels a side on his neck), and, while he burns, the blaze: sheets of flame
+ * crossed at his middle and ringed round him that climb from the corn at his feet to over his head in the first {@value #CLIMB} of the burn, flare at his
  * hands, and sink as he burns through. The flames and his head are at full brightness while he burns.
  */
 public class HarvestEffigyRenderer implements BlockEntityRenderer<HarvestEffigyBlockEntity, HarvestEffigyRenderer.State> {
@@ -44,6 +44,9 @@ public class HarvestEffigyRenderer implements BlockEntityRenderer<HarvestEffigyB
 	static final float SINK = 0.85F;
 	/** The blaze's tallest reach, in blocks. */
 	private static final float TOP = 3.1F;
+	/** The ring of flame round him: how many sheets a layer, and how far out from his middle (blocks). */
+	private static final int RING = 5;
+	private static final float RING_RADIUS = 0.36F;
 
 	private final ItemModelResolver itemModels;
 
@@ -117,15 +120,23 @@ public class HarvestEffigyRenderer implements BlockEntityRenderer<HarvestEffigyB
 		pose.translate(0.5F, 0.0F, 0.5F);
 		pose.rotateDegrees(Axis.YP, -RockingChairRenderer.yRotation(state.facing));
 		collector.submitCustomGeometry(pose, FLAME, (matrix, buffer) -> {
-			// The column: overlapping sheets a block tall, narrower as they climb, each flickering on its own.
-			int sheets = Mth.ceil(top / 0.8F);
-			for (int i = 0; i < sheets; i++) {
+			// The column: overlapping layers a block tall, each a crossed pair at his middle and a ring of sheets round
+			// him (so the fire shows past his body and cloak), narrower as they climb, each flickering on its own.
+			int layers = Mth.ceil(top / 0.8F);
+			for (int i = 0; i < layers; i++) {
 				float bottom = i * 0.8F;
 				float height = Math.min(1.1F, top - bottom + 0.15F);
 				float flicker = 1.0F + 0.14F * Mth.sin(time * (0.7F + i * 0.23F) + i * 1.3F);
 				float sway = 0.05F * Mth.sin(time * 0.31F + i * 2.1F);
 				float width = Math.max(0.45F, 1.2F - i * 0.17F);
 				crossed(buffer, matrix, 0.0F, bottom, 0.0F, width, height * flicker, sway, i * 30.0F);
+				for (int k = 0; k < RING; k++) {
+					double angle = Math.toRadians(k * 360.0 / RING + i * 37.0);
+					float out = RING_RADIUS * (1.0F - i * 0.12F);
+					float lick = 1.0F + 0.18F * Mth.sin(time * (0.9F + k * 0.11F) + k * 1.7F + i);
+					sheet(buffer, matrix, (float) Math.cos(angle) * out, bottom, (float) Math.sin(angle) * out, width * 0.6F, height * lick * 0.95F,
+							sway * 1.4F, (float) Math.toDegrees(angle) + 90.0F);
+				}
 			}
 			if (hands) {
 				for (int side = -1; side <= 1; side += 2) {
@@ -136,6 +147,21 @@ public class HarvestEffigyRenderer implements BlockEntityRenderer<HarvestEffigyB
 			}
 		});
 		pose.popPose();
+	}
+
+	/** One sheet of flame standing at ({@code x}, {@code y}, {@code z}), across {@code turn} degrees, seen from both sides. */
+	private static void sheet(VertexConsumer buffer, PoseStack.Pose matrix, float x, float y, float z, float width, float height, float sway,
+			float turn) {
+		double angle = Math.toRadians(turn);
+		float dx = (float) (Math.cos(angle) * width / 2);
+		float dz = (float) (Math.sin(angle) * width / 2);
+		float[][] front = {{x - dx, y, z - dz, 0, 1}, {x - dx + sway, y + height, z - dz, 0, 0}, {x + dx + sway, y + height, z + dz, 1, 0},
+				{x + dx, y, z + dz, 1, 1}};
+		float[][] back = {front[3], front[2], front[1], front[0]};
+		float nx = (float) -Math.sin(angle);
+		float nz = (float) Math.cos(angle);
+		DecorDraw.quad(buffer, matrix, front, nx, 0, nz, 0xFFFFFFFF, LightCoordsUtil.FULL_BRIGHT);
+		DecorDraw.quad(buffer, matrix, back, -nx, 0, -nz, 0xFFFFFFFF, LightCoordsUtil.FULL_BRIGHT);
 	}
 
 	/**

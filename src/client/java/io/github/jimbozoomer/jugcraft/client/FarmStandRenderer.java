@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Draws a Farm Stand's goods and its chalk, from its first block: in each of its six crates up to three of what it
  * holds, heaped (one if it holds one, two for a few, three for more); each crate's price chalked on the slate tag on its
- * front; and the owner's name on the slate board at the stand's end. Positions are in pixels for a stand facing north
+ * front; and the owner's name on the slate header board over its awning. Positions are in pixels for a stand facing north
  * whose second block lies to the west, x measured from the seam between its blocks (tools/decor20.py FARM_STAND).
  */
 public class FarmStandRenderer implements BlockEntityRenderer<FarmStandBlockEntity, FarmStandRenderer.State> {
@@ -39,8 +39,8 @@ public class FarmStandRenderer implements BlockEntityRenderer<FarmStandBlockEnti
 	 * tags' middle height and their faces' distance from the north side.
 	 */
 	static final float[][] TAGS = {{6.4F, 0.4F}, {14.8F, 7.4F}};
-	/** The slate board's middle (x, y) and its face's distance from the north side, and its width, in pixels. */
-	static final float[] BOARD = {-11.0F, 19.0F, 0.4F, 8.0F};
+	/** The slate header board's middle (x, y) and its face's distance from the north side, and its width, in pixels. */
+	static final float[] BOARD = {0.0F, 26.8F, 0.2F, 12.0F};
 	/** Where the copies of the goods lie in a crate (pixels from its middle), and their size. */
 	private static final float[][] HEAP = {{-1.8F, 0.6F, -0.8F}, {1.9F, 0.6F, 0.9F}, {0.0F, 1.6F, 0.2F}};
 	private static final float GOODS = 0.42F;
@@ -48,7 +48,7 @@ public class FarmStandRenderer implements BlockEntityRenderer<FarmStandBlockEnti
 	/** The chalk's tallest letters, in pixels, and how wide a tag's chalk may run. */
 	private static final float TAG_TEXT = 2.4F;
 	private static final float TAG_WIDTH = 7.0F;
-	private static final float BOARD_TEXT = 2.0F;
+	private static final float BOARD_TEXT = 2.6F;
 
 	private final ItemModelResolver itemModels;
 	private final Font font;

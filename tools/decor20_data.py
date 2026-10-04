@@ -355,7 +355,7 @@ def halves(lo, hi, uv_faces, rot=None):
 def farm_stand():
     """The Farm Stand, two blocks wide facing north: a trestle of weathered boards with a stepped riser at the back, six
     slatted crates (three on the table, three on the riser) for the goods, a striped orange-and-cream awning on four
-    posts sloping to a scalloped valance, a slate price board hung from the awning at the west end, price tags on the
+    posts sloping to a scalloped valance, a slate header board over its front for the owner's name, price tags on the
     apron and the back crates, a hay bale and pumpkins under the table and a bundle of corn on the east post. Modelled
     in the first block's frame with x from the seam (the second block lies west, at negative x); each block has its own
     half (models farm_stand_0 and _1)."""
@@ -373,7 +373,7 @@ def farm_stand():
     valance = sc.piece("valance", 32, 6, canvas_stripes(11, stripe=4, scallop=True))
     ridge = sc.piece("ridge", 32, 4, boards(PLANK, 12, width=4, nails=False))
     tag = sc.piece("tag", 12, 6, slate(13))
-    board = sc.piece("board", 16, 12, slate(14))
+    board = sc.piece("board", 24, 12, slate(14))
     chain = sc.piece("chain", 2, 6, solid(d17d.IRON, 15))
     hay_side = sc.piece("hay_side", 20, 10, straw(HAY, 16, bands=(2, 7)))
     hay_top = sc.piece("hay_top", 20, 16, straw(HAY, 17, bands=(4, 11)))
@@ -415,11 +415,11 @@ def farm_stand():
         el.append(cube((x0, 30.0, 15.4 - length), (x1, 30.5, 15.4), faces(awning, ("up", "down", "north")), slope))
         el.append(plane_xy(x0, x1, 21.0, 23.6, -0.5, valance))
         el.append(cube((x0, 29.6, 14.6), (x1, 31.2, 16.0), faces(ridge, ALL6)))
-    # The slate price board on two chains under the awning's west end.
+    # The slate header board standing over the awning's front edge, braced back to the awning.
     bx, by, bz, bw = d20.FARM_STAND["board"]
     el.append(cube((bx - bw / 2, by - 2.8, bz + 0.1), (bx + bw / 2, by + 2.8, bz + 0.7), faces(board, ALL6)))
-    for cx in (bx - bw / 2 + 1.0, bx + bw / 2 - 1.0):
-        el.append(plane_xy(cx - 0.3, cx + 0.3, by + 2.8, 23.6, bz + 0.4, chain))
+    for cx in (bx - bw / 2 + 1.5, bx + bw / 2 - 1.5):
+        el.append(cube((cx - 0.4, by - 2.6, bz + 0.7), (cx + 0.4, by - 1.8, bz + 2.6), faces(chain, ALL6)))
     # Under the table: a hay bale and pumpkins; on the east front post, a bundle of ornamental corn.
     el.append(cube((1.5, 0.0, 3.0), (12.5, 5.0, 12.0), faces(hay_side, ("north", "south", "east", "west"), up=hay_top, down=hay_top)))
     for x, z, r, piece in ((-5.0, 4.0, 2.4, pumpkin), (-10.0, 6.5, 2.0, white), (-7.0, 10.5, 2.0, pumpkin), (8.0, 1.6, 1.4, white)):
