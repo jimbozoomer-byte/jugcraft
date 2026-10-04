@@ -123,6 +123,9 @@ CROPS = {
     # Festival crops.
     "turnip": {"block": "turnip_crop", "display": "Turnip Crop", "seed": "turnip", "produce": "turnip",
                "legume": False, "stages": [0, 0, 1, 1, 2, 2, 2, 3], "loot": "root"},
+    # The graveyard flora: sculpted (tools/flora_models.py) rather than drawn as crossed pictures.
+    "mandrake": {"block": "mandrake_crop", "display": "Mandrake", "seed": "mandrake_root", "produce": "mandrake_root",
+                 "legume": False, "stages": [0, 0, 1, 1, 2, 2, 2, 3], "loot": "root", "sculpted": True},
 }
 
 # Wild plants: the natural entry point. Found in patches on grass in fitting biomes (new chunks
@@ -155,6 +158,7 @@ WILD_CROPS = {
                     "biomes": ["IS_SAVANNA", "IS_HILL"]},
     "wild_turnip": {"display": "Wild Turnip", "crop": "turnip", "texture": "turnip_stage3",
                     "biomes": ["IS_TAIGA", "IS_BIRCH_FOREST"]},
+    "wild_mandrake": {"display": "Wild Mandrake", "crop": "mandrake", "texture": "mandrake", "biomes": ["IS_SPOOKY"], "sculpted": True},
 }
 # Extra drop when a wild plant is broken without shears: Wild Corn sometimes gives ornamental corn kernels.
 WILD_BONUS = {"wild_corn": {"item": "ornamental_corn_kernels", "chance": 0.1}}
@@ -168,7 +172,7 @@ GRASS_SEEDS = ["corn_kernels", "sunflower_seeds", "beans", "sweet_potato", "flax
                "tomato_seeds", "pepper_seeds", "onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds",
                "butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
                "giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "bottle_gourd_seeds",
-               "ornamental_corn_kernels"]
+               "ornamental_corn_kernels", "mandrake_root"]
 GRASS_SEED_CHANCE = 0.125
 
 # Plain and food items. food: [nutrition, saturation modifier] (vanilla carrot is [3, 0.6],
@@ -244,6 +248,8 @@ ITEMS = {
                           "tags": ["c:seeds/warty_gourd", "minecraft:chicken_food", "minecraft:parrot_food"]},
     "turnip": {"display": "Turnip", "plants": "turnip_crop", "food": [3, 0.6], "compost": "medium",
                "tags": ["c:crops/turnip", "c:foods/vegetable", "minecraft:pig_food", "minecraft:rabbit_food"]},
+    # The graveyard flora's mandrake: planted from its root; screams when pulled (MANDRAKE).
+    "mandrake_root": {"display": "Mandrake Root", "plants": "mandrake_crop", "compost": "medium", "tags": ["c:crops/mandrake"]},
     "cranberries": {"display": "Cranberries", "plants": "cranberry_bush", "bog_seed": True, "food": [2, 0.1], "compost": "low",
                     "tags": ["c:crops/cranberry", "c:foods/berry", "minecraft:fox_food"]},
     "chestnut": {"display": "Chestnut", "plants": "chestnut_sapling", "compost": "low",
@@ -698,6 +704,15 @@ HALLOWEEN_ADVANCEMENTS.update(pinata.ADVANCEMENTS)
 HALLOWEEN_ADVANCEMENTS.update(hot_air_balloon.ADVANCEMENTS)
 # The leaf blower (tools/leaf_blower.py).
 HALLOWEEN_ADVANCEMENTS.update(leaf_blower.ADVANCEMENTS)
+# The graveyard flora's mandrake (agriculture/Mandrakes): pulling a ripe or wild one (not with shears) screams, and every
+# player within `scream_radius` blocks with nothing on their head is sickened (nausea for `nausea_seconds`). It is the
+# mandrake crop at its last age or a wild mandrake broken by a player. Pulled with your own ears covered: Mind Your Ears.
+MANDRAKE = {"crop": "mandrake_crop", "wild": "wild_mandrake", "root": "mandrake_root", "scream_radius": 8, "nausea_seconds": 8,
+            "advancement": "mind_your_ears"}
+HALLOWEEN_ADVANCEMENTS.update({
+    "mind_your_ears": {"icon": "jugcraft:mandrake_root", "title": "Mind Your Ears", "description": "Pull up a mandrake with your ears covered",
+                       "frame": "task"},
+})
 
 
 # ---------------------------------------------------------------- Halloween festivities
@@ -917,7 +932,7 @@ HEX = {"doses": 3, "room_extend_ticks": 100,
                                "display": "Shrinking Draught", "effect": "shrunk", "effect_display": "Shrunk", "scale": -0.5, "seconds": 180},
                  "giant": {"brew": "orange", "ingredients": ["jugcraft:beans"], "item": "giants_draught", "display": "Giant's Draught",
                            "effect": "giant", "effect_display": "Giant", "scale": 0.6, "step": 0.5, "reach": 1.0, "seconds": 180},
-                 "flying": {"brew": "purple", "ingredients": ["minecraft:phantom_membrane"], "item": "flying_ointment",
+                 "flying": {"brew": "purple", "ingredients": ["minecraft:phantom_membrane", "jugcraft:mandrake_root"], "item": "flying_ointment",
                             "display": "Flying Ointment", "seconds": 30}}}
 # The flying broomstick (fall addition 22; Broomstick, FlyingBroomstickItem, client/BroomstickClient): a witch's broom
 # anointed with Flying Ointment, ridden and steered by looking. Each ointment is `charge_per_ointment` ticks of flight,
@@ -2582,7 +2597,10 @@ def textures():
     for info in TALL_CROPS.values():
         for names in info["textures"]:
             out += [n for n in names if n not in out]
-    for info in CROPS.values():
+    for crop, info in CROPS.items():
+        if info.get("sculpted"):
+            out += [crop] if crop not in out else []
+            continue
         out += [f"{info['block'].removesuffix('_crop')}_stage{n}" for n in sorted(set(info["stages"]))]
     out += [w["texture"] for w in WILD_CROPS.values() if w["texture"] not in out]
     out += [f"{gourd}_{part}" for gourd in GOURDS for part in ("side", "top")] + STEM_TEXTURES + CRANBERRY["stages"]

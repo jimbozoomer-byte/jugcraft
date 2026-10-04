@@ -19,6 +19,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -90,6 +91,7 @@ import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.GlowLichenBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SaplingBlock;
@@ -134,7 +136,7 @@ public final class JugcraftAgriculture {
 			"tomato_seeds", "pepper_seeds", "onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds",
 			"butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
 			"giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "bottle_gourd_seeds",
-			"ornamental_corn_kernels");
+			"ornamental_corn_kernels", "mandrake_root");
 	/** The chestnut tree's feature (data/jugcraft/worldgen/feature/chestnut.json), grown by its sapling. */
 	public static final ResourceKey<Feature> CHESTNUT_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("chestnut"));
 	public static final TreeGrower CHESTNUT_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_chestnut", WeightedList.of(CHESTNUT_TREE),
@@ -393,6 +395,8 @@ public final class JugcraftAgriculture {
 		crop("barley_crop", "barley_seeds", false);
 		// Festival crops: turnips, gourds on stems, the cranberry bog bush and the chestnut tree.
 		crop("turnip_crop", "turnip", false);
+		// The graveyard flora's mandrake: planted from its root; it screams when pulled up ripe (Mandrakes).
+		crop("mandrake_crop", "mandrake_root", false);
 		gourd("butternut_squash", "butternut_squash_seeds", 1.0F, MapColor.TERRACOTTA_ORANGE);
 		gourd("acorn_squash", "acorn_squash_seeds", 1.0F, MapColor.COLOR_GREEN);
 		gourd("warty_gourd", "warty_gourd_seeds", 1.0F, MapColor.COLOR_YELLOW);
@@ -474,6 +478,7 @@ public final class JugcraftAgriculture {
 		seeds("acorn_squash_seeds", "acorn_squash_stem", COMPOST_LOW);
 		seeds("warty_gourd_seeds", "warty_gourd_stem", COMPOST_LOW);
 		edibleSeeds("turnip", "turnip_crop", 3, 0.6F, COMPOST_MEDIUM);
+		seeds("mandrake_root", "mandrake_crop", COMPOST_MEDIUM);
 		edibleSeeds("cranberries", "cranberry_bush", 2, 0.1F, COMPOST_LOW);
 		seeds("chestnut", "chestnut_sapling", COMPOST_LOW);
 		food("roasted_chestnuts", 4, 0.6F, COMPOST_MEDIUM_HIGH);
@@ -544,6 +549,8 @@ public final class JugcraftAgriculture {
 		wild("wild_oats");
 		wild("wild_barley");
 		wild("wild_turnip");
+		wild("wild_mandrake");
+		Mandrakes.register();
 
 		registerEquipment();
 		registerDecorations();
@@ -1895,10 +1902,48 @@ public final class JugcraftAgriculture {
 							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
 					yield floating;
 				}
+				case "grass" -> {
+					String tall = plant.get("tall").getAsString();
+					Block grass = registerBlock(id, props -> new WildGrassBlock(props, tall), BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS));
+					registerItem(id, props -> new BlockItem(grass, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_LOW), SEEDS_TAB);
+					yield grass;
+				}
+				case "tall_grass" -> {
+					Block tall = registerBlock(id, DoublePlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS));
+					registerItem(id, props -> new DoubleHighBlockItem(tall, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					yield tall;
+				}
+				case "hanging" -> {
+					int maxLength = plant.get("max_length").getAsInt();
+					Block hanging = registerBlock(id, props -> new HangingPlantBlock(props, maxLength), BlockBehaviour.Properties.ofFullCopy(Blocks.VINE));
+					registerItem(id, props -> new BlockItem(hanging, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_LOW), SEEDS_TAB);
+					yield hanging;
+				}
+				case "vine" -> {
+					// Glow lichen's block without its glow: on any faces, spread by bone meal.
+					Block vine = registerBlock(id, GlowLichenBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.VINE));
+					registerItem(id, props -> new BlockItem(vine, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_LOW), SEEDS_TAB);
+					yield vine;
+				}
 				default -> throw new IllegalStateException("Unknown wild plant kind in /jugcraft/plants.json: " + plant);
 			};
 			if (!(block instanceof WaterPlantBlock) && !(block instanceof FloatingPlantBlock)) {
 				fire.add(block, 60, 100);
+			}
+			// Scattered in vanilla's biomes too ("patch": conventional biome tags; placed feature patch_<id>).
+			if (plant.has("patch")) {
+				Predicate<BiomeSelectionContext> selector = context -> false;
+				for (JsonElement tag : plant.getAsJsonArray("patch")) {
+					String field = tag.getAsString().toLowerCase(Locale.ROOT);
+					TagKey<Biome> biomes = TagKey.create(Registries.BIOME, Identifier.parse("c:" + field));
+					selector = selector.or(BiomeSelectors.tag(biomes));
+				}
+				BiomeModifications.addFeature(BiomeSelectors.foundInOverworld().and(selector), GenerationStep.Decoration.VEGETAL_DECORATION,
+						ResourceKey.create(Registries.PLACED_FEATURE, Jugcraft.id("patch_" + id)));
 			}
 		}
 	}
@@ -2012,6 +2057,7 @@ public final class JugcraftAgriculture {
 		wildPatch("wild_oats", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_TAIGA);
 		wildPatch("wild_barley", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_HILL);
 		wildPatch("wild_turnip", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_BIRCH_FOREST);
+		wildPatch("wild_mandrake", ConventionalBiomeTags.IS_SPOOKY);
 		// Festival crops found as themselves: gourds on grass, ripe cranberries in swamp shallows, chestnut trees.
 		wildPatch("butternut_squash", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_SAVANNA);
 		wildPatch("acorn_squash", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_TAIGA);

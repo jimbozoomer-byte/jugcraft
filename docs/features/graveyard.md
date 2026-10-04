@@ -55,10 +55,10 @@ Pack 4 lays out the ground between the memorials and gives a reason to keep it.
 3. **Memorial Bench** (oak slats on cast-iron ends with scrolled arms; two oak slabs, a bronze ingot, two iron ingots; two blocks wide): a park bench in memory of someone, with the inscription on a bronze plaque on its top rail. Either half, used with an empty hand, **seats a player** (the seat at 0.46 m). Its oak silvers and its iron rusts as it weathers.
 4. **Open Grave** (oak planks, an iron shovel, three coarse dirt; two blocks long): a grave freshly dug. The cut in the turf goes down into darkness, two boards lie across it with the lowering straps over them, the spoil is heaped along one side with the spade stuck in it, and a wooden cross waits at its head with a little board for the name. It is a prop: the pit is drawn, not dug, so it stands on solid ground. **An open grave stirs spirits twice as often** as another grave at its stage.
 5. **Grave Vase** (three bronze ingots and a polished granite): a fluted bronze vase on a granite block. Any small flower put in it makes a bouquet (one flower is used):
-   - **white**: lily of the valley, oxeye daisy, white tulip, azure bluet;
-   - **red**: poppy, red tulip, red mum, hibiscus;
+   - **white**: lily of the valley, oxeye daisy, white tulip, azure bluet, snowdrop, ghost pipe;
+   - **red**: poppy, red tulip, red mum, hibiscus, spider lily;
    - **yellow**: dandelion, orange tulip, yellow and orange mums, goldenrod, marigold, orange cosmos;
-   - **purple**: allium, cornflower, blue orchid, lavender, heather, purple mum, frost iris;
+   - **purple**: allium, cornflower, blue orchid, lavender, heather, purple mum, frost iris, deadly nightshade;
    - **mixed**: any other small flower.
 
    The colours are item tags (`jugcraft:grave_flowers/<colour>`), and every flower the vase takes is in `jugcraft:grave_flowers` (the colours, the other vanilla small flowers, and anything added to vanilla's `small_flowers`), so packs can add flowers. The first bouquet earns **Flowers for the Dead**. **Fresh flowers calm the graves within 3 blocks**: they stir restless spirits only half as often. In time they **wilt** (each random tick has a 1 in 20 chance, about a day of play), their heads hanging and brown, and calm nothing; new flowers replace them. Shears clear the vase.

@@ -932,4 +932,6 @@ def crop_textures():
     out.update(ofrenda_textures())
     from graveyard_textures import graveyard_textures  # and the graveyard pack
     out.update(graveyard_textures())
+    from flora_data import flora_textures  # and the graveyard flora
+    out.update(flora_textures())
     return out

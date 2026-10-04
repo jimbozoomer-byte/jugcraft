@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: The graveyard flora
+- **Seventeen plants for a haunted churchyard**, sculpted like hand-built plants (bent stems, cut-out leaves and petals at angles, bells and berries as little boxes) on 64 × 64 textures: spider lily, snowdrop, deadly nightshade, bleeding heart and the glowing ghost pipe; black rose, foxglove, funeral lily and asphodel (two tall); withered grass and the ghost fern with their tall forms; dead man's fingers; grave moss; shroud moss hanging in strands; creeping ivy.
+- **The mandrake:** wild, or grown from its root; a ripe one screams when pulled, sickening bare-headed players within 8 blocks (Mind Your Ears). Its root makes Flying Ointment.
+- They grow in the haunted biomes and some of vanilla's. Grave vases take them by colour. Eight game tests, client screenshots. Record: [graveyard-flora.md](docs/features/graveyard-flora.md).
+
 ### Unmerged: Arms IV, batch 47
 - **Five ornate arms** in bronze and steel, drawn after the owner's reference sheets (nothing of them is copied): set stones (a garnet in bronze, a lit green phosphor stone in steel), flat-toned heads with bright edges, winged guards, lit rims and glints of light.
   - **labrys** (two-handed): its finishing blow whirls right round, striking up to 6 foes about you;
