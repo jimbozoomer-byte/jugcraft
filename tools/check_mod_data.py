@@ -853,12 +853,56 @@ def check_arms():
                         ("REAP_WEAR", arms.REAP_WEAR)):
         if f"{name} = {value};" not in java:
             err(f"JugcraftArms.{name} differs from tools/arms.py ({value})")
-    # Every arm swung as a sword is, a second, below its metal's sword: its trait is the reason to choose it.
+    # Arms III (batch 46): its traits' numbers and the two-handed swings.
+    for name, value in (("QUAKE_RADIUS", arms.QUAKE_RADIUS), ("QUAKE_SHARE", arms.QUAKE_SHARE), ("EXECUTE", arms.EXECUTE),
+                        ("EXECUTE_HEALTH", arms.EXECUTE_HEALTH), ("HOOK", arms.HOOK),
+                        ("TWO_HANDED_SLOW", arms.TWO_HANDED_SLOW), ("FINISHER", arms.FINISHER)):
+        if f"{name} = {f(value)};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({value})")
+    for name, value in (("QUAKE_TICKS", arms.QUAKE_DAZE[0]), ("QUAKE_AMPLIFIER", arms.QUAKE_DAZE[1]),
+                        ("QUEUE_TICKS", arms.QUEUE_TICKS), ("COMBO_WINDOW", arms.COMBO_WINDOW)):
+        if f"{name} = {value};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({value})")
+    heavy = {kind: {"strike": int(strike), "arc": float(arc), "targets": int(targets), "combo": int(combo)}
+             for kind, strike, arc, targets, combo in re.findall(
+                 r'Map\.entry\("([a-z_]+)", new Heavy\((\d+), ([\d.]+)F, (\d+), (\d+)\)\)', java)}
+    if heavy != {kind: {**info, "arc": float(info["arc"])} for kind, info in arms.TWO_HANDED.items()}:
+        err(f"JugcraftArms.TWO_HANDED {heavy} != tools/arms.py {arms.TWO_HANDED}")
+    import arms_moves
+    for kind, info in arms.TWO_HANDED.items():
+        if kind not in arms.KINDS or kind in arms.CHARGING or arms.KINDS[kind].get("pierce"):
+            err(f"tools/arms.py: TWO_HANDED {kind} is not a swung arm")
+            continue
+        moves = arms_moves.MOVES.get(kind, {})
+        ticks = arms.KINDS[kind]["swing"][1]
+        blow = moves.get("blow")
+        if not moves.get("two_handed") or blow is None:
+            err(f"tools/arms_moves.py: the two-handed {kind} has no two-handed grip or blow")
+            continue
+        # The blow lands when the animation lands it: every attack has a key at the blow, half a tick from the strike.
+        if abs(blow * ticks - info["strike"]) > 0.5:
+            err(f"The {kind}'s strike, tick {info['strike']}, is not its animation's blow ({blow} of {ticks} ticks)")
+        for clip in moves["attacks"]:
+            if not any(abs(t - blow) < 1e-9 for t, _pose, _k in clip.keys):
+                err(f"tools/arms_moves.py: the {kind}'s {clip.name} has no key at its blow, {blow}")
+        if len(moves["attacks"]) != info["combo"]:
+            err(f"The {kind}'s combo is {info['combo']} in tools/arms.py but {len(moves['attacks'])} attacks in its motion")
+        if ticks > 20.0 / (4.0 + arms.KINDS[kind]["speed"]):
+            err(f"The {kind}'s swing ({ticks} ticks) is longer than the time between its blows")
+        if not 0 < info["strike"] < ticks or not 0 < info["arc"] <= 180 or info["targets"] < 1:
+            err(f"tools/arms.py: the {kind}'s two-handed swing {info} is out of range")
+    mixins = load(RES / f"{MOD}.mixins.json") or {}
+    if "AttackStrengthAccessor" not in mixins.get("mixins", []):
+        err(f"{MOD}.mixins.json does not list AttackStrengthAccessor (the two-handed swings need it)")
+    # Every arm swung as a sword is, a second, below its metal's sword: its trait is the reason to choose it. A
+    # two-handed arm's finishing blow counts, over its combo.
     for kind, info in arms.KINDS.items():
         if kind in arms.CHARGING:
             continue
+        combo = arms.TWO_HANDED.get(kind, {}).get("combo", 1)
+        finishing = (combo - 1 + arms.FINISHER) / combo if kind in arms.TWO_HANDED else 1.0
         for metal, bonus in (("bronze", 2.0), ("steel", 2.5)):
-            arm = (1.0 + bonus + info["damage"]) * (4.0 + info["speed"])
+            arm = (1.0 + bonus + info["damage"]) * (4.0 + info["speed"]) * finishing
             sword = (1.0 + bonus + 3.0) * 1.6
             if arm >= sword:
                 err(f"The {metal} {kind} deals {arm:.2f} a second, not below the {metal} sword's {sword:.2f}")
