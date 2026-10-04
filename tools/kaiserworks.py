@@ -113,8 +113,8 @@ def _put(img, x, y, c):
 
 
 def lacquer(seed=4801):
-    """Black lacquered iron: deep black with a soft diagonal sheen and faint panel seams."""
-    rng = random.Random(seed)
+    """Black lacquered iron: deep black with a soft diagonal sheen and faint panel seams. (`seed` is unused since the
+    lacquer became a clean, noise-free fill.)"""
     img = _img()
     for y in range(16):
         for x in range(16):
@@ -122,8 +122,6 @@ def lacquer(seed=4801):
             c = BLACK[2] if 3 <= band <= 5 else BLACK[1]
             if band == 4:
                 c = BLACK[3]
-            if rng.random() < 0.06:
-                c = BLACK[0]
             if x in (0, 15) or y in (0, 15):
                 c = BLACK[0]
             _put(img, x, y, c)
@@ -158,12 +156,11 @@ def gilt_trim():
 
 def brass():
     """Polished brass: warm, banded with a bright highlight, and fine dark seams between panels."""
-    rng = random.Random(4804)
     img = _img()
     for y in range(16):
         for x in range(16):
             shade = 2 + round(math.sin((y + x * 0.25) / 16 * math.pi * 2) * 1.2)
-            c = BRASS[max(0, min(4, shade + (1 if rng.random() < 0.08 else 0)))]
+            c = BRASS[max(0, min(4, shade))]
             if y in (0, 8) or x == 0:
                 c = BRASS[0]
             _put(img, x, y, c)
