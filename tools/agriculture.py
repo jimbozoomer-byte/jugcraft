@@ -1526,13 +1526,15 @@ FIREWORKS = {"shapes": {"bat": {"item": "bat_firework", "display": "Bat Burst Fi
 # Sky lanterns (SkyLanternItem, SkyLantern): used, a lantern is let go in front of its holder; it rises `rise` blocks a
 # tick and drifts with the wind (`wind` blocks a tick, its direction turning full circle every `wind_period` ticks, the
 # same for every lantern), burns `lifetime` ticks plus up to `lifetime_spread` more, dimming over the last `fade_ticks`.
-# Dyed in the crafting grid (minecraft:dyeable), named in an anvil (its wish). `per_craft` a craft. When
+# Dyed in the crafting grid as Minecraft 26.3 dyes leather armour (a `dye_recipe` recipe taking any dye) and washed
+# clean in a water cauldron (`wash_tag`); named in an anvil (its wish). `per_craft` a craft. When
 # `festival_lanterns` are let go within `festival_radius` blocks of each other in `festival_window` ticks (SkyLanterns),
 # players within the radius get Luck for `luck_ticks` and A Sky Full of Wishes; no second festival there for
 # `festival_cooldown` ticks; the server remembers at most `memory` releases. Mooncakes (MooncakeItem), `mooncake_count`
 # a batch in the Cooking Pot, give `mooncake_food`, and Luck for `mooncake_luck_ticks` when eaten outdoors on a
 # full-moon night (`night` on the overworld clock, the first night of eight).
 LANTERNS = {"item": "sky_lantern", "display": "Sky Lantern", "entity": "sky_lantern", "default_colour": 0xE8642A,
+            "dye_recipe": "minecraft:crafting_dye", "dye_group": "dyed_sky_lantern", "wash_tag": "minecraft:cauldron_can_remove_dye",
             "rise": 0.035, "wind": 0.015, "wind_period": 72000, "lifetime": 2400, "lifetime_spread": 600, "fade_ticks": 100,
             "per_craft": 2, "festival_lanterns": 8, "festival_radius": 32, "festival_window": 2400, "festival_cooldown": 24000,
             "luck_ticks": 6000, "memory": 256,

@@ -667,6 +667,10 @@ def check_rocketry():
                          ("BLOCKS_PER_TICK", rocketry.POST_BLOCKS_PER_TICK), ("CHECK_INTERVAL", rocketry.POST_CHECK_INTERVAL)):
         if f"int {const} = {value:_};" not in post and f"int {const} = {value};" not in post:
             err(f"RocketPost.{const} differs from tools/rocketry.py ({value})")
+    booster = (JAVA_ROOT / "rocketry" / "BoosterRailBlockEntity.java").read_text(encoding="utf-8")
+    for const in ("BOOST_TICKS", "CHARGES_PER_PROPELLANT", "MAX_CHARGES"):
+        if f"int {const} = {getattr(rocketry, const)};" not in booster:
+            err(f"BoosterRailBlockEntity.{const} differs from tools/rocketry.py ({getattr(rocketry, const)})")
     launcher = (JAVA_ROOT / "rocketry" / "RocketLauncherItem.java").read_text(encoding="utf-8")
     for const, value in (("COOLDOWN", rocketry.LAUNCHER_COOLDOWN), ("HOMING_RANGE", rocketry.HOMING_RANGE)):
         if f"int {const} = {value};" not in launcher:
@@ -3802,7 +3806,8 @@ def check_fireworks(java, main):
 
 def check_lanterns(java, main):
     """The sky lantern festival: SkyLantern.java, SkyLanterns.java and MooncakeItem.java match LANTERNS in
-    tools/agriculture.py; the lantern is registered, dyeable, named and crafted; every mooncake is registered with its
+    tools/agriculture.py; the lantern is registered, named and crafted, dyed by a dyeing recipe as leather is and washed
+    in a cauldron; every mooncake is registered with its
     food, named, drawn and baked in the Cooking Pot; the festival has its message and advancement."""
     lt = ag.LANTERNS
 
@@ -3833,9 +3838,18 @@ def check_lanterns(java, main):
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     if lang.get(f"item.jugcraft.{lt['item']}") != lt["display"] or "message.jugcraft.sky_lantern.festival" not in lang:
         err("The sky lantern has no name, or the festival no message")
-    dyeable = (load(DATA / "minecraft" / "tags" / "item" / "dyeable.json") or {}).get("values", [])
-    if f"jugcraft:{lt['item']}" not in dyeable:
-        err("The sky lantern must be in minecraft:dyeable, so it can be dyed")
+    # Minecraft 26.3 dyes leather by a recipe per item, not by the minecraft:dyeable tag; the lantern is dyed the same way.
+    dyed = load(DATA / "jugcraft" / "recipe" / f"{lt['item']}_dyed.json") or {}
+    if (dyed.get("type") != lt["dye_recipe"] or dyed.get("target") != f"jugcraft:{lt['item']}"
+            or dyed.get("dye") != "#minecraft:dyes" or dyed.get("result", {}).get("id") != f"jugcraft:{lt['item']}"):
+        err(f"The sky lantern needs its dyeing recipe ({lt['dye_recipe']}: the lantern and any dye give it back)")
+    wash_tag = lt["wash_tag"].split(":")
+    washes = (load(DATA / wash_tag[0] / "tags" / "item" / f"{wash_tag[1]}.json") or {}).get("values", [])
+    if f"jugcraft:{lt['item']}" not in washes:
+        err(f"The sky lantern must be in {lt['wash_tag']}, so a cauldron washes its dye out")
+    dyeable = DATA / "minecraft" / "tags" / "item" / "dyeable.json"
+    if dyeable.exists() and f"jugcraft:{lt['item']}" in (load(dyeable) or {}).get("values", []):
+        err("The sky lantern is dyed by its recipe; minecraft:dyeable doesn't dye in 26.3")
     recipe = load(DATA / "jugcraft" / "recipe" / f"{lt['item']}.json") or {}
     if recipe.get("result", {}).get("count") != lt["per_craft"]:
         err(f"The sky lantern's recipe must make {lt['per_craft']}")

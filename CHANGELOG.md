@@ -8,49 +8,49 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### Unmerged: The leaf blower, fall addition 30
+### The leaf blower, fall addition 30 (#139)
 - **Leaf Blower:** a dieselpunk electric leaf blower in the powered tools' olive drab, gunmetal and chrome, charged at the Charging Station (40,000 JE; 4 JE a tick blowing, 6 vacuuming).
 - **Blow** (hold use): a stream 8 blocks long blows items along and nudges mobs (other players only where PvP allows), puts out candles, and **herds leaf piles** a layer at a time into heaps against whatever stops them. Gone with the Wind.
 - **Vacuum** (sneak): draws items in and takes leaf piles and leaf litter up into your inventory, a layer for an item, for the composter.
 - Only where its user may build. Eight game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-leaf-blower).
 
-### Unmerged: The hot-air balloon fiesta, fall addition 29
+### The hot-air balloon fiesta, fall addition 29 (#139)
 - **Hot-air balloons** in three designs: Harvest Stripes, a Jack-o'-Lantern special shape with carved faces, and Harvest Moon with a witch across the moon. A wicker basket for four under a twin-coil burner; fuel it with coal, charcoal or coke.
 - **Fly by heat:** the pilot fires the burner (jump) and opens the vent (back). It can't be steered: it drifts on **winds that blow different ways at different heights**, eight layers from sea level, the lowest two roughly opposite, so you can fly out low and come home higher (The Box). Gauges show height, heat, wind and fuel.
 - **Pibals** to see the winds aloft; **Mooring Posts** to tether a balloon for rides; a **night glow** while the burners fire. Up, Up and Away, The Box, Mass Ascension.
 - Envelopes are smooth turned surfaces painted as 768 × 384 wraps; the rest at 64 × 64. Ten game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-hot-air-balloon-fiesta).
 
-### Unmerged: The piñata party, fall addition 28
+### The piñata party, fall addition 28 (#139)
 - **Three piñatas** of crepe-paper fringe: a jack-o'-lantern Pumpkin, a seven-pointed Star with tassels, and a winged Bat. Hang one from the underside of a block, and anyone can fill it with anything, up to nine stacks.
 - **Swing at it:** a charged swing is a hit (the red-and-white **Piñata Stick** counts two); it swings on its rope, tears at half its hits, and bursts in confetti on the last, spraying its contents out. Piñata Party.
 - **The Blindfold** blacks out your view but for a sliver; burst one blindfolded for Blind Luck.
 - Painted at 64 × 64. Five game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-piñata-party).
 
-### Unmerged: The Ferris wheel, fall addition 27
+### The Ferris wheel, fall addition 27 (#139)
 - **A fairground big wheel**, real-life sized: place the **Ferris Wheel** booth and the wheel rises over it, 16 blocks high, two lattice A-frames, red trussed rims with 128 bulbs, and eight cars (pumpkin, cranberry, mustard and spruce) seating two each.
 - **Kinetic power turns it:** a hand crank, shaft or engine against the booth; 12 KE a tick is full speed, a turn in 40 seconds. One player can crank while friends ride.
 - **Ride it:** use the booth to board the car at the bottom; sneak to get off and you're set down by the booth. A block in a car's way jams it. Round and Round, and Two to a Car for riding round together.
 - It takes the planned ghost train's place (the Haunted Hayride and Jump-Scare Trap already cover that). Painted at 64 × 64. Seven game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-ferris-wheel).
 
-### Unmerged: The fall fair midway, fall addition 26
+### The fall fair midway, fall addition 26 (#139)
 - **The High Striker:** a red-and-white fairground tower five blocks tall with lamps up its front and a bell on top. Hit its pad with a **Carnival Mallet**: the puck climbs as far as the blow was strong, lighting the lamps with a rising note. Ring the bell (a fully charged swing, better still a falling one) to win a prize (Ring the Bell).
 - **Ring Toss:** a crate of nine bottles. Toss **Toss Rings** at it from three blocks or more; one over a bottle's neck is a ringer and wins a prize (Ringer!).
 - **Plush prizes:** a pumpkin, a ghost, a bat, a black cat, a squirrel, a rare werewolf and the 1-in-102 **Jumbo Pumpkin Plush** (Jackpot). Squeeze one and it squeaks. Step Right Up for any prize.
 - Painted at 64 × 64. Eight game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-fall-fair-midway).
 
-### Unmerged: The Pumpkling, fall addition 25
+### The Pumpkling, fall addition 25 (#139)
 - **Wake a carved pumpkin:** use a Wisp in a Jar or a bottle of Ectoplasm on a hand-carved pumpkin with a face, and it hops up as a **Pumpkling**, a pet on little vine legs wearing the face you carved (Little Jack).
 - It **follows** you, comes to you from afar, and **sits and stays** when you use it with an empty hand. A torch lights its face (a soul torch, blue); treats heal it.
 - **It guards crops:** crows keep away from crops near it, as from a scarecrow. A glass bottle settles it back into its pumpkin.
 - Six game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-pumpkling).
 
-### Unmerged: Squirrels and acorns, fall addition 24
+### Squirrels and acorns, fall addition 24 (#139)
 - **Squirrels**, red and grey, come to forests and taiga by day. They bound about with their bushy tails, climb tree trunks, and bolt when hurt.
 - **Acorns** drop from oak and dark oak leaves. Plant one on grass for an oak sapling, or roast it into **Roasted Acorns**.
 - A squirrel takes an acorn lying near, carries it off and **buries it**; one in four grows into an oak. Nuts tempt and breed squirrels (Nuts About Squirrels).
 - Five game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#squirrels-and-acorns).
 
-### Unmerged: Full-moon werewolves, fall addition 23
+### Full-moon werewolves, fall addition 23 (#139)
 - **Werewolves** come out of forests and taiga only on full-moon nights, howling: hulking, hunched wolf-men with long snouts, open jaws, long clawed arms and glowing eyes. They leap at players and villagers, shrug off half of any blow and heal, and are gone at dawn.
 - **Three kinds, three tiers:**
   - the **Brown Werewolf** (I) raids livestock too, howls its pack to the hunt and flees when badly hurt;
@@ -60,40 +60,43 @@ No numbered release yet. Everything below is on `main`.
 - **Wolfsbane**, a wild flower of taiga and forest (plantable and potted), wards them off: they won't hunt anyone holding a sprig or near it (Not Tonight).
 - Each kind drops its own **pelt**: two make that kind's **rug**, or cut one into leather. Thirteen game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#full-moon-werewolves).
 
-### Unmerged: Flying broomstick, fall addition 22
+### Flying broomstick, fall addition 22 (#139)
 - **Flying Broomstick**: a Witch's Broom anointed with Flying Ointment and two feathers. Use it to get on; it flies where you look (forward, back to brake, jump to climb), up to about 10 blocks a second, a quarter faster in a witch hat. It hovers where you leave it.
 - **Ointment is its fuel**: 2 minutes of flight each, up to 6, burnt only in the air. Run dry, it sinks gently to the ground. Anoint a broom with Flying Ointment; sneak-use takes it back with its flight.
 - No fall damage while riding, and slow falling when you get off in the air. The server checks each broom's flight and throws off a rider who moves it impossibly.
 - Two advancements (Up and Away; Over the Moon, a challenge), five game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#the-flying-broomstick).
 
-### Unmerged: Hex brews, fall addition 21
+### Hex brews, fall addition 21 (#139)
 - **Hex brews at the Bubbling Cauldron.** Over a fire, a brew takes a hex ingredient: green and a brown mushroom make the **Shrinking Draught**, orange and beans the **Giant's Draught**, purple and a phantom membrane **Flying Ointment**. A hex brew fills three bottles.
 - **Shrinking** makes you half size for 3 minutes, small enough for one-block gaps. **Giant** makes you 1.6 times your size for 3 minutes, with a block more reach and a higher step, and is refused where there is no room to grow. A shrunk player with no room to grow back stays small until there is. **Flying Ointment** gives 30 seconds of slow falling.
 - Two advancements (Drink Me, Fee-Fi-Fo-Fum), three game tests, client screenshots. Record: [even-more-fall-additions.md](docs/features/even-more-fall-additions.md#hex-brews).
 
-### Unmerged: Graveyard pack 4, grounds
+### Graveyard pack 4, grounds (#139)
 - **Kerbed Grave** in polished granite and marble chippings with an open book; **Planted Grave** whose flower bed goes to weeds as it is neglected; **Memorial Bench** with an inscribed plaque that seats a player; **Open Grave**, freshly dug with boards, straps, a spoil heap, a spade and a waiting cross.
 - **Grave Vase**: small flowers make a bouquet of their colour (Flowers for the Dead). Fresh flowers calm the graves within 3 blocks to half the spirits; they wilt in about a day. An open grave stirs spirits twice as often.
 - **Cemetery Lamp Post**: three blocks of cast iron, its lantern lit after dark and out by day.
 - Game and client tests. Record: [graveyard.md](docs/features/graveyard.md#grounds).
 
-### Unmerged: Graveyard pack 3, buildings
+### Graveyard pack 3, buildings (#139)
 - **Family Mausoleum**: an 85-block marble temple front with a portico of Tuscan columns, the family name on its frieze, and a room inside with twelve crypt fronts that each take their own inscription, an altar under a stained-glass window and a sanctuary lamp.
 - **Lych Gate** of oak and slate on rubble walls, its tie beam inscribed; **Cemetery Gateway** of granite piers with lanterns and a wrought-iron arch bearing the cemetery's name; **Columbarium** of six inscribed niches.
 - **Bronze Mausoleum Door**, opened by hand. Doorways and passages are left open for doors and gates of your own.
 - Buildings weather, wax and stir spirits like headstones and break as one, keeping every inscription. Game and client tests. Record: [graveyard.md](docs/features/graveyard.md#buildings).
 
-### Unmerged: Graveyard pack 2, monuments
+### Graveyard pack 2, monuments (#139)
 - **Six monuments**: a four-block **Grand Obelisk** in granite, a **Draped Urn**, the **Angel at the Tomb** (a grieving angel kneeling at an altar tomb, two blocks wide), a four-block **Trumpeting Angel** on a fluted column, an iron **Mortsafe** caged over a grave, and a bronze **Faithful Hound** watching on its plinth. The angels, urn and hound are sculpted.
 - They weather, wax, take epitaphs and stir spirits like the headstones; the mortsafe rusts and the hound grows verdigris.
 - Three game tests, client screenshots. Record: [graveyard.md](docs/features/graveyard.md#monuments).
 
-### Unmerged: Graveyard pack 1, headstones
+### Graveyard pack 1, headstones (#139)
 - **Nine life-sized, finely carved headstones** in four stones: a **gothic** marble headstone, two New England **slates** (willow and urn; winged skull), a child's **lamb** stone, a **broken column**, a three-block **Celtic high cross**, a **rustic scroll** on a granite boulder, a two-block **table tomb** and a **ledger stone**.
 - **They weather**: clean, worn, mossy, overgrown (ivy at the last). A brush scrubs a stage off, honeycomb waxes them, an axe takes the wax off, bone meal ages them. The letters fade as the stone weathers.
 - **The Stonemason's Chisel** opens an epitaph screen of four lines, checked on the server; each line is cut as large as it fits. A named Name Tag cuts the first line. Epitaphs go with the broken headstone.
 - **Neglected graves stir restless spirits more often**; a well-kept churchyard is quiet.
 - Two advancements, four game tests, client screenshots. Record: [graveyard.md](docs/features/graveyard.md).
+
+### Test fix: each giant tree's own fewest logs (#157)
+- `BiomeGameTests.bigTreesGrow` holds each giant to the fewest logs it can grow: a giant redwood 85, a giant mahogany 37 (a trunk two wide and at least 22 or 10 tall). #134's single floor of 30 let a stunted redwood pass. Test only; nothing in game changes. Record: [big-trees-and-rainforests.md](docs/features/big-trees-and-rainforests.md).
 
 ### Unmerged: Arms motion, batch 43
 - **New animations for every arm of batch 42**, seen by everyone and in first person.
@@ -102,6 +105,16 @@ No numbered release yet. Everything below is on `main`.
   - The spear and lance keep vanilla's arms and add the body.
 - Keys joined by Hermite splines so the motion flows through them. Timed on vanilla's own swing, so there is no networking. Client only, with no allocation per frame and the arms only beyond 32 blocks; four client mixins.
 - Learned from the combat animation mods and packs the owner sent (Better Combat, Malfu, Player Animation Library, Fresh Animations and Fresh Moves, Mo' Bends, NdRz's weapons); nothing of theirs is used. Record: [arms-motion.md](docs/features/arms-motion.md).
+
+### Unmerged: Liquid fuels, batch 43
+- **RP-1 kerosene**, hydrocracked from heavy fuel oil and hydrogen in the catalytic cracker. It is jet fuel too, burning in the gas turbine and the advanced engine.
+- **Cryogenic Liquefier**: condenses oxygen into **liquid oxygen**.
+- **Kerosene and liquid oxygen tanks** (chemical reactor) make **liquid rocket motors**: three rocket motors from a tank of each and two nozzles, with no solid propellant.
+- Advancement, handbook pages, game test. Record: [liquid-fuels.md](docs/features/liquid-fuels.md).
+
+### Unmerged: Booster rails, batch 42
+- **Booster rail:** a powered rail with rocket thrusters, loaded with solid propellant (8 boosts each). It kicks a minecart to full speed, from a standstill or uphill, and holds it there for 10 seconds, so long tracks and climbs need far fewer powered rails. Minecarts keep their normal speed limit.
+- Handbook page, game test. Record: [booster-rails.md](docs/features/booster-rails.md).
 
 ### Unmerged: Rocket launcher, batch 41
 - **Rocket launcher** with **high-explosive** and **homing rockets** (rocket workshop). Rockets fly straight, burst on impact and hurt living things only: no block is ever broken. Homing rockets lock on to the hostile mob nearest the crosshair and steer into it.
@@ -211,6 +224,9 @@ No numbered release yet. Everything below is on `main`.
 - **Loot:** the cluster and cabinet use the 26.x loot format (#34 fixed the other tables on main), and new game tests check ore Silk Touch and Fortune and double slabs.
 - **Dedicated-server check (CI):** a real client joins the game's own dedicated server, opens a machine and trades with the Retro Trader over the network, leaves and rejoins; and a world is saved and reopened with its trader, machine contents and cabinet intact. The two-client checklist is in [docs/TESTING.md](docs/TESTING.md#dedicated-server-and-two-clients).
 - Seventeen game tests, eight client screenshots, a "Dead Pixels" advancement. Records: [pixel-hollows.md](docs/features/pixel-hollows.md), [retro-trader.md](docs/features/retro-trader.md).
+
+### Fix: dyeing sky lanterns (pull request pending)
+- **Sky lanterns take dye again.** Minecraft 26.3 dyes leather by a recipe per item, not by the `minecraft:dyeable` tag, so the lantern had no way to be dyed. It now has its own dyeing recipe (a lantern and any dye) and a water cauldron washes the dye out. A new game test checks both.
 
 ### Agriculture: fall additions 20, the Día de Muertos ofrenda (pull request pending, stacked on the theremin)
 - **Ofrenda:** a three-tier home altar under an embroidered cloth. Set out up to six offerings; with flowers, a light, bread, a sugar skull and a drink it is complete: it glows and, at night, welcomes the restless spirits near, who come to it and show themselves, calm (Remembered).

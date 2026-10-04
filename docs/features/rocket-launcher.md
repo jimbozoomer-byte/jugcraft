@@ -56,4 +56,4 @@ Not applicable.
 
 ## Rollout and open questions
 - A proper 3D rocket model in flight could replace the item sprite.
-- Next rocketry batches: booster rails, and liquid fuels (kerosene, liquid oxygen).
+- Next rocketry batches: booster rails (batch 42, [booster-rails.md](booster-rails.md)), and liquid fuels (kerosene, liquid oxygen).

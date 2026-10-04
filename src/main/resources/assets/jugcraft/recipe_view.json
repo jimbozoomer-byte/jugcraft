@@ -4408,6 +4408,28 @@
         {
           "in": [
             [
+              "jugcraft:kerosene_tank",
+              1
+            ],
+            [
+              "jugcraft:lox_tank",
+              1
+            ],
+            [
+              "jugcraft:rocket_nozzle",
+              2
+            ]
+          ],
+          "out": [
+            "jugcraft:rocket_motor",
+            3
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
               "jugcraft:rocket_motor",
               1
             ],
@@ -4719,6 +4741,36 @@
           ],
           "results": [],
           "ticks": 120
+        },
+        {
+          "items": [
+            [
+              "jugcraft:cracking_catalyst",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:heavy_fuel_oil",
+              1000
+            ],
+            [
+              "jugcraft:hydrogen",
+              200
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:kerosene",
+              800
+            ],
+            [
+              "jugcraft:refinery_gas",
+              100
+            ]
+          ],
+          "results": [],
+          "ticks": 160
         }
       ]
     },
@@ -5845,6 +5897,50 @@
             ]
           ],
           "ticks": 120
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rocket_casing",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:kerosene",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:kerosene_tank",
+              1
+            ]
+          ],
+          "ticks": 60
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rocket_casing",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:liquid_oxygen",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:lox_tank",
+              1
+            ]
+          ],
+          "ticks": 60
         }
       ]
     },
@@ -6198,6 +6294,29 @@
             ]
           ],
           "ticks": 100
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:cryogenic_liquefier",
+      "type": "liquefaction",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:oxygen",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:liquid_oxygen",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 80
         }
       ]
     }
