@@ -12,11 +12,13 @@ from decor3_data import fitted
 from decor7_data import scaled
 from graveyard import FEATURE, STAGES, HEADSTONES, STONES, EPITAPH, CHISEL_RECIPE, PARTS
 import graveyard_models as gm
+import graveyard_grounds as gg
 
 MODELS = {"gothic": gm.gothic, "willow_urn": gm.willow_urn, "winged_skull": gm.winged_skull, "lamb": gm.lamb,
           "broken_column": gm.broken_column, "celtic_cross": gm.celtic_cross, "scroll": gm.scroll, "table_tomb": gm.table_tomb,
           "ledger": gm.ledger, "obelisk": gm.obelisk, "draped_urn": gm.draped_urn, "angel_of_grief": gm.angel_of_grief,
-          "trumpet_angel": gm.trumpet_angel, "mortsafe": gm.mortsafe, "hound": gm.hound}
+          "trumpet_angel": gm.trumpet_angel, "mortsafe": gm.mortsafe, "hound": gm.hound, "kerbed_grave": gg.kerbed_grave,
+          "planted_grave": gg.planted_grave, "memorial_bench": gg.memorial_bench, "open_grave": gg.open_grave}
 AXES = {"north": None, "south": None, "east": None, "west": None}
 FACE_AXES = {0: ("west", "east"), 1: ("down", "up"), 2: ("north", "south")}
 
@@ -24,14 +26,16 @@ FACE_AXES = {0: ("west", "east"), 1: ("down", "up"), 2: ("north", "south")}
 def textures(stone, stage, upper):
     """The texture variables for `stone` at `stage`; above the first block every face is moss-free from the ground."""
     if stone == "iron":
-        return {"iron": f"gy_iron_{stage}", "soil": "minecraft:block/coarse_dirt", "ivy": "gy_ivy"}
+        return {"iron": f"gy_iron_{stage}", "soil": "minecraft:block/coarse_dirt", "ivy": "gy_ivy", "oak": f"gy_oak_{stage}",
+                "bronze": f"gy_bronze_{stage}"}
     ground = f"{stage}_upper" if upper else stage
     out = {"stone": f"gy_{stone}_{ground}", "top": f"gy_{stone}_{stage}_upper", "relief": f"gy_{stone}_relief_{ground}",
            "relief_top": f"gy_{stone}_relief_{stage}_upper", "ivy": "gy_ivy"}
     if stone == "granite":
         out.update({"rough": f"gy_granite_rough_{stage}", "knot": f"gy_granite_knot_{stage}_upper"})
-    # Metals weather with the stone they stand on; the soil in a mortsafe is vanilla's coarse dirt.
-    out.update({"iron": f"gy_iron_{stage}", "bronze": f"gy_bronze_{stage}", "soil": "minecraft:block/coarse_dirt"})
+    # Metals and timber weather with the stone they stand on; the soil in a mortsafe is vanilla's coarse dirt.
+    out.update({"iron": f"gy_iron_{stage}", "bronze": f"gy_bronze_{stage}", "soil": "minecraft:block/coarse_dirt", "oak": f"gy_oak_{stage}",
+                "chippings": f"gy_chippings_{stage}", "bed": f"gy_flower_bed_{stage}", "pit": "gy_pit", "straps": "gy_straps"})
     return out
 
 
@@ -114,7 +118,7 @@ def part_model(headstone, part, stage):
     tex = textures(info["stone"], stage, upper=cells[part][1] > 0)
     used = {face["texture"][1:] for e in elements for face in e["faces"].values()}
     tex = {k: v for k, v in tex.items() if k in used}
-    particle = tex.get("stone") or tex.get("rough") or tex.get("iron") or next(iter(tex.values()))
+    particle = next((tex[k] for k in ("stone", "rough", "iron") if k in tex), None) or next(v for v in tex.values() if ":" not in v)
     return fitted(block_model(tex, elements, particle))
 
 
@@ -131,7 +135,7 @@ def item_model(headstone):
     factor = min(1.0, 16 / max(width, height, length))
     offset = ((16 - width * factor) / 2 if width > 16 else 8 * (1 - factor), 0,
               (16 - length * factor) / 2 if length > 16 else 8 * (1 - factor))
-    particle = tex.get("stone") or tex.get("rough") or tex.get("iron") or next(iter(tex.values()))
+    particle = next((tex[k] for k in ("stone", "rough", "iron") if k in tex), None) or next(v for v in tex.values() if ":" not in v)
     return fitted(block_model(tex, scaled(elements, factor, offset), particle))
 
 
@@ -491,6 +495,7 @@ def building_assets(root, write, lang):
         layouts.append(building_layout(building))
     write(root.parent.parent / MOD / "graveyard_buildings.json", layouts)
     door_assets(root, write, lang)
+    vase_assets(root, write, lang)
 
 
 def _particle(tex, used):
@@ -563,6 +568,7 @@ def building_loot(out, write):
             {"type": "minecraft:survives_explosion"},
             {"type": "minecraft:match_block", "blocks": rid(door), "state": {"half": "lower"}}]},
         "entries": [{"type": "minecraft:item", "name": rid(door)}], "rolls": 1}], "random_sequence": f"{MOD}:blocks/{door}"})
+    vase_loot(out, write)
 
 
 def building_recipes(out, write, conditions):
@@ -571,6 +577,7 @@ def building_recipes(out, write, conditions):
         write(out / f"{building}.json", {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped",
                                          "category": "building", "pattern": recipe["pattern"], "key": recipe["key"],
                                          "result": {"id": rid(building), "count": recipe.get("count", 1)}})
+    vase_recipes(out, write, conditions)
 
 
 def building_tags(tags):
@@ -582,3 +589,91 @@ def building_tags(tags):
     tags.add("block", "minecraft:mineable/pickaxe", rid(door))
     for registry in ("block", "item"):
         tags.add(registry, "minecraft:doors", rid(door))
+    vase_tags(tags)
+
+
+# ---------------------------------------------------------------- pack 4: the grave vase and the lamp post
+from graveyard import GRAVE_VASE, LAMP_POST
+
+
+def vase_assets(root, write, lang):
+    """The grave vase: one model empty and one for each bouquet, fresh and wilted; its blockstate by flowers and
+    wilting; its item, the empty vase."""
+    vase = GRAVE_VASE["block"]
+    models = root / "models" / "block"
+    tex = {"rough": "gy_granite_rough_clean", "stone": "gy_granite_clean", "top": "gy_granite_clean", "bronze": "gy_bronze_worn",
+           "pit": "gy_pit", "leaves": "gy_leaves"}
+
+    def model(elements, petals):
+        t = dict(tex)
+        if petals:
+            t["petals"] = f"gy_petals_{petals}"
+        used = {face["texture"][1:] for e in elements for face in e["faces"].values()}
+        return fitted(block_model({k: v for k, v in t.items() if k in used}, elements, "gy_bronze_worn"))
+
+    write(models / f"{vase}.json", model(gg.grave_vase(), None))
+    variants = {"flowers=none,wilted=false": {"model": rid(f"block/{vase}")}, "flowers=none,wilted=true": {"model": rid(f"block/{vase}")}}
+    for colour in GRAVE_VASE["colours"]:
+        write(models / f"{vase}_{colour}.json", model(gg.grave_vase(colour), colour))
+        write(models / f"{vase}_{colour}_wilted.json", model(gg.grave_vase(colour, wilted=True), "wilted"))
+        variants[f"flowers={colour},wilted=false"] = {"model": rid(f"block/{vase}_{colour}")}
+        variants[f"flowers={colour},wilted=true"] = {"model": rid(f"block/{vase}_{colour}_wilted")}
+    write(root / "blockstates" / f"{vase}.json", {"variants": variants})
+    write(root / "items" / f"{vase}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{vase}")}})
+    lang[f"block.{MOD}.{vase}"] = GRAVE_VASE["display"]
+    lang["message.jugcraft.grave_vase.not_a_flower"] = "Only small flowers go in a grave vase"
+
+    post = LAMP_POST["block"]
+    whole = {True: gg.lamp_post(True), False: gg.lamp_post(False)}
+    variants = {}
+    for part in range(3):
+        for lit_now in (False, True):
+            frags = grid_cut(whole[lit_now], (1, 3, 1)).get((0, part, 0), [])
+            name = f"{post}_{part}" + ("_lit" if lit_now and part == 2 else "")
+            if lit_now and part != 2:
+                continue
+            t = {"iron": "gy_iron_clean", "lantern": "gy_lantern_glass" if lit_now else "gy_lantern_unlit"}
+            used = {face["texture"][1:] for e in frags for face in e["faces"].values()}
+            write(models / f"{name}.json", fitted(block_model({k: v for k, v in t.items() if k in used}, moved(frags, (0, part, 0)), "gy_iron_clean")))
+        for facing in HORIZONTAL:
+            for lit_now in ("false", "true"):
+                name = f"{post}_{part}" + ("_lit" if lit_now == "true" and part == 2 else "")
+                variants[f"facing={facing},lit={lit_now},part={part}"] = turned(rid(f"block/{name}"), facing)
+    write(root / "blockstates" / f"{post}.json", {"variants": variants})
+    small = scaled(whole[False], 16 / 48, (16 / 3, 0, 16 / 3))
+    write(models / f"{post}_item.json", fitted(block_model({"iron": "gy_iron_clean", "lantern": "gy_lantern_unlit"}, small, "gy_iron_clean")))
+    write(root / "items" / f"{post}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{post}_item")}})
+    lang[f"block.{MOD}.{post}"] = LAMP_POST["display"]
+
+
+def vase_loot(out, write):
+    vase, post = GRAVE_VASE["block"], LAMP_POST["block"]
+    write(out / f"{vase}.json", {"type": "minecraft:block", "pools": [{
+        "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": rid(vase)}], "rolls": 1}],
+        "random_sequence": f"{MOD}:blocks/{vase}"})
+    write(out / f"{post}.json", {"type": "minecraft:block", "pools": [{
+        "condition": {"type": "minecraft:all_of", "terms": [
+            {"type": "minecraft:survives_explosion"},
+            {"type": "minecraft:match_block", "blocks": rid(post), "state": {"part": "0"}}]},
+        "entries": [{"type": "minecraft:item", "name": rid(post)}], "rolls": 1}], "random_sequence": f"{MOD}:blocks/{post}"})
+
+
+def vase_recipes(out, write, conditions):
+    for info in (GRAVE_VASE, LAMP_POST):
+        recipe = info["recipe"]
+        write(out / f"{info['block']}.json", {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped",
+                                              "category": "building", "pattern": recipe["pattern"], "key": recipe["key"],
+                                              "result": {"id": rid(info["block"]), "count": 1}})
+
+
+def vase_tags(tags):
+    for info in (GRAVE_VASE, LAMP_POST):
+        tags.add("block", "minecraft:mineable/pickaxe", rid(info["block"]))
+    for colour, flowers in GRAVE_VASE["flowers"].items():
+        for flower in flowers:
+            tags.add("item", f"jugcraft:grave_flowers/{colour}", flower)
+        tags.add("item", "jugcraft:grave_flowers", f"#jugcraft:grave_flowers/{colour}")
+    for flower in GRAVE_VASE["others"]:
+        tags.add("item", "jugcraft:grave_flowers", flower)
+    # Vanilla's small flowers, and those of any pack that adds to them.
+    tags.add("item", "jugcraft:grave_flowers", {"id": "#minecraft:small_flowers", "required": False})

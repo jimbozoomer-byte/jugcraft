@@ -74,6 +74,10 @@ public class HeadstoneBlock extends BaseEntityBlock {
 	static final int[][] TALL4 = {{0, 0, 0}, {0, 1, 0}, {0, 2, 0}, {0, 3, 0}};
 	/** The Angel at the Tomb: the altar's two halves and, above the one to the placer's right, the angel's wings. */
 	static final int[][] WIDE = {{0, 0, 0}, {1, 0, 0}, {1, 1, 0}};
+	/** Two blocks side by side, the second to the placer's right (the memorial bench). */
+	static final int[][] WIDE2 = {{0, 0, 0}, {1, 0, 0}};
+	/** How much more often an open grave stirs a spirit than other graves. */
+	public static final float OPEN_GRAVE_STIR = 2.0F;
 
 	/** A stone: the colour of letters cut into it, and the colour they fade towards as it weathers. */
 	public enum Stone {
@@ -139,6 +143,11 @@ public class HeadstoneBlock extends BaseEntityBlock {
 		/** The light {@code part} gives (a mausoleum's lamp, a gateway's lanterns). */
 		default int light(int part) {
 			return 0;
+		}
+
+		/** How much more often than other graves of its stage it stirs a spirit (an open grave the most). */
+		default float stir() {
+			return 1.0F;
 		}
 
 		/** How many blocks tall it stands above part 0. */
@@ -207,7 +216,20 @@ public class HeadstoneBlock extends BaseEntityBlock {
 				new Text(false, 8.0F, 6.9F, 0.4F, 5.4F, 2.8F, 1.0F / 96)),
 		FAITHFUL_HOUND("faithful_hound", Stone.GRANITE, SINGLE,
 				new double[][][] {{{1, 0, 2, 15, 6.2, 14}, {1, 6.2, 4.5, 14.5, 12.5, 12}}},
-				new Text(false, 8.0F, 3.3F, 2.6F, 11.0F, 3.6F, 1.0F / 80));
+				new Text(false, 8.0F, 3.3F, 2.6F, 11.0F, 3.6F, 1.0F / 80)),
+		// Pack 4: the grounds.
+		KERBED_GRAVE("kerbed_grave", Stone.GRANITE, LONG,
+				new double[][][] {{{0.6, 0, 0.1, 15.4, 3, 16}}, {{0.6, 0, 0, 15.4, 3, 15.9}, {3.4, 3, 7.4, 12.6, 4.8, 13.8}}},
+				new Text(true, 8.0F, 4.8F, 26.6F, 7.6F, 5.2F, 1.0F / 64)),
+		PLANTED_GRAVE("planted_grave", Stone.SANDSTONE, LONG,
+				new double[][][] {{{0.6, 0, 0.1, 15.4, 2.6, 16}}, {{0.6, 0, 0, 15.4, 2.6, 15.9}}},
+				new Text(true, 8.0F, 2.6F, 27.1F, 5.4F, 3.4F, 1.0F / 80)),
+		MEMORIAL_BENCH("memorial_bench", Stone.IRON, WIDE2,
+				new double[][][] {{{0, 0, 2, 15.6, 7.6, 12.2}, {0, 7.6, 9.6, 15.8, 16, 11}}, {{0.4, 0, 2, 16, 7.6, 12.2}, {0.2, 7.6, 9.6, 16, 16, 11}}},
+				new Text(false, 0.0F, 13.8F, 9.4F, 13.0F, 2.2F, 1.0F / 90)),
+		OPEN_GRAVE("open_grave", Stone.GRANITE, LONG,
+				new double[][][] {{{0, 0, 1, 6.4, 5, 16}, {5.4, 0, 8, 16, 1.2, 10.4}}, {{0, 0, 0, 6.2, 4.4, 14}, {5.4, 0, 4, 16, 1.2, 6.4}, {7.4, 0, 14, 14, 13, 15.2}}},
+				new Text(false, 10.7F, 6.7F, 29.6F, 4.4F, 2.6F, 1.0F / 80));
 
 		public final String id;
 		public final Stone stone;
@@ -257,6 +279,11 @@ public class HeadstoneBlock extends BaseEntityBlock {
 		@Override
 		public VoxelShape shape(int part, Direction facing) {
 			return shapes[part][facing.get2DDataValue()];
+		}
+
+		@Override
+		public float stir() {
+			return this == OPEN_GRAVE ? OPEN_GRAVE_STIR : 1.0F;
 		}
 
 		/** A box given facing north, turned to face {@code facing} about the block's centre. */
@@ -417,7 +444,10 @@ public class HeadstoneBlock extends BaseEntityBlock {
 		return part(state) == 0;
 	}
 
-	/** Weathers now and then; at night the grave may stir, the more often the more neglected. */
+	/**
+	 * Weathers now and then; at night the grave may stir, the more often the more neglected (and for an open grave,
+	 * more often still), half as often while fresh flowers stand in a grave vase near it.
+	 */
 	@Override
 	protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		int stage = state.getValue(WEATHERING);
@@ -427,7 +457,12 @@ public class HeadstoneBlock extends BaseEntityBlock {
 				setWeather(level, pos, stage + 1, false);
 			}
 		}
-		Spirits.stir(level, pos, random, STIR[stage]);
+		float factor = STIR[stage] * layout.stir();
+		// Spirits only rise at night, so the vases about it are only looked at then.
+		if (MourningAngelBlock.night(level) && GraveVaseBlock.calms(level, pos)) {
+			factor *= GraveVaseBlock.CALM;
+		}
+		Spirits.stir(level, pos, random, factor);
 	}
 
 	/** The brush, honeycomb, axe, bone meal, chisel and a named Name Tag; anything else does what it would anywhere. */

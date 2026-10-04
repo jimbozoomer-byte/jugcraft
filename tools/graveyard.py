@@ -46,6 +46,8 @@ LONG = [(0, 0, 0), (0, 0, 1)]
 TALL4 = [(0, 0, 0), (0, 1, 0), (0, 2, 0), (0, 3, 0)]
 # The Angel at the Tomb: the altar's two halves and, above the left one (the placer's right), her wings.
 WIDE = [(0, 0, 0), (1, 0, 0), (1, 1, 0)]
+# Two blocks side by side, the second to the placer's right (the memorial bench).
+WIDE2 = [(0, 0, 0), (1, 0, 0)]
 
 HEADSTONES = {
     "gothic_headstone": {
@@ -133,6 +135,27 @@ HEADSTONES = {
         "shapes": [[(1, 0, 2, 15, 6.2, 14), (1, 6.2, 4.5, 14.5, 12.5, 12)]],
         "text": {"face": "FRONT", "x": 8.0, "y": 3.3, "z": 2.6, "width": 11.0, "height": 3.6, "max_scale": 1 / 80},
         "recipe": {"pattern": ["BBB", "GGG"], "key": {"B": "#c:ingots/bronze", "G": "minecraft:polished_granite"}}},
+    # ---------------------------------------------------------------- pack 4: the grounds
+    "kerbed_grave": {
+        "display": "Kerbed Grave", "stone": "granite", "model": "kerbed_grave", "cells": LONG, "overgrowth": "slab", "pack": 4,
+        "shapes": [[(0.6, 0, 0.1, 15.4, 3.0, 16)], [(0.6, 0, 0, 15.4, 3.0, 15.9), (3.4, 3.0, 7.4, 12.6, 4.8, 13.8)]],
+        "text": {"face": "TOP", "x": 8.0, "y": 4.8, "z": 26.6, "width": 7.6, "height": 5.2, "max_scale": 1 / 64},
+        "recipe": {"pattern": ["GCG", "G G"], "key": {"G": "minecraft:polished_granite", "C": "minecraft:calcite"}}},
+    "planted_grave": {
+        "display": "Planted Grave", "stone": "sandstone", "model": "planted_grave", "cells": LONG, "overgrowth": "slab", "pack": 4,
+        "shapes": [[(0.6, 0, 0.1, 15.4, 2.6, 16)], [(0.6, 0, 0, 15.4, 2.6, 15.9)]],
+        "text": {"face": "TOP", "x": 8.0, "y": 2.6, "z": 27.1, "width": 5.4, "height": 3.4, "max_scale": 1 / 80},
+        "recipe": {"pattern": ["SFS", "SDS"], "key": {"S": "minecraft:smooth_sandstone", "F": "#jugcraft:grave_flowers", "D": "minecraft:dirt"}}},
+    "memorial_bench": {
+        "display": "Memorial Bench", "stone": "iron", "model": "memorial_bench", "cells": WIDE2, "overgrowth": "small", "pack": 4,
+        "shapes": [[(0, 0, 2.0, 15.6, 7.6, 12.2), (0, 7.6, 9.6, 15.8, 16.0, 11.0)], [(0.4, 0, 2.0, 16, 7.6, 12.2), (0.2, 7.6, 9.6, 16, 16.0, 11.0)]],
+        "text": {"face": "FRONT", "x": 0.0, "y": 13.8, "z": 9.4, "width": 13.0, "height": 2.2, "max_scale": 1 / 90},
+        "recipe": {"pattern": ["SBS", "I I"], "key": {"S": "minecraft:oak_slab", "B": "#c:ingots/bronze", "I": "minecraft:iron_ingot"}}},
+    "open_grave": {
+        "display": "Open Grave", "stone": "granite", "model": "open_grave", "cells": LONG, "overgrowth": "slab", "pack": 4,
+        "shapes": [[(0, 0, 1.0, 6.4, 5.0, 16), (5.4, 0, 8.0, 16, 1.2, 10.4)], [(0, 0, 0, 6.2, 4.4, 14.0), (5.4, 0, 4.0, 16, 1.2, 6.4), (7.4, 0, 14.0, 14.0, 13.0, 15.2)]],
+        "text": {"face": "FRONT", "x": 10.7, "y": 6.7, "z": 29.6, "width": 4.4, "height": 2.6, "max_scale": 1 / 80},
+        "recipe": {"pattern": ["P S", "DDD"], "key": {"P": "minecraft:oak_planks", "S": "minecraft:iron_shovel", "D": "minecraft:coarse_dirt"}}},
 }
 
 # ---------------------------------------------------------------- pack 3: buildings
@@ -200,12 +223,37 @@ BUILDINGS = {
 MAUSOLEUM_DOOR = {"id": "bronze_mausoleum_door", "display": "Bronze Mausoleum Door",
                   "recipe": {"pattern": ["BB", "BG", "BB"], "key": {"B": "#c:ingots/bronze", "G": "minecraft:glass_pane"}, "count": 2}}
 
+# Pack 4: how much more often a grave of each kind stirs a spirit than the rest (HeadstoneBlock.Layout.stir): an open
+# grave twice as often. And the grave vase: fresh flowers in one within `calm_reach` blocks of a grave halve its stirring
+# (`calm`); each random tick fresh flowers wilt `wilt_chance` of the time (about a day's play). Which flowers make
+# which bouquet: item tags jugcraft:grave_flowers/<colour>; any other small flower is mixed.
+STIR_BY_KIND = {"open_grave": 2.0}
+GRAVE_VASE = {"block": "grave_vase", "display": "Grave Vase", "calm": 0.5, "calm_reach": 3, "wilt_chance": 0.05,
+              "colours": ["white", "red", "yellow", "purple", "mixed"],
+              "flowers": {"white": ["minecraft:lily_of_the_valley", "minecraft:oxeye_daisy", "minecraft:white_tulip", "minecraft:azure_bluet"],
+                          "red": ["minecraft:poppy", "minecraft:red_tulip", "jugcraft:red_mum", "jugcraft:hibiscus"],
+                          "yellow": ["minecraft:dandelion", "minecraft:orange_tulip", "jugcraft:yellow_mum", "jugcraft:orange_mum",
+                                     "jugcraft:goldenrod", "jugcraft:marigold", "jugcraft:orange_cosmos"],
+                          "purple": ["minecraft:allium", "minecraft:cornflower", "minecraft:blue_orchid", "jugcraft:lavender", "jugcraft:heather",
+                                     "jugcraft:purple_mum", "jugcraft:frost_iris"]},
+              # Every flower the vase takes (jugcraft:grave_flowers): the colours' tags, these, and vanilla's small flowers.
+              "others": ["minecraft:pink_tulip", "minecraft:torchflower", "minecraft:wither_rose", "minecraft:open_eyeblossom",
+                         "minecraft:closed_eyeblossom"],
+              "recipe": {"pattern": ["B B", " B ", " G "], "key": {"B": "#c:ingots/bronze", "G": "minecraft:polished_granite"}}}
+# The cemetery lamp post: three blocks tall, its lamp lit while it is dark outside, looked at every `check_ticks`.
+LAMP_POST = {"block": "cemetery_lamp_post", "display": "Cemetery Lamp Post", "light": 15, "check_ticks": 100,
+             "recipe": {"pattern": ["ILI", " I ", " I "], "key": {"I": "minecraft:iron_ingot", "L": "minecraft:lantern"}}}
+# The memorial bench: where the sitter sits, in blocks above its base.
+BENCH_SEAT = 0.475
+
 # Advancements granted from code (agriculture.HALLOWEEN_ADVANCEMENTS).
 ADVANCEMENTS = {
     "here_lies": {"icon": "jugcraft:stonemasons_chisel", "title": "Here Lies…",
                   "description": "Cut an epitaph into a headstone with a Stonemason's Chisel", "frame": "task"},
     "groundskeeper": {"icon": "jugcraft:gothic_headstone", "title": "Groundskeeper",
                       "description": "Scrub an overgrown headstone back to clean stone with a brush", "frame": "task"},
+    "flowers_for_the_dead": {"icon": "jugcraft:grave_vase", "title": "Flowers for the Dead",
+                             "description": "Put fresh flowers in a grave vase", "frame": "task"},
 }
 
 # Every headstone's blockstate has parts 0 to PARTS - 1 (HeadstoneBlock.PART), however many it uses.
@@ -220,11 +268,11 @@ def parts(headstone):
 
 
 def blocks():
-    return list(HEADSTONES) + list(BUILDINGS) + [MAUSOLEUM_DOOR["id"]]
+    return list(HEADSTONES) + list(BUILDINGS) + [MAUSOLEUM_DOOR["id"], GRAVE_VASE["block"], LAMP_POST["block"]]
 
 
 def items():
-    return list(HEADSTONES) + [EPITAPH["chisel"]] + list(BUILDINGS) + [MAUSOLEUM_DOOR["id"]]
+    return list(HEADSTONES) + [EPITAPH["chisel"]] + list(BUILDINGS) + [MAUSOLEUM_DOOR["id"], GRAVE_VASE["block"], LAMP_POST["block"]]
 
 
 def textures():
@@ -238,4 +286,6 @@ def textures():
     out += [f"gy_{metal}_{stage}" for metal in ("iron", "bronze") for stage in STAGES]
     out += [f"gy_{wood}_{stage}" for wood in ("oak", "roof_slate") for stage in STAGES]
     out += ["gy_stained_glass", "gy_marble_floor", "gy_lamp_glass", "gy_lantern_glass", "gy_door_glass"]
+    out += [f"gy_{kind}_{stage}" for kind in ("chippings", "flower_bed") for stage in STAGES]
+    out += ["gy_pit", "gy_straps", "gy_leaves", "gy_lantern_unlit"] + [f"gy_petals_{c}" for c in GRAVE_VASE["colours"] + ["wilted"]]
     return out + ["gy_ivy"]
