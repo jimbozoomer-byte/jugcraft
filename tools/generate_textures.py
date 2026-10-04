@@ -1373,6 +1373,8 @@ def machines():
     mech.draw_all(save)
     import landship
     landship.draw_all(save)
+    import artillery
+    artillery.draw_all(save)
     import plastic
     plastic.draw_all(save)
     save(conveyor_frame(0), "block", "conveyor_belt")
