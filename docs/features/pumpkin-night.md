@@ -1,6 +1,6 @@
 # Pumpkin Night
 
-Status: implemented in source; CI verification below. Not yet played by hand, and the Farm Stand needs a two-client playtest before it is called done.
+Status: implemented. CI builds it and runs its game tests and client screenshots (below); not yet played by hand, and the Farm Stand needs a two-client playtest before it is called done.
 Proposal issue: none. The owner asked for it directly on 4 October 2026 ("Lets come up with another 20 very detailed well thought out additions to add for the halloween / fall season using the first 3 images for ideas of prop sets … lets do them piece by piece maybe 5 at a time"). These are prop sets 16–20 of the [Witching Season plan](witching-season.md), drawn from the reference pictures' red and green pumpkins, pumpkins on display, curling stems, the scarecrow in a tattered cloak, and the jack-o'-lanterns.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier. Every recipe takes early materials (pumpkins, jack-o'-lanterns, a note block, planks, wool, a chest, hay bales, sticks, string, vines, leaves, clay, gold nuggets, amethyst shards). The Farm Stand trades in Jugs, the walled town's existing currency.
@@ -149,7 +149,14 @@ Primary specialty and supported player role: farming and trade, with building an
 - **Originality**: all original. The look follows the owner's reference pictures, and nothing is traced from them.
 
 ## Verification
-Pending: CI's Build workflow on this branch.
+CI's Build workflow passed on 77595bcd (run 37236981086):
+- the generated data matched and the audit passed;
+- the mod built, and all 808 server game tests passed (these thirteen among them);
+- all three client shards passed and took the screenshots in [the gallery](../branches/AGRICULTURE.md#pumpkin-night).
+
+Runs before it found, and the commits after them fixed:
+- 37235152438: the main sources didn't compile against 26.3 (`BlockPos.getCenter`, `MusicBoxBlock.pitch`, `SimpleContainer.addListener` and `PushReaction.DESTROY` don't exist, and `SHOVEL_FLATTEN` is a holder);
+- 37235331453: every new test passed, but the Halloween Peddler's data test still counted thirteen trades where the new seeds made fifteen; the audit now holds that count to `tools/agriculture.py`. Its screenshots also showed the effigy's blaze hidden by his body and the stand's board hiding a price tag, both fixed for the passing run.
 
 - `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`: pass locally (1389 IDs). The audit's new check covers:
   - Java's numbers against `tools/decor20.py`: the server's rules, and where the client draws the faces, the goods, the chalk and the effigy's head;
