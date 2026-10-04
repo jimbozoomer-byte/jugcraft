@@ -1226,6 +1226,154 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/**
+	 * Batch 56 helper: a Triple Battery on a stone pad, a ready rack of five Heavy Shells beside it and a fire control
+	 * table facing south (down the range) with the battery linked to it through the wire, in {@code mode}. Returns the
+	 * battery; the rack is at (5, 1, 2) and the table at (8, 1, 2).
+	 */
+	private static io.github.jimbozoomer.jugcraft.artillery.TowerGun linkedBattery(GameTestHelper helper,
+			io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode mode) {
+		for (int x = 0; x < 5; x++) {
+			for (int z = 0; z < 5; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		BlockPos rackPos = new BlockPos(5, 1, 2);
+		helper.setBlock(rackPos, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack"));
+		helper.getBlockEntity(rackPos, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class).shells
+				.addItem(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 5));
+		BlockPos tablePos = new BlockPos(8, 1, 2);
+		helper.setBlock(tablePos, io.github.jimbozoomer.jugcraft.building.FireControl.TABLE.defaultBlockState()
+				.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.SOUTH)
+				.setValue(io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.MODE, mode));
+		var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("triple_battery");
+		io.github.jimbozoomer.jugcraft.artillery.TowerGun battery = helper.spawn(type, new Vec3(2.5, 1, 2.5));
+		battery.face(0.0F);
+		ServerPlayer layer = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.building.FireControl.startLink(layer, helper.getLevel(), helper.absolutePos(tablePos));
+		io.github.jimbozoomer.jugcraft.building.FireControl.link(layer, battery);
+		layer.discard();
+		return battery;
+	}
+
+	/**
+	 * Batch 56: linking through the wire, the link limit, a parallel sheaf's spacing, and that the wire on a linked gun
+	 * unlinks it.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
+	public void fireControlTableLinksGuns(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.PARALLEL);
+		BlockPos tablePos = new BlockPos(8, 1, 2);
+		var table = helper.getBlockEntity(tablePos, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		helper.assertTrue(table.linked(battery.getUUID()), "The wire should have linked the battery to the table");
+		helper.assertTrue(helper.absolutePos(tablePos).equals(battery.director()), "The battery should know its table");
+		for (int i = 1; i < io.github.jimbozoomer.jugcraft.building.FireControl.MAX_GUNS; i++) {
+			helper.assertTrue(table.link(java.util.UUID.randomUUID()), "A table should take " + io.github.jimbozoomer.jugcraft.building.FireControl.MAX_GUNS + " guns");
+		}
+		helper.assertFalse(table.link(java.util.UUID.randomUUID()), "A table should refuse a gun past its limit");
+		// Three guns on a parallel sheaf straight down the range lay on points six blocks apart across it.
+		while (table.links().size() > 3) {
+			table.unlink(table.links().get(table.links().size() - 1));
+		}
+		BlockPos target = helper.absolutePos(new BlockPos(8, 0, 30));
+		table.setTarget(target);
+		Vec3 first = table.aimPoint(table.links().get(0));
+		Vec3 middle = table.aimPoint(table.links().get(1));
+		Vec3 last = table.aimPoint(table.links().get(2));
+		helper.assertTrue(middle.distanceTo(Vec3.atCenterOf(target).add(0, 0.5, 0)) < 1.0E-6, "The middle gun should lay on the target");
+		helper.assertTrue(Math.abs(first.distanceTo(middle) - io.github.jimbozoomer.jugcraft.building.FireControl.SHEAF_SPACING) < 1.0E-6
+				&& Math.abs(last.distanceTo(middle) - io.github.jimbozoomer.jugcraft.building.FireControl.SHEAF_SPACING) < 1.0E-6
+				&& Math.abs(first.z - last.z) < 1.0E-6, "A parallel sheaf should spread across the line of fire, six blocks apart");
+		ServerPlayer layer = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.building.FireControl.startLink(layer, helper.getLevel(), helper.absolutePos(tablePos));
+		io.github.jimbozoomer.jugcraft.building.FireControl.link(layer, battery);
+		helper.assertFalse(table.linked(battery.getUUID()), "The wire on a linked gun should unlink it");
+		helper.assertTrue(battery.director() == null, "An unlinked gun should forget its table");
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 56: an uncrewed battery linked to a table on converge lays on the table's target but holds fire until a
+	 * redstone pulse into the table, then fires exactly one salvo from the ready rack; the table's comparator reads it as
+	 * ready while it waits.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 260, skyAccess = true)
+	public void fireControlSalvoOnPulse(GameTestHelper helper) {
+		linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CONVERGE);
+		BlockPos tablePos = new BlockPos(8, 1, 2);
+		var table = helper.getBlockEntity(tablePos, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		table.setTarget(helper.absolutePos(new BlockPos(2, 0, 30)));
+		var rack = helper.getBlockEntity(new BlockPos(5, 1, 2), io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		helper.runAfterDelay(70, () -> {
+			helper.assertTrue(rack.count() == 5, "A laid gun must not fire before the table orders it, but the rack holds " + rack.count());
+			helper.assertTrue(table.readyCount(helper.getLevel().getGameTime()) == 1, "The laid, loaded battery should report ready");
+			ServerLevel level = helper.getLevel();
+			BlockState state = level.getBlockState(helper.absolutePos(tablePos));
+			helper.assertTrue(state.getAnalogOutputSignal(level, helper.absolutePos(tablePos), Direction.NORTH) == 1,
+					"The table's comparator should read one ready gun");
+			helper.setBlock(new BlockPos(9, 1, 2), Blocks.REDSTONE_BLOCK);
+		});
+		helper.runAfterDelay(160, () -> helper.assertTrue(rack.count() == 2,
+				"One pulse should fire one salvo of three shells, leaving 2, but left " + rack.count()));
+		helper.runAfterDelay(240, () -> {
+			helper.assertTrue(rack.count() == 2, "A held signal must not fire again, but the rack holds " + rack.count());
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 56: on sentry an uncrewed battery ignores a hostile mob outside the table's 90 degree sector and one with a
+	 * player beside it, and lays on and fires at one inside the sector.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
+	public void fireControlSentryKeepsToItsSector(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.SENTRY);
+		var table = helper.getBlockEntity(new BlockPos(8, 1, 2), io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		table.setSectorWidth(90);
+		var rack = helper.getBlockEntity(new BlockPos(5, 1, 2), io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		for (int x = 30; x <= 32; x++) {
+			for (int z = 1; z <= 3; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		// East of the table: outside a sector facing south.
+		var outside = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityType.HUSK, new Vec3(31.5, 1, 2.5));
+		// South, in the sector, but with a player standing beside it.
+		for (int x = 1; x <= 3; x++) {
+			for (int z = 27; z <= 29; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		var guarded = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityType.HUSK, new Vec3(2.5, 1, 28.5));
+		ServerPlayer friend = helper.makeMockServerPlayerInLevel();
+		friend.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		friend.setPos(helper.absoluteVec(new Vec3(4.5, 1, 28.5)));
+		for (int tick = 5; tick <= 80; tick += 5) {
+			helper.runAfterDelay(tick, () -> {
+				var target = battery.sentryTarget();
+				helper.assertFalse(target == outside, "A sentry must not engage a mob outside its sector");
+				helper.assertFalse(target == guarded, "A sentry must not engage a mob with a player beside it");
+			});
+		}
+		helper.runAfterDelay(85, () -> {
+			helper.assertTrue(rack.count() == 5, "Nothing should have been fired yet, but the rack holds " + rack.count());
+			friend.discard();
+			guarded.discard();
+			outside.discard();
+			for (int x = 1; x <= 3; x++) {
+				for (int z = 31; z <= 33; z++) {
+					helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+				}
+			}
+			var hostile = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityType.HUSK, new Vec3(2.5, 1, 32.5));
+			hostile.setInvulnerable(true);
+		});
+		helper.runAfterDelay(280, () -> {
+			helper.assertTrue(rack.count() < 5, "A sentry should fire at a hostile mob in its sector, but the rack still holds " + rack.count());
+			helper.succeed();
+		});
+	}
+
 	/** Coal generator -> copper cables -> electric furnace smelts raw iron. */
 	@GameTest(maxTicks = 600)
 	public void cablesCarryPower(GameTestHelper helper) {
