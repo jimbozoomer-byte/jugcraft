@@ -30,6 +30,7 @@ import io.github.jimbozoomer.jugcraft.logistics.ConveyorSlopeBlock;
 import io.github.jimbozoomer.jugcraft.logistics.ItemSorterBlockEntity;
 import io.github.jimbozoomer.jugcraft.logistics.JugcraftLogistics;
 import io.github.jimbozoomer.jugcraft.logistics.PneumaticExtractorBlock;
+import io.github.jimbozoomer.jugcraft.machine.EnlargedMachineBlock;
 import io.github.jimbozoomer.jugcraft.machine.Footprint;
 import io.github.jimbozoomer.jugcraft.machine.GeneratorFuels;
 import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
@@ -509,6 +510,67 @@ public class JugcraftGameTests {
 			ItemStack output = crusher.getItem(MachineKind.CRUSHER.outputSlot());
 			helper.assertTrue(output.is(item("raw_tin")) && output.getCount() == 2, "Crusher output is " + output);
 		});
+	}
+
+	/**
+	 * Batch 44: a placed crusher fills its two by three by two footprint and crushes ore fed in through its top back
+	 * block; a compact crusher (one standing since before batch 44, which loads with the default state) is still one
+	 * block and still crushes.
+	 */
+	@GameTest(maxTicks = 400)
+	public void enlargedCrusherFormsAndOldCopiesKeepWorking(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		EnlargedMachineBlock block = (EnlargedMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.CRUSHER);
+		BlockPos master = new BlockPos(4, 1, 2);
+		helper.setBlock(master, block.formed(block.defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH)));
+		block.setPlacedBy(level, helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
+		Footprint footprint = MachineKind.CRUSHER.footprint();
+		helper.assertTrue(footprint.size() == 12, "The crusher should fill 12 blocks, not " + footprint.size());
+		for (int part = 0; part < footprint.size(); part++) {
+			BlockState at = level.getBlockState(footprint.partPos(helper.absolutePos(master), Direction.NORTH, part));
+			helper.assertTrue(at.is(block) && !at.getValue(EnlargedMachineBlock.COMPACT) && at.getValue(LargeMachineBlock.PART) == part,
+					"Part " + part + " is " + at);
+		}
+		BlockPos top = footprint.partPos(helper.absolutePos(master), Direction.NORTH, footprint.size() - 1);
+		MachineBlockEntity crusher = helper.getBlockEntity(master, MachineBlockEntity.class);
+		helper.assertTrue(block.getContainer(level.getBlockState(top), level, top) == crusher,
+				"The crusher's top back block should reach its slots");
+		charge(helper, master, Direction.UP);
+		crusher.setItem(0, new ItemStack(item("tin_ore")));
+
+		BlockPos old = new BlockPos(1, 1, 2);
+		helper.setBlock(old, machine(MachineKind.CRUSHER));
+		helper.assertTrue(helper.getBlockState(old).getValue(EnlargedMachineBlock.COMPACT), "A default crusher should be compact");
+		helper.assertTrue(block.footprint(helper.getBlockState(old)).size() == 1, "A compact crusher should be one block");
+		helper.assertBlockPresent(Blocks.AIR, old.above());
+		charge(helper, old, Direction.UP);
+		MachineBlockEntity oldCrusher = helper.getBlockEntity(old, MachineBlockEntity.class);
+		oldCrusher.setItem(0, new ItemStack(item("tin_ore")));
+		helper.succeedWhen(() -> {
+			for (MachineBlockEntity machine : List.of(crusher, oldCrusher)) {
+				ItemStack output = machine.getItem(MachineKind.CRUSHER.outputSlot());
+				helper.assertTrue(output.is(item("raw_tin")) && output.getCount() == 2, "Crusher output is " + output);
+			}
+		});
+	}
+
+	/** Breaking any block of an enlarged machine removes all of it and drops the one item. */
+	@GameTest
+	public void breakingAnEnlargedMachineRemovesItAll(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		EnlargedMachineBlock block = (EnlargedMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.SAWMILL);
+		BlockPos master = new BlockPos(4, 1, 1);
+		helper.setBlock(master, block.formed(block.defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH)));
+		block.setPlacedBy(level, helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
+		Footprint footprint = MachineKind.SAWMILL.footprint();
+		BlockPos far = footprint.partPos(helper.absolutePos(master), Direction.NORTH, footprint.size() - 1);
+		helper.assertTrue(level.getBlockState(far).is(block), "The sawmill's far block is missing");
+		level.destroyBlock(far, true);
+		for (int part = 0; part < footprint.size(); part++) {
+			BlockPos at = footprint.partPos(helper.absolutePos(master), Direction.NORTH, part);
+			helper.assertTrue(level.getBlockState(at).isAir(), "Part " + part + " of the sawmill is still there");
+		}
+		helper.succeed();
 	}
 
 	/** Coal generator -> copper cables -> electric furnace smelts raw iron. */

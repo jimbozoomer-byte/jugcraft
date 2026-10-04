@@ -75,7 +75,30 @@ FOOTPRINTS = {
                              (1, 1, -1), (-1, 1, 1), (1, 1, 1)],
     # Farming: a two-block crop harvester.
     "crop_harvester": [(0, 0, 0), (0, 1, 0)],
+    # Batch 44: one-block machines rebuilt as big dieselpunk multi-blocks (tools/giant_models.py).
+    "coal_generator": cuboid(2, 2, 3),
+    "steam_generator": cuboid(3, 3, 2),
+    "electric_furnace": cuboid(2, 2, 2),
+    "crusher": cuboid(2, 3, 2),
+    "metal_press": cuboid(2, 3, 2),
+    "wire_drawer": cuboid(4, 1, 2),
+    "circuit_assembler": cuboid(3, 2, 2),
+    "pulverizer": cuboid(3, 2, 2),
+    "ore_washer": cuboid(2, 2, 4),
+    "sieve": cuboid(2, 2, 3),
+    "sawmill": cuboid(2, 2, 5),
+    "fuel_cell": cuboid(2, 2, 2),
+    "hydroponic_bay": cuboid(3, 2, 3),
+    "electroplating_bath": cuboid(4, 2, 2),
+    "ammonia_chiller": cuboid(2, 3, 2),
+    "rocket_workshop": cuboid(5, 3, 3),
 }
+
+# Machines that were one block before batch 44 (MachineKind.enlarged()). Copies built before then load as "compact":
+# one block with the old model. Their blockstates add compact=true|false.
+ENLARGED = ("coal_generator", "steam_generator", "electric_furnace", "crusher", "metal_press", "wire_drawer",
+            "circuit_assembler", "pulverizer", "ore_washer", "sieve", "sawmill", "fuel_cell", "hydroponic_bay",
+            "electroplating_bath", "ammonia_chiller", "rocket_workshop")
 
 # Machines that take power at one marked socket only: (part, face) for a north-facing machine.
 # Keep in sync with MachineKind.powerPort(). Everything else takes power on any face.
@@ -394,3 +417,25 @@ FRONTS = {
     "advanced_engine": "advanced_engine_front",
     "crop_harvester": "crop_harvester_front",
 }
+
+
+def classic_giant(footprint):
+    """The classic look of a batch 44 giant: a plinth under one machine-steel body with its front on the master block,
+    and a tank behind it when the machine is deep enough."""
+    width = 1 + max(-x for x, _, _ in footprint)
+    height = 1 + max(y for _, y, _ in footprint)
+    depth = 1 + max(z for _, _, z in footprint)
+    x0, x1, top, back = -(width - 1) * 16, 16, height * 16, depth * 16
+    m = [((x0, 0, 0), (x1, 2, back), "heavy_plinth"),
+         ((x0 + 1, 2, 1), (x1 - 1, min(top, 30) - 2, min(back, 32) - 1), {"*": STEEL, "north": "#front", "up": TOP})]
+    if depth > 2:
+        m.append(((x0 + 3, 2, 34), (x1 - 3, top - 4, back - 2), {"*": "fluid_tank_side", "up": "fluid_tank_top"}))
+    if height > 2:
+        m.append(((x0 + 4, 28, 4), (x1 - 4, top - 2, 26), {"*": STEEL, "up": TOP}))
+    m.append(((x1 - 7, 12, -0.5), (x1 - 3, 16, 0), PIPE))
+    return m
+
+
+for _machine in ENLARGED:
+    MODELS[_machine] = classic_giant(FOOTPRINTS[_machine])
+    FRONTS[_machine] = f"{_machine}_front"

@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:block/rocket_workshop"
+    "model": "jugcraft:item/rocket_workshop"
   }
 }
