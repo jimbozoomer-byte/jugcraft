@@ -54,6 +54,7 @@ DARK_WOOD = Material((22, 16, 12), (40, 30, 22), (54, 40, 30), (72, 54, 40), (92
 GARNET = Material((40, 6, 12), (80, 12, 24), (120, 18, 36), (168, 30, 48), (214, 64, 78), (255, 176, 182))
 PHOSPHOR = Material((6, 34, 18), (14, 70, 34), (24, 110, 52), (40, 160, 78), (104, 216, 128), (206, 255, 214))
 CLOTH_RED = Material((44, 8, 10), (80, 14, 16), (110, 20, 22), (150, 32, 32), (188, 56, 50), (220, 96, 84), shine=False)
+OLIVE = Material((24, 28, 12), (46, 52, 24), (62, 70, 34), (86, 96, 48), (112, 124, 66), (140, 152, 90), shine=False)
 EMBER = Material((90, 20, 4), (150, 44, 8), (206, 84, 14), (244, 140, 30), (255, 200, 80), (255, 244, 190))
 CHAIN = Material((18, 19, 23), (44, 47, 54), (70, 75, 86), (104, 110, 124), (146, 152, 166), (196, 202, 214))
 
@@ -62,19 +63,25 @@ class Style:
     """The materials a metal's arms are made of: the blade, the fittings (guards, pommels, ferrules), the grip, the haft,
     a set stone, and an accent."""
 
-    def __init__(self, blade, fitting, grip, haft, gem, accent):
+    def __init__(self, blade, fitting, grip, haft, gem, accent, cloth=CLOTH_RED):
         self.blade = blade
         self.fitting = fitting
         self.grip = grip
         self.haft = haft
         self.gem = gem
         self.accent = accent
+        self.cloth = cloth
 
 
 STYLES = {
     "bronze": Style(BRONZE, BRASS, LEATHER, WOOD, GARNET, BRASS),
-    "steel": Style(STEEL, GUNMETAL, RUBBER, DARK_WOOD, PHOSPHOR, BRASS),
+    "steel": Style(STEEL, GUNMETAL, RUBBER, DARK_WOOD, PHOSPHOR, BRASS, OLIVE),
 }
+
+
+def _glint(material):
+    """The glint's colour: the highlight, most of the way to white."""
+    return tuple(int(c + (255 - c) * 0.6) for c in material.highlight)
 
 
 def _profile(value):
@@ -90,12 +97,19 @@ class Design:
         self.grip = grip
         self.shapes = []
         self.order = 0
+        self.glints = []
 
-    def _add(self, test, material, depth, z, part, tone, bounds):
-        """bounds: (s0, s1, t0, t1), a box the shape lies within."""
+    def _add(self, test, material, depth, z, part, tone, bounds, bevel=None):
+        """bounds: (s0, s1, t0, t1), a box the shape lies within. bevel: where across (t, or a function of s) the part's
+        lit face meets its shaded one, as a blade's two faces meet at its spine."""
         self.order += 1
         self.shapes.append({"test": test, "material": material, "depth": depth, "z": z, "order": self.order,
-                            "part": part if part is not None else self.order, "tone": tone, "bounds": bounds})
+                            "part": part if part is not None else self.order, "tone": tone, "bounds": bounds,
+                            "bevel": _profile(bevel) if bevel is not None else None})
+
+    def glint(self, s, t):
+        """A glint of light on the metal at (s, t): one pixel brighter than the highlight."""
+        self.glints.append((s, t))
 
     def points(self, step=0.5):
         """Sample points (s, t) the design covers, every `step` within each shape's box."""
@@ -112,7 +126,7 @@ class Design:
                 s += step
         return out
 
-    def strip(self, s0, s1, left, right=None, material=None, depth=1.0, z=0, part=None, tone=None, stripes=None):
+    def strip(self, s0, s1, left, right=None, material=None, depth=1.0, z=0, part=None, tone=None, stripes=None, bevel=None):
         """A part along the axis from s0 to s1, from -left(s) to +right(s) across (a number or a function of s).
         `stripes`: (period, tone) bands across it every `period` along (a grip's wrap)."""
         left = _profile(left)
@@ -127,9 +141,10 @@ class Design:
                 return stripes[1]
             return tone if tone is not None else True
         samples = [s0 + (s1 - s0) * i / 16 for i in range(17)]
-        self._add(test, material, depth, z, part, tone, (s0, s1, min(-left(v) for v in samples), max(right(v) for v in samples)))
+        self._add(test, material, depth, z, part, tone, (s0, s1, min(-left(v) for v in samples), max(right(v) for v in samples)),
+                  bevel)
 
-    def poly(self, points, material, depth=1.0, z=0, part=None, tone=None):
+    def poly(self, points, material, depth=1.0, z=0, part=None, tone=None, bevel=None):
         """A flat polygon, its corners (s, t)."""
         ss = [p[0] for p in points]
         ts = [p[1] for p in points]
@@ -138,7 +153,7 @@ class Design:
             if not _inside(points, s, t):
                 return None
             return tone if tone is not None else True
-        self._add(test, material, depth, z, part, tone, (min(ss), max(ss), min(ts), max(ts)))
+        self._add(test, material, depth, z, part, tone, (min(ss), max(ss), min(ts), max(ts)), bevel)
 
     def disc(self, s, t, r, material, depth=1.0, z=0, part=None, tone=None):
         def test(ss, tt):
@@ -289,9 +304,11 @@ def _join(grid, probe, steps, reach=4):
             cell = best[cell][1]
 
 
-def _shade(grid, size_x, size_y, lit, dark):
+def _shade(grid, size_x, size_y, lit, dark, coords=None):
     """Flat tones for every filled cell of `grid` ({(x, y): (shape, override)}), lit from `lit` (cell offsets that face the
-    light) and shaded towards `dark`: the lit edge bright, the far edge dark, the middle mid. Returns {(x, y): colour}."""
+    light) and shaded towards `dark`: the lit edge bright, the far edge dark, the middle mid. A bevelled part (a blade)
+    has two faces instead of a middle: light on the lit side of its bevel line, mid beyond it, which `coords` ({cell:
+    (s, t)}) places. Returns {(x, y): colour}."""
     out = {}
 
     def same(a, b):
@@ -322,6 +339,9 @@ def _shade(grid, size_x, size_y, lit, dark):
             tone = HIGHLIGHT if material.shine else LIGHT
         elif dd == 1:
             tone = DARK
+        elif shape.get("bevel") is not None and coords is not None and cell in coords:
+            s, t = coords[cell]
+            tone = LIGHT if t < shape["bevel"](s) else MID
         elif dl == 2:
             tone = LIGHT
         else:
@@ -375,6 +395,7 @@ def icon(design, size, grip_px, scale, mirrored=False):
     left if mirrored, for the spear's hand pose), `scale` pixels-diagonal-steps to a design unit, the hand at `grip_px`."""
     gx, gy = grip_px
     grid = {}
+    coords = {}
     for y in range(size):
         for x in range(size):
             dx, dy = x + 0.5 - gx, y + 0.5 - gy
@@ -383,6 +404,7 @@ def icon(design, size, grip_px, scale, mirrored=False):
             # Along: half the difference (a diagonal step a unit); across: half the sum (two pixel lines a unit).
             s = (dx - dy) / 2.0 / scale + design.grip
             t = (dx + dy) / 2.0 / scale
+            coords[(x, y)] = (s, t)
             got = design.sample(s, t)
             if got is not None:
                 grid[(x, y)] = got
@@ -395,8 +417,14 @@ def icon(design, size, grip_px, scale, mirrored=False):
     _join(grid, probe, EIGHT)
     lit = [(-1, 0), (0, -1)] if not mirrored else [(1, 0), (0, -1)]
     dark = [(1, 0), (0, 1)] if not mirrored else [(-1, 0), (0, 1)]
-    colours = _shade(grid, size, size, lit, dark)
+    colours = _shade(grid, size, size, lit, dark, coords)
     colours = _outline(grid, colours, size, size, lit)
+    for s, t in design.glints:
+        # The pixel the point falls in (the inverse of the mapping above).
+        dx, dy = scale * ((s - design.grip) + t), scale * (t - (s - design.grip))
+        cell = (int(math.floor(gx + (-dx if mirrored else dx))), int(math.floor(gy + dy)))
+        if cell in grid:
+            colours[cell] = _glint(grid[cell][0]["material"])
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     for (x, y), colour in colours.items():
         img.putpixel((x, y), tuple(colour) + (255,))
@@ -417,17 +445,23 @@ def upright(design, width=None):
     height = int(math.ceil(design.length))
     cx = width / 2.0
     grid = {}
+    coords = {}
     for y in range(height):
         for x in range(width):
             s = height - y - 0.5
             t = x + 0.5 - cx
+            coords[(x, y)] = (s, t)
             got = design.sample(s, t)
             if got is not None:
                 grid[(x, y)] = got
     _join(grid, lambda x, y: _probe(design, height - y - 0.5, x + 0.5 - cx), FOUR)
     lit = [(-1, 0)]
     dark = [(1, 0)]
-    colours = _shade(grid, width, height, lit, dark)
+    colours = _shade(grid, width, height, lit, dark, coords)
+    for s, t in design.glints:
+        cell = (int(math.floor(cx + t)), int(math.floor(height - s)))
+        if cell in grid:
+            colours[cell] = _glint(grid[cell][0]["material"])
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     for (x, y), colour in colours.items():
         img.putpixel((x, y), tuple(colour) + (255,))

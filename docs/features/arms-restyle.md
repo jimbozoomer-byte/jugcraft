@@ -16,6 +16,11 @@ Every arm (34 kinds in bronze and steel) and the Arms VI kit are redrawn:
   - Steel arms are blued steel with gunmetal fittings, black rubber grips, dark wood and brass rivets.
   - The ornate arms carry a garnet (bronze) or a lit green phosphor stone (steel).
 - **The longbows and arbalests** are redrawn the same way, as vanilla lays out its bow and crossbow. The shields' faces are flattened to clean tones.
+- **Refinement pass (the owner: "refine"):**
+  - Straight blades are bevelled: the lit face a tone lighter than the shaded one, meeting down the spine, with a glint near the point.
+  - The pike has iron langets nailed below its head and a cloth tassel (red on bronze, olive drab on steel).
+  - The quarterstaff has iron-shod, studded ends and more bands.
+  - The small arms are held larger, so they read in the hand: kama 1.15 (was 0.95), war pick 1.25 (1.1), katar 0.95 (0.85), kusarigama 1.15 (1.0).
 
 ## How it was studied
 - **Simply Swords and Epic Knights (studied, not copied):**
@@ -33,6 +38,7 @@ Every arm (34 kinds in bronze and steel) and the Arms VI kit are redrawn:
 - **One design per kind:** `tools/arms_art.py`, along the weapon's own axis, in parts (strips with a profile, polygons, discs, rings, bars). Each part has a material and a thickness. The designs are about 28 units for each unit of the kind's in-hand size, so every arm in the hand has the same texel size.
 - **The toolkit, `tools/arms_pixel.py`:**
   - draws the icon on the pixel diagonal: tones from each part's distance to its lit and shaded edges, then the outline;
+  - bevels a part when asked (light on one side of its bevel line, mid on the other) and adds glints, one pixel near white;
   - draws the upright texture for the model;
   - builds the model's boxes: greedy rectangles per thickness, each turned 45 degrees about the hand so the model lies over the icon. Front and back faces are textured from the upright image, the sides from its edge texels.
   - At most 32 boxes a model.

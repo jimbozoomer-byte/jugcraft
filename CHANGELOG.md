@@ -14,6 +14,7 @@ No numbered release yet. Everything below is on `main`.
   - **In the hand:** a 3D model with real thickness: thin blades with a raised ridge, chunky guards, round grips, deep heads;
   - **Palettes:** copper-bronze with brass and leather; blued steel with gunmetal, rubber and brass rivets.
 - **The longbows, arbalests and shield faces** are redrawn to match.
+- **Refined:** bevelled two-tone blades with a glint; the pike's langets and tassel; the quarterstaff's shod ends; the kama, war pick, katar and kusarigama held larger.
 - After studying how Simply Swords, Epic Knights and RPG Style More Weapons make weapons that read well; nothing of theirs is copied. Record: [arms-restyle.md](docs/features/arms-restyle.md).
 
 ### Unmerged: Arms VI, batch 52

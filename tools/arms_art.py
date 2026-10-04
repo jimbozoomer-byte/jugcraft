@@ -61,8 +61,10 @@ def blade(d, s0, s1, w0, w1, st, tip=4.0, fuller=None, ridge=False, depth=1.0):
     length `tip`. `fuller`: a groove (f0, f1), shares of the blade's length; `ridge`: a raised spine down the middle."""
     def width(s):
         return w0 + (w1 - w0) * (s - s0) / max(1e-6, s1 - s0)
-    d.strip(s0, s1, width, material=st.blade, depth=depth, part="blade")
-    d.poly([(s1, -w1), (s1 + tip, 0.0), (s1, w1)], st.blade, depth=depth, part="blade")
+    # Two faces meeting down the middle (lit and shaded), and a glint near the point on the lit edge.
+    d.strip(s0, s1, width, material=st.blade, depth=depth, part="blade", bevel=0.0)
+    d.poly([(s1, -w1), (s1 + tip, 0.0), (s1, w1)], st.blade, depth=depth, part="blade", bevel=0.0)
+    d.glint(s1 - 0.5, -w1 * 0.55)
     if fuller:
         f0, f1 = fuller
         a, b = s0 + (s1 - s0) * f0, s0 + (s1 - s0) * f1
@@ -326,9 +328,11 @@ def scythe(st):
 def quarterstaff(st):
     d = Design(50, grip=25.0)
     d.strip(0.0, 50.0, 1.0, material=st.haft, depth=2.0)
-    for s0, s1 in ((0.0, 2.2), (47.8, 50.0)):
-        d.strip(s0, s1, 1.25, material=st.fitting, depth=2.6, z=1)
-    for s in (5.0, 45.0):
+    # Iron-shod ends, each with a stud, and bands along the staff.
+    for s0, s1 in ((0.0, 3.0), (47.0, 50.0)):
+        d.strip(s0, s1, 1.3, material=st.fitting, depth=2.6, z=1)
+        rivets(d, [((s0 + s1) / 2, 0.0)], st)
+    for s in (5.0, 11.0, 39.0, 45.0):
         d.strip(s - 0.4, s + 0.4, 1.15, material=st.fitting, depth=2.4, z=1)
     grip(d, 20.0, 30.0, 1.15, st)
     return d
@@ -339,10 +343,16 @@ def pike(st):
     d.disc(0.8, 0.0, 1.0, st.fitting, depth=2.0)
     haft(d, 0.8, 57.0, 0.75, st, rings=(30.0,))
     grip(d, 10.0, 22.0, 0.9, st)
+    # Langets (iron strips nailed down the haft below the socket) and a cloth tassel where they end.
+    d.strip(47.0, 54.0, 0.85, material=st.fitting, depth=1.9, z=1)
+    rivets(d, [(49.0, 0.0), (52.0, 0.0)], st)
     socket(d, 54.0, 58.0, 1.0, st)
+    d.poly([(47.0, -0.8), (46.0, -2.2), (43.0, -2.0), (44.5, -0.8)], st.cloth, depth=1.2, part="tassel")
+    d.poly([(47.0, 0.8), (46.0, 2.2), (43.0, 2.0), (44.5, 0.8)], st.cloth, depth=1.2, part="tassel")
     d.poly([(57.5, -0.9), (59.0, -1.5), (62.0, -0.6), (64.0, 0.0), (62.0, 0.6), (59.0, 1.5), (57.5, 0.9)], st.blade,
-           depth=1.0, part="blade")
+           depth=1.0, part="blade", bevel=0.0)
     d.strip(58.0, 62.5, 0.35, material=st.blade, depth=1.5, z=1, part="ridge")
+    d.glint(60.0, -0.6)
     return d
 
 
