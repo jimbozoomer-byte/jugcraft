@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.weapons.ArmItem;
+import io.github.jimbozoomer.jugcraft.weapons.WeaponArtPayload;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.ArmedEntityRenderState;
@@ -29,7 +31,8 @@ import org.joml.Quaternionf;
 
 /**
  * Arms motion (batch 43, docs/features/arms-motion.md): keyframed attack, guard and parry animations for the arms of
- * batch 42, in third person (the whole body) and first person (the held arm). Client only.
+ * batch 42, in third person (the whole body) and first person (the held arm); and the weapon arts of Arms V (batch 48),
+ * played when the server says one began ({@link #receive}), over everything else. Client only.
  *
  * <p>The keys are authored in tools/arms_moves.py and written to assets/jugcraft/arms_motion/&lt;kind&gt;.json; they are
  * read once into flat float arrays. Each frame:
@@ -62,12 +65,15 @@ public final class ArmsMotion {
 	/** The kinds with motion files (tools/arms_moves.py: MOVES). */
 	public static final List<String> KINDS = List.of("longsword", "greatsword", "rapier", "flanged_mace", "war_hammer", "glaive",
 			"halberd", "spear", "lance", "dagger", "sabre", "estoc", "battle_axe", "flail", "scythe", "quarterstaff", "pike",
-			"zweihander", "maul", "executioner", "bill", "labrys", "battleblade", "war_fork", "kama", "war_pick");
+			"zweihander", "maul", "executioner", "bill", "labrys", "battleblade", "war_fork", "kama", "war_pick", "twinblade", "nodachi",
+			"earthbreaker", "katar", "moonblade", "kusarigama");
 	/** Ticks the guard takes to come up when an arm is taken in hand, and a parry or couch to settle. */
 	private static final float GUARD_TICKS = 5.0F;
 	private static final float USE_TICKS = 4.0F;
 	/** After this many ticks without a swing the combo starts again from its first attack. */
 	private static final float COMBO_RESET_TICKS = 30.0F;
+	/** The longest a weapon art holds its last pose waiting for its next phase (the leap, in the air), in ticks. */
+	private static final float ART_HOLD_TICKS = 60.0F;
 	/** Beyond this distance (squared, blocks) only the arms move. */
 	private static final double FULL_BODY_DISTANCE_SQ = 32.0 * 32.0;
 	/** Where the right hand holds an arm, in the arm's space (pixels; ItemInHandLayer's hand point). */
@@ -90,6 +96,9 @@ public final class ArmsMotion {
 	private static final float[] V = new float[3];
 	private static final float[] E = new float[3];
 	private static final float[] FP = new float[CHANNELS];
+	private static final float[] SPIN = new float[1];
+	/** The time (0 to 1) of the art clip {@link #artClip} found last. */
+	private static float artTime;
 	private static final Quaternionf Q = new Quaternionf();
 
 	private ArmsMotion() {
@@ -97,7 +106,11 @@ public final class ArmsMotion {
 
 	// ---------------------------------------------------------------- data
 
-	/** One attack: key times (0 to 1), tensions and poses, and the same for its first-person track. */
+	/**
+	 * One attack: key times (0 to 1), tensions and poses, and the same for its first-person track. A weapon art's clip
+	 * also has its length in ticks, whether it holds its last pose until its next phase, and may turn the whole body
+	 * (spin: degrees about the vertical at each key, or null).
+	 */
 	static final class Clip {
 		final float[] times;
 		final float[] tension;
@@ -105,6 +118,9 @@ public final class ArmsMotion {
 		final float[] fpTimes;
 		final float[] fpTension;
 		final float[] fpKeys;
+		float ticks;
+		boolean hold;
+		float[] spin;
 
 		Clip(float[] times, float[] tension, float[] keys, float[] fpTimes, float[] fpTension, float[] fpKeys) {
 			this.times = times;
@@ -124,6 +140,8 @@ public final class ArmsMotion {
 		float[] use;
 		float[] fpHold;
 		Clip[] attacks;
+		/** The weapon art's phases (Arms V), or none. */
+		Clip[] arts = new Clip[0];
 	}
 
 	/** What is remembered of an entity between frames: the swing seen last, the combo, the guard coming up, its pose. */
@@ -135,6 +153,10 @@ public final class ArmsMotion {
 		Item item;
 		float guard;
 		float time;
+		/** The weapon art phase playing (-1: none), when it began (the entity's ticks) and with what in hand. */
+		int artPhase = -1;
+		float artStart;
+		Item artItem;
 	}
 
 	/** Reads every kind's motion file from the mod's resources (once, at client start). */
@@ -164,15 +186,69 @@ public final class ArmsMotion {
 		return LIBRARY.size();
 	}
 
-	/** For the client game tests: an entity's combo, guard and this frame's torso turn and arm raise (degrees). */
+	/** For the client game tests: an entity's combo, guard, art phase and this frame's torso turn and arm raise (degrees). */
 	public static String describe(LivingEntity entity) {
 		Track track = TRACKS.get(entity);
 		if (track == null) {
 			return "no track";
 		}
 		float[] v = track.pose.values;
-		return "combo " + track.combo + ", guard " + track.guard + ", torso turn " + v[BODY * CHANNELS + 1] + ", arm raise "
-				+ v[RIGHT_ARM * CHANNELS];
+		return "combo " + track.combo + ", guard " + track.guard + ", art phase " + track.artPhase + ", torso turn "
+				+ v[BODY * CHANNELS + 1] + ", arm raise " + v[RIGHT_ARM * CHANNELS];
+	}
+
+	/** For the client game tests: the weapon art phase an entity is playing, or -1. */
+	public static int artPhase(LivingEntity entity) {
+		Track track = TRACKS.get(entity);
+		return track == null ? -1 : track.artPhase;
+	}
+
+	/** How many phases a kind's weapon art has (0: none). */
+	public static int artPhases(String kind) {
+		Motion motion = LIBRARY.get(kind);
+		return motion == null ? 0 : motion.arts.length;
+	}
+
+	/** A weapon art's phase began for a player this client sees (from the server): play it from now. */
+	public static void receive(WeaponArtPayload payload) {
+		Minecraft client = Minecraft.getInstance();
+		if (client.level != null && client.level.getEntity(payload.entity()) instanceof LivingEntity entity) {
+			playArt(entity, payload.phase());
+		}
+	}
+
+	static void playArt(LivingEntity entity, int phase) {
+		Track track = TRACKS.computeIfAbsent(entity, key -> new Track());
+		track.artPhase = phase;
+		track.artStart = entity.tickCount;
+		track.artItem = entity.getMainHandItem().getItem();
+	}
+
+	/**
+	 * The weapon art clip playing on this track now (its index; its time in {@link #artTime}), or -1. A clip ends after
+	 * its ticks, or holds its last pose (for at most ART_HOLD_TICKS) until its next phase; putting the arm away ends it.
+	 */
+	private static int artClip(Track track, LivingEntity entity, Motion motion, float now) {
+		int phase = track.artPhase;
+		if (phase < 0) {
+			return -1;
+		}
+		if (phase >= motion.arts.length || entity.getMainHandItem().getItem() != track.artItem) {
+			track.artPhase = -1;
+			return -1;
+		}
+		Clip clip = motion.arts[phase];
+		float elapsed = Math.max(0.0F, now - track.artStart);
+		if (elapsed < clip.ticks) {
+			artTime = elapsed / clip.ticks;
+			return phase;
+		}
+		if (clip.hold && elapsed < clip.ticks + ART_HOLD_TICKS) {
+			artTime = 1.0F;
+			return phase;
+		}
+		track.artPhase = -1;
+		return -1;
 	}
 
 	private static Motion parse(JsonObject json) {
@@ -185,12 +261,27 @@ public final class ArmsMotion {
 		JsonArray attacks = json.getAsJsonArray("attacks");
 		motion.attacks = new Clip[attacks.size()];
 		for (int i = 0; i < attacks.size(); i++) {
-			JsonObject attack = attacks.get(i).getAsJsonObject();
-			motion.attacks[i] = new Clip(floats(attack.getAsJsonArray("times")), floats(attack.getAsJsonArray("tension")),
-					flatten(attack.getAsJsonArray("keys")), floats(attack.getAsJsonArray("fp_times")),
-					floats(attack.getAsJsonArray("fp_tension")), flatten(attack.getAsJsonArray("fp_keys")));
+			motion.attacks[i] = clip(attacks.get(i).getAsJsonObject());
+		}
+		if (json.has("arts")) {
+			JsonArray arts = json.getAsJsonArray("arts");
+			motion.arts = new Clip[arts.size()];
+			for (int i = 0; i < arts.size(); i++) {
+				JsonObject art = arts.get(i).getAsJsonObject();
+				Clip clip = clip(art);
+				clip.ticks = art.get("ticks").getAsFloat();
+				clip.hold = art.get("hold").getAsBoolean();
+				clip.spin = art.has("spin") && art.get("spin").isJsonArray() ? floats(art.getAsJsonArray("spin")) : null;
+				motion.arts[i] = clip;
+			}
 		}
 		return motion;
+	}
+
+	private static Clip clip(JsonObject attack) {
+		return new Clip(floats(attack.getAsJsonArray("times")), floats(attack.getAsJsonArray("tension")),
+				flatten(attack.getAsJsonArray("keys")), floats(attack.getAsJsonArray("fp_times")),
+				floats(attack.getAsJsonArray("fp_tension")), flatten(attack.getAsJsonArray("fp_keys")));
 	}
 
 	private static float[] floats(JsonArray array) {
@@ -316,8 +407,18 @@ public final class ArmsMotion {
 		float[] v = pose.values;
 		LivingEntity.SwingDescription swing = entity.getCurrentSwing();
 		float t = entity.getSwingAnimation(partialTick);
-		boolean attacking = swing != null && t > 0.0F && swing.hand() == InteractionHand.MAIN_HAND && motion.attacks.length > 0;
-		if (attacking) {
+		// A weapon art plays over everything else; its spin turns the whole body (the renderer's body yaw).
+		int art = artClip(track, entity, motion, now);
+		boolean attacking = art >= 0 || swing != null && t > 0.0F && swing.hand() == InteractionHand.MAIN_HAND && motion.attacks.length > 0;
+		if (art >= 0) {
+			Clip clip = motion.arts[art];
+			evaluate(clip.times, clip.tension, clip.keys, SIZE, artTime, v);
+			if (clip.spin != null) {
+				evaluate(clip.times, clip.tension, clip.spin, 1, artTime, SPIN);
+				state.bodyRot += entity.getMainArm() == HumanoidArm.LEFT ? -SPIN[0] : SPIN[0];
+			}
+			t = artTime;
+		} else if (attacking) {
 			Clip clip = motion.attacks[Math.floorMod(track.combo, motion.attacks.length)];
 			evaluate(clip.times, clip.tension, clip.keys, SIZE, t, v);
 		} else {
@@ -587,6 +688,8 @@ public final class ArmsMotion {
 	// applied there, and vanilla's own swing for the hand is skipped (mixin/client/ArmsFirstPersonMixin).
 
 	private static Motion firstPerson;
+	private static int firstPersonArt = -1;
+	private static float firstPersonArtTime;
 	private static float firstPersonProgress;
 	private static float firstPersonUse;
 	private static LivingEntity firstPersonPlayer;
@@ -607,6 +710,8 @@ public final class ArmsMotion {
 		firstPersonProgress = swingProgress;
 		firstPersonPlayer = player;
 		firstPersonPartial = partialTick;
+		firstPersonArt = artClip(track(player, partialTick), player, motion, player.tickCount + partialTick);
+		firstPersonArtTime = artTime;
 		boolean using = player.isUsingItem() && player.getUsedItemHand() == InteractionHand.MAIN_HAND;
 		firstPersonUse = using ? smooth((player.getTicksUsingItem() + partialTick) / USE_TICKS) : 0.0F;
 	}
@@ -631,7 +736,12 @@ public final class ArmsMotion {
 		if (motion == null) {
 			return;
 		}
-		if (firstPersonProgress > 0.0F) {
+		if (firstPersonArt >= 0) {
+			// A weapon art holds the arm up against vanilla's dip all through.
+			poseStack.translate(0.0F, EQUIP_DROP * equip, 0.0F);
+			Clip clip = motion.arts[firstPersonArt];
+			evaluate(clip.fpTimes, clip.fpTension, clip.fpKeys, CHANNELS, firstPersonArtTime, FP);
+		} else if (firstPersonProgress > 0.0F) {
 			float t = firstPersonProgress;
 			float held = smooth(t / 0.1F) * (1.0F - smooth((t - 0.6F) / 0.4F));
 			poseStack.translate(0.0F, EQUIP_DROP * equip * held, 0.0F);

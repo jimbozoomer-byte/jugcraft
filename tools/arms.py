@@ -2,7 +2,9 @@
 halberds, spears and lances in bronze and steel; Arms II, batch 45: daggers, sabres, estocs, battle axes, flails,
 scythes, quarterstaves and pikes, each with a trait of its own (TRAITS); Arms III, batch 46: two-handed swings for
 the heavy arms (TWO_HANDED) and zweihanders, mauls, executioner's swords and bills; and Arms IV, batch 47: labryses,
-battleblades, war forks, kamas and war picks, in an ornate style.
+battleblades, war forks, kamas and war picks, in an ornate style; and Arms V, batch 48: twinblades, nodachis,
+earthbreakers, katars, moonblades and kusarigamas, each with a weapon art (ARTS), a special move with its own animation
+and its own shape of damage.
 
 After studying Epic Knights (all rights reserved) and Simply Swords (Timefall Development License) for how they draw,
 animate and keep their weapons cheap; none of their code, models, numbers or art is used. What carried over is the
@@ -139,6 +141,31 @@ KINDS = {
                  "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.1,
                  "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["## ", " S#", " S "],
                  "trait": "delve", "tooltip": "A beaked war pick that mines stone and ore as its metal's pickaxe does."},
+    # Arms V (batch 48): each has a weapon art (ARTS), a special move of its own, used with the use key.
+    "twinblade": {"display": "Twinblade", "damage": 4.0, "speed": -2.8, "swing": ("whack", 14), "reach": (0.0, 3.25),
+                  "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.7,
+                  "tags": ["swords"], "pattern": [" ##", " L ", "## "], "art": "cyclone",
+                  "tooltip": "A blade at each end of the grip: quick cuts, turn and turn about."},
+    "nodachi": {"display": "Nodachi", "damage": 6.5, "speed": -3.2, "swing": ("whack", 20), "reach": (0.0, 4.0),
+                "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 2.0,
+                "tags": ["swords"], "pattern": ["  #", " ##", "L  "], "art": "iaido",
+                "tooltip": "A great curved sword, drawn and swung with both hands at a long reach."},
+    "earthbreaker": {"display": "Earthbreaker", "damage": 9.5, "speed": -3.45, "swing": ("whack", 24), "reach": (0.0, 3.25),
+                     "margin": 0.0, "disable": 5.0, "wear": 2, "knockback": 1.0, "parry": 0.0, "held": 1.8,
+                     "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["###", "#S#", " SS"],
+                     "art": "leap_slam", "tooltip": "A siege hammer. Knocks foes back and breaks a shield's guard for 5 seconds."},
+    "katar": {"display": "Katar", "damage": 1.5, "speed": -2.0, "swing": ("stab", 5), "reach": (0.0, 2.75),
+              "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 0.85,
+              "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["# #", "#L#"], "art": "flurry",
+              "tooltip": "A punching blade, gripped across its frame: quick straight jabs at a short reach."},
+    "moonblade": {"display": "Moonblade", "damage": 6.0, "speed": -3.1, "swing": ("whack", 18), "reach": (0.0, 3.75),
+                  "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.8,
+                  "tags": ["swords"], "pattern": ["## ", "  #", "L# "], "art": "crescent",
+                  "tooltip": "A crescent-bladed greatsword: broad, sweeping cuts."},
+    "kusarigama": {"display": "Kusarigama", "damage": 2.0, "speed": -2.3, "swing": ("whack", 6), "reach": (0.0, 3.25),
+                   "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.0,
+                   "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["## ", "  #", "NN "],
+                   "art": "chain_lash", "tooltip": "A sickle on a weighted chain: quick hooking cuts."},
 }
 # Arms II traits (weapons/ArmItem.java; JugcraftArms.TRAITS). backstab: a blow landing within BACKSTAB_ANGLE degrees of
 # straight behind the target's body deals BACKSTAB more (a share of the blow). saddle: SADDLE more damage while riding.
@@ -214,7 +241,114 @@ TWO_HANDED = {
     "labrys": {"strike": 8, "arc": 100, "targets": 3, "combo": 2},
     "battleblade": {"strike": 7, "arc": 110, "targets": 4, "combo": 2},
     "war_fork": {"strike": 6, "arc": 30, "targets": 2, "combo": 2},
+    "twinblade": {"strike": 5, "arc": 140, "targets": 3, "combo": 3},
+    "nodachi": {"strike": 7, "arc": 100, "targets": 3, "combo": 2},
+    "earthbreaker": {"strike": 9, "arc": 80, "targets": 2, "combo": 2},
+    "moonblade": {"strike": 6, "arc": 130, "targets": 4, "combo": 2},
 }
+# Arms V (batch 48): weapon arts (weapons/WeaponArts.java). Each Arms V kind has one special move, used with the use key
+# (right click) with the arm in the main hand: it plays its own animation (tools/arms_moves.py: MOVES[kind]["arts"]) and
+# deals its damage in a shape of its own, then the arm needs `cooldown` ticks before its art is ready again (shown on
+# the hotbar as an item cooldown; plain blows are not held back). `ticks` is how long the wielder is busy with it (the
+# animation's length; the leap's spring, before the air), and the wielder moves at 1 - `slow` of their speed meanwhile.
+# Every hit of an art is the arm's attack damage times the move's share, struck through vanilla's thrust attack
+# (Player.stabAttack: enchantments, knockback, wear, the item's hit hooks) at a full charge, on the server.
+ARTS = {
+    "twinblade": {"move": "cyclone", "cooldown": 120, "ticks": 24, "slow": 0.3,
+                  "name": "Cyclone", "text": "spin three times, cutting every foe about you each time round and drawing them in."},
+    "nodachi": {"move": "iaido", "cooldown": 160, "ticks": 18, "slow": 0.0,
+                "name": "Iaido", "text": "dash ahead; every foe you pass is cut a moment later, as the blade comes round."},
+    "earthbreaker": {"move": "leap_slam", "cooldown": 200, "ticks": 8, "slow": 0.0,
+                     "name": "Leap Slam", "text": "leap and bring the hammer down where you land: harder at the centre, and harder the further you came down."},
+    "katar": {"move": "flurry", "cooldown": 100, "ticks": 20, "slow": 0.5,
+              "name": "Flurry", "text": "five quick jabs at the foe ahead, too fast to be shrugged off, then a driving finish."},
+    "moonblade": {"move": "crescent", "cooldown": 140, "ticks": 16, "slow": 0.5,
+                  "name": "Crescent", "text": "loose a crescent wave that runs ahead, through every foe in its way, until it meets a wall."},
+    "kusarigama": {"move": "chain_lash", "cooldown": 120, "ticks": 16, "slow": 0.5,
+                   "name": "Chain Lash", "text": "throw the weighted chain at the first foe in line, up to 9 blocks off, haul it in and reap it."},
+}
+# cyclone: hits at CYCLONE_FIRST, then every CYCLONE_EVERY ticks, CYCLONE_HITS in all; each strikes every foe within
+# CYCLONE_RADIUS (all round, up to CYCLONE_TARGETS) for CYCLONE_SHARE, without knockback, and draws it CYCLONE_PULL
+# blocks a tick towards the wielder; a foe's damage cooldown is let go before each, so all three land.
+CYCLONE_FIRST = 6
+CYCLONE_EVERY = 6
+CYCLONE_HITS = 3
+CYCLONE_RADIUS = 3.0
+CYCLONE_SHARE = 0.5
+CYCLONE_PULL = 0.15
+CYCLONE_TARGETS = 8
+# iaido: from tick IAIDO_START the wielder dashes along their level view at IAIDO_SPEED blocks a tick for IAIDO_DASH
+# ticks (stopped by what stops a player); every foe within IAIDO_WIDTH of the path is marked, up to IAIDO_TARGETS; the
+# cut lands on them IAIDO_DELAY ticks after the dash ends, for IAIDO_SHARE, wherever they are by then (within
+# IAIDO_REACH of the wielder).
+IAIDO_START = 3
+IAIDO_DASH = 5
+IAIDO_SPEED = 1.2
+IAIDO_WIDTH = 1.25
+IAIDO_DELAY = 4
+IAIDO_SHARE = 1.3
+IAIDO_TARGETS = 6
+IAIDO_REACH = 10.0
+# leap_slam: only from the ground. The wielder springs up at LEAP_UP and ahead at LEAP_FORWARD blocks a tick; on
+# landing (back on the ground after leaving it, at least LEAP_MIN_AIR ticks later; where they stand at LEAP_STUCK if a
+# low ceiling kept them down; given up after LEAP_MAX_AIR) every foe within LEAP_RADIUS and 1.5 blocks
+# of the landing height takes LEAP_SHARE at the centre, falling to LEAP_EDGE of that at the edge, plus LEAP_PER_BLOCK
+# for each block the wielder landed below where they leapt from (at most LEAP_DROP_MAX), and is thrown up at LEAP_LIFT.
+# The leap's own height costs no fall damage (vanilla's impulse rule: only the drop below the take-off counts).
+LEAP_UP = 0.8
+LEAP_FORWARD = 0.5
+LEAP_MIN_AIR = 4
+LEAP_STUCK = 12
+LEAP_MAX_AIR = 60
+LEAP_RADIUS = 3.5
+LEAP_SHARE = 1.0
+LEAP_EDGE = 0.5
+LEAP_PER_BLOCK = 0.15
+LEAP_DROP_MAX = 6.0
+LEAP_LIFT = 0.45
+LEAP_TARGETS = 8
+# flurry: FLURRY_JABS jabs from FLURRY_FIRST, every FLURRY_EVERY ticks, then the finish; each at the nearest foe within
+# the arm's reach and FLURRY_ARC degrees of the view, for FLURRY_SHARE (the finish FLURRY_FINISH, with knockback). A
+# foe's damage cooldown is let go before each jab.
+FLURRY_FIRST = 2
+FLURRY_EVERY = 3
+FLURRY_JABS = 5
+FLURRY_SHARE = 0.28
+FLURRY_FINISH = 0.9
+FLURRY_ARC = 50.0
+# crescent: at CRESCENT_RELEASE the wave leaves at waist height and runs along the level view at CRESCENT_SPEED blocks a
+# tick for CRESCENT_TICKS ticks, or until a block stops it; it strikes each foe within CRESCENT_WIDTH of its line once
+# (up to CRESCENT_TARGETS), for CRESCENT_SHARE, less CRESCENT_FADE of it for each foe it has already passed through. It
+# runs on its own once loosed, but fades if its wielder lets go of the moonblade.
+CRESCENT_RELEASE = 5
+CRESCENT_SPEED = 1.2
+CRESCENT_TICKS = 10
+CRESCENT_WIDTH = 1.5
+CRESCENT_SHARE = 0.9
+CRESCENT_FADE = 0.15
+CRESCENT_TARGETS = 6
+# chain_lash: at LASH_THROW the chain flies from the eye along the view up to LASH_RANGE blocks, stopped by blocks; the
+# first foe on it takes LASH_SHARE and is hauled in at LASH_PULL blocks a tick for each block it is off (at most
+# LASH_PULL_MAX, less its knockback resistance) and dragged from the saddle; at LASH_REAP, if it is within
+# LASH_REAP_REACH, the sickle reaps it for LASH_REAP_SHARE.
+LASH_THROW = 4
+LASH_RANGE = 9.0
+LASH_SHARE = 0.5
+LASH_PULL = 0.2
+LASH_PULL_MAX = 1.6
+LASH_REAP = 11
+LASH_REAP_SHARE = 0.8
+LASH_REAP_REACH = 3.5
+
+
+def art_share(kind):
+    """What an art deals one foe, in blows of the arm (on level ground, for the leap)."""
+    move = ARTS[kind]["move"]
+    return {"cyclone": CYCLONE_HITS * CYCLONE_SHARE, "iaido": IAIDO_SHARE, "leap_slam": LEAP_SHARE,
+            "flurry": FLURRY_JABS * FLURRY_SHARE + FLURRY_FINISH, "crescent": CRESCENT_SHARE,
+            "chain_lash": LASH_SHARE + LASH_REAP_SHARE}[move]
+
+
 TWO_HANDED_SLOW = 0.6
 FINISHER = 1.25
 QUEUE_TICKS = 4
@@ -240,7 +374,7 @@ PARRY_ANGLE = 60.0
 PARRY_DELAY = 0.1
 PARRY_WEAR = (3.0, 1.0, 0.5)
 # Crafting keys besides "#", the metal's ingot.
-KEYS = {"S": "minecraft:stick", "L": "minecraft:leather"}
+KEYS = {"S": "minecraft:stick", "L": "minecraft:leather", "N": "minecraft:iron_nugget"}
 
 # Vanilla's item/handheld hand poses (rotation, translation, scale) and where a vanilla sword sprite is held, in
 # pixels from its centre (x right, y up).
@@ -359,6 +493,12 @@ def write_all(write, assets, data, lang, condition):
         lang[f"tooltip.{MOD}.arms.{kind}"] = KINDS[kind]["tooltip"]
     lang[f"tooltip.{MOD}.arms.two_handed"] = "Two-handed: the blow lands as the swing comes round, on every foe in its arc."
     lang[f"message.{MOD}.two_handed.off_hand"] = "Two hands for this one: put away what is in your off hand."
+    for kind, art in ARTS.items():
+        seconds = art["cooldown"] / 20
+        lang[f"tooltip.{MOD}.arms.art.{art['move']}"] = (f"Use: {art['name']}. {art['text'][0].upper()}{art['text'][1:]} "
+                                                          f"Ready again after {seconds:g} s.")
+    lang[f"message.{MOD}.arms.art.ground"] = "Your feet must be on the ground to leap."
+    lang[f"message.{MOD}.arms.art.riding"] = "Not from the saddle."
     write(data / "tags" / "block" / "kama_cuts.json", {"values": KAMA_CUTS})
     for item in items():
         metal, kind = split(item)
