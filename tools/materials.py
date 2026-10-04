@@ -263,5 +263,8 @@ def feature_of(entry_id):
     import mech
     if entry_id in mech.ITEMS:
         return "machines"
+    import landship
+    if entry_id in landship.ITEMS:
+        return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)
