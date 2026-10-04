@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Landship, batch 49
+- **Landship:** a rideable kaiserpunk crawler tank for three. It has a rhomboid hull with animated tracks running round each side, a crest-bearing hub, sponson guns, smokestacks, and a turret whose cannon follows where the driver looks.
+- Drive with the movement keys; it climbs steps and bridges narrow trenches. Attack fires the cannon, using cannon shells; hold use for the side guns. It burns diesel or kerosene.
+- The shells' burst hurts creatures and never breaks blocks. Three game tests and a screenshot scene. Record: [landship.md](docs/features/landship.md).
+
 ### Unmerged: Kaiserworks, batch 48
 - 26 imperial building blocks to go with the dieselpunk set: black lacquer, riveted black and gilt-trimmed plate, polished brass, a gilt key-pattern frieze, an imperial crest (our own made-up empire), fluted marble and black iron columns, polished marble, station tiles, see-through wrought-iron lattice, leaded glass and gas lamps.
 - Made from plates, calcite, glass and gold trim, never back into metal. Game test and a screenshot scene. Record: [kaiserworks.md](docs/features/kaiserworks.md).

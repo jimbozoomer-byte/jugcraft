@@ -768,6 +768,93 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	private static io.github.jimbozoomer.jugcraft.landship.Landship drivenLandship(GameTestHelper helper, Vec3 at, ServerPlayer driver) {
+		io.github.jimbozoomer.jugcraft.landship.Landship landship = helper.spawn(
+				io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP, at);
+		landship.setFuel(1000);
+		driver.setPos(landship.getX(), landship.getY(), landship.getZ());
+		helper.assertTrue(driver.startRiding(landship, true, true), "The driver could not climb aboard");
+		return landship;
+	}
+
+	/** Batch 49: a fuelled Landship drives forward for its driver and burns fuel; an empty one stands still. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 200)
+	public void landshipDrivesOnFuel(GameTestHelper helper) {
+		walkerFloor(helper);
+		ServerPlayer driver = helper.makeMockServerPlayerInLevel();
+		ServerPlayer stranded = helper.makeMockServerPlayerInLevel();
+		io.github.jimbozoomer.jugcraft.landship.Landship landship = drivenLandship(helper, new Vec3(4.5, 1, 2.5), driver);
+		io.github.jimbozoomer.jugcraft.landship.Landship empty = drivenLandship(helper, new Vec3(11.5, 1, 2.5), stranded);
+		empty.setFuel(0);
+		Vec3 start = landship.position();
+		Vec3 emptyStart = empty.position();
+		helper.onEachTick(() -> {
+			landship.steer(driver, 1, 0, 0, 0);
+			empty.steer(stranded, 1, 0, 0, 0);
+		});
+		helper.runAfterDelay(40, () -> {
+			double driven = landship.position().subtract(start).horizontalDistance();
+			helper.assertTrue(driven > 3, "Holding forward should drive it forward, but it moved " + driven);
+			helper.assertTrue(landship.fuel() < 1000, "Driving should burn fuel");
+			helper.assertTrue(empty.position().subtract(emptyStart).horizontalDistance() < 0.1, "An empty landship should not move");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 49: the cannon fires a shell that uses one from the driver's inventory and bursts against a wall, hurting
+	 * the pig in front of it and leaving every block of the wall standing.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 200)
+	public void landshipCannonHurtsButNeverBreaksBlocks(GameTestHelper helper) {
+		walkerFloor(helper);
+		for (int x = 0; x < 16; x++) {
+			for (int y = 1; y <= 5; y++) {
+				helper.setBlock(new BlockPos(x, y, 14), Blocks.STONE);
+			}
+		}
+		ServerPlayer driver = helper.makeMockServerPlayerInLevel();
+		driver.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		driver.getInventory().add(new ItemStack(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.CANNON_SHELL, 2));
+		io.github.jimbozoomer.jugcraft.landship.Landship landship = drivenLandship(helper, new Vec3(7.5, 1, 3.5), driver);
+		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(7, 1, 13));
+		int[] ticks = {0};
+		helper.onEachTick(() -> {
+			driver.setYRot(0.0F);
+			driver.setXRot(0.0F);
+			if (++ticks[0] > 5) {
+				landship.steer(driver, 0, 0, 1, 0);
+			}
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(), "The shell's burst should hurt the pig");
+			for (int x = 0; x < 16; x++) {
+				for (int y = 1; y <= 5; y++) {
+					helper.assertBlockPresent(Blocks.STONE, new BlockPos(x, y, 14));
+				}
+			}
+			int shells = driver.getInventory().countItem(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.CANNON_SHELL);
+			helper.assertTrue(shells == 1, "One shot should use one shell, " + shells + " left");
+		});
+	}
+
+	/** Batch 49: a Landship's fuel is saved with it. */
+	@GameTest
+	public void landshipKeepsFuel(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		var type = io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP;
+		io.github.jimbozoomer.jugcraft.landship.Landship landship = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		landship.setFuel(4500);
+		net.minecraft.world.level.storage.TagValueOutput out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+				net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess());
+		landship.saveWithoutId(out);
+		io.github.jimbozoomer.jugcraft.landship.Landship copy = type.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
+		copy.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,
+				level.registryAccess(), out.buildResult()));
+		helper.assertTrue(copy.fuel() == 4500, "Fuel should be saved, got " + copy.fuel());
+		helper.succeed();
+	}
+
 	/** Coal generator -> copper cables -> electric furnace smelts raw iron. */
 	@GameTest(maxTicks = 600)
 	public void cablesCarryPower(GameTestHelper helper) {

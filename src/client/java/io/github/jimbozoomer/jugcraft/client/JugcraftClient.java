@@ -61,6 +61,9 @@ public final class JugcraftClient implements ClientModInitializer {
 		ZeppelinClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.DIESEL_WALKER, DieselWalkerRenderer::new);
 		WalkerClient.register();
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP, LandshipRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.SHELL, ThrownItemRenderer::new);
+		LandshipClient.register();
 		ArmsMotion.load();
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);
 		PetroFluidsClient.register();

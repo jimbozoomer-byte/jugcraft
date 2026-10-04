@@ -357,6 +357,19 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_kaiserworks");
 
+			// The Landship (batch 49), on the station tiles in front of the Kaiserworks front, turned to show its side.
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				io.github.jimbozoomer.jugcraft.landship.Landship landship = new io.github.jimbozoomer.jugcraft.landship.Landship(
+						io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP, overworld);
+				landship.snapTo(x - 18.5, y, z - 6.5, -60.0F, 0.0F);
+				overworld.addFreshEntity(landship);
+			});
+			server.runCommand("tp @p %d %d %d 180 12".formatted(x - 19, y + 3, z + 2));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_landship");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
