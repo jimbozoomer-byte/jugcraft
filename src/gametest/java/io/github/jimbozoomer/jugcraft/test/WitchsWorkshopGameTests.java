@@ -333,8 +333,9 @@ public class WitchsWorkshopGameTests {
 		BlockPos lower = helper.absolutePos(at);
 		ShowcaseBlockEntity shelves = (ShowcaseBlockEntity) level.getBlockEntity(lower);
 		// Each place's middle on the front (north) face: x across, y up the 32 pixels.
-		float[] xs = {4.5F, 8.0F, 11.5F};
-		float[] ys = {6.0F, 16.0F, 26.0F};
+		// Doubles: the test's blocks are millions of blocks out, where a float can't hold a sixteenth.
+		double[] xs = {4.5, 8.0, 11.5};
+		double[] ys = {6.0, 16.0, 26.0};
 		for (int row = 0; row < 3; row++) {
 			for (int column = 0; column < 3; column++) {
 				Vec3 hit = new Vec3(lower.getX() + xs[column] / 16, lower.getY() + ys[row] / 16, lower.getZ() + 2.0 / 16);
