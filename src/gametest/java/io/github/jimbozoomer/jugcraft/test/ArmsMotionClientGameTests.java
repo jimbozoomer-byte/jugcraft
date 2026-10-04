@@ -65,6 +65,9 @@ public class ArmsMotionClientGameTests implements FabricClientGameTest {
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			for (String kind : List.of("longsword", "war_hammer", "glaive")) {
 				hold(context, server, kind);
+				// Vanilla lowers the arm on screen until the attack cooldown, reset by the swap, recovers (28 ticks for a
+				// war hammer).
+				context.waitTicks(25);
 				context.takeScreenshot("jugcraft_motion_" + kind + "_first_person_guard");
 				strike(context, kind, "jugcraft_motion_" + kind + "_first_person_strike");
 				context.waitTicks(25);

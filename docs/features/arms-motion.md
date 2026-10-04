@@ -39,6 +39,8 @@ Every kind of arm from batch 42 now moves as a weapon of its weight, seen by eve
   - a thrust drives point first at the crosshair.
 
   A parry uses vanilla's sword-blocking pose; the guard eases out under it.
+
+  Through a stroke, the arm is held up against vanilla's cooldown dip (the drop of the held arm after a blow, which is largest for the slow arms); the dip comes back as the stroke settles, so the cooldown still shows.
 - **Left-handed players** get everything mirrored.
 - **Kept to vanilla's poses:**
   - swimming, crawling, gliding, sleeping and riptide spinning;

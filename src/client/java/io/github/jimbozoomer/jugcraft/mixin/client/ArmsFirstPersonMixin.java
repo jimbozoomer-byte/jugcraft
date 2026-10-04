@@ -45,7 +45,7 @@ public abstract class ArmsFirstPersonMixin {
 
 	@Inject(method = "applyItemArmTransform(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V", at = @At("TAIL"))
 	private void jugcraft$armPose(PoseStack poseStack, HumanoidArm arm, float equip, CallbackInfo info) {
-		ArmsMotion.firstPersonPose(poseStack, arm);
+		ArmsMotion.firstPersonPose(poseStack, arm, equip);
 	}
 
 	@WrapOperation(method = SUBMIT_ARM, at = @At(value = "INVOKE",

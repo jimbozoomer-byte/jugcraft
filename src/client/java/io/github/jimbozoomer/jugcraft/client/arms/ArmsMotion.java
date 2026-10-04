@@ -74,6 +74,8 @@ public final class ArmsMotion {
 	private static final float HAND_Y = 10.0F;
 	private static final float HAND_Z = -2.0F;
 	private static final float DEG = (float) (Math.PI / 180.0);
+	/** How far vanilla lowers the arm on screen at a full cooldown dip (FirstPersonHandsAndItemsRenderer, blocks). */
+	private static final float EQUIP_DROP = 0.6F;
 
 	private static final Map<String, Motion> LIBRARY = new HashMap<>();
 	private static final Map<LivingEntity, Track> TRACKS = new WeakHashMap<>();
@@ -618,13 +620,20 @@ public final class ArmsMotion {
 		return firstPerson != null;
 	}
 
-	/** After vanilla places the hand on screen: the guard, or the attack at the swing's progress (the combo's clip). */
-	public static void firstPersonPose(PoseStack poseStack, HumanoidArm arm) {
+	/**
+	 * After vanilla places the hand on screen (lowered by {@code equip} while the attack cooldown recovers): the guard, or
+	 * the attack at the swing's progress (the combo's clip). Through a stroke the arm is held up against vanilla's dip,
+	 * which comes back as the stroke settles, so a slow arm's blow is seen and its cooldown still shows after it.
+	 */
+	public static void firstPersonPose(PoseStack poseStack, HumanoidArm arm, float equip) {
 		Motion motion = firstPerson;
 		if (motion == null) {
 			return;
 		}
 		if (firstPersonProgress > 0.0F) {
+			float t = firstPersonProgress;
+			float held = smooth(t / 0.1F) * (1.0F - smooth((t - 0.6F) / 0.4F));
+			poseStack.translate(0.0F, EQUIP_DROP * equip * held, 0.0F);
 			Track track = track(firstPersonPlayer, firstPersonPartial);
 			Clip clip = motion.attacks[Math.floorMod(track.combo, motion.attacks.length)];
 			evaluate(clip.fpTimes, clip.fpTension, clip.fpKeys, CHANNELS, firstPersonProgress, FP);
