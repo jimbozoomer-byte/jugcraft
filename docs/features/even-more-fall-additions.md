@@ -1,6 +1,6 @@
 # Even More Fall Additions
 
-Status: hex brews (addition 21), the flying broomstick (addition 22), full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25), the fall fair midway (addition 26), the Ferris wheel (addition 27), the piñata party (addition 28) and the hot-air balloon fiesta (addition 29) are implemented in source and pass CI's game tests; the leaf blower (addition 30) is implemented in source. None is yet played by hand. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
+Status: hex brews (addition 21), the flying broomstick (addition 22), full-moon werewolves (addition 23), squirrels and acorns (addition 24), the Pumpkling (addition 25), the fall fair midway (addition 26), the Ferris wheel (addition 27), the piñata party (addition 28), the hot-air balloon fiesta (addition 29) and the leaf blower (addition 30) are implemented in source and pass CI's game tests. None is yet played by hand. The Build workflow compiles what exists; CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for these directly on 3 October 2026 ("Lets do even more fun fall and halloween stuff 10 well thought out good additions"). They follow the [more fall additions](more-fall-additions.md) and are numbered on from them. Each one is its own pull request, stacked on the one before, after the graveyard pack:
 21. hex brews: the Bubbling Cauldron's brews, bubbling over a fire, take a hex ingredient and become the Shrinking Draught, the Giant's Draught or Flying Ointment;
 22. the flying broomstick: a witch's broom anointed with Flying Ointment, ridden and steered by looking;
@@ -768,7 +768,18 @@ Its screenshots from run 37163157583, in [the guide](../branches/AGRICULTURE.md#
 Not run: flying one by hand (the tests fire the burner directly), a box flown in play, and a two-client dedicated-server playtest (riders together, a mass ascension).
 
 ### Leaf blower verification
-Not yet run: the build, the game tests and the client test (this pull request's own run). Locally, `python3 tools/check_mod_data.py` passes with 1097 IDs and now compares `tools/leaf_blower.py` with Java (it fails as it should with a number changed); `python3 scripts/check_repository.py` passes.
+
+Actual results (4 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API 0.161.0+26.3, Temurin JDK 25.0.4, GitHub Actions), on `claude/fall-30-leaf-blower` stacked on the hot-air balloon fiesta:
+
+| Check | Result |
+| --- | --- |
+| `python3 scripts/check_repository.py` | Pass |
+| `python3 tools/check_mod_data.py` (now also compares `tools/leaf_blower.py` with `LeafBlowerItem`: its charge, costs and stream; and checks it is a `Chargeable` registered empty, its model's textures, words, recipe and advancement) | Pass, 1097 IDs; fails as it should with a number changed |
+| `./gradlew build` on `889e6ef7` (Build workflow run [37165195553](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37165195553)) | Pass |
+| Game tests on the headless server, same run: 668 in total, 8 of them new here (`LeafBlowerGameTests`) | **All 668 pass** |
+| Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `889e6ef7` (all three client shards) |
+
+The game runs found, and fixed before this result: two calls that aren't in 26.3 (a pushed player's motion is now sent as the grapple hook sends it; vacuumed leaves go in through `placeItemBackInInventory`); `EntityTypes` for the test's pig; the herding test calling the leaf-moving step directly, which doesn't give the advancement; and the client test's framing (the game draws its own player only from their own camera, so the shots with them in are over their shoulder).
 
 The 8 new game tests (`LeafBlowerGameTests`), on a stone floor in an open arena, the blower facing east:
 1. flat, it won't start; charged, it starts; each tick of blowing costs its JE, until it is too flat for another and stops; it holds 40,000 JE;
@@ -781,6 +792,8 @@ The 8 new game tests (`LeafBlowerGameTests`), on a stone floor in an open arena,
 8. the recipe and advancement load.
 
 `LeafBlowerClientGameTests` takes screenshots: the blower held, over its user's shoulder at the foot of a lawn of leaf piles; blowing them up towards a fence (holding use); the heap they make against it, from an invisible camera stand; vacuuming it up, sneaking; and the blower itself twice life size, laid on its side.
+
+Its screenshots from run 37165195553, in [the guide](../branches/AGRICULTURE.md#the-leaf-blower): the blower held at the foot of a lawn of red, orange and yellow leaf piles before a fence; blowing, puffs of air streaming up the lawn and the piles already herded to the fence; the heap against the fence; vacuuming, two piles left and their leaves drawn in; and the blower in profile, twice life size. Its log has no missing model or texture.
 
 Not run: blowing by hand, and a two-client dedicated-server playtest (pushing a friend with PvP on and off).
 

@@ -1137,6 +1137,14 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 ### The leaf blower
 
+| **The Leaf Blower** at the foot of a leafy lawn | **Blowing:** the piles herded up to the fence |
+| --- | --- |
+| ![The Leaf Blower held](../images/ingame_leaf_blower.jpg) | ![Blowing leaves](../images/ingame_leaf_blower_blowing.jpg) |
+| **The heap** against the fence | **Vacuuming** it up |
+| ![The heap of leaves](../images/ingame_leaf_blower_heap.jpg) | ![Vacuuming the leaves](../images/ingame_leaf_blower_vacuum.jpg) |
+
+![The Leaf Blower in profile](../images/ingame_leaf_blower_model.jpg)
+
 - **The Leaf Blower** is a powered tool: charge it at a Charging Station. Hold use to blow, sneak and hold use to vacuum.
 - **Blowing** herds leaf piles along the way you face, a layer at a time, until a wall, a fence or a full pile stops them: sweep a lawn into one heap. It blows dropped items along, nudges mobs, and puts out candles.
 - **Vacuuming** takes leaf piles and leaf litter up into your inventory, a layer at a time, for the composter, and draws dropped items in. Details: [even more fall additions](../features/even-more-fall-additions.md#the-leaf-blower).
