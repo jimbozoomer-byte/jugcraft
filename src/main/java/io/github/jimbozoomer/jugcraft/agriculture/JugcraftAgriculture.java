@@ -19,6 +19,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -90,7 +91,9 @@ import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.GlowLichenBlock;
 import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.SlabBlock;
@@ -134,7 +137,7 @@ public final class JugcraftAgriculture {
 			"tomato_seeds", "pepper_seeds", "onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds",
 			"butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
 			"giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "bottle_gourd_seeds",
-			"ornamental_corn_kernels");
+			"ornamental_corn_kernels", "mandrake_root");
 	/** The chestnut tree's feature (data/jugcraft/worldgen/feature/chestnut.json), grown by its sapling. */
 	public static final ResourceKey<Feature> CHESTNUT_TREE = ResourceKey.create(Registries.FEATURE, Jugcraft.id("chestnut"));
 	public static final TreeGrower CHESTNUT_GROWER = new TreeGrower(Jugcraft.MOD_ID + "_chestnut", WeightedList.of(CHESTNUT_TREE),
@@ -254,6 +257,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<SpookySignBlockEntity> SPOOKY_SIGN_ENTITY;
 	public static BlockEntityType<BlackLightBlockEntity> BLACK_LIGHT_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> GLOW_PAINT_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> FLYING_EYEBALL_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> BRAZIER_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> SHADOW_LAMP_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> FLOATING_HAT_ENTITY;
@@ -393,6 +397,8 @@ public final class JugcraftAgriculture {
 		crop("barley_crop", "barley_seeds", false);
 		// Festival crops: turnips, gourds on stems, the cranberry bog bush and the chestnut tree.
 		crop("turnip_crop", "turnip", false);
+		// The graveyard flora's mandrake: planted from its root; it screams when pulled up ripe (Mandrakes).
+		crop("mandrake_crop", "mandrake_root", false);
 		gourd("butternut_squash", "butternut_squash_seeds", 1.0F, MapColor.TERRACOTTA_ORANGE);
 		gourd("acorn_squash", "acorn_squash_seeds", 1.0F, MapColor.COLOR_GREEN);
 		gourd("warty_gourd", "warty_gourd_seeds", 1.0F, MapColor.COLOR_YELLOW);
@@ -474,6 +480,7 @@ public final class JugcraftAgriculture {
 		seeds("acorn_squash_seeds", "acorn_squash_stem", COMPOST_LOW);
 		seeds("warty_gourd_seeds", "warty_gourd_stem", COMPOST_LOW);
 		edibleSeeds("turnip", "turnip_crop", 3, 0.6F, COMPOST_MEDIUM);
+		seeds("mandrake_root", "mandrake_crop", COMPOST_MEDIUM);
 		edibleSeeds("cranberries", "cranberry_bush", 2, 0.1F, COMPOST_LOW);
 		seeds("chestnut", "chestnut_sapling", COMPOST_LOW);
 		food("roasted_chestnuts", 4, 0.6F, COMPOST_MEDIUM_HIGH);
@@ -544,6 +551,8 @@ public final class JugcraftAgriculture {
 		wild("wild_oats");
 		wild("wild_barley");
 		wild("wild_turnip");
+		wild("wild_mandrake");
+		Mandrakes.register();
 
 		registerEquipment();
 		registerDecorations();
@@ -1734,7 +1743,64 @@ public final class JugcraftAgriculture {
 				.strength(3.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.METAL).noOcclusion().lightLevel(LampPostBlock::light)
 				.pushReaction(PushReaction.POPPED));
 		registerItem(LAMP_POST, props -> new BlockItem(post, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerChurchyardOrnaments();
+		registerHauntedHouseProps();
 	}
+
+	/**
+	 * Halloween decorations batch 15, the churchyard's ornaments (tools/decor15.py): the Bone Pile, the Ossuary Wall, the
+	 * Giant Bone Hand and the Witch's Lantern. (The Gargoyle is a headstone style.)
+	 */
+	private static void registerChurchyardOrnaments() {
+		Block pile = registerBlock(BONE_PILE, BonePileBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(0.4F)
+				.sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block wall = registerBlock(OSSUARY_WALL, OssuaryWallBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BONE_BLOCK));
+		Block hand = registerBlock(BONE_HAND, props -> new GiantBoneHandBlock(props, Block.box(2.5, 0.0, 2.5, 13.5, 16.0, 13.5),
+				Block.box(4.0, 0.0, 4.0, 12.0, 10.0, 12.0)), BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(1.5F)
+				.sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		Block lantern = registerBlock(WITCHS_LANTERN, LanternBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LANTERN)
+				.mapColor(MapColor.COLOR_PURPLE).lightLevel(state -> WITCHS_LANTERN_LIGHT));
+		for (Block block : List.of(pile, wall, lantern)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		registerItem(BONE_HAND, props -> new DoubleHighBlockItem(hand, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+	}
+
+	/**
+	 * Halloween decorations batch 16, the haunted house's props (tools/decor16.py): the Flying Eyeball (drawn by the
+	 * client), the ivory and black Pillar Candles (vanilla candles), the Spider Web (vanilla's multiface block) and the
+	 * Monster's Head. (The harvest plushes are the midway's.)
+	 */
+	private static void registerHauntedHouseProps() {
+		Block eyeball = registerBlock(FLYING_EYEBALL, FlyingEyeballBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.strength(0.3F).sound(SoundType.SLIME_BLOCK).noCollision().noOcclusion().pushReaction(PushReaction.POPPED));
+		FLYING_EYEBALL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(FLYING_EYEBALL),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(FLYING_EYEBALL_ENTITY, pos, state), eyeball)
+						.build());
+		Block ivory = registerBlock(IVORY_PILLAR_CANDLE, PillarCandleBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.CANDLE).mapColor(MapColor.SAND));
+		Block black = registerBlock(BLACK_PILLAR_CANDLE, PillarCandleBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.CANDLE).mapColor(MapColor.COLOR_BLACK));
+		Block web = registerBlock(SPIDER_WEB, MultifaceBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).noCollision()
+				.strength(0.2F).sound(SoundType.COBWEB).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block head = registerBlock(MONSTER_HEAD, MonsterHeadBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN)
+				.strength(1.0F).sound(SoundType.DECORATED_POT).noOcclusion().lightLevel(MonsterHeadBlock::light).pushReaction(PushReaction.POPPED));
+		for (Block block : List.of(eyeball, ivory, black, web, head)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	public static final String FLYING_EYEBALL = "flying_eyeball";
+	public static final String IVORY_PILLAR_CANDLE = "ivory_pillar_candle";
+	public static final String BLACK_PILLAR_CANDLE = "black_pillar_candle";
+	public static final String SPIDER_WEB = "spider_web";
+	public static final String MONSTER_HEAD = "monster_head";
+
+	public static final String BONE_PILE = "bone_pile";
+	public static final String OSSUARY_WALL = "ossuary_wall";
+	public static final String BONE_HAND = "giant_bone_hand";
+	public static final String WITCHS_LANTERN = "witchs_lantern";
+	public static final int WITCHS_LANTERN_LIGHT = 13;
 
 	/** The Grave Vase and the Cemetery Lamp Post. */
 	public static final String GRAVE_VASE = "grave_vase";
@@ -1895,10 +1961,48 @@ public final class JugcraftAgriculture {
 							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
 					yield floating;
 				}
+				case "grass" -> {
+					String tall = plant.get("tall").getAsString();
+					Block grass = registerBlock(id, props -> new WildGrassBlock(props, tall), BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS));
+					registerItem(id, props -> new BlockItem(grass, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_LOW), SEEDS_TAB);
+					yield grass;
+				}
+				case "tall_grass" -> {
+					Block tall = registerBlock(id, DoublePlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.TALL_GRASS));
+					registerItem(id, props -> new DoubleHighBlockItem(tall, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
+					yield tall;
+				}
+				case "hanging" -> {
+					int maxLength = plant.get("max_length").getAsInt();
+					Block hanging = registerBlock(id, props -> new HangingPlantBlock(props, maxLength), BlockBehaviour.Properties.ofFullCopy(Blocks.VINE));
+					registerItem(id, props -> new BlockItem(hanging, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_LOW), SEEDS_TAB);
+					yield hanging;
+				}
+				case "vine" -> {
+					// Glow lichen's block without its glow: on any faces, spread by bone meal.
+					Block vine = registerBlock(id, GlowLichenBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.VINE));
+					registerItem(id, props -> new BlockItem(vine, props), new Item.Properties().useBlockDescriptionPrefix()
+							.compostable(COMPOST_LOW), SEEDS_TAB);
+					yield vine;
+				}
 				default -> throw new IllegalStateException("Unknown wild plant kind in /jugcraft/plants.json: " + plant);
 			};
 			if (!(block instanceof WaterPlantBlock) && !(block instanceof FloatingPlantBlock)) {
 				fire.add(block, 60, 100);
+			}
+			// Scattered in vanilla's biomes too ("patch": conventional biome tags; placed feature patch_<id>).
+			if (plant.has("patch")) {
+				Predicate<BiomeSelectionContext> selector = context -> false;
+				for (JsonElement tag : plant.getAsJsonArray("patch")) {
+					String field = tag.getAsString().toLowerCase(Locale.ROOT);
+					TagKey<Biome> biomes = TagKey.create(Registries.BIOME, Identifier.parse("c:" + field));
+					selector = selector.or(BiomeSelectors.tag(biomes));
+				}
+				BiomeModifications.addFeature(BiomeSelectors.foundInOverworld().and(selector), GenerationStep.Decoration.VEGETAL_DECORATION,
+						ResourceKey.create(Registries.PLACED_FEATURE, Jugcraft.id("patch_" + id)));
 			}
 		}
 	}
@@ -2012,6 +2116,7 @@ public final class JugcraftAgriculture {
 		wildPatch("wild_oats", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_TAIGA);
 		wildPatch("wild_barley", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_HILL);
 		wildPatch("wild_turnip", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_BIRCH_FOREST);
+		wildPatch("wild_mandrake", ConventionalBiomeTags.IS_SPOOKY);
 		// Festival crops found as themselves: gourds on grass, ripe cranberries in swamp shallows, chestnut trees.
 		wildPatch("butternut_squash", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_SAVANNA);
 		wildPatch("acorn_squash", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_TAIGA);

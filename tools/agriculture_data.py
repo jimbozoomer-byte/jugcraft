@@ -51,9 +51,12 @@ import ferris_wheel_data
 import pinata_data
 import hot_air_balloon_data
 import leaf_blower_data
+import decor15_data
+import decor16_data
 import ofrenda_data
 import graveyard_data
 import regatta_data
+import flora_data
 import plants_data
 import trees_data
 from agriculture import (FEATURE, TALL_CROPS, TALL_SECTIONS, CROPS, WILD_CROPS, WILD_PATCH, ITEMS, SICKLES,
@@ -153,6 +156,12 @@ def assets(root, write, lang):
         lang[f"block.{MOD}.{block}"] = info["display"]
 
     for crop, info in CROPS.items():
+        if info.get("sculpted"):
+            # The mandrake: its crop, wild plant and root are sculpted (tools/flora_data.py).
+            wild = next(w for w, winfo in WILD_CROPS.items() if winfo["crop"] == crop)
+            flora_data.mandrake_assets(root, write, info["block"], wild, info["seed"], info["stages"])
+            lang[f"block.{MOD}.{info['block']}"] = info["display"]
+            continue
         for stage in sorted(set(info["stages"])):
             crop_model(stage_texture(crop, stage))
         write(root / "blockstates" / f"{info['block']}.json", {"variants": {
@@ -160,6 +169,9 @@ def assets(root, write, lang):
         lang[f"block.{MOD}.{info['block']}"] = info["display"]
 
     for wild, info in WILD_CROPS.items():
+        if info.get("sculpted"):
+            lang[f"block.{MOD}.{wild}"] = info["display"]
+            continue
         texture = rid(f"block/{info['texture']}")
         write(root / "models" / "block" / f"{wild}.json", {"parent": "minecraft:block/cross", "textures": {"cross": texture}})
         write(root / "blockstates" / f"{wild}.json", {"variants": {"": {"model": rid(f"block/{wild}")}}})
@@ -216,7 +228,12 @@ def assets(root, write, lang):
     ghost_data.assets(root, write, lang)
     face_paint_data.assets(root, write, lang)
 
+    sculpted_seeds = {info["seed"] for info in CROPS.values() if info.get("sculpted")}
     for item, info in list(ITEMS.items()) + list(SICKLES.items()):
+        if item in sculpted_seeds:
+            # Drawn as a sculpted model by flora_data.mandrake_assets above.
+            lang[f"item.{MOD}.{item}"] = info["display"]
+            continue
         parent = "minecraft:item/handheld" if item in SICKLES else "minecraft:item/generated"
         write(root / "models" / "item" / f"{item}.json", {"parent": parent, "textures": {"layer0": rid(f"item/{item}")}})
         write(root / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
@@ -240,6 +257,8 @@ def assets(root, write, lang):
     pinata_data.assets(root, write, lang)
     hot_air_balloon_data.assets(root, write, lang)
     leaf_blower_data.assets(root, write, lang)
+    decor15_data.assets(root, write, lang)
+    decor16_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
 
@@ -366,6 +385,8 @@ def loot(data, write):
     turkey_data.loot(out, write)
     werewolf_data.loot(out, write)
     midway_data.loot(out, write)
+    decor15_data.loot(out, write)
+    decor16_data.loot(out, write)
     ferris_wheel_data.loot(out, write)
     hot_air_balloon_data.loot(out, write)
     theremin_data.loot(out, write)
@@ -462,6 +483,8 @@ def tags(tags):
     squirrel_data.tags(tags)
     pumpkling_data.tags(tags)
     midway_data.tags(tags)
+    decor15_data.tags(tags)
+    decor16_data.tags(tags)
     ferris_wheel_data.tags(tags)
     hot_air_balloon_data.tags(tags)
     regatta_data.tags(tags)

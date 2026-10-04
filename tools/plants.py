@@ -11,8 +11,17 @@ Each plant is registered alike from the generated /jugcraft/plants.json (agricul
 A plant's "light" (0-15) makes it glow (flowers and glow plants).
 - "water_plant": a plant under water (agriculture/WaterPlantBlock, like seagrass); only shears take it.
 - "surface": a plant floating on still water (agriculture/FloatingPlantBlock, like a lily pad); placed on water.
+- "grass": short grass or a fern (agriculture/WildGrassBlock): replaced like grass when built over, only shears take it,
+  and bone meal grows it into its "tall" form.
+- "tall_grass": that tall form (vanilla's DoublePlantBlock, like tall grass), also replaceable and taken by shears.
+- "hanging": a plant hanging from leaves or the underside of a block (agriculture/HangingPlantBlock), in strands that
+  bone meal lengthens a block at a time; only shears take it.
+- "vine": a creeper on any face of a block, several at once (vanilla's GlowLichenBlock without its glow): bone meal
+  spreads it; only shears take it.
 Every plant composts, burns like vanilla flowers and follows the "biomes" feature switch for its recipes. Textures are
-drawn by tools/wild_textures.py. Biomes place them through tools/biomes.py EXTRAS.
+drawn by tools/wild_textures.py, or for "art": "flora" plants sculpted by tools/flora_models.py. Biomes place them
+through tools/biomes.py EXTRAS; a plant's "patch" also scatters it in vanilla's biomes with any of the given conventional
+biome tags (one patch in about `rarity` chunks, `tries` tries a patch).
 """
 
 FEATURE = "biomes"
@@ -44,9 +53,46 @@ PLANTS = {
     "snowpetals": {"kind": "flowerbed", "display": "Snowpetals"},
     # Batch 8: the Nether.
     "bramble": {"kind": "floor_plant", "display": "Bramble"},
+    # The graveyard flora (docs/features/graveyard-flora.md): plants for a haunted churchyard, sculpted.
+    "spider_lily": {"kind": "flower", "display": "Spider Lily", "dye": "red", "effect": "minecraft:weakness", "seconds": 7.0,
+                    "art": "flora", "patch": {"biomes": ["IS_SWAMP"], "rarity": 10, "tries": 24}},
+    "snowdrop": {"kind": "flower", "display": "Snowdrop", "dye": "white", "effect": "minecraft:absorption", "seconds": 6.0,
+                 "art": "flora", "patch": {"biomes": ["IS_SNOWY", "IS_TAIGA"], "rarity": 10, "tries": 32}},
+    "deadly_nightshade": {"kind": "flower", "display": "Deadly Nightshade", "dye": "purple", "effect": "minecraft:poison",
+                          "seconds": 10.0, "art": "flora", "patch": {"biomes": ["IS_SPOOKY"], "rarity": 6, "tries": 16}},
+    "bleeding_heart": {"kind": "flower", "display": "Bleeding Heart", "dye": "pink", "effect": "minecraft:health_boost",
+                       "seconds": 8.0, "art": "flora"},
+    "ghost_pipe": {"kind": "flower", "display": "Ghost Pipe", "dye": "light_gray", "effect": "minecraft:invisibility",
+                   "seconds": 6.0, "light": 6, "art": "flora", "patch": {"biomes": ["IS_SPOOKY"], "rarity": 4, "tries": 24}},
+    "black_rose": {"kind": "tall_flower", "display": "Black Rose", "dye": "black", "art": "flora",
+                   "patch": {"biomes": ["IS_SPOOKY"], "rarity": 14, "tries": 12}},
+    "foxglove": {"kind": "tall_flower", "display": "Foxglove", "dye": "magenta", "art": "flora",
+                 "patch": {"biomes": ["IS_FOREST"], "rarity": 18, "tries": 16}},
+    "funeral_lily": {"kind": "tall_flower", "display": "Funeral Lily", "dye": "white", "art": "flora"},
+    "asphodel": {"kind": "tall_flower", "display": "Asphodel", "dye": "white", "art": "flora"},
+    "withered_grass": {"kind": "grass", "display": "Withered Grass", "tall": "tall_withered_grass", "art": "flora"},
+    "tall_withered_grass": {"kind": "tall_grass", "display": "Tall Withered Grass", "art": "flora"},
+    "ghost_fern": {"kind": "grass", "display": "Ghost Fern", "tall": "large_ghost_fern", "art": "flora",
+                   "patch": {"biomes": ["IS_SPOOKY"], "rarity": 2, "tries": 32}},
+    "large_ghost_fern": {"kind": "tall_grass", "display": "Large Ghost Fern", "art": "flora"},
+    "dead_mans_fingers": {"kind": "floor_plant", "display": "Dead Man's Fingers", "art": "flora",
+                          "patch": {"biomes": ["IS_SPOOKY"], "rarity": 8, "tries": 12}},
+    "grave_moss": {"kind": "flowerbed", "display": "Grave Moss", "art": "flora",
+                   "patch": {"biomes": ["IS_SPOOKY"], "rarity": 6, "tries": 24}},
+    "shroud_moss": {"kind": "hanging", "display": "Shroud Moss", "art": "flora"},
+    "creeping_ivy": {"kind": "vine", "display": "Creeping Ivy", "art": "flora"},
 }
-KINDS = ("flower", "tall_flower", "flowerbed", "tall_plant", "dune_plant", "floor_plant", "water_plant", "surface")
-TALL = ("tall_flower", "tall_plant", "dune_plant")
+KINDS = ("flower", "tall_flower", "flowerbed", "tall_plant", "dune_plant", "floor_plant", "water_plant", "surface", "grass", "tall_grass",
+         "hanging", "vine")
+TALL = ("tall_flower", "tall_plant", "dune_plant", "tall_grass")
+# Hanging plants: bone meal lengthens a strand to at most `max_length` blocks; worldgen hangs strands of 1 to
+# `worldgen_length` blocks under leaves and logs.
+HANGING = {"max_length": 8, "worldgen_length": 4}
+
+
+def flora():
+    """The graveyard flora's plants: sculpted rather than drawn as crossed pictures."""
+    return [plant for plant, info in PLANTS.items() if info.get("art") == "flora"]
 
 
 def potted(plant):
@@ -89,6 +135,12 @@ def registration():
             entry["seconds"] = info["seconds"]
         if "light" in info:
             entry["light"] = info["light"]
+        if "tall" in info:
+            entry["tall"] = info["tall"]
+        if info["kind"] == "hanging":
+            entry["max_length"] = HANGING["max_length"]
+        if "patch" in info:
+            entry["patch"] = info["patch"]["biomes"]
         out.append(entry)
     return out
 
@@ -97,7 +149,9 @@ def textures():
     """Block textures the plants' models use."""
     out = []
     for plant, info in PLANTS.items():
-        if info["kind"] in TALL:
+        if info.get("art") == "flora":
+            out.append(plant)
+        elif info["kind"] in TALL:
             out += [f"{plant}_bottom", f"{plant}_top"]
         elif info["kind"] == "flowerbed":
             out += [plant, f"{plant}_stem"]

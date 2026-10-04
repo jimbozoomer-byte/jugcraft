@@ -60,7 +60,13 @@ public final class Midway {
 			new Plush("black_cat_plush", 4, 3, 12, 12, 12),
 			new Plush("squirrel_plush", 5, 4, 11, 13, 12),
 			new Plush("werewolf_plush", 4, 3, 12, 11, 13),
-			new Plush("jumbo_pumpkin_plush", 1, 1, 15, 15, 14));
+			new Plush("jumbo_pumpkin_plush", 1, 1, 15, 15, 14),
+			// The harvest plushes (Halloween decorations batch 16).
+			new Plush("owl_plush", 4, 5, 12, 12, 14),
+			new Plush("hedgehog_plush", 4, 2, 12, 13, 7),
+			new Plush("acorn_plush", 4, 4, 12, 12, 13),
+			new Plush("corn_plush", 4, 4, 12, 12, 13),
+			new Plush("maple_leaf_plush", 1, 5, 15, 11, 15));
 
 	/** A plush: its ID and its footprint (x0, z0 to x1, z1, and height) facing north, in pixels. */
 	public record Plush(String id, int x0, int z0, int x1, int z1, int height) {
