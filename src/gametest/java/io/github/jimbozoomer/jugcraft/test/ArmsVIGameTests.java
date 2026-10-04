@@ -40,7 +40,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * In-game tests for Arms VI (batch 53): the katana's seven cuts and the brazier mace's fire as the server works them,
+ * In-game tests for Arms VI (batch 55): the katana's seven cuts and the brazier mace's fire as the server works them,
  * the longbow's and arbalest's shots (their speed and the arrows' base damage, read back from the arrows they loose) and
  * the shields' blocking (how soon each is raised, how far round it covers, and the tower shield's brace and weight).
  * Wielders are mock players facing south (+z) with a full attack charge; foes and shield-bearers are still husks with

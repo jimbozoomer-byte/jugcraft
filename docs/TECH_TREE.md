@@ -530,7 +530,7 @@ Against one foe an art does no better than plain blows over its cooldown; its wo
 
 **Code:** `weapons/` (`WeaponArts`, `WeaponArtPayload`, `JugcraftArms.ARTS`, `ArmItem.use`), client `client/arms/ArmsMotion`; data from `tools/arms.py`, art from `tools/arms_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-v.md)).
 
-### Arms VI (batch 53): katana, brazier mace, longbows, arbalests and shields
+### Arms VI (batch 55): katana, brazier mace, longbows, arbalests and shields
 
 Two more arms and a war kit in bronze and steel. Shot for shot the longbow and arbalest hit harder and fly flatter than a bow and crossbow, but not a second for a second. A shield covering more than vanilla's is slower to raise.
 
