@@ -15,22 +15,28 @@ LEATHER = Material([(36, 20, 12), (58, 34, 20), (84, 52, 30), (110, 72, 44), (13
 WOOD = Material([(44, 28, 16), (70, 46, 26), (98, 66, 38), (126, 88, 52), (152, 112, 70)], 0.1, 6, 0.32)
 DARK_WOOD = Material([(26, 18, 14), (42, 30, 22), (60, 44, 32), (80, 60, 44), (102, 78, 58)], 0.1, 6, 0.32)
 BLUED = Material([(26, 30, 40), (46, 54, 70), (72, 84, 104), (108, 122, 144), (156, 170, 190), (214, 224, 236)], 0.65, 22)
+# Arms IV's set stones (batch 47): a deep garnet in the bronze arms, a lit green phosphor cabochon in the steel ones (the
+# dieselpunk green of the gauges, docs/ART_DIRECTION.md).
+GARNET = Material([(48, 4, 12), (92, 10, 24), (146, 20, 40), (196, 40, 60), (234, 96, 110), (255, 196, 200)], 0.85, 26, 0.35)
+PHOSPHOR = Material([(8, 44, 22), (18, 90, 42), (36, 146, 68), (76, 204, 108), (148, 240, 168), (222, 255, 230)], 0.6, 20, 0.6)
 
 
 class Style:
     """The materials a metal's arms are made of."""
 
-    def __init__(self, blade, fitting, grip, haft, accent):
+    def __init__(self, blade, fitting, grip, haft, accent, gem, glint):
         self.blade = blade
         self.fitting = fitting
         self.grip = grip
         self.haft = haft
         self.accent = accent
+        self.gem = gem
+        self.glint = glint
 
 
 STYLES = {
-    "bronze": Style(BRONZE, hd.BRASS, LEATHER, WOOD, hd.BRASS),
-    "steel": Style(BLUED, hd.GUNMETAL, hd.RUBBER, DARK_WOOD, hd.BRASS),
+    "bronze": Style(BRONZE, hd.BRASS, LEATHER, WOOD, hd.BRASS, GARNET, (255, 214, 168)),
+    "steel": Style(BLUED, hd.GUNMETAL, hd.RUBBER, DARK_WOOD, hd.BRASS, PHOSPHOR, (190, 255, 210)),
 }
 
 
@@ -493,16 +499,253 @@ def bill(style):
     return c
 
 
+# ---------------------------------------------------------------- Arms IV (batch 47): the ornate style
+#
+# After the owner's reference sheets of fantasy weapon sets (studied for their look only; nothing is traced or copied):
+# a faceted set stone as the focal point where head meets haft, guards that sweep into winged points, a lit rim along
+# the edges that face the light, and a few glints of light about the head. Drawn with the same renderer and metals.
+
+
+def gem(c, center, radius, style):
+    """A faceted set stone in a ring of the fitting metal: a lozenge cut into four lit facets, with a glint."""
+    cx, cy = center
+    c.disc(center, radius + 1.3, style.fitting)
+    top, right, bottom, left = (cx, cy - radius), (cx + radius, cy), (cx, cy + radius), (cx - radius, cy)
+    for a, b, n in ((top, left, (-0.5, -0.5, 0.7)), (top, right, (0.4, -0.5, 0.7)), (bottom, left, (-0.4, 0.5, 0.7)),
+                    (bottom, right, (0.5, 0.5, 0.7))):
+        c.polygon([center, a, b], style.gem, normal=_unit(*n))
+    c.disc(center, radius * 0.38, style.gem, dome=0.2, tint=0.15)
+    c.pixel(cx - radius * 0.35, cy - radius * 0.45, (255, 255, 255))
+
+
+def wing(c, w, s, side, reach, rise, material):
+    """One wing of a guard: from the hilt at s out to `side` * reach across, sweeping up the weapon by rise to a point."""
+    t0 = 1.5 * side
+    pts = [w(s - 1.6, t0), w(s - 1.0, side * reach * 0.55), w(s + rise * 0.35, side * reach * 0.85),
+           w(s + rise, side * reach), w(s + rise * 0.55, side * reach * 0.62), w(s + 1.2, side * reach * 0.38),
+           w(s + 1.8, t0)]
+    c.polygon(pts, material, normal=_unit(-w.ux * 0.3 * side, -w.uy * 0.3 * side, 1.0))
+
+
+def rim(canvas, strength=0.3):
+    """A lit rim: each painted pixel with open air above it or to its left (towards the light) is brightened, unless it
+    is bright already."""
+    src = canvas.img.copy()
+    sp = src.load()
+    n = canvas.size
+    for y in range(n):
+        for x in range(n):
+            r, g, b, a = sp[x, y]
+            if a < 255 or r + g + b > 600:
+                continue
+            open_up = y == 0 or sp[x, y - 1][3] < 255
+            open_left = x == 0 or sp[x - 1, y][3] < 255
+            if open_up or open_left:
+                canvas.px[x, y] = (int(r + (255 - r) * strength), int(g + (255 - g) * strength), int(b + (255 - b) * strength), 255)
+
+
+def flat(c, points, colour):
+    """Fills a polygon with one colour from a ramp: the flat tones of hand-placed pixel art, with no dithering."""
+    xs, ys = [p[0] for p in points], [p[1] for p in points]
+    for y in range(max(0, int(min(ys))), min(c.size, int(max(ys)) + 1)):
+        for x in range(max(0, int(min(xs))), min(c.size, int(max(xs)) + 1)):
+            if hd._inside(points, x + 0.5, y + 0.5):
+                c.put(x, y, colour)
+
+
+def cut(c, points):
+    """Clears every pixel inside a polygon (a notch, a hole)."""
+    xs, ys = [p[0] for p in points], [p[1] for p in points]
+    for y in range(max(0, int(min(ys))), min(c.size, int(max(ys)) + 1)):
+        for x in range(max(0, int(min(xs))), min(c.size, int(max(xs)) + 1)):
+            if hd._inside(points, x + 0.5, y + 0.5):
+                c.px[x, y] = (0, 0, 0, 0)
+
+
+def arc_blade(c, centre, radius, a0, a1, width, material, edge=None, steps=32):
+    """A crescent blade along a circle: from angle a0 to a1 (degrees, canvas space), `width(f)` deep inwards from the
+    circle at f (0 to 1), its cutting edge on the inside."""
+    cx, cy = centre
+    outer, inner = [], []
+    for i in range(steps + 1):
+        f = i / steps
+        a = math.radians(a0 + (a1 - a0) * f)
+        d = width(f)
+        outer.append((cx + math.cos(a) * radius, cy + math.sin(a) * radius))
+        inner.append((cx + math.cos(a) * (radius - d), cy + math.sin(a) * (radius - d)))
+    # Flat tones: a dark back, a lighter middle band, a bright cutting edge on the inside.
+    middle = [(o[0] + (i[0] - o[0]) * 0.4, o[1] + (i[1] - o[1]) * 0.4) for o, i in zip(outer, inner)]
+    flat(c, outer + inner[::-1], material.ramp[2])
+    flat(c, middle + inner[::-1], material.ramp[3])
+    for p, q in zip(outer, outer[1:]):
+        c.line(p, q, material.ramp[1], 1.0)
+    if edge:
+        for p, q in zip(inner, inner[1:]):
+            c.line(p, q, edge, 1.0)
+    return outer, inner
+
+
+def glints(points, colour):
+    """Small four-pointed glints of light in open air about the head, drawn after the outline (a step for canvas.after)."""
+    def step(canvas):
+        for x, y in points:
+            x, y = int(round(x)), int(round(y))
+            for dx, dy, k in ((0, 0, 1.0), (1, 0, 0.55), (-1, 0, 0.55), (0, 1, 0.55), (0, -1, 0.55)):
+                px, py = x + dx, y + dy
+                if 0 <= px < canvas.size and 0 <= py < canvas.size and canvas.px[px, py][3] == 0:
+                    canvas.px[px, py] = tuple(int(v) for v in colour) + (int(255 * k),)
+    return step
+
+
+def ornate(c, glint_points, style):
+    """Finish an Arms IV weapon: the lit rim now, the glints after the outline."""
+    rim(c)
+    c.after = [glints(glint_points, style.glint)]
+
+
+def pommel(c, w, s, style):
+    """A lozenge pommel with a short spike, as the reference sets end their grips."""
+    c.polygon([w(s - 3.6), w(s, 3.0), w(s + 2.4), w(s, -3.0)], style.fitting, normal=_unit(-0.3, -0.4, 0.8))
+    c.capsule(w(s - 5.6), w(s - 3.0), w.r(0.8), style.fitting)
+
+
+def labrys(style):
+    c = Canvas()
+    w = Axis(origin=(5.0, 59.0), scale=0.82)
+    haft(c, w, 0.0, 72.0, 1.9, style, rings=(0.32,))
+    grip(c, w, 2.0, 18.0, 2.2, style)
+    pommel(c, w, 1.6, style)
+    c.grip = w(9.0)
+    # Twin crescent bits either side of the haft, horns flaring back and forward, with bright edges.
+    for side in (1, -1):
+        bit = [w(54.0, 2.4 * side), w(50.0, 6.5 * side), w(44.0, 15.0 * side), w(46.5, 20.0 * side), w(52.0, 17.5 * side),
+               w(60.0, 18.6 * side), w(68.0, 17.5 * side), w(73.5, 20.0 * side), w(76.0, 15.0 * side), w(70.0, 6.5 * side),
+               w(66.0, 2.4 * side)]
+        # Dark by the haft, a lighter cheek, a bright edge along the crescent: flat tones.
+        dark = 1 if side > 0 else 1
+        flat(c, bit, style.blade.ramp[dark])
+        inner = [w(55.0, 3.6 * side), w(51.0, 7.5 * side), w(47.5, 15.0 * side), w(53.0, 15.6 * side), w(60.0, 16.6 * side),
+                 w(67.0, 15.6 * side), w(72.5, 15.0 * side), w(69.0, 7.5 * side), w(65.0, 3.6 * side)]
+        flat(c, inner, style.blade.ramp[3 if side > 0 else 2])
+        cheek = [w(53.5, 9.0 * side), w(50.0, 14.0 * side), w(60.0, 15.0 * side), w(70.0, 14.0 * side), w(66.5, 9.0 * side)]
+        flat(c, cheek, style.blade.ramp[4 if side > 0 else 3])
+        for p, q in zip(bit[2:9], bit[3:10]):
+            c.line(p, q, style.blade.ramp[-1], 1.0)
+    c.box(w(60.0), w.r(7.0), w.r(3.2), w.angle, style.fitting, bevel=1.2)
+    c.capsule(w(66.0), w(76.0), w.r(1.5), style.blade)  # the top spike
+    gem(c, w(60.0), w.r(2.6), style)
+    ornate(c, [w(44.0, 22.0), w(78.0, -18.0), w(80.0, 3.0)], style)
+    return c
+
+
+def battleblade(style):
+    c = Canvas()
+    w = Axis(origin=(4.0, 60.0), scale=0.86)
+    pommel(c, w, 2.0, style)
+    grip(c, w, 3.0, 21.0, 2.0, style)
+    c.grip = w(11.0)
+    # A broad cleaver of a blade with its point clipped back, saw notches cut from its back and a fuller down the middle.
+    def half(f):
+        return 6.4 + 0.6 * f if f < 0.86 else 7.0 * (1 - f) / 0.14 + 1.2
+    steps = 24
+    spine = [w(24.0 + 72.0 * i / steps, 0.0) for i in range(steps + 1)]
+    back = [w(24.0 + 72.0 * i / steps, half(i / steps)) for i in range(steps + 1)]
+    edge_side = [w(24.0 + 72.0 * i / steps, -half(i / steps)) for i in range(steps + 1)]
+    flat(c, spine + back[::-1], style.blade.ramp[3])  # the lit half, towards the light
+    flat(c, spine + edge_side[::-1], style.blade.ramp[2])
+    c.line(w(28.0, 0.8), w(66.0, 0.8), style.blade.ramp[1], 1.0)  # the fuller
+    c.line(w(28.0, 1.8), w(66.0, 1.8), style.blade.ramp[4], 1.0)
+    for s0 in range(40, 86, 9):
+        cut(c, [w(s0, 7.6), w(s0 + 3.0, 4.2), w(s0 + 4.5, 7.6)])
+    for p, q in zip([w(f, -6.4 - 0.6 * (f - 24) / 72) for f in range(24, 86, 6)], [w(f + 6, -6.4 - 0.6 * (f - 18) / 72) for f in range(24, 86, 6)]):
+        c.line(p, q, style.blade.ramp[-1], 1.0)
+    # A winged guard sweeping up the blade, a collar and the set stone.
+    for side in (1, -1):
+        wing(c, w, 22.0, side, 11.0, 7.0, style.fitting)
+    c.box(w(23.0), w.r(2.6), w.r(6.4), w.angle, style.fitting, bevel=1.0)
+    gem(c, w(23.0), w.r(2.8), style)
+    ornate(c, [w(98.0, 8.0), w(70.0, 12.0), w(30.0, -14.0)], style)
+    return c
+
+
+def war_fork(style):
+    c = Canvas()
+    w = Axis(origin=(3.5, 60.5), scale=0.76)
+    haft(c, w, 0.0, 82.0, 1.7, style, rings=(0.1, 0.5))
+    pommel(c, w, 1.0, style)
+    c.grip = w(20.0)
+    c.capsule(w(78.0), w(83.0), w.r(2.3), style.fitting)  # socket
+    # A crossbar with the set stone, two side tines curling up from its ends and the long middle tine, all barbed.
+    c.capsule(w(84.0, -7.5), w(84.0, 7.5), w.r(1.5), style.fitting)
+    for side in (1, -1):
+        c.capsule(w(84.0, 7.5 * side), w(98.0, 6.0 * side), w.r(1.7), style.blade)
+        c.polygon([w(96.0, 7.2 * side), w(104.0, 5.4 * side), w(97.0, 4.6 * side)], style.blade,
+                  normal=_unit(-w.ux * 0.3 * side, -w.uy * 0.3 * side, 1.0))
+        c.polygon([w(90.0, 6.6 * side), w(87.5, 9.6 * side), w(91.5, 7.9 * side)], style.blade)  # barb
+    blade(c, w, 84.0, 110.0, lambda f: 2.6 * (1 - f) + 0.4, style.blade)
+    for side in (1, -1):
+        c.polygon([w(100.0, 1.6 * side), w(97.5, 4.0 * side), w(102.0, 2.0 * side)], style.blade)  # barbs on the middle tine
+    gem(c, w(84.0), w.r(2.4), style)
+    ornate(c, [w(108.0, 9.0), w(96.0, -12.0)], style)
+    return c
+
+
+def kama(style):
+    c = Canvas()
+    w = Axis(origin=(14.0, 50.0), scale=1.1)
+    pommel(c, w, 1.4, style)
+    grip(c, w, 2.0, 17.0, 1.8, style)
+    c.grip = w(9.0)
+    c.capsule(w(16.6), w(19.4), w.r(2.2), style.fitting)  # ferrule
+    # A crescent blade rising from the ferrule and curling right round over the hand, its edge on the inside.
+    top = w(19.0)
+    centre = (top[0] + 8.0, top[1] - 15.0)
+    arc_blade(c, centre, 17.5, 128.0, -12.0, lambda f: 5.0 - 1.6 * f if f < 0.85 else 3.4 * (1 - f) / 0.15 + 0.2, style.blade,
+              edge=style.blade.ramp[-1])
+    gem(c, w(18.0), w.r(1.9), style)
+    ornate(c, [(centre[0] + 12.0, centre[1] - 15.0), (centre[0] - 9.0, centre[1] - 6.0)], style)
+    return c
+
+
+def war_pick(style):
+    c = Canvas()
+    w = Axis(origin=(8.0, 56.0), scale=0.98)
+    haft(c, w, 0.0, 50.0, 1.8, style, rings=(0.35,))
+    grip(c, w, 1.5, 15.0, 2.1, style)
+    pommel(c, w, 1.2, style)
+    c.grip = w(8.0)
+    # The head: a long beak curving down to one side, a square hammer face to the other, a top spike and the stone.
+    beak = [w(44.5, 2.0), w(43.5, 9.0), w(40.5, 14.0), w(35.5, 19.0), w(29.0, 23.0), w(34.0, 16.0), w(39.5, 12.5),
+            w(46.5, 13.0), w(51.0, 8.5), w(53.0, 2.0)]
+    flat(c, beak, style.blade.ramp[2])
+    flat(c, [w(44.5, 2.0), w(43.5, 9.0), w(40.5, 14.0), w(35.5, 19.0), w(29.0, 23.0), w(39.0, 12.0), w(45.0, 8.0),
+             w(48.0, 2.0)], style.blade.ramp[3])
+    for p, q in zip(beak[:5], beak[1:5]):
+        c.line(p, q, style.blade.ramp[-1], 1.0)
+    c.box(w(49.0, -7.0), w.r(4.6), w.r(4.4), w.angle, style.blade, bevel=1.6)
+    c.box(w(49.0, -11.2), w.r(4.8), w.r(0.9), w.angle, style.blade, bevel=0.5, tint=0.15)
+    c.box(w(49.0), w.r(5.6), w.r(3.2), w.angle, style.fitting, bevel=1.0)
+    c.capsule(w(53.0), w(61.0), w.r(1.5), style.blade)
+    for side in (1, -1):
+        wing(c, w, 44.0, side, 6.0, -5.0, style.fitting)
+    gem(c, w(49.5), w.r(2.2), style)
+    ornate(c, [w(36.0, 24.0), w(62.0, 4.0)], style)
+    return c
+
+
 WEAPONS = {"longsword": longsword, "greatsword": greatsword, "rapier": rapier, "flanged_mace": flanged_mace,
            "war_hammer": war_hammer, "glaive": glaive, "halberd": halberd, "spear": spear, "lance": lance,
            "dagger": dagger, "sabre": sabre, "estoc": estoc, "battle_axe": battle_axe, "flail": flail, "scythe": scythe,
            "quarterstaff": quarterstaff, "pike": pike, "zweihander": zweihander, "maul": maul, "executioner": executioner,
-           "bill": bill}
+           "bill": bill, "labrys": labrys, "battleblade": battleblade, "war_fork": war_fork, "kama": kama,
+           "war_pick": war_pick}
 
 
 def draw(kind, metal):
     canvas = WEAPONS[kind](STYLES[metal])
     canvas.finish()
+    for step in getattr(canvas, "after", ()):
+        step(canvas)
     return canvas.img
 
 

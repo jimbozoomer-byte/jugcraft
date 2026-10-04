@@ -499,6 +499,20 @@ Two-handed swings: the greatsword, war hammer, glaive, battle axe, scythe, quart
 
 **Code:** `weapons/` (`TwoHanded`, `TwoHandedSwingPayload`, `JugcraftArms.TWO_HANDED`), client `client/arms/TwoHandedInput`; data from `tools/arms.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-iii.md)).
 
+### Arms IV (batch 47)
+
+Five ornate arms in bronze and steel, set with a garnet (bronze) or a lit phosphor stone (steel). The labrys, battleblade and war fork swing two-handed, as Arms III's.
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Labrys | Hits 11.5 (steel 12) at 0.7 a second; its finishing blow whirls right round, striking up to 6 foes; stops a shield for 3 s | 4 ingots, 3 sticks |
+| Battleblade | Hits 10 (10.5) at 0.8 a second; each hit wears every piece of the foe's armor by 4 | 6 ingots, leather |
+| War Fork | Hits 8.5 (9) at 0.9 a second, reaches 4.5; half again as much to a foe coming at you | 4 ingots, 2 sticks |
+| Kama | Hits 4.5 (5) at 2 a second; use on grass, ferns, vines or leaves to cut them all, 3 by 3 by 3 | 3 ingots, stick |
+| War Pick | Hits 6 (6.5) at 1.4 a second; mines stone and ore as its metal's pickaxe | 3 ingots, 2 sticks |
+
+**Code:** `weapons/` (`JugcraftArms`, `ArmItem`, `TwoHanded`); data from `tools/arms.py`, art from `tools/arms_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-iv.md)).
+
 ### Construction chemistry (batch 32)
 
 | Item | What it does | Built from |
