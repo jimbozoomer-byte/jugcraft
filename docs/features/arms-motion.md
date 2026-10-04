@@ -1,6 +1,6 @@
 # Arms motion
 
-Status: implemented on `claude/arms-motion-43` (batch 43), awaiting review. Compiles and tests in CI only; **not yet played**. The first-person strokes were tuned against preview renders, not in the game.
+Status: merged in #156 (batch 43). Arms II (batch 45, [arms-ii.md](arms-ii.md)) gives its eight kinds guards, combos and strokes made the same way. Compiles and tests in CI only; **not yet played**. The first-person strokes were tuned against preview renders, not in the game.
 Proposal issue: the owner, 3 October 2026, with an archive of combat animation mods and resource packs attached: "I want you to make NEW ANIMATIONS for all the weapons and LEARN how to make new animations that are very high quality while keeping it optimized. I want them to be super fluid and look good use these as an example of how to do it".
 Owner: jimbozoomer-byte
 Target milestone and tier: the arms of batch 42 ([arms.md](arms.md)); no tier of its own.
@@ -115,7 +115,7 @@ None. The animations change nothing in play: damage, reach, swing time and the m
   - checks that `ArmsMotion.java` reads the same kinds and bones;
   - checks that the four mixins are registered.
 - `ArmsMotionClientGameTests` (CI job `client`):
-  - checks that all nine kinds' motion loads;
+  - checks that every kind's motion loads (seventeen, with Arms II);
   - screenshots the player from the front, holding each kind's guard and two ticks into a swing;
   - screenshots three longsword blows in a row (the combo);
   - screenshots guards and strokes in first person;
