@@ -137,6 +137,30 @@ No numbered release yet. Everything below is on `main`.
 - **Neglected graves stir restless spirits more often**; a well-kept churchyard is quiet.
 - Two advancements, four game tests, client screenshots. Record: [graveyard.md](docs/features/graveyard.md).
 
+
+
+### Unmerged: Landship, batch 49
+- **Landship:** a rideable kaiserpunk crawler tank for three. It has a rhomboid hull with animated tracks running round each side, a crest-bearing hub, sponson guns, smokestacks, and a turret whose cannon follows where the driver looks.
+- Drive with the movement keys; it climbs steps and bridges narrow trenches. Attack fires the cannon, using cannon shells; hold use for the side guns. It burns diesel or kerosene.
+- The shells' burst hurts creatures and never breaks blocks. Three game tests and a screenshot scene. Record: [landship.md](docs/features/landship.md).
+
+### Unmerged: Kaiserworks, batch 48
+- 26 imperial building blocks to go with the dieselpunk set: black lacquer, riveted black and gilt-trimmed plate, polished brass, a gilt key-pattern frieze, an imperial crest (our own made-up empire), fluted marble and black iron columns, polished marble, station tiles, see-through wrought-iron lattice, leaded glass and gas lamps.
+- Made from plates, calcite, glass and gold trim, never back into metal. Game test and a screenshot scene. Record: [kaiserworks.md](docs/features/kaiserworks.md).
+
+### Unmerged: Diesel Walker, batch 47
+- **Diesel Walker:** a rideable dieselpunk mech, about four blocks tall, with an open cockpit, a glowing core, a big fist and a drill arm. Walk with the movement keys (it climbs one-block steps), jump, hold use to drill the block you look at and press attack to punch. It burns diesel or kerosene from buckets. The server drives it from the pilot's keys.
+- The drill breaks one block at a time as the pilot would by hand, so protected land and break checks still apply. It is no quarry.
+- Four game tests and a screenshot scene. Record: [diesel-walker.md](docs/features/diesel-walker.md).
+
+### Unmerged: Zeppelin, batch 46
+- **Zeppelin:** a rideable dieselpunk airship for four. You steer it with the movement keys, jump to climb and sprint to sink. It burns diesel or kerosene from buckets and has a 27-slot cargo hold. It hovers where it is left and sinks gently when out of fuel. The server flies it from the pilot's keys.
+- Two game tests and a screenshot scene. Record: [zeppelin.md](docs/features/zeppelin.md).
+
+### Unmerged: Dieselworks, batch 45
+- 25 building blocks in the giants' look: rust, riveted, patina, perforated, red iron and copper dome plate (most with slabs and stairs), riveted band, skid iron, ribbed pillars, see-through rust grating for catwalks, steel I-beams, porthole windows and amber cage lamps.
+- Made from metal plates (one plate per block), never back into metal. Game test and a screenshot scene. Record: [dieselworks.md](docs/features/dieselworks.md).
+
 ### Unmerged: Dieselpunk giants, batch 44
 - Sixteen one-block machines are now big, detailed multi-blocks (from 2x2x2 up to the 5x3x3 rocket workshop, with long ones like the 2x2x5 sawmill and the 4x1x2 wire drawer) in a weathered dieselpunk look: rust, patina, perforated covers, ribbed coil stacks, banded domes, copper pipes with hex fittings and amber glow.
 - Machines already built in a world stay one block and keep working (`compact` state); placing the item builds the full machine.

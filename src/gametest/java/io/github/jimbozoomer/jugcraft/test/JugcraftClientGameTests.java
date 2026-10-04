@@ -308,6 +308,68 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_rocketry");
 			server.runCommand("clear @p");
 
+			// Dieselworks (batch 45), in the same spot: a riveted wall with portholes and a dome-plate cornice, a
+			// grating catwalk on I-beams and amber cage lamps.
+			server.runCommand("kill @e[type=minecraft:item_frame]");
+			server.runCommand("kill @e[type=minecraft:minecart]");
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 26, y, z - 10, x - 10, y + 6, z + 1));
+			server.runOnServer(minecraft -> buildDieselworks(minecraft.overworld(), new BlockPos(x - 24, y, z - 10)));
+			server.runCommand("tp @p %d %d %d 180 4".formatted(x - 19, y + 1, z - 2));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_dieselworks");
+
+			// The zeppelin (batch 46), moored over the Dieselworks wall, seen from further back.
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				io.github.jimbozoomer.jugcraft.airship.Zeppelin zeppelin = new io.github.jimbozoomer.jugcraft.airship.Zeppelin(
+						io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN, overworld);
+				zeppelin.snapTo(x - 18.5, y + 7, z - 14.5, 90.0F, 0.0F);
+				zeppelin.setFuel(io.github.jimbozoomer.jugcraft.airship.Zeppelin.FUEL_TANK);
+				overworld.addFreshEntity(zeppelin);
+			});
+			server.runCommand("tp @p %d %d %d 180 -12".formatted(x - 19, y + 2, z + 9));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_zeppelin");
+
+			// The Diesel Walker (batch 47), standing in front of the Dieselworks wall and facing the camera.
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = new io.github.jimbozoomer.jugcraft.walker.DieselWalker(
+						io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.DIESEL_WALKER, overworld);
+				walker.snapTo(x - 18.5, y + 1, z - 3.5, 0.0F, 0.0F);
+				overworld.addFreshEntity(walker);
+			});
+			server.runCommand("tp @p %d %d %d 180 8".formatted(x - 19, y + 2, z + 4));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_diesel_walker");
+
+			// Kaiserworks (batch 48), in the same spot: an imperial station front of marble columns, black lacquer,
+			// leaded glass, a gilt frieze and the crest, on station tiles with gas lamps.
+			server.runCommand("kill @e[type=jugcraft:diesel_walker]");
+			server.runCommand("kill @e[type=jugcraft:zeppelin]");
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 26, y, z - 10, x - 10, y + 8, z + 1));
+			server.runOnServer(minecraft -> buildKaiserworks(minecraft.overworld(), new BlockPos(x - 24, y, z - 10)));
+			server.runCommand("tp @p %d %d %d 180 6".formatted(x - 19, y + 2, z - 1));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_kaiserworks");
+
+			// The Landship (batch 49), on the station tiles in front of the Kaiserworks front, turned to show its side.
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				io.github.jimbozoomer.jugcraft.landship.Landship landship = new io.github.jimbozoomer.jugcraft.landship.Landship(
+						io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP, overworld);
+				landship.snapTo(x - 18.5, y, z - 6.5, -60.0F, 0.0F);
+				overworld.addFreshEntity(landship);
+			});
+			server.runCommand("tp @p %d %d %d 180 12".formatted(x - 19, y + 3, z + 2));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_landship");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
@@ -832,6 +894,69 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			cart.snapTo(at.getX() + 0.5, at.getY() + 0.1, at.getZ() + 0.5, 90, 0);
 			level.addFreshEntity(cart);
 		}
+	}
+
+	/** Batch 45: the Dieselworks showcase (base: the west end of the wall). */
+	private static void buildKaiserworks(ServerLevel level, BlockPos base) {
+		java.util.function.Function<String, BlockState> block = id ->
+				io.github.jimbozoomer.jugcraft.building.Kaiserworks.BLOCKS.get(id).defaultBlockState();
+		for (int dx = 0; dx <= 10; dx++) {
+			for (int dy = 0; dy <= 5; dy++) {
+				boolean window = (dx == 2 || dx == 3 || dx == 7 || dx == 8) && dy >= 1 && dy <= 3;
+				String id = dx % 5 == 0 ? "fluted_marble_column"
+						: dy == 0 ? "gilt_trimmed_plate" : window ? "leaded_glass" : dy == 4 ? "gilt_frieze"
+						: dy == 5 ? "riveted_black_plate" : "black_lacquer_plate";
+				level.setBlock(base.offset(dx, dy, 0), block.apply(id), 3);
+			}
+			level.setBlock(base.offset(dx, 6, 0), block.apply("polished_brass_plate_slab"), 3);
+			for (int dz = 1; dz <= 5; dz++) {
+				level.setBlock(base.offset(dx, -1, dz), block.apply("station_tiles"), 3);
+			}
+			level.setBlock(base.offset(dx, 0, 5), block.apply("wrought_iron_lattice_slab"), 3);
+		}
+		level.setBlock(base.offset(5, 6, 0), block.apply("imperial_crest")
+				.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.SOUTH), 3);
+		for (int dx : new int[] {1, 9}) {
+			level.setBlock(base.offset(dx, 0, 2), block.apply("black_iron_column"), 3);
+			level.setBlock(base.offset(dx, 1, 2), block.apply("imperial_gas_lamp"), 3);
+		}
+		for (int dx = 4; dx <= 6; dx++) {
+			level.setBlock(base.offset(dx, -1, 1), block.apply("polished_marble"), 3);
+			level.setBlock(base.offset(dx, 0, 1), block.apply("polished_marble_stairs"), 3);
+		}
+	}
+
+	private static void buildDieselworks(ServerLevel level, BlockPos base) {
+		java.util.function.Function<String, BlockState> block = id ->
+				io.github.jimbozoomer.jugcraft.building.Dieselworks.BLOCKS.get(id).defaultBlockState();
+		for (int dx = 0; dx <= 10; dx++) {
+			for (int dy = 0; dy <= 4; dy++) {
+				String id = dx % 5 == 0 ? (dx == 5 ? "ribbed_patina_pillar" : "ribbed_rust_pillar")
+						: dy <= 1 ? "riveted_rust_plate" : dy == 2 ? "riveted_band_block"
+						: dy == 4 ? "copper_dome_plate"
+						: dx == 2 || dx == 8 ? "porthole_window" : dx == 3 || dx == 7 ? "perforated_patina_plate" : "patina_plate";
+				level.setBlock(base.offset(dx, dy, 0), block.apply(id), 3);
+			}
+			level.setBlock(base.offset(dx, 5, 0), block.apply("red_iron_plate_slab"), 3);
+			for (int dz = 1; dz <= 5; dz++) {
+				level.setBlock(base.offset(dx, -1, dz), block.apply(dz == 1 ? "skid_iron_block" : "rust_plate"), 3);
+			}
+			// The catwalk: grating slabs two up, on I-beams at each end and in the middle.
+			level.setBlock(base.offset(dx, 2, 2), block.apply("rust_grating_slab"), 3);
+		}
+		for (int dx : new int[] {0, 5, 10}) {
+			level.setBlock(base.offset(dx, 0, 2), block.apply("steel_i_beam"), 3);
+			level.setBlock(base.offset(dx, 1, 2), block.apply("steel_i_beam"), 3);
+		}
+		for (int dx : new int[] {2, 8}) {
+			level.setBlock(base.offset(dx, 3, 2), block.apply("amber_cage_lamp"), 3);
+		}
+		level.setBlock(base.offset(4, 0, 4), block.apply("amber_cage_lamp"), 3);
+		for (int dx = 6; dx <= 9; dx++) {
+			level.setBlock(base.offset(dx, 0, 4), block.apply("red_iron_plate_stairs"), 3);
+		}
+		level.setBlock(base.offset(1, 0, 4), block.apply("rust_grating"), 3);
+		level.setBlock(base.offset(2, 0, 4), block.apply("copper_dome_plate_stairs"), 3);
 	}
 
 	private static void buildPowerGear(ServerLevel level, BlockPos start) {
