@@ -380,7 +380,7 @@ def machine_page(block):
 
 
 def arms_pages():
-    """Batch 42: the arms, three pages: swords, maces and hammers, polearms."""
+    """Batch 42: the arms, three pages: swords, maces and hammers, polearms. Batch 45 (Arms II): two more."""
     import arms
     import gear
 
@@ -414,6 +414,25 @@ def arms_pages():
             f"Lance: a horseman's charge that hits harder and unhorses riders at lower speeds, reaching "
             f"{arms.LANCE_REACH[1]} blocks."],
          "craft": craft("halberd")},
+        # Arms II (batch 45).
+        {"title": "Arms: Blades of Skill", "icon": f"{MOD}:steel_dagger", "text": [
+            f"Dagger: quick stabs at a {k['dagger']['reach'][1]}-block reach; a blow from behind deals "
+            f"{round(arms.BACKSTAB * 100)}% more.",
+            f"Sabre: quick sweeping cuts, and {arms.SADDLE:g} more damage from the saddle.",
+            f"Estoc: thrusts through mail, {arms.ARMOR_PIERCE:g} more damage for each point of the foe's armor (at most "
+            f"{arms.ARMOR_PIERCE_MAX:g}).",
+            f"Quarterstaff: two-handed, knocks foes back; hold use to parry {round(k['quarterstaff']['parry'] * 100)}% of a "
+            "blow from in front."],
+         "craft": craft("dagger")},
+        {"title": "Arms: Heavy and Long", "icon": f"{MOD}:steel_battle_axe", "text": [
+            f"Battle axe: two-handed; chops wood like an axe and stops a shield blocking for "
+            f"{k['battle_axe']['disable']:g} seconds.",
+            f"Flail: a hit dazes the foe, slowing it for {arms.DAZE[0] // 20} seconds.",
+            f"Scythe: wide sweeps at {k['scythe']['reach'][1]:g} blocks. Use it on a ripe crop to reap every ripe crop "
+            "around it, 3 by 3, and replant them.",
+            f"Pike: the longest reach, {k['pike']['reach'][1]:g} blocks, but nothing nearer than {k['pike']['reach'][0]:g}; "
+            f"{round(arms.RIDERS * 100)}% more damage to riders and their mounts."],
+         "craft": craft("scythe")},
     ]
 
 

@@ -41,6 +41,10 @@ TREE = {
     "arms": ("bronze", [f"{metal}_{kind}" for metal in ("bronze", "steel") for kind in (
         "longsword", "greatsword", "rapier", "flanged_mace", "war_hammer", "glaive", "halberd", "spear", "lance")],
         "Man-at-Arms", "Forge a longsword, greatsword, rapier, mace, war hammer, glaive, halberd, spear or lance", "task"),
+    # Batch 45: Arms II, from the bronze age on.
+    "arms_ii": ("bronze", [f"{metal}_{kind}" for metal in ("bronze", "steel") for kind in (
+        "dagger", "sabre", "estoc", "battle_axe", "flail", "scythe", "quarterstaff", "pike")],
+        "Armory", "Forge a dagger, sabre, estoc, battle axe, flail, scythe, quarterstaff or pike", "task"),
     # Batch 27: gear and plastic blocks.
     "scuba": ("rubber", ["scuba_mask", "scuba_tank"], "Deep Breath", "Make scuba gear and breathe under water on oxygen",
               "task"),

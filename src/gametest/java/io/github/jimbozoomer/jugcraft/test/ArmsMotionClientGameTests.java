@@ -20,7 +20,7 @@ import net.minecraft.core.BlockPos;
  */
 public class ArmsMotionClientGameTests implements FabricClientGameTest {
 	private static final List<String> KINDS = List.of("longsword", "greatsword", "rapier", "flanged_mace", "war_hammer", "glaive",
-			"halberd", "lance");
+			"halberd", "lance", "dagger", "sabre", "estoc", "battle_axe", "flail", "scythe", "quarterstaff", "pike");
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -63,7 +63,7 @@ public class ArmsMotionClientGameTests implements FabricClientGameTest {
 			// it also hides the hand, so it is shown with one press of its toggle (26.3's Options has no hideGui field to set).
 			context.getInput().pressKey(options -> options.keyToggleGui);
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
-			for (String kind : List.of("longsword", "war_hammer", "glaive")) {
+			for (String kind : List.of("longsword", "war_hammer", "glaive", "dagger", "scythe", "pike")) {
 				hold(context, server, kind);
 				// Vanilla lowers the arm on screen until the attack cooldown, reset by the swap, recovers (28 ticks for a
 				// war hammer).

@@ -840,6 +840,28 @@ def check_arms():
                         ("PARRY_WEAR_BASE", arms.PARRY_WEAR[1]), ("PARRY_WEAR_FACTOR", arms.PARRY_WEAR[2])):
         if f"{name} = {f(value)};" not in java:
             err(f"JugcraftArms.{name} differs from tools/arms.py ({value})")
+    # Arms II traits (batch 45): the same kinds and traits, and the same numbers.
+    traits = dict(re.findall(r'"([a-z_]+)",\s*Trait\.([A-Z_]+)', re.search(r"TRAITS = Map\.of\((.*?)\);", java, re.S).group(1)))
+    if traits != {kind: trait.upper() for kind, trait in arms.TRAITS.items()}:
+        err(f"JugcraftArms.TRAITS {traits} != tools/arms.py {arms.TRAITS}")
+    for name, value in (("BACKSTAB", arms.BACKSTAB), ("BACKSTAB_ANGLE", arms.BACKSTAB_ANGLE), ("SADDLE", arms.SADDLE),
+                        ("ARMOR_PIERCE", arms.ARMOR_PIERCE), ("ARMOR_PIERCE_MAX", arms.ARMOR_PIERCE_MAX),
+                        ("RIDERS", arms.RIDERS)):
+        if f"{name} = {f(value)};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({value})")
+    for name, value in (("DAZE_TICKS", arms.DAZE[0]), ("DAZE_AMPLIFIER", arms.DAZE[1]), ("REAP_RADIUS", arms.REAP_RADIUS),
+                        ("REAP_WEAR", arms.REAP_WEAR)):
+        if f"{name} = {value};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({value})")
+    # Every arm swung as a sword is, a second, below its metal's sword: its trait is the reason to choose it.
+    for kind, info in arms.KINDS.items():
+        if kind in arms.CHARGING:
+            continue
+        for metal, bonus in (("bronze", 2.0), ("steel", 2.5)):
+            arm = (1.0 + bonus + info["damage"]) * (4.0 + info["speed"])
+            sword = (1.0 + bonus + 3.0) * 1.6
+            if arm >= sword:
+                err(f"The {metal} {kind} deals {arm:.2f} a second, not below the {metal} sword's {sword:.2f}")
     for kind, info in arms.KINDS.items():
         if kind in arms.CHARGING:
             continue
