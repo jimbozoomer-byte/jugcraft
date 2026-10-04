@@ -387,7 +387,7 @@ public final class JugcraftArms {
 			}
 			for (Shield shield : SHIELDS) {
 				if (shield.metal().equals(metal)) {
-					kit(metal + "_" + shield.name(), properties -> new ArmItem(shield.name(), shield(properties, material, shield)));
+					kit(metal + "_" + shield.name(), properties -> new ArmShieldItem(shield.name(), shield(properties, material, shield)));
 				}
 			}
 		}
