@@ -333,6 +333,19 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_zeppelin");
 
+			// The Diesel Walker (batch 47), standing in front of the Dieselworks wall and facing the camera.
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = new io.github.jimbozoomer.jugcraft.walker.DieselWalker(
+						io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.DIESEL_WALKER, overworld);
+				walker.snapTo(x - 18.5, y + 1, z - 3.5, 0.0F, 0.0F);
+				overworld.addFreshEntity(walker);
+			});
+			server.runCommand("tp @p %d %d %d 180 8".formatted(x - 19, y + 2, z + 4));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_diesel_walker");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
