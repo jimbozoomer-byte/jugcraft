@@ -1,0 +1,116 @@
+name: API probe (temporary, Witching Season)
+on:
+  push:
+    branches: ['claude/beautiful-meitner-kfn85s']
+    paths: ['.github/workflows/probe.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Resolve Minecraft
+        run: ./gradlew compileJava --no-daemon -q
+      - name: Batch 18 APIs
+        run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-clientOnly-deobf-26.3.jar' | head -1)
+          CP="$CLIENT:$COMMON"
+          l() { echo "=== $1 /${2:-.}/"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-60}; }
+          l net.minecraft.world.level.block.entity.BaseContainerBlockEntity 'lock|canOpen|createMenu|canUnlock'
+          l net.minecraft.world.LockCode
+          l net.minecraft.world.item.crafting.CustomRecipe
+          l net.minecraft.world.item.crafting.BookCloningRecipe
+          l net.minecraft.world.item.crafting.CraftingInput 'getItem|size|width|height|items|ingredientCount'
+          l net.minecraft.world.item.crafting.RecipeSerializer
+          l net.minecraft.world.item.crafting.CraftingRecipe
+          l net.minecraft.world.item.crafting.CraftingBookCategory
+          l net.minecraft.world.level.Level 'rain|thunder'
+          l net.minecraft.world.level.block.LayeredCauldronBlock
+          l net.minecraft.world.level.block.AbstractCauldronBlock 'Drip|fill|isFull|canReceive|receive'
+          l net.minecraft.world.level.block.CauldronBlock
+          l net.minecraft.world.level.block.EnchantingTableBlock 'BOOKSHELF|isValid'
+          l net.minecraft.tags.BlockTags 'ENCHANT|BOOK'
+          l net.minecraft.tags.ItemTags 'BOOK'
+          l net.minecraft.world.level.block.ChiseledBookShelfBlock 'getHitSlot|SLOT|hit|addBook|removeBook|getRelativeHitCoordinates'
+          l net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity 'LastInteracted|lastInteracted|MAX_BOOKS|setItem|count'
+          l net.minecraft.world.entity.LivingEntity 'getItemBySlot|setItemSlot|onEquipItem|canUseSlot|ArmorSlots|isEquippableInSlot'
+          l net.minecraft.world.entity.EquipmentSlot
+          l net.minecraft.world.item.enchantment.EnchantmentHelper 'has\(|PREVENT'
+          l net.minecraft.world.item.enchantment.EnchantmentEffectComponents 'PREVENT'
+          l net.minecraft.world.entity.decoration.ArmorStand 'swapItem|interactAt|isDisabled'
+          l net.minecraft.world.entity.Entity 'hurtMarked|hasImpulse|needsSync|markHurt|resetPos'
+          l net.minecraft.world.entity.player.Player ' drop\('
+          l net.minecraft.world.inventory.ChestMenu 'Rows'
+          l net.minecraft.world.level.block.AbstractBedBlock
+          l net.minecraft.world.level.block.HopperBlock 'ENABLED'
+          l net.minecraft.world.level.block.entity.HopperBlockEntity 'getContainerAt|canTakeItemFromContainer|canPlaceItemInContainer'
+          l net.minecraft.world.WorldlyContainer
+          l net.minecraft.world.entity.monster.Enemy
+          l net.minecraft.world.entity.MobCategory
+          l net.minecraft.world.level.block.PointedDripstoneBlock 'fill|cauldron|Cauldron'
+          l net.minecraft.sounds.SoundEvents 'CHAIN|IRON_DOOR|VAULT|TRIAL|GRINDSTONE|BONE_BLOCK|WIND|LOCK|COPPER_DOOR|DECORATED_POT|STONE_|DEEPSLATE_|AMBIENT_CAVE|WARDEN_AMBIENT|SKELETON_AMBIENT|WITHER_SKELETON|CAT_|SILVERFISH|SPIDER|BREEZE|ARMOR_EQUIP' 200
+          l net.minecraft.core.particles.ParticleTypes 'DRIP|FALLING|SPLASH|RAIN|DUST|SOUL|ASH|SMOKE|GLOW' 80
+          l net.minecraft.world.level.block.state.properties.BlockStateProperties 'AXIS|BED_PART|FACING|ATTACH|SLOT'
+          l net.minecraft.world.level.block.RotatedPillarBlock
+          echo "=== data tags"; mkdir -p /tmp/c && cd /tmp/c && unzip -q -o "$COMMON" 'data/minecraft/tags/*' 'data/minecraft/recipe/book_cloning.json' 'data/minecraft/recipe/map_cloning.json' 2>/dev/null
+          ls data/minecraft/tags/block | grep -iE 'enchant|book|cauldron|bed'; ls data/minecraft/tags/item | grep -iE 'book|key|armor|head|skull' 
+          cat data/minecraft/tags/block/enchantment_power_provider.json data/minecraft/tags/block/enchantment_power_transmitter.json data/minecraft/tags/item/bookshelf_books.json data/minecraft/recipe/book_cloning.json 2>/dev/null
+      - name: Lair APIs
+        run: |
+          set +e
+          COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-clientOnly-deobf-26.3.jar' | head -1)
+          CP="$CLIENT:$COMMON"
+          l() { echo "=== $1 /${2:-.}/"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-60}; }
+          l net.minecraft.world.level.portal.TeleportTransition 'TeleportTransition\(|DO_NOTHING|PLAY_PORTAL|PostDimension|missingRespawn|withRotation'
+          l net.minecraft.server.level.ServerPlayer 'teleport|setRespawnPosition|getRespawnConfig|changeDimension|isChangingDimension|gameMode'
+          l net.minecraft.server.MinecraftServer 'getLevel\(|levelKeys|getAllLevels'
+          l net.minecraft.world.level.Level 'RESOURCE_KEY|OVERWORLD|dimension\(\)'
+          l net.minecraft.world.entity.player.Abilities
+          l net.minecraft.server.level.ServerBossEvent
+          l net.minecraft.world.BossEvent 'BossBarColor|BossBarOverlay|setProgress|setDarkenScreen|setCreateWorldFog|setPlayBossMusic'
+          l net.minecraft.world.entity.AnimationState
+          l net.minecraft.world.level.saveddata.SavedData
+          l net.minecraft.world.level.saveddata.SavedDataType
+          l net.minecraft.world.level.storage.DimensionDataStorage 'computeIfAbsent|get\('
+          l net.minecraft.world.level.levelgen.FlatLevelSource
+          l net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager 'get\(|getOrCreate'
+          l net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate 'placeInWorld|getSize'
+          l net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings 'set|StructurePlaceSettings\('
+          l net.minecraft.world.entity.monster.Monster 'createMonsterAttributes|Monster\('
+          l net.minecraft.world.entity.ai.attributes.Attributes 'MAX_HEALTH|ARMOR|KNOCKBACK|FOLLOW|ATTACK_DAMAGE|MOVEMENT|FLYING|SCALE|STEP'
+          l net.minecraft.world.entity.Entity 'handleEntityEvent|broadcastEntityEvent|setNoGravity|isInvulnerableTo|canChangeDimensions|checkDespawn|removeWhenFarAway|requiresCustomPersistence'
+          l net.minecraft.world.entity.Mob 'checkDespawn|removeWhenFarAway|setPersistenceRequired|requiresCustomPersistence|registerGoals|customServerAiStep|dropCustomDeathLoot'
+          l net.minecraft.world.entity.LivingEntity 'dropAllDeathLoot|shouldDropLoot|startSeenByPlayer|stopSeenByPlayer|dropCustomDeathLoot|getLastHurtByPlayer|die\('
+          l net.minecraft.client.animation.AnimationDefinition
+          l net.minecraft.client.animation.KeyframeAnimation
+          l net.minecraft.client.animation.KeyframeAnimations
+          l net.minecraft.client.animation.AnimationChannel
+          l net.minecraft.client.model.Model 'animate|KeyframeAnimation|bake'
+          l net.minecraft.client.model.EntityModel
+          l net.minecraft.client.renderer.entity.state.LivingEntityRenderState 'ageInTicks|walk'
+          l net.minecraft.client.renderer.entity.MobRenderer
+          l net.minecraft.world.level.dimension.DimensionType
+          l net.minecraft.world.level.dimension.LevelStem
+          FAPI=$(find ~/.gradle/caches -name 'fabric-entity-events-v1*.jar' | grep -v sources | head -1)
+          echo "=== fabric entity events: $FAPI"; unzip -l "$FAPI" | grep -E "\.class" | head -20
+          javap -cp "$FAPI:$CP" -p net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents 2>&1 | head -40
+          javap -cp "$FAPI:$CP" -p 'net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents' 2>&1 | head -20
+          FEV=$(find ~/.gradle/caches -name 'fabric-events-interaction-v0*.jar' | grep -v sources | head -1)
+          echo "=== fabric interaction: $FEV"; unzip -l "$FEV" | grep -E "api.*\.class" | head -20
+          javap -cp "$FEV:$CP" -p net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents 2>&1 | head -20
+          javap -cp "$FEV:$CP" -p 'net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents$Before' 2>&1 | head -10
+          javap -cp "$FEV:$CP" -p 'net.fabricmc.fabric.api.event.player.UseBlockCallback' 2>&1 | head -10
+          FNET=$(find ~/.gradle/caches -name 'fabric-networking-api-v1*.jar' | grep -v sources | head -1)
+          javap -cp "$FNET:$CP" -p 'net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents' 2>&1 | head -20
+          echo "=== dimension_type json"; mkdir -p /tmp/d && cd /tmp/d && unzip -q -o "$COMMON" 'data/minecraft/dimension_type/*' 2>/dev/null; ls data/minecraft/dimension_type; cat data/minecraft/dimension_type/the_end.json
