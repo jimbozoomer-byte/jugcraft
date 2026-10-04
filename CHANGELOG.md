@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Arms IV, batch 47
+- **Five ornate arms** in bronze and steel, drawn after the owner's reference sheets (nothing of them is copied): set stones (a garnet in bronze, a lit green phosphor stone in steel), flat-toned heads with bright edges, winged guards, lit rims and glints of light.
+  - **labrys** (two-handed): its finishing blow whirls right round, striking up to 6 foes about you;
+  - **battleblade** (two-handed): each hit wears every piece of the foe's armor;
+  - **war fork** (two-handed thrust): half again as much damage to a foe charging at you;
+  - **kama**: use on grass, ferns, vines or leaves to cut them all, 3 by 3 by 3;
+  - **war pick**: mines stone and ore as its metal's pickaxe.
+- Handbook pages, the **Masterwork** advancement, six game tests. The data check now also fails if an arm's id is taken elsewhere. Record: [arms-iv.md](docs/features/arms-iv.md).
+
 ### Unmerged: Arms III, batch 46
 - **Two-handed weapons**, after studying the Fiery Combat add-on the owner sent (nothing of it is used). Greatswords, war hammers, glaives, battle axes, scythes, quarterstaves, pikes and the new kinds now swing with both hands:
   - a click starts the swing, and the blow lands as the swing comes round, on the frame the animation lands it, not on the click;
@@ -122,6 +131,8 @@ No numbered release yet. Everything below is on `main`.
 - **The Stonemason's Chisel** opens an epitaph screen of four lines, checked on the server; each line is cut as large as it fits. A named Name Tag cuts the first line. Epitaphs go with the broken headstone.
 - **Neglected graves stir restless spirits more often**; a well-kept churchyard is quiet.
 - Two advancements, four game tests, client screenshots. Record: [graveyard.md](docs/features/graveyard.md).
+
+
 
 ### Unmerged: Kaiserworks, batch 48
 - 26 imperial building blocks to go with the dieselpunk set: black lacquer, riveted black and gilt-trimmed plate, polished brass, a gilt key-pattern frieze, an imperial crest (our own made-up empire), fluted marble and black iron columns, polished marble, station tiles, see-through wrought-iron lattice, leaded glass and gas lamps.
