@@ -1562,6 +1562,11 @@ def check_agriculture():
     chance = re.search(r'GRASS_SEED_CHANCE = ([\d.]+)F', main)
     if not seeds or re.findall(r'"([a-z_]+)"', seeds.group(1)) != ag.GRASS_SEEDS or not chance or float(chance.group(1)) != ag.GRASS_SEED_CHANCE:
         err("JugcraftAgriculture.java grass seeds differ from tools/agriculture.py")
+    # The grass seed game test counts every one of them, or its expected total is wrong.
+    test = (ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "AgricultureGameTests.java")
+    listed = re.search(r'String\[\] seeds = \{([^}]*)\}', test.read_text(encoding="utf-8")) if test.is_file() else None
+    if not listed or re.findall(r'"([a-z_]+)"', listed.group(1)) != ag.GRASS_SEEDS:
+        err("AgricultureGameTests.grassDropsJugcraftSeeds must count every seed in tools/agriculture.py GRASS_SEEDS")
     for name, info in ag.ITEMS.items():
         plants = info.get("plants")
         if plants and bool(info.get("trellis_seed")) != (plants in ag.trellis_crops()):
