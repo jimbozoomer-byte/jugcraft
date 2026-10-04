@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_lance",
+  "textures": {
+    "layer0": "jugcraft:item/steel_lance_in_hand"
+  }
+}

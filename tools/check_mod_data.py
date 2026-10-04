@@ -30,6 +30,7 @@ import gas_storage
 import control_electronics
 import rocketry
 import gear
+import arms
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
@@ -126,6 +127,8 @@ def model(ref):
 def _hi_res(name):
     """64x64 textures: the drone tower's realistic block textures (tools/tower_art.py) and items drawn with the
     high-detail renderer (tools/hd_art.py: construction_art.ITEMS so far)."""
+    if name in arms.textures():  # batch 42's arms (tools/arms_art.py)
+        return True
     import tower_art
     import blueprints
     import construction_art
@@ -312,6 +315,8 @@ def item_units(ref):
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
             or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks():
         return {}
+    if path in arms.items():
+        return arms.metal_content(path)
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
         # hold nothing the audit tracks, like the vanilla tools they are made from.
@@ -494,12 +499,17 @@ def check_fluid_recipes(registered):
                 err(f"{label}: {fluid_out} mB out from {fluid_in} mB in")
 
 
+# The diagonal walls (tools/diagonal_connections.py), which join #minecraft:walls.
+DIAGONAL_WALLS = {dg.DIAGONAL_WALL.format(name) for name in dg.VANILLA_WALLS}
+
+
 def check_tags():
     for path in sorted(DATA.rglob("tags/*/**/*.json")):
         registry = path.relative_to(DATA).parts[2]
         known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + machine_items()
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
+                                                    + arms.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
@@ -519,7 +529,7 @@ def check_tags():
                 namespace, trade = split(value)
                 if namespace == MOD and not (DATA / MOD / "villager_trade" / f"{trade}.json").exists():
                     err(f"{path.relative_to(ROOT)}: unknown villager trade {value}")
-            elif split(value)[0] == MOD and split(value)[1] not in known:
+            elif split(value)[0] == MOD and split(value)[1] not in known and split(value)[1] not in DIAGONAL_WALLS:
                 err(f"{path.relative_to(ROOT)}: unknown entry {value}")
 
 
@@ -788,6 +798,55 @@ def check_gear():
         for frame in frames:
             if not (ASSETS / "textures" / "item" / f"{frame}.png").exists():
                 err(f"Missing item texture {frame}.png")
+
+
+def check_arms():
+    """weapons/JugcraftArms.java against tools/arms.py (batch 42): the metals, each kind's numbers and traits in order,
+    the charging kinds' numbers, the lance and parry constants, and that each arm's model has its held pose."""
+    java = (JAVA_ROOT / "weapons" / "JugcraftArms.java").read_text(encoding="utf-8")
+
+    def f(value):
+        return f"{float(value)}F"
+    metals = re.findall(r'"([a-z_]+)"', re.search(r"METALS = List\.of\(([^)]*)\)", java).group(1))
+    if metals != arms.METALS:
+        err(f"JugcraftArms.METALS {metals} != tools/arms.py {arms.METALS}")
+    swung = [kind for kind in arms.KINDS if kind not in arms.CHARGING]
+    found = re.findall(r'new Kind\("([a-z_]+)"', java)
+    if found != swung:
+        err(f"JugcraftArms.KINDS {found} != tools/arms.py {swung}")
+    for kind in swung:
+        info = arms.KINDS[kind]
+        swing, ticks = info["swing"]
+        low, high = info["reach"]
+        expected = (f'new Kind("{kind}", {f(info["damage"])}, {f(info["speed"])}, SwingAnimationType.{swing.upper()}, {ticks}, '
+                    f'{f(low)}, {f(high)}, {f(info["margin"])}, {f(info["disable"])}, {info["wear"]}, {f(info["knockback"])}, '
+                    f'{f(info["parry"])}, {str("swords" in info["tags"]).lower()}, {str(info.get("pierce", False)).lower()})')
+        if expected not in java:
+            err(f"JugcraftArms: {kind} is not {expected}")
+    charges = re.findall(r'new Charge\("([a-z_]+)", "([a-z_]+)"', java)
+    if sorted(charges) != sorted(arms.CHARGE):
+        err(f"JugcraftArms.CHARGES {charges} != tools/arms.py {list(arms.CHARGE)}")
+    for (kind, metal), values in arms.CHARGE.items():
+        expected = f'new Charge("{kind}", "{metal}", ' + ", ".join(f(v) for v in values) + ")"
+        if expected not in java:
+            err(f"JugcraftArms: the {metal} {kind} is not {expected}")
+    for name, value in (("LANCE_DAMAGE", arms.LANCE_DAMAGE), ("LANCE_MIN_REACH", arms.LANCE_REACH[0]),
+                        ("LANCE_MAX_REACH", arms.LANCE_REACH[1]), ("PARRY_ANGLE", arms.PARRY_ANGLE),
+                        ("PARRY_DELAY", arms.PARRY_DELAY), ("PARRY_WEAR_THRESHOLD", arms.PARRY_WEAR[0]),
+                        ("PARRY_WEAR_BASE", arms.PARRY_WEAR[1]), ("PARRY_WEAR_FACTOR", arms.PARRY_WEAR[2])):
+        if f"{name} = {f(value)};" not in java:
+            err(f"JugcraftArms.{name} differs from tools/arms.py ({value})")
+    for kind, info in arms.KINDS.items():
+        if kind in arms.CHARGING:
+            continue
+        held = load(ASSETS / "models" / "item" / f"arms_{kind}.json") or {}
+        if held != arms.held_model(kind):
+            err(f"models/item/arms_{kind}.json is not tools/arms.py's held pose")
+    for item in arms.items():
+        _metal, kind = arms.split(item)
+        definition = load(ASSETS / "items" / f"{item}.json") or {}
+        if not definition.get("swap_animation_scale"):
+            err(f"items/{item}.json has no swap_animation_scale")
 
 
 def check_end_shares():
@@ -4095,39 +4154,63 @@ def check_deposits():
 def check_diagonal_connections():
     """Diagonal connections (tools/diagonal_connections.py): every block in #jugcraft:connects_diagonally has a
     blockstate with one arm part for each diagonal, turned toward it, and an arm model of turned elements; every
-    Jugcraft blockstate shaped like a fence, pane or bars (a part for each straight direction) is in the tag; vanilla's
-    rebuilt blockstates keep vanilla's own parts; and the Java property names match."""
+    Jugcraft blockstate shaped like a fence, pane or bars (a part for each straight direction) or like a wall (a low or
+    tall part for each) is in the tag; vanilla's rebuilt blockstates keep vanilla's own parts; vanilla's walls are left
+    as they are and each has a diagonal wall (its arms, post and low sides) in #minecraft:walls; and the Java property
+    names match."""
     tag = set((load(RES / "data" / MOD / "tags" / "block" / "connects_diagonally.json") or {}).get("values", []))
     if tag != set(dg.blocks()):
         err(f"#{dg.TAG} differs from tools/diagonal_connections.py: {sorted(tag ^ set(dg.blocks()))}")
     for block in sorted(tag):
-        namespace, name = block.split(":")
-        root = RES / "assets" / namespace
-        parts = (load(root / "blockstates" / f"{name}.json") or {}).get("multipart", [])
-        arms = {next(iter(p["when"])): p["apply"] for p in parts if set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)}
-        if sorted(arms) != sorted(dg.DIAGONAL_NAMES):
-            err(f"{block}: needs one diagonal arm part for each of {dg.DIAGONAL_NAMES}, has {sorted(arms)}")
+        name = block.split(":")[1]
+        namespace, state_name = dg.arm_blockstate(block)
+        parts = (load(RES / "assets" / namespace / "blockstates" / f"{state_name}.json") or {}).get("multipart", [])
+        models = dg.arm_models(block)
+        arms = {}
+        for part in parts:
+            diagonals = set(part.get("when", {})) & set(dg.DIAGONAL_NAMES)
+            if diagonals:
+                arms.setdefault(diagonals.pop(), []).append(part["apply"])
+        if sorted(arms) != sorted(dg.DIAGONAL_NAMES) or any(sorted(a["model"] for a in arms[d]) != sorted(models) for d in arms):
+            err(f"{block}: needs one diagonal arm part for each of {dg.DIAGONAL_NAMES} and each of {list(models)}, has {arms}")
             continue
         for diagonal, y in dg.DIAGONALS:
-            if arms[diagonal].get("y", 0) != y or arms[diagonal]["model"] != f"{MOD}:block/diagonal/{name}":
-                err(f"{block}: its {diagonal} arm should be {MOD}:block/diagonal/{name} turned y={y}")
-        model = load(ASSETS / "models" / "block" / "diagonal" / f"{name}.json") or {}
-        elements = model.get("elements", [])
-        if not elements or any(e.get("rotation", {}).get("axis") != "y" or e["rotation"].get("angle") != dg.ANGLE
-                               or not e["rotation"].get("rescale") for e in elements):
-            err(f"{block}: its diagonal arm model needs elements turned {dg.ANGLE} degrees about y, with rescale")
-        if not model.get("parent"):
-            err(f"{block}: its diagonal arm model needs the block's side model as parent (for its textures)")
+            if any(apply.get("y", 0) != y for apply in arms[diagonal]):
+                err(f"{block}: its {diagonal} arms should be turned y={y}")
+        for arm in models:
+            model = load(ASSETS / "models" / "block" / "diagonal" / f"{arm.split('/')[-1]}.json") or {}
+            elements = model.get("elements", [])
+            if not elements or any(e.get("rotation", {}).get("axis") != "y" or e["rotation"].get("angle") != dg.ANGLE
+                                   or not e["rotation"].get("rescale") for e in elements):
+                err(f"{block}: its diagonal arm model {arm} needs elements turned {dg.ANGLE} degrees about y, with rescale")
+            if not model.get("parent"):
+                err(f"{block}: its diagonal arm model {arm} needs the block's side model as parent (for its textures)")
     vanilla = dg.vanilla_blockstates()
     for name, (own, _side, _kind) in vanilla.items():
         parts = (load(RES / "assets" / "minecraft" / "blockstates" / f"{name}.json") or {}).get("multipart", [])
         if [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)] != own:
             err(f"minecraft:{name}: the rebuilt blockstate lost vanilla's own parts")
+    walls = set((load(RES / "data" / "minecraft" / "tags" / "block" / "walls.json") or {}).get("values", []))
+    for name in dg.VANILLA_WALLS:
+        diagonal = dg.DIAGONAL_WALL.format(name)
+        if (RES / "assets" / "minecraft" / "blockstates" / f"{name}.json").exists():
+            err(f"minecraft:{name}: its blockstate is overridden; vanilla's walls are left as they are")
+        parts = (load(ASSETS / "blockstates" / f"{diagonal}.json") or {}).get("multipart", [])
+        if [p for p in parts if not set(p.get("when", {})) & set(dg.DIAGONAL_NAMES)] != dg.diagonal_wall(name):
+            err(f"{MOD}:{diagonal}: needs the wall's post and low sides, as tools/diagonal_connections.py writes them")
+        if f"{MOD}:{diagonal}" not in walls:
+            err(f"{MOD}:{diagonal} is not in #minecraft:walls, so walls, gates and bars would not join it")
     for path in sorted((ASSETS / "blockstates").glob("*.json")):
+        if path.stem.startswith(dg.DIAGONAL_WALL.format("")):
+            continue
         parts = (load(path) or {}).get("multipart", [])
         sides = {next(iter(p["when"])) for p in parts if len(p.get("when", {})) == 1 and list(p["when"].values()) == ["true"]}
         if {"north", "east", "south", "west"} <= sides and not sides & {"up", "down"} and f"{MOD}:{path.stem}" not in tag:
             err(f"{MOD}:{path.stem} joins like a fence but is not in #{dg.TAG}; add it to tools/diagonal_connections.py")
+        heights = {next(iter(p["when"])) for p in parts
+                   if len(p.get("when", {})) == 1 and list(p["when"].values())[0] in ("low", "tall")}
+        if {"north", "east", "south", "west"} <= heights and f"{MOD}:{path.stem}" not in tag:
+            err(f"{MOD}:{path.stem} joins like a wall but is not in #{dg.TAG}; add it to tools/diagonal_connections.py")
     java = (ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "diagonal" / "DiagonalConnections.java")
     source = java.read_text(encoding="utf-8") if java.exists() else ""
     for diagonal, _y in dg.DIAGONALS:
@@ -4135,12 +4218,16 @@ def check_diagonal_connections():
             err(f"diagonal/DiagonalConnections.java does not name the property {diagonal}")
     if f'"{dg.TAG.split(":")[1]}"' not in source:
         err(f"diagonal/DiagonalConnections.java does not name the tag {dg.TAG}")
+    walls_java = java.with_name("DiagonalWalls.java")
+    if f'"{dg.DIAGONAL_WALL.format("")}"' not in (walls_java.read_text(encoding="utf-8") if walls_java.exists() else ""):
+        err(f"diagonal/DiagonalWalls.java does not register the diagonal walls as {dg.DIAGONAL_WALL}")
 
 
 def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
+                  | set(arms.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
                   | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
@@ -4155,6 +4242,7 @@ def main():
     check_java()
     check_deposits()
     check_gear()
+    check_arms()
     check_exosuit()
     check_grapple()
     check_field_chemistry()
