@@ -57,7 +57,7 @@ TREE = {
     "arms_v": ("bronze", [f"{metal}_{kind}" for metal in ("bronze", "steel") for kind in (
         "twinblade", "nodachi", "earthbreaker", "katar", "moonblade", "kusarigama")],
         "Weapon Art", "Forge a twinblade, nodachi, earthbreaker, katar, moonblade or kusarigama", "task"),
-    # Batch 53: Arms VI, the katana, brazier mace, bows, crossbows and shields, from the bronze age on.
+    # Batch 55: Arms VI, the katana, brazier mace, bows, crossbows and shields, from the bronze age on.
     "arms_vi": ("bronze", [f"{metal}_{kind}" for metal in ("bronze", "steel") for kind in (
         "katana", "brazier_mace", "longbow", "arbalest", "heater_shield", "tower_shield")],
         "War Kit", "Forge a katana, brazier mace, longbow, arbalest, heater shield or tower shield", "task"),
