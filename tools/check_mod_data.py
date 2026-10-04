@@ -23,6 +23,7 @@ import pinata
 import hot_air_balloon
 import leaf_blower
 import decor15
+import decor16
 import petro
 import deposits
 import seasons
@@ -2528,6 +2529,7 @@ def check_decor4(java):
     check_leaf_blower(java, number, lang)
     check_graveyard_flora(java, number, lang)
     check_churchyard_ornaments(java, number, lang)
+    check_haunted_house_props(java, lang)
 
 
 def check_churchyard_ornaments(java, number, lang):
@@ -2556,6 +2558,67 @@ def check_churchyard_ornaments(java, number, lang):
             err(f"The {recipe['id']} recipe is missing")
     if 'GARGOYLE("gargoyle"' not in java.get("HeadstoneBlock", "") or "gargoyle" not in gy.HEADSTONES:
         err("The Gargoyle must be a headstone style in HeadstoneBlock.java and tools/graveyard.py")
+
+
+def check_haunted_house_props(java, lang):
+    """Halloween decorations batch 16: Java's eyeball, candles and monster's head match tools/decor16.py; each prop is
+    registered, named, drawn on its 64 x 64 texture, drops and has its recipe; the eyeball's renderer and quads are
+    wired up; the pillar candles are vanilla candles (block tag minecraft:candles). The harvest plushes are checked with
+    the midway's."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    eye, head = decor16.FLYING_EYEBALL, decor16.MONSTER_HEAD
+    expected = {("FlyingEyeballBlock", "HOVER_PIXELS"): eye["hover_pixels"], ("FlyingEyeballBlock", "BOB_TICKS"): eye["bob_ticks"],
+                ("FlyingEyeballBlock", "FLAP_TICKS"): eye["flap_ticks"], ("FlyingEyeballBlock", "WATCH_RANGE"): eye["watch_range"],
+                ("FlyingEyeballBlock", "TURN_SPEED"): eye["turn_speed"], ("PillarCandleBlock", "FLAME_ABOVE"): decor16.PILLAR["flame_above"],
+                ("MonsterHeadBlock", "LIGHT"): head["light"], ("MonsterHeadBlock", "SPARK_CHANCE"): head["spark_chance"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(found - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/decor16.py ({value})")
+    layout = ",\n".join("{" + ", ".join("{" + ", ".join(f"{v:.1f}" for v in c) + "}" for c in decor16.CANDLES[n]) + "}"
+                         for n in sorted(decor16.CANDLES))
+    flat = re.sub(r"\s+", "", java.get("PillarCandleBlock", ""))
+    if re.sub(r"\s+", "", layout) not in flat:
+        err("PillarCandleBlock.LAYOUT differs from tools/decor16.py CANDLES")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ("registerHauntedHouseProps();", "FlyingEyeballBlock::new", "PillarCandleBlock::new", "MultifaceBlock::new", "MonsterHeadBlock::new"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    for block in decor16.blocks():
+        if f'"{block}"' not in main:
+            err(f"JugcraftAgriculture.java does not register {block}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"{block} has no name")
+        if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
+            err(f"{block} has no loot table")
+        with Image.open(ASSETS / "textures" / "block" / f"{block}.png") as img:
+            if img.size != (64, 64):
+                err(f"textures/block/{block}.png is {img.size}, not 64 x 64")
+    for name in decor16.PLUSHES:
+        if name not in midway.PLUSHES or lang.get(f"block.{MOD}.{name}") != decor16.PLUSHES[name]:
+            err(f"The harvest plush {name} must be a midway plush with its name")
+        with Image.open(ASSETS / "textures" / "block" / f"{name}.png") as img:
+            if img.size != (64, 64):
+                err(f"textures/block/{name}.png is {img.size}, not 64 x 64")
+    for recipe in decor16.SHAPED + decor16.SHAPELESS:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"The {recipe['id']} recipe is missing")
+    candles = (load(DATA / "minecraft" / "tags" / "block" / "candles.json") or {}).get("values", [])
+    for block in decor16.PILLAR_CANDLES:
+        if f"{MOD}:{block}" not in candles:
+            err(f"{block} must be in the block tag minecraft:candles, to be lit as vanilla's candles are")
+    quads = load(ASSETS / "decor16_quads.json") or {}
+    for model in ("flying_eyeball_body", "flying_eyeball_iris", "flying_eyeball_wing_left", "flying_eyeball_wing_right"):
+        if not quads.get(model):
+            err(f"decor16_quads.json has no {model}")
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    if 'Jugcraft.id("decor16_quads.json")' not in (client / "DecorQuads.java").read_text(encoding="utf-8"):
+        err("DecorQuads.java must read decor16_quads.json")
+    if "FLYING_EYEBALL_ENTITY, FlyingEyeballRenderer::new" not in (client / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient.java must draw the flying eyeball")
 
 
 def check_graveyard_flora(java, number, lang):
