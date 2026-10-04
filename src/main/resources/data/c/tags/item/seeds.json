@@ -20,6 +20,7 @@
     "#c:seeds/cinderella_pumpkin",
     "#c:seeds/bottle_gourd",
     "#c:seeds/ornamental_corn",
-    "#c:seeds/apple"
+    "#c:seeds/apple",
+    "jugcraft:acorn"
   ]
 }
