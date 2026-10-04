@@ -184,6 +184,9 @@ public final class JugcraftRocketry {
 		ROCKET_LAUNCHER = item("rocket_launcher", properties -> new RocketLauncherItem(properties.stacksTo(1)));
 		HE_ROCKET = described("he_rocket");
 		HOMING_ROCKET = described("homing_rocket");
+		// Batch 43: propellant tanks for liquid rocket motors (filled in the chemical reactor).
+		described("kerosene_tank");
+		described("lox_tank");
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("combat_rocket"));
 		COMBAT_ROCKET = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder
 				.<CombatRocket>of(CombatRocket::new, MobCategory.MISC).sized(0.3F, 0.3F)

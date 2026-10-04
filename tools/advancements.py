@@ -142,6 +142,7 @@ TREE = {
     "electroplating_bath": ("electrolytic_cell", "electroplating_bath", "Silver Lining", "Build an electroplating bath",
                             "task"),
     "ammonia_chiller": ("synthesis_converter", "ammonia_chiller", "Ice Cold", "Build an ammonia chiller", "task"),
+    "cryogenic_liquefier": ("rocket_workshop", "cryogenic_liquefier", "Minus 183", "Build a cryogenic liquefier", "task"),
     "rocket_workshop": ("processor", "rocket_workshop", "Rocket Science", "Build a rocket workshop", "goal"),
     "survey_rocket": ("rocket_workshop", "survey_rocket", "Eye in the Sky", "Assemble a survey rocket", "task"),
     "hydroponic_bay": ("crop_harvester", "hydroponic_bay", "Soil Optional", "Build a hydroponic bay", "task"),

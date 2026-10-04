@@ -64,6 +64,9 @@ ABOUT = {
     "sprinkler": "Pipe water in (or use a water bucket) and it sprays the crops within 4 blocks, at its height and one "
                  "below: every 5 seconds it uses 50 mB and gives each growing crop an extra growth tick. Load up to 16 "
                  "fertilizer (by hand or hopper) and every 30 seconds it spreads one over the 5x5 crops around it.",
+    "cryogenic_liquefier": "A cold box of chrome heat exchangers under frost. Pipe oxygen (from the air separation unit) "
+                           "into its tank: every 4 seconds a bucket of oxygen condenses into 250 mB of liquid oxygen, "
+                           "the oxidizer for liquid rocket motors. 96 JE/t.",
     "ammonia_chiller": "Ammonia boiling in its coils draws the heat out of water. Pipe ammonia into its first tank and "
                        "water into its second: every 5 seconds a bucket of water freezes into a block of ice. Put four "
                        "ice in its slot and it presses them into packed ice, and four packed ice into blue ice, against "
@@ -780,6 +783,7 @@ def build():
             machine_page("air_separation_unit"),
             machine_page("synthesis_converter"),
             machine_page("ammonia_chiller"),
+            machine_page("cryogenic_liquefier"),
             {"title": "Gas Cylinders", "icon": f"{MOD}:gas_cylinder", "text": [
                 "A gas cylinder carries 8 buckets of one gas: hydrogen to a far-off fuel cell, ammonia to a chiller, "
                 "oxygen or nitrogen into the field.",
@@ -886,6 +890,14 @@ def build():
                 "Homing rockets (with a guidance unit instead of the casing) lock on to the hostile mob nearest your "
                 "crosshair within 48 blocks, if you can see it, and steer into it. Their blast is smaller.",
                 "Like grenades, rockets hurt living things only: they never break, move or burn a block."]},
+            {"title": "Liquid Fuels", "icon": f"{MOD}:lox_tank", "text": [
+                "RP-1 kerosene: hydrocrack heavy fuel oil with hydrogen (in the water tank) over the catalyst in the "
+                "catalytic cracker. A bucket and 200 mB of hydrogen give 800 mB of kerosene, drawn off with the "
+                "naphtha. It is jet fuel too: 448 JE/mB in the gas turbine, 480 in the advanced engine.",
+                "Liquid oxygen: the cryogenic liquefier condenses a bucket of oxygen into 250 mB.",
+                "Fill a rocket casing with a bucket of each in the chemical reactor to make a kerosene tank and a "
+                "liquid oxygen tank. With two nozzles they make three rocket motors in the rocket workshop, with no "
+                "solid propellant."]},
             {"title": "Booster Rails", "icon": f"{MOD}:booster_rail", "text": [
                 "A booster rail is a straight rail with rocket thrusters. Power it with redstone like a powered rail; "
                 "unpowered it is an ordinary rail and does not brake.",

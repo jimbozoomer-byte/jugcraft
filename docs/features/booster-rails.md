@@ -50,4 +50,4 @@ Not applicable.
 
 ## Rollout and open questions
 - A faster rail line (above the vanilla minecart limit) would need minecart physics changes and is not attempted.
-- Next rocketry batch: liquid fuels (kerosene, liquid oxygen).
+- Next rocketry batch: liquid fuels (batch 43, [liquid-fuels.md](liquid-fuels.md)).

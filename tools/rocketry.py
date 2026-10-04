@@ -52,6 +52,9 @@ ITEMS = {
     "rocket_launcher": "Rocket Launcher",
     "he_rocket": "High-Explosive Rocket",
     "homing_rocket": "Homing Rocket",
+    # Batch 43: liquid fuels.
+    "kerosene_tank": "Kerosene Tank",
+    "lox_tank": "Liquid Oxygen Tank",
 }
 ROCKETS = ["survey_rocket", "cloud_seeding_rocket", "clear_sky_rocket", "signal_flare", "illumination_flare"]
 TOOLTIPS = {
@@ -59,7 +62,7 @@ TOOLTIPS = {
     "ammonium_perchlorate": "The oxidizer in solid rocket fuel.",
     "silver_iodide": "Seeds clouds: water freezes onto its crystals.",
     "solid_propellant": "Ammonium perchlorate and aluminum in a rubber binder.",
-    "rocket_motor": "A loaded solid-fuel motor, ready for a payload.",
+    "rocket_motor": "A loaded rocket motor, ready for a payload.",
     "survey_rocket": "Fire it straight up: from the top it surveys the ores and oil under 7x7 chunks.",
     "cloud_seeding_rocket": "Fire it into the sky to bring rain for five minutes. Weather rockets share a two-minute "
                             "cooldown.",
@@ -72,6 +75,8 @@ TOOLTIPS = {
                    "strings a steel line between them.",
     "rocket_launcher": "Fires a rocket from your inventory. Rockets hurt living things only: they never break blocks.",
     "he_rocket": "Rocket launcher ammunition: a big blast where it hits (12 hearts at the centre, 5 blocks across).",
+    "kerosene_tank": "A rocket casing filled with RP-1 kerosene, the fuel of a liquid rocket motor.",
+    "lox_tank": "A rocket casing filled with liquid oxygen, the oxidizer of a liquid rocket motor.",
     "homing_rocket": "Rocket launcher ammunition: locks on to the hostile mob nearest your crosshair within 48 blocks "
                      "and steers into it. A smaller blast.",
 }
@@ -136,6 +141,9 @@ def workshop_recipes():
          "output": rid("guidance_unit"), "count": 1, "ticks": 300, "features": feature + ["silicon"]},
         {"inputs": [[rid("rocket_casing"), 1], [rid("rocket_nozzle"), 1], [rid("solid_propellant"), 2]],
          "output": rid("rocket_motor"), "count": 1, "ticks": 200, "features": feature},
+        # Batch 43: a liquid rocket motor pair, kerosene and liquid oxygen feeding one nozzle each.
+        {"name": "liquid_rocket_motor", "inputs": [[rid("kerosene_tank"), 1], [rid("lox_tank"), 1], [rid("rocket_nozzle"), 2]],
+         "output": rid("rocket_motor"), "count": 3, "ticks": 200, "features": feature + ["crude_oil"]},
         {"inputs": [[rid("rocket_motor"), 1], [rid("guidance_unit"), 1], [rid("sensor"), 1]],
          "output": rid("survey_rocket"), "count": 1, "ticks": 300, "features": feature},
         {"inputs": [[rid("rocket_motor"), 1], [rid("silver_iodide"), 2]],
@@ -156,6 +164,32 @@ def workshop_recipes():
          "output": rid("illumination_flare"), "count": 4, "ticks": 100, "features": feature},
     ]
 
+
+# Batch 43 (docs/features/liquid-fuels.md): liquid fuels.
+# The cryogenic liquefier (MachineKind.CRYOGENIC_LIQUEFIER): oxygen in its one input tank, liquid oxygen out.
+LIQUEFIER_TANK = 8_000
+LIQUEFIER = {"inputs": [LIQUEFIER_TANK], "outputs": [LIQUEFIER_TANK], "item_inputs": 0, "item_outputs": 0,
+             "recipe_type": "liquefaction"}
+LIQUEFIER_RECIPES = [
+    # Oxygen gas condensed to liquid at -183 C: four parts of gas to one of liquid, power doing the cooling.
+    {"name": "liquid_oxygen", "fluids": [("jugcraft:oxygen", 1000)], "fluid_results": [("jugcraft:liquid_oxygen", 250)],
+     "ticks": 80, "features": ["machines"]},
+]
+# Hydrocracking in the catalytic cracker: heavy fuel oil and hydrogen (in the water tank) over the catalyst give RP-1
+# kerosene (the naphtha tank) and a little refinery gas.
+CRACKER_RECIPES = [
+    {"name": "kerosene", "items": [("jugcraft:cracking_catalyst", 1)],
+     "fluids": [("jugcraft:heavy_fuel_oil", 1000), ("jugcraft:hydrogen", 200)],
+     "fluid_results": [("jugcraft:kerosene", 800, 1), ("jugcraft:refinery_gas", 100, 2)], "source": 0, "ticks": 160,
+     "features": ["crude_oil", "salt"]},
+]
+# Propellant tanks filled in the chemical reactor: a rocket casing and a bucket of kerosene or liquid oxygen.
+TANK_RECIPES = [
+    {"name": "kerosene_tank", "items": [("jugcraft:rocket_casing", 1)], "fluids": [("jugcraft:kerosene", 1000)],
+     "results": [("jugcraft:kerosene_tank", 1)], "ticks": 60, "features": ["machines", "crude_oil"]},
+    {"name": "lox_tank", "items": [("jugcraft:rocket_casing", 1)], "fluids": [("jugcraft:liquid_oxygen", 1000)],
+     "results": [("jugcraft:lox_tank", 1)], "ticks": 60, "features": ["machines"]},
+]
 
 # Chemical reactor recipes (tools/petro.py FLUID_RECIPES["chemical_reactor"]).
 REACTOR_RECIPES = [
@@ -487,7 +521,24 @@ HD_ITEMS = {"survey_rocket": survey_rocket, "cloud_seeding_rocket": cloud_seedin
             "silver_iodide": silver_iodide, "solid_propellant": solid_propellant,
             "delivery_rocket": lambda: delivery_rocket(), "flight_plan": lambda: flight_plan(),
             "line_rocket": lambda: line_rocket(), "rocket_launcher": lambda: rocket_launcher(),
-            "he_rocket": lambda: he_rocket(), "homing_rocket": lambda: homing_rocket()}
+            "he_rocket": lambda: he_rocket(), "homing_rocket": lambda: homing_rocket(),
+            "kerosene_tank": lambda: propellant_tank(False), "lox_tank": lambda: propellant_tank(True)}
+
+
+def propellant_tank(oxygen):
+    """A rocket casing standing upright as a tank: steel with a coloured band (straw for kerosene, frost blue for liquid
+    oxygen), a valve on top and, for the oxygen, frost on its shoulders."""
+    import hd_art as hd
+    c = hd.Canvas()
+    band = hd.SAFETY_YELLOW if not oxygen else hd.GLASS
+    c.capsule((32, 12), (32, 56), 14, hd.STEEL, flat_ends=True,
+              bands=[(0.0, 0.06, hd.GUNMETAL), (0.42, 0.58, band), (0.94, 1.0, hd.GUNMETAL)])
+    c.capsule((32, 6), (32, 12), 3.0, hd.CHROME, flat_ends=True)
+    c.capsule((26, 5), (38, 5), 1.4, hd.RED if not oxygen else hd.SAFETY_YELLOW)
+    if oxygen:
+        for x, y in ((22, 16), (26, 14), (40, 15), (43, 18), (20, 52), (44, 50)):
+            c.disc((x, y), 1.6, hd.WHITE_PAINT, 0.6)
+    return c.finish()
 
 
 def rocket_launcher():
