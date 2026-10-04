@@ -4039,6 +4039,26 @@
         {
           "in": [
             [
+              "jugcraft:mandrake_root",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:mandrake_root",
+            3
+          ],
+          "extra": [
+            [
+              "jugcraft:mandrake_root",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
               "jugcraft:corn_kernels",
               1
             ]

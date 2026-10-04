@@ -42,7 +42,7 @@ public class RangeFinderItem extends Item {
 			return InteractionResult.FAIL;
 		}
 		Spotting.mark(player, block.getBlockPos());
-		int distance = (int) Math.round(Math.sqrt(block.getBlockPos().getCenter().distanceToSqr(player.getEyePosition())));
+		int distance = (int) Math.round(Math.sqrt(net.minecraft.world.phys.Vec3.atCenterOf(block.getBlockPos()).distanceToSqr(player.getEyePosition())));
 		player.sendOverlayMessage(Component.translatable("message.jugcraft.artillery.marked", distance));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SPYGLASS_USE, SoundSource.PLAYERS, 1.0F, 1.2F);
 		return InteractionResult.SUCCESS;

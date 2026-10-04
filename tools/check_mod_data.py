@@ -22,6 +22,8 @@ import ferris_wheel
 import pinata
 import hot_air_balloon
 import leaf_blower
+import decor15
+import decor16
 import petro
 import deposits
 import seasons
@@ -1782,6 +1784,11 @@ def check_agriculture():
     chance = re.search(r'GRASS_SEED_CHANCE = ([\d.]+)F', main)
     if not seeds or re.findall(r'"([a-z_]+)"', seeds.group(1)) != ag.GRASS_SEEDS or not chance or float(chance.group(1)) != ag.GRASS_SEED_CHANCE:
         err("JugcraftAgriculture.java grass seeds differ from tools/agriculture.py")
+    # The grass seed game test counts every one of them, or its expected total is wrong.
+    test = (ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "AgricultureGameTests.java")
+    listed = re.search(r'String\[\] seeds = \{([^}]*)\}', test.read_text(encoding="utf-8")) if test.is_file() else None
+    if not listed or re.findall(r'"([a-z_]+)"', listed.group(1)) != ag.GRASS_SEEDS:
+        err("AgricultureGameTests.grassDropsJugcraftSeeds must count every seed in tools/agriculture.py GRASS_SEEDS")
     for name, info in ag.ITEMS.items():
         plants = info.get("plants")
         if plants and bool(info.get("trellis_seed")) != (plants in ag.trellis_crops()):
@@ -2583,6 +2590,150 @@ def check_decor4(java):
     check_pinata(java, number, lang)
     check_hot_air_balloon(java, number, lang)
     check_leaf_blower(java, number, lang)
+    check_graveyard_flora(java, number, lang)
+    check_churchyard_ornaments(java, number, lang)
+    check_haunted_house_props(java, lang)
+
+
+def check_churchyard_ornaments(java, number, lang):
+    """Halloween decorations batch 15: Java's bone pile and lantern match tools/decor15.py; each ornament is registered,
+    named, drawn on its 64 x 64 texture, drops and has its recipe; the Gargoyle is a headstone style."""
+    bp = decor15.BONE_PILE
+    for name, value in (("MAX_LAYERS", bp["layers"]), ("LAYER_PIXELS", bp["layer_pixels"]), ("RATTLE_CHANCE", bp["rattle_chance"])):
+        found = number("BonePileBlock", name)
+        if found is None or float(found) != value:
+            err(f"BonePileBlock.{name} = {found} differs from tools/decor15.py ({value})")
+    if number("JugcraftAgriculture", "WITCHS_LANTERN_LIGHT") != float(decor15.WITCHS_LANTERN["light"]):
+        err("JugcraftAgriculture.WITCHS_LANTERN_LIGHT differs from tools/decor15.py")
+    main = java.get("JugcraftAgriculture", "")
+    for block in decor15.blocks():
+        if f'"{block}"' not in main:
+            err(f"JugcraftAgriculture.java does not register {block}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"{block} has no name")
+        if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
+            err(f"{block} has no loot table")
+        with Image.open(ASSETS / "textures" / "block" / f"{block}.png") as img:
+            if img.size != (64, 64):
+                err(f"textures/block/{block}.png is {img.size}, not 64 x 64")
+    for recipe in decor15.SHAPED + decor15.SHAPELESS:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"The {recipe['id']} recipe is missing")
+    if 'GARGOYLE("gargoyle"' not in java.get("HeadstoneBlock", "") or "gargoyle" not in gy.HEADSTONES:
+        err("The Gargoyle must be a headstone style in HeadstoneBlock.java and tools/graveyard.py")
+
+
+def check_haunted_house_props(java, lang):
+    """Halloween decorations batch 16: Java's eyeball, candles and monster's head match tools/decor16.py; each prop is
+    registered, named, drawn on its 64 x 64 texture, drops and has its recipe; the eyeball's renderer and quads are
+    wired up; the pillar candles are vanilla candles (block tag minecraft:candles). The harvest plushes are checked with
+    the midway's."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = ([\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    eye, head = decor16.FLYING_EYEBALL, decor16.MONSTER_HEAD
+    expected = {("FlyingEyeballBlock", "HOVER_PIXELS"): eye["hover_pixels"], ("FlyingEyeballBlock", "BOB_TICKS"): eye["bob_ticks"],
+                ("FlyingEyeballBlock", "FLAP_TICKS"): eye["flap_ticks"], ("FlyingEyeballBlock", "WATCH_RANGE"): eye["watch_range"],
+                ("FlyingEyeballBlock", "TURN_SPEED"): eye["turn_speed"], ("PillarCandleBlock", "FLAME_ABOVE"): decor16.PILLAR["flame_above"],
+                ("MonsterHeadBlock", "LIGHT"): head["light"], ("MonsterHeadBlock", "SPARK_CHANCE"): head["spark_chance"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(found - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/decor16.py ({value})")
+    layout = ",\n".join("{" + ", ".join("{" + ", ".join(f"{v:.1f}" for v in c) + "}" for c in decor16.CANDLES[n]) + "}"
+                         for n in sorted(decor16.CANDLES))
+    flat = re.sub(r"\s+", "", java.get("PillarCandleBlock", ""))
+    if re.sub(r"\s+", "", layout) not in flat:
+        err("PillarCandleBlock.LAYOUT differs from tools/decor16.py CANDLES")
+    main = java.get("JugcraftAgriculture", "")
+    for call in ("registerHauntedHouseProps();", "FlyingEyeballBlock::new", "PillarCandleBlock::new", "MultifaceBlock::new", "MonsterHeadBlock::new"):
+        if call not in main:
+            err(f"JugcraftAgriculture.java must call {call}")
+    for block in decor16.blocks():
+        if f'"{block}"' not in main:
+            err(f"JugcraftAgriculture.java does not register {block}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"{block} has no name")
+        if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
+            err(f"{block} has no loot table")
+        with Image.open(ASSETS / "textures" / "block" / f"{block}.png") as img:
+            if img.size != (64, 64):
+                err(f"textures/block/{block}.png is {img.size}, not 64 x 64")
+    for name in decor16.PLUSHES:
+        if name not in midway.PLUSHES or lang.get(f"block.{MOD}.{name}") != decor16.PLUSHES[name]:
+            err(f"The harvest plush {name} must be a midway plush with its name")
+        with Image.open(ASSETS / "textures" / "block" / f"{name}.png") as img:
+            if img.size != (64, 64):
+                err(f"textures/block/{name}.png is {img.size}, not 64 x 64")
+    for recipe in decor16.SHAPED + decor16.SHAPELESS:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"The {recipe['id']} recipe is missing")
+    candles = (load(DATA / "minecraft" / "tags" / "block" / "candles.json") or {}).get("values", [])
+    for block in decor16.PILLAR_CANDLES:
+        if f"{MOD}:{block}" not in candles:
+            err(f"{block} must be in the block tag minecraft:candles, to be lit as vanilla's candles are")
+    quads = load(ASSETS / "decor16_quads.json") or {}
+    for model in ("flying_eyeball_body", "flying_eyeball_iris", "flying_eyeball_wing_left", "flying_eyeball_wing_right"):
+        if not quads.get(model):
+            err(f"decor16_quads.json has no {model}")
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    if 'Jugcraft.id("decor16_quads.json")' not in (client / "DecorQuads.java").read_text(encoding="utf-8"):
+        err("DecorQuads.java must read decor16_quads.json")
+    if "FLYING_EYEBALL_ENTITY, FlyingEyeballRenderer::new" not in (client / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient.java must draw the flying eyeball")
+
+
+def check_graveyard_flora(java, number, lang):
+    """The graveyard flora: the mandrake's scream matches tools/agriculture.py MANDRAKE; every sculpted model turns its
+    elements only as block models may (one axis, 22.5 or 45 degrees) and stays within -16..32; each flora plant's texture
+    is the 64 x 64 one its models draw on; vanilla-biome patches have their placed features; the flying ointment takes a
+    mandrake root."""
+    md = ag.MANDRAKE
+    expected = {"SCREAM_RADIUS": md["scream_radius"], "NAUSEA_SECONDS": md["nausea_seconds"]}
+    for name, value in expected.items():
+        found = number("Mandrakes", name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"Mandrakes.{name} = {found} differs from tools/agriculture.py MANDRAKE ({value})")
+    source = java.get("Mandrakes", "")
+    for key in ("crop", "wild", "root", "advancement"):
+        if f'"{md[key]}"' not in source:
+            err(f"Mandrakes.java does not name the mandrake's {key} ({md[key]})")
+    if "Mandrakes.register()" not in java.get("JugcraftAgriculture", ""):
+        err("JugcraftAgriculture.java must register the mandrake's scream")
+    if f"jugcraft:{md['root']}" not in ag.HEX["brews"]["flying"]["ingredients"]:
+        err("Flying Ointment must take a mandrake root (tools/agriculture.py HEX)")
+    sculpted = [p for p in plants.flora()] + ["mandrake"]
+    models = ASSETS / "models" / "block"
+    for name in sculpted:
+        texture = ASSETS / "textures" / "block" / f"{name}.png"
+        if not texture.is_file():
+            err(f"The graveyard flora's {name} has no texture")
+        else:
+            with Image.open(texture) as img:
+                if img.size != (64, 64):
+                    err(f"textures/block/{name}.png is {img.size}, not 64 x 64")
+    for path in sorted(models.glob("*.json")):
+        model = load(path) or {}
+        if model.get("textures", {}).get("p", "").split("/")[-1] not in sculpted:
+            continue
+        for e in model.get("elements", []):
+            for c in e["from"] + e["to"]:
+                if not -16 <= c <= 32:
+                    err(f"{path.name}: an element reaches {c}, outside -16..32")
+                    break
+            r = e.get("rotation")
+            if r and (r.get("axis") not in ("x", "y", "z") or r.get("angle") not in (-45, -22.5, 22.5, 45)):
+                err(f"{path.name}: an element turns {r}, which block models cannot")
+    for plant, info in plants.PLANTS.items():
+        if "patch" in info and not (DATA / MOD / "worldgen" / "placed_feature" / f"patch_{plant}.json").is_file():
+            err(f"{plant} has a vanilla-biome patch but no placed feature patch_{plant}")
+        if info["kind"] == "grass" and plants.PLANTS.get(info.get("tall"), {}).get("kind") != "tall_grass":
+            err(f"{plant}: bone meal grows it into {info.get('tall')}, which is not a tall_grass plant")
+    for key in [f"advancements.{MOD}.{md['advancement']}.title", f"item.{MOD}.{md['root']}", f"block.{MOD}.{md['wild']}",
+                f"block.{MOD}.{md['crop']}"]:
+        if key not in lang:
+            err(f"The graveyard flora has no words for {key}")
 
 
 def check_midway(java, number, lang):

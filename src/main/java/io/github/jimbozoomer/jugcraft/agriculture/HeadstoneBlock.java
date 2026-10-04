@@ -217,6 +217,10 @@ public class HeadstoneBlock extends BaseEntityBlock {
 		FAITHFUL_HOUND("faithful_hound", Stone.GRANITE, SINGLE,
 				new double[][][] {{{1, 0, 2, 15, 6.2, 14}, {1, 6.2, 4.5, 14.5, 12.5, 12}}},
 				new Text(false, 8.0F, 3.3F, 2.6F, 11.0F, 3.6F, 1.0F / 80)),
+		// Pack 5, the churchyard's ornaments: a gargoyle crouched on a plinth whose die carries the inscription.
+		GARGOYLE("gargoyle", Stone.GRANITE, TALL2,
+				new double[][][] {{{1, 0, 1, 15, 1.6, 15}, {2, 1.6, 2, 14, 9.4, 14}, {1.2, 9.4, 1.2, 14.8, 16, 14.8}}, {{3, 0, 1.5, 13, 12, 13.5}}},
+				new Text(false, 8.0F, 5.5F, 1.6F, 10.0F, 4.6F, 1.0F / 80)),
 		// Pack 4: the grounds.
 		KERBED_GRAVE("kerbed_grave", Stone.GRANITE, LONG,
 				new double[][][] {{{0.6, 0, 0.1, 15.4, 3, 16}}, {{0.6, 0, 0, 15.4, 3, 15.9}, {3.4, 3, 7.4, 12.6, 4.8, 13.8}}},

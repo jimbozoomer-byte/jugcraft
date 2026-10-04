@@ -932,4 +932,10 @@ def crop_textures():
     out.update(ofrenda_textures())
     from graveyard_textures import graveyard_textures  # and the graveyard pack
     out.update(graveyard_textures())
+    from flora_data import flora_textures  # and the graveyard flora
+    out.update(flora_textures())
+    from decor15_data import textures as churchyard_textures  # and the churchyard's ornaments
+    out.update(churchyard_textures())
+    from decor16_data import textures as haunted_house_textures  # and the haunted house's props
+    out.update(haunted_house_textures())
     return out

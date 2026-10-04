@@ -622,3 +622,61 @@ def hound():
     # Its collar.
     s.add(Limb((4.4, y + 3.6, 6.9), (4.4, y + 3.6, 9.5), 0.5, 0.5, "#iron"))
     return out + s.boxes()
+
+
+def gargoyle():
+    """A gargoyle crouched on a plinth (two blocks): the plinth's die carries the inscription under a moulded cornice;
+    on it the beast hunches forward over the front edge on its haunches, clawed forefeet gripping the cornice, bat wings
+    folded high behind its shoulders, curled horns, a heavy brow over hollow eyes and its jaws open for the rain to
+    run out of. A tail curls down the back of the plinth."""
+    from sculpt import Sculpture, Ellipsoid, Limb
+    st = "#stone"
+    out = [b((1.0, 0, 1.0), (15.0, 1.6, 15.0), "#rough"), b((2.0, 1.6, 2.0), (14.0, 9.4, 14.0)),
+           b((2.6, 2.8, 1.6), (13.4, 8.2, 2.0), "#relief", faces=("north", "east", "west", "up", "down")),
+           b((1.2, 9.4, 1.2), (14.8, 10.8, 14.8), "#relief")]
+    s = Sculpture(0.5)
+    y = 10.8
+    lean = (0.0, math.cos(math.radians(25)), -math.sin(math.radians(25)))
+    side = (1.0, 0.0, 0.0)
+    depth = (0.0, math.sin(math.radians(25)), math.cos(math.radians(25)))
+    # Haunches and hind feet, crouched at the back of the cornice.
+    for x in (5.0, 11.0):
+        s.add(Ellipsoid((x, y + 2.6, 10.0), (2.2, 2.6, 3.0), st), Ellipsoid((x, y + 0.7, 7.8), (1.5, 0.7, 2.4), st))
+        s.add(Limb((x, y + 0.5, 6.0), (x + (x - 8) * 0.12, y + 0.2, 4.6), 0.45, 0.25, st))
+    # The body hunched forward, a deep chest, a ridge of spines down the back.
+    s.add(Ellipsoid((8.0, y + 6.6, 8.2), (3.4, 4.6, 3.0), st, axes=(side, lean, depth)),
+          Ellipsoid((8.0, y + 7.4, 6.0), (2.9, 2.8, 2.2), st))
+    for i in range(5):
+        s.add(Ellipsoid((8.0, y + 4.2 + i * 1.5, 10.8 - i * 0.6), (0.5, 0.6, 0.6), st))
+    # Forelegs down to clawed forefeet gripping the front of the cornice, the claws over its edge.
+    for x in (5.2, 10.8):
+        s.add(Limb((x, y + 8.4, 6.4), (x + (8 - x) * 0.08, y + 1.0, 2.6), 1.05, 0.8, st),
+              Ellipsoid((x, y + 0.7, 2.4), (1.2, 0.7, 1.4), st))
+        for dx in (-0.7, 0.0, 0.7):
+            s.add(Limb((x + dx, y + 0.6, 1.4), (x + dx * 1.2, y - 0.6, 0.7), 0.3, 0.18, st))
+    # Its head thrust forward: skull, heavy brow, snout and open jaws (carved hollow, the spout), hollow eyes.
+    s.add(Ellipsoid((8.0, y + 11.4, 4.2), (2.5, 2.3, 2.5), st), Ellipsoid((8.0, y + 12.6, 3.1), (2.3, 0.7, 0.9), st),
+          Limb((8.0, y + 10.9, 2.8), (8.0, y + 10.5, 0.9), 1.5, 1.1, st), Limb((8.0, y + 9.6, 3.0), (8.0, y + 9.4, 1.2), 1.2, 0.9, st))
+    s.subtract(Ellipsoid((8.0, y + 10.0, 1.2), (0.95, 0.45, 1.3), st), Ellipsoid((6.9, y + 11.9, 2.1), (0.45, 0.4, 0.5), st),
+               Ellipsoid((9.1, y + 11.9, 2.1), (0.45, 0.4, 0.5), st))
+    # Fangs at the corners of the jaws.
+    for x in (7.1, 8.9):
+        s.add(Limb((x, y + 10.3, 1.2), (x, y + 9.7, 1.1), 0.22, 0.12, st))
+    # Curled horns and pointed ears.
+    for sgn in (-1, 1):
+        x = 8.0 + sgn * 1.5
+        s.add(Limb((x, y + 13.0, 4.6), (x + sgn * 1.0, y + 14.8, 5.8), 0.6, 0.45, st),
+              Limb((x + sgn * 1.0, y + 14.8, 5.8), (x + sgn * 0.8, y + 15.6, 7.6), 0.45, 0.15, st),
+              Limb((8.0 + sgn * 2.2, y + 11.8, 4.8), (8.0 + sgn * 3.6, y + 12.8, 5.8), 0.45, 0.1, st, flat=((0, 0, 1), 0.5)))
+    # Wings folded high behind the shoulders: a bony arm up to a claw at the top, the membrane hanging from it in
+    # scallops down to the haunches.
+    for sgn in (-1, 1):
+        x = 8.0 + sgn * 3.2
+        s.add(Limb((x, y + 8.8, 9.0), (x + sgn * 1.0, y + 14.6, 10.6), 0.75, 0.45, st),
+              Limb((x + sgn * 1.0, y + 14.6, 10.6), (x + sgn * 0.6, y + 16.6, 9.6), 0.45, 0.15, st),
+              Ellipsoid((x + sgn * 0.9, y + 10.6, 11.4), (0.55, 4.0, 2.2), st),
+              Ellipsoid((x + sgn * 0.8, y + 7.8, 12.0), (0.5, 2.4, 1.8), st))
+    # The tail, over the back of the cornice and down the plinth.
+    s.add(Limb((8.0, y + 1.6, 12.4), (8.6, y + 0.2, 14.6), 0.9, 0.7, st), Limb((8.6, y + 0.2, 14.6), (9.4, y - 4.0, 14.8), 0.7, 0.45, st),
+          Limb((9.4, y - 4.0, 14.8), (8.4, y - 6.6, 14.7), 0.45, 0.2, st))
+    return out + s.boxes()
