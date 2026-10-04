@@ -454,6 +454,19 @@ def arms_pages():
             f"{round(arms.EXECUTE_HEALTH * 100)}% of its health.",
             "Bill: a hooked polearm that pulls the foes it strikes towards you and drags riders from the saddle."],
          "craft": craft("maul")},
+        # Arms IV (batch 47).
+        {"title": "Arms: Masterworks", "icon": f"{MOD}:steel_labrys", "text": [
+            "Two-handed, set with a garnet (bronze) or a lit phosphor stone (steel):",
+            f"Labrys: a double-bitted axe whose finishing blow whirls right round, striking up to {arms.WHIRL_TARGETS} foes "
+            "about you.",
+            f"Battleblade: a saw-backed cleaver; each hit wears every piece of the foe's armor by {arms.SUNDER} more.",
+            f"War fork: a barbed fork set against a charge: {round(arms.BRACE * 100)}% more damage to a foe coming at you."],
+         "craft": craft("labrys")},
+        {"title": "Arms: Kama and War Pick", "icon": f"{MOD}:steel_war_pick", "text": [
+            "Kama: quick hooking cuts. Use it on grass, ferns, vines or leaves to cut all of them about it, 3 by 3 by 3, "
+            "dropping what they drop.",
+            "War pick: a beaked pick that fights and mines stone and ore as its metal's pickaxe does."],
+         "craft": craft("war_pick")},
     ]
 
 
