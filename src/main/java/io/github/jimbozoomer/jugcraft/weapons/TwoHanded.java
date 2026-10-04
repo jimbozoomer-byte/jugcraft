@@ -48,7 +48,7 @@ import net.minecraft.world.phys.Vec3;
  * <p>A click with a two-handed arm ({@link JugcraftArms#TWO_HANDED}) does not hit at once, as vanilla's does: the client
  * (client/arms/TwoHandedInput) asks for a swing instead ({@link TwoHandedSwingPayload}). The server starts it, or
  * queues it behind a swing that is about to end, or refuses it (no two-handed arm in the main hand, something that
- * blocks in the off hand, using an item, dead or spectating). A swing:
+ * blocks in the off hand, using an item, busy with a weapon art, dead or spectating). A swing:
  * <ul>
  * <li>swings the arm for everyone, starts the attack charge again (as a click does), stops sprinting and slows its
  * wielder by {@link JugcraftArms#TWO_HANDED_SLOW} until it ends;</li>
@@ -112,8 +112,10 @@ public final class TwoHanded {
 		ServerTickEvents.END_SERVER_TICK.register(TwoHanded::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.getPlayer()));
 		// Vanilla's instant hit with a two-handed arm is refused on the server, so no client can skip the swing.
+		// So is any hit while busy with a weapon art (WeaponArts), whose own hits pass through here as a blow's do.
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> !level.isClientSide() && !striking
-				&& entity instanceof LivingEntity && heavy(player.getMainHandItem()) != null ? InteractionResult.FAIL : InteractionResult.PASS);
+				&& entity instanceof LivingEntity && (heavy(player.getMainHandItem()) != null || WeaponArts.busy(player))
+						? InteractionResult.FAIL : InteractionResult.PASS);
 	}
 
 	/** How the arm in this stack swings two-handed, or null if it is not a two-handed arm. */
@@ -148,7 +150,8 @@ public final class TwoHanded {
 	public static boolean start(ServerPlayer player) {
 		ItemStack stack = player.getMainHandItem();
 		JugcraftArms.Heavy heavy = heavy(stack);
-		if (heavy == null || !player.isAlive() || player.isSpectator() || player.isUsingItem() || swinging(player)) {
+		if (heavy == null || !player.isAlive() || player.isSpectator() || player.isUsingItem() || swinging(player)
+				|| WeaponArts.busy(player)) {
 			return false;
 		}
 		if (offHandBusy(player)) {
@@ -281,13 +284,13 @@ public final class TwoHanded {
 	}
 
 	/** Whether a blow from this player may strike this entity at all (as vanilla's sweep, and sparing tamed pets). */
-	private static boolean target(ServerPlayer player, LivingEntity foe) {
+	static boolean target(ServerPlayer player, LivingEntity foe) {
 		return foe != player && foe.isAlive() && !foe.isSpectator() && !player.isAlliedTo(foe) && !foe.isAlliedTo(player)
 				&& !(foe instanceof ArmorStand stand && stand.isMarker()) && foe.getRootVehicle() != player.getRootVehicle();
 	}
 
 	/** Whether other code (AttackEntityCallback: the town's protection, other mods) lets this player strike this foe. */
-	private static boolean allowed(ServerPlayer player, ServerLevel level, LivingEntity foe) {
+	static boolean allowed(ServerPlayer player, ServerLevel level, LivingEntity foe) {
 		striking = true;
 		try {
 			return AttackEntityCallback.EVENT.invoker().interact(player, level, InteractionHand.MAIN_HAND, foe, null) == InteractionResult.PASS;
