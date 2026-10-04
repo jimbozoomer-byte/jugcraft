@@ -4488,6 +4488,28 @@
         {
           "in": [
             [
+              "jugcraft:rocket_motor",
+              1
+            ],
+            [
+              "jugcraft:aluminum_wire",
+              4
+            ],
+            [
+              "minecraft:string",
+              8
+            ]
+          ],
+          "out": [
+            "jugcraft:line_rocket",
+            1
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
               "jugcraft:solid_propellant",
               1
             ],

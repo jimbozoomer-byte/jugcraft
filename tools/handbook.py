@@ -853,6 +853,12 @@ def build():
                 "plus a second for every 80 blocks; the cargo lands in the target pad's slots.",
                 "If nobody is near the target, the rocket waits and lands as soon as that area is loaded again. "
                 "Hoppers load a pad from the top and sides and unload it from the bottom."]},
+            {"title": "Ziplines", "icon": f"{MOD}:line_rocket", "text": [
+                "Place two zipline anchors up to 96 blocks apart with nothing solid between them. Stand within 4 "
+                "blocks of one and use a line-throwing rocket while looking at the other: it strings a steel line.",
+                "Use either anchor with an empty hand to ride the line to the other end, hanging below it. A steeper "
+                "drop is faster. Sneak to let go early (you fall from there).",
+                "Breaking either anchor takes the line down. Each anchor holds one line."]},
         ]},
         {"title": "Logistics", "icon": f"{MOD}:brass_item_pipe", "pages": [
             {"title": "Machine Sides", "icon": f"{MOD}:crusher", "text": [
