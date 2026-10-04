@@ -99,17 +99,16 @@ def rivets(d, points, st):
 def sickle(d, cs, ct, r, w, a0, a1, st, steps=12):
     """A sickle's or scythe's curved blade: along a circle about (cs, ct) of radius r from angle a0 to a1 (degrees, 0
     along +s, 90 along +t), `w` wide at its root narrowing to a point."""
-    outer, inner = [], []
+    outer, inner, edge = [], [], []
     for i in range(steps + 1):
         f = i / steps
         a = math.radians(a0 + (a1 - a0) * f)
-        width = w * (1 - f) + 0.35
+        # Broad most of the way, sweeping in to the point over the last third.
+        width = w * (1 - f ** 2.2) + 0.45
         outer.append((cs + math.cos(a) * r, ct + math.sin(a) * r))
         inner.append((cs + math.cos(a) * (r - width), ct + math.sin(a) * (r - width)))
+        edge.append((cs + math.cos(a) * (r - width + 0.7), ct + math.sin(a) * (r - width + 0.7)))
     d.poly(outer + inner[::-1], st.blade, depth=1.0, part="blade")
-    edge = [(cs + math.cos(math.radians(a0 + (a1 - a0) * i / steps)) * (r - (w * (1 - i / steps) + 0.35) + 0.7),
-             ct + math.sin(math.radians(a0 + (a1 - a0) * i / steps)) * (r - (w * (1 - i / steps) + 0.35) + 0.7))
-            for i in range(steps + 1)]
     d.poly(edge + inner[::-1], st.blade, depth=1.0, z=1, tone=HIGHLIGHT)
 
 
@@ -320,7 +319,7 @@ def scythe(st):
     d.strip(47.5, 50.5, 1.1, material=st.fitting, depth=2.4)
     # The long curved blade, from the top of the snath out to the left and down to its point.
     d.strip(49.0, 51.5, 2.2, 0.9, material=st.fitting, depth=2.4)
-    sickle(d, 40.0, -1.0, 11.5, 3.4, 0.0, -112.0, st, steps=16)
+    sickle(d, 40.0, -1.0, 11.5, 4.2, 0.0, -112.0, st, steps=16)
     return d
 
 
@@ -466,7 +465,7 @@ def kama(st):
     grip(d, 1.5, 9.5, 0.95, st, period=1.6)
     d.strip(16.5, 19.0, 1.05, material=st.fitting, depth=2.4)
     # A sickle blade from the top of the handle, swept out to the right and down.
-    sickle(d, 12.0, 0.6, 7.6, 2.6, 0.0, 125.0, st, steps=12)
+    sickle(d, 12.0, 0.6, 7.6, 3.0, 0.0, 125.0, st, steps=12)
     gem(d, 17.8, 0.0, 0.7, st)
     return d
 
@@ -565,7 +564,7 @@ def kusarigama(st):
     haft(d, 0.8, 18.0, 0.8, st)
     grip(d, 1.5, 9.5, 0.95, st, period=1.6)
     d.strip(16.5, 19.0, 1.05, material=st.fitting, depth=2.4)
-    sickle(d, 12.0, 0.6, 7.6, 2.6, 0.0, 125.0, st, steps=12)
+    sickle(d, 12.0, 0.6, 7.6, 3.0, 0.0, 125.0, st, steps=12)
     # The chain, slung from the butt down the lit side, and its weight.
     for i, (s, t) in enumerate([(1.0, -2.0), (2.6, -3.0), (4.4, -3.6), (6.2, -4.0), (8.0, -4.2)]):
         d.ring(s, t, 0.85, 0.3, CHAIN, depth=0.9 if i % 2 else 1.4, part=f"link{i}")

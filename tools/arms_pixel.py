@@ -193,6 +193,102 @@ def _inside(points, x, y):
     return inside
 
 
+def _probe(design, s, t, n=4):
+    """What a pixel centred on (s, t) is covered by, sampled n by n: (the shape covering most of it, with its tone),
+    and the share it covers; or None."""
+    hits = {}
+    for i in range(n):
+        for j in range(n):
+            got = design.sample(s - 0.5 + (i + 0.5) / n, t - 0.5 + (j + 0.5) / n)
+            if got is not None:
+                key = (got[0]["order"], got[1] if not isinstance(got[1], bool) else True)
+                entry = hits.setdefault(key, [got, 0])
+                entry[1] += 1
+    if not hits:
+        return None
+    got, count = max(hits.values(), key=lambda e: e[1])
+    return got, sum(e[1] for e in hits.values()) / float(n * n)
+
+
+FOUR = ((1, 0), (-1, 0), (0, 1), (0, -1))
+EIGHT = FOUR + ((1, 1), (1, -1), (-1, 1), (-1, -1))
+
+
+def _pieces(cells, steps):
+    left, pieces = set(cells), []
+    while left:
+        start = left.pop()
+        piece, todo = {start}, [start]
+        while todo:
+            x, y = todo.pop()
+            for dx, dy in steps:
+                q = (x + dx, y + dy)
+                if q in left:
+                    left.remove(q)
+                    piece.add(q)
+                    todo.append(q)
+        pieces.append(piece)
+    return sorted(pieces, key=len)
+
+
+def _join(grid, probe, steps, reach=4):
+    """Joins pieces of the design that sampling each pixel at its centre split apart (a thin sickle's point, a chain's
+    links, a narrow swept hilt): while there is more than one piece, the smallest is joined to another by the shortest
+    run of pixels the design partly covers (the most covered preferred), at most `reach` long. A piece that cannot be
+    joined that way is left as it is. `probe(x, y)`: (shape and tone, share covered) or None."""
+    cache = {}
+
+    def covered(cell):
+        if cell not in cache:
+            cache[cell] = probe(*cell)
+        return cache[cell]
+    stuck = set()
+    while True:
+        pieces = _pieces(grid, steps)
+        loose = [p for p in pieces if not p & stuck]
+        if len(pieces) < 2 or not loose:
+            return grid
+        piece = loose[0]
+        others = set(grid) - piece
+        # Cheapest paths out of the piece over partly covered pixels: each costs 1 + (1 - its share).
+        best = {cell: (0.0, None) for cell in piece}
+        frontier = sorted((0.0, cell) for cell in piece)
+        found = None
+        while frontier:
+            cost, cell = frontier.pop(0)
+            if cost > best[cell][0]:
+                continue
+            for dx, dy in steps:
+                q = (cell[0] + dx, cell[1] + dy)
+                if q in others:
+                    found = cell
+                    break
+                if q in grid or q in best and best[q][0] <= cost:
+                    continue
+                got = covered(q)
+                if got is None:
+                    continue
+                n, c = 0, cell
+                while best[c][1] is not None:
+                    n, c = n + 1, best[c][1]
+                if n >= reach:
+                    continue
+                new = cost + 2.0 - got[1]
+                if q not in best or new < best[q][0]:
+                    best[q] = (new, cell)
+                    frontier.append((new, q))
+                    frontier.sort()
+            if found:
+                break
+        if found is None:
+            stuck |= piece
+            continue
+        cell = found
+        while best[cell][1] is not None:
+            grid[cell] = covered(cell)[0]
+            cell = best[cell][1]
+
+
 def _shade(grid, size_x, size_y, lit, dark):
     """Flat tones for every filled cell of `grid` ({(x, y): (shape, override)}), lit from `lit` (cell offsets that face the
     light) and shaded towards `dark`: the lit edge bright, the far edge dark, the middle mid. Returns {(x, y): colour}."""
@@ -290,6 +386,13 @@ def icon(design, size, grip_px, scale, mirrored=False):
             got = design.sample(s, t)
             if got is not None:
                 grid[(x, y)] = got
+
+    def probe(x, y):
+        dx, dy = x + 0.5 - gx, y + 0.5 - gy
+        if mirrored:
+            dx = -dx
+        return _probe(design, (dx - dy) / 2.0 / scale + design.grip, (dx + dy) / 2.0 / scale)
+    _join(grid, probe, EIGHT)
     lit = [(-1, 0), (0, -1)] if not mirrored else [(1, 0), (0, -1)]
     dark = [(1, 0), (0, 1)] if not mirrored else [(-1, 0), (0, 1)]
     colours = _shade(grid, size, size, lit, dark)
@@ -321,6 +424,7 @@ def upright(design, width=None):
             got = design.sample(s, t)
             if got is not None:
                 grid[(x, y)] = got
+    _join(grid, lambda x, y: _probe(design, height - y - 0.5, x + 0.5 - cx), FOUR)
     lit = [(-1, 0)]
     dark = [(1, 0)]
     colours = _shade(grid, width, height, lit, dark)
