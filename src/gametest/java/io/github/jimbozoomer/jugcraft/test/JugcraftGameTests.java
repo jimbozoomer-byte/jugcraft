@@ -716,7 +716,7 @@ public class JugcraftGameTests {
 		walkerFloor(helper);
 		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
 		io.github.jimbozoomer.jugcraft.walker.DieselWalker walker = pilotedWalker(helper, new Vec3(7.5, 1, 3.5), pilot);
-		net.minecraft.world.entity.LivingEntity pig = helper.spawn(net.minecraft.world.entity.EntityType.PIG, new Vec3(7.5, 1, 5.7));
+		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(7, 1, 5));
 		helper.runAfterDelay(5, () -> walker.steer(pilot, 0, 0, 0, 0, 1));
 		helper.succeedWhen(() -> helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(), "The fist should hit the pig"));
 	}
