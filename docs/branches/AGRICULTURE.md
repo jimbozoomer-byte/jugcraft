@@ -1044,7 +1044,15 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 
 ### The churchyard's ornaments
 
-<!-- ornament-shots -->
+| **A catacomb corner**: ossuary walls, bone piles, gargoyles, giant bone hands and witch's lanterns | **The ossuary walls** and bone piles heaped at their foot |
+| --- | --- |
+| ![The churchyard's ornaments](../images/ingame_churchyard_ornaments.jpg) | ![Ossuary walls and bone piles](../images/ingame_churchyard_ossuary.jpg) |
+| **Two gargoyles** on their inscribed plinths, one weathered to moss, and a bone hand | **The giant bone hands**, the right one clenched by a hidden redstone block |
+| ![Gargoyles](../images/ingame_churchyard_gargoyles.jpg) | ![Giant bone hands](../images/ingame_churchyard_bone_hands.jpg) |
+| **Witch's lanterns** hanging from a beam, and two standing | **By night**, by the lanterns' violet light |
+| ![Witch's lanterns](../images/ingame_churchyard_lanterns.jpg) | ![The ornaments at night](../images/ingame_churchyard_ornaments_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`ChurchyardOrnamentsClientGameTests`, software rendering, small previews). The gargoyles' inscriptions and weathering are set for the picture.*
 
 - **Gargoyle**: crouched on a granite plinth, wings folded, jaws open for the rain. It weathers and takes an inscription on its plinth like the graveyard's monuments.
 - **Bone Pile**: bones and skulls heaped up to four layers. **Ossuary Wall**: a catacomb's skulls and long bones as a building block.
