@@ -1,5 +1,6 @@
 """Arms, batch 42 (docs/features/arms.md): longswords, greatswords, rapiers, flanged maces, war hammers, glaives,
-halberds, spears and lances in bronze and steel.
+halberds, spears and lances in bronze and steel; and Arms II, batch 45: daggers, sabres, estocs, battle axes, flails,
+scythes, quarterstaves and pikes, each with a trait of its own (TRAITS).
 
 After studying Epic Knights (all rights reserved) and Simply Swords (Timefall Development License) for how they draw,
 animate and keep their weapons cheap; none of their code, models, numbers or art is used. What carried over is the
@@ -61,7 +62,57 @@ KINDS = {
               "tooltip": "Jab, or hold use to charge with it."},
     "lance": {"display": "Lance", "pattern": ["  #", "#S#", "S  "], "tags": ["spears"], "held": 1.3,
               "tooltip": "A horseman's charge: hits harder and unhorses riders. Long reach, slow jabs."},
+    # Arms II (batch 45): each has a trait (TRAITS) besides its numbers.
+    "dagger": {"display": "Dagger", "damage": 1.0, "speed": -1.7, "swing": ("stab", 4), "reach": (0.0, 2.5),
+               "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 0.85,
+               "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": [" #", "L "],
+               "trait": "backstab", "tooltip": "Quick stabs at a short reach. A blow from behind deals half again as much."},
+    "sabre": {"display": "Sabre", "damage": 2.0, "speed": -2.2, "swing": ("whack", 6), "reach": (0.0, 3.0),
+              "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.2,
+              "tags": ["swords"], "pattern": [" #", " #", "L "], "trait": "saddle",
+              "tooltip": "A horseman's blade: quick sweeping cuts, 3 more damage from the saddle."},
+    "estoc": {"display": "Estoc", "damage": 3.0, "speed": -2.6, "swing": ("stab", 7), "reach": (0.0, 3.5),
+              "margin": 0.125, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.35,
+              "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["  #", " # ", "#L "],
+              "trait": "armor_pierce", "tooltip": "Thrusts through mail: more damage the more armor the foe wears."},
+    "battle_axe": {"display": "Battle Axe", "damage": 8.0, "speed": -3.3, "swing": ("whack", 12), "reach": (0.0, 3.25),
+                   "margin": 0.0, "disable": 5.0, "wear": 2, "knockback": 0.5, "parry": 0.0, "held": 1.5,
+                   "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["###", "#S ", " S "],
+                   "trait": "chop", "tooltip": "Two-handed. Chops wood like an axe and breaks a shield's guard for 5 seconds."},
+    "flail": {"display": "Flail", "damage": 5.0, "speed": -3.0, "swing": ("whack", 10), "reach": (0.0, 3.25),
+              "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.2,
+              "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["  #", " # ", "S  "],
+              "trait": "daze", "tooltip": "A hit dazes the foe, slowing it for 2 seconds."},
+    "scythe": {"display": "Scythe", "damage": 5.0, "speed": -3.0, "swing": ("whack", 10), "reach": (0.0, 4.0),
+               "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.9,
+               "tags": ["swords"], "pattern": ["###", "  S", " S "], "trait": "reap",
+               "tooltip": "Wide sweeps at a long reach. Use on ripe crops to reap them, 3 by 3, and replant."},
+    "quarterstaff": {"display": "Quarterstaff", "damage": 2.0, "speed": -2.4, "swing": ("whack", 7), "reach": (0.0, 3.5),
+                     "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 1.0, "parry": 0.5, "held": 1.8,
+                     "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["  #", " S ", "#  "],
+                     "tooltip": "Two-handed. Knocks foes back. Use to parry: blocks 50% of the damage from in front."},
+    "pike": {"display": "Pike", "damage": 5.0, "speed": -3.2, "swing": ("stab", 10), "reach": (2.0, 5.0),
+             "margin": 0.125, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 2.3,
+             "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["  #", " S ", "SS "],
+             "trait": "riders",
+             "tooltip": "The longest reach, but nothing nearer than 2 blocks. Half again as much damage to riders and mounts."},
 }
+# Arms II traits (weapons/ArmItem.java; JugcraftArms.TRAITS). backstab: a blow landing within BACKSTAB_ANGLE degrees of
+# straight behind the target's body deals BACKSTAB more (a share of the blow). saddle: SADDLE more damage while riding.
+# armor_pierce: ARMOR_PIERCE more for each point of the target's armor, at most ARMOR_PIERCE_MAX. chop: mines wood as an
+# axe of its metal does. daze: a hit slows the target (DAZE: ticks, Slowness amplifier). reap: use on a ripe crop to
+# harvest every ripe crop within REAP_RADIUS and replant it, at REAP_WEAR durability each. riders: RIDERS more (a share)
+# against anything riding or ridden.
+TRAITS = {kind: info["trait"] for kind, info in KINDS.items() if "trait" in info}
+BACKSTAB = 0.5
+BACKSTAB_ANGLE = 70.0
+SADDLE = 3.0
+ARMOR_PIERCE = 0.3
+ARMOR_PIERCE_MAX = 6.0
+DAZE = (40, 1)
+REAP_RADIUS = 1
+REAP_WEAR = 1
+RIDERS = 0.5
 METALS = list(gear.GEAR_TIERS)
 # The charging kinds, as Item.Properties.spear takes them, by metal: jab duration (s), charge damage multiplier,
 # charge delay (s), then for unhorsing, knockback and damage the longest a charge counts (s) and the speed it needs.

@@ -90,10 +90,11 @@ New code:
 - `Mandrakes`, for the scream.
 
 ## Verification
-Automated checks run (pending first green run; results are recorded below):
+Automated checks run on CI's Build workflow, run 37176762103 on commit 45f11936 (all jobs passed; the screenshots added after it change only documentation):
 - `python3 scripts/check_repository.py`: pass.
-- `python3 tools/check_mod_data.py`: pass, 1177 IDs. Its new graveyard flora check compares `Mandrakes.java` with `MANDRAKE`. It checks that every sculpted model turns its elements only as block models may (one axis, 22.5 or 45 degrees) and stays within -16..32. It also checks each flora texture is 64 × 64, the vanilla-biome patches have their placed features, grasses grow into tall grasses, and Flying Ointment takes a mandrake root.
-- `GraveyardFloraGameTests` (eight tests):
+- `python3 tools/check_mod_data.py`: pass, 1193 IDs with main merged in (1177 at the CI run). Its new graveyard flora check compares `Mandrakes.java` with `MANDRAKE`. It checks that every sculpted model turns its elements only as block models may (one axis, 22.5 or 45 degrees) and stays within -16..32. It also checks each flora texture is 64 × 64, the vanilla-biome patches have their placed features, grasses grow into tall grasses, and Flying Ointment takes a mandrake root.
+- `./gradlew build` with the game tests: pass, "All 697 required tests passed", among them:
+- `GraveyardFloraGameTests` (eight tests, all pass):
   1. every plant has its block and item; flowers are small or tall flowers with pots and dyes; the ghost pipe glows; each stands on grass (dead man's fingers on stone);
   2. grasses and ferns: nothing by hand, themselves to shears, bone meal grows them tall;
   3. shroud moss: not in open air; hangs from leaves; bone meal lengthens it (the old tip no longer a tip); shears only; it falls when the leaves go;
@@ -102,7 +103,7 @@ Automated checks run (pending first green run; results are recorded below):
   6. pulling a ripe mandrake: roots drop; the bare-headed (puller and a neighbour) are sickened, a helmeted neighbour isn't; a covered puller is spared and earns Mind Your Ears; nobody beyond 8 blocks hears it;
   7. a wild mandrake sheared comes whole and quietly; pulled by hand it gives roots and screams;
   8. the root is a Flying Ointment ingredient; vases take the flora by colour; loot, features, patches and the advancement load.
-- `GraveyardFloraClientGameTests`: a planted churchyard at dusk and at night, and up close: the flowers, the tall flowers, the ivied wall, the shrouded oak, the mandrake row, and the ghost pipes glowing.
+- `GraveyardFloraClientGameTests` (CI job `client`, all three shards pass): a planted churchyard at dusk and at night, and up close: the flowers, the tall flowers, the ivied wall, the shrouded oak, the mandrake row, and the ghost pipes glowing. Its eight screenshots are in [the agriculture branch](../branches/AGRICULTURE.md#the-graveyard-flora).
 
 Not run:
 - Planting and pulling by hand.

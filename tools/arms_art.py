@@ -1,4 +1,4 @@
-"""High-detail (64x64) art for the arms of batch 42, drawn with tools/hd_art.py (docs/features/arms.md).
+"""High-detail (64x64) art for the arms of batches 42 and 45, drawn with tools/hd_art.py (docs/features/arms.md).
 
 Each weapon is laid along the canvas diagonal, pommel or butt at the bottom left and point at the top right, the way
 vanilla draws its swords, so one sprite serves the inventory and the hand: the item models scale it up in the hand.
@@ -243,8 +243,177 @@ def lance(style):
     return c
 
 
+def curved_blade(c, w, s0, s1, half, bend, material, edge=None):
+    """A single-edged blade from s0 to s1 whose spine bends towards -t by bend * f squared (f from 0 to 1), its back
+    straight along the spine and its edge `half(f)` out on the -t side."""
+    steps = 28
+    back, front = [], []
+    for i in range(steps + 1):
+        f = i / steps
+        s = s0 + (s1 - s0) * f
+        t = -bend * f * f
+        back.append(w(s, t + half(f) * 0.25))
+        front.append(w(s, t - half(f)))
+    c.polygon(back + front[::-1], material, normal=_unit(-w.ux * 0.35, -w.uy * 0.35, 1.0))
+    c.polygon(back[:-1] + [w(s0 + (s1 - s0) * (steps - 1) / steps, -bend)], material, normal=_unit(w.ux * 0.3, w.uy * 0.3, 1.0),
+              tint=0.08)
+    if edge:
+        for p, q in zip(front, front[1:]):
+            c.line(p, q, edge, 1.0)
+
+
+# ---------------------------------------------------------------- Arms II (batch 45)
+
+
+def dagger(style):
+    c = Canvas()
+    w = Axis(origin=(10.0, 54.0), scale=1.2)
+    c.disc(w(1.6), w.r(2.2), style.fitting)  # pommel
+    grip(c, w, 2.8, 11.0, 1.5, style)
+    c.grip = w(7.0)
+    c.capsule(w(11.6, -5.0), w(11.6, 5.0), w.r(1.2), style.fitting)  # short crossguard
+    for t in (-5.3, 5.3):
+        c.disc(w(11.6, t), w.r(1.3), style.fitting)
+    # A diamond-section blade: a broad base tapering straight to a needle point.
+    blade(c, w, 12.4, 50.0, lambda f: 2.7 * (1 - f) + 0.2, style.blade, fuller=(0.04, 0.35))
+    c.disc(w(11.6), w.r(1.1), style.accent)
+    return c
+
+
+def sabre(style):
+    c = Canvas()
+    w = Axis(origin=(7.0, 57.0))
+    c.capsule(w(1.5), w(3.5), w.r(2.0), style.fitting)
+    grip(c, w, 3.5, 12.5, 1.5, style)
+    c.grip = w(8.0)
+    # A stirrup hilt: the knuckle bow from the guard round to the pommel, and a short back quillon.
+    c.capsule(w(13.0, 6.0), w(13.0, -3.5), w.r(1.2), style.fitting)
+    c.capsule(w(13.0, -3.5), w(2.5, -4.2), w.r(0.9), style.fitting)
+    c.capsule(w(2.5, -4.2), w(1.8, -1.2), w.r(0.9), style.fitting)
+    c.disc(w(13.0, 6.2), w.r(1.3), style.fitting)
+    # A curved single-edged blade, its edge on the knuckle-bow side.
+    curved_blade(c, w, 13.5, 80.0, lambda f: 3.0 - 0.4 * f if f < 0.86 else 2.7 * (1 - f) / 0.14, 10.0, style.blade,
+                 edge=(236, 240, 246))
+    return c
+
+
+def estoc(style):
+    c = Canvas()
+    w = Axis(origin=(5.0, 59.0), scale=0.94)
+    c.capsule(w(0.8), w(3.6), w.r(2.6), style.fitting)  # pear pommel
+    grip(c, w, 3.6, 19.0, 1.6, style)
+    c.grip = w(11.0)
+    c.capsule(w(19.6, -8.5), w(19.6, 8.5), w.r(1.3), style.fitting)  # a long straight crossguard
+    for t in (-8.9, 8.9):
+        c.disc(w(19.6, t), w.r(1.5), style.fitting)
+    c.ring(w(21.2, 2.6), w.r(2.6), w.r(1.6), style.fitting)  # a side ring
+    # A stiff, edgeless, triangular blade for thrusting through mail.
+    blade(c, w, 20.6, 92.0, lambda f: 2.1 * (1 - f) ** 0.8 + 0.25, style.blade)
+    c.disc(w(19.6), w.r(1.2), style.accent)
+    return c
+
+
+def battle_axe(style):
+    c = Canvas()
+    w = Axis(origin=(5.0, 59.0), scale=0.84)
+    haft(c, w, 0.0, 70.0, 1.8, style, rings=(0.3, 0.62))
+    grip(c, w, 1.0, 14.0, 2.1, style)
+    c.grip = w(8.0)
+    c.capsule(w(-1.2), w(1.2), w.r(2.5), style.fitting)
+    c.capsule(w(56.0, 1.5), w(70.0, 1.5), w.r(0.7), style.fitting)
+    c.capsule(w(56.0, -1.5), w(70.0, -1.5), w.r(0.7), style.fitting)
+    # A broad bearded head: the cheek, then a crescent edge sweeping down past the haft.
+    head = [w(60.0, 2.0), w(56.0, 5.0), w(49.0, 9.0), w(42.0, 15.5), w(45.0, 19.0), w(56.0, 20.5), w(67.0, 20.0),
+            w(76.0, 16.5), w(75.0, 9.0), w(72.0, 4.0), w(70.0, 2.0)]
+    c.polygon(head, style.blade, normal=_unit(-w.ux * 0.12, -w.uy * 0.12, 1.0), tint=-0.08)
+    for p, q in zip(head[3:8], head[4:9]):
+        c.line(p, q, (236, 240, 246), 1.0)
+    c.polygon([w(61.0, -2.0), w(64.0, -12.0), w(68.0, -2.0)], style.blade, normal=_unit(-w.ux * 0.4, -w.uy * 0.4, 1.0))
+    for s in (62.0, 67.0):
+        c.disc(w(s, 5.0), w.r(0.9), style.accent)
+    c.capsule(w(70.0), w(75.0), w.r(1.6), style.blade)  # top spike
+    return c
+
+
+def flail(style):
+    c = Canvas()
+    w = Axis(origin=(8.0, 56.0))
+    haft(c, w, 0.0, 26.0, 1.9, style, rings=(0.85,))
+    grip(c, w, 1.0, 13.0, 2.1, style)
+    c.grip = w(7.0)
+    c.capsule(w(-1.0), w(1.2), w.r(2.5), style.fitting)
+    c.capsule(w(25.0), w(28.5), w.r(2.2), style.fitting)  # the swivel cap
+    # A chain of links curving out to the ball.
+    links = 7
+    for i in range(links):
+        f = (i + 0.5) / links
+        s = 29.0 + f * 24.0
+        t = 5.5 * math.sin(f * math.pi)
+        if i % 2:
+            c.ring(w(s, t), w.r(2.0), w.r(1.1), style.fitting)
+        else:
+            c.capsule(w(s - 1.6, t), w(s + 1.6, t), w.r(0.9), style.fitting)
+    # The spiked ball.
+    ball = w(60.0, 1.0)
+    for i in range(10):
+        a = math.radians(i * 36 + 8)
+        tip = (ball[0] + math.cos(a) * w.r(10.0), ball[1] + math.sin(a) * w.r(10.0))
+        side = (-math.sin(a) * w.r(1.6), math.cos(a) * w.r(1.6))
+        c.polygon([(ball[0] + side[0], ball[1] + side[1]), tip, (ball[0] - side[0], ball[1] - side[1])], style.blade,
+                  normal=_unit(math.cos(a) * 0.5, math.sin(a) * 0.5, 1.0))
+    c.disc(ball, w.r(6.4), style.blade)
+    c.disc(ball, w.r(1.8), style.accent)
+    return c
+
+
+def scythe(style):
+    c = Canvas()
+    w = Axis(origin=(5.0, 59.0), scale=0.8)
+    haft(c, w, 0.0, 76.0, 1.6, style, rings=(0.05,))
+    c.capsule(w(-1.0), w(1.0), w.r(2.0), style.fitting)
+    # The snath's two hand nibs, then the long curved blade swept back along -t from the top.
+    for s in (6.0, 34.0):
+        c.capsule(w(s, 0.0), w(s, 7.0), w.r(1.2), style.grip)
+        c.disc(w(s, 7.2), w.r(1.3), style.fitting)
+    c.grip = w(6.0)
+    c.capsule(w(72.0), w(77.0), w.r(2.2), style.fitting)  # the tang collar
+    tip_w = Axis(origin=w(75.0, 0.0), angle=w.angle - 98.0, scale=0.8)
+    curved_blade(c, tip_w, 0.0, 44.0, lambda f: 3.2 - 1.2 * f if f < 0.85 else 2.2 * (1 - f) / 0.15, -9.0, style.blade,
+                 edge=(236, 240, 246))
+    return c
+
+
+def quarterstaff(style):
+    c = Canvas()
+    w = Axis(origin=(3.5, 60.5), scale=0.76)
+    haft(c, w, 0.0, 104.0, 1.9, style)
+    # Iron-shod ends, studded collars and a wrapped middle for the two hands.
+    for s0, s1 in ((-1.0, 9.0), (95.0, 105.0)):
+        c.capsule(w(s0), w(s1), w.r(2.4), style.fitting)
+        for s in (s0 + 2.5, s1 - 2.5):
+            c.disc(w(s, 1.6), w.r(0.8), style.accent)
+    grip(c, w, 38.0, 66.0, 2.15, style)
+    c.grip = w(44.0)
+    return c
+
+
+def pike(style):
+    c = Canvas()
+    w = Axis(origin=(3.0, 61.0), scale=0.75)
+    haft(c, w, 0.0, 96.0, 1.4, style, rings=(0.06, 0.25))
+    c.capsule(w(-1.0), w(1.0), w.r(1.8), style.fitting)
+    c.capsule(w(84.0, 1.1), w(96.0, 1.1), w.r(0.5), style.fitting)  # langets
+    c.capsule(w(84.0, -1.1), w(96.0, -1.1), w.r(0.5), style.fitting)
+    c.capsule(w(94.0), w(98.0), w.r(1.8), style.fitting)
+    blade(c, w, 97.0, 108.0, lambda f: 2.4 * math.sin(min(1.0, f * 1.8) * math.pi / 2) * (1 - f) + 0.2, style.blade)
+    c.grip = w(26.0)
+    return c
+
+
 WEAPONS = {"longsword": longsword, "greatsword": greatsword, "rapier": rapier, "flanged_mace": flanged_mace,
-           "war_hammer": war_hammer, "glaive": glaive, "halberd": halberd, "spear": spear, "lance": lance}
+           "war_hammer": war_hammer, "glaive": glaive, "halberd": halberd, "spear": spear, "lance": lance,
+           "dagger": dagger, "sabre": sabre, "estoc": estoc, "battle_axe": battle_axe, "flail": flail, "scythe": scythe,
+           "quarterstaff": quarterstaff, "pike": pike}
 
 
 def draw(kind, metal):

@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_scythe",
+  "textures": {
+    "layer0": "jugcraft:item/bronze_scythe"
+  }
+}

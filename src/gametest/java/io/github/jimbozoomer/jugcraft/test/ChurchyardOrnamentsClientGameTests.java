@@ -63,9 +63,9 @@ public class ChurchyardOrnamentsClientGameTests implements FabricClientGameTest 
 
 			shoot(context, singleplayer, x + 1, y + 3, z + 4, 180, 22, "jugcraft_churchyard_ornaments");
 			watchFrom(context, singleplayer, origin, new Vec3(-2.0, 0.9, -3.0), 180.0F, 18.0F, "jugcraft_churchyard_ossuary");
-			watchFrom(context, singleplayer, origin, new Vec3(3.5, 1.2, -1.5), 180.0F, 12.0F, "jugcraft_churchyard_gargoyles");
+			watchFrom(context, singleplayer, origin, new Vec3(4.0, 0.2, 1.0), 180.0F, 5.0F, "jugcraft_churchyard_gargoyles");
 			watchFrom(context, singleplayer, origin, new Vec3(7.5, 1.0, 0.5), 180.0F, 10.0F, "jugcraft_churchyard_bone_hands");
-			watchFrom(context, singleplayer, origin, new Vec3(-5.5, 1.5, -1.0), 200.0F, 10.0F, "jugcraft_churchyard_lanterns");
+			watchFrom(context, singleplayer, origin, new Vec3(-4.0, 0.0, 2.5), 180.0F, -5.0F, "jugcraft_churchyard_lanterns");
 			server.runCommand("time set 18000");
 			context.waitTicks(20);
 			shoot(context, singleplayer, x + 1, y + 3, z + 4, 180, 22, "jugcraft_churchyard_ornaments_night");
