@@ -42,7 +42,6 @@ public class ArmsVIIClientGameTests implements FabricClientGameTest {
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 12, y, z - 18, x + 16, y + 8, z + 8));
 			context.waitTicks(10);
 
-			// The GUI stays up throughout: hiding it (F1) also hides the hand in first person.
 			// Every variant (eight a row) and the four patterns in frames on a wall.
 			List<String> variants = List.copyOf(ArmVariants.ITEMS.keySet());
 			server.runCommand("fill %d %d %d %d %d %d minecraft:spruce_planks".formatted(x - 1, y, z - 12, x + 10, y + 6, z - 12));
@@ -80,7 +79,13 @@ public class ArmsVIIClientGameTests implements FabricClientGameTest {
 			}
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			ready(context, server, x + 4, y, z, "runebound_moonblade");
+			// The GUI is hidden by this point in CI (an earlier test in the shard leaves it so), and hiding it also hides the
+			// hand: one press of its toggle shows it for this shot, and a second puts it back as it was (26.3's Options has no
+			// hideGui field to set), as ArmsMotionClientGameTests does.
+			context.getInput().pressKey(options -> options.keyToggleGui);
+			context.waitTicks(5);
 			context.takeScreenshot("jugcraft_arms_vii_night_first_person");
+			context.getInput().pressKey(options -> options.keyToggleGui);
 			server.runCommand("time set noon");
 
 			// A Glacier Maul's blow with the attack key on a still pig ahead: it is chilled (Slowness, Frost's length).
