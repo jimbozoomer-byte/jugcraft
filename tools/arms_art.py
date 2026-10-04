@@ -144,12 +144,10 @@ def rapier(st):
     d = Design(34, grip=5.0)
     pommel(d, 1.6, 1.4, st)
     grip(d, 2.4, 7.8, 0.85, st, period=1.6)
-    # The swept hilt: a knuckle bow down the lit side and a ring round the ricasso.
-    d.line(8.2, -0.6, 3.0, -3.0, 0.8, st.fitting, depth=1.6)
-    d.line(3.0, -3.0, 2.4, -1.0, 0.8, st.fitting, depth=1.6)
-    d.ring(9.6, 0.0, 3.0, 1.9, st.fitting, depth=1.6)
-    d.strip(8.2, 9.0, 4.2, material=st.fitting, depth=2.2)
-    d.line(8.6, 3.8, 11.2, 4.6, 0.8, st.fitting, depth=1.6)
+    # The swept hilt, kept plain: quillons and a knuckle bow standing clear of the grip.
+    guard(d, 8.5, 3.4, st, thick=1.0, curl=0.8)
+    d.line(8.2, -3.8, 2.8, -3.8, 0.8, st.fitting, depth=1.6)
+    d.line(2.8, -3.8, 1.6, -1.2, 0.8, st.fitting, depth=1.6)
     blade(d, 9.0, 31.0, 0.75, 0.55, st, tip=3.0, ridge=True)
     return d
 
@@ -175,12 +173,10 @@ def war_hammer(st):
     haft(d, 1.0, 32.0, 0.85, st)
     grip(d, 1.8, 10.5, 1.0, st)
     socket(d, 25.0, 32.0, 1.2, st)
-    # The head: a square face to the right, a curved beak behind, a top spike.
-    d.poly([(27.0, 1.2), (34.5, 1.2), (35.0, 6.8), (26.5, 6.8)], st.blade, depth=4.0, part="face")
-    d.strip(26.0, 27.0, 0.0, 6.8, material=st.fitting, depth=4.4, z=1)
-    d.poly([(28.5, -1.2), (33.0, -1.2), (31.0, -5.5), (28.0, -7.0)], st.blade, depth=2.0, part="beak")
+    # The head: a squared face to the right, a tapering beak behind, a top spike.
+    d.poly([(27.0, 1.2), (33.5, 1.2), (34.0, 6.6), (26.5, 6.6)], st.blade, depth=4.0, part="face")
+    d.poly([(28.0, -1.2), (32.5, -1.2), (29.6, -7.0)], st.blade, depth=2.0, part="beak")
     d.poly([(32.0, -1.0), (37.5, 0.0), (32.0, 1.0)], st.blade, depth=1.8)
-    rivets(d, [(30.8, 4.0)], st)
     return d
 
 
@@ -203,19 +199,21 @@ def glaive(st):
 def halberd(st):
     d = Design(59, grip=13.0)
     d.disc(0.9, 0.0, 1.1, st.fitting, depth=2.2)
-    haft(d, 0.8, 46.0, 0.8, st, rings=(24.0,))
+    haft(d, 0.8, 44.0, 0.8, st, rings=(24.0,))
     grip(d, 8.0, 18.0, 0.95, st)
-    socket(d, 40.0, 49.0, 1.15, st)
-    d.poly([(48.0, -1.0), (58.5, 0.0), (48.0, 1.0)], st.blade, depth=1.4)   # the spike
-    # The axe blade: a broad crescent edge on the right.
-    d.poly([(41.0, 1.15), (48.5, 1.15), (50.5, 4.0), (49.5, 7.8), (46.0, 8.4), (42.0, 7.6), (40.5, 4.0)], st.blade,
-           depth=1.1, part="axe")
-    d.poly([(50.5, 4.0), (49.5, 7.8), (46.0, 8.4), (42.0, 7.6), (40.5, 4.0), (42.0, 6.6), (46.0, 7.3), (49.0, 6.8)],
-           st.blade, depth=1.1, z=1, tone=HIGHLIGHT)
-    # The back hook.
-    d.poly([(44.0, -1.15), (46.5, -1.15), (49.5, -4.8), (47.5, -5.4), (45.0, -3.2)], st.blade, depth=1.1, part="hook")
-    rivets(d, [(44.0, 2.4), (46.4, 2.4)], st)
+    socket(d, 37.0, 47.0, 1.15, st)
+    d.poly([(46.0, -1.2), (59.0, 0.0), (46.0, 1.2)], st.blade, depth=1.4)   # the spike
+    # The axe blade on the right: a long edge between two horns, drawn large enough to read.
+    d.poly(HALBERD_AXE, st.blade, depth=1.1, part="axe")
+    d.poly(HALBERD_EDGE, st.blade, depth=1.1, z=1, tone=HIGHLIGHT)
+    d.poly(HALBERD_HOOK, st.blade, depth=1.1, part="hook")   # the back hook
     return d
+
+
+# The halberd's head (shared with its variants).
+HALBERD_AXE = [(38.0, 1.15), (48.0, 1.15), (51.0, 8.4), (44.0, 7.2), (36.0, 8.4)]
+HALBERD_EDGE = [(51.0, 8.4), (44.0, 7.2), (36.0, 8.4), (37.0, 6.8), (44.0, 5.8), (49.6, 6.8)]
+HALBERD_HOOK = [(41.5, -1.15), (45.0, -1.15), (49.0, -6.4), (46.6, -7.0), (42.8, -4.0)]
 
 
 def spear(st):
@@ -260,8 +258,9 @@ def sabre(st):
     pommel(d, 1.4, 1.2, st, cap=False)
     grip(d, 2.2, 7.6, 0.85, st, period=1.6)
     # A D-guard: from the crosspiece round the knuckles (the lit side) to the pommel.
-    d.strip(7.8, 8.8, 2.6, 3.0, material=st.fitting, depth=2.2)
-    d.line(8.3, -2.6, 1.6, -2.2, 0.8, st.fitting, depth=1.6)
+    d.strip(7.8, 8.8, 4.0, 1.8, material=st.fitting, depth=2.2)
+    d.line(8.3, -3.6, 2.6, -3.6, 0.8, st.fitting, depth=1.6)
+    d.line(2.6, -3.6, 1.4, -1.0, 0.8, st.fitting, depth=1.6)
     curved(d, 8.8, 30.5, 1.15, lambda s: 0.006 * (s - 8.8) ** 2, st, tip=3.2)
     return d
 
@@ -289,7 +288,6 @@ def battle_axe(st):
     d.poly([(41.2, 8.8), (41.0, 9.6), (37.0, 11.8), (31.0, 11.5), (27.4, 9.6), (31.0, 10.6), (37.0, 10.8)], st.blade,
            depth=1.1, tone=HIGHLIGHT, z=1)
     d.poly([(37.0, -1.2), (39.0, -4.6), (36.0, -3.8), (34.0, -1.2)], st.blade, depth=1.2)
-    rivets(d, [(35.0, 2.5), (35.0, 4.5)], st)
     return d
 
 
@@ -341,18 +339,15 @@ def quarterstaff(st):
 def pike(st):
     d = Design(64, grip=16.0)
     d.disc(0.8, 0.0, 1.0, st.fitting, depth=2.0)
-    haft(d, 0.8, 57.0, 0.75, st, rings=(30.0,))
+    haft(d, 0.8, 54.0, 0.75, st, rings=(30.0,))
     grip(d, 10.0, 22.0, 0.9, st)
-    # Langets (iron strips nailed down the haft below the socket) and a cloth tassel where they end.
-    d.strip(47.0, 54.0, 0.85, material=st.fitting, depth=1.9, z=1)
-    rivets(d, [(49.0, 0.0), (52.0, 0.0)], st)
-    socket(d, 54.0, 58.0, 1.0, st)
-    d.poly([(47.0, -0.8), (46.0, -2.2), (43.0, -2.0), (44.5, -0.8)], st.cloth, depth=1.2, part="tassel")
-    d.poly([(47.0, 0.8), (46.0, 2.2), (43.0, 2.0), (44.5, 0.8)], st.cloth, depth=1.2, part="tassel")
-    d.poly([(57.5, -0.9), (59.0, -1.5), (62.0, -0.6), (64.0, 0.0), (62.0, 0.6), (59.0, 1.5), (57.5, 0.9)], st.blade,
+    # Langets (iron strips down the haft below the socket), then a broad leaf head.
+    d.strip(46.0, 52.0, 0.9, material=st.fitting, depth=1.9, z=1)
+    socket(d, 52.0, 55.5, 1.05, st)
+    d.poly([(55.0, -1.0), (57.0, -2.4), (61.0, -1.1), (64.0, 0.0), (61.0, 1.1), (57.0, 2.4), (55.0, 1.0)], st.blade,
            depth=1.0, part="blade", bevel=0.0)
-    d.strip(58.0, 62.5, 0.35, material=st.blade, depth=1.5, z=1, part="ridge")
-    d.glint(60.0, -0.6)
+    d.strip(55.5, 62.0, 0.35, material=st.blade, depth=1.5, z=1, part="ridge")
+    d.glint(59.0, -1.0)
     return d
 
 
@@ -383,7 +378,6 @@ def maul(st):
     d.strip(37.0, 47.5, 6.6, material=st.blade, depth=7.0, part="head")
     for s in (38.2, 46.3):
         d.strip(s - 0.6, s + 0.6, 6.9, material=st.fitting, depth=7.4, z=1, part=f"band{s}")
-    rivets(d, [(42.3, -4.8), (42.3, 4.8), (42.3, 0.0)], st)
     return d
 
 
@@ -404,15 +398,18 @@ def executioner(st):
 def bill(st):
     d = Design(62, grip=14.0)
     d.disc(0.9, 0.0, 1.1, st.fitting, depth=2.2)
-    haft(d, 0.8, 49.0, 0.8, st, rings=(26.0,))
+    haft(d, 0.8, 46.0, 0.8, st, rings=(26.0,))
     grip(d, 8.5, 19.0, 0.95, st)
-    socket(d, 45.0, 50.0, 1.15, st)
-    # A hooked blade: a cleaver edge forward (right) curling back into a hook at the top; a spike; a fluke behind.
-    d.poly([(49.0, -1.0), (49.0, 1.15), (51.0, 4.6), (56.0, 5.4), (59.0, 4.0), (58.0, 2.4), (56.4, 3.4), (54.0, 2.0),
-            (55.0, -1.0)], st.blade, depth=1.1, part="blade")
-    d.poly([(55.0, -0.8), (62.0, 0.0), (55.0, 0.8)], st.blade, depth=1.3)
-    d.poly([(49.5, -1.15), (52.0, -1.15), (53.0, -4.4), (50.4, -3.0)], st.blade, depth=1.1, part="fluke")
+    socket(d, 41.0, 47.0, 1.15, st)
+    # A hooked blade: a cleaver edge forward (right) sweeping up into a hook, and a spike.
+    d.poly(BILL_BLADE, st.blade, depth=1.1, part="blade")
+    d.poly([(52.5, -0.9), (62.0, 0.0), (52.5, 0.9)], st.blade, depth=1.3)
     return d
+
+
+# The bill's head (shared with its variants).
+BILL_BLADE = [(45.5, -1.15), (45.5, 1.15), (47.6, 5.4), (53.0, 6.0), (59.0, 7.6), (58.6, 5.0), (55.0, 2.6), (53.0, 0.0),
+              (53.0, -1.15)]
 
 
 # ---------------------------------------------------------------- Arms IV (batch 47): ornate, each with a set stone
@@ -491,7 +488,6 @@ def war_pick(st):
            part="beak")
     d.strip(23.0, 26.5, 4.0, -1.2, material=st.blade, depth=3.4, part="face")
     d.poly([(27.0, -0.8), (31.0, 0.0), (27.0, 0.8)], st.blade, depth=1.6)
-    gem(d, 24.8, 0.0, 0.7, st)
     return d
 
 
@@ -541,15 +537,13 @@ def earthbreaker(st):
 
 def katar(st):
     d = Design(24, grip=4.0)
-    # An H frame: two side bars and two cross grips, the blade rising from the top bar.
+    # An H frame: two side bars and a cross grip, the blade rising from the top bar.
     d.poly([(0.0, -4.1), (8.0, -4.1), (8.0, -2.7), (0.0, -2.7)], st.fitting, depth=1.8, part="frame")
     d.poly([(0.0, 2.7), (8.0, 2.7), (8.0, 4.1), (0.0, 4.1)], st.fitting, depth=1.8, part="frame")
-    d.strip(2.6, 3.8, 2.7, material=st.grip, depth=1.8, part="crossgrip")
-    d.strip(4.8, 6.0, 2.7, material=st.grip, depth=1.8, part="crossgrip2")
+    d.strip(3.2, 5.0, 2.7, material=st.grip, depth=1.8, part="crossgrip")
     d.strip(7.6, 9.2, 4.1, material=st.fitting, depth=2.4, part="top")
     d.poly([(9.2, -2.6), (24.0, 0.0), (9.2, 2.6)], st.blade, depth=1.1, part="blade")
     d.strip(9.2, 21.0, lambda s: 0.5 * (1 - (s - 9.2) / 14), material=st.blade, depth=1.7, z=1, part="ridge")
-    gem(d, 8.4, 0.0, 0.7, st)
     return d
 
 
@@ -575,10 +569,10 @@ def kusarigama(st):
     grip(d, 1.5, 9.5, 0.95, st, period=1.6)
     d.strip(16.5, 19.0, 1.05, material=st.fitting, depth=2.4)
     sickle(d, 12.0, 0.6, 7.6, 3.0, 0.0, 125.0, st, steps=12)
-    # The chain, slung from the butt down the lit side, and its weight.
-    for i, (s, t) in enumerate([(1.0, -2.0), (2.6, -3.0), (4.4, -3.6), (6.2, -4.0), (8.0, -4.2)]):
+    # The chain, swung out from the butt down the lit side, clear of the handle, and its weight.
+    for i, (s, t) in enumerate([(0.4, -1.8), (1.6, -3.4), (3.4, -4.6), (5.4, -5.2)]):
         d.ring(s, t, 0.85, 0.3, CHAIN, depth=0.9 if i % 2 else 1.4, part=f"link{i}")
-    d.disc(10.2, -4.4, 1.5, st.fitting, depth=3.0)
+    d.disc(7.8, -5.4, 1.5, st.fitting, depth=3.0)
     return d
 
 
