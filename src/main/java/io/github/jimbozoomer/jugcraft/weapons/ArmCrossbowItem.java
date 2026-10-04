@@ -13,7 +13,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 /**
- * An arbalest (Arms VI, batch 50, docs/features/arms-vi.md; {@link JugcraftArms#RANGED}): vanilla's crossbow, loading,
+ * An arbalest (Arms VI, batch 52, docs/features/arms-vi.md; {@link JugcraftArms#RANGED}): vanilla's crossbow, loading,
  * holding and firing as it does (with its enchantments), but shooting its bolts faster, at the arbalest's speed, with the
  * arbalest's base damage. Firework rockets fly as from vanilla's crossbow.
  */

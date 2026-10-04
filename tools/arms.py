@@ -166,7 +166,7 @@ KINDS = {
                    "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.0,
                    "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["## ", "  #", "NN "],
                    "art": "chain_lash", "tooltip": "A sickle on a weighted chain: quick hooking cuts."},
-    # Arms VI (batch 50): after the owner's reference sheets of a twin-katana set and an iron-and-wood war kit (studied
+    # Arms VI (batch 52): after the owner's reference sheets of a twin-katana set and an iron-and-wood war kit (studied
     # for their look; nothing is copied). The bows, crossbows and shields of the batch are in RANGED and SHIELDS.
     "katana": {"display": "Katana", "damage": 3.0, "speed": -2.5, "swing": ("whack", 7), "reach": (0.0, 3.25),
                "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.3,
@@ -281,7 +281,7 @@ ARTS = {
                   "name": "Crescent", "text": "loose a crescent wave that runs ahead, through every foe in its way, until it meets a wall."},
     "kusarigama": {"move": "chain_lash", "cooldown": 120, "ticks": 16, "slow": 0.5,
                    "name": "Chain Lash", "text": "throw the weighted chain at the first foe in line, up to 9 blocks off, haul it in and reap it."},
-    # Arms VI (batch 50).
+    # Arms VI (batch 52).
     "katana": {"move": "seven_cuts", "cooldown": 120, "ticks": 18, "slow": 0.4,
                "name": "Seven Cuts", "text": "seven cuts in a breath, each across every foe ahead, leaving arcs in the air."},
 }
@@ -377,7 +377,7 @@ def art_share(kind):
             "chain_lash": LASH_SHARE + LASH_REAP_SHARE, "seven_cuts": CUTS_COUNT * CUTS_SHARE}[move]
 
 
-# Arms VI (batch 50): bows and crossbows in the arms' metals (weapons/ArmBowItem.java, ArmCrossbowItem.java), after the
+# Arms VI (batch 52): bows and crossbows in the arms' metals (weapons/ArmBowItem.java, ArmCrossbowItem.java), after the
 # owner's reference sheets. A longbow draws fully in `draw` ticks (vanilla's bow: 20) on vanilla's curve, and looses its
 # arrow at `speed` blocks a tick (vanilla's bow: 3.0); an arbalest loads as vanilla's crossbow does and shoots its bolt
 # at `speed` (vanilla's: 3.15). An arrow's `damage` is its base damage (vanilla's: 2.0), which the game multiplies by its

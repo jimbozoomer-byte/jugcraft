@@ -9,7 +9,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 
 /**
- * A heater or tower shield (Arms VI, batch 50, docs/features/arms-vi.md; {@link JugcraftArms#SHIELDS}). It blocks through
+ * A heater or tower shield (Arms VI, batch 52, docs/features/arms-vi.md; {@link JugcraftArms#SHIELDS}). It blocks through
  * its blocks-attacks component ({@link JugcraftArms#shield}), as vanilla's shield does. It is a ShieldItem so that, raised
  * on screen, it is held as vanilla holds its shield (the blocking model's pose). Vanilla turns any other blocking item
  * as a parrying sword, which swings a shield out of sight.
