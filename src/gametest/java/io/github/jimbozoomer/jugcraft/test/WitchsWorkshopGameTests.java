@@ -20,8 +20,10 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -220,7 +222,7 @@ public class WitchsWorkshopGameTests {
 		use(helper, chandler, at, Direction.NORTH);
 		helper.assertTrue(helper.getBlockState(at).getValue(Candelabra.LIT) && helper.getBlockState(at).getLightEmission() == 9,
 				"Flint and steel lights it (light 9)");
-		chandler.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.PURPLE_DYE));
+		chandler.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("minecraft", "purple_dye"))));
 		use(helper, chandler, at, Direction.NORTH);
 		chandler.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.AMETHYST_SHARD));
 		use(helper, chandler, at, Direction.NORTH);
