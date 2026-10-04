@@ -59,6 +59,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftTools.CHARGING_STATION_ENTITY, ChargingStationRenderer::new);
 		RocketPackClient.register();
 		BroomstickClient.register();
+		BalloonClient.register();
 		ArmsMotion.load();
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);
 		PetroFluidsClient.register();
@@ -149,6 +150,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftAgriculture.FLYING_BROOMSTICK, BroomstickRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.WEREWOLF, WerewolfRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.SQUIRREL, SquirrelRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.PUMPKLING, PumpklingRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.gear.JugcraftGrapple.GRAPPLE_HOOK, GrappleHookRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.weapons.FieldChemistry.CHEMICAL_CLOUD,
 				net.minecraft.client.renderer.entity.NoopRenderer::new);
@@ -167,6 +169,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		ModelLayerRegistry.registerModelLayer(HorsemanModel.LAYER, HorsemanModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(WerewolfModel.LAYER, WerewolfModel::createLayer);
 		ModelLayerRegistry.registerModelLayer(SquirrelModel.LAYER, SquirrelModel::createLayer);
+		ModelLayerRegistry.registerModelLayer(PumpklingModel.LAYER, PumpklingModel::createLayer);
 		EntityRendererRegistry.register(JugcraftAgriculture.WILL_O_WISP, WispRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.CROW, CrowRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.HAY_GOLEM, HayGolemRenderer::new);
@@ -176,6 +179,11 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftAgriculture.FLAMING_PUMPKIN, context -> new ThrownItemRenderer<>(context, 1.5F, true));
 		EntityRendererRegistry.register(JugcraftAgriculture.BOWLING_PUMPKIN, BowlingPumpkinRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.TOILET_PAPER_ROLL, ThrownItemRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.TOSS_RING, ThrownItemRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.FERRIS_WHEEL, FerrisWheelRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.PINATA, PinataRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.HOT_AIR_BALLOON, HotAirBalloonRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.PIBAL, PibalRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.HAUNTED_HAYRIDE, HauntedHayrideRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.THROW_MARKER, ThrowMarkerRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.SEAT, SeatRenderer::new);
