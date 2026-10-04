@@ -9,6 +9,7 @@ Every recipe turns metal plate (or ingots, nuggets and glass) into blocks; nothi
 """
 import math
 import random
+import sys
 
 from PIL import Image
 
@@ -49,6 +50,7 @@ TEXTURES = {
     "porthole_window": "dw_porthole",
 }
 LAMP_LIGHT = 14
+LAMP_TEXTURES = {"amber_cage_lamp": {"metal": "dr_rust_bare", "bar": "dr_band", "glass": "dr_amber_on"}}
 TOOLTIPS = {
     "rust_grating": "See-through: build catwalks and walkways.",
     "steel_i_beam": "Lies along the axis you place it on, like a log.",
@@ -107,8 +109,15 @@ def pillar_blockstate(model):
 
 
 def write_all(write, assets, data, lang, condition, self_drop):
+    write_blocks(write, assets, data, lang, condition, self_drop, sys.modules[__name__])
+
+
+def write_blocks(write, assets, data, lang, condition, self_drop, spec):
+    """Writes a building set's models, blockstates, loot, names and recipes. spec is a module with BLOCKS, TEXTURES,
+    TOOLTIPS, RECIPES and LAMP_TEXTURES (and CREST_TEXTURES for "crest" blocks): this one, or tools/kaiserworks.py."""
     from construction import stairs_blockstate
     models = assets / "models" / "block"
+    BLOCKS, TEXTURES, TOOLTIPS, RECIPES = spec.BLOCKS, spec.TEXTURES, spec.TOOLTIPS, spec.RECIPES
     for block, (name, kind, _, _) in BLOCKS.items():
         lang[f"block.{MOD}.{block}"] = name
         model = f"{MOD}:block/{block}"
@@ -123,10 +132,17 @@ def write_all(write, assets, data, lang, condition, self_drop):
                                              "elements": i_beam_elements()})
             write(assets / "blockstates" / f"{block}.json", pillar_blockstate(model))
         elif kind == "lamp":
-            write(models / f"{block}.json", {"ambientocclusion": False, "textures": {
-                "metal": f"{MOD}:block/dr_rust_bare", "bar": f"{MOD}:block/dr_band", "glass": f"{MOD}:block/dr_amber_on",
-                "particle": f"{MOD}:block/dr_rust_bare"}, "elements": lamp_elements()})
+            textures = {key: f"{MOD}:block/{texture}" for key, texture in spec.LAMP_TEXTURES[block].items()}
+            write(models / f"{block}.json", {"ambientocclusion": False, "textures": {**textures, "particle": textures["metal"]},
+                                             "elements": lamp_elements()})
             write(assets / "blockstates" / f"{block}.json", {"variants": {"": {"model": model}}})
+        elif kind == "crest":
+            front, rest = spec.CREST_TEXTURES[block]
+            write(models / f"{block}.json", {"parent": "minecraft:block/orientable", "textures": {
+                "front": f"{MOD}:block/{front}", "side": f"{MOD}:block/{rest}", "top": f"{MOD}:block/{rest}"}})
+            write(assets / "blockstates" / f"{block}.json", {"variants": {
+                f"facing={facing}": ({"model": model, "y": y} if y else {"model": model})
+                for facing, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270))}})
         else:
             write(models / f"{block}.json", {"parent": "minecraft:block/cube_all",
                                              "textures": {"all": f"{MOD}:block/{TEXTURES[block]}"}})

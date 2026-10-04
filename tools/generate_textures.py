@@ -1363,6 +1363,8 @@ def machines():
     rocketry.draw_all(save)
     import dieselworks
     dieselworks.draw_all(save)
+    import kaiserworks
+    kaiserworks.draw_all(save)
     import zeppelin
     zeppelin.draw_all(save)
     import mech

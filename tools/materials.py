@@ -254,6 +254,9 @@ def feature_of(entry_id):
     import dieselworks
     if entry_id in dieselworks.blocks():
         return "machines"
+    import kaiserworks
+    if entry_id in kaiserworks.blocks():
+        return "machines"
     import zeppelin
     if entry_id in zeppelin.ITEMS:
         return "machines"
