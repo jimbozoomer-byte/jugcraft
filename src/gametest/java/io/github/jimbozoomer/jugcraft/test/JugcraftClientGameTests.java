@@ -346,6 +346,17 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_diesel_walker");
 
+			// Kaiserworks (batch 48), in the same spot: an imperial station front of marble columns, black lacquer,
+			// leaded glass, a gilt frieze and the crest, on station tiles with gas lamps.
+			server.runCommand("kill @e[type=jugcraft:diesel_walker]");
+			server.runCommand("kill @e[type=jugcraft:zeppelin]");
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 26, y, z - 10, x - 10, y + 8, z + 1));
+			server.runOnServer(minecraft -> buildKaiserworks(minecraft.overworld(), new BlockPos(x - 24, y, z - 10)));
+			server.runCommand("tp @p %d %d %d 180 6".formatted(x - 19, y + 2, z - 1));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_kaiserworks");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
@@ -873,6 +884,35 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 	}
 
 	/** Batch 45: the Dieselworks showcase (base: the west end of the wall). */
+	private static void buildKaiserworks(ServerLevel level, BlockPos base) {
+		java.util.function.Function<String, BlockState> block = id ->
+				io.github.jimbozoomer.jugcraft.building.Kaiserworks.BLOCKS.get(id).defaultBlockState();
+		for (int dx = 0; dx <= 10; dx++) {
+			for (int dy = 0; dy <= 5; dy++) {
+				boolean window = (dx == 2 || dx == 3 || dx == 7 || dx == 8) && dy >= 1 && dy <= 3;
+				String id = dx % 5 == 0 ? "fluted_marble_column"
+						: dy == 0 ? "gilt_trimmed_plate" : window ? "leaded_glass" : dy == 4 ? "gilt_frieze"
+						: dy == 5 ? "riveted_black_plate" : "black_lacquer_plate";
+				level.setBlock(base.offset(dx, dy, 0), block.apply(id), 3);
+			}
+			level.setBlock(base.offset(dx, 6, 0), block.apply("polished_brass_plate_slab"), 3);
+			for (int dz = 1; dz <= 5; dz++) {
+				level.setBlock(base.offset(dx, -1, dz), block.apply("station_tiles"), 3);
+			}
+			level.setBlock(base.offset(dx, 0, 5), block.apply("wrought_iron_lattice_slab"), 3);
+		}
+		level.setBlock(base.offset(5, 6, 0), block.apply("imperial_crest")
+				.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.SOUTH), 3);
+		for (int dx : new int[] {1, 9}) {
+			level.setBlock(base.offset(dx, 0, 2), block.apply("black_iron_column"), 3);
+			level.setBlock(base.offset(dx, 1, 2), block.apply("imperial_gas_lamp"), 3);
+		}
+		for (int dx = 4; dx <= 6; dx++) {
+			level.setBlock(base.offset(dx, -1, 1), block.apply("polished_marble"), 3);
+			level.setBlock(base.offset(dx, 0, 1), block.apply("polished_marble_stairs"), 3);
+		}
+	}
+
 	private static void buildDieselworks(ServerLevel level, BlockPos base) {
 		java.util.function.Function<String, BlockState> block = id ->
 				io.github.jimbozoomer.jugcraft.building.Dieselworks.BLOCKS.get(id).defaultBlockState();

@@ -648,6 +648,36 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Batch 48: every Kaiserworks block is registered and placeable; the lattice and leaded glass don't hide what is
+	 * behind them, the crest turns to face its placer and the gas lamp gives light.
+	 */
+	@GameTest
+	public void kaiserworksBlocksPlace(GameTestHelper helper) {
+		var blocks = io.github.jimbozoomer.jugcraft.building.Kaiserworks.BLOCKS;
+		helper.assertTrue(blocks.size() == 26, "Expected 26 Kaiserworks blocks, got " + blocks.size());
+		BlockPos at = new BlockPos(1, 1, 1);
+		for (var entry : blocks.entrySet()) {
+			helper.setBlock(at, entry.getValue().defaultBlockState());
+			helper.assertTrue(helper.getBlockState(at).is(entry.getValue()), entry.getKey() + " did not place");
+		}
+		ServerLevel level = helper.getLevel();
+		BlockPos abs = helper.absolutePos(at);
+		for (String id : new String[] {"wrought_iron_lattice", "leaded_glass"}) {
+			helper.setBlock(at, blocks.get(id).defaultBlockState());
+			helper.assertFalse(helper.getBlockState(at).isViewBlocking(level, abs, new net.minecraft.world.phys.AABB(abs)),
+					id + " should be see-through");
+		}
+		helper.setBlock(at, blocks.get("imperial_crest").defaultBlockState()
+				.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.EAST));
+		helper.assertTrue(helper.getBlockState(at).getValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING)
+				== net.minecraft.core.Direction.EAST, "The crest should keep the way it faces");
+		helper.setBlock(at, blocks.get("imperial_gas_lamp").defaultBlockState());
+		helper.assertTrue(helper.getBlockState(at).getLightEmission() == io.github.jimbozoomer.jugcraft.building.Kaiserworks.LAMP_LIGHT,
+				"The gas lamp should give light");
+		helper.succeed();
+	}
+
 	/** Batch 47: lays a stone floor under the empty depot structure for the Diesel Walker tests. */
 	private static void walkerFloor(GameTestHelper helper) {
 		for (int x = 0; x < 16; x++) {
