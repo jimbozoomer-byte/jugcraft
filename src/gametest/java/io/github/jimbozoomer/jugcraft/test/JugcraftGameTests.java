@@ -574,7 +574,7 @@ public class JugcraftGameTests {
 	}
 
 	/**
-	 * Batch 45: every Dieselworks block is registered and placeable; the grating doesn't block the view, the I-beam is
+	 * Batch 45: every Dieselworks block is registered and placeable; the grating doesn't hide what is behind it, the I-beam is
 	 * not a full cube, and the amber cage lamp gives light.
 	 */
 	@GameTest
@@ -589,7 +589,8 @@ public class JugcraftGameTests {
 		ServerLevel level = helper.getLevel();
 		BlockPos abs = helper.absolutePos(at);
 		helper.setBlock(at, blocks.get("rust_grating").defaultBlockState());
-		helper.assertFalse(helper.getBlockState(at).isViewBlocking(level, abs), "Rust grating should be see-through");
+		helper.assertFalse(helper.getBlockState(at).isViewBlocking(level, abs, new net.minecraft.world.phys.AABB(abs)),
+				"Rust grating should be see-through");
 		helper.setBlock(at, blocks.get("steel_i_beam").defaultBlockState());
 		helper.assertFalse(Block.isShapeFullBlock(helper.getBlockState(at).getShape(level, abs)), "An I-beam is not a full cube");
 		helper.setBlock(at, blocks.get("amber_cage_lamp").defaultBlockState());
