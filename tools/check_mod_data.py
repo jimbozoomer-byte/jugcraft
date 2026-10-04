@@ -21,6 +21,7 @@ import midway
 import ferris_wheel
 import pinata
 import hot_air_balloon
+import leaf_blower
 import petro
 import deposits
 import seasons
@@ -2357,6 +2358,7 @@ def check_decor4(java):
     check_ferris_wheel(java, number, lang)
     check_pinata(java, number, lang)
     check_hot_air_balloon(java, number, lang)
+    check_leaf_blower(java, number, lang)
 
 
 def check_midway(java, number, lang):
@@ -2600,6 +2602,42 @@ def check_hot_air_balloon(java, number, lang):
             ASSETS / "items" / f"{i}.json" for i in hot_air_balloon.items()]:
         if not path.exists():
             err(f"The hot-air balloon fiesta needs {path.relative_to(ROOT)}")
+
+
+def check_leaf_blower(java, number, lang):
+    """Fall addition 30: the Leaf Blower matches tools/leaf_blower.py (charge, costs, stream); it is a Chargeable item
+    that starts empty, so the Charging Station charges it; its model draws from textures that exist; its words, recipe
+    and advancement exist."""
+    lb = leaf_blower.LEAF_BLOWER
+    expected = {"CAPACITY": lb["capacity"], "BLOW_JE": lb["blow_je"], "VACUUM_JE": lb["vacuum_je"], "RANGE": lb["range"],
+                "CONE": lb["cone"], "PUSH_ITEMS": lb["push_items"], "PUSH_MOBS": lb["push_mobs"], "PILE_RANGE": lb["pile_range"],
+                "PILE_EVERY": lb["pile_every"], "VACUUM_RANGE": lb["vacuum_range"]}
+    for name, value in expected.items():
+        found = number("LeafBlowerItem", name)
+        if found is None or abs(float(found) - value) > 1e-9:
+            err(f"LeafBlowerItem.{name} = {found} differs from tools/leaf_blower.py ({value})")
+    source = java.get("LeafBlowerItem", "")
+    if f'ID = "{lb["item"]}"' not in source or "implements Chargeable" not in source:
+        err("LeafBlowerItem must be the Chargeable item tools/leaf_blower.py names")
+    if "registerItem(LeafBlowerItem.ID, LeafBlowerItem::new" not in java.get("JugcraftAgriculture", "") or \
+            "component(JugcraftTools.ENERGY, 0L)" not in java.get("JugcraftAgriculture", ""):
+        err("JugcraftAgriculture.java must register the Leaf Blower with an empty charge")
+    model = load(ASSETS / "models" / "item" / f"{lb['item']}.json") or {}
+    if not model.get("elements"):
+        err(f"The Leaf Blower needs its model, models/item/{lb['item']}.json")
+    for name, texture in model.get("textures", {}).items():
+        path = ASSETS / "textures" / f"{texture.split(':', 1)[1]}.png"
+        if not path.exists():
+            err(f"The Leaf Blower's model draws missing texture {texture}")
+    if lang.get(f"item.{MOD}.{lb['item']}") != lb["display"]:
+        err(f"The Leaf Blower has no words for item.{MOD}.{lb['item']}")
+    for key in (f"item.{MOD}.{lb['item']}.tooltip", f"message.{MOD}.leaf_blower.flat"):
+        if key not in lang:
+            err(f"The Leaf Blower has no words for {key}")
+    for path in [DATA / MOD / "advancement" / f"{a}.json" for a in leaf_blower.ADVANCEMENTS] + [
+            DATA / MOD / "recipe" / f"{r['id']}.json" for r in leaf_blower.SHAPED] + [ASSETS / "items" / f"{lb['item']}.json"]:
+        if not path.exists():
+            err(f"The Leaf Blower needs {path.relative_to(ROOT)}")
 
 
 def check_pumpkling(java, number, lang):
