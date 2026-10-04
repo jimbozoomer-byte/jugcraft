@@ -8,6 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -28,10 +29,11 @@ import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * An arm (batches 42 and 45, {@link JugcraftArms}): its numbers and most traits are item components, with a grey line
+ * An arm (batches 42, 45 and 46, {@link JugcraftArms}): its numbers and most traits are item components, with a grey line
  * saying what its kind does, from {@code tooltip.jugcraft.arms.<kind>}. An Arms II kind's {@link JugcraftArms.Trait}
- * is worked here, on the server: a bonus to the blow (backstab, saddle, armor pierce, riders), a daze on a hit, or the
- * scythe's reaping. Chopping is the axe's own tool component.
+ * is worked here, on the server: a bonus to the blow (backstab, saddle, armor pierce, riders, execute), a daze or a hook
+ * on a hit, or the scythe's reaping. Chopping is the axe's own tool component; the maul's quake is its finishing blow
+ * ({@link TwoHanded}). A two-handed kind says so in a second line.
  */
 public class ArmItem extends Item {
 	private final String kind;
@@ -45,7 +47,7 @@ public class ArmItem extends Item {
 
 	/**
 	 * The kind of arm: longsword, greatsword, rapier, flanged_mace, war_hammer, glaive, halberd, spear, lance, dagger,
-	 * sabre, estoc, battle_axe, flail, scythe, quarterstaff or pike.
+	 * sabre, estoc, battle_axe, flail, scythe, quarterstaff, pike, zweihander, maul, executioner or bill.
 	 */
 	public String kind() {
 		return kind;
@@ -60,6 +62,9 @@ public class ArmItem extends Item {
 	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip,
 			TooltipFlag flag) {
 		tooltip.accept(Component.translatable("tooltip.jugcraft.arms." + kind).withStyle(ChatFormatting.GRAY));
+		if (JugcraftArms.TWO_HANDED.containsKey(kind)) {
+			tooltip.accept(Component.translatable("tooltip.jugcraft.arms.two_handed").withStyle(ChatFormatting.DARK_GRAY));
+		}
 	}
 
 	@Override
@@ -79,6 +84,8 @@ public class ArmItem extends Item {
 			case ARMOR_PIERCE -> target instanceof LivingEntity living
 					? Math.min(JugcraftArms.ARMOR_PIERCE_MAX, JugcraftArms.ARMOR_PIERCE * living.getArmorValue()) : 0.0F;
 			case RIDERS -> target.isPassenger() || target.isVehicle() ? damage * JugcraftArms.RIDERS : 0.0F;
+			case EXECUTE -> target instanceof LivingEntity living && living.getHealth() <= living.getMaxHealth() * JugcraftArms.EXECUTE_HEALTH
+					? damage * JugcraftArms.EXECUTE : 0.0F;
 			default -> 0.0F;
 		};
 	}
@@ -102,6 +109,21 @@ public class ArmItem extends Item {
 		super.hurtEnemy(stack, target, attacker);
 		if (trait == JugcraftArms.Trait.DAZE && !target.level().isClientSide()) {
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, JugcraftArms.DAZE_TICKS, JugcraftArms.DAZE_AMPLIFIER), attacker);
+		}
+		if (trait == JugcraftArms.Trait.HOOK && !target.level().isClientSide()) {
+			hook(target, attacker);
+		}
+	}
+
+	/**
+	 * The bill's hook: pulls the foe towards its wielder at HOOK blocks a tick (less the foe's knockback resistance) and
+	 * drags it from the saddle, unless it cannot be dismounted by an item.
+	 */
+	static void hook(LivingEntity target, LivingEntity attacker) {
+		target.knockback(JugcraftArms.HOOK, target.getX() - attacker.getX(), target.getZ() - attacker.getZ(),
+				target.level().damageSources().mobAttack(attacker), 0.0F);
+		if (target.isPassenger() && !target.is(EntityTypeTags.CANNOT_BE_DISMOUNTED_BY_ITEM_USAGE)) {
+			target.stopRiding();
 		}
 	}
 

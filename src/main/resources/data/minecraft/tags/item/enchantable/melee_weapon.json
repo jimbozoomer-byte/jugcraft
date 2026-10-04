@@ -10,6 +10,8 @@
     "jugcraft:bronze_flail",
     "jugcraft:bronze_quarterstaff",
     "jugcraft:bronze_pike",
+    "jugcraft:bronze_maul",
+    "jugcraft:bronze_bill",
     "jugcraft:steel_flanged_mace",
     "jugcraft:steel_war_hammer",
     "jugcraft:steel_halberd",
@@ -18,6 +20,8 @@
     "jugcraft:steel_battle_axe",
     "jugcraft:steel_flail",
     "jugcraft:steel_quarterstaff",
-    "jugcraft:steel_pike"
+    "jugcraft:steel_pike",
+    "jugcraft:steel_maul",
+    "jugcraft:steel_bill"
   ]
 }

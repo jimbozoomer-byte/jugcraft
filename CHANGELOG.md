@@ -8,6 +8,21 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Arms III, batch 46
+- **Two-handed weapons**, after studying the Fiery Combat add-on the owner sent (nothing of it is used). Greatswords, war hammers, glaives, battle axes, scythes, quarterstaves, pikes and the new kinds now swing with both hands:
+  - a click starts the swing, and the blow lands as the swing comes round, on the frame the animation lands it, not on the click;
+  - the blow strikes every foe in an arc (up to 2 to 5 by kind);
+  - you are slowed while the swing is in the air;
+  - the last attack of each combo is a finishing blow, 25% stronger;
+  - a shield in the off hand stops the swing.
+- The server decides every swing and blow, and refuses vanilla's instant hit with these arms.
+- **Four new two-handers** in bronze and steel:
+  - **zweihander:** the widest cleave, and a guard;
+  - **maul:** its finishing blow shakes the ground;
+  - **executioner's sword:** half again as much against a foe at 30% health or less;
+  - **bill:** hooks foes towards you and drags riders from the saddle.
+- Handbook pages, the **Two-Hander** advancement, seven game tests and an end-to-end client test. Record: [arms-iii.md](docs/features/arms-iii.md).
+
 ### Unmerged: Arms II, batch 45
 - **Eight more arms** in bronze and steel, each with a trait of its own:
   - **dagger:** quick stabs; half again as much from behind;

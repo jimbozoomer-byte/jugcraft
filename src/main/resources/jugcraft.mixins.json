@@ -4,6 +4,7 @@
   "package": "io.github.jimbozoomer.jugcraft.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "AttackStrengthAccessor",
     "DiagonalBlockMixin",
     "DiagonalPathMixin",
     "DiagonalShapeMixin",

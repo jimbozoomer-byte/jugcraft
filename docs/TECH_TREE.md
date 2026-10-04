@@ -486,6 +486,19 @@ Eight more kinds, in bronze and steel as batch 42's, each with a trait.
 
 Each has its own guard, combo and first-person strokes, as batch 43's. **Code:** `weapons/` (`JugcraftArms.Trait`, worked by `ArmItem` on the server); data from `tools/arms.py`, art from `tools/arms_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-ii.md)).
 
+### Arms III (batch 46)
+
+Two-handed swings: the greatsword, war hammer, glaive, battle axe, scythe, quarterstaff, pike and these four start their swing on the click and land the blow as it comes round, on every foe in an arc. Each combo ends in a finishing blow, 25% stronger. The wielder is slowed while swinging, and a shield in the off hand stops it. In bronze and steel:
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Zweihander | Hits 10.5 (steel 11) at 0.8 a second, reaches 4; cleaves up to 5 foes; hold use to guard 50%. Sweeps | 4 ingots, leather |
+| Maul | Hits 13 (13.5) at 0.55 a second; its finishing blow shakes the ground: foes close by take half and are slowed; stops a shield for 5 s | 6 ingots, stick |
+| Executioner's Sword | Hits 11 (11.5) at 0.7 a second; half again as much against a foe at 30% health or less | 5 ingots, leather |
+| Bill | Hits 9 (9.5) at 0.9 a second, reaches 4.5; pulls foes towards you and drags riders from the saddle | 2 ingots, 2 sticks |
+
+**Code:** `weapons/` (`TwoHanded`, `TwoHandedSwingPayload`, `JugcraftArms.TWO_HANDED`), client `client/arms/TwoHandedInput`; data from `tools/arms.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-iii.md)).
+
 ### Construction chemistry (batch 32)
 
 | Item | What it does | Built from |

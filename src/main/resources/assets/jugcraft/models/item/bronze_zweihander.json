@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_zweihander",
+  "textures": {
+    "layer0": "jugcraft:item/bronze_zweihander"
+  }
+}
