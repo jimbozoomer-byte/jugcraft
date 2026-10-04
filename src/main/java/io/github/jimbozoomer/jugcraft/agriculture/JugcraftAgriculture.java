@@ -93,6 +93,7 @@ import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.GlowLichenBlock;
 import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.SlabBlock;
@@ -256,6 +257,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<SpookySignBlockEntity> SPOOKY_SIGN_ENTITY;
 	public static BlockEntityType<BlackLightBlockEntity> BLACK_LIGHT_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> GLOW_PAINT_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> FLYING_EYEBALL_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> BRAZIER_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> SHADOW_LAMP_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> FLOATING_HAT_ENTITY;
@@ -1742,6 +1744,7 @@ public final class JugcraftAgriculture {
 				.pushReaction(PushReaction.POPPED));
 		registerItem(LAMP_POST, props -> new BlockItem(post, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		registerChurchyardOrnaments();
+		registerHauntedHouseProps();
 	}
 
 	/**
@@ -1763,6 +1766,35 @@ public final class JugcraftAgriculture {
 		}
 		registerItem(BONE_HAND, props -> new DoubleHighBlockItem(hand, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 	}
+
+	/**
+	 * Halloween decorations batch 16, the haunted house's props (tools/decor16.py): the Flying Eyeball (drawn by the
+	 * client), the ivory and black Pillar Candles (vanilla candles), the Spider Web (vanilla's multiface block) and the
+	 * Monster's Head. (The harvest plushes are the midway's.)
+	 */
+	private static void registerHauntedHouseProps() {
+		Block eyeball = registerBlock(FLYING_EYEBALL, FlyingEyeballBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.strength(0.3F).sound(SoundType.SLIME_BLOCK).noCollision().noOcclusion().pushReaction(PushReaction.POPPED));
+		FLYING_EYEBALL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(FLYING_EYEBALL),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(FLYING_EYEBALL_ENTITY, pos, state), eyeball)
+						.build());
+		Block ivory = registerBlock(IVORY_PILLAR_CANDLE, PillarCandleBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.WHITE_CANDLE));
+		Block black = registerBlock(BLACK_PILLAR_CANDLE, PillarCandleBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BLACK_CANDLE));
+		Block web = registerBlock(SPIDER_WEB, MultifaceBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).noCollision()
+				.strength(0.2F).sound(SoundType.COBWEB).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block head = registerBlock(MONSTER_HEAD, MonsterHeadBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN)
+				.strength(1.0F).sound(SoundType.DECORATED_POT).noOcclusion().lightLevel(MonsterHeadBlock::light).pushReaction(PushReaction.POPPED));
+		for (Block block : List.of(eyeball, ivory, black, web, head)) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	public static final String FLYING_EYEBALL = "flying_eyeball";
+	public static final String IVORY_PILLAR_CANDLE = "ivory_pillar_candle";
+	public static final String BLACK_PILLAR_CANDLE = "black_pillar_candle";
+	public static final String SPIDER_WEB = "spider_web";
+	public static final String MONSTER_HEAD = "monster_head";
 
 	public static final String BONE_PILE = "bone_pile";
 	public static final String OSSUARY_WALL = "ossuary_wall";

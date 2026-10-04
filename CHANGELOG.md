@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: The haunted house's props (Halloween decorations batch 16)
+- **Flying Eyeball** (hovers on bat wings and stares at the nearest player), **Pillar Candles** in ivory and black (vanilla candles, one to four in a dripping cluster), **Spider Web** (on any face), and the **Monster's Head** (wakes on a redstone signal: jaw open, eyes glowing, bolts sparking).
+- Five **harvest plushes** for the midway's prize table: owl, hedgehog, acorn, corn and maple leaf.
+- Sculpted from the owner's reference pictures; 64 × 64 textures. Six game tests, client screenshots. Record: [haunted-house-props.md](docs/features/haunted-house-props.md).
+
 ### Unmerged: The churchyard's ornaments (Halloween decorations batch 15)
 - **Gargoyle** on a granite plinth (a graveyard monument: it weathers and takes an inscription), **Bone Pile** (heaps to four layers), **Ossuary Wall** (skulls and long bones), **Giant Bone Hand** (clenches on a redstone signal) and **Witch's Lantern** (violet glass, standing or hanging).
 - Sculpted from the owner's reference pictures; 64 × 64 textures. Six game tests, client screenshots. Record: [churchyard-ornaments.md](docs/features/churchyard-ornaments.md).

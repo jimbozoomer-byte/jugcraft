@@ -1041,6 +1041,16 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Giant Bone Hand**: two blocks tall out of grave earth, clenching into a fist on a redstone signal.
 - **Witch's Lantern**: gothic iron and violet glass, standing or hanging. Details: [the churchyard's ornaments](../features/churchyard-ornaments.md).
 
+### The haunted house's props
+
+<!-- props-shots -->
+
+- **Flying Eyeball**: a bloodshot eye on red bat wings that hovers in its block, bobbing and beating its wings, and **turns to stare at the nearest player**.
+- **Pillar Candles**, ivory and black: dripping church candles, one to four in a cluster, lit and put out like vanilla's.
+- **Spider Web**: a whole web, with its spider, strung over any face of a block.
+- **Monster's Head**: a stitched green monster's head with bolts in its neck; on a redstone signal its jaw drops, its eyes glow and its bolts spark.
+- **Harvest plushes**: an owl, a hedgehog, an acorn, an ear of corn and a maple leaf, five more prizes at the midway. Details: [the haunted house's props](../features/haunted-house-props.md).
+
 ## Even more fall additions
 
 Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).

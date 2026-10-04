@@ -61,4 +61,4 @@ Not run:
 Placed by players only; no worldgen. They work all year, and nothing depends on the Halloween event.
 
 ## Rollout and open questions
-- Batch 16 follows on this branch's successor: the haunted house's props from the same pictures.
+- Batch 16 follows on this branch's successor: [the haunted house's props](haunted-house-props.md), from the same pictures.
