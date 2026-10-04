@@ -432,9 +432,6 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_pixel_hollows_cave");
-			// Show the HUD again (it was toggled three times above), so the client tests after this one start as a new
-			// client does: a hidden HUD also hides the hand in first person.
-			context.getInput().pressKey(options -> options.keyToggleGui);
 		}
 	}
 

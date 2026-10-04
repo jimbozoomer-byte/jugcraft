@@ -45,8 +45,7 @@ public class ArmsMotionClientGameTests implements FabricClientGameTest {
 			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 0", x + 0.5, y, z + 0.5));
 			context.waitTicks(20);
 
-			// Third person, from the front: each kind's guard, then two ticks into a swing. The HUD stays up throughout, since
-			// hiding it also hides the hand in first person (and 26.3 gives no way to read whether it is hidden).
+			// Third person, from the front: each kind's guard, then two ticks into a swing.
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 			for (String kind : KINDS) {
 				hold(context, server, kind);
@@ -60,7 +59,9 @@ public class ArmsMotionClientGameTests implements FabricClientGameTest {
 				strike(context, "longsword", "jugcraft_motion_longsword_combo_" + blow);
 				context.waitTicks(12);
 			}
-			// First person: the guard and a stroke on screen.
+			// First person: the guard and a stroke on screen. The HUD has been hidden by this point in every CI run, and hiding
+			// it also hides the hand, so it is shown with one press of its toggle (26.3's Options has no hideGui field to set).
+			context.getInput().pressKey(options -> options.keyToggleGui);
 			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 			for (String kind : List.of("longsword", "war_hammer", "glaive")) {
 				hold(context, server, kind);
