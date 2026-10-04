@@ -162,18 +162,22 @@ public class WeaponArtsClientGameTests implements FabricClientGameTest {
 					&& wave.stream().filter(health -> near(HEALTH - health, two)).count() == 1
 					&& wave.stream().filter(health -> health == HEALTH).count() == 1, "The crescent left " + wave);
 
-			// Chain lash: a pig seven blocks ahead is caught, hauled in and reaped (looking a little down, to aim at it).
+			// Chain lash: a pig seven blocks ahead is caught, hauled in and reaped (looking a little down, to aim at it). The
+			// pig cannot walk (no movement speed), so it stays where the chain is aimed: one left to wander can step half a
+			// block off the chain's line before it is thrown (a CI run caught that), and the chain is a ray, not a cone. It
+			// keeps its AI, so the haul still moves it (a NoAI mob is not moved by a push).
 			ready(context, server, x, y, z + 6, "steel_kusarigama");
 			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 12", x + 0.5, y, z + 6 + 0.5));
 			server.runCommand(String.format(Locale.ROOT, "summon minecraft:pig %.1f %d %.1f {PersistenceRequired:1b,"
-					+ "attributes:[{id:\"minecraft:max_health\",base:100.0d}],Health:100.0f}", x + 0.5, y, z + 6 + 0.5 - 7.0));
+					+ "attributes:[{id:\"minecraft:max_health\",base:100.0d},{id:\"minecraft:movement_speed\",base:0.0d}],"
+					+ "Health:100.0f}", x + 0.5, y, z + 6 + 0.5 - 7.0));
 			context.waitTicks(10);
 			base = attack(server);
 			double before = distanceToPig(server);
 			use(context);
 			context.waitTicks(6);
 			context.takeScreenshot("jugcraft_art_chain_lash");
-			// Measured as the reap lands, before the pig, hurt, runs off.
+			// Measured as the reap lands, before the reap's own knockback throws the pig back.
 			context.waitTicks(JugcraftArms.LASH_REAP - 6);
 			double after = distanceToPig(server);
 			context.waitTicks(14);

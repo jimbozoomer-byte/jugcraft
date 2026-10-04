@@ -17,7 +17,7 @@ import graveyard_grounds as gg
 MODELS = {"gothic": gm.gothic, "willow_urn": gm.willow_urn, "winged_skull": gm.winged_skull, "lamb": gm.lamb,
           "broken_column": gm.broken_column, "celtic_cross": gm.celtic_cross, "scroll": gm.scroll, "table_tomb": gm.table_tomb,
           "ledger": gm.ledger, "obelisk": gm.obelisk, "draped_urn": gm.draped_urn, "angel_of_grief": gm.angel_of_grief,
-          "trumpet_angel": gm.trumpet_angel, "mortsafe": gm.mortsafe, "hound": gm.hound, "kerbed_grave": gg.kerbed_grave,
+          "trumpet_angel": gm.trumpet_angel, "mortsafe": gm.mortsafe, "hound": gm.hound, "gargoyle": gm.gargoyle, "kerbed_grave": gg.kerbed_grave,
           "planted_grave": gg.planted_grave, "memorial_bench": gg.memorial_bench, "open_grave": gg.open_grave}
 AXES = {"north": None, "south": None, "east": None, "west": None}
 FACE_AXES = {0: ("west", "east"), 1: ("down", "up"), 2: ("north", "south")}

@@ -18,7 +18,7 @@ Target milestone and tier: hex brews are Discovery tier. You need:
 - the Bubbling Cauldron (a cauldron and two iron ingots);
 - a water bucket and a brew ingredient;
 - a heat source: a lit campfire, fire, magma or lava;
-- the hex ingredients: a brown mushroom, beans (the Kitchen Garden) or a phantom membrane;
+- the hex ingredients: a brown mushroom, beans (the Kitchen Garden), or a phantom membrane or a mandrake root (the graveyard flora);
 - glass bottles.
 
 Every hex can be made without leaving the Overworld:
@@ -80,7 +80,7 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
    | --- | --- | --- | --- |
    | green | a brown mushroom (`jugcraft:hex/shrinking`) | shrinking brew, pale green | **Shrinking Draught** |
    | orange | beans (`jugcraft:hex/giant`) | giant's brew, deep amber | **Giant's Draught** |
-   | purple | a phantom membrane (`jugcraft:hex/flying`) | flying brew, violet | **Flying Ointment** |
+   | purple | a phantom membrane or a mandrake root (`jugcraft:hex/flying`) | flying brew, violet | **Flying Ointment** |
 
    The pot flashes with witch's sparkles and a low brewing sound. A cold pot ignores the hex ingredient, and so does the wrong brew.
 3. A hex brew glows (light 7) and gives off enchanting glyphs as well as bubbles. Its level drops as it is drawn.
@@ -191,7 +191,7 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
    - **Toss Rings** are thrown softly (they arc), from your hand.
    - A ring that comes down on the crate within a pixel and a quarter of a bottle's neck, thrown from **3 or more blocks** off, is a **ringer**: it settles over that bottle for 3 seconds, and you win a prize and **Ringer!** The ringer is used up.
    - Any other landing drops the ring back on the ground, to be thrown again.
-4. **Prizes:** each prize is one plush, one roll of the loot table `jugcraft:gameplay/midway_prize`: Pumpkin Plush (24 in 102), Ghost Plush (24), Bat Plush (20), Black Cat Plush (20), Squirrel Plush (9), Werewolf Plush (4), and the **Jumbo Pumpkin Plush** (1 in 102). Winning one earns **Step Right Up**, and the jumbo plush **Jackpot**.
+4. **Prizes:** each prize is one plush, one roll of the loot table `jugcraft:gameplay/midway_prize`: Pumpkin Plush (24 in 174), Ghost Plush (24), Bat Plush (20), Black Cat Plush (20), Squirrel Plush (9), Werewolf Plush (4), the five harvest plushes of [the haunted house's props](haunted-house-props.md) (Acorn, Corn and Maple Leaf 16 each, Owl and Hedgehog 12 each), and the **Jumbo Pumpkin Plush** (1 in 174). Winning one earns **Step Right Up**, and the jumbo plush **Jackpot**.
 5. **Plushes** are stuffed felt toys with stitched seams and embroidered faces. Each sits facing whoever places it, and squeaks (with a heart) when squeezed with an empty hand. They are only won, not crafted.
 
 ### The Ferris wheel
@@ -325,7 +325,7 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
     - A snow werewolf reads the two blocks at its feet each tick.
     - A shadow werewolf on the hunt tries its step at most every 10 seconds (up to 9 spots). Its howl looks at the level's players and the werewolves within 24 blocks at most every 30 seconds.
 - **Flying broomstick:**
-  - Costs: a Witch's Broom (two sticks and a wheat), one Flying Ointment and two feathers. Each further 2 minutes of flight is one Flying Ointment, so one hex brew (one phantom membrane) flies a broom for 6 minutes.
+  - Costs: a Witch's Broom (two sticks and a wheat), one Flying Ointment and two feathers. Each further 2 minutes of flight is one Flying Ointment, so one hex brew (one phantom membrane or mandrake root) flies a broom for 6 minutes.
   - Units: ticks of charge (2,400 an ointment, 7,200 at most, one a tick in the air); blocks a tick (push 0.05 forward, 0.025 sideways, 0.04 up; speed kept 0.91 a tick, 0.728 braking; top 0.6, 0.75 in a witch hat; dry, it sinks at up to 0.08).
   - Held forward it tops out about 0.51 blocks a tick (10 m/s, 12.6 in a hat): faster than a sprint (5.6 m/s) or a horse, far slower than elytra with rockets. It carries one player.
   - Nothing is made: the broom doesn't break down into anything, and its charge only burns.
@@ -344,7 +344,7 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
 - **Midway:**
   - Costs: the striker is 6 planks, 2 redstone lamps and a bell; the mallet a log, 2 red wool and 2 sticks (a wooden tool: 59 uses, 1 damage over the hand, and slow: 0.6 swings a second, so a full charge takes about 1.7 seconds); Ring Toss 6 glass bottles and 3 wooden slabs; 4 rings 2 sticks and a string.
   - Units: lamps 8 (two a part), the bell the 9th step; up a lamp every 2 ticks, a rest of 30 ticks, down a lamp a tick. Strength: charge × 0.7 to 1.0, + 0.15 critical; 0.95 rings; less climbs that share of 9, at least 1 lamp. Ring Toss: necks at 3.5, 8 and 12.5 pixels across each way; a ringer within 1.25 pixels of one, from 3 blocks or more; a ringer stays 60 ticks. A ring is tossed at 0.75 blocks a tick.
-  - Prizes cost a full swing and luck (a ring in six plain, two in three falling, every 3 seconds at best: the puck's climb and fall), or a ringer (a quarter string, and aim). Plushes are decoration and lead to nothing else, so there is no loop; the jumbo plush is 1 prize in 102.
+  - Prizes cost a full swing and luck (a ring in six plain, two in three falling, every 3 seconds at best: the puck's climb and fall), or a ringer (a quarter string, and aim). Plushes are decoration and lead to nothing else, so there is no loop; the jumbo plush is 1 prize in 174.
   - Automation: none. Only a player's left click strikes, only a thrown ring lands, and the prize goes to the player who struck or threw.
   - Cost on the server: a struck striker sets its five blocks once a step (about 20 steps a strike); a ring checks the block it hits once. No ticking block entity: the striker's base runs on scheduled ticks only while its puck moves.
 - **Ferris wheel:**

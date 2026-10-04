@@ -1,8 +1,9 @@
 """JSON resources for the fall fair midway (fall addition 26), from tools/midway.py: the High Striker's five parts (its
 base and strike pad, the tower with its lamps lit and unlit and the puck where it is, and the bell, rung or not), Ring
-Toss (the crate of nine bottles, and a ring over each in turn), the seven plushes; the mallet, ring and striker item
-models; names; loot (each block drops itself, the striker from its base only; the prize table); and the advancements'
-and recipes' data come through HALLOWEEN_ADVANCEMENTS, SHAPED and SHAPELESS in tools/agriculture.py.
+Toss (the crate of nine bottles, and a ring over each in turn), the twelve plushes (the five harvest plushes' models
+from tools/decor16_data.py); the mallet, ring and striker item models; names; loot (each block drops itself, the
+striker from its base only; the prize table); and the advancements' and recipes' data come through
+HALLOWEEN_ADVANCEMENTS, SHAPED and SHAPELESS in tools/agriculture.py.
 
 Called from agriculture_data.py. Models face north (the front at the low z side) and are turned by the blockstates.
 """
@@ -127,7 +128,11 @@ def _face(name):
 
 
 def plush(name):
-    """Each plush, stuffed felt, sat facing north with its face on the front."""
+    """Each plush, stuffed felt, sat facing north with its face on the front. The harvest plushes are sculpted in
+    tools/decor16_data.py."""
+    if PLUSHES[name].get("sculpted"):
+        import decor16_data
+        return decor16_data.plush_model(name)
     t = {"felt": name, "face": f"{name}_face"}
     face, full = _face(name)
     if name in ("pumpkin_plush", "jumbo_pumpkin_plush"):

@@ -23,7 +23,7 @@ No numbered release yet. Everything below is on `main`.
 - **Heater and tower shields,** built in 3D: the heater is quick to raise; the tower covers your flanks and braces you, but is heavy and slow.
 - After the owner's reference sheets (studied for their look; nothing is copied). Handbook pages, the **War Kit** advancement, five game tests and a client test. Record: [arms-vi.md](docs/features/arms-vi.md).
 
-### Unmerged: Arms V, batch 48
+### Arms V, batch 48 (#173)
 - **Weapon arts:** six new arms in bronze and steel, each with a special move used with the use key, its own animation and its own way of dealing damage. Then a few seconds before it is ready again (shown on the hotbar); plain blows are not held back.
   - **twinblade** (two-handed), **Cyclone**: three spins, each striking every foe all round and drawing them in;
   - **nodachi** (two-handed), **Iaido**: a dash; every foe passed is cut a moment later, all at once;
@@ -33,6 +33,20 @@ No numbered release yet. Everything below is on `main`.
   - **kusarigama**, **Chain Lash**: the chain catches the first foe in line up to 9 blocks off, hauls it in, and the sickle reaps it.
 - Every art runs on the server and is seen by every player nearby. Against one foe an art is no better than plain blows; the data check holds it to that.
 - Handbook pages, the **Weapon Art** advancement, seven game tests and an end-to-end client test. Record: [arms-v.md](docs/features/arms-v.md).
+
+### The haunted house's props, Halloween decorations batch 16 (#175)
+- **Flying Eyeball** (hovers on bat wings and stares at the nearest player), **Pillar Candles** in ivory and black (vanilla candles, one to four in a dripping cluster), **Spider Web** (on any face), and the **Monster's Head** (wakes on a redstone signal: jaw open, eyes glowing, bolts sparking).
+- Five **harvest plushes** for the midway's prize table: owl, hedgehog, acorn, corn and maple leaf.
+- Sculpted from the owner's reference pictures; 64 × 64 textures. Six game tests, client screenshots. Record: [haunted-house-props.md](docs/features/haunted-house-props.md).
+
+### The churchyard's ornaments, Halloween decorations batch 15 (#174)
+- **Gargoyle** on a granite plinth (a graveyard monument: it weathers and takes an inscription), **Bone Pile** (heaps to four layers), **Ossuary Wall** (skulls and long bones), **Giant Bone Hand** (clenches on a redstone signal) and **Witch's Lantern** (violet glass, standing or hanging).
+- Sculpted from the owner's reference pictures; 64 × 64 textures. Six game tests, client screenshots. Record: [churchyard-ornaments.md](docs/features/churchyard-ornaments.md).
+
+### The graveyard flora (#172)
+- **Seventeen plants for a haunted churchyard**, sculpted like hand-built plants (bent stems, cut-out leaves and petals at angles, bells and berries as little boxes) on 64 × 64 textures: spider lily, snowdrop, deadly nightshade, bleeding heart and the glowing ghost pipe; black rose, foxglove, funeral lily and asphodel (two tall); withered grass and the ghost fern with their tall forms; dead man's fingers; grave moss; shroud moss hanging in strands; creeping ivy.
+- **The mandrake:** wild, or grown from its root; a ripe one screams when pulled, sickening bare-headed players within 8 blocks (Mind Your Ears). Its root makes Flying Ointment.
+- They grow in the haunted biomes and some of vanilla's. Grave vases take them by colour. Eight game tests, client screenshots. Record: [graveyard-flora.md](docs/features/graveyard-flora.md).
 
 ### Arms IV, batch 47 (#170)
 - **Five ornate arms** in bronze and steel, drawn after the owner's reference sheets (nothing of them is copied): set stones (a garnet in bronze, a lit green phosphor stone in steel), flat-toned heads with bright edges, winged guards, lit rims and glints of light.
