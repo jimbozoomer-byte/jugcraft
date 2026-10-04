@@ -179,7 +179,15 @@
       "minecraft:patch_pumpkin",
       "minecraft:patch_sugar_cane",
       "minecraft:patch_firefly_bush_near_water",
-      "jugcraft:patch_dead_bush"
+      "jugcraft:patch_dead_bush",
+      "jugcraft:flora_withered_grass",
+      "jugcraft:flora_tall_withered_grass",
+      "jugcraft:flora_ghost_pipe",
+      "jugcraft:flora_dead_mans_fingers",
+      "jugcraft:flora_spider_lily",
+      "jugcraft:flora_grave_moss",
+      "jugcraft:flora_black_rose",
+      "jugcraft:flora_shroud_moss"
     ],
     [
       "minecraft:freeze_top_layer"

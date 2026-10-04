@@ -30,6 +30,12 @@ PLUSHES = {
     "squirrel_plush": {"display": "Squirrel Plush", "weight": 9, "shape": (5, 4, 11, 13, 12)},
     "werewolf_plush": {"display": "Werewolf Plush", "weight": 4, "shape": (4, 3, 12, 11, 13)},
     "jumbo_pumpkin_plush": {"display": "Jumbo Pumpkin Plush", "weight": 1, "shape": (1, 1, 15, 15, 14)},
+    # The harvest plushes (Halloween decorations batch 16, tools/decor16.py), sculpted on 64 x 64 textures.
+    "owl_plush": {"display": "Owl Plush", "weight": 12, "shape": (4, 5, 12, 12, 14), "sculpted": True},
+    "hedgehog_plush": {"display": "Hedgehog Plush", "weight": 12, "shape": (4, 2, 12, 13, 7), "sculpted": True},
+    "acorn_plush": {"display": "Acorn Plush", "weight": 16, "shape": (4, 4, 12, 12, 13), "sculpted": True},
+    "corn_plush": {"display": "Corn Plush", "weight": 16, "shape": (4, 4, 12, 12, 13), "sculpted": True},
+    "maple_leaf_plush": {"display": "Maple Leaf Plush", "weight": 16, "shape": (1, 5, 15, 11, 15), "sculpted": True},
 }
 JACKPOT = "jumbo_pumpkin_plush"
 PRIZE_TABLE = "gameplay/midway_prize"

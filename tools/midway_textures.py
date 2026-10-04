@@ -1,7 +1,8 @@
 """Original textures for the fall fair midway (fall addition 26), painted at 64 by 64 (docs/ART_DIRECTION.md, "High
 resolution"), four texels to each model pixel: the High Striker's painted wood, brass rail and bell, its lamps lit and
 unlit, the puck and pad, the four bands of its scale and its signboard; Ring Toss's slatted crate and its green, amber and
-milk-glass bottles and the ring; the seven plushes' felt and embroidered faces; and the striker, mallet and ring as items.
+milk-glass bottles and the ring; the first seven plushes' felt and embroidered faces (the harvest plushes are painted in
+tools/decor16_data.py); and the striker, mallet and ring as items.
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code from a fixed seed (tools/fur_paint.py's
 painter); no other texture is read, traced or recoloured.
