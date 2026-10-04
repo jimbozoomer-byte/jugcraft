@@ -1365,8 +1365,8 @@ public class JugcraftGameTests {
 					helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
 				}
 			}
-			var hostile = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new Vec3(2.5, 1, 32.5));
-			hostile.setInvulnerable(true);
+			// The first salvo is enough to pass, whether or not it kills the husk.
+			helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new Vec3(2.5, 1, 32.5));
 		});
 		helper.runAfterDelay(280, () -> {
 			helper.assertTrue(rack.count() < 5, "A sentry should fire at a hostile mob in its sector, but the rack still holds " + rack.count());
