@@ -58,7 +58,7 @@ import net.minecraft.world.phys.Vec3;
  * hit hooks) for the arm's attack damage and its trait bonus, at the charge the click had;</li>
  * <li>is the finishing blow, {@link JugcraftArms#FINISHER} times as strong, when it is the last attack of the kind's
  * combo (clicks within {@link JugcraftArms#COMBO_WINDOW} ticks carry the combo on); a maul's finishing blow also
- * shakes the ground ({@link JugcraftArms.Trait#QUAKE}).</li>
+ * shakes the ground ({@link JugcraftArms.Trait#QUAKE}), and a labrys's whirls right round ({@link JugcraftArms.Trait#WHIRL}).</li>
  * </ul>
  * Switching away from the arm, dying or leaving cancels the swing. Foes that other code protects from the player
  * (AttackEntityCallback, such as the town's townsfolk), allies, tamed pets of the wielder, the wielder's mount and
@@ -200,8 +200,11 @@ public final class TwoHanded {
 	 */
 	public static List<LivingEntity> strike(ServerPlayer player, ItemStack stack, JugcraftArms.Heavy heavy, boolean finisher, int charge) {
 		ServerLevel level = (ServerLevel) player.level();
-		List<LivingEntity> foes = foes(player, stack, heavy);
 		JugcraftArms.Trait trait = stack.getItem() instanceof ArmItem arm ? arm.trait() : null;
+		boolean whirl = finisher && trait == JugcraftArms.Trait.WHIRL;
+		// A labrys's finishing blow whirls right round.
+		List<LivingEntity> foes = foes(player, stack, whirl
+				? new JugcraftArms.Heavy(heavy.strike(), JugcraftArms.WHIRL_ARC, JugcraftArms.WHIRL_TARGETS, heavy.combo()) : heavy);
 		DamageSource source = level.damageSources().playerAttack(player);
 		float base = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		AttackStrengthAccessor strength = (AttackStrengthAccessor) player;
@@ -227,6 +230,13 @@ public final class TwoHanded {
 					1, 0.0, 0.0, 0.0, 0.0);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS,
 					1.0F, finisher ? 0.7F : 0.9F);
+		}
+		if (whirl) {
+			for (int i = 0; i < 6; i++) {
+				double angle = i * Math.PI / 3.0;
+				level.sendParticles(ParticleTypes.SWEEP_ATTACK, player.getX() + Math.cos(angle) * 1.6, player.getY(0.5),
+						player.getZ() + Math.sin(angle) * 1.6, 1, 0.0, 0.0, 0.0, 0.0);
+			}
 		}
 		if (finisher && trait == JugcraftArms.Trait.QUAKE) {
 			quake(level, player, base * JugcraftArms.FINISHER, new HashSet<>(struck), source);
