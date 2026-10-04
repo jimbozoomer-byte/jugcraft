@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
@@ -28,7 +29,7 @@ public final class Scarecrows {
 		return scarecrow.head().isEmpty() ? BARE : ScarecrowBlockEntity.lit(scarecrow.head()) ? LIT : HEADED;
 	}
 
-	/** Whether a scarecrow (or a Hay Golem) guards {@code pos}: one whose radius reaches it across the ground, and within its height. */
+	/** Whether a scarecrow (or a {@link CropGuard}: a Hay Golem, a Pumpkling) guards {@code pos}: one whose radius reaches it across the ground, and within its height. */
 	public static boolean guarded(ServerLevel level, BlockPos pos) {
 		int minX = SectionPos.blockToSectionCoord(pos.getX() - LIT);
 		int maxX = SectionPos.blockToSectionCoord(pos.getX() + LIT);
@@ -53,9 +54,10 @@ public final class Scarecrows {
 				}
 			}
 		}
-		for (HayGolem golem : level.getEntitiesOfClass(HayGolem.class, new AABB(pos).inflate(LIT, HEIGHT, LIT), HayGolem::isAlive)) {
-			BlockPos at = golem.blockPosition();
-			int radius = golem.guardRadius();
+		for (LivingEntity guard : level.getEntitiesOfClass(LivingEntity.class, new AABB(pos).inflate(LIT, HEIGHT, LIT),
+				entity -> entity instanceof CropGuard && entity.isAlive())) {
+			BlockPos at = guard.blockPosition();
+			int radius = Math.min(LIT, ((CropGuard) guard).guardRadius());
 			long dx = at.getX() - pos.getX();
 			long dz = at.getZ() - pos.getZ();
 			if (dx * dx + dz * dz <= (long) radius * radius && Math.abs(at.getY() - pos.getY()) <= HEIGHT) {
