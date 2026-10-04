@@ -212,7 +212,7 @@ def hanging_placement(count):
 def vine_placement(count):
     return [{"type": "minecraft:count", "count": count}, {"type": "minecraft:in_square"},
             {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING_NO_LEAVES"},
-            {"type": "minecraft:random_offset", "xz_spread": 0, "y_spread": {"type": "minecraft:uniform", "min_inclusive": 0, "max_inclusive": 3}},
+            {"type": "minecraft:offset", "x": 0, "y": {"type": "minecraft:uniform", "min_inclusive": 0, "max_inclusive": 3}, "z": 0},
             {"type": "minecraft:biome"}]
 
 
