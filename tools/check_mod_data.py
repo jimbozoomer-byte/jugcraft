@@ -43,6 +43,7 @@ import trenchworks
 import zeppelin
 import mech
 import landship
+import artillery
 import gear
 import arms
 import plastic
@@ -317,7 +318,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS:
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS:
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -515,7 +516,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS)
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS)
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -691,6 +692,45 @@ def check_walker():
             err(f"DieselWalkerRenderer lacks the joint {joint} from tools/mech.py")
     if not (ASSETS / "walker_quads.json").is_file():
         err("assets/jugcraft/walker_quads.json is missing: run tools/generate_material_data.py")
+
+
+def check_artillery():
+    """artillery/JugcraftArtillery.java against tools/artillery.py: the shells, guns, balloon and range finder, and the
+    renderers' pivots and the howitzer's track."""
+    java = (JAVA_ROOT / "artillery" / "JugcraftArtillery.java").read_text(encoding="utf-8")
+    floats = ("HEAVY_DAMAGE", "FLAK_DAMAGE", "MORTAR_TRAVERSE", "HOWITZER_TRAVERSE", "FLAK_TRAVERSE", "HOWITZER_TURN")
+    for const in ("HEAVY_SPEED", "HEAVY_GRAVITY", "HEAVY_RADIUS", "HEAVY_DAMAGE", "FLAK_SPEED", "FLAK_GRAVITY", "FLAK_RADIUS",
+                  "FLAK_DAMAGE", "FLAK_FUSE", "FLAK_PROXIMITY", "MORTAR_COOLDOWN", "HOWITZER_COOLDOWN", "FLAK_COOLDOWN",
+                  "MORTAR_TRAVERSE", "HOWITZER_TRAVERSE", "FLAK_TRAVERSE", "HOWITZER_ARC", "HOWITZER_SPEED", "HOWITZER_TURN",
+                  "HOWITZER_FUEL_TANK", "FUEL_PER_BUCKET", "HOWITZER_FUEL_PER_SECOND", "BALLOON_HEIGHT", "BALLOON_CLIMB",
+                  "MARK_RANGE", "MARK_TTL"):
+        value = getattr(artillery, const)
+        literal = f"{value}F" if const in floats else str(value)
+        if f" {const} = {literal};" not in java:
+            err(f"JugcraftArtillery.{const} differs from tools/artillery.py ({literal})")
+    for name, java_name in (("siege_mortar", "MORTAR_HEALTH"), ("self_propelled_howitzer", "HOWITZER_HEALTH"),
+                            ("flak_gun", "FLAK_HEALTH"), ("observation_balloon", "BALLOON_HEALTH")):
+        if f" {java_name} = {artillery.HEALTH[name]};" not in java:
+            err(f"JugcraftArtillery.{java_name} differs from tools/artillery.py ({artillery.HEALTH[name]})")
+    for name, pivot in (("MORTAR_PIVOT_HEIGHT", artillery.MORTAR_TRUNNION), ("HOWITZER_PIVOT_HEIGHT", artillery.HOWITZER_GUN),
+                        ("FLAK_PIVOT_HEIGHT", artillery.FLAK_HEAD)):
+        if f" {name} = {pivot[1] / 16};" not in java:
+            err(f"JugcraftArtillery.{name} should be {pivot[1] / 16} (tools/artillery.py)")
+    renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+                / "ArtilleryRenderers.java")
+    text = renderer.read_text(encoding="utf-8") if renderer.is_file() else ""
+    for name in ("MORTAR_TURNTABLE", "MORTAR_TRUNNION", "HOWITZER_GUN", "FLAK_HEAD"):
+        pivot = getattr(artillery, name)
+        if f"{name} = " + "{" + ", ".join(str(v) for v in pivot) + "}" not in text:
+            err(f"ArtilleryRenderers.{name} differs from tools/artillery.py ({pivot})")
+    for z, y in artillery.HOWITZER_TRACK:
+        if "{" + f"{z}, {y}" + "}" not in text:
+            err(f"ArtilleryRenderers.HOWITZER_TRACK lacks ({z}, {y}) from tools/artillery.py")
+    x0, x1 = artillery.HOWITZER_TRACK_X
+    if f"HOWITZER_TRACK_INNER = {x0};" not in text or f"HOWITZER_TRACK_OUTER = {x1};" not in text:
+        err("ArtilleryRenderers' howitzer track span differs from tools/artillery.py")
+    if not (ASSETS / "artillery_quads.json").is_file():
+        err("assets/jugcraft/artillery_quads.json is missing: run tools/generate_material_data.py")
 
 
 def check_landship():
@@ -5495,7 +5535,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS)
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS)
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
@@ -5526,6 +5566,7 @@ def main():
     check_zeppelin()
     check_walker()
     check_landship()
+    check_artillery()
     check_plastic()
     check_seasons()
     check_alpine()

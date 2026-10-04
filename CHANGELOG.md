@@ -35,6 +35,11 @@ No numbered release yet. Everything below is on `main`.
 
 ### Arms IV, batch 47 (#170)
 
+### Unmerged: Big guns, batch 51
+- **Siege Mortar**, **Self-Propelled Howitzer**, **Flak Gun** and **Observation Balloon**, with Heavy Shells, Flak Shells and a **Range Finder** to mark targets up to 256 blocks away.
+- Guns turn to a marked target (the gunner's, or a nearby spotter's) and work out the elevation that lands the shell there. Without a mark they fire where the gunner looks. Flak bursts beside flyers.
+- Every burst hurts creatures and never breaks blocks. Five game tests and a screenshot scene. Record: [big-guns.md](docs/features/big-guns.md).
+
 ### Unmerged: Trench works, batch 50
 - Sandbags, timber revetment, duckboards and barbed wire. The wire slows and cuts whatever pushes through it; sneak to cross carefully.
 - **Field telephones:** power one's back and every telephone on its dye channel within 256 blocks rings and gives a redstone signal from its front.
