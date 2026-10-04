@@ -27,6 +27,7 @@ import decor16
 import decor17
 import decor18
 import decor19
+import decor20
 import petro
 import deposits
 import seasons
@@ -2548,8 +2549,9 @@ def check_decor2(java):
         err("FLOATING_CANDLE needs one place per candle and a height for each place")
     if candle["max"] * candle["light_per_candle"] > 15:
         err("Floating candles would give more than light 15")
-    strands = re.findall(r'[A-Z]+\("([a-z]+)", "([a-z_]+)"\)', java.get("StringLightHookBlockEntity", ""))
-    if dict(strands) != {"lights": ag.STRING_LIGHTS["strand"], "bunting": bunting["item"]}:
+    strands = re.findall(r'[A-Z_]+\("([a-z_]+)", "([a-z_]+)"\)', java.get("StringLightHookBlockEntity", ""))
+    if dict(strands) != {"lights": ag.STRING_LIGHTS["strand"], "bunting": bunting["item"],
+                         **{strand: garland["item"] for strand, garland in decor20.GARLANDS.items()}}:
         err(f"StringLightHookBlockEntity.Strand {strands} differs from the strand items in tools/agriculture.py")
 
     def variants(block):
@@ -2704,6 +2706,7 @@ def check_decor4(java):
     check_haunted_house_props(java, lang)
     check_witchs_workshop(java, lang)
     check_laboratory_larder_dining(java, lang)
+    check_pumpkin_night(java, lang)
 
 
 def check_churchyard_ornaments(java, number, lang):
@@ -2864,6 +2867,116 @@ def check_laboratory_larder_dining(java, lang):
                      "YardSilhouetteRenderer", "HarvestMoonLampRenderer"):
         if f"{renderer}::new" not in registered:
             err(f"JugcraftClient.java must register {renderer}")
+
+
+def check_pumpkin_night(java, lang):
+    """Halloween decorations batch 20, Pumpkin Night: Java's numbers match tools/decor20.py (the server's rules and where
+    the client draws the faces, the goods, the chalk and the effigy's head); each block and item is registered, named,
+    drawn, drops and has its recipe; the heirlooms glow and fly as listed; the choir's sounds and the cloak's quads are
+    generated."""
+    def number(source, name, text=None):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", text if text is not None else java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    def floats(text, name):
+        match = re.search(rf"\b{name} = (\{{.*?\}});", text, re.S)
+        return [float(v.rstrip("FLD")) for v in re.findall(r"-?[\d.]+[FLD]?", match.group(1))] if match else None
+
+    stand, effigy, choir = decor20.FARM_STAND, decor20.EFFIGY, decor20.CHOIR
+    expected = {("SingingPumpkinBlock", "NOTES"): choir["notes"], ("SingingPumpkinBlock", "OPEN_TICKS"): choir["open_ticks"],
+                ("SingingPumpkinBlock", "LIGHT"): choir["light"], ("HarvestEffigyBlock", "BURN_TICKS"): effigy["burn_ticks"],
+                ("HarvestEffigyBlock", "CHEER_RADIUS"): effigy["cheer_radius"], ("HarvestEffigyBlock", "CROW_RADIUS"): effigy["crow_radius"],
+                ("HarvestEffigyBlock", "CHECK_TICKS"): effigy["check_ticks"], ("HarvestEffigyBlock", "LIGHT"): effigy["light"],
+                ("HarvestCheer", "REGENERATION_TICKS"): effigy["regeneration_ticks"], ("HarvestCheer", "LUCK_TICKS"): effigy["luck_ticks"],
+                ("EffigyAshesBlock", "YIELD"): decor20.ASHES["ash_yield"], ("FarmStandBlockEntity", "CRATES"): stand["crates"],
+                ("FarmStandMenu", "REACH"): stand["reach"], ("FarmStandMenu", "RATE_TICKS"): stand["rate_ticks"],
+                ("JugcraftAgriculture", "HEARTH_ASH_RADIUS"): decor20.HEARTH_ASH["radius"],
+                ("JugcraftAgriculture", "HEARTH_ASH_DOSES"): decor20.HEARTH_ASH["doses"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(found - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/decor20.py ({value})")
+    if floats(java.get("FarmStandMenu", ""), "PRICE_STEPS") != [float(v) for v in stand["price_steps"]]:
+        err("FarmStandMenu.PRICE_STEPS differs from tools/decor20.py FARM_STAND")
+    for voice in decor20.VOICES:
+        if not re.search(rf"\b{voice.upper()}\b", java.get("SingingPumpkinBlock", "")):
+            err(f"SingingPumpkinBlock.Voice has no {voice.upper()} to match tools/decor20.py")
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+
+    def client_source(name):
+        path = client / f"{name}.java"
+        return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+    faces = floats(client_source("SingingPumpkinRenderer"), "FACES")
+    if faces != [v for spec in decor20.VOICES.values() for v in spec["face"]]:
+        err("SingingPumpkinRenderer.FACES differs from tools/decor20.py VOICES")
+    renderer = client_source("FarmStandRenderer")
+    for name, value in (("CRATES", stand["crate_middles"]), ("TAGS", stand["tags"]), ("BOARD", [stand["board"]])):
+        if floats(renderer, name) != [float(v) for row in value for v in row]:
+            err(f"FarmStandRenderer.{name} differs from tools/decor20.py FARM_STAND")
+    blaze = client_source("HarvestEffigyRenderer")
+    for name, key in (("HEAD_PIXELS", "head"), ("NECK_TOP", "neck_top"), ("HAND_X", "hand_x"), ("HAND_Y", "hand_y")):
+        found = number("", name, blaze)
+        if found is None or abs(found - effigy[key]) > 1e-9:
+            err(f"HarvestEffigyRenderer.{name} = {found} differs from tools/decor20.py EFFIGY")
+    glows = client_source("CarvingTextures")
+    for pumpkin, spec in decor20.HEIRLOOMS.items():
+        if not re.search(rf'"hand_carved_{pumpkin}"\) \? {spec["glow"].upper()}\b', glows):
+            err(f"CarvingTextures.Glow does not give hand_carved_{pumpkin} the {spec['glow']} glow")
+        for item, factor in ((pumpkin, spec["throw"]), (f"hand_carved_{pumpkin}", spec["carved_throw"])):
+            if not re.search(rf'"{MOD}:{item}", {factor}\)', java.get("TrebuchetBlockEntity", "")):
+                err(f"TrebuchetBlockEntity.FACTORS does not throw {item} at {factor}")
+    main = java.get("JugcraftAgriculture", "")
+    if "registerPumpkinNight();" not in main:
+        err("JugcraftAgriculture.java must call registerPumpkinNight()")
+    for block in decor20.blocks():
+        id_ok = f'"{block}"' in main or (block.startswith("singing_pumpkin_") and 'SINGING_PUMPKIN = "singing_pumpkin_"' in main)
+        if not id_ok:
+            err(f"JugcraftAgriculture.java does not register {block}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"{block} has no name")
+        if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
+            err(f"{block} has no loot table")
+        if not (ASSETS / "textures" / "block" / f"{block}.png").is_file():
+            err(f"{block} has no texture")
+    for item in [g["item"] for g in decor20.GARLANDS.values()] + [decor20.HEARTH_ASH["item"]]:
+        if f'"{item}"' not in main:
+            err(f"JugcraftAgriculture.java does not register {item}")
+        if f"item.{MOD}.{item}" not in lang:
+            err(f"{item} has no name")
+        if not (ASSETS / "textures" / "item" / f"{item}.png").is_file():
+            err(f"{item} has no texture")
+    for key in decor20.MESSAGES:
+        if key not in lang:
+            err(f"The lang file has no {key}")
+    for recipe in decor20.SHAPED + decor20.SHAPELESS:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"The {recipe['id']} recipe is missing")
+    ashes = load(DATA / MOD / "loot_table" / "blocks" / f"{decor20.ASHES['block']}.json") or {}
+    entries = [e for pool in ashes.get("pools", []) for e in pool.get("entries", [])]
+    if [e.get("name") for e in entries] != [f"{MOD}:{decor20.HEARTH_ASH['item']}"] \
+            or entries[0].get("modifier", [{}])[0].get("count") != decor20.ASHES["ash_yield"]:
+        err(f"Effigy Ashes must drop {decor20.ASHES['ash_yield']} Hearth Ash")
+    sounds = load(ASSETS / "sounds.json") or {}
+    for event in [f"singing_pumpkin.{voice}" for voice in decor20.VOICES] + ["effigy.burn"]:
+        if event not in sounds:
+            err(f"sounds.json has no {event}")
+        for sound in sounds.get(event, {}).get("sounds", []):
+            ns, path = sound["name"].split(":")
+            if not (RES / "assets" / ns / "sounds" / f"{path}.ogg").is_file():
+                err(f"The sound {sound['name']} has no .ogg")
+    drawn = load(ASSETS / "decor20_quads.json") or {}
+    if not drawn.get("harvest_effigy_cloak"):
+        err(f"assets/{MOD}/decor20_quads.json has no harvest_effigy_cloak")
+    if '"decor20_quads.json"' not in client_source("DecorQuads"):
+        err("DecorQuads.java must load decor20_quads.json")
+    for texture in ("singing_pumpkin_face", "pumpkin_vine_garland", "autumn_leaf_garland", "harvest_effigy_cloak"):
+        if not (ASSETS / "textures" / "entity" / f"{texture}.png").is_file():
+            err(f"The client's texture entity/{texture} is missing")
+    registered = client_source("JugcraftClient")
+    for renderer_name in ("SingingPumpkinRenderer", "HarvestEffigyRenderer", "FarmStandRenderer", "FarmStandScreen"):
+        if f"{renderer_name}::new" not in registered:
+            err(f"JugcraftClient.java must register {renderer_name}")
 
 
 def check_witchs_workshop(java, lang):
