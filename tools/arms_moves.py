@@ -5,9 +5,12 @@ pose held while using it (the longsword's and rapier's parry). Two-handed kinds 
 every frame ("two_handed": how far below the right hand, in pixels); the spear and the lance keep vanilla's arms
 (its spear animations) and add the body: the lunge, the lean and the braced legs.
 
-Time runs over vanilla's swing for that kind (tools/arms.py: KINDS[kind]["swing"], 5 to 12 ticks). A hit lands the
-moment the player clicks, so the blow arrives early (about a quarter of the way in) and the rest is follow-through and
-recovery; the short cock-back before it is the anticipation. All original.
+Time runs over vanilla's swing for that kind (tools/arms.py: KINDS[kind]["swing"], 4 to 24 ticks). A one-handed hit
+lands the moment the player clicks, so the blow arrives early (about a quarter of the way in) and the rest is
+follow-through and recovery; the short cock-back before it is the anticipation. A two-handed kind's blow lands later,
+when its animation lands it (Arms III, batch 46): "blow" is that moment, as a share of the swing, and every one of its
+attacks has a key there; tools/arms.py's TWO_HANDED strike is it in ticks, and the last attack is the finishing blow.
+All original.
 
 Bones: P(body=..., head=..., right_arm=..., left_arm=..., right_leg=..., left_leg=..., item=...), each (rx, ry, rz)
 or (rx, ry, rz, x, y, z) in degrees and pixels. See tools/arms_motion.py for the axes; the item bone is the wrist (rx
@@ -166,7 +169,7 @@ GS = {
 }
 GS_FP = F(-6, 30, 22, -3, -1)
 MOVES["greatsword"] = {
-    "hold": GS_HOLD, "two_handed": 4, "fp_hold": GS_FP,
+    "hold": GS_HOLD, "two_handed": 4, "fp_hold": GS_FP, "blow": 0.34,
     "attacks": [
         fp(clip("sweep", GS_HOLD, (0.16, GS["wind"]), (0.34, GS["sweep"], 0.1), (0.52, GS["follow"]),
                 (0.78, settle(GS["follow"], GS_HOLD))), GS_FP, *fp_sweep(GS_FP)),
@@ -242,12 +245,12 @@ WH = {
 }
 WH_FP = F(0, 30, 24, -3, -2)
 MOVES["war_hammer"] = {
-    "hold": WH_HOLD, "two_handed": 9, "fp_hold": WH_FP,
+    "hold": WH_HOLD, "two_handed": 9, "fp_hold": WH_FP, "blow": 0.36,
     "attacks": [
-        fp(clip("slam", WH_HOLD, (0.18, WH["heave"]), (0.36, WH["slam"], 0.4), (0.5, WH["ground"], 0.2),
-                (0.8, settle(WH["ground"], WH_HOLD))), WH_FP, *fp_overhead(WH_FP, 1.3)),
         fp(clip("swing", WH_HOLD, (0.18, WH["wind"]), (0.36, WH["swing"], 0.1), (0.54, WH["carry"]),
                 (0.8, settle(WH["carry"], WH_HOLD))), WH_FP, *fp_sweep(WH_FP, 0.9)),
+        fp(clip("slam", WH_HOLD, (0.18, WH["heave"]), (0.36, WH["slam"], 0.4), (0.5, WH["ground"], 0.2),
+                (0.8, settle(WH["ground"], WH_HOLD))), WH_FP, *fp_overhead(WH_FP, 1.3)),
     ],
 }
 
@@ -263,7 +266,7 @@ GL = {
 }
 GL_FP = F(-8, 30, 26, -3, -2)
 MOVES["glaive"] = {
-    "hold": GL_HOLD, "two_handed": 11, "fp_hold": GL_FP,
+    "hold": GL_HOLD, "two_handed": 11, "fp_hold": GL_FP, "blow": 0.34,
     "attacks": [
         fp(clip("sweep", GL_HOLD, (0.16, GL["wind"]), (0.34, GL["sweep"], 0.1), (0.52, GL["wide"]),
                 (0.78, settle(GL["wide"], GL_HOLD))), GL_FP, *fp_sweep(GL_FP, 1.15)),
@@ -409,12 +412,12 @@ BA = {
 }
 BA_FP = F(0, 30, 24, -3, -2)
 MOVES["battle_axe"] = {
-    "hold": BA_HOLD, "two_handed": 9, "fp_hold": BA_FP,
+    "hold": BA_HOLD, "two_handed": 9, "fp_hold": BA_FP, "blow": 0.36,
     "attacks": [
-        fp(clip("chop", BA_HOLD, (0.18, BA["heave"]), (0.36, BA["chop"], 0.4), (0.5, BA["bite"], 0.2),
-                (0.8, settle(BA["bite"], BA_HOLD))), BA_FP, *fp_overhead(BA_FP, 1.2)),
         fp(clip("swing", BA_HOLD, (0.18, BA["wind"]), (0.36, BA["swing"], 0.1), (0.54, BA["carry"]),
                 (0.8, settle(BA["carry"], BA_HOLD))), BA_FP, *fp_sweep(BA_FP, 0.95)),
+        fp(clip("chop", BA_HOLD, (0.18, BA["heave"]), (0.36, BA["chop"], 0.4), (0.5, BA["bite"], 0.2),
+                (0.8, settle(BA["bite"], BA_HOLD))), BA_FP, *fp_overhead(BA_FP, 1.2)),
     ],
 }
 
@@ -459,7 +462,7 @@ SC = {
 }
 SC_FP = F(-8, 30, 26, -3, -2)
 MOVES["scythe"] = {
-    "hold": SC_HOLD, "two_handed": 16, "fp_hold": SC_FP,
+    "hold": SC_HOLD, "two_handed": 16, "fp_hold": SC_FP, "blow": 0.34,
     "attacks": [
         fp(clip("reap", SC_HOLD, (0.16, SC["wind"]), (0.34, SC["reap"], 0.1), (0.52, SC["through"]),
                 (0.78, settle(SC["through"], SC_HOLD))), SC_FP, *fp_sweep(SC_FP, 1.2)),
@@ -481,11 +484,11 @@ QS = {
 }
 QS_FP = F(-10, 30, 40, -4, -3)
 MOVES["quarterstaff"] = {
-    "hold": QS_HOLD, "two_handed": 13, "fp_hold": QS_FP,
+    "hold": QS_HOLD, "two_handed": 13, "fp_hold": QS_FP, "blow": 0.3,
     "attacks": [
         fp(clip("strike", QS_HOLD, (0.14, QS["raise"]), (0.3, QS["strike"], 0.3), (0.6, settle(QS["strike"], QS_HOLD))),
            QS_FP, *fp_forehand(QS_FP, 0.9, keys=3)),
-        fp(clip("jab", QS_HOLD, (0.12, QS["draw"]), (0.28, QS["jab"], 0.45), (0.56, settle(QS["jab"], QS_HOLD, 0.35))),
+        fp(clip("jab", QS_HOLD, (0.14, QS["draw"]), (0.3, QS["jab"], 0.45), (0.56, settle(QS["jab"], QS_HOLD, 0.35))),
            QS_FP, *fp_thrust(QS_FP, 1.0)),
         fp(clip("sweep", QS_HOLD, (0.14, QS["wind"]), (0.3, QS["sweep"], 0.1), (0.6, settle(QS["sweep"], QS_HOLD))),
            QS_FP, *fp_forehand(QS_FP, 1.0, keys=3)),
@@ -505,11 +508,115 @@ PK = {
 }
 PK_FP = F(-50, 20, 6, -3, -2)
 MOVES["pike"] = {
-    "hold": PK_HOLD, "two_handed": 14, "fp_hold": PK_FP,
+    "hold": PK_HOLD, "two_handed": 14, "fp_hold": PK_FP, "blow": 0.32,
     "attacks": [
         fp(clip("thrust", PK_HOLD, (0.14, PK["draw"]), (0.32, PK["thrust"], 0.45), (0.62, settle(PK["thrust"], PK_HOLD, 0.35))),
            PK_FP, *fp_thrust(PK_FP, 1.4)),
         fp(clip("high_thrust", PK_HOLD, (0.14, PK["high_draw"]), (0.32, PK["high"], 0.45), (0.62, settle(PK["high"], PK_HOLD, 0.35))),
            PK_FP, *fp_thrust(PK_FP, 1.2)),
+    ],
+}
+
+# ================================================================ Arms III (batch 46): two-handed arms
+#
+# Every one of these swings two-handed (tools/arms.py: TWO_HANDED): the blow lands at "blow", the last attack is the
+# finishing blow, and the swings are long and heavy, so the wind-up reads before the blow.
+
+LENGTH.update({"zweihander": 32, "maul": 19, "executioner": 26, "bill": 31})
+
+# ---------------------------------------------------------------- zweihander: the widest two-handed cleaves
+
+ZW_HOLD = P(body=(0, 20, 0), head=(0, -18, 0), right_arm=(-40, 12, 6), item=(52, 0, -10), **step(0.7, 5))
+ZW = {
+    "wind": P(body=(-4, 58, 0), head=(0, -48, 0), right_arm=(-116, 68, 32), item=(34, 0, 56), **step(-0.9, 10)),
+    "sweep": P(body=(8, -40, 0), head=(-2, 32, 0), right_arm=(-82, -40, -4), item=(-12, 0, -54), **step(2.0, -10)),
+    "follow": P(body=(12, -58, 0), head=(-4, 44, 0), right_arm=(-50, -60, -10), item=(-32, 0, -64), **step(2.2, -12)),
+    "low": P(body=(10, -40, 0), head=(-2, 30, 0), right_arm=(-30, -50, -10), item=(-40, 0, -70), **step(1.0, -8)),
+    "rise": P(body=(-2, 36, 0), head=(0, -28, 0), right_arm=(-140, 50, 28), item=(60, 0, 50), **step(1.6, 8)),
+    "raise": P(body=(-12, 14, 0), head=(-10, -10, 0), right_arm=(-174, 10, 6), item=(84, 0, 0), **step(-0.5, 4)),
+    "cleave": P(body=(24, 4, 0, 0, 0.9, -1.6), head=(12, -4, 0), right_arm=(-58, 4, 0), item=(-32, 0, 0), **step(2.6)),
+    "ground": P(body=(28, 2, 0, 0, 1.1, -2.0), head=(16, -2, 0), right_arm=(-24, 2, 0), item=(-54, 0, 0), **step(2.8)),
+}
+ZW_FP = F(-4, 30, 20, -3, -1)
+MOVES["zweihander"] = {
+    "hold": ZW_HOLD, "two_handed": 5, "fp_hold": ZW_FP, "blow": 0.34,
+    "attacks": [
+        fp(clip("sweep", ZW_HOLD, (0.16, ZW["wind"]), (0.34, ZW["sweep"], 0.1), (0.52, ZW["follow"]),
+                (0.78, settle(ZW["follow"], ZW_HOLD))), ZW_FP, *fp_sweep(ZW_FP, 1.1)),
+        fp(clip("rising", ZW_HOLD, (0.16, ZW["low"]), (0.34, ZW["rise"], 0.2), (0.78, settle(ZW["rise"], ZW_HOLD))),
+           ZW_FP, *fp_rising(ZW_FP)),
+        fp(clip("cleave", ZW_HOLD, (0.16, ZW["raise"]), (0.34, ZW["cleave"], 0.35), (0.5, ZW["ground"]),
+                (0.8, settle(ZW["ground"], ZW_HOLD))), ZW_FP, *fp_overhead(ZW_FP, 1.2)),
+    ],
+    # Holding use: the guard, the blade across the body, point up and to the left.
+    "use": P(body=(0, -10, 0), head=(0, 8, 0), right_arm=(-78, -28, -10), item=(74, 0, -42)),
+}
+
+# ---------------------------------------------------------------- maul: the heaviest swings, a ground-shaking slam
+
+MA_HOLD = P(body=(0, 24, 0), head=(0, -22, 0), right_arm=(-36, 14, 10), item=(76, 0, -34), **step(0.7, 6))
+MA = {
+    "wind": P(body=(-8, 60, 0), head=(0, -48, 0), right_arm=(-90, 74, 32), item=(54, 0, 54), **step(-0.9, 12)),
+    "swing": P(body=(10, -36, 0), head=(-2, 30, 0), right_arm=(-84, -36, -4), item=(0, 0, -52), **step(2.2, -10)),
+    "carry": P(body=(16, -54, 0), head=(-4, 42, 0), right_arm=(-54, -52, -10), item=(-20, 0, -62), **step(2.4, -12)),
+    "heave": P(body=(-20, 16, 0, 0, -0.6, 1.0), head=(-14, -12, 0), right_arm=(-180, 12, 10), item=(90, 0, -6),
+               **step(-0.8, 4)),
+    "slam": P(body=(32, 2, 0, 0, 1.2, -2.2), head=(18, -2, 0), right_arm=(-60, 2, 0), item=(-36, 0, 0), **step(2.8)),
+    "ground": P(body=(36, 0, 0, 0, 1.4, -2.6), head=(22, 0, 0), right_arm=(-28, 0, 0), item=(-64, 0, 0), **step(3.0)),
+}
+MA_FP = F(0, 30, 26, -3, -2)
+MOVES["maul"] = {
+    "hold": MA_HOLD, "two_handed": 9, "fp_hold": MA_FP, "blow": 0.36,
+    "attacks": [
+        fp(clip("swing", MA_HOLD, (0.18, MA["wind"]), (0.36, MA["swing"], 0.1), (0.54, MA["carry"]),
+                (0.8, settle(MA["carry"], MA_HOLD))), MA_FP, *fp_sweep(MA_FP, 0.9)),
+        fp(clip("slam", MA_HOLD, (0.18, MA["heave"]), (0.36, MA["slam"], 0.45), (0.5, MA["ground"], 0.25),
+                (0.82, settle(MA["ground"], MA_HOLD))), MA_FP, *fp_overhead(MA_FP, 1.4)),
+    ],
+}
+
+# ---------------------------------------------------------------- executioner's sword: a broad cut and a falling chop
+
+EX_HOLD = P(body=(0, 16, 0), head=(0, -14, 0), right_arm=(-38, 8, 4), item=(50, 0, -6), **step(0.6, 4))
+EX = {
+    "wind": P(body=(-4, 54, 0), head=(0, -44, 0), right_arm=(-112, 64, 30), item=(32, 0, 52), **step(-0.8, 10)),
+    "cut": P(body=(8, -34, 0), head=(-2, 28, 0), right_arm=(-82, -34, -4), item=(-10, 0, -50), **step(1.8, -10)),
+    "follow": P(body=(12, -50, 0), head=(-4, 38, 0), right_arm=(-52, -54, -10), item=(-28, 0, -58), **step(2.0, -12)),
+    "raise": P(body=(-12, 12, 0), head=(-10, -8, 0), right_arm=(-176, 8, 6), item=(86, 0, 0), **step(-0.4, 4)),
+    "chop": P(body=(26, 2, 0, 0, 0.9, -1.7), head=(12, -2, 0), right_arm=(-62, 2, 0), item=(-28, 0, 0), **step(2.4)),
+    "down": P(body=(30, 0, 0, 0, 1.1, -2.0), head=(16, 0, 0), right_arm=(-30, 0, 0), item=(-48, 0, 0), **step(2.6)),
+}
+EX_FP = F(-6, 30, 20, -3, -1)
+MOVES["executioner"] = {
+    "hold": EX_HOLD, "two_handed": 5, "fp_hold": EX_FP, "blow": 0.36,
+    "attacks": [
+        fp(clip("cut", EX_HOLD, (0.18, EX["wind"]), (0.36, EX["cut"], 0.15), (0.54, EX["follow"]),
+                (0.8, settle(EX["follow"], EX_HOLD))), EX_FP, *fp_sweep(EX_FP, 0.95)),
+        fp(clip("chop", EX_HOLD, (0.18, EX["raise"]), (0.36, EX["chop"], 0.4), (0.5, EX["down"], 0.2),
+                (0.8, settle(EX["down"], EX_HOLD))), EX_FP, *fp_overhead(EX_FP, 1.2)),
+    ],
+}
+
+# ---------------------------------------------------------------- bill: a hooking draw and an overhead chop
+
+BL_HOLD = P(body=(0, 26, 0), head=(0, -24, 0), right_arm=(-48, 16, 10), item=(50, 0, -24), **step(0.8, 8))
+BL = {
+    "reach": P(body=(-4, 50, 0), head=(0, -42, 0), right_arm=(-96, 60, 26), item=(20, 0, 56), **step(-0.4, 10)),
+    "hook": P(body=(8, -24, 0, 0, 0, 0.8), head=(-2, 20, 0), right_arm=(-60, -30, -6, 0, 0, 2), item=(-10, 0, -50),
+              **step(0.4, -8)),
+    "drag": P(body=(4, -36, 0, 0, 0, 1.2), head=(0, 30, 0), right_arm=(-40, -40, -8, 0, 0, 3), item=(-24, 0, -56),
+              **step(-0.4, -10)),
+    "raise": P(body=(-10, 16, 0), head=(-8, -12, 0), right_arm=(-168, 12, 8), item=(80, 0, -4), **step(-0.4, 6)),
+    "chop": P(body=(22, 4, 0, 0, 0.8, -1.5), head=(10, -2, 0), right_arm=(-64, 4, 0), item=(-30, 0, 0), **step(2.2)),
+    "down": P(body=(26, 2, 0, 0, 1.0, -1.8), head=(14, -2, 0), right_arm=(-32, 2, 0), item=(-50, 0, 0), **step(2.4)),
+}
+BL_FP = F(-10, 30, 30, -3, -1)
+MOVES["bill"] = {
+    "hold": BL_HOLD, "two_handed": 13, "fp_hold": BL_FP, "blow": 0.34,
+    "attacks": [
+        fp(clip("hook", BL_HOLD, (0.16, BL["reach"]), (0.34, BL["hook"], 0.2), (0.52, BL["drag"]),
+                (0.78, settle(BL["drag"], BL_HOLD))), BL_FP, *fp_sweep(BL_FP, 0.8)),
+        fp(clip("chop", BL_HOLD, (0.16, BL["raise"]), (0.34, BL["chop"], 0.3), (0.5, BL["down"]),
+                (0.78, settle(BL["down"], BL_HOLD))), BL_FP, *fp_overhead(BL_FP, 1.1)),
     ],
 }
