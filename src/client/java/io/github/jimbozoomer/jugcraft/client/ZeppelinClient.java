@@ -29,7 +29,7 @@ public final class ZeppelinClient {
 				|| zeppelin.getFirstPassenger() != player) {
 			return;
 		}
-		boolean typing = client.screen != null;
+		boolean typing = client.gui.screen() != null;
 		int forward = typing ? 0 : (client.options.keyUp.isDown() ? 1 : 0) - (client.options.keyDown.isDown() ? 1 : 0);
 		int turn = typing ? 0 : (client.options.keyLeft.isDown() ? 1 : 0) - (client.options.keyRight.isDown() ? 1 : 0);
 		int vertical = typing ? 0 : (client.options.keyJump.isDown() ? 1 : 0) - (client.options.keySprint.isDown() ? 1 : 0);
