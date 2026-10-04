@@ -118,7 +118,6 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider {
 		}
 		if (distanceTo(target) < JugcraftRaiders.GRENADE_MIN_RANGE) {
 			if (distanceTo(target) < 2.5F) {
-				swing(net.minecraft.world.InteractionHand.MAIN_HAND);
 				doHurtTarget(level, target);
 			}
 			return;
