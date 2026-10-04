@@ -275,5 +275,8 @@ def feature_of(entry_id):
     import tower_guns
     if entry_id in tower_guns.items():
         return "machines"
+    import fortifications
+    if entry_id in fortifications.blocks():
+        return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

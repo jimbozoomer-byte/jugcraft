@@ -20,6 +20,7 @@ Primary specialty and supported player role: builders and decorators of every br
   - iron bars and the 8 copper bars, waxed or not;
   - all 32 of vanilla's walls (cobblestone, the stone, brick, deepslate, blackstone, tuff, cinnabar and sulfur families, and the rest);
   - all 14 of Jugcraft's fences: the 13 wood-set fences and the wrought-iron cemetery fence (the graveyard fence).
+  - Jugcraft's own walls: the bastion concrete wall (batch 55, [fortifications](fortifications.md)). It gets a diagonal wall exactly as vanilla's walls do (`JUGCRAFT_WALLS` in `tools/diagonal_connections.py`).
 - **The rule, the same from either end.** Two blocks a diagonal step apart join when they would join side by side, and neither joins straight into the two blocks between them:
   - a wooden fence joins any wooden fence; the nether brick fence and the cemetery fence join each other but not wooden fences, as they do straight; panes and bars all join each other; any wall joins any wall;
   - fences, panes and bars, and walls, never join each other's kind diagonally (a wall joins bars straight, but not on the diagonal);

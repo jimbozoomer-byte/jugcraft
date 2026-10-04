@@ -445,6 +445,64 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_tower_guns");
 
+			// Fortifications (batch 55), west of the tower guns: a 7x7 bastion-concrete tower carrying a Grand Mortar inside a
+			// ring of parapets, a steel ladder and a blast door on its south face, an ammo hoist up its east side feeding a
+			// stocked ready rack, and a bastion wall in front.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 112, y, z - 14, x - 84, y + 14, z + 10));
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				var blocks = io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS;
+				int cx = x - 98;
+				int cz = z - 6;
+				int h = 6;
+				for (int dx = -3; dx <= 3; dx++) {
+					for (int dz = -3; dz <= 3; dz++) {
+						for (int dy = 0; dy < h; dy++) {
+							overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + dy, cz + dz), blocks.get("bastion_concrete").defaultBlockState());
+						}
+						if (Math.abs(dx) == 3 || Math.abs(dz) == 3) {
+							net.minecraft.core.Direction out = Math.abs(dz) == 3 ? (dz > 0 ? net.minecraft.core.Direction.SOUTH : net.minecraft.core.Direction.NORTH)
+									: (dx > 0 ? net.minecraft.core.Direction.EAST : net.minecraft.core.Direction.WEST);
+							overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + h, cz + dz), blocks.get("bastion_parapet").defaultBlockState()
+									.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, out));
+						}
+					}
+				}
+				for (int dy = 0; dy < h; dy++) {
+					overworld.setBlockAndUpdate(new BlockPos(cx + 2, y + dy, cz + 4), blocks.get("steel_ladder").defaultBlockState()
+							.setValue(net.minecraft.world.level.block.LadderBlock.FACING, net.minecraft.core.Direction.SOUTH));
+				}
+				var door = blocks.get("blast_door").defaultBlockState().setValue(net.minecraft.world.level.block.DoorBlock.FACING,
+						net.minecraft.core.Direction.SOUTH);
+				overworld.setBlock(new BlockPos(cx - 1, y, cz + 3), door.setValue(net.minecraft.world.level.block.DoorBlock.HALF,
+						net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER), 3);
+				overworld.setBlock(new BlockPos(cx - 1, y + 1, cz + 3), door.setValue(net.minecraft.world.level.block.DoorBlock.HALF,
+						net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER), 3);
+				for (int dy = 0; dy <= h; dy++) {
+					overworld.setBlockAndUpdate(new BlockPos(cx + 4, y + dy, cz), blocks.get("ammo_hoist").defaultBlockState());
+				}
+				BlockPos rackPos = new BlockPos(cx + 4, y + h + 1, cz);
+				overworld.setBlockAndUpdate(rackPos, blocks.get("ready_rack").defaultBlockState()
+						.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.SOUTH));
+				if (overworld.getBlockEntity(rackPos) instanceof io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity rack) {
+					for (int slot = 0; slot < rack.shells.getContainerSize(); slot++) {
+						rack.shells.setItem(slot, new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.GREAT_SHELL_ITEM, 4));
+					}
+				}
+				for (int dx = -6; dx <= 6; dx++) {
+					overworld.setBlockAndUpdate(new BlockPos(cx + dx, y, cz + 7), blocks.get("bastion_concrete_wall").defaultBlockState());
+				}
+				var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("grand_mortar");
+				io.github.jimbozoomer.jugcraft.artillery.TowerGun gun = new io.github.jimbozoomer.jugcraft.artillery.TowerGun(type, overworld);
+				gun.snapTo(cx + 0.5, y + h, cz + 0.5, 0.0F, 0.0F);
+				gun.face(200.0F);
+				overworld.addFreshEntity(gun);
+			});
+			server.runCommand("tp @p %d %d %d 168 22".formatted(x - 94, y + 9, z + 13));
+			context.waitTicks(60);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_fortifications");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;

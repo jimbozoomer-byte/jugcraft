@@ -1,6 +1,11 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:bastion_concrete",
+    "jugcraft:bastion_concrete_slab",
+    "jugcraft:bastion_concrete_stairs",
+    "jugcraft:bastion_concrete_wall",
+    "jugcraft:bastion_parapet",
     "jugcraft:concrete",
     "jugcraft:concrete_slab",
     "jugcraft:concrete_stairs",

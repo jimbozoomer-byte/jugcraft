@@ -1113,6 +1113,117 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/**
+	 * Batch 55: every fortification block places; the parapet has its crenel (a gap you can stand in), the wall joins
+	 * walls, the ladder is climbable and the hoist and rack have their block entities.
+	 */
+	@GameTest
+	public void fortificationBlocksPlace(GameTestHelper helper) {
+		int x = 0;
+		for (var entry : io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.entrySet()) {
+			if (entry.getKey().equals("blast_door") || entry.getKey().equals("steel_ladder")) {
+				continue;
+			}
+			BlockPos pos = new BlockPos(x++ % 8, 1, x / 8 * 2);
+			helper.setBlock(pos, entry.getValue());
+			helper.assertBlockPresent(entry.getValue(), pos);
+		}
+		ServerLevel level = helper.getLevel();
+		BlockPos parapet = new BlockPos(0, 3, 4);
+		helper.setBlock(parapet, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("bastion_parapet"));
+		var shape = helper.getBlockState(parapet).getShape(level, helper.absolutePos(parapet));
+		helper.assertTrue(shape.max(Direction.Axis.Y) == 1.0 && !Block.isShapeFullBlock(shape), "A parapet is full height but not a full cube");
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("bastion_concrete_wall").defaultBlockState().is(net.minecraft.tags.BlockTags.WALLS),
+				"The bastion wall should be in #minecraft:walls");
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("steel_ladder").defaultBlockState().is(net.minecraft.tags.BlockTags.CLIMBABLE),
+				"The steel ladder should be climbable");
+		BlockPos hoist = new BlockPos(2, 3, 4);
+		helper.setBlock(hoist, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ammo_hoist"));
+		helper.getBlockEntity(hoist, io.github.jimbozoomer.jugcraft.building.AmmoHoistBlock.Entity.class);
+		BlockPos rack = new BlockPos(4, 3, 4);
+		helper.setBlock(rack, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack"));
+		helper.getBlockEntity(rack, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		helper.succeed();
+	}
+
+	/** Batch 55: a blast door will not open by hand (its set is iron's) but opens on a redstone signal. */
+	@GameTest
+	public void blastDoorOpensOnlyByRedstone(GameTestHelper helper) {
+		var door = (net.minecraft.world.level.block.DoorBlock) io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("blast_door");
+		helper.assertFalse(door.type().canOpenByHand(), "A blast door must not open by hand");
+		BlockPos lower = new BlockPos(2, 1, 2);
+		helper.setBlock(lower, door.defaultBlockState().setValue(net.minecraft.world.level.block.DoorBlock.HALF,
+				net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER));
+		helper.setBlock(lower.above(), door.defaultBlockState().setValue(net.minecraft.world.level.block.DoorBlock.HALF,
+				net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER));
+		helper.assertBlockProperty(lower, net.minecraft.world.level.block.DoorBlock.OPEN, false);
+		helper.setBlock(lower.east(), Blocks.REDSTONE_BLOCK);
+		helper.succeedWhen(() -> helper.assertBlockProperty(lower, net.minecraft.world.level.block.DoorBlock.OPEN, true));
+	}
+
+	/**
+	 * Batch 55: shells loaded into the bottom of a four-high ammo hoist climb the shaft into the ready rack on top, and a
+	 * hopper cannot take them back out of the shaft.
+	 */
+	@GameTest(maxTicks = 300)
+	public void ammoHoistLiftsShellsToTheRack(GameTestHelper helper) {
+		for (int y = 1; y <= 4; y++) {
+			helper.setBlock(new BlockPos(2, y, 2), io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ammo_hoist"));
+		}
+		BlockPos rackPos = new BlockPos(2, 5, 2);
+		helper.setBlock(rackPos, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack"));
+		helper.assertBlockProperty(new BlockPos(2, 4, 2), io.github.jimbozoomer.jugcraft.building.AmmoHoistBlock.TOP, true);
+		helper.assertBlockProperty(new BlockPos(2, 1, 2), io.github.jimbozoomer.jugcraft.building.AmmoHoistBlock.TOP, false);
+		ServerLevel level = helper.getLevel();
+		var bottom = ItemStorage.SIDED.find(level, helper.absolutePos(new BlockPos(2, 1, 2)), Direction.DOWN);
+		helper.assertTrue(bottom != null && bottom.supportsInsertion() && !bottom.supportsExtraction(),
+				"A hoist should take items in but never give them up to a hopper");
+		ItemVariant shell = ItemVariant.of(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM);
+		try (Transaction transaction = Transaction.openOuter()) {
+			helper.assertTrue(bottom.insert(shell, 8, transaction) == 8, "The bottom hoist should take 8 shells");
+			transaction.commit();
+		}
+		var rack = helper.getBlockEntity(rackPos, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(rack.count() == 8, "The rack on top should hold all 8 shells, but holds " + rack.count());
+			helper.assertBlockProperty(rackPos, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.FILL, 1);
+		});
+	}
+
+	/**
+	 * Batch 55: a gunner with no shells on them fires a Triple Battery's salvo from the ready rack beside it, and the
+	 * rack loses three shells.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void gunsDrawShellsFromReadyRacks(GameTestHelper helper) {
+		for (int x = 0; x < 5; x++) {
+			for (int z = 0; z < 5; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		BlockPos rackPos = new BlockPos(5, 1, 2);
+		helper.setBlock(rackPos, io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS.get("ready_rack"));
+		var rack = helper.getBlockEntity(rackPos, io.github.jimbozoomer.jugcraft.building.ReadyRackBlock.Entity.class);
+		rack.shells.addItem(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 5));
+		var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("triple_battery");
+		io.github.jimbozoomer.jugcraft.artillery.TowerGun battery = helper.spawn(type, new Vec3(2.5, 1, 2.5));
+		battery.face(0.0F);
+		ServerPlayer gunner = helper.makeMockServerPlayerInLevel();
+		gunner.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		gunner.setPos(battery.getX(), battery.getY(), battery.getZ());
+		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
+		gunner.setYRot(0.0F);
+		gunner.setXRot(-20.0F);
+		for (int tick = 1; tick <= 40; tick++) {
+			int pressed = tick <= 30 ? 1 : 0;
+			helper.runAfterDelay(tick, () -> battery.steer(gunner, 0, 0, pressed));
+		}
+		helper.runAfterDelay(80, () -> {
+			helper.assertTrue(rack.count() == 2, "The salvo should take three shells from the rack, leaving 2, but left " + rack.count());
+			helper.succeed();
+		});
+	}
+
 	/** Coal generator -> copper cables -> electric furnace smelts raw iron. */
 	@GameTest(maxTicks = 600)
 	public void cablesCarryPower(GameTestHelper helper) {
