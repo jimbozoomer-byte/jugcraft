@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
  * (tools/pinata_data.py: the piñatas, whole and torn, and their ropes) and balloon_quads.json
  * (tools/hot_air_balloon_data.py: the hot-air balloons' basket and rigging, flames and envelopes, and the pibal) and zeppelin_quads.json
  * (tools/zeppelin.py: the zeppelin's body and propeller) and walker_quads.json (tools/mech.py: the Diesel Walker) and landship_quads.json
- * (tools/landship.py: the Landship) and trench_quads.json
+ * (tools/landship.py: the Landship) and decor16_quads.json (tools/decor16_data.py: the flying eyeball, its iris and its wings) and trench_quads.json
  * (tools/trenchworks.py: the searchlight's yoke, drum, lens and beam).
  */
 public final class DecorQuads {
@@ -36,7 +36,7 @@ public final class DecorQuads {
 			Jugcraft.id("decor8_quads.json"), Jugcraft.id("decor9_quads.json"), Jugcraft.id("decor10_quads.json"),
 			Jugcraft.id("decor11_quads.json"), Jugcraft.id("decor12_quads.json"), Jugcraft.id("ferris_wheel_quads.json"), Jugcraft.id("pinata_quads.json"),
 			Jugcraft.id("balloon_quads.json"), Jugcraft.id("zeppelin_quads.json"),
-			Jugcraft.id("walker_quads.json"), Jugcraft.id("landship_quads.json"),
+			Jugcraft.id("walker_quads.json"), Jugcraft.id("landship_quads.json"), Jugcraft.id("decor16_quads.json"),
 			Jugcraft.id("trench_quads.json"));
 	private static @Nullable Map<String, QuadModel> models;
 

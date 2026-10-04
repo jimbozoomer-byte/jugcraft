@@ -106,6 +106,11 @@ def biome(name):
 
 def extra_placement(extra):
     info = bm.EXTRAS[extra]
+    if info.get("placement") in ("hanging", "vine"):
+        # The graveyard flora's hanging strands and ivy (tools/plants_data.py).
+        import plants_data
+        placement = plants_data.hanging_placement if info["placement"] == "hanging" else plants_data.vine_placement
+        return placement(info["count"])
     if "placement" in info:
         return info["placement"]
     placement = []

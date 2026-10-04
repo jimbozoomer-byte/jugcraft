@@ -158,7 +158,10 @@
       "minecraft:patch_pumpkin",
       "minecraft:patch_sugar_cane",
       "minecraft:patch_firefly_bush_near_water",
-      "jugcraft:duckweed"
+      "jugcraft:duckweed",
+      "jugcraft:flora_deadly_nightshade",
+      "jugcraft:flora_bleeding_heart",
+      "jugcraft:flora_shroud_moss"
     ],
     [
       "minecraft:freeze_top_layer"

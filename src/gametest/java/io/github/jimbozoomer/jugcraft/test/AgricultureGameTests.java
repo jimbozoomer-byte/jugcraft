@@ -247,9 +247,11 @@ public class AgricultureGameTests {
 		helper.setBlock(SOIL, Blocks.GRASS_BLOCK);
 		helper.setBlock(CROP, Blocks.SHORT_GRASS);
 		BlockState grass = helper.getBlockState(CROP);
+		// Every seed in JugcraftAgriculture.GRASS_SEEDS (tools/agriculture.py), so the total is the whole chance.
 		String[] seeds = {"corn_kernels", "sunflower_seeds", "beans", "sweet_potato", "flax_seeds", "tomato_seeds", "pepper_seeds",
 				"onion", "garlic", "cabbage_seeds", "oat_seeds", "barley_seeds", "butternut_squash_seeds", "acorn_squash_seeds",
-				"warty_gourd_seeds", "turnip", "cranberries", "chestnut"};
+				"warty_gourd_seeds", "turnip", "cranberries", "chestnut", "giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds",
+				"cinderella_pumpkin_seeds", "bottle_gourd_seeds", "ornamental_corn_kernels", "mandrake_root"};
 		int[] found = new int[seeds.length];
 		int breaks = 4000;
 		int total = 0;

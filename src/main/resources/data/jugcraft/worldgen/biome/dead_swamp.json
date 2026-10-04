@@ -179,7 +179,10 @@
       "minecraft:patch_firefly_bush_near_water_swamp",
       "minecraft:seagrass_swamp",
       "jugcraft:patch_dead_bush",
-      "jugcraft:cattails"
+      "jugcraft:cattails",
+      "jugcraft:flora_withered_grass",
+      "jugcraft:flora_spider_lily",
+      "jugcraft:flora_shroud_moss"
     ],
     [
       "minecraft:freeze_top_layer"

@@ -82,5 +82,115 @@
   {
     "id": "bramble",
     "kind": "floor_plant"
+  },
+  {
+    "id": "spider_lily",
+    "kind": "flower",
+    "effect": "minecraft:weakness",
+    "seconds": 7.0,
+    "patch": [
+      "IS_SWAMP"
+    ]
+  },
+  {
+    "id": "snowdrop",
+    "kind": "flower",
+    "effect": "minecraft:absorption",
+    "seconds": 6.0,
+    "patch": [
+      "IS_SNOWY",
+      "IS_TAIGA"
+    ]
+  },
+  {
+    "id": "deadly_nightshade",
+    "kind": "flower",
+    "effect": "minecraft:poison",
+    "seconds": 10.0,
+    "patch": [
+      "IS_SPOOKY"
+    ]
+  },
+  {
+    "id": "bleeding_heart",
+    "kind": "flower",
+    "effect": "minecraft:health_boost",
+    "seconds": 8.0
+  },
+  {
+    "id": "ghost_pipe",
+    "kind": "flower",
+    "effect": "minecraft:invisibility",
+    "seconds": 6.0,
+    "light": 6,
+    "patch": [
+      "IS_SPOOKY"
+    ]
+  },
+  {
+    "id": "black_rose",
+    "kind": "tall_flower",
+    "patch": [
+      "IS_SPOOKY"
+    ]
+  },
+  {
+    "id": "foxglove",
+    "kind": "tall_flower",
+    "patch": [
+      "IS_FOREST"
+    ]
+  },
+  {
+    "id": "funeral_lily",
+    "kind": "tall_flower"
+  },
+  {
+    "id": "asphodel",
+    "kind": "tall_flower"
+  },
+  {
+    "id": "withered_grass",
+    "kind": "grass",
+    "tall": "tall_withered_grass"
+  },
+  {
+    "id": "tall_withered_grass",
+    "kind": "tall_grass"
+  },
+  {
+    "id": "ghost_fern",
+    "kind": "grass",
+    "tall": "large_ghost_fern",
+    "patch": [
+      "IS_SPOOKY"
+    ]
+  },
+  {
+    "id": "large_ghost_fern",
+    "kind": "tall_grass"
+  },
+  {
+    "id": "dead_mans_fingers",
+    "kind": "floor_plant",
+    "patch": [
+      "IS_SPOOKY"
+    ]
+  },
+  {
+    "id": "grave_moss",
+    "kind": "flowerbed",
+    "patch": [
+      "IS_SPOOKY"
+    ]
+  },
+  {
+    "id": "shroud_moss",
+    "kind": "hanging",
+    "max_length": 8
+  },
+  {
+    "id": "creeping_ivy",
+    "kind": "vine"
   }
 ]

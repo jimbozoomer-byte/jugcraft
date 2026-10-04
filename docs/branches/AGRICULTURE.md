@@ -1020,6 +1020,65 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - A **memorial bench** with an inscribed plaque that seats a player, and a **cemetery lamp post** three blocks tall, lit after dark.
 - **Grave vases**: put small flowers in for a bouquet of their colour. While fresh they calm the graves within 3 blocks to half the spirits, then they wilt. Details: [the graveyard pack](../features/graveyard.md#grounds).
 
+### The Graveyard: flora
+
+| **A haunted churchyard**: the flora round headstones, a crypt wall, a mandrake bed and an oak hung with shroud moss | **The flowers**: black roses, spider lilies, foxgloves, a funeral lily, snowdrops, nightshade and bleeding hearts |
+| --- | --- |
+| ![The graveyard flora](../images/ingame_graveyard_flora.jpg) | ![The flowers](../images/ingame_graveyard_flora_flowers.jpg) |
+| **The tall plants** along the wall: foxglove, funeral lily, asphodel, withered grass and ghost ferns | **The crypt wall**: creeping ivy over its faces, potted flora on top |
+| ![The tall plants](../images/ingame_graveyard_flora_tall.jpg) | ![Creeping ivy on the crypt wall](../images/ingame_graveyard_flora_wall.jpg) |
+| **Shroud moss** hanging from the oak's leaves | **The mandrake bed**, from seed to ripe, and a pulled root |
+| ![Shroud moss](../images/ingame_graveyard_flora_shroud_moss.jpg) | ![Mandrakes](../images/ingame_graveyard_flora_mandrakes.jpg) |
+| **By night** | **Ghost pipes** glowing in the dark |
+| ![The graveyard flora at night](../images/ingame_graveyard_flora_night.jpg) | ![Ghost pipes at night](../images/ingame_graveyard_flora_ghost_pipes.jpg) |
+
+*Real screenshots from the client game test that CI runs (`GraveyardFloraClientGameTests`, software rendering, small previews). The crops' stages are set for the picture.*
+
+- **Seventeen plants for a haunted churchyard**, sculpted like hand-built plants (bent stems, cut-out leaves and petals at angles, bells and berries as little boxes) rather than crossed pictures:
+  - flowers to pot and dye: **spider lily**, **snowdrop**, **deadly nightshade**, **bleeding heart** and the glowing **ghost pipe**;
+  - two-block flowers: **black rose**, **foxglove**, **funeral lily** and **asphodel**;
+  - foliage: **withered grass** and the silvery **ghost fern** (bone meal grows both tall), **dead man's fingers**, **grave moss**, **shroud moss** hanging in strands from leaves, and **creeping ivy** over walls.
+- **Where:** the Ghost Forest, Gloomweald, Hallowed Bog, Dead Swamp, Sludge Mire, Dead Forest and Bayou, and some in vanilla's spooky, swamp, snowy and forest biomes.
+- **The mandrake:** pull a wild one for its roots and plant them on farmland. A ripe mandrake **screams** when pulled up, sickening every player within 8 blocks with nothing on their head (wear something: **Mind Your Ears**). Its root also makes **Flying Ointment** in the purple brew.
+- **Grave vases** take the flora's flowers by colour. Details: [the graveyard flora](../features/graveyard-flora.md).
+
+### The churchyard's ornaments
+
+| **A catacomb corner**: ossuary walls, bone piles, gargoyles, giant bone hands and witch's lanterns | **The ossuary walls** and bone piles heaped at their foot |
+| --- | --- |
+| ![The churchyard's ornaments](../images/ingame_churchyard_ornaments.jpg) | ![Ossuary walls and bone piles](../images/ingame_churchyard_ossuary.jpg) |
+| **Two gargoyles** on their inscribed plinths, one weathered to moss, and a bone hand | **The giant bone hands**, the right one clenched by a hidden redstone block |
+| ![Gargoyles](../images/ingame_churchyard_gargoyles.jpg) | ![Giant bone hands](../images/ingame_churchyard_bone_hands.jpg) |
+| **Witch's lanterns** hanging from a beam, and two standing | **By night**, by the lanterns' violet light |
+| ![Witch's lanterns](../images/ingame_churchyard_lanterns.jpg) | ![The ornaments at night](../images/ingame_churchyard_ornaments_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`ChurchyardOrnamentsClientGameTests`, software rendering, small previews). The gargoyles' inscriptions and weathering are set for the picture.*
+
+- **Gargoyle**: crouched on a granite plinth, wings folded, jaws open for the rain. It weathers and takes an inscription on its plinth like the graveyard's monuments.
+- **Bone Pile**: bones and skulls heaped up to four layers. **Ossuary Wall**: a catacomb's skulls and long bones as a building block.
+- **Giant Bone Hand**: two blocks tall out of grave earth, clenching into a fist on a redstone signal.
+- **Witch's Lantern**: gothic iron and violet glass, standing or hanging. Details: [the churchyard's ornaments](../features/churchyard-ornaments.md).
+
+### The haunted house's props
+
+| **A haunted parlour**: flying eyeballs staring from the air, candles on the table, monster's heads, webs and the harvest plushes | **The flying eyeballs**, each turned to stare at the player |
+| --- | --- |
+| ![The haunted house's props](../images/ingame_haunted_house_props.jpg) | ![Flying eyeballs](../images/ingame_haunted_house_eyeballs.jpg) |
+| **Pillar candles**, ivory and black, one to four in a cluster, lit | **Monster's heads**: asleep, and awake on a redstone signal with its jaw dropped and eyes glowing |
+| ![Pillar candles](../images/ingame_haunted_house_candles.jpg) | ![Monster's heads](../images/ingame_haunted_house_monster_heads.jpg) |
+| **Spider webs** over the walls and ceiling of a corner | **The harvest plushes**: owl, hedgehog, acorn, corn and maple leaf |
+| ![Spider webs](../images/ingame_haunted_house_webs.jpg) | ![Harvest plushes](../images/ingame_haunted_house_plushes.jpg) |
+| **By candlelight** at night | |
+| ![The parlour at night](../images/ingame_haunted_house_props_night.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`HauntedHousePropsClientGameTests`, software rendering, small previews). The candles are lit and one head is powered for the picture.*
+
+- **Flying Eyeball**: a bloodshot eye on red bat wings that hovers in its block, bobbing and beating its wings, and **turns to stare at the nearest player**.
+- **Pillar Candles**, ivory and black: dripping church candles, one to four in a cluster, lit and put out like vanilla's.
+- **Spider Web**: a whole web, with its spider, strung over any face of a block.
+- **Monster's Head**: a stitched green monster's head with bolts in its neck; on a redstone signal its jaw drops, its eyes glow and its bolts spark.
+- **Harvest plushes**: an owl, a hedgehog, an acorn, an ear of corn and a maple leaf, five more prizes at the midway. Details: [the haunted house's props](../features/haunted-house-props.md).
+
 ## Even more fall additions
 
 Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).
@@ -1036,7 +1095,7 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 *Real screenshots from the client game test that CI runs (`HexBrewClientGameTests`, software rendering, small previews).*
 
-- **Brew a hex:** over a lit campfire, fire or magma, stir a brown mushroom into the Bubbling Cauldron's green brew, beans into the orange or a phantom membrane into the purple. A hex brew fills three glass bottles.
+- **Brew a hex:** over a lit campfire, fire or magma, stir a brown mushroom into the Bubbling Cauldron's green brew, beans into the orange or a phantom membrane (or a mandrake root, from the graveyard flora) into the purple. A hex brew fills three glass bottles.
 - **Shrinking Draught:** half your size for 3 minutes, through one-block gaps. **Giant's Draught:** 1.6 times your size for 3 minutes, a block more reach, only where there is room. Each cancels the other. **Flying Ointment:** 30 seconds of slow falling. Details: [even more fall additions](../features/even-more-fall-additions.md#hex-brews).
 
 ### The flying broomstick

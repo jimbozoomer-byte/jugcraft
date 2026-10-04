@@ -156,7 +156,10 @@
       "jugcraft:oxeye_daisies",
       "jugcraft:cattails",
       "jugcraft:lily_pads",
-      "jugcraft:lilies_of_the_valley"
+      "jugcraft:lilies_of_the_valley",
+      "jugcraft:flora_snowdrop",
+      "jugcraft:flora_funeral_lily",
+      "jugcraft:flora_asphodel"
     ],
     [
       "minecraft:freeze_top_layer"

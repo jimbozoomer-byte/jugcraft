@@ -38,6 +38,31 @@
           "type": "minecraft:item",
           "name": "jugcraft:jumbo_pumpkin_plush",
           "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:owl_plush",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:hedgehog_plush",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:acorn_plush",
+          "weight": 16
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:corn_plush",
+          "weight": 16
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:maple_leaf_plush",
+          "weight": 16
         }
       ]
     }
