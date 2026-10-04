@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_executioner",
+  "textures": {
+    "layer0": "jugcraft:item/steel_executioner"
+  }
+}

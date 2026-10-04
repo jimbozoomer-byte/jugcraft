@@ -469,6 +469,36 @@ Each in bronze (from the tin feature) and steel (machines), crafted from the met
 - Looks only: damage, reach and timing are unchanged.
 - Client code in `client/arms/` (`ArmsMotion`, `ArmsPose`); moves from `tools/arms_moves.py` on `tools/arms_motion.py` ([feature record](features/arms-motion.md)).
 
+### Arms II (batch 45)
+
+Eight more kinds, in bronze and steel as batch 42's, each with a trait.
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Dagger | Hits 4 (steel 4.5) at 2.3 a second, reaches 2.5; half again as much from behind | 1 ingot, leather |
+| Sabre | Hits 5 (5.5) at 1.8 a second, reaches 3; 3 more while riding. Sweeps | 2 ingots, leather |
+| Estoc | Hits 6 (6.5) at 1.4 a second with thrusts, reaches 3.5; 0.3 more per point of the foe's armor, at most 6 | 3 ingots, leather |
+| Battle Axe | Hits 11 (11.5) at 0.7 a second; chops wood as an axe; stops a shield for 5 s | 4 ingots, 2 sticks |
+| Flail | Hits 8 (8.5) at 1 a second; a hit slows the foe for 2 s | 2 ingots, stick |
+| Scythe | Hits 8 (8.5) at 1 a second, sweeping at 4 blocks; use on ripe crops to reap and replant them, 3 by 3 | 3 ingots, 2 sticks |
+| Quarterstaff | Hits 5 (5.5) at 1.6 a second, reaches 3.5; knocks back; hold use to parry 50% | 2 ingots, stick |
+| Pike | Hits 8 (8.5) at 0.8 a second, reaching 2 to 5 blocks; half again against riders and mounts | 1 ingot, 3 sticks |
+
+Each has its own guard, combo and first-person strokes, as batch 43's. **Code:** `weapons/` (`JugcraftArms.Trait`, worked by `ArmItem` on the server); data from `tools/arms.py`, art from `tools/arms_art.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-ii.md)).
+
+### Arms III (batch 46)
+
+Two-handed swings: the greatsword, war hammer, glaive, battle axe, scythe, quarterstaff, pike and these four start their swing on the click and land the blow as it comes round, on every foe in an arc. Each combo ends in a finishing blow, 25% stronger. The wielder is slowed while swinging, and a shield in the off hand stops it. In bronze and steel:
+
+| Item | What it does | Built from |
+| --- | --- | --- |
+| Zweihander | Hits 10.5 (steel 11) at 0.8 a second, reaches 4; cleaves up to 5 foes; hold use to guard 50%. Sweeps | 4 ingots, leather |
+| Maul | Hits 13 (13.5) at 0.55 a second; its finishing blow shakes the ground: foes close by take half and are slowed; stops a shield for 5 s | 6 ingots, stick |
+| Executioner's Sword | Hits 11 (11.5) at 0.7 a second; half again as much against a foe at 30% health or less | 5 ingots, leather |
+| Bill | Hits 9 (9.5) at 0.9 a second, reaches 4.5; pulls foes towards you and drags riders from the saddle | 2 ingots, 2 sticks |
+
+**Code:** `weapons/` (`TwoHanded`, `TwoHandedSwingPayload`, `JugcraftArms.TWO_HANDED`), client `client/arms/TwoHandedInput`; data from `tools/arms.py`, motion from `tools/arms_moves.py` ([feature record](features/arms-iii.md)).
+
 ### Construction chemistry (batch 32)
 
 | Item | What it does | Built from |

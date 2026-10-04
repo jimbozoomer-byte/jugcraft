@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jugcraft:item/steel_quarterstaff"
+  },
+  "swap_animation_scale": 1.8
+}

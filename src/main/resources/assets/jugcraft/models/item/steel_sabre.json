@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_sabre",
+  "textures": {
+    "layer0": "jugcraft:item/steel_sabre"
+  }
+}

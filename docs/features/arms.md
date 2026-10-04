@@ -12,11 +12,11 @@ Nine kinds of arms, each in bronze (steampunk: brass fittings, leather wraps, wa
 | Arm | Hit (bronze / steel) | Attacks a second | Reach (blocks) | Swing | Trait |
 |---|---|---|---|---|---|
 | Longsword | 7 / 7.5 | 1.3 | 3.25 | whack, 8 ticks | **Parry:** hold use to block 60% of a blow from in front (60° either side). Sweeps. |
-| Greatsword | 10 / 10.5 | 0.8 | 3.75 | whack, 11 ticks | Two-handed and heavy: extra knockback; a hit stops a shield blocking for 2 s. Sweeps. |
+| Greatsword | 10 / 10.5 | 0.8 | 3.75 | whack, 20 ticks (11 before batch 46) | Two-handed and heavy: extra knockback; a hit stops a shield blocking for 2 s. Sweeps. |
 | Rapier | 4.5 / 5 | 2.0 | 3.5 | stab, 5 ticks | Quick thrusts; parries 35%. Sweeps. |
 | Flanged Mace | 9 / 9.5 | 0.9 | 3 | whack, 9 ticks | A hit stops a shield blocking for 3 s. |
-| War Hammer | 11 / 11.5 | 0.7 | 3 | whack, 12 ticks | The heaviest blow, a knockback of 1, stops a shield blocking for 5 s (as an axe); wears 2 a hit. |
-| Glaive | 9 / 9.5 | 0.9 | 4.25 | whack, 10 ticks | A blade on a pole that sweeps at a long reach. |
+| War Hammer | 11 / 11.5 | 0.7 | 3 | whack, 22 ticks (12 before batch 46) | The heaviest blow, a knockback of 1, stops a shield blocking for 5 s (as an axe); wears 2 a hit. |
+| Glaive | 9 / 9.5 | 0.9 | 4.25 | whack, 18 ticks (10 before batch 46) | A blade on a pole that sweeps at a long reach. |
 | Halberd | 10 / 10.5 | 0.8 | 1–4.5 | stab, 12 ticks | Thrusts through every target in line, like the spear's jab; a hit stops a shield blocking for 3 s. |
 | Spear | 3 / 3.5 jab | 1.05 / 1.0 | 2–4.5 | stab | Vanilla's spear in Jugcraft metals: hold use to charge, harder at a run or on a horse. |
 | Lance | 4 / 4.5 jab | 0.8 / 0.77 | 2.5–5.5 | stab | A horseman's charge: 1.3 / 1.4 times the spear's charge damage, unhorses riders at lower speeds. |
@@ -70,5 +70,7 @@ Not applicable: no worldgen, mobs or dimensions. Mobs do not spawn with arms.
 
 ## Rollout and open questions
 - All numbers are first values for the owner to tune.
+- Since Arms III (batch 46, [arms-iii.md](arms-iii.md)) the greatsword, war hammer and glaive swing two-handed: the click starts a longer swing, the blow lands as it comes round on every foe in an arc, and the combo ends in a finishing blow.
+- Arms II (batch 45, [arms-ii.md](arms-ii.md)) adds daggers, sabres, estocs, battle axes, flails, scythes, quarterstaves and pikes, with traits worked by `ArmItem`.
 - More metals (iron, diamond, netherite and later Jugcraft alloys) would be more rows in `tools/arms.py` and art styles in `tools/arms_art.py`.
 - Custom attack animations beyond 26.3's whack and stab (an overhead hammer blow, a two-handed greatsword swing) would need client rendering code; left for a later batch if wanted.

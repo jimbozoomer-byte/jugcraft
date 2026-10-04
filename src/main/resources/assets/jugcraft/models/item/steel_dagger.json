@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_dagger",
+  "textures": {
+    "layer0": "jugcraft:item/steel_dagger"
+  }
+}

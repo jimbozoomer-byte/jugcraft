@@ -7,6 +7,12 @@ See docs/branches/AGRICULTURE.md for the design.
 """
 
 import plants
+import graveyard
+import midway
+import ferris_wheel
+import pinata
+import hot_air_balloon
+import leaf_blower
 
 FEATURE = "agriculture"
 
@@ -223,6 +229,8 @@ ITEMS = {
     # Fall additions 20: pan de muerto, the sweet bread of Día de Muertos, its top crossed with dough "bones".
     "pan_de_muerto_dough": {"display": "Pan de Muerto Dough", "compost": "medium", "tags": []},
     "pan_de_muerto": {"display": "Pan de Muerto", "food": [6, 0.7], "compost": "medium_high", "tags": ["c:foods", "c:foods/bread"]},
+    # Fall additions 24: acorns roasted in a furnace, smoker or on a campfire.
+    "roasted_acorns": {"display": "Roasted Acorns", "food": [3, 0.4], "compost": "medium", "tags": ["c:foods"]},
     # Fall additions 18: a wild turkey's meat, raw (it cooks into a whole roast turkey) and carved from the roast.
     "raw_turkey": {"display": "Raw Turkey", "food": [3, 0.3], "tags": ["c:foods", "c:foods/raw_meat"]},
     "turkey_slice": {"display": "Slice of Roast Turkey", "food": [3, 0.6], "tags": ["c:foods", "c:foods/cooked_meat"]},
@@ -660,6 +668,36 @@ HALLOWEEN_ADVANCEMENTS = {
     "taffy_puller": {"icon": "jugcraft:salt_water_taffy", "title": "Pulling Power", "description": "Pull a tray of warm taffy until it's done",
                      "frame": "task"},
 }
+# The graveyard pack (tools/graveyard.py).
+HALLOWEEN_ADVANCEMENTS.update(graveyard.ADVANCEMENTS)
+HALLOWEEN_ADVANCEMENTS.update({
+    "drink_me": {"icon": "jugcraft:shrinking_draught", "title": "Drink Me", "description": "Drink a Shrinking Draught", "frame": "task"},
+    "fee_fi_fo_fum": {"icon": "jugcraft:giants_draught", "title": "Fee-Fi-Fo-Fum", "description": "Drink a Giant's Draught", "frame": "task"},
+    "up_and_away": {"icon": "jugcraft:flying_broomstick", "title": "Up and Away", "description": "Take off on a flying broomstick",
+                    "frame": "task"},
+    "over_the_moon": {"icon": "jugcraft:flying_broomstick", "title": "Over the Moon",
+                      "description": "Fly a broomstick high across the sky on a full-moon night", "frame": "challenge"},
+    "silver_lining": {"icon": "jugcraft:silver_dagger", "title": "Silver Lining", "description": "Slay a werewolf with silver",
+                      "frame": "task"},
+    "leader_of_the_pack": {"icon": "jugcraft:shadow_werewolf_pelt", "title": "Leader of the Pack", "description": "Slay a shadow werewolf",
+                           "frame": "challenge"},
+    "wolfsbane_ward": {"icon": "jugcraft:wolfsbane", "title": "Not Tonight", "description": "Keep a werewolf at bay with wolfsbane",
+                       "frame": "task"},
+    "nuts_about_squirrels": {"icon": "jugcraft:acorn", "title": "Nuts About Squirrels", "description": "Breed two squirrels with nuts",
+                             "frame": "task"},
+    "little_jack": {"icon": "jugcraft:hand_carved_pumpkin", "title": "Little Jack",
+                    "description": "Wake a carved pumpkin with a wisp or ectoplasm", "frame": "task"},
+})
+# The fall fair midway (tools/midway.py).
+HALLOWEEN_ADVANCEMENTS.update(midway.ADVANCEMENTS)
+# The Ferris wheel (tools/ferris_wheel.py).
+HALLOWEEN_ADVANCEMENTS.update(ferris_wheel.ADVANCEMENTS)
+# The piñata party (tools/pinata.py).
+HALLOWEEN_ADVANCEMENTS.update(pinata.ADVANCEMENTS)
+# The hot-air balloon fiesta (tools/hot_air_balloon.py).
+HALLOWEEN_ADVANCEMENTS.update(hot_air_balloon.ADVANCEMENTS)
+# The leaf blower (tools/leaf_blower.py).
+HALLOWEEN_ADVANCEMENTS.update(leaf_blower.ADVANCEMENTS)
 
 
 # ---------------------------------------------------------------- Halloween festivities
@@ -868,6 +906,95 @@ CAULDRON = {"block": "bubbling_cauldron", "display": "Bubbling Cauldron", "light
             "brews": {"green": ["minecraft:spider_eye", "minecraft:fermented_spider_eye", "minecraft:slime_ball"],
                       "purple": ["minecraft:nether_wart", "minecraft:chorus_fruit", "minecraft:amethyst_shard"],
                       "orange": ["minecraft:glowstone_dust", "minecraft:blaze_powder", "minecraft:magma_cream"]}}
+# Hex brewing (fall addition 21; BubblingCauldronBlock, Hexes, HexDraughtItem): a brew bubbling over a heat source
+# turns into a hex brew when its hex ingredient (item tags jugcraft:hex/<hex>) is stirred in; a glass bottle draws one
+# of its `doses`. The Shrinking Draught and Giant's Draught scale the drinker (attribute minecraft:scale, `scale` added
+# to 1 times the base) for `seconds`; the giant also steps higher and reaches further. A giant's draught is only drunk
+# with room to grow; a shrunk player without room to grow back stays small `room_extend_ticks` longer, again and again,
+# so nobody wakes up inside a wall. Flying Ointment, rubbed on, gives Slow Falling for `seconds` (and fuels a broom).
+HEX = {"doses": 3, "room_extend_ticks": 100,
+       "brews": {"shrinking": {"brew": "green", "ingredients": ["minecraft:brown_mushroom"], "item": "shrinking_draught",
+                               "display": "Shrinking Draught", "effect": "shrunk", "effect_display": "Shrunk", "scale": -0.5, "seconds": 180},
+                 "giant": {"brew": "orange", "ingredients": ["jugcraft:beans"], "item": "giants_draught", "display": "Giant's Draught",
+                           "effect": "giant", "effect_display": "Giant", "scale": 0.6, "step": 0.5, "reach": 1.0, "seconds": 180},
+                 "flying": {"brew": "purple", "ingredients": ["minecraft:phantom_membrane"], "item": "flying_ointment",
+                            "display": "Flying Ointment", "seconds": 30}}}
+# The flying broomstick (fall addition 22; Broomstick, FlyingBroomstickItem, client/BroomstickClient): a witch's broom
+# anointed with Flying Ointment, ridden and steered by looking. Each ointment is `charge_per_ointment` ticks of flight,
+# up to `max_charge`, burnt while ridden off the ground. Forward pushes `accel` a tick along the look, strafe `strafe`
+# sideways, jump `climb` up; `drag` of the speed is kept each tick (`brake` of that when braking); at most `max_speed`
+# blocks a tick, times `hat_bonus` in a witch hat. Dry, it sinks at `sink`. The server checks every `check_ticks` ticks
+# that it went no further than its top speed allows (`tolerance` times, for lag) and, dry, climbed no more than
+# `dry_climb`; getting off in the air gives `slow_fall_ticks` of slow falling.
+BROOMSTICK = {"item": "flying_broomstick", "display": "Flying Broomstick", "charge_per_ointment": 2400, "max_charge": 7200,
+              "accel": 0.05, "strafe": 0.025, "climb": 0.04, "drag": 0.91, "brake": 0.8, "max_speed": 0.6, "hat_bonus": 1.25,
+              "sink": 0.08, "check_ticks": 20, "tolerance": 3.0, "dry_climb": 2.0, "low_charge": 400, "slow_fall_ticks": 100,
+              "moon_height": 48, "inputs": ["jugcraft:witchs_broom", "jugcraft:flying_ointment", "minecraft:feather", "minecraft:feather"]}
+# Full-moon werewolves (fall addition 23; Werewolf, Werewolves, client/WerewolfModel): a werewolf comes out of the woods
+# (biome tag jugcraft:werewolf_haunts) only on full-moon nights and is gone at dawn. Every `spawn_ticks`, for each player,
+# `spawn_chance` of the time a spot `min_distance` to `max_distance` blocks off is tried; fewer than `near_cap` near a
+# player, `level_cap` in all. Its hide takes `hide_factor` of any damage but silver's, which does `silver_factor`; it heals
+# a point every `regen_ticks` unless silver wounded it in the last `silver_wound_ticks`. Wolfsbane wards it off (held, or
+# within `ward_reach` blocks); a warded target is left alone `shun_ticks`. Silver: a dagger and arrows; its pelt makes a rug.
+WEREWOLF = {"entity": "werewolf", "display": "Werewolf", "size": [0.9, 2.4], "hide_factor": 0.5, "silver_factor": 2.5,
+            "regen_ticks": 40, "silver_wound_ticks": 100, "shun_ticks": 200, "spawn_ticks": 200, "spawn_chance": 0.3,
+            "min_distance": 24, "max_distance": 40, "near_cap": 2, "level_cap": 8, "ward_reach": 6,
+            "haunts": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:grove"],
+            # Which kind comes out: a snow werewolf in snowy biomes; a shadow werewolf `shadow_haunt_chance` of the time
+            # in its haunts and `shadow_chance` elsewhere; otherwise a brown one.
+            "snow_haunts": ["#c:is_snowy"],
+            "shadow_haunts": ["minecraft:dark_forest", "minecraft:pale_garden", "jugcraft:gloomweald", "jugcraft:ghost_forest"],
+            "shadow_chance": 0.08, "shadow_haunt_chance": 0.5,
+            # Three kinds, three tiers of danger: their attributes, the experience they give and what they drop.
+            "kinds": {
+                "brown": {"tier": 1, "display": "Brown Werewolf", "health": 40.0, "damage": 6.0, "armor": 2.0, "speed": 0.33,
+                          "scale": 1.0, "knockback": 0.3, "xp": 10, "pelt": "werewolf_pelt", "rug": "werewolf_rug"},
+                "snow": {"tier": 2, "display": "Snow Werewolf", "health": 50.0, "damage": 8.0, "armor": 4.0, "speed": 0.32,
+                         "scale": 1.05, "knockback": 0.4, "xp": 20, "pelt": "snow_werewolf_pelt", "rug": "snow_werewolf_rug"},
+                "shadow": {"tier": 3, "display": "Shadow Werewolf", "health": 80.0, "damage": 11.0, "armor": 6.0, "speed": 0.36,
+                           "scale": 1.15, "knockback": 0.6, "xp": 40, "pelt": "shadow_werewolf_pelt", "rug": "shadow_werewolf_rug"}},
+            # The brown werewolf: hunts livestock too (`prey`); its howl calls brown werewolves within `pack_reach` to its
+            # prey; below `flee_below` of its health it flees until healed to `flee_until`.
+            "prey": ["minecraft:sheep", "minecraft:pig", "minecraft:cow", "minecraft:chicken", "minecraft:rabbit"],
+            "pack_reach": 32, "flee_below": 0.25, "flee_until": 0.5,
+            # The snow werewolf: its bite slows (Slowness II) for `frostbite_ticks` and chills by `frostbite_chill` frozen
+            # ticks; it never freezes; on snow it is `snow_stride` faster.
+            "frostbite_ticks": 60, "frostbite_chill": 80, "snow_stride": 0.25,
+            # The shadow werewolf: steps out of the shadows behind prey at least `shadow_step_min` blocks off, every
+            # `shadow_step_ticks`; its howl darkens the night for players within `alpha_reach` for `darkness_ticks` and
+            # sends werewolves within `frenzy_reach` into a frenzy (Strength and Speed) for `frenzy_ticks`. A sprig in
+            # hand doesn't ward it.
+            "shadow_step_min": 6, "shadow_step_ticks": 200, "alpha_reach": 16, "darkness_ticks": 160, "frenzy_reach": 24,
+            "frenzy_ticks": 200, "howl_cooldown": 600,
+            "dagger": "silver_dagger", "arrow": "silver_arrow",
+            "dagger_material": {"durability": 200, "speed": 6.0, "bonus": 1.5, "enchantability": 20, "damage": 2.5, "attack_speed": -1.8},
+            "displays": {"werewolf_pelt": "Werewolf Pelt", "werewolf_rug": "Werewolf Rug", "snow_werewolf_pelt": "Snow Werewolf Pelt",
+                         "snow_werewolf_rug": "Snow Werewolf Rug", "shadow_werewolf_pelt": "Shadow Werewolf Pelt",
+                         "shadow_werewolf_rug": "Shadow Werewolf Rug", "silver_dagger": "Silver Dagger", "silver_arrow": "Silver Arrow"}}
+WEREWOLF_PELTS = [k["pelt"] for k in WEREWOLF["kinds"].values()]
+WEREWOLF_RUGS = [k["rug"] for k in WEREWOLF["kinds"].values()]
+# Wolfsbane (fall addition 23): a wild flower of taiga and forest (new chunks), plantable and potted, that wards werewolves
+# off; in suspicious stew it poisons for `seconds`.
+WOLFSBANE = {"block": "wolfsbane", "display": "Wolfsbane", "effect": "POISON", "seconds": 8.0, "biomes": ["IS_TAIGA", "IS_FOREST"],
+             "patch": {"rarity": 20, "tries": 24, "spread_xz": 5, "spread_y": 2}}
+# Squirrels and acorns (fall addition 24; Squirrel, Squirrels, AcornItem, client/SquirrelModel): squirrels, red or grey,
+# come to the woods (biome tag jugcraft:squirrel_habitat) by day; every `spawn_ticks`, for each player, `spawn_chance` of
+# the time a spot `min_distance` to `max_distance` blocks off is tried; fewer than `near_cap` near a player, `level_cap`
+# in all. They climb logs, are tempted and bred by nuts (jugcraft:squirrel_food), and gather acorns lying within
+# `seek_range`, burying each after `bury_ticks`; `sapling_chance` of buried acorns sprout as oak saplings (none within
+# `sapling_space` of another sapling or a log). Oak and dark oak leaves drop an acorn `acorn_chance` of the time.
+SQUIRRELS = {"entity": "squirrel", "display": "Squirrel", "health": 6, "speed": 0.32, "size": [0.4, 0.5], "spawn_ticks": 400,
+             "spawn_chance": 0.25, "min_distance": 20, "max_distance": 40, "near_cap": 6, "level_cap": 30, "seek_range": 10,
+             "bury_ticks": 200, "sapling_chance": 0.25, "sapling_space": 3, "acorn_chance": 0.05,
+             "acorn_leaves": ["oak_leaves", "dark_oak_leaves"], "acorn": "acorn", "acorn_display": "Acorn", "roasted": "roasted_acorns",
+             "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga"],
+             "food": ["jugcraft:acorn", "jugcraft:chestnut", "jugcraft:roasted_chestnuts"]}
+# The Pumpkling (Pumpkling): a hand-carved pumpkin woken by a spark into a pet; follows past `follow_start`, stops at
+# `follow_stop`, comes to its owner past `teleport`; treats heal `treat_heal`.
+PUMPKLING = {"entity": "pumpkling", "display": "Pumpkling", "health": 16, "speed": 0.3, "size": [0.6, 0.9],
+             "follow_start": 6.0, "follow_stop": 2.5, "teleport": 16.0, "treat_heal": 4.0, "tempt_range": 10.0,
+             "sparks": ["jugcraft:wisp_in_a_jar", "jugcraft:ectoplasm"],
+             "treats": ["minecraft:pumpkin_seeds", "jugcraft:roasted_pumpkin_seeds", "minecraft:pumpkin_pie", "jugcraft:candy_corn"]}
 # The Apothecary Shelf (ApothecaryShelfBlock): wall shelves of jars; sneak-use cycles `arrangements` ways to set them.
 APOTHECARY_SHELF = {"block": "apothecary_shelf", "display": "Apothecary Shelf", "arrangements": 4}
 # The Crystal Ball (CrystalBallBlock): glows `light`; gazing flares it to `gazing_light` for `gaze_ticks` and tells a
@@ -1399,13 +1526,15 @@ FIREWORKS = {"shapes": {"bat": {"item": "bat_firework", "display": "Bat Burst Fi
 # Sky lanterns (SkyLanternItem, SkyLantern): used, a lantern is let go in front of its holder; it rises `rise` blocks a
 # tick and drifts with the wind (`wind` blocks a tick, its direction turning full circle every `wind_period` ticks, the
 # same for every lantern), burns `lifetime` ticks plus up to `lifetime_spread` more, dimming over the last `fade_ticks`.
-# Dyed in the crafting grid (minecraft:dyeable), named in an anvil (its wish). `per_craft` a craft. When
+# Dyed in the crafting grid as Minecraft 26.3 dyes leather armour (a `dye_recipe` recipe taking any dye) and washed
+# clean in a water cauldron (`wash_tag`); named in an anvil (its wish). `per_craft` a craft. When
 # `festival_lanterns` are let go within `festival_radius` blocks of each other in `festival_window` ticks (SkyLanterns),
 # players within the radius get Luck for `luck_ticks` and A Sky Full of Wishes; no second festival there for
 # `festival_cooldown` ticks; the server remembers at most `memory` releases. Mooncakes (MooncakeItem), `mooncake_count`
 # a batch in the Cooking Pot, give `mooncake_food`, and Luck for `mooncake_luck_ticks` when eaten outdoors on a
 # full-moon night (`night` on the overworld clock, the first night of eight).
 LANTERNS = {"item": "sky_lantern", "display": "Sky Lantern", "entity": "sky_lantern", "default_colour": 0xE8642A,
+            "dye_recipe": "minecraft:crafting_dye", "dye_group": "dyed_sky_lantern", "wash_tag": "minecraft:cauldron_can_remove_dye",
             "rise": 0.035, "wind": 0.015, "wind_period": 72000, "lifetime": 2400, "lifetime_spread": 600, "fade_ticks": 100,
             "per_craft": 2, "festival_lanterns": 8, "festival_radius": 32, "festival_window": 2400, "festival_cooldown": 24000,
             "luck_ticks": 6000, "memory": 256,
@@ -1839,6 +1968,7 @@ SICKLE_PATTERN = [" M ", "  M", "SM "]
 # Cooking: every cooked food works in the furnace, smoker and on a campfire (vanilla timings).
 COOKING = {
     "pan_de_muerto": {"input": "pan_de_muerto_dough", "xp": 0.35},
+    "roasted_acorns": {"input": "acorn", "xp": 0.2},
     "roast_turkey": {"input": "raw_turkey", "xp": 0.35},
     "roasted_corn": {"input": "corn", "xp": 0.35},
     "popcorn": {"input": "corn_kernels", "xp": 0.1},
@@ -2403,7 +2533,7 @@ def planted_blocks():
 def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"]] + giant_blocks()
-            + [potted(m) for m in MUMS] + [MAZE["finish"], MAZE["corn"]] + plants.itemless())
+            + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless())
 
 
 def all_blocks():
@@ -2414,7 +2544,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + plants.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks())
 
 
 def all_items():
@@ -2425,7 +2555,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + plants.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items())
 
 
 def owns(entry_id):
@@ -2456,7 +2586,7 @@ def textures():
         out += [f"{info['block'].removesuffix('_crop')}_stage{n}" for n in sorted(set(info["stages"]))]
     out += [w["texture"] for w in WILD_CROPS.values() if w["texture"] not in out]
     out += [f"{gourd}_{part}" for gourd in GOURDS for part in ("side", "top")] + STEM_TEXTURES + CRANBERRY["stages"]
-    return out + EQUIPMENT_TEXTURES + TREE_TEXTURES + DECOR_TEXTURES + halloween_textures() + plants.textures()
+    return out + EQUIPMENT_TEXTURES + TREE_TEXTURES + DECOR_TEXTURES + halloween_textures() + graveyard.textures() + plants.textures()
 
 
 EQUIPMENT_TEXTURES = ["trellis", "trellis_post", "cooking_pot_side", "cooking_pot_rim", "cooking_pot_empty", "cooking_pot_soup"]
@@ -2478,3 +2608,30 @@ SHAPELESS += [{"id": "marigold_petals", "inputs": ["jugcraft:marigold"], "result
                                                "minecraft:light_blue_dye"], "result": "sugar_skull", "count": 2, "category": "building"},
               {"id": "pan_de_muerto_dough", "inputs": ["minecraft:wheat", "minecraft:wheat", "minecraft:wheat", "minecraft:egg",
                                                        "minecraft:sugar"], "result": "pan_de_muerto_dough", "count": 2, "category": "misc"}]
+
+# Fall additions 22: a flying broomstick is a witch's broom anointed with Flying Ointment and fletched with feathers.
+SHAPELESS += [{"id": BROOMSTICK["item"], "inputs": BROOMSTICK["inputs"], "result": BROOMSTICK["item"], "count": 1, "category": "misc"}]
+
+# Fall additions 23: silver against werewolves. A silver dagger; silver-tipped arrows; a werewolf's pelt laid out as a rug
+# or cut into leather.
+SHAPED += [{"id": WEREWOLF["dagger"], "pattern": ["S", "T"], "key": {"S": "#c:ingots/silver", "T": "minecraft:stick"},
+            "result": WEREWOLF["dagger"], "count": 1, "category": "equipment", "features": ["silver"]},
+           ] + [{"id": k["rug"], "pattern": ["PP"], "key": {"P": f"jugcraft:{k['pelt']}"}, "result": k["rug"], "count": 1,
+                 "category": "building"} for k in WEREWOLF["kinds"].values()]
+SHAPELESS += [{"id": WEREWOLF["arrow"], "inputs": ["#c:nuggets/silver"] + ["minecraft:arrow"] * 4, "result": WEREWOLF["arrow"], "count": 4,
+               "category": "equipment", "features": ["silver"]},
+              ] + [{"id": f"leather_from_{k['pelt']}", "inputs": [f"jugcraft:{k['pelt']}"], "result": "minecraft:leather", "count": 2,
+                    "category": "misc"} for k in WEREWOLF["kinds"].values()]
+# The fall fair midway's recipes (tools/midway.py).
+SHAPED += midway.SHAPED
+SHAPELESS += midway.SHAPELESS
+# The Ferris wheel's recipe (tools/ferris_wheel.py).
+SHAPED += ferris_wheel.SHAPED
+# The piñata party's recipes (tools/pinata.py).
+SHAPED += pinata.SHAPED
+SHAPELESS += pinata.SHAPELESS
+# The hot-air balloon fiesta's recipes (tools/hot_air_balloon.py).
+SHAPED += hot_air_balloon.SHAPED
+SHAPELESS += hot_air_balloon.SHAPELESS
+# The leaf blower's recipe (tools/leaf_blower.py).
+SHAPED += leaf_blower.SHAPED

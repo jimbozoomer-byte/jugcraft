@@ -20,6 +20,8 @@
     "jugcraft:scarecrow",
     "jugcraft:ornamental_corn_bundle",
     "jugcraft:gourd_birdhouse",
+    "jugcraft:high_striker",
+    "jugcraft:ring_toss",
     "jugcraft:regatta_flag",
     "jugcraft:regatta_buoy",
     "jugcraft:judging_stand",
@@ -60,6 +62,7 @@
     "jugcraft:spinning_wheel",
     "jugcraft:spirit_board",
     "jugcraft:theremin",
-    "jugcraft:ofrenda"
+    "jugcraft:ofrenda",
+    "jugcraft:lych_gate"
   ]
 }
