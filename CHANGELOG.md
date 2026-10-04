@@ -16,6 +16,10 @@ No numbered release yet. Everything below is on `main`.
 - Keys joined by Hermite splines so the motion flows through them. Timed on vanilla's own swing, so there is no networking. Client only, with no allocation per frame and the arms only beyond 32 blocks; four client mixins.
 - Learned from the combat animation mods and packs the owner sent (Better Combat, Malfu, Player Animation Library, Fresh Animations and Fresh Moves, Mo' Bends, NdRz's weapons); nothing of theirs is used. Record: [arms-motion.md](docs/features/arms-motion.md).
 
+### Unmerged: Rocket launcher, batch 41
+- **Rocket launcher** with **high-explosive** and **homing rockets** (rocket workshop). Rockets fly straight, burst on impact and hurt living things only: no block is ever broken. Homing rockets lock on to the hostile mob nearest the crosshair and steer into it.
+- Handbook page, two game tests. Record: [rocket-launcher.md](docs/features/rocket-launcher.md).
+
 ### Unmerged: Zipline, batch 40
 - **Zipline anchors** and the **line-throwing rocket:** fire a steel line between two anchors up to 96 blocks apart with a clear path, then use an anchor to ride the line to the other end. Steeper lines are faster; sneak to let go.
 - Handbook page, game test. Record: [zipline.md](docs/features/zipline.md).

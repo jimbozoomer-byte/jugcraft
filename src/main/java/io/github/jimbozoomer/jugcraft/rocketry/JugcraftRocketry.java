@@ -86,6 +86,11 @@ public final class JugcraftRocketry {
 	public static Block ZIPLINE_ANCHOR;
 	public static BlockEntityType<ZiplineAnchorBlockEntity> ZIPLINE_ANCHOR_ENTITY;
 	public static EntityType<ZiplineRider> ZIPLINE_RIDER;
+	/** Batch 41: the rocket launcher. */
+	public static Item ROCKET_LAUNCHER;
+	public static Item HE_ROCKET;
+	public static Item HOMING_ROCKET;
+	public static EntityType<CombatRocket> COMBAT_ROCKET;
 
 	private record Flight(ServerLevel level, UUID player, String name, RocketItem.Kind kind, Vec3 at, long due) {
 	}
@@ -117,6 +122,7 @@ public final class JugcraftRocketry {
 		ILLUMINATION_FLARE = rocket("illumination_flare", RocketItem.Kind.ILLUMINATION);
 		registerPost();
 		registerZipline();
+		registerLauncher();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> ITEMS.forEach(output::accept));
 		ServerTickEvents.END_SERVER_TICK.register(JugcraftRocketry::tick);
 		ServerTickEvents.END_SERVER_TICK.register(RocketPost::tick);
@@ -161,6 +167,28 @@ public final class JugcraftRocketry {
 		ZIPLINE_RIDER = Registry.register(BuiltInRegistries.ENTITY_TYPE, riderKey, EntityType.Builder
 				.<ZiplineRider>of(ZiplineRider::new, MobCategory.MISC).sized(0.001F, 0.001F).noSummon()
 				.clientTrackingRange(10).updateInterval(1).build(riderKey));
+	}
+
+	/** Batch 41: the rocket launcher, its two rockets and the rocket in flight. */
+	private static void registerLauncher() {
+		ROCKET_LAUNCHER = item("rocket_launcher", properties -> new RocketLauncherItem(properties.stacksTo(1)));
+		HE_ROCKET = described("he_rocket");
+		HOMING_ROCKET = described("homing_rocket");
+		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("combat_rocket"));
+		COMBAT_ROCKET = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder
+				.<CombatRocket>of(CombatRocket::new, MobCategory.MISC).sized(0.3F, 0.3F)
+				.clientTrackingRange(8).updateInterval(2).build(key));
+	}
+
+	/** A plain item with a grey tooltip line, {@code tooltip.jugcraft.<path>}. */
+	private static Item described(String path) {
+		return item(path, properties -> new Item(properties.stacksTo(16)) {
+			@Override
+			public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+					Consumer<Component> tooltip, TooltipFlag flag) {
+				tooltip.accept(Component.translatable("tooltip.jugcraft." + path).withStyle(ChatFormatting.GRAY));
+			}
+		});
 	}
 
 	private static Item rocket(String path, RocketItem.Kind kind) {

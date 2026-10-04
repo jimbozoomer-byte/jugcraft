@@ -3833,6 +3833,16 @@
             "Use either anchor with an empty hand to ride the line to the other end, hanging below it. A steeper drop is faster. Sneak to let go early (you fall from there).",
             "Breaking either anchor takes the line down. Each anchor holds one line."
           ]
+        },
+        {
+          "title": "Rocket Launcher",
+          "icon": "jugcraft:rocket_launcher",
+          "text": [
+            "The rocket launcher fires a rocket from your inventory (the other hand first), straight and fast. One shot every two seconds.",
+            "High-explosive rockets (four from two solid propellant, two guncotton and a rocket casing in the rocket workshop) burst hard where they hit: twelve hearts at the centre, falling off over 5 blocks.",
+            "Homing rockets (with a guidance unit instead of the casing) lock on to the hostile mob nearest your crosshair within 48 blocks, if you can see it, and steer into it. Their blast is smaller.",
+            "Like grenades, rockets hurt living things only: they never break, move or burn a block."
+          ]
         }
       ]
     },

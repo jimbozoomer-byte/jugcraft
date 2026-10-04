@@ -60,4 +60,4 @@ Not applicable.
 
 ## Rollout and open questions
 - A visible trolley model could replace the invisible one.
-- Next rocketry batches: the rocket launcher (damage only), booster rails, and liquid fuels (kerosene, liquid oxygen).
+- Next rocketry batches: the rocket launcher (batch 41, [rocket-launcher.md](rocket-launcher.md)), booster rails, and liquid fuels (kerosene, liquid oxygen).
