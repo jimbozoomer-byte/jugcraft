@@ -254,5 +254,8 @@ def feature_of(entry_id):
     import dieselworks
     if entry_id in dieselworks.blocks():
         return "machines"
+    import zeppelin
+    if entry_id in zeppelin.ITEMS:
+        return "machines"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)

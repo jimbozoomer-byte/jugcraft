@@ -134,9 +134,9 @@ No numbered release yet. Everything below is on `main`.
 
 
 
-
-
-
+### Unmerged: Zeppelin, batch 46
+- **Zeppelin:** a rideable dieselpunk airship for four. You steer it with the movement keys, jump to climb and sprint to sink. It burns diesel or kerosene from buckets and has a 27-slot cargo hold. It hovers where it is left and sinks gently when out of fuel. The server flies it from the pilot's keys.
+- Two game tests and a screenshot scene. Record: [zeppelin.md](docs/features/zeppelin.md).
 
 ### Unmerged: Dieselworks, batch 45
 - 25 building blocks in the giants' look: rust, riveted, patina, perforated, red iron and copper dome plate (most with slabs and stairs), riveted band, skid iron, ribbed pillars, see-through rust grating for catwalks, steel I-beams, porthole windows and amber cage lamps.

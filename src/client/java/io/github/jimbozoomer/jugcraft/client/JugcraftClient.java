@@ -61,6 +61,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		RocketPackClient.register();
 		BroomstickClient.register();
 		BalloonClient.register();
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN, ZeppelinRenderer::new);
+		ZeppelinClient.register();
 		ArmsMotion.load();
 		TwoHandedInput.register();
 		EntityRendererRegistry.register(JugcraftWeapons.GRENADE, ThrownItemRenderer::new);

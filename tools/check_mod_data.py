@@ -36,6 +36,7 @@ import gas_storage
 import control_electronics
 import rocketry
 import dieselworks
+import zeppelin
 import gear
 import arms
 import plastic
@@ -310,7 +311,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in zeppelin.ITEMS:
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -508,7 +509,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + list(zeppelin.ITEMS)
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -650,6 +651,19 @@ def check_control_electronics():
     for rgb in control_electronics.CHANNEL_COLORS.values():
         if "0x%02X%02X%02X" % rgb not in screen:
             err(f"LogicControllerScreen.COLORS lacks channel colour {rgb}")
+
+
+def check_zeppelin():
+    """airship/Zeppelin.java against tools/zeppelin.py: the flight, fuel and cargo numbers."""
+    java = (JAVA_ROOT / "airship" / "Zeppelin.java").read_text(encoding="utf-8")
+    for const in ("MAX_SPEED", "ACCELERATION", "CLIMB", "TURN", "DRIFT_SINK", "FUEL_TANK", "FUEL_PER_BUCKET",
+                  "FUEL_PER_SECOND", "SEATS", "CARGO_SLOTS", "HEALTH"):
+        value = getattr(zeppelin, const)
+        literal = f"{value}F" if const in ("TURN",) else str(value)
+        if f" {const} = {literal};" not in java:
+            err(f"Zeppelin.{const} differs from tools/zeppelin.py ({literal})")
+    if not (ASSETS / "zeppelin_quads.json").is_file():
+        err("assets/jugcraft/zeppelin_quads.json is missing: run tools/generate_material_data.py")
 
 
 def check_dieselworks():
@@ -5177,7 +5191,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(zeppelin.ITEMS)
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
@@ -5203,6 +5217,7 @@ def main():
     check_control_electronics()
     check_rocketry()
     check_dieselworks()
+    check_zeppelin()
     check_plastic()
     check_seasons()
     check_alpine()

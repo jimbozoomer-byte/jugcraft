@@ -319,6 +319,20 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_dieselworks");
 
+			// The zeppelin (batch 46), moored over the Dieselworks wall, seen from further back.
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				io.github.jimbozoomer.jugcraft.airship.Zeppelin zeppelin = new io.github.jimbozoomer.jugcraft.airship.Zeppelin(
+						io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN, overworld);
+				zeppelin.snapTo(x - 18.5, y + 7, z - 14.5, 90.0F, 0.0F);
+				zeppelin.setFuel(io.github.jimbozoomer.jugcraft.airship.Zeppelin.FUEL_TANK);
+				overworld.addFreshEntity(zeppelin);
+			});
+			server.runCommand("tp @p %d %d %d 180 -12".formatted(x - 19, y + 2, z + 9));
+			context.waitTicks(40);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_zeppelin");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
