@@ -149,6 +149,10 @@ def write_all(write, assets, data, lang, condition):
     by_tag["chest_armor"].append(f"{MOD}:scuba_tank")
     by_tag["foot_armor"].append(f"{MOD}:free_runners")
     by_tag["swords"].append(f"{MOD}:power_katana")
+    # Fall addition 23's silver dagger is a sword too. It is added here, not by tools/werewolf_data.py's tags, because
+    # the shared tag writer replaces a whole file and would drop every sword above.
+    from agriculture import WEREWOLF
+    by_tag["swords"].append(f"{MOD}:{WEREWOLF['dagger']}")
     by_tag.setdefault("enchantable/bow", []).append(f"{MOD}:power_bow")
     import exosuit
     for tag, values in exosuit.item_tags().items():

@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -93,10 +94,19 @@ public class CarvedPumpkinBlock extends BaseEntityBlock {
 		return new CarvedPumpkinBlockEntity(pos, state);
 	}
 
-	/** A torch (or a soul torch) lights a carved pumpkin that has something carved out to shine through. */
+	/**
+	 * A torch (or a soul torch) lights a carved pumpkin that has something carved out to shine through. A spark (a Wisp in
+	 * a Jar or Ectoplasm) wakes one with a face into a {@link Pumpkling}.
+	 */
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
 			InteractionHand hand, BlockHitResult hit) {
+		if (stack.is(Pumpkling.SPARKS) && player.mayBuild() && Pumpkling.wakeable(level, pos)) {
+			if (level instanceof ServerLevel server) {
+				Pumpkling.wake(server, pos, player, hand);
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (!isTorch(stack) || state.getValue(LIT) || state.getValue(GLOW) == 0) {
 			// Only a truly empty hand takes the torch out; anything else (the knife, a block) does its own thing.
 			return stack.isEmpty() ? InteractionResult.TRY_WITH_EMPTY_HAND : InteractionResult.PASS;
