@@ -69,7 +69,7 @@ public final class Trenchworks {
 			case "family" -> {
 				boolean sand = id.equals("sandbags");
 				BlockBehaviour.Properties base = sand
-						? BlockBehaviour.Properties.ofFullCopy(Blocks.WHITE_WOOL).mapColor(MapColor.SAND).sound(SoundType.WOOL)
+						? BlockBehaviour.Properties.of().mapColor(MapColor.SAND).sound(SoundType.WOOL)
 						: BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).mapColor(MapColor.WOOD);
 				Block full = block(id, new Block(properties(id, base.strength(hardness, blast))));
 				block(id + "_slab", new SlabBlock(properties(id + "_slab", BlockBehaviour.Properties.ofFullCopy(full))));
