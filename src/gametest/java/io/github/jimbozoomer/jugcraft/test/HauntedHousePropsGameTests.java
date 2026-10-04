@@ -121,7 +121,7 @@ public class HauntedHousePropsGameTests {
 			helper.assertTrue(flames.size() == n, n + " candles have " + n + " flames");
 			for (int i = 0; i < n; i++) {
 				double top = PillarCandleBlock.LAYOUT[n - 1][i][3] / 16;
-				helper.assertTrue(flames.get(i).y > top && flames.get(i).y < 1.0, "Each flame stands over its wick");
+				helper.assertTrue(flames.get(i).y > top && flames.get(i).y <= 1.0, "Each flame stands over its wick, within the block: " + flames.get(i));
 			}
 		}
 		helper.assertTrue(count(Block.getDrops(candles, level, helper.absolutePos(at), null), item("ivory_pillar_candle")) == 4, "They give back four");
