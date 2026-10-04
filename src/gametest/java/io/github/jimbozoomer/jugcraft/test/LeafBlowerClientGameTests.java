@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -23,14 +24,10 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Client game test for the leaf blower (fall addition 30): a lawn strewn with leaf piles in front of a fence; the
- * blower held, seen from the side; blowing, the piles herded up the lawn; the heap against the fence; vacuuming it up;
- * and the blower itself up close. The player stays where they blow while the camera watches from an invisible armor
- * stand. CI job {@code client}.
+ * blower held, over its user's shoulder; blowing, the piles herded up the lawn; the heap against the fence, from an
+ * invisible armor stand; vacuuming it up; and the blower itself up close. CI job {@code client}.
  */
 public class LeafBlowerClientGameTests implements FabricClientGameTest {
-	/** The side view: east of the lawn, looking west across the player and up to the fence. */
-	private static final Vec3 SIDE = new Vec3(7.5, 0.5, -2.5);
-
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		try (TestSingleplayerContext singleplayer = context.worldBuilder()
@@ -67,12 +64,15 @@ public class LeafBlowerClientGameTests implements FabricClientGameTest {
 			stand(context, singleplayer, x, y, z + 1, 180, 25);
 			context.waitTicks(100);
 
-			watchFrom(context, singleplayer, origin, SIDE, 90.0F, 10.0F, "jugcraft_leaf_blower");
+			// The game draws its own player only from their own camera, so these are over their shoulder.
+			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
+			context.waitTicks(10);
+			context.takeScreenshot("jugcraft_leaf_blower");
 
-			// Blowing: hold use. Seen from the side partway through, then the heap it makes against the fence.
+			// Blowing: hold use. Partway through, then the heap it makes against the fence, from a camera stand.
 			context.getInput().holdKey(options -> options.keyUse);
 			context.waitTicks(40);
-			watchFrom(context, singleplayer, origin, SIDE, 90.0F, 10.0F, "jugcraft_leaf_blower_blowing");
+			context.takeScreenshot("jugcraft_leaf_blower_blowing");
 			context.waitTicks(80);
 			context.getInput().releaseKey(options -> options.keyUse);
 			watchFrom(context, singleplayer, origin, new Vec3(4.5, 1.5, -1.5), 135.0F, 30.0F, "jugcraft_leaf_blower_heap");
@@ -81,17 +81,18 @@ public class LeafBlowerClientGameTests implements FabricClientGameTest {
 			stand(context, singleplayer, x, y, z - 2, 180, 35);
 			context.getInput().holdKey(options -> options.keyShift);
 			context.getInput().holdKey(options -> options.keyUse);
-			context.waitTicks(30);
-			watchFrom(context, singleplayer, origin, new Vec3(6.5, 0.5, -3.5), 90.0F, 15.0F, "jugcraft_leaf_blower_vacuum");
+			context.waitTicks(16);
+			context.takeScreenshot("jugcraft_leaf_blower_vacuum");
 			context.getInput().releaseKey(options -> options.keyUse);
 			context.getInput().releaseKey(options -> options.keyShift);
+			context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 
 			// The blower itself, twice life size, laid on its side; seen from the side.
 			server.runCommand(String.format(Locale.ROOT,
 					"summon minecraft:item_display %.1f %.1f %.1f {item:{id:\"jugcraft:%s\",count:1},item_display:\"fixed\","
 							+ "transformation:{left_rotation:[-0.7071f,0f,0f,0.7071f],right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[2f,2f,2f]}}",
 					x - 6.5, y + 1.8, z + 4.5, LeafBlowerItem.ID));
-			watchFrom(context, singleplayer, origin, new Vec3(-3.0, 0.0, 4.5), 90.0F, 0.0F, "jugcraft_leaf_blower_model");
+			watchFrom(context, singleplayer, origin, new Vec3(-4.8, 0.0, 4.5), 90.0F, 0.0F, "jugcraft_leaf_blower_model");
 		}
 	}
 
@@ -103,8 +104,8 @@ public class LeafBlowerClientGameTests implements FabricClientGameTest {
 	}
 
 	/**
-	 * Looks through an invisible armor stand at {@code at} (from the origin) along yaw and pitch, so the player can go on
-	 * blowing while the camera stands elsewhere; then gives the camera back.
+	 * Looks through an invisible armor stand at {@code at} (from the origin) along yaw and pitch, then gives the camera
+	 * back. The game doesn't draw its own player from another entity's camera, so this is for views without them.
 	 */
 	private static void watchFrom(ClientGameTestContext context, TestSingleplayerContext singleplayer, BlockPos origin, Vec3 at, float yaw,
 			float pitch, String name) {

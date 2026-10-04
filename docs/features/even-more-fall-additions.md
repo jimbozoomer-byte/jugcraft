@@ -763,7 +763,7 @@ The 8 new game tests (`LeafBlowerGameTests`), on a stone floor in an open arena,
 7. sneaking, it takes up a layer of a pile in reach into the inventory, leaves one out of reach, and draws an item in;
 8. the recipe and advancement load.
 
-`LeafBlowerClientGameTests` takes screenshots, from an invisible camera stand while the test player holds use: the blower held, seen from the side; blowing a lawn of leaf piles up towards a fence; the heap they make against it; vacuuming it up, sneaking; and the blower itself twice life size.
+`LeafBlowerClientGameTests` takes screenshots: the blower held, over its user's shoulder at the foot of a lawn of leaf piles; blowing them up towards a fence (holding use); the heap they make against it, from an invisible camera stand; vacuuming it up, sneaking; and the blower itself twice life size, laid on its side.
 
 Not run: blowing by hand, and a two-client dedicated-server playtest (pushing a friend with PvP on and off).
 
