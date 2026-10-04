@@ -1374,6 +1374,147 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/** Batch 57 helper: a stone floor over the whole of a drone_tower test's 44 x 44 ground. */
+	private static void raiderFloor(GameTestHelper helper) {
+		for (int x = 0; x < 44; x++) {
+			for (int z = 0; z < 44; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+	}
+
+	private static void killOutright(GameTestHelper helper, net.minecraft.world.entity.LivingEntity mob) {
+		mob.hurtServer(helper.getLevel(), helper.getLevel().damageSources().genericKill(), 10000.0F);
+	}
+
+	/**
+	 * Batch 57: every raider is a hostile mob (so sentries and town guards fight it), and a raider's blast hurts the pig
+	 * beside it but spares the raider standing just as close.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
+	public void raidersAreHostileAndSpareEachOther(GameTestHelper helper) {
+		raiderFloor(helper);
+		var grunt = helper.spawnWithNoFreeWill(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, new Vec3(10.5, 1, 10.5));
+		var walker = helper.spawnWithNoFreeWill(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.WALKER, new Vec3(20.5, 1, 20.5));
+		var blimp = helper.spawnWithNoFreeWill(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BLIMP, new Vec3(30.5, 8, 30.5));
+		for (Object raider : new Object[] {grunt, walker, blimp}) {
+			helper.assertTrue(raider instanceof net.minecraft.world.entity.monster.Enemy, raider + " should be a hostile mob");
+			helper.assertTrue(raider instanceof io.github.jimbozoomer.jugcraft.raiders.Raider, raider + " should be a raider");
+		}
+		var pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new Vec3(12.5, 1, 10.5));
+		Vec3 center = helper.absoluteVec(new Vec3(11.5, 1.5, 10.5));
+		io.github.jimbozoomer.jugcraft.weapons.Blast.detonate(helper.getLevel(), center, null, null,
+				io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BOMB_RADIUS, io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BOMB_DAMAGE,
+				target -> target instanceof io.github.jimbozoomer.jugcraft.raiders.Raider);
+		helper.assertTrue(grunt.getHealth() == grunt.getMaxHealth(), "A raider's blast should spare the raider");
+		helper.assertTrue(pig.getHealth() < pig.getMaxHealth(), "A raider's blast should hurt the pig");
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 57: a level 1 raid gathers its party (three grunts, a grenadier and an officer) bound for its objective; when
+	 * every raider has fallen the raid is won and the world's raid level goes up by one (to at most five).
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void raidIsWonWhenEveryRaiderFalls(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerLevel level = helper.getLevel();
+		int before = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raidLevel(level);
+		BlockPos objective = helper.absolutePos(new BlockPos(5, 1, 5));
+		var raid = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.start(level, objective, helper.absolutePos(new BlockPos(35, 1, 35)), 1,
+				level.getRandom());
+		helper.assertTrue(raid.total() == 5 && raid.members().size() == 5, "A level 1 raid should bring five raiders, not " + raid.total());
+		int[] kinds = new int[3];
+		for (java.util.UUID id : raid.members()) {
+			if (level.getEntity(id) instanceof io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry raider) {
+				kinds[raider.role().ordinal()]++;
+				helper.assertTrue(objective.equals(raider.objective()) && raid.id().equals(raider.raid()), "Each raider should know its raid");
+			}
+		}
+		helper.assertTrue(kinds[0] == 3 && kinds[1] == 1 && kinds[2] == 1, "Three grunts, a grenadier and an officer, not " + java.util.Arrays.toString(kinds));
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.active(level, raid.id()), "The raid should be under way");
+		helper.runAfterDelay(5, () -> {
+			for (java.util.UUID id : raid.members()) {
+				if (level.getEntity(id) instanceof net.minecraft.world.entity.LivingEntity raider) {
+					killOutright(helper, raider);
+				}
+			}
+		});
+		helper.succeedWhen(() -> {
+			helper.assertFalse(io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.active(level, raid.id()), "With every raider fallen the raid should end");
+			int after = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raidLevel(level);
+			helper.assertTrue(after >= Math.min(5, before + 1), "A won raid should raise the raid level from " + before + ", not leave it at " + after);
+		});
+	}
+
+	/**
+	 * Batch 57: a raid that withdraws takes its loaded raiders with it, and a raider whose raid has ended (it was
+	 * elsewhere when the raid withdrew) leaves at its next check.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
+	public void raidersWithdrawWithTheirRaid(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerLevel level = helper.getLevel();
+		var raid = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.start(level, helper.absolutePos(new BlockPos(5, 1, 5)),
+				helper.absolutePos(new BlockPos(30, 1, 30)), 1, level.getRandom());
+		var members = raid.members();
+		io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.withdraw(level, raid);
+		helper.assertFalse(io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.active(level, raid.id()), "A withdrawn raid should be over");
+		for (java.util.UUID id : members) {
+			helper.assertTrue(level.getEntity(id) == null, "Its raiders should leave with it");
+		}
+		var straggler = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, new Vec3(20.5, 1, 20.5));
+		straggler.joinRaid(java.util.UUID.randomUUID(), helper.absolutePos(new BlockPos(5, 1, 5)));
+		helper.succeedWhen(() -> helper.assertTrue(straggler.isRemoved(), "A raider whose raid is over should leave"));
+	}
+
+	/**
+	 * Batch 57: an officer rallies the raiders near them (Speed and Strength); when the officer falls, the raiders lose
+	 * heart (Weakness).
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void officerRalliesAndTheirFallRoutsTheRest(GameTestHelper helper) {
+		raiderFloor(helper);
+		var officer = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.OFFICER, new Vec3(20.5, 1, 20.5));
+		var grunt = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, new Vec3(23.5, 1, 20.5));
+		helper.runAfterDelay(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.RALLY_TICKS + 5, () -> {
+			helper.assertTrue(grunt.hasEffect(net.minecraft.world.effect.MobEffects.SPEED)
+					&& grunt.hasEffect(net.minecraft.world.effect.MobEffects.STRENGTH), "The officer should rally the grunt");
+			killOutright(helper, officer);
+			helper.assertTrue(grunt.hasEffect(net.minecraft.world.effect.MobEffects.WEAKNESS), "The officer's fall should rout the grunt");
+			helper.assertFalse(grunt.hasEffect(net.minecraft.world.effect.MobEffects.STRENGTH), "A routed raider loses the rally's strength");
+			helper.succeed();
+		});
+	}
+
+	/** Batch 57: a grenadier lobs its grenades at a player in range. */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
+	public void grenadierLobsGrenades(GameTestHelper helper) {
+		raiderFloor(helper);
+		var grenadier = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, new Vec3(10.5, 1, 20.5));
+		ServerPlayer target = helper.makeMockServerPlayerInLevel();
+		target.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		target.setPos(helper.absoluteVec(new Vec3(22.5, 1, 20.5)));
+		grenadier.setTarget(target);
+		net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(44, 26, 44);
+		helper.succeedWhen(() -> helper.assertFalse(helper.getLevel().getEntitiesOfClass(
+				io.github.jimbozoomer.jugcraft.raiders.RaiderBomb.class, area).isEmpty() && target.getHealth() == target.getMaxHealth(),
+				"The grenadier should have thrown a grenade (or hit the player) by now"));
+	}
+
+	/** Batch 57: a blimp climbs to cruise well above the player it hunts. */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
+	public void blimpCruisesOverItsQuarry(GameTestHelper helper) {
+		raiderFloor(helper);
+		var blimp = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BLIMP, new Vec3(30.5, 2, 30.5));
+		ServerPlayer target = helper.makeMockServerPlayerInLevel();
+		target.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		target.setPos(helper.absoluteVec(new Vec3(20.5, 1, 20.5)));
+		blimp.setTarget(target);
+		double start = blimp.getY();
+		helper.succeedWhen(() -> helper.assertTrue(blimp.getY() > start + 8, "The blimp should climb toward its cruising height"));
+	}
+
 	/** Coal generator -> copper cables -> electric furnace smelts raw iron. */
 	@GameTest(maxTicks = 600)
 	public void cablesCarryPower(GameTestHelper helper) {

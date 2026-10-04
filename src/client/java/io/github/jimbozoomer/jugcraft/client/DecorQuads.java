@@ -31,7 +31,8 @@ import org.jspecify.annotations.Nullable;
  * (tools/landship.py: the Landship) and decor16_quads.json (tools/decor16_data.py: the flying eyeball, its iris and its wings) and trench_quads.json
  * (tools/trenchworks.py: the searchlight's yoke, drum, lens and beam) and artillery_quads.json
  * (tools/artillery.py: the big guns and the observation balloon) and tower_gun_quads.json
- * (tools/tower_guns.py: the tower guns' plinths, turntables and barrels).
+ * (tools/tower_guns.py: the tower guns' plinths, turntables and barrels) and raider_quads.json
+ * (tools/raiders.py: the Raider Walker's and Raider Blimp's parts in raider paint).
  */
 public final class DecorQuads {
 	private static final List<Identifier> FILES = List.of(Jugcraft.id("decor_quads.json"), Jugcraft.id("decor7_quads.json"),
@@ -41,7 +42,8 @@ public final class DecorQuads {
 			Jugcraft.id("walker_quads.json"), Jugcraft.id("landship_quads.json"), Jugcraft.id("decor16_quads.json"),
 			Jugcraft.id("trench_quads.json"),
 			Jugcraft.id("artillery_quads.json"),
-			Jugcraft.id("tower_gun_quads.json"));
+			Jugcraft.id("tower_gun_quads.json"),
+			Jugcraft.id("raider_quads.json"));
 	private static @Nullable Map<String, QuadModel> models;
 
 	private DecorQuads() {

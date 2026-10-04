@@ -82,6 +82,7 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.register();
 		io.github.jimbozoomer.jugcraft.building.Fortifications.register();
 		io.github.jimbozoomer.jugcraft.building.FireControl.register();
+		io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.register();
 		JugcraftFarming.register();
 		JugcraftProspecting.register();
 		JugcraftKinetics.register();

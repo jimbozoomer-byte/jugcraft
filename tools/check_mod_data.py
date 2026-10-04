@@ -47,6 +47,7 @@ import artillery
 import tower_guns
 import fortifications
 import fire_control
+import raiders
 import gear
 import arms
 import plastic
@@ -321,7 +322,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -519,7 +520,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + fire_control.blocks() + fire_control.items() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -761,6 +762,58 @@ def check_tower_guns():
             err(f"{gun} fires an unknown shell {g['shell']}")
     if not (ASSETS / "tower_gun_quads.json").is_file():
         err("assets/jugcraft/tower_gun_quads.json is missing: run tools/generate_material_data.py")
+
+
+def check_raiders():
+    """raiders/*.java against tools/raiders.py: every kind's stats, the weapons' and raids' numbers, the party table and
+    the generated skins, paint and quads."""
+    folder = JAVA_ROOT / "raiders"
+    java = (folder / "JugcraftRaiders.java").read_text(encoding="utf-8")
+    raids = (folder / "RaiderRaids.java").read_text(encoding="utf-8")
+    for kind, (_, hp, dmg, armour, speed) in raiders.INFANTRY.items():
+        if f'infantry("{kind}", {hp}, {dmg}, {armour}, {speed:.2f});' not in java:
+            err(f"JugcraftRaiders.java does not give {kind} the stats tools/raiders.py does")
+    for kind, (_, hp, dmg, armour, speed, width, height) in raiders.MACHINES.items():
+        if f'machine("{kind}", {hp}, {dmg}, {armour}, {speed:.2f},' not in java or f".sized({width}F, {height}F)" not in java:
+            err(f"JugcraftRaiders.java does not give {kind} the stats or size tools/raiders.py does")
+    numbers = {"GRENADE_RADIUS": raiders.GRENADE_BLAST[0], "GRENADE_DAMAGE": f"{raiders.GRENADE_BLAST[1]}F",
+               "BOMB_RADIUS": raiders.BOMB_BLAST[0], "BOMB_DAMAGE": f"{raiders.BOMB_BLAST[1]}F"}
+    for const in ("GRENADE_COOLDOWN", "GRENADE_MIN_RANGE", "GRENADE_MAX_RANGE", "RALLY_TICKS", "RALLY_RADIUS", "RALLY_EFFECT",
+                  "ROUT_TICKS", "WALKER_PUNCH_COOLDOWN", "WALKER_LAUNCH_COOLDOWN", "WALKER_LAUNCH_MIN", "WALKER_LAUNCH_MAX",
+                  "BLIMP_CRUISE", "BLIMP_BOMB_COOLDOWN", "BLIMP_BOMB_REACH"):
+        numbers[const] = getattr(raiders, const)
+    for const, value in numbers.items():
+        if f" {const} = {value};" not in java:
+            err(f"JugcraftRaiders.{const} differs from tools/raiders.py ({value})")
+    for const in ("RAID_CHECK_TICKS", "SPAWN_MIN", "SPAWN_MAX", "RAID_TIMEOUT", "ABANDON_TICKS", "ABANDON_RANGE", "MAX_LEVEL"):
+        if f" {const} = {getattr(raiders, const)};" not in raids:
+            err(f"RaiderRaids.{const} differs from tools/raiders.py ({getattr(raiders, const)})")
+    if f" RAID_CHANCE = {raiders.RAID_CHANCE}F;" not in raids:
+        err(f"RaiderRaids.RAID_CHANCE differs from tools/raiders.py ({raiders.RAID_CHANCE})")
+    order = ["raider_grunt", "raider_grenadier", "raider_officer", "raider_blimp", "raider_walker"]
+    table = ", ".join("{" + ", ".join(str(raiders.party(level)[k]) for k in order) + "}" for level in range(1, raiders.MAX_LEVEL + 1))
+    if f"PARTY = {{{table}}};" not in raids:
+        err(f"RaiderRaids.PARTY differs from party() in tools/raiders.py ({table})")
+    config = (JAVA_ROOT / "config" / "JugcraftConfig.java").read_text(encoding="utf-8")
+    for key, default in raiders.OPTIONS.items():
+        if f'Map.entry("{key}", "{default}")' not in config:
+            err(f"JugcraftConfig.TEXT_OPTIONS lacks {key} (default {default})")
+    for skin in raiders.SKINS:
+        if not (ASSETS / "textures" / "entity" / "raider" / f"{skin}.png").is_file():
+            err(f"textures/entity/raider/{skin}.png is missing: run tools/generate_textures.py")
+    quads = load(ASSETS / "raider_quads.json") or {}
+    for part in ("raider_walker_body", "raider_walker_core", "raider_walker_leg", "raider_walker_fist_arm",
+                 "raider_walker_drill_arm", "raider_walker_drill_bit", "raider_blimp_body", "raider_blimp_propeller"):
+        if not quads.get(part):
+            err(f"raider_quads.json lacks {part}: run tools/generate_material_data.py")
+    for quad_list in quads.values():
+        for quad in quad_list:
+            if not (ASSETS / "textures" / "block" / f"{quad['texture']}.png").is_file() and "/" not in quad["texture"]:
+                err(f"raider_quads.json uses a missing texture {quad['texture']}")
+                return
+    for entity in raiders.ENTITIES:
+        if f'"{entity}"' not in java:
+            err(f"JugcraftRaiders.java does not register {entity}")
 
 
 def check_fire_control():
@@ -5601,7 +5654,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
@@ -5636,6 +5689,7 @@ def main():
     check_tower_guns()
     check_fortifications()
     check_fire_control()
+    check_raiders()
     check_plastic()
     check_seasons()
     check_alpine()
