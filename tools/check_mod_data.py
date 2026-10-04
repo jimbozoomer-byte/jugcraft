@@ -26,6 +26,7 @@ import decor15
 import decor16
 import decor17
 import decor18
+import decor19
 import petro
 import deposits
 import seasons
@@ -2674,6 +2675,7 @@ def check_decor4(java):
     check_churchyard_ornaments(java, number, lang)
     check_haunted_house_props(java, lang)
     check_witchs_workshop(java, lang)
+    check_laboratory_larder_dining(java, lang)
 
 
 def check_churchyard_ornaments(java, number, lang):
@@ -2763,6 +2765,77 @@ def check_haunted_house_props(java, lang):
         err("DecorQuads.java must read decor16_quads.json")
     if "FLYING_EYEBALL_ENTITY, FlyingEyeballRenderer::new" not in (client / "JugcraftClient.java").read_text(encoding="utf-8"):
         err("JugcraftClient.java must draw the flying eyeball")
+
+
+def check_laboratory_larder_dining(java, lang):
+    """Halloween decorations batch 19, the Laboratory, the Larder and the Dining Room: Java's numbers match
+    tools/decor19.py; each block is registered, named, drawn on its texture, drops and has its recipe; the renderers'
+    quads are generated."""
+    def number(source, name):
+        match = re.search(rf"\b{name} = (-?[\d.]+)[FLD]?;", java.get(source, ""))
+        return float(match.group(1)) if match else None
+
+    harness, chair, light, clock = decor19.HARNESS, decor19.CHAIR, decor19.WITCHLIGHT, decor19.CLOCK
+    expected = {("LightningHarnessBlock", "PULSE"): harness["pulse"], ("LightningHarnessBlock", "COIL_RANGE"): harness["coil_range"],
+                ("LightningHarnessBlock", "STRIKE_REACH"): harness["strike_reach"], ("LightningHarnessBlock", "TABLE_REACH"): harness["table_reach"],
+                ("LightningHarnessBlock", "CHECK_TICKS"): harness["check_ticks"], ("LightningHarnessBlock", "ARC_TICKS"): harness["arc_ticks"],
+                ("LightningHarnessBlock", "COOLDOWN_TICKS"): harness["cooldown_ticks"], ("LabTableBlock", "WAKE_TICKS"): harness["wake_ticks"],
+                ("CrawlingHandBlock", "LAP_TICKS"): decor19.HAND["lap_ticks"], ("SilkCocoonBlockEntity", "SLOTS"): decor19.COCOON["slots"],
+                ("SilkCocoonBlock", "WRIGGLE_TICKS"): decor19.COCOON["wriggle_ticks"], ("SilkSpoolStackBlock", "SPOOLS"): decor19.SPOOLS["spools"],
+                ("HauntedDiningChairBlock", "SEAT"): chair["seat"], ("HauntedDiningChairBlock", "REACH"): chair["reach"],
+                ("HauntedDiningChairBlock", "CHECK_TICKS"): chair["check_ticks"], ("HauntedDiningChairBlock", "OUT_TICKS"): chair["out_ticks"],
+                ("HauntedDiningChairBlock", "SLIDE"): chair["slide"], ("FloatingTableSettingBlock", "LIGHT"): decor19.SETTING["light"],
+                ("GrandfatherClockBlock", "HOUR_TICKS"): clock["hour_ticks"], ("GrandfatherClockBlock", "PULSE_TICKS"): clock["pulse_ticks"],
+                ("GrandfatherClockBlock", "FACE_TICKS"): clock["face_ticks"], ("GrandfatherClockBlock", "STRIKE_GAP"): clock["strike_gap"],
+                ("Witchlights", "ASLEEP"): light["asleep"], ("Witchlights", "AWAKE"): light["awake"], ("Witchlights", "RANGE"): light["range"],
+                ("Witchlights", "LINGER_TICKS"): light["linger_ticks"], ("Witchlights", "FADE_TICKS"): light["fade_ticks"],
+                ("Witchlights", "CHECK_TICKS"): light["check_ticks"], ("HarvestMoonLampBlock", "LIGHT"): decor19.MOON["light"]}
+    for (source, name), value in expected.items():
+        found = number(source, name)
+        if found is None or abs(found - value) > 1e-9:
+            err(f"{source}.{name} = {found} differs from tools/decor19.py ({value})")
+    slow = re.search(r"SLOW = new Vec3\(([\d.]+), ([\d.]+), ([\d.]+)\)", java.get("WebDrapeBlock", ""))
+    if not slow or [float(v) for v in slow.groups()] != decor19.DRAPE["slow"]:
+        err("WebDrapeBlock.SLOW differs from tools/decor19.py DRAPE")
+    for enum, names in (("FloatingTableSettingBlock", decor19.SETTINGS), ("YardSilhouetteBlock", decor19.FIGURES),
+                        ("Witchlights", decor19.WITCHLIGHT_COLOURS)):
+        for name in names:
+            if not re.search(rf"\b{name.upper()}\b", java.get(enum, "")):
+                err(f"{enum} has no {name.upper()} to match tools/decor19.py")
+    main = java.get("JugcraftAgriculture", "")
+    if "registerLaboratoryLarderDining();" not in main:
+        err("JugcraftAgriculture.java must call registerLaboratoryLarderDining()")
+    for block in decor19.blocks():
+        if f'"{block}"' not in main:
+            err(f"JugcraftAgriculture.java does not register {block}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"{block} has no name")
+        if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
+            err(f"{block} has no loot table")
+        if not (ASSETS / "textures" / "block" / f"{block}.png").is_file():
+            err(f"{block} has no texture")
+    for recipe in decor19.SHAPED + decor19.SHAPELESS:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"The {recipe['id']} recipe is missing")
+    drawn = load(ASSETS / "decor19_quads.json") or {}
+    wanted = (["crawling_hand", "lab_table_arms", "lab_table_eyes", "silk_cocoon", "spiderling", "haunted_dining_chair",
+               "setting_flame", "clock_hour_hand", "clock_minute_hand", "clock_pendulum", "clock_ghost_face", "witchlight_wisp",
+               "witchlight_glow"] + [f"crawling_hand_finger_{i}" for i in range(4)] + [f"silk_spool_silk_{i}" for i in range(decor19.SPOOLS["spools"])]
+              + [f"clock_moon_{p}" for p in range(8)] + [f"harvest_moon_face_{p}" for p in range(8)]
+              + [f"setting_{piece}" for piece in ("plate", "cutlery", "goblet", "candlestick", "saucer", "cup", "teapot", "platter")]
+              + [f"silhouette_{f}" for f in decor19.FIGURES] + [f"silhouette_{f}_eyes" for f in decor19.FIGURES])
+    for name in wanted:
+        if not drawn.get(name):
+            err(f"assets/{MOD}/decor19_quads.json has no {name}")
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    if '"decor19_quads.json"' not in (client / "DecorQuads.java").read_text(encoding="utf-8"):
+        err("DecorQuads.java must load decor19_quads.json")
+    registered = (client / "JugcraftClient.java").read_text(encoding="utf-8")
+    for renderer in ("LightningHarnessRenderer", "CrawlingHandRenderer", "SilkCocoonRenderer", "EggSacRenderer", "SilkSpoolRenderer",
+                     "DiningChairRenderer", "TableSettingRenderer", "GrandfatherClockRenderer", "WitchlightRenderer",
+                     "YardSilhouetteRenderer", "HarvestMoonLampRenderer"):
+        if f"{renderer}::new" not in registered:
+            err(f"JugcraftClient.java must register {renderer}")
 
 
 def check_witchs_workshop(java, lang):

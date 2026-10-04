@@ -23,8 +23,8 @@ import org.jspecify.annotations.Nullable;
  * its fingers walking.
  */
 public class CrawlingHandRenderer implements BlockEntityRenderer<DecorationBlockEntity, CrawlingHandRenderer.State> {
-	/** Each finger's knuckle, pixels, about which it lifts. */
-	private static final float[][] KNUCKLES = {{5.6F, 1.6F, 5.0F}, {7.3F, 1.6F, 4.4F}, {9.0F, 1.6F, 4.6F}, {10.6F, 1.6F, 5.4F}};
+	/** Each finger's knuckle, pixels, about which it lifts (tools/decor19_data.py KNUCKLES). */
+	private static final float[][] KNUCKLES = {{4.8F, 1.4F, 5.0F}, {6.4F, 1.4F, 4.4F}, {8.0F, 1.4F, 4.6F}, {9.6F, 1.4F, 5.2F}};
 	/** Half the side of the square the hand runs round, pixels. */
 	private static final float RUN = 3.0F;
 

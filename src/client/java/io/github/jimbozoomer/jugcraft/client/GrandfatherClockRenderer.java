@@ -24,7 +24,7 @@ import org.jspecify.annotations.Nullable;
  */
 public class GrandfatherClockRenderer implements BlockEntityRenderer<GrandfatherClockBlockEntity, GrandfatherClockRenderer.State> {
 	/** The dial's centre and the pendulum's pivot, in pixels from the lower half's corner. */
-	private static final float[] DIAL = {8.0F, 16.0F + 8.0F, 2.4F};
+	private static final float[] DIAL = {8.0F, 22.5F, 2.4F};
 	private static final float[] PIVOT = {8.0F, 15.0F, 4.0F};
 	private static final float SWING = 12.0F;
 

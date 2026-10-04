@@ -22,7 +22,7 @@ HARNESS = {"block": "lightning_harness", "display": "Lightning Harness", "pulse"
 CONSOLE = {"block": "brain_vat_console", "display": "Brain-Vat Console"}
 HAND = {"block": "crawling_hand", "display": "Crawling Hand", "lap_ticks": 80}
 
-COCOON = {"block": "silk_cocoon", "display": "Silk Cocoon", "slots": 9, "twitch_chance": 600, "wriggle_ticks": 20}
+COCOON = {"block": "silk_cocoon", "display": "Silk Cocoon", "slots": 9, "wriggle_ticks": 20}
 EGG_SACS = {"block": "egg_sac_cluster", "display": "Egg Sac Cluster"}
 # A Web Drape slows whoever walks through it by these factors (a cobweb's are 0.25, 0.05, 0.25).
 DRAPE = {"block": "web_drape", "display": "Web Drape", "slow": [0.6, 0.75, 0.6]}
@@ -30,9 +30,10 @@ SPOOLS = {"block": "silk_spool_stack", "display": "Silk Spool Stack", "spools": 
 
 CHAIR = {"block": "haunted_dining_chair", "display": "Haunted Dining Chair", "seat": 0.5, "reach": 2.0, "check_ticks": 20,
          "out_ticks": 100, "slide": 6.0}
-SETTING = {"block": "floating_table_setting", "display": "Floating Table Setting"}
+SETTING = {"block": "floating_table_setting", "display": "Floating Table Setting", "light": 7}
 SETTINGS = ["dinner", "tea", "feast"]
-CLOCK = {"block": "grandfather_clock", "display": "Grandfather Clock", "pulse_ticks": 4, "hour_ticks": 1000, "face_ticks": 200}
+CLOCK = {"block": "grandfather_clock", "display": "Grandfather Clock", "pulse_ticks": 4, "hour_ticks": 1000, "face_ticks": 200,
+         "strike_gap": 20}
 
 WITCHLIGHTS = {"witchlight_lamp_post": "Witchlight Lamp-Post", "witchlight_path_stake": "Witchlight Path Stake",
                "hanging_witchlight": "Hanging Witchlight"}
