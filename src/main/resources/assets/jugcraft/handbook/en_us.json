@@ -552,137 +552,149 @@
           "icon": "jugcraft:wood_paxel",
           "text": [
             "Jack of All Trades: Make a paxel.",
+            "Man-at-Arms: Forge a longsword, greatsword, rapier, mace, war hammer, glaive, halberd, spear or lance.",
             "Deep Breath: Make scuba gear and breathe under water on oxygen.",
             "Light on Your Feet: Make free runners and never take fall damage.",
-            "Charged Up: Make a power katana or power bow.",
-            "Lego My Ego: Mould coloured plastic blocks."
+            "Charged Up: Make a power katana or power bow."
           ]
         },
         {
           "title": "Milestones (7)",
-          "icon": "jugcraft:exosuit_helmet",
+          "icon": "jugcraft:white_plastic",
           "text": [
+            "Lego My Ego: Mould coloured plastic blocks.",
             "Steel Samurai: Build a piece of the powered exosuit.",
             "Masterless: Repaint your exosuit or katana in the Ronin livery.",
             "Black Gold: Fill a bucket with crude oil.",
-            "Nodding Donkey: Build a pumpjack over an oil reservoir.",
-            "Fractional Thinking: Build a distillation tower."
+            "Nodding Donkey: Build a pumpjack over an oil reservoir."
           ]
         },
         {
           "title": "Milestones (8)",
-          "icon": "jugcraft:fracking_rig",
+          "icon": "jugcraft:distillation_tower",
           "text": [
+            "Fractional Thinking: Build a distillation tower.",
             "Tight Spot: Build a fracking rig for shale oil.",
             "Diesel Power: Build a diesel generator.",
             "Spool Up: Build a gas turbine.",
-            "Top Shelf: Make premium diesel or premium gasoline in the hydrotreater.",
-            "Waste Not: Build a heat recovery unit to make power from a generator's exhaust."
+            "Top Shelf: Make premium diesel or premium gasoline in the hydrotreater."
           ]
         },
         {
           "title": "Milestones (9)",
-          "icon": "jugcraft:diesel_engine",
+          "icon": "jugcraft:heat_recovery_unit",
           "text": [
+            "Waste Not: Build a heat recovery unit to make power from a generator's exhaust.",
             "Eight Cylinders: Build a diesel engine.",
             "Fantastic Plastic: Press a plastic sheet.",
             "Bouncing Back: Make synthetic rubber.",
-            "Vinyl Revival: Make PVC resin from chlorine.",
-            "Squeaky Clean: Boil soap from lye."
+            "Vinyl Revival: Make PVC resin from chlorine."
           ]
         },
         {
           "title": "Milestones (10)",
-          "icon": "jugcraft:optical_fibre",
+          "icon": "jugcraft:soap",
           "text": [
+            "Squeaky Clean: Boil soap from lye.",
             "Light Speed: Draw borosilicate glass into optical fibre.",
             "Pin Pulled: Make a grenade.",
             "Going with the Flow: Build a flow battery.",
-            "Hit the Road: Lay asphalt, and walk faster on it.",
-            "Split Decision: Build an electrolytic cell."
+            "Hit the Road: Lay asphalt, and walk faster on it."
           ]
         },
         {
           "title": "Milestones (11)",
-          "icon": "jugcraft:sulfuric_acid_bucket",
+          "icon": "jugcraft:electrolytic_cell",
           "text": [
+            "Split Decision: Build an electrolytic cell.",
             "Oil of Vitriol: Make sulfuric acid.",
             "Green Revolution: Make fertilizer.",
             "Moonshine: Ferment crops into bioethanol.",
-            "The Bayer Way: Digest bauxite into alumina.",
-            "Clean Burn: Build a hydrogen fuel cell."
+            "The Bayer Way: Digest bauxite into alumina."
           ]
         },
         {
           "title": "Milestones (12)",
-          "icon": "jugcraft:air_separation_unit",
+          "icon": "jugcraft:fuel_cell",
           "text": [
+            "Clean Burn: Build a hydrogen fuel cell.",
             "Thin Air: Build an air separation unit.",
             "Reel Me In: Make a pneumatic grapple.",
             "Filtered: Make a gas mask.",
-            "Chemical Arsenal: Make a chlorine, smoke or thermite grenade or a flashbang.",
-            "Expanding Foam: Make a foam sprayer."
+            "Chemical Arsenal: Make a chlorine, smoke or thermite grenade or a flashbang."
           ]
         },
         {
           "title": "Milestones (13)",
-          "icon": "jugcraft:blastproof_concrete",
+          "icon": "jugcraft:foam_sprayer",
           "text": [
+            "Expanding Foam: Make a foam sprayer.",
             "Bunker Down: Cast blast-proof concrete, as blast-proof as obsidian.",
             "Field Medic: Make a first aid kit in the chemical reactor.",
             "Bread from Air: Build a synthesis converter, to make ammonia from air.",
-            "Aqua Fortis: Make nitric acid.",
-            "Kroll Call: Chlorinate titanium and melt the sponge."
+            "Aqua Fortis: Make nitric acid."
           ]
         },
         {
           "title": "Milestones (14)",
-          "icon": "jugcraft:lithium_battery_bank",
+          "icon": "jugcraft:titanium_ingot",
           "text": [
+            "Kroll Call: Chlorinate titanium and melt the sponge.",
             "Power Wall: Build a lithium battery bank.",
             "Strong Attraction: Make a neodymium magnet.",
             "Lossless (Almost): Build a magnet dynamo or magnet motor.",
-            "Pulling Strings: Pull a silicon boule in the arc furnace.",
-            "Etched in Light: Etch microchips in the lithography station."
+            "Pulling Strings: Pull a silicon boule in the arc furnace."
           ]
         },
         {
           "title": "Milestones (15)",
-          "icon": "jugcraft:processor",
+          "icon": "jugcraft:microchip",
           "text": [
+            "Etched in Light: Etch microchips in the lithography station.",
             "Central Processing: Assemble a processor.",
             "Hello, World: Build a network terminal.",
-            "Under Pressure: Build a gas holder.",
-            "Shut-Off Valve: Make a fluid valve.",
-            "Strained Relations: Make a fluid filter."
+            "In Control: Build a logic controller.",
+            "Mission Control: Build control monitor panels."
           ]
         },
         {
           "title": "Milestones (16)",
-          "icon": "jugcraft:advanced_solar_panel",
+          "icon": "jugcraft:gas_holder",
           "text": [
+            "Under Pressure: Build a gas holder.",
+            "Shut-Off Valve: Make a fluid valve.",
+            "Strained Relations: Make a fluid filter.",
             "Here Comes the Sun: Build an advanced solar panel.",
-            "Full of It: Make a tank gauge.",
-            "Concentrate: Build a solar receiver for a heliostat field.",
-            "Spool Up: Make a turbocharger for the advanced engine.",
-            "Keep It Spinning: Build a flywheel."
+            "Full of It: Make a tank gauge."
           ]
         },
         {
           "title": "Milestones (17)",
-          "icon": "jugcraft:advanced_engine",
+          "icon": "jugcraft:solar_receiver",
           "text": [
+            "Concentrate: Build a solar receiver for a heliostat field.",
+            "Spool Up: Make a turbocharger for the advanced engine.",
+            "Keep It Spinning: Build a flywheel.",
             "Four on the Floor: Build an advanced combustion engine.",
-            "King Cotton: Grow cotton.",
-            "Make It Rain: Build a sprinkler.",
-            "Silver Lining: Build an electroplating bath.",
-            "Soil Optional: Build a hydroponic bay."
+            "King Cotton: Grow cotton."
           ]
         },
         {
           "title": "Milestones (18)",
-          "icon": "jugcraft:crop_harvester",
+          "icon": "jugcraft:sprinkler",
           "text": [
+            "Make It Rain: Build a sprinkler.",
+            "Silver Lining: Build an electroplating bath.",
+            "Ice Cold: Build an ammonia chiller.",
+            "Rocket Science: Build a rocket workshop.",
+            "Eye in the Sky: Assemble a survey rocket."
+          ]
+        },
+        {
+          "title": "Milestones (19)",
+          "icon": "jugcraft:hydroponic_bay",
+          "text": [
+            "Soil Optional: Build a hydroponic bay.",
             "Reaping What You Sow: Build a crop harvester."
           ]
         }
@@ -2561,6 +2573,80 @@
           }
         },
         {
+          "title": "Arms: Swords",
+          "icon": "jugcraft:steel_longsword",
+          "text": [
+            "Bronze and steel make arms beyond the sword, each with its own way of fighting. All sweep like swords.",
+            "Longsword: a longer reach (3.25 blocks). Hold use to parry: it blocks 60% of a blow from in front, as a shield does all of it.",
+            "Greatsword: two-handed, slow and heavy, with a 3.75-block reach; a hit stops a shield blocking for 2 seconds.",
+            "Rapier: quick thrusts, two a second; its parry blocks 35%."
+          ],
+          "craft": {
+            "grid": [
+              null,
+              "jugcraft:steel_ingot",
+              null,
+              null,
+              "jugcraft:steel_ingot",
+              null,
+              "jugcraft:steel_ingot",
+              "minecraft:leather",
+              "jugcraft:steel_ingot"
+            ],
+            "result": "jugcraft:steel_longsword",
+            "count": 1
+          }
+        },
+        {
+          "title": "Arms: Maces and Hammers",
+          "icon": "jugcraft:steel_war_hammer",
+          "text": [
+            "Flanged mace: a hit stops a shield blocking for 3 seconds.",
+            "War hammer: the heaviest blow of all, knocking foes back; a hit stops a shield blocking for 5 seconds, as an axe's does.",
+            "Both take Sharpness, Smite, Bane of Arthropods, Knockback, Looting and Fire Aspect."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              "minecraft:stick",
+              "jugcraft:steel_ingot",
+              null,
+              "minecraft:stick",
+              null
+            ],
+            "result": "jugcraft:steel_war_hammer",
+            "count": 1
+          }
+        },
+        {
+          "title": "Arms: Polearms",
+          "icon": "jugcraft:steel_halberd",
+          "text": [
+            "Glaive: a blade on a pole that sweeps at 4.25 blocks.",
+            "Halberd: thrusts through every foe in line out to 4.5 blocks (not closer than 1); a hit stops a shield blocking for 3 seconds.",
+            "Spear: jab, or hold use to charge, as vanilla's spears do; faster on a horse or at a run.",
+            "Lance: a horseman's charge that hits harder and unhorses riders at lower speeds, reaching 5.5 blocks."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              "jugcraft:steel_ingot",
+              null,
+              "minecraft:stick",
+              "jugcraft:steel_ingot",
+              "minecraft:stick",
+              null,
+              null
+            ],
+            "result": "jugcraft:steel_halberd",
+            "count": 1
+          }
+        },
+        {
           "title": "Paxels",
           "icon": "jugcraft:steel_paxel",
           "text": [
@@ -3202,7 +3288,7 @@
           "icon": "jugcraft:salt",
           "text": [
             "Salt, sulfur, phosphate and bauxite get their real uses here.",
-            "Dissolve salt in water to make brine (chemical reactor), then split it in the electrolytic cell into chlorine, hydrogen and lye. Gases live only in tanks and pipes."
+            "Dissolve salt in water to make brine (chemical reactor), then split it in the electrolytic cell into chlorine, hydrogen and lye. Gases live only in tanks, pipes and gas cylinders."
           ]
         },
         {
@@ -3401,6 +3487,38 @@
           }
         },
         {
+          "title": "Ammonia Chiller",
+          "icon": "jugcraft:ammonia_chiller",
+          "text": [
+            "Ammonia boiling in its coils draws the heat out of water. Pipe ammonia into its first tank and water into its second: every 5 seconds a bucket of water freezes into a block of ice. Put four ice in its slot and it presses them into packed ice, and four packed ice into blue ice, against nine of each by crafting. Each batch loses 5 mB of ammonia. It works anywhere, even in the Nether.",
+            "Uses 24 JE/t while working. Holds 20,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:electric_motor",
+              "jugcraft:steel_plate",
+              "jugcraft:bronze_fluid_pipe",
+              "jugcraft:fluid_tank",
+              "jugcraft:bronze_fluid_pipe",
+              "jugcraft:steel_plate",
+              "minecraft:piston",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:ammonia_chiller",
+            "count": 1
+          }
+        },
+        {
+          "title": "Gas Cylinders",
+          "icon": "jugcraft:gas_cylinder",
+          "text": [
+            "A gas cylinder carries 8 buckets of one gas: hydrogen to a far-off fuel cell, ammonia to a chiller, oxygen or nitrogen into the field.",
+            "Use it on a tank, gas holder, pipe or machine to fill it from there; sneak and use it to empty it back. Its bar shows how full it is.",
+            "Used in the air with a scuba tank or a pneumatic grapple in the other hand, it tops that up with oxygen or nitrogen."
+          ]
+        },
+        {
           "title": "Grenades",
           "icon": "jugcraft:grenade",
           "text": [
@@ -3556,6 +3674,175 @@
             "result": "jugcraft:network_terminal",
             "count": 1
           }
+        },
+        {
+          "title": "Control Networks",
+          "icon": "jugcraft:sensor",
+          "text": [
+            "Data cable (optical fibre in a plastic sheath) joins sensors, relays and a logic controller. It carries no power. Channels are the sixteen dye colours: use a dye on a sensor or relay to set its channel.",
+            "A sensor goes on a tank, battery, machine or chest and reads how full it is: energy first, then fluids, then items. It gives a redstone signal like a comparator's and reports the exact percentage on its channel. Right-click it to see the reading.",
+            "A relay gives a full redstone signal on every side while the controller has its channel on. Set a machine beside it to a redstone mode and the controller runs the machine."
+          ]
+        },
+        {
+          "title": "Logic Controller",
+          "icon": "jugcraft:logic_controller",
+          "text": [
+            "Runs your factory by rules. Join sensors and relays to it with data cable, then right-click it: each of its eight rules reads \"IF channel below or above N% THEN channel ON or OFF\". Every second it averages each channel's sensors and works through the rules in order, a later rule overriding an earlier one; a channel no rule switches this time keeps its state, so two rules (off above 90%, on below 50%) leave a dead band. The strip along the bottom shows every channel's reading."
+          ]
+        },
+        {
+          "title": "The Control Room",
+          "icon": "jugcraft:control_monitor",
+          "text": [
+            "Six control monitor panels in a wall, three wide and two tall, all facing the same way, form one screen. Run a data cable from any panel to a logic controller and it shows every channel: its colour, reading, a bar, a two-minute graph and whether the controller has it on.",
+            "An alarm klaxon is switched like a relay: while its channel is on it lights up and sounds.",
+            "A control remote flips one channel by hand. Use it on a logic controller to bind it, sneak and use it to pick the channel, and use it to switch. The controller's rules may switch the channel back when their condition next holds. It works within 256 blocks of the controller."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Rocketry",
+      "icon": "jugcraft:survey_rocket",
+      "pages": [
+        {
+          "title": "Rocket Fuel",
+          "icon": "jugcraft:solid_propellant",
+          "text": [
+            "Rockets burn solid propellant: ammonium perchlorate (the oxidizer), aluminum and a rubber binder.",
+            "Ammonium perchlorate: a salt and 250 mB of ammonia in the chemical reactor make two. Iodine: eight dried kelp and 100 mB of sulfuric acid make one; with silver dust it makes silver iodide, which seeds clouds."
+          ]
+        },
+        {
+          "title": "Rocket Workshop",
+          "icon": "jugcraft:rocket_workshop",
+          "text": [
+            "Builds rockets from up to three ingredients in any slots, like the circuit assembler: solid propellant from ammonium perchlorate, aluminum and rubber; casings, nozzles and guidance units; motors; and the rockets themselves.",
+            "Uses 48 JE/t while working. Holds 20,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "minecraft:piston",
+              "jugcraft:steel_plate",
+              "minecraft:anvil",
+              "jugcraft:machine_casing",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:rocket_workshop",
+            "count": 1
+          },
+          "recipes": [
+            {
+              "in": [
+                [
+                  "jugcraft:ammonium_perchlorate",
+                  2
+                ],
+                [
+                  "jugcraft:aluminum_nugget",
+                  3
+                ],
+                [
+                  "jugcraft:rubber",
+                  1
+                ]
+              ],
+              "out": [
+                "jugcraft:solid_propellant",
+                2
+              ]
+            },
+            {
+              "in": [
+                [
+                  "jugcraft:steel_plate",
+                  3
+                ]
+              ],
+              "out": [
+                "jugcraft:rocket_casing",
+                1
+              ]
+            },
+            {
+              "in": [
+                [
+                  "jugcraft:tungsten_ingot",
+                  1
+                ],
+                [
+                  "jugcraft:steel_plate",
+                  1
+                ]
+              ],
+              "out": [
+                "jugcraft:rocket_nozzle",
+                2
+              ]
+            },
+            {
+              "in": [
+                [
+                  "jugcraft:processor",
+                  1
+                ],
+                [
+                  "jugcraft:microchip",
+                  2
+                ],
+                [
+                  "jugcraft:copper_wire",
+                  2
+                ]
+              ],
+              "out": [
+                "jugcraft:guidance_unit",
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Rockets",
+          "icon": "jugcraft:rocket_motor",
+          "text": [
+            "A rocket motor is a casing, a nozzle and two solid propellant. Fire any rocket with right-click under open sky; it rises like a firework and does its work at the top.",
+            "Survey rocket (motor, guidance unit, sensor): surveys ores and oil under 7x7 chunks. Cloud-seeding rocket (motor, two silver iodide): five minutes of rain. Clear-sky rocket (motor, two guncotton): five minutes of clear sky. Weather rockets share a two-minute cooldown.",
+            "Signal flares (four from propellant, paper and red dye) burst red and tell players within 512 blocks where they went up. Illumination flares (with glowstone) make hostile mobs within 48 blocks glow for 30 seconds."
+          ]
+        },
+        {
+          "title": "Rocket Post",
+          "icon": "jugcraft:delivery_rocket",
+          "text": [
+            "A rocket pad sends its cargo to another pad up to 4096 blocks away in the same dimension. Sneak and use a flight plan on the pad to deliver to, then put the plan, a delivery rocket (motor, casing, guidance unit) and up to nine stacks of cargo in the sending pad.",
+            "Press Launch, or give the pad a redstone pulse. It needs open sky. The flight takes three seconds plus a second for every 80 blocks; the cargo lands in the target pad's slots.",
+            "If nobody is near the target, the rocket waits and lands as soon as that area is loaded again. Hoppers load a pad from the top and sides and unload it from the bottom."
+          ]
+        },
+        {
+          "title": "Ziplines",
+          "icon": "jugcraft:line_rocket",
+          "text": [
+            "Place two zipline anchors up to 96 blocks apart with nothing solid between them. Stand within 4 blocks of one and use a line-throwing rocket while looking at the other: it strings a steel line.",
+            "Use either anchor with an empty hand to ride the line to the other end, hanging below it. A steeper drop is faster. Sneak to let go early (you fall from there).",
+            "Breaking either anchor takes the line down. Each anchor holds one line."
+          ]
+        },
+        {
+          "title": "Rocket Launcher",
+          "icon": "jugcraft:rocket_launcher",
+          "text": [
+            "The rocket launcher fires a rocket from your inventory (the other hand first), straight and fast. One shot every two seconds.",
+            "High-explosive rockets (four from two solid propellant, two guncotton and a rocket casing in the rocket workshop) burst hard where they hit: twelve hearts at the centre, falling off over 5 blocks.",
+            "Homing rockets (with a guidance unit instead of the casing) lock on to the hostile mob nearest your crosshair within 48 blocks, if you can see it, and steer into it. Their blast is smaller.",
+            "Like grenades, rockets hurt living things only: they never break, move or burn a block."
+          ]
         }
       ]
     },

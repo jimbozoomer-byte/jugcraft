@@ -37,6 +37,10 @@ TREE = {
                     "Make a piece of steel armor", "task"),
     "paxel": ("steel", [f"{tier}_paxel" for tier in ("wood", "stone", "iron", "gold", "diamond", "netherite", "bronze",
                                                       "steel")], "Jack of All Trades", "Make a paxel", "task"),
+    # Batch 42: the arms, in bronze from the bronze age on.
+    "arms": ("bronze", [f"{metal}_{kind}" for metal in ("bronze", "steel") for kind in (
+        "longsword", "greatsword", "rapier", "flanged_mace", "war_hammer", "glaive", "halberd", "spear", "lance")],
+        "Man-at-Arms", "Forge a longsword, greatsword, rapier, mace, war hammer, glaive, halberd, spear or lance", "task"),
     # Batch 27: gear and plastic blocks.
     "scuba": ("rubber", ["scuba_mask", "scuba_tank"], "Deep Breath", "Make scuba gear and breathe under water on oxygen",
               "task"),
@@ -113,6 +117,8 @@ TREE = {
     "microchip": ("silicon_boule", "microchip", "Etched in Light", "Etch microchips in the lithography station", "task"),
     "processor": ("microchip", "processor", "Central Processing", "Assemble a processor", "task"),
     "network_terminal": ("processor", "network_terminal", "Hello, World", "Build a network terminal", "goal"),
+    "logic_controller": ("network_terminal", "logic_controller", "In Control", "Build a logic controller", "task"),
+    "control_monitor": ("logic_controller", "control_monitor", "Mission Control", "Build control monitor panels", "task"),
     # Fluid logistics (batch 8).
     "gas_holder": ("electrolytic_cell", "gas_holder", "Under Pressure", "Build a gas holder", "goal"),
     "fluid_valve": ("crude_oil", "fluid_valve", "Shut-Off Valve", "Make a fluid valve", "task"),
@@ -131,6 +137,9 @@ TREE = {
     "sprinkler": ("cotton", "sprinkler", "Make It Rain", "Build a sprinkler", "task"),
     "electroplating_bath": ("electrolytic_cell", "electroplating_bath", "Silver Lining", "Build an electroplating bath",
                             "task"),
+    "ammonia_chiller": ("synthesis_converter", "ammonia_chiller", "Ice Cold", "Build an ammonia chiller", "task"),
+    "rocket_workshop": ("processor", "rocket_workshop", "Rocket Science", "Build a rocket workshop", "goal"),
+    "survey_rocket": ("rocket_workshop", "survey_rocket", "Eye in the Sky", "Assemble a survey rocket", "task"),
     "hydroponic_bay": ("crop_harvester", "hydroponic_bay", "Soil Optional", "Build a hydroponic bay", "task"),
     "crop_harvester": ("steel", "crop_harvester", "Reaping What You Sow", "Build a crop harvester", "goal"),
 }
