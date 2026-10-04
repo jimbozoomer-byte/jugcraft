@@ -86,6 +86,8 @@
     "crop_harvester": "diesel",
     "hydroponic_bay": "diesel",
     "electroplating_bath": "diesel",
+    "ammonia_chiller": "diesel",
+    "rocket_workshop": "diesel",
     "diesel_engine": "diesel",
     "wind_turbine": "diesel"
   }
