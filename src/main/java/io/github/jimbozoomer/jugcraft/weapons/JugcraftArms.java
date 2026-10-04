@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.gear.JugcraftGear;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -36,7 +37,8 @@ import net.minecraft.world.item.component.Weapon;
  * estocs, battle axes, flails, scythes, quarterstaves and pikes, each with a {@link Trait} of its own; and Arms III
  * (batch 46, docs/features/arms-iii.md): two-handed swings ({@link #TWO_HANDED}) and zweihanders, mauls, executioner's
  * swords and bills; and Arms IV (batch 47, docs/features/arms-iv.md): labryses, battleblades, war forks, kamas and war
- * picks.
+ * picks; and Arms V (batch 48, docs/features/arms-v.md): twinblades, nodachis, earthbreakers, katars, moonblades and
+ * kusarigamas, each with a weapon art ({@link #ARTS}, worked by {@link WeaponArts}).
  *
  * <p>After studying how Epic Knights and Simply Swords make, show and animate their weapons (none of their code, models
  * or art is used): every trait here is one of 26.3's own item components, so these are plain items with no per-tick
@@ -88,7 +90,14 @@ public final class JugcraftArms {
 			new Kind("battleblade", 7.0F, -3.2F, SwingAnimationType.WHACK, 20, 0.0F, 3.5F, 0.0F, 2.0F, 1, 0.5F, 0.0F, true, false),
 			new Kind("war_fork", 5.5F, -3.1F, SwingAnimationType.STAB, 18, 0.0F, 4.5F, 0.125F, 0.0F, 1, 0.0F, 0.0F, false, false),
 			new Kind("kama", 1.5F, -2.0F, SwingAnimationType.WHACK, 5, 0.0F, 2.75F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
-			new Kind("war_pick", 3.0F, -2.6F, SwingAnimationType.WHACK, 7, 0.0F, 3.0F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false));
+			new Kind("war_pick", 3.0F, -2.6F, SwingAnimationType.WHACK, 7, 0.0F, 3.0F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
+			// Arms V (batch 48): each has a weapon art (ARTS).
+			new Kind("twinblade", 4.0F, -2.8F, SwingAnimationType.WHACK, 14, 0.0F, 3.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
+			new Kind("nodachi", 6.5F, -3.2F, SwingAnimationType.WHACK, 20, 0.0F, 4.0F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
+			new Kind("earthbreaker", 9.5F, -3.45F, SwingAnimationType.WHACK, 24, 0.0F, 3.25F, 0.0F, 5.0F, 2, 1.0F, 0.0F, false, false),
+			new Kind("katar", 1.5F, -2.0F, SwingAnimationType.STAB, 5, 0.0F, 2.75F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
+			new Kind("moonblade", 6.0F, -3.1F, SwingAnimationType.WHACK, 18, 0.0F, 3.75F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
+			new Kind("kusarigama", 2.0F, -2.3F, SwingAnimationType.WHACK, 6, 0.0F, 3.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false));
 
 	/**
 	 * What an Arms II kind does besides its numbers (tools/arms.py: TRAITS), worked by {@link ArmItem} on the server:
@@ -173,7 +182,96 @@ public final class JugcraftArms {
 			Map.entry("bill", new Heavy(6, 90.0F, 3, 2)),
 			Map.entry("labrys", new Heavy(8, 100.0F, 3, 2)),
 			Map.entry("battleblade", new Heavy(7, 110.0F, 4, 2)),
-			Map.entry("war_fork", new Heavy(6, 30.0F, 2, 2)));
+			Map.entry("war_fork", new Heavy(6, 30.0F, 2, 2)),
+			Map.entry("twinblade", new Heavy(5, 140.0F, 3, 3)),
+			Map.entry("nodachi", new Heavy(7, 100.0F, 3, 2)),
+			Map.entry("earthbreaker", new Heavy(9, 80.0F, 2, 2)),
+			Map.entry("moonblade", new Heavy(6, 130.0F, 4, 2)));
+	/**
+	 * An Arms V kind's special move (tools/arms.py: ARTS; worked by {@link WeaponArts}), used with the use key: CYCLONE,
+	 * three spins striking all round; IAIDO, a dash whose cut lands a moment later on every foe passed; LEAP_SLAM, a leap
+	 * and a slam where the wielder lands; FLURRY, quick jabs too fast to be shrugged off; CRESCENT, a wave that runs ahead
+	 * through foes until a wall stops it; CHAIN_LASH, a chain thrown at the first foe in line, which is hauled in and
+	 * reaped.
+	 */
+	public enum Move {
+		CYCLONE, IAIDO, LEAP_SLAM, FLURRY, CRESCENT, CHAIN_LASH;
+
+		/** The move's name in ids and translation keys (cyclone, iaido, leap_slam ...). */
+		public String id() {
+			return name().toLowerCase(Locale.ROOT);
+		}
+	}
+
+	/**
+	 * A kind's art: its move; the ticks before it is ready again (an item cooldown); the ticks its wielder is busy with it
+	 * (the animation; for the leap, its spring); and the share of their speed it takes off them meanwhile.
+	 */
+	public record Art(Move move, int cooldown, int ticks, float slow) {
+	}
+
+	public static final Map<String, Art> ARTS = Map.ofEntries(
+			Map.entry("twinblade", new Art(Move.CYCLONE, 120, 24, 0.3F)),
+			Map.entry("nodachi", new Art(Move.IAIDO, 160, 18, 0.0F)),
+			Map.entry("earthbreaker", new Art(Move.LEAP_SLAM, 200, 8, 0.0F)),
+			Map.entry("katar", new Art(Move.FLURRY, 100, 20, 0.5F)),
+			Map.entry("moonblade", new Art(Move.CRESCENT, 140, 16, 0.5F)),
+			Map.entry("kusarigama", new Art(Move.CHAIN_LASH, 120, 16, 0.5F)));
+	/** Cyclone: CYCLONE_HITS hits from CYCLONE_FIRST, every CYCLONE_EVERY ticks, on every foe within CYCLONE_RADIUS. */
+	public static final int CYCLONE_FIRST = 6;
+	public static final int CYCLONE_EVERY = 6;
+	public static final int CYCLONE_HITS = 3;
+	public static final float CYCLONE_RADIUS = 3.0F;
+	public static final float CYCLONE_SHARE = 0.5F;
+	public static final float CYCLONE_PULL = 0.15F;
+	public static final int CYCLONE_TARGETS = 8;
+	/** Iaido: a dash from IAIDO_START for IAIDO_DASH ticks at IAIDO_SPEED; the cut lands IAIDO_DELAY ticks after it. */
+	public static final int IAIDO_START = 3;
+	public static final int IAIDO_DASH = 5;
+	public static final float IAIDO_SPEED = 1.2F;
+	public static final float IAIDO_WIDTH = 1.25F;
+	public static final int IAIDO_DELAY = 4;
+	public static final float IAIDO_SHARE = 1.3F;
+	public static final int IAIDO_TARGETS = 6;
+	public static final float IAIDO_REACH = 10.0F;
+	/** Leap slam: a spring of LEAP_UP up and LEAP_FORWARD ahead; the slam where the wielder lands, within LEAP_RADIUS. */
+	public static final float LEAP_UP = 0.8F;
+	public static final float LEAP_FORWARD = 0.5F;
+	public static final int LEAP_MIN_AIR = 4;
+	public static final int LEAP_STUCK = 12;
+	public static final int LEAP_MAX_AIR = 60;
+	public static final float LEAP_RADIUS = 3.5F;
+	public static final float LEAP_SHARE = 1.0F;
+	public static final float LEAP_EDGE = 0.5F;
+	public static final float LEAP_PER_BLOCK = 0.15F;
+	public static final float LEAP_DROP_MAX = 6.0F;
+	public static final float LEAP_LIFT = 0.45F;
+	public static final int LEAP_TARGETS = 8;
+	/** Flurry: FLURRY_JABS jabs from FLURRY_FIRST, every FLURRY_EVERY ticks, then the finish. */
+	public static final int FLURRY_FIRST = 2;
+	public static final int FLURRY_EVERY = 3;
+	public static final int FLURRY_JABS = 5;
+	public static final float FLURRY_SHARE = 0.28F;
+	public static final float FLURRY_FINISH = 0.9F;
+	public static final float FLURRY_ARC = 50.0F;
+	/** Crescent: loosed at CRESCENT_RELEASE, it runs CRESCENT_SPEED blocks a tick for CRESCENT_TICKS ticks. */
+	public static final int CRESCENT_RELEASE = 5;
+	public static final float CRESCENT_SPEED = 1.2F;
+	public static final int CRESCENT_TICKS = 10;
+	public static final float CRESCENT_WIDTH = 1.5F;
+	public static final float CRESCENT_SHARE = 0.9F;
+	public static final float CRESCENT_FADE = 0.15F;
+	public static final int CRESCENT_TARGETS = 6;
+	/** Chain lash: thrown at LASH_THROW up to LASH_RANGE blocks; the reap at LASH_REAP, within LASH_REAP_REACH. */
+	public static final int LASH_THROW = 4;
+	public static final float LASH_RANGE = 9.0F;
+	public static final float LASH_SHARE = 0.5F;
+	public static final float LASH_PULL = 0.2F;
+	public static final float LASH_PULL_MAX = 1.6F;
+	public static final int LASH_REAP = 11;
+	public static final float LASH_REAP_SHARE = 0.8F;
+	public static final float LASH_REAP_REACH = 3.5F;
+
 	/** A two-handed swing slows its wielder by this share while it is in the air. */
 	public static final float TWO_HANDED_SLOW = 0.6F;
 	/** The finishing blow of a combo is this many times as strong. */
@@ -232,6 +330,7 @@ public final class JugcraftArms {
 		}
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> ITEMS.values().forEach(item -> output.accept(item)));
 		TwoHanded.register();
+		WeaponArts.register();
 	}
 
 	/** A swung or thrust arm: the metal's durability, repair and enchantability, and the kind's traits. */

@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_katar",
+  "textures": {
+    "layer0": "jugcraft:item/steel_katar"
+  }
+}
