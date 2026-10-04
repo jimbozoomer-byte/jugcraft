@@ -57,15 +57,15 @@ public class HauntedHousePropsClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 
-			shoot(context, singleplayer, x, y + 2, z + 4, 180, 14, "jugcraft_haunted_house_props");
-			shoot(context, singleplayer, x + 1, y + 1, z - 2, 180, 8, "jugcraft_haunted_house_eyeballs");
+			shoot(context, singleplayer, x, y + 1, z + 1, 180, 10, "jugcraft_haunted_house_props");
+			shoot(context, singleplayer, x + 1, y + 1, z, 180, 8, "jugcraft_haunted_house_eyeballs");
 			watchFrom(context, singleplayer, origin, new Vec3(-2.5, 0.2, -3.0), 180.0F, 14.0F, "jugcraft_haunted_house_candles");
 			watchFrom(context, singleplayer, origin, new Vec3(4.0, 0.0, -3.0), 180.0F, 6.0F, "jugcraft_haunted_house_monster_heads");
 			watchFrom(context, singleplayer, origin, new Vec3(-3.5, 0.6, -4.0), 135.0F, -25.0F, "jugcraft_haunted_house_webs");
 			watchFrom(context, singleplayer, origin, new Vec3(-2.5, 0.6, -4.5), 180.0F, 0.0F, "jugcraft_haunted_house_plushes");
 			server.runCommand("time set 18000");
 			context.waitTicks(20);
-			shoot(context, singleplayer, x, y + 2, z + 4, 180, 14, "jugcraft_haunted_house_props_night");
+			shoot(context, singleplayer, x, y + 1, z + 1, 180, 10, "jugcraft_haunted_house_props_night");
 			server.runCommand("time set noon");
 			server.runCommand("gamerule minecraft:advance_time true");
 		}
