@@ -92,7 +92,7 @@ New code:
 ## Verification
 Automated checks run on CI's Build workflow, run 37176762103 on commit 45f11936 (all jobs passed; the screenshots added after it change only documentation):
 - `python3 scripts/check_repository.py`: pass.
-- `python3 tools/check_mod_data.py`: pass, 1177 IDs. Its new graveyard flora check compares `Mandrakes.java` with `MANDRAKE`. It checks that every sculpted model turns its elements only as block models may (one axis, 22.5 or 45 degrees) and stays within -16..32. It also checks each flora texture is 64 × 64, the vanilla-biome patches have their placed features, grasses grow into tall grasses, and Flying Ointment takes a mandrake root.
+- `python3 tools/check_mod_data.py`: pass, 1193 IDs with main merged in (1177 at the CI run). Its new graveyard flora check compares `Mandrakes.java` with `MANDRAKE`. It checks that every sculpted model turns its elements only as block models may (one axis, 22.5 or 45 degrees) and stays within -16..32. It also checks each flora texture is 64 × 64, the vanilla-biome patches have their placed features, grasses grow into tall grasses, and Flying Ointment takes a mandrake root.
 - `./gradlew build` with the game tests: pass, "All 697 required tests passed", among them:
 - `GraveyardFloraGameTests` (eight tests, all pass):
   1. every plant has its block and item; flowers are small or tall flowers with pots and dyes; the ghost pipe glows; each stands on grass (dead man's fingers on stone);

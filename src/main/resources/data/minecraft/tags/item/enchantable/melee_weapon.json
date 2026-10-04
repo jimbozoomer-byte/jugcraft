@@ -4,8 +4,20 @@
     "jugcraft:bronze_flanged_mace",
     "jugcraft:bronze_war_hammer",
     "jugcraft:bronze_halberd",
+    "jugcraft:bronze_dagger",
+    "jugcraft:bronze_estoc",
+    "jugcraft:bronze_battle_axe",
+    "jugcraft:bronze_flail",
+    "jugcraft:bronze_quarterstaff",
+    "jugcraft:bronze_pike",
     "jugcraft:steel_flanged_mace",
     "jugcraft:steel_war_hammer",
-    "jugcraft:steel_halberd"
+    "jugcraft:steel_halberd",
+    "jugcraft:steel_dagger",
+    "jugcraft:steel_estoc",
+    "jugcraft:steel_battle_axe",
+    "jugcraft:steel_flail",
+    "jugcraft:steel_quarterstaff",
+    "jugcraft:steel_pike"
   ]
 }

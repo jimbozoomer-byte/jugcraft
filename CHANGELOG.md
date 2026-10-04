@@ -13,6 +13,19 @@ No numbered release yet. Everything below is on `main`.
 - **The mandrake:** wild, or grown from its root; a ripe one screams when pulled, sickening bare-headed players within 8 blocks (Mind Your Ears). Its root makes Flying Ointment.
 - They grow in the haunted biomes and some of vanilla's. Grave vases take them by colour. Eight game tests, client screenshots. Record: [graveyard-flora.md](docs/features/graveyard-flora.md).
 
+### Unmerged: Arms II, batch 45
+- **Eight more arms** in bronze and steel, each with a trait of its own:
+  - **dagger:** quick stabs; half again as much from behind;
+  - **sabre:** 3 more damage from the saddle;
+  - **estoc:** pierces armor, up to 6 more against heavy armor;
+  - **battle axe:** chops wood as an axe and breaks a shield's guard;
+  - **flail:** a hit slows the foe for 2 seconds;
+  - **scythe:** wide sweeps, and reaps and replants ripe crops 3 by 3;
+  - **quarterstaff:** knockback and a parry;
+  - **pike:** the longest reach (5 blocks), half again against riders and their mounts.
+- Each has its own art, guard, combo and first-person strokes. None out-damages its metal's sword per second, which the data check now enforces.
+- Handbook pages, the **Armory** advancement, seven game tests. Record: [arms-ii.md](docs/features/arms-ii.md).
+
 ### The leaf blower, fall addition 30 (#139)
 - **Leaf Blower:** a dieselpunk electric leaf blower in the powered tools' olive drab, gunmetal and chrome, charged at the Charging Station (40,000 JE; 4 JE a tick blowing, 6 vacuuming).
 - **Blow** (hold use): a stream 8 blocks long blows items along and nudges mobs (other players only where PvP allows), puts out candles, and **herds leaf piles** a layer at a time into heaps against whatever stops them. Gone with the Wind.

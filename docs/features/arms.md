@@ -70,5 +70,6 @@ Not applicable: no worldgen, mobs or dimensions. Mobs do not spawn with arms.
 
 ## Rollout and open questions
 - All numbers are first values for the owner to tune.
+- Arms II (batch 45, [arms-ii.md](arms-ii.md)) adds daggers, sabres, estocs, battle axes, flails, scythes, quarterstaves and pikes, with traits worked by `ArmItem`.
 - More metals (iron, diamond, netherite and later Jugcraft alloys) would be more rows in `tools/arms.py` and art styles in `tools/arms_art.py`.
 - Custom attack animations beyond 26.3's whack and stab (an overhead hammer blow, a two-handed greatsword swing) would need client rendering code; left for a later batch if wanted.
