@@ -1,6 +1,6 @@
 # The Witching Season: twenty prop sets and two lairs
 
-Status: approved plan, not yet implemented. Each batch and each boss gets its own feature record, tests and pull request as it is built; this page is the master plan they follow and is updated when one lands.
+Status: approved plan, being built. Batch 17 is implemented in source ([witchs-workshop.md](witchs-workshop.md)); batches 18–20 and the two bosses are not started. Each batch and each boss gets its own feature record, tests and pull request as it is built; this page is the master plan they follow and is updated when one lands.
 Proposal issue: none. The owner asked for it directly on 4 October 2026 ("Lets come up with another 20 very detailed well thought out additions to add for the halloween / fall season using the first 3 images for ideas of prop sets and details … Then using the 4th and 5th images lets use those as inspiration for 2 new halloween bosses which should have their own dungeons which are accessible in their own different small pocket dimensions …"), with five reference pictures, then asked that the plan also draw on a set of pocket-dimension and animation mods they uploaded and on the Soulslike Weaponry wiki's boss page.
 Owner: @jimbozoomer-byte
 Target milestone and tier: the prop sets are Discovery and Workshops tier; the two bosses are Specialization tier (dungeon expeditions). Nothing here gates core progression.
@@ -88,6 +88,8 @@ Every set keeps to the house rules: original art painted by code (64 × 64 or la
 Each set lists its pieces, what they do, what they cost, and the checks that will prove it. Numbers are the starting values; balance can be tuned in review.
 
 ### Batch 17: the Witch's Workshop
+
+Built: [witchs-workshop.md](witchs-workshop.md) records it as made, with the few changes from this plan (sixteen candles on the chandelier, a curated list of what floats, the recipes settled).
 
 #### 1. The Horned Skull Cauldron
 *From picture 1's green cauldron with a horned skull, and picture 3's cauldron with curling green fumes.*

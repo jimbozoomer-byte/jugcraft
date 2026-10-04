@@ -93,6 +93,7 @@ public class EnchantedBroomBlockEntity extends BlockEntity {
 			}
 			double speed = EnchantedBroomBlock.PUSH_SPEED;
 			item.setDeltaMovement(to.x / flat * speed, Math.max(item.getDeltaMovement().y, 0.12), to.z / flat * speed);
+			item.needsSync = true; // Tell clients now, not at the item's next periodic update.
 			moved++;
 			any = true;
 		}

@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: The Witch's Workshop, Halloween decorations batch 17
+- The [Witching Season plan](docs/features/witching-season.md): twenty Halloween and fall prop sets from the owner's reference pictures, in four batches, then two bosses (a scythe-bearing reaper and a spider seamstress) in their own pocket-dimension lairs. What the uploaded pocket-dimension and animation mods and the Soulslike Weaponry boss page taught, and how Jugcraft does the same without new dependencies.
+- **Horned Skull Cauldron** (holds water or three bottles of one potion with nothing gained or lost; bubbles and fumes over heat; the **Brew Ladle** wafts a lasting potion onto up to four players near at a quarter duration; ingredients float in it) and the **Ember Bed** heat source.
+- **Wrought-iron candelabra**: the Floor Candelabrum, Table Candelabrum, Wall Girandole and Branching Chandelier, in six waxes and four flames, lit by flint and steel, burning arrows or redstone, with wax drips that grow while lit.
+- **Enchanted Broom** (anointed with Flying Ointment, it sweeps dropped items into a **Dustpan**) and the **Broom Rack**.
+- **Curiosity Cabinet** (nine places behind glazed doors), **Bell Jar** and **Moth Display Case** (the moths stir at night).
+- **Oddity jars**: eyeballs that watch, a beating heart that is a redstone clock, a bat that wakes, a two-headed snake and a drumming hand.
+- Sculpted props may use 128 × 128 textures (`docs/ART_DIRECTION.md`; the audit allows it). Record: [witchs-workshop.md](docs/features/witchs-workshop.md).
+
 ### The haunted house's props, Halloween decorations batch 16 (#175)
 - **Flying Eyeball** (hovers on bat wings and stares at the nearest player), **Pillar Candles** in ivory and black (vanilla candles, one to four in a dripping cluster), **Spider Web** (on any face), and the **Monster's Head** (wakes on a redstone signal: jaw open, eyes glowing, bolts sparking).
 - Five **harvest plushes** for the midway's prize table: owl, hedgehog, acorn, corn and maple leaf.
