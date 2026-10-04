@@ -1750,11 +1750,11 @@ public final class JugcraftAgriculture {
 	 */
 	private static void registerChurchyardOrnaments() {
 		Block pile = registerBlock(BONE_PILE, BonePileBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(0.4F)
-				.sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.DESTROY));
+				.sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.POPPED));
 		Block wall = registerBlock(OSSUARY_WALL, OssuaryWallBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BONE_BLOCK));
 		Block hand = registerBlock(BONE_HAND, props -> new GiantBoneHandBlock(props, Block.box(2.5, 0.0, 2.5, 13.5, 16.0, 13.5),
 				Block.box(4.0, 0.0, 4.0, 12.0, 10.0, 12.0)), BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(1.5F)
-				.sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.BLOCK));
+				.sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 		Block lantern = registerBlock(WITCHS_LANTERN, LanternBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.LANTERN)
 				.mapColor(MapColor.COLOR_PURPLE).lightLevel(state -> WITCHS_LANTERN_LIGHT));
 		for (Block block : List.of(pile, wall, lantern)) {
