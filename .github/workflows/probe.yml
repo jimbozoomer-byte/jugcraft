@@ -19,16 +19,27 @@ jobs:
           java-version: '25'
       - name: Resolve Minecraft
         run: ./gradlew compileClientJava --no-daemon -q
-      - name: Batch 18 client APIs
+      - name: Batch 18 client APIs 2
         run: |
           set +e
-          find ~/.gradle/caches -name 'minecraft-*26.3*.jar' | head
           COMMON=$(find ~/.gradle/caches -name 'minecraft-common-deobf-26.3.jar' | head -1)
-          CLIENT=$(find ~/.gradle/caches -name 'minecraft-client*26.3*.jar' | grep -v common | head -1)
-          echo "client: $CLIENT"
+          CLIENT=$(find ~/.gradle/caches -name 'minecraft-clientonly-deobf-26.3.jar' | head -1)
           CP="$CLIENT:$COMMON"
           l() { echo "=== $1 /${2:-.}/"; javap -cp "$CP" -p "$1" 2>&1 | grep -v 'lambda\$' | grep -iE "${2:-.}" | head -${3:-60}; }
-          unzip -l "$CLIENT" | grep -iE "Equipment|ArmorModel|HumanoidArmor|HumanoidModel|ArmorStand|EntityModelSet|BlockEntityRendererProvider|SkullModel|ModelLayers" | awk '{print $4}' | head -40
-          for c in $(unzip -l "$CLIENT" | grep -iE "layers/EquipmentLayerRenderer.class|HumanoidArmorLayer.class|ArmorModelSet.class|/EntityModelSet.class|BlockEntityRendererProvider\$Context.class|EquipmentClientInfo\$LayerType.class|renderer/entity/ArmorStandRenderer.class|state/ArmorStandRenderState.class|state/HumanoidRenderState.class|model/geom/ModelLayers.class|model/HumanoidModel.class|model/ArmorStandArmorModel.class|model/object/armorstand|SkeletonModel.class" | awk '{print $4}' | sed 's/\.class$//; s#/#.#g'); do
-            echo "=== $c"; javap -cp "$CP" -p "$c" 2>&1 | grep -v 'lambda\$' | grep -iE "public|protected|static final" | grep -viE "lambda" | head -40
-          done
+          m() { echo "=== $1 /$2/ (code)"; javap -cp "$CP" -c -p "$1" 2>&1 | awk -v re="$2" '/^  [a-z].*[(]/{p=($0 ~ re)} p' | grep -E "invoke|getfield|getstatic|^  [a-z]" | head -${3:-80}; }
+          l 'net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context'
+          l net.minecraft.client.Minecraft 'Equipment|getEntityModels|Paletted|getModelManager|getItemModelResolver|AtlasManager'
+          l 'net.minecraft.client.renderer.entity.EntityRendererProvider$Context' 'Equipment|getModelSet|Paletted'
+          m net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer 'submit|renderArmorPiece|setPartVisibility' 120
+          l net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer
+          l net.minecraft.client.model.Model
+          l net.minecraft.client.model.EntityModel
+          l net.minecraft.client.resources.model.EquipmentClientInfo
+          l 'net.minecraft.client.resources.model.EquipmentClientInfo$LayerType'
+          l net.minecraft.client.resources.model.EquipmentAssetManager
+          l net.minecraft.client.renderer.entity.state.EntityRenderState 'lightCoords|outlineColor|ageInTicks|EntityRenderState\('
+          l net.minecraft.client.renderer.entity.state.LivingEntityRenderState 'LivingEntityRenderState\(|yRot|bodyRot|isBaby|scale'
+          l net.minecraft.client.renderer.SubmitNodeCollector
+          l net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState
+          l net.minecraft.client.renderer.entity.ArmorModelSet
+          m net.minecraft.client.renderer.entity.ArmorStandRenderer '<init>' 60
