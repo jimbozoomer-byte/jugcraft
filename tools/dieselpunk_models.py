@@ -842,6 +842,23 @@ def ammonia_chiller():
     return m
 
 
+def cryogenic_liquefier():
+    """A cryogenic liquefier (batch 43): a frosted cold box on a gunmetal skid, chrome heat-exchanger stacks rising from
+    its top, a vacuum-jacketed dewar (a fat chrome cylinder) at the back right, a frost-blue sight glass and a gauge on
+    the front, and frost on its edges."""
+    cold = "el_glow_cyan!"
+    m = [box((0, 0, 0), (16, 1.5, 16), {"*": GUNMETAL, "north": HAZARD})]
+    m.append(box((1, 1.5, 1.5), (11, 12, 14.5), {"*": OLIVE, "north": STENCIL, "up": GRILLE}))
+    for x in (2.5, 5.5, 8.5):  # heat-exchanger stacks
+        m += cyl("y", x + 0.5, 5, 1.0, 12, 15.5, CHROME)
+    m += cyl("y", 13.5, 10.5, 2.4, 1.5, 13.5, CHROME, GUNMETAL)  # the dewar
+    m.append(pipe((11, 9, 9.5), (12, 10, 11.5), CHROME))
+    m.append(box((2.5, 6, 1), (8, 9.5, 1.5), cold))
+    m.append(dial("north", (9.5, 8, 1.25), 2.0, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (9.5, 4.5, 1.25), 1.25, texture=LAMP, body=GUNMETAL))
+    return m
+
+
 def rocket_workshop():
     """A rocket workshop (batch 38): a gunmetal bench with hazard edging; a white rocket body lies in a cradle on it
     with a yellow band and a nose cone, a press arm leans over its far end and a welding lamp glows at the front."""
@@ -1022,4 +1039,4 @@ MODELS = {"steel_foundry": steel_foundry(), "capacitor_bank": capacitor_bank(), 
           "synthesis_converter": synthesis_converter(), "gas_holder": gas_holder(),
           "crop_harvester": crop_harvester(), "hydroponic_bay": hydroponic_bay(),
           "electroplating_bath": electroplating_bath(), "ammonia_chiller": ammonia_chiller(),
-          "rocket_workshop": rocket_workshop()}
+          "rocket_workshop": rocket_workshop(), "cryogenic_liquefier": cryogenic_liquefier()}
