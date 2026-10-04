@@ -44,6 +44,13 @@ import turkey_data
 import theremin_data
 import broom_data
 import werewolf_data
+import squirrel_data
+import pumpkling_data
+import midway_data
+import ferris_wheel_data
+import pinata_data
+import hot_air_balloon_data
+import leaf_blower_data
 import ofrenda_data
 import graveyard_data
 import regatta_data
@@ -226,6 +233,13 @@ def assets(root, write, lang):
     theremin_data.assets(root, write, lang)
     broom_data.assets(root, write, lang)
     werewolf_data.assets(root, write, lang)
+    squirrel_data.assets(root, write, lang)
+    pumpkling_data.assets(root, write, lang)
+    midway_data.assets(root, write, lang)
+    ferris_wheel_data.assets(root, write, lang)
+    pinata_data.assets(root, write, lang)
+    hot_air_balloon_data.assets(root, write, lang)
+    leaf_blower_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
 
@@ -351,6 +365,9 @@ def loot(data, write):
     spirit_board_data.loot(out, write)
     turkey_data.loot(out, write)
     werewolf_data.loot(out, write)
+    midway_data.loot(out, write)
+    ferris_wheel_data.loot(out, write)
+    hot_air_balloon_data.loot(out, write)
     theremin_data.loot(out, write)
     ofrenda_data.loot(out, write)
     graveyard_data.loot(out, write)
@@ -442,6 +459,11 @@ def tags(tags):
     carving_data.tags(tags)
     halloween_data.tags(tags)
     werewolf_data.tags(tags)
+    squirrel_data.tags(tags)
+    pumpkling_data.tags(tags)
+    midway_data.tags(tags)
+    ferris_wheel_data.tags(tags)
+    hot_air_balloon_data.tags(tags)
     regatta_data.tags(tags)
     festivity_data.tags(tags)
     night_data.tags(tags)

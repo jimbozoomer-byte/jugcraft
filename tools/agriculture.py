@@ -8,6 +8,11 @@ See docs/branches/AGRICULTURE.md for the design.
 
 import plants
 import graveyard
+import midway
+import ferris_wheel
+import pinata
+import hot_air_balloon
+import leaf_blower
 
 FEATURE = "agriculture"
 
@@ -224,6 +229,8 @@ ITEMS = {
     # Fall additions 20: pan de muerto, the sweet bread of Día de Muertos, its top crossed with dough "bones".
     "pan_de_muerto_dough": {"display": "Pan de Muerto Dough", "compost": "medium", "tags": []},
     "pan_de_muerto": {"display": "Pan de Muerto", "food": [6, 0.7], "compost": "medium_high", "tags": ["c:foods", "c:foods/bread"]},
+    # Fall additions 24: acorns roasted in a furnace, smoker or on a campfire.
+    "roasted_acorns": {"display": "Roasted Acorns", "food": [3, 0.4], "compost": "medium", "tags": ["c:foods"]},
     # Fall additions 18: a wild turkey's meat, raw (it cooks into a whole roast turkey) and carved from the roast.
     "raw_turkey": {"display": "Raw Turkey", "food": [3, 0.3], "tags": ["c:foods", "c:foods/raw_meat"]},
     "turkey_slice": {"display": "Slice of Roast Turkey", "food": [3, 0.6], "tags": ["c:foods", "c:foods/cooked_meat"]},
@@ -676,7 +683,21 @@ HALLOWEEN_ADVANCEMENTS.update({
                            "frame": "challenge"},
     "wolfsbane_ward": {"icon": "jugcraft:wolfsbane", "title": "Not Tonight", "description": "Keep a werewolf at bay with wolfsbane",
                        "frame": "task"},
+    "nuts_about_squirrels": {"icon": "jugcraft:acorn", "title": "Nuts About Squirrels", "description": "Breed two squirrels with nuts",
+                             "frame": "task"},
+    "little_jack": {"icon": "jugcraft:hand_carved_pumpkin", "title": "Little Jack",
+                    "description": "Wake a carved pumpkin with a wisp or ectoplasm", "frame": "task"},
 })
+# The fall fair midway (tools/midway.py).
+HALLOWEEN_ADVANCEMENTS.update(midway.ADVANCEMENTS)
+# The Ferris wheel (tools/ferris_wheel.py).
+HALLOWEEN_ADVANCEMENTS.update(ferris_wheel.ADVANCEMENTS)
+# The piñata party (tools/pinata.py).
+HALLOWEEN_ADVANCEMENTS.update(pinata.ADVANCEMENTS)
+# The hot-air balloon fiesta (tools/hot_air_balloon.py).
+HALLOWEEN_ADVANCEMENTS.update(hot_air_balloon.ADVANCEMENTS)
+# The leaf blower (tools/leaf_blower.py).
+HALLOWEEN_ADVANCEMENTS.update(leaf_blower.ADVANCEMENTS)
 
 
 # ---------------------------------------------------------------- Halloween festivities
@@ -956,6 +977,24 @@ WEREWOLF_RUGS = [k["rug"] for k in WEREWOLF["kinds"].values()]
 # off; in suspicious stew it poisons for `seconds`.
 WOLFSBANE = {"block": "wolfsbane", "display": "Wolfsbane", "effect": "POISON", "seconds": 8.0, "biomes": ["IS_TAIGA", "IS_FOREST"],
              "patch": {"rarity": 20, "tries": 24, "spread_xz": 5, "spread_y": 2}}
+# Squirrels and acorns (fall addition 24; Squirrel, Squirrels, AcornItem, client/SquirrelModel): squirrels, red or grey,
+# come to the woods (biome tag jugcraft:squirrel_habitat) by day; every `spawn_ticks`, for each player, `spawn_chance` of
+# the time a spot `min_distance` to `max_distance` blocks off is tried; fewer than `near_cap` near a player, `level_cap`
+# in all. They climb logs, are tempted and bred by nuts (jugcraft:squirrel_food), and gather acorns lying within
+# `seek_range`, burying each after `bury_ticks`; `sapling_chance` of buried acorns sprout as oak saplings (none within
+# `sapling_space` of another sapling or a log). Oak and dark oak leaves drop an acorn `acorn_chance` of the time.
+SQUIRRELS = {"entity": "squirrel", "display": "Squirrel", "health": 6, "speed": 0.32, "size": [0.4, 0.5], "spawn_ticks": 400,
+             "spawn_chance": 0.25, "min_distance": 20, "max_distance": 40, "near_cap": 6, "level_cap": 30, "seek_range": 10,
+             "bury_ticks": 200, "sapling_chance": 0.25, "sapling_space": 3, "acorn_chance": 0.05,
+             "acorn_leaves": ["oak_leaves", "dark_oak_leaves"], "acorn": "acorn", "acorn_display": "Acorn", "roasted": "roasted_acorns",
+             "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga"],
+             "food": ["jugcraft:acorn", "jugcraft:chestnut", "jugcraft:roasted_chestnuts"]}
+# The Pumpkling (Pumpkling): a hand-carved pumpkin woken by a spark into a pet; follows past `follow_start`, stops at
+# `follow_stop`, comes to its owner past `teleport`; treats heal `treat_heal`.
+PUMPKLING = {"entity": "pumpkling", "display": "Pumpkling", "health": 16, "speed": 0.3, "size": [0.6, 0.9],
+             "follow_start": 6.0, "follow_stop": 2.5, "teleport": 16.0, "treat_heal": 4.0, "tempt_range": 10.0,
+             "sparks": ["jugcraft:wisp_in_a_jar", "jugcraft:ectoplasm"],
+             "treats": ["minecraft:pumpkin_seeds", "jugcraft:roasted_pumpkin_seeds", "minecraft:pumpkin_pie", "jugcraft:candy_corn"]}
 # The Apothecary Shelf (ApothecaryShelfBlock): wall shelves of jars; sneak-use cycles `arrangements` ways to set them.
 APOTHECARY_SHELF = {"block": "apothecary_shelf", "display": "Apothecary Shelf", "arrangements": 4}
 # The Crystal Ball (CrystalBallBlock): glows `light`; gazing flares it to `gazing_light` for `gaze_ticks` and tells a
@@ -1927,6 +1966,7 @@ SICKLE_PATTERN = [" M ", "  M", "SM "]
 # Cooking: every cooked food works in the furnace, smoker and on a campfire (vanilla timings).
 COOKING = {
     "pan_de_muerto": {"input": "pan_de_muerto_dough", "xp": 0.35},
+    "roasted_acorns": {"input": "acorn", "xp": 0.2},
     "roast_turkey": {"input": "raw_turkey", "xp": 0.35},
     "roasted_corn": {"input": "corn", "xp": 0.35},
     "popcorn": {"input": "corn_kernels", "xp": 0.1},
@@ -2502,7 +2542,7 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + plants.blocks())
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks())
 
 
 def all_items():
@@ -2513,7 +2553,7 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + plants.items())
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items())
 
 
 def owns(entry_id):
@@ -2580,3 +2620,16 @@ SHAPELESS += [{"id": WEREWOLF["arrow"], "inputs": ["#c:nuggets/silver"] + ["mine
                "category": "equipment", "features": ["silver"]},
               ] + [{"id": f"leather_from_{k['pelt']}", "inputs": [f"jugcraft:{k['pelt']}"], "result": "minecraft:leather", "count": 2,
                     "category": "misc"} for k in WEREWOLF["kinds"].values()]
+# The fall fair midway's recipes (tools/midway.py).
+SHAPED += midway.SHAPED
+SHAPELESS += midway.SHAPELESS
+# The Ferris wheel's recipe (tools/ferris_wheel.py).
+SHAPED += ferris_wheel.SHAPED
+# The piñata party's recipes (tools/pinata.py).
+SHAPED += pinata.SHAPED
+SHAPELESS += pinata.SHAPELESS
+# The hot-air balloon fiesta's recipes (tools/hot_air_balloon.py).
+SHAPED += hot_air_balloon.SHAPED
+SHAPELESS += hot_air_balloon.SHAPELESS
+# The leaf blower's recipe (tools/leaf_blower.py).
+SHAPED += leaf_blower.SHAPED
