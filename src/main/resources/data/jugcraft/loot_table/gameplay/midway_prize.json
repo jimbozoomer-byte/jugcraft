@@ -1,0 +1,46 @@
+{
+  "type": "minecraft:gift",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:pumpkin_plush",
+          "weight": 24
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:ghost_plush",
+          "weight": 24
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:bat_plush",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:black_cat_plush",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:squirrel_plush",
+          "weight": 9
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:werewolf_plush",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:jumbo_pumpkin_plush",
+          "weight": 1
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jugcraft:gameplay/midway_prize"
+}
