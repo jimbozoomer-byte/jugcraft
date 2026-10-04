@@ -18,9 +18,14 @@ Every arm (34 kinds in bronze and steel) and the Arms VI kit are redrawn:
 - **The longbows and arbalests** are redrawn the same way, as vanilla lays out its bow and crossbow. The shields' faces are flattened to clean tones.
 - **Refinement pass (the owner: "refine"):**
   - Straight blades are bevelled: the lit face a tone lighter than the shaded one, meeting down the spine, with a glint near the point.
-  - The pike has iron langets nailed below its head and a cloth tassel (red on bronze, olive drab on steel).
+  - The pike has iron langets below its head.
   - The quarterstaff has iron-shod, studded ends and more bands.
   - The small arms are held larger, so they read in the hand: kama 1.15 (was 0.95), war pick 1.25 (1.1), katar 0.95 (0.85), kusarigama 1.15 (1.0).
+- **Second pass (the owner: "make sure they are done similarly to those other mods … dont overcomplicate them"):** every icon was checked against the studied style at 8× and anything cluttered taken out.
+  - **Hilts that read as blobs:** the rapier is now plain quillons and a knuckle bow, without the cup ring. The sabre's D-guard stands clear of the grip, so the gap shows.
+  - **Heads too small or busy:** the halberd's axe is larger, a long edge between two horns. The bill has a bigger hook and spike, without the back fluke. The pike has a broader leaf and no tassel. The war hammer is a squared face, a tapering beak and a spike.
+  - **Stray details:** no single-pixel rivets on the maul, battle axe and war hammer heads, and no stone in the war pick's head. The katar has one cross grip, not two, and no stone.
+  - **The kusarigama's chain** swings out clear of the handle, four links and its weight, rather than lying along the grip.
 
 ## How it was studied
 - **Simply Swords and Epic Knights (studied, not copied):**
