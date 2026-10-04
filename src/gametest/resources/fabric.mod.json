@@ -146,6 +146,7 @@
 			"io.github.jimbozoomer.jugcraft.test.PinataClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BalloonClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.LeafBlowerClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.GraveyardFloraClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DiagonalClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsMotionClientGameTests"

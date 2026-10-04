@@ -15,6 +15,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * The mandrake's scream (the graveyard flora; tools/agriculture.py MANDRAKE): pulling up a ripe mandrake (the crop at
@@ -63,7 +64,7 @@ public final class Mandrakes {
 		level.sendParticles(ParticleTypes.SPORE_BLOSSOM_AIR, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 16, 0.4, 0.4, 0.4, 0.0);
 		AABB reach = new AABB(pos).inflate(SCREAM_RADIUS);
 		for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, reach,
-				p -> p.isAlive() && !p.isSpectator() && p.distanceToSqr(pos.getCenter()) <= SCREAM_RADIUS * SCREAM_RADIUS)) {
+				p -> p.isAlive() && !p.isSpectator() && p.distanceToSqr(Vec3.atCenterOf(pos)) <= SCREAM_RADIUS * SCREAM_RADIUS)) {
 			if (!earsCovered(player)) {
 				player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, NAUSEA_SECONDS * 20, 0));
 			}
