@@ -686,14 +686,15 @@
             "Make It Rain: Build a sprinkler.",
             "Silver Lining: Build an electroplating bath.",
             "Ice Cold: Build an ammonia chiller.",
-            "Rocket Science: Build a rocket workshop.",
-            "Eye in the Sky: Assemble a survey rocket."
+            "Minus 183: Build a cryogenic liquefier.",
+            "Rocket Science: Build a rocket workshop."
           ]
         },
         {
           "title": "Milestones (19)",
-          "icon": "jugcraft:hydroponic_bay",
+          "icon": "jugcraft:survey_rocket",
           "text": [
+            "Eye in the Sky: Assemble a survey rocket.",
             "Soil Optional: Build a hydroponic bay.",
             "Reaping What You Sow: Build a crop harvester."
           ]
@@ -3510,6 +3511,29 @@
           }
         },
         {
+          "title": "Cryogenic Liquefier",
+          "icon": "jugcraft:cryogenic_liquefier",
+          "text": [
+            "A cold box of chrome heat exchangers under frost. Pipe oxygen (from the air separation unit) into its tank: every 4 seconds a bucket of oxygen condenses into 250 mB of liquid oxygen, the oxidizer for liquid rocket motors. 96 JE/t.",
+            "Uses 96 JE/t while working. Holds 40,000 JE."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:ammonia_chiller",
+              "jugcraft:steel_plate",
+              "jugcraft:fluid_tank",
+              "jugcraft:electric_motor",
+              "jugcraft:fluid_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:advanced_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:cryogenic_liquefier",
+            "count": 1
+          }
+        },
+        {
           "title": "Gas Cylinders",
           "icon": "jugcraft:gas_cylinder",
           "text": [
@@ -3842,6 +3866,15 @@
             "High-explosive rockets (four from two solid propellant, two guncotton and a rocket casing in the rocket workshop) burst hard where they hit: twelve hearts at the centre, falling off over 5 blocks.",
             "Homing rockets (with a guidance unit instead of the casing) lock on to the hostile mob nearest your crosshair within 48 blocks, if you can see it, and steer into it. Their blast is smaller.",
             "Like grenades, rockets hurt living things only: they never break, move or burn a block."
+          ]
+        },
+        {
+          "title": "Liquid Fuels",
+          "icon": "jugcraft:lox_tank",
+          "text": [
+            "RP-1 kerosene: hydrocrack heavy fuel oil with hydrogen (in the water tank) over the catalyst in the catalytic cracker. A bucket and 200 mB of hydrogen give 800 mB of kerosene, drawn off with the naphtha. It is jet fuel too: 448 JE/mB in the gas turbine, 480 in the advanced engine.",
+            "Liquid oxygen: the cryogenic liquefier condenses a bucket of oxygen into 250 mB.",
+            "Fill a rocket casing with a bucket of each in the chemical reactor to make a kerosene tank and a liquid oxygen tank. With two nozzles they make three rocket motors in the rocket workshop, with no solid propellant."
           ]
         },
         {

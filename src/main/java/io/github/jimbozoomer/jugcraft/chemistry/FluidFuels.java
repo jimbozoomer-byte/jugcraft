@@ -45,6 +45,13 @@ public final class FluidFuels {
 	 */
 	public static final int PREMIUM_GASOLINE = 448;
 	public static final int ADVANCED_PREMIUM_GASOLINE = 512;
+	/**
+	 * Batch 43: RP-1 kerosene, hydrocracked from heavy fuel oil with hydrogen: jet fuel, as good as premium gasoline in
+	 * the gas turbine and a little better in the advanced engine. A bucket of heavy fuel oil (128 JE/mB burnt as it
+	 * is) and 200 mB of hydrogen give 800 mB. The fuels are used up, so never a loop.
+	 */
+	public static final int KEROSENE = 448;
+	public static final int ADVANCED_KEROSENE = 480;
 
 	private FluidFuels() {
 	}
@@ -63,11 +70,13 @@ public final class FluidFuels {
 					: fluid == PetroFluids.DIESEL.source() ? ADVANCED_DIESEL
 					: fluid == PetroFluids.BIOETHANOL.source() ? ADVANCED_BIOETHANOL
 					: fluid == PetroFluids.PREMIUM_DIESEL.source() ? ADVANCED_PREMIUM_DIESEL
-					: fluid == PetroFluids.PREMIUM_GASOLINE.source() ? ADVANCED_PREMIUM_GASOLINE : 0;
+					: fluid == PetroFluids.PREMIUM_GASOLINE.source() ? ADVANCED_PREMIUM_GASOLINE
+					: fluid == PetroFluids.KEROSENE.source() ? ADVANCED_KEROSENE : 0;
 			case GAS_TURBINE -> fluid == PetroFluids.GASOLINE.source() ? GASOLINE
 					: fluid == PetroFluids.REFINERY_GAS.fluid() ? REFINERY_GAS
 					: fluid == PetroFluids.BIOETHANOL.source() ? BIOETHANOL
-					: fluid == PetroFluids.PREMIUM_GASOLINE.source() ? PREMIUM_GASOLINE : 0;
+					: fluid == PetroFluids.PREMIUM_GASOLINE.source() ? PREMIUM_GASOLINE
+					: fluid == PetroFluids.KEROSENE.source() ? KEROSENE : 0;
 			default -> 0;
 		};
 	}

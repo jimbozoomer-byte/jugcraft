@@ -1338,6 +1338,28 @@ public class PetroGameTests {
 		});
 	}
 
+	/**
+	 * Batch 43 (liquid fuels): the cryogenic liquefier condenses a bucket of oxygen into 250 mB of liquid oxygen; RP-1
+	 * kerosene burns in the gas turbine and the advanced engine.
+	 */
+	@GameTest(maxTicks = 300)
+	public void cryogenicLiquefierMakesLiquidOxygen(GameTestHelper helper) {
+		MachineBlockEntity liquefier = placeSingle(helper, MachineKind.CRYOGENIC_LIQUEFIER, new BlockPos(1, 1, 1));
+		liquefier.tanks().input(0).fill(PetroFluids.OXYGEN.fluid(), 1000);
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.chemistry.FluidFuels.jePerMb(MachineKind.GAS_TURBINE,
+				PetroFluids.KEROSENE.source()) == io.github.jimbozoomer.jugcraft.chemistry.FluidFuels.KEROSENE,
+				"Kerosene does not burn in the gas turbine");
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.chemistry.FluidFuels.jePerMb(MachineKind.ADVANCED_ENGINE,
+				PetroFluids.KEROSENE.source()) == io.github.jimbozoomer.jugcraft.chemistry.FluidFuels.ADVANCED_KEROSENE,
+				"Kerosene does not burn in the advanced engine");
+		helper.succeedWhen(() -> {
+			int lox = liquefier.tanks().output(0).millibuckets();
+			helper.assertTrue(lox == 250 && liquefier.tanks().output(0).variant.isOf(PetroFluids.LIQUID_OXYGEN.source()),
+					"The liquefier holds " + lox + " mB of " + liquefier.tanks().output(0).variant);
+			helper.assertTrue(liquefier.tanks().input(0).millibuckets() == 0, "Oxygen left: " + liquefier.tanks().input(0).millibuckets());
+		});
+	}
+
 	/** Batch 30: the pneumatic grapple fills with nitrogen from a gas holder, up to its 4,000 mB. */
 	@GameTest
 	public void grappleFillsFromAGasHolder(GameTestHelper helper) {
