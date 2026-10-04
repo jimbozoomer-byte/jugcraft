@@ -365,7 +365,20 @@ Added after the record above, on the same branch. The model was rebuilt (128 × 
 7. a sprig in hand wards off a brown werewolf, not a shadow one; wolfsbane planted by its prey wards off the shadow one;
 8. each kind drops its own pelt; slaying a shadow werewolf earns Leader of the Pack, a brown one doesn't.
 
-Locally, `python3 tools/check_mod_data.py` passes with 1071 IDs. It now also compares each kind's tier, attributes and abilities, the pelt tables and haunts, and every box of the model with `tools/werewolf_model.py`. `python3 scripts/check_repository.py` passes. The build, the game tests and the client test with the three kinds have not run yet.
+Locally, `python3 tools/check_mod_data.py` passes with 1071 IDs. It now also compares each kind's tier, attributes and abilities, the pelt tables and haunts, and every box of the model with `tools/werewolf_model.py`. `python3 scripts/check_repository.py` passes.
+
+Then the textures were painted again at four times the detail (512 × 512, docs/ART_DIRECTION.md, "High resolution"): fur in locks and strands, ragged edges, pointed fangs and claws. Actual results:
+
+| Check | Result |
+| --- | --- |
+| `./gradlew build` on `d979eaf1` (run [37153477545](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37153477545)) | Pass |
+| Game tests, same run, including the 13 in `WerewolfGameTests` | **All pass** |
+| Client test, same run | **Passes**, but its picture showed the shadow werewolf red: the test had stood it in a spruce trunk, where it suffocated and flashed with hurt. Its texture is dark grey. `ebf5b4ec` stands it clear. |
+| `./gradlew build` on `ebf5b4ec` (run [37154692054](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37154692054)) | Pass |
+| Game tests on the headless server, same run: 619 in total | **All 619 pass** |
+| Client test, same run (all three shards) | **Passes** |
+
+The screenshots in [the guide](../branches/AGRICULTURE.md#full-moon-werewolves) come from run 37154692054: wolfsbane in the clearing; the silver framed above the fire with the three rugs (brown, snow and shadow); the snow werewolf facing the camera with the shadow werewolf snarling beside it; and the three kinds in the clearing. They are small software-rendered previews; the fur's finer detail shows best up close in a real client.
 
 ### Flying broomstick verification
 
@@ -405,6 +418,7 @@ Actual results (3 October 2026, Minecraft 26.3, Fabric Loader 0.19.3, Fabric API
 | `./gradlew build` on `e71302ed` (Build workflow run [37148025075](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37148025075)) | Pass |
 | Game tests on the headless server, same run: 606 in total, 5 of them new here (`SquirrelGameTests`) | **All 606 pass** |
 | Client game test (real client, Mesa software rendering, CI job `client`) | **Passes** on `e71302ed` (all three client shards of that run) |
+| Again on `da7b7277`, with the werewolves' new art merged in (run [37153498026](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37153498026)): data check, build, game tests and client test | Pass, 1073 IDs; **all 624 game tests pass**; all three client shards pass |
 
 The 5 new game tests (`SquirrelGameTests`):
 1. a squirrel goes for an acorn lying several blocks off and takes it, and the acorn is gone from the ground;
@@ -417,7 +431,7 @@ Found by CI and fixed before this record:
 - The first run failed in two of these tests at once, on grass: burying and planting asked for `minecraft:dirt`, which grass didn't pass in 26.3. They (and where squirrels come out) now ask whether an oak sapling could grow there (`Werewolves.woodlandFloor`). The same check had kept werewolves off grass; that was fixed on the branch below.
 - The bury test also checked for room to sprout after a squirrel had buried an acorn, which sprouts a sapling one time in four and leaves no room near it: it now checks the room first.
 
-The client test's first screenshots showed a squirrel at rest with its tail standing straight up behind its head, a column from the front. At rest the tail now sweeps up and back and its tip curls forward over the back (`2845d4ad`), and the test adds a side-on picture. Those screenshots come from this pull request's run.
+The client test's first screenshots showed a squirrel at rest with its tail standing straight up behind its head, a column from the front. At rest the tail now sweeps up and back and its tip curls forward over the back (`2845d4ad`), and the test adds a side-on picture. The screenshots in the [agriculture guide](../branches/AGRICULTURE.md#squirrels-and-acorns) come from run 37153498026: three squirrels by a stump with acorns about (one on the stump holding an acorn), one side on with its tail curled over its back, and acorns and roasted acorns in frames.
 
 Not run: squirrels burying acorns over a long time in play, and a sapling sprouting from one (a 1 in 4 chance, which no test waits for); a two-client dedicated-server playtest.
 

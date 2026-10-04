@@ -1,0 +1,73 @@
+{
+  "parent": "minecraft:item/spear_in_hand",
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [
+        5,
+        270,
+        -40
+      ],
+      "translation": [
+        0.0,
+        9.3,
+        2.0
+      ],
+      "scale": [
+        2.21,
+        2.21,
+        1.105
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        5,
+        -270,
+        40
+      ],
+      "translation": [
+        0.0,
+        9.3,
+        2.0
+      ],
+      "scale": [
+        2.21,
+        2.21,
+        1.105
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        -20,
+        90,
+        -35
+      ],
+      "translation": [
+        3.13,
+        7.75,
+        -0.88
+      ],
+      "scale": [
+        1.768,
+        1.768,
+        0.884
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        -20,
+        -90,
+        35
+      ],
+      "translation": [
+        3.13,
+        7.75,
+        -0.88
+      ],
+      "scale": [
+        1.768,
+        1.768,
+        0.884
+      ]
+    }
+  }
+}

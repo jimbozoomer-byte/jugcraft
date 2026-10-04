@@ -70,6 +70,8 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftLogistics.register();
 		JugcraftStorage.register();
 		JugcraftElectronics.register();
+		io.github.jimbozoomer.jugcraft.control.JugcraftControl.register();
+		io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.register();
 		JugcraftFarming.register();
 		JugcraftProspecting.register();
 		JugcraftKinetics.register();
@@ -77,6 +79,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftGear.register();
 		JugcraftExosuit.register();
 		JugcraftGrapple.register();
+		io.github.jimbozoomer.jugcraft.weapons.JugcraftArms.register();
 		io.github.jimbozoomer.jugcraft.weapons.FieldChemistry.register();
 		io.github.jimbozoomer.jugcraft.chemistry.ConstructionChemistry.register();
 		JugcraftGuide.register();
@@ -93,6 +96,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftDimensions.register();
 		JugcraftSeasons.register();
 		io.github.jimbozoomer.jugcraft.town.JugcraftTown.register();
+		io.github.jimbozoomer.jugcraft.diagonal.DiagonalWalls.register();
 		FeatureEnabledCondition.register();
 		JugcraftWorldgen.register();
 		JugcraftParties.register();
