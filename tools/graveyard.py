@@ -135,6 +135,12 @@ HEADSTONES = {
         "shapes": [[(1, 0, 2, 15, 6.2, 14), (1, 6.2, 4.5, 14.5, 12.5, 12)]],
         "text": {"face": "FRONT", "x": 8.0, "y": 3.3, "z": 2.6, "width": 11.0, "height": 3.6, "max_scale": 1 / 80},
         "recipe": {"pattern": ["BBB", "GGG"], "key": {"B": "#c:ingots/bronze", "G": "minecraft:polished_granite"}}},
+    # ---------------------------------------------------------------- pack 5: the churchyard's ornaments
+    "gargoyle": {
+        "display": "Gargoyle", "stone": "granite", "model": "gargoyle", "cells": TALL2, "overgrowth": "small", "pack": 5,
+        "shapes": [[(1, 0, 1, 15, 1.6, 15), (2, 1.6, 2, 14, 9.4, 14), (1.2, 9.4, 1.2, 14.8, 16, 14.8)], [(3, 0, 1.5, 13, 12, 13.5)]],
+        "text": {"face": "FRONT", "x": 8.0, "y": 5.5, "z": 1.6, "width": 10.0, "height": 4.6, "max_scale": 1 / 80},
+        "recipe": {"pattern": ["GCG", "GGG"], "key": {"G": "minecraft:polished_granite", "C": "minecraft:chiseled_stone_bricks"}}},
     # ---------------------------------------------------------------- pack 4: the grounds
     "kerbed_grave": {
         "display": "Kerbed Grave", "stone": "granite", "model": "kerbed_grave", "cells": LONG, "overgrowth": "slab", "pack": 4,

@@ -1032,6 +1032,15 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **The mandrake:** pull a wild one for its roots and plant them on farmland. A ripe mandrake **screams** when pulled up, sickening every player within 8 blocks with nothing on their head (wear something: **Mind Your Ears**). Its root also makes **Flying Ointment** in the purple brew.
 - **Grave vases** take the flora's flowers by colour. Details: [the graveyard flora](../features/graveyard-flora.md).
 
+### The churchyard's ornaments
+
+<!-- ornament-shots -->
+
+- **Gargoyle**: crouched on a granite plinth, wings folded, jaws open for the rain. It weathers and takes an inscription on its plinth like the graveyard's monuments.
+- **Bone Pile**: bones and skulls heaped up to four layers. **Ossuary Wall**: a catacomb's skulls and long bones as a building block.
+- **Giant Bone Hand**: two blocks tall out of grave earth, clenching into a fist on a redstone signal.
+- **Witch's Lantern**: gothic iron and violet glass, standing or hanging. Details: [the churchyard's ornaments](../features/churchyard-ornaments.md).
+
 ## Even more fall additions
 
 Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).

@@ -35,6 +35,8 @@ Each faces whoever places it and needs all its blocks free. Breaking any block o
 5. **Mortsafe** (cast iron; eight iron bars in a ring, two blocks long): the iron cage Scots set over a new grave against the body-snatchers: a heavy frame, spear-topped bars on every side, a grid of bars over the top, ball finials on its corner posts, over a mound of earth, and a plate at its foot for the name in gilt. It weathers from black paint to rust.
 6. **Faithful Hound** (bronze on granite; three bronze ingots over three polished granite): a bronze hound, sculpted, lying at its master's grave with its head up and watching, on a granite plinth that carries the epitaph. Its bronze darkens and grows verdigris as it weathers.
 
+A sixth monument, the **Gargoyle** (a gargoyle crouched on a granite plinth that carries the inscription), came with the churchyard's ornaments: [churchyard-ornaments.md](churchyard-ornaments.md).
+
 The monuments are headstones in every other way: they weather, wax, take an epitaph and stir spirits alike, and break as one.
 
 ### Buildings

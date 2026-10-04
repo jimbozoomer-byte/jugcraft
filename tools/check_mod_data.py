@@ -22,6 +22,7 @@ import ferris_wheel
 import pinata
 import hot_air_balloon
 import leaf_blower
+import decor15
 import petro
 import deposits
 import seasons
@@ -2369,6 +2370,35 @@ def check_decor4(java):
     check_hot_air_balloon(java, number, lang)
     check_leaf_blower(java, number, lang)
     check_graveyard_flora(java, number, lang)
+    check_churchyard_ornaments(java, number, lang)
+
+
+def check_churchyard_ornaments(java, number, lang):
+    """Halloween decorations batch 15: Java's bone pile and lantern match tools/decor15.py; each ornament is registered,
+    named, drawn on its 64 x 64 texture, drops and has its recipe; the Gargoyle is a headstone style."""
+    bp = decor15.BONE_PILE
+    for name, value in (("MAX_LAYERS", bp["layers"]), ("LAYER_PIXELS", bp["layer_pixels"]), ("RATTLE_CHANCE", bp["rattle_chance"])):
+        found = number("BonePileBlock", name)
+        if found is None or float(found) != value:
+            err(f"BonePileBlock.{name} = {found} differs from tools/decor15.py ({value})")
+    if number("JugcraftAgriculture", "WITCHS_LANTERN_LIGHT") != float(decor15.WITCHS_LANTERN["light"]):
+        err("JugcraftAgriculture.WITCHS_LANTERN_LIGHT differs from tools/decor15.py")
+    main = java.get("JugcraftAgriculture", "")
+    for block in decor15.blocks():
+        if f'"{block}"' not in main:
+            err(f"JugcraftAgriculture.java does not register {block}")
+        if f"block.{MOD}.{block}" not in lang:
+            err(f"{block} has no name")
+        if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
+            err(f"{block} has no loot table")
+        with Image.open(ASSETS / "textures" / "block" / f"{block}.png") as img:
+            if img.size != (64, 64):
+                err(f"textures/block/{block}.png is {img.size}, not 64 x 64")
+    for recipe in decor15.SHAPED + decor15.SHAPELESS:
+        if not (DATA / MOD / "recipe" / f"{recipe['id']}.json").is_file():
+            err(f"The {recipe['id']} recipe is missing")
+    if 'GARGOYLE("gargoyle"' not in java.get("HeadstoneBlock", "") or "gargoyle" not in gy.HEADSTONES:
+        err("The Gargoyle must be a headstone style in HeadstoneBlock.java and tools/graveyard.py")
 
 
 def check_graveyard_flora(java, number, lang):

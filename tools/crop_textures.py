@@ -934,4 +934,6 @@ def crop_textures():
     out.update(graveyard_textures())
     from flora_data import flora_textures  # and the graveyard flora
     out.update(flora_textures())
+    from decor15_data import textures as churchyard_textures  # and the churchyard's ornaments
+    out.update(churchyard_textures())
     return out
