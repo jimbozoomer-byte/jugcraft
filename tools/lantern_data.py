@@ -1,5 +1,6 @@
 """JSON resources for the sky lantern festival (fall additions 6), from tools/agriculture.py: the Sky Lantern (its item
-model, tinted by its dye, its recipe, the minecraft:dyeable tag that lets it be dyed in the crafting grid), the
+model, tinted by its dye, its recipe, its dyeing recipe in the form of vanilla's leather_helmet_dyed, and the tag that
+lets a water cauldron wash the dye out), the
 mooncakes' items (their Cooking Pot recipes come from POT_RECIPES), names and the festival's message.
 
 Called from agriculture_data.py (assets, recipes, tags). Formats follow vanilla Minecraft 26.3's own files. A lantern
@@ -34,9 +35,13 @@ def recipes(out, write, conditions):
         "pattern": ["PPP", "P P", "SCS"],
         "key": {"P": "minecraft:paper", "S": "minecraft:string", "C": "minecraft:candle"},
         "result": {"id": rid(LANTERNS["item"]), "count": LANTERNS["per_craft"]}})
+    # Dyeing, as Minecraft 26.3 dyes leather armour: the lantern and any dye give it back in that colour.
+    write(out / f"{LANTERNS['item']}_dyed.json", {
+        "fabric:load_conditions": conditions(), "type": LANTERNS["dye_recipe"], "group": LANTERNS["dye_group"],
+        "target": rid(LANTERNS["item"]), "dye": "#minecraft:dyes", "result": {"id": rid(LANTERNS["item"])}})
 
 
 def tags(tags):
-    tags.add("item", "minecraft:dyeable", rid(LANTERNS["item"]))
+    tags.add("item", LANTERNS["wash_tag"], rid(LANTERNS["item"]))
     for cake in LANTERNS["mooncakes"]:
         tags.add("item", "c:foods", rid(cake))

@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jugcraft:item/steel_sabre"
+  },
+  "swap_animation_scale": 1.2
+}

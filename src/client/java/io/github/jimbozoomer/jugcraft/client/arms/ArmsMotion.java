@@ -61,7 +61,8 @@ public final class ArmsMotion {
 	public static final int SIZE = 7 * CHANNELS;
 	/** The kinds with motion files (tools/arms_moves.py: MOVES). */
 	public static final List<String> KINDS = List.of("longsword", "greatsword", "rapier", "flanged_mace", "war_hammer", "glaive",
-			"halberd", "spear", "lance");
+			"halberd", "spear", "lance", "dagger", "sabre", "estoc", "battle_axe", "flail", "scythe", "quarterstaff", "pike",
+			"zweihander", "maul", "executioner", "bill");
 	/** Ticks the guard takes to come up when an arm is taken in hand, and a parry or couch to settle. */
 	private static final float GUARD_TICKS = 5.0F;
 	private static final float USE_TICKS = 4.0F;

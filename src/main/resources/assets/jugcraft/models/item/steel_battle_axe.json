@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:item/arms_battle_axe",
+  "textures": {
+    "layer0": "jugcraft:item/steel_battle_axe"
+  }
+}

@@ -38,7 +38,12 @@ public final class Spirits {
 
 	/** A grave's random tick: now and then, at night, a spirit rises from it. */
 	public static void stir(ServerLevel level, BlockPos grave, RandomSource random) {
-		if (random.nextFloat() < STIR_CHANCE && level.getGameRules().get(GameRules.SPAWN_MOBS)) {
+		stir(level, grave, random, 1.0F);
+	}
+
+	/** As {@link #stir(ServerLevel, BlockPos, RandomSource)}, {@code factor} times as often (a neglected headstone stirs more). */
+	public static void stir(ServerLevel level, BlockPos grave, RandomSource random, float factor) {
+		if (random.nextFloat() < STIR_CHANCE * factor && level.getGameRules().get(GameRules.SPAWN_MOBS)) {
 			rise(level, grave, MourningAngelBlock.night(level));
 		}
 	}

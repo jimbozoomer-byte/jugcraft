@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jugcraft:item/steel_maul"
+  },
+  "swap_animation_scale": 1.7
+}
