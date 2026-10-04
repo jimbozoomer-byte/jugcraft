@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: arms restyle
+- **Every arm redrawn:**
+  - **Icons:** crisp pixel-art icons (32 or 48 pixels, on the diagonal, flat tones, outlined);
+  - **In the hand:** a 3D model with real thickness: thin blades with a raised ridge, chunky guards, round grips, deep heads;
+  - **Palettes:** copper-bronze with brass and leather; blued steel with gunmetal, rubber and brass rivets.
+- **The longbows, arbalests and shield faces** are redrawn to match.
+- After studying how Simply Swords, Epic Knights and RPG Style More Weapons make weapons that read well; nothing of theirs is copied. Record: [arms-restyle.md](docs/features/arms-restyle.md).
+
 ### Unmerged: Arms VI, batch 50
 - **Katana:** quick, clean cuts, and its art **Seven Cuts**: seven cuts in a breath across every foe ahead, each leaving an arc of colour in the air (crimson from bronze, pale gold from steel).
 - **Brazier mace:** a burning brazier on a haft, with a flickering flame. It sets what it hits alight and lights campfires, candles and the ground.
