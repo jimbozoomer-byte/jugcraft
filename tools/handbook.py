@@ -492,7 +492,7 @@ def arms_pages():
             f"Kusarigama, Chain Lash: the chain catches the first foe in line up to {arms.LASH_RANGE:g} blocks off, hauls "
             "it in and the sickle reaps it as it comes."],
          "craft": craft("kusarigama")},
-        # Arms VI (batch 52).
+        # Arms VI (batch 53).
         {"title": "Arms: Katana and Brazier Mace", "icon": f"{MOD}:steel_katana", "text": [
             f"Katana, Seven Cuts: {arms.CUTS_COUNT} cuts in a breath, each across every foe ahead (up to "
             f"{arms.CUTS_TARGETS}), leaving arcs in the air: crimson from bronze, pale gold from steel.",

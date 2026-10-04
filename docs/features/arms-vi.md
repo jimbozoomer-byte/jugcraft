@@ -1,6 +1,6 @@
 # Arms VI: katanas, brazier maces, longbows, arbalests and shields
 
-Status: implemented on `claude/arms-vi` (batch 52), awaiting review. Compiles and tests in CI only; **not yet played**.
+Status: implemented on `claude/arms-vi` (batch 53), awaiting review. Compiles and tests in CI only; **not yet played**.
 Proposal issue: the owner, 4 October 2026: "start on the next batch of weapons", with three reference sheets (a twin-katana set with red slash effects, an iron-and-wood war kit of a mace, bows, a crossbow and shields, and a gold fantasy set), studied for their look only; nothing of them is copied.
 Owner: jimbozoomer-byte
 Target milestone and tier: bronze (tin) and steel (machines), beside the arms of batches 42 to 48 ([arms.md](arms.md) to [arms-v.md](arms-v.md)).

@@ -1101,7 +1101,7 @@ def check_arms():
             average = (arms.art_share(kind) * blow + plain * (cycle - busy)) / cycle
             if average >= sword:
                 err(f"The {metal} {kind} with its art deals {average:.2f} a second to one foe, not below the sword's {sword:.2f}")
-    # Arms VI (batch 52): the bows, crossbows and shields as tools/arms.py has them, in registration order, and in range.
+    # Arms VI (batch 53): the bows, crossbows and shields as tools/arms.py has them, in registration order, and in range.
     found_ranged = [(name, metal, {"draw": int(draw), "speed": float(speed), "damage": float(damage)})
                     for name, metal, draw, speed, damage in re.findall(
                         r'new Ranged\("([a-z_]+)", "([a-z]+)", (\d+), ([\d.]+)F, ([\d.]+)F\)', java)]

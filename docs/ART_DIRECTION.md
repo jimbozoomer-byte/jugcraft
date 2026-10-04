@@ -8,6 +8,13 @@ Jugcraft's look changes with its tiers, the way real technology did: the early g
 - Overlapping boxes never share a visible face plane (that flickers, z-fighting). The generators enforce it: `model_writer.separate_coplanar` runs on every model they write and pushes the smaller of two flush, differently drawn faces out by 0.02 pixels, so a band, dial or trim always draws in front of the body it sits on.
 - Textures are deterministic (seeded) and opaque on blocks. They are 16×16, or 32×32 or 64×64 where the art needs the detail (see [High resolution](#high-resolution)).
 
+## Texturing: keep it clean
+On 4 October 2026 the owner rejected the noisy, rust-covered dieselpunk textures ("you are doing way too much in terms of noise"). They pointed to vanilla copper blocks, a weathered pipe, Immersive Engineering Reimmersed's machines and a car drawn in vanilla's palette as the standard. Those references guided the style only; nothing of them is copied. The helpers in `tools/clean_metal.py` draw this way, and new textures should follow it:
+- **Flat fills from a short palette.** Use four or five shades per material. Never pick a random shade for every pixel.
+- **Shape comes from light.** Give a panel a one-pixel bevel: lit along the top and left, shaded along the bottom and right, with a dark seam round the outside. Shade recessed insets the other way round. Draw bolts as two-by-two heads lit at the top left.
+- **Wear is placed, not sprinkled.** Use a chip at a corner, a stain weeping from a bolt or a seam, or a few short streaks one shade off the fill. Rust is an accent, never a whole surface.
+- **Pattern beats noise.** Show grain, ribs, tread and ripples as regular shapes: plank lines, ribs every four rows, raised lozenges, long ripple lines.
+
 ## Steampunk: stone, bronze and early steel tiers
 Brass, copper and riveted iron; glass portholes and valve wheels; firebrick and wood. Textures start with `sp_` (`tools/steampunk_textures.py`). The classic style pack keeps the older plain look for anyone who prefers it.
 

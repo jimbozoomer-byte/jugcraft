@@ -13,8 +13,8 @@
     "dr_rust": "jugcraft:block/dr_rust",
     "dr_rust_bare": "jugcraft:block/dr_rust_bare",
     "dr_skid": "jugcraft:block/dr_skid",
+    "dr_soot": "jugcraft:block/dr_soot",
     "sp_gauge": "jugcraft:block/sp_gauge",
-    "sp_hopper_inside": "jugcraft:block/sp_hopper_inside",
     "sp_mesh": "jugcraft:block/sp_mesh",
     "particle": "jugcraft:block/sp_iron_plate"
   },
@@ -5032,7 +5032,7 @@
           ]
         },
         "up": {
-          "texture": "#sp_hopper_inside",
+          "texture": "#dr_soot",
           "uv": [
             0,
             0,
@@ -5100,7 +5100,7 @@
           ]
         },
         "up": {
-          "texture": "#sp_hopper_inside",
+          "texture": "#dr_soot",
           "uv": [
             0,
             0,
@@ -6596,7 +6596,7 @@
           ]
         },
         "up": {
-          "texture": "#sp_hopper_inside",
+          "texture": "#dr_soot",
           "uv": [
             0,
             0,
@@ -6664,7 +6664,7 @@
           ]
         },
         "up": {
-          "texture": "#sp_hopper_inside",
+          "texture": "#dr_soot",
           "uv": [
             0,
             0,
