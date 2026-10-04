@@ -1,0 +1,149 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jugcraft:block/gy_marble_clean_upper",
+    "top": "jugcraft:block/gy_marble_clean_upper",
+    "relief_top": "jugcraft:block/gy_marble_relief_clean_upper"
+  },
+  "elements": [
+    {
+      "from": [
+        6.74,
+        0,
+        5.0
+      ],
+      "to": [
+        9.26,
+        16,
+        11.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#relief_top"
+        },
+        "south": {
+          "texture": "#relief_top"
+        },
+        "east": {
+          "texture": "#relief_top"
+        },
+        "west": {
+          "texture": "#relief_top"
+        }
+      }
+    },
+    {
+      "from": [
+        5.0,
+        0,
+        6.74
+      ],
+      "to": [
+        11.0,
+        16,
+        9.26
+      ],
+      "faces": {
+        "north": {
+          "texture": "#relief_top"
+        },
+        "south": {
+          "texture": "#relief_top"
+        },
+        "east": {
+          "texture": "#relief_top"
+        },
+        "west": {
+          "texture": "#relief_top"
+        }
+      }
+    },
+    {
+      "from": [
+        6.6,
+        0.0,
+        4.95
+      ],
+      "to": [
+        7.1,
+        16,
+        5.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#top"
+        },
+        "south": {
+          "texture": "#top"
+        },
+        "east": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#top"
+        }
+      }
+    },
+    {
+      "from": [
+        7.75,
+        0.0,
+        4.95
+      ],
+      "to": [
+        8.25,
+        16,
+        5.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#top"
+        },
+        "south": {
+          "texture": "#top"
+        },
+        "east": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#top"
+        }
+      }
+    },
+    {
+      "from": [
+        8.9,
+        0.0,
+        4.95
+      ],
+      "to": [
+        9.4,
+        16,
+        5.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#top"
+        },
+        "south": {
+          "texture": "#top"
+        },
+        "east": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#top"
+        }
+      }
+    }
+  ]
+}
