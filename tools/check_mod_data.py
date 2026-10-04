@@ -671,6 +671,10 @@ def check_rocketry():
                          ("BLOCKS_PER_TICK", rocketry.POST_BLOCKS_PER_TICK), ("CHECK_INTERVAL", rocketry.POST_CHECK_INTERVAL)):
         if f"int {const} = {value:_};" not in post and f"int {const} = {value};" not in post:
             err(f"RocketPost.{const} differs from tools/rocketry.py ({value})")
+    booster = (JAVA_ROOT / "rocketry" / "BoosterRailBlockEntity.java").read_text(encoding="utf-8")
+    for const in ("BOOST_TICKS", "CHARGES_PER_PROPELLANT", "MAX_CHARGES"):
+        if f"int {const} = {getattr(rocketry, const)};" not in booster:
+            err(f"BoosterRailBlockEntity.{const} differs from tools/rocketry.py ({getattr(rocketry, const)})")
     launcher = (JAVA_ROOT / "rocketry" / "RocketLauncherItem.java").read_text(encoding="utf-8")
     for const, value in (("COOLDOWN", rocketry.LAUNCHER_COOLDOWN), ("HOMING_RANGE", rocketry.HOMING_RANGE)):
         if f"int {const} = {value};" not in launcher:

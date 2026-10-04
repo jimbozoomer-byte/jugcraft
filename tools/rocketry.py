@@ -90,7 +90,13 @@ POST_MIN_FLIGHT = 60
 POST_BLOCKS_PER_TICK = 4
 POST_CHECK_INTERVAL = 20
 PAD_CARGO = 9
-BLOCKS = {"rocket_pad": "Rocket Pad", "zipline_anchor": "Zipline Anchor"}
+BLOCKS = {"rocket_pad": "Rocket Pad", "zipline_anchor": "Zipline Anchor", "booster_rail": "Booster Rail"}
+# Batch 42 (docs/features/booster-rails.md): a boost holds a cart at full speed for BOOST_TICKS; one solid propellant
+# loaded into a booster rail gives CHARGES_PER_PROPELLANT boosts, and a rail holds at most MAX_CHARGES
+# (Java: BoosterRailBlockEntity).
+BOOST_TICKS = 200
+CHARGES_PER_PROPELLANT = 8
+MAX_CHARGES = 64
 # Batch 40 (docs/features/zipline.md): the longest line, and how close the player must stand to the anchor it leaves
 # from (Java: ZiplineAnchorBlockEntity.RANGE and REACH).
 LINE_RANGE = 96
@@ -182,6 +188,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
         "ingredients": [f"{MOD}:silver_dust", f"{MOD}:iodine"], "result": {"id": f"{MOD}:silver_iodide", "count": 2}})
     write_post(write, assets, data, lang, condition, self_drop)
     write_zipline(write, assets, data, lang, condition)
+    write_booster(write, assets, data, lang, condition)
     lang[f"entity.{MOD}.combat_rocket"] = "Rocket"
     lang[f"message.{MOD}.rocket_launcher.empty"] = "No rockets"
     write(data / "recipe" / "rocket_launcher.json", {
@@ -212,6 +219,65 @@ def write_zipline(write, assets, data, lang, condition):
         "pattern": ["PHP", " B ", "PBP"],
         "key": {"P": "#c:plates/steel", "H": "minecraft:tripwire_hook", "B": "minecraft:iron_bars"},
         "result": {"id": f"{MOD}:zipline_anchor", "count": 2}})
+
+
+def write_booster(write, assets, data, lang, condition):
+    """Batch 42: the booster rail's models (vanilla rail templates with its own texture), blockstate, item and recipe."""
+    lang[f"message.{MOD}.booster_rail.charges"] = "Booster rail: %s boosts loaded"
+    lang[f"tooltip.{MOD}.booster_rail"] = ("Powered by redstone and loaded with solid propellant (8 boosts each), it kicks "
+                                          "a passing minecart to full speed and keeps it there for 10 seconds, uphill too.")
+    models = assets / "models" / "block"
+    for suffix, texture in (("", "booster_rail"), ("_on", "booster_rail_on")):
+        textures = {"rail": f"{MOD}:block/{texture}"}
+        write(models / f"booster_rail{suffix}.json", {"parent": "minecraft:block/rail_flat", "textures": textures})
+        write(models / f"booster_rail{suffix}_raised_ne.json",
+              {"parent": "minecraft:block/template_rail_raised_ne", "textures": textures})
+        write(models / f"booster_rail{suffix}_raised_sw.json",
+              {"parent": "minecraft:block/template_rail_raised_sw", "textures": textures})
+    variants = {}
+    for powered, suffix in (("false", ""), ("true", "_on")):
+        base = f"{MOD}:block/booster_rail{suffix}"
+        variants[f"powered={powered},shape=north_south"] = {"model": base}
+        variants[f"powered={powered},shape=east_west"] = {"model": base, "y": 90}
+        variants[f"powered={powered},shape=ascending_north"] = {"model": base + "_raised_ne"}
+        variants[f"powered={powered},shape=ascending_east"] = {"model": base + "_raised_ne", "y": 90}
+        variants[f"powered={powered},shape=ascending_south"] = {"model": base + "_raised_sw"}
+        variants[f"powered={powered},shape=ascending_west"] = {"model": base + "_raised_sw", "y": 90}
+    write(assets / "blockstates" / "booster_rail.json", {"variants": variants})
+    write(assets / "models" / "item" / "booster_rail.json",
+          {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:block/booster_rail"}})
+    write(assets / "items" / "booster_rail.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/booster_rail"}})
+    write(data / "recipe" / "booster_rail.json", {
+        "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped", "category": "redstone",
+        "pattern": ["S S", "SNS", "SRS"],
+        "key": {"S": "#c:ingots/steel", "N": f"{MOD}:rocket_nozzle", "R": "minecraft:redstone"},
+        "result": {"id": f"{MOD}:booster_rail", "count": 6}})
+
+
+def booster_rail_texture(on):
+    """A 16x16 rail running north-south: steel rails on dark ties, every other tie a hazard-striped thruster block with a
+    nozzle that glows orange while the rail is powered. Transparent between the ties, like vanilla rails."""
+    from PIL import Image
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = img.load()
+    tie = [(58, 62, 72, 255), (44, 48, 56, 255)]
+    for y in range(16):
+        if y % 4 in (0, 1):  # ties
+            for x in range(1, 15):
+                px[x, y] = tie[y % 2]
+    for y in (2, 10):  # thrusters between the ties
+        for x in range(5, 11):
+            for dy in range(4):
+                stripe = (x + y + dy) % 4 < 2
+                px[x, y + dy] = (232, 188, 36, 255) if stripe else (30, 30, 34, 255)
+        nozzle = [(255, 160, 40, 255), (255, 230, 120, 255)] if on else [(90, 94, 104, 255), (60, 64, 72, 255)]
+        for x in range(7, 9):
+            for dy in range(1, 3):
+                px[x, y + dy] = nozzle[(x + dy) % 2]
+    for y in range(16):  # the rails
+        for x, shade in ((2, 186), (3, 146), (12, 186), (13, 146)):
+            px[x, y] = (shade, shade + 6, shade + 14, 255)
+    return img
 
 
 def anchor_model():
@@ -498,3 +564,5 @@ def flight_plan():
 def draw_all(save):
     for item, draw in HD_ITEMS.items():
         save(draw(), "item", item)
+    save(booster_rail_texture(False), "block", "booster_rail")
+    save(booster_rail_texture(True), "block", "booster_rail_on")

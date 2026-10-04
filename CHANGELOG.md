@@ -16,6 +16,10 @@ No numbered release yet. Everything below is on `main`.
 - Keys joined by Hermite splines so the motion flows through them. Timed on vanilla's own swing, so there is no networking. Client only, with no allocation per frame and the arms only beyond 32 blocks; four client mixins.
 - Learned from the combat animation mods and packs the owner sent (Better Combat, Malfu, Player Animation Library, Fresh Animations and Fresh Moves, Mo' Bends, NdRz's weapons); nothing of theirs is used. Record: [arms-motion.md](docs/features/arms-motion.md).
 
+### Unmerged: Booster rails, batch 42
+- **Booster rail:** a powered rail with rocket thrusters, loaded with solid propellant (8 boosts each). It kicks a minecart to full speed, from a standstill or uphill, and holds it there for 10 seconds, so long tracks and climbs need far fewer powered rails. Minecarts keep their normal speed limit.
+- Handbook page, game test. Record: [booster-rails.md](docs/features/booster-rails.md).
+
 ### Unmerged: Rocket launcher, batch 41
 - **Rocket launcher** with **high-explosive** and **homing rockets** (rocket workshop). Rockets fly straight, burst on impact and hurt living things only: no block is ever broken. Homing rockets lock on to the hostile mob nearest the crosshair and steer into it.
 - Handbook page, two game tests. Record: [rocket-launcher.md](docs/features/rocket-launcher.md).
