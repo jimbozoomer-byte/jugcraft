@@ -23,6 +23,7 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -69,22 +70,22 @@ public final class Candelabra {
 
 		/** The wax a dye (or bone meal, for ivory) gives, or null. */
 		public static Wax of(ItemStack stack) {
-			if (stack.is(Items.WHITE_DYE) || stack.is(Items.BONE_MEAL)) {
+			if (stack.is(Items.BONE_MEAL)) {
 				return IVORY;
 			}
-			if (stack.is(Items.BLACK_DYE)) {
-				return BLACK;
+			DyeColor dye = ScarecrowBlock.dyeColor(stack);
+			if (dye == null) {
+				return null;
 			}
-			if (stack.is(Items.PURPLE_DYE)) {
-				return PURPLE;
-			}
-			if (stack.is(Items.GREEN_DYE)) {
-				return GREEN;
-			}
-			if (stack.is(Items.ORANGE_DYE)) {
-				return ORANGE;
-			}
-			return stack.is(Items.RED_DYE) ? RED : null;
+			return switch (dye) {
+				case WHITE -> IVORY;
+				case BLACK -> BLACK;
+				case PURPLE -> PURPLE;
+				case GREEN -> GREEN;
+				case ORANGE -> ORANGE;
+				case RED -> RED;
+				default -> null;
+			};
 		}
 
 		@Override

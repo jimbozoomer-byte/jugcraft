@@ -69,7 +69,7 @@ public class OddityJarBlock extends Block implements EntityBlock {
 		}
 		if (!level.isClientSide()) {
 			level.blockEvent(pos, this, 1, 0);
-			level.playSound(null, pos, SoundEvents.CAT_HISS, SoundSource.BLOCKS, 0.4F, 1.6F);
+			level.playSound(null, pos, SoundEvents.SPIDER_AMBIENT, SoundSource.BLOCKS, 0.4F, 1.6F);
 		}
 		return InteractionResult.SUCCESS;
 	}

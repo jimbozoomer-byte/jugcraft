@@ -216,7 +216,7 @@ public class HornedSkullCauldronBlock extends BaseEntityBlock {
 
 	private static void giveBack(Player player, ItemStack stack) {
 		if (!stack.isEmpty() && !player.getInventory().add(stack)) {
-			player.drop(stack, false);
+			player.spawnAtLocation((ServerLevel) player.level(), stack);
 		}
 	}
 

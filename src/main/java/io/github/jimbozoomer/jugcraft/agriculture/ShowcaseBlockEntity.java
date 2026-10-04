@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Containers;
@@ -93,7 +94,7 @@ public class ShowcaseBlockEntity extends BlockEntity {
 				if (held.isEmpty()) {
 					player.setItemInHand(hand, there);
 				} else if (!player.getInventory().add(there)) {
-					player.drop(there, false);
+					player.spawnAtLocation((ServerLevel) level, there);
 				}
 				level.playSound(null, worldPosition, showcase.putSound(), SoundSource.BLOCKS, 0.8F, 1.2F);
 				level.gameEvent(player, GameEvent.BLOCK_CHANGE, worldPosition);
