@@ -32,6 +32,7 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityType;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
@@ -265,6 +266,15 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<ShowcaseBlockEntity> SHOWCASE_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> MOTH_CASE_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> ODDITY_JAR_ENTITY;
+	public static BlockEntityType<IronBoundCoffinBlockEntity> IRON_BOUND_COFFIN_ENTITY;
+	public static BlockEntityType<CoffinWardrobeBlockEntity> COFFIN_WARDROBE_ENTITY;
+	public static BlockEntityType<SarcophagusBlockEntity> SARCOPHAGUS_TOMB_ENTITY;
+	public static BlockEntityType<ColossalSkullBlockEntity> COLOSSAL_SKULL_ENTITY;
+	public static BlockEntityType<GargoyleSentinelBlockEntity> GARGOYLE_SENTINEL_ENTITY;
+	public static BlockEntityType<GargoyleRainspoutBlockEntity> GARGOYLE_RAINSPOUT_ENTITY;
+	/** A Skeleton Key's wards ({@link SkeletonKeyItem}). */
+	public static DataComponentType<Integer> KEY_WARDS;
+	public static RecipeSerializer<KeyCopyingRecipe> KEY_COPYING_SERIALIZER;
 	public static BlockEntityType<DecorationBlockEntity> BRAZIER_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> SHADOW_LAMP_ENTITY;
 	public static BlockEntityType<DecorationBlockEntity> FLOATING_HAT_ENTITY;
@@ -1753,6 +1763,7 @@ public final class JugcraftAgriculture {
 		registerChurchyardOrnaments();
 		registerHauntedHouseProps();
 		registerWitchsWorkshop();
+		registerCryptAndOssuary();
 	}
 
 	/**
@@ -1876,6 +1887,109 @@ public final class JugcraftAgriculture {
 	private static BlockBehaviour.Properties jar() {
 		return BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.5F).sound(SoundType.GLASS).noOcclusion().pushReaction(PushReaction.POPPED);
 	}
+
+	/**
+	 * Halloween decorations batch 18, the Crypt and the Ossuary (docs/features/crypt-and-ossuary.md): the Iron-Bound Coffin,
+	 * the Skeleton Key and the Coffin Wardrobe; the Stone Sarcophagi; the Bone Throne, Ribcage Bookcase, Skull Footstool
+	 * and Vertebra Floor Lamp; the Buried Colossus; and the Gargoyle Sentinel, Gargoyle Rainspout and Chimera Finial.
+	 */
+	private static void registerCryptAndOssuary() {
+		List<Block> blocks = new ArrayList<>();
+		KEY_WARDS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("key_wards"),
+				DataComponentType.<Integer>builder().persistent(Codec.intRange(1, SkeletonKeyItem.PATTERNS - 1)).networkSynchronized(ByteBufCodecs.VAR_INT)
+						.build());
+		KEY_COPYING_SERIALIZER = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Jugcraft.id(KEY_COPYING), KeyCopyingRecipe.SERIALIZER);
+		registerItem(KEY_BLANK, props -> new SkeletonKeyItem(props, true), new Item.Properties(), TOOL_TAB);
+		registerItem(SKELETON_KEY, props -> new SkeletonKeyItem(props, false), new Item.Properties().stacksTo(16), TOOL_TAB);
+
+		Block coffin = registerBlock(IRON_BOUND_COFFIN, IronBoundCoffinBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(3.0F, 6.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.BLOCK));
+		registerItem(IRON_BOUND_COFFIN, props -> new BlockItem(coffin, props), new Item.Properties().useBlockDescriptionPrefix().stacksTo(1), EQUIPMENT_TAB);
+		IRON_BOUND_COFFIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(IRON_BOUND_COFFIN),
+				FabricBlockEntityTypeBuilder.create(IronBoundCoffinBlockEntity::new, coffin).build());
+		Block wardrobe = registerBlock(COFFIN_WARDROBE, CoffinWardrobeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(2.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.BLOCK));
+		COFFIN_WARDROBE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(COFFIN_WARDROBE),
+				FabricBlockEntityTypeBuilder.create(CoffinWardrobeBlockEntity::new, wardrobe).build());
+		registerItem(COFFIN_WARDROBE, props -> new DoubleHighBlockItem(wardrobe, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+
+		List<Block> tombs = new ArrayList<>();
+		for (String stone : SARCOPHAGUS_STONES) {
+			Block tomb = registerBlock(stone + "_sarcophagus", SarcophagusBlock::new, BlockBehaviour.Properties.of()
+					.mapColor(stone.equals("stone_brick") ? MapColor.STONE : MapColor.DEEPSLATE).strength(3.0F, 6.0F).requiresCorrectToolForDrops()
+					.sound(stone.equals("deepslate") ? SoundType.POLISHED_DEEPSLATE : SoundType.STONE).noOcclusion().pushReaction(PushReaction.BLOCK));
+			tombs.add(tomb);
+		}
+		SARCOPHAGUS_TOMB_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("sarcophagus"),
+				FabricBlockEntityTypeBuilder.create(SarcophagusBlockEntity::new, tombs.toArray(Block[]::new)).build());
+		blocks.addAll(tombs);
+
+		Block throne = registerBlock(BONE_THRONE, BoneThroneBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(2.0F)
+				.sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.BLOCK).lightLevel(BoneThroneBlock::light));
+		registerItem(BONE_THRONE, props -> new DoubleHighBlockItem(throne, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block bookcase = registerBlock(RIBCAGE_BOOKCASE, RibcageBookcaseBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
+				.strength(1.5F).sound(SoundType.BONE_BLOCK).noOcclusion());
+		((FabricBlockEntityType) BlockEntityType.CHISELED_BOOKSHELF).addValidBlock(bookcase);
+		Block footstool = registerBlock(SKULL_FOOTSTOOL, SkullFootstoolBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND)
+				.strength(1.0F).sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block lamp = registerBlock(VERTEBRA_LAMP, VertebraFloorLampBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(1.0F)
+				.sound(SoundType.BONE_BLOCK).noOcclusion().pushReaction(PushReaction.POPPED).lightLevel(VertebraFloorLampBlock::light));
+		registerItem(VERTEBRA_LAMP, props -> new DoubleHighBlockItem(lamp, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		blocks.addAll(List.of(bookcase, footstool));
+
+		Block skull = registerBlock(COLOSSAL_SKULL, ColossalSkullBlock::new, colossal());
+		COLOSSAL_SKULL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(COLOSSAL_SKULL),
+				FabricBlockEntityTypeBuilder.create(ColossalSkullBlockEntity::new, skull).build());
+		Block rib = registerBlock(COLOSSAL_RIB, ColossalRibBlock::new, colossal());
+		registerItem(COLOSSAL_RIB, props -> new DoubleHighBlockItem(rib, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		Block vertebra = registerBlock(COLOSSAL_VERTEBRA, ColossalVertebraBlock::new, colossal());
+		Block femur = registerBlock(COLOSSAL_FEMUR, props -> new LongDecorationBlock(props, FEMUR_HEAD, FEMUR_FOOT), colossal());
+		blocks.addAll(List.of(skull, vertebra, femur));
+
+		Block sentinel = registerBlock(GARGOYLE_SENTINEL, GargoyleSentinelBlock::new, gargoyle());
+		GARGOYLE_SENTINEL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(GARGOYLE_SENTINEL),
+				FabricBlockEntityTypeBuilder.create(GargoyleSentinelBlockEntity::new, sentinel).build());
+		Block spout = registerBlock(GARGOYLE_RAINSPOUT, GargoyleRainspoutBlock::new, gargoyle().pushReaction(PushReaction.DESTROY));
+		GARGOYLE_RAINSPOUT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(GARGOYLE_RAINSPOUT),
+				FabricBlockEntityTypeBuilder.create(GargoyleRainspoutBlockEntity::new, spout).build());
+		Block finial = registerBlock(CHIMERA_FINIAL, ChimeraFinialBlock::new, gargoyle());
+		blocks.addAll(List.of(sentinel, spout, finial));
+		for (Block block : blocks) {
+			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
+			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	private static BlockBehaviour.Properties colossal() {
+		return BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(2.0F, 4.0F).requiresCorrectToolForDrops().sound(SoundType.BONE_BLOCK)
+				.noOcclusion().pushReaction(PushReaction.BLOCK);
+	}
+
+	private static BlockBehaviour.Properties gargoyle() {
+		return BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(2.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.STONE)
+				.noOcclusion();
+	}
+
+	public static final String IRON_BOUND_COFFIN = "iron_bound_coffin";
+	public static final String KEY_BLANK = "key_blank";
+	public static final String SKELETON_KEY = "skeleton_key";
+	public static final String KEY_COPYING = "key_copying";
+	public static final String COFFIN_WARDROBE = "coffin_wardrobe";
+	public static final List<String> SARCOPHAGUS_STONES = List.of("stone_brick", "deepslate", "blackstone");
+	public static final String BONE_THRONE = "bone_throne";
+	public static final String RIBCAGE_BOOKCASE = "ribcage_bookcase";
+	public static final String SKULL_FOOTSTOOL = "skull_footstool";
+	public static final String VERTEBRA_LAMP = "vertebra_floor_lamp";
+	public static final String COLOSSAL_SKULL = "colossal_skull";
+	public static final String COLOSSAL_RIB = "colossal_rib";
+	public static final String COLOSSAL_VERTEBRA = "colossal_vertebra";
+	public static final String COLOSSAL_FEMUR = "colossal_femur";
+	public static final String GARGOYLE_SENTINEL = "gargoyle_sentinel";
+	public static final String GARGOYLE_RAINSPOUT = "gargoyle_rainspout";
+	public static final String CHIMERA_FINIAL = "chimera_finial";
+	/** The Colossal Femur's hitboxes, in pixels for its head facing north (tools/decor18_data.py draws it). */
+	private static final double[][] FEMUR_HEAD = {{3.0, 0.0, 2.0, 13.0, 8.0, 16.0}};
+	private static final double[][] FEMUR_FOOT = {{4.0, 0.0, 0.0, 12.0, 7.0, 14.0}};
 
 	public static final String HORNED_SKULL_CAULDRON = "horned_skull_cauldron";
 	public static final String EMBER_BED = "ember_bed";

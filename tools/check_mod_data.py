@@ -25,6 +25,7 @@ import leaf_blower
 import decor15
 import decor16
 import decor17
+import decor18
 import petro
 import deposits
 import seasons
@@ -334,6 +335,10 @@ def item_units(ref):
     return {}
 
 
+# Special recipes, which make their result from what is in the grid: their type, registered by Java.
+SPECIAL_RECIPES = {f"{MOD}:{decor18.KEY['recipe']}"}
+
+
 def check_recipes(registered):
     for path in sorted((DATA / MOD / "recipe").glob("*.json")):
         recipe = load(path)
@@ -344,7 +349,12 @@ def check_recipes(registered):
         features = [c.get("feature") for c in conditions if c.get("condition") == f"{MOD}:feature_enabled"]
         if not features:
             err(f"{name}: missing feature switch condition")
-        elif split(recipe["result"]["id"])[1] in registered and feature_of(split(recipe["result"]["id"])[1]) not in features:
+        if "result" not in recipe:
+            # A special recipe makes its result from what is in the grid (the Skeleton Key's copying).
+            if recipe["type"] not in SPECIAL_RECIPES:
+                err(f"{name}: no result, and {recipe['type']} is not a known special recipe")
+            continue
+        if features and split(recipe["result"]["id"])[1] in registered and feature_of(split(recipe["result"]["id"])[1]) not in features:
             err(f"{name}: gated by {features} but its result belongs to {feature_of(split(recipe['result']['id'])[1])}")
 
         kind = recipe["type"]
