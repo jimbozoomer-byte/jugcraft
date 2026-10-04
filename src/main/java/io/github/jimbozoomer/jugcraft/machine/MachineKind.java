@@ -112,6 +112,8 @@ public enum MachineKind implements StringRepresentable {
 	// Gas storage (batch 35): an ammonia refrigeration unit freezing water into ice and packing ice down to blue ice.
 	// Ammonia in the first tank, water in the second; one input slot and one output.
 	AMMONIA_CHILLER("ammonia_chiller", 20_000, 256, 0, 24, 2),
+	/** Batch 43 (tools/rocketry.py): condenses oxygen into liquid oxygen. */
+	CRYOGENIC_LIQUEFIER("cryogenic_liquefier", 40_000, 512, 0, 96, 0),
 	// Rocketry (batch 38): like the circuit assembler, up to three ingredients in any slots, for rocket parts and rockets.
 	ROCKET_WORKSHOP("rocket_workshop", 20_000, 256, 0, 48, 4),
 	// Chemistry (batch 17, the electric look): a 3x3x2 vanadium redox flow battery. Its charge is capped by the
@@ -295,6 +297,8 @@ public enum MachineKind implements StringRepresentable {
 	/** The ammonia chiller's tanks (mB): ammonia refrigerant, and water to freeze. */
 	public static final int CHILLER_AMMONIA_TANK = 4_000;
 	public static final int CHILLER_WATER_TANK = 8_000;
+	/** The cryogenic liquefier's oxygen and liquid oxygen tanks (tools/rocketry.py LIQUEFIER_TANK). */
+	public static final int LIQUEFIER_TANK = 8_000;
 	/** Ticks the electric furnace needs per item (the vanilla furnace needs 200). */
 	public static final int ELECTRIC_FURNACE_TICKS = 100;
 
@@ -371,6 +375,7 @@ public enum MachineKind implements StringRepresentable {
 			case CHEMICAL_REACTOR -> "chemical_reaction";
 			case LITHOGRAPHY_STATION -> "lithography";
 			case AMMONIA_CHILLER -> "chilling";
+			case CRYOGENIC_LIQUEFIER -> "liquefaction";
 			default -> null;
 		};
 	}
@@ -411,6 +416,7 @@ public enum MachineKind implements StringRepresentable {
 			case CHEMICAL_REACTOR -> new FluidMachineSpec(List.of(CHEM_REACTOR_TANK), List.of(CHEM_REACTOR_TANK), 2, 1);
 			case LITHOGRAPHY_STATION -> new FluidMachineSpec(List.of(LITHOGRAPHY_TANK), List.of(), 2, 1);
 			case AMMONIA_CHILLER -> new FluidMachineSpec(List.of(CHILLER_AMMONIA_TANK, CHILLER_WATER_TANK), List.of(), 1, 1);
+			case CRYOGENIC_LIQUEFIER -> new FluidMachineSpec(List.of(LIQUEFIER_TANK), List.of(LIQUEFIER_TANK), 0, 0);
 			case FUEL_CELL -> new FluidMachineSpec(List.of(FUEL_CELL_TANK), List.of(), 0, 0);
 			case HYDROTREATER -> new FluidMachineSpec(List.of(HYDROTREATER_TANK, HYDROTREATER_TANK),
 					List.of(HYDROTREATER_TANK, HYDROTREATER_TANK), 0, 0);

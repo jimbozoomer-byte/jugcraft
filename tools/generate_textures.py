@@ -1270,6 +1270,9 @@ def machines():
     save(window(3401, [(40, 46, 60)], glow=[(90, 170, 230), (150, 210, 250), (60, 130, 200)]), "block",
          "electroplating_bath_front_on")
     save(window(3501, [(46, 56, 66), (60, 74, 86)]), "block", "ammonia_chiller_front")
+    save(window(4301, [(44, 52, 64), (58, 70, 86)]), "block", "cryogenic_liquefier_front")
+    save(window(4301, [(44, 52, 64)], glow=[(140, 200, 250), (200, 236, 255), (100, 170, 240)]), "block",
+         "cryogenic_liquefier_front_on")
     save(window(3501, [(46, 56, 66)], glow=[(170, 220, 250), (220, 244, 255), (120, 190, 240)]), "block",
          "ammonia_chiller_front_on")
     save(window(3801, [(54, 50, 44), (70, 64, 56)]), "block", "rocket_workshop_front")

@@ -290,6 +290,24 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_control_room");
 			server.runCommand("clear @p");
 
+			// Rocketry (batches 38-43), where the control room was: a wall of item frames with the rockets, the rocket
+			// workshop, cryogenic liquefier and a rocket pad, a zipline strung from the top of the wall, and a powered
+			// booster rail line with a minecart; the rocket launcher in hand.
+			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 26, y, z - 10, x - 10, y + 6, z + 1));
+			server.runOnServer(minecraft -> buildRocketry(minecraft.overworld(), new BlockPos(x - 24, y, z - 10)));
+			String[] rockets = {"survey_rocket", "signal_flare", "delivery_rocket", "line_rocket", "he_rocket", "homing_rocket",
+					"kerosene_tank", "lox_tank", "rocket_motor", "flight_plan"};
+			for (int i = 0; i < rockets.length; i++) {
+				server.runCommand("summon minecraft:item_frame %d %d %d {Facing:3b,Fixed:1b,Item:{id:\"jugcraft:%s\",count:1}}"
+						.formatted(x - 23 + i % 5 * 2, y + 1 + i / 5, z - 9, rockets[i]));
+			}
+			server.runCommand("item replace entity @p hotbar.0 with jugcraft:rocket_launcher");
+			server.runCommand("tp @p %d %d %d 180 10".formatted(x - 18, y + 1, z - 2));
+			context.waitTicks(80);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_rocketry");
+			server.runCommand("clear @p");
+
 			// Multi-block machines, ten blocks away, in views twelve blocks apart along the row (the wind turbine is
 			// nine tall; the oil machines are at the far end).
 			int views = (largeRowLength() + 11) / 12;
@@ -779,6 +797,40 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			controller.setRule(1, true, blue, false, 20, net.minecraft.world.item.DyeColor.ORANGE, true);
 			controller.evaluate(level, controllerPos);
 			controller.toggle(level, net.minecraft.world.item.DyeColor.ORANGE);
+		}
+	}
+
+	/** Batches 38-43: the rocketry scene (base: the west end of the back wall). */
+	private static void buildRocketry(ServerLevel level, BlockPos base) {
+		for (int dx = 0; dx <= 10; dx++) {
+			for (int dy = 0; dy <= 2; dy++) {
+				level.setBlock(base.offset(dx, dy, 0), Blocks.SMOOTH_STONE.defaultBlockState(), 3);
+			}
+		}
+		level.setBlock(base.offset(1, 0, 3), JugcraftMachines.MACHINES.get(MachineKind.ROCKET_WORKSHOP).defaultBlockState()
+				.setValue(MachineBlock.FACING, Direction.SOUTH), 3);
+		level.setBlock(base.offset(3, 0, 3), JugcraftMachines.MACHINES.get(MachineKind.CRYOGENIC_LIQUEFIER).defaultBlockState()
+				.setValue(MachineBlock.FACING, Direction.SOUTH), 3);
+		level.setBlock(base.offset(5, 0, 3), io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD.defaultBlockState(), 3);
+		// A zipline from the top of the wall down to an anchor near the camera.
+		BlockPos top = base.offset(10, 3, 0);
+		BlockPos low = base.offset(13, 0, 4);
+		BlockState anchor = io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_ANCHOR.defaultBlockState();
+		level.setBlock(top, anchor, 3);
+		level.setBlock(low, anchor, 3);
+		io.github.jimbozoomer.jugcraft.rocketry.ZiplineAnchorBlockEntity.connect(level, top, low, null);
+		// A powered booster rail line along the front, with a minecart on it.
+		BlockState rail = io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.BOOSTER_RAIL.defaultBlockState()
+				.setValue(net.minecraft.world.level.block.PoweredRailBlock.SHAPE, net.minecraft.world.level.block.state.properties.RailShape.EAST_WEST);
+		for (int dx = 1; dx <= 8; dx++) {
+			level.setBlock(base.offset(dx, 0, 5), rail, 3);
+		}
+		level.setBlock(base.offset(0, 0, 5), Blocks.REDSTONE_BLOCK.defaultBlockState(), 3);
+		var cart = net.minecraft.world.entity.EntityTypes.MINECART.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+		if (cart != null) {
+			BlockPos at = base.offset(5, 0, 5);
+			cart.snapTo(at.getX() + 0.5, at.getY() + 0.1, at.getZ() + 0.5, 90, 0);
+			level.addFreshEntity(cart);
 		}
 	}
 
