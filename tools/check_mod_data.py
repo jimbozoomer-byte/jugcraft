@@ -671,6 +671,12 @@ def check_rocketry():
                          ("BLOCKS_PER_TICK", rocketry.POST_BLOCKS_PER_TICK), ("CHECK_INTERVAL", rocketry.POST_CHECK_INTERVAL)):
         if f"int {const} = {value:_};" not in post and f"int {const} = {value};" not in post:
             err(f"RocketPost.{const} differs from tools/rocketry.py ({value})")
+    launcher = (JAVA_ROOT / "rocketry" / "RocketLauncherItem.java").read_text(encoding="utf-8")
+    for const, value in (("COOLDOWN", rocketry.LAUNCHER_COOLDOWN), ("HOMING_RANGE", rocketry.HOMING_RANGE)):
+        if f"int {const} = {value};" not in launcher:
+            err(f"RocketLauncherItem.{const} differs from tools/rocketry.py ({value})")
+    if f"int LIFETIME = {rocketry.ROCKET_LIFETIME};" not in (JAVA_ROOT / "rocketry" / "CombatRocket.java").read_text(encoding="utf-8"):
+        err(f"CombatRocket.LIFETIME differs from tools/rocketry.py ({rocketry.ROCKET_LIFETIME})")
     anchor = (JAVA_ROOT / "rocketry" / "ZiplineAnchorBlockEntity.java").read_text(encoding="utf-8")
     for const, value in (("RANGE", rocketry.LINE_RANGE), ("REACH", rocketry.ANCHOR_REACH)):
         if f"int {const} = {value};" not in anchor:

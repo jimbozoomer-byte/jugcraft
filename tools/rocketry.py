@@ -48,6 +48,10 @@ ITEMS = {
     "flight_plan": "Flight Plan",
     # Batch 40: the zipline.
     "line_rocket": "Line-Throwing Rocket",
+    # Batch 41: the rocket launcher.
+    "rocket_launcher": "Rocket Launcher",
+    "he_rocket": "High-Explosive Rocket",
+    "homing_rocket": "Homing Rocket",
 }
 ROCKETS = ["survey_rocket", "cloud_seeding_rocket", "clear_sky_rocket", "signal_flare", "illumination_flare"]
 TOOLTIPS = {
@@ -66,7 +70,17 @@ TOOLTIPS = {
     "delivery_rocket": "Carries a rocket pad's cargo to the pad its flight plan names. Used up on launch.",
     "line_rocket": "Stand by a zipline anchor and use it while looking at another anchor up to 96 blocks away: it "
                    "strings a steel line between them.",
+    "rocket_launcher": "Fires a rocket from your inventory. Rockets hurt living things only: they never break blocks.",
+    "he_rocket": "Rocket launcher ammunition: a big blast where it hits (12 hearts at the centre, 5 blocks across).",
+    "homing_rocket": "Rocket launcher ammunition: locks on to the hostile mob nearest your crosshair within 48 blocks "
+                     "and steers into it. A smaller blast.",
 }
+
+# Batch 41 (docs/features/rocket-launcher.md): the launcher's cooldown, how long a rocket flies before it bursts on its
+# own, and how far a homing rocket looks for a target (Java: RocketLauncherItem, CombatRocket). Blast sizes are in Java.
+LAUNCHER_COOLDOWN = 40
+ROCKET_LIFETIME = 100
+HOMING_RANGE = 48
 
 # Batch 39 (docs/features/rocket-post.md): rocket pads send their cargo to another pad (Java: rocketry/RocketPost,
 # RocketPadBlockEntity). Range in blocks, flight time (a minimum plus blocks per tick), how often waiting deliveries
@@ -126,6 +140,10 @@ def workshop_recipes():
          "output": rid("delivery_rocket"), "count": 1, "ticks": 300, "features": feature},
         {"inputs": [[rid("rocket_motor"), 1], [rid("aluminum_wire"), 4], ["minecraft:string", 8]],
          "output": rid("line_rocket"), "count": 1, "ticks": 200, "features": feature + ["aluminum"]},
+        {"inputs": [[rid("solid_propellant"), 2], [rid("guncotton"), 2], [rid("rocket_casing"), 1]],
+         "output": rid("he_rocket"), "count": 4, "ticks": 200, "features": feature},
+        {"inputs": [[rid("solid_propellant"), 2], [rid("guncotton"), 2], [rid("guidance_unit"), 1]],
+         "output": rid("homing_rocket"), "count": 4, "ticks": 300, "features": feature},
         {"inputs": [[rid("solid_propellant"), 1], ["minecraft:paper", 2], ["minecraft:red_dye", 1]],
          "output": rid("signal_flare"), "count": 4, "ticks": 100, "features": feature},
         {"inputs": [[rid("solid_propellant"), 1], ["minecraft:paper", 2], ["minecraft:glowstone_dust", 1]],
@@ -164,6 +182,13 @@ def write_all(write, assets, data, lang, condition, self_drop):
         "ingredients": [f"{MOD}:silver_dust", f"{MOD}:iodine"], "result": {"id": f"{MOD}:silver_iodide", "count": 2}})
     write_post(write, assets, data, lang, condition, self_drop)
     write_zipline(write, assets, data, lang, condition)
+    lang[f"entity.{MOD}.combat_rocket"] = "Rocket"
+    lang[f"message.{MOD}.rocket_launcher.empty"] = "No rockets"
+    write(data / "recipe" / "rocket_launcher.json", {
+        "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped", "category": "equipment",
+        "pattern": ["PPP", " GT", "  P"],
+        "key": {"P": "#c:plates/steel", "G": f"{MOD}:guidance_unit", "T": "minecraft:tripwire_hook"},
+        "result": {"id": f"{MOD}:rocket_launcher", "count": 1}})
 
 
 def write_zipline(write, assets, data, lang, condition):
@@ -395,7 +420,39 @@ HD_ITEMS = {"survey_rocket": survey_rocket, "cloud_seeding_rocket": cloud_seedin
             "guidance_unit": guidance_unit, "iodine": iodine, "ammonium_perchlorate": ammonium_perchlorate,
             "silver_iodide": silver_iodide, "solid_propellant": solid_propellant,
             "delivery_rocket": lambda: delivery_rocket(), "flight_plan": lambda: flight_plan(),
-            "line_rocket": lambda: line_rocket()}
+            "line_rocket": lambda: line_rocket(), "rocket_launcher": lambda: rocket_launcher(),
+            "he_rocket": lambda: he_rocket(), "homing_rocket": lambda: homing_rocket()}
+
+
+def rocket_launcher():
+    """A shoulder-fired tube lying across the icon: an olive tube with a flared exhaust, a sight, a grip and a trigger."""
+    import hd_art as hd
+    c = hd.Canvas()
+    c.capsule((8, 40), (56, 22), 7.5, hd.OLIVE, flat_ends=True, bands=[(0.08, 0.14, hd.SAFETY_YELLOW), (0.86, 0.92, hd.GUNMETAL)])
+    c.polygon([(6, 33), (10, 47), (2, 50), (0, 30)], hd.GUNMETAL)  # flared exhaust at the back
+    c.disc((57, 22), 5.0, hd.HAZARD_BLACK, 0.3)  # the muzzle
+    c.box((34, 22), 4, 3, -0.36, hd.GUNMETAL, bevel=0.8)  # the sight
+    c.disc((36, 20), 1.5, hd.GLASS, 0.8)
+    c.capsule((30, 38), (28, 52), 3.0, hd.RUBBER, flat_ends=True)  # the grip
+    c.capsule((40, 34), (39, 46), 2.4, hd.RUBBER, flat_ends=True)  # the fore grip
+    c.line((32, 42), (35, 44), (40, 40, 44), width=1.4)  # trigger
+    return c.finish()
+
+
+def he_rocket():
+    """A gunmetal rocket with a red warning band and a yellow warhead nose."""
+    import hd_art as hd
+    c = hd.Canvas()
+    _rocket(c, hd, hd.GUNMETAL, hd.RED, hd.SAFETY_YELLOW, fins=True)
+    return c.finish()
+
+
+def homing_rocket():
+    """A white rocket with a red band and a glass seeker eye in its nose."""
+    import hd_art as hd
+    c = hd.Canvas()
+    _rocket(c, hd, hd.WHITE_PAINT, hd.RED, hd.RED, fins=True, tip=hd.GLASS)
+    return c.finish()
 
 
 def line_rocket():

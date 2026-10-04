@@ -376,6 +376,46 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/**
+	 * Batch 41 (rocket launcher): a high-explosive rocket fired straight at a husk hurts it and leaves the glass beside
+	 * it standing (rockets never break blocks).
+	 */
+	@GameTest(maxTicks = 100)
+	public void heRocketHurtsButBreaksNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		net.minecraft.world.entity.Mob husk = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new BlockPos(6, 1, 1));
+		BlockPos glass = helper.absolutePos(new BlockPos(6, 1, 2));
+		level.setBlockAndUpdate(glass, Blocks.GLASS.defaultBlockState());
+		launch(helper, item("he_rocket"), new Vec3(1.5, 2.0, 1.5), new Vec3(1, 0, 0), null);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(husk.getHealth() < husk.getMaxHealth(), "The rocket did not hurt the husk");
+			helper.assertTrue(level.getBlockState(glass).is(Blocks.GLASS), "The rocket broke the glass");
+		});
+	}
+
+	/** Batch 41: a homing rocket fired past a husk turns and flies into it. */
+	@GameTest(maxTicks = 100)
+	public void homingRocketSteersIntoItsTarget(GameTestHelper helper) {
+		net.minecraft.world.entity.Mob husk = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.HUSK, new BlockPos(6, 1, 6));
+		launch(helper, item("homing_rocket"), new Vec3(1.5, 2.0, 1.5), new Vec3(1, 0, 0), husk);
+		helper.succeedWhen(() -> helper.assertTrue(husk.getHealth() < husk.getMaxHealth(), "The homing rocket missed the husk"));
+	}
+
+	/** Fires a rocket of {@code kind} from {@code from} (relative to the test) along {@code direction}, locked on to {@code target}. */
+	private static void launch(GameTestHelper helper, Item kind, Vec3 from, Vec3 direction,
+			net.minecraft.world.entity.LivingEntity target) {
+		var rocket = new io.github.jimbozoomer.jugcraft.rocketry.CombatRocket(
+				io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.COMBAT_ROCKET, helper.getLevel());
+		rocket.setItem(new ItemStack(kind));
+		Vec3 at = helper.absoluteVec(from);
+		rocket.setPos(at.x, at.y, at.z);
+		rocket.setDeltaMovement(direction.normalize().scale(io.github.jimbozoomer.jugcraft.rocketry.RocketLauncherItem.SPEED / 3.0));
+		if (target != null) {
+			rocket.lockOn(target);
+		}
+		helper.getLevel().addFreshEntity(rocket);
+	}
+
 	/** Ores drop their raw material to a plain pickaxe, more with Fortune; only Silk Touch takes the ore block itself. */
 	@GameTest
 	public void oresNeedSilkTouchToDropThemselves(GameTestHelper helper) {
