@@ -20,6 +20,7 @@ import math
 
 from PIL import Image
 
+from clean_metal import CHIP, CHIP_WIDE, bolt, corner_bolts, inset, patch, plate
 from steampunk_models import box, cyl
 from zeppelin import round_section, tiled_quads
 
@@ -87,7 +88,7 @@ ENTITIES = ["siege_mortar", "self_propelled_howitzer", "flak_gun", "observation_
 
 YELLOW, GUNMETAL, OLIVE, HAZARD, CONCRETE, DECK = "ar_yellow", "dp_gunmetal", "dp_olive", "dp_hazard", "ar_concrete", "ar_deck"
 SKID, BAND, NUT, BRASS, LACQUER, COPPER = "dr_skid", "dr_band", "dr_nut", "ik_brass", "ik_lacquer", "dr_copper_pipe"
-EXHAUST, SOOT, CANVAS, STRIPE, WICKER, ARMOR = "dp_exhaust", "sp_hopper_inside", "dz_canvas", "dz_canvas_stripe", "ar_wicker", "ar_armor"
+EXHAUST, SOOT, CANVAS, STRIPE, WICKER, ARMOR = "dp_exhaust", "dr_soot", "dz_canvas", "dz_canvas_stripe", "ar_wicker", "ar_armor"
 
 # Pivots, in pixels from the entity's feet (facing +z). Keep in sync with client/ArtilleryRenderers.
 MORTAR_TURNTABLE = (0, 10, 0)
@@ -327,58 +328,59 @@ def _put(img, x, y, c):
         img.putpixel((x, y), tuple(c) + (255,))
 
 
-def _noise(seed, palette, weights):
-    import random
-    rng = random.Random(seed)
-    img = _img()
-    for y in range(16):
-        for x in range(16):
-            _put(img, x, y, palette[rng.choices(range(len(palette)), weights)[0]])
-    return img
 
 
 def yellow():
-    """Chipped warning yellow over dark steel, rivets along the edges."""
-    import random
-    rng = random.Random(5101)
+    """Warning-yellow paint on steel: a bevelled panel with a recessed inset, six bolts and two chipped corners."""
     img = _img()
-    pal = [(150, 112, 20), (196, 150, 30), (222, 176, 44), (240, 198, 70)]
-    for y in range(16):
-        for x in range(16):
-            c = pal[rng.choices(range(4), (1, 3, 6, 2))[0]]
-            if rng.random() < 0.03:
-                c = (60, 58, 54)
-            if x in (0, 15) or y in (0, 15):
-                c = pal[0]
-            _put(img, x, y, c)
-    for x, y in ((2, 2), (13, 2), (2, 13), (13, 13), (7, 2), (7, 13)):
-        _put(img, x, y, (120, 92, 20))
-        _put(img, x + 1, y, (250, 214, 110))
+    pal = [(130, 96, 18), (176, 134, 28), (214, 170, 42), (236, 196, 72), (250, 220, 120)]
+    plate(img, pal)
+    inset(img, 4, 4, 11, 11, pal[3], pal[1])
+    for x, y in ((2, 2), (12, 2), (2, 12), (12, 12), (7, 2), (7, 12)):
+        bolt(img, x, y, pal)
+    patch(img, CHIP_WIDE, (84, 82, 78), 1, 13)
+    patch(img, CHIP, (84, 82, 78), 13, 1)
     return img
 
 
 def concrete():
-    return _noise(5102, [(118, 116, 108), (134, 132, 124), (150, 148, 140), (100, 98, 92)], (3, 5, 3, 1))
+    """Cast concrete like vanilla smooth stone: a flat grey, a formwork seam along the bottom and a few soft blotches."""
+    pal = [(100, 98, 92), (118, 116, 108), (134, 132, 124), (150, 148, 140)]
+    img = _img()
+    _rect(img, 0, 0, 15, 15, pal[2])
+    for x in range(16):
+        _put(img, x, 15, pal[1])
+        _put(img, x, 0, pal[3])
+    for pixels, c in (([(3, 4), (4, 4), (4, 5)], pal[1]), ([(10, 7), (11, 7)], pal[3]),
+                      ([(6, 11), (7, 11), (7, 12)], pal[1]), ([(12, 12), (13, 12)], pal[3])):
+        for x, y in pixels:
+            _put(img, x, y, c)
+    return img
 
 
 def deck():
-    """Diamond tread plate: dark steel with raised bright lozenges."""
-    img = _noise(5103, [(70, 70, 72), (80, 80, 82), (62, 62, 64)], (4, 3, 2))
-    for y in range(16):
-        for x in range(16):
-            if (x + 2 * y) % 8 == 0 and y % 4 == 1 or (x - 2 * y) % 8 == 4 and y % 4 == 3:
-                _put(img, x, y, (140, 140, 142))
+    """Diamond tread plate: flat dark steel with raised lozenges, each lit on its upper left."""
+    img = _img()
+    _rect(img, 0, 0, 15, 15, (72, 72, 74))
+    for cy in (2, 10):
+        for cx in (2, 10):
+            for ox, oy in ((0, 0), (4, 4)):
+                x, y = (cx + ox) % 16, (cy + oy) % 16
+                _put(img, x, y, (142, 142, 144))
+                _put(img, (x + 1) % 16, (y + 1) % 16, (112, 112, 114))
+                _put(img, (x + 2) % 16, (y + 2) % 16, (52, 52, 54))
     return img
 
 
 def armor():
-    """Worn khaki-bronze armour plate with welded seams and rivet heads."""
-    img = _noise(5104, [(110, 98, 66), (126, 112, 76), (140, 126, 88), (96, 86, 58)], (3, 5, 3, 1))
-    for i in range(16):
-        _put(img, i, 0, (78, 70, 48))
-        _put(img, 0, i, (78, 70, 48))
-    for x, y in ((3, 3), (12, 3), (3, 12), (12, 12)):
-        _put(img, x, y, (170, 156, 112))
+    """Khaki-bronze armour plate: a bevelled panel split by a welded seam, with bolts at the corners."""
+    pal = [(78, 70, 48), (100, 90, 62), (122, 110, 76), (142, 128, 90), (172, 158, 114)]
+    img = _img()
+    plate(img, pal)
+    for x in range(1, 15):
+        _put(img, x, 8, pal[0])
+        _put(img, x, 9, pal[3])
+    corner_bolts(img, pal)
     return img
 
 

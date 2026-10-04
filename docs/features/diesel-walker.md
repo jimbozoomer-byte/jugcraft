@@ -34,9 +34,9 @@ While the pilot sits in it, their own hands do nothing: use and attack go to the
 - **Fuel:** walking, turning and drilling burn 4 mB a second, so a full tank lasts about 16 minutes of work. Standing still burns nothing. With an empty tank it only stands. The pilot sees the fuel left above the hotbar.
 
 ## Connections
-- Input producers: the diesel engine, the mining drill (powered tools), riveted rust plate (giants), steel plates, an anvil and pistons. Fuel comes from the refinery.
+- Input producers: the diesel engine, the mining drill (powered tools), riveted steel plate (giants), steel plates, an anvil and pistons. Fuel comes from the refinery.
 - Output consumer: mining by hand at a faster pace, and fighting.
-- Recipe: `RER / DPA / L L`, where R is riveted rust plate, E a diesel engine, D a mining drill, P a steel plate, A an anvil and L a piston.
+- Recipe: `RER / DPA / L L`, where R is riveted steel plate, E a diesel engine, D a mining drill, P a steel plate, A an anvil and L a piston.
 
 ## Balance and automation
 - Fuel is only used up, never made.

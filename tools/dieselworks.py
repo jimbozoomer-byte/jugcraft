@@ -1,14 +1,13 @@
 """Dieselworks (batch 45, docs/features/dieselworks.md): building blocks in the look of the dieselpunk giants.
 
-Rusted and riveted plate, green patina panels, chipped red iron, banded copper dome plate, ribbed pillars, skid iron,
-see-through rust grating for catwalks, steel I-beams, porthole windows and amber cage lamps. The plates reuse the
+Weathered riveted steel plate, green patina panels, chipped red iron, banded copper dome plate, ribbed pillars, skid iron,
+see-through steel grating for catwalks, steel I-beams, porthole windows and amber cage lamps. The plates reuse the
 giants' textures (tools/dieselrust_textures.py, "dr_*"); the grating, porthole and lamp textures are drawn here.
 
 Java: building/Dieselworks.java registers the blocks; tools/check_mod_data.py keeps the list and strengths the same.
 Every recipe turns metal plate (or ingots, nuggets and glass) into blocks; nothing turns a block back into metal.
 """
 import math
-import random
 import sys
 
 from PIL import Image
@@ -19,8 +18,8 @@ MOD = "jugcraft"
 # "full" a plain cube, "pillar" a log-like column, "grating" a see-through cube with its slab, "beam" a steel I-beam
 # lying along an axis, "glass" a porthole window and "lamp" a small caged lamp.
 BLOCKS = {
-    "rust_plate": ("Rust Plate", "family", 5.0, 6.0),
-    "riveted_rust_plate": ("Riveted Rust Plate", "family", 5.0, 6.0),
+    "rust_plate": ("Weathered Steel Plate", "family", 5.0, 6.0),
+    "riveted_rust_plate": ("Riveted Steel Plate", "family", 5.0, 6.0),
     "patina_plate": ("Patina Plate", "family", 5.0, 6.0),
     "perforated_patina_plate": ("Perforated Patina Plate", "full", 5.0, 6.0),
     "red_iron_plate": ("Red Iron Plate", "family", 5.0, 6.0),
@@ -28,8 +27,8 @@ BLOCKS = {
     "riveted_band_block": ("Riveted Band", "full", 5.0, 6.0),
     "skid_iron_block": ("Skid Iron", "full", 5.0, 6.0),
     "ribbed_patina_pillar": ("Ribbed Patina Pillar", "pillar", 5.0, 6.0),
-    "ribbed_rust_pillar": ("Ribbed Rust Pillar", "pillar", 5.0, 6.0),
-    "rust_grating": ("Rust Grating", "grating", 3.0, 6.0),
+    "ribbed_rust_pillar": ("Ribbed Steel Pillar", "pillar", 5.0, 6.0),
+    "rust_grating": ("Steel Grating", "grating", 3.0, 6.0),
     "steel_i_beam": ("Steel I-Beam", "beam", 5.0, 6.0),
     "porthole_window": ("Porthole Window", "glass", 1.0, 3.0),
     "amber_cage_lamp": ("Amber Cage Lamp", "lamp", 1.5, 3.0),
@@ -216,44 +215,47 @@ def shaped(condition, pattern, key, result, count):
 
 # ------------------------------------------------------------------ art
 
-RUST = [(46, 26, 18), (70, 38, 22), (98, 52, 28), (128, 68, 34), (156, 88, 44), (184, 112, 58)]
-IRON = [(22, 20, 20), (52, 48, 46), (92, 86, 82), (140, 132, 124)]
+# The giants' weathered steel (tools/dieselrust_textures.PLATE), drawn in the clean style (tools/clean_metal.py).
+PLATE = [(44, 42, 44), (66, 63, 63), (86, 82, 80), (106, 101, 97), (128, 122, 116), (152, 146, 138)]
 
 
 def grating():
-    """Rust grating with see-through square holes, so catwalks show what is below."""
-    rng = random.Random(4501)
+    """Steel grating with see-through square holes, so catwalks show what is below: each bar lit on its top edge."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y in range(16):
         for x in range(16):
-            if x % 4 == 0 or y % 4 == 0 or x == 15 or y == 15:
-                c = RUST[rng.choice([2, 3, 3, 4])]
-                if x in (0, 15) or y in (0, 15):
-                    c = RUST[1]
-                img.putpixel((x, y), c + (255,))
+            if y % 4 == 0 or y == 15:
+                c = PLATE[3] if y != 15 else PLATE[1]
+            elif x % 4 == 0 or x == 15:
+                c = PLATE[2] if x != 15 else PLATE[1]
+            else:
+                continue
+            img.putpixel((x, y), c + (255,))
     for x, y in ((0, 0), (12, 0), (0, 12), (12, 12)):
-        img.putpixel((x, y), IRON[3] + (255,))
+        img.putpixel((x, y), PLATE[4] + (255,))
     return img
 
 
 def porthole():
-    """A round porthole: a riveted rust ring round clear glass with a bright glint."""
+    """A round porthole: a bolted steel ring, lit on its upper half, round clear glass with a bright glint."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    rng = random.Random(4502)
     for y in range(16):
         for x in range(16):
-            r = math.hypot(x - 7.5, y - 7.5)
-            if r > 5.2:
-                c = RUST[rng.choice([2, 3, 3, 4])]
-                if r > 7.6:
-                    c = RUST[1]
-                img.putpixel((x, y), c + (255,))
+            dx, dy = x - 7.5, y - 7.5
+            r = math.hypot(dx, dy)
+            if r > 7.6:
+                c = PLATE[1]
+            elif r > 5.2:
+                c = PLATE[3] if dx + dy < -2 else PLATE[1] if dx + dy > 2 else PLATE[2]
             elif r > 4.4:
-                img.putpixel((x, y), IRON[2] + (255,))
+                c = PLATE[0]
+            else:
+                continue
+            img.putpixel((x, y), c + (255,))
     for angle in range(0, 360, 45):
         x = round(7.5 + 6.4 * math.cos(math.radians(angle)))
         y = round(7.5 + 6.4 * math.sin(math.radians(angle)))
-        img.putpixel((x, y), IRON[3] + (255,))
+        img.putpixel((x, y), PLATE[5] + (255,))
     for x, y in ((5, 5), (6, 4), (4, 6)):
         img.putpixel((x, y), (230, 240, 236, 255))
     return img
