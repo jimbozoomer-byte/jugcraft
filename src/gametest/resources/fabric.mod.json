@@ -154,7 +154,8 @@
 			"io.github.jimbozoomer.jugcraft.test.ArmsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmsMotionClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.TwoHandedClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.WeaponArtsClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.WeaponArtsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ArmsProbeClientGameTests"
 		]
 	},
 	"depends": {
