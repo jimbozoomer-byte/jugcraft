@@ -82,7 +82,7 @@ public class EggSacRenderer implements BlockEntityRenderer<DecorationBlockEntity
 		for (Direction face : state.faces) {
 			pose.pushPose();
 			pose.translate(0.5F, 0.5F, 0.5F);
-			pose.mulPose(face.getOpposite().getRotation());
+			pose.mulPose(new org.joml.Matrix4f().rotation(face.getOpposite().getRotation()));
 			pose.translate(0.0F, -0.5F + 0.01F, 0.0F);
 			for (int i = 0; i < SPIDERS; i++) {
 				float heading = state.seed + i * 120.0F + face.ordinal() * 40.0F;
