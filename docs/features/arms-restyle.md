@@ -3,7 +3,7 @@
 Status: implemented on `claude/arms-restyle`, awaiting review. Compiles and tests in CI only; **not yet played**.
 Proposal issue: the owner, 4 October 2026: "Refine all the weapons make them look better, study how other people have made weapons that actually look good and copy that currently they look AWFUL", with Simply Swords, Epic Knights and RPG Style More Weapons attached to study ("i like these too for more unique weapons").
 Owner: jimbozoomer-byte
-Target milestone and tier: art only, for every arm of batches 42 to 53 ([arms.md](arms.md) to [arms-vi.md](arms-vi.md)).
+Target milestone and tier: art only, for every arm of batches 42 to 55 ([arms.md](arms.md) to [arms-vi.md](arms-vi.md)).
 Primary specialty and supported player role: fighting (looks only).
 
 ## Player experience

@@ -44,6 +44,7 @@ import zeppelin
 import mech
 import landship
 import artillery
+import tower_guns
 import gear
 import arms
 import arms_variants
@@ -320,7 +321,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS:
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items():
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -526,7 +527,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS)
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -741,6 +742,33 @@ def check_artillery():
         err("ArtilleryRenderers' howitzer track span differs from tools/artillery.py")
     if not (ASSETS / "artillery_quads.json").is_file():
         err("assets/jugcraft/artillery_quads.json is missing: run tools/generate_material_data.py")
+
+
+def check_tower_guns():
+    """artillery/JugcraftTowerGuns.java and client/TowerGunRenderer.java against tools/tower_guns.py: the Great Shell,
+    each gun's spec line and the renderer's pivots, and that every gun fits its footprint."""
+    java = (JAVA_ROOT / "artillery" / "JugcraftTowerGuns.java").read_text(encoding="utf-8")
+    for const in ("GREAT_SPEED", "GREAT_GRAVITY", "GREAT_RADIUS", "GREAT_DAMAGE"):
+        value = getattr(tower_guns, const)
+        literal = f"{value}F" if const == "GREAT_DAMAGE" else str(value)
+        if f" {const} = {literal};" not in java:
+            err(f"JugcraftTowerGuns.{const} differs from tools/tower_guns.py ({literal})")
+    renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+                / "TowerGunRenderer.java")
+    text = renderer.read_text(encoding="utf-8") if renderer.is_file() else ""
+    for gun, g in tower_guns.GUNS.items():
+        if tower_guns.java_spec(gun) not in java:
+            err(f"JugcraftTowerGuns' spec for {gun} differs from tools/tower_guns.py: {tower_guns.java_spec(gun)}")
+        if tower_guns.java_pivots(gun) not in text:
+            err(f"TowerGunRenderer's pivots for {gun} differ from tools/tower_guns.py: {tower_guns.java_pivots(gun)}")
+        base, _, _ = tower_guns.PARTS[gun]
+        reach = max(max(abs(v) for v in (f[0], t[0], f[2], t[2])) for f, t, *_ in base())
+        if reach > g["size"] * 8:
+            err(f"{gun}'s plinth reaches {reach} pixels from its centre, past its {g['size']}x{g['size']} footprint")
+        if g["shell"] not in ("heavy", "flak", "great"):
+            err(f"{gun} fires an unknown shell {g['shell']}")
+    if not (ASSETS / "tower_gun_quads.json").is_file():
+        err("assets/jugcraft/tower_gun_quads.json is missing: run tools/generate_material_data.py")
 
 
 def check_landship():
@@ -1110,7 +1138,7 @@ def check_arms():
             average = (arms.art_share(kind) * blow + plain * (cycle - busy)) / cycle
             if average >= sword:
                 err(f"The {metal} {kind} with its art deals {average:.2f} a second to one foe, not below the sword's {sword:.2f}")
-    # Arms VI (batch 53): the bows, crossbows and shields as tools/arms.py has them, in registration order, and in range.
+    # Arms VI (batch 55): the bows, crossbows and shields as tools/arms.py has them, in registration order, and in range.
     found_ranged = [(name, metal, {"draw": int(draw), "speed": float(speed), "damage": float(damage)})
                     for name, metal, draw, speed, damage in re.findall(
                         r'new Ranged\("([a-z_]+)", "([a-z]+)", (\d+), ([\d.]+)F, ([\d.]+)F\)', java)]
@@ -1179,7 +1207,7 @@ def check_arms():
 
 
 def check_arms_variants():
-    """weapons/ArmVariants.java against tools/arms_variants.py (Arms VII, batch 54): the variants in order with their kind,
+    """weapons/ArmVariants.java against tools/arms_variants.py (Arms VII, batch 56): the variants in order with their kind,
     line and boon; the styles and patterns; every number; each style variant's smithing recipe and each boss's trophy loot
     table; the boons' and lines' tooltips; that every boon is bounded; and that no variant deals as much a second as a
     netherite sword, whatever its boon adds."""
@@ -5661,7 +5689,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS)
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
     check_assets(sorted(registered))
     check_model_textures()
@@ -5694,6 +5722,7 @@ def main():
     check_walker()
     check_landship()
     check_artillery()
+    check_tower_guns()
     check_plastic()
     check_seasons()
     check_alpine()

@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 
 /**
- * Client game test for Arms VI (batch 53), with the real use key: the kit on a rack and in frames; a longbow drawn
+ * Client game test for Arms VI (batch 55), with the real use key: the kit on a rack and in frames; a longbow drawn
  * (first person and from the front) and loosed; an arbalest wound, shown loaded and fired; a tower shield and a heater
  * shield raised (first person and from the front); the katana's seven cuts on husks, caught mid-art from behind with
  * their arcs in the air and read back from the server; and the brazier mace's flame, and fire it lights on the ground

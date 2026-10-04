@@ -40,7 +40,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * In-game tests for Arms VII (batch 54): every variant is registered as an arm of its kind with its line's perk; each
+ * In-game tests for Arms VII (batch 56): every variant is registered as an arm of its kind with its line's perk; each
  * boon does what it says when its arm strikes, as the server works it; each style's smithing recipe and pattern recipe
  * load; and each boss's loot table drops one of its two trophies. Wielders are mock players facing south (+z) with a
  * full attack charge; foes are still pigs (living, not undead, so poison and the rest take) or, for Gravebane, husks.

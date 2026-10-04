@@ -18,7 +18,7 @@ import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.phys.AABB;
 
 /**
- * Client game test for Arms VII (batch 54): every variant and pattern in frames on a wall (their icons) and the
+ * Client game test for Arms VII (batch 56): every variant and pattern in frames on a wall (their icons) and the
  * variants on racks of armor stands (their 3D models), by daylight; trophies held from the front by day and the glowing
  * ones at midnight; one in first person; and a Glacier Maul's two-handed blow with the real attack key, its frost read
  * back from the server (CI job {@code client}).

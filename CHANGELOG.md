@@ -8,7 +8,7 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### Unmerged: Arms VII, batch 54
+### Unmerged: Arms VII, batch 56
 - **32 named variant arms,** each fighting as its kind does:
   - **Crafted styles** at a smithing table, from a steel arm, the style's pattern and a material (enchantments and wear kept): **gilded** (gold; enchants as gold), **ironclad** (dieselpunk; lasts twice as long), **bonecarved** (bone; harder against the undead) and **runebound** (glowing runes; marks foes so they glow).
   - **Boss trophies** for eight bosses still to be made, two each with a boon: the Yeti King (frost), the Cinder Tyrant (ember), the Mire Hag (venom), the Crypt Lich (drain, wither), the Iron Dreadnought (shock), the Alpha Werewolf (howl), the Storm Roc (gale) and the Abyssal Leviathan (tide). Their loot tables are ready; creative-only until the bosses exist.
@@ -23,7 +23,7 @@ No numbered release yet. Everything below is on `main`.
 - **Refined:** bevelled two-tone blades with a glint; the pike's langets and tassel; the quarterstaff's shod ends; the kama, war pick, katar and kusarigama held larger.
 - After studying how Simply Swords, Epic Knights and RPG Style More Weapons make weapons that read well; nothing of theirs is copied. Record: [arms-restyle.md](docs/features/arms-restyle.md).
 
-### Unmerged: Arms VI, batch 53
+### Unmerged: Arms VI, batch 55
 - **Katana:** quick, clean cuts, and its art **Seven Cuts**: seven cuts in a breath across every foe ahead, each leaving an arc of colour in the air (crimson from bronze, pale gold from steel).
 - **Brazier mace:** a burning brazier on a haft, with a flickering flame. It sets what it hits alight and lights campfires, candles and the ground.
 - **Longbow and arbalest:** a tall bow and a crossbow with a metal prod. Each shot hits harder and flies flatter than a bow's or crossbow's, though they deal no more a second. Drawn and wound in three steps, as vanilla's are.
@@ -56,6 +56,18 @@ No numbered release yet. Everything below is on `main`.
 - They grow in the haunted biomes and some of vanilla's. Grave vases take them by colour. Eight game tests, client screenshots. Record: [graveyard-flora.md](docs/features/graveyard-flora.md).
 
 ### Arms IV, batch 47 (#170)
+
+### Unmerged: Tower guns, batch 54
+- Five heavy emplacements for the top of a tower, after the owner's reference picture of a heavy mortar on a turntable mount: a concrete plinth, a railed turntable, a yellow cradle and a fat black barrel.
+  - For a 3x3 top: the **Bastion Mortar** and the twin-barrelled **Bastion Autocannon**.
+  - For a 5x5 top: the **Grand Mortar**, the long **Fortress Rifle** (out to about 210 blocks) and the three-barrelled **Triple Battery**.
+- Each needs a solid top under its whole footprint, and is crewed and aimed like the big guns.
+- The Grand Mortar fires the new **Great Shell** (2 Heavy Shells and TNT). Its burst reaches 7 blocks; like every shell, it hurts creatures and never breaks blocks.
+- Three game tests and a screenshot scene. Record: [tower-guns.md](docs/features/tower-guns.md).
+
+### Unmerged: Clean steampunk textures, batch 53
+- The steampunk textures (`sp_*`) get the same clean style as the dieselpunk ones: flat fills, bevelled plates with rivets, banded sheens, and wear only as a few placed marks. Iron and brass plates, wrought iron, brass, copper, tanks, planks, firebrick, glass, red iron, the hopper inside, water, lava, leaves, bark and soil lose their per-pixel noise.
+- Record: [clean-steampunk-textures.md](docs/features/clean-steampunk-textures.md).
 
 ### Unmerged: Clean dieselpunk textures, batch 52
 - Every dieselpunk texture is redrawn in a cleaner style: flat fills from short palettes, bevelled panels, recessed insets and two-by-two bolts, with wear only as a few small marks at corners and seams. No more per-pixel noise, and rust is now a small stain under a bolt rather than the whole surface. This covers the giants, Dieselworks blocks, zeppelin, Diesel Walker, Landship, trench works, big guns and the dieselpunk machine textures. The mechs and vehicles also get a clean soot texture for their smokestacks and openings, and the kaiserpunk brass and black lacquer lose their specks.

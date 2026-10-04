@@ -1023,6 +1023,96 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Batch 54: each tower gun's entity fits inside its footprint, and it stands only where a solid top covers the
+	 * whole footprint (a 5x5 top with one block missing will not do).
+	 */
+	@GameTest
+	public void towerGunsNeedAFullTop(GameTestHelper helper) {
+		for (var spec : io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.SPECS) {
+			float width = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type(spec.id()).getWidth();
+			helper.assertTrue(width < spec.footprint() && width > spec.footprint() - 1,
+					spec.id() + " is " + width + " wide for a " + spec.footprint() + "x" + spec.footprint() + " top");
+		}
+		for (int x = 0; x < 5; x++) {
+			for (int z = 0; z < 5; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE_BRICKS);
+			}
+		}
+		BlockPos centre = helper.absolutePos(new BlockPos(2, 1, 2));
+		ServerLevel level = helper.getLevel();
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.artillery.TowerGun.supported(level, centre, 5), "A full 5x5 top should hold a 5x5 gun");
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.artillery.TowerGun.supported(level, centre, 3), "A 5x5 top should hold a 3x3 gun");
+		helper.setBlock(new BlockPos(4, 0, 4), Blocks.AIR);
+		helper.assertFalse(io.github.jimbozoomer.jugcraft.artillery.TowerGun.supported(level, centre, 5), "A 5x5 top missing a corner should not");
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.artillery.TowerGun.supported(level, centre, 3), "The 3x3 middle is still whole");
+		helper.succeed();
+	}
+
+	/**
+	 * Batch 54: a Grand Mortar, crewed by a gunner with a marked target about 33 blocks away, lobs a Great Shell (using
+	 * one) and hurts the pig at the target, without breaking the floor.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 700, skyAccess = true)
+	public void grandMortarShellsTheMarkedTarget(GameTestHelper helper) {
+		for (int x = 0; x < 44; x++) {
+			for (int z = 0; z < 44; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("grand_mortar");
+		io.github.jimbozoomer.jugcraft.artillery.TowerGun mortar = helper.spawn(type, new Vec3(6.5, 1, 6.5));
+		mortar.face(0.0F);
+		ServerPlayer gunner = helper.makeMockServerPlayerInLevel();
+		gunner.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		gunner.getInventory().add(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.GREAT_SHELL_ITEM, 2));
+		gunner.setPos(mortar.getX(), mortar.getY(), mortar.getZ());
+		helper.assertTrue(gunner.startRiding(mortar, true, true), "The gunner could not climb aboard");
+		BlockPos target = new BlockPos(30, 1, 29);
+		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, target);
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.mark(gunner, helper.absolutePos(target.below()));
+		helper.onEachTick(() -> mortar.steer(gunner, 0, 0, 1));
+		helper.succeedWhen(() -> {
+			helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(), "The Great Shell should hurt the pig at the target");
+			helper.assertBlockPresent(Blocks.STONE, target.below());
+			int left = gunner.getInventory().countItem(io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.GREAT_SHELL_ITEM);
+			helper.assertTrue(left < 2, "Firing should use a Great Shell");
+		});
+	}
+
+	/**
+	 * Batch 54: one press on a Triple Battery fires a salvo of three Heavy Shells (one from each barrel, using three)
+	 * and then it reloads.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void tripleBatteryFiresASalvo(GameTestHelper helper) {
+		for (int x = 0; x < 5; x++) {
+			for (int z = 0; z < 5; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
+		var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("triple_battery");
+		io.github.jimbozoomer.jugcraft.artillery.TowerGun battery = helper.spawn(type, new Vec3(2.5, 1, 2.5));
+		battery.face(0.0F);
+		ServerPlayer gunner = helper.makeMockServerPlayerInLevel();
+		gunner.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		gunner.getInventory().add(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 5));
+		gunner.setPos(battery.getX(), battery.getY(), battery.getZ());
+		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
+		gunner.setYRot(0.0F);
+		gunner.setXRot(-20.0F);
+		// One press, held for a moment: the gun fires once it has turned onto the gunner's line.
+		for (int tick = 1; tick <= 40; tick++) {
+			int pressed = tick <= 30 ? 1 : 0;
+			helper.runAfterDelay(tick, () -> battery.steer(gunner, 0, 0, pressed));
+		}
+		helper.runAfterDelay(80, () -> {
+			int left = gunner.getInventory().countItem(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM);
+			helper.assertTrue(left == 2, "A salvo should use three Heavy Shells, leaving 2, but left " + left);
+			helper.succeed();
+		});
+	}
+
 	/** Coal generator -> copper cables -> electric furnace smelts raw iron. */
 	@GameTest(maxTicks = 600)
 	public void cablesCarryPower(GameTestHelper helper) {
