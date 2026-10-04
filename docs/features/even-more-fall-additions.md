@@ -18,7 +18,7 @@ Target milestone and tier: hex brews are Discovery tier. You need:
 - the Bubbling Cauldron (a cauldron and two iron ingots);
 - a water bucket and a brew ingredient;
 - a heat source: a lit campfire, fire, magma or lava;
-- the hex ingredients: a brown mushroom, beans (the Kitchen Garden) or a phantom membrane;
+- the hex ingredients: a brown mushroom, beans (the Kitchen Garden), or a phantom membrane or a mandrake root (the graveyard flora);
 - glass bottles.
 
 Every hex can be made without leaving the Overworld:
@@ -80,7 +80,7 @@ None of this depends on the Halloween event: a cauldron brews hexes and a broom 
    | --- | --- | --- | --- |
    | green | a brown mushroom (`jugcraft:hex/shrinking`) | shrinking brew, pale green | **Shrinking Draught** |
    | orange | beans (`jugcraft:hex/giant`) | giant's brew, deep amber | **Giant's Draught** |
-   | purple | a phantom membrane (`jugcraft:hex/flying`) | flying brew, violet | **Flying Ointment** |
+   | purple | a phantom membrane or a mandrake root (`jugcraft:hex/flying`) | flying brew, violet | **Flying Ointment** |
 
    The pot flashes with witch's sparkles and a low brewing sound. A cold pot ignores the hex ingredient, and so does the wrong brew.
 3. A hex brew glows (light 7) and gives off enchanting glyphs as well as bubbles. Its level drops as it is drawn.
@@ -325,7 +325,7 @@ Only its owner can sit it, light it, put it out or settle it; anyone can feed it
     - A snow werewolf reads the two blocks at its feet each tick.
     - A shadow werewolf on the hunt tries its step at most every 10 seconds (up to 9 spots). Its howl looks at the level's players and the werewolves within 24 blocks at most every 30 seconds.
 - **Flying broomstick:**
-  - Costs: a Witch's Broom (two sticks and a wheat), one Flying Ointment and two feathers. Each further 2 minutes of flight is one Flying Ointment, so one hex brew (one phantom membrane) flies a broom for 6 minutes.
+  - Costs: a Witch's Broom (two sticks and a wheat), one Flying Ointment and two feathers. Each further 2 minutes of flight is one Flying Ointment, so one hex brew (one phantom membrane or mandrake root) flies a broom for 6 minutes.
   - Units: ticks of charge (2,400 an ointment, 7,200 at most, one a tick in the air); blocks a tick (push 0.05 forward, 0.025 sideways, 0.04 up; speed kept 0.91 a tick, 0.728 braking; top 0.6, 0.75 in a witch hat; dry, it sinks at up to 0.08).
   - Held forward it tops out about 0.51 blocks a tick (10 m/s, 12.6 in a hat): faster than a sprint (5.6 m/s) or a horse, far slower than elytra with rockets. It carries one player.
   - Nothing is made: the broom doesn't break down into anything, and its charge only burns.

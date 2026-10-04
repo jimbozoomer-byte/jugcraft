@@ -12,10 +12,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
@@ -51,6 +51,8 @@ import net.minecraft.world.phys.Vec3;
  * (loot, features, patches, the advancement) loads.
  */
 public class GraveyardFloraGameTests {
+	private static final TagKey<Item> SMALL_FLOWERS = TagKey.create(Registries.ITEM, Identifier.withDefaultNamespace("small_flowers"));
+	private static final TagKey<Item> FLOWER_TAG = TagKey.create(Registries.ITEM, Identifier.withDefaultNamespace("flowers"));
 	private static final List<String> FLOWERS = List.of("spider_lily", "snowdrop", "deadly_nightshade", "bleeding_heart", "ghost_pipe");
 	private static final List<String> TALL_FLOWERS = List.of("black_rose", "foxglove", "funeral_lily", "asphodel");
 	private static final List<String> PLANTS = List.of("spider_lily", "snowdrop", "deadly_nightshade", "bleeding_heart", "ghost_pipe",
@@ -114,11 +116,11 @@ public class GraveyardFloraGameTests {
 			helper.assertTrue(item(plant) instanceof BlockItem held && held.getBlock() == block(plant), plant + " has its own item");
 		}
 		for (String flower : FLOWERS) {
-			helper.assertTrue(new ItemStack(item(flower)).is(ItemTags.SMALL_FLOWERS), flower + " is a small flower");
+			helper.assertTrue(new ItemStack(item(flower)).is(SMALL_FLOWERS), flower + " is a small flower");
 			helper.assertTrue(block("potted_" + flower) instanceof FlowerPotBlock pot && pot.getPotted() == block(flower), flower + " can be potted");
 		}
 		for (String flower : TALL_FLOWERS) {
-			helper.assertTrue(new ItemStack(item(flower)).is(ItemTags.FLOWERS), flower + " is a flower");
+			helper.assertTrue(new ItemStack(item(flower)).is(FLOWER_TAG), flower + " is a flower");
 		}
 		for (String recipe : List.of("red_dye_from_spider_lily", "black_dye_from_black_rose", "magenta_dye_from_foxglove", "purple_dye_from_deadly_nightshade")) {
 			helper.assertTrue(level.getServer().getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(recipe))).isPresent(),
@@ -323,8 +325,8 @@ public class GraveyardFloraGameTests {
 		for (String plant : PLANTS) {
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + plant))) != LootTable.EMPTY, plant + "'s loot loads");
-			helper.assertTrue(level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).get(
-					ResourceKey.create(Registries.CONFIGURED_FEATURE, Jugcraft.id(plant))).isPresent(), plant + "'s feature loads");
+			helper.assertTrue(level.registryAccess().lookupOrThrow(Registries.FEATURE).get(
+					ResourceKey.create(Registries.FEATURE, Jugcraft.id(plant))).isPresent(), plant + "'s feature loads");
 		}
 		for (String table : List.of("blocks/mandrake_crop", "blocks/wild_mandrake", "blocks/potted_spider_lily")) {
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id(table)))

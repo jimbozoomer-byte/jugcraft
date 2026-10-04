@@ -1020,6 +1020,18 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - A **memorial bench** with an inscribed plaque that seats a player, and a **cemetery lamp post** three blocks tall, lit after dark.
 - **Grave vases**: put small flowers in for a bouquet of their colour. While fresh they calm the graves within 3 blocks to half the spirits, then they wilt. Details: [the graveyard pack](../features/graveyard.md#grounds).
 
+### The Graveyard: flora
+
+<!-- flora-shots -->
+
+- **Seventeen plants for a haunted churchyard**, sculpted like hand-built plants (bent stems, cut-out leaves and petals at angles, bells and berries as little boxes) rather than crossed pictures:
+  - flowers to pot and dye: **spider lily**, **snowdrop**, **deadly nightshade**, **bleeding heart** and the glowing **ghost pipe**;
+  - two-block flowers: **black rose**, **foxglove**, **funeral lily** and **asphodel**;
+  - foliage: **withered grass** and the silvery **ghost fern** (bone meal grows both tall), **dead man's fingers**, **grave moss**, **shroud moss** hanging in strands from leaves, and **creeping ivy** over walls.
+- **Where:** the Ghost Forest, Gloomweald, Hallowed Bog, Dead Swamp, Sludge Mire, Dead Forest and Bayou, and some in vanilla's spooky, swamp, snowy and forest biomes.
+- **The mandrake:** pull a wild one for its roots and plant them on farmland. A ripe mandrake **screams** when pulled up, sickening every player within 8 blocks with nothing on their head (wear something: **Mind Your Ears**). Its root also makes **Flying Ointment** in the purple brew.
+- **Grave vases** take the flora's flowers by colour. Details: [the graveyard flora](../features/graveyard-flora.md).
+
 ## Even more fall additions
 
 Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).
@@ -1036,7 +1048,7 @@ Ten more fall and Halloween additions, numbered on from the twenty before, one p
 
 *Real screenshots from the client game test that CI runs (`HexBrewClientGameTests`, software rendering, small previews).*
 
-- **Brew a hex:** over a lit campfire, fire or magma, stir a brown mushroom into the Bubbling Cauldron's green brew, beans into the orange or a phantom membrane into the purple. A hex brew fills three glass bottles.
+- **Brew a hex:** over a lit campfire, fire or magma, stir a brown mushroom into the Bubbling Cauldron's green brew, beans into the orange or a phantom membrane (or a mandrake root, from the graveyard flora) into the purple. A hex brew fills three glass bottles.
 - **Shrinking Draught:** half your size for 3 minutes, through one-block gaps. **Giant's Draught:** 1.6 times your size for 3 minutes, a block more reach, only where there is room. Each cancels the other. **Flying Ointment:** 30 seconds of slow falling. Details: [even more fall additions](../features/even-more-fall-additions.md#hex-brews).
 
 ### The flying broomstick
