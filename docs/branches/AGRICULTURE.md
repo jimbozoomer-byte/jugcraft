@@ -1061,7 +1061,17 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 
 ### The haunted house's props
 
-<!-- props-shots -->
+| **A haunted parlour**: flying eyeballs staring from the air, candles on the table, monster's heads, webs and the harvest plushes | **The flying eyeballs**, each turned to stare at the player |
+| --- | --- |
+| ![The haunted house's props](../images/ingame_haunted_house_props.jpg) | ![Flying eyeballs](../images/ingame_haunted_house_eyeballs.jpg) |
+| **Pillar candles**, ivory and black, one to four in a cluster, lit | **Monster's heads**: asleep, and awake on a redstone signal with its jaw dropped and eyes glowing |
+| ![Pillar candles](../images/ingame_haunted_house_candles.jpg) | ![Monster's heads](../images/ingame_haunted_house_monster_heads.jpg) |
+| **Spider webs** over the walls and ceiling of a corner | **The harvest plushes**: owl, hedgehog, acorn, corn and maple leaf |
+| ![Spider webs](../images/ingame_haunted_house_webs.jpg) | ![Harvest plushes](../images/ingame_haunted_house_plushes.jpg) |
+| **By candlelight** at night | |
+| ![The parlour at night](../images/ingame_haunted_house_props_night.jpg) | |
+
+*Real screenshots from the client game test that CI runs (`HauntedHousePropsClientGameTests`, software rendering, small previews). The candles are lit and one head is powered for the picture.*
 
 - **Flying Eyeball**: a bloodshot eye on red bat wings that hovers in its block, bobbing and beating its wings, and **turns to stare at the nearest player**.
 - **Pillar Candles**, ivory and black: dripping church candles, one to four in a cluster, lit and put out like vanilla's.

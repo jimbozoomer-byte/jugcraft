@@ -1,6 +1,6 @@
 # The Haunted House's Props
 
-Status: implemented in source. Not yet played by hand. The Build workflow compiles it, and CI's game tests and client screenshots are recorded below once they pass.
+Status: implemented in source. Not yet played by hand. The Build workflow compiles it, and CI's game tests and client screenshots are recorded below.
 Proposal issue: none. The owner asked for it directly on 4 October 2026 ("also make a bunch more halloween and graveyard decoration use the attached images for references"), with pictures of Halloween props: a flying eyeball on bat wings, a cluster of pillar candles, a spider web, a stitched monster's head, and a sheet of fall creatures (an owl, a hedgehog, an acorn, an ear of corn and a maple leaf among them). This is the second of two batches of them (Halloween decorations batch 16). It is stacked on the churchyard's ornaments.
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier. The props are made from phantom membrane, a spider eye, honeycomb, string, black dye, black wool, iron nuggets, rotten flesh and a slime ball. The plushes are won at the fall fair midway.
@@ -44,9 +44,16 @@ Primary specialty and supported player role: building. These props dress a haunt
 No new dependencies. The models are built on `tools/flora_art.py` by `tools/decor16_data.py`, which paints their 64 × 64 textures by code and writes the eyeball's moving parts to `assets/jugcraft/decor16_quads.json` for its renderer. The pillar candles are vanilla's `CandleBlock` with these models and their own flames' places; the spider web is vanilla's `MultifaceBlock`. All original. The look follows the owner's reference pictures, and nothing is traced from them.
 
 ## Verification
-Automated checks (results recorded once CI passes):
-- `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`. The audit's new haunted house check compares `FlyingEyeballBlock`, `PillarCandleBlock` (its layout and flames) and `MonsterHeadBlock` with `tools/decor16.py`. It checks each prop is registered, named, drops and has its recipe and 64 × 64 texture, that the candles are in `minecraft:candles`, and that the eyeball's quads, `DecorQuads` and its renderer are wired up. The midway check covers the five plushes' footprints and weights.
-- `HauntedHousePropsGameTests` (six tests):
+Automated checks run on CI's Build workflow:
+- run 37178906733: compile failure (26.3 has no coloured candle constants), fixed;
+- run 37179138062: compiled, 715 of 716 game tests passed; the failure was this record's own test asking a flame to stand below the block's top when the tallest candle's flame stands exactly at it, fixed;
+- run 37179323948 on e0095799: every job passed;
+- run 37180140539 on 97692652 (the churchyard's ornaments and the flora merged in, and two close-ups reframed): every job passed.
+
+In them:
+- `python3 scripts/check_repository.py` and `python3 tools/check_mod_data.py`: pass. The audit's new haunted house check compares `FlyingEyeballBlock`, `PillarCandleBlock` (its layout and flames) and `MonsterHeadBlock` with `tools/decor16.py`. It checks each prop is registered, named, drops and has its recipe and 64 × 64 texture, that the candles are in `minecraft:candles`, and that the eyeball's quads, `DecorQuads` and its renderer are wired up. The midway check covers the five plushes' footprints and weights.
+- `./gradlew build` with the game tests: pass in the last two runs, among them:
+- `HauntedHousePropsGameTests` (six tests, all pass):
   1. the eyeball is placed, nothing collides with it, it has its block entity, it stays when its floor goes, it bobs within bounds and drops itself;
   2. pillar candles cluster to four and no more, light from flint and steel at 3 a candle, have a flame over each wick, give back four, and give no light unlit;
   3. a spider web covers the wall it was hung on, a second covers the ceiling in the same block, nothing collides with it and it gives two back;
@@ -54,7 +61,7 @@ Automated checks (results recorded once CI passes):
   5. the five harvest plushes are midway prizes and plush blocks;
   6. recipes and loot load.
 - `MidwayGameTests` squeezes every plush, the new ones included, and checks the prize table gives only plushes.
-- `HauntedHousePropsClientGameTests`: a parlour open to the south, by day and by candlelight: the whole room, the eyeballs close up, the candles, the monster's heads (one awake), the webs in a corner and the plushes on their shelf.
+- `HauntedHousePropsClientGameTests` (CI job `client`, pass): a parlour open to the south, by day and by candlelight: the whole room, the eyeballs close up, the candles, the monster's heads (one awake), the webs in a corner and the plushes on their shelf. Its seven screenshots are in [the agriculture branch](../branches/AGRICULTURE.md#the-haunted-houses-props).
 
 Not run:
 - Building with them by hand.
