@@ -1426,43 +1426,6 @@ public class JugcraftGameTests {
 			float wanted = (float) Math.toDegrees(Math.atan2(-to.x, to.z));
 			float off = Math.abs(net.minecraft.util.Mth.wrapDegrees(battery.aimYaw(0) - wanted));
 			helper.assertTrue(off < 4.0F, "The crewed gun should turn to the table's target (yaw " + wanted + "), not " + battery.aimYaw(0));
-	 * Fortification extras: the bunker door opens by hand; two sliding gates side by side open together on one signal and
-	 * leave only a post to bump into; the embrasure has a slit through it; the parapet corner's merlon turns with it.
-	 */
-	@GameTest(maxTicks = 60)
-	public void fortificationExtras(GameTestHelper helper) {
-		var blocks = io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS;
-		var door = (net.minecraft.world.level.block.DoorBlock) blocks.get("bunker_door");
-		helper.assertTrue(door.type().canOpenByHand(), "A bunker door should open by hand");
-		ServerLevel level = helper.getLevel();
-		BlockPos embrasure = new BlockPos(5, 1, 5);
-		helper.setBlock(embrasure, blocks.get("bastion_embrasure"));
-		var shape = helper.getBlockState(embrasure).getShape(level, helper.absolutePos(embrasure));
-		helper.assertTrue(!net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(shape,
-				net.minecraft.world.phys.shapes.Shapes.box(0.4, 0.6, 0.0, 0.6, 0.65, 1.0), net.minecraft.world.phys.shapes.BooleanOp.AND),
-				"An embrasure should have a slit right through it");
-		var corner = blocks.get("bastion_parapet_corner").defaultBlockState();
-		var north = corner.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.NORTH);
-		var south = corner.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.SOUTH);
-		helper.setBlock(new BlockPos(1, 1, 5), north);
-		helper.setBlock(new BlockPos(3, 1, 5), south);
-		var corner_nw = net.minecraft.world.phys.shapes.Shapes.box(0.1, 0.7, 0.1, 0.3, 0.9, 0.3);
-		helper.assertTrue(net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(helper.getBlockState(new BlockPos(1, 1, 5))
-				.getShape(level, helper.absolutePos(new BlockPos(1, 1, 5))), corner_nw, net.minecraft.world.phys.shapes.BooleanOp.AND)
-				&& !net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(helper.getBlockState(new BlockPos(3, 1, 5))
-						.getShape(level, helper.absolutePos(new BlockPos(3, 1, 5))), corner_nw, net.minecraft.world.phys.shapes.BooleanOp.AND),
-				"The corner's merlon should stand at the north-west facing north, and turn with it");
-		BlockPos left = new BlockPos(2, 1, 2);
-		BlockPos right = new BlockPos(3, 1, 2);
-		helper.setBlock(left, blocks.get("sliding_gate"));
-		helper.setBlock(right, blocks.get("sliding_gate"));
-		helper.assertBlockProperty(left, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, false);
-		helper.setBlock(new BlockPos(1, 1, 2), Blocks.REDSTONE_BLOCK);
-		helper.succeedWhen(() -> {
-			helper.assertBlockProperty(left, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, true);
-			helper.assertBlockProperty(right, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, true);
-			var open = helper.getBlockState(right).getCollisionShape(level, helper.absolutePos(right));
-			helper.assertTrue(open.bounds().getXsize() < 0.2, "An open gate should leave only its post");
 		});
 	}
 
@@ -3243,5 +3206,46 @@ public class JugcraftGameTests {
 			transaction.abort();
 		}
 		helper.succeed();
+	}
+
+	/**
+	 * Fortification extras: the bunker door opens by hand; two sliding gates side by side open together on one signal and
+	 * leave only a post to bump into; the embrasure has a slit through it; the parapet corner's merlon turns with it.
+	 */
+	@GameTest(maxTicks = 60)
+	public void fortificationExtras(GameTestHelper helper) {
+		var blocks = io.github.jimbozoomer.jugcraft.building.Fortifications.BLOCKS;
+		var door = (net.minecraft.world.level.block.DoorBlock) blocks.get("bunker_door");
+		helper.assertTrue(door.type().canOpenByHand(), "A bunker door should open by hand");
+		ServerLevel level = helper.getLevel();
+		BlockPos embrasure = new BlockPos(5, 1, 5);
+		helper.setBlock(embrasure, blocks.get("bastion_embrasure"));
+		var shape = helper.getBlockState(embrasure).getShape(level, helper.absolutePos(embrasure));
+		helper.assertTrue(!net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(shape,
+				net.minecraft.world.phys.shapes.Shapes.box(0.4, 0.6, 0.0, 0.6, 0.65, 1.0), net.minecraft.world.phys.shapes.BooleanOp.AND),
+				"An embrasure should have a slit right through it");
+		var corner = blocks.get("bastion_parapet_corner").defaultBlockState();
+		var north = corner.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.NORTH);
+		var south = corner.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.SOUTH);
+		helper.setBlock(new BlockPos(1, 1, 5), north);
+		helper.setBlock(new BlockPos(3, 1, 5), south);
+		var corner_nw = net.minecraft.world.phys.shapes.Shapes.box(0.1, 0.7, 0.1, 0.3, 0.9, 0.3);
+		helper.assertTrue(net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(helper.getBlockState(new BlockPos(1, 1, 5))
+				.getShape(level, helper.absolutePos(new BlockPos(1, 1, 5))), corner_nw, net.minecraft.world.phys.shapes.BooleanOp.AND)
+				&& !net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(helper.getBlockState(new BlockPos(3, 1, 5))
+						.getShape(level, helper.absolutePos(new BlockPos(3, 1, 5))), corner_nw, net.minecraft.world.phys.shapes.BooleanOp.AND),
+				"The corner's merlon should stand at the north-west facing north, and turn with it");
+		BlockPos left = new BlockPos(2, 1, 2);
+		BlockPos right = new BlockPos(3, 1, 2);
+		helper.setBlock(left, blocks.get("sliding_gate"));
+		helper.setBlock(right, blocks.get("sliding_gate"));
+		helper.assertBlockProperty(left, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, false);
+		helper.setBlock(new BlockPos(1, 1, 2), Blocks.REDSTONE_BLOCK);
+		helper.succeedWhen(() -> {
+			helper.assertBlockProperty(left, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, true);
+			helper.assertBlockProperty(right, io.github.jimbozoomer.jugcraft.building.SlidingGateBlock.OPEN, true);
+			var open = helper.getBlockState(right).getCollisionShape(level, helper.absolutePos(right));
+			helper.assertTrue(open.bounds().getXsize() < 0.2, "An open gate should leave only its post");
+		});
 	}
 }
