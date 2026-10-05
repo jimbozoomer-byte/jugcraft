@@ -10,10 +10,14 @@ and crusted with lichen. Block faces take their texture by position, so the bott
 ground: each stage has an `_upper` form, without the band of ground moss, for the parts of a monument above its first
 block.
 
-Called from crop_textures.crop_textures(). Every pixel is drawn here by code, from fixed seeds; no Mojang texture is
-read, traced or recoloured.
+Everything is painted in the clean, cartoon style (docs/ART_DIRECTION.md, "Creatures and faces: cute and clean"): flat
+tones, features in fixed places and regular patterns, no random speckle, and every pattern repeats every 16 pixels so
+neighbouring blocks join up.
+
+Called from crop_textures.crop_textures(). Every pixel is drawn here by code; no Mojang texture is read, traced or
+recoloured.
 """
-import random
+import math
 
 from PIL import Image
 
@@ -36,91 +40,94 @@ GRIME = rgb("3a3631")
 IVY = [rgb("1f3a14"), rgb("2b4d1a"), rgb("3a6322"), rgb("4c7a2c"), rgb("67953a")]
 
 
+# Fixed places (x, y) for the speckles and features a stone carries, so every block of a stone matches its neighbours.
+FLECKS = [(2, 1), (9, 3), (13, 8), (5, 7), (11, 12), (1, 11), (7, 14), (14, 1), (4, 4), (10, 9)]
+
+
+def _wave(x, shift, amplitude=1.0):
+    """A gentle wave across the texture, repeating every 16 pixels so neighbouring blocks join up."""
+    return amplitude * math.sin(2 * math.pi * (x + shift) / 16.0)
+
+
 def _base(stone, seed_extra=0, smooth=False):
-    """The bare stone of `stone`: marble with grey veins, slate in fine laminations, granite speckled with black mica,
-    pink feldspar and white quartz, sandstone in thin bedding planes."""
+    """The bare stone of `stone`, flat in its middle tone: marble with one smooth grey vein, slate in even laminations,
+    granite with neat flecks of black mica, pink feldspar and white quartz in a fixed pattern, sandstone in even
+    bedding planes."""
     base, accent, seed = STONES[stone]
-    rng = random.Random(seed + seed_extra)
+    shift = (seed + seed_extra) % 16
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            weights = (1, 3, 4, 2) if not smooth else (0, 2, 5, 3)
-            colour = rng.choices(base, weights=weights)[0]
-            if stone == "slate" and (y + (x // 6)) % 4 == 0:
-                colour = shade(colour, 0.93)
+            colour = base[2]
+            if stone == "slate" and y % 4 == 0:
+                colour = base[1]
+            elif stone == "slate" and y % 4 == 1:
+                colour = base[3]
             if stone == "sandstone" and y % 5 == 2:
-                colour = shade(colour, 0.95 if not smooth else 0.97)
+                colour = base[1]
+            elif stone == "sandstone" and y % 5 == 3:
+                colour = base[3]
             c.px(x, y, colour)
     if stone == "marble":
-        # One or two soft veins wandering across the face, broken here and there.
-        for start in (rng.randint(-2, 8), rng.randint(9, 20))[: 1 if smooth else 2]:
-            x = float(start)
-            for y in range(16):
-                x += rng.choice((-0.6, 0.3, 0.7, 1.0))
-                if rng.random() < 0.75:
-                    c.px(int(x) % 16, y, accent[1] if rng.random() < 0.8 else accent[0])
+        for y in range(16):
+            x = int(round(8 + _wave(y, shift, 3.0)))
+            c.px(x % 16, y, accent[1])
+            if not smooth:
+                c.px((x + 1) % 16, y, base[3])
     elif stone == "granite":
-        for _ in range(26 if not smooth else 18):
-            c.px(rng.randrange(16), rng.randrange(16), rng.choice(accent))
-    elif stone == "slate":
-        for _ in range(8):
-            c.px(rng.randrange(16), rng.randrange(16), accent[1])
-    elif stone == "sandstone":
-        for _ in range(10):
-            c.px(rng.randrange(16), rng.randrange(16), rng.choice(accent))
+        for i, (fx, fy) in enumerate(FLECKS[: 10 if not smooth else 6]):
+            x, y = (fx + shift) % 16, fy
+            c.px(x, y, accent[i % 3])
+            c.px((x + 1) % 16, y, accent[i % 3])
     return c
 
 
 def _weather(c, stone, stage, seed, upper=False):
-    """Weathers the canvas to `stage`: grime from the top, chips, moss from the ground up and lichen."""
+    """Weathers the canvas to `stage`, in neat shapes: duller stone; grime run down from the top in a few clean streaks;
+    a pale chip; lichen in round rosettes and moss in soft cushions; and moss from the ground up in a gentle wave."""
     if stage == 0:
         return c
-    rng = random.Random(seed * 7 + stage * 131 + (1 if upper else 0))
-    dull = (1.0, 0.95, 0.9, 0.84)[stage]
+    shift = seed % 16
+    dull = (1.0, 0.95, 0.9, 0.86)[stage]
     for y in range(16):
         for x in range(16):
             pixel = c.get(x, y)
             if pixel:
                 c.px(x, y, shade(pixel[:3], dull))
-    # Grime washed down from the top in streaks.
-    for _ in range(3 + 2 * stage):
-        x = rng.randrange(16)
-        length = rng.randint(3, 6 + 2 * stage)
+    # Grime washed down from the top in straight streaks two tones deep.
+    for i, gx in enumerate((3, 11, 7)[: 1 + stage]):
+        x = (gx + shift) % 16
+        length = 3 + 2 * stage + (i % 2) * 2
         for y in range(length):
-            if rng.random() < 0.85:
-                pixel = c.get(x, y)
-                if pixel:
-                    c.px(x, y, tuple(int(p * 0.75 + g * 0.25) for p, g in zip(pixel[:3], GRIME)))
-    # Chips: small pale scars.
-    for _ in range(stage):
-        x, y = rng.randrange(16), rng.randrange(16)
-        pixel = c.get(x, y)
+            pixel = c.get(x, y)
+            if pixel:
+                c.px(x, y, tuple(int(p * 0.7 + g * 0.3) for p, g in zip(pixel[:3], GRIME)) if y < length - 1 else
+                     tuple(int(p * 0.85 + g * 0.15) for p, g in zip(pixel[:3], GRIME)))
+    # A chipped corner: two pale pixels.
+    cx = (shift + 5) % 16
+    for dx in (0, 1):
+        pixel = c.get((cx + dx) % 16, 1)
         if pixel:
-            c.px(x, y, shade(pixel[:3], 1.12))
+            c.px((cx + dx) % 16, 1, shade(pixel[:3], 1.12))
     if stage >= 2:
-        # Lichen rosettes.
         lichen = LICHEN[stone]
-        for _ in range(3 if stage == 2 else 6):
-            cx, cy = rng.randrange(16), rng.randrange(16)
-            for dx, dy in ((0, 0), (1, 0), (0, 1), (-1, 0), (0, -1)):
-                if rng.random() < 0.8:
-                    c.px(cx + dx, cy + dy, rng.choice(lichen))
-        # Moss in cushions, and from the ground up unless this is an upper part.
-        for _ in range(2 if stage == 2 else 4):
-            cx, cy = rng.randrange(16), rng.randrange(4, 16)
-            radius = rng.choice((1, 1, 2))
-            for dy in range(-radius, radius + 1):
-                for dx in range(-radius - 1, radius + 2):
-                    if dx * dx / (radius + 1.2) ** 2 + dy * dy / (radius + 0.6) ** 2 <= 1 and rng.random() < 0.85:
-                        c.px(cx + dx, cy + dy, MOSS[2 + (dy < 0) + (rng.random() < 0.3)])
+        for lx, ly in ((4, 5), (12, 3), (8, 10), (1, 8), (14, 12), (6, 1))[: 2 if stage == 2 else 5]:
+            x, y = (lx + shift) % 16, ly
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                c.px((x + dx) % 16, y + dy, lichen[1])
+            c.px(x, y, lichen[0])
+        for mx, my in ((10, 7), (3, 12), (13, 4), (6, 9))[: 2 if stage == 2 else 4]:
+            x = (mx + shift) % 16
+            for dy, dxs in ((0, (0, 1)), (1, (-1, 0, 1, 2))):
+                for dx in dxs:
+                    c.px((x + dx) % 16, my + dy, MOSS[3] if dy == 0 else MOSS[2])
         if not upper:
             height = 2 if stage == 2 else 5
-            level = height
             for x in range(16):
-                level = max(1, min(height + 2, level + rng.choice((-1, 0, 0, 1))))
+                level = height + int(round(_wave(x, shift, 1.0)))
                 for y in range(16 - level, 16):
-                    depth = 15 - y
-                    c.px(x, y, MOSS[min(4, max(0, 1 + (depth < level - 1) + (rng.random() < 0.25) - (depth == 0)))])
+                    depth = y - (16 - level)
+                    c.px(x, y, MOSS[4] if depth == 0 else MOSS[3] if depth == 1 else MOSS[1] if y == 15 else MOSS[2])
     return c
 
 
@@ -129,49 +136,39 @@ def stone_face(stone, stage, upper=False):
 
 
 def relief_face(stone, stage, upper=False):
-    """Carved and polished work: smoother than the dressed face. Marble is polished almost white, slate shows the
-    pale grey of fresh-cut slate, granite polishes dark with fine specks, sandstone is rubbed smooth."""
+    """Carved and polished work, flat and bright: marble polished almost white with one faint vein, slate the pale grey
+    of fresh-cut slate, granite polished dark with a few neat specks, sandstone rubbed smooth."""
     base, accent, seed = STONES[stone]
-    rng = random.Random(seed + 50)
+    shift = (seed + 50) % 16
     c = Canvas()
+    colour = {"marble": shade(base[3], 1.03), "slate": shade(base[2], 1.38), "granite": rgb("766e6c"),
+              "sandstone": shade(base[2], 1.03)}[stone]
     for y in range(16):
         for x in range(16):
-            if stone == "marble":
-                colour = shade(rng.choice(base[2:]), 1.03)
-            elif stone == "slate":
-                colour = shade(rng.choice(base[1:3]), 1.38)
-            elif stone == "granite":
-                colour = rng.choices([rgb("6e6766"), rgb("766e6c"), rgb("7d7573")], weights=(2, 5, 3))[0]
-            else:
-                colour = shade(rng.choice(base[1:]), 1.03)
             c.px(x, y, colour)
     if stone == "granite":
-        for _ in range(14):
-            c.px(rng.randrange(16), rng.randrange(16), rng.choice((rgb("2e2b2c"), rgb("a8857c"), rgb("b9b2ac"))))
+        for i, (fx, fy) in enumerate(FLECKS[:6]):
+            c.px((fx + shift) % 16, fy, (rgb("2e2b2c"), rgb("a8857c"), rgb("b9b2ac"))[i % 3])
     elif stone == "marble":
-        x = float(rng.randint(2, 12))
         for y in range(16):
-            x += rng.choice((-0.5, 0.3, 0.6))
-            if rng.random() < 0.5:
-                c.px(int(x) % 16, y, accent[1])
+            c.px(int(round(8 + _wave(y, shift, 3.0))) % 16, y, accent[1])
     return _weather(c, stone, STAGES.index(stage), STONES[stone][2] + 3, upper).img
 
 
 def rough_face(stone, stage, upper=False):
-    """Rock-faced stone, split rather than sawn: lumps lit from above with shadowed undersides, and pits."""
+    """Rock-faced stone, split rather than sawn: rounded lumps in staggered rows, each lit along its top and left and
+    shadowed along its bottom and right."""
     c = _base(stone, 90)
-    rng = random.Random(STONES[stone][2] + 91)
-    for _ in range(9):
-        cx, cy, r = rng.randrange(16), rng.randrange(16), rng.choice((1, 2, 2))
-        for dy in range(-r, r + 1):
-            for dx in range(-r, r + 1):
-                if dx * dx + dy * dy <= r * r + 1:
-                    pixel = c.get((cx + dx) % 16, (cy + dy) % 16)
-                    factor = 1.12 if dy < 0 else (0.82 if dy == r else 1.0)
-                    c.px((cx + dx) % 16, (cy + dy) % 16, shade(pixel[:3], factor))
-    for _ in range(12):
-        x, y = rng.randrange(16), rng.randrange(16)
-        c.px(x, y, shade(c.get(x, y)[:3], 0.7))
+    for y in range(16):
+        for x in range(16):
+            row = y // 4
+            u = (x + (row % 2) * 2) % 4
+            v = y % 4
+            pixel = c.get(x, y)[:3]
+            if v == 0 or u == 0:
+                c.px(x, y, shade(pixel, 1.12))
+            elif v == 3 or u == 3:
+                c.px(x, y, shade(pixel, 0.8))
     return _weather(c, stone, STAGES.index(stage), STONES[stone][2] + 9, upper).img
 
 
@@ -198,7 +195,7 @@ def knotwork(stone, stage, upper=False):
             over = a if centre else b
             under = b if centre else a
             if over <= 1.3:
-                c.px(x, y, band[(x + y) % 2])
+                c.px(x, y, band[1])
             elif over <= 1.9:
                 c.px(x, y, edge)
             elif under <= 1.3:
@@ -217,69 +214,61 @@ VERDIGRIS = [rgb("3f7a66"), rgb("4f927a"), rgb("68a88e"), rgb("86bea4")]
 
 
 def iron(stage, seed=7301):
-    """Cast iron painted black: chipped at worn, rust breaking through the paint at mossy, rusty all over (with the
-    moss) when overgrown."""
-    rng = random.Random(seed + stage)
+    """Cast iron painted black, flat with a sheen down every eighth column: chipped at worn, rust running down from the
+    middle at mossy, rusty along the bottom with moss when overgrown."""
     c = Canvas()
-    rust = (0.0, 0.08, 0.3, 0.6)[stage]
     for y in range(16):
         for x in range(16):
-            colour = rng.choice(IRON) if rng.random() >= rust else rng.choice(RUST)
-            if stage >= 1 and rng.random() < 0.05:
-                colour = shade(colour, 1.4)
-            c.px(x, y, colour)
+            c.px(x, y, IRON[3] if x % 8 == 0 else IRON[2] if x % 8 == 1 else IRON[1])
+    if stage >= 1:
+        for x, y in ((5, 3), (12, 9), (2, 13))[:stage]:
+            c.px(x, y, shade(IRON[3], 1.4))
     if stage >= 2:
-        for _ in range(2 if stage == 2 else 5):
-            x = rng.randrange(16)
-            for y in range(rng.randrange(8), 16):
-                if rng.random() < 0.7:
-                    c.px(x, y, rng.choice(RUST[:2]))
+        for x in (4, 11, 14, 7)[: 2 if stage == 2 else 4]:
+            for y in range(6, 16):
+                c.px(x, y, RUST[2] if y == 6 else RUST[1])
     if stage == 3:
-        for _ in range(10):
-            c.px(rng.randrange(16), rng.randrange(10, 16), rng.choice(MOSS[1:]))
+        for x in range(16):
+            for y in range(13 + (x % 3 == 0), 16):
+                c.px(x, y, RUST[1] if y < 15 else RUST[0])
+        for x in range(1, 16, 4):
+            c.px(x, 15, MOSS[3])
+            c.px(x + 1, 15, MOSS[2])
+            c.px(x, 14, MOSS[3])
     return c.img
 
 
 def bronze(stage, seed=7401):
-    """Cast bronze: warm and polished new, darkening to a brown patina, then streaked and crusted with verdigris."""
-    rng = random.Random(seed + stage)
+    """Cast bronze, flat with a polished diagonal sheen: warm new, darkening to a brown patina, then with clean streaks
+    of verdigris running down, and crusted with it from the bottom when overgrown."""
+    factor = (1.0, 0.78, 0.68, 0.6)[stage]
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            colour = rng.choice(BRONZE)
-            if stage >= 1:
-                colour = shade(colour, (1.0, 0.78, 0.68, 0.6)[stage])
-            c.px(x, y, colour)
-    # Polished highlights where hands and weather wear it.
-    for _ in range(6 if stage == 0 else 2):
-        c.px(rng.randrange(16), rng.randrange(16), shade(BRONZE[3], 1.2))
+            sheen = (x + y) % 16 in (3, 4)
+            c.px(x, y, shade(BRONZE[3], factor * (1.12 if stage == 0 else 1.0)) if sheen else shade(BRONZE[2], factor))
     if stage >= 2:
-        for _ in range(4 if stage == 2 else 9):
-            x = rng.randrange(16)
-            length = rng.randint(4, 12)
-            start = rng.randrange(0, 8)
-            for y in range(start, min(16, start + length)):
-                if rng.random() < 0.8:
-                    c.px(x + (1 if rng.random() < 0.2 else 0), y, rng.choice(VERDIGRIS))
+        for x, top, length in ((3, 0, 9), (10, 2, 7), (13, 0, 12), (6, 4, 6), (1, 3, 8))[: 2 if stage == 2 else 5]:
+            for y in range(top, min(16, top + length)):
+                c.px(x, y, VERDIGRIS[2] if y == top else VERDIGRIS[1])
     if stage == 3:
-        for _ in range(30):
-            c.px(rng.randrange(16), rng.randrange(16), rng.choice(VERDIGRIS[1:]))
+        for x in range(16):
+            for y in range(12 + int(round(math.sin(2 * math.pi * x / 16.0))), 16):
+                c.px(x, y, VERDIGRIS[2] if y % 3 == 0 else VERDIGRIS[1])
     return c.img
 
 
 def ivy():
-    """Ivy leaves, dark and glossy, packed over their stems."""
-    rng = random.Random(7201)
+    """Ivy leaves, dark and glossy, in neat offset rows over their stems: each a small pointed leaf lit at its top."""
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            c.px(x, y, rng.choice(IVY[:3]))
-    for _ in range(14):
-        cx, cy = rng.randrange(16), rng.randrange(16)
-        colour = rng.choice(IVY[2:])
-        for dx, dy in ((0, 0), (1, 0), (-1, 0), (0, -1), (1, 1), (-1, 1)):
-            c.px(cx + dx, cy + dy, colour)
-        c.px(cx, cy + 1, shade(colour, 1.2))
+            c.px(x, y, IVY[1])
+    for row in range(4):
+        for col in range(4):
+            x0, y0 = col * 4 + (2 if row % 2 else 0), row * 4
+            for dx, dy, k in ((1, 0, 4), (0, 1, 3), (1, 1, 3), (2, 1, 3), (1, 2, 2), (0, 2, 2), (2, 2, 2), (1, 3, 0)):
+                c.px((x0 + dx) % 16, y0 + dy, IVY[k])
     return c.img
 
 
@@ -302,7 +291,7 @@ def chisel_item():
     # The mallet, a dumpy round head on a short handle, below it.
     for x in range(8, 13):
         for y in range(11, 15):
-            c.px(x, y, ash[(x + y) % 3])
+            c.px(x, y, ash[2] if y == 11 else ash[1])
     for i in range(4):
         c.px(6 - i, 12 + i // 2, ash[0])
     outline(c, rgb("26292d"))
@@ -317,63 +306,53 @@ SLATES = [rgb("2f343d"), rgb("373d47"), rgb("3f4651"), rgb("48505c")]
 
 
 def oak(stage, seed=7501):
-    """Oak timber with its grain running along it: warm brown when new, silvering grey as it weathers, then patched with
-    moss and lichen."""
-    rng = random.Random(seed + stage)
-    c = Canvas()
+    """Oak timber with its grain running along it in even planks: warm brown when new, silvering grey as it weathers,
+    with a check or two, then with neat tufts of moss and lichen."""
     silver = (0.0, 0.35, 0.55, 0.65)[stage]
+    c = Canvas()
     for x in range(16):
-        streak = rng.choice(OAK[1:])
         for y in range(16):
-            colour = streak if rng.random() < 0.7 else rng.choice(OAK)
-            if (x * 5 + y // 7) % 6 == 0:
-                colour = shade(colour, 0.78)
-            colour = tuple(int(p + (g - p) * silver) for p, g in zip(colour, SILVER))
-            c.px(x, y, colour)
-    # Checks (cracks) along the grain, and a knot.
-    for _ in range(1 + stage):
-        x = rng.randrange(16)
-        start = rng.randrange(10)
-        for y in range(start, min(16, start + rng.randint(3, 7))):
+            k = x % 4
+            colour = shade(OAK[0], 0.85) if k == 3 else OAK[3] if k == 0 else OAK[2] if (x // 4) % 2 else OAK[1]
+            c.px(x, y, tuple(int(p + (g - p) * silver) for p, g in zip(colour, SILVER)))
+    for x, start, length in ((5, 2, 5), (9, 8, 6), (1, 5, 4))[:stage]:
+        for y in range(start, start + length):
             c.px(x, y, shade(c.get(x, y)[:3], 0.62))
-    kx, ky = rng.randrange(3, 13), rng.randrange(3, 13)
     for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
-        c.px(kx + dx, ky + dy, shade(OAK[0], 0.8))
+        c.px(10 + dx, 4 + dy, shade(OAK[0], 0.8))
     if stage >= 2:
-        for _ in range(3 if stage == 2 else 7):
-            cx, cy = rng.randrange(16), rng.randrange(16)
-            for dx, dy in ((0, 0), (1, 0), (0, 1), (-1, 0), (0, -1), (1, 1)):
-                if rng.random() < 0.75:
-                    c.px(cx + dx, cy + dy, rng.choice(MOSS[1:4] + [rgb("a6b07a")]))
+        for cx, cy in ((3, 11), (12, 13), (7, 2), (14, 7))[: 2 if stage == 2 else 4]:
+            for dx, dy in ((0, 0), (1, 0), (0, 1), (-1, 0), (0, -1)):
+                c.px(cx + dx, cy + dy, MOSS[3] if (dx, dy) == (0, -1) else MOSS[2])
     return c.img
 
 
 def roof_slate(stage, seed=7601):
-    """Roofing slates in courses (running across the texture's u, as a roof's slope lies along a box's length), their
-    lower edges dark; worn slates go dusty, then moss fills the joints and spreads, with yellow lichen."""
-    rng = random.Random(seed + stage)
-    c = Canvas()
+    """Roofing slates in courses (running across the texture's u, as a roof's slope lies along a box's length): flat
+    slates in two tones by turns, their lower edges dark; worn slates go dusty, then moss fills a few joints, with
+    yellow lichen rosettes."""
     dust = (1.0, 1.08, 1.0, 0.95)[stage]
+    c = Canvas()
     for x in range(16):
         course = x // 4
         for y in range(16):
+            tile = (y + course * 3) // 6
             joint = (y + course * 3) % 6 == 0
-            colour = rng.choice(SLATES[1:]) if not joint else SLATES[0]
+            colour = SLATES[0] if joint else SLATES[2] if (tile + course) % 2 else SLATES[1]
             if x % 4 == 0:
                 colour = shade(SLATES[0], 0.8)
+            elif x % 4 == 1:
+                colour = SLATES[3]
             c.px(x, y, shade(colour, dust))
     if stage >= 2:
-        for _ in range(4 if stage == 2 else 10):
-            x = rng.randrange(0, 16, 4)
-            y = rng.randrange(16)
-            for dy in range(rng.randint(1, 3)):
-                c.px(x, y + dy, rng.choice(MOSS[1:4]))
-                if stage == 3 and rng.random() < 0.6:
-                    c.px(x + 1, y + dy, rng.choice(MOSS[2:]))
-        for _ in range(2 if stage == 2 else 5):
-            cx, cy = rng.randrange(16), rng.randrange(16)
+        for x, y in ((4, 3), (8, 9), (12, 1), (0, 12), (4, 14))[: 2 if stage == 2 else 5]:
+            for dy in range(3):
+                c.px(x, y + dy, MOSS[3] if dy == 0 else MOSS[2])
+                if stage == 3:
+                    c.px(x + 1, y + dy, MOSS[3])
+        for cx, cy in ((10, 6), (2, 9), (14, 13))[: 1 if stage == 2 else 3]:
             for dx, dy in ((0, 0), (1, 0), (0, 1)):
-                c.px(cx + dx, cy + dy, rng.choice(LICHEN["granite"]))
+                c.px(cx + dx, cy + dy, LICHEN["granite"][0])
     return c.img
 
 
@@ -402,61 +381,61 @@ def stained_glass():
 
 
 def marble_floor():
-    """A chequered floor of white marble and black slate in squares of four pixels (25 cm), polished."""
-    rng = random.Random(7701)
+    """A chequered floor of white marble and black slate in squares of four pixels (25 cm), polished: each square flat,
+    lit along its top and left edge."""
     c = Canvas()
     white = STONES["marble"][0]
     dark = [rgb("26292e"), rgb("2e3238"), rgb("353a41")]
     for y in range(16):
         for x in range(16):
+            lit = x % 4 == 0 or y % 4 == 0
             if (x // 4 + y // 4) % 2 == 0:
-                c.px(x, y, rng.choice(white[1:]))
+                c.px(x, y, white[3] if lit else white[2])
             else:
-                c.px(x, y, rng.choice(dark))
-    for x in range(16):
-        c.px(x, 0, shade(white[0], 0.85))
+                c.px(x, y, dark[2] if lit else dark[1])
     return c.img
 
 
 def lamp_glass():
-    """A sanctuary lamp's ruby glass, lit from within."""
+    """A sanctuary lamp's ruby glass, lit from within: three clean rings of red, brightest in the middle."""
     c = Canvas()
     for y in range(16):
         for x in range(16):
             glow = max(0.0, 1 - (abs(x - 7.5) + abs(y - 9)) / 12)
+            glow = 0.0 if glow < 0.3 else 0.5 if glow < 0.65 else 1.0
             c.px(x, y, tuple(min(255, int(v + 90 * glow)) for v in (176, 24, 34)))
     return c.img
 
 
 def lantern_glass():
-    """A lantern's panes with the flame's light behind them: warm amber, brightest in the middle."""
+    """A lantern's panes with the flame's light behind them: warm amber in three clean rings, brightest in the middle."""
     c = Canvas()
     for y in range(16):
         for x in range(16):
             glow = max(0.0, 1 - (abs(x - 7.5) + abs(y - 8.5)) / 11)
+            glow = 0.0 if glow < 0.3 else 0.5 if glow < 0.65 else 1.0
             c.px(x, y, (min(255, int(222 + 33 * glow)), min(255, int(150 + 80 * glow)), min(255, int(60 + 110 * glow))))
     return c.img
 
 
 def door_glass():
-    """Smoked glass behind a bronze grille: nearly black, with a faint sheen."""
-    rng = random.Random(7801)
+    """Smoked glass behind a bronze grille: flat near-black, with one clean diagonal sheen."""
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            c.px(x, y, rng.choice((rgb("15181c"), rgb("1b1f24"), rgb("22272d"))))
+            c.px(x, y, rgb("1b1f24"))
     for i in range(5):
         c.px(10 + i // 2, 2 + i, rgb("3c444e"))
     return c.img
 
 
 def mausoleum_door_item():
-    """The Bronze Mausoleum Door as an item: a bronze frame with a meeting stile, a grille over smoked glass above and
-    raised panels below."""
+    """The Bronze Mausoleum Door as an item: a flat bronze frame with a meeting stile, a grille over smoked glass above
+    and raised panels below."""
     c = Canvas()
     for y in range(1, 16):
         for x in range(3, 13):
-            c.px(x, y, BRONZE[1] if (x + y) % 3 else BRONZE[2])
+            c.px(x, y, BRONZE[2] if x in (3, 4) or y == 1 else BRONZE[1])
     for y in range(2, 8):
         for x in (4, 5, 6, 9, 10, 11):
             c.px(x, y, rgb("1b1f24"))
@@ -486,67 +465,71 @@ GRASS = [rgb("3f6b24"), rgb("4e7f2c"), rgb("5f9234"), rgb("74a540")]
 
 
 def chippings(stage, seed=7901):
-    """White marble chippings: clean and bright, greying as dirt settles in, green with algae, then grassed over."""
-    rng = random.Random(seed + stage)
+    """White marble chippings: round pebbles in neat offset rows, each lit at its top, grey between; dirtier pebbles at
+    worn, neat tufts of moss at mossy, and grass blades coming through when overgrown."""
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            colour = rng.choice(CHIPS[:3]) if rng.random() < 0.8 else rng.choice(CHIPS[3:])
-            if stage >= 1 and rng.random() < 0.12 * stage:
-                colour = shade(colour, 0.78)
+            row = y // 3
+            u = (x + (row % 2) * 2) % 4
+            v = y % 3
+            pebble = (x + (row % 2) * 2) // 4 + row
+            if u == 3 or v == 2:
+                colour = CHIPS[4]
+            elif v == 0 and u in (1, 2):
+                colour = CHIPS[2]
+            else:
+                colour = CHIPS[1]
+            if stage >= 1 and pebble % (5 - stage) == 0 and colour != CHIPS[4]:
+                colour = shade(colour, 0.82)
             c.px(x, y, colour)
     if stage >= 2:
-        for _ in range(5 if stage == 2 else 9):
-            cx, cy = rng.randrange(16), rng.randrange(16)
+        for cx, cy in ((3, 4), (11, 9), (7, 13), (14, 2), (1, 10))[: 2 if stage == 2 else 5]:
             for dx, dy in ((0, 0), (1, 0), (0, 1), (-1, 0), (1, 1)):
-                if rng.random() < 0.75:
-                    c.px(cx + dx, cy + dy, rng.choice(MOSS[2:]))
+                c.px((cx + dx) % 16, (cy + dy) % 16, MOSS[3] if dy == 0 else MOSS[2])
     if stage == 3:
-        for _ in range(14):
-            x, y = rng.randrange(16), rng.randrange(16)
-            for dy in range(rng.randint(1, 3)):
-                c.px(x, y - dy, rng.choice(GRASS))
+        for x, y in ((5, 7), (9, 3), (13, 12), (2, 14), (8, 10), (15, 6)):
+            for dy in range(3):
+                c.px(x, y - dy, GRASS[3] if dy == 2 else GRASS[2])
     return c.img
 
 
 def flower_bed(stage, seed=8001):
-    """A grave's planted bed seen from above and from the side alike: kept, neat flowers in rows on dark earth; let
-    go, weeds and grass come through and the flowers thin; overgrown, grass and brambles."""
-    rng = random.Random(seed + stage)
+    """A grave's planted bed seen from above and from the side alike: dark earth in even furrows, neat little flowers
+    in rows, each on two leaves; let go, the flowers thin and grass blades come through; overgrown, grass and brambles."""
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            c.px(x, y, rng.choice(SOIL))
-    flowers = (1.0, 0.6, 0.25, 0.08)[stage]
-    weeds = (0.0, 0.25, 0.6, 0.9)[stage]
-    for y in range(1, 16, 3):
-        for x in range(1, 16, 3):
-            ox, oy = x + rng.choice((0, 0, 1)), y + rng.choice((0, 0, 1))
-            if rng.random() < flowers:
-                c.px(ox, oy + 1, GRASS[1])
-                c.px(ox + 1, oy + 1, GRASS[2])
-                c.px(ox, oy, FLOWERS[(x // 3 + y // 3) % 4])
-    for _ in range(int(60 * weeds)):
-        x, y = rng.randrange(16), rng.randrange(16)
-        c.px(x, y, rng.choice(GRASS))
-        if rng.random() < 0.5:
-            c.px(x, y - 1, rng.choice(GRASS))
+            c.px(x, y, SOIL[0] if y % 4 == 3 else SOIL[2] if y % 4 == 0 else SOIL[1])
+    keep = (4, 3, 2, 1)[stage]
+    for i, (x0, y0) in enumerate((x, y) for y in range(0, 16, 4) for x in range(0, 16, 4)):
+        x = x0 + (2 if (y0 // 4) % 2 else 0)
+        if i % 4 >= keep:
+            continue
+        colour = FLOWERS[(x0 // 4 + y0 // 4) % 4]
+        c.px((x + 1) % 16, y0 + 2, GRASS[1])
+        c.px((x - 1) % 16, y0 + 2, GRASS[2])
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            c.px((x + dx) % 16, y0 + 1 + dy, colour)
+        c.px(x % 16, y0 + 1, rgb("f8e070"))
+    blades = (0, 3, 6, 10)[stage]
+    for x, y in ((2, 3), (9, 6), (14, 2), (5, 11), (12, 13), (0, 8), (7, 15), (11, 1), (3, 14), (15, 10))[:blades]:
+        for dy in range(2):
+            c.px(x, y - dy, GRASS[3] if dy == 1 else GRASS[2])
     if stage == 3:
-        for _ in range(6):
-            x, y = rng.randrange(16), rng.randrange(16)
+        for x, y in ((4, 6), (10, 10), (13, 5)):
             c.px(x, y, rgb("3a1f2e"))
             c.px(x + 1, y, rgb("5b2a40"))
     return c.img
 
 
 def pit():
-    """An open grave's darkness, seen down into: nearly black earth, the same all over so a grave two blocks long
+    """An open grave's darkness, seen down into: flat near-black earth, the same all over so a grave two blocks long
     shows no seam (its rim is the fresh earth round it)."""
-    rng = random.Random(8301)
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            c.px(x, y, rng.choice((rgb("0e0a07"), rgb("130e0a"), rgb("18120c"))))
+            c.px(x, y, rgb("130e0a"))
     return c.img
 
 
@@ -564,36 +547,45 @@ PETALS = {"white": [rgb("e8e4d8"), rgb("f4f1e8"), rgb("fffdf6")], "red": [rgb("8
 
 
 def petals(colour, seed=8101):
-    """Flower heads in `colour` (or `mixed`: all of them), or `wilted`: browned and dry."""
-    rng = random.Random(seed + len(colour))
+    """Flower heads in `colour` (or `mixed`: all of them, a colour to each flower), or `wilted`: browned and dry; neat
+    round flowers in offset rows, each lit at its middle, darker in the gaps."""
     c = Canvas()
     for y in range(16):
         for x in range(16):
+            row = y // 4
+            u = (x + (row % 2) * 2) % 4
+            v = y % 4
+            flower = (x + (row % 2) * 2) // 4 + row
             if colour == "wilted":
-                col = rng.choice((rgb("6e5a3a"), rgb("85704a"), rgb("5a4a30")))
+                palette = [rgb("5a4a30"), rgb("6e5a3a"), rgb("85704a")]
             elif colour == "mixed":
-                col = rng.choice(PETALS[("white", "red", "yellow", "purple")[((x // 4) + (y // 4)) % 4]])
+                palette = PETALS[("white", "red", "yellow", "purple")[flower % 4]]
             else:
-                col = rng.choice(PETALS[colour])
-            c.px(x, y, col)
+                palette = PETALS[colour]
+            gap = u == 3 or v == 3
+            middle = u in (1, 2) and v in (1, 2)
+            c.px(x, y, palette[0] if gap else palette[2] if middle and (u, v) == (1, 1) else palette[1])
     return c.img
 
 
 def leaves(seed=8201):
+    """Green leaves in neat offset rows, each lit at its top, darker between."""
     c = Canvas()
-    rng = random.Random(seed)
     for y in range(16):
         for x in range(16):
-            c.px(x, y, rng.choice(GRASS))
+            row = y // 4
+            u = (x + (row % 2) * 2) % 4
+            v = y % 4
+            c.px(x, y, GRASS[0] if v == 3 else GRASS[3] if v == 0 and u in (1, 2) else GRASS[2] if u in (1, 2) else GRASS[1])
     return c.img
 
 
 def lantern_unlit():
-    """A lantern's glass by day, unlit: dark amber with a gleam."""
+    """A lantern's glass by day, unlit: flat dark amber with one clean gleam."""
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            c.px(x, y, rgb("4a3a22") if (x + y) % 5 else rgb("5c4a2c"))
+            c.px(x, y, rgb("4a3a22"))
     for i in range(4):
         c.px(11 + i // 2, 2 + i, rgb("8a7a5a"))
     return c.img
