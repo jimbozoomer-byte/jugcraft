@@ -1101,15 +1101,25 @@ public class JugcraftGameTests {
 		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
 		gunner.setYRot(0.0F);
 		gunner.setXRot(-20.0F);
-		// One press, held for a moment: the gun fires once it has turned onto the gunner's line.
+		// Other artillery tests share this world and publish spotter marks. Give this gunner its own
+		// reachable target so a neighbouring test cannot redirect the salvo away from this fixture.
+		BlockPos salvoTarget = helper.absolutePos(new BlockPos(2, 2, 30));
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.mark(gunner, salvoTarget);
+		// One press, held for a moment: the gun fires once it has turned onto that target.
 		for (int tick = 1; tick <= 40; tick++) {
 			int pressed = tick <= 30 ? 1 : 0;
 			helper.runAfterDelay(tick, () -> battery.steer(gunner, 0, 0, pressed));
 		}
 		helper.runAfterDelay(80, () -> {
 			int left = gunner.getInventory().countItem(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM);
-			helper.assertTrue(left == 2, "A salvo should use three Heavy Shells, leaving 2, but left " + left);
-			helper.succeed();
+			try {
+				helper.assertTrue(left == 2, "A salvo should use three Heavy Shells, leaving 2, but left " + left
+						+ "; gun ticks=" + battery.tickCount + ", crewed=" + (battery.getFirstPassenger() == gunner)
+						+ ", aim=" + battery.aimYaw(1.0F) + "/" + battery.aimPitch());
+				helper.succeed();
+			} finally {
+				io.github.jimbozoomer.jugcraft.artillery.Spotting.clear(gunner);
+			}
 		});
 	}
 

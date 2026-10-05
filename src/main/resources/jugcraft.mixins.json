@@ -12,6 +12,7 @@
     "DiagonalWallMixin",
     "JigsawPlacementMixin",
     "MultiNoiseBiomeSourceMixin",
+    "NetherBiomeBootstrapMixin",
     "OverworldBiomeBuilderMixin",
     "PoolElementStructurePieceMixin",
     "StructureTemplatePoolAccessor",

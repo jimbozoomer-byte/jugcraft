@@ -51,6 +51,8 @@ Modonomicon presents the codex; it must not become the only owner of unlock stat
 
 GuiLib is a client library. Java and Kotlin source sets are supported by the build; its DSL is designed for Kotlin. Keep screens in the client source set and guard the path that opens a GuiLib screen when the mod is absent. If a future feature truly requires GuiLib, explicitly update the standalone dependency policy and publication plan instead of letting an absent class crash the client.
 
+Kotlin is currently provisioned for those optional client screens. Before introducing common/server Kotlin code, make Fabric Language Kotlin a common required dependency in the lock and test that installed server configuration. The development compiler's standard library is not a substitute for a declared, distributed runtime.
+
 Prototype custom inventory/container integration before replacing existing machine screens. Check keyboard navigation, narration, window/GUI scaling, resource reload, and frame time. A GUI must send a bounded request; the server still validates inventory, permission, distance, costs, and rewards.
 
 ### Optional adapters
@@ -58,6 +60,8 @@ Prototype custom inventory/container integration before replacing existing machi
 The [Jade adapter](features/framework-foundation.md) is discovered through Jade's entrypoint, and its tooltip class is resolved only during client registration. It reports energy and processing progress for the shared MachineBlockEntity. Future machine/ritual providers should send a small snapshot, never scan the world or mutate inventories. Discovery-restricted information must stay restricted.
 
 The existing [JEI adapter](features/jei-integration.md) remains optional. Its generated recipe view still does not reflect arbitrary server datapack recipe changes. Installing JEI does not resolve that existing limitation.
+
+The pinned JEI release also needs a client-only compatibility hook: its vanilla registry bootstrap cannot resolve data-pack biomes. `JeiRegistryBootstrapMixin` enters a thread-local scope that excludes custom Overworld and Nether placements only while constructing its vanilla world, loot, and advancement fallback data. Normal world generation stays outside that scope. The scope restores itself even on failure; a game test exercises the full fallback bootstrap and checks that real custom biome registrations and Nether placement survive it. Revalidate these hooks when updating JEI or Fabric's biome API; the scope is never entered by an absent JEI integration.
 
 Libraries available only as optional adapters must not leak into common initialization or saved-state types. Test with `-PjugcraftOptionalIntegrations=false` as well as with the complete development set.
 
