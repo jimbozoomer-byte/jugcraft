@@ -81,6 +81,6 @@ The owner asked on 3 October 2026 that new art not be held to Minecraft's 16×16
   Mob textures are drawn as cut-outs, so cleared pixels cut a shaggy mane's lower edge into points, and turn fangs and claws into real points.
 - **Shapes are still boxes.** Smoother outlines come from more, smaller, turned boxes. A renderer for real meshes would be a project of its own, and a dependency such as GeckoLib would need a reviewed platform change.
 - **Weapons are pixel art, with 3D in the hand** ([arms-restyle.md](features/arms-restyle.md)):
-  - icons are 32×32 or 48×48, on the 45-degree pixel diagonal, in flat tones lit from the top left, with a one-pixel outline: no dithering, noise or glints;
+  - icons are 16×16 in the owner's manner, from hand-drawn maps ([arms-icons-16.md](features/arms-icons-16.md)): on the diagonal, a one-pixel outline in each part's own dark tone, flat tones lit from the top left, chunky parts. A kind or variant without a map keeps its 32×32 or 48×48 drawn icon;
   - in the hand each weapon is a box model with thickness, built from the same design (`tools/arms_pixel.py`).
 - **Art stays original.** References guide the look; nothing is traced or copied from them.
