@@ -43,7 +43,7 @@ import net.minecraft.world.item.component.Weapon;
  * kusarigamas, each with a weapon art ({@link #ARTS}, worked by {@link WeaponArts}); and Arms VI (batch 55,
  * docs/features/arms-vi.md): katanas and brazier maces, longbows and arbalests ({@link #RANGED}) and heater and tower
  * shields ({@link #SHIELDS}); and Arms VII (batch 56, docs/features/arms-vii.md): named variants of the kinds, crafted
- * in four styles or dropped by bosses ({@link ArmVariants}); and Arms VIII (batch 57, docs/features/arms-viii.md):
+ * in four styles or dropped by bosses ({@link ArmVariants}); and Arms VIII (batch 59, docs/features/arms-viii.md):
  * javelins, franciscas, chakrams and harpoons, arms that are also thrown ({@link #THROWN}, {@link ThrownArmItem},
  * {@link ThrownArm}).
  *
@@ -108,7 +108,7 @@ public final class JugcraftArms {
 			// Arms VI (batch 55); its bows, crossbows and shields are RANGED and SHIELDS.
 			new Kind("katana", 3.0F, -2.5F, SwingAnimationType.WHACK, 7, 0.0F, 3.25F, 0.0F, 0.0F, 1, 0.0F, 0.0F, true, false),
 			new Kind("brazier_mace", 5.0F, -3.0F, SwingAnimationType.WHACK, 10, 0.0F, 3.0F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
-			// Arms VIII (batch 57): thrown arms; how each flies is THROWN.
+			// Arms VIII (batch 59): thrown arms; how each flies is THROWN.
 			new Kind("javelin", 2.5F, -2.6F, SwingAnimationType.STAB, 7, 0.0F, 3.25F, 0.125F, 0.0F, 1, 0.0F, 0.0F, false, false),
 			new Kind("francisca", 4.0F, -2.9F, SwingAnimationType.WHACK, 9, 0.0F, 3.0F, 0.0F, 2.0F, 1, 0.0F, 0.0F, false, false),
 			new Kind("chakram", 2.0F, -2.2F, SwingAnimationType.WHACK, 6, 0.0F, 2.75F, 0.0F, 0.0F, 1, 0.0F, 0.0F, false, false),
@@ -330,7 +330,7 @@ public final class JugcraftArms {
 			new Shield("tower_shield", "steel", 0.35F, 130.0F, 0.5F, 1350, 0.75F, 0.5F, 0.08F));
 
 	/**
-	 * A thrown arm in one metal (tools/arms.py: THROWN; Arms VIII, batch 57): held at least wind ticks before it is let
+	 * A thrown arm in one metal (tools/arms.py: THROWN; Arms VIII, batch 59): held at least wind ticks before it is let
 	 * go, it leaves at speed blocks a tick, falls gravity blocks a tick faster each tick (0: it flies flat), and strikes
 	 * for damage (vanilla's trident: 8), more for the arm's damage enchantments ({@link ThrownArm}).
 	 */

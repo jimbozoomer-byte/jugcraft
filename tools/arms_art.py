@@ -611,7 +611,7 @@ def brazier_mace(st, frame=0):
     return d
 
 
-# ---------------------------------------------------------------- Arms VIII (batch 57): thrown arms
+# ---------------------------------------------------------------- Arms VIII (batch 59): thrown arms
 
 
 def javelin(st):

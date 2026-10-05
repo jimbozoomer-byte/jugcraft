@@ -1,7 +1,8 @@
-# Arms VIII: thrown arms (batch 57)
+# Arms VIII: thrown arms (batch 59)
 
 Status: implemented on `claude/arms-viii`, awaiting review. Compiles and tests in CI only; **not yet played**.
 Proposal issue: the owner, 5 October 2026: "start on the next batch of weapons" (as for Arms V and VI). After the variants of Arms VII, this batch adds what the arms could not yet do: throw them.
+Batch number: 59. Main has 55 (Arms VI), Arms VII is 56, and other open work claims 57 and 58; if main takes 59 first, this moves up.
 
 Owner: jimbozoomer-byte
 Target milestone and tier: the bronze age (the `tin` feature) and the steel age (`machines`), as the other arms ([arms.md](arms.md) to [arms-vii.md](arms-vii.md)).

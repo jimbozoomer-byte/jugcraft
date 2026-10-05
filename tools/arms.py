@@ -5,7 +5,7 @@ the heavy arms (TWO_HANDED) and zweihanders, mauls, executioner's swords and bil
 battleblades, war forks, kamas and war picks, in an ornate style; and Arms V, batch 48: twinblades, nodachis,
 earthbreakers, katars, moonblades and kusarigamas, each with a weapon art (ARTS), a special move with its own animation
 and its own shape of damage; Arms VI, batch 55: katanas and brazier maces, longbows and arbalests (RANGED) and shields
-(SHIELDS); and Arms VIII, batch 57: thrown arms, javelins, franciscas, chakrams and harpoons (THROWN), each an arm in
+(SHIELDS); and Arms VIII, batch 59: thrown arms, javelins, franciscas, chakrams and harpoons (THROWN), each an arm in
 the hand that can also be thrown.
 
 After studying Epic Knights (all rights reserved) and Simply Swords (Timefall Development License) for how they draw,
@@ -179,7 +179,7 @@ KINDS = {
                      "tags": ["enchantable/melee_weapon", "enchantable/durability", "enchantable/fire_aspect"],
                      "pattern": ["#C#", " # ", " S "], "trait": "ignite",
                      "tooltip": "A mace whose head is a burning brazier: sets foes alight. Use it to light a campfire, a candle or the ground."},
-    # Arms VIII (batch 57): thrown arms. Each fights in the hand by its numbers here, and is thrown with the use key
+    # Arms VIII (batch 59): thrown arms. Each fights in the hand by its numbers here, and is thrown with the use key
     # (THROWN): hold to wind it back, let go to throw.
     "javelin": {"display": "Javelin", "damage": 2.5, "speed": -2.6, "swing": ("stab", 7), "reach": (0.0, 3.25),
                 "margin": 0.125, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.6,
@@ -446,7 +446,7 @@ RANGED_HELD = {"longbow": 1.3, "arbalest": 1.15}
 # A shield's sprites: its painted face, its bare back (and grip strap), and its metal trim (rim and boss).
 SHIELD_SPRITES = ["_face", "_back", "_trim"]
 
-# Arms VIII (batch 57): thrown arms (weapons/ThrownArmItem.java, ThrownArm.java). Hold use to wind one back and let go to
+# Arms VIII (batch 59): thrown arms (weapons/ThrownArmItem.java, ThrownArm.java). Hold use to wind one back and let go to
 # throw it, as vanilla's trident is thrown; a hold shorter than `wind` ticks does not throw. It leaves at `speed` blocks a
 # tick and falls `gravity` blocks a tick faster each tick (a snowball's 0.03; the chakram flies flat), and what it strikes
 # takes `damage` (vanilla's trident: 8), more for the arm's damage enchantments, as the trident's Impaling adds to its

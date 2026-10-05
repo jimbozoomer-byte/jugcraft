@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 
 /**
- * Draws a thrown arm in flight (Arms VIII, batch 57) as its own 3D model, the one it is held as (its item model outside
+ * Draws a thrown arm in flight (Arms VIII, batch 59) as its own 3D model, the one it is held as (its item model outside
  * the inventory), turned to its flight: the javelin and the harpoon point first along it, the francisca tumbles end over
  * end, and the chakram spins flat. The model lies on the diagonal with its point to the top right, as its icon does, so
  * it is first turned point up.

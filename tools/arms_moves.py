@@ -1107,7 +1107,7 @@ MOVES["brazier_mace"] = {
     ],
 }
 
-# ---------------------------------------------------------------- Arms VIII (batch 57): thrown arms
+# ---------------------------------------------------------------- Arms VIII (batch 59): thrown arms
 #
 # Each fights in the hand with moves like a kind's before it (the javelin and the harpoon as the estoc thrusts, the
 # francisca as the brazier mace swings, the chakram as the kama cuts). Holding use winds it back to throw (its "use"

@@ -568,7 +568,7 @@ Trophies last twice as long as steel. Glowing parts (runes, magma, venom, soul f
 
 **Code:** `weapons/ArmVariants` (the variants, boons and numbers), `ArmItem` (`boon`, `boonBonus`, `shock`); data from `tools/arms_variants.py`, art from `tools/arms_variants_art.py` ([feature record](features/arms-vii.md)).
 
-### Arms VIII (batch 57): thrown arms
+### Arms VIII (batch 59): thrown arms
 
 Four arms in bronze and steel that fight in the hand and are thrown with the use key: hold to wind back, let go to throw, as a trident is thrown. What a throw strikes takes its damage, more for the arm's damage enchantments; then the arm comes down where it struck, as itself, to be picked up (the chakram flies back). No throw hits harder than the trident's 8, and throwing one after another deals less a second than a netherite sword.
 

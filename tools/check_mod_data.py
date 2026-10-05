@@ -1172,7 +1172,7 @@ def check_arms():
             err(f"tools/arms.py: the {metal} {name} {info} is out of range")
         if info["angle"] > arms.VANILLA_SHIELD["angle"] and info["delay"] <= arms.VANILLA_SHIELD["delay"]:
             err(f"The {metal} {name} covers more than vanilla's shield without being slower to raise")
-    # Arms VIII (batch 57): the thrown arms as tools/arms.py has them, in registration order, and their balance: no
+    # Arms VIII (batch 59): the thrown arms as tools/arms.py has them, in registration order, and their balance: no
     # throw hits harder than the trident's, and throwing one after another deals less a second than a netherite sword.
     found_thrown = [(name, metal, {"wind": int(wind), "speed": float(speed), "gravity": float(gravity), "damage": float(damage)})
                     for name, metal, wind, speed, gravity, damage in re.findall(

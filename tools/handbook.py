@@ -514,7 +514,7 @@ def arms_pages():
             "while held.",
             "Hold use to block with either, as with a shield. An axe's blow still knocks them down for a while."],
          "craft": craft("tower_shield")},
-        # Arms VIII (batch 57).
+        # Arms VIII (batch 59).
         {"title": "Arms: Thrown Arms", "icon": f"{MOD}:steel_javelin", "text": [
             "A javelin, francisca, chakram or harpoon fights in the hand like any arm. Hold use to wind it back and let go "
             f"to throw it, as a trident is thrown; a steel javelin's throw hits for {arms.THROWN[('javelin', 'steel')]['damage']:g}, "

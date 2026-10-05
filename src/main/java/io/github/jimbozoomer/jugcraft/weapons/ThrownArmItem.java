@@ -20,7 +20,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 /**
- * A thrown arm (Arms VIII, batch 57, docs/features/arms-viii.md; {@link JugcraftArms#THROWN}): an arm of its kind in the
+ * A thrown arm (Arms VIII, batch 59, docs/features/arms-viii.md; {@link JugcraftArms#THROWN}): an arm of its kind in the
  * hand, thrown as vanilla's trident is. Hold use to wind it back (the trident's pose); let go after at least its wind to
  * throw it, as a {@link ThrownArm} carrying the arm itself, enchantments and wear and all. A throw wears it by
  * {@link JugcraftArms#THROW_WEAR} (never breaking it) and holds the next throw of the same arm back

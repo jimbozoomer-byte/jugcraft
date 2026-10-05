@@ -35,7 +35,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * A thrown arm in flight (Arms VIII, batch 57, docs/features/arms-viii.md): it carries the arm itself
+ * A thrown arm in flight (Arms VIII, batch 59, docs/features/arms-viii.md): it carries the arm itself
  * ({@link ThrownArmItem}), flies as its {@link JugcraftArms.Thrown} says, and strikes the first foe in its way for its
  * damage, more for the arm's damage enchantments (as Impaling adds to a trident's throw), through the trident's damage
  * (the death message says the victim was impaled). Then it comes down where it struck, as the arm again, to be picked up,

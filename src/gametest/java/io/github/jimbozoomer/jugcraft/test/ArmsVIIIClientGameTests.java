@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.phys.AABB;
 
 /**
- * Client game test for Arms VIII (batch 57): the four thrown arms hanging in flight before the camera (their 3D models,
+ * Client game test for Arms VIII (batch 59): the four thrown arms hanging in flight before the camera (their 3D models,
  * the javelin and harpoon point first, the francisca tumbling, the chakram spinning flat); the javelin wound back with the
  * real use key, from the front and in first person, and in flight as it leaves; and real throws: a steel javelin let go at
  * a still pig strikes it for its damage and comes down as itself, and a bronze chakram thrown past a pig comes back to the

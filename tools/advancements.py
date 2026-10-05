@@ -61,7 +61,7 @@ TREE = {
     "arms_vi": ("bronze", [f"{metal}_{kind}" for metal in ("bronze", "steel") for kind in (
         "katana", "brazier_mace", "longbow", "arbalest", "heater_shield", "tower_shield")],
         "War Kit", "Forge a katana, brazier mace, longbow, arbalest, heater shield or tower shield", "task"),
-    # Batch 57: Arms VIII, the thrown arms, from the bronze age on.
+    # Batch 59: Arms VIII, the thrown arms, from the bronze age on.
     "arms_viii": ("bronze", [f"{metal}_{kind}" for metal in ("bronze", "steel") for kind in (
         "javelin", "francisca", "chakram", "harpoon")],
         "Let Fly", "Forge a javelin, francisca, chakram or harpoon", "task"),

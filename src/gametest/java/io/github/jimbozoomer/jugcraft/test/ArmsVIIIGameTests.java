@@ -24,7 +24,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * In-game tests for Arms VIII (batch 57): every thrown arm is registered with its kind's thrown numbers; and a mock
+ * In-game tests for Arms VIII (batch 59): every thrown arm is registered with its kind's thrown numbers; and a mock
  * player's real throws (the item's own release, after a full wind) strike as the server works them. The javelin hits a
  * still pig for its damage and comes down as itself, worn by a throw; the chakram cuts two pigs in line on its way out
  * and again on its way back, and is caught into its thrower's inventory; the harpoon hauls its pig towards the thrower;
