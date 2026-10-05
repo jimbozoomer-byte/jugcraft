@@ -9,7 +9,8 @@ import math
 import random
 
 from crop_textures import Canvas, rgb, outline
-from halloween_textures import PLANK, shade, wood_grain
+from halloween_textures import PLANK, shade
+import block_style as bs
 
 VELVET = [rgb("2e1240"), rgb("3e1a56"), rgb("4e246c"), rgb("5e3080")]
 GOLD = [rgb("8a6416"), rgb("c09228"), rgb("e8c050"), rgb("fbe8a0")]
@@ -22,14 +23,10 @@ SOCKET = rgb("2a1e14")
 WEB = (226, 228, 234)
 
 
-def speckle(palette, seed, weights=(1, 2, 3, 2, 1)):
-    """A 16x16 of the palette's shades picked at random, weighted towards the middle ones."""
-    rng = random.Random(seed)
+def plain(palette, seed, weights=(1, 2, 3, 2, 1)):
+    """A 16x16 of the palette's shades in small clumps, as on vanilla blocks, weighted towards the middle ones."""
     c = Canvas()
-    picks = [i for i, w in enumerate(weights[:len(palette)]) for _ in range(w)]
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, palette[rng.choice(picks)])
+    bs.fill(c, 0, 0, 15, 15, palette, seed, list(weights[:len(palette)]), spread=0.7)
     return c
 
 
@@ -37,19 +34,19 @@ def speckle(palette, seed, weights=(1, 2, 3, 2, 1)):
 
 def stand_wood():
     c = Canvas()
-    wood_grain(c, PLANK, 7201)
+    bs.planks(PLANK, 7201, vertical=True)(c)
     return c.img
 
 
 def stand_cloth(hem=False):
     """Purple velvet with a soft diagonal sheen; the hem has a gold fringe along its lowest rows (v 4-5)."""
-    rng = random.Random(7202)
+    nap = bs.grain(16, 16, 7202)
     c = Canvas()
     for y in range(16):
         for x in range(16):
             tone = 2 if (x + y) % 6 < 3 else 1
-            if rng.random() < 0.15:
-                tone += rng.choice((-1, 1))
+            v = nap(x, y)
+            tone += 1 if v > 0.7 else -1 if v < 0.3 else 0  # the nap, in soft clumps
             c.px(x, y, VELVET[max(0, min(3, tone))])
     if hem:
         for x in range(16):
@@ -77,15 +74,13 @@ def stand_rosette():
 # ---------------------------------------------------------------- gravestones and other decorations
 
 def gravestone():
-    """Pale weathered limestone with darker pits and a few spots of lichen, so an engraving stands out."""
-    rng = random.Random(7203)
-    c = speckle(STONE, 7204)
-    for _ in range(10):
-        c.px(rng.randrange(16), rng.randrange(16), STONE[0])
-    for _ in range(6):
-        x, y = rng.randrange(16), rng.randrange(16)
+    """Pale weathered limestone, as vanilla stone, with a few spots of lichen, so an engraving stands out."""
+    c = Canvas()
+    bs.stone(STONE, 7204, cracks=2, spread=0.8)(c)
+    for x, y in ((2, 3), (12, 6), (5, 12)):
         c.px(x, y, LICHEN[0])
         c.px(x + 1, y, LICHEN[1])
+        c.px(x, y + 1, LICHEN[1])
     return c.img
 
 
@@ -111,12 +106,11 @@ def spun_cobweb():
 def ghost_sheet(face=False):
     """White cloth; its hem (v 14-15) is ragged. With a face: two black eyes and an open mouth in the head's
     window (u 5-11, v 3-8)."""
-    rng = random.Random(7205)
-    c = speckle(SHEET, 7206, weights=(1, 2, 3, 2))
+    c = plain(SHEET, 7206, weights=(1, 2, 3, 2))
     for x in range(16):
         if x % 3 == 0:
             c.img.putpixel((x, 15), (0, 0, 0, 0))
-            if rng.random() < 0.5:
+            if x % 6 == 0:
                 c.img.putpixel((x, 14), (0, 0, 0, 0))
     if face:
         for x, y in ((6, 4), (7, 4), (6, 5), (7, 5), (9, 4), (10, 4), (9, 5), (10, 5)):
@@ -135,7 +129,7 @@ def ghost_string():
 
 def skull_bone(face=False):
     """Old bone; with a face, the skull's eye sockets, nose and teeth in its north face's window (u 4-12, v 9-16)."""
-    c = speckle(BONE, 7207, weights=(1, 2, 3, 2))
+    c = plain(BONE, 7207, weights=(1, 2, 3, 2))
     if face:
         for x, y in ((5, 10), (6, 10), (5, 11), (6, 11), (9, 10), (10, 10), (9, 11), (10, 11)):
             c.px(x, y, SOCKET)
@@ -152,9 +146,7 @@ def candle_wax():
     """White candle wax with a few drips running down."""
     rng = random.Random(7208)
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, WAX[1] if rng.random() < 0.8 else WAX[0])
+    bs.fill(c, 0, 0, 15, 15, WAX[:2], 7208, [1, 4], spread=0.6)
     for x in range(0, 16, 3):
         length = rng.randrange(2, 6)
         for y in range(length):
@@ -210,14 +202,14 @@ def ghost_taffy_item():
 
 def fizz_rocks_item():
     """A little heap of sugary crystal pebbles in pink, blue and white, lighter on top."""
-    rng = random.Random(7209)
     c = Canvas()
     colors = [[rgb("b0407c"), rgb("f07ab8")], [rgb("3268b4"), rgb("7ab4f4")], [rgb("a8a8b8"), rgb("f4f4fa")]]
     for y in range(6, 14):
         half = (y - 5) * 0.8
         for x in range(int(8 - half), int(8 + half) + 1):
-            dark, light = colors[(x // 2 + y // 2 + rng.randrange(2)) % 3]
-            c.px(x, y, light if (x + y) % 2 else dark)
+            # Pebbles two pixels square, each one colour, lit at its upper left.
+            dark, light = colors[(x // 2 + y // 2 * 2) % 3]
+            c.px(x, y, light if x % 2 == 0 and y % 2 == 0 else dark)
     outline(c, rgb("3a2a40"))
     return c.img
 

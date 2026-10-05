@@ -9,6 +9,7 @@ import random
 
 from crop_textures import Canvas, rgb, outline, seeds_item, heart, KERNEL
 from kitchen_textures import bowl_item, round_fruit, ONION, CABBAGE
+import block_style as bs
 
 TURNIP_LEAF = [rgb("24481c"), rgb("2f5d22"), rgb("3d7429"), rgb("4f8c33"), rgb("6aa645"), rgb("8cc062")]
 TURNIP_PURPLE = [rgb("4a1f4e"), rgb("6c2f70"), rgb("8e4592"), rgb("b067b0"), rgb("cf92cc")]
@@ -111,16 +112,21 @@ def turnip_item():
 
 # ---------------------------------------------------------------- gourds and stems
 
-def gourd_side(palette, ribs, seed, warts=0, stripes=None, spot=None):
-    """A gourd skin: shading from light (top) to dark (bottom), ribs, warts and stripes."""
+def gourd_side(palette, ribs, seed, warts=0, stripes=None, spot=None, clean=False):
+    """A gourd skin: shading from light (top) to dark (bottom), ribs, warts and stripes. `clean` varies the skin in
+    small clumps (tools/block_style.py) instead of at random pixels."""
     rng = random.Random(seed)
+    grain = bs.grain(16, 16, seed) if clean else None
     c = Canvas()
     for y in range(16):
         for x in range(16):
             shade = 3 if y < 5 else 2 if y < 11 else 1
             if ribs and x % ribs == 0:
                 shade -= 1
-            if rng.random() < 0.08:
+            if clean:
+                v = grain(x, y)
+                shade = max(0, min(len(palette) - 1, shade + (1 if v > 0.7 else -1 if v < 0.3 else 0)))
+            elif rng.random() < 0.08:
                 shade = max(0, min(len(palette) - 1, shade + rng.choice((-1, 1))))
             c.px(x, y, palette[shade])
     if stripes:

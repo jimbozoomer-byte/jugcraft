@@ -7,12 +7,12 @@ socks on the lower legs, each with ribbed edges, and each motif on its own layer
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code, from a fixed seed; no Mojang texture is
 read, traced or recoloured.
 """
-import random
 
 from PIL import Image
 
 from crop_textures import Canvas, rgb, outline
-from halloween_textures import shade, wood_grain
+from halloween_textures import shade
+import block_style as bs
 from night_textures import box_faces
 
 HONEY = [rgb("8a5a2c"), rgb("a06c36"), rgb("b98042"), rgb("cc9450")]
@@ -29,20 +29,17 @@ LEAF = [rgb("a8261a"), rgb("d4461c"), rgb("e8742a")]
 
 def plank(palette, seed):
     c = Canvas()
-    wood_grain(c, palette, seed, vertical=False)
+    bs.planks(palette, seed)(c)
     return c.img
 
 
 def wool():
     """Fluffy carded wool, near-white for tinting."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    rng = random.Random(15015)
+    wool = bs.surface(KNIT, 15015, [1, 1, 2, 2], spread=0.7)
     for x in range(16):
         for y in range(16):
-            img.putpixel((x, y), KNIT[rng.choice((0, 1, 2, 2, 3, 3))] + (255,))
-    for _ in range(12):
-        x, y = rng.randrange(16), rng.randrange(16)
-        img.putpixel((x, y), KNIT[0] + (255,))
+            img.putpixel((x, y), wool(x, y) + (255,))
     return img
 
 

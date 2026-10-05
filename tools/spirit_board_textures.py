@@ -8,12 +8,12 @@ Called from crop_textures.crop_textures(). Every pixel is drawn here by code, fr
 read, traced or recoloured. The letters sit where SpiritBoard.place() says, which tools/check_mod_data.py checks.
 """
 import math
-import random
 
 from PIL import Image
 
 from crop_textures import Canvas, rgb, outline
 from halloween_textures import shade
+import block_style as bs
 
 BIRCH = [rgb("dccaa0"), rgb("e4d4ac"), rgb("eadcb6"), rgb("f0e4c2")]
 INK = rgb("2a1a10")
@@ -72,11 +72,10 @@ def glyph(img, char, x, y, color):
 def face():
     """The lettered face: birch grain, a double border, YES and a sun, NO and a moon, the letters, numbers and GOODBYE."""
     img = Image.new("RGBA", FACE)
-    rng = random.Random(17001)
+    grain = bs.Field(FACE[0], FACE[1], 17001, 8.0, 1.5)    # long streaks along the board, as in planks
     for y in range(FACE[1]):
-        grain = rng.choice((0, 0, 1, 1, 2))
         for x in range(FACE[0]):
-            img.putpixel((x, y), BIRCH[(grain + (1 if rng.random() < 0.15 else 0) + (x // 9 + y // 5) % 2) % 4] + (255,))
+            img.putpixel((x, y), bs.tone(grain(x, y), BIRCH, spread=0.8) + (255,))
     for x in range(FACE[0]):
         for y in (0, FACE[1] - 1):
             img.putpixel((x, y), EDGE[1] + (255,))
@@ -123,7 +122,7 @@ def heart(x, y):
 def planchette():
     """The planchette from above: walnut with a gold rim, and a round glass lens in the middle."""
     img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    rng = random.Random(17010)
+    grain = bs.Field(32, 32, 17010, 6.0, 1.5)
     for x in range(32):
         for y in range(32):
             if not heart(x, y):
@@ -138,17 +137,18 @@ def planchette():
             elif d <= 5.2:
                 color = GOLD
             else:
-                color = WALNUT[(y // 2 + rng.choice((0, 0, 1))) % 4]
+                color = bs.tone(grain(x, y), WALNUT, spread=0.8)
             img.putpixel((x, y), color + (255,))
     return img
 
 
 def noise(palette, seed, weights=None):
+    """A plain 16x16 of the palette in small clumps, in the manner of the vanilla blocks (tools/block_style.py)."""
     img = Image.new("RGBA", (16, 16))
-    rng = random.Random(seed)
+    surface = bs.surface(palette, seed, weights)
     for x in range(16):
         for y in range(16):
-            img.putpixel((x, y), rng.choices(palette, weights or [1] * len(palette))[0] + (255,))
+            img.putpixel((x, y), surface(x, y) + (255,))
     return img
 
 
