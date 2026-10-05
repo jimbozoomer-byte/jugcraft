@@ -1408,6 +1408,34 @@ public class JugcraftGameTests {
 				target -> target instanceof io.github.jimbozoomer.jugcraft.raiders.Raider);
 		helper.assertTrue(grunt.getHealth() == grunt.getMaxHealth(), "A raider's blast should spare the raider");
 		helper.assertTrue(pig.getHealth() < pig.getMaxHealth(), "A raider's blast should hurt the pig");
+	/**
+	 * Fire control extras: a creeping barrage fires its first salvo on the target, then each salvo after steps the point
+	 * {@value io.github.jimbozoomer.jugcraft.building.FireControl#CREEP_STEP} blocks further down range, starting again after
+	 * {@value io.github.jimbozoomer.jugcraft.building.FireControl#CREEP_STEPS} steps; setting a new target starts it afresh.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
+	public void creepingBarrageWalksDownRange(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CREEPING);
+		var table = helper.getBlockEntity(new BlockPos(8, 1, 2), io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		var mode = io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CREEPING;
+		table.setTarget(helper.absolutePos(new BlockPos(8, 0, 20)));
+		Vec3 start = table.aimPoint(battery.getUUID());
+		int step = io.github.jimbozoomer.jugcraft.building.FireControl.CREEP_STEP;
+		int steps = io.github.jimbozoomer.jugcraft.building.FireControl.CREEP_STEPS;
+		helper.assertTrue(table.fire(mode), "A creeping barrage with a target should fire");
+		helper.assertTrue(table.aimPoint(battery.getUUID()).distanceTo(start) < 1.0E-6, "The first salvo lands on the target itself");
+		helper.assertTrue(table.fire(mode), "and the second fires too");
+		Vec3 next = table.aimPoint(battery.getUUID());
+		helper.assertTrue(Math.abs(next.z - start.z - step) < 1.0E-6 && Math.abs(next.x - start.x) < 1.0E-6,
+				"The second salvo should land " + step + " blocks further down range, not at " + next.subtract(start));
+		for (int i = 2; i <= steps; i++) {
+			table.fire(mode);
+		}
+		helper.assertTrue(table.aimPoint(battery.getUUID()).distanceTo(start) < 1.0E-6, "After " + steps + " steps it starts again");
+		table.fire(mode);
+		table.setTarget(helper.absolutePos(new BlockPos(8, 0, 20)));
+		helper.assertTrue(table.creep() == 0 && table.aimPoint(battery.getUUID()).distanceTo(start) < 1.0E-6,
+				"Setting the target again starts the barrage afresh");
 		helper.succeed();
 	}
 
@@ -1639,6 +1667,26 @@ public class JugcraftGameTests {
 			}
 			helper.assertTrue(blimp.getY() > start + 8, "The blimp should climb toward its cruising height: at " + blimp.getY()
 					+ " from " + start + ", hunting " + blimp.getTarget() + ", moving " + blimp.getDeltaMovement() + ", removed " + blimp.isRemoved());
+	 * Fire control extras: a gunner aboard a linked gun, with no mark of their own, has the gun laid on the table's point
+	 * (whichever way they look); they still choose when it fires.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void crewedGunFollowsTheTable(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CONVERGE);
+		var table = helper.getBlockEntity(new BlockPos(8, 1, 2), io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		// Off to the side of the battery's start, so it has to turn to it.
+		BlockPos target = helper.absolutePos(new BlockPos(30, 0, 30));
+		table.setTarget(target);
+		ServerPlayer gunner = helper.makeMockServerPlayerInLevel();
+		gunner.setPos(battery.getX(), battery.getY(), battery.getZ());
+		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.clear(gunner);
+		helper.onEachTick(() -> gunner.setYRot(90.0F));
+		helper.succeedWhen(() -> {
+			Vec3 to = Vec3.atCenterOf(target).subtract(battery.position());
+			float wanted = (float) Math.toDegrees(Math.atan2(-to.x, to.z));
+			float off = Math.abs(net.minecraft.util.Mth.wrapDegrees(battery.aimYaw(0) - wanted));
+			helper.assertTrue(off < 4.0F, "The crewed gun should turn to the table's target (yaw " + wanted + "), not " + battery.aimYaw(0));
 		});
 	}
 

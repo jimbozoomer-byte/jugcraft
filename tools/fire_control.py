@@ -7,10 +7,13 @@
     into the table (a button, a lever, a ringing field telephone) fires one round from each.
   - Parallel: the same, but the guns lay on points SHEAF_SPACING blocks apart across the line of fire, so their shells
     land side by side instead of on one block.
+  - Creeping barrage: as converge, but after each salvo the target steps CREEP_STEP blocks further down the line of
+    fire, CREEP_STEPS times, then starts again from where it was set: a wall of fire walking ahead of an advance.
   - Sentry: each gun fires on its own at the nearest hostile mob inside the table's sector, no closer than
     SENTRY_MIN_RANGE blocks to the gun and never with a player within CHECK_FIRE blocks of the mob.
   Guns the table lays fire only shells from ready racks next to them (batch 55). A comparator reads how many linked
-  guns are ready (laid, reloaded and with a shell to hand).
+  guns are ready (laid, reloaded and with a shell to hand). A gunner aboard a linked gun with no mark of their own lays
+  it on the table's point too, and fires it when they choose.
 - Fire Control Wire: a reel of signal cable. Use it on a table to start a link, then on a gun within LINK_RANGE blocks
   of the table to link (or unlink) it. Sneak and use it on a table to cut every link.
 
@@ -31,14 +34,15 @@ BLOCKS = {"fire_control_table": ("Fire Control Table", 3.0, 6.0)}
 ITEMS = {"fire_control_wire": "Fire Control Wire"}
 TOOLTIPS = {
     "fire_control_table": "Lays every linked gun that has nobody at its controls. Use empty-handed to change mode (hold, "
-                          "converge, parallel, sentry), sneak to change the sector, with a Range Finder to set the target. "
+                          "converge, parallel, creeping barrage, sentry), sneak to change the sector, with a Range Finder to set the target. "
                           "A redstone pulse fires one round from each gun.",
     "fire_control_wire": "Use on a fire control table, then on a gun nearby, to link (or unlink) it. Sneak-use on a table "
                          "to cut every link.",
 }
 # The table's modes, in the order using it cycles through them, with each mode's lamp colour.
-MODES = ["hold", "converge", "parallel", "sentry"]
-MODE_NAMES = {"hold": "Hold", "converge": "Converge", "parallel": "Parallel", "sentry": "Sentry"}
+MODES = ["hold", "converge", "parallel", "creeping", "sentry"]
+MODE_NAMES = {"hold": "Hold", "converge": "Converge", "parallel": "Parallel", "creeping": "Creeping Barrage",
+              "sentry": "Sentry"}
 # The widths, in degrees, sneak-using the table cycles its sector through (centred on the way the table faces).
 SECTORS = [90, 180, 270, 360]
 # How many guns a table directs, and how far from it (in blocks) a linked gun may stand.
@@ -54,6 +58,10 @@ CHECK_FIRE = 8
 SENTRY_SCAN = 10
 # Ticks between the table's own updates (its comparator reading and lamp).
 TABLE_INTERVAL = 10
+# A creeping barrage: how far the target steps down range after each salvo (blocks), and how many steps before it starts
+# again from where it was set.
+CREEP_STEP = 5
+CREEP_STEPS = 6
 
 
 def blocks():
@@ -155,6 +163,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
         f"message.{MOD}.fire_control.unlinked": "Gun unlinked",
         f"message.{MOD}.fire_control.cleared": "Every link to this table cut",
         f"message.{MOD}.fire_control.fire": "Fire!",
+        f"message.{MOD}.fire_control.creep": "step %s of %s",
     })
     for name, result, pattern, key, count in RECIPES:
         write(data / "recipe" / f"{name}.json", shaped(condition, pattern, key, result, count))
@@ -177,6 +186,7 @@ LAMP_COLOURS = {
     "hold": [(70, 20, 18), (120, 36, 30), (150, 52, 44)],
     "converge": [(150, 96, 20), (226, 160, 48), (255, 214, 120)],
     "parallel": [(36, 110, 52), (76, 182, 88), (160, 236, 160)],
+    "creeping": [(30, 70, 140), (70, 130, 220), (170, 210, 255)],
     "sentry": [(140, 24, 20), (226, 56, 40), (255, 150, 120)],
 }
 

@@ -47,6 +47,8 @@ import org.jspecify.annotations.Nullable;
  * <li>Converge: every gun lays on the table's target, and a redstone pulse fires one round from each.</li>
  * <li>Parallel: as converge, but the guns lay on points {@value FireControl#SHEAF_SPACING} blocks apart across the line
  * of fire.</li>
+ * <li>Creeping barrage: as converge, but after each salvo the target steps {@value FireControl#CREEP_STEP} blocks further
+ * down the line of fire, {@value FireControl#CREEP_STEPS} times, then starts again from where it was set.</li>
  * <li>Sentry: each gun picks and fires on the nearest hostile mob inside the table's sector by itself.</li>
  * </ul>
  * The guns do the laying and firing themselves ({@code CrewedGun}); the table holds the orders: the mode, the target, the
@@ -62,7 +64,7 @@ public class FireControlTableBlock extends HorizontalDirectionalBlock implements
 
 	/** What the table has its guns do. */
 	public enum Mode implements StringRepresentable {
-		HOLD("hold"), CONVERGE("converge"), PARALLEL("parallel"), SENTRY("sentry");
+		HOLD("hold"), CONVERGE("converge"), PARALLEL("parallel"), CREEPING("creeping"), SENTRY("sentry");
 
 		private final String name;
 
@@ -72,7 +74,7 @@ public class FireControlTableBlock extends HorizontalDirectionalBlock implements
 
 		/** Whether the guns lay on the table's target and fire on a pulse. */
 		public boolean mission() {
-			return this == CONVERGE || this == PARALLEL;
+			return this == CONVERGE || this == PARALLEL || this == CREEPING;
 		}
 
 		Mode next() {
@@ -197,6 +199,10 @@ public class FireControlTableBlock extends HorizontalDirectionalBlock implements
 	private static void status(ServerLevel level, BlockPos pos, BlockState state, Entity table, Player player) {
 		Component target = table.target == null ? Component.translatable("message.jugcraft.fire_control.no_target")
 				: Component.translatable("message.jugcraft.fire_control.target", (int) Math.round(Math.sqrt(table.target.distSqr(pos))));
+		if (table.target != null && state.getValue(MODE) == Mode.CREEPING) {
+			target = target.copy().append(", ").append(Component.translatable("message.jugcraft.fire_control.creep",
+					table.creep + 1, FireControl.CREEP_STEPS));
+		}
 		player.sendOverlayMessage(Component.translatable("message.jugcraft.fire_control.status",
 				Component.translatable("message.jugcraft.fire_control.mode." + state.getValue(MODE).getSerializedName()),
 				table.readyCount(level.getGameTime()), table.links.size(), table.sectorWidth(), target));
@@ -226,6 +232,9 @@ public class FireControlTableBlock extends HorizontalDirectionalBlock implements
 		private int sector = FireControl.SECTORS.length - 1;
 		private long salvo;
 		private int lastReady;
+		/** A creeping barrage: how many steps down range it has walked, and whether it has fired since the target was set. */
+		private int creep;
+		private boolean firedHere;
 
 		public Entity(BlockPos pos, BlockState state) {
 			super(FireControl.TABLE_ENTITY, pos, state);
@@ -271,7 +280,14 @@ public class FireControlTableBlock extends HorizontalDirectionalBlock implements
 		/** Sets the target directly (as using a Range Finder on the table does). */
 		public void setTarget(@Nullable BlockPos target) {
 			this.target = target == null ? null : target.immutable();
+			creep = 0;
+			firedHere = false;
 			setChanged();
+		}
+
+		/** How many steps down range a creeping barrage has walked. */
+		public int creep() {
+			return creep;
 		}
 
 		public int sectorWidth() {
@@ -297,6 +313,11 @@ public class FireControlTableBlock extends HorizontalDirectionalBlock implements
 			if (!mode.mission() || target == null || links.isEmpty()) {
 				return false;
 			}
+			if (mode == Mode.CREEPING && firedHere) {
+				// Each salvo after the first walks the barrage a step further down range.
+				creep = (creep + 1) % FireControl.CREEP_STEPS;
+			}
+			firedHere = true;
 			salvo++;
 			setChanged();
 			return true;
@@ -324,14 +345,17 @@ public class FireControlTableBlock extends HorizontalDirectionalBlock implements
 				return null;
 			}
 			Vec3 point = Vec3.atCenterOf(target).add(0, 0.5, 0);
-			if (mode() != Mode.PARALLEL || links.size() < 2) {
-				return point;
-			}
 			Vec3 line = point.subtract(Vec3.atCenterOf(worldPosition));
 			line = new Vec3(line.x, 0, line.z);
 			if (line.lengthSqr() < 1.0E-4) {
 				Direction facing = getBlockState().getValue(FACING);
 				line = new Vec3(facing.getStepX(), 0, facing.getStepZ());
+			}
+			if (mode() == Mode.CREEPING) {
+				return point.add(line.normalize().scale(creep * FireControl.CREEP_STEP));
+			}
+			if (mode() != Mode.PARALLEL || links.size() < 2) {
+				return point;
 			}
 			Vec3 across = new Vec3(-line.z, 0, line.x).normalize();
 			return point.add(across.scale((index - (links.size() - 1) / 2.0) * FireControl.SHEAF_SPACING));
@@ -356,6 +380,8 @@ public class FireControlTableBlock extends HorizontalDirectionalBlock implements
 			target = input.read("target", BlockPos.CODEC).orElse(null);
 			sector = Mth.clamp(input.getIntOr("sector", FireControl.SECTORS.length - 1), 0, FireControl.SECTORS.length - 1);
 			salvo = input.getLongOr("salvo", 0L);
+			creep = Mth.clamp(input.getIntOr("creep", 0), 0, FireControl.CREEP_STEPS - 1);
+			firedHere = input.getBooleanOr("fired_here", false);
 		}
 
 		@Override
@@ -367,6 +393,8 @@ public class FireControlTableBlock extends HorizontalDirectionalBlock implements
 			}
 			output.putInt("sector", sector);
 			output.putLong("salvo", salvo);
+			output.putInt("creep", creep);
+			output.putBoolean("fired_here", firedHere);
 		}
 	}
 }

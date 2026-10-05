@@ -825,7 +825,7 @@ def check_fire_control():
         if f".strength({hardness}F, {blast}F)" not in java:
             err(f"FireControl.java does not give {block} the strength tools/fire_control.py does ({hardness}, {blast})")
     for const in ("MAX_GUNS", "LINK_RANGE", "SHEAF_SPACING", "SENTRY_RANGE", "SENTRY_MIN_RANGE", "CHECK_FIRE", "SENTRY_SCAN",
-                  "TABLE_INTERVAL"):
+                  "TABLE_INTERVAL", "CREEP_STEP", "CREEP_STEPS"):
         if f" {const} = {getattr(fire_control, const)};" not in java:
             err(f"FireControl.{const} differs from tools/fire_control.py ({getattr(fire_control, const)})")
     sectors = ", ".join(str(s) for s in fire_control.SECTORS)
