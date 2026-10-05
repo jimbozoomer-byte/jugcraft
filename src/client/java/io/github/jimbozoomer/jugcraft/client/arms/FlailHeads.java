@@ -61,7 +61,7 @@ public final class FlailHeads {
 	public static final String BALL = "flail_ball";
 	/** An armed entity's flail heads, on its render state for this frame. */
 	public static final RenderStateDataKey<Heads> HEADS = RenderStateDataKey.create(() -> "jugcraft:flail_heads");
-	/** The hand poses of arms_heads.json, in the order of {@link #context}. */
+	/** The hand poses of arms_heads.json, by context: 0 and 1 third person (right, left), 2 and 3 first person. */
 	private static final List<String> CONTEXTS = List.of("thirdperson_righthand", "thirdperson_lefthand", "firstperson_righthand",
 			"firstperson_lefthand");
 
@@ -101,6 +101,9 @@ public final class FlailHeads {
 	/** One flail item's head: lengths in sim units are worked out per hand pose (their display scale). */
 	static final class Spec {
 		int links;
+		/** How far each link is turned about its length from the last (radians): a chain's links interlock a quarter
+		 * turn apart, a spine's vertebrae all face one way. */
+		float twist;
 		/** Per hand pose: the eye and the grip in the item's base frame (where the handle is drawn from), blocks. */
 		final Vector3f[] anchor = new Vector3f[4];
 		final Vector3f[] grip = new Vector3f[4];
@@ -144,6 +147,7 @@ public final class FlailHeads {
 	private static Spec parse(JsonObject json) {
 		Spec spec = new Spec();
 		spec.links = json.get("links").getAsInt();
+		spec.twist = json.get("twist").getAsFloat() * DEG;
 		float[] anchor = floats(json.getAsJsonArray("anchor"));
 		float[] grip = floats(json.getAsJsonArray("grip"));
 		JsonObject display = json.getAsJsonObject("display");
@@ -614,8 +618,9 @@ public final class FlailHeads {
 	}
 
 	/**
-	 * Draws a chain's links and ball from the pose stack's frame: each link midway between its joints, along them, every
-	 * other one turned a quarter about its length so they interlock; the ball at the last point, its lug up the chain.
+	 * Draws a chain's links and ball from the pose stack's frame: each link midway between its joints, along them, each
+	 * turned by the head's twist from the last (a quarter, so a chain's links interlock); the ball at the last point, its
+	 * lug up the chain and its face (a skull's) the way the haft points.
 	 */
 	private static void draw(Chain chain, ItemStackRenderState link, ItemStackRenderState ball, float scale, PoseStack poseStack,
 			SubmitNodeCollector collector, int light) {
@@ -644,7 +649,7 @@ public final class FlailHeads {
 			// The part's +y (its length, the ball's lug) along u, by the shortest turn from straight up, then rolled.
 			float tilt = (float) Math.acos(Math.max(-1.0F, Math.min(1.0F, uy)));
 			float heading = (float) Math.atan2(ux, uz);
-			float twist = roll + (last ? 0.0F : (i % 2) * (float) (Math.PI / 2.0));
+			float twist = roll + (last ? 0.0F : i * chain.spec.twist);
 			float px = last ? chain.x[b] : (chain.x[a] + chain.x[b]) * 0.5F;
 			float py = last ? chain.x[b + 1] : (chain.x[a + 1] + chain.x[b + 1]) * 0.5F;
 			float pz = last ? chain.x[b + 2] : (chain.x[a + 2] + chain.x[b + 2]) * 0.5F;

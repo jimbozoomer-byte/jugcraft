@@ -29,16 +29,25 @@ MOD = "jugcraft"
 # The custom_model_data strings that pick a flail's head parts (FlailHeads.LINK and BALL in Java).
 LINK_CASE = "flail_link"
 BALL_CASE = "flail_ball"
-# The kinds whose head swings free, and its measures in design units: how many links and their pitch (centre to
-# centre), each link's outer width, the thickness of its bars, and the ball's core radius and spike lengths.
+# The kinds whose head swings free, and its measures in design units: its style ("spiked": oval chain links and a
+# spiked ball; "skull": vertebrae and a horned skull), how many links and their pitch (centre to centre), how far each
+# link is turned about its length from the last (degrees: a chain's interlock), each link's outer width and the
+# thickness of its bars, and the ball's core radius and spike lengths.
 HEADS = {
-    "flail": {"links": 4, "pitch": 2.4, "link_width": 1.9, "link_bar": 0.62, "ball": 3.6, "base": 1.2, "tip": 1.2,
-              "diagonal": 2.3},
+    "flail": {"style": "spiked", "links": 4, "pitch": 2.4, "twist": 90, "link_width": 1.9, "link_bar": 0.62, "ball": 3.6,
+              "base": 1.2, "tip": 1.2, "diagonal": 2.3},
+}
+# Arms VII variants (tools/arms_variants.py) whose head swings free, by name: the Bonecarved Flail's spine of vertebrae
+# and horned skull ("ball": the skull's half width; "horn": its horns' length).
+VARIANT_HEADS = {
+    "bonecarved_flail": {"style": "skull", "links": 5, "pitch": 1.55, "twist": 0, "vertebra": 1.5, "ball": 3.9, "horn": 2.6},
 }
 # The swatches: a 16-texel square in the bottom right corner of the 64x64 _model texture (the handle's upright image
 # only fills the top left), as rows of four 4-texel squares, highlight to dark: the chain, the ball's metal and its
-# fittings.
+# fittings. A skull's face and jaw are painted just above them (FACE, JAW).
 SWATCH = (48, 48)
+FACE = (48, 32, 12, 11)
+JAW = (48, 43, 10, 5)
 ROWS = ("chain", "blade", "fitting")
 TONES = (HIGHLIGHT, LIGHT, MID, DARK)
 # Which tone each face of a box takes, lit from above and the front left as the icons are (an index into TONES), for
@@ -47,9 +56,12 @@ FACE_TONE = {"up": 1, "north": 1, "west": 1, "south": 2, "east": 2, "down": 3}
 POINT_TONE = {"up": 0, "north": 0, "west": 0, "south": 1, "east": 1, "down": 2}
 
 
-def paint_swatches(texture, style):
-    """Paints the head's swatches into a flail's _model texture (its free corner; texture is the 64x64 image)."""
-    materials = {"chain": px.CHAIN, "blade": style.blade, "fitting": style.fitting}
+def paint_swatches(texture, materials, skull=False):
+    """Paints the head's swatches into a flail's _model texture (its free corner; texture is the 64x64 image):
+    materials gives the chain's, the ball's and the fittings' (keys "chain", "blade", "fitting"); a skull's face and
+    jaw too, if it has one."""
+    if skull:
+        paint_face(texture, materials["blade"])
     x0, y0 = SWATCH
     for row, name in enumerate(ROWS):
         tones = materials[name].tones()
@@ -142,24 +154,103 @@ def ball_elements(head, unit):
     return out
 
 
+def paint_face(texture, bone):
+    """A skull's face and its jaw, in the house's clean creature style (docs/ART_DIRECTION.md): flat bone lit along its
+    top and left and shaded along its bottom and right, square eye sockets in a soft dark plum as Minecraft's skulls
+    have, no nose holes; the jaw a neat row of square teeth with dark gaps."""
+    tones = bone.tones()
+    plum = (58, 34, 52)
+    x0, y0, w, h = FACE
+    for y in range(h):
+        for x in range(w):
+            tone = LIGHT
+            if y == 0 or x == 0:
+                tone = HIGHLIGHT
+            elif y == h - 1 or x == w - 1:
+                tone = MID
+            texture.putpixel((x0 + x, y0 + y), tuple(tones[tone]) + (255,))
+    for ex in (2, w - 5):
+        for y in range(4, 7):
+            for x in range(ex, ex + 3):
+                texture.putpixel((x0 + x, y0 + y), plum + (255,))
+        # A soft lower lid, a shade into the bone, keeps the socket from reading as a hole cut through.
+        for x in range(ex, ex + 3):
+            texture.putpixel((x0 + x, y0 + 7), tuple(tones[MID]) + (255,))
+    x0, y0, w, h = JAW
+    for y in range(h):
+        for x in range(w):
+            if y == 0 or y == h - 1:
+                colour = tones[MID] if y == 0 else tones[DARK]
+            else:
+                colour = plum if x % 2 == 1 or x in (0, w - 1) else tones[HIGHLIGHT if y == 1 else LIGHT]
+            texture.putpixel((x0 + x, y0 + y), tuple(colour) + (255,))
+    return texture
+
+
+def _face_uv(rect):
+    x0, y0, w, h = rect
+    return [x0 / 4.0, y0 / 4.0, (x0 + w) / 4.0, (y0 + h) / 4.0]
+
+
+def vertebra_elements(head, unit):
+    """One vertebra, its spine along y and centred: a round body, a cord through it to the next (exactly a pitch long,
+    so neighbours meet end to end), side processes and a spine at the back."""
+    w = head["vertebra"] * unit / 2.0
+    half_pitch = head["pitch"] * unit / 2.0
+    out = [_box((C - w, C - 0.32 * w * 2, C - w), (C + w, C + 0.32 * w * 2, C + w), "chain"),
+           _box((C - 0.3 * w, C - half_pitch + 0.01, C - 0.3 * w), (C + 0.3 * w, C + half_pitch - 0.01, C + 0.3 * w), "chain"),
+           _box((C - 1.7 * w, C - 0.3 * w, C - 0.62 * w), (C + 1.7 * w, C + 0.3 * w, C + 0.62 * w), "chain", True),
+           _box((C - 0.24 * w, C - 0.2 * w, C - 1.75 * w), (C + 0.24 * w, C + 0.2 * w, C - 0.9 * w), "chain", True)]
+    return out
+
+
+def skull_elements(head, unit):
+    """A horned skull, centred, its crown up (+y, towards the chain) and its face to the front (+z): a broad cranium
+    and a deeper, narrower one through it (the face painted on its front), a jaw with its teeth, two horns from the
+    temples in two tiers, and a horn lug on the crown."""
+    r = head["ball"] * unit
+    face, jaw = _face_uv(FACE), _face_uv(JAW)
+    a = _box((C - r, C - 0.3 * r, C - 0.86 * r), (C + r, C + 0.95 * r, C + 0.86 * r), "blade")
+    b = _box((C - 0.72 * r, C - 0.18 * r, C - r), (C + 0.72 * r, C + 1.1 * r, C + r), "blade")
+    b["faces"]["south"] = {"uv": face, "texture": "#tex"}
+    j = _box((C - 0.62 * r, C - 0.82 * r, C - 0.35 * r), (C + 0.62 * r, C - 0.24 * r, C + 0.97 * r), "blade")
+    j["faces"]["south"] = {"uv": jaw, "texture": "#tex"}
+    out = [a, b, j]
+    horn = head["horn"] * unit
+    for side, angle in ((1, 40.0), (-1, -40.0)):
+        for w, a0, a1, point in ((0.2 * r, 0.8 * r, r + horn * 0.55, False), (0.09 * r, r + horn * 0.5, r + horn, True)):
+            lo, hi = [C - w, C - w + 0.35 * r, C - w], [C + w, C + w + 0.35 * r, C + w]
+            lo[0], hi[0] = (C + a0, C + a1) if side > 0 else (C - a1, C - a0)
+            out.append(_box(lo, hi, "fitting", point, {"angle": 45.0 if side > 0 else -45.0, "axis": "z", "origin": [C, C + 0.35 * r, C]}))
+    top = 1.1 * r
+    out.append(_box((C - 0.28 * r, C + top - 0.1, C - 0.28 * r), (C + 0.28 * r, C + top + 0.32 * r, C + 0.28 * r), "fitting"))
+    out.append(_box((C - 0.12 * r, C + top + 0.32 * r - 0.1, C - 0.14 * r), (C + 0.12 * r, C + top + 0.6 * r, C + 0.14 * r), "fitting"))
+    return out
+
+
 def ball_reach(head, unit):
-    """How far the ball reaches from its centre (model pixels): the core and spikes, for the haft it swings clear of."""
+    """How far the ball reaches from its centre (model pixels): the core and spikes, or the skull and its horns, for the
+    haft it swings clear of."""
+    if head["style"] == "skull":
+        return (head["ball"] + head["horn"] * 0.8) * unit
     return (head["ball"] + head["diagonal"]) * unit
 
 
 def lug(head, unit):
     """From the ball's centre to where the last link hooks its lug (model pixels)."""
+    if head["style"] == "skull":
+        return (1.1 + 0.6) * head["ball"] * unit - 0.25 * head["vertebra"] * unit
     return (head["ball"] + 0.62 * head["ball"]) * unit - 0.5 * head["link_bar"] * unit
 
 
 # ---------------------------------------------------------------- the models and the table
 
 
-def models(kind, unit):
-    """{"link": model, "ball": model}: the shared head models of a kind, textured #tex, with no parent."""
-    head = HEADS[kind]
-    return {"link": {"textures": {"particle": "#tex"}, "elements": link_elements(head, unit)},
-            "ball": {"textures": {"particle": "#tex"}, "elements": ball_elements(head, unit)}}
+def models(head, unit):
+    """{"link": model, "ball": model}: a head's models (HEADS or VARIANT_HEADS), textured #tex, with no parent."""
+    skull = head["style"] == "skull"
+    return {"link": {"textures": {"particle": "#tex"}, "elements": (vertebra_elements if skull else link_elements)(head, unit)},
+            "ball": {"textures": {"particle": "#tex"}, "elements": (skull_elements if skull else ball_elements)(head, unit)}}
 
 
 def definition(item, fallback):
@@ -170,17 +261,16 @@ def definition(item, fallback):
             "fallback": fallback}
 
 
-def entry(kind, layout, display):
-    """An item's arms_heads.json entry: `layout` is (grip_model, unit, grip, eye): the hand's point in model pixels,
-    model pixels a design unit, and the grip and eye along the haft in design units; `display` the handle's hand
-    poses. The eye and the grip are given in model pixels, on the handle's 45-degree lean."""
-    head = HEADS[kind]
+def entry(head, layout, display):
+    """An item's arms_heads.json entry for a head (HEADS or VARIANT_HEADS): `layout` is (grip_model, unit, grip, eye):
+    the hand's point in model pixels, model pixels a design unit, and the grip and eye along the haft in design units;
+    `display` the handle's hand poses. The eye and the grip are given in model pixels, on the handle's 45-degree lean."""
     (gx, gy), unit, grip, eye = layout
     lean = math.sqrt(0.5)
     along = (eye - grip) * unit
     anchor = [round(gx + along * lean, 4), round(gy + along * lean, 4), 8.0]
     return {"anchor": anchor, "grip": [round(gx, 4), round(gy, 4), 8.0], "links": head["links"],
-            "pitch": round(head["pitch"] * unit, 4), "lug": round(lug(head, unit), 4),
+            "pitch": round(head["pitch"] * unit, 4), "twist": head["twist"], "lug": round(lug(head, unit), 4),
             "reach": round(ball_reach(head, unit), 4), "haft": round(0.85 * unit, 4),
             "display": {context: display[context] for context in sorted(display)}}
 

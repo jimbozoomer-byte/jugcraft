@@ -1366,15 +1366,17 @@ def check_flail_heads():
     if table != json.loads(json.dumps(arms.heads_table())):
         err("arms_heads.json is not what tools/arms.py writes (run tools/generate_material_data.py)")
         table = table or {}
-    for kind in arms_heads.HEADS:
+    shared = [f"arms_{kind}" for kind in arms_heads.HEADS] + list(arms_heads.VARIANT_HEADS)
+    for name in shared:
         for part in ("link", "ball"):
-            model = load(ASSETS / "models" / "item" / f"arms_{kind}_{part}.json") or {}
+            model = load(ASSETS / "models" / "item" / f"{name}_{part}.json") or {}
             if "parent" in model or "display" in model or not model.get("elements"):
-                err(f"models/item/arms_{kind}_{part}.json must be elements with no parent and no display transforms")
+                err(f"models/item/{name}_{part}.json must be elements with no parent and no display transforms")
                 continue
             bad = arms_heads.coplanar(model["elements"])
             if bad:
-                err(f"models/item/arms_{kind}_{part}.json: faces sharing a plane (they would flicker): {bad[:4]}")
+                err(f"models/item/{name}_{part}.json: faces sharing a plane (they would flicker): {bad[:4]}")
+    for kind in arms_heads.HEADS:
         # The handle alone: no box of the in-hand model reaches past the eye the chain hangs from.
         held = load(ASSETS / "models" / "item" / f"arms_{kind}.json") or {}
         grip_model, unit, grip, eye = arms_art.head_layout(kind, arms.KINDS[kind]["held"])
@@ -1402,6 +1404,22 @@ def check_flail_heads():
         tex = ASSETS / "textures" / "item"
         if (tex / f"{item}_model.png.mcmeta").is_file():
             err(f"textures/item/{item}_model.png must stay one frame (the head swings live, not in the texture)")
+    # The Arms VII variants whose head swings: handle-only in the hand, their parts picked by FlailHeads' strings.
+    import arms_variants_art
+    for name in arms_heads.VARIANT_HEADS:
+        if f"{MOD}:{name}" not in table:
+            err(f"arms_heads.json has no entry for {name}")
+        definition = (load(ASSETS / "items" / f"{name}.json") or {}).get("model", {})
+        cases = {case.get("when"): case["model"].get("model") for case in definition.get("cases", [])}
+        if (definition.get("property") != "minecraft:custom_model_data" or cases.get(arms_heads.LINK_CASE) != f"{MOD}:item/{name}_link"
+                or cases.get(arms_heads.BALL_CASE) != f"{MOD}:item/{name}_ball"):
+            err(f"items/{name}.json must pick {name}_link and {name}_ball by custom_model_data")
+        held = load(ASSETS / "models" / "item" / f"{name}_in_hand.json") or {}
+        grip_model, unit, grip, eye = arms_variants_art.head_layout(name, arms.KINDS[arms_variants.kind(name)]["held"])
+        if any(e["to"][1] - grip_model[1] > (eye - grip + 1.5) * unit + 1e-3 for e in held.get("elements", [])):
+            err(f"models/item/{name}_in_hand.json reaches past the eye: its head should be drawn live, not modelled")
+        if (ASSETS / "textures" / "item" / f"{name}_model.png.mcmeta").is_file():
+            err(f"textures/item/{name}_model.png must stay one frame")
     java = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "arms"
             / "FlailHeads.java").read_text(encoding="utf-8")
     for name, value in (("LINK", arms_heads.LINK_CASE), ("BALL", arms_heads.BALL_CASE)):

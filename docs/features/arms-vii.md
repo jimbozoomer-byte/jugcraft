@@ -24,7 +24,7 @@ The arm keeps its enchantments and wear.
 |---|---|---|---|---|
 | Gilded: polished steel, gold, royal-blue velvet, sapphires | Gilder's Pattern: 8 gold nuggets round paper | gold ingot | longsword, rapier, sabre, halberd | takes enchantments as gold does (22; steel's 12) |
 | Ironclad (dieselpunk): gun steel, olive drab, hazard stripes, rubber grips | Ironclad Pattern: yellow and black dye round a steel plate | steel plate | zweihander, maul, war pick, battle axe | lasts twice as long (1,800) |
-| Bonecarved: bone, horn, leather, a garnet eye | Bonecarver's Pattern: bone, flint, leather, paper | bone block | dagger, flail (a skull on a chain of vertebrae), glaive (a jawbone blade), labrys (shoulder-blade bits) | **Gravebane:** 20% harder against the undead |
+| Bonecarved: bone, horn, leather, a garnet eye | Bonecarver's Pattern: bone, flint, leather, paper | bone block | dagger, flail (a horned skull on a spine of vertebrae, swinging free in the hand since 5 October 2026: [arms-restyle.md](arms-restyle.md#the-flails-head-swings-5-october-2026)), glaive (a jawbone blade), labrys (shoulder-blade bits) | **Gravebane:** 20% harder against the undead |
 | Runebound: void-dark steel with runes that glow cyan | Runecarver's Pattern: amethyst, ectoplasm, paper | ectoplasm | nodachi, moonblade, staff (quarterstaff), war hammer | **Mark:** a struck foe glows for 4 s, seen through walls |
 
 **Boss trophies: 16 arms, two for each of eight bosses still to be made.** They have no recipe. Each boss's loot table is ready to drop one of its two (see [branches/BOSSES.md](../branches/BOSSES.md)). They last twice as long as steel, carry epic rarity, and have a boon:

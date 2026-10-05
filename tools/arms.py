@@ -628,20 +628,27 @@ def write_all(write, assets, data, lang, condition):
 
 def write_heads(write, models):
     """The shared head models of the kinds whose head swings free (tools/arms_heads.py), sized by each kind's layout."""
-    for kind in arms_heads.HEADS:
+    for kind, head in arms_heads.HEADS.items():
         _grip_model, unit, _grip, _eye = arms_art.head_layout(kind, KINDS[kind]["held"])
-        for part, model in arms_heads.models(kind, unit).items():
+        for part, model in arms_heads.models(head, unit).items():
             write(models / f"arms_{kind}_{part}.json", model)
 
 
 def heads_table():
-    """arms_heads.json as tools/arms.py writes it (for tools/check_mod_data.py)."""
+    """arms_heads.json as tools/arms.py writes it (for tools/check_mod_data.py): the arms' flails and the Arms VII
+    variants' (tools/arms_variants.py) whose head swings free."""
+    import arms_variants   # (here: it imports this module)
+    import arms_variants_art
     table = {}
     for item in items():
         metal, kind = split(item)
         if kind in arms_heads.HEADS:
-            table[f"{MOD}:{item}"] = arms_heads.entry(kind, arms_art.head_layout(kind, KINDS[kind]["held"]),
+            table[f"{MOD}:{item}"] = arms_heads.entry(arms_heads.HEADS[kind], arms_art.head_layout(kind, KINDS[kind]["held"]),
                                                       held_model(kind)["display"])
+    for name, head in arms_heads.VARIANT_HEADS.items():
+        held = KINDS[arms_variants.kind(name)]["held"]
+        table[f"{MOD}:{name}"] = arms_heads.entry(head, arms_variants_art.head_layout(name, held),
+                                                  arms_variants.held_model(name)["display"])
     return table
 
 

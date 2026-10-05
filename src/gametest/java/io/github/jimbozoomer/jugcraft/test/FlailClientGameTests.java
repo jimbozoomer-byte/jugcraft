@@ -18,7 +18,7 @@ import net.minecraft.world.entity.HumanoidArm;
 /**
  * Client game test for the flail's swinging head (docs/features/arms-restyle.md, "The flail's head swings"; 5 October
  * 2026, the owner: "flails should have an animated ball that actually flails around"): the heads load; held on guard,
- * the ball hangs below the handle's eye; through a strike (from the front, at 1, 3, 5 and 8 ticks) it stays on its chain
+ * the ball (and the Bonecarved Flail's skull) hangs below the handle's eye; through a strike (from the front, at 1, 3, 5 and 8 ticks) it stays on its chain
  * and swings; a quick turn swings it out; armor stands hold flails in either hand; the inventory's paper doll draws it
  * without flinging it; and on screen, in first person, the guard and the strike (CI job {@code client}).
  */
@@ -27,7 +27,7 @@ public class FlailClientGameTests implements FabricClientGameTest {
 	public void runTest(ClientGameTestContext context) {
 		int loaded = context.computeOnClient(client -> FlailHeads.loadedItems());
 		Jugcraft.LOGGER.info("[flail] {} flail heads loaded", loaded);
-		check(loaded >= 2, "Only " + loaded + " flail heads loaded (the bronze and steel flails' at least)");
+		check(loaded >= 3, "Only " + loaded + " flail heads loaded (the bronze, steel and Bonecarved Flails' at least)");
 		try (TestSingleplayerContext singleplayer = context.worldBuilder()
 				.adjustSettings(creator -> creator.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE)).create()) {
 			singleplayer.getConnection().waitForChunksRender();
@@ -44,18 +44,20 @@ public class FlailClientGameTests implements FabricClientGameTest {
 			server.runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 0", x + 0.5, y, z + 0.5));
 			context.waitTicks(20);
 
-			// Third person, from the front: the guard, the ball hanging below the eye.
+			// Third person, from the front: the guard, the ball (the Bonecarved Flail's skull) hanging below the eye.
 			context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
-			for (String metal : List.of("bronze", "steel")) {
-				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:" + metal + "_flail");
+			for (String flail : List.of("bronze_flail", "steel_flail", "bonecarved_flail")) {
+				server.runCommand("item replace entity @p weapon.mainhand with jugcraft:" + flail);
 				context.waitTicks(30);
-				context.takeScreenshot("jugcraft_flail_" + metal + "_guard");
+				context.takeScreenshot("jugcraft_flail_" + flail.replace("_flail", "") + "_guard");
 				float hang = context.computeOnClient(client -> FlailHeads.hang(client.player));
 				String chain = context.computeOnClient(client -> FlailHeads.describe(client.player));
-				Jugcraft.LOGGER.info("[flail] {} guard: hang {} ({})", metal, hang, chain);
-				check(hang > 0.7F, "On guard the " + metal + " flail's ball does not hang below its eye: " + chain);
-				check(context.computeOnClient(client -> FlailHeads.withinReach(client.player)), "The " + metal + " flail's chain parted: " + chain);
+				Jugcraft.LOGGER.info("[flail] {} guard: hang {} ({})", flail, hang, chain);
+				check(hang > 0.7F, "On guard the " + flail + "'s ball does not hang below its eye: " + chain);
+				check(context.computeOnClient(client -> FlailHeads.withinReach(client.player)), "The " + flail + "'s chain parted: " + chain);
 			}
+			server.runCommand("item replace entity @p weapon.mainhand with jugcraft:steel_flail");
+			context.waitTicks(30);
 
 			// A strike, caught 1, 3, 5 and 8 ticks after the attack key: the ball trails, whips round and swings on.
 			int last = 0;

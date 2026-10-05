@@ -702,7 +702,8 @@ def model(kind, metal, held, frame=0, mirrored=False):
     texture.paste(upright, (0, 0))
     if kind in HANDLES:
         import arms_heads   # (here: arms_heads draws on this module's layout)
-        arms_heads.paint_swatches(texture, STYLES[metal])
+        style = STYLES[metal]
+        arms_heads.paint_swatches(texture, {"chain": CHAIN, "blade": style.blade, "fitting": style.fitting})
     return texture, elements
 
 
