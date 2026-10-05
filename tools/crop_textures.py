@@ -938,6 +938,14 @@ def crop_textures():
     out.update(churchyard_textures())
     from decor16_data import textures as haunted_house_textures  # and the haunted house's props
     out.update(haunted_house_textures())
+    from decor17_data import textures as witchs_workshop_textures  # and the witch's workshop
+    out.update(witchs_workshop_textures())
+    from decor18_data import textures as crypt_textures  # and the crypt and the ossuary
+    out.update(crypt_textures())
+    from decor19_data import textures as laboratory_textures  # and the laboratory, the larder and the dining room
+    out.update(laboratory_textures())
+    from decor20_data import textures as pumpkin_night_textures  # and Pumpkin Night
+    out.update(pumpkin_night_textures())
     from wood_style import wood_textures  # and, last, every tree's woods and leaves, after the owner's paintings
     out.update(wood_textures())
     return out

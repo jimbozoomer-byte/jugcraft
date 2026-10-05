@@ -18,6 +18,41 @@ No numbered release yet. Everything below is on `main`.
 - **Every tree's leaves**, in every season's look, are redrawn in vanilla's fine speckle; needles, blossom, fronds and bare twigs each in their own way.
 - Original textures drawn by code (`tools/wood_style.py`); nothing of vanilla's is recoloured. Record: [wood-repaint.md](docs/features/wood-repaint.md).
 
+### Cute, clean creature decorations: batches 15 to 20 repainted (#191)
+- **Smooth fire**: the Ember Bed's hearth now burns in smooth bands of colour on a glow of coals, and the Horned Skull Cauldron's ram skull has big round sockets and no nostrils.
+- **Every creature prop of batches 15 to 20 repainted** in a clean, cute style after the owner's reference pictures: flat colour in two or three tones with lit and shaded edges and no speckle. The **Monster Head** is a bright green Frankenstein head with a blunt black fringe and sleepy closed eyes that open glowing when it wakes; the **Flying Eyeball**, plushes, moths and jar oddities are clean and glossy; skulls (the **Colossal Skull** too) have big round sockets with a glint and no nose holes; bones are smooth cream; the gargoyles have round eyes and little fangs; the **Crawling Hand** is the monster's green; the cocoon sleeps, the clock's ghost says "oo" and the **Harvest Moon** has a sleeping smile.
+- Shared painters in `tools/cute_art.py`; the rules are in [ART_DIRECTION.md](docs/ART_DIRECTION.md#creatures-and-faces-cute-and-clean). Block IDs and states are unchanged, so placed props keep working and just look new.
+
+### Pumpkin Night, Halloween decorations batch 20 (#190)
+- **Red Kuri** and **Kabocha** pumpkins join the heirlooms: seeds from grass, wild patches and the Halloween Peddler; their own hand-carved pumpkins, glowing ember orange and greenish gold; **Red Kuri Soup** and **Kabocha Tempura** in the Cooking Pot; pumpkin pie, heads and the trebuchet as the other heirlooms.
+- **Farm Stand**: an owner's two-block stall of six crates under a striped awning. The owner stocks and prices them in Jugs; anyone in reach buys one item at a time and the Jugs go straight to the owner, every sale checked on the server. Only its owner takes it down.
+- **Pumpkin Vine Garland** and **Autumn Leaf Garland**, strung between String Light Hooks with warm bulbs that glow when a hook is lit.
+- **Harvest Effigy**: a three-block wicker man in a dyeable cloak who wears a carved pumpkin. Lit at night, he burns for 30 seconds; players near get **Harvest Cheer** (Regeneration and Luck) once a night; rain puts him out. Burnt through, he leaves **Effigy Ashes** that give **Hearth Ash**, a weak fertilizer.
+- **Singing Pumpkins** in four voices (bass, tenor, alto, soprano), tuned like note blocks over two octaves and sung by redstone, their mouths opening as they sing; the voices are Jugcraft's own, synthesised. Record: [pumpkin-night.md](docs/features/pumpkin-night.md).
+
+### The Laboratory, the Larder and the Dining Room, Halloween decorations batch 19 (#188)
+- **Lightning Harness** (fires on a strong signal, a Tesla Coil's arc or lightning, cracking arcs down to a Lab Table and waking its patient), **Brain-Vat Console** (an analogue memory cell: it remembers the strongest signal at its back until a side clears it) and **Crawling Hand** (drums its fingers; powered, it scuttles).
+- **Silk Cocoon** (a 9-slot larder hung from a ceiling that wriggles when opened), **Egg Sac Cluster** (pulsing sacs on any faces, like glow lichen; spiderlings skitter out at night), **Web Drape** (a 2 × 2 web curtain that slows you) and **Silk Spool Stack** (three spools, each dyed to any colour).
+- **Haunted Dining Chair** (sits you; at night slides out toward a player near), **Floating Table Setting** (laid for dinner, tea or a feast, bobbing over the table, its candle lit with flint) and **Grandfather Clock** (hands on the time of day, the moon's phase in its arch, a pulse and the hour struck each hour, a comparator reading the hour, and a face at the glass at midnight).
+- **Witchlight Lamp-Post**, **Path Stake** and **Hanging Witchlight** (wake as a player comes near, linger, then sleep; redstone keeps them awake; five dye colours).
+- **Yard Silhouette** (six black cut-out figures whose eyes glow at night, in sixteen turns) and the **Harvest Moon Lamp** (2 × 2; its face shows tonight's moon, which a comparator reads). Record: [laboratory-larder-dining.md](docs/features/laboratory-larder-dining.md).
+
+### The Crypt and the Ossuary, Halloween decorations batch 18 (#186)
+- **Iron-Bound Coffin** (54 slots; locks to a **Skeleton Key** cut from a **Key Blank**, and then opens only for someone holding that key and refuses hoppers and pipes; keys copy onto blanks at a crafting table) and the **Coffin Wardrobe** (a skeleton mannequin behind glass that swaps the armour you wear for the armour it holds; cursed pieces stay on).
+- **Stone, Deepslate and Blackstone Sarcophagi** (27 slots under a lid that slides aside over a skeleton; the Stonemason's Chisel carves the lid as a knight, a lady or a skull; at night, shut, they sometimes knock).
+- **Bone Throne** (a seat whose crest's eyes glow while sat in at night), **Ribcage Bookcase** (a chiseled bookshelf that powers enchanting tables), **Skull Footstool** and **Vertebra Floor Lamp**.
+- **The Buried Colossus**: a 2 × 2 × 2 **Colossal Skull** whose jaw drops on redstone, **Colossal Ribs** that meet as an arch, **Colossal Vertebrae** that line up as a spine, and a **Colossal Femur**.
+- **Gargoyle Sentinel** (watches for monsters within 16 blocks and gives a signal by their distance), **Gargoyle Rainspout** (pours rain into a cauldron below) and **Chimera Finial** (a rain and storm sensor that spreads its wings in a storm). Record: [crypt-and-ossuary.md](docs/features/crypt-and-ossuary.md).
+
+### The Witch's Workshop, Halloween decorations batch 17 (#183)
+- The [Witching Season plan](docs/features/witching-season.md): twenty Halloween and fall prop sets from the owner's reference pictures, in four batches, then two bosses (a scythe-bearing reaper and a spider seamstress) in their own pocket-dimension lairs. What the uploaded pocket-dimension and animation mods and the Soulslike Weaponry boss page taught, and how Jugcraft does the same without new dependencies.
+- **Horned Skull Cauldron** (holds water or three bottles of one potion with nothing gained or lost; bubbles and fumes over heat; the **Brew Ladle** wafts a lasting potion onto up to four players near at a quarter duration; ingredients float in it) and the **Ember Bed** heat source.
+- **Wrought-iron candelabra**: the Floor Candelabrum, Table Candelabrum, Wall Girandole and Branching Chandelier, in six waxes and four flames, lit by flint and steel, burning arrows or redstone, with wax drips that grow while lit.
+- **Enchanted Broom** (anointed with Flying Ointment, it sweeps dropped items into a **Dustpan**) and the **Broom Rack**.
+- **Curiosity Cabinet** (nine places behind glazed doors), **Bell Jar** and **Moth Display Case** (the moths stir at night).
+- **Oddity jars**: eyeballs that watch, a beating heart that is a redstone clock, a bat that wakes, a two-headed snake and a drumming hand.
+- Sculpted props may use 128 × 128 textures (`docs/ART_DIRECTION.md`; the audit allows it). Record: [witchs-workshop.md](docs/features/witchs-workshop.md).
+
 ### Arms VII, batch 56 (#184)
 - **32 named variant arms,** each fighting as its kind does:
   - **Crafted styles** at a smithing table, from a steel arm, the style's pattern and a material (enchantments and wear kept): **gilded** (gold; enchants as gold), **ironclad** (dieselpunk; lasts twice as long), **bonecarved** (bone; harder against the undead) and **runebound** (glowing runes; marks foes so they glow).

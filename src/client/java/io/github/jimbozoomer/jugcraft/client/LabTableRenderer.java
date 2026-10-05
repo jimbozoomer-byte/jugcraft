@@ -22,8 +22,10 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Draws the Lab Table's patient on the foot block: legs under the sheet, and the torso and head, which sit up about the
- * hips while the table is powered ({@link LabTableBlock#lean}) and twitch at night. Coordinates are in pixels of the
- * foot block, for a table whose head lies to the north.
+ * hips while the table is powered ({@link LabTableBlock#lean}) and twitch at night. Woken by a Lightning Harness
+ * ({@link LabTableBlock#awake}), it sits bolt upright with its arms out and its eyes flashing (decor19_quads.json:
+ * {@code lab_table_arms}, {@code lab_table_eyes}). Coordinates are in pixels of the foot block, for a table whose head
+ * lies to the north.
  */
 public class LabTableRenderer implements BlockEntityRenderer<DecorationBlockEntity, LabTableRenderer.State> {
 	/** The hips, about which the patient sits up. */
@@ -36,6 +38,8 @@ public class LabTableRenderer implements BlockEntityRenderer<DecorationBlockEnti
 		Direction facing = Direction.NORTH;
 		float lean;
 		float twitch;
+		boolean woken;
+		boolean flash;
 	}
 
 	public LabTableRenderer(BlockEntityRendererProvider.Context context) {
@@ -56,7 +60,9 @@ public class LabTableRenderer implements BlockEntityRenderer<DecorationBlockEnti
 			return;
 		}
 		state.facing = block.getValue(LabTableBlock.FACING);
-		boolean powered = block.getValue(LabTableBlock.POWERED);
+		state.woken = LabTableBlock.awake(table.marked(), level.getGameTime());
+		state.flash = state.woken && Math.floorMod(level.getGameTime(), 6) < 3;
+		boolean powered = block.getValue(LabTableBlock.POWERED) || state.woken;
 		double now = level.getGameTime() + (double) partialTick;
 		double[] patient = patients.computeIfAbsent(table, t -> new double[] {powered ? LabTableBlock.SIT_DEGREES : 0.0, now});
 		float elapsed = (float) Math.max(0.0, Math.min(20.0, now - patient[1]));
@@ -83,6 +89,14 @@ public class LabTableRenderer implements BlockEntityRenderer<DecorationBlockEnti
 			pose.rotateDegrees(Axis.XP, state.lean + state.twitch);
 			pose.translate(0.0F, -HIP_Y / 16, -HIP_Z / 16);
 			torso.submit(pose, collector, state.lightCoords);
+			QuadModel arms = state.woken ? DecorQuads.get("lab_table_arms") : null;
+			if (arms != null) {
+				arms.submit(pose, collector, state.lightCoords);
+			}
+			QuadModel eyes = state.flash ? DecorQuads.get("lab_table_eyes") : null;
+			if (eyes != null) {
+				eyes.submit(pose, collector, 0xF000F0);
+			}
 		}
 		pose.popPose();
 	}
