@@ -41,7 +41,7 @@ Primary specialty and supported player role: building. These props dress a haunt
 - The recipes follow the agriculture feature switch. The pillar candles are in the block tag `minecraft:candles` (so vanilla's lighting finds them), not the item tag, which vanilla's candle cakes use.
 
 ## Dependencies and assets
-No new dependencies. The models are built on `tools/flora_art.py` by `tools/decor16_data.py`, which paints their 64 × 64 textures by code and writes the eyeball's moving parts to `assets/jugcraft/decor16_quads.json` for its renderer. The pillar candles are vanilla's `CandleBlock` with these models and their own flames' places; the spider web is vanilla's `MultifaceBlock`. All original. The look follows the owner's reference pictures, and nothing is traced from them.
+No new dependencies. The models are built on `tools/flora_art.py` by `tools/decor16_data.py`, which paints their 64 × 64 textures by code and writes the eyeball's moving parts to `assets/jugcraft/decor16_quads.json` for its renderer. The pillar candles are vanilla's `CandleBlock` with these models and their own flames' places; the spider web is vanilla's `MultifaceBlock`. All original. The look follows the owner's reference pictures, and nothing is traced from them. Since 5 October 2026 the creature props are painted with the clean, cute painters in `tools/cute_art.py` ([ART_DIRECTION.md](../ART_DIRECTION.md#creatures-and-faces-cute-and-clean)).
 
 ## Verification
 Automated checks run on CI's Build workflow:

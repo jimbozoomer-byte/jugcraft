@@ -18,6 +18,7 @@
     "jugcraft:bronze_twinblade",
     "jugcraft:bronze_nodachi",
     "jugcraft:bronze_moonblade",
+    "jugcraft:bronze_katana",
     "jugcraft:steel_longsword",
     "jugcraft:steel_greatsword",
     "jugcraft:steel_rapier",
@@ -29,6 +30,21 @@
     "jugcraft:steel_battleblade",
     "jugcraft:steel_twinblade",
     "jugcraft:steel_nodachi",
-    "jugcraft:steel_moonblade"
+    "jugcraft:steel_moonblade",
+    "jugcraft:steel_katana",
+    "jugcraft:gilded_longsword",
+    "jugcraft:gilded_rapier",
+    "jugcraft:gilded_sabre",
+    "jugcraft:ironclad_zweihander",
+    "jugcraft:bonecarved_glaive",
+    "jugcraft:runebound_nodachi",
+    "jugcraft:runebound_moonblade",
+    "jugcraft:cinderbrand",
+    "jugcraft:hagthorn",
+    "jugcraft:soulreaver",
+    "jugcraft:gravewarden",
+    "jugcraft:moonfang",
+    "jugcraft:howler",
+    "jugcraft:stormcaller"
   ]
 }

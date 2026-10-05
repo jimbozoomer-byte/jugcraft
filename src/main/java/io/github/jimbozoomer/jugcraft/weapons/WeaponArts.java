@@ -14,7 +14,9 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.resources.Identifier;
@@ -55,7 +57,9 @@ import net.minecraft.world.phys.Vec3;
  * <li>{@link JugcraftArms.Move#CRESCENT}: a wave that runs ahead, through every foe in its way (each weakening it), until
  * a block stops it;</li>
  * <li>{@link JugcraftArms.Move#CHAIN_LASH}: a chain at the first foe in line, which is struck and hauled in, then reaped
- * as it arrives.</li>
+ * as it arrives;</li>
+ * <li>{@link JugcraftArms.Move#SEVEN_CUTS} (Arms VI): seven quick cuts across every foe ahead, each drawn in the air as an
+ * arc of the katana's colour.</li>
  * </ul>
  * Every hit is the arm's attack damage times the move's share, struck through vanilla's thrust attack (Player.stabAttack:
  * enchantments, knockback, wear, the item's hit hooks) at a full charge, after letting go of the foe's damage cooldown,
@@ -67,11 +71,15 @@ import net.minecraft.world.phys.Vec3;
  * <p>While busy with an art the wielder cannot swing or hit with the arm (vanilla's hit is refused, as for two-handed
  * arms), and is slowed by the art's share. Switching away from the arm, dying or leaving ends it. An art that moves its
  * wielder (iaido, the leap) uses vanilla's impulse rule for falls: only a drop below where it began counts. None works
- * from the saddle but the flurry, the crescent and the chain. The work each tick is over the arts in progress only.
+ * from the saddle but the flurry, the crescent, the chain and the seven cuts. The work each tick is over the arts in
+ * progress only.
  */
 public final class WeaponArts {
 	/** The movement modifier an art puts on its wielder while they are busy with it. */
 	public static final Identifier SLOW = Jugcraft.id("weapon_art");
+	/** The colours of the seven cuts' arcs: crimson for a bronze katana, pale gold for a steel one. */
+	private static final int CUT_BRONZE = 0xC41E2A;
+	private static final int CUT_STEEL = 0xF2D27A;
 	/** An attack-strength ticker past any arm's delay: every hit of an art is at a full charge. */
 	private static final int FULL_CHARGE = 1000;
 	private static final Map<UUID, Active> ACTIVE = new HashMap<>();
@@ -213,6 +221,7 @@ public final class WeaponArts {
 			case FLURRY -> Math.max(ticks, JugcraftArms.FLURRY_FIRST + JugcraftArms.FLURRY_JABS * JugcraftArms.FLURRY_EVERY);
 			case CRESCENT -> Math.max(ticks, JugcraftArms.CRESCENT_RELEASE + JugcraftArms.CRESCENT_TICKS);
 			case CHAIN_LASH -> Math.max(ticks, JugcraftArms.LASH_REAP);
+			case SEVEN_CUTS -> Math.max(ticks, JugcraftArms.CUTS_FIRST + (JugcraftArms.CUTS_COUNT - 1) * JugcraftArms.CUTS_EVERY);
 		};
 	}
 
@@ -246,6 +255,12 @@ public final class WeaponArts {
 					lash(active);
 				} else if (t == JugcraftArms.LASH_REAP) {
 					reap(active);
+				}
+			}
+			case SEVEN_CUTS -> {
+				long n = t - JugcraftArms.CUTS_FIRST;
+				if (n >= 0 && n % JugcraftArms.CUTS_EVERY == 0 && n / JugcraftArms.CUTS_EVERY < JugcraftArms.CUTS_COUNT) {
+					cut(active, (int) (n / JugcraftArms.CUTS_EVERY));
 				}
 			}
 		}
@@ -485,6 +500,39 @@ public final class WeaponArts {
 			level.sendParticles(ParticleTypes.SWEEP_ATTACK, foe.getX(), foe.getY(0.5), foe.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 			sound(player, SoundEvents.PLAYER_ATTACK_SWEEP, 1.2F);
 		}
+	}
+
+	/**
+	 * One of the seven cuts: every foe within the katana's reach and CUTS_ARC ahead, held where it is but by the last cut,
+	 * and an arc of the metal's colour drawn across the air where the blade went (alternately falling left and right, the
+	 * last level and wide).
+	 */
+	private static void cut(Active active, int index) {
+		ServerPlayer player = active.player;
+		ServerLevel level = (ServerLevel) player.level();
+		boolean last = index == JugcraftArms.CUTS_COUNT - 1;
+		for (LivingEntity foe : TwoHanded.foes(player, active.stack, new JugcraftArms.Heavy(0, JugcraftArms.CUTS_ARC,
+				JugcraftArms.CUTS_TARGETS, 1))) {
+			Vec3 motion = foe.getDeltaMovement();
+			if (hit(player, foe, JugcraftArms.CUTS_SHARE, last, false) && !last) {
+				push(foe, motion);
+			}
+		}
+		boolean steel = BuiltInRegistries.ITEM.getKey(active.stack.getItem()).getPath().startsWith("steel_");
+		DustParticleOptions dust = new DustParticleOptions(steel ? CUT_STEEL : CUT_BRONZE, last ? 1.6F : 1.2F);
+		Vec3 ahead = active.heading;
+		Vec3 right = new Vec3(-ahead.z, 0.0, ahead.x);
+		double tilt = last ? 0.0 : (index % 2 == 0 ? 0.7 : -0.7);
+		double radius = last ? 2.6 : 2.0;
+		double reach = last ? 1.2 : 0.95;
+		Vec3 centre = player.position().add(0.0, player.getBbHeight() * 0.65, 0.0);
+		for (int i = 0; i <= 12; i++) {
+			double angle = (i / 12.0 - 0.5) * Math.PI * reach;
+			Vec3 point = centre.add(ahead.scale(radius * Math.cos(angle) * 0.8)).add(right.scale(radius * Math.sin(angle)))
+					.add(0.0, tilt * Math.sin(angle), 0.0);
+			level.sendParticles(dust, point.x, point.y, point.z, 1, 0.0, 0.0, 0.0, 0.0);
+		}
+		sound(player, SoundEvents.PLAYER_ATTACK_SWEEP, 1.25F + index * 0.06F);
 	}
 
 	// ---------------------------------------------------------------- shared
