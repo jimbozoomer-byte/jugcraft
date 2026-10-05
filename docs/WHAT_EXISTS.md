@@ -551,7 +551,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 
 - There are two machine styles. **Steampunk** is the default (`DEFAULT_STYLE`). **Classic** ships as the built-in pack `jugcraft:alternate_machines`.
 - Steampunk models are built from Python helpers: `box`, `cyl`, `gear`, `wheel`, `dial`, `pipe`.
-- **Rules:** no coplanar overlapping faces; near the middle of each side, the body comes within about 1 px of the edge, so cables meet it; glowing textures are listed in `GLOW` (and have `_on` variants).
+- **Rules:** closed models; no coplanar (or under 0.09 px apart) differently drawn faces, which `model_writer.separate_coplanar` pulls 0.1 px apart (rotated elements included, multi-blocks before they are sliced); UVs inside the sprite (`fit_uvs`); near the middle of each side, the body comes within about 1 px of the edge, so cables meet it; glowing textures are listed in `GLOW` (and have `_on` variants). The full list is in [ART_DIRECTION.md](ART_DIRECTION.md#rules-for-everything); `tools/art_check.py` checks it.
 - Every new machine needs a model in `steampunk_models.MODELS` **and** classic front textures (`<id>_front`, plus `_front_on` if lit). The checker verifies that both styles cover every block state.
 
 ## How to add things
@@ -605,6 +605,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 - Every tall-crop age and section, and every crop age, has a model. Agriculture recipes (crafting, cooking and Cooking Pot) never form a loop, no two Cooking Pot recipes share their ingredients, a seed is a trellis seed exactly when it plants a climbing crop, and a bog seed exactly when it plants the cranberry bush. Every stem age, cranberry age and leaf fruit state has a model.
 - Every ID has a model, a texture, a name, and a loot table (for blocks). Both machine styles cover every block state. Model elements stay within −16..32. Loot tables are written in 26.3's form (`condition`, `modifier`, `type`); the checker rejects the pre-26 `conditions`/`functions`/`function` keys, which 26.3 ignores without an error.
 - No recipe makes pixel shards. The Retro Trader's Java trades and map-search bounds match `tools/pixel_hollows.py`, and his shard buyback never pays more per shard than his cheapest possible shard sale.
+- **Art** (`tools/art_check.py`): in block, item and classic-pack models no two differently drawn faces share a plane (Z1) or lie under 0.09 px apart (N1), every UV stays inside its sprite (U1), and opaque boxes leave no exposed face out (O1; machines none at all). In quad parts (`*_quads.json`, `kinetic_rotors.json`, `worn_models.json`) no visible coplanar quads draw differently and no back-to-back pair shares a plane under a type that does not cull (Z2), no part shows the backs of culled quads over more than 0.5% of its silhouette (H1), `entitySolid` samples only opaque texels (A1) and `entityCutout` no half-transparent ones (A2). Allow-lists in the file name each accepted exception with its reason.
 
 ## File map
 
@@ -634,7 +635,7 @@ Each machine recipe is a normal Minecraft recipe file, so a data pack can add, r
 | `tools/materials.py`, `tools/machines.py`, `tools/pixel_hollows.py` | **source of truth** for content and numbers |
 | `tools/pixel_hollows_textures.py`, `tools/retro_models.py`, `tools/retro_game_shop.py`, `tools/pixel_hollows_sound.py` | Pixel Hollows and Retro Trader textures, models, shop template and ambient loop |
 | `tools/generate_*.py`, `tools/model_writer.py`, `tools/steampunk_*.py`, `tools/large_machines.py`, `tools/logistics_models.py` | generators |
-| `tools/check_mod_data.py` | offline audit |
+| `tools/check_mod_data.py`, `tools/art_check.py` | offline audit; the art's geometry and texture rules |
 | `docs/TECH_TREE.md` | player-facing guide |
 | `docs/features/` | feature records (required for gameplay features) |
 | `docs/MACHINE_ROADMAP.md`, `docs/branches/CHEMISTRY.md` | planned, not built |

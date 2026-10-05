@@ -355,7 +355,7 @@
       "to": [
         9,
         2.5,
-        13
+        13.1
       ],
       "faces": {
         "north": {
@@ -365,16 +365,40 @@
           "texture": "#husk"
         },
         "east": {
-          "texture": "#husk"
+          "texture": "#husk",
+          "uv": [
+            3,
+            13.5,
+            4.5,
+            15.5
+          ]
         },
         "west": {
-          "texture": "#husk"
+          "texture": "#husk",
+          "uv": [
+            11.5,
+            13.5,
+            13,
+            15.5
+          ]
         },
         "up": {
-          "texture": "#husk"
+          "texture": "#husk",
+          "uv": [
+            7,
+            11.5,
+            9,
+            13
+          ]
         },
         "down": {
-          "texture": "#husk"
+          "texture": "#husk",
+          "uv": [
+            7,
+            3,
+            9,
+            4.5
+          ]
         }
       }
     },

@@ -256,26 +256,50 @@
     {
       "from": [
         11.0,
-        -0.02,
+        -0.1,
         11.0
       ],
       "to": [
         15.6,
-        2.6,
+        2.65,
         15.6
       ],
       "faces": {
         "north": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            0.4,
+            13.4,
+            5.0,
+            16
+          ]
         },
         "south": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            11.0,
+            13.4,
+            15.6,
+            16
+          ]
         },
         "east": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            0.4,
+            13.4,
+            5.0,
+            16
+          ]
         },
         "west": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            11.0,
+            13.4,
+            15.6,
+            16
+          ]
         },
         "up": {
           "texture": "#ivy"
@@ -287,8 +311,8 @@
     },
     {
       "from": [
-        0.98,
-        1.78,
+        0.9,
+        1.7,
         4.0
       ],
       "to": [
@@ -298,22 +322,58 @@
       ],
       "faces": {
         "north": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            12.4,
+            13.3,
+            15.0,
+            14.2
+          ]
         },
         "south": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            1.0,
+            13.3,
+            3.6,
+            14.2
+          ]
         },
         "east": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            6.0,
+            13.3,
+            12.0,
+            14.2
+          ]
         },
         "west": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            4.0,
+            13.3,
+            10.0,
+            14.2
+          ]
         },
         "up": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            1.0,
+            4.0,
+            3.6,
+            10.0
+          ]
         },
         "down": {
-          "texture": "#ivy"
+          "texture": "#ivy",
+          "uv": [
+            1.0,
+            6.0,
+            3.6,
+            12.0
+          ]
         }
       }
     }

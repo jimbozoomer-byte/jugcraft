@@ -74,3 +74,4 @@ Not applicable: it is crafted and placed by players only.
 - The hitbox is 2.5 wide and 4.25 tall. The fist and drill reach a little past it.
 - Movement is server-driven, so with high ping the pilot's keys answer a little late.
 - Ideas for later: arm swaps (a second fist, a claw or a cannon arm, damage only), a bigger two-seat walker and a mech bay to refuel and repair.
+- **Fixed 5 October 2026 (shared render fixes):** the walker is drawn closed (no see-through gaps), and the quads inside each part no longer z-fight. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

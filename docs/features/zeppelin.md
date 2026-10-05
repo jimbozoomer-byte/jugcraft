@@ -61,3 +61,4 @@ Not applicable: it is crafted and placed by players only.
 - The hitbox (5 wide, 7.5 tall) covers the gondola and the middle of the envelope. The envelope's nose and tail can pass through blocks.
 - Movement is server-driven, so with high ping the pilot's keys answer a little late.
 - Ideas for later: a mooring mast block, cargo winch drops and a bigger airship.
+- **Fixed 5 October 2026 (shared render fixes):** the envelope and gondola are drawn closed (no see-through gaps), and the wheel no longer flickers. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

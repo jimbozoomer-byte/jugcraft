@@ -86,3 +86,4 @@ Not applicable: the guns are crafted and placed by players only.
 ## Rollout and open questions
 - The towers are any blocks the player builds. A ready-made gun tower block or structure could follow if the owner wants one.
 - Automatic fire without a gunner (a sentry mode) is left out on purpose: the guns need a crew.
+- **Fixed 5 October 2026 (shared render fixes):** the guns are drawn closed (no see-through gaps in barrels, rings and plinths), and the quads no longer z-fight. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

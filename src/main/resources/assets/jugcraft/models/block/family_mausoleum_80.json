@@ -210,7 +210,7 @@
       ],
       "to": [
         0,
-        4.02,
+        4.1,
         17.6
       ],
       "faces": {
@@ -269,15 +269,27 @@
       ],
       "to": [
         16,
-        4.04,
+        4.1,
         17.6
       ],
       "faces": {
         "north": {
-          "texture": "#stone"
+          "texture": "#stone",
+          "uv": [
+            0,
+            12,
+            16,
+            13.0
+          ]
         },
         "south": {
-          "texture": "#stone"
+          "texture": "#stone",
+          "uv": [
+            0,
+            12,
+            16,
+            13.0
+          ]
         },
         "west": {
           "texture": "#stone",

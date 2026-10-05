@@ -216,19 +216,43 @@
           "texture": "#lamp"
         },
         "east": {
-          "texture": "#deck"
+          "texture": "#deck",
+          "uv": [
+            0,
+            13,
+            0.5,
+            15
+          ]
         },
         "south": {
           "texture": "#deck"
         },
         "west": {
-          "texture": "#deck"
+          "texture": "#deck",
+          "uv": [
+            15.5,
+            13,
+            16,
+            15
+          ]
         },
         "up": {
-          "texture": "#deck"
+          "texture": "#deck",
+          "uv": [
+            7,
+            15.5,
+            9,
+            16
+          ]
         },
         "down": {
-          "texture": "#deck"
+          "texture": "#deck",
+          "uv": [
+            7,
+            0,
+            9,
+            0.5
+          ]
         }
       }
     }

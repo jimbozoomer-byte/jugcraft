@@ -72,3 +72,4 @@ Not applicable.
 - Shafts placed before #37 have no block entity, so they do not spin until re-placed.
 - A spinning part is drawn up to 96 blocks away; further off, turning blocks show without it.
 - Speed/torque (RPM) is deliberately left out; KE per tick keeps it simple.
+- **Fixed 5 October 2026 (shared render fixes):** spinning rotors keep 0.1 px off the still block's faces and their own collars are separated, so they no longer flicker. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

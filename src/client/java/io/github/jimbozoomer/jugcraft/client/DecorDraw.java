@@ -57,4 +57,52 @@ final class DecorDraw {
 					.setNormal(matrix, nx, ny, nz);
 		}
 	}
+
+	/** How far (pixels) each side of a two-sided plane stands off the plane's middle (see {@link #twoSided}). */
+	static final float TWO_SIDED_LIFT = 0.05F;
+
+	/**
+	 * A plane seen from both sides, for the render types that do not cull back faces in 26.3 (entityCutout,
+	 * entityTranslucent): the quad through {@code corners} ({x, y, z, u, v}, positions in blocks) lit with normal (nx, ny,
+	 * nz) and lifted {@code liftPixels} out along the plane's normal on that side, then the same quad reversed, lit the
+	 * opposite way and lifted as far the other way. An exact reversed twin on one plane would draw at the same depth as
+	 * the front from both sides and flicker (docs/ART_DIRECTION.md, Rules for everything).
+	 */
+	static void twoSided(VertexConsumer buffer, PoseStack.Pose matrix, float[][] corners, float nx, float ny, float nz, int color, int light,
+			float liftPixels) {
+		float[] lift = lift(corners, nx, ny, nz, liftPixels / 16.0F);
+		for (int k = 0; k < 4; k++) {
+			float[] c = corners[k];
+			buffer.addVertex(matrix, c[0] + lift[0], c[1] + lift[1], c[2] + lift[2]).setColor(color).setUv(c[3], c[4])
+					.setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(matrix, nx, ny, nz);
+		}
+		for (int k = 3; k >= 0; k--) {
+			float[] c = corners[k];
+			buffer.addVertex(matrix, c[0] - lift[0], c[1] - lift[1], c[2] - lift[2]).setColor(color).setUv(c[3], c[4])
+					.setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(matrix, -nx, -ny, -nz);
+		}
+	}
+
+	/**
+	 * The offset that lifts a quad through {@code corners} ({x, y, z, ...}) {@code distance} off its plane on the side
+	 * (nx, ny, nz) faces: along the plane's own normal (from its diagonals), so the lift always leaves the plane even when
+	 * the lighting normal lies in it.
+	 */
+	static float[] lift(float[][] corners, float nx, float ny, float nz, float distance) {
+		float ax = corners[2][0] - corners[0][0], ay = corners[2][1] - corners[0][1], az = corners[2][2] - corners[0][2];
+		float bx = corners[3][0] - corners[1][0], by = corners[3][1] - corners[1][1], bz = corners[3][2] - corners[1][2];
+		float px = ay * bz - az * by, py = az * bx - ax * bz, pz = ax * by - ay * bx;
+		float length = (float) Math.sqrt(px * px + py * py + pz * pz);
+		if (length < 1.0E-12F) {
+			px = nx;
+			py = ny;
+			pz = nz;
+			length = (float) Math.sqrt(px * px + py * py + pz * pz);
+			if (length < 1.0E-12F) {
+				return new float[] {0, 0, 0};
+			}
+		}
+		float scale = distance / length * (px * nx + py * ny + pz * nz < 0 ? -1 : 1);
+		return new float[] {px * scale, py * scale, pz * scale};
+	}
 }

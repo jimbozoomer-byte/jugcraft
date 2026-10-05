@@ -89,3 +89,4 @@ Not applicable: crafted and placed by players only.
   - Smoke and star shells.
   - Telephones carrying fire orders.
   - Block-breaking shells, only if the owner wants them.
+- **Fixed 5 October 2026 (shared render fixes):** the guns and the observation balloon's envelope are drawn closed (no see-through gaps), and the quads no longer z-fight. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

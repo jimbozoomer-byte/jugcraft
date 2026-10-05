@@ -84,3 +84,4 @@ Not applicable: it is crafted and placed by players only.
   - A heavier four-track landship with a bigger gun, like the second reference.
   - Gunners in the sponsons aiming for themselves.
   - Breaking through walls, only if the owner wants block breaking.
+- **Fixed 5 October 2026 (shared render fixes):** the hull, turret and barrel are drawn closed (no see-through gaps), and the barrel's muzzle and the turret ring no longer flicker. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

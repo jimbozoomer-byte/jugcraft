@@ -16,12 +16,18 @@
       ],
       "to": [
         16,
-        4.02,
+        4.1,
         16
       ],
       "faces": {
         "north": {
-          "texture": "#relief"
+          "texture": "#relief",
+          "uv": [
+            0,
+            12,
+            16,
+            16
+          ]
         },
         "up": {
           "texture": "#relief_top"

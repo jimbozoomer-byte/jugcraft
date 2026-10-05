@@ -126,16 +126,40 @@
           "texture": "#bark"
         },
         "east": {
-          "texture": "#bark"
+          "texture": "#bark",
+          "uv": [
+            11.5,
+            11,
+            16.0,
+            14
+          ]
         },
         "west": {
-          "texture": "#bark"
+          "texture": "#bark",
+          "uv": [
+            0.0,
+            11,
+            4.5,
+            14
+          ]
         },
         "up": {
-          "texture": "#bark"
+          "texture": "#bark",
+          "uv": [
+            6.5,
+            0.0,
+            9.5,
+            4.5
+          ]
         },
         "down": {
-          "texture": "#bark"
+          "texture": "#bark",
+          "uv": [
+            6.5,
+            11.5,
+            9.5,
+            16.0
+          ]
         }
       },
       "rotation": {
@@ -161,10 +185,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#bark"
+          "texture": "#bark",
+          "uv": [
+            6.5,
+            8,
+            7.5,
+            13.5
+          ]
         },
         "south": {
-          "texture": "#bark"
+          "texture": "#bark",
+          "uv": [
+            8.5,
+            8,
+            9.5,
+            13.5
+          ]
         },
         "east": {
           "texture": "#bark"
@@ -173,10 +209,22 @@
           "texture": "#bark"
         },
         "up": {
-          "texture": "#bark"
+          "texture": "#bark",
+          "uv": [
+            8.5,
+            7.5,
+            9.5,
+            8.5
+          ]
         },
         "down": {
-          "texture": "#bark"
+          "texture": "#bark",
+          "uv": [
+            8.5,
+            7.5,
+            9.5,
+            8.5
+          ]
         }
       }
     },
@@ -199,16 +247,40 @@
           "texture": "#bark"
         },
         "east": {
-          "texture": "#bark"
+          "texture": "#bark",
+          "uv": [
+            7.5,
+            3,
+            8.5,
+            7.5
+          ]
         },
         "west": {
-          "texture": "#bark"
+          "texture": "#bark",
+          "uv": [
+            7.5,
+            3,
+            8.5,
+            7.5
+          ]
         },
         "up": {
-          "texture": "#bark"
+          "texture": "#bark",
+          "uv": [
+            7.5,
+            7.5,
+            8.5,
+            8.5
+          ]
         },
         "down": {
-          "texture": "#bark"
+          "texture": "#bark",
+          "uv": [
+            7.5,
+            7.5,
+            8.5,
+            8.5
+          ]
         }
       }
     }

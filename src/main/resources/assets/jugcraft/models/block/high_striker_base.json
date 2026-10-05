@@ -112,7 +112,7 @@
     {
       "from": [
         7,
-        3.48,
+        3.3,
         4
       ],
       "to": [
@@ -122,16 +122,40 @@
       ],
       "faces": {
         "north": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            7,
+            0,
+            9,
+            12.5
+          ]
         },
         "south": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            7,
+            0,
+            9,
+            12.5
+          ]
         },
         "east": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            11,
+            0,
+            12,
+            12.5
+          ]
         },
         "west": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            4,
+            0,
+            5,
+            12.5
+          ]
         },
         "up": {
           "texture": "#brass"
@@ -176,32 +200,68 @@
     {
       "from": [
         6,
-        3.5,
+        3.4,
         4.5
       ],
       "to": [
         10,
         4.5,
-        5
+        5.1
       ],
       "faces": {
         "north": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            6,
+            11.5,
+            10,
+            12.5
+          ]
         },
         "south": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            6,
+            11.5,
+            10,
+            12.5
+          ]
         },
         "east": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            11,
+            11.5,
+            11.5,
+            12.5
+          ]
         },
         "west": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            4.5,
+            11.5,
+            5,
+            12.5
+          ]
         },
         "up": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            6,
+            4.5,
+            10,
+            5
+          ]
         },
         "down": {
-          "texture": "#brass"
+          "texture": "#brass",
+          "uv": [
+            6,
+            11,
+            10,
+            11.5
+          ]
         }
       }
     },
@@ -209,12 +269,12 @@
       "from": [
         2,
         0.5,
-        -0.01
+        -0.1
       ],
       "to": [
         14,
         2.5,
-        -0.01
+        -0.1
       ],
       "faces": {
         "north": {

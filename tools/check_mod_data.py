@@ -5730,6 +5730,17 @@ def check_model_uvs():
                     err(f"{path.relative_to(ROOT)}: the {side} face reads {list(uv)} outside its see-through texture {texture}; pin its uv")
 
 
+def check_art():
+    """The art's geometry and texture rules for every block/item model and quad part (tools/art_check.py; the rules are
+    in docs/ART_DIRECTION.md, Rules for everything): no shared or nearly shared face planes, UVs inside their sprites,
+    closed models, and textures that suit their render type."""
+    import art_check
+    problems, summary = art_check.run(machine_blocks())
+    for problem in problems:
+        err(problem)
+    print(summary)
+
+
 def check_town():
     """The walled town: its data is written, its shops have no profit loop, every townsperson's skin and every line they
     can say exists, and the Java side names the same feature, shops screen ids and decor kinds."""
@@ -6031,6 +6042,7 @@ def main():
     check_recipe_categories()
     check_advancements(registered)
     check_model_uvs()
+    check_art()
     check_pixel_hollows()
     check_town()
     check_diagonal_connections()
