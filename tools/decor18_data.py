@@ -138,6 +138,27 @@ def iron_plate(seed=1, rivets=True):
     return paint
 
 
+def canal(palette=BONE):
+    """A vertebra's end, opaque (5 October 2026: its old ring left the canal and corners see-through): bone, its rim lit
+    along the top and shaded along the bottom, the spinal canal a dark round recess in the middle with its lower wall
+    catching a little light, and the square corners filled with a step darker bone."""
+    def paint(p):
+        cx, cy = (p.w - 1) / 2, (p.h - 1) / 2
+        for y in range(p.h):
+            for x in range(p.w):
+                d = math.hypot((x - cx) / (p.w / 2), (y - cy) / (p.h / 2))
+                if d > 1.0:
+                    c = palette[2]
+                elif d >= 0.55:
+                    c = palette[4] if y < cy else palette[3]
+                elif d >= 0.45:
+                    c = ca.SOCKET[2]
+                else:
+                    c = ca.SOCKET[1] if y > cy + p.h * 0.12 else ca.SOCKET[0]
+                p.put(x, y, c)
+    return paint
+
+
 def ring(palette=IRON):
     def paint(p):
         cx, cy = (p.w - 1) / 2, (p.h - 1) / 2
@@ -310,19 +331,27 @@ def effigy_face(palette, kind="helm"):
     return paint
 
 
+def skull_sockets(w, h):
+    """Where a human skull's square eye sockets lie on its face picture `w` x `h` texels: [(u0, v0, u1, v1)], whole
+    texels, a quarter of the face wide each, a little above the middle."""
+    sw, sh = max(2, round(w * 0.25)), max(2, round(h * 0.25))
+    v0 = round(h * 0.36)
+    return [(round(w * ex - sw / 2), v0, round(w * ex - sw / 2) + sw, v0 + sh) for ex in (0.3, 0.7)]
+
+
 def human_skull(palette=BONE, seed=1, glow=None):
-    """A cute skull from the front (tools/cute_art.py): a smooth dome lit along its top, two big round sockets with a
-    glint (or filled with `glow`), no nose holes, and a neat row of square teeth along the bottom."""
+    """A skull from the front, the Minecraft way (5 October 2026: round, glinting sockets looked goofy): a smooth dome lit
+    along its top, two square dark sockets (skull_sockets) each over a lip of shaded bone, filled flat with `glow` inside
+    a dark rim when lit, no nose holes, and a neat row of square teeth along the bottom."""
     def paint(p):
         ca.soft(palette, len(palette) // 2)(p)
         w, h = p.w, p.h
-        rx, ry = max(1.5, w * 0.17), max(1.5, h * 0.17)
-        for ex in (0.3, 0.7):
+        for u0, v0, u1, v1 in skull_sockets(w, h):
+            ca.square_socket(p, u0, v0, u1, v1, lip=palette[1])
             if glow:
-                ca.ellipse(p, ex * w, h * 0.48, rx, ry, SOCKET[0])
-                ca.ellipse(p, ex * w, h * 0.48, rx * 0.62, ry * 0.62, glow)
-            else:
-                ca.eye(p, ex * w, h * 0.48, rx, ry)
+                for y in range(v0 + 1, v1 - 1 if v1 - v0 > 2 else v1):
+                    for x in range(u0 + 1, u1 - 1 if u1 - u0 > 2 else u1):
+                        p.put(x, y, glow)
         rows = max(1, int(h * 0.14))
         ca.teeth(p, w * 0.26, w * 0.74, h - rows - 1, rows, palette[-1], ca.SOCKET[1], tooth=max(1, w // 8))
     return paint
@@ -527,28 +556,28 @@ def iron_bound_coffin():
                             {"east": lid_edge, "west": lid_edge, "north": lid_edge, "south": lid_edge, "up": lid_top, "down": lining_}))
         # The raised panel along the lid, narrowing toward the feet.
         if head:
-            lid.append(cube((3.0, COFFIN_BODY + COFFIN_LID, 6.5), (13.0, COFFIN_BODY + COFFIN_LID + 0.8, 16.0), faces(panel, ("up", "north", "east", "west"))))
+            lid.append(cube((3.0, COFFIN_BODY + COFFIN_LID, 6.5), (13.0, COFFIN_BODY + COFFIN_LID + 0.8, 16.0), faces(panel, ("up", "north", "south", "east", "west"))))
             lid.append(cube((4.2, COFFIN_BODY + COFFIN_LID, 3.0), (11.8, COFFIN_BODY + COFFIN_LID + 0.8, 6.5), faces(panel, ("up", "north", "east", "west"))))
         else:
-            lid.append(cube((3.6, COFFIN_BODY + COFFIN_LID, 0.0), (12.4, COFFIN_BODY + COFFIN_LID + 0.8, 9.0), faces(panel, ("up", "south", "east", "west"))))
+            lid.append(cube((3.6, COFFIN_BODY + COFFIN_LID, 0.0), (12.4, COFFIN_BODY + COFFIN_LID + 0.8, 9.0), faces(panel, ("up", "north", "south", "east", "west"))))
             lid.append(cube((4.6, COFFIN_BODY + COFFIN_LID, 9.0), (11.4, COFFIN_BODY + COFFIN_LID + 0.8, 13.0), faces(panel, ("up", "south", "east", "west"))))
         for z, (x0, x1) in bands:
-            els.append(cube((x0 - 0.35, -0.01, z), (x1 + 0.35, COFFIN_BODY + 0.01, z + 1.0), faces(band, ("north", "south", "east", "west"))))
+            els.append(cube((x0 - 0.35, -0.01, z), (x1 + 0.35, COFFIN_BODY + 0.01, z + 1.0), faces(band, ("north", "south", "east", "west", "up"))))
             lid.append(cube((x0 - 0.55, COFFIN_BODY - 0.01, z), (x1 + 0.55, COFFIN_BODY + COFFIN_LID + 0.35, z + 1.0),
-                            faces(band, ("north", "south", "east", "west", "up"))))
+                            faces(band, ("north", "south", "east", "west", "up", "down"))))
         return els, lid
 
     head_body, head_lid = half(COFFIN_HEAD, [(4.0, (2.0, 14.0)), (12.0, (1.0, 15.0))], True)
     foot_body, foot_lid = half(COFFIN_FOOT, [(3.0, (1.5, 14.5)), (10.0, (2.5, 13.5))], False)
     # Iron caps on the corners of the head and foot ends, and ring handles on the sides.
     for x in (3.0, 11.6):
-        head_body.append(cube((x, -0.01, 0.7), (x + 1.4, COFFIN_BODY + 0.01, 2.1), faces(corner, ("north", "east", "west", "south"))))
-        foot_body.append(cube((x, -0.01, 13.9), (x + 1.4, COFFIN_BODY + 0.01, 15.3), faces(corner, ("north", "east", "west", "south"))))
+        head_body.append(cube((x, -0.01, 0.7), (x + 1.4, COFFIN_BODY + 0.01, 2.1), faces(corner, ("north", "east", "west", "south", "up"))))
+        foot_body.append(cube((x, -0.01, 13.9), (x + 1.4, COFFIN_BODY + 0.01, 15.3), faces(corner, ("north", "east", "west", "south", "up"))))
     for x in (0.5, 15.0):
         head_body.append(cube((x, 3.5, 8.5), (x + 0.5, 6.5, 11.5), faces(ring_, ("east", "west"))))
         foot_body.append(cube((x + (0.5 if x < 8 else -0.5), 3.5, 1.0), (x + (1.0 if x < 8 else 0.0), 6.5, 4.0), faces(ring_, ("east", "west"))))
     # The hasp on the lid's foot edge (it moves with the lid), the staple it closes over, and the padlock.
-    foot_lid.append(cube((6.9, 6.0, 15.1), (9.1, COFFIN_BODY + COFFIN_LID, 15.7), faces(hasp, ("south", "east", "west", "up", "down"))))
+    foot_lid.append(cube((6.9, 6.0, 15.1), (9.1, COFFIN_BODY + COFFIN_LID, 15.7), faces(hasp, ALL6)))
     foot_body.append(cube((7.5, 6.6, 15.0), (8.5, 7.6, 16.0), faces(staple, ALL6)))
     padlock_ = [cube((6.6, 2.6, 15.3), (9.4, 5.6, 16.4), faces(lock, ALL6)),
                 cube((7.1, 5.6, 15.6), (8.9, 7.4, 16.1), faces(shackle, ("south", "north", "east", "west", "up")))]
@@ -645,19 +674,23 @@ def coffin_wardrobe():
         a0, a1 = WARDROBE[i][2], WARDROBE[i][3]
         b0, b1 = WARDROBE[i + 1][2], WARDROBE[i + 1][3]
         lo, hi = min(a0, b0), max(a1, b1)
-        els.append(cube((lo, y - 0.3, WARDROBE_FRONT), (lo + abs(a0 - b0) + 1.0, y + 0.3, WARDROBE_BACK), faces(cap, ("up", "down", "north"))))
-        els.append(cube((hi - abs(a1 - b1) - 1.0, y - 0.3, WARDROBE_FRONT), (hi, y + 0.3, WARDROBE_BACK), faces(cap, ("up", "down", "north"))))
+        # The ledge lies on the wider part's side of the step (above it if the part below is wider), so its outer end
+        # and back never share a plane with the wider part's wall.
+        ly0, ly1 = (y, y + 0.3) if a0 < b0 else (y - 0.3, y)
+        els.append(cube((lo, ly0, WARDROBE_FRONT), (lo + abs(a0 - b0) + 1.0, ly1, WARDROBE_BACK), faces(cap, ("up", "down", "north", "west", "south"))))
+        ly0, ly1 = (y, y + 0.3) if a1 > b1 else (y - 0.3, y)
+        els.append(cube((hi - abs(a1 - b1) - 1.0, ly0, WARDROBE_FRONT), (hi, ly1, WARDROBE_BACK), faces(cap, ("up", "down", "north", "east", "south"))))
     els.append(cube((3.0, 0.0, WARDROBE_FRONT), (13.0, 1.0, WARDROBE_BACK), faces(cap, ("up", "down", "north", "east", "west"))))
     els.append(cube((3.5, 31.5, WARDROBE_FRONT - 0.2), (12.5, 32.0, WARDROBE_BACK), faces(cap, ALL6)))
     # The door: a frame following the outline, a glazing bar at the shoulders, the glass, hinges and a knob.
     for y0, y1, x0, x1 in WARDROBE:
-        els.append(cube((x0, y0, WARDROBE_FRONT - 0.6), (x0 + 1.2, y1, WARDROBE_FRONT), faces(frame, ("north", "west", "east"))))
-        els.append(cube((x1 - 1.2, y0, WARDROBE_FRONT - 0.6), (x1, y1, WARDROBE_FRONT), faces(frame, ("north", "west", "east"))))
+        els.append(cube((x0, y0, WARDROBE_FRONT - 0.6), (x0 + 1.2, y1, WARDROBE_FRONT), faces(frame, ("north", "west", "east", "up", "down"))))
+        els.append(cube((x1 - 1.2, y0, WARDROBE_FRONT - 0.6), (x1, y1, WARDROBE_FRONT), faces(frame, ("north", "west", "east", "up", "down"))))
         els.append(fa.plane_xy(x0 + 1.2, x1 - 1.2, y0, y1, WARDROBE_FRONT - 0.3, pane))
     els.append(cube((1.2, 16.6, WARDROBE_FRONT - 0.7), (14.8, 17.6, WARDROBE_FRONT), faces(frame_h, ("north", "up", "down"))))
     els.append(cube((3.0, 0.0, WARDROBE_FRONT - 0.6), (13.0, 1.6, WARDROBE_FRONT), faces(frame_h, ("north", "up"))))
     for y in (4.0, 26.0):
-        els.append(cube((0.2, y, WARDROBE_FRONT - 0.8), (4.6, y + 1.2, WARDROBE_FRONT - 0.5), faces(strap, ("north", "up", "down", "west"))))
+        els.append(cube((0.2, y, WARDROBE_FRONT - 0.8), (4.6, y + 1.2, WARDROBE_FRONT - 0.5), faces(strap, ("north", "up", "down", "west", "east", "south"))))
     els.append(cube((14.0, 14.5, WARDROBE_FRONT - 1.4), (15.1, 15.6, WARDROBE_FRONT - 0.5), faces(knob, ALL6)))
     # The crest: a little skull on the crown.
     els.append(cube((6.4, 28.6, WARDROBE_FRONT - 1.6), (9.6, 31.2, WARDROBE_FRONT - 0.2), {"north": crest, "east": skull_side, "west": skull_side,
@@ -860,9 +893,11 @@ def skull_at(sc, x0, y0, z0, w, h, d, face="north", glow=None, prefix="skull"):
     out = [cube((x0, y0 + h * 0.18, z0), (x0 + w, y0 + h, z0 + d), {face: front, **{s: side for s in ALL6 if s != face}})]
     out.append(cube((x0 + w * 0.18, y0, z0 + 0.05), (x0 + w * 0.82, y0 + h * 0.2, z0 + d * 0.55), faces(side, ("north", "east", "west", "down"))))
     if glow:
-        for ex in (0.3, 0.7):
-            cx = x0 + w * ex
-            out.append(cube((cx - w * 0.11, y0 + h * 0.48, z0 - 0.06), (cx + w * 0.11, y0 + h * 0.66, z0 - 0.04), {"north": glow}, light=15))
+        # A flat glowing square exactly over each socket (a north face's picture runs from x0 + w on its left), 0.1 in front.
+        top, tall = y0 + h, h * 0.82
+        for u0, v0, u1, v1 in skull_sockets(12, 12):
+            out.append(cube((x0 + w * (1 - u1 / 12), top - tall * v1 / 12, z0 - 0.1), (x0 + w * (1 - u0 / 12), top - tall * v0 / 12, z0 - 0.1),
+                            {"north": glow}, light=15))
     return out
 
 
@@ -880,7 +915,7 @@ def bone_throne():
     spine = sc.piece("spine", 4, 24, vertebrae(8))
     rib = sc.piece("rib", 12, 3, strip(BONE, 9, light=True, horizontal=True))
     horn = sc.piece("horn", 10, 26, d17d.horn(10))
-    eye = sc.piece("eye", 4, 4, glow_dot((220, 30, 24)))
+    eye = sc.piece("eye", 4, 4, ca.bevel(pal("b81c16", "dc2a20", "f4523a"), 1, light=0, dark=0))
     els = []
     for x in (2.2, 12.0):
         for z in (2.4, 12.2):
@@ -943,7 +978,7 @@ def ribcage_bookcase():
     pages = sc.piece("pages", 12, 8, book_pages())
     els = [cube((0.5, 0.0, 1.0), (15.5, 1.6, 15.0), faces(plank, SIDES4, up=plank_top, down=plank_top)),
            cube((0.5, 14.6, 1.0), (15.5, 16.0, 15.0), faces(plank, SIDES4, up=plank_top, down=plank_top)),
-           cube((1.0, 1.6, 14.0), (15.0, 14.6, 14.8), faces(back, ("north", "south"))),
+           cube((1.0, 1.6, 14.0), (15.0, 14.6, 14.8), faces(back, ("north", "south"), east=plank, west=plank)),
            cube((6.8, 1.6, 12.6), (9.2, 14.6, 14.6), faces(spine, SIDES4)),
            cube((1.0, 7.6, 3.6), (15.0, 8.2, 13.0), faces(shelf, ALL6))]
     els += long_bone((1.2, 7.4, 2.8), (14.8, 8.4, 3.8), shaft, knob, axis="x", knob_size=0.5)
@@ -1050,7 +1085,7 @@ def colossal_skull():
     lower_teeth = sc.piece("lower_teeth", 24, 3, teeth())
     els = [cube((-14.0, 8.0, 6.0), (14.0, 28.0, 29.0), faces(side, ("east", "west"), up=top, down=hollow, south=dome)),
            cube((-12.0, 28.0, 8.0), (12.0, 31.0, 27.0), faces(top, ALL6)),
-           cube((-15.0, 12.0, 9.0), (15.0, 25.0, 25.0), faces(side, ("east", "west", "north", "south"))),
+           cube((-15.0, 12.0, 9.0), (15.0, 25.0, 25.0), faces(side, ("east", "west", "north", "south", "up", "down"))),
            cube((-11.0, 6.0, 27.0), (11.0, 27.0, 31.0), faces(dome, ALL6)),
            cube((-13.0, 19.6, 3.0), (13.0, 24.0, 7.0), faces(brow, ALL6)),
            cube((-12.0, 24.0, 5.0), (12.0, 28.0, 8.0), faces(dome, ("north", "east", "west", "up"))),
@@ -1058,15 +1093,18 @@ def colossal_skull():
            cube((-12.0, 11.0, 4.0), (-10.0, 19.6, 8.0), faces(face, ("north", "east", "west"))),
            cube((-2.6, 13.4, 4.0), (2.6, 19.6, 8.0), faces(face, ("north", "east", "west"))),
            cube((10.0, 11.0, 4.0), (12.0, 19.6, 8.0), faces(face, ("north", "east", "west"))),
-           cube((-12.0, 8.0, 4.0), (-2.0, 11.6, 8.0), faces(cheek, ("north", "east", "west", "down"))),
-           cube((2.0, 8.0, 4.0), (12.0, 11.6, 8.0), faces(cheek, ("north", "east", "west", "down"))),
+           cube((-12.0, 8.0, 4.0), (-2.0, 11.6, 8.0), faces(cheek, ("north", "east", "west", "down"), up=hollow)),
+           cube((2.0, 8.0, 4.0), (12.0, 11.6, 8.0), faces(cheek, ("north", "east", "west", "down"), up=hollow)),
            cube((-11.0, 9.0, 8.0), (11.0, 20.0, 9.0), faces(hollow, ("north",))),
-           cube((-2.0, 8.0, 4.0), (2.0, 13.4, 8.0), faces(face, ("north",))),
+           cube((-2.0, 8.0, 4.0), (2.0, 13.4, 8.0), faces(face, ("north", "east", "west"))),
+           # The skull's front corners beside the brow and cheeks, closed.
+           cube((-14.0, 8.0, 6.0), (-12.0, 28.0, 6.0), faces(side, ("north",))),
+           cube((12.0, 8.0, 6.0), (14.0, 28.0, 6.0), faces(side, ("north",))),
            # Cheekbones out the sides, and the upper jaw with its teeth.
            cube((-15.6, 9.0, 7.0), (-12.0, 12.4, 16.0), faces(cheek, ALL6)),
            cube((12.0, 9.0, 7.0), (15.6, 12.4, 16.0), faces(cheek, ALL6)),
            cube((-8.0, 4.4, 4.4), (8.0, 8.0, 12.0), faces(face, ALL6)),
-           cube((-7.2, 3.2, 4.2), (7.2, 4.4, 5.8), faces(upper_teeth, ("north", "east", "west", "down")))]
+           cube((-7.2, 3.2, 4.2), (7.2, 4.4, 5.8), faces(upper_teeth, ALL6))]
     sc.models[d18.SKULL["block"]] = els
     # The jaw, hinged at its back corners (the renderer turns it down about x at y 8, z 15).
     sc.models["colossal_skull_jaw"] = [
@@ -1095,10 +1133,10 @@ def colossal_rib():
     # The shaft stands on the centre line z 12; each piece above leans further north (a negative turn about x tips its
     # top north) and starts where the one below it ends: 22.5 degrees from (y 2, z 12) to (y 10.3, z 8.6), then 45 to
     # (y 14.1, z 4.1), then level. (The item draws it a block higher, so nothing may reach above 15.9.)
-    els = [cube((6.2, -15.9, 10.0), (9.8, 4.0, 14.0), faces(bone_, SIDES4, down=end)),
-           cube((6.3, 2.0, 10.2), (9.7, 11.4, 13.8), faces(bone_, SIDES4), rotation((8.0, 2.0, 12.0), "x", -22.5)),
-           cube((6.4, 9.4, 6.9), (9.6, 15.8, 10.3), faces(bone_, SIDES4), rotation((8.0, 9.6, 8.6), "x", -45)),
-           cube((6.5, 12.4, -2.0), (9.5, 15.6, 5.6), faces(bone_, ("east", "west", "up", "down")))]
+    els = [cube((6.2, -15.9, 10.0), (9.8, 4.0, 14.0), faces(bone_, SIDES4, down=end, up=end)),
+           cube((6.3, 2.0, 10.2), (9.7, 11.4, 13.8), faces(bone_, SIDES4, up=end, down=end), rotation((8.0, 2.0, 12.0), "x", -22.5)),
+           cube((6.4, 9.4, 6.9), (9.6, 15.8, 10.3), faces(bone_, SIDES4, up=end, down=end), rotation((8.0, 9.6, 8.6), "x", -45)),
+           cube((6.5, 12.4, -2.0), (9.5, 15.6, 5.6), faces(bone_, ("east", "west", "up", "down"), south=end, north=end))]
     els.append(cube((5.2, -15.9, 9.0), (10.8, -15.0, 15.0), faces(end, ALL6)))
     sc.models["colossal_rib_joined"] = els + [cube((6.6, 12.5, -8.0), (9.4, 15.7, -1.6), faces(bone_, ("east", "west", "up", "down"), north=end)),
                                               cube((6.2, 12.1, -8.0), (9.8, 16.1, -6.6), faces(end, ALL6))]
@@ -1111,10 +1149,11 @@ def colossal_vertebra():
     standing back, and a wing out each side."""
     sc = Sculpt(d18.VERTEBRA["block"], 192, 64)
     body = sc.piece("body", 16, 16, cracked_bone(2, 2))
-    ring_ = sc.piece("rings", 14, 14, ring(BONE))
+    ring_ = sc.piece("rings", 14, 14, canal(BONE))
     wing = sc.piece("wing", 8, 10, cracked_bone(3, 1))
+    # The round body: a box and a copy turned 45 degrees, its ends 0.1 inside the box's so no two caps share a plane.
     els = [cube((4.0, 0.2, 4.0), (12.0, 15.8, 12.0), faces(body, SIDES4, up=ring_, down=ring_)),
-           cube((3.4, 0.0, 3.4), (12.6, 15.8, 12.6), faces(body, SIDES4, up=ring_, down=ring_), rotation((8.0, 8.0, 8.0), "y", 45)),
+           cube((3.4, 0.3, 3.4), (12.6, 15.7, 12.6), faces(body, SIDES4, up=ring_, down=ring_), rotation((8.0, 8.0, 8.0), "y", 45)),
            cube((5.6, 3.0, 12.0), (10.4, 13.0, 14.0), faces(wing, ALL6)),
            cube((7.0, 4.0, 13.0), (9.0, 11.0, 16.0), faces(wing, ALL6)),
            cube((0.4, 5.0, 7.0), (4.0, 11.0, 10.0), faces(wing, ALL6)),
@@ -1130,7 +1169,7 @@ def colossal_femur():
     shaft = sc.piece("shaft", 20, 48, cracked_bone(2, 4, moss=0.1))
     knob = sc.piece("knob", 16, 16, cracked_bone(3, 1))
     els = [cube((5.2, 0.0, 8.0), (10.8, 5.6, 26.0), faces(shaft, ALL6)),
-           cube((5.8, 0.0, 8.0), (10.2, 5.6, 26.0), faces(shaft, ALL6), rotation((8.0, 2.8, 17.0), "z", 45)),
+           cube((5.8, 0.0, 8.1), (10.2, 5.6, 25.9), faces(shaft, ALL6), rotation((8.0, 2.8, 17.0), "z", 45)),
            cube((3.6, 0.0, 1.0), (9.4, 6.4, 6.6), faces(knob, ALL6)),
            cube((3.0, 0.6, 1.6), (10.0, 5.8, 6.0), faces(knob, ALL6), rotation((6.5, 3.2, 3.8), "y", 45)),
            cube((5.4, 0.4, 4.6), (9.4, 5.0, 10.0), faces(knob, ALL6), rotation((7.4, 2.7, 7.3), "y", 22.5)),
@@ -1279,8 +1318,13 @@ def stream_texture():
 
 
 def socket_glow_texture():
+    """The colossal skull's sockets' glow: a flat pale-blue square, a little fainter in a one-texel rim, drawn exactly over
+    each socket (skull glows are flat squares, never soft halos)."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    glow_dot((120, 200, 255), 200)(Px(img))
+    for y in range(16):
+        for x in range(16):
+            rim = x in (0, 15) or y in (0, 15)
+            img.putpixel((x, y), (120, 200, 255, 150 if rim else 200))
     return img
 
 

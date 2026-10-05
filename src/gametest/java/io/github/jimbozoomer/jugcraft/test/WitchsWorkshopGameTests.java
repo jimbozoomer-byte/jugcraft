@@ -6,15 +6,21 @@ import io.github.jimbozoomer.jugcraft.agriculture.BeatingHeartJarBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.BroomRackBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.Candelabra;
 import io.github.jimbozoomer.jugcraft.agriculture.CuriosityCabinetBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.DecorationBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.DustpanBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.EnchantedBroomBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.EnchantedBroomBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.GiantBeatingHeartBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HandJarBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HornedSkullCauldronBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HornedSkullCauldronBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.MothCaseBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.ShowcaseBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.SpecimenJarBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.SpecimenTankBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.SpecimenVesselBlock;
+import io.github.jimbozoomer.jugcraft.agriculture.TallSpecimenJarBlock;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -38,12 +44,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.component.BlockItemStateProperties;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -52,8 +61,9 @@ import net.minecraft.world.phys.Vec3;
  * gain or loss, heats over an Ember Bed, wafts a lasting potion onto those near and floats ingredients; the candelabra
  * take waxes and flames, light by flint and steel and by redstone, drip and are scraped, and hang or stand as they
  * should; the Enchanted Broom sweeps dropped items into a Dustpan only while anointed; the Curiosity Cabinet, Bell Jar and
- * Broom Rack show what they are given; the Moth Display Case changes its moths; the Oddity Jars beat, wake and point; and
- * the data loads.
+ * Broom Rack show what they are given; the Moth Display Case changes its moths; the Oddity Jars beat, wake and point; the
+ * Giant's Beating Heart stands whole and beats; the Tall Specimen Jar and Specimen Tank stand whole and keep their
+ * specimens; and the data loads.
  */
 public class WitchsWorkshopGameTests {
 	private static Block block(String id) {
@@ -82,6 +92,20 @@ public class WitchsWorkshopGameTests {
 	private static InteractionResult useAt(GameTestHelper helper, ServerPlayer player, BlockPos on, Vec3 at, Direction face) {
 		BlockHitResult hit = new BlockHitResult(at, face, helper.absolutePos(on), false);
 		return player.gameMode.useItemOn(player, helper.getLevel(), player.getMainHandItem(), InteractionHand.MAIN_HAND, hit);
+	}
+
+	/** Places an item's block from below {@code at} with the player turned to {@code yaw} (0 faces south, so the prop faces north). */
+	private static void place(GameTestHelper helper, ServerPlayer player, String id, BlockPos at, float yaw) {
+		player.setYRot(yaw);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item(id)));
+		BlockPos below = helper.absolutePos(at.below());
+		BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(below).relative(Direction.UP, 0.5), Direction.UP, below, false);
+		player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit));
+	}
+
+	private static List<ItemEntity> drops(GameTestHelper helper, Item item) {
+		AABB area = new AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(8, 8, 8).inflate(2.0);
+		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, area, entity -> entity.getItem().is(item));
 	}
 
 	private static void floor(GameTestHelper helper) {
@@ -420,18 +444,133 @@ public class WitchsWorkshopGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * The Giant's Beating Heart stands 3 x 3 x 3, every block part of it and its block entity on the first; with a block in
+	 * the way it is not placed. Its first block beats (15 to the sides, none below, then off after its pulse), use changes
+	 * its tempo, and a signal from below any of its bottom blocks stops it. Broken anywhere, it goes whole and drops once.
+	 */
+	@GameTest(maxTicks = 40)
+	public void giantHeartStandsAndBeats(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		GiantBeatingHeartBlock heart = (GiantBeatingHeartBlock) block("giant_beating_heart");
+		BlockPos master = new BlockPos(6, 2, 2);
+		BlockPos absolute = helper.absolutePos(master);
+		ServerPlayer builder = player(helper, new BlockPos(1, 2, 8), ItemStack.EMPTY);
+		BlockPos blocker = heart.partPos(absolute, Direction.NORTH, heart.cells().length - 1);
+		level.setBlock(blocker, Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
+		place(helper, builder, "giant_beating_heart", master, 0.0F);
+		helper.assertBlockNotPresent(heart, master);
+		level.setBlock(blocker, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+		place(helper, builder, "giant_beating_heart", master, 0.0F);
+		helper.assertTrue(heart.cells().length == 27, "27 blocks");
+		for (int part = 0; part < heart.cells().length; part++) {
+			BlockState state = level.getBlockState(heart.partPos(absolute, Direction.NORTH, part));
+			helper.assertTrue(state.is(heart) && heart.part(state) == part && state.getValue(GiantBeatingHeartBlock.FACING) == Direction.NORTH,
+					"Part " + part + " of the vat is in place");
+		}
+		helper.assertTrue(level.getBlockEntity(absolute) instanceof DecorationBlockEntity
+				&& level.getBlockEntity(heart.partPos(absolute, Direction.NORTH, GiantBeatingHeartBlock.MIDDLE)) == null,
+				"Its block entity is on its first block only");
+
+		BlockState resting = level.getBlockState(absolute);
+		helper.assertTrue(GiantBeatingHeartBlock.period(resting) == 30, "At 40 a minute it beats every 30 ticks");
+		resting.tick(level, absolute, level.getRandom());
+		BlockState beating = level.getBlockState(absolute);
+		helper.assertTrue(beating.getValue(GiantBeatingHeartBlock.BEAT) && beating.getSignal(level, absolute, Direction.NORTH) == 15
+				&& beating.getSignal(level, absolute, Direction.UP) == 0, "A beat gives 15 to the sides but not below");
+		BlockPos middle = heart.partPos(absolute, Direction.NORTH, GiantBeatingHeartBlock.MIDDLE);
+		helper.assertTrue(level.getBlockState(middle).getSignal(level, middle, Direction.NORTH) == 0, "Only its first block gives the signal");
+		beating.tick(level, absolute, level.getRandom());
+		helper.assertTrue(!level.getBlockState(absolute).getValue(GiantBeatingHeartBlock.BEAT), "and it stops after its pulse");
+		builder.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		use(helper, builder, new BlockPos(5, 3, 3), Direction.NORTH);
+		helper.assertTrue(level.getBlockState(absolute).getValue(GiantBeatingHeartBlock.TEMPO) == 1
+				&& GiantBeatingHeartBlock.period(level.getBlockState(absolute)) == 24, "Using any block of it changes its tempo to 50");
+		BlockPos farCorner = heart.partPos(absolute, Direction.NORTH, 2);
+		level.setBlock(farCorner.below(), Blocks.REDSTONE_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
+		level.getBlockState(absolute).setValue(GiantBeatingHeartBlock.BEAT, false).tick(level, absolute, level.getRandom());
+		helper.assertTrue(!level.getBlockState(absolute).getValue(GiantBeatingHeartBlock.BEAT), "Powered from below its far corner, it doesn't beat");
+		level.setBlock(farCorner.below(), Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
+
+		level.destroyBlock(heart.partPos(absolute, Direction.NORTH, 22), true);
+		for (int part = 0; part < heart.cells().length; part++) {
+			helper.assertFalse(level.getBlockState(heart.partPos(absolute, Direction.NORTH, part)).is(heart), "Broken anywhere, part " + part + " goes too");
+		}
+		helper.succeedWhen(() -> helper.assertTrue(drops(helper, item("giant_beating_heart")).stream().mapToInt(e -> e.getItem().getCount()).sum() == 1,
+				"It drops once"));
+	}
+
+	/**
+	 * The Tall Specimen Jar stands two blocks tall and the Specimen Tank 2 x 2 x 2, glowing; sneak-use on any block of one
+	 * puts in the next specimen on all its blocks; broken anywhere, each goes whole and drops once, keeping its specimen.
+	 */
+	@GameTest(maxTicks = 40)
+	public void biggerSpecimenJarsKeepTheirSpecimens(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		floor(helper);
+		ServerPlayer keeper = player(helper, new BlockPos(1, 2, 8), ItemStack.EMPTY);
+		SpecimenVesselBlock tall = (SpecimenVesselBlock) block("tall_specimen_jar");
+		BlockPos jar = new BlockPos(1, 2, 2);
+		place(helper, keeper, "tall_specimen_jar", jar, 0.0F);
+		helper.assertTrue(helper.getBlockState(jar).is(tall) && helper.getBlockState(jar.above()).is(tall) && tall.part(helper.getBlockState(jar.above())) == 1
+				&& helper.getBlockState(jar).getLightEmission() == TallSpecimenJarBlock.LIGHT
+				&& helper.getBlockState(jar).getValue(SpecimenVesselBlock.SPECIMEN) == SpecimenJarBlock.Specimen.EYE, "The tall jar stands two tall, glowing, with an eye");
+
+		SpecimenVesselBlock tank = (SpecimenVesselBlock) block("specimen_tank");
+		BlockPos master = new BlockPos(6, 2, 4);
+		BlockPos absolute = helper.absolutePos(master);
+		place(helper, keeper, "specimen_tank", master, 0.0F);
+		for (int part = 0; part < tank.cells().length; part++) {
+			BlockState state = level.getBlockState(tank.partPos(absolute, Direction.NORTH, part));
+			helper.assertTrue(state.is(tank) && tank.part(state) == part && state.getLightEmission() == SpecimenTankBlock.LIGHT,
+					"Part " + part + " of the tank is in place and glows");
+		}
+		keeper.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		keeper.setShiftKeyDown(true);
+		use(helper, keeper, new BlockPos(5, 3, 5), Direction.NORTH);
+		use(helper, keeper, jar.above(), Direction.NORTH);
+		keeper.setShiftKeyDown(false);
+		for (int part = 0; part < tank.cells().length; part++) {
+			helper.assertTrue(level.getBlockState(tank.partPos(absolute, Direction.NORTH, part)).getValue(SpecimenVesselBlock.SPECIMEN)
+					== SpecimenJarBlock.Specimen.TENTACLE, "Sneak-use puts a tentacle in every block of the tank: part " + part);
+		}
+		helper.assertTrue(helper.getBlockState(jar).getValue(SpecimenVesselBlock.SPECIMEN) == SpecimenJarBlock.Specimen.TENTACLE,
+				"and in the tall jar, used at its top");
+		use(helper, keeper, jar, Direction.NORTH);
+		helper.assertTrue(helper.getBlockState(jar).getValue(SpecimenVesselBlock.SPECIMEN) == SpecimenJarBlock.Specimen.TENTACLE,
+				"Used without sneaking, it keeps its specimen");
+
+		level.destroyBlock(tank.partPos(absolute, Direction.NORTH, 7), true);
+		level.destroyBlock(helper.absolutePos(jar.above()), true);
+		for (int part = 0; part < tank.cells().length; part++) {
+			helper.assertFalse(level.getBlockState(tank.partPos(absolute, Direction.NORTH, part)).is(tank), "Broken anywhere, part " + part + " goes too");
+		}
+		helper.assertFalse(helper.getBlockState(jar).is(tall), "and the tall jar goes whole");
+		helper.succeedWhen(() -> {
+			for (String id : List.of("tall_specimen_jar", "specimen_tank")) {
+				List<ItemEntity> dropped = drops(helper, item(id));
+				helper.assertTrue(dropped.size() == 1 && dropped.get(0).getItem().getCount() == 1, id + " drops once");
+				BlockItemStateProperties state = dropped.get(0).getItem().get(DataComponents.BLOCK_STATE);
+				helper.assertTrue(state != null && state.apply(block(id).defaultBlockState()).getValue(SpecimenVesselBlock.SPECIMEN)
+						== SpecimenJarBlock.Specimen.TENTACLE, id + " keeps its tentacle: " + state);
+			}
+		});
+	}
+
 	/** Recipes and loot tables load. */
 	@GameTest
 	public void workshopDataLoads(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		for (String id : List.of("horned_skull_cauldron", "horned_skull_cauldron_from_bones", "ember_bed", "brew_ladle", "floor_candelabrum",
 				"table_candelabrum", "wall_girandole", "branching_chandelier", "enchanted_broom", "dustpan", "broom_rack", "curiosity_cabinet", "bell_jar",
-				"moth_display_case", "jar_of_eyeballs", "beating_heart_jar", "bat_in_a_jar", "two_headed_snake_jar", "hand_in_a_jar")) {
+				"moth_display_case", "jar_of_eyeballs", "beating_heart_jar", "bat_in_a_jar", "two_headed_snake_jar", "hand_in_a_jar",
+				"giant_beating_heart", "tall_specimen_jar", "specimen_tank")) {
 			helper.assertTrue(level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id(id))).isPresent(), id + " has a recipe");
 		}
 		for (String id : List.of("horned_skull_cauldron", "ember_bed", "floor_candelabrum", "table_candelabrum", "wall_girandole", "branching_chandelier",
 				"enchanted_broom", "dustpan", "broom_rack", "curiosity_cabinet", "bell_jar", "moth_display_case", "jar_of_eyeballs", "beating_heart_jar",
-				"bat_in_a_jar", "two_headed_snake_jar", "hand_in_a_jar")) {
+				"bat_in_a_jar", "two_headed_snake_jar", "hand_in_a_jar", "giant_beating_heart", "tall_specimen_jar", "specimen_tank")) {
 			helper.assertTrue(level.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE,
 					Jugcraft.id("blocks/" + id))) != LootTable.EMPTY, id + "'s loot loads");
 		}

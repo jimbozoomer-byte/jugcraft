@@ -388,8 +388,8 @@ def farm_stand():
     for x in (-POST_X, POST_X):
         el.append(cube((x - 0.7, 0.0, 0.6), (x + 0.7, FRONT_POST_TOP, 2.0), faces(post, ("north", "south", "east", "west"), up=post_end)))
         el.append(cube((x - 0.7, 0.0, 14.0), (x + 0.7, 30.0, 15.4), faces(post, ("north", "south", "east", "west"), up=post_end)))
-    el += halves((-STAND_W, TABLE_TOP - 1.0, 0.6), (STAND_W, TABLE_TOP, 9.0), faces(top, ("up", "down"), north=apron, south=apron))
-    el += halves((-STAND_W + 0.2, TABLE_TOP - 3.2, 0.6), (STAND_W - 0.2, TABLE_TOP - 1.0, 1.0), faces(apron, ("north", "south")))
+    el += halves((-STAND_W, TABLE_TOP - 1.0, 0.6), (STAND_W, TABLE_TOP, 9.0), faces(top, ("up", "down"), north=apron, south=apron, east=apron, west=apron))
+    el += halves((-STAND_W + 0.2, TABLE_TOP - 3.2, 0.6), (STAND_W - 0.2, TABLE_TOP - 1.0, 1.0), faces(apron, ("north", "south", "down", "east", "west")))
     el += halves((-STAND_W, TABLE_TOP - 1.0, 9.0), (STAND_W, RISER_TOP, 15.4), faces(riser, ("north", "east", "west", "south"), up=top))
     # Crossbraces between the legs, low down.
     el += halves((-POST_X + 0.7, 1.6, 14.2), (POST_X - 0.7, 2.6, 15.2), faces(post, ALL6))
@@ -411,8 +411,8 @@ def farm_stand():
     # scalloped valance hanging from its front edge.
     slope = rotation((0.0, 30.0, 15.4), "x", -22.5)
     length = 15.4 / math.cos(math.radians(22.5)) + 0.6
-    for x0, x1 in ((-STAND_W - 0.5, 0.0), (0.0, STAND_W + 0.5)):
-        el.append(cube((x0, 30.0, 15.4 - length), (x1, 30.5, 15.4), faces(awning, ("up", "down", "north")), slope))
+    for x0, x1, outer in ((-STAND_W - 0.5, 0.0, "west"), (0.0, STAND_W + 0.5, "east")):
+        el.append(cube((x0, 30.0, 15.4 - length), (x1, 30.5, 15.4), faces(awning, ("up", "down", "north"), **{outer: ridge}), slope))
         el.append(plane_xy(x0, x1, 21.0, 23.6, -0.5, valance))
         el.append(cube((x0, 29.6, 14.6), (x1, 31.2, 16.0), faces(ridge, ALL6)))
     # The slate header board standing over the awning's front edge, braced back to the awning.
@@ -738,7 +738,7 @@ def build(name):
 def decor20_quads():
     """The renderer's models: the effigy's cloak (tinted with its dye), cut out round its tatters."""
     cloak = build("harvest_effigy_cloak")
-    return {"harvest_effigy_cloak": [dict(q, cutout=True) for q in quads(cloak.models["harvest_effigy_cloak"],
+    return {"harvest_effigy_cloak": [dict(q, cutout=True) for q in quads(d17d.single_sheets(cloak.models["harvest_effigy_cloak"]),
                                                                          {"p": "entity/harvest_effigy_cloak"})]}
 
 

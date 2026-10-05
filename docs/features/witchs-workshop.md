@@ -1,9 +1,9 @@
 # The Witch's Workshop
 
-Status: implemented. CI builds it and its game tests and client screenshots pass (below); not yet played by hand.
+Status: implemented. CI builds batch 17 as first released and its game tests and client screenshots pass (below); not yet played by hand. The bigger jars and the art fixes of 5 October 2026 are written but not yet built or run (see Verification).
 Proposal issue: none. The owner asked for it directly on 4 October 2026 ("Lets come up with another 20 very detailed well thought out additions to add for the halloween / fall season using the first 3 images for ideas of prop sets … lets do them piece by piece maybe 5 at a time"). These are prop sets 1–5 of the [Witching Season plan](witching-season.md), drawn from the reference pictures' cauldron, chandelier, broom and jars.
 Owner: @jimbozoomer-byte
-Target milestone and tier: Discovery tier for most sets; the Enchanted Broom needs Flying Ointment from the hex brews (a Bubbling Cauldron over a fire), and the Beating Heart Jar a brass nugget from the alloy smelter (Workshops tier).
+Target milestone and tier: Discovery tier for most sets; the Enchanted Broom needs Flying Ointment from the hex brews (a Bubbling Cauldron over a fire), and the Beating Heart Jar a brass nugget from the alloy smelter (Workshops tier). Of the bigger jars, the Giant's Beating Heart is Workshops tier (brass ingots and a Beating Heart Jar); the Tall Specimen Jar and Specimen Tank are Discovery tier (iron, glass and the batch 8 Specimen Jar).
 Primary specialty and supported player role: building, with useful machines for farmers and brewers. These props furnish a witch's workshop: a brewing corner, candlelight, a broom closet, a collector's cabinet, a shelf of oddities.
 
 ## Player experience
@@ -75,15 +75,36 @@ Squat glass jars on dark bases under iron lids, with paper labels:
    - It beats at 60, 80, 100 or 120 beats a minute; use it to change the tempo.
    - Each beat gives a two-tick signal of 15 to every side but the one below, and the heart swells with it.
    - A signal into its base stops it, and it starts again when that signal goes.
-3. **Bat in a Jar** (glass, an iron nugget, phantom membrane and leather): a bat hanging asleep from the lid. When a player comes within three blocks it wakes with a flap, squeaks and flutters round the jar for five seconds, then settles. It wakes again for the next player to come close.
+3. **Bat in a Jar** (glass, an iron nugget, phantom membrane and leather): a bat hanging asleep from the lid. When a player comes within three blocks it wakes with a flap, squeaks and flutters round the jar for five seconds, then settles. It wakes again for the next player to come close. Its jar is a little wider and taller than the others (12.4 pixels across, 15.4 tall), so the bat's wings stay inside the glass as it flies.
 4. **Two-Headed Snake Jar** (glass, an iron nugget, string and a slime ball): a coiled snake in pale green fluid whose two heads sway this way and that. Use the jar and both heads flick their tongues and hiss.
 5. **Hand in a Jar** (glass, an iron nugget, rotten flesh and a bone): a stitched hand floating in yellowed fluid, drumming its fingers one after another. While it has a redstone signal, it points at the nearest player.
+
+### 6. The bigger jars
+Added on 5 October 2026, when the owner asked for bigger jars. Each is several blocks placed and broken as one, like the Colossal Skull: it stands from the block aimed at to the placer's right, up and away, and isn't placed if anything is in the way. Breaking any block of it breaks it all and drops it once.
+1. **Giant's Beating Heart** (Workshops tier; five glass, a Beating Heart Jar, two brass ingots and a block of redstone): a giant's heart in a glass vat of red murk, three blocks wide, tall and deep, on an iron plinth with a brass gauge, under an iron lid. Its great vessels rise from the heart into three brass-collared tubes through the lid.
+   - **It is a slow redstone clock**: 40, 50, 60 or 72 beats a minute (use any block of it with an empty hand to change the tempo).
+   - Each beat gives a two-tick signal of 15 from its first block (bottom front corner on the placer's left) to every side but the one below, with a deep heartbeat.
+   - A redstone signal into any of its nine bottom blocks from below stops it, and it starts again when that signal goes.
+   - The heart swells with each beat: the atria first, then the ventricles a fifth of a second later (lub-dub), each settling over two-fifths of a second.
+2. **Tall Specimen Jar** (an iron ingot over a Specimen Jar over glass): the Specimen Jar drawn out two blocks tall on a wider iron foot, its fluid glowing (light 8).
+3. **Specimen Tank** (four iron ingots, four glass and a Tall Specimen Jar): a glass tank two blocks every way on an iron plinth, with iron corner posts and a hatch in the lid (light 10).
+   - Both hold one of the Specimen Jar's specimens (an eye, a tentacle, a pumpkin or a brain), drawn big, bobbing and turning slowly in the middle of the fluid among rising bubbles.
+   - Sneak-use any block of one to put in the next specimen. Broken, it keeps its specimen.
+   - They keep the small jar's look: the same green fluid, clear glass and iron fittings.
 
 ## Changes from the plan
 - The Branching Chandelier has sixteen candles, not thirteen: a candle in the middle of its crown would have stood in its own stem, so the top tier has four.
 - Things are floated with a plain use, not sneaking (vanilla skips a block's own use while a player sneaks holding something), so what floats is a curated item tag rather than "any item".
 - Recipes settled: two bones stand in for the goat horns, and the Jar of Eyeballs takes seven spider eyes (a crafting grid holds nine things in all).
 - The Ember Bed is a full block, so the cauldron stands on its stones rather than floating over a low fire.
+- **Art fixes, 5 October 2026** (the owner's feedback on the first screenshots):
+  - **Horned Skull Cauldron**: its pot is closed. Looking in, the old pot's walls showed the sky through their backs (the inside of a box has no faces). The neck and rim are now rings of boxes built by `flora_art.box_ring`, lined inside, and the empty pot shows a dark iron well. The ram skull has square, Minecraft-like eye sockets, and the brew's glow covers them exactly as a flat square.
+  - **Skulls everywhere** have square sockets: the Colossal Skull, the Bone Throne's crest, the Skull Footstool, the sarcophagi's skull lids, the bone piles and the ossuary wall (every skull drawn by `cute_art.skull_face` or `decor18_data.human_skull`). Glows on them are flat squares on the sockets, not round blobs with a glint.
+  - **Bat in a Jar**: the jar is wider and taller and the bat a touch smaller and nearer the middle, so its wingtips never pass through the glass (they reached 7.4 pixels from the middle in a jar 3.7 wide; now 5.4 in one 5.8 wide).
+  - **Clean jar fittings**: the Bat in a Jar's, Hand in a Jar's, Two-Headed Snake Jar's and Jar of Eyeballs' lids, bases and knobs are flat iron with a one-pixel bevel instead of speckled wrought iron, and their labels have a paper back. The Beating Heart Jar is left as it was.
+  - **Props that showed the sky through their backs** are closed: the Colossal Vertebra (its canal is now a dark well), Colossal Skull, Colossal Rib, Curiosity Cabinet (door posts and crest), Bell Jar (its shoulder), the four candelabra (drip pans are solid iron to their corners), Coffin Wardrobe, Iron-Bound Coffin (lid panel and hasp, seen open), Ribcage Bookcase, Grandfather Clock and the Farm Stand (table ends, apron and awning ends).
+  - **No doubled quads**: the client's cut-out quads (the bat's wings and the other batch 17 to 20 cut-outs, the Harvest Effigy's cloak, the spiderlings, the witchlights' glow and the lab table's eyes) are each one plane, drawn from both sides, instead of two planes back to back that flickered.
+  - **Clean wrought iron**: the candelabra's bars and knops, the moth case's frame and the Harvest Moon Lamp's iron are flat iron with a bevel, and the twisted bars (candelabra and witchlights) have even ridges, instead of speckle.
 
 ## Connections
 - Existing input producer:
@@ -114,6 +135,8 @@ Squat glass jars on dark bases under iron lids, with paper labels:
   - asleep, it doesn't tick at all.
 - **The heart jar** is a signal source and nothing more; its beats are scheduled ticks, one a beat.
 - **The bat jar** looks for a player within three blocks every ten ticks, nearby only.
+- **The Giant's Beating Heart** is a signal source and nothing more, like the heart jar it's made from: one scheduled tick a beat on its first block only, and the other 26 blocks never tick. It costs a Beating Heart Jar, two brass ingots and a block of redstone, more than the clock it replaces. Its signal can't reach below, so it can't stop itself.
+- **The Tall Specimen Jar and Specimen Tank** do nothing but glow; each costs the smaller jar it is made from, more iron and glass. Changing the specimen costs nothing and gives nothing.
 - **The client draws**: the eyes, the hand's pointing, the moths and the cabinet's doors are drawn by clients from what they already know. The server does nothing for them.
 - **Recipes**: each takes materials in and gives the prop; breaking gives the prop back. The Ember Bed makes two from four cobblestone and a coal, worth less than it uses.
 
@@ -123,16 +146,18 @@ Squat glass jars on dark bases under iron lids, with paper labels:
   - colouring, lighting and snuffing;
   - anointing, sweeping and racking;
   - placing things on show;
-  - the heart's tempo.
+  - the heart's tempo (and the Giant's Beating Heart's);
+  - the bigger jars' specimens.
 - **Build rights**: changing a cauldron, a candelabrum or a moth case needs them (the player's build ability), so the lairs' protection will cover them later.
 - **Saved**:
   - block state, and in block entities: the cauldron's potion and floating things, the broom's charge, the Dustpan's nine stacks, and the cabinet's, bell jar's and rack's things;
   - the cabinet's door swing and the snake's tongues are client animations, not saved.
-- **Drops on breaking**: the cabinet, bell jar, rack, cauldron and Dustpan spill what they hold.
+- **Drops on breaking**: the cabinet, bell jar, rack, cauldron and Dustpan spill what they hold. The bigger jars drop once, from their first block's loot table (the others match nothing); the Tall Specimen Jar and Specimen Tank keep their specimen on the item.
+- **Bigger jars**: every block of one is saved in its block state (`facing`, `part`, the heart's `beat` and `tempo`, a vessel's `specimen`); the block entity on the first block holds nothing and is there for drawing.
 - **New IDs**:
-  - blocks and items `horned_skull_cauldron`, `ember_bed`, `floor_candelabrum`, `table_candelabrum`, `wall_girandole`, `branching_chandelier`, `enchanted_broom`, `dustpan`, `broom_rack`, `curiosity_cabinet`, `bell_jar`, `moth_display_case`, `jar_of_eyeballs`, `beating_heart_jar`, `bat_in_a_jar`, `two_headed_snake_jar`, `hand_in_a_jar`;
+  - blocks and items `horned_skull_cauldron`, `ember_bed`, `floor_candelabrum`, `table_candelabrum`, `wall_girandole`, `branching_chandelier`, `enchanted_broom`, `dustpan`, `broom_rack`, `curiosity_cabinet`, `bell_jar`, `moth_display_case`, `jar_of_eyeballs`, `beating_heart_jar`, `bat_in_a_jar`, `two_headed_snake_jar`, `hand_in_a_jar`, and (the bigger jars) `giant_beating_heart`, `tall_specimen_jar`, `specimen_tank`;
   - the item `brew_ladle`;
-  - block entity types `horned_skull_cauldron`, `candelabrum`, `enchanted_broom`, `dustpan`, `showcase`, `moth_display_case`, `oddity_jar`;
+  - block entity types `horned_skull_cauldron`, `candelabrum`, `enchanted_broom`, `dustpan`, `showcase`, `moth_display_case`, `oddity_jar`, `giant_beating_heart`, `specimen_vessel`;
   - item tags `jugcraft:brooms` and `jugcraft:cauldron_floaters`;
   - their recipes.
 - **Feature switch**: the recipes follow the agriculture feature switch.
@@ -142,11 +167,23 @@ Squat glass jars on dark bases under iron lids, with paper labels:
 - **Models**: built on `tools/flora_art.py` by `tools/decor17_data.py`, which paints their textures by code (64 × 64, or 128 × 128 for the cauldron, candelabra, broom, cabinet and moth case).
 - **Art style**: the creature props (faces, bones, fur, scales, fire) are painted with the clean, cute painters in `tools/cute_art.py` since 5 October 2026, after the owner asked for simpler, smoother creatures ([ART_DIRECTION.md](../ART_DIRECTION.md#creatures-and-faces-cute-and-clean)).
 - **The 128 × 128 rule**: the toolkit's texture size is now a choice. `docs/ART_DIRECTION.md` and the audit allow 128 × 128 for a sculpted prop that packs many pieces.
-- **Client textures**: five small greyscale textures the client tints: brew, fume, wax, flame and glow.
+- **Client textures**: five small greyscale textures the client tints: brew, fume, wax, flame and glow (a flat square since 5 October 2026).
+- **The bigger jars' models**: each block of a multi-block prop has its own model, the prop's box cut at the block boundaries (`decor17_data.cell_part`), and a multipart block state picks it by `part` and turns it by `facing`. The heart and the specimens are client quads (`giant_heart_*`, `big_specimen_*`), modelled in the prop's frame. `MultiDecorationBlock.box(across, up, deep)` lists the cells in the order `decor17_data.cells` counts them.
 - **Moving parts and layout**: the moving parts are in `assets/jugcraft/decor17_quads.json`, and the candelabra's candle layout in `/jugcraft/candelabra.json`, which Java reads.
 - **Originality**: all original. The look follows the owner's reference pictures, and nothing is traced from them.
 
 ## Verification
+**Bigger jars and art fixes (5 October 2026)**: not yet built or run. Locally, with no Gradle and no game:
+- `python3 tools/generate_textures.py`, `python3 tools/generate_material_data.py`, `python3 tools/check_mod_data.py` (PASS, 1440 IDs) and `python3 scripts/check_repository.py` (PASS). The audit's Witch's Workshop check now also compares the bat jar's numbers and wing reach, the cauldron's square eye glow, and (a new check) the bigger jars' sizes, tempos, pulse, lub-dub, swell anchors, lights, specimen middles, scales and bubbles with `tools/decor17.py`, that the heart sits inside the murk at the peak of its swell, that the specimens fit their fluid, that every part model exists and both renderers are registered.
+- `javac` parse-only over every Java source: no errors. Nothing was compiled against Minecraft.
+- Drawn outside the game from the generated models and quads, from several angles each, looking into the empty cauldron, and with see-through pixels counted (the sky showing through the back of a face): the cauldron went from 20,319 such pixels over 24 views to 1, the other props listed above from hundreds or thousands to nearly none.
+- New server game tests in `WitchsWorkshopGameTests`, to run in CI:
+  - `giantHeartStandsAndBeats`: placed facing north it fills 27 blocks with its block entity on the first only; with a block in the way it isn't placed; its first block beats (15 to the sides, none below, none from the middle block), stops after its pulse, changes tempo when any block is used, doesn't beat with power under its far corner, and broken from its back it goes whole and drops once;
+  - `biggerSpecimenJarsKeepTheirSpecimens`: the tall jar stands two tall and the tank 2 × 2 × 2, glowing; sneak-use on a tank's upper block and the jar's top puts a tentacle in every block; a plain use changes nothing; broken anywhere each goes whole and drops once with its tentacle;
+  - `workshopDataLoads` now also loads their recipes and loot.
+- New client screenshots, to take in CI: `WitchsWorkshopClientGameTests` adds `jugcraft_witchs_workshop_cauldrons_inside` (an empty and a swiftness cauldron seen from above); `BiggerJarsClientGameTests` takes `jugcraft_bigger_jars`, `_giant_heart`, `_giant_heart_above`, `_specimens`, `_night` and `_giant_heart_night`.
+
+**Batch 17 as first released:**
 CI's Build workflow passed on 9447e0b7 (run 37219365133): the generated data matched, the audit passed, the mod built, every server game test passed (these eight among them), and all three client shards passed and took the screenshots below. Runs before it found, and the commits after them fixed:
 - 37217854334: names that are gone in 26.3 (the dye items, the cat's hiss, `Player.drop`, `hurtMarked`);
 - 37218300868: the same dye name in a game test;

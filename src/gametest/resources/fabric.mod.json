@@ -162,6 +162,7 @@
 			"io.github.jimbozoomer.jugcraft.test.ChurchyardOrnamentsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.HauntedHousePropsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.WitchsWorkshopClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BiggerJarsClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CryptAndOssuaryClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.LaboratoryLarderDiningClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PumpkinNightClientGameTests",

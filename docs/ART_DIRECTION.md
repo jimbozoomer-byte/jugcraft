@@ -6,6 +6,8 @@ Jugcraft's look changes with its tiers, the way real technology did: the early g
 - Detailed models built from boxes (see `tools/steampunk_models.py`): round prisms, gears, gauges, rivets, pipes. No flat cubes where a real machine would have shape.
 - **Things that are big in real life are big in the world.** A turbine, a foundry or a charging station takes several blocks; a hand tool stays in the hand.
 - Overlapping boxes never share a visible face plane (that flickers, z-fighting). The generators enforce it: `model_writer.separate_coplanar` runs on every model they write and pushes the smaller of two flush, differently drawn faces out by 0.02 pixels, so a band, dial or trim always draws in front of the body it sits on.
+- **Closed geometry.** Every box that can be seen from a side has a face on that side; a box whose inside can be looked into (a pot, a jar, a drawer, the end of a pipe) is built as a ring of boxes with an inner lining (`flora_art.box_ring`) or capped, never left as an open shell. Block models are drawn one-sided, so an open side shows the sky through the back of the far wall. Textures on an opaque piece are opaque to their corners (a round dish painted on a square face fills the corners with metal).
+- **One plane for a cut-out.** A flat cut-out the client draws (a wing, a cloak, a leaf) is one quad: the 26.3 cut-out entity render type draws both sides, so a second, reversed quad on the same plane only flickers against it (`decor17_data.single_sheets` keeps one). Its UVs stay inside its sprite.
 - Textures are deterministic (seeded) and opaque on blocks. They are 16×16, or 32×32, 64×64 or (for a sculpted prop's packed texture) 128×128 where the art needs the detail (see [High resolution](#high-resolution)).
 
 ## Texturing: keep it clean
@@ -18,10 +20,12 @@ On 4 October 2026 the owner rejected the noisy, rust-covered dieselpunk textures
 ## Creatures and faces: cute and clean
 On 5 October 2026 the owner found the Ember Bed's fire speckly and the Horned Skull Cauldron's nostrils ugly, and asked for every creature prop to be simplified: cute, or at least smooth, but still good-looking, after their reference pictures (the Frankenstein head above all). The painters in `tools/cute_art.py` draw this way, and every skull, bone, monster, bug, ghost and other creature prop should follow it:
 - **Two or three tones a material, no noise.** Fill flat, light the top and left edge, shade the bottom and right one. A rounded form gets a lighter band over its top and a darker one under it, nothing else.
-- **Simple faces.** Big round eye sockets with a white glint, or closed eyes drawn as one clean curve. No nose holes or nostrils. Teeth are a neat row of squares with a dark gap; a mouth is one clean line or curve. Rosy cheeks where it suits.
+- **Simple faces.** Living creatures get big round eyes with a white glint, or closed eyes drawn as one clean curve. No nose holes or nostrils. Teeth are a neat row of squares with a dark gap; a mouth is one clean line or curve. Rosy cheeks where it suits.
+- **Skulls have square sockets** (5 October 2026, the owner: Minecraft-like), each a quarter of the face wide: hard-edged dark plum, darkest under the brow and a step lighter along the far rim, over a one-texel lip of shaded bone, with no glint and no rounding (`cute_art.square_socket`, `block_skull_face`). A glow in a skull's eyes is a flat square laid exactly over the socket, just in front of it, never a round blob.
 - **Fire in smooth bands.** Rounded tongues of flame banded deep orange, orange, yellow and a pale core, standing on a glow of coals; never a scatter of random sparks.
 - **Pattern, not scatter.** Fur, scales, feathers, straw, quills and stone carvings are regular shapes (offset rows, even stripes, scallops), and moss or lichen sits in neat tufts at fixed places.
 - **Bright, friendly colours.** The monster is a bright green, bone a warm cream, sockets a soft dark plum rather than black.
+- **Metal fittings are clean too.** Lids, bases, knobs and wrought iron are a flat fill with a one-pixel bevel (`decor17_data.wrought_clean`, `lid_top_clean`), not speckle; a twisted bar is even diagonal ridges.
 
 ![Before and after: the hearth, the monster head, the Colossal Skull, a chimera and the crawling hand, the singing pumpkins and the Harvest Moon](images/cute_creatures_before_after.jpg)
 
