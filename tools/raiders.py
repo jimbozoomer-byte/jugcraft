@@ -2,7 +2,8 @@
 
 - Infantry: the Raider Grunt (a cleaver), the Raider Grenadier (lobs small grenades from range) and the Raider Officer
   (rallies the raiders near them; when they fall, the rest lose heart).
-- The Raider Walker: a raider-built copy of the Diesel Walker that wades in and punches, with a grenade launcher.
+- The Raider Walker: the Armoured Walker (batch 58, the owner's model) in raider paint. It wades in and rams with its
+  piston, and lobs grenades from its hull gun.
 - The Raider Blimp: a small airship that cruises over its target and drops bombs. Flak brings it down.
 - Raids: now and then a party marches on a player's base (or the town, if they are in it). It shows a bar, ends when
   every raider has fallen, and the next is a little stronger; if nobody fights it, it withdraws.
@@ -11,8 +12,8 @@ Every blast is a damage-only weapons/Blast: raiders never break, move or burn a 
 guns (batch 56) and town guards fight them. Raids can be switched off (raiders.enabled=false, or raiders.raids=off).
 
 Art is original: the uniforms (player skin layout, drawn with tools/town_skins.py's helpers), the raider paint, canvas
-and the insignia, all in the clean style. The walker and blimp reuse the Diesel Walker's and the Zeppelin's shapes
-(tools/mech.py, tools/zeppelin.py) in raider paint, the blimp at a little over half the zeppelin's size; they are
+and the insignia, all in the clean style. The walker and blimp reuse the Armoured Walker's and the Zeppelin's shapes
+(tools/armoured_walker.py, tools/zeppelin.py) in raider paint, the blimp at a little over half the zeppelin's size; they are
 exported to assets/jugcraft/raider_quads.json. tools/check_mod_data.py keeps the Java numbers the same as these.
 """
 import json
@@ -35,7 +36,7 @@ INFANTRY = {
 }
 # The walker and the blimp: (display name, max health, attack damage, armour, movement speed, width, height).
 MACHINES = {
-    "raider_walker": ("Raider Walker", 120, 14, 14, 0.22, 2.5, 4.25),
+    "raider_walker": ("Raider Walker", 120, 14, 14, 0.22, 2.6, 4.6),
     "raider_blimp": ("Raider Blimp", 50, 0, 2, 0.12, 2.8, 4.4),
 }
 BOMB = "raider_bomb"
@@ -113,6 +114,9 @@ REPAINT = {
     "dr_red": "rd_paint", "dr_rust": "rd_plate", "dr_rust_bare": "rd_plate", "dr_ribbed_rust": "rd_plate",
     "dr_blue": "rd_paint", "dz_canvas": "rd_canvas", "dz_canvas_stripe": "rd_canvas_stripe",
     "dz_canvas_nose": "rd_canvas_nose",
+    # The Armoured Walker (batch 58, the owner's model), which the raiders field as their walker.
+    "aw_plate": "rd_paint", "aw_plate_seam": "rd_paint", "aw_plate_dark": "rd_plate", "aw_leg": "rd_plate",
+    "aw_canvas": "rd_canvas",
 }
 BLIMP_SCALE = 0.55
 
@@ -129,11 +133,11 @@ def repaint(quads, scale=1.0):
 
 
 def export():
-    import mech
+    import armoured_walker
     import zeppelin
-    walker = mech.export()
+    walker = armoured_walker.export()
     blimp = zeppelin.export()
-    out = {name.replace("walker_", "raider_walker_"): repaint(quads) for name, quads in walker.items()}
+    out = {name.replace("armoured_walker", "raider_walker"): repaint(quads) for name, quads in walker.items()}
     out["raider_blimp_body"] = repaint(blimp["zeppelin_body"], BLIMP_SCALE)
     out["raider_blimp_propeller"] = repaint(blimp["zeppelin_propeller"], BLIMP_SCALE)
     return out

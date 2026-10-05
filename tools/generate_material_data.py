@@ -176,6 +176,8 @@ def assets():
     import fire_control
     fire_control.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import raiders
+    import armoured_walker
+    armoured_walker.write_all(write, ASSETS, DATA / MOD, lang, condition)
     raiders.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import zeppelin
     zeppelin.write_all(write, ASSETS, DATA / MOD, lang, condition)

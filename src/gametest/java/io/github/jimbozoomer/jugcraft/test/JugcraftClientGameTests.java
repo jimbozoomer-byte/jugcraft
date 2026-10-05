@@ -574,6 +574,20 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_raiders");
+
+			// The Armoured Walker (batch 58, the owner's Blender model) beside the raiders' walker in their paint.
+			server.runOnServer(minecraft -> {
+				ServerLevel overworld = minecraft.overworld();
+				io.github.jimbozoomer.jugcraft.walker.ArmouredWalker walker = new io.github.jimbozoomer.jugcraft.walker.ArmouredWalker(
+						io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.ARMOURED_WALKER, overworld);
+				walker.snapTo(x - 167.5, y, z - 6.5, -20.0F, 0.0F);
+				overworld.addFreshEntity(walker);
+			});
+			server.runCommand("tp @p %d %d %d 200 2".formatted(x - 170, y + 3, z + 2));
+			context.waitTicks(30);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_armoured_walker");
+			server.runCommand("kill @e[type=jugcraft:armoured_walker]");
 			for (String raider : new String[] {"raider_grunt", "raider_grenadier", "raider_officer", "raider_walker", "raider_blimp"}) {
 				server.runCommand("kill @e[type=jugcraft:" + raider + "]");
 			}

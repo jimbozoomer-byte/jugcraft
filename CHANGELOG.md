@@ -35,6 +35,20 @@ No numbered release yet. Everything below is on `main`.
 
 ### Arms IV, batch 47 (#170)
 
+### Unmerged: The Armoured Walker, batch 58
+- **Armoured Walker:** a heavy walker made from the owner's own Blender model:
+  - an octagonal riveted blue-grey hull with a framed gun port and cannon
+  - amber lamps, a chain slung across the front and a roof pouch
+  - a jointed tool arm and a piston ram arm
+  - thigh slabs, angled shins and hinged feet
+- Piloted like the Diesel Walker:
+  - **hold use:** fires the hull cannon (Heavy Shells, damage only, every 2 seconds)
+  - **attack:** rams with the piston (16 damage, throws hard)
+  - takes 90 damage to knock down
+  - crafted by upgrading a Diesel Walker with steel and pistons
+- The **Raider Walker** now uses the same model in raider paint. It rams with its piston and lobs grenades from its hull gun.
+- Three game tests and a screenshot scene. Record: [armoured-walker.md](docs/features/armoured-walker.md).
+
 ### Unmerged: The raider faction, batch 57
 - **Raiders:**
   - the **Grunt** (cleaver)

@@ -128,7 +128,15 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider {
 
 	/** Lobs a grenade (or, {@code heavy}, a bomb) from {@code thrower} so that it lands about where {@code target} stands. */
 	static void throwAt(ServerLevel level, LivingEntity thrower, LivingEntity target, boolean heavy) {
+		throwAt(level, thrower, target, heavy, null);
+	}
+
+	/** As above, launched from {@code from} (a walker's hull gun) rather than the thrower's hand. */
+	static void throwAt(ServerLevel level, LivingEntity thrower, LivingEntity target, boolean heavy, net.minecraft.world.phys.@Nullable Vec3 from) {
 		RaiderBomb bomb = new RaiderBomb(level, thrower, heavy);
+		if (from != null) {
+			bomb.setPos(from);
+		}
 		double dx = target.getX() - thrower.getX();
 		double dz = target.getZ() - thrower.getZ();
 		double dy = target.getY(0.3) - bomb.getY();

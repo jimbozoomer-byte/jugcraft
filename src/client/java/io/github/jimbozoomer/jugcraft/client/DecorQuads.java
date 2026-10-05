@@ -32,7 +32,8 @@ import org.jspecify.annotations.Nullable;
  * (tools/trenchworks.py: the searchlight's yoke, drum, lens and beam) and artillery_quads.json
  * (tools/artillery.py: the big guns and the observation balloon) and tower_gun_quads.json
  * (tools/tower_guns.py: the tower guns' plinths, turntables and barrels) and raider_quads.json
- * (tools/raiders.py: the Raider Walker's and Raider Blimp's parts in raider paint).
+ * (tools/raiders.py: the Raider Walker's and Raider Blimp's parts in raider paint) and armoured_walker_quads.json
+ * (tools/armoured_walker.py: the Armoured Walker's hull, legs, arms and piston).
  */
 public final class DecorQuads {
 	private static final List<Identifier> FILES = List.of(Jugcraft.id("decor_quads.json"), Jugcraft.id("decor7_quads.json"),
@@ -43,7 +44,8 @@ public final class DecorQuads {
 			Jugcraft.id("trench_quads.json"),
 			Jugcraft.id("artillery_quads.json"),
 			Jugcraft.id("tower_gun_quads.json"),
-			Jugcraft.id("raider_quads.json"));
+			Jugcraft.id("raider_quads.json"),
+			Jugcraft.id("armoured_walker_quads.json"));
 	private static @Nullable Map<String, QuadModel> models;
 
 	private DecorQuads() {

@@ -751,6 +751,70 @@ public class JugcraftGameTests {
 		helper.succeedWhen(() -> helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(), "The fist should hit the pig"));
 	}
 
+	private static io.github.jimbozoomer.jugcraft.walker.ArmouredWalker pilotedArmouredWalker(GameTestHelper helper, Vec3 at, ServerPlayer pilot) {
+		io.github.jimbozoomer.jugcraft.walker.ArmouredWalker walker = helper.spawn(
+				io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.ARMOURED_WALKER, at);
+		walker.setFuel(1000);
+		pilot.setPos(walker.getX(), walker.getY(), walker.getZ());
+		helper.assertTrue(pilot.startRiding(walker, true, true), "The pilot could not climb in");
+		return walker;
+	}
+
+	/** Batch 58: the Armoured Walker walks on fuel, as the Diesel Walker does. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 200)
+	public void armouredWalkerWalksOnFuel(GameTestHelper helper) {
+		walkerFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		var walker = pilotedArmouredWalker(helper, new Vec3(7.5, 1, 2.5), pilot);
+		Vec3 start = walker.position();
+		helper.onEachTick(() -> walker.steer(pilot, 1, 0, 0, 0, 0));
+		helper.runAfterDelay(40, () -> {
+			double walked = walker.position().subtract(start).horizontalDistance();
+			helper.assertTrue(walked > 3, "Holding forward should walk it forward, but it moved " + walked);
+			helper.assertTrue(walker.fuel() < 1000, "Walking should burn fuel");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Batch 58: holding use fires the hull cannon (a Heavy Shell toward where the pilot looks), at most once every
+	 * {@value io.github.jimbozoomer.jugcraft.walker.ArmouredWalker#CANNON_COOLDOWN} ticks.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 120, skyAccess = true)
+	public void armouredWalkerFiresItsCannon(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		var walker = pilotedArmouredWalker(helper, new Vec3(20.5, 1, 6.5), pilot);
+		pilot.getInventory().add(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 4));
+		Vec3 aim = helper.absoluteVec(new Vec3(20.5, 4, 40.5));
+		net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(44, 26, 44);
+		java.util.Set<java.util.UUID> shells = new java.util.HashSet<>();
+		helper.onEachTick(() -> {
+			pilot.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, aim);
+			walker.steer(pilot, 0, 0, 0, 1, 0);
+			for (var shell : helper.getLevel().getEntitiesOfClass(io.github.jimbozoomer.jugcraft.artillery.ArtilleryShell.class, area)) {
+				if (shells.add(shell.getUUID())) {
+					helper.assertTrue(shell.getDeltaMovement().z > 1.0, "The shell should fly where the pilot looks, not " + shell.getDeltaMovement());
+				}
+			}
+		});
+		helper.runAfterDelay(60, () -> {
+			helper.assertTrue(shells.size() == 2, "Sixty ticks of holding use should fire twice (once every 40), not " + shells.size());
+			helper.succeed();
+		});
+	}
+
+	/** Batch 58: attack rams the piston into what stands in front, throwing it. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 100)
+	public void armouredWalkerRams(GameTestHelper helper) {
+		walkerFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		var walker = pilotedArmouredWalker(helper, new Vec3(7.5, 1, 3.5), pilot);
+		net.minecraft.world.entity.Mob pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(7, 1, 6));
+		helper.runAfterDelay(5, () -> walker.steer(pilot, 0, 0, 0, 0, 1));
+		helper.succeedWhen(() -> helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(), "The ram should hit the pig"));
+	}
+
 	/** Batch 47: a Diesel Walker's fuel is saved with it. */
 	@GameTest
 	public void dieselWalkerKeepsFuel(GameTestHelper helper) {

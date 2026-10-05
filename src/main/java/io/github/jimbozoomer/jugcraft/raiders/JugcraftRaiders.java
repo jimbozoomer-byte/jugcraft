@@ -68,7 +68,7 @@ public final class JugcraftRaiders {
 		GRENADIER = infantry("raider_grenadier", 20, 3, 2, 0.28);
 		OFFICER = infantry("raider_officer", 32, 6, 6, 0.30);
 		WALKER = entity("raider_walker", EntityType.Builder.<RaiderWalker>of(RaiderWalker::new, MobCategory.MONSTER)
-				.sized(2.5F, 4.25F).eyeHeight(3.4F).notInPeaceful().clientTrackingRange(10));
+				.sized(2.6F, 4.6F).eyeHeight(3.5F).notInPeaceful().clientTrackingRange(10));
 		FabricDefaultAttributeRegistry.register(WALKER, machine("raider_walker", 120, 14, 14, 0.22, RaiderWalker::attributes));
 		BLIMP = entity("raider_blimp", EntityType.Builder.<RaiderBlimp>of(RaiderBlimp::new, MobCategory.MONSTER)
 				.sized(2.8F, 4.4F).eyeHeight(1.0F).notInPeaceful().clientTrackingRange(12));

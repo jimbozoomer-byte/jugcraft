@@ -207,14 +207,16 @@ public class DieselWalker extends Entity {
 			passenger.resetFallDistance();
 		}
 
-		boolean drilled = listening && drill > 0 && fuelled && pilot instanceof ServerPlayer player && drill(level, player);
+		boolean drilled = listening && drill > 0 && fuelled && pilot instanceof ServerPlayer player && useHeld(level, player);
 		if (!drilled) {
 			stopDrilling(level);
 		}
 		entityData.set(DRILLING, drilled);
 		boolean pressed = listening && punch > 0;
-		if (pressed && !punchHeld && fuelled && pilot instanceof ServerPlayer player && tickCount - lastPunch >= PUNCH_COOLDOWN) {
-			punch(level, player, heading);
+		if (pressed && !punchHeld && fuelled && pilot instanceof ServerPlayer player && tickCount - lastPunch >= attackCooldown()) {
+			lastPunch = tickCount;
+			entityData.set(PUNCHED_AT, tickCount);
+			attack(level, player, heading);
 		}
 		punchHeld = pressed;
 
@@ -234,6 +236,39 @@ public class DieselWalker extends Entity {
 		if (damage > 0 && tickCount % 10 == 0) {
 			damage = Math.max(0, damage - 1);
 		}
+	}
+
+	/**
+	 * One tick of the pilot holding use: the Diesel Walker drills. Returns whether it is drilling (which burns fuel and
+	 * spins the bit); a walker with another tool overrides this.
+	 */
+	protected boolean useHeld(ServerLevel level, ServerPlayer pilot) {
+		return drill(level, pilot);
+	}
+
+	/** The pilot pressed attack (at most every {@link #attackCooldown()} ticks): the Diesel Walker punches. */
+	protected void attack(ServerLevel level, ServerPlayer pilot, Vec3 heading) {
+		punch(level, pilot, heading);
+	}
+
+	/** Ticks between attacks. */
+	protected int attackCooldown() {
+		return PUNCH_COOLDOWN;
+	}
+
+	/** Damage a player must deal (with no long break) to knock it down. */
+	protected int health() {
+		return HEALTH;
+	}
+
+	/** What it drops when knocked down. */
+	protected ItemStack dropStack() {
+		return new ItemStack(JugcraftWalkers.DIESEL_WALKER_ITEM);
+	}
+
+	/** Where the pilot sits, in blocks, before turning with the walker. */
+	protected Vec3 seat() {
+		return SEAT;
 	}
 
 	/** One tick of drilling the block the pilot looks at; false if there is nothing it can drill. */
@@ -282,8 +317,6 @@ public class DieselWalker extends Entity {
 
 	/** The fist: hits every living thing in a box just in front, for the pilot. */
 	private void punch(ServerLevel level, ServerPlayer pilot, Vec3 heading) {
-		lastPunch = tickCount;
-		entityData.set(PUNCHED_AT, tickCount);
 		Vec3 centre = position().add(heading.scale(2.2)).add(0, 1.6, 0);
 		AABB reach = new AABB(centre, centre).inflate(1.6);
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, reach, e -> e != pilot && e.isAlive())) {
@@ -305,7 +338,7 @@ public class DieselWalker extends Entity {
 
 	@Override
 	protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
-		return SEAT.yRot(-getYRot() * Mth.DEG_TO_RAD);
+		return seat().yRot(-getYRot() * Mth.DEG_TO_RAD);
 	}
 
 	@Override
@@ -323,8 +356,8 @@ public class DieselWalker extends Entity {
 			return true;
 		}
 		damage += amount;
-		if (damage >= HEALTH) {
-			spawnAtLocation(level, new ItemStack(JugcraftWalkers.DIESEL_WALKER_ITEM));
+		if (damage >= health()) {
+			spawnAtLocation(level, dropStack());
 			discard();
 		}
 		return true;
