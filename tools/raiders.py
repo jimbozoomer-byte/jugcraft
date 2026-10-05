@@ -64,6 +64,11 @@ WALKER_LAUNCH_MAX = 24
 BLIMP_CRUISE = 16
 BLIMP_BOMB_COOLDOWN = 50
 BLIMP_BOMB_REACH = 3
+# Siege ladders: how long a grunt must be stuck against a wall (ticks), the tallest it climbs, and how long a ladder
+# lasts before it crumbles (ticks). Only where mob griefing is on; they drop nothing.
+LADDER_STUCK = 40
+LADDER_MAX = 8
+LADDER_TTL = 1200
 
 # Raids. The server looks every RAID_CHECK_TICKS; a player is raided only after GRACE days of play, at most once every
 # INTERVAL days (each per world, text options raiders.grace_days and raiders.interval_days), RAID_CHANCE of the
@@ -77,6 +82,10 @@ RAID_TIMEOUT = 12000
 ABANDON_TICKS = 2400
 ABANDON_RANGE = 160
 MAX_LEVEL = 5
+# Raider camps: one chunk in CAMP_RARITY (in the plains, savanna and badlands), on flat ground only.
+CAMP_RARITY = 400
+CAMP_LOOT = [("minecraft:gunpowder", 1, 4), ("minecraft:iron_nugget", 2, 8), (f"{MOD}:heavy_shell", 1, 3),
+             (f"{MOD}:grenade", 0, 2), ("minecraft:bread", 1, 3), (f"{MOD}:steel_plate", 0, 2)]
 # Text options and their defaults (config/JugcraftConfig.java).
 OPTIONS = {"raiders.raids": "on", "raiders.grace_days": "3", "raiders.interval_days": "3", "raiders.walkers": "on",
            "raiders.blimps": "on"}
@@ -89,8 +98,10 @@ def party(level):
 
 
 ENTITIES = {**{k: v[0] for k, v in INFANTRY.items()}, **{k: v[0] for k, v in MACHINES.items()}, BOMB: "Raider Bomb"}
-ITEMS = {INSIGNIA: "Raider Insignia"}
-TOOLTIPS = {INSIGNIA: "Torn from a raider officer's sleeve: proof of a raid beaten off."}
+ITEMS = {INSIGNIA: "Raider Insignia", "raid_horn": "Raider War Horn"}
+BLOCKS = {"siege_ladder": "Siege Ladder"}
+TOOLTIPS = {INSIGNIA: "Torn from a raider officer's sleeve: proof of a raid beaten off. Three make a Raider War Horn.",
+            "raid_horn": "Blow it to call a raid on your base now, at the world's raid level. Used up when it brings one."}
 LANG = {
     "event.jugcraft.raid": "Raid (level %s)",
     "message.jugcraft.raid.coming": "Raiders are coming! Their engines rumble to the %s.",
@@ -98,6 +109,13 @@ LANG = {
     "message.jugcraft.raid.withdrawn": "The raiders withdraw.",
     "message.jugcraft.raid.dir.north": "north", "message.jugcraft.raid.dir.south": "south",
     "message.jugcraft.raid.dir.east": "east", "message.jugcraft.raid.dir.west": "west",
+    "message.jugcraft.raid_horn.off": "Raids are switched off on this server",
+    "message.jugcraft.raid_horn.dimension": "Only the Overworld's raiders answer the horn",
+    "message.jugcraft.raid_horn.peaceful": "No raiders come in peaceful",
+    "message.jugcraft.raid_horn.under_way": "A raid is already under way",
+    "message.jugcraft.raid_horn.no_room": "The raiders found nowhere near to gather",
+    "advancements.jugcraft.raid_beaten.title": "Beat Them Back",
+    "advancements.jugcraft.raid_beaten.description": "See a raid through until every raider has fallen",
 }
 
 # Loot: (item, min, max, player kill only). Small: a raid comes at most every few days, and costs the fight.
@@ -167,6 +185,36 @@ def write_all(write, assets, data, lang, condition):
             pools.append(pool)
         write(data / "loot_table" / "entities" / f"{entity}.json",
               {"type": "minecraft:entity", "pools": pools, "random_sequence": f"{MOD}:entities/{entity}"})
+    for block, name in BLOCKS.items():
+        lang[f"block.{MOD}.{block}"] = name
+        ref = f"{MOD}:block/{block}"
+        write(assets / "models" / "block" / f"{block}.json",
+              {"parent": "minecraft:block/ladder", "textures": {"texture": f"{MOD}:block/rd_ladder", "particle": f"{MOD}:block/rd_ladder"}})
+        write(assets / "blockstates" / f"{block}.json", {"variants": {
+            f"facing={f}": ({"model": ref, "y": y} if y else {"model": ref})
+            for f, y in {"north": 0, "east": 90, "south": 180, "west": 270}.items()}})
+    write(data / "worldgen" / "feature" / "raider_camp.json", {"type": f"{MOD}:raider_camp"})
+    write(data / "worldgen" / "placed_feature" / "raider_camp.json", {
+        "feature": f"{MOD}:raider_camp",
+        "placement": [{"type": "minecraft:rarity_filter", "chance": CAMP_RARITY}, {"type": "minecraft:in_square"},
+                      {"type": "minecraft:surface_water_depth_filter", "max_water_depth": 0},
+                      {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"}, {"type": "minecraft:biome"}]})
+    write(data / "loot_table" / "chests" / "raider_camp.json", {
+        "type": "minecraft:chest", "random_sequence": f"{MOD}:chests/raider_camp",
+        "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": item,
+                                            "modifier": {"type": "minecraft:set_count",
+                                                         "count": {"type": "minecraft:uniform", "min": low, "max": high}}}]}
+                  for item, low, high in CAMP_LOOT]})
+    write(data / "recipe" / "raid_horn.json", {
+        "fabric:load_conditions": condition(FEATURE), "type": "minecraft:crafting_shaped", "category": "misc",
+        "pattern": ["III", " H "], "key": {"I": f"{MOD}:{INSIGNIA}", "H": "minecraft:goat_horn"},
+        "result": {"id": f"{MOD}:raid_horn", "count": 1}})
+    write(data / "advancement" / "raid_beaten.json", {
+        "parent": "minecraft:adventure/root",
+        "display": {"icon": {"id": f"{MOD}:{INSIGNIA}"}, "title": {"translate": "advancements.jugcraft.raid_beaten.title"},
+                    "description": {"translate": "advancements.jugcraft.raid_beaten.description"},
+                    "frame": "challenge", "show_toast": True, "announce_to_chat": True},
+        "criteria": {"done": {"trigger": "minecraft:impossible"}}})
     # Written compact: it is thousands of quads.
     (assets / "raider_quads.json").write_text(json.dumps(export(), separators=(",", ":")) + "\n", encoding="utf-8")
 
@@ -276,6 +324,12 @@ SKINS = {
 }
 
 
+def add_tags(tags):
+    for block in BLOCKS:
+        tags.add("block", "minecraft:climbable", f"{MOD}:{block}")
+        tags.add("block", "minecraft:mineable/axe", f"{MOD}:{block}")
+
+
 def write_skins(out):
     out.mkdir(parents=True, exist_ok=True)
     for name, (seed, outfit) in SKINS.items():
@@ -347,7 +401,41 @@ def insignia():
     return img
 
 
+def ladder():
+    """Rough raider poles and lashed rungs, see-through between them."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    wood = [(70, 52, 34), (92, 70, 46), (114, 88, 58)]
+    for y in range(16):
+        for x, c in ((1, wood[2]), (2, wood[1]), (13, wood[2]), (14, wood[0])):
+            clean_metal.put(img, x, y, c)
+    for y0 in (2, 7, 12):
+        for x in range(3, 13):
+            clean_metal.put(img, x, y0, wood[2])
+            clean_metal.put(img, x, y0 + 1, wood[0])
+        for x in (2, 13):
+            clean_metal.put(img, x, y0, STRIPE[0])
+    return img
+
+
+def horn():
+    """The war horn: a curled horn bound in red cloth with a brass mouthpiece."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    bone = [(150, 136, 110), (186, 170, 140), (214, 200, 170)]
+    for i, (x, y) in enumerate(((3, 12), (4, 11), (5, 10), (6, 9), (7, 8), (8, 7), (9, 6), (10, 5), (11, 4), (12, 3))):
+        r = 1 + i // 3
+        for dx in range(-r, r + 1):
+            clean_metal.put(img, min(15, max(0, x + dx)), y, bone[1] if dx < r else bone[0])
+        clean_metal.put(img, x, y - 1, bone[2])
+    for x, y in ((6, 9), (7, 9), (8, 8), (7, 8)):
+        clean_metal.put(img, x, y, STRIPE[1])
+    for x, y in ((2, 13), (3, 13)):
+        clean_metal.put(img, x, y, BRASS)
+    return img
+
+
 def draw_all(save):
+    save(ladder(), "block", "rd_ladder")
+    save(horn(), "item", "raid_horn")
     save(paint(), "block", "rd_paint")
     save(plate(), "block", "rd_plate")
     save(canvas(), "block", "rd_canvas")

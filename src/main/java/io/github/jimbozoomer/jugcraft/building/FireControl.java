@@ -58,6 +58,9 @@ public final class FireControl {
 	public static final int SENTRY_SCAN = 10;
 	/** Ticks between the table's own updates (its comparator reading). */
 	public static final int TABLE_INTERVAL = 10;
+	/** A creeping barrage: how far (blocks) the target steps down range after each salvo, and how many steps it takes. */
+	public static final int CREEP_STEP = 5;
+	public static final int CREEP_STEPS = 6;
 	/** The sector widths, in degrees, that sneak-using a table cycles through. */
 	public static final int[] SECTORS = {90, 180, 270, 360};
 

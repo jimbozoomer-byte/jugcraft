@@ -521,7 +521,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
@@ -809,7 +809,7 @@ def check_raiders():
                "BOMB_RADIUS": raiders.BOMB_BLAST[0], "BOMB_DAMAGE": f"{raiders.BOMB_BLAST[1]}F"}
     for const in ("GRENADE_COOLDOWN", "GRENADE_MIN_RANGE", "GRENADE_MAX_RANGE", "RALLY_TICKS", "RALLY_RADIUS", "RALLY_EFFECT",
                   "ROUT_TICKS", "WALKER_PUNCH_COOLDOWN", "WALKER_LAUNCH_COOLDOWN", "WALKER_LAUNCH_MIN", "WALKER_LAUNCH_MAX",
-                  "BLIMP_CRUISE", "BLIMP_BOMB_COOLDOWN", "BLIMP_BOMB_REACH"):
+                  "BLIMP_CRUISE", "BLIMP_BOMB_COOLDOWN", "BLIMP_BOMB_REACH", "LADDER_STUCK", "LADDER_MAX", "LADDER_TTL"):
         numbers[const] = getattr(raiders, const)
     for const, value in numbers.items():
         if f" {const} = {value};" not in java:
@@ -854,7 +854,7 @@ def check_fire_control():
         if f".strength({hardness}F, {blast}F)" not in java:
             err(f"FireControl.java does not give {block} the strength tools/fire_control.py does ({hardness}, {blast})")
     for const in ("MAX_GUNS", "LINK_RANGE", "SHEAF_SPACING", "SENTRY_RANGE", "SENTRY_MIN_RANGE", "CHECK_FIRE", "SENTRY_SCAN",
-                  "TABLE_INTERVAL"):
+                  "TABLE_INTERVAL", "CREEP_STEP", "CREEP_STEPS"):
         if f" {const} = {getattr(fire_control, const)};" not in java:
             err(f"FireControl.{const} differs from tools/fire_control.py ({getattr(fire_control, const)})")
     sectors = ", ".join(str(s) for s in fire_control.SECTORS)

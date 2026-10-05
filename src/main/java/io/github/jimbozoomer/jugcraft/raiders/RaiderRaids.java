@@ -373,6 +373,11 @@ public final class RaiderRaids {
 			for (ServerPlayer player : List.copyOf(bar.getPlayers())) {
 				player.sendSystemMessage(Component.translatable(won ? "message.jugcraft.raid.won" : "message.jugcraft.raid.withdrawn"));
 				if (won) {
+					// Everyone who saw it through earns Beat Them Back.
+					var advancement = world.getServer().getAdvancements().get(Jugcraft.id("raid_beaten"));
+					if (advancement != null) {
+						player.getAdvancements().award(advancement, "done");
+					}
 					world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE,
 							SoundSource.PLAYERS, 1.0F, 1.0F);
 				}

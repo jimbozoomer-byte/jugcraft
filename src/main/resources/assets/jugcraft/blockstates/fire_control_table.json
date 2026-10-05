@@ -9,6 +9,9 @@
     "facing=north,mode=parallel": {
       "model": "jugcraft:block/fire_control_table_parallel"
     },
+    "facing=north,mode=creeping": {
+      "model": "jugcraft:block/fire_control_table_creeping"
+    },
     "facing=north,mode=sentry": {
       "model": "jugcraft:block/fire_control_table_sentry"
     },
@@ -22,6 +25,10 @@
     },
     "facing=east,mode=parallel": {
       "model": "jugcraft:block/fire_control_table_parallel",
+      "y": 90
+    },
+    "facing=east,mode=creeping": {
+      "model": "jugcraft:block/fire_control_table_creeping",
       "y": 90
     },
     "facing=east,mode=sentry": {
@@ -40,6 +47,10 @@
       "model": "jugcraft:block/fire_control_table_parallel",
       "y": 180
     },
+    "facing=south,mode=creeping": {
+      "model": "jugcraft:block/fire_control_table_creeping",
+      "y": 180
+    },
     "facing=south,mode=sentry": {
       "model": "jugcraft:block/fire_control_table_sentry",
       "y": 180
@@ -54,6 +65,10 @@
     },
     "facing=west,mode=parallel": {
       "model": "jugcraft:block/fire_control_table_parallel",
+      "y": 270
+    },
+    "facing=west,mode=creeping": {
+      "model": "jugcraft:block/fire_control_table_creeping",
       "y": 270
     },
     "facing=west,mode=sentry": {

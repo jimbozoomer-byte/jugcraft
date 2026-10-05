@@ -444,8 +444,19 @@ public abstract class CrewedGun extends Entity {
 		super.remove(reason);
 	}
 
-	/** The yaw and elevation the gun should turn to, or null to hold still. */
+	/**
+	 * The yaw and elevation the gun should turn to, or null to hold still: the gunner's own mark; else, for a gun linked
+	 * to a fire control table on a fire mission, the table's point for it; else a nearby spotter's mark, or where the
+	 * gunner looks.
+	 */
 	private float @Nullable [] wantedAim(ServerLevel level, ServerPlayer gunner, Vec3 pivot) {
+		if (Spotting.own(level, gunner) == null) {
+			FireControlTableBlock.Entity table = director(level);
+			Vec3 point = table != null && table.mode().mission() ? table.aimPoint(getUUID()) : null;
+			if (point != null) {
+				return outOfRange(gunner, solve(point, pivot));
+			}
+		}
 		BlockPos target = Spotting.target(level, gunner, pivot);
 		if (target == null && highArc()) {
 			// A mortar lobs at the block its gunner looks at.
@@ -460,7 +471,11 @@ public abstract class CrewedGun extends Entity {
 			// Direct fire where the gunner looks.
 			return new float[] {limitYaw(gunner.getYRot()), Mth.clamp(-gunner.getXRot(), minPitch(), maxPitch())};
 		}
-		float[] aim = solve(Vec3.atCenterOf(target).add(0, 0.5, 0), pivot);
+		return outOfRange(gunner, solve(Vec3.atCenterOf(target).add(0, 0.5, 0), pivot));
+	}
+
+	/** Passes an aim through, telling the gunner once when there is none (the point is out of reach). */
+	private float @Nullable [] outOfRange(ServerPlayer gunner, float @Nullable [] aim) {
 		if (aim == null) {
 			if (!warned) {
 				gunner.sendOverlayMessage(Component.translatable("message.jugcraft.artillery.out_of_range"));

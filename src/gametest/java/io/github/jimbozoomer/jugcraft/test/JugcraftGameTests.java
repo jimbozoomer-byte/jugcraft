@@ -1472,6 +1472,34 @@ public class JugcraftGameTests {
 				target -> target instanceof io.github.jimbozoomer.jugcraft.raiders.Raider);
 		helper.assertTrue(grunt.getHealth() == grunt.getMaxHealth(), "A raider's blast should spare the raider");
 		helper.assertTrue(pig.getHealth() < pig.getMaxHealth(), "A raider's blast should hurt the pig");
+	/**
+	 * Fire control extras: a creeping barrage fires its first salvo on the target, then each salvo after steps the point
+	 * {@value io.github.jimbozoomer.jugcraft.building.FireControl#CREEP_STEP} blocks further down range, starting again after
+	 * {@value io.github.jimbozoomer.jugcraft.building.FireControl#CREEP_STEPS} steps; setting a new target starts it afresh.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
+	public void creepingBarrageWalksDownRange(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CREEPING);
+		var table = helper.getBlockEntity(new BlockPos(8, 1, 2), io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		var mode = io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CREEPING;
+		table.setTarget(helper.absolutePos(new BlockPos(8, 0, 20)));
+		Vec3 start = table.aimPoint(battery.getUUID());
+		int step = io.github.jimbozoomer.jugcraft.building.FireControl.CREEP_STEP;
+		int steps = io.github.jimbozoomer.jugcraft.building.FireControl.CREEP_STEPS;
+		helper.assertTrue(table.fire(mode), "A creeping barrage with a target should fire");
+		helper.assertTrue(table.aimPoint(battery.getUUID()).distanceTo(start) < 1.0E-6, "The first salvo lands on the target itself");
+		helper.assertTrue(table.fire(mode), "and the second fires too");
+		Vec3 next = table.aimPoint(battery.getUUID());
+		helper.assertTrue(Math.abs(next.z - start.z - step) < 1.0E-6 && Math.abs(next.x - start.x) < 1.0E-6,
+				"The second salvo should land " + step + " blocks further down range, not at " + next.subtract(start));
+		for (int i = 2; i <= steps; i++) {
+			table.fire(mode);
+		}
+		helper.assertTrue(table.aimPoint(battery.getUUID()).distanceTo(start) < 1.0E-6, "After " + steps + " steps it starts again");
+		table.fire(mode);
+		table.setTarget(helper.absolutePos(new BlockPos(8, 0, 20)));
+		helper.assertTrue(table.creep() == 0 && table.aimPoint(battery.getUUID()).distanceTo(start) < 1.0E-6,
+				"Setting the target again starts the barrage afresh");
 		helper.succeed();
 	}
 
@@ -1596,6 +1624,100 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/**
+	 * Raider extras: grunts marching on an objective behind a wall they cannot path round prop siege ladders up it, which
+	 * are climbable and drop nothing.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 600, skyAccess = true)
+	public void siegeLaddersGoUpWalls(GameTestHelper helper) {
+		raiderFloor(helper);
+		for (int x = 0; x < 44; x++) {
+			for (int y = 1; y <= 5; y++) {
+				helper.setBlock(new BlockPos(x, y, 14), Blocks.STONE_BRICKS);
+			}
+		}
+		ServerLevel level = helper.getLevel();
+		var raid = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.start(level, helper.absolutePos(new BlockPos(20, 1, 30)),
+				helper.absolutePos(new BlockPos(20, 1, 6)), 1, level.getRandom());
+		helper.succeedWhen(() -> {
+			boolean ladder = false;
+			for (int x = 0; x < 44 && !ladder; x++) {
+				for (int y = 1; y <= 5 && !ladder; y++) {
+					ladder = io.github.jimbozoomer.jugcraft.raiders.SiegeLadderBlock.is(helper.getBlockState(new BlockPos(x, y, 13)));
+				}
+			}
+			helper.assertTrue(ladder, "A grunt stuck at the wall should have propped a siege ladder against it");
+			helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.SIEGE_LADDER.defaultBlockState()
+					.is(net.minecraft.tags.BlockTags.CLIMBABLE), "A siege ladder should be climbable");
+			io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.withdraw(level, raid);
+		});
+	}
+
+	/**
+	 * Raider extras: the Raider War Horn calls a raid at the world's raid level on the blower's base, or refuses (and is
+	 * kept) while another raid is under way.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 100, skyAccess = true)
+	public void raidHornCallsARaid(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setPos(helper.absoluteVec(new Vec3(20.5, 1, 20.5)));
+		player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.RAID_HORN));
+		int before = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raids(level).size();
+		var result = io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.RAID_HORN.use(level, player, net.minecraft.world.InteractionHand.MAIN_HAND);
+		var raids = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raids(level);
+		if (before > 0) {
+			// Another test's raid is under way: the horn must refuse and start nothing.
+			helper.assertTrue(result == net.minecraft.world.InteractionResult.FAIL && raids.size() == before, "The horn should refuse while a raid is under way");
+		} else if (result == net.minecraft.world.InteractionResult.SUCCESS) {
+			helper.assertTrue(raids.size() == 1, "Blowing the horn should start one raid");
+			var raid = raids.get(0);
+			helper.assertTrue(raid.objective().equals(player.blockPosition()) && raid.level() == io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.raidLevel(level),
+					"It should come for the blower's base at the world's raid level");
+			io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.withdraw(level, raid);
+		} else {
+			// Nowhere loaded and open for the party to gather (the test area's surroundings): refused, nothing started.
+			helper.assertTrue(raids.isEmpty(), "A refused horn should start nothing");
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * Raider extras: a raider camp on flat ground has its sandbag ring, campfire, tents and a supply barrel with its loot
+	 * table, held by a garrison of four raiders who never despawn; on uneven ground none is built.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", skyAccess = true)
+	public void raiderCampHoldsItsGround(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = helper.absolutePos(new BlockPos(14, 1, 14));
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderCampFeature.build(level, origin, level.getRandom()),
+				"A camp should be built on flat ground");
+		helper.assertBlockPresent(Blocks.CAMPFIRE, new BlockPos(14, 1, 14));
+		helper.assertBlockPresent(Blocks.BARREL, new BlockPos(17, 1, 16));
+		var barrel = helper.getBlockEntity(new BlockPos(17, 1, 16), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderCampFeature.LOOT.equals(barrel.getLootTable()), "The barrel should hold the camp's loot");
+		var raiders = level.getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry.class,
+				new net.minecraft.world.phys.AABB(origin).inflate(8));
+		helper.assertTrue(raiders.size() == 4 && raiders.stream().allMatch(net.minecraft.world.entity.Mob::isPersistenceRequired),
+				"Four raiders should hold the camp, for good, not " + raiders.size());
+		// A tall step in the ground: no camp.
+		for (int x = 32; x < 44; x++) {
+			for (int z = 30; z < 44; z++) {
+				for (int y = 1; y <= 4; y++) {
+					helper.setBlock(new BlockPos(x, y, z), Blocks.STONE);
+				}
+			}
+		}
+		helper.assertFalse(io.github.jimbozoomer.jugcraft.raiders.RaiderCampFeature.build(level, helper.absolutePos(new BlockPos(32, 1, 32)),
+				level.getRandom()), "No camp on uneven ground");
+		for (var raider : raiders) {
+			raider.discard();
+		}
+		helper.succeed();
+	}
+
 	/** Batch 57: a blimp climbs to cruise well above what it hunts. */
 	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 300, skyAccess = true)
 	public void blimpCruisesOverItsQuarry(GameTestHelper helper) {
@@ -1609,6 +1731,26 @@ public class JugcraftGameTests {
 			}
 			helper.assertTrue(blimp.getY() > start + 8, "The blimp should climb toward its cruising height: at " + blimp.getY()
 					+ " from " + start + ", hunting " + blimp.getTarget() + ", moving " + blimp.getDeltaMovement() + ", removed " + blimp.isRemoved());
+	 * Fire control extras: a gunner aboard a linked gun, with no mark of their own, has the gun laid on the table's point
+	 * (whichever way they look); they still choose when it fires.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 200, skyAccess = true)
+	public void crewedGunFollowsTheTable(GameTestHelper helper) {
+		var battery = linkedBattery(helper, io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Mode.CONVERGE);
+		var table = helper.getBlockEntity(new BlockPos(8, 1, 2), io.github.jimbozoomer.jugcraft.building.FireControlTableBlock.Entity.class);
+		// Off to the side of the battery's start, so it has to turn to it.
+		BlockPos target = helper.absolutePos(new BlockPos(30, 0, 30));
+		table.setTarget(target);
+		ServerPlayer gunner = helper.makeMockServerPlayerInLevel();
+		gunner.setPos(battery.getX(), battery.getY(), battery.getZ());
+		helper.assertTrue(gunner.startRiding(battery, true, true), "The gunner could not climb aboard");
+		io.github.jimbozoomer.jugcraft.artillery.Spotting.clear(gunner);
+		helper.onEachTick(() -> gunner.setYRot(90.0F));
+		helper.succeedWhen(() -> {
+			Vec3 to = Vec3.atCenterOf(target).subtract(battery.position());
+			float wanted = (float) Math.toDegrees(Math.atan2(-to.x, to.z));
+			float off = Math.abs(net.minecraft.util.Mth.wrapDegrees(battery.aimYaw(0) - wanted));
+			helper.assertTrue(off < 4.0F, "The crewed gun should turn to the table's target (yaw " + wanted + "), not " + battery.aimYaw(0));
 		});
 	}
 

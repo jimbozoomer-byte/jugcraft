@@ -51,6 +51,10 @@ public final class JugcraftRaiders {
 	public static final int BLIMP_CRUISE = 16;
 	public static final int BLIMP_BOMB_COOLDOWN = 50;
 	public static final int BLIMP_BOMB_REACH = 3;
+	/** Siege ladders: how long a grunt must be stuck against a wall (ticks), the tallest it climbs, and how long a ladder lasts. */
+	public static final int LADDER_STUCK = 40;
+	public static final int LADDER_MAX = 8;
+	public static final int LADDER_TTL = 1200;
 
 	public static EntityType<RaiderInfantry> GRUNT;
 	public static EntityType<RaiderInfantry> GRENADIER;
@@ -59,6 +63,8 @@ public final class JugcraftRaiders {
 	public static EntityType<RaiderBlimp> BLIMP;
 	public static EntityType<RaiderBomb> BOMB;
 	public static Item INSIGNIA;
+	public static Item RAID_HORN;
+	public static net.minecraft.world.level.block.Block SIEGE_LADDER;
 
 	private JugcraftRaiders() {
 	}
@@ -83,6 +89,24 @@ public final class JugcraftRaiders {
 				tooltip.accept(Component.translatable("tooltip.jugcraft.raider_insignia").withStyle(ChatFormatting.GRAY));
 			}
 		});
+		ResourceKey<Item> hornKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("raid_horn"));
+		RAID_HORN = Registry.register(BuiltInRegistries.ITEM, hornKey, new RaidHornItem(new Item.Properties().setId(hornKey).stacksTo(1)
+				.rarity(Rarity.RARE)));
+		ResourceKey<net.minecraft.world.level.block.Block> ladderKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("siege_ladder"));
+		SIEGE_LADDER = Registry.register(BuiltInRegistries.BLOCK, ladderKey, SiegeLadderBlock.create(
+				net.minecraft.world.level.block.state.BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.LADDER)
+						.strength(0.2F).noLootTable().setId(ladderKey)));
+		// Raider camps (raider extras): rare, out in the plains, savanna and badlands.
+		Registry.register(BuiltInRegistries.FEATURE, Jugcraft.id("raider_camp"), new RaiderCampFeature());
+		if (io.github.jimbozoomer.jugcraft.config.JugcraftConfig.isFeatureEnabled(FEATURE)) {
+			net.fabricmc.fabric.api.biome.v1.BiomeModifications.addFeature(
+					net.fabricmc.fabric.api.biome.v1.BiomeSelectors.foundInOverworld().and(
+							net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags.IS_PLAINS)
+									.or(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags.IS_SAVANNA))
+									.or(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags.IS_BADLANDS))),
+					net.minecraft.world.level.levelgen.GenerationStep.Decoration.SURFACE_STRUCTURES,
+					ResourceKey.create(Registries.PLACED_FEATURE, Jugcraft.id("raider_camp")));
+		}
 		RaiderRaids.register();
 	}
 
