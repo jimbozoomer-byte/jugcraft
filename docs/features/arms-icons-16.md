@@ -28,10 +28,19 @@ Every arm's inventory icon is redrawn at vanilla's own size, 16×16, in the owne
   - the zweihander has leather on its ricasso and parrying lugs;
   - the nodachi has a longer, wider blade than the katana;
   - the pike has langets and a ring, where the javelin has a thin shaft.
-- **The 3D models in the hand stay,** as the owner asked. Their palettes are a little stronger, so they match the new
-  icons:
-  - bronze is a warmer, redder copper-bronze;
-  - steel is a brighter blued steel.
+- **The 3D models in the hand stay,** as the owner asked. Their palettes change with the icons', in the colours the owner
+  chose from two options on 5 October 2026 ("I like the alternate versions for steel and bronze"):
+  - bronze is a tan gold (#7e5222 to #f6d696), apart from vanilla's copper and matching the mod's bronze ingots;
+  - steel is a dark blue-grey (#4a5262 to #d0d8e4), apart from vanilla's iron and matching the mod's steel.
+- **The big arms show the whole weapon.** The first 16×16 drafts of nine kinds were cropped, so their guards and grips
+  filled half the icon. The owner said: "redo Sabre, Zweihander, Moonblade, Greatsword, Battleblade, Executioner,
+  Halberd, Longsword, Nodachi. I get that those are big but just cutting them off doesn't really work well".
+  - They are redrawn to fit the full diagonal at their true proportions: a blade two thirds of the length (nine or ten
+    steps of fifteen), a slim guard, a short grip and a small pommel. The halberd has a full-length haft and a compact
+    head.
+  - Two designs were made for each and judged against the old 32 and 48-pixel icons' proportions and the owner's sheet,
+    then critiqued and checked as a family. Small to large at 2×, they read: dagger, katana, rapier and estoc, longsword
+    and sabre, zweihander, greatsword and the broad blades.
 
   The longbows, arbalests, shields and the Arms VII variants take the same palettes, so they shift slightly too.
 
@@ -97,7 +106,7 @@ Not applicable: no gameplay change.
 
 | Check | Result |
 |---|---|
-| `python3 tools/generate_textures.py` | Run. 209 textures changed, all under `textures/item/`: 34 kinds' icons and models in bronze and steel, plus the bows, arbalests, shields, 20 variants and one smithing pattern re-tinted by the stronger palettes. Running it again changes nothing. |
+| `python3 tools/generate_textures.py` | Run. 209 textures differ from main, all under `textures/item/`: 34 kinds' icons and models in bronze and steel, plus the bows, arbalests, shields, 20 variants and one smithing pattern re-tinted by the new palettes. Running it again changes nothing. |
 | Each map's 16 rows of 16 known symbols | Run: all 38 pass. |
 | Generator output against the preview renderer | Compared pixel by pixel: bronze is identical. Steel differs only in the haft and grip, which the generator draws in steel's dark wood and rubber (the 3D models' materials). |
 | `python3 tools/check_mod_data.py` | PASS: 1437 material IDs, data files and recipe audit. |

@@ -46,8 +46,9 @@ class Material:
 # Tones (an index into Material.tones()).
 OUT_DARK, OUT_LIGHT, DARK, MID, LIGHT, HIGHLIGHT = range(6)
 
-BRONZE = Material((61, 27, 12), (106, 46, 20), (142, 64, 28), (196, 100, 46), (228, 140, 74), (248, 196, 138))
-STEEL = Material((38, 40, 48), (74, 78, 90), (108, 114, 128), (158, 164, 178), (202, 208, 220), (244, 246, 250))
+# The owner's chosen bronze (a tan gold, apart from vanilla's copper) and steel (a dark blue-grey, apart from iron).
+BRONZE = Material((62, 36, 16), (94, 59, 25), (126, 82, 34), (180, 128, 60), (220, 170, 92), (246, 214, 150))
+STEEL = Material((30, 33, 41), (52, 57, 69), (74, 82, 98), (110, 120, 137), (152, 162, 180), (208, 216, 228))
 BRASS = Material((62, 42, 6), (100, 70, 12), (140, 104, 20), (200, 160, 42), (242, 218, 106), (255, 242, 176))
 GUNMETAL = Material((22, 24, 30), (38, 42, 50), (54, 58, 68), (86, 92, 104), (134, 142, 156), (174, 182, 194))
 LEATHER = Material((45, 28, 14), (58, 34, 20), (74, 42, 24), (98, 58, 34), (122, 74, 44), (142, 90, 56), shine=False)

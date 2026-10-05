@@ -10,7 +10,8 @@ No numbered release yet. Everything below is on `main`.
 
 ### Unmerged: Arms icons in the owner's 16×16 style
 - **Every arm's inventory icon is redrawn at 16×16** in the owner's manner: on the diagonal, a one-pixel outline in each part's own dark tone, flat tones lit from the top left, chunky parts that read at a glance. Each kind is one map of letters in `tools/arms_icons/` that the owner can edit.
-- **The 3D models in the hand stay**; their palettes are a little stronger to match (a redder bronze, a brighter steel), which also re-tints the bows, arbalests, shields and some variants slightly. Record: [arms-icons-16.md](docs/features/arms-icons-16.md).
+- **The big arms show the whole weapon**: the longsword, greatsword, zweihander, executioner, battleblade, moonblade, sabre, nodachi and halberd fit the full diagonal at their true proportions.
+- **The 3D models in the hand stay**; bronze becomes the owner's tan gold and steel a dark blue-grey, in the icons and models alike, which also re-tints the bows, arbalests, shields and some variants. Record: [arms-icons-16.md](docs/features/arms-icons-16.md).
 
 ### Cute, clean creature decorations: batches 15 to 20 repainted (#191)
 - **Smooth fire**: the Ember Bed's hearth now burns in smooth bands of colour on a glow of coals, and the Horned Skull Cauldron's ram skull has big round sockets and no nostrils.
