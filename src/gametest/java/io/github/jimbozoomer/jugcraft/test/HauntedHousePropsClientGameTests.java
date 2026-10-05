@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
  * Client game test for the haunted house's props: a parlour open to the south, its dark oak walls and ceiling strung with
  * spider webs, pillar candles of each count lit on a long table, two monster's heads on pedestals (one awake), flying
  * eyeballs hovering about the room staring at the player, and the five harvest plushes on a shelf behind the candles. By day, close up,
- * and by candlelight at night. CI job {@code client}.
+ * and by candlelight at night, with the eyeballs close up at night and one seen from behind. CI job {@code client}.
  */
 public class HauntedHousePropsClientGameTests implements FabricClientGameTest {
 	@Override
@@ -66,6 +66,10 @@ public class HauntedHousePropsClientGameTests implements FabricClientGameTest {
 			server.runCommand("time set 18000");
 			context.waitTicks(20);
 			shoot(context, singleplayer, x, y + 1, z + 1, 180, 10, "jugcraft_haunted_house_props_night");
+			// The eyeballs by candlelight, close: each glowing iris on its white, with nothing glowing round it.
+			shoot(context, singleplayer, x + 1, y + 1, z, 180, 8, "jugcraft_haunted_house_eyeballs_night");
+			// One from behind (it stares at the player, not this camera): its wings' backs and its nerve.
+			watchFrom(context, singleplayer, origin, new Vec3(3.5, 0.6, -5.9), 0.0F, 2.0F, "jugcraft_haunted_house_eyeball_back");
 			server.runCommand("time set noon");
 			server.runCommand("gamerule minecraft:advance_time true");
 		}
