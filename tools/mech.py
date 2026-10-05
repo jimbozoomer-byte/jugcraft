@@ -69,8 +69,9 @@ def body():
     # The chest: a front wall with the core, side walls and a tall backrest; the pilot sits on the floor between them.
     m.append(box((-16, 30, 6), (16, 40, 10), {"*": RED}))
     m.append(box((-16.5, 39, 5.5), (16.5, 41, 10.5), BAND))
+    # The side walls stand a quarter pixel proud of the backrest's sides, back and foot, so the two never share a plane.
     for x0, x1 in ((-16, -12), (12, 16)):
-        m.append(box((x0, 30, -10), (x1, 48, 10), RED))
+        m.append(box((x0 - 0.25 if x0 < 0 else x0, 29.75, -10.25), (x1 + 0.25 if x1 > 0 else x1, 48, 10.25), RED))
         m.append(box((x0 - 0.5, 44, -10.5), (x1 + 0.5, 45.5, 10.5), BAND))
     m.append(box((-16, 30, -10), (16, 54, -6), {"*": RUST, "north": RUST_BARE}))
     m.append(box((-12, 30, -6), (12, 31, 6), {"*": RUST, "up": GRATE}))
@@ -101,13 +102,14 @@ def core():
 
 
 def leg():
-    """One leg below its hip: thigh, knee, shin and a heavy foot pointing forward."""
-    m = [box((-4, -12, -4), (4, 0, 4), SKID)]
-    m += cyl("x", -12, 0, 4.5, -5, 5, NUT, BAND)
+    """One leg below its hip: thigh, knee, shin and a heavy foot pointing forward. The thigh stops a quarter pixel inside
+    the pelvis's side planes (which it swings across), and the knee drum stands a quarter pixel proud of the shin."""
+    m = [box((-3.75, -12, -4), (3.75, 0, 4), SKID)]
+    m += cyl("x", -12, 0, 4.5, -5.25, 5.25, NUT, BAND)
     m.append(box((-5, -22, -5), (5, -13, 5), {"*": RUST}))
     m.append(box((-5.5, -16, -5.5), (5.5, -15, 5.5), BAND))
     m.append(box((-6, -26, -7), (6, -22, 9), {"*": RED, "down": SKID}))
-    m.append(box((-6.5, -26, 7), (6.5, -24, 10), BAND))
+    m.append(box((-6.5, -25.75, 7), (6.5, -24, 10), BAND))
     return m
 
 
@@ -127,7 +129,7 @@ def drill_arm():
     """The right arm: upper arm, forearm and the drill housing (the bit is drawn and spun separately)."""
     m = [box((-3, -12, -3), (3, 0, 3), SKID)]
     m.append(box((-5, -20, -4), (5, -12, 8), PATINA))
-    m += cyl("z", 0, -16, 5, 6, 12, BAND, RUST_BARE)
+    m += cyl("z", 0, -16, 5.25, 6, 12, BAND, RUST_BARE)
     m.append(box((-6, -13, 0), (6, -11.5, 8), COPPER))
     return m
 

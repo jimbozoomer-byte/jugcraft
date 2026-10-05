@@ -18,6 +18,7 @@ import math
 from PIL import Image
 
 from steampunk_models import box, cyl
+from tower_guns import TUBE, bore
 from zeppelin import tiled_quads
 
 MOD = "jugcraft"
@@ -104,8 +105,9 @@ def side_frame(sign):
     m.append(box((s0, 9, 4), (s1, 21, 16), {"*": RIVETED}))
     m.append(box((s0 - 0.25 * sign, 20, 3.5), (s1 + 0.25 * sign, 21.5, 16.5), {"*": GILT}))
     gx = outer + 3 * sign
-    m += cyl("z", gx, 15, 1.2, 16, 25, SKID)
+    m += cyl("z", gx, 15, 1.2, 16, 25, TUBE)
     m += cyl("z", gx, 15, 1.8, 16, 18.5, BRASS)
+    m.append(bore(25, 0.5, 1.2, gx, 15))
     return m
 
 
@@ -135,21 +137,25 @@ def body():
 
 
 def turret():
-    """The turret, about its own pivot: a lacquered drum with a brass ring, a copper-dome cupola and the mantlet."""
+    """The turret, about its own pivot: a lacquered drum with a brass ring, a copper-dome cupola and the mantlet. The
+    ring reaches down a pixel to sit on the casemate's gilt band, so no slit shows under the turret."""
     m = []
     m += cyl("y", 0, 0, 11, 0, 8, RIVETED, LACQUER)
-    m += cyl("y", 0, 0, 11.6, 0, 1.5, BRASS)
+    m += cyl("y", 0, 0, 11.6, -1, 1.5, BRASS)
     m += cyl("y", 0, -4, 4.5, 8, 11, DOME)
     m.append(box((-5, 2, 8), (5, 10, 13), {"*": BRASS}))
     return m
 
 
 def barrel():
-    """The cannon, about the barrel's pivot, pointing along +z."""
+    """The cannon, about the barrel's pivot, pointing along +z: a steel tube in a lacquered sleeve, ending in a brass
+    muzzle band whose steel face holds the bore. The tube ends inside the band, so no faces share a plane; the sleeve
+    starts a quarter pixel further back, so at full recoil its end stays clear of the mantlet's face."""
     m = []
-    m += cyl("z", 0, 0, 2.2, 3, 36, SKID)
-    m += cyl("z", 0, 0, 3.0, 3, 9, LACQUER)
-    m += cyl("z", 0, 0, 3.0, 32, 36, BRASS)
+    m += cyl("z", 0, 0, 2.2, 3, 34, TUBE)
+    m += cyl("z", 0, 0, 3.0, 2.75, 9, LACQUER)
+    m += cyl("z", 0, 0, 3.0, 32, 36, BRASS, TUBE)
+    m.append(bore(36, 1.6, 3.0))
     return m
 
 

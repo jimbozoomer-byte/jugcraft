@@ -63,8 +63,8 @@ public class TowerGunRenderer extends EntityRenderer<TowerGun, TowerGunRenderer.
 
 	@Override
 	protected AABB getBoundingBoxForCulling(TowerGun gun, float partialTick) {
-		// The barrel reaches well past the footprint.
-		return gun.getBoundingBox().inflate(7.0, 4.0, 7.0);
+		// The barrel reaches well past the footprint: the Grand Mortar's muzzle stands 8.6 blocks up at full elevation.
+		return gun.getBoundingBox().inflate(7.0, 5.0, 7.0);
 	}
 
 	@Override

@@ -23,9 +23,8 @@ Java: artillery/TowerGun and artillery/JugcraftTowerGuns; client/TowerGunRendere
 import json
 import math
 
-from PIL import Image
-
 import clean_metal
+import gun_icons
 from steampunk_models import box, cyl
 from zeppelin import tiled_quads
 
@@ -78,10 +77,20 @@ TOOLTIPS = {
     "great_shell": "Ammunition for the Grand Mortar. Its burst hurts creatures up to 7 blocks away but never breaks blocks.",
 }
 
-YELLOW, GUNMETAL, HAZARD, CONCRETE, DECK, OLIVE = "ar_yellow", "dp_gunmetal", "dp_hazard", "ar_concrete", "ar_deck", "dp_olive"
-SKID, BAND, NUT, COPPER, SOOT, GRILLE = "dr_skid", "dr_band", "dr_nut", "dr_copper_pipe", "dr_soot", "dp_grille"
+YELLOW, HAZARD, CONCRETE, DECK, OLIVE = "ar_yellow", "dp_hazard", "ar_concrete", "ar_deck", "ar_olive"
+SKID, BAND, NUT, COPPER, GRILLE = "dr_skid", "dr_band", "dr_nut", "dr_copper_pipe", "dp_grille"
 BRASS, ARMOR, AMBER = "ik_brass", "ar_armor", "dr_amber_on"
-PORT, WARNING, SLOTS = "tg_port", "tg_warning", "tg_slots"
+SLOTS = "tg_slots"
+# The guns' own clean steel (5 October 2026, the owner: "parts of the grand mortar are invisible ... same with the barrels
+# on most of the big guns, lots of their textures are conflicting"). The big faces are mapped by world position in
+# 16-pixel cells, so a framed panel with corner bolts (dp_gunmetal) turned every barrel and housing into a stack of
+# crates. These tile without a visible frame: tg_tube is a near-flat steel for every barrel and muzzle (a tube shows it
+# in four orientations, so it has no direction), tg_steel seamless coursed plate for housings, roofs and brakes, tg_soot
+# a flat sooty dark for vents and exhaust mouths. Bores, port covers and hazard signs are decals ("!" faces), each drawn
+# whole on its own plate.
+TUBE, STEEL, SOOT = "tg_tube", "tg_steel", "tg_soot"
+GUNMETAL = STEEL
+PORT, WARNING, BORE = "tg_port!", "tg_warning!", "tg_bore!"
 
 
 def items():
@@ -142,17 +151,34 @@ def shell_rack(x, z, count):
     """A rack of shells standing on the deck."""
     m = []
     for i in range(count):
-        m += cyl("y", x + i * 3.5, z, 1.4, 3, 10, BRASS, GUNMETAL)
+        m += cyl("y", x + i * 3.5, z, 1.4, 3, 10, BRASS, TUBE)
     return m
 
 
+def bore(z, r, ring, cx=0.0, cy=0.0):
+    """A muzzle's bore: a plate 0.1 pixel proud of the muzzle face at z (facing +z), drawn once with the whole tg_bore
+    decal, a dark round bore on barrel steel. The decal's dark disc spans three quarters of the plate, so the bore's
+    radius is r, or less where the plate must stay inside three quarters of the muzzle's radius `ring` (where the
+    stepped muzzle's face is solid). The plate stands off the muzzle face, so the two never share a plane."""
+    s = math.floor(min(r / 0.75, ring * 0.75) * 4) / 4
+    return box((cx - s, cy - s, z), (cx + s, cy + s, z + 0.1), {"*": TUBE, "south": BORE})
+
+
+def port_plate(face, x, y0, y1, z0, z1, proud=0.5):
+    """A round port cover (tg_port, drawn whole) on a yellow plate standing `proud` pixels off a wall whose outer face is
+    at x, facing east or west."""
+    x0, x1 = (x, x + proud) if face == "east" else (x - proud, x)
+    return box((x0, y0, z0), (x1, y1, z1), {"*": YELLOW, face: PORT})
+
+
 def cradle_side(x0, x1, ty, tz, depth, port_r):
-    """One yellow cradle cheek rising to the trunnion, with a round port hub (an X-braced cover) on its outer face."""
+    """One yellow cradle cheek rising to the trunnion, with a square port plate (a round X-braced cover, drawn whole)
+    over the trunnion on its outer face."""
     m = [box((x0, 3, tz - depth), (x1, ty - 6, tz + depth * 0.7), YELLOW)]
     m.append(box((x0, ty - 6, tz - depth * 0.65), (x1, ty + port_r * 0.6, tz + depth * 0.5), YELLOW))
     m.append(box((x0 - 0.5, 3, tz - depth - 0.5), (x1 + 0.5, 4.5, tz + depth * 0.7 + 0.5), BAND))
-    outer = (x1, x1 + 1.5) if x0 >= 0 else (x0 - 1.5, x0)
-    m += cyl("x", ty, tz, port_r, outer[0], outer[1], YELLOW, PORT)
+    face, wall = ("east", x1) if x0 >= 0 else ("west", x0)
+    m.append(port_plate(face, wall, ty - port_r, ty + port_r, tz - port_r, tz + port_r, 1.5))
     return m
 
 
@@ -173,13 +199,15 @@ def pipe_run(points, r=1.2):
 
 def fat_barrel(r, length, breech):
     """A fat black barrel along +z from its trunnion: a yellow breech housing, a sleeve over the first stretch,
-    reinforcing bands and a heavy muzzle ring with a sooty bore."""
+    reinforcing bands and a heavy muzzle ring round a dark bore. The tube ends inside the muzzle ring, so their faces
+    never share a plane."""
     m = [box((-breech, -breech, -breech * 1.5), (breech, breech, breech * 0.3), YELLOW)]
     m.append(box((-breech - 0.5, -breech - 0.5, -breech * 0.6), (breech + 0.5, breech + 0.5, -breech * 0.6 + 2), BAND))
-    m += cyl("z", 0, 0, r, breech * 0.3, length, GUNMETAL, SOOT)
-    m += cyl("z", 0, 0, r + 1.5, breech * 0.3, length * 0.35, GUNMETAL)
-    m += cyl("z", 0, 0, r + 1, length * 0.68, length * 0.68 + 3, GUNMETAL)
-    m += cyl("z", 0, 0, r + 1.5, length - 6, length, GUNMETAL, SOOT)
+    m += cyl("z", 0, 0, r, breech * 0.3, length - 3, TUBE)
+    m += cyl("z", 0, 0, r + 1.5, breech * 0.3, length * 0.35, TUBE)
+    m += cyl("z", 0, 0, r + 1, length * 0.68, length * 0.68 + 3, TUBE)
+    m += cyl("z", 0, 0, r + 1.5, length - 6, length, TUBE)
+    m.append(bore(length, r * 0.75, r + 1.5))
     return m
 
 
@@ -219,15 +247,21 @@ def bastion_autocannon_turntable():
     tz = g["trunnion"][2]
     m = deck(18)
     m += railing(16.5, 3, 10, 135, 225)
-    # The gunhouse: a yellow armoured box open at the back, with the barrels' mantlet slot at the front.
-    m.append(box((-13, 3, -6), (-8, ty + 4, tz + 4), {"*": YELLOW, "west": PORT}))
-    m.append(box((8, 3, -6), (13, ty + 4, tz + 4), {"*": YELLOW, "east": PORT}))
-    m.append(box((-13, ty + 4, -6), (13, ty + 6, tz + 4), {"*": YELLOW, "up": GUNMETAL}))
+    # The gunhouse: a yellow armoured box open at the back. Its roof stops short of the front over a mantlet slot, so the
+    # barrels' housing swings up through it at every elevation instead of cutting the roof.
+    m.append(box((-13, 3, -6), (-8, ty + 4, tz + 4), YELLOW))
+    m.append(box((8, 3, -6), (13, ty + 4, tz + 4), YELLOW))
+    m.append(box((-13, ty + 4, -6), (13, ty + 6, -1), {"*": YELLOW, "up": GUNMETAL}))
+    m.append(box((-13, ty + 4, -1), (-8.5, ty + 6, tz + 4), {"*": YELLOW, "up": GUNMETAL}))
+    m.append(box((8.5, ty + 4, -1), (13, ty + 6, tz + 4), {"*": YELLOW, "up": GUNMETAL}))
     m.append(box((-13.5, 3, -6.5), (13.5, 4.5, tz + 4.5), BAND))
-    # Ammunition drums on the sides and a sight on the roof.
+    # A port cover on each wall, above the ammunition drums.
+    m.append(port_plate("west", -13, ty - 3.5, ty + 3.5, 1, 8))
+    m.append(port_plate("east", 13, ty - 3.5, ty + 3.5, 1, 8))
+    # Ammunition drums on the sides and a sight on the roof, behind the slot.
     for x in (-15, 15):
         m += cyl("z", x, 9, 3, -4, 4, OLIVE, BRASS)
-    m.append(box((-1, ty + 6, -2), (1, ty + 9, 0), NUT))
+    m.append(box((-1, ty + 6, -4), (1, ty + 9, -2), NUT))
     return m
 
 
@@ -235,9 +269,10 @@ def bastion_autocannon_barrel():
     g = GUNS["bastion_autocannon"]
     m = [box((-8, -5, -6), (8, 5, 4), {"*": GUNMETAL, "south": YELLOW})]
     for x in g["barrels"]:
-        m += cyl("z", x, 0, 1.5, 4, g["muzzle"], GUNMETAL, SOOT)
-        m += cyl("z", x, 0, 2.4, 4, 12, GUNMETAL)
-        m += cyl("z", x, 0, 2.2, g["muzzle"] - 5, g["muzzle"], GUNMETAL, SOOT)
+        m += cyl("z", x, 0, 1.5, 4, g["muzzle"] - 3, TUBE)
+        m += cyl("z", x, 0, 2.4, 4, 12, TUBE)
+        m += cyl("z", x, 0, 2.2, g["muzzle"] - 5, g["muzzle"], TUBE)
+        m.append(bore(g["muzzle"], 1.1, 2.2, x))
     return m
 
 
@@ -278,7 +313,7 @@ def grand_mortar_barrel():
     m = fat_barrel(11, g["muzzle"], 14)
     # Twin recuperator cylinders riding on top of the breech.
     for x in (-5, 5):
-        m += cyl("z", x, 16, 3, -18, 22, GUNMETAL, NUT)
+        m += cyl("z", x, 16, 3, -18, 22, TUBE, NUT)
     return m
 
 
@@ -294,16 +329,22 @@ def fortress_rifle_turntable():
     tz = g["trunnion"][2]
     m = deck(30)
     m += railing(28.5, 3, 12, 135, 225, step=15)
-    # The armoured gunhouse: slab sides with ports, a sloped-looking roof in two steps and vents at the back.
-    m.append(box((-24, 3, -24), (-14, ty + 8, tz), {"*": YELLOW, "west": PORT}))
-    m.append(box((14, 3, -24), (24, ty + 8, tz), {"*": YELLOW, "east": PORT}))
-    m.append(box((-24, ty + 8, -24), (24, ty + 11, tz - 4), {"*": YELLOW, "up": GUNMETAL}))
+    # The armoured gunhouse: slab sides with port covers, a sloped-looking roof in two steps and vents at the back. The
+    # lower roof leaves a mantlet slot over the barrel's housing, which rises into it as the gun elevates; the upper step
+    # bridges the slot above the housing's highest reach.
+    m.append(box((-24, 3, -24), (-14, ty + 8, tz), YELLOW))
+    m.append(box((14, 3, -24), (24, ty + 8, tz), YELLOW))
+    m.append(port_plate("west", -24, 10, 22, -1, 11))
+    m.append(port_plate("east", 24, 10, 22, -1, 11))
+    m.append(box((-24, ty + 8, -24), (24, ty + 11, 0), {"*": YELLOW, "up": GUNMETAL}))
+    m.append(box((-24, ty + 8, 0), (-12.5, ty + 11, tz - 4), {"*": YELLOW, "up": GUNMETAL}))
+    m.append(box((12.5, ty + 8, 0), (24, ty + 11, tz - 4), {"*": YELLOW, "up": GUNMETAL}))
     m.append(box((-20, ty + 11, -20), (20, ty + 13, tz - 10), {"*": YELLOW, "up": GUNMETAL}))
     m.append(box((-14, 3, -24), (14, ty + 8, -21), {"*": YELLOW, "north": GRILLE}))
     m.append(box((-24.5, 3, -24.5), (24.5, 4.5, tz + 0.5), BAND))
     # The range-finder arms across the roof, with a lens at each end.
-    m += cyl("x", ty + 15, -14, 2, -28, 28, GUNMETAL, AMBER)
-    m.append(box((-2, ty + 13, -16), (2, ty + 15, -12), NUT))
+    m += cyl("x", ty + 15, -14, 2, -28, 28, TUBE, AMBER)
+    m.append(box((-2, ty + 13, -15.75), (2, ty + 15, -12.25), NUT))
     m.append(box((24, 10, -14), (25.5, 20, -4), {"*": YELLOW, "east": WARNING}))
     return m
 
@@ -312,13 +353,14 @@ def fortress_rifle_barrel():
     g = GUNS["fortress_rifle"]
     length = g["muzzle"]
     m = [box((-12, -10, -12), (12, 10, 4), {"*": YELLOW, "south": GUNMETAL})]
-    m += cyl("z", 0, 0, 4.5, 4, length - 8, GUNMETAL, SOOT)
-    m += cyl("z", 0, 0, 6, 4, 30, GUNMETAL)
-    m += cyl("z", 0, 0, 5.5, 54, 58, GUNMETAL)
-    # The muzzle brake: a block with vent slots.
+    m += cyl("z", 0, 0, 4.5, 4, length - 7, TUBE)
+    m += cyl("z", 0, 0, 6, 4, 30, TUBE)
+    m += cyl("z", 0, 0, 5.5, 54, 58, TUBE)
+    # The muzzle brake: a block with vent slots and the bore in its face.
     m.append(box((-6, -5, length - 8), (6, 5, length), GUNMETAL))
     for z in (length - 6, length - 3):
         m.append(box((-6.5, -2, z), (6.5, 2, z + 1.5), SOOT))
+    m.append(bore(length, 3.4, 6))
     return m
 
 
@@ -346,11 +388,14 @@ def triple_battery_turntable():
 
 def triple_battery_barrel():
     g = GUNS["triple_battery"]
-    m = [box((-17, -7, -8), (17, 7, 4), {"*": YELLOW, "south": GUNMETAL})]
+    # The housing's front stands half a pixel clear of the drum's front step, and the sleeves a quarter pixel clear of
+    # its side facets, so they never share a plane at any elevation.
+    m = [box((-17, -7, -8), (17, 7, 4.5), {"*": YELLOW, "south": GUNMETAL})]
     for x in g["barrels"]:
-        m += cyl("z", x, 0, 3, 4, g["muzzle"], GUNMETAL, SOOT)
-        m += cyl("z", x, 0, 4, 4, 22, GUNMETAL)
-        m += cyl("z", x, 0, 3.8, g["muzzle"] - 5, g["muzzle"], GUNMETAL, SOOT)
+        m += cyl("z", x, 0, 3, 4, g["muzzle"] - 3, TUBE)
+        m += cyl("z", x, 0, 4.25, 4, 22, TUBE)
+        m += cyl("z", x, 0, 3.8, g["muzzle"] - 5, g["muzzle"], TUBE)
+        m.append(bore(g["muzzle"], 2.2, 3.8, x))
     return m
 
 
@@ -497,46 +542,74 @@ def slots():
     return img
 
 
-def icon(kind):
-    """The items: each gun side-on in miniature, and the Great Shell."""
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    black, yellow, stone, steel, brass = (34, 34, 38), PAINT[2], STONE[1], (120, 118, 112), (196, 160, 80)
+TUBE_PAL = [(54, 56, 60), (63, 65, 69), (72, 74, 78), (81, 83, 87), (96, 98, 102)]
 
-    def rect(x0, y0, x1, y1, c):
-        clean_metal.rect(img, x0, y0, x1, y1, c)
 
-    if kind == "great_shell":
-        rect(5, 6, 10, 14, brass)
-        rect(5, 3, 10, 5, steel)
-        rect(6, 1, 9, 2, steel)
-        rect(5, 10, 10, 10, (170, 40, 40))
-        rect(5, 12, 10, 12, (140, 110, 50))
-        return img
-    size = GUNS[kind]["size"]
-    rect(1 if size == 5 else 3, 13, 14 if size == 5 else 12, 14, stone)
-    rect(2 if size == 5 else 4, 11, 13 if size == 5 else 11, 12, steel)
-    if kind in ("bastion_mortar", "grand_mortar"):
-        rect(5, 7 if size == 5 else 8, 10, 10, yellow)
-        width = 3 if size == 5 else 2
-        for i in range(7):
-            rect(7 + i, 6 - i, 7 + i + width, 7 - i + (width - 2), black)
-    elif kind == "bastion_autocannon":
-        rect(4, 7, 10, 10, yellow)
-        for i in range(6):
-            clean_metal.put(img, 9 + i, 7 - i, black)
-            clean_metal.put(img, 10 + i, 8 - i, black)
-    elif kind == "fortress_rifle":
-        rect(2, 6, 9, 10, yellow)
-        rect(9, 7, 15, 8, black)
-    elif kind == "triple_battery":
-        rect(3, 7, 11, 10, yellow)
-        for y in (5, 7, 9):
-            rect(10, y, 15, y, black)
+def tube():
+    """Barrel steel: one flat shade with a few faint marks in a fixed pattern, one shade either side, and no bevel, bolt
+    or streak. A barrel shows it four ways round and repeats it every 16 pixels, so anything with a direction or a
+    frame would read as stacked crates; the barrel's shape comes from its steps, bands and the light."""
+    img = clean_metal.canvas(TUBE_PAL[2])
+    for x, y in ((2, 3), (10, 1), (6, 11), (13, 9)):
+        clean_metal.put(img, x, y, TUBE_PAL[3])
+    for x, y in ((5, 6), (14, 14), (1, 13), (9, 7)):
+        clean_metal.put(img, x, y, TUBE_PAL[1])
+    return img
+
+
+def steel():
+    """Plate steel that tiles without a frame: two courses of plates to a tile, set like bastion concrete's blocks, each
+    with a dark seam along its foot and its left joint, and lit along its top and left edges."""
+    img = clean_metal.canvas(TUBE_PAL[2])
+    for top, joint in ((0, 0), (8, 8)):
+        for x in range(16):
+            clean_metal.put(img, x, top, TUBE_PAL[3])
+            clean_metal.put(img, x, top + 7, TUBE_PAL[1])
+        for y in range(top, top + 8):
+            clean_metal.put(img, joint, y, TUBE_PAL[1])
+            if top < y < top + 7:
+                clean_metal.put(img, (joint + 1) % 16, y, TUBE_PAL[3])
+    return img
+
+
+SOOT_PAL = [(22, 21, 20), (30, 29, 28), (38, 36, 34)]
+
+
+def soot():
+    """A flat sooty dark for vents, slots and exhaust mouths, with a few marks one shade off in a fixed pattern."""
+    img = clean_metal.canvas(SOOT_PAL[1])
+    for x, y in ((3, 4), (11, 2), (7, 12), (14, 9)):
+        clean_metal.put(img, x, y, SOOT_PAL[0])
+    for x, y in ((9, 6), (2, 10)):
+        clean_metal.put(img, x, y, SOOT_PAL[2])
+    return img
+
+
+def bore_decal():
+    """A muzzle's bore, drawn whole on its plate: barrel steel round a dark round mouth whose radius is three quarters of
+    the plate's half-width; inside it the lip is shaded at the top left and caught by the light at the bottom right, as
+    a hole lit from the top left is, and a darker core shows the depth."""
+    img = clean_metal.canvas(TUBE_PAL[2])
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x - 7.5, y - 7.5
+            d = math.hypot(dx, dy)
+            if d < 6.0:
+                if d >= 4.8:
+                    c = (34, 34, 38) if dx + dy < 0 else (78, 80, 84)
+                elif d >= 3.6:
+                    c = (24, 24, 27)
+                else:
+                    c = (14, 14, 16)
+                clean_metal.put(img, x, y, c)
+            elif d < 6.9:
+                clean_metal.put(img, x, y, TUBE_PAL[1] if dx + dy < 0 else TUBE_PAL[3])
     return img
 
 
 def draw_all(save):
-    for name, img in (("tg_port", port()), ("tg_warning", warning()), ("tg_slots", slots())):
+    for name, img in (("tg_port", port()), ("tg_warning", warning()), ("tg_slots", slots()), ("tg_tube", tube()),
+                      ("tg_steel", steel()), ("tg_soot", soot()), ("tg_bore", bore_decal())):
         save(img, "block", name)
     for item in list(GUNS) + ["great_shell"]:
-        save(icon(item), "item", item)
+        save(gun_icons.draw(item), "item", item)

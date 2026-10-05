@@ -785,6 +785,85 @@ def check_tower_guns():
         err("assets/jugcraft/tower_gun_quads.json is missing: run tools/generate_material_data.py")
 
 
+def check_gun_art():
+    """The 5 October 2026 art fixes for the big guns, the Landship, the Diesel Walker and the balloons stay fixed: no
+    moving gun part flickers against or cuts through its mount over its whole travel (tools/gun_poses.py); every quad
+    texture exists and block ones are opaque; each decal (port cover, hazard sign, bore) is drawn whole, UV 0 to 1; the
+    Observation Balloon's envelope is a closed, outward-facing mesh on its own opaque texture; and nothing opaque is drawn
+    through the translucent "nocull" path (opaque two-sided quads are "cutout", which 26.3 draws from both sides)."""
+    import gun_poses
+    files = ("artillery_quads.json", "tower_gun_quads.json", "landship_quads.json", "walker_quads.json", "balloon_quads.json")
+    quads = {name: load(ASSETS / name) or {} for name in files}
+    opacity = {}
+
+    def alpha(texture):
+        if texture not in opacity:
+            path = ASSETS / "textures" / (f"{texture}.png" if "/" in texture else f"block/{texture}.png")
+            if not path.is_file():
+                opacity[texture] = None
+            else:
+                with Image.open(path) as img:
+                    histogram = img.convert("RGBA").getchannel("A").histogram()
+                    lowest = next(v for v in range(256) if histogram[v])
+                    opacity[texture] = (lowest, any(histogram[1:255]))
+        return opacity[texture]
+
+    for name, parts in quads.items():
+        for part, qs in parts.items():
+            for quad in qs:
+                texture = quad["texture"]
+                found = alpha(texture)
+                if found is None:
+                    err(f"{name}'s {part} draws missing texture {texture}")
+                    break
+                if quad.get("nocull") and not found[1]:
+                    err(f"{name}'s {part} draws {texture}, which has no part-transparent pixels, through the translucent "
+                        f"'nocull' path: flag it 'cutout' (26.3's entityCutout draws both sides)")
+                    break
+                if "/" not in texture and not quad.get("cutout") and not quad.get("nocull") and found[0] < 255:
+                    err(f"{name}'s {part} draws {texture}, which has see-through pixels, as a solid quad")
+                    break
+                if texture in ("tg_port", "tg_warning", "tg_bore"):
+                    us = [v[3] for v in quad["vertices"]]
+                    vs = [v[4] for v in quad["vertices"]]
+                    if min(us) != 0 or max(us) != 1 or min(vs) != 0 or max(vs) != 1:
+                        err(f"{name}'s {part} cuts the {texture} decal (UV {min(us)}..{max(us)}, {min(vs)}..{max(vs)}): "
+                            f"give it a '!' face")
+                        break
+    guns = dict(quads["artillery_quads.json"])
+    guns.update(quads["tower_gun_quads.json"])
+    if all(part in guns for part in ("mortar_barrel", "grand_mortar_barrel")):
+        found = gun_poses.problems(artillery, tower_guns, guns)
+        for problem in found[:12]:
+            err(problem)
+        if len(found) > 12:
+            err(f"... and {len(found) - 12} more big-gun poses that flicker or cut through their mounts")
+    envelope = quads["artillery_quads.json"].get("balloon_envelope", [])
+    path = ASSETS / "textures" / f"{artillery.ENVELOPE_TEXTURE}.png"
+    if not path.is_file():
+        err(f"The Observation Balloon's envelope texture {artillery.ENVELOPE_TEXTURE} is missing: run tools/generate_textures.py")
+    elif Image.open(path).size != artillery.ENVELOPE_SIZE:
+        err(f"{path.relative_to(ROOT)} must be {artillery.ENVELOPE_SIZE[0]} by {artillery.ENVELOPE_SIZE[1]}")
+    edges = {}
+    for quad in envelope:
+        if quad["texture"] != artillery.ENVELOPE_TEXTURE or quad.get("nocull") or quad.get("cutout"):
+            err("The Observation Balloon's envelope must be plain (culled) quads on its own texture")
+            break
+        v = [tuple(round(c, 2) for c in p[:3]) for p in quad["vertices"]]
+        a = [v[2][k] - v[0][k] for k in range(3)]
+        b = [v[3][k] - v[1][k] for k in range(3)]
+        n = (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+        if sum(n[k] * quad["normal"][k] for k in range(3)) <= 0:
+            err("An Observation Balloon envelope quad is wound against its normal (it would be culled from outside)")
+            break
+        for k in range(4):
+            if v[k] != v[(k + 1) % 4]:
+                edges[(v[k], v[(k + 1) % 4])] = edges.get((v[k], v[(k + 1) % 4]), 0) + 1
+    open_edges = sum(1 for (p, q), count in edges.items() if count != 1 or edges.get((q, p)) != 1)
+    if envelope and open_edges:
+        err(f"The Observation Balloon's envelope is not closed: {open_edges} edges lack a matching neighbour")
+
+
 def check_landship():
     """landship/Landship.java against tools/landship.py: the driving, gun, fuel and size numbers, and the renderer's
     track path, link pitch and pivots."""
@@ -6016,6 +6095,7 @@ def main():
     check_landship()
     check_artillery()
     check_tower_guns()
+    check_gun_art()
     check_plastic()
     check_seasons()
     check_alpine()
