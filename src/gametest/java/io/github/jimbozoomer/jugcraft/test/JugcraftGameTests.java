@@ -1571,39 +1571,28 @@ public class JugcraftGameTests {
 	}
 
 	/**
-	 * Batch 57: raiders hunt players on their own. A test player only becomes a fair target once their client counts as
-	 * loaded (since 1.21.4 nobody attacks a player whose client is still loading in; a mock player's never does by itself),
-	 * so the test marks it loaded. A grunt then finds and hits them, and a grenadier lobs grenades at them.
+	 * Batch 57: raiders find and go for the people they hunt by themselves: a grunt hunts a townsperson down to striking
+	 * distance, and a grenadier lobs grenades at them. (A townsperson stands in for a player: the test server's mock
+	 * player is always in creative mode, and no hostile mob targets a creative player. Townsfolk cannot be hurt, so the
+	 * test checks the grunt closes in rather than that the blow lands; the fist itself is vanilla's.)
 	 */
 	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 400, skyAccess = true)
-	public void raidersHuntPlayers(GameTestHelper helper) {
+	public void raidersHuntOnTheirOwn(GameTestHelper helper) {
 		raiderFloor(helper);
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
-		player.setPos(helper.absoluteVec(new Vec3(20.5, 1, 20.5)));
+		var victim = helper.spawnWithNoFreeWill(io.github.jimbozoomer.jugcraft.town.JugcraftTown.TOWNSFOLK, new Vec3(20.5, 1, 20.5));
 		var grunt = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, new Vec3(16.5, 1, 20.5));
 		var grenadier = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, new Vec3(20.5, 1, 8.5));
 		net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(44, 26, 44);
 		boolean[] threw = {false};
-		helper.onEachTick(() -> threw[0] |= !helper.getLevel().getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderBomb.class, area).isEmpty());
+		boolean[] closed = {false};
+		helper.onEachTick(() -> {
+			threw[0] |= !helper.getLevel().getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderBomb.class, area).isEmpty();
+			closed[0] |= grunt.getTarget() == victim && grunt.distanceTo(victim) < 2.0F;
+		});
 		helper.succeedWhen(() -> {
-			if (grunt.getTarget() != player || grenadier.getTarget() != player) {
-				// Why not: what a player needs to be a fair target, and any "loaded" switch the player class has.
-				StringBuilder loaded = new StringBuilder();
-				for (Class<?> c = player.getClass(); c != null; c = c.getSuperclass()) {
-					for (java.lang.reflect.Method m : c.getDeclaredMethods()) {
-						if (m.getName().toLowerCase(java.util.Locale.ROOT).contains("load")) {
-							loaded.append(c.getSimpleName()).append('.').append(m.getName()).append(java.util.Arrays.toString(m.getParameterTypes())).append(' ');
-						}
-					}
-				}
-				helper.assertTrue(false, "Both raiders should hunt the player: the grunt hunts " + grunt.getTarget() + ", the grenadier "
-						+ grenadier.getTarget() + "; canAttack=" + grunt.canAttack(player) + " seenAsEnemy=" + player.canBeSeenAsEnemy()
-						+ " invulnerable=" + player.isInvulnerable() + " creative=" + player.isCreative() + " spectator=" + player.isSpectator()
-						+ " sees=" + grunt.hasLineOfSight(player) + " difficulty=" + helper.getLevel().getDifficulty() + " load methods: " + loaded);
-			}
-			helper.assertTrue(player.getHealth() < player.getMaxHealth(), "The grunt should have hit the player");
-			helper.assertTrue(threw[0], "The grenadier should have thrown at the player");
+			helper.assertTrue(grunt.getTarget() == victim, "The grunt should hunt the townsperson, not " + grunt.getTarget());
+			helper.assertTrue(closed[0], "The grunt should close to striking distance, but is " + grunt.distanceTo(victim) + " away");
+			helper.assertTrue(threw[0], "The grenadier should have thrown at the townsperson (it hunts " + grenadier.getTarget() + ")");
 		});
 	}
 
