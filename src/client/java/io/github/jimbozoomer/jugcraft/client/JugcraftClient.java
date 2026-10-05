@@ -45,6 +45,7 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
+		new io.github.jimbozoomer.jugcraft.client.scary.ScaryClient().onInitializeClient();
 		for (MachineKind kind : MachineKind.values()) {
 			MenuScreens.register(JugcraftMachines.menuType(kind), MachineScreen::new);
 		}
