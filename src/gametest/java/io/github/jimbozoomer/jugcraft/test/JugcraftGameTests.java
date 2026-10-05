@@ -1555,7 +1555,18 @@ public class JugcraftGameTests {
 					ladder = io.github.jimbozoomer.jugcraft.raiders.SiegeLadderBlock.is(helper.getBlockState(new BlockPos(x, y, 15)));
 				}
 			}
-			helper.assertTrue(ladder, "A grunt stuck at the wall should have propped a siege ladder against it");
+			if (!ladder) {
+				// Say where the raid's infantry are and what they are doing, so a failure shows why.
+				StringBuilder seen = new StringBuilder();
+				for (var raider : level.getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry.class,
+						new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(44, 8, 44))) {
+					BlockPos rel = raider.blockPosition().subtract(helper.absolutePos(BlockPos.ZERO));
+					seen.append(' ').append(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(raider.getType()).getPath()).append('@').append(rel.getX()).append(',').append(rel.getY()).append(',')
+							.append(rel.getZ()).append(raider.getTarget() != null ? " target=" + net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(raider.getTarget().getType()).getPath() : "")
+							.append(raider.getNavigation().isDone() ? " idle" : " moving").append(';');
+				}
+				helper.assertTrue(false, "A grunt stuck at the wall should have propped a siege ladder against it; raiders:" + seen);
+			}
 			helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.SIEGE_LADDER.defaultBlockState()
 					.is(net.minecraft.tags.BlockTags.CLIMBABLE), "A siege ladder should be climbable");
 			io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.withdraw(level, raid);
