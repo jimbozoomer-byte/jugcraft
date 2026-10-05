@@ -124,6 +124,7 @@ def item_name(item):
 
 def assets():
     lang = {
+        "generator.jugcraft.designed": "Jugcraft Designed",
         "config.jade.plugin_jugcraft.machine_status": "Machine status",
         "tooltip.jugcraft.machine_energy": "Energy: %s / %s JE",
         "tooltip.jugcraft.machine_progress": "Processing: %s%%",

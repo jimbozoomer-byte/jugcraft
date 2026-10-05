@@ -78,6 +78,10 @@ dependencies {
 }
 
 processResources {
+	from('tools/world-designer') {
+		include 'index.html', 'style.css', 'model.js', 'editor.js'
+		into 'jugcraft/world-designer'
+	}
 	inputs.property "version", project.version
 	inputs.file frameworkLockFile
 
