@@ -1,6 +1,6 @@
 # Wood repaint: every tree's wood and leaves in vanilla's manner
 
-Status: implemented on `claude/wood-repaint`, awaiting review. Compiles and tests in CI only; **not yet played**.
+Status: implemented on `claude/wood-repaint`, awaiting review. Green in CI, with in-game screenshots; **not yet played**.
 Proposal issue: the owner, 5 October 2026, with a screenshot of 24 stripped logs they had repainted: "heres how I redid and painted all the different wood types can you use these match them closest to the new ones we have added into the game and then make all the other things related to each one be based off these, they should look more similar to how the vanilla textures are in the way I did them here". They followed it with pictures of the trees they like (vanilla-like fine-speckled leaves and bark), "Recoloring vanilla log textures is a good way to start if you feel like you are over complicating them" and "I don't want rings in the trees make them similar to vanilla in terms of that".
 Owner: jimbozoomer-byte
 Target milestone and tier: art only, for the 13 woods of the agriculture and biomes branches ([festival-crops.md](festival-crops.md), [alpine-spawn.md](alpine-spawn.md), [seasonal-forests.md](seasonal-forests.md), [wetlands.md](wetlands.md), [warm-and-dry.md](warm-and-dry.md), [big-trees-and-rainforests.md](big-trees-and-rainforests.md)).
@@ -71,7 +71,29 @@ Every texture name, block ID, item ID and model is the same, so worlds, placed b
   - every tree grown side by side in summer, three or so to a shot, with each tree's logs and leaves logged;
   - a sample wall of each wood: log, stripped log and planks up the face, log and stripped ends and a slab on top, and stairs, a fence and a gate before it;
   - the larch, maple, aspen and willow grown again in autumn.
-- **CI:** the existing biome and tree client tests also take their screenshots with the new textures. This record will say what CI shows.
+- **CI results:**
+  - **82a5c0a1, the first push:** all green. The biome survey's screenshots (shard 2) and the chestnut and larch scenes show the new woods and leaves in game.
+  - **614c264a:** all green. `WoodClientGameTests` grew every tree. Logs and leaves near each trunk:
+
+    | Tree | Logs | Leaves |
+    |---|---|---|
+    | chestnut | 6 | 134 |
+    | larch | 10 | 57 |
+    | maple | 6 | 136 |
+    | aspen | 8 | 148 |
+    | fir | 9 | 97 |
+    | dead | 11 | none |
+    | jacaranda | 9 | 85 |
+    | willow | 7 | 85 |
+    | palm | 10 | 79 |
+    | cypress | 10 | 34 |
+    | redwood | 13 | 106 |
+    | eucalyptus | 13 | 45 |
+    | mahogany | 10 | 80 |
+
+    Its shots showed the HUD and hand, which an earlier test in the shard had hidden and the test's toggle showed again.
+  - **97ccc856:** the test hides the HUD only if it is showing, as `OfrendaClientGameTests` does.
+  - **bd1a4513 (with main merged in): all green.** The build, the server tests and all three client shards passed. The tree, autumn and sample-wall shots are clean.
 - **Not run:** play, and a look at the trees in-game beyond CI's screenshots.
 
 ## World and event applicability
