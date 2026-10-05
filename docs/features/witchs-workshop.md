@@ -140,6 +140,7 @@ Squat glass jars on dark bases under iron lids, with paper labels:
 ## Dependencies and assets
 - **No new dependencies.**
 - **Models**: built on `tools/flora_art.py` by `tools/decor17_data.py`, which paints their textures by code (64 × 64, or 128 × 128 for the cauldron, candelabra, broom, cabinet and moth case).
+- **Art style**: the creature props (faces, bones, fur, scales, fire) are painted with the clean, cute painters in `tools/cute_art.py` since 5 October 2026, after the owner asked for simpler, smoother creatures ([ART_DIRECTION.md](../ART_DIRECTION.md#creatures-and-faces-cute-and-clean)).
 - **The 128 × 128 rule**: the toolkit's texture size is now a choice. `docs/ART_DIRECTION.md` and the audit allow 128 × 128 for a sculpted prop that packs many pieces.
 - **Client textures**: five small greyscale textures the client tints: brew, fume, wax, flame and glow.
 - **Moving parts and layout**: the moving parts are in `assets/jugcraft/decor17_quads.json`, and the candelabra's candle layout in `/jugcraft/candelabra.json`, which Java reads.

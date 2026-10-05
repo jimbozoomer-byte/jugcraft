@@ -42,7 +42,10 @@ public abstract class MultiDecorationBlock extends Block {
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(LIT, true).setValue(partProperty(), MASTER));
 	}
 
-	/** Each part's cell: {blocks to the right of the player who placed it, blocks up}; part 0 at {0, 0}. */
+	/**
+	 * Each part's cell: {blocks to the right of the player who placed it, blocks up}, and for a prop deeper than one
+	 * block a third, blocks away from that player; part 0 at {0, 0}.
+	 */
 	public abstract int[][] cells();
 
 	/** The part property, 0 to the number of cells less one. */
@@ -55,13 +58,15 @@ public abstract class MultiDecorationBlock extends Block {
 	/** Where part {@code part} of the prop with its master at {@code master}, facing {@code facing}, is. */
 	public BlockPos partPos(BlockPos master, Direction facing, int part) {
 		int[] cell = cells()[part];
-		return master.relative(facing.getCounterClockWise(), cell[0]).above(cell[1]);
+		BlockPos at = master.relative(facing.getCounterClockWise(), cell[0]).above(cell[1]);
+		return cell.length > 2 ? at.relative(facing.getOpposite(), cell[2]) : at;
 	}
 
 	/** Where the master of the prop this block belongs to is. */
 	public BlockPos masterPos(BlockPos pos, BlockState state) {
 		int[] cell = cells()[part(state)];
-		return pos.relative(state.getValue(FACING).getCounterClockWise(), -cell[0]).below(cell[1]);
+		BlockPos at = pos.relative(state.getValue(FACING).getCounterClockWise(), -cell[0]).below(cell[1]);
+		return cell.length > 2 ? at.relative(state.getValue(FACING), cell[2]) : at;
 	}
 
 	/** Placed facing the player, from the block they aimed at to their right and up: every block it needs must be free. */
