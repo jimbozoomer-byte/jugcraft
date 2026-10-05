@@ -8,6 +8,16 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Wood repaint
+- **Every wood the mod adds is redrawn** in its colour from the owner's 24 painted woods, matched to the closest painting: bark, log ends, stripped logs and planks, so its stairs, slabs, fences and gates follow too.
+- **Drawn as vanilla draws wood:**
+  - **Bark:** long vertical furrows, with no rings across the trunk.
+  - **Log ends:** square growth rings.
+  - **Stripped wood:** straight grain.
+  - **Planks:** four lit boards with staggered joints.
+- **Every tree's leaves**, in every season's look, are redrawn in vanilla's fine speckle; needles, blossom, fronds and bare twigs each in their own way.
+- Original textures drawn by code (`tools/wood_style.py`); nothing of vanilla's is recoloured. Record: [wood-repaint.md](docs/features/wood-repaint.md).
+
 ### Arms restyle (#180)
 - **Every arm redrawn:**
   - **Icons:** crisp pixel-art icons (32 or 48 pixels, on the diagonal, flat tones, outlined);

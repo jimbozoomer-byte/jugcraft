@@ -51,7 +51,7 @@ Nine biomes grow in Jugcraft regions, each in place of the vanilla biome with th
 - Existing worlds: new chunks only; see [biome-regions.md](biome-regions.md).
 
 ## Dependencies and assets
-- Textures drawn by code in `tools/forest_textures.py` (wood, leaves in every look, saplings); nothing read, traced or recoloured.
+- Textures drawn by code in `tools/forest_textures.py` (saplings); nothing read, traced or recoloured. Since the [wood repaint](wood-repaint.md), their woods and leaves are drawn by `tools/wood_style.py`.
 - Biomes start from the vanilla biome they replace, by reference (`tools/biome_bases.py`: its ore, cave, lake and spring features, mobs, music and sky), with their own trees and plants (`tools/biomes.py`, `tools/trees.py`). No Mojang file is copied.
 - The larch's one-off seasonal leaves became a general `SeasonalLeavesBlock`, shared by larch, maple and aspen; the larch's blocks and states are unchanged, and its tree feature now lists the `jugcraft:seasonal_leaves` decorator.
 
