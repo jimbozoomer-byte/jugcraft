@@ -12,6 +12,8 @@ import random
 
 from PIL import Image, ImageDraw
 
+import cute_art as ca
+import decor16_data as d16d
 import decor17_data as d17d
 import decor18_data as d18d
 import decor19 as d19
@@ -28,6 +30,8 @@ BRASS = d17d.BRASS
 COPPER = d17d.COPPER
 BONE = d17d.BONE
 SKIN = d17d.SKIN
+# The Crawling Hand is the monster's (tools/decor16_data.py monster_head): the same bright green.
+MONSTER_SKIN = d16d.SKIN
 GLASS = d17d.GLASS
 DARK_WOOD = pal("140b07", "1f120b", "2c1a10", "3a2315", "4a2e1c", "5c3a24")
 WALNUT = pal("1e120a", "2e1c10", "402818", "543522", "6a442c", "805638")
@@ -122,60 +126,49 @@ def dials():
 
 
 def brain(seed=1, lit=False):
-    """A brain's folds: pink, lined with winding dark grooves; brighter when it remembers."""
+    """A cartoon brain's folds: smooth pink, neat wavy grooves in even rows and a parting down the middle; a step
+    brighter when it remembers."""
     def paint(p):
-        rng = random.Random(seed)
         lift = 1 if lit else 0
         for y in range(p.h):
             for x in range(p.w):
-                p.put(x, y, shade(BRAIN, 2 + lift + rng.choice((0, 0, 1))))
-        for _ in range(p.w * p.h // 6):
-            x, y = rng.randrange(p.w), rng.randrange(p.h)
-            for _ in range(rng.randrange(2, 5)):
-                p.put(x, y, BRAIN[0 + lift])
-                x += rng.choice((-1, 0, 1))
-                y += rng.choice((-1, 0, 1))
+                wave = (y + (1 if (x // 2) % 2 else 0)) % 3 == 2
+                p.put(x, y, BRAIN[1 + lift] if wave else BRAIN[3 + lift] if y % 3 == 0 else BRAIN[2 + lift])
         for y in range(p.h):
             p.put(p.w // 2, y, BRAIN[0])
     return paint
 
 
 def silk(seed=1, palette=SILK, face=False):
-    """Silk wound round and round: pale diagonal bands with fine threads, and if `face` the press of a face beneath."""
+    """Silk wound round and round: clean pale diagonal bands; if `face`, a sleepy face pressed through it (two closed
+    eyes and a little round mouth)."""
     def paint(p):
-        rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
-                band = (x + y * 2) % 5
-                k = 3 if band < 3 else 2
-                k += rng.choice((0, 0, 0, 1, -1))
-                p.put(x, y, shade(palette, k))
-        for _ in range(p.w * p.h // 8):
-            x, y = rng.randrange(p.w), rng.randrange(p.h)
-            p.put(x, y, palette[-1])
+                band = (x + y * 2) % 6
+                p.put(x, y, palette[4] if band == 0 else palette[3] if band < 4 else palette[2])
         if face:
             cx = p.w / 2
-            for x, y in ((cx - 2, 3), (cx + 1, 3)):
-                p.put(x, y, palette[1])
-                p.put(x + 1, y, palette[1])
-            for x in range(int(cx - 1), int(cx + 2)):
-                p.put(x, 7, palette[1])
+            for ex in (cx - 2.5, cx + 1.5):
+                p.put(ex, 4, palette[0])
+                p.put(ex + 1, 4, palette[0])
+                p.put(ex - 0.5, 3, palette[1])
+                p.put(ex + 1.5, 3, palette[1])
+            p.put(cx - 0.5, 7, palette[0])
+            p.put(cx + 0.5, 7, palette[1])
     return paint
 
 
 def sacs(seed=1, glisten=0):
-    """Egg sacs: pale round bumps veined faintly, each with a glint that brightens with `glisten` (0 to 3)."""
+    """Egg sacs: smooth pale round bumps, lit along their top, each with a glint that brightens with `glisten` (0 to
+    3)."""
     def paint(p):
-        rng = random.Random(seed)
-        for y in range(p.h):
-            for x in range(p.w):
-                p.put(x, y, shade(SAC, 2 + rng.choice((0, 0, 1, -1))))
-        for _ in range(p.w * p.h // 12):
-            x, y = rng.randrange(p.w), rng.randrange(p.h)
-            p.put(x, y, SAC_VEIN[rng.randrange(2)])
-        for _ in range(max(1, p.w * p.h // 40)):
-            x, y = rng.randrange(p.w), rng.randrange(p.h)
-            p.put(x, y, SAC[min(4, 2 + glisten)])
+        ca.soft(SAC, 2, edge=1, top=0.3, bottom=0.3)(p)
+        g = SAC[min(4, 2 + glisten)] if glisten < 3 else (255, 255, 255)
+        p.put(1, 1, g)
+        if p.w > 4:
+            p.put(2, 1, g)
+            p.put(1, 2, g)
     return paint
 
 
@@ -343,14 +336,14 @@ FINGER_LENGTHS = [3.0, 3.8, 3.6, 2.8]
 
 
 def crawling_hand():
-    """The Crawling Hand, lying palm down pointing north in the middle of its block: a grey-green stitched palm, its
-    wrist cut off raw at the south, a thumb out to the east, and four fingers (each its own quad model, so the client
-    lifts them) with yellowed nails."""
+    """The Crawling Hand, lying palm down pointing north in the middle of its block: a stitched palm, its
+    wrist cut off at the south, a thumb out to the east, and four fingers (each its own quad model, so the client
+    lifts them) with yellowed nails; bright green, the monster's own skin."""
     sc = Sculpt(d19.HAND["block"], 193, 64)
-    back = sc.piece("back", 14, 12, d17d.stitches(2))
-    side = sc.piece("side", 12, 3, d17d.skin(3))
-    stump = sc.piece("stump", 10, 4, solid(RED[2:], 4))
-    finger = sc.piece("finger", 3, 8, d17d.skin(5, nail=True))
+    back = sc.piece("back", 14, 12, d17d.stitches(2, MONSTER_SKIN))
+    side = sc.piece("side", 12, 3, d17d.skin(3, palette=MONSTER_SKIN))
+    stump = sc.piece("stump", 10, 4, ca.bevel(RED, 3))
+    finger = sc.piece("finger", 3, 8, d17d.skin(5, nail=True, palette=MONSTER_SKIN))
     palm = [cube((4.0, 0.0, 5.0), (11.0, 1.6, 10.5), faces(back, ("up",), north=side, south=side, east=side, west=side, down=side)),
             cube((4.6, 0.0, 10.5), (10.4, 1.4, 12.2), faces(side, ("up", "east", "west", "down"), south=stump)),
             cube((11.0, 0.0, 6.4), (13.2, 1.2, 8.2), faces(finger, ALL6), rotation((11.0, 0.6, 8.2), "y", 22.5))]
@@ -390,7 +383,7 @@ def silk_cocoon():
     wrap = sc.piece("wrap", 16, 20, silk(2))
     face_ = sc.piece("face", 10, 10, silk(3, face=True))
     top = sc.piece("top", 10, 10, silk(4))
-    thread = sc.piece("thread", 2, 8, solid(SILK[3:], 5))
+    thread = sc.piece("thread", 2, 8, ca.bevel(SILK, 4, light=1, dark=0))
     strand = sc.piece("strand", 6, 6, d18d.membrane(SILK, 6) if hasattr(d18d, "membrane") else silk(6))
     els = [plane_zy(7.5, 8.5, 13.0, 16.0, 8.0, thread), plane_xy(7.5, 8.5, 13.0, 16.0, 8.0, thread),
            cube((7.0, 12.0, 7.0), (9.0, 13.2, 9.0), faces(top, ALL6)),
@@ -440,8 +433,8 @@ def egg_sac_strip():
 
 def spiderling_sculpt():
     sc = Sculpt("spiderling", 209, 16)
-    sc.piece("spider_body", 4, 4, solid(pal("100b0a", "1a1210", "261a16", "34241e"), 8, glossy=(120, 30, 30)))
-    sc.piece("spider_leg", 2, 4, solid(pal("120c0a", "1e1612", "2a201a"), 9))
+    sc.piece("spider_body", 4, 4, lambda p: (ca.bevel(pal("100b0a", "1a1210", "261a16", "34241e"), 1)(p), p.put(1, 1, (220, 70, 70))))
+    sc.piece("spider_leg", 2, 4, ca.bevel(pal("120c0a", "1e1612", "2a201a"), 1))
     sc.models["spiderling"] = spiderling(sc)
     return sc
 
@@ -757,8 +750,8 @@ def night_sky(seed=1):
 
 def moon_picture(phase, size=24, palette=MOON, face=False, background=None):
     """The moon in `phase` (0 full, 4 new, as the game counts them: 1 to 3 waning, lit on the left; 5 to 7 waxing, lit
-    on the right) on a see-through ground: craters, a darker rim, the unlit part ashen blue; with `face`, a sleeping
-    face in the craters."""
+    on the right) on a see-through ground: craters, a darker rim, the unlit part ashen blue; with `face`, a cute
+    sleeping face (closed eyes, a little smile, rosy cheeks)."""
     lit_angle = {0: math.pi, 1: 0.75 * math.pi, 2: 0.5 * math.pi, 3: 0.25 * math.pi, 4: 0.0, 5: 0.25 * math.pi,
                  6: 0.5 * math.pi, 7: 0.75 * math.pi}[phase]
     waxing = phase >= 5
@@ -781,15 +774,26 @@ def moon_picture(phase, size=24, palette=MOON, face=False, background=None):
                 if math.hypot(u - cu, v - cv) < cr:
                     k -= 1
             if face:
-                if (abs(v + 0.12) < 0.05 and 0.18 < abs(u) < 0.42) or (abs(math.hypot(u, v - 0.05) - 0.4) < 0.05 and v > 0.3 and abs(u) < 0.3):
-                    k -= 2
-            colour = shade(palette, k) if lit else shade(MOON_SHADOW, 1 + (1 if k > 2 else 0))
+                # A sleepy smile: closed eyes curving down, a little smile and rosy cheeks.
+                for side in (-1, 1):
+                    eu = u - side * 0.3
+                    if abs(math.hypot(eu, v + 0.22) - 0.13) < 0.045 and v > -0.22:
+                        k = 0
+                    if math.hypot(eu * 0.8 - side * 0.06, (v - 0.12) * 1.4) < 0.1:
+                        k = 99
+                if abs(math.hypot(u, v - 0.12) - 0.2) < 0.045 and v > 0.2:
+                    k = 0
+            if k == 99:
+                colour = (236, 140, 120) if lit else shade(MOON_SHADOW, 2)
+            else:
+                colour = shade(palette, k) if lit else shade(MOON_SHADOW, 1 + (1 if k > 2 else 0))
             px[x, y] = tuple(colour) + (255,)
     return img
 
 
 def ghost_face(seed=1):
-    """A ghost's face for the clock's case at midnight: pale and see-through, dark hollow eyes and a long wailing mouth."""
+    """A ghost's face for the clock's case at midnight, cute and see-through: a smooth pale sheet, its outline a touch
+    brighter, two big round dark eyes each with a glint, and a little round "oo" mouth."""
     def paint(p):
         cx = (p.w - 1) / 2
         for y in range(p.h):
@@ -798,15 +802,11 @@ def ghost_face(seed=1):
             for x in range(p.w):
                 d = abs(x - cx)
                 if d < half:
-                    p.put(x, y, (220, 236, 255), int(170 * (1 - d / max(half, 0.5)) ** 0.4))
+                    p.put(x, y, (236, 244, 255) if d > half - 1.2 else (214, 230, 252), 170)
         for ex in (cx - p.w * 0.18, cx + p.w * 0.18):
-            for y in range(int(p.h * 0.3), int(p.h * 0.42)):
-                for x in range(int(ex - p.w * 0.07), int(ex + p.w * 0.07) + 1):
-                    p.put(x, y, (14, 18, 30), 230)
-        for y in range(int(p.h * 0.52), int(p.h * 0.8)):
-            wide = p.w * 0.07 * math.sin(math.pi * (y - p.h * 0.52) / (p.h * 0.28))
-            for x in range(int(cx - wide), int(cx + wide) + 1):
-                p.put(x, y, (14, 18, 30), 230)
+            ca.ellipse(p, ex + 0.5, p.h * 0.38, p.w * 0.09, p.h * 0.075, (20, 24, 40))
+            ca.ellipse(p, ex - p.w * 0.03 + 0.5, p.h * 0.36, 1.0, 1.0, ca.GLINT)
+        ca.ellipse(p, cx + 0.5, p.h * 0.6, p.w * 0.06, p.h * 0.06, (20, 24, 40))
     return paint
 
 

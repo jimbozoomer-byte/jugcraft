@@ -37,7 +37,7 @@ Primary specialty and supported player role: building. These ornaments are for a
 - The recipes follow the agriculture feature switch.
 
 ## Dependencies and assets
-No new dependencies. The gargoyle is sculpted with `tools/sculpt.py` (in `tools/graveyard_models.py`) on the graveyard's stone textures. The other models are built on `tools/flora_art.py` by `tools/decor15_data.py`, which paints their 64 × 64 textures by code. The lantern is vanilla's `LanternBlock` with these models. All original. The look follows the owner's reference pictures, and nothing is traced from them.
+No new dependencies. The gargoyle is sculpted with `tools/sculpt.py` (in `tools/graveyard_models.py`) on the graveyard's stone textures. The other models are built on `tools/flora_art.py` by `tools/decor15_data.py`, which paints their 64 × 64 textures by code. The lantern is vanilla's `LanternBlock` with these models. All original. The look follows the owner's reference pictures, and nothing is traced from them. Since 5 October 2026 the creature props are painted with the clean, cute painters in `tools/cute_art.py` ([ART_DIRECTION.md](../ART_DIRECTION.md#creatures-and-faces-cute-and-clean)).
 
 ## Verification
 Automated checks run on CI's Build workflow: run 37177097502 on 2e913a39 (every job passed), and run 37178330514 on bfd738e9, after the close-ups were reframed and the flora (with main) merged in (every job passed). The branch has since merged the flora again, with Arms III from main:

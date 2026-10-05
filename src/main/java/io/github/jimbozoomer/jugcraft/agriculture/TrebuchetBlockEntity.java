@@ -56,7 +56,9 @@ public class TrebuchetBlockEntity extends BlockEntity {
 			Map.entry("minecraft:pumpkin", 1.0), Map.entry("minecraft:carved_pumpkin", 1.06), Map.entry("minecraft:jack_o_lantern", 1.03),
 			Map.entry("jugcraft:white_pumpkin", 1.02), Map.entry("jugcraft:jarrahdale_pumpkin", 0.97), Map.entry("jugcraft:cinderella_pumpkin", 0.95),
 			Map.entry("jugcraft:hand_carved_pumpkin", 1.06), Map.entry("jugcraft:hand_carved_white_pumpkin", 1.08),
-			Map.entry("jugcraft:hand_carved_jarrahdale_pumpkin", 1.03), Map.entry("jugcraft:hand_carved_cinderella_pumpkin", 1.01));
+			Map.entry("jugcraft:hand_carved_jarrahdale_pumpkin", 1.03), Map.entry("jugcraft:hand_carved_cinderella_pumpkin", 1.01),
+			Map.entry("jugcraft:red_kuri_pumpkin", 0.99), Map.entry("jugcraft:kabocha_pumpkin", 0.96),
+			Map.entry("jugcraft:hand_carved_red_kuri_pumpkin", 1.05), Map.entry("jugcraft:hand_carved_kabocha_pumpkin", 1.02));
 
 	/** One place on the board: a player's longest throw, in tenths of a block. */
 	public record Entry(UUID thrower, String name, int tenths) {

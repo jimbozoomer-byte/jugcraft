@@ -76,7 +76,7 @@ public class HayGolemRenderer extends MobRenderer<HayGolem, HayGolemRenderer.Sta
 			pumpkin = plain == null ? ItemStack.EMPTY : new ItemStack(plain);
 			state.carving = head.getOrDefault(JugcraftAgriculture.CARVING, PumpkinCarving.BLANK);
 			if (!state.carving.isBlank()) {
-				state.carvingType = CarvingTextures.get(state.carving, state.lit, ScarecrowBlockEntity.soul(head));
+				state.carvingType = CarvingTextures.get(state.carving, state.lit, ScarecrowBlockEntity.soul(head), CarvingTextures.Glow.of(head));
 			}
 		}
 		itemModels.updateForTopItem(state.head, pumpkin, ItemDisplayContext.FIXED, golem.level(), null, golem.getId());

@@ -183,6 +183,11 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.WITCHLIGHT_ENTITY, WitchlightRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SILHOUETTE_ENTITY, YardSilhouetteRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.MOON_LAMP_ENTITY, HarvestMoonLampRenderer::new);
+		// Halloween decorations batch 20, Pumpkin Night.
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SINGING_PUMPKIN_ENTITY, SingingPumpkinRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.HARVEST_EFFIGY_ENTITY, HarvestEffigyRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.FARM_STAND_ENTITY, FarmStandRenderer::new);
+		MenuScreens.register(JugcraftAgriculture.FARM_STAND_MENU, FarmStandScreen::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FORTUNE_TABLE_ENTITY, FortuneTellerTableRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.BONFIRE_ENTITY, HalloweenBonfireRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.WAX_POT_ENTITY, WaxPotRenderer::new);

@@ -11,6 +11,7 @@ import random
 
 from PIL import Image
 
+import cute_art as ca
 import decor16_data as d16d
 import decor17 as d17
 import flora_art as fa
@@ -24,7 +25,7 @@ ALL6 = ("north", "south", "east", "west", "up", "down")
 IRON = pal("0b0b0e", "141419", "1d1e24", "282a32", "353843", "464a57", "5e6372")
 POT = pal("0c0b0e", "151318", "1e1b22", "29252e", "35303b", "433d4a", "554e5e")
 RUST = pal("2a140c", "46200f", "653216", "84461e")
-BONE = pal("6a604c", "8b8066", "ada282", "cbc09e", "e2d8b8", "f4ecd4")
+BONE = pal("8a7a5c", "b5a684", "d6cba8", "ebe2c4", "f8f3e2", "fffaf0")
 HORN = pal("2a221a", "3e3426", "564836", "6e5c44", "8a7556", "a6906c")
 SOCKET = pal("070505", "120d0b", "1e1612")
 EMBER = pal("3a0a02", "7a1a04", "c23c0a", "ec7416", "ffae3c", "ffe08a")
@@ -211,76 +212,14 @@ def drip_pan():
 
 
 def bone(seed=1, cracks=2, porous=True):
-    """Weathered bone: ivory, mottled, a few fine cracks and pores."""
-    def paint(p):
-        rng = random.Random(seed)
-        for y in range(p.h):
-            for x in range(p.w):
-                p.put(x, y, shade(BONE, 3 + rng.choice((0, 0, 0, 1, -1, 1))))
-        if porous:
-            for _ in range(p.w * p.h // 25):
-                p.put(rng.randrange(p.w), rng.randrange(p.h), BONE[1])
-        for _ in range(cracks):
-            x, y = rng.random() * p.w, 0
-            for _ in range(p.h):
-                p.put(x, y, BONE[0])
-                x += rng.choice((-1, 0, 0, 1)) * 0.6
-                y += 1
-                if rng.random() < 0.12:
-                    break
-    return paint
-
-
-def skull_face(seed=1):
-    """A ram's skull from the front: a domed brow, two deep sockets, the long face narrowing to the nose holes."""
-    def paint(p):
-        bone(seed, cracks=1)(p)
-        w, h = p.w, p.h
-        for ex in (0.24, 0.76):
-            cx, cy = ex * w, h * 0.5
-            for y in range(h):
-                for x in range(w):
-                    d = math.hypot((x - cx) / (w * 0.15), (y - cy) / (h * 0.2))
-                    if d < 1.0:
-                        p.put(x, y, SOCKET[0] if d < 0.6 else SOCKET[1])
-                    elif d < 1.25:
-                        p.put(x, y, BONE[1])
-        # The brow ridge's shadow and the suture down the middle.
-        for x in range(int(w * 0.1), int(w * 0.9)):
-            p.put(x, int(h * 0.26), BONE[2])
-        for y in range(0, int(h * 0.3)):
-            p.put(w / 2, y, BONE[1] if y % 2 else BONE[2])
-    return paint
-
-
-def snout(seed=1, teeth=True):
-    def paint(p):
-        bone(seed, cracks=1)(p)
-        w, h = p.w, p.h
-        for dx in (-1, 1):
-            cx = w / 2 + dx * w * 0.16
-            for y in range(int(h * 0.12), int(h * 0.42)):
-                p.put(cx, y, SOCKET[0])
-                p.put(cx + dx * 0.6, y, SOCKET[1])
-        if teeth:
-            for x in range(int(w * 0.12), int(w * 0.88)):
-                p.put(x, h - 2, SOCKET[1])
-                if x % 2 == 0:
-                    p.put(x, h - 1, BONE[5])
-    return paint
+    """Clean bone: smooth warm cream, lit along its top and left and shaded along its bottom and right (the clean art
+    style of tools/cute_art.py; `seed`, `cracks` and `porous` are kept for callers and no longer scatter marks)."""
+    return ca.soft(ca.BONE, 3)
 
 
 def horn(seed=1):
-    """A ram's horn: grey-brown keratin in growth rings across it, a lit ridge along it."""
-    def paint(p):
-        rng = random.Random(seed)
-        for y in range(p.h):
-            ring = (y + rng.random() * 0.4) % 3 < 1
-            for x in range(p.w):
-                across = x / max(1, p.w - 1)
-                k = 3 + (1 if across < 0.4 else 0) - (1 if ring else 0) + rng.choice((0, 0, -1))
-                p.put(x, y, shade(HORN, k))
-    return paint
+    """A ram's horn: grey-brown keratin in even growth rings across it, lit along one side."""
+    return ca.bands(HORN, 3, period=4)
 
 
 def claw():
@@ -491,11 +430,10 @@ def tin(seed=1, dents=3):
 
 def moth_wings(kind):
     """A moth's two wings on one side, painted together (forewing above, hindwing below), the body's edge on the
-    right-hand side; seen from above with the head up. Luna: pale green with an eyespot on each wing and long trailing
-    tails; death's-head: mottled brown forewings over ochre hindwings banded black; atlas: rust red with white windows
-    and the snake-head tips."""
+    right-hand side; seen from above with the head up, in clean flat colour. Luna: pale green, lighter along the leading
+    edge, a round eyespot on each wing and long trailing tails; death's-head: brown forewings with a pale band over
+    ochre hindwings in even black bands; atlas: rust red with pale tips and white windows."""
     def paint(p):
-        rng = random.Random({"luna": 1, "deaths_head": 2, "atlas": 3}[kind])
         w, h = p.w, p.h
 
         def fore(x, y):
@@ -513,40 +451,23 @@ def moth_wings(kind):
                 f, hh = fore(x, y), hind(x, y)
                 if not (f or hh):
                     continue
+                out = (w - 1 - x) / w
                 if kind == "luna":
-                    c = shade(LUNA, 3 + rng.choice((0, 0, 1, -1)))
-                    if f and y < h * 0.1:
-                        c = (110, 40, 70)
+                    c = LUNA[4] if f and y < h * 0.16 else LUNA[3] if f else LUNA[2]
                 elif kind == "deaths_head":
-                    c = shade(HAWK, (2 if f else 4) + rng.choice((0, 0, 1, -1)))
-                    if hh and int((w - x) / 3) % 3 == 0:
-                        c = HAWK[0]
+                    c = (HAWK[4] if 0.4 < out < 0.55 else HAWK[3]) if f else (HAWK[0] if int((w - x) / 3) % 3 == 0 else HAWK_SKULL[0])
                 else:
-                    c = shade(ATLAS, 3 + rng.choice((0, 0, 1, -1)))
-                    if f and (w - 1 - x) / w > 0.82 and y < h * 0.16:
-                        c = ATLAS[5]
+                    c = (ATLAS[5] if out > 0.82 and y < h * 0.16 else ATLAS[3]) if f else ATLAS[2]
                 p.put(x, y, c)
         if kind == "luna":
             for cx, cy in ((w * 0.55, h * 0.26), (w * 0.62, h * 0.62)):
-                for y in range(h):
-                    for x in range(w):
-                        if math.hypot(x - cx, y - cy) < max(1.2, w * 0.07) and p.get(x, y):
-                            p.put(x, y, LUNA_EYE[1])
-                p.put(cx, cy, LUNA_EYE[2])
+                r = max(1.2, w * 0.07)
+                ca.ellipse(p, cx, cy, r, r, LUNA_EYE[1])
+                p.put(cx - 0.5, cy - 0.5, LUNA_EYE[2])
         if kind == "atlas":
             for cx, cy in ((w * 0.5, h * 0.3), (w * 0.58, h * 0.6)):
-                for d in range(3):
-                    p.put(cx - d * 0.5, cy + d, ATLAS_WINDOW[1])
-                    p.put(cx + 0.5, cy + d, ATLAS_WINDOW[0])
+                ca.ellipse(p, cx, cy + 1, 1.2, 1.6, ATLAS_WINDOW[1])
         p.outline((40, 28, 20))
-        # Veins from the body.
-        for i in range(4):
-            a = -0.9 + i * 0.5
-            for s in range(int(w * 0.8)):
-                x, y = w - 1 - s * math.cos(a) * 0.9, h * 0.3 + s * math.sin(a) * 0.6
-                c = p.get(x, y)
-                if c:
-                    p.put(x, y, tuple(max(0, v - 34) for v in c[:3]))
     return paint
 
 
@@ -569,58 +490,47 @@ def thorax(kind):
 
 
 def heart(seed=1):
+    """A cartoon heart's muscle: smooth deep red, a soft highlight high on its left, two clean vessels down it and a
+    neat cap of fat along its top."""
     def paint(p):
-        rng = random.Random(seed)
-        for y in range(p.h):
-            for x in range(p.w):
-                p.put(x, y, shade(HEART, 3 + rng.choice((0, 0, -1, 1))))
-        # Vessels branching over it and a cap of fat at the top.
-        for v in range(3):
-            x, y = rng.random() * p.w, 0
-            for _ in range(p.h):
-                p.put(x, y, HEART[1])
-                x += rng.choice((-1, 0, 1)) * 0.7
-                y += 1
+        ca.soft(HEART, 3, edge=1, top=0.25, bottom=0.3)(p)
+        ca.ellipse(p, p.w * 0.32, p.h * 0.38, max(1.0, p.w * 0.12), max(1.0, p.h * 0.09), HEART[5])
+        for vx in (0.58, 0.74):
+            x = p.w * vx
+            for y in range(int(p.h * 0.2), int(p.h * 0.85)):
+                p.put(x + (0.6 if y > p.h * 0.5 else 0), y, HEART[1])
         for x in range(p.w):
             for y in range(int(p.h * 0.18)):
-                if rng.random() < 0.7:
-                    p.put(x, y, rng.choice(FAT))
+                p.put(x, y, FAT[2] if y == 0 else FAT[1])
     return paint
 
 
 def fur(seed=1):
-    return noise(FUR, seed, 2, (0, 0, -1, 1, 1))
+    """Soft black fur: one flat tone with a lit top and left edge."""
+    return ca.bevel(FUR, 2)
 
 
 def scales(seed=1, belly=False):
-    """Snake scales in offset rows, each lit at its top; a paler belly band along the bottom if `belly`."""
+    """Snake scales in neat offset rows, each a flat green lit at its top; a paler belly band along the bottom if
+    `belly`."""
     def paint(p):
-        rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
-                sx, sy = (x + (y // 2) % 2) % 2, y % 2
-                k = 3 + (1 if sy == 0 and sx == 0 else 0) - (1 if sy == 1 else 0) + rng.choice((0, 0, -1))
-                p.put(x, y, shade(SCALE, k))
-                if (x // 3 + y // 3) % 4 == 0 and rng.random() < 0.5:
-                    p.put(x, y, SCALE[1])
+                sx, sy = (x + (y // 2) % 2 * 2) % 4, y % 2
+                k = 3 + (1 if sy == 0 and sx < 2 else 0) - (1 if sx == 3 else 0)
+                p.put(x, y, SCALE[k])
         if belly:
             for y in range(int(p.h * 0.7), p.h):
                 for x in range(p.w):
-                    p.put(x, y, shade(BELLY, 2 - (y % 2)))
+                    p.put(x, y, BELLY[2] if y % 2 else BELLY[3])
     return paint
 
 
-def skin(seed=1, nail=False):
+def skin(seed=1, nail=False, palette=SKIN):
+    """Smooth skin (pale, or in `palette`), lit along its top and shaded along its bottom; with a neat nail along the top
+    if `nail`."""
     def paint(p):
-        rng = random.Random(seed)
-        for y in range(p.h):
-            for x in range(p.w):
-                p.put(x, y, shade(SKIN, 3 + rng.choice((0, 0, 0, -1, 1))))
-        for y in range(p.h):
-            if y % 4 == 2:
-                for x in range(p.w):
-                    if rng.random() < 0.5:
-                        p.put(x, y, SKIN[2])
+        ca.soft(palette, 3)(p)
         if nail:
             for x in range(p.w):
                 p.put(x, 0, NAIL[2])
@@ -628,38 +538,48 @@ def skin(seed=1, nail=False):
     return paint
 
 
-def stitches(seed=1):
+def stitches(seed=1, palette=SKIN):
+    """Smooth skin with a neat stitched seam across its middle: a dark line crossed by evenly spaced stitches."""
     def paint(p):
-        skin(seed)(p)
+        skin(seed, palette=palette)(p)
         y = p.h // 2
-        for x in range(p.w):
-            p.put(x, y, (40, 20, 18))
-            if x % 2 == 0:
-                p.put(x, y - 1, (60, 30, 26))
-                p.put(x, y + 1, (60, 30, 26))
+        for x in range(1, p.w - 1):
+            p.put(x, y, palette[1])
+        for x in range(2, p.w - 2, 3):
+            for dy in (-1, 0, 1):
+                p.put(x, y + dy, (40, 20, 18))
     return paint
 
 
 # ---------------------------------------------------------------- 1. the horned skull cauldron
 
+def cute_jaw():
+    """The ram skull's jaw: a soft cream strip with a neat row of little square teeth."""
+    def paint(p):
+        ca.soft(ca.BONE, 2)(p)
+        ca.teeth(p, 1, p.w - 1, 0, 2, ca.BONE[4], ca.SOCKET[1], tooth=2)
+    return paint
+
+
 def horned_skull_cauldron():
     """A squat black-iron pot on four clawed feet with two riveted bands, a lip round its rim and a hollow inside, and a
-    bleached ram's skull bolted to its front, its horns curling out past the rim. The brew, the floating things, the
+    friendly ram's skull bolted to its front (big round sockets, no nose holes), its ringed horns curling out past the
+    rim. The brew, the floating things, the
     fumes and the skull's glowing eyes are the client's (the pot's inside is 3.3..12.7 across, its floor at 8.5)."""
     sc = Sculpt(d17.CAULDRON["block"], 171, 128)
-    outer = sc.piece("outer", 48, 34, cast_iron(2, 0.03))
-    inner = sc.piece("inner", 38, 30, cast_iron(3, 0.02))
-    floor = sc.piece("floor", 38, 38, noise(POT, 4, 1))
-    rim = sc.piece("rim", 52, 6, cast_iron(5, 0.0, ridge=(0,)))
-    bands = sc.piece("band", 52, 4, band(6, 8))
-    foot = sc.piece("foot", 8, 12, cast_iron(7, 0.1))
-    claws = sc.piece("claw", 4, 6, claw())
-    face = sc.piece("skull_face", 24, 18, skull_face(8))
-    side = sc.piece("skull_side", 12, 18, bone(9, 1))
-    top = sc.piece("skull_top", 24, 12, bone(10, 2))
-    nose = sc.piece("snout", 16, 12, snout(11))
-    jaw = sc.piece("jaw", 12, 4, snout(12, teeth=True))
-    horns = sc.piece("horn", 10, 26, horn(13))
+    outer = sc.piece("outer", 48, 34, ca.soft(ca.IRON, 2))
+    inner = sc.piece("inner", 38, 30, ca.bevel(ca.IRON, 1))
+    floor = sc.piece("floor", 38, 38, ca.bevel(ca.IRON, 1, edge=2))
+    rim = sc.piece("rim", 52, 6, ca.bevel(ca.IRON, 4))
+    bands = sc.piece("band", 52, 4, ca.riveted(ca.IRON, 3, 8))
+    foot = sc.piece("foot", 8, 12, ca.bevel(ca.IRON, 2))
+    claws = sc.piece("claw", 4, 6, ca.bevel(ca.IRON, 4))
+    face = sc.piece("skull_face", 24, 18, ca.skull_face(sockets=0.26, socket_x=0.232, socket_y=0.61, mouth=False))
+    side = sc.piece("skull_side", 12, 18, ca.soft(ca.BONE, 2))
+    top = sc.piece("skull_top", 24, 12, ca.soft(ca.BONE, 3))
+    nose = sc.piece("snout", 16, 12, ca.soft(ca.BONE, 3, bottom=0.3))
+    jaw = sc.piece("jaw", 12, 4, cute_jaw())
+    horns = sc.piece("horn", 10, 26, ca.bands(ca.HORN, 3, period=4, width=1))
     bolt = sc.piece("bolt", 4, 4, d16d.bolt_head())
     # A rounded belly (a cross of two boxes with a third turned between them), a narrower neck whose walls are hollow
     # above it, and a flared lip; the inside's floor is at 8.5.
@@ -720,14 +640,14 @@ SKULL_EYES = [(5.9, 8.6, 7.1, 9.6), (8.9, 8.6, 10.1, 9.6)]
 
 
 def ember_bed():
-    """A hearth of sooty fieldstones a block high round a bed of glowing embers, with an arched draft hole in each side
-    showing the fire, and a few lumps of coal and charcoal on top. The cauldron stands on its stones."""
+    """A hearth of clean-cut stone blocks a block high round a bed of glowing coals, with an arched opening in each side
+    showing a smooth fire, and a few lumps of coal on top. The cauldron stands on its stones."""
     sc = Sculpt(d17.EMBER_BED["block"], 172)
-    wall = sc.piece("wall", 32, 32, stones(2, glow_hole=True))
-    wall_in = sc.piece("wall_in", 20, 32, stones(3))
-    top = sc.piece("top", 32, 6, stones(4))
-    glow = sc.piece("embers", 22, 22, embers(5))
-    lump = sc.piece("lump", 4, 4, noise(COAL, 6, 2))
+    wall = sc.piece("wall", 32, 32, ca.hearth_wall(2))
+    wall_in = sc.piece("wall_in", 20, 32, ca.blocks(ca.STONE, 3, course=5, length=8, base=1))
+    top = sc.piece("top", 32, 6, ca.blocks(ca.STONE, 4, course=6, length=8, base=3))
+    glow = sc.piece("embers", 22, 22, ca.coals(5))
+    lump = sc.piece("lump", 4, 4, ca.bevel(ca.COAL, 1))
     els = [cube((0, 0, 0), (16, 16, 3), {"north": wall, "south": wall_in, "up": top, "east": top, "west": top, "down": top}),
            cube((0, 0, 13), (16, 16, 16), {"south": wall, "north": wall_in, "up": top, "east": top, "west": top, "down": top}),
            cube((0, 0, 3), (3, 16, 13), {"west": wall, "east": wall_in, "up": top, "down": top}),
@@ -1063,7 +983,7 @@ def moth_case():
     sc = Sculpt(d17.MOTH_CASE["block"], 179, 128)
     frame = sc.piece("frame", 4, 28, wrought(2))
     frame_h = sc.piece("frame_h", 30, 4, wrought(3, horizontal=True))
-    backing = sc.piece("backing", 26, 22, noise(BACKING, 4, 1))
+    backing = sc.piece("backing", 26, 22, ca.bevel(BACKING, 1, light=1, dark=0))
     tag = sc.piece("tag", 10, 3, label(5, 1))
     pane = sc.piece("pane", 26, 22, glass(40))
     els = [cube((1.5, 2.5, 15.4), (14.5, 13.5, 16.0), {"north": backing}),
@@ -1133,7 +1053,7 @@ EYEBALLS = [(6.2, 2.4, 6.4), (9.6, 2.5, 6.6), (7.8, 2.3, 9.6), (6.6, 4.8, 8.6), 
 def beating_heart_jar():
     sc = jar("beating_heart_jar", 120)
     muscle = sc.piece("heart", 14, 14, heart(21))
-    vessel = sc.piece("vessel", 4, 8, strip(HEART[:4], 22))
+    vessel = sc.piece("vessel", 4, 8, ca.bevel(HEART, 2, sides="lr"))
     stand = sc.piece("stand", 6, 6, strip(BRASS, 23, light=True))
     dial = sc.piece("dial", 6, 6, dial_face())
     # The heart centred on the origin (it swells about its middle as it beats), and its brass stand and dial.
@@ -1164,7 +1084,7 @@ def bat_in_a_jar():
     body = sc.piece("bat_fur", 8, 8, fur(21))
     face = sc.piece("bat_face", 6, 5, bat_face())
     wing = sc.piece("bat_wing", 14, 12, bat_wing())
-    ear = sc.piece("bat_ear", 2, 3, noise(FUR, 22, 1))
+    ear = sc.piece("bat_ear", 2, 3, ca.bevel(FUR, 1))
     # The bat centred on the origin, head down as it hangs (the client turns it head up as it wakes and flies).
     sc.models["oddity_bat_body"] = [cube((-1.2, -1.6, -1.0), (1.2, 1.6, 1.0), {s: body for s in ALL6}),
                                     cube((-1.0, -3.2, -1.0), (1.0, -1.6, 0.8), {"north": face, "south": body, "east": body, "west": body,
@@ -1177,11 +1097,16 @@ def bat_in_a_jar():
 
 
 def bat_face():
+    """A bat's cute face: soft black fur, two round red eyes each with a glint, and one little white fang."""
     def paint(p):
-        noise(FUR, 23, 2)(p)
-        p.put(1, 2, (200, 40, 40))
-        p.put(p.w - 2, 2, (200, 40, 40))
-        p.put(p.w // 2, p.h - 1, (230, 220, 210))
+        ca.bevel(FUR, 2)(p)
+        for x in (1, p.w - 3):
+            p.put(x, 1, (220, 60, 60))
+            p.put(x + 1, 1, (220, 60, 60))
+            p.put(x, 2, (160, 30, 36))
+            p.put(x + 1, 2, (160, 30, 36))
+            p.put(x, 1, ca.GLINT)
+        p.put(p.w // 2, p.h - 1, (240, 234, 222))
     return paint
 
 
@@ -1202,7 +1127,7 @@ def two_headed_snake_jar():
     coil = sc.piece("scales", 16, 16, scales(21))
     belly = sc.piece("scales_belly", 16, 8, scales(22, belly=True))
     head = sc.piece("snake_head", 6, 6, snake_head())
-    tongue = sc.piece("tongue", 2, 3, solid(((150, 20, 30), (190, 40, 50)), 23))
+    tongue = sc.piece("tongue", 2, 3, ca.bevel(pal("8a1420", "be2a36", "e0505a"), 1))
     # The coil, round the jar's middle, in three stacked loops; each head on its neck centred on the origin, looking north.
     coils = []
     for i, (y, r) in enumerate(((1.4, 2.6), (2.6, 2.2), (3.7, 1.7))):
@@ -1216,10 +1141,15 @@ def two_headed_snake_jar():
 
 
 def snake_head():
+    """A snake's head from the front: its scales, two big round yellow eyes with dark slit pupils."""
     def paint(p):
         scales(24)(p)
-        p.put(1, 1, (220, 180, 30))
-        p.put(p.w - 2, 1, (220, 180, 30))
+        for x in (0, p.w - 2):
+            for dx in (0, 1):
+                p.put(x + dx, 1, (240, 200, 50))
+                p.put(x + dx, 2, (220, 170, 30))
+            p.put(x + (1 if x == 0 else 0), 1, (30, 20, 10))
+            p.put(x + (1 if x == 0 else 0), 2, (30, 20, 10))
     return paint
 
 
