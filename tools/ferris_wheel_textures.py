@@ -25,6 +25,11 @@ CREAM = [rgb("6e6656"), rgb("a49a84"), rgb("cfc6ae"), rgb("e9e2cc"), rgb("f9f5e8
 RED = [rgb("3e0808"), rgb("6c1010"), rgb("9c1a16"), rgb("c42a22"), rgb("e45444")]
 GOLD = [rgb("5a3c0a"), rgb("8c6418"), rgb("bc9030"), rgb("e0bc5a"), rgb("fbe7a4")]
 BRASS = [rgb("4a3010"), rgb("7a5420"), rgb("a8803a"), rgb("d0aa5c"), rgb("f0d898"), rgb("fff4d4")]
+# The rims' gold edge, warm (more red than green) so it stays gold, not olive, where a face is turned from the light;
+# and their lit red.
+RIM_GOLD, RIM_LIT = rgb("e2a03e"), rgb("d8402e")
+# The wheel's polished brass: a warm, saturated yellow, so thin posts and rails read as brass, not tan.
+BRASS_LIT, BRASS_FILL, BRASS_SHADE = rgb("f8dc80"), rgb("dcac48"), rgb("a8782c")
 RUST = [rgb("3a1a0a"), rgb("6a3014"), rgb("8e4a22")]
 IRON = [rgb("16181c"), rgb("2a2e34"), rgb("444a52"), rgb("666e78"), rgb("9aa2ac")]
 CONCRETE = [rgb("5a5852"), rgb("7a776e"), rgb("989488"), rgb("b4b0a2"), rgb("ccc8ba")]
@@ -53,27 +58,95 @@ def flat(colour, size=N):
     return Image.new("RGBA", (size, size), colour + (255,))
 
 
+# The metals (cream steel, brass and the axle's iron) share one layout, in uv units (four texels each), which
+# tools/ferris_wheel_data.py metal() pins every face of them to by its shape. A face's bands run along it, a pixel (four
+# texels) each, so nothing finer than a model pixel crosses a member: a lit band along its top or left edge, the fill
+# and, on members three pixels across or more, a shaded band along the other edge. Squarer faces show a plate, lit along
+# its top and left and shaded along its bottom and right.
+#   strips banded across u, for faces whose length runs down v (rows 0 to 15): a member's width in pixels -> (u0, u1)
+METAL_ACROSS_U = {1: (0, 1), 2: (1, 3), 3: (3, 6), 4: (6, 10), 6: (10, 16)}
+#   strips banded across v, for faces whose length runs along u: a member's height in pixels -> (u0, v0, u1, v1)
+METAL_ACROSS_V = {1: (0, 4, 4, 5), 2: (0, 5, 4, 7), 3: (0, 7, 4, 10), 4: (4, 4, 8, 8), 6: (12, 4, 16, 10)}
+METAL_PLATE_SMALL = (0, 10, 4, 14)          # a 4-pixel plate, for faces up to 6 pixels across
+METAL_PLATE_BIG = (4, 8, 12, 16)            # an 8-pixel plate, for bigger ones
+METAL_FILL = (8, 4, 12, 8)                  # plain fill
+
+
+def metal_bands(width):
+    """A strip's bands for a member `width` pixels across: lit, fill and (from three pixels) shaded, a pixel each, the
+    fill taking the rest; a member a pixel across is one tone between lit and fill. As a list of band indices (0 lit,
+    1 fill, 2 shade, 3 between), one a texel."""
+    texels = 4 * width
+    if width == 1:
+        return [3] * 4
+    if width == 2:
+        return [0] * 4 + [1] * 4
+    return [0] * 4 + [1] * (texels - 8) + [2] * 4
+
+
+def metal(lit, fill, shade, boss=None):
+    """A metal's texture in the layout above: `lit`, `fill` and `shade` colours; `boss` (a pair: lit, shaded) adds a
+    round boss to the big plate's middle (the brass cap over the axle's end)."""
+    colours = (lit, fill, shade, tuple((a + b) // 2 for a, b in zip(lit, fill)))
+    img = flat(fill)
+
+    def put(x, y, band):
+        img.putpixel((x, y), colours[band] + (255,))
+    for width, (u0, u1) in METAL_ACROSS_U.items():
+        for i, band in enumerate(metal_bands(width)):
+            for y in range(16):
+                put(u0 * 4 + i, y, band)
+    for width, (u0, v0, u1, v1) in METAL_ACROSS_V.items():
+        for i, band in enumerate(metal_bands(width)):
+            for x in range(u0 * 4, u1 * 4):
+                put(x, v0 * 4 + i, band)
+    for u0, v0, u1, v1 in (METAL_PLATE_SMALL, METAL_PLATE_BIG):
+        x0, y0, x1, y1 = u0 * 4, v0 * 4, u1 * 4, v1 * 4
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                band = 0 if y < y0 + 4 or x < x0 + 4 else 2 if y >= y1 - 4 or x >= x1 - 4 else 1
+                # The bevel's two corners where lit meets shaded are split on the diagonal.
+                if (y < y0 + 4 and x >= x1 - 4) or (x < x0 + 4 and y >= y1 - 4):
+                    band = 0 if (x - x0) + (y - y0) < (x1 - x0) else 2
+                put(x, y, band)
+    if boss:
+        u0, v0, u1, v1 = METAL_PLATE_BIG
+        cx, cy = (u0 + u1) * 2, (v0 + v1) * 2
+        for y in range(v0 * 4, v1 * 4):
+            for x in range(u0 * 4, u1 * 4):
+                dx, dy = x + 0.5 - cx, y + 0.5 - cy
+                d = math.hypot(dx, dy)
+                if 6 <= d < 10:
+                    img.putpixel((x, y), (boss[0] if dx + dy < 0 else boss[1]) + (255,))
+                elif d < 6:
+                    put(x, y, 1)
+    return img
+
+
 def steel():
-    """The cream enamel of the braces, spokes, ties and bearings: one even colour (the faces' own light shades them)."""
-    return flat(CREAM[3])
+    """The cream enamel of the braces, spokes, ties, bearings and the cars' hangers and floors."""
+    return metal(CREAM[4], CREAM[3], CREAM[2])
 
 
 def brass():
-    """Polished brass, one even colour a shade brighter than the palette's middle."""
-    return flat(rgb("dcb466"))
+    """Polished brass: the cars' posts, rails and yokes, the pivot's collars and the cap over the axle's end, with a
+    round boss on it."""
+    return metal(BRASS_LIT, BRASS_FILL, BRASS_SHADE, boss=(BRASS_LIT, BRASS_SHADE))
 
 
 def axle():
-    return flat(IRON[3])
+    """The axle's dark iron, lit along its top, shaded under it."""
+    return metal(IRON[4], IRON[3], IRON[2])
 
 
 def rim():
-    """The rims, banded along their length (every column alike, so any length of rim shows the same bands): the outer
-    ring's front and back (rows 0 to 11, three pixels deep) lit along its outer edge, with a gold pinstripe a pixel wide
-    down its middle (a deeper gold, so it holds steady against the red from afar) and shaded along its inner edge; its outer and inner faces (rows 12 to 27); the inner ring's front
-    and back (rows 28 to 35) and its edges (rows 36 to 41)."""
-    rows = ([RED[4]] * 2 + [RED[3]] * 2 + [GOLD[2]] * 4 + [RED[3]] * 2 + [RED[2]] * 2 + [RED[3]] * 8 + [RED[2]] * 8
-            + [RED[4]] * 2 + [RED[3]] * 4 + [RED[2]] * 2 + [RED[2]] * 6)
+    """The rims, banded along their length (every column alike, so any length of rim shows the same bands), every band
+    a pixel (four texels) or more, so none is finer than the model: the outer ring's front and back (rows 0 to 11,
+    three pixels deep) a warm gold edge round the outside, the red and a shaded red along the inside; its outer face
+    (rows 12 to 19) red and its inner face (rows 20 to 27) shaded; the inner ring's front and back (rows 28 to 35) lit
+    red along their outer edge and red, and its edges (rows 36 to 41) shaded."""
+    rows = ([RIM_GOLD] * 4 + [RED[3]] * 4 + [RED[2]] * 4 + [RED[3]] * 8 + [RED[2]] * 8
+            + [RIM_LIT] * 4 + [RED[3]] * 4 + [RED[2]] * 6)
     img = flat(RED[3])
     for y, colour in enumerate(rows):
         for x in range(N):
@@ -283,6 +356,36 @@ def floor():
     return img
 
 
+def enamel(p, colours, level=0.6, streak=0.06, grime=0.1):
+    """A painted metal face: even paint, faint streaks along it, a little grime gathered at its ends."""
+    for y in range(N):
+        for x in range(N):
+            f = level + streak * (p.noise(x * 4, y * 0.5, 9.0) - 0.5) + 0.05 * (p.noise(x, y, 4.0) - 0.5)
+            f -= grime * max(0.0, abs(y - N / 2) / (N / 2) - 0.75) * 4
+            p.put(x, y, ramp(colours, f))
+
+
+def booth_steel():
+    """The booth's riveted cream steel (its lever's slot, gauge housing and deck's underside), as it was painted before
+    the wheel's metals were redrawn: the booth is a block model, sampling it by position."""
+    p = Painter(N, N, 27002)
+    enamel(p, CREAM, 0.62)
+    for y in (6, N - 7):
+        for x in (8, N // 2, N - 9):
+            rivet(p, x, y, CREAM, 1.8)
+    return p.img
+
+
+def booth_brass():
+    """The booth's brass (its lever and buttons), as it was painted before the wheel's metals were redrawn."""
+    p = Painter(N, N, 27007)
+    for y in range(N):
+        for x in range(N):
+            f = 0.5 + 0.35 * math.cos((x / N) * math.pi * 2.4 + 0.7) + 0.06 * (p.noise(x, y, 8.0) - 0.5)
+            p.put(x, y, ramp(BRASS, f))
+    return p.img
+
+
 def booth_side():
     """The booth's side: a cream panel in a red frame, a gold sunburst rising from its foot."""
     p = Painter(N, N, 27050)
@@ -396,7 +499,8 @@ def ferris_wheel_textures():
     blocks = {"ferris_wheel_lattice": lattice(), "ferris_wheel_steel": steel(), "ferris_wheel_rim": rim(), "ferris_wheel_hub": hub(),
               "ferris_wheel_axle": axle(), "ferris_wheel_footing": footing(), "ferris_wheel_brass": brass(), "ferris_wheel_bulb": bulb(),
               "ferris_wheel_seat": seat(), "ferris_wheel_floor": floor(), "ferris_wheel_booth_side": booth_side(),
-              "ferris_wheel_booth_front": booth_front(), "ferris_wheel_booth_deck": booth_deck(), "ferris_wheel_gauge": gauge()}
+              "ferris_wheel_booth_front": booth_front(), "ferris_wheel_booth_deck": booth_deck(), "ferris_wheel_gauge": gauge(),
+              "ferris_wheel_booth_steel": booth_steel(), "ferris_wheel_booth_brass": booth_brass()}
     for colour in CAR_COLOURS:
         blocks[f"ferris_wheel_car_{colour}"] = car(colour)
         blocks[f"ferris_wheel_canopy_{colour}"] = canopy(colour)

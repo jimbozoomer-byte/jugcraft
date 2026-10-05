@@ -18,6 +18,7 @@ import math
 from decor_data import MOD, rid, box, block_model, flat_item, self_drop, turned
 from decor6_data import quads
 from ferris_wheel import FERRIS_WHEEL, CAR_COLOURS
+from ferris_wheel_textures import METAL_ACROSS_U, METAL_ACROSS_V, METAL_PLATE_SMALL, METAL_PLATE_BIG, METAL_FILL
 import ferris_wheel
 
 HORIZONTAL = ("north", "east", "south", "west")
@@ -93,6 +94,35 @@ def sized(element, region=FULL, sides=None):
             w, h = face_size(element, side)
             face["uv"] = [round(u0, 4), round(v0, 4), round(min(u0 + w, u1), 4), round(min(v0 + h, v1), 4)]
     return element
+
+
+METALS = ("#steel", "#brass", "#axle")
+
+
+def metal_width(size):
+    """Which of the metals' strips (tools/ferris_wheel_textures.py) suits a member `size` pixels across."""
+    return 1 if size <= 1.25 else 2 if size <= 2.3 else 3 if size <= 3.5 else 4 if size <= 5 else 6
+
+
+def metal(elements):
+    """Pins every steel, brass and axle face of `elements` to the part of the metals' texture that suits its shape, at
+    about four texels to a pixel across it: a long face (a bar, a rail, a post) to a strip whose bands run along its
+    length, lit along one edge; a squarer one at least 3.5 pixels each way to a plate, lit along its top and left and
+    shaded along its bottom and right."""
+    for element in elements:
+        for side, face in element["faces"].items():
+            if face["texture"] not in METALS:
+                continue
+            w, h = face_size(element, side)
+            if min(w, h) >= 3.5 and max(w, h) < 2.5 * min(w, h):
+                face["uv"] = list(METAL_PLATE_SMALL if max(w, h) <= 6 else METAL_PLATE_BIG)
+            elif h >= w:
+                u0, u1 = METAL_ACROSS_U[metal_width(w)]
+                face["uv"] = [u0, 0, u1, round(min(h, 4.0), 4)]
+            else:
+                u0, v0, u1, v1 = METAL_ACROSS_V[metal_width(h)]
+                face["uv"] = [u0, v0, round(u0 + min(w, u1 - u0), 4), v1]
+    return elements
 
 
 def bar(a, b, width, z0, z1, texture, pieces=1, faces=ALL, regions=None):
@@ -234,7 +264,7 @@ def section_quads():
         out += ring_prism(WHEEL_TEXTURES["rim"], R, 3, z - 1, z + 1, 90.0, RIM_FACE, RIM_OUT, RIM_IN)
         out += ring_prism(WHEEL_TEXTURES["rim"], R_IN, 2, z - 1 + INSET["inner"], z + 1 - INSET["inner"], 90.0, INNER_FACE, INNER_EDGE,
                           INNER_EDGE)
-    return out + drawn(section_boxes(), WHEEL_TEXTURES)
+    return out + drawn(metal(section_boxes()), WHEEL_TEXTURES)
 
 
 def hub_quads():
@@ -246,26 +276,30 @@ def hub_quads():
     for z in RIMS:
         outer, inner = (z - 2.5, z + 0.8) if z < 0 else (z + 2.5, z - 0.8)
         facing = -1.0 if z < 0 else 1.0
-        for zf, nz, texture in ((outer, facing, WHEEL_TEXTURES["hub"]), (inner, -facing, WHEEL_TEXTURES["steel"])):
+        for zf, nz, texture, (u0, v0, u1, v1) in ((outer, facing, WHEEL_TEXTURES["hub"], FULL),
+                                                   (inner, -facing, WHEEL_TEXTURES["steel"], METAL_FILL)):
             for k in range(0, sides, 2):
                 pts = [(0.0, 0.0), corners[k], corners[(k + 1) % sides], corners[(k + 2) % sides]]
                 out.append(quad(texture, [(x, y, zf) for x, y in pts], (0.0, 0.0, nz),
-                                [((x + radius) / (2 * radius) * 16, (radius - y) / (2 * radius) * 16) for x, y in pts]))
-        side = 2 * radius * math.sin(math.pi / sides)
+                                [(u0 + (x + radius) / (2 * radius) * (u1 - u0), v0 + (radius - y) / (2 * radius) * (v1 - v0))
+                                 for x, y in pts]))
+        # Its rim, banded round it: lit along its outer edge, shaded along its inner.
         z0, z1 = min(outer, inner), max(outer, inner)
+        su0, sv0, su1, sv1 = METAL_ACROSS_V[metal_width(z1 - z0)]
         for k in range(sides):
             p0, p1 = corners[k], corners[(k + 1) % sides]
             n = polar(1.0, 360.0 * (k + 0.5) / sides)
+            edge = [(su0, sv0), (su1, sv0), (su1, sv1), (su0, sv1)] if z < 0 else [(su0, sv1), (su1, sv1), (su1, sv0), (su0, sv0)]
             out.append(quad(WHEEL_TEXTURES["steel"], [(p0[0], p0[1], z0), (p1[0], p1[1], z0), (p1[0], p1[1], z1), (p0[0], p0[1], z1)],
-                            (n[0], n[1], 0.0), [(0, 0), (side, 0), (side, z1 - z0), (0, z1 - z0)]))
+                            (n[0], n[1], 0.0), edge))
     return out
 
 
 def pivot():
-    """A car's pivot bar across both rims at the top of the wheel, its ends hidden inside the outer rings (it used to
-    share their faces), with a brass collar either side of where the car hangs, sunk a little into the car's yoke; the
-    client turns it to each car's place."""
-    e = [sized(box((-1.3, R - 1.3, RIMS[0] - 0.9), (1.3, R + 1.3, RIMS[1] + 0.9), "#steel", faces=("east", "west", "up", "down")))]
+    """A car's pivot bar across both rims at the top of the wheel, a closed box whose capped ends are hidden 0.1 pixel
+    inside the outer rings (it used to share their faces), with a brass collar either side of where the car hangs, sunk
+    a little into the car's yoke; the client turns it to each car's place."""
+    e = [box((-1.3, R - 1.3, RIMS[0] - 0.9), (1.3, R + 1.3, RIMS[1] + 0.9), "#steel")]
     for z0, z1 in ((-7.5, -6.4), (6.4, 7.5)):
         e.append(sized(box((-2, R - 2, z0), (2, R + 2, z1), "#brass")))
     return e
@@ -280,8 +314,9 @@ def lights():
     joint = R_IN / math.cos(math.radians(HALF_SEGMENT))
     for z in RIMS:
         z0, z1 = (z - 2, z - 0.6) if z < 0 else (z + 0.6, z + 2)
-        # The inner ring's bulb is a little smaller, so its top and bottom stay clear of the ring's faces.
-        for (x, y), r in ((polar(R, a), 1.25), (polar(joint, spoke), 0.85), (polar(36, spoke), 1.0), (polar(60, spoke), 1.0)):
+        # The inner ring's bulb is a little smaller, so its top and bottom stay clear of the ring's faces; the outer
+        # ring's, where a car's pivot bar runs through it, keeps its sides 0.1 pixel inside the bar's.
+        for (x, y), r in ((polar(R, a), 1.2), (polar(joint, spoke), 0.85), (polar(36, spoke), 1.0), (polar(60, spoke), 1.0)):
             e.append(with_uvs(box((x - r, y - r, z0), (x + r, y + r, z1), "#bulb"), {s: FULL for s in ALL}))
     return e
 
@@ -352,11 +387,11 @@ def drawn(elements, textures):
 
 
 def wheel_quads():
-    out = {"ferris_wheel_frame": drawn(frame(), FRAME_TEXTURES), "ferris_wheel_section": section_quads(),
-           "ferris_wheel_hub": hub_quads(), "ferris_wheel_pivot": drawn(pivot(), WHEEL_TEXTURES),
+    out = {"ferris_wheel_frame": drawn(metal(frame()), FRAME_TEXTURES), "ferris_wheel_section": section_quads(),
+           "ferris_wheel_hub": hub_quads(), "ferris_wheel_pivot": drawn(metal(pivot()), WHEEL_TEXTURES),
            "ferris_wheel_lights": drawn(lights(), WHEEL_TEXTURES)}
     for colour in CAR_COLOURS:
-        out[f"ferris_wheel_car_{colour}"] = drawn(car(), car_textures(colour))
+        out[f"ferris_wheel_car_{colour}"] = drawn(metal(car()), car_textures(colour))
     return out
 
 
@@ -364,9 +399,10 @@ def wheel_quads():
 
 def booth():
     """The booth: a loading platform with a plank deck, its panelled sides painted, and the operator's controls on its
-    front: a brass lever leaning in its slot, a speed gauge and two buttons."""
+    front: a brass lever leaning in its slot, a speed gauge and two buttons. Its brass and steel are its own textures
+    (the wheel's are laid out for the wheel's faces; a block model samples by position)."""
     t = {"side": "ferris_wheel_booth_side", "front": "ferris_wheel_booth_front", "deck": "ferris_wheel_booth_deck",
-         "brass": "ferris_wheel_brass", "steel": "ferris_wheel_steel", "gauge": "ferris_wheel_gauge"}
+         "brass": "ferris_wheel_booth_brass", "steel": "ferris_wheel_booth_steel", "gauge": "ferris_wheel_gauge"}
     e = [box((0, 0, 0), (16, 13, 16), "#side", textures={"north": "#front", "up": "#deck"}),
          box((-0.5, 13, -0.5), (16.5, 16, 16.5), "#deck", textures={"down": "#steel"}),
          # The lever in its slot, leaning forward, and its knob.
