@@ -46,7 +46,7 @@ For comparison: the bronze sword hits 6 at 1.6 a second, the steel sword 6.5, th
 
 ## Dependencies and assets
 - No new dependencies, mixins or entities.
-- Art: one 64x64 sprite per arm, drawn by `tools/arms_art.py` with the high-detail renderer (`tools/hd_art.py`), laid along the diagonal as vanilla's swords so it serves the inventory and the hand. A spear or lance also has its sprite mirrored, point to the top left, for the hand, as vanilla's spears do.
+- Art (since restyled: pixel-art icons and 3D models in the hand, [arms-restyle.md](arms-restyle.md)): one 64x64 sprite per arm, drawn by `tools/arms_art.py` with the high-detail renderer (`tools/hd_art.py`), laid along the diagonal as vanilla's swords so it serves the inventory and the hand. A spear or lance also has its sprite mirrored, point to the top left, for the hand, as vanilla's spears do.
 - Models: each arm's model is two lines over a shared in-hand model per kind (`models/item/arms_<kind>.json`), written by `tools/arms.py`: vanilla's sword poses (the lance: vanilla's spear poses) made larger by the kind's size and moved so the hand stays on the grip. The spear uses vanilla's `item/spear_in_hand` itself.
 - Learned from, not copied: Epic Knights (all rights reserved) and Simply Swords (Timefall Development License) were read for their approach only:
   - a table of weapon kinds and their traits;

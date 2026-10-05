@@ -58,7 +58,7 @@ The 64x64 items are listed in `construction_art.ITEMS`. New high-detail items sh
 
 ## High resolution
 The owner asked on 3 October 2026 that new art not be held to Minecraft's 16×16, so it can follow the reference images more closely. From then on:
-- **Blocks and items** may use 32×32 or 64×64 textures (`tools/check_mod_data.py` allows 16, 32 and 64). A block model's faces sample their texture by position (0 to 16), so a 64×64 texture draws four times finer with no change to the model. Vanilla blocks beside them stay 16×16, so new things look sharper than the world around them.
+- **Blocks and items** may use 32×32 or 64×64 textures (`tools/check_mod_data.py` allows 16, 32, 48 and 64; 48 is for the long arms' icons). A block model's faces sample their texture by position (0 to 16), so a 64×64 texture draws four times finer with no change to the model. Vanilla blocks beside them stay 16×16, so new things look sharper than the world around them.
 - **Creatures** are painted at several times their model's texture size. The model keeps its layout (its `LayerDefinition` size) and samples the larger image by it, so each model pixel shows a patch of painted detail. The werewolves are painted at four times (512×512, `TEXTURE_SCALE` in `tools/werewolf_model.py`).
 - **Fur** is painted by `tools/fur_paint.py`:
   - each face shaded towards the light, with soft patches;
@@ -67,4 +67,7 @@ The owner asked on 3 October 2026 that new art not be held to Minecraft's 16×16
 
   Mob textures are drawn as cut-outs, so cleared pixels cut a shaggy mane's lower edge into points, and turn fangs and claws into real points.
 - **Shapes are still boxes.** Smoother outlines come from more, smaller, turned boxes. A renderer for real meshes would be a project of its own, and a dependency such as GeckoLib would need a reviewed platform change.
+- **Weapons are pixel art, with 3D in the hand** ([arms-restyle.md](features/arms-restyle.md)):
+  - icons are 32×32 or 48×48, on the 45-degree pixel diagonal, in flat tones lit from the top left, with a one-pixel outline: no dithering, noise or glints;
+  - in the hand each weapon is a box model with thickness, built from the same design (`tools/arms_pixel.py`).
 - **Art stays original.** References guide the look; nothing is traced or copied from them.

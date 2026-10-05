@@ -12,7 +12,7 @@ import random
 from PIL import Image
 
 import arms
-import arms_art
+import arms_pixel as px
 import arms_kit
 import hd_art as hd
 from hd_art import Material
@@ -43,14 +43,14 @@ def _boards(img, material, rng, width, x0=0, y0=0, x1=None, y1=None, vertical=Tr
     """Planks with a grain, a dark seam between each, lit a little from the top left."""
     x1 = img.width if x1 is None else x1
     y1 = img.height if y1 is None else y1
-    shift = [rng.uniform(-0.08, 0.08) for _ in range(64)]
+    shift = [0.0 for _ in range(64)]
     for y in range(y0, y1):
         for x in range(x0, x1):
             along, across = (y, x - x0) if vertical else (x, y - y0)
             board = across // width
             edge = across % width
             grain = 0.06 * math.sin(along * 0.45 + board * 2.1 + math.sin(along * 0.11 + board) * 3.0)
-            value = 0.55 + shift[board % 64] + grain - 0.12 * (along / max(1, (y1 if vertical else x1))) + rng.uniform(-0.03, 0.03)
+            value = 0.55 + shift[board % 64] + grain - 0.12 * (along / max(1, (y1 if vertical else x1)))
             if edge == 0:
                 value = 0.12
             elif edge == 1:
@@ -117,7 +117,7 @@ def _on_face(kind, painted):
 def heater_face(metal):
     """A heater shield's face. Bronze: crimson, a gold chevron and a gold jug in chief (Jugcraft's own charge). Steel:
     navy, a riveted steel bend and a pale-green gauge-light roundel."""
-    style = arms_art.STYLES[metal]
+    style = px.STYLES[metal]
     width, height = _face_size("heater_shield")
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     rng = random.Random(f"heater_{metal}")
@@ -125,7 +125,7 @@ def heater_face(metal):
     for y in range(height):
         for x in range(width):
             grain = 0.03 * math.sin(y * 0.5 + math.sin(x * 0.3) * 2)
-            _put(img, x, y, _tone(field, 0.52 + grain - 0.1 * y / height + rng.uniform(-0.04, 0.04)))
+            _put(img, x, y, _tone(field, 0.52 + grain - 0.1 * y / height))
     if metal == "bronze":
         # The chevron: a band rising from the flanks to a peak at the middle.
         for y in range(height):
@@ -134,7 +134,7 @@ def heater_face(metal):
                 peak = 11.5 - abs(mx - 8.0) * 1.15
                 if peak - 2.2 <= my <= peak:
                     lit = 0.75 if my > peak - 0.6 else (0.35 if my < peak - 1.7 else 0.6)
-                    _put(img, x, y, _tone(GOLD, lit + rng.uniform(-0.04, 0.04)))
+                    _put(img, x, y, _tone(GOLD, lit))
         # A jug in chief: a round belly, a neck and a handle, in gold, in model pixels about (8, 15).
         for y in range(height):
             for x in range(width):
@@ -173,7 +173,7 @@ def heater_face(metal):
                 d = math.hypot(mx - 11.0, my - 15.5)
                 if d <= 1.9:
                     _put(img, x, y, _tone(hd.GUNMETAL, 0.7 if (mx - 11.0) - (my - 15.5) < 0 else 0.35) if d > 1.35
-                         else _tone(arms_art.PHOSPHOR, 0.85 - d / 2.6))
+                         else _tone(px.PHOSPHOR, 0.85 - d / 2.6))
     _wear(img, rng, 18, (style.haft.ramp[3] if metal == "bronze" else style.blade.ramp[3]))
     _vignette(img)
     return _on_face("heater_shield", img)
@@ -182,7 +182,7 @@ def heater_face(metal):
 def tower_face(metal):
     """A tower shield's face. Bronze: oak boards bound with three bronze bands. Steel: olive-painted riveted plates with a
     vision slit near the top, the paint worn to the steel at the edges."""
-    style = arms_art.STYLES[metal]
+    style = px.STYLES[metal]
     width, height = _face_size("tower_shield")
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     rng = random.Random(f"tower_{metal}")
@@ -193,13 +193,13 @@ def tower_face(metal):
             for y in range(y0, y0 + 6):
                 for x in range(width):
                     lit = 0.8 if y == y0 else (0.28 if y == y0 + 5 else 0.55)
-                    _put(img, x, y, _tone(_metal(style), lit + rng.uniform(-0.03, 0.03)))
+                    _put(img, x, y, _tone(_metal(style), lit))
             for x in range(4, width - 2, 9):
                 _rivet(img, x, y0 + 2, GOLD, big=True)
     else:
         for y in range(height):
             for x in range(width):
-                _put(img, x, y, _tone(OLIVE, 0.5 - 0.12 * y / height + rng.uniform(-0.03, 0.03)))
+                _put(img, x, y, _tone(OLIVE, 0.5 - 0.12 * y / height))
         seams = [int(height * f) for f in (0.3, 0.62)]
         for seam in seams:
             for x in range(width):
@@ -229,16 +229,16 @@ def tower_face(metal):
 
 def back(metal):
     """A shield's back: bare boards (dark for steel), a leather strap across their middle (STRAP_UV)."""
-    style = arms_art.STYLES[metal]
+    style = px.STYLES[metal]
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
     rng = random.Random(f"back_{metal}")
     _boards(img, style.haft, rng, 8)
     u0, v0, u1, v1 = arms_kit.STRAP_UV
-    strap = arms_art.LEATHER if metal == "bronze" else hd.RUBBER
+    strap = px.LEATHER if metal == "bronze" else hd.RUBBER
     for y in range(int(v0 * 4) - 2, int(v1 * 4) + 2):
         for x in range(64):
             edge = y in (int(v0 * 4) - 2, int(v1 * 4) + 1)
-            _put(img, x, y, _tone(strap, 0.2 if edge else 0.5 + 0.08 * math.sin(x * 0.7) + rng.uniform(-0.04, 0.04)))
+            _put(img, x, y, _tone(strap, 0.2 if edge else 0.5 + 0.08 * math.sin(x * 0.7)))
     for x in (10, 32, 54):
         _rivet(img, x, int(v0 * 4) + 3, style.fitting, big=True)
     return img
@@ -247,151 +247,158 @@ def back(metal):
 def trim(metal):
     """A shield's metal: the rim band along the top (RIM_UV), the boss's face at the bottom left (BOSS_UV), plain metal
     at the bottom right (PLAIN_UV)."""
-    style = arms_art.STYLES[metal]
+    style = px.STYLES[metal]
     metal_material = _metal(style)
     img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
     rng = random.Random(f"trim_{metal}")
     for y in range(16):
         for x in range(32):
             lit = (0.85, 0.65, 0.5, 0.3)[min(3, y)] if y < 4 else 0.5
-            _put(img, x, y, _tone(metal_material, lit + rng.uniform(-0.04, 0.04)))
+            _put(img, x, y, _tone(metal_material, lit))
     for x in range(3, 32, 8):
         _rivet(img, x, 1, style.fitting)
-    canvas = hd.Canvas(16)
-    canvas.disc((8.0, 8.0), 7.6, metal_material, dome=0.85)
-    canvas.ring((8.0, 8.0), 7.9, 6.0, style.fitting)
-    canvas.disc((8.0, 8.0), 2.2, style.fitting, dome=1.0)
-    img.paste(canvas.img, (0, 16))
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x + 0.5 - 8.0, y + 0.5 - 8.0
+            dist = math.hypot(dx, dy)
+            if dist <= 2.2:
+                _put(img, x, 16 + y, style.fitting.highlight if dx + dy < 0 else style.fitting.light)
+            elif 6.0 <= dist <= 7.9:
+                _put(img, x, 16 + y, _tone(style.fitting, 0.75 - (dx + dy) / 22.0))
+            elif dist < 6.0:
+                _put(img, x, 16 + y, _tone(metal_material, 0.62 - (dx + dy) / 18.0))
     for y in range(16, 32):
         for x in range(16, 32):
-            _put(img, x, y, _tone(metal_material, 0.5 + rng.uniform(-0.04, 0.04)))
+            _put(img, x, y, _tone(metal_material, 0.5))
     return img
 
 
 # ---------------------------------------------------------------- bows and crossbows
 #
-# Drawn as vanilla 26.3 draws its bow and crossbow (read in game), so vanilla's hand poses hold them: a bow's limbs run
-# from the top right to the bottom left with its grip at the centre and its arrow pointing to the top left; a crossbow's
-# stock runs from its butt at the bottom right to its prod at the top left. Each in its own frame (arms_art.Axis): for
-# the bow, s along the limbs and t forward, the way the arrow flies; for the crossbow, s along the stock towards the prod
-# and t across it.
-BOW_AXIS = {"origin": (32.0, 32.0), "angle": -45.0}
-CROSSBOW_AXIS = {"origin": (55.0, 55.0), "angle": -135.0, "scale": 1.12}
-# How far back the string is drawn in each of the three steps, and where a crossbow's nut holds it once loaded.
-BOW_DRAW = (7.0, 12.0, 17.0)
-CROSSBOW_PULL = (5.0, 10.0, 15.0)
-STRING = (226, 222, 204)
+# In the arms' pixel style (tools/arms_pixel.py), as vanilla 26.3 lays out its bow and crossbow (read in game), so
+# vanilla's hand poses hold them: a bow's limbs run from the top right to the bottom left with its grip at the centre
+# and its arrow pointing to the top left; a crossbow's stock runs from its butt at the bottom right to its prod at the
+# top left. All of a bow's (or crossbow's) frames are fitted alike, so it stays put as it is drawn.
+ICON = 32
+# How far back the string is drawn in each of the three steps (design units), and a crossbow's in its three.
+BOW_DRAW = (4.0, 7.0, 10.0)
+CROSSBOW_PULL = (2.5, 5.0, 7.5)
+STRING = px.Material((70, 64, 52), (110, 102, 86), (150, 142, 122), (196, 190, 170), (226, 222, 204), (240, 238, 226),
+                     shine=False)
+FLETCH = px.CLOTH_RED
 
 
-def _limb(c, w, s0, s1, tip_t, grip_t, width, material, tint=0.0):
-    """A bow limb from the grip (s0) to a tip (s1), curving back from grip_t to tip_t, tapering as it goes."""
-    steps = 10
-    for i in range(steps):
-        f0, f1 = i / steps, (i + 1) / steps
-        a = w(s0 + (s1 - s0) * f0, grip_t + (tip_t - grip_t) * f0 ** 1.6)
-        b = w(s0 + (s1 - s0) * f1, grip_t + (tip_t - grip_t) * f1 ** 1.6)
-        c.capsule(a, b, w.r(width * (1.0 - 0.45 * f0)), material, tint=tint)
-
-
-def _arrow(c, w, t0, t1, style, s=0.0):
-    """An arrow along t from its nock (t0) to its head (t1): a shaft, three vanes and a steel head."""
-    c.capsule(w(s, t0), w(s, t1 - 3.0), w.r(0.75), arms_art.WOOD, tint=0.1)
-    for side in (1.6, -1.6):
-        arms_art.flat(c, [w(s, t0 + 0.5), w(s + side, t0 + 1.5), w(s + side, t0 + 6.0), w(s, t0 + 7.5)], (196, 40, 40))
-    arms_art.flat(c, [w(s - 1.8, t1 - 4.0), w(s, t1), w(s + 1.8, t1 - 4.0), w(s, t1 - 3.0)], style.blade.ramp[4])
-
-
-def longbow(metal, draw=None):
-    """A longbow at rest (draw None) or drawn back `draw` pixels with an arrow nocked. Bronze: yew with brass nocks and a
-    leather grip. Steel: dark wood backed with blued steel, a gunmetal riser and a rubber grip."""
-    style = arms_art.STYLES[metal]
-    c = hd.Canvas()
-    w = arms_art.Axis(**BOW_AXIS)
-    length = 29.0
-    bend = 6.0 + (draw or 0.0) * 0.22
-    limb = arms_art.WOOD if metal == "bronze" else arms_art.DARK_WOOD
-    tips = []
+def _arrow_design(d, s, t_nock, length, st, along_s=False):
+    """An arrow from its nock to its head, across the bow (along -t) or along a crossbow's stock (along s)."""
+    if along_s:
+        d.strip(t_nock, t_nock + length - 2.4, 0.45, material=px.WOOD, depth=1.0, z=3)
+        d.poly([(t_nock + length - 2.6, -1.3), (t_nock + length, 0.0), (t_nock + length - 2.6, 1.3)], st.blade, z=3)
+        for side in (1, -1):
+            d.poly([(t_nock + 0.3, 0.0), (t_nock + 0.9, side * 1.2), (t_nock + 3.6, side * 1.2), (t_nock + 4.2, 0.0)],
+                   FLETCH, z=2)
+        return
+    head = t_nock - length
+    d.line(s, t_nock, s, head + 2.4, 0.9, px.WOOD, z=3)
+    d.poly([(s - 1.3, head + 2.6), (s, head), (s + 1.3, head + 2.6)], st.blade, z=3)
     for side in (1, -1):
-        _limb(c, w, 0.0, side * length, -bend, 0.0, 2.1, limb)
-        if metal == "steel":
-            _limb(c, w, 0.0, side * (length - 4.0), -bend + 1.0, 1.0, 0.8, style.blade, tint=0.1)
-        tip = w(side * length, -bend)
-        tips.append(tip)
-        c.disc(tip, w.r(1.5), style.fitting)
-    # The string: straight between the tips at rest; drawn back to the nock in a V.
-    nock = w(0.0, -bend - (draw or 0.0) - 1.0)
+        d.poly([(s, t_nock - 0.3), (s + side * 1.2, t_nock - 0.9), (s + side * 1.2, t_nock - 3.6), (s, t_nock - 4.2)],
+               FLETCH, z=2)
+
+
+def longbow_design(metal, draw=None):
+    """A longbow at rest (draw None) or drawn back `draw` with an arrow nocked. Bronze: yew with brass nocks and a
+    leather grip. Steel: dark wood backed with blued steel, gunmetal fittings and a rubber grip."""
+    st = px.STYLES[metal]
+    half = 15.0
+    d = px.Design(2 * half, grip=half)
+    bend = 2.6 + (draw or 0.0) * 0.22
+
+    def centre(s):
+        return bend * (abs(s - half) / half) ** 1.7
+
+    def width(s):
+        return 1.05 - 0.5 * abs(s - half) / half
+    d.strip(0.8, 2 * half - 0.8, lambda s: width(s) - centre(s), lambda s: width(s) + centre(s), material=st.haft,
+            part="limbs")
+    if metal == "steel":
+        d.strip(2.0, 2 * half - 2.0, lambda s: width(s) + 0.6 - centre(s), lambda s: -width(s) + centre(s),
+                material=st.blade, part="backing")
+    for tip in (0.8, 2 * half - 0.8):
+        d.disc(tip, centre(tip), 0.9, st.fitting, z=2)
+    nock = bend + (draw or 0.0)
     if draw is None:
-        c.line(tips[0], tips[1], STRING, 1.0)
+        d.line(0.8, bend, 2 * half - 0.8, bend, 0.8, STRING, z=-1)
     else:
-        c.line(tips[0], nock, STRING, 1.0)
-        c.line(tips[1], nock, STRING, 1.0)
-    # The grip and riser over the middle.
-    if metal == "steel":
-        c.box(w(0.0, 0.6), w.r(1.8), w.r(7.5), w.angle + 90, hd.GUNMETAL, bevel=1.0)
-    c.capsule(w(-4.5, 0.0), w(4.5, 0.0), w.r(2.0), style.grip, bands=[(f, f + 0.08, style.fitting) for f in (0.15, 0.5, 0.85)])
-    if draw is not None:
-        _arrow(c, w, -bend - draw - 1.0, -bend - draw + 34.0, style)
-    c.grip = w(0.0)
-    c.finish()
-    return c.img
+        d.line(0.8, bend, half, nock, 0.8, STRING, z=-1)
+        d.line(half, nock, 2 * half - 0.8, bend, 0.8, STRING, z=-1)
+        _arrow_design(d, half, nock, 17.0, st)
+    d.strip(half - 2.6, half + 2.6, 1.35, material=st.grip, stripes=(1.3, px.DARK), z=1)
+    for s in (half - 2.9, half + 2.9):
+        d.strip(s - 0.4, s + 0.4, 1.45, material=st.fitting, z=2)
+    return d
 
 
-def arbalest(metal, pull=None, load=None):
-    """An arbalest: a wooden stock with a metal prod across its nose and a stirrup to hold it down, at rest (pull and load
-    None), wound back `pull` pixels, or loaded with an arrow or a firework. Steel's carries a cranequin's geared rack."""
-    style = arms_art.STYLES[metal]
-    c = hd.Canvas()
-    w = arms_art.Axis(**CROSSBOW_AXIS)
-    stock = arms_art.WOOD if metal == "bronze" else arms_art.DARK_WOOD
-    nose, nut = 46.0, 30.0
-    # The stock: butt, then the tiller running up to the nose.
-    c.box(w(5.0), w.r(4.6), w.r(3.2), w.angle, stock, bevel=1.5)
-    c.capsule(w(6.0), w(nose + 2.0), w.r(2.3), stock)
-    c.capsule(w(14.0, -2.2), w(19.0, -5.0), w.r(0.9), style.fitting)  # the trigger lever
-    c.disc(w(nut), w.r(1.8), style.fitting)  # the nut
+def arbalest_design(metal, pull=None, load=None):
+    """An arbalest: a wooden stock with a metal prod across its nose and a stirrup to hold it down, at rest, wound back
+    `pull`, or loaded with an arrow or a firework. The steel one carries a cranequin's geared rack."""
+    st = px.STYLES[metal]
+    d = px.Design(30.0, grip=7.0)
+    nose, nut = 24.5, 15.0
+    d.strip(0.0, 6.5, 2.0, material=st.haft, part="butt")
+    d.strip(6.5, nose + 1.5, 1.1, material=st.haft, part="tiller")
+    d.line(9.0, 1.1, 12.0, 3.2, 0.8, st.fitting)      # the trigger lever
+    d.disc(nut, 0.0, 1.0, st.fitting, z=2)             # the nut
     if metal == "steel":
-        c.capsule(w(12.0, 2.6), w(nut - 2.0, 2.6), w.r(1.1), hd.GUNMETAL, bands=[(i / 8, i / 8 + 0.04, style.fitting) for i in range(1, 8)])
-    # The prod: a metal bow across the nose, its arms swept back towards the butt, bending further as it is wound.
-    flex = (pull or (nose - nut if load else 0.0)) * 0.12
+        d.strip(7.5, nut - 1.5, -1.1, 2.3, material=px.GUNMETAL, stripes=(1.0, px.DARK), z=1)
+    flex = (pull or ((nose - nut) * 0.6 if load else 0.0)) * 0.35
     tips = []
     for side in (1, -1):
-        steps = 8
-        for i in range(steps):
-            f0, f1 = i / steps, (i + 1) / steps
-            a = w(nose - (4.0 + flex) * f0 ** 1.5, side * 17.0 * f0)
-            b = w(nose - (4.0 + flex) * f1 ** 1.5, side * 17.0 * f1)
-            c.capsule(a, b, w.r(1.7 * (1.0 - 0.35 * f0)), style.blade)
-        tip = w(nose - 4.0 - flex, side * 17.0)
-        tips.append(tip)
-        c.disc(tip, w.r(1.2), style.fitting)
-    c.capsule(w(nose + 1.0, -2.6), w(nose + 4.5, -2.6), w.r(0.8), style.fitting)  # the stirrup
-    c.capsule(w(nose + 1.0, 2.6), w(nose + 4.5, 2.6), w.r(0.8), style.fitting)
-    c.capsule(w(nose + 4.5, -2.6), w(nose + 4.5, 2.6), w.r(0.8), style.fitting)
-    # The string: across the prod at rest, drawn back towards the nut as it is wound, caught on the nut once loaded.
-    back = nut if load else (nose - 4.0 - flex - (pull or 0.0))
-    string = w(back)
-    c.line(tips[0], string, STRING, 1.0)
-    c.line(tips[1], string, STRING, 1.0)
+        pts_out, pts_in = [], []
+        for i in range(9):
+            f = i / 8
+            sv = nose - (2.0 + flex) * f ** 1.5
+            pts_out.append((sv + 0.6, side * 11.0 * f))
+            pts_in.append((sv - 0.6, side * 11.0 * f))
+        d.poly(pts_out + pts_in[::-1], st.blade, part=f"prod{side}")
+        tips.append((nose - 2.0 - flex, side * 11.0))
+        d.disc(nose - 2.0 - flex, side * 11.0, 0.8, st.fitting, z=2)
+    d.strip(nose + 1.0, nose + 4.5, 1.6, -0.6, material=st.fitting, part="stirrup")
+    d.strip(nose + 1.0, nose + 4.5, -0.6, 1.6, material=st.fitting, part="stirrup2")
+    d.strip(nose + 3.6, nose + 4.5, 1.6, material=st.fitting, part="stirrup3")
+    back = nut if load else (nose - 2.0 - flex - (pull or 0.0))
+    for s_tip, t_tip in tips:
+        d.line(s_tip, t_tip, back, 0.0, 0.8, STRING, z=1)
     if load == "arrow":
-        c.capsule(w(nut, 0.0), w(nose + 8.0, 0.0), w.r(0.75), arms_art.WOOD, tint=0.1)
-        arms_art.flat(c, [w(nose + 6.5, -1.8), w(nose + 11.0, 0.0), w(nose + 6.5, 1.8), w(nose + 7.5, 0.0)], style.blade.ramp[4])
-        for side in (1.6, -1.6):
-            arms_art.flat(c, [w(nut + 0.5, 0.0), w(nut + 1.5, side), w(nut + 6.0, side), w(nut + 7.5, 0.0)], (196, 40, 40))
+        _arrow_design(d, 0.0, nut, 16.0, st, along_s=True)
     elif load == "firework":
-        c.capsule(w(nut + 1.0, 0.0), w(nose + 4.0, 0.0), w.r(2.2), hd.RED, bands=[(0.45, 0.6, hd.WHITE_PAINT)])
-        arms_art.flat(c, [w(nose + 3.5, -2.2), w(nose + 8.5, 0.0), w(nose + 3.5, 2.2)], hd.WHITE_PAINT.ramp[3])
-    c.grip = w(10.0)
-    c.finish()
-    return c.img
+        d.strip(nut + 0.5, nose + 2.5, 1.5, material=px.CLOTH_RED, stripes=(2.5, px.HIGHLIGHT), z=3)
+        d.poly([(nose + 2.5, -1.5), (nose + 5.5, 0.0), (nose + 2.5, 1.5)], hd_white, z=3)
+    return d
+
+
+hd_white = px.Material((90, 90, 92), (140, 140, 144), (184, 184, 188), (214, 214, 218), (236, 236, 240), (252, 252, 255))
+
+
+def _frames(designs, mirrored):
+    grip_px, scale = px.fit(designs, ICON)
+    if mirrored:
+        grip_px = (ICON - grip_px[0], grip_px[1])
+    return [px.icon(d, ICON, grip_px, scale, mirrored=mirrored) for d in designs]
 
 
 def bow_sprites(metal):
-    return {"": longbow(metal), **{f"_pulling_{i}": longbow(metal, draw) for i, draw in enumerate(BOW_DRAW)}}
+    designs = [longbow_design(metal)] + [longbow_design(metal, draw) for draw in BOW_DRAW]
+    # A bow's arrow points to the top left: the icon's across direction (t) runs that way mirrored about the diagonal,
+    # which the bow's symmetry makes the same as turning it: draw it with t towards the bottom right, arrow along -t.
+    frames = _frames(designs, mirrored=False)
+    return dict(zip(["", "_pulling_0", "_pulling_1", "_pulling_2"], frames))
 
 
 def crossbow_sprites(metal):
-    return {"_standby": arbalest(metal), **{f"_pulling_{i}": arbalest(metal, pull) for i, pull in enumerate(CROSSBOW_PULL)},
-            "_arrow": arbalest(metal, load="arrow"), "_firework": arbalest(metal, load="firework")}
+    designs = [arbalest_design(metal)] + [arbalest_design(metal, pull) for pull in CROSSBOW_PULL] + [
+        arbalest_design(metal, load="arrow"), arbalest_design(metal, load="firework")]
+    frames = _frames(designs, mirrored=True)
+    return dict(zip(["_standby", "_pulling_0", "_pulling_1", "_pulling_2", "_arrow", "_firework"], frames))
 
 
 RANGED_ART = {"bow": bow_sprites, "crossbow": crossbow_sprites}

@@ -1,5 +1,5 @@
 {
-  "parent": "jugcraft:item/arms_battleblade",
+  "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "jugcraft:item/bronze_battleblade"
   }
