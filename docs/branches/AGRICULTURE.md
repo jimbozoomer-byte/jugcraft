@@ -1079,6 +1079,84 @@ Ten more fall and Halloween additions, numbered on from the first ten, one per p
 - **Monster's Head**: a stitched green monster's head with bolts in its neck; on a redstone signal its jaw drops, its eyes glow and its bolts spark.
 - **Harvest plushes**: an owl, a hedgehog, an acorn, an ear of corn and a maple leaf, five more prizes at the midway. Details: [the haunted house's props](../features/haunted-house-props.md).
 
+### The Witch's Workshop
+
+| **The workshop**: two horned skull cauldrons over ember beds, the candelabra, the cabinet of curiosities, the jars and the broom | **The cauldrons**: a potion's colour, its fumes rising over the heat and things floating in it |
+| --- | --- |
+| ![The Witch's Workshop](../images/ingame_witchs_workshop.jpg) | ![The cauldrons](../images/ingame_witchs_workshop_cauldrons.jpg) |
+| **The cabinet of curiosities**, with candelabra in purple and red wax | **The oddity jars**: eyeballs, a beating heart, a bat and a two-headed snake |
+| ![The cabinet](../images/ingame_witchs_workshop_cabinet.jpg) | ![The jars](../images/ingame_witchs_workshop_jars.jpg) |
+| **The Enchanted Broom** and its Dustpan | **By candlelight** at night |
+| ![The broom](../images/ingame_witchs_workshop_broom.jpg) | ![The workshop at night](../images/ingame_witchs_workshop_night.jpg) |
+| **The branching chandelier** and the wall girandole | **The moth cases** and the bell jar |
+| ![The candelabra](../images/ingame_witchs_workshop_candelabra.jpg) | ![The moths](../images/ingame_witchs_workshop_moths.jpg) |
+
+*Real screenshots from the client game test that CI runs (`WitchsWorkshopClientGameTests`, software rendering, small previews). The cauldrons are filled, heated and stocked, the candles lit and recoloured, and the broom woken, for the picture.*
+
+- **Horned Skull Cauldron**: an iron pot with a ram's skull on its front that holds water or three bottles of one potion, brews over heat (an Ember Bed is one), floats a witch's ingredients, and, stirred with the Brew Ladle, wafts the potion onto up to four players near it at a quarter of its duration.
+- **Wrought-iron candelabra**: a floor candelabrum, a table candelabrum, a wall girandole and a branching chandelier, in six waxes and four flames, lit by flint, burning arrows or redstone, dripping wax as they burn.
+- **Enchanted Broom and Dustpan**: woken with Flying Ointment, the broom sweeps dropped items into a Dustpan for three in-game days. The Broom Rack shows three brooms.
+- **Cabinet of curiosities**: the Curiosity Cabinet shows nine things on its shelves, the Bell Jar one, and the Moth Display Case pinned moths that stir at night.
+- **Oddity jars**: eyeballs that watch you, a heart that beats as a redstone clock, a bat that wakes as you come near, a two-headed snake and a drumming hand. Details: [the Witch's Workshop](../features/witchs-workshop.md).
+
+### The Crypt and the Ossuary
+
+| **The crypt, the parlour and the buried giant**: sarcophagi and coffins, the bone throne and its bookcases, the colossus before a church wall | **The crypt**: stone brick, deepslate and blackstone sarcophagi carved with a knight, a lady and a skull, the deepslate one open; a locked Iron-Bound Coffin and an open one |
+| --- | --- |
+| ![The Crypt and the Ossuary](../images/ingame_crypt_and_ossuary.jpg) | ![The crypt](../images/ingame_crypt_and_ossuary_crypt.jpg) |
+| **The Coffin Wardrobe**, dressed in odd armour, and an open coffin on its velvet | **The ossuary parlour**: the Bone Throne between two Ribcage Bookcases, the Skull Footstool and Vertebra Floor Lamps |
+| ![The wardrobe](../images/ingame_crypt_and_ossuary_wardrobe.jpg) | ![The parlour](../images/ingame_crypt_and_ossuary_parlour.jpg) |
+| **The Buried Colossus**: the skull with its jaw dropped, ribs arched over a spine, a femur and the Giant Bone Hand | **A church wall in a thunderstorm**: Chimera Finials with their wings spread, Gargoyle Rainspouts over cauldrons |
+| ![The colossus](../images/ingame_crypt_and_ossuary_colossus.jpg) | ![The gargoyles in the storm](../images/ingame_crypt_and_ossuary_gargoyles.jpg) |
+| **The parlour at night**, the throne's eyes burning | **The colossus at night**, a Gargoyle Sentinel watching a pumpkin-headed zombie |
+| ![The parlour at night](../images/ingame_crypt_and_ossuary_night.jpg) | ![The colossus at night](../images/ingame_crypt_and_ossuary_colossus_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`CryptAndOssuaryClientGameTests`, software rendering, small previews). The coffin is locked, the wardrobe dressed, the bookcases filled and the skull's jaw dropped, for the picture.*
+
+- **Iron-Bound Coffin**: 54 slots, locked to a Skeleton Key cut from a Key Blank; locked, only its key opens it and hoppers can't reach in. Keys copy onto blanks. The **Coffin Wardrobe** swaps the armour you wear for the armour on its skeleton mannequin.
+- **Stone Sarcophagi**: 27 slots under a lid that slides aside over a skeleton, recarved with the Stonemason's Chisel; at night, shut, they sometimes knock.
+- **The ossuary parlour**: the Bone Throne (its crest's eyes glow while sat in at night), the Ribcage Bookcase (a chiseled bookshelf that powers enchanting tables), the Skull Footstool and the Vertebra Floor Lamp.
+- **The Buried Colossus**: a Colossal Skull whose jaw drops on redstone, Colossal Ribs that meet as an arch, Colossal Vertebrae and a Colossal Femur.
+- **The gargoyles**: the Gargoyle Sentinel signals the nearest monster by its distance, the Gargoyle Rainspout fills a cauldron in the rain, and the Chimera Finial reads rain and storms. Details: [the Crypt and the Ossuary](../features/crypt-and-ossuary.md).
+
+### The Laboratory, the Larder and the Dining Room
+
+| **The laboratory, the larder, the dining room and the yard**, from above | **The laboratory**: the Lightning Harness caught as it fires, the patient on the Lab Table sitting bolt upright; the Brain-Vat Consoles and a Tesla Coil |
+| --- | --- |
+| ![The Laboratory, the Larder and the Dining Room](../images/ingame_laboratory_larder_dining.jpg) | ![The laboratory](../images/ingame_laboratory_larder_dining_laboratory.jpg) |
+| **The spider's larder**: Silk Cocoons hung from a beam, Egg Sac Clusters on the floor and wall, a Web Drape across the door and a Silk Spool Stack in three colours | **The dining room**: a Harvest Feast Table laid with Floating Table Settings for dinner, tea and a feast, Haunted Dining Chairs round it and the Grandfather Clock by the wall |
+| ![The larder](../images/ingame_laboratory_larder_dining_larder.jpg) | ![The dining room](../images/ingame_laboratory_larder_dining_dining.jpg) |
+| **The yard**: a path of Witchlight Path Stakes in every colour, a Witchlight Lamp-Post, Hanging Witchlights under a fence arch, the six Yard Silhouettes and the Harvest Moon Lamp | **The dining room at midnight**: the candles lit and a chair slid out |
+| ![The yard](../images/ingame_laboratory_larder_dining_yard.jpg) | ![The dining room at midnight](../images/ingame_laboratory_larder_dining_dining_night.jpg) |
+| **The yard at midnight**: the witchlights awake, the full moon lit | **The laboratory at midnight** |
+| ![The yard at midnight](../images/ingame_laboratory_larder_dining_yard_night.jpg) | ![The laboratory at midnight](../images/ingame_laboratory_larder_dining_laboratory_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`LaboratoryLarderDiningClientGameTests`, software rendering, small previews). The harness is fired, the candles lit and a chair slid out for the picture; the witchlights are kept awake by redstone torches under the path.*
+
+- **The Reanimation Rig**: the Lightning Harness fires on a strong signal, a Tesla Coil's arc or lightning and wakes the Lab Table's patient; the Brain-Vat Console remembers the strongest signal at its back; the Crawling Hand drums its fingers and, powered, scuttles.
+- **The Spider's Larder**: the Silk Cocoon (a 9-slot larder that wriggles), Egg Sac Clusters (spiderlings at night), the Web Drape (2 × 2, slows you) and the Silk Spool Stack (dye each spool).
+- **The Poltergeist's Dinner Party**: the Haunted Dining Chair slides out at night, the Floating Table Setting is laid three ways, and the Grandfather Clock keeps the hour and the moon, strikes and pulses each hour, and shows a face at midnight.
+- **The Witchlight Lantern Path**: three lamps that wake for a player near, in five colours.
+- **The Yard Silhouettes and the Harvest Moon Lamp**: six black cut-outs whose eyes glow at night, and a 2 × 2 moon showing tonight's phase. Details: [the Laboratory, the Larder and the Dining Room](../features/laboratory-larder-dining.md).
+
+### Pumpkin Night
+
+| **The farm stand, the effigy and the choir**, from above | **The Farm Stand**: Red Kuri, Kabocha, apples, carrots, white pumpkins and corn in its crates, each price chalked on its tag and the owner's name on the header board; carved Red Kuri and Kabocha on hay bales beside it |
+| --- | --- |
+| ![Pumpkin Night](../images/ingame_pumpkin_night.jpg) | ![The Farm Stand](../images/ingame_pumpkin_night_farm_stand.jpg) |
+| **The Singing Pumpkins** caught mid-song, mouths open: bass, tenor, alto and soprano on hay bales, a Pumpkin Vine Garland and an Autumn Leaf Garland strung on the posts behind | **The Harvest Effigy at midnight**, burning: the blaze climbing round him to his carved Red Kuri head, his hands alight, his purple cloak |
+| ![The choir](../images/ingame_pumpkin_night_choir.jpg) | ![The effigy burning](../images/ingame_pumpkin_night_effigy_burning.jpg) |
+| **The garlands at midnight**, their bulbs lit by the hooks' power | **The Farm Stand at midnight**, the carved heirlooms glowing their own colours |
+| ![The garlands at midnight](../images/ingame_pumpkin_night_garlands_night.jpg) | ![The Farm Stand at midnight](../images/ingame_pumpkin_night_farm_stand_night.jpg) |
+
+*Real screenshots from the client game test that CI runs (`PumpkinNightClientGameTests`, software rendering, small previews). The choir is made to sing and the effigy lit for the pictures; the hooks are charged so the bulbs glow.*
+
+- **Red Kuri and Kabocha pumpkins**: heirlooms with their own seeds, hand-carved pumpkins that glow ember orange and greenish gold, and Red Kuri Soup and Kabocha Tempura.
+- **The Farm Stand**: an owner's stall of six crates sold for Jugs one item at a time, every sale checked on the server.
+- **The garlands**: a Pumpkin Vine Garland and an Autumn Leaf Garland hung between String Light Hooks.
+- **The Harvest Effigy**: burnt on a fall night for Harvest Cheer, once a night; he leaves Effigy Ashes that give Hearth Ash.
+- **The Singing Pumpkins**: four voices tuned like note blocks and sung by redstone. Details: [Pumpkin Night](../features/pumpkin-night.md).
+
 ## Even more fall additions
 
 Ten more fall and Halloween additions, numbered on from the twenty before, one per pull request ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md)).

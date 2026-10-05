@@ -57,7 +57,7 @@ public class CarvedPumpkinRenderer implements BlockEntityRenderer<CarvedPumpkinB
 		}
 		boolean lit = block.getValue(CarvedPumpkinBlock.LIT);
 		state.facing = block.getValue(CarvedPumpkinBlock.FACING);
-		state.type = CarvingTextures.get(state.carving, lit, block.getValue(CarvedPumpkinBlock.SOUL));
+		state.type = CarvingTextures.get(state.carving, lit, block.getValue(CarvedPumpkinBlock.SOUL), CarvingTextures.Glow.of(block.getBlock()));
 		Level level = pumpkin.getLevel();
 		for (int face = 0; face < PumpkinCarving.FACES; face++) {
 			Direction side = PumpkinCarving.side(state.facing, face);

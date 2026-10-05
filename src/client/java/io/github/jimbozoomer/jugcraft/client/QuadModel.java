@@ -70,6 +70,11 @@ public final class QuadModel {
 
 	/** Draws the quads in the current pose, one geometry submission per texture. */
 	public void submit(PoseStack pose, SubmitNodeCollector collector, int light) {
+		submit(pose, collector, light, 0xFFFFFFFF);
+	}
+
+	/** Draws the quads in the current pose tinted {@code color} (ARGB), one geometry submission per texture. */
+	public void submit(PoseStack pose, SubmitNodeCollector collector, int light, int color) {
 		for (Map.Entry<RenderType, List<Quad>> entry : quads.entrySet()) {
 			List<Quad> list = entry.getValue();
 			collector.submitCustomGeometry(pose, entry.getKey(), (matrix, buffer) -> {
@@ -77,7 +82,7 @@ public final class QuadModel {
 					for (int i = 0; i < 4; i++) {
 						float[] v = quad.vertices()[i];
 						float[] n = quad.normals()[i];
-						buffer.addVertex(matrix, v[0], v[1], v[2]).setColor(0xFFFFFFFF).setUv(v[3], v[4])
+						buffer.addVertex(matrix, v[0], v[1], v[2]).setColor(color).setUv(v[3], v[4])
 								.setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(matrix, n[0], n[1], n[2]);
 					}
 				}

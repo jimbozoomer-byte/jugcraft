@@ -75,5 +75,66 @@
       }
     ],
     "subtitle": "subtitles.jugcraft.entity.villager.work_retro_trader"
+  },
+  "singing_pumpkin.bass": {
+    "subtitle": "subtitles.jugcraft.singing_pumpkin.bass",
+    "sounds": [
+      {
+        "name": "jugcraft:choir/bass_ah",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "jugcraft:choir/bass_oh",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "singing_pumpkin.tenor": {
+    "subtitle": "subtitles.jugcraft.singing_pumpkin.tenor",
+    "sounds": [
+      {
+        "name": "jugcraft:choir/tenor_ah",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "jugcraft:choir/tenor_oh",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "singing_pumpkin.alto": {
+    "subtitle": "subtitles.jugcraft.singing_pumpkin.alto",
+    "sounds": [
+      {
+        "name": "jugcraft:choir/alto_ah",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "jugcraft:choir/alto_oh",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "singing_pumpkin.soprano": {
+    "subtitle": "subtitles.jugcraft.singing_pumpkin.soprano",
+    "sounds": [
+      {
+        "name": "jugcraft:choir/soprano_ah",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "jugcraft:choir/soprano_oh",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "effigy.burn": {
+    "subtitle": "subtitles.jugcraft.effigy.burn",
+    "sounds": [
+      {
+        "name": "jugcraft:effigy/effigy_burn",
+        "attenuation_distance": 32
+      }
+    ]
   }
 }

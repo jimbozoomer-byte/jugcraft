@@ -12,7 +12,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 
 /**
  * One small texture per carved design: the four faces side by side (64x16 for a pumpkin, 192x48 for a giant
@@ -39,7 +43,38 @@ final class CarvingTextures {
 	static final int HOLE_SOUL = 0xFFC8FAFF;
 	static final int HOLE_WALL_SOUL = 0xFF37A9C9;
 
-	private record Key(PumpkinCarving carving, boolean lit, boolean soul) {
+	/**
+	 * The colour a flame shines through a hand-carved pumpkin: candlelight, or for the Red Kuri a deeper orange and for
+	 * the Kabocha a greenish gold (tools/decor20.py HEIRLOOMS). A soul torch shines blue through any of them.
+	 */
+	enum Glow {
+		CANDLE(SHAVED_LIT, HOLE_LIT, HOLE_WALL_LIT),
+		DEEP(0xFFF0782A, 0xFFFFA54A, 0xFFD24E18),
+		GOLD(0xFFD6D45C, 0xFFF4F08C, 0xFFA6AE32);
+
+		final int shaved;
+		final int hole;
+		final int wall;
+
+		Glow(int shaved, int hole, int wall) {
+			this.shaved = shaved;
+			this.hole = hole;
+			this.wall = wall;
+		}
+
+		/** The glow of a hand-carved pumpkin block (any other block glows candlelight). */
+		static Glow of(Block carved) {
+			String id = BuiltInRegistries.BLOCK.getKey(carved).getPath();
+			return id.equals("hand_carved_red_kuri_pumpkin") ? DEEP : id.equals("hand_carved_kabocha_pumpkin") ? GOLD : CANDLE;
+		}
+
+		/** The glow of a pumpkin worn as a head (as an item stack). */
+		static Glow of(ItemStack head) {
+			return head.getItem() instanceof BlockItem item ? of(item.getBlock()) : CANDLE;
+		}
+	}
+
+	private record Key(PumpkinCarving carving, boolean lit, boolean soul, Glow glow) {
 	}
 
 	/** A giant pumpkin's four 48x48 faces in one array (compared by content), whether it is lit, and by a soul torch. */
@@ -66,7 +101,12 @@ final class CarvingTextures {
 
 	/** The render type drawing this design, creating its texture the first time it is seen. */
 	static RenderType get(PumpkinCarving carving, boolean lit, boolean soul) {
-		Key key = new Key(carving, lit, lit && soul);
+		return get(carving, lit, soul, Glow.CANDLE);
+	}
+
+	/** The render type drawing this design glowing {@code glow} when lit, creating its texture the first time it is seen. */
+	static RenderType get(PumpkinCarving carving, boolean lit, boolean soul, Glow glow) {
+		Key key = new Key(carving, lit, lit && soul, lit ? glow : Glow.CANDLE);
 		Entry entry = CACHE.get(key);
 		if (entry != null) {
 			return entry.type();
@@ -75,7 +115,7 @@ final class CarvingTextures {
 		for (int face = 0; face < PumpkinCarving.FACES; face++) {
 			faces[face] = carving.face(face);
 		}
-		return create(key, faces, PumpkinCarving.SIZE, lit, key.soul());
+		return create(key, faces, PumpkinCarving.SIZE, lit, key.soul(), key.glow());
 	}
 
 	/**
@@ -90,10 +130,10 @@ final class CarvingTextures {
 		}
 		GiantKey key = new GiantKey(all, lit, lit && soul);
 		Entry entry = CACHE.get(key);
-		return entry != null ? entry.type() : create(key, faces, GIANT, lit, key.soul());
+		return entry != null ? entry.type() : create(key, faces, GIANT, lit, key.soul(), Glow.CANDLE);
 	}
 
-	private static RenderType create(Object key, int[][] faces, int size, boolean lit, boolean soul) {
+	private static RenderType create(Object key, int[][] faces, int size, boolean lit, boolean soul, Glow glow) {
 		if (CACHE.size() >= MAX) {
 			Iterator<Entry> eldest = CACHE.values().iterator();
 			Minecraft.getInstance().getTextureManager().release(eldest.next().id());
@@ -104,7 +144,7 @@ final class CarvingTextures {
 			for (int y = 0; y < size; y++) {
 				for (int x = 0; x < size; x++) {
 					int above = y == 0 ? PumpkinCarving.SKIN : CarvingFace.pixel(faces[face], size, x, y - 1);
-					image.setPixel(face * size + x, y, color(CarvingFace.pixel(faces[face], size, x, y), above, lit, soul));
+					image.setPixel(face * size + x, y, color(CarvingFace.pixel(faces[face], size, x, y), above, lit, soul, glow));
 				}
 			}
 		}
@@ -130,15 +170,20 @@ final class CarvingTextures {
 	 * flesh, or a hole with a lighter wall under its top edge; candlelit, soul-lit or dark.
 	 */
 	static int color(int depth, int above, boolean lit, boolean soul) {
+		return color(depth, above, lit, soul, Glow.CANDLE);
+	}
+
+	/** As {@link #color(int, int, boolean, boolean)}, lit by a flame glowing {@code glow}. */
+	static int color(int depth, int above, boolean lit, boolean soul, Glow glow) {
 		boolean blue = lit && soul;
 		return switch (depth) {
-			case PumpkinCarving.SHAVED -> blue ? SHAVED_SOUL : lit ? SHAVED_LIT : SHAVED;
+			case PumpkinCarving.SHAVED -> blue ? SHAVED_SOUL : lit ? glow.shaved : SHAVED;
 			case PumpkinCarving.CUT -> {
 				boolean wall = above != PumpkinCarving.CUT;
 				if (blue) {
 					yield wall ? HOLE_WALL_SOUL : HOLE_SOUL;
 				}
-				yield lit ? (wall ? HOLE_WALL_LIT : HOLE_LIT) : (wall ? HOLE_WALL : HOLE);
+				yield lit ? (wall ? glow.wall : glow.hole) : (wall ? HOLE_WALL : HOLE);
 			}
 			default -> 0;
 		};

@@ -43,6 +43,10 @@ public class LabTableBlock extends BaseEntityBlock {
 	public static final float SIT_SPEED = 6.0F;
 	public static final int TWITCH_PERIOD = 97;
 	public static final int TWITCH_TICKS = 4;
+	/** How long a patient woken by a Lightning Harness sits up, arms out (batch 19). */
+	public static final int WAKE_TICKS = 100;
+	/** The block event that wakes the patient. */
+	public static final int EVENT_WAKE = 1;
 	/** The way from the foot to the head. */
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 	public static final EnumProperty<BedPart> PART = BlockStateProperties.BED_PART;
@@ -68,6 +72,38 @@ public class LabTableBlock extends BaseEntityBlock {
 	/** Whether the patient twitches at {@code time}: at night, for a few ticks of each period (by where it lies). */
 	public static boolean twitching(BlockPos pos, boolean night, long time) {
 		return night && Math.floorMod(time + pos.hashCode(), TWITCH_PERIOD) < TWITCH_TICKS;
+	}
+
+	/**
+	 * Wakes the patient of the table whose foot is at {@code foot}: for {@value #WAKE_TICKS} ticks it sits bolt upright,
+	 * arms out, groaning, its eyes flashing (a Lightning Harness above calls this).
+	 */
+	public static void wake(Level level, BlockPos foot) {
+		BlockState state = level.getBlockState(foot);
+		if (!(state.getBlock() instanceof LabTableBlock) || state.getValue(PART) != BedPart.FOOT) {
+			return;
+		}
+		level.blockEvent(foot, state.getBlock(), EVENT_WAKE, 0);
+		BlockPos head = other(foot, state);
+		level.playSound(null, head, SoundEvents.ZOMBIE_AMBIENT, SoundSource.BLOCKS, 1.0F, 0.5F);
+		if (level instanceof ServerLevel server) {
+			server.sendParticles(ParticleTypes.ELECTRIC_SPARK, head.getX() + 0.5, head.getY() + 1.2, head.getZ() + 0.5, 24, 0.4, 0.4, 0.4, 0.08);
+		}
+	}
+
+	/** Whether a patient woken at game time {@code woken} is still awake at {@code now}. */
+	public static boolean awake(long woken, long now) {
+		return now >= woken && now - woken < WAKE_TICKS;
+	}
+
+	/** The foot's block entity marks when the patient was woken, on the server and on clients. */
+	@Override
+	protected boolean triggerEvent(BlockState state, Level level, BlockPos pos, int id, int param) {
+		if (id == EVENT_WAKE && level.getBlockEntity(pos) instanceof DecorationBlockEntity table) {
+			table.mark(level.getGameTime());
+			return true;
+		}
+		return super.triggerEvent(state, level, pos, id, param);
 	}
 
 	/** {@code current} lean of the patient moved toward sitting up or lying down by {@value #SIT_SPEED} degrees. */
