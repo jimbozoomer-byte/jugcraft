@@ -65,7 +65,7 @@ Before a banked wood becomes a tree, check it beside vanilla's and the others. R
 - row 7 for the mahogany, which is more saturated than any vanilla wood;
 - row 4 for the chestnut, whose planks are close to vanilla birch's.
 
-These are left for the owner to decide.
+The owner chose to keep all three as they are: the jacaranda's grey-brown bark, the mahogany's deep red and the chestnut's light tan. Rows 4 and 7 stay banked for an elm and a yew.
 
 ## Connections
 - Existing input producer: none changed.
