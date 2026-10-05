@@ -11,6 +11,7 @@ read, traced or recoloured.
 """
 from PIL import Image
 
+import block_style as bs
 import cute_art as ca
 from flora_art import Px
 
@@ -136,15 +137,13 @@ def _flat(palette, base, **kw):
 
 
 def bone():
-    """The bones' ends: smooth cream, bevelled."""
-    return _flat(BONE, 1)
+    """The bones' ends: cream bone with a soft grain, in the manner of a vanilla bone block's end."""
+    return bs.img(bs.cloth([BONE[0], BONE[1], BONE[2], rgb("f6f2e8")], 18120))
 
 
 def skin():
-    """Crisp roast skin: smooth golden brown, a glossy lit band across its top, a darker crisp edge below, and a few
-    neat highlights."""
-    img = Image.new("RGBA", (16, 16))
-    ca.soft(SKIN, 2, top=0.25, bottom=0.25)(Px(img))
+    """Crisp roast skin: golden brown in soft clumps, with a few neat glossy highlights."""
+    img = bs.img(bs.cloth(SKIN[1:4], 18101))
     for x, y in ((3, 2), (4, 2), (10, 3), (11, 3), (6, 8), (7, 8), (12, 11), (2, 12)):
         img.putpixel((x, y), rgb("f4d08a") + (255,))
     return img
@@ -161,21 +160,8 @@ def meat():
 
 
 def platter():
-    """A silver platter: a polished, bevelled rim round a plain, flat middle with one soft shine."""
-    img = Image.new("RGBA", (16, 16))
-    for x in range(16):
-        for y in range(16):
-            ring = min(x, y, 15 - x, 15 - y)
-            if ring == 0:
-                colour = PLATTER[0]
-            elif ring == 1:
-                colour = PLATTER[3] if x + y < 16 else PLATTER[1]
-            else:
-                colour = PLATTER[2]
-            img.putpixel((x, y), colour + (255,))
-    for x, y in ((4, 4), (5, 4), (4, 5)):
-        img.putpixel((x, y), PLATTER[3] + (255,))
-    return img
+    """A silver platter: polished metal in the manner of a vanilla iron block, a lit rim round a softly clouded middle."""
+    return bs.img(bs.metal([rgb("70747a")] + PLATTER, 18150, panels=False))
 
 
 def cranberries():
