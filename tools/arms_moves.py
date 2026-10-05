@@ -1106,3 +1106,67 @@ MOVES["brazier_mace"] = {
            BZ_FP, *fp_overhead(BZ_FP, 0.9)[:2], fsettle(fp_overhead(BZ_FP, 0.9)[1], BZ_FP)),
     ],
 }
+
+# ---------------------------------------------------------------- Arms VIII (batch 57): thrown arms
+#
+# Each fights in the hand with moves like a kind's before it (the javelin and the harpoon as the estoc thrusts, the
+# francisca as the brazier mace swings, the chakram as the kama cuts). Holding use winds it back to throw (its "use"
+# pose): the javelin and the harpoon drawn back over the shoulder, point forward and the off hand reaching out ahead;
+# the francisca raised behind the head; the chakram drawn across the body for a flat backhand throw.
+
+LENGTH.update({"javelin": 26, "francisca": 13, "chakram": 9, "harpoon": 26})
+
+JV_HOLD = P(body=(0, 16, 0), head=(0, -14, 0), right_arm=(-50, -2, 4), left_arm=(-30, 20, -14), item=(-44, 0, 0),
+            **step(0.5, 4))
+JV_FP = F(-36, 12, 4, -2, 1)
+OVERARM = P(body=(-6, 34, 0), head=(-2, -28, 0), right_arm=(-160, 30, 22, 0, 0, 3), left_arm=(-84, -30, -10), item=(-30, 0, 4),
+            **step(-0.8, 8))
+MOVES["javelin"] = {
+    "hold": JV_HOLD, "fp_hold": JV_FP,
+    "attacks": [
+        fp(clip("thrust", JV_HOLD, (0.14, ES["draw"]), (0.32, ES["thrust"], 0.45), (0.6, settle(ES["thrust"], JV_HOLD, 0.3))),
+           JV_FP, *fp_thrust(JV_FP, 1.2)),
+        fp(clip("high_thrust", JV_HOLD, (0.14, ES["high_draw"]), (0.32, ES["high"], 0.45), (0.6, settle(ES["high"], JV_HOLD, 0.3))),
+           JV_FP, *fp_thrust(JV_FP, 1.0)),
+    ],
+    "use": OVERARM,
+}
+
+FR_HOLD = BZ_HOLD
+FR_FP = BZ_FP
+MOVES["francisca"] = {
+    "hold": FR_HOLD, "fp_hold": FR_FP,
+    "attacks": [
+        fp(clip("swing", FR_HOLD, (0.16, BZ["wind"]), (0.32, BZ["swing"], 0.15), (0.5, BZ["follow"]),
+                (0.76, settle(BZ["follow"], FR_HOLD))), FR_FP, *fp_forehand(FR_FP, 1.0)),
+        fp(clip("chop", FR_HOLD, (0.16, BZ["raise"]), (0.32, BZ["smash"], 0.35), (0.7, settle(BZ["smash"], FR_HOLD))),
+           FR_FP, *fp_overhead(FR_FP, 0.9)[:2], fsettle(fp_overhead(FR_FP, 0.9)[1], FR_FP)),
+    ],
+    # Raised behind the head, the bit forward, the off hand out ahead.
+    "use": P(body=(-8, 26, 0), head=(-4, -22, 0), right_arm=(-168, 20, 20), left_arm=(-80, -24, -10), item=(76, 0, 10),
+             **step(-0.6, 6)),
+}
+
+MOVES["chakram"] = {
+    "hold": SK_HOLD, "fp_hold": SK_FP,
+    "attacks": [
+        fp(clip("slice", SK_HOLD, (0.12, SK["wind_r"]), (0.28, SK["hook_l"], 0.2), (0.46, SK["draw_l"]),
+                (0.72, settle(SK["draw_l"], SK_HOLD))), SK_FP, *fp_forehand(SK_FP, 0.8)),
+        fp(clip("backslice", SK_HOLD, (0.12, SK["wind_l"]), (0.28, SK["hook_r"], 0.2), (0.62, settle(SK["hook_r"], SK_HOLD))),
+           SK_FP, *fp_forehand(SK_FP, 0.7, keys=3)),
+    ],
+    # Drawn across the body, flat, for a backhand throw.
+    "use": P(body=(0, -34, 0), head=(0, 28, 0), right_arm=(-80, -64, -30), left_arm=(-50, 30, -14), item=(10, 0, -70),
+             **step(0.3, -6)),
+}
+
+MOVES["harpoon"] = {
+    "hold": JV_HOLD, "fp_hold": JV_FP,
+    "attacks": [
+        fp(clip("thrust", JV_HOLD, (0.14, ES["draw"]), (0.32, ES["thrust"], 0.45), (0.6, settle(ES["thrust"], JV_HOLD, 0.3))),
+           JV_FP, *fp_thrust(JV_FP, 1.2)),
+        fp(clip("jab", JV_HOLD, (0.12, ES["draw"]), (0.28, mix(ES["thrust"], JV_HOLD, 0.3), 0.4),
+                (0.56, settle(ES["thrust"], JV_HOLD, 0.2))), JV_FP, *fp_thrust(JV_FP, 0.8)),
+    ],
+    "use": OVERARM,
+}

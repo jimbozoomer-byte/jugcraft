@@ -4,7 +4,9 @@ scythes, quarterstaves and pikes, each with a trait of its own (TRAITS); Arms II
 the heavy arms (TWO_HANDED) and zweihanders, mauls, executioner's swords and bills; and Arms IV, batch 47: labryses,
 battleblades, war forks, kamas and war picks, in an ornate style; and Arms V, batch 48: twinblades, nodachis,
 earthbreakers, katars, moonblades and kusarigamas, each with a weapon art (ARTS), a special move with its own animation
-and its own shape of damage.
+and its own shape of damage; Arms VI, batch 55: katanas and brazier maces, longbows and arbalests (RANGED) and shields
+(SHIELDS); and Arms VIII, batch 57: thrown arms, javelins, franciscas, chakrams and harpoons (THROWN), each an arm in
+the hand that can also be thrown.
 
 After studying Epic Knights (all rights reserved) and Simply Swords (Timefall Development License) for how they draw,
 animate and keep their weapons cheap; none of their code, models, numbers or art is used. What carried over is the
@@ -177,6 +179,24 @@ KINDS = {
                      "tags": ["enchantable/melee_weapon", "enchantable/durability", "enchantable/fire_aspect"],
                      "pattern": ["#C#", " # ", " S "], "trait": "ignite",
                      "tooltip": "A mace whose head is a burning brazier: sets foes alight. Use it to light a campfire, a candle or the ground."},
+    # Arms VIII (batch 57): thrown arms. Each fights in the hand by its numbers here, and is thrown with the use key
+    # (THROWN): hold to wind it back, let go to throw.
+    "javelin": {"display": "Javelin", "damage": 2.5, "speed": -2.6, "swing": ("stab", 7), "reach": (0.0, 3.25),
+                "margin": 0.125, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.6,
+                "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["  #", " S ", "SN "],
+                "tooltip": "A light spear made for throwing: quick jabs in the hand."},
+    "francisca": {"display": "Francisca", "damage": 4.0, "speed": -2.9, "swing": ("whack", 9), "reach": (0.0, 3.0),
+                  "margin": 0.0, "disable": 2.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.0,
+                  "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": [" #", "#S"], "trait": "chop",
+                  "tooltip": "A throwing axe with an upswept bit. Chops wood like an axe."},
+    "chakram": {"display": "Chakram", "damage": 2.0, "speed": -2.2, "swing": ("whack", 6), "reach": (0.0, 2.75),
+                "margin": 0.0, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 0.95,
+                "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": [" # ", "# #", " L "],
+                "tooltip": "A bladed ring, held by its wrapped rim: quick slicing cuts."},
+    "harpoon": {"display": "Harpoon", "damage": 3.0, "speed": -2.7, "swing": ("stab", 8), "reach": (0.0, 3.25),
+                "margin": 0.125, "disable": 0.0, "wear": 1, "knockback": 0.0, "parry": 0.0, "held": 1.6,
+                "tags": ["enchantable/melee_weapon", "enchantable/durability"], "pattern": ["  #", "#S ", "T  "],
+                "tooltip": "A barbed spear on a line: stabs in the hand."},
 }
 # Arms II traits (weapons/ArmItem.java; JugcraftArms.TRAITS). backstab: a blow landing within BACKSTAB_ANGLE degrees of
 # straight behind the target's body deals BACKSTAB more (a share of the blow). saddle: SADDLE more damage while riding.
@@ -426,6 +446,64 @@ RANGED_HELD = {"longbow": 1.3, "arbalest": 1.15}
 # A shield's sprites: its painted face, its bare back (and grip strap), and its metal trim (rim and boss).
 SHIELD_SPRITES = ["_face", "_back", "_trim"]
 
+# Arms VIII (batch 57): thrown arms (weapons/ThrownArmItem.java, ThrownArm.java). Hold use to wind one back and let go to
+# throw it, as vanilla's trident is thrown; a hold shorter than `wind` ticks does not throw. It leaves at `speed` blocks a
+# tick and falls `gravity` blocks a tick faster each tick (a snowball's 0.03; the chakram flies flat), and what it strikes
+# takes `damage` (vanilla's trident: 8), more for the arm's damage enchantments, as the trident's Impaling adds to its
+# throw. Then it falls where it struck, as itself, with its enchantments and wear, to be picked up again; the chakram
+# flies back to its thrower. A throw wears it by THROW_WEAR, and another of its kind and metal can be thrown
+# THROW_COOLDOWN ticks later. Balance: no throw hits harder than the trident's, and throwing one after another (the wind
+# and the cooldown) deals less a second than a netherite sword's blows (tools/check_mod_data.py).
+THROWN = {
+    ("javelin", "bronze"): {"wind": 10, "speed": 2.6, "gravity": 0.035, "damage": 7.0},
+    ("javelin", "steel"): {"wind": 10, "speed": 2.8, "gravity": 0.035, "damage": 8.0},
+    ("francisca", "bronze"): {"wind": 6, "speed": 1.6, "gravity": 0.06, "damage": 6.0},
+    ("francisca", "steel"): {"wind": 6, "speed": 1.7, "gravity": 0.06, "damage": 7.0},
+    ("chakram", "bronze"): {"wind": 6, "speed": 1.4, "gravity": 0.0, "damage": 4.0},
+    ("chakram", "steel"): {"wind": 6, "speed": 1.5, "gravity": 0.0, "damage": 5.0},
+    ("harpoon", "bronze"): {"wind": 10, "speed": 2.0, "gravity": 0.04, "damage": 5.0},
+    ("harpoon", "steel"): {"wind": 10, "speed": 2.2, "gravity": 0.04, "damage": 6.0},
+}
+THROWN_KINDS = ["javelin", "francisca", "chakram", "harpoon"]
+THROW_WEAR = 1
+THROW_COOLDOWN = 10
+VANILLA_TRIDENT = {"wind": 10, "speed": 2.5, "damage": 8.0}
+# What each does when thrown, after its tooltip's first line (tools/arms.py writes tooltip.jugcraft.arms.throw.<kind>).
+THROW_TEXT = {
+    "javelin": "It flies far and straight.",
+    "francisca": "It tumbles end over end and breaks a raised shield's guard for {disable:g} seconds.",
+    "chakram": "It flies flat, cuts every foe on its way out and back, and returns to your hand.",
+    "harpoon": "It keeps its speed underwater and hauls what it strikes towards you.",
+}
+# francisca: one that strikes a foe blocking with a shield (or a parrying arm) stops it blocking for FRANCISCA_DISABLE
+# seconds, as an axe's blow does (less for a shield that shrugs off axes, as the tower shield does).
+FRANCISCA_DISABLE = 3.0
+# chakram: it flies out until it is CHAKRAM_RANGE blocks from where it was thrown or meets a block, then turns back to
+# its thrower at CHAKRAM_RETURN blocks a tick, through anything in its way. It strikes each foe it passes once on the way
+# out and once on the way back, up to CHAKRAM_TARGETS each way. Within CHAKRAM_CATCH blocks of its thrower it is caught
+# (into the inventory, or at their feet if that is full); if its thrower is gone, or it has flown CHAKRAM_MAX_TICKS, it
+# falls where it is.
+CHAKRAM_RANGE = 12.0
+CHAKRAM_RETURN = 1.2
+CHAKRAM_TARGETS = 4
+CHAKRAM_CATCH = 1.5
+CHAKRAM_MAX_TICKS = 100
+# harpoon: underwater it keeps HARPOON_WATER of its speed each tick (as in air; a thrown thing keeps 0.8 in water); a foe
+# it strikes is hauled towards its thrower at HARPOON_PULL blocks a tick for each block it is off (at most
+# HARPOON_PULL_MAX), less its knockback resistance, and dragged from the saddle.
+HARPOON_WATER = 0.99
+HARPOON_PULL = 0.2
+HARPOON_PULL_MAX = 1.6
+# How large each is drawn in flight: its 3D model's square, in blocks (client/ThrownArmRenderer.java).
+FLIGHT = {"javelin": 1.4, "francisca": 0.85, "chakram": 0.8, "harpoon": 1.4}
+
+
+def throw_per_second(kind, metal):
+    """A thrown arm's damage a second, thrown one after another as fast as the wind and THROW_COOLDOWN allow."""
+    t = THROWN[(kind, metal)]
+    return t["damage"] * 20.0 / (t["wind"] + THROW_COOLDOWN)
+
+
 TWO_HANDED_SLOW = 0.6
 FINISHER = 1.25
 QUEUE_TICKS = 4
@@ -591,6 +669,9 @@ def write_all(write, assets, data, lang, condition):
         seconds = art["cooldown"] / 20
         lang[f"tooltip.{MOD}.arms.art.{art['move']}"] = (f"Use: {art['name']}. {art['text'][0].upper()}{art['text'][1:]} "
                                                           f"Ready again after {seconds:g} s.")
+    for kind in THROWN_KINDS:
+        lang[f"tooltip.{MOD}.arms.throw.{kind}"] = ("Hold use, then let go to throw it: %s damage. "
+                                                     + THROW_TEXT[kind].format(disable=FRANCISCA_DISABLE))
     lang[f"message.{MOD}.arms.art.ground"] = "Your feet must be on the ground to leap."
     lang[f"message.{MOD}.arms.art.riding"] = "Not from the saddle."
     write(data / "tags" / "block" / "kama_cuts.json", {"values": KAMA_CUTS})

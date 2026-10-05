@@ -8,6 +8,14 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Arms VIII, batch 57
+- **Thrown arms** in bronze and steel, each an arm in the hand that you can also throw: hold use to wind it back and let go, as you throw a trident. What it strikes takes its damage (up to 8, the trident's), more with Sharpness and the like, and it comes down where it struck as itself, enchantments and wear kept, to be picked up again.
+  - **Javelin:** flies far and straight.
+  - **Francisca:** a throwing axe that tumbles end over end and knocks a raised shield down for 3 seconds; chops wood in the hand.
+  - **Chakram:** a bladed ring that flies flat for 12 blocks, cutting every foe on its way out and back, and returns to your hand.
+  - **Harpoon:** keeps its speed underwater and hauls what it strikes towards you, out of the saddle.
+- Each flies as its own 3D model, with its own moves in the hand and a wind-up pose. Handbook page, the **Let Fly** advancement, six game tests and a client test with real throws. Record: [arms-viii.md](docs/features/arms-viii.md).
+
 ### Unmerged: Arms VII, batch 56
 - **32 named variant arms,** each fighting as its kind does:
   - **Crafted styles** at a smithing table, from a steel arm, the style's pattern and a material (enchantments and wear kept): **gilded** (gold; enchants as gold), **ironclad** (dieselpunk; lasts twice as long), **bonecarved** (bone; harder against the undead) and **runebound** (glowing runes; marks foes so they glow).

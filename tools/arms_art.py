@@ -611,13 +611,67 @@ def brazier_mace(st, frame=0):
     return d
 
 
+# ---------------------------------------------------------------- Arms VIII (batch 57): thrown arms
+
+
+def javelin(st):
+    d = Design(45, grip=17.0)
+    d.disc(0.7, 0.0, 0.8, st.fitting, depth=1.8)
+    haft(d, 0.6, 36.0, 0.65, st)
+    grip(d, 14.0, 20.0, 0.85, st, period=1.5)   # bound at the balance, where it is thrown from
+    socket(d, 34.0, 37.5, 0.9, st)
+    d.poly([(37.0, -0.85), (38.6, -1.8), (42.4, -0.8), (45.0, 0.0), (42.4, 0.8), (38.6, 1.8), (37.0, 0.85)], st.blade,
+           depth=1.0, part="blade", bevel=0.0)
+    d.strip(37.5, 43.0, 0.3, material=st.blade, depth=1.4, z=1, part="ridge")
+    d.glint(40.0, -1.0)
+    return d
+
+
+def francisca(st):
+    d = Design(28, grip=5.0)
+    d.disc(0.9, 0.0, 1.0, st.fitting, depth=2.0)
+    haft(d, 0.8, 24.0, 0.8, st)
+    grip(d, 1.5, 9.0, 0.95, st, period=1.6)
+    socket(d, 19.5, 24.5, 1.1, st)
+    # A narrow neck flaring into an upswept bit: its toe sweeps up past the top of the haft, as a francisca's does.
+    d.poly([(21.0, 1.1), (23.8, 1.1), (24.6, 2.8), (28.4, 5.6), (27.4, 8.2), (23.4, 8.4), (19.2, 7.6), (17.0, 6.0),
+            (20.6, 2.8)], st.blade, depth=1.2, part="bit")
+    d.poly([(28.4, 5.6), (27.4, 8.2), (23.4, 8.4), (19.2, 7.6), (17.0, 6.0), (18.4, 5.8), (19.8, 6.8), (23.4, 7.4),
+            (26.8, 7.2), (27.6, 5.4)], st.blade, depth=1.2, z=1, tone=HIGHLIGHT)
+    return d
+
+
+def chakram(st):
+    d = Design(22, grip=2.0)
+    # A bladed ring, its outer edge ground bright, held by a wrapped stretch of its rim.
+    d.ring(11.0, 0.0, 10.5, 8.2, st.blade, depth=1.0, part="ring")
+    d.ring(11.0, 0.0, 10.5, 9.5, st.blade, depth=1.0, z=1, tone=HIGHLIGHT)
+    d.strip(0.3, 2.9, 3.0, material=st.grip, depth=2.0, z=2, stripes=(1.0, DARK), part="wrap")
+    return d
+
+
+def harpoon(st):
+    d = Design(45, grip=14.0)
+    d.disc(0.7, 0.0, 0.8, st.fitting, depth=1.8)
+    haft(d, 0.6, 36.0, 0.7, st, rings=(26.0,))
+    grip(d, 10.0, 18.0, 0.9, st, period=1.4)
+    socket(d, 33.0, 37.0, 0.95, st)
+    # A narrow barbed head: a point and two barbs swept back.
+    d.poly([(36.5, -0.8), (42.0, -0.8), (45.0, 0.0), (42.0, 0.8), (36.5, 0.8)], st.blade, depth=1.0, part="blade", bevel=0.0)
+    for side in (1, -1):
+        d.poly([(40.5, side * 0.8), (37.2, side * 2.8), (38.6, side * 0.8)], st.blade, depth=1.0, part=f"barb{side}")
+    d.glint(42.0, -0.4)
+    return d
+
+
 WEAPONS = {"longsword": longsword, "greatsword": greatsword, "rapier": rapier, "flanged_mace": flanged_mace,
            "war_hammer": war_hammer, "glaive": glaive, "halberd": halberd, "spear": spear, "lance": lance,
            "dagger": dagger, "sabre": sabre, "estoc": estoc, "battle_axe": battle_axe, "flail": flail, "scythe": scythe,
            "quarterstaff": quarterstaff, "pike": pike, "zweihander": zweihander, "maul": maul, "executioner": executioner,
            "bill": bill, "labrys": labrys, "battleblade": battleblade, "war_fork": war_fork, "kama": kama,
            "war_pick": war_pick, "twinblade": twinblade, "nodachi": nodachi, "earthbreaker": earthbreaker, "katar": katar,
-           "moonblade": moonblade, "kusarigama": kusarigama, "katana": katana, "brazier_mace": brazier_mace}
+           "moonblade": moonblade, "kusarigama": kusarigama, "katana": katana, "brazier_mace": brazier_mace,
+           "javelin": javelin, "francisca": francisca, "chakram": chakram, "harpoon": harpoon}
 # Kinds whose sprite flickers (an animated texture, its frames top to bottom in one strip): frames, ticks each.
 ANIMATED = {"brazier_mace": (4, 3)}
 # A kind's icon is 32 pixels if it is held smaller than LARGE, 48 if larger (the great arms and polearms).
