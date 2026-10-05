@@ -73,10 +73,11 @@ CALYX = pal("2a4a22", "3e6630", "5a8444")
 # ---------------------------------------------------------------- the piece atlas
 
 class Atlas:
-    """A 64 x 64 texture filled row by row with painted pieces, a texel apart."""
+    """A square texture (64 x 64 unless `size` says otherwise) filled row by row with painted pieces, a texel apart."""
 
-    def __init__(self):
-        self.img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+    def __init__(self, size=SIZE):
+        self.size = size
+        self.img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
         self.x = self.y = self.row = 0
         self.uvs = {}
 
@@ -90,12 +91,13 @@ class Atlas:
         if turn:
             img = img.rotate(-turn, expand=True)
         w, h = img.size
-        if self.x + w > SIZE:
+        if self.x + w > self.size:
             self.x, self.y, self.row = 0, self.y + self.row + 1, 0
-        if self.y + h > SIZE:
+        if self.y + h > self.size:
             raise ValueError(f"texture full placing {key}")
         self.img.alpha_composite(img, (self.x, self.y))
-        uv = (self.x * UV, self.y * UV, (self.x + w) * UV, (self.y + h) * UV)
+        unit = 16 / self.size
+        uv = (self.x * unit, self.y * unit, (self.x + w) * unit, (self.y + h) * unit)
         self.uvs[key] = uv
         self.x += w + 1
         self.row = max(self.row, h)
@@ -563,11 +565,12 @@ def segment(base, length, axis=None, angle=0, width=1.0, uv=None, light=None, en
 
 
 class Sculpt:
-    """A plant being built: its texture's pieces and its models' elements (several models may share the pieces)."""
+    """A plant being built: its texture's pieces and its models' elements (several models may share the pieces). Its
+    texture is 64 x 64 unless `size` asks for a bigger one (128 for a detailed prop)."""
 
-    def __init__(self, name, seed):
+    def __init__(self, name, seed, size=SIZE):
         self.name = name
-        self.atlas = Atlas()
+        self.atlas = Atlas(size)
         self.rng = random.Random(seed)
         self.models = {}
 
