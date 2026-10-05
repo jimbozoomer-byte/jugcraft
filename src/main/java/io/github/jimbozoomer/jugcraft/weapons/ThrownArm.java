@@ -179,7 +179,9 @@ public class ThrownArm extends ThrowableItemProjectile {
 			for (Entity foe : level.getEntities(this, swept, this::canHitEntity)) {
 				if (struckBack.size() < JugcraftArms.CHAKRAM_TARGETS && struckBack.add(foe.getId())) {
 					// Its cut on the way out may be moments ago: let that go, as the arts' repeated hits do.
-					foe.invulnerableTime = 0;
+					if (foe instanceof LivingEntity living) {
+						living.damageCooldownTime = 0;
+					}
 					strike(level, foe);
 				}
 			}
