@@ -95,7 +95,8 @@ Primary specialty: logistics / building. Supports builders and anyone running a 
 
 ## Dependencies and assets
 - Fabric API only.
-- Textures are original, drawn by `tools/tower.py`. Furniture models are box lists, also generated there.
+- Textures are original, drawn by `tools/tower.py` and, at 64 px, `tools/tower_art.py`. Furniture models are box lists, also generated there.
+- **Steel Armor Plate (5 October 2026):** the owner called it horrific, so its noisy 64 px texture (fractal noise, a zipper weld, a dot grid of bolts and grime that darkened every block from top to bottom) is now clean 32 px pixel art ([ART_DIRECTION.md](../ART_DIRECTION.md#tiling-building-blocks)): six flat gunmetal shades, one thick plate a block with a bevel split across the edge, a sheen band, and chamfered corners that meet as a recessed diamond round a whole round bolt boss wherever four plates meet. The other tower blocks keep their textures for now.
 - The tower-screen pictures are drawn by `tools/drone_tower.py screen_image`.
 
 ## Verification
@@ -103,7 +104,7 @@ Primary specialty: logistics / building. Supports builders and anyone running a 
   - `tools/check_mod_data.py` passes; its new `check_tower` keeps `JugcraftTower` in sync with `tools/tower.py`.
   - The code compiles against the 26.3 jars.
 - **Server game tests (`TowerGameTests`):** data consistency, the core building the Command Post, the upgrade needing the plinth and modules, tower tier gating drone tiers, a finished tower holding 100 drones, and drones flying the next tier in.
-- **Client game test (`TowerClientGameTests`):** screenshots of the plinth, the tower screen, tier 1 and the command room, the tier 2 deck, drones building tier 3, and tier 9.
+- **Client game test (`TowerClientGameTests`):** screenshots of the plinth, the tower screen, tier 1 and the command room, the tier 2 deck, drones building tier 3, and tier 9. The Command Post's armour core and band and the tier 3 shell show the Steel Armor Plate; its slab and stairs are in `jugcraft_foam_sprayer` (`JugcraftClientGameTests`).
 - **Results on Narvisius's Windows PC (1 Oct 2026, commit 7c9d1ed):** `gradlew build` passed with all 125 server game tests, including the six tower tests. `runClientGameTest` passed, including `TowerClientGameTests`; its screenshots were checked by eye. The client receives all 32 docked drones of a full tier 2 tower.
 - **The first run found two bugs, both fixed:**
   - tower tiles at the buttress feet were skipped as "under cover", so tier 3 never started;

@@ -11,9 +11,25 @@ Jugcraft's look changes with its tiers, the way real technology did: the early g
 ## Texturing: keep it clean
 On 4 October 2026 the owner rejected the noisy, rust-covered dieselpunk textures ("you are doing way too much in terms of noise"). They pointed to vanilla copper blocks, a weathered pipe, Immersive Engineering Reimmersed's machines and a car drawn in vanilla's palette as the standard. Those references guided the style only; nothing of them is copied. The helpers in `tools/clean_metal.py` draw this way, and new textures should follow it:
 - **Flat fills from a short palette.** Use four or five shades per material. Never pick a random shade for every pixel.
-- **Shape comes from light.** Give a panel a one-pixel bevel: lit along the top and left, shaded along the bottom and right, with a dark seam round the outside. Shade recessed insets the other way round. Draw bolts as two-by-two heads lit at the top left.
+- **Shape comes from light.** Give a panel a one-pixel bevel: lit along the top and left, shaded along the bottom and right. A panel inside a face, or a part of a model, also gets a dark seam round the outside; a building block that tiles does not (it splits the seam across its edge, see [Tiling building blocks](#tiling-building-blocks)). Shade recessed insets the other way round. Draw bolts as two-by-two heads lit at the top left.
 - **Wear is placed, not sprinkled.** Use a chip at a corner, a stain weeping from a bolt or a seam, or a few short streaks one shade off the fill. Rust is an accent, never a whole surface.
 - **Pattern beats noise.** Show grain, ribs, tread and ripples as regular shapes: plank lines, ribs every four rows, raised lozenges, long ripple lines.
+
+### Tiling building blocks
+On 5 October 2026 the owner called the steel plate blocks and blast-proof concrete horrific ("like you didn't even try") and said bastion concrete looks good. Bastion's board-marked courses run straight across every block, so a wall reads as one surface. The rejected blocks were framed tiles: a near-black outline on all four edges (a doubled dark seam wherever two met), warm brown steel, per-pixel speckle, and a rust stain and pip-like bolts stamped on every block. A full-block texture that is built into walls, floors and stairs follows these rules (`tools/clean_metal.sheet`, the Dieselworks steel set in `tools/dieselworks.py`, blast-proof concrete in `tools/construction.py`, Steel Armor Plate in `tools/tower_art.py`):
+1. **Never outline all four edges.** Light the top row and left column, and put the shade or seam on the bottom row and right column. Next to a neighbour that makes one seam and one lit edge per boundary.
+2. **Draw the block edge like an interior line.** Give patterns a period that divides the block (four or eight pixels at 16), so courses, ribs, lifts and rivet rows carry on across the edge.
+3. **Keep the lattice even, not stamped.** Joints, tie holes and rivets sit on an even lattice or are staggered course by course; never stamp one bright accent (a glint, a stain) on the same spot of every block.
+4. **Four to six flat shades**, neighbours mostly 14 to 25 brightness steps apart (a glint may stand further out), with no random shade per pixel.
+5. **No rust on building blocks.** Weathering is one shade off the fill: brushed streaks, a scuff at an edge.
+6. **Keep details off the slab cut** (rows 7|8 at 16 px, 15|16 at 32 px), so slabs and stair steps never show half a bolt or hole.
+7. **One palette per material across a building set.** A texture shared with machines keeps its name and look; the building block gets its own (`dw_*` beside the giants' `dr_*`).
+8. **Make the material read.** Steel is cool blue-grey with lit edges and a sheen band or brushed streaks; concrete is boards or cast lifts with low-contrast tie holes on a lattice, and stays a neutral or warm grey, never steel-blue.
+9. **Match the neighbours' brightness**, so a set does not jump from dark to light between blocks.
+
+![Before and after: the Dieselworks steel set, Steel Armor Plate and blast-proof concrete, tiled three by three, with bastion concrete as the liked reference](images/building_blocks_before_after.png)
+
+*Before (top) and after (bottom), tiled outside the game; bastion concrete (left) is the reference the owner liked.*
 
 ## Creatures and faces: cute and clean
 On 5 October 2026 the owner found the Ember Bed's fire speckly and the Horned Skull Cauldron's nostrils ugly, and asked for every creature prop to be simplified: cute, or at least smooth, but still good-looking, after their reference pictures (the Frankenstein head above all). The painters in `tools/cute_art.py` draw this way, and every skull, bone, monster, bug, ghost and other creature prop should follow it:

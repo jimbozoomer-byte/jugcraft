@@ -30,7 +30,20 @@ Slabs make 6 from 3 and stairs 4 from 6, as in vanilla.
 ## Connections
 - Existing input producer: the plates from the metal press, iron bars, glass, glowstone and dye.
 - Existing output consumer: building only.
-- Technology/magic connection: none; this is decoration. It reuses the giants' textures (`dr_*`). The grating and porthole textures (`dw_*`) are new and drawn by code.
+- Technology/magic connection: none; this is decoration. The patina, red iron, copper dome and skid blocks reuse the giants' textures (`dr_*`). The steel set has its own `dw_*` textures (see below); the porthole texture is drawn here too.
+
+## The steel set's textures (5 October 2026)
+The owner called the steel plate blocks horrific ("like you didn't even try") and pointed to bastion concrete as the look they like. The two steel plates had reused the giants' machine textures: warm brown-grey, framed in a near-black outline on all four sides (so a wall became a grid of dark-mortared tiles), with a rust stain and pip-like bolts stamped on every block. The whole steel set now has its own textures in one cool blue-grey steel palette (`tools/dieselworks.STEEL`), drawn by the rules in [ART_DIRECTION.md](../ART_DIRECTION.md#tiling-building-blocks):
+
+| Block | Texture | Look |
+| --- | --- | --- |
+| Weathered Steel Plate, slab, stairs | `dw_steel_plate` | One brushed sheet a block: the seam split across the edge (lit top and left, seam bottom and right), brushed streaks one shade up |
+| Riveted Steel Plate, slab, stairs | `dw_steel_plate_riveted` | The same sheet framed by twelve rivets four pixels apart, so the rivet rows carry on evenly across every joint; none crosses the slab cut |
+| Ribbed Steel Pillar | `dw_ribbed_steel` (side), `dw_steel_plate` (end) | A rib every four rows, shaded across like a round column |
+| Riveted Band | `dw_steel_band` | A dark strap with a rivet every four pixels, unbroken across the block edge |
+| Steel Grating, slab | `dw_grating` | A lit steel frame and bars with nine even see-through holes |
+
+No colour is random per pixel, and there is no rust. The blocks show as metal on maps (they were brown). The giants, the zeppelin and the vehicles keep their own `dr_*` steel; the porthole ring stays on it too, since its texture is shared with the zeppelin and the raiders. Block IDs, recipes and models are unchanged, so placed blocks just look new.
 
 ## Balance and automation
 One plate of metal makes one block. No recipe turns a block back into metal, so nothing gains material.
@@ -43,7 +56,8 @@ No dependencies. Code: `building/Dieselworks.java`. Data and art: `tools/dieselw
 
 ## Verification
 - Planned in CI: the game test `dieselworksBlocksPlace`. It places all 25 blocks and checks that the grating is see-through, the I-beam is not a full cube and the lamp gives light 14.
-- Planned in CI: the client screenshot `jugcraft_dieselworks`, a riveted wall with portholes, a grating catwalk on I-beams and lamps.
+- Planned in CI: the client screenshot `jugcraft_dieselworks`, a riveted wall with portholes, a grating catwalk on I-beams and lamps, ribbed steel pillars, a riveted band and a weathered steel floor; since 5 October 2026 the front row also holds the steel plates' slabs and stairs.
+- Done offline for the 5 October 2026 textures: 3 x 3 tilings, a block-model render of the screenshot scene before and after, and a palette and noise check (four to six colours each, no small random steps, no all-round dark outline). Not yet seen in the game.
 - Done locally: `check_mod_data.py` and `check_repository.py` pass, and offline renders of the block models were reviewed.
 - Not done: a survival play-test.
 
