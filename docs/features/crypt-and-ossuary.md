@@ -114,6 +114,7 @@ Primary specialty and supported player role: building, with useful pieces for st
 ## Dependencies and assets
 - **No new dependencies.**
 - **Models**: built on `tools/flora_art.py` by `tools/decor18_data.py`, which paints their textures by code (128 × 128 for every sculpted prop).
+- **Art style**: the creature props (faces, bones, fur, scales, fire) are painted with the clean, cute painters in `tools/cute_art.py` since 5 October 2026, after the owner asked for simpler, smoother creatures ([ART_DIRECTION.md](../ART_DIRECTION.md#creatures-and-faces-cute-and-clean)).
 - **Moving parts**: the sarcophagi's lids, the skull's jaw and the sentinel's head and eyes are in `assets/jugcraft/decor18_quads.json`. The rainspout's stream and the skull's socket glow use two small greyscale textures the client tints.
 - **The wardrobe's armour** is vanilla's own armour drawn on an armour stand the client keeps (never added to the world).
 - **Originality**: all original. The look follows the owner's reference pictures, and nothing is traced from them.

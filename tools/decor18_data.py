@@ -10,6 +10,7 @@ import random
 
 from PIL import Image
 
+import cute_art as ca
 import decor15_data as d15d
 import decor17_data as d17d
 import decor18 as d18
@@ -165,18 +166,11 @@ def padlock():
 
 
 def stone(palette, seed=1, joints=False, lichen=0.0, tooled=True):
-    """Dressed stone: fine mottling, tooled striations, a few chips; ashlar joints if `joints`; lichen spots."""
+    """Dressed stone, clean: one flat tone with a lit top-left edge and a shaded bottom-right one; ashlar joints if
+    `joints`; with `lichen`, neat tufts at fixed places along the bottom. (`seed` and `tooled` are kept for callers.)"""
     def paint(p):
-        rng = random.Random(seed)
         n = len(palette)
-        for y in range(p.h):
-            for x in range(p.w):
-                k = n // 2 + rng.choice((0, 0, 0, -1, 1)) + (1 if tooled and (x + y * 3) % 7 == 0 else 0)
-                p.put(x, y, shade(palette, k))
-        for _ in range(p.w * p.h // 60):
-            cx, cy = rng.randrange(p.w), rng.randrange(p.h)
-            p.put(cx, cy, palette[1])
-            p.put(cx + 1, cy, palette[n - 1])
+        ca.bevel(palette, n // 2)(p)
         if joints:
             course = max(4, p.h // 3)
             for y in range(0, p.h, course):
@@ -186,11 +180,13 @@ def stone(palette, seed=1, joints=False, lichen=0.0, tooled=True):
                 for x in range(offset, p.w, max(6, p.w // 2)):
                     for yy in range(y, min(p.h, y + course)):
                         p.put(x, yy, palette[1])
-        for _ in range(int(p.w * p.h * lichen / 8)):
-            cx, cy = rng.randrange(p.w), rng.randrange(p.h)
-            for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1), (-1, 0)):
-                if rng.random() < 0.7:
-                    p.put(cx + dx, cy + dy, rng.choice(LICHEN))
+        if lichen:
+            step = max(5, int(1.0 / lichen))
+            for x in range((seed * 5) % step, p.w, step):
+                p.put(x, p.h - 2, LICHEN[1])
+                p.put(x + 1, p.h - 2, LICHEN[2])
+                p.put(x, p.h - 1, LICHEN[0])
+                p.put(x + 1, p.h - 1, LICHEN[1])
     return paint
 
 
@@ -252,30 +248,33 @@ def relief(palette, seed=1, kind="plain"):
     def paint(p):
         stone(palette, seed, tooled=kind == "plain")(p)
         n = len(palette)
-        rng = random.Random(seed)
         if kind == "folds":
             for x in range(p.w):
-                phase = math.sin(x * 0.9 + rng.random() * 0.3)
+                phase = math.sin(x * 0.9)
                 for y in range(p.h):
                     k = n // 2 + (1 if phase > 0.4 else 0) - (1 if phase < -0.5 else 0)
-                    p.put(x, y, shade(palette, k + rng.choice((0, 0, -1))))
-        elif kind == "mail":
-            for y in range(p.h):
-                for x in range(p.w):
-                    if (x + (y % 2)) % 2 == 0:
-                        p.put(x, y, palette[n // 2 + 1])
-                    else:
-                        p.put(x, y, palette[n // 2 - 1])
-        elif kind == "mane":
-            for y in range(p.h):
-                for x in range(p.w):
-                    k = n // 2 + (1 if (x + y // 2) % 3 == 0 else 0) - (1 if (x - y) % 4 == 0 else 0)
                     p.put(x, y, shade(palette, k))
-        elif kind == "scales":
+        elif kind == "mail":
+            # Rows of rings: a dark line under each row, lit along its top.
             for y in range(p.h):
                 for x in range(p.w):
-                    sx, sy = (x + (y // 2) % 2 * 2) % 4, y % 2
-                    k = n // 2 + (1 if sy == 0 and sx < 2 else 0) - (1 if sy == 1 and sx == 3 else 0)
+                    k = n // 2 - (1 if y % 3 == 2 else 0) + (1 if y % 3 == 0 else 0)
+                    p.put(x, y, shade(palette, k))
+        elif kind == "mane":
+            # Long locks: four texels wide, lit down their left edge, a dark parting between.
+            for y in range(p.h):
+                for x in range(p.w):
+                    lock = (x + (y // 6) % 2 * 2) % 4
+                    p.put(x, y, shade(palette, n // 2 + (1 if lock == 0 else 0) - (1 if lock == 3 else 0)))
+        elif kind == "scales":
+            # Big rounded scales in offset rows, each lit at its top with a dark lower curve.
+            for y in range(p.h):
+                for x in range(p.w):
+                    row = y // 4
+                    u = (x + row % 2 * 3) % 6 - 2.5
+                    v = y % 4
+                    edge = v >= 3 - (abs(u) > 1.6)
+                    k = n // 2 + (1 if v == 0 and abs(u) < 2 else 0) - (1 if edge else 0)
                     p.put(x, y, shade(palette, k))
     return paint
 
@@ -312,97 +311,78 @@ def effigy_face(palette, kind="helm"):
 
 
 def human_skull(palette=BONE, seed=1, glow=None):
-    """A skull from the front at its own scale: dome, two deep sockets, the nose hole, the upper teeth."""
+    """A cute skull from the front (tools/cute_art.py): a smooth dome lit along its top, two big round sockets with a
+    glint (or filled with `glow`), no nose holes, and a neat row of square teeth along the bottom."""
     def paint(p):
-        rng = random.Random(seed)
-        for y in range(p.h):
-            for x in range(p.w):
-                p.put(x, y, shade(palette, len(palette) // 2 + rng.choice((0, 0, -1, 1)) + (1 if y < p.h * 0.25 else 0)))
+        ca.soft(palette, len(palette) // 2)(p)
         w, h = p.w, p.h
+        rx, ry = max(1.5, w * 0.17), max(1.5, h * 0.17)
         for ex in (0.3, 0.7):
-            cx, cy = ex * w, h * 0.48
-            for y in range(h):
-                for x in range(w):
-                    d = math.hypot((x - cx) / (w * 0.16), (y - cy) / (h * 0.16))
-                    if d < 1.0:
-                        p.put(x, y, glow if glow and d < 0.55 else (SOCKET[0] if d < 0.7 else SOCKET[1]))
-        cx = (w - 1) / 2
-        for y in range(int(h * 0.64), int(h * 0.78)):
-            half = (y - h * 0.64) / (h * 0.14) * w * 0.07 + 0.3
-            for x in range(int(cx - half), int(cx + half) + 1):
-                p.put(x, y, SOCKET[0])
-        for x in range(int(w * 0.24), int(w * 0.77)):
-            p.put(x, h - 2, SOCKET[1] if x % 2 else palette[-1])
-            p.put(x, h - 1, palette[-2] if x % 2 == 0 else SOCKET[0])
+            if glow:
+                ca.ellipse(p, ex * w, h * 0.48, rx, ry, SOCKET[0])
+                ca.ellipse(p, ex * w, h * 0.48, rx * 0.62, ry * 0.62, glow)
+            else:
+                ca.eye(p, ex * w, h * 0.48, rx, ry)
+        rows = max(1, int(h * 0.14))
+        ca.teeth(p, w * 0.26, w * 0.74, h - rows - 1, rows, palette[-1], ca.SOCKET[1], tooth=max(1, w // 8))
     return paint
 
 
 def teeth(palette=BONE):
+    """A neat row of square teeth, lit along the top, a dark gap every third texel."""
     def paint(p):
         for y in range(p.h):
             for x in range(p.w):
                 gap = x % 3 == 2
-                p.put(x, y, SOCKET[1] if gap else shade(palette, len(palette) - 2 - (1 if y > p.h * 0.6 else 0)))
+                p.put(x, y, ca.SOCKET[1] if gap else palette[-1] if y == 0 else palette[-2])
     return paint
 
 
 def cracked_bone(seed=1, cracks=3, palette=BONE, moss=0.0):
-    """Big weathered bone: mottled, pitted, with long branching cracks and grime in its hollows."""
+    """Big bone, clean and smooth: warm cream lit along its top and shaded along its bottom; with `moss`, neat tufts of
+    lichen at fixed places along its lower edge. (`seed` and `cracks` are kept for callers.)"""
     def paint(p):
-        rng = random.Random(seed)
-        n = len(palette)
-        for y in range(p.h):
-            for x in range(p.w):
-                k = n // 2 + rng.choice((0, 0, 0, -1, 1)) + (1 if y < p.h * 0.15 else 0) - (1 if y > p.h * 0.85 else 0)
-                p.put(x, y, shade(palette, k))
-        for _ in range(p.w * p.h // 30):
-            p.put(rng.randrange(p.w), rng.randrange(p.h), palette[1])
-        for _ in range(cracks):
-            x, y = rng.random() * p.w, rng.random() * p.h * 0.3
-            direction = rng.uniform(0.6, 2.5)
-            for _ in range(int(p.h * 0.9)):
-                p.put(x, y, SOCKET[1])
-                p.put(x + 1, y, palette[n - 1])
-                x += math.cos(direction) + rng.uniform(-0.6, 0.6)
-                y += abs(math.sin(direction)) + 0.3
-                if rng.random() < 0.08:
-                    direction += rng.uniform(-0.8, 0.8)
-        for _ in range(int(p.w * p.h * moss / 6)):
-            cx, cy = rng.randrange(p.w), p.h - 1 - rng.randrange(max(1, p.h // 3))
-            p.put(cx, cy, rng.choice(LICHEN[:2]))
+        ca.soft(palette, len(palette) // 2, edge=1, top=0.2, bottom=0.2)(p)
+        if moss:
+            step = max(4, int(6 / max(0.05, moss) / 4))
+            for x in range((seed * 3) % step, p.w, step):
+                for dx in (0, 1, 2):
+                    p.put(x + dx, p.h - 2, LICHEN[1])
+                p.put(x + 1, p.h - 3, LICHEN[2])
+                for dx in (0, 1, 2):
+                    p.put(x + dx, p.h - 1, LICHEN[0])
     return paint
 
 
 def vertebrae(seed=1, palette=BONE):
-    """A column of vertebrae seen from the side: bodies with a dark disc between each, lit along one edge."""
+    """A column of vertebrae seen from the side: smooth rounded bodies, lit along one edge, with a warm brown disc
+    between each."""
     def paint(p):
-        rng = random.Random(seed)
         n = len(palette)
         for y in range(p.h):
             disc = y % 5 == 4
             for x in range(p.w):
-                k = n // 2 + (1 if x < p.w * 0.35 else 0) - (1 if x > p.w * 0.75 else 0) + rng.choice((0, 0, -1))
-                p.put(x, y, SOCKET[1] if disc else shade(palette, k))
+                k = n // 2 + (1 if x < p.w * 0.35 or y % 5 == 0 else 0) - (1 if x >= p.w * 0.75 else 0)
+                p.put(x, y, palette[1] if disc else shade(palette, k))
     return paint
 
 
 def ribs_texture(seed=1, palette=BONE):
-    """A ribcage seen from the front: the sternum down the middle and the ribs curving off it, dark between."""
+    """A ribcage seen from the front: the sternum down the middle and smooth cream ribs curving off it, each two texels
+    thick and lit along its top, soft dark plum between."""
     def paint(p):
-        rng = random.Random(seed)
         w, h = p.w, p.h
         for y in range(h):
             for x in range(w):
-                p.put(x, y, SOCKET[0])
+                p.put(x, y, ca.SOCKET[1])
         cx = (w - 1) / 2
         for i in range(max(3, h // 3)):
             y0 = 1 + i * 3
             for x in range(w):
-                dy = abs(x - cx) * 0.25
-                yy = y0 + dy
+                yy = y0 + abs(x - cx) * 0.25
                 if yy < h:
-                    p.put(x, yy, shade(palette, 3 + (1 if x < cx else 0) + rng.choice((0, -1))))
-                    p.put(x, yy + 1, palette[1])
+                    p.put(x, yy, palette[4])
+                    p.put(x, yy + 1, palette[3])
         for y in range(h):
             p.put(cx, y, palette[4])
             p.put(cx + 1, y, palette[3])
@@ -440,13 +420,12 @@ def book_pages():
 
 
 def membrane(palette=GARGOYLE, seed=1):
-    """A bat's wing in stone: the finger bones fanning out and the webbing between, lit along each bone."""
+    """A bat's wing in stone: smooth webbing in one flat tone, the finger bones fanning out as clean lit ridges."""
     def paint(p):
-        rng = random.Random(seed)
         n = len(palette)
         for y in range(p.h):
             for x in range(p.w):
-                p.put(x, y, shade(palette, n // 2 - 1 + rng.choice((0, 0, -1))))
+                p.put(x, y, palette[n // 2 - 1])
         for i in range(4):
             a = 0.2 + i * 0.38
             for s in range(int(max(p.w, p.h) * 1.3)):
@@ -458,26 +437,28 @@ def membrane(palette=GARGOYLE, seed=1):
 
 
 def grotesque(palette=GARGOYLE, seed=1, mouth=False):
-    """A gargoyle's face: heavy brows, deep-set eyes, a snout with flared nostrils, and fangs over a grinning mouth."""
+    """A gargoyle's face, cute but grumpy: smooth stone, a heavy lit brow, two big round dark eyes each with a glint, no
+    nostrils, and a wide mouth (shut, or open) with two little fangs."""
     def paint(p):
-        stone(palette, seed, lichen=0.1)(p)
+        ca.soft(palette, len(palette) // 2)(p)
         n = len(palette)
         w, h = p.w, p.h
-        for x in range(w):
-            p.put(x, h * 0.3, palette[n - 1])
-            p.put(x, h * 0.3 + 1, palette[1])
-        for ex in (0.28, 0.72):
-            for dx in (-1, 0, 1):
-                p.put(ex * w + dx, h * 0.42, SOCKET[0])
-            p.put(ex * w, h * 0.42 + 1, SOCKET[1])
-        p.put(w * 0.43, h * 0.6, SOCKET[0])
-        p.put(w * 0.57, h * 0.6, SOCKET[0])
-        y = h * 0.8
-        for x in range(int(w * 0.15), int(w * 0.85)):
-            p.put(x, y, SOCKET[0] if mouth else palette[1])
-        for fx in (0.3, 0.7):
-            p.put(fx * w, y - 1, BONE[4])
-            p.put(fx * w, y, BONE[3])
+        for x in range(1, w - 1):
+            p.put(x, h * 0.28, palette[n - 1])
+            p.put(x, h * 0.28 + 1, palette[n - 3])
+        r = max(1.2, min(w * 0.13, h * 0.16))
+        for ex in (0.3, 0.7):
+            ca.eye(p, ex * w, h * 0.5, r, r)
+        y = int(h * 0.78)
+        x0, x1 = int(w * 0.24), int(w * 0.76)
+        for x in range(x0, x1):
+            p.put(x, y, ca.SOCKET[0])
+            if mouth:
+                p.put(x, y + 1, ca.SOCKET[1])
+        for fx in (0.34, 0.66):
+            p.put(fx * w, y, BONE[4])
+            if mouth:
+                p.put(fx * w, y + 1, BONE[3])
     return paint
 
 
@@ -1053,15 +1034,15 @@ def vertebra_floor_lamp():
 
 def colossal_skull():
     """The Colossal Skull, facing north, drawn whole from its first block (its others to the right, up and back: x
-    from -16, y to 32, z to 32): a giant's cracked cranium, its brow, deep sockets, the nose hole, cheekbones and the
-    upper teeth. Its lower jaw and its sockets' glow are the client's (decor18_quads.json: `colossal_skull_jaw`)."""
+    from -16, y to 32, z to 32): a giant's cracked cranium, its brow, big round sockets, cheekbones and the upper
+    teeth. Its lower jaw and its sockets' glow are the client's (decor18_quads.json: `colossal_skull_jaw`)."""
     sc = Sculpt(d18.SKULL["block"], 190, 128)
     dome = sc.piece("dome", 48, 32, cracked_bone(2, 4, moss=0.15))
     side = sc.piece("side", 40, 32, cracked_bone(3, 3, moss=0.2))
     top = sc.piece("top", 40, 40, cracked_bone(4, 3))
     brow = sc.piece("brow", 44, 6, cracked_bone(5, 1))
     face = sc.piece("face", 20, 16, cracked_bone(6, 2))
-    hollow = sc.piece("hollow", 16, 16, solid(SOCKET, 7))
+    hollow = sc.piece("hollow", 16, 16, ca.bevel(ca.SOCKET, 1, light=0, dark=1))
     cheek = sc.piece("cheek", 16, 8, cracked_bone(8, 1))
     upper_teeth = sc.piece("upper_teeth", 28, 4, teeth())
     jaw = sc.piece("jaw", 28, 8, cracked_bone(9, 1))
@@ -1073,14 +1054,14 @@ def colossal_skull():
            cube((-11.0, 6.0, 27.0), (11.0, 27.0, 31.0), faces(dome, ALL6)),
            cube((-13.0, 19.6, 3.0), (13.0, 24.0, 7.0), faces(brow, ALL6)),
            cube((-12.0, 24.0, 5.0), (12.0, 28.0, 8.0), faces(dome, ("north", "east", "west", "up"))),
-           # The face round the sockets and the nose hole, and the hollows behind them.
+           # The face round the sockets (no nose hole: the clean style keeps faces simple), and the hollows behind them.
            cube((-12.0, 11.0, 4.0), (-10.0, 19.6, 8.0), faces(face, ("north", "east", "west"))),
            cube((-2.6, 13.4, 4.0), (2.6, 19.6, 8.0), faces(face, ("north", "east", "west"))),
            cube((10.0, 11.0, 4.0), (12.0, 19.6, 8.0), faces(face, ("north", "east", "west"))),
            cube((-12.0, 8.0, 4.0), (-2.0, 11.6, 8.0), faces(cheek, ("north", "east", "west", "down"))),
            cube((2.0, 8.0, 4.0), (12.0, 11.6, 8.0), faces(cheek, ("north", "east", "west", "down"))),
            cube((-11.0, 9.0, 8.0), (11.0, 20.0, 9.0), faces(hollow, ("north",))),
-           cube((-2.0, 8.0, 5.0), (2.0, 13.4, 5.6), faces(face, ("north",)), rotation((0.0, 10.7, 5.3), "z", 45)),
+           cube((-2.0, 8.0, 4.0), (2.0, 13.4, 8.0), faces(face, ("north",))),
            # Cheekbones out the sides, and the upper jaw with its teeth.
            cube((-15.6, 9.0, 7.0), (-12.0, 12.4, 16.0), faces(cheek, ALL6)),
            cube((12.0, 9.0, 7.0), (15.6, 12.4, 16.0), faces(cheek, ALL6)),
@@ -1175,12 +1156,12 @@ def gargoyle_sentinel():
     top = sc.piece("top", 24, 24, stone(GARGOYLE, 4))
     hide = sc.piece("hide", 24, 24, relief(GARGOYLE, 5, "scales"))
     limb = sc.piece("limb", 8, 20, stone(GARGOYLE, 6))
-    claw = sc.piece("claw", 6, 4, strip(GARGOYLE, 7, light=True))
+    claw = sc.piece("claw", 6, 4, ca.bevel(GARGOYLE, 4))
     wing = sc.piece("wing", 24, 28, membrane(GARGOYLE, 8))
     face = sc.piece("face", 16, 14, grotesque(GARGOYLE, 9))
     head_side = sc.piece("head_side", 14, 14, relief(GARGOYLE, 10, "scales"))
     snout = sc.piece("snout", 12, 8, grotesque(GARGOYLE, 11, mouth=True))
-    horn_ = sc.piece("horn", 6, 16, strip(GARGOYLE, 12, light=True))
+    horn_ = sc.piece("horn", 6, 16, ca.bevel(GARGOYLE, 4, sides="lr"))
     eye = sc.piece("eye", 4, 4, glow_dot((255, 60, 40)))
     els = [cube((2.0, 0.0, 2.0), (14.0, 1.4, 14.0), faces(base, SIDES4, up=top, down=top)),
            cube((3.0, 1.4, 3.0), (13.0, 5.0, 13.0), faces(die, SIDES4)),
@@ -1223,15 +1204,15 @@ def gargoyle_rainspout():
     plate = sc.piece("plate", 20, 14, stone(GARGOYLE, 2, lichen=0.12))
     corbel = sc.piece("corbel", 16, 8, relief(GARGOYLE, 3))
     channel = sc.piece("channel", 30, 6, stone(GARGOYLE, 4, lichen=0.1))
-    lead = sc.piece("lead", 10, 28, noise(COPPER, 5, 2))
+    lead = sc.piece("lead", 10, 28, ca.bevel(COPPER, 2, sides="lr"))
     back = sc.piece("back", 12, 28, relief(GARGOYLE, 6, "scales"))
-    spine = sc.piece("spine", 4, 4, strip(GARGOYLE, 7, light=True))
+    spine = sc.piece("spine", 4, 4, ca.bevel(GARGOYLE, 4))
     limb = sc.piece("limb", 6, 12, stone(GARGOYLE, 8))
     face = sc.piece("face", 14, 12, grotesque(GARGOYLE, 9, mouth=True))
     head_side = sc.piece("head_side", 12, 12, relief(GARGOYLE, 10, "scales"))
     jaw = sc.piece("jaw", 12, 6, grotesque(GARGOYLE, 11, mouth=True))
-    gullet = sc.piece("gullet", 6, 6, solid(SOCKET, 12))
-    horn_ = sc.piece("horn", 6, 12, strip(GARGOYLE, 13, light=True))
+    gullet = sc.piece("gullet", 6, 6, ca.bevel(ca.SOCKET, 1, light=0))
+    horn_ = sc.piece("horn", 6, 12, ca.bevel(GARGOYLE, 4, sides="lr"))
     els = [cube((3.6, 2.6, 14.0), (12.4, 13.4, 16.0), faces(plate, ALL6)),
            cube((5.0, 0.6, 13.0), (11.0, 3.6, 16.0), faces(corbel, ALL6), rotation((8.0, 3.6, 14.5), "x", -22.5)),
            # The gutter: its floor lined with lead, its walls, the beast's back and spines over it.
@@ -1267,7 +1248,7 @@ def chimera_finial():
     body = sc.piece("body", 16, 12, relief(GARGOYLE, 4, "scales"))
     mane = sc.piece("mane", 12, 12, relief(GARGOYLE, 5, "mane"))
     face = sc.piece("face", 8, 8, grotesque(GARGOYLE, 6))
-    horn_ = sc.piece("horn", 4, 8, strip(GARGOYLE, 7, light=True))
+    horn_ = sc.piece("horn", 4, 8, ca.bevel(GARGOYLE, 4, sides="lr"))
     wing = sc.piece("wing", 14, 14, membrane(GARGOYLE, 8))
     tail = sc.piece("tail", 4, 10, relief(GARGOYLE, 9, "scales"))
     els = [cube((3.6, 0.0, 3.6), (12.4, 1.6, 12.4), faces(base, ALL6)),

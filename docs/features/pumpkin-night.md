@@ -140,6 +140,7 @@ Primary specialty and supported player role: farming and trade, with building an
 ## Dependencies and assets
 - **No new dependencies.** The garlands extend the existing String Light Hook (`StringLightHookBlockEntity.Strand`); the stand uses the town's `Jugs`.
 - **Models**: built on `tools/flora_art.py` by `tools/decor20_data.py`, which paints their textures by code: 128 × 128 for the stand and the effigy, 64 × 64 for the rest.
+- **Art style**: the creature props (faces, bones, fur, scales, fire) are painted with the clean, cute painters in `tools/cute_art.py` since 5 October 2026, after the owner asked for simpler, smoother creatures ([ART_DIRECTION.md](../ART_DIRECTION.md#creatures-and-faces-cute-and-clean)).
 - **Client-drawn parts**:
   - the singing faces' mouth, eyes and pupils (`textures/entity/singing_pumpkin_face`, 32 × 32);
   - the effigy's cloak (`decor20_quads.json`, on a pale cloth tinted by the dye) and the blaze (the Halloween Bonfire's flame);

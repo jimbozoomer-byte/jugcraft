@@ -10,6 +10,7 @@ import random
 
 from PIL import Image
 
+import cute_art as ca
 import decor16 as d16
 import flora_art as fa
 from flora_art import SIDES4, Px, Sculpt, column, cube, pal, plane_xy, plane_zy, rotation, shade, solid, strip
@@ -31,8 +32,8 @@ BLACK_WAX = pal("0b0a0d", "16141a", "211e27", "2e2a36", "403b4c", "585266")
 WICK = pal("0e0b08", "241c14", "3a2e22")
 EMBER = pal("8a2a08", "d8601a", "ffb040")
 WEB = (232, 236, 240)
-SKIN = pal("1f3a1c", "2d5226", "3f6d32", "548a40", "6ea652", "8cc068")
-SKIN_DARK = pal("16291a", "203a22", "2c4c2c")
+SKIN = pal("1d4a22", "2c6a2e", "43903c", "5fb04a", "7ccb5e", "9fe07e")
+SKIN_DARK = pal("10261a", "1a3a24", "275030")
 HAIR = pal("07080a", "101318", "1a2028", "26303a", "34424e")
 STITCH = pal("140c0a", "2a1c16", "40302a")
 MOUTH = pal("1c0608", "3a0e12", "5a1a1e", "7a2a2a")
@@ -50,14 +51,12 @@ def rid(path):
 # ---------------------------------------------------------------- painters
 
 def felt(palette, seed=1, seam=True, k=None):
-    """Stuffed felt: one colour family with a fine fuzz, and a dashed seam stitched a texel inside the edge."""
+    """Stuffed felt: one smooth colour, lit along its top and shaded along its bottom, with a dashed seam stitched a texel
+    inside the edge."""
     def paint(p):
-        rng = random.Random(seed)
         n = len(palette)
         base = n // 2 if k is None else k
-        for y in range(p.h):
-            for x in range(p.w):
-                p.put(x, y, shade(palette, base + rng.choice((0, 0, 0, 0, -1, 1))))
+        ca.soft(palette, base, edge=0, top=0.2, bottom=0.2)(p)
         if seam and p.w > 4 and p.h > 4:
             for x in range(1, p.w - 1):
                 if x % 3 != 2:
@@ -71,73 +70,62 @@ def felt(palette, seed=1, seam=True, k=None):
 
 
 def sclera(seed=1, veins=5, toward=None):
-    """The white of the eye, its veins branching in from the edges (toward the iris, `toward` (x, y) in 0..1)."""
+    """The white of the eye, clean and glossy: bright white with a soft grey shade round its lower edge, and a few smooth
+    red veins curling in from the edges (toward the iris, `toward` (x, y) in 0..1), each a single even line."""
     def paint(p):
-        rng = random.Random(seed)
-        for y in range(p.h):
-            for x in range(p.w):
-                p.put(x, y, shade(SCLERA, 3 + rng.choice((0, 0, 0, -1, 1))))
-        for x in range(p.w):
-            p.put(x, 0, SCLERA[1])
-            p.put(x, p.h - 1, SCLERA[1])
-        for y in range(p.h):
-            p.put(0, y, SCLERA[1])
-            p.put(p.w - 1, y, SCLERA[1])
+        w, h = p.w, p.h
+        for y in range(h):
+            for x in range(w):
+                k = 4 if y < h * 0.35 else 3
+                if y >= h - 1 or x >= w - 1:
+                    k = 1
+                elif y >= h * 0.8 or x >= w * 0.85:
+                    k = 2
+                p.put(x, y, SCLERA[k])
         tx, ty = toward or (0.5, 0.5)
         for v in range(veins):
-            side = rng.randrange(4)
-            t = rng.random()
-            x, y = [(t * p.w, 0), (p.w - 1, t * p.h), (t * p.w, p.h - 1), (0, t * p.h)][side]
-            steps = int(min(p.w, p.h) * (0.35 + rng.random() * 0.25))
-            angle = math.atan2(ty * p.h - y, tx * p.w - x)
-            for s in range(steps):
-                p.put(x, y, VEIN[1] if s < steps * 0.6 else VEIN[2])
-                if s % 4 == 3 and rng.random() < 0.6:
-                    bx, by = x, y
-                    ba = angle + rng.choice((-1.1, 1.1))
-                    for _ in range(rng.randrange(2, 5)):
-                        bx += math.cos(ba)
-                        by += math.sin(ba)
-                        p.put(bx, by, VEIN[2])
-                angle += rng.uniform(-0.45, 0.45)
+            # Fixed, even spacing round the edge (the seed turns them), each curving gently inward.
+            t = ((v + 0.5) / max(1, veins) + seed * 0.17) % 1.0
+            side = int(t * 4)
+            along = t * 4 - side
+            x, y = [(along * w, 0), (w - 1, along * h), ((1 - along) * w, h - 1), (0, (1 - along) * h)][side]
+            angle = math.atan2(ty * h - y, tx * w - x)
+            bend = 0.08 if v % 2 else -0.08
+            for s in range(int(min(w, h) * 0.3)):
+                p.put(x, y, VEIN[1])
+                angle += bend
                 x += math.cos(angle)
                 y += math.sin(angle)
     return paint
 
 
 def iris():
-    """The iris seen face on: a ring of fibres from pale green at the pupil to deep green, a dark limbal ring, a black
-    pupil and a glint; white of the eye in the corners."""
+    """The iris seen face on: a clean green disc in three rings (pale round the pupil to deep at its rim), a dark rim, a
+    big round black pupil and two white glints; white of the eye in the corners."""
     def paint(p):
-        rng = random.Random(3)
         cx, cy = (p.w - 1) / 2, (p.h - 1) / 2
         r = p.w / 2
         for y in range(p.h):
             for x in range(p.w):
                 d = math.hypot(x - cx, y - cy) / r
-                a = math.atan2(y - cy, x - cx)
                 if d > 0.98:
-                    p.put(x, y, shade(SCLERA, 3 if d > 1.1 else 2))
-                elif d > 0.86:
-                    p.put(x, y, IRIS[0])
-                elif d > 0.34:
-                    fibre = 0.5 + 0.5 * math.sin(a * 13 + rng.random() * 0.6)
-                    k = 4 - int((d - 0.34) / 0.52 * 3.2) + (1 if fibre > 0.8 else 0)
-                    p.put(x, y, shade(IRIS, k))
-                elif d > 0.3:
+                    p.put(x, y, SCLERA[3])
+                elif d > 0.84:
                     p.put(x, y, IRIS[1])
+                elif d > 0.66:
+                    p.put(x, y, IRIS[3] if y < cy else IRIS[2])
+                elif d > 0.42:
+                    p.put(x, y, IRIS[4] if y < cy else IRIS[3])
                 else:
-                    p.put(x, y, PUPIL[0] if d < 0.22 else PUPIL[1])
-        g = p.w * 0.12
-        for dy in range(-1, 1):
-            for dx in range(-1, 1):
-                p.put(cx - r * 0.38 + dx + g, cy - r * 0.38 + dy + g, (255, 255, 255))
+                    p.put(x, y, PUPIL[0])
+        ca.ellipse(p, cx - r * 0.3 + 0.5, cy - r * 0.3 + 0.5, max(1.0, r * 0.2), max(1.0, r * 0.2), ca.GLINT)
+        p.put(cx + r * 0.25, cy + r * 0.2, ca.GLINT)
     return paint
 
 
 def bat_wing(seed=1):
-    """A bat's wing, its hinge on the right-hand edge: the arm bone up to the wrist and its claw, three fingers
-    spreading to the tip and the trailing edge, scalloped membrane between, lit toward the leading edge."""
+    """A bat's wing, its hinge on the right-hand edge: a smooth membrane in two tones (lit along its leading edge),
+    three neat scallops along its trailing edge, and the arm and fingers drawn as clean darker lines."""
     def paint(p):
         w, h = p.w, p.h
         hinge_top, hinge_bottom = (w - 1, h * 0.38), (w - 1, h * 0.72)
@@ -153,19 +141,15 @@ def bat_wing(seed=1):
                     c = not c
             return c
 
-        rng = random.Random(seed)
         for y in range(h):
             for x in range(w):
                 if inside(x + 0.5, y + 0.5):
-                    lead = 1 - y / h
-                    k = 2 + int(lead * 2.5) + rng.choice((0, 0, 0, -1))
-                    p.put(x, y, shade(WING, k))
+                    p.put(x, y, WING[4] if y < h * 0.3 else WING[3])
         # Scallops: bite the trailing edge between each pair of neighbouring tips.
         edge = tips + [hinge_bottom]
         for (x1, y1), (x2, y2) in zip(edge, edge[1:]):
             mx, my = (x1 + x2) / 2, (y1 + y2) / 2
             span = math.hypot(x2 - x1, y2 - y1)
-            # The bite's centre lies outside the wing, past the edge's middle, away from the wrist.
             ox, oy = mx - wrist[0], my - wrist[1]
             norm = math.hypot(ox, oy) or 1
             bx, by = mx + ox / norm * span * 0.42, my + oy / norm * span * 0.42
@@ -174,24 +158,29 @@ def bat_wing(seed=1):
                 for x in range(w):
                     if math.hypot(x + 0.5 - bx, y + 0.5 - by) < radius:
                         p.img.putpixel((x, y), (0, 0, 0, 0))
+        # A darker rim a texel inside the trailing edge, so the scallops read cleanly.
+        for y in range(h):
+            for x in range(w):
+                if p.get(x, y) and y > h * 0.3:
+                    below = p.get(x, y + 1) if y + 1 < h else None
+                    if not below:
+                        p.put(x, y, WING[2])
 
         def line(a, b, c, width=1):
             steps = int(max(abs(b[0] - a[0]), abs(b[1] - a[1]))) + 1
             for s in range(steps + 1):
                 t = s / steps
                 x, y = a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t
-                p.put(x, y, c)
-                if width > 1:
-                    p.put(x, y + 1, c)
+                if p.get(x, y):
+                    p.put(x, y, c)
+                    if width > 1 and p.get(x, y + 1):
+                        p.put(x, y + 1, c)
 
-        line(hinge_top, wrist, WING_BONE[1], 2)
-        line((hinge_top[0], hinge_top[1] + 1), (wrist[0], wrist[1] + 1), WING_BONE[2])
+        line(hinge_top, wrist, WING_BONE[2], 2)
         for tip in tips:
-            line(wrist, tip, WING_BONE[1])
-        # The claw at the wrist.
-        p.put(wrist[0] - 1, wrist[1] - 1, WING_BONE[0])
-        p.put(wrist[0] - 2, wrist[1] - 1, WING_BONE[0])
-        p.put(wrist[0], wrist[1], WING_BONE[0])
+            line(wrist, tip, WING_BONE[2])
+        p.put(wrist[0], wrist[1], WING_BONE[1])
+        p.put(wrist[0] - 1, wrist[1] - 1, WING_BONE[1])
     return paint
 
 
@@ -314,122 +303,128 @@ def web():
 
 
 def bolt_head():
+    """A neck bolt's head: pale steel, bevelled, with a round boss and a glint."""
     def paint(p):
-        for y in range(p.h):
-            for x in range(p.w):
-                edge = x in (0, p.w - 1) or y in (0, p.h - 1)
-                p.put(x, y, METAL[1] if edge else METAL[3 if x + y < p.w else 2])
-        p.put(p.w // 2, p.h // 2, METAL[4])
+        ca.bevel(METAL, 3)(p)
+        ca.ellipse(p, p.w / 2, p.h / 2, max(1.0, p.w * 0.28), max(1.0, p.h * 0.28), METAL[2])
+        p.put(p.w // 2 - 1, p.h // 2 - 1, METAL[4])
     return paint
 
 
 def monster_skin(seed=1, stitches=0, horizontal=False):
-    """The monster's green skin, mottled with darker patches, with `stitches` rows of black stitches across it."""
+    """The monster's bright green skin: smooth, lit along its top and shaded along its bottom, with `stitches` neat rows
+    of evenly spaced black stitches across it."""
     def paint(p):
-        rng = random.Random(seed)
-        for y in range(p.h):
-            for x in range(p.w):
-                p.put(x, y, shade(SKIN, 3 + rng.choice((0, 0, 0, -1, 1))))
-        for _ in range(p.w * p.h // 40):
-            cx, cy = rng.randrange(p.w), rng.randrange(p.h)
-            for dx in range(-1, 2):
-                for dy in range(-1, 1):
-                    p.put(cx + dx, cy + dy, shade(SKIN, 2))
+        ca.soft(SKIN, 3, edge=1, top=0.22, bottom=0.2)(p)
         for s in range(stitches):
             if horizontal:
                 y = int(p.h * (s + 1) / (stitches + 1))
-                x0, x1 = int(p.w * 0.15), int(p.w * 0.85)
+                x0, x1 = int(p.w * 0.2), int(p.w * 0.8)
                 for x in range(x0, x1):
-                    p.put(x, y, STITCH[1])
-                for x in range(x0 + 1, x1, 3):
+                    p.put(x, y, SKIN[1])
+                for x in range(x0 + 1, x1 - 1, 3):
                     p.put(x, y - 1, STITCH[0])
+                    p.put(x, y, STITCH[0])
                     p.put(x, y + 1, STITCH[0])
             else:
                 x = int(p.w * (s + 1) / (stitches + 1))
-                for y in range(int(p.h * 0.1), int(p.h * 0.9)):
-                    p.put(x, y, STITCH[1])
-                    if y % 3 == 0:
-                        p.put(x - 1, y, STITCH[0])
-                        p.put(x + 1, y, STITCH[0])
+                y0, y1 = int(p.h * 0.15), int(p.h * 0.85)
+                for y in range(y0, y1):
+                    p.put(x, y, SKIN[1])
+                for y in range(y0 + 1, y1 - 1, 3):
+                    p.put(x - 1, y, STITCH[0])
+                    p.put(x, y, STITCH[0])
+                    p.put(x + 1, y, STITCH[0])
     return paint
 
 
+# The monster's eyes on the front of its head (x from, to; y from, to, in pixels), and its forehead's scar's height.
+MONSTER_EYES = ((4.0, 7.2), (8.8, 12.0))
+MONSTER_EYE_Y = (9.9, 11.9)
+
+
 def monster_face(awake):
-    """The front of the monster's head above the jaw: a scarred brow stitched across, deep-set eyes (dull, or glowing
-    when it wakes), a broad nose and the upper lip; asleep, the closed mouth's line runs along the bottom."""
+    """The front of the monster's head above the jaw, after the owner's reference: smooth bright green, shaded under the
+    fringe, a neat stitched scar across the forehead, big heavy-lidded eyes in dark sockets (sleepy, or wide and glowing
+    when it wakes), cheeks shaded down the sides; asleep, a closed mouth's neat line runs along the bottom."""
     def paint(p):
         monster_skin(11)(p)
         w, h = p.w, p.h
-        # The forehead's scar, stitched across, and a shorter one down the left temple.
-        y = int(h * 0.16)
-        for x in range(int(w * 0.18), int(w * 0.7)):
-            p.put(x, y + (1 if x > w * 0.45 else 0), STITCH[1])
-        for x in range(int(w * 0.2), int(w * 0.7), 3):
-            p.put(x, y - 1, STITCH[0])
-            p.put(x, y + 2, STITCH[0])
-        for yy in range(int(h * 0.2), int(h * 0.55)):
-            p.put(int(w * 0.08), yy, STITCH[1])
-            if yy % 3 == 0:
-                p.put(int(w * 0.08) - 1, yy, STITCH[0])
-                p.put(int(w * 0.08) + 1, yy, STITCH[0])
-        # Deep-set eyes under the brow: dark sockets, the eye inside.
-        for ex in (0.2, 0.58):
-            x0, x1 = int(w * ex), int(w * (ex + 0.22))
-            y0, y1 = int(h * 0.36), int(h * 0.56)
-            for yy in range(y0, y1):
-                for x in range(x0, x1):
-                    p.put(x, yy, SKIN_DARK[0] if yy in (y0, y1 - 1) or x in (x0, x1 - 1) else SKIN_DARK[1])
-            pal_ = EYE_GLOW if awake else EYE_DULL
-            for yy in range(y0 + 2, y1 - 2):
-                for x in range(x0 + 2, x1 - 2):
-                    p.put(x, yy, shade(pal_, 2 if awake else 2))
-            px = (x0 + x1) // 2
-            p.put(px, (y0 + y1) // 2, PUPIL[0] if not awake else EYE_GLOW[4])
-            p.put(px - 1, (y0 + y1) // 2, PUPIL[0] if not awake else EYE_GLOW[3])
-        # Cheekbones' shadows and the upper lip.
-        for x in range(int(w * 0.1), int(w * 0.9)):
-            p.put(x, h - 3, SKIN[1])
+        # The fringe's shadow along the top, and the cheeks' shade down each side.
+        for y in range(h):
+            for x in range(w):
+                if y < h * 0.12:
+                    p.put(x, y, SKIN[2])
+                elif x < 2 or x >= w - 2:
+                    p.put(x, y, SKIN[2] if y < h - 2 else SKIN[1])
+        # A neat stitched scar down the left cheek.
+        x = int(w * 0.1)
+        for y in range(int(h * 0.62), int(h * 0.92)):
+            p.put(x, y, SKIN[1])
+        for y in range(int(h * 0.64), int(h * 0.92), 3):
+            for dx in (-1, 0, 1):
+                p.put(x + dx, y, STITCH[0])
+        # Big eyes under the brow, in the boxes of MONSTER_EYES (the awake glow is drawn over them, monster_head).
+        for ex0, ex1 in MONSTER_EYES:
+            x0, x1 = w * (ex0 - 2.0) / 12.0, w * (ex1 - 2.0) / 12.0
+            y0, y1 = h * (15.0 - MONSTER_EYE_Y[1]) / 8.0, h * (15.0 - MONSTER_EYE_Y[0]) / 8.0
+            ca.rounded_rect(p, x0, y0, x1, y1, SKIN_DARK[0] if awake else SKIN[2], corner=1)
+            inner = (x0 + 1, y0 + 1, x1 - 1, y1 - 1)
+            if awake:
+                ca.rounded_rect(p, *inner, EYE_GLOW[2], corner=1)
+                ca.rounded_rect(p, inner[0] + 1, inner[1] + 1, inner[2] - 1, inner[3] - 1, EYE_GLOW[4], corner=0)
+            else:
+                # Asleep: the socket a soft shadow, the eye shut in a thick dark curve, lashes down.
+                ca.rounded_rect(p, *inner, SKIN[2], corner=1)
+                cx = (x0 + x1) / 2
+                half = (x1 - x0) / 2 - 1
+                for x in range(int(x0) + 1, int(x1) - 1):
+                    t = (x + 0.5 - cx) / half
+                    p.put(x, int(y1) - (3 if abs(t) > 0.6 else 2), SKIN_DARK[0])
+        # Asleep, the closed mouth: a neat dark line with a stitch at each corner.
         if not awake:
-            for x in range(int(w * 0.22), int(w * 0.78)):
+            for x in range(int(w * 0.24), int(w * 0.76)):
+                p.put(x, h - 2, STITCH[0])
+            for x in (int(w * 0.24), int(w * 0.76) - 1):
+                p.put(x, h - 3, STITCH[0])
                 p.put(x, h - 1, STITCH[0])
-            for x in range(int(w * 0.26), int(w * 0.76), 4):
-                p.put(x, h - 2, STITCH[1])
     return paint
 
 
 def jaw_front(awake):
-    """The chin and lower lip; awake, with the lower teeth along its top."""
+    """The chin and lower lip: smooth green, the lip a shade darker along its top while the mouth is shut."""
     def paint(p):
         monster_skin(12)(p)
         if awake:
             return
-        for x in range(int(p.w * 0.22), int(p.w * 0.78), 4):
-            p.put(x, 0, STITCH[1])
-            p.put(x, 1, STITCH[0])
-        for x in range(p.w):
-            p.put(x, p.h - 1, SKIN[1])
+        for x in range(int(p.w * 0.24), int(p.w * 0.76)):
+            p.put(x, 0, SKIN[2])
     return paint
 
 
 def teeth(seed=1):
+    """A neat row of square cream teeth, two texels apart from a dark gap."""
     def paint(p):
-        rng = random.Random(seed)
         for x in range(p.w):
-            gap = x % 4 == 3 or rng.random() < 0.08
+            gap = x % 3 == 2
             for y in range(p.h):
-                p.put(x, y, MOUTH[0] if gap else shade(TOOTH, 2 + (1 if y < p.h // 2 else 0) - rng.choice((0, 0, 1))))
+                p.put(x, y, MOUTH[0] if gap else (TOOTH[3] if y == 0 else TOOTH[2]))
     return paint
 
 
 def hair(seed=1, fringe=False):
-    """Coarse black hair, combed flat, with blue-green lights; a fringe's lower edge hangs in jagged points."""
+    """Black hair, combed flat: a dark flat colour with a cool sheen in even combed lines; a fringe is cut straight
+    along its lower edge with regular square notches (after the reference's blunt bangs)."""
     def paint(p):
-        rng = random.Random(seed)
         for x in range(p.w):
-            length = p.h if not fringe else int(p.h * rng.choice((0.45, 0.6, 0.75, 0.9, 1.0)))
+            length = p.h
+            if fringe:
+                length = p.h if (x // 3) % 3 else int(p.h * 0.6)
             for y in range(length):
-                k = 1 + (2 if (x + y // 2) % 5 == 0 else 0) + rng.choice((0, 0, 1))
-                p.put(x, y, shade(HAIR, k))
+                k = 2 if x % 5 == 0 else 1
+                if fringe and y == length - 1:
+                    k = 0
+                p.put(x, y, HAIR[k])
     return paint
 
 
@@ -448,7 +443,7 @@ def flying_eyeball():
     front = sc.piece("sclera_front", 24, 24, sclera(4, 9, (0.5, 0.5)))
     small = sc.piece("sclera_small", 16, 16, sclera(5, 3))
     eye = sc.piece("iris", 16, 16, iris())
-    nerve = sc.piece("nerve", 4, 12, strip(NERVE, 3, light=True))
+    nerve = sc.piece("nerve", 4, 12, ca.bevel(NERVE, 2, sides="lr"))
     sides = {s: side for s in ("south", "east", "west", "up", "down")}
     body = [cube((5, 5, 5), (11, 11, 11), {"north": front, **sides}),
             cube((4.5, 6, 6), (11.5, 10, 10), {s: small for s in ("east", "west", "up", "down", "north", "south")}),
@@ -537,18 +532,18 @@ def monster_head():
     skin_back = sc.piece("skin_back", 18, 12, monster_skin(14, 2))
     jaw = sc.piece("jaw", 22, 6, jaw_front(False))
     jaw_side = sc.piece("jaw_side", 16, 6, monster_skin(15))
-    mouth = sc.piece("mouth", 8, 4, solid(MOUTH, 7))
+    mouth = sc.piece("mouth", 8, 4, ca.bevel(MOUTH, 1, light=0))
     teeth_uv = sc.piece("teeth", 12, 2, teeth(2))
     hair_side = sc.piece("hair_side", 26, 4, hair(4))
     fringe = sc.piece("fringe", 26, 7, hair(5, fringe=True))
     neck = sc.piece("neck", 10, 6, monster_skin(16, 1, horizontal=True))
-    collar = sc.piece("collar", 10, 2, solid(SHIRT, 2))
-    brow = sc.piece("brow", 16, 3, solid(SKIN_DARK, 3))
-    nose = sc.piece("nose", 4, 5, solid(SKIN[2:], 4))
-    ear = sc.piece("ear", 4, 5, solid(SKIN[1:4], 5))
+    collar = sc.piece("collar", 10, 2, ca.bevel(SHIRT, 1))
+    brow = sc.piece("brow", 16, 3, ca.bevel(SKIN, 2, light=1, dark=1, sides="tb"))
+    nose = sc.piece("nose", 4, 5, ca.bevel(SKIN, 3))
+    ear = sc.piece("ear", 4, 5, ca.bevel(SKIN, 3))
     bolt = sc.piece("bolt", 4, 4, bolt_head())
-    shaft = sc.piece("shaft", 3, 3, solid(METAL[1:4], 6))
-    glow = sc.piece("glow", 4, 2, solid(EYE_GLOW[2:], 8))
+    shaft = sc.piece("shaft", 3, 3, ca.bevel(METAL, 2))
+    glow = sc.piece("glow", 4, 2, ca.bevel(EYE_GLOW, 3, light=1, dark=0))
 
     def head(awake):
         els = [cube((4.5, 0, 4.5), (11.5, 1.2, 11.2), {**{s: collar for s in SIDES4}, "up": collar}),
@@ -564,7 +559,7 @@ def monster_head():
                                                             "south": hair_side, "north": hair_side}),
                 plane_xy(1.6, 14.4, 13.0, 14.6, 1.5, fringe),
                 cube((3.0, 12.0, 1.4), (13.0, 12.9, 2.0), {"north": brow, "up": brow, "down": brow, "east": brow, "west": brow}),
-                cube((7.0, 8.4, 1.2), (9.0, 10.8, 2.0), {"north": nose, "east": nose, "west": nose, "down": nose}),
+                cube((7.3, 8.6, 1.4), (8.7, 10.4, 2.0), {"north": nose, "east": nose, "west": nose, "down": nose}),
                 cube((1.2, 8.5, 7.0), (2.0, 11.5, 9.5), {s: ear for s in ("west", "north", "south", "up")}),
                 cube((14.0, 8.5, 7.0), (14.8, 11.5, 9.5), {s: ear for s in ("east", "north", "south", "up")})]
         jaw_els = [cube((2.5, 4.0, 2.5), (13.5, 7.0, 13.0), {"north": jaw, "east": jaw_side, "west": jaw_side,
@@ -577,8 +572,8 @@ def monster_head():
             els += [cube((3.5, 4.2, 3.2), (12.5, 7.0, 12.0), {"north": mouth, "east": mouth, "west": mouth, "down": mouth}),
                     cube((3.5, 6.2, 2.3), (12.5, 7.0, 2.7), {"north": teeth_uv, "down": teeth_uv})]
             # Glowing eyes over the painted ones (the face is drawn mirrored on a north face, so they sit mirrored too).
-            for x0 in (2.0 + 12 * 0.2, 2.0 + 12 * 0.58):
-                els.append(cube((x0 + 0.7, 10.9, 1.95), (x0 + 12 * 0.22 - 0.7, 11.8, 1.95), {"north": glow}, light=15))
+            for x0, x1 in MONSTER_EYES:
+                els.append(cube((x0 + 0.6, MONSTER_EYE_Y[0] + 0.5, 1.95), (x1 - 0.6, MONSTER_EYE_Y[1] - 0.5, 1.95), {"north": glow}, light=15))
         return els + jaw_els
 
     sc.models["monster_head"] = head(False)
@@ -660,39 +655,37 @@ def feathers(palette, seed=1, rows=4):
 
 
 def spines(seed=1, jagged=False):
-    """A hedgehog's spines: dark-rooted quills with pale tips, row on row, all lying back (down the piece); along the
-    top edge, if `jagged`, their points stand out (cut out between them)."""
+    """A hedgehog's spines, neat and soft: a warm brown back with even rows of short pale-tipped quills all lying back
+    (down the piece); along the top edge, if `jagged`, their rounded points stand out (cut out between them)."""
     def paint(p):
-        rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
-                p.put(x, y, shade(HEDGEHOG, 1 + rng.choice((0, 0, 1))))
-        for row in range(-2, p.h, 2):
-            for x0 in range(-(row % 4) // 2, p.w + 2, 2):
-                length = rng.choice((3, 4, 4, 5))
-                lean = rng.choice((-1, 0, 0, 1)) * 0.25
-                for i in range(length):
-                    k = (2, 3, 4, 5, 5)[min(4, i * 5 // length)]
-                    p.put(x0 + lean * i, row + i, shade(HEDGEHOG, k))
+                p.put(x, y, HEDGEHOG[2])
+        for row in range(-2, p.h, 4):
+            for x0 in range((row // 4) % 2 * 2, p.w + 2, 4):
+                for i in range(4):
+                    k = (3, 3, 4, 5)[i]
+                    p.put(x0, row + i, HEDGEHOG[k])
+                    p.put(x0 + 1, row + i, HEDGEHOG[k - 1])
         if jagged:
             for x in range(p.w):
-                cut = (0, 2, 3, 1)[x % 4] + rng.choice((0, 0, 1))
+                cut = (0, 1, 2, 1)[x % 4]
                 for y in range(min(cut, p.h)):
                     p.img.putpixel((x, y), (0, 0, 0, 0))
                 if cut < p.h:
-                    p.put(x, cut, HEDGEHOG[5])
+                    p.put(x, cut, HEDGEHOG[4])
     return paint
 
 
 def kernels(seed=1, face=False):
-    """An ear of corn: rows of plump kernels, each lit at its top-left; with an embroidered grinning face if `face`."""
+    """An ear of corn: neat rows of plump kernels, each a flat yellow square lit at its top-left with a darker seam
+    between; with an embroidered grinning face if `face`."""
     def paint(p):
-        rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
                 kx, ky = x % 3, (y + (x // 3) % 2) % 3
-                k = 3 if (kx, ky) == (0, 0) else (2 if kx < 2 and ky < 2 else 0)
-                p.put(x, y, shade(KERNEL, k + rng.choice((0, 0, 1))))
+                k = 4 if (kx, ky) == (0, 0) else (3 if kx < 2 and ky < 2 else 1)
+                p.put(x, y, KERNEL[k])
         if face:
             plush_face(KERNEL, [(0.3, 0.38), (0.7, 0.38)], "grin", cheeks=False, eye_size=0.13)(Overlay(p, KERNEL))
     return paint
@@ -711,12 +704,12 @@ class Overlay:
 
 
 def acorn_cap(seed=1):
+    """An acorn's cap: even rows of little overlapping scales, each a flat brown with a darker lower edge."""
     def paint(p):
-        rng = random.Random(seed)
         for y in range(p.h):
             for x in range(p.w):
                 scale = (x + (y // 2) % 2 * 2) % 4 == 0 or y % 2 == 0 and x % 4 == 2
-                p.put(x, y, shade(ACORN_CAP, (1 if scale else 3) + rng.choice((0, 0, 1))))
+                p.put(x, y, ACORN_CAP[2 if scale else 3])
     return paint
 
 
@@ -725,7 +718,6 @@ def maple_leaf(face):
     def paint(p):
         w, h = p.w, p.h
         cx, cy = w / 2, h * 0.62
-        rng = random.Random(8)
         lobes = [(-90, 1.0), (-35, 0.9), (-145, 0.9), (20, 0.62), (-200, 0.62)]
         for y in range(h):
             for x in range(w):
@@ -741,8 +733,7 @@ def maple_leaf(face):
                         tooth = 0.1 * max(0.0, math.sin(off / 40 * math.pi * 3.5))
                         reach = max(reach, lobe * 0.95 + tooth)
                 if d <= reach:
-                    k = 3 - int(d * 2) + rng.choice((0, 0, 0, 1))
-                    p.put(x, y, shade(MAPLE, k))
+                    p.put(x, y, MAPLE[3] if dy < 0.0 else MAPLE[2])
         p.outline(MAPLE[1])
         for la, length in lobes:
             for s in range(int(length * h * 0.55)):
