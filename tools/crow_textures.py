@@ -4,8 +4,6 @@ bright eyes, laid out for the client's CrowModel (64 by 32; each box's faces whe
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code, from a fixed seed; no Mojang texture is
 read, traced or recoloured.
 """
-import random
-
 from PIL import Image
 
 from crop_textures import rgb
@@ -31,14 +29,14 @@ def box_area(u, v, w, h, d):
 
 def crow():
     img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
-    rng = random.Random(28101)
     for name, (u, v, w, h, d) in BOXES.items():
         for x, y in box_area(u, v, w, h, d):
             if name in ("beak", "leg"):
-                colour = BEAK[rng.randrange(2)]
+                colour = BEAK[1] if y == v or y == v + d else BEAK[0]
             else:
-                colour = FEATHER[rng.choice((0, 1, 1, 2, 2, 3))]
-                if name in ("left_wing", "right_wing") and y == v + d and rng.random() < 0.5:
+                # Flat black feathers, a glossy blue-black band along the top of each side, the wings' edge glossiest.
+                colour = FEATHER[3] if y == v + d else FEATHER[2] if y < v + d else FEATHER[1]
+                if name in ("left_wing", "right_wing") and y == v + d:
                     colour = FEATHER[4]
             img.putpixel((x, y), colour + (255,))
     # The eyes, one on each side of the head (its side faces: u 0-2 and 6-8, v 3-5).
