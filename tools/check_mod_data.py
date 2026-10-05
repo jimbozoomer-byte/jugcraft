@@ -788,6 +788,9 @@ def check_raiders():
     for const in ("RAID_CHECK_TICKS", "SPAWN_MIN", "SPAWN_MAX", "RAID_TIMEOUT", "ABANDON_TICKS", "ABANDON_RANGE", "MAX_LEVEL"):
         if f" {const} = {getattr(raiders, const)};" not in raids:
             err(f"RaiderRaids.{const} differs from tools/raiders.py ({getattr(raiders, const)})")
+    camps = (folder / "RaiderCamps.java").read_text(encoding="utf-8")
+    if f" RARITY = {raiders.CAMP_RARITY};" not in camps:
+        err(f"RaiderCamps.RARITY differs from tools/raiders.py CAMP_RARITY ({raiders.CAMP_RARITY})")
     if f" RAID_CHANCE = {raiders.RAID_CHANCE}F;" not in raids:
         err(f"RaiderRaids.RAID_CHANCE differs from tools/raiders.py ({raiders.RAID_CHANCE})")
     order = ["raider_grunt", "raider_grenadier", "raider_officer", "raider_blimp", "raider_walker"]

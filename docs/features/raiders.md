@@ -85,6 +85,9 @@ Five kinds of raider. All are hostile mobs: sentry guns (batch 56) and town guar
 - **Garrison:** an officer, two grunts and a grenadier hold it.
   - They belong to no raid and never despawn.
   - Once killed they are gone for good, and the barrel is looted once.
+- **How they appear:** one newly generated overworld chunk in 400 is picked from the world seed. The camp is built at its centre on the next server tick, but only on flat, dry ground in those biomes and never on the town.
+  - Chunks generated before the camps existed never get one.
+  - A chunk picked just as the server stops is skipped.
 - **Switching off:** the camps are not generated with `raiders.enabled=false`.
 
 ### Townsfolk

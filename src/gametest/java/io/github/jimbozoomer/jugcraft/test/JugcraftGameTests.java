@@ -1628,12 +1628,12 @@ public class JugcraftGameTests {
 		raiderFloor(helper);
 		ServerLevel level = helper.getLevel();
 		BlockPos origin = helper.absolutePos(new BlockPos(14, 1, 14));
-		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderCampFeature.build(level, origin, level.getRandom()),
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderCamps.build(level, origin, level.getRandom()),
 				"A camp should be built on flat ground");
 		helper.assertBlockPresent(Blocks.CAMPFIRE, new BlockPos(14, 1, 14));
 		helper.assertBlockPresent(Blocks.BARREL, new BlockPos(17, 1, 16));
 		var barrel = helper.getBlockEntity(new BlockPos(17, 1, 16), net.minecraft.world.level.block.entity.BarrelBlockEntity.class);
-		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderCampFeature.LOOT.equals(barrel.getLootTable()), "The barrel should hold the camp's loot");
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.raiders.RaiderCamps.LOOT.equals(barrel.getLootTable()), "The barrel should hold the camp's loot");
 		var raiders = level.getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry.class,
 				new net.minecraft.world.phys.AABB(origin).inflate(8));
 		helper.assertTrue(raiders.size() == 4 && raiders.stream().allMatch(net.minecraft.world.entity.Mob::isPersistenceRequired),
@@ -1646,7 +1646,7 @@ public class JugcraftGameTests {
 				}
 			}
 		}
-		helper.assertFalse(io.github.jimbozoomer.jugcraft.raiders.RaiderCampFeature.build(level, helper.absolutePos(new BlockPos(32, 1, 32)),
+		helper.assertFalse(io.github.jimbozoomer.jugcraft.raiders.RaiderCamps.build(level, helper.absolutePos(new BlockPos(32, 1, 32)),
 				level.getRandom()), "No camp on uneven ground");
 		for (var raider : raiders) {
 			raider.discard();
