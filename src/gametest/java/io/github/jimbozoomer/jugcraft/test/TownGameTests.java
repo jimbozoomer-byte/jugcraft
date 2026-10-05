@@ -49,6 +49,31 @@ public class TownGameTests {
 	private static final int FAR = 48_000;
 
 	@GameTest
+	public void townPumpkinsAtUnloadedChunkEdgeStayDecorations(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		int cx = 8100, cz = 8100;
+		level.getChunk(cx, cz);
+		helper.assertTrue(level.getChunkSource().getChunkNow(cx + 1, cz + 1) == null,
+				"Regression setup needs an unloaded diagonal neighbor");
+		BlockPos pos = new BlockPos((cx << 4) + 15, 80, (cz << 4) + 15);
+		TownBuilder.set(level, pos.below(), Blocks.STONE.defaultBlockState());
+		TownBuilder.set(level, pos, Blocks.CARVED_PUMPKIN.defaultBlockState());
+		helper.assertTrue(level.getBlockState(pos).is(Blocks.CARVED_PUMPKIN),
+				"A Halloween pumpkin can be placed at a partially loaded town edge");
+		TownBuilder.set(level, pos, Blocks.AIR.defaultBlockState());
+		TownBuilder.set(level, pos.below(), TownData.parse("minecraft:copper_block"));
+		TownBuilder.set(level, pos, Blocks.CARVED_PUMPKIN.defaultBlockState());
+		helper.assertTrue(level.getBlockState(pos).is(Blocks.CARVED_PUMPKIN)
+				&& level.getBlockState(pos.below()) == TownData.parse("minecraft:copper_block"),
+				"Town scenery must not turn into a copper golem");
+		helper.assertTrue(level.getChunkSource().getChunkNow(cx + 1, cz + 1) == null,
+				"Decorating must not load the neighboring chunk");
+		TownBuilder.set(level, pos, Blocks.AIR.defaultBlockState());
+		TownBuilder.set(level, pos.below(), Blocks.AIR.defaultBlockState());
+		helper.succeed();
+	}
+
+	@GameTest
 	public void townDataReadsWhole(GameTestHelper helper) {
 		TownData data = TownData.get();
 		helper.assertTrue(data.unknownStates() == 0, "Every block state in the town's palette is a real one, " + data.unknownStates() + " are not");

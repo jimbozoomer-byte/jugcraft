@@ -20,9 +20,11 @@ from PIL import Image
 
 class Material:
     """A ramp of flat tones, darkest first: outline (away from the light), outline (towards it), dark, mid, light,
-    highlight. `shine`: whether the lit edge takes the highlight (metal) or only the light tone (wood, leather)."""
+    highlight. `shine`: whether the lit edge takes the highlight (metal) or only the light tone (wood, leather).
+    `glow`: whether it gives light (runes, embers): its boxes in a 3D model are drawn at full light, as a glowing block's
+    are (light_emission 15)."""
 
-    def __init__(self, outline_dark, outline_light, dark, mid, light, highlight, shine=True):
+    def __init__(self, outline_dark, outline_light, dark, mid, light, highlight, shine=True, glow=False):
         self.outline_dark = outline_dark
         self.outline_light = outline_light
         self.dark = dark
@@ -30,6 +32,7 @@ class Material:
         self.light = light
         self.highlight = highlight
         self.shine = shine
+        self.glow = glow
 
     def tones(self):
         return [self.outline_dark, self.outline_light, self.dark, self.mid, self.light, self.highlight]
@@ -511,11 +514,11 @@ def model_elements(design, texture_size, offset, grip_model, unit, mirrored=Fals
     ox, oy = offset
     by_depth = {}
     for cell, shape in cells.items():
-        by_depth.setdefault(shape["depth"], set()).add(cell)
+        by_depth.setdefault((shape["depth"], shape["material"].glow), set()).add(cell)
     elements = []
-    for depth in sorted(by_depth):
+    for depth, glow in sorted(by_depth):
         half = depth * unit / 2.0
-        for x0, y0, x1, y1 in _rectangles(by_depth[depth]):
+        for x0, y0, x1, y1 in _rectangles(by_depth[(depth, glow)]):
             # Upright texel (x, y) spans t in [x - cx, x + 1 - cx] and s in [height - y - 1, height - y].
             fx = gx + (x0 - cx) * unit
             tx = gx + (x1 - cx) * unit
@@ -533,7 +536,10 @@ def model_elements(design, texture_size, offset, grip_model, unit, mirrored=Fals
                 "up": {"uv": [r(u0), r(v0), r(u1), r(v0 + k)], "texture": "#tex"},
                 "down": {"uv": [r(u0), r(v1 - k), r(u1), r(v1)], "texture": "#tex"},
             }
-            elements.append({"from": [r(fx), r(fy), r(8 - half)], "to": [r(tx), r(ty), r(8 + half)],
-                             "rotation": {"angle": 45.0 if mirrored else -45.0, "axis": "z", "origin": [r(gx), r(gy), 8]},
-                             "faces": faces})
+            element = {"from": [r(fx), r(fy), r(8 - half)], "to": [r(tx), r(ty), r(8 + half)],
+                       "rotation": {"angle": 45.0 if mirrored else -45.0, "axis": "z", "origin": [r(gx), r(gy), 8]},
+                       "faces": faces}
+            if glow:
+                element["light_emission"] = 15
+            elements.append(element)
     return img, elements
