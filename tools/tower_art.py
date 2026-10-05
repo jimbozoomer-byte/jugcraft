@@ -6,9 +6,10 @@ cladding, a twill weave under resin on composite, weld seams and wear on armour,
 carbide, a hexagonal lattice on graphene. Lighting is baked from the top-left like vanilla's textures, but kept
 soft so a wall of blocks reads as one surface rather than a grid of tiles.
 
-Steel Armor Plate is the exception: the owner rejected its noisy look on 5 October 2026, so it is drawn flat at 32x32
-in the clean style (steel_armor_plate below; docs/ART_DIRECTION.md, "Tiling building blocks"). The rest of the set
-still awaits that clean pass.
+Steel Armor Plate and Hazard Plating are the exceptions: the owner rejected the noisy armour on 5 October 2026, so both
+are drawn flat at 32x32 in the clean style (steel_armor_plate and hazard_plating below; docs/ART_DIRECTION.md, "Tiling
+building blocks"). Hazard Plating is the armour plate with a hazard band, because the tower lays it right round armour
+pads and doors. The rest of the set still awaits that clean pass.
 """
 import math
 
@@ -256,7 +257,8 @@ def tungsten_steel_frame():
 
 
 def armor_plate(base, seed, rivet_color, weld=True, stripe=None):
-    """Thick armour: two plates with a welded seam, rows of countersunk bolts, scuffed edges and grime."""
+    """Thick armour: two plates with a welded seam, rows of countersunk bolts, scuffed edges and grime. Only
+    depleted-uranium armour still uses it; steel armour and hazard plating are drawn clean below."""
     img = colorize(base, pnoise(seed, 14) * 0.6 + pnoise(seed + 1, 3) * 0.4, 10)
     for x0, x1 in ((0, 32), (32, N)):
         bevel(img, x0, 0, x1, N, 2, 1.18, 0.7)
@@ -365,21 +367,34 @@ def silicon_carbide_armor():
     return to_image(img)
 
 
+# The hazard band's paint: the dieselpunk machines' hazard stripes (tools/dieselpunk_textures.HAZARD), yellow, lit
+# yellow and black.
+HAZARD = [(222, 172, 28), (246, 204, 60), (28, 26, 24)]
+
+
 def hazard_plating():
-    """Steel plate (the same steel as the armour plates) with one band of worn yellow-and-black hazard stripes
-    across the middle. A full block of stripes made edges and parapets far too busy, so the stripes are a band."""
-    yy, xx = np.mgrid[0:N, 0:N]
-    img = np.array(armor_plate((78, 84, 94), 85, (150, 156, 164), weld=False), dtype=float)[..., :3]
-    band = (yy >= 22) & (yy < 42)
-    stripe = ((xx + yy) // 10) % 2 == 0
-    paint = np.where(stripe[..., None], colorize((196, 158, 44), pnoise(80, 10), 10), colorize((32, 32, 34), pnoise(81, 10), 4))
-    img[band] = paint[band]
-    worn = (pnoise(82, 5, octaves=2) > 0.72) & band
-    img[worn] = colorize((110, 114, 120), grain(83), 10)[worn]
-    img[21:22, :] *= 0.55
-    img[42:43, :] *= 1.2
-    grime(img, 84, 0.1)
-    return to_image(img)
+    """Hazard Plating, 32x32: Steel Armor Plate (the same chamfered plate and bolt bosses, so a hazard rim and the
+    armour it frames meet as one steel and complete each other's bosses) with a flat band of yellow-and-black diagonal
+    stripes across its lower half. The band is lit along its top row and shaded along its bottom row, and its stripes
+    repeat every 16 pixels, which divides the block, so a row of blocks shows one unbroken band. It starts below the
+    slab cut (rows 15|16) and stops short of the corner chamfers, so a slab shows it whole or not at all. No noise or
+    wear: the armour's six steel shades and three of paint."""
+    n = 32
+    img = steel_armor_plate()
+    px = img.load()
+    for y in range(16, 26):
+        for x in range(n):
+            if min(x + 0.5, n - x - 0.5) + (n - y - 0.5) < 8:
+                continue  # leave the corner chamfer whole
+            if y == 16:
+                c = ARMOR[4]
+            elif y == 25:
+                c = ARMOR[0]
+            else:
+                phase = (x + y) % 16
+                c = HAZARD[2] if phase >= 8 else HAZARD[1] if phase == 0 else HAZARD[0]
+            px[x, y] = c + (255,)
+    return img
 
 
 def blast_glass():

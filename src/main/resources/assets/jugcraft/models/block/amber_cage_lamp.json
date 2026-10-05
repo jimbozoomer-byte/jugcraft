@@ -1,10 +1,10 @@
 {
   "ambientocclusion": false,
   "textures": {
-    "metal": "jugcraft:block/dr_rust_bare",
+    "metal": "jugcraft:block/dw_steel_plate",
     "bar": "jugcraft:block/dr_band",
     "glass": "jugcraft:block/dr_amber_on",
-    "particle": "jugcraft:block/dr_rust_bare"
+    "particle": "jugcraft:block/dw_steel_plate"
   },
   "elements": [
     {

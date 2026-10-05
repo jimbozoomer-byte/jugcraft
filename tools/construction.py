@@ -149,12 +149,25 @@ def _speckle(base, spread, seed, dots=()):
     return img
 
 
+# Plain concrete, dark to light: 0 the lift joint, 1 a faint form mark, 2 the fill, 3 the lift's lit top edge. Lighter,
+# warmer and plainer than blast-proof concrete (BLAST below), so the concretes read as a set: plain (light and smooth),
+# bastion (warm board marks, tools/fortifications.py) and blast-proof (cool, dark, heavy lifts and tie holes).
+CONCRETE = [(128, 127, 122), (136, 135, 130), (146, 145, 140), (158, 157, 152)]
+
+
 def concrete():
-    """Poured concrete: an even grey with fine aggregate flecks."""
-    rng = random.Random(3201)
-    dots = [((rng.randrange(16), rng.randrange(16)), rng.choice([(120, 122, 124), (176, 176, 172), (100, 102, 104)]))
-            for _ in range(18)]
-    return _speckle((148, 150, 150), 5, 3202, dots)
+    """Poured concrete: one smooth lift a block, lit along its top row with its joint on its bottom row, so a wall reads
+    as level pours with no vertical joints and the block edge looks like any other lift line. Two short form marks one
+    shade under the fill, one in each half, so slabs and stair steps show whole marks. No tie holes and no per-pixel
+    flecks: four colours."""
+    img = Image.new("RGBA", (16, 16), CONCRETE[2] + (255,))
+    for x in range(16):
+        _px(img, x, 0, CONCRETE[3])
+        _px(img, x, 15, CONCRETE[0])
+    for x0, x1, y in ((3, 7, 5), (9, 13, 10)):
+        for x in range(x0, x1 + 1):
+            _px(img, x, y, CONCRETE[1])
+    return img
 
 
 # Blast-proof concrete, dark to light: 0 the depth of a tie hole, 1 a lift joint, 2 the fill, 3 a lift's lit top edge.

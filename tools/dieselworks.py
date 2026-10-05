@@ -3,8 +3,9 @@
 Weathered riveted steel plate, green patina panels, chipped red iron, banded copper dome plate, ribbed pillars, skid iron,
 see-through steel grating for catwalks, steel I-beams, porthole windows and amber cage lamps. The patina, red iron, dome
 and skid blocks reuse the giants' textures (tools/dieselrust_textures.py, "dr_*"). The steel set (both steel plates, the
-Ribbed Steel Pillar, the Riveted Band and the grating) has its own "dw_*" textures, drawn here in one cool steel palette
-as tiling building blocks (docs/ART_DIRECTION.md, "Tiling building blocks"); the giants keep their "dr_*" steel.
+Ribbed Steel Pillar, the Riveted Band, the grating, the I-beam, the porthole ring and the lamp's base and cap) has its
+own "dw_*" textures, drawn here in one cool steel palette as tiling building blocks (docs/ART_DIRECTION.md, "Tiling
+building blocks"); the giants keep their "dr_*" steel.
 
 Java: building/Dieselworks.java registers the blocks; tools/check_mod_data.py keeps the list and strengths the same.
 Every recipe turns metal plate (or ingots, nuggets and glass) into blocks; nothing turns a block back into metal.
@@ -50,10 +51,12 @@ TEXTURES = {
     "ribbed_patina_pillar": ("dr_ribbed_patina", "dr_patina"),
     "ribbed_rust_pillar": ("dw_ribbed_steel", "dw_steel_plate"),
     "rust_grating": "dw_grating",
-    "porthole_window": "dw_porthole",
+    "porthole_window": "dw_porthole_steel",
 }
 LAMP_LIGHT = 14
-LAMP_TEXTURES = {"amber_cage_lamp": {"metal": "dr_rust_bare", "bar": "dr_band", "glass": "dr_amber_on"}}
+LAMP_TEXTURES = {"amber_cage_lamp": {"metal": "dw_steel_plate", "bar": "dr_band", "glass": "dr_amber_on"}}
+# The I-beam's flanges ("side") and web, both in the Dieselworks steel.
+BEAM_TEXTURES = {"steel_i_beam": {"side": "dw_steel_plate", "web": "dw_steel_plate"}}
 TOOLTIPS = {
     "rust_grating": "See-through: build catwalks and walkways.",
     "steel_i_beam": "Lies along the axis you place it on, like a log.",
@@ -84,7 +87,7 @@ def _faces(texture, uv=None):
 
 
 def i_beam_elements():
-    """A steel I-beam along y (the blockstate turns it): two flanges joined by a web, with a rust band."""
+    """A steel I-beam along y (the blockstate turns it): two flanges joined by a web."""
     out = []
     for x0, x1 in ((1, 4), (12, 15)):
         out.append({"from": [x0, 0, 1], "to": [x1, 16, 15], "faces": _faces("#side")})
@@ -93,7 +96,7 @@ def i_beam_elements():
 
 
 def lamp_elements():
-    """A caged amber lamp: a rusty base and cap, four cage bars and the glowing glass between them."""
+    """A caged amber lamp: a steel base and cap, four cage bars and the glowing glass between them."""
     return [
         {"from": [4, 0, 4], "to": [12, 2, 12], "faces": _faces("#metal")},
         {"from": [5, 2, 5], "to": [11, 11, 11], "faces": _faces("#glass"), "light_emission": 14},
@@ -117,7 +120,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
 
 def write_blocks(write, assets, data, lang, condition, self_drop, spec):
     """Writes a building set's models, blockstates, loot, names and recipes. spec is a module with BLOCKS, TEXTURES,
-    TOOLTIPS, RECIPES and LAMP_TEXTURES (and CREST_TEXTURES for "crest" blocks): this one, or tools/kaiserworks.py."""
+    TOOLTIPS, RECIPES and LAMP_TEXTURES (BEAM_TEXTURES for "beam" blocks, CREST_TEXTURES for "crest" blocks): this one,
+    or tools/kaiserworks.py."""
     from construction import stairs_blockstate
     models = assets / "models" / "block"
     BLOCKS, TEXTURES, TOOLTIPS, RECIPES = spec.BLOCKS, spec.TEXTURES, spec.TOOLTIPS, spec.RECIPES
@@ -130,8 +134,8 @@ def write_blocks(write, assets, data, lang, condition, self_drop, spec):
                                              "textures": {"side": f"{MOD}:block/{side}", "end": f"{MOD}:block/{end}"}})
             write(assets / "blockstates" / f"{block}.json", pillar_blockstate(model))
         elif kind == "beam":
-            write(models / f"{block}.json", {"textures": {"side": f"{MOD}:block/dr_skid", "web": f"{MOD}:block/dr_rust_bare",
-                                                          "particle": f"{MOD}:block/dr_skid"},
+            textures = {key: f"{MOD}:block/{texture}" for key, texture in spec.BEAM_TEXTURES[block].items()}
+            write(models / f"{block}.json", {"textures": {**textures, "particle": textures["side"]},
                                              "elements": i_beam_elements()})
             write(assets / "blockstates" / f"{block}.json", pillar_blockstate(model))
         elif kind == "lamp":
@@ -220,15 +224,22 @@ def shaped(condition, pattern, key, result, count):
 # ------------------------------------------------------------------ art
 
 # The giants' weathered steel (tools/dieselrust_textures.PLATE), drawn in the clean style (tools/clean_metal.py). Only
-# the porthole ring still uses it: dw_porthole is shared with the zeppelin and the raiders' quads.
+# dw_porthole still uses it, because the zeppelin and the raiders' quads share that texture; the Porthole Window block
+# itself uses dw_porthole_steel.
 PLATE = [(44, 42, 44), (66, 63, 63), (86, 82, 80), (106, 101, 97), (128, 122, 116), (152, 146, 138)]
 
 # The Dieselworks steel: cool blue-grey, one palette for every steel block of the set, dark to light. 0 deep shadow,
-# 1 seam and shade, 2 fill, 3 sheen, 4 lit edge, 5 glint. The owner called the old warm-brown plates (the giants' dr_*
-# textures, each framed in near-black) horrific on 5 October 2026; these follow bastion concrete, which they liked.
+# 1 seam and shade, 2 fill, 3 sheen and lit edge, 4 rivet glint and lit rail, 5 glint. The owner called the old
+# warm-brown plates (the giants' dr_* textures, each framed in near-black) horrific on 5 October 2026; these follow
+# bastion concrete, which they liked.
 STEEL = [(58, 63, 71), (82, 88, 97), (104, 110, 119), (118, 124, 133), (138, 144, 152), (172, 178, 184)]
-# Rivet heads lit at the top left, glinting no brighter than a lit edge, so a riveted wall does not sparkle.
-RIVET = STEEL[:5]
+# A sheet's lit top row and left column: one shade over the fill, the same as its brushed streaks, so the joint between
+# two blocks (seam, then the next block's lit edge) is about as strong as one of bastion's course lines and the wall
+# does not read as a grid of framed tiles.
+LIT = STEEL[3]
+# Rivet heads for clean_metal.bolt(): lit at the top left, shaded at the bottom right only one shade under the fill,
+# so they read as raised domes, not as dark holes or dice pips.
+RIVET = (STEEL[1], STEEL[3], STEEL[4])
 
 
 def steel_plate():
@@ -236,19 +247,19 @@ def steel_plate():
     column, seam on the bottom row and right column), so a wall or floor shows one seam between blocks. Brushed streaks
     one shade up, staggered at five heights; no glint, rust or stain stamped into every block."""
     img = clean_metal.canvas(STEEL[2])
-    clean_metal.sheet(img, STEEL[4], STEEL[2], STEEL[1])
+    clean_metal.sheet(img, LIT, STEEL[2], STEEL[1])
     for x0, x1, y in ((2, 8, 3), (7, 13, 6), (1, 4, 9), (9, 13, 10), (3, 8, 12)):
         clean_metal.rect(img, x0, y, x1, y, STEEL[3])
     return img
 
 
 def riveted_steel_plate():
-    """Riveted Steel Plate: the same sheet framed by twelve rivets at x and y 1, 5, 9 and 13, with a one-row sheen
-    across its upper part. The rivets' period of four carries on across the seam into the next block, so a wall shows
-    one even rivet lattice along every joint; no rivet crosses the slab cut (rows 7|8), so slabs and stair steps never
-    show half a head."""
+    """Riveted Steel Plate: the same sheet framed by twelve raised rivets at x and y 1, 5, 9 and 13, with a one-row
+    sheen across its upper part. The rivets' period of four carries on across the seam into the next block, so a wall
+    shows one even rivet lattice along every joint; no rivet crosses the slab cut (rows 7|8), so slabs and stair steps
+    never show half a head."""
     img = clean_metal.canvas(STEEL[2])
-    clean_metal.sheet(img, STEEL[4], STEEL[2], STEEL[1])
+    clean_metal.sheet(img, LIT, STEEL[2], STEEL[1])
     clean_metal.rect(img, 3, 3, 12, 3, STEEL[3])
     for x in (1, 5, 9, 13):
         clean_metal.bolt(img, x, 1, RIVET)
@@ -273,10 +284,10 @@ def ribbed_steel():
 
 def steel_band():
     """The Riveted Band: a dark steel strap across the sheet, lit along its top and casting a shadow under it, with a
-    rivet every four pixels. The strap and its rivets carry on unbroken across the block edge, so a course of bands
-    reads as one long strap; the sheet above and below keeps the split seam."""
+    raised rivet every four pixels. The strap and its rivets carry on unbroken across the block edge, so a course of
+    bands reads as one long strap; the sheet above and below keeps the split seam."""
     img = clean_metal.canvas(STEEL[2])
-    clean_metal.sheet(img, STEEL[4], STEEL[2], STEEL[1])
+    clean_metal.sheet(img, LIT, STEEL[2], STEEL[1])
     clean_metal.rect(img, 0, 4, 15, 4, STEEL[3])
     clean_metal.rect(img, 0, 5, 15, 10, STEEL[1])
     clean_metal.rect(img, 0, 11, 15, 11, STEEL[0])
@@ -287,19 +298,20 @@ def steel_band():
 
 
 def grating():
-    """Steel grating in the Dieselworks steel, with see-through square holes so catwalks show what is below: a frame
-    lit on its top and left edges and shaded on the others, and two bars each way, leaving nine even 4 x 4 holes."""
+    """Steel bar grating in the Dieselworks steel, see-through so catwalks show what is below. Bearing bars run down
+    the block every four pixels (x 0, 4, 8 and 12), so they carry on evenly across every joint. Each half of the block
+    is framed by its own pair of cross rails, lit along its top row (0 and 8) and shaded along its bottom row (7 and
+    15). The rail pair at the slab cut (7|8) is therefore drawn exactly like the pair at the block edge (15|0), and both
+    slab halves are closed at the top and bottom: a slab or a stair step never ends in open prongs. The slots are
+    3 x 6."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    bars = (0, 5, 10, 15)
+    rails = {0: STEEL[4], 7: STEEL[1], 8: STEEL[4], 15: STEEL[1]}
     for y in range(16):
         for x in range(16):
-            if y in bars:
-                c = STEEL[4] if y == 0 else STEEL[1] if y == 15 else STEEL[3]
-            elif x in bars:
-                c = STEEL[3] if x == 0 else STEEL[1] if x == 15 else STEEL[2]
-            else:
-                continue
-            clean_metal.put(img, x, y, c)
+            if y in rails:
+                clean_metal.put(img, x, y, rails[y])
+            elif x % 4 == 0:
+                clean_metal.put(img, x, y, STEEL[2])
     return img
 
 
@@ -328,9 +340,39 @@ def porthole():
     return img
 
 
+def porthole_steel():
+    """The Porthole Window block: the same bolted ring and clear round glass as porthole(), set in a Dieselworks steel
+    sheet (lit top row and left column, seam on the bottom row and right column) so it sits flush in a steel wall. The
+    ring stays inside the sheet's edges, so the seams of the wall run on past the window unbroken."""
+    img = clean_metal.canvas(STEEL[2])
+    clean_metal.sheet(img, LIT, STEEL[2], STEEL[1])
+    for y in range(1, 15):
+        for x in range(1, 15):
+            dx, dy = x - 7.5, y - 7.5
+            r = math.hypot(dx, dy)
+            if r > 7.0:
+                continue
+            if r > 5.2:
+                c = STEEL[4] if dx + dy < -2 else STEEL[1] if dx + dy > 2 else STEEL[3]
+            elif r > 4.4:
+                c = STEEL[0]
+            else:
+                img.putpixel((x, y), (0, 0, 0, 0))
+                continue
+            clean_metal.put(img, x, y, c)
+    for angle in range(0, 360, 45):
+        x = round(7.5 + 6.1 * math.cos(math.radians(angle)))
+        y = round(7.5 + 6.1 * math.sin(math.radians(angle)))
+        clean_metal.put(img, x, y, STEEL[5])
+    for x, y in ((5, 5), (6, 4), (4, 6)):
+        img.putpixel((x, y), (230, 240, 236, 255))
+    return img
+
+
 def draw_all(save):
     save(grating(), "block", "dw_grating")
     save(porthole(), "block", "dw_porthole")
+    save(porthole_steel(), "block", "dw_porthole_steel")
     save(steel_plate(), "block", "dw_steel_plate")
     save(riveted_steel_plate(), "block", "dw_steel_plate_riveted")
     save(ribbed_steel(), "block", "dw_ribbed_steel")
