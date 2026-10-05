@@ -27,6 +27,9 @@ On 5 October 2026 the owner found the Ember Bed's fire speckly and the Horned Sk
 
 *Before (left) and after (right), drawn from the block models and textures outside the game.*
 
+## Ores, tools and armor: the owner's material sets
+On 5 October 2026 the owner drew a whole set for a new ore (its ore, raw ore, nugget, ingot, blocks, tools, armor and weapons) in one chartreuse palette, as "a basis on how new ores that turn into tools are styled". **Follow [MATERIAL_SETS.md](MATERIAL_SETS.md)** for every new material's set: 16×16, vanilla's proportions, one bold colour stepped into five tones with an outline in its darkest, chunky rounded ore blobs, a decorated storage block, and armor in a plain and a gold-trimmed look where the material has an upgrade. The first material built on it is [thallite](features/thallite.md).
+
 ## Steampunk: stone, bronze and early steel tiers
 Brass, copper and riveted iron; glass portholes and valve wheels; firebrick and wood. Textures start with `sp_` (`tools/steampunk_textures.py`). Since batch 53 they follow [Texturing: keep it clean](#texturing-keep-it-clean) too. The classic style pack keeps the older plain look for anyone who prefers it.
 
