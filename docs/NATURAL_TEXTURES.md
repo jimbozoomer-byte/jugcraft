@@ -111,6 +111,9 @@ The same rules carry over to other natural blocks and plants.
 | Water-side and swamp blocks | Muted, slightly greyed versions of the land colours, as vanilla's swamp and mangrove blocks are. |
 
 ## Adding a new wood or tree
+The trees the biomes still need, with their proposed shapes and colours, are planned in
+[branches/TREES.md](branches/TREES.md).
+
 1. **Get its colour:** a painting from the owner, or an approved colour. The owner's second set of paintings waits in `OWNER_BANK` (`tools/wood_style.py`): seven woods with their bark, each under a suggested species ([features/wood-repaint.md](features/wood-repaint.md#the-owners-second-set)). Add it to `WOOD` with the painting's number and
    the sampled colour.
 2. **Give it bark:** a darker ramp and a kind (`furrowed`, `plated`, `stringy`, `streaked`, `marked`) in `BARK`.
