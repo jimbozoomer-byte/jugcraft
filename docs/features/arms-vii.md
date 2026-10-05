@@ -45,6 +45,7 @@ The arm keeps its enchantments and wear.
 - Each arm is drawn with the restyle's toolkit: a pixel-art icon on the diagonal and a 3D model in the hand.
 - Glowing parts are lit at full brightness in the hand, so they show in the dark: runes, magma, venom, soul fire, charged coils and lightning.
 - Tooltips name the kind's trait or art, the boon (in aqua) and the line (in purple: the style's perk, or "A trophy of …").
+- **The Runebound arms are smooth 3D models in the hand** (see [Runebound meshes](#runebound-meshes) below); the other 28 keep the restyle's pixel look.
 - **Second pass (the owner: "dont overcomplicate them"):** each design was checked against the studied mods at 8× and kept to one or two accents.
   - **Gilded:** the rapier and sabre use the base arms' plainer hilts in gold. The halberd uses the larger halberd head, with a gold hook and one sapphire, and no chasing or tassels.
   - **Ironclad:** no bolt grids.
@@ -53,6 +54,27 @@ The arm keeps its enchantments and wear.
   - **Iron Dreadnought:** the Dynamo Halberd is the halberd head with a charged edge and a copper coil, without hazard band, bolts or loose arcs. The Piston Hammer has two rings and one vent.
   - **Abyssal Leviathan:** the arms lose the coral. The Tidebreaker's tines rise from a bronze crossbar round a pearl. Leviathan's Hook is the bill's hook, with one glowing tide line and a pearl spike.
   - **Rimeclaw:** an open frame with one fur grip.
+
+## Runebound meshes
+
+The owner, 5 October 2026: "the runebound weapons need to look much better if possible don't even use minecraft esque textures make like a nicer 3d model and use that to make it really be cool and special". The four Runebound arms are now drawn in the hand as smooth meshes instead of boxes, and their icons are rendered from them. Nothing else about them changes.
+
+- **Tier, inputs, outputs, costs:** unchanged. The same items (`jugcraft:runebound_nodachi`, `runebound_moonblade`, `runebound_staff`, `runebound_war_hammer`), recipes (a steel arm, the Runecarver's Pattern and ectoplasm at a smithing table), stats and Mark boon. It is a client-side look only: no server state, no saved data, no new item.
+- **The looks** (one or two accents each, as the owner asked before):
+  - **Moonblade:** a crescent of violet moon steel ground to a bright edge, with a channel of glowing glyphs following the crescent; a crescent-moon guard with glowing horn tips round a heart crystal in a silver bezel; a cord-wrapped grip; a faceted crystal pommel in an iron cup.
+  - **Nodachi:** one continuous curve, ground to its edge with a frosted wave of temper along it and a glowing channel of glyphs by its back; a gold habaki; an oval tsuba with a ring of light sunk round its rim; a diamond-wrapped tsuka and iron kashira.
+  - **Staff:** dark ironwood with a glowing helix winding up each half; a leather grip between iron collars; at each end an iron ferrule whose three claws hold a floating crystal.
+  - **War Hammer:** a flared, chamfered head of dark moon steel with a glowing sigil sunk in each side and a moon-gold band behind its face; a curved beak and a top spike; iron langets down an iron-banded ironwood haft; a cord grip and an iron pommel.
+  - The runes and crystals glow at full light (they show in the dark) and the glyphs pulse gently (an animated texture, blended between frames).
+- **How it is built:**
+  - `tools/arms_mesh.py` builds each arm in its design's units (the restyle design it replaces: the same length and grip), from lofted blades (a lens section ground to an edge, a channel cut into the flats), lathe-turned parts, swept tubes and faceted crystals. Normals are given at every corner and smoothed within each panel, so curves are smooth and creases stay sharp. It is laid on the diagonal by the same 45-degree turn about the hand as the box model, and keeps that model's hand poses, so it is held in exactly the same place in both hands, in first and third person and on armor stands.
+  - The model JSON (`models/item/runebound_*_in_hand.json`, a quad a line) lists the quads under the Fabric model type `jugcraft:mesh`, beside the box model's `elements`. `client/MeshItemModels.java` reads them through Fabric API's model loading API (`UnbakedModelDeserializer`) and bakes a renderer API mesh. Fabric draws that as any item model, with the enchantment glint and the arms' motion.
+  - Textures: `item/runebound_mesh` (128×128, painted materials: moon steel, the ground edge and the temper line, iron, silver, moon gold, wraps, ironwood, crystal) and `item/runebound_rune` (64×64 frames, animated: twelve glyphs, a glowing band and the hammer's sigil). The icons (48×48) are rendered offline from the meshes by `arms_mesh.icon`.
+- **Failure behaviour:** the type is marked `optional`: if the mesh loader is not registered, Minecraft loads the file as a vanilla model from its `elements`, the old box model. If the quads cannot be read, or the mesh cannot be baked, the loader draws the same box model and logs a warning. The arm never goes missing.
+- **Checks** (`tools/check_mod_data.py`, `check_mesh_models`): every quad has four corners of eight numbers, unit normals, UVs within its sprite and corners within −16..32; only the glyph strip and the crystal regions glow; at most 2,000 quads an arm; no two flat, parallel quads overlap closer than 0.1 pixel (they could flicker); the mesh runs from the design's butt to its point along the diagonal from the hand, as the box model did; both textures are solid.
+- **Offline evidence** (not a game test; previews drawn by a scratch renderer from the generated meshes): every arm renders the same with and without back-face culling from 48 directions, so every quad faces outward; the coplanar scan (every pair of quads compared) finds none closer than 0.1 pixel; first-person previews in both hands put the grip where the box model's was.
+- **Client game test** (`RuneboundClientGameTests`, CI): asserts the `jugcraft:mesh` loader is registered, then shoots the four on a close rack of armor stands by day and at midnight, each held from the front by day, a Moonblade with the enchantment glint, the Moonblade and Nodachi in first person by day and the Staff at night. **Not yet run in CI** at the time of writing.
+- **Not verified yet:** how the smooth per-corner lighting looks in game (expected, since Fabric's renderer passes each corner's normal to the item shader, but unseen until the CI screenshots); third-party renderers such as Sodium/Iris drawing Fabric item meshes; whether the `enchantment_glint_override` component syntax in the test's command is right for 26.3 (if not, that one shot shows no glint).
 
 ## Connections
 - **Existing input producer:**

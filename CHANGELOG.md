@@ -8,6 +8,16 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Runebound arms as real 3D models (art fixes, 5 October 2026)
+- **The Runebound Nodachi, Moonblade, Staff and War Hammer are now smooth 3D models in the hand**, not stacks of pixel boxes, after the owner's "make like a nicer 3d model ... really be cool and special":
+  - **Moonblade:** a crescent of violet moon steel ground to a bright edge, a channel of glowing glyphs following the crescent, a crescent-moon guard with glowing horn tips round a heart crystal in a silver bezel, a cord-wrapped grip and a faceted crystal pommel.
+  - **Nodachi:** a continuous curve with a frosted wave of temper along its edge and a glowing channel of glyphs by its back, a gold habaki, an oval tsuba with a ring of light round its rim and a diamond-wrapped tsuka.
+  - **Staff:** dark ironwood with a glowing helix winding up each half, a leather grip between iron collars, and at each end three iron claws holding a floating crystal.
+  - **War Hammer:** a flared, chamfered head with a glowing sigil sunk in each side and a moon-gold band, a curved beak, a top spike, langets and an iron-banded haft.
+- Curves shade smoothly and edges stay crisp; the runes and crystals glow at full light in the dark and pulse gently. They are held exactly where the old models were, in either hand, first and third person, and take the enchantment glint.
+- **New icons**, rendered from the same models.
+- Item ids, recipes and stats are unchanged. Built on Fabric API's model loading and renderer API (already part of fabric-api, so no new dependency): `client/MeshItemModels.java` reads the meshes from `tools/arms_mesh.py`. The old box models stay in the files as a fallback. Record: [arms-vii.md](docs/features/arms-vii.md#runebound-meshes).
+
 ### Cute, clean creature decorations: batches 15 to 20 repainted (#191)
 - **Smooth fire**: the Ember Bed's hearth now burns in smooth bands of colour on a glow of coals, and the Horned Skull Cauldron's ram skull has big round sockets and no nostrils.
 - **Every creature prop of batches 15 to 20 repainted** in a clean, cute style after the owner's reference pictures: flat colour in two or three tones with lit and shaded edges and no speckle. The **Monster Head** is a bright green Frankenstein head with a blunt black fringe and sleepy closed eyes that open glowing when it wakes; the **Flying Eyeball**, plushes, moths and jar oddities are clean and glossy; skulls (the **Colossal Skull** too) have big round sockets with a glint and no nose holes; bones are smooth cream; the gargoyles have round eyes and little fangs; the **Crawling Hand** is the monster's green; the cocoon sleeps, the clock's ghost says "oo" and the **Harvest Moon** has a sleeping smile.
