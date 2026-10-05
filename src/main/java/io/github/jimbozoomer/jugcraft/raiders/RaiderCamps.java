@@ -37,16 +37,18 @@ import net.minecraft.world.level.storage.loot.LootTable;
 /**
  * Raider camps (raider extras): rare camps out in the plains, savanna and badlands, to find and clear. One newly
  * generated overworld chunk in {@value #RARITY} (chosen from the world seed, so the same seed gives the same camps) is
- * marked; the camp is built at its centre on the next server tick, if the ground there is flat and dry and the town is
- * not there. Inside a ring of sandbags (with four gaps) a campfire burns between two olive tents, with a supply barrel
- * (loot table {@code jugcraft:chests/raider_camp}), held by an officer, two grunts and a grenadier who stay put until
- * someone comes. Its raiders belong to no raid, never despawn and do not come back once killed. Chunks generated
+ * marked; the camp is built at its centre on the next server tick, if the ground there is flat and dry, the town is
+ * not there and it is at least {@value #SPAWN_CLEARANCE} blocks from the world spawn. Inside a ring of sandbags (with
+ * four gaps) a campfire burns between two olive tents, with a supply barrel (loot table
+ * {@code jugcraft:chests/raider_camp}), held by an officer, two grunts and a grenadier who stay put until someone comes. Its raiders belong to no raid, never despawn and do not come back once killed. Chunks generated
  * before this existed (or with the raiders feature off) never get one.
  */
 public final class RaiderCamps {
 	public static final int RADIUS = 6;
 	public static final int MAX_SLOPE = 2;
 	public static final int RARITY = 400;
+	/** No camp within this many blocks of the world spawn, so a new player does not start beside one. */
+	public static final int SPAWN_CLEARANCE = 512;
 	public static final ResourceKey<LootTable> LOOT = ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id("chests/raider_camp"));
 	private static final int FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
 	private static final Deque<ChunkPos> QUEUE = new ArrayDeque<>();
@@ -83,7 +85,9 @@ public final class RaiderCamps {
 		int z = (pos.z() << 4) + 8;
 		BlockPos origin = new BlockPos(x, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z), z);
 		BlockPos town = TownState.get(level).origin();
-		if (camping(level.getBiome(origin)) && (town == null || !TownBuilder.overlaps(town, pos))) {
+		BlockPos spawn = level.getRespawnData().pos();
+		double fromSpawn = Math.hypot(x - spawn.getX(), z - spawn.getZ());
+		if (fromSpawn >= SPAWN_CLEARANCE && camping(level.getBiome(origin)) && (town == null || !TownBuilder.overlaps(town, pos))) {
 			build(level, origin, level.getRandom());
 		}
 	}
