@@ -16,6 +16,8 @@ No numbered release yet. Everything below is on `main`.
   - **Stripped wood:** straight grain.
   - **Planks:** four lit boards with staggered joints.
 - **Every tree's leaves**, in every season's look, are redrawn in vanilla's fine speckle; needles, blossom, fronds and bare twigs each in their own way.
+- **The owner's second set** of eight painted woods: the jacaranda takes its mauve wood, and the other seven wait in a bank for new trees (cedar, plane, walnut, wenge, elm, hickory and yew).
+- **[NATURAL_TEXTURES.md](docs/NATURAL_TEXTURES.md):** how these woods were drawn, as the rule for every future wood and natural texture.
 - Original textures drawn by code (`tools/wood_style.py`); nothing of vanilla's is recoloured. Record: [wood-repaint.md](docs/features/wood-repaint.md).
 
 ### Cute, clean creature decorations: batches 15 to 20 repainted (#191)

@@ -33,7 +33,7 @@ Every wood the mod adds is redrawn in its colour from the owner's paintings, and
 | aspen | 9 | `#d5d1ce` |
 | fir | 16 | `#ceb678` |
 | dead | 23 | `#7a7a7a` |
-| jacaranda | 7 | `#a97b74` |
+| jacaranda | second set, row 6 (was 7) | `#7a5a5e` (was `#a97b74`) |
 | willow | 22 | `#c7c785` |
 | palm | 10 | `#e5d5b2` |
 | cypress | 14 | `#916558` |
@@ -42,6 +42,30 @@ Every wood the mod adds is redrawn in its colour from the owner's paintings, and
 | mahogany | 2 | `#7a1f0d` |
 
 The match is by colour first, then by species where two paintings were close: the speckled painting is the rainbow eucalyptus, and the deep red one is mahogany. The other eleven paintings are not used yet. Any pairing is one line to change in `WOOD` in `tools/wood_style.py`.
+
+### The owner's second set
+Later the same day the owner sent eight complete woods they had painted (bark, log end, stripped side, stripped end and planks each): "heres some wood I did you can use these and use them to recolor for future wood or if you think this fits any of the current better". Their colours were sampled from the screenshot, and each was drawn by `tools/wood_style.py` in its own colours beside the owner's painting to compare like for like.
+
+Three independent judges then mapped the eight rows: one by the owner's intent, one by species realism, and one by distinctness from the other woods and from vanilla's. A change was made only where two agreed:
+- **The jacaranda takes row 6's mauve wood** (`#7a5a5e`, was `#a97b74`). It is the only purple wood, it suits the violet-blossom tree, and it moves the jacaranda further from the cypress. Its bark is unchanged, so only its log end, stripped log and ends, and planks are redrawn.
+- **The other seven rows wait in a bank** (`OWNER_BANK` in `tools/wood_style.py`) for new trees, each under the species judged to suit it:
+
+| Row | Suggested tree | Wood | Bark |
+|---|---|---|---|
+| 0 | western red cedar | `#84654d` | reddish-brown, furrowed |
+| 1 | London plane | `#9b8059` | pale olive-grey, mottled |
+| 2 | black walnut (the clock, theremin and planchette are described as walnut) | `#67533c` | charcoal, furrowed |
+| 3 | wenge | `#544233` | dark mossy olive |
+| 4 | elm | `#866448` | dark brown, blocky |
+| 5 | shagbark hickory | `#78573c` | pale grey, in strips |
+| 7 | yew (the longbows are described as yew) | `#654135` | grey-brown, flaky |
+
+Before a banked wood becomes a tree, check it beside vanilla's and the others. Rows 0, 4 and 5 are close to each other, and 2, 4 and 5 lie near vanilla's dark oak and spruce, so nudge them apart. One judge each also proposed:
+- row 6's purple bark for the jacaranda too;
+- row 7 for the mahogany, which is more saturated than any vanilla wood;
+- row 4 for the chestnut, whose planks are close to vanilla birch's.
+
+These are left for the owner to decide.
 
 ## Connections
 - Existing input producer: none changed.

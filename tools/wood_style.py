@@ -43,8 +43,9 @@ def ramp(base, factors=(0.58, 0.72, 0.86, 1.0, 1.12, 1.24)):
     return out
 
 
-# Each wood: the owner's painting it follows (its number in their screenshot, left to right, top to bottom, from 0),
-# and the wood's colour, sampled from that painting's side.
+# Each wood: the owner's painting it follows, and the wood's colour, sampled from that painting's side. A number is a
+# painting in their first set (24 stripped logs, left to right, top to bottom, from 0); "2:<row>" is a row of their
+# second set (OWNER_BANK below).
 WOOD = {
     "chestnut": (11, "b6a075"),
     "larch": (1, "c98634"),
@@ -52,7 +53,7 @@ WOOD = {
     "aspen": (9, "d5d1ce"),
     "fir": (16, "ceb678"),
     "dead": (23, "7a7a7a"),
-    "jacaranda": (7, "a97b74"),
+    "jacaranda": ("2:6", "7a5a5e"),   # the second set's mauve wood (it was painting 7, #a97b74)
     "willow": (22, "c7c785"),
     "palm": (10, "e5d5b2"),
     "cypress": (14, "916558"),
@@ -60,6 +61,22 @@ WOOD = {
     "eucalyptus": (21, "bda281"),
     "mahogany": (2, "7a1f0d"),
 }
+# The owner's second set of painted woods (5 October 2026: "you can use these and use them to recolor for future wood"):
+# eight full woods (bark, ends, stripped, planks). Row 6's wood is the jacaranda's; the other seven wait for new trees,
+# each under the species a panel judged it suits (docs/NATURAL_TEXTURES.md, "Adding a new wood"). Each: its row, the
+# wood's colour (the stripped side's), the bark's tones (dark to light) and the bark's kind. Only the colours are used;
+# the patterns are drawn here. Before one becomes a tree, check it against vanilla's woods and the others here: rows 0,
+# 4 and 5 are close to each other, and 2, 4 and 5 lie near vanilla's dark oak and spruce.
+OWNER_BANK = {
+    "western_red_cedar": (0, "84654d", pal("483229", "513a2f", "563d31", "65493a", "6b4f40"), "furrowed"),
+    "london_plane": (1, "9b8059", pal("676251", "78735f", "847f6b", "9a9583", "a29e8b"), "marked"),
+    "black_walnut": (2, "67533c", pal("392e27", "3c322c", "413730", "4d433d", "594f49"), "furrowed"),
+    "wenge": (3, "544233", pal("3a3323", "433b2b", "484031", "4f4637", "584c3e"), "furrowed"),
+    "elm": (4, "866448", pal("433527", "493b2b", "50412f", "64513b", "6a583f"), "furrowed"),
+    "shagbark_hickory": (5, "78573c", pal("524938", "5c5241", "615644", "746753", "857660"), "stringy"),
+    "yew": (7, "654135", pal("473729", "564636", "614f3f", "6e5d4a", "766551"), "plated"),
+}
+
 # The owner's eucalyptus is speckled in pastels, as rainbow eucalyptus wood is.
 EUCALYPTUS_FLECKS = pal("e8a578", "e3a0a0", "9cc0d8", "e6c87a", "f0e0c0")
 
