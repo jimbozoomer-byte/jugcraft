@@ -40,7 +40,8 @@ import net.minecraft.world.item.component.Weapon;
  * picks; and Arms V (batch 48, docs/features/arms-v.md): twinblades, nodachis, earthbreakers, katars, moonblades and
  * kusarigamas, each with a weapon art ({@link #ARTS}, worked by {@link WeaponArts}); and Arms VI (batch 55,
  * docs/features/arms-vi.md): katanas and brazier maces, longbows and arbalests ({@link #RANGED}) and heater and tower
- * shields ({@link #SHIELDS}).
+ * shields ({@link #SHIELDS}); and Arms VII (batch 56, docs/features/arms-vii.md): named variants of the kinds, crafted
+ * in four styles or dropped by bosses ({@link ArmVariants}).
  *
  * <p>After studying how Epic Knights and Simply Swords make, show and animate their weapons (none of their code, models
  * or art is used): every trait here is one of 26.3's own item components, so these are plain items with no per-tick
@@ -395,6 +396,7 @@ public final class JugcraftArms {
 			ITEMS.values().forEach(item -> output.accept(item));
 			KIT.values().forEach(item -> output.accept(item));
 		});
+		ArmVariants.register();
 		TwoHanded.register();
 		WeaponArts.register();
 	}
