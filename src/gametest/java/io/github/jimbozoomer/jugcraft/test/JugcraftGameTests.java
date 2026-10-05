@@ -1533,7 +1533,7 @@ public class JugcraftGameTests {
 						}
 					}
 				}
-				helper.fail("Both raiders should hunt the player: the grunt hunts " + grunt.getTarget() + ", the grenadier "
+				helper.assertTrue(false, "Both raiders should hunt the player: the grunt hunts " + grunt.getTarget() + ", the grenadier "
 						+ grenadier.getTarget() + "; canAttack=" + grunt.canAttack(player) + " seenAsEnemy=" + player.canBeSeenAsEnemy()
 						+ " invulnerable=" + player.isInvulnerable() + " creative=" + player.isCreative() + " spectator=" + player.isSpectator()
 						+ " sees=" + grunt.hasLineOfSight(player) + " difficulty=" + helper.getLevel().getDifficulty() + " load methods: " + loaded);
