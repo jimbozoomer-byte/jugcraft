@@ -40,9 +40,11 @@ No numbered release yet. Everything below is on `main`.
   - **Hold:** the guns stand still.
   - **Converge:** every gun lays on the table's target (your Range Finder mark), and a redstone pulse into the table fires one round from each.
   - **Parallel:** as Converge, but the guns' shells land 6 blocks apart across the line of fire.
+  - **Creeping Barrage:** as Converge, but each salvo after the first lands 5 blocks further down range, six steps, then starts again.
   - **Sentry:** each gun fires by itself at the nearest hostile mob in the table's sector (90°, 180°, 270° or all round). It never fires within 12 blocks of the gun, or at a mob with a player within 8 blocks of it.
+- A gunner aboard a linked gun with no mark of their own has it laid on the table's point, and fires it when they choose.
 - Guns the table fires use shells from ready racks only. A comparator reads how many linked guns are ready. A ringing field telephone can give the order to fire.
-- Three game tests and a screenshot scene. Record: [fire-control.md](docs/features/fire-control.md).
+- Five game tests and a screenshot scene. Record: [fire-control.md](docs/features/fire-control.md).
 
 ### Unmerged: Fortifications, batch 55
 - **Bastion Concrete** (block, slab, stairs and Jugcraft's first **wall**, which joins diagonally like vanilla's), the crenellated **Bastion Parapet**, the **Steel Ladder** and a redstone-only **Blast Door**.

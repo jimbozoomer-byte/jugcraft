@@ -13,7 +13,7 @@ Two new things:
 
 | Thing | What it is |
 | --- | --- |
-| **Fire Control Table** | A steel plotting table: a firing chart with range arcs and the line of fire, a brass pointer and plotting pins, and on its far edge a range dial, the field handset and the **mode lamp** (dim red: hold, amber: converge, green: parallel, bright red: sentry). It faces the way you look when you place it, towards the enemy, so you stand behind it. |
+| **Fire Control Table** | A steel plotting table: a firing chart with range arcs and the line of fire, a brass pointer and plotting pins, and on its far edge a range dial, the field handset and the **mode lamp** (dim red: hold, amber: converge, green: parallel, blue: creeping barrage, bright red: sentry). It faces the way you look when you place it, towards the enemy, so you stand behind it. |
 | **Fire Control Wire** | A reel of signal cable that links guns to a table. It is a tool and is not used up. |
 
 ### Linking guns
@@ -34,11 +34,20 @@ Every crewed gun can be linked: the Siege Mortar, Self-Propelled Howitzer and Fl
 - **Every use** shows the table's state, for example: "Fire control: Converge, 3 of 3 guns ready, sector 360°, target 143 blocks away".
 
 ### The modes
-The table lays only guns that **have nobody at their controls**. A gunner aboard always has the gun to themselves. Orders given while they crew it are not saved up for later.
+The table lays only guns that **have nobody at their controls**. A gunner aboard fires the gun themselves (orders given while they crew it are not saved up for later).
+
+**A gunner aboard a linked gun, with no Range Finder mark of their own, has the gun laid on the table's point** on any fire mission, whichever way they look. They still choose when to fire. Their own mark, if they have one, comes first; another spotter's mark comes after the table.
 
 - **Hold:** the guns stand still.
 - **Converge:** every gun turns and elevates onto the table's target (the same ballistics as a gunner's mark), then waits. **A redstone pulse into the table fires one round from each gun**: a salvo, for a multi-barrel gun. One pulse is one salvo: holding the signal on does not fire again. A gun still reloading fires as soon as it is ready. Anything that gives a pulse works: a button, a lever, a daylight sensor, or a **field telephone** (batch 50) ringing beside the table, so a spotter far off can call for fire.
 - **Parallel:** as converge, but each gun lays on its own point, **6 blocks apart across the line of fire**, in the order they were linked. Their shells land in a line instead of on one block.
+- **Creeping barrage:** as converge, but a wall of fire that walks.
+  - The first salvo lands on the target.
+  - Each salvo after it steps the point **5 blocks further down the line of fire** (away from the table).
+  - After 6 steps (30 blocks) it starts again from the target.
+  - Setting the target again also starts it afresh.
+  - The status line shows the step ("step 3 of 6").
+  - Its lamp is blue.
 - **Sentry:** every gun picks its own target, checking every half second: the nearest **hostile mob** (anything vanilla counts as an enemy) that is:
   - inside the table's sector, as seen from the table;
   - within 96 blocks of the gun but **no closer than 12**;
@@ -116,6 +125,10 @@ The table lays only guns that **have nobody at their controls**. A gunner aboard
 ## World and event applicability
 Not applicable: everything is crafted and placed by players. The raider faction (idea 3) is meant to give sentries something to shoot at.
 
+### Later additions (on this branch)
+- **The creeping barrage mode:** test `creepingBarrageWalksDownRange` covers the first salvo on the target, each later salvo 5 blocks further, the restart after 6 steps, and a fresh start on a new target.
+- **Crewed guns following the table:** test `crewedGunFollowsTheTable` has a gunner looking away to the west while their linked battery turns to the table's target.
+
 ## Rollout and open questions
 - Next is **idea 3, a dieselpunk raider faction.** Its raiders will count as hostile mobs, so sentries engage them.
-- Possible later additions: a creeping barrage (the target stepping forward each salvo), and letting a crewed gun follow the table's target as well as the gunner's own mark.
+- Both earlier ideas, a creeping barrage and crewed guns following the table, are now done (above).
