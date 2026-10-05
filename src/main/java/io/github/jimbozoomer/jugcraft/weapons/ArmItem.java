@@ -11,6 +11,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
@@ -28,11 +30,17 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.CandleCakeBlock;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.gameevent.GameEvent;
 
 /**
  * An arm (batches 42 and 45 to 47, {@link JugcraftArms}): its numbers and most traits are item components, with a grey line
@@ -40,7 +48,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * is worked here, on the server: a bonus to the blow (backstab, saddle, armor pierce, riders, execute, brace), a daze, a
  * hook or a sunder on a hit, or the scythe's reaping and the kama's clearing. Delving is the pickaxe's tool component. Chopping is the axe's own tool component; the maul's quake is its finishing blow
  * ({@link TwoHanded}). A two-handed kind says so in a second line. An Arms V kind's weapon art is used from here
- * ({@link #use}) and says what it does in a gold line.
+ * ({@link #use}) and says what it does in a gold line. Arms VI's brazier mace sets what it hits alight and lights blocks
+ * ({@link #useOn}); its shields are ArmItems too, blocking through their blocks-attacks component.
  */
 public class ArmItem extends Item {
 	/** The blocks a kama cuts (data/jugcraft/tags/block/kama_cuts.json). */
@@ -161,6 +170,9 @@ public class ArmItem extends Item {
 		if (trait == JugcraftArms.Trait.SUNDER && !target.level().isClientSide()) {
 			sunder(target);
 		}
+		if (trait == JugcraftArms.Trait.IGNITE && !target.level().isClientSide()) {
+			target.igniteForSeconds(JugcraftArms.IGNITE_SECONDS);
+		}
 	}
 
 	/** The battleblade's sunder: every piece of armor the target wears takes SUNDER more wear. */
@@ -194,6 +206,9 @@ public class ArmItem extends Item {
 	public InteractionResult useOn(UseOnContext context) {
 		if (trait == JugcraftArms.Trait.CLEAR) {
 			return clear(context);
+		}
+		if (trait == JugcraftArms.Trait.IGNITE) {
+			return light(context);
 		}
 		if (trait != JugcraftArms.Trait.REAP) {
 			return super.useOn(context);
@@ -260,6 +275,40 @@ public class ArmItem extends Item {
 			if (player != null) {
 				stack.hurtAndBreak(cuts.size() * JugcraftArms.CLEAR_WEAR, player, context.getHand());
 			}
+		}
+		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * The brazier mace, used on a block, lights it as flint and steel does: an unlit campfire, candle or candle cake is lit;
+	 * otherwise fire is set on the face used, where fire can go. Each costs IGNITE_WEAR durability. Only where the player
+	 * may change the world (as for the kama).
+	 */
+	private static InteractionResult light(UseOnContext context) {
+		Level level = context.getLevel();
+		Player player = context.getPlayer();
+		BlockPos pos = context.getClickedPos();
+		BlockState state = level.getBlockState(pos);
+		ItemStack stack = context.getItemInHand();
+		boolean lightable = CampfireBlock.canLight(state) || CandleBlock.canLight(state) || CandleCakeBlock.canLight(state);
+		BlockPos target = lightable ? pos : pos.relative(context.getClickedFace());
+		if (player != null && (!player.mayUseItemAt(target, context.getClickedFace(), stack) || !level.mayInteract(player, target)
+				|| TownProtection.denies(player, level, target))) {
+			return InteractionResult.PASS;
+		}
+		if (lightable) {
+			level.playSound(player, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
+			level.setBlock(pos, state.setValue(BlockStateProperties.LIT, true), Block.UPDATE_ALL_IMMEDIATE);
+			level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
+		} else if (BaseFireBlock.canBePlacedAt(level, target, context.getHorizontalDirection())) {
+			level.playSound(player, target, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
+			level.setBlock(target, BaseFireBlock.getState(level, target), Block.UPDATE_ALL_IMMEDIATE);
+			level.gameEvent(player, GameEvent.BLOCK_PLACE, target);
+		} else {
+			return InteractionResult.FAIL;
+		}
+		if (player != null) {
+			stack.hurtAndBreak(JugcraftArms.IGNITE_WEAR, player, context.getHand());
 		}
 		return InteractionResult.SUCCESS;
 	}

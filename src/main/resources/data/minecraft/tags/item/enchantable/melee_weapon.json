@@ -19,6 +19,7 @@
     "jugcraft:bronze_earthbreaker",
     "jugcraft:bronze_katar",
     "jugcraft:bronze_kusarigama",
+    "jugcraft:bronze_brazier_mace",
     "jugcraft:steel_flanged_mace",
     "jugcraft:steel_war_hammer",
     "jugcraft:steel_halberd",
@@ -36,6 +37,7 @@
     "jugcraft:steel_war_pick",
     "jugcraft:steel_earthbreaker",
     "jugcraft:steel_katar",
-    "jugcraft:steel_kusarigama"
+    "jugcraft:steel_kusarigama",
+    "jugcraft:steel_brazier_mace"
   ]
 }

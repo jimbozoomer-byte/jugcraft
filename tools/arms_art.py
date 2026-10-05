@@ -870,17 +870,83 @@ def kusarigama(style):
     return c
 
 
+# ---------------------------------------------------------------- Arms VI (batch 55)
+
+
+def katana(style):
+    c = Canvas()
+    w = Axis(origin=(6.0, 58.0), scale=0.86)
+    c.capsule(w(0.5), w(2.5), w.r(1.8), style.fitting)  # the cap
+    # A long cord-wrapped grip: diamonds of the wrap over the grip leather.
+    grip(c, w, 2.5, 20.0, 1.7, style)
+    for i in range(6):
+        s = 4.0 + i * 2.7
+        c.polygon([w(s, 0.0), w(s + 1.35, 1.6), w(s + 2.7, 0.0), w(s + 1.35, -1.6)], style.grip, tint=0.25)
+    c.grip = w(11.0)
+    # A small round guard with the stone in it, a collar, and a gently curved blade: a bright tempered edge and a
+    # wavy temper line along it.
+    c.disc(w(21.0), w.r(4.0), style.fitting, dome=0.4)
+    c.disc(w(21.0), w.r(2.7), style.fitting, dome=0.2, tint=-0.15)
+    c.capsule(w(22.0), w(24.5), w.r(1.9), style.accent)
+    curved_blade(c, w, 23.5, 86.0, lambda f: 2.7 - 0.4 * f if f < 0.9 else 2.34 * (1 - f) / 0.1 + 0.1, 6.0, style.blade,
+                 edge=style.blade.ramp[-1])
+    for i in range(14):
+        f0, f1 = i / 14, (i + 1) / 14
+        s0, s1 = 25.0 + 56.0 * f0, 25.0 + 56.0 * f1
+        t0 = -6.0 * f0 * f0 - (1.4 + 0.4 * (i % 2))
+        t1 = -6.0 * f1 * f1 - (1.4 + 0.4 * ((i + 1) % 2))
+        c.line(w(s0, t0), w(s1, t1), style.blade.ramp[4], 1.0)
+    gem(c, w(21.0), w.r(1.7), style)
+    ornate(c, [w(84.0, 4.0), w(52.0, -10.0)], style)
+    return c
+
+
+EMBER = Material([(80, 16, 4), (150, 40, 8), (214, 86, 16), (248, 146, 34), (255, 206, 90), (255, 246, 196)], 0.2, 8, 1.0)
+
+
+def brazier_mace(style, frame=0):
+    """A mace whose head is a brazier: a cage of bars round a bed of coals, with a flame licking up through it (frame
+    0 to 3: the flame flickers)."""
+    c = Canvas()
+    w = Axis(origin=(7.0, 57.0), scale=0.9)
+    haft(c, w, 0.0, 44.0, 1.9, style, rings=(0.4,))
+    grip(c, w, 2.0, 17.0, 2.2, style)
+    pommel(c, w, 1.6, style)
+    c.grip = w(9.5)
+    # The flame behind the bars: tongues from the coals up past the cage's crown, swaying with the frame.
+    sway = (0.0, 1.2, -0.6, 0.8)[frame % 4]
+    height = (0.0, 2.0, 1.0, -1.0)[frame % 4]
+    for width, top, tone in ((8.5, 70.0 + height, 1), (6.4, 66.5 + height, 2), (4.4, 63.0 + height, 3), (2.4, 59.0 + height, 4)):
+        flat(c, [w(46.0, -width), w(53.0, -width * 0.95 + sway * 0.5), w(top - 6.0, sway - width * 0.35), w(top, sway),
+                 w(top - 7.0, sway + width * 0.45), w(53.0, width * 0.95 + sway * 0.5), w(46.0, width)], EMBER.ramp[tone])
+    flat(c, [w(48.5, -1.2), w(56.0 + height * 0.5, sway * 0.6), w(48.5, 1.2)], EMBER.ramp[5])
+    # The coals and the cage: a bowl, four bars curving up to a crown ring, and a spike above.
+    c.box(w(45.5), w.r(2.2), w.r(8.0), w.angle, style.fitting, bevel=1.0, tint=-0.2)
+    for t in (-7.5, -2.5, 2.5, 7.5):
+        bow = 1.6 if abs(t) > 5 else 0.6
+        c.capsule(w(46.0, t), w(53.0, t + bow * (1 if t > 0 else -1)), w.r(0.85), style.fitting, tint=-0.3)
+        c.capsule(w(53.0, t + bow * (1 if t > 0 else -1)), w(60.0, t * 0.6), w.r(0.85), style.fitting, tint=-0.3)
+    c.capsule(w(60.0, -5.2), w(60.0, 5.2), w.r(1.1), style.fitting, tint=-0.15)
+    c.capsule(w(61.0), w(67.0), w.r(1.2), style.blade, tint=-0.15)
+    gem(c, w(45.5), w.r(2.2), style)
+    return c
+
+
+# Kinds whose sprite flickers (an animated item texture, its frames top to bottom in one strip): frames, ticks each.
+ANIMATED = {"brazier_mace": (4, 3)}
+
+
 WEAPONS = {"longsword": longsword, "greatsword": greatsword, "rapier": rapier, "flanged_mace": flanged_mace,
            "war_hammer": war_hammer, "glaive": glaive, "halberd": halberd, "spear": spear, "lance": lance,
            "dagger": dagger, "sabre": sabre, "estoc": estoc, "battle_axe": battle_axe, "flail": flail, "scythe": scythe,
            "quarterstaff": quarterstaff, "pike": pike, "zweihander": zweihander, "maul": maul, "executioner": executioner,
            "bill": bill, "labrys": labrys, "battleblade": battleblade, "war_fork": war_fork, "kama": kama,
            "war_pick": war_pick, "twinblade": twinblade, "nodachi": nodachi, "earthbreaker": earthbreaker, "katar": katar,
-           "moonblade": moonblade, "kusarigama": kusarigama}
+           "moonblade": moonblade, "kusarigama": kusarigama, "katana": katana, "brazier_mace": brazier_mace}
 
 
-def draw(kind, metal):
-    canvas = WEAPONS[kind](STYLES[metal])
+def draw(kind, metal, frame=0):
+    canvas = WEAPONS[kind](STYLES[metal], frame) if kind in ANIMATED else WEAPONS[kind](STYLES[metal])
     canvas.finish()
     for step in getattr(canvas, "after", ()):
         step(canvas)
