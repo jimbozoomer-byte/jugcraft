@@ -385,8 +385,17 @@ def ore_washer():
 SCREEN_TILT = ("x", -22.5, (0.5, 17, 25))
 # Where its pieces are cut along z: every piece is at most 16 pixels long (a rotated element is kept whole, its UVs
 # pinned from 0, so a longer face would stretch its texture), the long ones a multiple of 4 (the mesh and the wall
-# bolts repeat every 4), and none lies inside part 8's z range 16..32, so all of them get those pinned UVs.
+# bolts repeat every 4), and none lies inside part 8's z range 16..32, so every piece cut at them gets those pinned
+# UVs (an uncut piece within z 16..32 also needs to reach outside part 8 along x or y: see WIDE_CUT).
 SCREEN_Z = (9, 13, 29, 41)
+# Where the 24-pixel-wide pieces (x -12..12) are cut along x: 8 + 16. Both are multiples of every repeat on them (the
+# mesh's 2, the bolts' and rivets' 4, the hazard stripes' 8), so with each piece's UVs pinned from 0 the pattern carries
+# on across the cut on every face (on north faces, whose UVs run from the east end, for any texture). (A cut that left
+# odd pieces, 11 + 13, doubled a wire down the middle of the deck and restarted the stripes mid-lip.) Both pieces reach
+# west of x 0, outside part 8, so both get pinned UVs: a piece wholly inside part 8 (such as x 4..12 of a bar at z 21)
+# would read its texture by position instead. The motor beam runs the full width, x -16..16, cut at 0: its east half
+# lies inside part 8 and reads the plain paint by position, which carries on from the pinned west half without a seam.
+WIDE_CUT = (-4,)
 SCREEN_FRAME, SCREEN_MESH, GRAVEL, FLINT, NUGGETS, FINES = (
     "dr_screen_frame", "dr_screen_mesh", "dr_gravel", "dr_flint_heap", "dr_nugget_heap", "dr_fines")
 PAINT, SPRING, SAWDUST = "dr_red_paint", "dr_spring", "dr_sawdust"
@@ -439,29 +448,29 @@ def sieve_screen():
     wall = {"*": SCREEN_FRAME, "up": BAND, "down": PAINT}
     for x0, x1 in ((-13.5, -12), (12, 13.5)):
         m += tilted((x0, 16, 9), (x1, 22, 41), wall)
-    m += tilted((-12, 16, 39.5), (12, 22, 41), wall, x_cuts=(-1,))
+    m += tilted((-12, 16, 39.5), (12, 22, 41), wall, x_cuts=WIDE_CUT)
     # Deck of woven wire over the front two thirds, on two bars underneath.
-    m += tilted((-12, 16.5, 9), (12, 17, 29), {"*": RUST_BARE, "up": SCREEN_MESH, "down": SCREEN_MESH}, x_cuts=(-1,))
+    m += tilted((-12, 16.5, 9), (12, 17, 29), {"*": RUST_BARE, "up": SCREEN_MESH, "down": SCREEN_MESH}, x_cuts=WIDE_CUT)
     for z in (12, 21):
-        m += tilted((-12, 15.5, z - 0.75), (12, 16.5, z + 0.75), RUST_BARE, x_cuts=(-1,), z_cuts=())
+        m += tilted((-12, 15.5, z - 0.75), (12, 16.5, z + 0.75), RUST_BARE, x_cuts=WIDE_CUT, z_cuts=())
     # Steel cross bars over the wire, every eight pixels (twice the weave), so they never beat against it.
     for z in (13, 21):
-        m += tilted((-12, 17, z - 0.5), (12, 17.75, z + 0.5), "dp_chrome", x_cuts=(-1,), z_cuts=())
+        m += tilted((-12, 17, z - 0.5), (12, 17.75, z + 0.5), "dp_chrome", x_cuts=WIDE_CUT, z_cuts=())
     # The grizzly under the feed: bars along the flow on a cross member, with gaps to see through.
-    m += tilted((-12, 15.5, 29), (12, 17, 30.5), RUST_BARE, x_cuts=(-1,))
+    m += tilted((-12, 15.5, 29), (12, 17, 30.5), RUST_BARE, x_cuts=WIDE_CUT)
     for x in (-10.5, -7.5, -4.5, -1.5, 1.5, 4.5, 7.5, 10.5):
         m += tilted((x - 0.625, 16, 29.75), (x + 0.625, 17.5, 39.5), RUST_BARE)
     # Gravel riding down the grizzly from the feed, heaped where the chute drops it.
-    m += tilted((-9, 17.5, 31), (9, 18.5, 39.5), GRAVEL, x_cuts=(-1,))
+    m += tilted((-8, 17.5, 31), (8, 18.5, 39.5), GRAVEL)
     m += tilted((-6, 18.5, 34), (5, 19.5, 39.5), GRAVEL)
     # Discharge lip at the low end, its front edge hazard-striped.
-    m += tilted((-12, 15, 8.25), (12, 17.25, 9), {"*": RUST_BARE, "north": HAZARD}, x_cuts=(-1,))
+    m += tilted((-12, 15, 8.25), (12, 17.25, 9), {"*": RUST_BARE, "north": HAZARD}, x_cuts=WIDE_CUT)
     # Spring brackets on the side plates, front and back.
     for x0, x1 in ((-16, -13.5), (13.5, 16)):
         for z in (12, 38):
             m += tilted((x0, 14, z - 2), (x1, 16, z + 2), RUST_BARE, z_cuts=())
     # The motor beam across the middle, the vibrator motor on its feet: patina housing, blue end bells.
-    m += tilted((-13.5, 22, 23), (13.5, 23.5, 27), PAINT, x_cuts=(-1,), z_cuts=())
+    m += tilted((-16, 22, 23), (16, 23.5, 27), PAINT, x_cuts=(0,), z_cuts=())
     m += tilted((-3.5, 23.5, 23.75), (3.5, 24.75, 26.25), RUST_BARE, z_cuts=())
     y, z = EXCITER
     for x0, x1, r, texture, cap in ((-4.5, 4.5, 2.5, RIB_PATINA, BLUE), (-5, -4.5, 2, BLUE, BLUE), (4.5, 5, 2, BLUE, BLUE)):
@@ -557,10 +566,16 @@ def sawmill():
     m += cyl("z", -1, 19, 6, 7, 29, "sp_bark", "sp_wood")
     for z in (8, 26):
         m.append(box((-12, 13, z), (-9, 21, z + 2), RUST_PIPE))
-    # Pillow-block bearings on red pedestals either side of the blade (the arbor runs through them).
+    # Pillow-block bearings on red pedestals either side of the blade (the arbor runs through them): a foot plate, the
+    # housing with its bore on the arbor (y 18, z 44) and a cap. The housing's bearing face is stretched over it, so the
+    # housing lies wholly in the block above y 16; cut at the seam, each piece would show the whole face again.
     for x0, x1 in ((-5.75, -2.75), (2.75, 5.75)):
-        m.append(box((x0 + 0.25, 9, 41.5), (x1 - 0.25, 14.5, 46.5), PAINT))
-        m.append(box((x0, 14.5, 41), (x1, 21.5, 47), {"*": RUST_BARE, "east": f"{NUT}!", "west": f"{NUT}!"}))
+        m.append(box((x0 + 0.25, 9, 41.5), (x1 - 0.25, 15.25, 46.5), PAINT))
+        m.append(box((x0, 15.25, 40.75), (x1, 16, 47.25), RUST_BARE))
+        m.append(box((x0, 16, 42), (x1, 20, 46), {"*": RUST_BARE, "east": f"{NUT}!", "west": f"{NUT}!"}))
+        m.append(box((x0 + 0.25, 20, 42.5), (x1 - 0.25, 21.25, 45.5), RUST_BARE))
+        for z in (41, 46.25):
+            m.append(box((x0 + 0.75, 16, z), (x1 - 0.75, 16.5, z + 0.75), BAND))
     # The hood over the blade's top and back: two cheek plates, a top plate and a back plate, open at the front and
     # below, so the teeth show where they meet the log.
     for x0, x1 in ((-2.75, -1.75), (0.75, 1.75)):
@@ -573,8 +588,12 @@ def sawmill():
     m += stack("x", SAW_DRIVE[0], SAW_DRIVE[1], 5, -15.5, -9.5, RIB_PATINA, 4, BLUE)
     for y0, y1 in ((21, 21.75), (14.25, 15)):
         m.append(box((PULLEY_X[0] + 0.25, y0, cz), (PULLEY_X[1] - 0.25, y1, SAW_DRIVE[1]), RUBBER))
-    # The dust duct from the hood's back down to the bed, inside the machine's blocks.
-    m += pipe_run([(-0.5, 28.75, 58.5), (-0.5, 28.75, 72), (-0.5, 9.5, 72)], 1.5, COPPER)
+    # The dust duct from the hood's back down to the bed, inside the machine's blocks. It runs on the hood's centre
+    # line, across the x 0 block seam, so its joints are plain red flanges, not hex nuts: a stretched nut face cut at
+    # the seam would show twice, squeezed.
+    for frm, to, texture in pipe_run([(-0.5, 28.75, 58.5), (-0.5, 28.75, 72), (-0.5, 9.5, 72)], 1.5, COPPER):
+        stretched = isinstance(texture, dict) and any(t and t.endswith("!") for t in texture.values())
+        m.append(box(frm, to, PAINT) if stretched else (frm, to, texture))
     m += valve("x", 12, 70, 3, 14)
     # Control box on the master block (part 0, the only block whose lit state changes): gauge and amber lamp.
     m.append(box((10.5, 3, 0.75), (15.5, 14, 4.5), {"*": RUST_BARE, "north": "dr_red"}))
@@ -809,15 +828,19 @@ def _sieve_exciter():
 
 # Parts that turn: drawn by client/MachineRotors through the machines' block entity renderer, standing still while
 # the machine is idle ("always") and turning while its master block is lit, only on the big machine (compact=false).
-# Speeds in degrees per tick (at most 10 for the 24-tooth blade: faster, its teeth would seem to run backwards at 30
-# frames a second); a negative speed turns the sawmill's front teeth down into the log. See tools/machine_rotors.py.
+# Speeds in degrees per tick; a negative speed turns the sawmill's front teeth down into the log. A toothed part must
+# turn less than half its pitch a frame, or its teeth seem to run backwards: the 24-tooth blade (15-degree pitch) at
+# SAW_SPEED, 140 degrees a second, stays under 7.5 degrees a frame down to 20 frames a second. See machine_rotors.py.
+SAW_SPEED = -7
 ROTORS = {
-    "sawmill_blade": {"block": "sawmill", "axis": "x", "center": (0, *SAW_CENTER), "property": "lit", "speed": -10,
-                      "ease": 12, "always": True, "when": {"compact": "false"}, "quads": _sawmill_blade(),
+    "sawmill_blade": {"block": "sawmill", "axis": "x", "center": (0, *SAW_CENTER), "property": "lit",
+                      "speed": SAW_SPEED, "ease": 12, "always": True, "when": {"compact": "false"},
+                      "quads": _sawmill_blade(),
                       # Slabs (x0, x1, radius) the static models of both styles keep clear: the blade, its flanges.
                       "clear": [(SAW_X[0], SAW_X[1], SAW_R_TIP + 0.25), (-2.25, 1.25, 3.5)]},
-    "sawmill_drive": {"block": "sawmill", "axis": "x", "center": (0, *SAW_DRIVE), "property": "lit", "speed": -10,
-                      "ease": 12, "always": True, "when": {"compact": "false"}, "quads": _sawmill_drive()},
+    "sawmill_drive": {"block": "sawmill", "axis": "x", "center": (0, *SAW_DRIVE), "property": "lit",
+                      "speed": SAW_SPEED, "ease": 12, "always": True, "when": {"compact": "false"},
+                      "quads": _sawmill_drive()},
     "sieve_exciter": {"block": "sieve", "axis": "x", "center": screen_point(*EXCITER), "property": "lit", "speed": 24,
                       "ease": 8, "always": True, "when": {"compact": "false"}, "quads": _sieve_exciter()},
 }

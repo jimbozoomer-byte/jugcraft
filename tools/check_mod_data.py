@@ -1758,12 +1758,13 @@ def check_machine_rotors():
     big machine and the parts it needs, its textures exist, are still and opaque (the solid render type ignores alpha)
     and every UV stays inside its texture; the renderer reads the file; the static models of both styles keep clear of
     the blade; the sawmill's and sieve's elements stay inside their footprints (an element kept whole outside them
-    stretches its texture and escapes the per-part separation) and their running lamps are on the master block, the
-    only one whose lit state changes."""
+    stretches its texture and escapes the per-part separation), no face of theirs drawn with a stretched texture
+    ("name!") is cut by a block seam (each piece would show the whole texture again, squeezed), and their running lamps
+    are on the master block, the only one whose lit state changes."""
     import steampunk_models  # noqa: F401  (loads giant_models after the helpers it builds on)
     from giant_models import MODELS as GIANTS, ROTORS
     from large_machines import ENLARGED, FOOTPRINTS, MODELS as CLASSIC
-    from model_writer import unpack
+    from model_writer import FACE_AXES, unpack
     data = load(ASSETS / "machine_rotor_quads.json")
     if data is None:
         return
@@ -1827,6 +1828,18 @@ def check_machine_rotors():
                     covered += (b[0] - a[0]) * (b[1] - a[1]) * (b[2] - a[2])
             if abs(covered - (to[0] - frm[0]) * (to[1] - frm[1]) * (to[2] - frm[2])) > 1e-6:
                 err(f"{machine}: element {frm}..{to} reaches outside its footprint")
+        for style, models in (("steampunk", GIANTS), ("classic", CLASSIC)):
+            for item in models[machine]:
+                frm, to, texture, options = unpack(item)
+                if options.get("rotation"):
+                    continue  # kept whole on one part, never cut
+                faces = texture if isinstance(texture, dict) else {"*": texture}
+                for face, (u_axis, v_axis, _, _) in FACE_AXES.items():
+                    name = faces.get(face, faces.get("*"))
+                    if name and name.endswith("!") and any(
+                            frm[axis] < seam < to[axis] for axis in (u_axis, v_axis) for seam in range(-64, 129, 16)):
+                        err(f"{style} {machine}: the {face} face of {frm}..{to} stretches {name[:-1]} across a block seam "
+                            "(each part would show the whole texture again): keep it inside one block")
         for index in range(len(footprint)):
             path = ASSETS / "models" / "block" / f"{machine}_part{index}.json"
             if index and '"#dr_amber"' in path.read_text(encoding="utf-8"):

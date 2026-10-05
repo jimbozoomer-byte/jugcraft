@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * Client game test for the turning machine parts (client/MachineRotors): a powered giant sawmill cutting oak logs and a
  * powered giant sieve sifting gravel, both running (amber lamps lit). Shots: both machines together; the sawmill's side
- * close up twice, two ticks apart, so the blade (10 degrees a tick, 24 teeth) and its belt drive show as turned 20
+ * close up twice, three ticks apart, so the blade (7 degrees a tick, 24 teeth) and its belt drive show as turned 21
  * degrees between them; and the sieve from the front and from its corner, its vibrator weights spinning. CI job
  * {@code client}.
  */
@@ -59,12 +59,12 @@ public class MachineMotionClientGameTests implements FabricClientGameTest {
 
 			// Both machines from the south: the sawmill's side (blade, pulleys and belt) and the sieve's front (deck).
 			shoot(context, singleplayer, x + 5, y + 2, z - 0.5, 180, 25, "jugcraft_sawmill_sieve_running");
-			// The sawmill's blade face on, then again two ticks later: the blade, the maker's plate and the pulleys' spokes
-			// have turned 20 degrees (not a multiple of the 15-degree tooth pitch).
+			// The sawmill's blade face on, then again three ticks later: the blade, the maker's plate and the pulleys' spokes
+			// have turned 21 degrees (not a multiple of the 15-degree tooth pitch).
 			place(context, singleplayer, x + 2.75, y, z - 1.5, 180, 8);
 			context.waitTicks(10);
 			context.takeScreenshot("jugcraft_sawmill_blade_a");
-			context.waitTicks(2);
+			context.waitTicks(3);
 			context.takeScreenshot("jugcraft_sawmill_blade_b");
 			// The sieve from the front (its tilted deck faces the camera) and from its front left corner.
 			shoot(context, singleplayer, x + 9, y + 1, z - 3, 180, 32, "jugcraft_sieve_running");

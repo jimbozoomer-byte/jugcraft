@@ -219,7 +219,7 @@
       ],
       "to": [
         13.0,
-        14.5,
+        15.25,
         14.5
       ],
       "faces": {
@@ -246,13 +246,13 @@
     {
       "from": [
         10.25,
-        14.5,
-        9.0
+        15.25,
+        8.75
       ],
       "to": [
         13.25,
-        16,
-        15.0
+        16.0,
+        15.25
       ],
       "faces": {
         "north": {
@@ -262,22 +262,13 @@
           "texture": "#dr_rust_bare"
         },
         "east": {
-          "texture": "#dr_nut",
-          "uv": [
-            0,
-            0,
-            16,
-            16
-          ]
+          "texture": "#dr_rust_bare"
         },
         "west": {
-          "texture": "#dr_nut",
-          "uv": [
-            0,
-            0,
-            16,
-            16
-          ]
+          "texture": "#dr_rust_bare"
+        },
+        "up": {
+          "texture": "#dr_rust_bare"
         },
         "down": {
           "texture": "#dr_rust_bare"
