@@ -58,7 +58,7 @@ Each barrel of a salvo uses one shell. A gunner with fewer shells fires as many 
 
 ## Dependencies and assets
 - No dependencies. All art is original.
-  - The new textures are drawn in `tools/tower_guns.py`: `tg_port` (a round port cover), `tg_warning` (a hazard sign) and `tg_slots` (the plinth's vent slots). So are the item icons.
+  - The new textures are drawn in `tools/tower_guns.py`: `tg_port` (a round port cover), `tg_warning` (a hazard sign) and `tg_slots` (the plinth's vent slots); since the 5 October 2026 art fixes also `tg_tube` (barrel steel), `tg_steel` (seamless plate), `tg_soot` and the `tg_bore` decal. The ports, signs and bores are drawn whole on their own plates. The item icons are drawn in `tools/gun_icons.py`. See [big-guns-art-fixes.md](big-guns-art-fixes.md).
   - The models reuse the big guns', the dieselpunk and the Kaiserworks textures.
 - The models are exported to `assets/jugcraft/tower_gun_quads.json` (a plinth, a turntable and a barrel for each gun) and drawn by `client/TowerGunRenderer`.
 - Code:

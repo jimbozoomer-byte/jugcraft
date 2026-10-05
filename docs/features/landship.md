@@ -57,7 +57,7 @@ Cannon Shells: a steel plate, gunpowder and a brass nugget make 4.
 ## Dependencies and assets
 - No dependencies. All art is original.
   - The tread texture and the item icons are drawn in `tools/landship.py`.
-  - The model reuses the Kaiserworks `ik_*` and the giants' `dr_*` textures.
+  - The model reuses the Kaiserworks `ik_*` and the giants' `dr_*` textures; its cannon and sponson guns use the tower guns' `tg_tube` steel and `tg_bore` decal. Since the 5 October 2026 art fixes the turret's brass ring sits on the casemate's gilt band (no slit under the turret) and no barrel faces share a plane ([big-guns-art-fixes.md](big-guns-art-fixes.md)).
   - The sounds are vanilla's: explosion, dispenser and minecart.
 - The model is exported as quads to `assets/jugcraft/landship_quads.json` (about 1,030 faces, 16-pixel tiles, hidden faces culled) in four parts: body, turret, barrel and one track link. `client/LandshipRenderer` lays about 33 links round each side and animates them.
 - The shell reuses `weapons/Blast`.

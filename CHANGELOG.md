@@ -8,6 +8,15 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Big guns, Landship, walker and balloons: art fixes (5 October 2026)
+- **Solid barrels with real bores**: every big gun's and tower gun's barrel is plain gun steel instead of a grid of bolted panels, each muzzle has one round dark bore, and port covers and hazard signs are drawn whole instead of in fragments. Yellow, khaki and olive housings are seamless painted armour with one weld seam a course.
+- **Nothing flickers or cuts through as a gun moves**: the Siege Mortar's deck meets its base and its rails clear the cradle; the Triple Battery's sleeves and housing clear its drum; the Bastion Autocannon and Fortress Rifle have mantlet slots in their roofs; the Self-Propelled Howitzer has a low engine deck the gun swings over and its exhausts behind the crew; the Flak Gun's cradle clears its pedestal. The Grand Mortar stays drawn at full elevation.
+- **Landship and Diesel Walker**: no slit under the Landship's turret and no flicker on its muzzle; the walker's thighs, chest walls, knees and drill no longer share faces with their neighbours, so it no longer flickers as it walks.
+- **Observation Balloon**: a smooth, closed envelope with three tail lobes and its own clean canvas texture (gore seams, red and cream bands, the stencilled serial reading level), instead of stair-stepped boxes with gaps.
+- **Smooth rise**: the Observation Balloon, pibals and hot-air balloons now glide up on every client instead of stepping; the hot-air balloons' envelopes, rope and flame are drawn in the opaque pass so they can't show through themselves.
+- **New icons** for the eight guns, the shells, the balloon and the Range Finder: 32x32 pixel art with outlines, shading and round bores.
+- IDs, recipes and numbers are unchanged. Record: [big-guns-art-fixes.md](docs/features/big-guns-art-fixes.md); rules in [ART_DIRECTION.md](docs/ART_DIRECTION.md#big-models-drawn-as-quads-guns-vehicles-and-balloons).
+
 ### Cute, clean creature decorations: batches 15 to 20 repainted (#191)
 - **Smooth fire**: the Ember Bed's hearth now burns in smooth bands of colour on a glow of coals, and the Horned Skull Cauldron's ram skull has big round sockets and no nostrils.
 - **Every creature prop of batches 15 to 20 repainted** in a clean, cute style after the owner's reference pictures: flat colour in two or three tones with lit and shaded edges and no speckle. The **Monster Head** is a bright green Frankenstein head with a blunt black fringe and sleepy closed eyes that open glowing when it wakes; the **Flying Eyeball**, plushes, moths and jar oddities are clean and glossy; skulls (the **Colossal Skull** too) have big round sockets with a glint and no nose holes; bones are smooth cream; the gargoyles have round eyes and little fangs; the **Crawling Hand** is the monster's green; the cocoon sleeps, the clock's ghost says "oo" and the **Harvest Moon** has a sleeping smile.

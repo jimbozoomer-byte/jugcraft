@@ -15,7 +15,7 @@ Four new machines, each placed from its item (it faces the way you face) and kno
 | Machine | What it is | Crew |
 | --- | --- | --- |
 | **Siege Mortar** | A fixed emplacement: a concrete ring, a railed turntable deck with hazard edging, a yellow cradle and a fat black barrel. It lobs Heavy Shells on the high arc (45° to 85°), 17 to about 110 blocks | Gunner, plus one more on the deck |
-| **Self-Propelled Howitzer** | A tracked carriage with an armoured cab, a domed engine and a long gun with a muzzle brake. The gun turns 30° either side of the hull and fires Heavy Shells flat or high. It is driven like the landship, slower, and burns diesel or kerosene | Driver-gunner in the cab, plus one on the deck |
+| **Self-Propelled Howitzer** | A tracked carriage with an armoured cab, a low grille engine deck and a long gun with a muzzle brake. The gun turns 30° either side of the hull and fires Heavy Shells flat or high. It is driven like the landship, slower, and burns diesel or kerosene | Driver-gunner in the cab, plus one on the deck |
 | **Flak Gun** | Twin anti-aircraft cannon on a cross mount. It swings fast and fires a Flak Shell every 8 ticks while attack is held. The shells burst beside anything flying | Gunner |
 | **Observation Balloon** | A kite balloon on a winch cable. Climb into its basket and it rises 32 blocks above where it was placed; climb out and it winches down. It never drifts | Spotter |
 
@@ -59,7 +59,7 @@ Every burst is the grenades' and rockets' `Blast`. It hurts living things only, 
 
 ## Dependencies and assets
 - No dependencies. All art is original.
-  - The new textures (`ar_*`) and the item icons are drawn in `tools/artillery.py`.
+  - The new textures (`ar_*`) are drawn in `tools/artillery.py`, the item icons in `tools/gun_icons.py`, and the barrels use the tower guns' `tg_*` steel. The 5 October 2026 art fixes (closed barrels, whole decals, seamless paint, the smooth balloon and its smooth rise) are recorded in [big-guns-art-fixes.md](big-guns-art-fixes.md).
   - The models reuse the giants', Kaiserworks, powered-tools and zeppelin textures.
   - The howitzer's tracks reuse the landship's track link.
 - The models are exported to `assets/jugcraft/artillery_quads.json` and drawn by `client/ArtilleryRenderers`.
