@@ -530,16 +530,17 @@ def flying_eyeball():
     """The eyeball (centred on EYE_CENTRE, its iris to the north) and its two wings (each hinged at the origin, for the
     renderer to sweep back and beat), as models for the client; and the whole, wings raised, as the item's model.
 
-    The iris is a disc with see-through corners (the client draws it glowing, so nothing round it may glow), laid 0.1
-    pixel proud of the cap's white front; the cap's thin sides sample a thin strip, about four texels to a pixel like
-    the rest. The client's wings are one face each: 26.3 draws a cut-out quad from both sides, so a second, back-to-back
-    face would only fight it."""
+    The iris is a disc with see-through corners (the client draws it glowing, so nothing round it may glow), with a white
+    glint inside the disc, laid 0.1 pixel proud of the cap's white front; the cap's thin sides sample a thin strip,
+    about four texels to a pixel like the rest. The client's wings are one face each: 26.3 draws a cut-out quad from
+    both sides, so a second, back-to-back face would only fight it. The item's wings are drawn from both sides as two
+    faces 0.1 pixel apart (each lifted 0.05 off the wing's plane), so they cannot fight whether or not items cull."""
     sc = Sculpt(d16.FLYING_EYEBALL["block"], 71)
     wing = sc.piece("wing", 28, 24, membrane_wing())
     side = sc.piece("sclera", 24, 24, sclera(3, 6, palette=WARM_SCLERA))
     front = sc.piece("sclera_front", 24, 24, sclera(4, 9, (0.5, 0.5), palette=WARM_SCLERA))
     small = sc.piece("sclera_small", 16, 16, sclera(5, 3, palette=WARM_SCLERA))
-    eye = sc.piece("iris", 16, 16, iris(corner=None, glint=IRIS[5], glints=1))
+    eye = sc.piece("iris", 16, 16, iris(corner=None, glint=ca.GLINT, glints=1))
     nerve = sc.piece("nerve", 4, 12, ca.bevel(NERVE, 2, sides="lr"))
     nu0, nv0, nu1, nv1 = nerve
     nerve_tip = (nu0, nv0, nu1, nv0 + (nu1 - nu0))          # a 4 x 4 texel end of the strip, for the nerve's tip
@@ -563,15 +564,20 @@ def flying_eyeball():
     right = plane_xy(0.0, 7.0, -2.5, 3.5, 0.0, (u1, v0, u0, v1))
     sc.models["flying_eyeball_body"] = body
     sc.models["flying_eyeball_iris"] = iris_quad
-    # The client's wings: the south face only (see above); the item keeps both, as items cull.
+    # The client's wings: the south face only (see above).
     sc.models["flying_eyeball_wing_left"] = [dict(left, faces={"south": left["faces"]["south"]})]
     sc.models["flying_eyeball_wing_right"] = [dict(right, faces={"south": right["faces"]["south"]})]
-    # The item: the whole at rest, wings raised in a V.
+    # The item: the whole at rest, wings raised in a V, each wing's two faces lifted apart (see above).
     lx, ly, lz = WING_HINGES["left"]
     rx, ry, rz = WING_HINGES["right"]
+
+    def lifted(sheet):
+        sheet["from"][2] = round(sheet["from"][2] - 0.05, 4)
+        sheet["to"][2] = round(sheet["to"][2] + 0.05, 4)
+        return sheet
     item = body + iris_quad + [
-        plane_xy(lx - 7.0, lx, ly - 2.5, ly + 3.5, lz, wing, rotation((lx, ly, lz), "z", -22.5)),
-        plane_xy(rx, rx + 7.0, ry - 2.5, ry + 3.5, rz, (u1, v0, u0, v1), rotation((rx, ry, rz), "z", 22.5))]
+        lifted(plane_xy(lx - 7.0, lx, ly - 2.5, ly + 3.5, lz, wing, rotation((lx, ly, lz), "z", -22.5))),
+        lifted(plane_xy(rx, rx + 7.0, ry - 2.5, ry + 3.5, rz, (u1, v0, u0, v1), rotation((rx, ry, rz), "z", 22.5)))]
     sc.models["flying_eyeball_item"] = item
     return sc
 
