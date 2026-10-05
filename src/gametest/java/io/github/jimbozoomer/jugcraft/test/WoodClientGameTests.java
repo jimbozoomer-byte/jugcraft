@@ -111,7 +111,12 @@ public class WoodClientGameTests implements FabricClientGameTest {
 			}
 			context.waitTicks(20);
 
-			context.getInput().pressKey(options -> options.keyToggleGui);
+			// Hide the HUD, hand and chat whatever an earlier test in this client left (as OfrendaClientGameTests does).
+			context.runOnClient(client -> {
+				if (!client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
 			// The summer trees, three or so to a shot, from in front and a little below their crowns.
 			int[][] groups = {{0, 2}, {3, 5}, {6, 8}, {9, 10}, {11, 12}};
 			for (int g = 0; g < groups.length; g++) {
@@ -126,7 +131,6 @@ public class WoodClientGameTests implements FabricClientGameTest {
 			}
 			// The seasonal trees in autumn.
 			shoot(context, singleplayer, autumnFirst + 12, y + 6, autumnRow + 18, 180, -10, "jugcraft_wood_autumn");
-			context.getInput().pressKey(options -> options.keyToggleGui);
 		}
 	}
 
