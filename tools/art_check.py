@@ -89,7 +89,6 @@ O1_ALLOW = {
 }
 # H1: quad parts whose open side is only ever drawn against another part, or decor whose own fixes will close it.
 H1_ALLOW = {
-    "ferris_wheel_lights": "the bulbs leave out the face against the rim; always drawn on ferris_wheel_section",
     "ferris_wheel_section": "rim and spoke members end open against the next section's copy (the renderer draws 16); "
                             "the ferris wheel's own art fix owns ferris_wheel_data.py",
     "jump_scare_spring": "the spring's coil is a stack of open rings; to be closed with its own decor art fix",
