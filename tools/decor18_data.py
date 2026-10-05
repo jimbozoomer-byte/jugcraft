@@ -1048,11 +1048,17 @@ def colossal_skull():
     jaw = sc.piece("jaw", 28, 8, cracked_bone(9, 1))
     jaw_side = sc.piece("jaw_side", 16, 10, cracked_bone(10, 1))
     lower_teeth = sc.piece("lower_teeth", 24, 3, teeth())
-    els = [cube((-14.0, 8.0, 6.0), (14.0, 28.0, 29.0), faces(side, ("east", "west"), up=top, down=hollow, south=dome)),
+    # The cranium's front is left out on purpose: the sockets look through it into the hollows lined by the face round
+    # them and closed behind by the dark plate at z 8 (model_writer "_keep_open"; art_check's O1 allow-list names the
+    # skull). Thin plates close its front beside the face, and the brow reaches back to the plate over the sockets.
+    els = [dict(cube((-14.0, 8.0, 6.0), (14.0, 28.0, 29.0), faces(side, ("east", "west"), up=top, down=hollow, south=dome)),
+                _keep_open=["north"]),
+           cube((-14.0, 8.0, 5.9), (-12.0, 28.0, 6.0), faces(side, ALL6)),
+           cube((12.0, 8.0, 5.9), (14.0, 28.0, 6.0), faces(side, ALL6)),
            cube((-12.0, 28.0, 8.0), (12.0, 31.0, 27.0), faces(top, ALL6)),
            cube((-15.0, 12.0, 9.0), (15.0, 25.0, 25.0), faces(side, ("east", "west", "north", "south"))),
            cube((-11.0, 6.0, 27.0), (11.0, 27.0, 31.0), faces(dome, ALL6)),
-           cube((-13.0, 19.6, 3.0), (13.0, 24.0, 7.0), faces(brow, ALL6)),
+           cube((-13.0, 19.6, 3.0), (13.0, 24.0, 8.0), faces(brow, ALL6)),
            cube((-12.0, 24.0, 5.0), (12.0, 28.0, 8.0), faces(dome, ("north", "east", "west", "up"))),
            # The face round the sockets (no nose hole: the clean style keeps faces simple), and the hollows behind them.
            cube((-12.0, 11.0, 4.0), (-10.0, 19.6, 8.0), faces(face, ("north", "east", "west"))),
@@ -1162,7 +1168,8 @@ def gargoyle_sentinel():
     head_side = sc.piece("head_side", 14, 14, relief(GARGOYLE, 10, "scales"))
     snout = sc.piece("snout", 12, 8, grotesque(GARGOYLE, 11, mouth=True))
     horn_ = sc.piece("horn", 6, 16, ca.bevel(GARGOYLE, 4, sides="lr"))
-    eye = sc.piece("eye", 4, 4, glow_dot((255, 60, 40)))
+    # Opaque: the renderer draws the eyes cut out, which shows a half-transparent texel solid anyway.
+    eye = sc.piece("eye", 4, 4, glow_dot((255, 60, 40), 255))
     els = [cube((2.0, 0.0, 2.0), (14.0, 1.4, 14.0), faces(base, SIDES4, up=top, down=top)),
            cube((3.0, 1.4, 3.0), (13.0, 5.0, 13.0), faces(die, SIDES4)),
            cube((2.6, 5.0, 2.6), (13.4, 6.0, 13.4), faces(base, SIDES4, up=top, down=top)),
@@ -1342,7 +1349,17 @@ def texture_of(model):
     return model
 
 
+def _image_of(name):
+    """The Sculpt texture a model's "#p" (block/<name>) is drawn from, for fa.closing_writer; None for another."""
+    try:
+        return build(name).atlas.img
+    except KeyError:
+        return None
+
+
 def assets(root, write, lang):
+    # Every block and item model is closed: no face a box leaves out shows a hole (docs/ART_DIRECTION.md).
+    write = fa.closing_writer(write, _image_of)
     models = root / "models" / "block"
     states = root / "blockstates"
     items = root / "models" / "item"

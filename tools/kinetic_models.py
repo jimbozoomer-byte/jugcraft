@@ -43,8 +43,9 @@ def brass_gearbox():
 def hand_crank():
     """A hub plate against the driven block (north); the axle, brass arm and wooden handle spin."""
     static = cyl("z", 8, 8, 3, 0, 1.5, IRON_PLATE, BRASS)
-    # The axle starts ROTOR_GAP off the hub plate, so the spinning rotor never shares a plane with the still block.
-    rotor = cyl("z", 8, 8, 1, 1.5 + ROTOR_GAP, 7, IRON)
+    # The axle starts ROTOR_GAP inside the hub plate: its end is hidden in the plate, and no plane of the spinning rotor
+    # is shared with the still block (nor does a slit open between them).
+    rotor = cyl("z", 8, 8, 1, 1.5 - ROTOR_GAP, 7, IRON)
     rotor.append(box((7, 7, 7), (9, 13.5, 8.5), BRASS))
     rotor += cyl("z", 8, 12.5, 0.9, 8.5, 13, "sp_wood")
     return static, rotor
@@ -186,7 +187,8 @@ def solar_tracker():
     m.append(box((5.5, 4, 5.5), (10.5, 4.5, 10.5), "el_glow"))
     m.append(box((7, 7, 2), (9, 7.5, 14), "el_frame"))
     rotor = [box((1, 8.5, 1), (15, 9.5, 15), {"*": "el_frame", "up": "el_solar"}),
-             box((7, 7.5 + ROTOR_GAP, 1.5), (9, 8.5, 14.5), "iron_shaft")]  # rests just off the mount bar
+             # The pivot sinks into the mount bar and is ROTOR_GAP narrower on each side: no shared plane, no slit.
+             box((7 + ROTOR_GAP, 7.5 - ROTOR_GAP, 1.5), (9 - ROTOR_GAP, 8.5, 14.5), "iron_shaft")]
     return m, rotor
 
 
@@ -195,7 +197,9 @@ def heliostat():
     rotor, half as far as a tracker, as a mirror aiming at a fixed receiver turns half the sun's angle)."""
     m = [box((5, 0, 5), (11, 1, 11), "el_frame"), box((7, 1, 7), (9, 9, 9), "el_casing")]
     rotor = [box((2, 9, 2), (14, 10, 14), {"*": "el_frame", "up": "el_mirror"}),
-             box((7 + ROTOR_GAP, 8, 2.5), (9 - ROTOR_GAP, 9 - ROTOR_GAP, 13.5), "iron_shaft")]  # inside the post's sides
+             # Inside the post's sides; its top meets the mirror's underside (both turn), so no slit opens under the
+             # mirror. Its top shares the post's top plane only where the mirror covers both.
+             box((7 + ROTOR_GAP, 8, 2.5), (9 - ROTOR_GAP, 9, 13.5), "iron_shaft")]
     return m, rotor
 
 

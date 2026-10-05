@@ -70,7 +70,31 @@ final class DecorDraw {
 	 */
 	static void twoSided(VertexConsumer buffer, PoseStack.Pose matrix, float[][] corners, float nx, float ny, float nz, int color, int light,
 			float liftPixels) {
+		twoSided(buffer, matrix, corners, nx, ny, nz, color, light, liftPixels, false);
+	}
+
+	/**
+	 * As {@link #twoSided}, but the back shows the picture the same way round as the front (its u flipped across the
+	 * quad's u range) rather than mirrored, as a flame or a sign seen from behind should.
+	 */
+	static void twoSidedReadable(VertexConsumer buffer, PoseStack.Pose matrix, float[][] corners, float nx, float ny, float nz, int color,
+			int light, float liftPixels) {
+		twoSided(buffer, matrix, corners, nx, ny, nz, color, light, liftPixels, true);
+	}
+
+	private static void twoSided(VertexConsumer buffer, PoseStack.Pose matrix, float[][] corners, float nx, float ny, float nz, int color,
+			int light, float liftPixels, boolean readableBack) {
 		float[] lift = lift(corners, nx, ny, nz, liftPixels / 16.0F);
+		float uSum = 0.0F;
+		if (readableBack) {
+			float uMin = corners[0][3];
+			float uMax = corners[0][3];
+			for (float[] c : corners) {
+				uMin = Math.min(uMin, c[3]);
+				uMax = Math.max(uMax, c[3]);
+			}
+			uSum = uMin + uMax;
+		}
 		for (int k = 0; k < 4; k++) {
 			float[] c = corners[k];
 			buffer.addVertex(matrix, c[0] + lift[0], c[1] + lift[1], c[2] + lift[2]).setColor(color).setUv(c[3], c[4])
@@ -78,7 +102,8 @@ final class DecorDraw {
 		}
 		for (int k = 3; k >= 0; k--) {
 			float[] c = corners[k];
-			buffer.addVertex(matrix, c[0] - lift[0], c[1] - lift[1], c[2] - lift[2]).setColor(color).setUv(c[3], c[4])
+			float u = readableBack ? uSum - c[3] : c[3];
+			buffer.addVertex(matrix, c[0] - lift[0], c[1] - lift[1], c[2] - lift[2]).setColor(color).setUv(u, c[4])
 					.setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(matrix, -nx, -ny, -nz);
 		}
 	}

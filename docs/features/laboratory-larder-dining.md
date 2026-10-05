@@ -142,3 +142,4 @@ Placed by players only; no worldgen. They work all year, and nothing depends on 
 ## Rollout and open questions
 - Open: whether the Haunted Dining Chair should slide out for creative players (it does for every player now).
 - Open: whether witchlights should also wake for tamed animals or villagers walking a path.
+- **Fixed 5 October 2026 (shared render fixes):** the Lightning Harness and the Grandfather Clock no longer show holes where a box left a face out (the clock's back wall ends showed through its sides), and the Silk Spool Stack's tinted silk is closed at both ends. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

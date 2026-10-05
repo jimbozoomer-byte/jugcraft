@@ -477,8 +477,9 @@ def silk_spool_stack():
     sc.models[d19.SPOOLS["block"]] = els
     silks = {}
     for i, x in enumerate(SPOOL_X):
-        silks[i] = [cube((x - 2.1, 2.8, 5.9), (x + 2.1, 12.4, 10.1), faces(silk_, SIDES4)),
-                    cube((x - 1.6, 2.8, 5.4), (x + 1.6, 12.4, 10.6), faces(silk_, SIDES4))]
+        # Closed at both ends: the client draws the silk on its own, culled, so an open end is a hole into it.
+        silks[i] = [cube((x - 2.1, 2.8, 5.9), (x + 2.1, 12.4, 10.1), faces(silk_, ALL6)),
+                    cube((x - 1.6, 2.8, 5.4), (x + 1.6, 12.4, 10.6), faces(silk_, ALL6))]
         sc.models[f"silk_spool_silk_{i}"] = silks[i]
     sc.models["item"] = els + [e for i in silks for e in silks[i]]
     return sc
@@ -1375,7 +1376,17 @@ MOON_ITEM = {"gui": {"rotation": [25, 225, 0], "translation": [0, -2, 0], "scale
 MULTIFACE = {"north": {}, "south": {"y": 180}, "east": {"y": 90}, "west": {"y": 270}, "up": {"x": 270}, "down": {"x": 90}}
 
 
+def _image_of(name):
+    """The Sculpt texture a model's "#p" (block/<name>) is drawn from, for fa.closing_writer; None for another."""
+    try:
+        return build(name).atlas.img
+    except KeyError:
+        return None
+
+
 def assets(root, write, lang):
+    # Every block and item model is closed: no face a box leaves out shows a hole (docs/ART_DIRECTION.md).
+    write = fa.closing_writer(write, _image_of)
     models = root / "models" / "block"
     states = root / "blockstates"
     items = root / "models" / "item"

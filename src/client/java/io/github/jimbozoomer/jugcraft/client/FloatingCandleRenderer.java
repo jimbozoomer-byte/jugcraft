@@ -109,15 +109,16 @@ public class FloatingCandleRenderer implements BlockEntityRenderer<FloatingCandl
 
 	/**
 	 * Two crossed flames standing on the wick at (x, y, z), each seen from both sides: two sides lifted off the flame's
-	 * middle ({@link DecorDraw#twoSided}), never one plane drawn twice.
+	 * middle ({@link DecorDraw#twoSidedReadable}), never one plane drawn twice, the back reading the same way round as the
+	 * front.
 	 */
 	private static void flame(VertexConsumer buffer, PoseStack.Pose matrix, float x, float y, float z) {
 		float h = FLAME_WIDTH / 2;
 		float y1 = y + FLAME_HEIGHT;
 		float v = 0.375F;
-		DecorDraw.twoSided(buffer, matrix, new float[][] {{x - h, y, z, 0.5F, v}, {x + h, y, z, 0.75F, v}, {x + h, y1, z, 0.75F, 0.0F},
+		DecorDraw.twoSidedReadable(buffer, matrix, new float[][] {{x - h, y, z, 0.5F, v}, {x + h, y, z, 0.75F, v}, {x + h, y1, z, 0.75F, 0.0F},
 				{x - h, y1, z, 0.5F, 0.0F}}, 0, 0, 1, 0xFFFFFFFF, FULL_BRIGHT, DecorDraw.TWO_SIDED_LIFT);
-		DecorDraw.twoSided(buffer, matrix, new float[][] {{x, y, z + h, 0.5F, v}, {x, y, z - h, 0.75F, v}, {x, y1, z - h, 0.75F, 0.0F},
+		DecorDraw.twoSidedReadable(buffer, matrix, new float[][] {{x, y, z + h, 0.5F, v}, {x, y, z - h, 0.75F, v}, {x, y1, z - h, 0.75F, 0.0F},
 				{x, y1, z + h, 0.5F, 0.0F}}, 1, 0, 0, 0xFFFFFFFF, FULL_BRIGHT, DecorDraw.TWO_SIDED_LIFT);
 	}
 

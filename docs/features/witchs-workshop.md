@@ -194,3 +194,4 @@ Placed by players only; no worldgen. They work all year, and nothing depends on 
 ## Rollout and open questions
 - Open: whether the Enchanted Broom should also sweep into a hopper or a chest when there is no Dustpan.
 - Open: whether wafting should also work for splash or lingering potions poured in, which it can't hold today.
+- **Fixed 5 October 2026 (shared render fixes):** the Horned Skull Cauldron's hollow is built from lined walls (no solid box fills it, no see-through slits round its rim), the candelabra's drip pans, sockets and the Branching Chandelier's arm-tip drops are closed (the drops were written upside down, so they drew inside out), and the Curiosity Cabinet, Moth Display Case, Enchanted Broom and oddity jars no longer show holes where a box left a face out. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

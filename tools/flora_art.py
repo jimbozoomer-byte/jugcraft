@@ -607,6 +607,44 @@ def model(name, elements, display=None):
     return out
 
 
+def opaque_boxes(img):
+    """For model_writer.finish_closed: whether every face of an element reads only fully opaque texels of the Sculpt
+    texture `img` (its "#p"), as art_check O1 judges it. A see-through box (glass, a web) may leave faces out."""
+    alpha = img.convert("RGBA").getchannel("A")
+    w, h = img.size
+
+    def opaque(e):
+        for spec in e.get("faces", {}).values():
+            if spec.get("texture") != "#p" or "uv" not in spec:
+                return False
+            us, vs = (spec["uv"][0] / 16, spec["uv"][2] / 16), (spec["uv"][1] / 16, spec["uv"][3] / 16)
+            shift_u, shift_v = math.floor(min(us) + 1e-6), math.floor(min(vs) + 1e-6)
+            x0 = max(0, int((min(us) - shift_u) * w + 0.01))  # within 0.01 texel of a texel line: on it (art_check)
+            x1 = min(w, max(x0 + 1, int(math.ceil((max(us) - shift_u) * w - 0.01))))
+            y0 = max(0, int((min(vs) - shift_v) * h + 0.01))
+            y1 = min(h, max(y0 + 1, int(math.ceil((max(vs) - shift_v) * h - 0.01))))
+            if x1 > x0 and y1 > y0 and alpha.crop((x0, y0, x1, y1)).getextrema()[0] < 255:
+                return False
+        return True
+    return opaque
+
+
+def closing_writer(write, image_of):
+    """write(path, obj) for a Sculpt set's block and item models that draws every face its boxes leave out where
+    nothing covers it (model_writer.finish_closed; docs/ART_DIRECTION.md, Closed geometry). image_of(name) is the
+    texture a model's "#p" names (jugcraft:block/<name>), or None to write the model as it is."""
+    import model_writer
+
+    def closed(path, obj):
+        ref = obj.get("textures", {}).get("p", "") if isinstance(obj, dict) and obj.get("elements") else ""
+        img = image_of(ref.split("/", 1)[1]) if isinstance(ref, str) and ref.startswith(f"{MOD}:block/") else None
+        if img is not None:
+            obj = dict(obj, elements=list(obj["elements"]))
+            model_writer.finish_closed(obj["elements"], opaque_boxes(img))
+        return write(path, obj)
+    return closed
+
+
 def transformed(elements, scale=1.0, offset=(0, 0, 0), centre=(8, 0, 8)):
     """`elements` scaled about `centre` and moved by `offset` (the turns keep their angles)."""
     out = []

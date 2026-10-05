@@ -11,18 +11,29 @@ Block, item and classic-pack models (assets/jugcraft/models, resourcepacks/alter
   U1  a face's UV (written, or automatic from the element's position) leaves the sprite (0..16): the block atlas's
       neighbouring sprites show through.
   O1  an unrotated opaque box leaves out a face that nothing covers (a hole to look into); faces on the block's
-      0/16 planes are the seams of models cut into several blocks and are not counted. Machines must have none.
+      0/16 planes are the seams of models cut into several blocks and are not counted here (X2 checks them).
+      Machines must have none.
+  I1  an element runs backwards (from > to on an axis): Minecraft draws it inside out, and the separation pass
+      cannot place its faces.
 
 Quad parts (assets/jugcraft/*_quads.json, kinetic_rotors.json, worn_models.json, drawn by client/QuadModel: plain quads
 with RenderTypes.entitySolid, which culls back faces and ignores alpha; "cutout" with entityCutout and "nocull" with
 entityTranslucent, which do not cull in 26.3):
   Z2  same-facing coplanar overlaps drawing different texels that are not buried inside the part, and opposite-facing
       pairs on one plane where either quad does not cull (draw a two-sided plane as two lifted sides instead).
+  N2  the same-facing pairs with their planes 0 < gap < N1_GAP px apart.
   H1  the back of a culled quad is the nearest surface for more than H1_LIMIT of the part's silhouette, from 12
       views: a see-through hole (missing faces).
   A1  an entitySolid quad (or a Java RenderTypes.entitySolid texture) samples texels that are not fully opaque.
   A2  an entityCutout quad (or a Java RenderTypes.entityCutout texture) samples half-transparent texels (cutout draws
       them opaque).
+
+Models drawn together (each multi-block's part models at their footprint offsets, in both styles; the decor parts
+DRAWN_TOGETHER lists; the _lower/_upper and _bottom/_top halves of two-block things; each kinetic rotor with its block's
+_active model):
+  X1  faces of different models share a plane or lie closer than N1_GAP px, facing the same way and drawn differently
+      (for a rotor, unless buried inside a closed shell).
+  X2  a left-out face on a seam between the models is bared: the neighbouring model does not cover it (a slit).
 """
 import json
 import math
@@ -44,6 +55,7 @@ N1_GAP = 0.09          # faces closer than this (px) count as near-coplanar; mod
 PLANE_EPS = 1e-3       # px: faces this close count as one plane
 H1_LIMIT = 0.005       # share of the silhouette
 H1_SCALE = 1.5         # raster pixels per model pixel
+TEXEL_EPS = 0.01       # texels: a UV edge this close to a texel line lies on it
 
 # ------------------------------------------------------------------ allow-lists (every entry with its reason)
 
@@ -56,6 +68,8 @@ _VESSEL = "vessel or lantern: the open face is its mouth (contents drawn inside 
 _DECOR = "decor built from open boxes (left-out faces); to be closed with its own decor art fixes"
 _FLORA = "graveyard flora: thin stems, leaves and petals left open; to be closed with the graveyard flora art fixes"
 _STONE = "graveyard memorial built from open boxes; to be closed with the graveyard art fixes"
+_SOCKETS = ("sculpted sockets: the cranium's front is left out (\"_keep_open\") where the eye sockets look into hollows "
+            "lined by the face round them and closed by a dark plate behind; the rest of the skull is closed")
 O1_ALLOW = {
     "aluminum_cable_arm": _ARM, "copper_cable_arm": _ARM, "silver_cable_arm": _ARM, "data_cable_arm": _ARM,
     "fluid_filter_arm": _ARM, "bronze_fluid_pipe_arm": _ARM, "brass_item_pipe_arm": _ARM,
@@ -71,6 +85,7 @@ O1_ALLOW = {
     "angel_at_the_tomb": _STONE, "bone_pile": _STONE, "cemetery_fence_side": _STONE, "cemetery_gate": _STONE,
     "draped_urn": _STONE, "faithful_hound": _STONE, "family_mausoleum": _STONE, "giant_bone_hand": _STONE,
     "mourning_angel": _STONE, "ossuary_wall": _STONE,
+    "colossal_skull": _SOCKETS,
 }
 # H1: quad parts whose open side is only ever drawn against another part, or decor whose own fixes will close it.
 H1_ALLOW = {
@@ -124,10 +139,11 @@ def _region_alpha(img, uvs):
     us = [u for u, _ in uvs]
     vs = [v for _, v in uvs]
     shift_u, shift_v = math.floor(min(us) + 1e-6), math.floor(min(vs) + 1e-6)
-    x0 = max(0, int((min(us) - shift_u) * w + 1e-6))
-    x1 = min(w, max(x0 + 1, int(math.ceil((max(us) - shift_u) * w - 1e-6))))
-    y0 = max(0, int((min(vs) - shift_v) * h + 1e-6))
-    y1 = min(h, max(y0 + 1, int(math.ceil((max(vs) - shift_v) * h - 1e-6))))
+    # Edges within TEXEL_EPS of a texel line sit on it (quad files round UVs to 5 decimals: 35/64 reads 35.0003).
+    x0 = max(0, int((min(us) - shift_u) * w + TEXEL_EPS))
+    x1 = min(w, max(x0 + 1, int(math.ceil((max(us) - shift_u) * w - TEXEL_EPS))))
+    y0 = max(0, int((min(vs) - shift_v) * h + TEXEL_EPS))
+    y1 = min(h, max(y0 + 1, int(math.ceil((max(vs) - shift_v) * h - TEXEL_EPS))))
     alpha = img[y0:y1, x0:x1, 3]
     if alpha.size == 0:
         return 255, False
@@ -279,7 +295,7 @@ def _pairs(faces, near_gap, opposite=False):
             for b in range(a + 1, len(items)):
                 d2, j = items[b]
                 gap = d2 - d1
-                if gap >= near_gap:
+                if gap >= near_gap - 1e-6:  # a gap of exactly near_gap (in floating point) is far enough
                     break
                 overlap = _clip(poly(i), poly(j))
                 if len(overlap) < 3 or abs(_area(overlap)) < 1e-3:
@@ -475,6 +491,11 @@ def check_block_models(machines):
         seen.add(key)
         count += 1
         name = str(path.relative_to(ROOT / "src" / "main" / "resources"))
+        backwards = [i for i, el in enumerate(elements) if any(el["from"][k] > el["to"][k] + 1e-6 for k in range(3))]
+        if backwards:
+            el = elements[backwards[0]]
+            errors.append(f"I1 {name}: {len(backwards)} element(s) run backwards, e.g. element {backwards[0]} from {el['from']} "
+                          f"to {el['to']}: write the low corner as \"from\"")
         faces, raw = _model_faces(elements, lookup)
         u1 = [f"{f.label[1]} face of element {f.label[0]} reads uv {list(uv)}" for f, uv in zip(faces, raw)
               if min(uv) < -1e-3 or max(uv) > 16 + 1e-3]
@@ -646,8 +667,8 @@ def check_quad_parts():
         where = f"{file}:{name}"
         faces = _part_faces(raw)
         shells = None
-        z2, b2b = [], []
-        for i, j, gap, overlap, u, v, n, d in _pairs(faces, PLANE_EPS * 2, opposite=True):
+        z2, n2, b2b = [], [], []
+        for i, j, gap, overlap, u, v, n, d in _pairs(faces, N1_GAP, opposite=True):
             a, b = faces[i], faces[j]
             if gap is None:
                 if a.kind == "solid" and b.kind == "solid":
@@ -660,7 +681,11 @@ def check_quad_parts():
                 continue
             shells = shells or _Shells(faces)
             if not _buried(shells, overlap, u, v, n, d, (1,)):
-                z2.append((a, b))
+                (z2 if gap == 0 else n2).append((a, b, gap))
+        if n2:
+            errors.append(f"N2 {where}: {len(n2)} pair(s) of differently drawn quads lie closer than {N1_GAP} px (they flicker at a "
+                          f"distance), e.g. {n2[0][0].label} / {n2[0][1].label}, gap {n2[0][2]:.3f}: separate the boxes before "
+                          "exporting (model_writer.separate_boxes)")
         if z2:
             errors.append(f"Z2 {where}: {len(z2)} pair(s) of differently drawn quads share a plane (they flicker), e.g. "
                           f"{z2[0][0].label} / {z2[0][1].label}: separate the boxes before exporting (model_writer.separate_boxes)")
@@ -713,6 +738,177 @@ def check_java_render_types():
     return errors, allowed
 
 
+# ------------------------------------------------------------------ models drawn together
+
+def _assembly(members, roots):
+    """Faces and unrotated boxes of models drawn together: members = [(model path, offset in px)]. Face labels become
+    (member, element, face); boxes are (member, element, from, to, faces present, its faces)."""
+    faces, boxes = [], []
+    for member, (path, offset) in enumerate(members):
+        if path is None or not path.exists():
+            continue
+        elements, lookup, _ = _resolve(json.loads(path.read_text(encoding="utf-8")), roots)
+        if not elements:
+            continue
+        own, _ = _model_faces(elements, lookup)
+        for f in own:
+            f.pts = [tuple(p[k] + offset[k] for k in range(3)) for p in f.pts]
+            f.label = (member,) + tuple(f.label)
+        faces += own
+        by_element = defaultdict(list)
+        for f in own:
+            by_element[f.label[1]].append(f)
+        for index, el in enumerate(elements):
+            if not el.get("rotation"):
+                boxes.append((member, index, [el["from"][k] + offset[k] for k in range(3)],
+                              [el["to"][k] + offset[k] for k in range(3)], set(el.get("faces", {})), by_element[index]))
+    return faces, boxes
+
+
+def _uncovered(rect, covers):
+    """Area of rectangle (a0, a1, b0, b1) that no cover rectangle reaches (exact, by the covers' edges)."""
+    a0, a1, b0, b1 = rect
+    xs, ys, clipped = {a0, a1}, {b0, b1}, []
+    for c0, c1, d0, d1 in covers:
+        c0, c1, d0, d1 = max(c0, a0), min(c1, a1), max(d0, b0), min(d1, b1)
+        if c0 < c1 and d0 < d1:
+            clipped.append((c0, c1, d0, d1))
+            xs |= {c0, c1}
+            ys |= {d0, d1}
+    xs, ys = sorted(xs), sorted(ys)
+    free = 0.0
+    for i in range(len(xs) - 1):
+        for j in range(len(ys) - 1):
+            cx, cy = (xs[i] + xs[i + 1]) / 2, (ys[j] + ys[j + 1]) / 2
+            if not any(c0 <= cx <= c1 and d0 <= cy <= d1 for c0, c1, d0, d1 in clipped):
+                free += (xs[i + 1] - xs[i]) * (ys[j + 1] - ys[j])
+    return free
+
+
+def _cross_errors(name, faces, boxes, cells, shells_for=None, open_allowed=False):
+    """X1 and X2 for one assembly. cells: the block cells (px offsets / 16) the assembly fills, for seams; open_allowed
+    skips X2 (a family O1_ALLOW already lists as built from open boxes)."""
+    errors = []
+    found = []
+    for i, j, gap, overlap, u, v, n, d in _pairs(faces, N1_GAP):
+        a, b = faces[i], faces[j]
+        if a.label[0] == b.label[0] or not _differ(a, b, overlap, u, v, n, d):
+            continue
+        if shells_for is not None:
+            shells = shells_for()
+            if _buried(shells, overlap, u, v, n, d, (1,)):
+                continue
+        found.append((a, b, gap, abs(_area(overlap))))
+    if found:
+        a, b, gap, area = found[0]
+        errors.append(f"X1 {name}: {len(found)} pair(s) of differently drawn faces of models drawn together share a plane or "
+                      f"lie closer than {N1_GAP} px (they flicker), e.g. {a.label} / {b.label}, {area:.2f} px2"
+                      f"{f', gap {gap:.3f}' if gap else ''}: separate them across the models (model_writer.split_model)")
+    holes = []
+    if cells is not None and not open_allowed:
+        for member, index, f, t, present, own in boxes:
+            if not present or len(present) == 6 or any(t[k] - f[k] <= 1e-6 for k in range(3)) or not _opaque(own):
+                continue
+            for face, normal in _NORMAL.items():
+                if face in present:
+                    continue
+                axis, sign = _AXIS[face], sum(normal)
+                plane = t[axis] if sign > 0 else f[axis]
+                if abs(plane / 16 - round(plane / 16)) > 1e-6:
+                    continue  # not a seam: O1 checks it in its own model
+                cell = [math.floor((f[k] + t[k]) / 32) for k in range(3)]
+                cell[axis] = round(plane / 16) - (1 if sign < 0 else 0)
+                if tuple(cell) not in cells:
+                    continue  # the structure's outside, against the world
+                others = [k for k in range(3) if k != axis]
+                probe = plane + sign * 0.001
+                covers = [(F[others[0]], T[others[0]], F[others[1]], T[others[1]]) for m2, i2, F, T, _p, _o in boxes
+                          if (m2, i2) != (member, index) and F[axis] < probe < T[axis]]
+                free = _uncovered((f[others[0]], t[others[0]], f[others[1]], t[others[1]]), covers)
+                if free > 1e-3:
+                    holes.append((member, index, face, free))
+    if holes:
+        member, index, face, free = max(holes, key=lambda h: h[3])
+        errors.append(f"X2 {name}: {len(holes)} left-out face(s) at the seams between its models are bared ({sum(h[3] for h in holes):.2f} "
+                      f"px2 of holes), e.g. the {face} face of element {index} of model {member}, {free:.2f} px2: move the pieces of a "
+                      "cut element together (model_writer.split_model) or draw the face")
+    return errors
+
+
+# Numbered part models of decor drawn whole and shared out among their blocks: (model, its block's offset in px).
+DRAWN_TOGETHER = {
+    "farm_stand": [("farm_stand_0", (0, 0, 0)), ("farm_stand_1", (-16, 0, 0))],
+    "harvest_effigy": [(f"harvest_effigy_{i}", (0, 16 * i, 0)) for i in range(3)],
+}
+
+
+def _halves():
+    """(lower, upper) block models of things two blocks tall, drawn one above the other: _lower/_upper, _bottom/_top."""
+    base = ASSETS / "models" / "block"
+    out = []
+    for upper in sorted(base.glob("*.json")):
+        stem = upper.stem
+        for top, bottom in (("_upper", "_lower"), ("_top", "_bottom")):
+            if stem.endswith(top) or (top + "_") in stem:
+                lower = base / (stem.replace(top, bottom, 1) + ".json")
+                if lower.exists():
+                    out.append((lower, upper))
+    return out
+
+
+def check_assemblies(machines=()):
+    """X1 (shared or near planes between models drawn together) and X2 (bared seams): every multi-block's part models at
+    their footprint offsets (both styles), two-block things' halves, and each kinetic rotor with its block's model. A
+    family O1_ALLOW lists as built from open boxes (never a machine) may leave its seams open too."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from large_machines import FOOTPRINTS
+    errors, count, allowed = [], 0, defaultdict(set)
+    for style, roots in (("", (ASSETS,)), ("classic ", (PACK, ASSETS))):
+        for machine, footprint in FOOTPRINTS.items():
+            members = [(roots[0] / "models" / "block" / f"{machine}_part{i}.json", [c * 16 for c in cell])
+                       for i, cell in enumerate(footprint)]
+            if not all(p.exists() for p, _ in members):
+                continue
+            count += 1
+            faces, boxes = _assembly(members, roots)
+            errors += _cross_errors(f"{style}{machine} (parts)", faces, boxes, {tuple(c) for c in footprint})
+    for name, members in DRAWN_TOGETHER.items():
+        count += 1
+        paths = [(ASSETS / "models" / "block" / f"{model}.json", offset) for model, offset in members]
+        faces, boxes = _assembly(paths, (ASSETS,))
+        errors += _cross_errors(f"{name} (parts)", faces, boxes, {tuple(o // 16 for o in offset) for _m, offset in members})
+    for lower, upper in _halves():
+        count += 1
+        faces, boxes = _assembly([(lower, (0, 0, 0)), (upper, (0, 16, 0))], (ASSETS,))
+        key = None if _family(lower.stem) in machines else _allowed(O1_ALLOW, lower.stem)
+        found = _cross_errors(f"{lower.stem} + {upper.stem}", faces, boxes, {(0, 0, 0), (0, 1, 0)}, open_allowed=bool(key))
+        if key and not found and _cross_errors("", faces, boxes, {(0, 0, 0), (0, 1, 0)}):
+            allowed["O1"].add(key)  # its seams are open as its O1 entry says
+        errors += found
+    rotors = ASSETS / "kinetic_rotors.json"
+    if rotors.exists():
+        for block, raw in json.loads(rotors.read_text(encoding="utf-8")).items():
+            raw = raw.get("quads") if isinstance(raw, dict) else raw
+            path = next((ASSETS / "models" / "block" / f"{block}{suffix}.json" for suffix in ("_active", "_turning", "")
+                         if (ASSETS / "models" / "block" / f"{block}{suffix}.json").exists()), None)
+            if path is None or not raw:
+                continue
+            count += 1
+            faces, _ = _assembly([(path, (0, 0, 0))], (ASSETS,))
+            spin = _part_faces(raw)
+            for f in spin:
+                f.label = ("rotor", f.label)
+            union = faces + spin
+            shells = []
+
+            def shells_for(union=union, shells=shells):
+                if not shells:
+                    shells.append(_Shells(union))
+                return shells[0]
+            errors += _cross_errors(f"{block} rotor + {path.stem}", union, [], None, shells_for)
+    return errors, count, allowed
+
+
 def run(machines=()):
     """All rules: (errors, summary line)."""
     start = time.time()
@@ -724,7 +920,10 @@ def run(machines=()):
     quad_errors, quad_allowed, parts = check_quad_parts()
     java_errors, java_allowed = check_java_render_types()
     errors += quad_errors + java_errors
-    for table in (used, quad_allowed, java_allowed):
+    late = time.time()
+    cross_errors, assemblies, cross_allowed = check_assemblies(machines)
+    errors += cross_errors
+    for table in (used, quad_allowed, java_allowed, cross_allowed):
         for rule, names in table.items():
             allowed[rule] |= names
     stale = [f"{rule} allow-list entry {name} is no longer needed: remove it"
@@ -732,8 +931,8 @@ def run(machines=()):
              for name in table if name not in allowed[rule]]
     errors += stale
     listed = ", ".join(f"{rule} {len(names)}" for rule, names in sorted(allowed.items())) or "none"
-    summary = (f"art check: {models} block/item models ({middle - start:.1f} s) and {parts} quad parts "
-               f"({time.time() - middle:.1f} s); allow-listed: {listed}")
+    summary = (f"art check: {models} block/item models ({middle - start:.1f} s), {parts} quad parts ({late - middle:.1f} s) "
+               f"and {assemblies} models drawn together ({time.time() - late:.1f} s); allow-listed: {listed}")
     return errors, summary
 
 

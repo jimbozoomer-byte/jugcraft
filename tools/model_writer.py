@@ -18,6 +18,7 @@ Model elements are tuples (from, to, texture) or (from, to, texture, options):
   blocks, so keep each one inside a single block's reach.
 """
 import copy
+from collections import defaultdict
 import json
 import math
 from pathlib import Path
@@ -52,14 +53,136 @@ def write(path, obj):
     path.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
 
 
-def finish_elements(elements):
+def finish_elements(elements, strip=True):
     """What every written block or item model gets (docs/ART_DIRECTION.md, Rules for everything): no two differently
     drawn faces share a plane, and no face reads outside its sprite. The list is given private copies of its elements
-    first (generators share face dicts and coordinate lists between elements and models)."""
+    first (generators share face dicts and coordinate lists between elements and models). With strip, the generators'
+    private keys ("_keep_open") are dropped, so they never reach a model file."""
     elements[:] = [copy.deepcopy(e) for e in elements]
     fit_uvs(elements)
     separate_coplanar(elements)
     fit_uvs(elements)
+    if strip:
+        for e in elements:
+            for key in [k for k in e if k.startswith("_")]:
+                del e[key]
+
+
+def finish_closed(elements, opaque=None):
+    """finish_elements for models that must be closed (docs/ART_DIRECTION.md, Closed geometry): every left-out face of
+    an unrotated opaque box that nothing covers is drawn (close_open_faces), before and after the separation pass, since
+    a push can bare a strip of a face left out beside it. opaque(element) picks the boxes that count (a see-through box
+    may leave faces out on purpose); by default every box does. An element's "_keep_open" lists faces it leaves out on
+    purpose (a socket or a vessel's mouth looking into a hollow lined behind it); art_check's O1 allow-list names such
+    models."""
+    elements[:] = [copy.deepcopy(e) for e in elements]
+    for _ in range(6):
+        close_open_faces(elements, opaque)
+        finish_elements(elements, strip=False)
+        if not open_faces(elements, opaque):
+            finish_elements(elements)
+            return elements
+    raise ValueError("finish_closed: closing and separating did not settle")
+
+
+# The model axes a face's texture runs along: (across, down).
+_FACE_UV_AXES = {"north": (0, 1), "south": (0, 1), "east": (2, 1), "west": (2, 1), "up": (0, 2), "down": (0, 2)}
+# Where the closing pass probes just outside a left-out face: the centres of a 4 x 4 and of an 8 x 8 grid.
+_PROBES = sorted({(k + 0.5) / n for n in (4, 8) for k in range(n)})
+
+
+def open_faces(elements, opaque=None):
+    """(index, face) of every left-out face of an unrotated box (not a flat plane, with at least one face drawn) that
+    nothing covers: a point just outside it lies in no other unrotated box. Faces on the block's 0/16 planes are the
+    seams of models cut into blocks and do not count (as in art_check O1); nor do the faces an element's "_keep_open"
+    names."""
+    boxes = [(i, e["from"], e["to"]) for i, e in enumerate(elements) if not e.get("rotation") and "from" in e]
+    out = []
+    for i, f, t in boxes:
+        e = elements[i]
+        present = set(e.get("faces", {}))
+        if not present or len(present) == 6 or any(t[k] - f[k] <= 1e-6 for k in range(3)):
+            continue
+        if opaque is not None and not opaque(e):
+            continue
+        for face, (axis, sign) in _FACE_DIR.items():
+            if face in present or face in e.get("_keep_open", ()):
+                continue
+            plane = t[axis] if sign > 0 else f[axis]
+            if abs(plane) < 1e-6 or abs(plane - 16) < 1e-6:
+                continue
+            others = [k for k in range(3) if k != axis]
+            exposed = False
+            for a in _PROBES:
+                for b in _PROBES:
+                    p = [0.0, 0.0, 0.0]
+                    p[axis] = plane + sign * 0.01
+                    p[others[0]] = f[others[0]] + a * (t[others[0]] - f[others[0]])
+                    p[others[1]] = f[others[1]] + b * (t[others[1]] - f[others[1]])
+                    if not any(all(F[k] - 1e-6 <= p[k] <= T[k] + 1e-6 for k in range(3)) for j, F, T in boxes if j != i):
+                        exposed = True
+                        break
+                if exposed:
+                    break
+            if exposed:
+                out.append((i, face))
+    return out
+
+
+def _face_size(face, frm, to):
+    across, down = _FACE_UV_AXES[face]
+    return abs(to[across] - frm[across]), abs(to[down] - frm[down])
+
+
+def _closing_face(e, face):
+    """A face for left-out `face` of element e, drawn like the element's others: the opposite face's (same size) if it
+    has one, otherwise a window of the face that needs the least stretch, at that face's texel density."""
+    axis = _FACE_DIR[face][0]
+    faces = e["faces"]
+    opposite = next(f for f, (a, si) in _FACE_DIR.items() if a == axis and si == -_FACE_DIR[face][1])
+    if opposite in faces:
+        spec = copy.deepcopy(faces[opposite])
+        spec.pop("cullface", None)
+        return spec  # with no "uv" it reads its texture by position, as the opposite face does
+    width, height = _face_size(face, e["from"], e["to"])
+    best = None
+    for name, spec in faces.items():
+        w, h = _face_size(name, e["from"], e["to"])
+        turned = spec.get("rotation", 0) in (90, 270)
+        if turned:
+            w, h = h, w
+        need = (height, width) if turned else (width, height)
+        if "uv" not in spec:
+            # A texture read by position: the new face reads it by its own position too, at the same density.
+            out = {k: copy.deepcopy(v) for k, v in spec.items() if k not in ("cullface", "rotation")}
+            if best is None or 1.0 < best[0] - 1e-9:
+                best = (1.0, out)
+            continue
+        u0, v0, u1, v1 = spec["uv"]
+        uv, stretch = [u0, v0, u1, v1], 1.0
+        for lo, hi, size, wanted in ((0, 2, w, need[0]), (1, 3, h, need[1])):
+            span = uv[hi] - uv[lo]
+            length = abs(span) / size * wanted if size > 1e-9 else abs(span)
+            if length < abs(span):
+                middle = (uv[lo] + uv[hi]) / 2
+                direction = 1 if span >= 0 else -1
+                uv[lo], uv[hi] = middle - direction * length / 2, middle + direction * length / 2
+            elif length > 1e-9:
+                stretch *= length / max(abs(span), 1e-9)
+        if best is None or stretch < best[0] - 1e-9:
+            out = {k: copy.deepcopy(v) for k, v in spec.items() if k not in ("cullface", "uv")}
+            out["uv"] = [round(v, 4) + 0.0 for v in uv]
+            best = (stretch, out)
+    return best[1]
+
+
+def close_open_faces(elements, opaque=None):
+    """Draws every face open_faces finds left out and uncovered (a hole to look into: block models cull back faces).
+    Returns how many it added."""
+    found = open_faces(elements, opaque)
+    for i, face in found:
+        elements[i]["faces"][face] = _closing_face(elements[i], face)
+    return len(found)
 
 
 # Faces as (axis, sign) of the direction they face.
@@ -80,19 +203,26 @@ def auto_uv(face, frm, to):
 
 
 def fit_uv(uv, clamp=True):
-    """A UV rectangle moved inside the sprite (0..16): shifted by whole multiples of 16 when its span fits, so a tiling
-    texture carries on seamlessly, otherwise clamped (or, with clamp=False, left as it is)."""
+    """A UV rectangle moved inside the sprite (0..16), keeping its size (texel density) wherever the span fits: shifted
+    by whole multiples of 16 when that brings it inside, so a tiling texture carries on seamlessly; a span that
+    straddles a tile edge is shifted by whole tiles and then slid the least distance that brings it inside. A span
+    longer than the sprite reads the whole sprite (or, with clamp=False, is left as it is)."""
     out = list(uv)
     for i, j in ((0, 2), (1, 3)):
         lo, hi = min(out[i], out[j]), max(out[i], out[j])
         if lo >= -1e-6 and hi <= 16 + 1e-6:
             continue
-        shift = -16 * math.floor((lo + 1e-6) / 16)
-        if hi + shift <= 16 + 1e-6:
-            out[i], out[j] = out[i] + shift, out[j] + shift
-        elif clamp:
-            out[i], out[j] = min(16.0, max(0.0, out[i])), min(16.0, max(0.0, out[j]))
-    return [round(v, 4) for v in out]
+        if hi - lo > 16 + 1e-6:
+            if clamp:
+                out[i], out[j] = (0.0, 16.0) if out[i] <= out[j] else (16.0, 0.0)
+            continue
+        shift = -16 * math.floor((lo + 1e-6) / 16)  # the start into 0..16
+        if hi + shift > 16 + 1e-6:
+            over = hi + shift - 16  # slid back that far, or a tile lower and slid forward
+            under = 16 - (lo + shift)
+            shift = shift - over if over <= under else shift - 16 + under
+        out[i], out[j] = out[i] + shift, out[j] + shift
+    return [round(v, 4) + 0.0 for v in out]
 
 
 def fit_uvs(elements):
@@ -297,7 +427,7 @@ def _overlap_corners(axis, plane, lo, hi):
     return corners
 
 
-def separate_coplanar(elements, nudge=COPLANAR_NUDGE, pin_uv=True, pair_filter=None, world=_world):
+def separate_coplanar(elements, nudge=COPLANAR_NUDGE, pin_uv=True, pair_filter=None, world=_world, links=None):
     """Stops z-fighting: where two elements have faces on the same plane, facing the same way, overlapping and
     drawn differently, the GPU flickers between them (most often a band, dial or trim laid flush on a body). The
     smaller face (the detail) is pushed out by `nudge` so it always draws in front; the element stays a closed box.
@@ -308,7 +438,14 @@ def separate_coplanar(elements, nudge=COPLANAR_NUDGE, pin_uv=True, pair_filter=N
     unturned space, so a push survives the turn; faces that lie square to the world after turning (a face along its
     element's rotation axis, as on every gear and handwheel) are compared as turned polygons with everything else.
     pair_filter(first, face1, second, face2), if given, picks the pairs to consider; world(element, point) turns a
-    point the way the model's consumer does (Minecraft's block model rotations by default)."""
+    point the way the model's consumer does (Minecraft's block model rotations by default). links maps id(element) to
+    the elements that move with it (the pieces of one element cut into part models): a push moves each of them whose
+    face lies on the same plane by as much, so no step opens at the seams between them."""
+    for index, e in enumerate(elements):
+        backwards = [axis for axis in range(3) if e["from"][axis] > e["to"][axis] + 1e-9]
+        if backwards:
+            raise ValueError(f"element {index} runs backwards on axis {'/'.join('xyz'[a] for a in backwards)} (from {e['from']} "
+                             f"to {e['to']}): write its low corner as \"from\" (Minecraft draws such a box inside out)")
     live = [e for e in elements if e.get("faces")]
     reach = min(MIN_GAP, nudge)
 
@@ -319,8 +456,19 @@ def separate_coplanar(elements, nudge=COPLANAR_NUDGE, pin_uv=True, pair_filter=N
         if _same_look(first, face1, second, face2, overlap, frame):
             return False
         mover, face = front
-        _push(mover, face, nudge if gap <= 1e-9 else round(nudge - gap, 4), pin_uv)
-        pushed.add((id(mover), face))
+        amount = nudge if gap <= 1e-9 else round(nudge - gap, 4)
+        together = [mover]
+        if links:
+            axis, sign = _FACE_DIR[face]
+
+            def plane(e):
+                return world(e, list(e["to"] if sign > 0 else e["from"]))[axis]
+            here = plane(mover)
+            together += [e for e in links.get(id(mover), ()) if e is not mover and face in e.get("faces", {})
+                         and (id(e), face) not in pushed and abs(plane(e) - here) < 1e-6]
+        for e in together:
+            _push(e, face, amount, pin_uv)
+            pushed.add((id(e), face))
         return True
 
     for _ in range(16):  # A push can line a face up with a third element (a stack of reliefs); passes settle it.
@@ -557,24 +705,37 @@ def separated_bounds(elements, footprint=None):
     return out
 
 
-def separate_parts(parts, footprint):
+def separate_parts(parts, footprint, sources=None):
     """After slice_model: separate_coplanar over every part model of a multi-block at once, each in its block of the
     structure, comparing the UVs each part's faces really have (part-local, fitted into the sprite). It settles what
     the pass before slicing cannot see: pushes that reach across a part boundary, and pieces whose UVs differ only
-    because they sit in different part files. Works in place on the parts' element dicts."""
-    union, offsets = [], {}
+    because they sit in different part files. sources (from slice_model) names the element each piece was cut from:
+    the pieces of one element move together, so no step opens at the seam between two parts (whose cut faces are
+    left out). Works in place on the parts' element dicts."""
+    union, offsets, pieces = [], {}, defaultdict(list)
     for index, part in enumerate(parts):
         part[:] = [copy.deepcopy(e) for e in part]
         fit_uvs(part)
-        for e in part:
+        for position, e in enumerate(part):
             offsets[id(e)] = [footprint[index][k] * 16 for k in range(3)]
             union.append(e)
+            if sources is not None and sources[index][position] is not None:
+                pieces[sources[index][position]].append(e)
+    links = {id(e): group for group in pieces.values() if len(group) > 1 for e in group}
 
     def world(e, point):
         q = _world(e, point)
         return [q[k] + offsets[id(e)][k] for k in range(3)]
-    separate_coplanar(union, world=world)
+    separate_coplanar(union, world=world, links=links)
     return parts
+
+
+def split_model(name, elements, footprint):
+    """A structure-space model (tuples) cut into its part models with no shared planes inside or across them:
+    separated_bounds before the cut, slice_model, then separate_parts with the pieces of each cut element linked."""
+    sources = []
+    parts = slice_model(name, elements, footprint, separated_bounds(elements, footprint), sources=sources)
+    return separate_parts(parts, footprint, sources)
 
 
 def _placement(frm, to, rotation, footprint):
@@ -600,11 +761,14 @@ def _placement(frm, to, rotation, footprint):
     return "whole", index, inside
 
 
-def slice_model(name, elements, footprint, moved=None):
+def slice_model(name, elements, footprint, moved=None, sources=None):
     """Cuts one structure-space model into per-part models, like Immersive Engineering's split models. moved (from
     separated_bounds) gives elements' pushed bounds: the cut follows the original bounds, then each piece's outer faces
-    take the pushed planes."""
+    take the pushed planes. A list given as sources is filled, per part, with the index of the element each piece was
+    cut from (None for an element kept whole), for separate_parts."""
     parts = [[] for _ in footprint]
+    if sources is not None:
+        sources[:] = [[] for _ in footprint]
     for number, item in enumerate(elements):
         frm, to, texture, options = unpack(item)
         new_frm, new_to = moved[number] if moved and moved[number] else (frm, to)
@@ -629,6 +793,8 @@ def slice_model(name, elements, footprint, moved=None):
                     local_a = [a[axis] - low[axis] for axis in range(3)]
                     local_b = [b[axis] - low[axis] for axis in range(3)]
                     parts[index].append(element(local_a, local_b, texture, skip=skip))
+                    if sources is not None:
+                        sources[index].append(number)
             continue
         # Reaches outside the footprint, or is rotated: keep it whole on the part nearest its center.
         low = [footprint[index][axis] * 16 for axis in range(3)]
@@ -640,6 +806,8 @@ def slice_model(name, elements, footprint, moved=None):
         if rotation:
             local_rotation = (rotation[0], rotation[1], [rotation[2][axis] - low[axis] for axis in range(3)], *rotation[3:])
         parts[index].append(element(local_a, local_b, texture, uv=not inside, rotation=local_rotation))
+        if sources is not None:
+            sources[index].append(None)
     return parts
 
 
@@ -749,8 +917,7 @@ def write_classic(root, machines, parts, fluid_blocks):
             textures = {name: rid(f"block/{name}") for name in texture_names(MODELS[machine])}
             textures["front"] = rid(f"block/{front}")
             textures["particle"] = rid("block/machine_side")
-            moved = separated_bounds(MODELS[machine], FOOTPRINTS[machine])
-            sliced = separate_parts(slice_model(machine, MODELS[machine], FOOTPRINTS[machine], moved), FOOTPRINTS[machine])
+            sliced = split_model(machine, MODELS[machine], FOOTPRINTS[machine])
             for index, elements in enumerate(sliced):
                 out.model(f"{machine}_part{index}", {"ambientocclusion": False, "textures": textures, "elements": elements})
                 if info["lit"]:
@@ -810,8 +977,7 @@ def write_steampunk(root, machines, parts, fluid_blocks):
         textures = textures_for(elements)
         lit = info["lit"] and bool(glow_override(elements))
         if machine in FOOTPRINTS:
-            moved = separated_bounds(elements, FOOTPRINTS[machine])
-            sliced = separate_parts(slice_model(machine, elements, FOOTPRINTS[machine], moved), FOOTPRINTS[machine])
+            sliced = split_model(machine, elements, FOOTPRINTS[machine])
             for index, part_elements in enumerate(sliced):
                 out.model(f"{machine}_part{index}", {"ambientocclusion": False, "textures": textures,
                                                      "elements": part_elements})

@@ -8,11 +8,13 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
-### Fixed: see-through and flickering machines, guns, landship, walker, zeppelin, observation balloon (art core)
+### Fixed: see-through and flickering machines, guns, landship, walker, zeppelin, observation balloon, Witching Season props (art core)
 - **Closed from every side:** the grand mortar and the other tower guns, the siege mortar, howitzer and flak gun, the landship, the Diesel Walker, the zeppelin, the observation balloon's envelope and the searchlight no longer show the world through gaps in their barrels, rings, decks and hulls. The exporter drew whole 16-pixel patches of a face away wherever a smaller part sat on part of it; it now removes only what is really covered.
 - **No more flashing textures:** collars, muzzle rings, hazard rims, caps, gear teeth, handwheels, the joins between a big machine's blocks and spinning shafts no longer flicker, close up or far away. Every exported model now keeps differently drawn faces at least 0.1 pixel apart (was 0.02, which failed beyond about 30 blocks), including turned parts.
-- **Two-sided sheets** (string lights and pennants, floating-candle, Aura Candle, bonfire and witch-fire flames, grapple and zipline lines, the drone depot's doors, and the quad-drawn decorations) no longer fight themselves.
-- **No strips of other textures** on faces that reached past their own (trebuchets, the blueprint table, dead trees, the console desk, weathervanes and others).
+- **Two-sided sheets** (string lights, pennants and garland leaves, floating-candle, Aura Candle, bonfire, witch-fire and Harvest Effigy flames, grapple and zipline lines, the drone depot's doors, the blueprint placement ghost and the quad-drawn decorations) no longer fight themselves. The floating candles' flames read the same way round from behind again.
+- **No strips of other textures** on faces that reached past their own (trebuchets, the blueprint table, dead trees, the console desk, weathervanes and others); such faces keep their texture's density, so the drone depot terminal and console desk screens show their screens.
+- **Witching Season props closed:** the Coffin Wardrobe, Curiosity Cabinet, oddity jars, Iron-Bound Coffin, sarcophagi, candelabra, Bone Throne, Ribcage Bookcase, Grandfather Clock and the rest no longer show holes where a box left a face out; the Horned Skull Cauldron's hollow is lined walls; the Colossal Skull keeps its open sockets with its front closed beside them; the Farm Stand, Harvest Effigy and tall flowers no longer flicker where their blocks meet.
+- **No slits at spinning parts:** the hand crank's axle, the solar tracker's pivot and the heliostat's shaft meet their still parts with no gap.
 - A new check, `tools/art_check.py` (run by `check_mod_data.py`), keeps it that way. Rules: [ART_DIRECTION.md](docs/ART_DIRECTION.md#rules-for-everything). Record: [see-through-and-flicker-fixes.md](docs/features/see-through-and-flicker-fixes.md).
 
 ### Cute, clean creature decorations: batches 15 to 20 repainted (#191)

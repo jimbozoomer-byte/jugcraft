@@ -156,3 +156,4 @@ Placed by players only; no worldgen. They work all year, and nothing depends on 
 ## Rollout and open questions
 - Open: whether a locked coffin should also resist breaking by anyone but its keyholder (vanilla's locks don't, and land claims already do).
 - Open: whether the Gargoyle Sentinel should also be able to watch for players (a door that opens for visitors), as a setting.
+- **Fixed 5 October 2026 (shared render fixes):** the Coffin Wardrobe, Iron-Bound Coffin, sarcophagi, Bone Throne, Ribcage Bookcase, Skull Footstool, Vertebra Floor Lamp and Colossal Rib no longer show holes where a box left a face out; the Colossal Skull keeps its open sockets but its front is closed beside them; the Gargoyle Sentinel's eyes are fully opaque (cut out, they drew solid anyway). Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

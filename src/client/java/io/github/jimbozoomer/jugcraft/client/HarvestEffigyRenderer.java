@@ -149,7 +149,10 @@ public class HarvestEffigyRenderer implements BlockEntityRenderer<HarvestEffigyB
 		pose.popPose();
 	}
 
-	/** One sheet of flame standing at ({@code x}, {@code y}, {@code z}), across {@code turn} degrees, seen from both sides. */
+	/**
+	 * One sheet of flame standing at ({@code x}, {@code y}, {@code z}), across {@code turn} degrees, seen from both sides (each
+	 * side lifted off the middle, never one plane twice).
+	 */
 	private static void sheet(VertexConsumer buffer, PoseStack.Pose matrix, float x, float y, float z, float width, float height, float sway,
 			float turn) {
 		double angle = Math.toRadians(turn);
@@ -157,11 +160,10 @@ public class HarvestEffigyRenderer implements BlockEntityRenderer<HarvestEffigyB
 		float dz = (float) (Math.sin(angle) * width / 2);
 		float[][] front = {{x - dx, y, z - dz, 0, 1}, {x - dx + sway, y + height, z - dz, 0, 0}, {x + dx + sway, y + height, z + dz, 1, 0},
 				{x + dx, y, z + dz, 1, 1}};
-		float[][] back = {front[3], front[2], front[1], front[0]};
 		float nx = (float) -Math.sin(angle);
 		float nz = (float) Math.cos(angle);
-		DecorDraw.quad(buffer, matrix, front, nx, 0, nz, 0xFFFFFFFF, LightCoordsUtil.FULL_BRIGHT);
-		DecorDraw.quad(buffer, matrix, back, -nx, 0, -nz, 0xFFFFFFFF, LightCoordsUtil.FULL_BRIGHT);
+		// Each side lifted off the middle, never one plane drawn twice (the flame's type does not cull).
+		DecorDraw.twoSided(buffer, matrix, front, nx, 0, nz, 0xFFFFFFFF, LightCoordsUtil.FULL_BRIGHT, DecorDraw.TWO_SIDED_LIFT);
 	}
 
 	/**
@@ -176,11 +178,9 @@ public class HarvestEffigyRenderer implements BlockEntityRenderer<HarvestEffigyB
 			float dz = (float) (Math.sin(angle) * width / 2);
 			float[][] front = {{x - dx, y, z - dz, 0, 1}, {x - dx + sway, y + height, z - dz, 0, 0}, {x + dx + sway, y + height, z + dz, 1, 0},
 					{x + dx, y, z + dz, 1, 1}};
-			float[][] back = {front[3], front[2], front[1], front[0]};
 			float nx = (float) -Math.sin(angle);
 			float nz = (float) Math.cos(angle);
-			DecorDraw.quad(buffer, matrix, front, nx, 0, nz, 0xFFFFFFFF, LightCoordsUtil.FULL_BRIGHT);
-			DecorDraw.quad(buffer, matrix, back, -nx, 0, -nz, 0xFFFFFFFF, LightCoordsUtil.FULL_BRIGHT);
+			DecorDraw.twoSided(buffer, matrix, front, nx, 0, nz, 0xFFFFFFFF, LightCoordsUtil.FULL_BRIGHT, DecorDraw.TWO_SIDED_LIFT);
 		}
 	}
 

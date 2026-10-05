@@ -814,9 +814,7 @@ def powered_tools(lang):
         elements = tool_models.BLOCKS[block]
         textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
         textures["particle"] = rid("block/dp_olive")
-        halves = model_writer.separate_parts(model_writer.slice_model(
-            block, elements, [(0, 0, 0), (0, 1, 0)], model_writer.separated_bounds(elements, [(0, 0, 0), (0, 1, 0)])),
-            [(0, 0, 0), (0, 1, 0)])
+        halves = model_writer.split_model(block, elements, [(0, 0, 0), (0, 1, 0)])
         lit_from, lit_to = tool_models.LIT[block]
         for half, part in zip(("lower", "upper"), halves):
             write(ASSETS / "models" / "block" / f"{block}_{half}.json",
@@ -901,9 +899,7 @@ def pixel_hollows_assets(lang):
     elements = retro_models.arcade_cabinet()
     textures = {name: rid(f"block/{name}") for name in model_writer.texture_names(elements)}
     textures["particle"] = rid("block/rt_side_art")
-    halves = model_writer.separate_parts(model_writer.slice_model(
-        ph.CABINET, elements, [(0, 0, 0), (0, 1, 0)], model_writer.separated_bounds(elements, [(0, 0, 0), (0, 1, 0)])),
-        [(0, 0, 0), (0, 1, 0)])
+    halves = model_writer.split_model(ph.CABINET, elements, [(0, 0, 0), (0, 1, 0)])
     for half, part in zip(("lower", "upper"), halves):
         write(ASSETS / "models" / "block" / f"{ph.CABINET}_{half}.json",
               {"parent": "minecraft:block/block", "textures": textures, "elements": part})

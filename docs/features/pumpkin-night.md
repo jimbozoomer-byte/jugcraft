@@ -201,3 +201,4 @@ Placed by players only, apart from the heirlooms' wild patches. They work all ye
 - Open: whether the Farm Stand should take items as payment too (barter), or stay Jugs-only.
 - Open: whether Harvest Cheer should need a minimum number of players near.
 - Open: whether the choir should offer a choice of vowel per pumpkin rather than picking one at random each note.
+- **Fixed 5 October 2026 (shared render fixes):** the Farm Stand and the Harvest Effigy are separated whole before they are shared out among their blocks, so no face of one block's part fights one of the next (the effigy's shoulders flickered), and the stall's counter, apron and crate shelf are closed at their ends and undersides; the effigy's blaze and the garlands' leaves are drawn as two lifted sides, never one plane twice. Record: [see-through-and-flicker-fixes.md](see-through-and-flicker-fixes.md).

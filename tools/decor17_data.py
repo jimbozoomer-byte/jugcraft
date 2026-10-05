@@ -582,10 +582,16 @@ def horned_skull_cauldron():
     horns = sc.piece("horn", 10, 26, ca.bands(ca.HORN, 3, period=4, width=1))
     bolt = sc.piece("bolt", 4, 4, d16d.bolt_head())
     # A rounded belly (a cross of two boxes with a third turned between them), a narrower neck whose walls are hollow
-    # above it, and a flared lip; the inside's floor is at 8.5.
+    # above it, and a flared lip; the inside's floor is at 8.5. The cross is solid up to the floor and a ring of walls
+    # round the hollow above it (lined inside), so no box fills the hollow and every face that shows is drawn.
     belly = {s: outer for s in SIDES4}
-    els = [cube((1.4, 3.6, 3.4), (14.6, 9.8, 12.6), belly),
-           cube((3.4, 3.6, 1.4), (12.6, 9.8, 14.6), belly),
+    els = [cube((1.4, 3.6, 3.4), (14.6, 8.0, 12.6), belly),
+           cube((3.4, 3.6, 1.4), (12.6, 8.0, 14.6), belly),
+           cube((1.4, 8.0, 3.3), (3.3, 9.8, 12.7), {**belly, "east": inner, "up": outer}),
+           cube((12.7, 8.0, 3.3), (14.6, 9.8, 12.7), {**belly, "west": inner, "up": outer}),
+           cube((3.3, 8.0, 1.4), (12.7, 9.8, 3.3), {**belly, "south": inner, "up": outer}),
+           cube((3.3, 8.0, 12.7), (12.7, 9.8, 14.6), {**belly, "north": inner, "up": outer}),
+           # The turned box rounds the belly's corners; inside the hollow none of its faces show (it has no top).
            cube((3.2, 3.6, 3.2), (12.8, 9.8, 12.8), belly, rotation((8, 6.7, 8), "y", 45)),
            cube((2.6, 2.4, 2.6), (13.4, 3.6, 13.4), {**{s: outer for s in SIDES4}, "down": floor}),
            cube((2.2, 9.8, 2.2), (13.8, 12.6, 3.3), {"north": outer, "south": inner, "east": outer, "west": outer}),
@@ -599,7 +605,11 @@ def horned_skull_cauldron():
            cube((13.5, 12.6, 2.5), (14.5, 13.6, 13.5), {"east": rim, "west": rim, "up": rim, "down": rim}),
            cube((1.3, 5.0, 3.3), (14.7, 6.0, 12.7), {s: bands for s in SIDES4}),
            cube((3.3, 5.0, 1.3), (12.7, 6.0, 14.7), {s: bands for s in SIDES4}),
-           cube((2.1, 9.8, 2.1), (13.9, 10.6, 13.9), {s: bands for s in SIDES4}),
+           # The neck's band: a ring a tenth of a pixel proud of the neck's walls, not a slab across the hollow.
+           cube((2.1, 9.8, 2.1), (13.9, 10.6, 2.3), {s: bands for s in SIDES4}),
+           cube((2.1, 9.8, 13.7), (13.9, 10.6, 13.9), {s: bands for s in SIDES4}),
+           cube((2.1, 9.8, 2.3), (2.3, 10.6, 13.7), {s: bands for s in SIDES4}),
+           cube((13.7, 9.8, 2.3), (13.9, 10.6, 13.7), {s: bands for s in SIDES4}),
            ]
     # Four feet, each ending in three iron claws.
     for x, z in ((2.2, 2.2), (11.8, 2.2), (2.2, 11.8), (11.8, 11.8)):
@@ -782,7 +792,8 @@ def candelabra():
     for x, y, z, _ in d17.CANDELABRA["branching_chandelier"]["candles"]:
         hanging += cup(x, y, z, 2.4)
     for x, z in ((-10.0, 8.0), (26.0, 8.0), (8.0, -10.0), (8.0, 26.0)):
-        hanging.append(cube((x - 0.5, -6.4, z - 0.5), (x + 0.5, -7.6, z + 0.5), {s: knop for s in SIDES4}))
+        # A drop under each long arm's tip (from its low corner up: a box written top-down draws inside out).
+        hanging.append(cube((x - 0.5, -7.6, z - 0.5), (x + 0.5, -6.4, z + 0.5), {**{s: knop for s in SIDES4}, "down": knop}))
     sc.models["branching_chandelier"] = hanging
     return sc
 
@@ -1295,7 +1306,17 @@ def decor17_quads():
 
 # ---------------------------------------------------------------- files
 
+def _image_of(name):
+    """The Sculpt texture a model's "#p" (block/<name>) is drawn from, for fa.closing_writer; None for another."""
+    try:
+        return build(name).atlas.img
+    except KeyError:
+        return None
+
+
 def assets(root, write, lang):
+    # Every block and item model is closed: no face a box leaves out shows a hole (docs/ART_DIRECTION.md).
+    write = fa.closing_writer(write, _image_of)
     models = root / "models" / "block"
     states = root / "blockstates"
     items = root / "models" / "item"
