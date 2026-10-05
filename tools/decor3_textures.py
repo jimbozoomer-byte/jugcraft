@@ -1,12 +1,14 @@
 """Original textures for the third batch of Halloween decorations, the graveyard (requires Pillow): wrought iron, the
 crypt set, the Grave Mound and its zombie hand, the Mourning Angel and the Pop-Up Skeleton.
 
-Painted in the clean, cartoon style (docs/ART_DIRECTION.md, "Creatures and faces: cute and clean"): flat tones, lit
-and shaded edges, features in fixed places, no random speckle.
+Materials are painted in the manner of the vanilla blocks (tools/block_style.py): stone as stone bricks, earth as dirt,
+wood as planks, cloth as wool; a short palette used mostly in its mid-tones, variation in small clumps rather than
+per-pixel static. Faces stay simple and cute.
 
 Called from crop_textures.crop_textures(). Every pixel is drawn here by code; no Mojang texture is read, traced or
 recoloured. Block and item textures are 16x16 and opaque.
 """
+import block_style as bs
 from crop_textures import Canvas, rgb, outline
 from halloween_textures import shade
 
@@ -29,42 +31,35 @@ SOCKET = rgb("1a1612")
 
 
 def flat(c, x0, y0, x1, y1, palette, seed=0, weights=None):
-    """Fills x0..x1, y0..y1 flat in the palette's commonest tone (by `weights`; the middle one by default)."""
-    w = weights or [1] * len(palette)
-    k = max(range(len(palette)), key=lambda i: (w[i], -abs(i - (len(palette) - 1) / 2)))
+    """Fills x0..x1, y0..y1 with a soft surface of the palette (darkest first) in small clumps, in the manner of the
+    vanilla blocks (tools/block_style.py); `weights` are kept for callers."""
+    g = bs.grain(16, 16, seed, 2.0, 5.0)
+    palette = sorted(palette, key=lambda c: 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2])
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
-            c.px(x, y, palette[k])
+            c.px(x, y, bs.tone(g(x, y), palette, spread=0.7))
 
 
 def wrought_iron():
-    """Wrought iron painted black: flat, a sheen down every fourth column, two neat spots of rust."""
+    """Wrought iron painted black, in soft clumps with a sheen down every fourth column and two small spots of rust."""
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, IRON[3] if x % 4 == 0 else IRON[1])
+    flat(c, 0, 0, 15, 15, [rgb("141418")] + IRON, 9601)
+    for x in range(0, 16, 4):
+        for y in range(16):
+            if y % 6:
+                c.px(x, y, IRON[3])
     c.px(6, 4, RUST)
     c.px(13, 11, RUST)
     return c.img
 
 
 def crypt_bricks(seed, lichen=True):
-    """Dark stone bricks: rows four pixels tall, offset every other row, each brick flat in one of two tones and lit
-    along its top, with a neat crack and a few tufts of lichen."""
+    """Weathered dark stone bricks in the manner of vanilla stone bricks: rows four pixels tall, two bricks across,
+    offset every other row, each a soft-grained stone lit along its top, in dark joints, with a little lichen."""
     c = Canvas()
-    for y in range(16):
-        row = y // 4
-        for x in range(16):
-            u = x + (4 if row % 2 else 0)
-            joint = y % 4 == 3 or u % 8 == 7
-            brick = u // 8 + row
-            c.px(x, y, MORTAR if joint else CRYPT[3] if y % 4 == 0 else CRYPT[2] if brick % 2 else CRYPT[1])
-    for i, (x, y) in enumerate(((9, 5), (10, 6), (11, 6))):
-        c.px(x, y, MORTAR)
+    bs.bricks([shade(CRYPT[0], 0.9)] + CRYPT + [shade(CRYPT[3], 1.08)], seed, rows=4, cols=2, mortar=MORTAR)(c)
     if lichen:
-        for x, y in ((3, 9), (12, 2), (6, 14)):
-            c.px(x, y, LICHEN[1])
-            c.px(x + 1, y, LICHEN[0])
+        bs.moss_over(c, LICHEN, seed + 1, amount=0.06)
     return c.img
 
 
@@ -144,11 +139,9 @@ def crypt_door_item():
 # ---------------------------------------------------------------- the grave mound
 
 def mound_top():
-    """Freshly turned earth in flat rows of clods, a few neat blades of grass and fallen leaves."""
+    """Freshly turned earth in the manner of vanilla dirt, with a few blades of grass and fallen leaves."""
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, SOIL[3] if y % 4 == 0 and x % 4 != 3 else SOIL[0] if y % 4 == 3 else SOIL[2] if (x // 4 + y // 4) % 2 else SOIL[1])
+    bs.dirt([rgb("261a10")] + SOIL, 9701, pebbles=[rgb("6a6058"), rgb("8a8078")], count=2)(c)
     for x, y in ((2, 5), (9, 2), (13, 10), (5, 13), (11, 6)):
         c.px(x, y, GRASS[2])
         c.px(x, y - 1, GRASS[1])
@@ -159,13 +152,9 @@ def mound_top():
 
 
 def mound_side():
-    """The mound's side: flat earth in even layers, with two pebbles."""
+    """The mound's side: earth in the manner of vanilla dirt, with a couple of pebbles."""
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, SOIL[0] if y % 5 == 4 else SOIL[2] if y % 5 == 0 else SOIL[1])
-    c.px(4, 7, rgb("6a6058"))
-    c.px(11, 12, rgb("6a6058"))
+    bs.dirt([rgb("261a10")] + SOIL[:3] + [rgb("4f3a26")], 9711, pebbles=[rgb("6a6058"), rgb("8a8078")], count=3)(c)
     return c.img
 
 
@@ -246,11 +235,9 @@ def angel_item():
 # ---------------------------------------------------------------- the pop-up skeleton
 
 def crate():
-    """Weathered planks with dark gaps between them and a nail at each end."""
+    """Weathered planks in the manner of vanilla planks, with a nail at each end of three boards."""
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, PLANK[0] if y % 5 == 4 else PLANK[3] if y % 5 == 0 else PLANK[2] if (y // 5) % 2 else PLANK[1])
+    bs.planks([rgb("3a2c20")] + PLANK, 9901, boards=3)(c)
     for y in (1, 6, 11):
         for x in (1, 14):
             c.px(x, y, IRON[3])

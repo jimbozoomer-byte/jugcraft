@@ -10,16 +10,19 @@ and crusted with lichen. Block faces take their texture by position, so the bott
 ground: each stage has an `_upper` form, without the band of ground moss, for the parts of a monument above its first
 block.
 
-Everything is painted in the clean, cartoon style (docs/ART_DIRECTION.md, "Creatures and faces: cute and clean"): flat
-tones, features in fixed places and regular patterns, no random speckle, and every pattern repeats every 16 pixels so
-neighbouring blocks join up.
+Every material is painted in the manner of the vanilla blocks (tools/block_style.py): stone as stone, cobblestone or
+gravel, oak as planks, moss as on mossy cobblestone; a short palette used mostly in its mid-tones, variation in small
+clumps rather than per-pixel static, and every pattern tiling so neighbouring blocks join up.
 
-Called from crop_textures.crop_textures(). Every pixel is drawn here by code; no Mojang texture is read, traced or
-recoloured.
+Called from crop_textures.crop_textures(). Every pixel is drawn here by code, from fixed seeds; no Mojang texture is
+read, traced or recoloured.
 """
 import math
+import random
 
 from PIL import Image
+
+import block_style as bs
 
 from crop_textures import Canvas, rgb, outline
 from halloween_textures import shade
@@ -34,100 +37,75 @@ STONES = {
     "sandstone": ([rgb("b99e6c"), rgb("c7ad7a"), rgb("d3ba88"), rgb("dcc596")], [rgb("a88c5c"), rgb("e4d0a6")], 7104),
 }
 MOSS = [rgb("2f4a1c"), rgb("3e5e22"), rgb("4f7429"), rgb("63883a"), rgb("7a9c48")]
-LICHEN = {"marble": [rgb("b8c08a"), rgb("a6b07a")], "slate": [rgb("a9b39a"), rgb("c6ccb4")],
+LICHEN = {"marble": [rgb("b8c08a"), rgb("a6b07a")], "slate": [rgb("7f8a72"), rgb("939e86")],
           "granite": [rgb("d9a548"), rgb("c88a3a")], "sandstone": [rgb("cf8f3a"), rgb("b9c07e")]}
 GRIME = rgb("3a3631")
 IVY = [rgb("1f3a14"), rgb("2b4d1a"), rgb("3a6322"), rgb("4c7a2c"), rgb("67953a")]
 
 
-# Fixed places (x, y) for the speckles and features a stone carries, so every block of a stone matches its neighbours.
-FLECKS = [(2, 1), (9, 3), (13, 8), (5, 7), (11, 12), (1, 11), (7, 14), (14, 1), (4, 4), (10, 9)]
-
-
-def _wave(x, shift, amplitude=1.0):
-    """A gentle wave across the texture, repeating every 16 pixels so neighbouring blocks join up."""
-    return amplitude * math.sin(2 * math.pi * (x + shift) / 16.0)
+def _ramp(stone):
+    """A stone's six tones, darkest first: its four base colours with a darker and a lighter one beyond them."""
+    base = STONES[stone][0]
+    return [shade(base[0], 0.88)] + list(base) + [shade(base[3], 1.05)]
 
 
 def _base(stone, seed_extra=0, smooth=False):
-    """The bare stone of `stone`, flat in its middle tone: marble with one smooth grey vein, slate in even laminations,
-    granite with neat flecks of black mica, pink feldspar and white quartz in a fixed pattern, sandstone in even
-    bedding planes."""
+    """The bare stone of `stone`, in the manner of the vanilla stones (tools/block_style.py): marble a pale stone of soft
+    clumps with a grey vein meandering across, slate dark and fine-grained in broken laminations, granite speckled with
+    black mica, pink feldspar and white quartz, sandstone in soft bedding bands."""
     base, accent, seed = STONES[stone]
-    shift = (seed + seed_extra) % 16
+    seed += seed_extra
+    ramp = _ramp(stone)
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            colour = base[2]
-            if stone == "slate" and y % 4 == 0:
-                colour = base[1]
-            elif stone == "slate" and y % 4 == 1:
-                colour = base[3]
-            if stone == "sandstone" and y % 5 == 2:
-                colour = base[1]
-            elif stone == "sandstone" and y % 5 == 3:
-                colour = base[3]
-            c.px(x, y, colour)
+    if stone == "granite":
+        bs.speckled(ramp, accent, seed, density=0.06 if smooth else 0.09)(c)
+        return c
+    bs.stone(ramp, seed, cracks=0 if stone != "slate" else 2, spread=0.55 if smooth else 0.75)(c)
+    g = bs.grain(16, 16, seed + 13, 2.0, 5.0)
     if stone == "marble":
+        phase = seed % 16
         for y in range(16):
-            x = int(round(8 + _wave(y, shift, 3.0)))
-            c.px(x % 16, y, accent[1])
-            if not smooth:
-                c.px((x + 1) % 16, y, base[3])
-    elif stone == "granite":
-        for i, (fx, fy) in enumerate(FLECKS[: 10 if not smooth else 6]):
-            x, y = (fx + shift) % 16, fy
-            c.px(x, y, accent[i % 3])
-            c.px((x + 1) % 16, y, accent[i % 3])
+            x = int(round(8 + 3.0 * math.sin(2 * math.pi * (y + phase) / 16.0) + 1.5 * math.sin(2 * math.pi * (y + phase) / 8.0)))
+            if g(x, y) > 0.3:
+                c.px(x % 16, y, accent[1] if g(x, y) < 0.65 else accent[0])
+    elif stone == "slate":
+        for y in range(0, 16, 4):
+            for x in range(16):
+                if g(x, y) > 0.38:
+                    c.px(x, y, ramp[1])
+    elif stone == "sandstone":
+        for y in range(16):
+            for x in range(16):
+                if y % 5 == 2 and g(x, y) > 0.3:
+                    c.px(x, y, ramp[1])
+                elif y % 5 == 3 and g(x, y) > 0.55:
+                    c.px(x, y, ramp[4])
     return c
 
 
 def _weather(c, stone, stage, seed, upper=False):
-    """Weathers the canvas to `stage`, in neat shapes: duller stone; grime run down from the top in a few clean streaks;
-    a pale chip; lichen in round rosettes and moss in soft cushions; and moss from the ground up in a gentle wave."""
+    """Weathers the canvas to `stage`, in the manner of vanilla mossy cobblestone: duller stone, soft grime washed down
+    from the top, a pale chip or two; then moss in irregular clumps (and from the ground up, unless this is an upper
+    part) and small rosettes of lichen."""
     if stage == 0:
         return c
-    shift = seed % 16
     dull = (1.0, 0.95, 0.9, 0.86)[stage]
     for y in range(16):
         for x in range(16):
             pixel = c.get(x, y)
             if pixel:
                 c.px(x, y, shade(pixel[:3], dull))
-    # Grime washed down from the top in straight streaks two tones deep.
-    for i, gx in enumerate((3, 11, 7)[: 1 + stage]):
-        x = (gx + shift) % 16
-        length = 3 + 2 * stage + (i % 2) * 2
-        for y in range(length):
-            pixel = c.get(x, y)
-            if pixel:
-                c.px(x, y, tuple(int(p * 0.7 + g * 0.3) for p, g in zip(pixel[:3], GRIME)) if y < length - 1 else
-                     tuple(int(p * 0.85 + g * 0.15) for p, g in zip(pixel[:3], GRIME)))
-    # A chipped corner: two pale pixels.
-    cx = (shift + 5) % 16
-    for dx in (0, 1):
-        pixel = c.get((cx + dx) % 16, 1)
+    bs.grime_over(c, GRIME, seed * 7 + stage, streaks=1 + stage, strength=0.22 + 0.06 * stage)
+    rng = random.Random(seed * 11 + stage)
+    for _ in range(stage):
+        x, y = rng.randrange(16), rng.randrange(16)
+        pixel = c.get(x, y)
         if pixel:
-            c.px((cx + dx) % 16, 1, shade(pixel[:3], 1.12))
+            c.px(x, y, shade(pixel[:3], 1.12))
     if stage >= 2:
-        lichen = LICHEN[stone]
-        for lx, ly in ((4, 5), (12, 3), (8, 10), (1, 8), (14, 12), (6, 1))[: 2 if stage == 2 else 5]:
-            x, y = (lx + shift) % 16, ly
-            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-                c.px((x + dx) % 16, y + dy, lichen[1])
-            c.px(x, y, lichen[0])
-        for mx, my in ((10, 7), (3, 12), (13, 4), (6, 9))[: 2 if stage == 2 else 4]:
-            x = (mx + shift) % 16
-            for dy, dxs in ((0, (0, 1)), (1, (-1, 0, 1, 2))):
-                for dx in dxs:
-                    c.px((x + dx) % 16, my + dy, MOSS[3] if dy == 0 else MOSS[2])
-        if not upper:
-            height = 2 if stage == 2 else 5
-            for x in range(16):
-                level = height + int(round(_wave(x, shift, 1.0)))
-                for y in range(16 - level, 16):
-                    depth = y - (16 - level)
-                    c.px(x, y, MOSS[4] if depth == 0 else MOSS[3] if depth == 1 else MOSS[1] if y == 15 else MOSS[2])
+        ground = 0 if upper else (3 if stage == 2 else 6)
+        bs.moss_over(c, MOSS[1:], seed * 13 + stage, amount=0.1 if stage == 2 else 0.2, ground=ground,
+                     lichen=LICHEN[stone], lichen_count=3 if stage == 2 else 6)
     return c
 
 
@@ -136,39 +114,33 @@ def stone_face(stone, stage, upper=False):
 
 
 def relief_face(stone, stage, upper=False):
-    """Carved and polished work, flat and bright: marble polished almost white with one faint vein, slate the pale grey
-    of fresh-cut slate, granite polished dark with a few neat specks, sandstone rubbed smooth."""
+    """Carved and polished work, smoother than the dressed face but still stone: marble polished almost white with a
+    faint vein, slate the pale grey of fresh-cut slate, granite polished dark with fine specks, sandstone rubbed smooth;
+    all in soft, low-contrast clumps."""
     base, accent, seed = STONES[stone]
-    shift = (seed + 50) % 16
     c = Canvas()
-    colour = {"marble": shade(base[3], 1.03), "slate": shade(base[2], 1.38), "granite": rgb("766e6c"),
-              "sandstone": shade(base[2], 1.03)}[stone]
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, colour)
     if stone == "granite":
-        for i, (fx, fy) in enumerate(FLECKS[:6]):
-            c.px((fx + shift) % 16, fy, (rgb("2e2b2c"), rgb("a8857c"), rgb("b9b2ac"))[i % 3])
-    elif stone == "marble":
-        for y in range(16):
-            c.px(int(round(8 + _wave(y, shift, 3.0))) % 16, y, accent[1])
+        dark = [rgb("5e5756"), rgb("676060"), rgb("6e6766"), rgb("766e6c"), rgb("7d7573")]
+        bs.speckled(dark, (rgb("2e2b2c"), rgb("a8857c"), rgb("b9b2ac")), seed + 50, density=0.05)(c)
+    else:
+        lift = {"marble": 1.03, "slate": 1.38, "sandstone": 1.03}[stone]
+        ramp = [shade(k, lift) for k in _ramp(stone)]
+        bs.stone(ramp, seed + 50, cracks=0, spread=0.45, coarse=7.0)(c)
+        if stone == "marble":
+            g = bs.grain(16, 16, seed + 51, 2.0, 5.0)
+            for y in range(16):
+                x = int(round(8 + 3.0 * math.sin(2 * math.pi * y / 16.0)))
+                if g(x, y) > 0.45:
+                    c.px(x % 16, y, accent[1])
     return _weather(c, stone, STAGES.index(stage), STONES[stone][2] + 3, upper).img
 
 
 def rough_face(stone, stage, upper=False):
-    """Rock-faced stone, split rather than sawn: rounded lumps in staggered rows, each lit along its top and left and
-    shadowed along its bottom and right."""
-    c = _base(stone, 90)
-    for y in range(16):
-        for x in range(16):
-            row = y // 4
-            u = (x + (row % 2) * 2) % 4
-            v = y % 4
-            pixel = c.get(x, y)[:3]
-            if v == 0 or u == 0:
-                c.px(x, y, shade(pixel, 1.12))
-            elif v == 3 or u == 3:
-                c.px(x, y, shade(pixel, 0.8))
+    """Rock-faced stone, split rather than sawn: rounded lumps, in the manner of vanilla cobblestone, each lit along its
+    upper left and shaded along its lower right, with dark joints."""
+    c = Canvas()
+    ramp = _ramp(stone)
+    bs.cobble(ramp, STONES[stone][2] + 90, count=7, joint=shade(ramp[0], 0.85))(c)
     return _weather(c, stone, STAGES.index(stage), STONES[stone][2] + 9, upper).img
 
 
@@ -214,61 +186,38 @@ VERDIGRIS = [rgb("3f7a66"), rgb("4f927a"), rgb("68a88e"), rgb("86bea4")]
 
 
 def iron(stage, seed=7301):
-    """Cast iron painted black, flat with a sheen down every eighth column: chipped at worn, rust running down from the
-    middle at mossy, rusty along the bottom with moss when overgrown."""
+    """Cast iron painted black, in soft clumps with a sheen down every eighth column: chipped at worn, rust breaking
+    through in clumps at mossy, rusty and mossy from the bottom when overgrown."""
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, IRON[3] if x % 8 == 0 else IRON[2] if x % 8 == 1 else IRON[1])
+    ramp = [rgb("16171a")] + IRON + [rgb("4a4e55")]
+    bs.stone(ramp, seed, cracks=0, spread=0.55)(c)
+    for x in range(0, 16, 8):
+        for y in range(16):
+            c.px(x, y, ramp[-1] if y % 5 else ramp[-2])
     if stage >= 1:
-        for x, y in ((5, 3), (12, 9), (2, 13))[:stage]:
-            c.px(x, y, shade(IRON[3], 1.4))
-    if stage >= 2:
-        for x in (4, 11, 14, 7)[: 2 if stage == 2 else 4]:
-            for y in range(6, 16):
-                c.px(x, y, RUST[2] if y == 6 else RUST[1])
+        bs.moss_over(c, RUST[1:], seed + stage, amount=(0.04, 0.16, 0.34)[stage - 1], ground=0 if stage < 3 else 4)
     if stage == 3:
-        for x in range(16):
-            for y in range(13 + (x % 3 == 0), 16):
-                c.px(x, y, RUST[1] if y < 15 else RUST[0])
-        for x in range(1, 16, 4):
-            c.px(x, 15, MOSS[3])
-            c.px(x + 1, 15, MOSS[2])
-            c.px(x, 14, MOSS[3])
+        bs.moss_over(c, MOSS[1:], seed + 17, amount=0.08, ground=3)
     return c.img
 
 
 def bronze(stage, seed=7401):
-    """Cast bronze, flat with a polished diagonal sheen: warm new, darkening to a brown patina, then with clean streaks
-    of verdigris running down, and crusted with it from the bottom when overgrown."""
+    """Cast bronze, in the manner of a vanilla metal block: a warm face of soft clumps with a lit edge, darkening to a
+    brown patina, then with verdigris in clumps, crusting up from the bottom when overgrown."""
     factor = (1.0, 0.78, 0.68, 0.6)[stage]
+    ramp = [shade(k, factor) for k in [shade(BRONZE[0], 0.85)] + BRONZE + [shade(BRONZE[3], 1.15)]]
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            sheen = (x + y) % 16 in (3, 4)
-            c.px(x, y, shade(BRONZE[3], factor * (1.12 if stage == 0 else 1.0)) if sheen else shade(BRONZE[2], factor))
+    bs.metal(ramp, seed, panels=False)(c)
     if stage >= 2:
-        for x, top, length in ((3, 0, 9), (10, 2, 7), (13, 0, 12), (6, 4, 6), (1, 3, 8))[: 2 if stage == 2 else 5]:
-            for y in range(top, min(16, top + length)):
-                c.px(x, y, VERDIGRIS[2] if y == top else VERDIGRIS[1])
-    if stage == 3:
-        for x in range(16):
-            for y in range(12 + int(round(math.sin(2 * math.pi * x / 16.0))), 16):
-                c.px(x, y, VERDIGRIS[2] if y % 3 == 0 else VERDIGRIS[1])
+        bs.moss_over(c, VERDIGRIS[1:], seed + stage, amount=0.14 if stage == 2 else 0.3, ground=0 if stage == 2 else 5)
     return c.img
 
 
 def ivy():
-    """Ivy leaves, dark and glossy, in neat offset rows over their stems: each a small pointed leaf lit at its top."""
+    """Ivy leaves, dark and glossy, packed over their stems, in the manner of vanilla leaves: clumps of greens with
+    darker shadows between."""
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, IVY[1])
-    for row in range(4):
-        for col in range(4):
-            x0, y0 = col * 4 + (2 if row % 2 else 0), row * 4
-            for dx, dy, k in ((1, 0, 4), (0, 1, 3), (1, 1, 3), (2, 1, 3), (1, 2, 2), (0, 2, 2), (2, 2, 2), (1, 3, 0)):
-                c.px((x0 + dx) % 16, y0 + dy, IVY[k])
+    bs.stone(IVY, 7201, fine=1.6, coarse=4.0, cracks=0, spread=1.0)(c)
     return c.img
 
 
@@ -306,53 +255,40 @@ SLATES = [rgb("2f343d"), rgb("373d47"), rgb("3f4651"), rgb("48505c")]
 
 
 def oak(stage, seed=7501):
-    """Oak timber with its grain running along it in even planks: warm brown when new, silvering grey as it weathers,
-    with a check or two, then with neat tufts of moss and lichen."""
+    """Oak timber in the manner of vanilla planks, its grain running along it: warm brown when new, silvering grey as
+    it weathers, then with moss and lichen in clumps."""
     silver = (0.0, 0.35, 0.55, 0.65)[stage]
+    ramp = [shade(OAK[0], 0.85)] + OAK + [shade(OAK[3], 1.08)]
+    ramp = [tuple(int(p + (g - p) * silver) for p, g in zip(k, SILVER)) for k in ramp]
     c = Canvas()
-    for x in range(16):
-        for y in range(16):
-            k = x % 4
-            colour = shade(OAK[0], 0.85) if k == 3 else OAK[3] if k == 0 else OAK[2] if (x // 4) % 2 else OAK[1]
-            c.px(x, y, tuple(int(p + (g - p) * silver) for p, g in zip(colour, SILVER)))
-    for x, start, length in ((5, 2, 5), (9, 8, 6), (1, 5, 4))[:stage]:
-        for y in range(start, start + length):
-            c.px(x, y, shade(c.get(x, y)[:3], 0.62))
-    for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
-        c.px(10 + dx, 4 + dy, shade(OAK[0], 0.8))
+    bs.planks(ramp, seed + stage, boards=4, vertical=True)(c)
     if stage >= 2:
-        for cx, cy in ((3, 11), (12, 13), (7, 2), (14, 7))[: 2 if stage == 2 else 4]:
-            for dx, dy in ((0, 0), (1, 0), (0, 1), (-1, 0), (0, -1)):
-                c.px(cx + dx, cy + dy, MOSS[3] if (dx, dy) == (0, -1) else MOSS[2])
+        bs.moss_over(c, MOSS[1:], seed + stage, amount=0.08 if stage == 2 else 0.18, lichen=[rgb("a6b07a"), rgb("8a9a62")],
+                     lichen_count=2 if stage == 2 else 4)
     return c.img
 
 
 def roof_slate(stage, seed=7601):
-    """Roofing slates in courses (running across the texture's u, as a roof's slope lies along a box's length): flat
-    slates in two tones by turns, their lower edges dark; worn slates go dusty, then moss fills a few joints, with
-    yellow lichen rosettes."""
+    """Roofing slates in courses (running across the texture's u, as a roof's slope lies along a box's length): each
+    slate a fine-grained dark stone, lit along its upper edge, its lower edge dark; worn slates go dusty, then moss
+    creeps into the joints in clumps, with yellow lichen."""
     dust = (1.0, 1.08, 1.0, 0.95)[stage]
+    ramp = [shade(SLATES[0], 0.85)] + SLATES + [shade(SLATES[3], 1.1)]
+    g = bs.grain(16, 16, seed, 2.0, 5.0)
     c = Canvas()
     for x in range(16):
         course = x // 4
         for y in range(16):
-            tile = (y + course * 3) // 6
             joint = (y + course * 3) % 6 == 0
-            colour = SLATES[0] if joint else SLATES[2] if (tile + course) % 2 else SLATES[1]
+            colour = ramp[0] if joint else bs.tone(g(x, y), ramp[1:5], spread=0.7)
             if x % 4 == 0:
                 colour = shade(SLATES[0], 0.8)
-            elif x % 4 == 1:
-                colour = SLATES[3]
+            elif x % 4 == 1 and not joint:
+                colour = ramp[4]
             c.px(x, y, shade(colour, dust))
     if stage >= 2:
-        for x, y in ((4, 3), (8, 9), (12, 1), (0, 12), (4, 14))[: 2 if stage == 2 else 5]:
-            for dy in range(3):
-                c.px(x, y + dy, MOSS[3] if dy == 0 else MOSS[2])
-                if stage == 3:
-                    c.px(x + 1, y + dy, MOSS[3])
-        for cx, cy in ((10, 6), (2, 9), (14, 13))[: 1 if stage == 2 else 3]:
-            for dx, dy in ((0, 0), (1, 0), (0, 1)):
-                c.px(cx + dx, cy + dy, LICHEN["granite"][0])
+        bs.moss_over(c, MOSS[1:], seed + stage, amount=0.1 if stage == 2 else 0.22, lichen=LICHEN["granite"],
+                     lichen_count=1 if stage == 2 else 3)
     return c.img
 
 
@@ -381,18 +317,19 @@ def stained_glass():
 
 
 def marble_floor():
-    """A chequered floor of white marble and black slate in squares of four pixels (25 cm), polished: each square flat,
-    lit along its top and left edge."""
+    """A chequered floor of white marble and black slate in squares of four pixels (25 cm), polished: each square a
+    soft-grained stone, lit along its top and left edge."""
     c = Canvas()
-    white = STONES["marble"][0]
-    dark = [rgb("26292e"), rgb("2e3238"), rgb("353a41")]
+    white = _ramp("marble")
+    dark = [rgb("22252a"), rgb("26292e"), rgb("2e3238"), rgb("353a41"), rgb("3c4249")]
+    g = bs.grain(16, 16, 7701, 2.0, 4.0)
     for y in range(16):
         for x in range(16):
             lit = x % 4 == 0 or y % 4 == 0
             if (x // 4 + y // 4) % 2 == 0:
-                c.px(x, y, white[3] if lit else white[2])
+                c.px(x, y, white[5] if lit else bs.tone(g(x, y), white[1:5], spread=0.6))
             else:
-                c.px(x, y, dark[2] if lit else dark[1])
+                c.px(x, y, dark[4] if lit else bs.tone(g(x, y), dark[:4], spread=0.6))
     return c.img
 
 
@@ -465,42 +402,29 @@ GRASS = [rgb("3f6b24"), rgb("4e7f2c"), rgb("5f9234"), rgb("74a540")]
 
 
 def chippings(stage, seed=7901):
-    """White marble chippings: round pebbles in neat offset rows, each lit at its top, grey between; dirtier pebbles at
-    worn, neat tufts of moss at mossy, and grass blades coming through when overgrown."""
+    """White marble chippings, in the manner of vanilla gravel: small rounded chips of several pale tones packed
+    together; dirt settling in clumps at worn, moss at mossy, and moss with grass blades when overgrown."""
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            row = y // 3
-            u = (x + (row % 2) * 2) % 4
-            v = y % 3
-            pebble = (x + (row % 2) * 2) // 4 + row
-            if u == 3 or v == 2:
-                colour = CHIPS[4]
-            elif v == 0 and u in (1, 2):
-                colour = CHIPS[2]
-            else:
-                colour = CHIPS[1]
-            if stage >= 1 and pebble % (5 - stage) == 0 and colour != CHIPS[4]:
-                colour = shade(colour, 0.82)
-            c.px(x, y, colour)
+    bs.gravel([CHIPS[4], CHIPS[3], CHIPS[0], CHIPS[1], CHIPS[2]], seed, count=18)(c)
+    if stage >= 1:
+        bs.moss_over(c, [rgb("8a8478"), rgb("9a9488"), rgb("aaa498")], seed + 1, amount=0.06 * stage)
     if stage >= 2:
-        for cx, cy in ((3, 4), (11, 9), (7, 13), (14, 2), (1, 10))[: 2 if stage == 2 else 5]:
-            for dx, dy in ((0, 0), (1, 0), (0, 1), (-1, 0), (1, 1)):
-                c.px((cx + dx) % 16, (cy + dy) % 16, MOSS[3] if dy == 0 else MOSS[2])
+        bs.moss_over(c, MOSS[1:], seed + 2, amount=0.12 if stage == 2 else 0.24)
     if stage == 3:
-        for x, y in ((5, 7), (9, 3), (13, 12), (2, 14), (8, 10), (15, 6)):
-            for dy in range(3):
-                c.px(x, y - dy, GRASS[3] if dy == 2 else GRASS[2])
+        rng = random.Random(seed + 3)
+        for _ in range(6):
+            x, y = rng.randrange(16), rng.randrange(3, 16)
+            for dy in range(rng.randint(2, 3)):
+                c.px(x, y - dy, GRASS[3] if dy else GRASS[2])
     return c.img
 
 
 def flower_bed(stage, seed=8001):
-    """A grave's planted bed seen from above and from the side alike: dark earth in even furrows, neat little flowers
-    in rows, each on two leaves; let go, the flowers thin and grass blades come through; overgrown, grass and brambles."""
+    """A grave's planted bed seen from above and from the side alike: dark earth in the manner of vanilla dirt, neat
+    little flowers in rows, each on two leaves; let go, the flowers thin and grass comes through; overgrown, grass and
+    brambles."""
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, SOIL[0] if y % 4 == 3 else SOIL[2] if y % 4 == 0 else SOIL[1])
+    bs.dirt([rgb("2f2116")] + SOIL + [rgb("5e4630")], seed)(c)
     keep = (4, 3, 2, 1)[stage]
     for i, (x0, y0) in enumerate((x, y) for y in range(0, 16, 4) for x in range(0, 16, 4)):
         x = x0 + (2 if (y0 // 4) % 2 else 0)
@@ -512,10 +436,8 @@ def flower_bed(stage, seed=8001):
         for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
             c.px((x + dx) % 16, y0 + 1 + dy, colour)
         c.px(x % 16, y0 + 1, rgb("f8e070"))
-    blades = (0, 3, 6, 10)[stage]
-    for x, y in ((2, 3), (9, 6), (14, 2), (5, 11), (12, 13), (0, 8), (7, 15), (11, 1), (3, 14), (15, 10))[:blades]:
-        for dy in range(2):
-            c.px(x, y - dy, GRASS[3] if dy == 1 else GRASS[2])
+    if stage >= 1:
+        bs.moss_over(c, GRASS, seed + stage, amount=(0.06, 0.16, 0.34)[stage - 1])
     if stage == 3:
         for x, y in ((4, 6), (10, 10), (13, 5)):
             c.px(x, y, rgb("3a1f2e"))
@@ -524,12 +446,10 @@ def flower_bed(stage, seed=8001):
 
 
 def pit():
-    """An open grave's darkness, seen down into: flat near-black earth, the same all over so a grave two blocks long
+    """An open grave's darkness, seen down into: nearly black earth in faint clumps, tiling so a grave two blocks long
     shows no seam (its rim is the fresh earth round it)."""
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            c.px(x, y, rgb("130e0a"))
+    bs.dirt([rgb("0a0705"), rgb("0e0a07"), rgb("130e0a"), rgb("18120c"), rgb("1d160f")], 8301)(c)
     return c.img
 
 
@@ -547,36 +467,29 @@ PETALS = {"white": [rgb("e8e4d8"), rgb("f4f1e8"), rgb("fffdf6")], "red": [rgb("8
 
 
 def petals(colour, seed=8101):
-    """Flower heads in `colour` (or `mixed`: all of them, a colour to each flower), or `wilted`: browned and dry; neat
-    round flowers in offset rows, each lit at its middle, darker in the gaps."""
+    """Flower heads in `colour` (or `mixed`: all of them, in irregular patches), or `wilted`: browned and dry; in the
+    manner of vanilla flowering leaves: clumps of petal colour, a shade darker in the gaps between flowers."""
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            row = y // 4
-            u = (x + (row % 2) * 2) % 4
-            v = y % 4
-            flower = (x + (row % 2) * 2) // 4 + row
-            if colour == "wilted":
-                palette = [rgb("5a4a30"), rgb("6e5a3a"), rgb("85704a")]
-            elif colour == "mixed":
-                palette = PETALS[("white", "red", "yellow", "purple")[flower % 4]]
-            else:
-                palette = PETALS[colour]
-            gap = u == 3 or v == 3
-            middle = u in (1, 2) and v in (1, 2)
-            c.px(x, y, palette[0] if gap else palette[2] if middle and (u, v) == (1, 1) else palette[1])
+    if colour == "mixed":
+        field = bs.Field(16, 16, seed, 3.0)
+        parts = {}
+        for i, name in enumerate(("white", "red", "yellow", "purple")):
+            part = Canvas()
+            bs.stone([shade(PETALS[name][0], 0.8)] + PETALS[name], seed + i, fine=1.5, coarse=3.5, cracks=0)(part)
+            parts[i] = part
+        for y in range(16):
+            for x in range(16):
+                c.px(x, y, parts[min(3, int(field(x, y) * 4))].get(x, y)[:3])
+        return c.img
+    palette = [rgb("5a4a30"), rgb("6e5a3a"), rgb("85704a")] if colour == "wilted" else PETALS[colour]
+    bs.stone([shade(palette[0], 0.8)] + palette, seed + len(colour), fine=1.5, coarse=3.5, cracks=0)(c)
     return c.img
 
 
 def leaves(seed=8201):
-    """Green leaves in neat offset rows, each lit at its top, darker between."""
+    """Green leaves in the manner of vanilla leaves: clumps of greens with darker shadows between."""
     c = Canvas()
-    for y in range(16):
-        for x in range(16):
-            row = y // 4
-            u = (x + (row % 2) * 2) % 4
-            v = y % 4
-            c.px(x, y, GRASS[0] if v == 3 else GRASS[3] if v == 0 and u in (1, 2) else GRASS[2] if u in (1, 2) else GRASS[1])
+    bs.stone(GRASS, seed, fine=1.6, coarse=4.0, cracks=0, spread=1.0)(c)
     return c.img
 
 
