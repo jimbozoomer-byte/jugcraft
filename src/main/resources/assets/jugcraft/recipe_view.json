@@ -4304,6 +4304,46 @@
         {
           "in": [
             [
+              "jugcraft:red_kuri_pumpkin_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:red_kuri_pumpkin",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:red_kuri_pumpkin_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:kabocha_pumpkin_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:kabocha_pumpkin",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:kabocha_pumpkin_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
               "jugcraft:bottle_gourd_seeds",
               1
             ]

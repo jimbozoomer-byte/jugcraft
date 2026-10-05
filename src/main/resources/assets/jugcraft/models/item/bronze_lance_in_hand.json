@@ -1,6 +1,6 @@
 {
   "parent": "jugcraft:item/arms_lance",
   "textures": {
-    "layer0": "jugcraft:item/bronze_lance_in_hand"
+    "tex": "jugcraft:item/bronze_lance_model"
   }
 }

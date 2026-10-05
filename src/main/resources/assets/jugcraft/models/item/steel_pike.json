@@ -1,5 +1,5 @@
 {
-  "parent": "jugcraft:item/arms_pike",
+  "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "jugcraft:item/steel_pike"
   }

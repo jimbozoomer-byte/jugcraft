@@ -160,6 +160,9 @@ def write_all(write, assets, data, lang, condition):
     import arms  # batch 42: the arms join swords, spears and the enchantable tags
     for tag, values in arms.item_tags().items():
         by_tag.setdefault(tag, []).extend(values)
+    import arms_variants  # batch 56: each variant joins its kind's tags
+    for tag, values in arms_variants.item_tags().items():
+        by_tag.setdefault(tag, []).extend(values)
     for tag, values in by_tag.items():
         write(tags / f"{tag}.json", {"replace": False, "values": values})
     for tier, info in GEAR_TIERS.items():

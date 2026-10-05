@@ -38,7 +38,10 @@ public class StringLightHookBlockEntity extends BlockEntity {
 	/** What can be strung between hooks, and the item each is. */
 	public enum Strand {
 		LIGHTS("lights", "jack_o_lantern_string_lights"),
-		BUNTING("bunting", "bat_bunting");
+		BUNTING("bunting", "bat_bunting"),
+		/** Pumpkin Night (tools/decor20.py GARLANDS): a twisting pumpkin vine and a twine of autumn leaves, both with warm bulbs. */
+		PUMPKIN_VINE("pumpkin_vine", "pumpkin_vine_garland"),
+		AUTUMN_LEAVES("autumn_leaves", "autumn_leaf_garland");
 
 		public final String name;
 		public final String item;
