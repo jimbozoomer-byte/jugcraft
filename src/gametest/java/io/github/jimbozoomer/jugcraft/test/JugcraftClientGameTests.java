@@ -460,7 +460,13 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 						for (int dy = 0; dy < h; dy++) {
 							overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + dy, cz + dz), blocks.get("bastion_concrete").defaultBlockState());
 						}
-						if (Math.abs(dx) == 3 || Math.abs(dz) == 3) {
+						if (Math.abs(dx) == 3 && Math.abs(dz) == 3) {
+							// Corner merlons, turned so each stands on its outside corner.
+							net.minecraft.core.Direction corner = dz < 0 ? (dx < 0 ? net.minecraft.core.Direction.NORTH : net.minecraft.core.Direction.EAST)
+									: (dx > 0 ? net.minecraft.core.Direction.SOUTH : net.minecraft.core.Direction.WEST);
+							overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + h, cz + dz), blocks.get("bastion_parapet_corner").defaultBlockState()
+									.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, corner));
+						} else if (Math.abs(dx) == 3 || Math.abs(dz) == 3) {
 							net.minecraft.core.Direction out = Math.abs(dz) == 3 ? (dz > 0 ? net.minecraft.core.Direction.SOUTH : net.minecraft.core.Direction.NORTH)
 									: (dx > 0 ? net.minecraft.core.Direction.EAST : net.minecraft.core.Direction.WEST);
 							overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + h, cz + dz), blocks.get("bastion_parapet").defaultBlockState()
@@ -489,8 +495,20 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 						rack.shells.setItem(slot, new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.GREAT_SHELL_ITEM, 4));
 					}
 				}
+				// Gun slits in the tower's south face, and the wall in front with a sliding gate in its middle.
+				for (int dx = 1; dx <= 2; dx++) {
+					overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + 3, cz + 3), blocks.get("bastion_embrasure").defaultBlockState()
+							.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.SOUTH));
+				}
 				for (int dx = -6; dx <= 6; dx++) {
-					overworld.setBlockAndUpdate(new BlockPos(cx + dx, y, cz + 7), blocks.get("bastion_concrete_wall").defaultBlockState());
+					if (Math.abs(dx) <= 1) {
+						for (int dy = 0; dy < 2; dy++) {
+							overworld.setBlockAndUpdate(new BlockPos(cx + dx, y + dy, cz + 7), blocks.get("sliding_gate").defaultBlockState()
+									.setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, net.minecraft.core.Direction.SOUTH));
+						}
+					} else {
+						overworld.setBlockAndUpdate(new BlockPos(cx + dx, y, cz + 7), blocks.get("bastion_concrete_wall").defaultBlockState());
+					}
 				}
 				var type = io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.type("grand_mortar");
 				io.github.jimbozoomer.jugcraft.artillery.TowerGun gun = new io.github.jimbozoomer.jugcraft.artillery.TowerGun(type, overworld);
