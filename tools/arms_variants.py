@@ -13,6 +13,7 @@ numbers here and in Java are kept together by tools/check_mod_data.py (check_arm
 tools/arms_variants_art.py.
 """
 import arms
+import arms_icons
 import arms_variants_art
 
 MOD = "jugcraft"
@@ -222,9 +223,13 @@ def write_all(write, assets, data, lang, condition):
 
 def draw_all(save):
     """Each variant's icon and model texture (tools/arms_variants_art.py), and the patterns' sprites."""
-    for name, kind_, *_ in VARIANTS:
+    for name, kind_, line, *_ in VARIANTS:
         held = arms.KINDS[kind_]["held"]
-        save(arms_variants_art.draw(name, held), "item", name)
+        # The inventory icon: the variant's 16x16 map in its line's materials (tools/arms_icons.py), or its drawing.
+        if arms_icons.has(name):
+            save(arms_icons.draw(name, arms_variants_art.LINE_STYLES[line]), "item", name)
+        else:
+            save(arms_variants_art.draw(name, held), "item", name)
         save(arms_variants_art.model(name, held)[0], "item", f"{name}_model")
     for style, info in STYLES.items():
         save(arms_variants_art.pattern(style), "item", info["pattern"])
