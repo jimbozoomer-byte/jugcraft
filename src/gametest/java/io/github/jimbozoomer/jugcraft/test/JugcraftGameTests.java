@@ -1516,7 +1516,6 @@ public class JugcraftGameTests {
 		raiderFloor(helper);
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
-		player.setClientLoaded(true);
 		player.setPos(helper.absoluteVec(new Vec3(20.5, 1, 20.5)));
 		var grunt = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, new Vec3(16.5, 1, 20.5));
 		var grenadier = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, new Vec3(20.5, 1, 8.5));
@@ -1524,8 +1523,21 @@ public class JugcraftGameTests {
 		boolean[] threw = {false};
 		helper.onEachTick(() -> threw[0] |= !helper.getLevel().getEntitiesOfClass(io.github.jimbozoomer.jugcraft.raiders.RaiderBomb.class, area).isEmpty());
 		helper.succeedWhen(() -> {
-			helper.assertTrue(grunt.getTarget() == player && grenadier.getTarget() == player,
-					"Both raiders should hunt the player: the grunt hunts " + grunt.getTarget() + ", the grenadier " + grenadier.getTarget());
+			if (grunt.getTarget() != player || grenadier.getTarget() != player) {
+				// Why not: what a player needs to be a fair target, and any "loaded" switch the player class has.
+				StringBuilder loaded = new StringBuilder();
+				for (Class<?> c = player.getClass(); c != null; c = c.getSuperclass()) {
+					for (java.lang.reflect.Method m : c.getDeclaredMethods()) {
+						if (m.getName().toLowerCase(java.util.Locale.ROOT).contains("load")) {
+							loaded.append(c.getSimpleName()).append('.').append(m.getName()).append(java.util.Arrays.toString(m.getParameterTypes())).append(' ');
+						}
+					}
+				}
+				helper.fail("Both raiders should hunt the player: the grunt hunts " + grunt.getTarget() + ", the grenadier "
+						+ grenadier.getTarget() + "; canAttack=" + grunt.canAttack(player) + " seenAsEnemy=" + player.canBeSeenAsEnemy()
+						+ " invulnerable=" + player.isInvulnerable() + " creative=" + player.isCreative() + " spectator=" + player.isSpectator()
+						+ " sees=" + grunt.hasLineOfSight(player) + " difficulty=" + helper.getLevel().getDifficulty() + " load methods: " + loaded);
+			}
 			helper.assertTrue(player.getHealth() < player.getMaxHealth(), "The grunt should have hit the player");
 			helper.assertTrue(threw[0], "The grenadier should have thrown at the player");
 		});
