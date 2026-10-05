@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -24,12 +25,14 @@ import net.minecraft.world.level.storage.ValueOutput;
 /**
  * The Coffin's {@value #SLOTS} slots, kept in its head half and shown as a chest. While anyone has it open the lid is
  * up on both halves (it creaks open and thuds shut); like a chest, it is re-checked when an opener walks away. Hoppers
- * and pipes reach it like a chest; breaking it spills what is inside.
+ * and pipes reach it like a chest; breaking it spills what is inside. The Iron-Bound Coffin's chest
+ * ({@link IronBoundCoffinBlockEntity}) is one of these with more slots.
  */
 public class CoffinBlockEntity extends BaseContainerBlockEntity {
 	public static final int SLOTS = 27;
 
-	private NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
+	private final int slots;
+	private NonNullList<ItemStack> items;
 	private final ContainerOpenersCounter openers = new ContainerOpenersCounter() {
 		@Override
 		protected void onOpen(Level level, BlockPos pos, BlockState state) {
@@ -53,7 +56,13 @@ public class CoffinBlockEntity extends BaseContainerBlockEntity {
 	};
 
 	public CoffinBlockEntity(BlockPos pos, BlockState state) {
-		super(JugcraftAgriculture.COFFIN_ENTITY, pos, state);
+		this(JugcraftAgriculture.COFFIN_ENTITY, pos, state, SLOTS);
+	}
+
+	protected CoffinBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, int slots) {
+		super(type, pos, state);
+		this.slots = slots;
+		this.items = NonNullList.withSize(slots, ItemStack.EMPTY);
 	}
 
 	/** Lifts or lowers the lid on both halves. */
@@ -114,18 +123,18 @@ public class CoffinBlockEntity extends BaseContainerBlockEntity {
 
 	@Override
 	public int getContainerSize() {
-		return SLOTS;
+		return slots;
 	}
 
 	@Override
 	protected AbstractContainerMenu createMenu(int containerId, Inventory inventory) {
-		return ChestMenu.threeRows(containerId, inventory, this);
+		return slots > SLOTS ? ChestMenu.sixRows(containerId, inventory, this) : ChestMenu.threeRows(containerId, inventory, this);
 	}
 
 	@Override
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
-		items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
+		items = NonNullList.withSize(slots, ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(input, items);
 	}
 

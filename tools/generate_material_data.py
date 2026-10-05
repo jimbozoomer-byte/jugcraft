@@ -924,8 +924,9 @@ def pixel_hollows_assets(lang):
     lang[f"message.{MOD}.pixel_hollows_map.found"] = "Pixel Hollows marked on the map, around Y %s"
     for event, subtitle in ph.SUBTITLES.items():
         lang[f"subtitles.{MOD}.{event}"] = subtitle
+    import choir_sounds
     import drone_sounds
-    write(ASSETS / "sounds.json", {**drone_sounds.SOUNDS, **ph.SOUNDS})
+    write(ASSETS / "sounds.json", {**drone_sounds.SOUNDS, **ph.SOUNDS, **choir_sounds.SOUNDS})
 
 
 def petro_assets(lang):
