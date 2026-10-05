@@ -11,6 +11,7 @@ import random
 
 from PIL import Image
 
+import cute_art as ca
 import decor17_data as d17d
 import decor18_data as d18d
 import decor20 as d20
@@ -112,18 +113,15 @@ def slats(palette, seed=1, count=3, gap=1):
 
 
 def straw(palette=STRAW, seed=1, bands=(), ragged=False):
-    """Straw stalks running down the piece, gold and pale, with twine `bands` (rows) bound round; `ragged` frays the foot."""
+    """Straw stalks running down the piece in clean gold and pale stripes, with twine `bands` (rows) bound round; `ragged`
+    frays the foot."""
     def paint(p):
-        rng = random.Random(seed)
-        n = len(palette)
-        tones = [rng.choice((1, 2, 2, 3, 3, 4, 5)) for _ in range(p.w)]
         for x in range(p.w):
-            end = p.h - (rng.randrange(0, 4) if ragged else 0)
+            # Stalks in a fixed run of tones, two texels wide; a ragged foot frays in a regular zigzag.
+            tone = (3, 4, 3, 2, 3, 4)[(x // 2 + seed) % 6]
+            end = p.h - ((0, 1, 2, 1)[x % 4] if ragged else 0)
             for y in range(end):
-                k = tones[x] + (1 if (y + x * 3) % 9 == 0 else 0) - (1 if rng.random() < 0.08 else 0)
-                p.put(x, y, shade(palette, k))
-            if rng.random() < 0.25:
-                tones[x] = rng.choice((1, 2, 3, 4))
+                p.put(x, y, palette[tone])
         for row in bands:
             for x in range(p.w):
                 p.put(x, row, TWINE[1 + (x % 3 == 0)])
@@ -227,7 +225,7 @@ def slate(seed=1, frame=True):
 
 
 def cloth(seed=1, tatters=True):
-    """Pale homespun cloth (tinted by its dye in the game): a coarse weave, folds down it, and a tattered, holed foot."""
+    """Pale homespun cloth (tinted by its dye in the game): smooth, soft folds down it, and a tattered, holed foot."""
     def paint(p):
         rng = random.Random(seed)
         folds = [rng.uniform(0, p.w) for _ in range(max(2, p.w // 6))]
@@ -240,7 +238,7 @@ def cloth(seed=1, tatters=True):
                 if y > cut[x]:
                     continue
                 fold = min(abs(x - f) for f in folds)
-                k = 3 + (1 if fold < 1.0 else 0) - (1 if 1.5 < fold < 2.5 else 0) + ((x + y) % 2) * rng.choice((0, 0, -1))
+                k = 3 + (1 if fold < 1.0 else 0) - (1 if 1.5 < fold < 2.5 else 0)
                 p.put(x, y, shade(CLOTH, k))
         if tatters:
             for _ in range(p.w * p.h // 60):
@@ -283,17 +281,19 @@ def charred(seed=1):
 
 
 def pumpkin_skin(palette, seed=1, ribs=4, face=None):
-    """A pumpkin's side: ribs down it, lighter at the shoulder; `face` paints the carved face on: glowing eye holes and a
+    """A pumpkin's side, clean and smooth: even ribs down it (a dark groove, a lit edge beside it), lighter at the
+    shoulder; `face` paints the carved face on: glowing eye holes and a
     closed smile ({eye_x: [x, x], eye_y, eye, mouth_x, mouth_y, mouth_w} in texels)."""
     def paint(p):
-        rng = random.Random(seed)
         n = len(palette)
+        step = max(2, p.w // ribs) if ribs else 0
         for y in range(p.h):
             for x in range(p.w):
                 k = n - 2 - int(y / max(1, p.h - 1) * 2.4)
-                if ribs and x % max(2, p.w // ribs) == 0:
+                if step and x % step == 0:
                     k -= 1
-                k += rng.choice((0, 0, 0, 0, -1, 1))
+                elif step and x % step == 1:
+                    k += 1
                 p.put(x, y, shade(palette, k))
         if face is None:
             return
@@ -566,16 +566,16 @@ def singing_pumpkin(voice):
     face = sc.piece("face", int(width * texel), int((height - 2.0) * texel), pumpkin_skin(skin, 1, ribs=4, face=face_px))
     side = sc.piece("side", int(width * texel), int((height - 2.0) * texel), pumpkin_skin(skin, 2, ribs=4))
     inner = sc.piece("inner", int((width - 2.0) * texel), int(height * texel), pumpkin_skin(skin, 3, ribs=3))
-    cap = sc.piece("cap", int(width * texel), int(width * texel), solid(skin, 4, rim=True))
+    cap = sc.piece("cap", int(width * texel), int(width * texel), ca.bevel(skin, len(skin) - 2, light=0, dark=2))
     stem_w = 2.4 if voice == "bass" else 1.6 if voice != "soprano" else 1.0
-    stem = sc.piece("stem", 4, 8, strip(STEM, 5))
+    stem = sc.piece("stem", 4, 8, ca.bevel(STEM, 2, sides="lr"))
     el = [cube((x0, 1.0, x0), (x1, height - 1.0, x1), faces(side, ("south", "east", "west"), north=face, up=cap, down=cap)),
           cube((x0 + 1.0, 0.0, x0 + 1.0), (x1 - 1.0, height, x1 - 1.0), faces(inner, ("south", "east", "west", "north"), up=cap, down=cap)),
           cube((x0 + 0.5, 0.4, x0 + 0.6), (x1 - 0.5, height - 0.4, x1 - 0.5), faces(inner, ("east", "west", "south"), up=cap, down=cap)),
           cube((8.0 - stem_w / 2, height, 8.0 - stem_w / 2), (8.0 + stem_w / 2, height + 2.2, 8.0 + stem_w / 2), faces(stem, ALL6)),
           cube((8.0 - stem_w / 2, height + 1.6, 8.0 - stem_w / 2), (8.0 + stem_w / 2 + 1.4, height + 2.4, 8.0 + stem_w / 2), faces(stem, ALL6))]
     if voice == "bass":
-        brow = sc.piece("brow", 8, 2, solid([skin[0], skin[1]], 6))
+        brow = sc.piece("brow", 8, 2, ca.bevel([skin[0], skin[1]], 0, light=1, dark=0))
         for s in (-1, 1):
             el.append(cube((8.0 + s * eye_dx - 2.0, eye_y + eye / 2 + 0.2, front - 0.3), (8.0 + s * eye_dx + 2.0, eye_y + eye / 2 + 1.0, front + 0.5),
                            faces(brow, ALL6), rotation((8.0 + s * eye_dx, eye_y + eye / 2 + 0.6, front), "z", -22.5 * s)))
@@ -583,13 +583,13 @@ def singing_pumpkin(voice):
         leaf = sc.piece("leaf", 10, 10, fa.leaf(LEAF_GREEN, "heart", 7))
         el.append(fa.plane_xz(8.0, 13.0, 4.0, 9.0, height + 0.3, leaf, rotation((8.0, height + 0.3, 6.5), "z", 22.5)))
     elif voice == "alto":
-        ribbon = sc.piece("ribbon", 6, 4, solid(pal("4a1a5a", "6a2a80", "8a40a6", "aa60c4"), 8))
+        ribbon = sc.piece("ribbon", 6, 4, ca.bevel(pal("4a1a5a", "6a2a80", "8a40a6", "aa60c4"), 2))
         el += [cube((7.0, height + 0.4, 6.8), (9.0, height + 1.4, 9.2), faces(ribbon, ALL6)),
                cube((4.6, height + 0.6, 7.4), (7.0, height + 2.2, 8.6), faces(ribbon, ALL6), rotation((7.0, height + 1.4, 8.0), "z", 22.5)),
                cube((9.0, height + 0.6, 7.4), (11.4, height + 2.2, 8.6), faces(ribbon, ALL6), rotation((9.0, height + 1.4, 8.0), "z", -22.5))]
     else:
-        lash = sc.piece("lash", 4, 2, solid(pal("1a1410", "2a2018"), 9))
-        tendril = sc.piece("tendril", 2, 2, solid(LEAF_GREEN, 10))
+        lash = sc.piece("lash", 4, 2, ca.bevel(pal("1a1410", "2a2018"), 0, light=1, dark=0))
+        tendril = sc.piece("tendril", 2, 2, ca.bevel(LEAF_GREEN, 3))
         for s in (-1, 1):
             el.append(cube((8.0 + s * eye_dx - 1.4, eye_y + eye / 2, front - 0.2), (8.0 + s * eye_dx + 1.4, eye_y + eye / 2 + 0.5, front + 0.2),
                            faces(lash, ALL6)))
