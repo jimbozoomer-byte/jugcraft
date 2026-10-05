@@ -49,12 +49,12 @@ def img(painter, size=16):
 
 
 class Field:
-    """Smooth periodic value noise (0 to 1) on a `w` x `h` tile: features about `cell` pixels across, wrapping at the
-    tile's edges so the texture tiles."""
+    """Smooth periodic value noise (0 to 1) on a `w` x `h` tile: features about `cell` pixels across (and `cell_y`
+    down, when given, for streaks), wrapping at the tile's edges so the texture tiles."""
 
-    def __init__(self, w, h, seed, cell):
+    def __init__(self, w, h, seed, cell, cell_y=None):
         self.w, self.h, self.cell = w, h, cell
-        self.nx, self.ny = max(1, round(w / cell)), max(1, round(h / cell))
+        self.nx, self.ny = max(1, round(w / cell)), max(1, round(h / (cell_y or cell)))
         rng = random.Random(seed)
         self.grid = [[rng.random() for _ in range(self.nx)] for _ in range(self.ny)]
 
@@ -89,6 +89,43 @@ def tone(value, palette, middle=0.5, spread=1.0):
 
 def _lerp(a, b, t):
     return tuple(int(round(a[i] + (b[i] - a[i]) * t)) for i in range(3))
+
+
+def _luma(c):
+    return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
+
+
+def surface(palette, seed=1, weights=None, spread=0.8, size=(16, 16)):
+    """(x, y) -> colour: a plain surface of `palette` in small clumps, in the vanilla manner: one ground tone (the
+    commonest by `weights`, one per colour in the order given; otherwise the middle, or the lighter of the two middle
+    tones) covering most of the face, with clumps of the tones either side of it as accents. The colours are put in
+    order darkest first; a larger `spread` makes the accents commoner."""
+    order = sorted(range(len(palette)), key=lambda i: _luma(palette[i]))
+    ordered = [palette[i] for i in order]
+    n = len(ordered)
+    counts = [weights[i] for i in order] if weights else [1] * n
+    top = max(counts)
+    modes = [k for k, count in enumerate(counts) if count == top]
+    ground = int(math.floor(sum(modes) / len(modes) + 0.51))
+    g = grain(size[0], size[1], seed)
+    return lambda x, y: ordered[max(0, min(n - 1, ground + int(round((g(x, y) - 0.5) * spread * 4.0))))]
+
+
+def fill(c, x0, y0, x1, y1, palette, seed=1, weights=None, spread=0.8):
+    """Fills x0..x1, y0..y1 of a Canvas (or anything with `px`) with `surface(palette, ...)`: the clumped replacement for
+    a fill of random pixels."""
+    size = c.img.size if hasattr(c, "img") else _size(c)
+    s = surface(palette, seed, weights, spread, size)
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            _put(c, x, y, s(x, y))
+
+
+def wobble(seed, amount, size=(16, 16)):
+    """(x, y) -> -amount, 0 or +amount in soft clumps: a gentle variation for surfaces shaded by formula (paper, glass,
+    linen) in place of a random amount at every pixel."""
+    g = grain(size[0], size[1], seed)
+    return lambda x, y: amount if g(x, y) > 0.6 else -amount if g(x, y) < 0.4 else 0.0
 
 
 # ---------------------------------------------------------------- stone
@@ -288,6 +325,42 @@ def log_bark(palette, seed=1):
                 if x in furrows and (y + x) % 7 not in (0, 1):
                     c = palette[0]
                 _put(p, x, y, c)
+    return paint
+
+
+def streaks(palette, seed=1, vertical=True, across=1.5, along=8.0, spread=1.0):
+    """Fibres, as on the side of a vanilla hay bale: tones in thin streaks a pixel or two across and several long,
+    running down the tile (or across it), the palette's middle tones commonest."""
+    def paint(p):
+        w, h = _size(p)
+        cx, cy = (across, along) if vertical else (along, across)
+        f1, f2 = Field(w, h, seed, cx, cy), Field(w, h, seed + 7, cx * 2, cy * 1.5)
+        for y in range(h):
+            for x in range(w):
+                _put(p, x, y, tone(0.65 * f1(x, y) + 0.35 * f2(x, y), palette, spread=spread))
+    return paint
+
+
+def heap(palettes, seed=1, count=10, joint=None, weights=None):
+    """Small things heaped together, as vanilla gravel but in colours: `count` rounded pieces, each in one of
+    `palettes` (dark, mid, light), lit along its upper left and shaded along its lower right, dark between."""
+    def paint(p):
+        w, h = _size(p)
+        pts = _cells(w, h, seed, count)
+        rng = random.Random(seed + 3)
+        picks = [i for i, n in enumerate(weights or [1] * len(palettes)) for _ in range(n)]
+        kinds = [palettes[rng.choice(picks)] for _ in pts]
+        for y in range(h):
+            for x in range(w):
+                i, d1, d2 = _nearest(pts, x + 0.5, y + 0.5, w, h)
+                if d2 - d1 < 0.9:
+                    _put(p, x, y, joint or (20, 16, 14))
+                    continue
+                px, py = pts[i]
+                dx = ((x + 0.5 - px + w / 2) % w) - w / 2
+                dy = ((y + 0.5 - py + h / 2) % h) - h / 2
+                k = 1 + (1 if dx + dy < -1.5 else 0) - (1 if dx + dy > 1.8 and d2 - d1 < 2.2 else 0)
+                _put(p, x, y, kinds[i][max(0, min(2, k))])
     return paint
 
 
