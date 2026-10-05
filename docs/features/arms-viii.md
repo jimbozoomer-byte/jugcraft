@@ -1,6 +1,6 @@
 # Arms VIII: thrown arms (batch 59)
 
-Status: implemented on `claude/arms-viii`, awaiting review. Compiles and tests in CI only; **not yet played**.
+Status: implemented on `claude/arms-viii`, awaiting review. Green in CI (build, server and client tests); **not yet played**.
 Proposal issue: the owner, 5 October 2026: "start on the next batch of weapons" (as for Arms V and VI). After the variants of Arms VII, this batch adds what the arms could not yet do: throw them.
 Batch number: 59. Main has 55 (Arms VI), Arms VII is 56, and other open work claims 57 and 58; if main takes 59 first, this moves up.
 
@@ -71,7 +71,13 @@ Four new kinds of arm in bronze and steel. Each fights in the hand like any arm,
   - the francisca in first person, at rest and wound back;
   - a real survival throw of a steel javelin at a still pig (its damage and the javelin come down, read back from the server);
   - a bronze chakram thrown past a pig and back into the inventory.
-- **Results:** not run yet; this record will say what CI shows.
+- **Results (CI):**
+  - **dd60fa0a, the first compile, failed:** `Entity.invulnerableTime` is private on 26.3. c8e227da lets go of `LivingEntity.damageCooldownTime` instead, as the arts do. Every other new call compiled (`EnchantmentHelper.modifyDamage`, `BlocksAttacks.disable`, `ItemStack.hurtWithoutBreaking`, `getYRot(float)`).
+  - **c8e227da:** the build and all 777 server game tests passed, `ArmsVIIIGameTests` among them (the chakram took each pig from 10 to 2: 8 each, both ways). Client shard 1 failed in the older `ArmsClientGameTests`: with 38 arms a metal its racks need a sixth shot. 40d59d79 gives them one.
+  - **40d59d79: all green.** The build, all 777 server tests and the three client shards passed. `ArmsVIIIClientGameTests`:
+    - the survival javelin throw took 8.0 from the pig, and the javelin came down;
+    - the chakram came back into the inventory once, having taken 8 from the pig;
+    - its shots show the javelin wound back over the shoulder and let go, the francisca raised in first person, the javelin come down by the struck pig, and the chakram on its way out. The four in flight are drawn, but small at that distance.
 - **Not run:** play; two players; how the throws feel against real mobs; the harpoon underwater (only its code path, which undoes water's drag).
 
 ## World and event applicability
