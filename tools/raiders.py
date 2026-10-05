@@ -193,12 +193,6 @@ def write_all(write, assets, data, lang, condition):
         write(assets / "blockstates" / f"{block}.json", {"variants": {
             f"facing={f}": ({"model": ref, "y": y} if y else {"model": ref})
             for f, y in {"north": 0, "east": 90, "south": 180, "west": 270}.items()}})
-    write(data / "worldgen" / "feature" / "raider_camp.json", {"type": f"{MOD}:raider_camp"})
-    write(data / "worldgen" / "placed_feature" / "raider_camp.json", {
-        "feature": f"{MOD}:raider_camp",
-        "placement": [{"type": "minecraft:rarity_filter", "chance": CAMP_RARITY}, {"type": "minecraft:in_square"},
-                      {"type": "minecraft:surface_water_depth_filter", "max_water_depth": 0},
-                      {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"}, {"type": "minecraft:biome"}]})
     write(data / "loot_table" / "chests" / "raider_camp.json", {
         "type": "minecraft:chest", "random_sequence": f"{MOD}:chests/raider_camp",
         "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": item,

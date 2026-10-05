@@ -20,6 +20,14 @@ Six new blocks:
 | **Ammo Hoist** | Stack hoists into a shaft (the top one shows a pulley head). Each holds up to 16 items. Every 8 ticks each lifts up to 4 of them into the hoist above. The top hoist hands them to the container on top of it or, failing that, beside it. A shaft of any height carries a steady 10 items a second. |
 | **Ready Rack** | Nine slots of shells (Heavy, Flak and Great Shells; nothing else fits), with three shelves that fill with shells as it fills up. **A gunner with no shell of the kind their gun fires draws one from any ready rack within 2 blocks of the gun.** |
 
+### Extras: doors, gates, corners and gun slits
+| Block | What it is |
+| --- | --- |
+| **Bunker Door** | A heavy timber door for dugouts and bunkers: vertical spruce boards crossed by two black iron straps, a viewing hatch in the top half and a ring pull. **Opens by hand**, like a wooden door. Tougher than one: 4 hardness, 12 blast resistance. Mined with an axe. |
+| **Sliding Gate** | A panel of heavy steel bars between two hazard-striped rails, **opened only by redstone**.<br>**Gates side by side or stacked (facing the same way) form one gate:** a signal into any panel slides them all aside together, up to 64 panels. They close when no panel is powered.<br>Closed, it is a full-height barrier you can see and shoot through. Open, only the slim end post is left and you walk through; mobs path through it only when it is open.<br>It cannot be pushed by pistons. |
+| **Bastion Parapet Corner** | The parapet's footing with one big merlon on its outer corner, to turn a ring of parapets round a corner. Its merlon stands at the front-left of the way you face when you place it. |
+| **Bastion Embrasure** | A full block of bastion concrete with a **gun slit** two pixels high and six wide at eye height, running the way you face when you place it. You see and shoot out through it; most of what comes back meets concrete. |
+
 ### Supplying a gun tower
 - **Loading a hoist:** use it with an item in hand, or feed it from pipes, hoppers or conveyors. They can load any hoist in the shaft, but **nothing can take items back out of a hoist**, so a hopper under the shaft cannot rob it.
 - **The top of the shaft:** the top hoist puts items into whatever is on it (a ready rack, a chest or a crate), or failing that into containers beside it.
@@ -32,6 +40,11 @@ Six new blocks:
   - A rack counts when it stands within 2 blocks of the gun's own size, from one block below the gun to one block above its top.
 
 ## Connections
+- Recipes for the extras:
+  - Bunker Door: `PP / PI / PP`, spruce planks and an iron ingot (1).
+  - Sliding Gate: `SRS` three times, steel plates and rebar (3).
+  - Bastion Parapet Corner: `B_ / BB` (2).
+  - Bastion Embrasure: 2 × 2 Bastion Concrete (4).
 - Recipes:
   - Bastion Concrete: `CRC / RCR / CRC`: 5 concrete and 4 rebar (makes 8).
   - Bastion Concrete Slab: 3 in a row (6). Stairs: the usual pattern (4).
@@ -93,9 +106,17 @@ Six new blocks:
   - I reviewed offline renders of the concrete, parapets, hoist shaft and racks, and a sheet of the new textures. The wall, ladder and door use vanilla templates that the offline renderer cannot draw; the CI screenshot will show them.
 - Not done: a two-player server, and a long-running shaft across a chunk reload.
 
+- Fortification extras, planned in CI:
+  - `fortificationExtras`:
+    - The bunker door opens by hand.
+    - The embrasure's slit runs right through it.
+    - The parapet corner's merlon turns with its facing.
+    - Two sliding gates side by side open together from one redstone block, each leaving only its post.
+  - The fortifications screenshot now has corner merlons, gun slits in the tower and a sliding gate in the front wall.
+
 ## World and event applicability
 Not applicable: everything is crafted and placed by players.
 
 ## Rollout and open questions
 - **Fire control (idea 2) comes next:** a fire-control table to direct several guns at once, and an optional sentry mode. The racks will feed sentries as they feed gunners.
-- Doors in other materials (a wooden bunker door) and a sliding gate could follow if wanted.
+- The bunker door, sliding gate, parapet corner and embrasure are now done (above).

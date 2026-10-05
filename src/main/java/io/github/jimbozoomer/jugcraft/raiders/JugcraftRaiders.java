@@ -97,16 +97,7 @@ public final class JugcraftRaiders {
 				net.minecraft.world.level.block.state.BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.LADDER)
 						.strength(0.2F).noLootTable().setId(ladderKey)));
 		// Raider camps (raider extras): rare, out in the plains, savanna and badlands.
-		Registry.register(BuiltInRegistries.FEATURE, Jugcraft.id("raider_camp"), new RaiderCampFeature());
-		if (io.github.jimbozoomer.jugcraft.config.JugcraftConfig.isFeatureEnabled(FEATURE)) {
-			net.fabricmc.fabric.api.biome.v1.BiomeModifications.addFeature(
-					net.fabricmc.fabric.api.biome.v1.BiomeSelectors.foundInOverworld().and(
-							net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags.IS_PLAINS)
-									.or(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags.IS_SAVANNA))
-									.or(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags.IS_BADLANDS))),
-					net.minecraft.world.level.levelgen.GenerationStep.Decoration.SURFACE_STRUCTURES,
-					ResourceKey.create(Registries.PLACED_FEATURE, Jugcraft.id("raider_camp")));
-		}
+		RaiderCamps.register();
 		RaiderRaids.register();
 	}
 

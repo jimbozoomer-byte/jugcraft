@@ -57,7 +57,7 @@ public final class Fortifications {
 	public static BlockEntityType<AmmoHoistBlock.Entity> HOIST_ENTITY;
 	public static BlockEntityType<ReadyRackBlock.Entity> RACK_ENTITY;
 	private static final List<String> TOOLTIPS = List.of("bastion_concrete", "bastion_parapet", "steel_ladder", "blast_door",
-			"ammo_hoist", "ready_rack");
+			"ammo_hoist", "ready_rack", "bunker_door", "sliding_gate", "bastion_parapet_corner", "bastion_embrasure");
 
 	private Fortifications() {
 	}
@@ -69,6 +69,10 @@ public final class Fortifications {
 		entry("blast_door", "door", 15.0F, 1200.0F);
 		entry("ammo_hoist", "hoist", 3.0F, 6.0F);
 		entry("ready_rack", "rack", 2.5F, 6.0F);
+		entry("bunker_door", "door_wood", 4.0F, 12.0F);
+		entry("sliding_gate", "gate", 6.0F, 24.0F);
+		entry("bastion_parapet_corner", "parapet_corner", 4.0F, 24.0F);
+		entry("bastion_embrasure", "embrasure", 4.0F, 24.0F);
 		HOIST_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ammo_hoist"),
 				FabricBlockEntityTypeBuilder.create(AmmoHoistBlock.Entity::new, BLOCKS.get("ammo_hoist")).build());
 		RACK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ready_rack"),
@@ -104,6 +108,16 @@ public final class Fortifications {
 					.sound(SoundType.METAL).requiresCorrectToolForDrops().strength(hardness, blast).noOcclusion())));
 			case "rack" -> block(id, new ReadyRackBlock(properties(id, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
 					.sound(SoundType.METAL).strength(hardness, blast).noOcclusion())));
+			// Fortification extras: a wooden door opened by hand, a redstone sliding gate, a parapet corner and an embrasure.
+			case "door_wood" -> block(id, new DoorBlock(BlockSetType.SPRUCE, properties(id, BlockBehaviour.Properties.of()
+					.mapColor(MapColor.WOOD).sound(SoundType.WOOD).strength(hardness, blast).noOcclusion().ignitedByLava())));
+			case "gate" -> block(id, new SlidingGateBlock(properties(id, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+					.sound(SoundType.METAL).requiresCorrectToolForDrops().strength(hardness, blast).noOcclusion()
+					.pushReaction(PushReaction.IMMOVEABLE))));
+			case "parapet_corner" -> block(id, new ParapetCornerBlock(properties(id, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+					.sound(SoundType.STONE).requiresCorrectToolForDrops().strength(hardness, blast).noOcclusion())));
+			case "embrasure" -> block(id, new EmbrasureBlock(properties(id, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+					.sound(SoundType.STONE).requiresCorrectToolForDrops().strength(hardness, blast).noOcclusion())));
 			default -> throw new IllegalArgumentException(kind);
 		}
 	}
