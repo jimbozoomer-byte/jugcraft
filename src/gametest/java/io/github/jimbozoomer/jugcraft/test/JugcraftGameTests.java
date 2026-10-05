@@ -1551,7 +1551,8 @@ public class JugcraftGameTests {
 			boolean ladder = false;
 			for (int x = 0; x < 44 && !ladder; x++) {
 				for (int y = 1; y <= 5 && !ladder; y++) {
-					ladder = io.github.jimbozoomer.jugcraft.raiders.SiegeLadderBlock.is(helper.getBlockState(new BlockPos(x, y, 13)));
+					// The raiders come from the south, so their ladders go up the wall's south face.
+					ladder = io.github.jimbozoomer.jugcraft.raiders.SiegeLadderBlock.is(helper.getBlockState(new BlockPos(x, y, 15)));
 				}
 			}
 			helper.assertTrue(ladder, "A grunt stuck at the wall should have propped a siege ladder against it");
