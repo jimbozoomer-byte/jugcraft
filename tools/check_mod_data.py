@@ -1298,6 +1298,73 @@ def check_arms_variants():
             err(f"recipe/{info['pattern']}.json is missing: the {style} pattern must be craftable")
 
 
+def check_mesh_models():
+    """The Runebound arms' mesh models (tools/arms_mesh.py, read in game by client/MeshItemModels.java): each in-hand
+    model is an optional "jugcraft:mesh" model keeping its box model as "elements"; every quad has four corners of
+    eight numbers (unit normals, UVs within the sprite, corners within -16..32 pixels) and a texture slot the model
+    defines; only the glyph strip and the atlas's glowing regions glow; there are at most arms_mesh.MAX_QUADS; no two
+    flat, parallel quads overlap closer than 0.1 pixel (drawn without culling they could flicker); the mesh lies along the
+    diagonal from the butt to the point of the design it replaces, held at its grip, as the box model was; and its
+    textures are solid (no see-through pixel)."""
+    import math
+    import arms_mesh as am
+    import arms_variants_art
+    glowing = [m for m in vars(am).values() if isinstance(m, am.Mat) and m.slot == "mesh" and m.glow]
+
+    def inside(mat, u, v):
+        x0, y0, x1, y1 = mat.region
+        return x0 / mat.size - 1e-4 <= u <= x1 / mat.size + 1e-4 and y0 / mat.size - 1e-4 <= v <= y1 / mat.size + 1e-4
+    for name in am.NAMES:
+        ref = f"models/item/{name}_in_hand.json"
+        model = load(ASSETS / "models" / "item" / f"{name}_in_hand.json") or {}
+        kind = model.get("fabric:type")
+        if not isinstance(kind, dict) or kind.get("id") != f"{MOD}:mesh" or kind.get("optional") is not True:
+            err(f"{ref}: expected \"fabric:type\": {{\"id\": \"{MOD}:mesh\", \"optional\": true}}")
+        if not model.get("elements"):
+            err(f"{ref}: the box model (\"elements\") must stay as the mesh's fallback")
+        textures = model.get("textures", {})
+        quads = model.get("quads") or []
+        if not quads or len(quads) > am.MAX_QUADS:
+            err(f"{ref}: {len(quads)} quads, expected 1 to {am.MAX_QUADS}")
+        problems = set()
+        corners = []
+        for q in quads:
+            v = q.get("v")
+            if q.get("t") not in textures:
+                problems.add(f"a quad's texture slot {q.get('t')} is not defined")
+            if not (isinstance(v, list) and len(v) == 4 and all(isinstance(c, list) and len(c) == 8 for c in v)):
+                problems.add("a quad is not four corners of eight numbers")
+                continue
+            corners.append([c[:3] for c in v])
+            for c in v:
+                if not all(-16 <= x <= 32 for x in c[:3]):
+                    problems.add("a corner lies outside -16..32")
+                if not (0 <= c[3] <= 1 and 0 <= c[4] <= 1):
+                    problems.add("a UV lies outside its sprite")
+                if abs(math.sqrt(sum(n * n for n in c[5:])) - 1.0) > 0.03:
+                    problems.add("a normal is not of unit length")
+            if q.get("t") == "rune" and not q.get("e"):
+                problems.add("a quad drawn in the glyph strip does not glow")
+            if q.get("t") == "mesh" and q.get("e") and not any(all(inside(m, c[3], c[4]) for c in v) for m in glowing):
+                problems.add("a glowing quad of the atlas lies outside its glowing regions")
+        for problem in sorted(problems):
+            err(f"{ref}: {problem}")
+        overlaps = am.coplanar_overlaps(corners)
+        if overlaps:
+            err(f"{ref}: {len(overlaps)} pairs of parallel quads overlap closer than 0.1 px (they could flicker)")
+        # Held as the box model was: along the diagonal from the hand, from the design's butt to its point.
+        grip, (gx, gy), unit = am.placement(name)
+        length = arms_variants_art.design(name).length
+        along = [((x - gx) + (y - gy)) * am.C45 for q in corners for x, y, _z in q]
+        if corners and (abs(min(along) + grip * unit) > 0.6 or abs(max(along) - (length - grip) * unit) > 0.6):
+            err(f"{ref}: the mesh runs {min(along):.2f} to {max(along):.2f} px along the arm from the hand, not "
+                f"{-grip * unit:.2f} to {(length - grip) * unit:.2f} as its design")
+    for texture in (am.ATLAS, am.RUNE):
+        png = ASSETS / "textures" / "item" / f"{texture}.png"
+        if png.is_file() and Image.open(png).convert("RGBA").getextrema()[3][0] < 255:
+            err(f"textures/item/{texture}.png has see-through pixels: the mesh textures must be solid")
+
+
 def check_arms_motion():
     """client/arms/ArmsMotion.java against tools/arms_motion.py and tools/arms_moves.py (batch 43): every kind of arm has
     its motion file as the generator writes it, with whole poses, keys in time order from 0 to 1 and tensions from 0 to
@@ -5998,6 +6065,7 @@ def main():
     check_gear()
     check_arms()
     check_arms_variants()
+    check_mesh_models()
     check_arms_motion()
     check_exosuit()
     check_grapple()

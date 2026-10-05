@@ -40,11 +40,13 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
  * pumpkin boats to theirs, gravestones to the renderer of their engravings, and Halloween's night creatures,
  * thrown pumpkins and landing markers to theirs; the Harvest Moon's state to the pumpkins' sparks; the drone
  * depot's renderers (drones, pickup lift, control room screen) and terminal screen, and the server's season to
- * grass and foliage colours, and the Party key to the Party screen.
+ * grass and foliage colours, and the Party key to the Party screen; and the mesh item models the Runebound arms are
+ * drawn with (MeshItemModels).
  */
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
+		MeshItemModels.register();
 		for (MachineKind kind : MachineKind.values()) {
 			MenuScreens.register(JugcraftMachines.menuType(kind), MachineScreen::new);
 		}
