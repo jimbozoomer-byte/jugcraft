@@ -126,14 +126,15 @@ def texture(ref):
         return
     animated = png.with_name(png.name + ".mcmeta").is_file()
     with Image.open(png) as img:
-        # Square: 16x16, or 32x32 or 64x64 for high-resolution art, or 128x128 for a sculpted prop's packed texture
-        # (docs/ART_DIRECTION.md, "High resolution"). Animated textures are a vertical strip of square frames of 16x16,
-        # 32x32 or 64x64 with an .mcmeta beside them.
+        # Square: 16x16, or 32x32, 48x48 or 64x64 for high-resolution art, or 128x128 for a sculpted prop's packed texture
+        # (docs/ART_DIRECTION.md, "High resolution"; 48 for the icons of the long arms, which the arms' texel size wants).
+        # Animated textures are a vertical strip of square frames of 16x16, 32x32, 48x48 or 64x64 with an .mcmeta beside
+        # them.
         width, height = img.size
-        if animated and not (width in (16, 32, 64) and height % width == 0 and height > width):
-            err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16, 32x32 or 64x64 frames")
-        elif not animated and img.size not in ((16, 16), (32, 32), (64, 64), (128, 128)):
-            err(f"Texture {ref} is {img.size}, expected 16x16, 32x32, 64x64 or 128x128")
+        if animated and not (width in (16, 32, 48, 64) and height % width == 0 and height > width):
+            err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16, 32x32, 48x48 or 64x64 frames")
+        elif not animated and img.size not in ((16, 16), (32, 32), (48, 48), (64, 64), (128, 128)):
+            err(f"Texture {ref} is {img.size}, expected 16x16, 32x32, 48x48, 64x64 or 128x128")
 
 
 def model(ref):
