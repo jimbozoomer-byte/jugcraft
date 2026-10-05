@@ -31,6 +31,11 @@ BLOCKS = {
     "blast_door": ("Blast Door", "door", 15.0, 1200.0),
     "ammo_hoist": ("Ammo Hoist", "hoist", 3.0, 6.0),
     "ready_rack": ("Ready Rack", "rack", 2.5, 6.0),
+    # Fortification extras.
+    "bunker_door": ("Bunker Door", "door_wood", 4.0, 12.0),
+    "sliding_gate": ("Sliding Gate", "gate", 6.0, 24.0),
+    "bastion_parapet_corner": ("Bastion Parapet Corner", "parapet_corner", 4.0, 24.0),
+    "bastion_embrasure": ("Bastion Embrasure", "embrasure", 4.0, 24.0),
 }
 TOOLTIPS = {
     "bastion_concrete": "Board-marked cast concrete: tougher than plain concrete against blasts. Also makes walls.",
@@ -41,6 +46,10 @@ TOOLTIPS = {
                   "above or beside it. Use one with an item in hand to load it.",
     "ready_rack": "Holds shells beside a gun. A gunner with no shells draws from any ready rack next to their gun. Use "
                   "with shells to stock it, empty-handed to take a stack back.",
+    "bunker_door": "A heavy strapped timber door for dugouts and bunkers. Opens by hand.",
+    "sliding_gate": "Steel bars that slide aside on a redstone signal. Gates side by side or stacked open together.",
+    "bastion_parapet_corner": "A parapet's corner: one big merlon to turn a ring of parapets round a corner.",
+    "bastion_embrasure": "Bastion concrete with a narrow gun slit through it, to see and shoot out through.",
 }
 # The ammo hoist: ticks between lifts, items each lift carries, and how many items each hoist block holds.
 HOIST_INTERVAL = 8
@@ -125,8 +134,34 @@ def rack(fill):
     return m
 
 
-def blast_door_textures():
-    return {"bottom": f"{MOD}:block/fw_blast_door_bottom", "top": f"{MOD}:block/fw_blast_door_top"}
+def blast_door_textures(block="blast_door"):
+    return {"bottom": f"{MOD}:block/fw_{block}_bottom", "top": f"{MOD}:block/fw_{block}_top"}
+
+
+def gate(opened):
+    """The sliding gate facing north: a closed panel of heavy bars between two hazard-striped rails; slid open, only its
+    end post remains (the bars stacked inside it)."""
+    if opened:
+        return [box((0, 0, 6), (2.5, 16, 10), {"*": GUNMETAL, "up": HAZARD})]
+    m = [box((0, 0, 6), (2, 16, 10), GUNMETAL), box((14, 0, 6), (16, 16, 10), GUNMETAL)]
+    for x in (3.5, 6.5, 9.5, 12.5):
+        m.append(box((x - 0.75, 0, 7.25), (x + 0.75, 16, 8.75), CHROME))
+    for y in (2, 12):
+        m.append(box((2, y, 6.5), (14, y + 2, 9.5), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD}))
+    return m
+
+
+def parapet_corner():
+    """The parapet's footing with one big merlon on its front-left corner (facing north)."""
+    face = {"*": CONCRETE, "up": CAP, "down": CAP}
+    return [box((0, 0, 0), (16, 8, 16), face), box((0, 8, 0), (7, 16, 7), face)]
+
+
+def embrasure():
+    """A full block of bastion concrete with a slit two pixels high and six wide, running along z (facing north)."""
+    face = {"*": CONCRETE, "up": CAP, "down": CAP}
+    return [box((0, 0, 0), (16, 9, 16), face), box((0, 11, 0), (16, 16, 16), face),
+            box((0, 9, 0), (5, 11, 16), face), box((11, 9, 0), (16, 11, 16), face)]
 
 
 # Rotations for vanilla door models (as tools/decor3_data.py).
@@ -168,6 +203,10 @@ RECIPES = [
     ("ammo_hoist", "ammo_hoist", ["SCS", "SGS", "SCS"], {"S": "#c:plates/steel", "C": "minecraft:iron_chain",
                                                         "G": "#c:gears/steel"}, 4),
     ("ready_rack", "ready_rack", ["S S", "PPP", "S S"], {"S": "#c:plates/steel", "P": "#minecraft:wooden_slabs"}, 2),
+    ("bunker_door", "bunker_door", ["PP", "PI", "PP"], {"P": "minecraft:spruce_planks", "I": "minecraft:iron_ingot"}, 1),
+    ("sliding_gate", "sliding_gate", ["SRS", "SRS", "SRS"], {"S": "#c:plates/steel", "R": f"{MOD}:rebar"}, 3),
+    ("bastion_parapet_corner", "bastion_parapet_corner", ["B ", "BB"], {"B": f"{MOD}:bastion_concrete"}, 2),
+    ("bastion_embrasure", "bastion_embrasure", ["BB", "BB"], {"B": f"{MOD}:bastion_concrete"}, 4),
 ]
 
 
@@ -236,12 +275,12 @@ def write_all(write, assets, data, lang, condition, self_drop):
             write(states / f"{block}.json", {"variants": {f"facing={f}": ({"model": ref, "y": y} if y else {"model": ref})
                                                           for f, y in FACING_Y.items()}})
             flat_item(block, "steel_ladder")
-        elif kind == "door":
+        elif kind in ("door", "door_wood"):
             for half in ("bottom", "top"):
                 for hinge in ("left", "right"):
                     for opened in ("", "_open"):
                         write(models / f"{block}_{half}_{hinge}{opened}.json",
-                              {"parent": f"minecraft:block/door_{half}_{hinge}{opened}", "textures": blast_door_textures()})
+                              {"parent": f"minecraft:block/door_{half}_{hinge}{opened}", "textures": blast_door_textures(block)})
             variants = {}
             for facing in FACING_Y:
                 for half, part in (("lower", "bottom"), ("upper", "top")):
@@ -253,7 +292,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
                                 variant["y"] = y
                             variants[f"facing={facing},half={half},hinge={hinge},open={is_open}"] = variant
             write(states / f"{block}.json", {"variants": variants})
-            flat_item(block, "blast_door")
+            flat_item(block, block)
             # A door drops one item, from its lower half only (as the crypt door's loot table).
             write(data / "loot_table" / "blocks" / f"{block}.json", {
                 "type": "minecraft:block", "random_sequence": f"{MOD}:blocks/{block}",
@@ -262,6 +301,19 @@ def write_all(write, assets, data, lang, condition, self_drop):
                                {"type": "minecraft:survives_explosion"},
                                {"type": "minecraft:match_block", "blocks": f"{MOD}:{block}", "state": {"half": "lower"}}]}}]})
             continue
+        elif kind == "gate":
+            write(models / f"{block}.json", model(gate(False), GUNMETAL))
+            write(models / f"{block}_open.json", model(gate(True), GUNMETAL))
+            write(states / f"{block}.json", {"variants": {
+                f"facing={f},open={o},powered={p}": ({"model": ref + ("_open" if o == "true" else ""), "y": y} if y
+                                                      else {"model": ref + ("_open" if o == "true" else "")})
+                for f, y in FACING_Y.items() for o in ("false", "true") for p in ("false", "true")}})
+            item(block)
+        elif kind in ("parapet_corner", "embrasure"):
+            write(models / f"{block}.json", model(parapet_corner() if kind == "parapet_corner" else embrasure(), CONCRETE))
+            write(states / f"{block}.json", {"variants": {f"facing={f}": ({"model": ref, "y": y} if y else {"model": ref})
+                                                          for f, y in FACING_Y.items()}})
+            item(block)
         elif kind == "hoist":
             write(models / f"{block}.json", model(hoist(False), SKID))
             write(models / f"{block}_top.json", model(hoist(True), SKID))
@@ -290,10 +342,12 @@ def add_tags(tags):
     tags.add("block", "minecraft:climbable", f"{MOD}:steel_ladder")
     tags.add("block", "minecraft:doors", f"{MOD}:blast_door")
     tags.add("item", "minecraft:doors", f"{MOD}:blast_door")
+    tags.add("block", "minecraft:wooden_doors", f"{MOD}:bunker_door")
+    tags.add("item", "minecraft:wooden_doors", f"{MOD}:bunker_door")
     for shell in SHELLS:
         tags.add("item", f"{MOD}:artillery_shells", f"{MOD}:{shell}")
     for block in blocks():
-        tags.add("block", "minecraft:mineable/pickaxe", f"{MOD}:{block}")
+        tags.add("block", "minecraft:mineable/axe" if block == "bunker_door" else "minecraft:mineable/pickaxe", f"{MOD}:{block}")
         if block.startswith("bastion"):
             tags.add("block", "minecraft:needs_stone_tool", f"{MOD}:{block}")
         if block == "blast_door":
@@ -396,10 +450,48 @@ def blast_door(top):
     return img
 
 
+TIMBER = [(70, 50, 32), (92, 68, 44), (112, 84, 54), (132, 100, 66)]
+
+
+def bunker_door(top):
+    """The bunker door's halves: vertical spruce boards in a frame, crossed by two black iron straps with bolt heads; the
+    top half has a small viewing hatch, the bottom a ring pull."""
+    img = clean_metal.canvas(TIMBER[2])
+    for x in range(16):
+        for y in range(16):
+            if x % 4 == 0:
+                clean_metal.put(img, x, y, TIMBER[0])
+            elif x % 4 == 1:
+                clean_metal.put(img, x, y, TIMBER[3])
+    clean_metal.rect(img, 0, 0, 15, 0, TIMBER[0])
+    clean_metal.rect(img, 0, 15, 15, 15, TIMBER[0])
+    for y0 in ((3, 12) if top else (3, 11)):
+        for x in range(1, 15):
+            clean_metal.put(img, x, y0, STEEL[0])
+            clean_metal.put(img, x, y0 + 1, STEEL[1])
+        for x in (2, 7, 12):
+            clean_metal.put(img, x, y0, STEEL[4])
+    if top:
+        clean_metal.rect(img, 6, 6, 9, 9, STEEL[0])
+        clean_metal.rect(img, 7, 7, 8, 8, (24, 22, 20))
+    else:
+        for x, y in ((11, 6), (12, 6), (10, 7), (13, 7), (11, 8), (12, 8)):
+            clean_metal.put(img, x, y, STEEL[3])
+    return img
+
+
 def icon(kind):
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     if kind == "steel_ladder":
         return ladder()
+    if kind == "bunker_door":
+        clean_metal.rect(img, 4, 1, 11, 14, TIMBER[2])
+        for x in (4, 8):
+            clean_metal.rect(img, x, 1, x, 14, TIMBER[0])
+        for y in (3, 11):
+            clean_metal.rect(img, 4, y, 11, y, STEEL[0])
+        clean_metal.rect(img, 7, 6, 8, 7, (24, 22, 20))
+        return img
     if kind == "blast_door":
         clean_metal.rect(img, 4, 1, 11, 14, STEEL[2])
         clean_metal.bevel(img, 4, 1, 11, 14, STEEL[3], STEEL[1], STEEL[2])
@@ -413,7 +505,8 @@ def icon(kind):
 def draw_all(save):
     for name, img in (("fw_bastion", bastion()), ("fw_bastion_top", bastion_top()), ("fw_ladder", ladder()),
                       ("fw_chain", chain()), ("fw_blast_door_bottom", blast_door(False)),
-                      ("fw_blast_door_top", blast_door(True))):
+                      ("fw_blast_door_top", blast_door(True)), ("fw_bunker_door_bottom", bunker_door(False)),
+                      ("fw_bunker_door_top", bunker_door(True))):
         save(img, "block", name)
-    for item in ("steel_ladder", "blast_door"):
+    for item in ("steel_ladder", "blast_door", "bunker_door"):
         save(icon(item), "item", item)
