@@ -71,14 +71,25 @@ public class ArmsVIIIGameTests {
 	@GameTest(structure = ARENA, maxTicks = 120)
 	public void chakramCutsBothWaysAndComesBack(GameTestHelper helper) {
 		floor(helper);
-		// Two pigs in line on a raised walk, so their middles are near the thrower's eye (and stay up when struck).
+		// Two pigs in line on a raised walk, so their middles are near the thrower's eye (and stay up when struck); the
+		// corridor the chakram flies out and back along is cleared, whatever was there.
 		for (int x = 0; x <= 2; x++) {
 			for (int z = 3; z <= 11; z++) {
 				helper.setBlock(new BlockPos(x, 2, z), Blocks.STONE);
 			}
+			for (int z = 0; z <= 15; z++) {
+				for (int y = 3; y <= 6; y++) {
+					helper.setBlock(new BlockPos(x, y, z), Blocks.AIR);
+				}
+			}
 		}
 		Mob near = pig(helper, new BlockPos(1, 3, 4));
 		Mob far = pig(helper, new BlockPos(1, 3, 7));
+		// Each cut knocks its pig back, which can carry it off the walk or out of the chakram's way back. Here they stand
+		// fast, so the test sees the chakram's own path.
+		for (Mob pig : List.of(near, far)) {
+			pig.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0);
+		}
 		ServerPlayer thrower = thrower(helper, "bronze_chakram", new BlockPos(1, 2, 0), near, GameType.SURVIVAL);
 		JugcraftArms.Thrown thrown = JugcraftArms.thrown("chakram", "bronze");
 		release(thrower, thrown);
@@ -94,7 +105,8 @@ public class ArmsVIIIGameTests {
 			Jugcraft.LOGGER.info("[arms viii] chakram: near pig {} -> {}, far pig {} -> {}", max, near.getHealth(), max, far.getHealth());
 			float both = 2.0F * thrown.damage();
 			helper.assertTrue(Math.abs(max - near.getHealth() - both) < 1.0E-3F && Math.abs(max - far.getHealth() - both) < 1.0E-3F,
-					"The chakram took " + (max - near.getHealth()) + " and " + (max - far.getHealth()) + ", not " + both + " from each pig");
+					"The chakram took " + (max - near.getHealth()) + " and " + (max - far.getHealth()) + ", not " + both + " from each pig"
+							+ " (the pigs at " + where(helper, near) + " and " + where(helper, far) + ")");
 		});
 	}
 
@@ -164,6 +176,12 @@ public class ArmsVIIIGameTests {
 		player.setXRot((float) Math.toDegrees(Math.atan2(-aim.y, Math.sqrt(aim.x * aim.x + aim.z * aim.z))));
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftArms.ITEMS.get(arm)));
 		return player;
+	}
+
+	/** Where a mob is, relative to the test's origin, for a failure message. */
+	private static String where(GameTestHelper helper, Mob mob) {
+		BlockPos origin = helper.absolutePos(BlockPos.ZERO);
+		return String.format(java.util.Locale.ROOT, "%.2f %.2f %.2f", mob.getX() - origin.getX(), mob.getY() - origin.getY(), mob.getZ() - origin.getZ());
 	}
 
 	private static List<ItemEntity> items(GameTestHelper helper, String arm) {
