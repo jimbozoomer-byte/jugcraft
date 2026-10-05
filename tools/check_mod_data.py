@@ -51,6 +51,7 @@ import artillery
 import tower_guns
 import gear
 import arms
+import arms_variants
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
                       RENEWABLE_UNITS, WOODS, machine_blocks, machine_items, machine_recipes)
@@ -329,6 +330,14 @@ def item_units(ref):
         return {}
     if path in arms.items():
         return arms.metal_content(path)
+    if path in arms_variants.items():
+        # A styled variant holds the steel arm it is smithed from and its style's addition; patterns and trophies none.
+        if path in arms_variants.BY_ID and arms_variants.line(path) in arms_variants.STYLES:
+            content = dict(arms.metal_content(f"steel_{arms_variants.kind(path)}"))
+            for metal, units in item_units(arms_variants.STYLES[arms_variants.line(path)]["addition"]).items():
+                content[metal] = content.get(metal, 0) + units
+            return content
+        return {}
     if path in gear.items():
         # Gear holds the ingots it is crafted from; a paxel holds its pickaxe, axe and shovel. Vanilla-tier paxels
         # hold nothing the audit tracks, like the vanilla tools they are made from.
@@ -530,7 +539,7 @@ def check_tags():
         known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + machine_items()
                                                     + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
-                                                    + arms.items()
+                                                    + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + town_assets.blocks())
@@ -1209,6 +1218,84 @@ def check_arms():
         definition = load(ASSETS / "items" / f"{item}.json") or {}
         if not definition.get("swap_animation_scale"):
             err(f"items/{item}.json has no swap_animation_scale")
+
+
+def check_arms_variants():
+    """weapons/ArmVariants.java against tools/arms_variants.py (Arms VII, batch 56): the variants in order with their kind,
+    line and boon; the styles and patterns; every number; each style variant's smithing recipe and each boss's trophy loot
+    table; the boons' and lines' tooltips; that every boon is bounded; and that no variant deals as much a second as a
+    netherite sword, whatever its boon adds."""
+    import arms_variants as av
+    java = (JAVA_ROOT / "weapons" / "ArmVariants.java").read_text(encoding="utf-8")
+    found = [(name, kind, line, None if boon == "null" else boon.split(".")[1].lower())
+             for name, kind, line, boon in re.findall(r'new Variant\("([a-z_]+)", "([a-z_]+)", "([a-z_]+)", (null|Boon\.[A-Z]+)\)', java)]
+    expected = [(name, kind, line, boon) for name, kind, line, boon, _display in av.VARIANTS]
+    if found != expected:
+        err(f"ArmVariants.VARIANTS {found} != tools/arms_variants.py {expected}")
+    boons = re.search(r"enum Boon \{\s*([A-Z_, ]+?)\s*\}", java)
+    if not boons or [b.strip().lower() for b in boons.group(1).split(",")] != list(av.BOONS):
+        err(f"ArmVariants.Boon differs from tools/arms_variants.py BOONS {list(av.BOONS)}")
+    if re.findall(r'"([a-z_]+)"', re.search(r"STYLES = List\.of\(([^)]*)\)", java).group(1)) != list(av.STYLES):
+        err(f"ArmVariants.STYLES differs from tools/arms_variants.py {list(av.STYLES)}")
+    if re.findall(r'"([a-z_]+)"', re.search(r"PATTERN_NAMES = List\.of\(([^)]*)\)", java, re.S).group(1)) != av.patterns():
+        err(f"ArmVariants.PATTERN_NAMES differs from tools/arms_variants.py {av.patterns()}")
+    ints = {"FROST_TICKS": av.FROST[0], "FROST_AMPLIFIER": av.FROST[1], "EMBER_SECONDS": av.EMBER_SECONDS,
+            "VENOM_TICKS": av.VENOM[0], "VENOM_AMPLIFIER": av.VENOM[1], "WITHER_TICKS": av.WITHER[0],
+            "WITHER_AMPLIFIER": av.WITHER[1], "HOWL_TICKS": av.HOWL[0], "HOWL_AMPLIFIER": av.HOWL[1],
+            "MARK_TICKS": av.MARK_TICKS, "GILDED_ENCHANTABILITY": av.GILDED_ENCHANTABILITY,
+            "IRONCLAD_DURABILITY": av.IRONCLAD_DURABILITY, "TROPHY_DURABILITY": av.TROPHY_DURABILITY}
+    floats = {"DRAIN_HEAL": av.DRAIN_HEAL, "SHOCK_SHARE": av.SHOCK_SHARE, "SHOCK_RANGE": av.SHOCK_RANGE,
+              "GALE_KNOCKBACK": av.GALE_KNOCKBACK, "GALE_LIFT": av.GALE_LIFT, "TIDE": av.TIDE, "GRAVEBANE": av.GRAVEBANE}
+    for name, value in ints.items():
+        if f"{name} = {value};" not in java:
+            err(f"ArmVariants.{name} differs from tools/arms_variants.py ({value})")
+    for name, value in floats.items():
+        if f"{name} = {float(value)}F;" not in java:
+            err(f"ArmVariants.{name} differs from tools/arms_variants.py ({value})")
+    # Bounded: no effect longer than 5 s or above amplifier 1; no share above half a blow.
+    for ticks, amplifier in (av.FROST, av.VENOM, av.WITHER, av.HOWL, (av.MARK_TICKS, 0), (av.EMBER_SECONDS * 20, 0)):
+        if ticks > 100 or amplifier > 1:
+            err(f"tools/arms_variants.py: a boon lasts {ticks} ticks at amplifier {amplifier}, over 5 s or amplifier 1")
+    if av.SHOCK_SHARE > 0.5 or av.TIDE > 0.5 or av.GRAVEBANE > 0.5:
+        err("tools/arms_variants.py: SHOCK_SHARE, TIDE and GRAVEBANE must be at most half a blow")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for name, kind, line, boon, _display in av.VARIANTS:
+        if kind not in arms.KINDS or kind in arms.CHARGING:
+            err(f"tools/arms_variants.py: {name} is of {kind}, not a swung kind of tools/arms.py")
+        if line not in av.LINES:
+            err(f"tools/arms_variants.py: {name}'s line {line} is neither a style nor a boss")
+        if boon is not None and f"tooltip.{MOD}.arms.boon.{boon}" not in lang:
+            err(f"lang: no tooltip for the {boon} boon")
+        if f"tooltip.{MOD}.arms.line.{line}" not in lang:
+            err(f"lang: no tooltip for the {line} line")
+        recipe = load(DATA / MOD / "recipe" / f"{name}.json") if line in av.STYLES else None
+        if line in av.STYLES and (not recipe or recipe.get("type") != "minecraft:smithing_transform"
+                                  or recipe.get("base") != f"{MOD}:steel_{kind}"
+                                  or recipe.get("template") != f"{MOD}:{av.STYLES[line]['pattern']}"):
+            err(f"recipe/{name}.json must smith the steel {kind} with the {line} pattern")
+        if line not in av.STYLES and (DATA / MOD / "recipe" / f"{name}.json").is_file():
+            err(f"{name} is a trophy of {line}: it has no recipe")
+        # A second at most: the steel arm's (its two-handed finisher too), with its boon at its best, below netherite's sword.
+        info = arms.KINDS[kind]
+        combo = arms.TWO_HANDED.get(kind, {}).get("combo", 1)
+        finishing = (combo - 1 + arms.FINISHER) / combo if kind in arms.TWO_HANDED else 1.0
+        blow = 1.0 + 2.5 + info["damage"]
+        if boon == "tide":
+            blow *= 1.0 + av.TIDE
+        if boon == "gravebane":
+            blow *= 1.0 + av.GRAVEBANE
+        second = blow * (4.0 + info["speed"]) * finishing
+        second += {"ember": 1.0, "venom": 0.8, "wither": 0.5}.get(boon, 0.0)   # fire, Poison and Wither, a second
+        if second >= 12.8:
+            err(f"{name} deals {second:.2f} a second at best, not below a netherite sword's 12.8")
+    for boss in av.BOSSES:
+        table = load(DATA / MOD / "loot_table" / "bosses" / f"{boss}.json") or {}
+        dropped = re.findall(r'"name": "jugcraft:([a-z_]+)"', json.dumps(table, indent=0))
+        if sorted(dropped) != sorted(av.trophies(boss)):
+            err(f"loot_table/bosses/{boss}.json drops {dropped}, not its trophies {av.trophies(boss)}")
+    for style, info in av.STYLES.items():
+        if not (DATA / MOD / "recipe" / f"{info['pattern']}.json").is_file():
+            err(f"recipe/{info['pattern']}.json is missing: the {style} pattern must be craftable")
 
 
 def check_arms_motion():
@@ -5893,7 +5980,7 @@ def main():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
-                  | set(arms.items())
+                  | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
                   | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set(town_assets.blocks()))
@@ -5910,6 +5997,7 @@ def main():
     check_deposits()
     check_gear()
     check_arms()
+    check_arms_variants()
     check_arms_motion()
     check_exosuit()
     check_grapple()

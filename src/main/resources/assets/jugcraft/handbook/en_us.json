@@ -2948,6 +2948,49 @@
           }
         },
         {
+          "title": "Arms: Styles",
+          "icon": "jugcraft:gilded_longsword",
+          "text": [
+            "Four styles restyle a steel arm at a smithing table: gilded, ironclad, bonecarved, runebound. Put the style's pattern, the steel arm and the style's material in; the arm keeps its enchantments and wear.",
+            "Gilded (a gold ingot): longsword, rapier, sabre, halberd. Takes enchantments as gold does.",
+            "Ironclad (a steel plate): zweihander, maul, war pick, battle axe. Painted, plated and bolted; lasts twice as long.",
+            "Bonecarved (a bone block): dagger, flail, glaive, labrys. 20% harder against the undead.",
+            "Runebound (ectoplasm): nodachi, moonblade, staff, war hammer. Its runes glow, and a foe it strikes glows for 4 seconds, seen through walls.",
+            "Each fights as its kind does: the same swing, reach, trait and art."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:gold_nugget",
+              "minecraft:gold_nugget",
+              "minecraft:gold_nugget",
+              "minecraft:gold_nugget",
+              "minecraft:paper",
+              "minecraft:gold_nugget",
+              "minecraft:gold_nugget",
+              "minecraft:gold_nugget",
+              "minecraft:gold_nugget"
+            ],
+            "result": "jugcraft:gilders_pattern",
+            "count": 1
+          }
+        },
+        {
+          "title": "Arms: Trophies",
+          "icon": "jugcraft:glacier_maul",
+          "text": [
+            "Great foes yet to be met in the world will each carry two arms of their own, with a boon:",
+            "The Yeti King: Glacier Maul and Rimeclaw.",
+            "The Cinder Tyrant: Cinderbrand and Magmaw.",
+            "The Mire Hag: Hagthorn and Bogfang.",
+            "The Crypt Lich: Soulreaver and Gravewarden.",
+            "The Iron Dreadnought: Dynamo Halberd and Piston Hammer.",
+            "The Alpha Werewolf: Moonfang and Howler.",
+            "The Storm Roc: Stormcaller and Galefeather.",
+            "The Abyssal Leviathan: Tidebreaker and Leviathan's Hook.",
+            "Trophies last twice as long as steel, and fight as their kinds do."
+          ]
+        },
+        {
           "title": "Paxels",
           "icon": "jugcraft:steel_paxel",
           "text": [
