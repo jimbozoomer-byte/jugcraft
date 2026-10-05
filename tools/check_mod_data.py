@@ -820,6 +820,8 @@ def check_raiders():
     camps = (folder / "RaiderCamps.java").read_text(encoding="utf-8")
     if f" RARITY = {raiders.CAMP_RARITY};" not in camps:
         err(f"RaiderCamps.RARITY differs from tools/raiders.py CAMP_RARITY ({raiders.CAMP_RARITY})")
+    if f" SPAWN_CLEARANCE = {raiders.CAMP_SPAWN_CLEARANCE};" not in camps:
+        err(f"RaiderCamps.SPAWN_CLEARANCE differs from tools/raiders.py CAMP_SPAWN_CLEARANCE ({raiders.CAMP_SPAWN_CLEARANCE})")
     if f" RAID_CHANCE = {raiders.RAID_CHANCE}F;" not in raids:
         err(f"RaiderRaids.RAID_CHANCE differs from tools/raiders.py ({raiders.RAID_CHANCE})")
     order = ["raider_grunt", "raider_grenadier", "raider_officer", "raider_blimp", "raider_walker"]

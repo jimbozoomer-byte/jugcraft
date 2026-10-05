@@ -84,6 +84,8 @@ ABANDON_RANGE = 160
 MAX_LEVEL = 5
 # Raider camps: one chunk in CAMP_RARITY (in the plains, savanna and badlands), on flat ground only.
 CAMP_RARITY = 400
+# No camp this close (blocks) to the world spawn, so a new player does not start beside one.
+CAMP_SPAWN_CLEARANCE = 512
 CAMP_LOOT = [("minecraft:gunpowder", 1, 4), ("minecraft:iron_nugget", 2, 8), (f"{MOD}:heavy_shell", 1, 3),
              (f"{MOD}:grenade", 0, 2), ("minecraft:bread", 1, 3), (f"{MOD}:steel_plate", 0, 2)]
 # Text options and their defaults (config/JugcraftConfig.java).

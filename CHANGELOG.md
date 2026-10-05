@@ -63,7 +63,7 @@ No numbered release yet. Everything below is on `main`.
 - **Switch:** `raiders.enabled=false` or `raiders.raids=off`. `raiders.walkers`, `raiders.blimps`, `raiders.grace_days` and `raiders.interval_days` tune it.
 - **Siege Ladders:** a grunt stuck at a wall props up a ladder and climbs it. It needs mob griefing on, and the ladder crumbles after a minute, dropping nothing.
 - **Raider War Horn** (three insignia and a goat horn) calls a raid on purpose. The **Beat Them Back** advancement goes to everyone who sees a raid through.
-- **Raider camps:** rare sandbagged camps in the plains, savanna and badlands. Each has tents, a campfire, a supply barrel and a garrison of four to clear.
+- **Raider camps:** rare sandbagged camps in the plains, savanna and badlands, never within 512 blocks of the world spawn. Each has tents, a campfire, a supply barrel and a garrison of four to clear.
 - Ten game tests and a screenshot scene. Record: [raiders.md](docs/features/raiders.md).
 
 ### Unmerged: Fire control, batch 56
