@@ -58,7 +58,7 @@ Five kinds of raider. All are hostile mobs: sentry guns (batch 56) and town guar
 
 ### Siege ladders
 - **Walls slow raiders rather than stop them.**
-  - A grunt on its way somewhere (its raid's objective, or someone it hunts) that has been pressed against a wall for 2 seconds props a **Siege Ladder** up the wall face.
+  - A grunt on its way somewhere (its raid's objective, or someone it hunts) that has got no closer to it for 2 seconds, with a wall in front of it on that side, props a **Siege Ladder** up the wall face. (A blocked path leaves a mob standing at the wall, not pushing into it, so this goes by progress.)
   - The ladder goes up to 8 blocks, or to the top of the wall, and the grunt climbs it.
 - **Temporary:** a siege ladder is rough poles and lashed rungs. It crumbles after a minute and drops nothing, and players break it in a moment.
 - **Only placed where mob griefing is on** (the `mobGriefing` game rule), as with any mob that changes blocks.

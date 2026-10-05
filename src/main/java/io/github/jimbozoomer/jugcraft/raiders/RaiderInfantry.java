@@ -54,8 +54,10 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider {
 
 	private final RaidMember member = new RaidMember();
 	private int rally;
-	/** How long a grunt has been stuck against a wall on its way somewhere (for its siege ladders). */
+	/** How long a grunt has gone without getting closer to where it is going (for its siege ladders). */
 	private int stuck;
+	/** The closest it has come to where it is going since it last got stuck. */
+	private double closest = Double.MAX_VALUE;
 
 	public RaiderInfantry(EntityType<? extends RaiderInfantry> type, Level level) {
 		super(type, level);
@@ -116,13 +118,24 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider {
 	}
 
 	/**
-	 * Siege ladders: a grunt on its way somewhere (a raid's objective, or someone it hunts) that has been pressed against
-	 * a wall for {@value JugcraftRaiders#LADDER_STUCK} ticks props a ladder up it, up to
-	 * {@value JugcraftRaiders#LADDER_MAX} blocks or the top of the wall, and climbs. Only where mob griefing is on.
+	 * Siege ladders: a grunt on its way somewhere (someone it hunts, or its raid's objective) that has got no closer to
+	 * it for {@value JugcraftRaiders#LADDER_STUCK} ticks with a wall in front of it, on that side, props a ladder up the
+	 * wall, up to {@value JugcraftRaiders#LADDER_MAX} blocks or the top of the wall, and climbs. A blocked path leaves a
+	 * mob standing at the wall rather than pushing into it, so this goes by progress rather than by collisions. Only
+	 * where mob griefing is on.
 	 */
 	private void climbWalls(ServerLevel level) {
-		boolean going = getTarget() != null || member.objective != null;
-		if (!going || !horizontalCollision || onClimbable()) {
+		BlockPos goal = getTarget() != null ? getTarget().blockPosition() : member.objective;
+		if (goal == null || onClimbable()) {
+			stuck = 0;
+			closest = Double.MAX_VALUE;
+			return;
+		}
+		double dx = goal.getX() + 0.5 - getX();
+		double dz = goal.getZ() + 0.5 - getZ();
+		double distance = Math.sqrt(dx * dx + dz * dz);
+		if (distance < closest - 0.5) {
+			closest = distance;
 			stuck = 0;
 			return;
 		}
@@ -130,7 +143,10 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider {
 			return;
 		}
 		stuck = 0;
-		net.minecraft.core.Direction facing = getDirection();
+		closest = Double.MAX_VALUE;
+		net.minecraft.core.Direction facing = Math.abs(dx) > Math.abs(dz)
+				? (dx > 0 ? net.minecraft.core.Direction.EAST : net.minecraft.core.Direction.WEST)
+				: (dz > 0 ? net.minecraft.core.Direction.SOUTH : net.minecraft.core.Direction.NORTH);
 		BlockPos at = blockPosition();
 		int placed = 0;
 		for (int dy = 0; dy < JugcraftRaiders.LADDER_MAX; dy++) {
