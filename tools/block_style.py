@@ -299,7 +299,7 @@ def metal(palette, seed=1, panels=True, rivets=False):
     def paint(p):
         w, h = _size(p)
         n = len(palette)
-        g = grain(w, h, seed, 3.0, 8.0, 0.5)
+        g = grain(w, h, seed, 2.0, 4.0, 0.6)
         mid = n // 2
         for y in range(h):
             for x in range(w):
