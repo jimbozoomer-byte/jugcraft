@@ -249,6 +249,15 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		return kind;
 	}
 
+	/** Read-only server state for inspection overlays; does not advance or complete work. */
+	public int processingProgress() {
+		return progress;
+	}
+
+	public int processingDuration() {
+		return maxProgress;
+	}
+
 	public SideConfig sides() {
 		return sides;
 	}

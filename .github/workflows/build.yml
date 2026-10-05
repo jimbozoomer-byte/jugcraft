@@ -28,6 +28,32 @@ jobs:
         run: python3 tools/check_mod_data.py
       - name: Build mod
         run: ./gradlew build --no-daemon
+      - name: Verify pinned library downloads
+        run: python3 scripts/package_modrinth.py verify
+      - name: Package Jugcraft Complete
+        run: python3 scripts/package_modrinth.py build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jugcraft-installers
+          path: |
+            build/libs/*.jar
+            build/distributions/*
+          if-no-files-found: error
+
+  optional-absent:
+    name: optional integrations absent
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Build and run server tests without optional integrations
+        run: ./gradlew build --no-daemon -PjugcraftOptionalIntegrations=false
 
   # A real game client with software rendering (Mesa): runs the client game tests in
   # src/gametest (JugcraftClientGameTests and the rest), which build showrooms and worlds and

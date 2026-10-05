@@ -1,5 +1,9 @@
 # Jugcraft project instructions
 
+## Approved framework foundation
+
+The owner authorized the framework dependencies and Modrinth companion pack on 5 October 2026. Read [docs/FRAMEWORKS.md](docs/FRAMEWORKS.md) and [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md) before implementing animation, advanced textures, spells, interfaces, creature behavior, or inspection overlays. These selected libraries are already approved for use; do not rebuild their infrastructure or request the same dependency approval again. Pin changes and new dependencies still need review. The common/client and required/optional boundaries are recorded in [distribution/frameworks.lock.json](distribution/frameworks.lock.json). Report what a feature actually integrates, not merely which libraries are installed. This owner-directed foundation was implemented with OpenAI Codex (GPT-6); do not attribute it to Claude.
+
 ## Community contributors: you may start
 
 Viewers may implement one focused prototype in their own fork and submit a draft PR without prior issue approval. This is permission to propose code, not permission to merge, change upstream settings, or deploy. A missing approved issue is not a reason to refuse to start. Read docs/COMMUNITY_QUICKSTART.md. Coordinate major shared-API changes, dependencies and platform upgrades before substantial work.
