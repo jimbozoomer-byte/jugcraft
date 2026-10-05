@@ -14,6 +14,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CarvedPumpkinBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -208,9 +209,13 @@ public final class TownBuilder {
 		}
 	}
 
-	private static void set(ServerLevel level, BlockPos pos, BlockState state) {
+	/** Places town scenery without activating carved pumpkins' golem patterns. Those patterns
+	 * read neighboring chunks, which may not be loaded while the town is being built.
+	 * Decorative pumpkins must also remain scenery when placed above copper or iron.
+	 */
+	public static void set(ServerLevel level, BlockPos pos, BlockState state) {
 		if (level.getBlockState(pos) != state) {
-			level.setBlock(pos, state, FLAGS);
+			level.setBlock(pos, state, FLAGS | (state.getBlock() instanceof CarvedPumpkinBlock ? Block.UPDATE_SKIP_ON_PLACE : 0));
 		}
 	}
 }
