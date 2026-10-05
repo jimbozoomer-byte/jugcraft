@@ -86,8 +86,8 @@ Every machine is one `MachineBlock` + `MachineBlockEntity` whose behavior comes 
 | WIND_TURBINE | wind_turbine | **9 tall**, 12–72 JE/t; rotor drawn by `client/WindTurbineRenderer` | 48k / 0 / 192 / – | – | – |
 | PULVERIZER | pulverizer | ore → 2 dust + byproduct | 10k / 128 / 0 / 20 | in, out, 2 byproduct | `jugcraft:pulverizing` |
 | ORE_WASHER | ore_washer | ore + 500 mB water → 3 washed ore | 10k / 128 / 0 / 16 | in, out (water tank) | `jugcraft:ore_washing` |
-| SIEVE | sieve | gravel → flint + finds | 10k / 128 / 0 / 8 | in, out, 2 byproduct | `jugcraft:sifting` |
-| SAWMILL | sawmill | log → 6 planks + sawdust | 10k / 128 / 0 / 12 | in, out, 2 byproduct | `jugcraft:sawing` |
+| SIEVE | sieve | gravel → flint + finds; vibrator weights drawn turning by `client/MachineRotors` | 10k / 128 / 0 / 8 | in, out, 2 byproduct | `jugcraft:sifting` |
+| SAWMILL | sawmill | log → 6 planks + sawdust; blade and belt drive drawn turning by `client/MachineRotors` | 10k / 128 / 0 / 12 | in, out, 2 byproduct | `jugcraft:sawing` |
 | CAPACITOR_BANK | capacitor_bank | **2×2** battery: charges any side, outputs from its front | 4M / 4,096 / 4,096 / – | – | – |
 | LITHIUM_BATTERY_BANK | lithium_battery_bank | **3×2×1** battery (electric look): charges any side, outputs from all six front faces | 32M / 16,384 / 16,384 / – | – | – |
 | LITHOGRAPHY_STATION | lithography_station | **3×2×2** fluid processor (cyan look): wafer + 2 copper wire + 100 mB acid → 4 microchips | 60k / 1,024 / 0 / 192 | 2 in, out, 4,000 mB tank | `jugcraft:lithography` |
@@ -300,6 +300,7 @@ Every `FenceBlock` and `IronBarsBlock` has the properties `north_east`, `south_e
 - **Consumers:** `MachineBlockEntity` (as JE, up to `kind.maxInput`, for any powered non-generator, non-battery kind, reached through any block of a multi-block) and `DynamoBlockEntity` (KE → JE at 75%).
 - **Caching:** networks are cached per (source, side) and level. Shafts, gearboxes, sources and the dynamo call `KineticNetworks.invalidate(level)` when placed, removed or their neighbors change. There are at most 256 parts per network.
 - **Turning look:** `ShaftBlock.TURNING`, set by the network with client-only updates and cleared by a scheduled tick 10–20 ticks after the last push. While it is set (or a steam engine is `lit`), the block's `_active` model leaves out its rotor and client `KineticRotorRenderer` (via `KineticRotors`) draws it spinning, from `assets/jugcraft/kinetic_rotors.json` (exported by `tools/kinetic_rotors.py` from `kinetic_models.ROTORS`). `ShaftBlockEntity` holds no data; it exists only for the renderer.
+- **Machine rotors:** the giant sawmill's blade and belt drive and the giant sieve's eccentric weights are drawn by client `MachineRotors` through the machine renderer (`WindTurbineRenderer`) from `assets/jugcraft/machine_rotor_quads.json` (exported by `tools/machine_rotors.py` from `giant_models.ROTORS`): standing still while idle, turning while the master block is `lit`, only on the big machine (`compact=false`), with each machine's angle kept on the client and speed changes eased.
 
 ### Fluids (`fluid/`)
 

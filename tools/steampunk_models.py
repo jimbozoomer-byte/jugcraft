@@ -1043,3 +1043,5 @@ from large_machines import ENLARGED as _ENLARGED  # noqa: E402
 COMPACT = {machine: MODELS[machine] for machine in _ENLARGED}
 from giant_models import MODELS as _GIANTS  # noqa: E402
 MODELS.update(_GIANTS)
+# What the giants' item icons add for the parts a renderer draws (the sawmill's blade): model_writer.
+from giant_models import ITEM_EXTRAS  # noqa: E402,F401

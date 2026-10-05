@@ -20,7 +20,7 @@
       "to": [
         15,
         12,
-        15
+        13.5
       ],
       "faces": {
         "south": {
@@ -31,6 +31,32 @@
         },
         "up": {
           "texture": "#machine_top"
+        }
+      }
+    },
+    {
+      "from": [
+        2.75,
+        0,
+        15
+      ],
+      "to": [
+        13,
+        12,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#fluid_tank_side"
+        },
+        "east": {
+          "texture": "#fluid_tank_side"
+        },
+        "west": {
+          "texture": "#fluid_tank_side"
+        },
+        "up": {
+          "texture": "#fluid_tank_top"
         }
       }
     }

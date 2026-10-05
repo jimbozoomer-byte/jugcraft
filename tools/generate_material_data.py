@@ -616,6 +616,9 @@ def machine_assets(lang):
         write(ASSETS / "blockstates" / f"{block}.json", {"variants": {k.rstrip(","): v for k, v in variants.items()}})
         write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
     write(ASSETS / "kinetic_rotors.json", kinetic_rotors.export(KINETIC_BLOCKS))
+    # Machines' turning parts (the sawmill's blade, the sieve's weights): client/MachineRotors draws them.
+    import machine_rotors
+    write(ASSETS / "machine_rotor_quads.json", machine_rotors.export())
     # Conveyor slopes: an ascending and a descending model, each with a moving-belt version, turned to face the way
     # items travel.
     for block, info in SLOPE_BLOCKS.items():

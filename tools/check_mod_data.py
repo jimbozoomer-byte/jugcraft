@@ -1753,6 +1753,99 @@ def check_large_machines():
                 err(f"{path.name}: element outside -16..32")
 
 
+def check_machine_rotors():
+    """The turning parts client/MachineRotors draws (tools/machine_rotors.py, giant_models.ROTORS): every rotor names a
+    big machine and the parts it needs, its textures exist, are still and opaque (the solid render type ignores alpha)
+    and every UV stays inside its texture; the renderer reads the file; the static models of both styles keep clear of
+    the blade; the sawmill's and sieve's elements stay inside their footprints (an element kept whole outside them
+    stretches its texture and escapes the per-part separation), no face of theirs drawn with a stretched texture
+    ("name!") is cut by a block seam (each piece would show the whole texture again, squeezed), and their running lamps
+    are on the master block, the only one whose lit state changes."""
+    import steampunk_models  # noqa: F401  (loads giant_models after the helpers it builds on)
+    from giant_models import MODELS as GIANTS, ROTORS
+    from large_machines import ENLARGED, FOOTPRINTS, MODELS as CLASSIC
+    from model_writer import FACE_AXES, unpack
+    data = load(ASSETS / "machine_rotor_quads.json")
+    if data is None:
+        return
+    if set(data) != set(ROTORS):
+        err(f"machine_rotor_quads.json has {sorted(data)}, giant_models.ROTORS {sorted(ROTORS)}: run generate_material_data.py")
+    opaque = {}
+    for name, rotor in data.items():
+        if rotor.get("block") not in ENLARGED or rotor.get("axis") not in ("x", "y", "z"):
+            err(f"machine rotor {name}: block {rotor.get('block')} is not a big machine, or its axis is wrong")
+        if rotor.get("when", {}).get("compact") != "false":
+            err(f"machine rotor {name} must only draw on the big machine (when compact=false)")
+        for key in ("center", "property", "speed", "quads"):
+            if key not in rotor:
+                err(f"machine rotor {name} has no {key}")
+        for quad in rotor.get("quads", []):
+            texture = quad["texture"]
+            png = ASSETS / "textures" / "block" / f"{texture}.png"
+            if texture not in opaque:
+                if not png.is_file() or png.with_name(png.name + ".mcmeta").is_file():
+                    err(f"machine rotor {name}: texture {texture} is missing or animated (the renderer draws the whole image)")
+                    opaque[texture] = True
+                else:
+                    with Image.open(png) as img:
+                        opaque[texture] = img.convert("RGBA").getextrema()[3][0] == 255
+                    if not opaque[texture]:
+                        err(f"machine rotor {name}: texture {texture} has see-through pixels (rotors are drawn solid)")
+            if len(quad["vertices"]) != 4 or any(not (0 <= v[3] <= 1 and 0 <= v[4] <= 1) for v in quad["vertices"]):
+                err(f"machine rotor {name}: a {texture} quad has a UV outside its texture (nothing may rely on wrapping)")
+                break
+    client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+    rotors_java = (client / "MachineRotors.java").read_text(encoding="utf-8") if (client / "MachineRotors.java").is_file() else ""
+    renderer = (client / "WindTurbineRenderer.java").read_text(encoding="utf-8")
+    if '"machine_rotor_quads.json"' not in rotors_java or "MachineRotors.extract" not in renderer or "MachineRotors.submit" not in renderer:
+        err("client/MachineRotors must read machine_rotor_quads.json and the machine renderer must extract and submit it")
+    for name, rotor in ROTORS.items():
+        _, cy, cz = rotor["center"]
+        for style, models in (("steampunk", GIANTS), ("classic", CLASSIC)):
+            for item in models[rotor["block"]]:
+                frm, to, _texture, options = unpack(item)
+                if options.get("rotation"):
+                    continue
+                for x0, x1, radius in rotor.get("clear", []):
+                    if frm[0] >= x1 or to[0] <= x0:
+                        continue
+                    dy = max(frm[1] - cy, 0, cy - to[1])
+                    dz = max(frm[2] - cz, 0, cz - to[2])
+                    if dy * dy + dz * dz < radius * radius:
+                        err(f"{style} {rotor['block']}: element {frm}..{to} cuts into the turning {name} (x {x0}..{x1}, r {radius})")
+    for machine in ("sawmill", "sieve"):
+        footprint = FOOTPRINTS[machine]
+        for item in GIANTS[machine]:
+            frm, to, _texture, options = unpack(item)
+            if options.get("rotation"):
+                continue
+            covered = 0.0
+            for offset in footprint:
+                low = [offset[axis] * 16 for axis in range(3)]
+                a = [max(frm[axis], low[axis]) for axis in range(3)]
+                b = [min(to[axis], low[axis] + 16) for axis in range(3)]
+                if all(a[axis] < b[axis] for axis in range(3)):
+                    covered += (b[0] - a[0]) * (b[1] - a[1]) * (b[2] - a[2])
+            if abs(covered - (to[0] - frm[0]) * (to[1] - frm[1]) * (to[2] - frm[2])) > 1e-6:
+                err(f"{machine}: element {frm}..{to} reaches outside its footprint")
+        for style, models in (("steampunk", GIANTS), ("classic", CLASSIC)):
+            for item in models[machine]:
+                frm, to, texture, options = unpack(item)
+                if options.get("rotation"):
+                    continue  # kept whole on one part, never cut
+                faces = texture if isinstance(texture, dict) else {"*": texture}
+                for face, (u_axis, v_axis, _, _) in FACE_AXES.items():
+                    name = faces.get(face, faces.get("*"))
+                    if name and name.endswith("!") and any(
+                            frm[axis] < seam < to[axis] for axis in (u_axis, v_axis) for seam in range(-64, 129, 16)):
+                        err(f"{style} {machine}: the {face} face of {frm}..{to} stretches {name[:-1]} across a block seam "
+                            "(each part would show the whole texture again): keep it inside one block")
+        for index in range(len(footprint)):
+            path = ASSETS / "models" / "block" / f"{machine}_part{index}.json"
+            if index and '"#dr_amber"' in path.read_text(encoding="utf-8"):
+                err(f"{machine}_part{index} has the amber running lamp: only the master block (part 0) lights up")
+
+
 def check_handbook(registered):
     """Every Jugcraft item the Engineer's Handbook shows must exist."""
     book = load(ASSETS / "handbook" / "en_us.json")
@@ -6034,6 +6127,7 @@ def main():
     check_machines(registered)
     check_large_machines()
     check_style_pack()
+    check_machine_rotors()
     check_drones()
     check_tower()
     check_guide_books()
