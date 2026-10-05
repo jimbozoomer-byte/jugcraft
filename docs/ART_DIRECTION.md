@@ -15,13 +15,12 @@ On 4 October 2026 the owner rejected the noisy, rust-covered dieselpunk textures
 - **Wear is placed, not sprinkled.** Use a chip at a corner, a stain weeping from a bolt or a seam, or a few short streaks one shade off the fill. Rust is an accent, never a whole surface.
 - **Pattern beats noise.** Show grain, ribs, tread and ripples as regular shapes: plank lines, ribs every four rows, raised lozenges, long ripple lines.
 
-## Woods and leaves: vanilla's manner
-On 5 October 2026 the owner repainted the woods and asked for every tree to look "more similar to how the vanilla textures are" ([wood-repaint.md](features/wood-repaint.md)). `tools/wood_style.py` draws every tree's wood and leaves this way, and new trees should follow it:
-- **One colour per wood,** from the owner's paintings, as a short ramp of tones; the bark has its own darker colour.
-- **Bark runs along the trunk:** vertical furrows and ridges, never rings or bands across it.
-- **Log ends:** square growth rings to the edge inside a one-pixel rim of bark.
-- **Planks:** four boards a block, lit on top, a dark seam below, staggered joints.
-- **Leaves:** a fine speckle of one- and two-pixel leaves in four tones, with small gaps that stay dark underneath for fast graphics.
+## Woods, leaves and other natural textures: vanilla's manner
+On 5 October 2026 the owner repainted the woods and asked for every tree to look "more similar to how the vanilla textures are" ([wood-repaint.md](features/wood-repaint.md)); seeing the result in game, they asked for the way it was done to become the rule for "any additional wood or natural textures". **Follow [NATURAL_TEXTURES.md](NATURAL_TEXTURES.md)** for every wood, tree, leaf, sapling, plant, stone, soil or ore texture. In short:
+- 16×16, drawn by code in vanilla's manner (never recoloured from Mojang's files).
+- One colour a material, from the owner's paintings, stepped into a lightness ramp; kept within vanilla's brightness and saturation.
+- Marks that follow the material: vertical bark furrows (never rings across a trunk), straight stripped grain, four lit boards, square rings on log ends, a fine clumped speckle of leaves with a few small gaps.
+- Low contrast, no outlines or gradients, one trait a species; seamless and seeded.
 
 ## Steampunk: stone, bronze and early steel tiers
 Brass, copper and riveted iron; glass portholes and valve wheels; firebrick and wood. Textures start with `sp_` (`tools/steampunk_textures.py`). Since batch 53 they follow [Texturing: keep it clean](#texturing-keep-it-clean) too. The classic style pack keeps the older plain look for anyone who prefers it.
