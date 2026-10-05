@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:item/spear_in_hand",
+  "parent": "jugcraft:item/arms_spear",
   "textures": {
-    "layer0": "jugcraft:item/bronze_spear_in_hand"
+    "tex": "jugcraft:item/bronze_spear_model"
   }
 }

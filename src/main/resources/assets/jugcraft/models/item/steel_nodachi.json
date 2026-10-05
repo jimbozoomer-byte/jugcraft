@@ -1,5 +1,5 @@
 {
-  "parent": "jugcraft:item/arms_nodachi",
+  "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "jugcraft:item/steel_nodachi"
   }

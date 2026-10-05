@@ -159,6 +159,35 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.DANCE_FLOOR_ENTITY, DanceFloorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.GHOST_BELL_ENTITY, GhostBellRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FLYING_EYEBALL_ENTITY, FlyingEyeballRenderer::new);
+		// Halloween decorations batch 17, the Witch's Workshop.
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.HORNED_SKULL_CAULDRON_ENTITY, HornedSkullCauldronRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CANDELABRUM_ENTITY, CandelabrumRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.ENCHANTED_BROOM_ENTITY, EnchantedBroomRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.DUSTPAN_ENTITY, DustpanRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOWCASE_ENTITY, ShowcaseRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.MOTH_CASE_ENTITY, MothCaseRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.ODDITY_JAR_ENTITY, OddityJarRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.COFFIN_WARDROBE_ENTITY, CoffinWardrobeRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SARCOPHAGUS_TOMB_ENTITY, SarcophagusRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.COLOSSAL_SKULL_ENTITY, ColossalSkullRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.GARGOYLE_SENTINEL_ENTITY, GargoyleSentinelRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.GARGOYLE_RAINSPOUT_ENTITY, GargoyleRainspoutRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.LIGHTNING_HARNESS_ENTITY, LightningHarnessRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CRAWLING_HAND_ENTITY, CrawlingHandRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SILK_COCOON_ENTITY, SilkCocoonRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.EGG_SAC_ENTITY, EggSacRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SILK_SPOOL_ENTITY, SilkSpoolRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.DINING_CHAIR_ENTITY, DiningChairRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.TABLE_SETTING_ENTITY, TableSettingRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.GRANDFATHER_CLOCK_ENTITY, GrandfatherClockRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.WITCHLIGHT_ENTITY, WitchlightRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SILHOUETTE_ENTITY, YardSilhouetteRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.MOON_LAMP_ENTITY, HarvestMoonLampRenderer::new);
+		// Halloween decorations batch 20, Pumpkin Night.
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SINGING_PUMPKIN_ENTITY, SingingPumpkinRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.HARVEST_EFFIGY_ENTITY, HarvestEffigyRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.FARM_STAND_ENTITY, FarmStandRenderer::new);
+		MenuScreens.register(JugcraftAgriculture.FARM_STAND_MENU, FarmStandScreen::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FORTUNE_TABLE_ENTITY, FortuneTellerTableRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.BONFIRE_ENTITY, HalloweenBonfireRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.WAX_POT_ENTITY, WaxPotRenderer::new);

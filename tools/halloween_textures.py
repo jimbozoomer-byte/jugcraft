@@ -21,6 +21,12 @@ GIANT_STEM = [rgb("3d3a16"), rgb("5a5422"), rgb("7a7232"), rgb("9a9046")]
 WHITE_PUMPKIN = [rgb("9c9a88"), rgb("c4c2b0"), rgb("dddbca"), rgb("eeede2"), rgb("fbfaf3")]
 JARRAHDALE = [rgb("4a5a5c"), rgb("62757a"), rgb("7c9196"), rgb("98abae"), rgb("b6c6c6")]
 CINDERELLA = [rgb("6e1c0a"), rgb("9a2c10"), rgb("c04218"), rgb("dc5e24"), rgb("ee8240")]
+# Pumpkin Night's heirlooms (tools/decor20.py): Red Kuri, a smooth teardrop of deep red-orange; Kabocha, squat and dark
+# green, flecked and striped pale.
+RED_KURI = [rgb("5a1406"), rgb("86220a"), rgb("b0360e"), rgb("d04e16"), rgb("e8702a")]
+KABOCHA = [rgb("10241a"), rgb("1a3622"), rgb("274c2e"), rgb("37643c"), rgb("4e7e50")]
+KABOCHA_FLECK = [rgb("7e9a6c"), rgb("9cb48a"), rgb("b8c8a2")]
+TEMPURA = [rgb("9a6a1e"), rgb("c48e2e"), rgb("e0b04a"), rgb("f2d27a"), rgb("fbeab0")]
 BOTTLE = [rgb("4c6a2c"), rgb("67873a"), rgb("86a64e"), rgb("a8c070"), rgb("cad898")]
 BOTTLE_SPOT = [rgb("d8dcae"), rgb("eef0cc")]
 DRIED = [rgb("6a4a22"), rgb("8c6630"), rgb("ad8442"), rgb("c9a35c"), rgb("e0c080")]
@@ -600,6 +606,45 @@ def birdhouse_icon():
     return c.img
 
 
+def kabocha_side():
+    """A kabocha's skin: dark green with faint ribs, flecked and streaked here and there with pale grey-green."""
+    img = gourd_side(KABOCHA, 4, 6505, warts=3)
+    c = Canvas()
+    c.img = img
+    rng = random.Random(6507)
+    for _ in range(22):
+        x, y = rng.randrange(16), rng.randrange(16)
+        length = rng.choice((1, 1, 2, 3))
+        for dy in range(length):
+            c.px(x, y + dy, KABOCHA_FLECK[rng.randrange(2)] if rng.random() < 0.6 else KABOCHA[4])
+    return c.img
+
+
+def tempura_item():
+    """Kabocha Tempura: three crescent slices of kabocha, green rind and orange flesh, in a crisp golden batter, fanned on
+    a paper."""
+    c = Canvas()
+    for y in range(9, 15):
+        for x in range(1, 15):
+            if abs(x - 7.5) + abs(y - 12) * 1.6 < 8:
+                c.px(x, y, PAPER[2 if (x + y) % 5 else 3])
+    rng = random.Random(6506)
+    for i, (cx, cy) in enumerate(((5.0, 9.5), (8.5, 7.5), (11.5, 9.0))):
+        for y in range(16):
+            for x in range(16):
+                d = math.hypot(x - cx, (y - cy) * 1.4)
+                if 1.6 < d < 4.4 and y <= cy + 1:
+                    edge = d > 3.6
+                    batter = TEMPURA[rng.choice((1, 2, 2, 3))] if rng.random() < 0.45 else None
+                    if edge:
+                        c.px(x, y, KABOCHA[3] if not batter else batter)
+                    else:
+                        c.px(x, y, batter if batter else rgb("e88a2a") if d > 2.4 else rgb("f2a444"))
+        c.px(cx, cy - 3, TEMPURA[4])
+    outline(c, TEMPURA[0])
+    return c.img
+
+
 def halloween_textures():
     """(kind, name) -> image for every Halloween-harvest texture."""
     out = giant_textures()
@@ -610,6 +655,10 @@ def halloween_textures():
         ("block", "jarrahdale_pumpkin_top"): gourd_top(JARRAHDALE, 10, STALK[0]),
         ("block", "cinderella_pumpkin_side"): gourd_side(CINDERELLA, 3, 6502),
         ("block", "cinderella_pumpkin_top"): gourd_top(CINDERELLA, 10, STALK[1]),
+        ("block", "red_kuri_pumpkin_side"): gourd_side(RED_KURI, 8, 6504, warts=2),
+        ("block", "red_kuri_pumpkin_top"): gourd_top(RED_KURI, 6, STALK[0]),
+        ("block", "kabocha_pumpkin_side"): kabocha_side(),
+        ("block", "kabocha_pumpkin_top"): gourd_top(KABOCHA, 8, STALK[1]),
         ("block", "bottle_gourd_side"): gourd_side(BOTTLE, 0, 6503, spot=BOTTLE_SPOT + [BOTTLE_SPOT[0]]),
         ("block", "bottle_gourd_top"): gourd_top(BOTTLE, 0, STALK[1]),
         ("block", "ornamental_corn_middle_ears"): ornamental_middle(),
@@ -635,6 +684,13 @@ def halloween_textures():
                                                          [(4, 4), (9, 4), (6, 8), (11, 9), (3, 12), (8, 13)], size=(3, 1)),
         ("item", "cinderella_pumpkin_seeds"): seeds_item([rgb("d0b47c"), rgb("e4cc98"), rgb("f6e6c0")],
                                                          [(3, 5), (8, 3), (12, 6), (5, 10), (10, 11), (6, 13)], size=(3, 1)),
+        ("item", "red_kuri_pumpkin_seeds"): seeds_item([rgb("c89a5c"), rgb("dcb478"), rgb("f0d4a0")],
+                                                       [(4, 3), (10, 4), (6, 7), (12, 9), (3, 11), (8, 12)], size=(3, 1)),
+        ("item", "kabocha_pumpkin_seeds"): seeds_item([rgb("b8a878"), rgb("d0c294"), rgb("e8dcb4")],
+                                                      [(3, 4), (9, 3), (12, 8), (6, 9), (10, 13), (3, 12)], size=(3, 1)),
+        ("item", "red_kuri_soup"): bowl_item([rgb("8a2a0c"), rgb("b23e12"), rgb("d0581c"), rgb("e87a34")],
+                                             [(SEED_PALE[2], [(6, 6), (10, 7)]), (rgb("4a7a32"), [(8, 6), (5, 7)])]),
+        ("item", "kabocha_tempura"): tempura_item(),
         ("item", "bottle_gourd_seeds"): seeds_item([rgb("8a7046"), rgb("a88a5a"), rgb("c8aa78")],
                                                    [(3, 4), (8, 4), (12, 7), (5, 9), (10, 12), (3, 13)], size=(2, 2)),
         ("item", "dried_bottle_gourd"): bottle_gourd_item(dried=True),

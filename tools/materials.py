@@ -233,6 +233,9 @@ def feature_of(entry_id):
     import arms
     if entry_id in arms.items():
         return arms.feature(entry_id)
+    import arms_variants
+    if entry_id in arms_variants.items():
+        return arms_variants.FEATURE
     import grapple
     if entry_id in grapple.items():
         return FEATURE
