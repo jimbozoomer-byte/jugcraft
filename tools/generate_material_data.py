@@ -1280,6 +1280,8 @@ def tags():
     fortifications.add_tags(tags)
     import fire_control
     fire_control.add_tags(tags)
+    import raiders
+    raiders.add_tags(tags)
     tags.add("block", "minecraft:rails", rid("booster_rail"))
     tags.add("item", "minecraft:rails", rid("booster_rail"))
     import construction

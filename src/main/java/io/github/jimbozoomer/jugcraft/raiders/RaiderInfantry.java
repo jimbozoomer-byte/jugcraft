@@ -54,6 +54,8 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider {
 
 	private final RaidMember member = new RaidMember();
 	private int rally;
+	/** How long a grunt has been stuck against a wall on its way somewhere (for its siege ladders). */
+	private int stuck;
 
 	public RaiderInfantry(EntityType<? extends RaiderInfantry> type, Level level) {
 		super(type, level);
@@ -100,6 +102,9 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider {
 		if (member.checkRaid(level, this)) {
 			return;
 		}
+		if (role() == Role.GRUNT) {
+			climbWalls(level);
+		}
 		if (role() == Role.OFFICER && ++rally >= JugcraftRaiders.RALLY_TICKS) {
 			rally = 0;
 			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(JugcraftRaiders.RALLY_RADIUS),
@@ -107,6 +112,42 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider {
 				near.addEffect(new MobEffectInstance(MobEffects.SPEED, JugcraftRaiders.RALLY_EFFECT, 0, true, true), this);
 				near.addEffect(new MobEffectInstance(MobEffects.STRENGTH, JugcraftRaiders.RALLY_EFFECT, 0, true, true), this);
 			}
+		}
+	}
+
+	/**
+	 * Siege ladders: a grunt on its way somewhere (a raid's objective, or someone it hunts) that has been pressed against
+	 * a wall for {@value JugcraftRaiders#LADDER_STUCK} ticks props a ladder up it, up to
+	 * {@value JugcraftRaiders#LADDER_MAX} blocks or the top of the wall, and climbs. Only where mob griefing is on.
+	 */
+	private void climbWalls(ServerLevel level) {
+		boolean going = getTarget() != null || member.objective != null;
+		if (!going || !horizontalCollision || onClimbable()) {
+			stuck = 0;
+			return;
+		}
+		if (++stuck < JugcraftRaiders.LADDER_STUCK || !level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING)) {
+			return;
+		}
+		stuck = 0;
+		net.minecraft.core.Direction facing = getDirection();
+		BlockPos at = blockPosition();
+		int placed = 0;
+		for (int dy = 0; dy < JugcraftRaiders.LADDER_MAX; dy++) {
+			BlockPos spot = at.above(dy);
+			BlockPos wall = spot.relative(facing);
+			if (!level.getBlockState(wall).isFaceSturdy(level, wall, facing.getOpposite()) || !level.getBlockState(spot).isAir()
+					&& !SiegeLadderBlock.is(level.getBlockState(spot))) {
+				break;
+			}
+			if (!SiegeLadderBlock.is(level.getBlockState(spot))) {
+				level.setBlock(spot, JugcraftRaiders.SIEGE_LADDER.defaultBlockState()
+						.setValue(net.minecraft.world.level.block.LadderBlock.FACING, facing.getOpposite()), net.minecraft.world.level.block.Block.UPDATE_ALL);
+				placed++;
+			}
+		}
+		if (placed > 0) {
+			level.playSound(null, getX(), getY(), getZ(), SoundEvents.LADDER_PLACE, SoundSource.HOSTILE, 1.0F, 0.8F);
 		}
 	}
 

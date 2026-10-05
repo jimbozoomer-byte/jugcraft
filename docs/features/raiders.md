@@ -56,6 +56,41 @@ Five kinds of raider. All are hostile mobs: sentry guns (batch 56) and town guar
 | 4 | 6 | 2 | 1 | 1 | 1 |
 | 5 | 7 | 3 | 1 | 2 | 1 |
 
+### Siege ladders
+- **Walls slow raiders rather than stop them.**
+  - A grunt on its way somewhere (its raid's objective, or someone it hunts) that has been pressed against a wall for 2 seconds props a **Siege Ladder** up the wall face.
+  - The ladder goes up to 8 blocks, or to the top of the wall, and the grunt climbs it.
+- **Temporary:** a siege ladder is rough poles and lashed rungs. It crumbles after a minute and drops nothing, and players break it in a moment.
+- **Only placed where mob griefing is on** (the `mobGriefing` game rule), as with any mob that changes blocks.
+- **Placement rules:** a ladder only goes into air, against a sturdy wall face. Raiders still never break a block.
+
+### The war horn and the advancement
+- **Raider War Horn:** three Raider Insignia over a goat horn.
+  - Blow it to **call a raid on purpose**: one comes at the world's raid level against your base (or the town, if you are near it), and the horn is used up.
+  - It refuses, and you keep it, when:
+    - raids are off
+    - you are outside the Overworld
+    - the difficulty is peaceful
+    - another raid is under way
+    - the raiders find nowhere to gather
+  - Each raid has one officer, so a horn (three insignia) always costs more raids than it brings: no loop.
+- **Beat Them Back:** a challenge advancement for everyone who sees a raid through (in range of its bar) until every raider has fallen.
+
+### Raider camps
+- **What and where:** rare camps to find and clear, out in the **plains, savanna and badlands**: one chunk in 400, on flat dry ground only.
+- **Layout:**
+  - a ring of sandbags (trench works) with a gap to each side
+  - a campfire between two olive tents
+  - a cauldron and a **supply barrel**: gunpowder, iron nuggets, Heavy Shells, perhaps a grenade or two, bread and steel plate
+- **Garrison:** an officer, two grunts and a grenadier hold it.
+  - They belong to no raid and never despawn.
+  - Once killed they are gone for good, and the barrel is looted once.
+- **Switching off:** the camps are not generated with `raiders.enabled=false`.
+
+### Townsfolk
+- Raiders hunt the town's folk, but townsfolk cannot be hurt (only `/kill` removes them, by design).
+- In the town, raiders are a threat to players, while townsfolk serve as decoys and the guards fight back.
+
 ### Switching it off
 - In `config/jugcraft.properties`:
   - `raiders.enabled=false` (the feature switch) or `raiders.raids=off` stops raids.
@@ -124,6 +159,15 @@ Their weapons never drop.
   - `JugcraftConfig` gains the `raiders` feature and its options.
 
 ## Verification
+- Later additions:
+  - `raidersHuntOnTheirOwn`: a grunt hunts a townsperson down to striking distance, and a grenadier throws at them.
+    - It stands in for a player. The test server's mock player always reports creative mode (found with a diagnostic run: `creative=true`, with `canAttack`, enemy and line of sight all true), and no hostile mob targets a creative player.
+    - That is why the first player-targeting tests never saw an attack. It was the test, not the raiders.
+  - `siegeLaddersGoUpWalls`: a raid party marching on an objective behind a five-high wall props siege ladders against it.
+  - `raidHornCallsARaid`: the horn starts a raid at the world's level on the blower's base, or refuses while another is under way.
+  - `raiderCampHoldsItsGround`:
+    - On flat ground a camp gets its campfire, its barrel with the camp's loot table, and four raiders who never despawn.
+    - On uneven ground none is built.
 - Planned in CI:
   - `raidersAreHostileAndSpareEachOther`: grunt, walker and blimp are hostile mobs and raiders. A raider-sparing blast hurts a pig and spares a grunt beside it.
   - `raidIsWonWhenEveryRaiderFalls`:
@@ -151,8 +195,4 @@ Their weapons never drop.
 
 ## Rollout and open questions
 - **Next is idea 4, the armoured train.**
-- Possible later additions:
-  - raider camps to find and clear
-  - siege ladders (so walls slow raiders rather than stop them)
-  - a horn item that calls a raid on purpose
-  - a raid advancement
+- Raider camps, siege ladders, the war horn and the raid advancement are now done (above).

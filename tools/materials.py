@@ -282,7 +282,7 @@ def feature_of(entry_id):
     if entry_id in fire_control.blocks() + fire_control.items():
         return "machines"
     import raiders
-    if entry_id in raiders.ITEMS:
-        return "machines"
+    if entry_id in raiders.ITEMS or entry_id in raiders.BLOCKS:
+        return "raiders"
     import pixel_hollows
     return pixel_hollows.feature_of(entry_id)
