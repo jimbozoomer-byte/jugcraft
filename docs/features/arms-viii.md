@@ -78,6 +78,8 @@ Four new kinds of arm in bronze and steel. Each fights in the hand like any arm,
     - the survival javelin throw took 8.0 from the pig, and the javelin came down;
     - the chakram came back into the inventory once, having taken 8 from the pig;
     - its shots show the javelin wound back over the shoulder and let go, the francisca raised in first person, the javelin come down by the struck pig, and the chakram on its way out. The four in flight are drawn, but small at that distance.
+  - **36506e23 and 0570f0d0, with main (#184 and #192) merged in:** the server tests failed once, on both commits. The chakram took 8 from the near pig and only 4 from the far one: its way back missed the far pig. The hit cooldown was ruled out: the field the return pass resets is the one 26.3's `LivingEntity.hurtServer` checks. Each cut knocks its pig back, which can carry it off the walk or out of the chakram's way back. 39f1f6c3 holds the test's pigs still (knockback resistance 1), clears the corridor the chakram flies along, and names where the pigs ended up if it fails.
+  - **39f1f6c3: all green.** The build, all 777 server tests (the chakram took both pigs from 10 to 2) and the three client shards passed.
 - **Not run:** play; two players; how the throws feel against real mobs; the harpoon underwater (only its code path, which undoes water's drag).
 
 ## World and event applicability
