@@ -104,6 +104,7 @@ Each lantern is a pierced iron base, four corner posts, leaded glass panes and a
 ## Dependencies and assets
 - **No new dependencies.**
 - **Models**: built on `tools/flora_art.py` by `tools/decor19_data.py`, which paints their textures by code (128 × 128 for the chair, the setting, the clock and the silhouettes; 64 × 64 for the rest). The egg sacs' texture is a strip of six 32 × 32 frames, so they pulse.
+- **Art style**: the creature props (faces, bones, fur, scales, fire) are painted with the clean, cute painters in `tools/cute_art.py` since 5 October 2026, after the owner asked for simpler, smoother creatures ([ART_DIRECTION.md](../ART_DIRECTION.md#creatures-and-faces-cute-and-clean)).
 - **Moving parts**: the hand and its fingers, the patient's arms and eyes, the cocoon, the spiderling, the spools' silk, the chair, the setting's pieces and flame, the clock's hands, moon, pendulum and ghost, the witchlights' wisp and glow, the silhouettes and their eyes, and the moon's faces are in `assets/jugcraft/decor19_quads.json`. The glows, the wisp, the spiderling and the moon's eight faces are small textures under `textures/entity`; the harness's arcs reuse the Tesla Coil's.
 - **Originality**: all original. The look follows the owner's reference pictures, and nothing is traced from them.
 

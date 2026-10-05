@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Everything below is on `main`.
 
+### Unmerged: Cute, clean creature decorations (batches 15 to 20 repainted)
+- **Smooth fire**: the Ember Bed's hearth now burns in smooth bands of colour on a glow of coals, and the Horned Skull Cauldron's ram skull has big round sockets and no nostrils.
+- **Every creature prop of batches 15 to 20 repainted** in a clean, cute style after the owner's reference pictures: flat colour in two or three tones with lit and shaded edges and no speckle. The **Monster Head** is a bright green Frankenstein head with a blunt black fringe and sleepy closed eyes that open glowing when it wakes; the **Flying Eyeball**, plushes, moths and jar oddities are clean and glossy; skulls (the **Colossal Skull** too) have big round sockets with a glint and no nose holes; bones are smooth cream; the gargoyles have round eyes and little fangs; the **Crawling Hand** is the monster's green; the cocoon sleeps, the clock's ghost says "oo" and the **Harvest Moon** has a sleeping smile.
+- Shared painters in `tools/cute_art.py`; the rules are in [ART_DIRECTION.md](docs/ART_DIRECTION.md#creatures-and-faces-cute-and-clean). Block IDs and states are unchanged, so placed props keep working and just look new.
+
 ### Unmerged: Pumpkin Night, Halloween decorations batch 20
 - **Red Kuri** and **Kabocha** pumpkins join the heirlooms: seeds from grass, wild patches and the Halloween Peddler; their own hand-carved pumpkins, glowing ember orange and greenish gold; **Red Kuri Soup** and **Kabocha Tempura** in the Cooking Pot; pumpkin pie, heads and the trebuchet as the other heirlooms.
 - **Farm Stand**: an owner's two-block stall of six crates under a striped awning. The owner stocks and prices them in Jugs; anyone in reach buys one item at a time and the Jugs go straight to the owner, every sale checked on the server. Only its owner takes it down.
